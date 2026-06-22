@@ -14,7 +14,7 @@ RUN VITE_BASE_PATH=/overlay/ npm run build:overlay
 
 FROM node:20-bookworm-slim AS runtime
 WORKDIR /app
-ENV NODE_ENV=production \
+ENV NODE_ENV=development \
     PORT=3000 \
     PUBLIC_BASE_URL=http://localhost:3000 \
     DASHBOARD_BASE_URL=http://localhost:3000 \
