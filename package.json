@@ -1,0 +1,30 @@
+{
+  "name": "streamops-twitch-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Modular Twitch broadcast automation platform with OBS bridge, overlays, dashboard, LoL participation queue, and Codex automation scaffolding.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:server": "npm --workspace apps/server run dev",
+    "dev:bridge": "npm --workspace apps/bridge run dev",
+    "dev:dashboard": "npm --workspace apps/dashboard run dev",
+    "dev:overlay": "npm --workspace apps/overlay run dev",
+    "build:shared": "npm --workspace packages/shared run build",
+    "build:server": "npm --workspace apps/server run build",
+    "build:bridge": "npm --workspace apps/bridge run build",
+    "build:dashboard": "npm --workspace apps/dashboard run build",
+    "build:overlay": "npm --workspace apps/overlay run build",
+    "build": "npm run build:shared && npm run build:server && npm run build:bridge && npm run build:dashboard && npm run build:overlay",
+    "validate:config": "npm --workspace apps/server run validate:config",
+    "test:run": "npm --workspace packages/shared run test:run && npm --workspace apps/server run test:run && npm --workspace apps/bridge run test:run",
+    "test": "npm run build:shared && npm --workspace packages/shared run test:run && npm run build:server && npm --workspace apps/server run test:run && npm run build:bridge && npm --workspace apps/bridge run test:run",
+    "start:server": "npm --workspace apps/server run start",
+    "start:bridge": "npm --workspace apps/bridge run start"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

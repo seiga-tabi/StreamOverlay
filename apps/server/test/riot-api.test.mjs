@@ -1,0 +1,234 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+process.env.RIOT_API_KEY = "riot-test-key";
+process.env.RIOT_ACCOUNT_REGION = "asia";
+process.env.RIOT_LOL_PLATFORM = "kr";
+
+const { RiotApiClient, RiotApiHttpError, RiotApiNetworkError } = await import("../dist/services/riot-api.js");
+const { appConfig } = await import("../dist/config.js");
+
+const originalFetch = globalThis.fetch;
+
+function jsonResponse(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" }
+  });
+}
+
+test.after(() => {
+  globalThis.fetch = originalFetch;
+});
+
+test("RiotApiClient는 Riot ID와 랭크 전적을 조회한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), token: init?.headers?.["X-Riot-Token"] });
+    const target = String(url);
+    if (target.includes("/riot/account/v1/accounts/by-riot-id/")) {
+      return jsonResponse({ puuid: "puuid-1", gameName: "HideOnBush", tagLine: "KR1" });
+    }
+    if (target.includes("/lol/summoner/v4/summoners/by-puuid/")) {
+      return jsonResponse({
+        puuid: "puuid-1",
+        profileIconId: 29,
+        revisionDate: 1,
+        summonerLevel: 421
+      });
+    }
+    if (target.includes("/lol/league/v4/entries/by-puuid/")) {
+      return jsonResponse([
+        { queueType: "RANKED_FLEX_SR", tier: "EMERALD", rank: "IV", leaguePoints: 11, wins: 44, losses: 39 },
+        { queueType: "RANKED_SOLO_5x5", tier: "DIAMOND", rank: "II", leaguePoints: 64, wins: 92, losses: 74 }
+      ]);
+    }
+    return jsonResponse({ status: { message: "not found" } }, 404);
+  };
+
+  const client = new RiotApiClient();
+  const account = await client.getAccountByRiotId("HideOnBush", "KR1");
+  const stats = await client.getRankedStatsByPuuid("puuid-1");
+
+  assert.equal(account?.puuid, "puuid-1");
+  assert.equal(stats?.queueType, "RANKED_SOLO_5x5");
+  assert.equal(stats?.tier, "DIAMOND");
+  assert.equal(stats?.rank, "II");
+  assert.equal(stats?.leaguePoints, 64);
+  assert.equal(stats?.wins, 92);
+  assert.equal(stats?.losses, 74);
+  assert.equal(stats?.winRate, 55);
+  assert.equal(stats?.summonerLevel, 421);
+  assert.ok(calls.some((call) => call.url.startsWith("https://asia.api.riotgames.com/riot/account/v1/")));
+  assert.ok(calls.some((call) => call.url.startsWith("https://kr.api.riotgames.com/lol/summoner/v4/")));
+  assert.ok(calls.some((call) => call.url.startsWith("https://kr.api.riotgames.com/lol/league/v4/entries/by-puuid/")));
+  assert.equal(calls.some((call) => call.url.includes("/lol/league/v4/entries/by-summoner/")), false);
+  assert.ok(calls.every((call) => call.token === "riot-test-key"));
+});
+
+test("RiotApiClient는 랭크 기록이 없으면 UNRANKED 전적을 반환한다", async () => {
+  globalThis.fetch = async (url) => {
+    const target = String(url);
+    if (target.includes("/lol/summoner/v4/summoners/by-puuid/")) {
+      return jsonResponse({
+        puuid: "puuid-2",
+        profileIconId: 30,
+        revisionDate: 1,
+        summonerLevel: 89
+      });
+    }
+    if (target.includes("/lol/league/v4/entries/by-puuid/")) return jsonResponse([]);
+    return jsonResponse({ status: { message: "not found" } }, 404);
+  };
+
+  const client = new RiotApiClient();
+  const stats = await client.getRankedStatsByPuuid("puuid-2");
+
+  assert.equal(stats?.queueType, "UNRANKED");
+  assert.equal(stats?.tier, "UNRANKED");
+  assert.equal(stats?.summonerLevel, 89);
+  assert.equal(stats?.winRate, 0);
+});
+
+test("RiotApiClient는 현재 진행 중인 게임을 PUUID로 조회한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), token: init?.headers?.["X-Riot-Token"] });
+    if (String(url).includes("/lol/spectator/v5/active-games/by-summoner/")) {
+      return jsonResponse({
+        gameId: 123456789,
+        gameStartTime: 1760000000000,
+        gameMode: "CLASSIC",
+        participants: [
+          { puuid: "streamer-puuid", championId: 103, teamId: 100 }
+        ]
+      });
+    }
+    return jsonResponse({ status: { message: "not found" } }, 404);
+  };
+
+  const client = new RiotApiClient();
+  const game = await client.getCurrentGameByPuuid("streamer-puuid");
+
+  assert.equal(game?.gameId, 123456789);
+  assert.equal(game?.participants[0].puuid, "streamer-puuid");
+  assert.ok(calls[0].url.startsWith("https://kr.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/"));
+  assert.equal(calls[0].token, "riot-test-key");
+});
+
+test("RiotApiClient는 웹 저장 key를 env보다 우선 사용한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), token: init?.headers?.["X-Riot-Token"] });
+    return jsonResponse({ puuid: "puuid-runtime", gameName: "Runtime", tagLine: "KR1" });
+  };
+
+  const client = new RiotApiClient({
+    getApiKey() {
+      return "RGAPI-runtime-secret-key";
+    },
+    getUpdatedAt() {
+      return "2026-06-22T00:00:00.000Z";
+    },
+    setApiKey() {
+      throw new Error("setApiKey가 호출되면 안 됩니다.");
+    },
+    clearApiKey() {
+      throw new Error("clearApiKey가 호출되면 안 됩니다.");
+    }
+  });
+
+  const account = await client.getAccountByRiotId("Runtime", "KR1");
+  const status = client.credentialStatus();
+
+  assert.equal(account?.puuid, "puuid-runtime");
+  assert.equal(calls[0].token, "RGAPI-runtime-secret-key");
+  assert.equal(status.source, "runtime");
+  assert.equal(status.maskedKey, "RGAPI-...-key");
+  assert.equal(status.updatedAt, "2026-06-22T00:00:00.000Z");
+});
+
+test("RiotApiClient는 일본 서버 별칭 jp를 jp1 host로 정규화한다", async () => {
+  const previousPlatform = appConfig.riot.lolPlatform;
+  const calls = [];
+  try {
+    appConfig.riot.lolPlatform = "jp";
+    globalThis.fetch = async (url, init) => {
+      calls.push({ url: String(url), token: init?.headers?.["X-Riot-Token"] });
+      return jsonResponse({
+        gameId: 123456789,
+        gameStartTime: 1760000000000,
+        gameMode: "CLASSIC",
+        participants: []
+      });
+    };
+
+    const client = new RiotApiClient();
+    await client.getCurrentGameByPuuid("streamer-puuid");
+
+    assert.ok(calls[0].url.startsWith("https://jp1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/"));
+    assert.equal(calls[0].token, "riot-test-key");
+  } finally {
+    appConfig.riot.lolPlatform = previousPlatform;
+  }
+});
+
+test("RiotApiClient는 enabledQueues를 Match-V5 queue query로 전달하고 중복 match id를 제거한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), token: init?.headers?.["X-Riot-Token"] });
+    const target = String(url);
+    if (target.includes("queue=420")) return jsonResponse(["KR_1", "KR_2"]);
+    if (target.includes("queue=440")) return jsonResponse(["KR_2", "KR_3"]);
+    return jsonResponse([]);
+  };
+
+  const client = new RiotApiClient();
+  const ids = await client.getRecentMatchIdsByPuuid("puuid-queue", 20, [420, 440, 420]);
+
+  assert.deepEqual(ids, ["KR_1", "KR_2", "KR_3"]);
+  assert.equal(calls.length, 2);
+  assert.ok(calls.every((call) => call.url.startsWith("https://asia.api.riotgames.com/lol/match/v5/")));
+  assert.ok(calls.some((call) => call.url.includes("queue=420")));
+  assert.ok(calls.some((call) => call.url.includes("queue=440")));
+});
+
+test("RiotApiClient는 HTTP 실패에 route와 host를 포함하되 token은 포함하지 않는다", async () => {
+  globalThis.fetch = async () => jsonResponse({ status: { message: "Forbidden" } }, 403);
+
+  const client = new RiotApiClient();
+  await assert.rejects(
+    () => client.getSummonerByPuuid("puuid-403"),
+    (error) => {
+      assert.ok(error instanceof RiotApiHttpError);
+      assert.equal(error.status, 403);
+      assert.equal(error.route, "summoner.by_puuid");
+      assert.equal(error.host, "kr.api.riotgames.com");
+      assert.match(error.message, /403/);
+      assert.doesNotMatch(error.message, /riot-test-key/);
+      return true;
+    }
+  );
+});
+
+test("RiotApiClient는 network 실패에 원인 code와 host를 포함한다", async () => {
+  globalThis.fetch = async () => {
+    const error = new TypeError("fetch failed");
+    error.cause = Object.assign(new Error("getaddrinfo ENOTFOUND kr.api.riotgames.com"), { code: "ENOTFOUND" });
+    throw error;
+  };
+
+  const client = new RiotApiClient();
+  await assert.rejects(
+    () => client.getChampionMasteryTopByPuuid("puuid-network"),
+    (error) => {
+      assert.ok(error instanceof RiotApiNetworkError);
+      assert.equal(error.route, "champion_mastery.top");
+      assert.equal(error.host, "kr.api.riotgames.com");
+      assert.equal(error.causeCode, "ENOTFOUND");
+      assert.match(error.message, /ENOTFOUND/);
+      assert.doesNotMatch(error.message, /riot-test-key/);
+      return true;
+    }
+  );
+});

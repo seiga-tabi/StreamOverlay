@@ -1,0 +1,11 @@
+{
+  "rewards": true,
+  "chatCommands": true,
+  "chatOverlay": true,
+  "streamStatus": true,
+  "participation": true,
+  "lolProfileEnrichment": true,
+  "lolGameMonitor": true,
+  "twitchOverlay": true,
+  "translation": false
+}

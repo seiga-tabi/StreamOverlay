@@ -1,0 +1,51 @@
+{
+  "!클립": [
+    {
+      "type": "obs.saveReplayBuffer"
+    },
+    {
+      "type": "log.highlight",
+      "reason": "viewer_clip_request:{user}:{input}"
+    },
+    {
+      "type": "overlay.banner",
+      "title": "クリップ候補",
+      "subtitle": "클립 후보",
+      "message": "{user}さんのクリップ候補を保存しました。",
+      "variant": "info",
+      "durationMs": 3500,
+      "source": "chat.clip",
+      "eventKind": "custom",
+      "speechEnabled": true,
+      "speechLanguage": "ja-JP"
+    }
+  ],
+  "!질문": [
+    {
+      "type": "queue.question",
+      "question": "{input}",
+      "userName": "{user}"
+    },
+    {
+      "type": "overlay.question",
+      "userName": "{user}",
+      "question": "{input}",
+      "durationMs": 12000,
+      "variant": "info",
+      "source": "chat.question"
+    }
+  ],
+  "!비상테스트": [
+    {
+      "type": "overlay.banner",
+      "title": "緊急モードテスト",
+      "subtitle": "비상 모드 테스트",
+      "message": "緊急モードのテストです。実際のモデレーション処罰は実行しません。",
+      "variant": "warning",
+      "durationMs": 5000,
+      "eventKind": "test",
+      "speechEnabled": true,
+      "speechLanguage": "ja-JP"
+    }
+  ]
+}

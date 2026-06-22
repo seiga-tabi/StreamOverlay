@@ -1,0 +1,54 @@
+{
+  "defaults": {
+    "durationMs": 5200,
+    "soundVolume": 0.65,
+    "speechEnabled": true,
+    "speechLanguage": "ja-JP",
+    "speechRate": 1,
+    "speechPitch": 1,
+    "speechVolume": 0.9
+  },
+  "follow": {
+    "enabled": true,
+    "title": "フォローありがとう",
+    "subtitle": "팔로우 감사합니다",
+    "variant": "info",
+    "mediaUrl": "/alerts/seiga.gif",
+    "mediaAlt": "Seiga follow alert",
+    "soundUrl": "/alerts/seoya_follow_alert.wav"
+  },
+  "cheer": {
+    "enabled": true,
+    "subtitle": "ビッツありがとう / 비트 감사합니다",
+    "mediaUrl": "/alerts/seiga.gif",
+    "mediaAlt": "Seiga bits alert",
+    "soundUrl": "/alerts/seoya_bits_alert.wav"
+  },
+  "subscription": {
+    "enabled": true,
+    "title": "サブスクありがとう",
+    "subtitle": "구독 감사합니다",
+    "variant": "success",
+    "mediaUrl": "/alerts/seiga.gif",
+    "mediaAlt": "Seiga subscription alert",
+    "soundUrl": "/alerts/seoya_subscribe_alert.wav"
+  },
+  "subscriptionMessage": {
+    "enabled": true,
+    "title": "サブスクメッセージ",
+    "subtitle": "구독 메시지",
+    "variant": "success",
+    "mediaUrl": "/alerts/seiga.gif",
+    "mediaAlt": "Seiga subscription message alert",
+    "soundUrl": "/alerts/seoya_subscribe_alert.wav"
+  },
+  "raid": {
+    "enabled": true,
+    "title": "レイドありがとう",
+    "subtitle": "레이드 감사합니다",
+    "variant": "warning",
+    "mediaUrl": "",
+    "mediaAlt": "raid alert",
+    "soundUrl": ""
+  }
+}

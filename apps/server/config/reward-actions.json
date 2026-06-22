@@ -1,0 +1,66 @@
+{
+  "화면 흔들기": {
+    "name": "화면 흔들기",
+    "cooldownMs": 5000,
+    "maxPerStream": 20,
+    "defaultOverlayBanner": {
+      "title": "画面揺らし！",
+      "subtitle": "画面揺らし / 화면 흔들기",
+      "message": "{user}さんが画面揺らしを発動しました。",
+      "variant": "success",
+      "durationMs": 4000,
+      "speechEnabled": true,
+      "speechLanguage": "ja-JP"
+    },
+    "actions": [
+      {
+        "type": "obs.showSource",
+        "sceneName": "메인",
+        "sourceName": "shake_overlay",
+        "durationMs": 3000
+      }
+    ]
+  },
+  "클립 요청": {
+    "name": "클립 요청",
+    "cooldownMs": 10000,
+    "maxPerStream": 30,
+    "defaultOverlayBanner": {
+      "title": "クリップリクエスト",
+      "subtitle": "クリップリクエスト / 클립 요청",
+      "message": "{user}さんのクリップリクエストを記録しました。",
+      "variant": "info",
+      "durationMs": 3500,
+      "speechEnabled": true,
+      "speechLanguage": "ja-JP"
+    },
+    "actions": [
+      {
+        "type": "obs.saveReplayBuffer"
+      },
+      {
+        "type": "log.highlight",
+        "reason": "channel_point_clip_request:{user}:{input}"
+      }
+    ]
+  },
+  "일본어 자막 강조": {
+    "name": "일본어 자막 강조",
+    "cooldownMs": 60000,
+    "maxPerStream": 5,
+    "actions": [
+      {
+        "type": "overlay.banner",
+        "title": "日本語字幕",
+        "subtitle": "일본어 자막",
+        "message": "日本語字幕の強調モードをオンにしました。",
+        "durationMs": 3000,
+        "variant": "info",
+        "eventKind": "reward",
+        "source": "reward.subtitle_boost",
+        "speechEnabled": true,
+        "speechLanguage": "ja-JP"
+      }
+    ]
+  }
+}

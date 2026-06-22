@@ -1,0 +1,46 @@
+{
+  "voicevox_base_url": "http://127.0.0.1:50021",
+  "default_speaker_id": 3,
+  "output_dir": "output",
+  "audio": {
+    "target_frame_rate": 44100,
+    "target_channels": 2,
+    "gap_ms_after_sfx": 120,
+    "tts_gain_db": 0.0,
+    "sfx_gain_db": -2.0,
+    "master_gain_db": -1.0,
+    "normalize": true
+  },
+  "voice": {
+    "speedScale": 1.05,
+    "pitchScale": 0.0,
+    "intonationScale": 1.15,
+    "volumeScale": 1.0,
+    "prePhonemeLength": 0.08,
+    "postPhonemeLength": 0.16
+  },
+  "limits": {
+    "max_name_chars": 28,
+    "max_message_chars": 140,
+    "max_repeat_chars": 4
+  },
+  "sfx": {
+    "follow": "sfx/seoya_follow_alert.wav",
+    "bits": "sfx/seoya_bits_alert.wav",
+    "subscribe": "sfx/seoya_subscribe_alert.wav",
+    "donation": "sfx/seoya_bits_alert.wav",
+    "test": "sfx/seoya_follow_alert.wav"
+  },
+  "blocked_words": [
+    "死ね",
+    "殺す"
+  ],
+  "pronunciation_overrides": {
+    "www": "わらわら",
+    "w": "わら",
+    "草": "くさ",
+    "乙": "おつ",
+    "888": "ぱちぱちぱち",
+    "8888": "ぱちぱちぱちぱち"
+  }
+}

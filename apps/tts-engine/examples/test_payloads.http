@@ -1,0 +1,29 @@
+### Health check
+GET http://127.0.0.1:8787/health
+
+### Speaker list
+GET http://127.0.0.1:8787/speakers
+
+### Exact TTS
+POST http://127.0.0.1:8787/speak
+Content-Type: application/json
+
+{
+  "text": "こんにちは。これはテスト音声です。",
+  "speaker_id": 3,
+  "save_file": true
+}
+
+### Bits alert with message
+POST http://127.0.0.1:8787/alert
+Content-Type: application/json
+
+{
+  "event_type": "bits",
+  "name": "SeoyaFan",
+  "amount": 500,
+  "message": "今日も配信ありがとう！無理しないでね。",
+  "speaker_id": 3,
+  "with_sfx": true,
+  "save_file": true
+}

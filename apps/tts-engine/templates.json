@@ -1,0 +1,33 @@
+{
+  "follow": [
+    "{name}さん、フォローありがとう！",
+    "{name}さん、ようこそ！フォロー感謝です！",
+    "わあ、{name}さんが来てくれた！フォローありがとう！"
+  ],
+  "bits": [
+    "{name}さん、{amount}ビッツありがとう！{message_part}",
+    "{name}さんから{amount}ビッツです！ありがとう！{message_part}",
+    "{amount}ビッツ！？ {name}さん、応援ありがとう！{message_part}"
+  ],
+  "subscribe": [
+    "{name}さん、サブスクありがとう！",
+    "やったー！{name}さん、サブスク感謝です！",
+    "{name}さん、メンバー入りありがとう！これからもよろしくね！"
+  ],
+  "donation": [
+    "{name}さん、支援ありがとう！{message_part}",
+    "{name}さんから応援が届きました。ありがとう！{message_part}",
+    "{name}さん、ナイス支援！{message_part}"
+  ],
+  "test": [
+    "これは、せや放送のテスト音声です。"
+  ],
+  "message_prefix": [
+    "メッセージを読みます。{message}",
+    "コメントはこちら。{message}",
+    "{message}"
+  ],
+  "message_empty": [
+    ""
+  ]
+}

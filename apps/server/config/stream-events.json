@@ -1,0 +1,30 @@
+{
+  "stream.online": [
+    {
+      "type": "overlay.banner",
+      "title": "配信開始",
+      "subtitle": "방송 시작",
+      "message": "配信を開始しました！",
+      "variant": "success",
+      "durationMs": 5000,
+      "eventKind": "stream",
+      "source": "stream.online",
+      "speechEnabled": true,
+      "speechLanguage": "ja-JP"
+    }
+  ],
+  "stream.offline": [
+    {
+      "type": "overlay.banner",
+      "title": "配信終了",
+      "subtitle": "방송 종료",
+      "message": "配信終了の処理をしています。",
+      "variant": "info",
+      "durationMs": 5000,
+      "eventKind": "stream",
+      "source": "stream.offline",
+      "speechEnabled": true,
+      "speechLanguage": "ja-JP"
+    }
+  ]
+}

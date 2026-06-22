@@ -1,0 +1,26 @@
+services:
+  server:
+    environment:
+      NODE_ENV: production
+      STREAMOPS_LOCAL_NO_AUTH: "false"
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?PUBLIC_BASE_URL is required}
+      DASHBOARD_BASE_URL: ${DASHBOARD_BASE_URL:?DASHBOARD_BASE_URL is required}
+      OVERLAY_BASE_URL: ${OVERLAY_BASE_URL:?OVERLAY_BASE_URL is required}
+      TWITCH_REDIRECT_URI: ${TWITCH_REDIRECT_URI:?TWITCH_REDIRECT_URI is required}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
+      DASHBOARD_AUTH_TOKEN: ${DASHBOARD_AUTH_TOKEN:-}
+      DASHBOARD_AUTH_TOKEN_FILE: ${DASHBOARD_AUTH_TOKEN_FILE:-}
+      OVERLAY_ACCESS_TOKEN: ${OVERLAY_ACCESS_TOKEN:-}
+      OVERLAY_ACCESS_TOKEN_FILE: ${OVERLAY_ACCESS_TOKEN_FILE:-}
+      BRIDGE_SHARED_SECRET: ${BRIDGE_SHARED_SECRET:-}
+      BRIDGE_SHARED_SECRET_FILE: ${BRIDGE_SHARED_SECRET_FILE:-}
+
+  tts-engine:
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
