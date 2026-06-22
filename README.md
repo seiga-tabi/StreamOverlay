@@ -67,7 +67,7 @@ https://bot.example.com/overlay/?mode=participation
 https://bot.example.com/api/twitch/status
 ```
 
-자세한 서버 준비, reverse proxy, OBS URL, 영구 볼륨 설명은 [docs/DEPLOYMENT_DOCKER.md](/Users/kokonenne/codex/streamops-twitch-bot/docs/DEPLOYMENT_DOCKER.md)를 확인하세요. 실제 key를 예시 파일이나 커밋에 넣었다면 [docs/SECRETS_ROTATION.md](/Users/kokonenne/codex/streamops-twitch-bot/docs/SECRETS_ROTATION.md)의 절차대로 즉시 교체하세요.
+자세한 서버 준비, reverse proxy, OBS URL, 영구 볼륨 설명은 [docs/DEPLOYMENT_DOCKER.md](docs/DEPLOYMENT_DOCKER.md)를 확인하세요. 실제 key를 예시 파일이나 커밋에 넣었다면 [docs/SECRETS_ROTATION.md](docs/SECRETS_ROTATION.md)의 절차대로 즉시 교체하세요.
 
 ## OBS 연결
 
