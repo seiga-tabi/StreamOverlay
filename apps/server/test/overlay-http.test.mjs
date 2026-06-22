@@ -33,14 +33,33 @@ function createRequest(method, url, body, headers = {}) {
   };
 }
 
-function createRawRequest(method, url, rawBody) {
+function createRawRequest(method, url, rawBody, headers = {}) {
   return {
     method,
     url,
+    headers,
     async *[Symbol.asyncIterator]() {
-      if (rawBody !== undefined) yield Buffer.from(rawBody);
+      if (rawBody !== undefined) yield Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(rawBody);
     }
   };
+}
+
+function createMultipartBody(boundary, parts) {
+  const chunks = [];
+  for (const part of parts) {
+    chunks.push(Buffer.from(`--${boundary}\r\n`));
+    const disposition = [
+      `form-data; name="${part.name}"`,
+      part.filename ? `filename="${part.filename}"` : undefined
+    ].filter(Boolean).join("; ");
+    chunks.push(Buffer.from(`Content-Disposition: ${disposition}\r\n`));
+    if (part.contentType) chunks.push(Buffer.from(`Content-Type: ${part.contentType}\r\n`));
+    chunks.push(Buffer.from("\r\n"));
+    chunks.push(Buffer.isBuffer(part.data) ? part.data : Buffer.from(String(part.data)));
+    chunks.push(Buffer.from("\r\n"));
+  }
+  chunks.push(Buffer.from(`--${boundary}--\r\n`));
+  return Buffer.concat(chunks);
 }
 
 function createResponse() {
@@ -433,6 +452,98 @@ test("/alerts 경로는 overlay public asset을 서빙한다", async () => {
   } finally {
     appConfig.paths.overlayStatic = previousOverlayStatic;
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("알림 GIF 업로드 API는 파일을 state에 저장하고 overlay URL로 서빙한다", async () => {
+  const previousConfigDir = appConfig.paths.config;
+  const previousStateDir = appConfig.paths.state;
+  const configDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-config-"));
+  const stateDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-state-"));
+  try {
+    appConfig.paths.config = configDir;
+    appConfig.paths.state = stateDir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {}
+    });
+    const boundary = "streamops-test-boundary";
+    const gif = Buffer.concat([Buffer.from("GIF89a"), Buffer.from([1, 0, 1, 0, 0, 0, 0])]);
+    const uploadBody = createMultipartBody(boundary, [
+      { name: "eventType", data: "follow" },
+      { name: "file", filename: "follow.gif", contentType: "image/gif", data: gif }
+    ]);
+
+    const uploadReq = createRawRequest("POST", "/api/alerts/assets", uploadBody, {
+      "content-type": `multipart/form-data; boundary=${boundary}`
+    });
+    const uploadRes = createResponse();
+    await handler(uploadReq, uploadRes);
+
+    assert.equal(uploadRes.statusCode, 200);
+    const uploaded = JSON.parse(uploadRes.body);
+    assert.match(uploaded.url, /^\/alerts\/uploads\/follow-\d+-[a-f0-9]+\.gif$/);
+    assert.equal(uploaded.size, gif.byteLength);
+
+    const saveReq = createRequest("POST", "/api/alerts/config", {
+      eventType: "follow",
+      mediaUrl: uploaded.url,
+      mediaAlt: "follow alert"
+    });
+    const saveRes = createResponse();
+    await handler(saveReq, saveRes);
+
+    assert.equal(saveRes.statusCode, 200);
+    const saved = JSON.parse(saveRes.body);
+    assert.equal(saved.config.follow.mediaUrl, uploaded.url);
+    assert.equal(saved.assets.length, 1);
+
+    const runtimeConfig = JSON.parse(readFileSync(path.join(stateDir, "alert-overlays.runtime.json"), "utf8"));
+    assert.equal(runtimeConfig.follow.mediaUrl, uploaded.url);
+
+    const assetReq = createRequest("GET", uploaded.url);
+    const assetRes = createResponse();
+    await handler(assetReq, assetRes);
+
+    assert.equal(assetRes.statusCode, 200);
+    assert.equal(assetRes.headers["Content-Type"], "image/gif");
+    assert.equal(assetRes.headers["X-Content-Type-Options"], "nosniff");
+  } finally {
+    appConfig.paths.config = previousConfigDir;
+    appConfig.paths.state = previousStateDir;
+    rmSync(configDir, { recursive: true, force: true });
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test("알림 asset 업로드 API는 GIF가 아닌 파일을 거부한다", async () => {
+  const previousStateDir = appConfig.paths.state;
+  const stateDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-invalid-state-"));
+  try {
+    appConfig.paths.state = stateDir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {}
+    });
+    const boundary = "streamops-test-boundary-invalid";
+    const uploadBody = createMultipartBody(boundary, [
+      { name: "eventType", data: "cheer" },
+      { name: "file", filename: "cheer.png", contentType: "image/png", data: Buffer.from("not-a-gif") }
+    ]);
+
+    const req = createRawRequest("POST", "/api/alerts/assets", uploadBody, {
+      "content-type": `multipart/form-data; boundary=${boundary}`
+    });
+    const res = createResponse();
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 400);
+    assert.match(JSON.parse(res.body).error, /GIF/);
+  } finally {
+    appConfig.paths.state = previousStateDir;
+    rmSync(stateDir, { recursive: true, force: true });
   }
 });
 

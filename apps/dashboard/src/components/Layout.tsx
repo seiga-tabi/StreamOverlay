@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { dashboardI18n, uiText } from "../i18n";
 
-const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "followers", "events", "questions", "participation", "settings"] as const;
+const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "followers", "events", "questions", "participation", "settings"] as const;
 
 export type Page = (typeof pages)[number];
 
 const navSections: Array<{ key: keyof typeof uiText.app.navGroups; items: Page[] }> = [
   { key: "operations", items: ["dashboard", "twitch"] },
-  { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards"] },
+  { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
   { key: "community", items: ["followers", "questions", "participation", "events"] },
   { key: "system", items: ["settings"] }
 ];

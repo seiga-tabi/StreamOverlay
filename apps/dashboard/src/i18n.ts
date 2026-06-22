@@ -38,6 +38,7 @@ export const dashboardI18n = {
       overlayStatus: { label: "Overlay 연결", short: "연결" },
       overlayTest: { label: "Overlay 테스트", short: "테스트" },
       overlayRewards: { label: "Reward 매핑", short: "Reward" },
+      overlayAlerts: { label: "알림 GIF", short: "알림 GIF" },
       followers: { label: "팔로워 관리", short: "팔로워" },
       events: { label: "이벤트 로그", short: "이벤트" },
       questions: { label: "질문 큐", short: "질문" },
@@ -118,6 +119,10 @@ export const dashboardI18n = {
         rewards: {
           title: "Reward 매핑",
           description: "Channel point reward가 어떤 overlay action으로 이어지는지 read-only로 확인합니다."
+        },
+        alerts: {
+          title: "알림 GIF 관리",
+          description: "팔로우, 정기구독, 후원(Bits/Cheer) 알림에 사용할 GIF를 등록합니다."
         }
       }
     },
@@ -267,6 +272,7 @@ export const dashboardI18n = {
       overlayStatus: { label: "Overlay 接続", short: "接続" },
       overlayTest: { label: "Overlay テスト", short: "テスト" },
       overlayRewards: { label: "Reward マッピング", short: "Reward" },
+      overlayAlerts: { label: "通知 GIF", short: "通知 GIF" },
       followers: { label: "フォロワー管理", short: "フォロワー" },
       events: { label: "イベントログ", short: "イベント" },
       questions: { label: "質問キュー", short: "質問" },
@@ -347,6 +353,10 @@ export const dashboardI18n = {
         rewards: {
           title: "Reward マッピング",
           description: "Channel point reward がどの overlay action につながるかを read-only で確認します。"
+        },
+        alerts: {
+          title: "通知 GIF 管理",
+          description: "フォロー、サブスク、支援(Bits/Cheer)通知に使う GIF を登録します。"
         }
       }
     },

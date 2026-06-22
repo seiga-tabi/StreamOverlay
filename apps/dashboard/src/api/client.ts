@@ -50,6 +50,17 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return (await response.json()) as T;
 }
 
+export async function apiPostForm<T>(path: string, body: FormData): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    credentials: "include",
+    headers: { ...csrfHeaders() },
+    body
+  });
+  if (!response.ok) throw new Error(await errorMessage(path, response));
+  return (await response.json()) as T;
+}
+
 export async function getDashboardAuthStatus(): Promise<DashboardAuthStatus> {
   const response = await fetch(`${API_BASE}/api/dashboard/auth/status`, { credentials: "include" });
   if (!response.ok) throw new Error(await errorMessage("/api/dashboard/auth/status", response));

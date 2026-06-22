@@ -111,6 +111,7 @@ export default function App() {
         {page === "overlayStatus" ? <OverlayOpsPage view="status" /> : null}
         {page === "overlayTest" ? <OverlayOpsPage view="test" /> : null}
         {page === "overlayRewards" ? <OverlayOpsPage view="rewards" /> : null}
+        {page === "overlayAlerts" ? <OverlayOpsPage view="alerts" /> : null}
         {page === "followers" ? <FollowersPage /> : null}
         {page === "events" ? <EventsPage snapshot={snapshot} /> : null}
         {page === "questions" ? <QuestionsPage snapshot={snapshot} /> : null}

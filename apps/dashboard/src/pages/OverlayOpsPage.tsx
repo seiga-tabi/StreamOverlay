@@ -1,9 +1,10 @@
+import { AlertAssetPanel } from "../components/AlertAssetPanel";
 import { OverlayClientStatusCard } from "../components/OverlayClientStatusCard";
 import { OverlayTestPanel } from "../components/OverlayTestPanel";
 import { RewardMappingPanel } from "../components/RewardMappingPanel";
 import { uiText } from "../i18n";
 
-type OverlayOpsView = "status" | "test" | "rewards";
+type OverlayOpsView = "status" | "test" | "rewards" | "alerts";
 
 export function OverlayOpsPage({ view }: { view: OverlayOpsView }) {
   const t = uiText.overlayOpsPage;
@@ -21,6 +22,7 @@ export function OverlayOpsPage({ view }: { view: OverlayOpsView }) {
         {view === "status" ? <OverlayClientStatusCard /> : null}
         {view === "test" ? <OverlayTestPanel /> : null}
         {view === "rewards" ? <RewardMappingPanel /> : null}
+        {view === "alerts" ? <AlertAssetPanel /> : null}
       </div>
     </>
   );

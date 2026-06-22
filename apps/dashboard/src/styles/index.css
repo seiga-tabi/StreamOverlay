@@ -1079,6 +1079,116 @@ code {
   margin-bottom: 0;
 }
 
+.alert-asset-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.alert-asset-list {
+  display: grid;
+  gap: 12px;
+}
+
+.alert-asset-row {
+  display: grid;
+  grid-template-columns: minmax(180px, .85fr) 180px minmax(260px, 1fr);
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, .58);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.alert-asset-row > * {
+  min-width: 0;
+}
+
+.alert-asset-info strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-strong);
+}
+
+.alert-asset-info p,
+.alert-preview small {
+  margin-bottom: 0;
+}
+
+.alert-preview {
+  display: grid;
+  gap: 6px;
+}
+
+.alert-preview img,
+.alert-preview span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, rgba(122, 167, 255, .12), rgba(182, 156, 255, .08)),
+    rgba(255, 255, 255, .68);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  object-fit: contain;
+  overflow: hidden;
+}
+
+.alert-upload-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.selected-file-name {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-library {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.asset-library-row {
+  display: grid;
+  grid-template-columns: 86px minmax(180px, 1fr) minmax(180px, .8fr);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, .5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.asset-library-row > * {
+  min-width: 0;
+}
+
+.asset-library-row img {
+  width: 86px;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, .74);
+}
+
+.asset-library-row strong,
+.asset-library-row code {
+  overflow-wrap: anywhere;
+}
+
 .page-title-row {
   margin-bottom: 0;
 }
@@ -1448,6 +1558,11 @@ code {
   }
 
   .reward-mapping-row {
+    grid-template-columns: 1fr;
+  }
+
+  .alert-asset-row,
+  .asset-library-row {
     grid-template-columns: 1fr;
   }
 

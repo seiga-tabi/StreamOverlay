@@ -14,6 +14,16 @@ import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js
 import { getRewardMappingSummaries } from "../modules/rewards.module.js";
 import { loadGameMonitorConfig, restartActiveLolGameMonitor, saveGameMonitorConfig, type LolGameMonitorConfig } from "../modules/lol-game-monitor.module.js";
 import {
+  ALERT_OVERLAY_KEYS,
+  alertAssetRoot,
+  isAlertOverlayKey,
+  isSafeAlertMediaUrl,
+  listAlertGifAssets,
+  loadAlertOverlayConfig,
+  saveAlertOverlayPreset,
+  type AlertOverlayKey
+} from "../services/alert-overlay-config.js";
+import {
   DashboardSessionStore,
   authenticateDashboardRequest,
   authorizeHttpRequest,
@@ -25,6 +35,7 @@ import {
 import { dashboardApiLimiter, dashboardLoginLimiter, oauthLimiter } from "../security/rate-limit.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
+const MAX_ALERT_GIF_BYTES = 5_000_000;
 const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
@@ -42,7 +53,7 @@ class HttpRequestError extends Error {
   }
 }
 
-async function readBody(req: IncomingMessage, maxBytes = MAX_JSON_BODY_BYTES): Promise<string> {
+async function readRawBody(req: IncomingMessage, maxBytes = MAX_JSON_BODY_BYTES): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let totalBytes = 0;
   for await (const chunk of req) {
@@ -53,7 +64,11 @@ async function readBody(req: IncomingMessage, maxBytes = MAX_JSON_BODY_BYTES): P
     }
     chunks.push(buffer);
   }
-  return Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
+}
+
+async function readBody(req: IncomingMessage, maxBytes = MAX_JSON_BODY_BYTES): Promise<string> {
+  return (await readRawBody(req, maxBytes)).toString("utf8");
 }
 
 async function readJsonBody<T>(req: IncomingMessage): Promise<T> {
@@ -231,6 +246,73 @@ function contentTypeFor(filePath: string): string {
   return "application/octet-stream";
 }
 
+type MultipartPart = {
+  name: string;
+  filename?: string;
+  contentType?: string;
+  data: Buffer;
+};
+
+function headerValue(headers: Record<string, string>, name: string): string | undefined {
+  return headers[name.toLowerCase()];
+}
+
+function parseContentDisposition(value: string | undefined): { name?: string; filename?: string } {
+  if (!value) return {};
+  const name = /(?:^|;\s*)name="([^"]*)"/i.exec(value)?.[1];
+  const filename = /(?:^|;\s*)filename="([^"]*)"/i.exec(value)?.[1];
+  return { name, filename };
+}
+
+function parseMultipartBody(req: IncomingMessage, body: Buffer): MultipartPart[] {
+  const contentType = Array.isArray(req.headers["content-type"]) ? req.headers["content-type"][0] : req.headers["content-type"];
+  const boundaryMatch = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType ?? "");
+  const boundary = boundaryMatch?.[1] ?? boundaryMatch?.[2];
+  if (!boundary) throw new HttpRequestError(400, { error: "multipart boundary가 필요합니다." });
+
+  const raw = body.toString("latin1");
+  const chunks = raw.split(`--${boundary}`);
+  const parts: MultipartPart[] = [];
+  for (const chunk of chunks.slice(1, -1)) {
+    const normalized = chunk.startsWith("\r\n") ? chunk.slice(2) : chunk;
+    const headerEnd = normalized.indexOf("\r\n\r\n");
+    if (headerEnd < 0) continue;
+    const headerLines = normalized.slice(0, headerEnd).split("\r\n");
+    const headers = Object.fromEntries(headerLines.map((line) => {
+      const index = line.indexOf(":");
+      return index < 0 ? ["", ""] : [line.slice(0, index).trim().toLowerCase(), line.slice(index + 1).trim()];
+    }).filter(([key]) => key)) as Record<string, string>;
+    const disposition = parseContentDisposition(headerValue(headers, "content-disposition"));
+    if (!disposition.name) continue;
+    let data = normalized.slice(headerEnd + 4);
+    if (data.endsWith("\r\n")) data = data.slice(0, -2);
+    parts.push({
+      name: disposition.name,
+      filename: disposition.filename,
+      contentType: headerValue(headers, "content-type"),
+      data: Buffer.from(data, "latin1")
+    });
+  }
+  return parts;
+}
+
+function isGifBytes(data: Buffer): boolean {
+  const signature = data.subarray(0, 6).toString("ascii");
+  return signature === "GIF87a" || signature === "GIF89a";
+}
+
+function multipartText(parts: MultipartPart[], name: string): string | undefined {
+  const part = parts.find((item) => item.name === name && !item.filename);
+  return part ? part.data.toString("utf8").trim() : undefined;
+}
+
+function alertConfigResponse() {
+  return {
+    keys: ALERT_OVERLAY_KEYS,
+    config: loadAlertOverlayConfig()
+  };
+}
+
 function staticEtag(size: number, mtimeMs: number): string {
   return `"${size.toString(16)}-${Math.trunc(mtimeMs).toString(16)}"`;
 }
@@ -305,9 +387,12 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
 
 async function sendOverlayAlertAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
   if (!pathname.startsWith("/alerts/")) return false;
-  const relative = decodeURIComponent(pathname.slice("/alerts/".length));
+  const uploadPrefix = "/alerts/uploads/";
+  const root = pathname.startsWith(uploadPrefix)
+    ? path.resolve(alertAssetRoot())
+    : path.resolve(appConfig.paths.overlayStatic, "alerts");
+  const relative = decodeURIComponent(pathname.slice(pathname.startsWith(uploadPrefix) ? uploadPrefix.length : "/alerts/".length));
   const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
-  const root = path.resolve(appConfig.paths.overlayStatic, "alerts");
   const candidate = path.resolve(root, normalized);
   if (candidate !== root && !candidate.startsWith(`${root}${path.sep}`)) {
     res.writeHead(403, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
@@ -475,6 +560,53 @@ export function createHttpHandler(input: {
       if (req.method === "GET" && url.pathname === "/api/status") return sendJson(req, res, 200, input.store.getStatus());
       if (req.method === "GET" && url.pathname === "/api/overlay/status") return sendJson(req, res, 200, input.store.getOverlayStatus());
       if (req.method === "GET" && url.pathname === "/api/rewards/mappings") return sendJson(req, res, 200, getRewardMappingSummaries());
+      if (req.method === "GET" && url.pathname === "/api/alerts/config") {
+        return sendJson(req, res, 200, {
+          ...alertConfigResponse(),
+          assets: await listAlertGifAssets()
+        });
+      }
+      if (req.method === "POST" && url.pathname === "/api/alerts/config") {
+        const body = await readJsonBody<{ eventType?: unknown; mediaUrl?: unknown; mediaAlt?: unknown }>(req);
+        if (typeof body.eventType !== "string" || !isAlertOverlayKey(body.eventType)) {
+          return sendJson(req, res, 400, { error: "eventType이 허용 목록에 없습니다." });
+        }
+        if (typeof body.mediaUrl !== "string" || !isSafeAlertMediaUrl(body.mediaUrl)) {
+          return sendJson(req, res, 400, { error: "mediaUrl은 안전한 /alerts/... 경로여야 합니다." });
+        }
+        if (body.mediaAlt !== undefined && (typeof body.mediaAlt !== "string" || body.mediaAlt.length > 120)) {
+          return sendJson(req, res, 400, { error: "mediaAlt는 120자 이하 문자열이어야 합니다." });
+        }
+        await saveAlertOverlayPreset(body.eventType, {
+          mediaUrl: body.mediaUrl,
+          mediaAlt: typeof body.mediaAlt === "string" ? body.mediaAlt : `${body.eventType} alert`
+        });
+        return sendJson(req, res, 200, {
+          ...alertConfigResponse(),
+          assets: await listAlertGifAssets()
+        });
+      }
+      if (req.method === "POST" && url.pathname === "/api/alerts/assets") {
+        const parts = parseMultipartBody(req, await readRawBody(req, MAX_ALERT_GIF_BYTES + 200_000));
+        const file = parts.find((part) => part.name === "file" && part.filename);
+        if (!file) return sendJson(req, res, 400, { error: "file 필드가 필요합니다." });
+        if (file.data.byteLength < 6 || file.data.byteLength > MAX_ALERT_GIF_BYTES) {
+          return sendJson(req, res, 400, { error: "GIF 파일은 1바이트 이상 5MB 이하여야 합니다." });
+        }
+        if (!isGifBytes(file.data)) return sendJson(req, res, 400, { error: "GIF 파일만 등록할 수 있습니다." });
+        const rawEventType = multipartText(parts, "eventType") ?? "alert";
+        const eventType: AlertOverlayKey | "alert" = isAlertOverlayKey(rawEventType) ? rawEventType : "alert";
+        const fileName = `${eventType}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}.gif`;
+        const root = alertAssetRoot();
+        await fs.mkdir(root, { recursive: true });
+        const filePath = path.join(root, fileName);
+        await fs.writeFile(filePath, file.data, { mode: 0o644 });
+        return sendJson(req, res, 200, {
+          fileName,
+          url: `/alerts/uploads/${fileName}`,
+          size: file.data.byteLength
+        });
+      }
       if (req.method === "GET" && url.pathname === "/api/events/recent") return sendJson(req, res, 200, input.store.recentEvents(50));
       if (req.method === "GET" && url.pathname === "/api/actions/recent") return sendJson(req, res, 200, input.store.recentActions(50));
       if (req.method === "GET" && url.pathname === "/api/questions") return sendJson(req, res, 200, input.store.getQuestions());

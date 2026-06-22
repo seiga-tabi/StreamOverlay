@@ -6,48 +6,12 @@ import type {
   TwitchSubscriptionInternalEvent,
   TwitchSubscriptionMessageInternalEvent
 } from "@streamops/shared";
-import fs from "node:fs";
-import path from "node:path";
-import { appConfig } from "../config.js";
 import type { BotModule } from "../core/module.js";
 import { sanitizeDisplayName, sanitizeViewerInput } from "../core/safe-text.js";
-
-type AlertOverlayPreset = {
-  enabled?: boolean;
-  title?: string;
-  subtitle?: string;
-  message?: string;
-  variant?: "info" | "success" | "warning" | "danger";
-  durationMs?: number;
-  mediaUrl?: string;
-  mediaAlt?: string;
-  soundUrl?: string;
-  soundVolume?: number;
-  speechEnabled?: boolean;
-  speechText?: string;
-  speechLanguage?: "ja-JP" | "ko-KR";
-  speechRate?: number;
-  speechPitch?: number;
-  speechVolume?: number;
-};
-
-type AlertOverlayConfig = {
-  defaults?: AlertOverlayPreset;
-  follow?: AlertOverlayPreset;
-  cheer?: AlertOverlayPreset;
-  subscription?: AlertOverlayPreset;
-  subscriptionMessage?: AlertOverlayPreset;
-  raid?: AlertOverlayPreset;
-};
+import { loadAlertOverlayConfig, type AlertOverlayConfig, type AlertOverlayKey, type AlertOverlayPreset } from "../services/alert-overlay-config.js";
 
 const DISPLAY_COMMENT_MAX_LENGTH = 160;
 const SPEECH_COMMENT_MAX_LENGTH = 80;
-
-function loadAlertOverlayConfig(): AlertOverlayConfig {
-  const filePath = path.join(appConfig.paths.config, "alert-overlays.json");
-  if (!fs.existsSync(filePath)) return {};
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as AlertOverlayConfig;
-}
 
 function cleanPreset(preset: AlertOverlayPreset | undefined): AlertOverlayPreset {
   if (!preset || preset.enabled === false) return {};
@@ -58,7 +22,7 @@ function cleanPreset(preset: AlertOverlayPreset | undefined): AlertOverlayPreset
 
 function withPreset(
   config: AlertOverlayConfig,
-  key: keyof Omit<AlertOverlayConfig, "defaults">,
+  key: AlertOverlayKey,
   action: BotAction & { type: "overlay.banner" }
 ): BotAction {
   const defaults = cleanPreset(config.defaults);
