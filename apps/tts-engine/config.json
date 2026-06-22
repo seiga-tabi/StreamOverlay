@@ -25,11 +25,11 @@
     "max_repeat_chars": 4
   },
   "sfx": {
-    "follow": "sfx/seoya_follow_alert.wav",
-    "bits": "sfx/seoya_bits_alert.wav",
-    "subscribe": "sfx/seoya_subscribe_alert.wav",
-    "donation": "sfx/seoya_bits_alert.wav",
-    "test": "sfx/seoya_follow_alert.wav"
+    "follow": "",
+    "bits": "",
+    "subscribe": "",
+    "donation": "",
+    "test": ""
   },
   "blocked_words": [
     "死ね",

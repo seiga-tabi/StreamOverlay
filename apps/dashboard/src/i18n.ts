@@ -128,7 +128,7 @@ export const dashboardI18n = {
       refreshing: "새로고침 중",
       refreshDone: "팔로워 목록을 갱신했습니다.",
       refreshFailed: "팔로워 목록 갱신 실패",
-      scopeHint: "전체 목록과 팔로우 취소 추정에는 Twitch OAuth scope moderator:read:followers가 필요합니다.",
+      scopeHint: "전체 목록과 팔로우 취소 추정에는 Twitch OAuth scope moderator:read:followers가 필요합니다. 서버 .env의 TWITCH_EXTRA_SCOPES에 추가한 뒤 서버를 재시작하고 Twitch를 다시 연결해야 반영됩니다.",
       dataLimit: "Twitch는 시청자의 장르별 시청 이력을 제공하지 않습니다. 장르는 StreamOps가 관측한 채팅/시참 활동 기준입니다.",
       metrics: {
         activeFollowers: "현재 팔로워",
@@ -357,7 +357,7 @@ export const dashboardI18n = {
       refreshing: "更新中",
       refreshDone: "フォロワー一覧を更新しました。",
       refreshFailed: "フォロワー一覧の更新に失敗しました",
-      scopeHint: "全体一覧とフォロー解除推定には Twitch OAuth scope moderator:read:followers が必要です。",
+      scopeHint: "全体一覧とフォロー解除推定には Twitch OAuth scope moderator:read:followers が必要です。サーバー .env の TWITCH_EXTRA_SCOPES に追加し、サーバー再起動後に Twitch を再接続すると反映されます。",
       dataLimit: "Twitch は視聴者のジャンル別視聴履歴を提供しません。ジャンルは StreamOps が観測したチャット/参加活動基準です。",
       metrics: {
         activeFollowers: "現在のフォロワー",

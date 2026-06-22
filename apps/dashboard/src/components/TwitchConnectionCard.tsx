@@ -13,6 +13,7 @@ const i18n = {
     missingScopes: "권한 부족",
     connect: "Twitch 연결",
     reconnect: "다시 연결",
+    forceReconnect: "권한 다시 승인",
     disconnect: "연결 해제",
     refresh: "토큰 갱신",
     eventSubReconnect: "EventSub 재연결",
@@ -55,6 +56,7 @@ const i18n = {
     missingScopes: "権限不足",
     connect: "Twitch 接続",
     reconnect: "再接続",
+    forceReconnect: "権限を再承認",
     disconnect: "接続解除",
     refresh: "トークン更新",
     eventSubReconnect: "EventSub 再接続",
@@ -297,7 +299,7 @@ export function TwitchConnectionCard() {
 
       <div className="button-row">
         <button onClick={() => connect(false)}>{status?.connected ? t.reconnect : t.connect}</button>
-        <button className="secondary" onClick={() => connect(true)}>{t.reconnect}</button>
+        <button className="secondary" onClick={() => connect(true)}>{t.forceReconnect}</button>
         <button className="secondary" onClick={() => void refresh()} disabled={!status || status.source !== "oauth"}>{t.refresh}</button>
         <button className="secondary" onClick={() => void reconnectEventSub()} disabled={!status}>{t.eventSubReconnect}</button>
         <button className="secondary" onClick={() => void disconnect()} disabled={!status || status.source !== "oauth"}>{t.disconnect}</button>
