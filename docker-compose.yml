@@ -115,7 +115,7 @@ services:
     expose:
       - "50021"
 
-정  cloudflared:
+  cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: streamops-cloudflared
     restart: unless-stopped

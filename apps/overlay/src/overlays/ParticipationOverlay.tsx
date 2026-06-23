@@ -7,11 +7,19 @@ import type {
   ParticipationTeamsUpdateMessage
 } from "@streamops/shared";
 
+const MAX_VISIBLE_QUEUE_ROWS = 4;
+const QUEUE_SLOT_NUMBERS = Array.from({ length: MAX_VISIBLE_QUEUE_ROWS }, (_, index) => index + 1);
+
 const i18n = {
   ko: {
     selectedLabel: "다음 참가자",
     queueTitle: "롤 시참 대기열",
+    queueHeroTitle: "참가 대기열",
     teamTitle: "내전 팀",
+    broadcasterLabel: "방송자",
+    liveBadge: "LIVE",
+    waitingLabel: "대기 중",
+    emptySlotMeta: "참가 대기",
     open: "모집 중",
     closed: "모집 종료",
     openDescription: "시참 참가자를 모집 중입니다.",
@@ -68,7 +76,12 @@ const i18n = {
   ja: {
     selectedLabel: "次の参加者",
     queueTitle: "LoL 参加待機列",
+    queueHeroTitle: "参加待機列",
     teamTitle: "カスタムチーム",
+    broadcasterLabel: "配信者",
+    liveBadge: "LIVE",
+    waitingLabel: "待機中",
+    emptySlotMeta: "参加待機",
     open: "募集中",
     closed: "募集終了",
     openDescription: "参加者を募集しています。",
@@ -126,7 +139,6 @@ const i18n = {
 
 const t = i18n.ja;
 const ko = i18n.ko;
-const MAX_VISIBLE_QUEUE_ROWS = 4;
 
 type BilingualValue = {
   ja: string;
@@ -137,6 +149,14 @@ function BilingualText({ value, className }: { value: BilingualValue; className?
   return (
     <span className={`bilingual-text ${className ?? ""}`}>
       <span className="bilingual-ja">{value.ja}</span>
+    </span>
+  );
+}
+
+function LocalizedText({ value, className }: { value: BilingualValue; className?: string }) {
+  return (
+    <span className={className} data-ko={value.ko} data-ja={value.ja}>
+      {value.ja}
     </span>
   );
 }
@@ -265,6 +285,33 @@ function queueCount(count: number): BilingualValue {
   return pair(t.queueCount(count), ko.queueCount(count));
 }
 
+function queueSlotNumber(slot: number): string {
+  return String(slot).padStart(2, "0");
+}
+
+function cssUrl(url: string): string {
+  return `url("${url.replaceAll("\"", "%22")}")`;
+}
+
+function firstQueueArtUrl(queue: ParticipationQueueEntry[]): string | undefined {
+  for (const entry of queue) {
+    const artUrl = championArtUrl(primaryChampion(entry.topChampions));
+    if (artUrl) return artUrl;
+  }
+  return undefined;
+}
+
+function queueSlotStatus(entry: ParticipationQueueEntry | undefined): BilingualValue {
+  if (!entry) return pair(t.waitingLabel, ko.waitingLabel);
+  return statusLabel(entry.status);
+}
+
+function queueSlotMeta(entry: ParticipationQueueEntry | undefined): BilingualValue {
+  if (!entry) return pair(t.emptySlotMeta, ko.emptySlotMeta);
+  const role = mainRoleLabel(entry.mainRole);
+  return pair(role.ja, role.ko);
+}
+
 export function ParticipationOverlay({
   queue,
   status,
@@ -277,48 +324,26 @@ export function ParticipationOverlay({
   const shouldShowQueueCard = queue.length > 0 || status?.isOpen || Boolean(teams);
   const visibleQueue = queue.slice(0, MAX_VISIBLE_QUEUE_ROWS);
   const hiddenQueueCount = Math.max(0, queue.length - visibleQueue.length);
-  const nextCandidate = status?.nextCandidate;
+  const broadcasterArtUrl = firstQueueArtUrl(visibleQueue);
 
   return (
     <>
       {shouldShowQueueCard ? (
-        <div className={`queue-card compact ${status?.isOpen ? "open" : "closed"}`}>
-          <div className="queue-header">
-            <div>
-              <div className="label"><BilingualText value={pair(t.queueTitle, ko.queueTitle)} /></div>
-              <div className="queue-status-line"><BilingualText value={statusDescription(status)} /></div>
-            </div>
-            <div className={`queue-status-pill ${status?.isOpen ? "open" : "closed"}`}>
-              <BilingualText value={statusValue(status)} />
-            </div>
+        <div className={`queue-card compact streamer-queue ${status?.isOpen ? "open" : "closed"}`}>
+          <QueueBroadcasterPanel artUrl={broadcasterArtUrl} status={status} visibleCount={visibleQueue.length} />
+          <div className="streamer-queue-slots" aria-label={t.queueTitle}>
+            {QUEUE_SLOT_NUMBERS.map((slot) => (
+              <QueueSlotRow
+                entry={visibleQueue[slot - 1]}
+                fallbackArtUrl={broadcasterArtUrl}
+                slot={slot}
+                key={`queue-slot-${slot}-${visibleQueue[slot - 1]?.position ?? "empty"}`}
+              />
+            ))}
           </div>
-          <div className="queue-count"><BilingualText value={queueCount(visibleQueue.length)} /></div>
-          {nextCandidate ? (
-            <div className="queue-next-candidate">
-              <BilingualText value={pair(t.nextCandidate, ko.nextCandidate)} />
-              <strong>#{nextCandidate.position} {nextCandidate.twitchUserName}</strong>
-              <BilingualText value={statusLabel(nextCandidate.status)} />
-            </div>
-          ) : null}
-          {queue.length > 0 ? (
-            <div className="queue-list" aria-label={`${t.queueTitle} / ${ko.queueTitle}`}>
-              {visibleQueue.map((entry, index) => (
-                <QueueEntryRow
-                  entry={entry}
-                  slot={index + 1}
-                  key={`${entry.position}-${entry.twitchUserName}`}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="queue-empty">
-              <strong><BilingualText value={statusValue(status)} /></strong>
-              <span><BilingualText value={pair(t.emptyQueue, ko.emptyQueue)} /></span>
-            </div>
-          )}
           {hiddenQueueCount > 0 ? (
-            <div className="queue-more">
-              <BilingualText value={pair(t.moreCount(hiddenQueueCount), ko.moreCount(hiddenQueueCount))} />
+            <div className="streamer-queue-more">
+              <LocalizedText value={pair(t.moreCount(hiddenQueueCount), ko.moreCount(hiddenQueueCount))} />
             </div>
           ) : null}
         </div>
@@ -336,41 +361,71 @@ export function ParticipationOverlay({
   );
 }
 
-function QueueEntryRow({
+function QueueBroadcasterPanel({
+  artUrl,
+  status,
+  visibleCount
+}: {
+  artUrl?: string;
+  status?: ParticipationStatusUpdateMessage;
+  visibleCount: number;
+}) {
+  const artStyle = artUrl ? ({ "--streamer-queue-art": cssUrl(artUrl) } as CSSProperties) : undefined;
+  const statusText = statusValue(status);
+  const statusSubline = statusDescription(status);
+  return (
+    <div className="queue-broadcaster-card" style={artStyle}>
+      <div className="queue-broadcaster-crest" aria-hidden="true">
+        <span data-ko={ko.liveBadge} data-ja={t.liveBadge}>{ko.liveBadge}</span>
+      </div>
+      <div className="queue-broadcaster-copy">
+        <LocalizedText className="queue-broadcaster-kicker" value={pair(t.broadcasterLabel, ko.broadcasterLabel)} />
+        <LocalizedText className="queue-broadcaster-title" value={pair(t.queueHeroTitle, ko.queueHeroTitle)} />
+        <LocalizedText className="queue-broadcaster-subline" value={statusSubline} />
+      </div>
+      <div className={`queue-broadcaster-status ${status?.isOpen ? "open" : "closed"}`}>
+        <LocalizedText value={statusText} />
+        <LocalizedText value={queueCount(visibleCount)} />
+      </div>
+    </div>
+  );
+}
+
+function QueueSlotRow({
   entry,
+  fallbackArtUrl,
   slot
 }: {
-  entry: ParticipationQueueEntry;
+  entry?: ParticipationQueueEntry;
+  fallbackArtUrl?: string;
   slot: number;
 }) {
-  const champion = primaryChampion(entry.topChampions);
-  const artUrl = championArtUrl(champion);
-  const name = championName(champion);
-  const role = mainRoleLabel(entry.mainRole);
-  const roleShort = mainRoleShortLabel(entry.mainRole);
-  const artStyle = artUrl ? ({ "--queue-art": `url("${artUrl}")` } as CSSProperties) : undefined;
+  const champion = primaryChampion(entry?.topChampions);
+  const artUrl = championArtUrl(champion) ?? fallbackArtUrl;
+  const artStyle = artUrl ? ({ "--streamer-queue-art": cssUrl(artUrl) } as CSSProperties) : undefined;
+  const slotStatus = queueSlotStatus(entry);
+  const slotMeta = queueSlotMeta(entry);
+  const ariaLabel = entry
+    ? `${queueSlotNumber(slot)} ${entry.twitchUserName} ${slotMeta.ja}`
+    : `${queueSlotNumber(slot)} ${t.waitingLabel}`;
   return (
     <div
-      className={`queue-row nameplate mastery-card slot-${slot} ${artUrl ? "has-art" : "empty-art"}`}
-      aria-label={`${entry.twitchUserName} ${role.ja} / ${role.ko}`}
-      data-status={entry.status}
+      className={`streamer-queue-row slot-${slot} ${entry ? "filled-slot" : "empty-slot"} ${artUrl ? "has-art" : "empty-art"}`}
+      aria-label={ariaLabel}
+      data-status={entry?.status ?? "waiting"}
+      style={artStyle}
     >
-      <div className="queue-row-surface">
-        <div className="queue-art-panel" style={artStyle} aria-hidden="true">
-          <div className="queue-art-overlay">
-            <span className="queue-hero-champion"><BilingualText value={name} /></span>
-            <span className="queue-mastery"><BilingualText value={masterySummary(champion)} /></span>
-          </div>
-        </div>
-        <span className="queue-row-index" aria-hidden="true"><BilingualText value={roleShort} /></span>
-        <div className="queue-detail-panel">
-          <div className="queue-player-line">
-            <strong className="queue-name">{entry.twitchUserName}</strong>
-          </div>
-          <div className="queue-stat-line">
-            <span><BilingualText value={recordSummary(entry)} /></span>
-          </div>
-        </div>
+      <div className="streamer-queue-row-art" aria-hidden="true" />
+      <div className="streamer-queue-index" aria-hidden="true">{queueSlotNumber(slot)}</div>
+      <div className="streamer-queue-divider" aria-hidden="true" />
+      <div className="streamer-queue-copy">
+        <strong className="streamer-queue-name">
+          {entry?.twitchUserName ?? <LocalizedText value={pair(t.waitingLabel, ko.waitingLabel)} />}
+        </strong>
+        <span className="streamer-queue-meta"><LocalizedText value={slotMeta} /></span>
+      </div>
+      <div className="streamer-queue-state">
+        <LocalizedText value={slotStatus} />
       </div>
     </div>
   );
