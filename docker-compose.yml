@@ -115,6 +115,17 @@ services:
     expose:
       - "50021"
 
+정  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: streamops-cloudflared
+    restart: unless-stopped
+    profiles:
+      - tunnel
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      server:
+        condition: service_healthy
+
 volumes:
   streamops_state:
   streamops_tts_output:

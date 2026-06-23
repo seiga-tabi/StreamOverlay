@@ -176,6 +176,53 @@ https://bot.example.com/overlay/?mode=events#token=OVERLAY_ACCESS_TOKEN_VALUE
 
 ## Reverse proxy 예시
 
+Cloudflare 502에서 Browser와 Cloudflare가 `Working`이고 Host만 `Error`라면, StreamOps 서버가 죽은 것보다 Cloudflare가 origin에 도달하지 못하는 경우가 많습니다. `https://bot.example.com`은 기본적으로 origin의 443 포트나 Cloudflare Tunnel로 들어오므로, Docker의 `HOST_PORT=3000`만 열어두면 공개 도메인에서 바로 접속되지 않습니다.
+
+다음 중 하나를 반드시 준비해야 합니다.
+
+- Caddy/Nginx 같은 reverse proxy가 host 443에서 TLS를 받고 `127.0.0.1:3000`으로 proxy합니다.
+- Cloudflare Tunnel이 `http://server:3000` 또는 `http://127.0.0.1:3000`으로 proxy합니다.
+
+확인 명령:
+
+```bash
+curl http://127.0.0.1:3000/health/ready
+nc -vz 127.0.0.1 80
+nc -vz 127.0.0.1 443
+docker compose ps
+```
+
+`curl http://127.0.0.1:3000/health/ready`는 성공하지만 공개 URL만 502라면 reverse proxy 또는 Tunnel 설정 문제입니다.
+
+### Cloudflare Tunnel
+
+Cloudflare Zero Trust에서 tunnel을 만들고 public hostname을 `bot.example.com`으로 연결합니다. Service URL은 compose profile을 사용할 때 같은 Docker network의 서버 이름을 사용할 수 있습니다.
+
+```text
+http://server:3000
+```
+
+`.env`에 tunnel token을 넣습니다.
+
+```text
+CLOUDFLARE_TUNNEL_TOKEN=...
+PUBLIC_BASE_URL=https://bot.example.com
+DASHBOARD_BASE_URL=https://bot.example.com
+OVERLAY_BASE_URL=https://bot.example.com/overlay
+TWITCH_REDIRECT_URI=https://bot.example.com/api/twitch/auth/callback
+CORS_ORIGINS=https://bot.example.com
+TRUST_PROXY=true
+```
+
+실행:
+
+```bash
+docker compose --profile tunnel up -d
+docker compose logs -f cloudflared
+```
+
+Cloudflare Tunnel을 쓰면 host의 80/443 포트를 직접 열 필요가 없습니다.
+
 ### Caddy
 
 ```caddyfile
