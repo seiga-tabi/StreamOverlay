@@ -9,6 +9,7 @@ import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
 const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
 const EventsPage = lazy(async () => ({ default: (await import("./pages/EventsPage")).EventsPage }));
 const QuestionsPage = lazy(async () => ({ default: (await import("./pages/QuestionsPage")).QuestionsPage }));
+const SoloRankPage = lazy(async () => ({ default: (await import("./pages/SoloRankPage")).SoloRankPage }));
 const ParticipationPage = lazy(async () => ({ default: (await import("./pages/ParticipationPage")).ParticipationPage }));
 const SettingsPage = lazy(async () => ({ default: (await import("./pages/SettingsPage")).SettingsPage }));
 const TwitchConnectionPage = lazy(async () => ({ default: (await import("./pages/TwitchConnectionPage")).TwitchConnectionPage }));
@@ -115,6 +116,7 @@ export default function App() {
         {page === "followers" ? <FollowersPage /> : null}
         {page === "events" ? <EventsPage snapshot={snapshot} /> : null}
         {page === "questions" ? <QuestionsPage snapshot={snapshot} /> : null}
+        {page === "soloRank" ? <SoloRankPage /> : null}
         {page === "participation" ? <ParticipationPage snapshot={snapshot} /> : null}
         {page === "settings" ? <SettingsPage /> : null}
       </Suspense>

@@ -1,4 +1,4 @@
-import type { LolChampionSummary, LolMainRole, LolProfileStatus, LolRankedStats, ParticipationEntry } from "@streamops/shared";
+import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRankHistoryPoint, LolRankTier, LolRecentMatchChampion, ParticipationEntry } from "@streamops/shared";
 import { formatRiotId, normalizeRiotIdKey, toSafeErrorMessage } from "@streamops/shared";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { DataDragonService } from "./data-dragon.js";
@@ -12,6 +12,7 @@ export type LolParticipationProfileConfig = {
   matchAnalysisCount: number;
   mainRoleMinConfidence: number;
   enabledQueues: number[];
+  championSkinOverrides?: Record<string, number>;
   rateLimit: {
     backoffMs: number;
     maxBackoffMs: number;
@@ -23,14 +24,40 @@ export type LolProfilePatch = {
   profileFailureReason?: string;
   mainRole?: LolMainRole;
   mainRoleConfidence?: number;
+  ladderRank?: number;
   topChampions?: LolChampionSummary[];
   rankedStats?: LolRankedStats;
+  performanceStats?: LolPerformanceStats;
+  recentMatches?: LolRecentMatchChampion[];
+  rankHistory?: LolRankHistoryPoint[];
   verifiedRank?: string;
   profileAnalyzedAt?: string;
   riotPuuid?: string;
 };
 
 const ROLE_ORDER: LolMainRole[] = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"];
+const STREAMER_RECENT_MATCH_LIMIT = 10;
+const RANK_HISTORY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const RANK_HISTORY_MAX_POINTS = 64;
+const RANK_TIER_SCORE: Record<LolRankTier, number> = {
+  UNRANKED: 0,
+  IRON: 0,
+  BRONZE: 400,
+  SILVER: 800,
+  GOLD: 1200,
+  PLATINUM: 1600,
+  EMERALD: 2000,
+  DIAMOND: 2400,
+  MASTER: 2800,
+  GRANDMASTER: 3200,
+  CHALLENGER: 3600
+};
+const RANK_DIVISION_SCORE: Record<string, number> = {
+  IV: 0,
+  III: 100,
+  II: 200,
+  I: 300
+};
 const POSITION_ALIASES: Record<string, LolMainRole> = {
   TOP: "TOP",
   JUNGLE: "JUNGLE",
@@ -85,8 +112,56 @@ export function topChampionsFromMatches(matches: RiotMatch[], puuid: string): Ar
     .map(([championId, games]) => ({ championId, games }));
 }
 
-function isFresh(entry: LolProfileCacheEntry, ttlHours: number): boolean {
+function roundStat(value: number, digits: number): number {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+}
+
+export function performanceStatsFromMatches(matches: RiotMatch[], puuid: string): LolPerformanceStats | undefined {
+  let sampleSize = 0;
+  let kills = 0;
+  let deaths = 0;
+  let assists = 0;
+
+  for (const match of matches) {
+    const participant = match.info.participants.find((item) => item.puuid === puuid);
+    if (!participant) continue;
+    if (
+      typeof participant.kills !== "number" ||
+      typeof participant.deaths !== "number" ||
+      typeof participant.assists !== "number" ||
+      !Number.isFinite(participant.kills) ||
+      !Number.isFinite(participant.deaths) ||
+      !Number.isFinite(participant.assists)
+    ) {
+      continue;
+    }
+
+    sampleSize += 1;
+    kills += Math.max(0, participant.kills);
+    deaths += Math.max(0, participant.deaths);
+    assists += Math.max(0, participant.assists);
+  }
+
+  if (sampleSize === 0) return undefined;
+  return {
+    sampleSize,
+    averageKills: roundStat(kills / sampleSize, 1),
+    averageDeaths: roundStat(deaths / sampleSize, 1),
+    averageAssists: roundStat(assists / sampleSize, 1),
+    kda: roundStat((kills + assists) / Math.max(1, deaths), 2)
+  };
+}
+
+function skinOverridesKey(config: LolParticipationProfileConfig, entry: ParticipationEntry): string | undefined {
+  if (entry.id !== "streamer-profile") return undefined;
+  const entries = Object.entries(config.championSkinOverrides ?? {}).sort(([a], [b]) => a.localeCompare(b));
+  return entries.length > 0 ? JSON.stringify(entries) : undefined;
+}
+
+function isFresh(entry: LolProfileCacheEntry, ttlHours: number, skinKey?: string): boolean {
   if (entry.status !== "ready" || !entry.analyzedAt) return false;
+  if (skinKey !== undefined && entry.championSkinOverridesKey !== skinKey) return false;
   const analyzedAt = Date.parse(entry.analyzedAt);
   if (!Number.isFinite(analyzedAt)) return false;
   return Date.now() - analyzedAt < ttlHours * 60 * 60 * 1000;
@@ -104,9 +179,44 @@ function isUsablePuuid(puuid: string | undefined): puuid is string {
 
 function rankLabel(stats: LolRankedStats | undefined): string | undefined {
   if (!stats) return undefined;
-  if (stats.tier === "UNRANKED") return stats.summonerLevel ? `UNRANKED Lv.${stats.summonerLevel}` : "UNRANKED";
+  if (stats.tier === "UNRANKED") return stats.summonerLevel ? `Unranked Lv.${stats.summonerLevel}` : "Unranked";
   const queue = stats.queueType === "RANKED_FLEX_SR" ? "자유랭크" : "솔로랭크";
   return `${queue} ${stats.tier}${stats.rank ? ` ${stats.rank}` : ""} ${stats.leaguePoints}LP`;
+}
+
+function rankScore(stats: LolRankedStats): number {
+  if (stats.tier === "UNRANKED") return 0;
+  return RANK_TIER_SCORE[stats.tier] + (stats.rank ? RANK_DIVISION_SCORE[stats.rank] ?? 0 : 0) + Math.max(0, Math.trunc(stats.leaguePoints));
+}
+
+function buildRankHistory(previous: LolRankHistoryPoint[] | undefined, stats: LolRankedStats | undefined, analyzedAt: string): LolRankHistoryPoint[] | undefined {
+  const cutoff = Date.parse(analyzedAt) - RANK_HISTORY_WINDOW_MS;
+  const history = (previous ?? [])
+    .filter((point) => {
+      const time = Date.parse(point.date);
+      return Number.isFinite(time) && time >= cutoff;
+    })
+    .map((point) => ({ ...point }));
+
+  if (!stats) return history.length > 0 ? history.slice(-RANK_HISTORY_MAX_POINTS) : undefined;
+
+  const point: LolRankHistoryPoint = {
+    date: analyzedAt,
+    tier: stats.tier,
+    rank: stats.rank,
+    leaguePoints: stats.leaguePoints,
+    wins: stats.wins,
+    losses: stats.losses,
+    rankScore: rankScore(stats)
+  };
+  const last = history.at(-1);
+  const lastAt = last ? Date.parse(last.date) : 0;
+  if (last && Number.isFinite(lastAt) && Date.parse(analyzedAt) - lastAt < 15 * 60 * 1000) {
+    history[history.length - 1] = point;
+  } else {
+    history.push(point);
+  }
+  return history.slice(-RANK_HISTORY_MAX_POINTS);
 }
 
 function patchFromProfile(profile: LolProfileCacheEntry): LolProfilePatch {
@@ -114,8 +224,12 @@ function patchFromProfile(profile: LolProfileCacheEntry): LolProfilePatch {
     profileStatus: profile.status,
     mainRole: profile.mainRole,
     mainRoleConfidence: profile.mainRoleConfidence,
+    ladderRank: profile.ladderRank,
     topChampions: profile.topChampions?.map((champion) => ({ ...champion })),
     rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
+    performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
+    recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
+    rankHistory: profile.rankHistory?.map((point) => ({ ...point })),
     verifiedRank: rankLabel(profile.rankedStats),
     profileAnalyzedAt: profile.analyzedAt,
     profileFailureReason: profile.failedReason,
@@ -148,7 +262,7 @@ export class LolProfileEnrichmentService {
       ? this.profiles.getByPuuid(entry.riotPuuid)
       : this.profiles.getByRiotId(entry.riotGameName, entry.riotTagLine);
     if (!cached) return undefined;
-    if (isBackoffActive(cached) || isFresh(cached, config.profileCacheTtlHours)) return patchFromProfile(cached);
+    if (isBackoffActive(cached) || isFresh(cached, config.profileCacheTtlHours, skinOverridesKey(config, entry))) return patchFromProfile(cached);
     return undefined;
   }
 
@@ -156,7 +270,11 @@ export class LolProfileEnrichmentService {
     const cached = isUsablePuuid(entry.riotPuuid)
       ? this.profiles.getByPuuid(entry.riotPuuid)
       : this.profiles.getByRiotId(entry.riotGameName, entry.riotTagLine);
-    if (!force && cached && (isBackoffActive(cached) || isFresh(cached, config.profileCacheTtlHours))) {
+    const currentSkinOverridesKey = skinOverridesKey(config, entry);
+    const isStreamerProfile = entry.id === "streamer-profile";
+    const skinOverrides = isStreamerProfile ? config.championSkinOverrides : undefined;
+    const matchQueueIds = isStreamerProfile ? [420] : config.enabledQueues;
+    if (!force && cached && (isBackoffActive(cached) || isFresh(cached, config.profileCacheTtlHours, currentSkinOverridesKey))) {
       return patchFromProfile(cached);
     }
 
@@ -170,18 +288,25 @@ export class LolProfileEnrichmentService {
         : await this.riot.getAccountByRiotId(entry.riotGameName, entry.riotTagLine);
       if (!account) return this.saveFailure(entry, "failed", "Riot 계정을 찾을 수 없습니다.");
 
-      const [topChampions, rankedStats, matches] = await Promise.all([
-        this.getTopChampions(account.puuid).catch((error) => {
+      const [topChampions, rankedStats, ladderRank, matches] = await Promise.all([
+        this.getTopChampions(account.puuid, skinOverrides).catch((error) => {
           if (shouldFailProfileAnalysis(error)) throw error;
           this.logger.error({ type: "lol_profile.mastery_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
           return [];
         }),
-        this.riot.getRankedStatsByPuuid(account.puuid).catch((error) => {
+        this.riot.getRankedStatsByPuuid(account.puuid, isStreamerProfile ? ["RANKED_SOLO_5x5"] : undefined).catch((error) => {
           if (shouldFailProfileAnalysis(error)) throw error;
           this.logger.error({ type: "lol_profile.rank_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
           return undefined;
         }),
-        this.getRecentMatches(account.puuid, config.matchAnalysisCount, config.enabledQueues).catch((error) => {
+        isStreamerProfile && typeof this.riot.getLadderRankByPuuid === "function"
+          ? this.riot.getLadderRankByPuuid(account.puuid, ["RANKED_SOLO_5x5"]).catch((error) => {
+            if (shouldFailProfileAnalysis(error)) throw error;
+            this.logger.error({ type: "lol_profile.ladder_rank_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
+            return undefined;
+          })
+          : Promise.resolve(undefined),
+        this.getRecentMatches(account.puuid, config.matchAnalysisCount, matchQueueIds).catch((error) => {
           if (shouldFailProfileAnalysis(error)) throw error;
           this.logger.error({ type: "lol_profile.match_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
           return [];
@@ -189,10 +314,14 @@ export class LolProfileEnrichmentService {
       ]);
 
       const role = inferMainRoleFromMatches(matches, account.puuid, config.mainRoleMinConfidence);
+      const performanceStats = performanceStatsFromMatches(matches, account.puuid);
+      const recentMatches = await this.recentMatchChampionsFromMatches(matches, account.puuid);
       const fallbackChampions = topChampions.length > 0
         ? topChampions
-        : await Promise.all(topChampionsFromMatches(matches, account.puuid).map((champion) => this.dataDragon.mapChampionSummary(champion)));
+        : await Promise.all(topChampionsFromMatches(matches, account.puuid).map((champion) => this.dataDragon.mapChampionSummary({ ...champion, skinOverrides })));
       const analyzedAt = new Date().toISOString();
+      const resolvedLadderRank = ladderRank ?? cached?.ladderRank;
+      const rankHistory = buildRankHistory(cached?.rankHistory, rankedStats, analyzedAt);
       const profile = this.profiles.save({
         riotPuuid: account.puuid,
         riotGameName: account.gameName,
@@ -201,9 +330,14 @@ export class LolProfileEnrichmentService {
         status: "ready",
         mainRole: role.mainRole,
         mainRoleConfidence: role.confidence,
+        ladderRank: resolvedLadderRank,
         topChampions: fallbackChampions,
         rankedStats,
-        analyzedAt
+        performanceStats,
+        recentMatches,
+        rankHistory,
+        analyzedAt,
+        championSkinOverridesKey: currentSkinOverridesKey
       });
       this.logger.event({ type: "lol_profile.ready", riotId: formatRiotId(entry.riotGameName, entry.riotTagLine), entryId: entry.id, mainRole: profile.mainRole });
       return patchFromProfile(profile);
@@ -218,12 +352,13 @@ export class LolProfileEnrichmentService {
     }
   }
 
-  private async getTopChampions(puuid: string): Promise<LolChampionSummary[]> {
+  private async getTopChampions(puuid: string, skinOverrides?: Record<string, number>): Promise<LolChampionSummary[]> {
     const mastery = await this.riot.getChampionMasteryTopByPuuid(puuid, 3);
     return Promise.all(mastery.slice(0, 3).map((champion) => this.dataDragon.mapChampionSummary({
       championId: champion.championId,
       masteryLevel: champion.championLevel,
-      masteryPoints: champion.championPoints
+      masteryPoints: champion.championPoints,
+      skinOverrides
     })));
   }
 
@@ -235,6 +370,31 @@ export class LolProfileEnrichmentService {
       if (match) matches.push(match);
     }
     return matches;
+  }
+
+  private async recentMatchChampionsFromMatches(matches: RiotMatch[], puuid: string): Promise<LolRecentMatchChampion[]> {
+    const recent: LolRecentMatchChampion[] = [];
+    for (const match of matches.slice(0, STREAMER_RECENT_MATCH_LIMIT)) {
+      const participant = match.info.participants.find((item) => item.puuid === puuid);
+      if (!participant?.championId || typeof participant.win !== "boolean") continue;
+      const champion = await this.dataDragon.mapChampionSummary({ championId: participant.championId }).catch((): LolChampionSummary => ({
+        championId: participant.championId,
+        nameKo: `Champion ${participant.championId}`
+      }));
+      recent.push({
+        championId: champion.championId,
+        championKey: champion.championKey,
+        nameKo: champion.nameKo,
+        nameJa: champion.nameJa,
+        iconUrl: champion.iconUrl,
+        splashUrl: champion.splashUrl,
+        loadingUrl: champion.loadingUrl,
+        imageVersion: champion.imageVersion,
+        imageLocale: champion.imageLocale,
+        won: participant.win
+      });
+    }
+    return recent;
   }
 
   private saveFailure(entry: ParticipationEntry, status: Exclude<LolProfileStatus, "pending" | "analyzing" | "ready">, reason: string, backoffMs?: number): LolProfilePatch {

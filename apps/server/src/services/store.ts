@@ -15,7 +15,7 @@ import type {
   TwitchEventSubStatus,
   TwitchEventSubSubscriptionStatus
 } from "@streamops/shared";
-import { OVERLAY_CHANNELS, formatRiotId, isActiveParticipationStatus, isWaitingParticipationStatus, newId, normalizeRiotIdKey, nowIso } from "@streamops/shared";
+import { OVERLAY_CHANNELS, formatRiotId, isActiveParticipationStatus, isWaitingParticipationStatus, newId, normalizeRiotIdKey, nowIso, type ParticipationStreamerProfile } from "@streamops/shared";
 
 export type QuestionEntry = {
   id: string;
@@ -250,6 +250,7 @@ export class Store {
   private lastFollowerSnapshotTruncated?: boolean;
   private followerPersistTimer?: NodeJS.Timeout;
   private participationQueue: ParticipationEntry[] = [];
+  private participationStreamerProfile?: ParticipationStreamerProfile;
   private overlayStatus: OverlayStatus = {
     clientCount: 0,
     clientsByChannel: Object.fromEntries(OVERLAY_CHANNELS.map((channel) => [channel, 0])) as Record<OverlayChannel, number>,
@@ -631,6 +632,30 @@ export class Store {
     return [...this.participationQueue];
   }
 
+  setParticipationStreamerProfile(profile: ParticipationStreamerProfile | undefined): ParticipationStreamerProfile | undefined {
+    this.participationStreamerProfile = profile ? {
+      ...profile,
+      topChampions: profile.topChampions?.map((champion) => ({ ...champion })),
+      rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
+      performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
+      recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
+      rankHistory: profile.rankHistory?.map((point) => ({ ...point }))
+    } : undefined;
+    return this.getParticipationStreamerProfile();
+  }
+
+  getParticipationStreamerProfile(): ParticipationStreamerProfile | undefined {
+    const profile = this.participationStreamerProfile;
+    return profile ? {
+      ...profile,
+      topChampions: profile.topChampions?.map((champion) => ({ ...champion })),
+      rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
+      performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
+      recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
+      rankHistory: profile.rankHistory?.map((point) => ({ ...point }))
+    } : undefined;
+  }
+
   getActiveParticipationQueue(): ParticipationEntry[] {
     return this.participationQueue.filter((entry) => isActiveParticipationStatus(entry.status));
   }
@@ -804,9 +829,15 @@ export class Store {
     return entries;
   }
 
-  markVisibleParticipationQueueInGame(limit = PARTICIPATION_OVERLAY_VISIBLE_LIMIT): ParticipationEntry[] {
+  markVisibleParticipationQueueInGame(
+    input: number | { limit?: number; participantPuuids?: Iterable<string | undefined> } = PARTICIPATION_OVERLAY_VISIBLE_LIMIT
+  ): ParticipationEntry[] {
     const entries: ParticipationEntry[] = [];
     const seenIds = new Set<string>();
+    const limit = typeof input === "number" ? input : input.limit ?? PARTICIPATION_OVERLAY_VISIBLE_LIMIT;
+    const participantPuuids = typeof input === "number"
+      ? undefined
+      : new Set(Array.from(input.participantPuuids ?? []).filter((puuid): puuid is string => typeof puuid === "string" && puuid.length > 0));
     const markInGame = (entry: ParticipationEntry): void => {
       if (seenIds.has(entry.id)) return;
       seenIds.add(entry.id);
@@ -819,6 +850,14 @@ export class Store {
     for (const entry of this.participationQueue) {
       if (!["selected", "checked_in", "invited"].includes(entry.status)) continue;
       markInGame(entry);
+    }
+
+    if (participantPuuids && participantPuuids.size > 0) {
+      for (const entry of this.getWaitingParticipationQueue()) {
+        if (!entry.riotPuuid || !participantPuuids.has(entry.riotPuuid)) continue;
+        markInGame(entry);
+      }
+      return entries;
     }
 
     const maxWaiting = Math.max(0, Math.trunc(limit));

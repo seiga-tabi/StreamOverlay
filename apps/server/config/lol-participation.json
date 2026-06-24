@@ -5,6 +5,7 @@
   "matchAnalysisCount": 20,
   "mainRoleMinConfidence": 45,
   "enabledQueues": [420, 440, 430, 400],
+  "championSkinOverrides": {},
   "gameMonitor": {
     "enabled": true,
     "streamerRiotId": "",

@@ -33,6 +33,7 @@ const i18n = {
       questions: "질문",
       mission: "미션",
       participation: "시참",
+      "solo-rank": "솔로랭크 전적",
       all: "전체"
     }
   },
@@ -62,6 +63,7 @@ const i18n = {
       questions: "質問",
       mission: "ミッション",
       participation: "参加",
+      "solo-rank": "ソロランク戦績",
       all: "全体"
     }
   }

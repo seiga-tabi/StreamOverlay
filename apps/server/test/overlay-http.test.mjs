@@ -108,6 +108,105 @@ test("dashboard overlay test action은 /api/actions/test에서 검증 후 dispat
   assert.equal(dispatched[0].reason, "dashboard.test");
 });
 
+test("participation invite message API는 대기열 참가자에게 Twitch 채팅 메시지를 전송한다", async () => {
+  const dispatched = [];
+  const handler = createHttpHandler({
+    store: {
+      getParticipationEntryById(id) {
+        return id === "entry-1" ? { id: "entry-1", twitchUserName: "ViewerOne" } : undefined;
+      }
+    },
+    twitchAuth: {},
+    actions: {
+      async dispatchOne(action, ctx, reason) {
+        dispatched.push({ action, ctx, reason });
+      }
+    }
+  });
+
+  const req = createRequest("POST", "/api/participation/invite-message", {
+    entryId: "entry-1",
+    message: "https://example.com/invite 참가 안내입니다."
+  });
+  const res = createResponse();
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(JSON.parse(res.body), { ok: true, entryId: "entry-1", twitchUserName: "ViewerOne" });
+  assert.equal(dispatched.length, 1);
+  assert.deepEqual(dispatched[0].action, {
+    type: "twitch.chat",
+    message: "@ViewerOne https://example.com/invite 참가 안내입니다."
+  });
+  assert.equal(dispatched[0].reason, "dashboard.participation_invite");
+});
+
+test("participation invite message API는 http/https가 아닌 링크 프로토콜을 거부한다", async () => {
+  const dispatched = [];
+  const handler = createHttpHandler({
+    store: {
+      getParticipationEntryById(id) {
+        return id === "entry-1" ? { id: "entry-1", twitchUserName: "ViewerOne" } : undefined;
+      }
+    },
+    twitchAuth: {},
+    actions: {
+      async dispatchOne(action) {
+        dispatched.push(action);
+      }
+    }
+  });
+
+  const req = createRequest("POST", "/api/participation/invite-message", {
+    entryId: "entry-1",
+    message: "lol://invite-code"
+  });
+  const res = createResponse();
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 400);
+  assert.match(JSON.parse(res.body).error, /http/);
+  assert.equal(dispatched.length, 0);
+});
+
+test("participation invite bulk message API는 전송 가능한 참가자를 한 채팅 메시지로 묶는다", async () => {
+  const entries = new Map([
+    ["entry-1", { id: "entry-1", twitchUserName: "ViewerOne", status: "waitlisted" }],
+    ["entry-2", { id: "entry-2", twitchUserName: "ViewerTwo", status: "checked_in" }],
+    ["entry-3", { id: "entry-3", twitchUserName: "ViewerThree", status: "in_game" }]
+  ]);
+  const dispatched = [];
+  const handler = createHttpHandler({
+    store: {
+      getParticipationEntryById(id) {
+        return entries.get(id);
+      }
+    },
+    twitchAuth: {},
+    actions: {
+      async dispatchOne(action, ctx, reason) {
+        dispatched.push({ action, ctx, reason });
+      }
+    }
+  });
+
+  const req = createRequest("POST", "/api/participation/invite-message/bulk", {
+    entryIds: ["entry-1", "entry-2", "entry-3"],
+    message: "https://example.com/invite 참가 안내입니다."
+  });
+  const res = createResponse();
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(JSON.parse(res.body), { ok: true, targetCount: 2, sentMessages: 1 });
+  assert.equal(dispatched.length, 1);
+  assert.deepEqual(dispatched[0].action, {
+    type: "twitch.chat",
+    message: "@ViewerOne @ViewerTwo https://example.com/invite 참가 안내입니다."
+  });
+  assert.equal(dispatched[0].reason, "dashboard.participation_invite_bulk");
+});
+
 test("POST API는 올바르지 않은 JSON body를 400으로 반환한다", async () => {
   const handler = createHttpHandler({
     store: {},

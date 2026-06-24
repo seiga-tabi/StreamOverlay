@@ -159,6 +159,7 @@ export class OverlayHub {
     if (message.type === "participation.queue.update") return `${message.queue.length}명 대기`;
     if (message.type === "participation.selected.show") return message.twitchUserName;
     if (message.type === "participation.status.update") return message.message;
+    if (message.type === "solo-rank.profile.update") return message.profile.displayName;
     if (message.type === "participation.teams.update") return `A ${message.teams.a.length}명 / B ${message.teams.b.length}명`;
     return undefined;
   }

@@ -114,8 +114,15 @@ function queueAction(ctx: ModuleContext) {
   return { type: "overlay.participationQueue" as const, isOpen: isParticipationOpen(ctx), queue: publicQueue(ctx) };
 }
 
-function statusAction(settings: ParticipationSettingsFile, isOpen: boolean, message: string) {
-  return { type: "overlay.participationStatus" as const, isOpen, mode: settings.mode, phase: isOpen ? "recruiting" as const : "closed" as const, message };
+function statusAction(ctx: ModuleContext, settings: ParticipationSettingsFile, isOpen: boolean, message: string) {
+  return {
+    type: "overlay.participationStatus" as const,
+    isOpen,
+    mode: settings.mode,
+    phase: isOpen ? "recruiting" as const : "closed" as const,
+    message,
+    streamerProfile: ctx.store.getParticipationStreamerProfile()
+  };
 }
 
 function logEntry(entry: ParticipationEntry): Record<string, unknown> {
@@ -358,7 +365,7 @@ export const participationModule: BotModule = {
       ctx.store.setParticipationOpen(true);
       ctx.logger.event({ type: "participation.opened", reason: "open_by_default" });
       void ctx.actions.dispatch([
-        statusAction(settings, true, "롤 시참 모집 중"),
+        statusAction(ctx, settings, true, "롤 시참 모집 중"),
         queueAction(ctx)
       ], {}, "participation.open_by_default");
       ctx.dashboard.broadcastSnapshot();
@@ -378,11 +385,16 @@ export const participationModule: BotModule = {
       }
 
       if (commandKind === "open") {
+        if (isParticipationOpen(ctx)) {
+          ctx.logger.event({ type: "participation.open_ignored", reason: "already_open", twitchUserId: event.chatterUserId, twitchUserName: event.chatterUserName });
+          return;
+        }
+
         ctx.store.setParticipationOpen(true);
         ctx.logger.event({ type: "participation.opened", twitchUserId: event.chatterUserId, twitchUserName: event.chatterUserName });
         await ctx.actions.dispatch([
-          { type: "overlay.banner", message: "롤 시참 모집 시작!", variant: "success", durationMs: 5000 },
-          statusAction(settings, true, "롤 시참 모집 중"),
+          { type: "overlay.banner", message: "参加募集を開始しました。", variant: "success", durationMs: 5000 },
+          statusAction(ctx, settings, true, "롤 시참 모집 중"),
           { type: "twitch.chat", message: settings.guideMessage },
           queueAction(ctx)
         ], {}, "participation.open");
@@ -394,7 +406,7 @@ export const participationModule: BotModule = {
         ctx.store.setParticipationOpen(false);
         ctx.logger.event({ type: "participation.closed", twitchUserId: event.chatterUserId, twitchUserName: event.chatterUserName });
         await ctx.actions.dispatch([
-          statusAction(settings, false, "롤 시참 모집 종료"),
+          statusAction(ctx, settings, false, "롤 시참 모집 종료"),
           queueAction(ctx)
         ], {}, "participation.close");
         ctx.dashboard.broadcastSnapshot();

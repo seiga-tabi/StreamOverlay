@@ -6,14 +6,16 @@ import type {
   OverlayBannerMessage,
   OverlayChannel,
   OverlayMessage,
+  ParticipationStreamerProfile,
   ParticipationQueueUpdateMessage,
   ParticipationStatusUpdateMessage,
   ParticipationTeamsUpdateMessage,
   QuestionShowMessage,
+  SoloRankProfileUpdateMessage,
   SubtitleBoostMessage,
   SubtitleUpdateMessage
 } from "@streamops/shared";
-import { normalizeOverlayChannel } from "@streamops/shared";
+import { normalizeOverlayChannel, validateOverlayMessage } from "@streamops/shared";
 import { connectOverlaySocket } from "./socket";
 
 const EventOverlay = lazy(async () => ({ default: (await import("./overlays/EventOverlay")).EventOverlay }));
@@ -21,6 +23,7 @@ const SubtitleOverlay = lazy(async () => ({ default: (await import("./overlays/S
 const QuestionOverlay = lazy(async () => ({ default: (await import("./overlays/QuestionOverlay")).QuestionOverlay }));
 const MissionOverlay = lazy(async () => ({ default: (await import("./overlays/MissionOverlay")).MissionOverlay }));
 const ParticipationOverlay = lazy(async () => ({ default: (await import("./overlays/ParticipationOverlay")).ParticipationOverlay }));
+const SoloRankOverlay = lazy(async () => ({ default: (await import("./overlays/SoloRankOverlay")).SoloRankOverlay }));
 const ChatOverlay = lazy(async () => ({ default: (await import("./overlays/ChatOverlay")).ChatOverlay }));
 
 type OverlayState = {
@@ -33,7 +36,25 @@ type OverlayState = {
   participationQueue?: ParticipationQueueUpdateMessage;
   participationStatus?: ParticipationStatusUpdateMessage;
   teams?: ParticipationTeamsUpdateMessage;
+  soloRankProfile?: SoloRankProfileUpdateMessage;
   emergency?: EmergencyShowMessage;
+};
+
+const PARTICIPATION_CACHE_KEY = "streamops.overlay.participationState";
+const PARTICIPATION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const SOLO_RANK_CACHE_KEY = "streamops.overlay.soloRankState";
+const SOLO_RANK_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+
+type CachedParticipationState = {
+  savedAt: number;
+  participationQueue?: ParticipationQueueUpdateMessage;
+  participationStatus?: ParticipationStatusUpdateMessage;
+  teams?: ParticipationTeamsUpdateMessage;
+};
+
+type CachedSoloRankState = {
+  savedAt: number;
+  soloRankProfile?: SoloRankProfileUpdateMessage;
 };
 
 function currentMode(): OverlayChannel {
@@ -59,12 +80,115 @@ function duration(message: { durationMs?: number } | undefined, fallback: number
   return message?.durationMs ?? fallback;
 }
 
+function validateCachedMessage<T extends OverlayMessage["type"]>(
+  value: unknown,
+  type: T
+): Extract<OverlayMessage, { type: T }> | undefined {
+  const validation = validateOverlayMessage(value);
+  if (!validation.ok) return undefined;
+  const message = value as OverlayMessage;
+  return message.type === type ? message as Extract<OverlayMessage, { type: T }> : undefined;
+}
+
+function loadCachedParticipationState(): Partial<OverlayState> {
+  try {
+    const raw = window.localStorage.getItem(PARTICIPATION_CACHE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Partial<CachedParticipationState>;
+    if (typeof parsed.savedAt !== "number" || Date.now() - parsed.savedAt > PARTICIPATION_CACHE_TTL_MS) {
+      window.localStorage.removeItem(PARTICIPATION_CACHE_KEY);
+      return {};
+    }
+    return {
+      participationQueue: validateCachedMessage(parsed.participationQueue, "participation.queue.update"),
+      participationStatus: validateCachedMessage(parsed.participationStatus, "participation.status.update"),
+      teams: validateCachedMessage(parsed.teams, "participation.teams.update")
+    };
+  } catch {
+    return {};
+  }
+}
+
+function saveCachedParticipationState(state: OverlayState): void {
+  try {
+    const cache: CachedParticipationState = {
+      savedAt: Date.now(),
+      participationQueue: state.participationQueue,
+      participationStatus: state.participationStatus,
+      teams: state.teams
+    };
+    window.localStorage.setItem(PARTICIPATION_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // OBS Browser Source에서 storage가 막힌 경우에도 실시간 overlay 동작은 유지합니다.
+  }
+}
+
+function loadCachedSoloRankState(): Partial<OverlayState> {
+  try {
+    const raw = window.localStorage.getItem(SOLO_RANK_CACHE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Partial<CachedSoloRankState>;
+    if (typeof parsed.savedAt !== "number" || Date.now() - parsed.savedAt > SOLO_RANK_CACHE_TTL_MS) {
+      window.localStorage.removeItem(SOLO_RANK_CACHE_KEY);
+      return {};
+    }
+    return {
+      soloRankProfile: validateCachedMessage(parsed.soloRankProfile, "solo-rank.profile.update")
+    };
+  } catch {
+    return {};
+  }
+}
+
+function saveCachedSoloRankState(state: OverlayState): void {
+  try {
+    const cache: CachedSoloRankState = {
+      savedAt: Date.now(),
+      soloRankProfile: state.soloRankProfile
+    };
+    window.localStorage.setItem(SOLO_RANK_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // OBS Browser Source에서 storage가 막힌 경우에도 실시간 overlay 동작은 유지합니다.
+  }
+}
+
 function championArt(championKey: string) {
   return {
+    iconUrl: `https://ddragon.leagueoflegends.com/cdn/16.12.1/img/champion/${championKey}.png`,
     splashUrl: `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championKey}_0.jpg`,
     loadingUrl: `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${championKey}_0.jpg`
   };
 }
+
+const mockSoloRankProfile: ParticipationStreamerProfile = {
+  displayName: "ゼド",
+  profileStatus: "ready",
+  mainRole: "MIDDLE",
+  mainRoleConfidence: 66,
+  ladderRank: 124,
+  topChampions: [{ championId: 238, championKey: "Zed", nameKo: "제드", nameJa: "ゼド", ...championArt("Zed"), masteryLevel: 28, masteryPoints: 273918 }],
+  rankedStats: { queueType: "RANKED_SOLO_5x5", tier: "DIAMOND", rank: "I", leaguePoints: 75, wins: 123, losses: 97, winRate: 55, summonerLevel: 512, profileIconId: 29, tierIconUrl: "/riot/ranked-emblems/diamond.png?v=ranked-emblems-1", fetchedAt: "2026-06-16T00:00:00.000Z" },
+  performanceStats: { sampleSize: 20, averageKills: 5.7, averageDeaths: 4.1, averageAssists: 6.1, kda: 2.85 },
+  recentMatches: [
+    { championId: 238, championKey: "Zed", nameKo: "제드", nameJa: "ゼド", ...championArt("Zed"), won: true },
+    { championId: 103, championKey: "Ahri", nameKo: "아리", nameJa: "アーリ", ...championArt("Ahri"), won: false },
+    { championId: 157, championKey: "Yasuo", nameKo: "야스오", nameJa: "ヤスオ", ...championArt("Yasuo"), won: true },
+    { championId: 777, championKey: "Yone", nameKo: "요네", nameJa: "ヨネ", ...championArt("Yone"), won: false },
+    { championId: 84, championKey: "Akali", nameKo: "아칼리", nameJa: "アカリ", ...championArt("Akali"), won: true },
+    { championId: 7, championKey: "Leblanc", nameKo: "르블랑", nameJa: "ルブラン", ...championArt("Leblanc"), won: true },
+    { championId: 112, championKey: "Viktor", nameKo: "빅토르", nameJa: "ビクター", ...championArt("Viktor"), won: false },
+    { championId: 55, championKey: "Katarina", nameKo: "카타리나", nameJa: "カタリナ", ...championArt("Katarina"), won: true },
+    { championId: 91, championKey: "Talon", nameKo: "탈론", nameJa: "タロン", ...championArt("Talon"), won: false },
+    { championId: 246, championKey: "Qiyana", nameKo: "키아나", nameJa: "キヤナ", ...championArt("Qiyana"), won: true }
+  ],
+  rankHistory: [
+    { date: "2026-05-18T00:00:00.000Z", tier: "DIAMOND", rank: "II", leaguePoints: 28, wins: 111, losses: 91, rankScore: 2628 },
+    { date: "2026-05-24T00:00:00.000Z", tier: "DIAMOND", rank: "II", leaguePoints: 44, wins: 115, losses: 92, rankScore: 2644 },
+    { date: "2026-05-31T00:00:00.000Z", tier: "DIAMOND", rank: "II", leaguePoints: 61, wins: 118, losses: 94, rankScore: 2661 },
+    { date: "2026-06-08T00:00:00.000Z", tier: "DIAMOND", rank: "I", leaguePoints: 12, wins: 120, losses: 96, rankScore: 2712 },
+    { date: "2026-06-16T00:00:00.000Z", tier: "DIAMOND", rank: "I", leaguePoints: 75, wins: 123, losses: 97, rankScore: 2775 }
+  ]
+};
 
 const mockMessages: OverlayMessage[] = [
   {
@@ -113,7 +237,22 @@ const mockMessages: OverlayMessage[] = [
   { type: "chat.message.add", id: "mock-chat-2", userName: "Streamer", message: "다들 어서와요. 곧 시참 시작합니다.", createdAt: new Date().toISOString(), isBroadcaster: true, source: "mock" },
   { type: "chat.message.add", id: "mock-chat-3", userName: "Yuto", message: "LINE 느낌 채팅창 귀엽네요", createdAt: new Date().toISOString(), source: "mock" },
   { type: "mission.update", title: "오늘의 미션", missions: [{ id: "m1", text: "첫 승 달성", done: false }, { id: "m2", text: "시청자 5인 팀 완성", done: true }], source: "mock" },
-  { type: "participation.status.update", isOpen: true, mode: "normal5", message: "롤 시참 모집 중", source: "mock" },
+  {
+    type: "participation.status.update",
+    isOpen: true,
+    mode: "normal5",
+    message: "롤 시참 모집 중",
+    streamerProfile: mockSoloRankProfile,
+    source: "mock"
+  },
+  {
+    type: "solo-rank.profile.update",
+    profile: mockSoloRankProfile,
+    region: "KR",
+    queueLabel: "Solo/Duo",
+    ladderRank: 124,
+    source: "mock"
+  },
   {
     type: "participation.queue.update",
     isOpen: true,
@@ -139,7 +278,11 @@ export default function App() {
   const previewMode = useMemo(() => isPreviewMode(), []);
   const timersRef = useRef<number[]>([]);
   const [connected, setConnected] = useState(mockMode);
-  const [state, setState] = useState<OverlayState>({ chatMessages: [] });
+  const [state, setState] = useState<OverlayState>(() => ({
+    chatMessages: [],
+    ...(mockMode ? {} : loadCachedParticipationState()),
+    ...(mockMode ? {} : loadCachedSoloRankState())
+  }));
 
   const scheduleTimeout = useCallback((callback: () => void, timeoutMs: number) => {
     const timerId = window.setTimeout(() => {
@@ -199,6 +342,10 @@ export default function App() {
       setState((previous) => ({ ...previous, participationStatus: message }));
       return;
     }
+    if (message.type === "solo-rank.profile.update") {
+      setState((previous) => ({ ...previous, soloRankProfile: message }));
+      return;
+    }
     if (message.type === "participation.selected.show") {
       return;
     }
@@ -233,6 +380,18 @@ export default function App() {
     return connectOverlaySocket(mode, applyMessage, setConnected);
   }, [applyMessage, mockMode, mode, previewMode, scheduleTimeout]);
 
+  useEffect(() => {
+    if (mockMode) return;
+    if (mode !== "all" && mode !== "participation") return;
+    saveCachedParticipationState(state);
+  }, [mockMode, mode, state.participationQueue, state.participationStatus, state.teams]);
+
+  useEffect(() => {
+    if (mockMode) return;
+    if (mode !== "all" && mode !== "solo-rank") return;
+    saveCachedSoloRankState(state);
+  }, [mockMode, mode, state.soloRankProfile]);
+
   useEffect(() => () => {
     for (const timerId of timersRef.current) window.clearTimeout(timerId);
     timersRef.current = [];
@@ -246,6 +405,7 @@ export default function App() {
         {shouldShow(mode, "questions") ? <QuestionOverlay question={state.question} /> : null}
         {shouldShow(mode, "chat") ? <ChatOverlay messages={state.chatMessages} /> : null}
         {shouldShow(mode, "mission") ? <MissionOverlay mission={state.mission} /> : null}
+        {shouldShow(mode, "solo-rank") ? <SoloRankOverlay profile={state.soloRankProfile} /> : null}
         {shouldShow(mode, "participation") ? (
           <ParticipationOverlay
             queue={state.participationQueue?.queue ?? []}

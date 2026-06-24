@@ -3,7 +3,7 @@ import { apiPost } from "../api/client";
 const i18n = {
   ko: {
     title: "Overlay 테스트",
-    description: "고정된 안전 payload만 전송합니다. 임의 action 입력은 제공하지 않습니다.",
+    description: "고정된 안전 payload만 전송합니다. 솔로랭크 전적은 방송자 Riot ID 기준 실제 데이터를 갱신합니다.",
     sent: "Overlay 테스트 메시지를 전송했습니다.",
     failed: "Overlay 테스트 전송에 실패했습니다.",
     banner: "배너",
@@ -13,11 +13,12 @@ const i18n = {
     subtitle: "자막",
     question: "질문",
     participation: "시참 대기열",
+    soloRank: "솔로랭크 전적",
     mission: "미션"
   },
   ja: {
     title: "Overlay テスト",
-    description: "固定された安全な payload のみ送信します。任意 action 入力は提供しません。",
+    description: "固定された安全な payload のみ送信します。ソロランク戦績は配信者 Riot ID 基準の実データを更新します。",
     sent: "Overlay テストメッセージを送信しました。",
     failed: "Overlay テスト送信に失敗しました。",
     banner: "バナー",
@@ -27,11 +28,16 @@ const i18n = {
     subtitle: "字幕",
     question: "質問",
     participation: "参加待機列",
+    soloRank: "ソロランク戦績",
     mission: "ミッション"
   }
 } as const;
 
 const t = i18n.ko;
+
+type OverlayTestItem =
+  | { label: string; action: unknown; endpoint?: never }
+  | { label: string; endpoint: string; action?: never };
 
 function championArt(championKey: string) {
   return {
@@ -40,7 +46,7 @@ function championArt(championKey: string) {
   };
 }
 
-const testActions = [
+const testActions: OverlayTestItem[] = [
   {
     label: t.banner,
     action: {
@@ -153,6 +159,10 @@ const testActions = [
     }
   },
   {
+    label: t.soloRank,
+    endpoint: "/api/participation/streamer-profile/refresh"
+  },
+  {
     label: t.mission,
     action: {
       type: "overlay.mission",
@@ -168,9 +178,13 @@ const testActions = [
 ];
 
 export function OverlayTestPanel() {
-  async function run(action: unknown) {
+  async function run(item: (typeof testActions)[number]) {
     try {
-      await apiPost("/api/actions/test", { action });
+      if (item.endpoint !== undefined) {
+        await apiPost(item.endpoint, {});
+      } else {
+        await apiPost("/api/actions/test", { action: item.action });
+      }
       alert(t.sent);
     } catch {
       alert(t.failed);
@@ -183,7 +197,7 @@ export function OverlayTestPanel() {
       <p className="muted">{t.description}</p>
       <div className="button-row">
         {testActions.map((item) => (
-          <button key={item.label} onClick={() => void run(item.action)}>{item.label}</button>
+          <button key={item.label} onClick={() => void run(item)}>{item.label}</button>
         ))}
       </div>
     </div>

@@ -1,11 +1,13 @@
-import type { LolChampionSummary, LolMainRole, LolProfileStatus, LolRankedStats } from "./participation.js";
+import type { LolChampionSummary, LolMainRole, LolProfileStatus, LolRankedStats, ParticipationStreamerProfile } from "./participation.js";
 
-export const OVERLAY_CHANNELS = ["events", "chat", "subtitles", "questions", "mission", "participation", "all"] as const;
+export const OVERLAY_CHANNELS = ["events", "chat", "subtitles", "questions", "mission", "participation", "solo-rank", "all"] as const;
 export const OVERLAY_VARIANTS = ["info", "success", "warning", "danger"] as const;
 export const OVERLAY_BANNER_EVENT_KINDS = ["follow", "cheer", "subscription", "subscription_message", "raid", "reward", "stream", "test", "custom"] as const;
 export const OVERLAY_SPEECH_LANGUAGES = ["ja-JP", "ko-KR"] as const;
 export const PARTICIPATION_PHASES = ["recruiting", "closed", "in_game", "game_ended"] as const;
 export const MAX_CHAMPION_MASTERY_LEVEL = 1000;
+export const MAX_RECENT_MATCH_CHAMPIONS = 10;
+export const MAX_RANK_HISTORY_POINTS = 64;
 
 export type OverlayChannel = (typeof OVERLAY_CHANNELS)[number];
 export type OverlayVariant = (typeof OVERLAY_VARIANTS)[number];
@@ -126,6 +128,15 @@ export type ParticipationStatusUpdateMessage = OverlayMessageBase & {
   phase?: ParticipationPhase;
   message?: string;
   nextCandidate?: ParticipationQueueEntry;
+  streamerProfile?: ParticipationStreamerProfile;
+};
+
+export type SoloRankProfileUpdateMessage = OverlayMessageBase & {
+  type: "solo-rank.profile.update";
+  profile: ParticipationStreamerProfile;
+  region?: string;
+  queueLabel?: string;
+  ladderRank?: number;
 };
 
 export type ParticipationSelectedShowMessage = OverlayMessageBase & {
@@ -173,6 +184,7 @@ export type OverlayMessage =
   | MissionUpdateMessage
   | ParticipationQueueUpdateMessage
   | ParticipationStatusUpdateMessage
+  | SoloRankProfileUpdateMessage
   | ParticipationSelectedShowMessage
   | ParticipationSelectedClearMessage
   | ParticipationTeamsUpdateMessage
@@ -392,6 +404,7 @@ function validateLolRankedStats(value: unknown, fieldName: string): OverlayValid
     "winRate",
     "summonerLevel",
     "profileIconId",
+    "tierIconUrl",
     "fetchedAt"
   ]);
   if (!keys.ok) return keys;
@@ -419,7 +432,56 @@ function validateLolRankedStats(value: unknown, fieldName: string): OverlayValid
     const profileIconId = integerInRange(value.profileIconId, 0, 100000, `${fieldName}.profileIconId`);
     if (!profileIconId.ok) return profileIconId;
   }
+  const tierIconUrl = optionalString(value.tierIconUrl, MAX_MESSAGE_LENGTH, `${fieldName}.tierIconUrl`);
+  if (!tierIconUrl.ok) return tierIconUrl;
   return nonEmptyString(value.fetchedAt, 64) ? ok() : fail(`${fieldName}.fetchedAt은 필수 문자열입니다.`);
+}
+
+function validateLolPerformanceStats(value: unknown, fieldName: string): OverlayValidationResult {
+  if (value === undefined) return ok();
+  if (!isRecord(value)) return fail(`${fieldName}는 객체여야 합니다.`);
+  const keys = validateExactObjectKeys(value, ["sampleSize", "averageKills", "averageDeaths", "averageAssists", "kda"]);
+  if (!keys.ok) return keys;
+  const sampleSize = integerInRange(value.sampleSize, 0, 100, `${fieldName}.sampleSize`);
+  if (!sampleSize.ok) return sampleSize;
+  const kills = optionalNumberInRange(value.averageKills, 0, 100, `${fieldName}.averageKills`);
+  if (!kills.ok) return kills;
+  if (typeof value.averageKills !== "number") return fail(`${fieldName}.averageKills는 필수 숫자입니다.`);
+  const deaths = optionalNumberInRange(value.averageDeaths, 0, 100, `${fieldName}.averageDeaths`);
+  if (!deaths.ok) return deaths;
+  if (typeof value.averageDeaths !== "number") return fail(`${fieldName}.averageDeaths는 필수 숫자입니다.`);
+  const assists = optionalNumberInRange(value.averageAssists, 0, 100, `${fieldName}.averageAssists`);
+  if (!assists.ok) return assists;
+  if (typeof value.averageAssists !== "number") return fail(`${fieldName}.averageAssists는 필수 숫자입니다.`);
+  const kda = optionalNumberInRange(value.kda, 0, 1000, `${fieldName}.kda`);
+  if (!kda.ok) return kda;
+  return typeof value.kda === "number" ? ok() : fail(`${fieldName}.kda는 필수 숫자입니다.`);
+}
+
+function validateLolRankHistory(value: unknown, fieldName: string): OverlayValidationResult {
+  if (value === undefined) return ok();
+  if (!Array.isArray(value)) return fail(`${fieldName}은 배열이어야 합니다.`);
+  if (value.length > MAX_RANK_HISTORY_POINTS) return fail(`${fieldName}은 최대 ${MAX_RANK_HISTORY_POINTS}개까지 허용됩니다.`);
+  for (const [index, point] of value.entries()) {
+    if (!isRecord(point)) return fail(`${fieldName}[${index}]은 객체여야 합니다.`);
+    const keys = validateExactObjectKeys(point, ["date", "tier", "rank", "leaguePoints", "wins", "losses", "rankScore"]);
+    if (!keys.ok) return keys;
+    if (!nonEmptyString(point.date, 64)) return fail(`${fieldName}[${index}].date는 필수 문자열입니다.`);
+    const tier = optionalExactString(point.tier, LOL_RANK_TIERS, `${fieldName}[${index}].tier`);
+    if (!tier.ok) return tier;
+    if (typeof point.tier !== "string") return fail(`${fieldName}[${index}].tier는 필수입니다.`);
+    const rank = optionalExactString(point.rank, LOL_RANK_DIVISIONS, `${fieldName}[${index}].rank`);
+    if (!rank.ok) return rank;
+    const leaguePoints = integerInRange(point.leaguePoints, 0, 5000, `${fieldName}[${index}].leaguePoints`);
+    if (!leaguePoints.ok) return leaguePoints;
+    const wins = integerInRange(point.wins, 0, 10000, `${fieldName}[${index}].wins`);
+    if (!wins.ok) return wins;
+    const losses = integerInRange(point.losses, 0, 10000, `${fieldName}[${index}].losses`);
+    if (!losses.ok) return losses;
+    const rankScore = integerInRange(point.rankScore, 0, 100000, `${fieldName}[${index}].rankScore`);
+    if (!rankScore.ok) return rankScore;
+  }
+  return ok();
 }
 
 function validateTopChampions(value: unknown, fieldName: string): OverlayValidationResult {
@@ -438,6 +500,9 @@ function validateTopChampions(value: unknown, fieldName: string): OverlayValidat
       "loadingUrl",
       "imageVersion",
       "imageLocale",
+      "skinNum",
+      "skinNameKo",
+      "skinNameJa",
       "masteryLevel",
       "masteryPoints",
       "games"
@@ -461,6 +526,14 @@ function validateTopChampions(value: unknown, fieldName: string): OverlayValidat
     if (champion.imageLocale !== undefined && champion.imageLocale !== "neutral") {
       return fail(`${fieldName}[${index}].imageLocale은 neutral만 허용됩니다.`);
     }
+    if (champion.skinNum !== undefined) {
+      const skinNum = integerInRange(champion.skinNum, 0, 1000, `${fieldName}[${index}].skinNum`);
+      if (!skinNum.ok) return skinNum;
+    }
+    const skinNameKo = optionalString(champion.skinNameKo, MAX_SHORT_TEXT_LENGTH, `${fieldName}[${index}].skinNameKo`);
+    if (!skinNameKo.ok) return skinNameKo;
+    const skinNameJa = optionalString(champion.skinNameJa, MAX_SHORT_TEXT_LENGTH, `${fieldName}[${index}].skinNameJa`);
+    if (!skinNameJa.ok) return skinNameJa;
     if (champion.masteryLevel !== undefined) {
       const masteryLevel = integerInRange(champion.masteryLevel, 0, MAX_CHAMPION_MASTERY_LEVEL, `${fieldName}[${index}].masteryLevel`);
       if (!masteryLevel.ok) return masteryLevel;
@@ -473,6 +546,48 @@ function validateTopChampions(value: unknown, fieldName: string): OverlayValidat
       const games = integerInRange(champion.games, 0, 1000, `${fieldName}[${index}].games`);
       if (!games.ok) return games;
     }
+  }
+  return ok();
+}
+
+function validateRecentMatchChampions(value: unknown, fieldName: string): OverlayValidationResult {
+  if (value === undefined) return ok();
+  if (!Array.isArray(value)) return fail(`${fieldName}은 배열이어야 합니다.`);
+  if (value.length > MAX_RECENT_MATCH_CHAMPIONS) return fail(`${fieldName}은 최대 ${MAX_RECENT_MATCH_CHAMPIONS}개까지 허용됩니다.`);
+  for (const [index, champion] of value.entries()) {
+    if (!isRecord(champion)) return fail(`${fieldName}[${index}]은 객체여야 합니다.`);
+    const keys = validateExactObjectKeys(champion, [
+      "championId",
+      "championKey",
+      "nameKo",
+      "nameJa",
+      "iconUrl",
+      "splashUrl",
+      "loadingUrl",
+      "imageVersion",
+      "imageLocale",
+      "won"
+    ]);
+    if (!keys.ok) return keys;
+    const championId = integerInRange(champion.championId, 1, 10000, `${fieldName}[${index}].championId`);
+    if (!championId.ok) return championId;
+    const championKey = optionalString(champion.championKey, MAX_SHORT_TEXT_LENGTH, `${fieldName}[${index}].championKey`);
+    if (!championKey.ok) return championKey;
+    if (!nonEmptyString(champion.nameKo, MAX_SHORT_TEXT_LENGTH)) return fail(`${fieldName}[${index}].nameKo는 필수 문자열입니다.`);
+    const nameJa = optionalString(champion.nameJa, MAX_SHORT_TEXT_LENGTH, `${fieldName}[${index}].nameJa`);
+    if (!nameJa.ok) return nameJa;
+    const iconUrl = optionalString(champion.iconUrl, MAX_MESSAGE_LENGTH, `${fieldName}[${index}].iconUrl`);
+    if (!iconUrl.ok) return iconUrl;
+    const splashUrl = optionalString(champion.splashUrl, MAX_MESSAGE_LENGTH, `${fieldName}[${index}].splashUrl`);
+    if (!splashUrl.ok) return splashUrl;
+    const loadingUrl = optionalString(champion.loadingUrl, MAX_MESSAGE_LENGTH, `${fieldName}[${index}].loadingUrl`);
+    if (!loadingUrl.ok) return loadingUrl;
+    const imageVersion = optionalString(champion.imageVersion, MAX_SHORT_TEXT_LENGTH, `${fieldName}[${index}].imageVersion`);
+    if (!imageVersion.ok) return imageVersion;
+    if (champion.imageLocale !== undefined && champion.imageLocale !== "neutral") {
+      return fail(`${fieldName}[${index}].imageLocale은 neutral만 허용됩니다.`);
+    }
+    if (typeof champion.won !== "boolean") return fail(`${fieldName}[${index}].won은 boolean이어야 합니다.`);
   }
   return ok();
 }
@@ -520,6 +635,50 @@ function validateParticipationQueue(value: unknown): OverlayValidationResult {
   return ok();
 }
 
+function validateParticipationStreamerProfile(value: unknown): OverlayValidationResult {
+  if (value === undefined) return ok();
+  if (!isRecord(value)) return fail("streamerProfile은 객체여야 합니다.");
+  const keys = validateExactObjectKeys(value, [
+    "displayName",
+    "riotTagLine",
+    "profileStatus",
+    "mainRole",
+    "mainRoleConfidence",
+    "ladderRank",
+    "topChampions",
+    "rankedStats",
+      "performanceStats",
+      "recentMatches",
+      "rankHistory"
+    ]);
+  if (!keys.ok) return keys;
+  const displayName = optionalString(value.displayName, MAX_SHORT_TEXT_LENGTH, "streamerProfile.displayName");
+  if (!displayName.ok) return displayName;
+  const riotTagLine = optionalString(value.riotTagLine, MAX_SHORT_TEXT_LENGTH, "streamerProfile.riotTagLine");
+  if (!riotTagLine.ok) return riotTagLine;
+  const profileStatus = optionalExactString(value.profileStatus, LOL_PROFILE_STATUSES, "streamerProfile.profileStatus");
+  if (!profileStatus.ok) return profileStatus;
+  const mainRole = optionalExactString(value.mainRole, LOL_MAIN_ROLES, "streamerProfile.mainRole");
+  if (!mainRole.ok) return mainRole;
+  if (value.mainRoleConfidence !== undefined) {
+    const confidence = integerInRange(value.mainRoleConfidence, 0, 100, "streamerProfile.mainRoleConfidence");
+    if (!confidence.ok) return confidence;
+  }
+  if (value.ladderRank !== undefined) {
+    const ladderRank = integerInRange(value.ladderRank, 1, 10000000, "streamerProfile.ladderRank");
+    if (!ladderRank.ok) return ladderRank;
+  }
+  const topChampions = validateTopChampions(value.topChampions, "streamerProfile.topChampions");
+  if (!topChampions.ok) return topChampions;
+  const rankedStats = validateLolRankedStats(value.rankedStats, "streamerProfile.rankedStats");
+  if (!rankedStats.ok) return rankedStats;
+  const performanceStats = validateLolPerformanceStats(value.performanceStats, "streamerProfile.performanceStats");
+  if (!performanceStats.ok) return performanceStats;
+  const recentMatches = validateRecentMatchChampions(value.recentMatches, "streamerProfile.recentMatches");
+  if (!recentMatches.ok) return recentMatches;
+  return validateLolRankHistory(value.rankHistory, "streamerProfile.rankHistory");
+}
+
 function validateTeams(value: unknown): OverlayValidationResult {
   if (!isRecord(value)) return fail("teams는 객체여야 합니다.");
   const keys = validateExactObjectKeys(value, ["a", "b"]);
@@ -564,6 +723,7 @@ export function overlayChannelForMessage(message: OverlayMessage): OverlayChanne
   if (message.type === "chat.message.add" || message.type === "chat.clear") return "chat";
   if (message.type === "mission.update") return "mission";
   if (message.type.startsWith("participation.")) return "participation";
+  if (message.type.startsWith("solo-rank.")) return "solo-rank";
   return "events";
 }
 
@@ -711,7 +871,7 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
       return validateParticipationQueue(message.queue);
     }
     case "participation.status.update": {
-      const keys = validateKeys(message, ["isOpen", "mode", "phase", "message", "nextCandidate"]);
+      const keys = validateKeys(message, ["isOpen", "mode", "phase", "message", "nextCandidate", "streamerProfile"]);
       if (!keys.ok) return keys;
       if (typeof message.isOpen !== "boolean") return fail("isOpen은 boolean이어야 합니다.");
       const mode = optionalExactString(message.mode, PARTICIPATION_MODES, "mode");
@@ -720,9 +880,24 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
       if (!phase.ok) return phase;
       const messageResult = optionalString(message.message, MAX_MESSAGE_LENGTH, "message");
       if (!messageResult.ok) return messageResult;
-      if (message.nextCandidate === undefined) return ok();
-      const nextCandidateResult = validateParticipationQueue([message.nextCandidate]);
-      return nextCandidateResult.ok ? ok() : nextCandidateResult;
+      if (message.nextCandidate !== undefined) {
+        const nextCandidateResult = validateParticipationQueue([message.nextCandidate]);
+        if (!nextCandidateResult.ok) return nextCandidateResult;
+      }
+      return validateParticipationStreamerProfile(message.streamerProfile);
+    }
+    case "solo-rank.profile.update": {
+      const keys = validateKeys(message, ["profile", "region", "queueLabel", "ladderRank"]);
+      if (!keys.ok) return keys;
+      if (!isRecord(message.profile)) return fail("profile은 객체여야 합니다.");
+      const profile = validateParticipationStreamerProfile(message.profile);
+      if (!profile.ok) return profile;
+      const region = optionalString(message.region, MAX_SHORT_TEXT_LENGTH, "region");
+      if (!region.ok) return region;
+      const queueLabel = optionalString(message.queueLabel, MAX_SHORT_TEXT_LENGTH, "queueLabel");
+      if (!queueLabel.ok) return queueLabel;
+      if (message.ladderRank !== undefined) return integerInRange(message.ladderRank, 1, 10000000, "ladderRank");
+      return ok();
     }
     case "participation.selected.show": {
       const keys = validateKeys(message, [

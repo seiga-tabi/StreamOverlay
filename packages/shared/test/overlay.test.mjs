@@ -191,6 +191,115 @@ test("participation status overlay schema는 게임 phase와 다음 후보를 �
   assert.equal(result.ok, true);
 });
 
+test("participation status overlay schema는 방송자 프로필 표시 정보를 허용하고 Riot ID는 거부한다", () => {
+  const valid = validateOverlayMessage({
+    type: "participation.status.update",
+    isOpen: true,
+    mode: "normal5",
+    streamerProfile: {
+      displayName: "Streamer",
+      profileStatus: "ready",
+      mainRole: "MIDDLE",
+      mainRoleConfidence: 66,
+      topChampions: [
+        {
+          championId: 103,
+          championKey: "Ahri",
+          nameKo: "아리",
+          nameJa: "アーリ",
+          splashUrl: "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_0.jpg",
+          masteryLevel: 7,
+          masteryPoints: 315000
+        }
+      ],
+      performanceStats: { sampleSize: 20, averageKills: 5.7, averageDeaths: 4.1, averageAssists: 6.1, kda: 2.85 }
+    }
+  });
+  assert.equal(valid.ok, true);
+
+  const invalid = validateOverlayMessage({
+    type: "participation.status.update",
+    isOpen: true,
+    streamerProfile: {
+      displayName: "Streamer",
+      riotId: "Streamer#KR1"
+    }
+  });
+  assert.equal(invalid.ok, false);
+});
+
+test("solo rank overlay schema는 방송자 전적 프로필을 허용하고 solo-rank channel로 라우팅한다", () => {
+  const message = {
+    type: "solo-rank.profile.update",
+    region: "KR",
+    queueLabel: "Solo/Duo",
+    profile: {
+      displayName: "Streamer",
+      profileStatus: "ready",
+      mainRole: "MIDDLE",
+      mainRoleConfidence: 66,
+      topChampions: [
+        {
+          championId: 238,
+          championKey: "Zed",
+          nameKo: "제드",
+          nameJa: "ゼド",
+          splashUrl: "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zed_0.jpg",
+          skinNum: 0,
+          masteryLevel: 28,
+          masteryPoints: 273918
+        }
+      ],
+      rankedStats: {
+        queueType: "RANKED_SOLO_5x5",
+        tier: "DIAMOND",
+        rank: "I",
+        leaguePoints: 75,
+        wins: 123,
+        losses: 97,
+        winRate: 55,
+        summonerLevel: 512,
+        profileIconId: 29,
+        tierIconUrl: "/riot/ranked-emblems/diamond.png?v=ranked-emblems-1",
+        fetchedAt: "2026-06-16T00:00:00.000Z"
+      },
+      performanceStats: { sampleSize: 20, averageKills: 5.7, averageDeaths: 4.1, averageAssists: 6.1, kda: 2.85 },
+      recentMatches: [
+        {
+          championId: 238,
+          championKey: "Zed",
+          nameKo: "제드",
+          nameJa: "ゼド",
+          iconUrl: "https://ddragon.leagueoflegends.com/cdn/16.12.1/img/champion/Zed.png",
+          won: true
+        },
+        {
+          championId: 103,
+          championKey: "Ahri",
+          nameKo: "아리",
+          nameJa: "アーリ",
+          iconUrl: "https://ddragon.leagueoflegends.com/cdn/16.12.1/img/champion/Ahri.png",
+          won: false
+        }
+      ]
+    }
+  };
+
+  assert.equal(validateOverlayMessage(message).ok, true);
+  assert.equal(overlayChannelForMessage(message), "solo-rank");
+  assert.equal(overlayMessageMatchesChannel(message, "solo-rank"), true);
+  assert.equal(overlayMessageMatchesChannel(message, "events"), false);
+
+  const invalid = validateOverlayMessage({
+    ...message,
+    profile: {
+      ...message.profile,
+      performanceStats: { ...message.profile.performanceStats, puuid: "secret" }
+    }
+  });
+  assert.equal(invalid.ok, false);
+});
+
 test("participation overlay schema는 Riot ID 노출 필드를 거부한다", () => {
   const result = validateOverlayMessage({
     type: "participation.queue.update",
@@ -279,6 +388,7 @@ test("participation overlay schema는 주라인과 모스트 챔피언을 허용
             loadingUrl: "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Yasuo_0.jpg",
             imageVersion: "16.12.1",
             imageLocale: "neutral",
+            skinNum: 0,
             masteryLevel: 24,
             masteryPoints: 100000
           }

@@ -112,7 +112,13 @@ export const appConfig = {
   riot: {
     apiKey: env("RIOT_API_KEY"),
     accountRegion: env("RIOT_ACCOUNT_REGION", "asia"),
-    lolPlatform: env("RIOT_LOL_PLATFORM", "kr")
+    lolPlatform: env("RIOT_LOL_PLATFORM", "kr"),
+    rateLimit: {
+      enabled: boolEnv("RIOT_RATE_LIMIT_ENABLED", true),
+      perSecond: Math.max(1, intEnv("RIOT_RATE_LIMIT_PER_SECOND", 20)),
+      perTwoMinutes: Math.max(1, intEnv("RIOT_RATE_LIMIT_PER_TWO_MINUTES", 100)),
+      queueMax: Math.max(1, intEnv("RIOT_RATE_LIMIT_QUEUE_MAX", 500))
+    }
   },
   translation: {
     chatEnabled: boolEnv("CHAT_TRANSLATION_ENABLED", false),

@@ -14,6 +14,7 @@ export const dashboardI18n = {
       navGroups: {
         operations: "운영",
         overlay: "Overlay",
+        lol: "LoL 방송",
         community: "커뮤니티",
         system: "시스템"
       },
@@ -39,6 +40,7 @@ export const dashboardI18n = {
       overlayTest: { label: "Overlay 테스트", short: "테스트" },
       overlayRewards: { label: "Reward 매핑", short: "Reward" },
       overlayAlerts: { label: "알림 GIF", short: "알림 GIF" },
+      soloRank: { label: "솔로랭크 설정", short: "솔로랭크" },
       followers: { label: "팔로워 관리", short: "팔로워" },
       events: { label: "이벤트 로그", short: "이벤트" },
       questions: { label: "질문 큐", short: "질문" },
@@ -248,6 +250,7 @@ export const dashboardI18n = {
       navGroups: {
         operations: "運用",
         overlay: "Overlay",
+        lol: "LoL 配信",
         community: "コミュニティ",
         system: "システム"
       },
@@ -273,6 +276,7 @@ export const dashboardI18n = {
       overlayTest: { label: "Overlay テスト", short: "テスト" },
       overlayRewards: { label: "Reward マッピング", short: "Reward" },
       overlayAlerts: { label: "通知 GIF", short: "通知 GIF" },
+      soloRank: { label: "ソロランク設定", short: "ソロランク" },
       followers: { label: "フォロワー管理", short: "フォロワー" },
       events: { label: "イベントログ", short: "イベント" },
       questions: { label: "質問キュー", short: "質問" },

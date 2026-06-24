@@ -9,7 +9,8 @@ const LAST_RELOAD_AT_KEY = "streamops.overlay.lastReloadAt";
 
 function autoReloadEnabled(): boolean {
   const params = new URLSearchParams(window.location.search);
-  return params.get("reload") !== "0" && params.get("autoReload") !== "0";
+  if (params.get("reload") === "0" || params.get("autoReload") === "0") return false;
+  return import.meta.env.VITE_OVERLAY_AUTO_RELOAD !== "false";
 }
 
 function lastReloadAt(): number {

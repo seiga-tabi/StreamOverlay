@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { LolChampionSummary, LolMainRole, LolProfileStatus, LolRankedStats } from "@streamops/shared";
+import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRecentMatchChampion, LolRankHistoryPoint } from "@streamops/shared";
 import { normalizeRiotIdKey } from "@streamops/shared";
 
 export type LolProfileCacheEntry = {
@@ -11,8 +11,13 @@ export type LolProfileCacheEntry = {
   status: LolProfileStatus;
   mainRole?: LolMainRole;
   mainRoleConfidence?: number;
+  ladderRank?: number;
   topChampions?: LolChampionSummary[];
   rankedStats?: LolRankedStats;
+  performanceStats?: LolPerformanceStats;
+  recentMatches?: LolRecentMatchChampion[];
+  rankHistory?: LolRankHistoryPoint[];
+  championSkinOverridesKey?: string;
   analyzedAt?: string;
   failedReason?: string;
   nextRetryAt?: string;
@@ -32,7 +37,10 @@ function clone(entry: LolProfileCacheEntry): LolProfileCacheEntry {
   return {
     ...entry,
     topChampions: entry.topChampions?.map((champion) => ({ ...champion })),
-    rankedStats: entry.rankedStats ? { ...entry.rankedStats } : undefined
+    rankedStats: entry.rankedStats ? { ...entry.rankedStats } : undefined,
+    performanceStats: entry.performanceStats ? { ...entry.performanceStats } : undefined,
+    recentMatches: entry.recentMatches?.map((match) => ({ ...match })),
+    rankHistory: entry.rankHistory?.map((point) => ({ ...point }))
   };
 }
 

@@ -30,6 +30,8 @@
 - `ws://localhost:3000/ws/overlay?channel=participation`
 - `ws://localhost:3000/ws/overlay?channel=all`
 
+WebSocket이 순간적으로 끊겼다가 복구되면 overlay가 Browser Source를 다시 로드합니다. 시참 overlay는 마지막 대기열 상태를 브라우저 저장소에 복구용으로 저장하므로 새로고침 직후에도 이전 대기열을 먼저 표시하고, WebSocket 연결 후 최신 상태로 덮어씁니다. 강제 새로고침을 끄려면 URL에 `autoReload=0` 또는 `reload=0`을 추가합니다.
+
 ## 각 overlay mode
 
 ### events

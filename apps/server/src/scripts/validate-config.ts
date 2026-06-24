@@ -258,6 +258,18 @@ function validateLolParticipationConfig(configDir: string): void {
   if (parsed.enabledQueues !== undefined && (!Array.isArray(parsed.enabledQueues) || !parsed.enabledQueues.every((value) => Number.isInteger(value)))) {
     fail(fileName, "enabledQueues는 정수 배열이어야 합니다.");
   }
+  if (parsed.championSkinOverrides !== undefined) {
+    if (!isRecord(parsed.championSkinOverrides)) {
+      fail(fileName, "championSkinOverrides는 객체여야 합니다.");
+    } else {
+      for (const [key, value] of Object.entries(parsed.championSkinOverrides)) {
+        if (!/^[A-Za-z0-9_. -]{1,40}$/.test(key)) fail(fileName, `championSkinOverrides key가 올바르지 않습니다: ${key}`);
+        if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 1000) {
+          fail(fileName, `championSkinOverrides.${key}는 0 이상 1000 이하 정수여야 합니다.`);
+        }
+      }
+    }
+  }
   if (parsed.gameMonitor !== undefined) {
     if (!isRecord(parsed.gameMonitor)) {
       fail(fileName, "gameMonitor는 객체여야 합니다.");

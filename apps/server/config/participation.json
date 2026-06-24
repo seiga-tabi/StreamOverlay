@@ -7,5 +7,5 @@
   "maxQueueSize": 50,
   "showRiotIdOnOverlay": false,
   "channelPointRewardTitles": ["롤 시참 신청", "시참 신청"],
-  "guideMessage": "参加案内 / 시참 안내\nJP｜申請: !参加 / !join / !시참 RiotID#タグ / 例: !参加 HideOnBush#KR1 / 取消: !参加取消 / !cancel\nKR｜신청: !시참 / !join / !参加 RiotID#태그 / 예: !시참 HideOnBush#KR1 / 취소: !시참취소 / !cancel"
+  "guideMessage": "参加案内 / 시참 안내\nJP｜申請: !参加 / !join / !시참 RiotID#タグ / 例: !参加 HideOnBush#KR1 / 取消: !参加取消 / !cancel"
 }

@@ -88,6 +88,10 @@ BRIDGE_SHARED_SECRET_FILE=/run/secrets/bridge_shared_secret
 https://bot.example.com/overlay/?mode=participation#token=OVERLAY_ACCESS_TOKEN_VALUE
 ```
 
+overlay는 WebSocket이 순간적으로 끊겼다가 복구되면 Browser Source를 다시 로드합니다. 시참 overlay는 마지막 대기열 상태를 브라우저 저장소에 복구용으로 저장하므로 새로고침 직후에도 이전 대기열을 먼저 표시하고, WebSocket 연결 후 최신 상태로 덮어씁니다. 강제 새로고침을 끄려면 query string에 `autoReload=0` 또는 `reload=0`을 추가하세요.
+
+Riot API는 Personal API Key 기준 보호값으로 실행됩니다. 기본값은 `RIOT_RATE_LIMIT_PER_SECOND=20`, `RIOT_RATE_LIMIT_PER_TWO_MINUTES=100`이며, 서버는 이 한도를 넘는 요청을 host별 queue에서 지연 처리합니다. Production API Key를 승인받은 경우에만 이 값을 올리세요.
+
 `BRIDGE_SHARED_SECRET`은 local bridge가 `/bridge` WebSocket에 연결할 때 `Authorization: Bearer ...` header로 전송됩니다. URL query string에 secret을 넣지 마세요.
 
 ## 빌드와 실행

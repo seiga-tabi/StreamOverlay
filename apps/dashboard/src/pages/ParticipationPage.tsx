@@ -1,6 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
-import type { LolChampionSummary, LolGameMonitorSettings, ParticipationDashboardQueueEntry, ParticipationState } from "@streamops/shared";
-import { apiGet, apiPost } from "../api/client";
+import { useState, type FormEvent } from "react";
+import type { LolChampionSummary, ParticipationDashboardQueueEntry, ParticipationState } from "@streamops/shared";
+import { apiPost } from "../api/client";
 
 type DashboardSnapshot = {
   participationState?: ParticipationState;
@@ -40,13 +40,25 @@ const i18n = {
     gameMonitorSaveFailed: "게임 감시 설정 저장에 실패했습니다.",
     gameMonitorLoadFailed: "게임 감시 설정을 불러오지 못했습니다.",
     gameMonitorWaiting: "Riot ID가 비어 있으면 감시가 대기 상태로 유지됩니다.",
+    profileSettingsTitle: "방송자 챔피언 스킨 설정",
+    championSkinOverrides: "모스트 1 챔피언 스킨",
+    championSkinOverridesHelp: "방송자 Riot ID가 등록되어 있고 Riot API key가 설정되어 있으면 숙련도 1등 챔피언의 스킨을 이미지로 선택할 수 있습니다.",
+    saveProfileSettings: "선택 저장",
+    reloadProfileSettings: "스킨 목록 새로고침",
+    profileSettingsSaved: "스킨 설정을 저장했습니다.",
+    profileSettingsLoadFailed: "스킨 설정을 불러오지 못했습니다.",
+    profileSettingsSaveFailed: "스킨 설정 저장에 실패했습니다.",
+    profileSettingsMissingStreamer: "방송자 Riot ID를 먼저 등록하세요.",
+    profileSettingsRiotMissing: "Riot API key가 설정되어 있어야 스킨 목록을 불러올 수 있습니다.",
+    profileSettingsNoChampion: "숙련도 1등 챔피언 정보를 찾지 못했습니다.",
+    selectedSkin: "선택됨",
     refreshProfile: "프로필 새로고침",
     roleOverride: "수동 라인 보정",
     source: "신청 경로",
     checkInUntil: "확인 기한",
     createdAt: "신청 시간",
     none: "없음",
-    unranked: "UNRANKED",
+    unranked: "Unranked",
     soloRank: "솔로랭크",
     flexRank: "자유랭크",
     winRate: "승률",
@@ -56,6 +68,18 @@ const i18n = {
     refreshFailed: "프로필 새로고침 요청 실패",
     roleUpdated: "수동 라인 보정을 저장했습니다.",
     roleUpdateFailed: "수동 라인 보정에 실패했습니다.",
+    inviteMessage: "초대 링크/안내 메시지",
+    invitePlaceholder: "초대 링크 또는 안내 메시지 입력",
+    sendInvite: "전송",
+    sendingInvite: "전송 중",
+    inviteSent: "채팅으로 전송했습니다.",
+    inviteFailed: "메시지 전송에 실패했습니다.",
+    bulkInviteTitle: "대기열 일괄 전송",
+    bulkInviteTargetCount: (count: number) => `대상 ${count}명`,
+    bulkInvitePlaceholder: "대기열 참가자에게 보낼 공통 링크 또는 안내 메시지",
+    sendBulkInvite: "대기열 일괄 전송",
+    bulkInviteSent: (count: number, messages: number) => `${count}명에게 ${messages}개 채팅 메시지로 전송했습니다.`,
+    bulkInviteNoTargets: "전송 가능한 대기열 참가자가 없습니다.",
     mainRoles: {
       TOP: "탑",
       JUNGLE: "정글",
@@ -131,13 +155,25 @@ const i18n = {
     gameMonitorSaveFailed: "試合監視設定の保存に失敗しました。",
     gameMonitorLoadFailed: "試合監視設定を読み込めませんでした。",
     gameMonitorWaiting: "Riot ID が空の場合、監視は待機状態になります。",
+    profileSettingsTitle: "配信者チャンピオンスキン設定",
+    championSkinOverrides: "得意1位チャンピオンスキン",
+    championSkinOverridesHelp: "配信者 Riot ID が登録され、Riot API key が設定されている場合、熟練度1位チャンピオンのスキンを画像で選択できます。",
+    saveProfileSettings: "選択を保存",
+    reloadProfileSettings: "スキン一覧を更新",
+    profileSettingsSaved: "スキン設定を保存しました。",
+    profileSettingsLoadFailed: "スキン設定を読み込めませんでした。",
+    profileSettingsSaveFailed: "スキン設定の保存に失敗しました。",
+    profileSettingsMissingStreamer: "配信者 Riot ID を先に登録してください。",
+    profileSettingsRiotMissing: "スキン一覧を読み込むには Riot API key が必要です。",
+    profileSettingsNoChampion: "熟練度1位チャンピオン情報が見つかりませんでした。",
+    selectedSkin: "選択中",
     refreshProfile: "プロフィール更新",
     roleOverride: "手動ロール補正",
     source: "申請経路",
     checkInUntil: "確認期限",
     createdAt: "申請時間",
     none: "なし",
-    unranked: "UNRANKED",
+    unranked: "Unranked",
     soloRank: "ソロランク",
     flexRank: "フレックス",
     winRate: "勝率",
@@ -147,6 +183,18 @@ const i18n = {
     refreshFailed: "プロフィール更新リクエストに失敗しました。",
     roleUpdated: "手動ロール補正を保存しました。",
     roleUpdateFailed: "手動ロール補正に失敗しました。",
+    inviteMessage: "招待リンク/案内メッセージ",
+    invitePlaceholder: "招待リンクまたは案内メッセージを入力",
+    sendInvite: "送信",
+    sendingInvite: "送信中",
+    inviteSent: "チャットに送信しました。",
+    inviteFailed: "メッセージ送信に失敗しました。",
+    bulkInviteTitle: "待機列一括送信",
+    bulkInviteTargetCount: (count: number) => `対象 ${count}人`,
+    bulkInvitePlaceholder: "待機列の参加者に送る共通リンクまたは案内メッセージ",
+    sendBulkInvite: "待機列に一括送信",
+    bulkInviteSent: (count: number, messages: number) => `${count}人に${messages}件のチャットメッセージで送信しました。`,
+    bulkInviteNoTargets: "送信可能な待機列参加者がいません。",
     mainRoles: {
       TOP: "トップ",
       JUNGLE: "ジャングル",
@@ -196,6 +244,7 @@ const i18n = {
 } as const;
 
 const t = i18n.ko;
+const INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
 
 function roleLabel(role: string | undefined): string {
   if (!role) return t.roles.unknown;
@@ -243,6 +292,12 @@ function championArtUrl(champion: LolChampionSummary | undefined): string | unde
   return champion?.splashUrl ?? champion?.loadingUrl ?? champion?.iconUrl;
 }
 
+function apiErrorDetail(error: unknown, path: string, fallback: string): string {
+  if (!(error instanceof Error) || !error.message) return fallback;
+  const escapedPath = path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return error.message.replace(new RegExp(`^${escapedPath} failed: \\d+(?: - )?`), "");
+}
+
 function fallbackState(snapshot: DashboardSnapshot): ParticipationState {
   const queue = snapshot.participationQueue ?? [];
   return {
@@ -265,56 +320,13 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
   const state = snapshot.participationState ?? fallbackState(snapshot);
   const queue = state.queue ?? [];
   const summary = state.summary;
-  const [gameMonitor, setGameMonitor] = useState<LolGameMonitorSettings | null>(null);
-  const [streamerRiotId, setStreamerRiotId] = useState("");
-  const [monitorEnabled, setMonitorEnabled] = useState(true);
-  const [autoSelectNextAfterGame, setAutoSelectNextAfterGame] = useState(true);
-  const [announceInChat, setAnnounceInChat] = useState(true);
-  const [monitorSaving, setMonitorSaving] = useState(false);
-  const [monitorMessage, setMonitorMessage] = useState("");
-
-  useEffect(() => {
-    let mounted = true;
-    void apiGet<LolGameMonitorSettings>("/api/participation/game-monitor")
-      .then((settings) => {
-        if (!mounted) return;
-        setGameMonitor(settings);
-        setStreamerRiotId(settings.streamerRiotId);
-        setMonitorEnabled(settings.enabled);
-        setAutoSelectNextAfterGame(settings.autoSelectNextAfterGame);
-        setAnnounceInChat(settings.announceInChat);
-      })
-      .catch(() => {
-        if (mounted) setMonitorMessage(t.gameMonitorLoadFailed);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  async function saveGameMonitor(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setMonitorSaving(true);
-    setMonitorMessage("");
-    try {
-      const saved = await apiPost<LolGameMonitorSettings>("/api/participation/game-monitor", {
-        streamerRiotId,
-        enabled: monitorEnabled,
-        autoSelectNextAfterGame,
-        announceInChat
-      });
-      setGameMonitor(saved);
-      setStreamerRiotId(saved.streamerRiotId);
-      setMonitorEnabled(saved.enabled);
-      setAutoSelectNextAfterGame(saved.autoSelectNextAfterGame);
-      setAnnounceInChat(saved.announceInChat);
-      setMonitorMessage(t.gameMonitorSaved);
-    } catch {
-      setMonitorMessage(t.gameMonitorSaveFailed);
-    } finally {
-      setMonitorSaving(false);
-    }
-  }
+  const [inviteDrafts, setInviteDrafts] = useState<Record<string, string>>({});
+  const [inviteBusyId, setInviteBusyId] = useState<string | null>(null);
+  const [inviteMessages, setInviteMessages] = useState<Record<string, string>>({});
+  const [bulkInviteDraft, setBulkInviteDraft] = useState("");
+  const [bulkInviteSending, setBulkInviteSending] = useState(false);
+  const [bulkInviteMessage, setBulkInviteMessage] = useState("");
+  const bulkInviteTargets = queue.filter((entry) => INVITE_TARGET_STATUSES.has(entry.status));
 
   async function refreshProfile(entryId: string) {
     try {
@@ -331,6 +343,47 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
       alert(t.roleUpdated);
     } catch {
       alert(t.roleUpdateFailed);
+    }
+  }
+
+  async function sendInviteMessage(event: FormEvent<HTMLFormElement>, entry: ParticipationDashboardQueueEntry) {
+    event.preventDefault();
+    const message = (inviteDrafts[entry.id] ?? "").trim();
+    if (!message) return;
+    setInviteBusyId(entry.id);
+    setInviteMessages((previous) => ({ ...previous, [entry.id]: "" }));
+    try {
+      await apiPost<{ ok: boolean }>("/api/participation/invite-message", {
+        entryId: entry.id,
+        message
+      });
+      setInviteMessages((previous) => ({ ...previous, [entry.id]: t.inviteSent }));
+    } catch (error) {
+      setInviteMessages((previous) => ({ ...previous, [entry.id]: apiErrorDetail(error, "/api/participation/invite-message", t.inviteFailed) }));
+    } finally {
+      setInviteBusyId(null);
+    }
+  }
+
+  async function sendBulkInviteMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const message = bulkInviteDraft.trim();
+    if (!message || bulkInviteTargets.length === 0) {
+      setBulkInviteMessage(t.bulkInviteNoTargets);
+      return;
+    }
+    setBulkInviteSending(true);
+    setBulkInviteMessage("");
+    try {
+      const result = await apiPost<{ ok: boolean; targetCount: number; sentMessages: number }>("/api/participation/invite-message/bulk", {
+        entryIds: bulkInviteTargets.map((entry) => entry.id),
+        message
+      });
+      setBulkInviteMessage(t.bulkInviteSent(result.targetCount, result.sentMessages));
+    } catch (error) {
+      setBulkInviteMessage(apiErrorDetail(error, "/api/participation/invite-message/bulk", t.inviteFailed));
+    } finally {
+      setBulkInviteSending(false);
     }
   }
 
@@ -353,44 +406,30 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
         <div><span>{t.played}</span><strong>{summary.played}</strong></div>
       </div>
 
-      <div className="card participation-monitor-card">
-        <div className="card-title-row">
-          <h2>{t.gameMonitorTitle}</h2>
-          <span className={`queue-status ${monitorEnabled && streamerRiotId.trim() ? "good" : "neutral"}`}>
-            {monitorEnabled && streamerRiotId.trim() ? t.active : t.closed}
-          </span>
-        </div>
-        <form className="participation-monitor-form" onSubmit={(event) => void saveGameMonitor(event)}>
-          <label className="field">
-            <span>{t.streamerRiotId}</span>
-            <input
-              value={streamerRiotId}
-              placeholder="StreamerName#KR1"
-              onChange={(event) => setStreamerRiotId(event.target.value)}
-              autoComplete="off"
-            />
-          </label>
-          <label className="toggle-row">
-            <input type="checkbox" checked={monitorEnabled} onChange={(event) => setMonitorEnabled(event.target.checked)} />
-            <span>{t.gameMonitorEnabled}</span>
-          </label>
-          <label className="toggle-row">
-            <input type="checkbox" checked={autoSelectNextAfterGame} onChange={(event) => setAutoSelectNextAfterGame(event.target.checked)} />
-            <span>{t.autoSelectNext}</span>
-          </label>
-          <label className="toggle-row">
-            <input type="checkbox" checked={announceInChat} onChange={(event) => setAnnounceInChat(event.target.checked)} />
-            <span>{t.announceInChat}</span>
-          </label>
-          <button className="secondary compact-button" disabled={monitorSaving} type="submit">{t.saveGameMonitor}</button>
-        </form>
-        <p className="muted">{gameMonitor?.streamerRiotId ? gameMonitor.streamerRiotId : t.gameMonitorWaiting}</p>
-        {monitorMessage ? <p className="form-message">{monitorMessage}</p> : null}
-      </div>
-
       <div className="card">
         <h2>{t.queueTitle}</h2>
         {queue.length === 0 ? <p className="muted">{t.empty}</p> : null}
+        {queue.length > 0 ? (
+          <form className="queue-bulk-invite" onSubmit={(event) => void sendBulkInviteMessage(event)}>
+            <div className="queue-bulk-invite-heading">
+              <strong>{t.bulkInviteTitle}</strong>
+              <span>{t.bulkInviteTargetCount(bulkInviteTargets.length)}</span>
+            </div>
+            <label className="field">
+              <span>{t.inviteMessage}</span>
+              <input
+                value={bulkInviteDraft}
+                placeholder={t.bulkInvitePlaceholder}
+                onChange={(event) => setBulkInviteDraft(event.target.value)}
+                autoComplete="off"
+              />
+            </label>
+            <button className="secondary compact-button" disabled={bulkInviteSending || !bulkInviteDraft.trim() || bulkInviteTargets.length === 0} type="submit">
+              {bulkInviteSending ? t.sendingInvite : t.sendBulkInvite}
+            </button>
+            {bulkInviteMessage ? <p className="form-message">{bulkInviteMessage}</p> : null}
+          </form>
+        ) : null}
         {queue.length > 0 ? (
           <div className="participation-table">
             {queue.map((entry) => (
@@ -429,6 +468,21 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
                   <span>{t.createdAt}: {formatTime(entry.createdAt)}</span>
                   <button className="secondary compact-button" onClick={() => void refreshProfile(entry.id)}>{t.refreshProfile}</button>
                 </div>
+                <form className="queue-invite" onSubmit={(event) => void sendInviteMessage(event, entry)}>
+                  <label className="field">
+                    <span>{t.inviteMessage}</span>
+                    <input
+                      value={inviteDrafts[entry.id] ?? ""}
+                      placeholder={t.invitePlaceholder}
+                      onChange={(event) => setInviteDrafts((previous) => ({ ...previous, [entry.id]: event.target.value }))}
+                      autoComplete="off"
+                    />
+                  </label>
+                  <button className="secondary compact-button" disabled={inviteBusyId === entry.id || !(inviteDrafts[entry.id] ?? "").trim()} type="submit">
+                    {inviteBusyId === entry.id ? t.sendingInvite : t.sendInvite}
+                  </button>
+                  {inviteMessages[entry.id] ? <p className="form-message">{inviteMessages[entry.id]}</p> : null}
+                </form>
               </div>
             ))}
           </div>

@@ -140,6 +140,7 @@ export class ActionDispatcher {
             phase: action.phase,
             message: action.message,
             nextCandidate: action.nextCandidate,
+            streamerProfile: action.streamerProfile,
             durationMs: action.durationMs,
             variant: action.variant,
             source: action.source ?? reason
@@ -164,6 +165,18 @@ export class ActionDispatcher {
         case "overlay.participationTeams":
           actionStatus = this.broadcastOverlay({ type: "participation.teams.update", teams: action.teams, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
           break;
+        case "overlay.soloRankProfile":
+          actionStatus = this.broadcastOverlay({
+            type: "solo-rank.profile.update",
+            profile: action.profile,
+            region: action.region,
+            queueLabel: action.queueLabel,
+            ladderRank: action.ladderRank,
+            durationMs: action.durationMs,
+            variant: action.variant,
+            source: action.source ?? reason
+          });
+          break;
         case "overlay.emergency":
           actionStatus = this.broadcastOverlay(action.active === false
             ? { type: "emergency.clear", durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason }
@@ -181,7 +194,7 @@ export class ActionDispatcher {
         }
         case "participation.open":
           this.store.setParticipationOpen(true);
-          actionStatus = this.broadcastOverlay({ type: "overlay.banner", title: "시참 모집", message: "롤 시참 모집을 시작합니다!", variant: "success", durationMs: 5000, source: reason });
+          actionStatus = this.broadcastOverlay({ type: "overlay.banner", title: "参加募集", message: "参加募集を開始しました。", variant: "success", durationMs: 5000, source: reason });
           break;
         case "participation.close":
           this.store.setParticipationOpen(false);

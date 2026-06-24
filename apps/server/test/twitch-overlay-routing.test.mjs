@@ -39,11 +39,13 @@ function createHarness(options = {}) {
   const dashboard = new DashboardHub(store);
   const overlay = new OverlayHub(logger, store);
   const bridge = { send: () => "cmd-test" };
+  const sentChatMessages = [];
   const twitchChat = {
     renderMessageTemplate(template, ctx) {
       return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key) => String(ctx[key] ?? ""));
     },
-    async sendChatMessage() {
+    async sendChatMessage(message, options) {
+      sentChatMessages.push({ message, options });
       return { status: "sent" };
     }
   };
@@ -58,7 +60,7 @@ function createHarness(options = {}) {
   };
   const twitch = options.twitch ?? {};
   const ctx = { events, actions, logger, store, overlay, dashboard, twitch, riot, lolProfileEnrichment: options.lolProfileEnrichment };
-  return { events, actions, store, socket, ctx };
+  return { events, actions, store, socket, ctx, sentChatMessages };
 }
 
 async function settle() {
@@ -551,6 +553,29 @@ test("!시참 신청은 Riot 프로필 분석 결과를 안전한 overlay queue�
   assert.equal(lastQueueMessage.queue.length, 0);
   assert.ok(retainedStatus);
   assert.equal(retainedStatus.isOpen, true);
+});
+
+test("!시참시작 명령이 반복되어도 Twitch 안내 채팅은 한 번만 전송한다", async () => {
+  const { events, store, ctx, sentChatMessages } = createHarness();
+  participationModule.setup(ctx);
+
+  const baseEvent = {
+    type: "twitch.chatMessage",
+    broadcasterUserId: "broadcaster-1",
+    chatterUserId: "broadcaster-1",
+    chatterUserName: "Streamer",
+    message: "!시참시작",
+    createdAt: new Date().toISOString()
+  };
+
+  events.emit({ ...baseEvent, id: "chat-open-once-1" });
+  await settle();
+  events.emit({ ...baseEvent, id: "chat-open-once-2" });
+  await settle();
+
+  assert.equal(store.getStatus().participation, "open");
+  assert.equal(sentChatMessages.length, 1);
+  assert.match(sentChatMessages[0].message, /参加案内/);
 });
 
 test("!시참취소 명령은 본인 신청을 취소하고 overlay 대기열에서 제거한다", async () => {

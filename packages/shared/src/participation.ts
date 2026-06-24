@@ -33,7 +33,26 @@ export type LolRankedStats = {
   winRate: number;
   summonerLevel?: number;
   profileIconId?: number;
+  tierIconUrl?: string;
   fetchedAt: string;
+};
+
+export type LolPerformanceStats = {
+  sampleSize: number;
+  averageKills: number;
+  averageDeaths: number;
+  averageAssists: number;
+  kda: number;
+};
+
+export type LolRankHistoryPoint = {
+  date: string;
+  tier: LolRankTier;
+  rank?: string;
+  leaguePoints: number;
+  wins: number;
+  losses: number;
+  rankScore: number;
 };
 
 export type LolChampionSummary = {
@@ -46,9 +65,33 @@ export type LolChampionSummary = {
   loadingUrl?: string;
   imageVersion?: string;
   imageLocale?: "neutral";
+  skinNum?: number;
+  skinNameKo?: string;
+  skinNameJa?: string;
   masteryLevel?: number;
   masteryPoints?: number;
   games?: number;
+};
+
+export type LolChampionSkinOption = {
+  skinNum: number;
+  nameKo: string;
+  nameJa?: string;
+  splashUrl: string;
+  loadingUrl: string;
+};
+
+export type LolRecentMatchChampion = {
+  championId: number;
+  championKey?: string;
+  nameKo: string;
+  nameJa?: string;
+  iconUrl?: string;
+  splashUrl?: string;
+  loadingUrl?: string;
+  imageVersion?: string;
+  imageLocale?: "neutral";
+  won: boolean;
 };
 
 export type LolRoleAnalysis = {
@@ -63,6 +106,8 @@ export type LolProfileSummary = {
   mainRoleConfidence?: number;
   topChampions?: LolChampionSummary[];
   rankedStats?: LolRankedStats;
+  performanceStats?: LolPerformanceStats;
+  recentMatches?: LolRecentMatchChampion[];
   analyzedAt?: string;
 };
 
@@ -143,6 +188,20 @@ export type ParticipationPublicQueueEntry = {
   mainRoleConfidence?: number;
   topChampions?: LolChampionSummary[];
   rankedStats?: LolRankedStats;
+};
+
+export type ParticipationStreamerProfile = {
+  displayName?: string;
+  riotTagLine?: string;
+  profileStatus?: LolProfileStatus;
+  mainRole?: LolMainRole;
+  mainRoleConfidence?: number;
+  ladderRank?: number;
+  topChampions?: LolChampionSummary[];
+  rankedStats?: LolRankedStats;
+  performanceStats?: LolPerformanceStats;
+  recentMatches?: LolRecentMatchChampion[];
+  rankHistory?: LolRankHistoryPoint[];
 };
 
 export type ParticipationDashboardQueueEntry = ParticipationPublicQueueEntry & {

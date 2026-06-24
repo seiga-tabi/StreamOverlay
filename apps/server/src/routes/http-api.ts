@@ -9,10 +9,13 @@ import { normalizeLolRole, parseRiotIdDetailed, toSafeErrorMessage, validateBotA
 import type { TwitchAuthService } from "../services/twitch-auth.js";
 import type { TwitchApiClient } from "../services/twitch-api.js";
 import type { RiotApiClient } from "../services/riot-api.js";
+import type { DataDragonService } from "../services/data-dragon.js";
 import { appConfig } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
+import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
 import { getRewardMappingSummaries } from "../modules/rewards.module.js";
-import { loadGameMonitorConfig, restartActiveLolGameMonitor, saveGameMonitorConfig, type LolGameMonitorConfig } from "../modules/lol-game-monitor.module.js";
+import { loadGameMonitorConfig, refreshActiveStreamerProfile, restartActiveLolGameMonitor, saveGameMonitorConfig, type LolGameMonitorConfig } from "../modules/lol-game-monitor.module.js";
+import { loadLolParticipationProfileSettings, saveLolParticipationProfileSettings, type LolParticipationProfileSettings } from "../modules/lol-profile-enrichment.module.js";
 import {
   ALERT_OVERLAY_KEYS,
   alertAssetRoot,
@@ -36,6 +39,11 @@ import { dashboardApiLimiter, dashboardLoginLimiter, oauthLimiter } from "../sec
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
+const MAX_PARTICIPATION_INVITE_MESSAGE_LENGTH = 360;
+const MAX_PARTICIPATION_INVITE_BULK_TARGETS = 20;
+const MAX_TWITCH_CHAT_MESSAGE_LENGTH = 500;
+const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
+const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
 const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
@@ -313,6 +321,54 @@ function alertConfigResponse() {
   };
 }
 
+function validateParticipationInviteMessage(value: unknown): { ok: true; message: string } | { ok: false; error: string } {
+  if (typeof value !== "string") return { ok: false, error: "message는 문자열이어야 합니다." };
+  const message = value.replace(/\s+/g, " ").trim();
+  if (!message) return { ok: false, error: "전송할 메시지가 필요합니다." };
+  if (message.length > MAX_PARTICIPATION_INVITE_MESSAGE_LENGTH) {
+    return { ok: false, error: `메시지는 ${MAX_PARTICIPATION_INVITE_MESSAGE_LENGTH}자 이하여야 합니다.` };
+  }
+  for (const match of message.matchAll(/\b([a-z][a-z0-9+.-]*):/gi)) {
+    const protocol = match[1]?.toLowerCase();
+    if (protocol && !SAFE_CHAT_URL_PROTOCOLS.has(protocol)) {
+      return { ok: false, error: "초대 링크는 http:// 또는 https:// 주소만 사용할 수 있습니다." };
+    }
+  }
+  return { ok: true, message };
+}
+
+function participationMention(userName: string): string {
+  return `@${userName.trim()}`;
+}
+
+function buildParticipationInviteChatMessages(entries: Array<{ twitchUserName: string }>, message: string): { ok: true; messages: string[] } | { ok: false; error: string } {
+  const mentions = [...new Map(entries.map((entry) => [entry.twitchUserName.toLocaleLowerCase(), participationMention(entry.twitchUserName)])).values()];
+  const messages: string[] = [];
+  let currentMentions: string[] = [];
+  for (const mention of mentions) {
+    const nextMentions = [...currentMentions, mention];
+    const nextMessage = `${nextMentions.join(" ")} ${message}`;
+    if (nextMessage.length <= MAX_TWITCH_CHAT_MESSAGE_LENGTH) {
+      currentMentions = nextMentions;
+      continue;
+    }
+    if (currentMentions.length === 0) return { ok: false, error: "멘션을 포함한 메시지가 너무 깁니다." };
+    messages.push(`${currentMentions.join(" ")} ${message}`);
+    currentMentions = [mention];
+  }
+  if (currentMentions.length > 0) messages.push(`${currentMentions.join(" ")} ${message}`);
+  return messages.length > 0 ? { ok: true, messages } : { ok: false, error: "전송 대상이 없습니다." };
+}
+
+function selectedChampionSkinNum(champion: { championId: number; championKey?: string }, overrides: Record<string, number>): number {
+  const keys = [champion.championKey, champion.championKey?.toLowerCase(), String(champion.championId)].filter((key): key is string => Boolean(key));
+  for (const key of keys) {
+    const skinNum = overrides[key];
+    if (typeof skinNum === "number" && Number.isInteger(skinNum) && skinNum >= 0 && skinNum <= 1000) return skinNum;
+  }
+  return 0;
+}
+
 function staticEtag(size: number, mtimeMs: number): string {
   return `"${size.toString(16)}-${Math.trunc(mtimeMs).toString(16)}"`;
 }
@@ -355,6 +411,25 @@ async function sendStaticFile(req: IncomingMessage, res: ServerResponse, filePat
   } catch {
     res.writeHead(404, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
     res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "not found" }));
+  }
+}
+
+async function sendRankedEmblemAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
+  const match = /^\/riot\/ranked-emblems\/([a-z]+)\.png$/i.exec(pathname);
+  if (!match?.[1]) return false;
+  try {
+    const filePath = await rankedEmblemAssetPath(match[1]);
+    if (!filePath) {
+      res.writeHead(404, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
+      res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "not found" }));
+      return true;
+    }
+    await sendStaticFile(req, res, filePath);
+    return true;
+  } catch (error) {
+    res.writeHead(502, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
+    res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: toSafeErrorMessage(error) }));
+    return true;
   }
 }
 
@@ -452,6 +527,7 @@ export function createHttpHandler(input: {
   actions: ActionDispatcher;
   twitch?: TwitchApiClient;
   riot?: RiotApiClient;
+  dataDragon?: DataDragonService;
   twitchAuth: TwitchAuthService;
   eventSub?: TwitchEventSubClient;
   refreshLolProfile?: (entryId: string) => Promise<boolean>;
@@ -484,6 +560,7 @@ export function createHttpHandler(input: {
       }
       if ((req.method === "GET" || req.method === "HEAD") && await sendOverlayAlertAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendLocalTtsAsset(req, res, url.pathname)) return;
+      if ((req.method === "GET" || req.method === "HEAD") && await sendRankedEmblemAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/dashboard", appConfig.paths.dashboardStatic)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/overlay", appConfig.paths.overlayStatic)) return;
 
@@ -619,6 +696,47 @@ export function createHttpHandler(input: {
       if (req.method === "GET" && url.pathname === "/api/participation/queue") return sendJson(req, res, 200, input.store.getParticipationQueue());
       if (req.method === "GET" && url.pathname === "/api/participation/state") return sendJson(req, res, 200, input.store.getParticipationState());
       if (req.method === "GET" && url.pathname === "/api/participation/game-monitor") return sendJson(req, res, 200, loadGameMonitorConfig());
+      if (req.method === "GET" && url.pathname === "/api/participation/streamer-profile") return sendJson(req, res, 200, { profile: input.store.getParticipationStreamerProfile() });
+      if (req.method === "GET" && url.pathname === "/api/participation/profile-settings") return sendJson(req, res, 200, loadLolParticipationProfileSettings());
+      if (req.method === "GET" && url.pathname === "/api/participation/profile-settings/skin-options") {
+        const settings = loadLolParticipationProfileSettings();
+        const monitor = loadGameMonitorConfig();
+        const streamerRiotId = monitor.streamerRiotId.trim();
+        if (!streamerRiotId) {
+          return sendJson(req, res, 200, { status: "missing_streamer", streamerRiotId, skins: [], selectedSkinNum: 0 });
+        }
+        if (!input.riot?.isConfigured()) {
+          return sendJson(req, res, 200, { status: "riot_not_configured", streamerRiotId, skins: [], selectedSkinNum: 0 });
+        }
+        if (!input.dataDragon) {
+          return sendJson(req, res, 503, { error: "Data Dragon service를 사용할 수 없습니다." });
+        }
+        const parsed = parseRiotIdDetailed(streamerRiotId);
+        if (!parsed.ok) {
+          return sendJson(req, res, 200, { status: "invalid_streamer", streamerRiotId, skins: [], selectedSkinNum: 0, message: parsed.message });
+        }
+        const account = await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine);
+        if (!account?.puuid) {
+          return sendJson(req, res, 200, { status: "not_found", streamerRiotId, skins: [], selectedSkinNum: 0 });
+        }
+        const mastery = await input.riot.getChampionMasteryTopByPuuid(account.puuid, 1);
+        const topChampion = mastery[0];
+        if (!topChampion?.championId) {
+          return sendJson(req, res, 200, { status: "no_mastery", streamerRiotId, skins: [], selectedSkinNum: 0 });
+        }
+        const skinOptions = await input.dataDragon.getChampionSkinOptions(topChampion.championId);
+        return sendJson(req, res, 200, {
+          status: "ready",
+          streamerRiotId,
+          champion: {
+            ...skinOptions.champion,
+            masteryLevel: topChampion.championLevel,
+            masteryPoints: topChampion.championPoints
+          },
+          skins: skinOptions.skins,
+          selectedSkinNum: selectedChampionSkinNum(skinOptions.champion, settings.championSkinOverrides)
+        });
+      }
 
       if (req.method === "POST" && url.pathname === "/api/participation/game-monitor") {
         const body = await readJsonBody<Partial<LolGameMonitorConfig>>(req);
@@ -644,12 +762,75 @@ export function createHttpHandler(input: {
         return sendJson(req, res, 200, saved);
       }
 
+      if (req.method === "POST" && url.pathname === "/api/participation/profile-settings") {
+        const body = await readJsonBody<Partial<LolParticipationProfileSettings>>(req);
+        if (body.championSkinOverrides !== undefined && (typeof body.championSkinOverrides !== "object" || body.championSkinOverrides === null || Array.isArray(body.championSkinOverrides))) {
+          return sendJson(req, res, 400, { error: "championSkinOverrides는 객체여야 합니다." });
+        }
+        const saved = saveLolParticipationProfileSettings({
+          championSkinOverrides: body.championSkinOverrides ?? {}
+        });
+        return sendJson(req, res, 200, saved);
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/participation/streamer-profile/refresh") {
+        const profile = await refreshActiveStreamerProfile(true);
+        if (!profile) return sendJson(req, res, 404, { error: "방송자 프로필 갱신을 사용할 수 없습니다. Riot API key와 방송자 Riot ID를 확인하세요." });
+        return sendJson(req, res, 200, { profile });
+      }
+
       if (req.method === "POST" && url.pathname === "/api/participation/profile/refresh") {
         const body = await readJsonBody<{ entryId?: string }>(req);
         if (!body.entryId) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
         const refreshed = await input.refreshLolProfile?.(body.entryId);
         if (!refreshed) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없거나 refresh를 사용할 수 없습니다." });
         return sendJson(req, res, 200, input.store.getParticipationState());
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/participation/invite-message") {
+        const body = await readJsonBody<{ entryId?: unknown; message?: unknown }>(req);
+        if (typeof body.entryId !== "string" || !body.entryId.trim()) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
+        const entry = input.store.getParticipationEntryById(body.entryId.trim());
+        if (!entry) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
+        const validation = validateParticipationInviteMessage(body.message);
+        if (!validation.ok) return sendJson(req, res, 400, { error: validation.error });
+        await input.actions.dispatchOne({
+          type: "twitch.chat",
+          message: `@${entry.twitchUserName} ${validation.message}`
+        }, { user: "dashboard", input: "" }, "dashboard.participation_invite");
+        return sendJson(req, res, 200, {
+          ok: true,
+          entryId: entry.id,
+          twitchUserName: entry.twitchUserName
+        });
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/participation/invite-message/bulk") {
+        const body = await readJsonBody<{ entryIds?: unknown; message?: unknown }>(req);
+        if (!Array.isArray(body.entryIds) || body.entryIds.length === 0) return sendJson(req, res, 400, { error: "entryIds가 필요합니다." });
+        const entryIds = [...new Set(body.entryIds.filter((id): id is string => typeof id === "string").map((id) => id.trim()).filter(Boolean))];
+        if (entryIds.length === 0) return sendJson(req, res, 400, { error: "entryIds가 필요합니다." });
+        if (entryIds.length > MAX_PARTICIPATION_INVITE_BULK_TARGETS) {
+          return sendJson(req, res, 400, { error: `일괄 전송 대상은 최대 ${MAX_PARTICIPATION_INVITE_BULK_TARGETS}명입니다.` });
+        }
+        const entries = entryIds.map((entryId) => input.store.getParticipationEntryById(entryId));
+        if (entries.some((entry) => !entry)) return sendJson(req, res, 404, { error: "일부 시참 entry를 찾을 수 없습니다." });
+        const targets = entries
+          .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+          .filter((entry) => PARTICIPATION_INVITE_TARGET_STATUSES.has(entry.status));
+        if (targets.length === 0) return sendJson(req, res, 400, { error: "일괄 전송 가능한 대기열 참가자가 없습니다." });
+        const validation = validateParticipationInviteMessage(body.message);
+        if (!validation.ok) return sendJson(req, res, 400, { error: validation.error });
+        const chatMessages = buildParticipationInviteChatMessages(targets, validation.message);
+        if (!chatMessages.ok) return sendJson(req, res, 400, { error: chatMessages.error });
+        for (const message of chatMessages.messages) {
+          await input.actions.dispatchOne({ type: "twitch.chat", message }, { user: "dashboard", input: "" }, "dashboard.participation_invite_bulk");
+        }
+        return sendJson(req, res, 200, {
+          ok: true,
+          targetCount: targets.length,
+          sentMessages: chatMessages.messages.length
+        });
       }
 
       if (req.method === "POST" && url.pathname === "/api/followers/refresh") {

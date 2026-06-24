@@ -18,12 +18,29 @@ export type RiotSummoner = {
 };
 
 export type RiotLeagueEntry = {
+  leagueId?: string;
+  summonerId?: string;
+  puuid?: string;
   queueType: string;
   tier: string;
   rank: string;
   leaguePoints: number;
   wins: number;
   losses: number;
+};
+
+type RiotLeagueListEntry = {
+  summonerId?: string;
+  puuid?: string;
+  rank: string;
+  leaguePoints: number;
+  wins: number;
+  losses: number;
+};
+
+type RiotLeagueList = {
+  leagueId: string;
+  entries: RiotLeagueListEntry[];
 };
 
 export type RiotChampionMastery = {
@@ -39,6 +56,10 @@ export type RiotMatchParticipant = {
   championName?: string;
   individualPosition?: string;
   teamPosition?: string;
+  kills?: number;
+  deaths?: number;
+  assists?: number;
+  win?: boolean;
 };
 
 export type RiotMatch = {
@@ -107,6 +128,37 @@ export class RiotApiNetworkError extends Error {
   }
 }
 
+export type RiotRateLimitWindow = {
+  limit: number;
+  windowMs: number;
+};
+
+type RiotRequestLimiterOptions = {
+  enabled?: boolean;
+  windows?: RiotRateLimitWindow[];
+  maxQueueSize?: number;
+  now?: () => number;
+};
+
+type RiotQueuedRequest<T> = {
+  run: () => Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: unknown) => void;
+};
+
+type RiotRateLimitBucket = {
+  host: string;
+  startedAt: number[];
+  queue: RiotQueuedRequest<unknown>[];
+  timer?: ReturnType<typeof setTimeout>;
+  pauseUntil?: number;
+};
+
+const DEFAULT_RIOT_RATE_LIMIT_WINDOWS: RiotRateLimitWindow[] = [
+  { limit: 20, windowMs: 1_000 },
+  { limit: 100, windowMs: 120_000 }
+];
+
 const LOL_RANK_TIERS = new Set([
   "IRON",
   "BRONZE",
@@ -122,6 +174,128 @@ const LOL_RANK_TIERS = new Set([
 ]);
 
 const RANKED_QUEUE_PRIORITY = ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"] as const;
+export type RiotRankedQueueType = (typeof RANKED_QUEUE_PRIORITY)[number];
+const RANK_DIVISION_SCORE: Record<string, number> = {
+  I: 3,
+  II: 2,
+  III: 1,
+  IV: 0
+};
+
+function normalizeRateLimitWindow(value: RiotRateLimitWindow): RiotRateLimitWindow | undefined {
+  const limit = Math.trunc(value.limit);
+  const windowMs = Math.trunc(value.windowMs);
+  if (!Number.isFinite(limit) || !Number.isFinite(windowMs) || limit <= 0 || windowMs <= 0) return undefined;
+  return { limit, windowMs };
+}
+
+export class RiotRequestLimiter {
+  private readonly buckets = new Map<string, RiotRateLimitBucket>();
+  private readonly enabled: boolean;
+  private readonly windows: RiotRateLimitWindow[];
+  private readonly maxQueueSize: number;
+  private readonly now: () => number;
+  private readonly maxWindowMs: number;
+
+  constructor(options: RiotRequestLimiterOptions = {}) {
+    this.enabled = options.enabled ?? true;
+    this.windows = (options.windows ?? DEFAULT_RIOT_RATE_LIMIT_WINDOWS)
+      .map(normalizeRateLimitWindow)
+      .filter((window): window is RiotRateLimitWindow => Boolean(window))
+      .sort((a, b) => a.windowMs - b.windowMs);
+    this.maxQueueSize = Math.max(1, Math.trunc(options.maxQueueSize ?? 500));
+    this.now = options.now ?? (() => Date.now());
+    this.maxWindowMs = Math.max(...this.windows.map((window) => window.windowMs), 0);
+  }
+
+  schedule<T>(host: string, run: () => Promise<T>): Promise<T> {
+    if (!this.enabled || this.windows.length === 0) return run();
+    const bucket = this.bucketFor(host);
+    if (bucket.queue.length >= this.maxQueueSize) {
+      return Promise.reject(new RiotRateLimitError("Riot API request queue is full", undefined, undefined, host));
+    }
+    return new Promise<T>((resolve, reject) => {
+      bucket.queue.push({ run, resolve, reject } as RiotQueuedRequest<unknown>);
+      this.drain(bucket);
+    });
+  }
+
+  pause(host: string, retryAfterMs: number | undefined): void {
+    if (!this.enabled || !retryAfterMs || retryAfterMs <= 0) return;
+    const bucket = this.bucketFor(host);
+    bucket.pauseUntil = Math.max(bucket.pauseUntil ?? 0, this.now() + retryAfterMs);
+    this.scheduleDrain(bucket, retryAfterMs);
+  }
+
+  private bucketFor(host: string): RiotRateLimitBucket {
+    const safeHostName = host || "unknown";
+    const existing = this.buckets.get(safeHostName);
+    if (existing) return existing;
+    const bucket: RiotRateLimitBucket = {
+      host: safeHostName,
+      startedAt: [],
+      queue: []
+    };
+    this.buckets.set(safeHostName, bucket);
+    return bucket;
+  }
+
+  private compact(bucket: RiotRateLimitBucket, now: number): void {
+    if (this.maxWindowMs <= 0) {
+      bucket.startedAt = [];
+      return;
+    }
+    bucket.startedAt = bucket.startedAt.filter((timestamp) => now - timestamp < this.maxWindowMs);
+  }
+
+  private canStart(bucket: RiotRateLimitBucket, now: number): boolean {
+    if (bucket.pauseUntil && bucket.pauseUntil > now) return false;
+    this.compact(bucket, now);
+    return this.windows.every((window) => bucket.startedAt.filter((timestamp) => now - timestamp < window.windowMs).length < window.limit);
+  }
+
+  private nextDelayMs(bucket: RiotRateLimitBucket, now: number): number {
+    let delayMs = bucket.pauseUntil && bucket.pauseUntil > now ? bucket.pauseUntil - now : 1;
+    this.compact(bucket, now);
+    for (const window of this.windows) {
+      const active = bucket.startedAt
+        .filter((timestamp) => now - timestamp < window.windowMs)
+        .sort((a, b) => a - b);
+      if (active.length < window.limit) continue;
+      const oldestBlocking = active[active.length - window.limit] ?? active[0];
+      if (oldestBlocking === undefined) continue;
+      delayMs = Math.max(delayMs, oldestBlocking + window.windowMs - now + 5);
+    }
+    return Math.max(1, Math.ceil(delayMs));
+  }
+
+  private scheduleDrain(bucket: RiotRateLimitBucket, delayMs: number): void {
+    if (bucket.timer) return;
+    bucket.timer = setTimeout(() => {
+      bucket.timer = undefined;
+      this.drain(bucket);
+    }, Math.max(1, Math.ceil(delayMs)));
+  }
+
+  private drain(bucket: RiotRateLimitBucket): void {
+    if (bucket.timer) return;
+    while (bucket.queue.length > 0) {
+      const now = this.now();
+      if (!this.canStart(bucket, now)) {
+        this.scheduleDrain(bucket, this.nextDelayMs(bucket, now));
+        return;
+      }
+      const item = bucket.queue.shift();
+      if (!item) return;
+      bucket.startedAt.push(now);
+      void item.run().then(item.resolve, item.reject);
+    }
+  }
+}
+
+function rankedTierIconUrl(tier: LolRankTier): string | undefined {
+  return tier === "UNRANKED" ? undefined : `/riot/ranked-emblems/${tier.toLowerCase()}.png?v=ranked-emblems-1`;
+}
 
 function winRate(wins: number, losses: number): number {
   const total = wins + losses;
@@ -132,6 +306,40 @@ function winRate(wins: number, losses: number): number {
 function rankTier(value: string | undefined): LolRankTier {
   const tier = (value ?? "UNRANKED").toUpperCase();
   return LOL_RANK_TIERS.has(tier) ? (tier as LolRankTier) : "UNRANKED";
+}
+
+function safeStat(value: unknown): number {
+  const number = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(number) ? Math.max(0, Math.trunc(number)) : 0;
+}
+
+function rankDivisionScore(value: string | undefined): number {
+  return RANK_DIVISION_SCORE[(value ?? "").toUpperCase()] ?? 0;
+}
+
+function compareLeagueEntries(a: RiotLeagueListEntry, b: RiotLeagueListEntry): number {
+  return rankDivisionScore(b.rank) - rankDivisionScore(a.rank) ||
+    safeStat(b.leaguePoints) - safeStat(a.leaguePoints) ||
+    safeStat(b.wins) - safeStat(a.wins) ||
+    safeStat(a.losses) - safeStat(b.losses);
+}
+
+function sameLeagueEntryStats(entry: RiotLeagueListEntry, rankedEntry: RiotLeagueEntry): boolean {
+  return (entry.rank ?? "").toUpperCase() === (rankedEntry.rank ?? "").toUpperCase() &&
+    safeStat(entry.leaguePoints) === safeStat(rankedEntry.leaguePoints) &&
+    safeStat(entry.wins) === safeStat(rankedEntry.wins) &&
+    safeStat(entry.losses) === safeStat(rankedEntry.losses);
+}
+
+function listEntryFromRankedEntry(entry: RiotLeagueEntry): RiotLeagueListEntry {
+  return {
+    summonerId: entry.summonerId,
+    puuid: entry.puuid,
+    rank: entry.rank,
+    leaguePoints: safeStat(entry.leaguePoints),
+    wins: safeStat(entry.wins),
+    losses: safeStat(entry.losses)
+  };
 }
 
 function normalizeRegion(value: string, fallback: string): string {
@@ -190,8 +398,26 @@ function causeCode(error: unknown): string | undefined {
   return typeof cause?.code === "string" ? cause.code : undefined;
 }
 
+type RiotApiClientOptions = {
+  rateLimiter?: RiotRequestLimiter;
+};
+
 export class RiotApiClient {
-  constructor(private readonly apiKeyProvider?: RiotApiKeyProvider) {}
+  private readonly rateLimiter: RiotRequestLimiter;
+
+  constructor(
+    private readonly apiKeyProvider?: RiotApiKeyProvider,
+    options: RiotApiClientOptions = {}
+  ) {
+    this.rateLimiter = options.rateLimiter ?? new RiotRequestLimiter({
+      enabled: appConfig.riot.rateLimit.enabled,
+      windows: [
+        { limit: appConfig.riot.rateLimit.perSecond, windowMs: 1_000 },
+        { limit: appConfig.riot.rateLimit.perTwoMinutes, windowMs: 120_000 }
+      ],
+      maxQueueSize: appConfig.riot.rateLimit.queueMax
+    });
+  }
 
   private get apiKey(): string {
     return this.apiKeyProvider?.getApiKey() || appConfig.riot.apiKey;
@@ -245,6 +471,7 @@ export class RiotApiClient {
 
   private async fetchJson<T>(url: string, route: string): Promise<T | null> {
     const host = safeHost(url);
+    await this.rateLimiter.schedule(host, async () => undefined);
     let response: Response;
     try {
       const apiKey = this.apiKey;
@@ -257,7 +484,11 @@ export class RiotApiClient {
       throw new RiotApiNetworkError(route, host, causeMessage(error), causeCode(error));
     }
     if (response.status === 404) return null;
-    if (response.status === 429) throw new RiotRateLimitError("Riot API rate limit exceeded", retryAfterMs(response), route, host);
+    if (response.status === 429) {
+      const retryMs = retryAfterMs(response);
+      this.rateLimiter.pause(host, retryMs);
+      throw new RiotRateLimitError("Riot API rate limit exceeded", retryMs, route, host);
+    }
     if (!response.ok) throw new RiotApiHttpError(response.status, route, host, await readErrorBody(response));
     return (await response.json()) as T;
   }
@@ -284,6 +515,12 @@ export class RiotApiClient {
     if (!this.isConfigured()) return [];
     const url = `https://${this.lolPlatform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`;
     return (await this.fetchJson<RiotLeagueEntry[]>(url, "league.entries_by_puuid")) ?? [];
+  }
+
+  async getLeagueById(leagueId: string): Promise<RiotLeagueList | null> {
+    if (!this.isConfigured()) return null;
+    const url = `https://${this.lolPlatform}.api.riotgames.com/lol/league/v4/leagues/${encodeURIComponent(leagueId)}`;
+    return this.fetchJson<RiotLeagueList>(url, "league.by_id");
   }
 
   async getChampionMasteryTopByPuuid(puuid: string, count = 3): Promise<RiotChampionMastery[]> {
@@ -327,14 +564,40 @@ export class RiotApiClient {
     return this.fetchJson<RiotCurrentGameInfo>(url, "spectator.active_game");
   }
 
-  async getRankedStatsByPuuid(puuid: string): Promise<LolRankedStats | undefined> {
+  async getLadderRankByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY): Promise<number | undefined> {
+    if (!this.isConfigured()) return undefined;
+    const [summoner, entries] = await Promise.all([
+      this.getSummonerByPuuid(puuid),
+      this.getLeagueEntriesByPuuid(puuid)
+    ]);
+    const rankedEntry = queuePriority
+      .map((queueType) => entries.find((entry) => entry.queueType === queueType))
+      .find(Boolean);
+    if (!rankedEntry?.leagueId) return undefined;
+
+    const league = await this.getLeagueById(rankedEntry.leagueId);
+    const targetSummonerId = rankedEntry.summonerId ?? summoner?.id;
+    const sorted = [...(league?.entries ?? [])].sort(compareLeagueEntries);
+    const index = sorted.findIndex((entry) => (
+      Boolean(entry.puuid && entry.puuid === puuid) ||
+      Boolean(targetSummonerId && entry.summonerId === targetSummonerId) ||
+      sameLeagueEntryStats(entry, rankedEntry)
+    ));
+    if (index >= 0) return index + 1;
+    if (sorted.length === 0) return undefined;
+    const target = listEntryFromRankedEntry(rankedEntry);
+    const higherEntries = sorted.filter((entry) => compareLeagueEntries(entry, target) < 0);
+    return higherEntries.length + 1;
+  }
+
+  async getRankedStatsByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY): Promise<LolRankedStats | undefined> {
     if (!this.isConfigured()) return undefined;
     const [summoner, entries] = await Promise.all([
       this.getSummonerByPuuid(puuid),
       this.getLeagueEntriesByPuuid(puuid)
     ]);
 
-    const rankedEntry = RANKED_QUEUE_PRIORITY
+    const rankedEntry = queuePriority
       .map((queueType) => entries.find((entry) => entry.queueType === queueType))
       .find(Boolean);
 
@@ -354,9 +617,10 @@ export class RiotApiClient {
 
     const wins = Math.max(0, Math.trunc(rankedEntry.wins));
     const losses = Math.max(0, Math.trunc(rankedEntry.losses));
+    const tier = rankTier(rankedEntry.tier);
     return {
       queueType: rankedEntry.queueType === "RANKED_FLEX_SR" ? "RANKED_FLEX_SR" : "RANKED_SOLO_5x5",
-      tier: rankTier(rankedEntry.tier),
+      tier,
       rank: rankedEntry.rank,
       leaguePoints: Math.max(0, Math.trunc(rankedEntry.leaguePoints)),
       wins,
@@ -364,6 +628,7 @@ export class RiotApiClient {
       winRate: winRate(wins, losses),
       summonerLevel: summoner?.summonerLevel,
       profileIconId: summoner?.profileIconId,
+      tierIconUrl: rankedTierIconUrl(tier),
       fetchedAt: new Date().toISOString()
     };
   }

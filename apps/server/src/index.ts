@@ -95,6 +95,7 @@ const server = http.createServer(createHttpHandler({
   actions,
   twitch,
   riot,
+  dataDragon,
   twitchAuth,
   eventSub: twitchEventSub,
   refreshLolProfile: (entryId) => refreshLolProfileForEntry(moduleContext, entryId),

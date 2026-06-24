@@ -20,10 +20,15 @@
 RIOT_API_KEY=
 RIOT_ACCOUNT_REGION=asia
 RIOT_LOL_PLATFORM=kr
+RIOT_RATE_LIMIT_ENABLED=true
+RIOT_RATE_LIMIT_PER_SECOND=20
+RIOT_RATE_LIMIT_PER_TWO_MINUTES=100
+RIOT_RATE_LIMIT_QUEUE_MAX=500
 ```
 
 Riot API key는 서버 환경변수로만 설정합니다. 코드, 프론트엔드, overlay, Git에는 저장하지 않습니다.
 일본 서버 계정은 `RIOT_LOL_PLATFORM=jp1`, 한국 서버 계정은 `RIOT_LOL_PLATFORM=kr`을 사용합니다. `RIOT_ACCOUNT_REGION=asia`는 Riot ID/Match-V5 조회용 region이므로 보통 일본/한국 계정 모두 `asia`로 둡니다.
+기본 rate limit 값은 Personal API Key 기준입니다. 서버는 host별 요청 큐로 `20 requests / 1초`, `100 requests / 2분`을 넘지 않도록 Riot API 호출을 지연합니다.
 
 ## 입력 형식
 

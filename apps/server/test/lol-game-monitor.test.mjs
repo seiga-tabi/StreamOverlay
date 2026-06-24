@@ -55,7 +55,13 @@ function createHarness() {
       currentGame: {
         gameId: 10001,
         gameStartTime: 1760000000000,
-        participants: [{ puuid: "streamer-puuid", championId: 103, teamId: 100 }]
+        participants: [
+          { puuid: "streamer-puuid", championId: 103, teamId: 100 },
+          { puuid: "viewer-1-puuid", championId: 1, teamId: 100 },
+          { puuid: "viewer-2-puuid", championId: 2, teamId: 100 },
+          { puuid: "viewer-3-puuid", championId: 3, teamId: 100 },
+          { puuid: "viewer-4-puuid", championId: 4, teamId: 100 }
+        ]
       },
       isConfigured() {
         return true;
@@ -74,7 +80,7 @@ function createHarness() {
   return { ctx, overlayMessages, chatActions, logger };
 }
 
-test("LolGameMonitorController는 게임 시작 시 참가자를 in_game으로 표시한다", async () => {
+test("LolGameMonitorController는 게임 시작 시 current game에 있는 참가자만 in_game으로 표시한다", async () => {
   const { ctx, overlayMessages } = createHarness();
   for (let index = 1; index <= 5; index += 1) {
     ctx.store.addParticipation(ctx.store.makeParticipationEntry({
@@ -82,6 +88,7 @@ test("LolGameMonitorController는 게임 시작 시 참가자를 in_game으로 �
       twitchUserName: `Viewer${index}`,
       riotGameName: `Viewer${index}`,
       riotTagLine: "KR1",
+      riotPuuid: `viewer-${index}-puuid`,
       preferredRole: "mid",
       status: "waitlisted",
       source: "chat_command"
@@ -116,6 +123,7 @@ test("LolGameMonitorController는 게임 종료 후 in_game을 played로 바꾸�
       twitchUserName: `Viewer${index}`,
       riotGameName: `Viewer${index}`,
       riotTagLine: "KR1",
+      riotPuuid: `viewer-${index}-puuid`,
       preferredRole: "mid",
       status: "waitlisted",
       source: "chat_command"

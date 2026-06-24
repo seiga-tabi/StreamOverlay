@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { LolGameMonitorSettings, ParticipationEntry, ParticipationPublicQueueEntry } from "@streamops/shared";
+import type { LolGameMonitorSettings, ParticipationEntry, ParticipationPublicQueueEntry, ParticipationStreamerProfile } from "@streamops/shared";
 import { formatRiotId, parseRiotIdDetailed, toSafeErrorMessage } from "@streamops/shared";
 import type { BotModule, ModuleContext } from "../core/module.js";
 import { appConfig } from "../config.js";
 import type { RiotCurrentGameInfo } from "../services/riot-api.js";
+import type { LolProfilePatch } from "../services/lol-profile-enrichment.js";
+import { loadLolParticipationProfileConfig } from "./lol-profile-enrichment.module.js";
 
 export type LolGameMonitorConfig = LolGameMonitorSettings;
 
@@ -135,8 +137,41 @@ function overlayEntryFromParticipation(entry: ParticipationEntry, position: numb
   };
 }
 
+function currentGameParticipantPuuids(game: RiotCurrentGameInfo): string[] {
+  return game.participants
+    .map((participant) => participant.puuid)
+    .filter((puuid): puuid is string => typeof puuid === "string" && puuid.length > 0);
+}
+
+function streamerProfileFromPatch(displayName: string, tagLine: string, patch: LolProfilePatch): ParticipationStreamerProfile {
+  return {
+    displayName,
+    riotTagLine: tagLine,
+    profileStatus: patch.profileStatus,
+    mainRole: patch.mainRole,
+    mainRoleConfidence: patch.mainRoleConfidence,
+    ladderRank: patch.ladderRank,
+    topChampions: patch.topChampions?.map((champion) => ({ ...champion })),
+    rankedStats: patch.rankedStats ? { ...patch.rankedStats } : undefined,
+    performanceStats: patch.performanceStats ? { ...patch.performanceStats } : undefined,
+    recentMatches: patch.recentMatches?.map((match) => ({ ...match })),
+    rankHistory: patch.rankHistory?.map((point) => ({ ...point }))
+  };
+}
+
+function regionFromTagLine(tagLine: string): string {
+  const normalized = tagLine.trim().replace(/\d+$/u, "").toUpperCase();
+  return normalized || tagLine.trim().toUpperCase() || "KR";
+}
+
+function soloRankQueueLabel(profile: ParticipationStreamerProfile | undefined): string {
+  if (profile?.rankedStats?.queueType === "RANKED_FLEX_SR") return "Flex";
+  return "Solo/Duo";
+}
+
 export class LolGameMonitorController {
   private streamerPuuid?: string;
+  private streamerRegion?: string;
   private timer?: NodeJS.Timeout;
   private inGame = false;
   private lastGameId?: string;
@@ -158,6 +193,7 @@ export class LolGameMonitorController {
     this.config = config;
     this.settings = settings;
     this.streamerPuuid = undefined;
+    this.streamerRegion = undefined;
     this.inGame = false;
     this.lastGameId = undefined;
     this.missingSince = undefined;
@@ -199,7 +235,11 @@ export class LolGameMonitorController {
     }
 
     this.streamerPuuid = account.puuid;
+    this.streamerRegion = regionFromTagLine(account.tagLine);
     this.ctx.logger.event({ type: "lol_game_monitor.started", riotId, pollIntervalMs: this.config.pollIntervalMs });
+    void this.refreshStreamerProfile(account.gameName, account.tagLine, account.puuid).catch((error) => {
+      this.ctx.logger.error({ type: "lol_game_monitor.streamer_profile_failed", error: toSafeErrorMessage(error), riotId });
+    });
     await this.pollOnce();
     this.timer = setInterval(() => void this.pollOnce(), this.config.pollIntervalMs);
     this.timer.unref?.();
@@ -225,6 +265,48 @@ export class LolGameMonitorController {
     }
   }
 
+  async refreshStreamerProfileFromConfig(force = true): Promise<ParticipationStreamerProfile | undefined> {
+    if (!this.ctx.riot.isConfigured()) throw new Error("RIOT_API_KEY가 설정되지 않았습니다.");
+    const parsed = parseRiotIdDetailed(this.config.streamerRiotId);
+    if (!parsed.ok) throw new Error(parsed.message);
+    const account = await this.ctx.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine);
+    if (!account?.puuid) throw new Error("방송자 Riot 계정을 찾을 수 없습니다.");
+    this.streamerPuuid = account.puuid;
+    this.streamerRegion = regionFromTagLine(account.tagLine);
+    return this.refreshStreamerProfile(account.gameName, account.tagLine, account.puuid, force);
+  }
+
+  private async refreshStreamerProfile(gameName: string, tagLine: string, puuid: string, force = false): Promise<ParticipationStreamerProfile | undefined> {
+    if (!this.ctx.lolProfileEnrichment) return;
+    const profileConfig = loadLolParticipationProfileConfig();
+    if (!profileConfig.enabled) return;
+    this.ctx.store.setParticipationStreamerProfile({ displayName: gameName, riotTagLine: tagLine, profileStatus: "analyzing" });
+    this.broadcastStatus(this.inGame ? "in_game" : "recruiting", this.ctx.store.getNextWaitingParticipationOverlayEntry());
+    this.broadcastSoloRankProfile(regionFromTagLine(tagLine));
+    const now = new Date().toISOString();
+    const profileEntry: ParticipationEntry = {
+      id: "streamer-profile",
+      twitchUserId: "broadcaster",
+      twitchUserName: "Streamer",
+      riotGameName: gameName,
+      riotTagLine: tagLine,
+      riotPuuid: puuid,
+      preferredRole: "fill",
+      status: "verified",
+      source: "dashboard",
+      createdAt: now,
+      updatedAt: now
+    };
+    const cached = force ? undefined : this.ctx.lolProfileEnrichment.getCachedPatch(profileEntry, profileConfig);
+    const patch = cached ?? await this.ctx.lolProfileEnrichment.enrich(profileEntry, profileConfig, force);
+    const profile = this.ctx.store.setParticipationStreamerProfile(streamerProfileFromPatch(gameName, tagLine, patch));
+    this.ctx.logger.event({ type: "lol_game_monitor.streamer_profile_ready", riotId: formatRiotId(gameName, tagLine), profileStatus: profile?.profileStatus, mainRole: profile?.mainRole });
+    this.broadcastStatus(this.inGame ? "in_game" : "recruiting", this.ctx.store.getNextWaitingParticipationOverlayEntry());
+    this.broadcastSoloRankProfile(regionFromTagLine(tagLine));
+    this.ctx.dashboard.broadcastSnapshot();
+    return profile;
+  }
+
   private async handleActiveGame(game: RiotCurrentGameInfo): Promise<void> {
     const gameId = String(game.gameId);
     this.missingSince = undefined;
@@ -232,7 +314,7 @@ export class LolGameMonitorController {
 
     this.inGame = true;
     this.lastGameId = gameId;
-    const changed = this.ctx.store.markVisibleParticipationQueueInGame();
+    const changed = this.ctx.store.markVisibleParticipationQueueInGame({ participantPuuids: currentGameParticipantPuuids(game) });
     const nextCandidate = this.ctx.store.getNextWaitingParticipationOverlayEntry();
     this.ctx.logger.event({ type: "lol_game_monitor.game_started", gameId, changedEntries: changed.map((entry) => entry.id) });
     this.broadcastStatus("in_game", nextCandidate);
@@ -278,13 +360,14 @@ export class LolGameMonitorController {
     this.ctx.dashboard.broadcastSnapshot();
   }
 
-  private broadcastStatus(phase: "in_game" | "game_ended", nextCandidate?: ParticipationPublicQueueEntry): void {
+  private broadcastStatus(phase: "recruiting" | "in_game" | "game_ended", nextCandidate?: ParticipationPublicQueueEntry): void {
     this.ctx.overlay.broadcast({
       type: "participation.status.update",
       isOpen: isParticipationOpen(this.ctx),
       mode: this.settings.mode,
       phase,
       nextCandidate,
+      streamerProfile: this.ctx.store.getParticipationStreamerProfile(),
       source: "lol.game_monitor"
     });
   }
@@ -294,6 +377,19 @@ export class LolGameMonitorController {
       type: "participation.queue.update",
       isOpen: isParticipationOpen(this.ctx),
       queue: this.ctx.store.getParticipationOverlayQueue(),
+      source: "lol.game_monitor"
+    });
+  }
+
+  private broadcastSoloRankProfile(region = this.streamerRegion): void {
+    const profile = this.ctx.store.getParticipationStreamerProfile();
+    if (!profile) return;
+    this.ctx.overlay.broadcast({
+      type: "solo-rank.profile.update",
+      profile,
+      region,
+      queueLabel: soloRankQueueLabel(profile),
+      ladderRank: profile.ladderRank,
       source: "lol.game_monitor"
     });
   }
@@ -318,4 +414,9 @@ export async function restartActiveLolGameMonitor(config = loadGameMonitorConfig
   if (!activeLolGameMonitorController) return false;
   await activeLolGameMonitorController.restart(config, loadParticipationSettings());
   return true;
+}
+
+export async function refreshActiveStreamerProfile(force = true): Promise<ParticipationStreamerProfile | undefined> {
+  if (!activeLolGameMonitorController) return undefined;
+  return activeLolGameMonitorController.refreshStreamerProfileFromConfig(force);
 }
