@@ -2,9 +2,9 @@
   "enabled": true,
   "showRiotIdPublicly": false,
   "profileCacheTtlHours": 24,
-  "matchAnalysisCount": 20,
+  "matchAnalysisCount": 10,
   "mainRoleMinConfidence": 45,
-  "enabledQueues": [420, 440, 430, 400],
+  "enabledQueues": [420, 440],
   "championSkinOverrides": {},
   "gameMonitor": {
     "enabled": true,

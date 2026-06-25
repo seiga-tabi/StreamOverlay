@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import type { LolChampionSummary, ParticipationDashboardQueueEntry, ParticipationState } from "@streamops/shared";
+import type { LolChampionSummary, ParticipationDashboardQueueEntry, ParticipationState, ParticipationStatus } from "@streamops/shared";
 import { apiPost } from "../api/client";
 
 type DashboardSnapshot = {
@@ -22,6 +22,15 @@ const i18n = {
     checkedIn: "확인 완료",
     noShow: "노쇼",
     played: "완료",
+    manualControlTitle: "수동 상태 제어",
+    manualControlHelp: "자동 게임 감지가 늦거나 챔피언 선택 단계일 때 대기열 표시 상태를 직접 전환합니다.",
+    manualOpen: "모집 시작",
+    manualShowQueue: "대기열 표시",
+    manualMarkInGame: "앞 4명 게임 중",
+    manualFinishGame: "게임 종료 처리",
+    manualClose: "모집 종료",
+    manualControlSaved: "시참 상태를 수동으로 갱신했습니다.",
+    manualControlFailed: "시참 상태 수동 갱신에 실패했습니다.",
     queueTitle: "대기열",
     empty: "대기자가 없습니다.",
     riotId: "Riot ID",
@@ -68,6 +77,9 @@ const i18n = {
     refreshFailed: "프로필 새로고침 요청 실패",
     roleUpdated: "수동 라인 보정을 저장했습니다.",
     roleUpdateFailed: "수동 라인 보정에 실패했습니다.",
+    entryStatusOverride: "수동 상태 변경",
+    entryStatusUpdated: "참가자 상태를 변경했습니다.",
+    entryStatusUpdateFailed: "참가자 상태 변경에 실패했습니다.",
     inviteMessage: "초대 링크/안내 메시지",
     invitePlaceholder: "초대 링크 또는 안내 메시지 입력",
     sendInvite: "전송",
@@ -137,6 +149,15 @@ const i18n = {
     checkedIn: "確認完了",
     noShow: "不在",
     played: "完了",
+    manualControlTitle: "手動状態制御",
+    manualControlHelp: "自動試合検知が遅い場合やチャンピオン選択中に、待機列の表示状態を手動で切り替えます。",
+    manualOpen: "募集開始",
+    manualShowQueue: "待機列表示",
+    manualMarkInGame: "先頭4人を試合中",
+    manualFinishGame: "試合終了処理",
+    manualClose: "募集終了",
+    manualControlSaved: "参加状態を手動で更新しました。",
+    manualControlFailed: "参加状態の手動更新に失敗しました。",
     queueTitle: "待機列",
     empty: "待機者はいません。",
     riotId: "Riot ID",
@@ -183,6 +204,9 @@ const i18n = {
     refreshFailed: "プロフィール更新リクエストに失敗しました。",
     roleUpdated: "手動ロール補正を保存しました。",
     roleUpdateFailed: "手動ロール補正に失敗しました。",
+    entryStatusOverride: "手動状態変更",
+    entryStatusUpdated: "参加者の状態を変更しました。",
+    entryStatusUpdateFailed: "参加者の状態変更に失敗しました。",
     inviteMessage: "招待リンク/案内メッセージ",
     invitePlaceholder: "招待リンクまたは案内メッセージを入力",
     sendInvite: "送信",
@@ -245,6 +269,22 @@ const i18n = {
 
 const t = i18n.ko;
 const INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
+const ENTRY_STATUS_OPTIONS: ParticipationStatus[] = [
+  "pending",
+  "verified",
+  "waitlisted",
+  "selected",
+  "checked_in",
+  "invited",
+  "in_game",
+  "played",
+  "skipped",
+  "cancelled",
+  "no_show",
+  "rejected",
+  "blocked"
+];
+type ManualParticipationAction = "open" | "show_queue" | "mark_in_game" | "finish_game" | "close";
 
 function roleLabel(role: string | undefined): string {
   if (!role) return t.roles.unknown;
@@ -326,6 +366,10 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
   const [bulkInviteDraft, setBulkInviteDraft] = useState("");
   const [bulkInviteSending, setBulkInviteSending] = useState(false);
   const [bulkInviteMessage, setBulkInviteMessage] = useState("");
+  const [manualBusyAction, setManualBusyAction] = useState<ManualParticipationAction | null>(null);
+  const [manualMessage, setManualMessage] = useState("");
+  const [entryStatusBusyId, setEntryStatusBusyId] = useState<string | null>(null);
+  const [entryStatusMessages, setEntryStatusMessages] = useState<Record<string, string>>({});
   const bulkInviteTargets = queue.filter((entry) => INVITE_TARGET_STATUSES.has(entry.status));
 
   async function refreshProfile(entryId: string) {
@@ -343,6 +387,33 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
       alert(t.roleUpdated);
     } catch {
       alert(t.roleUpdateFailed);
+    }
+  }
+
+  async function applyManualControl(action: ManualParticipationAction) {
+    setManualBusyAction(action);
+    setManualMessage("");
+    try {
+      await apiPost("/api/participation/manual-control", { action });
+      setManualMessage(t.manualControlSaved);
+    } catch (error) {
+      setManualMessage(apiErrorDetail(error, "/api/participation/manual-control", t.manualControlFailed));
+    } finally {
+      setManualBusyAction(null);
+    }
+  }
+
+  async function updateEntryStatus(entry: ParticipationDashboardQueueEntry, status: ParticipationStatus) {
+    if (entry.status === status) return;
+    setEntryStatusBusyId(entry.id);
+    setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: "" }));
+    try {
+      await apiPost("/api/participation/entry-status", { entryId: entry.id, status });
+      setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: t.entryStatusUpdated }));
+    } catch (error) {
+      setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: apiErrorDetail(error, "/api/participation/entry-status", t.entryStatusUpdateFailed) }));
+    } finally {
+      setEntryStatusBusyId(null);
     }
   }
 
@@ -406,6 +477,21 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
         <div><span>{t.played}</span><strong>{summary.played}</strong></div>
       </div>
 
+      <div className="card participation-manual-card">
+        <div>
+          <h2>{t.manualControlTitle}</h2>
+          <p className="muted">{t.manualControlHelp}</p>
+        </div>
+        <div className="participation-manual-actions">
+          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("open")}>{manualBusyAction === "open" ? t.sendingInvite : t.manualOpen}</button>
+          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("show_queue")}>{manualBusyAction === "show_queue" ? t.sendingInvite : t.manualShowQueue}</button>
+          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("mark_in_game")}>{manualBusyAction === "mark_in_game" ? t.sendingInvite : t.manualMarkInGame}</button>
+          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("finish_game")}>{manualBusyAction === "finish_game" ? t.sendingInvite : t.manualFinishGame}</button>
+          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("close")}>{manualBusyAction === "close" ? t.sendingInvite : t.manualClose}</button>
+        </div>
+        {manualMessage ? <p className="form-message">{manualMessage}</p> : null}
+      </div>
+
       <div className="card">
         <h2>{t.queueTitle}</h2>
         {queue.length === 0 ? <p className="muted">{t.empty}</p> : null}
@@ -461,7 +547,23 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
                     ))}
                   </select>
                 </div>
-                <div className={`queue-status ${entry.status}`}>{statusLabel(entry.status)}</div>
+                <div className="queue-status-control">
+                  <span className={`queue-status ${entry.status}`}>{statusLabel(entry.status)}</span>
+                  <label className="queue-status-select">
+                    <span>{t.entryStatusOverride}</span>
+                    <select
+                      aria-label={t.entryStatusOverride}
+                      value={entry.status}
+                      disabled={entryStatusBusyId === entry.id}
+                      onChange={(event) => void updateEntryStatus(entry, event.target.value as ParticipationStatus)}
+                    >
+                      {ENTRY_STATUS_OPTIONS.map((status) => (
+                        <option value={status} key={status}>{statusLabel(status)}</option>
+                      ))}
+                    </select>
+                  </label>
+                  {entryStatusMessages[entry.id] ? <p className="form-message">{entryStatusMessages[entry.id]}</p> : null}
+                </div>
                 <div className="queue-meta">
                   <span>{t.source}: {sourceLabel(entry.source)}</span>
                   <span>{t.checkInUntil}: {formatTime(entry.checkInExpiresAt)}</span>

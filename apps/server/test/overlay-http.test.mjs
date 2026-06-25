@@ -6,6 +6,7 @@ import path from "node:path";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
+const { Store } = await import("../dist/services/store.js");
 
 const previousAuthConfig = {
   localNoAuth: appConfig.security.localNoAuth,
@@ -207,6 +208,77 @@ test("participation invite bulk message API는 전송 가능한 참가자를 한
   assert.equal(dispatched[0].reason, "dashboard.participation_invite_bulk");
 });
 
+test("participation manual control API는 앞 4명을 게임 중으로 전환하고 오버레이를 갱신한다", async () => {
+  const store = new Store();
+  store.setParticipationOpen(true);
+  for (let index = 1; index <= 5; index += 1) {
+    store.addParticipation(store.makeParticipationEntry({
+      twitchUserId: `viewer-${index}`,
+      twitchUserName: `Viewer${index}`,
+      riotGameName: `Viewer${index}`,
+      riotTagLine: "KR1",
+      preferredRole: "mid",
+      status: "waitlisted",
+      source: "chat_command"
+    }));
+  }
+  const dispatched = [];
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    actions: {
+      async dispatchOne(action, ctx, reason) {
+        dispatched.push({ action, ctx, reason });
+      }
+    }
+  });
+
+  const req = createRequest("POST", "/api/participation/manual-control", { action: "mark_in_game" });
+  const res = createResponse();
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.equal(body.ok, true);
+  assert.equal(body.phase, "in_game");
+  assert.deepEqual(store.getParticipationQueue().slice(0, 4).map((entry) => entry.status), ["in_game", "in_game", "in_game", "in_game"]);
+  assert.equal(store.getParticipationQueue()[4].status, "waitlisted");
+  assert.ok(dispatched.some((item) => item.action.type === "overlay.participationStatus" && item.action.phase === "in_game"));
+  assert.ok(dispatched.some((item) => item.action.type === "overlay.participationQueue" && item.action.queue.length === 1 && item.action.queue[0].twitchUserName === "Viewer5"));
+});
+
+test("participation entry-status API는 참가자 상태를 수동 변경한다", async () => {
+  const store = new Store();
+  store.setParticipationOpen(true);
+  const entry = store.addParticipation(store.makeParticipationEntry({
+    twitchUserId: "viewer-1",
+    twitchUserName: "ViewerOne",
+    riotGameName: "ViewerOne",
+    riotTagLine: "KR1",
+    preferredRole: "mid",
+    status: "waitlisted",
+    source: "chat_command"
+  }));
+  const dispatched = [];
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    actions: {
+      async dispatchOne(action, ctx, reason) {
+        dispatched.push({ action, ctx, reason });
+      }
+    }
+  });
+
+  const req = createRequest("POST", "/api/participation/entry-status", { entryId: entry.id, status: "invited" });
+  const res = createResponse();
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(store.getParticipationQueue()[0].status, "invited");
+  assert.ok(dispatched.some((item) => item.reason === "dashboard.participation_entry_status"));
+});
+
 test("POST API는 올바르지 않은 JSON body를 400으로 반환한다", async () => {
   const handler = createHttpHandler({
     store: {},
@@ -311,6 +383,7 @@ test("EventSub reconnect API는 client reconnect를 호출하고 status를 반�
 
 test("follower refresh API는 Twitch follower snapshot을 Store에 반영한다", async () => {
   const calls = [];
+  let twitchCalls = 0;
   let followerState;
   const handler = createHttpHandler({
     store: {
@@ -331,6 +404,7 @@ test("follower refresh API는 Twitch follower snapshot을 Store에 반영한다"
     },
     twitch: {
       async getChannelFollowers(limit) {
+        twitchCalls += 1;
         assert.equal(limit, 50);
         return {
           followers: [{ userId: "100", userLogin: "viewer100", userName: "Viewer100", followedAt: "2026-06-01T00:00:00.000Z" }],
@@ -349,8 +423,50 @@ test("follower refresh API는 Twitch follower snapshot을 Store에 반영한다"
 
   assert.equal(res.statusCode, 200);
   assert.equal(calls.length, 1);
+  assert.equal(twitchCalls, 1);
   assert.equal(calls[0].followers[0].userName, "Viewer100");
   assert.equal(JSON.parse(res.body).summary.activeFollowers, 1);
+
+  const cooldownReq = createRequest("POST", "/api/followers/refresh?limit=50", {});
+  const cooldownRes = createResponse();
+  await handler(cooldownReq, cooldownRes);
+
+  assert.equal(cooldownRes.statusCode, 200);
+  assert.equal(twitchCalls, 1);
+  assert.equal(cooldownRes.headers["X-StreamOps-Cache"], "cooldown");
+  assert.equal(JSON.parse(cooldownRes.body).summary.activeFollowers, 1);
+});
+
+test("participation profile refresh API는 같은 entry의 연속 강제 갱신을 쿨다운한다", async () => {
+  let refreshCalls = 0;
+  const handler = createHttpHandler({
+    store: {
+      getParticipationState() {
+        return { isOpen: true, queue: [], activeQueue: [], summary: { total: 0, active: 0, waiting: 0, selected: 0, checkedIn: 0, noShow: 0, played: 0 } };
+      }
+    },
+    twitchAuth: {},
+    actions: {},
+    async refreshLolProfile(entryId) {
+      assert.equal(entryId, "entry-1");
+      refreshCalls += 1;
+      return true;
+    }
+  });
+
+  const firstReq = createRequest("POST", "/api/participation/profile/refresh", { entryId: "entry-1" });
+  const firstRes = createResponse();
+  await handler(firstReq, firstRes);
+
+  const secondReq = createRequest("POST", "/api/participation/profile/refresh", { entryId: "entry-1" });
+  const secondRes = createResponse();
+  await handler(secondReq, secondRes);
+
+  assert.equal(firstRes.statusCode, 200);
+  assert.equal(secondRes.statusCode, 200);
+  assert.equal(refreshCalls, 1);
+  assert.equal(secondRes.headers["X-StreamOps-Cache"], "cooldown");
+  assert.ok(Number(secondRes.headers["Retry-After"]) > 0);
 });
 
 test("follower refresh API는 scope 부족 오류를 400으로 반환한다", async () => {

@@ -5,7 +5,18 @@ import path from "node:path";
 import { URL } from "node:url";
 import type { Store } from "../services/store.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
-import { normalizeLolRole, parseRiotIdDetailed, toSafeErrorMessage, validateBotAction, type BotAction } from "@streamops/shared";
+import {
+  normalizeLolRole,
+  parseRiotIdDetailed,
+  toSafeErrorMessage,
+  validateBotAction,
+  type BotAction,
+  type LolChampionSkinOption,
+  type LolChampionSummary,
+  type ParticipationPhase,
+  type ParticipationStreamerProfile,
+  type ParticipationStatus
+} from "@streamops/shared";
 import type { TwitchAuthService } from "../services/twitch-auth.js";
 import type { TwitchApiClient } from "../services/twitch-api.js";
 import type { RiotApiClient } from "../services/riot-api.js";
@@ -42,14 +53,44 @@ const MAX_ALERT_GIF_BYTES = 5_000_000;
 const MAX_PARTICIPATION_INVITE_MESSAGE_LENGTH = 360;
 const MAX_PARTICIPATION_INVITE_BULK_TARGETS = 20;
 const MAX_TWITCH_CHAT_MESSAGE_LENGTH = 500;
+const PROFILE_REFRESH_COOLDOWN_MS = 60_000;
+const SKIN_OPTIONS_CACHE_TTL_MS = 10 * 60_000;
+const FOLLOWER_REFRESH_COOLDOWN_MS = 5 * 60_000;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
 const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
+const PARTICIPATION_MANUAL_ACTIONS = new Set(["open", "show_queue", "mark_in_game", "finish_game", "close"]);
+const PARTICIPATION_ENTRY_STATUSES = new Set<ParticipationStatus>([
+  "pending",
+  "verified",
+  "waitlisted",
+  "selected",
+  "checked_in",
+  "invited",
+  "in_game",
+  "played",
+  "skipped",
+  "cancelled",
+  "no_show",
+  "rejected",
+  "blocked"
+]);
 const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
   "X-Permitted-Cross-Domain-Policies": "none",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
 };
+
+type SkinOptionsResponse = {
+  status: "ready" | "missing_streamer" | "riot_not_configured" | "invalid_streamer" | "not_found" | "no_mastery";
+  streamerRiotId: string;
+  champion?: LolChampionSummary;
+  skins: LolChampionSkinOption[];
+  selectedSkinNum: number;
+  message?: string;
+};
+
+type FollowerManagementState = ReturnType<Store["getFollowerManagementState"]>;
 
 class HttpRequestError extends Error {
   constructor(
@@ -360,6 +401,58 @@ function buildParticipationInviteChatMessages(entries: Array<{ twitchUserName: s
   return messages.length > 0 ? { ok: true, messages } : { ok: false, error: "전송 대상이 없습니다." };
 }
 
+async function broadcastParticipationSnapshot(input: {
+  store: Store;
+  actions: ActionDispatcher;
+}, phase: ParticipationPhase, reason: string): Promise<void> {
+  const isOpen = input.store.getStatus().participation === "open";
+  await input.actions.dispatchOne({
+    type: "overlay.participationStatus",
+    isOpen,
+    phase,
+    nextCandidate: input.store.getNextWaitingParticipationOverlayEntry(),
+    streamerProfile: input.store.getParticipationStreamerProfile(),
+    source: reason
+  }, { user: "dashboard", input: "" }, reason);
+  await input.actions.dispatchOne({
+    type: "overlay.participationQueue",
+    isOpen,
+    queue: input.store.getParticipationOverlayQueue(),
+    source: reason
+  }, { user: "dashboard", input: "" }, reason);
+}
+
+async function applyManualParticipationAction(input: {
+  store: Store;
+  actions: ActionDispatcher;
+}, action: string): Promise<ParticipationPhase> {
+  switch (action) {
+    case "open":
+      input.store.setParticipationOpen(true);
+      await broadcastParticipationSnapshot(input, "recruiting", "dashboard.participation_manual.open");
+      return "recruiting";
+    case "show_queue": {
+      const phase = input.store.getStatus().participation === "open" ? "recruiting" : "closed";
+      await broadcastParticipationSnapshot(input, phase, "dashboard.participation_manual.show_queue");
+      return phase;
+    }
+    case "mark_in_game":
+      input.store.markVisibleParticipationQueueInGame();
+      await broadcastParticipationSnapshot(input, "in_game", "dashboard.participation_manual.mark_in_game");
+      return "in_game";
+    case "finish_game":
+      input.store.markInGameParticipantsPlayed();
+      await broadcastParticipationSnapshot(input, "game_ended", "dashboard.participation_manual.finish_game");
+      return "game_ended";
+    case "close":
+      input.store.setParticipationOpen(false);
+      await broadcastParticipationSnapshot(input, "closed", "dashboard.participation_manual.close");
+      return "closed";
+    default:
+      throw new HttpRequestError(400, { error: "허용되지 않은 시참 수동 조작입니다." });
+  }
+}
+
 function selectedChampionSkinNum(champion: { championId: number; championKey?: string }, overrides: Record<string, number>): number {
   const keys = [champion.championKey, champion.championKey?.toLowerCase(), String(champion.championId)].filter((key): key is string => Boolean(key));
   for (const key of keys) {
@@ -367,6 +460,14 @@ function selectedChampionSkinNum(champion: { championId: number; championKey?: s
     if (typeof skinNum === "number" && Number.isInteger(skinNum) && skinNum >= 0 && skinNum <= 1000) return skinNum;
   }
   return 0;
+}
+
+function sortedJson(value: Record<string, unknown>): string {
+  return JSON.stringify(Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))));
+}
+
+function retryAfterSeconds(until: number): string {
+  return String(Math.max(1, Math.ceil((until - Date.now()) / 1000)));
 }
 
 function staticEtag(size: number, mtimeMs: number): string {
@@ -534,6 +635,17 @@ export function createHttpHandler(input: {
   sessions?: DashboardSessionStore;
 }) {
   const sessions = input.sessions ?? new DashboardSessionStore();
+  let followerRefreshInFlight: Promise<FollowerManagementState> | undefined;
+  let followerRefreshAvailableAt = 0;
+  let lastFollowerRefreshState: FollowerManagementState | undefined;
+  let streamerProfileRefreshInFlight: Promise<ParticipationStreamerProfile | undefined> | undefined;
+  let streamerProfileRefreshAvailableAt = 0;
+  let streamerProfileRefreshKey = "";
+  let lastStreamerProfileRefresh: ParticipationStreamerProfile | undefined;
+  const entryProfileRefreshInFlight = new Map<string, Promise<boolean>>();
+  const entryProfileRefreshAvailableAt = new Map<string, number>();
+  const skinOptionsCache = new Map<string, { expiresAt: number; response: SkinOptionsResponse }>();
+  const skinOptionsInFlight = new Map<string, Promise<SkinOptionsResponse>>();
 
   async function getTwitchStatus() {
     const status = await input.twitchAuth.getStatus();
@@ -542,6 +654,88 @@ export function createHttpHandler(input: {
       eventSub: input.store.getTwitchEventSubStatus(),
       chat: input.store.getTwitchChatStatus()
     };
+  }
+
+  function currentStreamerRefreshKey(): string {
+    return loadGameMonitorConfig().streamerRiotId.trim().toLocaleLowerCase();
+  }
+
+  async function refreshFollowerSnapshot(limit: number): Promise<FollowerManagementState> {
+    if (!input.twitch) throw new Error("Twitch API client를 사용할 수 없습니다.");
+    const snapshot = await input.twitch.getChannelFollowers(Number.isFinite(limit) ? limit : 5000);
+    const state = input.store.reconcileFollowerSnapshot({
+      followers: snapshot.followers,
+      total: snapshot.total,
+      truncated: snapshot.truncated
+    });
+    lastFollowerRefreshState = state;
+    followerRefreshAvailableAt = Date.now() + FOLLOWER_REFRESH_COOLDOWN_MS;
+    return state;
+  }
+
+  async function loadFreshSkinOptions(): Promise<SkinOptionsResponse> {
+    const settings = loadLolParticipationProfileSettings();
+    const monitor = loadGameMonitorConfig();
+    const streamerRiotId = monitor.streamerRiotId.trim();
+    if (!streamerRiotId) {
+      return { status: "missing_streamer", streamerRiotId, skins: [], selectedSkinNum: 0 };
+    }
+    if (!input.riot?.isConfigured()) {
+      return { status: "riot_not_configured", streamerRiotId, skins: [], selectedSkinNum: 0 };
+    }
+    if (!input.dataDragon) {
+      throw new Error("Data Dragon service를 사용할 수 없습니다.");
+    }
+    const parsed = parseRiotIdDetailed(streamerRiotId);
+    if (!parsed.ok) {
+      return { status: "invalid_streamer", streamerRiotId, skins: [], selectedSkinNum: 0, message: parsed.message };
+    }
+    const account = await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine);
+    if (!account?.puuid) {
+      return { status: "not_found", streamerRiotId, skins: [], selectedSkinNum: 0 };
+    }
+    const mastery = await input.riot.getChampionMasteryTopByPuuid(account.puuid, 1);
+    const topChampion = mastery[0];
+    if (!topChampion?.championId) {
+      return { status: "no_mastery", streamerRiotId, skins: [], selectedSkinNum: 0 };
+    }
+    const skinOptions = await input.dataDragon.getChampionSkinOptions(topChampion.championId);
+    return {
+      status: "ready",
+      streamerRiotId,
+      champion: {
+        ...skinOptions.champion,
+        masteryLevel: topChampion.championLevel,
+        masteryPoints: topChampion.championPoints
+      },
+      skins: skinOptions.skins,
+      selectedSkinNum: selectedChampionSkinNum(skinOptions.champion, settings.championSkinOverrides)
+    };
+  }
+
+  async function getSkinOptionsWithCache(): Promise<{ response: SkinOptionsResponse; headers: Record<string, string> }> {
+    const settings = loadLolParticipationProfileSettings();
+    const streamerRiotId = loadGameMonitorConfig().streamerRiotId.trim();
+    const cacheKey = `${streamerRiotId.toLocaleLowerCase()}:${sortedJson(settings.championSkinOverrides)}`;
+    const cached = skinOptionsCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return { response: cached.response, headers: { "X-StreamOps-Cache": "hit" } };
+    }
+    const running = skinOptionsInFlight.get(cacheKey);
+    if (running) {
+      const response = await running;
+      return { response, headers: { "X-StreamOps-Cache": "in-flight" } };
+    }
+    const request = loadFreshSkinOptions()
+      .then((response) => {
+        skinOptionsCache.set(cacheKey, { response, expiresAt: Date.now() + SKIN_OPTIONS_CACHE_TTL_MS });
+        return response;
+      })
+      .finally(() => {
+        skinOptionsInFlight.delete(cacheKey);
+      });
+    skinOptionsInFlight.set(cacheKey, request);
+    return { response: await request, headers: { "X-StreamOps-Cache": "miss" } };
   }
 
   return async (req: IncomingMessage, res: ServerResponse) => {
@@ -699,43 +893,12 @@ export function createHttpHandler(input: {
       if (req.method === "GET" && url.pathname === "/api/participation/streamer-profile") return sendJson(req, res, 200, { profile: input.store.getParticipationStreamerProfile() });
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings") return sendJson(req, res, 200, loadLolParticipationProfileSettings());
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings/skin-options") {
-        const settings = loadLolParticipationProfileSettings();
-        const monitor = loadGameMonitorConfig();
-        const streamerRiotId = monitor.streamerRiotId.trim();
-        if (!streamerRiotId) {
-          return sendJson(req, res, 200, { status: "missing_streamer", streamerRiotId, skins: [], selectedSkinNum: 0 });
+        try {
+          const { response, headers } = await getSkinOptionsWithCache();
+          return sendJson(req, res, 200, response, headers);
+        } catch (error) {
+          return sendJson(req, res, 400, { error: toSafeErrorMessage(error) });
         }
-        if (!input.riot?.isConfigured()) {
-          return sendJson(req, res, 200, { status: "riot_not_configured", streamerRiotId, skins: [], selectedSkinNum: 0 });
-        }
-        if (!input.dataDragon) {
-          return sendJson(req, res, 503, { error: "Data Dragon service를 사용할 수 없습니다." });
-        }
-        const parsed = parseRiotIdDetailed(streamerRiotId);
-        if (!parsed.ok) {
-          return sendJson(req, res, 200, { status: "invalid_streamer", streamerRiotId, skins: [], selectedSkinNum: 0, message: parsed.message });
-        }
-        const account = await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine);
-        if (!account?.puuid) {
-          return sendJson(req, res, 200, { status: "not_found", streamerRiotId, skins: [], selectedSkinNum: 0 });
-        }
-        const mastery = await input.riot.getChampionMasteryTopByPuuid(account.puuid, 1);
-        const topChampion = mastery[0];
-        if (!topChampion?.championId) {
-          return sendJson(req, res, 200, { status: "no_mastery", streamerRiotId, skins: [], selectedSkinNum: 0 });
-        }
-        const skinOptions = await input.dataDragon.getChampionSkinOptions(topChampion.championId);
-        return sendJson(req, res, 200, {
-          status: "ready",
-          streamerRiotId,
-          champion: {
-            ...skinOptions.champion,
-            masteryLevel: topChampion.championLevel,
-            masteryPoints: topChampion.championPoints
-          },
-          skins: skinOptions.skins,
-          selectedSkinNum: selectedChampionSkinNum(skinOptions.champion, settings.championSkinOverrides)
-        });
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/game-monitor") {
@@ -762,6 +925,20 @@ export function createHttpHandler(input: {
         return sendJson(req, res, 200, saved);
       }
 
+      if (req.method === "POST" && url.pathname === "/api/participation/manual-control") {
+        const body = await readJsonBody<{ action?: unknown }>(req);
+        if (typeof body.action !== "string" || !PARTICIPATION_MANUAL_ACTIONS.has(body.action)) {
+          return sendJson(req, res, 400, { error: "허용되지 않은 시참 수동 조작입니다." });
+        }
+        const phase = await applyManualParticipationAction(input, body.action);
+        return sendJson(req, res, 200, {
+          ok: true,
+          action: body.action,
+          phase,
+          state: input.store.getParticipationState()
+        });
+      }
+
       if (req.method === "POST" && url.pathname === "/api/participation/profile-settings") {
         const body = await readJsonBody<Partial<LolParticipationProfileSettings>>(req);
         if (body.championSkinOverrides !== undefined && (typeof body.championSkinOverrides !== "object" || body.championSkinOverrides === null || Array.isArray(body.championSkinOverrides))) {
@@ -774,16 +951,63 @@ export function createHttpHandler(input: {
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-profile/refresh") {
-        const profile = await refreshActiveStreamerProfile(true);
+        const key = currentStreamerRefreshKey();
+        const cachedProfile = key && streamerProfileRefreshKey === key
+          ? lastStreamerProfileRefresh ?? input.store.getParticipationStreamerProfile()
+          : undefined;
+        if (streamerProfileRefreshInFlight && streamerProfileRefreshKey === key) {
+          const profile = await streamerProfileRefreshInFlight;
+          if (!profile) return sendJson(req, res, 404, { error: "방송자 프로필 갱신을 사용할 수 없습니다. Riot API key와 방송자 Riot ID를 확인하세요." });
+          return sendJson(req, res, 200, { profile }, { "X-StreamOps-Cache": "in-flight" });
+        }
+        if (cachedProfile && Date.now() < streamerProfileRefreshAvailableAt) {
+          return sendJson(req, res, 200, { profile: cachedProfile }, {
+            "X-StreamOps-Cache": "cooldown",
+            "Retry-After": retryAfterSeconds(streamerProfileRefreshAvailableAt)
+          });
+        }
+        streamerProfileRefreshKey = key;
+        const refreshRequest = refreshActiveStreamerProfile(true)
+          .then((profile) => {
+            if (profile) {
+              lastStreamerProfileRefresh = profile;
+              streamerProfileRefreshAvailableAt = Date.now() + PROFILE_REFRESH_COOLDOWN_MS;
+            }
+            return profile;
+          })
+          .finally(() => {
+            if (streamerProfileRefreshInFlight === refreshRequest) streamerProfileRefreshInFlight = undefined;
+          });
+        streamerProfileRefreshInFlight = refreshRequest;
+        const profile = await streamerProfileRefreshInFlight;
         if (!profile) return sendJson(req, res, 404, { error: "방송자 프로필 갱신을 사용할 수 없습니다. Riot API key와 방송자 Riot ID를 확인하세요." });
         return sendJson(req, res, 200, { profile });
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/profile/refresh") {
         const body = await readJsonBody<{ entryId?: string }>(req);
-        if (!body.entryId) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
-        const refreshed = await input.refreshLolProfile?.(body.entryId);
+        if (typeof body.entryId !== "string" || !body.entryId.trim()) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
+        const entryId = body.entryId.trim();
+        const currentRefresh = entryProfileRefreshInFlight.get(entryId);
+        if (currentRefresh) {
+          const refreshed = await currentRefresh;
+          if (!refreshed) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없거나 refresh를 사용할 수 없습니다." });
+          return sendJson(req, res, 200, input.store.getParticipationState(), { "X-StreamOps-Cache": "in-flight" });
+        }
+        const availableAt = entryProfileRefreshAvailableAt.get(entryId) ?? 0;
+        if (Date.now() < availableAt) {
+          return sendJson(req, res, 200, input.store.getParticipationState(), {
+            "X-StreamOps-Cache": "cooldown",
+            "Retry-After": retryAfterSeconds(availableAt)
+          });
+        }
+        const refresh = input.refreshLolProfile?.(entryId) ?? Promise.resolve(false);
+        entryProfileRefreshInFlight.set(entryId, refresh);
+        const refreshed = await refresh.finally(() => {
+          entryProfileRefreshInFlight.delete(entryId);
+        });
         if (!refreshed) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없거나 refresh를 사용할 수 없습니다." });
+        entryProfileRefreshAvailableAt.set(entryId, Date.now() + PROFILE_REFRESH_COOLDOWN_MS);
         return sendJson(req, res, 200, input.store.getParticipationState());
       }
 
@@ -836,18 +1060,31 @@ export function createHttpHandler(input: {
       if (req.method === "POST" && url.pathname === "/api/followers/refresh") {
         if (!input.twitch) return sendJson(req, res, 503, { error: "Twitch API client를 사용할 수 없습니다." });
         const limit = Number(url.searchParams.get("limit") ?? "5000");
-        let snapshot: Awaited<ReturnType<TwitchApiClient["getChannelFollowers"]>>;
+        if (followerRefreshInFlight) {
+          if (lastFollowerRefreshState) {
+            return sendJson(req, res, 200, lastFollowerRefreshState, { "X-StreamOps-Cache": "in-flight" });
+          }
+          try {
+            return sendJson(req, res, 200, await followerRefreshInFlight, { "X-StreamOps-Cache": "in-flight" });
+          } catch (error) {
+            return sendJson(req, res, 400, { error: toSafeErrorMessage(error) });
+          }
+        }
+        if (lastFollowerRefreshState && Date.now() < followerRefreshAvailableAt) {
+          return sendJson(req, res, 200, lastFollowerRefreshState, {
+            "X-StreamOps-Cache": "cooldown",
+            "Retry-After": retryAfterSeconds(followerRefreshAvailableAt)
+          });
+        }
+        followerRefreshInFlight = refreshFollowerSnapshot(limit)
+          .finally(() => {
+            followerRefreshInFlight = undefined;
+          });
         try {
-          snapshot = await input.twitch.getChannelFollowers(Number.isFinite(limit) ? limit : 5000);
+          return sendJson(req, res, 200, await followerRefreshInFlight);
         } catch (error) {
           return sendJson(req, res, 400, { error: toSafeErrorMessage(error) });
         }
-        const state = input.store.reconcileFollowerSnapshot({
-          followers: snapshot.followers,
-          total: snapshot.total,
-          truncated: snapshot.truncated
-        });
-        return sendJson(req, res, 200, state);
       }
 
       if (req.method === "POST" && url.pathname === "/api/riot/api-key") {
@@ -878,6 +1115,23 @@ export function createHttpHandler(input: {
           isOpen: input.store.getStatus().participation === "open",
           queue: input.store.getParticipationOverlayQueue()
         }, {}, "dashboard.role_override");
+        return sendJson(req, res, 200, input.store.getParticipationState());
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/participation/entry-status") {
+        const body = await readJsonBody<{ entryId?: unknown; status?: unknown }>(req);
+        if (typeof body.entryId !== "string" || !body.entryId.trim()) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
+        if (typeof body.status !== "string" || !PARTICIPATION_ENTRY_STATUSES.has(body.status as ParticipationStatus)) {
+          return sendJson(req, res, 400, { error: "허용되지 않은 참가자 상태입니다." });
+        }
+        const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus);
+        if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
+        await input.actions.dispatchOne({
+          type: "overlay.participationQueue",
+          isOpen: input.store.getStatus().participation === "open",
+          queue: input.store.getParticipationOverlayQueue(),
+          source: "dashboard.participation_entry_status"
+        }, { user: "dashboard", input: "" }, "dashboard.participation_entry_status");
         return sendJson(req, res, 200, input.store.getParticipationState());
       }
 

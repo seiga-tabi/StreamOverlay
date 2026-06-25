@@ -72,3 +72,46 @@ test("TwitchApiClient는 followers scope가 없으면 조회를 거부한다", a
     /moderator:read:followers/
   );
 });
+
+test("TwitchApiClient는 429 이후 Ratelimit-Reset까지 다음 요청을 지연한다", async () => {
+  const sleeps = [];
+  const calls = [];
+  let now = 1000;
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    if (calls.length === 1) {
+      return new Response(JSON.stringify({ error: "rate limited" }), {
+        status: 429,
+        headers: {
+          "content-type": "application/json",
+          "Ratelimit-Reset": "3",
+          "Ratelimit-Remaining": "0"
+        }
+      });
+    }
+    return jsonResponse({
+      total: 1,
+      data: [{ user_id: "1", user_login: "alpha", user_name: "Alpha", followed_at: "2026-01-01T00:00:00Z" }],
+      pagination: {}
+    });
+  };
+
+  const client = new TwitchApiClient(createAuth(), {
+    now: () => now,
+    sleep: async (ms) => {
+      sleeps.push(ms);
+    }
+  });
+
+  await assert.rejects(
+    () => client.getChannelFollowers(1),
+    /429/
+  );
+
+  now = 1500;
+  const result = await client.getChannelFollowers(1);
+
+  assert.deepEqual(sleeps, [1500]);
+  assert.equal(result.followers[0]?.userName, "Alpha");
+  assert.equal(calls.length, 2);
+});

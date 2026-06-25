@@ -3232,19 +3232,6 @@ body,
   content: "";
 }
 
-.streamer-queue-row:not(.in-game-row) .streamer-queue-index::after {
-  position: absolute;
-  top: -27px;
-  left: 50%;
-  width: 28px;
-  height: 16px;
-  background:
-    linear-gradient(180deg, var(--streamer-gold-bright), var(--streamer-gold) 72%, var(--streamer-gold-dim));
-  clip-path: polygon(0 100%, 18% 34%, 37% 64%, 50% 0, 63% 64%, 82% 34%, 100% 100%);
-  content: "";
-  transform: translateX(-50%);
-}
-
 .streamer-queue-divider {
   position: relative;
   z-index: 3;
@@ -3339,35 +3326,50 @@ body,
 @media (max-width: 900px), (max-height: 760px) {
   .queue-card.compact.streamer-queue,
   .mode-all .queue-card.compact.streamer-queue {
-    top: 24px;
-    gap: 16px;
-    width: calc(100vw - 32px);
-    max-height: calc(100vh - 48px);
+    top: 12px;
+    gap: 10px;
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
   }
 
   .queue-broadcaster-card {
-    grid-template-columns: 132px minmax(0, 1fr);
-    min-height: 104px;
-    padding: 0 20px 0 18px;
+    grid-template-columns: 128px minmax(0, 1fr);
+    min-height: 116px;
+    padding: 0 18px;
+  }
+
+  .queue-broadcaster-card::before {
+    background:
+      linear-gradient(90deg, rgba(2, 5, 7, .94) 0%, rgba(5, 7, 7, .76) 30%, rgba(19, 17, 12, .2) 64%, rgba(2, 3, 4, .78) 100%),
+      linear-gradient(180deg, rgba(255, 241, 191, .1), transparent 44%, rgba(0, 0, 0, .5)),
+      var(--streamer-queue-art, linear-gradient(120deg, #101814 0%, #4d3c2a 54%, #100f0f 100%));
+    background-position: 62% 18%;
+    background-size: cover;
+    filter: saturate(.96) contrast(1.12) brightness(.86);
   }
 
   .queue-broadcaster-crest {
-    width: 108px;
-    height: 62px;
+    width: 106px;
+    height: 70px;
   }
 
   .queue-broadcaster-crest::after {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .queue-broadcaster-copy {
+    gap: 7px;
+    padding-right: 16px;
   }
 
   .queue-broadcaster-title {
-    font-size: 36px;
+    font-size: 42px;
   }
 
   .queue-broadcaster-kicker,
   .queue-broadcaster-subline {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .queue-broadcaster-status {
@@ -3375,7 +3377,7 @@ body,
   }
 
   .streamer-queue-slots {
-    gap: 14px;
+    gap: 8px;
   }
 
   .streamer-queue-slots.in-game-only {
@@ -3383,56 +3385,74 @@ body,
   }
 
   .streamer-queue-row {
-    grid-template-columns: 124px 1px minmax(0, 1fr);
-    min-height: 86px;
-    padding: 0 18px 0 22px;
+    grid-template-columns: 132px 1px minmax(0, 1fr);
+    min-height: 92px;
+    padding: 0 18px;
   }
 
   .streamer-queue-row.in-game-row {
-    min-height: 96px;
+    min-height: 104px;
+  }
+
+  .streamer-queue-row::before {
+    background:
+      linear-gradient(90deg, rgba(4, 7, 10, .95) 0%, rgba(6, 8, 9, .76) 30%, rgba(24, 22, 17, .2) 68%, rgba(3, 4, 5, .72) 100%),
+      repeating-linear-gradient(135deg, transparent 0 16px, rgba(255, 255, 255, .025) 16px 17px);
+  }
+
+  .streamer-queue-row-art {
+    background-position: 62% 20%;
+    opacity: .9;
+    filter: saturate(.98) contrast(1.12) brightness(.82);
   }
 
   .streamer-queue-row::after {
-    inset: 8px 14px 8px 50px;
+    inset: 8px 14px 8px 46px;
   }
 
   .streamer-queue-index {
-    width: 96px;
-    height: 58px;
-    font-size: 38px;
+    width: 102px;
+    height: 62px;
+    font-size: 43px;
   }
 
   .streamer-queue-index::before {
-    inset: -12px -22px -12px -18px;
+    inset: -12px -20px -12px -16px;
   }
 
   .streamer-queue-divider {
-    height: 52px;
+    height: 58px;
   }
 
   .streamer-queue-copy {
     gap: 6px;
-    padding: 0 12px 0 20px;
+    padding: 0 12px 0 22px;
   }
 
   .streamer-queue-name {
-    font-size: 27px;
+    font-size: 33px;
   }
 
   .streamer-queue-row.in-game-row .streamer-queue-name {
-    font-size: 31px;
+    font-size: 36px;
   }
 
   .streamer-queue-meta {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .streamer-queue-row.in-game-row .streamer-queue-meta {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .streamer-queue-state {
     display: none;
+  }
+
+  .streamer-queue-more {
+    margin-top: -2px;
+    padding: 8px 18px;
+    font-size: 15px;
   }
 }
 

@@ -1231,6 +1231,18 @@ code {
   gap: 12px;
 }
 
+.participation-manual-card {
+  display: grid;
+  gap: 12px;
+}
+
+.participation-manual-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
 .participation-monitor-form {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(132px, auto)) auto;
@@ -1542,6 +1554,38 @@ code {
   color: var(--muted);
 }
 
+.queue-status-control {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.queue-status-control .queue-status {
+  width: fit-content;
+}
+
+.queue-status-select {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.queue-status-select select {
+  min-width: 0;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, .82);
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 750;
+}
+
 .queue-status.good,
 .queue-status.verified,
 .queue-status.checked_in,
@@ -1713,7 +1757,8 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .participation-monitor-form .compact-button {
+  .participation-monitor-form .compact-button,
+  .participation-manual-actions .compact-button {
     width: 100%;
   }
 
@@ -1730,6 +1775,7 @@ code {
     grid-column: 1 / -1;
   }
 
+  .queue-status-control,
   .queue-meta,
   .queue-invite {
     grid-column: 2 / -1;

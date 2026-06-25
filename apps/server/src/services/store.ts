@@ -813,7 +813,17 @@ export class Store {
     if (!entry) return undefined;
     entry.status = status;
     entry.updatedAt = nowIso();
-    if (status === "played") entry.playedAt = nowIso();
+    if (status === "selected") {
+      entry.selectedAt = entry.selectedAt ?? nowIso();
+    } else {
+      entry.selectedAt = undefined;
+      entry.checkInExpiresAt = undefined;
+    }
+    if (status === "played") {
+      entry.playedAt = nowIso();
+    } else {
+      entry.playedAt = undefined;
+    }
     return entry;
   }
 

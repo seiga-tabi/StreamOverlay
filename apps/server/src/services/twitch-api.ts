@@ -42,14 +42,45 @@ type CachedTwitchUserProfile = {
   expiresAt: number;
 };
 
+type TwitchApiClientOptions = {
+  now?: () => number;
+  sleep?: (ms: number) => Promise<void>;
+};
+
 const USER_PROFILE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const USER_PROFILE_ERROR_CACHE_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000;
+
+function sleepMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function safeHost(url: string | URL): string {
+  try {
+    return new URL(String(url)).host;
+  } catch {
+    return "api.twitch.tv";
+  }
+}
+
+function headerNumber(response: Response, name: string): number | undefined {
+  const raw = response.headers.get(name);
+  if (!raw) return undefined;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : undefined;
+}
 
 export class TwitchApiClient {
   private readonly userProfileCache = new Map<string, CachedTwitchUserProfile>();
   private readonly userProfileRequests = new Map<string, Promise<TwitchUserProfile | undefined>>();
+  private readonly rateLimitPauseUntilByHost = new Map<string, number>();
+  private readonly now: () => number;
+  private readonly sleep: (ms: number) => Promise<void>;
 
-  constructor(private readonly auth?: TwitchAuthService) {}
+  constructor(private readonly auth?: TwitchAuthService, options: TwitchApiClientOptions = {}) {
+    this.now = options.now ?? (() => Date.now());
+    this.sleep = options.sleep ?? sleepMs;
+  }
 
   isConfigured(): boolean {
     return Boolean(appConfig.twitch.clientId && appConfig.twitch.userAccessToken && appConfig.twitch.broadcasterId);
@@ -228,6 +259,8 @@ export class TwitchApiClient {
   private async request(url: string | URL, init: RequestInit): Promise<Response | undefined> {
     const authContext = await this.auth?.getAccessContext({ refreshIfExpired: true, allowLegacy: true });
     if (!authContext) return undefined;
+    const host = safeHost(url);
+    await this.waitForRateLimit(host);
 
     const response = await fetch(url, {
       ...init,
@@ -238,13 +271,15 @@ export class TwitchApiClient {
         ...init.headers
       }
     });
+    this.observeRateLimit(host, response);
 
     if (response.status !== 401 || authContext.source !== "oauth" || !this.auth) return response;
     const refreshed = await this.auth.refreshAfterUnauthorized();
     if (!refreshed) return response;
     const retryContext = await this.auth.getAccessContext({ refreshIfExpired: true, allowLegacy: false });
     if (!retryContext) return response;
-    return fetch(url, {
+    await this.waitForRateLimit(host);
+    const retryResponse = await fetch(url, {
       ...init,
       headers: {
         "Client-Id": retryContext.clientId,
@@ -253,5 +288,33 @@ export class TwitchApiClient {
         ...init.headers
       }
     });
+    this.observeRateLimit(host, retryResponse);
+    return retryResponse;
+  }
+
+  private async waitForRateLimit(host: string): Promise<void> {
+    const pauseUntil = this.rateLimitPauseUntilByHost.get(host) ?? 0;
+    const waitMs = pauseUntil - this.now();
+    if (waitMs > 0) await this.sleep(waitMs);
+  }
+
+  private observeRateLimit(host: string, response: Response): void {
+    const resetSeconds = headerNumber(response, "ratelimit-reset");
+    const resetAt = resetSeconds ? resetSeconds * 1000 : undefined;
+    const retryAfterSeconds = headerNumber(response, "retry-after");
+    const retryAfterUntil = retryAfterSeconds ? this.now() + Math.max(0, retryAfterSeconds * 1000) : undefined;
+    const remaining = headerNumber(response, "ratelimit-remaining");
+
+    let pauseUntil: number | undefined;
+    if (response.status === 429) {
+      pauseUntil = resetAt && resetAt > this.now()
+        ? resetAt
+        : retryAfterUntil ?? this.now() + DEFAULT_RATE_LIMIT_BACKOFF_MS;
+    } else if (remaining !== undefined && remaining <= 0 && resetAt && resetAt > this.now()) {
+      pauseUntil = resetAt;
+    }
+
+    if (!pauseUntil) return;
+    this.rateLimitPauseUntilByHost.set(host, Math.max(this.rateLimitPauseUntilByHost.get(host) ?? 0, pauseUntil));
   }
 }
