@@ -49,7 +49,8 @@ test("공개 Twitch 로그인 URL은 팔로우 조회 scope만 요청한다", ()
   assert.equal(url.searchParams.get("client_id"), baseConfig.clientId);
   assert.equal(url.searchParams.get("redirect_uri"), "http://localhost:3000/api/public/twitch/auth/callback");
   assert.equal(url.searchParams.get("scope"), "user:read:follows");
-  assert.ok(url.searchParams.get("state"));
+  assert.match(url.searchParams.get("state") ?? "", /^public:/);
+  assert.equal(service.isPublicState(url.searchParams.get("state")), true);
 });
 
 test("OAuth state는 일회성으로 검증되고 만료된 state는 거부된다", () => {

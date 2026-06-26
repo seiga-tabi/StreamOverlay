@@ -1886,6 +1886,23 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
+  async function handlePublicTwitchAuthCallback(res: ServerResponse, url: URL): Promise<void> {
+    if (!input.publicTwitchAuth) return sendSafeOAuthHtml(res, 503, "Twitch 연결 실패", "Twitch 공개 로그인을 사용할 수 없습니다.");
+    const error = url.searchParams.get("error");
+    if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch 권한 승인이 완료되지 않았습니다. 전적 페이지에서 다시 시도해주세요.");
+    if (!input.publicTwitchAuth.verifyState(url.searchParams.get("state"))) {
+      return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth state 검증에 실패했습니다. 전적 페이지에서 다시 연결을 시작해주세요.");
+    }
+    const code = url.searchParams.get("code");
+    if (!code) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
+    try {
+      const session = await input.publicTwitchAuth.connectWithCode(code);
+      return sendRedirect(res, `${appConfig.dashboardBaseUrl}/lol?viewer_twitch=connected`, { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
+    } catch {
+      return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch token 교환 또는 사용자 정보 조회에 실패했습니다. 서버 설정을 확인한 뒤 다시 시도해주세요.");
+    }
+  }
+
   async function buildPublicLolSuggestions(rawQuery: string): Promise<PublicLolSuggestion[]> {
     const query = rawQuery.trim().normalize("NFKC").replace(/＃/g, "#");
     if (query.length < 2) return [];
@@ -2519,20 +2536,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendRedirect(res, input.publicTwitchAuth.createAuthorizationUrl(forceVerify));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/auth/callback") {
-        if (!input.publicTwitchAuth) return sendSafeOAuthHtml(res, 503, "Twitch 연결 실패", "Twitch 공개 로그인을 사용할 수 없습니다.");
-        const error = url.searchParams.get("error");
-        if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch 권한 승인이 완료되지 않았습니다. 전적 페이지에서 다시 시도해주세요.");
-        if (!input.publicTwitchAuth.verifyState(url.searchParams.get("state"))) {
-          return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth state 검증에 실패했습니다. 전적 페이지에서 다시 연결을 시작해주세요.");
-        }
-        const code = url.searchParams.get("code");
-        if (!code) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
-        try {
-          const session = await input.publicTwitchAuth.connectWithCode(code);
-          return sendRedirect(res, `${appConfig.dashboardBaseUrl}/lol?viewer_twitch=connected`, { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
-        } catch {
-          return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch token 교환 또는 사용자 정보 조회에 실패했습니다. 서버 설정을 확인한 뒤 다시 시도해주세요.");
-        }
+        return handlePublicTwitchAuthCallback(res, url);
       }
       if (req.method === "POST" && url.pathname === "/api/public/twitch/logout") {
         input.publicTwitchAuth?.disconnect(publicTwitchViewerSessionIdFromRequest(req));
@@ -2567,6 +2571,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendRedirect(res, input.twitchAuth.createAuthorizationUrl(forceVerify));
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/callback") {
+        if (input.publicTwitchAuth?.isPublicState(url.searchParams.get("state"))) {
+          return handlePublicTwitchAuthCallback(res, url);
+        }
         const error = url.searchParams.get("error");
         if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch 권한 승인이 완료되지 않았습니다. 대시보드에서 다시 시도해주세요.");
         if (!input.twitchAuth.verifyState(url.searchParams.get("state"))) {

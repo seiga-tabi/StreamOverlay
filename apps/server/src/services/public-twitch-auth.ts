@@ -63,6 +63,7 @@ export const PUBLIC_TWITCH_VIEWER_SESSION_COOKIE = "loltrace_twitch_viewer_sessi
 
 const TOKEN_REFRESH_SKEW_MS = 60 * 1000;
 const DEFAULT_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+const PUBLIC_TWITCH_OAUTH_STATE_PREFIX = "public:";
 
 function parseCookies(req: IncomingMessage): Record<string, string> {
   const header = req.headers.cookie;
@@ -177,7 +178,7 @@ export class PublicTwitchAuthService {
     if (!this.config.clientId || !this.config.redirectUri) {
       throw new Error("Twitch 공개 로그인 client ID 또는 redirect URI가 설정되지 않았습니다.");
     }
-    const state = this.stateStore.create();
+    const state = `${PUBLIC_TWITCH_OAUTH_STATE_PREFIX}${this.stateStore.create()}`;
     const url = new URL("https://id.twitch.tv/oauth2/authorize");
     url.searchParams.set("response_type", "code");
     url.searchParams.set("client_id", this.config.clientId);
@@ -188,8 +189,13 @@ export class PublicTwitchAuthService {
     return url.toString();
   }
 
+  isPublicState(state: string | null | undefined): boolean {
+    return Boolean(state?.startsWith(PUBLIC_TWITCH_OAUTH_STATE_PREFIX));
+  }
+
   verifyState(state: string | null | undefined): boolean {
-    return this.stateStore.consume(state);
+    if (!this.isPublicState(state)) return false;
+    return this.stateStore.consume(state?.slice(PUBLIC_TWITCH_OAUTH_STATE_PREFIX.length));
   }
 
   async connectWithCode(code: string): Promise<PublicTwitchViewerSession> {

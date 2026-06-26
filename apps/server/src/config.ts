@@ -93,7 +93,7 @@ export const appConfig = {
     clientId: env("TWITCH_CLIENT_ID"),
     clientSecret: env("TWITCH_CLIENT_SECRET"),
     redirectUri: env("TWITCH_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/twitch/auth/callback`),
-    publicRedirectUri: env("TWITCH_PUBLIC_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/public/twitch/auth/callback`),
+    publicRedirectUri: env("TWITCH_PUBLIC_REDIRECT_URI", env("TWITCH_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/twitch/auth/callback`)),
     extraScopes: listEnv("TWITCH_EXTRA_SCOPES"),
     tokenStorePath: env("TWITCH_TOKEN_STORE_PATH", path.resolve(projectRoot, ".streamops", "twitch-token.json")),
     userAccessToken: env("TWITCH_USER_ACCESS_TOKEN"),
