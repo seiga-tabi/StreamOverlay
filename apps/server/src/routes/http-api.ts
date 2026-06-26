@@ -119,6 +119,14 @@ type PublicLolMatchBadge = {
   rank?: number;
 };
 
+type PublicLocale = "ko" | "ja";
+
+type PublicLocalePreference = {
+  locale: PublicLocale;
+  source: "country" | "accept-language" | "fallback";
+  country?: string;
+};
+
 type PublicLolMatchParticipant = {
   riotId?: string;
   isTarget: boolean;
@@ -618,6 +626,67 @@ type MultipartPart = {
 
 function headerValue(headers: Record<string, string>, name: string): string | undefined {
   return headers[name.toLowerCase()];
+}
+
+function requestHeaderValue(req: IncomingMessage, name: string): string | undefined {
+  const value = req.headers[name.toLowerCase()];
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function localeFromCountryCode(country: string | undefined): PublicLocale | undefined {
+  const code = country?.trim().toUpperCase();
+  if (code === "JP") return "ja";
+  if (code === "KR" || code === "KP") return "ko";
+  return undefined;
+}
+
+function countryCodeFromRequest(req: IncomingMessage): string | undefined {
+  const headerNames = [
+    "cf-ipcountry",
+    "x-vercel-ip-country",
+    "cloudfront-viewer-country",
+    "x-country-code",
+    "x-appengine-country",
+    "x-forwarded-country"
+  ];
+  for (const name of headerNames) {
+    const code = requestHeaderValue(req, name)?.trim().toUpperCase();
+    if (code && /^[A-Z]{2}$/.test(code) && code !== "XX") return code;
+  }
+  return undefined;
+}
+
+function localeFromAcceptLanguage(req: IncomingMessage): PublicLocale | undefined {
+  const acceptLanguage = requestHeaderValue(req, "accept-language");
+  if (!acceptLanguage) return undefined;
+  const candidates = acceptLanguage
+    .split(",")
+    .map((part) => {
+      const [rawTag = "", ...params] = part.trim().split(";");
+      const q = params
+        .map((param) => /^q=(\d+(?:\.\d+)?)$/i.exec(param.trim())?.[1])
+        .find((value): value is string => Boolean(value));
+      return {
+        tag: rawTag.trim().toLowerCase(),
+        q: q ? Number(q) : 1
+      };
+    })
+    .filter((candidate) => candidate.tag && Number.isFinite(candidate.q))
+    .sort((a, b) => b.q - a.q);
+  for (const candidate of candidates) {
+    if (candidate.tag.startsWith("ja")) return "ja";
+    if (candidate.tag.startsWith("ko")) return "ko";
+  }
+  return undefined;
+}
+
+function publicLocalePreference(req: IncomingMessage): PublicLocalePreference {
+  const country = countryCodeFromRequest(req);
+  const countryLocale = localeFromCountryCode(country);
+  if (countryLocale) return { locale: countryLocale, source: "country", country };
+  const languageLocale = localeFromAcceptLanguage(req);
+  if (languageLocale) return { locale: languageLocale, source: "accept-language" };
+  return { locale: "ko", source: "fallback" };
 }
 
 function parseContentDisposition(value: string | undefined): { name?: string; filename?: string } {
@@ -2391,7 +2460,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
             ? oauthLimiter
-            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/")
+            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -2430,6 +2499,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/lol/suggestions") {
         return sendJson(req, res, 200, { suggestions: await buildPublicLolSuggestions(url.searchParams.get("q") ?? "") });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public/locale") {
+        return sendJson(req, res, 200, publicLocalePreference(req));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/status") {
         if (!input.publicTwitchAuth) {

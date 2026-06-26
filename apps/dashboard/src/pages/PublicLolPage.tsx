@@ -340,6 +340,7 @@ type PublicNotification = {
 const RECENT_SEARCH_STORAGE_KEY = "loltrace.recent.jp";
 const FAVORITE_STORAGE_KEY = "loltrace.favorites.jp";
 const THEME_STORAGE_KEY = "loltrace.theme";
+const LOCALE_STORAGE_KEY = "loltrace.locale";
 const NOTIFICATION_STORAGE_KEY = "loltrace.notifications";
 const MAX_RECENT_SEARCHES = 8;
 const MAX_FAVORITES = 24;
@@ -361,6 +362,10 @@ const publicI18n = {
     clearSearch: "검색어 지우기",
     searchServer: "검색 서버",
     jpServer: "일본 서버",
+    language: "언어",
+    languageMenu: "언어 선택",
+    languageKo: "한국어",
+    languageJa: "일본어",
     summonerResults: "소환사",
     relatedSummoners: "연관 닉네임",
     inputSearch: "입력값",
@@ -566,6 +571,10 @@ const publicI18n = {
     clearSearch: "検索語を削除",
     searchServer: "検索サーバー",
     jpServer: "日本サーバー",
+    language: "言語",
+    languageMenu: "言語選択",
+    languageKo: "韓国語",
+    languageJa: "日本語",
     summonerResults: "サモナー",
     relatedSummoners: "関連ニックネーム",
     inputSearch: "入力値",
@@ -796,9 +805,44 @@ function matchHighlightClass(badges: PublicLolMatchBadge[] | undefined): string 
   return highlight ? `highlight-${highlight}` : "";
 }
 
-function detectPublicLocale(): PublicLocale {
+function isPublicLocale(value: unknown): value is PublicLocale {
+  return value === "ko" || value === "ja";
+}
+
+function readStoredLocale(): PublicLocale | undefined {
+  try {
+    const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+    return isPublicLocale(stored) ? stored : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function saveStoredLocale(locale: PublicLocale): void {
+  try {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  } catch {
+    // 언어 저장 실패는 화면 사용을 막지 않습니다.
+  }
+}
+
+function detectBrowserPublicLocale(): PublicLocale {
   const lang = document.documentElement.lang || navigator.language || "";
   return lang.toLocaleLowerCase().startsWith("ja") ? "ja" : "ko";
+}
+
+function detectPublicLocale(): PublicLocale {
+  return readStoredLocale() ?? detectBrowserPublicLocale();
+}
+
+async function loadPublicLocalePreference(signal?: AbortSignal): Promise<PublicLocale | undefined> {
+  const response = await fetch(`${apiBase}/api/public/locale`, {
+    credentials: "include",
+    signal
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  const body = await response.json() as { locale?: unknown };
+  return isPublicLocale(body.locale) ? body.locale : undefined;
 }
 
 const tierLabels: Record<string, string> = {
@@ -2135,7 +2179,8 @@ function ProfileTopPanel({
   const rank5v5Stats = ranked5v5Stats(profile);
   const masteryChampionArt = assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl);
   return (
-    <section id="public-ranking" className="public-profile-top-grid">
+    <section id="public-ranking" className={`public-profile-top-grid ${masteryChampionArt ? "has-mastery-art" : ""}`}>
+      {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
       <div className="public-profile-top-main">
         <ProfileSeasonBadges profile={profile} />
         <div className="public-profile-top-content">
@@ -2182,8 +2227,7 @@ function ProfileTopPanel({
           </div>
         </div>
       </div>
-      <aside className={`public-profile-top-side ${masteryChampionArt ? "has-mastery-art" : ""}`} aria-label={t().ranking}>
-        {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
+      <aside className="public-profile-top-side" aria-label={t().ranking}>
         <RankOverviewCard title={t().soloRank} stats={soloStats} fallback={!soloStats} />
         <RankOverviewCard title={t().flexRank} stats={flexStats} fallback={!flexStats} />
         <RankOverviewCard title={t().ranked5v5} stats={rank5v5Stats} fallback={!rank5v5Stats} />
@@ -2473,6 +2517,59 @@ function PublicFilterPanel({
   );
 }
 
+function PublicMatchFilterBar({
+  filters,
+  champions,
+  onChange,
+  onReset
+}: {
+  filters: PublicMatchFilters;
+  champions: LolChampionSummary[];
+  onChange: (filters: PublicMatchFilters) => void;
+  onReset: () => void;
+}) {
+  const filterActive = hasActiveFilters(filters);
+  return (
+    <div className={`public-match-filter-bar ${filterActive ? "active" : ""}`}>
+      <div className="public-match-filter-title">
+        <span aria-hidden="true">▽</span>
+        <strong data-ko={publicI18n.ko.filter} data-ja={publicI18n.ja.filter}>{filterActive ? t().activeFilter : t().filter}</strong>
+      </div>
+      <label>
+        <span data-ko={publicI18n.ko.queueFilter} data-ja={publicI18n.ja.queueFilter}>{t().queueFilter}</span>
+        <select value={filters.queue} onChange={(event) => onChange({ ...filters, queue: event.target.value as MatchQueueFilter })}>
+          <option value="all">{t().allQueues}</option>
+          <option value="solo">{t().soloQueue}</option>
+          <option value="flex">{t().flexQueue}</option>
+          <option value="ranked5v5">{t().ranked5v5}</option>
+          <option value="normal">{t().normalQueue}</option>
+          <option value="aram">{t().aramQueue}</option>
+        </select>
+      </label>
+      <label>
+        <span data-ko={publicI18n.ko.championFilter} data-ja={publicI18n.ja.championFilter}>{t().championFilter}</span>
+        <select value={filters.championId} onChange={(event) => onChange({ ...filters, championId: event.target.value })}>
+          <option value="all">{t().allChampions}</option>
+          {champions.map((champion) => (
+            <option value={String(champion.championId)} key={champion.championId}>{championName(champion)}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span data-ko={publicI18n.ko.periodFilter} data-ja={publicI18n.ja.periodFilter}>{t().periodFilter}</span>
+        <select value={filters.period} onChange={(event) => onChange({ ...filters, period: event.target.value as MatchPeriodFilter })}>
+          <option value="all">{t().periodAll}</option>
+          <option value="7d">{t().period7}</option>
+          <option value="30d">{t().period30}</option>
+        </select>
+      </label>
+      <button type="button" onClick={onReset} disabled={!filterActive} data-ko={publicI18n.ko.resetFilter} data-ja={publicI18n.ja.resetFilter}>
+        {t().resetFilter}
+      </button>
+    </div>
+  );
+}
+
 function PublicNotificationPanel({
   notifications,
   onMarkAllRead
@@ -2497,6 +2594,56 @@ function PublicNotificationPanel({
           </article>
         ))}
       </div>
+    </div>
+  );
+}
+
+function PublicLocaleSelector({
+  locale,
+  onLocale
+}: {
+  locale: PublicLocale;
+  onLocale: (locale: PublicLocale) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const options: Array<{ locale: PublicLocale; code: string; label: string }> = [
+    { locale: "ko", code: "KR", label: t().languageKo },
+    { locale: "ja", code: "JP", label: t().languageJa }
+  ];
+  const activeCode = locale === "ja" ? "JP" : "KR";
+  function selectLocale(nextLocale: PublicLocale): void {
+    onLocale(nextLocale);
+    setOpen(false);
+  }
+  return (
+    <div className="public-locale-menu">
+      <button
+        className="public-locale-button"
+        type="button"
+        aria-label={t().languageMenu}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="public-globe-icon" aria-hidden="true"><span /></span>
+        <strong>{activeCode}</strong>
+      </button>
+      {open ? (
+        <div className="public-locale-popover" role="menu" aria-label={t().language}>
+          {options.map((option) => (
+            <button
+              key={option.locale}
+              type="button"
+              className={option.locale === locale ? "active" : ""}
+              role="menuitemradio"
+              aria-checked={option.locale === locale}
+              onClick={() => selectLocale(option.locale)}
+            >
+              <span>{option.code}</span>
+              <strong>{option.label}</strong>
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -2548,6 +2695,7 @@ function PublicAppHeader({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const filterActive = hasActiveFilters(filters);
+  const twitchUser = twitchStatus.connected ? twitchStatus.user : undefined;
   return (
     <header id={showSearch ? "public-search" : undefined} className={`public-app-header ${showSearch ? "" : "home"}`}>
       {showSearch ? (
@@ -2567,9 +2715,7 @@ function PublicAppHeader({
         </div>
       )}
       <div className="public-header-tools">
-        <button className="public-header-select" type="button" onClick={() => onLocale(locale === "ko" ? "ja" : "ko")}>
-          {locale === "ko" ? "KR" : "JP"}
-        </button>
+        <PublicLocaleSelector locale={locale} onLocale={onLocale} />
         <button
           className={`public-twitch-login-chip ${twitchStatus.connected ? "connected" : ""}`}
           type="button"
@@ -2590,7 +2736,7 @@ function PublicAppHeader({
           ) : null}
         </div> : null}
       </div>
-      {showSearch ? <div className="public-header-user">
+      {showSearch && twitchUser ? <div className="public-header-user">
         <div className="public-header-popover-wrap">
           <button type="button" aria-label={t().notifications} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
             ♧{unreadCount > 0 ? <span>{unreadCount}</span> : null}
@@ -2598,10 +2744,10 @@ function PublicAppHeader({
           {notificationsOpen ? <PublicNotificationPanel notifications={notifications} onMarkAllRead={onMarkNotificationsRead} /> : null}
         </div>
         <div className="public-header-avatar">
-          {profile?.profileIconUrl ? <img src={assetUrl(profile.profileIconUrl)} alt="" /> : <span>{profile?.gameName.slice(0, 1).toUpperCase() ?? "L"}</span>}
+          {twitchUser.profileImageUrl ? <img src={twitchUser.profileImageUrl} alt="" /> : <span>{twitchUser.displayName.slice(0, 1).toUpperCase()}</span>}
         </div>
         <div>
-          <strong>{profile?.gameName ?? t().brand}</strong>
+          <strong>{twitchUser.displayName}</strong>
           <small data-ko={publicI18n.ko.online} data-ja={publicI18n.ja.online}>{t().online}</small>
         </div>
       </div> : null}
@@ -3149,13 +3295,21 @@ function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; o
 
 function RecentMatches({
   profile,
+  filters,
+  champions,
   onSearchRiotId,
+  onFilters,
+  onResetFilters,
   onLoadMore,
   loadingMore = false,
   moreError = ""
 }: {
   profile: PublicLolProfile;
+  filters: PublicMatchFilters;
+  champions: LolChampionSummary[];
   onSearchRiotId: (riotId: string) => void;
+  onFilters: (filters: PublicMatchFilters) => void;
+  onResetFilters: () => void;
   onLoadMore?: () => void;
   loadingMore?: boolean;
   moreError?: string;
@@ -3189,6 +3343,7 @@ function RecentMatches({
         <h2 data-ko={publicI18n.ko.recentGames} data-ja={publicI18n.ja.recentGames}>{t().recentGames}</h2>
         <span>{profile.summary.recentGames}{t().games}</span>
       </div>
+      <PublicMatchFilterBar filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />
       <div className="public-match-list">
         {profile.recentMatches.length === 0 ? <p className="public-empty">{t().noData}</p> : profile.recentMatches.map((match) => {
           const expanded = expandedMatchId === match.matchId;
@@ -3435,9 +3590,7 @@ function PublicTopbar({
         <button type="button" onClick={() => onNavigate("community")} data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</button>
       </nav>
       <div className="public-top-actions">
-        <button className="public-locale-button" type="button" onClick={() => onLocale(locale === "ko" ? "ja" : "ko")}>
-          {locale === "ko" ? "KR" : "JP"}
-        </button>
+        <PublicLocaleSelector locale={locale} onLocale={onLocale} />
         <button className="public-theme-button" type="button" aria-label={t().darkMode}>●</button>
         <button className="public-login-button" type="button" onClick={onOpenAdmin} data-ko={publicI18n.ko.login} data-ja={publicI18n.ja.login}>{t().login}</button>
       </div>
@@ -3473,7 +3626,7 @@ function PublicMobileNav({ onNavigate }: { onNavigate: (target: PublicNavTarget)
 }
 
 export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
-  const [locale, setLocale] = useState<PublicLocale>(() => detectPublicLocale());
+  const [locale, setLocaleState] = useState<PublicLocale>(() => detectPublicLocale());
   activePublicLocale = locale;
   const [query, setQuery] = useState("");
   const [profile, setProfile] = useState<PublicLolProfile | null>(null);
@@ -3523,9 +3676,28 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
     return [...unique.values()].sort((a, b) => championName(a).localeCompare(championName(b)));
   }, [profile]);
 
+  function changeLocale(nextLocale: PublicLocale): void {
+    setLocaleState(nextLocale);
+    saveStoredLocale(nextLocale);
+  }
+
   useEffect(() => {
     document.documentElement.lang = locale === "ja" ? "ja" : "ko";
   }, [locale]);
+
+  useEffect(() => {
+    if (readStoredLocale()) return undefined;
+    const controller = new AbortController();
+    void loadPublicLocalePreference(controller.signal)
+      .then((preferredLocale) => {
+        if (!preferredLocale || readStoredLocale()) return;
+        setLocaleState(preferredLocale);
+      })
+      .catch(() => {
+        // 지역 기반 언어 추정 실패 시 브라우저 언어 기본값을 유지합니다.
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     void loadTwitchViewer();
@@ -3810,7 +3982,7 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
-            onLocale={setLocale}
+            onLocale={changeLocale}
             onTwitchLogin={openTwitchViewerPanel}
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
@@ -3846,6 +4018,7 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
           locale={locale}
           profile={profile}
           twitchStatus={twitchStatus}
+          showFilters={false}
           query={query}
           loading={loading}
           suggestions={visibleSuggestions}
@@ -3856,7 +4029,7 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
           onClear={clearSearch}
           onSubmit={(event) => void submit(event)}
           onPickSuggestion={pickSuggestion}
-          onLocale={setLocale}
+          onLocale={changeLocale}
           onTwitchLogin={openTwitchViewerPanel}
           onFilters={setFilters}
           onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
@@ -3882,7 +4055,11 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
 	                  <OverviewMetricPanel profile={activeProfile} />
 		                  <RecentMatches
                         profile={activeProfile}
+                        filters={filters}
+                        champions={availableChampions}
                         onSearchRiotId={searchRiotId}
+                        onFilters={setFilters}
+                        onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
                         onLoadMore={() => void loadMoreRecentMatches()}
                         loadingMore={loadingMoreMatches}
                         moreError={moreMatchesError}
