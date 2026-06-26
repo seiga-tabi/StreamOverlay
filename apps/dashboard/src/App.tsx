@@ -4,6 +4,7 @@ import { connectDashboardSocket } from "./api/socket";
 import { Layout, type Page } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { uiText } from "./i18n";
+import { PublicLolPage } from "./pages/PublicLolPage";
 import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
 
 const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
@@ -30,18 +31,39 @@ const initialSnapshot = {
   }
 };
 
+function isAdminLocation(): boolean {
+  return window.location.pathname === "/dashboard" || window.location.pathname.startsWith("/dashboard/");
+}
+
 export default function App() {
   const initialAuthRequired = runtimeConfig().dashboardAuthRequired !== false;
+  const [surface, setSurface] = useState<"public" | "admin">(() => isAdminLocation() ? "admin" : "public");
   const [authRequired, setAuthRequired] = useState(initialAuthRequired);
   const [page, setPage] = useState<Page>("dashboard");
   const [snapshot, setSnapshot] = useState<any>(initialSnapshot);
   const [socketConnected, setSocketConnected] = useState(false);
-  const [authState, setAuthState] = useState<"checking" | "authenticated" | "login">("checking");
+  const [authState, setAuthState] = useState<"checking" | "authenticated" | "login">(() => isAdminLocation() ? "checking" : "login");
   const [authError, setAuthError] = useState("");
   const [loginDisabled, setLoginDisabled] = useState(false);
 
   useEffect(() => {
+    const syncSurface = () => {
+      const nextSurface = isAdminLocation() ? "admin" : "public";
+      setSurface(nextSurface);
+      if (nextSurface === "admin") setAuthState("checking");
+      if (nextSurface === "public") {
+        setSocketConnected(false);
+        clearDashboardCsrfToken();
+      }
+    };
+    window.addEventListener("popstate", syncSurface);
+    return () => window.removeEventListener("popstate", syncSurface);
+  }, []);
+
+  useEffect(() => {
+    if (surface !== "admin") return undefined;
     let mounted = true;
+    setAuthState("checking");
     void getDashboardAuthStatus()
       .then((status) => {
         if (!mounted) return;
@@ -67,14 +89,14 @@ export default function App() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [surface]);
 
   useEffect(() => {
-    if (authState !== "authenticated") return undefined;
+    if (surface !== "admin" || authState !== "authenticated") return undefined;
     return connectDashboardSocket((message) => {
       if (message.type === "dashboard.snapshot") setSnapshot(message);
     }, setSocketConnected);
-  }, [authState]);
+  }, [surface, authState]);
 
   async function login(token: string): Promise<void> {
     if (loginDisabled) return;
@@ -100,12 +122,29 @@ export default function App() {
     setAuthState(authRequired ? "login" : "authenticated");
   }
 
+  function openAdmin(): void {
+    if (!isAdminLocation()) window.history.pushState({}, "", "/dashboard");
+    setSurface("admin");
+    setAuthState("checking");
+  }
+
+  function openPublic(): void {
+    if (isAdminLocation()) window.history.pushState({}, "", "/");
+    setSocketConnected(false);
+    setSurface("public");
+    clearDashboardCsrfToken();
+  }
+
+  if (surface === "public") {
+    return <PublicLolPage onOpenAdmin={openAdmin} />;
+  }
+
   if (authState !== "authenticated") {
-    return <LoginPage checking={authState === "checking"} disabled={loginDisabled} error={authError} onLogin={login} />;
+    return <LoginPage checking={authState === "checking"} disabled={loginDisabled} error={authError} onLogin={login} onBackToPublic={openPublic} />;
   }
 
   return (
-    <Layout page={page} setPage={setPage} onLogout={authRequired ? logout : undefined}>
+    <Layout page={page} setPage={setPage} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card">{uiText.app.loading}</div>}>
         {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} /> : null}
         {page === "twitch" ? <TwitchConnectionPage /> : null}

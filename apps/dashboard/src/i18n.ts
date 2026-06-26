@@ -6,6 +6,7 @@ export const dashboardI18n = {
       navLabel: "대시보드 메뉴",
       liveSafety: "라이브 안전 모드",
       currentView: "현재 화면",
+      publicHome: "전적 검색",
       quickSettings: "설정",
       logout: "로그아웃",
       workspaceKicker: "Streamer Profile",
@@ -31,7 +32,8 @@ export const dashboardI18n = {
       invalid: "토큰이 올바르지 않습니다.",
       unavailable: "인증 상태를 확인하지 못했습니다. 서버 연결을 확인해주세요.",
       notConfigured: "서버에 DASHBOARD_AUTH_TOKEN이 설정되지 않아 로그인이 잠겨 있습니다.",
-      hint: "서버 환경 변수 DASHBOARD_AUTH_TOKEN에 설정한 값과 동일해야 합니다."
+      hint: "서버 환경 변수 DASHBOARD_AUTH_TOKEN에 설정한 값과 동일해야 합니다.",
+      backToPublic: "전적 검색으로 돌아가기"
     },
     pages: {
       dashboard: { label: "운영 현황", short: "대시보드" },
@@ -242,6 +244,7 @@ export const dashboardI18n = {
       navLabel: "ダッシュボードメニュー",
       liveSafety: "ライブ安全モード",
       currentView: "現在の画面",
+      publicHome: "戦績検索",
       quickSettings: "設定",
       logout: "ログアウト",
       workspaceKicker: "Streamer Profile",
@@ -267,7 +270,8 @@ export const dashboardI18n = {
       invalid: "token が正しくありません。",
       unavailable: "認証状態を確認できませんでした。サーバー接続を確認してください。",
       notConfigured: "サーバーに DASHBOARD_AUTH_TOKEN が設定されていないためログインはロックされています。",
-      hint: "サーバー環境変数 DASHBOARD_AUTH_TOKEN に設定した値と同じである必要があります。"
+      hint: "サーバー環境変数 DASHBOARD_AUTH_TOKEN に設定した値と同じである必要があります。",
+      backToPublic: "戦績検索に戻る"
     },
     pages: {
       dashboard: { label: "運用状況", short: "ダッシュボード" },

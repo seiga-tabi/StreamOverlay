@@ -93,6 +93,7 @@ export const appConfig = {
     clientId: env("TWITCH_CLIENT_ID"),
     clientSecret: env("TWITCH_CLIENT_SECRET"),
     redirectUri: env("TWITCH_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/twitch/auth/callback`),
+    publicRedirectUri: env("TWITCH_PUBLIC_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/public/twitch/auth/callback`),
     extraScopes: listEnv("TWITCH_EXTRA_SCOPES"),
     tokenStorePath: env("TWITCH_TOKEN_STORE_PATH", path.resolve(projectRoot, ".streamops", "twitch-token.json")),
     userAccessToken: env("TWITCH_USER_ACCESS_TOKEN"),
@@ -112,7 +113,7 @@ export const appConfig = {
   riot: {
     apiKey: env("RIOT_API_KEY"),
     accountRegion: env("RIOT_ACCOUNT_REGION", "asia"),
-    lolPlatform: env("RIOT_LOL_PLATFORM", "kr"),
+    lolPlatform: env("RIOT_LOL_PLATFORM", "jp1"),
     rateLimit: {
       enabled: boolEnv("RIOT_RATE_LIMIT_ENABLED", true),
       perSecond: Math.max(1, intEnv("RIOT_RATE_LIMIT_PER_SECOND", 20)),

@@ -1,4 +1,5 @@
 export const TWITCH_MVP_SCOPES = ["user:read:chat", "user:write:chat", "channel:read:redemptions"] as const;
+export const TWITCH_PUBLIC_VIEWER_SCOPES = ["user:read:follows"] as const;
 
 export const TWITCH_OPTIONAL_SCOPES = [
   "channel:manage:redemptions",

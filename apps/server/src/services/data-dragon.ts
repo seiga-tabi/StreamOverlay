@@ -122,6 +122,7 @@ export class DataDragonService {
 
   async mapChampionSummary(input: {
     championId: number;
+    championName?: string;
     masteryLevel?: number;
     masteryPoints?: number;
     games?: number;
@@ -155,6 +156,7 @@ export class DataDragonService {
 
     return {
       championId: input.championId,
+      championKey: input.championName,
       nameKo: `Champion ${input.championId}`,
       masteryLevel: input.masteryLevel,
       masteryPoints: input.masteryPoints,

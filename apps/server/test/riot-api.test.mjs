@@ -67,6 +67,38 @@ test("RiotApiClient는 Riot ID와 랭크 전적을 조회한다", async () => {
   assert.ok(calls.every((call) => call.token === "riot-test-key"));
 });
 
+test("RiotApiClient는 솔로랭크, 자유랭크, 5v5 랭크를 각각 반환한다", async () => {
+  globalThis.fetch = async (url) => {
+    const target = String(url);
+    if (target.includes("/lol/summoner/v4/summoners/by-puuid/")) {
+      return jsonResponse({
+        puuid: "puuid-three-ranks",
+        profileIconId: 31,
+        revisionDate: 1,
+        summonerLevel: 512
+      });
+    }
+    if (target.includes("/lol/league/v4/entries/by-puuid/")) {
+      return jsonResponse([
+        { queueType: "RANKED_TEAM_5x5", tier: "GOLD", rank: "I", leaguePoints: 22, wins: 20, losses: 10 },
+        { queueType: "RANKED_FLEX_SR", tier: "EMERALD", rank: "IV", leaguePoints: 11, wins: 44, losses: 39 },
+        { queueType: "RANKED_SOLO_5x5", tier: "DIAMOND", rank: "II", leaguePoints: 64, wins: 92, losses: 74 }
+      ]);
+    }
+    return jsonResponse({ status: { message: "not found" } }, 404);
+  };
+
+  const client = new RiotApiClient();
+  const stats = await client.getRankedQueueStatsByPuuid("puuid-three-ranks");
+
+  assert.equal(stats.solo?.queueType, "RANKED_SOLO_5x5");
+  assert.equal(stats.flex?.queueType, "RANKED_FLEX_SR");
+  assert.equal(stats.ranked5v5?.queueType, "RANKED_TEAM_5x5");
+  assert.equal(stats.ranked5v5?.tier, "GOLD");
+  assert.equal(stats.ranked5v5?.summonerLevel, 512);
+  assert.equal(stats.primary?.queueType, "RANKED_SOLO_5x5");
+});
+
 test("RiotApiClient는 랭크 기록이 없으면 UNRANKED 전적을 반환한다", async () => {
   globalThis.fetch = async (url) => {
     const target = String(url);

@@ -52,14 +52,56 @@ export type RiotChampionMastery = {
 
 export type RiotMatchParticipant = {
   puuid: string;
+  riotIdGameName?: string;
+  riotIdTagline?: string;
+  summonerName?: string;
+  teamId?: number;
   championId: number;
   championName?: string;
+  champLevel?: number;
   individualPosition?: string;
   teamPosition?: string;
   kills?: number;
   deaths?: number;
   assists?: number;
   win?: boolean;
+  goldEarned?: number;
+  totalDamageDealtToChampions?: number;
+  totalDamageDealtToObjectives?: number;
+  totalDamageTaken?: number;
+  totalMinionsKilled?: number;
+  neutralMinionsKilled?: number;
+  visionScore?: number;
+  wardsPlaced?: number;
+  wardsKilled?: number;
+  detectorWardsPlaced?: number;
+  largestMultiKill?: number;
+  doubleKills?: number;
+  tripleKills?: number;
+  quadraKills?: number;
+  pentaKills?: number;
+  turretKills?: number;
+  inhibitorKills?: number;
+  objectivesStolen?: number;
+  totalTimeSpentDead?: number;
+  summoner1Id?: number;
+  summoner2Id?: number;
+  item0?: number;
+  item1?: number;
+  item2?: number;
+  item3?: number;
+  item4?: number;
+  item5?: number;
+  item6?: number;
+  challenges?: {
+    killParticipation?: number;
+    damagePerMinute?: number;
+    goldPerMinute?: number;
+    kda?: number;
+    laneMinionsFirst10Minutes?: number;
+    soloKills?: number;
+    visionScorePerMinute?: number;
+  };
 };
 
 export type RiotMatch = {
@@ -69,8 +111,17 @@ export type RiotMatch = {
   };
   info: {
     gameCreation?: number;
+    gameDuration?: number;
+    gameMode?: string;
+    gameType?: string;
+    mapId?: number;
     queueId?: number;
     participants: RiotMatchParticipant[];
+    teams?: Array<{
+      teamId: number;
+      win?: boolean;
+      objectives?: Record<string, { first?: boolean; kills?: number }>;
+    }>;
   };
 };
 
@@ -88,6 +139,7 @@ export type RiotCurrentGameInfo = {
   gameLength?: number;
   gameMode?: string;
   gameType?: string;
+  gameQueueConfigId?: number;
   mapId?: number;
   participants: RiotCurrentGameParticipant[];
 };
@@ -173,8 +225,9 @@ const LOL_RANK_TIERS = new Set([
   "UNRANKED"
 ]);
 
-const RANKED_QUEUE_PRIORITY = ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"] as const;
+const RANKED_QUEUE_PRIORITY = ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_TEAM_5x5"] as const;
 export type RiotRankedQueueType = (typeof RANKED_QUEUE_PRIORITY)[number];
+const RANKED_5V5_QUEUE_ALIASES = new Set(["RANKED_TEAM_5x5", "RANKED_PREMADE_5x5", "RANKED_5V5", "RANKED_5x5"]);
 const RANK_DIVISION_SCORE: Record<string, number> = {
   I: 3,
   II: 2,
@@ -313,6 +366,44 @@ function safeStat(value: unknown): number {
   return Number.isFinite(number) ? Math.max(0, Math.trunc(number)) : 0;
 }
 
+function unrankedStatsFromSummoner(summoner: RiotSummoner | null): LolRankedStats {
+  return {
+    queueType: "UNRANKED",
+    tier: "UNRANKED",
+    leaguePoints: 0,
+    wins: 0,
+    losses: 0,
+    winRate: 0,
+    summonerLevel: summoner?.summonerLevel,
+    profileIconId: summoner?.profileIconId,
+    fetchedAt: new Date().toISOString()
+  };
+}
+
+function rankedStatsFromEntry(rankedEntry: RiotLeagueEntry, summoner: RiotSummoner | null): LolRankedStats {
+  const wins = Math.max(0, Math.trunc(rankedEntry.wins));
+  const losses = Math.max(0, Math.trunc(rankedEntry.losses));
+  const tier = rankTier(rankedEntry.tier);
+  const queueType = rankedEntry.queueType === "RANKED_FLEX_SR"
+    ? "RANKED_FLEX_SR"
+    : RANKED_5V5_QUEUE_ALIASES.has(rankedEntry.queueType)
+      ? "RANKED_TEAM_5x5"
+      : "RANKED_SOLO_5x5";
+  return {
+    queueType,
+    tier,
+    rank: rankedEntry.rank,
+    leaguePoints: Math.max(0, Math.trunc(rankedEntry.leaguePoints)),
+    wins,
+    losses,
+    winRate: winRate(wins, losses),
+    summonerLevel: summoner?.summonerLevel,
+    profileIconId: summoner?.profileIconId,
+    tierIconUrl: rankedTierIconUrl(tier),
+    fetchedAt: new Date().toISOString()
+  };
+}
+
 function rankDivisionScore(value: string | undefined): number {
   return RANK_DIVISION_SCORE[(value ?? "").toUpperCase()] ?? 0;
 }
@@ -438,7 +529,7 @@ export class RiotApiClient {
   }
 
   private get lolPlatform(): string {
-    return normalizePlatformRouting(appConfig.riot.lolPlatform, "kr");
+    return normalizePlatformRouting(appConfig.riot.lolPlatform, "jp1");
   }
 
   routingStatus(): { configured: boolean; source: "runtime" | "env" | "none"; accountRegion: string; lolPlatform: string } {
@@ -530,20 +621,21 @@ export class RiotApiClient {
     return (await this.fetchJson<RiotChampionMastery[]>(url, "champion_mastery.top")) ?? [];
   }
 
-  async getRecentMatchIdsByPuuid(puuid: string, count = 20, queueIds: number[] = []): Promise<string[]> {
+  async getRecentMatchIdsByPuuid(puuid: string, count = 20, queueIds: number[] = [], start = 0): Promise<string[]> {
     if (!this.isConfigured()) return [];
+    const safeStart = Math.max(0, Math.min(1000, Math.trunc(start)));
     const safeCount = Math.max(1, Math.min(100, Math.trunc(count)));
     const safeQueueIds = [...new Set(queueIds)]
       .map((queueId) => Math.trunc(queueId))
       .filter((queueId) => queueId > 0);
     if (safeQueueIds.length === 0) {
-      const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=0&count=${safeCount}`;
+      const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}`;
       return (await this.fetchJson<string[]>(url, "match.ids")) ?? [];
     }
 
     const ids = new Set<string>();
     for (const queueId of safeQueueIds) {
-      const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=0&count=${safeCount}&queue=${queueId}`;
+      const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}&queue=${queueId}`;
       for (const matchId of await this.fetchJson<string[]>(url, "match.ids") ?? []) {
         ids.add(matchId);
         if (ids.size >= safeCount) return [...ids];
@@ -602,34 +694,29 @@ export class RiotApiClient {
       .find(Boolean);
 
     if (!rankedEntry) {
-      return {
-        queueType: "UNRANKED",
-        tier: "UNRANKED",
-        leaguePoints: 0,
-        wins: 0,
-        losses: 0,
-        winRate: 0,
-        summonerLevel: summoner?.summonerLevel,
-        profileIconId: summoner?.profileIconId,
-        fetchedAt: new Date().toISOString()
-      };
+      return unrankedStatsFromSummoner(summoner);
     }
 
-    const wins = Math.max(0, Math.trunc(rankedEntry.wins));
-    const losses = Math.max(0, Math.trunc(rankedEntry.losses));
-    const tier = rankTier(rankedEntry.tier);
+    return rankedStatsFromEntry(rankedEntry, summoner);
+  }
+
+  async getRankedQueueStatsByPuuid(puuid: string): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats }> {
+    if (!this.isConfigured()) return {};
+    const [summoner, entries] = await Promise.all([
+      this.getSummonerByPuuid(puuid),
+      this.getLeagueEntriesByPuuid(puuid)
+    ]);
+    const soloEntry = entries.find((entry) => entry.queueType === "RANKED_SOLO_5x5");
+    const flexEntry = entries.find((entry) => entry.queueType === "RANKED_FLEX_SR");
+    const ranked5v5Entry = entries.find((entry) => RANKED_5V5_QUEUE_ALIASES.has(entry.queueType));
+    const solo = soloEntry ? rankedStatsFromEntry(soloEntry, summoner) : undefined;
+    const flex = flexEntry ? rankedStatsFromEntry(flexEntry, summoner) : undefined;
+    const ranked5v5 = ranked5v5Entry ? rankedStatsFromEntry(ranked5v5Entry, summoner) : undefined;
     return {
-      queueType: rankedEntry.queueType === "RANKED_FLEX_SR" ? "RANKED_FLEX_SR" : "RANKED_SOLO_5x5",
-      tier,
-      rank: rankedEntry.rank,
-      leaguePoints: Math.max(0, Math.trunc(rankedEntry.leaguePoints)),
-      wins,
-      losses,
-      winRate: winRate(wins, losses),
-      summonerLevel: summoner?.summonerLevel,
-      profileIconId: summoner?.profileIconId,
-      tierIconUrl: rankedTierIconUrl(tier),
-      fetchedAt: new Date().toISOString()
+      solo,
+      flex,
+      ranked5v5,
+      primary: solo ?? flex ?? ranked5v5 ?? unrankedStatsFromSummoner(summoner)
     };
   }
 }

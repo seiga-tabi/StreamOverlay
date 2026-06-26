@@ -44,6 +44,7 @@ export class MemoryRateLimiter {
 
 export const dashboardLoginLimiter = new MemoryRateLimiter(8, 60_000);
 export const dashboardApiLimiter = new MemoryRateLimiter(240, 60_000);
+export const publicLolApiLimiter = new MemoryRateLimiter(60, 60_000);
 export const oauthLimiter = new MemoryRateLimiter(20, 60_000);
 export const websocketLimiter = new MemoryRateLimiter(60, 60_000);
 export const bridgeCommandLimiter = new MemoryRateLimiter(120, 60_000);
@@ -51,6 +52,7 @@ export const bridgeCommandLimiter = new MemoryRateLimiter(120, 60_000);
 export function resetSecurityRateLimiters(): void {
   dashboardLoginLimiter.reset();
   dashboardApiLimiter.reset();
+  publicLolApiLimiter.reset();
   oauthLimiter.reset();
   websocketLimiter.reset();
   bridgeCommandLimiter.reset();

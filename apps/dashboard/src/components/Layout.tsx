@@ -17,11 +17,13 @@ export function Layout({
   page,
   setPage,
   onLogout,
+  onPublicHome,
   children
 }: {
   page: Page;
   setPage: (page: Page) => void;
   onLogout?: () => void;
+  onPublicHome?: () => void;
   children: ReactNode;
 }) {
   const currentPage = uiText.pages[page];
@@ -70,6 +72,7 @@ export function Layout({
             <strong>{currentPage.short}</strong>
           </div>
           <div className="top-actions">
+            {onPublicHome ? <button className="secondary top-action" onClick={onPublicHome}>{uiText.app.publicHome}</button> : null}
             <button className="secondary top-action" onClick={() => setPage("settings")}>{uiText.app.quickSettings}</button>
             {onLogout ? <button className="secondary top-action" onClick={onLogout}>{uiText.app.logout}</button> : null}
             <span className="top-chip">{uiText.app.liveSafety}</span>

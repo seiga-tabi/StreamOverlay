@@ -24,7 +24,7 @@ export type LolRankTier =
   | "UNRANKED";
 
 export type LolRankedStats = {
-  queueType: "RANKED_SOLO_5x5" | "RANKED_FLEX_SR" | "UNRANKED";
+  queueType: "RANKED_SOLO_5x5" | "RANKED_FLEX_SR" | "RANKED_TEAM_5x5" | "UNRANKED";
   tier: LolRankTier;
   rank?: string;
   leaguePoints: number;

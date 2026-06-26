@@ -8,12 +8,45 @@ type TwitchUserProfile = {
   profileImageUrl?: string;
 };
 
+export type TwitchApiAccessContext = {
+  clientId: string;
+  accessToken: string;
+  scopes: string[];
+};
+
 type TwitchUsersResponse = {
   data?: Array<{
     id: string;
     login: string;
     display_name: string;
     profile_image_url?: string;
+  }>;
+};
+
+export type TwitchStreamStatus = {
+  userId: string;
+  userLogin: string;
+  userName: string;
+  title?: string;
+  gameId?: string;
+  gameName?: string;
+  viewerCount?: number;
+  startedAt?: string;
+  thumbnailUrl?: string;
+};
+
+type TwitchStreamsResponse = {
+  data?: Array<{
+    id: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    game_id?: string;
+    game_name?: string;
+    title?: string;
+    viewer_count?: number;
+    started_at?: string;
+    thumbnail_url?: string;
   }>;
 };
 
@@ -37,8 +70,33 @@ type TwitchChannelFollowersResponse = {
   };
 };
 
+export type TwitchFollowedChannel = {
+  broadcasterId: string;
+  broadcasterLogin: string;
+  broadcasterName: string;
+  followedAt: string;
+};
+
+type TwitchFollowedChannelsResponse = {
+  total?: number;
+  data?: Array<{
+    broadcaster_id: string;
+    broadcaster_login: string;
+    broadcaster_name: string;
+    followed_at: string;
+  }>;
+  pagination?: {
+    cursor?: string;
+  };
+};
+
 type CachedTwitchUserProfile = {
   profile: TwitchUserProfile;
+  expiresAt: number;
+};
+
+type CachedTwitchStreamStatus = {
+  stream?: TwitchStreamStatus;
   expiresAt: number;
 };
 
@@ -49,6 +107,8 @@ type TwitchApiClientOptions = {
 
 const USER_PROFILE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const USER_PROFILE_ERROR_CACHE_TTL_MS = 5 * 60 * 1000;
+const STREAM_STATUS_CACHE_TTL_MS = 60 * 1000;
+const STREAM_STATUS_ERROR_CACHE_TTL_MS = 30 * 1000;
 const DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000;
 
 function sleepMs(ms: number): Promise<void> {
@@ -73,6 +133,8 @@ function headerNumber(response: Response, name: string): number | undefined {
 export class TwitchApiClient {
   private readonly userProfileCache = new Map<string, CachedTwitchUserProfile>();
   private readonly userProfileRequests = new Map<string, Promise<TwitchUserProfile | undefined>>();
+  private readonly streamStatusCache = new Map<string, CachedTwitchStreamStatus>();
+  private readonly streamStatusRequests = new Map<string, Promise<TwitchStreamStatus | undefined>>();
   private readonly rateLimitPauseUntilByHost = new Map<string, number>();
   private readonly now: () => number;
   private readonly sleep: (ms: number) => Promise<void>;
@@ -182,6 +244,58 @@ export class TwitchApiClient {
     return (await this.getUserProfile(userId))?.profileImageUrl;
   }
 
+  async getStreamByUserId(userId: string): Promise<TwitchStreamStatus | undefined> {
+    const safeUserId = userId.trim();
+    if (!/^\d{1,32}$/.test(safeUserId)) return undefined;
+
+    const cached = this.streamStatusCache.get(safeUserId);
+    if (cached && cached.expiresAt > Date.now()) return cached.stream;
+
+    const pending = this.streamStatusRequests.get(safeUserId);
+    if (pending) return pending;
+
+    const request = this.fetchStreamByUserId(safeUserId)
+      .then((stream) => {
+        this.streamStatusCache.set(safeUserId, {
+          stream,
+          expiresAt: Date.now() + (stream ? STREAM_STATUS_CACHE_TTL_MS : STREAM_STATUS_ERROR_CACHE_TTL_MS)
+        });
+        return stream;
+      })
+      .finally(() => {
+        this.streamStatusRequests.delete(safeUserId);
+      });
+    this.streamStatusRequests.set(safeUserId, request);
+    return request;
+  }
+
+  async getStreamsByUserIds(context: TwitchApiAccessContext, userIds: readonly string[]): Promise<Map<string, TwitchStreamStatus>> {
+    const safeUserIds = [...new Set(userIds.map((userId) => userId.trim()).filter((userId) => /^\d{1,32}$/.test(userId)))].slice(0, 100);
+    const streams = new Map<string, TwitchStreamStatus>();
+    if (safeUserIds.length === 0) return streams;
+
+    const url = new URL("https://api.twitch.tv/helix/streams");
+    for (const userId of safeUserIds) url.searchParams.append("user_id", userId);
+    const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
+    if (!response.ok) throw new Error(`Twitch stream lookup failed: ${response.status}`);
+    const body = (await response.json()) as TwitchStreamsResponse;
+    for (const stream of body.data ?? []) {
+      if (!stream.user_id) continue;
+      streams.set(stream.user_id, {
+        userId: stream.user_id,
+        userLogin: stream.user_login,
+        userName: stream.user_name || stream.user_login,
+        title: stream.title,
+        gameId: stream.game_id,
+        gameName: stream.game_name,
+        viewerCount: typeof stream.viewer_count === "number" ? Math.max(0, Math.trunc(stream.viewer_count)) : undefined,
+        startedAt: stream.started_at,
+        thumbnailUrl: this.safeHttpsUrl(stream.thumbnail_url)
+      });
+    }
+    return streams;
+  }
+
   async getChannelFollowers(limit = 5000): Promise<{
     followers: TwitchChannelFollower[];
     total?: number;
@@ -228,6 +342,52 @@ export class TwitchApiClient {
     };
   }
 
+  async getFollowedChannels(context: TwitchApiAccessContext & { userId: string }, limit = 100): Promise<{
+    channels: TwitchFollowedChannel[];
+    total?: number;
+    truncated: boolean;
+  }> {
+    const safeUserId = context.userId.trim();
+    if (!/^\d{1,32}$/.test(safeUserId)) throw new Error("Twitch user_id가 유효하지 않습니다.");
+    if (!context.scopes.includes("user:read:follows")) {
+      throw new Error("user:read:follows scope가 필요합니다.");
+    }
+
+    const channels: TwitchFollowedChannel[] = [];
+    let cursor: string | undefined;
+    let total: number | undefined;
+    const max = Math.max(1, Math.min(Math.trunc(limit), 1000));
+
+    do {
+      const url = new URL("https://api.twitch.tv/helix/channels/followed");
+      url.searchParams.set("user_id", safeUserId);
+      url.searchParams.set("first", String(Math.min(100, max - channels.length)));
+      if (cursor) url.searchParams.set("after", cursor);
+
+      const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
+      if (!response.ok) throw new Error(`Twitch followed channel lookup failed: ${response.status}`);
+      const body = (await response.json()) as TwitchFollowedChannelsResponse;
+      total = typeof body.total === "number" ? body.total : total;
+
+      for (const item of body.data ?? []) {
+        if (!item.broadcaster_id) continue;
+        channels.push({
+          broadcasterId: item.broadcaster_id,
+          broadcasterLogin: item.broadcaster_login,
+          broadcasterName: item.broadcaster_name || item.broadcaster_login || item.broadcaster_id,
+          followedAt: item.followed_at
+        });
+      }
+      cursor = body.pagination?.cursor;
+    } while (cursor && channels.length < max);
+
+    return {
+      channels,
+      total,
+      truncated: Boolean(cursor && channels.length >= max)
+    };
+  }
+
   private async fetchUserProfile(userId: string): Promise<TwitchUserProfile | undefined> {
     const url = new URL("https://api.twitch.tv/helix/users");
     url.searchParams.set("id", userId);
@@ -243,6 +403,28 @@ export class TwitchApiClient {
       login: user.login,
       displayName: user.display_name,
       profileImageUrl: this.safeHttpsUrl(user.profile_image_url)
+    };
+  }
+
+  private async fetchStreamByUserId(userId: string): Promise<TwitchStreamStatus | undefined> {
+    const url = new URL("https://api.twitch.tv/helix/streams");
+    url.searchParams.set("user_id", userId);
+    const response = await this.request(url, { method: "GET" });
+    if (!response?.ok) return undefined;
+
+    const body = (await response.json()) as TwitchStreamsResponse;
+    const stream = body.data?.[0];
+    if (!stream?.user_id) return undefined;
+    return {
+      userId: stream.user_id,
+      userLogin: stream.user_login,
+      userName: stream.user_name || stream.user_login,
+      title: stream.title,
+      gameId: stream.game_id,
+      gameName: stream.game_name,
+      viewerCount: typeof stream.viewer_count === "number" ? Math.max(0, Math.trunc(stream.viewer_count)) : undefined,
+      startedAt: stream.started_at,
+      thumbnailUrl: this.safeHttpsUrl(stream.thumbnail_url)
     };
   }
 
@@ -290,6 +472,22 @@ export class TwitchApiClient {
     });
     this.observeRateLimit(host, retryResponse);
     return retryResponse;
+  }
+
+  private async requestWithAccessContext(url: string | URL, init: RequestInit, context: TwitchApiAccessContext): Promise<Response> {
+    const host = safeHost(url);
+    await this.waitForRateLimit(host);
+    const response = await fetch(url, {
+      ...init,
+      headers: {
+        "Client-Id": context.clientId,
+        Authorization: `Bearer ${context.accessToken}`,
+        "Content-Type": "application/json",
+        ...init.headers
+      }
+    });
+    this.observeRateLimit(host, response);
+    return response;
   }
 
   private async waitForRateLimit(host: string): Promise<void> {

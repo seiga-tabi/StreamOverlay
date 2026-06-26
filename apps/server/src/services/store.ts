@@ -702,6 +702,27 @@ export class Store {
     return entry ? { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined } : undefined;
   }
 
+  findReusableParticipationProfile(input: {
+    riotGameName: string;
+    riotTagLine: string;
+    riotPuuid?: string;
+  }): ParticipationEntry | undefined {
+    const riotIdKey = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
+    const reusable = this.participationQueue
+      .filter((candidate) => {
+        if (isActiveParticipationStatus(candidate.status)) return false;
+        if (!candidate.profileStatus && !candidate.rankedStats && !candidate.topChampions?.length) return false;
+        if (input.riotPuuid && candidate.riotPuuid && candidate.riotPuuid === input.riotPuuid) return true;
+        return normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine) === riotIdKey;
+      })
+      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
+    return reusable ? {
+      ...reusable,
+      topChampions: reusable.topChampions ? reusable.topChampions.map((champion) => ({ ...champion })) : undefined,
+      rankedStats: reusable.rankedStats ? { ...reusable.rankedStats } : undefined
+    } : undefined;
+  }
+
   findParticipationDuplicate(input: {
     twitchUserId: string;
     riotGameName: string;

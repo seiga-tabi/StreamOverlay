@@ -205,6 +205,24 @@ function duplicateMessage(reason: "twitch_user" | "riot_id", twitchUserName: str
   return chatGuide(`${twitchUserName}さん、この Riot ID はすでに登録されています。`, `${twitchUserName}님, 이미 등록된 Riot ID입니다.`, "登録済み", "등록됨");
 }
 
+function reusableProfilePatch(previous: ParticipationEntry | undefined): Pick<
+  Partial<ParticipationEntry>,
+  "profileStatus" | "profileFailureReason" | "mainRole" | "mainRoleConfidence" | "topChampions" | "rankedStats" | "verifiedRank" | "profileAnalyzedAt" | "riotPuuid"
+> {
+  if (!previous) return {};
+  return {
+    riotPuuid: previous.riotPuuid,
+    profileStatus: previous.profileStatus,
+    profileFailureReason: previous.profileFailureReason,
+    mainRole: previous.mainRole,
+    mainRoleConfidence: previous.mainRoleConfidence,
+    topChampions: previous.topChampions?.map((champion) => ({ ...champion })),
+    rankedStats: previous.rankedStats ? { ...previous.rankedStats } : undefined,
+    verifiedRank: previous.verifiedRank,
+    profileAnalyzedAt: previous.profileAnalyzedAt
+  };
+}
+
 async function applyFromText(ctx: ModuleContext, settings: ParticipationSettingsFile, input: {
   text: string;
   twitchUserId: string;
@@ -288,22 +306,36 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
     return;
   }
 
+  const previousProfile = ctx.store.findReusableParticipationProfile({
+    riotGameName: parsedInput.riotId.gameName,
+    riotTagLine: parsedInput.riotId.tagLine,
+    riotPuuid
+  });
+  const reusedProfile = reusableProfilePatch(previousProfile);
+  const resolvedRiotPuuid = riotPuuid ?? reusedProfile.riotPuuid;
   const entry = ctx.store.makeParticipationEntry({
     twitchUserId: input.twitchUserId,
     twitchUserName: input.twitchUserName,
     riotGameName: parsedInput.riotId.gameName,
     riotTagLine: parsedInput.riotId.tagLine,
-    riotPuuid,
+    riotPuuid: resolvedRiotPuuid,
     requestedRole: parsedInput.role,
     preferredRole: parsedInput.role,
-    profileStatus: ctx.lolProfileEnrichment ? "pending" : undefined,
-    status: riotPuuid ? "verified" : "waitlisted",
+    profileStatus: reusedProfile.profileStatus ?? (ctx.lolProfileEnrichment ? "pending" : undefined),
+    profileFailureReason: reusedProfile.profileFailureReason,
+    mainRole: reusedProfile.mainRole,
+    mainRoleConfidence: reusedProfile.mainRoleConfidence,
+    topChampions: reusedProfile.topChampions,
+    rankedStats: reusedProfile.rankedStats,
+    verifiedRank: reusedProfile.verifiedRank,
+    profileAnalyzedAt: reusedProfile.profileAnalyzedAt,
+    status: resolvedRiotPuuid ? "verified" : "waitlisted",
     source: input.source,
     redemptionId: input.redemptionId
   });
 
   const saved = ctx.store.addParticipation(entry);
-  ctx.logger.event({ type: "participation.applied", verification, entry: logEntry(saved) });
+  ctx.logger.event({ type: "participation.applied", verification, reusedProfile: Boolean(previousProfile), entry: logEntry(saved) });
   ctx.events.emit({
     type: "participation.entryCreated",
     id: newId("event"),

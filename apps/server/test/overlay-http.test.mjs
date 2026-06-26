@@ -78,6 +78,78 @@ function createResponse() {
   };
 }
 
+test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공된다", async () => {
+  const previousConfig = {
+    publicBaseUrl: appConfig.publicBaseUrl,
+    overlayBaseUrl: appConfig.overlayBaseUrl
+  };
+  appConfig.publicBaseUrl = "http://localhost:3000";
+  appConfig.overlayBaseUrl = "http://localhost:3000/overlay";
+
+  try {
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const dashboardReq = createRequest("GET", "/dashboard/config.js");
+    const dashboardRes = createResponse();
+    await handler(dashboardReq, dashboardRes);
+
+    assert.equal(dashboardRes.statusCode, 200);
+    assert.match(dashboardRes.headers["Content-Type"], /text\/javascript/);
+    assert.match(dashboardRes.headers["Cache-Control"], /no-cache/);
+    assert.match(dashboardRes.body, /apiBase/);
+    assert.match(dashboardRes.body, /wsBase/);
+    assert.match(dashboardRes.body, /overlayBase/);
+    assert.match(dashboardRes.body, /http:\/\/localhost:3000\/overlay/);
+    assert.doesNotMatch(dashboardRes.body, /localhost:5174/);
+
+    const overlayReq = createRequest("GET", "/overlay/config.js");
+    const overlayRes = createResponse();
+    await handler(overlayReq, overlayRes);
+
+    assert.equal(overlayRes.statusCode, 200);
+    assert.match(overlayRes.headers["Content-Type"], /text\/javascript/);
+    assert.match(overlayRes.headers["Cache-Control"], /no-cache/);
+    assert.match(overlayRes.body, /wsBase/);
+    assert.doesNotMatch(overlayRes.body, /overlayBase/);
+  } finally {
+    appConfig.publicBaseUrl = previousConfig.publicBaseUrl;
+    appConfig.overlayBaseUrl = previousConfig.overlayBaseUrl;
+  }
+});
+
+test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-public-lol-route-"));
+  try {
+    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>LOLTRACE</title><div id=\"root\"></div>");
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const req = createRequest("GET", "/lol/summoners/jp/%E3%81%9B%E3%81%84%E3%81%8C-sei");
+    const res = createResponse();
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.match(res.headers["Content-Type"], /text\/html/);
+    assert.match(res.body, /LOLTRACE/);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("dashboard overlay test action은 /api/actions/test에서 검증 후 dispatch된다", async () => {
   const dispatched = [];
   const handler = createHttpHandler({

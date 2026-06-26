@@ -180,7 +180,11 @@ function isUsablePuuid(puuid: string | undefined): puuid is string {
 function rankLabel(stats: LolRankedStats | undefined): string | undefined {
   if (!stats) return undefined;
   if (stats.tier === "UNRANKED") return stats.summonerLevel ? `Unranked Lv.${stats.summonerLevel}` : "Unranked";
-  const queue = stats.queueType === "RANKED_FLEX_SR" ? "자유랭크" : "솔로랭크";
+  const queue = stats.queueType === "RANKED_FLEX_SR"
+    ? "자유랭크"
+    : stats.queueType === "RANKED_TEAM_5x5"
+      ? "5v5 랭크"
+      : "솔로랭크";
   return `${queue} ${stats.tier}${stats.rank ? ` ${stats.rank}` : ""} ${stats.leaguePoints}LP`;
 }
 
@@ -189,7 +193,7 @@ function rankScore(stats: LolRankedStats): number {
   return RANK_TIER_SCORE[stats.tier] + (stats.rank ? RANK_DIVISION_SCORE[stats.rank] ?? 0 : 0) + Math.max(0, Math.trunc(stats.leaguePoints));
 }
 
-function buildRankHistory(previous: LolRankHistoryPoint[] | undefined, stats: LolRankedStats | undefined, analyzedAt: string): LolRankHistoryPoint[] | undefined {
+export function buildRankHistory(previous: LolRankHistoryPoint[] | undefined, stats: LolRankedStats | undefined, analyzedAt: string): LolRankHistoryPoint[] | undefined {
   const cutoff = Date.parse(analyzedAt) - RANK_HISTORY_WINDOW_MS;
   const history = (previous ?? [])
     .filter((point) => {

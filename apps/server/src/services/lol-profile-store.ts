@@ -26,6 +26,7 @@ export type LolProfileCacheEntry = {
 export interface LolProfileRepository {
   getByPuuid(puuid: string): LolProfileCacheEntry | undefined;
   getByRiotId(gameName: string, tagLine: string): LolProfileCacheEntry | undefined;
+  searchByText(query: string, limit?: number): LolProfileCacheEntry[];
   save(entry: LolProfileCacheEntry): LolProfileCacheEntry;
 }
 
@@ -60,6 +61,24 @@ export class LocalJsonLolProfileRepository implements LolProfileRepository {
     const key = normalizeRiotIdKey(gameName, tagLine);
     const entry = [...this.profiles.values()].find((profile) => profile.riotIdKey === key);
     return entry ? clone(entry) : undefined;
+  }
+
+  searchByText(query: string, limit = 8): LolProfileCacheEntry[] {
+    const searchText = query.trim().normalize("NFKC").replace(/＃/g, "#").toLocaleLowerCase();
+    if (!searchText) return [];
+    const safeLimit = Math.max(1, Math.min(20, Math.trunc(limit)));
+    return [...this.profiles.values()]
+      .filter((profile) => {
+        const riotId = `${profile.riotGameName}#${profile.riotTagLine}`.normalize("NFKC").toLocaleLowerCase();
+        const gameName = profile.riotGameName.normalize("NFKC").toLocaleLowerCase();
+        const tagLine = profile.riotTagLine.normalize("NFKC").toLocaleLowerCase();
+        const tagOnly = searchText.startsWith("#") ? searchText.slice(1) : "";
+        if (tagOnly) return tagLine.includes(tagOnly);
+        return riotId.includes(searchText) || gameName.includes(searchText) || tagLine.includes(searchText);
+      })
+      .sort((a, b) => Date.parse(b.analyzedAt ?? "") - Date.parse(a.analyzedAt ?? ""))
+      .slice(0, safeLimit)
+      .map(clone);
   }
 
   save(entry: LolProfileCacheEntry): LolProfileCacheEntry {

@@ -119,6 +119,14 @@ export function authenticateDashboardRequest(req: IncomingMessage, sessions: Das
 export function requiredHttpPrincipal(method: string | undefined, pathname: string): PrincipalType {
   if (pathname === "/health" || pathname === "/health/live" || pathname === "/health/ready") return "PUBLIC";
   if (pathname === "/api/dashboard/auth/status" || pathname === "/api/dashboard/auth/check") return "PUBLIC";
+  if (method === "GET" && (
+    pathname === "/api/lol/profile" ||
+    pathname === "/api/lol/suggestions" ||
+    pathname === "/api/lol/matches" ||
+    pathname === "/api/lol/match-ranks"
+  )) return "PUBLIC";
+  if (pathname === "/api/public/twitch/status" || pathname === "/api/public/twitch/followed-lol" || pathname === "/api/public/twitch/logout") return "PUBLIC";
+  if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (pathname.startsWith("/api/")) return "DASHBOARD_ADMIN";
   return "PUBLIC";

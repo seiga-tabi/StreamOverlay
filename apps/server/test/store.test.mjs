@@ -58,6 +58,46 @@ test("Store는 overlay 시참 대기열을 4명으로 제한하고 게임 시작
   assert.deepEqual(store.getParticipationOverlayQueue().map((entry) => `${entry.position}:${entry.twitchUserName}`), ["1:Viewer5", "2:Viewer6"]);
 });
 
+test("Store는 이전 참가자의 비활성 Riot 프로필 기록을 재사용 후보로 반환한다", () => {
+  const store = new Store();
+  const previous = store.addParticipation(store.makeParticipationEntry({
+    twitchUserId: "viewer-1",
+    twitchUserName: "Viewer1",
+    riotGameName: "HideOnBush",
+    riotTagLine: "KR1",
+    riotPuuid: "puuid-hide",
+    preferredRole: "mid",
+    status: "played",
+    source: "chat_command",
+    profileStatus: "ready",
+    mainRole: "MIDDLE",
+    mainRoleConfidence: 82,
+    topChampions: [{ championId: 103, nameKo: "아리" }],
+    rankedStats: {
+      queueType: "RANKED_SOLO_5x5",
+      tier: "DIAMOND",
+      rank: "I",
+      leaguePoints: 55,
+      wins: 100,
+      losses: 80,
+      winRate: 56,
+      fetchedAt: "2026-06-26T00:00:00.000Z"
+    },
+    verifiedRank: "솔로랭크 DIAMOND I 55LP",
+    profileAnalyzedAt: "2026-06-26T00:00:00.000Z"
+  }));
+
+  const reusable = store.findReusableParticipationProfile({
+    riotGameName: "hideonbush",
+    riotTagLine: "kr1"
+  });
+
+  assert.equal(reusable?.id, previous.id);
+  assert.equal(reusable?.profileStatus, "ready");
+  assert.equal(reusable?.mainRole, "MIDDLE");
+  assert.equal(reusable?.topChampions?.[0]?.nameKo, "아리");
+});
+
 test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", () => {
   const store = new Store();
 

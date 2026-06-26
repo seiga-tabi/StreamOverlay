@@ -166,6 +166,7 @@ function regionFromTagLine(tagLine: string): string {
 
 function soloRankQueueLabel(profile: ParticipationStreamerProfile | undefined): string {
   if (profile?.rankedStats?.queueType === "RANKED_FLEX_SR") return "Flex";
+  if (profile?.rankedStats?.queueType === "RANKED_TEAM_5x5") return "5v5";
   return "Solo/Duo";
 }
 

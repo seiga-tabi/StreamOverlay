@@ -64,6 +64,48 @@ test("TwitchApiClient는 channel followers를 pagination으로 조회한다", as
   assert.ok(calls.every((call) => call.authorization === "Bearer access-token"));
 });
 
+test("TwitchApiClient는 로그인 사용자가 팔로우 중인 채널을 조회한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: new URL(String(url)), authorization: init?.headers?.Authorization });
+    return jsonResponse({
+      total: 1,
+      data: [{ broadcaster_id: "55", broadcaster_login: "streamer", broadcaster_name: "Streamer", followed_at: "2026-06-26T00:00:00Z" }],
+      pagination: {}
+    });
+  };
+
+  const client = new TwitchApiClient(createAuth());
+  const result = await client.getFollowedChannels({
+    clientId: "client-id",
+    accessToken: "viewer-access-token",
+    scopes: ["user:read:follows"],
+    userId: "999"
+  });
+
+  assert.equal(result.total, 1);
+  assert.equal(result.truncated, false);
+  assert.deepEqual(result.channels.map((channel) => channel.broadcasterName), ["Streamer"]);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url.pathname, "/helix/channels/followed");
+  assert.equal(calls[0].url.searchParams.get("user_id"), "999");
+  assert.equal(calls[0].authorization, "Bearer viewer-access-token");
+});
+
+test("TwitchApiClient는 팔로우 조회 scope가 없으면 followed channel 조회를 거부한다", async () => {
+  const client = new TwitchApiClient(createAuth());
+
+  await assert.rejects(
+    () => client.getFollowedChannels({
+      clientId: "client-id",
+      accessToken: "viewer-access-token",
+      scopes: ["user:read:chat"],
+      userId: "999"
+    }),
+    /user:read:follows/
+  );
+});
+
 test("TwitchApiClient는 followers scope가 없으면 조회를 거부한다", async () => {
   const client = new TwitchApiClient(createAuth(["user:read:chat"]));
 
@@ -71,6 +113,38 @@ test("TwitchApiClient는 followers scope가 없으면 조회를 거부한다", a
     () => client.getChannelFollowers(),
     /moderator:read:followers/
   );
+});
+
+test("TwitchApiClient는 user id로 현재 방송 상태를 조회하고 짧게 캐시한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: new URL(String(url)), authorization: init?.headers?.Authorization });
+    return jsonResponse({
+      data: [{
+        user_id: "1234",
+        user_login: "hideonbush",
+        user_name: "Hide on bush",
+        game_id: "21779",
+        game_name: "League of Legends",
+        title: "랭크 방송",
+        viewer_count: 321,
+        started_at: "2026-06-26T01:00:00Z",
+        thumbnail_url: "https://static-cdn.jtvnw.net/previews-ttv/live_user_hideonbush-{width}x{height}.jpg"
+      }]
+    });
+  };
+
+  const client = new TwitchApiClient(createAuth());
+  const first = await client.getStreamByUserId("1234");
+  const second = await client.getStreamByUserId("1234");
+
+  assert.equal(first?.userName, "Hide on bush");
+  assert.equal(first?.viewerCount, 321);
+  assert.deepEqual(second, first);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url.pathname, "/helix/streams");
+  assert.equal(calls[0].url.searchParams.get("user_id"), "1234");
+  assert.equal(calls[0].authorization, "Bearer access-token");
 });
 
 test("TwitchApiClient는 429 이후 Ratelimit-Reset까지 다음 요청을 지연한다", async () => {

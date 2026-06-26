@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { TwitchAuthService, TwitchOAuthStateStore } from "../dist/services/twitch-auth.js";
 import { MemoryTwitchTokenStore } from "../dist/services/twitch-token-store.js";
+import { PublicTwitchAuthService, PublicTwitchViewerSessionStore } from "../dist/services/public-twitch-auth.js";
 
 const baseConfig = {
   clientId: "client_id_test",
@@ -24,6 +25,30 @@ test("OAuth URL은 Authorization Code Flow와 최소 scope, state를 포함한�
   assert.equal(url.searchParams.get("client_id"), baseConfig.clientId);
   assert.equal(url.searchParams.get("redirect_uri"), baseConfig.redirectUri);
   assert.equal(url.searchParams.get("scope"), "user:read:chat user:write:chat channel:read:redemptions");
+  assert.ok(url.searchParams.get("state"));
+});
+
+test("공개 Twitch 로그인 URL은 팔로우 조회 scope만 요청한다", () => {
+  const service = new PublicTwitchAuthService(
+    new PublicTwitchViewerSessionStore(),
+    new TwitchOAuthStateStore(),
+    {
+      clientId: "client_id_test",
+      clientSecret: "client_secret_test",
+      redirectUri: "http://localhost:3000/api/public/twitch/auth/callback",
+      dashboardBaseUrl: "http://localhost:5173"
+    },
+    async () => {
+      throw new Error("fetch should not be called");
+    }
+  );
+
+  const url = new URL(service.createAuthorizationUrl());
+  assert.equal(url.origin + url.pathname, "https://id.twitch.tv/oauth2/authorize");
+  assert.equal(url.searchParams.get("response_type"), "code");
+  assert.equal(url.searchParams.get("client_id"), baseConfig.clientId);
+  assert.equal(url.searchParams.get("redirect_uri"), "http://localhost:3000/api/public/twitch/auth/callback");
+  assert.equal(url.searchParams.get("scope"), "user:read:follows");
   assert.ok(url.searchParams.get("state"));
 });
 

@@ -5,12 +5,14 @@ export function LoginPage({
   checking,
   disabled,
   error,
-  onLogin
+  onLogin,
+  onBackToPublic
 }: {
   checking: boolean;
   disabled?: boolean;
   error: string;
   onLogin: (token: string) => Promise<void>;
+  onBackToPublic?: () => void;
 }) {
   const [token, setToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -55,6 +57,7 @@ export function LoginPage({
           <button disabled={disabled || !token.trim() || checking || submitting} type="submit">
             {checking || submitting ? t.checking : t.login}
           </button>
+          {onBackToPublic ? <button className="secondary" type="button" onClick={onBackToPublic}>{t.backToPublic}</button> : null}
         </form>
         <p className="hint">{t.hint}</p>
       </section>

@@ -13,6 +13,7 @@ import { TwitchApiClient } from "./services/twitch-api.js";
 import { TwitchEventSubClient } from "./services/twitch-eventsub-client.js";
 import { TwitchAuthChatTokenProvider, TwitchChatService } from "./services/twitch-chat-service.js";
 import { TwitchAuthService, TwitchOAuthStateStore } from "./services/twitch-auth.js";
+import { PublicTwitchAuthService, PublicTwitchViewerSessionStore } from "./services/public-twitch-auth.js";
 import { LocalJsonTwitchTokenStore } from "./services/twitch-token-store.js";
 import { RiotApiClient } from "./services/riot-api.js";
 import { LocalJsonRiotApiKeyStore } from "./services/riot-api-key-store.js";
@@ -38,6 +39,7 @@ const overlay = new OverlayHub(logger, store, () => dashboard.broadcastSnapshot(
 const bridge = new BridgeManager(logger, store, dashboard);
 const twitchTokenStore = new LocalJsonTwitchTokenStore(appConfig.twitch.tokenStorePath);
 const twitchAuth = new TwitchAuthService(twitchTokenStore, new TwitchOAuthStateStore());
+const publicTwitchAuth = new PublicTwitchAuthService(new PublicTwitchViewerSessionStore(), new TwitchOAuthStateStore());
 const twitch = new TwitchApiClient(twitchAuth);
 const twitchChat = new TwitchChatService(new TwitchAuthChatTokenProvider(twitchAuth), logger, store);
 const riotApiKeyStore = new LocalJsonRiotApiKeyStore();
@@ -96,7 +98,9 @@ const server = http.createServer(createHttpHandler({
   twitch,
   riot,
   dataDragon,
+  profileRepository: lolProfileRepository,
   twitchAuth,
+  publicTwitchAuth,
   eventSub: twitchEventSub,
   refreshLolProfile: (entryId) => refreshLolProfileForEntry(moduleContext, entryId),
   sessions
