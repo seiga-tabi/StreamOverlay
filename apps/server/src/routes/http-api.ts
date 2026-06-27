@@ -20,7 +20,9 @@ import {
   type LolRoleAnalysis,
   type ParticipationPhase,
   type ParticipationStreamerProfile,
-  type ParticipationStatus
+  type ParticipationStatus,
+  type StreamerProfileLink,
+  type StreamerRiotIdRequest
 } from "@streamops/shared";
 import type { TwitchAuthService } from "../services/twitch-auth.js";
 import type { TwitchApiClient, TwitchStreamStatus } from "../services/twitch-api.js";
@@ -72,6 +74,9 @@ const FOLLOWER_REFRESH_COOLDOWN_MS = 5 * 60_000;
 const PUBLIC_LOL_PROFILE_MATCH_COUNT = 20;
 const PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT = 20;
 const PUBLIC_LOL_PROFILE_MAX_MATCH_START = 200;
+const STREAMER_PROFILE_LINK_MAX = 5;
+const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
+const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
 const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 3 * 60_000;
@@ -367,13 +372,16 @@ type PublicLolTwitchStream = {
   twitchLogin?: string;
   twitchDisplayName: string;
   profileImageUrl?: string;
+  profileLinkUrl?: string;
+  profileLinkLabel?: string;
+  profileLinks?: StreamerProfileLink[];
   channelUrl?: string;
   title?: string;
   gameName?: string;
   viewerCount?: number;
   startedAt?: string;
   thumbnailUrl?: string;
-  source: "participation" | "connected_streamer";
+  source: "participation" | "connected_streamer" | "approved_streamer";
 };
 
 type PublicLolTwitchCandidate = {
@@ -381,6 +389,9 @@ type PublicLolTwitchCandidate = {
   twitchLogin?: string;
   twitchDisplayName: string;
   profileImageUrl?: string;
+  profileLinkUrl?: string;
+  profileLinkLabel?: string;
+  profileLinks?: StreamerProfileLink[];
   source: PublicLolTwitchStream["source"];
 };
 
@@ -401,7 +412,7 @@ type PublicTwitchFollowedLolChannel = {
   riotGameName?: string;
   riotTagLine?: string;
   rankedStats?: LolRankedStats;
-  source?: "participation" | "connected_streamer";
+  source?: "participation" | "connected_streamer" | "approved_streamer";
 };
 
 type PublicTwitchFollowedLolResponse = {
@@ -410,6 +421,10 @@ type PublicTwitchFollowedLolResponse = {
   truncated: boolean;
   matchedCount: number;
   channels: PublicTwitchFollowedLolChannel[];
+};
+
+type PublicTwitchViewerStatusResponse = Awaited<ReturnType<PublicTwitchAuthService["getStatus"]>> & {
+  streamerRiotRequest?: StreamerRiotIdRequest;
 };
 
 type FollowerManagementState = ReturnType<Store["getFollowerManagementState"]>;
@@ -518,8 +533,8 @@ function wsOriginFor(value: string): string {
   }
 }
 
-function cspForStaticApp(mountPath: "/dashboard" | "/overlay"): string {
-  if (mountPath === "/dashboard") {
+function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay"): string {
+  if (mountPath === "/admin" || mountPath === "/dashboard") {
     return [
       "default-src 'self'",
       "base-uri 'none'",
@@ -917,10 +932,10 @@ async function sendRankedEmblemAsset(req: IncomingMessage, res: ServerResponse, 
   }
 }
 
-async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname: string, mountPath: "/dashboard" | "/overlay", staticDir: string): Promise<boolean> {
+async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname: string, mountPath: "/admin" | "/dashboard" | "/overlay", staticDir: string): Promise<boolean> {
   if (pathname !== mountPath && !pathname.startsWith(`${mountPath}/`)) return false;
   if (pathname === `${mountPath}/config.js`) {
-    const body = mountPath === "/dashboard" ? dashboardRuntimeConfig() : overlayRuntimeConfig();
+    const body = mountPath === "/overlay" ? overlayRuntimeConfig() : dashboardRuntimeConfig();
     res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-cache", ...SECURITY_HEADERS });
     if (req.method === "HEAD") {
       res.end();
@@ -932,6 +947,10 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
   const relative = pathname === mountPath || pathname === `${mountPath}/`
     ? "index.html"
     : decodeURIComponent(pathname.slice(mountPath.length + 1));
+  if (mountPath === "/overlay" && relative && !path.extname(relative)) {
+    await sendStaticFile(req, res, path.resolve(staticDir, "index.html"));
+    return true;
+  }
   const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
   const candidate = path.resolve(staticDir, normalized);
   const root = path.resolve(staticDir);
@@ -1577,6 +1596,109 @@ function twitchChannelUrl(login: string | undefined): string | undefined {
   return login ? `https://www.twitch.tv/${encodeURIComponent(login)}` : undefined;
 }
 
+function defaultStreamerProfileLinkLabel(url: URL): string {
+  return url.hostname.replace(/^www\./i, "").slice(0, STREAMER_PROFILE_LINK_LABEL_MAX) || "Link";
+}
+
+function streamerProfileLinkPlatform(url: URL): string {
+  const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+  if (host === "youtu.be" || host.endsWith("youtube.com")) return "youtube";
+  if (host.endsWith("twitch.tv")) return "twitch";
+  if (host === "discord.gg" || host.endsWith("discord.com")) return "discord";
+  if (host === "x.com" || host.endsWith("twitter.com")) return "x";
+  if (host.endsWith("instagram.com")) return "instagram";
+  if (host.endsWith("tiktok.com")) return "tiktok";
+  if (host.endsWith("afreecatv.com") || host.endsWith("sooplive.co.kr")) return "soop";
+  return "website";
+}
+
+function normalizedStreamerProfileLinkEntry(input: unknown, index: number): StreamerProfileLink | undefined {
+  const record = typeof input === "object" && input !== null ? input as {
+    id?: unknown;
+    url?: unknown;
+    label?: unknown;
+  } : undefined;
+  if (!record) {
+    throw new HttpRequestError(400, { error: "프로필 링크 항목은 객체여야 합니다." });
+  }
+  if (record.url !== undefined && typeof record.url !== "string") {
+    throw new HttpRequestError(400, { error: "프로필 링크 URL은 문자열이어야 합니다." });
+  }
+  if (record.label !== undefined && typeof record.label !== "string") {
+    throw new HttpRequestError(400, { error: "프로필 링크 이름은 문자열이어야 합니다." });
+  }
+  if (record.id !== undefined && typeof record.id !== "string") {
+    throw new HttpRequestError(400, { error: "프로필 링크 ID는 문자열이어야 합니다." });
+  }
+  const rawUrl = typeof record.url === "string" ? record.url.trim() : "";
+  if (!rawUrl) return undefined;
+  if (rawUrl.length > STREAMER_PROFILE_LINK_URL_MAX) {
+    throw new HttpRequestError(400, { error: "프로필 링크 URL은 2048자 이하여야 합니다." });
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new HttpRequestError(400, { error: "프로필 링크 URL 형식이 올바르지 않습니다." });
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new HttpRequestError(400, { error: "프로필 링크는 http 또는 https URL만 사용할 수 있습니다." });
+  }
+  if (parsed.username || parsed.password) {
+    throw new HttpRequestError(400, { error: "프로필 링크에는 사용자 인증 정보를 포함할 수 없습니다." });
+  }
+  const rawId = typeof record.id === "string" ? record.id.trim() : "";
+  const rawLabel = typeof record.label === "string" ? record.label.trim() : "";
+  return {
+    id: (rawId || `plink_${crypto.randomBytes(8).toString("hex")}_${index}`).slice(0, 80),
+    url: parsed.toString(),
+    label: (rawLabel || defaultStreamerProfileLinkLabel(parsed)).slice(0, STREAMER_PROFILE_LINK_LABEL_MAX),
+    platform: streamerProfileLinkPlatform(parsed)
+  };
+}
+
+function normalizedStreamerProfileLink(body: {
+  profileLinkUrl?: unknown;
+  profileLinkLabel?: unknown;
+  profileLinks?: unknown;
+}): {
+  profileLinkUrl?: string;
+  profileLinkLabel?: string;
+  profileLinks?: StreamerProfileLink[];
+} {
+  if (body.profileLinks !== undefined) {
+    if (!Array.isArray(body.profileLinks)) {
+      throw new HttpRequestError(400, { error: "profileLinks는 배열이어야 합니다." });
+    }
+    if (body.profileLinks.length > STREAMER_PROFILE_LINK_MAX) {
+      throw new HttpRequestError(400, { error: `프로필 링크는 최대 ${STREAMER_PROFILE_LINK_MAX}개까지 등록할 수 있습니다.` });
+    }
+    const profileLinks = body.profileLinks
+      .map((item, index) => normalizedStreamerProfileLinkEntry(item, index))
+      .filter((item): item is StreamerProfileLink => Boolean(item));
+    return {
+      profileLinkUrl: profileLinks[0]?.url,
+      profileLinkLabel: profileLinks[0]?.label,
+      profileLinks
+    };
+  }
+  if (body.profileLinkUrl !== undefined && typeof body.profileLinkUrl !== "string") {
+    throw new HttpRequestError(400, { error: "profileLinkUrl은 문자열이어야 합니다." });
+  }
+  if (body.profileLinkLabel !== undefined && typeof body.profileLinkLabel !== "string") {
+    throw new HttpRequestError(400, { error: "profileLinkLabel은 문자열이어야 합니다." });
+  }
+  const rawUrl = body.profileLinkUrl?.trim() ?? "";
+  const rawLabel = body.profileLinkLabel?.trim() ?? "";
+  if (!rawUrl) return {};
+  const profileLink = normalizedStreamerProfileLinkEntry({ url: rawUrl, label: rawLabel }, 0);
+  return {
+    profileLinkUrl: profileLink?.url,
+    profileLinkLabel: profileLink?.label,
+    profileLinks: profileLink ? [profileLink] : []
+  };
+}
+
 function publicLolTwitchStreamFromCandidate(
   candidate: PublicLolTwitchCandidate,
   stream: TwitchStreamStatus | undefined,
@@ -1591,6 +1713,9 @@ function publicLolTwitchStreamFromCandidate(
     twitchLogin: login,
     twitchDisplayName: stream?.userName || profile?.displayName || candidate.twitchDisplayName,
     profileImageUrl: profile?.profileImageUrl || candidate.profileImageUrl,
+    profileLinkUrl: candidate.profileLinkUrl,
+    profileLinkLabel: candidate.profileLinkLabel,
+    profileLinks: candidate.profileLinks,
     channelUrl: twitchChannelUrl(login),
     title: stream?.title,
     gameName: stream?.gameName,
@@ -1705,6 +1830,20 @@ export function createHttpHandler(input: HttpHandlerInput) {
       });
     }
 
+    for (const request of listApprovedStreamerRiotIds()) {
+      if (request.normalizedRiotId !== riotIdKey) continue;
+      candidates.set(request.twitchUserId, {
+        twitchUserId: request.twitchUserId,
+        twitchLogin: request.twitchLogin,
+        twitchDisplayName: request.twitchDisplayName,
+        profileImageUrl: request.twitchProfileImageUrl,
+        profileLinkUrl: request.profileLinkUrl,
+        profileLinkLabel: request.profileLinkLabel,
+        profileLinks: request.profileLinks?.map((link) => ({ ...link })),
+        source: "approved_streamer"
+      });
+    }
+
     const monitorConfig = loadGameMonitorConfig();
     const streamerRiotId = parseRiotIdDetailed(monitorConfig.streamerRiotId);
     if (streamerRiotId.ok && normalizeRiotIdKey(streamerRiotId.gameName, streamerRiotId.tagLine) === riotIdKey && typeof input.twitchAuth.getStatus === "function") {
@@ -1743,6 +1882,122 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (profile?.rankedStats) return { ...profile.rankedStats };
     const suggestion = publicLolSuggestionCache.get(publicLolSuggestionKey(gameName, tagLine));
     return suggestion?.rankedStats ? { ...suggestion.rankedStats } : undefined;
+  }
+
+  function listApprovedStreamerRiotIds(): StreamerRiotIdRequest[] {
+    const storeWithRegistry = input.store as Store & { listApprovedStreamerRiotIds?: () => StreamerRiotIdRequest[] };
+    return typeof storeWithRegistry.listApprovedStreamerRiotIds === "function"
+      ? storeWithRegistry.listApprovedStreamerRiotIds()
+      : [];
+  }
+
+  function approvedStreamerRiotIdForTwitchUser(twitchUserId: string | undefined): StreamerRiotIdRequest | undefined {
+    if (!twitchUserId) return undefined;
+    return listApprovedStreamerRiotIds().find((request) => request.twitchUserId === twitchUserId);
+  }
+
+  function currentStreamerRiotIdRequestForTwitchUser(twitchUserId: string | undefined): StreamerRiotIdRequest | undefined {
+    if (!twitchUserId) return undefined;
+    const requests = listStreamerRiotIdRequests().filter((request) => request.twitchUserId === twitchUserId);
+    return requests.find((request) => request.status === "approved")
+      ?? requests.find((request) => request.status === "pending")
+      ?? requests[0];
+  }
+
+  function publicStreamerDashboardInfo(request: StreamerRiotIdRequest): {
+    twitchUserId: string;
+    twitchLogin: string;
+    twitchDisplayName: string;
+    twitchProfileImageUrl?: string;
+    riotGameName: string;
+    riotTagLine: string;
+    overlaySlug?: string;
+    overlayKey?: string;
+    profileLinkUrl?: string;
+    profileLinkLabel?: string;
+    profileLinks?: StreamerProfileLink[];
+  } {
+    return {
+      twitchUserId: request.twitchUserId,
+      twitchLogin: request.twitchLogin,
+      twitchDisplayName: request.twitchDisplayName,
+      twitchProfileImageUrl: request.twitchProfileImageUrl,
+      riotGameName: request.riotGameName,
+      riotTagLine: request.riotTagLine,
+      overlaySlug: request.overlaySlug,
+      overlayKey: request.overlayKey,
+      profileLinkUrl: request.profileLinkUrl,
+      profileLinkLabel: request.profileLinkLabel,
+      profileLinks: request.profileLinks?.map((link) => ({ ...link }))
+    };
+  }
+
+  function listStreamerRiotIdRequests(): StreamerRiotIdRequest[] {
+    const storeWithRegistry = input.store as Store & { listStreamerRiotIdRequests?: () => StreamerRiotIdRequest[] };
+    return typeof storeWithRegistry.listStreamerRiotIdRequests === "function"
+      ? storeWithRegistry.listStreamerRiotIdRequests()
+      : [];
+  }
+
+  function upsertStreamerRiotIdRequest(request: {
+    twitchUserId: string;
+    twitchLogin: string;
+    twitchDisplayName: string;
+    twitchProfileImageUrl?: string;
+    riotGameName: string;
+    riotTagLine: string;
+  }): StreamerRiotIdRequest {
+    const storeWithRegistry = input.store as Store & {
+      upsertStreamerRiotIdRequest?: (input: typeof request) => StreamerRiotIdRequest;
+    };
+    if (typeof storeWithRegistry.upsertStreamerRiotIdRequest !== "function") {
+      throw new HttpRequestError(503, { error: "스트리머 Riot ID 등록 저장소를 사용할 수 없습니다." });
+    }
+    return storeWithRegistry.upsertStreamerRiotIdRequest(request);
+  }
+
+  function resolveStreamerRiotIdRequest(request: {
+    requestId: string;
+    decision: "approved" | "rejected";
+    reviewer?: string;
+    note?: string;
+  }): StreamerRiotIdRequest | undefined {
+    const storeWithRegistry = input.store as Store & {
+      resolveStreamerRiotIdRequest?: (input: typeof request) => StreamerRiotIdRequest | undefined;
+    };
+    if (typeof storeWithRegistry.resolveStreamerRiotIdRequest !== "function") {
+      throw new HttpRequestError(503, { error: "스트리머 Riot ID 등록 저장소를 사용할 수 없습니다." });
+    }
+    return storeWithRegistry.resolveStreamerRiotIdRequest(request);
+  }
+
+  function updateApprovedStreamerProfileLink(request: {
+    twitchUserId: string;
+    profileLinkUrl?: string;
+    profileLinkLabel?: string;
+    profileLinks?: StreamerProfileLink[];
+  }): StreamerRiotIdRequest | undefined {
+    const storeWithRegistry = input.store as Store & {
+      updateApprovedStreamerProfileLink?: (input: typeof request) => StreamerRiotIdRequest | undefined;
+    };
+    if (typeof storeWithRegistry.updateApprovedStreamerProfileLink !== "function") {
+      throw new HttpRequestError(503, { error: "스트리머 프로필 링크 저장소를 사용할 수 없습니다." });
+    }
+    return storeWithRegistry.updateApprovedStreamerProfileLink(request);
+  }
+
+  function updateApprovedStreamerRiotId(request: {
+    twitchUserId: string;
+    riotGameName: string;
+    riotTagLine: string;
+  }): StreamerRiotIdRequest | undefined {
+    const storeWithRegistry = input.store as Store & {
+      updateApprovedStreamerRiotId?: (input: typeof request) => StreamerRiotIdRequest | undefined;
+    };
+    if (typeof storeWithRegistry.updateApprovedStreamerRiotId !== "function") {
+      throw new HttpRequestError(503, { error: "스트리머 Riot ID 저장소를 사용할 수 없습니다." });
+    }
+    return storeWithRegistry.updateApprovedStreamerRiotId(request);
   }
 
   function rememberPublicLolParticipantRank(riotId: string | undefined, rankedStats: LolRankedStats | undefined, fetchedAt: string): void {
@@ -1819,6 +2074,29 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }]));
   }
 
+  function approvedStreamerRiotProfilesByTwitchId(): Map<string, {
+    riotGameName: string;
+    riotTagLine: string;
+    rankedStats?: LolRankedStats;
+    source: "approved_streamer";
+  }> {
+    const profiles = new Map<string, {
+      riotGameName: string;
+      riotTagLine: string;
+      rankedStats?: LolRankedStats;
+      source: "approved_streamer";
+    }>();
+    for (const request of listApprovedStreamerRiotIds()) {
+      profiles.set(request.twitchUserId, {
+        riotGameName: request.riotGameName,
+        riotTagLine: request.riotTagLine,
+        rankedStats: cachedRankedStatsForRiotId(request.riotGameName, request.riotTagLine),
+        source: "approved_streamer"
+      });
+    }
+    return profiles;
+  }
+
   async function getPublicTwitchFollowedLol(limit: number, req: IncomingMessage): Promise<PublicTwitchFollowedLolResponse> {
     if (!input.publicTwitchAuth) {
       return { connected: false, truncated: false, matchedCount: 0, channels: [] };
@@ -1838,6 +2116,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       userId: context.userId
     }, safeLimit);
     const participationProfiles = participationRiotProfilesByTwitchId();
+    const approvedProfiles = approvedStreamerRiotProfilesByTwitchId();
     const connectedStreamer = await connectedStreamerRiotProfile();
     const streams = await input.twitch.getStreamsByUserIds({
       clientId: context.clientId,
@@ -1848,7 +2127,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const channels = followed.channels.map((channel): PublicTwitchFollowedLolChannel => {
       const connectedProfile = connectedStreamer?.twitchUserId === channel.broadcasterId ? connectedStreamer : undefined;
       const participationProfile = participationProfiles.get(channel.broadcasterId);
-      const riotProfile = connectedProfile ?? participationProfile;
+      const approvedProfile = approvedProfiles.get(channel.broadcasterId);
+      const riotProfile = connectedProfile ?? approvedProfile ?? participationProfile;
       const stream = streams.get(channel.broadcasterId);
       const riotId = riotProfile ? `${riotProfile.riotGameName}#${riotProfile.riotTagLine}` : undefined;
       return {
@@ -1884,6 +2164,52 @@ export function createHttpHandler(input: HttpHandlerInput) {
       matchedCount: channels.filter((channel) => Boolean(channel.riotId)).length,
       channels
     };
+  }
+
+  async function createPublicStreamerRiotIdRequest(req: IncomingMessage): Promise<StreamerRiotIdRequest> {
+    if (!input.publicTwitchAuth) {
+      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
+    }
+    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
+    const [context, status] = await Promise.all([
+      input.publicTwitchAuth.getAccessContext(sessionId),
+      input.publicTwitchAuth.getStatus(sessionId)
+    ]);
+    if (!context || !status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 Riot ID 등록을 요청할 수 있습니다." });
+    }
+    const body = await readJsonBody<{ riotId?: unknown }>(req);
+    if (typeof body.riotId !== "string") {
+      throw new HttpRequestError(400, { error: "riotId는 문자열이어야 합니다." });
+    }
+    const parsed = parseRiotIdDetailed(body.riotId);
+    if (!parsed.ok) {
+      throw new HttpRequestError(400, { error: parsed.message });
+    }
+    return upsertStreamerRiotIdRequest({
+      twitchUserId: status.user.id,
+      twitchLogin: status.user.login,
+      twitchDisplayName: status.user.displayName || status.user.login,
+      twitchProfileImageUrl: status.user.profileImageUrl,
+      riotGameName: parsed.gameName,
+      riotTagLine: parsed.tagLine
+    });
+  }
+
+  async function getPublicTwitchViewerStatus(req: IncomingMessage): Promise<PublicTwitchViewerStatusResponse> {
+    if (!input.publicTwitchAuth) {
+      return {
+        connected: false,
+        configured: false,
+        requiredScopes: ["user:read:follows"],
+        missingScopes: ["user:read:follows"]
+      };
+    }
+    const status = await input.publicTwitchAuth.getStatus(publicTwitchViewerSessionIdFromRequest(req));
+    const streamerRiotRequest = status.connected
+      ? currentStreamerRiotIdRequestForTwitchUser(status.user?.id)
+      : undefined;
+    return streamerRiotRequest ? { ...status, streamerRiotRequest } : status;
   }
 
   async function handlePublicTwitchAuthCallback(res: ServerResponse, url: URL): Promise<void> {
@@ -2468,6 +2794,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if ((req.method === "GET" || req.method === "HEAD") && await sendOverlayAlertAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendLocalTtsAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendRankedEmblemAsset(req, res, url.pathname)) return;
+      if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/admin", appConfig.paths.dashboardStatic)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/dashboard", appConfig.paths.dashboardStatic)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/overlay", appConfig.paths.overlayStatic)) return;
 
@@ -2494,11 +2821,41 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/health/ready") return sendJson(req, res, 200, { ok: true, status: "ready" });
       if (req.method === "GET" && url.pathname === "/api/dashboard/auth/status") {
         const principal = authenticateDashboardRequest(req, sessions);
+        if (principal?.type === "DASHBOARD_ADMIN") {
+          const streamer = principal.role === "streamer"
+            ? approvedStreamerRiotIdForTwitchUser(principal.twitchUserId)
+            : undefined;
+          return sendJson(req, res, 200, {
+            required: !appConfig.security.localNoAuth,
+            configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
+            authenticated: true,
+            role: principal.role,
+            streamer: streamer ? publicStreamerDashboardInfo(streamer) : undefined,
+            csrfToken: principal.method === "session" ? principal.csrfToken : undefined
+          });
+        }
+        if (input.publicTwitchAuth) {
+          const publicTwitchStatus = await input.publicTwitchAuth.getStatus(publicTwitchViewerSessionIdFromRequest(req));
+          const approvedStreamer = publicTwitchStatus.connected
+            ? approvedStreamerRiotIdForTwitchUser(publicTwitchStatus.user?.id)
+            : undefined;
+          if (approvedStreamer && publicTwitchStatus.user) {
+            const session = sessions.create({ role: "streamer", twitchUserId: publicTwitchStatus.user.id });
+            return sendJson(req, res, 200, {
+              required: !appConfig.security.localNoAuth,
+              configured: true,
+              authenticated: true,
+              role: "streamer",
+              streamer: publicStreamerDashboardInfo(approvedStreamer),
+              csrfToken: session.csrfToken,
+              expiresAt: new Date(session.expiresAt).toISOString()
+            }, { "Set-Cookie": dashboardSessionCookie(session) });
+          }
+        }
         return sendJson(req, res, 200, {
           required: !appConfig.security.localNoAuth,
           configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
-          authenticated: Boolean(principal),
-          csrfToken: principal?.type === "DASHBOARD_ADMIN" && principal.method === "session" ? principal.csrfToken : undefined
+          authenticated: false
         });
       }
       if (req.method === "GET" && url.pathname === "/api/lol/profile") {
@@ -2521,14 +2878,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, publicLocalePreference(req));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/status") {
-        if (!input.publicTwitchAuth) {
-          return sendJson(req, res, 200, { connected: false, configured: false, requiredScopes: ["user:read:follows"], missingScopes: ["user:read:follows"] });
-        }
-        return sendJson(req, res, 200, await input.publicTwitchAuth.getStatus(publicTwitchViewerSessionIdFromRequest(req)));
+        return sendJson(req, res, 200, await getPublicTwitchViewerStatus(req));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/followed-lol") {
         const limit = Number(url.searchParams.get("limit") ?? "100");
         return sendJson(req, res, 200, await getPublicTwitchFollowedLol(limit, req));
+      }
+      if (req.method === "POST" && url.pathname === "/api/public/twitch/riot-id-request") {
+        return sendJson(req, res, 200, { request: await createPublicStreamerRiotIdRequest(req) });
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/auth/start") {
         if (!input.publicTwitchAuth) return sendJson(req, res, 503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
@@ -2558,6 +2915,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           required: !appConfig.security.localNoAuth,
           configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
           authenticated: true,
+          role: "admin",
           csrfToken: session.csrfToken,
           expiresAt: new Date(session.expiresAt).toISOString()
         }, { "Set-Cookie": dashboardSessionCookie(session) });
@@ -2654,6 +3012,61 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/participation/state") return sendJson(req, res, 200, input.store.getParticipationState());
       if (req.method === "GET" && url.pathname === "/api/participation/game-monitor") return sendJson(req, res, 200, loadGameMonitorConfig());
       if (req.method === "GET" && url.pathname === "/api/participation/streamer-profile") return sendJson(req, res, 200, { profile: input.store.getParticipationStreamerProfile() });
+      if (req.method === "POST" && url.pathname === "/api/participation/streamer-profile-link") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
+          return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
+        }
+        const body = await readJsonBody<{ profileLinkUrl?: unknown; profileLinkLabel?: unknown; profileLinks?: unknown }>(req);
+        const link = normalizedStreamerProfileLink(body);
+        const request = updateApprovedStreamerProfileLink({
+          twitchUserId: auth.principal.twitchUserId,
+          ...link
+        });
+        if (!request) return sendJson(req, res, 404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
+        return sendJson(req, res, 200, { streamer: publicStreamerDashboardInfo(request), request });
+      }
+      if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
+          return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
+        }
+        const previous = approvedStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
+        if (!previous) return sendJson(req, res, 404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
+        const body = await readJsonBody<{ riotId?: unknown }>(req);
+        if (typeof body.riotId !== "string") {
+          return sendJson(req, res, 400, { error: "riotId는 gameName#tagLine 문자열이어야 합니다." });
+        }
+        const parsed = parseRiotIdDetailed(body.riotId);
+        if (!parsed.ok) return sendJson(req, res, 400, { error: parsed.message });
+        const request = updateApprovedStreamerRiotId({
+          twitchUserId: auth.principal.twitchUserId,
+          riotGameName: parsed.gameName,
+          riotTagLine: parsed.tagLine
+        });
+        if (!request) return sendJson(req, res, 404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
+
+        const monitorConfig = loadGameMonitorConfig();
+        const monitorRiotId = parseRiotIdDetailed(monitorConfig.streamerRiotId);
+        let gameMonitor: LolGameMonitorConfig | undefined;
+        let streamerProfile: ParticipationStreamerProfile | undefined;
+        if (
+          monitorRiotId.ok &&
+          normalizeRiotIdKey(monitorRiotId.gameName, monitorRiotId.tagLine) === previous.normalizedRiotId
+        ) {
+          gameMonitor = saveGameMonitorConfig({ streamerRiotId: `${request.riotGameName}#${request.riotTagLine}` });
+          await restartActiveLolGameMonitor(gameMonitor);
+          streamerProfile = await refreshActiveStreamerProfile(true).catch(() => undefined);
+        }
+
+        return sendJson(req, res, 200, {
+          streamer: publicStreamerDashboardInfo(request),
+          request,
+          gameMonitor,
+          streamerProfile
+        });
+      }
+      if (req.method === "GET" && url.pathname === "/api/participation/streamer-riot-id-requests") {
+        return sendJson(req, res, 200, { requests: listStreamerRiotIdRequests() });
+      }
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings") return sendJson(req, res, 200, loadLolParticipationProfileSettings());
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings/skin-options") {
         try {
@@ -2686,6 +3099,25 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const saved = saveGameMonitorConfig(patch);
         await restartActiveLolGameMonitor(saved);
         return sendJson(req, res, 200, saved);
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/resolve") {
+        const body = await readJsonBody<{ requestId?: unknown; decision?: unknown; note?: unknown }>(req);
+        if (typeof body.requestId !== "string" || !body.requestId.trim()) {
+          return sendJson(req, res, 400, { error: "requestId는 문자열이어야 합니다." });
+        }
+        if (body.decision !== "approved" && body.decision !== "rejected") {
+          return sendJson(req, res, 400, { error: "decision은 approved 또는 rejected여야 합니다." });
+        }
+        const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 300) : undefined;
+        const request = resolveStreamerRiotIdRequest({
+          requestId: body.requestId,
+          decision: body.decision,
+          reviewer: "dashboard",
+          note
+        });
+        if (!request) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
+        return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/manual-control") {

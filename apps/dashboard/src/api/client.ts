@@ -2,12 +2,35 @@ import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../
 
 const API_BASE = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
 
+export type DashboardStreamerProfileLink = {
+  id: string;
+  url: string;
+  label: string;
+  platform?: string;
+};
+
+export type DashboardStreamerInfo = {
+  twitchUserId: string;
+  twitchLogin: string;
+  twitchDisplayName: string;
+  twitchProfileImageUrl?: string;
+  riotGameName: string;
+  riotTagLine: string;
+  overlaySlug?: string;
+  overlayKey?: string;
+  profileLinkUrl?: string;
+  profileLinkLabel?: string;
+  profileLinks?: DashboardStreamerProfileLink[];
+};
+
 export type DashboardAuthStatus = {
   required: boolean;
   configured?: boolean;
   authenticated: boolean;
+  role?: "admin" | "streamer";
   csrfToken?: string;
   expiresAt?: string;
+  streamer?: DashboardStreamerInfo;
 };
 
 function csrfHeaders(): Record<string, string> {
@@ -89,6 +112,25 @@ export async function logoutDashboardSession(): Promise<void> {
     headers: { "Content-Type": "application/json", ...csrfHeaders() },
     body: "{}"
   });
+}
+
+export async function updateStreamerProfileLink(body: {
+  profileLinkUrl?: string;
+  profileLinkLabel?: string;
+  profileLinks?: Array<{
+    id?: string;
+    url: string;
+    label?: string;
+    platform?: string;
+  }>;
+}): Promise<DashboardStreamerInfo> {
+  const result = await apiPost<{ streamer: DashboardStreamerInfo }>("/api/participation/streamer-profile-link", body);
+  return result.streamer;
+}
+
+export async function updateStreamerRiotId(riotId: string): Promise<DashboardStreamerInfo> {
+  const result = await apiPost<{ streamer: DashboardStreamerInfo }>("/api/participation/streamer-riot-id", { riotId });
+  return result.streamer;
 }
 
 export const apiBase = API_BASE;

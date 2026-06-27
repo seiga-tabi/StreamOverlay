@@ -3,10 +3,11 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { appConfig, originAllowed } from "../config.js";
 
 export type PrincipalType = "PUBLIC" | "DASHBOARD_ADMIN" | "OVERLAY_CLIENT" | "BRIDGE_SERVICE" | "OAUTH_CALLBACK";
+export type DashboardRole = "admin" | "streamer";
 
 export type AuthPrincipal =
   | { type: "PUBLIC" }
-  | { type: "DASHBOARD_ADMIN"; method: "session" | "token"; sessionId?: string; csrfToken?: string }
+  | { type: "DASHBOARD_ADMIN"; method: "session" | "token"; role: DashboardRole; sessionId?: string; csrfToken?: string; twitchUserId?: string }
   | { type: "OVERLAY_CLIENT" }
   | { type: "BRIDGE_SERVICE" }
   | { type: "OAUTH_CALLBACK" };
@@ -25,6 +26,8 @@ export type DashboardSession = {
   id: string;
   csrfToken: string;
   expiresAt: number;
+  role: DashboardRole;
+  twitchUserId?: string;
 };
 
 export const DASHBOARD_SESSION_COOKIE = "streamops_dashboard_session";
@@ -34,12 +37,14 @@ const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 export class DashboardSessionStore {
   private readonly sessions = new Map<string, DashboardSession>();
 
-  create(): DashboardSession {
+  create(input: { role?: DashboardRole; twitchUserId?: string } = {}): DashboardSession {
     this.prune();
     const session: DashboardSession = {
       id: crypto.randomBytes(32).toString("base64url"),
       csrfToken: crypto.randomBytes(32).toString("base64url"),
-      expiresAt: Date.now() + appConfig.security.dashboardSessionTtlMs
+      expiresAt: Date.now() + appConfig.security.dashboardSessionTtlMs,
+      role: input.role ?? "admin",
+      twitchUserId: input.twitchUserId
     };
     this.sessions.set(session.id, session);
     return session;
@@ -105,15 +110,22 @@ function bearerToken(req: IncomingMessage): string | undefined {
 }
 
 export function authenticateDashboardRequest(req: IncomingMessage, sessions: DashboardSessionStore): AuthPrincipal | undefined {
-  if (appConfig.security.localNoAuth) return { type: "DASHBOARD_ADMIN", method: "token" };
+  if (appConfig.security.localNoAuth) return { type: "DASHBOARD_ADMIN", method: "token", role: "admin" };
   const token = appConfig.security.dashboardAuthToken;
   if (!token) return undefined;
   if (tokenMatches(token, bearerToken(req)) || tokenMatches(token, headerValue(req.headers["x-streamops-dashboard-token"]))) {
-    return { type: "DASHBOARD_ADMIN", method: "token" };
+    return { type: "DASHBOARD_ADMIN", method: "token", role: "admin" };
   }
   const session = sessions.get(dashboardSessionIdFromRequest(req));
   if (!session) return undefined;
-  return { type: "DASHBOARD_ADMIN", method: "session", sessionId: session.id, csrfToken: session.csrfToken };
+  return {
+    type: "DASHBOARD_ADMIN",
+    method: "session",
+    role: session.role,
+    sessionId: session.id,
+    csrfToken: session.csrfToken,
+    twitchUserId: session.twitchUserId
+  };
 }
 
 export function requiredHttpPrincipal(method: string | undefined, pathname: string): PrincipalType {
@@ -126,7 +138,12 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     pathname === "/api/lol/match-ranks" ||
     pathname === "/api/public/locale"
   )) return "PUBLIC";
-  if (pathname === "/api/public/twitch/status" || pathname === "/api/public/twitch/followed-lol" || pathname === "/api/public/twitch/logout") return "PUBLIC";
+  if (
+    pathname === "/api/public/twitch/status" ||
+    pathname === "/api/public/twitch/followed-lol" ||
+    pathname === "/api/public/twitch/riot-id-request" ||
+    pathname === "/api/public/twitch/logout"
+  ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (pathname.startsWith("/api/")) return "DASHBOARD_ADMIN";
@@ -160,6 +177,54 @@ function csrfValid(req: IncomingMessage, principal: AuthPrincipal): boolean {
   return tokenMatches(principal.csrfToken ?? "", header);
 }
 
+type StreamerDashboardRule = {
+  method?: string;
+  path?: string;
+  prefix?: string;
+};
+
+const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
+  { method: "GET", path: "/api/dashboard/auth/status" },
+  { method: "POST", path: "/api/dashboard/auth/logout" },
+  { method: "GET", path: "/api/status" },
+  { method: "GET", path: "/api/overlay/status" },
+  { method: "GET", path: "/api/alerts/config" },
+  { method: "POST", path: "/api/alerts/config" },
+  { method: "POST", path: "/api/alerts/assets" },
+  { method: "GET", path: "/api/events/recent" },
+  { method: "GET", path: "/api/actions/recent" },
+  { method: "GET", path: "/api/questions" },
+  { method: "GET", path: "/api/highlights" },
+  { method: "GET", path: "/api/followers" },
+  { method: "POST", path: "/api/followers/refresh" },
+  { method: "GET", path: "/api/participation/queue" },
+  { method: "GET", path: "/api/participation/state" },
+  { method: "GET", path: "/api/participation/game-monitor" },
+  { method: "POST", path: "/api/participation/game-monitor" },
+  { method: "GET", path: "/api/participation/streamer-profile" },
+  { method: "POST", path: "/api/participation/streamer-riot-id" },
+  { method: "POST", path: "/api/participation/streamer-profile-link" },
+  { method: "POST", path: "/api/participation/streamer-profile/refresh" },
+  { method: "GET", path: "/api/participation/profile-settings" },
+  { method: "POST", path: "/api/participation/profile-settings" },
+  { method: "GET", path: "/api/participation/profile-settings/skin-options" },
+  { method: "POST", path: "/api/participation/manual-control" },
+  { method: "POST", path: "/api/participation/profile/refresh" },
+  { method: "POST", path: "/api/participation/invite-message" },
+  { method: "POST", path: "/api/participation/invite-message/bulk" },
+  { method: "POST", path: "/api/participation/role-override" },
+  { method: "POST", path: "/api/participation/entry-status" }
+];
+
+export function streamerDashboardRequestAllowed(method: string | undefined, pathname: string): boolean {
+  const requestMethod = method ?? "GET";
+  return STREAMER_DASHBOARD_API_RULES.some((rule) => {
+    if (rule.method && rule.method !== requestMethod) return false;
+    if (rule.path && rule.path === pathname) return true;
+    return Boolean(rule.prefix && pathname.startsWith(rule.prefix));
+  });
+}
+
 export function authorizeHttpRequest(req: IncomingMessage, pathname: string, sessions: DashboardSessionStore): AuthResult {
   const required = requiredHttpPrincipal(req.method, pathname);
   if (required === "PUBLIC") return { ok: true, principal: { type: "PUBLIC" } };
@@ -177,6 +242,9 @@ export function authorizeHttpRequest(req: IncomingMessage, pathname: string, ses
   }
   if (!csrfValid(req, principal)) {
     return { ok: false, status: 403, code: "CSRF_REQUIRED", message: "valid CSRF token is required" };
+  }
+  if (principal.type === "DASHBOARD_ADMIN" && principal.role === "streamer" && !streamerDashboardRequestAllowed(req.method, pathname)) {
+    return { ok: false, status: 403, code: "FORBIDDEN", message: "streamer dashboard role is not allowed for this endpoint" };
   }
   return { ok: true, principal };
 }

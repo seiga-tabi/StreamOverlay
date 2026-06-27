@@ -1032,6 +1032,30 @@ code {
   font-size: 13px;
 }
 
+.streamer-overlay-access p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.overlay-access-grid {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.overlay-access-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.overlay-access-grid code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .reward-mapping-list {
   display: grid;
   gap: 10px;
@@ -1243,6 +1267,322 @@ code {
   min-width: 0;
 }
 
+.streamer-riot-requests-card {
+  display: grid;
+  gap: 14px;
+}
+
+.streamer-riot-requests-head {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.streamer-riot-requests-head h2 {
+  margin: 0;
+}
+
+.streamer-riot-requests-list {
+  display: grid;
+  gap: 10px;
+}
+
+.streamer-riot-request-row {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.1fr) minmax(150px, .9fr) minmax(92px, .48fr) minmax(150px, .72fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, .24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .62);
+}
+
+.streamer-riot-request-row.pending {
+  border-color: rgba(79, 114, 245, .28);
+  background: rgba(79, 114, 245, .06);
+}
+
+.streamer-riot-request-row.approved {
+  border-color: rgba(34, 197, 94, .28);
+  background: rgba(34, 197, 94, .06);
+}
+
+.streamer-riot-request-row.rejected {
+  border-color: rgba(244, 63, 94, .24);
+  background: rgba(244, 63, 94, .05);
+}
+
+.streamer-riot-request-row > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.streamer-riot-request-row span,
+.streamer-riot-request-row small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.streamer-riot-request-row strong {
+  overflow: hidden;
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.streamer-riot-request-row strong small {
+  margin-left: 4px;
+}
+
+.streamer-riot-request-user {
+  display: flex !important;
+  gap: 10px;
+  align-items: center;
+}
+
+.streamer-riot-request-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: rgba(79, 114, 245, .12);
+  color: var(--primary);
+  font-weight: 900;
+}
+
+.streamer-riot-request-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.streamer-riot-request-actions {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: end;
+}
+
+.my-riot-account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.my-riot-account-empty {
+  display: grid;
+  gap: 8px;
+}
+
+.my-riot-account-empty strong {
+  color: #15213a;
+  font-size: 18px;
+}
+
+.my-riot-account-profile {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.my-riot-avatar {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #536dfe, #16bca5);
+  color: #fff;
+  font-weight: 900;
+}
+
+.my-riot-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-riot-account-profile span,
+.my-riot-account-card > span {
+  color: #697995;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.my-riot-account-profile strong,
+.my-riot-account-card strong {
+  display: block;
+  margin-top: 4px;
+  color: #14223b;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.my-riot-account-profile small,
+.my-riot-account-card small {
+  color: #75839a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.my-riot-account-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.my-riot-account-card.featured {
+  border-color: #bfdbfe;
+  background: linear-gradient(135deg, #f8fbff, #eef6ff);
+}
+
+.my-riot-account-card.featured strong small {
+  margin-left: 4px;
+  color: #53637d;
+}
+
+.my-riot-account-card.wide {
+  grid-column: 1 / -1;
+}
+
+.my-riot-overlay-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.my-riot-overlay-detail div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e3eaf5;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.my-riot-overlay-detail code {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: #1d2a44;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-riot-id-form,
+.my-riot-profile-link-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, .65fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.my-riot-id-form {
+  grid-template-columns: minmax(220px, 1fr) auto;
+}
+
+.my-riot-profile-link-form {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.my-riot-id-form label,
+.my-riot-profile-link-form label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.my-riot-id-form label span,
+.my-riot-profile-link-form label span {
+  color: #697995;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.my-riot-id-form input,
+.my-riot-profile-link-form input {
+  min-height: 38px;
+  min-width: 0;
+  padding: 0 12px;
+  border: 1px solid #d8e1ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #17233d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.my-riot-id-form input:focus,
+.my-riot-profile-link-form input:focus {
+  border-color: #4d7dff;
+  outline: 3px solid rgba(77, 125, 255, .16);
+}
+
+.my-riot-profile-link-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.my-riot-profile-link-list {
+  display: grid;
+  gap: 10px;
+}
+
+.my-riot-profile-link-row {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(180px, .55fr) auto;
+  gap: 10px;
+  align-items: end;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e4ebf7;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.my-riot-profile-link-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  width: fit-content;
+  padding: 0 16px;
+  border: 1px dashed #6d8cff;
+  border-radius: 8px;
+  background: #eef4ff;
+  color: #315ee8;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.my-riot-profile-link-add:hover:not(:disabled) {
+  border-style: solid;
+  background: #e3edff;
+}
+
+.my-riot-profile-link-add:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
 .participation-monitor-form {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(132px, auto)) auto;
@@ -1389,8 +1729,7 @@ code {
 
 .public-brand,
 .public-topbar nav button,
-.public-top-actions button,
-.public-footer button {
+.public-top-actions button {
   border: 0;
   background: transparent;
   color: inherit;
@@ -1455,8 +1794,7 @@ code {
   font-weight: 850;
 }
 
-.public-login-button,
-.public-footer button {
+.public-login-button {
   min-height: 38px;
   padding: 8px 16px;
   border-radius: 8px;
@@ -2059,8 +2397,7 @@ code {
 .public-stat-card,
 .public-panel,
 .public-profile-hero,
-.public-empty-state,
-.public-footer {
+.public-empty-state {
   border: 1px solid rgba(138, 157, 195, .18);
   border-radius: 8px;
   background: rgba(16, 26, 44, .78);
@@ -2590,7 +2927,7 @@ code {
 
 .public-twitch-stream-badge {
   display: inline-grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
   gap: 8px;
   align-items: center;
   max-width: min(100%, 620px);
@@ -2651,6 +2988,35 @@ code {
   font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.public-twitch-stream-badge .public-twitch-stream-links {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.public-twitch-stream-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  max-width: 120px;
+  padding: 0 8px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 166, 204, .28);
+  border-radius: 999px;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-twitch-stream-links a:hover {
+  border-color: rgba(77, 125, 255, .52);
+  color: #4d7dff;
 }
 
 .public-rank-panel {
@@ -4016,8 +4382,7 @@ code {
 }
 
 .public-empty,
-.public-empty-state p,
-.public-footer span {
+.public-empty-state p {
   margin: 0;
   color: #aeb9cf;
 }
@@ -4065,16 +4430,6 @@ code {
   color: #7ee1d6;
   font-size: 11px;
   font-weight: 900;
-}
-
-.public-footer {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  justify-content: space-between;
-  width: min(100%, 1500px);
-  margin: 14px auto 0;
-  padding: 16px 18px;
 }
 
 .skin-option strong {
@@ -4307,6 +4662,11 @@ code {
   font-size: 12px;
 }
 
+.compact-button.danger {
+  border-color: rgba(244, 63, 94, .35);
+  color: #e11d48;
+}
+
 .queue-status {
   min-width: 86px;
   background: rgba(255, 255, 255, .7);
@@ -4512,6 +4872,14 @@ code {
     grid-template-columns: 1fr;
   }
 
+  .streamer-riot-request-row {
+    grid-template-columns: 1fr;
+  }
+
+  .streamer-riot-request-actions {
+    justify-content: start;
+  }
+
   .riot-key-form {
     grid-template-columns: 1fr;
   }
@@ -4585,6 +4953,17 @@ code {
   }
 
   .twitch-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .my-riot-account-grid,
+  .my-riot-overlay-detail,
+  .my-riot-id-form,
+  .my-riot-profile-link-form {
+    grid-template-columns: 1fr;
+  }
+
+  .my-riot-profile-link-row {
     grid-template-columns: 1fr;
   }
 }
@@ -4667,6 +5046,16 @@ code {
     grid-column: auto;
     justify-self: stretch;
     width: 100%;
+  }
+
+  .my-riot-account-profile {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .my-riot-account-profile .compact-button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    text-align: center;
   }
 
   .button-row button {
@@ -4931,14 +5320,12 @@ code {
   }
 
   .public-profile-hero,
-  .public-empty-state,
-  .public-footer {
+  .public-empty-state {
     padding: 16px;
   }
 
   .public-profile-main,
-  .public-rank-panel,
-  .public-footer {
+  .public-rank-panel {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -5124,8 +5511,7 @@ code {
   font-size: 12px;
 }
 
-.public-login-button,
-.public-footer button {
+.public-login-button {
   min-height: 38px;
   padding: 9px 18px;
   border-radius: 8px;
@@ -5378,7 +5764,6 @@ code {
 .public-panel,
 .public-profile-top-grid,
 .public-empty-state,
-.public-footer,
 .public-stat-card {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -5485,6 +5870,82 @@ code {
   border: 0;
   color: #8a93a8;
   align-self: center;
+}
+
+.public-profile-actions > .public-profile-link-icons {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.public-profile-link-icons {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.public-profile-link-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d8e1ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
+}
+
+.public-profile-link-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, .1);
+}
+
+.public-profile-link-icon.youtube {
+  border-color: #fecdd3;
+  background: #fff1f2;
+  color: #dc2626;
+}
+
+.public-profile-link-icon.twitch {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.public-profile-link-icon.discord {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.public-profile-link-icon.x {
+  border-color: #cbd5e1;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.public-profile-link-icon.instagram {
+  border-color: #fbcfe8;
+  background: #fdf2f8;
+  color: #be185d;
+}
+
+.public-profile-link-icon.tiktok {
+  border-color: #bae6fd;
+  background: #ecfeff;
+  color: #0891b2;
+}
+
+.public-profile-link-icon.soop {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #047857;
 }
 
 .public-profile-top-side {
@@ -5656,8 +6117,7 @@ code {
 .public-opponent-cell span,
 .public-opponent-cell small,
 .public-empty,
-.public-empty-state p,
-.public-footer span {
+.public-empty-state p {
   color: #7d879a;
 }
 
@@ -5934,10 +6394,6 @@ code {
   background: #ffffff;
   color: #344054;
   font-weight: 850;
-}
-
-.public-footer {
-  color: #667085;
 }
 
 .public-mobile-nav {
@@ -6584,11 +7040,11 @@ code {
   gap: 4px;
 }
 
-.public-header-tools,
-.public-header-user {
+.public-header-tools {
   display: flex;
   gap: 10px;
   align-items: center;
+  justify-content: flex-end;
   min-width: 0;
 }
 
@@ -6697,12 +7153,109 @@ code {
   white-space: nowrap;
 }
 
+.public-twitch-profile-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.public-twitch-profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 80;
+  display: grid;
+  gap: 6px;
+  width: min(260px, calc(100vw - 28px));
+  padding: 10px;
+  border: 1px solid #d9e3f2;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(28, 40, 67, .14);
+}
+
+.public-twitch-profile-menu-head {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  padding: 4px 4px 8px;
+  border-bottom: 1px solid #edf2f8;
+}
+
+.public-twitch-profile-menu-head img,
+.public-twitch-profile-menu-head > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #6545ff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 950;
+  object-fit: cover;
+}
+
+.public-twitch-profile-menu-head div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.public-twitch-profile-menu-head strong,
+.public-twitch-profile-menu-head small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-twitch-profile-menu-head strong {
+  color: #17233d;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.public-twitch-profile-menu-head small {
+  color: #667891;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.public-twitch-profile-menu button {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #263650;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: left;
+}
+
+.public-twitch-profile-menu button:hover {
+  background: #eef4ff;
+  color: #2867ef;
+}
+
+.public-twitch-profile-menu button.dashboard {
+  background: linear-gradient(135deg, #4d7dff, #6545ff);
+  color: #fff;
+}
+
+.public-twitch-profile-menu button.dashboard:hover {
+  background: linear-gradient(135deg, #376cff, #5637f5);
+  color: #fff;
+}
+
 .public-header-popover-wrap {
   position: relative;
   display: inline-flex;
 }
 
-.public-header-user .public-header-popover-wrap > button {
+.public-header-popover-wrap > button:not(.public-filter-button) {
   position: relative;
   display: grid;
   place-items: center;
@@ -6715,7 +7268,7 @@ code {
   font-size: 20px;
 }
 
-.public-header-user .public-header-popover-wrap > button span {
+.public-header-popover-wrap > button:not(.public-filter-button) span {
   position: absolute;
   top: 0;
   right: 0;
@@ -6829,82 +7382,6 @@ code {
   margin: 0;
   color: #7c8aa1;
   font-size: 11px;
-}
-
-.public-header-user {
-  justify-content: end;
-}
-
-.public-header-user > button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: #263450;
-  font-size: 20px;
-}
-
-.public-header-user > button span {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #497cff;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 950;
-}
-
-.public-header-avatar {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  overflow: hidden;
-  border: 3px solid #dbe7ff;
-  border-radius: 50%;
-  background: #eef4ff;
-}
-
-.public-header-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.public-header-avatar span {
-  color: #3f6fff;
-  font-weight: 950;
-}
-
-.public-header-user div:last-child {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-}
-
-.public-header-user strong {
-  max-width: 110px;
-  overflow: hidden;
-  color: #17213a;
-  font-size: 13px;
-  font-weight: 950;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.public-header-user small {
-  color: #20b486;
-  font-size: 11px;
-  font-weight: 900;
 }
 
 .public-dashboard-home {
@@ -7746,11 +8223,6 @@ code {
   display: none;
 }
 
-.public-dashboard-shell .public-footer {
-  width: 100%;
-  margin: 16px 0 0;
-}
-
 .public-dashboard-shell .public-favorite-button {
   display: inline-flex;
   gap: 6px;
@@ -7868,6 +8340,211 @@ code {
   font-size: 12px;
 }
 
+.public-streamer-riot-request {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 260px) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #dce7f4;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.public-streamer-riot-request > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.public-streamer-riot-request strong {
+  color: #17233d;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.public-streamer-riot-request small {
+  color: #6f7f98;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.public-streamer-riot-request label {
+  min-width: 0;
+}
+
+.public-streamer-riot-request input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d9e3f2;
+  border-radius: 8px;
+  background: #fbfdff;
+  color: #17233d;
+  font-size: 13px;
+  font-weight: 850;
+  outline: none;
+}
+
+.public-streamer-riot-request input:focus {
+  border-color: #4d7dff;
+  box-shadow: 0 0 0 3px rgba(77, 125, 255, .14);
+}
+
+.public-streamer-riot-request button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #4d7dff;
+  border-radius: 8px;
+  background: #4d7dff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.public-streamer-riot-request button:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
+
+.public-streamer-register-screen {
+  display: grid;
+  place-items: start center;
+  min-height: calc(100vh - 82px);
+  padding: clamp(36px, 7vw, 76px) 18px;
+}
+
+.public-followed-screen {
+  display: grid;
+  place-items: start center;
+  min-height: calc(100vh - 82px);
+  padding: clamp(28px, 6vw, 64px) 18px;
+}
+
+.public-streamer-register-card {
+  display: grid;
+  gap: 18px;
+  width: min(100%, 720px);
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid #dce7f4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 24px 60px rgba(53, 72, 107, .12);
+}
+
+.public-followed-screen-card {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 960px);
+}
+
+.public-followed-screen-card > .public-twitch-followed-panel {
+  margin: 0;
+}
+
+.public-back-button {
+  justify-self: start;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d9e3f2;
+  border-radius: 8px;
+  background: #fff;
+  color: #33435f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.public-streamer-register-head {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.public-streamer-register-avatar {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #6545ff;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.public-streamer-register-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-streamer-register-head h1 {
+  margin: 0;
+  color: #17233d;
+  font-size: clamp(24px, 4vw, 34px);
+}
+
+.public-streamer-register-head p {
+  margin: 6px 0 0;
+  color: #667891;
+  line-height: 1.55;
+}
+
+.public-streamer-register-head small {
+  display: inline-block;
+  margin-top: 6px;
+  color: #16a37e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.public-streamer-register-login {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #dce7f4;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.public-streamer-register-login p {
+  margin: 0;
+  color: #667891;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.public-streamer-register-login button {
+  justify-self: start;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #4d7dff;
+  border-radius: 8px;
+  background: #4d7dff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.public-streamer-riot-request.standalone {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.public-form-message {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #16a37e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .public-twitch-followed-list {
   display: grid;
   gap: 8px;
@@ -7904,7 +8581,7 @@ code {
   place-items: center;
   width: 38px;
   height: 38px;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 50%;
   background: #eef4ff;
   color: #4d7dff;
@@ -7914,18 +8591,21 @@ code {
 .public-twitch-channel-avatar img {
   width: 100%;
   height: 100%;
+  border-radius: inherit;
   object-fit: cover;
 }
 
 .public-twitch-channel-avatar i {
   position: absolute;
-  right: 1px;
-  bottom: 1px;
-  width: 10px;
-  height: 10px;
+  right: -1px;
+  bottom: -1px;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
   border: 2px solid #fff;
   border-radius: 50%;
   background: #a8b3c5;
+  box-shadow: 0 0 0 1px rgba(116, 130, 153, .12);
 }
 
 .public-twitch-channel-avatar i.live {
@@ -7952,9 +8632,13 @@ code {
 
 .public-twitch-channel-main small,
 .public-twitch-channel-meta small {
+  min-width: 0;
+  overflow: hidden;
   color: #78879d;
   font-size: 11px;
   font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .public-twitch-channel-meta span small {
@@ -8196,11 +8880,52 @@ code {
 }
 
 .public-dashboard-shell.theme-dark .public-twitch-login-chip,
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu,
+.public-dashboard-shell.theme-dark .public-streamer-register-card,
+.public-dashboard-shell.theme-dark .public-back-button,
+.public-dashboard-shell.theme-dark .public-streamer-register-login,
+.public-dashboard-shell.theme-dark .public-streamer-riot-request,
 .public-dashboard-shell.theme-dark .public-twitch-followed-actions button,
 .public-dashboard-shell.theme-dark .public-twitch-channel-actions a {
   border-color: #26344c;
   background: #151f2e;
   color: #dbe6f7;
+}
+
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu-head {
+  border-bottom-color: #26344c;
+}
+
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu button {
+  color: #dbe6f7;
+}
+
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu button:hover {
+  background: #1d2b45;
+  color: #8fb4ff;
+}
+
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu button.dashboard,
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu button.dashboard:hover {
+  background: linear-gradient(135deg, #4d7dff, #6545ff);
+  color: #fff;
+}
+
+.public-dashboard-shell.theme-dark .public-streamer-riot-request input {
+  border-color: #2c3b54;
+  background: #0f1726;
+  color: #e5eefb;
+}
+
+.public-dashboard-shell.theme-dark .public-streamer-riot-request small,
+.public-dashboard-shell.theme-dark .public-streamer-register-head p,
+.public-dashboard-shell.theme-dark .public-streamer-register-login p,
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu-head small {
+  color: #94a4bb;
+}
+
+.public-dashboard-shell.theme-dark .public-form-message {
+  color: #5ee6ad;
 }
 
 .public-dashboard-shell.theme-dark .public-twitch-login-chip.connected,
@@ -8218,9 +8943,16 @@ code {
 }
 
 .public-dashboard-shell.theme-dark .public-twitch-followed-summary span,
+.public-dashboard-shell.theme-dark .public-streamer-register-head h1,
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu-head strong,
+.public-dashboard-shell.theme-dark .public-streamer-riot-request strong,
 .public-dashboard-shell.theme-dark .public-twitch-channel-main strong,
 .public-dashboard-shell.theme-dark .public-twitch-channel-meta span {
   color: #e5eefb;
+}
+
+.public-dashboard-shell.theme-dark .public-twitch-channel-avatar i {
+  border-color: #151f2e;
 }
 
 .public-dashboard-shell.theme-dark .public-app-header {
@@ -8486,6 +9218,55 @@ code {
   color: #8fb7ff;
 }
 
+.public-dashboard-shell.theme-dark .public-profile-link-icon {
+  border-color: #2c3b54;
+  background: #101827;
+  color: #dbe6f7;
+  box-shadow: none;
+}
+
+.public-dashboard-shell.theme-dark .public-profile-link-icon.youtube {
+  border-color: rgba(248, 113, 113, .45);
+  background: rgba(127, 29, 29, .28);
+  color: #fecdd3;
+}
+
+.public-dashboard-shell.theme-dark .public-profile-link-icon.twitch {
+  border-color: rgba(167, 139, 250, .45);
+  background: rgba(76, 29, 149, .28);
+  color: #ddd6fe;
+}
+
+.public-dashboard-shell.theme-dark .public-profile-link-icon.discord {
+  border-color: rgba(129, 140, 248, .45);
+  background: rgba(49, 46, 129, .28);
+  color: #c7d2fe;
+}
+
+.public-dashboard-shell.theme-dark .public-profile-link-icon.x {
+  border-color: #475569;
+  background: #020617;
+  color: #ffffff;
+}
+
+.public-dashboard-shell.theme-dark .public-profile-link-icon.instagram {
+  border-color: rgba(244, 114, 182, .45);
+  background: rgba(131, 24, 67, .25);
+  color: #fbcfe8;
+}
+
+.public-dashboard-shell.theme-dark .public-profile-link-icon.tiktok {
+  border-color: rgba(34, 211, 238, .42);
+  background: rgba(22, 78, 99, .24);
+  color: #a5f3fc;
+}
+
+.public-dashboard-shell.theme-dark .public-profile-link-icon.soop {
+  border-color: rgba(74, 222, 128, .42);
+  background: rgba(20, 83, 45, .24);
+  color: #bbf7d0;
+}
+
 @media (max-width: 1400px) {
   .public-dashboard-content-grid {
     grid-template-columns: minmax(0, 1fr) 340px;
@@ -8545,6 +9326,19 @@ code {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .public-streamer-riot-request {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .public-streamer-register-head {
+    grid-template-columns: minmax(0, 1fr);
+    text-align: center;
+  }
+
+  .public-streamer-register-avatar {
+    justify-self: center;
+  }
+
   .public-twitch-channel-actions {
     justify-content: start;
   }
@@ -8588,10 +9382,6 @@ code {
 
   .public-app-header {
     grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .public-header-user {
-    display: none;
   }
 
   .public-right-rail {

@@ -204,6 +204,37 @@ export type ParticipationStreamerProfile = {
   rankHistory?: LolRankHistoryPoint[];
 };
 
+export type StreamerRiotIdRequestStatus = "pending" | "approved" | "rejected";
+
+export type StreamerProfileLink = {
+  id: string;
+  url: string;
+  label: string;
+  platform?: string;
+};
+
+export type StreamerRiotIdRequest = {
+  id: string;
+  twitchUserId: string;
+  twitchLogin: string;
+  twitchDisplayName: string;
+  twitchProfileImageUrl?: string;
+  riotGameName: string;
+  riotTagLine: string;
+  normalizedRiotId: string;
+  overlaySlug?: string;
+  overlayKey?: string;
+  profileLinkUrl?: string;
+  profileLinkLabel?: string;
+  profileLinks?: StreamerProfileLink[];
+  status: StreamerRiotIdRequestStatus;
+  requestedAt: string;
+  updatedAt: string;
+  reviewedAt?: string;
+  reviewer?: string;
+  note?: string;
+};
+
 export type ParticipationDashboardQueueEntry = ParticipationPublicQueueEntry & {
   id: string;
   twitchUserName: string;

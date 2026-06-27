@@ -108,6 +108,15 @@ test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공
     assert.match(dashboardRes.body, /http:\/\/localhost:3000\/overlay/);
     assert.doesNotMatch(dashboardRes.body, /localhost:5174/);
 
+    const adminReq = createRequest("GET", "/admin/config.js");
+    const adminRes = createResponse();
+    await handler(adminReq, adminRes);
+
+    assert.equal(adminRes.statusCode, 200);
+    assert.match(adminRes.headers["Content-Type"], /text\/javascript/);
+    assert.match(adminRes.body, /apiBase/);
+    assert.match(adminRes.body, /overlayBase/);
+
     const overlayReq = createRequest("GET", "/overlay/config.js");
     const overlayRes = createResponse();
     await handler(overlayReq, overlayRes);
@@ -144,6 +153,33 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(res.statusCode, 200);
     assert.match(res.headers["Content-Type"], /text\/html/);
     assert.match(res.body, /LOLTRACE/);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("관리자 URL은 dashboard 앱 index를 서빙한다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-admin-route-"));
+  try {
+    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>StreamOps Admin</title><div id=\"root\"></div>");
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const req = createRequest("GET", "/admin");
+    const res = createResponse();
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.match(res.headers["Content-Type"], /text\/html/);
+    assert.match(res.body, /StreamOps Admin/);
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });

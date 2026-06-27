@@ -31,7 +31,10 @@ import { newId, nowIso, toSafeErrorMessage } from "@streamops/shared";
 assertRuntimeConfig();
 
 const logger = new JsonlLogger(appConfig.paths.logs);
-const store = new Store({ followerStatePath: `${appConfig.paths.state}/followers.json` });
+const store = new Store({
+  followerStatePath: `${appConfig.paths.state}/followers.json`,
+  streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`
+});
 const sessions = new DashboardSessionStore();
 const events = new EventBus();
 const dashboard = new DashboardHub(store);
@@ -153,8 +156,23 @@ function rateLimitUpgrade(req: http.IncomingMessage, pathname: string): boolean 
   return result.ok;
 }
 
-function attachOverlayAfterAuthentication(socket: import("ws").WebSocket, channel: string | null): void {
-  if (!appConfig.security.overlayAccessToken) {
+function overlayStreamerSlugFromUrl(url: URL): string | undefined {
+  const raw = url.searchParams.get("streamer") ?? undefined;
+  return raw?.trim().toLowerCase() || undefined;
+}
+
+function overlayAccessTokenMatches(token: string | undefined, streamerSlug?: string): boolean {
+  if (!token) return false;
+  if (tokenMatches(appConfig.security.overlayAccessToken, token)) return true;
+  return store.listApprovedStreamerRiotIds().some((request) => {
+    if (!request.overlayKey || !tokenMatches(request.overlayKey, token)) return false;
+    const slug = request.overlaySlug ?? request.twitchLogin.toLowerCase();
+    return !streamerSlug || slug === streamerSlug || request.twitchLogin.toLowerCase() === streamerSlug;
+  });
+}
+
+function attachOverlayAfterAuthentication(socket: import("ws").WebSocket, channel: string | null, streamerSlug?: string): void {
+  if (!appConfig.security.overlayAccessToken && store.listApprovedStreamerRiotIds().every((request) => !request.overlayKey)) {
     overlay.add(socket, channel);
     return;
   }
@@ -166,7 +184,7 @@ function attachOverlayAfterAuthentication(socket: import("ws").WebSocket, channe
   const authenticate = (raw: import("ws").RawData) => {
     try {
       const parsed = JSON.parse(raw.toString()) as { type?: unknown; token?: unknown };
-      if (parsed.type !== "overlay.auth" || typeof parsed.token !== "string" || !tokenMatches(appConfig.security.overlayAccessToken, parsed.token)) {
+      if (parsed.type !== "overlay.auth" || typeof parsed.token !== "string" || !overlayAccessTokenMatches(parsed.token, streamerSlug)) {
         socket.close(1008, "authentication failed");
         return;
       }
@@ -225,16 +243,26 @@ bridgeWss.on("connection", (socket, req) => {
   events.emit({ type: "bridge.connected", id: newId("event"), createdAt: nowIso(), payload: { name } });
 });
 
-dashboardWss.on("connection", (socket) => dashboard.add(socket));
+dashboardWss.on("connection", (socket, req) => {
+  const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+  const principal = authenticateDashboardRequest(req, sessions);
+  const role = principal?.type === "DASHBOARD_ADMIN"
+    ? principal.role
+    : tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url))
+      ? "admin"
+      : "admin";
+  dashboard.add(socket, role);
+});
 overlayWss.on("connection", (socket, req) => {
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
   const channel = url.searchParams.get("channel") ?? url.searchParams.get("mode");
+  const streamerSlug = overlayStreamerSlugFromUrl(url);
   const legacyToken = legacyQueryToken(url);
-  if (legacyToken && tokenMatches(appConfig.security.overlayAccessToken, legacyToken)) {
+  if (legacyToken && overlayAccessTokenMatches(legacyToken, streamerSlug)) {
     overlay.add(socket, channel);
     return;
   }
-  attachOverlayAfterAuthentication(socket, channel);
+  attachOverlayAfterAuthentication(socket, channel, streamerSlug);
 });
 
 twitchEventSub.start();

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
-const { DashboardSessionStore, DASHBOARD_SESSION_COOKIE } = await import("../dist/security/auth.js");
+const { DashboardSessionStore, DASHBOARD_SESSION_COOKIE, authorizeHttpRequest } = await import("../dist/security/auth.js");
 const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 
@@ -1370,5 +1370,37 @@ test("내부 자동화용 bearer token 인증은 session CSRF 없이 사용할 �
 
     assert.equal(res.statusCode, 200);
     assert.equal(dispatched.length, 1);
+  });
+});
+
+test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있다", async () => {
+  await withAuthConfig(async () => {
+    const sessions = new DashboardSessionStore();
+    const session = sessions.create({ role: "streamer", twitchUserId: "streamer-twitch-user" });
+    const cookie = `${DASHBOARD_SESSION_COOKIE}=${session.id}`;
+
+    const allowedReq = createRequest("GET", "/api/events/recent", undefined, { cookie });
+    const allowed = authorizeHttpRequest(allowedReq, "/api/events/recent", sessions);
+    assert.equal(allowed.ok, true);
+    assert.equal(allowed.principal.type, "DASHBOARD_ADMIN");
+    assert.equal(allowed.principal.role, "streamer");
+
+    const allowedRiotIdUpdateReq = createRequest("POST", "/api/participation/streamer-riot-id", { riotId: "Seiga#JP1" }, {
+      cookie,
+      origin: DASHBOARD_ORIGIN,
+      "x-streamops-csrf": session.csrfToken
+    });
+    const allowedRiotIdUpdate = authorizeHttpRequest(allowedRiotIdUpdateReq, "/api/participation/streamer-riot-id", sessions);
+    assert.equal(allowedRiotIdUpdate.ok, true);
+
+    const blockedReq = createRequest("POST", "/api/actions/test", { action: testAction }, {
+      cookie,
+      origin: DASHBOARD_ORIGIN,
+      "x-streamops-csrf": session.csrfToken
+    });
+    const blocked = authorizeHttpRequest(blockedReq, "/api/actions/test", sessions);
+    assert.equal(blocked.ok, false);
+    assert.equal(blocked.status, 403);
+    assert.equal(blocked.code, "FORBIDDEN");
   });
 });

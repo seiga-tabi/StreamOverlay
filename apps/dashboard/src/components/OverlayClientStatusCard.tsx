@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { OverlayChannel, OverlayStatus } from "@streamops/shared";
 import { OVERLAY_CHANNELS } from "@streamops/shared";
+import type { DashboardStreamerInfo } from "../api/client";
 import { apiGet } from "../api/client";
 import { runtimeConfig } from "../runtime-config";
 
@@ -17,6 +18,10 @@ const i18n = {
     previewDescription: "실제 OBS Source와 같은 overlay URL을 mock 데이터로 렌더링합니다.",
     refreshPreview: "미리보기 새로고침",
     previewFrameTitle: "Overlay 미리보기",
+    streamerOverlay: "스트리머 전용 오버레이",
+    streamerOverlayDescription: "승인된 스트리머 key가 포함된 OBS Browser Source URL입니다. key는 외부에 공개하지 마세요.",
+    streamerSlug: "URL 닉네임",
+    streamerKey: "스트리머 key",
     clients: "연결 client",
     recent: "최근 overlay 메시지",
     empty: "최근 overlay 메시지가 없습니다.",
@@ -47,6 +52,10 @@ const i18n = {
     previewDescription: "実際の OBS Source と同じ overlay URL を mock データで描画します。",
     refreshPreview: "プレビュー更新",
     previewFrameTitle: "Overlay プレビュー",
+    streamerOverlay: "配信者専用オーバーレイ",
+    streamerOverlayDescription: "承認済み配信者 key を含む OBS Browser Source URL です。key は外部に公開しないでください。",
+    streamerSlug: "URL ニックネーム",
+    streamerKey: "配信者 key",
     clients: "接続 client",
     recent: "最近の overlay メッセージ",
     empty: "最近の overlay メッセージはありません。",
@@ -71,25 +80,33 @@ const i18n = {
 
 const t = i18n.ko;
 
-function overlayUrl(mode: OverlayChannel, params: Record<string, string> = {}): string {
+function overlayUrl(mode: OverlayChannel, params: Record<string, string> = {}, streamer?: DashboardStreamerInfo): string {
   const base = OVERLAY_BASE.endsWith("/") ? OVERLAY_BASE : `${OVERLAY_BASE}/`;
   try {
     const url = new URL(base, window.location.href);
+    if (streamer?.overlaySlug) {
+      url.pathname = `${url.pathname.replace(/\/$/, "")}/${encodeURIComponent(streamer.overlaySlug)}`;
+    }
     url.searchParams.set("mode", mode);
     for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+    if (streamer?.overlayKey && !params.mock) {
+      url.hash = new URLSearchParams({ token: streamer.overlayKey }).toString();
+    }
     return url.toString();
   } catch {
     const search = new URLSearchParams({ mode, ...params });
-    return `${base}?${search.toString()}`;
+    const path = streamer?.overlaySlug ? `${base}${encodeURIComponent(streamer.overlaySlug)}` : base;
+    const hash = streamer?.overlayKey && !params.mock ? `#${new URLSearchParams({ token: streamer.overlayKey }).toString()}` : "";
+    return `${path}?${search.toString()}${hash}`;
   }
 }
 
-function modeUrl(mode: OverlayChannel): string {
-  return overlayUrl(mode);
+function modeUrl(mode: OverlayChannel, streamer?: DashboardStreamerInfo): string {
+  return overlayUrl(mode, {}, streamer);
 }
 
-function previewUrl(mode: OverlayChannel, nonce: number): string {
-  return overlayUrl(mode, { mock: "1", preview: "1", reload: "0", nonce: String(nonce) });
+function previewUrl(mode: OverlayChannel, nonce: number, streamer?: DashboardStreamerInfo): string {
+  return overlayUrl(mode, { mock: "1", preview: "1", reload: "0", nonce: String(nonce) }, streamer);
 }
 
 async function copyText(value: string): Promise<void> {
@@ -97,7 +114,7 @@ async function copyText(value: string): Promise<void> {
   alert(t.copied);
 }
 
-export function OverlayClientStatusCard() {
+export function OverlayClientStatusCard({ streamer }: { streamer?: DashboardStreamerInfo }) {
   const [status, setStatus] = useState<OverlayStatus>();
   const [previewNonce, setPreviewNonce] = useState(0);
   const modes = useMemo(() => OVERLAY_CHANNELS, []);
@@ -121,9 +138,21 @@ export function OverlayClientStatusCard() {
         </div>
         <span className="count-badge">{status?.clientCount ?? 0}</span>
       </div>
+      {streamer?.overlaySlug && streamer.overlayKey ? (
+        <div className="ops-note streamer-overlay-access">
+          <strong>{t.streamerOverlay}</strong>
+          <p>{t.streamerOverlayDescription}</p>
+          <div className="overlay-access-grid">
+            <span>{t.streamerSlug}</span>
+            <code>{streamer.overlaySlug}</code>
+            <span>{t.streamerKey}</span>
+            <code>{streamer.overlayKey}</code>
+          </div>
+        </div>
+      ) : null}
       <div className="overlay-url-list">
         {modes.map((mode) => {
-          const url = modeUrl(mode);
+          const url = modeUrl(mode, streamer);
           return (
             <div className="overlay-url-row" key={mode}>
               <div>
@@ -153,13 +182,13 @@ export function OverlayClientStatusCard() {
             <div className="overlay-preview-tile" key={mode}>
               <div className="overlay-preview-head">
                 <strong>{t.modes[mode]}</strong>
-                <a className="secondary compact-button" href={modeUrl(mode)} target="_blank" rel="noreferrer">{t.open}</a>
+                <a className="secondary compact-button" href={modeUrl(mode, streamer)} target="_blank" rel="noreferrer">{t.open}</a>
               </div>
               <div className="overlay-preview-frame">
                 <iframe
                   key={`${mode}-${previewNonce}`}
                   title={`${t.previewFrameTitle}: ${t.modes[mode]}`}
-                  src={previewUrl(mode, previewNonce)}
+                  src={previewUrl(mode, previewNonce, streamer)}
                   loading="lazy"
                   sandbox="allow-scripts allow-same-origin"
                   referrerPolicy="no-referrer"

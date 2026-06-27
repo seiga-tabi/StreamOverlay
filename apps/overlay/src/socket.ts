@@ -41,7 +41,19 @@ function reloadAfterRecoveredConnection(): boolean {
 
 function overlayTokenFromFragment(): string {
   const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
-  return new URLSearchParams(hash).get("token") ?? "";
+  const hashParams = new URLSearchParams(hash);
+  const searchParams = new URLSearchParams(window.location.search);
+  return hashParams.get("token")
+    ?? hashParams.get("key")
+    ?? searchParams.get("token")
+    ?? searchParams.get("key")
+    ?? "";
+}
+
+function overlayStreamerSlugFromPath(): string {
+  const segments = window.location.pathname.split("/").map((part) => part.trim()).filter(Boolean);
+  const slug = segments[0] === "overlay" ? segments[1] : segments.length === 1 && segments[0] !== "assets" ? segments[0] : "";
+  return slug ? decodeURIComponent(slug).trim().toLowerCase() : "";
 }
 
 export function connectOverlaySocket(
@@ -63,6 +75,8 @@ export function connectOverlaySocket(
   function connect() {
     const params = new URLSearchParams({ channel });
     const token = overlayTokenFromFragment();
+    const streamerSlug = overlayStreamerSlugFromPath();
+    if (streamerSlug) params.set("streamer", streamerSlug);
     reconnectTimer = undefined;
     try {
       ws = new WebSocket(`${WS_BASE}/ws/overlay?${params.toString()}`);

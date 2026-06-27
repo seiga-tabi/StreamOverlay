@@ -4,7 +4,7 @@ import { QuestionQueue } from "../components/QuestionQueue";
 import { ActionTester } from "../components/ActionTester";
 import { uiText } from "../i18n";
 
-export function DashboardPage({ snapshot, socketConnected }: { snapshot: any; socketConnected: boolean }) {
+export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { snapshot: any; socketConnected: boolean; role?: "admin" | "streamer" }) {
   const status = snapshot.status ?? { server: "offline", twitch: "disabled", stream: "unknown", bridge: "disconnected", obs: "unknown", participation: "closed" };
   const t = uiText.dashboard;
 
@@ -33,7 +33,7 @@ export function DashboardPage({ snapshot, socketConnected }: { snapshot: any; so
         <EventLog events={snapshot.events ?? []} />
         <QuestionQueue questions={snapshot.questions ?? []} />
       </div>
-      <ActionTester />
+      {role === "admin" ? <ActionTester /> : null}
     </>
   );
 }

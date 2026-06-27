@@ -98,6 +98,86 @@ test("Store는 이전 참가자의 비활성 Riot 프로필 기록을 재사용 
   assert.equal(reusable?.topChampions?.[0]?.nameKo, "아리");
 });
 
+test("Store는 스트리머 Riot ID 등록 요청을 저장하고 승인 목록을 갱신한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-riot-requests-"));
+  const filePath = path.join(dir, "streamer-riot-ids.json");
+  try {
+    const store = new Store({ streamerRiotIdStatePath: filePath });
+    const first = store.upsertStreamerRiotIdRequest({
+      twitchUserId: "twitch-1",
+      twitchLogin: "streamer",
+      twitchDisplayName: "Streamer",
+      twitchProfileImageUrl: "https://example.test/avatar.png",
+      riotGameName: "Seiga",
+      riotTagLine: "JP1"
+    });
+
+    assert.equal(first.status, "pending");
+    assert.equal(store.listStreamerRiotIdRequests().length, 1);
+
+    const approved = store.resolveStreamerRiotIdRequest({ requestId: first.id, decision: "approved", reviewer: "dashboard" });
+    assert.equal(approved?.status, "approved");
+    assert.equal(approved?.overlaySlug, "streamer");
+    assert.match(approved?.overlayKey ?? "", /^sok_/);
+    assert.deepEqual(store.listApprovedStreamerRiotIds().map((request) => request.normalizedRiotId), ["seiga#jp1"]);
+    const linked = store.updateApprovedStreamerProfileLink({
+      twitchUserId: "twitch-1",
+      profileLinks: [
+        {
+          id: "profile-youtube",
+          url: "https://youtube.com/@streamer",
+          label: "YouTube",
+          platform: "youtube"
+        },
+        {
+          id: "profile-discord",
+          url: "https://discord.gg/example",
+          label: "Discord",
+          platform: "discord"
+        }
+      ]
+    });
+    assert.equal(linked?.profileLinkUrl, "https://youtube.com/@streamer");
+    assert.equal(linked?.profileLinkLabel, "YouTube");
+    assert.equal(linked?.profileLinks?.length, 2);
+    assert.equal(linked?.profileLinks?.[1]?.platform, "discord");
+    const renamed = store.updateApprovedStreamerRiotId({
+      twitchUserId: "twitch-1",
+      riotGameName: "SeigaChanged",
+      riotTagLine: "JP2"
+    });
+    assert.equal(renamed?.normalizedRiotId, "seigachanged#jp2");
+    assert.equal(renamed?.overlayKey, approved?.overlayKey);
+    assert.equal(renamed?.profileLinkUrl, "https://youtube.com/@streamer");
+    assert.equal(renamed?.profileLinks?.length, 2);
+    assert.deepEqual(store.listApprovedStreamerRiotIds().map((request) => request.normalizedRiotId), ["seigachanged#jp2"]);
+
+    const second = store.upsertStreamerRiotIdRequest({
+      twitchUserId: "twitch-1",
+      twitchLogin: "streamer",
+      twitchDisplayName: "Streamer",
+      riotGameName: "Seiga",
+      riotTagLine: "SEI"
+    });
+    store.resolveStreamerRiotIdRequest({ requestId: second.id, decision: "approved", reviewer: "dashboard" });
+
+    const approvedRequests = store.listApprovedStreamerRiotIds();
+    assert.equal(approvedRequests.length, 1);
+    assert.equal(approvedRequests[0].normalizedRiotId, "seiga#sei");
+    assert.equal(approvedRequests[0].overlayKey, approved?.overlayKey);
+    assert.equal(approvedRequests[0].profileLinkUrl, "https://youtube.com/@streamer");
+    assert.equal(approvedRequests[0].profileLinks?.length, 2);
+
+    const restartedStore = new Store({ streamerRiotIdStatePath: filePath });
+    assert.equal(restartedStore.listApprovedStreamerRiotIds()[0].normalizedRiotId, "seiga#sei");
+    assert.equal(restartedStore.listApprovedStreamerRiotIds()[0].overlayKey, approved?.overlayKey);
+    assert.equal(restartedStore.listApprovedStreamerRiotIds()[0].profileLinkLabel, "YouTube");
+    assert.equal(restartedStore.listApprovedStreamerRiotIds()[0].profileLinks?.[1]?.label, "Discord");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", () => {
   const store = new Store();
 

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import type {
   BotStatus,
   InternalEvent,
@@ -10,6 +11,8 @@ import type {
   ParticipationEntry,
   ParticipationPublicQueueEntry,
   ParticipationState,
+  StreamerProfileLink,
+  StreamerRiotIdRequest,
   TwitchChatSendFailure,
   TwitchChatStatus,
   TwitchEventSubStatus,
@@ -91,6 +94,16 @@ export type FollowerManagementState = {
 
 export type StoreOptions = {
   followerStatePath?: string;
+  streamerRiotIdStatePath?: string;
+};
+
+export type StreamerRiotIdRequestInput = {
+  twitchUserId: string;
+  twitchLogin: string;
+  twitchDisplayName: string;
+  twitchProfileImageUrl?: string;
+  riotGameName: string;
+  riotTagLine: string;
 };
 
 export type ParticipationDuplicate = {
@@ -232,6 +245,100 @@ function normalizedFollowerRecord(value: unknown): FollowerRecord | undefined {
   };
 }
 
+function cloneStreamerProfileLinks(links: StreamerProfileLink[] | undefined): StreamerProfileLink[] | undefined {
+  return links?.map((link) => ({ ...link }));
+}
+
+function normalizedStreamerProfileLinks(value: unknown, legacyUrl?: string, legacyLabel?: string): StreamerProfileLink[] | undefined {
+  const links: StreamerProfileLink[] = [];
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const input = objectRecord(item);
+      const url = optionalString(input?.url);
+      if (!url) continue;
+      const label = optionalString(input?.label) || legacyLabel || url;
+      links.push({
+        id: optionalString(input?.id) || newId("plink"),
+        url,
+        label,
+        platform: optionalString(input?.platform)
+      });
+    }
+  }
+  if (!links.length && legacyUrl) {
+    links.push({
+      id: newId("plink"),
+      url: legacyUrl,
+      label: legacyLabel || legacyUrl
+    });
+  }
+  return links.length ? links : undefined;
+}
+
+function firstStreamerProfileLink(links: StreamerProfileLink[] | undefined): StreamerProfileLink | undefined {
+  return links?.find((link) => link.url);
+}
+
+function cloneStreamerRiotIdRequest(request: StreamerRiotIdRequest): StreamerRiotIdRequest {
+  return { ...request, profileLinks: cloneStreamerProfileLinks(request.profileLinks) };
+}
+
+function streamerOverlaySlug(twitchLogin: string, twitchUserId?: string): string {
+  const slug = twitchLogin.trim().toLowerCase().replace(/[^a-z0-9_]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return slug || `streamer-${twitchUserId ?? "unknown"}`;
+}
+
+function newStreamerOverlayKey(): string {
+  return `sok_${crypto.randomBytes(24).toString("base64url")}`;
+}
+
+function ensureApprovedStreamerOverlayAccess(request: StreamerRiotIdRequest): void {
+  if (request.status !== "approved") return;
+  request.overlaySlug = request.overlaySlug || streamerOverlaySlug(request.twitchLogin, request.twitchUserId);
+  request.overlayKey = request.overlayKey || newStreamerOverlayKey();
+}
+
+function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest | undefined {
+  const input = objectRecord(value);
+  const id = optionalString(input?.id);
+  const twitchUserId = optionalString(input?.twitchUserId);
+  const twitchLogin = optionalString(input?.twitchLogin);
+  const twitchDisplayName = optionalString(input?.twitchDisplayName);
+  const riotGameName = optionalString(input?.riotGameName);
+  const riotTagLine = optionalString(input?.riotTagLine);
+  if (!id || !twitchUserId || !twitchLogin || !twitchDisplayName || !riotGameName || !riotTagLine) return undefined;
+  const status = input?.status === "approved" || input?.status === "rejected" ? input.status : "pending";
+  const requestedAt = optionalString(input?.requestedAt) ?? nowIso();
+  const updatedAt = optionalString(input?.updatedAt) ?? requestedAt;
+  const profileLinkUrl = optionalString(input?.profileLinkUrl);
+  const profileLinkLabel = optionalString(input?.profileLinkLabel);
+  const profileLinks = normalizedStreamerProfileLinks(input?.profileLinks, profileLinkUrl, profileLinkLabel);
+  const primaryProfileLink = firstStreamerProfileLink(profileLinks);
+  const request: StreamerRiotIdRequest = {
+    id,
+    twitchUserId,
+    twitchLogin,
+    twitchDisplayName,
+    twitchProfileImageUrl: optionalString(input?.twitchProfileImageUrl),
+    riotGameName,
+    riotTagLine,
+    normalizedRiotId: normalizeRiotIdKey(riotGameName, riotTagLine),
+    overlaySlug: optionalString(input?.overlaySlug) ?? streamerOverlaySlug(twitchLogin, twitchUserId),
+    overlayKey: optionalString(input?.overlayKey),
+    profileLinkUrl: primaryProfileLink?.url ?? profileLinkUrl,
+    profileLinkLabel: primaryProfileLink?.label ?? profileLinkLabel,
+    profileLinks,
+    status,
+    requestedAt,
+    updatedAt,
+    reviewedAt: optionalString(input?.reviewedAt),
+    reviewer: optionalString(input?.reviewer),
+    note: optionalString(input?.note)
+  };
+  ensureApprovedStreamerOverlayAccess(request);
+  return request;
+}
+
 export class Store {
   private static readonly maxSeenTwitchMessageIds = 5000;
   private static readonly maxEvents = 200;
@@ -251,6 +358,7 @@ export class Store {
   private followerPersistTimer?: NodeJS.Timeout;
   private participationQueue: ParticipationEntry[] = [];
   private participationStreamerProfile?: ParticipationStreamerProfile;
+  private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
   private overlayStatus: OverlayStatus = {
     clientCount: 0,
     clientsByChannel: Object.fromEntries(OVERLAY_CHANNELS.map((channel) => [channel, 0])) as Record<OverlayChannel, number>,
@@ -284,6 +392,7 @@ export class Store {
 
   constructor(private readonly options: StoreOptions = {}) {
     this.loadFollowerState();
+    this.loadStreamerRiotIdState();
   }
 
   getStatus(): BotStatus {
@@ -626,6 +735,192 @@ export class Store {
       this.persistFollowerState();
     }, 1000);
     this.followerPersistTimer.unref?.();
+  }
+
+  private loadStreamerRiotIdState(): void {
+    if (!this.options.streamerRiotIdStatePath) return;
+    try {
+      const raw = fs.readFileSync(this.options.streamerRiotIdStatePath, "utf8");
+      const parsed = objectRecord(JSON.parse(raw));
+      const requests = Array.isArray(parsed?.requests) ? parsed.requests : [];
+      this.streamerRiotIdRequests = requests
+        .map(normalizedStreamerRiotIdRequest)
+        .filter((request): request is StreamerRiotIdRequest => Boolean(request));
+    } catch {
+      this.streamerRiotIdRequests = [];
+    }
+  }
+
+  private persistStreamerRiotIdState(): void {
+    if (!this.options.streamerRiotIdStatePath) return;
+    try {
+      const dir = path.dirname(this.options.streamerRiotIdStatePath);
+      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+      const tmpPath = `${this.options.streamerRiotIdStatePath}.${process.pid}.${Date.now()}.tmp`;
+      const payload = {
+        version: 1,
+        requests: this.streamerRiotIdRequests.map(cloneStreamerRiotIdRequest)
+      };
+      fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+      fs.renameSync(tmpPath, this.options.streamerRiotIdStatePath);
+    } catch {
+      // 방송 중 등록 요청 저장 실패가 runtime 동작을 막지 않도록 무시합니다.
+    }
+  }
+
+  listStreamerRiotIdRequests(): StreamerRiotIdRequest[] {
+    return this.streamerRiotIdRequests
+      .map(cloneStreamerRiotIdRequest)
+      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+  }
+
+  listApprovedStreamerRiotIds(): StreamerRiotIdRequest[] {
+    return this.listStreamerRiotIdRequests().filter((request) => request.status === "approved");
+  }
+
+  upsertStreamerRiotIdRequest(input: StreamerRiotIdRequestInput): StreamerRiotIdRequest {
+    const now = nowIso();
+    const normalizedRiotId = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
+    const approvedSame = this.streamerRiotIdRequests.find((request) =>
+      request.twitchUserId === input.twitchUserId &&
+      request.normalizedRiotId === normalizedRiotId &&
+      request.status === "approved"
+    );
+    if (approvedSame) {
+      Object.assign(approvedSame, {
+        twitchLogin: input.twitchLogin,
+        twitchDisplayName: input.twitchDisplayName,
+        twitchProfileImageUrl: input.twitchProfileImageUrl,
+        overlaySlug: approvedSame.overlaySlug || streamerOverlaySlug(input.twitchLogin, input.twitchUserId),
+        updatedAt: now
+      });
+      ensureApprovedStreamerOverlayAccess(approvedSame);
+      this.persistStreamerRiotIdState();
+      return cloneStreamerRiotIdRequest(approvedSame);
+    }
+
+    const existing = this.streamerRiotIdRequests.find((request) => request.twitchUserId === input.twitchUserId && request.status === "pending")
+      ?? this.streamerRiotIdRequests.find((request) =>
+        request.twitchUserId === input.twitchUserId &&
+        request.normalizedRiotId === normalizedRiotId &&
+        request.status === "rejected"
+      );
+    if (existing) {
+      Object.assign(existing, {
+        twitchLogin: input.twitchLogin,
+        twitchDisplayName: input.twitchDisplayName,
+        twitchProfileImageUrl: input.twitchProfileImageUrl,
+        riotGameName: input.riotGameName,
+        riotTagLine: input.riotTagLine,
+        normalizedRiotId,
+        status: "pending" as const,
+        updatedAt: now,
+        reviewedAt: undefined,
+        reviewer: undefined,
+        note: undefined
+      });
+      this.persistStreamerRiotIdState();
+      return cloneStreamerRiotIdRequest(existing);
+    }
+
+    const request: StreamerRiotIdRequest = {
+      id: newId("riotreq"),
+      twitchUserId: input.twitchUserId,
+      twitchLogin: input.twitchLogin,
+      twitchDisplayName: input.twitchDisplayName,
+      twitchProfileImageUrl: input.twitchProfileImageUrl,
+      riotGameName: input.riotGameName,
+      riotTagLine: input.riotTagLine,
+      normalizedRiotId,
+      status: "pending",
+      requestedAt: now,
+      updatedAt: now
+    };
+    this.streamerRiotIdRequests.unshift(request);
+    this.persistStreamerRiotIdState();
+    return cloneStreamerRiotIdRequest(request);
+  }
+
+  resolveStreamerRiotIdRequest(input: {
+    requestId: string;
+    decision: "approved" | "rejected";
+    reviewer?: string;
+    note?: string;
+  }): StreamerRiotIdRequest | undefined {
+    const request = this.streamerRiotIdRequests.find((candidate) => candidate.id === input.requestId);
+    if (!request) return undefined;
+    const now = nowIso();
+    request.status = input.decision;
+    request.updatedAt = now;
+    request.reviewedAt = now;
+    request.reviewer = input.reviewer;
+    request.note = input.note;
+    if (input.decision === "approved") {
+      const previousApproved = this.streamerRiotIdRequests.find((candidate) =>
+        candidate.id !== request.id &&
+        candidate.twitchUserId === request.twitchUserId &&
+        candidate.status === "approved"
+      );
+      request.overlaySlug = request.overlaySlug || previousApproved?.overlaySlug;
+      request.overlayKey = request.overlayKey || previousApproved?.overlayKey;
+      request.profileLinks = request.profileLinks?.length
+        ? cloneStreamerProfileLinks(request.profileLinks)
+        : cloneStreamerProfileLinks(previousApproved?.profileLinks);
+      const primaryProfileLink = firstStreamerProfileLink(request.profileLinks);
+      request.profileLinkUrl = request.profileLinkUrl || primaryProfileLink?.url || previousApproved?.profileLinkUrl;
+      request.profileLinkLabel = request.profileLinkLabel || primaryProfileLink?.label || previousApproved?.profileLinkLabel;
+      request.profileLinks = normalizedStreamerProfileLinks(request.profileLinks, request.profileLinkUrl, request.profileLinkLabel);
+      ensureApprovedStreamerOverlayAccess(request);
+      for (const candidate of this.streamerRiotIdRequests) {
+        if (candidate.id === request.id || candidate.twitchUserId !== request.twitchUserId || candidate.status !== "approved") continue;
+        candidate.status = "rejected";
+        candidate.updatedAt = now;
+        candidate.reviewedAt = now;
+        candidate.reviewer = input.reviewer;
+        candidate.note = "새 Riot ID 승인으로 이전 승인 기록을 비활성화했습니다.";
+      }
+    }
+    this.persistStreamerRiotIdState();
+    return cloneStreamerRiotIdRequest(request);
+  }
+
+  updateApprovedStreamerProfileLink(input: {
+    twitchUserId: string;
+    profileLinkUrl?: string;
+    profileLinkLabel?: string;
+    profileLinks?: StreamerProfileLink[];
+  }): StreamerRiotIdRequest | undefined {
+    const request = this.streamerRiotIdRequests.find((candidate) =>
+      candidate.twitchUserId === input.twitchUserId &&
+      candidate.status === "approved"
+    );
+    if (!request) return undefined;
+    const profileLinks = normalizedStreamerProfileLinks(input.profileLinks, input.profileLinkUrl, input.profileLinkLabel);
+    const primaryProfileLink = firstStreamerProfileLink(profileLinks);
+    request.profileLinks = profileLinks;
+    request.profileLinkUrl = primaryProfileLink?.url;
+    request.profileLinkLabel = primaryProfileLink ? primaryProfileLink.label : undefined;
+    request.updatedAt = nowIso();
+    this.persistStreamerRiotIdState();
+    return cloneStreamerRiotIdRequest(request);
+  }
+
+  updateApprovedStreamerRiotId(input: {
+    twitchUserId: string;
+    riotGameName: string;
+    riotTagLine: string;
+  }): StreamerRiotIdRequest | undefined {
+    const request = this.streamerRiotIdRequests.find((candidate) =>
+      candidate.twitchUserId === input.twitchUserId &&
+      candidate.status === "approved"
+    );
+    if (!request) return undefined;
+    request.riotGameName = input.riotGameName;
+    request.riotTagLine = input.riotTagLine;
+    request.normalizedRiotId = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
+    request.updatedAt = nowIso();
+    this.persistStreamerRiotIdState();
+    return cloneStreamerRiotIdRequest(request);
   }
 
   getParticipationQueue(): ParticipationEntry[] {

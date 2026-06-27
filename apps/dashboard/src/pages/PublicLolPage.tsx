@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis } from "@streamops/shared";
+import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest } from "@streamops/shared";
 import { apiBase } from "../api/client";
 
 type PublicLolMatchParticipant = {
@@ -143,6 +143,13 @@ type PublicLolRolePerformance = {
   averageKda: number;
 };
 
+type PublicProfileLink = {
+  id?: string;
+  url: string;
+  label: string;
+  platform?: string;
+};
+
 type PublicLolTwitchStream = {
   matched: true;
   isLive: boolean;
@@ -150,13 +157,16 @@ type PublicLolTwitchStream = {
   twitchLogin?: string;
   twitchDisplayName: string;
   profileImageUrl?: string;
+  profileLinkUrl?: string;
+  profileLinkLabel?: string;
+  profileLinks?: PublicProfileLink[];
   channelUrl?: string;
   title?: string;
   gameName?: string;
   viewerCount?: number;
   startedAt?: string;
   thumbnailUrl?: string;
-  source: "participation" | "connected_streamer";
+  source: "participation" | "connected_streamer" | "approved_streamer";
 };
 
 type PublicTwitchViewerStatus = {
@@ -171,6 +181,7 @@ type PublicTwitchViewerStatus = {
     profileImageUrl?: string;
   };
   tokenExpiresAt?: string;
+  streamerRiotRequest?: StreamerRiotIdRequest;
 };
 
 type PublicTwitchFollowedLolChannel = {
@@ -190,7 +201,7 @@ type PublicTwitchFollowedLolChannel = {
   riotGameName?: string;
   riotTagLine?: string;
   rankedStats?: LolRankedStats;
-  source?: "participation" | "connected_streamer";
+  source?: "participation" | "connected_streamer" | "approved_streamer";
 };
 
 type PublicTwitchFollowedLolResponse = {
@@ -479,7 +490,6 @@ const publicI18n = {
     flexRank: "자유랭크",
     ranked5v5: "5v5 랭크",
     rankTrend: "랭크 흐름",
-    streamerOps: "스트리머 오버레이와 방송 관리는 로그인 후 사용할 수 있습니다.",
     emptyTitle: "JP 서버 Riot ID를 입력하면 전적 카드가 열립니다.",
     emptyDescription: "tagLine은 JP1 외 다른 값도 검색할 수 있습니다.",
     win: "승리",
@@ -541,6 +551,7 @@ const publicI18n = {
     twitchStreamer: "Twitch 스트리머",
     twitchViewers: "시청자",
     openTwitch: "Twitch 열기",
+    profileLinks: "프로필 링크",
     twitchViewerLogin: "Twitch 로그인",
     twitchViewerLogout: "Twitch 로그아웃",
     twitchFollowedTitle: "팔로우 방송인 전적",
@@ -551,6 +562,20 @@ const publicI18n = {
     twitchFollowedNoRiot: "Riot ID 미연결",
     twitchLoginRequired: "Twitch 로그인 후 팔로우 중인 방송인의 전적을 확인할 수 있습니다.",
     twitchNotConfigured: "Twitch 공개 로그인이 아직 설정되지 않았습니다.",
+    streamerRiotRequestTitle: "내 Riot ID 등록 요청",
+    streamerRiotRequestBody: "관리자가 확인하면 팔로워들이 Twitch 팔로우 목록에서 내 전적을 바로 볼 수 있습니다.",
+    streamerRiotRequestPlaceholder: "게임명#태그",
+    streamerRiotRequestSubmit: "등록 요청",
+    streamerRiotRequestSubmitting: "요청 중",
+    streamerRiotRequestSent: "등록 요청을 보냈습니다. 관리자 승인 후 반영됩니다.",
+    streamerRiotRequestApproved: "이미 승인된 Riot ID입니다.",
+    streamerRiotRegister: "스트리머 등록",
+    streamerRiotRegisterDescription: "내 Twitch 계정과 Riot ID를 연결해 팔로워에게 전적과 오버레이를 보여줍니다.",
+    streamerRiotRegisterBack: "돌아가기",
+    streamerDashboardOpen: "대시보드 열기",
+    streamerRecordOpen: "내 전적 보기",
+    twitchProfileMenu: "Twitch 프로필 메뉴",
+    twitchFollowedOpen: "팔로우 전적 보기",
     viewRecord: "전적 보기",
     loadMoreMatches: "더보기",
     loadingMoreMatches: "불러오는 중",
@@ -688,7 +713,6 @@ const publicI18n = {
     flexRank: "フレックスランク",
     ranked5v5: "5v5 ランク",
     rankTrend: "ランク推移",
-    streamerOps: "配信 overlay と運用管理はログイン後に利用できます。",
     emptyTitle: "JP サーバー Riot ID を入力すると戦績カードが開きます。",
     emptyDescription: "tagLine は JP1 以外の値も検索できます。",
     win: "勝利",
@@ -750,6 +774,7 @@ const publicI18n = {
     twitchStreamer: "Twitch 配信者",
     twitchViewers: "視聴者",
     openTwitch: "Twitch を開く",
+    profileLinks: "プロフィールリンク",
     twitchViewerLogin: "Twitch ログイン",
     twitchViewerLogout: "Twitch ログアウト",
     twitchFollowedTitle: "フォロー配信者の戦績",
@@ -760,6 +785,20 @@ const publicI18n = {
     twitchFollowedNoRiot: "Riot ID 未連携",
     twitchLoginRequired: "Twitchログイン後、フォロー中の配信者の戦績を確認できます。",
     twitchNotConfigured: "Twitch公開ログインがまだ設定されていません。",
+    streamerRiotRequestTitle: "自分の Riot ID 登録申請",
+    streamerRiotRequestBody: "管理者が確認すると、フォロワーの Twitch フォロー一覧からあなたの戦績を見られます。",
+    streamerRiotRequestPlaceholder: "ゲーム名#タグ",
+    streamerRiotRequestSubmit: "登録申請",
+    streamerRiotRequestSubmitting: "申請中",
+    streamerRiotRequestSent: "登録申請を送信しました。管理者承認後に反映されます。",
+    streamerRiotRequestApproved: "すでに承認済みの Riot ID です。",
+    streamerRiotRegister: "配信者登録",
+    streamerRiotRegisterDescription: "自分の Twitch アカウントと Riot ID を連携し、フォロワーに戦績とオーバーレイを表示します。",
+    streamerRiotRegisterBack: "戻る",
+    streamerDashboardOpen: "ダッシュボードを開く",
+    streamerRecordOpen: "自分の戦績を見る",
+    twitchProfileMenu: "Twitch プロフィールメニュー",
+    twitchFollowedOpen: "フォロー戦績を見る",
     viewRecord: "戦績を見る",
     loadMoreMatches: "もっと見る",
     loadingMoreMatches: "読み込み中",
@@ -988,6 +1027,19 @@ async function getPublicTwitchFollowedLol(): Promise<PublicTwitchFollowedLolResp
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
   return (await response.json()) as PublicTwitchFollowedLolResponse;
+}
+
+async function requestPublicStreamerRiotId(riotId: string): Promise<StreamerRiotIdRequest> {
+  const response = await fetch(`${apiBase}/api/public/twitch/riot-id-request`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ riotId })
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  const body = await response.json() as { request?: StreamerRiotIdRequest };
+  if (!body.request) throw new Error(t().searchFailed);
+  return body.request;
 }
 
 async function logoutPublicTwitch(): Promise<void> {
@@ -2094,8 +2146,75 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
   );
 }
 
+function profileLinkPlatformFromUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+    if (host === "youtu.be" || host.endsWith("youtube.com")) return "youtube";
+    if (host.endsWith("twitch.tv")) return "twitch";
+    if (host === "discord.gg" || host.endsWith("discord.com")) return "discord";
+    if (host === "x.com" || host.endsWith("twitter.com")) return "x";
+    if (host.endsWith("instagram.com")) return "instagram";
+    if (host.endsWith("tiktok.com")) return "tiktok";
+    if (host.endsWith("afreecatv.com") || host.endsWith("sooplive.co.kr")) return "soop";
+  } catch {
+    return "website";
+  }
+  return "website";
+}
+
+function profileLinkIconText(platform: string): string {
+  const icons: Record<string, string> = {
+    youtube: "YT",
+    twitch: "TV",
+    discord: "DC",
+    x: "X",
+    instagram: "IG",
+    tiktok: "TT",
+    soop: "SO",
+    website: "LK"
+  };
+  return icons[platform] ?? "LK";
+}
+
+function profileLinksFromStream(stream: PublicLolTwitchStream | undefined): PublicProfileLink[] {
+  if (!stream) return [];
+  if (stream.profileLinks?.length) return stream.profileLinks.filter((link) => Boolean(link.url));
+  return stream.profileLinkUrl ? [{
+    id: "legacy-profile-link",
+    url: stream.profileLinkUrl,
+    label: stream.profileLinkLabel ?? "Link",
+    platform: profileLinkPlatformFromUrl(stream.profileLinkUrl)
+  }] : [];
+}
+
+function ProfileLinkIcons({ links }: { links: PublicProfileLink[] }) {
+  if (!links.length) return null;
+  return (
+    <span className="public-profile-link-icons" aria-label={t().profileLinks}>
+      {links.map((link, index) => {
+        const platform = (link.platform || profileLinkPlatformFromUrl(link.url)).toLowerCase().replace(/[^a-z0-9_-]/g, "") || "website";
+        return (
+          <a
+            className={`public-profile-link-icon ${platform}`}
+            href={link.url}
+            target="_blank"
+            rel="noreferrer"
+            title={link.label}
+            aria-label={link.label}
+            key={`${link.id ?? link.url}:${index}`}
+          >
+            {profileLinkIconText(platform)}
+          </a>
+        );
+      })}
+    </span>
+  );
+}
+
 function TwitchStreamBadge({ stream }: { stream: PublicLolTwitchStream | undefined }) {
   if (!stream) return null;
+  const profileLinks = profileLinksFromStream(stream);
   const label = stream.isLive ? t().twitchLive : t().twitchOffline;
   const meta = [
     stream.gameName,
@@ -2113,23 +2232,21 @@ function TwitchStreamBadge({ stream }: { stream: PublicLolTwitchStream | undefin
       {stream.title ? <em>{stream.title}</em> : null}
     </>
   );
-  if (!stream.channelUrl) {
-    return (
-      <div className={`public-twitch-stream-badge ${stream.isLive ? "live" : "offline"}`} aria-label={`${t().twitchStreamer} ${label}`}>
-        {content}
-      </div>
-    );
-  }
   return (
-    <a
+    <div
       className={`public-twitch-stream-badge ${stream.isLive ? "live" : "offline"}`}
-      href={stream.channelUrl}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`${t().openTwitch}: ${stream.twitchDisplayName}`}
+      aria-label={`${t().twitchStreamer} ${label}`}
     >
       {content}
-    </a>
+      {stream.channelUrl || profileLinks.length ? (
+        <span className="public-twitch-stream-links">
+          {stream.channelUrl ? <a href={stream.channelUrl} target="_blank" rel="noreferrer">{t().openTwitch}</a> : null}
+          {profileLinks.map((link, index) => (
+            <a href={link.url} target="_blank" rel="noreferrer" key={`${link.id ?? link.url}:${index}`}>{link.label}</a>
+          ))}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -2178,6 +2295,7 @@ function ProfileTopPanel({
   const flexStats = flexRankStats(profile);
   const rank5v5Stats = ranked5v5Stats(profile);
   const masteryChampionArt = assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl);
+  const profileLinks = profileLinksFromStream(profile.twitchStream);
   return (
     <section id="public-ranking" className={`public-profile-top-grid ${masteryChampionArt ? "has-mastery-art" : ""}`}>
       {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
@@ -2221,6 +2339,7 @@ function ProfileTopPanel({
               <button type="button" className="public-secondary-action" onClick={onToggleFavorite}>
                 {favoriteActive ? t().favoriteRemove : t().favoriteAdd}
               </button>
+              <ProfileLinkIcons links={profileLinks} />
               <span>{t().fetchedAt} {formatDate(profile.fetchedAt)}</span>
             </div>
             <TwitchStreamBadge stream={profile.twitchStream} />
@@ -2666,6 +2785,11 @@ function PublicAppHeader({
   onPickSuggestion,
   onLocale,
   onTwitchLogin,
+  onTwitchFollowed,
+  onStreamerRegister,
+  onStreamerDashboard,
+  onStreamerRecord,
+  onTwitchLogout,
   onFilters,
   onResetFilters,
   onMarkNotificationsRead
@@ -2687,15 +2811,24 @@ function PublicAppHeader({
   onPickSuggestion: (suggestion: SearchSuggestion) => void;
   onLocale: (locale: PublicLocale) => void;
   onTwitchLogin: () => void;
+  onTwitchFollowed: () => void;
+  onStreamerRegister: () => void;
+  onStreamerDashboard: () => void;
+  onStreamerRecord: () => void;
+  onTwitchLogout: () => void;
   onFilters: (filters: PublicMatchFilters) => void;
   onResetFilters: () => void;
   onMarkNotificationsRead: () => void;
 }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const filterActive = hasActiveFilters(filters);
   const twitchUser = twitchStatus.connected ? twitchStatus.user : undefined;
+  const approvedStreamerRequest = twitchStatus.streamerRiotRequest?.status === "approved" ? twitchStatus.streamerRiotRequest : undefined;
+  const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved" && twitchStatus.streamerRiotRequest?.status !== "pending";
+  const canOpenStreamerDashboard = Boolean(approvedStreamerRequest);
   return (
     <header id={showSearch ? "public-search" : undefined} className={`public-app-header ${showSearch ? "" : "home"}`}>
       {showSearch ? (
@@ -2716,16 +2849,65 @@ function PublicAppHeader({
       )}
       <div className="public-header-tools">
         <PublicLocaleSelector locale={locale} onLocale={onLocale} />
-        <button
-          className={`public-twitch-login-chip ${twitchStatus.connected ? "connected" : ""}`}
-          type="button"
-          onClick={onTwitchLogin}
-          disabled={!twitchStatus.configured}
-          title={twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchLoginRequired}
-        >
-          {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
-          <strong>{twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchViewerLogin}</strong>
-        </button>
+        {showSearch && twitchUser ? (
+          <div className="public-header-popover-wrap">
+            <button type="button" aria-label={t().notifications} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
+              ♧{unreadCount > 0 ? <span>{unreadCount}</span> : null}
+            </button>
+            {notificationsOpen ? <PublicNotificationPanel notifications={notifications} onMarkAllRead={onMarkNotificationsRead} /> : null}
+          </div>
+        ) : null}
+        <div className="public-twitch-profile-wrap">
+          <button
+            className={`public-twitch-login-chip ${twitchStatus.connected ? "connected" : ""}`}
+            type="button"
+            onClick={() => {
+              if (!twitchStatus.connected) {
+                onTwitchLogin();
+                return;
+              }
+              setTwitchMenuOpen((open) => !open);
+            }}
+            disabled={!twitchStatus.configured}
+            aria-expanded={twitchMenuOpen}
+            title={twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchLoginRequired}
+          >
+            {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
+            <strong>{twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchViewerLogin}</strong>
+          </button>
+          {twitchStatus.connected && twitchMenuOpen ? (
+            <div className="public-twitch-profile-menu" role="menu" aria-label={t().twitchProfileMenu}>
+              <div className="public-twitch-profile-menu-head">
+                {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
+                <div>
+                  <strong>{twitchStatus.user?.displayName ?? twitchStatus.user?.login}</strong>
+                  <small>@{twitchStatus.user?.login}</small>
+                </div>
+              </div>
+              {canRegisterStreamer ? (
+                <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerRegister(); }}>
+                  {t().streamerRiotRegister}
+                </button>
+              ) : null}
+              {canOpenStreamerDashboard ? (
+                <button className="dashboard" type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerDashboard(); }}>
+                  {t().streamerDashboardOpen}
+                </button>
+              ) : null}
+              {approvedStreamerRequest ? (
+                <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerRecord(); }}>
+                  {t().streamerRecordOpen}
+                </button>
+              ) : null}
+              <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onTwitchFollowed(); }}>
+                {t().twitchFollowedOpen}
+              </button>
+              <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onTwitchLogout(); }}>
+                {t().twitchViewerLogout}
+              </button>
+            </div>
+          ) : null}
+        </div>
         {showFilters ? <div className="public-header-popover-wrap">
           <button className={`public-filter-button ${filterActive ? "active" : ""}`} type="button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>
             <span aria-hidden="true">▽</span>
@@ -2736,21 +2918,6 @@ function PublicAppHeader({
           ) : null}
         </div> : null}
       </div>
-      {showSearch && twitchUser ? <div className="public-header-user">
-        <div className="public-header-popover-wrap">
-          <button type="button" aria-label={t().notifications} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
-            ♧{unreadCount > 0 ? <span>{unreadCount}</span> : null}
-          </button>
-          {notificationsOpen ? <PublicNotificationPanel notifications={notifications} onMarkAllRead={onMarkNotificationsRead} /> : null}
-        </div>
-        <div className="public-header-avatar">
-          {twitchUser.profileImageUrl ? <img src={twitchUser.profileImageUrl} alt="" /> : <span>{twitchUser.displayName.slice(0, 1).toUpperCase()}</span>}
-        </div>
-        <div>
-          <strong>{twitchUser.displayName}</strong>
-          <small data-ko={publicI18n.ko.online} data-ja={publicI18n.ja.online}>{t().online}</small>
-        </div>
-      </div> : null}
     </header>
   );
 }
@@ -2834,6 +3001,89 @@ function PublicRightRail({ profile }: { profile: PublicLolProfile }) {
         </div>
       </section>
     </aside>
+  );
+}
+
+function PublicStreamerRegistrationScreen({
+  status,
+  onLogin,
+  onBack,
+  onSubmitted
+}: {
+  status: PublicTwitchViewerStatus;
+  onLogin: () => void;
+  onBack: () => void;
+  onSubmitted: (request: StreamerRiotIdRequest) => void;
+}) {
+  const [riotIdDraft, setRiotIdDraft] = useState("");
+  const [requestBusy, setRequestBusy] = useState(false);
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
+
+  async function submitStreamerRiotIdRequest(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    const riotId = riotIdDraft.trim();
+    if (!riotId) return;
+    setRequestBusy(true);
+    setRequestMessage("");
+    setRequestError("");
+    try {
+      const request = await requestPublicStreamerRiotId(riotId);
+      setRiotIdDraft(`${request.riotGameName}#${request.riotTagLine}`);
+      setRequestMessage(request.status === "approved" ? t().streamerRiotRequestApproved : t().streamerRiotRequestSent);
+      onSubmitted(request);
+    } catch (submitError) {
+      setRequestError(submitError instanceof Error ? submitError.message : t().searchFailed);
+    } finally {
+      setRequestBusy(false);
+    }
+  }
+
+  return (
+    <section className="public-streamer-register-screen">
+      <div className="public-streamer-register-card">
+        <button className="public-back-button" type="button" onClick={onBack}>{t().streamerRiotRegisterBack}</button>
+        <div className="public-streamer-register-head">
+          <span className="public-streamer-register-avatar">
+            {status.user?.profileImageUrl ? <img src={status.user.profileImageUrl} alt="" /> : "T"}
+          </span>
+          <div>
+            <h1>{t().streamerRiotRegister}</h1>
+            <p>{t().streamerRiotRegisterDescription}</p>
+            {status.user ? <small>@{status.user.login}</small> : null}
+          </div>
+        </div>
+        {!status.configured ? (
+          <p className="public-empty">{t().twitchNotConfigured}</p>
+        ) : !status.connected ? (
+          <div className="public-streamer-register-login">
+            <p>{t().twitchLoginRequired}</p>
+            <button type="button" onClick={onLogin}>{t().twitchViewerLogin}</button>
+          </div>
+        ) : (
+          <form className="public-streamer-riot-request standalone" onSubmit={(event) => void submitStreamerRiotIdRequest(event)}>
+            <div>
+              <strong data-ko={publicI18n.ko.streamerRiotRequestTitle} data-ja={publicI18n.ja.streamerRiotRequestTitle}>{t().streamerRiotRequestTitle}</strong>
+              <small data-ko={publicI18n.ko.streamerRiotRequestBody} data-ja={publicI18n.ja.streamerRiotRequestBody}>{t().streamerRiotRequestBody}</small>
+            </div>
+            <label>
+              <span className="sr-only">{t().streamerRiotRequestPlaceholder}</span>
+              <input
+                value={riotIdDraft}
+                placeholder={t().streamerRiotRequestPlaceholder}
+                onChange={(event) => setRiotIdDraft(event.target.value)}
+                autoComplete="off"
+              />
+            </label>
+            <button type="submit" disabled={requestBusy || !riotIdDraft.trim()}>
+              {requestBusy ? t().streamerRiotRequestSubmitting : t().streamerRiotRequestSubmit}
+            </button>
+            {requestMessage ? <p className="public-form-message">{requestMessage}</p> : null}
+            {requestError ? <p className="public-error">{requestError}</p> : null}
+          </form>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -2923,6 +3173,46 @@ function PublicTwitchFollowedPanel({
           </div>
         </>
       )}
+    </section>
+  );
+}
+
+function PublicTwitchFollowedScreen({
+  status,
+  followed,
+  loading,
+  error,
+  onLogin,
+  onLogout,
+  onRefresh,
+  onSearch,
+  onBack
+}: {
+  status: PublicTwitchViewerStatus;
+  followed: PublicTwitchFollowedLolResponse | null;
+  loading: boolean;
+  error: string;
+  onLogin: () => void;
+  onLogout: () => void;
+  onRefresh: () => void;
+  onSearch: (riotId: string) => void;
+  onBack: () => void;
+}) {
+  return (
+    <section className="public-followed-screen">
+      <div className="public-followed-screen-card">
+        <button className="public-back-button" type="button" onClick={onBack}>{t().streamerRiotRegisterBack}</button>
+        <PublicTwitchFollowedPanel
+          status={status}
+          followed={followed}
+          loading={loading}
+          error={error}
+          onLogin={onLogin}
+          onLogout={onLogout}
+          onRefresh={onRefresh}
+          onSearch={onSearch}
+        />
+      </div>
     </section>
   );
 }
@@ -3625,7 +3915,13 @@ function PublicMobileNav({ onNavigate }: { onNavigate: (target: PublicNavTarget)
   );
 }
 
-export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
+export function PublicLolPage({
+  onOpenAdmin,
+  onOpenStreamerDashboard
+}: {
+  onOpenAdmin: () => void;
+  onOpenStreamerDashboard: () => void;
+}) {
   const [locale, setLocaleState] = useState<PublicLocale>(() => detectPublicLocale());
   activePublicLocale = locale;
   const [query, setQuery] = useState("");
@@ -3643,6 +3939,8 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
   const [profileTab, setProfileTab] = useState<PublicProfileTab>("overview");
   const [activeNav, setActiveNav] = useState<PublicNavTarget>("search");
   const [premiumOpen, setPremiumOpen] = useState(false);
+  const [streamerRegisterOpen, setStreamerRegisterOpen] = useState(false);
+  const [followedScreenOpen, setFollowedScreenOpen] = useState(false);
   const [nowTick, setNowTick] = useState(() => Date.now());
   const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>({
     connected: false,
@@ -3727,6 +4025,8 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
       setProfile(null);
       setError("");
       setFilters(DEFAULT_MATCH_FILTERS);
+      setStreamerRegisterOpen(false);
+      setFollowedScreenOpen(false);
       setActiveNav("search");
     };
     window.addEventListener("popstate", handlePopState);
@@ -3824,20 +4124,44 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
   }
 
   function openTwitchViewerPanel(): void {
+    setStreamerRegisterOpen(false);
+    setFollowedScreenOpen(false);
     if (!twitchStatus.connected) {
       if (twitchStatus.configured) startTwitchLogin();
       return;
     }
+    setFollowedScreenOpen(true);
     setActiveNav("community");
-    window.setTimeout(() => {
-      document.getElementById("public-twitch-followed")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+  }
+
+  function openStreamerRegisterScreen(): void {
+    setFollowedScreenOpen(false);
+    if (!twitchStatus.connected) {
+      if (twitchStatus.configured) startTwitchLogin();
+      return;
+    }
+    setStreamerRegisterOpen(true);
+    setActiveNav("community");
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+  }
+
+  function openStreamerRecord(): void {
+    const request = twitchStatus.streamerRiotRequest;
+    if (request?.status !== "approved") return;
+    const riotId = `${request.riotGameName}#${request.riotTagLine}`;
+    setStreamerRegisterOpen(false);
+    setFollowedScreenOpen(false);
+    setQuery(riotId);
+    void runSearch(riotId);
   }
 
   async function disconnectTwitchViewer(): Promise<void> {
     await logoutPublicTwitch();
     setTwitchStatus({ connected: false, configured: true, requiredScopes: ["user:read:follows"], missingScopes: ["user:read:follows"] });
     setFollowedLol(null);
+    setStreamerRegisterOpen(false);
+    setFollowedScreenOpen(false);
   }
 
   function toggleTheme(): void {
@@ -3868,11 +4192,13 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
 	    setError("");
     setMoreMatchesError("");
 	    try {
-	      const result = await searchProfile(riotId, { refresh: options.refresh });
+      const result = await searchProfile(riotId, { refresh: options.refresh });
       setProfile(result);
       setNowTick(Date.now());
       setProfileTab("overview");
       setFilters(DEFAULT_MATCH_FILTERS);
+      setStreamerRegisterOpen(false);
+      setFollowedScreenOpen(false);
       setActiveNav("search");
       setQuery(result.riotId);
       if (updateUrl) setPublicPath(publicSummonerPath(result.riotId), options.replaceUrl);
@@ -3929,11 +4255,15 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
 	    setError("");
     setMoreMatchesError("");
 	    setFilters(DEFAULT_MATCH_FILTERS);
+    setStreamerRegisterOpen(false);
+    setFollowedScreenOpen(false);
     setActiveNav("search");
     setPublicPath("/");
   }
 
   function navigatePublic(target: PublicNavTarget): void {
+    setStreamerRegisterOpen(false);
+    setFollowedScreenOpen(false);
     setActiveNav(target);
     if (profile) {
       if (target === "champion") setProfileTab("champions");
@@ -3962,6 +4292,100 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
     }, 0);
   }
 
+  if (streamerRegisterOpen) {
+    return (
+      <main className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}>
+        <section className="public-app-main">
+          <PublicAppHeader
+            locale={locale}
+            profile={profile}
+            twitchStatus={twitchStatus}
+            showSearch={false}
+            showFilters={false}
+            query={query}
+            loading={loading}
+            suggestions={visibleSuggestions}
+            filters={filters}
+            champions={availableChampions}
+            notifications={notifications}
+            onQuery={setQuery}
+            onClear={clearSearch}
+            onSubmit={(event) => void submit(event)}
+            onPickSuggestion={pickSuggestion}
+            onLocale={changeLocale}
+            onTwitchLogin={openTwitchViewerPanel}
+            onTwitchFollowed={openTwitchViewerPanel}
+            onStreamerRegister={openStreamerRegisterScreen}
+            onStreamerDashboard={onOpenStreamerDashboard}
+            onStreamerRecord={openStreamerRecord}
+            onTwitchLogout={() => void disconnectTwitchViewer()}
+            onFilters={setFilters}
+            onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+            onMarkNotificationsRead={markNotificationsRead}
+          />
+          <PublicStreamerRegistrationScreen
+            status={twitchStatus}
+            onLogin={startTwitchLogin}
+            onBack={() => setStreamerRegisterOpen(false)}
+            onSubmitted={(request) => {
+              setTwitchStatus((current) => ({ ...current, streamerRiotRequest: request }));
+              void loadFollowedLol();
+            }}
+          />
+        </section>
+        <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
+      </main>
+    );
+  }
+
+  if (followedScreenOpen) {
+    return (
+      <main className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}>
+        <section className="public-app-main">
+          <PublicAppHeader
+            locale={locale}
+            profile={profile}
+            twitchStatus={twitchStatus}
+            showSearch={false}
+            showFilters={false}
+            query={query}
+            loading={loading}
+            suggestions={visibleSuggestions}
+            filters={filters}
+            champions={availableChampions}
+            notifications={notifications}
+            onQuery={setQuery}
+            onClear={clearSearch}
+            onSubmit={(event) => void submit(event)}
+            onPickSuggestion={pickSuggestion}
+            onLocale={changeLocale}
+            onTwitchLogin={openTwitchViewerPanel}
+            onTwitchFollowed={openTwitchViewerPanel}
+            onStreamerRegister={openStreamerRegisterScreen}
+            onStreamerDashboard={onOpenStreamerDashboard}
+            onStreamerRecord={openStreamerRecord}
+            onTwitchLogout={() => void disconnectTwitchViewer()}
+            onFilters={setFilters}
+            onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+            onMarkNotificationsRead={markNotificationsRead}
+          />
+          <PublicTwitchFollowedScreen
+            status={twitchStatus}
+            followed={followedLol}
+            loading={followedLoading}
+            error={followedError}
+            onLogin={startTwitchLogin}
+            onLogout={() => void disconnectTwitchViewer()}
+            onRefresh={() => void loadFollowedLol()}
+            onSearch={(riotId) => void runSearch(riotId)}
+            onBack={() => setFollowedScreenOpen(false)}
+          />
+        </section>
+        <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
+      </main>
+    );
+  }
+
   if (!profile) {
     return (
       <main className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}>
@@ -3984,6 +4408,11 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
             onPickSuggestion={pickSuggestion}
             onLocale={changeLocale}
             onTwitchLogin={openTwitchViewerPanel}
+            onTwitchFollowed={openTwitchViewerPanel}
+            onStreamerRegister={openStreamerRegisterScreen}
+            onStreamerDashboard={onOpenStreamerDashboard}
+            onStreamerRecord={openStreamerRecord}
+            onTwitchLogout={() => void disconnectTwitchViewer()}
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
             onMarkNotificationsRead={markNotificationsRead}
@@ -4031,6 +4460,11 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
           onPickSuggestion={pickSuggestion}
           onLocale={changeLocale}
           onTwitchLogin={openTwitchViewerPanel}
+          onTwitchFollowed={openTwitchViewerPanel}
+          onStreamerRegister={openStreamerRegisterScreen}
+          onStreamerDashboard={onOpenStreamerDashboard}
+          onStreamerRecord={openStreamerRecord}
+          onTwitchLogout={() => void disconnectTwitchViewer()}
           onFilters={setFilters}
           onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
           onMarkNotificationsRead={markNotificationsRead}
@@ -4080,27 +4514,12 @@ export function PublicLolPage({ onOpenAdmin }: { onOpenAdmin: () => void }) {
 	                </>
               ) : null}
 
-              <PublicTwitchFollowedPanel
-                status={twitchStatus}
-                followed={followedLol}
-                loading={followedLoading}
-                error={followedError}
-                onLogin={startTwitchLogin}
-                onLogout={() => void disconnectTwitchViewer()}
-                onRefresh={() => void loadFollowedLol()}
-                onSearch={(riotId) => void runSearch(riotId)}
-              />
               <PublicSavedDataPanel favorites={favorites} recentSearches={recentSearches} onPick={pickSuggestion} />
               <PublicMoreFeatures />
             </section>
             <PublicRightRail profile={activeProfile} />
           </div>
         </div>
-
-        <footer className="public-footer">
-          <span data-ko={publicI18n.ko.streamerOps} data-ja={publicI18n.ja.streamerOps}>{t().streamerOps}</span>
-          <button type="button" onClick={onOpenAdmin}>{t().login}</button>
-        </footer>
       </section>
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
     </main>

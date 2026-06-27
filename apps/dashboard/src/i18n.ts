@@ -32,6 +32,7 @@ export const dashboardI18n = {
       invalid: "토큰이 올바르지 않습니다.",
       unavailable: "인증 상태를 확인하지 못했습니다. 서버 연결을 확인해주세요.",
       notConfigured: "서버에 DASHBOARD_AUTH_TOKEN이 설정되지 않아 로그인이 잠겨 있습니다.",
+      adminOnly: "관리자 페이지는 dashboard token으로 다시 로그인해야 합니다.",
       hint: "서버 환경 변수 DASHBOARD_AUTH_TOKEN에 설정한 값과 동일해야 합니다.",
       backToPublic: "전적 검색으로 돌아가기"
     },
@@ -42,11 +43,13 @@ export const dashboardI18n = {
       overlayTest: { label: "Overlay 테스트", short: "테스트" },
       overlayRewards: { label: "Reward 매핑", short: "Reward" },
       overlayAlerts: { label: "알림 GIF", short: "알림 GIF" },
+      myRiotAccount: { label: "내 Riot ID", short: "내 Riot ID" },
       soloRank: { label: "솔로랭크 설정", short: "솔로랭크" },
       followers: { label: "팔로워 관리", short: "팔로워" },
       events: { label: "이벤트 로그", short: "이벤트" },
       questions: { label: "질문 큐", short: "질문" },
       participation: { label: "시참 관리", short: "시참" },
+      streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
       settings: { label: "시스템 설정", short: "설정" }
     },
     dashboard: {
@@ -270,6 +273,7 @@ export const dashboardI18n = {
       invalid: "token が正しくありません。",
       unavailable: "認証状態を確認できませんでした。サーバー接続を確認してください。",
       notConfigured: "サーバーに DASHBOARD_AUTH_TOKEN が設定されていないためログインはロックされています。",
+      adminOnly: "管理者ページは dashboard token で再ログインしてください。",
       hint: "サーバー環境変数 DASHBOARD_AUTH_TOKEN に設定した値と同じである必要があります。",
       backToPublic: "戦績検索に戻る"
     },
@@ -280,11 +284,13 @@ export const dashboardI18n = {
       overlayTest: { label: "Overlay テスト", short: "テスト" },
       overlayRewards: { label: "Reward マッピング", short: "Reward" },
       overlayAlerts: { label: "通知 GIF", short: "通知 GIF" },
+      myRiotAccount: { label: "自分の Riot ID", short: "Riot ID" },
       soloRank: { label: "ソロランク設定", short: "ソロランク" },
       followers: { label: "フォロワー管理", short: "フォロワー" },
       events: { label: "イベントログ", short: "イベント" },
       questions: { label: "質問キュー", short: "質問" },
       participation: { label: "参加管理", short: "参加" },
+      streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },
       settings: { label: "システム設定", short: "設定" }
     },
     dashboard: {

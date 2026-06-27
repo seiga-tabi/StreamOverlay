@@ -1,14 +1,31 @@
 import type { ReactNode } from "react";
 import { dashboardI18n, uiText } from "../i18n";
 
-const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "soloRank", "participation", "followers", "events", "questions", "settings"] as const;
+const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "streamerRiotRequests", "followers", "events", "questions", "settings"] as const;
 
 export type Page = (typeof pages)[number];
+export type DashboardRole = "admin" | "streamer";
+
+export const STREAMER_ALLOWED_PAGES: Page[] = [
+  "dashboard",
+  "overlayStatus",
+  "overlayAlerts",
+  "myRiotAccount",
+  "soloRank",
+  "participation",
+  "followers",
+  "questions",
+  "events"
+];
+
+export function pageAllowedForRole(page: Page, role: DashboardRole): boolean {
+  return role === "admin" || STREAMER_ALLOWED_PAGES.includes(page);
+}
 
 const navSections: Array<{ key: keyof typeof uiText.app.navGroups; items: Page[] }> = [
   { key: "operations", items: ["dashboard", "twitch"] },
   { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
-  { key: "lol", items: ["soloRank", "participation"] },
+  { key: "lol", items: ["myRiotAccount", "soloRank", "participation", "streamerRiotRequests"] },
   { key: "community", items: ["followers", "questions", "events"] },
   { key: "system", items: ["settings"] }
 ];
@@ -16,17 +33,25 @@ const navSections: Array<{ key: keyof typeof uiText.app.navGroups; items: Page[]
 export function Layout({
   page,
   setPage,
+  role = "admin",
   onLogout,
   onPublicHome,
   children
 }: {
   page: Page;
   setPage: (page: Page) => void;
+  role?: DashboardRole;
   onLogout?: () => void;
   onPublicHome?: () => void;
   children: ReactNode;
 }) {
   const currentPage = uiText.pages[page];
+  const visibleNavSections = navSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => pageAllowedForRole(item, role))
+    }))
+    .filter((section) => section.items.length > 0);
 
   return (
     <div className="app-shell">
@@ -44,7 +69,7 @@ export function Layout({
           <p>{uiText.app.workspaceDescription}</p>
         </div>
         <nav aria-label={uiText.app.navLabel}>
-          {navSections.map((section) => (
+          {visibleNavSections.map((section) => (
             <div className="nav-group" key={section.key}>
               <div className="nav-section-title">{uiText.app.navGroups[section.key]}</div>
               <div className="nav-group-items">
@@ -73,7 +98,7 @@ export function Layout({
           </div>
           <div className="top-actions">
             {onPublicHome ? <button className="secondary top-action" onClick={onPublicHome}>{uiText.app.publicHome}</button> : null}
-            <button className="secondary top-action" onClick={() => setPage("settings")}>{uiText.app.quickSettings}</button>
+            {role === "admin" ? <button className="secondary top-action" onClick={() => setPage("settings")}>{uiText.app.quickSettings}</button> : null}
             {onLogout ? <button className="secondary top-action" onClick={onLogout}>{uiText.app.logout}</button> : null}
             <span className="top-chip">{uiText.app.liveSafety}</span>
           </div>
