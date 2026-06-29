@@ -76,48 +76,65 @@ function visibleSkin(skin: DataDragonSkin): boolean {
 
 export class DataDragonService {
   private versionsCache?: { version: string; fetchedAt: number };
+  private versionRequest?: Promise<string>;
   private championCache = new Map<string, Map<number, ChampionMapEntry>>();
+  private championMapRequests = new Map<string, Promise<Map<number, ChampionMapEntry>>>();
   private championDetailCache = new Map<string, DataDragonChampion | undefined>();
+  private championDetailRequests = new Map<string, Promise<DataDragonChampion | undefined>>();
 
   constructor(private readonly fetchImpl: typeof fetch = fetch) {}
 
   async getLatestVersion(): Promise<string> {
     if (this.versionsCache && Date.now() - this.versionsCache.fetchedAt < 6 * 60 * 60 * 1000) return this.versionsCache.version;
-    const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/api/versions.json`);
-    if (!response.ok) throw new Error(`Data Dragon versions lookup failed: ${response.status}`);
-    const versions = (await response.json()) as string[];
-    const version = versions[0];
-    if (!version) throw new Error("Data Dragon version list is empty");
-    this.versionsCache = { version, fetchedAt: Date.now() };
-    return version;
+    if (this.versionRequest) return this.versionRequest;
+    this.versionRequest = (async () => {
+      const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/api/versions.json`);
+      if (!response.ok) throw new Error(`Data Dragon versions lookup failed: ${response.status}`);
+      const versions = (await response.json()) as string[];
+      const version = versions[0];
+      if (!version) throw new Error("Data Dragon version list is empty");
+      this.versionsCache = { version, fetchedAt: Date.now() };
+      return version;
+    })().finally(() => {
+      this.versionRequest = undefined;
+    });
+    return this.versionRequest;
   }
 
   async getChampionMap(version?: string): Promise<Map<number, ChampionMapEntry>> {
     const resolvedVersion = version ?? await this.getLatestVersion();
     const cached = this.championCache.get(resolvedVersion);
     if (cached) return cached;
+    const running = this.championMapRequests.get(resolvedVersion);
+    if (running) return running;
 
-    const [ko, ja] = await Promise.all([
-      this.fetchChampionData(resolvedVersion, "ko_KR"),
-      this.fetchChampionData(resolvedVersion, "ja_JP").catch(() => undefined)
-    ]);
-    const jaByKey = new Map(Object.values(ja?.data ?? {}).map((champion) => [champion.key, champion]));
-    const map = new Map<number, ChampionMapEntry>();
+    const request = (async () => {
+      const [ko, ja] = await Promise.all([
+        this.fetchChampionData(resolvedVersion, "ko_KR"),
+        this.fetchChampionData(resolvedVersion, "ja_JP").catch(() => undefined)
+      ]);
+      const jaByKey = new Map(Object.values(ja?.data ?? {}).map((champion) => [champion.key, champion]));
+      const map = new Map<number, ChampionMapEntry>();
 
-    for (const champion of Object.values(ko.data)) {
-      const championId = Number(champion.key);
-      if (!Number.isFinite(championId)) continue;
-      map.set(championId, {
-        championId,
-        championKey: champion.id,
-        nameKo: champion.name,
-        nameJa: jaByKey.get(champion.key)?.name,
-        ...championImageUrls(resolvedVersion, champion.id, champion.image?.full)
-      });
-    }
+      for (const champion of Object.values(ko.data)) {
+        const championId = Number(champion.key);
+        if (!Number.isFinite(championId)) continue;
+        map.set(championId, {
+          championId,
+          championKey: champion.id,
+          nameKo: champion.name,
+          nameJa: jaByKey.get(champion.key)?.name,
+          ...championImageUrls(resolvedVersion, champion.id, champion.image?.full)
+        });
+      }
 
-    this.championCache.set(resolvedVersion, map);
-    return map;
+      this.championCache.set(resolvedVersion, map);
+      return map;
+    })().finally(() => {
+      this.championMapRequests.delete(resolvedVersion);
+    });
+    this.championMapRequests.set(resolvedVersion, request);
+    return request;
   }
 
   async mapChampionSummary(input: {
@@ -223,11 +240,19 @@ export class DataDragonService {
   private async fetchChampionDetail(version: string, language: "ko_KR" | "ja_JP", championKey: string): Promise<DataDragonChampion | undefined> {
     const cacheKey = `${version}:${language}:${championKey}`;
     if (this.championDetailCache.has(cacheKey)) return this.championDetailCache.get(cacheKey);
-    const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/champion/${championKey}.json`);
-    if (!response.ok) throw new Error(`Data Dragon champion detail lookup failed: ${response.status}`);
-    const parsed = (await response.json()) as ChampionDataResponse;
-    const champion = parsed.data?.[championKey] ?? Object.values(parsed.data ?? {}).find((entry) => entry.id === championKey);
-    this.championDetailCache.set(cacheKey, champion);
-    return champion;
+    const running = this.championDetailRequests.get(cacheKey);
+    if (running) return running;
+    const request = (async () => {
+      const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/champion/${championKey}.json`);
+      if (!response.ok) throw new Error(`Data Dragon champion detail lookup failed: ${response.status}`);
+      const parsed = (await response.json()) as ChampionDataResponse;
+      const champion = parsed.data?.[championKey] ?? Object.values(parsed.data ?? {}).find((entry) => entry.id === championKey);
+      this.championDetailCache.set(cacheKey, champion);
+      return champion;
+    })().finally(() => {
+      this.championDetailRequests.delete(cacheKey);
+    });
+    this.championDetailRequests.set(cacheKey, request);
+    return request;
   }
 }

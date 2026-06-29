@@ -55,6 +55,7 @@ export type TwitchChannelFollower = {
   userLogin: string;
   userName: string;
   followedAt: string;
+  profileImageUrl?: string;
 };
 
 type TwitchChannelFollowersResponse = {
@@ -74,6 +75,7 @@ export type TwitchFollowedChannel = {
   broadcasterId: string;
   broadcasterLogin: string;
   broadcasterName: string;
+  profileImageUrl?: string;
   followedAt: string;
 };
 
@@ -90,8 +92,37 @@ type TwitchFollowedChannelsResponse = {
   };
 };
 
+export type TwitchUserSubscription = {
+  broadcasterId: string;
+  broadcasterLogin: string;
+  broadcasterName: string;
+  tier: string;
+  isGift: boolean;
+  gifterId?: string;
+  gifterLogin?: string;
+  gifterName?: string;
+};
+
+type TwitchUserSubscriptionResponse = {
+  data?: Array<{
+    broadcaster_id: string;
+    broadcaster_login: string;
+    broadcaster_name: string;
+    tier: string;
+    is_gift?: boolean;
+    gifter_id?: string;
+    gifter_login?: string;
+    gifter_name?: string;
+  }>;
+};
+
 type CachedTwitchUserProfile = {
   profile: TwitchUserProfile;
+  expiresAt: number;
+};
+
+type CachedTwitchUserSubscription = {
+  subscription?: TwitchUserSubscription;
   expiresAt: number;
 };
 
@@ -107,6 +138,7 @@ type TwitchApiClientOptions = {
 
 const USER_PROFILE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const USER_PROFILE_ERROR_CACHE_TTL_MS = 5 * 60 * 1000;
+const USER_SUBSCRIPTION_CACHE_TTL_MS = 5 * 60 * 1000;
 const STREAM_STATUS_LIVE_CACHE_TTL_MS = 10 * 1000;
 const STREAM_STATUS_OFFLINE_CACHE_TTL_MS = 30 * 1000;
 const DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000;
@@ -133,6 +165,7 @@ function headerNumber(response: Response, name: string): number | undefined {
 export class TwitchApiClient {
   private readonly userProfileCache = new Map<string, CachedTwitchUserProfile>();
   private readonly userProfileRequests = new Map<string, Promise<TwitchUserProfile | undefined>>();
+  private readonly userSubscriptionCache = new Map<string, CachedTwitchUserSubscription>();
   private readonly streamStatusCache = new Map<string, CachedTwitchStreamStatus>();
   private readonly streamStatusRequests = new Map<string, Promise<TwitchStreamStatus | undefined>>();
   private readonly streamStatusCacheVersions = new Map<string, number>();
@@ -244,6 +277,41 @@ export class TwitchApiClient {
 
   async getUserProfileImageUrl(userId: string): Promise<string | undefined> {
     return (await this.getUserProfile(userId))?.profileImageUrl;
+  }
+
+  async getUserProfiles(userIds: readonly string[], context?: TwitchApiAccessContext): Promise<Map<string, TwitchUserProfile>> {
+    const safeUserIds = [...new Set(userIds.map((userId) => userId.trim()).filter((userId) => /^\d{1,32}$/.test(userId)))];
+    const profiles = new Map<string, TwitchUserProfile>();
+    const missingUserIds: string[] = [];
+
+    for (const userId of safeUserIds) {
+      const cached = this.userProfileCache.get(userId);
+      if (cached && cached.expiresAt > Date.now()) {
+        if (cached.profile.login || cached.profile.displayName || cached.profile.profileImageUrl) {
+          profiles.set(userId, cached.profile);
+        }
+        continue;
+      }
+      missingUserIds.push(userId);
+    }
+
+    for (let index = 0; index < missingUserIds.length; index += 100) {
+      const chunk = missingUserIds.slice(index, index + 100);
+      const fetchedProfiles = await this.fetchUserProfiles(chunk, context);
+      for (const [userId, profile] of fetchedProfiles) {
+        this.userProfileCache.set(userId, { profile, expiresAt: Date.now() + USER_PROFILE_CACHE_TTL_MS });
+        profiles.set(userId, profile);
+      }
+      for (const userId of chunk) {
+        if (fetchedProfiles.has(userId)) continue;
+        this.userProfileCache.set(userId, {
+          profile: { id: userId, login: "", displayName: "" },
+          expiresAt: Date.now() + USER_PROFILE_ERROR_CACHE_TTL_MS
+        });
+      }
+    }
+
+    return profiles;
   }
 
   clearStreamStatusCache(userId?: string): void {
@@ -358,6 +426,11 @@ export class TwitchApiClient {
       cursor = body.pagination?.cursor;
     } while (cursor && followers.length < max);
 
+    const profiles = await this.getUserProfiles(followers.map((follower) => follower.userId));
+    for (const follower of followers) {
+      follower.profileImageUrl = profiles.get(follower.userId)?.profileImageUrl;
+    }
+
     return {
       followers,
       total,
@@ -404,6 +477,11 @@ export class TwitchApiClient {
       cursor = body.pagination?.cursor;
     } while (cursor && channels.length < max);
 
+    const profiles = await this.getUserProfiles(channels.map((channel) => channel.broadcasterId), context);
+    for (const channel of channels) {
+      channel.profileImageUrl = profiles.get(channel.broadcasterId)?.profileImageUrl;
+    }
+
     return {
       channels,
       total,
@@ -411,21 +489,95 @@ export class TwitchApiClient {
     };
   }
 
+  async checkUserSubscriptions(
+    context: TwitchApiAccessContext & { userId: string },
+    broadcasterIds: readonly string[]
+  ): Promise<Map<string, TwitchUserSubscription>> {
+    const safeUserId = context.userId.trim();
+    if (!/^\d{1,32}$/.test(safeUserId)) throw new Error("Twitch user_id가 유효하지 않습니다.");
+    if (!context.scopes.includes("user:read:subscriptions")) {
+      throw new Error("user:read:subscriptions scope가 필요합니다.");
+    }
+
+    const safeBroadcasterIds = [...new Set(broadcasterIds.map((id) => id.trim()).filter((id) => /^\d{1,32}$/.test(id)))].slice(0, 100);
+    const subscriptions = new Map<string, TwitchUserSubscription>();
+    const missingBroadcasterIds: string[] = [];
+
+    for (const broadcasterId of safeBroadcasterIds) {
+      const cacheKey = `${safeUserId}:${broadcasterId}`;
+      const cached = this.userSubscriptionCache.get(cacheKey);
+      if (cached && cached.expiresAt > this.now()) {
+        if (cached.subscription) subscriptions.set(broadcasterId, cached.subscription);
+        continue;
+      }
+      missingBroadcasterIds.push(broadcasterId);
+    }
+
+    for (const broadcasterId of missingBroadcasterIds) {
+      const subscription = await this.fetchUserSubscription(context, safeUserId, broadcasterId);
+      this.userSubscriptionCache.set(`${safeUserId}:${broadcasterId}`, {
+        subscription,
+        expiresAt: this.now() + USER_SUBSCRIPTION_CACHE_TTL_MS
+      });
+      if (subscription) subscriptions.set(broadcasterId, subscription);
+    }
+
+    return subscriptions;
+  }
+
   private async fetchUserProfile(userId: string): Promise<TwitchUserProfile | undefined> {
+    return (await this.fetchUserProfiles([userId])).get(userId);
+  }
+
+  private async fetchUserProfiles(userIds: readonly string[], context?: TwitchApiAccessContext): Promise<Map<string, TwitchUserProfile>> {
+    const profiles = new Map<string, TwitchUserProfile>();
+    if (userIds.length === 0) return profiles;
+
     const url = new URL("https://api.twitch.tv/helix/users");
-    url.searchParams.set("id", userId);
-    const response = await this.request(url, { method: "GET" });
-    if (!response?.ok) return undefined;
+    for (const userId of userIds.slice(0, 100)) url.searchParams.append("id", userId);
+    const response = context
+      ? await this.requestWithAccessContext(url, { method: "GET" }, context)
+      : await this.request(url, { method: "GET" });
+    if (!response?.ok) return profiles;
 
     const body = (await response.json()) as TwitchUsersResponse;
-    const user = body.data?.[0];
-    if (!user?.id) return undefined;
+    for (const user of body.data ?? []) {
+      if (!user?.id) continue;
+      profiles.set(user.id, {
+        id: user.id,
+        login: user.login,
+        displayName: user.display_name,
+        profileImageUrl: this.safeHttpsUrl(user.profile_image_url)
+      });
+    }
 
+    return profiles;
+  }
+
+  private async fetchUserSubscription(
+    context: TwitchApiAccessContext,
+    userId: string,
+    broadcasterId: string
+  ): Promise<TwitchUserSubscription | undefined> {
+    const url = new URL("https://api.twitch.tv/helix/subscriptions/user");
+    url.searchParams.set("broadcaster_id", broadcasterId);
+    url.searchParams.set("user_id", userId);
+    const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
+    if (response.status === 404) return undefined;
+    if (!response.ok) throw new Error(`Twitch user subscription lookup failed: ${response.status}`);
+
+    const body = (await response.json()) as TwitchUserSubscriptionResponse;
+    const item = body.data?.[0];
+    if (!item?.broadcaster_id) return undefined;
     return {
-      id: user.id,
-      login: user.login,
-      displayName: user.display_name,
-      profileImageUrl: this.safeHttpsUrl(user.profile_image_url)
+      broadcasterId: item.broadcaster_id,
+      broadcasterLogin: item.broadcaster_login,
+      broadcasterName: item.broadcaster_name || item.broadcaster_login || item.broadcaster_id,
+      tier: item.tier,
+      isGift: Boolean(item.is_gift),
+      gifterId: item.gifter_id,
+      gifterLogin: item.gifter_login,
+      gifterName: item.gifter_name
     };
   }
 

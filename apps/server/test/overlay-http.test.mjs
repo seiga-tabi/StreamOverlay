@@ -543,7 +543,13 @@ test("follower refresh API는 Twitch follower snapshot을 Store에 반영한다"
         twitchCalls += 1;
         assert.equal(limit, 50);
         return {
-          followers: [{ userId: "100", userLogin: "viewer100", userName: "Viewer100", followedAt: "2026-06-01T00:00:00.000Z" }],
+          followers: [{
+            userId: "100",
+            userLogin: "viewer100",
+            userName: "Viewer100",
+            profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/viewer100.png",
+            followedAt: "2026-06-01T00:00:00.000Z"
+          }],
           total: 1,
           truncated: false
         };
@@ -561,6 +567,7 @@ test("follower refresh API는 Twitch follower snapshot을 Store에 반영한다"
   assert.equal(calls.length, 1);
   assert.equal(twitchCalls, 1);
   assert.equal(calls[0].followers[0].userName, "Viewer100");
+  assert.equal(calls[0].followers[0].profileImageUrl, "https://static-cdn.jtvnw.net/jtv_user_pictures/viewer100.png");
   assert.equal(JSON.parse(res.body).summary.activeFollowers, 1);
 
   const cooldownReq = createRequest("POST", "/api/followers/refresh?limit=50", {});

@@ -69,6 +69,21 @@ events.onAny((event) => {
       followedAt: event.followedAt ?? event.createdAt,
       source: "eventsub"
     });
+    void twitch.getUserProfileImageUrl(event.userId)
+      .then((profileImageUrl) => {
+        if (!profileImageUrl) return;
+        store.recordFollower({
+          userId: event.userId,
+          userName: event.userName,
+          profileImageUrl,
+          followedAt: event.followedAt ?? event.createdAt,
+          source: "eventsub"
+        });
+        dashboard.broadcastSnapshot();
+      })
+      .catch((error) => {
+        logger.error({ type: "followers.profile_image_lookup_failed", userId: event.userId, error: toSafeErrorMessage(error) });
+      });
   }
   if (event.type === "twitch.chatMessage") {
     store.recordFollowerActivity({
@@ -83,7 +98,10 @@ events.onAny((event) => {
       userId: event.twitchUserId,
       userName: event.twitchUserName,
       kind: "participation",
-      genre: "League of Legends 시참"
+      genre: "League of Legends 시참",
+      riotGameName: event.riotGameName,
+      riotTagLine: event.riotTagLine,
+      riotPuuid: event.riotPuuid
     });
   }
   logger.event({ eventType: event.type, event });

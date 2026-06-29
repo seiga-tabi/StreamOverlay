@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { LolChampionSummary, ParticipationDashboardQueueEntry, ParticipationState, ParticipationStatus } from "@streamops/shared";
 import { apiPost } from "../api/client";
-import { createDashboardLocaleProxy } from "../i18n";
+import { createDashboardLocaleProxy, dashboardLocale } from "../i18n";
 
 type DashboardSnapshot = {
   participationState?: ParticipationState;
@@ -320,9 +320,15 @@ function mainRoleLabel(role: string | undefined, confidence: number | undefined)
   return confidence === undefined ? label : `${label} ${confidence}%`;
 }
 
+function championDisplayName(champion: LolChampionSummary | undefined): string {
+  if (!champion) return t.none;
+  if (dashboardLocale === "ja") return champion.nameJa ?? champion.nameKo ?? champion.championKey ?? String(champion.championId);
+  return champion.nameKo ?? champion.nameJa ?? champion.championKey ?? String(champion.championId);
+}
+
 function championLabel(champions: LolChampionSummary[] | undefined): string {
   if (!champions?.length) return t.none;
-  return champions.slice(0, 3).map((champion) => champion.nameKo ?? champion.championKey ?? champion.championId).join(", ");
+  return champions.slice(0, 3).map((champion) => championDisplayName(champion)).join(", ");
 }
 
 function primaryChampion(champions: LolChampionSummary[] | undefined): LolChampionSummary | undefined {
@@ -536,7 +542,7 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
                   {championArtUrl(primaryChampion(entry.topChampions)) ? (
                     <img src={championArtUrl(primaryChampion(entry.topChampions))} alt="" />
                   ) : null}
-                  <strong>{primaryChampion(entry.topChampions)?.nameKo ?? t.topChampions}</strong>
+                  <strong>{primaryChampion(entry.topChampions) ? championDisplayName(primaryChampion(entry.topChampions)) : t.topChampions}</strong>
                 </div>
                 <div className="queue-user">
                   <strong>{entry.twitchUserName}</strong>

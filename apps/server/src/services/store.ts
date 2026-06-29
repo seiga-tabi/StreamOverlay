@@ -58,6 +58,11 @@ export type FollowerRecord = {
   userId: string;
   userLogin?: string;
   userName: string;
+  profileImageUrl?: string;
+  riotGameName?: string;
+  riotTagLine?: string;
+  riotPuuid?: string;
+  riotIdUpdatedAt?: string;
   followedAt?: string;
   firstSeenAt: string;
   lastSeenAt: string;
@@ -71,6 +76,7 @@ export type FollowerSnapshotInput = {
   userId: string;
   userLogin?: string;
   userName: string;
+  profileImageUrl?: string;
   followedAt?: string;
 };
 
@@ -235,6 +241,11 @@ function normalizedFollowerRecord(value: unknown): FollowerRecord | undefined {
     userId,
     userLogin: optionalString(input?.userLogin),
     userName: optionalString(input?.userName) ?? userId,
+    profileImageUrl: optionalString(input?.profileImageUrl),
+    riotGameName: optionalString(input?.riotGameName),
+    riotTagLine: optionalString(input?.riotTagLine),
+    riotPuuid: optionalString(input?.riotPuuid),
+    riotIdUpdatedAt: optionalString(input?.riotIdUpdatedAt),
     followedAt: optionalString(input?.followedAt),
     firstSeenAt: optionalString(input?.firstSeenAt) ?? optionalString(input?.followedAt) ?? now,
     lastSeenAt: optionalString(input?.lastSeenAt) ?? now,
@@ -577,6 +588,11 @@ export class Store {
       userId: input.userId,
       userLogin: input.userLogin ?? previous?.userLogin,
       userName: input.userName || previous?.userName || input.userId,
+      profileImageUrl: input.profileImageUrl ?? previous?.profileImageUrl,
+      riotGameName: previous?.riotGameName,
+      riotTagLine: previous?.riotTagLine,
+      riotPuuid: previous?.riotPuuid,
+      riotIdUpdatedAt: previous?.riotIdUpdatedAt,
       followedAt: input.followedAt ?? previous?.followedAt,
       firstSeenAt: previous?.firstSeenAt ?? input.followedAt ?? now,
       lastSeenAt: now,
@@ -597,12 +613,21 @@ export class Store {
     userName?: string;
     kind: FollowerActivityKind;
     genre: string;
+    riotGameName?: string;
+    riotTagLine?: string;
+    riotPuuid?: string;
   }): FollowerRecord | undefined {
     const previous = this.followers.get(input.userId);
     if (!previous || previous.status !== "following") return undefined;
     const now = nowIso();
     previous.userName = input.userName || previous.userName;
     previous.lastSeenAt = now;
+    if (input.riotGameName && input.riotTagLine) {
+      previous.riotGameName = input.riotGameName;
+      previous.riotTagLine = input.riotTagLine;
+      previous.riotPuuid = input.riotPuuid || previous.riotPuuid;
+      previous.riotIdUpdatedAt = now;
+    }
     previous.activity.total += 1;
     previous.activity.lastActivityAt = now;
     previous.activity.genres[input.genre] = (previous.activity.genres[input.genre] ?? 0) + 1;

@@ -204,11 +204,25 @@ type PublicTwitchFollowedLolChannel = {
   source?: "participation" | "connected_streamer" | "approved_streamer";
 };
 
+type PublicTwitchSubscriptionChannel = {
+  twitchUserId: string;
+  twitchLogin: string;
+  twitchDisplayName: string;
+  profileImageUrl?: string;
+  channelUrl?: string;
+  tier: string;
+  tierLabel: string;
+  isGift: boolean;
+  gifterName?: string;
+};
+
 type PublicTwitchFollowedLolResponse = {
   connected: boolean;
   total?: number;
   truncated: boolean;
   matchedCount: number;
+  subscriptionScopeGranted: boolean;
+  subscriptions: PublicTwitchSubscriptionChannel[];
   channels: PublicTwitchFollowedLolChannel[];
 };
 
@@ -547,6 +561,11 @@ const publicI18n = {
     savedData: "저장된 데이터",
     cachedRanking: "저장된 검색 기반 랭킹",
     liveDataNotice: "실시간 친구/전체 자동완성은 Riot 공개 API 제한으로 자체 DB가 쌓인 데이터만 표시합니다.",
+    subscriptionsTitle: "구독 중인 방송인",
+    subscriptionsSubtitle: "최근 Twitch 팔로우 기준",
+    subscriptionsEmpty: "팔로우 목록에서 구독 중인 방송인을 찾지 못했습니다.",
+    subscriptionMissingScope: "구독 상태 확인 권한이 필요합니다. Twitch를 다시 로그인해주세요.",
+    subscriptionGift: "선물 구독",
     refreshAvailableIn: "후 가능",
     twitchLive: "방송 중",
     twitchOffline: "스트리머 오프라인",
@@ -772,6 +791,11 @@ const publicI18n = {
     savedData: "保存データ",
     cachedRanking: "保存済み検索ベースランキング",
     liveDataNotice: "リアルタイム友達/全体オートコンプリートは Riot 公開 API の制限により、蓄積済みデータのみ表示します。",
+    subscriptionsTitle: "サブスク中の配信者",
+    subscriptionsSubtitle: "最近の Twitch フォロー基準",
+    subscriptionsEmpty: "フォロー一覧からサブスク中の配信者を見つけられませんでした。",
+    subscriptionMissingScope: "サブスク状態の確認権限が必要です。Twitch に再ログインしてください。",
+    subscriptionGift: "ギフトサブスク",
     refreshAvailableIn: "後に可能",
     twitchLive: "配信中",
     twitchOffline: "配信者オフライン",
@@ -3216,10 +3240,14 @@ function PublicTwitchFollowedScreen({
 function PublicSavedDataPanel({
   favorites,
   recentSearches,
+  twitchStatus,
+  followed,
   onPick
 }: {
   favorites: PublicFavorite[];
   recentSearches: SearchSuggestion[];
+  twitchStatus: PublicTwitchViewerStatus;
+  followed: PublicTwitchFollowedLolResponse | null;
   onPick: (suggestion: SearchSuggestion) => void;
 }) {
   const unique = new Map<string, SearchSuggestion>();
@@ -3230,6 +3258,7 @@ function PublicSavedDataPanel({
   const rankingRows = [...unique.values()]
     .sort((a, b) => rankScore(b.rankedStats) - rankScore(a.rankedStats) || suggestionRiotId(a).localeCompare(suggestionRiotId(b)))
     .slice(0, 8);
+  const subscriptions = followed?.subscriptions ?? [];
   return (
     <section id="public-saved-data" className="public-panel public-saved-data-panel">
       <div className="public-section-head">
@@ -3258,9 +3287,25 @@ function PublicSavedDataPanel({
             </button>
           ))}
         </article>
-        <article className="notice">
-          <strong data-ko={publicI18n.ko.liveGame} data-ja={publicI18n.ja.liveGame}>{t().liveGame}</strong>
-          <p data-ko={publicI18n.ko.liveDataNotice} data-ja={publicI18n.ja.liveDataNotice}>{t().liveDataNotice}</p>
+        <article className="public-subscriptions-card">
+          <strong data-ko={publicI18n.ko.subscriptionsTitle} data-ja={publicI18n.ja.subscriptionsTitle}>{t().subscriptionsTitle}</strong>
+          <p data-ko={publicI18n.ko.subscriptionsSubtitle} data-ja={publicI18n.ja.subscriptionsSubtitle}>{t().subscriptionsSubtitle}</p>
+          {!twitchStatus.connected ? (
+            <p className="public-empty">{t().twitchLoginRequired}</p>
+          ) : followed && !followed.subscriptionScopeGranted ? (
+            <p className="public-empty">{t().subscriptionMissingScope}</p>
+          ) : subscriptions.length === 0 ? (
+            <p className="public-empty">{t().subscriptionsEmpty}</p>
+          ) : subscriptions.slice(0, 5).map((subscription) => (
+            <a className="public-subscription-row" href={subscription.channelUrl} target="_blank" rel="noreferrer" key={`subscription:${subscription.twitchUserId}`}>
+              {subscription.profileImageUrl ? <img src={subscription.profileImageUrl} alt="" /> : <em>{subscription.twitchDisplayName.slice(0, 1).toUpperCase()}</em>}
+              <strong>{subscription.twitchDisplayName}<small>@{subscription.twitchLogin}</small></strong>
+              <span>
+                <b>{subscription.tierLabel}</b>
+                {subscription.isGift ? <small>{t().subscriptionGift}</small> : null}
+              </span>
+            </a>
+          ))}
         </article>
       </div>
     </section>
@@ -4155,7 +4200,12 @@ export function PublicLolPage({
 
   async function disconnectTwitchViewer(): Promise<void> {
     await logoutPublicTwitch();
-    setTwitchStatus({ connected: false, configured: true, requiredScopes: ["user:read:follows"], missingScopes: ["user:read:follows"] });
+    setTwitchStatus({
+      connected: false,
+      configured: true,
+      requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+      missingScopes: ["user:read:follows", "user:read:subscriptions"]
+    });
     setFollowedLol(null);
     setStreamerRegisterOpen(false);
     setFollowedScreenOpen(false);
@@ -4511,7 +4561,13 @@ export function PublicLolPage({
 	                </>
               ) : null}
 
-              <PublicSavedDataPanel favorites={favorites} recentSearches={recentSearches} onPick={pickSuggestion} />
+              <PublicSavedDataPanel
+                favorites={favorites}
+                recentSearches={recentSearches}
+                twitchStatus={twitchStatus}
+                followed={followedLol}
+                onPick={pickSuggestion}
+              />
               <PublicMoreFeatures />
             </section>
           </div>

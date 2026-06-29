@@ -187,7 +187,7 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
             clientId: "client-id",
             accessToken: "viewer-access",
             userId: "999",
-            scopes: ["user:read:follows"]
+            scopes: ["user:read:follows", "user:read:subscriptions"]
           };
         }
       },
@@ -202,6 +202,7 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
               broadcasterId: "55",
               broadcasterLogin: "streamer",
               broadcasterName: "Streamer",
+              profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/streamer.png",
               followedAt: "2026-06-26T00:00:00Z"
             }]
           };
@@ -216,6 +217,17 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
             gameName: "League of Legends",
             viewerCount: 77,
             startedAt: "2026-06-26T01:00:00Z"
+          }]]);
+        },
+        async checkUserSubscriptions(context, broadcasterIds) {
+          assert.equal(context.userId, "999");
+          assert.deepEqual(broadcasterIds, ["55"]);
+          return new Map([["55", {
+            broadcasterId: "55",
+            broadcasterLogin: "streamer",
+            broadcasterName: "Streamer",
+            tier: "1000",
+            isGift: false
           }]]);
         }
       },
@@ -238,7 +250,11 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
     assert.equal(body.matchedCount, 1);
     assert.equal(body.channels[0].riotId, "Seiga#JP1");
     assert.equal(body.channels[0].isLive, true);
+    assert.equal(body.channels[0].profileImageUrl, "https://static-cdn.jtvnw.net/jtv_user_pictures/streamer.png");
     assert.equal(body.channels[0].rankedStats.tier, "DIAMOND");
+    assert.equal(body.subscriptionScopeGranted, true);
+    assert.equal(body.subscriptions[0].twitchUserId, "55");
+    assert.equal(body.subscriptions[0].tierLabel, "Tier 1");
   });
 });
 

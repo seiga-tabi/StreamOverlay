@@ -167,11 +167,13 @@ export const dashboardI18n = {
       },
       columns: {
         user: "사용자",
+        riotId: "Riot ID",
         status: "상태",
         followedAt: "팔로우 시각",
         activity: "관측 활동",
         genre: "주요 관측 장르"
       },
+      riotIdMissing: "미등록",
       statuses: {
         following: "팔로우 중",
         unfollowed: "취소 추정"
@@ -412,11 +414,13 @@ export const dashboardI18n = {
       },
       columns: {
         user: "ユーザー",
+        riotId: "Riot ID",
         status: "状態",
         followedAt: "フォロー日時",
         activity: "観測活動",
         genre: "主な観測ジャンル"
       },
+      riotIdMissing: "未登録",
       statuses: {
         following: "フォロー中",
         unfollowed: "解除推定"

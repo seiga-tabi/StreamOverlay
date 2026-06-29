@@ -4851,10 +4851,33 @@ code {
   border-radius: var(--radius-md);
 }
 
-.follower-mini-row > div {
-  display: grid;
-  gap: 3px;
+.follower-identity {
+  display: flex;
+  gap: 10px;
+  align-items: center;
   min-width: 0;
+}
+
+.follower-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border: 1px solid rgba(122, 167, 255, .34);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(88, 111, 255, .95), rgba(36, 203, 170, .85));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(25, 46, 89, .12);
+}
+
+.follower-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .follower-mini-row strong,
@@ -4864,7 +4887,7 @@ code {
   overflow-wrap: anywhere;
 }
 
-.follower-mini-row > div > span {
+.follower-mini-row .queue-user > span {
   color: var(--muted);
   font-size: 13px;
 }
@@ -4898,7 +4921,7 @@ code {
 
 .follower-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1.1fr) minmax(100px, auto) minmax(130px, .7fr) minmax(90px, .45fr) minmax(180px, 1fr);
+  grid-template-columns: minmax(180px, 1.1fr) minmax(140px, .75fr) minmax(100px, auto) minmax(130px, .7fr) minmax(90px, .45fr) minmax(180px, 1fr);
   gap: 12px;
   align-items: center;
   min-width: 0;
@@ -4918,6 +4941,12 @@ code {
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.follower-riot-id {
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 850;
 }
 
 @media (max-width: 1200px) {
@@ -4969,11 +4998,12 @@ code {
   }
 
   .follower-row {
-    grid-template-columns: minmax(180px, 1fr) minmax(100px, auto) minmax(130px, .7fr);
+    grid-template-columns: minmax(180px, 1fr) minmax(140px, .75fr) minmax(100px, auto);
   }
 
   .follower-row > :nth-child(4),
-  .follower-row > :nth-child(5) {
+  .follower-row > :nth-child(5),
+  .follower-row > :nth-child(6) {
     grid-column: 1 / -1;
   }
 
@@ -5100,7 +5130,8 @@ code {
   }
 
   .follower-row > :nth-child(4),
-  .follower-row > :nth-child(5) {
+  .follower-row > :nth-child(5),
+  .follower-row > :nth-child(6) {
     grid-column: auto;
   }
 
@@ -8838,6 +8869,12 @@ code {
   line-height: 1.55;
 }
 
+.public-subscriptions-card > p {
+  margin: 0;
+  color: #687890;
+  font-size: 12px;
+}
+
 .public-saved-grid button {
   display: grid;
   grid-template-columns: 22px 34px minmax(0, 1fr) auto;
@@ -8855,6 +8892,24 @@ code {
 
 .public-saved-grid article:nth-child(2) button {
   grid-template-columns: 34px minmax(0, 1fr) auto;
+}
+
+.public-subscription-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  min-height: 46px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #fff;
+  color: #1c2a45;
+  text-decoration: none;
+}
+
+.public-subscription-row:hover {
+  background: #edf4ff;
 }
 
 .public-saved-grid button:hover {
@@ -8883,12 +8938,47 @@ code {
   object-fit: cover;
 }
 
+.public-subscription-row > span {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  color: #356fff;
+  font-size: 11px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.public-subscription-row > span small {
+  color: #7a879d;
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .public-saved-grid button strong {
   display: grid;
   min-width: 0;
   overflow: hidden;
   color: #17233d;
   font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-subscription-row strong {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  color: #17233d;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-subscription-row strong small {
+  min-width: 0;
+  overflow: hidden;
+  color: #7a879d;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -9113,6 +9203,7 @@ code {
 .public-dashboard-shell.theme-dark .public-section-head h2,
 .public-dashboard-shell.theme-dark .public-saved-grid article > strong,
 .public-dashboard-shell.theme-dark .public-saved-grid button strong,
+.public-dashboard-shell.theme-dark .public-subscription-row strong,
 .public-dashboard-shell.theme-dark .public-popover-head strong,
 .public-dashboard-shell.theme-dark .public-notification-list strong {
   color: #eef5ff;
@@ -9226,6 +9317,7 @@ code {
 .public-dashboard-shell.theme-dark .public-filter-popover select,
 .public-dashboard-shell.theme-dark .public-saved-grid article,
 .public-dashboard-shell.theme-dark .public-saved-grid button,
+.public-dashboard-shell.theme-dark .public-subscription-row,
 .public-dashboard-shell.theme-dark .public-notification-list article,
 .public-dashboard-shell.theme-dark .public-aggregate-grid,
 .public-dashboard-shell.theme-dark .public-lp-chart,
@@ -9331,6 +9423,9 @@ code {
 .public-dashboard-shell.theme-dark .public-aggregate-grid span,
 .public-dashboard-shell.theme-dark .public-aggregate-grid small,
 .public-dashboard-shell.theme-dark .public-saved-grid article.notice p,
+.public-dashboard-shell.theme-dark .public-subscriptions-card > p,
+.public-dashboard-shell.theme-dark .public-subscription-row strong small,
+.public-dashboard-shell.theme-dark .public-subscription-row > small,
 .public-dashboard-shell.theme-dark .public-notification-list p,
 .public-dashboard-shell.theme-dark .public-dialog p,
 .public-dashboard-shell.theme-dark .public-twitch-stream-badge small,
@@ -9378,6 +9473,7 @@ code {
 .public-dashboard-shell.theme-dark .public-sidebar nav button:hover,
 .public-dashboard-shell.theme-dark .public-sidebar-favorites button:hover,
 .public-dashboard-shell.theme-dark .public-saved-grid button:hover,
+.public-dashboard-shell.theme-dark .public-subscription-row:hover,
 .public-dashboard-shell.theme-dark .public-filter-button.active,
 .public-dashboard-shell.theme-dark .public-favorite-button.active {
   background: #203657;

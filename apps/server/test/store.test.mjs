@@ -226,14 +226,22 @@ test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", ()
 
   store.reconcileFollowerSnapshot({
     followers: [
-      { userId: "1", userLogin: "alpha", userName: "Alpha", followedAt: "2026-01-01T00:00:00.000Z" },
+      { userId: "1", userLogin: "alpha", userName: "Alpha", profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/alpha.png", followedAt: "2026-01-01T00:00:00.000Z" },
       { userId: "2", userLogin: "bravo", userName: "Bravo", followedAt: "2026-01-02T00:00:00.000Z" }
     ],
     total: 2,
     truncated: false
   });
   store.recordFollowerActivity({ userId: "1", userName: "Alpha", kind: "chat", genre: "채팅 참여" });
-  store.recordFollowerActivity({ userId: "1", userName: "Alpha", kind: "participation", genre: "League of Legends 시참" });
+  store.recordFollowerActivity({
+    userId: "1",
+    userName: "Alpha",
+    kind: "participation",
+    genre: "League of Legends 시참",
+    riotGameName: "Seiga",
+    riotTagLine: "JP1",
+    riotPuuid: "puuid-1"
+  });
 
   const state = store.reconcileFollowerSnapshot({
     followers: [
@@ -245,6 +253,10 @@ test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", ()
 
   assert.equal(state.summary.activeFollowers, 1);
   assert.equal(state.summary.unfollowed, 1);
+  assert.equal(state.followers.find((follower) => follower.userId === "1")?.profileImageUrl, "https://static-cdn.jtvnw.net/jtv_user_pictures/alpha.png");
+  assert.equal(state.followers.find((follower) => follower.userId === "1")?.riotGameName, "Seiga");
+  assert.equal(state.followers.find((follower) => follower.userId === "1")?.riotTagLine, "JP1");
+  assert.equal(state.followers.find((follower) => follower.userId === "1")?.riotPuuid, "puuid-1");
   assert.equal(state.recentUnfollowers[0].userId, "2");
   assert.deepEqual(state.topObservedGenres, [
     { name: "채팅 참여", count: 1 },

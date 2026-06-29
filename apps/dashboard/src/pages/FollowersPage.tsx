@@ -6,6 +6,11 @@ type FollowerRecord = {
   userId: string;
   userLogin?: string;
   userName: string;
+  profileImageUrl?: string;
+  riotGameName?: string;
+  riotTagLine?: string;
+  riotPuuid?: string;
+  riotIdUpdatedAt?: string;
   followedAt?: string;
   firstSeenAt: string;
   lastSeenAt: string;
@@ -74,6 +79,35 @@ function statusClass(status: FollowerRecord["status"]): string {
   return status === "following" ? "good" : "bad";
 }
 
+function followerInitial(record: FollowerRecord): string {
+  return (record.userName || record.userLogin || record.userId).slice(0, 1).toUpperCase();
+}
+
+function followerRiotId(record: FollowerRecord): string | undefined {
+  if (!record.riotGameName || !record.riotTagLine) return undefined;
+  return `${record.riotGameName}#${record.riotTagLine}`;
+}
+
+function FollowerAvatar({ record }: { record: FollowerRecord }) {
+  return (
+    <span className="follower-avatar" aria-hidden="true">
+      {record.profileImageUrl ? <img src={record.profileImageUrl} alt="" loading="lazy" /> : followerInitial(record)}
+    </span>
+  );
+}
+
+function FollowerIdentity({ record }: { record: FollowerRecord }) {
+  return (
+    <div className="follower-identity">
+      <FollowerAvatar record={record} />
+      <div className="queue-user">
+        <strong>{record.userName}</strong>
+        <span>{record.userLogin ? `@${record.userLogin}` : record.userId}</span>
+      </div>
+    </div>
+  );
+}
+
 function FollowerMiniList({ items, empty }: { items: FollowerRecord[]; empty: string }) {
   const t = uiText.followersPage;
   if (items.length === 0) return <p className="empty-state">{empty}</p>;
@@ -81,10 +115,7 @@ function FollowerMiniList({ items, empty }: { items: FollowerRecord[]; empty: st
     <div className="follower-mini-list">
       {items.map((item) => (
         <div className="follower-mini-row" key={`${item.userId}-${item.status}`}>
-          <div>
-            <strong>{item.userName}</strong>
-            <span>{item.userLogin ? `@${item.userLogin}` : item.userId}</span>
-          </div>
+          <FollowerIdentity record={item} />
           <span className={`queue-status ${statusClass(item.status)}`}>
             {t.statuses[item.status]}
           </span>
@@ -226,6 +257,7 @@ export function FollowersPage() {
           <div className="follower-table">
             <div className="follower-row follower-head">
               <span>{t.columns.user}</span>
+              <span>{t.columns.riotId}</span>
               <span>{t.columns.status}</span>
               <span>{t.columns.followedAt}</span>
               <span>{t.columns.activity}</span>
@@ -233,10 +265,8 @@ export function FollowersPage() {
             </div>
             {state.followers.map((follower) => (
               <div className="follower-row" key={follower.userId}>
-                <div className="queue-user">
-                  <strong>{follower.userName}</strong>
-                  <span>{follower.userLogin ? `@${follower.userLogin}` : follower.userId}</span>
-                </div>
+                <FollowerIdentity record={follower} />
+                <span className="follower-riot-id">{followerRiotId(follower) ?? t.riotIdMissing}</span>
                 <span className={`queue-status ${statusClass(follower.status)}`}>{t.statuses[follower.status]}</span>
                 <span>{formatDate(follower.followedAt ?? follower.firstSeenAt)}</span>
                 <span>{follower.activity.total}</span>

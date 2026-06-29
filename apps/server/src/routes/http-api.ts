@@ -79,9 +79,12 @@ const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
 const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
 const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
-const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 3 * 60_000;
+const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS = 10 * 60_000;
 const PUBLIC_LOL_MATCH_RANK_CACHE_TTL_MS = 5 * 60_000;
+const PUBLIC_LOL_MATCH_DETAIL_CACHE_TTL_MS = 30 * 60_000;
+const PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX = 1000;
+const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
 const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
 const PARTICIPATION_MANUAL_ACTIONS = new Set(["open", "show_queue", "mark_in_game", "finish_game", "close"]);
@@ -415,11 +418,25 @@ type PublicTwitchFollowedLolChannel = {
   source?: "participation" | "connected_streamer" | "approved_streamer";
 };
 
+type PublicTwitchSubscriptionChannel = {
+  twitchUserId: string;
+  twitchLogin: string;
+  twitchDisplayName: string;
+  profileImageUrl?: string;
+  channelUrl?: string;
+  tier: string;
+  tierLabel: string;
+  isGift: boolean;
+  gifterName?: string;
+};
+
 type PublicTwitchFollowedLolResponse = {
   connected: boolean;
   total?: number;
   truncated: boolean;
   matchedCount: number;
+  subscriptionScopeGranted: boolean;
+  subscriptions: PublicTwitchSubscriptionChannel[];
   channels: PublicTwitchFollowedLolChannel[];
 };
 
@@ -1596,6 +1613,13 @@ function twitchChannelUrl(login: string | undefined): string | undefined {
   return login ? `https://www.twitch.tv/${encodeURIComponent(login)}` : undefined;
 }
 
+function twitchSubscriptionTierLabel(tier: string | undefined): string {
+  if (tier === "1000") return "Tier 1";
+  if (tier === "2000") return "Tier 2";
+  if (tier === "3000") return "Tier 3";
+  return tier ? `Tier ${tier}` : "구독";
+}
+
 function defaultStreamerProfileLinkLabel(url: URL): string {
   return url.hostname.replace(/^www\./i, "").slice(0, STREAMER_PROFILE_LINK_LABEL_MAX) || "Link";
 }
@@ -1748,6 +1772,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolMatchPageInFlight = new Map<string, Promise<PublicLolMatchPageResponse>>();
   const publicLolMatchRankCache = new Map<string, { expiresAt: number; response: PublicLolMatchRankResponse }>();
   const publicLolMatchRankInFlight = new Map<string, Promise<PublicLolMatchRankResponse>>();
+  const publicLolMatchDetailCache = new Map<string, { expiresAt: number; match: RiotMatch }>();
+  const publicLolMatchDetailInFlight = new Map<string, Promise<RiotMatch | null>>();
 
   async function getTwitchStatus() {
     const status = await input.twitchAuth.getStatus();
@@ -2101,12 +2127,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   async function getPublicTwitchFollowedLol(limit: number, req: IncomingMessage): Promise<PublicTwitchFollowedLolResponse> {
     if (!input.publicTwitchAuth) {
-      return { connected: false, truncated: false, matchedCount: 0, channels: [] };
+      return { connected: false, truncated: false, matchedCount: 0, subscriptionScopeGranted: false, subscriptions: [], channels: [] };
     }
     const sessionId = publicTwitchViewerSessionIdFromRequest(req);
     const context = await input.publicTwitchAuth.getAccessContext(sessionId);
     if (!context) {
-      return { connected: false, truncated: false, matchedCount: 0, channels: [] };
+      return { connected: false, truncated: false, matchedCount: 0, subscriptionScopeGranted: false, subscriptions: [], channels: [] };
     }
     if (!input.twitch) throw new HttpRequestError(503, { error: "Twitch API client를 사용할 수 없습니다." });
 
@@ -2125,6 +2151,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
       accessToken: context.accessToken,
       scopes: context.scopes
     }, followed.channels.map((channel) => channel.broadcasterId)).catch(() => new Map<string, TwitchStreamStatus>());
+    const subscriptionScopeGranted = context.scopes.includes("user:read:subscriptions");
+    const subscriptionCheckChannels = followed.channels.slice(0, PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT);
+    const subscriptionsByBroadcasterId = subscriptionScopeGranted
+      ? await input.twitch.checkUserSubscriptions({
+        clientId: context.clientId,
+        accessToken: context.accessToken,
+        scopes: context.scopes,
+        userId: context.userId
+      }, subscriptionCheckChannels.map((channel) => channel.broadcasterId)).catch(() => new Map())
+      : new Map();
 
     const channels = followed.channels.map((channel): PublicTwitchFollowedLolChannel => {
       const connectedProfile = connectedStreamer?.twitchUserId === channel.broadcasterId ? connectedStreamer : undefined;
@@ -2137,6 +2173,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         twitchUserId: channel.broadcasterId,
         twitchLogin: channel.broadcasterLogin,
         twitchDisplayName: stream?.userName || channel.broadcasterName,
+        profileImageUrl: channel.profileImageUrl,
         followedAt: channel.followedAt,
         isLive: Boolean(stream),
         channelUrl: twitchChannelUrl(stream?.userLogin || channel.broadcasterLogin),
@@ -2158,12 +2195,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (liveScore !== 0) return liveScore;
       return Date.parse(b.followedAt) - Date.parse(a.followedAt);
     });
+    const channelById = new Map(followed.channels.map((channel) => [channel.broadcasterId, channel]));
+    const subscriptions = [...subscriptionsByBroadcasterId.values()]
+      .map((subscription): PublicTwitchSubscriptionChannel => {
+        const followedChannel = channelById.get(subscription.broadcasterId);
+        return {
+          twitchUserId: subscription.broadcasterId,
+          twitchLogin: subscription.broadcasterLogin || followedChannel?.broadcasterLogin || subscription.broadcasterId,
+          twitchDisplayName: subscription.broadcasterName || followedChannel?.broadcasterName || subscription.broadcasterLogin || subscription.broadcasterId,
+          profileImageUrl: followedChannel?.profileImageUrl,
+          channelUrl: twitchChannelUrl(subscription.broadcasterLogin || followedChannel?.broadcasterLogin),
+          tier: subscription.tier,
+          tierLabel: twitchSubscriptionTierLabel(subscription.tier),
+          isGift: subscription.isGift,
+          gifterName: subscription.gifterName
+        };
+      })
+      .sort((a, b) => a.twitchDisplayName.localeCompare(b.twitchDisplayName));
 
     return {
       connected: true,
       total: followed.total,
       truncated: followed.truncated,
       matchedCount: channels.filter((channel) => Boolean(channel.riotId)).length,
+      subscriptionScopeGranted,
+      subscriptions,
       channels
     };
   }
@@ -2203,8 +2259,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return {
         connected: false,
         configured: false,
-        requiredScopes: ["user:read:follows"],
-        missingScopes: ["user:read:follows"]
+        requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+        missingScopes: ["user:read:follows", "user:read:subscriptions"]
       };
     }
     const status = await input.publicTwitchAuth.getStatus(publicTwitchViewerSessionIdFromRequest(req));
@@ -2354,6 +2410,41 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
+  function rememberPublicLolMatchDetail(match: RiotMatch): void {
+    const matchId = match.metadata.matchId?.trim();
+    if (!matchId) return;
+    publicLolMatchDetailCache.set(matchId.toUpperCase(), {
+      match,
+      expiresAt: Date.now() + PUBLIC_LOL_MATCH_DETAIL_CACHE_TTL_MS
+    });
+    if (publicLolMatchDetailCache.size <= PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX) return;
+    const oldestKey = [...publicLolMatchDetailCache.entries()]
+      .sort((a, b) => a[1].expiresAt - b[1].expiresAt)[0]?.[0];
+    if (oldestKey) publicLolMatchDetailCache.delete(oldestKey);
+  }
+
+  async function getPublicLolMatchDetail(matchId: string): Promise<RiotMatch | null> {
+    if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
+    const cacheKey = matchId.trim().toUpperCase();
+    if (!cacheKey) return null;
+    const cached = publicLolMatchDetailCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.match;
+    if (cached) publicLolMatchDetailCache.delete(cacheKey);
+    const running = publicLolMatchDetailInFlight.get(cacheKey);
+    if (running) return running;
+
+    const request = input.riot.getMatch(matchId)
+      .then((match) => {
+        if (match) rememberPublicLolMatchDetail(match);
+        return match;
+      })
+      .finally(() => {
+        publicLolMatchDetailInFlight.delete(cacheKey);
+      });
+    publicLolMatchDetailInFlight.set(cacheKey, request);
+    return request;
+  }
+
   async function buildPublicLolMatchPageForAccount(
     account: { puuid: string },
     matchStart: number,
@@ -2369,7 +2460,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const safeStart = publicLolMatchStart(matchStart);
     const matchIds = await input.riot.getRecentMatchIdsByPuuid(account.puuid, PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT, [], safeStart).catch(() => []);
     const rawMatches = (await Promise.all(
-      matchIds.slice(0, PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT).map((matchId) => input.riot?.getMatch(matchId).catch(() => null))
+      matchIds.slice(0, PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT).map((matchId) => getPublicLolMatchDetail(matchId).catch(() => null))
     ))
       .filter((match): match is RiotMatch => Boolean(match))
       .filter(isPublicLolQueue)
@@ -2436,9 +2527,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         ranked5v5: stats?.queueType === "RANKED_TEAM_5x5" ? stats : undefined,
         primary: stats
       })).catch((): PublicLolRankedQueues => ({}));
-    const [rankedQueues, ladderRank, mastery] = await Promise.all([
+    const [rankedQueues, mastery] = await Promise.all([
       rankedQueuesRequest,
-      input.riot.getLadderRankByPuuid(account.puuid).catch(() => undefined),
       input.riot.getChampionMasteryTopByPuuid(account.puuid, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT).catch(() => [])
     ]);
     const rankedStats = rankedQueues.primary;
@@ -2473,7 +2563,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       lolPlatform: routing.lolPlatform,
       profileIconUrl: await profileIconUrl(input.dataDragon, rankedStats?.profileIconId),
       summonerLevel: rankedStats?.summonerLevel,
-      ladderRank,
+      ladderRank: existingProfile?.ladderRank,
       rankedStats,
       rankedQueues: {
         solo: rankedQueues.solo,
@@ -2642,7 +2732,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
     if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
 
-    const match = await input.riot.getMatch(matchId).catch((error) => {
+    const match = await getPublicLolMatchDetail(matchId).catch((error) => {
       throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
     });
     if (!match) throw new HttpRequestError(404, { error: "경기 상세 정보를 찾지 못했습니다." });
