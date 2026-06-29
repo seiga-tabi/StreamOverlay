@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TwitchConnectionStatus } from "@streamops/shared";
 import { apiBase, apiGet, apiPost } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 const i18n = {
   ko: {
@@ -91,7 +92,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 function statusLabel(status: TwitchConnectionStatus["state"]): string {
   if (status === "connected") return t.connected;

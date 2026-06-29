@@ -3,6 +3,7 @@ import type { OverlayChannel, OverlayStatus } from "@streamops/shared";
 import { OVERLAY_CHANNELS } from "@streamops/shared";
 import type { DashboardStreamerInfo } from "../api/client";
 import { apiGet } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 import { runtimeConfig } from "../runtime-config";
 
 const OVERLAY_BASE = runtimeConfig().overlayBase ?? import.meta.env.VITE_OVERLAY_BASE ?? "http://localhost:5174";
@@ -78,7 +79,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 function overlayUrl(mode: OverlayChannel, params: Record<string, string> = {}, streamer?: DashboardStreamerInfo): string {
   const base = OVERLAY_BASE.endsWith("/") ? OVERLAY_BASE : `${OVERLAY_BASE}/`;

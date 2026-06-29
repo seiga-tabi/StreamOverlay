@@ -3,7 +3,7 @@ import { checkDashboardAuthToken, getDashboardAuthStatus, logoutDashboardSession
 import { connectDashboardSocket } from "./api/socket";
 import { Layout, pageAllowedForRole, type DashboardRole, type Page } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
-import { uiText } from "./i18n";
+import { applyDashboardLocale, dashboardI18n, detectDashboardLocale, setDashboardLocale as saveDashboardLocale, type DashboardLocale } from "./i18n";
 import { PublicLolPage } from "./pages/PublicLolPage";
 import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
 
@@ -35,6 +35,7 @@ const initialSnapshot = {
 
 type AppSurface = "public" | "admin" | "streamer";
 type AuthState = "checking" | "authenticated" | "login" | "streamerAccess";
+type AuthErrorKey = "" | "invalid" | "unavailable" | "notConfigured" | "adminOnly";
 
 const streamerEntryI18n = {
   ko: {
@@ -55,8 +56,6 @@ const streamerEntryI18n = {
   }
 } as const;
 
-const streamerEntryText = streamerEntryI18n.ko;
-
 function surfaceForLocation(): AppSurface {
   if (window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/")) return "admin";
   if (window.location.pathname === "/dashboard" || window.location.pathname.startsWith("/dashboard/")) return "streamer";
@@ -69,22 +68,21 @@ function isManagedSurface(surface: AppSurface): boolean {
 
 function StreamerDashboardEntryPage({
   checking,
+  locale,
   onBackToPublic,
   onOpenAdmin
 }: {
   checking: boolean;
+  locale: DashboardLocale;
   onBackToPublic: () => void;
   onOpenAdmin: () => void;
 }) {
+  const streamerEntryText = streamerEntryI18n[locale];
   return (
     <main className="auth-shell">
       <section className="auth-card">
         <div className="brand-block auth-brand">
-          <div className="brand-mark">S</div>
-          <div>
-            <div className="brand">StreamOps</div>
-            <div className="brand-subtitle">{uiText.app.brandSubtitle}</div>
-          </div>
+          <img className="brand-logo" src="/images/seigagg-logo.png" alt="Seiga.GG" />
         </div>
         <span className="eyebrow" data-ko={streamerEntryI18n.ko.eyebrow} data-ja={streamerEntryI18n.ja.eyebrow}>{streamerEntryText.eyebrow}</span>
         <h1 data-ko={streamerEntryI18n.ko.title} data-ja={streamerEntryI18n.ja.title}>{streamerEntryText.title}</h1>
@@ -106,6 +104,7 @@ function StreamerDashboardEntryPage({
 export default function App() {
   const initialAuthRequired = runtimeConfig().dashboardAuthRequired !== false;
   const [surface, setSurface] = useState<AppSurface>(() => surfaceForLocation());
+  const [dashboardLocale, setDashboardLocaleState] = useState<DashboardLocale>(() => detectDashboardLocale());
   const [authRequired, setAuthRequired] = useState(initialAuthRequired);
   const [page, setPage] = useState<Page>("dashboard");
   const [dashboardRole, setDashboardRole] = useState<DashboardRole>("admin");
@@ -113,8 +112,32 @@ export default function App() {
   const [snapshot, setSnapshot] = useState<any>(initialSnapshot);
   const [socketConnected, setSocketConnected] = useState(false);
   const [authState, setAuthState] = useState<AuthState>(() => isManagedSurface(surfaceForLocation()) ? "checking" : "login");
-  const [authError, setAuthError] = useState("");
+  const [authErrorKey, setAuthErrorKey] = useState<AuthErrorKey>("");
   const [loginDisabled, setLoginDisabled] = useState(false);
+  const currentText = dashboardI18n[dashboardLocale];
+  const authError = authErrorKey ? currentText.authPage[authErrorKey] : "";
+
+  useEffect(() => {
+    if (!isManagedSurface(surface)) return undefined;
+    saveDashboardLocale(dashboardLocale);
+    applyDashboardLocale(dashboardLocale);
+    let scheduled = false;
+    const observer = new MutationObserver(() => {
+      if (scheduled) return;
+      scheduled = true;
+      window.requestAnimationFrame(() => {
+        scheduled = false;
+        applyDashboardLocale(dashboardLocale);
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [dashboardLocale, surface]);
+
+  function changeDashboardLocale(locale: DashboardLocale): void {
+    saveDashboardLocale(locale);
+    setDashboardLocaleState(locale);
+  }
 
   useEffect(() => {
     const syncSurface = () => {
@@ -145,7 +168,7 @@ export default function App() {
             setDashboardStreamer(undefined);
             clearDashboardCsrfToken();
             setLoginDisabled(false);
-            setAuthError(uiText.authPage.adminOnly);
+            setAuthErrorKey("adminOnly");
             setAuthState("login");
             return;
           }
@@ -157,7 +180,7 @@ export default function App() {
           }
           setDashboardRole(role);
           setDashboardStreamer(status.streamer);
-          setAuthError("");
+          setAuthErrorKey("");
           setLoginDisabled(false);
           setAuthState("authenticated");
         } else {
@@ -165,7 +188,7 @@ export default function App() {
           setDashboardStreamer(undefined);
           clearDashboardCsrfToken();
           setLoginDisabled(status.configured === false);
-          setAuthError(status.configured === false ? uiText.authPage.notConfigured : "");
+          setAuthErrorKey(status.configured === false ? "notConfigured" : "");
           setAuthState(surface === "streamer" ? "streamerAccess" : "login");
         }
       })
@@ -173,7 +196,7 @@ export default function App() {
         if (!mounted) return;
         clearDashboardCsrfToken();
         setLoginDisabled(false);
-        setAuthError(uiText.authPage.unavailable);
+        setAuthErrorKey("unavailable");
         setDashboardRole("admin");
         setDashboardStreamer(undefined);
         setAuthState(surface === "streamer" ? "streamerAccess" : "login");
@@ -197,11 +220,11 @@ export default function App() {
 
   async function login(token: string): Promise<void> {
     if (loginDisabled) return;
-    setAuthError("");
+    setAuthErrorKey("");
     try {
       const status = await checkDashboardAuthToken(token);
       if (!status.authenticated) {
-        setAuthError(uiText.authPage.invalid);
+        setAuthErrorKey("invalid");
         return;
       }
       setDashboardRole(status.role ?? "admin");
@@ -209,7 +232,7 @@ export default function App() {
       setLoginDisabled(false);
       setAuthState("authenticated");
     } catch {
-      setAuthError(uiText.authPage.invalid);
+      setAuthErrorKey("invalid");
     }
   }
 
@@ -247,16 +270,16 @@ export default function App() {
   }
 
   if (surface === "streamer" && authState !== "authenticated") {
-    return <StreamerDashboardEntryPage checking={authState === "checking"} onBackToPublic={openPublic} onOpenAdmin={openAdmin} />;
+    return <StreamerDashboardEntryPage checking={authState === "checking"} locale={dashboardLocale} onBackToPublic={openPublic} onOpenAdmin={openAdmin} />;
   }
 
   if (authState !== "authenticated") {
-    return <LoginPage checking={authState === "checking"} disabled={loginDisabled} error={authError} onLogin={login} onBackToPublic={openPublic} />;
+    return <LoginPage checking={authState === "checking"} disabled={loginDisabled} error={authError} onLogin={login} onBackToPublic={openPublic} locale={dashboardLocale} />;
   }
 
   return (
-    <Layout page={page} setPage={setPage} role={dashboardRole} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
-      <Suspense fallback={<div className="card loading-card">{uiText.app.loading}</div>}>
+    <Layout page={page} setPage={setPage} role={dashboardRole} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
+      <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} role={dashboardRole} /> : null}
         {page === "twitch" && dashboardRole === "admin" ? <TwitchConnectionPage /> : null}
         {page === "overlayStatus" ? <OverlayOpsPage view="status" streamer={dashboardStreamer} /> : null}

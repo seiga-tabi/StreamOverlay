@@ -268,6 +268,16 @@ const mockMessages: OverlayMessage[] = [
 ];
 
 function withPreviewDuration(message: OverlayMessage): OverlayMessage {
+  if (message.type === "overlay.banner") {
+    return {
+      ...message,
+      durationMs: 60_000,
+      soundUrl: undefined,
+      speechEnabled: false,
+      speechAudioUrl: undefined,
+      speechText: undefined
+    };
+  }
   if ("durationMs" in message) return { ...message, durationMs: 60_000 } as OverlayMessage;
   return message;
 }
@@ -339,7 +349,12 @@ export default function App() {
       return;
     }
     if (message.type === "participation.status.update") {
-      setState((previous) => ({ ...previous, participationStatus: message }));
+      const shouldClearTeams = !message.isOpen || message.phase === "in_game" || message.phase === "game_ended" || message.phase === "closed";
+      setState((previous) => ({
+        ...previous,
+        participationStatus: message,
+        teams: shouldClearTeams ? undefined : previous.teams
+      }));
       return;
     }
     if (message.type === "solo-rank.profile.update") {
@@ -409,6 +424,7 @@ export default function App() {
         {shouldShow(mode, "participation") ? (
           <ParticipationOverlay
             queue={state.participationQueue?.queue ?? []}
+            queueIsOpen={state.participationQueue?.isOpen}
             status={state.participationStatus}
             teams={state.teams}
           />

@@ -1850,12 +1850,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
       const status = await input.twitchAuth.getStatus().catch(() => undefined);
       const broadcaster = status?.broadcaster;
       if (broadcaster?.id) {
+        const existing = candidates.get(broadcaster.id);
         candidates.set(broadcaster.id, {
+          ...existing,
           twitchUserId: broadcaster.id,
-          twitchLogin: broadcaster.login,
-          twitchDisplayName: broadcaster.displayName || broadcaster.login,
-          profileImageUrl: broadcaster.profileImageUrl,
-          source: "connected_streamer"
+          twitchLogin: broadcaster.login || existing?.twitchLogin,
+          twitchDisplayName: broadcaster.displayName || broadcaster.login || existing?.twitchDisplayName || broadcaster.id,
+          profileImageUrl: existing?.profileImageUrl || broadcaster.profileImageUrl,
+          source: existing?.source === "approved_streamer" ? "approved_streamer" : "connected_streamer"
         });
       }
     }
@@ -2532,6 +2534,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     publicLolMatchRankInFlight.clear();
   }
 
+  function invalidatePublicLolProfileCachesForStreamer(request: StreamerRiotIdRequest | undefined): void {
+    if (!request?.riotGameName || !request.riotTagLine) return;
+    invalidatePublicLolProfileCaches(publicLolProfileCacheKey(request.riotGameName, request.riotTagLine));
+  }
+
   async function getPublicLolProfile(rawRiotId: string, options: { refresh?: boolean } = {}): Promise<PublicLolProfileResponse> {
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
@@ -2794,6 +2801,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if ((req.method === "GET" || req.method === "HEAD") && await sendOverlayAlertAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendLocalTtsAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendRankedEmblemAsset(req, res, url.pathname)) return;
+      if (
+        (req.method === "GET" || req.method === "HEAD") &&
+        url.pathname.startsWith("/images/") &&
+        await sendStaticApp(req, res, `/dashboard${url.pathname}`, "/dashboard", appConfig.paths.dashboardStatic)
+      ) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/admin", appConfig.paths.dashboardStatic)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/dashboard", appConfig.paths.dashboardStatic)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/overlay", appConfig.paths.overlayStatic)) return;
@@ -3023,6 +3035,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ...link
         });
         if (!request) return sendJson(req, res, 404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
+        invalidatePublicLolProfileCachesForStreamer(request);
         return sendJson(req, res, 200, { streamer: publicStreamerDashboardInfo(request), request });
       }
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id") {
@@ -3043,6 +3056,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
           riotTagLine: parsed.tagLine
         });
         if (!request) return sendJson(req, res, 404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
+        invalidatePublicLolProfileCachesForStreamer(previous);
+        invalidatePublicLolProfileCachesForStreamer(request);
 
         const monitorConfig = loadGameMonitorConfig();
         const monitorRiotId = parseRiotIdDetailed(monitorConfig.streamerRiotId);
@@ -3109,6 +3124,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (body.decision !== "approved" && body.decision !== "rejected") {
           return sendJson(req, res, 400, { error: "decision은 approved 또는 rejected여야 합니다." });
         }
+        const beforeRequests = listStreamerRiotIdRequests();
+        const beforeRequest = beforeRequests.find((candidate) => candidate.id === body.requestId);
+        const previousApprovedRequests = beforeRequest
+          ? beforeRequests.filter((candidate) => candidate.twitchUserId === beforeRequest.twitchUserId && candidate.status === "approved")
+          : [];
         const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 300) : undefined;
         const request = resolveStreamerRiotIdRequest({
           requestId: body.requestId,
@@ -3117,6 +3137,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
           note
         });
         if (!request) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
+        invalidatePublicLolProfileCachesForStreamer(request);
+        for (const previousRequest of previousApprovedRequests) invalidatePublicLolProfileCachesForStreamer(previousRequest);
         return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
       }
 

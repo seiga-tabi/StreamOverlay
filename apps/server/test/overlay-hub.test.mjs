@@ -72,6 +72,31 @@ test("OverlayHub는 reconnect client에 마지막 안전 상태를 복구한다"
   assert.equal(reconnectSocket.sent[0].missions[0].text, "첫 승 하기");
 });
 
+test("OverlayHub는 게임 중 상태에서 이전 시참 팀 retained message를 지운다", () => {
+  const { hub } = createHub();
+  const firstSocket = new FakeSocket();
+  hub.add(firstSocket, "participation");
+  hub.broadcast({
+    type: "participation.teams.update",
+    teams: {
+      a: [{ twitchUserName: "ViewerA" }],
+      b: [{ twitchUserName: "ViewerB" }]
+    }
+  });
+  hub.broadcast({
+    type: "participation.status.update",
+    isOpen: true,
+    phase: "in_game",
+    message: "게임 중"
+  });
+
+  const reconnectSocket = new FakeSocket();
+  hub.add(reconnectSocket, "participation");
+
+  assert.equal(reconnectSocket.sent.some((message) => message.type === "participation.teams.update"), false);
+  assert.equal(reconnectSocket.sent.some((message) => message.type === "participation.status.update" && message.phase === "in_game"), true);
+});
+
 test("OverlayHub는 invalid overlay message를 전송하지 않는다", () => {
   const { hub, store } = createHub();
   const socket = new FakeSocket();

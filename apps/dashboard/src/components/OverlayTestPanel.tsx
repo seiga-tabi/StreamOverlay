@@ -1,4 +1,5 @@
 import { apiPost } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 const i18n = {
   ko: {
@@ -33,7 +34,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 type OverlayTestItem =
   | { label: string; action: unknown; endpoint?: never }

@@ -8,6 +8,18 @@ const SPEECH_COMPLETE_GRACE_MS = 300;
 const SPEECH_START_FAILSAFE_MS = 3500;
 const SPEECH_FAILSAFE_MS = 45_000;
 
+function stopActiveSpeechAudios(): void {
+  for (const audio of activeSpeechAudios) {
+    audio.pause();
+    try {
+      audio.currentTime = 0;
+    } catch {
+      // 일부 브라우저/OBS 환경에서는 재생 위치 변경이 막힐 수 있습니다.
+    }
+  }
+  activeSpeechAudios.clear();
+}
+
 function hasText(value: string | undefined): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
@@ -106,6 +118,7 @@ export function Banner({
 
   useEffect(() => {
     if (!speechAudioUrl || typeof window === "undefined") return;
+    stopActiveSpeechAudios();
     const audio = new Audio(speechAudioUrl);
     audio.volume = banner.speechVolume ?? 0.9;
     let active = true;
@@ -210,6 +223,7 @@ export function Banner({
       active = false;
       clearStartFailSafe();
       window.clearTimeout(failSafeTimer);
+      window.speechSynthesis.cancel();
     };
   }, [banner.speechLanguage, banner.speechPitch, banner.speechRate, banner.speechVolume, speechText]);
 

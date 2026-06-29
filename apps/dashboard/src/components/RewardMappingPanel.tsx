@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { RewardMappingSummary } from "@streamops/shared";
 import { apiGet } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 const i18n = {
   ko: {
@@ -29,7 +30,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 function formatNumber(value?: number): string {
   return value == null ? "-" : String(value);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { StreamerRiotIdRequest } from "@streamops/shared";
 import { apiGet, apiPost } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 type DashboardSnapshot = {
   streamerRiotIdRequests?: StreamerRiotIdRequest[];
@@ -61,7 +62,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 function requestStatusLabel(status: StreamerRiotIdRequest["status"]): string {
   return t[status] ?? status;

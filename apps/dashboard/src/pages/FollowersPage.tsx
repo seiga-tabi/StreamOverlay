@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiGet, apiPost } from "../api/client";
-import { uiText } from "../i18n";
+import { dashboardLocale, uiText } from "../i18n";
 
 type FollowerRecord = {
   userId: string;
@@ -53,13 +53,11 @@ const emptyState: FollowerState = {
   dataNotes: []
 };
 
-const t = uiText.followersPage;
-
 function formatDate(value?: string): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat(dashboardLocale === "ja" ? "ja-JP" : "ko-KR", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -77,6 +75,7 @@ function statusClass(status: FollowerRecord["status"]): string {
 }
 
 function FollowerMiniList({ items, empty }: { items: FollowerRecord[]; empty: string }) {
+  const t = uiText.followersPage;
   if (items.length === 0) return <p className="empty-state">{empty}</p>;
   return (
     <div className="follower-mini-list">
@@ -96,6 +95,7 @@ function FollowerMiniList({ items, empty }: { items: FollowerRecord[]; empty: st
 }
 
 export function FollowersPage() {
+  const t = uiText.followersPage;
   const [state, setState] = useState<FollowerState>(emptyState);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -132,7 +132,7 @@ export function FollowersPage() {
     { label: t.metrics.unfollowed, value: state.summary.unfollowed },
     { label: t.metrics.newFollowers7d, value: state.summary.newFollowers7d },
     { label: t.metrics.observedGenreFollowers, value: state.summary.observedGenreFollowers }
-  ], [state.summary]);
+  ], [state.summary, t]);
 
   return (
     <>

@@ -147,6 +147,40 @@ test("TwitchApiClient는 user id로 현재 방송 상태를 조회하고 짧게 
   assert.equal(calls[0].authorization, "Bearer access-token");
 });
 
+test("TwitchApiClient는 방송 상태 캐시를 user id 단위로 무효화한다", async () => {
+  const calls = [];
+  let isLive = true;
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: new URL(String(url)), authorization: init?.headers?.Authorization });
+    return jsonResponse({
+      data: isLive
+        ? [{
+            user_id: "1234",
+            user_login: "hideonbush",
+            user_name: "Hide on bush",
+            game_id: "21779",
+            game_name: "League of Legends",
+            title: "랭크 방송",
+            viewer_count: 321,
+            started_at: "2026-06-26T01:00:00Z"
+          }]
+        : []
+    });
+  };
+
+  const client = new TwitchApiClient(createAuth());
+  const live = await client.getStreamByUserId("1234");
+  isLive = false;
+  const cachedLive = await client.getStreamByUserId("1234");
+  client.clearStreamStatusCache("1234");
+  const offline = await client.getStreamByUserId("1234");
+
+  assert.equal(live?.userName, "Hide on bush");
+  assert.deepEqual(cachedLive, live);
+  assert.equal(offline, undefined);
+  assert.equal(calls.length, 2);
+});
+
 test("TwitchApiClient는 429 이후 Ratelimit-Reset까지 다음 요청을 지연한다", async () => {
   const sleeps = [];
   const calls = [];

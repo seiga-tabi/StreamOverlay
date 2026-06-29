@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { apiBase, apiGet, apiPost, apiPostForm } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 type AlertOverlayKey = "follow" | "cheer" | "subscription";
 
@@ -108,13 +109,15 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
-const alertEvents: Array<{ key: AlertOverlayKey; label: string; description: string; mediaAlt: string }> = [
-  { key: "follow", ...t.events.follow },
-  { key: "subscription", ...t.events.subscription },
-  { key: "cheer", ...t.events.cheer }
-];
+function alertEvents(): Array<{ key: AlertOverlayKey; label: string; description: string; mediaAlt: string }> {
+  return [
+    { key: "follow", ...t.events.follow },
+    { key: "subscription", ...t.events.subscription },
+    { key: "cheer", ...t.events.cheer }
+  ];
+}
 
 function absoluteAssetUrl(pathname: string | undefined): string {
   return pathname ? `${apiBase}${pathname}` : "";
@@ -228,7 +231,7 @@ export function AlertAssetPanel() {
       {error ? <p className="error-text">{error}</p> : null}
 
       <div className="alert-asset-list">
-        {alertEvents.map((item) => {
+        {alertEvents().map((item) => {
           const preset = config[item.key];
           const mediaUrl = preset?.mediaUrl ?? "";
           const selectedFile = selectedFiles[item.key];

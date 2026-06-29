@@ -16,12 +16,14 @@ export const streamStatusModule: BotModule = {
   name: "stream-status",
   setup(ctx) {
     const config = loadConfig();
-    ctx.events.on<TwitchStreamStatusInternalEvent>("twitch.streamOnline", async () => {
+    ctx.events.on<TwitchStreamStatusInternalEvent>("twitch.streamOnline", async (event) => {
+      ctx.twitch.clearStreamStatusCache?.(event.broadcasterUserId);
       ctx.store.patchStatus({ stream: "online", lastStreamOnlineAt: nowIso(), postStreamReportReady: false });
       await ctx.actions.dispatch(config["stream.online"] ?? [], {}, "stream.online");
       ctx.dashboard.broadcastSnapshot();
     });
-    ctx.events.on<TwitchStreamStatusInternalEvent>("twitch.streamOffline", async () => {
+    ctx.events.on<TwitchStreamStatusInternalEvent>("twitch.streamOffline", async (event) => {
+      ctx.twitch.clearStreamStatusCache?.(event.broadcasterUserId);
       ctx.store.patchStatus({ stream: "offline", lastStreamOfflineAt: nowIso(), postStreamReportReady: true });
       await ctx.actions.dispatch(config["stream.offline"] ?? [], {}, "stream.offline");
       ctx.logger.event({ type: "stream.post_stream_report_ready", approved: false });

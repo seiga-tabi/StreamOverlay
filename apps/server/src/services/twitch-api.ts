@@ -107,8 +107,8 @@ type TwitchApiClientOptions = {
 
 const USER_PROFILE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const USER_PROFILE_ERROR_CACHE_TTL_MS = 5 * 60 * 1000;
-const STREAM_STATUS_CACHE_TTL_MS = 60 * 1000;
-const STREAM_STATUS_ERROR_CACHE_TTL_MS = 30 * 1000;
+const STREAM_STATUS_LIVE_CACHE_TTL_MS = 10 * 1000;
+const STREAM_STATUS_OFFLINE_CACHE_TTL_MS = 30 * 1000;
 const DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000;
 
 function sleepMs(ms: number): Promise<void> {
@@ -135,6 +135,8 @@ export class TwitchApiClient {
   private readonly userProfileRequests = new Map<string, Promise<TwitchUserProfile | undefined>>();
   private readonly streamStatusCache = new Map<string, CachedTwitchStreamStatus>();
   private readonly streamStatusRequests = new Map<string, Promise<TwitchStreamStatus | undefined>>();
+  private readonly streamStatusCacheVersions = new Map<string, number>();
+  private streamStatusGlobalCacheVersion = 0;
   private readonly rateLimitPauseUntilByHost = new Map<string, number>();
   private readonly now: () => number;
   private readonly sleep: (ms: number) => Promise<void>;
@@ -244,6 +246,20 @@ export class TwitchApiClient {
     return (await this.getUserProfile(userId))?.profileImageUrl;
   }
 
+  clearStreamStatusCache(userId?: string): void {
+    const safeUserId = userId?.trim();
+    if (safeUserId) {
+      this.streamStatusCache.delete(safeUserId);
+      this.streamStatusRequests.delete(safeUserId);
+      this.streamStatusCacheVersions.set(safeUserId, (this.streamStatusCacheVersions.get(safeUserId) ?? 0) + 1);
+      return;
+    }
+    this.streamStatusCache.clear();
+    this.streamStatusRequests.clear();
+    this.streamStatusCacheVersions.clear();
+    this.streamStatusGlobalCacheVersion += 1;
+  }
+
   async getStreamByUserId(userId: string): Promise<TwitchStreamStatus | undefined> {
     const safeUserId = userId.trim();
     if (!/^\d{1,32}$/.test(safeUserId)) return undefined;
@@ -254,12 +270,15 @@ export class TwitchApiClient {
     const pending = this.streamStatusRequests.get(safeUserId);
     if (pending) return pending;
 
+    const cacheVersion = this.streamStatusCacheVersion(safeUserId);
     const request = this.fetchStreamByUserId(safeUserId)
       .then((stream) => {
-        this.streamStatusCache.set(safeUserId, {
-          stream,
-          expiresAt: Date.now() + (stream ? STREAM_STATUS_CACHE_TTL_MS : STREAM_STATUS_ERROR_CACHE_TTL_MS)
-        });
+        if (this.streamStatusCacheVersion(safeUserId) === cacheVersion) {
+          this.streamStatusCache.set(safeUserId, {
+            stream,
+            expiresAt: Date.now() + (stream ? STREAM_STATUS_LIVE_CACHE_TTL_MS : STREAM_STATUS_OFFLINE_CACHE_TTL_MS)
+          });
+        }
         return stream;
       })
       .finally(() => {
@@ -267,6 +286,10 @@ export class TwitchApiClient {
       });
     this.streamStatusRequests.set(safeUserId, request);
     return request;
+  }
+
+  private streamStatusCacheVersion(userId: string): string {
+    return `${this.streamStatusGlobalCacheVersion}:${this.streamStatusCacheVersions.get(userId) ?? 0}`;
   }
 
   async getStreamsByUserIds(context: TwitchApiAccessContext, userIds: readonly string[]): Promise<Map<string, TwitchStreamStatus>> {

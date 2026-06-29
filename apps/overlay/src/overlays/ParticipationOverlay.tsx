@@ -335,25 +335,40 @@ function streamerProfileSubline(
 export function ParticipationOverlay({
   queue,
   status,
-  teams
+  teams,
+  queueIsOpen
 }: {
   queue: ParticipationQueueEntry[];
   status?: ParticipationStatusUpdateMessage;
   teams?: ParticipationTeamsUpdateMessage;
+  queueIsOpen?: boolean;
 }) {
-  const shouldShowQueueCard = queue.length > 0 || status?.isOpen || Boolean(teams);
+  const queueStatusFallback: ParticipationStatusUpdateMessage | undefined = queueIsOpen === undefined
+    ? undefined
+    : {
+        type: "participation.status.update",
+        isOpen: queueIsOpen,
+        phase: queueIsOpen ? "recruiting" : "closed"
+      };
+  const effectiveStatus = queueIsOpen !== undefined && status?.isOpen !== queueIsOpen
+    ? queueStatusFallback
+    : status ?? queueStatusFallback;
+  const isStreamerInGame = effectiveStatus?.phase === "in_game";
+  const shouldShowTeamsCard = Boolean(teams) && !isStreamerInGame;
+  const shouldShowQueueCard = isStreamerInGame || queue.length > 0 || effectiveStatus?.isOpen || shouldShowTeamsCard;
   const visibleQueue = queue.slice(0, MAX_VISIBLE_QUEUE_ROWS);
   const hiddenQueueCount = Math.max(0, queue.length - visibleQueue.length);
-  const isStreamerInGame = status?.phase === "in_game";
 
   return (
     <>
       {shouldShowQueueCard ? (
-        <div className={`queue-card compact streamer-queue ${status?.isOpen ? "open" : "closed"}`}>
-          <QueueBroadcasterPanel profile={status?.streamerProfile} status={status} visibleCount={visibleQueue.length} />
+        <div className={`queue-card compact streamer-queue ${effectiveStatus?.isOpen ? "open" : "closed"}`}>
+          {!isStreamerInGame ? (
+            <QueueBroadcasterPanel profile={effectiveStatus?.streamerProfile} status={effectiveStatus} visibleCount={visibleQueue.length} />
+          ) : null}
           <div className={`streamer-queue-slots ${isStreamerInGame ? "in-game-only" : ""}`} aria-label={t.queueTitle}>
             {isStreamerInGame ? (
-              <InGameQueueRow profile={status?.streamerProfile} />
+              <InGameQueueRow profile={effectiveStatus?.streamerProfile} />
             ) : (
               QUEUE_SLOT_NUMBERS.map((slot) => (
                 <QueueSlotRow
@@ -371,7 +386,7 @@ export function ParticipationOverlay({
           ) : null}
         </div>
       ) : null}
-      {teams ? (
+      {shouldShowTeamsCard && teams ? (
         <div className="teams-card">
           <div className="label"><BilingualText value={pair(t.teamTitle, ko.teamTitle)} /></div>
           <div className="teams-grid">
@@ -387,6 +402,7 @@ export function ParticipationOverlay({
 function InGameQueueRow({ profile }: { profile?: ParticipationStreamerProfile }) {
   const artUrl = championArtUrl(streamerProfileChampion(profile));
   const artStyle = artUrl ? ({ "--streamer-queue-art": cssUrl(artUrl) } as CSSProperties) : undefined;
+  const title = streamerProfileTitle(profile);
   return (
     <div
       className={`streamer-queue-row in-game-row filled-slot ${artUrl ? "has-art" : "empty-art"}`}
@@ -399,7 +415,7 @@ function InGameQueueRow({ profile }: { profile?: ParticipationStreamerProfile })
       <div className="streamer-queue-divider" aria-hidden="true" />
       <div className="streamer-queue-copy">
         <strong className="streamer-queue-name">
-          <LocalizedText value={pair(t.inGame, ko.inGame)} />
+          <LocalizedText value={title} />
         </strong>
         <span className="streamer-queue-meta">
           <LocalizedText value={pair(t.inGameQueueMeta, ko.inGameQueueMeta)} />

@@ -9,6 +9,10 @@ export const dashboardI18n = {
       publicHome: "전적 검색",
       quickSettings: "설정",
       logout: "로그아웃",
+      language: "언어",
+      languageMenu: "언어 선택",
+      languageKo: "한국어",
+      languageJa: "일본어",
       workspaceKicker: "Streamer Profile",
       workspaceLabel: "방송 운영 허브",
       workspaceDescription: "Twitch 연결, 커뮤니티 반응, OBS overlay를 한 흐름에서 관리합니다.",
@@ -250,6 +254,10 @@ export const dashboardI18n = {
       publicHome: "戦績検索",
       quickSettings: "設定",
       logout: "ログアウト",
+      language: "言語",
+      languageMenu: "言語選択",
+      languageKo: "韓国語",
+      languageJa: "日本語",
       workspaceKicker: "Streamer Profile",
       workspaceLabel: "配信運用ハブ",
       workspaceDescription: "Twitch 接続、コミュニティ反応、OBS overlay を一つの流れで管理します。",
@@ -485,5 +493,65 @@ export const dashboardI18n = {
 
 export type DashboardLocale = keyof typeof dashboardI18n;
 
-export const dashboardLocale: DashboardLocale = "ko";
-export const uiText = dashboardI18n[dashboardLocale];
+export const DASHBOARD_LOCALE_STORAGE_KEY = "loltrace.locale";
+
+export function isDashboardLocale(value: unknown): value is DashboardLocale {
+  return value === "ko" || value === "ja";
+}
+
+export function detectDashboardLocale(): DashboardLocale {
+  if (typeof window !== "undefined") {
+    const stored = window.localStorage.getItem(DASHBOARD_LOCALE_STORAGE_KEY);
+    if (isDashboardLocale(stored)) return stored;
+    const language = window.navigator.language || document.documentElement.lang || "";
+    if (language.toLocaleLowerCase().startsWith("ja")) return "ja";
+  }
+  return "ko";
+}
+
+export let dashboardLocale: DashboardLocale = detectDashboardLocale();
+export let uiText = dashboardI18n[dashboardLocale];
+
+export function setDashboardLocale(locale: DashboardLocale): void {
+  dashboardLocale = locale;
+  uiText = dashboardI18n[locale];
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(DASHBOARD_LOCALE_STORAGE_KEY, locale);
+  }
+}
+
+export function createDashboardLocaleProxy<T extends Record<DashboardLocale, object>>(messages: T): T["ko"] {
+  return new Proxy(messages.ko, {
+    get(target, property, receiver) {
+      if (typeof property === "symbol") return Reflect.get(target, property, receiver);
+      return Reflect.get(messages[dashboardLocale], property, receiver);
+    }
+  }) as T["ko"];
+}
+
+function localizedAttribute(element: Element, locale: DashboardLocale, suffix: string): string | undefined {
+  const attribute = locale === "ja" ? `data-ja${suffix}` : `data-ko${suffix}`;
+  return element.getAttribute(attribute) ?? undefined;
+}
+
+export function applyDashboardLocale(locale: DashboardLocale, root: ParentNode = document): void {
+  if (typeof document !== "undefined") document.documentElement.lang = locale === "ja" ? "ja" : "ko";
+  for (const element of root.querySelectorAll<HTMLElement>("[data-ko][data-ja]")) {
+    const value = localizedAttribute(element, locale, "");
+    if (value === undefined) continue;
+    const canReplaceText = element.children.length === 0 || element.getAttribute("data-i18n-text") === "true";
+    if (canReplaceText && element.textContent !== value) element.textContent = value;
+  }
+  for (const element of root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("[data-ko-placeholder][data-ja-placeholder]")) {
+    const value = localizedAttribute(element, locale, "-placeholder");
+    if (value !== undefined) element.placeholder = value;
+  }
+  for (const element of root.querySelectorAll<HTMLElement>("[data-ko-aria-label][data-ja-aria-label]")) {
+    const value = localizedAttribute(element, locale, "-aria-label");
+    if (value !== undefined) element.setAttribute("aria-label", value);
+  }
+  for (const element of root.querySelectorAll<HTMLElement>("[data-ko-title][data-ja-title]")) {
+    const value = localizedAttribute(element, locale, "-title");
+    if (value !== undefined) element.title = value;
+  }
+}

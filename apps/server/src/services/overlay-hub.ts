@@ -111,6 +111,9 @@ export class OverlayHub {
       this.retainedMessages.delete(this.retainedKeyForClear(message.type));
       return;
     }
+    if (message.type === "participation.status.update" && (!message.isOpen || message.phase === "in_game" || message.phase === "game_ended" || message.phase === "closed")) {
+      this.retainedMessages.delete("participation.teams.update");
+    }
 
     const ttlMs = this.retainTtlMs(message);
     this.retainedMessages.set(message.type, {

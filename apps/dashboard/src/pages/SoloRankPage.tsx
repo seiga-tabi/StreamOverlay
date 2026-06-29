@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { LolChampionSkinOption, LolChampionSummary, LolGameMonitorSettings } from "@streamops/shared";
 import { apiGet, apiPost } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 type LolProfileSettings = {
   championSkinOverrides: Record<string, number>;
@@ -83,7 +84,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 function championArtUrl(champion: LolChampionSummary | undefined): string | undefined {
   return champion?.splashUrl ?? champion?.loadingUrl ?? champion?.iconUrl;

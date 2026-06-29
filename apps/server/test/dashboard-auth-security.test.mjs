@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
@@ -904,6 +907,133 @@ test("공개 LoL 전적 API는 시참 기록과 Riot ID가 일치하면 Twitch �
     assert.equal(body.twitchStream.twitchDisplayName, "Hide on bush");
     assert.equal(body.twitchStream.channelUrl, "https://www.twitch.tv/hideonbush");
     assert.equal(body.twitchStream.viewerCount, 123);
+  });
+});
+
+test("공개 LoL 전적 API는 승인 스트리머가 방송관리 연결 계정과 같아도 승인 정보와 링크를 유지한다", async () => {
+  await withAuthConfig(async () => {
+    const previousConfigDir = appConfig.paths.config;
+    const previousStateDir = appConfig.paths.state;
+    const configDir = mkdtempSync(path.join(tmpdir(), "streamops-approved-streamer-config-"));
+    const stateDir = mkdtempSync(path.join(tmpdir(), "streamops-approved-streamer-state-"));
+    try {
+      mkdirSync(configDir, { recursive: true });
+      mkdirSync(stateDir, { recursive: true });
+      writeFileSync(path.join(stateDir, "lol-game-monitor.json"), JSON.stringify({ streamerRiotId: "Seiga#sei" }));
+      appConfig.paths.config = configDir;
+      appConfig.paths.state = stateDir;
+      const handler = createHttpHandler({
+        store: {
+          getParticipationQueue() {
+            return [];
+          },
+          listApprovedStreamerRiotIds() {
+            return [{
+              id: "request-1",
+              twitchUserId: "1234",
+              twitchLogin: "seiga",
+              twitchDisplayName: "西雅_せいが",
+              twitchProfileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga.png",
+              riotGameName: "Seiga",
+              riotTagLine: "sei",
+              normalizedRiotId: "seiga#sei",
+              status: "approved",
+              requestedAt: "2026-06-26T00:00:00.000Z",
+              updatedAt: "2026-06-26T00:00:00.000Z",
+              overlaySlug: "seiga",
+              overlayKey: "overlay-key",
+              profileLinkUrl: "https://www.youtube.com/@seiga",
+              profileLinkLabel: "YouTube",
+              profileLinks: [{
+                id: "link-1",
+                url: "https://www.youtube.com/@seiga",
+                label: "YouTube",
+                platform: "youtube"
+              }]
+            }];
+          }
+        },
+        twitchAuth: {
+          async getStatus() {
+            return {
+              broadcaster: {
+                id: "1234",
+                login: "seiga",
+                displayName: "西雅_せいが",
+                profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga-live.png"
+              }
+            };
+          }
+        },
+        twitch: {
+          async getStreamByUserId(userId) {
+            assert.equal(userId, "1234");
+            return {
+              userId,
+              userLogin: "seiga",
+              userName: "西雅_せいが",
+              title: "랭크 방송",
+              gameName: "League of Legends",
+              viewerCount: 45,
+              startedAt: "2026-06-26T01:00:00.000Z"
+            };
+          },
+          async getUserProfile(userId) {
+            assert.equal(userId, "1234");
+            return {
+              login: "seiga",
+              displayName: "西雅_せいが",
+              profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga-live.png"
+            };
+          }
+        },
+        actions: {
+          async dispatchOne() {}
+        },
+        sessions: new DashboardSessionStore(),
+        riot: {
+          isConfigured() {
+            return true;
+          },
+          routingStatus() {
+            return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+          },
+          async getAccountByRiotId(gameName, tagLine) {
+            return { puuid: "target-puuid", gameName, tagLine };
+          },
+          async getRankedStatsByPuuid() {
+            return undefined;
+          },
+          async getLadderRankByPuuid() {
+            return undefined;
+          },
+          async getChampionMasteryTopByPuuid() {
+            return [];
+          },
+          async getRecentMatchIdsByPuuid() {
+            return [];
+          }
+        }
+      });
+
+      const req = createRequest("GET", "/api/lol/profile?riotId=Seiga%23sei", undefined, { origin: DASHBOARD_ORIGIN });
+      const res = createResponse();
+
+      await handler(req, res);
+
+      assert.equal(res.statusCode, 200);
+      const body = JSON.parse(res.body);
+      assert.equal(body.twitchStream.isLive, true);
+      assert.equal(body.twitchStream.source, "approved_streamer");
+      assert.equal(body.twitchStream.profileLinkUrl, "https://www.youtube.com/@seiga");
+      assert.equal(body.twitchStream.profileLinks[0].label, "YouTube");
+      assert.equal(body.twitchStream.channelUrl, "https://www.twitch.tv/seiga");
+    } finally {
+      appConfig.paths.config = previousConfigDir;
+      appConfig.paths.state = previousStateDir;
+      rmSync(configDir, { recursive: true, force: true });
+      rmSync(stateDir, { recursive: true, force: true });
+    }
   });
 });
 

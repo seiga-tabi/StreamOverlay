@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { LolChampionSummary, ParticipationDashboardQueueEntry, ParticipationState, ParticipationStatus } from "@streamops/shared";
 import { apiPost } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 type DashboardSnapshot = {
   participationState?: ParticipationState;
@@ -267,7 +268,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 const INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
 const ENTRY_STATUS_OPTIONS: ParticipationStatus[] = [
   "pending",
@@ -357,7 +358,9 @@ function fallbackState(snapshot: DashboardSnapshot): ParticipationState {
 }
 
 export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot }) {
-  const state = snapshot.participationState ?? fallbackState(snapshot);
+  const snapshotState = snapshot.participationState ?? fallbackState(snapshot);
+  const [localState, setLocalState] = useState<ParticipationState>(snapshotState);
+  const state = localState;
   const queue = state.queue ?? [];
   const summary = state.summary;
   const [inviteDrafts, setInviteDrafts] = useState<Record<string, string>>({});
@@ -372,9 +375,14 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
   const [entryStatusMessages, setEntryStatusMessages] = useState<Record<string, string>>({});
   const bulkInviteTargets = queue.filter((entry) => INVITE_TARGET_STATUSES.has(entry.status));
 
+  useEffect(() => {
+    setLocalState(snapshot.participationState ?? fallbackState(snapshot));
+  }, [snapshot]);
+
   async function refreshProfile(entryId: string) {
     try {
-      await apiPost("/api/participation/profile/refresh", { entryId });
+      const nextState = await apiPost<ParticipationState>("/api/participation/profile/refresh", { entryId });
+      setLocalState(nextState);
       alert(t.refreshing);
     } catch {
       alert(t.refreshFailed);
@@ -383,7 +391,8 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
 
   async function overrideRole(entryId: string, role: string) {
     try {
-      await apiPost("/api/participation/role-override", { entryId, role });
+      const nextState = await apiPost<ParticipationState>("/api/participation/role-override", { entryId, role });
+      setLocalState(nextState);
       alert(t.roleUpdated);
     } catch {
       alert(t.roleUpdateFailed);
@@ -394,7 +403,8 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
     setManualBusyAction(action);
     setManualMessage("");
     try {
-      await apiPost("/api/participation/manual-control", { action });
+      const result = await apiPost<{ ok: boolean; action: ManualParticipationAction; phase: string; state: ParticipationState }>("/api/participation/manual-control", { action });
+      setLocalState(result.state);
       setManualMessage(t.manualControlSaved);
     } catch (error) {
       setManualMessage(apiErrorDetail(error, "/api/participation/manual-control", t.manualControlFailed));
@@ -408,7 +418,8 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
     setEntryStatusBusyId(entry.id);
     setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: "" }));
     try {
-      await apiPost("/api/participation/entry-status", { entryId: entry.id, status });
+      const nextState = await apiPost<ParticipationState>("/api/participation/entry-status", { entryId: entry.id, status });
+      setLocalState(nextState);
       setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: t.entryStatusUpdated }));
     } catch (error) {
       setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: apiErrorDetail(error, "/api/participation/entry-status", t.entryStatusUpdateFailed) }));

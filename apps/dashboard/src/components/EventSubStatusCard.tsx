@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TwitchConnectionStatus, TwitchEventSubStatus } from "@streamops/shared";
 import { apiGet, apiPost } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 const i18n = {
   ko: {
@@ -35,7 +36,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 function websocketClass(status?: TwitchEventSubStatus): string {
   if (status?.websocket === "connected") return "good";

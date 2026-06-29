@@ -159,6 +159,34 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
   }
 });
 
+test("공개 dashboard 이미지 asset은 /images 경로로 서빙된다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-dashboard-images-"));
+  try {
+    mkdirSync(path.join(dir, "images"));
+    writeFileSync(path.join(dir, "images", "seigagg-logo.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const req = createRequest("GET", "/images/seigagg-logo.png");
+    const res = createResponse();
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.match(res.headers["Content-Type"], /image\/png/);
+    assert.equal(Buffer.from(res.body, "binary").length > 0, true);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("관리자 URL은 dashboard 앱 index를 서빙한다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-admin-route-"));

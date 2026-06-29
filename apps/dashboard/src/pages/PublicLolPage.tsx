@@ -267,8 +267,10 @@ type PublicTrendLine = {
   points: PublicTrendPoint[];
   linePoints: string;
   areaPath: string;
-  minLabel: string;
-  maxLabel: string;
+  yLabels: string[];
+  startLabel: string;
+  middleLabel: string;
+  endLabel: string;
 };
 
 type PublicLolProfile = {
@@ -400,6 +402,10 @@ const publicI18n = {
     profileSummary: "플레이어 요약",
     recentGames: "최근 게임",
     recent20Games: "최근 20게임",
+    justNow: "방금 전",
+    minutesAgo: "분 전",
+    hoursAgo: "시간 전",
+    daysAgo: "일 전",
     topChampions: "챔피언 숙련도",
     analysis: "핵심 분석",
     detailAnalysis: "상세 분석",
@@ -448,10 +454,6 @@ const publicI18n = {
     wards: "와드",
     deathTime: "사망 시간",
     popularChampions: "인기 챔피언",
-    trendChampions: "트렌드 챔피언",
-    friendsLive: "친구 라이브",
-    patchSummary: "패치 요약",
-    duoRecommendation: "듀오 추천",
     lpTrend: "LP 변화 추이",
     aggregatePerformance: "종합 성과",
     roleWinRate: "포지션별 승률",
@@ -548,6 +550,8 @@ const publicI18n = {
     refreshAvailableIn: "후 가능",
     twitchLive: "방송 중",
     twitchOffline: "스트리머 오프라인",
+    twitchOnlineShort: "온라인",
+    twitchOfflineShort: "오프라인",
     twitchStreamer: "Twitch 스트리머",
     twitchViewers: "시청자",
     openTwitch: "Twitch 열기",
@@ -623,6 +627,10 @@ const publicI18n = {
     profileSummary: "プレイヤー概要",
     recentGames: "最近の試合",
     recent20Games: "最近20試合",
+    justNow: "たった今",
+    minutesAgo: "分前",
+    hoursAgo: "時間前",
+    daysAgo: "日前",
     topChampions: "チャンピオン熟練度",
     analysis: "主要分析",
     detailAnalysis: "詳細分析",
@@ -671,10 +679,6 @@ const publicI18n = {
     wards: "ワード",
     deathTime: "死亡時間",
     popularChampions: "人気チャンピオン",
-    trendChampions: "トレンドチャンピオン",
-    friendsLive: "フレンドライブ",
-    patchSummary: "パッチまとめ",
-    duoRecommendation: "デュオおすすめ",
     lpTrend: "LP推移",
     aggregatePerformance: "総合成績",
     roleWinRate: "ポジション別勝率",
@@ -771,6 +775,8 @@ const publicI18n = {
     refreshAvailableIn: "後に可能",
     twitchLive: "配信中",
     twitchOffline: "配信者オフライン",
+    twitchOnlineShort: "オンライン",
+    twitchOfflineShort: "オフライン",
     twitchStreamer: "Twitch 配信者",
     twitchViewers: "視聴者",
     openTwitch: "Twitch を開く",
@@ -1343,6 +1349,10 @@ function rankTierClass(stats: LolRankedStats | undefined, state: "ready" | "load
   return `public-team-rank-badge ${stats?.tier ? stats.tier.toLocaleLowerCase() : "unranked"}`;
 }
 
+function rankTrendTierClass(stats: LolRankedStats | undefined): string {
+  return `tier-${stats?.tier ? stats.tier.toLocaleLowerCase() : "unranked"}`;
+}
+
 function matchRankBadgeLabel(stats: LolRankedStats | undefined, loading = false): string {
   if (loading) return "...";
   return shortRankLabel(stats, "-", "U");
@@ -1466,7 +1476,27 @@ function formatDate(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(date);
+  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(date);
+}
+
+function formatShortDate(value: string | undefined): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "-";
+  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "numeric", day: "numeric" }).format(date);
+}
+
+function formatRelativeDate(value: string | undefined): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "-";
+  const elapsedMs = Math.max(0, Date.now() - date.getTime());
+  const minutes = Math.floor(elapsedMs / 60_000);
+  if (minutes < 1) return t().justNow;
+  if (minutes < 60) return `${minutes}${t().minutesAgo}`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}${t().hoursAgo}`;
+  return `${Math.floor(hours / 24)}${t().daysAgo}`;
 }
 
 function formatDuration(seconds: number | undefined): string {
@@ -1847,19 +1877,65 @@ function estimatedLpDelta(match: PublicLolRecentMatch): number {
   return 0;
 }
 
+const rankTrendTierSteps = [
+  { tier: "IRON", base: 0, code: "I" },
+  { tier: "BRONZE", base: 400, code: "B" },
+  { tier: "SILVER", base: 800, code: "S" },
+  { tier: "GOLD", base: 1200, code: "G" },
+  { tier: "PLATINUM", base: 1600, code: "P" },
+  { tier: "EMERALD", base: 2000, code: "E" },
+  { tier: "DIAMOND", base: 2400, code: "D" },
+  { tier: "MASTER", base: 2800, code: "M" },
+  { tier: "GRANDMASTER", base: 3200, code: "GM" },
+  { tier: "CHALLENGER", base: 3600, code: "C" }
+];
+
+function rankTrendStepForScore(score: number): { tier: string; base: number; code: string } {
+  return [...rankTrendTierSteps].reverse().find((item) => score >= item.base) ?? rankTrendTierSteps[0]!;
+}
+
+function rankTrendDivisionLabel(score: number): string {
+  if (!Number.isFinite(score) || score <= 0) return "U";
+  const step = rankTrendStepForScore(score);
+  if (step.tier === "MASTER" || step.tier === "GRANDMASTER" || step.tier === "CHALLENGER") return step.code;
+  const divisions = ["4", "3", "2", "1"];
+  const division = divisions[Math.min(3, Math.floor(Math.max(0, score - step.base) / 100))] ?? "4";
+  return `${step.code}${division}`;
+}
+
+function rankTrendPointLabel(score: number): string {
+  const step = rankTrendStepForScore(score);
+  const lp = Math.max(0, Math.round(score - step.base));
+  if (step.tier === "MASTER" || step.tier === "GRANDMASTER" || step.tier === "CHALLENGER") {
+    return `${rankTrendDivisionLabel(score)} ${lp} LP`;
+  }
+  return `${rankTrendDivisionLabel(score)} ${Math.min(99, lp % 100)} LP`;
+}
+
+function rankTrendAxisLabels(minScore: number, maxScore: number): string[] {
+  const minTick = Math.floor(minScore / 100) * 100;
+  const maxTick = Math.ceil(maxScore / 100) * 100;
+  const middleTick = Math.round(((minTick + maxTick) / 2) / 100) * 100;
+  return [maxTick, middleTick, minTick]
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .map(rankTrendDivisionLabel);
+}
+
 function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
   const matches = profile.recentMatches.slice(0, 20).reverse();
   if (matches.length === 0) return undefined;
-  const currentLp = profile.rankedStats?.leaguePoints ?? 0;
+  const currentRankScore = rankScore(profile.rankedStats);
   const totalDelta = matches.reduce((sum, match) => sum + estimatedLpDelta(match), 0);
-  let runningLp = currentLp - totalDelta;
+  let runningRankScore = currentRankScore - totalDelta;
   const samples = matches.map((match, index) => {
-    runningLp += estimatedLpDelta(match);
+    runningRankScore += estimatedLpDelta(match);
+    const displayValue = Math.max(0, runningRankScore);
     return {
       key: `${match.matchId}:lp:${index}`,
-      value: runningLp,
-      label: `${resultLabel(match.result)} · ${Math.max(0, Math.round(runningLp))} LP`,
-      result: match.result
+      value: displayValue,
+      label: `${resultLabel(match.result)} · ${rankTrendPointLabel(displayValue)}`,
+      result: match.result,
+      startedAt: match.startedAt
     };
   });
 
@@ -1868,8 +1944,10 @@ function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
   const height = 112;
   const padX = 14;
   const padY = 16;
-  const min = Math.min(...samples.map((point) => point.value));
-  const max = Math.max(...samples.map((point) => point.value));
+  const rawMin = Math.min(...samples.map((point) => point.value));
+  const rawMax = Math.max(...samples.map((point) => point.value));
+  const min = Math.floor(rawMin / 100) * 100;
+  const max = Math.ceil(rawMax / 100) * 100;
   const range = Math.max(1, max - min);
   const points = samples.map((point, index): PublicTrendPoint => {
     const x = samples.length === 1
@@ -1888,8 +1966,10 @@ function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
     points,
     linePoints,
     areaPath,
-    minLabel: `${Math.max(0, Math.round(min))} LP`,
-    maxLabel: `${Math.max(0, Math.round(max))} LP`
+    yLabels: rankTrendAxisLabels(rawMin, rawMax),
+    startLabel: formatShortDate(samples[0]?.startedAt),
+    middleLabel: formatShortDate(samples[Math.floor(samples.length / 2)]?.startedAt),
+    endLabel: formatShortDate(samples[samples.length - 1]?.startedAt)
   };
 }
 
@@ -2113,6 +2193,32 @@ function RankOverviewCard({
   );
 }
 
+function TwitchStreamOverviewCard({ stream }: { stream: PublicLolTwitchStream | undefined }) {
+  if (!stream) return null;
+  const meta = stream.isLive
+    ? [
+      stream.gameName,
+      stream.viewerCount !== undefined ? `${formatNumber(stream.viewerCount)} ${t().twitchViewers}` : undefined
+    ].filter(Boolean).join(" · ")
+    : stream.twitchDisplayName;
+  return (
+    <article className={`public-rank-overview-card public-stream-overview-card ${stream.isLive ? "live" : "offline"}`}>
+      {stream.profileImageUrl ? (
+        <img src={assetUrl(stream.profileImageUrl)} alt="" />
+      ) : (
+        <div className={`public-rank-fallback public-stream-fallback ${stream.isLive ? "live" : ""}`}>TV</div>
+      )}
+      <div>
+        <span data-ko={publicI18n.ko.twitchStreamer} data-ja={publicI18n.ja.twitchStreamer}>{t().twitchStreamer}</span>
+        <strong data-ko={stream.isLive ? publicI18n.ko.twitchOnlineShort : publicI18n.ko.twitchOfflineShort} data-ja={stream.isLive ? publicI18n.ja.twitchOnlineShort : publicI18n.ja.twitchOfflineShort}>
+          {stream.isLive ? t().twitchOnlineShort : t().twitchOfflineShort}
+        </strong>
+        <small>{meta || stream.twitchDisplayName}</small>
+      </div>
+    </article>
+  );
+}
+
 function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
   const recentLosses = Math.max(0, profile.summary.recentGames - profile.summary.recentWins);
   return (
@@ -2188,6 +2294,11 @@ function profileLinksFromStream(stream: PublicLolTwitchStream | undefined): Publ
   }] : [];
 }
 
+function visibleStreamerStream(stream: PublicLolTwitchStream | undefined): PublicLolTwitchStream | undefined {
+  if (!stream || stream.source === "participation") return undefined;
+  return stream;
+}
+
 function ProfileLinkIcons({ links }: { links: PublicProfileLink[] }) {
   if (!links.length) return null;
   return (
@@ -2212,47 +2323,10 @@ function ProfileLinkIcons({ links }: { links: PublicProfileLink[] }) {
   );
 }
 
-function TwitchStreamBadge({ stream }: { stream: PublicLolTwitchStream | undefined }) {
-  if (!stream) return null;
-  const profileLinks = profileLinksFromStream(stream);
-  const label = stream.isLive ? t().twitchLive : t().twitchOffline;
-  const meta = [
-    stream.gameName,
-    stream.viewerCount !== undefined ? `${formatNumber(stream.viewerCount)} ${t().twitchViewers}` : undefined,
-    stream.isLive && stream.startedAt ? formatDate(stream.startedAt) : undefined
-  ].filter(Boolean).join(" · ");
-  const content = (
-    <>
-      <span className={`public-live-dot ${stream.isLive ? "live" : ""}`} aria-hidden="true" />
-      {stream.profileImageUrl ? <img src={stream.profileImageUrl} alt="" /> : null}
-      <span>
-        <strong>{label}</strong>
-        <small>{stream.twitchDisplayName}{meta ? ` · ${meta}` : ""}</small>
-      </span>
-      {stream.title ? <em>{stream.title}</em> : null}
-    </>
-  );
-  return (
-    <div
-      className={`public-twitch-stream-badge ${stream.isLive ? "live" : "offline"}`}
-      aria-label={`${t().twitchStreamer} ${label}`}
-    >
-      {content}
-      {stream.channelUrl || profileLinks.length ? (
-        <span className="public-twitch-stream-links">
-          {stream.channelUrl ? <a href={stream.channelUrl} target="_blank" rel="noreferrer">{t().openTwitch}</a> : null}
-          {profileLinks.map((link, index) => (
-            <a href={link.url} target="_blank" rel="noreferrer" key={`${link.id ?? link.url}:${index}`}>{link.label}</a>
-          ))}
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
 function LpTrendLineChart({ profile, compact = false }: { profile: PublicLolProfile; compact?: boolean }) {
   const trend = rankTrendLine(profile);
   if (!trend) return <p className="public-empty">{t().noData}</p>;
+  const latestPoint = trend.points[trend.points.length - 1];
 
   return (
     <>
@@ -2260,15 +2334,19 @@ function LpTrendLineChart({ profile, compact = false }: { profile: PublicLolProf
         <path className="public-lp-line-area" d={trend.areaPath} />
         <polyline className="public-lp-line-stroke" points={trend.linePoints} />
         {trend.points.map((point) => (
-          <g className={`public-lp-line-point ${point.result}`} key={point.key}>
+          <g className={`public-lp-line-point ${point.result} ${point.key === latestPoint?.key ? "latest" : ""}`} key={point.key}>
             <circle cx={point.x} cy={point.y} r="4" />
             <title>{point.label}</title>
           </g>
         ))}
       </svg>
+      {compact ? null : <div className="public-lp-chart-y-axis" aria-hidden="true">
+        {trend.yLabels.map((label) => <span key={label}>{label}</span>)}
+      </div>}
       {compact ? null : <div className="public-lp-chart-axis" aria-hidden="true">
-        <span>{trend.minLabel}</span>
-        <span>{trend.maxLabel}</span>
+        <span>{trend.startLabel}</span>
+        <span>{trend.middleLabel}</span>
+        <span>{trend.endLabel}</span>
       </div>}
     </>
   );
@@ -2295,7 +2373,8 @@ function ProfileTopPanel({
   const flexStats = flexRankStats(profile);
   const rank5v5Stats = ranked5v5Stats(profile);
   const masteryChampionArt = assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl);
-  const profileLinks = profileLinksFromStream(profile.twitchStream);
+  const registeredStreamerStream = visibleStreamerStream(profile.twitchStream);
+  const profileLinks = profileLinksFromStream(registeredStreamerStream);
   return (
     <section id="public-ranking" className={`public-profile-top-grid ${masteryChampionArt ? "has-mastery-art" : ""}`}>
       {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
@@ -2320,36 +2399,38 @@ function ProfileTopPanel({
               </button>
             </div>
             <div className="public-profile-actions">
-              <button
-                type="button"
-                className={`public-refresh-button ${refreshCoolingDown ? "cooldown" : ""}`}
-                onClick={onRefresh}
-                disabled={refreshDisabled}
-                title={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
-              >
-                {refreshCoolingDown ? (
-                  <strong>{formatCooldown(refreshRemaining)}</strong>
-                ) : (
-                  <>
-                    <span aria-hidden="true">↻</span>
-                    <strong>{loading ? t().searching : t().refreshProfile}</strong>
-                  </>
-                )}
-              </button>
+              <div className="public-refresh-stack">
+                <ProfileLinkIcons links={profileLinks} />
+                <button
+                  type="button"
+                  className={`public-refresh-button ${refreshCoolingDown ? "cooldown" : ""}`}
+                  onClick={onRefresh}
+                  disabled={refreshDisabled}
+                  title={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
+                >
+                  {refreshCoolingDown ? (
+                    <strong>{formatCooldown(refreshRemaining)}</strong>
+                  ) : (
+                    <>
+                      <span aria-hidden="true">↻</span>
+                      <strong>{loading ? t().searching : t().refreshProfile}</strong>
+                    </>
+                  )}
+                </button>
+                <span className="public-refresh-updated-at">{t().fetchedAt} {formatDate(profile.fetchedAt)}</span>
+              </div>
               <button type="button" className="public-secondary-action" onClick={onToggleFavorite}>
                 {favoriteActive ? t().favoriteRemove : t().favoriteAdd}
               </button>
-              <ProfileLinkIcons links={profileLinks} />
-              <span>{t().fetchedAt} {formatDate(profile.fetchedAt)}</span>
             </div>
-            <TwitchStreamBadge stream={profile.twitchStream} />
           </div>
         </div>
       </div>
-      <aside className="public-profile-top-side" aria-label={t().ranking}>
+      <aside className={`public-profile-top-side ${registeredStreamerStream ? "has-stream-status" : ""}`} aria-label={t().ranking}>
         <RankOverviewCard title={t().soloRank} stats={soloStats} fallback={!soloStats} />
         <RankOverviewCard title={t().flexRank} stats={flexStats} fallback={!flexStats} />
         <RankOverviewCard title={t().ranked5v5} stats={rank5v5Stats} fallback={!rank5v5Stats} />
+        <TwitchStreamOverviewCard stream={registeredStreamerStream} />
       </aside>
       <ProfileMetricStrip profile={profile} />
     </section>
@@ -2423,7 +2504,7 @@ function RankSummaryPanel({ profile }: { profile: PublicLolProfile }) {
           <span className={index < 3 ? "passed" : index === 3 ? "current" : ""} key={step}>{step}</span>
         ))}
       </div>
-      <div className="public-rank-mini-chart">
+      <div className={`public-rank-mini-chart ${rankTrendTierClass(stats)}`}>
         <LpTrendLineChart profile={profile} compact />
       </div>
     </section>
@@ -2484,7 +2565,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
           <h2 data-ko={publicI18n.ko.lpTrend} data-ja={publicI18n.ja.lpTrend}>{t().lpTrend}</h2>
           <span data-ko={publicI18n.ko.recent20Games} data-ja={publicI18n.ja.recent20Games}>{t().recent20Games}</span>
         </div>
-        <div className="public-lp-chart">
+        <div className={`public-lp-chart ${rankTrendTierClass(profile.rankedStats)}`}>
           <LpTrendLineChart profile={profile} />
         </div>
       </article>
@@ -2539,8 +2620,7 @@ function PublicSidebar({
   return (
     <aside className="public-sidebar">
       <button className="public-sidebar-brand" type="button" onClick={onHome}>
-        <span className="public-brand-mark">L</span>
-        <strong data-ko={publicI18n.ko.brand} data-ja={publicI18n.ja.brand}>{t().brand}</strong>
+        <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
       </button>
       <nav aria-label="LOLTRACE">
         {items.map((item, index) => (
@@ -2831,6 +2911,9 @@ function PublicAppHeader({
   const canOpenStreamerDashboard = Boolean(approvedStreamerRequest);
   return (
     <header id={showSearch ? "public-search" : undefined} className={`public-app-header ${showSearch ? "" : "home"}`}>
+      <div className="public-header-brand">
+        <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
+      </div>
       {showSearch ? (
         <SearchForm
           query={query}
@@ -2841,12 +2924,7 @@ function PublicAppHeader({
           suggestions={suggestions}
           onPickSuggestion={onPickSuggestion}
         />
-      ) : (
-        <div className="public-header-brand">
-          <span className="public-brand-mark">L</span>
-          <strong data-ko={publicI18n.ko.brand} data-ja={publicI18n.ja.brand}>{t().brand}</strong>
-        </div>
-      )}
+      ) : null}
       <div className="public-header-tools">
         <PublicLocaleSelector locale={locale} onLocale={onLocale} />
         {showSearch && twitchUser ? (
@@ -2919,88 +2997,6 @@ function PublicAppHeader({
         </div> : null}
       </div>
     </header>
-  );
-}
-
-function PublicRightRail({ profile }: { profile: PublicLolProfile }) {
-  const champions = profile.championPerformance.length > 0
-    ? profile.championPerformance.slice(0, 5)
-    : profile.topChampions.slice(0, 5).map((champion, index) => ({
-      champion,
-      games: Math.max(1, 8 - index),
-      wins: Math.max(0, 5 - index),
-      winRate: Math.max(45, 56 - index * 2),
-      averageKda: Math.max(1.5, 3.2 - index * .25)
-    }));
-  const liveRows = profile.recentMatches.slice(0, 3);
-  const duoRows = champions.slice(0, 2);
-  return (
-    <aside className="public-right-rail">
-      <section className="public-panel public-rail-card public-trend-card">
-        <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.trendChampions} data-ja={publicI18n.ja.trendChampions}>{t().trendChampions}</h2>
-          <span data-ko={publicI18n.ko.details} data-ja={publicI18n.ja.details}>{t().details}</span>
-        </div>
-        <div className="public-trend-list">
-          {champions.map((item, index) => (
-            <article key={`${item.champion.championId}:trend`}>
-              <span>{index + 1}</span>
-              {item.champion.iconUrl ? <img src={item.champion.iconUrl} alt="" /> : <em>{championName(item.champion).slice(0, 1)}</em>}
-              <strong>{championName(item.champion)}</strong>
-              <small>{t().winRate} {formatPercent(item.winRate, 1)}</small>
-              <small>{gamesText(item.games)}</small>
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="public-panel public-rail-card">
-        <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.friendsLive} data-ja={publicI18n.ja.friendsLive}>{t().friendsLive}</h2>
-          <span data-ko={publicI18n.ko.details} data-ja={publicI18n.ja.details}>{t().details}</span>
-        </div>
-        <div className="public-live-list">
-          {liveRows.length === 0 ? <p className="public-empty">{t().noData}</p> : liveRows.map((match) => (
-            <article key={`${match.matchId}:live`}>
-              {match.champion.iconUrl ? <img src={match.champion.iconUrl} alt="" /> : <span>{championName(match.champion).slice(0, 1)}</span>}
-              <div>
-                <strong>{match.opponent?.riotId ?? championName(match.champion)}</strong>
-                <small>{match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? t().queue : t().queue}</small>
-              </div>
-              <em>{t().live}</em>
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="public-panel public-rail-card">
-        <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.patchSummary} data-ja={publicI18n.ja.patchSummary}>{t().patchSummary}</h2>
-          <span>25.10</span>
-        </div>
-        <ul className="public-patch-list">
-          <li>{activePublicLocale === "ja" ? "精密系ルーンの序盤効率が調整されました。" : "정밀 계열 룬 초반 효율이 조정되었습니다."}</li>
-          <li>{activePublicLocale === "ja" ? "一部メイジの基本防御力が上昇しました。" : "일부 메이지 기본 방어력이 증가했습니다."}</li>
-          <li>{activePublicLocale === "ja" ? "ドラゴン再出現待機時間が短縮されました。" : "드래곤 재등장 대기 시간이 단축되었습니다."}</li>
-        </ul>
-      </section>
-      <section className="public-panel public-rail-card">
-        <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.duoRecommendation} data-ja={publicI18n.ja.duoRecommendation}>{t().duoRecommendation}</h2>
-          <span>{mainRoleLabel(profile.roleAnalysis?.mainRole)}</span>
-        </div>
-        <div className="public-duo-list">
-          {duoRows.map((item, index) => (
-            <article key={`${item.champion.championId}:duo`}>
-              {item.champion.iconUrl ? <img src={item.champion.iconUrl} alt="" /> : <span>{championName(item.champion).slice(0, 1)}</span>}
-              <div>
-                <strong>{championName(item.champion)}</strong>
-                <small>{rankLabel(profile.rankedStats)}</small>
-              </div>
-              <em>{Math.max(72, 92 - index * 5)}%</em>
-            </article>
-          ))}
-        </div>
-      </section>
-    </aside>
   );
 }
 
@@ -3645,9 +3641,11 @@ function RecentMatches({
             <article className={`public-match-row ${match.result} ${highlightClass} ${expanded ? "expanded" : ""}`} key={match.matchId}>
               <div className="public-match-summary">
                 <div className="public-result">
+                  <b className={`public-match-result-pill ${match.result}`}>{resultLabel(match.result)}</b>
                   <strong>{match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}</strong>
-                  <span>{formatDate(match.startedAt)}</span>
+                  <span className="public-match-started">{formatDate(match.startedAt)}</span>
                   <small>{resultLabel(match.result)} · {formatDuration(match.durationSeconds)}</small>
+                  <em className="public-match-relative">{formatRelativeDate(match.startedAt)}</em>
                 </div>
                 <div className={`public-champion-cell ${highlightClass}`}>
                   {match.champion.iconUrl ? <img src={match.champion.iconUrl} alt="" /> : <span>{championName(match.champion).slice(0, 1)}</span>}
@@ -3868,8 +3866,7 @@ function PublicTopbar({
   return (
     <header className="public-topbar">
       <button className="public-brand" type="button" onClick={onHome}>
-        <span className="public-brand-mark">L</span>
-        <strong data-ko={publicI18n.ko.brand} data-ja={publicI18n.ja.brand}>{t().brand}</strong>
+        <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
       </button>
       <nav aria-label="LOLTRACE">
         <button type="button" onClick={() => onNavigate("search")} data-ko={publicI18n.ko.searchNav} data-ja={publicI18n.ja.searchNav}>{t().searchNav}</button>
@@ -4517,7 +4514,6 @@ export function PublicLolPage({
               <PublicSavedDataPanel favorites={favorites} recentSearches={recentSearches} onPick={pickSuggestion} />
               <PublicMoreFeatures />
             </section>
-            <PublicRightRail profile={activeProfile} />
           </div>
         </div>
       </section>

@@ -195,10 +195,39 @@ export class ActionDispatcher {
         case "participation.open":
           this.store.setParticipationOpen(true);
           actionStatus = this.broadcastOverlay({ type: "overlay.banner", title: "参加募集", message: "参加募集を開始しました。", variant: "success", durationMs: 5000, source: reason });
+          this.broadcastOverlay({
+            type: "participation.status.update",
+            isOpen: true,
+            mode: action.mode,
+            phase: "recruiting",
+            message: "롤 시참 모집 중",
+            streamerProfile: this.store.getParticipationStreamerProfile(),
+            source: reason
+          });
+          this.broadcastOverlay({
+            type: "participation.queue.update",
+            isOpen: true,
+            queue: this.store.getParticipationOverlayQueue(),
+            source: reason
+          });
           break;
         case "participation.close":
           this.store.setParticipationOpen(false);
           actionStatus = this.broadcastOverlay({ type: "overlay.banner", title: "시참 모집", message: "롤 시참 모집을 종료합니다.", variant: "info", durationMs: 5000, source: reason });
+          this.broadcastOverlay({
+            type: "participation.status.update",
+            isOpen: false,
+            phase: "closed",
+            message: "롤 시참 모집 종료",
+            streamerProfile: this.store.getParticipationStreamerProfile(),
+            source: reason
+          });
+          this.broadcastOverlay({
+            type: "participation.queue.update",
+            isOpen: false,
+            queue: this.store.getParticipationOverlayQueue(),
+            source: reason
+          });
           break;
         case "noop":
           break;

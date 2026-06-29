@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { updateStreamerProfileLink, updateStreamerRiotId, type DashboardStreamerInfo, type DashboardStreamerProfileLink } from "../api/client";
+import { createDashboardLocaleProxy } from "../i18n";
 
 const PROFILE_LINK_LIMIT = 5;
 
@@ -86,7 +87,7 @@ const i18n = {
   }
 } as const;
 
-const t = i18n.ko;
+const t = createDashboardLocaleProxy(i18n);
 
 function newProfileLinkDraft(): ProfileLinkDraft {
   return { id: `draft-${Date.now()}-${Math.random().toString(36).slice(2)}`, url: "", label: "" };
