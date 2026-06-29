@@ -1040,6 +1040,52 @@ export class Store {
     return entry;
   }
 
+  reactivateReusableParticipation(entry: ParticipationEntry): { entry: ParticipationEntry; reused: boolean } {
+    const reusable = this.participationQueue
+      .map((candidate, index) => ({ candidate, index }))
+      .filter(({ candidate }) => candidate.twitchUserId === entry.twitchUserId && !isActiveParticipationStatus(candidate.status))
+      .sort((a, b) => Date.parse(b.candidate.updatedAt) - Date.parse(a.candidate.updatedAt))[0];
+
+    if (!reusable) {
+      this.participationQueue.push(entry);
+      return { entry, reused: false };
+    }
+
+    const previous = reusable.candidate;
+    const sameRiotIdentity = Boolean(entry.riotPuuid && previous.riotPuuid && entry.riotPuuid === previous.riotPuuid)
+      || normalizeRiotIdKey(previous.riotGameName, previous.riotTagLine) === normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine);
+    const profileFallback = sameRiotIdentity ? previous : undefined;
+    const reactivated: ParticipationEntry = {
+      ...previous,
+      twitchUserId: entry.twitchUserId,
+      twitchUserName: entry.twitchUserName,
+      riotGameName: entry.riotGameName,
+      riotTagLine: entry.riotTagLine,
+      riotPuuid: entry.riotPuuid ?? profileFallback?.riotPuuid,
+      requestedRole: entry.requestedRole,
+      preferredRole: entry.preferredRole,
+      secondaryRole: entry.secondaryRole,
+      declaredRank: entry.declaredRank,
+      verifiedRank: entry.verifiedRank ?? profileFallback?.verifiedRank,
+      rankedStats: entry.rankedStats ?? profileFallback?.rankedStats,
+      profileStatus: entry.profileStatus ?? profileFallback?.profileStatus,
+      profileFailureReason: entry.profileFailureReason ?? profileFallback?.profileFailureReason,
+      mainRole: entry.mainRole ?? profileFallback?.mainRole,
+      mainRoleConfidence: entry.mainRoleConfidence ?? profileFallback?.mainRoleConfidence,
+      topChampions: entry.topChampions ?? profileFallback?.topChampions,
+      profileAnalyzedAt: entry.profileAnalyzedAt ?? profileFallback?.profileAnalyzedAt,
+      status: entry.status,
+      source: entry.source,
+      redemptionId: entry.redemptionId,
+      selectedAt: undefined,
+      checkInExpiresAt: undefined,
+      playedAt: undefined,
+      updatedAt: nowIso()
+    };
+    this.participationQueue[reusable.index] = reactivated;
+    return { entry: reactivated, reused: true };
+  }
+
   addOrUpdateParticipation(entry: ParticipationEntry): ParticipationEntry {
     const existingIndex = this.participationQueue.findIndex(
       (candidate) =>

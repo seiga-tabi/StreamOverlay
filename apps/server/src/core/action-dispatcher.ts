@@ -305,6 +305,32 @@ export class ActionDispatcher {
   }
 
   private overlayCooldownKey(message: OverlayMessage): string {
+    if (message.type === "participation.queue.update") {
+      const queueKey = message.queue
+        .map((entry) => [
+          entry.position,
+          entry.twitchUserName,
+          entry.status,
+          entry.preferredRole ?? "",
+          entry.profileStatus ?? "",
+          entry.mainRole ?? ""
+        ].join(":"))
+        .join("|");
+      return `${message.type}:${message.source ?? ""}:${message.isOpen ?? ""}:${queueKey}`;
+    }
+    if (message.type === "participation.status.update") {
+      const nextCandidateKey = message.nextCandidate
+        ? `${message.nextCandidate.position}:${message.nextCandidate.twitchUserName}:${message.nextCandidate.status}`
+        : "";
+      return `${message.type}:${message.source ?? ""}:${message.isOpen}:${message.phase ?? ""}:${message.message ?? ""}:${nextCandidateKey}`;
+    }
+    if (message.type === "participation.teams.update") {
+      const teamKey = [
+        message.teams.a.map((player) => `${player.twitchUserName}:${player.preferredRole ?? ""}`).join(","),
+        message.teams.b.map((player) => `${player.twitchUserName}:${player.preferredRole ?? ""}`).join(",")
+      ].join("|");
+      return `${message.type}:${message.source ?? ""}:${teamKey}`;
+    }
     if ("message" in message && typeof message.message === "string") return `${message.type}:${message.source ?? ""}:${message.message}`;
     if (message.type === "question.show") return `${message.type}:${message.source ?? ""}:${message.userName}:${message.question}`;
     if (message.type === "subtitle.update") return `${message.type}:${message.source ?? ""}:${message.translated}`;

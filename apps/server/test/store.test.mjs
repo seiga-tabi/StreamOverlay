@@ -98,6 +98,49 @@ test("Store는 이전 참가자의 비활성 Riot 프로필 기록을 재사용 
   assert.equal(reusable?.topChampions?.[0]?.nameKo, "아리");
 });
 
+test("Store는 같은 트위치 유저의 이전 비활성 참가 기록을 다시 대기열에 올린다", () => {
+  const store = new Store();
+  const previous = store.addParticipation(store.makeParticipationEntry({
+    twitchUserId: "viewer-1",
+    twitchUserName: "Viewer1",
+    riotGameName: "HideOnBush",
+    riotTagLine: "KR1",
+    riotPuuid: "puuid-hide",
+    preferredRole: "mid",
+    status: "played",
+    source: "chat_command",
+    profileStatus: "ready",
+    mainRole: "MIDDLE",
+    topChampions: [{ championId: 103, nameKo: "아리" }],
+    playedAt: "2026-06-26T00:00:00.000Z"
+  }));
+
+  const result = store.reactivateReusableParticipation(store.makeParticipationEntry({
+    twitchUserId: "viewer-1",
+    twitchUserName: "ViewerRenamed",
+    riotGameName: "HideOnBush",
+    riotTagLine: "KR1",
+    riotPuuid: "puuid-hide",
+    preferredRole: "jungle",
+    requestedRole: "jungle",
+    status: "verified",
+    source: "chat_command"
+  }));
+
+  assert.equal(result.reused, true);
+  assert.equal(result.entry.id, previous.id);
+  assert.equal(result.entry.createdAt, previous.createdAt);
+  assert.equal(result.entry.twitchUserName, "ViewerRenamed");
+  assert.equal(result.entry.status, "verified");
+  assert.equal(result.entry.preferredRole, "jungle");
+  assert.equal(result.entry.playedAt, undefined);
+  assert.equal(result.entry.profileStatus, "ready");
+  assert.equal(result.entry.mainRole, "MIDDLE");
+  assert.equal(result.entry.topChampions?.[0]?.nameKo, "아리");
+  assert.equal(store.getParticipationQueue().length, 1);
+  assert.deepEqual(store.getParticipationOverlayQueue().map((entry) => entry.twitchUserName), ["ViewerRenamed"]);
+});
+
 test("Store는 스트리머 Riot ID 등록 요청을 저장하고 승인 목록을 갱신한다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-riot-requests-"));
   const filePath = path.join(dir, "streamer-riot-ids.json");

@@ -334,8 +334,9 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
     redemptionId: input.redemptionId
   });
 
-  const saved = ctx.store.addParticipation(entry);
-  ctx.logger.event({ type: "participation.applied", verification, reusedProfile: Boolean(previousProfile), entry: logEntry(saved) });
+  const savedResult = ctx.store.reactivateReusableParticipation(entry);
+  const saved = savedResult.entry;
+  ctx.logger.event({ type: "participation.applied", verification, reusedProfile: Boolean(previousProfile), reusedEntry: savedResult.reused, entry: logEntry(saved) });
   ctx.events.emit({
     type: "participation.entryCreated",
     id: newId("event"),

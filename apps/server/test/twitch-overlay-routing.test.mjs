@@ -67,6 +67,14 @@ async function settle() {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+async function settleUntil(predicate, attempts = 20) {
+  for (let index = 0; index < attempts; index += 1) {
+    if (predicate()) return;
+    await settle();
+  }
+  throw new Error("비동기 상태 변경이 제한 시간 안에 반영되지 않았습니다.");
+}
+
 test("channel point redemption은 reward config를 거쳐 overlay.banner를 표시한다", async () => {
   const { events, socket, ctx } = createHarness();
   rewardsModule.setup(ctx);
@@ -601,6 +609,54 @@ test("!시참시작 명령이 반복되어도 Twitch 안내 채팅은 한 번만
   assert.equal(store.getStatus().participation, "open");
   assert.equal(sentChatMessages.length, 1);
   assert.match(sentChatMessages[0].message, /参加案内/);
+});
+
+test("!시참 신청은 이전 비활성 참가 기록을 새로 만들지 않고 재사용한다", async () => {
+  const { events, store, socket, ctx } = createHarness();
+  participationModule.setup(ctx);
+
+  events.emit({
+    type: "twitch.chatMessage",
+    id: "chat-reuse-open-1",
+    broadcasterUserId: "broadcaster-1",
+    chatterUserId: "broadcaster-1",
+    chatterUserName: "Streamer",
+    message: "!queueopen",
+    createdAt: new Date().toISOString()
+  });
+  await settle();
+
+  const firstApply = {
+    type: "twitch.chatMessage",
+    broadcasterUserId: "broadcaster-1",
+    chatterUserId: "user-reuse-1",
+    chatterUserName: "ReuseViewer",
+    message: "!시참 HideOnBush#KR1",
+    createdAt: new Date().toISOString()
+  };
+  events.emit({ ...firstApply, id: "chat-reuse-apply-1" });
+  await settle();
+
+  const firstEntry = store.getParticipationQueue()[0];
+  assert.ok(firstEntry);
+  store.markParticipant(firstEntry.id, "played");
+  assert.equal(store.getParticipationQueue()[0].status, "played");
+
+  events.emit({ ...firstApply, id: "chat-reuse-apply-2", chatterUserName: "ReuseViewerRenamed" });
+  await settleUntil(() => store.getParticipationQueue()[0]?.twitchUserName === "ReuseViewerRenamed");
+
+  const queue = store.getParticipationQueue();
+  const lastQueueMessage = socket.sent.filter((message) => message.type === "participation.queue.update").at(-1);
+
+  assert.equal(queue.length, 1);
+  assert.equal(queue[0].id, firstEntry.id);
+  assert.equal(queue[0].createdAt, firstEntry.createdAt);
+  assert.equal(queue[0].twitchUserName, "ReuseViewerRenamed");
+  assert.equal(queue[0].status, "waitlisted");
+  assert.equal(queue[0].playedAt, undefined);
+  assert.ok(lastQueueMessage);
+  assert.equal(lastQueueMessage.queue.length, 1);
+  assert.equal(lastQueueMessage.queue[0].twitchUserName, "ReuseViewerRenamed");
 });
 
 test("!시참취소 명령은 본인 신청을 취소하고 overlay 대기열에서 제거한다", async () => {
