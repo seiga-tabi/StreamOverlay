@@ -3806,13 +3806,12 @@ function SearchableRiotId({
 function TeamChampionAvatar({ player }: { player: PublicLolMatchParticipant }) {
   const stream = visibleStreamerStream(player.twitchStream);
   const streamLabel = stream ? (stream.isLive ? t().twitchOnlineShort : t().twitchOfflineShort) : "";
+  const streamStatusLabel = stream ? `${stream.twitchDisplayName} · ${streamLabel}` : "";
   return (
     <span className={`public-team-champion-avatar ${stream ? "streamer" : ""} ${stream?.isLive ? "live" : stream ? "offline" : ""}`}>
       {player.champion.iconUrl ? <img src={player.champion.iconUrl} alt="" /> : <span>{championName(player.champion).slice(0, 1)}</span>}
       {stream ? (
-        <em title={`${stream.twitchDisplayName} · ${streamLabel}`} data-ko={stream.isLive ? publicI18n.ko.twitchOnlineShort : publicI18n.ko.twitchOfflineShort} data-ja={stream.isLive ? publicI18n.ja.twitchOnlineShort : publicI18n.ja.twitchOfflineShort}>
-          {streamLabel}
-        </em>
+        <em title={streamStatusLabel} aria-label={streamStatusLabel} role="img" />
       ) : null}
     </span>
   );

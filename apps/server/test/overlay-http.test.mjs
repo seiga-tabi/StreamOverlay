@@ -963,3 +963,26 @@ test("/tts 경로는 로컬 TTS 캐시 WAV를 서빙한다", async () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("정적 파일 경로의 잘못된 URL 인코딩은 400으로 응답한다", async () => {
+  const previousPublicPath = appConfig.localTts.publicPath;
+  try {
+    appConfig.localTts.publicPath = "/tts";
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {}
+    });
+
+    for (const target of ["/dashboard/%E0%A4%A", "/alerts/%E0%A4%A", "/tts/%E0%A4%A"]) {
+      const req = createRequest("GET", target);
+      const res = createResponse();
+      await handler(req, res);
+
+      assert.equal(res.statusCode, 400, target);
+      assert.equal(JSON.parse(res.body).error, "잘못된 정적 파일 경로입니다.");
+    }
+  } finally {
+    appConfig.localTts.publicPath = previousPublicPath;
+  }
+});

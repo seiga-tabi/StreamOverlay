@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { TwitchAuthService, TwitchOAuthStateStore } from "../dist/services/twitch-auth.js";
-import { MemoryTwitchTokenStore } from "../dist/services/twitch-token-store.js";
+import { LocalJsonTwitchTokenStore, MemoryTwitchTokenStore } from "../dist/services/twitch-token-store.js";
 import { PublicTwitchAuthService, PublicTwitchViewerSessionStore } from "../dist/services/public-twitch-auth.js";
 
 const baseConfig = {
@@ -114,4 +117,33 @@ test("연결 상태는 누락된 scope를 missing_scopes로 표시한다", async
   const status = await service.getStatus();
   assert.equal(status.state, "missing_scopes");
   assert.deepEqual(status.missingScopes, ["user:write:chat", "channel:read:redemptions"]);
+});
+
+test("로컬 Twitch token 저장소는 디렉터리와 파일 권한을 제한한다", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "streamops-token-store-"));
+  const filePath = path.join(directory, "nested", "twitch-token.json");
+  const store = new LocalJsonTwitchTokenStore(filePath);
+  const token = {
+    accessToken: "access",
+    refreshToken: "refresh",
+    tokenType: "bearer",
+    scopes: ["user:read:chat"],
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    broadcaster: { id: "1234", login: "tester", displayName: "Tester" },
+    updatedAt: new Date().toISOString()
+  };
+
+  await store.set(token);
+  const directoryMode = (await fs.stat(path.dirname(filePath))).mode & 0o777;
+  const fileMode = (await fs.stat(filePath)).mode & 0o777;
+  assert.equal(directoryMode, 0o700);
+  assert.equal(fileMode, 0o600);
+
+  await fs.chmod(path.dirname(filePath), 0o755);
+  await fs.chmod(filePath, 0o644);
+  const loaded = await store.get();
+
+  assert.equal(loaded?.accessToken, "access");
+  assert.equal((await fs.stat(path.dirname(filePath))).mode & 0o777, 0o700);
+  assert.equal((await fs.stat(filePath)).mode & 0o777, 0o600);
 });

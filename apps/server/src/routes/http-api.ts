@@ -943,6 +943,19 @@ async function sendStaticFile(req: IncomingMessage, res: ServerResponse, filePat
   }
 }
 
+function decodeUrlPathSegment(value: string): string | undefined {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
+}
+
+function sendInvalidStaticPath(req: IncomingMessage, res: ServerResponse): void {
+  res.writeHead(400, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
+  res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "잘못된 정적 파일 경로입니다." }));
+}
+
 async function sendRankedEmblemAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
   const match = /^\/riot\/ranked-emblems\/([a-z]+)\.png$/i.exec(pathname);
   if (!match?.[1]) return false;
@@ -956,8 +969,9 @@ async function sendRankedEmblemAsset(req: IncomingMessage, res: ServerResponse, 
     await sendStaticFile(req, res, filePath);
     return true;
   } catch (error) {
+    void error;
     res.writeHead(502, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
-    res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: toSafeErrorMessage(error) }));
+    res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "랭크 아이콘을 불러오지 못했습니다." }));
     return true;
   }
 }
@@ -976,7 +990,11 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
   }
   const relative = pathname === mountPath || pathname === `${mountPath}/`
     ? "index.html"
-    : decodeURIComponent(pathname.slice(mountPath.length + 1));
+    : decodeUrlPathSegment(pathname.slice(mountPath.length + 1));
+  if (relative === undefined) {
+    sendInvalidStaticPath(req, res);
+    return true;
+  }
   if (mountPath === "/overlay" && relative && !path.extname(relative)) {
     await sendStaticFile(req, res, path.resolve(staticDir, "index.html"));
     return true;
@@ -1003,7 +1021,11 @@ async function sendOverlayAlertAsset(req: IncomingMessage, res: ServerResponse, 
   const root = pathname.startsWith(uploadPrefix)
     ? path.resolve(alertAssetRoot())
     : path.resolve(appConfig.paths.overlayStatic, "alerts");
-  const relative = decodeURIComponent(pathname.slice(pathname.startsWith(uploadPrefix) ? uploadPrefix.length : "/alerts/".length));
+  const relative = decodeUrlPathSegment(pathname.slice(pathname.startsWith(uploadPrefix) ? uploadPrefix.length : "/alerts/".length));
+  if (relative === undefined) {
+    sendInvalidStaticPath(req, res);
+    return true;
+  }
   const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
   const candidate = path.resolve(root, normalized);
   if (candidate !== root && !candidate.startsWith(`${root}${path.sep}`)) {
@@ -1019,7 +1041,11 @@ async function sendLocalTtsAsset(req: IncomingMessage, res: ServerResponse, path
   const configuredPath = appConfig.localTts.publicPath.trim().replace(/\/+$/, "") || "/tts";
   const publicPath = configuredPath.startsWith("/") ? configuredPath : `/${configuredPath}`;
   if (pathname !== publicPath && !pathname.startsWith(`${publicPath}/`)) return false;
-  const relative = decodeURIComponent(pathname.slice(publicPath.length + 1));
+  const relative = decodeUrlPathSegment(pathname.slice(publicPath.length + 1));
+  if (relative === undefined) {
+    sendInvalidStaticPath(req, res);
+    return true;
+  }
   const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
   const root = path.resolve(appConfig.localTts.cacheDir);
   const candidate = path.resolve(root, normalized);
@@ -1042,7 +1068,7 @@ function sendSafeOAuthHtml(res: ServerResponse, status: number, title: string, m
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${title}</title>
+    <title>${safeTitle}</title>
     <style>
       body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f7fb; color: #1f2937; }
       main { max-width: 560px; margin: 12vh auto; padding: 28px; background: #fff; border: 1px solid #e4e7ec; border-radius: 8px; }
@@ -1921,8 +1947,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     let offline: PublicLolTwitchStream | undefined;
     for (const candidate of candidates.values()) {
       const [stream, profile] = await Promise.all([
-        input.twitch?.getStreamByUserId(candidate.twitchUserId).catch(() => undefined) ?? Promise.resolve(undefined),
-        input.twitch?.getUserProfile(candidate.twitchUserId).catch(() => undefined) ?? Promise.resolve(undefined)
+        typeof input.twitch?.getStreamByUserId === "function" ? input.twitch.getStreamByUserId(candidate.twitchUserId).catch(() => undefined) : Promise.resolve(undefined),
+        typeof input.twitch?.getUserProfile === "function" ? input.twitch.getUserProfile(candidate.twitchUserId).catch(() => undefined) : Promise.resolve(undefined)
       ]);
       const fallbackLive =
         candidate.source === "connected_streamer" &&
@@ -1963,7 +1989,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         profileLinks: request.profileLinks?.map((link) => ({ ...link })),
         source: "approved_streamer"
       };
-      const stream = await input.twitch?.getStreamByUserId(request.twitchUserId).catch(() => undefined);
+      const stream = typeof input.twitch?.getStreamByUserId === "function"
+        ? await input.twitch.getStreamByUserId(request.twitchUserId).catch(() => undefined)
+        : undefined;
       return {
         riotKey,
         stream: publicLolTwitchStreamFromCandidate(candidate, stream, {
@@ -2690,11 +2718,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return request;
   }
 
-  async function withFreshPublicLolCurrentGame(response: PublicLolProfileResponse, key: string): Promise<PublicLolProfileResponse> {
+  async function withFreshPublicLolDynamicState(response: PublicLolProfileResponse, key: string): Promise<PublicLolProfileResponse> {
     const targetPuuid = publicLolProfilePuuidCache.get(key);
-    if (!targetPuuid) return response;
-    const liveGame = await getPublicLolCurrentGame(key, targetPuuid);
-    return { ...response, liveGame };
+    const [liveGame, twitchStream] = await Promise.all([
+      targetPuuid ? getPublicLolCurrentGame(key, targetPuuid).catch(() => response.liveGame) : Promise.resolve(response.liveGame),
+      buildPublicLolTwitchStream(response.gameName, response.tagLine).catch(() => response.twitchStream)
+    ]);
+    return { ...response, liveGame, twitchStream };
   }
 
   async function buildPublicLolProfile(rawRiotId: string): Promise<PublicLolProfileResponse> {
@@ -2847,7 +2877,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const cached = publicLolProfileCache.get(key);
     if (!options.refresh && cached && cached.expiresAt > Date.now()) {
-      return withPublicLolRefreshState(await withFreshPublicLolCurrentGame(cached.response, key), key);
+      return withPublicLolRefreshState(await withFreshPublicLolDynamicState(cached.response, key), key);
     }
     if (cached) publicLolProfileCache.delete(key);
 
@@ -3668,7 +3698,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return sendJson(req, res, 404, { error: "not found" });
     } catch (error) {
       if (error instanceof HttpRequestError) return sendJson(req, res, error.status, error.payload);
-      void error;
+      input.logger?.error({
+        type: "http_api.unhandled_error",
+        path: url.pathname,
+        method: req.method,
+        error: toSafeErrorMessage(error)
+      });
       return sendJson(req, res, 500, { error: "서버 내부 오류" });
     }
   };

@@ -131,6 +131,11 @@ type CachedTwitchStreamStatus = {
   expiresAt: number;
 };
 
+type CachedTwitchAppAccessContext = {
+  context: TwitchApiAccessContext;
+  expiresAt: number;
+};
+
 type TwitchApiClientOptions = {
   now?: () => number;
   sleep?: (ms: number) => Promise<void>;
@@ -142,6 +147,7 @@ const USER_SUBSCRIPTION_CACHE_TTL_MS = 5 * 60 * 1000;
 const STREAM_STATUS_LIVE_CACHE_TTL_MS = 10 * 1000;
 const STREAM_STATUS_OFFLINE_CACHE_TTL_MS = 30 * 1000;
 const DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000;
+const APP_ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000;
 
 function sleepMs(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -170,6 +176,7 @@ export class TwitchApiClient {
   private readonly streamStatusRequests = new Map<string, Promise<TwitchStreamStatus | undefined>>();
   private readonly streamStatusCacheVersions = new Map<string, number>();
   private streamStatusGlobalCacheVersion = 0;
+  private appAccessContext?: CachedTwitchAppAccessContext;
   private readonly rateLimitPauseUntilByHost = new Map<string, number>();
   private readonly now: () => number;
   private readonly sleep: (ms: number) => Promise<void>;
@@ -584,7 +591,11 @@ export class TwitchApiClient {
   private async fetchStreamByUserId(userId: string): Promise<TwitchStreamStatus | undefined> {
     const url = new URL("https://api.twitch.tv/helix/streams");
     url.searchParams.set("user_id", userId);
-    const response = await this.request(url, { method: "GET" });
+    let response = await this.request(url, { method: "GET" });
+    if (!response?.ok) {
+      const appContext = await this.getAppAccessContext();
+      response = appContext ? await this.requestWithAccessContext(url, { method: "GET" }, appContext) : response;
+    }
     if (!response?.ok) return undefined;
 
     const body = (await response.json()) as TwitchStreamsResponse;
@@ -601,6 +612,48 @@ export class TwitchApiClient {
       startedAt: stream.started_at,
       thumbnailUrl: this.safeHttpsUrl(stream.thumbnail_url)
     };
+  }
+
+  private async getAppAccessContext(): Promise<TwitchApiAccessContext | undefined> {
+    if (!appConfig.twitch.clientId || !appConfig.twitch.clientSecret) return undefined;
+    if (this.appAccessContext && this.appAccessContext.expiresAt > this.now() + APP_ACCESS_TOKEN_REFRESH_MARGIN_MS) {
+      return this.appAccessContext.context;
+    }
+
+    const url = new URL("https://id.twitch.tv/oauth2/token");
+    const host = safeHost(url);
+    await this.waitForRateLimit(host);
+    const body = new URLSearchParams({
+      client_id: appConfig.twitch.clientId,
+      client_secret: appConfig.twitch.clientSecret,
+      grant_type: "client_credentials"
+    });
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body
+    });
+    this.observeRateLimit(host, response);
+    if (!response.ok) return undefined;
+
+    const token = await response.json() as {
+      access_token?: string;
+      expires_in?: number;
+      scope?: string[];
+    };
+    const accessToken = typeof token.access_token === "string" ? token.access_token.trim() : "";
+    if (!accessToken) return undefined;
+    const expiresInMs = Math.max(60_000, Math.trunc(Number(token.expires_in ?? 3600)) * 1000);
+    const context: TwitchApiAccessContext = {
+      clientId: appConfig.twitch.clientId,
+      accessToken,
+      scopes: Array.isArray(token.scope) ? token.scope.filter((scope): scope is string => typeof scope === "string") : []
+    };
+    this.appAccessContext = {
+      context,
+      expiresAt: this.now() + expiresInMs
+    };
+    return context;
   }
 
   private safeHttpsUrl(value: string | undefined): string | undefined {

@@ -39,6 +39,7 @@ export class LocalJsonTwitchTokenStore implements TwitchTokenStore {
 
   async get(): Promise<TwitchStoredToken | undefined> {
     try {
+      await this.hardenStoragePermissions();
       const raw = await fs.readFile(this.filePath, "utf8");
       const parsed = JSON.parse(raw) as TwitchStoredToken;
       if (!parsed.accessToken || !parsed.refreshToken || !parsed.broadcaster?.id) return undefined;
@@ -50,9 +51,8 @@ export class LocalJsonTwitchTokenStore implements TwitchTokenStore {
   }
 
   async set(token: TwitchStoredToken): Promise<void> {
-    await fs.mkdir(path.dirname(this.filePath), { recursive: true });
+    await this.ensureStorageDirectory();
     const temporaryPath = `${this.filePath}.tmp`;
-    // TODO: 운영 전 DB 또는 OS secret store/encryption 기반 저장소로 교체해야 합니다.
     await fs.writeFile(temporaryPath, `${JSON.stringify(token, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
     await fs.rename(temporaryPath, this.filePath);
     await fs.chmod(this.filePath, 0o600);
@@ -61,6 +61,22 @@ export class LocalJsonTwitchTokenStore implements TwitchTokenStore {
   async clear(): Promise<void> {
     try {
       await fs.unlink(this.filePath);
+    } catch (error) {
+      if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") return;
+      throw error;
+    }
+  }
+
+  private async ensureStorageDirectory(): Promise<void> {
+    const directory = path.dirname(this.filePath);
+    await fs.mkdir(directory, { recursive: true, mode: 0o700 });
+    await fs.chmod(directory, 0o700);
+  }
+
+  private async hardenStoragePermissions(): Promise<void> {
+    await this.ensureStorageDirectory();
+    try {
+      await fs.chmod(this.filePath, 0o600);
     } catch (error) {
       if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") return;
       throw error;

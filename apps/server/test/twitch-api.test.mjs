@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 const { TwitchApiClient } = await import("../dist/services/twitch-api.js");
+const { appConfig } = await import("../dist/config.js");
 
 const originalFetch = globalThis.fetch;
 
@@ -210,6 +211,45 @@ test("TwitchApiClient는 user id로 현재 방송 상태를 조회하고 짧게 
   assert.equal(calls[0].url.pathname, "/helix/streams");
   assert.equal(calls[0].url.searchParams.get("user_id"), "1234");
   assert.equal(calls[0].authorization, "Bearer access-token");
+});
+
+test("TwitchApiClient는 사용자 OAuth 없이 app access token으로 방송 상태를 조회한다", async () => {
+  const previousClientId = appConfig.twitch.clientId;
+  const previousClientSecret = appConfig.twitch.clientSecret;
+  appConfig.twitch.clientId = "client-id";
+  appConfig.twitch.clientSecret = "client-secret";
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    const target = new URL(String(url));
+    calls.push({ url: target, authorization: init?.headers?.Authorization, body: String(init?.body ?? "") });
+    if (target.host === "id.twitch.tv") {
+      return jsonResponse({ access_token: "app-access-token", expires_in: 3600, token_type: "bearer" });
+    }
+    return jsonResponse({
+      data: [{
+        user_id: "1234",
+        user_login: "hideonbush",
+        user_name: "Hide on bush",
+        game_name: "League of Legends",
+        viewer_count: 321
+      }]
+    });
+  };
+
+  try {
+    const client = new TwitchApiClient();
+    const result = await client.getStreamByUserId("1234");
+
+    assert.equal(result?.userName, "Hide on bush");
+    assert.equal(calls.length, 2);
+    assert.equal(calls[0].url.host, "id.twitch.tv");
+    assert.match(calls[0].body, /grant_type=client_credentials/);
+    assert.equal(calls[1].url.pathname, "/helix/streams");
+    assert.equal(calls[1].authorization, "Bearer app-access-token");
+  } finally {
+    appConfig.twitch.clientId = previousClientId;
+    appConfig.twitch.clientSecret = previousClientSecret;
+  }
 });
 
 test("TwitchApiClient는 방송 상태 캐시를 user id 단위로 무효화한다", async () => {

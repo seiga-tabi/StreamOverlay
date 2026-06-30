@@ -88,11 +88,19 @@ export function tokenMatches(expected: string, candidate: string | undefined): b
 function parseCookies(req: IncomingMessage): Record<string, string> {
   const header = req.headers.cookie;
   if (!header) return {};
-  return Object.fromEntries(header.split(";").map((part) => {
+  const cookies: Record<string, string> = {};
+  for (const part of header.split(";")) {
     const index = part.indexOf("=");
-    if (index < 0) return ["", ""];
-    return [part.slice(0, index).trim(), decodeURIComponent(part.slice(index + 1).trim())];
-  }).filter(([key]) => key));
+    if (index < 0) continue;
+    const key = part.slice(0, index).trim();
+    if (!key) continue;
+    try {
+      cookies[key] = decodeURIComponent(part.slice(index + 1).trim());
+    } catch {
+      continue;
+    }
+  }
+  return cookies;
 }
 
 export function dashboardSessionIdFromRequest(req: IncomingMessage): string | undefined {
