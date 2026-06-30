@@ -142,7 +142,11 @@ export class TwitchEventSubClient {
       this.store.patchTwitchEventSubStatus({ websocket: previousSocket ? "reconnecting" : "connected" });
       this.logger.event({ type: "twitch.eventsub.connected", reconnecting: Boolean(previousSocket) });
     });
-    socket.on("message", (raw) => void this.handleMessage(raw?.toString?.() ?? String(raw), socket, previousSocket));
+    socket.on("message", (raw) => {
+      void this.handleMessage(raw?.toString?.() ?? String(raw), socket, previousSocket).catch((error) => {
+        this.handleMessageFailure(error, socket);
+      });
+    });
     socket.on("close", () => this.handleClose(socket));
     socket.on("error", (error) => {
       this.logger.error({ type: "twitch.eventsub.error", error: toSafeErrorMessage(error) });
@@ -205,6 +209,25 @@ export class TwitchEventSubClient {
         this.connect(reconnectUrl, socket);
       }
     }
+  }
+
+  private handleMessageFailure(error: unknown, socket: EventSubSocket): void {
+    const safeError = toSafeErrorMessage(error);
+    const statuses = this.subscriptions.map<TwitchEventSubSubscriptionStatus>((type) => ({
+      type,
+      version: getEventSubDefinition(type)?.version ?? "1",
+      enabled: true,
+      status: "failed",
+      requiredScopes: getEventSubDefinition(type)?.requiredScopes ?? [],
+      missingScopes: [],
+      error: "Twitch OAuth 인증 갱신에 실패했습니다. Twitch 로그인을 다시 연결해주세요."
+    }));
+    this.store.patchStatus({ twitch: "disconnected" });
+    this.store.patchTwitchEventSubStatus({ websocket: "disconnected" });
+    this.store.setTwitchEventSubSubscriptions(statuses);
+    this.logger.error({ type: "twitch.eventsub.message_failed", error: safeError });
+    this.suppressedCloseSockets.add(socket);
+    socket.close();
   }
 
   private async subscribe(sessionId: string | undefined): Promise<void> {

@@ -179,6 +179,39 @@ test("scope가 누락된 subscription은 생성하지 않고 status에 표시한
   assert.equal(status.subscriptions[0].status, "skipped");
 });
 
+test("EventSub OAuth 갱신 실패는 서버 프로세스를 죽이지 않고 실패 상태로 표시한다", async () => {
+  const sockets = [];
+  const store = new Store();
+  const twitch = {
+    async getEventSubAccessContext() {
+      throw new Error("Twitch OAuth refresh failed: 400");
+    },
+    async createEventSubSubscription() {
+      assert.fail("OAuth 갱신 실패 시 subscription 생성은 호출되지 않아야 합니다.");
+    }
+  };
+  const client = new TwitchEventSubClient(new EventBus(), twitch, store, createLogger(), {
+    subscriptions: ["stream.online"],
+    webSocketFactory: () => {
+      const socket = new FakeSocket();
+      sockets.push(socket);
+      return socket;
+    }
+  });
+
+  client.start();
+  sockets[0].emitOpen();
+  sockets[0].emitMessage(welcome("session-oauth-fail"));
+  await settle();
+  await settle();
+
+  const status = store.getTwitchEventSubStatus();
+  assert.equal(status.websocket, "disconnected");
+  assert.equal(status.subscriptions[0].status, "failed");
+  assert.match(status.subscriptions[0].error, /Twitch OAuth 인증 갱신/);
+  assert.equal(sockets[0].closed, true);
+});
+
 test("channel.follow subscription은 moderator scope와 moderator_user_id 조건을 사용한다", async () => {
   const sockets = [];
   const twitch = createTwitchMock(["moderator:read:followers"]);
