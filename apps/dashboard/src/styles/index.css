@@ -1605,7 +1605,7 @@ code {
 
 .my-riot-profile-link-row {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(180px, .55fr) auto;
+  grid-template-columns: auto minmax(240px, 1fr) minmax(180px, .55fr) auto;
   gap: 10px;
   align-items: end;
   min-width: 0;
@@ -1613,6 +1613,11 @@ code {
   border: 1px solid #e4ebf7;
   border-radius: 8px;
   background: #f8fbff;
+}
+
+.my-riot-profile-link-preview {
+  align-self: end;
+  margin-bottom: 2px;
 }
 
 .my-riot-profile-link-add {
@@ -2520,6 +2525,46 @@ code {
   font-size: 24px;
 }
 
+.metric-tone-excellent {
+  color: #0f9f6e !important;
+}
+
+.metric-tone-good {
+  color: #2563eb !important;
+}
+
+.metric-tone-neutral {
+  color: #172033 !important;
+}
+
+.metric-tone-warning {
+  color: #d97706 !important;
+}
+
+.metric-tone-bad {
+  color: #e11d48 !important;
+}
+
+.public-dashboard-shell.theme-dark .metric-tone-excellent {
+  color: #34d399 !important;
+}
+
+.public-dashboard-shell.theme-dark .metric-tone-good {
+  color: #60a5fa !important;
+}
+
+.public-dashboard-shell.theme-dark .metric-tone-neutral {
+  color: #dbe6f7 !important;
+}
+
+.public-dashboard-shell.theme-dark .metric-tone-warning {
+  color: #fbbf24 !important;
+}
+
+.public-dashboard-shell.theme-dark .metric-tone-bad {
+  color: #fb7185 !important;
+}
+
 .public-profile-layout {
   display: grid;
   gap: 14px;
@@ -2533,8 +2578,10 @@ code {
 }
 
 .public-profile-top-grid {
+  --public-profile-art-position: 58% 18%;
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, .9fr);
+  grid-template-rows: auto auto;
   min-height: 250px;
   overflow: hidden;
   position: relative;
@@ -2544,6 +2591,8 @@ code {
 }
 
 .public-profile-top-grid.has-mastery-art::after {
+  grid-column: 1 / -1;
+  grid-row: 1;
   position: absolute;
   z-index: 1;
   inset: 0;
@@ -2555,6 +2604,8 @@ code {
 }
 
 .public-profile-top-main {
+  grid-column: 1;
+  grid-row: 1;
   display: grid;
   align-content: start;
   gap: 16px;
@@ -2568,15 +2619,23 @@ code {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  max-width: min(720px, 100%);
+  min-width: 0;
 }
 
 .public-season-badges span {
+  flex: 0 0 auto;
+  max-width: 100%;
   padding: 5px 8px;
   border-radius: 6px;
   background: rgba(255, 255, 255, .1);
   color: #d7e2f4;
   font-size: 12px;
   font-weight: 900;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .public-profile-top-content {
@@ -2665,6 +2724,8 @@ code {
 }
 
 .public-profile-top-side {
+  grid-column: 2;
+  grid-row: 1;
   display: grid;
   align-content: center;
   gap: 8px;
@@ -2677,13 +2738,15 @@ code {
 }
 
 .public-profile-mastery-art {
+  grid-column: 1 / -1;
+  grid-row: 1;
   position: absolute;
   z-index: 0;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 62% 12%;
+  object-position: var(--public-profile-art-position);
   opacity: .74;
   pointer-events: none;
 }
@@ -3504,6 +3567,36 @@ code {
   font-size: 26px;
   font-weight: 950;
   line-height: 1;
+}
+
+.public-match-score.metric-tone-excellent strong,
+.public-match-impact.metric-tone-excellent strong {
+  background: #dffcf0;
+  color: #0f9f6e;
+}
+
+.public-match-score.metric-tone-good strong,
+.public-match-impact.metric-tone-good strong {
+  background: #e6f0ff;
+  color: #2563eb;
+}
+
+.public-match-score.metric-tone-neutral strong,
+.public-match-impact.metric-tone-neutral strong {
+  background: #eef4ff;
+  color: #334155;
+}
+
+.public-match-score.metric-tone-warning strong,
+.public-match-impact.metric-tone-warning strong {
+  background: #fff3d6;
+  color: #d97706;
+}
+
+.public-match-score.metric-tone-bad strong,
+.public-match-impact.metric-tone-bad strong {
+  background: #ffe4e6;
+  color: #e11d48;
 }
 
 .public-result span,
@@ -4429,6 +4522,71 @@ code {
   font-weight: 950;
 }
 
+.public-team-champion-avatar {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  overflow: visible !important;
+  border-radius: 50%;
+}
+
+.public-team-champion-avatar > img,
+.public-team-champion-avatar > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.public-team-champion-avatar > span {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #334155, #5b55ff);
+  color: #fff;
+  font-weight: 950;
+}
+
+.public-team-champion-avatar.streamer {
+  box-shadow:
+    0 0 0 2px rgba(168, 85, 247, .24),
+    0 0 14px rgba(168, 85, 247, .28);
+}
+
+.public-team-champion-avatar em {
+  position: absolute;
+  right: -8px;
+  bottom: -5px;
+  display: inline-grid;
+  min-width: 28px;
+  height: 14px;
+  padding: 0 5px;
+  border: 1px solid rgba(255, 255, 255, .84);
+  border-radius: 999px;
+  background: #94a3b8;
+  color: #fff;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 12px;
+  place-items: center;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, .2);
+}
+
+.public-team-champion-avatar.live em {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  box-shadow: 0 0 12px rgba(239, 68, 68, .36);
+}
+
+.public-team-champion-avatar.offline em {
+  background: linear-gradient(135deg, #64748b, #94a3b8);
+}
+
 .public-team-player-main strong,
 .public-team-player-main .public-riot-id-link {
   display: block;
@@ -4511,6 +4669,15 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.public-riot-id-static.streamer .public-riot-name,
+.public-riot-id-link.streamer .public-riot-name {
+  background: linear-gradient(135deg, #7c3aed 0%, #c026d3 48%, #60a5fa 100%);
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 18px rgba(168, 85, 247, .22);
+  -webkit-background-clip: text;
 }
 
 .public-opponent-cell .public-riot-id-link {
@@ -5651,7 +5818,17 @@ code {
   }
 
   .my-riot-profile-link-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .my-riot-profile-link-row label,
+  .my-riot-profile-link-row button {
+    grid-column: 1 / -1;
+  }
+
+  .my-riot-profile-link-preview {
+    align-self: start;
+    margin-bottom: 0;
   }
 }
 
@@ -6473,12 +6650,6 @@ code {
   color: #596691;
 }
 
-.public-season-badges span:first-child,
-.public-season-badges span:nth-child(3) {
-  background: #fff0c7;
-  color: #a06a13;
-}
-
 .public-profile-top-content {
   gap: 26px;
 }
@@ -6579,66 +6750,115 @@ code {
 }
 
 .public-profile-link-icon {
+  --profile-link-bg: linear-gradient(180deg, #46566f 0%, #243044 58%, #172033 100%);
+  --profile-link-border: rgba(255, 255, 255, .26);
+  --profile-link-glow: rgba(15, 23, 42, .28);
   display: inline-grid;
   place-items: center;
+  position: relative;
   width: 34px;
   height: 34px;
-  border: 1px solid #d8e1ef;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #334155;
+  overflow: hidden;
+  border: 1px solid var(--profile-link-border);
+  border-radius: 10px;
+  background: var(--profile-link-bg);
+  color: #ffffff;
   font-size: 11px;
   font-weight: 950;
   line-height: 1;
   text-decoration: none;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, .42),
+    inset 0 -3px 7px rgba(0, 0, 0, .22),
+    0 9px 16px var(--profile-link-glow);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+
+.public-profile-link-icon::before {
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .24), rgba(255, 255, 255, 0) 46%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 44%);
+  content: "";
+  pointer-events: none;
+}
+
+.public-profile-link-icon svg {
+  position: relative;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  display: block;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
 }
 
 .public-profile-link-icon:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, .1);
+  transform: translateY(-1px) scale(1.02);
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, .46),
+    inset 0 -3px 7px rgba(0, 0, 0, .24),
+    0 12px 22px var(--profile-link-glow);
 }
 
 .public-profile-link-icon.youtube {
-  border-color: #fecdd3;
-  background: #fff1f2;
-  color: #dc2626;
+  --profile-link-bg: linear-gradient(180deg, #ff3030 0%, #f20000 56%, #c60000 100%);
+  --profile-link-border: rgba(255, 255, 255, .28);
+  --profile-link-glow: rgba(240, 0, 0, .42);
+  --profile-link-youtube-play: #ef0000;
+}
+
+.public-profile-link-icon.youtube svg {
+  width: 25px;
+  height: 25px;
 }
 
 .public-profile-link-icon.twitch {
-  border-color: #ddd6fe;
-  background: #f5f3ff;
-  color: #6d28d9;
+  --profile-link-bg: linear-gradient(160deg, #b35cff 0%, #8f46f5 48%, #6530d9 100%);
+  --profile-link-border: rgba(255, 255, 255, .28);
+  --profile-link-glow: rgba(145, 70, 255, .42);
+}
+
+.public-profile-link-icon.twitch svg {
+  width: 25px;
+  height: 25px;
 }
 
 .public-profile-link-icon.discord {
-  border-color: #c7d2fe;
-  background: #eef2ff;
-  color: #4f46e5;
+  --profile-link-bg: linear-gradient(160deg, #7380ff 0%, #5865f2 58%, #3f46c8 100%);
+  --profile-link-border: rgba(255, 255, 255, .18);
+  --profile-link-glow: rgba(88, 101, 242, .34);
 }
 
 .public-profile-link-icon.x {
-  border-color: #cbd5e1;
-  background: #0f172a;
-  color: #ffffff;
+  --profile-link-bg: linear-gradient(180deg, #242424 0%, #080808 58%, #000000 100%);
+  --profile-link-border: rgba(255, 255, 255, .2);
+  --profile-link-glow: rgba(0, 0, 0, .38);
+}
+
+.public-profile-link-icon.x svg {
+  width: 23px;
+  height: 23px;
 }
 
 .public-profile-link-icon.instagram {
-  border-color: #fbcfe8;
-  background: #fdf2f8;
-  color: #be185d;
+  --profile-link-bg: linear-gradient(135deg, #f97316, #db2777 48%, #6d28d9);
+  --profile-link-border: rgba(255, 255, 255, .2);
+  --profile-link-glow: rgba(219, 39, 119, .36);
 }
 
 .public-profile-link-icon.tiktok {
-  border-color: #bae6fd;
-  background: #ecfeff;
-  color: #0891b2;
+  --profile-link-bg: #05070b;
+  --profile-link-border: rgba(34, 211, 238, .35);
+  --profile-link-glow: rgba(34, 211, 238, .3);
 }
 
 .public-profile-link-icon.soop {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
-  color: #047857;
+  --profile-link-bg: #00c471;
+  --profile-link-border: rgba(255, 255, 255, .2);
+  --profile-link-glow: rgba(0, 196, 113, .34);
 }
 
 .public-profile-top-side {
@@ -6758,6 +6978,7 @@ code {
 
 .public-profile-metric-strip {
   grid-column: 1 / -1;
+  grid-row: 2;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
@@ -8451,6 +8672,74 @@ code {
   font-size: 11px;
 }
 
+.public-season-badges span.tier-iron,
+.public-dashboard-shell .public-season-badges span.tier-iron {
+  background: #edf0f4;
+  color: #5d6675;
+}
+
+.public-season-badges span.tier-bronze,
+.public-dashboard-shell .public-season-badges span.tier-bronze {
+  background: #fff1e7;
+  color: #a15d30;
+}
+
+.public-season-badges span.tier-silver,
+.public-dashboard-shell .public-season-badges span.tier-silver {
+  background: #eef2f8;
+  color: #64748b;
+}
+
+.public-season-badges span.tier-gold,
+.public-dashboard-shell .public-season-badges span.tier-gold {
+  background: #fff4cf;
+  color: #a06a13;
+}
+
+.public-season-badges span.tier-platinum,
+.public-dashboard-shell .public-season-badges span.tier-platinum {
+  background: #e4fbf8;
+  color: #13877a;
+}
+
+.public-season-badges span.tier-emerald,
+.public-dashboard-shell .public-season-badges span.tier-emerald {
+  background: #e4f8ee;
+  color: #178a59;
+}
+
+.public-season-badges span.tier-diamond,
+.public-dashboard-shell .public-season-badges span.tier-diamond {
+  background: #e8f4ff;
+  color: #2563c7;
+}
+
+.public-season-badges span.tier-master,
+.public-dashboard-shell .public-season-badges span.tier-master {
+  background: #f2eaff;
+  color: #7447c8;
+}
+
+.public-season-badges span.tier-grandmaster,
+.public-dashboard-shell .public-season-badges span.tier-grandmaster {
+  background: #ffe8ed;
+  color: #c53b55;
+}
+
+.public-season-badges span.tier-challenger,
+.public-dashboard-shell .public-season-badges span.tier-challenger {
+  background: linear-gradient(135deg, #e3f5ff, #fff3bf);
+  color: #1d5f94;
+}
+
+.public-season-badges span.tier-unranked,
+.public-dashboard-shell .public-season-badges span.tier-unranked,
+.public-season-badges span.recent-form,
+.public-dashboard-shell .public-season-badges span.recent-form {
+  background: #eef5ff;
+  color: #5f7399;
+}
+
 .public-dashboard-shell .public-profile-top-content {
   gap: 24px;
 }
@@ -8629,13 +8918,13 @@ code {
 
 .public-dashboard-shell .public-profile-metric-strip {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  background: rgba(251, 253, 255, .78);
+  background: rgba(251, 253, 255, .96);
 }
 
 .public-dashboard-shell .public-profile-top-grid.has-mastery-art .public-profile-metric-strip {
   border-top-color: rgba(226, 232, 240, .58);
-  background: rgba(251, 253, 255, .58);
-  backdrop-filter: blur(4px);
+  background: rgba(251, 253, 255, .96);
+  backdrop-filter: none;
 }
 
 .public-dashboard-shell .public-profile-metric-card {
@@ -9278,6 +9567,31 @@ code {
 .public-match-impact.loss {
   background: #fff0f3;
   color: #f43f5e;
+}
+
+.public-match-impact.metric-tone-excellent {
+  background: #dffcf0;
+  color: #0f9f6e;
+}
+
+.public-match-impact.metric-tone-good {
+  background: #e6f0ff;
+  color: #2563eb;
+}
+
+.public-match-impact.metric-tone-neutral {
+  background: #eef4ff;
+  color: #334155;
+}
+
+.public-match-impact.metric-tone-warning {
+  background: #fff3d6;
+  color: #d97706;
+}
+
+.public-match-impact.metric-tone-bad {
+  background: #ffe4e6;
+  color: #e11d48;
 }
 
 .public-match-impact strong {
@@ -10080,7 +10394,7 @@ code {
 
 .public-dashboard-shell.theme-dark .public-profile-top-grid.has-mastery-art .public-profile-metric-strip {
   border-top-color: rgba(51, 65, 85, .58);
-  background: rgba(15, 23, 42, .5);
+  background: rgba(15, 23, 42, .94);
 }
 
 .public-dashboard-shell.theme-dark .public-profile-metric-card {
@@ -10535,52 +10849,53 @@ code {
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon {
-  border-color: #2c3b54;
-  background: #101827;
-  color: #dbe6f7;
-  box-shadow: none;
+  border-color: var(--profile-link-border);
+  background: var(--profile-link-bg);
+  color: #ffffff;
+  box-shadow: 0 8px 18px var(--profile-link-glow);
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.youtube {
-  border-color: rgba(248, 113, 113, .45);
-  background: rgba(127, 29, 29, .28);
-  color: #fecdd3;
+  --profile-link-bg: linear-gradient(180deg, #ff3030 0%, #f20000 56%, #c60000 100%);
+  --profile-link-border: rgba(255, 255, 255, .28);
+  --profile-link-glow: rgba(240, 0, 0, .42);
+  --profile-link-youtube-play: #ef0000;
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.twitch {
-  border-color: rgba(167, 139, 250, .45);
-  background: rgba(76, 29, 149, .28);
-  color: #ddd6fe;
+  --profile-link-bg: linear-gradient(160deg, #b35cff 0%, #8f46f5 48%, #6530d9 100%);
+  --profile-link-border: rgba(255, 255, 255, .28);
+  --profile-link-glow: rgba(145, 70, 255, .42);
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.discord {
-  border-color: rgba(129, 140, 248, .45);
-  background: rgba(49, 46, 129, .28);
-  color: #c7d2fe;
+  --profile-link-bg: linear-gradient(160deg, #7380ff 0%, #5865f2 58%, #3f46c8 100%);
+  --profile-link-border: rgba(255, 255, 255, .18);
+  --profile-link-glow: rgba(88, 101, 242, .34);
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.x {
-  border-color: #475569;
-  background: #020617;
-  color: #ffffff;
+  --profile-link-bg: linear-gradient(180deg, #242424 0%, #080808 58%, #000000 100%);
+  --profile-link-border: rgba(255, 255, 255, .2);
+  --profile-link-glow: rgba(0, 0, 0, .38);
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.instagram {
-  border-color: rgba(244, 114, 182, .45);
-  background: rgba(131, 24, 67, .25);
-  color: #fbcfe8;
+  --profile-link-bg: linear-gradient(135deg, #f97316, #db2777 48%, #6d28d9);
+  --profile-link-border: rgba(255, 255, 255, .2);
+  --profile-link-glow: rgba(219, 39, 119, .36);
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.tiktok {
-  border-color: rgba(34, 211, 238, .42);
-  background: rgba(22, 78, 99, .24);
-  color: #a5f3fc;
+  --profile-link-bg: #05070b;
+  --profile-link-border: rgba(34, 211, 238, .35);
+  --profile-link-glow: rgba(34, 211, 238, .3);
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.soop {
-  border-color: rgba(74, 222, 128, .42);
-  background: rgba(20, 83, 45, .24);
-  color: #bbf7d0;
+  --profile-link-bg: #00c471;
+  --profile-link-border: rgba(255, 255, 255, .2);
+  --profile-link-glow: rgba(0, 196, 113, .34);
 }
 
 @media (max-width: 1400px) {
@@ -10589,8 +10904,14 @@ code {
   }
 
   .public-dashboard-shell .public-profile-top-side {
+    grid-column: 1;
+    grid-row: 2;
     border-top: 1px solid #e4ebf5;
     border-left: 0;
+  }
+
+  .public-dashboard-shell .public-profile-metric-strip {
+    grid-row: 3;
   }
 
   .public-overview-dashboard-panel {
@@ -10672,8 +10993,14 @@ code {
   }
 
   .public-dashboard-shell .public-profile-top-side {
+    grid-column: 1;
+    grid-row: 2;
     border-top: 1px solid #e4ebf5;
     border-left: 0;
+  }
+
+  .public-dashboard-shell .public-profile-metric-strip {
+    grid-row: 3;
   }
 
   .public-match-filter-bar {
@@ -11512,6 +11839,31 @@ code {
     color: #f43f5e;
   }
 
+  .public-dashboard-shell .public-match-impact.metric-tone-excellent {
+    background: #dffcf0;
+    color: #0f9f6e;
+  }
+
+  .public-dashboard-shell .public-match-impact.metric-tone-good {
+    background: #e6f0ff;
+    color: #2563eb;
+  }
+
+  .public-dashboard-shell .public-match-impact.metric-tone-neutral {
+    background: #eef4ff;
+    color: #334155;
+  }
+
+  .public-dashboard-shell .public-match-impact.metric-tone-warning {
+    background: #fff3d6;
+    color: #d97706;
+  }
+
+  .public-dashboard-shell .public-match-impact.metric-tone-bad {
+    background: #ffe4e6;
+    color: #e11d48;
+  }
+
   .public-dashboard-shell .public-match-impact strong {
     display: block;
     min-width: auto;
@@ -11763,5 +12115,309 @@ code {
 
   .public-dashboard-shell.theme-dark .public-team-stat.kda strong {
     color: #eef5ff;
+  }
+}
+
+.public-dashboard-shell.public-home-shell .public-dashboard-home {
+  min-height: calc(100vh - 96px);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage {
+  width: min(1240px, calc(100vw - 192px));
+  transform: translateY(-2vh);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-wrap {
+  width: 100%;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-form {
+  position: relative;
+  grid-template-columns: 136px minmax(0, 1fr) auto;
+  gap: 26px;
+  min-height: 106px;
+  padding: 13px 18px 13px 24px;
+  border: 1px solid rgba(150, 132, 255, .92);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(18, 24, 49, .82), rgba(7, 13, 31, .88)),
+    rgba(7, 13, 31, .86);
+  box-shadow:
+    0 0 0 1px rgba(89, 172, 255, .32),
+    0 0 30px rgba(111, 104, 255, .52),
+    0 0 68px rgba(35, 132, 255, .34),
+    0 34px 96px rgba(0, 0, 0, .58);
+  backdrop-filter: blur(20px) saturate(135%);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-server {
+  min-width: 136px;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-pill {
+  width: 116px;
+  min-height: 62px;
+  padding: 0 24px;
+  border: 1px solid rgba(142, 126, 255, .34);
+  background:
+    linear-gradient(180deg, rgba(36, 35, 80, .8), rgba(18, 22, 52, .86)),
+    rgba(20, 25, 58, .86);
+  color: #c9c0ff;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .04),
+    0 0 26px rgba(117, 95, 255, .22);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-pill strong {
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-pill > span {
+  border-top-color: #a7a2ff;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field {
+  border-left: 1px solid rgba(144, 154, 203, .42);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input {
+  min-height: 68px;
+  padding: 0 14px 0 34px;
+  color: #f3f7ff;
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input::placeholder {
+  color: rgba(171, 181, 213, .5);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-actions {
+  gap: 10px;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-icon-button {
+  border: 1px solid rgba(146, 130, 255, .42);
+  background: rgba(23, 27, 63, .62);
+  color: #b8b2ff;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .04),
+    0 0 28px rgba(127, 103, 255, .22);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-clear {
+  width: 48px;
+  height: 48px;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-submit {
+  width: 68px;
+  height: 68px;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-icon-button:hover {
+  background: rgba(39, 48, 103, .78);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .08),
+    0 0 32px rgba(132, 108, 255, .36);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-clear span,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-clear span::after {
+  width: 18px;
+  height: 3px;
+  background: #8d98d9;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-submit span {
+  width: 31px;
+  height: 31px;
+  border-width: 4px;
+  border-color: #c7c2ff;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-submit span::after {
+  right: -9px;
+  bottom: -6px;
+  width: 14px;
+  height: 4px;
+  background: #c7c2ff;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-menu {
+  top: calc(100% + 12px);
+  min-width: 210px;
+  border-color: rgba(150, 132, 255, .52);
+  background: rgba(10, 16, 36, .96);
+  box-shadow: 0 22px 56px rgba(0, 0, 0, .44), 0 0 30px rgba(100, 119, 255, .22);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-panel {
+  top: calc(100% + 16px);
+  right: 0;
+  left: 0;
+  border-color: rgba(150, 132, 255, .72);
+  border-radius: 18px;
+  background: rgba(10, 16, 36, .96);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, .52),
+    0 0 36px rgba(80, 141, 255, .24);
+}
+
+@media (max-width: 980px) {
+  .public-dashboard-shell.public-home-shell .public-home-search-stage {
+    width: min(100%, calc(100vw - 36px));
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-form {
+    grid-template-columns: 92px minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 76px;
+    padding: 8px 10px 8px 12px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-server {
+    min-width: 92px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-pill {
+    width: 82px;
+    min-height: 48px;
+    padding: 0 14px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-pill strong {
+    font-size: 16px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input {
+    min-height: 52px;
+    padding: 0 8px 0 14px;
+    font-size: 18px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-submit {
+    width: 50px;
+    height: 50px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-submit span {
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+  }
+}
+
+@media (max-width: 520px) {
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-form {
+    grid-template-columns: 78px minmax(0, 1fr) 42px;
+    gap: 6px;
+    min-height: 62px;
+    padding: 7px 8px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-server {
+    min-width: 78px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-pill {
+    width: 70px;
+    min-height: 42px;
+    padding: 0 11px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field {
+    border-left-color: rgba(144, 154, 203, .28);
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input {
+    min-height: 44px;
+    padding-left: 10px;
+    font-size: 15px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-actions {
+    gap: 4px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-clear {
+    display: none;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-submit {
+    width: 42px;
+    height: 42px;
+  }
+
+  .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-submit span {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+.public-dashboard-shell .public-team-player-main .public-team-champion-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.public-dashboard-shell .public-team-player-main .public-team-champion-avatar > img,
+.public-dashboard-shell .public-team-player-main .public-team-champion-avatar > span {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.public-dashboard-shell .public-riot-id-static.streamer .public-riot-name,
+.public-dashboard-shell .public-riot-id-link.streamer .public-riot-name {
+  background: linear-gradient(135deg, #6d28d9 0%, #c026d3 52%, #2563eb 100%);
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 16px rgba(147, 51, 234, .18);
+  -webkit-background-clip: text;
+}
+
+.public-dashboard-shell.theme-dark .public-riot-id-static.streamer .public-riot-name,
+.public-dashboard-shell.theme-dark .public-riot-id-link.streamer .public-riot-name {
+  background: linear-gradient(135deg, #a78bfa 0%, #f0abfc 52%, #93c5fd 100%);
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 18px rgba(192, 132, 252, .32);
+  -webkit-background-clip: text;
+}
+
+@media (max-width: 720px) {
+  .public-dashboard-shell .public-team-player-main .public-team-champion-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+  }
+
+  .public-dashboard-shell .public-team-champion-avatar em {
+    right: -6px;
+    bottom: -5px;
+    min-width: 20px;
+    height: 12px;
+    padding: 0 4px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 10px;
+  }
+
+  .public-dashboard-shell .public-team-champion-avatar em::before {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+  }
+
+  .public-dashboard-shell .public-team-champion-avatar.live em {
+    color: #fff;
+  }
+
+  .public-dashboard-shell .public-team-champion-avatar.offline em {
+    color: #e2e8f0;
   }
 }

@@ -143,6 +143,7 @@ type PublicLolMatchParticipant = {
   riotId?: string;
   isTarget: boolean;
   champion: LolChampionSummary;
+  twitchStream?: PublicLolTwitchStream;
   championLevel?: number;
   position?: string;
   kills: number;
@@ -1368,9 +1369,12 @@ async function publicLolMatchParticipantDetail(
   match: RiotMatch,
   participant: RiotMatchParticipant,
   teamStats: Omit<PublicLolMatchTeamDetail, "players" | "result">,
-  targetPuuid: string
+  targetPuuid: string,
+  streamerByRiotId: Map<string, PublicLolTwitchStream>
 ): Promise<PublicLolMatchParticipant> {
   const durationMinutes = matchDurationMinutes(match);
+  const riotId = participantRiotId(participant);
+  const parsedRiotId = riotId ? parseRiotIdDetailed(riotId) : undefined;
   const cs = participantCs(participant);
   const goldEarned = safeOptionalStat(participant.goldEarned);
   const damageDealtToChampions = safeOptionalStat(participant.totalDamageDealtToChampions);
@@ -1378,12 +1382,13 @@ async function publicLolMatchParticipantDetail(
   const damageTaken = safeOptionalStat(participant.totalDamageTaken);
   const visionScore = safeOptionalStat(participant.visionScore);
   return {
-    riotId: participantRiotId(participant),
+    riotId,
     isTarget: participant.puuid === targetPuuid,
     champion: await mapChampionSummary(dataDragon, {
       championId: participant.championId,
       championName: participant.championName
     }),
+    twitchStream: parsedRiotId?.ok ? streamerByRiotId.get(normalizeRiotIdKey(parsedRiotId.gameName, parsedRiotId.tagLine)) : undefined,
     championLevel: safeOptionalStat(participant.champLevel),
     position: participant.individualPosition || participant.teamPosition,
     kills: safeMatchStat(participant.kills),
@@ -1413,7 +1418,8 @@ async function publicLolMatchTeams(
   dataDragon: DataDragonService | undefined,
   dataDragonVersion: string | undefined,
   match: RiotMatch,
-  targetPuuid: string
+  targetPuuid: string,
+  streamerByRiotId: Map<string, PublicLolTwitchStream>
 ): Promise<PublicLolMatchTeamDetail[]> {
   const teamIds = [...new Set(match.info.participants.map((participant) => participant.teamId).filter((teamId): teamId is number => teamId !== undefined))]
     .sort((a, b) => a - b);
@@ -1422,7 +1428,7 @@ async function publicLolMatchTeams(
     const teamInfo = match.info.teams?.find((team) => team.teamId === teamId);
     const players = (await Promise.all(match.info.participants
       .filter((participant) => participant.teamId === teamId)
-      .map((participant) => publicLolMatchParticipantDetail(dataDragon, dataDragonVersion, match, participant, teamStats, targetPuuid))))
+      .map((participant) => publicLolMatchParticipantDetail(dataDragon, dataDragonVersion, match, participant, teamStats, targetPuuid, streamerByRiotId))))
       .sort((a, b) => publicLolRoleOrder(a.position) - publicLolRoleOrder(b.position));
     return {
       ...teamStats,
@@ -1929,6 +1935,53 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return offline;
   }
 
+  async function buildApprovedStreamerStreamsByRiotId(riotIds: Iterable<string | undefined>): Promise<Map<string, PublicLolTwitchStream>> {
+    const wantedRiotIds = new Set<string>();
+    for (const riotId of riotIds) {
+      if (!riotId) continue;
+      const parsed = parseRiotIdDetailed(riotId);
+      if (parsed.ok) wantedRiotIds.add(normalizeRiotIdKey(parsed.gameName, parsed.tagLine));
+    }
+    if (wantedRiotIds.size === 0) return new Map();
+
+    const requests = listApprovedStreamerRiotIds()
+      .map((request) => ({
+        request,
+        riotKey: request.normalizedRiotId || normalizeRiotIdKey(request.riotGameName, request.riotTagLine)
+      }))
+      .filter(({ riotKey }) => wantedRiotIds.has(riotKey));
+    if (requests.length === 0) return new Map();
+
+    const resolved = await Promise.all(requests.map(async ({ request, riotKey }) => {
+      const candidate: PublicLolTwitchCandidate = {
+        twitchUserId: request.twitchUserId,
+        twitchLogin: request.twitchLogin,
+        twitchDisplayName: request.twitchDisplayName,
+        profileImageUrl: request.twitchProfileImageUrl,
+        profileLinkUrl: request.profileLinkUrl,
+        profileLinkLabel: request.profileLinkLabel,
+        profileLinks: request.profileLinks?.map((link) => ({ ...link })),
+        source: "approved_streamer"
+      };
+      const stream = await input.twitch?.getStreamByUserId(request.twitchUserId).catch(() => undefined);
+      return {
+        riotKey,
+        stream: publicLolTwitchStreamFromCandidate(candidate, stream, {
+          login: request.twitchLogin,
+          displayName: request.twitchDisplayName,
+          profileImageUrl: request.twitchProfileImageUrl
+        })
+      };
+    }));
+
+    const streamsByRiotId = new Map<string, PublicLolTwitchStream>();
+    for (const item of resolved) {
+      const existing = streamsByRiotId.get(item.riotKey);
+      if (!existing || item.stream.isLive) streamsByRiotId.set(item.riotKey, item.stream);
+    }
+    return streamsByRiotId;
+  }
+
   function cachedRankedStatsForRiotId(gameName: string, tagLine: string): LolRankedStats | undefined {
     const profile = input.profileRepository?.getByRiotId(gameName, tagLine);
     if (profile?.rankedStats) return { ...profile.rankedStats };
@@ -2363,7 +2416,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   async function publicLolRecentMatchFromRiotMatch(
     match: RiotMatch,
     targetPuuid: string,
-    dataDragonVersion: string | undefined
+    dataDragonVersion: string | undefined,
+    streamerByRiotId: Map<string, PublicLolTwitchStream>
   ): Promise<PublicLolRecentMatch | undefined> {
     const participant = match.info.participants.find((item) => item.puuid === targetPuuid);
     if (!participant) return undefined;
@@ -2430,7 +2484,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         assists: safeMatchStat(opponent.assists),
         kda: participantKda(opponent)
       } : undefined,
-      teams: await publicLolMatchTeams(input.dataDragon, dataDragonVersion, match, targetPuuid)
+      teams: await publicLolMatchTeams(input.dataDragon, dataDragonVersion, match, targetPuuid, streamerByRiotId)
     };
   }
 
@@ -2490,8 +2544,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       .filter(isPublicLolQueue)
       .sort((a, b) => publicLolMatchSortTime(b) - publicLolMatchSortTime(a))
       .slice(0, PUBLIC_LOL_PROFILE_MATCH_COUNT);
+    const streamerByRiotId = await buildApprovedStreamerStreamsByRiotId(rawMatches.flatMap((match) => match.info.participants.map((participant) => participantRiotId(participant))));
     const recentMatches = (await Promise.all(
-      rawMatches.map((match) => publicLolRecentMatchFromRiotMatch(match, account.puuid, dataDragonVersion))
+      rawMatches.map((match) => publicLolRecentMatchFromRiotMatch(match, account.puuid, dataDragonVersion, streamerByRiotId))
     )).filter((match): match is PublicLolRecentMatch => Boolean(match));
     const hasMoreRecentMatches = matchIds.length >= PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT;
     return {

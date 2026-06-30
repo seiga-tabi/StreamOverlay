@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { updateStreamerProfileLink, updateStreamerRiotId, type DashboardStreamerInfo, type DashboardStreamerProfileLink } from "../api/client";
+import { ProfileLinkIcon, profileLinkPlatformFromUrl } from "../components/ProfileLinkIcon";
 import { createDashboardLocaleProxy } from "../i18n";
 
 const PROFILE_LINK_LIMIT = 5;
@@ -306,6 +307,12 @@ export function MyRiotAccountPage({
             <div className="my-riot-profile-link-list">
               {profileLinks.map((link, index) => (
                 <div className="my-riot-profile-link-row" key={link.id}>
+                  <ProfileLinkIcon
+                    url={link.url}
+                    platform={profileLinkPlatformFromUrl(link.url)}
+                    label={link.label || t.profileLink}
+                    className="my-riot-profile-link-preview"
+                  />
                   <label>
                     <span data-ko={i18n.ko.profileLinkUrl} data-ja={i18n.ja.profileLinkUrl}>{t.profileLinkUrl}</span>
                     <input

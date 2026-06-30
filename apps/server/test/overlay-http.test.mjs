@@ -136,7 +136,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-public-lol-route-"));
   try {
-    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>LOLTRACE</title><div id=\"root\"></div>");
+    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>Seiga.GG</title><div id=\"root\"></div>");
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
       store: {},
@@ -152,7 +152,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
 
     assert.equal(res.statusCode, 200);
     assert.match(res.headers["Content-Type"], /text\/html/);
-    assert.match(res.body, /LOLTRACE/);
+    assert.match(res.body, /Seiga\.GG/);
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });

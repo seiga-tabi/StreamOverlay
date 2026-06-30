@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest } from "@streamops/shared";
 import { apiBase } from "../api/client";
+import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 
 type PublicLolMatchParticipant = {
   riotId?: string;
   isTarget: boolean;
   champion: LolChampionSummary;
+  twitchStream?: PublicLolTwitchStream;
   championLevel?: number;
   position?: string;
   kills: number;
@@ -415,7 +417,7 @@ const SUMMONER_SPELL_FILE_BY_ID: Record<number, string> = {
 };
 const publicI18n = {
   ko: {
-    brand: "LOLTRACE",
+    brand: "Seiga.GG",
     tagline: "JP 서버 전적 검색과 방송 분석을 한 화면에서 확인합니다.",
     searchPlaceholder: "JP 서버 닉네임#태그 검색",
     search: "검색",
@@ -442,7 +444,7 @@ const publicI18n = {
     liveGame: "라이브게임",
     filter: "필터",
     online: "온라인",
-    premiumTitle: "LOLTRACE Premium",
+    premiumTitle: "Seiga.GG Premium",
     premiumBody: "광고 제거, 상세 통계, 프로 리플레이 등 프리미엄 기능을 경험해보세요.",
     premiumCta: "프리미엄 업그레이드",
     version: "버전",
@@ -667,7 +669,7 @@ const publicI18n = {
     redTeam: "레드 팀"
   },
   ja: {
-    brand: "LOLTRACE",
+    brand: "Seiga.GG",
     tagline: "JP サーバー戦績検索と配信分析を一つの画面で確認します。",
     searchPlaceholder: "JP サーバー ニックネーム#タグ検索",
     search: "検索",
@@ -694,7 +696,7 @@ const publicI18n = {
     liveGame: "ライブゲーム",
     filter: "フィルター",
     online: "オンライン",
-    premiumTitle: "LOLTRACE Premium",
+    premiumTitle: "Seiga.GG Premium",
     premiumBody: "広告非表示、詳細統計、プロリプレイなどのプレミアム機能を体験できます。",
     premiumCta: "プレミアムにアップグレード",
     version: "バージョン",
@@ -1634,6 +1636,92 @@ function formatPercent(value: number | undefined, digits = 0): string {
   return `${value.toFixed(digits)}%`;
 }
 
+function KdaMetricText({ value, digits = 2 }: { value: number | undefined; digits?: number }) {
+  return (
+    <>
+      <span className={metricToneClass(kdaTone(value))}>{formatDecimal(value, digits)}</span> KDA
+    </>
+  );
+}
+
+function CsPerMinuteMetricText({ value }: { value: number | undefined }) {
+  const metric = <span className={metricToneClass(csTone(value))}>{formatDecimal(value, 1)}</span>;
+  return activePublicLocale === "ja" ? <>分あたりCS {metric}</> : <>분당 CS {metric}</>;
+}
+
+function KillParticipationMetricText({ value }: { value: number | undefined }) {
+  const metric = <span className={metricToneClass(percentTone(value))}>{formatPercent(value)}</span>;
+  return activePublicLocale === "ja" ? <>キル関与 {metric}</> : <>킬 관여 {metric}</>;
+}
+
+type MetricTone = "excellent" | "good" | "neutral" | "warning" | "bad";
+
+function metricToneClass(tone: MetricTone | undefined): string {
+  return `metric-tone-${tone ?? "neutral"}`;
+}
+
+function kdaTone(value: number | undefined): MetricTone {
+  if (value === undefined || !Number.isFinite(value)) return "neutral";
+  if (value >= 5) return "excellent";
+  if (value >= 3) return "good";
+  if (value >= 2) return "neutral";
+  if (value >= 1.2) return "warning";
+  return "bad";
+}
+
+function percentTone(value: number | undefined, mode: "higher" | "lower" = "higher"): MetricTone {
+  if (value === undefined || !Number.isFinite(value)) return "neutral";
+  const safeValue = Math.max(0, Math.min(100, value));
+  if (mode === "lower") {
+    if (safeValue <= 20) return "excellent";
+    if (safeValue <= 35) return "good";
+    if (safeValue <= 45) return "neutral";
+    if (safeValue <= 60) return "warning";
+    return "bad";
+  }
+  if (safeValue >= 70) return "excellent";
+  if (safeValue >= 55) return "good";
+  if (safeValue >= 45) return "neutral";
+  if (safeValue >= 35) return "warning";
+  return "bad";
+}
+
+function teamShareTone(value: number | undefined): MetricTone {
+  if (value === undefined || !Number.isFinite(value)) return "neutral";
+  if (value >= 30) return "excellent";
+  if (value >= 23) return "good";
+  if (value >= 17) return "neutral";
+  if (value >= 12) return "warning";
+  return "bad";
+}
+
+function scoreTone(value: number | undefined): MetricTone {
+  if (value === undefined || !Number.isFinite(value)) return "neutral";
+  if (value >= 85) return "excellent";
+  if (value >= 70) return "good";
+  if (value >= 55) return "neutral";
+  if (value >= 40) return "warning";
+  return "bad";
+}
+
+function csTone(value: number | undefined): MetricTone {
+  if (value === undefined || !Number.isFinite(value)) return "neutral";
+  if (value >= 8) return "excellent";
+  if (value >= 6.5) return "good";
+  if (value >= 5) return "neutral";
+  if (value >= 4) return "warning";
+  return "bad";
+}
+
+function damagePerMinuteTone(value: number | undefined): MetricTone {
+  if (value === undefined || !Number.isFinite(value)) return "neutral";
+  if (value >= 850) return "excellent";
+  if (value >= 650) return "good";
+  if (value >= 450) return "neutral";
+  if (value >= 300) return "warning";
+  return "bad";
+}
+
 function mainRoleLabel(role: string | undefined): string {
   if (!role) return "-";
   return roleLabels[activePublicLocale][role.toUpperCase()] ?? role;
@@ -2278,12 +2366,12 @@ function SummaryCards({ profile }: { profile: PublicLolProfile }) {
     <section id="public-stats" className="public-card-grid summary">
       <article className="public-stat-card">
         <span>{t().winRate}</span>
-        <strong>{stats ? `${stats.winRate}%` : "-"}</strong>
+        <strong className={metricToneClass(percentTone(stats?.winRate))}>{stats ? `${stats.winRate}%` : "-"}</strong>
         <p>{stats ? winLossText(stats.wins, stats.wins + stats.losses) : t().noData}</p>
       </article>
       <article className="public-stat-card">
         <span>{t().kda}</span>
-        <strong>{formatDecimal(performance?.kda)}</strong>
+        <strong className={metricToneClass(kdaTone(performance?.kda))}>{formatDecimal(performance?.kda)}</strong>
         <p>{performance ? `${performance.averageKills} / ${performance.averageDeaths} / ${performance.averageAssists}` : t().noData}</p>
       </article>
       <article className="public-stat-card">
@@ -2293,17 +2381,17 @@ function SummaryCards({ profile }: { profile: PublicLolProfile }) {
       </article>
       <article className="public-stat-card">
         <span>{t().recentGames}</span>
-        <strong>{summary.recentWinRate}%</strong>
+        <strong className={metricToneClass(percentTone(summary.recentWinRate))}>{summary.recentWinRate}%</strong>
         <p>{gamesText(summary.recentGames)} · {winsText(summary.recentWins)} · {summary.totalKills}/{summary.totalDeaths}/{summary.totalAssists}</p>
       </article>
       <article className="public-stat-card">
         <span data-ko={publicI18n.ko.damage} data-ja={publicI18n.ja.damage}>{t().damage}</span>
-        <strong>{formatNumber(summary.averageDamagePerMinute)}</strong>
+        <strong className={metricToneClass(damagePerMinuteTone(summary.averageDamagePerMinute))}>{formatNumber(summary.averageDamagePerMinute)}</strong>
         <p>{perMinuteText(t().damage, summary.averageDamagePerMinute)} · {t().damageShare} {formatPercent(summary.averageDamageShare, 1)}</p>
       </article>
       <article className="public-stat-card">
         <span>CS / {t().gold}</span>
-        <strong>{formatDecimal(summary.averageCsPerMinute, 1)}</strong>
+        <strong className={metricToneClass(csTone(summary.averageCsPerMinute))}>{formatDecimal(summary.averageCsPerMinute, 1)}</strong>
         <p>{perMinuteText("CS", summary.averageCsPerMinute, 1)} · {perMinuteText(t().gold, summary.averageGoldPerMinute)}</p>
       </article>
       <article className="public-stat-card">
@@ -2319,21 +2407,24 @@ function ProfileSeasonBadges({ profile }: { profile: PublicLolProfile }) {
   const historyBadges = [...(profile.rankHistory ?? [])]
     .filter((point) => Number.isFinite(Date.parse(point.date)))
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-    .reduce<Array<{ year: string; label: string }>>((items, point) => {
+    .reduce<Array<{ year: string; label: string; tier?: string }>>((items, point) => {
       const year = String(new Date(point.date).getFullYear());
-      if (!items.some((item) => item.year === year)) items.push({ year, label: rankPointLabel(point) });
+      if (!items.some((item) => item.year === year)) items.push({ year, label: rankPointLabel(point), tier: point.tier });
       return items;
-    }, [])
-    .slice(0, 3);
+    }, []);
   const fetchedYear = new Date(profile.fetchedAt).getFullYear();
   const seasonLabel = Number.isFinite(fetchedYear) ? `${fetchedYear}` : t().currentSeason;
   const badges = historyBadges.length > 0
     ? historyBadges
-    : [{ year: seasonLabel, label: rankLabel(profile.rankedStats) }];
+    : [{ year: seasonLabel, label: rankLabel(profile.rankedStats), tier: profile.rankedStats?.tier }];
   return (
     <div className="public-season-badges" aria-label={t().rankTrend}>
-      {badges.map((badge) => <span key={`${badge.year}:${badge.label}`}>{badge.year} {badge.label}</span>)}
-      <span>{t().recentForm} {winLossText(profile.summary.recentWins, profile.summary.recentGames)}</span>
+      {badges.map((badge) => (
+        <span className={`tier-${badge.tier ? badge.tier.toLocaleLowerCase() : "unranked"}`} key={`${badge.year}:${badge.label}`}>
+          {badge.year} {badge.label}
+        </span>
+      ))}
+      <span className="recent-form">{t().recentForm} {winLossText(profile.summary.recentWins, profile.summary.recentGames)}</span>
     </div>
   );
 }
@@ -2355,7 +2446,13 @@ function RankOverviewCard({
       <div>
         <span>{title}</span>
         <strong>{unranked ? t().unranked : rankLabel(stats)}</strong>
-        <small>{stats ? `${stats.leaguePoints} LP · ${t().winRate} ${stats.winRate}%` : t().noData}</small>
+        <small>
+          {stats ? (
+            <>
+              {stats.leaguePoints} LP · <span className={metricToneClass(percentTone(stats.winRate))}>{t().winRate} {stats.winRate}%</span>
+            </>
+          ) : t().noData}
+        </small>
       </div>
     </article>
   );
@@ -2400,6 +2497,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
       icon: "K",
       title: `${t().average} ${t().kda}`,
       value: formatDecimal(profile.summary.averageKda),
+      valueTone: metricToneClass(kdaTone(profile.summary.averageKda)),
       detail: `${profile.summary.totalKills} / ${profile.summary.totalDeaths} / ${profile.summary.totalAssists}`,
       progress: metricProgress(profile.summary.averageKda, 6),
       scale: ["0", "2.0", "4.0", "6.0+"],
@@ -2411,6 +2509,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
       icon: "CS",
       title: t().averageCsPerMinute,
       value: formatDecimal(profile.summary.averageCsPerMinute, 1),
+      valueTone: metricToneClass(csTone(profile.summary.averageCsPerMinute)),
       detail: t().perMinuteCs,
       progress: metricProgress(profile.summary.averageCsPerMinute, 8),
       scale: ["0", "4.0", "6.0", "8.0+"],
@@ -2422,6 +2521,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
       icon: activePublicLocale === "ja" ? "勝" : "승",
       title: t().winRate,
       value: formatPercent(profile.summary.recentWinRate),
+      valueTone: metricToneClass(percentTone(profile.summary.recentWinRate)),
       detail: `${profile.summary.recentWins}${winLabel} ${recentLosses}${lossLabel}`,
       progress: metricProgress(profile.summary.recentWinRate, 100),
       scale: ["0%", "25%", "50%", "75%", "100%"],
@@ -2433,6 +2533,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
       icon: activePublicLocale === "ja" ? "点" : "점",
       title: t().aiScore,
       value: String(aiScore),
+      valueTone: metricToneClass(scoreTone(aiScore)),
       detail: t().recentFlowBasis,
       progress: metricProgress(aiScore, 100),
       scale: ["0", "25", "50", "75", "100"],
@@ -2451,7 +2552,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
               <small aria-hidden="true">?</small>
             </span>
           </div>
-          <strong>{card.value}</strong>
+          <strong className={card.valueTone}>{card.value}</strong>
           <small className="public-profile-metric-detail">{card.detail}</small>
           <div className="public-profile-metric-bar" aria-hidden="true">
             <i style={{ width: card.progress }} />
@@ -2464,37 +2565,6 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
       ))}
     </div>
   );
-}
-
-function profileLinkPlatformFromUrl(url: string): string {
-  try {
-    const parsed = new URL(url);
-    const host = parsed.hostname.replace(/^www\./i, "").toLowerCase();
-    if (host === "youtu.be" || host.endsWith("youtube.com")) return "youtube";
-    if (host.endsWith("twitch.tv")) return "twitch";
-    if (host === "discord.gg" || host.endsWith("discord.com")) return "discord";
-    if (host === "x.com" || host.endsWith("twitter.com")) return "x";
-    if (host.endsWith("instagram.com")) return "instagram";
-    if (host.endsWith("tiktok.com")) return "tiktok";
-    if (host.endsWith("afreecatv.com") || host.endsWith("sooplive.co.kr")) return "soop";
-  } catch {
-    return "website";
-  }
-  return "website";
-}
-
-function profileLinkIconText(platform: string): string {
-  const icons: Record<string, string> = {
-    youtube: "YT",
-    twitch: "TV",
-    discord: "DC",
-    x: "X",
-    instagram: "IG",
-    tiktok: "TT",
-    soop: "SO",
-    website: "LK"
-  };
-  return icons[platform] ?? "LK";
 }
 
 function profileLinksFromStream(stream: PublicLolTwitchStream | undefined): PublicProfileLink[] {
@@ -2518,19 +2588,15 @@ function ProfileLinkIcons({ links }: { links: PublicProfileLink[] }) {
   return (
     <span className="public-profile-link-icons" aria-label={t().profileLinks}>
       {links.map((link, index) => {
-        const platform = (link.platform || profileLinkPlatformFromUrl(link.url)).toLowerCase().replace(/[^a-z0-9_-]/g, "") || "website";
+        const platform = profileLinkPlatformClass(link.platform, link.url);
         return (
-          <a
-            className={`public-profile-link-icon ${platform}`}
+          <ProfileLinkIcon
+            platform={platform}
+            url={link.url}
+            label={link.label}
             href={link.url}
-            target="_blank"
-            rel="noreferrer"
-            title={link.label}
-            aria-label={link.label}
             key={`${link.id ?? link.url}:${index}`}
-          >
-            {profileLinkIconText(platform)}
-          </a>
+          />
         );
       })}
     </span>
@@ -2765,7 +2831,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
           </div>
           <div className="public-aggregate-grade">
             <span data-ko={publicI18n.ko.aggregateGrade} data-ja={publicI18n.ja.aggregateGrade}>{t().aggregateGrade}</span>
-            <strong>{aggregateGrade}</strong>
+            <strong className={metricToneClass(scoreTone(averageAiScore(profile)))}>{aggregateGrade}</strong>
             <div className="public-aggregate-record">
               <b>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"}</b>
               <b>{recentLosses}{activePublicLocale === "ja" ? "敗" : "패"}</b>
@@ -2778,7 +2844,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
               <circle className="value" cx="60" cy="60" r="48" pathLength="100" strokeDasharray={`${winRate} 100`} />
             </svg>
             <div>
-              <strong>{formatPercent(winRate)}</strong>
+              <strong className={metricToneClass(percentTone(winRate))}>{formatPercent(winRate)}</strong>
               <span>{t().winRate}</span>
             </div>
           </div>
@@ -2803,7 +2869,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
             <div key={role.role}>
               <span>{mainRoleLabel(role.role)}</span>
               <div><i style={{ width: barWidth(role.winRate, 100) }} /></div>
-              <strong>{formatPercent(role.winRate)}</strong>
+              <strong className={metricToneClass(percentTone(role.winRate))}>{formatPercent(role.winRate)}</strong>
               <small>{winLossText(role.wins, role.games)}</small>
             </div>
           ))}
@@ -2846,7 +2912,7 @@ function PublicSidebar({
       <button className="public-sidebar-brand" type="button" onClick={onHome}>
         <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
       </button>
-      <nav aria-label="LOLTRACE">
+      <nav aria-label="Seiga.GG">
         {items.map((item, index) => (
           <button className={activeTarget === item.target ? "active" : ""} type="button" onClick={() => onNavigate(item.target)} key={`${item.target}:${item.label}:${index}`}>
             <span aria-hidden="true">{item.icon}</span>
@@ -3692,28 +3758,51 @@ function SearchableRiotId({
   riotId,
   fallback,
   badges,
+  streamer,
   onSearch
 }: {
   riotId: string | undefined;
   fallback: string;
   badges?: PublicLolMatchBadge[];
+  streamer?: PublicLolTwitchStream;
   onSearch: (riotId: string) => void;
 }) {
   const display = splitRiotId(riotId, fallback);
+  const visibleStreamer = visibleStreamerStream(streamer);
   if (!riotId) {
     return (
-      <strong className="public-riot-id-static">
+      <strong className={`public-riot-id-static ${visibleStreamer ? "streamer" : ""}`}>
         <span className="public-riot-name">{display.name}</span>
         <RiotIdAwardBadges badges={badges} />
       </strong>
     );
   }
   return (
-    <button className="public-riot-id-link" type="button" onClick={() => onSearch(riotId)} title={`${t().search}: ${riotId}`}>
+    <button
+      className={`public-riot-id-link ${visibleStreamer ? "streamer" : ""}`}
+      type="button"
+      onClick={() => onSearch(riotId)}
+      title={visibleStreamer ? `${t().twitchStreamer} · ${visibleStreamer.isLive ? t().twitchOnlineShort : t().twitchOfflineShort} · ${riotId}` : `${t().search}: ${riotId}`}
+    >
       <span className="public-riot-name">{display.name}</span>
       {display.tag ? <span className="public-riot-tag-badge">{display.tag}</span> : null}
       <RiotIdAwardBadges badges={badges} />
     </button>
+  );
+}
+
+function TeamChampionAvatar({ player }: { player: PublicLolMatchParticipant }) {
+  const stream = visibleStreamerStream(player.twitchStream);
+  const streamLabel = stream ? (stream.isLive ? t().twitchOnlineShort : t().twitchOfflineShort) : "";
+  return (
+    <span className={`public-team-champion-avatar ${stream ? "streamer" : ""} ${stream?.isLive ? "live" : stream ? "offline" : ""}`}>
+      {player.champion.iconUrl ? <img src={player.champion.iconUrl} alt="" /> : <span>{championName(player.champion).slice(0, 1)}</span>}
+      {stream ? (
+        <em title={`${stream.twitchDisplayName} · ${streamLabel}`} data-ko={stream.isLive ? publicI18n.ko.twitchOnlineShort : publicI18n.ko.twitchOfflineShort} data-ja={stream.isLive ? publicI18n.ja.twitchOnlineShort : publicI18n.ja.twitchOfflineShort}>
+          {streamLabel}
+        </em>
+      ) : null}
+    </span>
   );
 }
 
@@ -3761,9 +3850,9 @@ function MatchTeamDetails({
 	              return (
 	                <article className={`public-team-player ${player.isTarget ? "target" : ""} ${playerHighlightClass}`} key={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`}>
 	                  <div className="public-team-player-main">
-	                    {player.champion.iconUrl ? <img src={player.champion.iconUrl} alt="" /> : <span>{championName(player.champion).slice(0, 1)}</span>}
+	                    <TeamChampionAvatar player={player} />
 	                    <div className="public-team-player-copy">
-	                      <SearchableRiotId riotId={player.riotId} fallback={playerDisplayName(player)} badges={playerHighlightBadges} onSearch={onSearchRiotId} />
+	                      <SearchableRiotId riotId={player.riotId} fallback={playerDisplayName(player)} badges={playerHighlightBadges} streamer={player.twitchStream} onSearch={onSearchRiotId} />
 	                      <div className="public-team-player-meta">
 	                        <small>{mainRoleLabel(player.position)} · {championName(player.champion)} Lv.{formatNumber(player.championLevel)}</small>
 	                        <span
@@ -3778,15 +3867,15 @@ function MatchTeamDetails({
 	                  <PlayerItemBuild items={player.items} itemKey={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`} />
 	                  <div className="public-team-stat kda">
 	                    <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
-	                    <span>{formatDecimal(player.kda)} KDA</span>
+	                    <span><KdaMetricText value={player.kda} /></span>
 	                  </div>
                 <div className="public-team-stat" style={{ background: heatBackground(player.goldEarned, maxGold, "green") }}>
                   <strong>{formatNumber(player.goldEarned)}</strong>
-                  <span>{t().gold} · {formatPercent(player.goldShare, 1)}</span>
+                  <span className={metricToneClass(teamShareTone(player.goldShare))}>{t().gold} · {formatPercent(player.goldShare, 1)}</span>
                 </div>
                 <div className="public-team-stat" style={{ background: heatBackground(player.damageDealtToChampions, maxDamage) }}>
                   <strong>{formatNumber(player.damageDealtToChampions)}</strong>
-                  <span>{t().damage} · {formatPercent(player.damageShare, 1)}</span>
+                  <span className={metricToneClass(teamShareTone(player.damageShare))}>{t().damage} · {formatPercent(player.damageShare, 1)}</span>
                 </div>
                 <div className="public-team-stat" style={{ background: heatBackground(player.damageTaken, maxTaken, "red") }}>
                   <strong>{formatNumber(player.damageTaken)}</strong>
@@ -4008,6 +4097,7 @@ function RecentMatches({
           const opponentRank = matchRankForOpponent(rankDetail, match.opponent);
           const dataDragonVersion = recentMatchDataDragonVersion(match);
           const recentItemSlots = fixedRecentItemSlots(match.items, 6);
+          const aiScore = matchAiScore(match);
           return (
             <article className={`public-match-row ${match.result} ${highlightClass} ${expanded ? "expanded" : ""}`} key={match.matchId}>
               <div className="public-match-summary">
@@ -4039,17 +4129,17 @@ function RecentMatches({
                 </div>
                 <div className="public-kda">
                   <strong>{match.kills} / {match.deaths} / {match.assists}</strong>
-                  <span>{formatDecimal(match.kda)} KDA</span>
+                  <span><KdaMetricText value={match.kda} /></span>
                   <MatchBadges badges={match.badges} compact />
                 </div>
-                <div className="public-match-score">
+                <div className={`public-match-score ${metricToneClass(scoreTone(aiScore))}`}>
                   <span data-ko={publicI18n.ko.aiScore} data-ja={publicI18n.ja.aiScore}>{t().aiScore}</span>
-                  <strong>{matchAiScore(match)}</strong>
+                  <strong>{aiScore}</strong>
                 </div>
                 <div className="public-match-meta">
                   <span>CS {formatNumber(match.cs)}</span>
-                  <span>{perMinuteText("CS", match.csPerMinute, 1)}</span>
-                  <span>{killParticipationText(match.killParticipation)}</span>
+                  <span><CsPerMinuteMetricText value={match.csPerMinute} /></span>
+                  <span><KillParticipationMetricText value={match.killParticipation} /></span>
                 </div>
                 <div className="public-match-inline-items" aria-label={t().items}>
                   {recentItemSlots.map((item, index) => (
@@ -4058,8 +4148,8 @@ function RecentMatches({
                     </span>
                   ))}
                 </div>
-                <div className={`public-match-impact ${match.result}`}>
-                  <strong>{matchAiScore(match)}</strong>
+                <div className={`public-match-impact ${match.result} ${metricToneClass(scoreTone(aiScore))}`}>
+                  <strong>{aiScore}</strong>
                   <span>{t().aiScore}</span>
                 </div>
                 <button
@@ -4104,7 +4194,7 @@ function RecentMatches({
 	                        {match.opponent.champion.iconUrl ? <img src={match.opponent.champion.iconUrl} alt="" /> : null}
 	                        <div>
                             <SearchableRiotId riotId={match.opponent.riotId} fallback={championName(match.opponent.champion)} onSearch={onSearchRiotId} />
-	                          <small>{championName(match.opponent.champion)} · {match.opponent.kills}/{match.opponent.deaths}/{match.opponent.assists} · {formatDecimal(match.opponent.kda)} KDA</small>
+	                          <small>{championName(match.opponent.champion)} · {match.opponent.kills}/{match.opponent.deaths}/{match.opponent.assists} · <KdaMetricText value={match.opponent.kda} /></small>
                             <span
                               className={rankTierClass(opponentRank, rankLoading ? "loading" : opponentRank ? "ready" : "unknown")}
                               title={rankLoading ? t().tierLoading : opponentRank ? rankLabel(opponentRank) : t().tierUnavailable}
@@ -4159,7 +4249,7 @@ function ChampionMastery({ profile }: { profile: PublicLolProfile }) {
               <strong>{championName(champion)}</strong>
               <small>{t().mastery} Lv.{formatNumber(row.masteryLevel)}</small>
               <b>{formatNumber(row.masteryPoints)}</b>
-              <em>{performance ? `${formatPercent(performance.winRate)} · ${gamesText(performance.games)}` : t().masteryPoint}</em>
+              <em className={metricToneClass(percentTone(performance?.winRate))}>{performance ? `${formatPercent(performance.winRate)} · ${gamesText(performance.games)}` : t().masteryPoint}</em>
               <div className="public-champion-progress" aria-hidden="true">
                 <i style={{ width: barWidth(row.masteryPoints, maxMasteryPoints) }} />
               </div>
@@ -4212,20 +4302,20 @@ function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
                 <span><i style={{ width: barWidth(performance?.games, maxGames) }} /></span>
               </div>
               <div className="public-champion-analysis-metric">
-                <strong>{performance ? `${winsText(performance.wins)} · ${formatPercent(performance.winRate)}` : "-"}</strong>
+                <strong className={metricToneClass(percentTone(performance?.winRate))}>{performance ? `${winsText(performance.wins)} · ${formatPercent(performance.winRate)}` : "-"}</strong>
                 <span><i className="win" style={{ width: barWidth(performance?.wins, maxWins) }} /></span>
               </div>
               <div className="public-champion-analysis-metric">
-                <strong>{performance ? `${formatDecimal(performance.averageKda)} KDA` : "-"}</strong>
-                <small>{performance ? `${formatDecimal(performance.averageKda, 2)}` : "-"}</small>
+                <strong>{performance ? <KdaMetricText value={performance.averageKda} /> : "-"}</strong>
+                <small className={metricToneClass(kdaTone(performance?.averageKda))}>{performance ? `${formatDecimal(performance.averageKda, 2)}` : "-"}</small>
                 <span><i style={{ width: barWidth(performance?.averageKda, maxKda) }} /></span>
               </div>
               <div className="public-champion-analysis-metric">
-                <strong>{formatDecimal(performance?.averageCsPerMinute, 1)}</strong>
+                <strong className={metricToneClass(csTone(performance?.averageCsPerMinute))}>{formatDecimal(performance?.averageCsPerMinute, 1)}</strong>
                 <span><i style={{ width: barWidth(performance?.averageCsPerMinute, maxCs) }} /></span>
               </div>
               <div className="public-champion-analysis-metric">
-                <strong>{formatNumber(performance?.averageDamagePerMinute)}</strong>
+                <strong className={metricToneClass(damagePerMinuteTone(performance?.averageDamagePerMinute))}>{formatNumber(performance?.averageDamagePerMinute)}</strong>
                 <span><i style={{ width: barWidth(performance?.averageDamagePerMinute, maxDpm) }} /></span>
               </div>
               <div className="public-champion-analysis-metric">
@@ -4243,7 +4333,11 @@ function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
             <article className="public-role-chip" key={item.role}>
               <span>{mainRoleLabel(item.role)}</span>
               <strong>{gamesText(item.games)}</strong>
-              <small>{formatPercent(item.winRate)} · {formatDecimal(item.averageKda)} KDA</small>
+              <small>
+                <span className={metricToneClass(percentTone(item.winRate))}>{formatPercent(item.winRate)}</span>
+                {" · "}
+                <KdaMetricText value={item.averageKda} />
+              </small>
             </article>
           ))}
         </div>
@@ -4307,7 +4401,7 @@ function PublicTopbar({
       <button className="public-brand" type="button" onClick={onHome}>
         <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
       </button>
-      <nav aria-label="LOLTRACE">
+      <nav aria-label="Seiga.GG">
         <button type="button" onClick={() => onNavigate("search")} data-ko={publicI18n.ko.searchNav} data-ja={publicI18n.ja.searchNav}>{t().searchNav}</button>
         <button type="button" onClick={() => onNavigate("ranking")} data-ko={publicI18n.ko.ranking} data-ja={publicI18n.ja.ranking}>{t().ranking}</button>
         <button type="button" onClick={() => onNavigate("champion")} data-ko={publicI18n.ko.championAnalysis} data-ja={publicI18n.ja.championAnalysis}>{t().championAnalysis}</button>
@@ -4326,7 +4420,7 @@ function PublicTopbar({
 
 function PublicMobileNav({ onNavigate }: { onNavigate: (target: PublicNavTarget) => void }) {
   return (
-    <nav className="public-mobile-nav" aria-label="LOLTRACE mobile">
+    <nav className="public-mobile-nav" aria-label="Seiga.GG mobile">
       <button type="button" onClick={() => onNavigate("search")}>
         <span aria-hidden="true">⌂</span>
         <strong data-ko={publicI18n.ko.searchNav} data-ja={publicI18n.ja.searchNav}>{t().searchNav}</strong>

@@ -117,6 +117,13 @@ export default function App() {
   const currentText = dashboardI18n[dashboardLocale];
   const authError = authErrorKey ? currentText.authPage[authErrorKey] : "";
 
+  function syncDashboardLocalePreference(): DashboardLocale {
+    const nextLocale = detectDashboardLocale();
+    saveDashboardLocale(nextLocale);
+    setDashboardLocaleState(nextLocale);
+    return nextLocale;
+  }
+
   useEffect(() => {
     if (!isManagedSurface(surface)) return undefined;
     saveDashboardLocale(dashboardLocale);
@@ -142,6 +149,7 @@ export default function App() {
   useEffect(() => {
     const syncSurface = () => {
       const nextSurface = surfaceForLocation();
+      if (isManagedSurface(nextSurface)) syncDashboardLocalePreference();
       setSurface(nextSurface);
       if (isManagedSurface(nextSurface)) setAuthState("checking");
       if (nextSurface === "public") {
@@ -247,12 +255,14 @@ export default function App() {
   }
 
   function openAdmin(): void {
+    syncDashboardLocalePreference();
     if (surfaceForLocation() !== "admin") window.history.pushState({}, "", "/admin");
     setSurface("admin");
     setAuthState("checking");
   }
 
   function openStreamerDashboard(): void {
+    syncDashboardLocalePreference();
     if (surfaceForLocation() !== "streamer") window.history.pushState({}, "", "/dashboard");
     setSurface("streamer");
     setAuthState("checking");
