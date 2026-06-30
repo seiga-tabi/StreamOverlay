@@ -135,6 +135,14 @@ type PublicLolChampionPerformance = {
   averageDamagePerMinute?: number;
 };
 
+type PublicChampionAnalysisRow = {
+  champion: LolChampionSummary;
+  masteryRank?: number;
+  masteryLevel?: number;
+  masteryPoints?: number;
+  performance?: PublicLolChampionPerformance;
+};
+
 type PublicLolRolePerformance = {
   role: string;
   games: number;
@@ -230,11 +238,19 @@ type PublicLolCurrentGameParticipant = {
   riotId?: string;
   isTarget: boolean;
   teamId: number;
+  summonerSpells: number[];
+  profileIconUrl?: string;
+  rankedStats?: LolRankedStats;
+  bot?: boolean;
   champion: LolChampionSummary;
 };
 
 type PublicLolCurrentGame = {
   isLive: boolean;
+  status: "live" | "not_found" | "unavailable";
+  message?: string;
+  errorCode?: string;
+  lolPlatform?: string;
   gameId?: string;
   queueId?: number;
   gameMode?: string;
@@ -379,6 +395,24 @@ const DEFAULT_MATCH_FILTERS: PublicMatchFilters = {
   championId: "all",
   period: "all"
 };
+const SUMMONER_SPELL_FILE_BY_ID: Record<number, string> = {
+  1: "SummonerBoost",
+  3: "SummonerExhaust",
+  4: "SummonerFlash",
+  6: "SummonerHaste",
+  7: "SummonerHeal",
+  11: "SummonerSmite",
+  12: "SummonerTeleport",
+  13: "SummonerMana",
+  14: "SummonerDot",
+  21: "SummonerBarrier",
+  30: "SummonerPoroRecall",
+  31: "SummonerPoroThrow",
+  32: "SummonerSnowball",
+  39: "SummonerSnowURFSnowball",
+  54: "Summoner_UltBookPlaceholder",
+  55: "Summoner_UltBookSmitePlaceholder"
+};
 const publicI18n = {
   ko: {
     brand: "LOLTRACE",
@@ -455,10 +489,14 @@ const publicI18n = {
     total: "합계",
     perMinute: "분당",
     teamShare: "팀 비중",
+    champion: "챔피언",
+    gamesPlayed: "게임 수",
+    wins: "승리",
     championPerformance: "챔피언별 최근 성과",
     rolePerformance: "포지션별 최근 성과",
     opponent: "상대",
     items: "아이템",
+    summonerSpells: "소환사 주문",
     damage: "딜량",
     damageTaken: "받은 피해",
     damageShare: "팀 딜 비중",
@@ -470,6 +508,11 @@ const publicI18n = {
     popularChampions: "인기 챔피언",
     lpTrend: "LP 변화 추이",
     aggregatePerformance: "종합 성과",
+    aggregateGrade: "종합 등급",
+    championMasteryTop5: "챔피언 숙련도 TOP 5",
+    masteryBasis: "숙련도 기준",
+    championDetailStats: "상세 분석",
+    recentChampionStats: "최근 챔피언 성과",
     roleWinRate: "포지션별 승률",
     details: "자세히 보기",
     searchNav: "검색",
@@ -518,6 +561,10 @@ const publicI18n = {
     kda: "KDA",
     winRate: "승률",
     average: "평균",
+    averageCsPerMinute: "평균 CS/분",
+    perMinuteCs: "분당 CS",
+    recentFlowBasis: "최근 흐름 기준",
+    topPercentPrefix: "상위",
     mainRole: "주 포지션",
     confidence: "신뢰도",
     mastery: "숙련도",
@@ -606,7 +653,16 @@ const publicI18n = {
     currentGameStatus: "실시간 게임 상태",
     currentlyInGame: "게임중입니다",
     notInGame: "게임중이 아닙니다",
+    currentGameUnavailable: "인게임 정보를 불러오지 못했습니다.",
+    currentGameUnavailableDetail: "인게임 정보는 Riot Spectator API로 별도 조회됩니다.",
+    currentGamePlatform: "조회 서버",
     currentGameParticipants: "참가자",
+    currentGameMode: "모드",
+    currentGameDuration: "진행 시간",
+    currentGameUpdated: "마지막 업데이트",
+    currentGameAverageTier: "평균 티어",
+    currentGameReady: "분석 준비",
+    currentGameBot: "봇",
     blueTeam: "블루 팀",
     redTeam: "레드 팀"
   },
@@ -685,10 +741,14 @@ const publicI18n = {
     total: "合計",
     perMinute: "分あたり",
     teamShare: "チーム比率",
+    champion: "チャンピオン",
+    gamesPlayed: "試合数",
+    wins: "勝利",
     championPerformance: "チャンピオン別最近成績",
     rolePerformance: "ポジション別最近成績",
     opponent: "相手",
     items: "アイテム",
+    summonerSpells: "サモナースペル",
     damage: "ダメージ",
     damageTaken: "受けたダメージ",
     damageShare: "チームダメージ比率",
@@ -700,6 +760,11 @@ const publicI18n = {
     popularChampions: "人気チャンピオン",
     lpTrend: "LP推移",
     aggregatePerformance: "総合成績",
+    aggregateGrade: "総合グレード",
+    championMasteryTop5: "チャンピオン熟練度 TOP 5",
+    masteryBasis: "熟練度基準",
+    championDetailStats: "詳細分析",
+    recentChampionStats: "最近のチャンピオン成績",
     roleWinRate: "ポジション別勝率",
     details: "詳細を見る",
     searchNav: "検索",
@@ -748,6 +813,10 @@ const publicI18n = {
     kda: "KDA",
     winRate: "勝率",
     average: "平均",
+    averageCsPerMinute: "平均CS/分",
+    perMinuteCs: "分あたりCS",
+    recentFlowBasis: "最近の流れ基準",
+    topPercentPrefix: "上位",
     mainRole: "メインロール",
     confidence: "信頼度",
     mastery: "熟練度",
@@ -836,7 +905,16 @@ const publicI18n = {
     currentGameStatus: "リアルタイムゲーム状態",
     currentlyInGame: "ゲーム中です",
     notInGame: "ゲーム中ではありません",
+    currentGameUnavailable: "ゲーム中情報を読み込めませんでした。",
+    currentGameUnavailableDetail: "ゲーム中情報は Riot Spectator API で別途取得します。",
+    currentGamePlatform: "照会サーバー",
     currentGameParticipants: "参加者",
+    currentGameMode: "モード",
+    currentGameDuration: "進行時間",
+    currentGameUpdated: "最終更新",
+    currentGameAverageTier: "平均ティア",
+    currentGameReady: "分析準備",
+    currentGameBot: "ボット",
     blueTeam: "ブルーチーム",
     redTeam: "レッドチーム"
   }
@@ -892,6 +970,14 @@ function saveStoredLocale(locale: PublicLocale): void {
     window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
   } catch {
     // 언어 저장 실패는 화면 사용을 막지 않습니다.
+  }
+}
+
+function clearStoredLocale(): void {
+  try {
+    window.localStorage.removeItem(LOCALE_STORAGE_KEY);
+  } catch {
+    // 언어 저장소 삭제 실패는 화면 사용을 막지 않습니다.
   }
 }
 
@@ -1679,7 +1765,38 @@ function championPerformanceFromMatches(matches: PublicLolRecentMatch[]): Public
       averageKda: kdaFromTotals(item.kills, item.deaths, item.assists),
       averageCsPerMinute: averageNumbers(item.csPerMinute, 1),
       averageDamagePerMinute: averageNumbers(item.damagePerMinute, 0)
-    }));
+	    }));
+}
+
+function championAnalysisRows(profile: PublicLolProfile): PublicChampionAnalysisRow[] {
+  const rows = new Map<number, PublicChampionAnalysisRow>();
+  profile.topChampions.forEach((champion, index) => {
+    rows.set(champion.championId, {
+      champion,
+      masteryRank: index + 1,
+      masteryLevel: champion.masteryLevel,
+      masteryPoints: champion.masteryPoints
+    });
+  });
+  profile.championPerformance.forEach((performance) => {
+    const existing = rows.get(performance.champion.championId);
+    rows.set(performance.champion.championId, {
+      champion: existing?.champion ?? performance.champion,
+      masteryRank: existing?.masteryRank,
+      masteryLevel: existing?.masteryLevel ?? performance.champion.masteryLevel,
+      masteryPoints: existing?.masteryPoints ?? performance.champion.masteryPoints,
+      performance
+    });
+  });
+  return [...rows.values()].sort((a, b) => {
+    const rankDiff = (a.masteryRank ?? 999) - (b.masteryRank ?? 999);
+    if (rankDiff !== 0) return rankDiff;
+    return (b.performance?.games ?? 0) - (a.performance?.games ?? 0) || (b.masteryPoints ?? 0) - (a.masteryPoints ?? 0);
+  });
+}
+
+function championAnalysisMax(rows: PublicChampionAnalysisRow[], value: (row: PublicChampionAnalysisRow) => number | undefined): number {
+  return Math.max(1, ...rows.map((row) => value(row) ?? 0));
 }
 
 function rolePerformanceFromMatches(matches: PublicLolRecentMatch[]): PublicLolRolePerformance[] {
@@ -1893,6 +2010,33 @@ function matchAiScore(match: PublicLolRecentMatch): number {
 function averageAiScore(profile: PublicLolProfile): number {
   if (profile.recentMatches.length === 0) return 0;
   return Math.round(profile.recentMatches.reduce((sum, match) => sum + matchAiScore(match), 0) / profile.recentMatches.length);
+}
+
+function aggregatePerformanceGrade(profile: PublicLolProfile): string {
+  if (profile.summary.recentGames === 0) return "-";
+  const weightedScore = Math.round((averageAiScore(profile) * .62) + (profile.summary.recentWinRate * .38));
+  if (weightedScore >= 88) return "S+";
+  if (weightedScore >= 80) return "S";
+  if (weightedScore >= 72) return "A+";
+  if (weightedScore >= 64) return "A";
+  if (weightedScore >= 56) return "B";
+  if (weightedScore >= 46) return "C";
+  return "D";
+}
+
+function metricProgress(value: number | undefined, max: number): string {
+  if (value === undefined || !Number.isFinite(value) || max <= 0) return "0%";
+  return barWidth(Math.max(0, Math.min(max, value)), max);
+}
+
+function metricTopPercent(value: number | undefined, excellentAt: number, range: number): number {
+  if (value === undefined || !Number.isFinite(value) || excellentAt <= 0) return 99;
+  const ratio = Math.max(0, Math.min(1, value / excellentAt));
+  return Math.max(1, Math.min(99, Math.round(100 - ratio * range)));
+}
+
+function topPercentText(percent: number): string {
+  return `${t().topPercentPrefix} ${percent}%`;
 }
 
 function estimatedLpDelta(match: PublicLolRecentMatch): number {
@@ -2219,12 +2363,9 @@ function RankOverviewCard({
 
 function TwitchStreamOverviewCard({ stream }: { stream: PublicLolTwitchStream | undefined }) {
   if (!stream) return null;
-  const meta = stream.isLive
-    ? [
-      stream.gameName,
-      stream.viewerCount !== undefined ? `${formatNumber(stream.viewerCount)} ${t().twitchViewers}` : undefined
-    ].filter(Boolean).join(" · ")
-    : stream.twitchDisplayName;
+  const categoryLabel = stream.isLive ? stream.gameName : undefined;
+  const viewerLabel = stream.isLive && stream.viewerCount !== undefined ? `${formatNumber(stream.viewerCount)} ${t().twitchViewers}` : undefined;
+  const offlineLabel = !stream.isLive ? stream.twitchDisplayName : undefined;
   return (
     <article className={`public-rank-overview-card public-stream-overview-card ${stream.isLive ? "live" : "offline"}`}>
       {stream.profileImageUrl ? (
@@ -2237,7 +2378,11 @@ function TwitchStreamOverviewCard({ stream }: { stream: PublicLolTwitchStream | 
         <strong data-ko={stream.isLive ? publicI18n.ko.twitchOnlineShort : publicI18n.ko.twitchOfflineShort} data-ja={stream.isLive ? publicI18n.ja.twitchOnlineShort : publicI18n.ja.twitchOfflineShort}>
           {stream.isLive ? t().twitchOnlineShort : t().twitchOfflineShort}
         </strong>
-        <small>{meta || stream.twitchDisplayName}</small>
+        <span className="public-stream-meta">
+          {categoryLabel ? <small title={categoryLabel}>{categoryLabel}</small> : null}
+          {viewerLabel ? <small title={viewerLabel}>{viewerLabel}</small> : null}
+          {offlineLabel ? <small title={offlineLabel}>{offlineLabel}</small> : null}
+        </span>
       </div>
     </article>
   );
@@ -2245,33 +2390,78 @@ function TwitchStreamOverviewCard({ stream }: { stream: PublicLolTwitchStream | 
 
 function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
   const recentLosses = Math.max(0, profile.summary.recentGames - profile.summary.recentWins);
+  const aiScore = averageAiScore(profile);
+  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
+  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  const metricCards = [
+    {
+      key: "kda",
+      tone: "purple",
+      icon: "K",
+      title: `${t().average} ${t().kda}`,
+      value: formatDecimal(profile.summary.averageKda),
+      detail: `${profile.summary.totalKills} / ${profile.summary.totalDeaths} / ${profile.summary.totalAssists}`,
+      progress: metricProgress(profile.summary.averageKda, 6),
+      scale: ["0", "2.0", "4.0", "6.0+"],
+      rank: topPercentText(metricTopPercent(profile.summary.averageKda, 3, 72))
+    },
+    {
+      key: "cs",
+      tone: "green",
+      icon: "CS",
+      title: t().averageCsPerMinute,
+      value: formatDecimal(profile.summary.averageCsPerMinute, 1),
+      detail: t().perMinuteCs,
+      progress: metricProgress(profile.summary.averageCsPerMinute, 8),
+      scale: ["0", "4.0", "6.0", "8.0+"],
+      rank: topPercentText(metricTopPercent(profile.summary.averageCsPerMinute, 7, 72))
+    },
+    {
+      key: "win",
+      tone: "blue",
+      icon: activePublicLocale === "ja" ? "勝" : "승",
+      title: t().winRate,
+      value: formatPercent(profile.summary.recentWinRate),
+      detail: `${profile.summary.recentWins}${winLabel} ${recentLosses}${lossLabel}`,
+      progress: metricProgress(profile.summary.recentWinRate, 100),
+      scale: ["0%", "25%", "50%", "75%", "100%"],
+      rank: topPercentText(metricTopPercent(profile.summary.recentWinRate, 95, 100))
+    },
+    {
+      key: "score",
+      tone: "orange",
+      icon: activePublicLocale === "ja" ? "点" : "점",
+      title: t().aiScore,
+      value: String(aiScore),
+      detail: t().recentFlowBasis,
+      progress: metricProgress(aiScore, 100),
+      scale: ["0", "25", "50", "75", "100"],
+      rank: topPercentText(metricTopPercent(aiScore, 100, 88))
+    }
+  ];
+
   return (
     <div className="public-profile-metric-strip" aria-label={t().profileSummary}>
-      <article>
-        <span>{t().recentGames}</span>
-        <strong>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"} {recentLosses}{activePublicLocale === "ja" ? "敗" : "패"}</strong>
-        <small>{t().winRate} {formatPercent(profile.summary.recentWinRate)}</small>
-      </article>
-      <article>
-        <span>{t().kda}</span>
-        <strong>{formatDecimal(profile.summary.averageKda)}</strong>
-        <small>{profile.summary.totalKills} / {profile.summary.totalDeaths} / {profile.summary.totalAssists}</small>
-      </article>
-      <article>
-        <span data-ko={publicI18n.ko.killParticipation} data-ja={publicI18n.ja.killParticipation}>{t().killParticipation}</span>
-        <strong>{formatPercent(profile.summary.averageKillParticipation)}</strong>
-        <small>{t().average}</small>
-      </article>
-      <article>
-        <span>{t().mainRole}</span>
-        <strong>{mainRoleLabel(profile.roleAnalysis?.mainRole)}</strong>
-        <small>{profile.roleAnalysis ? `${t().confidence} ${profile.roleAnalysis.confidence}%` : t().noData}</small>
-      </article>
-      <article>
-        <span>{t().aiScore}</span>
-        <strong>{averageAiScore(profile)}</strong>
-        <small>{t().recentForm}</small>
-      </article>
+      {metricCards.map((card) => (
+        <article className={`public-profile-metric-card ${card.tone}`} key={card.key}>
+          <div className="public-profile-metric-head">
+            <span className="public-profile-metric-icon" aria-hidden="true">{card.icon}</span>
+            <span className="public-profile-metric-label">
+              <span>{card.title}</span>
+              <small aria-hidden="true">?</small>
+            </span>
+          </div>
+          <strong>{card.value}</strong>
+          <small className="public-profile-metric-detail">{card.detail}</small>
+          <div className="public-profile-metric-bar" aria-hidden="true">
+            <i style={{ width: card.progress }} />
+          </div>
+          <div className="public-profile-metric-scale" aria-hidden="true">
+            {card.scale.map((label) => <span key={`${card.key}:${label}`}>{label}</span>)}
+          </div>
+          <em>{card.rank}</em>
+        </article>
+      ))}
     </div>
   );
 }
@@ -2554,33 +2744,43 @@ function FlexRankPlaceholder() {
 
 function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const roles = profile.rolePerformance.slice(0, 5);
+  const recentLosses = Math.max(0, profile.summary.recentGames - profile.summary.recentWins);
+  const aggregateRank = soloRankStats(profile) ?? flexRankStats(profile) ?? profile.rankedStats;
+  const aggregateTierIcon = assetUrl(aggregateRank?.tierIconUrl);
+  const aggregateGrade = aggregatePerformanceGrade(profile);
+  const winRate = Math.max(0, Math.min(100, profile.summary.recentWinRate));
   return (
     <section id="public-stats" className="public-overview-dashboard-panel">
       <article className="public-panel public-aggregate-card">
         <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.aggregatePerformance} data-ja={publicI18n.ja.aggregatePerformance}>{t().aggregatePerformance}</h2>
+          <h2 data-ko={publicI18n.ko.aggregatePerformance} data-ja={publicI18n.ja.aggregatePerformance}>
+            <span className="public-aggregate-title-icon" aria-hidden="true"><i /><i /><i /></span>
+            {t().aggregatePerformance}
+          </h2>
           <span>{profile.summary.recentGames}{t().games}</span>
         </div>
-        <div className="public-aggregate-grid">
-          <div>
-            <strong>{formatDecimal(profile.summary.averageKda)}</strong>
-            <span>{t().average} KDA</span>
-            <small>{profile.summary.totalKills} / {profile.summary.totalDeaths} / {profile.summary.totalAssists}</small>
+        <div className="public-aggregate-hero">
+          <div className="public-aggregate-emblem" aria-hidden="true">
+            {aggregateTierIcon ? <img src={aggregateTierIcon} alt="" /> : <span>{aggregateGrade}</span>}
           </div>
-          <div>
-            <strong>{formatDecimal(profile.summary.averageCsPerMinute, 1)}</strong>
-            <span>{t().average} CS</span>
-            <small>{activePublicLocale === "ja" ? "毎分" : "분당"}</small>
+          <div className="public-aggregate-grade">
+            <span data-ko={publicI18n.ko.aggregateGrade} data-ja={publicI18n.ja.aggregateGrade}>{t().aggregateGrade}</span>
+            <strong>{aggregateGrade}</strong>
+            <div className="public-aggregate-record">
+              <b>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"}</b>
+              <b>{recentLosses}{activePublicLocale === "ja" ? "敗" : "패"}</b>
+            </div>
+            <small>{gamesText(profile.summary.recentGames)} · {t().aiScore} {averageAiScore(profile)}</small>
           </div>
-          <div>
-            <strong>{formatPercent(profile.summary.recentWinRate)}</strong>
-            <span>{t().winRate}</span>
-            <small>{winLossText(profile.summary.recentWins, profile.summary.recentGames)}</small>
-          </div>
-          <div>
-            <strong>{averageAiScore(profile)}</strong>
-            <span>{t().aiScore}</span>
-            <small>{t().recentForm}</small>
+          <div className="public-aggregate-winrate" aria-label={`${t().winRate} ${formatPercent(winRate)}`}>
+            <svg viewBox="0 0 120 120" role="img">
+              <circle className="track" cx="60" cy="60" r="48" pathLength="100" />
+              <circle className="value" cx="60" cy="60" r="48" pathLength="100" strokeDasharray={`${winRate} 100`} />
+            </svg>
+            <div>
+              <strong>{formatPercent(winRate)}</strong>
+              <span>{t().winRate}</span>
+            </div>
           </div>
         </div>
       </article>
@@ -2823,10 +3023,12 @@ function PublicNotificationPanel({
 
 function PublicLocaleSelector({
   locale,
-  onLocale
+  onLocale,
+  onAutoLocale
 }: {
   locale: PublicLocale;
   onLocale: (locale: PublicLocale) => void;
+  onAutoLocale?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const options: Array<{ locale: PublicLocale; code: string; label: string }> = [
@@ -2836,6 +3038,10 @@ function PublicLocaleSelector({
   const activeCode = locale === "ja" ? "JP" : "KR";
   function selectLocale(nextLocale: PublicLocale): void {
     onLocale(nextLocale);
+    setOpen(false);
+  }
+  function selectAutoLocale(): void {
+    onAutoLocale?.();
     setOpen(false);
   }
   return (
@@ -2849,6 +3055,7 @@ function PublicLocaleSelector({
       >
         <span className="public-globe-icon" aria-hidden="true"><span /></span>
         <strong>{activeCode}</strong>
+        <i aria-hidden="true" />
       </button>
       {open ? (
         <div className="public-locale-popover" role="menu" aria-label={t().language}>
@@ -2863,8 +3070,18 @@ function PublicLocaleSelector({
             >
               <span>{option.code}</span>
               <strong>{option.label}</strong>
+              <em aria-hidden="true">✓</em>
             </button>
           ))}
+          <button
+            type="button"
+            className="public-locale-auto"
+            role="menuitem"
+            onClick={selectAutoLocale}
+          >
+            <span aria-hidden="true">↔</span>
+            <strong data-ko="언어 자동 감지" data-ja="言語を自動検出">{activePublicLocale === "ja" ? "言語を自動検出" : "언어 자동 감지"}</strong>
+          </button>
         </div>
       ) : null}
     </div>
@@ -2888,6 +3105,7 @@ function PublicAppHeader({
   onSubmit,
   onPickSuggestion,
   onLocale,
+  onAutoLocale,
   onTwitchLogin,
   onTwitchFollowed,
   onStreamerRegister,
@@ -2914,6 +3132,7 @@ function PublicAppHeader({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onPickSuggestion: (suggestion: SearchSuggestion) => void;
   onLocale: (locale: PublicLocale) => void;
+  onAutoLocale: () => void;
   onTwitchLogin: () => void;
   onTwitchFollowed: () => void;
   onStreamerRegister: () => void;
@@ -2950,7 +3169,7 @@ function PublicAppHeader({
         />
       ) : null}
       <div className="public-header-tools">
-        <PublicLocaleSelector locale={locale} onLocale={onLocale} />
+        <PublicLocaleSelector locale={locale} onLocale={onLocale} onAutoLocale={onAutoLocale} />
         {showSearch && twitchUser ? (
           <div className="public-header-popover-wrap">
             <button type="button" aria-label={t().notifications} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
@@ -3388,10 +3607,13 @@ function RecentRecords({ profile }: { profile: PublicLolProfile }) {
 }
 
 function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge[]; compact?: boolean }) {
-  const visibleBadges = (badges ?? []).slice(0, compact ? 3 : 4);
+  const allBadges = badges ?? [];
+  const priorityBadge = compact ? allBadges.find((badge) => badge.code === "mvp" || badge.code === "ace") : undefined;
+  const orderedBadges = priorityBadge ? [priorityBadge, ...allBadges.filter((badge) => badge !== priorityBadge)] : allBadges;
+  const visibleBadges = orderedBadges.slice(0, compact ? 3 : 4);
   if (visibleBadges.length === 0) return null;
   return (
-    <div className={`public-match-badges ${compact ? "compact" : ""}`}>
+    <div className={`public-match-badges ${compact ? "compact" : ""}`} data-mobile-overflow={compact && allBadges.length > 1 ? "true" : undefined}>
       {visibleBadges.map((badge) => (
         <span
           className={`public-match-badge ${badge.code}`}
@@ -3404,6 +3626,35 @@ function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge
       ))}
     </div>
   );
+}
+
+function dataDragonVersionFromUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  return url.match(/\/cdn\/([^/]+)\//)?.[1];
+}
+
+function recentMatchDataDragonVersion(match: PublicLolRecentMatch): string | undefined {
+  return dataDragonVersionFromUrl(match.champion.iconUrl) ?? match.items.map((item) => dataDragonVersionFromUrl(item.iconUrl)).find(Boolean);
+}
+
+function profileDataDragonVersion(profile: PublicLolProfile): string | undefined {
+  return dataDragonVersionFromUrl(profile.profileIconUrl) ??
+    profile.topChampions.map((champion) => dataDragonVersionFromUrl(champion.iconUrl)).find(Boolean) ??
+    profile.recentMatches.map((match) => recentMatchDataDragonVersion(match)).find(Boolean);
+}
+
+function summonerSpellIconUrl(spellId: number, version?: string): string | undefined {
+  const spellFile = SUMMONER_SPELL_FILE_BY_ID[spellId];
+  return spellFile && version ? `https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${spellFile}.png` : undefined;
+}
+
+function fixedRecentItemSlots(items: PublicLolRecentMatch["items"], count = 6): Array<PublicLolRecentMatch["items"][number] | undefined> {
+  const slots = Array<PublicLolRecentMatch["items"][number] | undefined>(count).fill(undefined);
+  items.forEach((item, index) => {
+    const slot = item.slot >= 0 && item.slot < count ? item.slot : index;
+    if (slot >= 0 && slot < count && !slots[slot]) slots[slot] = item;
+  });
+  return slots;
 }
 
 function PlayerItemBuild({ items, itemKey }: { items: PublicLolMatchParticipant["items"]; itemKey: string }) {
@@ -3563,60 +3814,133 @@ function currentGameTeamLabel(teamId: number): string {
   return `${t().teamDetails} ${teamId}`;
 }
 
+function currentGameQueueLabel(liveGame: PublicLolCurrentGame): string {
+  return liveGame.queueId
+    ? queueLabels[activePublicLocale][liveGame.queueId] ?? `${t().queue} ${liveGame.queueId}`
+    : liveGame.gameMode ?? "-";
+}
+
 function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; onSearchRiotId: (riotId: string) => void }) {
   const liveGame = profile.liveGame;
-  const teamIds = [...new Set((liveGame?.participants ?? []).map((participant) => participant.teamId))].sort((a, b) => a - b);
+  const isLive = liveGame?.isLive === true;
+  const isUnavailable = liveGame?.status === "unavailable";
+  const participants = liveGame?.participants ?? [];
+  const teamIds = [...new Set(participants.map((participant) => participant.teamId))].sort((a, b) => a - b);
+  const spellVersion = profileDataDragonVersion(profile);
+  const averageTier = averageTierLabel(participants.map((participant) => participant.rankedStats));
+  const expectedParticipants = Math.max(10, participants.length);
   return (
-    <section id="public-ingame" className={`public-panel public-ingame-panel ${liveGame?.isLive ? "live" : "offline"}`}>
-      <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.currentGameStatus} data-ja={publicI18n.ja.currentGameStatus}>{t().currentGameStatus}</h2>
-        <span>{liveGame?.isLive ? t().currentlyInGame : t().notInGame}</span>
+    <section id="public-ingame" className={`public-panel public-ingame-panel ${isLive ? "live" : isUnavailable ? "unavailable" : "offline"}`}>
+      <div className="public-ingame-status-head">
+        <div>
+          <h2 data-ko={publicI18n.ko.currentGameStatus} data-ja={publicI18n.ja.currentGameStatus}>{t().currentGameStatus}</h2>
+          <span className={`public-ingame-live-state ${isLive ? "live" : isUnavailable ? "unavailable" : "offline"}`}>
+            <i />
+            {isLive ? t().currentlyInGame : isUnavailable ? t().currentGameUnavailable : t().notInGame}
+          </span>
+        </div>
+        <small>{t().currentGameUpdated} {formatRelativeDate(liveGame?.fetchedAt)}</small>
       </div>
-      {!liveGame?.isLive ? (
+      {!isLive ? (
         <div className="public-ingame-empty">
-          <strong data-ko={publicI18n.ko.notInGame} data-ja={publicI18n.ja.notInGame}>{t().notInGame}</strong>
+          <strong data-ko={isUnavailable ? publicI18n.ko.currentGameUnavailable : publicI18n.ko.notInGame} data-ja={isUnavailable ? publicI18n.ja.currentGameUnavailable : publicI18n.ja.notInGame}>
+            {isUnavailable ? t().currentGameUnavailable : t().notInGame}
+          </strong>
+          {isUnavailable ? <small>{t().currentGameUnavailableDetail}</small> : null}
+          <small>{t().currentGamePlatform} {liveGame?.lolPlatform ?? profile.lolPlatform}</small>
           <small>{t().fetchedAt} {formatDate(liveGame?.fetchedAt)}</small>
         </div>
       ) : (
         <>
           <div className="public-ingame-summary">
-            <div>
-              <span>{t().queue}</span>
-              <strong>{liveGame.queueId ? queueLabels[activePublicLocale][liveGame.queueId] ?? `${t().queue} ${liveGame.queueId}` : liveGame.gameMode ?? "-"}</strong>
+            <div className="public-ingame-summary-card">
+              <span>{t().currentGameMode}</span>
+              <strong>{currentGameQueueLabel(liveGame)}</strong>
+              <small>{liveGame.gameMode ?? "-"}</small>
             </div>
-            <div>
+            <div className="public-ingame-summary-card">
               <span>{t().currentGameParticipants}</span>
-              <strong>{liveGame.participants.length}</strong>
+              <strong>{participants.length} / {expectedParticipants}</strong>
+              <small>{t().currentGameReady}</small>
             </div>
-            <div>
-              <span>{t().fetchedAt}</span>
-              <strong>{formatDate(liveGame.fetchedAt)}</strong>
-            </div>
-            <div>
-              <span>{t().perMinute}</span>
+            <div className="public-ingame-summary-card">
+              <span>{t().currentGameDuration}</span>
               <strong>{formatDuration(liveGame.gameLengthSeconds)}</strong>
+              <small>{t().currentlyInGame}</small>
+            </div>
+            <div className="public-ingame-summary-card">
+              <span>{t().currentGameAverageTier}</span>
+              <strong>{averageTier}</strong>
+              <small>{t().currentGamePlatform} {liveGame.lolPlatform ?? profile.lolPlatform}</small>
             </div>
           </div>
           <div className="public-ingame-teams">
             {teamIds.map((teamId) => (
-              <article key={`current-game:${teamId}`}>
+              <article className={teamId === 100 ? "blue" : teamId === 200 ? "red" : ""} key={`current-game:${teamId}`}>
                 <div className="public-ingame-team-head">
                   <strong>{currentGameTeamLabel(teamId)}</strong>
-                  <span>{liveGame.participants.filter((participant) => participant.teamId === teamId).length}</span>
+                  <span>{participants.filter((participant) => participant.teamId === teamId).length}/5</span>
+                </div>
+                <div className="public-ingame-table-head">
+                  <span>{t().summonerResults}</span>
+                  <span>{t().champion}</span>
+                  <span>{t().summonerSpells}</span>
+                  <span>{t().tier}</span>
                 </div>
                 <div className="public-ingame-player-list">
-                  {liveGame.participants.filter((participant) => participant.teamId === teamId).map((participant, index) => (
-                    <div className={participant.isTarget ? "target" : ""} key={`${teamId}:${participant.riotId ?? participant.champion.championId}:${index}`}>
-                      {participant.champion.iconUrl ? <img src={participant.champion.iconUrl} alt="" /> : <span>{championName(participant.champion).slice(0, 1)}</span>}
-                      <div>
-                        <SearchableRiotId riotId={participant.riotId} fallback={participant.isTarget ? profile.riotId : championName(participant.champion)} onSearch={onSearchRiotId} />
-                        <small>{championName(participant.champion)}</small>
+                  {participants.filter((participant) => participant.teamId === teamId).map((participant, index) => {
+                    const spellIcons = participant.summonerSpells
+                      .map((spellId) => ({ spellId, iconUrl: summonerSpellIconUrl(spellId, spellVersion) }))
+                      .slice(0, 2);
+                    return (
+                      <div className={participant.isTarget ? "target" : ""} key={`${teamId}:${participant.riotId ?? participant.champion.championId}:${index}`}>
+                        <div className="public-ingame-summoner-cell">
+                          {participant.champion.iconUrl ? <img src={participant.champion.iconUrl} alt="" /> : <span>{championName(participant.champion).slice(0, 1)}</span>}
+                          <div>
+                            <SearchableRiotId riotId={participant.riotId} fallback={participant.isTarget ? profile.riotId : championName(participant.champion)} onSearch={onSearchRiotId} />
+                            {participant.profileIconUrl ? <small><img src={assetUrl(participant.profileIconUrl)} alt="" /> {participant.bot ? t().currentGameBot : t().currentGameReady}</small> : null}
+                          </div>
+                        </div>
+                        <div className="public-ingame-champion-cell">
+                          <strong>{championName(participant.champion)}</strong>
+                          <small>{participant.isTarget ? t().currentlyInGame : t().currentGameReady}</small>
+                        </div>
+                        <div className="public-ingame-spell-cell">
+                          {spellIcons.length > 0 ? spellIcons.map((spell) => (
+                            <span key={`${participant.riotId ?? index}:spell:${spell.spellId}`}>
+                              {spell.iconUrl ? <img src={spell.iconUrl} alt="" /> : spell.spellId}
+                            </span>
+                          )) : (
+                            <>
+                              <span>-</span>
+                              <span>-</span>
+                            </>
+                          )}
+                        </div>
+                        <div className="public-ingame-rank-cell">
+                          <span className={rankTierClass(participant.rankedStats, participant.rankedStats ? "ready" : "unknown")}>{matchRankBadgeLabel(participant.rankedStats)}</span>
+                          <small>{rankLabel(participant.rankedStats)}</small>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </article>
             ))}
+          </div>
+          <div className="public-ingame-bottom-summary">
+            <div>
+              <span>{t().currentGamePlatform}</span>
+              <strong>{liveGame.lolPlatform ?? profile.lolPlatform}</strong>
+            </div>
+            <div>
+              <span>{t().currentGameUpdated}</span>
+              <strong>{formatDate(liveGame.fetchedAt)}</strong>
+            </div>
+            <div>
+              <span>{t().currentGameAverageTier}</span>
+              <strong>{averageTier}</strong>
+            </div>
           </div>
         </>
       )}
@@ -3682,6 +4006,8 @@ function RecentMatches({
           const rankDetail = matchRanks[match.matchId];
           const rankLoading = Boolean(matchRankLoading[match.matchId]);
           const opponentRank = matchRankForOpponent(rankDetail, match.opponent);
+          const dataDragonVersion = recentMatchDataDragonVersion(match);
+          const recentItemSlots = fixedRecentItemSlots(match.items, 6);
           return (
             <article className={`public-match-row ${match.result} ${highlightClass} ${expanded ? "expanded" : ""}`} key={match.matchId}>
               <div className="public-match-summary">
@@ -3694,6 +4020,18 @@ function RecentMatches({
                 </div>
                 <div className={`public-champion-cell ${highlightClass}`}>
                   {match.champion.iconUrl ? <img src={match.champion.iconUrl} alt="" /> : <span>{championName(match.champion).slice(0, 1)}</span>}
+                  {match.summonerSpells.length > 0 ? (
+                    <div className="public-match-mobile-spells" aria-label={t().summonerSpells}>
+                      {match.summonerSpells.slice(0, 2).map((spellId) => {
+                        const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
+                        return (
+                          <span key={`${match.matchId}:spell:${spellId}`}>
+                            {iconUrl ? <img src={iconUrl} alt="" /> : spellId}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : null}
                   <div>
                     <strong>{championName(match.champion)}</strong>
                     <small>{mainRoleLabel(match.position)} · Lv.{formatNumber(match.championLevel)}</small>
@@ -3714,9 +4052,9 @@ function RecentMatches({
                   <span>{killParticipationText(match.killParticipation)}</span>
                 </div>
                 <div className="public-match-inline-items" aria-label={t().items}>
-                  {match.items.slice(0, 6).map((item) => (
-                    <span key={`${match.matchId}:inline:${item.slot}:${item.itemId}`}>
-                      {item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId}
+                  {recentItemSlots.map((item, index) => (
+                    <span className={item ? "" : "empty"} key={`${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`}>
+                      {item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId : null}
                     </span>
                   ))}
                 </div>
@@ -3799,50 +4137,104 @@ function RecentMatches({
 	}
 
 function ChampionMastery({ profile }: { profile: PublicLolProfile }) {
+  const rows = championAnalysisRows(profile).slice(0, 5);
+  const maxMasteryPoints = championAnalysisMax(rows, (row) => row.masteryPoints);
   return (
-    <section id="public-champions" className="public-panel">
+    <section id="public-champions" className="public-panel public-champion-mastery-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.topChampions} data-ja={publicI18n.ja.topChampions}>{t().topChampions}</h2>
+        <h2 data-ko={publicI18n.ko.championMasteryTop5} data-ja={publicI18n.ja.championMasteryTop5}>{t().championMasteryTop5}</h2>
+        <span data-ko={publicI18n.ko.masteryBasis} data-ja={publicI18n.ja.masteryBasis}>{t().masteryBasis}</span>
       </div>
-      <div className="public-champion-list">
-        {profile.topChampions.length === 0 ? <p className="public-empty">{t().noData}</p> : profile.topChampions.map((champion) => (
-          <article className="public-champion-row" key={champion.championId}>
-            {champion.iconUrl ? <img src={champion.iconUrl} alt="" /> : <span>{championName(champion).slice(0, 1)}</span>}
-            <div>
+      <div className="public-champion-top-grid">
+        {rows.length === 0 ? <p className="public-empty">{t().noData}</p> : rows.map((row, index) => {
+          const champion = row.champion;
+          const artUrl = assetUrl(champion.loadingUrl ?? champion.splashUrl ?? champion.iconUrl);
+          const performance = row.performance;
+          return (
+            <article className="public-champion-top-card" key={champion.championId}>
+              <span className="public-champion-top-rank">{row.masteryRank ?? index + 1}</span>
+              <div className="public-champion-top-art">
+                {artUrl ? <img src={artUrl} alt="" /> : <span>{championName(champion).slice(0, 1)}</span>}
+              </div>
               <strong>{championName(champion)}</strong>
-              <small>{t().mastery} Lv.{formatNumber(champion.masteryLevel)} · {formatNumber(champion.masteryPoints)} {t().masteryPoint}</small>
-            </div>
-          </article>
-        ))}
+              <small>{t().mastery} Lv.{formatNumber(row.masteryLevel)}</small>
+              <b>{formatNumber(row.masteryPoints)}</b>
+              <em>{performance ? `${formatPercent(performance.winRate)} · ${gamesText(performance.games)}` : t().masteryPoint}</em>
+              <div className="public-champion-progress" aria-hidden="true">
+                <i style={{ width: barWidth(row.masteryPoints, maxMasteryPoints) }} />
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
 }
 
 function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
+  const rows = championAnalysisRows(profile);
+  const maxGames = championAnalysisMax(rows, (row) => row.performance?.games);
+  const maxWins = championAnalysisMax(rows, (row) => row.performance?.wins);
+  const maxKda = championAnalysisMax(rows, (row) => row.performance?.averageKda);
+  const maxCs = championAnalysisMax(rows, (row) => row.performance?.averageCsPerMinute);
+  const maxDpm = championAnalysisMax(rows, (row) => row.performance?.averageDamagePerMinute);
+  const maxMasteryPoints = championAnalysisMax(rows, (row) => row.masteryPoints);
   return (
     <section className="public-panel public-detail-analysis-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.detailAnalysis} data-ja={publicI18n.ja.detailAnalysis}>{t().detailAnalysis}</h2>
+        <h2 data-ko={publicI18n.ko.championDetailStats} data-ja={publicI18n.ja.championDetailStats}>{t().championDetailStats}</h2>
         <span>{profile.summary.recentGames}{t().games}</span>
       </div>
-      <div className="public-performance-block">
-        <h3 data-ko={publicI18n.ko.championPerformance} data-ja={publicI18n.ja.championPerformance}>{t().championPerformance}</h3>
-        <div className="public-performance-list">
-          {profile.championPerformance.length === 0 ? <p className="public-empty">{t().noData}</p> : profile.championPerformance.map((item) => (
-            <article className="public-performance-row" key={item.champion.championId}>
-              {item.champion.iconUrl ? <img src={item.champion.iconUrl} alt="" /> : <span>{championName(item.champion).slice(0, 1)}</span>}
-              <div>
-                <strong>{championName(item.champion)}</strong>
-                <small>{gamesText(item.games)} · {winsText(item.wins)} · {formatPercent(item.winRate)}</small>
+      <div className="public-champion-analysis-table" aria-label={t().recentChampionStats}>
+        <div className="public-champion-analysis-head">
+          <span>{t().champion}</span>
+          <span>{t().gamesPlayed}</span>
+          <span>{t().wins}</span>
+          <span>{t().kda}</span>
+          <span>{t().averageCsPerMinute}</span>
+          <span>DPM</span>
+          <span>{t().masteryPoint}</span>
+        </div>
+        {rows.length === 0 ? <p className="public-empty">{t().noData}</p> : rows.map((row) => {
+          const performance = row.performance;
+          const champion = row.champion;
+          return (
+            <article className="public-champion-analysis-row" key={champion.championId}>
+              <div className="public-champion-analysis-name">
+                {champion.iconUrl ? <img src={champion.iconUrl} alt="" /> : <span>{championName(champion).slice(0, 1)}</span>}
+                <div>
+                  <strong>{championName(champion)}</strong>
+                  <small>{t().mastery} Lv.{formatNumber(row.masteryLevel)}</small>
+                </div>
               </div>
-              <div>
-                <strong>{formatDecimal(item.averageKda)} KDA</strong>
-                <small>CS {formatDecimal(item.averageCsPerMinute, 1)} · DPM {formatNumber(item.averageDamagePerMinute)}</small>
+              <div className="public-champion-analysis-metric">
+                <strong>{performance ? gamesText(performance.games) : "-"}</strong>
+                <span><i style={{ width: barWidth(performance?.games, maxGames) }} /></span>
+              </div>
+              <div className="public-champion-analysis-metric">
+                <strong>{performance ? `${winsText(performance.wins)} · ${formatPercent(performance.winRate)}` : "-"}</strong>
+                <span><i className="win" style={{ width: barWidth(performance?.wins, maxWins) }} /></span>
+              </div>
+              <div className="public-champion-analysis-metric">
+                <strong>{performance ? `${formatDecimal(performance.averageKda)} KDA` : "-"}</strong>
+                <small>{performance ? `${formatDecimal(performance.averageKda, 2)}` : "-"}</small>
+                <span><i style={{ width: barWidth(performance?.averageKda, maxKda) }} /></span>
+              </div>
+              <div className="public-champion-analysis-metric">
+                <strong>{formatDecimal(performance?.averageCsPerMinute, 1)}</strong>
+                <span><i style={{ width: barWidth(performance?.averageCsPerMinute, maxCs) }} /></span>
+              </div>
+              <div className="public-champion-analysis-metric">
+                <strong>{formatNumber(performance?.averageDamagePerMinute)}</strong>
+                <span><i style={{ width: barWidth(performance?.averageDamagePerMinute, maxDpm) }} /></span>
+              </div>
+              <div className="public-champion-analysis-metric">
+                <strong>{formatNumber(row.masteryPoints)}</strong>
+                <span><i style={{ width: barWidth(row.masteryPoints, maxMasteryPoints) }} /></span>
               </div>
             </article>
-          ))}
-        </div>
+          );
+        })}
       </div>
       <div className="public-performance-block">
         <h3 data-ko={publicI18n.ko.rolePerformance} data-ja={publicI18n.ja.rolePerformance}>{t().rolePerformance}</h3>
@@ -3900,12 +4292,14 @@ function PublicTopbar({
   onHome,
   onOpenAdmin,
   onLocale,
+  onAutoLocale,
   onNavigate
 }: {
   locale: PublicLocale;
   onHome: () => void;
   onOpenAdmin: () => void;
   onLocale: (locale: PublicLocale) => void;
+  onAutoLocale: () => void;
   onNavigate: (target: PublicNavTarget) => void;
 }) {
   return (
@@ -3922,7 +4316,7 @@ function PublicTopbar({
         <button type="button" onClick={() => onNavigate("community")} data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</button>
       </nav>
       <div className="public-top-actions">
-        <PublicLocaleSelector locale={locale} onLocale={onLocale} />
+        <PublicLocaleSelector locale={locale} onLocale={onLocale} onAutoLocale={onAutoLocale} />
         <button className="public-theme-button" type="button" aria-label={t().darkMode}>●</button>
         <button className="public-login-button" type="button" onClick={onOpenAdmin} data-ko={publicI18n.ko.login} data-ja={publicI18n.ja.login}>{t().login}</button>
       </div>
@@ -4019,6 +4413,17 @@ export function PublicLolPage({
   function changeLocale(nextLocale: PublicLocale): void {
     setLocaleState(nextLocale);
     saveStoredLocale(nextLocale);
+  }
+
+  function autoDetectLocale(): void {
+    clearStoredLocale();
+    void loadPublicLocalePreference()
+      .then((preferredLocale) => {
+        setLocaleState(preferredLocale ?? detectBrowserPublicLocale());
+      })
+      .catch(() => {
+        setLocaleState(detectBrowserPublicLocale());
+      });
   }
 
   useEffect(() => {
@@ -4360,6 +4765,7 @@ export function PublicLolPage({
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
             onLocale={changeLocale}
+            onAutoLocale={autoDetectLocale}
             onTwitchLogin={openTwitchViewerPanel}
             onTwitchFollowed={openTwitchViewerPanel}
             onStreamerRegister={openStreamerRegisterScreen}
@@ -4406,6 +4812,7 @@ export function PublicLolPage({
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
             onLocale={changeLocale}
+            onAutoLocale={autoDetectLocale}
             onTwitchLogin={openTwitchViewerPanel}
             onTwitchFollowed={openTwitchViewerPanel}
             onStreamerRegister={openStreamerRegisterScreen}
@@ -4454,6 +4861,7 @@ export function PublicLolPage({
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
             onLocale={changeLocale}
+            onAutoLocale={autoDetectLocale}
             onTwitchLogin={openTwitchViewerPanel}
             onTwitchFollowed={openTwitchViewerPanel}
             onStreamerRegister={openStreamerRegisterScreen}
@@ -4506,6 +4914,7 @@ export function PublicLolPage({
           onSubmit={(event) => void submit(event)}
           onPickSuggestion={pickSuggestion}
           onLocale={changeLocale}
+          onAutoLocale={autoDetectLocale}
           onTwitchLogin={openTwitchViewerPanel}
           onTwitchFollowed={openTwitchViewerPanel}
           onStreamerRegister={openStreamerRegisterScreen}

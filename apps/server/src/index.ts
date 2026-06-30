@@ -123,6 +123,7 @@ const server = http.createServer(createHttpHandler({
   twitchAuth,
   publicTwitchAuth,
   eventSub: twitchEventSub,
+  logger,
   refreshLolProfile: (entryId) => refreshLolProfileForEntry(moduleContext, entryId),
   sessions
 }));

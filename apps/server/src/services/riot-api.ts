@@ -129,6 +129,13 @@ export type RiotCurrentGameParticipant = {
   puuid?: string;
   summonerId?: string;
   riotId?: string;
+  riotIdGameName?: string;
+  riotIdTagline?: string;
+  summonerName?: string;
+  spell1Id?: number;
+  spell2Id?: number;
+  profileIconId?: number;
+  bot?: boolean;
   championId: number;
   teamId: number;
 };
