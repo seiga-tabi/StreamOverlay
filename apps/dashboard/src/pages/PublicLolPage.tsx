@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
@@ -2269,6 +2269,11 @@ function SearchForm({
 }) {
   const [serverMenuOpen, setServerMenuOpen] = useState(false);
   const hasQuery = query.trim().length > 0;
+  function submitFromKeyboard(event: KeyboardEvent<HTMLInputElement>): void {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  }
 
   return (
     <div className="public-search-wrap">
@@ -2298,11 +2303,18 @@ function SearchForm({
           <span className="sr-only" data-ko={publicI18n.ko.searchPlaceholder} data-ja={publicI18n.ja.searchPlaceholder}>{t().searchPlaceholder}</span>
           <input
             id="public-search-input"
+            name="riotId"
+            type="search"
             value={query}
             placeholder={t().searchPlaceholder}
             data-ko={publicI18n.ko.searchPlaceholder}
             data-ja={publicI18n.ja.searchPlaceholder}
+            enterKeyHint="search"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             onChange={(event) => onQuery(event.target.value)}
+            onKeyDown={submitFromKeyboard}
             disabled={loading}
           />
         </label>
@@ -4780,7 +4792,10 @@ export function PublicLolPage({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await runSearch(query);
+    const riotIdInput = event.currentTarget.elements.namedItem("riotId");
+    const riotId = riotIdInput instanceof HTMLInputElement ? riotIdInput.value : query;
+    setQuery(riotId);
+    await runSearch(riotId);
   }
 
   function pickSuggestion(suggestion: SearchSuggestion): void {
