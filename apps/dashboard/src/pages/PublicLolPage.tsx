@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 
 type PublicLolMatchParticipant = {
+  participantId?: number;
   riotId?: string;
   isTarget: boolean;
   champion: LolChampionSummary;
@@ -29,6 +30,7 @@ type PublicLolMatchParticipant = {
   visionScorePerMinute?: number;
   items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
   summonerSpells: number[];
+  runes: Array<{ runeId: number; nameKo?: string; nameJa?: string; iconUrl?: string; kind: "primary" | "secondary"; category?: "style" | "keystone" | "perk" }>;
   badges?: PublicLolMatchBadge[];
 };
 
@@ -58,6 +60,44 @@ type PublicLolMatchRankResponse = {
   status: "ready";
   matchId: string;
   participants: PublicLolMatchRankParticipant[];
+  fetchedAt: string;
+};
+
+type PublicLolMatchBuildItemEvent = {
+  itemId: number;
+  iconUrl?: string;
+  timestampMs: number;
+};
+
+type PublicLolMatchBuildSkillEvent = {
+  slot: number;
+  key: "Q" | "W" | "E" | "R";
+  level: number;
+  timestampMs: number;
+  nameKo?: string;
+  nameJa?: string;
+  iconUrl?: string;
+};
+
+type PublicLolMatchBuildParticipant = {
+  participantId?: number;
+  riotId?: string;
+  teamId?: number;
+  result: "win" | "loss" | "unknown";
+  champion: LolChampionSummary;
+  score: number;
+  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  itemEvents: PublicLolMatchBuildItemEvent[];
+  skillOrder: PublicLolMatchBuildSkillEvent[];
+  runes: PublicLolMatchParticipant["runes"];
+  summonerSpells: number[];
+  badges: PublicLolMatchBadge[];
+};
+
+type PublicLolMatchBuildResponse = {
+  status: "ready";
+  matchId: string;
+  participants: PublicLolMatchBuildParticipant[];
   fetchedAt: string;
 };
 
@@ -364,7 +404,9 @@ type SearchSuggestion = {
 };
 
 type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
+type PublicMainPage = "search" | "favorites" | "subscriptions" | "patch";
 type PublicProfileTab = "overview" | "champions" | "ingame";
+type PublicExpandedMatchView = "record" | "build";
 type PublicTheme = "light" | "dark";
 type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram";
 type MatchPeriodFilter = "all" | "7d" | "30d";
@@ -391,6 +433,9 @@ const MAX_RECENT_SEARCHES = 8;
 const MAX_FAVORITES = 24;
 const MAX_NOTIFICATIONS = 16;
 const MAX_SEARCH_SUGGESTIONS = 6;
+const RECENT_ANALYSIS_MATCH_LIMIT = 20;
+const LP_TREND_WINDOW_DAYS = 30;
+const LP_TREND_WINDOW_MS = LP_TREND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 const PUBLIC_SUMMONER_ROUTE_PREFIX = "/lol/summoners/jp/";
 const DEFAULT_MATCH_FILTERS: PublicMatchFilters = {
   queue: "all",
@@ -460,6 +505,10 @@ const publicI18n = {
     analysis: "핵심 분석",
     detailAnalysis: "상세 분석",
     matchDetails: "경기 상세",
+    matchRecordTab: "전적",
+    matchBuildTab: "빌드",
+    buildLoading: "빌드 불러오는 중",
+    buildLoadFailed: "빌드 정보를 불러오지 못했습니다.",
     expandMatch: "경기 상세 펼치기",
     collapseMatch: "경기 상세 접기",
     aiScore: "점수",
@@ -498,8 +547,10 @@ const publicI18n = {
     rolePerformance: "포지션별 최근 성과",
     opponent: "상대",
     items: "아이템",
+    runes: "룬",
     summonerSpells: "소환사 주문",
     damage: "딜량",
+    totalDamage: "총피해량",
     damageTaken: "받은 피해",
     damageShare: "팀 딜 비중",
     gold: "골드",
@@ -523,6 +574,8 @@ const publicI18n = {
     championAnalysis: "챔피언 분석",
     ingame: "인게임",
     stats: "통계",
+    spectate: "관전하기",
+    patchNotes: "패치노트",
     promotion: "프로모션",
     community: "커뮤니티",
     multimatch: "멀티서치",
@@ -610,11 +663,14 @@ const publicI18n = {
     savedData: "저장된 데이터",
     cachedRanking: "저장된 검색 기반 랭킹",
     liveDataNotice: "실시간 친구/전체 자동완성은 Riot 공개 API 제한으로 자체 DB가 쌓인 데이터만 표시합니다.",
+    subscriptionStatus: "구독현황",
     subscriptionsTitle: "구독 중인 방송인",
     subscriptionsSubtitle: "최근 Twitch 팔로우 기준",
     subscriptionsEmpty: "팔로우 목록에서 구독 중인 방송인을 찾지 못했습니다.",
     subscriptionMissingScope: "구독 상태 확인 권한이 필요합니다. Twitch를 다시 로그인해주세요.",
     subscriptionGift: "선물 구독",
+    patchNotesPreparing: "패치노트 페이지를 준비 중입니다.",
+    patchNotesPreparingBody: "Riot 패치 데이터와 자체 해설을 연결한 뒤 이 화면에서 업데이트 내역을 보여줄 예정입니다.",
     refreshAvailableIn: "후 가능",
     twitchLive: "방송 중",
     twitchOffline: "스트리머 오프라인",
@@ -712,6 +768,10 @@ const publicI18n = {
     analysis: "主要分析",
     detailAnalysis: "詳細分析",
     matchDetails: "試合詳細",
+    matchRecordTab: "戦績",
+    matchBuildTab: "ビルド",
+    buildLoading: "ビルド読み込み中",
+    buildLoadFailed: "ビルド情報を読み込めませんでした。",
     expandMatch: "試合詳細を開く",
     collapseMatch: "試合詳細を閉じる",
     aiScore: "スコア",
@@ -750,8 +810,10 @@ const publicI18n = {
     rolePerformance: "ポジション別最近成績",
     opponent: "相手",
     items: "アイテム",
+    runes: "ルーン",
     summonerSpells: "サモナースペル",
     damage: "ダメージ",
+    totalDamage: "総ダメージ",
     damageTaken: "受けたダメージ",
     damageShare: "チームダメージ比率",
     gold: "ゴールド",
@@ -775,6 +837,8 @@ const publicI18n = {
     championAnalysis: "チャンピオン分析",
     ingame: "インゲーム",
     stats: "統計",
+    spectate: "観戦",
+    patchNotes: "パッチノート",
     promotion: "プロモーション",
     community: "コミュニティ",
     multimatch: "マルチサーチ",
@@ -862,11 +926,14 @@ const publicI18n = {
     savedData: "保存データ",
     cachedRanking: "保存済み検索ベースランキング",
     liveDataNotice: "リアルタイム友達/全体オートコンプリートは Riot 公開 API の制限により、蓄積済みデータのみ表示します。",
+    subscriptionStatus: "サブスク状況",
     subscriptionsTitle: "サブスク中の配信者",
     subscriptionsSubtitle: "最近の Twitch フォロー基準",
     subscriptionsEmpty: "フォロー一覧からサブスク中の配信者を見つけられませんでした。",
     subscriptionMissingScope: "サブスク状態の確認権限が必要です。Twitch に再ログインしてください。",
     subscriptionGift: "ギフトサブスク",
+    patchNotesPreparing: "パッチノートページを準備中です。",
+    patchNotesPreparingBody: "Riot のパッチデータと独自解説を接続したあと、この画面で更新内容を表示します。",
     refreshAvailableIn: "後に可能",
     twitchLive: "配信中",
     twitchOffline: "配信者オフライン",
@@ -1062,6 +1129,43 @@ const roleLabels: Record<PublicLocale, Record<string, string>> = {
   }
 };
 
+type PublicRoleIconKey = "top" | "jungle" | "mid" | "bottom" | "support" | "fill" | "unknown";
+
+const roleIconAssets: Partial<Record<PublicRoleIconKey, string>> = {
+  top: "/images/roles/position-top.svg",
+  jungle: "/images/roles/position-jungle.svg",
+  mid: "/images/roles/position-middle.svg",
+  bottom: "/images/roles/position-bottom.svg",
+  support: "/images/roles/position-utility.svg"
+};
+
+function roleIconKey(role: string | undefined): PublicRoleIconKey {
+  const normalized = (role ?? "UNKNOWN").toUpperCase();
+  if (normalized === "TOP") return "top";
+  if (normalized === "JUNGLE") return "jungle";
+  if (normalized === "MID" || normalized === "MIDDLE") return "mid";
+  if (normalized === "BOTTOM") return "bottom";
+  if (normalized === "UTILITY" || normalized === "SUPPORT") return "support";
+  if (normalized === "FILL") return "fill";
+  return "unknown";
+}
+
+function RoleIcon({ role }: { role: string | undefined }) {
+  const icon = roleIconKey(role);
+  const iconSrc = roleIconAssets[icon];
+  return (
+    <span className={`public-role-icon ${icon}`} aria-hidden="true">
+      {iconSrc ? (
+        <img src={iconSrc} alt="" />
+      ) : (
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M11 3.8h2v6.1l4.3-4.3 1.4 1.4-4.3 4.3h6.1v2h-6.1l4.3 4.3-1.4 1.4-4.3-4.3v6.1h-2v-6.1L6.7 19l-1.4-1.4 4.3-4.3H3.5v-2h6.1L5.3 7l1.4-1.4L11 9.9V3.8Z" />
+        </svg>
+      )}
+    </span>
+  );
+}
+
 const objectiveLabels: Record<PublicLocale, Record<string, string>> = {
   ko: {
     baron: "바론",
@@ -1119,6 +1223,14 @@ async function getPublicLolMatchRanks(matchId: string): Promise<PublicLolMatchRa
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
   return (await response.json()) as PublicLolMatchRankResponse;
+}
+
+async function getPublicLolMatchBuild(matchId: string): Promise<PublicLolMatchBuildResponse> {
+  const response = await fetch(`${apiBase}/api/lol/match-build?matchId=${encodeURIComponent(matchId)}`, {
+    credentials: "include"
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return (await response.json()) as PublicLolMatchBuildResponse;
 }
 
 async function searchSuggestions(query: string, signal: AbortSignal): Promise<SearchSuggestion[]> {
@@ -1200,6 +1312,10 @@ function splitRiotIdText(riotId: string): { gameName: string; tagLine: string } 
   const gameName = normalized.slice(0, hashIndex).trim().replace(/\s+/g, " ");
   const tagLine = normalizedTagLine(normalized.slice(hashIndex + 1));
   return gameName && tagLine ? { gameName, tagLine } : undefined;
+}
+
+function normalizeRiotId(riotId: string): string {
+  return riotId.trim().normalize("NFKC").replace(/＃/g, "#").toLocaleLowerCase();
 }
 
 function publicSummonerPath(riotId: string): string {
@@ -1558,16 +1674,6 @@ function matchRankForPlayer(
   return participant?.rankedStats;
 }
 
-function matchRankForOpponent(rankDetail: PublicLolMatchRankResponse | undefined, opponent: PublicLolRecentMatch["opponent"]): LolRankedStats | undefined {
-  if (!rankDetail || !opponent) return undefined;
-  const riotKey = opponent.riotId ? searchTextForMatch(opponent.riotId) : "";
-  const participant = rankDetail.participants.find((item) => (
-    (riotKey && item.riotId && searchTextForMatch(item.riotId) === riotKey) ||
-    item.championId === opponent.champion.championId
-  ));
-  return participant?.rankedStats;
-}
-
 function resultLabel(result: PublicLolRecentMatch["result"]): string {
   if (result === "win") return t().win;
   if (result === "loss") return t().loss;
@@ -1616,6 +1722,12 @@ function formatDuration(seconds: number | undefined): string {
   const minutes = Math.floor(seconds / 60);
   const rest = Math.max(0, Math.floor(seconds % 60));
   return `${minutes}:${String(rest).padStart(2, "0")}`;
+}
+
+function formatBuildMinute(timestampMs: number | undefined): string {
+  if (timestampMs === undefined || !Number.isFinite(timestampMs)) return "-";
+  const minutes = Math.max(0, Math.floor(timestampMs / 60_000));
+  return activePublicLocale === "ja" ? `${minutes}分` : `${minutes}분`;
 }
 
 function refreshRemainingMs(profile: PublicLolProfile | null, now: number): number {
@@ -1761,6 +1873,14 @@ function multikillLabel(value: number | undefined): string {
 
 function objectiveSummary(objectives: Record<string, number> | undefined): string {
   const entries = Object.entries(objectives ?? {})
+    .filter(([, value]) => value > 0)
+    .map(([key, value]) => `${objectiveLabels[activePublicLocale][key] ?? key} ${value}`);
+  return entries.length > 0 ? entries.join(" · ") : "-";
+}
+
+function objectiveSummaryByOrder(objectives: Record<string, number> | undefined, keys: string[]): string {
+  const entries = keys
+    .map((key) => [key, objectives?.[key] ?? 0] as const)
     .filter(([, value]) => value > 0)
     .map(([key, value]) => `${objectiveLabels[activePublicLocale][key] ?? key} ${value}`);
   return entries.length > 0 ? entries.join(" · ") : "-";
@@ -2095,14 +2215,27 @@ function matchAiScore(match: PublicLolRecentMatch): number {
   return clampScore(18 + resultScore + kdaScore + killParticipationScore + csScore + damageScore + visionScore);
 }
 
+function recentAnalysisMatches(profile: PublicLolProfile): PublicLolRecentMatch[] {
+  return profile.recentMatches.slice(0, RECENT_ANALYSIS_MATCH_LIMIT);
+}
+
 function averageAiScore(profile: PublicLolProfile): number {
-  if (profile.recentMatches.length === 0) return 0;
-  return Math.round(profile.recentMatches.reduce((sum, match) => sum + matchAiScore(match), 0) / profile.recentMatches.length);
+  const matches = recentAnalysisMatches(profile);
+  if (matches.length === 0) return 0;
+  return Math.round(matches.reduce((sum, match) => sum + matchAiScore(match), 0) / matches.length);
+}
+
+function aggregatePerformanceScore(profile: PublicLolProfile): number {
+  const matches = recentAnalysisMatches(profile);
+  if (matches.length === 0) return 0;
+  const summary = summarizeMatches(matches);
+  return Math.floor((averageAiScore(profile) * .62) + (summary.recentWinRate * .38));
 }
 
 function aggregatePerformanceGrade(profile: PublicLolProfile): string {
-  if (profile.summary.recentGames === 0) return "-";
-  const weightedScore = Math.round((averageAiScore(profile) * .62) + (profile.summary.recentWinRate * .38));
+  const matches = recentAnalysisMatches(profile);
+  if (matches.length === 0) return "-";
+  const weightedScore = aggregatePerformanceScore(profile);
   if (weightedScore >= 88) return "S+";
   if (weightedScore >= 80) return "S";
   if (weightedScore >= 72) return "A+";
@@ -2177,40 +2310,132 @@ function rankTrendAxisLabels(minScore: number, maxScore: number): string[] {
     .map(rankTrendDivisionLabel);
 }
 
-function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
-  const matches = profile.recentMatches.slice(0, 20).reverse();
-  if (matches.length === 0) return undefined;
-  const currentRankScore = rankScore(profile.rankedStats);
-  const totalDelta = matches.reduce((sum, match) => sum + estimatedLpDelta(match), 0);
-  let runningRankScore = currentRankScore - totalDelta;
-  const samples = matches.map((match, index) => {
-    runningRankScore += estimatedLpDelta(match);
-    const displayValue = Math.max(0, runningRankScore);
-    return {
-      key: `${match.matchId}:lp:${index}`,
-      value: displayValue,
-      label: `${resultLabel(match.result)} · ${rankTrendPointLabel(displayValue)}`,
-      result: match.result,
-      startedAt: match.startedAt
-    };
+function recentMatchesWithinWindow(matches: PublicLolRecentMatch[], windowMs: number): PublicLolRecentMatch[] {
+  const cutoff = Date.now() - windowMs;
+  return matches.filter((match) => {
+    if (!match.startedAt) return false;
+    const time = Date.parse(match.startedAt);
+    return Number.isFinite(time) && time >= cutoff;
   });
+}
+
+function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
+  const windowEnd = Date.now();
+  const windowStart = windowEnd - LP_TREND_WINDOW_MS;
+  const windowMiddle = windowStart + (LP_TREND_WINDOW_MS / 2);
+  const currentRankScore = rankScore(profile.rankedStats);
+
+  const storedRankSamples = (profile.rankHistory ?? [])
+    .map((point, index) => {
+      const startedAtMs = Date.parse(point.date);
+      const value = Number.isFinite(point.rankScore) ? point.rankScore : undefined;
+      if (!Number.isFinite(startedAtMs) || value === undefined) return undefined;
+      return {
+        key: `${profile.riotId}:rank-history:${point.date}:${index}`,
+        value,
+        label: rankTrendPointLabel(value),
+        result: "unknown" as PublicLolRecentMatch["result"],
+        startedAtMs
+      };
+    })
+    .filter((point): point is NonNullable<typeof point> => Boolean(point))
+    .sort((a, b) => a.startedAtMs - b.startedAtMs);
+  const baselineRankSample = storedRankSamples
+    .filter((point) => point.startedAtMs < windowStart)
+    .at(-1);
+  const historySamples = [
+    ...(baselineRankSample ? [{
+      ...baselineRankSample,
+      key: `${baselineRankSample.key}:window-start`,
+      startedAtMs: windowStart
+    }] : []),
+    ...storedRankSamples.filter((point) => point.startedAtMs >= windowStart && point.startedAtMs <= windowEnd)
+  ];
+  const samples = historySamples.length >= 2 ? historySamples : (() => {
+    const filteredMatches = recentMatchesWithinWindow(profile.recentMatches, LP_TREND_WINDOW_MS);
+    const matches = (filteredMatches.length > 0 ? filteredMatches : profile.recentMatches.slice(0, RECENT_ANALYSIS_MATCH_LIMIT)).slice().reverse();
+    if (matches.length === 0 && currentRankScore <= 0) return [];
+    const totalDelta = matches.reduce((sum, match) => sum + estimatedLpDelta(match), 0);
+    const startingRankScore = Math.max(0, currentRankScore - totalDelta);
+    let runningRankScore = startingRankScore;
+    const fallbackStepMs = matches.length > 1 ? LP_TREND_WINDOW_MS / (matches.length - 1) : 0;
+    const matchSamples = matches.map((match, index) => {
+      runningRankScore += estimatedLpDelta(match);
+      const displayValue = Math.max(0, runningRankScore);
+      const parsedStartedAt = Date.parse(match.startedAt ?? "");
+      const startedAtMs = Number.isFinite(parsedStartedAt)
+        ? parsedStartedAt
+        : matches.length === 1 ? windowEnd : windowStart + fallbackStepMs * index;
+      return {
+        key: `${match.matchId}:lp:${index}`,
+        value: displayValue,
+        label: `${resultLabel(match.result)} · ${rankTrendPointLabel(displayValue)}`,
+        result: match.result,
+        startedAtMs
+      };
+    });
+    const currentDisplayRankScore = currentRankScore > 0
+      ? currentRankScore
+      : matchSamples[matchSamples.length - 1]?.value ?? 0;
+    return matchSamples.length > 0
+      ? [
+          {
+            key: `${profile.riotId}:lp:start`,
+            value: startingRankScore,
+            label: rankTrendPointLabel(startingRankScore),
+            result: "unknown" as PublicLolRecentMatch["result"],
+            startedAtMs: windowStart
+          },
+          ...matchSamples,
+          {
+            key: `${profile.riotId}:lp:current`,
+            value: currentDisplayRankScore,
+            label: rankTrendPointLabel(currentDisplayRankScore),
+            result: "unknown" as PublicLolRecentMatch["result"],
+            startedAtMs: windowEnd
+          }
+        ]
+      : [
+          {
+            key: `${profile.riotId}:lp:start`,
+            value: currentRankScore,
+            label: rankTrendPointLabel(currentRankScore),
+            result: "unknown" as PublicLolRecentMatch["result"],
+            startedAtMs: windowStart
+          },
+          {
+            key: `${profile.riotId}:lp:current`,
+            value: currentRankScore,
+            label: rankTrendPointLabel(currentRankScore),
+            result: "unknown" as PublicLolRecentMatch["result"],
+            startedAtMs: windowEnd
+          }
+        ];
+  })();
 
   if (samples.length === 0) return undefined;
   const width = 320;
   const height = 112;
-  const padX = 14;
-  const padY = 16;
+  const padX = 26;
+  const padY = 18;
   const rawMin = Math.min(...samples.map((point) => point.value));
   const rawMax = Math.max(...samples.map((point) => point.value));
   const min = Math.floor(rawMin / 100) * 100;
   const max = Math.ceil(rawMax / 100) * 100;
   const range = Math.max(1, max - min);
-  const points = samples.map((point, index): PublicTrendPoint => {
-    const x = samples.length === 1
-      ? width / 2
-      : padX + (index / (samples.length - 1)) * (width - padX * 2);
+  const points = samples.map((point): PublicTrendPoint => {
+    const rawTimeRatio = Number.isFinite(point.startedAtMs) ? (point.startedAtMs - windowStart) / LP_TREND_WINDOW_MS : 0;
+    const timeRatio = Math.max(0, Math.min(1, rawTimeRatio));
+    const x = padX + timeRatio * (width - padX * 2);
     const y = padY + (1 - ((point.value - min) / range)) * (height - padY * 2);
-    return { ...point, x: roundTo(x, 1), y: roundTo(y, 1) };
+    return {
+      key: point.key,
+      x: roundTo(x, 1),
+      y: roundTo(y, 1),
+      value: point.value,
+      label: point.label,
+      result: point.result
+    };
   });
   const linePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
   const baseY = height - padY;
@@ -2223,9 +2448,9 @@ function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
     linePoints,
     areaPath,
     yLabels: rankTrendAxisLabels(rawMin, rawMax),
-    startLabel: formatShortDate(samples[0]?.startedAt),
-    middleLabel: formatShortDate(samples[Math.floor(samples.length / 2)]?.startedAt),
-    endLabel: formatShortDate(samples[samples.length - 1]?.startedAt)
+    startLabel: formatShortDate(new Date(windowStart).toISOString()),
+    middleLabel: formatShortDate(new Date(windowMiddle).toISOString()),
+    endLabel: formatShortDate(new Date(windowEnd).toISOString())
   };
 }
 
@@ -2822,11 +3047,13 @@ function FlexRankPlaceholder() {
 
 function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const roles = profile.rolePerformance.slice(0, 5);
-  const recentLosses = Math.max(0, profile.summary.recentGames - profile.summary.recentWins);
+  const aggregateSummary = summarizeMatches(recentAnalysisMatches(profile));
+  const recentLosses = Math.max(0, aggregateSummary.recentGames - aggregateSummary.recentWins);
   const aggregateRank = soloRankStats(profile) ?? flexRankStats(profile) ?? profile.rankedStats;
   const aggregateTierIcon = assetUrl(aggregateRank?.tierIconUrl);
   const aggregateGrade = aggregatePerformanceGrade(profile);
-  const winRate = Math.max(0, Math.min(100, profile.summary.recentWinRate));
+  const aggregateScore = aggregatePerformanceScore(profile);
+  const winRate = Math.max(0, Math.min(100, aggregateSummary.recentWinRate));
   return (
     <section id="public-stats" className="public-overview-dashboard-panel">
       <article className="public-panel public-aggregate-card">
@@ -2835,7 +3062,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
             <span className="public-aggregate-title-icon" aria-hidden="true"><i /><i /><i /></span>
             {t().aggregatePerformance}
           </h2>
-          <span>{profile.summary.recentGames}{t().games}</span>
+          <span>{aggregateSummary.recentGames}{t().games}</span>
         </div>
         <div className="public-aggregate-hero">
           <div className="public-aggregate-emblem" aria-hidden="true">
@@ -2843,12 +3070,12 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
           </div>
           <div className="public-aggregate-grade">
             <span data-ko={publicI18n.ko.aggregateGrade} data-ja={publicI18n.ja.aggregateGrade}>{t().aggregateGrade}</span>
-            <strong className={metricToneClass(scoreTone(averageAiScore(profile)))}>{aggregateGrade}</strong>
+            <strong className={metricToneClass(scoreTone(aggregateScore))}>{aggregateGrade}</strong>
             <div className="public-aggregate-record">
-              <b>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"}</b>
+              <b>{aggregateSummary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"}</b>
               <b>{recentLosses}{activePublicLocale === "ja" ? "敗" : "패"}</b>
             </div>
-            <small>{gamesText(profile.summary.recentGames)} · {t().aiScore} {averageAiScore(profile)}</small>
+            <small>{gamesText(aggregateSummary.recentGames)} · {t().aiScore} {aggregateScore}</small>
           </div>
           <div className="public-aggregate-winrate" aria-label={`${t().winRate} ${formatPercent(winRate)}`}>
             <svg viewBox="0 0 120 120" role="img">
@@ -2856,8 +3083,8 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
               <circle className="value" cx="60" cy="60" r="48" pathLength="100" strokeDasharray={`${winRate} 100`} />
             </svg>
             <div>
-              <strong className={metricToneClass(percentTone(winRate))}>{formatPercent(winRate)}</strong>
               <span>{t().winRate}</span>
+              <strong className={metricToneClass(percentTone(winRate))}>{formatPercent(winRate)}</strong>
             </div>
           </div>
         </div>
@@ -2865,7 +3092,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
       <article className="public-panel public-lp-trend-card">
         <div className="public-section-head">
           <h2 data-ko={publicI18n.ko.lpTrend} data-ja={publicI18n.ja.lpTrend}>{t().lpTrend}</h2>
-          <span data-ko={publicI18n.ko.recent20Games} data-ja={publicI18n.ja.recent20Games}>{t().recent20Games}</span>
+          <span data-ko={publicI18n.ko.period30} data-ja={publicI18n.ja.period30}>{t().period30}</span>
         </div>
         <div className={`public-lp-chart ${rankTrendTierClass(profile.rankedStats)}`}>
           <LpTrendLineChart profile={profile} />
@@ -2879,7 +3106,10 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
         <div className="public-role-win-list">
           {roles.length === 0 ? <p className="public-empty">{t().noData}</p> : roles.map((role) => (
             <div key={role.role}>
-              <span>{mainRoleLabel(role.role)}</span>
+              <span className="public-role-win-label" title={mainRoleLabel(role.role)}>
+                <RoleIcon role={role.role} />
+                <b>{mainRoleLabel(role.role)}</b>
+              </span>
               <div><i style={{ width: barWidth(role.winRate, 100) }} /></div>
               <strong className={metricToneClass(percentTone(role.winRate))}>{formatPercent(role.winRate)}</strong>
               <small>{winLossText(role.wins, role.games)}</small>
@@ -3102,7 +3332,7 @@ function PublicNotificationPanel({
 function PublicLocaleSelector({
   locale,
   onLocale,
-  onAutoLocale
+  onAutoLocale: _onAutoLocale
 }: {
   locale: PublicLocale;
   onLocale: (locale: PublicLocale) => void;
@@ -3116,10 +3346,6 @@ function PublicLocaleSelector({
   const activeCode = locale === "ja" ? "JP" : "KR";
   function selectLocale(nextLocale: PublicLocale): void {
     onLocale(nextLocale);
-    setOpen(false);
-  }
-  function selectAutoLocale(): void {
-    onAutoLocale?.();
     setOpen(false);
   }
   return (
@@ -3144,25 +3370,42 @@ function PublicLocaleSelector({
               className={option.locale === locale ? "active" : ""}
               role="menuitemradio"
               aria-checked={option.locale === locale}
+              aria-label={`${option.code} ${option.label}`}
               onClick={() => selectLocale(option.locale)}
             >
-              <span>{option.code}</span>
-              <strong>{option.label}</strong>
+              <strong>{option.code}</strong>
               <em aria-hidden="true">✓</em>
             </button>
           ))}
-          <button
-            type="button"
-            className="public-locale-auto"
-            role="menuitem"
-            onClick={selectAutoLocale}
-          >
-            <span aria-hidden="true">↔</span>
-            <strong data-ko="언어 자동 감지" data-ja="言語を自動検出">{activePublicLocale === "ja" ? "言語を自動検出" : "언어 자동 감지"}</strong>
-          </button>
         </div>
       ) : null}
     </div>
+  );
+}
+
+function PublicHeaderMenu({
+  activePage,
+  onPage
+}: {
+  activePage: PublicMainPage;
+  onPage: (page: PublicMainPage) => void;
+}) {
+  const items: Array<{ key: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
+    { key: "search", icon: "⌕", ko: publicI18n.ko.searchNav, ja: publicI18n.ja.searchNav, label: t().searchNav },
+    { key: "favorites", icon: "☆", ko: publicI18n.ko.favoritesTitle, ja: publicI18n.ja.favoritesTitle, label: t().favoritesTitle },
+    { key: "subscriptions", icon: "◆", ko: publicI18n.ko.subscriptionStatus, ja: publicI18n.ja.subscriptionStatus, label: t().subscriptionStatus },
+    { key: "patch", icon: "▣", ko: publicI18n.ko.patchNotes, ja: publicI18n.ja.patchNotes, label: t().patchNotes }
+  ];
+
+  return (
+    <nav className="public-header-nav" aria-label="Seiga.GG">
+      {items.map((item) => (
+        <button className={activePage === item.key ? "active" : ""} type="button" onClick={() => onPage(item.key)} key={item.key}>
+          <span aria-hidden="true">{item.icon}</span>
+          <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
+        </button>
+      ))}
+    </nav>
   );
 }
 
@@ -3170,6 +3413,7 @@ function PublicAppHeader({
   locale,
   profile,
   twitchStatus,
+  activePage,
   showSearch = true,
   showFilters = true,
   query,
@@ -3182,6 +3426,7 @@ function PublicAppHeader({
   onClear,
   onSubmit,
   onPickSuggestion,
+  onPage,
   onLocale,
   onAutoLocale,
   onTwitchLogin,
@@ -3197,6 +3442,7 @@ function PublicAppHeader({
   locale: PublicLocale;
   profile: PublicLolProfile | null;
   twitchStatus: PublicTwitchViewerStatus;
+  activePage: PublicMainPage;
   showSearch?: boolean;
   showFilters?: boolean;
   query: string;
@@ -3209,6 +3455,7 @@ function PublicAppHeader({
   onClear: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onPickSuggestion: (suggestion: SearchSuggestion) => void;
+  onPage: (page: PublicMainPage) => void;
   onLocale: (locale: PublicLocale) => void;
   onAutoLocale: () => void;
   onTwitchLogin: () => void;
@@ -3235,6 +3482,7 @@ function PublicAppHeader({
       <div className="public-header-brand">
         <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
       </div>
+      <PublicHeaderMenu activePage={activePage} onPage={onPage} />
       {showSearch ? (
         <SearchForm
           query={query}
@@ -3534,47 +3782,21 @@ function PublicTwitchFollowedScreen({
   );
 }
 
-function PublicSavedDataPanel({
+function PublicFavoritesPage({
   favorites,
-  recentSearches,
-  twitchStatus,
-  followed,
   onPick
 }: {
   favorites: PublicFavorite[];
-  recentSearches: SearchSuggestion[];
-  twitchStatus: PublicTwitchViewerStatus;
-  followed: PublicTwitchFollowedLolResponse | null;
   onPick: (suggestion: SearchSuggestion) => void;
 }) {
-  const unique = new Map<string, SearchSuggestion>();
-  for (const suggestion of [...favorites, ...recentSearches]) {
-    const key = normalizeSuggestionKey(suggestion);
-    if (!unique.has(key)) unique.set(key, suggestion);
-  }
-  const rankingRows = [...unique.values()]
-    .sort((a, b) => rankScore(b.rankedStats) - rankScore(a.rankedStats) || suggestionRiotId(a).localeCompare(suggestionRiotId(b)))
-    .slice(0, 8);
-  const subscriptions = followed?.subscriptions ?? [];
   return (
-    <section id="public-saved-data" className="public-panel public-saved-data-panel">
+    <section className="public-panel public-saved-data-panel public-menu-page-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.savedData} data-ja={publicI18n.ja.savedData}>{t().savedData}</h2>
-        <span data-ko={publicI18n.ko.cachedRanking} data-ja={publicI18n.ja.cachedRanking}>{t().cachedRanking}</span>
+        <h2 data-ko={publicI18n.ko.favoritesTitle} data-ja={publicI18n.ja.favoritesTitle}>{t().favoritesTitle}</h2>
+        <span>{favorites.length}</span>
       </div>
-      <div className="public-saved-grid">
-        <article>
-          <strong data-ko={publicI18n.ko.ranking} data-ja={publicI18n.ja.ranking}>{t().ranking}</strong>
-          {rankingRows.length === 0 ? <p className="public-empty">{t().noData}</p> : rankingRows.map((row, index) => (
-            <button type="button" onClick={() => onPick(row)} key={`ranking:${normalizeSuggestionKey(row)}`}>
-              <span>{index + 1}</span>
-              {row.profileIconUrl ? <img src={assetUrl(row.profileIconUrl)} alt="" /> : <em>{row.gameName.slice(0, 1).toUpperCase()}</em>}
-              <strong>{row.gameName}<small>#{row.tagLine}</small></strong>
-              <b>{rankLabel(row.rankedStats)}</b>
-            </button>
-          ))}
-        </article>
-        <article>
+      <div className="public-saved-grid single">
+        <article className="public-favorites-card">
           <strong data-ko={publicI18n.ko.favoritesTitle} data-ja={publicI18n.ja.favoritesTitle}>{t().favoritesTitle}</strong>
           {favorites.length === 0 ? <p className="public-empty">{t().noFavorites}</p> : favorites.map((favorite) => (
             <button type="button" onClick={() => onPick(favorite)} key={`favorite:${normalizeSuggestionKey(favorite)}`}>
@@ -3584,6 +3806,26 @@ function PublicSavedDataPanel({
             </button>
           ))}
         </article>
+      </div>
+    </section>
+  );
+}
+
+function PublicSubscriptionsPage({
+  twitchStatus,
+  followed
+}: {
+  twitchStatus: PublicTwitchViewerStatus;
+  followed: PublicTwitchFollowedLolResponse | null;
+}) {
+  const subscriptions = followed?.subscriptions ?? [];
+  return (
+    <section className="public-panel public-saved-data-panel public-menu-page-panel">
+      <div className="public-section-head">
+        <h2 data-ko={publicI18n.ko.subscriptionStatus} data-ja={publicI18n.ja.subscriptionStatus}>{t().subscriptionStatus}</h2>
+        <span>{subscriptions.length}</span>
+      </div>
+      <div className="public-saved-grid single">
         <article className="public-subscriptions-card">
           <strong data-ko={publicI18n.ko.subscriptionsTitle} data-ja={publicI18n.ja.subscriptionsTitle}>{t().subscriptionsTitle}</strong>
           <p data-ko={publicI18n.ko.subscriptionsSubtitle} data-ja={publicI18n.ja.subscriptionsSubtitle}>{t().subscriptionsSubtitle}</p>
@@ -3604,6 +3846,21 @@ function PublicSavedDataPanel({
             </a>
           ))}
         </article>
+      </div>
+    </section>
+  );
+}
+
+function PublicPatchNotesPage() {
+  return (
+    <section className="public-panel public-menu-page-panel public-patch-notes-page">
+      <div className="public-section-head">
+        <h2 data-ko={publicI18n.ko.patchNotes} data-ja={publicI18n.ja.patchNotes}>{t().patchNotes}</h2>
+        <span>Seiga.GG</span>
+      </div>
+      <div className="public-patch-placeholder">
+        <strong data-ko={publicI18n.ko.patchNotesPreparing} data-ja={publicI18n.ja.patchNotesPreparing}>{t().patchNotesPreparing}</strong>
+        <p data-ko={publicI18n.ko.patchNotesPreparingBody} data-ja={publicI18n.ja.patchNotesPreparingBody}>{t().patchNotesPreparingBody}</p>
       </div>
     </section>
   );
@@ -3688,10 +3945,12 @@ function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge
   const allBadges = badges ?? [];
   const priorityBadge = compact ? allBadges.find((badge) => badge.code === "mvp" || badge.code === "ace") : undefined;
   const orderedBadges = priorityBadge ? [priorityBadge, ...allBadges.filter((badge) => badge !== priorityBadge)] : allBadges;
-  const visibleBadges = orderedBadges.slice(0, compact ? 3 : 4);
+  const maxVisibleBadges = compact ? 1 : 4;
+  const visibleBadges = orderedBadges.slice(0, maxVisibleBadges);
+  const overflowCount = Math.max(0, orderedBadges.length - visibleBadges.length);
   if (visibleBadges.length === 0) return null;
   return (
-    <div className={`public-match-badges ${compact ? "compact" : ""}`} data-mobile-overflow={compact && allBadges.length > 1 ? "true" : undefined}>
+    <div className={`public-match-badges ${compact ? "compact" : ""}`}>
       {visibleBadges.map((badge) => (
         <span
           className={`public-match-badge ${badge.code}`}
@@ -3702,6 +3961,7 @@ function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge
           {matchBadgeLabel(badge.code)}
         </span>
       ))}
+      {overflowCount > 0 ? <span className="public-match-badge more" aria-label={`${overflowCount} more`}>...</span> : null}
     </div>
   );
 }
@@ -3735,14 +3995,224 @@ function fixedRecentItemSlots(items: PublicLolRecentMatch["items"], count = 6): 
   return slots;
 }
 
+function buildParticipantKey(participant: Pick<PublicLolMatchBuildParticipant, "participantId" | "riotId" | "champion">): string {
+  return participant.participantId !== undefined
+    ? `participant:${participant.participantId}`
+    : `${participant.riotId ?? "unknown"}:${participant.champion.championId}`;
+}
+
+function defaultBuildParticipantKey(match: PublicLolRecentMatch, build: PublicLolMatchBuildResponse | undefined): string | undefined {
+  const target = match.teams.flatMap((team) => team.players).find((player) => player.isTarget);
+  if (target?.participantId !== undefined) return `participant:${target.participantId}`;
+  const targetBuild = build?.participants.find((participant) => participant.riotId && target?.riotId && normalizeRiotId(participant.riotId) === normalizeRiotId(target.riotId));
+  return targetBuild ? buildParticipantKey(targetBuild) : build?.participants[0] ? buildParticipantKey(build.participants[0]) : undefined;
+}
+
+function abilityName(skill: PublicLolMatchBuildSkillEvent): string {
+  if (activePublicLocale === "ja") return skill.nameJa ?? skill.nameKo ?? skill.key;
+  return skill.nameKo ?? skill.nameJa ?? skill.key;
+}
+
+function RecentMatchBuildPanel({
+  match,
+  build,
+  loading,
+  error,
+  selectedKey,
+  onSelect
+}: {
+  match: PublicLolRecentMatch;
+  build: PublicLolMatchBuildResponse | undefined;
+  loading: boolean;
+  error: string;
+  selectedKey: string | undefined;
+  onSelect: (key: string) => void;
+}) {
+  if (loading && !build) return <div className="public-match-build-state">{t().buildLoading}</div>;
+  if (error && !build) return <div className="public-match-build-state error">{error}</div>;
+  const participants = build?.participants ?? [];
+  const activeKey = selectedKey ?? defaultBuildParticipantKey(match, build);
+  const selectedParticipant = participants.find((participant) => buildParticipantKey(participant) === activeKey) ?? participants[0];
+  if (!selectedParticipant) return <div className="public-match-build-state">{t().noData}</div>;
+  const selectedItems = selectedParticipant.items ?? [];
+  const selectedItemEvents = selectedParticipant.itemEvents ?? [];
+  const selectedSkillOrder = selectedParticipant.skillOrder ?? [];
+  const selectedRunes = selectedParticipant.runes ?? [];
+  const itemEvents = selectedItemEvents.length > 0
+    ? selectedItemEvents
+    : fixedRecentItemSlots(selectedItems, 7)
+      .filter((item): item is PublicLolMatchBuildParticipant["items"][number] => Boolean(item))
+      .map((item) => ({ itemId: item.itemId, iconUrl: item.iconUrl, timestampMs: Number.NaN }));
+  const visibleSkillIcons = [...new Map(selectedSkillOrder.map((skill) => [skill.key, skill])).values()].slice(0, 4);
+  return (
+    <section className="public-match-build-panel" aria-label={t().matchBuildTab}>
+      <div className="public-match-build-picker" role="listbox" aria-label={t().champion}>
+        {participants.map((participant) => {
+          const key = buildParticipantKey(participant);
+          return (
+            <button
+              type="button"
+              className={key === buildParticipantKey(selectedParticipant) ? "active" : ""}
+              key={key}
+              onClick={() => onSelect(key)}
+              title={participant.riotId ?? championName(participant.champion)}
+            >
+              {participant.champion.iconUrl ? <img src={participant.champion.iconUrl} alt="" /> : <span>{championName(participant.champion).slice(0, 1)}</span>}
+              <strong className={metricToneClass(scoreTone(participant.score))}>{participant.score}</strong>
+            </button>
+          );
+        })}
+      </div>
+      <div className="public-match-build-group items">
+        <span data-ko={publicI18n.ko.items} data-ja={publicI18n.ja.items}>{t().items}</span>
+        <div className="public-match-build-timeline">
+          {itemEvents.length > 0 ? itemEvents.slice(0, 24).map((item, index) => (
+            <div key={`${match.matchId}:build-event:${selectedParticipant.participantId ?? selectedParticipant.riotId}:${index}:${item.itemId}`}>
+              <span>{item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId}</span>
+              <small>{formatBuildMinute(item.timestampMs)}</small>
+            </div>
+          )) : <p className="public-empty">{t().noData}</p>}
+        </div>
+      </div>
+      <div className="public-match-build-group skills">
+        <span data-ko={publicI18n.ko.matchBuildTab} data-ja={publicI18n.ja.matchBuildTab}>{activePublicLocale === "ja" ? "スキルビルド" : "스킬 빌드"}</span>
+        <div className="public-match-skill-build">
+          <div className="public-match-skill-icons">
+            {visibleSkillIcons.map((skill) => (
+              <span key={`${selectedParticipant.participantId}:skill-icon:${skill.key}`} title={abilityName(skill)}>
+                {skill.iconUrl ? <img src={skill.iconUrl} alt="" /> : skill.key}
+                <b>{skill.key}</b>
+              </span>
+            ))}
+          </div>
+          <div className="public-match-skill-grid" aria-label={activePublicLocale === "ja" ? "スキル順" : "스킬 순서"}>
+            {(["Q", "W", "E", "R"] as const).map((key) => (
+              <Fragment key={`skill-row:${key}`}>
+                <strong>{key}</strong>
+                {Array.from({ length: 18 }).map((_, index) => {
+                  const level = index + 1;
+                  const skill = selectedSkillOrder.find((item) => item.level === level && item.key === key);
+                  return (
+                    <span className={skill ? key.toLowerCase() : ""} key={`${selectedParticipant.participantId}:skill-level:${key}:${level}`} title={skill ? `${level} · ${abilityName(skill)}` : `${level}`}>
+                      {skill ? level : ""}
+                    </span>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="public-match-build-group runes">
+        <span data-ko={publicI18n.ko.runes} data-ja={publicI18n.ja.runes}>{t().runes}</span>
+        <div className="public-match-build-runes">
+          {selectedRunes.length > 0 ? selectedRunes.map((rune, index) => (
+            <span className={`rune-${rune.kind}`} key={`${selectedParticipant.participantId}:rune:${rune.kind}:${rune.category ?? "unknown"}:${rune.runeId}:${index}`} title={runeName(rune)}>
+              {rune.iconUrl ? <img src={rune.iconUrl} alt="" /> : rune.runeId}
+              <small>{runeName(rune)}</small>
+            </span>
+          )) : <p className="public-empty">{t().noData}</p>}
+        </div>
+        <div className="public-match-build-summary">
+          <strong>{selectedParticipant.riotId ?? championName(selectedParticipant.champion)}</strong>
+          <small>{championName(selectedParticipant.champion)} · {t().aiScore} {selectedParticipant.score}</small>
+          <MatchBadges badges={selectedParticipant.badges} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function fixedTeamItemSlots(items: PublicLolMatchParticipant["items"]): Array<PublicLolMatchParticipant["items"][number] | undefined> {
+  const slots = Array<PublicLolMatchParticipant["items"][number] | undefined>(7).fill(undefined);
+  items.forEach((item, index) => {
+    const slot = item.slot >= 0 && item.slot < slots.length ? item.slot : index;
+    if (slot >= 0 && slot < slots.length && !slots[slot] && item.itemId > 0) slots[slot] = item;
+  });
+  return [0, 1, 2, 6, 3, 4, 5].map((slot) => slots[slot]);
+}
+
 function PlayerItemBuild({ items, itemKey }: { items: PublicLolMatchParticipant["items"]; itemKey: string }) {
+  const itemSlots = fixedTeamItemSlots(items);
   return (
     <div className="public-team-item-build" aria-label={t().items}>
-      {items.length > 0 ? items.map((item) => (
-        <span className="public-team-item-slot" key={`${itemKey}:${item.slot}:${item.itemId}`}>
+      {itemSlots.map((item, index) => item ? (
+        <span className="public-team-item-slot" key={`${itemKey}:${index}:${item.slot}:${item.itemId}`}>
           {item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId}
         </span>
-      )) : <span className="public-team-item-empty">-</span>}
+      ) : (
+        <span className="public-team-item-empty" key={`${itemKey}:${index}:empty`} aria-hidden="true" />
+      ))}
+    </div>
+  );
+}
+
+function runeName(rune: PublicLolMatchParticipant["runes"][number] | undefined): string {
+  if (!rune) return "-";
+  if (activePublicLocale === "ja") return rune.nameJa ?? rune.nameKo ?? `Rune ${rune.runeId}`;
+  return rune.nameKo ?? rune.nameJa ?? `Rune ${rune.runeId}`;
+}
+
+function PlayerSpellBuild({
+  spells,
+  dataDragonVersion
+}: {
+  spells: number[] | undefined;
+  dataDragonVersion: string | undefined;
+}) {
+  const slots = [spells?.[0], spells?.[1]];
+  return (
+    <div className="public-team-spell-build" aria-label={t().summonerSpells}>
+      {slots.map((spellId, index) => {
+        const iconUrl = spellId ? summonerSpellIconUrl(spellId, dataDragonVersion) : undefined;
+        return spellId ? (
+          <span className="public-team-spell-slot" key={`${spellId}:${index}`} title={`Spell ${spellId}`}>
+            {iconUrl ? <img src={iconUrl} alt="" /> : <b>{spellId}</b>}
+          </span>
+        ) : (
+          <span className="public-team-spell-empty" key={`empty:${index}`} aria-hidden="true" />
+        );
+      })}
+    </div>
+  );
+}
+
+function PlayerRuneBuild({ runes }: { runes: PublicLolMatchParticipant["runes"] | undefined }) {
+  const primary = runes?.find((rune) => rune.kind === "primary" && rune.category === "keystone") ??
+    runes?.find((rune) => rune.kind === "primary" && rune.category !== "style") ??
+    runes?.find((rune) => rune.kind === "primary") ??
+    runes?.[0];
+  const secondary = runes?.find((rune) => rune.kind === "secondary" && rune.category === "perk") ??
+    runes?.find((rune) => rune.kind === "secondary" && rune.category !== "style") ??
+    runes?.find((rune) => rune.kind === "secondary") ??
+    runes?.find((rune) => rune !== primary);
+  const slots = [primary, secondary];
+  return (
+    <div className="public-team-rune-build" aria-label={t().runes}>
+      {slots.map((rune, index) => rune ? (
+        <span className={`public-team-rune-slot rune-${rune.kind}`} key={`${rune.runeId}:${rune.kind}:${rune.category ?? "unknown"}`} title={runeName(rune)}>
+          {rune.iconUrl ? <img src={rune.iconUrl} alt="" /> : <b>{rune.runeId}</b>}
+        </span>
+      ) : (
+        <span className="public-team-rune-empty" key={`empty:${index}`} aria-hidden="true" />
+      ))}
+    </div>
+  );
+}
+
+function PlayerLoadoutBuild({
+  spells,
+  runes,
+  dataDragonVersion
+}: {
+  spells: number[] | undefined;
+  runes: PublicLolMatchParticipant["runes"] | undefined;
+  dataDragonVersion: string | undefined;
+}) {
+  return (
+    <div className="public-team-loadout-build" aria-label={`${t().summonerSpells} / ${t().runes}`}>
+      <PlayerSpellBuild spells={spells} dataDragonVersion={dataDragonVersion} />
+      <PlayerRuneBuild runes={runes} />
     </div>
   );
 }
@@ -3830,27 +4300,29 @@ function MatchTeamDetails({
 }) {
   if (match.teams.length === 0) return null;
   const maxDamage = matchTeamTotal(match, (player) => player.damageDealtToChampions);
-  const maxGold = matchTeamTotal(match, (player) => player.goldEarned);
+  const maxCs = matchTeamTotal(match, (player) => player.cs);
   const maxVision = matchTeamTotal(match, (player) => player.visionScore);
-  const maxTaken = matchTeamTotal(match, (player) => player.damageTaken);
+  const dataDragonVersion = recentMatchDataDragonVersion(match);
   return (
     <div className="public-team-detail" aria-label={t().teamDetails}>
       {match.teams.map((team) => (
         <section className={`public-team-card ${team.players.some((player) => player.isTarget) ? "ally" : "enemy"}`} key={`${match.matchId}:${team.teamId}`}>
           {(() => {
             const teamRankStats = team.players.map((player, index) => matchRankForPlayer(rankDetail, team.teamId, player, index));
-            const knownTierCount = teamRankStats.filter(Boolean).length;
             const tierSummary = rankLoading
               ? t().tierLoading
               : rankDetail
-                ? `${t().averageTier} ${averageTierLabel(teamRankStats)} · ${t().knownTier} ${knownTierCount}/${team.players.length}`
-                : `${t().tierUnavailable} · ${t().knownTier} 0/${team.players.length}`;
+                ? `${t().averageTier} ${averageTierLabel(teamRankStats)}`
+                : t().tierUnavailable;
             return (
               <>
           <div className="public-team-head">
             <strong>{teamLabel(team)}</strong>
             <span>{resultLabel(team.result)} · {team.kills}/{team.deaths}/{team.assists}</span>
-            <small>{t().gold} {formatNumber(team.goldEarned)} · {t().damage} {formatNumber(team.damageDealtToChampions)} · {objectiveSummary(team.objectives)}</small>
+            <div className="public-team-head-summary">
+              <small>{t().gold} {formatNumber(team.goldEarned)} · {t().damage} {formatNumber(team.damageDealtToChampions)} · {objectiveLabels[activePublicLocale].champion} {formatNumber(team.kills)}</small>
+              <small>{objectiveSummaryByOrder(team.objectives, ["horde", "riftHerald", "dragon", "baron", "inhibitor", "tower"])}</small>
+            </div>
             <em>{tierSummary}</em>
           </div>
 	          <div className="public-team-player-list">
@@ -3862,16 +4334,16 @@ function MatchTeamDetails({
 	                <article className={`public-team-player ${player.isTarget ? "target" : ""} ${playerHighlightClass}`} key={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`}>
 	                  <div className="public-team-player-main">
 	                    <TeamChampionAvatar player={player} />
+                      <PlayerLoadoutBuild spells={player.summonerSpells} runes={player.runes} dataDragonVersion={dataDragonVersion} />
 	                    <div className="public-team-player-copy">
-	                      <SearchableRiotId riotId={player.riotId} fallback={playerDisplayName(player)} badges={playerHighlightBadges} streamer={player.twitchStream} onSearch={onSearchRiotId} />
-	                      <div className="public-team-player-meta">
-	                        <small>{mainRoleLabel(player.position)} · {championName(player.champion)} Lv.{formatNumber(player.championLevel)}</small>
+	                      <div className="public-team-player-id-line">
 	                        <span
                             className={rankTierClass(rankedStats, rankLoading ? "loading" : rankedStats ? "ready" : "unknown")}
                             title={rankLoading ? t().tierLoading : rankedStats ? rankLabel(rankedStats) : t().tierUnavailable}
                           >
                             {matchRankBadgeLabel(rankedStats, rankLoading)}
                           </span>
+	                        <SearchableRiotId riotId={player.riotId} fallback={playerDisplayName(player)} badges={playerHighlightBadges} streamer={player.twitchStream} onSearch={onSearchRiotId} />
 	                      </div>
 	                    </div>
 	                  </div>
@@ -3880,17 +4352,13 @@ function MatchTeamDetails({
 	                    <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
 	                    <span><KdaMetricText value={player.kda} /></span>
 	                  </div>
-                <div className="public-team-stat" style={{ background: heatBackground(player.goldEarned, maxGold, "green") }}>
-                  <strong>{formatNumber(player.goldEarned)}</strong>
-                  <span className={metricToneClass(teamShareTone(player.goldShare))}>{t().gold} · {formatPercent(player.goldShare, 1)}</span>
-                </div>
                 <div className="public-team-stat" style={{ background: heatBackground(player.damageDealtToChampions, maxDamage) }}>
                   <strong>{formatNumber(player.damageDealtToChampions)}</strong>
-                  <span className={metricToneClass(teamShareTone(player.damageShare))}>{t().damage} · {formatPercent(player.damageShare, 1)}</span>
+                  <span className={metricToneClass(teamShareTone(player.damageShare))}>{t().totalDamage}</span>
                 </div>
-                <div className="public-team-stat" style={{ background: heatBackground(player.damageTaken, maxTaken, "red") }}>
-                  <strong>{formatNumber(player.damageTaken)}</strong>
-                  <span>{t().damageTaken} · {formatPercent(player.damageTakenShare, 1)}</span>
+                <div className="public-team-stat" style={{ background: heatBackground(player.cs, maxCs, "green") }}>
+                  <strong>{formatNumber(player.cs)}</strong>
+                  <span className={metricToneClass(csTone(player.csPerMinute))}>{activePublicLocale === "ja" ? `CS · ${formatDecimal(player.csPerMinute, 1)}/分` : `CS · ${formatDecimal(player.csPerMinute, 1)}/분`}</span>
                 </div>
                 <div className="public-team-stat" style={{ background: heatBackground(player.visionScore, maxVision) }}>
                   <strong>{formatNumber(player.visionScore)}</strong>
@@ -4070,13 +4538,23 @@ function RecentMatches({
   moreError?: string;
 }) {
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
+  const [expandedMatchViews, setExpandedMatchViews] = useState<Record<string, PublicExpandedMatchView>>({});
   const [matchRanks, setMatchRanks] = useState<Record<string, PublicLolMatchRankResponse>>({});
   const [matchRankLoading, setMatchRankLoading] = useState<Record<string, boolean>>({});
+  const [matchBuilds, setMatchBuilds] = useState<Record<string, PublicLolMatchBuildResponse>>({});
+  const [matchBuildLoading, setMatchBuildLoading] = useState<Record<string, boolean>>({});
+  const [matchBuildErrors, setMatchBuildErrors] = useState<Record<string, string>>({});
+  const [selectedBuildParticipantKeys, setSelectedBuildParticipantKeys] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setExpandedMatchId(null);
+    setExpandedMatchViews({});
     setMatchRanks({});
     setMatchRankLoading({});
+    setMatchBuilds({});
+    setMatchBuildLoading({});
+    setMatchBuildErrors({});
+    setSelectedBuildParticipantKeys({});
   }, [profile.riotId, profile.refreshAvailableAt]);
 
   async function ensureMatchRanks(matchId: string): Promise<void> {
@@ -4092,6 +4570,24 @@ function RecentMatches({
     }
   }
 
+  async function ensureMatchBuild(match: PublicLolRecentMatch): Promise<void> {
+    if (matchBuilds[match.matchId] || matchBuildLoading[match.matchId]) return;
+    setMatchBuildLoading((current) => ({ ...current, [match.matchId]: true }));
+    setMatchBuildErrors((current) => ({ ...current, [match.matchId]: "" }));
+    try {
+      const response = await getPublicLolMatchBuild(match.matchId);
+      setMatchBuilds((current) => ({ ...current, [match.matchId]: response }));
+      setSelectedBuildParticipantKeys((current) => current[match.matchId]
+        ? current
+        : { ...current, [match.matchId]: defaultBuildParticipantKey(match, response) ?? "" });
+    } catch (error) {
+      const message = error instanceof Error && error.message ? error.message : t().buildLoadFailed;
+      setMatchBuildErrors((current) => ({ ...current, [match.matchId]: message }));
+    } finally {
+      setMatchBuildLoading((current) => ({ ...current, [match.matchId]: false }));
+    }
+  }
+
   return (
     <section className="public-panel public-matches-panel">
       <div className="public-section-head">
@@ -4102,10 +4598,13 @@ function RecentMatches({
       <div className="public-match-list">
         {profile.recentMatches.length === 0 ? <p className="public-empty">{t().noData}</p> : profile.recentMatches.map((match) => {
           const expanded = expandedMatchId === match.matchId;
+          const expandedView = expandedMatchViews[match.matchId] ?? "record";
           const highlightClass = matchHighlightClass(match.badges);
           const rankDetail = matchRanks[match.matchId];
           const rankLoading = Boolean(matchRankLoading[match.matchId]);
-          const opponentRank = matchRankForOpponent(rankDetail, match.opponent);
+          const build = matchBuilds[match.matchId];
+          const buildLoading = Boolean(matchBuildLoading[match.matchId]);
+          const buildError = matchBuildErrors[match.matchId] ?? "";
           const dataDragonVersion = recentMatchDataDragonVersion(match);
           const recentItemSlots = fixedRecentItemSlots(match.items, 6);
           const aiScore = matchAiScore(match);
@@ -4171,7 +4670,10 @@ function RecentMatches({
                   onClick={() => {
                     const opening = expandedMatchId !== match.matchId;
                     setExpandedMatchId(opening ? match.matchId : null);
-                    if (opening) void ensureMatchRanks(match.matchId);
+                    if (opening) {
+                      setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
+                      void ensureMatchRanks(match.matchId);
+                    }
                   }}
                 >
                   <span aria-hidden="true" />
@@ -4180,43 +4682,48 @@ function RecentMatches({
 
               {expanded ? (
                 <div className="public-match-expanded">
-                  <div className="public-match-detail">
-                    <div className="public-match-loadout">
-                      <div className="public-item-list" aria-label={t().items}>
-                        {match.items.length > 0 ? match.items.map((item) => (
-                          <span className="public-item-slot" key={`${match.matchId}:${item.slot}:${item.itemId}`}>
-                            {item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId}
-                          </span>
-                        )) : <span className="public-item-empty">-</span>}
-                      </div>
-                      <MatchBadges badges={match.badges} />
-                    </div>
-                    <div className="public-detail-grid">
-                      <span>{t().damage} {formatNumber(match.damageDealtToChampions)} · {perMinuteText(t().damage, match.damagePerMinute)}</span>
-                      <span>{t().damageShare} {formatPercent(match.damageShare, 1)}</span>
-                      <span>{t().gold} {formatNumber(match.goldEarned)} · {perMinuteText(t().gold, match.goldPerMinute)}</span>
-                      <span>{t().vision} {formatNumber(match.visionScore)} · {t().wards} {formatNumber(match.wardsPlaced)} / {formatNumber(match.wardsKilled)}</span>
-                      <span>{t().objectives} {objectiveSummary(match.team?.objectives)}</span>
-                      <span>{t().deathTime} {formatDuration(match.totalTimeSpentDead)}</span>
-                    </div>
-	                    {match.opponent ? (
-	                      <div className="public-opponent-cell">
-	                        <span data-ko={publicI18n.ko.opponent} data-ja={publicI18n.ja.opponent}>{t().opponent}</span>
-	                        {match.opponent.champion.iconUrl ? <img src={match.opponent.champion.iconUrl} alt="" /> : null}
-	                        <div>
-                            <SearchableRiotId riotId={match.opponent.riotId} fallback={championName(match.opponent.champion)} onSearch={onSearchRiotId} />
-	                          <small>{championName(match.opponent.champion)} · {match.opponent.kills}/{match.opponent.deaths}/{match.opponent.assists} · <KdaMetricText value={match.opponent.kda} /></small>
-                            <span
-                              className={rankTierClass(opponentRank, rankLoading ? "loading" : opponentRank ? "ready" : "unknown")}
-                              title={rankLoading ? t().tierLoading : opponentRank ? rankLabel(opponentRank) : t().tierUnavailable}
-                            >
-                              {matchRankBadgeLabel(opponentRank, rankLoading)}
-                            </span>
-                          </div>
-	                      </div>
-	                    ) : null}
-	                  </div>
-	                  <MatchTeamDetails match={match} rankDetail={rankDetail} rankLoading={rankLoading} onSearchRiotId={onSearchRiotId} />
+                  <div className="public-match-expanded-tabs" role="tablist" aria-label={t().matchDetails}>
+                    <button
+                      type="button"
+                      className={expandedView === "record" ? "active" : ""}
+                      role="tab"
+                      aria-selected={expandedView === "record"}
+                      onClick={() => {
+                        setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
+                        void ensureMatchRanks(match.matchId);
+                      }}
+                      data-ko={publicI18n.ko.matchRecordTab}
+                      data-ja={publicI18n.ja.matchRecordTab}
+                    >
+                      {t().matchRecordTab}
+                    </button>
+                    <button
+                      type="button"
+                      className={expandedView === "build" ? "active" : ""}
+                      role="tab"
+                      aria-selected={expandedView === "build"}
+                      onClick={() => {
+                        setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "build" }));
+                        void ensureMatchBuild(match);
+                      }}
+                      data-ko={publicI18n.ko.matchBuildTab}
+                      data-ja={publicI18n.ja.matchBuildTab}
+                    >
+                      {t().matchBuildTab}
+                    </button>
+                  </div>
+                  {expandedView === "record" ? (
+                    <MatchTeamDetails match={match} rankDetail={rankDetail} rankLoading={rankLoading} onSearchRiotId={onSearchRiotId} />
+                  ) : (
+                    <RecentMatchBuildPanel
+                      match={match}
+                      build={build}
+                      loading={buildLoading}
+                      error={buildError}
+                      selectedKey={selectedBuildParticipantKeys[match.matchId]}
+                      onSelect={(key) => setSelectedBuildParticipantKeys((current) => ({ ...current, [match.matchId]: key }))}
+                    />
+                  )}
 	                </div>
               ) : null}
             </article>
@@ -4318,7 +4825,6 @@ function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
               </div>
               <div className="public-champion-analysis-metric">
                 <strong>{performance ? <KdaMetricText value={performance.averageKda} /> : "-"}</strong>
-                <small className={metricToneClass(kdaTone(performance?.averageKda))}>{performance ? `${formatDecimal(performance.averageKda, 2)}` : "-"}</small>
                 <span><i style={{ width: barWidth(performance?.averageKda, maxKda) }} /></span>
               </div>
               <div className="public-champion-analysis-metric">
@@ -4478,6 +4984,7 @@ export function PublicLolPage({
   const [filters, setFilters] = useState<PublicMatchFilters>(DEFAULT_MATCH_FILTERS);
   const [remoteSuggestions, setRemoteSuggestions] = useState<SearchSuggestion[]>([]);
   const [profileTab, setProfileTab] = useState<PublicProfileTab>("overview");
+  const [activeMainPage, setActiveMainPage] = useState<PublicMainPage>("search");
   const [activeNav, setActiveNav] = useState<PublicNavTarget>("search");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [streamerRegisterOpen, setStreamerRegisterOpen] = useState(false);
@@ -4579,6 +5086,7 @@ export function PublicLolPage({
       setFilters(DEFAULT_MATCH_FILTERS);
       setStreamerRegisterOpen(false);
       setFollowedScreenOpen(false);
+      setActiveMainPage("search");
       setActiveNav("search");
     };
     window.addEventListener("popstate", handlePopState);
@@ -4704,8 +5212,20 @@ export function PublicLolPage({
     const riotId = `${request.riotGameName}#${request.riotTagLine}`;
     setStreamerRegisterOpen(false);
     setFollowedScreenOpen(false);
+    setActiveMainPage("search");
     setQuery(riotId);
     void runSearch(riotId);
+  }
+
+  function changeMainPage(page: PublicMainPage): void {
+    setActiveMainPage(page);
+    setStreamerRegisterOpen(false);
+    setFollowedScreenOpen(false);
+    setActiveNav(page === "search" ? "search" : "community");
+    window.setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (page === "search") document.getElementById("public-search-input")?.focus();
+    }, 0);
   }
 
   async function disconnectTwitchViewer(): Promise<void> {
@@ -4756,6 +5276,7 @@ export function PublicLolPage({
       setFilters(DEFAULT_MATCH_FILTERS);
       setStreamerRegisterOpen(false);
       setFollowedScreenOpen(false);
+      setActiveMainPage("search");
       setActiveNav("search");
       setQuery(result.riotId);
       if (updateUrl) setPublicPath(publicSummonerPath(result.riotId), options.replaceUrl);
@@ -4814,9 +5335,10 @@ export function PublicLolPage({
 	    setProfile(null);
 	    setError("");
     setMoreMatchesError("");
-	    setFilters(DEFAULT_MATCH_FILTERS);
+    setFilters(DEFAULT_MATCH_FILTERS);
     setStreamerRegisterOpen(false);
     setFollowedScreenOpen(false);
+    setActiveMainPage("search");
     setActiveNav("search");
     setPublicPath("/");
   }
@@ -4852,6 +5374,19 @@ export function PublicLolPage({
     }, 0);
   }
 
+  function renderMainMenuPage() {
+    if (activeMainPage === "favorites") {
+      return <PublicFavoritesPage favorites={favorites} onPick={pickSuggestion} />;
+    }
+    if (activeMainPage === "subscriptions") {
+      return <PublicSubscriptionsPage twitchStatus={twitchStatus} followed={followedLol} />;
+    }
+    if (activeMainPage === "patch") {
+      return <PublicPatchNotesPage />;
+    }
+    return null;
+  }
+
   if (streamerRegisterOpen) {
     return (
       <main className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}>
@@ -4860,6 +5395,7 @@ export function PublicLolPage({
             locale={locale}
             profile={profile}
             twitchStatus={twitchStatus}
+            activePage={activeMainPage}
             showSearch={false}
             showFilters={false}
             query={query}
@@ -4872,6 +5408,7 @@ export function PublicLolPage({
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
+            onPage={changeMainPage}
             onLocale={changeLocale}
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={openTwitchViewerPanel}
@@ -4907,6 +5444,7 @@ export function PublicLolPage({
             locale={locale}
             profile={profile}
             twitchStatus={twitchStatus}
+            activePage={activeMainPage}
             showSearch={false}
             showFilters={false}
             query={query}
@@ -4919,6 +5457,7 @@ export function PublicLolPage({
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
+            onPage={changeMainPage}
             onLocale={changeLocale}
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={openTwitchViewerPanel}
@@ -4956,6 +5495,7 @@ export function PublicLolPage({
             locale={locale}
             profile={profile}
             twitchStatus={twitchStatus}
+            activePage={activeMainPage}
             showSearch={false}
             showFilters={false}
             query={query}
@@ -4968,6 +5508,7 @@ export function PublicLolPage({
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
+            onPage={changeMainPage}
             onLocale={changeLocale}
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={openTwitchViewerPanel}
@@ -4980,20 +5521,26 @@ export function PublicLolPage({
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
             onMarkNotificationsRead={markNotificationsRead}
           />
-          <section id="public-search" className="public-home-content public-dashboard-home">
-            <div className="public-home-search-stage">
-              <SearchForm
-                query={query}
-                loading={loading}
-                onQuery={setQuery}
-                onClear={clearSearch}
-                onSubmit={(event) => void submit(event)}
-                suggestions={visibleSuggestions}
-                onPickSuggestion={pickSuggestion}
-              />
-            </div>
-            {error ? <p className="public-error">{error}</p> : null}
-          </section>
+          {activeMainPage === "search" ? (
+            <section id="public-search" className="public-home-content public-dashboard-home">
+              <div className="public-home-search-stage">
+                <SearchForm
+                  query={query}
+                  loading={loading}
+                  onQuery={setQuery}
+                  onClear={clearSearch}
+                  onSubmit={(event) => void submit(event)}
+                  suggestions={visibleSuggestions}
+                  onPickSuggestion={pickSuggestion}
+                />
+              </div>
+              {error ? <p className="public-error">{error}</p> : null}
+            </section>
+          ) : (
+            <section className="public-home-content public-dashboard-home public-menu-page-home">
+              {renderMainMenuPage()}
+            </section>
+          )}
         </section>
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </main>
@@ -5010,6 +5557,7 @@ export function PublicLolPage({
           locale={locale}
           profile={profile}
           twitchStatus={twitchStatus}
+          activePage={activeMainPage}
           showFilters={false}
           query={query}
           loading={loading}
@@ -5021,6 +5569,7 @@ export function PublicLolPage({
           onClear={clearSearch}
           onSubmit={(event) => void submit(event)}
           onPickSuggestion={pickSuggestion}
+          onPage={changeMainPage}
           onLocale={changeLocale}
           onAutoLocale={autoDetectLocale}
           onTwitchLogin={openTwitchViewerPanel}
@@ -5037,55 +5586,57 @@ export function PublicLolPage({
         <div className="public-profile-layout">
           <div className="public-dashboard-content-grid">
             <section className="public-dashboard-center">
-              <ProfileTopPanel
-                profile={activeProfile}
-                loading={loading}
-                favoriteActive={favoriteActive}
-                refreshRemaining={refreshRemaining}
-                onRefresh={() => void runSearch(profile.riotId, { refresh: true })}
-                onToggleFavorite={toggleFavorite}
-              />
-              {error ? <p className="public-error">{error}</p> : null}
-              <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} />
-
-	              {profileTab === "overview" ? (
-	                <>
-	                  <OverviewMetricPanel profile={activeProfile} />
-		                  <RecentMatches
-                        profile={activeProfile}
-                        filters={filters}
-                        champions={availableChampions}
-                        onSearchRiotId={searchRiotId}
-                        onFilters={setFilters}
-                        onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
-                        onLoadMore={() => void loadMoreRecentMatches()}
-                        loadingMore={loadingMoreMatches}
-                        moreError={moreMatchesError}
-                      />
-	                </>
-	              ) : null}
-
-              {profileTab === "champions" ? (
+              {activeMainPage === "search" ? (
                 <>
-                  <ChampionMastery profile={activeProfile} />
-                  <DetailedPerformance profile={activeProfile} />
+                  <ProfileTopPanel
+                    profile={activeProfile}
+                    loading={loading}
+                    favoriteActive={favoriteActive}
+                    refreshRemaining={refreshRemaining}
+                    onRefresh={() => void runSearch(profile.riotId, { refresh: true })}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                  {error ? <p className="public-error">{error}</p> : null}
+                  <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} />
+
+	                {profileTab === "overview" ? (
+	                  <div className="public-overview-search-layout">
+	                    <OverviewMetricPanel profile={activeProfile} />
+		                <RecentMatches
+                          profile={activeProfile}
+                          filters={filters}
+                          champions={availableChampions}
+                          onSearchRiotId={searchRiotId}
+                          onFilters={setFilters}
+                          onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+                          onLoadMore={() => void loadMoreRecentMatches()}
+                          loadingMore={loadingMoreMatches}
+                          moreError={moreMatchesError}
+                        />
+	                  </div>
+	                ) : null}
+
+                  {profileTab === "champions" ? (
+                    <>
+                      <ChampionMastery profile={activeProfile} />
+                      <DetailedPerformance profile={activeProfile} />
+                    </>
+                  ) : null}
+
+	                {profileTab === "ingame" ? (
+	                  <>
+		                    <IngamePanel profile={activeProfile} onSearchRiotId={searchRiotId} />
+	                  </>
+                  ) : null}
+
+                  <PublicMoreFeatures />
                 </>
-              ) : null}
-
-	              {profileTab === "ingame" ? (
-	                <>
-		                  <IngamePanel profile={activeProfile} onSearchRiotId={searchRiotId} />
-	                </>
-              ) : null}
-
-              <PublicSavedDataPanel
-                favorites={favorites}
-                recentSearches={recentSearches}
-                twitchStatus={twitchStatus}
-                followed={followedLol}
-                onPick={pickSuggestion}
-              />
-              <PublicMoreFeatures />
+              ) : (
+                <>
+                  {error ? <p className="public-error">{error}</p> : null}
+                  {renderMainMenuPage()}
+                </>
+              )}
             </section>
           </div>
         </div>

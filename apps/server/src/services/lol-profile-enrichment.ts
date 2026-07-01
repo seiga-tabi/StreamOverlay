@@ -195,12 +195,22 @@ function rankScore(stats: LolRankedStats): number {
 
 export function buildRankHistory(previous: LolRankHistoryPoint[] | undefined, stats: LolRankedStats | undefined, analyzedAt: string): LolRankHistoryPoint[] | undefined {
   const cutoff = Date.parse(analyzedAt) - RANK_HISTORY_WINDOW_MS;
-  const history = (previous ?? [])
+  const previousPoints = (previous ?? [])
     .filter((point) => {
       const time = Date.parse(point.date);
-      return Number.isFinite(time) && time >= cutoff;
+      return Number.isFinite(time);
     })
-    .map((point) => ({ ...point }));
+    .map((point) => ({ ...point }))
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+  const baseline = previousPoints
+    .filter((point) => Date.parse(point.date) < cutoff)
+    .at(-1);
+  const history = [
+    ...(baseline ? [{ ...baseline }] : []),
+    ...previousPoints
+      .filter((point) => Date.parse(point.date) >= cutoff)
+      .map((point) => ({ ...point }))
+  ];
 
   if (!stats) return history.length > 0 ? history.slice(-RANK_HISTORY_MAX_POINTS) : undefined;
 

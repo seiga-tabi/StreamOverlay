@@ -32,8 +32,8 @@ import {
   publicTwitchViewerSessionCookie,
   publicTwitchViewerSessionIdFromRequest
 } from "../services/public-twitch-auth.js";
-import { RiotApiHttpError, RiotRateLimitError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant } from "../services/riot-api.js";
-import type { DataDragonService } from "../services/data-dragon.js";
+import { RiotApiHttpError, RiotRateLimitError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant, type RiotMatchTimeline } from "../services/riot-api.js";
+import type { DataDragonService, LolChampionAbilitySummary, LolRuneSummary } from "../services/data-dragon.js";
 import type { LolProfileCacheEntry, LolProfileRepository } from "../services/lol-profile-store.js";
 import { appConfig } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
@@ -86,6 +86,7 @@ const PUBLIC_LOL_CURRENT_GAME_LIVE_CACHE_TTL_MS = 20_000;
 const PUBLIC_LOL_CURRENT_GAME_NOT_FOUND_CACHE_TTL_MS = 5_000;
 const PUBLIC_LOL_CURRENT_GAME_ERROR_CACHE_TTL_MS = 10_000;
 const PUBLIC_LOL_MATCH_RANK_CACHE_TTL_MS = 5 * 60_000;
+const PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX = 1000;
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
@@ -131,6 +132,11 @@ type PublicLolMatchBadge = {
   rank?: number;
 };
 
+type PublicLolMatchRune = LolRuneSummary & {
+  kind: "primary" | "secondary";
+  category: "style" | "keystone" | "perk";
+};
+
 type PublicLocale = "ko" | "ja";
 
 type PublicLocalePreference = {
@@ -140,6 +146,7 @@ type PublicLocalePreference = {
 };
 
 type PublicLolMatchParticipant = {
+  participantId?: number;
   riotId?: string;
   isTarget: boolean;
   champion: LolChampionSummary;
@@ -165,6 +172,7 @@ type PublicLolMatchParticipant = {
   visionScorePerMinute?: number;
   items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
   summonerSpells: number[];
+  runes: PublicLolMatchRune[];
   badges?: PublicLolMatchBadge[];
 };
 
@@ -194,6 +202,44 @@ type PublicLolMatchRankResponse = {
   status: "ready";
   matchId: string;
   participants: PublicLolMatchRankParticipant[];
+  fetchedAt: string;
+};
+
+type PublicLolMatchBuildItemEvent = {
+  itemId: number;
+  iconUrl?: string;
+  timestampMs: number;
+};
+
+type PublicLolMatchBuildSkillEvent = {
+  slot: number;
+  key: "Q" | "W" | "E" | "R";
+  level: number;
+  timestampMs: number;
+  nameKo?: string;
+  nameJa?: string;
+  iconUrl?: string;
+};
+
+type PublicLolMatchBuildParticipant = {
+  participantId?: number;
+  riotId?: string;
+  teamId?: number;
+  result: "win" | "loss" | "unknown";
+  champion: LolChampionSummary;
+  score: number;
+  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  itemEvents: PublicLolMatchBuildItemEvent[];
+  skillOrder: PublicLolMatchBuildSkillEvent[];
+  runes: PublicLolMatchRune[];
+  summonerSpells: number[];
+  badges: PublicLolMatchBadge[];
+};
+
+type PublicLolMatchBuildResponse = {
+  status: "ready";
+  matchId: string;
+  participants: PublicLolMatchBuildParticipant[];
   fetchedAt: string;
 };
 
@@ -553,6 +599,14 @@ function originFor(value: string): string {
   }
 }
 
+function originFromUrl(value: string): string | undefined {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 function wsOriginFor(value: string): string {
   try {
     const url = new URL(value);
@@ -563,7 +617,89 @@ function wsOriginFor(value: string): string {
   }
 }
 
-function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay"): string {
+function headerFirstValue(value: string | string[] | undefined): string | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return raw?.split(",")[0]?.trim();
+}
+
+function requestProtocol(req: IncomingMessage): "http" | "https" {
+  const forwardedProto = appConfig.security.trustProxy ? headerFirstValue(req.headers["x-forwarded-proto"]) : undefined;
+  if (forwardedProto === "http" || forwardedProto === "https") return forwardedProto;
+  try {
+    const protocol = new URL(appConfig.publicBaseUrl).protocol.replace(":", "");
+    return protocol === "https" ? "https" : "http";
+  } catch {
+    return "http";
+  }
+}
+
+function requestOrigin(req: IncomingMessage): string | undefined {
+  const forwardedHost = appConfig.security.trustProxy ? headerFirstValue(req.headers["x-forwarded-host"]) : undefined;
+  const host = forwardedHost || headerFirstValue(req.headers.host);
+  if (!host) return undefined;
+  try {
+    return new URL(`${requestProtocol(req)}://${host}`).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function publicOriginForRequest(req: IncomingMessage): string {
+  return requestOrigin(req) ?? originFromUrl(appConfig.publicBaseUrl) ?? "http://localhost:3000";
+}
+
+function trustedPublicOriginForRequest(req: IncomingMessage): string {
+  const fallback = originFromUrl(appConfig.publicBaseUrl) ?? "http://localhost:3000";
+  const allowedOrigins = new Set(
+    [
+      appConfig.publicBaseUrl,
+      appConfig.dashboardBaseUrl,
+      appConfig.overlayBaseUrl,
+      appConfig.twitch.publicRedirectUri,
+      ...appConfig.security.corsOrigins
+    ]
+      .map(originFromUrl)
+      .filter((origin): origin is string => Boolean(origin))
+  );
+  const requestedOrigin = requestOrigin(req);
+  return requestedOrigin && allowedOrigins.has(requestedOrigin) ? requestedOrigin : fallback;
+}
+
+function wsBaseForOrigin(origin: string): string {
+  return origin.replace(/^https:/, "wss:").replace(/^http:/, "ws:");
+}
+
+function publicTwitchCallbackUrlForRequest(req: IncomingMessage): string {
+  const origin = publicOriginForRequest(req);
+  try {
+    const configured = new URL(appConfig.twitch.publicRedirectUri);
+    return `${origin}${configured.pathname || "/api/public/twitch/auth/callback"}${configured.search}`;
+  } catch {
+    return `${origin}/api/public/twitch/auth/callback`;
+  }
+}
+
+function publicLolReturnUrlForRequest(req: IncomingMessage): string {
+  const url = new URL("/lol", publicOriginForRequest(req));
+  url.searchParams.set("viewer_twitch", "connected");
+  return url.toString();
+}
+
+function cspConnectSrcForRequest(req: IncomingMessage | undefined): string {
+  const requestPublicOrigin = req ? trustedPublicOriginForRequest(req) : originFromUrl(appConfig.publicBaseUrl);
+  return [
+    "'self'",
+    originFor(appConfig.publicBaseUrl),
+    wsOriginFor(appConfig.publicBaseUrl),
+    requestPublicOrigin,
+    requestPublicOrigin ? wsBaseForOrigin(requestPublicOrigin) : undefined
+  ]
+    .filter((value): value is string => Boolean(value))
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .join(" ");
+}
+
+function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay", req?: IncomingMessage): string {
   if (mountPath === "/admin" || mountPath === "/dashboard") {
     return [
       "default-src 'self'",
@@ -572,7 +708,7 @@ function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay"): strin
       "script-src 'self'",
       "style-src 'self'",
       "img-src 'self' data: https:",
-      `connect-src 'self' ${originFor(appConfig.publicBaseUrl)} ${wsOriginFor(appConfig.publicBaseUrl)}`,
+      `connect-src ${cspConnectSrcForRequest(req)}`,
       `frame-src 'self' ${originFor(appConfig.overlayBaseUrl)}`,
       "frame-ancestors 'self'",
       "form-action 'self'"
@@ -586,20 +722,20 @@ function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay"): strin
     "style-src 'self'",
     "img-src 'self' data: https:",
     "media-src 'self' https:",
-    `connect-src 'self' ${originFor(appConfig.publicBaseUrl)} ${wsOriginFor(appConfig.publicBaseUrl)}`,
+    `connect-src ${cspConnectSrcForRequest(req)}`,
     "frame-ancestors 'self'",
     "form-action 'none'"
   ].join("; ");
 }
 
-function staticSecurityHeaders(filePath: string): Record<string, string> {
+function staticSecurityHeaders(req: IncomingMessage, filePath: string): Record<string, string> {
   const headers: Record<string, string> = { ...SECURITY_HEADERS };
   if (appConfig.nodeEnv === "production" && appConfig.publicBaseUrl.startsWith("https://")) {
     headers["Strict-Transport-Security"] = "max-age=15552000; includeSubDomains";
   }
   if (filePath.endsWith("index.html")) {
-    if (filePath.includes(`${path.sep}dashboard${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/dashboard");
-    if (filePath.includes(`${path.sep}overlay${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/overlay");
+    if (filePath.includes(`${path.sep}dashboard${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/dashboard", req);
+    if (filePath.includes(`${path.sep}overlay${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/overlay", req);
   }
   return headers;
 }
@@ -612,26 +748,20 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
-function escapeJsString(value: string): string {
-  return JSON.stringify(value).replaceAll("<", "\\u003c");
-}
-
-function publicWsBaseUrl(): string {
-  return appConfig.publicBaseUrl.replace(/^https:/, "wss:").replace(/^http:/, "ws:");
-}
-
-function dashboardRuntimeConfig(): string {
+function dashboardRuntimeConfig(req: IncomingMessage): string {
+  void req;
   return `window.__STREAMOPS_CONFIG__ = {
-  apiBase: ${escapeJsString(appConfig.publicBaseUrl)},
-  wsBase: ${escapeJsString(publicWsBaseUrl())},
-  overlayBase: ${escapeJsString(appConfig.overlayBaseUrl)},
+  apiBase: "",
+  wsBase: (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host,
+  overlayBase: window.location.origin + "/overlay",
   dashboardAuthRequired: ${appConfig.security.localNoAuth ? "false" : "true"}
 };\n`;
 }
 
-function overlayRuntimeConfig(): string {
+function overlayRuntimeConfig(req: IncomingMessage): string {
+  void req;
   return `window.__STREAMOPS_CONFIG__ = {
-  wsBase: ${escapeJsString(publicWsBaseUrl())}
+  wsBase: (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host
 };\n`;
 }
 
@@ -923,7 +1053,7 @@ async function sendStaticFile(req: IncomingMessage, res: ServerResponse, filePat
       "Cache-Control": cacheControl,
       "ETag": etag,
       "Last-Modified": lastModified,
-      ...staticSecurityHeaders(filePath)
+      ...staticSecurityHeaders(req, filePath)
     };
     if (isNotModified(req, etag, stat.mtime)) {
       res.writeHead(304, baseHeaders);
@@ -979,7 +1109,7 @@ async function sendRankedEmblemAsset(req: IncomingMessage, res: ServerResponse, 
 async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname: string, mountPath: "/admin" | "/dashboard" | "/overlay", staticDir: string): Promise<boolean> {
   if (pathname !== mountPath && !pathname.startsWith(`${mountPath}/`)) return false;
   if (pathname === `${mountPath}/config.js`) {
-    const body = mountPath === "/overlay" ? overlayRuntimeConfig() : dashboardRuntimeConfig();
+    const body = mountPath === "/overlay" ? overlayRuntimeConfig(req) : dashboardRuntimeConfig(req);
     res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-cache", ...SECURITY_HEADERS });
     if (req.method === "HEAD") {
       res.end();
@@ -1085,6 +1215,13 @@ function sendSafeOAuthHtml(res: ServerResponse, status: number, title: string, m
 </html>`);
 }
 
+function twitchOAuthErrorMessage(url: URL, fallback: string): string {
+  const error = url.searchParams.get("error")?.trim();
+  const description = url.searchParams.get("error_description")?.trim();
+  const detail = [error, description].filter((value): value is string => Boolean(value)).join(": ");
+  return detail ? `${fallback} Twitch 응답: ${detail}` : fallback;
+}
+
 type HttpHandlerInput = {
   store: Store;
   actions: ActionDispatcher;
@@ -1186,6 +1323,49 @@ function participantItems(participant: RiotMatchParticipant, version: string | u
 
 function participantSummonerSpells(participant: RiotMatchParticipant): number[] {
   return [safeMatchStat(participant.summoner1Id), safeMatchStat(participant.summoner2Id)].filter((spellId) => spellId > 0);
+}
+
+function participantRuneIds(participant: RiotMatchParticipant): Array<Pick<PublicLolMatchRune, "runeId" | "kind" | "category">> {
+  const styles = participant.perks?.styles ?? [];
+  const primary = styles.find((style) => style.description === "primaryStyle") ?? styles[0];
+  const secondary = styles.find((style) => style.description === "subStyle") ?? styles[1];
+  const runes: Array<Pick<PublicLolMatchRune, "runeId" | "kind" | "category">> = [];
+  const primaryStyleId = safeMatchStat(primary?.style);
+  if (primaryStyleId > 0) runes.push({ runeId: primaryStyleId, kind: "primary", category: "style" });
+  for (const [index, selection] of (primary?.selections ?? []).entries()) {
+    const runeId = safeMatchStat(selection.perk);
+    if (runeId > 0) runes.push({ runeId, kind: "primary", category: index === 0 ? "keystone" : "perk" });
+  }
+  const secondaryStyleId = safeMatchStat(secondary?.style);
+  if (secondaryStyleId > 0) runes.push({ runeId: secondaryStyleId, kind: "secondary", category: "style" });
+  for (const selection of secondary?.selections ?? []) {
+    const runeId = safeMatchStat(selection.perk);
+    if (runeId > 0) runes.push({ runeId, kind: "secondary", category: "perk" });
+  }
+  const seen = new Set<string>();
+  return runes.filter((rune) => {
+    const key = `${rune.kind}:${rune.category}:${rune.runeId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+async function participantRunes(
+  dataDragon: DataDragonService | undefined,
+  dataDragonVersion: string | undefined,
+  participant: RiotMatchParticipant
+): Promise<PublicLolMatchRune[]> {
+  const runeIds = participantRuneIds(participant);
+  if (runeIds.length === 0) return [];
+  if (!dataDragon) return runeIds.map((rune) => ({ runeId: rune.runeId, kind: rune.kind, category: rune.category }));
+  const summaries = await dataDragon.mapRuneSummaries(runeIds.map((rune) => rune.runeId), dataDragonVersion).catch(() => []);
+  return runeIds.map((rune, index) => ({
+    ...summaries[index],
+    runeId: rune.runeId,
+    kind: rune.kind,
+    category: rune.category
+  }));
 }
 
 function participantRiotId(participant: RiotMatchParticipant): string | undefined {
@@ -1408,6 +1588,7 @@ async function publicLolMatchParticipantDetail(
   const damageTaken = safeOptionalStat(participant.totalDamageTaken);
   const visionScore = safeOptionalStat(participant.visionScore);
   return {
+    participantId: safeOptionalStat(participant.participantId),
     riotId,
     isTarget: participant.puuid === targetPuuid,
     champion: await mapChampionSummary(dataDragon, {
@@ -1436,6 +1617,7 @@ async function publicLolMatchParticipantDetail(
     visionScorePerMinute: averageDefined([participant.challenges?.visionScorePerMinute], 2) ?? (visionScore !== undefined && durationMinutes ? roundTo(visionScore / durationMinutes, 2) : undefined),
     items: participantItems(participant, dataDragonVersion),
     summonerSpells: participantSummonerSpells(participant),
+    runes: await participantRunes(dataDragon, dataDragonVersion, participant),
     badges: publicLolMatchBadges(match, participant)
   };
 }
@@ -1503,6 +1685,17 @@ async function profileIconUrl(dataDragon: DataDragonService | undefined, profile
 async function dataDragonLatestVersion(dataDragon: DataDragonService | undefined): Promise<string | undefined> {
   if (!dataDragon || typeof dataDragon.getLatestVersion !== "function") return undefined;
   return dataDragon.getLatestVersion().catch(() => undefined);
+}
+
+async function dataDragonVersionForMatch(
+  dataDragon: DataDragonService | undefined,
+  match: RiotMatch,
+  fallbackVersion: string | undefined
+): Promise<string | undefined> {
+  if (!dataDragon) return fallbackVersion;
+  const gameVersion = match.info.gameVersion;
+  if (!gameVersion) return fallbackVersion ?? dataDragonLatestVersion(dataDragon);
+  return dataDragon.getVersionForGameVersion(gameVersion).catch(async () => fallbackVersion ?? dataDragonLatestVersion(dataDragon));
 }
 
 function recentWinRate(matches: PublicLolRecentMatch[]): number {
@@ -1828,6 +2021,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolMatchPageInFlight = new Map<string, Promise<PublicLolMatchPageResponse>>();
   const publicLolMatchRankCache = new Map<string, { expiresAt: number; response: PublicLolMatchRankResponse }>();
   const publicLolMatchRankInFlight = new Map<string, Promise<PublicLolMatchRankResponse>>();
+  const publicLolMatchBuildCache = new Map<string, { expiresAt: number; response: PublicLolMatchBuildResponse }>();
+  const publicLolMatchBuildInFlight = new Map<string, Promise<PublicLolMatchBuildResponse>>();
   const publicLolMatchDetailCache = new Map<string, { expiresAt: number; match: RiotMatch }>();
   const publicLolMatchDetailInFlight = new Map<string, Promise<RiotMatch | null>>();
 
@@ -2375,18 +2570,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return streamerRiotRequest ? { ...status, streamerRiotRequest } : status;
   }
 
-  async function handlePublicTwitchAuthCallback(res: ServerResponse, url: URL): Promise<void> {
+  async function handlePublicTwitchAuthCallback(req: IncomingMessage, res: ServerResponse, url: URL): Promise<void> {
     if (!input.publicTwitchAuth) return sendSafeOAuthHtml(res, 503, "Twitch 연결 실패", "Twitch 공개 로그인을 사용할 수 없습니다.");
     const error = url.searchParams.get("error");
-    if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch 권한 승인이 완료되지 않았습니다. 전적 페이지에서 다시 시도해주세요.");
+    if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", twitchOAuthErrorMessage(url, "Twitch 권한 승인이 완료되지 않았습니다. 전적 페이지에서 다시 시도해주세요."));
     if (!input.publicTwitchAuth.verifyState(url.searchParams.get("state"))) {
       return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth state 검증에 실패했습니다. 전적 페이지에서 다시 연결을 시작해주세요.");
     }
     const code = url.searchParams.get("code");
     if (!code) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
     try {
-      const session = await input.publicTwitchAuth.connectWithCode(code);
-      return sendRedirect(res, `${appConfig.dashboardBaseUrl}/lol?viewer_twitch=connected`, { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
+      const session = await input.publicTwitchAuth.connectWithCode(code, publicTwitchCallbackUrlForRequest(req));
+      return sendRedirect(res, publicLolReturnUrlForRequest(req), { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
     } catch {
       return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch token 교환 또는 사용자 정보 조회에 실패했습니다. 서버 설정을 확인한 뒤 다시 시도해주세요.");
     }
@@ -2574,7 +2769,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       .slice(0, PUBLIC_LOL_PROFILE_MATCH_COUNT);
     const streamerByRiotId = await buildApprovedStreamerStreamsByRiotId(rawMatches.flatMap((match) => match.info.participants.map((participant) => participantRiotId(participant))));
     const recentMatches = (await Promise.all(
-      rawMatches.map((match) => publicLolRecentMatchFromRiotMatch(match, account.puuid, dataDragonVersion, streamerByRiotId))
+      rawMatches.map(async (match) => publicLolRecentMatchFromRiotMatch(
+        match,
+        account.puuid,
+        await dataDragonVersionForMatch(input.dataDragon, match, dataDragonVersion),
+        streamerByRiotId
+      ))
     )).filter((match): match is PublicLolRecentMatch => Boolean(match));
     const hasMoreRecentMatches = matchIds.length >= PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT;
     return {
@@ -2850,6 +3050,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     publicLolMatchRankCache.clear();
     publicLolMatchRankInFlight.clear();
+    publicLolMatchBuildCache.clear();
+    publicLolMatchBuildInFlight.clear();
   }
 
   function invalidatePublicLolProfileCachesForStreamer(request: StreamerRiotIdRequest | undefined): void {
@@ -2991,6 +3193,135 @@ export function createHttpHandler(input: HttpHandlerInput) {
       participants,
       fetchedAt
     };
+  }
+
+  function timelineParticipantEvents(timeline: RiotMatchTimeline | null, participantId: number | undefined, type: string): Array<{ timestampMs: number; itemId?: number; skillSlot?: number }> {
+    if (!timeline || participantId === undefined) return [];
+    const events: Array<{ timestampMs: number; itemId?: number; skillSlot?: number }> = [];
+    for (const frame of timeline.info.frames ?? []) {
+      for (const event of frame.events ?? []) {
+        if (event.type !== type || safeOptionalStat(event.participantId) !== participantId) continue;
+        events.push({
+          timestampMs: safeOptionalStat(event.timestamp) ?? safeOptionalStat(frame.timestamp) ?? 0,
+          itemId: safeOptionalStat(event.itemId),
+          skillSlot: safeOptionalStat(event.skillSlot)
+        });
+      }
+    }
+    return events.sort((a, b) => a.timestampMs - b.timestampMs);
+  }
+
+  function publicLolBuildItemEvents(timeline: RiotMatchTimeline | null, participantId: number | undefined, version: string | undefined): PublicLolMatchBuildItemEvent[] {
+    return timelineParticipantEvents(timeline, participantId, "ITEM_PURCHASED")
+      .filter((event) => event.itemId !== undefined && event.itemId > 0)
+      .map((event) => ({
+        itemId: event.itemId!,
+        iconUrl: version ? itemIconUrl(version, event.itemId!) : undefined,
+        timestampMs: event.timestampMs
+      }));
+  }
+
+  function abilityForSlot(abilities: LolChampionAbilitySummary[], slot: number | undefined): LolChampionAbilitySummary | undefined {
+    return abilities.find((ability) => ability.slot === slot);
+  }
+
+  function skillKeyForSlot(slot: number | undefined): "Q" | "W" | "E" | "R" {
+    if (slot === 2) return "W";
+    if (slot === 3) return "E";
+    if (slot === 4) return "R";
+    return "Q";
+  }
+
+  function publicLolBuildSkillOrder(
+    timeline: RiotMatchTimeline | null,
+    participantId: number | undefined,
+    abilities: LolChampionAbilitySummary[]
+  ): PublicLolMatchBuildSkillEvent[] {
+    return timelineParticipantEvents(timeline, participantId, "SKILL_LEVEL_UP")
+      .filter((event) => event.skillSlot !== undefined && event.skillSlot >= 1 && event.skillSlot <= 4)
+      .map((event, index) => {
+        const ability = abilityForSlot(abilities, event.skillSlot);
+        return {
+          slot: event.skillSlot!,
+          key: ability?.key ?? skillKeyForSlot(event.skillSlot),
+          level: index + 1,
+          timestampMs: event.timestampMs,
+          nameKo: ability?.nameKo,
+          nameJa: ability?.nameJa,
+          iconUrl: ability?.iconUrl
+        };
+      });
+  }
+
+  async function buildPublicLolMatchBuild(matchId: string): Promise<PublicLolMatchBuildResponse> {
+    if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
+    if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
+
+    const match = await getPublicLolMatchDetail(matchId).catch((error) => {
+      throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
+    });
+    if (!match) throw new HttpRequestError(404, { error: "경기 상세 정보를 찾지 못했습니다." });
+
+    const timeline = await input.riot.getMatchTimeline(match.metadata.matchId || matchId).catch(() => null);
+    const fallbackDataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
+    const dataDragonVersion = await dataDragonVersionForMatch(input.dataDragon, match, fallbackDataDragonVersion);
+    const participants = await Promise.all(match.info.participants.map(async (participant): Promise<PublicLolMatchBuildParticipant> => {
+      const participantId = safeOptionalStat(participant.participantId);
+      const champion = await mapChampionSummary(input.dataDragon, {
+        championId: participant.championId,
+        championName: participant.championName
+      });
+      const abilities = input.dataDragon
+        ? await input.dataDragon.getChampionAbilities(participant.championId, dataDragonVersion).catch(() => [])
+        : [];
+      return {
+        participantId,
+        riotId: participantRiotId(participant),
+        teamId: participant.teamId,
+        result: participant.win === true ? "win" : participant.win === false ? "loss" : "unknown",
+        champion,
+        score: participantImpactScore(match, participant),
+        items: participantItems(participant, dataDragonVersion),
+        itemEvents: publicLolBuildItemEvents(timeline, participantId, dataDragonVersion),
+        skillOrder: publicLolBuildSkillOrder(timeline, participantId, abilities),
+        runes: await participantRunes(input.dataDragon, dataDragonVersion, participant),
+        summonerSpells: participantSummonerSpells(participant),
+        badges: publicLolMatchBadges(match, participant)
+      };
+    }));
+
+    return {
+      status: "ready",
+      matchId: match.metadata.matchId || matchId,
+      participants: participants.sort((a, b) => (a.teamId ?? 0) - (b.teamId ?? 0)),
+      fetchedAt: new Date().toISOString()
+    };
+  }
+
+  async function getPublicLolMatchBuild(rawMatchId: string): Promise<PublicLolMatchBuildResponse> {
+    const matchId = rawMatchId.trim();
+    if (!matchId) throw new HttpRequestError(400, { error: "matchId가 필요합니다." });
+    const cacheKey = matchId.toUpperCase();
+    const cached = publicLolMatchBuildCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.response;
+    if (cached) publicLolMatchBuildCache.delete(cacheKey);
+
+    const running = publicLolMatchBuildInFlight.get(cacheKey);
+    if (running) return running;
+
+    const request = buildPublicLolMatchBuild(matchId)
+      .then((response) => {
+        publicLolMatchBuildCache.set(cacheKey, {
+          response,
+          expiresAt: Date.now() + PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS
+        });
+        return response;
+      })
+      .finally(() => {
+        publicLolMatchBuildInFlight.delete(cacheKey);
+      });
+    publicLolMatchBuildInFlight.set(cacheKey, request);
+    return request;
   }
 
   async function getPublicLolMatchRanks(rawMatchId: string): Promise<PublicLolMatchRankResponse> {
@@ -3203,6 +3534,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/lol/match-ranks") {
         return sendJson(req, res, 200, await getPublicLolMatchRanks(url.searchParams.get("matchId") ?? ""));
       }
+      if (req.method === "GET" && url.pathname === "/api/lol/match-build") {
+        return sendJson(req, res, 200, await getPublicLolMatchBuild(url.searchParams.get("matchId") ?? ""));
+      }
       if (req.method === "GET" && url.pathname === "/api/lol/suggestions") {
         return sendJson(req, res, 200, { suggestions: await buildPublicLolSuggestions(url.searchParams.get("q") ?? "") });
       }
@@ -3222,10 +3556,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/public/twitch/auth/start") {
         if (!input.publicTwitchAuth) return sendJson(req, res, 503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
         const forceVerify = url.searchParams.get("force_verify") === "1" || url.searchParams.get("force_verify") === "true";
-        return sendRedirect(res, input.publicTwitchAuth.createAuthorizationUrl(forceVerify));
+        return sendRedirect(res, input.publicTwitchAuth.createAuthorizationUrl(forceVerify, publicTwitchCallbackUrlForRequest(req)));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/auth/callback") {
-        return handlePublicTwitchAuthCallback(res, url);
+        return handlePublicTwitchAuthCallback(req, res, url);
       }
       if (req.method === "POST" && url.pathname === "/api/public/twitch/logout") {
         input.publicTwitchAuth?.disconnect(publicTwitchViewerSessionIdFromRequest(req));
@@ -3262,10 +3596,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/callback") {
         if (input.publicTwitchAuth?.isPublicState(url.searchParams.get("state"))) {
-          return handlePublicTwitchAuthCallback(res, url);
+          return handlePublicTwitchAuthCallback(req, res, url);
         }
         const error = url.searchParams.get("error");
-        if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch 권한 승인이 완료되지 않았습니다. 대시보드에서 다시 시도해주세요.");
+        if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", twitchOAuthErrorMessage(url, "Twitch 권한 승인이 완료되지 않았습니다. 대시보드에서 다시 시도해주세요."));
         if (!input.twitchAuth.verifyState(url.searchParams.get("state"))) {
           return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth state 검증에 실패했습니다. 대시보드에서 다시 연결을 시작해주세요.");
         }

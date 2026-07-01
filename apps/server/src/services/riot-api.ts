@@ -51,6 +51,7 @@ export type RiotChampionMastery = {
 };
 
 export type RiotMatchParticipant = {
+  participantId?: number;
   puuid: string;
   riotIdGameName?: string;
   riotIdTagline?: string;
@@ -86,6 +87,18 @@ export type RiotMatchParticipant = {
   totalTimeSpentDead?: number;
   summoner1Id?: number;
   summoner2Id?: number;
+  perks?: {
+    styles?: Array<{
+      description?: string;
+      style?: number;
+      selections?: Array<{
+        perk?: number;
+        var1?: number;
+        var2?: number;
+        var3?: number;
+      }>;
+    }>;
+  };
   item0?: number;
   item1?: number;
   item2?: number;
@@ -112,6 +125,7 @@ export type RiotMatch = {
   info: {
     gameCreation?: number;
     gameDuration?: number;
+    gameVersion?: string;
     gameMode?: string;
     gameType?: string;
     mapId?: number;
@@ -121,6 +135,27 @@ export type RiotMatch = {
       teamId: number;
       win?: boolean;
       objectives?: Record<string, { first?: boolean; kills?: number }>;
+    }>;
+  };
+};
+
+export type RiotMatchTimelineEvent = {
+  type?: string;
+  timestamp?: number;
+  participantId?: number;
+  itemId?: number;
+  skillSlot?: number;
+  levelUpType?: string;
+};
+
+export type RiotMatchTimeline = {
+  metadata: {
+    matchId: string;
+  };
+  info: {
+    frames: Array<{
+      timestamp?: number;
+      events?: RiotMatchTimelineEvent[];
     }>;
   };
 };
@@ -655,6 +690,12 @@ export class RiotApiClient {
     if (!this.isConfigured()) return null;
     const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}`;
     return this.fetchJson<RiotMatch>(url, "match.detail");
+  }
+
+  async getMatchTimeline(matchId: string): Promise<RiotMatchTimeline | null> {
+    if (!this.isConfigured()) return null;
+    const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}/timeline`;
+    return this.fetchJson<RiotMatchTimeline>(url, "match.timeline");
   }
 
   async getCurrentGameByPuuid(puuid: string): Promise<RiotCurrentGameInfo | null> {

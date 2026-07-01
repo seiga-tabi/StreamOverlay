@@ -182,15 +182,15 @@ export class PublicTwitchAuthService {
     private readonly fetchImpl: FetchLike = fetch
   ) {}
 
-  createAuthorizationUrl(forceVerify = false): string {
-    if (!this.config.clientId || !this.config.redirectUri) {
+  createAuthorizationUrl(forceVerify = false, redirectUri = this.config.redirectUri): string {
+    if (!this.config.clientId || !redirectUri) {
       throw new Error("Twitch 공개 로그인 client ID 또는 redirect URI가 설정되지 않았습니다.");
     }
     const state = `${PUBLIC_TWITCH_OAUTH_STATE_PREFIX}${this.stateStore.create()}`;
     const url = new URL("https://id.twitch.tv/oauth2/authorize");
     url.searchParams.set("response_type", "code");
     url.searchParams.set("client_id", this.config.clientId);
-    url.searchParams.set("redirect_uri", this.config.redirectUri);
+    url.searchParams.set("redirect_uri", redirectUri);
     url.searchParams.set("scope", this.requiredScopes.join(" "));
     url.searchParams.set("state", state);
     if (forceVerify) url.searchParams.set("force_verify", "true");
@@ -206,9 +206,9 @@ export class PublicTwitchAuthService {
     return this.stateStore.consume(state?.slice(PUBLIC_TWITCH_OAUTH_STATE_PREFIX.length));
   }
 
-  async connectWithCode(code: string): Promise<PublicTwitchViewerSession> {
+  async connectWithCode(code: string, redirectUri = this.config.redirectUri): Promise<PublicTwitchViewerSession> {
     if (!code.trim() || code.length > 512) throw new Error("Twitch OAuth code가 유효하지 않습니다.");
-    const tokenResponse = await this.exchangeCode(code);
+    const tokenResponse = await this.exchangeCode(code, redirectUri);
     const user = await this.fetchViewerInfo(tokenResponse.access_token);
     if (!tokenResponse.refresh_token) throw new Error("Twitch refresh token이 응답에 없습니다.");
     return this.sessions.create({
@@ -269,8 +269,8 @@ export class PublicTwitchAuthService {
     });
   }
 
-  private async exchangeCode(code: string): Promise<TwitchTokenResponse> {
-    if (!this.config.clientId || !this.config.clientSecret || !this.config.redirectUri) {
+  private async exchangeCode(code: string, redirectUri: string): Promise<TwitchTokenResponse> {
+    if (!this.config.clientId || !this.config.clientSecret || !redirectUri) {
       throw new Error("Twitch 공개 로그인 설정이 부족합니다.");
     }
     const body = new URLSearchParams({
@@ -278,7 +278,7 @@ export class PublicTwitchAuthService {
       client_secret: this.config.clientSecret,
       code,
       grant_type: "authorization_code",
-      redirect_uri: this.config.redirectUri
+      redirect_uri: redirectUri
     });
     const response = await this.fetchImpl("https://id.twitch.tv/oauth2/token", {
       method: "POST",

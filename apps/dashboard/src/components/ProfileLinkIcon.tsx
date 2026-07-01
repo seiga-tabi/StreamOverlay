@@ -33,14 +33,15 @@ function ProfileLinkIconGlyph({ platform }: { platform: string }) {
     case "youtube":
       return (
         <svg viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M12.2 15.2c.8-2.8 3-4.4 6-4.7a92 92 0 0 1 11.6 0c3 .3 5.2 1.9 6 4.7a34.8 34.8 0 0 1 0 17.6c-.8 2.8-3 4.4-6 4.7a92 92 0 0 1-11.6 0c-3-.3-5.2-1.9-6-4.7a34.8 34.8 0 0 1 0-17.6Z" fill="currentColor" />
-          <path d="M21.2 17.8v12.4L31.8 24 21.2 17.8Z" fill="var(--profile-link-youtube-play, #ef0000)" />
+          <path d="M37.8 16.1c-.3-1.3-1.4-2.4-2.8-2.8C32.6 12.7 24 12.7 24 12.7s-8.6 0-11 .6c-1.4.4-2.5 1.5-2.8 2.8-.6 2.5-.6 7.9-.6 7.9s0 5.4.6 7.9c.3 1.3 1.4 2.4 2.8 2.8 2.4.6 11 .6 11 .6s8.6 0 11-.6c1.4-.4 2.5-1.5 2.8-2.8.6-2.5.6-7.9.6-7.9s0-5.4-.6-7.9Z" fill="currentColor" />
+          <path d="M21.1 29.4V18.6L30.5 24l-9.4 5.4Z" fill="var(--profile-link-youtube-play, #ff0000)" />
         </svg>
       );
     case "twitch":
       return (
         <svg viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M10 7h30v21.4L31.4 37H24l-6.7 5.6h-4.5V37H6V13l4-6Zm4.2 5.2V31h6v4.1l4.8-4.1h5.3l5.5-5.5V12.2H14.2Zm8.7 5.4h4.1v9.3h-4.1v-9.3Zm8.1 0h4.1v9.3H31v-9.3Z" fill="currentColor" />
+          <path d="M12 7h29v20.6L32.7 36h-7.2L19 42h-5.1v-6H7V13l5-6Zm4.1 4.6v20h6.4v4.2l4.5-4.2h5.5l4.4-4.5V11.6H16.1Z" fill="currentColor" />
+          <path d="M25.1 17.1h3.6v9.8h-3.6v-9.8Zm8.2 0h3.6v9.8h-3.6v-9.8Z" fill="var(--profile-link-twitch-cutout, #9146ff)" />
         </svg>
       );
     case "discord":
@@ -52,7 +53,7 @@ function ProfileLinkIconGlyph({ platform }: { platform: string }) {
     case "x":
       return (
         <svg viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M10.2 9h9.1l6.7 8.9L32.8 9h5.1L28.4 21.5 39 35.6h-9.1l-7.4-9.8-7.5 9.8H9.9l10.2-13.4L10.2 9Zm7 3.7 14.6 19.2h1.9L19.1 12.7h-1.9Z" fill="currentColor" />
+          <path d="M28.7 21.1 40.2 8h-4.1l-9.2 10.5L19.5 8H8.3l12 17.1L8.5 40h4.1l9.5-12 8.3 12h11.3L28.7 21.1Zm-5 3.3-1.8-2.5-8.2-10.4h3.8l7.3 9.3 1.8 2.5 8.8 11.2h-3.8l-7.9-10.1Z" fill="currentColor" />
         </svg>
       );
     case "instagram":

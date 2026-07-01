@@ -20,6 +20,7 @@ services:
       TWITCH_CLIENT_ID: ${TWITCH_CLIENT_ID:-}
       TWITCH_CLIENT_SECRET: ${TWITCH_CLIENT_SECRET:-}
       TWITCH_REDIRECT_URI: ${TWITCH_REDIRECT_URI:-http://localhost:3000/api/twitch/auth/callback}
+      TWITCH_PUBLIC_REDIRECT_URI: ${TWITCH_PUBLIC_REDIRECT_URI:-http://localhost:3000/api/public/twitch/auth/callback}
       TWITCH_EXTRA_SCOPES: ${TWITCH_EXTRA_SCOPES:-}
       TWITCH_TOKEN_STORE_PATH: ${TWITCH_TOKEN_STORE_PATH:-/app/.streamops/twitch-token.json}
       TWITCH_USER_ACCESS_TOKEN: ${TWITCH_USER_ACCESS_TOKEN:-}

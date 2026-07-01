@@ -105,7 +105,7 @@ test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공
     assert.match(dashboardRes.body, /apiBase/);
     assert.match(dashboardRes.body, /wsBase/);
     assert.match(dashboardRes.body, /overlayBase/);
-    assert.match(dashboardRes.body, /http:\/\/localhost:3000\/overlay/);
+    assert.match(dashboardRes.body, /window\.location\.origin \+ "\/overlay"/);
     assert.doesNotMatch(dashboardRes.body, /localhost:5174/);
 
     const adminReq = createRequest("GET", "/admin/config.js");
