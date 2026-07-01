@@ -648,6 +648,40 @@ function publicOriginForRequest(req: IncomingMessage): string {
   return requestOrigin(req) ?? originFromUrl(appConfig.publicBaseUrl) ?? "http://localhost:3000";
 }
 
+function forwardedOrigin(req: IncomingMessage): string | undefined {
+  const forwardedProto = headerFirstValue(req.headers["x-forwarded-proto"]);
+  const forwardedHost = headerFirstValue(req.headers["x-forwarded-host"]);
+  if ((forwardedProto !== "http" && forwardedProto !== "https") || !forwardedHost) return undefined;
+  try {
+    return new URL(`${forwardedProto}://${forwardedHost}`).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function refererOrigin(req: IncomingMessage): string | undefined {
+  const referer = headerFirstValue(req.headers.referer);
+  return referer ? originFromUrl(referer) : undefined;
+}
+
+function isLocalOrigin(origin: string | undefined): boolean {
+  if (!origin) return false;
+  try {
+    const hostname = new URL(origin).hostname.toLowerCase();
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  } catch {
+    return false;
+  }
+}
+
+function externalPublicOriginForRequest(req: IncomingMessage): string {
+  return forwardedOrigin(req) ??
+    refererOrigin(req) ??
+    requestOrigin(req) ??
+    originFromUrl(appConfig.publicBaseUrl) ??
+    "http://localhost:3000";
+}
+
 function trustedPublicOriginForRequest(req: IncomingMessage): string {
   const fallback = originFromUrl(appConfig.publicBaseUrl) ?? "http://localhost:3000";
   const allowedOrigins = new Set(
@@ -670,9 +704,12 @@ function wsBaseForOrigin(origin: string): string {
 }
 
 function publicTwitchCallbackUrlForRequest(req: IncomingMessage): string {
+  const origin = externalPublicOriginForRequest(req);
   try {
     const configured = new URL(appConfig.twitch.publicRedirectUri);
-    return configured.toString();
+    if (isLocalOrigin(origin) && isLocalOrigin(configured.origin)) return configured.toString();
+    const pathname = configured.pathname || "/api/public/twitch/auth/callback";
+    return `${origin}${pathname}${configured.search}`;
   } catch {
     return `${trustedPublicOriginForRequest(req)}/api/public/twitch/auth/callback`;
   }
@@ -2573,13 +2610,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!input.publicTwitchAuth) return sendSafeOAuthHtml(res, 503, "Twitch 연결 실패", "Twitch 공개 로그인을 사용할 수 없습니다.");
     const error = url.searchParams.get("error");
     if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", twitchOAuthErrorMessage(url, "Twitch 권한 승인이 완료되지 않았습니다. 전적 페이지에서 다시 시도해주세요."));
-    if (!input.publicTwitchAuth.verifyState(url.searchParams.get("state"))) {
+    const state = input.publicTwitchAuth.consumeState(url.searchParams.get("state"));
+    if (!state) {
       return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth state 검증에 실패했습니다. 전적 페이지에서 다시 연결을 시작해주세요.");
     }
     const code = url.searchParams.get("code");
     if (!code) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
     try {
-      const session = await input.publicTwitchAuth.connectWithCode(code, publicTwitchCallbackUrlForRequest(req));
+      const session = await input.publicTwitchAuth.connectWithCode(code, state.redirectUri ?? publicTwitchCallbackUrlForRequest(req));
       return sendRedirect(res, publicLolReturnUrlForRequest(req), { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
     } catch {
       return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch token 교환 또는 사용자 정보 조회에 실패했습니다. 서버 설정을 확인한 뒤 다시 시도해주세요.");

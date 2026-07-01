@@ -7,6 +7,7 @@ import type { TwitchStoredToken, TwitchTokenStore } from "./twitch-token-store.j
 type OAuthStateRecord = {
   state: string;
   expiresAt: number;
+  metadata?: Record<string, string>;
 };
 
 type TwitchTokenResponse = {
@@ -61,19 +62,23 @@ export class TwitchOAuthStateStore {
 
   constructor(private readonly ttlMs = DEFAULT_STATE_TTL_MS, private readonly now = () => Date.now()) {}
 
-  create(): string {
+  create(metadata?: Record<string, string>): string {
     this.cleanup();
     const state = randomBytes(24).toString("base64url");
-    this.states.set(state, { state, expiresAt: this.now() + this.ttlMs });
+    this.states.set(state, { state, expiresAt: this.now() + this.ttlMs, metadata });
     return state;
   }
 
   consume(state: string | null | undefined): boolean {
-    if (!state) return false;
+    return Boolean(this.consumeRecord(state));
+  }
+
+  consumeRecord(state: string | null | undefined): OAuthStateRecord | undefined {
+    if (!state) return undefined;
     const record = this.states.get(state);
-    if (!record) return false;
+    if (!record) return undefined;
     this.states.delete(state);
-    return record.expiresAt >= this.now();
+    return record.expiresAt >= this.now() ? record : undefined;
   }
 
   private cleanup(): void {
