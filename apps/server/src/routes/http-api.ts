@@ -670,12 +670,11 @@ function wsBaseForOrigin(origin: string): string {
 }
 
 function publicTwitchCallbackUrlForRequest(req: IncomingMessage): string {
-  const origin = publicOriginForRequest(req);
   try {
     const configured = new URL(appConfig.twitch.publicRedirectUri);
-    return `${origin}${configured.pathname || "/api/public/twitch/auth/callback"}${configured.search}`;
+    return configured.toString();
   } catch {
-    return `${origin}/api/public/twitch/auth/callback`;
+    return `${trustedPublicOriginForRequest(req)}/api/public/twitch/auth/callback`;
   }
 }
 
