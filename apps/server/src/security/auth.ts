@@ -152,6 +152,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     pathname === "/api/public/twitch/followed-lol" ||
     pathname === "/api/public/twitch/riot-id-request" ||
     pathname === "/api/public/twitch/logout" ||
+    (pathname === "/api/public/community/posts" && (method === "GET" || method === "POST")) ||
     (method === "GET" && (pathname === "/api/public/tournaments" || pathname.startsWith("/api/public/tournaments/")))
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";

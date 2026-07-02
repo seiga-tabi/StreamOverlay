@@ -12,6 +12,8 @@ import {
   toSafeErrorMessage,
   validateBotAction,
   type BotAction,
+  type CommunityPost,
+  type CommunityPostCreateInput,
   type LolChampionSkinOption,
   type LolChampionSummary,
   type LolPerformanceStats,
@@ -2129,11 +2131,32 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   function twitchEventSubLiveFallback(twitchUserId: string | undefined): boolean {
-    const status = input.store.getTwitchStreamLiveStatus(twitchUserId);
+    const storeWithLiveStatus = input.store as Store & {
+      getTwitchStreamLiveStatus?: (twitchUserId: string | undefined) => { isLive: boolean; updatedAt: string } | undefined;
+    };
+    const status = typeof storeWithLiveStatus.getTwitchStreamLiveStatus === "function"
+      ? storeWithLiveStatus.getTwitchStreamLiveStatus(twitchUserId)
+      : undefined;
     if (!status?.isLive) return false;
     const updatedAt = Date.parse(status.updatedAt);
     if (!Number.isFinite(updatedAt)) return false;
     return Date.now() - updatedAt <= TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS;
+  }
+
+  function rememberTwitchStreamLiveStatus(status: {
+    twitchUserId: string;
+    isLive: boolean;
+    source: "eventsub" | "snapshot";
+  }): void {
+    const storeWithLiveStatus = input.store as Store & {
+      setTwitchStreamLiveStatus?: (input: {
+        twitchUserId: string;
+        isLive: boolean;
+        source: "eventsub" | "snapshot";
+      }) => void;
+    };
+    if (typeof storeWithLiveStatus.setTwitchStreamLiveStatus !== "function") return;
+    storeWithLiveStatus.setTwitchStreamLiveStatus(status);
   }
 
   async function lookupTwitchStreamByUserId(twitchUserId: string): Promise<TwitchStreamStatus | undefined> {
@@ -2141,7 +2164,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     try {
       const stream = await input.twitch.getStreamByUserId(twitchUserId);
       if (stream || !twitchEventSubLiveFallback(twitchUserId)) {
-        input.store.setTwitchStreamLiveStatus({
+        rememberTwitchStreamLiveStatus({
           twitchUserId,
           isLive: Boolean(stream),
           source: "snapshot"
@@ -2166,13 +2189,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
     try {
       const streamByLogin = await input.twitch.getStreamByUserLogin(login);
       if (streamByLogin) {
-        input.store.setTwitchStreamLiveStatus({
+        rememberTwitchStreamLiveStatus({
           twitchUserId: candidate.twitchUserId,
           isLive: true,
           source: "snapshot"
         });
         if (streamByLogin.userId !== candidate.twitchUserId) {
-          input.store.setTwitchStreamLiveStatus({
+          rememberTwitchStreamLiveStatus({
             twitchUserId: streamByLogin.userId,
             isLive: true,
             source: "snapshot"
@@ -2508,6 +2531,39 @@ export function createHttpHandler(input: HttpHandlerInput) {
       : [];
   }
 
+  function communityText(value: unknown, maxLength: number): string {
+    if (typeof value !== "string") return "";
+    return value
+      .replace(/\r\n/g, "\n")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .trim()
+      .slice(0, maxLength);
+  }
+
+  function listCommunityPosts(limit: number): CommunityPost[] {
+    const storeWithCommunity = input.store as Store & { listCommunityPosts?: (limit?: number) => CommunityPost[] };
+    return typeof storeWithCommunity.listCommunityPosts === "function"
+      ? storeWithCommunity.listCommunityPosts(limit)
+      : [];
+  }
+
+  function createCommunityPost(inputBody: CommunityPostCreateInput & {
+    authorTwitchUserId: string;
+    authorTwitchLogin: string;
+    authorDisplayName: string;
+    authorProfileImageUrl?: string;
+    authorRiotGameName?: string;
+    authorRiotTagLine?: string;
+  }): CommunityPost {
+    const storeWithCommunity = input.store as Store & { createCommunityPost?: (body: typeof inputBody) => CommunityPost | undefined };
+    if (typeof storeWithCommunity.createCommunityPost !== "function") {
+      throw new HttpRequestError(503, { error: "커뮤니티 저장소를 사용할 수 없습니다." });
+    }
+    const post = storeWithCommunity.createCommunityPost(inputBody);
+    if (!post) throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
+    return post;
+  }
+
   function getPublicTournamentBySlug(slug: string): StreamerTournament | undefined {
     const storeWithTournaments = input.store as Store & { getPublicTournamentBySlug?: (slug: string) => StreamerTournament | undefined };
     return typeof storeWithTournaments.getPublicTournamentBySlug === "function"
@@ -2767,6 +2823,35 @@ export function createHttpHandler(input: HttpHandlerInput) {
       twitchProfileImageUrl: status.user.profileImageUrl,
       riotGameName: parsed.gameName,
       riotTagLine: parsed.tagLine
+    });
+  }
+
+  async function createPublicCommunityPost(req: IncomingMessage): Promise<CommunityPost> {
+    if (!input.publicTwitchAuth) {
+      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
+    }
+    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
+    const status = await input.publicTwitchAuth.getStatus(sessionId);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 작성할 수 있습니다." });
+    }
+    const body = await readJsonBody<CommunityPostCreateInput>(req);
+    const title = communityText(body.title, 80);
+    const content = communityText(body.body, 2000);
+    if (!title || !content) {
+      throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
+    }
+    const streamerRiotRequest = currentStreamerRiotIdRequestForTwitchUser(status.user.id);
+    const approvedRiotRequest = streamerRiotRequest?.status === "approved" ? streamerRiotRequest : undefined;
+    return createCommunityPost({
+      title,
+      body: content,
+      authorTwitchUserId: status.user.id,
+      authorTwitchLogin: status.user.login,
+      authorDisplayName: status.user.displayName || status.user.login,
+      authorProfileImageUrl: status.user.profileImageUrl,
+      authorRiotGameName: approvedRiotRequest?.riotGameName,
+      authorRiotTagLine: approvedRiotRequest?.riotTagLine
     });
   }
 
@@ -3684,7 +3769,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
             ? oauthLimiter
-            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname === "/api/public/locale"
+            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -3768,6 +3853,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const tournament = slug ? getPublicTournamentBySlug(slug) : undefined;
         if (!tournament) return sendJson(req, res, 404, { error: "공개 대회를 찾을 수 없습니다." });
         return sendJson(req, res, 200, { tournament });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public/community/posts") {
+        const limit = Math.max(1, Math.min(100, Math.trunc(Number(url.searchParams.get("limit")) || 50)));
+        return sendJson(req, res, 200, { posts: listCommunityPosts(limit) });
+      }
+      if (req.method === "POST" && url.pathname === "/api/public/community/posts") {
+        const post = await createPublicCommunityPost(req);
+        return sendJson(req, res, 201, { post, posts: listCommunityPosts(50) });
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/status") {
         return sendJson(req, res, 200, await getPublicTwitchViewerStatus(req));

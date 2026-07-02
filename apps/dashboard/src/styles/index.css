@@ -4187,6 +4187,14 @@ code {
   padding: 10px 12px 12px;
 }
 
+.public-match-expanded-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
 .public-match-expanded-tabs {
   display: inline-flex;
   width: fit-content;
@@ -4209,6 +4217,34 @@ code {
   cursor: pointer;
   font-size: 13px;
   font-weight: 950;
+}
+
+.public-match-id-mask-toggle {
+  flex: 0 0 auto;
+  min-width: 104px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(118, 139, 188, .28);
+  border-radius: 999px;
+  background: rgba(9, 18, 36, .68);
+  color: #b8c5de;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 950;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+  white-space: nowrap;
+}
+
+.public-match-id-mask-toggle:hover {
+  border-color: rgba(125, 103, 255, .66);
+  color: #ffffff;
+}
+
+.public-match-id-mask-toggle.active {
+  border-color: rgba(125, 103, 255, .78);
+  background: linear-gradient(135deg, rgba(109, 92, 255, .95), rgba(52, 120, 255, .92));
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(74, 92, 255, .22);
 }
 
 .public-match-expanded-tabs button:hover,
@@ -9695,49 +9731,6 @@ code {
   font-weight: 850;
 }
 
-.public-notification-popover {
-  width: min(360px, calc(100vw - 24px));
-}
-
-.public-notification-list {
-  display: grid;
-  gap: 8px;
-  max-height: 320px;
-  overflow: auto;
-}
-
-.public-notification-list article {
-  display: grid;
-  gap: 4px;
-  padding: 10px;
-  border: 1px solid #dfe7f3;
-  border-radius: 8px;
-  background: #f7fbff;
-}
-
-.public-notification-list article.read {
-  opacity: .62;
-}
-
-.public-notification-list strong {
-  color: #17233c;
-  font-size: 13px;
-}
-
-.public-notification-list p {
-  margin: 0;
-  color: #5e6e88;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.public-notification-list small,
-.public-notification-list > p {
-  margin: 0;
-  color: #7c8aa1;
-  font-size: 11px;
-}
-
 .public-dashboard-home {
   display: grid;
   place-items: center;
@@ -11677,9 +11670,15 @@ code {
 }
 
 .public-subscriptions-layout > .public-twitch-followed-panel .public-section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: 14px;
   margin-bottom: 0;
+}
+
+.public-subscriptions-layout > .public-twitch-followed-panel .public-section-head > div:first-child {
+  min-width: 0;
 }
 
 .public-subscriptions-layout > .public-twitch-followed-panel .public-section-head h2 {
@@ -11707,6 +11706,7 @@ code {
   align-self: start;
   justify-content: end;
   flex: 0 0 auto;
+  max-width: 100%;
 }
 
 .public-subscriptions-layout .public-twitch-followed-actions button {
@@ -11876,8 +11876,13 @@ code {
 }
 
 .public-subscriptions-layout .public-twitch-followed-list article {
-  grid-template-columns: minmax(170px, 1.2fr) minmax(126px, .8fr) minmax(92px, auto);
-  gap: 10px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr) 88px;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.public-subscriptions-layout .public-twitch-followed-list article > * {
+  min-width: 0;
 }
 
 .public-subscriptions-layout .public-twitch-channel-main {
@@ -11896,16 +11901,22 @@ code {
 .public-subscriptions-layout .public-twitch-channel-actions {
   flex-wrap: nowrap;
   justify-content: end;
+  justify-self: end;
   min-width: 0;
+  width: 88px;
 }
 
 .public-subscriptions-layout .public-twitch-channel-actions a,
 .public-subscriptions-layout .public-twitch-channel-actions button {
-  min-width: 92px;
+  width: 88px;
+  min-width: 0;
   min-height: 32px;
-  padding: 0 8px;
+  padding: 0 6px;
+  overflow: hidden;
+  font-size: 11px;
   line-height: 1.15;
   text-align: center;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -11955,6 +11966,217 @@ code {
   color: #687890;
   font-size: 13px;
   line-height: 1.6;
+}
+
+.public-community-page {
+  display: grid;
+  gap: 14px;
+}
+
+.public-community-lead {
+  margin: -4px 0 4px;
+  color: #687890;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.public-community-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 14px;
+  min-width: 0;
+}
+
+.public-community-compose,
+.public-community-list,
+.public-community-post {
+  min-width: 0;
+  border: 1px solid #e3eaf5;
+  border-radius: 10px;
+  background: #fbfdff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+}
+
+.public-community-compose,
+.public-community-list {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px;
+}
+
+.public-community-list {
+  max-height: min(760px, calc(100vh - 220px));
+  overflow: auto;
+}
+
+.public-community-card-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.public-community-card-head strong {
+  color: #17233d;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.public-community-card-head button,
+.public-community-login button,
+.public-community-form button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #d7e2f2;
+  border-radius: 8px;
+  background: #4d6fff;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.public-community-card-head button {
+  min-height: 34px;
+  background: #ffffff;
+  color: #31405c;
+}
+
+.public-community-card-head button:disabled,
+.public-community-form button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.public-community-login {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 8px;
+  background: #f3f7ff;
+}
+
+.public-community-login p,
+.public-community-error {
+  margin: 0;
+  color: #6b7890;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.public-community-error {
+  color: #ef4444;
+}
+
+.public-community-form {
+  display: grid;
+  gap: 12px;
+}
+
+.public-community-form label {
+  display: grid;
+  gap: 7px;
+  color: #40506b;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.public-community-form input,
+.public-community-form textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d7e2f2;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17233d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  outline: none;
+}
+
+.public-community-form input {
+  height: 44px;
+  padding: 0 12px;
+}
+
+.public-community-form textarea {
+  min-height: 160px;
+  padding: 12px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.public-community-post {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.public-community-post header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.public-community-post img,
+.public-community-post header > em {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.public-community-post header > em {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #7d5cff, #54d6ff);
+  color: #ffffff;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.public-community-post header strong {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: #17233d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.public-community-post header small,
+.public-community-post time {
+  min-width: 0;
+  overflow: hidden;
+  color: #7a879d;
+  font-size: 11px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-community-post h3 {
+  margin: 0;
+  color: #17233d;
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.public-community-post p {
+  margin: 0;
+  color: #465774;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .public-header-submenu button.active {
@@ -13188,6 +13410,22 @@ code {
 }
 
 @media (max-width: 720px) {
+  .public-community-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .public-community-list {
+    max-height: none;
+  }
+
+  .public-community-post header {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .public-community-post time {
+    grid-column: 2;
+  }
+
   .dashboard-tournament-stepper {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -14281,8 +14519,7 @@ code {
 .public-dashboard-shell.theme-dark .public-saved-grid button strong,
 .public-dashboard-shell.theme-dark .public-subscription-row strong,
 .public-dashboard-shell.theme-dark .public-patch-placeholder strong,
-.public-dashboard-shell.theme-dark .public-popover-head strong,
-.public-dashboard-shell.theme-dark .public-notification-list strong {
+.public-dashboard-shell.theme-dark .public-popover-head strong {
   color: #eef5ff;
 }
 
@@ -14433,7 +14670,6 @@ code {
 .public-dashboard-shell.theme-dark .public-saved-grid button,
 .public-dashboard-shell.theme-dark .public-subscription-row,
 .public-dashboard-shell.theme-dark .public-patch-placeholder,
-.public-dashboard-shell.theme-dark .public-notification-list article,
 .public-dashboard-shell.theme-dark .public-aggregate-grid,
 .public-dashboard-shell.theme-dark .public-lp-chart,
 .public-dashboard-shell.theme-dark .public-twitch-stream-badge {
@@ -14535,6 +14771,22 @@ code {
   color: #dbe6f7;
 }
 
+.public-dashboard-shell.theme-dark .public-community-form input,
+.public-dashboard-shell.theme-dark .public-community-form textarea,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form input,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form textarea {
+  border-color: rgba(93, 110, 145, .42);
+  background: rgba(6, 13, 28, .86);
+  color: #f2f6ff;
+}
+
+.public-dashboard-shell.theme-dark .public-community-card-head button,
+.public-dashboard-shell:not(.public-home-shell) .public-community-card-head button {
+  border-color: rgba(93, 110, 145, .45);
+  background: rgba(12, 19, 35, .88);
+  color: #dbe6f7;
+}
+
 .public-dashboard-shell.theme-dark .public-home-search-stage .public-search-field {
   border-left-color: #26344c;
 }
@@ -14588,7 +14840,6 @@ code {
 .public-dashboard-shell.theme-dark .public-subscription-row strong small,
 .public-dashboard-shell.theme-dark .public-subscription-row > small,
 .public-dashboard-shell.theme-dark .public-patch-placeholder p,
-.public-dashboard-shell.theme-dark .public-notification-list p,
 .public-dashboard-shell.theme-dark .public-dialog p,
 .public-dashboard-shell.theme-dark .public-twitch-stream-badge small,
 .public-dashboard-shell.theme-dark .public-twitch-stream-badge em {
@@ -14769,6 +15020,20 @@ code {
 
   .public-subscriptions-layout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .public-subscriptions-layout > .public-twitch-followed-panel .public-section-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .public-subscriptions-layout .public-twitch-followed-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .public-subscriptions-layout .public-twitch-followed-actions button {
+    width: 100%;
+    min-width: 0;
   }
 
   .public-saved-grid {
@@ -15865,9 +16130,19 @@ code {
     background: rgba(255, 255, 255, .44);
   }
 
+  .public-dashboard-shell .public-match-expanded-toolbar {
+    gap: 6px;
+  }
+
   .public-dashboard-shell .public-match-expanded-tabs {
     width: 100%;
     justify-content: stretch;
+  }
+
+  .public-dashboard-shell .public-match-expanded-toolbar .public-match-expanded-tabs {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
   }
 
   .public-dashboard-shell .public-match-expanded-tabs button {
@@ -15876,6 +16151,13 @@ code {
     height: 30px;
     padding: 0 10px;
     font-size: 12px;
+  }
+
+  .public-dashboard-shell .public-match-id-mask-toggle {
+    min-width: 78px;
+    height: 30px;
+    padding: 0 9px;
+    font-size: 10px;
   }
 
   .public-dashboard-shell .public-match-build-panel {
@@ -16616,6 +16898,10 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-saved-grid button,
 .public-dashboard-shell:not(.public-home-shell) .public-subscription-row,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder,
+.public-dashboard-shell:not(.public-home-shell) .public-community-compose,
+.public-dashboard-shell:not(.public-home-shell) .public-community-list,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post,
+.public-dashboard-shell:not(.public-home-shell) .public-community-login,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary > div,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-bottom-summary > div {
   border-color: rgba(93, 110, 145, .34);
@@ -16635,12 +16921,15 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-subscriptions-card > strong,
 .public-dashboard-shell:not(.public-home-shell) .public-saved-grid button strong,
 .public-dashboard-shell:not(.public-home-shell) .public-subscription-row strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-card-head strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post header strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post h3,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-main strong,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-meta span,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder strong,
 .public-dashboard-shell:not(.public-home-shell) .public-dialog h2,
 .public-dashboard-shell:not(.public-home-shell) .public-popover-head strong,
-.public-dashboard-shell:not(.public-home-shell) .public-notification-list strong,
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu-head strong,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-empty strong,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-status-head h2,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary strong,
@@ -16679,8 +16968,14 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-main small,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-meta small,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-meta .muted,
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu-head small,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder p,
-.public-dashboard-shell:not(.public-home-shell) .public-notification-list p,
+.public-dashboard-shell:not(.public-home-shell) .public-community-lead,
+.public-dashboard-shell:not(.public-home-shell) .public-community-login p,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form label,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post header small,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post time,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post p,
 .public-dashboard-shell:not(.public-home-shell) .public-dialog p,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary span,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary small,
@@ -16729,11 +17024,23 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-back-button,
 .public-dashboard-shell:not(.public-home-shell) .public-streamer-riot-request input,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-actions a,
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-followed-actions button {
   border-color: rgba(93, 110, 145, .42);
   background: rgba(10, 17, 31, .88);
   color: #dbe6f7;
   box-shadow: none;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button:hover {
+  background: rgba(90, 112, 255, .18);
+  color: #ffffff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button.dashboard,
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button.dashboard:hover {
+  background: linear-gradient(135deg, #7559ff, #4d6dff);
+  color: #ffffff;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-search-field {

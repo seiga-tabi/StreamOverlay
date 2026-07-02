@@ -3,6 +3,8 @@ import path from "node:path";
 import crypto from "node:crypto";
 import type {
   BotStatus,
+  CommunityPost,
+  CommunityPostCreateInput,
   InternalEvent,
   OverlayChannel,
   OverlayMessageLogEntry,
@@ -109,6 +111,7 @@ export type StoreOptions = {
   followerStatePath?: string;
   streamerRiotIdStatePath?: string;
   tournamentStatePath?: string;
+  communityStatePath?: string;
 };
 
 export type TwitchStreamLiveStatus = {
@@ -527,6 +530,44 @@ function normalizedStreamerTournament(value: unknown): StreamerTournament | unde
   };
 }
 
+function cloneCommunityPost(post: CommunityPost): CommunityPost {
+  return { ...post };
+}
+
+function normalizedCommunityPost(value: unknown): CommunityPost | undefined {
+  const input = objectRecord(value);
+  const id = optionalString(input?.id);
+  const title = optionalString(input?.title);
+  const body = optionalString(input?.body);
+  const authorTwitchUserId = optionalString(input?.authorTwitchUserId);
+  const authorTwitchLogin = optionalString(input?.authorTwitchLogin);
+  const authorDisplayName = optionalString(input?.authorDisplayName);
+  if (!id || !title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
+  const createdAt = optionalString(input?.createdAt) || nowIso();
+  return {
+    id,
+    title,
+    body,
+    authorTwitchUserId,
+    authorTwitchLogin,
+    authorDisplayName,
+    authorProfileImageUrl: optionalString(input?.authorProfileImageUrl),
+    authorRiotGameName: optionalString(input?.authorRiotGameName),
+    authorRiotTagLine: optionalString(input?.authorRiotTagLine),
+    createdAt,
+    updatedAt: optionalString(input?.updatedAt) || createdAt
+  };
+}
+
+type CommunityPostAuthorInput = {
+  authorTwitchUserId: string;
+  authorTwitchLogin: string;
+  authorDisplayName: string;
+  authorProfileImageUrl?: string;
+  authorRiotGameName?: string;
+  authorRiotTagLine?: string;
+};
+
 export class Store {
   private static readonly maxSeenTwitchMessageIds = 5000;
   private static readonly maxEvents = 200;
@@ -548,6 +589,7 @@ export class Store {
   private participationStreamerProfile?: ParticipationStreamerProfile;
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
   private tournaments: StreamerTournament[] = [];
+  private communityPosts: CommunityPost[] = [];
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
   private overlayStatus: OverlayStatus = {
     clientCount: 0,
@@ -584,6 +626,7 @@ export class Store {
     this.loadFollowerState();
     this.loadStreamerRiotIdState();
     this.loadTournamentState();
+    this.loadCommunityState();
   }
 
   getStatus(): BotStatus {
@@ -1027,6 +1070,71 @@ export class Store {
     } catch {
       // 대회 정보 저장 실패가 방송 중 runtime 동작을 막지 않도록 무시합니다.
     }
+  }
+
+  private loadCommunityState(): void {
+    if (!this.options.communityStatePath) return;
+    try {
+      const raw = fs.readFileSync(this.options.communityStatePath, "utf8");
+      const parsed = objectRecord(JSON.parse(raw));
+      const posts = Array.isArray(parsed?.posts) ? parsed.posts : [];
+      this.communityPosts = posts
+        .map(normalizedCommunityPost)
+        .filter((post): post is CommunityPost => Boolean(post));
+    } catch {
+      this.communityPosts = [];
+    }
+  }
+
+  private persistCommunityState(): void {
+    if (!this.options.communityStatePath) return;
+    try {
+      const dir = path.dirname(this.options.communityStatePath);
+      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+      const tmpPath = `${this.options.communityStatePath}.${process.pid}.${Date.now()}.tmp`;
+      const payload = {
+        version: 1,
+        posts: this.communityPosts.map(cloneCommunityPost)
+      };
+      fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+      fs.renameSync(tmpPath, this.options.communityStatePath);
+    } catch {
+      // 커뮤니티 저장 실패가 공개 전적 검색과 방송 기능을 막지 않도록 무시합니다.
+    }
+  }
+
+  listCommunityPosts(limit = 50): CommunityPost[] {
+    const safeLimit = Math.max(1, Math.min(100, Math.trunc(Number(limit) || 50)));
+    return this.communityPosts
+      .map(cloneCommunityPost)
+      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+      .slice(0, safeLimit);
+  }
+
+  createCommunityPost(input: CommunityPostCreateInput & CommunityPostAuthorInput): CommunityPost | undefined {
+    const title = input.title.trim();
+    const body = input.body.trim();
+    const authorTwitchUserId = input.authorTwitchUserId.trim();
+    const authorTwitchLogin = input.authorTwitchLogin.trim();
+    const authorDisplayName = input.authorDisplayName.trim();
+    if (!title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
+    const now = nowIso();
+    const post: CommunityPost = {
+      id: newId("post"),
+      title,
+      body,
+      authorTwitchUserId,
+      authorTwitchLogin,
+      authorDisplayName,
+      authorProfileImageUrl: input.authorProfileImageUrl?.trim() || undefined,
+      authorRiotGameName: input.authorRiotGameName?.trim() || undefined,
+      authorRiotTagLine: input.authorRiotTagLine?.trim() || undefined,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.communityPosts = [post, ...this.communityPosts].slice(0, 500);
+    this.persistCommunityState();
+    return cloneCommunityPost(post);
   }
 
   private uniqueTournamentSlug(base: string, existingId?: string): string {

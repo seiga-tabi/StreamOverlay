@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useMemo, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
+import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import type { CommunityPost, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 
@@ -426,22 +426,13 @@ type PublicMatchFilters = {
   period: MatchPeriodFilter;
 };
 type PublicFavorite = SearchSuggestion;
-type PublicNotification = {
-  id: string;
-  title: string;
-  body: string;
-  createdAt: string;
-  read: boolean;
-};
 
 const RECENT_SEARCH_STORAGE_KEY = "loltrace.recent.jp";
 const FAVORITE_STORAGE_KEY = "loltrace.favorites.jp";
 const THEME_STORAGE_KEY = "loltrace.theme";
 const LOCALE_STORAGE_KEY = "loltrace.locale";
-const NOTIFICATION_STORAGE_KEY = "loltrace.notifications";
 const MAX_RECENT_SEARCHES = 8;
 const MAX_FAVORITES = 24;
-const MAX_NOTIFICATIONS = 16;
 const MAX_SEARCH_SUGGESTIONS = 6;
 const RECENT_ANALYSIS_MATCH_LIMIT = 20;
 const LP_TREND_WINDOW_DAYS = 30;
@@ -507,7 +498,6 @@ const publicI18n = {
     premiumBody: "광고 제거, 상세 통계, 프로 리플레이 등 프리미엄 기능을 경험해보세요.",
     premiumCta: "프리미엄 업그레이드",
     version: "버전",
-    notifications: "알림",
     profileSummary: "플레이어 요약",
     recentGames: "최근 게임",
     recent20Games: "최근 20게임",
@@ -521,6 +511,8 @@ const publicI18n = {
     matchDetails: "경기 상세",
     matchRecordTab: "전적",
     matchBuildTab: "빌드",
+    riotIdMaskOn: "가리기 ON",
+    riotIdMaskOff: "가리기 OFF",
     buildLoading: "빌드 불러오는 중",
     buildLoadFailed: "빌드 정보를 불러오지 못했습니다.",
     expandMatch: "경기 상세 펼치기",
@@ -650,7 +642,7 @@ const publicI18n = {
     ingame: "인게임",
     stats: "통계",
     spectate: "관전하기",
-    patchNotes: "패치노트",
+    patchNotes: "커뮤니티",
     promotion: "프로모션",
     community: "커뮤니티",
     multimatch: "멀티서치",
@@ -730,8 +722,6 @@ const publicI18n = {
     favoriteRemove: "즐겨찾기 해제",
     favoriteAdded: "즐겨찾기에 추가했습니다.",
     favoriteRemoved: "즐겨찾기에서 해제했습니다.",
-    notificationsEmpty: "새 알림이 없습니다.",
-    markAllRead: "모두 읽음",
     premiumNoticeTitle: "프리미엄 기능 안내",
     premiumNoticeBody: "결제/구독은 아직 연결되지 않았습니다. 현재는 방송 관리 로그인으로 이동합니다.",
     openStreamerLogin: "방송 관리 열기",
@@ -744,8 +734,20 @@ const publicI18n = {
     subscriptionsEmpty: "팔로우 목록에서 구독 중인 방송인을 찾지 못했습니다.",
     subscriptionMissingScope: "구독 상태 확인 권한이 필요합니다. Twitch를 다시 로그인해주세요.",
     subscriptionGift: "선물 구독",
-    patchNotesPreparing: "패치노트 페이지를 준비 중입니다.",
-    patchNotesPreparingBody: "Riot 패치 데이터와 자체 해설을 연결한 뒤 이 화면에서 업데이트 내역을 보여줄 예정입니다.",
+    patchNotesPreparing: "커뮤니티 게시판을 준비 중입니다.",
+    patchNotesPreparingBody: "Twitch 로그인 후 게시글을 작성할 수 있습니다.",
+    communitySubtitle: "Twitch 로그인 후 자유롭게 글을 작성할 수 있습니다.",
+    communityWriteTitle: "게시글 작성",
+    communityListTitle: "최근 게시글",
+    communityLoginRequired: "게시글 작성은 Twitch 로그인 후 사용할 수 있습니다.",
+    communityTitleLabel: "제목",
+    communityBodyLabel: "내용",
+    communityTitlePlaceholder: "제목을 입력하세요",
+    communityBodyPlaceholder: "내용을 입력하세요",
+    communitySubmit: "게시하기",
+    communitySubmitting: "게시 중",
+    communityEmpty: "아직 게시글이 없습니다.",
+    communityLoadFailed: "게시글을 불러오지 못했습니다.",
     refreshAvailableIn: "후 가능",
     twitchLive: "방송 중",
     twitchOffline: "스트리머 오프라인",
@@ -831,7 +833,6 @@ const publicI18n = {
     premiumBody: "広告非表示、詳細統計、プロリプレイなどのプレミアム機能を体験できます。",
     premiumCta: "プレミアムにアップグレード",
     version: "バージョン",
-    notifications: "通知",
     profileSummary: "プレイヤー概要",
     recentGames: "最近の試合",
     recent20Games: "最近20試合",
@@ -845,6 +846,8 @@ const publicI18n = {
     matchDetails: "試合詳細",
     matchRecordTab: "戦績",
     matchBuildTab: "ビルド",
+    riotIdMaskOn: "非表示 ON",
+    riotIdMaskOff: "非表示 OFF",
     buildLoading: "ビルド読み込み中",
     buildLoadFailed: "ビルド情報を読み込めませんでした。",
     expandMatch: "試合詳細を開く",
@@ -974,7 +977,7 @@ const publicI18n = {
     ingame: "インゲーム",
     stats: "統計",
     spectate: "観戦",
-    patchNotes: "パッチノート",
+    patchNotes: "コミュニティ",
     promotion: "プロモーション",
     community: "コミュニティ",
     multimatch: "マルチサーチ",
@@ -1054,8 +1057,6 @@ const publicI18n = {
     favoriteRemove: "お気に入り解除",
     favoriteAdded: "お気に入りに追加しました。",
     favoriteRemoved: "お気に入りから解除しました。",
-    notificationsEmpty: "新しい通知はありません。",
-    markAllRead: "すべて既読",
     premiumNoticeTitle: "プレミアム機能案内",
     premiumNoticeBody: "決済/購読はまだ接続されていません。現在は配信管理ログインへ移動します。",
     openStreamerLogin: "配信管理を開く",
@@ -1068,8 +1069,20 @@ const publicI18n = {
     subscriptionsEmpty: "フォロー一覧からサブスク中の配信者を見つけられませんでした。",
     subscriptionMissingScope: "サブスク状態の確認権限が必要です。Twitch に再ログインしてください。",
     subscriptionGift: "ギフトサブスク",
-    patchNotesPreparing: "パッチノートページを準備中です。",
-    patchNotesPreparingBody: "Riot のパッチデータと独自解説を接続したあと、この画面で更新内容を表示します。",
+    patchNotesPreparing: "コミュニティ掲示板を準備中です。",
+    patchNotesPreparingBody: "Twitchログイン後、投稿を作成できます。",
+    communitySubtitle: "Twitchログイン後、自由に投稿を作成できます。",
+    communityWriteTitle: "投稿作成",
+    communityListTitle: "最近の投稿",
+    communityLoginRequired: "投稿作成は Twitch ログイン後に利用できます。",
+    communityTitleLabel: "タイトル",
+    communityBodyLabel: "内容",
+    communityTitlePlaceholder: "タイトルを入力してください",
+    communityBodyPlaceholder: "内容を入力してください",
+    communitySubmit: "投稿する",
+    communitySubmitting: "投稿中",
+    communityEmpty: "まだ投稿がありません。",
+    communityLoadFailed: "投稿を読み込めませんでした。",
     refreshAvailableIn: "後に可能",
     twitchLive: "配信中",
     twitchOffline: "配信者オフライン",
@@ -1415,6 +1428,27 @@ async function getPublicTournament(slug: string): Promise<StreamerTournament> {
   return body.tournament;
 }
 
+async function getPublicCommunityPosts(): Promise<CommunityPost[]> {
+  const response = await fetch(`${apiBase}/api/public/community/posts?limit=50`, {
+    credentials: "include"
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  const body = await response.json() as { posts?: CommunityPost[] };
+  return Array.isArray(body.posts) ? body.posts : [];
+}
+
+async function createPublicCommunityPost(input: { title: string; body: string }): Promise<CommunityPost[]> {
+  const response = await fetch(`${apiBase}/api/public/community/posts`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  const body = await response.json() as { posts?: CommunityPost[] };
+  return Array.isArray(body.posts) ? body.posts : [];
+}
+
 async function requestPublicStreamerRiotId(riotId: string): Promise<StreamerRiotIdRequest> {
   const response = await fetch(`${apiBase}/api/public/twitch/riot-id-request`, {
     method: "POST",
@@ -1636,37 +1670,6 @@ function favoriteFromProfile(profile: PublicLolProfile): PublicFavorite {
 function isFavoriteProfile(favorites: PublicFavorite[], profile: PublicLolProfile): boolean {
   const key = normalizeSuggestionKey(favoriteFromProfile(profile));
   return favorites.some((favorite) => normalizeSuggestionKey(favorite) === key);
-}
-
-function readNotifications(): PublicNotification[] {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(NOTIFICATION_STORAGE_KEY) ?? "[]") as Array<Partial<PublicNotification>>;
-    return parsed
-      .map((item) => ({
-        id: typeof item.id === "string" ? item.id : cryptoRandomId(),
-        title: typeof item.title === "string" ? item.title : "",
-        body: typeof item.body === "string" ? item.body : "",
-        createdAt: typeof item.createdAt === "string" ? item.createdAt : new Date().toISOString(),
-        read: item.read === true
-      }))
-      .filter((item) => item.title || item.body)
-      .slice(0, MAX_NOTIFICATIONS);
-  } catch {
-    return [];
-  }
-}
-
-function writeNotifications(notifications: PublicNotification[]): void {
-  try {
-    window.localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(notifications.slice(0, MAX_NOTIFICATIONS)));
-  } catch {
-    // 알림 저장 실패는 화면 동작에 영향을 주지 않습니다.
-  }
-}
-
-function cryptoRandomId(): string {
-  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-  return `${Date.now()}:${Math.random().toString(16).slice(2)}`;
 }
 
 function searchTextForMatch(value: string): string {
@@ -3522,34 +3525,6 @@ function PublicMatchFilterBar({
   );
 }
 
-function PublicNotificationPanel({
-  notifications,
-  onMarkAllRead
-}: {
-  notifications: PublicNotification[];
-  onMarkAllRead: () => void;
-}) {
-  return (
-    <div className="public-popover public-notification-popover">
-      <div className="public-popover-head">
-        <strong data-ko={publicI18n.ko.notifications} data-ja={publicI18n.ja.notifications}>{t().notifications}</strong>
-        <button type="button" onClick={onMarkAllRead} data-ko={publicI18n.ko.markAllRead} data-ja={publicI18n.ja.markAllRead}>{t().markAllRead}</button>
-      </div>
-      <div className="public-notification-list">
-        {notifications.length === 0 ? (
-          <p data-ko={publicI18n.ko.notificationsEmpty} data-ja={publicI18n.ja.notificationsEmpty}>{t().notificationsEmpty}</p>
-        ) : notifications.map((notification) => (
-          <article className={notification.read ? "read" : ""} key={notification.id}>
-            <strong>{notification.title}</strong>
-            <p>{notification.body}</p>
-            <small>{formatDate(notification.createdAt)}</small>
-          </article>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function PublicLocaleSelector({
   locale,
   onLocale,
@@ -3679,7 +3654,6 @@ function PublicAppHeader({
   suggestions,
   filters,
   champions,
-  notifications,
   onQuery,
   onClear,
   onSubmit,
@@ -3693,8 +3667,7 @@ function PublicAppHeader({
   onStreamerRecord,
   onTwitchLogout,
   onFilters,
-  onResetFilters,
-  onMarkNotificationsRead
+  onResetFilters
 }: {
   locale: PublicLocale;
   profile: PublicLolProfile | null;
@@ -3708,7 +3681,6 @@ function PublicAppHeader({
   suggestions: SearchSuggestion[];
   filters: PublicMatchFilters;
   champions: LolChampionSummary[];
-  notifications: PublicNotification[];
   onQuery: (value: string) => void;
   onClear: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -3723,13 +3695,11 @@ function PublicAppHeader({
   onTwitchLogout: () => void;
   onFilters: (filters: PublicMatchFilters) => void;
   onResetFilters: () => void;
-  onMarkNotificationsRead: () => void;
 }) {
   const [filterOpen, setFilterOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const twitchMenuCloseTimer = useRef<number | undefined>(undefined);
   const filterActive = hasActiveFilters(filters);
   const twitchUser = twitchStatus.connected ? twitchStatus.user : undefined;
   const approvedStreamerRequest = twitchStatus.streamerRiotRequest?.status === "approved" ? twitchStatus.streamerRiotRequest : undefined;
@@ -3739,6 +3709,23 @@ function PublicAppHeader({
     onPage(page);
     setMobileMenuOpen(false);
   };
+
+  function clearTwitchMenuCloseTimer(): void {
+    if (twitchMenuCloseTimer.current === undefined) return;
+    window.clearTimeout(twitchMenuCloseTimer.current);
+    twitchMenuCloseTimer.current = undefined;
+  }
+
+  function scheduleTwitchMenuClose(): void {
+    clearTwitchMenuCloseTimer();
+    twitchMenuCloseTimer.current = window.setTimeout(() => {
+      setTwitchMenuOpen(false);
+      twitchMenuCloseTimer.current = undefined;
+    }, 160);
+  }
+
+  useEffect(() => () => clearTwitchMenuCloseTimer(), []);
+
   return (
     <header id={showSearch ? "public-search" : undefined} className={`public-app-header ${showSearch ? "" : "home"} ${mobileMenuOpen ? "mobile-menu-open" : ""}`}>
       <div className="public-header-brand">
@@ -3768,15 +3755,7 @@ function PublicAppHeader({
       ) : null}
       <div className="public-header-tools">
         <PublicLocaleSelector locale={locale} onLocale={onLocale} onAutoLocale={onAutoLocale} />
-        {showSearch && twitchUser ? (
-          <div className="public-header-popover-wrap">
-            <button type="button" aria-label={t().notifications} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
-              ♧{unreadCount > 0 ? <span>{unreadCount}</span> : null}
-            </button>
-            {notificationsOpen ? <PublicNotificationPanel notifications={notifications} onMarkAllRead={onMarkNotificationsRead} /> : null}
-          </div>
-        ) : null}
-        <div className="public-twitch-profile-wrap">
+        <div className="public-twitch-profile-wrap" onMouseEnter={clearTwitchMenuCloseTimer} onMouseLeave={scheduleTwitchMenuClose}>
           <button
             className={`public-twitch-login-chip ${twitchStatus.connected ? "connected" : ""}`}
             type="button"
@@ -4102,16 +4081,110 @@ function PublicSubscriptionsPage({
   );
 }
 
-function PublicPatchNotesPage() {
+function PublicCommunityPage({
+  twitchStatus,
+  posts,
+  loading,
+  error,
+  submitting,
+  onLogin,
+  onRefresh,
+  onSubmit
+}: {
+  twitchStatus: PublicTwitchViewerStatus;
+  posts: CommunityPost[];
+  loading: boolean;
+  error: string;
+  submitting: boolean;
+  onLogin: () => void;
+  onRefresh: () => void;
+  onSubmit: (input: { title: string; body: string }) => Promise<void>;
+}) {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const canSubmit = twitchStatus.connected && title.trim().length > 0 && body.trim().length > 0 && !submitting;
+
+  async function submitPost(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    if (!canSubmit) return;
+    await onSubmit({ title, body });
+    setTitle("");
+    setBody("");
+  }
+
   return (
-    <section className="public-panel public-menu-page-panel public-patch-notes-page">
+    <section className="public-panel public-menu-page-panel public-community-page">
       <div className="public-section-head">
         <h2 data-ko={publicI18n.ko.patchNotes} data-ja={publicI18n.ja.patchNotes}>{t().patchNotes}</h2>
         <span>Seiga.GG</span>
       </div>
-      <div className="public-patch-placeholder">
-        <strong data-ko={publicI18n.ko.patchNotesPreparing} data-ja={publicI18n.ja.patchNotesPreparing}>{t().patchNotesPreparing}</strong>
-        <p data-ko={publicI18n.ko.patchNotesPreparingBody} data-ja={publicI18n.ja.patchNotesPreparingBody}>{t().patchNotesPreparingBody}</p>
+      <p className="public-community-lead" data-ko={publicI18n.ko.communitySubtitle} data-ja={publicI18n.ja.communitySubtitle}>{t().communitySubtitle}</p>
+      <div className="public-community-layout">
+        <article className="public-community-compose">
+          <div className="public-community-card-head">
+            <strong data-ko={publicI18n.ko.communityWriteTitle} data-ja={publicI18n.ja.communityWriteTitle}>{t().communityWriteTitle}</strong>
+          </div>
+          {!twitchStatus.connected ? (
+            <div className="public-community-login">
+              <p data-ko={publicI18n.ko.communityLoginRequired} data-ja={publicI18n.ja.communityLoginRequired}>{t().communityLoginRequired}</p>
+              <button type="button" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>{t().twitchViewerLogin}</button>
+            </div>
+          ) : (
+            <form className="public-community-form" onSubmit={submitPost}>
+              <label>
+                <span data-ko={publicI18n.ko.communityTitleLabel} data-ja={publicI18n.ja.communityTitleLabel}>{t().communityTitleLabel}</span>
+                <input
+                  value={title}
+                  onChange={(event) => setTitle(event.currentTarget.value)}
+                  maxLength={80}
+                  placeholder={t().communityTitlePlaceholder}
+                  data-ko={publicI18n.ko.communityTitlePlaceholder}
+                  data-ja={publicI18n.ja.communityTitlePlaceholder}
+                />
+              </label>
+              <label>
+                <span data-ko={publicI18n.ko.communityBodyLabel} data-ja={publicI18n.ja.communityBodyLabel}>{t().communityBodyLabel}</span>
+                <textarea
+                  value={body}
+                  onChange={(event) => setBody(event.currentTarget.value)}
+                  maxLength={2000}
+                  rows={8}
+                  placeholder={t().communityBodyPlaceholder}
+                  data-ko={publicI18n.ko.communityBodyPlaceholder}
+                  data-ja={publicI18n.ja.communityBodyPlaceholder}
+                />
+              </label>
+              <button type="submit" disabled={!canSubmit} data-ko={publicI18n.ko.communitySubmit} data-ja={publicI18n.ja.communitySubmit}>
+                {submitting ? t().communitySubmitting : t().communitySubmit}
+              </button>
+            </form>
+          )}
+        </article>
+        <article className="public-community-list">
+          <div className="public-community-card-head">
+            <strong data-ko={publicI18n.ko.communityListTitle} data-ja={publicI18n.ja.communityListTitle}>{t().communityListTitle}</strong>
+            <button type="button" onClick={onRefresh} disabled={loading} data-ko={publicI18n.ko.twitchFollowedRefresh} data-ja={publicI18n.ja.twitchFollowedRefresh}>{t().twitchFollowedRefresh}</button>
+          </div>
+          {error ? <p className="public-community-error">{error}</p> : null}
+          {loading ? (
+            <p className="public-empty" data-ko={publicI18n.ko.tournamentPlayerRecordLoading} data-ja={publicI18n.ja.tournamentPlayerRecordLoading}>{t().tournamentPlayerRecordLoading}</p>
+          ) : posts.length === 0 ? (
+            <p className="public-empty" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>{t().communityEmpty}</p>
+          ) : posts.map((post) => (
+            <section className="public-community-post" key={post.id}>
+              <header>
+                {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
+                <strong>
+                  {post.authorDisplayName}
+                  <small>@{post.authorTwitchLogin}{post.authorRiotGameName && post.authorRiotTagLine ? ` · ${post.authorRiotGameName}#${post.authorRiotTagLine}` : ""}</small>
+                </strong>
+                <time>{formatTournamentDateTime(post.createdAt)}</time>
+              </header>
+              <h3>{post.title}</h3>
+              <p>{post.body}</p>
+            </section>
+          ))}
+        </article>
       </div>
     </section>
   );
@@ -5160,6 +5233,7 @@ function RecentMatchBuildPanel({
   loading,
   error,
   selectedKey,
+  hideRiotIds,
   onSelect
 }: {
   match: PublicLolRecentMatch;
@@ -5167,6 +5241,7 @@ function RecentMatchBuildPanel({
   loading: boolean;
   error: string;
   selectedKey: string | undefined;
+  hideRiotIds: boolean;
   onSelect: (key: string) => void;
 }) {
   if (loading && !build) return <div className="public-match-build-state">{t().buildLoading}</div>;
@@ -5196,7 +5271,7 @@ function RecentMatchBuildPanel({
               className={key === buildParticipantKey(selectedParticipant) ? "active" : ""}
               key={key}
               onClick={() => onSelect(key)}
-              title={participant.riotId ?? championName(participant.champion)}
+              title={hideRiotIds ? "*" : participant.riotId ?? championName(participant.champion)}
             >
               {participant.champion.iconUrl ? <img src={participant.champion.iconUrl} alt="" /> : <span>{championName(participant.champion).slice(0, 1)}</span>}
               <strong className={metricToneClass(scoreTone(participant.score))}>{participant.score}</strong>
@@ -5255,7 +5330,7 @@ function RecentMatchBuildPanel({
           )) : <p className="public-empty">{t().noData}</p>}
         </div>
         <div className="public-match-build-summary">
-          <strong>{selectedParticipant.riotId ?? championName(selectedParticipant.champion)}</strong>
+          <strong>{hideRiotIds ? "*" : selectedParticipant.riotId ?? championName(selectedParticipant.champion)}</strong>
           <small>{championName(selectedParticipant.champion)} · {t().aiScore} {selectedParticipant.score}</small>
           <MatchBadges badges={selectedParticipant.badges} />
         </div>
@@ -5432,11 +5507,13 @@ function MatchTeamDetails({
   match,
   rankDetail,
   rankLoading,
+  hideRiotIds,
   onSearchRiotId
 }: {
   match: PublicLolRecentMatch;
   rankDetail?: PublicLolMatchRankResponse;
   rankLoading?: boolean;
+  hideRiotIds: boolean;
   onSearchRiotId: (riotId: string) => void;
 }) {
   if (match.teams.length === 0) return null;
@@ -5485,7 +5562,13 @@ function MatchTeamDetails({
                             {matchRankBadgeLabel(rankedStats, rankLoading)}
                           </span>
                           <span className="public-team-player-id-stack">
-	                          <SearchableRiotId riotId={player.riotId} fallback={playerDisplayName(player)} badges={playerHighlightBadges} streamer={player.twitchStream} onSearch={onSearchRiotId} />
+	                          <SearchableRiotId
+                              riotId={hideRiotIds ? undefined : player.riotId}
+                              fallback={hideRiotIds ? "*" : playerDisplayName(player)}
+                              badges={playerHighlightBadges}
+                              streamer={player.twitchStream}
+                              onSearch={onSearchRiotId}
+                            />
                             <span className="public-team-mobile-kda" aria-label={t().kda}>
                               <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
                               <span><KdaMetricText value={player.kda} /></span>
@@ -5692,6 +5775,7 @@ function RecentMatches({
   const [matchBuildLoading, setMatchBuildLoading] = useState<Record<string, boolean>>({});
   const [matchBuildErrors, setMatchBuildErrors] = useState<Record<string, string>>({});
   const [selectedBuildParticipantKeys, setSelectedBuildParticipantKeys] = useState<Record<string, string>>({});
+  const [hiddenRiotIdMatches, setHiddenRiotIdMatches] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setExpandedMatchId(null);
@@ -5702,6 +5786,7 @@ function RecentMatches({
     setMatchBuildLoading({});
     setMatchBuildErrors({});
     setSelectedBuildParticipantKeys({});
+    setHiddenRiotIdMatches({});
   }, [profile.riotId, profile.refreshAvailableAt]);
 
   async function ensureMatchRanks(matchId: string): Promise<void> {
@@ -5752,6 +5837,7 @@ function RecentMatches({
           const build = matchBuilds[match.matchId];
           const buildLoading = Boolean(matchBuildLoading[match.matchId]);
           const buildError = matchBuildErrors[match.matchId] ?? "";
+          const hideRiotIds = Boolean(hiddenRiotIdMatches[match.matchId]);
           const dataDragonVersion = recentMatchDataDragonVersion(match);
           const recentItemSlots = fixedRecentItemSlots(match.items, 6);
           const aiScore = matchAiScore(match);
@@ -5829,38 +5915,50 @@ function RecentMatches({
 
               {expanded ? (
                 <div className="public-match-expanded">
-                  <div className="public-match-expanded-tabs" role="tablist" aria-label={t().matchDetails}>
+                  <div className="public-match-expanded-toolbar">
+                    <div className="public-match-expanded-tabs" role="tablist" aria-label={t().matchDetails}>
+                      <button
+                        type="button"
+                        className={expandedView === "record" ? "active" : ""}
+                        role="tab"
+                        aria-selected={expandedView === "record"}
+                        onClick={() => {
+                          setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
+                          void ensureMatchRanks(match.matchId);
+                        }}
+                        data-ko={publicI18n.ko.matchRecordTab}
+                        data-ja={publicI18n.ja.matchRecordTab}
+                      >
+                        {t().matchRecordTab}
+                      </button>
+                      <button
+                        type="button"
+                        className={expandedView === "build" ? "active" : ""}
+                        role="tab"
+                        aria-selected={expandedView === "build"}
+                        onClick={() => {
+                          setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "build" }));
+                          void ensureMatchBuild(match);
+                        }}
+                        data-ko={publicI18n.ko.matchBuildTab}
+                        data-ja={publicI18n.ja.matchBuildTab}
+                      >
+                        {t().matchBuildTab}
+                      </button>
+                    </div>
                     <button
                       type="button"
-                      className={expandedView === "record" ? "active" : ""}
-                      role="tab"
-                      aria-selected={expandedView === "record"}
-                      onClick={() => {
-                        setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
-                        void ensureMatchRanks(match.matchId);
-                      }}
-                      data-ko={publicI18n.ko.matchRecordTab}
-                      data-ja={publicI18n.ja.matchRecordTab}
+                      className={`public-match-id-mask-toggle ${hideRiotIds ? "active" : ""}`}
+                      aria-pressed={hideRiotIds}
+                      onClick={() => setHiddenRiotIdMatches((current) => ({ ...current, [match.matchId]: !current[match.matchId] }))}
+                      data-ko={hideRiotIds ? publicI18n.ko.riotIdMaskOn : publicI18n.ko.riotIdMaskOff}
+                      data-ja={hideRiotIds ? publicI18n.ja.riotIdMaskOn : publicI18n.ja.riotIdMaskOff}
                     >
-                      {t().matchRecordTab}
-                    </button>
-                    <button
-                      type="button"
-                      className={expandedView === "build" ? "active" : ""}
-                      role="tab"
-                      aria-selected={expandedView === "build"}
-                      onClick={() => {
-                        setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "build" }));
-                        void ensureMatchBuild(match);
-                      }}
-                      data-ko={publicI18n.ko.matchBuildTab}
-                      data-ja={publicI18n.ja.matchBuildTab}
-                    >
-                      {t().matchBuildTab}
+                      {hideRiotIds ? t().riotIdMaskOn : t().riotIdMaskOff}
                     </button>
                   </div>
                   {expandedView === "record" ? (
-                    <MatchTeamDetails match={match} rankDetail={rankDetail} rankLoading={rankLoading} onSearchRiotId={onSearchRiotId} />
+                    <MatchTeamDetails match={match} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
                   ) : (
                     <RecentMatchBuildPanel
                       match={match}
@@ -5868,6 +5966,7 @@ function RecentMatches({
                       loading={buildLoading}
                       error={buildError}
                       selectedKey={selectedBuildParticipantKeys[match.matchId]}
+                      hideRiotIds={hideRiotIds}
                       onSelect={(key) => setSelectedBuildParticipantKeys((current) => ({ ...current, [match.matchId]: key }))}
                     />
                   )}
@@ -6127,7 +6226,6 @@ export function PublicLolPage({
   const [recentSearches, setRecentSearches] = useState<SearchSuggestion[]>(() => readRecentSearches());
   const [favorites, setFavorites] = useState<PublicFavorite[]>(() => readFavorites());
   const [theme, setTheme] = useState<PublicTheme>(() => readStoredTheme());
-  const [notifications, setNotifications] = useState<PublicNotification[]>(() => readNotifications());
   const [filters, setFilters] = useState<PublicMatchFilters>(DEFAULT_MATCH_FILTERS);
   const [remoteSuggestions, setRemoteSuggestions] = useState<SearchSuggestion[]>([]);
   const [profileTab, setProfileTab] = useState<PublicProfileTab>("overview");
@@ -6149,6 +6247,10 @@ export function PublicLolPage({
   const [publicTournamentSlug, setPublicTournamentSlug] = useState<string | undefined>(() => tournamentRouteFromPublicPath()?.slug);
   const [publicTournamentLoading, setPublicTournamentLoading] = useState(false);
   const [publicTournamentError, setPublicTournamentError] = useState("");
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
+  const [communityLoading, setCommunityLoading] = useState(false);
+  const [communitySubmitting, setCommunitySubmitting] = useState(false);
+  const [communityError, setCommunityError] = useState("");
   const storedSuggestions = useMemo(() => {
     const unique = new Map<string, SearchSuggestion>();
     for (const suggestion of [...favorites, ...recentSearches]) {
@@ -6224,6 +6326,12 @@ export function PublicLolPage({
   }, [activeMainPage, publicTournaments.length, publicTournamentLoading, publicTournamentError]);
 
   useEffect(() => {
+    if (activeMainPage !== "patch") return;
+    if (communityPosts.length > 0 || communityLoading) return;
+    void loadCommunityPosts();
+  }, [activeMainPage, communityPosts.length, communityLoading]);
+
+  useEffect(() => {
     if (refreshRemainingMs(profile, Date.now()) <= 0) return undefined;
     const timer = window.setInterval(() => setNowTick(Date.now()), 1000);
     return () => window.clearInterval(timer);
@@ -6263,7 +6371,7 @@ export function PublicLolPage({
       const riotId = riotIdFromPublicSummonerPath();
       if (!riotId) return;
       setQuery(riotId);
-      void runSearch(riotId, { replaceUrl, notify: false });
+      void runSearch(riotId, { replaceUrl });
     };
     loadFromPath(true);
     const handlePopState = () => {
@@ -6278,7 +6386,7 @@ export function PublicLolPage({
       const riotId = riotIdFromPublicSummonerPath();
       if (riotId) {
         setQuery(riotId);
-        void runSearch(riotId, { updateUrl: false, notify: false });
+        void runSearch(riotId, { updateUrl: false });
         return;
       }
       setProfile(null);
@@ -6321,31 +6429,6 @@ export function PublicLolPage({
       controller.abort();
     };
   }, [query, profile?.riotId]);
-
-  function pushNotification(title: string, body: string): void {
-    setNotifications((current) => {
-      const next = [
-        {
-          id: cryptoRandomId(),
-          title,
-          body,
-          createdAt: new Date().toISOString(),
-          read: false
-        },
-        ...current
-      ].slice(0, MAX_NOTIFICATIONS);
-      writeNotifications(next);
-      return next;
-    });
-  }
-
-  function markNotificationsRead(): void {
-    setNotifications((current) => {
-      const next = current.map((notification) => ({ ...notification, read: true }));
-      writeNotifications(next);
-      return next;
-    });
-  }
 
   async function loadTwitchViewer(): Promise<void> {
     setFollowedError("");
@@ -6397,6 +6480,30 @@ export function PublicLolPage({
     }
   }
 
+  async function loadCommunityPosts(): Promise<void> {
+    setCommunityLoading(true);
+    setCommunityError("");
+    try {
+      setCommunityPosts(await getPublicCommunityPosts());
+    } catch (requestError) {
+      setCommunityError(requestError instanceof Error ? requestError.message : t().communityLoadFailed);
+    } finally {
+      setCommunityLoading(false);
+    }
+  }
+
+  async function submitCommunityPost(input: { title: string; body: string }): Promise<void> {
+    setCommunitySubmitting(true);
+    setCommunityError("");
+    try {
+      setCommunityPosts(await createPublicCommunityPost(input));
+    } catch (requestError) {
+      setCommunityError(requestError instanceof Error ? requestError.message : t().searchFailed);
+    } finally {
+      setCommunitySubmitting(false);
+    }
+  }
+
   function startTwitchLogin(): void {
     window.location.href = `${apiBase}/api/public/twitch/auth/start`;
   }
@@ -6440,9 +6547,17 @@ export function PublicLolPage({
   }
 
   function changeMainPage(page: PublicMainPage): void {
+    if (page === "search") {
+      resetHome();
+      window.setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        document.getElementById("public-search-input")?.focus();
+      }, 0);
+      return;
+    }
     setActiveMainPage(page);
     setStreamerRegisterOpen(false);
-    setActiveNav(page === "search" ? "search" : "community");
+    setActiveNav("community");
     if (page.startsWith("tournament")) {
       const nextSlug = publicTournamentSlug || publicTournaments[0]?.slug;
       if (page === "tournamentCalendar") {
@@ -6456,7 +6571,6 @@ export function PublicLolPage({
     }
     window.setTimeout(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
-      if (page === "search") document.getElementById("public-search-input")?.focus();
     }, 0);
   }
 
@@ -6485,17 +6599,15 @@ export function PublicLolPage({
       : [favorite, ...favorites.filter((item) => normalizeSuggestionKey(item) !== normalizeSuggestionKey(favorite))].slice(0, MAX_FAVORITES);
     writeFavorites(next);
     setFavorites(next);
-    pushNotification(t().favoritesTitle, active ? t().favoriteRemoved : t().favoriteAdded);
   }
 
 	  async function runSearch(
 	    value: string,
-	    options: { updateUrl?: boolean; replaceUrl?: boolean; notify?: boolean; refresh?: boolean } = {}
+	    options: { updateUrl?: boolean; replaceUrl?: boolean; refresh?: boolean } = {}
 	  ): Promise<void> {
     const riotId = jpRiotIdQuery(value);
     if (!riotId) return;
     const updateUrl = options.updateUrl !== false;
-    const notify = options.notify !== false;
 	    setLoading(true);
 	    setError("");
     setMoreMatchesError("");
@@ -6512,7 +6624,6 @@ export function PublicLolPage({
       if (updateUrl) setPublicPath(publicSummonerPath(result.riotId), options.replaceUrl);
       saveRecentSearch(result);
       setRecentSearches(readRecentSearches());
-      if (notify) pushNotification(t().search, `${result.riotId} ${t().fetchedAt} ${formatDate(result.fetchedAt)}`);
     } catch (requestError) {
       if (!options.refresh) setProfile(null);
       setError(requestError instanceof Error ? requestError.message : t().searchFailed);
@@ -6621,7 +6732,18 @@ export function PublicLolPage({
       );
     }
     if (activeMainPage === "patch") {
-      return <PublicPatchNotesPage />;
+      return (
+        <PublicCommunityPage
+          twitchStatus={twitchStatus}
+          posts={communityPosts}
+          loading={communityLoading}
+          error={communityError}
+          submitting={communitySubmitting}
+          onLogin={startTwitchLogin}
+          onRefresh={() => void loadCommunityPosts()}
+          onSubmit={submitCommunityPost}
+        />
+      );
     }
     if (activeMainPage === "tournamentCalendar") {
       return (
@@ -6688,7 +6810,6 @@ export function PublicLolPage({
             suggestions={visibleSuggestions}
             filters={filters}
             champions={availableChampions}
-            notifications={notifications}
             onQuery={setQuery}
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
@@ -6703,7 +6824,6 @@ export function PublicLolPage({
             onTwitchLogout={() => void disconnectTwitchViewer()}
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
-            onMarkNotificationsRead={markNotificationsRead}
           />
           <PublicStreamerRegistrationScreen
             status={twitchStatus}
@@ -6720,7 +6840,7 @@ export function PublicLolPage({
     );
   }
 
-  if (!profile) {
+  if (!profile && activeMainPage === "search") {
     return (
       <main className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}>
         <section className="public-app-main">
@@ -6737,7 +6857,6 @@ export function PublicLolPage({
             suggestions={visibleSuggestions}
             filters={filters}
             champions={availableChampions}
-            notifications={notifications}
             onQuery={setQuery}
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
@@ -6752,29 +6871,68 @@ export function PublicLolPage({
             onTwitchLogout={() => void disconnectTwitchViewer()}
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
-            onMarkNotificationsRead={markNotificationsRead}
           />
           {loading ? <SeigaSearchLoader /> : null}
-          {activeMainPage === "search" ? (
-            <section id="public-search" className="public-home-content public-dashboard-home">
-              <div className="public-home-search-stage">
-                <SearchForm
-                  query={query}
-                  loading={loading}
-                  onQuery={setQuery}
-                  onClear={clearSearch}
-                  onSubmit={(event) => void submit(event)}
-                  suggestions={visibleSuggestions}
-                  onPickSuggestion={pickSuggestion}
-                />
-              </div>
-              {error ? <p className="public-error">{error}</p> : null}
-            </section>
-          ) : (
-            <section className={`public-home-content public-dashboard-home public-menu-page-home ${activeMainPage === "subscriptions" ? "subscriptions" : ""} ${activeMainPage.startsWith("tournament") ? "tournament" : ""}`}>
-              {renderMainMenuPage()}
-            </section>
-          )}
+          <section id="public-search" className="public-home-content public-dashboard-home">
+            <div className="public-home-search-stage">
+              <SearchForm
+                query={query}
+                loading={loading}
+                onQuery={setQuery}
+                onClear={clearSearch}
+                onSubmit={(event) => void submit(event)}
+                suggestions={visibleSuggestions}
+                onPickSuggestion={pickSuggestion}
+              />
+            </div>
+            {error ? <p className="public-error">{error}</p> : null}
+          </section>
+        </section>
+        <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
+      </main>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <main className={`public-lol-shell public-dashboard-shell theme-${theme}`}>
+        <section className="public-app-main">
+          <PublicAppHeader
+            locale={locale}
+            profile={profile}
+            twitchStatus={twitchStatus}
+            activePage={activeMainPage}
+            activeTarget={activeNav}
+            showFilters={false}
+            query={query}
+            loading={loading}
+            suggestions={visibleSuggestions}
+            filters={filters}
+            champions={availableChampions}
+            onQuery={setQuery}
+            onClear={clearSearch}
+            onSubmit={(event) => void submit(event)}
+            onPickSuggestion={pickSuggestion}
+            onPage={changeMainPage}
+            onLocale={changeLocale}
+            onAutoLocale={autoDetectLocale}
+            onTwitchLogin={startTwitchLogin}
+            onStreamerRegister={openStreamerRegisterScreen}
+            onStreamerDashboard={onOpenStreamerDashboard}
+            onStreamerRecord={openStreamerRecord}
+            onTwitchLogout={() => void disconnectTwitchViewer()}
+            onFilters={setFilters}
+            onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+          />
+          {loading ? <SeigaSearchLoader /> : null}
+          <div className="public-profile-layout">
+            <div className="public-dashboard-content-grid">
+              <section className="public-dashboard-center">
+                {error ? <p className="public-error">{error}</p> : null}
+                {renderMainMenuPage()}
+              </section>
+            </div>
+          </div>
         </section>
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </main>
@@ -6799,7 +6957,6 @@ export function PublicLolPage({
           suggestions={visibleSuggestions}
           filters={filters}
           champions={availableChampions}
-          notifications={notifications}
           onQuery={setQuery}
           onClear={clearSearch}
           onSubmit={(event) => void submit(event)}
@@ -6814,7 +6971,6 @@ export function PublicLolPage({
           onTwitchLogout={() => void disconnectTwitchViewer()}
           onFilters={setFilters}
           onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
-          onMarkNotificationsRead={markNotificationsRead}
         />
         {loading ? <SeigaSearchLoader /> : null}
 

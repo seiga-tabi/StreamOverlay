@@ -34,7 +34,8 @@ const logger = new JsonlLogger(appConfig.paths.logs);
 const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
   streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
-  tournamentStatePath: `${appConfig.paths.state}/tournaments.json`
+  tournamentStatePath: `${appConfig.paths.state}/tournaments.json`,
+  communityStatePath: `${appConfig.paths.state}/community-posts.json`
 });
 const sessions = new DashboardSessionStore();
 const events = new EventBus();
