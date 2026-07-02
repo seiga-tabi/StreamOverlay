@@ -363,6 +363,35 @@ export class TwitchApiClient {
     return request;
   }
 
+  async getStreamByUserLogin(login: string): Promise<TwitchStreamStatus | undefined> {
+    const safeLogin = login.trim().toLowerCase();
+    if (!/^[a-z0-9_]{1,32}$/.test(safeLogin)) return undefined;
+
+    const cacheKey = `login:${safeLogin}`;
+    const cached = this.streamStatusCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.stream;
+
+    const pending = this.streamStatusRequests.get(cacheKey);
+    if (pending) return pending;
+
+    const cacheVersion = this.streamStatusCacheVersion(cacheKey);
+    const request = this.fetchStreamByUserLogin(safeLogin)
+      .then((stream) => {
+        if (this.streamStatusCacheVersion(cacheKey) === cacheVersion) {
+          this.streamStatusCache.set(cacheKey, {
+            stream,
+            expiresAt: Date.now() + (stream ? STREAM_STATUS_LIVE_CACHE_TTL_MS : STREAM_STATUS_OFFLINE_CACHE_TTL_MS)
+          });
+        }
+        return stream;
+      })
+      .finally(() => {
+        this.streamStatusRequests.delete(cacheKey);
+      });
+    this.streamStatusRequests.set(cacheKey, request);
+    return request;
+  }
+
   private streamStatusCacheVersion(userId: string): string {
     return `${this.streamStatusGlobalCacheVersion}:${this.streamStatusCacheVersions.get(userId) ?? 0}`;
   }
@@ -591,12 +620,23 @@ export class TwitchApiClient {
   private async fetchStreamByUserId(userId: string): Promise<TwitchStreamStatus | undefined> {
     const url = new URL("https://api.twitch.tv/helix/streams");
     url.searchParams.set("user_id", userId);
+    return this.fetchStream(url);
+  }
+
+  private async fetchStreamByUserLogin(login: string): Promise<TwitchStreamStatus | undefined> {
+    const url = new URL("https://api.twitch.tv/helix/streams");
+    url.searchParams.set("user_login", login);
+    return this.fetchStream(url);
+  }
+
+  private async fetchStream(url: URL): Promise<TwitchStreamStatus | undefined> {
     let response = await this.request(url, { method: "GET" });
     if (!response?.ok) {
       const appContext = await this.getAppAccessContext();
       response = appContext ? await this.requestWithAccessContext(url, { method: "GET" }, appContext) : response;
     }
-    if (!response?.ok) return undefined;
+    if (!response) throw new Error("Twitch stream lookup failed: not_configured");
+    if (!response.ok) throw new Error(`Twitch stream lookup failed: ${response.status}`);
 
     const body = (await response.json()) as TwitchStreamsResponse;
     const stream = body.data?.[0];

@@ -511,7 +511,7 @@ export function TournamentsPage() {
     const nextMatches: TournamentMatch[] = [];
     for (let index = 0; index < teams.length; index += 2) {
       nextMatches.push(createMatch(form.matches.length + nextMatches.length, {
-        round: `${Math.floor(index / 2) + 1}경기`,
+        round: "1라운드",
         teamAId: teams[index]?.id,
         teamBId: teams[index + 1]?.id,
         scheduledAt: form.matchDraftDate || undefined,

@@ -91,6 +91,7 @@ const PUBLIC_LOL_MATCH_RANK_CACHE_TTL_MS = 5 * 60_000;
 const PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX = 1000;
+const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 18 * 60 * 60_000;
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
 const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
@@ -2127,6 +2128,80 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
+  function twitchEventSubLiveFallback(twitchUserId: string | undefined): boolean {
+    const status = input.store.getTwitchStreamLiveStatus(twitchUserId);
+    if (!status?.isLive) return false;
+    const updatedAt = Date.parse(status.updatedAt);
+    if (!Number.isFinite(updatedAt)) return false;
+    return Date.now() - updatedAt <= TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS;
+  }
+
+  async function lookupTwitchStreamByUserId(twitchUserId: string): Promise<TwitchStreamStatus | undefined> {
+    if (typeof input.twitch?.getStreamByUserId !== "function") return undefined;
+    try {
+      const stream = await input.twitch.getStreamByUserId(twitchUserId);
+      if (stream || !twitchEventSubLiveFallback(twitchUserId)) {
+        input.store.setTwitchStreamLiveStatus({
+          twitchUserId,
+          isLive: Boolean(stream),
+          source: "snapshot"
+        });
+      }
+      return stream;
+    } catch (error) {
+      input.logger?.error({
+        type: "public_lol.twitch_stream_lookup_failed",
+        twitchUserId,
+        error: toSafeErrorMessage(error)
+      });
+      return undefined;
+    }
+  }
+
+  async function lookupTwitchStreamForCandidate(candidate: PublicLolTwitchCandidate): Promise<TwitchStreamStatus | undefined> {
+    const streamById = await lookupTwitchStreamByUserId(candidate.twitchUserId);
+    if (streamById) return streamById;
+    const login = safeTwitchLogin(candidate.twitchLogin);
+    if (!login || typeof input.twitch?.getStreamByUserLogin !== "function") return undefined;
+    try {
+      const streamByLogin = await input.twitch.getStreamByUserLogin(login);
+      if (streamByLogin) {
+        input.store.setTwitchStreamLiveStatus({
+          twitchUserId: candidate.twitchUserId,
+          isLive: true,
+          source: "snapshot"
+        });
+        if (streamByLogin.userId !== candidate.twitchUserId) {
+          input.store.setTwitchStreamLiveStatus({
+            twitchUserId: streamByLogin.userId,
+            isLive: true,
+            source: "snapshot"
+          });
+        }
+      }
+      return streamByLogin;
+    } catch (error) {
+      input.logger?.error({
+        type: "public_lol.twitch_stream_login_lookup_failed",
+        twitchUserId: candidate.twitchUserId,
+        twitchLogin: login,
+        error: toSafeErrorMessage(error)
+      });
+      return undefined;
+    }
+  }
+
+  function connectedBroadcasterLiveFallback(
+    candidate: PublicLolTwitchCandidate,
+    broadcaster: { id?: string; login?: string } | undefined
+  ): boolean {
+    if (typeof input.store.getStatus !== "function" || input.store.getStatus().stream !== "online") return false;
+    const candidateLogin = safeTwitchLogin(candidate.twitchLogin || candidate.twitchDisplayName);
+    const broadcasterLogin = safeTwitchLogin(broadcaster?.login);
+    if (broadcaster?.id && candidate.twitchUserId === broadcaster.id) return true;
+    return Boolean(candidateLogin && broadcasterLogin && candidateLogin === broadcasterLogin);
+  }
+
   function rememberPublicLolSuggestion(profile: Pick<PublicLolProfileResponse, "riotId" | "gameName" | "tagLine" | "profileIconUrl" | "summonerLevel" | "lolPlatform" | "rankedStats" | "fetchedAt">): void {
     const key = publicLolSuggestionKey(profile.gameName, profile.tagLine);
     publicLolSuggestionCache.set(key, {
@@ -2213,11 +2288,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
       });
     }
 
+    const twitchAuthStatus = typeof input.twitchAuth.getStatus === "function"
+      ? await input.twitchAuth.getStatus().catch(() => undefined)
+      : undefined;
+    const broadcaster = twitchAuthStatus?.broadcaster;
     const monitorConfig = loadGameMonitorConfig();
     const streamerRiotId = parseRiotIdDetailed(monitorConfig.streamerRiotId);
-    if (streamerRiotId.ok && normalizeRiotIdKey(streamerRiotId.gameName, streamerRiotId.tagLine) === riotIdKey && typeof input.twitchAuth.getStatus === "function") {
-      const status = await input.twitchAuth.getStatus().catch(() => undefined);
-      const broadcaster = status?.broadcaster;
+    if (streamerRiotId.ok && normalizeRiotIdKey(streamerRiotId.gameName, streamerRiotId.tagLine) === riotIdKey) {
       if (broadcaster?.id) {
         const existing = candidates.get(broadcaster.id);
         candidates.set(broadcaster.id, {
@@ -2234,10 +2311,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
     let offline: PublicLolTwitchStream | undefined;
     for (const candidate of candidates.values()) {
       const [stream, profile] = await Promise.all([
-        typeof input.twitch?.getStreamByUserId === "function" ? input.twitch.getStreamByUserId(candidate.twitchUserId).catch(() => undefined) : Promise.resolve(undefined),
+        lookupTwitchStreamForCandidate(candidate),
         typeof input.twitch?.getUserProfile === "function" ? input.twitch.getUserProfile(candidate.twitchUserId).catch(() => undefined) : Promise.resolve(undefined)
       ]);
       const fallbackLive =
+        twitchEventSubLiveFallback(candidate.twitchUserId) ||
+        connectedBroadcasterLiveFallback(candidate, broadcaster) ||
         candidate.source === "connected_streamer" &&
         typeof input.store.getStatus === "function" &&
         input.store.getStatus().stream === "online";
@@ -2265,6 +2344,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       .filter(({ riotKey }) => wantedRiotIds.has(riotKey));
     if (requests.length === 0) return new Map();
 
+    const twitchAuthStatus = typeof input.twitchAuth.getStatus === "function"
+      ? await input.twitchAuth.getStatus().catch(() => undefined)
+      : undefined;
+    const broadcaster = twitchAuthStatus?.broadcaster;
     const resolved = await Promise.all(requests.map(async ({ request, riotKey }) => {
       const candidate: PublicLolTwitchCandidate = {
         twitchUserId: request.twitchUserId,
@@ -2276,16 +2359,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
         profileLinks: request.profileLinks?.map((link) => ({ ...link })),
         source: "approved_streamer"
       };
-      const stream = typeof input.twitch?.getStreamByUserId === "function"
-        ? await input.twitch.getStreamByUserId(request.twitchUserId).catch(() => undefined)
-        : undefined;
+      const stream = await lookupTwitchStreamForCandidate(candidate);
       return {
         riotKey,
         stream: publicLolTwitchStreamFromCandidate(candidate, stream, {
           login: request.twitchLogin,
           displayName: request.twitchDisplayName,
           profileImageUrl: request.twitchProfileImageUrl
-        })
+        }, twitchEventSubLiveFallback(request.twitchUserId) || connectedBroadcasterLiveFallback(candidate, broadcaster))
       };
     }));
 

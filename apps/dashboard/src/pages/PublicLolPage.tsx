@@ -414,7 +414,7 @@ type SearchSuggestion = {
 };
 
 type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
-type PublicMainPage = "search" | "favorites" | "subscriptions" | "patch" | "tournamentCalendar" | "tournamentList" | "tournamentBracket" | "tournamentSchedule" | "tournamentNews";
+type PublicMainPage = "search" | "favorites" | "subscriptions" | "patch" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule";
 type PublicProfileTab = "overview" | "champions" | "ingame";
 type PublicExpandedMatchView = "record" | "build";
 type PublicTheme = "light" | "dark";
@@ -623,7 +623,6 @@ const publicI18n = {
     tournamentVs: "VS",
     tournamentLiveShort: "LIVE",
     tournamentNotice: "최근 공지사항",
-    tournamentSponsor: "대회 스폰서",
     tournamentAllView: "전체 보기",
     tournamentDownloadBracket: "전체 대진표 다운로드",
     tournamentRound16: "16강",
@@ -948,7 +947,6 @@ const publicI18n = {
     tournamentVs: "VS",
     tournamentLiveShort: "LIVE",
     tournamentNotice: "最近のお知らせ",
-    tournamentSponsor: "大会スポンサー",
     tournamentAllView: "すべて見る",
     tournamentDownloadBracket: "全トーナメント表をダウンロード",
     tournamentRound16: "ベスト16",
@@ -1496,7 +1494,7 @@ function riotIdFromPublicSummonerPath(pathname: string = window.location.pathnam
 }
 
 type PublicTournamentRoute = {
-  page: Extract<PublicMainPage, "tournamentCalendar" | "tournamentList" | "tournamentBracket" | "tournamentSchedule" | "tournamentNews">;
+  page: Extract<PublicMainPage, "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule">;
   slug?: string;
 };
 
@@ -1511,16 +1509,18 @@ function tournamentRouteFromPublicPath(pathname: string = window.location.pathna
   const [slug, tab] = pathname.slice(PUBLIC_TOURNAMENT_ROUTE_PREFIX.length).split("/");
   if (!slug) return { page: "tournamentList" };
   const page =
-    tab === "schedule" ? "tournamentSchedule" :
     tab === "news" ? "tournamentNews" :
+    tab === "teams" ? "tournamentTeams" :
+    tab === "schedule" ? "tournamentSchedule" :
     "tournamentBracket";
   return { page, slug: decodeURIComponent(slug) };
 }
 
 function publicTournamentDetailPath(slug: string, page: PublicMainPage = "tournamentBracket"): string {
   const suffix =
-    page === "tournamentSchedule" ? "/schedule" :
     page === "tournamentNews" ? "/news" :
+    page === "tournamentTeams" ? "/teams" :
+    page === "tournamentSchedule" ? "/schedule" :
     "";
   return `${PUBLIC_TOURNAMENT_ROUTE_PREFIX}${encodeURIComponent(slug)}${suffix}`;
 }
@@ -2265,6 +2265,16 @@ function profileWithAdditionalMatchPage(profile: PublicLolProfile, page: PublicL
     nextRecentMatchStart: page.nextRecentMatchStart,
     hasMoreRecentMatches: page.hasMoreRecentMatches
   }, [...matches.values()]);
+}
+
+function profileWithDynamicState(profile: PublicLolProfile, next: PublicLolProfile): PublicLolProfile {
+  if (profile.riotId !== next.riotId) return profile;
+  return {
+    ...profile,
+    twitchStream: next.twitchStream,
+    liveGame: next.liveGame,
+    refreshAvailableAt: next.refreshAvailableAt
+  };
 }
 
 function hasActiveFilters(filters: PublicMatchFilters): boolean {
@@ -3615,7 +3625,7 @@ function PublicHeaderMenu({
     { key: "subscriptions", icon: "◆", ko: publicI18n.ko.subscriptionStatus, ja: publicI18n.ja.subscriptionStatus, label: t().subscriptionStatus },
     { key: "patch", icon: "▣", ko: publicI18n.ko.patchNotes, ja: publicI18n.ja.patchNotes, label: t().patchNotes }
   ];
-  const contentPages: PublicMainPage[] = ["tournamentCalendar", "tournamentList", "tournamentBracket", "tournamentSchedule", "tournamentNews"];
+  const contentPages: PublicMainPage[] = ["tournamentCalendar", "tournamentList", "tournamentNews", "tournamentTeams", "tournamentBracket", "tournamentSchedule"];
   const contentItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
     { page: "tournamentCalendar", icon: "◷", ko: publicI18n.ko.tournamentCalendar, ja: publicI18n.ja.tournamentCalendar, label: t().tournamentCalendar },
     { page: "tournamentList", icon: "▣", ko: publicI18n.ko.tournamentList, ja: publicI18n.ja.tournamentList, label: t().tournamentList }
@@ -4174,6 +4184,30 @@ function firstRoundDate(tournament: StreamerTournament, round: string): string {
   return formatTournamentDate(match?.scheduledAt);
 }
 
+type PublicTournamentMatch = StreamerTournament["matches"][number];
+
+function isTournamentMatchNumberRound(value: string | undefined): boolean {
+  return /^(\d+)\s*(?:경기|試合|match)$/i.test(value?.trim() ?? "");
+}
+
+function formatTournamentBracketStageName(round: string | undefined, index: number, total: number): string {
+  if (index === total - 1 && total > 1) return t().tournamentFinal;
+  if (isTournamentMatchNumberRound(round)) return activePublicLocale === "ja" ? `${index + 1}ラウンド` : `${index + 1}라운드`;
+  return formatTournamentRoundName(round);
+}
+
+function tournamentMatchWinnerTeamId(match: PublicTournamentMatch): string | undefined {
+  if (match.winnerTeamId) return match.winnerTeamId;
+  if (match.status !== "completed" || match.scoreA === undefined || match.scoreB === undefined || match.scoreA === match.scoreB) return undefined;
+  return match.scoreA > match.scoreB ? match.teamAId : match.teamBId;
+}
+
+function tournamentMatchSideClass(teamId: string | undefined, winnerTeamId: string | undefined, hasScore: boolean): string {
+  if (!teamId || !winnerTeamId) return "";
+  if (teamId === winnerTeamId) return "winner";
+  return hasScore ? "loser" : "";
+}
+
 type TournamentTeamRecord = {
   id: string;
   team: string;
@@ -4517,7 +4551,7 @@ function PublicTournamentPage({
   error,
   onSelectTournament
 }: {
-  page: Extract<PublicMainPage, "tournamentBracket" | "tournamentSchedule" | "tournamentNews">;
+  page: Extract<PublicMainPage, "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule">;
   onPage: (page: PublicMainPage) => void;
   tournaments: StreamerTournament[];
   selectedSlug?: string;
@@ -4525,10 +4559,11 @@ function PublicTournamentPage({
   error: string;
   onSelectTournament: (slug: string) => void;
 }) {
-  const tabs: Array<{ page: Extract<PublicMainPage, "tournamentBracket" | "tournamentSchedule" | "tournamentNews">; label: string; ko: string; ja: string }> = [
+  const tabs: Array<{ page: Extract<PublicMainPage, "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule">; label: string; ko: string; ja: string }> = [
+    { page: "tournamentNews", label: t().tournamentNews, ko: publicI18n.ko.tournamentNews, ja: publicI18n.ja.tournamentNews },
+    { page: "tournamentTeams", label: t().tournamentTeamGroups, ko: publicI18n.ko.tournamentTeamGroups, ja: publicI18n.ja.tournamentTeamGroups },
     { page: "tournamentBracket", label: t().tournamentBracket, ko: publicI18n.ko.tournamentBracket, ja: publicI18n.ja.tournamentBracket },
-    { page: "tournamentSchedule", label: t().tournamentScheduleRanking, ko: publicI18n.ko.tournamentScheduleRanking, ja: publicI18n.ja.tournamentScheduleRanking },
-    { page: "tournamentNews", label: t().tournamentNews, ko: publicI18n.ko.tournamentNews, ja: publicI18n.ja.tournamentNews }
+    { page: "tournamentSchedule", label: t().tournamentScheduleRanking, ko: publicI18n.ko.tournamentScheduleRanking, ja: publicI18n.ja.tournamentScheduleRanking }
   ];
   const tournament = tournaments.find((item) => item.slug === selectedSlug) ?? tournaments[0];
   const teamById = new Map(tournament?.teams.map((team) => [team.id, team]) ?? []);
@@ -4557,6 +4592,7 @@ function PublicTournamentPage({
   const teamGroups = buildTournamentTeamGroups(tournament);
   const bracketRounds = tournament ? tournamentRoundNames(tournament) : [];
   const tournamentPlayerQueries = useMemo(() => {
+    if (page !== "tournamentTeams") return [];
     const unique = new Map<string, string>();
     for (const team of tournament?.teams ?? []) {
       for (const player of team.players ?? []) {
@@ -4568,7 +4604,7 @@ function PublicTournamentPage({
     return [...unique.entries()]
       .slice(0, TOURNAMENT_PLAYER_PROFILE_LIMIT)
       .map(([key, query]) => ({ key, query }));
-  }, [tournament]);
+  }, [page, tournament]);
   const tournamentPlayerQueryKey = tournamentPlayerQueries.map((item) => item.key).join("|");
   const [tournamentPlayerProfiles, setTournamentPlayerProfiles] = useState<Record<string, TournamentPlayerProfileState>>({});
 
@@ -4669,31 +4705,38 @@ function PublicTournamentPage({
                 <p>{tournamentDescriptionText(tournament.description, t().tournamentBracketIntro)}</p>
               </div>
             </div>
-            <div className="public-tournament-round-tabs">
-              {bracketRounds.map((round, index) => (
-                <span className={index === 0 ? "active" : ""} key={round}>{formatTournamentRoundName(round)}</span>
-              ))}
-            </div>
             <div className={`public-tournament-bracket rounds-${Math.min(Math.max(bracketRounds.length, 1), 4)}`} aria-label={t().tournamentBracket}>
-              {bracketRounds.map((round, roundIndex) => (
-                <div className={`public-tournament-round ${roundIndex === bracketRounds.length - 1 ? "final-round" : ""} ${roundIndex > 0 ? `future round-${roundIndex + 1}` : ""}`} key={round}>
-                  <strong>{formatTournamentRoundName(round)}<small>{firstRoundDate(tournament, round)}</small></strong>
-                  {tournament.matches.filter((match) => match.round === round).map((match) => {
+              {bracketRounds.map((round, roundIndex) => {
+                const roundMatches = tournament.matches.filter((match) => match.round === round);
+                const isLastRound = roundIndex === bracketRounds.length - 1;
+                return (
+                <div className={`public-tournament-round ${isLastRound ? "final-round" : ""} ${roundIndex > 0 ? `future round-${roundIndex + 1}` : ""}`} key={round}>
+                  <strong>{formatTournamentBracketStageName(round, roundIndex, bracketRounds.length)}<small>{firstRoundDate(tournament, round)}</small></strong>
+                  {roundMatches.map((match, matchIndex) => {
                     const teamA = match.teamAId ? teamById.get(match.teamAId) : undefined;
                     const teamB = match.teamBId ? teamById.get(match.teamBId) : undefined;
                     const teamAName = formatTournamentTeamName(teamA?.name);
                     const teamBName = formatTournamentTeamName(teamB?.name);
                     const isTbd = !teamA || !teamB;
+                    const winnerTeamId = tournamentMatchWinnerTeamId(match);
+                    const hasScore = match.scoreA !== undefined || match.scoreB !== undefined || match.status === "completed";
+                    const pairClass = isLastRound
+                      ? "connector-none"
+                      : matchIndex % 2 === 0 && matchIndex + 1 < roundMatches.length
+                        ? "pair-top"
+                        : matchIndex % 2 === 1
+                          ? "pair-bottom"
+                          : "pair-solo";
                     return (
-                      <article className={`public-tournament-match-card ${isTbd ? "tbd" : ""} ${match.status}`} key={match.id}>
-                        <div className={!teamA ? "pending" : ""}>
+                      <article className={`public-tournament-match-card ${isTbd ? "tbd" : ""} ${match.status} ${pairClass} ${winnerTeamId ? "advanced" : ""}`} key={match.id}>
+                        <div className={`${!teamA ? "pending" : ""} ${tournamentMatchSideClass(match.teamAId, winnerTeamId, hasScore)}`}>
                           <b>{teamA?.seed ?? "-"}</b>
                           {avatar(teamAName)}
                           <span>{teamAName}</span>
                           {match.status === "live" ? <em>{t().tournamentLiveShort}</em> : <i>{match.scoreA ?? "-"}</i>}
                         </div>
                         <small>{t().tournamentVs}</small>
-                        <div className={!teamB ? "pending" : ""}>
+                        <div className={`${!teamB ? "pending" : ""} ${tournamentMatchSideClass(match.teamBId, winnerTeamId, hasScore)}`}>
                           <b>{teamB?.seed ?? "-"}</b>
                           {avatar(teamBName)}
                           <span>{teamBName}</span>
@@ -4704,7 +4747,7 @@ function PublicTournamentPage({
                     );
                   })}
                 </div>
-              ))}
+              );})}
               <div className="public-tournament-winner" aria-hidden="true">🏆</div>
             </div>
             <div className="public-tournament-info-grid">
@@ -4721,19 +4764,23 @@ function PublicTournamentPage({
                 </article>
               ))}
             </div>
-            <TournamentTeamsPanel
-              tournament={tournament}
-              groups={teamGroups}
-              recordByTeamId={recordByTeamId}
-              playerProfiles={tournamentPlayerProfiles}
-              avatar={avatar}
-            />
           </div>
           <aside className="public-tournament-side">
             <TournamentScheduleCard upcoming={scheduleItems.slice(0, 3)} avatar={avatar} />
             <TournamentNoticeCard notices={notices} />
-            <TournamentSponsorCard />
           </aside>
+        </div>
+      ) : null}
+
+      {tournament && page === "tournamentTeams" ? (
+        <div className="public-tournament-single-column">
+          <TournamentTeamsPanel
+            tournament={tournament}
+            groups={teamGroups}
+            recordByTeamId={recordByTeamId}
+            playerProfiles={tournamentPlayerProfiles}
+            avatar={avatar}
+          />
         </div>
       ) : null}
 
@@ -4956,23 +5003,6 @@ function TournamentNoticeCard({ notices }: { notices: Array<{ title: string; dat
           <time>{notice.date}</time>
         </div>
       ))}
-    </article>
-  );
-}
-
-function TournamentSponsorCard() {
-  return (
-    <article className="public-tournament-card public-tournament-sponsors">
-      <div className="public-tournament-card-head">
-        <strong data-ko={publicI18n.ko.tournamentSponsor} data-ja={publicI18n.ja.tournamentSponsor}>{t().tournamentSponsor}</strong>
-        <button type="button" data-ko={publicI18n.ko.tournamentAllView} data-ja={publicI18n.ja.tournamentAllView}>{t().tournamentAllView} ›</button>
-      </div>
-      <div>
-        <span>Twitch</span>
-        <span>RIOT GAMES</span>
-        <span>AMD</span>
-        <span>ROG</span>
-      </div>
     </article>
   );
 }
@@ -5454,12 +5484,14 @@ function MatchTeamDetails({
                           >
                             {matchRankBadgeLabel(rankedStats, rankLoading)}
                           </span>
-	                        <SearchableRiotId riotId={player.riotId} fallback={playerDisplayName(player)} badges={playerHighlightBadges} streamer={player.twitchStream} onSearch={onSearchRiotId} />
+                          <span className="public-team-player-id-stack">
+	                          <SearchableRiotId riotId={player.riotId} fallback={playerDisplayName(player)} badges={playerHighlightBadges} streamer={player.twitchStream} onSearch={onSearchRiotId} />
+                            <span className="public-team-mobile-kda" aria-label={t().kda}>
+                              <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
+                              <span><KdaMetricText value={player.kda} /></span>
+                            </span>
+                          </span>
 	                      </div>
-                        <div className="public-team-mobile-kda" aria-label={t().kda}>
-                          <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
-                          <span><KdaMetricText value={player.kda} /></span>
-                        </div>
 	                    </div>
 	                  </div>
 	                  <PlayerItemBuild items={player.items} itemKey={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`} />
@@ -6198,6 +6230,27 @@ export function PublicLolPage({
   }, [profile?.refreshAvailableAt]);
 
   useEffect(() => {
+    if (!profile?.twitchStream?.twitchUserId) return undefined;
+    let cancelled = false;
+    const syncStreamerStatus = async () => {
+      try {
+        const next = await searchProfile(profile.riotId);
+        if (cancelled) return;
+        setProfile((current) => current ? profileWithDynamicState(current, next) : current);
+      } catch {
+        // Twitch 상태 갱신 실패는 전적 화면 사용을 막지 않습니다.
+      }
+    };
+    const timer = window.setInterval(() => {
+      void syncStreamerStatus();
+    }, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [profile?.riotId, profile?.twitchStream?.twitchUserId]);
+
+  useEffect(() => {
     const loadFromPath = (replaceUrl = true) => {
       const tournamentRoute = tournamentRouteFromPublicPath();
       if (tournamentRoute) {
@@ -6376,7 +6429,7 @@ export function PublicLolPage({
     void runSearch(riotId);
   }
 
-  function openTournamentDetail(slug: string, page: Extract<PublicMainPage, "tournamentBracket" | "tournamentSchedule" | "tournamentNews"> = "tournamentBracket"): void {
+  function openTournamentDetail(slug: string, page: Extract<PublicMainPage, "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule"> = "tournamentBracket"): void {
     setStreamerRegisterOpen(false);
     setActiveMainPage(page);
     setActiveNav("community");
@@ -6592,12 +6645,12 @@ export function PublicLolPage({
         />
       );
     }
-    if (activeMainPage === "tournamentBracket" || activeMainPage === "tournamentSchedule" || activeMainPage === "tournamentNews") {
+    if (activeMainPage === "tournamentNews" || activeMainPage === "tournamentTeams" || activeMainPage === "tournamentBracket" || activeMainPage === "tournamentSchedule") {
       return (
         <PublicTournamentPage
           page={activeMainPage}
           onPage={(page) => {
-            if (page === "tournamentBracket" || page === "tournamentSchedule" || page === "tournamentNews") {
+            if (page === "tournamentNews" || page === "tournamentTeams" || page === "tournamentBracket" || page === "tournamentSchedule") {
               const slug = publicTournamentSlug || publicTournaments[0]?.slug;
               if (slug) openTournamentDetail(slug, page);
               else changeMainPage("tournamentList");

@@ -111,6 +111,13 @@ export type StoreOptions = {
   tournamentStatePath?: string;
 };
 
+export type TwitchStreamLiveStatus = {
+  twitchUserId: string;
+  isLive: boolean;
+  updatedAt: string;
+  source: "eventsub" | "snapshot";
+};
+
 export type StreamerRiotIdRequestInput = {
   twitchUserId: string;
   twitchLogin: string;
@@ -541,6 +548,7 @@ export class Store {
   private participationStreamerProfile?: ParticipationStreamerProfile;
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
   private tournaments: StreamerTournament[] = [];
+  private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
   private overlayStatus: OverlayStatus = {
     clientCount: 0,
     clientsByChannel: Object.fromEntries(OVERLAY_CHANNELS.map((channel) => [channel, 0])) as Record<OverlayChannel, number>,
@@ -585,6 +593,31 @@ export class Store {
   patchStatus(patch: Partial<BotStatus>): BotStatus {
     this.status = { ...this.status, ...patch };
     return this.getStatus();
+  }
+
+  setTwitchStreamLiveStatus(input: {
+    twitchUserId: string;
+    isLive: boolean;
+    source: "eventsub" | "snapshot";
+    updatedAt?: string;
+  }): TwitchStreamLiveStatus | undefined {
+    const twitchUserId = input.twitchUserId.trim();
+    if (!/^\d{1,32}$/.test(twitchUserId)) return undefined;
+    const status: TwitchStreamLiveStatus = {
+      twitchUserId,
+      isLive: input.isLive,
+      source: input.source,
+      updatedAt: input.updatedAt ?? nowIso()
+    };
+    this.twitchStreamLiveStatusByUserId.set(twitchUserId, status);
+    return { ...status };
+  }
+
+  getTwitchStreamLiveStatus(twitchUserId: string | undefined): TwitchStreamLiveStatus | undefined {
+    const safeTwitchUserId = twitchUserId?.trim();
+    if (!safeTwitchUserId) return undefined;
+    const status = this.twitchStreamLiveStatusByUserId.get(safeTwitchUserId);
+    return status ? { ...status } : undefined;
   }
 
   markTwitchMessageSeen(id: string): boolean {
