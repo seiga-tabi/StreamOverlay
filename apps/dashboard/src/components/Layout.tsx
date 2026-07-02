@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { dashboardI18n, type DashboardLocale } from "../i18n";
 
-const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "streamerRiotRequests", "followers", "events", "questions", "settings"] as const;
+const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests", "followers", "events", "questions", "settings"] as const;
 
 export type Page = (typeof pages)[number];
 export type DashboardRole = "admin" | "streamer";
@@ -13,6 +13,7 @@ export const STREAMER_ALLOWED_PAGES: Page[] = [
   "myRiotAccount",
   "soloRank",
   "participation",
+  "tournaments",
   "followers",
   "questions",
   "events"
@@ -25,7 +26,7 @@ export function pageAllowedForRole(page: Page, role: DashboardRole): boolean {
 const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
   { key: "operations", items: ["dashboard", "twitch"] },
   { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
-  { key: "lol", items: ["myRiotAccount", "soloRank", "participation", "streamerRiotRequests"] },
+  { key: "lol", items: ["myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests"] },
   { key: "community", items: ["followers", "questions", "events"] },
   { key: "system", items: ["settings"] }
 ];

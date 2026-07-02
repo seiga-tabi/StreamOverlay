@@ -22,7 +22,9 @@ import {
   type ParticipationStreamerProfile,
   type ParticipationStatus,
   type StreamerProfileLink,
-  type StreamerRiotIdRequest
+  type StreamerRiotIdRequest,
+  type StreamerTournament,
+  type TournamentUpsertInput
 } from "@streamops/shared";
 import type { TwitchAuthService } from "../services/twitch-auth.js";
 import type { TwitchApiClient, TwitchStreamStatus } from "../services/twitch-api.js";
@@ -622,9 +624,20 @@ function headerFirstValue(value: string | string[] | undefined): string | undefi
   return raw?.split(",")[0]?.trim();
 }
 
+function isLocalHostHeader(host: string | undefined): boolean {
+  if (!host) return false;
+  try {
+    const hostname = new URL(`http://${host}`).hostname.toLowerCase();
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  } catch {
+    return false;
+  }
+}
+
 function requestProtocol(req: IncomingMessage): "http" | "https" {
   const forwardedProto = appConfig.security.trustProxy ? headerFirstValue(req.headers["x-forwarded-proto"]) : undefined;
   if (forwardedProto === "http" || forwardedProto === "https") return forwardedProto;
+  if (isLocalHostHeader(headerFirstValue(req.headers.host))) return "http";
   try {
     const protocol = new URL(appConfig.publicBaseUrl).protocol.replace(":", "");
     return protocol === "https" ? "https" : "http";
@@ -713,6 +726,45 @@ function publicTwitchCallbackUrlForRequest(req: IncomingMessage): string {
   } catch {
     return `${trustedPublicOriginForRequest(req)}/api/public/twitch/auth/callback`;
   }
+}
+
+function apiOriginForRequest(req: IncomingMessage): string {
+  return forwardedOrigin(req) ??
+    requestOrigin(req) ??
+    originFromUrl(appConfig.publicBaseUrl) ??
+    "http://localhost:3000";
+}
+
+function twitchCallbackUrlForRequest(req: IncomingMessage): string {
+  const origin = apiOriginForRequest(req);
+  try {
+    const configured = new URL(appConfig.twitch.redirectUri);
+    if (isLocalOrigin(origin) && isLocalOrigin(configured.origin)) return configured.toString();
+    const pathname = configured.pathname || "/api/twitch/auth/callback";
+    return `${origin}${pathname}${configured.search}`;
+  } catch {
+    return `${origin}/api/twitch/auth/callback`;
+  }
+}
+
+function dashboardReturnUrlForRequest(req: IncomingMessage): string {
+  const fallbackOrigin = originFromUrl(appConfig.dashboardBaseUrl) ??
+    originFromUrl(appConfig.publicBaseUrl) ??
+    "http://localhost:5173";
+  const allowedOrigins = new Set(
+    [
+      appConfig.dashboardBaseUrl,
+      appConfig.publicBaseUrl,
+      ...appConfig.security.corsOrigins
+    ]
+      .map(originFromUrl)
+      .filter((origin): origin is string => Boolean(origin))
+  );
+  const requestedOrigin = refererOrigin(req);
+  const origin = requestedOrigin && allowedOrigins.has(requestedOrigin) ? requestedOrigin : fallbackOrigin;
+  const returnUrl = new URL("/", origin);
+  returnUrl.searchParams.set("twitch", "connected");
+  return returnUrl.toString();
 }
 
 function publicLolReturnUrlForRequest(req: IncomingMessage): string {
@@ -1178,7 +1230,11 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
 }
 
 function isPublicLolAppRoute(pathname: string): boolean {
-  return pathname === "/lol" || pathname === "/lol/" || pathname.startsWith("/lol/summoners/");
+  return pathname === "/lol" ||
+    pathname === "/lol/" ||
+    pathname.startsWith("/lol/summoners/") ||
+    pathname === "/lol/tournaments" ||
+    pathname.startsWith("/lol/tournaments/");
 }
 
 async function sendOverlayAlertAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
@@ -2364,6 +2420,49 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return storeWithRegistry.updateApprovedStreamerRiotId(request);
   }
 
+  function listPublicTournaments(): StreamerTournament[] {
+    const storeWithTournaments = input.store as Store & { listPublicTournaments?: () => StreamerTournament[] };
+    return typeof storeWithTournaments.listPublicTournaments === "function"
+      ? storeWithTournaments.listPublicTournaments()
+      : [];
+  }
+
+  function getPublicTournamentBySlug(slug: string): StreamerTournament | undefined {
+    const storeWithTournaments = input.store as Store & { getPublicTournamentBySlug?: (slug: string) => StreamerTournament | undefined };
+    return typeof storeWithTournaments.getPublicTournamentBySlug === "function"
+      ? storeWithTournaments.getPublicTournamentBySlug(slug)
+      : undefined;
+  }
+
+  function listDashboardTournaments(role: "admin" | "streamer", twitchUserId?: string): StreamerTournament[] {
+    const storeWithTournaments = input.store as Store & {
+      listDashboardTournaments?: (request: { role: "admin" | "streamer"; twitchUserId?: string }) => StreamerTournament[];
+    };
+    return typeof storeWithTournaments.listDashboardTournaments === "function"
+      ? storeWithTournaments.listDashboardTournaments({ role, twitchUserId })
+      : [];
+  }
+
+  function upsertStreamerTournament(body: TournamentUpsertInput, owner: StreamerRiotIdRequest): StreamerTournament | undefined {
+    const storeWithTournaments = input.store as Store & {
+      upsertStreamerTournament?: (body: TournamentUpsertInput, owner: StreamerRiotIdRequest) => StreamerTournament | undefined;
+    };
+    if (typeof storeWithTournaments.upsertStreamerTournament !== "function") {
+      throw new HttpRequestError(503, { error: "대회 저장소를 사용할 수 없습니다." });
+    }
+    return storeWithTournaments.upsertStreamerTournament(body, owner);
+  }
+
+  function deleteStreamerTournament(id: string, owner: StreamerRiotIdRequest): boolean {
+    const storeWithTournaments = input.store as Store & {
+      deleteStreamerTournament?: (id: string, owner: StreamerRiotIdRequest) => boolean;
+    };
+    if (typeof storeWithTournaments.deleteStreamerTournament !== "function") {
+      throw new HttpRequestError(503, { error: "대회 저장소를 사용할 수 없습니다." });
+    }
+    return storeWithTournaments.deleteStreamerTournament(id, owner);
+  }
+
   function rememberPublicLolParticipantRank(riotId: string | undefined, rankedStats: LolRankedStats | undefined, fetchedAt: string): void {
     if (!riotId || !rankedStats) return;
     const parsed = parseRiotIdDetailed(riotId);
@@ -3504,7 +3603,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
             ? oauthLimiter
-            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname === "/api/public/locale"
+            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -3580,6 +3679,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/public/locale") {
         return sendJson(req, res, 200, publicLocalePreference(req));
       }
+      if (req.method === "GET" && url.pathname === "/api/public/tournaments") {
+        return sendJson(req, res, 200, { tournaments: listPublicTournaments() });
+      }
+      if (req.method === "GET" && url.pathname.startsWith("/api/public/tournaments/")) {
+        const slug = decodeURIComponent(url.pathname.slice("/api/public/tournaments/".length)).trim();
+        const tournament = slug ? getPublicTournamentBySlug(slug) : undefined;
+        if (!tournament) return sendJson(req, res, 404, { error: "공개 대회를 찾을 수 없습니다." });
+        return sendJson(req, res, 200, { tournament });
+      }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/status") {
         return sendJson(req, res, 200, await getPublicTwitchViewerStatus(req));
       }
@@ -3629,7 +3737,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/start") {
         const forceVerify = url.searchParams.get("force_verify") === "1" || url.searchParams.get("force_verify") === "true";
-        return sendRedirect(res, input.twitchAuth.createAuthorizationUrl(forceVerify));
+        return sendRedirect(res, input.twitchAuth.createAuthorizationUrl(forceVerify, {
+          redirectUri: twitchCallbackUrlForRequest(req),
+          returnUrl: dashboardReturnUrlForRequest(req)
+        }));
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/callback") {
         if (input.publicTwitchAuth?.isPublicState(url.searchParams.get("state"))) {
@@ -3637,18 +3748,19 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         const error = url.searchParams.get("error");
         if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", twitchOAuthErrorMessage(url, "Twitch 권한 승인이 완료되지 않았습니다. 대시보드에서 다시 시도해주세요."));
-        if (!input.twitchAuth.verifyState(url.searchParams.get("state"))) {
+        const state = input.twitchAuth.consumeState(url.searchParams.get("state"));
+        if (!state) {
           return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth state 검증에 실패했습니다. 대시보드에서 다시 연결을 시작해주세요.");
         }
         const code = url.searchParams.get("code");
         if (!code) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
         try {
-          await input.twitchAuth.connectWithCode(code);
+          await input.twitchAuth.connectWithCode(code, state.redirectUri ?? twitchCallbackUrlForRequest(req));
           input.eventSub?.reconnect("twitch.oauth.connected");
         } catch {
           return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch token 교환 또는 방송자 정보 조회에 실패했습니다. 서버 설정을 확인한 뒤 다시 시도해주세요.");
         }
-        return sendRedirect(res, `${appConfig.dashboardBaseUrl}?twitch=connected`);
+        return sendRedirect(res, state.returnUrl || dashboardReturnUrlForRequest(req));
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/status") return sendJson(req, res, 200, await getTwitchStatus());
       if (req.method === "GET" && url.pathname === "/api/twitch/scopes") return sendJson(req, res, 200, input.twitchAuth.getScopes());
@@ -3707,6 +3819,34 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/questions") return sendJson(req, res, 200, input.store.getQuestions());
       if (req.method === "GET" && url.pathname === "/api/highlights") return sendJson(req, res, 200, input.store.getHighlights());
       if (req.method === "GET" && url.pathname === "/api/followers") return sendJson(req, res, 200, input.store.getFollowerManagementState());
+      if (req.method === "GET" && url.pathname === "/api/tournaments") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN") return sendJson(req, res, 403, { error: "대시보드 인증이 필요합니다." });
+        return sendJson(req, res, 200, {
+          tournaments: listDashboardTournaments(auth.principal.role, auth.principal.twitchUserId)
+        });
+      }
+      if (req.method === "POST" && url.pathname === "/api/tournaments") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
+          return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
+        }
+        const owner = approvedStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
+        if (!owner) return sendJson(req, res, 403, { error: "승인된 스트리머 등록 정보가 필요합니다." });
+        const body = await readJsonBody<TournamentUpsertInput>(req);
+        const tournament = upsertStreamerTournament(body, owner);
+        if (!tournament) return sendJson(req, res, 400, { error: "대회 제목과 올바른 입력값이 필요합니다." });
+        return sendJson(req, res, 200, { tournament, tournaments: listDashboardTournaments(auth.principal.role, auth.principal.twitchUserId) });
+      }
+      if (req.method === "DELETE" && url.pathname.startsWith("/api/tournaments/")) {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
+          return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
+        }
+        const owner = approvedStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
+        if (!owner) return sendJson(req, res, 403, { error: "승인된 스트리머 등록 정보가 필요합니다." });
+        const tournamentId = decodeURIComponent(url.pathname.slice("/api/tournaments/".length)).trim();
+        if (!tournamentId) return sendJson(req, res, 400, { error: "대회 ID가 필요합니다." });
+        if (!deleteStreamerTournament(tournamentId, owner)) return sendJson(req, res, 404, { error: "삭제할 대회를 찾을 수 없습니다." });
+        return sendJson(req, res, 200, { tournaments: listDashboardTournaments(auth.principal.role, auth.principal.twitchUserId) });
+      }
       if (req.method === "GET" && url.pathname === "/api/riot/settings") {
         if (!input.riot) return sendJson(req, res, 503, { error: "Riot API client를 사용할 수 없습니다." });
         return sendJson(req, res, 200, input.riot.credentialStatus());

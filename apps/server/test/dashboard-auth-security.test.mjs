@@ -157,6 +157,54 @@ test("공개 LoL 전적 API는 JP1이 아닌 tagLine도 허용한다", async () 
   });
 });
 
+test("로컬 Twitch OAuth 시작은 운영 PUBLIC_BASE_URL이 있어도 localhost callback을 사용한다", async () => {
+  await withAuthConfig(async () => {
+    const previous = {
+      publicBaseUrl: appConfig.publicBaseUrl,
+      dashboardBaseUrl: appConfig.dashboardBaseUrl,
+      twitchRedirectUri: appConfig.twitch.redirectUri,
+      corsOrigins: [...appConfig.security.corsOrigins]
+    };
+    appConfig.publicBaseUrl = "https://gg.seigatabi.com";
+    appConfig.dashboardBaseUrl = "https://gg.seigatabi.com";
+    appConfig.twitch.redirectUri = "https://gg.seigatabi.com/api/twitch/auth/callback";
+    appConfig.security.corsOrigins = ["http://localhost:5173"];
+    try {
+      let captured;
+      const handler = createHttpHandler({
+        store: {},
+        sessions: new DashboardSessionStore(),
+        twitchAuth: {
+          createAuthorizationUrl(forceVerify, options) {
+            captured = { forceVerify, options };
+            const url = new URL("https://id.twitch.tv/oauth2/authorize");
+            url.searchParams.set("redirect_uri", options.redirectUri);
+            return url.toString();
+          }
+        },
+        actions: { async dispatchOne() {} }
+      });
+      const req = createRequest("GET", "/api/twitch/auth/start", undefined, {
+        host: "localhost:3000",
+        referer: "http://localhost:5173/dashboard"
+      });
+      const res = createResponse();
+
+      await handler(req, res);
+
+      assert.equal(res.statusCode, 302);
+      assert.equal(captured.options.redirectUri, "http://localhost:3000/api/twitch/auth/callback");
+      assert.equal(captured.options.returnUrl, "http://localhost:5173/?twitch=connected");
+      assert.match(res.headers.Location, /redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Ftwitch%2Fauth%2Fcallback/);
+    } finally {
+      appConfig.publicBaseUrl = previous.publicBaseUrl;
+      appConfig.dashboardBaseUrl = previous.dashboardBaseUrl;
+      appConfig.twitch.redirectUri = previous.twitchRedirectUri;
+      appConfig.security.corsOrigins = previous.corsOrigins;
+    }
+  });
+});
+
 test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송인 Riot ID를 매칭한다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({

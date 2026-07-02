@@ -33,7 +33,8 @@ assertRuntimeConfig();
 const logger = new JsonlLogger(appConfig.paths.logs);
 const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
-  streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`
+  streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
+  tournamentStatePath: `${appConfig.paths.state}/tournaments.json`
 });
 const sessions = new DashboardSessionStore();
 const events = new EventBus();

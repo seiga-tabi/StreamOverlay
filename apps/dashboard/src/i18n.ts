@@ -53,6 +53,7 @@ export const dashboardI18n = {
       events: { label: "이벤트 로그", short: "이벤트" },
       questions: { label: "질문 큐", short: "질문" },
       participation: { label: "시참 관리", short: "시참" },
+      tournaments: { label: "대회 관리", short: "대회" },
       streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
       settings: { label: "시스템 설정", short: "설정" }
     },
@@ -300,6 +301,7 @@ export const dashboardI18n = {
       events: { label: "イベントログ", short: "イベント" },
       questions: { label: "質問キュー", short: "質問" },
       participation: { label: "参加管理", short: "参加" },
+      tournaments: { label: "大会管理", short: "大会" },
       streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },
       settings: { label: "システム設定", short: "設定" }
     },

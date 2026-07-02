@@ -31,6 +31,23 @@ test("OAuth URL은 Authorization Code Flow와 최소 scope, state를 포함한�
   assert.ok(url.searchParams.get("state"));
 });
 
+test("OAuth URL은 요청별 redirect URI와 return URL을 state에 저장한다", () => {
+  const store = new MemoryTwitchTokenStore();
+  const stateStore = new TwitchOAuthStateStore();
+  const service = new TwitchAuthService(store, stateStore, baseConfig, async () => {
+    throw new Error("fetch should not be called");
+  });
+  const redirectUri = "http://localhost:3000/api/twitch/auth/callback";
+  const returnUrl = "http://localhost:5173/?twitch=connected";
+
+  const url = new URL(service.createAuthorizationUrl(false, { redirectUri, returnUrl }));
+  const state = service.consumeState(url.searchParams.get("state"));
+
+  assert.equal(url.searchParams.get("redirect_uri"), redirectUri);
+  assert.equal(state?.redirectUri, redirectUri);
+  assert.equal(state?.returnUrl, returnUrl);
+});
+
 test("공개 Twitch 로그인 URL은 팔로우와 구독 조회 scope를 요청한다", () => {
   const service = new PublicTwitchAuthService(
     new PublicTwitchViewerSessionStore(),
@@ -54,6 +71,33 @@ test("공개 Twitch 로그인 URL은 팔로우와 구독 조회 scope를 요청�
   assert.equal(url.searchParams.get("scope"), "user:read:follows user:read:subscriptions");
   assert.match(url.searchParams.get("state") ?? "", /^public:/);
   assert.equal(service.isPublicState(url.searchParams.get("state")), true);
+});
+
+test("OAuth code 교환은 state에 저장한 요청별 redirect URI를 사용한다", async () => {
+  const store = new MemoryTwitchTokenStore();
+  const redirectUri = "http://localhost:3000/api/twitch/auth/callback";
+  let capturedBody = "";
+  const service = new TwitchAuthService(store, new TwitchOAuthStateStore(), baseConfig, async (requestUrl, init) => {
+    const url = String(requestUrl);
+    if (url.includes("/oauth2/token")) {
+      capturedBody = String(init?.body);
+      return new Response(JSON.stringify({
+        access_token: "access_token",
+        refresh_token: "refresh_token",
+        expires_in: 3600,
+        scope: ["user:read:chat", "user:write:chat", "channel:read:redemptions"],
+        token_type: "bearer"
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+    return new Response(JSON.stringify({
+      data: [{ id: "1234", login: "tester", display_name: "Tester" }]
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
+  });
+
+  await service.connectWithCode("oauth-code", redirectUri);
+
+  const params = new URLSearchParams(capturedBody);
+  assert.equal(params.get("redirect_uri"), redirectUri);
 });
 
 test("OAuth state는 일회성으로 검증되고 만료된 state는 거부된다", () => {

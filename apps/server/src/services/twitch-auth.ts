@@ -38,6 +38,11 @@ type TwitchAuthConfig = {
   extraScopes?: string[];
 };
 
+type TwitchAuthorizationOptions = {
+  redirectUri?: string;
+  returnUrl?: string;
+};
+
 type FetchLike = typeof fetch;
 
 const DEFAULT_STATE_TTL_MS = 10 * 60 * 1000;
@@ -110,16 +115,17 @@ export class TwitchAuthService {
     this.scopes = resolveTwitchScopes(this.config.extraScopes ?? []);
   }
 
-  createAuthorizationUrl(forceVerify = false): string {
-    if (!this.config.clientId || !this.config.redirectUri) {
+  createAuthorizationUrl(forceVerify = false, options: TwitchAuthorizationOptions = {}): string {
+    const redirectUri = options.redirectUri ?? this.config.redirectUri;
+    if (!this.config.clientId || !redirectUri) {
       throw new Error("Twitch OAuth client ID 또는 redirect URI가 설정되지 않았습니다.");
     }
 
-    const state = this.stateStore.create();
+    const state = this.stateStore.create({ redirectUri, returnUrl: options.returnUrl ?? "" });
     const url = new URL("https://id.twitch.tv/oauth2/authorize");
     url.searchParams.set("response_type", "code");
     url.searchParams.set("client_id", this.config.clientId);
-    url.searchParams.set("redirect_uri", this.config.redirectUri);
+    url.searchParams.set("redirect_uri", redirectUri);
     url.searchParams.set("scope", this.scopes.requiredScopes.join(" "));
     url.searchParams.set("state", state);
     if (forceVerify) url.searchParams.set("force_verify", "true");
@@ -128,6 +134,15 @@ export class TwitchAuthService {
 
   verifyState(state: string | null | undefined): boolean {
     return this.stateStore.consume(state);
+  }
+
+  consumeState(state: string | null | undefined): { redirectUri?: string; returnUrl?: string } | undefined {
+    const record = this.stateStore.consumeRecord(state);
+    if (!record) return undefined;
+    return {
+      redirectUri: record.metadata?.redirectUri,
+      returnUrl: record.metadata?.returnUrl
+    };
   }
 
   getScopes(): TwitchConnectionStatus {
@@ -178,9 +193,9 @@ export class TwitchAuthService {
     };
   }
 
-  async connectWithCode(code: string): Promise<TwitchConnectionStatus> {
+  async connectWithCode(code: string, redirectUri = this.config.redirectUri): Promise<TwitchConnectionStatus> {
     if (!this.verifyCodeInput(code)) throw new Error("Twitch OAuth code가 유효하지 않습니다.");
-    const tokenResponse = await this.exchangeCode(code);
+    const tokenResponse = await this.exchangeCode(code, redirectUri);
     const broadcaster = await this.fetchBroadcasterInfo(tokenResponse.access_token);
     await this.saveToken(tokenResponse, broadcaster);
     return this.getStatus();
@@ -260,8 +275,8 @@ export class TwitchAuthService {
     };
   }
 
-  private async exchangeCode(code: string): Promise<TwitchTokenResponse> {
-    if (!this.config.clientId || !this.config.clientSecret || !this.config.redirectUri) {
+  private async exchangeCode(code: string, redirectUri: string): Promise<TwitchTokenResponse> {
+    if (!this.config.clientId || !this.config.clientSecret || !redirectUri) {
       throw new Error("Twitch OAuth 설정이 부족합니다.");
     }
     const body = new URLSearchParams({
@@ -269,7 +284,7 @@ export class TwitchAuthService {
       client_secret: this.config.clientSecret,
       code,
       grant_type: "authorization_code",
-      redirect_uri: this.config.redirectUri
+      redirect_uri: redirectUri
     });
     const response = await this.fetchImpl("https://id.twitch.tv/oauth2/token", {
       method: "POST",

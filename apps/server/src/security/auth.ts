@@ -151,7 +151,8 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     pathname === "/api/public/twitch/status" ||
     pathname === "/api/public/twitch/followed-lol" ||
     pathname === "/api/public/twitch/riot-id-request" ||
-    pathname === "/api/public/twitch/logout"
+    pathname === "/api/public/twitch/logout" ||
+    (method === "GET" && (pathname === "/api/public/tournaments" || pathname.startsWith("/api/public/tournaments/")))
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";
@@ -206,6 +207,9 @@ const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "GET", path: "/api/highlights" },
   { method: "GET", path: "/api/followers" },
   { method: "POST", path: "/api/followers/refresh" },
+  { method: "GET", path: "/api/tournaments" },
+  { method: "POST", path: "/api/tournaments" },
+  { method: "DELETE", prefix: "/api/tournaments/" },
   { method: "GET", path: "/api/participation/queue" },
   { method: "GET", path: "/api/participation/state" },
   { method: "GET", path: "/api/participation/game-monitor" },

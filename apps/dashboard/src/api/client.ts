@@ -1,4 +1,5 @@
 import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../runtime-config";
+import type { StreamerTournament, TournamentUpsertInput } from "@streamops/shared";
 
 const API_BASE = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
 
@@ -73,6 +74,16 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return (await response.json()) as T;
 }
 
+export async function apiDelete<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: { ...csrfHeaders() }
+  });
+  if (!response.ok) throw new Error(await errorMessage(path, response));
+  return (await response.json()) as T;
+}
+
 export async function apiPostForm<T>(path: string, body: FormData): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     method: "POST",
@@ -131,6 +142,21 @@ export async function updateStreamerProfileLink(body: {
 export async function updateStreamerRiotId(riotId: string): Promise<DashboardStreamerInfo> {
   const result = await apiPost<{ streamer: DashboardStreamerInfo }>("/api/participation/streamer-riot-id", { riotId });
   return result.streamer;
+}
+
+export async function getDashboardTournaments(): Promise<StreamerTournament[]> {
+  const result = await apiGet<{ tournaments: StreamerTournament[] }>("/api/tournaments");
+  return result.tournaments;
+}
+
+export async function saveDashboardTournament(body: TournamentUpsertInput): Promise<StreamerTournament[]> {
+  const result = await apiPost<{ tournament: StreamerTournament; tournaments: StreamerTournament[] }>("/api/tournaments", body);
+  return result.tournaments;
+}
+
+export async function deleteDashboardTournament(id: string): Promise<StreamerTournament[]> {
+  const result = await apiDelete<{ tournaments: StreamerTournament[] }>(`/api/tournaments/${encodeURIComponent(id)}`);
+  return result.tournaments;
 }
 
 export const apiBase = API_BASE;

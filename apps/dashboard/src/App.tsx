@@ -13,6 +13,7 @@ const QuestionsPage = lazy(async () => ({ default: (await import("./pages/Questi
 const MyRiotAccountPage = lazy(async () => ({ default: (await import("./pages/MyRiotAccountPage")).MyRiotAccountPage }));
 const SoloRankPage = lazy(async () => ({ default: (await import("./pages/SoloRankPage")).SoloRankPage }));
 const ParticipationPage = lazy(async () => ({ default: (await import("./pages/ParticipationPage")).ParticipationPage }));
+const TournamentsPage = lazy(async () => ({ default: (await import("./pages/TournamentsPage")).TournamentsPage }));
 const StreamerRiotRequestsPage = lazy(async () => ({ default: (await import("./pages/StreamerRiotRequestsPage")).StreamerRiotRequestsPage }));
 const SettingsPage = lazy(async () => ({ default: (await import("./pages/SettingsPage")).SettingsPage }));
 const TwitchConnectionPage = lazy(async () => ({ default: (await import("./pages/TwitchConnectionPage")).TwitchConnectionPage }));
@@ -302,6 +303,7 @@ export default function App() {
         {page === "myRiotAccount" ? <MyRiotAccountPage streamer={dashboardStreamer} onStreamerChange={setDashboardStreamer} /> : null}
         {page === "soloRank" ? <SoloRankPage /> : null}
         {page === "participation" ? <ParticipationPage snapshot={snapshot} /> : null}
+        {page === "tournaments" ? <TournamentsPage /> : null}
         {page === "streamerRiotRequests" && dashboardRole === "admin" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
         {page === "settings" && dashboardRole === "admin" ? <SettingsPage /> : null}
       </Suspense>

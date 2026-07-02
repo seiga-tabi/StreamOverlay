@@ -241,6 +241,7 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
     }
     validateHttpsUrl(errors, "PUBLIC_BASE_URL", appConfig.publicBaseUrl);
     validateHttpsUrl(errors, "TWITCH_REDIRECT_URI", appConfig.twitch.redirectUri);
+    validateHttpsUrl(errors, "TWITCH_PUBLIC_REDIRECT_URI", appConfig.twitch.publicRedirectUri);
     validateCorsOrigins(errors);
   }
   return errors.length ? { ok: false, errors } : { ok: true };
