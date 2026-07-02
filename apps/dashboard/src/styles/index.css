@@ -11678,6 +11678,7 @@ code {
 
 .public-subscriptions-layout > .public-twitch-followed-panel .public-section-head {
   align-items: start;
+  gap: 14px;
   margin-bottom: 0;
 }
 
@@ -11705,12 +11706,15 @@ code {
 .public-subscriptions-layout .public-twitch-followed-actions {
   align-self: start;
   justify-content: end;
+  flex: 0 0 auto;
 }
 
 .public-subscriptions-layout .public-twitch-followed-actions button {
-  min-width: 108px;
+  min-width: 128px;
   min-height: 36px;
   padding: 0 14px;
+  line-height: 1.15;
+  text-align: center;
   white-space: nowrap;
 }
 
@@ -11872,8 +11876,8 @@ code {
 }
 
 .public-subscriptions-layout .public-twitch-followed-list article {
-  grid-template-columns: minmax(130px, 1.15fr) minmax(90px, .75fr) 78px;
-  gap: 8px;
+  grid-template-columns: minmax(170px, 1.2fr) minmax(126px, .8fr) minmax(92px, auto);
+  gap: 10px;
 }
 
 .public-subscriptions-layout .public-twitch-channel-main {
@@ -11897,9 +11901,11 @@ code {
 
 .public-subscriptions-layout .public-twitch-channel-actions a,
 .public-subscriptions-layout .public-twitch-channel-actions button {
-  width: 78px;
+  min-width: 92px;
   min-height: 32px;
   padding: 0 8px;
+  line-height: 1.15;
+  text-align: center;
   white-space: nowrap;
 }
 
@@ -14230,6 +14236,25 @@ code {
 .public-dashboard-shell.theme-dark .public-twitch-channel-main strong,
 .public-dashboard-shell.theme-dark .public-twitch-channel-meta span {
   color: #e5eefb;
+}
+
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-twitch-followed-summary span,
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-twitch-channel-main strong,
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-subscription-row strong {
+  color: #f8fbff;
+  text-shadow: 0 1px 10px rgba(2, 6, 23, .28);
+}
+
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-twitch-channel-main small,
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-twitch-channel-meta small,
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-subscription-row strong small,
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-subscriptions-card > p,
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-twitch-followed-panel .public-section-head p {
+  color: #b6c5dc;
+}
+
+.public-dashboard-shell.theme-dark .public-subscriptions-page .public-twitch-channel-meta .muted {
+  color: #c0cbe0;
 }
 
 .public-dashboard-shell.theme-dark .public-twitch-channel-avatar i {
