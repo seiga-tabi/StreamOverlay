@@ -17730,14 +17730,16 @@ code {
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda {
-    display: grid;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
     justify-self: center;
-    justify-items: center;
-    gap: 1px;
+    gap: 6px;
     min-width: 0;
     margin-top: 2px;
     text-align: center;
     line-height: 1.08;
+    white-space: nowrap;
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda strong {
