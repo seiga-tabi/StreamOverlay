@@ -92,6 +92,7 @@ export type TwitchConnectionStatus = {
   eventSub?: TwitchEventSubStatus;
   chat?: TwitchChatStatus;
   legacyConfigured?: boolean;
+  refreshed?: boolean;
   error?: string;
 };
 

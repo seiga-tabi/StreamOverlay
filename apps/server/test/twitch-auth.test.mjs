@@ -143,6 +143,97 @@ test("token refresh는 refresh_token grant를 호출하고 새 token을 저장�
   assert.match(capturedBody, /refresh_token=old_refresh/);
 });
 
+test("연결 상태 조회는 만료된 OAuth token을 자동 갱신한다", async () => {
+  const store = new MemoryTwitchTokenStore();
+  await store.set({
+    accessToken: "old_access",
+    refreshToken: "old_refresh",
+    tokenType: "bearer",
+    scopes: ["user:read:chat", "user:write:chat", "channel:read:redemptions"],
+    expiresAt: "2000-01-01T00:00:00.000Z",
+    broadcaster: { id: "1234", login: "tester", displayName: "Tester" },
+    updatedAt: "2000-01-01T00:00:00.000Z"
+  });
+
+  let refreshCalls = 0;
+  const service = new TwitchAuthService(store, new TwitchOAuthStateStore(), baseConfig, async () => {
+    refreshCalls += 1;
+    return new Response(JSON.stringify({
+      access_token: "new_access",
+      refresh_token: "new_refresh",
+      expires_in: 3600,
+      scope: ["user:read:chat", "user:write:chat", "channel:read:redemptions"],
+      token_type: "bearer"
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
+  });
+
+  const status = await service.getStatus();
+  const stored = await store.get();
+
+  assert.equal(status.state, "connected");
+  assert.equal(status.connected, true);
+  assert.equal(status.refreshed, true);
+  assert.equal(stored?.accessToken, "new_access");
+  assert.equal(refreshCalls, 1);
+});
+
+test("동시에 들어온 연결 상태 조회는 token refresh를 한 번만 호출한다", async () => {
+  const store = new MemoryTwitchTokenStore();
+  await store.set({
+    accessToken: "old_access",
+    refreshToken: "old_refresh",
+    tokenType: "bearer",
+    scopes: ["user:read:chat", "user:write:chat", "channel:read:redemptions"],
+    expiresAt: "2000-01-01T00:00:00.000Z",
+    broadcaster: { id: "1234", login: "tester", displayName: "Tester" },
+    updatedAt: "2000-01-01T00:00:00.000Z"
+  });
+
+  let refreshCalls = 0;
+  const service = new TwitchAuthService(store, new TwitchOAuthStateStore(), baseConfig, async () => {
+    refreshCalls += 1;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    return new Response(JSON.stringify({
+      access_token: "new_access",
+      refresh_token: "new_refresh",
+      expires_in: 3600,
+      scope: ["user:read:chat", "user:write:chat", "channel:read:redemptions"],
+      token_type: "bearer"
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
+  });
+
+  const [first, second] = await Promise.all([service.getStatus(), service.getStatus()]);
+
+  assert.equal(first.state, "connected");
+  assert.equal(second.state, "connected");
+  assert.equal(first.refreshed, true);
+  assert.equal(second.refreshed, true);
+  assert.equal(refreshCalls, 1);
+});
+
+test("만료된 OAuth refresh token이 거부되면 재연결 안내 상태를 반환한다", async () => {
+  const store = new MemoryTwitchTokenStore();
+  await store.set({
+    accessToken: "old_access",
+    refreshToken: "old_refresh",
+    tokenType: "bearer",
+    scopes: ["user:read:chat", "user:write:chat", "channel:read:redemptions"],
+    expiresAt: "2000-01-01T00:00:00.000Z",
+    broadcaster: { id: "1234", login: "tester", displayName: "Tester" },
+    updatedAt: "2000-01-01T00:00:00.000Z"
+  });
+
+  const service = new TwitchAuthService(store, new TwitchOAuthStateStore(), baseConfig, async () => (
+    new Response(JSON.stringify({ message: "invalid refresh token" }), { status: 400, headers: { "Content-Type": "application/json" } })
+  ));
+
+  const status = await service.getStatus();
+
+  assert.equal(status.state, "token_expired");
+  assert.equal(status.connected, false);
+  assert.match(status.error ?? "", /Twitch refresh token/);
+});
+
 test("연결 상태는 누락된 scope를 missing_scopes로 표시한다", async () => {
   const store = new MemoryTwitchTokenStore();
   await store.set({

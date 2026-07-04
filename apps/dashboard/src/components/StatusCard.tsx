@@ -4,9 +4,11 @@ type Props = {
   label: string;
   value: string;
   hint?: string;
+  actionLabel?: string;
+  onAction?: () => void;
 };
 
-export function StatusCard({ label, value, hint }: Props) {
+export function StatusCard({ label, value, hint, actionLabel, onAction }: Props) {
   const good = ["online", "connected", "open"].includes(value);
   const disabled = value === "disabled" || value === "unknown";
   const valueLabel = uiText.statusValues[value as keyof typeof uiText.statusValues] ?? value;
@@ -22,6 +24,11 @@ export function StatusCard({ label, value, hint }: Props) {
         <span className="status-raw">{value}</span>
       </div>
       {hint ? <div className="hint">{hint}</div> : null}
+      {actionLabel && onAction ? (
+        <button className="status-card-action" type="button" onClick={onAction}>
+          {actionLabel}
+        </button>
+      ) : null}
     </div>
   );
 }

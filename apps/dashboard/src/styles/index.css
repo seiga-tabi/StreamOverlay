@@ -567,6 +567,23 @@ nav {
   overflow-wrap: anywhere;
 }
 
+.status-card-action {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 2px;
+  padding: 9px 12px;
+  border: 1px solid rgba(79, 120, 232, .32);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #5b7cff, #7357f6);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 12px 26px rgba(91, 124, 255, .2);
+}
+
+.status-card-action:hover {
+  background: linear-gradient(135deg, #486df2, #6449e9);
+}
+
 .good,
 .good-text {
   color: var(--success);
@@ -2569,33 +2586,51 @@ code {
 }
 
 @media (max-width: 520px) {
+  .public-search-loading-overlay {
+    place-items: start center;
+    padding: calc(env(safe-area-inset-top, 0px) + 180px) 16px 16px;
+    background:
+      radial-gradient(circle at 50% 36%, rgba(117, 79, 255, .14), transparent 34%),
+      linear-gradient(180deg, rgba(4, 8, 18, .14), rgba(4, 8, 18, .34));
+  }
+
+  .public-dashboard-shell.public-home-shell .public-search-loading-overlay {
+    padding-top: calc(50vh + 48px);
+  }
+
   .public-search-loading-card {
-    padding: 18px 20px 16px;
-    border-radius: 18px;
+    gap: 8px;
+    width: min(148px, calc(100vw - 48px));
+    padding: 13px 14px 12px;
+    border-radius: 16px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .08),
+      0 16px 46px rgba(2, 7, 20, .46),
+      0 0 30px rgba(139, 92, 246, .2);
   }
 
   .seiga-logo-loader {
-    width: 108px;
-    height: 108px;
-  }
-
-  .ring-inner {
-    inset: 15px;
-  }
-
-  .loader-scan {
     width: 76px;
     height: 76px;
   }
 
-  .seiga-mark {
+  .ring-inner {
+    inset: 10px;
+  }
+
+  .loader-scan {
     width: 54px;
-    height: 60px;
-    transform: scale(.9);
+    height: 54px;
+  }
+
+  .seiga-mark {
+    width: 66px;
+    height: 74px;
+    scale: .62;
   }
 
   .public-search-loading-card > strong {
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 
@@ -11973,6 +12008,13 @@ code {
   gap: 14px;
 }
 
+.public-community-page.list-only {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
 .public-community-lead {
   margin: -4px 0 4px;
   color: #687890;
@@ -11981,11 +12023,45 @@ code {
   line-height: 1.55;
 }
 
+.public-community-toolbar {
+  margin: 6px 0 0;
+}
+
+.public-community-toolbar strong {
+  color: #edf4ff;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, .28);
+}
+
 .public-community-layout {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   gap: 14px;
   min-width: 0;
+}
+
+.public-community-page.party .public-community-layout {
+  grid-template-columns: 1fr;
+}
+
+.public-community-page.list-only .public-community-layout {
+  grid-template-columns: 1fr;
+}
+
+.public-community-page.list-only .public-community-list {
+  max-height: none;
+  overflow: visible;
+}
+
+.public-community-page.party .public-community-compose,
+.public-community-page.party .public-community-list {
+  max-width: 920px;
+  width: 100%;
+  justify-self: center;
+}
+
+.public-community-page.party .public-community-list {
+  max-height: none;
+  overflow: visible;
 }
 
 .public-community-compose,
@@ -12011,11 +12087,25 @@ code {
   overflow: auto;
 }
 
+.public-community-post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 14px;
+}
+
 .public-community-card-head {
   display: flex;
   gap: 12px;
   align-items: center;
   justify-content: space-between;
+}
+
+.public-community-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .public-community-card-head strong {
@@ -12044,10 +12134,26 @@ code {
   color: #31405c;
 }
 
+.public-community-card-head button.primary {
+  border-color: #4d6fff;
+  background: #4d6fff;
+  color: #ffffff;
+}
+
 .public-community-card-head button:disabled,
 .public-community-form button:disabled {
   cursor: not-allowed;
   opacity: .55;
+}
+
+.public-community-write-page {
+  display: grid;
+  gap: 14px;
+}
+
+.public-community-compose.standalone {
+  width: min(760px, 100%);
+  justify-self: center;
 }
 
 .public-community-login {
@@ -12056,6 +12162,29 @@ code {
   padding: 18px;
   border-radius: 8px;
   background: #f3f7ff;
+}
+
+.public-community-already-posted {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid #dbe7ff;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f7fbff, #eef4ff);
+}
+
+.public-community-already-posted strong {
+  color: #17233d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.public-community-already-posted p {
+  margin: 0;
+  color: #687890;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.55;
 }
 
 .public-community-login p,
@@ -12069,6 +12198,18 @@ code {
 
 .public-community-error {
   color: #ef4444;
+}
+
+.public-community-policy-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #dbe7ff;
+  border-radius: 8px;
+  background: #f5f8ff;
+  color: #52647d;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.5;
 }
 
 .public-community-form {
@@ -12085,6 +12226,7 @@ code {
 }
 
 .public-community-form input,
+.public-community-form select,
 .public-community-form textarea {
   width: 100%;
   min-width: 0;
@@ -12098,9 +12240,24 @@ code {
   outline: none;
 }
 
-.public-community-form input {
+.public-community-form input,
+.public-community-form select {
   height: 44px;
   padding: 0 12px;
+}
+
+.public-community-form select {
+  appearance: none;
+  padding-right: 34px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 19px,
+    calc(100% - 13px) 19px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
 
 .public-community-form textarea {
@@ -12110,10 +12267,288 @@ code {
   resize: vertical;
 }
 
-.public-community-post {
+.public-party-compose-prompt {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #dce7f6;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.public-party-compose-prompt input {
+  height: 46px;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+}
+
+.public-party-option-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.public-community-riot-check {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  gap: 8px;
+  align-items: center;
+}
+
+.public-community-riot-check button,
+.public-community-file-control button {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.public-community-riot-check.valid input {
+  border-color: rgba(45, 212, 153, .78);
+  box-shadow: 0 0 0 1px rgba(45, 212, 153, .16);
+}
+
+.public-community-riot-check.invalid input {
+  border-color: rgba(248, 113, 113, .8);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, .14);
+}
+
+.public-community-riot-message {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.public-community-riot-message.valid {
+  color: #0f9f75;
+}
+
+.public-community-riot-message.invalid {
+  color: #dc2626;
+}
+
+.public-community-tag-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid #d7e2f2;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.public-community-tag-picker button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid #d7e2f2;
+  border-radius: 999px;
+  background: #f5f8ff;
+  color: #52647d;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.public-community-tag-picker button.active {
+  border-color: rgba(77, 111, 255, .64);
+  background: linear-gradient(135deg, #4d6fff, #6b4cff);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(77, 111, 255, .2);
+}
+
+.public-party-post-list {
+  display: grid;
+  gap: 12px;
+}
+
+.public-party-post {
   display: grid;
   gap: 10px;
-  padding: 16px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #e0e8f4;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #17233d;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+}
+
+.public-party-post:hover {
+  border-color: rgba(96, 119, 255, .58);
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px rgba(31, 44, 90, .12);
+}
+
+.public-party-post header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.public-party-post header strong {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: #17233d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.public-party-post header small {
+  overflow: hidden;
+  color: #72829a;
+  font-size: 12px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-party-post header > em {
+  color: #8b98ad;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.public-party-post h3,
+.public-party-post p {
+  margin: 0;
+}
+
+.public-party-post h3 {
+  color: #17233d;
+  font-size: 20px;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.public-party-post p {
+  color: #52627a;
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.public-party-tags,
+.public-party-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.public-party-tags span {
+  min-height: 24px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #edf2ff;
+  color: #526fff;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.public-party-meta {
+  padding-top: 4px;
+}
+
+.public-party-meta span {
+  color: #687891;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.public-community-file-control {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 8px 10px;
+  border: 1px solid #d7e2f2;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.public-community-file-control strong {
+  overflow: hidden;
+  color: #52647d;
+  font-size: 12px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-community-file-field input[type="file"] {
+  display: none;
+}
+
+.public-community-file-field small {
+  color: #718099;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.public-community-post {
+  position: relative;
+  display: flex;
+  min-height: 190px;
+  overflow: hidden;
+  padding: 0;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(125, 92, 255, .22), transparent 30%),
+    linear-gradient(145deg, #121a2b, #080e18);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.public-community-post:hover {
+  border-color: rgba(96, 119, 255, .72);
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(34, 52, 98, .16);
+}
+
+.public-community-post::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  background: linear-gradient(180deg, rgba(6, 10, 18, .14) 0%, rgba(6, 10, 18, .52) 44%, rgba(6, 10, 18, .88) 100%);
+  pointer-events: none;
+}
+
+.public-community-post-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.public-community-post-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-community-post-content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  width: 100%;
+  min-height: 190px;
+  padding: 14px;
 }
 
 .public-community-post header {
@@ -12124,15 +12559,22 @@ code {
   min-width: 0;
 }
 
-.public-community-post img,
-.public-community-post header > em {
+.public-community-avatar,
+.public-community-avatar img,
+.public-community-avatar em {
   width: 38px;
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-.public-community-post header > em {
+.public-community-avatar {
+  display: block;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .18);
+}
+
+.public-community-avatar em {
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, #7d5cff, #54d6ff);
@@ -12145,38 +12587,453 @@ code {
   display: grid;
   gap: 2px;
   min-width: 0;
-  color: #17233d;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 950;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, .45);
 }
 
 .public-community-post header small,
 .public-community-post time {
   min-width: 0;
   overflow: hidden;
-  color: #7a879d;
+  color: rgba(224, 232, 246, .82);
   font-size: 11px;
   font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.public-community-post-main {
+  align-self: end;
+  display: grid;
+  gap: 6px;
+}
+
 .public-community-post h3 {
   margin: 0;
-  color: #17233d;
-  font-size: 18px;
+  color: #ffffff;
+  font-size: 20px;
   font-weight: 950;
   line-height: 1.35;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .5);
 }
 
 .public-community-post p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   margin: 0;
-  color: #465774;
+  color: rgba(233, 239, 250, .86);
   font-size: 13px;
   font-weight: 750;
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.public-community-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.public-community-post-meta span,
+.public-community-post-meta em {
+  min-height: 26px;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .12);
+  color: rgba(255, 255, 255, .94);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.1;
+  backdrop-filter: blur(8px);
+}
+
+.public-community-post-meta span {
+  background: rgba(82, 101, 255, .28);
+}
+
+.public-community-detail-page {
+  display: grid;
+  gap: 18px;
+}
+
+.public-community-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 16px;
+  align-items: start;
+  min-width: 0;
+}
+
+.public-community-detail-article,
+.public-community-record-preview {
+  min-width: 0;
+  border: 1px solid #d9e5f4;
+  border-radius: 12px;
+  background: #fbfdff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, .08);
+}
+
+.public-community-detail-article {
+  display: grid;
+  gap: 16px;
+  overflow: hidden;
+  padding: 18px;
+}
+
+.public-community-detail-media {
+  overflow: hidden;
+  margin: -18px -18px 0;
+  aspect-ratio: 16 / 7;
+  background: #101828;
+}
+
+.public-community-detail-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-community-detail-article header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.public-community-detail-article header div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.public-community-detail-article header strong,
+.public-community-detail-article h3 {
+  color: #17233d;
+  font-weight: 950;
+}
+
+.public-community-detail-article header strong {
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-community-detail-article header small {
+  overflow: hidden;
+  color: #718099;
+  font-size: 12px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-community-detail-article h3 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.25;
+}
+
+.public-community-detail-article p {
+  margin: 0;
+  color: #40506b;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.public-community-record-preview {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.public-community-record-card {
+  display: grid;
+  gap: 14px;
+}
+
+.public-community-record-main {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.public-community-record-main > img,
+.public-community-record-main > span {
+  width: 62px;
+  height: 62px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px rgba(79, 109, 255, .24);
+}
+
+.public-community-record-main > span {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #5c72ff, #54d6ff);
+  color: #ffffff;
+  font-weight: 950;
+}
+
+.public-community-record-main div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.public-community-record-main strong {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  min-width: 0;
+  overflow: hidden;
+  color: #17233d;
+  font-size: 18px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-community-record-main strong small {
+  color: #718099;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.public-community-record-main em {
+  color: #5a6b86;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.public-community-record-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.public-community-record-stats span {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dbe7f5;
+  border-radius: 10px;
+  background: #f6f9fe;
+}
+
+.public-community-record-stats small,
+.public-community-record-stats em {
+  color: #70819a;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.public-community-record-stats b {
+  color: #17233d;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.public-community-record-champions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.public-community-record-champions img {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.public-community-comments {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #dbe7f5;
+}
+
+.public-community-comments-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.public-community-comments-head strong {
+  color: #17233d;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.public-community-comments-head span {
+  min-width: 28px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #edf2ff;
+  color: #526fff;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.public-community-comment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.public-community-comment {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dbe7f5;
+  border-radius: 10px;
+  background: #f7faff;
+}
+
+.public-community-comment > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.public-community-comment header {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.public-community-comment header strong {
+  overflow: hidden;
+  color: #17233d;
+  font-size: 13px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-community-comment header small {
+  flex: 0 1 auto;
+  overflow: hidden;
+  color: #718099;
+  font-size: 12px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-community-comment p {
+  margin: 0;
+  color: #40506b;
+  font-size: 13px;
+  font-weight: 780;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.public-community-comment-form {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+}
+
+.public-community-comment-form textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1px solid #d7e2f2;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #17233d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.55;
+  resize: vertical;
+  outline: none;
+}
+
+.public-community-comment-form button {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #d7e2f2;
+  border-radius: 9px;
+  background: #4d6fff;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.public-community-comment-form button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.public-community-comment-login {
+  padding: 14px;
+}
+
+@media (max-width: 720px) {
+  .public-community-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .public-community-detail-media {
+    aspect-ratio: 16 / 9;
+  }
+
+  .public-community-record-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .public-community-comment-form {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .public-community-comment-form button {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .public-community-layout,
+  .public-community-page.party .public-community-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .public-party-option-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-party-option-grid label:last-child {
+    grid-column: 1 / -1;
+  }
 }
 
 .public-header-submenu button.active {
@@ -12746,6 +13603,10 @@ code {
   gap: 26px;
   align-items: start;
   padding: 0 28px 28px;
+}
+
+.public-tournament-layout--full {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .public-tournament-main {
@@ -13398,6 +14259,10 @@ code {
 }
 
 @media (max-width: 1100px) {
+  .public-community-post-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+
   .dashboard-tournament-grid {
     grid-template-columns: 1fr;
   }
@@ -13416,6 +14281,10 @@ code {
 
   .public-community-list {
     max-height: none;
+  }
+
+  .public-community-post-grid {
+    grid-template-columns: 1fr;
   }
 
   .public-community-post header {
@@ -14772,12 +15641,26 @@ code {
 }
 
 .public-dashboard-shell.theme-dark .public-community-form input,
+.public-dashboard-shell.theme-dark .public-community-form select,
 .public-dashboard-shell.theme-dark .public-community-form textarea,
 .public-dashboard-shell:not(.public-home-shell) .public-community-form input,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form select,
 .public-dashboard-shell:not(.public-home-shell) .public-community-form textarea {
   border-color: rgba(93, 110, 145, .42);
   background: rgba(6, 13, 28, .86);
   color: #f2f6ff;
+}
+
+.public-dashboard-shell.theme-dark .public-community-form select,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 19px,
+    calc(100% - 13px) 19px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
 }
 
 .public-dashboard-shell.theme-dark .public-community-card-head button,
@@ -14785,6 +15668,13 @@ code {
   border-color: rgba(93, 110, 145, .45);
   background: rgba(12, 19, 35, .88);
   color: #dbe6f7;
+}
+
+.public-dashboard-shell.theme-dark .public-community-card-head button.primary,
+.public-dashboard-shell:not(.public-home-shell) .public-community-card-head button.primary {
+  border-color: rgba(95, 114, 255, .9);
+  background: linear-gradient(135deg, #4d6fff, #6b4cff);
+  color: #ffffff;
 }
 
 .public-dashboard-shell.theme-dark .public-home-search-stage .public-search-field {
@@ -16582,6 +17472,29 @@ code {
     0 0 36px rgba(80, 141, 255, .24);
 }
 
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-title {
+  border-bottom-color: rgba(150, 132, 255, .24);
+  color: #aeb8d7;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-list button {
+  color: #edf4ff;
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-list button:hover {
+  border-color: rgba(150, 132, 255, .34);
+  background: rgba(112, 92, 255, .12);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-name span {
+  color: #f8fbff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .32);
+}
+
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-name strong {
+  color: #b7c1db;
+}
+
 @media (max-width: 980px) {
   .public-dashboard-shell.public-home-shell .public-home-search-stage {
     width: min(680px, calc(100vw - 36px));
@@ -16901,12 +17814,22 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-community-compose,
 .public-dashboard-shell:not(.public-home-shell) .public-community-list,
 .public-dashboard-shell:not(.public-home-shell) .public-community-post,
+.public-dashboard-shell:not(.public-home-shell) .public-party-post,
+.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-preview,
 .public-dashboard-shell:not(.public-home-shell) .public-community-login,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary > div,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-bottom-summary > div {
   border-color: rgba(93, 110, 145, .34);
   background: rgba(15, 24, 42, .76);
   box-shadow: 0 12px 26px rgba(2, 6, 23, .16);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-page.list-only {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-section-head h2,
@@ -16924,6 +17847,12 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-community-card-head strong,
 .public-dashboard-shell:not(.public-home-shell) .public-community-post header strong,
 .public-dashboard-shell:not(.public-home-shell) .public-community-post h3,
+.public-dashboard-shell:not(.public-home-shell) .public-party-post header strong,
+.public-dashboard-shell:not(.public-home-shell) .public-party-post h3,
+.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article header strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article h3,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-main strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats b,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-main strong,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-meta span,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder strong,
@@ -16976,6 +17905,15 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-community-post header small,
 .public-dashboard-shell:not(.public-home-shell) .public-community-post time,
 .public-dashboard-shell:not(.public-home-shell) .public-community-post p,
+.public-dashboard-shell:not(.public-home-shell) .public-party-post header small,
+.public-dashboard-shell:not(.public-home-shell) .public-party-post p,
+.public-dashboard-shell:not(.public-home-shell) .public-party-meta span,
+.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article header small,
+.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article p,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-main strong small,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-main em,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats small,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats em,
 .public-dashboard-shell:not(.public-home-shell) .public-dialog p,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary span,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary small,
@@ -16989,6 +17927,134 @@ code {
 .public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-name small,
 .public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-metric small {
   color: #9fb0c8;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-post {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(125, 92, 255, .24), transparent 30%),
+    linear-gradient(145deg, #121a2b, #080e18);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-already-posted {
+  border-color: rgba(93, 110, 145, .38);
+  background: rgba(15, 24, 42, .78);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-already-posted strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post header strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post h3 {
+  color: #ffffff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-already-posted p,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post p {
+  color: rgba(233, 239, 250, .86);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-policy-note {
+  border-color: rgba(102, 118, 255, .28);
+  background: rgba(80, 96, 255, .12);
+  color: rgba(231, 236, 255, .88);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-post header small,
+.public-dashboard-shell:not(.public-home-shell) .public-community-post time,
+.public-dashboard-shell:not(.public-home-shell) .public-community-file-field small {
+  color: rgba(224, 232, 246, .82);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker,
+.public-dashboard-shell:not(.public-home-shell) .public-community-file-control {
+  border-color: rgba(93, 110, 145, .42);
+  background: rgba(6, 13, 28, .86);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker button {
+  border-color: rgba(93, 110, 145, .5);
+  background: rgba(15, 24, 42, .84);
+  color: #c7d2e5;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker button.active {
+  border-color: rgba(106, 127, 255, .85);
+  background: linear-gradient(135deg, #4d6fff, #6b4cff);
+  color: #ffffff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-file-control strong {
+  color: #c7d2e5;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-riot-message.valid {
+  color: #34d399;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-riot-message.invalid {
+  color: #f87171;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-party-compose-prompt,
+.public-dashboard-shell:not(.public-home-shell) .public-party-compose-prompt input {
+  border-color: rgba(93, 110, 145, .34);
+  background: rgba(9, 15, 28, .72);
+  color: #f2f6ff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-party-tags span {
+  background: rgba(91, 110, 255, .18);
+  color: #aebcff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-party-post {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(91, 110, 255, .14), transparent 28%),
+    rgba(15, 24, 42, .78);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-comments {
+  border-color: rgba(93, 110, 145, .34);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-comments-head strong,
+.public-dashboard-shell:not(.public-home-shell) .public-community-comment header strong {
+  color: #f2f6ff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-comments-head span {
+  background: rgba(91, 110, 255, .18);
+  color: #aebcff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-comment {
+  border-color: rgba(93, 110, 145, .34);
+  background: rgba(9, 15, 28, .72);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-comment header small,
+.public-dashboard-shell:not(.public-home-shell) .public-community-comment p {
+  color: #9fb0c8;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-comment-form textarea {
+  border-color: rgba(93, 110, 145, .34);
+  background: rgba(9, 15, 28, .72);
+  color: #f2f6ff;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article,
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-preview {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(125, 92, 255, .15), transparent 32%),
+    rgba(10, 17, 32, .92);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats span {
+  border-color: rgba(93, 110, 145, .34);
+  background: rgba(18, 29, 51, .78);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-community-record-champions small {
+  color: rgba(224, 232, 246, .82);
 }
 
 .public-dashboard-shell:not(.public-home-shell) .metric-tone-excellent {
@@ -18333,4 +19399,1959 @@ code {
   .public-tournament-bracket.rounds-4 {
     grid-template-columns: repeat(4, minmax(176px, 1fr)) 54px;
   }
+}
+
+.public-tournament-bracket {
+  --bracket-connector: 34px;
+  --bracket-row-gap: 22px;
+  grid-template-columns: repeat(3, minmax(240px, 1fr)) 72px;
+  gap: 44px;
+  padding: 12px 4px 18px;
+}
+
+.public-tournament-bracket.rounds-1 {
+  grid-template-columns: minmax(260px, 360px) 72px;
+}
+
+.public-tournament-bracket.rounds-2 {
+  grid-template-columns: repeat(2, minmax(240px, 1fr)) 72px;
+}
+
+.public-tournament-bracket.rounds-4 {
+  grid-template-columns: repeat(4, minmax(220px, 1fr)) 72px;
+}
+
+.public-tournament-round {
+  gap: var(--bracket-row-gap);
+}
+
+.public-tournament-round.future {
+  padding-top: 68px;
+}
+
+.public-tournament-round.future.round-3 {
+  padding-top: 154px;
+}
+
+.public-tournament-round.future.round-4 {
+  padding-top: 240px;
+}
+
+.public-tournament-round > strong {
+  justify-self: center;
+  min-width: min(100%, 230px);
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .035)),
+    rgba(18, 18, 20, .92);
+  color: #f8fafc;
+  text-align: center;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .28);
+}
+
+.public-tournament-round > strong > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-tournament-round > strong small {
+  margin-top: 4px;
+  color: rgba(238, 242, 255, .68);
+  font-size: 12px;
+}
+
+.public-tournament-match-card,
+.public-tournament-match-card.tbd {
+  --bracket-line-color: rgba(60, 230, 176, .95);
+  --bracket-line-glow: 0 0 14px rgba(60, 230, 176, .36), 0 0 28px rgba(60, 230, 176, .18);
+  gap: 0;
+  min-height: 116px;
+  padding: 22px 0 0;
+  border-color: rgba(255, 255, 255, .16);
+  border-radius: 8px;
+  background: rgba(5, 7, 12, .82);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .03),
+    0 18px 34px rgba(0, 0, 0, .24);
+  opacity: 1;
+}
+
+.public-tournament-match-card.advanced {
+  border-color: rgba(43, 201, 146, .5);
+  box-shadow:
+    inset 0 0 0 1px rgba(43, 201, 146, .14),
+    0 0 0 1px rgba(43, 201, 146, .08),
+    0 18px 34px rgba(0, 0, 0, .26);
+}
+
+.public-tournament-match-card::after {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--bracket-line-color);
+  transform: translateY(-50%);
+}
+
+.public-tournament-match-card::before {
+  right: calc((var(--bracket-connector) + 2px) * -1);
+  width: 3px;
+  border-radius: 999px;
+  background: var(--bracket-line-color);
+}
+
+.public-tournament-match-result-label {
+  position: absolute;
+  top: -20px;
+  left: 2px;
+  color: rgba(228, 235, 255, .78);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.public-tournament-match-card div.public-tournament-match-team,
+.public-tournament-match-card.tbd div.public-tournament-match-team {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 34px minmax(0, 1fr) auto 36px;
+  gap: 9px;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 0 0 10px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 0;
+}
+
+.public-tournament-match-card div.public-tournament-match-team:first-of-type {
+  border-top: 0;
+}
+
+.public-tournament-match-card div.public-tournament-match-team.winner {
+  background:
+    linear-gradient(90deg, rgba(43, 201, 146, .26), rgba(43, 201, 146, .08) 58%, rgba(255, 255, 255, .02));
+  box-shadow: inset 0 0 0 1px rgba(43, 201, 146, .34);
+}
+
+.public-tournament-match-card div.public-tournament-match-team.loser {
+  opacity: .62;
+}
+
+.public-tournament-match-point {
+  position: absolute;
+  left: -34px;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 28px;
+  border-radius: 6px 0 0 6px;
+  background: linear-gradient(135deg, #2fd39d, #20a97e);
+  color: #082114 !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  transform: translateY(-50%);
+  box-shadow: 0 0 18px rgba(43, 201, 146, .24);
+}
+
+.public-tournament-match-card b {
+  color: rgba(244, 247, 255, .9);
+  font-size: 13px;
+}
+
+.public-tournament-match-card .public-tournament-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+}
+
+.public-tournament-match-card .public-tournament-match-name {
+  color: rgba(247, 249, 255, .92);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.public-tournament-match-card .winner .public-tournament-match-name {
+  color: #44d6a8;
+}
+
+.public-tournament-match-check {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #38d29e;
+  color: #06130e !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.public-tournament-match-state {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #ff315c;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.public-tournament-match-card i {
+  display: grid;
+  align-self: stretch;
+  place-items: center;
+  min-width: 36px;
+  min-height: 42px;
+  background: rgba(255, 255, 255, .96);
+  color: #0f172a;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 950;
+  text-align: center;
+}
+
+.public-tournament-match-card .loser i,
+.public-tournament-match-card .pending i {
+  background: rgba(255, 255, 255, .06);
+  color: rgba(232, 238, 255, .72);
+}
+
+.public-tournament-match-card > small.public-tournament-match-vs {
+  position: absolute;
+  left: 64px;
+  top: 64px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 124, 255, .38);
+  background: linear-gradient(135deg, rgba(93, 76, 210, .95), rgba(58, 48, 140, .95));
+  color: #f0ecff;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px rgba(109, 92, 255, .28);
+}
+
+.public-tournament-match-card time {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  gap: 6px;
+  justify-content: flex-end;
+  color: rgba(232, 238, 255, .66);
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.public-tournament-match-card time small {
+  padding: 2px 6px;
+  background: rgba(125, 92, 255, .18);
+  color: #bfb5ff;
+}
+
+.public-tournament-match-card time em {
+  display: none;
+}
+
+.public-tournament-match-card div.pending {
+  opacity: .8;
+}
+
+.public-tournament-match-card div.pending .public-tournament-match-name {
+  color: rgba(229, 234, 248, .68);
+}
+
+.public-tournament-winner {
+  width: 58px;
+  height: 58px;
+  border-color: rgba(255, 210, 64, .35);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 210, 64, .22), rgba(255, 210, 64, .05) 58%, transparent 72%),
+    rgba(13, 13, 16, .76);
+  box-shadow: 0 0 30px rgba(255, 210, 64, .12);
+}
+
+@media (max-width: 1180px) {
+  .public-tournament-bracket {
+    grid-template-columns: repeat(3, minmax(230px, 1fr)) 68px;
+    gap: 38px;
+  }
+
+  .public-tournament-bracket.rounds-4 {
+    grid-template-columns: repeat(4, minmax(214px, 1fr)) 68px;
+  }
+}
+
+@media (max-width: 760px) {
+  .public-tournament-bracket {
+    --bracket-connector: 22px;
+    grid-template-columns: repeat(3, minmax(216px, 1fr)) 54px;
+    gap: 28px;
+  }
+
+  .public-tournament-bracket.rounds-1 {
+    grid-template-columns: minmax(216px, 1fr) 54px;
+  }
+
+  .public-tournament-bracket.rounds-2 {
+    grid-template-columns: repeat(2, minmax(216px, 1fr)) 54px;
+  }
+
+  .public-tournament-bracket.rounds-4 {
+    grid-template-columns: repeat(4, minmax(206px, 1fr)) 54px;
+  }
+
+  .public-tournament-round.future {
+    padding-top: 56px;
+  }
+
+  .public-tournament-round.future.round-3 {
+    padding-top: 128px;
+  }
+
+  .public-tournament-round.future.round-4 {
+    padding-top: 196px;
+  }
+
+  .public-tournament-match-point {
+    left: -26px;
+    width: 26px;
+    font-size: 10px !important;
+  }
+}
+
+/* 공개 웹 파스텔 블루 테마 */
+.public-dashboard-shell {
+  --seiga-pastel-blue: #BFE3FF;
+  --seiga-pastel-bg: #F3F7FB;
+  --seiga-pastel-cyan: #D5F1FF;
+  --seiga-pastel-surface: rgba(255, 255, 255, .9);
+  --seiga-pastel-surface-strong: rgba(255, 255, 255, .97);
+  --seiga-pastel-border: rgba(126, 177, 223, .46);
+  --seiga-pastel-border-strong: rgba(87, 143, 214, .6);
+  --seiga-pastel-text: #10233d;
+  --seiga-pastel-heading: #07162c;
+  --seiga-pastel-muted: #637795;
+  --seiga-pastel-soft: #edf8ff;
+  --seiga-pastel-accent: #4f7cff;
+  --seiga-pastel-accent-strong: #305fe8;
+  --seiga-pastel-shadow: 0 22px 70px rgba(79, 124, 255, .14);
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell.public-home-shell {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(213, 241, 255, .56), transparent 30%),
+    linear-gradient(90deg, rgba(243, 247, 251, .88) 0%, rgba(213, 241, 255, .66) 45%, rgba(191, 227, 255, .72) 100%),
+    linear-gradient(180deg, rgba(243, 247, 251, .45), rgba(243, 247, 251, .9)),
+    url("/images/lol-home-zed.jpg") center / cover no-repeat,
+    var(--seiga-pastel-bg) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(191, 227, 255, .64), transparent 31%),
+    radial-gradient(circle at 82% 0%, rgba(213, 241, 255, .74), transparent 34%),
+    linear-gradient(180deg, #f8fbff 0%, var(--seiga-pastel-bg) 42%, #edf8ff 100%) !important;
+}
+
+.public-dashboard-shell .public-app-main,
+.public-dashboard-shell:not(.public-home-shell) .public-app-main,
+.public-dashboard-shell:not(.public-home-shell) .public-profile-layout {
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-app-header,
+.public-dashboard-shell.theme-dark .public-app-header,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header {
+  border-color: var(--seiga-pastel-border) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(243, 247, 251, .82)),
+    radial-gradient(circle at 18% 0%, rgba(191, 227, 255, .7), transparent 42%) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 14px 40px rgba(68, 112, 190, .12) !important;
+}
+
+.public-dashboard-shell .public-app-header.home {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-header-nav,
+.public-dashboard-shell .public-app-header.home .public-header-nav {
+  border-color: rgba(128, 161, 224, .4) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(229, 244, 255, .82)),
+    radial-gradient(circle at 18% 0%, rgba(191, 227, 255, .82), transparent 46%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .78),
+    0 16px 34px rgba(68, 112, 190, .16) !important;
+}
+
+.public-dashboard-shell .public-header-nav button {
+  color: rgba(16, 35, 61, .72) !important;
+}
+
+.public-dashboard-shell .public-header-nav button:hover,
+.public-dashboard-shell .public-header-nav button.active {
+  background: rgba(191, 227, 255, .72) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+}
+
+.public-dashboard-shell .public-header-nav button::after {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-header-nav button.active::after {
+  background: linear-gradient(90deg, #77b9ff, #4f7cff) !important;
+  box-shadow: 0 0 12px rgba(79, 124, 255, .42) !important;
+}
+
+.public-dashboard-shell .public-header-submenu,
+.public-dashboard-shell .public-twitch-profile-menu,
+.public-dashboard-shell.theme-dark .public-twitch-profile-menu,
+.public-dashboard-shell .public-popover,
+.public-dashboard-shell .public-dialog {
+  border-color: var(--seiga-pastel-border) !important;
+  background: rgba(255, 255, 255, .96) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 24px 64px rgba(55, 96, 164, .18) !important;
+}
+
+.public-dashboard-shell .public-header-submenu button,
+.public-dashboard-shell .public-twitch-profile-menu button {
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-header-submenu button:hover,
+.public-dashboard-shell .public-header-submenu button.active,
+.public-dashboard-shell .public-twitch-profile-menu button:hover {
+  background: rgba(213, 241, 255, .72) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+}
+
+.public-dashboard-shell .public-locale-button,
+.public-dashboard-shell.theme-dark .public-app-header .public-locale-button,
+.public-dashboard-shell .public-twitch-login-chip,
+.public-dashboard-shell.theme-dark .public-twitch-login-chip {
+  border-color: var(--seiga-pastel-border) !important;
+  background: rgba(255, 255, 255, .92) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 10px 24px rgba(68, 112, 190, .1) !important;
+}
+
+.public-dashboard-shell .public-twitch-login-chip.connected,
+.public-dashboard-shell.theme-dark .public-twitch-login-chip.connected {
+  border-color: rgba(46, 191, 145, .4) !important;
+  background: linear-gradient(135deg, rgba(230, 255, 248, .96), rgba(213, 241, 255, .9)) !important;
+  color: #075444 !important;
+}
+
+.public-dashboard-shell .public-twitch-login-chip:not(.connected) {
+  background: linear-gradient(135deg, #5f8cff, #7b61ff) !important;
+  color: #fff !important;
+}
+
+.public-dashboard-shell .public-locale-popover,
+.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover {
+  border-color: var(--seiga-pastel-border) !important;
+  background: rgba(255, 255, 255, .98) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 22px 54px rgba(55, 96, 164, .18) !important;
+}
+
+.public-dashboard-shell .public-locale-popover button {
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-locale-popover button:hover,
+.public-dashboard-shell .public-locale-popover button.active {
+  background: rgba(213, 241, 255, .82) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+}
+
+.public-dashboard-shell .public-search-form,
+.public-dashboard-shell.theme-dark .public-app-header .public-search-form,
+.public-dashboard-shell.theme-dark .public-home-search-stage .public-search-form,
+.public-dashboard-shell:not(.public-home-shell) .public-search-form,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-form {
+  border-color: rgba(113, 154, 255, .66) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(229, 244, 255, .76)),
+    radial-gradient(circle at 12% 0%, rgba(213, 241, 255, .86), transparent 48%) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .72),
+    0 20px 54px rgba(73, 121, 255, .18),
+    0 0 26px rgba(191, 227, 255, .48) !important;
+}
+
+.public-dashboard-shell .public-search-field input,
+.public-dashboard-shell .public-app-header:not(.home) .public-search-field input,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-search-field input::placeholder,
+.public-dashboard-shell .public-app-header:not(.home) .public-search-field input::placeholder,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input::placeholder {
+  color: rgba(99, 119, 149, .72) !important;
+}
+
+.public-dashboard-shell .public-server-pill,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-server-pill {
+  border-color: rgba(113, 154, 255, .32) !important;
+  background: rgba(213, 241, 255, .8) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+}
+
+.public-dashboard-shell .public-search-icon-button {
+  border-color: rgba(113, 154, 255, .32) !important;
+  background: rgba(255, 255, 255, .72) !important;
+  color: var(--seiga-pastel-accent) !important;
+}
+
+.public-dashboard-shell .public-search-icon-button:hover {
+  background: rgba(191, 227, 255, .84) !important;
+}
+
+.public-dashboard-shell .public-search-submit span,
+.public-dashboard-shell .public-search-submit span::after {
+  border-color: var(--seiga-pastel-accent) !important;
+}
+
+.public-dashboard-shell .public-search-clear span,
+.public-dashboard-shell .public-search-clear span::after {
+  background: var(--seiga-pastel-accent) !important;
+}
+
+.public-dashboard-shell .public-suggestion-panel,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-panel {
+  border-color: rgba(113, 154, 255, .42) !important;
+  background: rgba(255, 255, 255, .96) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 24px 58px rgba(55, 96, 164, .18) !important;
+}
+
+.public-dashboard-shell .public-suggestion-title,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-title {
+  border-bottom-color: rgba(126, 177, 223, .36) !important;
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-suggestion-list button,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-list button {
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-suggestion-list button:hover,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-list button:hover {
+  background: rgba(213, 241, 255, .68) !important;
+}
+
+.public-dashboard-shell .public-suggestion-name span,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-name span,
+.public-dashboard-shell .public-suggestion-name strong,
+.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-name strong {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell .public-panel,
+.public-dashboard-shell:not(.public-home-shell) .public-panel,
+.public-dashboard-shell .public-profile-tabs,
+.public-dashboard-shell:not(.public-home-shell) .public-profile-tabs,
+.public-dashboard-shell .public-profile-top-grid,
+.public-dashboard-shell:not(.public-home-shell) .public-profile-top-grid,
+.public-dashboard-shell .public-profile-top-side,
+.public-dashboard-shell .public-profile-metric-strip,
+.public-dashboard-shell .public-profile-metric-card,
+.public-dashboard-shell .public-rank-overview-card,
+.public-dashboard-shell .public-dashboard-empty-card,
+.public-dashboard-shell .public-subscriptions-card,
+.public-dashboard-shell:not(.public-home-shell) .public-subscriptions-card,
+.public-dashboard-shell .public-twitch-followed-summary,
+.public-dashboard-shell .public-twitch-followed-list article,
+.public-dashboard-shell .public-community-compose,
+.public-dashboard-shell .public-community-detail-article,
+.public-dashboard-shell .public-community-record-preview,
+.public-dashboard-shell .public-community-login,
+.public-dashboard-shell .public-party-post,
+.public-dashboard-shell:not(.public-home-shell) .public-party-post,
+.public-dashboard-shell .public-tournament-calendar-page.public-panel,
+.public-dashboard-shell .public-tournament-list-page.public-panel,
+.public-dashboard-shell .public-tournament-page.public-panel,
+.public-dashboard-shell.theme-dark .public-tournament-calendar-page.public-panel,
+.public-dashboard-shell.theme-dark .public-tournament-list-page.public-panel,
+.public-dashboard-shell.theme-dark .public-tournament-page.public-panel {
+  border-color: var(--seiga-pastel-border) !important;
+  background:
+    linear-gradient(180deg, var(--seiga-pastel-surface-strong), rgba(237, 248, 255, .9)),
+    radial-gradient(circle at 16% 0%, rgba(213, 241, 255, .65), transparent 44%) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: var(--seiga-pastel-shadow) !important;
+}
+
+.public-dashboard-shell .public-menu-page-panel.public-community-page.list-only {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-profile-top-grid.has-mastery-art::after,
+.public-dashboard-shell.theme-dark .public-profile-top-grid.has-mastery-art::after {
+  background:
+    linear-gradient(90deg, rgba(243, 247, 251, .92), rgba(243, 247, 251, .72) 48%, rgba(213, 241, 255, .76)),
+    linear-gradient(180deg, rgba(191, 227, 255, .38), rgba(243, 247, 251, .18)) !important;
+}
+
+.public-dashboard-shell .public-profile-mastery-art {
+  opacity: .42 !important;
+}
+
+.public-dashboard-shell .public-profile-top-grid.has-mastery-art .public-profile-top-side,
+.public-dashboard-shell.theme-dark .public-profile-top-grid.has-mastery-art .public-profile-top-side,
+.public-dashboard-shell .public-profile-top-grid.has-mastery-art .public-profile-metric-strip,
+.public-dashboard-shell.theme-dark .public-profile-top-grid.has-mastery-art .public-profile-metric-strip {
+  border-color: rgba(126, 177, 223, .34) !important;
+  background: rgba(255, 255, 255, .58) !important;
+}
+
+.public-dashboard-shell .public-profile-title-row h2,
+.public-dashboard-shell .public-section-head h2,
+.public-dashboard-shell .public-section-head strong,
+.public-dashboard-shell .public-profile-metric-card > strong,
+.public-dashboard-shell .public-profile-metric-label > span,
+.public-dashboard-shell .public-rank-overview-card strong,
+.public-dashboard-shell .public-streamer-register-head h1,
+.public-dashboard-shell .public-community-card-head strong,
+.public-dashboard-shell .public-community-post h3,
+.public-dashboard-shell .public-party-post h3,
+.public-dashboard-shell .public-community-detail-article h3,
+.public-dashboard-shell .public-tournament-page-head h2,
+.public-dashboard-shell .public-tournament-title-row h2,
+.public-dashboard-shell .public-tournament-brand strong {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell .public-profile-title-row span,
+.public-dashboard-shell .public-section-head p,
+.public-dashboard-shell .public-section-head span,
+.public-dashboard-shell .public-profile-metric-detail,
+.public-dashboard-shell .public-profile-metric-scale,
+.public-dashboard-shell .public-rank-overview-card span,
+.public-dashboard-shell .public-rank-overview-card small,
+.public-dashboard-shell .public-community-lead,
+.public-dashboard-shell .public-community-post p,
+.public-dashboard-shell .public-party-post p,
+.public-dashboard-shell .public-community-detail-article p,
+.public-dashboard-shell .public-tournament-page-head p {
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-refresh-button,
+.public-dashboard-shell.theme-dark .public-refresh-button,
+.public-dashboard-shell .public-community-card-head button.primary,
+.public-dashboard-shell:not(.public-home-shell) .public-community-card-head button.primary,
+.public-dashboard-shell .public-twitch-followed-actions button.primary {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
+  color: #fff !important;
+  box-shadow: 0 16px 34px rgba(79, 124, 255, .24) !important;
+}
+
+.public-dashboard-shell .public-favorite-button,
+.public-dashboard-shell .public-back-button,
+.public-dashboard-shell .public-filter-button,
+.public-dashboard-shell .public-community-card-head button,
+.public-dashboard-shell:not(.public-home-shell) .public-community-card-head button,
+.public-dashboard-shell .public-twitch-followed-actions button,
+.public-dashboard-shell .public-twitch-channel-actions a,
+.public-dashboard-shell .public-tournament-calendar-page .public-tournament-page-head > button,
+.public-dashboard-shell .public-tournament-list-page .public-tournament-page-head > button,
+.public-dashboard-shell .public-tournament-list-card > button {
+  border-color: var(--seiga-pastel-border) !important;
+  background: rgba(255, 255, 255, .76) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-profile-tabs button {
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-profile-tabs button:hover,
+.public-dashboard-shell .public-profile-tabs button.active {
+  background: rgba(191, 227, 255, .82) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+  box-shadow: inset 0 0 0 1px rgba(113, 154, 255, .24) !important;
+}
+
+.public-dashboard-shell .public-overview-dashboard-panel > .public-panel,
+.public-dashboard-shell .public-aggregate-card,
+.public-dashboard-shell .public-lp-trend-card,
+.public-dashboard-shell .public-role-win-card,
+.public-dashboard-shell .public-overview-metric-card,
+.public-dashboard-shell .public-champion-analysis-card,
+.public-dashboard-shell .public-champion-top-card {
+  border-color: var(--seiga-pastel-border) !important;
+  background: rgba(255, 255, 255, .86) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 18px 46px rgba(79, 124, 255, .12) !important;
+}
+
+.public-dashboard-shell .public-aggregate-hero,
+.public-dashboard-shell.theme-dark .public-aggregate-hero {
+  border-color: rgba(126, 177, 223, .5) !important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(191, 227, 255, .8), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, .94), rgba(229, 244, 255, .82)) !important;
+}
+
+.public-dashboard-shell .public-lp-chart,
+.public-dashboard-shell.theme-dark .public-lp-chart {
+  border-color: rgba(126, 177, 223, .48) !important;
+  background:
+    linear-gradient(180deg, rgba(245, 252, 255, .92), rgba(213, 241, 255, .52)) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-lp-chart-axis,
+.public-dashboard-shell .public-lp-chart-y-axis,
+.public-dashboard-shell.theme-dark .public-lp-chart-axis,
+.public-dashboard-shell.theme-dark .public-lp-chart-y-axis {
+  color: #4b6b91 !important;
+}
+
+.public-dashboard-shell .public-match-row,
+.public-dashboard-shell:not(.public-home-shell) .public-match-row {
+  border-color: rgba(126, 177, 223, .45) !important;
+  background:
+    linear-gradient(90deg, rgba(223, 242, 255, .86), rgba(255, 255, 255, .9)) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 14px 32px rgba(55, 96, 164, .12) !important;
+}
+
+.public-dashboard-shell .public-match-row.win,
+.public-dashboard-shell:not(.public-home-shell) .public-match-row.win {
+  border-color: rgba(78, 146, 255, .46) !important;
+  background:
+    linear-gradient(90deg, rgba(191, 227, 255, .92), rgba(245, 251, 255, .92)) !important;
+}
+
+.public-dashboard-shell .public-match-row.loss,
+.public-dashboard-shell:not(.public-home-shell) .public-match-row.loss {
+  border-color: rgba(255, 157, 178, .48) !important;
+  background:
+    linear-gradient(90deg, rgba(255, 230, 235, .9), rgba(255, 250, 252, .92)) !important;
+}
+
+.public-dashboard-shell .public-match-expanded,
+.public-dashboard-shell.theme-dark .public-match-expanded {
+  border-top-color: rgba(126, 177, 223, .36) !important;
+  background: rgba(255, 255, 255, .72) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-match-expanded-tabs {
+  border-color: rgba(126, 177, 223, .42) !important;
+  background: rgba(243, 247, 251, .82) !important;
+}
+
+.public-dashboard-shell .public-match-expanded-tabs button {
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-match-expanded-tabs button.active,
+.public-dashboard-shell .public-match-expanded-tabs button:hover {
+  background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
+  color: #fff !important;
+}
+
+.public-dashboard-shell .public-result strong,
+.public-dashboard-shell .public-match-row h3,
+.public-dashboard-shell .public-match-row strong,
+.public-dashboard-shell .public-champion-cell strong,
+.public-dashboard-shell .public-champion-cell .public-champion-name,
+.public-dashboard-shell .public-team-player-main strong,
+.public-dashboard-shell .public-team-player-main .public-riot-id-static,
+.public-dashboard-shell .public-team-player-main .public-riot-id-link,
+.public-dashboard-shell .public-team-player-main .public-riot-name,
+.public-dashboard-shell .public-opponent-cell .public-riot-id-link {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell .public-match-row small,
+.public-dashboard-shell .public-match-row span,
+.public-dashboard-shell .public-team-player-meta small,
+.public-dashboard-shell .public-team-head span,
+.public-dashboard-shell .public-team-head small {
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-score-pill,
+.public-dashboard-shell .public-match-score {
+  background: rgba(213, 241, 255, .88) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+  border-color: rgba(113, 154, 255, .38) !important;
+}
+
+.public-dashboard-shell .public-match-inline-items span,
+.public-dashboard-shell .public-team-item-slot,
+.public-dashboard-shell .public-team-spell-slot,
+.public-dashboard-shell .public-team-rune-slot,
+.public-dashboard-shell .public-match-inline-items span.empty,
+.public-dashboard-shell .public-team-item-empty,
+.public-dashboard-shell .public-team-spell-empty,
+.public-dashboard-shell .public-team-rune-empty {
+  border-color: rgba(126, 177, 223, .44) !important;
+  background: rgba(255, 255, 255, .74) !important;
+}
+
+.public-dashboard-shell .public-team-card,
+.public-dashboard-shell:not(.public-home-shell) .public-team-card,
+.public-dashboard-shell.theme-dark .public-team-card {
+  border-color: rgba(126, 177, 223, .46) !important;
+  background: rgba(255, 255, 255, .78) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-team-card.ally,
+.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally {
+  border-color: rgba(57, 202, 150, .42) !important;
+  background: linear-gradient(180deg, rgba(235, 255, 249, .88), rgba(255, 255, 255, .82)) !important;
+}
+
+.public-dashboard-shell .public-team-card.enemy,
+.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy {
+  border-color: rgba(255, 128, 160, .42) !important;
+  background: linear-gradient(180deg, rgba(255, 238, 242, .88), rgba(255, 255, 255, .82)) !important;
+}
+
+.public-dashboard-shell .public-team-player,
+.public-dashboard-shell:not(.public-home-shell) .public-team-player {
+  border-color: rgba(126, 177, 223, .28) !important;
+  background: rgba(255, 255, 255, .54) !important;
+}
+
+.public-dashboard-shell .public-team-player.target {
+  background: linear-gradient(90deg, rgba(191, 227, 255, .72), rgba(255, 255, 255, .58)) !important;
+}
+
+.public-dashboard-shell .public-team-stat {
+  background: rgba(224, 238, 255, .8) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-team-stat strong,
+.public-dashboard-shell .public-team-stat.kda strong,
+.public-dashboard-shell.theme-dark .public-team-stat.kda strong {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-team-stat span,
+.public-dashboard-shell .public-team-stat.kda span {
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-riot-tag-badge,
+.public-dashboard-shell.theme-dark .public-riot-tag-badge {
+  border-color: rgba(79, 124, 255, .32) !important;
+  background: rgba(213, 241, 255, .88) !important;
+  color: #245fbb !important;
+}
+
+.public-dashboard-shell .public-community-post:not(.has-image),
+.public-dashboard-shell:not(.public-home-shell) .public-community-post:not(.has-image),
+.public-dashboard-shell .public-community-comment,
+.public-dashboard-shell .public-community-comment-form textarea,
+.public-dashboard-shell .public-community-form input,
+.public-dashboard-shell .public-community-form select,
+.public-dashboard-shell .public-community-form textarea,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form input,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form select,
+.public-dashboard-shell:not(.public-home-shell) .public-community-form textarea {
+  border-color: rgba(126, 177, 223, .44) !important;
+  background: rgba(255, 255, 255, .86) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-community-post.has-image {
+  border-color: rgba(126, 177, 223, .44) !important;
+  box-shadow: 0 18px 46px rgba(55, 96, 164, .14) !important;
+}
+
+.public-dashboard-shell .public-community-post.has-image::before {
+  background: linear-gradient(180deg, rgba(10, 26, 50, .05), rgba(10, 26, 50, .7)) !important;
+}
+
+.public-dashboard-shell .public-community-post.has-image h3,
+.public-dashboard-shell .public-community-post.has-image header strong,
+.public-dashboard-shell .public-community-post.has-image p {
+  color: #fff !important;
+}
+
+.public-dashboard-shell .public-community-error {
+  color: #d72d55 !important;
+}
+
+.public-dashboard-shell .public-community-tag-picker,
+.public-dashboard-shell .public-community-file-control,
+.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker,
+.public-dashboard-shell:not(.public-home-shell) .public-community-file-control {
+  border-color: rgba(126, 177, 223, .42) !important;
+  background: rgba(243, 247, 251, .82) !important;
+}
+
+.public-dashboard-shell .public-community-tag-picker button,
+.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker button,
+.public-dashboard-shell .public-party-tags span {
+  border-color: rgba(126, 177, 223, .42) !important;
+  background: rgba(213, 241, 255, .72) !important;
+  color: #245fbb !important;
+}
+
+.public-dashboard-shell .public-community-tag-picker button.active {
+  background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
+  color: #fff !important;
+}
+
+.public-dashboard-shell .public-subscription-row,
+.public-dashboard-shell.theme-dark .public-subscription-row,
+.public-dashboard-shell .public-twitch-followed-list article {
+  border-color: rgba(126, 177, 223, .42) !important;
+  background: rgba(255, 255, 255, .72) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-subscription-row strong,
+.public-dashboard-shell .public-twitch-channel-main strong,
+.public-dashboard-shell .public-twitch-channel-meta span,
+.public-dashboard-shell .public-twitch-followed-summary span {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-subscription-row small,
+.public-dashboard-shell .public-twitch-channel-main small,
+.public-dashboard-shell .public-twitch-channel-meta small,
+.public-dashboard-shell .public-twitch-followed-summary small {
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar,
+.public-dashboard-shell .public-tournament-calendar-day,
+.public-dashboard-shell .public-tournament-list-card,
+.public-dashboard-shell .public-tournament-side-card,
+.public-dashboard-shell .public-tournament-info-grid article,
+.public-dashboard-shell .public-tournament-match-card,
+.public-dashboard-shell .public-tournament-match-card.tbd,
+.public-dashboard-shell .public-tournament-team-card,
+.public-dashboard-shell .public-tournament-team-player-table {
+  border-color: rgba(126, 177, 223, .44) !important;
+  background: rgba(255, 255, 255, .76) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day.has-event {
+  background: linear-gradient(180deg, rgba(213, 241, 255, .9), rgba(255, 255, 255, .72)) !important;
+}
+
+.public-dashboard-shell .public-tournament-match-card.advanced {
+  border-color: rgba(46, 191, 145, .54) !important;
+  background: linear-gradient(180deg, rgba(229, 255, 247, .9), rgba(255, 255, 255, .78)) !important;
+}
+
+.public-dashboard-shell .public-tournament-match-card b,
+.public-dashboard-shell .public-tournament-match-card .public-tournament-match-name,
+.public-dashboard-shell .public-tournament-round > strong,
+.public-dashboard-shell .public-tournament-info-grid strong,
+.public-dashboard-shell .public-tournament-team-card strong {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-tournament-match-card i,
+.public-dashboard-shell .public-tournament-match-card time,
+.public-dashboard-shell .public-tournament-round > strong small,
+.public-dashboard-shell .public-tournament-info-grid span,
+.public-dashboard-shell .public-tournament-team-card small {
+  color: var(--seiga-pastel-muted) !important;
+}
+
+.public-dashboard-shell .public-tournament-match-card::before,
+.public-dashboard-shell .public-tournament-match-card::after {
+  background: rgba(79, 124, 255, .62) !important;
+  box-shadow: 0 0 12px rgba(79, 124, 255, .24) !important;
+}
+
+.public-dashboard-shell .public-stream-overview-card.live strong {
+  color: #e11d48 !important;
+}
+
+.public-dashboard-shell .public-stream-overview-card.offline strong {
+  color: #66768f !important;
+}
+
+.public-dashboard-shell .public-stream-fallback {
+  background: rgba(213, 241, 255, .86) !important;
+  color: #245fbb !important;
+}
+
+/* 전적검색 목록 파스텔 톤 보정 */
+.public-dashboard-shell .public-match-filter-bar,
+.public-dashboard-shell.theme-dark .public-match-filter-bar {
+  border-color: rgba(126, 177, 223, .46) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(223, 242, 255, .82)) !important;
+  box-shadow: 0 16px 40px rgba(79, 124, 255, .12) !important;
+}
+
+.public-dashboard-shell .public-match-filter-title {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-match-filter-title span,
+.public-dashboard-shell .public-match-filter-bar.active .public-match-filter-title span {
+  background: rgba(191, 227, 255, .92) !important;
+  color: #245fbb !important;
+}
+
+.public-dashboard-shell .public-match-filter-bar label {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell .public-match-filter-bar select,
+.public-dashboard-shell.theme-dark .public-filter-popover select {
+  border-color: rgba(126, 177, 223, .56) !important;
+  background: rgba(255, 255, 255, .94) !important;
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-match-filter-bar button,
+.public-dashboard-shell.theme-dark .public-match-filter-bar button {
+  border-color: rgba(126, 177, 223, .5) !important;
+  background: rgba(243, 247, 251, .92) !important;
+  color: #245fbb !important;
+}
+
+.public-dashboard-shell .public-match-filter-bar button:not(:disabled):hover {
+  background: rgba(213, 241, 255, .92) !important;
+}
+
+.public-dashboard-shell .public-match-row,
+.public-dashboard-shell:not(.public-home-shell) .public-match-row {
+  border-color: rgba(126, 177, 223, .48) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-match-row.win,
+.public-dashboard-shell:not(.public-home-shell) .public-match-row.win {
+  border-left-color: #62a8ff !important;
+  background:
+    linear-gradient(90deg, rgba(191, 227, 255, .92), rgba(243, 249, 255, .96) 42%, rgba(255, 255, 255, .94)) !important;
+}
+
+.public-dashboard-shell .public-match-row.loss,
+.public-dashboard-shell:not(.public-home-shell) .public-match-row.loss {
+  border-left-color: #ff8fa5 !important;
+  background:
+    linear-gradient(90deg, rgba(255, 228, 235, .92), rgba(255, 247, 250, .96) 42%, rgba(255, 255, 255, .94)) !important;
+}
+
+.public-dashboard-shell .public-match-row .public-result strong,
+.public-dashboard-shell .public-match-row.win .public-result strong,
+.public-dashboard-shell .public-match-row.loss .public-result strong,
+.public-dashboard-shell .public-match-row .public-champion-cell strong,
+.public-dashboard-shell .public-match-row .public-champion-cell .public-riot-name,
+.public-dashboard-shell .public-match-row .public-champion-cell .public-riot-id-static,
+.public-dashboard-shell .public-match-row .public-champion-cell .public-riot-id-link,
+.public-dashboard-shell .public-match-row .public-kda strong,
+.public-dashboard-shell .public-match-row .public-match-meta strong,
+.public-dashboard-shell .public-match-row .public-match-impact strong {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell .public-match-row .public-result span,
+.public-dashboard-shell .public-match-row .public-result small,
+.public-dashboard-shell .public-match-row .public-champion-cell small,
+.public-dashboard-shell .public-match-row .public-kda span,
+.public-dashboard-shell .public-match-row .public-match-meta span,
+.public-dashboard-shell .public-match-row .public-match-meta small,
+.public-dashboard-shell .public-match-row .public-match-impact span {
+  color: #5d7190 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell .public-match-row .public-kda .metric-tone-excellent,
+.public-dashboard-shell .public-match-row .public-match-meta .metric-tone-excellent {
+  color: #0ea371 !important;
+}
+
+.public-dashboard-shell .public-match-row .public-kda .metric-tone-good,
+.public-dashboard-shell .public-match-row .public-match-meta .metric-tone-good {
+  color: #2563eb !important;
+}
+
+.public-dashboard-shell .public-match-row .public-kda .metric-tone-neutral,
+.public-dashboard-shell .public-match-row .public-match-meta .metric-tone-neutral {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell .public-match-row .public-kda .metric-tone-warning,
+.public-dashboard-shell .public-match-row .public-match-meta .metric-tone-warning {
+  color: #d97706 !important;
+}
+
+.public-dashboard-shell .public-match-row .public-kda .metric-tone-bad,
+.public-dashboard-shell .public-match-row .public-match-meta .metric-tone-bad {
+  color: #e11d48 !important;
+}
+
+.public-dashboard-shell .public-match-impact {
+  border: 1px solid rgba(126, 177, 223, .44) !important;
+  background: rgba(223, 242, 255, .82) !important;
+  color: #245fbb !important;
+}
+
+.public-dashboard-shell .public-match-impact.metric-tone-excellent {
+  border-color: rgba(16, 185, 129, .36) !important;
+  background: rgba(223, 252, 240, .86) !important;
+}
+
+.public-dashboard-shell .public-match-impact.metric-tone-good {
+  border-color: rgba(96, 165, 250, .38) !important;
+  background: rgba(230, 240, 255, .9) !important;
+}
+
+.public-dashboard-shell .public-match-impact.metric-tone-warning {
+  border-color: rgba(245, 158, 11, .38) !important;
+  background: rgba(255, 243, 214, .9) !important;
+}
+
+.public-dashboard-shell .public-match-impact.metric-tone-bad,
+.public-dashboard-shell .public-match-impact.loss {
+  border-color: rgba(244, 63, 94, .32) !important;
+  background: rgba(255, 228, 230, .9) !important;
+}
+
+.public-dashboard-shell .public-match-expand {
+  border-color: rgba(126, 177, 223, .44) !important;
+  background: rgba(223, 242, 255, .74) !important;
+  color: #245fbb !important;
+}
+
+/* 전적 상세 파스텔 톤 보정 */
+.public-dashboard-shell:not(.public-home-shell) .public-match-expanded,
+.public-dashboard-shell:not(.public-home-shell) .public-match-detail,
+.public-dashboard-shell:not(.public-home-shell) .public-match-loadout {
+  border-color: rgba(126, 177, 223, .42) !important;
+  background: rgba(255, 255, 255, .76) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-match-expanded-tabs {
+  border-color: rgba(126, 177, 223, .46) !important;
+  background: rgba(229, 244, 255, .76) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-match-expanded-tabs button {
+  color: #5d7190 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-match-expanded-tabs button:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-match-expanded-tabs button.active {
+  background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
+  color: #ffffff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-match-id-mask-toggle {
+  border-color: rgba(126, 177, 223, .5) !important;
+  background: rgba(255, 255, 255, .88) !important;
+  color: #526984 !important;
+  box-shadow: 0 10px 24px rgba(55, 96, 164, .12) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-match-id-mask-toggle:hover {
+  border-color: rgba(79, 124, 255, .5) !important;
+  color: #245fbb !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-match-id-mask-toggle.active {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
+  color: #ffffff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-card,
+.public-dashboard-shell.theme-dark .public-team-card {
+  border-color: rgba(126, 177, 223, .48) !important;
+  background: rgba(255, 255, 255, .86) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally {
+  border-color: rgba(39, 190, 142, .46) !important;
+  background: linear-gradient(180deg, rgba(232, 255, 249, .9), rgba(255, 255, 255, .86)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy {
+  border-color: rgba(255, 128, 160, .46) !important;
+  background: linear-gradient(180deg, rgba(255, 238, 243, .9), rgba(255, 255, 255, .86)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-head,
+.public-dashboard-shell:not(.public-home-shell) .public-ingame-team-head,
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-head {
+  border-color: rgba(126, 177, 223, .38) !important;
+  background:
+    linear-gradient(180deg, rgba(191, 227, 255, .9), rgba(213, 241, 255, .7)) !important;
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally .public-team-head strong {
+  color: #08785d !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy .public-team-head strong {
+  color: #d43f61 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-head span,
+.public-dashboard-shell:not(.public-home-shell) .public-team-head small,
+.public-dashboard-shell:not(.public-home-shell) .public-team-head-summary small,
+.public-dashboard-shell:not(.public-home-shell) .public-opponent-cell > span,
+.public-dashboard-shell:not(.public-home-shell) .public-opponent-cell small {
+  color: #526984 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-head em {
+  border-color: rgba(79, 124, 255, .42) !important;
+  background: rgba(255, 255, 255, .72) !important;
+  color: #245fbb !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-player {
+  border-top-color: rgba(126, 177, 223, .3) !important;
+  background: rgba(255, 255, 255, .58) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-player.target {
+  background:
+    linear-gradient(90deg, rgba(191, 227, 255, .74), rgba(255, 255, 255, .64)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-player.highlight-mvp {
+  background:
+    linear-gradient(90deg, rgba(255, 247, 219, .92), rgba(255, 255, 255, .68)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-player.highlight-ace {
+  background:
+    linear-gradient(90deg, rgba(255, 232, 238, .92), rgba(255, 255, 255, .68)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-kda strong,
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda strong,
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat strong,
+.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-name,
+.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-static,
+.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-link,
+.public-dashboard-shell:not(.public-home-shell) .public-opponent-cell .public-riot-name {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-static.streamer .public-riot-name,
+.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-link.streamer .public-riot-name {
+  background: linear-gradient(135deg, #6d42ff 0%, #bc36d6 48%, #2080dd 100%) !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-background-clip: text !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-player-meta small,
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat span,
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda span {
+  color: #5d7190 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat {
+  border: 1px solid rgba(126, 177, 223, .34) !important;
+  background: rgba(223, 242, 255, .82) !important;
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda {
+  background: rgba(229, 244, 255, .9) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-excellent {
+  color: #0ea371 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-good {
+  color: #2563eb !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-neutral {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-warning {
+  color: #d97706 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-bad {
+  color: #e11d48 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-team-item-slot,
+.public-dashboard-shell:not(.public-home-shell) .public-team-item-empty,
+.public-dashboard-shell:not(.public-home-shell) .public-team-spell-slot,
+.public-dashboard-shell:not(.public-home-shell) .public-team-spell-empty,
+.public-dashboard-shell:not(.public-home-shell) .public-team-rune-slot,
+.public-dashboard-shell:not(.public-home-shell) .public-team-rune-empty {
+  border-color: rgba(126, 177, 223, .44) !important;
+  background: rgba(255, 255, 255, .76) !important;
+  color: #526984 !important;
+}
+
+/* 종합 성과 카드 파스텔 톤 보정 */
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-card {
+  border-color: rgba(126, 177, 223, .5) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(237, 248, 255, .9)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-card .public-section-head h2,
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-card .public-section-head > span {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-hero {
+  border-color: rgba(126, 177, 223, .58) !important;
+  background:
+    radial-gradient(circle at 22% 28%, rgba(191, 227, 255, .84), transparent 36%),
+    radial-gradient(circle at 82% 18%, rgba(213, 241, 255, .72), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(229, 244, 255, .88)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    0 18px 46px rgba(79, 124, 255, .12) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-emblem {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, .98), rgba(213, 241, 255, .72)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(126, 177, 223, .42),
+    0 18px 38px rgba(55, 96, 164, .16) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade > span {
+  background: rgba(213, 241, 255, .92) !important;
+  color: #386eff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade > strong {
+  color: #386eff !important;
+  text-shadow: 0 12px 28px rgba(79, 124, 255, .2) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade > strong.metric-tone-excellent {
+  color: #0ea371 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade > strong.metric-tone-good {
+  color: #2563eb !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade > strong.metric-tone-neutral {
+  color: #386eff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade > strong.metric-tone-warning {
+  color: #d97706 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade > strong.metric-tone-bad {
+  color: #e11d48 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-record {
+  border-top-color: rgba(126, 177, 223, .52) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-record b {
+  color: #386eff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-record b + b {
+  color: #e4496a !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-grade small,
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate span {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate .track {
+  stroke: rgba(143, 177, 214, .42) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate .value {
+  stroke: #6757ff !important;
+  filter: drop-shadow(0 6px 10px rgba(103, 87, 255, .28)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate strong {
+  color: #10233d !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate strong.metric-tone-excellent {
+  color: #0ea371 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate strong.metric-tone-good {
+  color: #2563eb !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate strong.metric-tone-warning {
+  color: #d97706 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-aggregate-winrate strong.metric-tone-bad {
+  color: #e11d48 !important;
+}
+
+/* 상세 분석 표/포지션 성과 파스텔 톤 보정 */
+.public-dashboard-shell:not(.public-home-shell) .public-detail-analysis-panel {
+  border-color: rgba(126, 177, 223, .5) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(237, 248, 255, .9)) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 18px 46px rgba(79, 124, 255, .12) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-detail-analysis-panel .public-section-head h2,
+.public-dashboard-shell:not(.public-home-shell) .public-detail-analysis-panel .public-section-head > span,
+.public-dashboard-shell:not(.public-home-shell) .public-performance-block h3 {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-table {
+  overflow: hidden;
+  border-color: rgba(126, 177, 223, .46) !important;
+  background: rgba(255, 255, 255, .78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .82),
+    0 14px 32px rgba(55, 96, 164, .08) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-head {
+  border-bottom-color: rgba(126, 177, 223, .4) !important;
+  background:
+    linear-gradient(180deg, rgba(213, 241, 255, .92), rgba(191, 227, 255, .74)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-head span {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-row {
+  border-top-color: rgba(126, 177, 223, .26) !important;
+  background: rgba(255, 255, 255, .48) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-row:nth-child(even) {
+  background: rgba(223, 242, 255, .4) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-name strong,
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-metric strong {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-name small,
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-metric small {
+  color: #5d7190 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-metric span,
+.public-dashboard-shell:not(.public-home-shell) .public-champion-progress {
+  background: rgba(161, 190, 220, .32) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-progress i,
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-metric i {
+  background: linear-gradient(90deg, #7a66ff, #5d8cff, #3ec7f4) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-metric i.win {
+  background: linear-gradient(90deg, #19c886, #5d8cff) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-role-chip-list {
+  gap: 12px;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-role-chip {
+  min-height: 76px;
+  border-color: rgba(126, 177, 223, .46) !important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(191, 227, 255, .78), transparent 42%),
+    rgba(255, 255, 255, .82) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 14px 32px rgba(55, 96, 164, .1) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-role-chip span {
+  color: #118b78 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-role-chip strong {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-role-chip small {
+  color: #5d7190 !important;
+}
+
+/* 전적 프로필 가독성 보정 */
+.public-dashboard-shell:not(.public-home-shell) .public-profile-top-grid,
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-strip {
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-title-row h2,
+.public-dashboard-shell:not(.public-home-shell) .public-profile-title-row h2 .public-riot-name {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, .7),
+    0 10px 28px rgba(55, 96, 164, .16) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-title-row span,
+.public-dashboard-shell:not(.public-home-shell) .public-refresh-updated-at {
+  color: #526984 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-season-badges span,
+.public-dashboard-shell:not(.public-home-shell) .public-profile-actions > span {
+  border-color: rgba(126, 177, 223, .48) !important;
+  background: rgba(213, 241, 255, .86) !important;
+  color: #245fbb !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-season-badges span.recent-form {
+  background: rgba(229, 244, 255, .9) !important;
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card {
+  border-color: rgba(126, 177, 223, .46) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(237, 248, 255, .88)) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .86),
+    0 14px 32px rgba(55, 96, 164, .1) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-label > span {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-label small {
+  background: rgba(213, 241, 255, .92) !important;
+  color: #6c86a6 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card > strong {
+  color: var(--seiga-pastel-heading) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card > strong.metric-tone-excellent {
+  color: #0ea371 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card > strong.metric-tone-good {
+  color: #2563eb !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card > strong.metric-tone-neutral {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card > strong.metric-tone-warning {
+  color: #d97706 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card > strong.metric-tone-bad {
+  color: #e11d48 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-detail,
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-scale {
+  color: #526984 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-bar {
+  background: rgba(92, 111, 137, .78) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card em {
+  background: rgba(213, 241, 255, .84) !important;
+  color: var(--metric-accent) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-rank-overview-card span,
+.public-dashboard-shell:not(.public-home-shell) .public-rank-overview-card small,
+.public-dashboard-shell:not(.public-home-shell) .public-stream-meta small {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-rank-overview-card strong {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+/* 상단 언어/프로필 메뉴 파스텔 톤 보정 */
+.public-dashboard-shell:not(.public-home-shell) .public-app-header .public-locale-button {
+  border-color: rgba(126, 177, 223, .52) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(229, 244, 255, .88)) !important;
+  color: var(--seiga-pastel-heading) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .82),
+    0 12px 28px rgba(55, 96, 164, .12) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header .public-locale-button:hover {
+  border-color: rgba(79, 124, 255, .5) !important;
+  background: rgba(213, 241, 255, .94) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header .public-locale-button i,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header .public-locale-button span,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header .public-locale-button strong {
+  color: inherit !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu,
+.public-dashboard-shell.theme-dark:not(.public-home-shell) .public-twitch-profile-menu {
+  border-color: rgba(126, 177, 223, .56) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(237, 248, 255, .95)) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .86),
+    0 24px 64px rgba(55, 96, 164, .2) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu-head {
+  border-bottom-color: rgba(126, 177, 223, .42) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu-head strong {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu-head small {
+  color: #637795 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button {
+  border: 1px solid rgba(126, 177, 223, .36) !important;
+  background: rgba(255, 255, 255, .74) !important;
+  color: var(--seiga-pastel-heading) !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button:hover {
+  border-color: rgba(79, 124, 255, .44) !important;
+  background: rgba(213, 241, 255, .9) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button.dashboard,
+.public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu button.dashboard:hover {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(79, 124, 255, .24) !important;
+}
+
+/* 대회 목록/일정 파스텔 톤 가독성 보정 */
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-card,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card {
+  border-color: rgba(126, 177, 223, .48) !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(213, 241, 255, .66), transparent 42%),
+    rgba(255, 255, 255, .86) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 16px 38px rgba(55, 96, 164, .1) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card > div:first-child span {
+  background: rgba(220, 255, 243, .92) !important;
+  color: #0f9b75 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-title strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card strong {
+  color: var(--seiga-pastel-heading) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card p,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-title span,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card time,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card span {
+  color: #526984 !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card dl div {
+  border: 1px solid rgba(126, 177, 223, .34) !important;
+  background: rgba(229, 244, 255, .82) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card dt {
+  color: #637795 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card dd {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-empty {
+  border-color: rgba(126, 177, 223, .44) !important;
+  background: rgba(255, 255, 255, .76) !important;
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-grid {
+  border-color: rgba(126, 177, 223, .42) !important;
+  background: rgba(255, 255, 255, .62) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-grid > b {
+  border-color: rgba(126, 177, 223, .32) !important;
+  background: rgba(213, 241, 255, .72) !important;
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day {
+  border-color: rgba(126, 177, 223, .24) !important;
+  background: rgba(245, 252, 255, .72) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day.outside {
+  background: rgba(229, 238, 248, .66) !important;
+  opacity: .72 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day > strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day i {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card > button {
+  border-color: rgba(79, 124, 255, .34) !important;
+  background: rgba(213, 241, 255, .82) !important;
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card > button:hover {
+  background: rgba(191, 227, 255, .92) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button em,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button span {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button small {
+  color: #526984 !important;
+}
+
+@media (max-width: 760px) {
+  .public-dashboard-shell.public-home-shell {
+    background:
+      linear-gradient(180deg, rgba(243, 247, 251, .76), rgba(243, 247, 251, .92)),
+      url("/images/lol-home-zed.jpg") center top / cover no-repeat,
+      var(--seiga-pastel-bg) !important;
+  }
+
+  .public-dashboard-shell .public-app-header.home .public-header-nav {
+    background: rgba(255, 255, 255, .92) !important;
+  }
+
+  .public-dashboard-shell .public-match-row,
+  .public-dashboard-shell:not(.public-home-shell) .public-match-row,
+  .public-dashboard-shell .public-team-card,
+  .public-dashboard-shell .public-team-player {
+    box-shadow: 0 10px 24px rgba(55, 96, 164, .1) !important;
+  }
+}
+
+/* 대회 일정 캘린더 파스텔 톤 최종 보정 */
+.public-dashboard-shell .public-tournament-calendar-page.public-panel {
+  border-color: rgba(126, 177, 223, .52) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(213, 241, 255, .58), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, .97), rgba(237, 248, 255, .92)) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 24px 70px rgba(55, 96, 164, .14) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-page .public-section-kicker {
+  background: rgba(225, 214, 255, .78) !important;
+  color: #8268ff !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-page h1,
+.public-dashboard-shell .public-tournament-calendar-page p,
+.public-dashboard-shell .public-tournament-calendar-title strong,
+.public-dashboard-shell .public-tournament-upcoming-card strong {
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-page h1,
+.public-dashboard-shell .public-tournament-calendar-title strong,
+.public-dashboard-shell .public-tournament-upcoming-card strong {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-page p,
+.public-dashboard-shell .public-tournament-calendar-title span,
+.public-dashboard-shell .public-tournament-upcoming-card time,
+.public-dashboard-shell .public-tournament-upcoming-card span,
+.public-dashboard-shell .public-tournament-upcoming-card small {
+  color: #526984 !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-page .public-ghost-button {
+  border-color: rgba(126, 177, 223, .56) !important;
+  background: rgba(255, 255, 255, .82) !important;
+  color: var(--seiga-pastel-heading) !important;
+  box-shadow: 0 12px 28px rgba(55, 96, 164, .1) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-page .public-ghost-button:hover {
+  border-color: rgba(79, 124, 255, .48) !important;
+  background: rgba(213, 241, 255, .9) !important;
+  color: var(--seiga-pastel-accent-strong) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-card,
+.public-dashboard-shell .public-tournament-upcoming-card {
+  border-color: rgba(126, 177, 223, .5) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(213, 241, 255, .62), transparent 42%),
+    rgba(255, 255, 255, .88) !important;
+  color: var(--seiga-pastel-text) !important;
+  box-shadow: 0 18px 44px rgba(55, 96, 164, .12) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-grid {
+  border-color: rgba(126, 177, 223, .48) !important;
+  background: rgba(243, 247, 251, .94) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-grid > b {
+  border-color: rgba(126, 177, 223, .34) !important;
+  background: rgba(213, 241, 255, .86) !important;
+  color: #405873 !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day {
+  border-color: rgba(126, 177, 223, .36) !important;
+  background: rgba(255, 255, 255, .78) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day.outside {
+  background: rgba(226, 236, 248, .74) !important;
+  opacity: 1 !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day.today {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(229, 244, 255, .9)) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(113, 154, 255, .48),
+    0 10px 24px rgba(79, 124, 255, .12) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day > strong {
+  color: #405873 !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day.outside > strong,
+.public-dashboard-shell .public-tournament-calendar-day i {
+  color: #90a0b7 !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day button,
+.public-dashboard-shell .public-tournament-upcoming-card > button {
+  border-color: rgba(79, 124, 255, .36) !important;
+  background: linear-gradient(135deg, rgba(191, 227, 255, .96), rgba(213, 241, 255, .88)) !important;
+  color: var(--seiga-pastel-heading) !important;
+  box-shadow: 0 10px 22px rgba(79, 124, 255, .12) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day button:hover,
+.public-dashboard-shell .public-tournament-upcoming-card > button:hover {
+  border-color: rgba(79, 124, 255, .52) !important;
+  background: linear-gradient(135deg, rgba(213, 241, 255, .98), rgba(191, 227, 255, .96)) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day button.live {
+  border-color: rgba(79, 124, 255, .52) !important;
+  background: linear-gradient(135deg, rgba(191, 227, 255, .98), rgba(225, 214, 255, .9)) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day button.completed {
+  border-color: rgba(126, 177, 223, .36) !important;
+  background: rgba(229, 244, 255, .9) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day button em,
+.public-dashboard-shell .public-tournament-calendar-day button span {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-tournament-calendar-day button small {
+  color: #526984 !important;
 }

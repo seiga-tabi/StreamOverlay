@@ -205,6 +205,55 @@ test("로컬 Twitch OAuth 시작은 운영 PUBLIC_BASE_URL이 있어도 localhos
   });
 });
 
+test("운영 Twitch OAuth 시작은 프록시 host가 달라도 설정된 callback을 사용한다", async () => {
+  await withAuthConfig(async () => {
+    const previous = {
+      publicBaseUrl: appConfig.publicBaseUrl,
+      dashboardBaseUrl: appConfig.dashboardBaseUrl,
+      twitchRedirectUri: appConfig.twitch.redirectUri,
+      corsOrigins: [...appConfig.security.corsOrigins]
+    };
+    appConfig.publicBaseUrl = "https://gg.seigatabi.com";
+    appConfig.dashboardBaseUrl = "https://gg.seigatabi.com";
+    appConfig.twitch.redirectUri = "https://gg.seigatabi.com/api/twitch/auth/callback";
+    appConfig.security.corsOrigins = ["https://gg.seigatabi.com"];
+    try {
+      let captured;
+      const handler = createHttpHandler({
+        store: {},
+        sessions: new DashboardSessionStore(),
+        twitchAuth: {
+          createAuthorizationUrl(forceVerify, options) {
+            captured = { forceVerify, options };
+            const url = new URL("https://id.twitch.tv/oauth2/authorize");
+            url.searchParams.set("redirect_uri", options.redirectUri);
+            return url.toString();
+          }
+        },
+        actions: { async dispatchOne() {} }
+      });
+      const req = createRequest("GET", "/api/twitch/auth/start", undefined, {
+        host: "streamoverlay-server:3000",
+        "x-forwarded-proto": "https",
+        "x-forwarded-host": "m.gg.seigatabi.com",
+        referer: "https://gg.seigatabi.com/dashboard"
+      });
+      const res = createResponse();
+
+      await handler(req, res);
+
+      assert.equal(res.statusCode, 302);
+      assert.equal(captured.options.redirectUri, "https://gg.seigatabi.com/api/twitch/auth/callback");
+      assert.match(res.headers.Location, /redirect_uri=https%3A%2F%2Fgg\.seigatabi\.com%2Fapi%2Ftwitch%2Fauth%2Fcallback/);
+    } finally {
+      appConfig.publicBaseUrl = previous.publicBaseUrl;
+      appConfig.dashboardBaseUrl = previous.dashboardBaseUrl;
+      appConfig.twitch.redirectUri = previous.twitchRedirectUri;
+      appConfig.security.corsOrigins = previous.corsOrigins;
+    }
+  });
+});
+
 test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송인 Riot ID를 매칭한다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({
@@ -1889,5 +1938,19 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     assert.equal(blocked.ok, false);
     assert.equal(blocked.status, 403);
     assert.equal(blocked.code, "FORBIDDEN");
+  });
+});
+
+test("공개 커뮤니티 댓글 API는 dashboard 인증을 요구하지 않는다", async () => {
+  await withAuthConfig(async () => {
+    const sessions = new DashboardSessionStore();
+    const req = createRequest("POST", "/api/public/community/posts/post-1/comments", { body: "참여하고 싶어요" }, {
+      origin: DASHBOARD_ORIGIN
+    });
+
+    const result = authorizeHttpRequest(req, "/api/public/community/posts/post-1/comments", sessions);
+
+    assert.equal(result.ok, true);
+    assert.equal(result.principal.type, "PUBLIC");
   });
 });

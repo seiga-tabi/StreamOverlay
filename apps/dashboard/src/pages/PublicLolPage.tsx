@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import type { CommunityPost, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
+import type { CommunityPost, CommunityPostCategory, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 
@@ -398,6 +398,13 @@ type TournamentPlayerProfileState = {
   error?: string;
 };
 
+type CommunityPostProfileState = {
+  riotId?: string;
+  status: "idle" | "loading" | "ready" | "error";
+  profile?: PublicLolProfile;
+  error?: string;
+};
+
 const TOURNAMENT_PLAYER_PROFILE_LIMIT = 30;
 const TOURNAMENT_PLAYER_PROFILE_CONCURRENCY = 3;
 const tournamentPlayerProfileCache = new Map<string, TournamentPlayerProfileState>();
@@ -414,7 +421,7 @@ type SearchSuggestion = {
 };
 
 type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
-type PublicMainPage = "search" | "favorites" | "subscriptions" | "patch" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule";
+type PublicMainPage = "search" | "favorites" | "subscriptions" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule";
 type PublicProfileTab = "overview" | "champions" | "ingame";
 type PublicExpandedMatchView = "record" | "build";
 type PublicTheme = "light" | "dark";
@@ -617,6 +624,8 @@ const publicI18n = {
     tournamentNotice: "최근 공지사항",
     tournamentAllView: "전체 보기",
     tournamentDownloadBracket: "전체 대진표 다운로드",
+    tournamentFinalResult: "최종결과",
+    tournamentPointPerPick: "포인트 / 픽",
     tournamentRound16: "16강",
     tournamentRound8: "8강",
     tournamentRound4: "4강",
@@ -645,6 +654,8 @@ const publicI18n = {
     patchNotes: "커뮤니티",
     promotion: "프로모션",
     community: "커뮤니티",
+    communityServerRecruit: "서버모집",
+    communityPartyRecruit: "파티모집",
     multimatch: "멀티서치",
     darkMode: "다크 모드",
     moreMenu: "더보기",
@@ -737,15 +748,69 @@ const publicI18n = {
     patchNotesPreparing: "커뮤니티 게시판을 준비 중입니다.",
     patchNotesPreparingBody: "Twitch 로그인 후 게시글을 작성할 수 있습니다.",
     communitySubtitle: "Twitch 로그인 후 자유롭게 글을 작성할 수 있습니다.",
+    communityServerSubtitle: "커뮤니티 서버와 클랜 모집 글을 확인하고 등록할 수 있습니다.",
+    communityPartySubtitle: "같이 게임할 파티원을 찾고 현재 모집 조건을 공유할 수 있습니다.",
     communityWriteTitle: "게시글 작성",
+    communityEditTitle: "게시글 수정",
+    communityPartyWriteTitle: "파티 모집 작성",
+    communityServerWriteButton: "서버모집 작성",
+    communityPartyWriteButton: "파티모집 작성",
+    communityEditButton: "내 글 수정",
     communityListTitle: "최근 게시글",
+    communityPartyListTitle: "최근 파티 모집",
     communityLoginRequired: "게시글 작성은 Twitch 로그인 후 사용할 수 있습니다.",
+    communityPartyPrompt: "어떤 파티를 찾고 계신가요?",
     communityTitleLabel: "제목",
     communityBodyLabel: "내용",
+    communityRiotIdLabel: "전적 Riot ID",
+    communityTagsLabel: "태그",
+    communityImageLabel: "대표 이미지",
     communityTitlePlaceholder: "제목을 입력하세요",
     communityBodyPlaceholder: "내용을 입력하세요",
+    communityPartyTitlePlaceholder: "예: 시참! 즐겁게 게임하실 분 구해요",
+    communityPartyBodyPlaceholder: "모집 조건, 선호 포지션, 연락 방법을 입력하세요",
+    communityRiotIdPlaceholder: "소환사명#태그",
+    communityTagsPlaceholder: "클랜, 협곡, 즐겜",
+    communityImageHelp: "PNG/JPG/GIF/WEBP, 5MB 이하",
+    communityImageReplaceHelp: "새 이미지를 선택하면 기존 대표 이미지가 교체됩니다.",
+    communitySelectPlaceholder: "선택해주세요",
+    communityRiotIdCheck: "확인",
+    communityRiotIdChecking: "확인 중",
+    communityRiotIdValid: "전적이 확인되었습니다.",
+    communityRiotIdInvalid: "전적을 확인하지 못했습니다.",
+    communityImageChoose: "이미지 선택",
+    communityImageSelected: "선택됨",
+    communityImageEmpty: "선택된 파일 없음",
+    communityAlreadyPosted: "이미 이 게시판에 게시글을 작성했습니다. 게시판별 계정당 1개만 등록할 수 있습니다.",
+    communityPartyLimitReached: "파티 모집글은 하루에 2개까지 작성할 수 있습니다.",
+    communityPartyAutoDeleteNotice: "파티 모집글은 작성 후 24시간이 지나면 자동 삭제됩니다.",
+    communityRecordLabel: "전적",
+    communityPartyTierLabel: "티어",
+    communityPartyRoleLabel: "역할",
+    communityPartyModeLabel: "모드",
+    communityPartyVoiceLabel: "음성 채팅",
+    communityPartyCapacityLabel: "모집 인원",
+    communityPartyTierPlaceholder: "예: 다이아 IV",
+    communityPartyRolePlaceholder: "예: 미드, 정글",
+    communityPartyModePlaceholder: "예: 랭크 게임",
+    communityPartyVoicePlaceholder: "예: 디스코드",
+    communityDetailTitle: "게시글 상세",
+    communityBackToList: "목록으로",
+    communityRecordPreview: "등록 전적",
+    communityRecordMissing: "게시글에 연결된 Riot ID가 없습니다.",
+    communityRecordLoading: "전적을 불러오는 중입니다.",
+    communityRecordFailed: "전적을 불러오지 못했습니다.",
+    communityCommentsTitle: "댓글",
+    communityCommentPlaceholder: "댓글을 입력하세요",
+    communityCommentLoginRequired: "댓글 작성은 Twitch 로그인 후 사용할 수 있습니다.",
+    communityCommentSubmit: "댓글 작성",
+    communityCommentSubmitting: "작성 중",
+    communityCommentEmpty: "아직 댓글이 없습니다.",
+    communityCommentFailed: "댓글을 작성하지 못했습니다.",
     communitySubmit: "게시하기",
+    communityUpdateSubmit: "수정하기",
     communitySubmitting: "게시 중",
+    communityUpdating: "수정 중",
     communityEmpty: "아직 게시글이 없습니다.",
     communityLoadFailed: "게시글을 불러오지 못했습니다.",
     refreshAvailableIn: "후 가능",
@@ -952,6 +1017,8 @@ const publicI18n = {
     tournamentNotice: "最近のお知らせ",
     tournamentAllView: "すべて見る",
     tournamentDownloadBracket: "全トーナメント表をダウンロード",
+    tournamentFinalResult: "最終結果",
+    tournamentPointPerPick: "ポイント / ピック",
     tournamentRound16: "ベスト16",
     tournamentRound8: "ベスト8",
     tournamentRound4: "準決勝",
@@ -980,6 +1047,8 @@ const publicI18n = {
     patchNotes: "コミュニティ",
     promotion: "プロモーション",
     community: "コミュニティ",
+    communityServerRecruit: "サーバー募集",
+    communityPartyRecruit: "パーティー募集",
     multimatch: "マルチサーチ",
     darkMode: "ダークモード",
     moreMenu: "もっと見る",
@@ -1072,15 +1141,69 @@ const publicI18n = {
     patchNotesPreparing: "コミュニティ掲示板を準備中です。",
     patchNotesPreparingBody: "Twitchログイン後、投稿を作成できます。",
     communitySubtitle: "Twitchログイン後、自由に投稿を作成できます。",
+    communityServerSubtitle: "コミュニティサーバーやクラン募集を確認・登録できます。",
+    communityPartySubtitle: "一緒にプレイするメンバーを探し、募集条件を共有できます。",
     communityWriteTitle: "投稿作成",
+    communityEditTitle: "投稿編集",
+    communityPartyWriteTitle: "パーティー募集作成",
+    communityServerWriteButton: "サーバー募集を書く",
+    communityPartyWriteButton: "パーティー募集を書く",
+    communityEditButton: "自分の投稿を編集",
     communityListTitle: "最近の投稿",
+    communityPartyListTitle: "最近のパーティー募集",
     communityLoginRequired: "投稿作成は Twitch ログイン後に利用できます。",
+    communityPartyPrompt: "どんなパーティーを探していますか？",
     communityTitleLabel: "タイトル",
     communityBodyLabel: "内容",
+    communityRiotIdLabel: "戦績 Riot ID",
+    communityTagsLabel: "タグ",
+    communityImageLabel: "代表画像",
     communityTitlePlaceholder: "タイトルを入力してください",
     communityBodyPlaceholder: "内容を入力してください",
+    communityPartyTitlePlaceholder: "例: 楽しく一緒にプレイできる方募集",
+    communityPartyBodyPlaceholder: "募集条件、希望ロール、連絡方法を入力してください",
+    communityRiotIdPlaceholder: "サモナー名#タグ",
+    communityTagsPlaceholder: "クラン, ランク, 募集",
+    communityImageHelp: "PNG/JPG/GIF/WEBP、5MB以下",
+    communityImageReplaceHelp: "新しい画像を選択すると、既存の代表画像が差し替えられます。",
+    communitySelectPlaceholder: "選択してください",
+    communityRiotIdCheck: "確認",
+    communityRiotIdChecking: "確認中",
+    communityRiotIdValid: "戦績を確認しました。",
+    communityRiotIdInvalid: "戦績を確認できませんでした。",
+    communityImageChoose: "画像を選択",
+    communityImageSelected: "選択済み",
+    communityImageEmpty: "選択されたファイルなし",
+    communityAlreadyPosted: "すでにこの掲示板に投稿済みです。掲示板ごとに1アカウント1件のみ登録できます。",
+    communityPartyLimitReached: "パーティー募集は1日2件まで作成できます。",
+    communityPartyAutoDeleteNotice: "パーティー募集は投稿から24時間後に自動削除されます。",
+    communityRecordLabel: "戦績",
+    communityPartyTierLabel: "ティア",
+    communityPartyRoleLabel: "役割",
+    communityPartyModeLabel: "モード",
+    communityPartyVoiceLabel: "ボイスチャット",
+    communityPartyCapacityLabel: "募集人数",
+    communityPartyTierPlaceholder: "例: ダイヤ IV",
+    communityPartyRolePlaceholder: "例: ミッド、ジャングル",
+    communityPartyModePlaceholder: "例: ランクゲーム",
+    communityPartyVoicePlaceholder: "例: Discord",
+    communityDetailTitle: "投稿詳細",
+    communityBackToList: "一覧へ",
+    communityRecordPreview: "登録戦績",
+    communityRecordMissing: "投稿に連携された Riot ID がありません。",
+    communityRecordLoading: "戦績を読み込み中です。",
+    communityRecordFailed: "戦績を読み込めませんでした。",
+    communityCommentsTitle: "コメント",
+    communityCommentPlaceholder: "コメントを入力してください",
+    communityCommentLoginRequired: "コメント作成は Twitch ログイン後に利用できます。",
+    communityCommentSubmit: "コメント作成",
+    communityCommentSubmitting: "作成中",
+    communityCommentEmpty: "まだコメントがありません。",
+    communityCommentFailed: "コメントを作成できませんでした。",
     communitySubmit: "投稿する",
+    communityUpdateSubmit: "更新する",
     communitySubmitting: "投稿中",
+    communityUpdating: "更新中",
     communityEmpty: "まだ投稿がありません。",
     communityLoadFailed: "投稿を読み込めませんでした。",
     refreshAvailableIn: "後に可能",
@@ -1139,11 +1262,69 @@ const publicI18n = {
 
 type PublicLocale = keyof typeof publicI18n;
 type PublicText = (typeof publicI18n)[PublicLocale];
+type PublicLocalizedOption = {
+  value: string;
+  ko: string;
+  ja: string;
+};
 
 let activePublicLocale: PublicLocale = "ko";
 
 function t(): PublicText {
   return publicI18n[activePublicLocale];
+}
+
+const PARTY_TIER_OPTIONS: PublicLocalizedOption[] = [
+  { value: "any", ko: "티어 무관", ja: "ティア不問" },
+  { value: "iron", ko: "아이언", ja: "アイアン" },
+  { value: "bronze", ko: "브론즈", ja: "ブロンズ" },
+  { value: "silver", ko: "실버", ja: "シルバー" },
+  { value: "gold", ko: "골드", ja: "ゴールド" },
+  { value: "platinum", ko: "플래티넘", ja: "プラチナ" },
+  { value: "emerald", ko: "에메랄드", ja: "エメラルド" },
+  { value: "diamond", ko: "다이아몬드", ja: "ダイヤモンド" },
+  { value: "master-plus", ko: "마스터 이상", ja: "マスター以上" }
+];
+
+const PARTY_ROLE_OPTIONS: PublicLocalizedOption[] = [
+  { value: "any", ko: "역할 무관", ja: "役割不問" },
+  { value: "top", ko: "탑", ja: "トップ" },
+  { value: "jungle", ko: "정글", ja: "ジャングル" },
+  { value: "mid", ko: "미드", ja: "ミッド" },
+  { value: "bottom", ko: "원딜", ja: "ボット" },
+  { value: "support", ko: "서포터", ja: "サポート" }
+];
+
+const PARTY_MODE_OPTIONS: PublicLocalizedOption[] = [
+  { value: "ranked-solo", ko: "랭크 게임", ja: "ランクゲーム" },
+  { value: "ranked-flex", ko: "자유랭크", ja: "フレックスランク" },
+  { value: "normal", ko: "일반 게임", ja: "ノーマル" },
+  { value: "aram", ko: "칼바람", ja: "ARAM" },
+  { value: "duo", ko: "듀오", ja: "デュオ" },
+  { value: "scrim", ko: "내전", ja: "カスタム" }
+];
+
+const PARTY_VOICE_OPTIONS: PublicLocalizedOption[] = [
+  { value: "any", ko: "음성 무관", ja: "ボイス不問" },
+  { value: "required", ko: "음성 가능", ja: "ボイスあり" },
+  { value: "none", ko: "음성 없음", ja: "ボイスなし" }
+];
+
+const PARTY_TAG_OPTIONS: PublicLocalizedOption[] = [
+  { value: "rank", ko: "랭크", ja: "ランク" },
+  { value: "normal", ko: "일반", ja: "ノーマル" },
+  { value: "aram", ko: "칼바람", ja: "ARAM" },
+  { value: "duo", ko: "듀오", ja: "デュオ" },
+  { value: "fun", ko: "즐겜", ja: "エンジョイ" },
+  { value: "tryhard", ko: "빡겜", ja: "ガチ" },
+  { value: "discord", ko: "디스코드", ja: "Discord" },
+  { value: "beginner", ko: "초보환영", ja: "初心者歓迎" }
+];
+
+function publicOptionLabel(options: PublicLocalizedOption[], value: string | undefined): string {
+  if (!value) return "";
+  const option = options.find((item) => item.value === value);
+  return option ? option[activePublicLocale] : value;
 }
 
 const matchBadgeLabelKeys: Record<PublicLolMatchBadgeCode, keyof typeof publicI18n.ko> = {
@@ -1428,8 +1609,10 @@ async function getPublicTournament(slug: string): Promise<StreamerTournament> {
   return body.tournament;
 }
 
-async function getPublicCommunityPosts(): Promise<CommunityPost[]> {
-  const response = await fetch(`${apiBase}/api/public/community/posts?limit=50`, {
+async function getPublicCommunityPosts(category?: CommunityPostCategory): Promise<CommunityPost[]> {
+  const params = new URLSearchParams({ limit: "50" });
+  if (category) params.set("category", category);
+  const response = await fetch(`${apiBase}/api/public/community/posts?${params.toString()}`, {
     credentials: "include"
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
@@ -1437,16 +1620,102 @@ async function getPublicCommunityPosts(): Promise<CommunityPost[]> {
   return Array.isArray(body.posts) ? body.posts : [];
 }
 
-async function createPublicCommunityPost(input: { title: string; body: string }): Promise<CommunityPost[]> {
+async function createPublicCommunityPost(input: {
+  category: CommunityPostCategory;
+  title: string;
+  body: string;
+  riotId: string;
+  tags: string;
+  imageFile?: File | null;
+  partyTier?: string;
+  partyRole?: string;
+  partyMode?: string;
+  partyVoice?: string;
+  partyCapacity?: number;
+}): Promise<CommunityPost[]> {
+  const formData = new FormData();
+  formData.set("category", input.category);
+  formData.set("title", input.title);
+  formData.set("body", input.body);
+  if (input.riotId.trim()) formData.set("riotId", input.riotId.trim());
+  if (input.tags.trim()) formData.set("tags", input.tags.trim());
+  if (input.partyTier?.trim()) formData.set("partyTier", input.partyTier.trim());
+  if (input.partyRole?.trim()) formData.set("partyRole", input.partyRole.trim());
+  if (input.partyMode?.trim()) formData.set("partyMode", input.partyMode.trim());
+  if (input.partyVoice?.trim()) formData.set("partyVoice", input.partyVoice.trim());
+  if (input.partyCapacity) formData.set("partyCapacity", String(input.partyCapacity));
+  if (input.imageFile) formData.set("image", input.imageFile);
   const response = await fetch(`${apiBase}/api/public/community/posts`, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input)
+    body: formData
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
-  const body = await response.json() as { posts?: CommunityPost[] };
-  return Array.isArray(body.posts) ? body.posts : [];
+  const body = await response.json() as { post?: CommunityPost; posts?: CommunityPost[] };
+  if (Array.isArray(body.posts)) return body.posts;
+  const refreshedPosts = await getPublicCommunityPosts(input.category);
+  if (refreshedPosts.length > 0) return refreshedPosts;
+  return body.post ? [body.post] : [];
+}
+
+async function updatePublicCommunityPost(postId: string, input: {
+  category: CommunityPostCategory;
+  title: string;
+  body: string;
+  riotId: string;
+  tags: string;
+  imageFile?: File | null;
+}): Promise<CommunityPost[]> {
+  const formData = new FormData();
+  formData.set("category", input.category);
+  formData.set("title", input.title);
+  formData.set("body", input.body);
+  if (input.riotId.trim()) formData.set("riotId", input.riotId.trim());
+  if (input.tags.trim()) formData.set("tags", input.tags.trim());
+  if (input.imageFile) formData.set("image", input.imageFile);
+  const response = await fetch(`${apiBase}/api/public/community/posts/${encodeURIComponent(postId)}`, {
+    method: "PATCH",
+    credentials: "include",
+    body: formData
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  const body = await response.json() as { post?: CommunityPost; posts?: CommunityPost[] };
+  if (Array.isArray(body.posts)) return body.posts;
+  const refreshedPosts = await getPublicCommunityPosts(input.category);
+  if (refreshedPosts.length > 0) return refreshedPosts;
+  return body.post ? [body.post] : [];
+}
+
+async function createPublicCommunityComment(postId: string, body: string): Promise<CommunityPost[]> {
+  const response = await fetch(`${apiBase}/api/public/community/posts/${encodeURIComponent(postId)}/comments`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ body })
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  const responseBody = await response.json() as { post?: CommunityPost; posts?: CommunityPost[] };
+  if (Array.isArray(responseBody.posts)) return responseBody.posts;
+  const refreshedPosts = await getPublicCommunityPosts("party");
+  if (refreshedPosts.length > 0) return refreshedPosts;
+  return responseBody.post ? [responseBody.post] : [];
+}
+
+function communityPostRiotId(post: CommunityPost | undefined): string | undefined {
+  const gameName = post?.riotGameName?.trim();
+  const tagLine = post?.riotTagLine?.trim();
+  return gameName && tagLine ? `${gameName}#${tagLine}` : undefined;
+}
+
+function communityPostCategory(post: CommunityPost | undefined): CommunityPostCategory {
+  return post?.category === "party" ? "party" : "server";
+}
+
+const PARTY_COMMUNITY_POST_LIMIT = 2;
+const PARTY_COMMUNITY_POST_TTL_MS = 24 * 60 * 60 * 1000;
+
+function communityPageCategory(page: PublicMainPage): CommunityPostCategory {
+  return page === "communityParty" || page === "communityPartyWrite" ? "party" : "server";
 }
 
 async function requestPublicStreamerRiotId(riotId: string): Promise<StreamerRiotIdRequest> {
@@ -2766,7 +3035,7 @@ function SearchForm({
           </button>
         </div>
       </form>
-      {suggestions.length > 0 ? (
+      {!loading && suggestions.length > 0 ? (
         <div className="public-suggestion-panel">
           <div className="public-suggestion-title" data-ko={publicI18n.ko.summonerResults} data-ja={publicI18n.ja.summonerResults}>{t().summonerResults}</div>
           <div className="public-suggestion-list" role="listbox" aria-label={t().relatedSummoners}>
@@ -3597,13 +3866,17 @@ function PublicHeaderMenu({
   };
   const items: Array<{ key: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
     { key: "favorites", icon: "☆", ko: publicI18n.ko.favoritesTitle, ja: publicI18n.ja.favoritesTitle, label: t().favoritesTitle },
-    { key: "subscriptions", icon: "◆", ko: publicI18n.ko.subscriptionStatus, ja: publicI18n.ja.subscriptionStatus, label: t().subscriptionStatus },
-    { key: "patch", icon: "▣", ko: publicI18n.ko.patchNotes, ja: publicI18n.ja.patchNotes, label: t().patchNotes }
+    { key: "subscriptions", icon: "◆", ko: publicI18n.ko.subscriptionStatus, ja: publicI18n.ja.subscriptionStatus, label: t().subscriptionStatus }
   ];
   const contentPages: PublicMainPage[] = ["tournamentCalendar", "tournamentList", "tournamentNews", "tournamentTeams", "tournamentBracket", "tournamentSchedule"];
   const contentItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
     { page: "tournamentCalendar", icon: "◷", ko: publicI18n.ko.tournamentCalendar, ja: publicI18n.ja.tournamentCalendar, label: t().tournamentCalendar },
     { page: "tournamentList", icon: "▣", ko: publicI18n.ko.tournamentList, ja: publicI18n.ja.tournamentList, label: t().tournamentList }
+  ];
+  const communityPages: PublicMainPage[] = ["patch", "communityParty", "communityServerWrite", "communityPartyWrite", "communityDetail"];
+  const communityItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
+    { page: "patch", icon: "▤", ko: publicI18n.ko.communityServerRecruit, ja: publicI18n.ja.communityServerRecruit, label: t().communityServerRecruit },
+    { page: "communityParty", icon: "♙", ko: publicI18n.ko.communityPartyRecruit, ja: publicI18n.ja.communityPartyRecruit, label: t().communityPartyRecruit }
   ];
 
   return (
@@ -3624,6 +3897,25 @@ function PublicHeaderMenu({
         </button>
         <div className="public-header-submenu" role="menu" aria-label={t().contentMenu}>
           {contentItems.map((item) => (
+            <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
+              <span aria-hidden="true">{item.icon}</span>
+              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="public-header-menu-item">
+        <button
+          className={communityPages.includes(activePage) ? "active" : ""}
+          type="button"
+          aria-haspopup="menu"
+          onClick={() => onPage("patch")}
+        >
+          <span aria-hidden="true">▣</span>
+          <strong data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</strong>
+        </button>
+        <div className="public-header-submenu" role="menu" aria-label={t().community}>
+          {communityItems.map((item) => (
             <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
               <span aria-hidden="true">{item.icon}</span>
               <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
@@ -4081,111 +4373,653 @@ function PublicSubscriptionsPage({
   );
 }
 
+type CommunityPostSubmitInput = {
+  category: CommunityPostCategory;
+  title: string;
+  body: string;
+  riotId: string;
+  tags: string;
+  imageFile?: File | null;
+  partyTier?: string;
+  partyRole?: string;
+  partyMode?: string;
+  partyVoice?: string;
+  partyCapacity?: number;
+};
+
+function communityPostLimitState(category: CommunityPostCategory, twitchStatus: PublicTwitchViewerStatus, posts: CommunityPost[]) {
+  const isParty = category === "party";
+  const ownCategoryPosts = twitchStatus.user
+    ? posts.filter((post) => post.authorTwitchUserId === twitchStatus.user?.id && communityPostCategory(post) === category)
+    : [];
+  const myPost = ownCategoryPosts[0];
+  const recentPartyPostCount = isParty
+    ? ownCategoryPosts.filter((post) => {
+      const createdMs = Date.parse(post.createdAt);
+      return Number.isFinite(createdMs) && Date.now() - createdMs < PARTY_COMMUNITY_POST_TTL_MS;
+    }).length
+    : 0;
+  const partyLimitReached = isParty && recentPartyPostCount >= PARTY_COMMUNITY_POST_LIMIT;
+  const serverLimitReached = !isParty && Boolean(myPost);
+  return {
+    isParty,
+    myPost,
+    recentPartyPostCount,
+    partyLimitReached,
+    serverLimitReached,
+    postLimitReached: partyLimitReached || serverLimitReached
+  };
+}
+
 function PublicCommunityPage({
+  category,
   twitchStatus,
   posts,
   loading,
   error,
-  submitting,
-  onLogin,
   onRefresh,
-  onSubmit
+  onWrite,
+  onOpenPost
 }: {
+  category: CommunityPostCategory;
   twitchStatus: PublicTwitchViewerStatus;
   posts: CommunityPost[];
   loading: boolean;
   error: string;
+  onRefresh: () => void;
+  onWrite: () => void;
+  onOpenPost: (post: CommunityPost) => void;
+}) {
+  const isParty = category === "party";
+  const visiblePosts = posts.filter((post) => communityPostCategory(post) === category);
+  const hasOwnServerPost = !isParty && Boolean(twitchStatus.user && visiblePosts.some((post) => post.authorTwitchUserId === twitchStatus.user?.id));
+
+  return (
+    <section className={`public-panel public-menu-page-panel public-community-page list-only ${isParty ? "party" : "server"}`}>
+      <div className="public-section-head">
+        <h2
+          data-ko={isParty ? publicI18n.ko.communityPartyRecruit : publicI18n.ko.communityServerRecruit}
+          data-ja={isParty ? publicI18n.ja.communityPartyRecruit : publicI18n.ja.communityServerRecruit}
+        >
+          {isParty ? t().communityPartyRecruit : t().communityServerRecruit}
+        </h2>
+        <span>Seiga.GG</span>
+      </div>
+      <p
+        className="public-community-lead"
+        data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
+        data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
+      >
+        {isParty ? t().communityPartySubtitle : t().communityServerSubtitle}
+      </p>
+      <div className="public-community-card-head public-community-toolbar">
+        <strong
+          data-ko={isParty ? publicI18n.ko.communityPartyListTitle : publicI18n.ko.communityListTitle}
+          data-ja={isParty ? publicI18n.ja.communityPartyListTitle : publicI18n.ja.communityListTitle}
+        >
+          {isParty ? t().communityPartyListTitle : t().communityListTitle}
+        </strong>
+        <div className="public-community-card-actions">
+          <button type="button" onClick={onRefresh} disabled={loading} data-ko={publicI18n.ko.twitchFollowedRefresh} data-ja={publicI18n.ja.twitchFollowedRefresh}>{t().twitchFollowedRefresh}</button>
+          <button
+            type="button"
+            className="primary"
+            onClick={onWrite}
+            data-ko={isParty ? publicI18n.ko.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ko.communityEditButton : publicI18n.ko.communityServerWriteButton}
+            data-ja={isParty ? publicI18n.ja.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ja.communityEditButton : publicI18n.ja.communityServerWriteButton}
+          >
+            {isParty ? t().communityPartyWriteButton : hasOwnServerPost ? t().communityEditButton : t().communityServerWriteButton}
+          </button>
+        </div>
+      </div>
+      {error ? <p className="public-community-error">{error}</p> : null}
+      {loading ? (
+        <p className="public-empty" data-ko={publicI18n.ko.tournamentPlayerRecordLoading} data-ja={publicI18n.ja.tournamentPlayerRecordLoading}>{t().tournamentPlayerRecordLoading}</p>
+      ) : visiblePosts.length === 0 ? (
+        <p className="public-empty" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>{t().communityEmpty}</p>
+      ) : (
+        <div className={isParty ? "public-party-post-list" : "public-community-post-grid"}>
+          {visiblePosts.map((post) => (
+            <button
+              type="button"
+              className={isParty ? "public-party-post" : post.imageUrl ? "public-community-post has-image" : "public-community-post"}
+              key={post.id}
+              onClick={() => onOpenPost(post)}
+            >
+              {isParty ? (
+                <>
+                  <header>
+                    <span className="public-community-avatar">
+                      {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
+                    </span>
+                    <strong>{post.authorDisplayName}<small>@{post.authorTwitchLogin} · {formatRelativeDate(post.createdAt)}</small></strong>
+                    <em aria-hidden="true">...</em>
+                  </header>
+                  <h3>{post.title}</h3>
+                  <p>{post.body}</p>
+                  <div className="public-party-tags">
+                    {(post.tags.length ? post.tags : [post.partyMode, post.partyRole].filter((tag): tag is string => Boolean(tag))).slice(0, 4).map((tag) => <span key={`${post.id}:party:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</span>)}
+                  </div>
+                  <div className="public-party-meta">
+                    {post.partyTier ? <span>♕ {publicOptionLabel(PARTY_TIER_OPTIONS, post.partyTier)}</span> : null}
+                    {post.partyRole ? <span>⌁ {publicOptionLabel(PARTY_ROLE_OPTIONS, post.partyRole)}</span> : null}
+                    {post.partyCapacity ? <span>♙ 1 / {post.partyCapacity}</span> : null}
+                    {post.partyVoice ? <span>◉ {publicOptionLabel(PARTY_VOICE_OPTIONS, post.partyVoice)}</span> : null}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {post.imageUrl ? (
+                    <div className="public-community-post-media" aria-hidden="true">
+                      <img src={assetUrl(post.imageUrl)} alt="" />
+                    </div>
+                  ) : null}
+                  <div className="public-community-post-content">
+                    <header>
+                      <span className="public-community-avatar">
+                        {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
+                      </span>
+                      <strong>
+                        {post.authorDisplayName}
+                        <small>@{post.authorTwitchLogin}{post.authorRiotGameName && post.authorRiotTagLine ? ` · ${post.authorRiotGameName}#${post.authorRiotTagLine}` : ""}</small>
+                      </strong>
+                      <time>{formatTournamentDateTime(post.createdAt)}</time>
+                    </header>
+                    <div className="public-community-post-main">
+                      <h3>{post.title}</h3>
+                      <p>{post.body}</p>
+                    </div>
+                    <div className="public-community-post-meta">
+                      {post.riotGameName && post.riotTagLine ? <span>{t().communityRecordLabel} {post.riotGameName}#{post.riotTagLine}</span> : null}
+                      {post.tags.map((tag) => <em key={`${post.id}:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</em>)}
+                    </div>
+                  </div>
+                </>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PublicCommunityWritePage({
+  category,
+  twitchStatus,
+  posts,
+  editingPost,
+  error,
+  submitting,
+  onLogin,
+  onBack,
+  onSubmit
+}: {
+  category: CommunityPostCategory;
+  twitchStatus: PublicTwitchViewerStatus;
+  posts: CommunityPost[];
+  editingPost?: CommunityPost;
+  error: string;
   submitting: boolean;
   onLogin: () => void;
-  onRefresh: () => void;
-  onSubmit: (input: { title: string; body: string }) => Promise<void>;
+  onBack: () => void;
+  onSubmit: (input: CommunityPostSubmitInput) => Promise<boolean>;
 }) {
+  const isParty = category === "party";
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const canSubmit = twitchStatus.connected && title.trim().length > 0 && body.trim().length > 0 && !submitting;
+  const [riotId, setRiotId] = useState("");
+  const [tags, setTags] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [partyTier, setPartyTier] = useState("");
+  const [partyRole, setPartyRole] = useState("");
+  const [partyMode, setPartyMode] = useState("");
+  const [partyVoice, setPartyVoice] = useState("");
+  const [partyCapacity, setPartyCapacity] = useState("4");
+  const [riotCheckStatus, setRiotCheckStatus] = useState<"idle" | "checking" | "valid" | "invalid">("idle");
+  const [riotCheckMessage, setRiotCheckMessage] = useState("");
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const { myPost, recentPartyPostCount, postLimitReached, partyLimitReached } = communityPostLimitState(category, twitchStatus, posts);
+  const isEditingServerPost = !isParty && Boolean(editingPost);
+  const canSubmit = Boolean(title.trim() && body.trim()) && (!postLimitReached || isEditingServerPost) && !submitting;
+
+  useEffect(() => {
+    if (isEditingServerPost && editingPost) {
+      setTitle(editingPost.title);
+      setBody(editingPost.body);
+      setRiotId(communityPostRiotId(editingPost) ?? "");
+      setTags(editingPost.tags.join(", "));
+      setSelectedTags([]);
+      setImageFile(null);
+      setRiotCheckStatus("idle");
+      setRiotCheckMessage("");
+      if (imageInputRef.current) imageInputRef.current.value = "";
+      return;
+    }
+    setTitle("");
+    setBody("");
+    setRiotId("");
+    setTags("");
+    setSelectedTags([]);
+    setImageFile(null);
+    setPartyTier("");
+    setPartyRole("");
+    setPartyMode("");
+    setPartyVoice("");
+    setPartyCapacity("4");
+    setRiotCheckStatus("idle");
+    setRiotCheckMessage("");
+    if (imageInputRef.current) imageInputRef.current.value = "";
+  }, [category, editingPost?.id, isEditingServerPost]);
+
+  function updateRiotId(value: string): void {
+    setRiotId(value);
+    setRiotCheckStatus("idle");
+    setRiotCheckMessage("");
+  }
+
+  function togglePartyTag(value: string): void {
+    setSelectedTags((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+  }
+
+  async function checkRiotId(): Promise<void> {
+    const parsed = splitRiotIdText(riotId);
+    if (!parsed) {
+      setRiotCheckStatus("invalid");
+      setRiotCheckMessage(t().communityRiotIdInvalid);
+      return;
+    }
+    setRiotCheckStatus("checking");
+    setRiotCheckMessage("");
+    try {
+      const profile = await searchProfile(`${parsed.gameName}#${parsed.tagLine}`);
+      setRiotId(`${profile.gameName}#${profile.tagLine}`);
+      setRiotCheckStatus("valid");
+      setRiotCheckMessage(`${t().communityRiotIdValid} ${profile.gameName}#${profile.tagLine}`);
+    } catch {
+      setRiotCheckStatus("invalid");
+      setRiotCheckMessage(t().communityRiotIdInvalid);
+    }
+  }
 
   async function submitPost(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     if (!canSubmit) return;
-    await onSubmit({ title, body });
+    const created = await onSubmit({
+      category,
+	      title,
+	      body,
+	      riotId,
+	      tags: isParty ? selectedTags.join(",") : tags,
+	      imageFile,
+      partyTier: isParty ? partyTier : undefined,
+      partyRole: isParty ? partyRole : undefined,
+      partyMode: isParty ? partyMode : undefined,
+      partyVoice: isParty ? partyVoice : undefined,
+      partyCapacity: isParty ? Number(partyCapacity) || undefined : undefined
+    });
+    if (!created) return;
     setTitle("");
     setBody("");
+	    setRiotId("");
+	    setTags("");
+	    setSelectedTags([]);
+	    setImageFile(null);
+    setPartyTier("");
+    setPartyRole("");
+    setPartyMode("");
+    setPartyVoice("");
+    setPartyCapacity("4");
+    if (imageInputRef.current) imageInputRef.current.value = "";
+    onBack();
   }
 
   return (
-    <section className="public-panel public-menu-page-panel public-community-page">
+    <section className={`public-panel public-menu-page-panel public-community-write-page ${isParty ? "party" : "server"}`}>
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.patchNotes} data-ja={publicI18n.ja.patchNotes}>{t().patchNotes}</h2>
-        <span>Seiga.GG</span>
+        <h2
+          data-ko={isParty ? publicI18n.ko.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ko.communityEditTitle : publicI18n.ko.communityWriteTitle}
+          data-ja={isParty ? publicI18n.ja.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ja.communityEditTitle : publicI18n.ja.communityWriteTitle}
+        >
+          {isParty ? t().communityPartyWriteTitle : isEditingServerPost ? t().communityEditTitle : t().communityWriteTitle}
+        </h2>
+        <button className="public-back-button" type="button" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>{t().communityBackToList}</button>
       </div>
-      <p className="public-community-lead" data-ko={publicI18n.ko.communitySubtitle} data-ja={publicI18n.ja.communitySubtitle}>{t().communitySubtitle}</p>
-      <div className="public-community-layout">
-        <article className="public-community-compose">
-          <div className="public-community-card-head">
-            <strong data-ko={publicI18n.ko.communityWriteTitle} data-ja={publicI18n.ja.communityWriteTitle}>{t().communityWriteTitle}</strong>
+      <p
+        className="public-community-lead"
+        data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
+        data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
+      >
+        {isParty ? t().communityPartySubtitle : t().communityServerSubtitle}
+      </p>
+      <article className="public-community-compose standalone">
+        {!twitchStatus.connected ? (
+          <div className="public-community-login">
+            <p data-ko={publicI18n.ko.communityLoginRequired} data-ja={publicI18n.ja.communityLoginRequired}>{t().communityLoginRequired}</p>
+            <button type="button" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>{t().twitchViewerLogin}</button>
           </div>
-          {!twitchStatus.connected ? (
-            <div className="public-community-login">
-              <p data-ko={publicI18n.ko.communityLoginRequired} data-ja={publicI18n.ja.communityLoginRequired}>{t().communityLoginRequired}</p>
-              <button type="button" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>{t().twitchViewerLogin}</button>
-            </div>
-          ) : (
-            <form className="public-community-form" onSubmit={submitPost}>
-              <label>
-                <span data-ko={publicI18n.ko.communityTitleLabel} data-ja={publicI18n.ja.communityTitleLabel}>{t().communityTitleLabel}</span>
-                <input
-                  value={title}
-                  onChange={(event) => setTitle(event.currentTarget.value)}
-                  maxLength={80}
-                  placeholder={t().communityTitlePlaceholder}
-                  data-ko={publicI18n.ko.communityTitlePlaceholder}
-                  data-ja={publicI18n.ja.communityTitlePlaceholder}
-                />
-              </label>
-              <label>
-                <span data-ko={publicI18n.ko.communityBodyLabel} data-ja={publicI18n.ja.communityBodyLabel}>{t().communityBodyLabel}</span>
-                <textarea
-                  value={body}
-                  onChange={(event) => setBody(event.currentTarget.value)}
-                  maxLength={2000}
-                  rows={8}
-                  placeholder={t().communityBodyPlaceholder}
-                  data-ko={publicI18n.ko.communityBodyPlaceholder}
-                  data-ja={publicI18n.ja.communityBodyPlaceholder}
-                />
-              </label>
-              <button type="submit" disabled={!canSubmit} data-ko={publicI18n.ko.communitySubmit} data-ja={publicI18n.ja.communitySubmit}>
-                {submitting ? t().communitySubmitting : t().communitySubmit}
-              </button>
-            </form>
-          )}
-        </article>
-        <article className="public-community-list">
-          <div className="public-community-card-head">
-            <strong data-ko={publicI18n.ko.communityListTitle} data-ja={publicI18n.ja.communityListTitle}>{t().communityListTitle}</strong>
-            <button type="button" onClick={onRefresh} disabled={loading} data-ko={publicI18n.ko.twitchFollowedRefresh} data-ja={publicI18n.ja.twitchFollowedRefresh}>{t().twitchFollowedRefresh}</button>
+        ) : postLimitReached && !isEditingServerPost ? (
+          <div className="public-community-already-posted">
+            <strong>{partyLimitReached ? t().communityPartyLimitReached : t().communityAlreadyPosted}</strong>
+            {isParty ? (
+              <p>{recentPartyPostCount} / {PARTY_COMMUNITY_POST_LIMIT} · {t().communityPartyAutoDeleteNotice}</p>
+            ) : myPost ? (
+              <p>{myPost.title}</p>
+            ) : null}
           </div>
-          {error ? <p className="public-community-error">{error}</p> : null}
-          {loading ? (
-            <p className="public-empty" data-ko={publicI18n.ko.tournamentPlayerRecordLoading} data-ja={publicI18n.ja.tournamentPlayerRecordLoading}>{t().tournamentPlayerRecordLoading}</p>
-          ) : posts.length === 0 ? (
-            <p className="public-empty" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>{t().communityEmpty}</p>
-          ) : posts.map((post) => (
-            <section className="public-community-post" key={post.id}>
-              <header>
+        ) : (
+          <form className="public-community-form" onSubmit={submitPost}>
+            {error ? <p className="public-community-error">{error}</p> : null}
+            {isParty ? (
+              <p className="public-community-policy-note" data-ko={publicI18n.ko.communityPartyAutoDeleteNotice} data-ja={publicI18n.ja.communityPartyAutoDeleteNotice}>{t().communityPartyAutoDeleteNotice}</p>
+            ) : null}
+            <label>
+              <span data-ko={publicI18n.ko.communityTitleLabel} data-ja={publicI18n.ja.communityTitleLabel}>{t().communityTitleLabel}</span>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.currentTarget.value)}
+                maxLength={80}
+                placeholder={isParty ? t().communityPartyTitlePlaceholder : t().communityTitlePlaceholder}
+                data-ko={isParty ? publicI18n.ko.communityPartyTitlePlaceholder : publicI18n.ko.communityTitlePlaceholder}
+                data-ja={isParty ? publicI18n.ja.communityPartyTitlePlaceholder : publicI18n.ja.communityTitlePlaceholder}
+                required
+              />
+            </label>
+            <label>
+              <span data-ko={publicI18n.ko.communityBodyLabel} data-ja={publicI18n.ja.communityBodyLabel}>{t().communityBodyLabel}</span>
+              <textarea
+                value={body}
+                onChange={(event) => setBody(event.currentTarget.value)}
+                maxLength={1000}
+                rows={isParty ? 5 : 6}
+                placeholder={isParty ? t().communityPartyBodyPlaceholder : t().communityBodyPlaceholder}
+                data-ko={isParty ? publicI18n.ko.communityPartyBodyPlaceholder : publicI18n.ko.communityBodyPlaceholder}
+                data-ja={isParty ? publicI18n.ja.communityPartyBodyPlaceholder : publicI18n.ja.communityBodyPlaceholder}
+                required
+              />
+            </label>
+            {isParty ? (
+              <div className="public-party-option-grid">
+	                <label>
+	                  <span data-ko={publicI18n.ko.communityPartyTierLabel} data-ja={publicI18n.ja.communityPartyTierLabel}>{t().communityPartyTierLabel}</span>
+	                  <select value={partyTier} onChange={(event) => setPartyTier(event.currentTarget.value)}>
+	                    <option value="">{t().communitySelectPlaceholder}</option>
+	                    {PARTY_TIER_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+	                  </select>
+	                </label>
+	                <label>
+	                  <span data-ko={publicI18n.ko.communityPartyRoleLabel} data-ja={publicI18n.ja.communityPartyRoleLabel}>{t().communityPartyRoleLabel}</span>
+	                  <select value={partyRole} onChange={(event) => setPartyRole(event.currentTarget.value)}>
+	                    <option value="">{t().communitySelectPlaceholder}</option>
+	                    {PARTY_ROLE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+	                  </select>
+	                </label>
+	                <label>
+	                  <span data-ko={publicI18n.ko.communityPartyModeLabel} data-ja={publicI18n.ja.communityPartyModeLabel}>{t().communityPartyModeLabel}</span>
+	                  <select value={partyMode} onChange={(event) => setPartyMode(event.currentTarget.value)}>
+	                    <option value="">{t().communitySelectPlaceholder}</option>
+	                    {PARTY_MODE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+	                  </select>
+	                </label>
+	                <label>
+	                  <span data-ko={publicI18n.ko.communityPartyVoiceLabel} data-ja={publicI18n.ja.communityPartyVoiceLabel}>{t().communityPartyVoiceLabel}</span>
+	                  <select value={partyVoice} onChange={(event) => setPartyVoice(event.currentTarget.value)}>
+	                    <option value="">{t().communitySelectPlaceholder}</option>
+	                    {PARTY_VOICE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+	                  </select>
+	                </label>
+                <label>
+                  <span data-ko={publicI18n.ko.communityPartyCapacityLabel} data-ja={publicI18n.ja.communityPartyCapacityLabel}>{t().communityPartyCapacityLabel}</span>
+                  <input type="number" min={2} max={10} value={partyCapacity} onChange={(event) => setPartyCapacity(event.currentTarget.value)} />
+                </label>
+              </div>
+            ) : null}
+            <label>
+	              <span data-ko={publicI18n.ko.communityRiotIdLabel} data-ja={publicI18n.ja.communityRiotIdLabel}>{t().communityRiotIdLabel}</span>
+	              <div className={`public-community-riot-check ${riotCheckStatus}`}>
+	                <input
+	                  value={riotId}
+	                  onChange={(event) => updateRiotId(event.currentTarget.value)}
+	                  maxLength={80}
+	                  placeholder={t().communityRiotIdPlaceholder}
+	                  data-ko={publicI18n.ko.communityRiotIdPlaceholder}
+	                  data-ja={publicI18n.ja.communityRiotIdPlaceholder}
+	                />
+	                <button type="button" onClick={checkRiotId} disabled={!riotId.trim() || riotCheckStatus === "checking"}>
+	                  {riotCheckStatus === "checking" ? t().communityRiotIdChecking : t().communityRiotIdCheck}
+	                </button>
+	              </div>
+	              {riotCheckMessage ? <small className={`public-community-riot-message ${riotCheckStatus}`}>{riotCheckMessage}</small> : null}
+	            </label>
+	            {isParty ? (
+	              <label>
+	                <span data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</span>
+	                <div className="public-community-tag-picker">
+	                  {PARTY_TAG_OPTIONS.map((option) => (
+	                    <button
+	                      className={selectedTags.includes(option.value) ? "active" : ""}
+	                      type="button"
+	                      onClick={() => togglePartyTag(option.value)}
+	                      key={option.value}
+	                    >
+	                      #{option[activePublicLocale]}
+	                    </button>
+	                  ))}
+	                </div>
+	              </label>
+	            ) : (
+	            <label>
+	              <span data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</span>
+	              <input
+	                value={tags}
+                onChange={(event) => setTags(event.currentTarget.value)}
+                maxLength={120}
+                placeholder={t().communityTagsPlaceholder}
+                data-ko={publicI18n.ko.communityTagsPlaceholder}
+	                data-ja={publicI18n.ja.communityTagsPlaceholder}
+	              />
+	            </label>
+	            )}
+	            <label className="public-community-file-field">
+	              <span data-ko={publicI18n.ko.communityImageLabel} data-ja={publicI18n.ja.communityImageLabel}>{t().communityImageLabel}</span>
+	              <div className="public-community-file-control">
+	                <button type="button" onClick={() => imageInputRef.current?.click()}>
+	                  {t().communityImageChoose}
+	                </button>
+	                <strong>{imageFile ? `${t().communityImageSelected}: ${imageFile.name}` : t().communityImageEmpty}</strong>
+	              </div>
+	              <input
+	                ref={imageInputRef}
+	                type="file"
+	                accept="image/png,image/jpeg,image/gif,image/webp"
+	                onChange={(event) => setImageFile(event.currentTarget.files?.[0] ?? null)}
+	              />
+              <small
+                data-ko={isEditingServerPost ? publicI18n.ko.communityImageReplaceHelp : publicI18n.ko.communityImageHelp}
+                data-ja={isEditingServerPost ? publicI18n.ja.communityImageReplaceHelp : publicI18n.ja.communityImageHelp}
+              >
+                {isEditingServerPost ? t().communityImageReplaceHelp : t().communityImageHelp}
+              </small>
+            </label>
+            <button type="submit" disabled={!canSubmit}>
+              {submitting ? (isEditingServerPost ? t().communityUpdating : t().communitySubmitting) : isEditingServerPost ? t().communityUpdateSubmit : t().communitySubmit}
+            </button>
+          </form>
+        )}
+      </article>
+    </section>
+  );
+}
+
+function PublicCommunityDetailPage({
+  post,
+  profileState,
+  twitchStatus,
+  commentSubmitting,
+  commentError,
+  onLogin,
+  onBack,
+  onSearchRiotId,
+  onSubmitComment
+}: {
+  post: CommunityPost | undefined;
+  profileState: CommunityPostProfileState;
+  twitchStatus: PublicTwitchViewerStatus;
+  commentSubmitting: boolean;
+  commentError: string;
+  onLogin: () => void;
+  onBack: () => void;
+  onSearchRiotId: (riotId: string) => void;
+  onSubmitComment: (postId: string, body: string) => Promise<void>;
+}) {
+  const [commentBody, setCommentBody] = useState("");
+  const riotId = communityPostRiotId(post);
+  const profile = profileState.profile;
+  const primaryRank = profile ? soloRankStats(profile) ?? flexRankStats(profile) ?? ranked5v5Stats(profile) ?? profile.rankedStats : undefined;
+  const topChampions = profile?.topChampions.slice(0, 5) ?? [];
+  const isParty = communityPostCategory(post) === "party";
+  const comments = post?.comments ?? [];
+
+  async function submitComment(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    if (!post || !commentBody.trim() || commentSubmitting) return;
+    await onSubmitComment(post.id, commentBody);
+    setCommentBody("");
+  }
+
+  return (
+    <section className="public-panel public-menu-page-panel public-community-detail-page">
+      <div className="public-section-head">
+        <div>
+          <h2 data-ko={publicI18n.ko.communityDetailTitle} data-ja={publicI18n.ja.communityDetailTitle}>{t().communityDetailTitle}</h2>
+          <span>{post ? formatTournamentDateTime(post.createdAt) : "Seiga.GG"}</span>
+        </div>
+        <button className="public-back-button" type="button" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>{t().communityBackToList}</button>
+      </div>
+      {!post ? (
+        <p className="public-empty" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>{t().communityEmpty}</p>
+      ) : (
+        <div className="public-community-detail-layout">
+          <article className="public-community-detail-article">
+            {post.imageUrl ? (
+              <div className="public-community-detail-media">
+                <img src={assetUrl(post.imageUrl)} alt={post.imageAlt ?? ""} />
+              </div>
+            ) : null}
+            <header>
+              <span className="public-community-avatar">
                 {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
-                <strong>
-                  {post.authorDisplayName}
-                  <small>@{post.authorTwitchLogin}{post.authorRiotGameName && post.authorRiotTagLine ? ` · ${post.authorRiotGameName}#${post.authorRiotTagLine}` : ""}</small>
-                </strong>
-                <time>{formatTournamentDateTime(post.createdAt)}</time>
-              </header>
-              <h3>{post.title}</h3>
-              <p>{post.body}</p>
-            </section>
-          ))}
-        </article>
-      </div>
+              </span>
+              <div>
+                <strong>{post.authorDisplayName}</strong>
+                <small>@{post.authorTwitchLogin}{post.authorRiotGameName && post.authorRiotTagLine ? ` · ${post.authorRiotGameName}#${post.authorRiotTagLine}` : ""}</small>
+              </div>
+            </header>
+            <h3>{post.title}</h3>
+            <p>{post.body}</p>
+            <div className="public-community-post-meta">
+              {riotId ? <span>{t().communityRecordLabel} {riotId}</span> : null}
+              {post.tags.map((tag) => <em key={`${post.id}:detail:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</em>)}
+            </div>
+            {isParty ? (
+              <section className="public-community-comments">
+                <div className="public-community-comments-head">
+                  <strong data-ko={publicI18n.ko.communityCommentsTitle} data-ja={publicI18n.ja.communityCommentsTitle}>{t().communityCommentsTitle}</strong>
+                  <span>{comments.length}</span>
+                </div>
+                {comments.length > 0 ? (
+                  <div className="public-community-comment-list">
+                    {comments.map((comment) => (
+                      <article className="public-community-comment" key={comment.id}>
+                        <span className="public-community-avatar">
+                          {comment.authorProfileImageUrl ? <img src={comment.authorProfileImageUrl} alt="" /> : <em>{comment.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
+                        </span>
+                        <div>
+                          <header>
+                            <strong>{comment.authorDisplayName}</strong>
+                            <small>@{comment.authorTwitchLogin} · {formatRelativeDate(comment.createdAt)}</small>
+                          </header>
+                          <p>{comment.body}</p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="public-empty" data-ko={publicI18n.ko.communityCommentEmpty} data-ja={publicI18n.ja.communityCommentEmpty}>{t().communityCommentEmpty}</p>
+                )}
+                {commentError ? <p className="public-community-error">{commentError}</p> : null}
+                {twitchStatus.connected ? (
+                  <form className="public-community-comment-form" onSubmit={submitComment}>
+                    <span className="public-community-avatar">
+                      {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <em>{twitchStatus.user?.displayName?.slice(0, 1).toUpperCase() ?? "T"}</em>}
+                    </span>
+                    <textarea
+                      value={commentBody}
+                      onChange={(event) => setCommentBody(event.currentTarget.value)}
+                      maxLength={500}
+                      rows={3}
+                      placeholder={t().communityCommentPlaceholder}
+                      data-ko={publicI18n.ko.communityCommentPlaceholder}
+                      data-ja={publicI18n.ja.communityCommentPlaceholder}
+                    />
+                    <button type="submit" disabled={!commentBody.trim() || commentSubmitting}>
+                      {commentSubmitting ? t().communityCommentSubmitting : t().communityCommentSubmit}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="public-community-login public-community-comment-login">
+                    <p data-ko={publicI18n.ko.communityCommentLoginRequired} data-ja={publicI18n.ja.communityCommentLoginRequired}>{t().communityCommentLoginRequired}</p>
+                    <button type="button" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>{t().twitchViewerLogin}</button>
+                  </div>
+                )}
+              </section>
+            ) : null}
+          </article>
+          <aside className="public-community-record-preview">
+            <div className="public-community-card-head">
+              <strong data-ko={publicI18n.ko.communityRecordPreview} data-ja={publicI18n.ja.communityRecordPreview}>{t().communityRecordPreview}</strong>
+              {riotId ? <button type="button" onClick={() => onSearchRiotId(riotId)} data-ko={publicI18n.ko.viewRecord} data-ja={publicI18n.ja.viewRecord}>{t().viewRecord}</button> : null}
+            </div>
+            {!riotId ? (
+              <p className="public-empty" data-ko={publicI18n.ko.communityRecordMissing} data-ja={publicI18n.ja.communityRecordMissing}>{t().communityRecordMissing}</p>
+            ) : profileState.status === "loading" ? (
+              <p className="public-empty" data-ko={publicI18n.ko.communityRecordLoading} data-ja={publicI18n.ja.communityRecordLoading}>{t().communityRecordLoading}</p>
+            ) : profileState.status === "error" ? (
+              <p className="public-community-error">{profileState.error || t().communityRecordFailed}</p>
+            ) : profile ? (
+              <div className="public-community-record-card">
+                <div className="public-community-record-main">
+                  {profile.profileIconUrl ? <img src={assetUrl(profile.profileIconUrl)} alt="" /> : <span>{profile.gameName.slice(0, 1).toUpperCase()}</span>}
+                  <div>
+                    <strong>{profile.gameName}<small>#{profile.tagLine}</small></strong>
+                    <em>{rankLabel(primaryRank)}</em>
+                  </div>
+                </div>
+                <div className="public-community-record-stats">
+                  <span>
+                    <small>{t().recentGames}</small>
+                    <b>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"} {Math.max(0, profile.summary.recentGames - profile.summary.recentWins)}{activePublicLocale === "ja" ? "敗" : "패"}</b>
+                    <em className={metricToneClass(percentTone(profile.summary.recentWinRate))}>{formatPercent(profile.summary.recentWinRate)}</em>
+                  </span>
+                  <span>
+                    <small>{t().kda}</small>
+                    <b className={metricToneClass(kdaTone(profile.summary.averageKda))}>{formatDecimal(profile.summary.averageKda)}</b>
+                    <em>{profile.summary.totalKills} / {profile.summary.totalDeaths} / {profile.summary.totalAssists}</em>
+                  </span>
+                </div>
+                <div className="public-community-record-champions">
+                  {topChampions.length > 0 ? topChampions.map((champion) => (
+                    champion.iconUrl ? <img src={assetUrl(champion.iconUrl)} alt={championName(champion)} title={championName(champion)} key={champion.championId} /> : null
+                  )) : <small>{t().noData}</small>}
+                </div>
+              </div>
+            ) : (
+              <p className="public-empty">{t().noData}</p>
+            )}
+          </aside>
+        </div>
+      )}
     </section>
   );
 }
@@ -4267,6 +5101,11 @@ function formatTournamentBracketStageName(round: string | undefined, index: numb
   if (index === total - 1 && total > 1) return t().tournamentFinal;
   if (isTournamentMatchNumberRound(round)) return activePublicLocale === "ja" ? `${index + 1}ラウンド` : `${index + 1}라운드`;
   return formatTournamentRoundName(round);
+}
+
+function tournamentBracketRoundPoint(index: number, total: number): number {
+  if (total > 1 && index === total - 1) return 40;
+  return [5, 10, 20][Math.min(Math.max(index, 0), 2)] ?? 5;
 }
 
 function tournamentMatchWinnerTeamId(match: PublicTournamentMatch): string | undefined {
@@ -4770,7 +5609,7 @@ function PublicTournamentPage({
       ) : null}
 
       {tournament && page === "tournamentBracket" ? (
-        <div className="public-tournament-layout">
+        <div className="public-tournament-layout public-tournament-layout--full">
           <div className="public-tournament-main">
             <div className="public-tournament-title-row">
               <div>
@@ -4782,9 +5621,13 @@ function PublicTournamentPage({
               {bracketRounds.map((round, roundIndex) => {
                 const roundMatches = tournament.matches.filter((match) => match.round === round);
                 const isLastRound = roundIndex === bracketRounds.length - 1;
+                const roundPoint = tournamentBracketRoundPoint(roundIndex, bracketRounds.length);
                 return (
                 <div className={`public-tournament-round ${isLastRound ? "final-round" : ""} ${roundIndex > 0 ? `future round-${roundIndex + 1}` : ""}`} key={round}>
-                  <strong>{formatTournamentBracketStageName(round, roundIndex, bracketRounds.length)}<small>{firstRoundDate(tournament, round)}</small></strong>
+                  <strong>
+                    <span>{formatTournamentBracketStageName(round, roundIndex, bracketRounds.length)}</span>
+                    <small>{roundPoint}{t().tournamentPointPerPick}</small>
+                  </strong>
                   {roundMatches.map((match, matchIndex) => {
                     const teamA = match.teamAId ? teamById.get(match.teamAId) : undefined;
                     const teamB = match.teamBId ? teamById.get(match.teamBId) : undefined;
@@ -4802,20 +5645,26 @@ function PublicTournamentPage({
                           : "pair-solo";
                     return (
                       <article className={`public-tournament-match-card ${isTbd ? "tbd" : ""} ${match.status} ${pairClass} ${winnerTeamId ? "advanced" : ""}`} key={match.id}>
-                        <div className={`${!teamA ? "pending" : ""} ${tournamentMatchSideClass(match.teamAId, winnerTeamId, hasScore)}`}>
+                        <span className="public-tournament-match-result-label">{t().tournamentFinalResult}</span>
+                        <div className={`public-tournament-match-team ${!teamA ? "pending" : ""} ${tournamentMatchSideClass(match.teamAId, winnerTeamId, hasScore)}`}>
+                          {winnerTeamId === match.teamAId ? <span className="public-tournament-match-point">+{roundPoint}</span> : null}
                           <b>{teamA?.seed ?? "-"}</b>
                           {avatar(teamAName)}
-                          <span>{teamAName}</span>
-                          {match.status === "live" ? <em>{t().tournamentLiveShort}</em> : <i>{match.scoreA ?? "-"}</i>}
+                          <span className="public-tournament-match-name">{teamAName}</span>
+                          {match.status === "live" && winnerTeamId !== match.teamAId ? <span className="public-tournament-match-state">{t().tournamentLiveShort}</span> : null}
+                          {winnerTeamId === match.teamAId ? <span className="public-tournament-match-check">✓</span> : null}
+                          <i>{match.scoreA ?? "-"}</i>
                         </div>
-                        <small>{t().tournamentVs}</small>
-                        <div className={`${!teamB ? "pending" : ""} ${tournamentMatchSideClass(match.teamBId, winnerTeamId, hasScore)}`}>
+                        <small className="public-tournament-match-vs">{t().tournamentVs}</small>
+                        <div className={`public-tournament-match-team ${!teamB ? "pending" : ""} ${tournamentMatchSideClass(match.teamBId, winnerTeamId, hasScore)}`}>
+                          {winnerTeamId === match.teamBId ? <span className="public-tournament-match-point">+{roundPoint}</span> : null}
                           <b>{teamB?.seed ?? "-"}</b>
                           {avatar(teamBName)}
-                          <span>{teamBName}</span>
+                          <span className="public-tournament-match-name">{teamBName}</span>
+                          {winnerTeamId === match.teamBId ? <span className="public-tournament-match-check">✓</span> : null}
                           <i>{match.scoreB ?? "-"}</i>
                         </div>
-                        <time>{formatTournamentTime(match.scheduledAt)}<small>{match.format ?? "BO3"}</small></time>
+                        <time>{formatTournamentTime(match.scheduledAt)}<small>{match.format ?? "BO3"}</small><em>{firstRoundDate(tournament, round)}</em></time>
                       </article>
                     );
                   })}
@@ -4838,10 +5687,6 @@ function PublicTournamentPage({
               ))}
             </div>
           </div>
-          <aside className="public-tournament-side">
-            <TournamentScheduleCard upcoming={scheduleItems.slice(0, 3)} avatar={avatar} />
-            <TournamentNoticeCard notices={notices} />
-          </aside>
         </div>
       ) : null}
 
@@ -6250,7 +7095,11 @@ export function PublicLolPage({
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [communityLoading, setCommunityLoading] = useState(false);
   const [communitySubmitting, setCommunitySubmitting] = useState(false);
+  const [communityCommentSubmitting, setCommunityCommentSubmitting] = useState(false);
   const [communityError, setCommunityError] = useState("");
+  const [communityCommentError, setCommunityCommentError] = useState("");
+  const [selectedCommunityPostId, setSelectedCommunityPostId] = useState<string | undefined>();
+  const [communityPostProfile, setCommunityPostProfile] = useState<CommunityPostProfileState>({ status: "idle" });
   const storedSuggestions = useMemo(() => {
     const unique = new Map<string, SearchSuggestion>();
     for (const suggestion of [...favorites, ...recentSearches]) {
@@ -6265,6 +7114,10 @@ export function PublicLolPage({
     if (!profile) return null;
     return profileWithMatches(profile, filteredMatches(profile, filters));
   }, [profile, filters]);
+  const selectedCommunityPost = useMemo(
+    () => communityPosts.find((post) => post.id === selectedCommunityPostId),
+    [communityPosts, selectedCommunityPostId]
+  );
   const refreshRemaining = refreshRemainingMs(profile, nowTick);
   const availableChampions = useMemo(() => {
     const unique = new Map<number, LolChampionSummary>();
@@ -6326,10 +7179,9 @@ export function PublicLolPage({
   }, [activeMainPage, publicTournaments.length, publicTournamentLoading, publicTournamentError]);
 
   useEffect(() => {
-    if (activeMainPage !== "patch") return;
-    if (communityPosts.length > 0 || communityLoading) return;
-    void loadCommunityPosts();
-  }, [activeMainPage, communityPosts.length, communityLoading]);
+    if (activeMainPage !== "patch" && activeMainPage !== "communityParty" && activeMainPage !== "communityServerWrite" && activeMainPage !== "communityPartyWrite") return;
+    void loadCommunityPosts(communityPageCategory(activeMainPage));
+  }, [activeMainPage]);
 
   useEffect(() => {
     if (refreshRemainingMs(profile, Date.now()) <= 0) return undefined;
@@ -6480,11 +7332,11 @@ export function PublicLolPage({
     }
   }
 
-  async function loadCommunityPosts(): Promise<void> {
+  async function loadCommunityPosts(category: CommunityPostCategory = communityPageCategory(activeMainPage)): Promise<void> {
     setCommunityLoading(true);
     setCommunityError("");
     try {
-      setCommunityPosts(await getPublicCommunityPosts());
+      setCommunityPosts(await getPublicCommunityPosts(category));
     } catch (requestError) {
       setCommunityError(requestError instanceof Error ? requestError.message : t().communityLoadFailed);
     } finally {
@@ -6492,15 +7344,62 @@ export function PublicLolPage({
     }
   }
 
-  async function submitCommunityPost(input: { title: string; body: string }): Promise<void> {
+  async function loadCommunityPostProfile(post: CommunityPost): Promise<void> {
+    const riotId = communityPostRiotId(post);
+    if (!riotId) {
+      setCommunityPostProfile({ status: "idle" });
+      return;
+    }
+    setCommunityPostProfile({ riotId, status: "loading" });
+    try {
+      const nextProfile = await searchProfile(riotId);
+      setCommunityPostProfile({ riotId, status: "ready", profile: nextProfile });
+    } catch (requestError) {
+      setCommunityPostProfile({
+        riotId,
+        status: "error",
+        error: requestError instanceof Error ? requestError.message : t().communityRecordFailed
+      });
+    }
+  }
+
+  async function submitCommunityPost(input: CommunityPostSubmitInput): Promise<boolean> {
     setCommunitySubmitting(true);
     setCommunityError("");
     try {
       setCommunityPosts(await createPublicCommunityPost(input));
+      return true;
     } catch (requestError) {
       setCommunityError(requestError instanceof Error ? requestError.message : t().searchFailed);
+      return false;
     } finally {
       setCommunitySubmitting(false);
+    }
+  }
+
+  async function updateCommunityServerPost(postId: string, input: CommunityPostSubmitInput): Promise<boolean> {
+    setCommunitySubmitting(true);
+    setCommunityError("");
+    try {
+      setCommunityPosts(await updatePublicCommunityPost(postId, input));
+      return true;
+    } catch (requestError) {
+      setCommunityError(requestError instanceof Error ? requestError.message : t().searchFailed);
+      return false;
+    } finally {
+      setCommunitySubmitting(false);
+    }
+  }
+
+  async function submitCommunityComment(postId: string, body: string): Promise<void> {
+    setCommunityCommentSubmitting(true);
+    setCommunityCommentError("");
+    try {
+      setCommunityPosts(await createPublicCommunityComment(postId, body));
+    } catch (requestError) {
+      setCommunityCommentError(requestError instanceof Error ? requestError.message : t().communityCommentFailed);
+    } finally {
+      setCommunityCommentSubmitting(false);
     }
   }
 
@@ -6546,6 +7445,16 @@ export function PublicLolPage({
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
   }
 
+  function openCommunityPost(post: CommunityPost): void {
+    setStreamerRegisterOpen(false);
+    setSelectedCommunityPostId(post.id);
+    setCommunityCommentError("");
+    setActiveMainPage("communityDetail");
+    setActiveNav("community");
+    void loadCommunityPostProfile(post);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+  }
+
   function changeMainPage(page: PublicMainPage): void {
     if (page === "search") {
       resetHome();
@@ -6554,6 +7463,11 @@ export function PublicLolPage({
         document.getElementById("public-search-input")?.focus();
       }, 0);
       return;
+    }
+    if (page !== "communityDetail") {
+      setSelectedCommunityPostId(undefined);
+      setCommunityPostProfile({ status: "idle" });
+      setCommunityCommentError("");
     }
     setActiveMainPage(page);
     setStreamerRegisterOpen(false);
@@ -6678,6 +7592,8 @@ export function PublicLolPage({
     setMoreMatchesError("");
     setFilters(DEFAULT_MATCH_FILTERS);
     setStreamerRegisterOpen(false);
+    setSelectedCommunityPostId(undefined);
+    setCommunityPostProfile({ status: "idle" });
     setActiveMainPage("search");
     setActiveNav("search");
     setPublicPath("/");
@@ -6731,17 +7647,52 @@ export function PublicLolPage({
         />
       );
     }
-    if (activeMainPage === "patch") {
+    if (activeMainPage === "patch" || activeMainPage === "communityParty") {
+      const category = communityPageCategory(activeMainPage);
       return (
         <PublicCommunityPage
+          category={category}
           twitchStatus={twitchStatus}
           posts={communityPosts}
           loading={communityLoading}
           error={communityError}
+          onRefresh={() => void loadCommunityPosts(category)}
+          onWrite={() => changeMainPage(category === "party" ? "communityPartyWrite" : "communityServerWrite")}
+          onOpenPost={openCommunityPost}
+        />
+      );
+    }
+    if (activeMainPage === "communityServerWrite" || activeMainPage === "communityPartyWrite") {
+      const category = communityPageCategory(activeMainPage);
+      const editingPost = category === "server" && twitchStatus.user
+        ? communityPosts.find((post) => post.authorTwitchUserId === twitchStatus.user?.id && communityPostCategory(post) === "server")
+        : undefined;
+      return (
+        <PublicCommunityWritePage
+          category={category}
+          twitchStatus={twitchStatus}
+          posts={communityPosts}
+          editingPost={editingPost}
+          error={communityError}
           submitting={communitySubmitting}
           onLogin={startTwitchLogin}
-          onRefresh={() => void loadCommunityPosts()}
-          onSubmit={submitCommunityPost}
+          onBack={() => changeMainPage(category === "party" ? "communityParty" : "patch")}
+          onSubmit={(input) => editingPost ? updateCommunityServerPost(editingPost.id, input) : submitCommunityPost(input)}
+        />
+      );
+    }
+    if (activeMainPage === "communityDetail") {
+      return (
+        <PublicCommunityDetailPage
+          post={selectedCommunityPost}
+          profileState={communityPostProfile}
+          twitchStatus={twitchStatus}
+          commentSubmitting={communityCommentSubmitting}
+          commentError={communityCommentError}
+          onLogin={startTwitchLogin}
+          onBack={() => changeMainPage(communityPostCategory(selectedCommunityPost) === "party" ? "communityParty" : "patch")}
+          onSearchRiotId={searchFollowedRiotId}
+          onSubmitComment={submitCommunityComment}
         />
       );
     }

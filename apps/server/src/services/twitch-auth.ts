@@ -96,6 +96,7 @@ export class TwitchOAuthStateStore {
 
 export class TwitchAuthService {
   private readonly scopes: ReturnType<typeof resolveTwitchScopes>;
+  private refreshInFlight?: Promise<TwitchStoredToken>;
 
   constructor(
     private readonly tokenStore: TwitchTokenStore,
@@ -179,18 +180,15 @@ export class TwitchAuthService {
       };
     }
 
-    const missingScopes = findMissingScopes(this.scopes.requiredScopes, token.scopes);
-    const expired = this.isExpired(token);
-    return {
-      ...base,
-      state: expired ? "token_expired" : missingScopes.length > 0 ? "missing_scopes" : "connected",
-      connected: !expired && missingScopes.length === 0,
-      source: "oauth",
-      broadcaster: token.broadcaster,
-      grantedScopes: token.scopes,
-      missingScopes,
-      tokenExpiresAt: token.expiresAt
-    };
+    if (this.isExpired(token)) {
+      try {
+        return this.statusFromToken(await this.refreshToken(token), base, undefined, true);
+      } catch (error) {
+        return this.statusFromToken(token, base, typeof error === "object" && error && "message" in error ? String(error.message) : "Twitch OAuth token refresh failed");
+      }
+    }
+
+    return this.statusFromToken(token, base);
   }
 
   async connectWithCode(code: string, redirectUri = this.config.redirectUri): Promise<TwitchConnectionStatus> {
@@ -296,6 +294,14 @@ export class TwitchAuthService {
   }
 
   private async refreshToken(stored: TwitchStoredToken): Promise<TwitchStoredToken> {
+    if (this.refreshInFlight) return this.refreshInFlight;
+    this.refreshInFlight = this.refreshTokenRequest(stored).finally(() => {
+      this.refreshInFlight = undefined;
+    });
+    return this.refreshInFlight;
+  }
+
+  private async refreshTokenRequest(stored: TwitchStoredToken): Promise<TwitchStoredToken> {
     if (!this.config.clientId || !this.config.clientSecret) throw new Error("Twitch OAuth 설정이 부족합니다.");
     const body = new URLSearchParams({
       client_id: this.config.clientId,
@@ -308,13 +314,40 @@ export class TwitchAuthService {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });
-    if (!response.ok) throw new Error(`Twitch OAuth refresh failed: ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 400 || response.status === 401) {
+        throw new Error("저장된 Twitch refresh token이 만료되었거나 현재 Twitch 앱 설정과 맞지 않습니다. Twitch를 다시 연결해주세요.");
+      }
+      throw new Error(`Twitch OAuth refresh failed: ${response.status}`);
+    }
     const refreshed = (await response.json()) as TwitchTokenResponse;
     const next = await this.saveToken(
       { ...refreshed, refresh_token: refreshed.refresh_token ?? stored.refreshToken, scope: refreshed.scope ?? stored.scopes },
       stored.broadcaster
     );
     return next;
+  }
+
+  private statusFromToken(
+    token: TwitchStoredToken,
+    base: Pick<TwitchConnectionStatus, "requiredScopes" | "optionalScopes" | "enabledOptionalScopes" | "legacyConfigured">,
+    error?: string,
+    refreshed = false
+  ): TwitchConnectionStatus {
+    const missingScopes = findMissingScopes(this.scopes.requiredScopes, token.scopes);
+    const expired = this.isExpired(token);
+    return {
+      ...base,
+      state: expired ? "token_expired" : missingScopes.length > 0 ? "missing_scopes" : "connected",
+      connected: !expired && missingScopes.length === 0,
+      source: "oauth",
+      broadcaster: token.broadcaster,
+      grantedScopes: token.scopes,
+      missingScopes,
+      tokenExpiresAt: token.expiresAt,
+      ...(refreshed ? { refreshed: true } : {}),
+      ...(error ? { error } : {})
+    };
   }
 
   private async saveToken(tokenResponse: TwitchTokenResponse, broadcaster: TwitchBroadcasterInfo): Promise<TwitchStoredToken> {

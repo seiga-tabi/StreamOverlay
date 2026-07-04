@@ -4,6 +4,9 @@ import crypto from "node:crypto";
 import type {
   BotStatus,
   CommunityPost,
+  CommunityPostCategory,
+  CommunityPostComment,
+  CommunityPostCommentCreateInput,
   CommunityPostCreateInput,
   InternalEvent,
   OverlayChannel,
@@ -229,6 +232,11 @@ function objectRecord(value: unknown): Record<string, unknown> | undefined {
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+function optionalNumber(value: unknown): number | undefined {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : undefined;
 }
 
 function normalizedFollowerActivity(value: unknown): FollowerActivity {
@@ -531,7 +539,58 @@ function normalizedStreamerTournament(value: unknown): StreamerTournament | unde
 }
 
 function cloneCommunityPost(post: CommunityPost): CommunityPost {
-  return { ...post };
+  return {
+    ...post,
+    tags: [...post.tags],
+    comments: post.comments.map((comment) => ({ ...comment }))
+  };
+}
+
+function normalizedCommunityTags(value: unknown): string[] {
+  const rawTags = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [];
+  const tags: string[] = [];
+  for (const rawTag of rawTags) {
+    if (typeof rawTag !== "string") continue;
+    const tag = rawTag.trim().replace(/^#+/, "").slice(0, 20);
+    if (!tag || tags.includes(tag)) continue;
+    tags.push(tag);
+    if (tags.length >= 5) break;
+  }
+  return tags;
+}
+
+function normalizedCommunityCategory(value: unknown): CommunityPostCategory {
+  return value === "party" ? "party" : "server";
+}
+
+function normalizedCommunityComment(value: unknown): CommunityPostComment | undefined {
+  const input = objectRecord(value);
+  const id = optionalString(input?.id);
+  const body = optionalString(input?.body);
+  const authorTwitchUserId = optionalString(input?.authorTwitchUserId);
+  const authorTwitchLogin = optionalString(input?.authorTwitchLogin);
+  const authorDisplayName = optionalString(input?.authorDisplayName);
+  const createdAt = optionalString(input?.createdAt) || nowIso();
+  if (!id || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
+  return {
+    id,
+    body,
+    authorTwitchUserId,
+    authorTwitchLogin,
+    authorDisplayName,
+    authorProfileImageUrl: optionalString(input?.authorProfileImageUrl),
+    createdAt
+  };
+}
+
+function normalizedCommunityComments(value: unknown): CommunityPostComment[] {
+  return Array.isArray(value)
+    ? value.map(normalizedCommunityComment).filter((comment): comment is CommunityPostComment => Boolean(comment))
+    : [];
 }
 
 function normalizedCommunityPost(value: unknown): CommunityPost | undefined {
@@ -546,14 +605,26 @@ function normalizedCommunityPost(value: unknown): CommunityPost | undefined {
   const createdAt = optionalString(input?.createdAt) || nowIso();
   return {
     id,
+    category: normalizedCommunityCategory(input?.category),
     title,
     body,
+    riotGameName: optionalString(input?.riotGameName),
+    riotTagLine: optionalString(input?.riotTagLine),
+    tags: normalizedCommunityTags(input?.tags),
+    imageUrl: optionalString(input?.imageUrl),
+    imageAlt: optionalString(input?.imageAlt),
+    partyTier: optionalString(input?.partyTier),
+    partyRole: optionalString(input?.partyRole),
+    partyMode: optionalString(input?.partyMode),
+    partyVoice: optionalString(input?.partyVoice),
+    partyCapacity: optionalNumber(input?.partyCapacity),
     authorTwitchUserId,
     authorTwitchLogin,
     authorDisplayName,
     authorProfileImageUrl: optionalString(input?.authorProfileImageUrl),
     authorRiotGameName: optionalString(input?.authorRiotGameName),
     authorRiotTagLine: optionalString(input?.authorRiotTagLine),
+    comments: normalizedCommunityComments(input?.comments),
     createdAt,
     updatedAt: optionalString(input?.updatedAt) || createdAt
   };
@@ -566,6 +637,23 @@ type CommunityPostAuthorInput = {
   authorProfileImageUrl?: string;
   authorRiotGameName?: string;
   authorRiotTagLine?: string;
+  riotGameName?: string;
+  riotTagLine?: string;
+  tags?: string[] | string;
+  imageUrl?: string;
+  imageAlt?: string;
+  partyTier?: string;
+  partyRole?: string;
+  partyMode?: string;
+  partyVoice?: string;
+  partyCapacity?: number;
+};
+
+type CommunityPostCommentAuthorInput = {
+  authorTwitchUserId: string;
+  authorTwitchLogin: string;
+  authorDisplayName: string;
+  authorProfileImageUrl?: string;
 };
 
 export class Store {
@@ -574,6 +662,9 @@ export class Store {
   private static readonly maxActions = 200;
   private static readonly maxQuestions = 200;
   private static readonly maxHighlights = 200;
+  private static readonly maxPartyCommunityPostsPerDay = 2;
+  private static readonly partyCommunityPostTtlMs = 24 * 60 * 60 * 1000;
+  private static readonly communityCleanupIntervalMs = 24 * 60 * 60 * 1000;
   private readonly seenTwitchMessageIds = new Set<string>();
   private readonly seenTwitchMessageIdOrder: string[] = [];
   private readonly events: InternalEvent[] = [];
@@ -590,6 +681,7 @@ export class Store {
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
   private tournaments: StreamerTournament[] = [];
   private communityPosts: CommunityPost[] = [];
+  private communityCleanupTimer?: NodeJS.Timeout;
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
   private overlayStatus: OverlayStatus = {
     clientCount: 0,
@@ -627,6 +719,8 @@ export class Store {
     this.loadStreamerRiotIdState();
     this.loadTournamentState();
     this.loadCommunityState();
+    this.cleanupExpiredPartyCommunityPosts();
+    this.startCommunityCleanupTimer();
   }
 
   getStatus(): BotStatus {
@@ -1103,38 +1197,165 @@ export class Store {
     }
   }
 
-  listCommunityPosts(limit = 50): CommunityPost[] {
+  private startCommunityCleanupTimer(): void {
+    if (this.communityCleanupTimer) return;
+    this.communityCleanupTimer = setInterval(() => {
+      this.cleanupExpiredPartyCommunityPosts();
+    }, Store.communityCleanupIntervalMs);
+    this.communityCleanupTimer.unref?.();
+  }
+
+  private isExpiredPartyCommunityPost(post: CommunityPost, referenceMs = Date.now()): boolean {
+    if (post.category !== "party") return false;
+    const createdMs = Date.parse(post.createdAt);
+    return !Number.isFinite(createdMs) || referenceMs - createdMs >= Store.partyCommunityPostTtlMs;
+  }
+
+  private cleanupExpiredPartyCommunityPosts(referenceMs = Date.now()): boolean {
+    const nextPosts = this.communityPosts.filter((post) => !this.isExpiredPartyCommunityPost(post, referenceMs));
+    if (nextPosts.length === this.communityPosts.length) return false;
+    this.communityPosts = nextPosts;
+    this.persistCommunityState();
+    return true;
+  }
+
+  listCommunityPosts(limit = 50, category?: CommunityPostCategory): CommunityPost[] {
+    this.cleanupExpiredPartyCommunityPosts();
     const safeLimit = Math.max(1, Math.min(100, Math.trunc(Number(limit) || 50)));
     return this.communityPosts
+      .filter((post) => !category || post.category === category)
       .map(cloneCommunityPost)
       .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
       .slice(0, safeLimit);
   }
 
+  getCommunityPostByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): CommunityPost | undefined {
+    this.cleanupExpiredPartyCommunityPosts();
+    const safeUserId = twitchUserId?.trim();
+    if (!safeUserId) return undefined;
+    const post = this.communityPosts.find((item) => item.authorTwitchUserId === safeUserId && (!category || item.category === category));
+    return post ? cloneCommunityPost(post) : undefined;
+  }
+
+  countCommunityPostsByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): number {
+    this.cleanupExpiredPartyCommunityPosts();
+    const safeUserId = twitchUserId?.trim();
+    if (!safeUserId) return 0;
+    return this.communityPosts.filter((item) => item.authorTwitchUserId === safeUserId && (!category || item.category === category)).length;
+  }
+
+  getCommunityPostById(postId: string | undefined): CommunityPost | undefined {
+    this.cleanupExpiredPartyCommunityPosts();
+    const safePostId = postId?.trim();
+    if (!safePostId) return undefined;
+    const post = this.communityPosts.find((item) => item.id === safePostId);
+    return post ? cloneCommunityPost(post) : undefined;
+  }
+
   createCommunityPost(input: CommunityPostCreateInput & CommunityPostAuthorInput): CommunityPost | undefined {
     const title = input.title.trim();
     const body = input.body.trim();
+    const category = normalizedCommunityCategory(input.category);
     const authorTwitchUserId = input.authorTwitchUserId.trim();
     const authorTwitchLogin = input.authorTwitchLogin.trim();
     const authorDisplayName = input.authorDisplayName.trim();
     if (!title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
+    this.cleanupExpiredPartyCommunityPosts();
+    if (category === "party") {
+      if (this.countCommunityPostsByAuthor(authorTwitchUserId, category) >= Store.maxPartyCommunityPostsPerDay) return undefined;
+    } else if (this.communityPosts.some((item) => item.authorTwitchUserId === authorTwitchUserId && item.category === category)) {
+      return undefined;
+    }
     const now = nowIso();
     const post: CommunityPost = {
       id: newId("post"),
+      category,
       title,
       body,
+      riotGameName: input.riotGameName?.trim() || undefined,
+      riotTagLine: input.riotTagLine?.trim() || undefined,
+      tags: normalizedCommunityTags(input.tags),
+      imageUrl: input.imageUrl?.trim() || undefined,
+      imageAlt: input.imageAlt?.trim() || undefined,
+      partyTier: input.partyTier?.trim() || undefined,
+      partyRole: input.partyRole?.trim() || undefined,
+      partyMode: input.partyMode?.trim() || undefined,
+      partyVoice: input.partyVoice?.trim() || undefined,
+      partyCapacity: input.partyCapacity && input.partyCapacity > 0 ? Math.max(1, Math.min(5, Math.trunc(input.partyCapacity))) : undefined,
       authorTwitchUserId,
       authorTwitchLogin,
       authorDisplayName,
       authorProfileImageUrl: input.authorProfileImageUrl?.trim() || undefined,
       authorRiotGameName: input.authorRiotGameName?.trim() || undefined,
       authorRiotTagLine: input.authorRiotTagLine?.trim() || undefined,
+      comments: [],
       createdAt: now,
       updatedAt: now
     };
     this.communityPosts = [post, ...this.communityPosts].slice(0, 500);
     this.persistCommunityState();
     return cloneCommunityPost(post);
+  }
+
+  updateCommunityPost(postId: string, input: CommunityPostCreateInput & {
+    riotGameName?: string;
+    riotTagLine?: string;
+    tags?: string[] | string;
+  }): CommunityPost | undefined {
+    this.cleanupExpiredPartyCommunityPosts();
+    const safePostId = postId.trim();
+    const title = input.title.trim();
+    const body = input.body.trim();
+    if (!safePostId || !title || !body) return undefined;
+    const postIndex = this.communityPosts.findIndex((item) => item.id === safePostId);
+    if (postIndex < 0) return undefined;
+    const post = this.communityPosts[postIndex];
+    if (!post) return undefined;
+    const updatedPost: CommunityPost = {
+      ...post,
+      title,
+      body,
+      riotGameName: input.riotGameName?.trim() || undefined,
+      riotTagLine: input.riotTagLine?.trim() || undefined,
+      tags: normalizedCommunityTags(input.tags),
+      imageUrl: input.imageUrl !== undefined ? input.imageUrl.trim() || undefined : post.imageUrl,
+      imageAlt: input.imageAlt !== undefined ? input.imageAlt.trim() || undefined : post.imageAlt,
+      updatedAt: nowIso()
+    };
+    this.communityPosts = this.communityPosts.map((item, index) => (index === postIndex ? updatedPost : item));
+    this.persistCommunityState();
+    return cloneCommunityPost(updatedPost);
+  }
+
+  addCommunityPostComment(postId: string, input: CommunityPostCommentCreateInput & CommunityPostCommentAuthorInput): CommunityPost | undefined {
+    this.cleanupExpiredPartyCommunityPosts();
+    const safePostId = postId.trim();
+    const body = input.body.trim();
+    const authorTwitchUserId = input.authorTwitchUserId.trim();
+    const authorTwitchLogin = input.authorTwitchLogin.trim();
+    const authorDisplayName = input.authorDisplayName.trim();
+    if (!safePostId || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
+    const postIndex = this.communityPosts.findIndex((item) => item.id === safePostId);
+    if (postIndex < 0) return undefined;
+    const post = this.communityPosts[postIndex];
+    if (!post || post.category !== "party") return undefined;
+    const comment: CommunityPostComment = {
+      id: newId("comment"),
+      body,
+      authorTwitchUserId,
+      authorTwitchLogin,
+      authorDisplayName,
+      authorProfileImageUrl: input.authorProfileImageUrl?.trim() || undefined,
+      createdAt: nowIso()
+    };
+    const updatedPost: CommunityPost = {
+      ...post,
+      comments: [...post.comments, comment],
+      updatedAt: comment.createdAt
+    };
+    this.communityPosts = this.communityPosts.map((item, index) => (index === postIndex ? updatedPost : item));
+    this.persistCommunityState();
+    return cloneCommunityPost(updatedPost);
   }
 
   private uniqueTournamentSlug(base: string, existingId?: string): string {

@@ -13,6 +13,8 @@ import {
   validateBotAction,
   type BotAction,
   type CommunityPost,
+  type CommunityPostCategory,
+  type CommunityPostCommentCreateInput,
   type CommunityPostCreateInput,
   type LolChampionSkinOption,
   type LolChampionSummary,
@@ -70,6 +72,7 @@ import { dashboardApiLimiter, dashboardLoginLimiter, oauthLimiter, publicLolApiL
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
+const MAX_COMMUNITY_IMAGE_BYTES = 5_000_000;
 const MAX_PARTICIPATION_INVITE_MESSAGE_LENGTH = 360;
 const MAX_PARTICIPATION_INVITE_BULK_TARGETS = 20;
 const MAX_TWITCH_CHAT_MESSAGE_LENGTH = 500;
@@ -723,7 +726,8 @@ function publicTwitchCallbackUrlForRequest(req: IncomingMessage): string {
   const origin = externalPublicOriginForRequest(req);
   try {
     const configured = new URL(appConfig.twitch.publicRedirectUri);
-    if (isLocalOrigin(origin) && isLocalOrigin(configured.origin)) return configured.toString();
+    if (!isLocalOrigin(origin)) return configured.toString();
+    if (isLocalOrigin(configured.origin)) return configured.toString();
     const pathname = configured.pathname || "/api/public/twitch/auth/callback";
     return `${origin}${pathname}${configured.search}`;
   } catch {
@@ -742,7 +746,8 @@ function twitchCallbackUrlForRequest(req: IncomingMessage): string {
   const origin = apiOriginForRequest(req);
   try {
     const configured = new URL(appConfig.twitch.redirectUri);
-    if (isLocalOrigin(origin) && isLocalOrigin(configured.origin)) return configured.toString();
+    if (!isLocalOrigin(origin)) return configured.toString();
+    if (isLocalOrigin(configured.origin)) return configured.toString();
     const pathname = configured.pathname || "/api/twitch/auth/callback";
     return `${origin}${pathname}${configured.search}`;
   } catch {
@@ -999,6 +1004,31 @@ function isGifBytes(data: Buffer): boolean {
   return signature === "GIF87a" || signature === "GIF89a";
 }
 
+function communityAssetRoot(): string {
+  return path.resolve(appConfig.paths.state, "community-assets");
+}
+
+function communityImageExtension(file: MultipartPart): "png" | "jpg" | "gif" | "webp" | undefined {
+  const type = file.contentType?.toLowerCase().split(";")[0]?.trim();
+  if (file.data.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return type === undefined || type === "image/png" ? "png" : undefined;
+  }
+  if (file.data.byteLength >= 3 && file.data[0] === 0xff && file.data[1] === 0xd8 && file.data[2] === 0xff) {
+    return type === undefined || type === "image/jpeg" || type === "image/jpg" ? "jpg" : undefined;
+  }
+  if (isGifBytes(file.data)) {
+    return type === undefined || type === "image/gif" ? "gif" : undefined;
+  }
+  if (
+    file.data.byteLength >= 12 &&
+    file.data.subarray(0, 4).toString("ascii") === "RIFF" &&
+    file.data.subarray(8, 12).toString("ascii") === "WEBP"
+  ) {
+    return type === undefined || type === "image/webp" ? "webp" : undefined;
+  }
+  return undefined;
+}
+
 function multipartText(parts: MultipartPart[], name: string): string | undefined {
   const part = parts.find((item) => item.name === name && !item.filename);
   return part ? part.data.toString("utf8").trim() : undefined;
@@ -1247,6 +1277,26 @@ async function sendOverlayAlertAsset(req: IncomingMessage, res: ServerResponse, 
     ? path.resolve(alertAssetRoot())
     : path.resolve(appConfig.paths.overlayStatic, "alerts");
   const relative = decodeUrlPathSegment(pathname.slice(pathname.startsWith(uploadPrefix) ? uploadPrefix.length : "/alerts/".length));
+  if (relative === undefined) {
+    sendInvalidStaticPath(req, res);
+    return true;
+  }
+  const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
+  const candidate = path.resolve(root, normalized);
+  if (candidate !== root && !candidate.startsWith(`${root}${path.sep}`)) {
+    res.writeHead(403, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
+    res.end(JSON.stringify({ error: "forbidden" }));
+    return true;
+  }
+  await sendStaticFile(req, res, candidate);
+  return true;
+}
+
+async function sendCommunityAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
+  const uploadPrefix = "/community/uploads/";
+  if (!pathname.startsWith(uploadPrefix)) return false;
+  const root = communityAssetRoot();
+  const relative = decodeUrlPathSegment(pathname.slice(uploadPrefix.length));
   if (relative === undefined) {
     sendInvalidStaticPath(req, res);
     return true;
@@ -2123,6 +2173,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   async function getTwitchStatus() {
     const status = await input.twitchAuth.getStatus();
+    if (status.refreshed && status.connected) {
+      input.eventSub?.reconnect("twitch.oauth.auto_refreshed");
+    }
     return {
       ...status,
       eventSub: input.store.getTwitchEventSubStatus(),
@@ -2540,11 +2593,82 @@ export function createHttpHandler(input: HttpHandlerInput) {
       .slice(0, maxLength);
   }
 
-  function listCommunityPosts(limit: number): CommunityPost[] {
-    const storeWithCommunity = input.store as Store & { listCommunityPosts?: (limit?: number) => CommunityPost[] };
+  function communityTags(value: unknown): string[] {
+    const rawTags = Array.isArray(value)
+      ? value
+      : typeof value === "string"
+        ? value.split(",")
+        : [];
+    const tags: string[] = [];
+    for (const rawTag of rawTags) {
+      if (typeof rawTag !== "string") continue;
+      const tag = communityText(rawTag.replace(/^#+/, ""), 20);
+      if (!tag || tags.includes(tag)) continue;
+      tags.push(tag);
+      if (tags.length >= 5) break;
+    }
+    return tags;
+  }
+
+  function communityCategory(value: unknown): CommunityPostCategory {
+    return value === "party" ? "party" : "server";
+  }
+
+  function communityPositiveInt(value: unknown, max: number): number | undefined {
+    const numberValue = Number(value);
+    if (!Number.isFinite(numberValue) || numberValue <= 0) return undefined;
+    return Math.max(1, Math.min(max, Math.trunc(numberValue)));
+  }
+
+  function isSafeCommunityImageUrl(value: string | undefined): boolean {
+    return Boolean(value && /^\/community\/uploads\/[a-z0-9._-]+\.(?:png|jpe?g|gif|webp)$/i.test(value));
+  }
+
+  async function saveCommunityImage(file: MultipartPart | undefined): Promise<{ imageUrl?: string; imageAlt?: string }> {
+    if (!file || !file.filename || file.data.byteLength === 0) return {};
+    if (file.data.byteLength > MAX_COMMUNITY_IMAGE_BYTES) {
+      throw new HttpRequestError(400, { error: "이미지는 5MB 이하로 등록해주세요." });
+    }
+    const ext = communityImageExtension(file);
+    if (!ext) {
+      throw new HttpRequestError(400, { error: "PNG, JPG, GIF, WEBP 이미지만 등록할 수 있습니다." });
+    }
+    const fileName = `community-${Date.now()}-${crypto.randomBytes(4).toString("hex")}.${ext}`;
+    const root = communityAssetRoot();
+    await fs.mkdir(root, { recursive: true });
+    await fs.writeFile(path.join(root, fileName), file.data, { mode: 0o644 });
+    return {
+      imageUrl: `/community/uploads/${fileName}`,
+      imageAlt: file.filename.slice(0, 120)
+    };
+  }
+
+  function listCommunityPosts(limit: number, category?: CommunityPostCategory): CommunityPost[] {
+    const storeWithCommunity = input.store as Store & { listCommunityPosts?: (limit?: number, category?: CommunityPostCategory) => CommunityPost[] };
     return typeof storeWithCommunity.listCommunityPosts === "function"
-      ? storeWithCommunity.listCommunityPosts(limit)
+      ? storeWithCommunity.listCommunityPosts(limit, category)
       : [];
+  }
+
+  function getCommunityPostByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): CommunityPost | undefined {
+    const storeWithCommunity = input.store as Store & { getCommunityPostByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => CommunityPost | undefined };
+    return typeof storeWithCommunity.getCommunityPostByAuthor === "function"
+      ? storeWithCommunity.getCommunityPostByAuthor(twitchUserId, category)
+      : undefined;
+  }
+
+  function countCommunityPostsByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): number {
+    const storeWithCommunity = input.store as Store & { countCommunityPostsByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => number };
+    return typeof storeWithCommunity.countCommunityPostsByAuthor === "function"
+      ? storeWithCommunity.countCommunityPostsByAuthor(twitchUserId, category)
+      : 0;
+  }
+
+  function getCommunityPostById(postId: string | undefined): CommunityPost | undefined {
+    const storeWithCommunity = input.store as Store & { getCommunityPostById?: (postId: string | undefined) => CommunityPost | undefined };
+    return typeof storeWithCommunity.getCommunityPostById === "function"
+      ? storeWithCommunity.getCommunityPostById(postId)
+      : undefined;
   }
 
   function createCommunityPost(inputBody: CommunityPostCreateInput & {
@@ -2554,13 +2678,69 @@ export function createHttpHandler(input: HttpHandlerInput) {
     authorProfileImageUrl?: string;
     authorRiotGameName?: string;
     authorRiotTagLine?: string;
+    riotGameName?: string;
+    riotTagLine?: string;
+    tags?: string[] | string;
+    imageUrl?: string;
+    imageAlt?: string;
+    partyTier?: string;
+    partyRole?: string;
+    partyMode?: string;
+    partyVoice?: string;
+    partyCapacity?: number;
   }): CommunityPost {
-    const storeWithCommunity = input.store as Store & { createCommunityPost?: (body: typeof inputBody) => CommunityPost | undefined };
+    const storeWithCommunity = input.store as Store & {
+      createCommunityPost?: (body: typeof inputBody) => CommunityPost | undefined;
+      getCommunityPostByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => CommunityPost | undefined;
+      countCommunityPostsByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => number;
+    };
     if (typeof storeWithCommunity.createCommunityPost !== "function") {
       throw new HttpRequestError(503, { error: "커뮤니티 저장소를 사용할 수 없습니다." });
     }
+    const category = communityCategory(inputBody.category);
+    if (category === "party" && typeof storeWithCommunity.countCommunityPostsByAuthor === "function" && storeWithCommunity.countCommunityPostsByAuthor(inputBody.authorTwitchUserId, category) >= 2) {
+      throw new HttpRequestError(409, { error: "파티 모집글은 하루에 2개까지 작성할 수 있습니다." });
+    }
+    if (category !== "party" && typeof storeWithCommunity.getCommunityPostByAuthor === "function" && storeWithCommunity.getCommunityPostByAuthor(inputBody.authorTwitchUserId, category)) {
+      throw new HttpRequestError(409, { error: "커뮤니티 게시글은 게시판별 계정당 1개만 작성할 수 있습니다." });
+    }
     const post = storeWithCommunity.createCommunityPost(inputBody);
     if (!post) throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
+    return post;
+  }
+
+  function updateCommunityPost(postId: string, inputBody: CommunityPostCreateInput & {
+    riotGameName?: string;
+    riotTagLine?: string;
+    tags?: string[] | string;
+    imageUrl?: string;
+    imageAlt?: string;
+  }): CommunityPost {
+    const storeWithCommunity = input.store as Store & {
+      updateCommunityPost?: (postId: string, body: typeof inputBody) => CommunityPost | undefined;
+    };
+    if (typeof storeWithCommunity.updateCommunityPost !== "function") {
+      throw new HttpRequestError(503, { error: "커뮤니티 저장소를 사용할 수 없습니다." });
+    }
+    const post = storeWithCommunity.updateCommunityPost(postId, inputBody);
+    if (!post) throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
+    return post;
+  }
+
+  function addCommunityPostComment(postId: string, inputBody: CommunityPostCommentCreateInput & {
+    authorTwitchUserId: string;
+    authorTwitchLogin: string;
+    authorDisplayName: string;
+    authorProfileImageUrl?: string;
+  }): CommunityPost {
+    const storeWithCommunity = input.store as Store & {
+      addCommunityPostComment?: (postId: string, body: typeof inputBody) => CommunityPost | undefined;
+    };
+    if (typeof storeWithCommunity.addCommunityPostComment !== "function") {
+      throw new HttpRequestError(503, { error: "커뮤니티 저장소를 사용할 수 없습니다." });
+    }
+    const post = storeWithCommunity.addCommunityPostComment(postId, inputBody);
+    if (!post) throw new HttpRequestError(404, { error: "댓글을 작성할 파티모집 글을 찾을 수 없습니다." });
     return post;
   }
 
@@ -2835,23 +3015,205 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!status.connected || !status.user) {
       throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 작성할 수 있습니다." });
     }
-    const body = await readJsonBody<CommunityPostCreateInput>(req);
-    const title = communityText(body.title, 80);
-    const content = communityText(body.body, 2000);
+    const contentType = requestHeaderValue(req, "content-type") ?? "";
+    let category: CommunityPostCategory = "server";
+    let title = "";
+    let content = "";
+    let rawRiotId = "";
+    let tags: string[] = [];
+    let partyTier: string | undefined;
+    let partyRole: string | undefined;
+    let partyMode: string | undefined;
+    let partyVoice: string | undefined;
+    let partyCapacity: number | undefined;
+    let imageUrl: string | undefined;
+    let imageAlt: string | undefined;
+
+    if (/^multipart\/form-data\b/i.test(contentType)) {
+      const parts = parseMultipartBody(req, await readRawBody(req, MAX_COMMUNITY_IMAGE_BYTES + MAX_JSON_BODY_BYTES));
+      category = communityCategory(multipartText(parts, "category"));
+      title = communityText(multipartText(parts, "title"), 80);
+      content = communityText(multipartText(parts, "body"), 2000);
+      rawRiotId = communityText(multipartText(parts, "riotId"), 80);
+      tags = communityTags(multipartText(parts, "tags"));
+      partyTier = communityText(multipartText(parts, "partyTier"), 24) || undefined;
+      partyRole = communityText(multipartText(parts, "partyRole"), 24) || undefined;
+      partyMode = communityText(multipartText(parts, "partyMode"), 32) || undefined;
+      partyVoice = communityText(multipartText(parts, "partyVoice"), 32) || undefined;
+      partyCapacity = communityPositiveInt(multipartText(parts, "partyCapacity"), 5);
+      const image = await saveCommunityImage(parts.find((part) => (part.name === "image" || part.name === "file") && part.filename));
+      imageUrl = image.imageUrl;
+      imageAlt = image.imageAlt;
+    } else {
+      const body = await readJsonBody<CommunityPostCreateInput>(req);
+      category = communityCategory(body.category);
+      title = communityText(body.title, 80);
+      content = communityText(body.body, 2000);
+      rawRiotId = communityText(body.riotId, 80);
+      tags = communityTags(body.tags);
+      partyTier = communityText(body.partyTier, 24) || undefined;
+      partyRole = communityText(body.partyRole, 24) || undefined;
+      partyMode = communityText(body.partyMode, 32) || undefined;
+      partyVoice = communityText(body.partyVoice, 32) || undefined;
+      partyCapacity = communityPositiveInt(body.partyCapacity, 5);
+      const requestedImageUrl = communityText(body.imageUrl, 220);
+      if (requestedImageUrl && !isSafeCommunityImageUrl(requestedImageUrl)) {
+        throw new HttpRequestError(400, { error: "이미지는 파일 업로드 또는 저장된 커뮤니티 이미지 경로만 사용할 수 있습니다." });
+      }
+      imageUrl = requestedImageUrl || undefined;
+      imageAlt = communityText(body.imageAlt, 120) || undefined;
+    }
+
     if (!title || !content) {
       throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
+    }
+    if (category === "party" && countCommunityPostsByAuthor(status.user.id, category) >= 2) {
+      throw new HttpRequestError(409, { error: "파티 모집글은 하루에 2개까지 작성할 수 있습니다." });
+    }
+    if (category !== "party" && getCommunityPostByAuthor(status.user.id, category)) {
+      throw new HttpRequestError(409, { error: "커뮤니티 게시글은 게시판별 계정당 1개만 작성할 수 있습니다." });
+    }
+    let riotGameName: string | undefined;
+    let riotTagLine: string | undefined;
+    if (rawRiotId) {
+      const parsed = parseRiotIdDetailed(rawRiotId);
+      if (!parsed.ok) {
+        throw new HttpRequestError(400, { error: parsed.message });
+      }
+      riotGameName = parsed.gameName;
+      riotTagLine = parsed.tagLine;
     }
     const streamerRiotRequest = currentStreamerRiotIdRequestForTwitchUser(status.user.id);
     const approvedRiotRequest = streamerRiotRequest?.status === "approved" ? streamerRiotRequest : undefined;
     return createCommunityPost({
+      category,
       title,
       body: content,
+      riotGameName,
+      riotTagLine,
+      tags,
+      imageUrl,
+      imageAlt,
+      partyTier,
+      partyRole,
+      partyMode,
+      partyVoice,
+      partyCapacity,
       authorTwitchUserId: status.user.id,
       authorTwitchLogin: status.user.login,
       authorDisplayName: status.user.displayName || status.user.login,
       authorProfileImageUrl: status.user.profileImageUrl,
       authorRiotGameName: approvedRiotRequest?.riotGameName,
       authorRiotTagLine: approvedRiotRequest?.riotTagLine
+    });
+  }
+
+  async function updatePublicCommunityPost(req: IncomingMessage, postId: string): Promise<CommunityPost> {
+    if (!input.publicTwitchAuth) {
+      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
+    }
+    const currentPost = getCommunityPostById(postId);
+    if (!currentPost) {
+      throw new HttpRequestError(404, { error: "수정할 게시글을 찾을 수 없습니다." });
+    }
+    if (currentPost.category !== "server") {
+      throw new HttpRequestError(400, { error: "서버 모집 글만 수정할 수 있습니다." });
+    }
+    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
+    const status = await input.publicTwitchAuth.getStatus(sessionId);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 수정할 수 있습니다." });
+    }
+    if (currentPost.authorTwitchUserId !== status.user.id) {
+      throw new HttpRequestError(403, { error: "본인이 작성한 게시글만 수정할 수 있습니다." });
+    }
+
+    const contentType = requestHeaderValue(req, "content-type") ?? "";
+    let title = "";
+    let content = "";
+    let rawRiotId = "";
+    let tags: string[] = [];
+    let imageUrl: string | undefined;
+    let imageAlt: string | undefined;
+    let hasImageReplacement = false;
+
+    if (/^multipart\/form-data\b/i.test(contentType)) {
+      const parts = parseMultipartBody(req, await readRawBody(req, MAX_COMMUNITY_IMAGE_BYTES + MAX_JSON_BODY_BYTES));
+      title = communityText(multipartText(parts, "title"), 80);
+      content = communityText(multipartText(parts, "body"), 2000);
+      rawRiotId = communityText(multipartText(parts, "riotId"), 80);
+      tags = communityTags(multipartText(parts, "tags"));
+      const image = await saveCommunityImage(parts.find((part) => (part.name === "image" || part.name === "file") && part.filename));
+      imageUrl = image.imageUrl;
+      imageAlt = image.imageAlt;
+      hasImageReplacement = Boolean(imageUrl);
+    } else {
+      const body = await readJsonBody<CommunityPostCreateInput>(req);
+      title = communityText(body.title, 80);
+      content = communityText(body.body, 2000);
+      rawRiotId = communityText(body.riotId, 80);
+      tags = communityTags(body.tags);
+      const requestedImageUrl = communityText(body.imageUrl, 220);
+      if (requestedImageUrl && !isSafeCommunityImageUrl(requestedImageUrl)) {
+        throw new HttpRequestError(400, { error: "이미지는 파일 업로드 또는 저장된 커뮤니티 이미지 경로만 사용할 수 있습니다." });
+      }
+      if (requestedImageUrl) {
+        imageUrl = requestedImageUrl;
+        imageAlt = communityText(body.imageAlt, 120) || undefined;
+        hasImageReplacement = true;
+      }
+    }
+
+    if (!title || !content) {
+      throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
+    }
+
+    let riotGameName: string | undefined;
+    let riotTagLine: string | undefined;
+    if (rawRiotId) {
+      const parsed = parseRiotIdDetailed(rawRiotId);
+      if (!parsed.ok) {
+        throw new HttpRequestError(400, { error: parsed.message });
+      }
+      riotGameName = parsed.gameName;
+      riotTagLine = parsed.tagLine;
+    }
+
+    return updateCommunityPost(postId, {
+      category: "server",
+      title,
+      body: content,
+      riotGameName,
+      riotTagLine,
+      tags,
+      ...(hasImageReplacement ? { imageUrl, imageAlt } : {})
+    });
+  }
+
+  async function createPublicCommunityComment(req: IncomingMessage, postId: string): Promise<CommunityPost> {
+    if (!input.publicTwitchAuth) {
+      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
+    }
+    const currentPost = getCommunityPostById(postId);
+    if (!currentPost || currentPost.category !== "party") {
+      throw new HttpRequestError(404, { error: "댓글을 작성할 파티모집 글을 찾을 수 없습니다." });
+    }
+    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
+    const status = await input.publicTwitchAuth.getStatus(sessionId);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 댓글을 작성할 수 있습니다." });
+    }
+    const body = await readJsonBody<CommunityPostCommentCreateInput>(req);
+    const commentBody = communityText(body.body, 500);
+    if (!commentBody) {
+      throw new HttpRequestError(400, { error: "댓글 내용을 입력해주세요." });
+    }
+    return addCommunityPostComment(postId, {
+      body: commentBody,
+      authorTwitchUserId: status.user.id,
+      authorTwitchLogin: status.user.login,
+      authorDisplayName: status.user.displayName || status.user.login,
+      authorProfileImageUrl: status.user.profileImageUrl
     });
   }
 
@@ -3752,6 +4114,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
       }
       if ((req.method === "GET" || req.method === "HEAD") && await sendOverlayAlertAsset(req, res, url.pathname)) return;
+      if ((req.method === "GET" || req.method === "HEAD") && await sendCommunityAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendLocalTtsAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendRankedEmblemAsset(req, res, url.pathname)) return;
       if (
@@ -3856,11 +4219,24 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/public/community/posts") {
         const limit = Math.max(1, Math.min(100, Math.trunc(Number(url.searchParams.get("limit")) || 50)));
-        return sendJson(req, res, 200, { posts: listCommunityPosts(limit) });
+        const category = url.searchParams.has("category") ? communityCategory(url.searchParams.get("category")) : undefined;
+        return sendJson(req, res, 200, { posts: listCommunityPosts(limit, category) });
       }
       if (req.method === "POST" && url.pathname === "/api/public/community/posts") {
         const post = await createPublicCommunityPost(req);
-        return sendJson(req, res, 201, { post, posts: listCommunityPosts(50) });
+        return sendJson(req, res, 201, { post, posts: listCommunityPosts(50, post.category) });
+      }
+      const communityPostMatch = url.pathname.match(/^\/api\/public\/community\/posts\/([^/]+)$/);
+      if (req.method === "PATCH" && communityPostMatch) {
+        const postId = decodeURIComponent(communityPostMatch[1] ?? "");
+        const post = await updatePublicCommunityPost(req, postId);
+        return sendJson(req, res, 200, { post, posts: listCommunityPosts(50, post.category) });
+      }
+      const communityCommentMatch = url.pathname.match(/^\/api\/public\/community\/posts\/([^/]+)\/comments$/);
+      if (req.method === "POST" && communityCommentMatch) {
+        const postId = decodeURIComponent(communityCommentMatch[1] ?? "");
+        const post = await createPublicCommunityComment(req, postId);
+        return sendJson(req, res, 201, { post, posts: listCommunityPosts(50, post.category) });
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/status") {
         return sendJson(req, res, 200, await getPublicTwitchViewerStatus(req));
@@ -4372,6 +4748,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
       if (req.method === "POST" && url.pathname === "/api/twitch/token/refresh") {
         await input.twitchAuth.refreshStoredToken();
+        input.eventSub?.reconnect("dashboard.token_refresh");
         return sendJson(req, res, 200, await getTwitchStatus());
       }
 

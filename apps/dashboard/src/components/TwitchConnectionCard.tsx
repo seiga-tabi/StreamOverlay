@@ -24,6 +24,8 @@ const i18n = {
     grantedScopes: "승인된 권한",
     requiredScopes: "필수 권한",
     missingScopeWarning: "누락된 권한이 있습니다. 다시 연결해 권한을 승인해주세요.",
+    tokenRefreshWarning: "저장된 Twitch token 자동 갱신에 실패했습니다.",
+    reconnectRequired: "권한 다시 승인으로 Twitch를 다시 연결해주세요.",
     legacyConfigured: ".env 기반 Twitch token이 설정되어 있습니다. OAuth 연결 후에는 OAuth token을 우선 사용합니다.",
     none: "없음",
     refreshDone: "토큰 상태를 갱신했습니다.",
@@ -67,6 +69,8 @@ const i18n = {
     grantedScopes: "承認済み権限",
     requiredScopes: "必須権限",
     missingScopeWarning: "不足している権限があります。再接続して権限を承認してください。",
+    tokenRefreshWarning: "保存済み Twitch token の自動更新に失敗しました。",
+    reconnectRequired: "権限を再承認して Twitch を再接続してください。",
     legacyConfigured: ".env ベースの Twitch token が設定されています。OAuth 接続後は OAuth token を優先します。",
     none: "なし",
     refreshDone: "トークン状態を更新しました。",
@@ -255,6 +259,13 @@ export function TwitchConnectionCard() {
         <div className="scope-warning">
           <strong>{t.missingScopeWarning}</strong>
           <div className="chips">{status.missingScopes.map((scope) => <code key={scope}>{scope}</code>)}</div>
+        </div>
+      ) : null}
+      {status?.error ? (
+        <div className="scope-warning">
+          <strong>{t.tokenRefreshWarning}</strong>
+          <p className="muted">{status.error}</p>
+          <p className="muted">{t.reconnectRequired}</p>
         </div>
       ) : null}
       {status?.eventSub?.missingScopes.length ? (
