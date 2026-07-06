@@ -7998,7 +7998,7 @@ code {
   grid-column: 1 / -1;
   grid-row: 2;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(300px, 1.25fr) repeat(3, minmax(0, 1fr));
   gap: 10px;
   position: relative;
   z-index: 2;
@@ -8160,99 +8160,112 @@ code {
   font-weight: 950;
 }
 
-.public-play-activity-card {
+.public-recent-champions-card {
   --metric-accent: #3b82f6;
   --metric-accent-soft: #7dd3fc;
   --metric-bg: #e9f7ff;
-  gap: 9px;
+  gap: 10px;
+  align-content: start;
 }
 
-.public-play-activity-summary {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+.public-recent-champions-card .public-profile-metric-label small {
+  width: auto;
+  height: auto;
+  padding: 3px 7px;
+  background: #e9f7ff;
+  color: #3b82f6;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.public-recent-champion-list {
+  display: grid;
   gap: 8px;
   min-width: 0;
 }
 
-.public-play-activity-summary strong {
+.public-recent-champion-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
   min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid rgba(126, 177, 223, .28);
+  border-radius: 10px;
+  background: rgba(239, 248, 255, .72);
+}
+
+.public-recent-champion-row img,
+.public-recent-champion-fallback {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(126, 177, 223, .46);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 6px 14px rgba(68, 112, 190, .12);
+}
+
+.public-recent-champion-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #60a5fa, #7c3aed);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.public-recent-champion-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.public-recent-champion-main strong {
   overflow: hidden;
   color: #10233f;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 950;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.public-play-activity-summary small {
-  flex: 0 0 auto;
-  color: #607794;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.public-play-activity-grid {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 9px;
-  grid-template-rows: repeat(7, 9px);
-  gap: 3px;
-  align-content: center;
-  justify-content: end;
-  min-height: 73px;
-  padding: 2px;
-}
-
-.public-play-activity-cell {
-  width: 9px;
-  height: 9px;
-  min-width: 9px;
-  min-height: 9px;
-  border: 1px solid rgba(126, 177, 223, .42);
-  border-radius: 3px;
-  background: #eef8ff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72);
-}
-
-.public-play-activity-cell.level-1 {
-  background: #d5f1ff;
-}
-
-.public-play-activity-cell.level-2 {
-  background: #bfe3ff;
-}
-
-.public-play-activity-cell.level-3 {
-  background: #7cc8ff;
-}
-
-.public-play-activity-cell.level-4 {
-  background: #3b82f6;
-  border-color: rgba(37, 99, 235, .56);
-  box-shadow: 0 0 10px rgba(59, 130, 246, .28);
-}
-
-.public-play-activity-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: #526984;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.public-play-activity-footer span {
-  min-width: 0;
+.public-recent-champion-main small {
   overflow: hidden;
+  color: #637795;
+  font-size: 11px;
+  font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.public-play-activity-footer em {
-  justify-self: auto;
-  flex: 0 0 auto;
+.public-recent-champion-score {
+  min-width: 64px;
+  text-align: right;
+}
+
+.public-recent-champion-score strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.public-recent-champion-score small {
+  display: block;
+  color: #637795;
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.public-recent-champions-empty {
+  margin: 0;
+  padding: 18px 10px;
+  border-radius: 10px;
+  background: rgba(239, 248, 255, .72);
+  color: #637795;
+  font-size: 12px;
+  font-weight: 850;
+  text-align: center;
 }
 
 .public-profile-tabs {
@@ -8878,22 +8891,24 @@ code {
     font-size: 21px;
   }
 
-  .public-play-activity-grid {
-    grid-auto-columns: 8px;
-    grid-template-rows: repeat(7, 8px);
-    min-height: 64px;
-    gap: 2px;
+  .public-recent-champion-row {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 6px;
   }
 
-  .public-play-activity-cell {
-    width: 8px;
-    height: 8px;
-    min-width: 8px;
-    min-height: 8px;
+  .public-recent-champion-row img,
+  .public-recent-champion-fallback {
+    width: 30px;
+    height: 30px;
   }
 
-  .public-play-activity-summary strong {
-    font-size: 14px;
+  .public-recent-champion-main strong {
+    font-size: 12px;
+  }
+
+  .public-recent-champion-score {
+    min-width: 54px;
   }
 
   .public-profile-tabs {
@@ -10450,7 +10465,7 @@ code {
 }
 
 .public-dashboard-shell .public-profile-metric-strip {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(300px, 1.25fr) repeat(3, minmax(0, 1fr));
   background: rgba(251, 253, 255, .96);
 }
 
@@ -16343,6 +16358,7 @@ code {
 
   .public-dashboard-shell .public-profile-metric-strip {
     grid-row: 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .public-overview-dashboard-panel {
@@ -21749,35 +21765,20 @@ code {
   color: var(--metric-accent) !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-summary strong {
+.public-dashboard-shell:not(.public-home-shell) .public-recent-champion-main strong {
   color: var(--seiga-pastel-heading) !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-summary small,
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-footer {
+.public-dashboard-shell:not(.public-home-shell) .public-recent-champion-main small,
+.public-dashboard-shell:not(.public-home-shell) .public-recent-champion-score small,
+.public-dashboard-shell:not(.public-home-shell) .public-recent-champions-empty {
   color: #526984 !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-cell {
-  border-color: rgba(126, 177, 223, .5) !important;
-  background: #eef8ff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-cell.level-1 {
-  background: #d5f1ff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-cell.level-2 {
-  background: #bfe3ff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-cell.level-3 {
-  background: #7cc8ff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-play-activity-cell.level-4 {
-  background: #3b82f6 !important;
-  border-color: rgba(37, 99, 235, .62) !important;
+.public-dashboard-shell:not(.public-home-shell) .public-recent-champion-row,
+.public-dashboard-shell:not(.public-home-shell) .public-recent-champions-empty {
+  border-color: rgba(126, 177, 223, .38) !important;
+  background: rgba(239, 248, 255, .82) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-rank-overview-card span,

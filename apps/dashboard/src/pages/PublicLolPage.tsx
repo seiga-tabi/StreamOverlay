@@ -357,12 +357,13 @@ type PublicTrendLine = {
   endLabel: string;
 };
 
-type PublicPlayActivityDay = {
-  key: string;
-  date: Date;
+type PublicRecentChampionSummary = {
+  champion: LolChampionSummary;
   games: number;
-  minutes: number;
-  level: 0 | 1 | 2 | 3 | 4;
+  wins: number;
+  losses: number;
+  winRate: number;
+  averageKda: number;
 };
 
 type PublicLolProfile = {
@@ -550,12 +551,10 @@ const publicI18n = {
     expandMatch: "경기 상세 펼치기",
     collapseMatch: "경기 상세 접기",
     aiScore: "점수",
-    playActivityTitle: "플레이 기록",
-    playActivityPeriod: "최근 5주",
-    playActivityEmpty: "최근 플레이 기록 없음",
-    playActivityGamesUnit: "게임",
-    playActivityHoursUnit: "시간",
-    playActivityMinutesUnit: "분",
+    recentChampionsTitle: "플레이한 챔피언",
+    recentChampionsPeriod: "최근 20게임",
+    recentChampionsEmpty: "최근 챔피언 기록 없음",
+    rating: "평점",
     mvpBadge: "MVP",
     aceBadge: "ACE",
     unstoppableBadge: "저지불가",
@@ -951,12 +950,10 @@ const publicI18n = {
     expandMatch: "試合詳細を開く",
     collapseMatch: "試合詳細を閉じる",
     aiScore: "スコア",
-    playActivityTitle: "プレイ記録",
-    playActivityPeriod: "直近5週間",
-    playActivityEmpty: "最近のプレイ記録なし",
-    playActivityGamesUnit: "試合",
-    playActivityHoursUnit: "時間",
-    playActivityMinutesUnit: "分",
+    recentChampionsTitle: "プレイしたチャンピオン",
+    recentChampionsPeriod: "直近20試合",
+    recentChampionsEmpty: "最近のチャンピオン記録なし",
+    rating: "評価",
     mvpBadge: "MVP",
     aceBadge: "ACE",
     unstoppableBadge: "止められない",
@@ -2800,79 +2797,54 @@ function topPercentText(percent: number): string {
   return `${t().topPercentPrefix} ${percent}%`;
 }
 
-const playActivityWindowDays = 35;
+const recentChampionSummaryLimit = 20;
+const recentChampionDisplayLimit = 3;
 
-function localDayStart(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
+function recentChampionSummaries(matches: PublicLolRecentMatch[]): PublicRecentChampionSummary[] {
+  const buckets = new Map<number, {
+    champion: LolChampionSummary;
+    games: number;
+    wins: number;
+    losses: number;
+    kills: number;
+    deaths: number;
+    assists: number;
+    firstIndex: number;
+  }>();
 
-function localDateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function playActivityLevel(games: number, minutes: number): PublicPlayActivityDay["level"] {
-  if (games <= 0) return 0;
-  if (games >= 5 || minutes >= 180) return 4;
-  if (games >= 3 || minutes >= 100) return 3;
-  if (games >= 2 || minutes >= 50) return 2;
-  return 1;
-}
-
-function buildPlayActivity(matches: PublicLolRecentMatch[]): PublicPlayActivityDay[] {
-  const today = localDayStart(new Date());
-  const firstDay = new Date(today);
-  firstDay.setDate(today.getDate() - (playActivityWindowDays - 1));
-  const buckets = new Map<string, { games: number; minutes: number }>();
-
-  for (const match of matches) {
-    if (!match.startedAt) continue;
-    const startedAt = new Date(match.startedAt);
-    if (Number.isNaN(startedAt.getTime())) continue;
-    const day = localDayStart(startedAt);
-    if (day < firstDay || day > today) continue;
-    const key = localDateKey(day);
-    const bucket = buckets.get(key) ?? { games: 0, minutes: 0 };
-    bucket.games += 1;
-    bucket.minutes += Math.max(1, Math.round((match.durationSeconds ?? 0) / 60));
-    buckets.set(key, bucket);
-  }
-
-  return Array.from({ length: playActivityWindowDays }, (_, index) => {
-    const date = new Date(firstDay);
-    date.setDate(firstDay.getDate() + index);
-    const key = localDateKey(date);
-    const bucket = buckets.get(key) ?? { games: 0, minutes: 0 };
-    return {
-      key,
-      date,
-      games: bucket.games,
-      minutes: bucket.minutes,
-      level: playActivityLevel(bucket.games, bucket.minutes)
+  matches.slice(0, recentChampionSummaryLimit).forEach((match, index) => {
+    const championId = match.champion.championId;
+    const bucket = buckets.get(championId) ?? {
+      champion: match.champion,
+      games: 0,
+      wins: 0,
+      losses: 0,
+      kills: 0,
+      deaths: 0,
+      assists: 0,
+      firstIndex: index
     };
+
+    bucket.games += 1;
+    if (match.result === "win") bucket.wins += 1;
+    if (match.result === "loss") bucket.losses += 1;
+    bucket.kills += match.kills;
+    bucket.deaths += match.deaths;
+    bucket.assists += match.assists;
+    buckets.set(championId, bucket);
   });
-}
 
-function formatPlayActivityDuration(minutes: number): string {
-  if (minutes <= 0) return `0${t().playActivityMinutesUnit}`;
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  if (hours <= 0) return `${remainingMinutes}${t().playActivityMinutesUnit}`;
-  if (remainingMinutes <= 0) return `${hours}${t().playActivityHoursUnit}`;
-  return `${hours}${t().playActivityHoursUnit} ${remainingMinutes}${t().playActivityMinutesUnit}`;
-}
-
-function formatPlayActivityDate(date: Date): string {
-  return date.toLocaleDateString(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
-    month: "numeric",
-    day: "numeric"
-  });
-}
-
-function playActivityCellLabel(day: PublicPlayActivityDay): string {
-  return `${formatPlayActivityDate(day.date)} · ${day.games}${t().playActivityGamesUnit} · ${formatPlayActivityDuration(day.minutes)}`;
+  return Array.from(buckets.values())
+    .sort((a, b) => b.games - a.games || b.wins - a.wins || a.firstIndex - b.firstIndex)
+    .slice(0, recentChampionDisplayLimit)
+    .map((bucket) => ({
+      champion: bucket.champion,
+      games: bucket.games,
+      wins: bucket.wins,
+      losses: bucket.losses,
+      winRate: winRateFromTotals(bucket.wins, bucket.games),
+      averageKda: kdaFromTotals(bucket.kills, bucket.deaths, bucket.assists)
+    }));
 }
 
 function estimatedLpDelta(match: PublicLolRecentMatch): number {
@@ -3382,37 +3354,47 @@ function TwitchStreamOverviewCard({ stream }: { stream: PublicLolTwitchStream | 
   );
 }
 
-function ProfilePlayActivityCard({ days }: { days: PublicPlayActivityDay[] }) {
-  const totalGames = days.reduce((sum, day) => sum + day.games, 0);
-  const totalMinutes = days.reduce((sum, day) => sum + day.minutes, 0);
-
+function ProfileRecentChampionsCard({ champions }: { champions: PublicRecentChampionSummary[] }) {
+  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
+  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
   return (
-    <article className="public-profile-metric-card blue public-play-activity-card">
+    <article className="public-profile-metric-card blue public-recent-champions-card">
       <div className="public-profile-metric-head">
-        <span className="public-profile-metric-icon" aria-hidden="true">▦</span>
+        <span className="public-profile-metric-icon" aria-hidden="true">◇</span>
         <span className="public-profile-metric-label">
-          <span data-ko={publicI18n.ko.playActivityTitle} data-ja={publicI18n.ja.playActivityTitle}>{t().playActivityTitle}</span>
-          <small aria-hidden="true">?</small>
+          <span data-ko={publicI18n.ko.recentChampionsTitle} data-ja={publicI18n.ja.recentChampionsTitle}>{t().recentChampionsTitle}</span>
+          <small>{t().recentChampionsPeriod}</small>
         </span>
       </div>
-      <div className="public-play-activity-summary">
-        <strong>{totalGames > 0 ? `${totalGames}${t().playActivityGamesUnit}` : t().playActivityEmpty}</strong>
-        <small data-ko={publicI18n.ko.playActivityPeriod} data-ja={publicI18n.ja.playActivityPeriod}>{t().playActivityPeriod}</small>
-      </div>
-      <div className="public-play-activity-grid" aria-label={t().playActivityTitle}>
-        {days.map((day) => (
-          <span
-            className={`public-play-activity-cell level-${day.level}`}
-            title={playActivityCellLabel(day)}
-            aria-label={playActivityCellLabel(day)}
-            key={day.key}
-          />
-        ))}
-      </div>
-      <div className="public-play-activity-footer">
-        <span>{formatPlayActivityDuration(totalMinutes)}</span>
-        <em>{t().playActivityPeriod}</em>
-      </div>
+      {champions.length > 0 ? (
+        <div className="public-recent-champion-list">
+          {champions.map((item) => {
+            const name = championName(item.champion);
+            const iconUrl = assetUrl(item.champion.iconUrl);
+            return (
+              <div className="public-recent-champion-row" key={item.champion.championId}>
+                {iconUrl ? (
+                  <img src={iconUrl} alt="" loading="lazy" />
+                ) : (
+                  <span className="public-recent-champion-fallback" aria-hidden="true">{name.slice(0, 1)}</span>
+                )}
+                <div className="public-recent-champion-main">
+                  <strong title={name}>{name}</strong>
+                  <small>{formatPercent(item.winRate)} ({item.wins}{winLabel} / {item.losses}{lossLabel})</small>
+                </div>
+                <div className="public-recent-champion-score">
+                  <strong className={metricToneClass(kdaTone(item.averageKda))}>{formatDecimal(item.averageKda)}</strong>
+                  <small>{t().kda} {t().rating}</small>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="public-recent-champions-empty" data-ko={publicI18n.ko.recentChampionsEmpty} data-ja={publicI18n.ja.recentChampionsEmpty}>
+          {t().recentChampionsEmpty}
+        </p>
+      )}
     </article>
   );
 }
@@ -3421,7 +3403,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
   const recentLosses = Math.max(0, profile.summary.recentGames - profile.summary.recentWins);
   const winLabel = activePublicLocale === "ja" ? "勝" : "승";
   const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
-  const activityDays = buildPlayActivity(profile.recentMatches);
+  const recentChampions = recentChampionSummaries(profile.recentMatches);
   const metricCards = [
     {
       key: "kda",
@@ -3463,7 +3445,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
 
   return (
     <div className="public-profile-metric-strip" aria-label={t().profileSummary}>
-      <ProfilePlayActivityCard days={activityDays} />
+      <ProfileRecentChampionsCard champions={recentChampions} />
       {metricCards.map((card) => (
         <article className={`public-profile-metric-card ${card.tone}`} key={card.key}>
           <div className="public-profile-metric-head">
