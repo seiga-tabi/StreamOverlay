@@ -228,6 +228,7 @@ export type StreamerRiotIdRequest = {
   profileLinkLabel?: string;
   profileLinks?: StreamerProfileLink[];
   status: StreamerRiotIdRequestStatus;
+  dashboardEnabled?: boolean;
   requestedAt: string;
   updatedAt: string;
   reviewedAt?: string;

@@ -366,6 +366,7 @@ function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest 
     profileLinkLabel: primaryProfileLink?.label ?? profileLinkLabel,
     profileLinks,
     status,
+    dashboardEnabled: status === "approved" && input?.dashboardEnabled === true,
     requestedAt,
     updatedAt,
     reviewedAt: optionalString(input?.reviewedAt),
@@ -1491,6 +1492,7 @@ export class Store {
         riotTagLine: input.riotTagLine,
         normalizedRiotId,
         status: "pending" as const,
+        dashboardEnabled: false,
         updatedAt: now,
         reviewedAt: undefined,
         reviewer: undefined,
@@ -1510,6 +1512,7 @@ export class Store {
       riotTagLine: input.riotTagLine,
       normalizedRiotId,
       status: "pending",
+      dashboardEnabled: false,
       requestedAt: now,
       updatedAt: now
     };
@@ -1528,6 +1531,7 @@ export class Store {
     if (!request) return undefined;
     const now = nowIso();
     request.status = input.decision;
+    request.dashboardEnabled = false;
     request.updatedAt = now;
     request.reviewedAt = now;
     request.reviewer = input.reviewer;
@@ -1540,6 +1544,7 @@ export class Store {
       );
       request.overlaySlug = request.overlaySlug || previousApproved?.overlaySlug;
       request.overlayKey = request.overlayKey || previousApproved?.overlayKey;
+      request.dashboardEnabled = previousApproved?.dashboardEnabled === true;
       request.profileLinks = request.profileLinks?.length
         ? cloneStreamerProfileLinks(request.profileLinks)
         : cloneStreamerProfileLinks(previousApproved?.profileLinks);
@@ -1551,12 +1556,31 @@ export class Store {
       for (const candidate of this.streamerRiotIdRequests) {
         if (candidate.id === request.id || candidate.twitchUserId !== request.twitchUserId || candidate.status !== "approved") continue;
         candidate.status = "rejected";
+        candidate.dashboardEnabled = false;
         candidate.updatedAt = now;
         candidate.reviewedAt = now;
         candidate.reviewer = input.reviewer;
         candidate.note = "새 Riot ID 승인으로 이전 승인 기록을 비활성화했습니다.";
       }
     }
+    this.persistStreamerRiotIdState();
+    return cloneStreamerRiotIdRequest(request);
+  }
+
+  setStreamerRiotIdDashboardEnabled(input: {
+    requestId: string;
+    dashboardEnabled: boolean;
+    reviewer?: string;
+    note?: string;
+  }): StreamerRiotIdRequest | undefined {
+    const request = this.streamerRiotIdRequests.find((candidate) => candidate.id === input.requestId);
+    if (!request || request.status !== "approved") return undefined;
+    const now = nowIso();
+    request.dashboardEnabled = input.dashboardEnabled;
+    request.updatedAt = now;
+    request.reviewedAt = now;
+    request.reviewer = input.reviewer;
+    request.note = input.note;
     this.persistStreamerRiotIdState();
     return cloneStreamerRiotIdRequest(request);
   }

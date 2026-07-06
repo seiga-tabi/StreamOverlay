@@ -88,6 +88,11 @@ export type RiotMatchParticipant = {
   summoner1Id?: number;
   summoner2Id?: number;
   perks?: {
+    statPerks?: {
+      defense?: number;
+      flex?: number;
+      offense?: number;
+    };
     styles?: Array<{
       description?: string;
       style?: number;

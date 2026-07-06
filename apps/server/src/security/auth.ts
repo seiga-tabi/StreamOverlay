@@ -31,6 +31,8 @@ export type DashboardSession = {
 };
 
 export const DASHBOARD_SESSION_COOKIE = "streamops_dashboard_session";
+export const ADMIN_DASHBOARD_SESSION_COOKIE = "streamops_admin_session";
+export const STREAMER_DASHBOARD_SESSION_COOKIE = "streamops_streamer_session";
 
 const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -103,8 +105,24 @@ function parseCookies(req: IncomingMessage): Record<string, string> {
   return cookies;
 }
 
-export function dashboardSessionIdFromRequest(req: IncomingMessage): string | undefined {
-  return parseCookies(req)[DASHBOARD_SESSION_COOKIE];
+function dashboardSessionCookieNames(expectedRole?: DashboardRole): string[] {
+  if (expectedRole === "admin") return [ADMIN_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE];
+  if (expectedRole === "streamer") return [STREAMER_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE];
+  return [ADMIN_DASHBOARD_SESSION_COOKIE, STREAMER_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE];
+}
+
+function dashboardSessionIdsFromRequest(req: IncomingMessage, expectedRole?: DashboardRole): string[] {
+  const cookies = parseCookies(req);
+  const ids: string[] = [];
+  for (const name of dashboardSessionCookieNames(expectedRole)) {
+    const id = cookies[name];
+    if (id && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
+}
+
+export function dashboardSessionIdFromRequest(req: IncomingMessage, expectedRole?: DashboardRole): string | undefined {
+  return dashboardSessionIdsFromRequest(req, expectedRole)[0];
 }
 
 function headerValue(value: string | string[] | undefined): string | undefined {
@@ -117,23 +135,41 @@ function bearerToken(req: IncomingMessage): string | undefined {
   return authorization.slice("Bearer ".length);
 }
 
-export function authenticateDashboardRequest(req: IncomingMessage, sessions: DashboardSessionStore): AuthPrincipal | undefined {
-  if (appConfig.security.localNoAuth) return { type: "DASHBOARD_ADMIN", method: "token", role: "admin" };
+function dashboardRoleHintFromRequest(req: IncomingMessage): DashboardRole | undefined {
+  const surface = headerValue(req.headers["x-streamops-dashboard-surface"]);
+  if (surface === "admin" || surface === "streamer") return surface;
+  const referer = headerValue(req.headers.referer);
+  if (!referer) return undefined;
+  try {
+    const pathname = new URL(referer).pathname;
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) return "admin";
+    if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) return "streamer";
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
+export function authenticateDashboardRequest(req: IncomingMessage, sessions: DashboardSessionStore, expectedRole?: DashboardRole): AuthPrincipal | undefined {
+  if (appConfig.security.localNoAuth && expectedRole !== "streamer") return { type: "DASHBOARD_ADMIN", method: "token", role: "admin" };
   const token = appConfig.security.dashboardAuthToken;
-  if (!token) return undefined;
-  if (tokenMatches(token, bearerToken(req)) || tokenMatches(token, headerValue(req.headers["x-streamops-dashboard-token"]))) {
+  if (token && expectedRole !== "streamer" && (tokenMatches(token, bearerToken(req)) || tokenMatches(token, headerValue(req.headers["x-streamops-dashboard-token"])))) {
     return { type: "DASHBOARD_ADMIN", method: "token", role: "admin" };
   }
-  const session = sessions.get(dashboardSessionIdFromRequest(req));
-  if (!session) return undefined;
-  return {
-    type: "DASHBOARD_ADMIN",
-    method: "session",
-    role: session.role,
-    sessionId: session.id,
-    csrfToken: session.csrfToken,
-    twitchUserId: session.twitchUserId
-  };
+  for (const sessionId of dashboardSessionIdsFromRequest(req, expectedRole)) {
+    const session = sessions.get(sessionId);
+    if (!session) continue;
+    if (expectedRole && session.role !== expectedRole) continue;
+    return {
+      type: "DASHBOARD_ADMIN",
+      method: "session",
+      role: session.role,
+      sessionId: session.id,
+      csrfToken: session.csrfToken,
+      twitchUserId: session.twitchUserId
+    };
+  }
+  return undefined;
 }
 
 export function requiredHttpPrincipal(method: string | undefined, pathname: string): PrincipalType {
@@ -247,7 +283,7 @@ export function authorizeHttpRequest(req: IncomingMessage, pathname: string, ses
   if (required === "PUBLIC") return { ok: true, principal: { type: "PUBLIC" } };
   if (required === "OAUTH_CALLBACK") return { ok: true, principal: { type: "OAUTH_CALLBACK" } };
 
-  const principal = authenticateDashboardRequest(req, sessions);
+  const principal = authenticateDashboardRequest(req, sessions, dashboardRoleHintFromRequest(req));
   if (!principal) {
     return { ok: false, status: 401, code: "AUTH_REQUIRED", message: "dashboard authentication required" };
   }
@@ -266,27 +302,39 @@ export function authorizeHttpRequest(req: IncomingMessage, pathname: string, ses
   return { ok: true, principal };
 }
 
-export function dashboardSessionCookie(session: DashboardSession): string {
-  const maxAge = Math.max(1, Math.trunc((session.expiresAt - Date.now()) / 1000));
-  return [
-    `${DASHBOARD_SESSION_COOKIE}=${encodeURIComponent(session.id)}`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Strict",
-    `Max-Age=${maxAge}`,
-    appConfig.nodeEnv === "production" ? "Secure" : ""
-  ].filter(Boolean).join("; ");
+function dashboardCookieNameForRole(role: DashboardRole): string {
+  return role === "streamer" ? STREAMER_DASHBOARD_SESSION_COOKIE : ADMIN_DASHBOARD_SESSION_COOKIE;
 }
 
-export function clearDashboardSessionCookie(): string {
+function expiredDashboardSessionCookie(name: string): string {
   return [
-    `${DASHBOARD_SESSION_COOKIE}=`,
+    `${name}=`,
     "Path=/",
     "HttpOnly",
     "SameSite=Strict",
     "Max-Age=0",
     appConfig.nodeEnv === "production" ? "Secure" : ""
   ].filter(Boolean).join("; ");
+}
+
+export function dashboardSessionCookie(session: DashboardSession): string[] {
+  const maxAge = Math.max(1, Math.trunc((session.expiresAt - Date.now()) / 1000));
+  const sessionCookie = [
+    `${dashboardCookieNameForRole(session.role)}=${encodeURIComponent(session.id)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Strict",
+    `Max-Age=${maxAge}`,
+    appConfig.nodeEnv === "production" ? "Secure" : ""
+  ].filter(Boolean).join("; ");
+  return [sessionCookie, expiredDashboardSessionCookie(DASHBOARD_SESSION_COOKIE)];
+}
+
+export function clearDashboardSessionCookie(role?: DashboardRole): string[] {
+  const names = role
+    ? [dashboardCookieNameForRole(role), DASHBOARD_SESSION_COOKIE]
+    : [ADMIN_DASHBOARD_SESSION_COOKIE, STREAMER_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE];
+  return names.map(expiredDashboardSessionCookie);
 }
 
 export function clientIp(req: IncomingMessage): string {

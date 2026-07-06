@@ -14,7 +14,9 @@ const i18n = {
     empty: "처리할 등록 요청이 없습니다.",
     loadFailed: "등록 요청을 불러오지 못했습니다.",
     resolveFailed: "등록 요청 처리에 실패했습니다.",
+    dashboardAccessFailed: "대시보드 사용 권한 변경에 실패했습니다.",
     resolved: "등록 요청을 처리했습니다.",
+    dashboardAccessUpdated: "대시보드 사용 권한을 변경했습니다.",
     pending: "대기",
     approved: "승인됨",
     rejected: "거절됨",
@@ -23,6 +25,9 @@ const i18n = {
     totalCount: "전체 요청",
     twitchAccount: "Twitch 계정",
     riotId: "Riot ID",
+    dashboardAccess: "대시보드 사용",
+    dashboardEnabled: "사용 가능",
+    dashboardDisabled: "사용 불가",
     overlayAccess: "오버레이 접근",
     overlaySlug: "URL",
     overlayKey: "Key",
@@ -31,6 +36,8 @@ const i18n = {
     reviewedAt: "처리 시간",
     approve: "승인",
     reject: "거절",
+    dashboardEnable: "대시보드 허용",
+    dashboardDisable: "대시보드 차단",
     loading: "불러오는 중",
     none: "없음"
   },
@@ -40,7 +47,9 @@ const i18n = {
     empty: "処理する登録申請はありません。",
     loadFailed: "登録申請を読み込めませんでした。",
     resolveFailed: "登録申請の処理に失敗しました。",
+    dashboardAccessFailed: "ダッシュボード利用権限の変更に失敗しました。",
     resolved: "登録申請を処理しました。",
+    dashboardAccessUpdated: "ダッシュボード利用権限を変更しました。",
     pending: "待機",
     approved: "承認済み",
     rejected: "拒否済み",
@@ -49,6 +58,9 @@ const i18n = {
     totalCount: "全申請",
     twitchAccount: "Twitch アカウント",
     riotId: "Riot ID",
+    dashboardAccess: "ダッシュボード利用",
+    dashboardEnabled: "利用可",
+    dashboardDisabled: "利用不可",
     overlayAccess: "オーバーレイ接続",
     overlaySlug: "URL",
     overlayKey: "Key",
@@ -57,6 +69,8 @@ const i18n = {
     reviewedAt: "処理時間",
     approve: "承認",
     reject: "拒否",
+    dashboardEnable: "利用を許可",
+    dashboardDisable: "利用を停止",
     loading: "読み込み中",
     none: "なし"
   }
@@ -130,6 +144,23 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
     }
   }
 
+  async function updateDashboardAccess(requestId: string, dashboardEnabled: boolean) {
+    setBusyId(requestId);
+    setMessage("");
+    try {
+      const result = await apiPost<{ request: StreamerRiotIdRequest; requests: StreamerRiotIdRequest[] }>(
+        "/api/participation/streamer-riot-id-requests/dashboard-access",
+        { requestId, dashboardEnabled }
+      );
+      setRequests(result.requests);
+      setMessage(t.dashboardAccessUpdated);
+    } catch (error) {
+      setMessage(apiErrorDetail(error, "/api/participation/streamer-riot-id-requests/dashboard-access", t.dashboardAccessFailed));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   return (
     <>
       <div className="page-title-row page-header compact">
@@ -171,6 +202,12 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                   <strong>{requestStatusLabel(request.status)}</strong>
                 </div>
                 <div>
+                  <span>{t.dashboardAccess}</span>
+                  <strong className={request.dashboardEnabled ? "access-enabled" : "access-disabled"}>
+                    {request.dashboardEnabled ? t.dashboardEnabled : t.dashboardDisabled}
+                  </strong>
+                </div>
+                <div>
                   <span>{t.overlayAccess}</span>
                   {request.overlaySlug && request.overlayKey ? (
                     <>
@@ -199,6 +236,15 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                   >
                     {t.reject}
                   </button>
+                  {request.status === "approved" ? (
+                    <button
+                      className={`secondary compact-button ${request.dashboardEnabled ? "danger" : ""}`}
+                      disabled={busyId === request.id}
+                      onClick={() => void updateDashboardAccess(request.id, !request.dashboardEnabled)}
+                    >
+                      {request.dashboardEnabled ? t.dashboardDisable : t.dashboardEnable}
+                    </button>
+                  ) : null}
                 </div>
               </article>
             ))}

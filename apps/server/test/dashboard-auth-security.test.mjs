@@ -6,7 +6,7 @@ import path from "node:path";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
-const { DashboardSessionStore, DASHBOARD_SESSION_COOKIE, authorizeHttpRequest } = await import("../dist/security/auth.js");
+const { DashboardSessionStore, ADMIN_DASHBOARD_SESSION_COOKIE, STREAMER_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE, authorizeHttpRequest } = await import("../dist/security/auth.js");
 const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 
@@ -352,6 +352,126 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
     assert.equal(body.subscriptionScopeGranted, true);
     assert.equal(body.subscriptions[0].twitchUserId, "55");
     assert.equal(body.subscriptions[0].tierLabel, "Tier 1");
+  });
+});
+
+test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별도로 변경할 수 있다", async () => {
+  await withAuthConfig(async () => {
+    const sessions = new DashboardSessionStore();
+    const requests = [{
+      id: "riotreq-1",
+      twitchUserId: "streamer-1",
+      twitchLogin: "seiga",
+      twitchDisplayName: "Seiga",
+      twitchProfileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga.png",
+      riotGameName: "Seiga",
+      riotTagLine: "JP1",
+      normalizedRiotId: "seiga#jp1",
+      overlaySlug: "seiga",
+      overlayKey: "sok_test",
+      status: "approved",
+      dashboardEnabled: false,
+      requestedAt: "2026-07-06T00:00:00.000Z",
+      updatedAt: "2026-07-06T00:00:00.000Z"
+    }];
+    const store = {
+      getStatus() {
+        return { server: "online" };
+      },
+      listStreamerRiotIdRequests() {
+        return requests.map((request) => ({ ...request }));
+      },
+      listApprovedStreamerRiotIds() {
+        return requests.filter((request) => request.status === "approved").map((request) => ({ ...request }));
+      },
+      setStreamerRiotIdDashboardEnabled(input) {
+        const request = requests.find((candidate) => candidate.id === input.requestId);
+        if (!request || request.status !== "approved") return undefined;
+        request.dashboardEnabled = input.dashboardEnabled;
+        request.reviewer = input.reviewer;
+        request.note = input.note;
+        request.updatedAt = "2026-07-06T00:10:00.000Z";
+        return { ...request };
+      }
+    };
+    const handler = createHttpHandler({
+      store,
+      twitchAuth: {},
+      publicTwitchAuth: {
+        async getStatus(sessionId) {
+          assert.equal(sessionId, "viewer-session");
+          return {
+            connected: true,
+            user: {
+              id: "streamer-1",
+              login: "seiga",
+              displayName: "Seiga",
+              profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga.png"
+            }
+          };
+        }
+      },
+      actions: {
+        async dispatchOne() {}
+      },
+      sessions
+    });
+
+    const deniedAuthReq = createRequest("GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`,
+      "x-streamops-dashboard-surface": "streamer"
+    });
+    const deniedAuthRes = createResponse();
+    await handler(deniedAuthReq, deniedAuthRes);
+
+    assert.equal(deniedAuthRes.statusCode, 200);
+    assert.equal(JSON.parse(deniedAuthRes.body).authenticated, false);
+
+    const disabledStreamerSession = sessions.create({ role: "streamer", twitchUserId: "streamer-1" });
+    const deniedApiReq = createRequest("GET", "/api/status", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: `${STREAMER_DASHBOARD_SESSION_COOKIE}=${disabledStreamerSession.id}`,
+      "x-streamops-dashboard-surface": "streamer"
+    });
+    const deniedApiRes = createResponse();
+    await handler(deniedApiReq, deniedApiRes);
+
+    assert.equal(deniedApiRes.statusCode, 403);
+    assert.equal(JSON.parse(deniedApiRes.body).code, "STREAMER_DASHBOARD_DISABLED");
+
+    const adminSession = sessions.create({ role: "admin" });
+    const toggleReq = createRequest("POST", "/api/participation/streamer-riot-id-requests/dashboard-access", {
+      requestId: "riotreq-1",
+      dashboardEnabled: true
+    }, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: `${ADMIN_DASHBOARD_SESSION_COOKIE}=${adminSession.id}`,
+      "x-streamops-csrf": adminSession.csrfToken,
+      "x-streamops-dashboard-surface": "admin"
+    });
+    const toggleRes = createResponse();
+    await handler(toggleReq, toggleRes);
+
+    assert.equal(toggleRes.statusCode, 200);
+    const toggleBody = JSON.parse(toggleRes.body);
+    assert.equal(toggleBody.request.dashboardEnabled, true);
+    assert.equal(toggleBody.requests[0].dashboardEnabled, true);
+
+    const allowedAuthReq = createRequest("GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`,
+      "x-streamops-dashboard-surface": "streamer"
+    });
+    const allowedAuthRes = createResponse();
+    await handler(allowedAuthReq, allowedAuthRes);
+
+    assert.equal(allowedAuthRes.statusCode, 200);
+    const allowedAuthBody = JSON.parse(allowedAuthRes.body);
+    assert.equal(allowedAuthBody.authenticated, true);
+    assert.equal(allowedAuthBody.role, "streamer");
+    assert.equal(allowedAuthBody.streamer.dashboardEnabled, true);
+    assert.equal(cookieHeader(allowedAuthRes.headers["Set-Cookie"]).startsWith(`${STREAMER_DASHBOARD_SESSION_COOKIE}=`), true);
   });
 });
 
@@ -1797,18 +1917,22 @@ test("dashboard 로그인은 HttpOnly cookie와 CSRF token을 발급하고 raw t
     await handler(loginReq, loginRes);
 
     assert.equal(loginRes.statusCode, 200);
-    assert.match(loginRes.headers["Set-Cookie"], new RegExp(`${DASHBOARD_SESSION_COOKIE}=`));
-    assert.match(loginRes.headers["Set-Cookie"], /HttpOnly/);
-    assert.match(loginRes.headers["Set-Cookie"], /SameSite=Strict/);
-    assert.doesNotMatch(loginRes.headers["Set-Cookie"], new RegExp(AUTH_TOKEN));
+    const sessionCookie = cookieHeader(loginRes.headers["Set-Cookie"]);
+    const setCookieHeader = Array.isArray(loginRes.headers["Set-Cookie"])
+      ? loginRes.headers["Set-Cookie"].join("\n")
+      : loginRes.headers["Set-Cookie"];
+    assert.match(sessionCookie, new RegExp(`${ADMIN_DASHBOARD_SESSION_COOKIE}=`));
+    assert.match(setCookieHeader, /HttpOnly/);
+    assert.match(setCookieHeader, /SameSite=Strict/);
+    assert.doesNotMatch(setCookieHeader, new RegExp(AUTH_TOKEN));
     assert.doesNotMatch(loginRes.body, new RegExp(AUTH_TOKEN));
 
     const loginBody = JSON.parse(loginRes.body);
     assert.equal(loginBody.authenticated, true);
     assert.equal(typeof loginBody.csrfToken, "string");
 
-    const statusReq = createRequest("GET", "/api/dashboard/auth/status", undefined, {
-      cookie: cookieHeader(loginRes.headers["Set-Cookie"])
+    const statusReq = createRequest("GET", "/api/dashboard/auth/status?surface=admin", undefined, {
+      cookie: sessionCookie
     });
     const statusRes = createResponse();
     await handler(statusReq, statusRes);
@@ -1880,7 +2004,7 @@ test("잘못 인코딩된 쿠키는 인증 상태 조회를 실패시키지 않�
       },
       sessions: new DashboardSessionStore()
     });
-    const req = createRequest("GET", "/api/dashboard/auth/status", undefined, {
+    const req = createRequest("GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
       cookie: `${DASHBOARD_SESSION_COOKIE}=%; ${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=%`
     });
     const res = createResponse();
@@ -1890,6 +2014,32 @@ test("잘못 인코딩된 쿠키는 인증 상태 조회를 실패시키지 않�
     assert.equal(res.statusCode, 200);
     assert.equal(JSON.parse(res.body).authenticated, false);
     assert.equal(publicSessionId, undefined);
+  });
+});
+
+test("admin 세션과 streamer 세션은 서로 다른 dashboard surface에서 인증되지 않는다", async () => {
+  await withAuthConfig(async () => {
+    const sessions = new DashboardSessionStore();
+    const handler = handlerWithSessionStore(sessions);
+
+    const adminSession = sessions.create({ role: "admin" });
+    const streamerSession = sessions.create({ role: "streamer", twitchUserId: "streamer-twitch-user" });
+
+    const adminAsStreamerReq = createRequest("GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
+      cookie: `${ADMIN_DASHBOARD_SESSION_COOKIE}=${adminSession.id}`
+    });
+    const adminAsStreamerRes = createResponse();
+    await handler(adminAsStreamerReq, adminAsStreamerRes);
+    assert.equal(adminAsStreamerRes.statusCode, 200);
+    assert.equal(JSON.parse(adminAsStreamerRes.body).authenticated, false);
+
+    const streamerAsAdminReq = createRequest("GET", "/api/dashboard/auth/status?surface=admin", undefined, {
+      cookie: `${STREAMER_DASHBOARD_SESSION_COOKIE}=${streamerSession.id}`
+    });
+    const streamerAsAdminRes = createResponse();
+    await handler(streamerAsAdminReq, streamerAsAdminRes);
+    assert.equal(streamerAsAdminRes.statusCode, 200);
+    assert.equal(JSON.parse(streamerAsAdminRes.body).authenticated, false);
   });
 });
 
@@ -1913,9 +2063,12 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
   await withAuthConfig(async () => {
     const sessions = new DashboardSessionStore();
     const session = sessions.create({ role: "streamer", twitchUserId: "streamer-twitch-user" });
-    const cookie = `${DASHBOARD_SESSION_COOKIE}=${session.id}`;
+    const cookie = `${STREAMER_DASHBOARD_SESSION_COOKIE}=${session.id}`;
 
-    const allowedReq = createRequest("GET", "/api/events/recent", undefined, { cookie });
+    const allowedReq = createRequest("GET", "/api/events/recent", undefined, {
+      cookie,
+      "x-streamops-dashboard-surface": "streamer"
+    });
     const allowed = authorizeHttpRequest(allowedReq, "/api/events/recent", sessions);
     assert.equal(allowed.ok, true);
     assert.equal(allowed.principal.type, "DASHBOARD_ADMIN");
@@ -1924,6 +2077,7 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     const allowedRiotIdUpdateReq = createRequest("POST", "/api/participation/streamer-riot-id", { riotId: "Seiga#JP1" }, {
       cookie,
       origin: DASHBOARD_ORIGIN,
+      "x-streamops-dashboard-surface": "streamer",
       "x-streamops-csrf": session.csrfToken
     });
     const allowedRiotIdUpdate = authorizeHttpRequest(allowedRiotIdUpdateReq, "/api/participation/streamer-riot-id", sessions);
@@ -1932,6 +2086,7 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     const blockedReq = createRequest("POST", "/api/actions/test", { action: testAction }, {
       cookie,
       origin: DASHBOARD_ORIGIN,
+      "x-streamops-dashboard-surface": "streamer",
       "x-streamops-csrf": session.csrfToken
     });
     const blocked = authorizeHttpRequest(blockedReq, "/api/actions/test", sessions);

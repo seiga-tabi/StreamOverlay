@@ -22,7 +22,7 @@ import { LolProfileEnrichmentService } from "./services/lol-profile-enrichment.j
 import { LocalJsonLolProfileRepository } from "./services/lol-profile-store.js";
 import { LocalTtsService } from "./services/local-tts-service.js";
 import { createHttpHandler } from "./routes/http-api.js";
-import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMatches } from "./security/auth.js";
+import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMatches, type DashboardRole } from "./security/auth.js";
 import { websocketLimiter } from "./security/rate-limit.js";
 import { getEnabledModules } from "./modules/index.js";
 import { refreshLolProfileForEntry } from "./modules/lol-profile-enrichment.module.js";
@@ -149,9 +149,14 @@ function legacyQueryToken(url: URL): string | undefined {
   return url.searchParams.get("token") ?? url.searchParams.get("secret") ?? undefined;
 }
 
+function dashboardWsRoleFromUrl(url: URL): DashboardRole {
+  return url.searchParams.get("surface") === "streamer" ? "streamer" : "admin";
+}
+
 function hasDashboardWsAuth(req: http.IncomingMessage, url: URL): boolean {
-  return Boolean(authenticateDashboardRequest(req, sessions))
-    || tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url));
+  const role = dashboardWsRoleFromUrl(url);
+  return Boolean(authenticateDashboardRequest(req, sessions, role))
+    || (role === "admin" && tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url)));
 }
 
 function hasBridgeWsAuth(req: http.IncomingMessage, url: URL): boolean {
@@ -266,12 +271,13 @@ bridgeWss.on("connection", (socket, req) => {
 
 dashboardWss.on("connection", (socket, req) => {
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
-  const principal = authenticateDashboardRequest(req, sessions);
+  const roleHint = dashboardWsRoleFromUrl(url);
+  const principal = authenticateDashboardRequest(req, sessions, roleHint);
   const role = principal?.type === "DASHBOARD_ADMIN"
     ? principal.role
-    : tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url))
+    : roleHint === "admin" && tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url))
       ? "admin"
-      : "admin";
+      : roleHint;
   dashboard.add(socket, role);
 });
 overlayWss.on("connection", (socket, req) => {

@@ -30,7 +30,14 @@ type PublicLolMatchParticipant = {
   visionScorePerMinute?: number;
   items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
   summonerSpells: number[];
-  runes: Array<{ runeId: number; nameKo?: string; nameJa?: string; iconUrl?: string; kind: "primary" | "secondary"; category?: "style" | "keystone" | "perk" }>;
+  runes: Array<{
+    runeId: number;
+    nameKo?: string;
+    nameJa?: string;
+    iconUrl?: string;
+    kind: "primary" | "secondary" | "stat";
+    category?: "style" | "keystone" | "perk" | "offense" | "flex" | "defense";
+  }>;
   badges?: PublicLolMatchBadge[];
 };
 
@@ -97,6 +104,7 @@ type PublicLolMatchBuildParticipant = {
 type PublicLolMatchBuildResponse = {
   status: "ready";
   matchId: string;
+  dataDragonVersion?: string;
   participants: PublicLolMatchBuildParticipant[];
   fetchedAt: string;
 };
@@ -276,6 +284,10 @@ type PublicTwitchFollowedLolResponse = {
   channels: PublicTwitchFollowedLolChannel[];
 };
 
+function isRegisteredStreamerRequest(request: StreamerRiotIdRequest | undefined): request is StreamerRiotIdRequest {
+  return request?.status === "approved" && Boolean(request.overlaySlug && request.overlayKey);
+}
+
 type PublicLolCurrentGameParticipant = {
   riotId?: string;
   isTarget: boolean;
@@ -343,6 +355,14 @@ type PublicTrendLine = {
   startLabel: string;
   middleLabel: string;
   endLabel: string;
+};
+
+type PublicPlayActivityDay = {
+  key: string;
+  date: Date;
+  games: number;
+  minutes: number;
+  level: 0 | 1 | 2 | 3 | 4;
 };
 
 type PublicLolProfile = {
@@ -432,7 +452,12 @@ type PublicMatchFilters = {
   championId: string;
   period: MatchPeriodFilter;
 };
-type PublicFavorite = SearchSuggestion;
+type PublicFavorite = SearchSuggestion & {
+  recentGames?: number;
+  recentWins?: number;
+  recentWinRate?: number;
+  averageKda?: number;
+};
 
 const RECENT_SEARCH_STORAGE_KEY = "loltrace.recent.jp";
 const FAVORITE_STORAGE_KEY = "loltrace.favorites.jp";
@@ -525,6 +550,12 @@ const publicI18n = {
     expandMatch: "경기 상세 펼치기",
     collapseMatch: "경기 상세 접기",
     aiScore: "점수",
+    playActivityTitle: "플레이 기록",
+    playActivityPeriod: "최근 5주",
+    playActivityEmpty: "최근 플레이 기록 없음",
+    playActivityGamesUnit: "게임",
+    playActivityHoursUnit: "시간",
+    playActivityMinutesUnit: "분",
     mvpBadge: "MVP",
     aceBadge: "ACE",
     unstoppableBadge: "저지불가",
@@ -553,6 +584,8 @@ const publicI18n = {
     total: "합계",
     perMinute: "분당",
     teamShare: "팀 비중",
+    totalKill: "총 킬",
+    totalGold: "총 골드",
     champion: "챔피언",
     gamesPlayed: "게임 수",
     wins: "승리",
@@ -918,6 +951,12 @@ const publicI18n = {
     expandMatch: "試合詳細を開く",
     collapseMatch: "試合詳細を閉じる",
     aiScore: "スコア",
+    playActivityTitle: "プレイ記録",
+    playActivityPeriod: "直近5週間",
+    playActivityEmpty: "最近のプレイ記録なし",
+    playActivityGamesUnit: "試合",
+    playActivityHoursUnit: "時間",
+    playActivityMinutesUnit: "分",
     mvpBadge: "MVP",
     aceBadge: "ACE",
     unstoppableBadge: "止められない",
@@ -946,6 +985,8 @@ const publicI18n = {
     total: "合計",
     perMinute: "分あたり",
     teamShare: "チーム比率",
+    totalKill: "総キル",
+    totalGold: "総ゴールド",
     champion: "チャンピオン",
     gamesPlayed: "試合数",
     wins: "勝利",
@@ -1906,7 +1947,11 @@ function readFavorites(): PublicFavorite[] {
         summonerLevel: typeof item.summonerLevel === "number" ? item.summonerLevel : undefined,
         lolPlatform: typeof item.lolPlatform === "string" ? item.lolPlatform : undefined,
         rankedStats: item.rankedStats && typeof item.rankedStats === "object" ? item.rankedStats as LolRankedStats : undefined,
-        lastSeenAt: typeof item.lastSeenAt === "string" ? item.lastSeenAt : undefined
+        lastSeenAt: typeof item.lastSeenAt === "string" ? item.lastSeenAt : undefined,
+        recentGames: typeof item.recentGames === "number" ? item.recentGames : undefined,
+        recentWins: typeof item.recentWins === "number" ? item.recentWins : undefined,
+        recentWinRate: typeof item.recentWinRate === "number" ? item.recentWinRate : undefined,
+        averageKda: typeof item.averageKda === "number" ? item.averageKda : undefined
       }))
       .filter((item) => item.gameName && item.tagLine)
       .slice(0, MAX_FAVORITES);
@@ -1932,7 +1977,11 @@ function favoriteFromProfile(profile: PublicLolProfile): PublicFavorite {
     summonerLevel: profile.summonerLevel,
     lolPlatform: profile.lolPlatform,
     rankedStats: profile.rankedStats,
-    lastSeenAt: profile.fetchedAt
+    lastSeenAt: profile.fetchedAt,
+    recentGames: profile.summary.recentGames,
+    recentWins: profile.summary.recentWins,
+    recentWinRate: profile.summary.recentWinRate,
+    averageKda: profile.summary.averageKda
   };
 }
 
@@ -2346,6 +2395,27 @@ function objectiveSummaryByOrder(objectives: Record<string, number> | undefined,
   return entries.length > 0 ? entries.join(" · ") : "-";
 }
 
+const teamCompareObjectiveKeys = ["horde", "riftHerald", "dragon", "baron", "inhibitor", "tower"] as const;
+
+const objectiveShortLabels: Record<PublicLocale, Record<(typeof teamCompareObjectiveKeys)[number], string>> = {
+  ko: {
+    horde: "유충",
+    riftHerald: "전령",
+    dragon: "용",
+    baron: "바론",
+    inhibitor: "억제",
+    tower: "타워"
+  },
+  ja: {
+    horde: "グラブ",
+    riftHerald: "ヘラルド",
+    dragon: "ドラ",
+    baron: "バロン",
+    inhibitor: "インヒビ",
+    tower: "タワー"
+  }
+};
+
 function safeRecordValue(value: number | undefined): number {
   return value !== undefined && Number.isFinite(value) ? value : -1;
 }
@@ -2730,6 +2800,81 @@ function topPercentText(percent: number): string {
   return `${t().topPercentPrefix} ${percent}%`;
 }
 
+const playActivityWindowDays = 35;
+
+function localDayStart(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function localDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function playActivityLevel(games: number, minutes: number): PublicPlayActivityDay["level"] {
+  if (games <= 0) return 0;
+  if (games >= 5 || minutes >= 180) return 4;
+  if (games >= 3 || minutes >= 100) return 3;
+  if (games >= 2 || minutes >= 50) return 2;
+  return 1;
+}
+
+function buildPlayActivity(matches: PublicLolRecentMatch[]): PublicPlayActivityDay[] {
+  const today = localDayStart(new Date());
+  const firstDay = new Date(today);
+  firstDay.setDate(today.getDate() - (playActivityWindowDays - 1));
+  const buckets = new Map<string, { games: number; minutes: number }>();
+
+  for (const match of matches) {
+    if (!match.startedAt) continue;
+    const startedAt = new Date(match.startedAt);
+    if (Number.isNaN(startedAt.getTime())) continue;
+    const day = localDayStart(startedAt);
+    if (day < firstDay || day > today) continue;
+    const key = localDateKey(day);
+    const bucket = buckets.get(key) ?? { games: 0, minutes: 0 };
+    bucket.games += 1;
+    bucket.minutes += Math.max(1, Math.round((match.durationSeconds ?? 0) / 60));
+    buckets.set(key, bucket);
+  }
+
+  return Array.from({ length: playActivityWindowDays }, (_, index) => {
+    const date = new Date(firstDay);
+    date.setDate(firstDay.getDate() + index);
+    const key = localDateKey(date);
+    const bucket = buckets.get(key) ?? { games: 0, minutes: 0 };
+    return {
+      key,
+      date,
+      games: bucket.games,
+      minutes: bucket.minutes,
+      level: playActivityLevel(bucket.games, bucket.minutes)
+    };
+  });
+}
+
+function formatPlayActivityDuration(minutes: number): string {
+  if (minutes <= 0) return `0${t().playActivityMinutesUnit}`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (hours <= 0) return `${remainingMinutes}${t().playActivityMinutesUnit}`;
+  if (remainingMinutes <= 0) return `${hours}${t().playActivityHoursUnit}`;
+  return `${hours}${t().playActivityHoursUnit} ${remainingMinutes}${t().playActivityMinutesUnit}`;
+}
+
+function formatPlayActivityDate(date: Date): string {
+  return date.toLocaleDateString(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
+    month: "numeric",
+    day: "numeric"
+  });
+}
+
+function playActivityCellLabel(day: PublicPlayActivityDay): string {
+  return `${formatPlayActivityDate(day.date)} · ${day.games}${t().playActivityGamesUnit} · ${formatPlayActivityDuration(day.minutes)}`;
+}
+
 function estimatedLpDelta(match: PublicLolRecentMatch): number {
   if (match.result === "win") return 20;
   if (match.result === "loss") return -18;
@@ -2924,10 +3069,26 @@ function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
   };
 }
 
-function heatBackground(value: number | undefined, total: number, color: "blue" | "green" | "red" = "blue"): string {
-  const width = barWidth(value, total);
-  const rgba = color === "green" ? "34, 197, 94" : color === "red" ? "239, 68, 68" : "126, 225, 214";
-  return `linear-gradient(90deg, rgba(${rgba}, .22) 0 ${width}, rgba(255, 255, 255, .035) ${width} 100%)`;
+function PublicTeamMetricStat({
+  value,
+  total,
+  tone,
+  label,
+  labelClassName
+}: {
+  value: number | undefined;
+  total: number;
+  tone: "damage" | "cs" | "vision";
+  label: ReactNode;
+  labelClassName?: string;
+}) {
+  return (
+    <div className={`public-team-stat metric-bar ${tone}`}>
+      <i className="public-team-stat-fill" style={{ width: barWidth(value, total) }} aria-hidden="true" />
+      <strong>{formatNumber(value)}</strong>
+      <span className={labelClassName}>{label}</span>
+    </div>
+  );
 }
 
 function playerDisplayName(player: PublicLolMatchParticipant): string {
@@ -2943,6 +3104,12 @@ function splitRiotId(riotId: string | undefined, fallback: string): { name: stri
     name: value.slice(0, separatorIndex),
     tag: value.slice(separatorIndex + 1)
   };
+}
+
+function maskedRiotIdName(riotId: string | undefined, fallback: string): string {
+  const display = splitRiotId(riotId, fallback);
+  const nameLength = Array.from(display.name.trim()).length;
+  return "*".repeat(Math.max(1, nameLength));
 }
 
 function SearchForm({
@@ -3215,11 +3382,46 @@ function TwitchStreamOverviewCard({ stream }: { stream: PublicLolTwitchStream | 
   );
 }
 
+function ProfilePlayActivityCard({ days }: { days: PublicPlayActivityDay[] }) {
+  const totalGames = days.reduce((sum, day) => sum + day.games, 0);
+  const totalMinutes = days.reduce((sum, day) => sum + day.minutes, 0);
+
+  return (
+    <article className="public-profile-metric-card blue public-play-activity-card">
+      <div className="public-profile-metric-head">
+        <span className="public-profile-metric-icon" aria-hidden="true">▦</span>
+        <span className="public-profile-metric-label">
+          <span data-ko={publicI18n.ko.playActivityTitle} data-ja={publicI18n.ja.playActivityTitle}>{t().playActivityTitle}</span>
+          <small aria-hidden="true">?</small>
+        </span>
+      </div>
+      <div className="public-play-activity-summary">
+        <strong>{totalGames > 0 ? `${totalGames}${t().playActivityGamesUnit}` : t().playActivityEmpty}</strong>
+        <small data-ko={publicI18n.ko.playActivityPeriod} data-ja={publicI18n.ja.playActivityPeriod}>{t().playActivityPeriod}</small>
+      </div>
+      <div className="public-play-activity-grid" aria-label={t().playActivityTitle}>
+        {days.map((day) => (
+          <span
+            className={`public-play-activity-cell level-${day.level}`}
+            title={playActivityCellLabel(day)}
+            aria-label={playActivityCellLabel(day)}
+            key={day.key}
+          />
+        ))}
+      </div>
+      <div className="public-play-activity-footer">
+        <span>{formatPlayActivityDuration(totalMinutes)}</span>
+        <em>{t().playActivityPeriod}</em>
+      </div>
+    </article>
+  );
+}
+
 function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
   const recentLosses = Math.max(0, profile.summary.recentGames - profile.summary.recentWins);
-  const aiScore = averageAiScore(profile);
   const winLabel = activePublicLocale === "ja" ? "勝" : "승";
   const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  const activityDays = buildPlayActivity(profile.recentMatches);
   const metricCards = [
     {
       key: "kda",
@@ -3256,23 +3458,12 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
       progress: metricProgress(profile.summary.recentWinRate, 100),
       scale: ["0%", "25%", "50%", "75%", "100%"],
       rank: topPercentText(metricTopPercent(profile.summary.recentWinRate, 95, 100))
-    },
-    {
-      key: "score",
-      tone: "orange",
-      icon: activePublicLocale === "ja" ? "点" : "점",
-      title: t().aiScore,
-      value: String(aiScore),
-      valueTone: metricToneClass(scoreTone(aiScore)),
-      detail: t().recentFlowBasis,
-      progress: metricProgress(aiScore, 100),
-      scale: ["0", "25", "50", "75", "100"],
-      rank: topPercentText(metricTopPercent(aiScore, 100, 88))
     }
   ];
 
   return (
     <div className="public-profile-metric-strip" aria-label={t().profileSummary}>
+      <ProfilePlayActivityCard days={activityDays} />
       {metricCards.map((card) => (
         <article className={`public-profile-metric-card ${card.tone}`} key={card.key}>
           <div className="public-profile-metric-head">
@@ -3851,10 +4042,12 @@ function PublicLocaleSelector({
 function PublicHeaderMenu({
   activePage,
   activeTarget,
+  showSubscriptions,
   onPage
 }: {
   activePage: PublicMainPage;
   activeTarget: PublicNavTarget;
+  showSubscriptions: boolean;
   onPage: (page: PublicMainPage) => void;
 }) {
   const searchItem: { key: PublicMainPage; icon: string; ko: string; ja: string; label: string } = {
@@ -3864,10 +4057,20 @@ function PublicHeaderMenu({
     ja: publicI18n.ja.searchNav,
     label: t().searchNav
   };
-  const items: Array<{ key: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
-    { key: "favorites", icon: "☆", ko: publicI18n.ko.favoritesTitle, ja: publicI18n.ja.favoritesTitle, label: t().favoritesTitle },
-    { key: "subscriptions", icon: "◆", ko: publicI18n.ko.subscriptionStatus, ja: publicI18n.ja.subscriptionStatus, label: t().subscriptionStatus }
-  ];
+  const favoritesItem: { key: PublicMainPage; icon: string; ko: string; ja: string; label: string } = {
+    key: "favorites",
+    icon: "☆",
+    ko: publicI18n.ko.favoritesTitle,
+    ja: publicI18n.ja.favoritesTitle,
+    label: t().favoritesTitle
+  };
+  const subscriptionsItem: { key: PublicMainPage; icon: string; ko: string; ja: string; label: string } = {
+    key: "subscriptions",
+    icon: "◆",
+    ko: publicI18n.ko.subscriptionStatus,
+    ja: publicI18n.ja.subscriptionStatus,
+    label: t().subscriptionStatus
+  };
   const contentPages: PublicMainPage[] = ["tournamentCalendar", "tournamentList", "tournamentNews", "tournamentTeams", "tournamentBracket", "tournamentSchedule"];
   const contentItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
     { page: "tournamentCalendar", icon: "◷", ko: publicI18n.ko.tournamentCalendar, ja: publicI18n.ja.tournamentCalendar, label: t().tournamentCalendar },
@@ -3884,6 +4087,10 @@ function PublicHeaderMenu({
       <button className={activePage === "search" && activeTarget === "search" ? "active" : ""} type="button" onClick={() => onPage("search")}>
         <span aria-hidden="true">{searchItem.icon}</span>
         <strong data-ko={searchItem.ko} data-ja={searchItem.ja}>{searchItem.label}</strong>
+      </button>
+      <button className={activePage === favoritesItem.key ? "active" : ""} type="button" onClick={() => onPage(favoritesItem.key)}>
+        <span aria-hidden="true">{favoritesItem.icon}</span>
+        <strong data-ko={favoritesItem.ko} data-ja={favoritesItem.ja}>{favoritesItem.label}</strong>
       </button>
       <div className="public-header-menu-item">
         <button
@@ -3923,12 +4130,12 @@ function PublicHeaderMenu({
           ))}
         </div>
       </div>
-      {items.map((item) => (
-        <button className={activePage === item.key ? "active" : ""} type="button" onClick={() => onPage(item.key)} key={item.key}>
-          <span aria-hidden="true">{item.icon}</span>
-          <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
+      {showSubscriptions ? (
+        <button className={activePage === subscriptionsItem.key ? "active" : ""} type="button" onClick={() => onPage(subscriptionsItem.key)}>
+          <span aria-hidden="true">{subscriptionsItem.icon}</span>
+          <strong data-ko={subscriptionsItem.ko} data-ja={subscriptionsItem.ja}>{subscriptionsItem.label}</strong>
         </button>
-      ))}
+      ) : null}
     </nav>
   );
 }
@@ -3993,10 +4200,9 @@ function PublicAppHeader({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const twitchMenuCloseTimer = useRef<number | undefined>(undefined);
   const filterActive = hasActiveFilters(filters);
-  const twitchUser = twitchStatus.connected ? twitchStatus.user : undefined;
-  const approvedStreamerRequest = twitchStatus.streamerRiotRequest?.status === "approved" ? twitchStatus.streamerRiotRequest : undefined;
+  const registeredStreamerRequest = isRegisteredStreamerRequest(twitchStatus.streamerRiotRequest) ? twitchStatus.streamerRiotRequest : undefined;
   const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved" && twitchStatus.streamerRiotRequest?.status !== "pending";
-  const canOpenStreamerDashboard = Boolean(approvedStreamerRequest);
+  const canOpenStreamerDashboard = registeredStreamerRequest?.dashboardEnabled === true;
   const handleMenuPage = (page: PublicMainPage) => {
     onPage(page);
     setMobileMenuOpen(false);
@@ -4033,7 +4239,7 @@ function PublicAppHeader({
         <span aria-hidden="true" />
         <strong data-ko={publicI18n.ko.mobileMenu} data-ja={publicI18n.ja.mobileMenu}>{t().mobileMenu}</strong>
       </button>
-      <PublicHeaderMenu activePage={activePage} activeTarget={activeTarget} onPage={handleMenuPage} />
+      <PublicHeaderMenu activePage={activePage} activeTarget={activeTarget} showSubscriptions={twitchStatus.connected} onPage={handleMenuPage} />
       {showSearch ? (
         <SearchForm
           query={query}
@@ -4084,7 +4290,7 @@ function PublicAppHeader({
                   {t().streamerDashboardOpen}
                 </button>
               ) : null}
-              {approvedStreamerRequest ? (
+              {registeredStreamerRequest ? (
                 <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerRecord(); }}>
                   {t().streamerRecordOpen}
                 </button>
@@ -4289,6 +4495,9 @@ function PublicFavoritesPage({
   favorites: PublicFavorite[];
   onPick: (suggestion: SearchSuggestion) => void;
 }) {
+  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
+  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+
   return (
     <section className="public-panel public-saved-data-panel public-menu-page-panel">
       <div className="public-section-head">
@@ -4297,14 +4506,44 @@ function PublicFavoritesPage({
       </div>
       <div className="public-saved-grid single">
         <article className="public-favorites-card">
-          <strong data-ko={publicI18n.ko.favoritesTitle} data-ja={publicI18n.ja.favoritesTitle}>{t().favoritesTitle}</strong>
-          {favorites.length === 0 ? <p className="public-empty">{t().noFavorites}</p> : favorites.map((favorite) => (
-            <button type="button" onClick={() => onPick(favorite)} key={`favorite:${normalizeSuggestionKey(favorite)}`}>
-              {favorite.profileIconUrl ? <img src={assetUrl(favorite.profileIconUrl)} alt="" /> : <em>{favorite.gameName.slice(0, 1).toUpperCase()}</em>}
-              <strong>{favorite.gameName}<small>#{favorite.tagLine}</small></strong>
-              <b>{rankLabel(favorite.rankedStats)}</b>
-            </button>
-          ))}
+          <div className="public-favorites-card-head">
+            <strong data-ko={publicI18n.ko.favoritesTitle} data-ja={publicI18n.ja.favoritesTitle}>{t().favoritesTitle}</strong>
+            <span>{favorites.length}</span>
+          </div>
+          {favorites.length === 0 ? <p className="public-empty">{t().noFavorites}</p> : (
+            <div className="public-favorite-list">
+              {favorites.map((favorite) => {
+                const recentGames = favorite.recentGames ?? 0;
+                const recentWins = favorite.recentWins ?? 0;
+                const recentLosses = Math.max(0, recentGames - recentWins);
+                const hasRecentSummary = recentGames > 0;
+                return (
+                  <button className="public-favorite-row" type="button" onClick={() => onPick(favorite)} key={`favorite:${normalizeSuggestionKey(favorite)}`}>
+                    {favorite.profileIconUrl ? <img src={assetUrl(favorite.profileIconUrl)} alt="" /> : <em>{favorite.gameName.slice(0, 1).toUpperCase()}</em>}
+                    <span className="public-favorite-main">
+                      <strong className="public-favorite-name">
+                        {favorite.gameName}
+                        <small>#{favorite.tagLine}</small>
+                      </strong>
+                      <span className="public-favorite-recent">
+                        {hasRecentSummary ? (
+                          <>
+                            <b>{t().recentGames} {recentGames}{t().games}</b>
+                            <i>{recentWins}{winLabel} {recentLosses}{lossLabel}</i>
+                            {typeof favorite.averageKda === "number" ? <i>{formatDecimal(favorite.averageKda)} {t().kda}</i> : null}
+                            {typeof favorite.recentWinRate === "number" ? <i>{t().winRate} {formatPercent(favorite.recentWinRate)}</i> : null}
+                          </>
+                        ) : (
+                          <i>{t().noData}</i>
+                        )}
+                      </span>
+                    </span>
+                    <span className="public-favorite-rank">{rankLabel(favorite.rankedStats)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </article>
       </div>
     </section>
@@ -4443,7 +4682,6 @@ function PublicCommunityPage({
         >
           {isParty ? t().communityPartyRecruit : t().communityServerRecruit}
         </h2>
-        <span>Seiga.GG</span>
       </div>
       <p
         className="public-community-lead"
@@ -4901,12 +5139,49 @@ function PublicCommunityDetailPage({
         <p className="public-empty" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>{t().communityEmpty}</p>
       ) : (
         <div className="public-community-detail-layout">
-          <article className="public-community-detail-article">
-            {post.imageUrl ? (
-              <div className="public-community-detail-media">
-                <img src={assetUrl(post.imageUrl)} alt={post.imageAlt ?? ""} />
+          {riotId ? (
+            <aside className="public-community-record-strip">
+              <div className="public-community-card-head">
+                <strong data-ko={publicI18n.ko.communityRecordPreview} data-ja={publicI18n.ja.communityRecordPreview}>{t().communityRecordPreview}</strong>
+                <button type="button" onClick={() => onSearchRiotId(riotId)} data-ko={publicI18n.ko.viewRecord} data-ja={publicI18n.ja.viewRecord}>{t().viewRecord}</button>
               </div>
-            ) : null}
+              {profileState.status === "loading" ? (
+                <p className="public-empty" data-ko={publicI18n.ko.communityRecordLoading} data-ja={publicI18n.ja.communityRecordLoading}>{t().communityRecordLoading}</p>
+              ) : profileState.status === "error" ? (
+                <p className="public-community-error">{profileState.error || t().communityRecordFailed}</p>
+              ) : profile ? (
+                <div className="public-community-record-inline">
+                  <div className="public-community-record-main">
+                    {profile.profileIconUrl ? <img src={assetUrl(profile.profileIconUrl)} alt="" /> : <span>{profile.gameName.slice(0, 1).toUpperCase()}</span>}
+                    <div>
+                      <strong>{profile.gameName}<small>#{profile.tagLine}</small></strong>
+                      <em>{rankLabel(primaryRank)}</em>
+                    </div>
+                  </div>
+                  <div className="public-community-record-stats compact">
+                    <span>
+                      <small>{t().recentGames}</small>
+                      <b>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"} {Math.max(0, profile.summary.recentGames - profile.summary.recentWins)}{activePublicLocale === "ja" ? "敗" : "패"}</b>
+                      <em className={metricToneClass(percentTone(profile.summary.recentWinRate))}>{formatPercent(profile.summary.recentWinRate)}</em>
+                    </span>
+                    <span>
+                      <small>{t().kda}</small>
+                      <b className={metricToneClass(kdaTone(profile.summary.averageKda))}>{formatDecimal(profile.summary.averageKda)}</b>
+                      <em>{profile.summary.totalKills} / {profile.summary.totalDeaths} / {profile.summary.totalAssists}</em>
+                    </span>
+                  </div>
+                  <div className="public-community-record-champions">
+                    {topChampions.length > 0 ? topChampions.map((champion) => (
+                      champion.iconUrl ? <img src={assetUrl(champion.iconUrl)} alt={championName(champion)} title={championName(champion)} key={champion.championId} /> : null
+                    )) : <small>{t().noData}</small>}
+                  </div>
+                </div>
+              ) : (
+                <p className="public-empty">{t().noData}</p>
+              )}
+            </aside>
+          ) : null}
+          <article className="public-community-detail-article">
             <header>
               <span className="public-community-avatar">
                 {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
@@ -4918,6 +5193,11 @@ function PublicCommunityDetailPage({
             </header>
             <h3>{post.title}</h3>
             <p>{post.body}</p>
+            {post.imageUrl ? (
+              <div className="public-community-detail-media">
+                <img src={assetUrl(post.imageUrl)} alt={post.imageAlt ?? ""} />
+              </div>
+            ) : null}
             <div className="public-community-post-meta">
               {riotId ? <span>{t().communityRecordLabel} {riotId}</span> : null}
               {post.tags.map((tag) => <em key={`${post.id}:detail:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</em>)}
@@ -4976,48 +5256,6 @@ function PublicCommunityDetailPage({
               </section>
             ) : null}
           </article>
-          <aside className="public-community-record-preview">
-            <div className="public-community-card-head">
-              <strong data-ko={publicI18n.ko.communityRecordPreview} data-ja={publicI18n.ja.communityRecordPreview}>{t().communityRecordPreview}</strong>
-              {riotId ? <button type="button" onClick={() => onSearchRiotId(riotId)} data-ko={publicI18n.ko.viewRecord} data-ja={publicI18n.ja.viewRecord}>{t().viewRecord}</button> : null}
-            </div>
-            {!riotId ? (
-              <p className="public-empty" data-ko={publicI18n.ko.communityRecordMissing} data-ja={publicI18n.ja.communityRecordMissing}>{t().communityRecordMissing}</p>
-            ) : profileState.status === "loading" ? (
-              <p className="public-empty" data-ko={publicI18n.ko.communityRecordLoading} data-ja={publicI18n.ja.communityRecordLoading}>{t().communityRecordLoading}</p>
-            ) : profileState.status === "error" ? (
-              <p className="public-community-error">{profileState.error || t().communityRecordFailed}</p>
-            ) : profile ? (
-              <div className="public-community-record-card">
-                <div className="public-community-record-main">
-                  {profile.profileIconUrl ? <img src={assetUrl(profile.profileIconUrl)} alt="" /> : <span>{profile.gameName.slice(0, 1).toUpperCase()}</span>}
-                  <div>
-                    <strong>{profile.gameName}<small>#{profile.tagLine}</small></strong>
-                    <em>{rankLabel(primaryRank)}</em>
-                  </div>
-                </div>
-                <div className="public-community-record-stats">
-                  <span>
-                    <small>{t().recentGames}</small>
-                    <b>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"} {Math.max(0, profile.summary.recentGames - profile.summary.recentWins)}{activePublicLocale === "ja" ? "敗" : "패"}</b>
-                    <em className={metricToneClass(percentTone(profile.summary.recentWinRate))}>{formatPercent(profile.summary.recentWinRate)}</em>
-                  </span>
-                  <span>
-                    <small>{t().kda}</small>
-                    <b className={metricToneClass(kdaTone(profile.summary.averageKda))}>{formatDecimal(profile.summary.averageKda)}</b>
-                    <em>{profile.summary.totalKills} / {profile.summary.totalDeaths} / {profile.summary.totalAssists}</em>
-                  </span>
-                </div>
-                <div className="public-community-record-champions">
-                  {topChampions.length > 0 ? topChampions.map((champion) => (
-                    champion.iconUrl ? <img src={assetUrl(champion.iconUrl)} alt={championName(champion)} title={championName(champion)} key={champion.championId} /> : null
-                  )) : <small>{t().noData}</small>}
-                </div>
-              </div>
-            ) : (
-              <p className="public-empty">{t().noData}</p>
-            )}
-          </aside>
         </div>
       )}
     </section>
@@ -6072,6 +6310,262 @@ function abilityName(skill: PublicLolMatchBuildSkillEvent): string {
   return skill.nameKo ?? skill.nameJa ?? skill.key;
 }
 
+type PublicRuneCatalogRune = {
+  id: number;
+  key?: string;
+  icon?: string;
+  name?: string;
+};
+
+type PublicRuneCatalogSlot = {
+  runes?: PublicRuneCatalogRune[];
+};
+
+type PublicRuneCatalogStyle = {
+  id: number;
+  key?: string;
+  icon?: string;
+  name?: string;
+  slots?: PublicRuneCatalogSlot[];
+};
+
+type PublicStatShardOption = {
+  runeId: number;
+  matchRuneIds?: number[];
+  category: "offense" | "flex" | "defense";
+  nameKo: string;
+  nameJa: string;
+  iconUrl: string;
+};
+
+const RUNE_CATALOG_CACHE = new Map<string, Promise<PublicRuneCatalogStyle[]>>();
+
+const STAT_SHARD_OPTIONS: PublicStatShardOption[] = [
+  {
+    runeId: 5008,
+    category: "offense",
+    nameKo: "적응형 능력치",
+    nameJa: "アダプティブフォース",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsAdaptiveForceIcon.png"
+  },
+  {
+    runeId: 5005,
+    category: "offense",
+    nameKo: "공격 속도",
+    nameJa: "攻撃速度",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsAttackSpeedIcon.png"
+  },
+  {
+    runeId: 5007,
+    category: "offense",
+    nameKo: "스킬 가속",
+    nameJa: "スキルヘイスト",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsCDRScalingIcon.png"
+  },
+  {
+    runeId: 5008,
+    category: "flex",
+    nameKo: "적응형 능력치",
+    nameJa: "アダプティブフォース",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsAdaptiveForceIcon.png"
+  },
+  {
+    runeId: 5002,
+    category: "flex",
+    nameKo: "방어력",
+    nameJa: "物理防御",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsArmorIcon.png"
+  },
+  {
+    runeId: 5003,
+    category: "flex",
+    nameKo: "마법 저항력",
+    nameJa: "魔法防御",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsMagicResIcon.png"
+  },
+  {
+    runeId: 5001,
+    matchRuneIds: [5001, 5011],
+    category: "defense",
+    nameKo: "체력",
+    nameJa: "体力",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsHealthScalingIcon.png"
+  },
+  {
+    runeId: 5002,
+    category: "defense",
+    nameKo: "방어력",
+    nameJa: "物理防御",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsArmorIcon.png"
+  },
+  {
+    runeId: 5003,
+    category: "defense",
+    nameKo: "마법 저항력",
+    nameJa: "魔法防御",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsMagicResIcon.png"
+  }
+];
+
+function dataDragonRuneAssetUrl(path: string | undefined): string | undefined {
+  return path ? `https://ddragon.leagueoflegends.com/cdn/img/${path}` : undefined;
+}
+
+function loadRuneCatalog(version: string, locale: PublicLocale): Promise<PublicRuneCatalogStyle[]> {
+  const language = locale === "ja" ? "ja_JP" : "ko_KR";
+  const cacheKey = `${version}:${language}`;
+  const cached = RUNE_CATALOG_CACHE.get(cacheKey);
+  if (cached) return cached;
+  const request = fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/${language}/runesReforged.json`)
+    .then((response) => response.ok ? response.json() : [])
+    .then((data) => Array.isArray(data) ? data as PublicRuneCatalogStyle[] : [])
+    .catch(() => []);
+  RUNE_CATALOG_CACHE.set(cacheKey, request);
+  return request;
+}
+
+function useRuneCatalog(version: string | undefined): PublicRuneCatalogStyle[] | undefined {
+  const locale = activePublicLocale;
+  const [catalog, setCatalog] = useState<PublicRuneCatalogStyle[] | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!version) {
+      setCatalog(undefined);
+      return () => {
+        cancelled = true;
+      };
+    }
+    setCatalog(undefined);
+    loadRuneCatalog(version, locale).then((runes) => {
+      if (!cancelled) setCatalog(runes.length > 0 ? runes : undefined);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [version, locale]);
+
+  return catalog;
+}
+
+function findRuneStyle(
+  catalog: PublicRuneCatalogStyle[] | undefined,
+  runes: PublicLolMatchParticipant["runes"],
+  kind: "primary" | "secondary"
+): PublicRuneCatalogStyle | undefined {
+  const styleRune = runes.find((rune) => rune.kind === kind && rune.category === "style");
+  if (styleRune) {
+    const matchedStyle = catalog?.find((style) => style.id === styleRune.runeId);
+    if (matchedStyle) return matchedStyle;
+  }
+  const selectedIds = new Set(runes.filter((rune) => rune.kind === kind && rune.category !== "style").map((rune) => rune.runeId));
+  return catalog?.find((style) => style.slots?.some((slot) => slot.runes?.some((rune) => selectedIds.has(rune.id))));
+}
+
+function RuneTreeColumn({
+  kind,
+  runes,
+  catalog
+}: {
+  kind: "primary" | "secondary";
+  runes: PublicLolMatchParticipant["runes"];
+  catalog: PublicRuneCatalogStyle[] | undefined;
+}) {
+  const style = findRuneStyle(catalog, runes, kind);
+  const styleRune = runes.find((rune) => rune.kind === kind && rune.category === "style");
+  const selectedIds = new Set(runes.filter((rune) => rune.kind === kind && rune.category !== "style").map((rune) => rune.runeId));
+  const fallbackRunes = runes.filter((rune) => rune.kind === kind && rune.category !== "style");
+  const runeSlots = style?.slots?.length
+    ? kind === "secondary"
+      ? style.slots.slice(1)
+      : style.slots
+    : [];
+  const title = style?.name ?? runeName(styleRune) ?? (kind === "primary" ? (activePublicLocale === "ja" ? "メインルーン" : "주 룬") : (activePublicLocale === "ja" ? "サブルーン" : "부 룬"));
+  const styleIcon = dataDragonRuneAssetUrl(style?.icon) ?? styleRune?.iconUrl;
+
+  return (
+    <div className={`public-match-rune-column ${kind}`}>
+      <strong className="public-match-rune-title">
+        <span className={`public-match-rune-style ${styleIcon ? "selected" : ""}`} title={title}>
+          {styleIcon ? <img src={styleIcon} alt="" /> : <i>{title.slice(0, 1)}</i>}
+        </span>
+        <em>{title}</em>
+      </strong>
+      {runeSlots.length ? runeSlots.map((slot, slotIndex) => (
+        <div className="public-match-rune-row" key={`${kind}:slot:${slotIndex}`}>
+          {(slot.runes ?? []).map((rune) => {
+            const selected = selectedIds.has(rune.id);
+            const iconUrl = dataDragonRuneAssetUrl(rune.icon);
+            return (
+              <span className={selected ? "selected" : ""} title={rune.name ?? `Rune ${rune.id}`} key={`${kind}:rune:${rune.id}`}>
+                {iconUrl ? <img src={iconUrl} alt="" /> : <i>{rune.id}</i>}
+              </span>
+            );
+          })}
+        </div>
+      )) : (
+        <div className="public-match-rune-row fallback">
+          {fallbackRunes.map((rune) => (
+            <span className="selected" title={runeName(rune)} key={`${kind}:fallback:${rune.runeId}`}>
+              {rune.iconUrl ? <img src={rune.iconUrl} alt="" /> : <i>{rune.runeId}</i>}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RuneShardColumn({ runes }: { runes: PublicLolMatchParticipant["runes"] }) {
+  const selectedByCategory = new Map(
+    runes
+      .filter((rune) => rune.kind === "stat")
+      .map((rune) => [rune.category, rune])
+  );
+  const categories: Array<PublicStatShardOption["category"]> = ["offense", "flex", "defense"];
+  const shardTitle = activePublicLocale === "ja" ? "ステータスシャード" : "능력치 파편";
+  return (
+    <div className="public-match-rune-column shards">
+      <strong className="public-match-rune-title text-only">
+        <em>{shardTitle}</em>
+      </strong>
+      {categories.map((category) => {
+        const selected = selectedByCategory.get(category);
+        return (
+          <div className="public-match-rune-row shard-row" key={`shard:${category}`}>
+            {STAT_SHARD_OPTIONS.filter((option) => option.category === category).map((option) => {
+              const active = selected ? [option.runeId, ...(option.matchRuneIds ?? [])].includes(selected.runeId) : false;
+              const label = activePublicLocale === "ja" ? option.nameJa : option.nameKo;
+              return (
+                <span className={active ? "selected" : ""} title={label} key={`${category}:${option.runeId}`}>
+                  <img src={option.iconUrl} alt="" />
+                </span>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MatchRuneBoard({
+  runes,
+  catalog
+}: {
+  runes: PublicLolMatchParticipant["runes"];
+  catalog: PublicRuneCatalogStyle[] | undefined;
+}) {
+  if (runes.length === 0) return <p className="public-empty">{t().noData}</p>;
+  return (
+    <div className="public-match-rune-board">
+      <RuneTreeColumn kind="primary" runes={runes} catalog={catalog} />
+      <RuneTreeColumn kind="secondary" runes={runes} catalog={catalog} />
+      <RuneShardColumn runes={runes} />
+    </div>
+  );
+}
+
 function RecentMatchBuildPanel({
   match,
   build,
@@ -6089,6 +6583,8 @@ function RecentMatchBuildPanel({
   hideRiotIds: boolean;
   onSelect: (key: string) => void;
 }) {
+  const dataDragonVersion = build?.dataDragonVersion ?? recentMatchDataDragonVersion(match);
+  const runeCatalog = useRuneCatalog(dataDragonVersion);
   if (loading && !build) return <div className="public-match-build-state">{t().buildLoading}</div>;
   if (error && !build) return <div className="public-match-build-state error">{error}</div>;
   const participants = build?.participants ?? [];
@@ -6105,18 +6601,20 @@ function RecentMatchBuildPanel({
       .filter((item): item is PublicLolMatchBuildParticipant["items"][number] => Boolean(item))
       .map((item) => ({ itemId: item.itemId, iconUrl: item.iconUrl, timestampMs: Number.NaN }));
   const visibleSkillIcons = [...new Map(selectedSkillOrder.map((skill) => [skill.key, skill])).values()].slice(0, 4);
+  const selectedParticipantLabel = selectedParticipant.riotId ?? championName(selectedParticipant.champion);
   return (
     <section className="public-match-build-panel" aria-label={t().matchBuildTab}>
       <div className="public-match-build-picker" role="listbox" aria-label={t().champion}>
         {participants.map((participant) => {
           const key = buildParticipantKey(participant);
+          const participantLabel = participant.riotId ?? championName(participant.champion);
           return (
             <button
               type="button"
               className={key === buildParticipantKey(selectedParticipant) ? "active" : ""}
               key={key}
               onClick={() => onSelect(key)}
-              title={hideRiotIds ? "*" : participant.riotId ?? championName(participant.champion)}
+              title={hideRiotIds ? maskedRiotIdName(participant.riotId, participantLabel) : participantLabel}
             >
               {participant.champion.iconUrl ? <img src={participant.champion.iconUrl} alt="" /> : <span>{championName(participant.champion).slice(0, 1)}</span>}
               <strong className={metricToneClass(scoreTone(participant.score))}>{participant.score}</strong>
@@ -6166,16 +6664,9 @@ function RecentMatchBuildPanel({
       </div>
       <div className="public-match-build-group runes">
         <span data-ko={publicI18n.ko.runes} data-ja={publicI18n.ja.runes}>{t().runes}</span>
-        <div className="public-match-build-runes">
-          {selectedRunes.length > 0 ? selectedRunes.map((rune, index) => (
-            <span className={`rune-${rune.kind}`} key={`${selectedParticipant.participantId}:rune:${rune.kind}:${rune.category ?? "unknown"}:${rune.runeId}:${index}`} title={runeName(rune)}>
-              {rune.iconUrl ? <img src={rune.iconUrl} alt="" /> : rune.runeId}
-              <small>{runeName(rune)}</small>
-            </span>
-          )) : <p className="public-empty">{t().noData}</p>}
-        </div>
+        <MatchRuneBoard runes={selectedRunes} catalog={runeCatalog} />
         <div className="public-match-build-summary">
-          <strong>{hideRiotIds ? "*" : selectedParticipant.riotId ?? championName(selectedParticipant.champion)}</strong>
+          <strong>{hideRiotIds ? maskedRiotIdName(selectedParticipant.riotId, selectedParticipantLabel) : selectedParticipantLabel}</strong>
           <small>{championName(selectedParticipant.champion)} · {t().aiScore} {selectedParticipant.score}</small>
           <MatchBadges badges={selectedParticipant.badges} />
         </div>
@@ -6297,6 +6788,94 @@ function RiotIdAwardBadges({ badges }: { badges?: PublicLolMatchBadge[] }) {
   );
 }
 
+function teamCompareTeams(match: PublicLolRecentMatch): [PublicLolMatchTeamDetail, PublicLolMatchTeamDetail] | undefined {
+  if (match.teams.length < 2) return undefined;
+  const ally = match.teams.find((team) => team.players.some((player) => player.isTarget));
+  const enemy = match.teams.find((team) => team !== ally);
+  if (ally && enemy) return [enemy, ally];
+  const fallbackLeft = match.teams[0];
+  const fallbackRight = match.teams[1];
+  if (!fallbackLeft || !fallbackRight) return undefined;
+  return [fallbackLeft, fallbackRight];
+}
+
+function teamComparePercent(value: number, total: number): number {
+  if (total <= 0) return 50;
+  if (value <= 0) return 0;
+  return Math.max(12, Math.min(88, (value / total) * 100));
+}
+
+function TeamCompareObjectiveList({
+  team,
+  side
+}: {
+  team: PublicLolMatchTeamDetail;
+  side: "left" | "right";
+}) {
+  return (
+    <div className={`public-team-compare-objectives ${side}`} aria-label={`${teamLabel(team)} ${t().objectives}`}>
+      {teamCompareObjectiveKeys.map((key) => (
+        <span className={`public-team-compare-objective ${key}`} key={`${team.teamId}:${key}`} title={objectiveLabels[activePublicLocale][key]}>
+          <i aria-hidden="true">{objectiveShortLabels[activePublicLocale][key]}</i>
+          <b>{team.objectives?.[key] ?? 0}</b>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function TeamCompareMetric({
+  label,
+  leftValue,
+  rightValue
+}: {
+  label: string;
+  leftValue: number;
+  rightValue: number;
+}) {
+  const total = Math.max(0, leftValue) + Math.max(0, rightValue);
+  const leftWidth = teamComparePercent(leftValue, total);
+  const rightWidth = total <= 0 ? 50 : Math.max(0, 100 - leftWidth);
+  return (
+    <div className="public-team-compare-metric">
+      <span className="public-team-compare-track">
+        <i className="left" style={{ width: `${leftWidth}%` }}>
+          <b>{formatNumber(leftValue)}</b>
+        </i>
+        <i className="right" style={{ width: `${rightWidth}%` }}>
+          <b>{formatNumber(rightValue)}</b>
+        </i>
+        <em>{label}</em>
+      </span>
+    </div>
+  );
+}
+
+function MatchTeamCompare({ match }: { match: PublicLolRecentMatch }) {
+  const teams = teamCompareTeams(match);
+  if (!teams) return null;
+  const [leftTeam, rightTeam] = teams;
+  return (
+    <section className="public-team-compare" aria-label={t().teamDetails}>
+      <div className="public-team-compare-label left">
+        <strong>{teamLabel(leftTeam)}</strong>
+        <span>{resultLabel(leftTeam.result)} · {leftTeam.kills}/{leftTeam.deaths}/{leftTeam.assists}</span>
+      </div>
+      <div className="public-team-compare-label right">
+        <strong>{teamLabel(rightTeam)}</strong>
+        <span>{resultLabel(rightTeam.result)} · {rightTeam.kills}/{rightTeam.deaths}/{rightTeam.assists}</span>
+      </div>
+      <TeamCompareObjectiveList team={leftTeam} side="left" />
+      <div className="public-team-compare-bars">
+        <TeamCompareMetric label={t().totalKill} leftValue={leftTeam.kills} rightValue={rightTeam.kills} />
+        <TeamCompareMetric label={t().totalGold} leftValue={leftTeam.goldEarned} rightValue={rightTeam.goldEarned} />
+        <TeamCompareMetric label={t().totalDamage} leftValue={leftTeam.damageDealtToChampions} rightValue={rightTeam.damageDealtToChampions} />
+      </div>
+      <TeamCompareObjectiveList team={rightTeam} side="right" />
+    </section>
+  );
+}
+
 function SearchableRiotId({
   riotId,
   fallback,
@@ -6334,8 +6913,14 @@ function SearchableRiotId({
   );
 }
 
-function TeamChampionAvatar({ player }: { player: PublicLolMatchParticipant }) {
-  const stream = visibleStreamerStream(player.twitchStream);
+function TeamChampionAvatar({
+  player,
+  hideStreamerStatus = false
+}: {
+  player: PublicLolMatchParticipant;
+  hideStreamerStatus?: boolean;
+}) {
+  const stream = hideStreamerStatus ? undefined : visibleStreamerStream(player.twitchStream);
   const streamLabel = stream ? (stream.isLive ? t().twitchOnlineShort : t().twitchOfflineShort) : "";
   const streamStatusLabel = stream ? `${stream.twitchDisplayName} · ${streamLabel}` : "";
   return (
@@ -6368,8 +6953,9 @@ function MatchTeamDetails({
   const dataDragonVersion = recentMatchDataDragonVersion(match);
   return (
     <div className="public-team-detail" aria-label={t().teamDetails}>
-      {match.teams.map((team) => (
-        <section className={`public-team-card ${team.players.some((player) => player.isTarget) ? "ally" : "enemy"}`} key={`${match.matchId}:${team.teamId}`}>
+      {match.teams.map((team, teamIndex) => (
+        <Fragment key={`${match.matchId}:${team.teamId}`}>
+        <section className={`public-team-card ${team.players.some((player) => player.isTarget) ? "ally" : "enemy"}`}>
           {(() => {
             const teamRankStats = team.players.map((player, index) => matchRankForPlayer(rankDetail, team.teamId, player, index));
             const tierSummary = rankLoading
@@ -6383,8 +6969,7 @@ function MatchTeamDetails({
             <strong>{teamLabel(team)}</strong>
             <span>{resultLabel(team.result)} · {team.kills}/{team.deaths}/{team.assists}</span>
             <div className="public-team-head-summary">
-              <small>{t().gold} {formatNumber(team.goldEarned)} · {t().damage} {formatNumber(team.damageDealtToChampions)} · {objectiveLabels[activePublicLocale].champion} {formatNumber(team.kills)}</small>
-              <small>{objectiveSummaryByOrder(team.objectives, ["horde", "riftHerald", "dragon", "baron", "inhibitor", "tower"])}</small>
+              <small>{t().totalGold} {formatNumber(team.goldEarned)} · {t().totalDamage} {formatNumber(team.damageDealtToChampions)} · {t().totalKill} {formatNumber(team.kills)}</small>
             </div>
             <em>{tierSummary}</em>
           </div>
@@ -6396,7 +6981,7 @@ function MatchTeamDetails({
 	              return (
 	                <article className={`public-team-player ${player.isTarget ? "target" : ""} ${playerHighlightClass}`} key={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`}>
 	                  <div className="public-team-player-main">
-	                    <TeamChampionAvatar player={player} />
+		                    <TeamChampionAvatar player={player} hideStreamerStatus={hideRiotIds} />
                       <PlayerLoadoutBuild spells={player.summonerSpells} runes={player.runes} dataDragonVersion={dataDragonVersion} />
 	                    <div className="public-team-player-copy">
 	                      <div className="public-team-player-id-line">
@@ -6409,9 +6994,9 @@ function MatchTeamDetails({
                           <span className="public-team-player-id-stack">
 	                          <SearchableRiotId
                               riotId={hideRiotIds ? undefined : player.riotId}
-                              fallback={hideRiotIds ? "*" : playerDisplayName(player)}
+                              fallback={hideRiotIds ? maskedRiotIdName(player.riotId, playerDisplayName(player)) : playerDisplayName(player)}
                               badges={playerHighlightBadges}
-                              streamer={player.twitchStream}
+	                              streamer={hideRiotIds ? undefined : player.twitchStream}
                               onSearch={onSearchRiotId}
                             />
                             <span className="public-team-mobile-kda" aria-label={t().kda}>
@@ -6427,18 +7012,26 @@ function MatchTeamDetails({
 	                    <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
 	                    <span><KdaMetricText value={player.kda} /></span>
 	                  </div>
-                <div className="public-team-stat" style={{ background: heatBackground(player.damageDealtToChampions, maxDamage) }}>
-                  <strong>{formatNumber(player.damageDealtToChampions)}</strong>
-                  <span className={metricToneClass(teamShareTone(player.damageShare))}>{t().totalDamage}</span>
-                </div>
-                <div className="public-team-stat" style={{ background: heatBackground(player.cs, maxCs, "green") }}>
-                  <strong>{formatNumber(player.cs)}</strong>
-                  <span className={metricToneClass(csTone(player.csPerMinute))}>{activePublicLocale === "ja" ? `CS · ${formatDecimal(player.csPerMinute, 1)}/分` : `CS · ${formatDecimal(player.csPerMinute, 1)}/분`}</span>
-                </div>
-                <div className="public-team-stat" style={{ background: heatBackground(player.visionScore, maxVision) }}>
-                  <strong>{formatNumber(player.visionScore)}</strong>
-                  <span>{t().vision} · {activePublicLocale === "ja" ? `${formatDecimal(player.visionScorePerMinute, 2)}/分` : `${formatDecimal(player.visionScorePerMinute, 2)}/분`}</span>
-                </div>
+                <PublicTeamMetricStat
+                  value={player.damageDealtToChampions}
+                  total={maxDamage}
+                  tone="damage"
+                  label={t().totalDamage}
+                  labelClassName={metricToneClass(teamShareTone(player.damageShare))}
+                />
+                <PublicTeamMetricStat
+                  value={player.cs}
+                  total={maxCs}
+                  tone="cs"
+                  label={activePublicLocale === "ja" ? `CS · ${formatDecimal(player.csPerMinute, 1)}/分` : `CS · ${formatDecimal(player.csPerMinute, 1)}/분`}
+                  labelClassName={metricToneClass(csTone(player.csPerMinute))}
+                />
+                <PublicTeamMetricStat
+                  value={player.visionScore}
+                  total={maxVision}
+                  tone="vision"
+                  label={`${t().vision} · ${activePublicLocale === "ja" ? `${formatDecimal(player.visionScorePerMinute, 2)}/分` : `${formatDecimal(player.visionScorePerMinute, 2)}/분`}`}
+                />
               </article>
             );})}
           </div>
@@ -6446,6 +7039,8 @@ function MatchTeamDetails({
             );
           })()}
         </section>
+        {teamIndex === 0 && match.teams.length > 1 ? <MatchTeamCompare match={match} /> : null}
+        </Fragment>
       ))}
     </div>
 	  );
@@ -6914,7 +7509,7 @@ function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
                 <strong className={metricToneClass(percentTone(performance?.winRate))}>{performance ? `${winsText(performance.wins)} · ${formatPercent(performance.winRate)}` : "-"}</strong>
                 <span><i className="win" style={{ width: barWidth(performance?.wins, maxWins) }} /></span>
               </div>
-              <div className="public-champion-analysis-metric">
+              <div className="public-champion-analysis-metric kda">
                 <strong>{performance ? <KdaMetricText value={performance.averageKda} /> : "-"}</strong>
                 <span><i style={{ width: barWidth(performance?.averageKda, maxKda) }} /></span>
               </div>
@@ -7538,6 +8133,14 @@ export function PublicLolPage({
       if (updateUrl) setPublicPath(publicSummonerPath(result.riotId), options.replaceUrl);
       saveRecentSearch(result);
       setRecentSearches(readRecentSearches());
+      setFavorites((current) => {
+        const favorite = favoriteFromProfile(result);
+        const favoriteKey = normalizeSuggestionKey(favorite);
+        if (!current.some((item) => normalizeSuggestionKey(item) === favoriteKey)) return current;
+        const next = [favorite, ...current.filter((item) => normalizeSuggestionKey(item) !== favoriteKey)].slice(0, MAX_FAVORITES);
+        writeFavorites(next);
+        return next;
+      });
     } catch (requestError) {
       if (!options.refresh) setProfile(null);
       setError(requestError instanceof Error ? requestError.message : t().searchFailed);

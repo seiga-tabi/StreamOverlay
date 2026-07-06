@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { checkDashboardAuthToken, getDashboardAuthStatus, logoutDashboardSession, type DashboardStreamerInfo } from "./api/client";
+import { checkDashboardAuthToken, getDashboardAuthStatus, logoutDashboardSession, setDashboardAuthSurface, type DashboardAuthSurface, type DashboardStreamerInfo } from "./api/client";
 import { connectDashboardSocket } from "./api/socket";
 import { Layout, pageAllowedForRole, type DashboardRole, type Page } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
@@ -65,6 +65,10 @@ function surfaceForLocation(): AppSurface {
 
 function isManagedSurface(surface: AppSurface): boolean {
   return surface === "admin" || surface === "streamer";
+}
+
+function authSurfaceFor(surface: AppSurface): DashboardAuthSurface {
+  return surface === "streamer" ? "streamer" : "admin";
 }
 
 function StreamerDashboardEntryPage({
@@ -152,7 +156,10 @@ export default function App() {
       const nextSurface = surfaceForLocation();
       if (isManagedSurface(nextSurface)) syncDashboardLocalePreference();
       setSurface(nextSurface);
-      if (isManagedSurface(nextSurface)) setAuthState("checking");
+      if (isManagedSurface(nextSurface)) {
+        setDashboardAuthSurface(authSurfaceFor(nextSurface));
+        setAuthState("checking");
+      }
       if (nextSurface === "public") {
         setSocketConnected(false);
         clearDashboardCsrfToken();
@@ -165,8 +172,10 @@ export default function App() {
   useEffect(() => {
     if (!isManagedSurface(surface)) return undefined;
     let mounted = true;
+    const authSurface = authSurfaceFor(surface);
+    setDashboardAuthSurface(authSurface);
     setAuthState("checking");
-    void getDashboardAuthStatus()
+    void getDashboardAuthStatus(authSurface)
       .then((status) => {
         if (!mounted) return;
         setAuthRequired(status.required);
@@ -182,9 +191,12 @@ export default function App() {
             return;
           }
           if (surface === "streamer" && role !== "streamer") {
-            window.history.replaceState({}, "", "/admin");
-            setSurface("admin");
-            setAuthState("checking");
+            setDashboardRole("admin");
+            setDashboardStreamer(undefined);
+            clearDashboardCsrfToken();
+            setAuthErrorKey("");
+            setLoginDisabled(false);
+            setAuthState("streamerAccess");
             return;
           }
           setDashboardRole(role);
@@ -219,7 +231,7 @@ export default function App() {
     if (!isManagedSurface(surface) || authState !== "authenticated") return undefined;
     return connectDashboardSocket((message) => {
       if (message.type === "dashboard.snapshot") setSnapshot(message);
-    }, setSocketConnected);
+    }, setSocketConnected, authSurfaceFor(surface));
   }, [surface, authState]);
 
   useEffect(() => {
@@ -236,6 +248,10 @@ export default function App() {
         setAuthErrorKey("invalid");
         return;
       }
+      if ((status.role ?? "admin") !== "admin") {
+        setAuthErrorKey("adminOnly");
+        return;
+      }
       setDashboardRole(status.role ?? "admin");
       setDashboardStreamer(status.streamer);
       setLoginDisabled(false);
@@ -246,7 +262,7 @@ export default function App() {
   }
 
   function logout(): void {
-    void logoutDashboardSession();
+    void logoutDashboardSession(authSurfaceFor(surface));
     clearDashboardCsrfToken();
     setSocketConnected(false);
     setSnapshot(initialSnapshot);

@@ -66,7 +66,8 @@ import {
   clearDashboardSessionCookie,
   clientIp,
   dashboardSessionCookie,
-  dashboardSessionIdFromRequest
+  dashboardSessionIdFromRequest,
+  type DashboardRole
 } from "../security/auth.js";
 import { dashboardApiLimiter, dashboardLoginLimiter, oauthLimiter, publicLolApiLimiter } from "../security/rate-limit.js";
 
@@ -141,8 +142,8 @@ type PublicLolMatchBadge = {
 };
 
 type PublicLolMatchRune = LolRuneSummary & {
-  kind: "primary" | "secondary";
-  category: "style" | "keystone" | "perk";
+  kind: "primary" | "secondary" | "stat";
+  category: "style" | "keystone" | "perk" | "offense" | "flex" | "defense";
 };
 
 type PublicLocale = "ko" | "ja";
@@ -247,6 +248,7 @@ type PublicLolMatchBuildParticipant = {
 type PublicLolMatchBuildResponse = {
   status: "ready";
   matchId: string;
+  dataDragonVersion?: string;
   participants: PublicLolMatchBuildParticipant[];
   fetchedAt: string;
 };
@@ -560,7 +562,7 @@ function corsHeaders(req: IncomingMessage): Record<string, string> {
   const origin = requestHeaders.origin;
   const responseHeaders: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-CSRF",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-Dashboard-Surface, X-StreamOps-CSRF",
     "Vary": "Origin"
   };
   if (typeof origin === "string") {
@@ -597,6 +599,10 @@ function sendJson(req: IncomingMessage, res: ServerResponse, status: number, pay
 function sendRedirect(res: ServerResponse, location: string, headers: Record<string, string | string[]> = {}): void {
   res.writeHead(302, { ...SECURITY_HEADERS, Location: location, ...headers });
   res.end();
+}
+
+function dashboardAuthSurface(value: string | null | undefined): DashboardRole {
+  return value === "streamer" ? "streamer" : "admin";
 }
 
 function originFor(value: string): string {
@@ -1470,6 +1476,55 @@ function participantSummonerSpells(participant: RiotMatchParticipant): number[] 
   return [safeMatchStat(participant.summoner1Id), safeMatchStat(participant.summoner2Id)].filter((spellId) => spellId > 0);
 }
 
+const STAT_SHARD_SUMMARIES: Record<number, LolRuneSummary> = {
+  5008: {
+    runeId: 5008,
+    nameKo: "적응형 능력치",
+    nameJa: "アダプティブフォース",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsAdaptiveForceIcon.png"
+  },
+  5005: {
+    runeId: 5005,
+    nameKo: "공격 속도",
+    nameJa: "攻撃速度",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsAttackSpeedIcon.png"
+  },
+  5007: {
+    runeId: 5007,
+    nameKo: "스킬 가속",
+    nameJa: "スキルヘイスト",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsCDRScalingIcon.png"
+  },
+  5001: {
+    runeId: 5001,
+    nameKo: "체력 증가",
+    nameJa: "体力増加",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsHealthScalingIcon.png"
+  },
+  5011: {
+    runeId: 5011,
+    nameKo: "체력",
+    nameJa: "体力",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsHealthScalingIcon.png"
+  },
+  5002: {
+    runeId: 5002,
+    nameKo: "방어력",
+    nameJa: "物理防御",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsArmorIcon.png"
+  },
+  5003: {
+    runeId: 5003,
+    nameKo: "마법 저항력",
+    nameJa: "魔法防御",
+    iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsMagicResIcon.png"
+  }
+};
+
+function statShardSummary(runeId: number): LolRuneSummary {
+  return STAT_SHARD_SUMMARIES[runeId] ?? { runeId };
+}
+
 function participantRuneIds(participant: RiotMatchParticipant): Array<Pick<PublicLolMatchRune, "runeId" | "kind" | "category">> {
   const styles = participant.perks?.styles ?? [];
   const primary = styles.find((style) => style.description === "primaryStyle") ?? styles[0];
@@ -1487,6 +1542,13 @@ function participantRuneIds(participant: RiotMatchParticipant): Array<Pick<Publi
     const runeId = safeMatchStat(selection.perk);
     if (runeId > 0) runes.push({ runeId, kind: "secondary", category: "perk" });
   }
+  const statPerks = participant.perks?.statPerks;
+  const offenseShardId = safeMatchStat(statPerks?.offense);
+  const flexShardId = safeMatchStat(statPerks?.flex);
+  const defenseShardId = safeMatchStat(statPerks?.defense);
+  if (offenseShardId > 0) runes.push({ runeId: offenseShardId, kind: "stat", category: "offense" });
+  if (flexShardId > 0) runes.push({ runeId: flexShardId, kind: "stat", category: "flex" });
+  if (defenseShardId > 0) runes.push({ runeId: defenseShardId, kind: "stat", category: "defense" });
   const seen = new Set<string>();
   return runes.filter((rune) => {
     const key = `${rune.kind}:${rune.category}:${rune.runeId}`;
@@ -1503,10 +1565,15 @@ async function participantRunes(
 ): Promise<PublicLolMatchRune[]> {
   const runeIds = participantRuneIds(participant);
   if (runeIds.length === 0) return [];
-  if (!dataDragon) return runeIds.map((rune) => ({ runeId: rune.runeId, kind: rune.kind, category: rune.category }));
+  if (!dataDragon) return runeIds.map((rune) => ({
+    ...(rune.kind === "stat" ? statShardSummary(rune.runeId) : {}),
+    runeId: rune.runeId,
+    kind: rune.kind,
+    category: rune.category
+  }));
   const summaries = await dataDragon.mapRuneSummaries(runeIds.map((rune) => rune.runeId), dataDragonVersion).catch(() => []);
   return runeIds.map((rune, index) => ({
-    ...summaries[index],
+    ...(rune.kind === "stat" ? statShardSummary(rune.runeId) : summaries[index]),
     runeId: rune.runeId,
     kind: rune.kind,
     category: rune.category
@@ -2473,6 +2540,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return listApprovedStreamerRiotIds().find((request) => request.twitchUserId === twitchUserId);
   }
 
+  function streamerDashboardEnabled(request: StreamerRiotIdRequest | undefined): request is StreamerRiotIdRequest {
+    return Boolean(request && request.status === "approved" && request.dashboardEnabled === true);
+  }
+
+  function dashboardEnabledStreamerRiotIdForTwitchUser(twitchUserId: string | undefined): StreamerRiotIdRequest | undefined {
+    const request = approvedStreamerRiotIdForTwitchUser(twitchUserId);
+    return streamerDashboardEnabled(request) ? request : undefined;
+  }
+
   function currentStreamerRiotIdRequestForTwitchUser(twitchUserId: string | undefined): StreamerRiotIdRequest | undefined {
     if (!twitchUserId) return undefined;
     const requests = listStreamerRiotIdRequests().filter((request) => request.twitchUserId === twitchUserId);
@@ -2493,6 +2569,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     profileLinkUrl?: string;
     profileLinkLabel?: string;
     profileLinks?: StreamerProfileLink[];
+    dashboardEnabled?: boolean;
   } {
     return {
       twitchUserId: request.twitchUserId,
@@ -2505,7 +2582,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       overlayKey: request.overlayKey,
       profileLinkUrl: request.profileLinkUrl,
       profileLinkLabel: request.profileLinkLabel,
-      profileLinks: request.profileLinks?.map((link) => ({ ...link }))
+      profileLinks: request.profileLinks?.map((link) => ({ ...link })),
+      dashboardEnabled: request.dashboardEnabled === true
     };
   }
 
@@ -2546,6 +2624,21 @@ export function createHttpHandler(input: HttpHandlerInput) {
       throw new HttpRequestError(503, { error: "스트리머 Riot ID 등록 저장소를 사용할 수 없습니다." });
     }
     return storeWithRegistry.resolveStreamerRiotIdRequest(request);
+  }
+
+  function setStreamerRiotIdDashboardEnabled(request: {
+    requestId: string;
+    dashboardEnabled: boolean;
+    reviewer?: string;
+    note?: string;
+  }): StreamerRiotIdRequest | undefined {
+    const storeWithRegistry = input.store as Store & {
+      setStreamerRiotIdDashboardEnabled?: (input: typeof request) => StreamerRiotIdRequest | undefined;
+    };
+    if (typeof storeWithRegistry.setStreamerRiotIdDashboardEnabled !== "function") {
+      throw new HttpRequestError(503, { error: "스트리머 대시보드 권한 저장소를 사용할 수 없습니다." });
+    }
+    return storeWithRegistry.setStreamerRiotIdDashboardEnabled(request);
   }
 
   function updateApprovedStreamerProfileLink(request: {
@@ -3957,6 +4050,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return {
       status: "ready",
       matchId: match.metadata.matchId || matchId,
+      dataDragonVersion,
       participants: participants.sort((a, b) => (a.teamId ?? 0) - (b.teamId ?? 0)),
       fetchedAt: new Date().toISOString()
     };
@@ -4148,24 +4242,34 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/health/live") return sendJson(req, res, 200, { ok: true, status: "live" });
       if (req.method === "GET" && url.pathname === "/health/ready") return sendJson(req, res, 200, { ok: true, status: "ready" });
       if (req.method === "GET" && url.pathname === "/api/dashboard/auth/status") {
-        const principal = authenticateDashboardRequest(req, sessions);
+        const surface = dashboardAuthSurface(url.searchParams.get("surface"));
+        const principal = authenticateDashboardRequest(req, sessions, surface);
         if (principal?.type === "DASHBOARD_ADMIN") {
           const streamer = principal.role === "streamer"
-            ? approvedStreamerRiotIdForTwitchUser(principal.twitchUserId)
+            ? dashboardEnabledStreamerRiotIdForTwitchUser(principal.twitchUserId)
             : undefined;
+          if (principal.role === "streamer" && !streamer) {
+            return sendJson(req, res, 200, {
+              required: !appConfig.security.localNoAuth,
+              configured: Boolean(input.publicTwitchAuth),
+              authenticated: false
+            }, { "Set-Cookie": clearDashboardSessionCookie("streamer") });
+          }
           return sendJson(req, res, 200, {
             required: !appConfig.security.localNoAuth,
-            configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
+            configured: surface === "streamer"
+              ? Boolean(input.publicTwitchAuth)
+              : appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
             authenticated: true,
             role: principal.role,
             streamer: streamer ? publicStreamerDashboardInfo(streamer) : undefined,
             csrfToken: principal.method === "session" ? principal.csrfToken : undefined
           });
         }
-        if (input.publicTwitchAuth) {
+        if (surface === "streamer" && input.publicTwitchAuth) {
           const publicTwitchStatus = await input.publicTwitchAuth.getStatus(publicTwitchViewerSessionIdFromRequest(req));
           const approvedStreamer = publicTwitchStatus.connected
-            ? approvedStreamerRiotIdForTwitchUser(publicTwitchStatus.user?.id)
+            ? dashboardEnabledStreamerRiotIdForTwitchUser(publicTwitchStatus.user?.id)
             : undefined;
           if (approvedStreamer && publicTwitchStatus.user) {
             const session = sessions.create({ role: "streamer", twitchUserId: publicTwitchStatus.user.id });
@@ -4182,9 +4286,19 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         return sendJson(req, res, 200, {
           required: !appConfig.security.localNoAuth,
-          configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
+          configured: surface === "streamer"
+            ? Boolean(input.publicTwitchAuth)
+            : appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
           authenticated: false
         });
+      }
+      if (
+        auth.principal.type === "DASHBOARD_ADMIN" &&
+        auth.principal.role === "streamer" &&
+        url.pathname !== "/api/dashboard/auth/logout" &&
+        !dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId)
+      ) {
+        return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다.", code: "STREAMER_DASHBOARD_DISABLED" });
       }
       if (req.method === "GET" && url.pathname === "/api/lol/profile") {
         const refresh = url.searchParams.get("refresh") === "1" || url.searchParams.get("refresh") === "true";
@@ -4271,7 +4385,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             authenticated: false
           });
         }
-        const session = sessions.create();
+        const session = sessions.create({ role: "admin" });
         return sendJson(req, res, 200, {
           required: !appConfig.security.localNoAuth,
           configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
@@ -4282,8 +4396,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }, { "Set-Cookie": dashboardSessionCookie(session) });
       }
       if (req.method === "POST" && url.pathname === "/api/dashboard/auth/logout") {
-        sessions.revoke(dashboardSessionIdFromRequest(req));
-        return sendJson(req, res, 200, { ok: true }, { "Set-Cookie": clearDashboardSessionCookie() });
+        const surface = dashboardAuthSurface(url.searchParams.get("surface"));
+        sessions.revoke(dashboardSessionIdFromRequest(req, surface));
+        return sendJson(req, res, 200, { ok: true }, { "Set-Cookie": clearDashboardSessionCookie(surface) });
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/start") {
         const forceVerify = url.searchParams.get("force_verify") === "1" || url.searchParams.get("force_verify") === "true";
@@ -4371,6 +4486,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/followers") return sendJson(req, res, 200, input.store.getFollowerManagementState());
       if (req.method === "GET" && url.pathname === "/api/tournaments") {
         if (auth.principal.type !== "DASHBOARD_ADMIN") return sendJson(req, res, 403, { error: "대시보드 인증이 필요합니다." });
+        if (auth.principal.role === "streamer" && !dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId)) {
+          return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
+        }
         return sendJson(req, res, 200, {
           tournaments: listDashboardTournaments(auth.principal.role, auth.principal.twitchUserId)
         });
@@ -4379,8 +4497,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
           return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
         }
-        const owner = approvedStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
-        if (!owner) return sendJson(req, res, 403, { error: "승인된 스트리머 등록 정보가 필요합니다." });
+        const owner = dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
+        if (!owner) return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
         const body = await readJsonBody<TournamentUpsertInput>(req);
         const tournament = upsertStreamerTournament(body, owner);
         if (!tournament) return sendJson(req, res, 400, { error: "대회 제목과 올바른 입력값이 필요합니다." });
@@ -4390,8 +4508,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
           return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
         }
-        const owner = approvedStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
-        if (!owner) return sendJson(req, res, 403, { error: "승인된 스트리머 등록 정보가 필요합니다." });
+        const owner = dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
+        if (!owner) return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
         const tournamentId = decodeURIComponent(url.pathname.slice("/api/tournaments/".length)).trim();
         if (!tournamentId) return sendJson(req, res, 400, { error: "대회 ID가 필요합니다." });
         if (!deleteStreamerTournament(tournamentId, owner)) return sendJson(req, res, 404, { error: "삭제할 대회를 찾을 수 없습니다." });
@@ -4423,8 +4541,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
           return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
         }
-        const previous = approvedStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
-        if (!previous) return sendJson(req, res, 404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
+        const previous = dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
+        if (!previous) return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
         const body = await readJsonBody<{ riotId?: unknown }>(req);
         if (typeof body.riotId !== "string") {
           return sendJson(req, res, 400, { error: "riotId는 gameName#tagLine 문자열이어야 합니다." });
@@ -4461,6 +4579,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         });
       }
       if (req.method === "GET" && url.pathname === "/api/participation/streamer-riot-id-requests") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
         return sendJson(req, res, 200, { requests: listStreamerRiotIdRequests() });
       }
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings") return sendJson(req, res, 200, loadLolParticipationProfileSettings());
@@ -4498,6 +4619,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/resolve") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
         const body = await readJsonBody<{ requestId?: unknown; decision?: unknown; note?: unknown }>(req);
         if (typeof body.requestId !== "string" || !body.requestId.trim()) {
           return sendJson(req, res, 400, { error: "requestId는 문자열이어야 합니다." });
@@ -4520,6 +4644,29 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!request) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
         invalidatePublicLolProfileCachesForStreamer(request);
         for (const previousRequest of previousApprovedRequests) invalidatePublicLolProfileCachesForStreamer(previousRequest);
+        return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/dashboard-access") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        const body = await readJsonBody<{ requestId?: unknown; dashboardEnabled?: unknown; note?: unknown }>(req);
+        if (typeof body.requestId !== "string" || !body.requestId.trim()) {
+          return sendJson(req, res, 400, { error: "requestId는 문자열이어야 합니다." });
+        }
+        if (typeof body.dashboardEnabled !== "boolean") {
+          return sendJson(req, res, 400, { error: "dashboardEnabled는 boolean이어야 합니다." });
+        }
+        const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 300) : undefined;
+        const request = setStreamerRiotIdDashboardEnabled({
+          requestId: body.requestId,
+          dashboardEnabled: body.dashboardEnabled,
+          reviewer: "dashboard",
+          note
+        });
+        if (!request) return sendJson(req, res, 404, { error: "승인된 등록 요청을 찾을 수 없습니다." });
+        invalidatePublicLolProfileCachesForStreamer(request);
         return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
       }
 
