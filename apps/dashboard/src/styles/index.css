@@ -5003,6 +5003,36 @@ code {
   }
 }
 
+@media (max-width: 760px) {
+  .public-team-compare {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "leftLabel rightLabel"
+      "bars bars";
+    gap: 8px 10px;
+    padding: 10px;
+  }
+
+  .public-team-compare-label.left {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .public-team-compare-label.right {
+    justify-items: end;
+    text-align: right;
+  }
+
+  .public-team-compare-objectives,
+  .public-team-compare-metric:nth-child(n + 2) {
+    display: none;
+  }
+
+  .public-team-compare-bars {
+    gap: 0;
+  }
+}
+
 .public-ingame-panel {
   display: grid;
   gap: 14px;
@@ -23313,14 +23343,25 @@ code {
   box-shadow: 0 14px 26px rgba(92, 124, 255, 0.24);
 }
 
+html[lang="ja"] .public-dashboard-shell,
+html[lang="ja"] .public-dashboard-shell button,
+html[lang="ja"] .public-dashboard-shell input,
+html[lang="ja"] .public-dashboard-shell textarea,
+html[lang="ja"] .public-dashboard-shell select {
+  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", "Hiragino Sans", "Yu Gothic", Meiryo, "Segoe UI", system-ui, sans-serif;
+  font-synthesis-weight: none;
+  text-rendering: geometricPrecision;
+  letter-spacing: 0;
+}
+
 html[lang="ja"] .public-dashboard-shell .public-header-nav button,
 html[lang="ja"] .public-dashboard-shell .public-app-header.home .public-header-nav button,
 html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button,
 html[lang="ja"] .public-dashboard-shell .public-header-submenu button {
   align-items: center;
-  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, "Noto Sans JP", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 14px;
-  font-weight: 850;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 760;
   line-height: 1;
   letter-spacing: 0;
 }
@@ -23334,16 +23375,16 @@ html[lang="ja"] .public-dashboard-shell .public-header-submenu button strong {
   min-height: 1em;
   color: inherit;
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 850;
+  font-size: 13px;
+  font-weight: 760;
   line-height: 1;
   letter-spacing: 0;
 }
 
 html[lang="ja"] .public-dashboard-shell .public-header-nav button.active strong,
 html[lang="ja"] .public-dashboard-shell .public-header-submenu button.active strong {
-  font-size: 14px;
-  font-weight: 900;
+  font-size: 13px;
+  font-weight: 820;
   line-height: 1;
 }
 
@@ -23359,17 +23400,208 @@ html[lang="ja"] .public-dashboard-shell .public-header-submenu button span {
   line-height: 1;
 }
 
-html[lang="ja"] .public-dashboard-shell :where(.public-tournament-calendar-page, .public-tournament-list-page, .public-tournament-page) {
-  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, "Noto Sans JP", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button,
+html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button strong {
+  font-size: 12px;
+}
+
+/* 모바일 헤더 메뉴 최종 보정: submenu가 본문 위에 따로 떠서 겹치지 않도록 하나의 패널로 고정 */
+@media (max-width: 760px) {
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav,
+  .public-dashboard-shell .public-app-header.home.mobile-menu-open .public-header-nav,
+  .public-dashboard-shell .public-app-header:not(.home).mobile-menu-open .public-header-nav {
+    position: absolute !important;
+    top: calc(100% + 10px) !important;
+    right: 10px !important;
+    left: 10px !important;
+    z-index: 120 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: min(72vh, 560px) !important;
+    padding: 10px !important;
+    overflow-y: auto !important;
+    border: 1px solid rgba(126, 177, 223, .72) !important;
+    border-radius: 22px !important;
+    background:
+      radial-gradient(circle at 14% 0%, rgba(213, 241, 255, .82), transparent 42%),
+      linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(243, 247, 251, .96)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .9),
+      0 22px 50px rgba(55, 96, 164, .22) !important;
+    transform: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav > button,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item > button,
+  .public-dashboard-shell .public-app-header.home.mobile-menu-open .public-header-nav > button,
+  .public-dashboard-shell .public-app-header.home.mobile-menu-open .public-header-menu-item > button,
+  .public-dashboard-shell .public-app-header:not(.home).mobile-menu-open .public-header-nav > button,
+  .public-dashboard-shell .public-app-header:not(.home).mobile-menu-open .public-header-menu-item > button {
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 44px !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(126, 177, 223, .46) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, .82) !important;
+    color: #17314f !important;
+    box-shadow: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav > button.active,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item > button.active {
+    border-color: rgba(79, 124, 255, .42) !important;
+    background: linear-gradient(135deg, rgba(191, 227, 255, .98), rgba(213, 241, 255, .9)) !important;
+    color: #245dff !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav button span,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-submenu button span {
+    color: #7d72ff !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav button strong,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-submenu button strong {
+    color: inherit !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav button::after {
+    display: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item,
+  .public-dashboard-shell .public-app-header.home.mobile-menu-open .public-header-menu-item,
+  .public-dashboard-shell .public-app-header:not(.home).mobile-menu-open .public-header-menu-item {
+    display: grid !important;
+    grid-column: 1 / -1 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-submenu,
+  .public-dashboard-shell .public-app-header.home.mobile-menu-open .public-header-submenu,
+  .public-dashboard-shell .public-app-header:not(.home).mobile-menu-open .public-header-submenu {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-submenu button,
+  .public-dashboard-shell .public-app-header.home.mobile-menu-open .public-header-submenu button,
+  .public-dashboard-shell .public-app-header:not(.home).mobile-menu-open .public-header-submenu button {
+    justify-content: center !important;
+    min-width: 0 !important;
+    height: 42px !important;
+    padding: 0 10px !important;
+    border: 1px solid rgba(126, 177, 223, .44) !important;
+    border-radius: 15px !important;
+    background: rgba(255, 255, 255, .74) !important;
+    color: #17314f !important;
+    text-align: center !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-submenu button.active,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-submenu button:hover {
+    border-color: rgba(79, 124, 255, .42) !important;
+    background: rgba(191, 227, 255, .82) !important;
+    color: #245dff !important;
+  }
+}
+
+html[lang="ja"] .public-dashboard-shell :where(
+  .public-menu-page-panel,
+  .public-participation-page,
+  .public-tournament-calendar-page,
+  .public-tournament-list-page,
+  .public-tournament-page
+) {
+  font-family: inherit;
   letter-spacing: 0;
   word-break: keep-all;
+}
+
+html[lang="ja"] .public-dashboard-shell :where(
+  .public-section-head h2,
+  .public-section-head h3,
+  .public-section-head p,
+  .public-menu-page-panel h2,
+  .public-menu-page-panel h3,
+  .public-menu-page-panel p,
+  .public-menu-page-panel strong,
+  .public-participation-streamer-head strong,
+  .public-participation-streamer-head p,
+  .public-participation-streamer-head span,
+  .public-participation-card h3,
+  .public-participation-card strong,
+  .public-participation-card span,
+  .public-participation-no-streamer,
+  .public-empty,
+  .public-empty-state p,
+  .public-subscriptions-card > strong,
+  .public-subscription-row strong,
+  .public-twitch-channel-meta strong
+) {
+  font-family: inherit;
+  letter-spacing: 0;
+  line-height: 1.45;
+}
+
+html[lang="ja"] .public-dashboard-shell :where(.public-section-head h2, .public-menu-page-panel h2) {
+  font-size: clamp(20px, 2.1vw, 28px);
+  font-weight: 820;
+}
+
+html[lang="ja"] .public-dashboard-shell :where(
+  .public-section-head p,
+  .public-menu-page-panel p,
+  .public-participation-streamer-head p,
+  .public-empty,
+  .public-empty-state p
+) {
+  font-weight: 680;
+}
+
+html[lang="ja"] .public-dashboard-shell :where(
+  .public-participation-streamer-head strong,
+  .public-participation-card h3,
+  .public-participation-card strong,
+  .public-subscriptions-card > strong,
+  .public-subscription-row strong
+) {
+  font-weight: 800;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > span {
+  font-size: 13px;
+  font-weight: 760;
 }
 
 html[lang="ja"] .public-dashboard-shell .public-tournament-page-head span,
 html[lang="ja"] .public-dashboard-shell .public-tournament-list-card > div:first-child span {
   font-family: inherit;
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 760;
   line-height: 1.1;
   letter-spacing: 0;
 }
@@ -23378,7 +23610,7 @@ html[lang="ja"] .public-dashboard-shell .public-tournament-page-head h2,
 html[lang="ja"] .public-dashboard-shell .public-tournament-title-row h2 {
   font-family: inherit;
   font-size: clamp(30px, 3vw, 42px);
-  font-weight: 900;
+  font-weight: 820;
   line-height: 1.16;
   letter-spacing: 0;
 }
@@ -23399,7 +23631,7 @@ html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button,
 html[lang="ja"] .public-dashboard-shell .public-tournament-upcoming-card > button {
   font-family: inherit;
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 760;
   line-height: 1.25;
   letter-spacing: 0;
 }
@@ -23410,7 +23642,7 @@ html[lang="ja"] .public-dashboard-shell .public-tournament-list-card strong,
 html[lang="ja"] .public-dashboard-shell .public-tournament-card-head strong {
   font-family: inherit;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 820;
   line-height: 1.25;
   letter-spacing: 0;
 }
@@ -23432,14 +23664,14 @@ html[lang="ja"] .public-dashboard-shell .public-tournament-list-card dd {
 html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button span {
   font-family: inherit;
   font-size: 10px;
-  font-weight: 850;
+  font-weight: 760;
   line-height: 1.2;
 }
 
 html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button em {
   font-family: inherit;
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 760;
   line-height: 1.2;
 }
 

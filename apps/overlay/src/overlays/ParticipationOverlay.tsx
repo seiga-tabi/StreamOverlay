@@ -332,6 +332,16 @@ function streamerProfileSubline(
     : mastery;
 }
 
+function shouldKeepStatus(status: ParticipationStatusUpdateMessage | undefined): boolean {
+  return status?.phase === "in_game" || status?.phase === "game_ended";
+}
+
+function appendNextCandidate(queue: ParticipationQueueEntry[], status: ParticipationStatusUpdateMessage | undefined): ParticipationQueueEntry[] {
+  if (status?.phase !== "game_ended" || !status.nextCandidate) return queue;
+  const alreadyVisible = queue.some((entry) => entry.twitchUserName === status.nextCandidate?.twitchUserName);
+  return alreadyVisible ? queue : [status.nextCandidate, ...queue];
+}
+
 export function ParticipationOverlay({
   queue,
   status,
@@ -350,14 +360,16 @@ export function ParticipationOverlay({
         isOpen: queueIsOpen,
         phase: queueIsOpen ? "recruiting" : "closed"
       };
-  const effectiveStatus = queueIsOpen !== undefined && status?.isOpen !== queueIsOpen
+  const effectiveStatus = queueIsOpen !== undefined && status?.isOpen !== queueIsOpen && !shouldKeepStatus(status)
     ? queueStatusFallback
     : status ?? queueStatusFallback;
   const isStreamerInGame = effectiveStatus?.phase === "in_game";
+  const isGameEnded = effectiveStatus?.phase === "game_ended";
+  const displayQueue = appendNextCandidate(queue, effectiveStatus);
   const shouldShowTeamsCard = Boolean(teams) && !isStreamerInGame;
-  const shouldShowQueueCard = isStreamerInGame || queue.length > 0 || effectiveStatus?.isOpen || shouldShowTeamsCard;
-  const visibleQueue = queue.slice(0, MAX_VISIBLE_QUEUE_ROWS);
-  const hiddenQueueCount = Math.max(0, queue.length - visibleQueue.length);
+  const shouldShowQueueCard = isStreamerInGame || isGameEnded || displayQueue.length > 0 || effectiveStatus?.isOpen || shouldShowTeamsCard;
+  const visibleQueue = displayQueue.slice(0, MAX_VISIBLE_QUEUE_ROWS);
+  const hiddenQueueCount = Math.max(0, displayQueue.length - visibleQueue.length);
 
   return (
     <>
