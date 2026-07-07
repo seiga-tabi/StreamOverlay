@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { dashboardI18n, type DashboardLocale } from "../i18n";
 
-const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests", "followers", "events", "questions", "settings"] as const;
+const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests", "followers", "events", "settings"] as const;
 
 export type Page = (typeof pages)[number];
 export type DashboardRole = "admin" | "streamer";
@@ -13,10 +13,7 @@ export const STREAMER_ALLOWED_PAGES: Page[] = [
   "myRiotAccount",
   "soloRank",
   "participation",
-  "tournaments",
-  "followers",
-  "questions",
-  "events"
+  "followers"
 ];
 
 export function pageAllowedForRole(page: Page, role: DashboardRole): boolean {
@@ -27,7 +24,7 @@ const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; ite
   { key: "operations", items: ["dashboard", "twitch"] },
   { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
   { key: "lol", items: ["myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests"] },
-  { key: "community", items: ["followers", "questions", "events"] },
+  { key: "community", items: ["followers", "events"] },
   { key: "system", items: ["settings"] }
 ];
 
@@ -63,6 +60,7 @@ function DashboardLocaleSelector({
       >
         <span className="public-globe-icon" aria-hidden="true"><span /></span>
         <strong>{activeCode}</strong>
+        <i aria-hidden="true" />
       </button>
       {open ? (
         <div className="public-locale-popover dashboard-locale-popover" role="menu" aria-label={text.language}>
@@ -73,10 +71,11 @@ function DashboardLocaleSelector({
               className={option.locale === locale ? "active" : ""}
               role="menuitemradio"
               aria-checked={option.locale === locale}
+              aria-label={`${option.code} ${option.label}`}
               onClick={() => selectLocale(option.locale)}
             >
-              <span>{option.code}</span>
-              <strong>{option.label}</strong>
+              <strong>{option.code}</strong>
+              <em aria-hidden="true">✓</em>
             </button>
           ))}
         </div>
@@ -114,10 +113,10 @@ export function Layout({
     .filter((section) => section.items.length > 0);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-locale={locale} lang={locale === "ja" ? "ja" : "ko"}>
       <aside className="app-sidebar">
         <div className="brand-block">
-          <img className="brand-logo" src="/images/seigagg-logo.png" alt="Seiga.GG" />
+          <img className="brand-logo" src="/images/yorogg-logo.png" alt="YORO.gg" />
         </div>
         <div className="sidebar-profile">
           <span data-ko={dashboardI18n.ko.app.workspaceKicker} data-ja={dashboardI18n.ja.app.workspaceKicker}>{uiText.app.workspaceKicker}</span>

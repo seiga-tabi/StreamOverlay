@@ -1533,6 +1533,110 @@ test("공개 LoL 전적 캐시는 Twitch 방송 상태를 매 요청마다 갱�
   });
 });
 
+test("공개 LoL 전적 API는 내부 방송 상태가 online이어도 Twitch 현재 방송이 없으면 오프라인으로 응답한다", async () => {
+  await withAuthConfig(async () => {
+    let rememberedLiveStatus = {
+      twitchUserId: "1234",
+      isLive: true,
+      source: "eventsub",
+      updatedAt: new Date().toISOString()
+    };
+    let streamLookups = 0;
+    const handler = createHttpHandler({
+      store: {
+        getStatus() {
+          return { stream: "online" };
+        },
+        getTwitchStreamLiveStatus(userId) {
+          return userId === "1234" ? rememberedLiveStatus : undefined;
+        },
+        setTwitchStreamLiveStatus(input) {
+          rememberedLiveStatus = {
+            twitchUserId: input.twitchUserId,
+            isLive: input.isLive,
+            source: input.source,
+            updatedAt: new Date().toISOString()
+          };
+        },
+        listApprovedStreamerRiotIds() {
+          return [{
+            id: "request-1",
+            twitchUserId: "1234",
+            twitchLogin: "seiga",
+            twitchDisplayName: "西雅_せいが",
+            twitchProfileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga.png",
+            riotGameName: "Seiga",
+            riotTagLine: "sei",
+            normalizedRiotId: "seiga#sei",
+            status: "approved",
+            requestedAt: "2026-06-26T00:00:00.000Z",
+            updatedAt: "2026-06-26T00:00:00.000Z",
+            overlaySlug: "seiga",
+            overlayKey: "overlay-key"
+          }];
+        }
+      },
+      twitchAuth: {},
+      twitch: {
+        async getStreamByUserId(userId) {
+          streamLookups += 1;
+          assert.equal(userId, "1234");
+          return undefined;
+        },
+        async getUserProfile(userId) {
+          assert.equal(userId, "1234");
+          return {
+            login: "seiga",
+            displayName: "西雅_せいが",
+            profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga.png"
+          };
+        }
+      },
+      actions: {
+        async dispatchOne() {}
+      },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() {
+          return true;
+        },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+        },
+        async getAccountByRiotId(gameName, tagLine) {
+          return { puuid: "target-puuid", gameName, tagLine };
+        },
+        async getRankedStatsByPuuid() {
+          return undefined;
+        },
+        async getLadderRankByPuuid() {
+          return undefined;
+        },
+        async getChampionMasteryTopByPuuid() {
+          return [];
+        },
+        async getRecentMatchIdsByPuuid() {
+          return [];
+        },
+        async getCurrentGameByPuuid() {
+          return null;
+        }
+      }
+    });
+
+    const req = createRequest("GET", "/api/lol/profile?riotId=Seiga%23sei", undefined, { origin: DASHBOARD_ORIGIN });
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200, res.body);
+    const body = JSON.parse(res.body);
+    assert.equal(body.twitchStream.isLive, false);
+    assert.equal(rememberedLiveStatus.isLive, false);
+    assert.equal(streamLookups, 1);
+  });
+});
+
 test("공개 LoL 전적 API는 같은 Riot ID 요청을 캐시하고 최근 경기를 최신순으로 정렬한다", async () => {
   await withAuthConfig(async () => {
     let accountLookups = 0;
@@ -2065,11 +2169,11 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     const session = sessions.create({ role: "streamer", twitchUserId: "streamer-twitch-user" });
     const cookie = `${STREAMER_DASHBOARD_SESSION_COOKIE}=${session.id}`;
 
-    const allowedReq = createRequest("GET", "/api/events/recent", undefined, {
+    const allowedReq = createRequest("GET", "/api/status", undefined, {
       cookie,
       "x-streamops-dashboard-surface": "streamer"
     });
-    const allowed = authorizeHttpRequest(allowedReq, "/api/events/recent", sessions);
+    const allowed = authorizeHttpRequest(allowedReq, "/api/status", sessions);
     assert.equal(allowed.ok, true);
     assert.equal(allowed.principal.type, "DASHBOARD_ADMIN");
     assert.equal(allowed.principal.role, "streamer");
@@ -2093,6 +2197,17 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     assert.equal(blocked.ok, false);
     assert.equal(blocked.status, 403);
     assert.equal(blocked.code, "FORBIDDEN");
+
+    for (const pathname of ["/api/events/recent", "/api/questions", "/api/tournaments"]) {
+      const adminOnlyReq = createRequest("GET", pathname, undefined, {
+        cookie,
+        "x-streamops-dashboard-surface": "streamer"
+      });
+      const adminOnly = authorizeHttpRequest(adminOnlyReq, pathname, sessions);
+      assert.equal(adminOnly.ok, false);
+      assert.equal(adminOnly.status, 403);
+      assert.equal(adminOnly.code, "FORBIDDEN");
+    }
   });
 });
 
@@ -2104,6 +2219,20 @@ test("공개 커뮤니티 댓글 API는 dashboard 인증을 요구하지 않는�
     });
 
     const result = authorizeHttpRequest(req, "/api/public/community/posts/post-1/comments", sessions);
+
+    assert.equal(result.ok, true);
+    assert.equal(result.principal.type, "PUBLIC");
+  });
+});
+
+test("공개 시청자 참여 취소 API는 dashboard CSRF를 요구하지 않는다", async () => {
+  await withAuthConfig(async () => {
+    const sessions = new DashboardSessionStore();
+    const req = createRequest("POST", "/api/public/participation/cancel", { streamerKey: "streamer-1" }, {
+      origin: DASHBOARD_ORIGIN
+    });
+
+    const result = authorizeHttpRequest(req, "/api/public/participation/cancel", sessions);
 
     assert.equal(result.ok, true);
     assert.equal(result.principal.type, "PUBLIC");

@@ -132,6 +132,91 @@ li + li {
   min-height: 100vh;
 }
 
+.app-shell[data-locale="ja"] {
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+.app-shell[data-locale="ja"] h1,
+.app-shell[data-locale="ja"] h2,
+.app-shell[data-locale="ja"] h3,
+.app-shell[data-locale="ja"] strong,
+.app-shell[data-locale="ja"] button {
+  letter-spacing: 0;
+}
+
+.app-shell[data-locale="ja"] .top-bar strong {
+  font-size: 18px;
+  line-height: 1.28;
+  font-weight: 850;
+}
+
+.app-shell[data-locale="ja"] .top-action,
+.app-shell[data-locale="ja"] .top-chip {
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.app-shell[data-locale="ja"] .dashboard-locale-button strong {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.app-shell[data-locale="ja"] .page-header h1 {
+  font-size: clamp(28px, 2.4vw, 34px);
+  line-height: 1.18;
+  font-weight: 900;
+}
+
+.app-shell[data-locale="ja"] .page-header .muted {
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 700;
+}
+
+.app-shell[data-locale="ja"] .connection-pill span,
+.app-shell[data-locale="ja"] .status-card-head .muted {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+.app-shell[data-locale="ja"] .connection-pill strong {
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 850;
+}
+
+.app-shell[data-locale="ja"] .status-card {
+  gap: 12px;
+}
+
+.app-shell[data-locale="ja"] .status-value {
+  font-size: clamp(24px, 1.8vw, 28px);
+  line-height: 1.18;
+  font-weight: 900;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.app-shell[data-locale="ja"] .status-raw {
+  font-size: 12px;
+  line-height: 1.32;
+  font-weight: 760;
+}
+
+.app-shell[data-locale="ja"] .hint {
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 760;
+}
+
 .auth-shell {
   display: grid;
   min-height: 100vh;
@@ -195,15 +280,16 @@ li + li {
 
 .brand-logo {
   display: block;
-  width: min(100%, 178px);
+  width: min(100%, 190px);
   height: auto;
-  max-height: 54px;
+  max-height: 78px;
   object-fit: contain;
+  border-radius: 14px;
 }
 
 .auth-brand .brand-logo {
-  width: min(100%, 224px);
-  max-height: 70px;
+  width: min(100%, 260px);
+  max-height: 112px;
 }
 
 .brand-mark {
@@ -1849,8 +1935,8 @@ code {
 }
 
 .public-brand .public-brand-logo {
-  width: 174px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
 }
 
 .public-topbar nav {
@@ -2449,8 +2535,10 @@ code {
 
 .seiga-mark {
   position: relative;
-  width: 66px;
-  height: 74px;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  object-fit: cover;
   transform-origin: center;
   animation: seigaMarkPulse 1.8s ease-in-out infinite;
 }
@@ -2632,9 +2720,9 @@ code {
   }
 
   .seiga-mark {
-    width: 66px;
-    height: 74px;
-    scale: .62;
+    width: 52px;
+    height: 52px;
+    scale: 1;
   }
 
   .public-search-loading-card > strong {
@@ -7036,10 +7124,10 @@ code {
     min-height: 64px;
   }
 
-  .public-brand .public-brand-logo {
-    width: 132px;
-    height: 40px;
-  }
+.public-brand .public-brand-logo {
+  width: 40px;
+  height: 40px;
+}
 
   .public-top-actions span {
     display: none;
@@ -7329,8 +7417,8 @@ code {
 }
 
 .public-brand .public-brand-logo {
-  width: 162px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
 }
 
 .public-topbar nav {
@@ -7903,6 +7991,12 @@ code {
   text-align: center;
 }
 
+.public-rank-overview-card > div {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .public-profile-top-grid.has-mastery-art .public-rank-overview-card {
   padding: 12px;
   border: 1px solid rgba(226, 232, 240, .76);
@@ -7946,6 +8040,10 @@ code {
   object-fit: cover;
 }
 
+.public-stream-overview-card {
+  overflow: hidden;
+}
+
 .public-stream-overview-card.live img,
 .public-stream-overview-card.live .public-stream-fallback {
   box-shadow:
@@ -7971,13 +8069,26 @@ code {
 
 .public-stream-meta {
   display: grid;
+  justify-items: center;
   gap: 2px;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
 }
 
 .public-stream-meta small {
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.public-stream-overview-card.live .public-stream-meta small:first-child {
+  display: -webkit-box;
+  white-space: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .public-stream-fallback {
@@ -9047,8 +9158,10 @@ code {
 }
 
 .public-sidebar-brand .public-brand-logo {
-  width: 150px;
+  width: 44px;
   height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 .public-sidebar-brand .public-brand-mark {
@@ -9353,15 +9466,16 @@ code {
 
 .public-brand-logo {
   display: block;
-  width: 152px;
+  width: 44px;
   max-width: 100%;
-  height: 42px;
-  object-fit: contain;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 .public-header-brand .public-brand-logo {
-  width: 138px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   filter: drop-shadow(0 1px 6px rgba(255, 255, 255, .74)) drop-shadow(0 8px 20px rgba(25, 38, 78, .16));
 }
 
@@ -12253,8 +12367,8 @@ code {
 }
 
 .public-subscriptions-layout .public-twitch-followed-list article {
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr) 88px;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(108px, .62fr) minmax(188px, auto);
+  gap: 10px;
   overflow: hidden;
 }
 
@@ -12279,22 +12393,27 @@ code {
   flex-wrap: nowrap;
   justify-content: end;
   justify-self: end;
-  min-width: 0;
-  width: 88px;
+  min-width: 188px;
+  width: auto;
 }
 
 .public-subscriptions-layout .public-twitch-channel-actions a,
 .public-subscriptions-layout .public-twitch-channel-actions button {
-  width: 88px;
-  min-width: 0;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 82px;
   min-height: 32px;
-  padding: 0 6px;
-  overflow: hidden;
+  padding: 0 10px;
+  overflow: visible;
   font-size: 11px;
   line-height: 1.15;
   text-align: center;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   white-space: nowrap;
+}
+
+.public-subscriptions-layout .public-twitch-channel-actions a {
+  min-width: 100px;
 }
 
 .public-saved-grid button small {
@@ -16479,6 +16598,21 @@ code {
     justify-content: start;
   }
 
+  .public-subscriptions-layout .public-twitch-channel-actions {
+    justify-content: stretch;
+    justify-self: stretch;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .public-subscriptions-layout .public-twitch-channel-actions a,
+  .public-subscriptions-layout .public-twitch-channel-actions button {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .public-dashboard-shell .public-profile-top-grid {
     grid-template-columns: 1fr;
   }
@@ -16601,8 +16735,8 @@ code {
   }
 
   .public-app-header.home .public-header-brand .public-brand-logo {
-    width: 140px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
   }
 
   .public-header-tools {
@@ -18069,8 +18203,8 @@ code {
 
 @media (max-width: 520px) {
   .public-app-header.home .public-header-brand .public-brand-logo {
-    width: 122px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
 
   .public-app-header.home .public-locale-button {
@@ -22562,4 +22696,805 @@ code {
 
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-player-list > div.target {
   background: linear-gradient(90deg, rgba(191, 227, 255, .58), rgba(255, 255, 255, .28)) !important;
+}
+
+/* 공개 시청자 참여 페이지 */
+.public-dashboard-shell .public-participation-page,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page {
+  color: var(--seiga-pastel-text) !important;
+}
+
+.public-dashboard-shell .public-participation-page .public-section-head h2,
+.public-dashboard-shell .public-participation-page h3,
+.public-dashboard-shell .public-participation-page strong,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page .public-section-head h2,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page h3,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page strong {
+  color: var(--seiga-pastel-heading) !important;
+}
+
+.public-dashboard-shell .public-participation-page .public-section-head p,
+.public-dashboard-shell .public-participation-page small,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page .public-section-head p,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page small {
+  color: #5f748f !important;
+}
+
+.public-participation-streamer-select {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(126, 177, 223, .58);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(191, 227, 255, .72), transparent 36%),
+    linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(243, 247, 251, .88));
+  box-shadow: 0 16px 34px rgba(55, 96, 164, .1);
+}
+
+.public-participation-streamer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.public-participation-streamer-head strong {
+  display: block;
+  font-size: 18px;
+  color: var(--seiga-pastel-heading);
+}
+
+.public-participation-streamer-head p {
+  margin: 5px 0 0;
+  color: #5f748f;
+  font-weight: 800;
+}
+
+.public-participation-streamer-head > span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #e7f4ff;
+  color: #4268e8;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.public-participation-streamer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.public-participation-streamer-card {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(126, 177, 223, .48);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .78);
+  color: var(--seiga-pastel-text);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease, background .16s ease;
+}
+
+.public-participation-streamer-card:hover,
+.public-participation-streamer-card.active {
+  border-color: rgba(92, 124, 255, .72);
+  background: linear-gradient(135deg, rgba(191, 227, 255, .82), rgba(255, 255, 255, .86));
+  box-shadow: 0 12px 28px rgba(80, 119, 216, .16);
+  transform: translateY(-1px);
+}
+
+.public-participation-streamer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #5c7cff, #6bd5ff);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 950;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .34);
+}
+
+.public-participation-streamer-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-participation-streamer-info {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.public-participation-streamer-info strong,
+.public-participation-streamer-info small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-participation-streamer-info strong {
+  color: var(--seiga-pastel-heading);
+  font-weight: 950;
+}
+
+.public-participation-streamer-info small {
+  color: #5f748f;
+  font-weight: 850;
+}
+
+.public-participation-streamer-meta {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.public-participation-streamer-meta em {
+  border-radius: 999px;
+  background: #dcfff2;
+  color: #07966a;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.public-participation-streamer-meta small {
+  color: #5f748f;
+  font-weight: 900;
+}
+
+.public-participation-no-streamer {
+  border: 1px dashed rgba(126, 177, 223, .58);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .68);
+  color: #5f748f;
+  padding: 16px;
+  font-weight: 900;
+}
+
+.public-participation-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, .82fr) minmax(360px, 1.18fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.public-participation-card {
+  border: 1px solid rgba(126, 177, 223, .58);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(229, 244, 255, .72));
+  padding: 18px;
+  box-shadow: 0 16px 34px rgba(55, 96, 164, .1);
+}
+
+.public-participation-card h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.public-participation-form {
+  display: grid;
+  gap: 12px;
+}
+
+.public-participation-form label {
+  display: grid;
+  gap: 7px;
+  color: #5f748f;
+  font-weight: 900;
+}
+
+.public-participation-form input,
+.public-participation-form select {
+  width: 100%;
+  height: 46px;
+  border: 1px solid rgba(126, 177, 223, .72);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .96);
+  color: var(--seiga-pastel-heading);
+  padding: 0 13px;
+  font: inherit;
+  font-weight: 900;
+}
+
+.public-participation-form input::placeholder {
+  color: #8fa2bc;
+}
+
+.public-participation-form button,
+.public-participation-actions button,
+.public-participation-current button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #5c7cff, #7365ff);
+  color: #fff;
+  font-weight: 950;
+  cursor: pointer;
+  padding: 0 16px;
+  box-shadow: 0 12px 24px rgba(92, 124, 255, .2);
+}
+
+.public-participation-current button.danger {
+  border: 1px solid rgba(255, 137, 162, .72);
+  background: linear-gradient(135deg, #fff1f5, #ffe2e9);
+  color: #cf3158;
+  box-shadow: none;
+}
+
+.public-participation-form button:disabled,
+.public-participation-actions button:disabled,
+.public-participation-current button:disabled {
+  opacity: .58;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.public-participation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.public-participation-actions button.secondary {
+  border: 1px solid rgba(126, 177, 223, .72);
+  background: rgba(255, 255, 255, .92);
+  color: var(--seiga-pastel-heading);
+  box-shadow: none;
+}
+
+.public-participation-message {
+  margin: 12px 0 0;
+  color: #07966a;
+  font-weight: 900;
+}
+
+.public-participation-current {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(126, 177, 223, .42);
+  border-radius: 14px;
+  background: rgba(243, 247, 251, .82);
+}
+
+.public-participation-current span {
+  color: #4d7cff;
+  font-weight: 950;
+}
+
+.public-participation-queue-list {
+  display: grid;
+  gap: 10px;
+}
+
+.public-participation-queue-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(126, 177, 223, .5);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .72);
+}
+
+.public-participation-queue-row.viewer {
+  border-color: rgba(104, 99, 255, .56);
+  background: linear-gradient(135deg, rgba(191, 227, 255, .78), rgba(213, 241, 255, .68));
+}
+
+.public-participation-position {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #e7f4ff;
+  color: #4268e8;
+  font-weight: 950;
+}
+
+.public-participation-queue-main {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.public-participation-queue-main strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-participation-queue-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.public-participation-queue-tags span {
+  border-radius: 999px;
+  background: #e7f4ff;
+  color: #376b9d;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.public-participation-queue-tags .viewer {
+  background: #655bff;
+  color: #fff;
+}
+
+.public-participation-queue-champions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.public-participation-queue-champions img,
+.public-participation-queue-champions em {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: #d5f1ff;
+  color: #4268e8;
+  object-fit: cover;
+  font-style: normal;
+  font-weight: 950;
+}
+
+@media (max-width: 760px) {
+  .public-participation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .public-participation-streamer-head {
+    flex-direction: column;
+  }
+
+  .public-participation-streamer-list {
+    grid-template-columns: 1fr;
+  }
+
+  .public-participation-streamer-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .public-participation-streamer-meta {
+    grid-column: 2;
+    justify-items: start;
+  }
+
+  .public-participation-queue-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .public-participation-queue-champions {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+}
+
+.public-site-footer {
+  max-width: min(1320px, calc(100% - 32px));
+  margin: 32px auto 0;
+  padding: 20px 22px 22px;
+  border: 1px solid rgba(126, 177, 223, 0.52);
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(213, 241, 255, 0.78)),
+    #f3f7fb;
+  color: #4f6682;
+  text-align: center;
+  box-shadow: 0 -18px 48px rgba(97, 157, 214, 0.16);
+}
+
+.public-site-footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(126, 177, 223, 0.36);
+}
+
+.public-site-footer-nav button {
+  min-height: 38px;
+  border: 1px solid rgba(126, 177, 223, 0.58);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #10233f;
+  padding: 0 16px;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(97, 157, 214, 0.12);
+  transition: transform 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.public-site-footer-nav button:hover,
+.public-site-footer-nav button:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(92, 124, 255, 0.62);
+  color: #4d63ff;
+  outline: none;
+}
+
+.public-site-footer-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
+.public-site-footer-brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 70% 22%, rgba(213, 241, 255, 0.92), transparent 34%),
+    linear-gradient(135deg, #5c7cff, #9a5cff);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow: 0 12px 24px rgba(92, 124, 255, 0.2);
+}
+
+.public-site-footer-brand-word {
+  color: #10233f;
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.public-site-footer p {
+  max-width: 940px;
+  margin: 0 auto 8px;
+  color: #5d7390;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.public-site-footer strong {
+  display: block;
+  color: #10233f;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.public-legal-page {
+  max-width: min(1040px, calc(100% - 32px));
+  margin: 28px auto;
+  overflow: hidden;
+  border: 1px solid rgba(126, 177, 223, 0.56);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(213, 241, 255, 0.72)),
+    #f3f7fb;
+  color: #233b59;
+  box-shadow: 0 24px 60px rgba(97, 157, 214, 0.18);
+}
+
+.public-legal-hero {
+  padding: 34px 34px 26px;
+  border-bottom: 1px solid rgba(126, 177, 223, 0.34);
+  background: linear-gradient(135deg, rgba(191, 227, 255, 0.42), rgba(255, 255, 255, 0.9));
+}
+
+.public-legal-hero h1 {
+  margin: 10px 0 12px;
+  color: #0e1f38;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 950;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.public-legal-hero p {
+  max-width: 780px;
+  margin: 0;
+  color: #4f6682;
+  font-weight: 850;
+  line-height: 1.75;
+}
+
+.public-legal-hero > span:not(.public-section-kicker) {
+  display: inline-flex;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #5b708c;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.public-legal-sections {
+  display: grid;
+  gap: 18px;
+  padding: 28px 34px 34px;
+}
+
+.public-legal-notice,
+.public-legal-sections article,
+.public-contact-card {
+  border: 1px solid rgba(126, 177, 223, 0.48);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 18px;
+  box-shadow: 0 16px 32px rgba(97, 157, 214, 0.1);
+}
+
+.public-legal-notice {
+  background: linear-gradient(135deg, rgba(191, 227, 255, 0.58), rgba(213, 241, 255, 0.48));
+}
+
+.public-legal-sections h2 {
+  margin: 0 0 8px;
+  color: #0e1f38;
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.public-legal-sections p,
+.public-legal-notice p,
+.public-contact-card p {
+  margin: 0;
+  color: #4f6682;
+  font-weight: 820;
+  line-height: 1.75;
+}
+
+.public-contact-card {
+  display: grid;
+  gap: 16px;
+  margin: 28px 34px 34px;
+}
+
+.public-contact-card div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.public-contact-card strong {
+  color: #0e1f38;
+  font-weight: 950;
+}
+
+.public-contact-card a {
+  color: #4d63ff;
+  font-weight: 950;
+}
+
+.public-contact-mail-button {
+  justify-self: start;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #5c7cff, #7365ff);
+  color: #fff !important;
+  padding: 0 18px;
+  text-decoration: none;
+  box-shadow: 0 14px 26px rgba(92, 124, 255, 0.24);
+}
+
+html[lang="ja"] .public-dashboard-shell .public-header-nav button,
+html[lang="ja"] .public-dashboard-shell .public-app-header.home .public-header-nav button,
+html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button,
+html[lang="ja"] .public-dashboard-shell .public-header-submenu button {
+  align-items: center;
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, "Noto Sans JP", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-header-nav button strong,
+html[lang="ja"] .public-dashboard-shell .public-app-header.home .public-header-nav button strong,
+html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button strong,
+html[lang="ja"] .public-dashboard-shell .public-header-submenu button strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1em;
+  color: inherit;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-header-nav button.active strong,
+html[lang="ja"] .public-dashboard-shell .public-header-submenu button.active strong {
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-header-nav button span,
+html[lang="ja"] .public-dashboard-shell .public-app-header.home .public-header-nav button span,
+html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button span,
+html[lang="ja"] .public-dashboard-shell .public-header-submenu button span {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: 1;
+}
+
+html[lang="ja"] .public-dashboard-shell :where(.public-tournament-calendar-page, .public-tournament-list-page, .public-tournament-page) {
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, "Noto Sans JP", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+  word-break: keep-all;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-page-head span,
+html[lang="ja"] .public-dashboard-shell .public-tournament-list-card > div:first-child span {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-page-head h2,
+html[lang="ja"] .public-dashboard-shell .public-tournament-title-row h2 {
+  font-family: inherit;
+  font-size: clamp(30px, 3vw, 42px);
+  font-weight: 900;
+  line-height: 1.16;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-page-head p,
+html[lang="ja"] .public-dashboard-shell .public-tournament-list-card p {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 760;
+  line-height: 1.65;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-page-head > button,
+html[lang="ja"] .public-dashboard-shell .public-tournament-list-card > button,
+html[lang="ja"] .public-dashboard-shell .public-tournament-card-head button,
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button,
+html[lang="ja"] .public-dashboard-shell .public-tournament-upcoming-card > button {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-title strong,
+html[lang="ja"] .public-dashboard-shell .public-tournament-upcoming-card strong,
+html[lang="ja"] .public-dashboard-shell .public-tournament-list-card strong,
+html[lang="ja"] .public-dashboard-shell .public-tournament-card-head strong {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-grid > b,
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day > strong,
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day i,
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-title span,
+html[lang="ja"] .public-dashboard-shell .public-tournament-upcoming-card time,
+html[lang="ja"] .public-dashboard-shell .public-tournament-upcoming-card span,
+html[lang="ja"] .public-dashboard-shell .public-tournament-upcoming-card small,
+html[lang="ja"] .public-dashboard-shell .public-tournament-list-card dt,
+html[lang="ja"] .public-dashboard-shell .public-tournament-list-card dd {
+  font-family: inherit;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button span {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button em {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button small {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 760;
+  line-height: 1.2;
+}
+
+@media (max-width: 760px) {
+  .public-site-footer {
+    max-width: calc(100% - 20px);
+    margin-top: 32px;
+    padding: 18px 12px 20px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .public-site-footer-nav {
+    gap: 8px;
+  }
+
+  .public-site-footer-nav button {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .public-site-footer-brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 13px;
+    font-size: 13px;
+  }
+
+  .public-site-footer-brand-word {
+    font-size: 19px;
+  }
+
+  .public-legal-page {
+    max-width: calc(100% - 20px);
+    margin: 18px auto;
+    border-radius: 20px;
+  }
+
+  .public-legal-hero,
+  .public-legal-sections,
+  .public-contact-card {
+    padding: 22px 18px;
+  }
+
+  .public-contact-card {
+    margin: 18px;
+  }
+
+  .public-contact-mail-button {
+    justify-self: stretch;
+  }
 }

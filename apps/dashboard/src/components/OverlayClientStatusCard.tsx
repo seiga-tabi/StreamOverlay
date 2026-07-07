@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type { OverlayChannel, OverlayStatus } from "@streamops/shared";
-import { OVERLAY_CHANNELS } from "@streamops/shared";
 import type { DashboardStreamerInfo } from "../api/client";
 import { apiGet } from "../api/client";
 import { createDashboardLocaleProxy } from "../i18n";
 import { runtimeConfig } from "../runtime-config";
 
 const OVERLAY_BASE = runtimeConfig().overlayBase ?? import.meta.env.VITE_OVERLAY_BASE ?? "http://localhost:5174";
+const DASHBOARD_OVERLAY_CHANNELS = ["events", "chat", "participation", "solo-rank"] as const;
 
 const i18n = {
   ko: {
@@ -35,12 +35,8 @@ const i18n = {
     modes: {
       events: "이벤트",
       chat: "채팅",
-      subtitles: "자막",
-      questions: "질문",
-      mission: "미션",
       participation: "시참",
-      "solo-rank": "솔로랭크 전적",
-      all: "전체"
+      "solo-rank": "솔로랭크 전적"
     }
   },
   ja: {
@@ -69,12 +65,8 @@ const i18n = {
     modes: {
       events: "イベント",
       chat: "チャット",
-      subtitles: "字幕",
-      questions: "質問",
-      mission: "ミッション",
       participation: "参加",
-      "solo-rank": "ソロランク戦績",
-      all: "全体"
+      "solo-rank": "ソロランク戦績"
     }
   }
 } as const;
@@ -118,7 +110,7 @@ async function copyText(value: string): Promise<void> {
 export function OverlayClientStatusCard({ streamer }: { streamer?: DashboardStreamerInfo }) {
   const [status, setStatus] = useState<OverlayStatus>();
   const [previewNonce, setPreviewNonce] = useState(0);
-  const modes = useMemo(() => OVERLAY_CHANNELS, []);
+  const modes = useMemo(() => DASHBOARD_OVERLAY_CHANNELS, []);
 
   async function loadStatus() {
     setStatus(await apiGet<OverlayStatus>("/api/overlay/status"));

@@ -34,7 +34,7 @@ export function LoginPage({
     <main className="auth-shell">
       <section className="auth-card">
         <div className="brand-block auth-brand">
-          <img className="brand-logo" src="/images/seigagg-logo.png" alt="Seiga.GG" />
+          <img className="brand-logo" src="/images/yorogg-logo.png" alt="YORO.gg" />
         </div>
         <span className="eyebrow" data-ko={dashboardI18n.ko.authPage.eyebrow} data-ja={dashboardI18n.ja.authPage.eyebrow}>{t.eyebrow}</span>
         <h1 data-ko={dashboardI18n.ko.authPage.title} data-ja={dashboardI18n.ja.authPage.title}>{t.title}</h1>

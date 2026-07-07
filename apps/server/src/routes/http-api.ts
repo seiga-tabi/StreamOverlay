@@ -6,6 +6,7 @@ import { URL } from "node:url";
 import type { Store } from "../services/store.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
+  formatRiotId,
   normalizeRiotIdKey,
   normalizeLolRole,
   parseRiotIdDetailed,
@@ -21,7 +22,9 @@ import {
   type LolPerformanceStats,
   type LolRankHistoryPoint,
   type LolRankedStats,
+  type LolRole,
   type LolRoleAnalysis,
+  type ParticipationEntry,
   type ParticipationPhase,
   type ParticipationStreamerProfile,
   type ParticipationStatus,
@@ -90,6 +93,7 @@ const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
 const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS = 10 * 60_000;
+const PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE = 100;
 const PUBLIC_LOL_CURRENT_GAME_LIVE_CACHE_TTL_MS = 20_000;
 const PUBLIC_LOL_CURRENT_GAME_NOT_FOUND_CACHE_TTL_MS = 5_000;
 const PUBLIC_LOL_CURRENT_GAME_ERROR_CACHE_TTL_MS = 10_000;
@@ -97,7 +101,7 @@ const PUBLIC_LOL_MATCH_RANK_CACHE_TTL_MS = 5 * 60_000;
 const PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX = 1000;
-const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 18 * 60 * 60_000;
+const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 5 * 60_000;
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
 const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
@@ -511,6 +515,65 @@ type PublicTwitchFollowedLolResponse = {
 
 type PublicTwitchViewerStatusResponse = Awaited<ReturnType<PublicTwitchAuthService["getStatus"]>> & {
   streamerRiotRequest?: StreamerRiotIdRequest;
+};
+
+type PublicParticipationQueueItem = {
+  position: number;
+  twitchUserName: string;
+  preferredRole?: LolRole;
+  requestedRole?: LolRole;
+  status: ParticipationStatus;
+  profileStatus?: ParticipationEntry["profileStatus"];
+  mainRole?: ParticipationEntry["mainRole"];
+  mainRoleConfidence?: number;
+  rankedStats?: LolRankedStats;
+  topChampions?: LolChampionSummary[];
+  isViewer: boolean;
+};
+
+type PublicParticipationViewerEntry = PublicParticipationQueueItem & {
+  riotId: string;
+  source: ParticipationEntry["source"];
+};
+
+type PublicParticipationStreamer = {
+  id: string;
+  twitchUserId?: string;
+  twitchLogin?: string;
+  twitchDisplayName: string;
+  twitchProfileImageUrl?: string;
+  riotId?: string;
+  riotGameName?: string;
+  riotTagLine?: string;
+  isOpen: boolean;
+  queueSize: number;
+  updatedAt: string;
+};
+
+type PublicParticipationStateResponse = {
+  connected: boolean;
+  configured: boolean;
+  isOpen: boolean;
+  summary: ReturnType<Store["getParticipationState"]>["summary"];
+  streamers: PublicParticipationStreamer[];
+  selectedStreamerId?: string;
+  queue: PublicParticipationQueueItem[];
+  viewerEntry?: PublicParticipationViewerEntry;
+  maxQueueSize: number;
+  updatedAt: string;
+};
+
+type PublicParticipationJoinResponse = {
+  ok: true;
+  alreadyJoined: boolean;
+  reused: boolean;
+  state: PublicParticipationStateResponse;
+  entry?: PublicParticipationViewerEntry;
+};
+
+type PublicParticipationCancelResponse = {
+  ok: true;
+  state: PublicParticipationStateResponse;
 };
 
 type FollowerManagementState = ReturnType<Store["getFollowerManagementState"]>;
@@ -1272,6 +1335,9 @@ function isPublicLolAppRoute(pathname: string): boolean {
   return pathname === "/lol" ||
     pathname === "/lol/" ||
     pathname.startsWith("/lol/summoners/") ||
+    pathname === "/privacy" ||
+    pathname === "/terms" ||
+    pathname === "/contact" ||
     pathname === "/lol/tournaments" ||
     pathname.startsWith("/lol/tournaments/");
 }
@@ -2283,13 +2349,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (typeof input.twitch?.getStreamByUserId !== "function") return undefined;
     try {
       const stream = await input.twitch.getStreamByUserId(twitchUserId);
-      if (stream || !twitchEventSubLiveFallback(twitchUserId)) {
-        rememberTwitchStreamLiveStatus({
-          twitchUserId,
-          isLive: Boolean(stream),
-          source: "snapshot"
-        });
-      }
+      rememberTwitchStreamLiveStatus({
+        twitchUserId,
+        isLive: Boolean(stream),
+        source: "snapshot"
+      });
       return stream;
     } catch (error) {
       input.logger?.error({
@@ -2332,17 +2396,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
       });
       return undefined;
     }
-  }
-
-  function connectedBroadcasterLiveFallback(
-    candidate: PublicLolTwitchCandidate,
-    broadcaster: { id?: string; login?: string } | undefined
-  ): boolean {
-    if (typeof input.store.getStatus !== "function" || input.store.getStatus().stream !== "online") return false;
-    const candidateLogin = safeTwitchLogin(candidate.twitchLogin || candidate.twitchDisplayName);
-    const broadcasterLogin = safeTwitchLogin(broadcaster?.login);
-    if (broadcaster?.id && candidate.twitchUserId === broadcaster.id) return true;
-    return Boolean(candidateLogin && broadcasterLogin && candidateLogin === broadcasterLogin);
   }
 
   function rememberPublicLolSuggestion(profile: Pick<PublicLolProfileResponse, "riotId" | "gameName" | "tagLine" | "profileIconUrl" | "summonerLevel" | "lolPlatform" | "rankedStats" | "fetchedAt">): void {
@@ -2457,12 +2510,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         lookupTwitchStreamForCandidate(candidate),
         typeof input.twitch?.getUserProfile === "function" ? input.twitch.getUserProfile(candidate.twitchUserId).catch(() => undefined) : Promise.resolve(undefined)
       ]);
-      const fallbackLive =
-        twitchEventSubLiveFallback(candidate.twitchUserId) ||
-        connectedBroadcasterLiveFallback(candidate, broadcaster) ||
-        candidate.source === "connected_streamer" &&
-        typeof input.store.getStatus === "function" &&
-        input.store.getStatus().stream === "online";
+      const fallbackLive = twitchEventSubLiveFallback(candidate.twitchUserId);
       const item = publicLolTwitchStreamFromCandidate(candidate, stream, profile, fallbackLive);
       if (item.isLive) return item;
       offline ??= item;
@@ -2487,10 +2535,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
       .filter(({ riotKey }) => wantedRiotIds.has(riotKey));
     if (requests.length === 0) return new Map();
 
-    const twitchAuthStatus = typeof input.twitchAuth.getStatus === "function"
-      ? await input.twitchAuth.getStatus().catch(() => undefined)
-      : undefined;
-    const broadcaster = twitchAuthStatus?.broadcaster;
     const resolved = await Promise.all(requests.map(async ({ request, riotKey }) => {
       const candidate: PublicLolTwitchCandidate = {
         twitchUserId: request.twitchUserId,
@@ -2509,7 +2553,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           login: request.twitchLogin,
           displayName: request.twitchDisplayName,
           profileImageUrl: request.twitchProfileImageUrl
-        }, twitchEventSubLiveFallback(request.twitchUserId) || connectedBroadcasterLiveFallback(candidate, broadcaster))
+        }, twitchEventSubLiveFallback(request.twitchUserId))
       };
     }));
 
@@ -3066,6 +3110,231 @@ export function createHttpHandler(input: HttpHandlerInput) {
       subscriptionScopeGranted,
       subscriptions,
       channels
+    };
+  }
+
+  function publicParticipationQueueItem(
+    entry: ParticipationEntry,
+    position: number,
+    viewerTwitchUserId?: string
+  ): PublicParticipationQueueItem {
+    return {
+      position,
+      twitchUserName: entry.twitchUserName,
+      ...(entry.preferredRole ? { preferredRole: entry.preferredRole } : {}),
+      ...(entry.requestedRole ? { requestedRole: entry.requestedRole } : {}),
+      status: entry.status,
+      ...(entry.profileStatus ? { profileStatus: entry.profileStatus } : {}),
+      ...(entry.mainRole ? { mainRole: entry.mainRole } : {}),
+      ...(typeof entry.mainRoleConfidence === "number" ? { mainRoleConfidence: entry.mainRoleConfidence } : {}),
+      ...(entry.rankedStats ? { rankedStats: { ...entry.rankedStats } } : {}),
+      ...(entry.topChampions?.length ? { topChampions: entry.topChampions.map((champion) => ({ ...champion })) } : {}),
+      isViewer: Boolean(viewerTwitchUserId && entry.twitchUserId === viewerTwitchUserId)
+    };
+  }
+
+  function publicParticipationViewerEntry(entry: ParticipationEntry, position: number): PublicParticipationViewerEntry {
+    return {
+      ...publicParticipationQueueItem(entry, position, entry.twitchUserId),
+      riotId: formatRiotId(entry.riotGameName, entry.riotTagLine),
+      source: entry.source
+    };
+  }
+
+  async function publicParticipationStreamers(
+    participationState: ReturnType<Store["getParticipationState"]>,
+    selectedStreamerId?: string
+  ): Promise<{ streamers: PublicParticipationStreamer[]; selectedStreamerId?: string }> {
+    if (!participationState.isOpen) {
+      return { streamers: [] };
+    }
+    const now = new Date().toISOString();
+    const streamerProfile = input.store.getParticipationStreamerProfile();
+    const monitorRiotId = parseRiotIdDetailed(loadGameMonitorConfig().streamerRiotId);
+    const approvedStreamers = listApprovedStreamerRiotIds();
+    const monitorKey = monitorRiotId.ok ? normalizeRiotIdKey(monitorRiotId.gameName, monitorRiotId.tagLine) : undefined;
+    const matchedApproved = monitorKey
+      ? approvedStreamers.find((request) => request.normalizedRiotId === monitorKey)
+      : undefined;
+    const connectedStreamer = await connectedStreamerRiotProfile().catch(() => undefined);
+    const connectedApproved = connectedStreamer?.twitchUserId
+      ? approvedStreamers.find((request) => request.twitchUserId === connectedStreamer.twitchUserId)
+      : undefined;
+    const activeStreamer = matchedApproved ?? connectedApproved;
+    const riotGameName = activeStreamer?.riotGameName ?? (monitorRiotId.ok ? monitorRiotId.gameName : streamerProfile?.displayName);
+    const riotTagLine = activeStreamer?.riotTagLine ?? (monitorRiotId.ok ? monitorRiotId.tagLine : streamerProfile?.riotTagLine);
+    const fallbackDisplayName = riotGameName
+      ? formatRiotId(riotGameName, riotTagLine || "JP1")
+      : "YORO.gg";
+    const streamer: PublicParticipationStreamer = {
+      id: activeStreamer?.twitchUserId ?? (monitorKey ? `riot:${monitorKey}` : "active"),
+      ...(activeStreamer?.twitchUserId ? { twitchUserId: activeStreamer.twitchUserId } : {}),
+      ...(activeStreamer?.twitchLogin ? { twitchLogin: activeStreamer.twitchLogin } : {}),
+      twitchDisplayName: activeStreamer?.twitchDisplayName || streamerProfile?.displayName || fallbackDisplayName,
+      ...(activeStreamer?.twitchProfileImageUrl ? { twitchProfileImageUrl: activeStreamer.twitchProfileImageUrl } : {}),
+      ...(riotGameName ? { riotGameName } : {}),
+      ...(riotTagLine ? { riotTagLine } : {}),
+      ...(riotGameName ? { riotId: formatRiotId(riotGameName, riotTagLine || "JP1") } : {}),
+      isOpen: true,
+      queueSize: participationState.summary.active,
+      updatedAt: now
+    };
+    const streamers = [streamer];
+    const hasSelected = selectedStreamerId && streamers.some((item) => item.id === selectedStreamerId);
+    const nextSelectedStreamerId = hasSelected ? selectedStreamerId : streamers[0]?.id;
+    return nextSelectedStreamerId ? { streamers, selectedStreamerId: nextSelectedStreamerId } : { streamers };
+  }
+
+  async function getPublicParticipationState(
+    req: IncomingMessage,
+    knownStatus?: PublicTwitchViewerStatusResponse
+  ): Promise<PublicParticipationStateResponse> {
+    const status = knownStatus ?? await getPublicTwitchViewerStatus(req);
+    const viewerId = status.connected ? status.user?.id : undefined;
+    const participationState = input.store.getParticipationState();
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const requestedStreamerId = url.searchParams.get("streamerId")?.trim() || undefined;
+    const streamerState = await publicParticipationStreamers(participationState, requestedStreamerId);
+    const activeEntries = input.store.getActiveParticipationQueue();
+    const queue = participationState.isOpen
+      ? activeEntries
+        .slice(0, PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE)
+        .map((entry, index) => publicParticipationQueueItem(entry, index + 1, viewerId))
+      : [];
+    const viewerIndex = viewerId ? activeEntries.findIndex((entry) => entry.twitchUserId === viewerId) : -1;
+    const viewerEntry = viewerIndex >= 0 && activeEntries[viewerIndex]
+      ? publicParticipationViewerEntry(activeEntries[viewerIndex], viewerIndex + 1)
+      : undefined;
+    return {
+      connected: Boolean(status.connected),
+      configured: Boolean(status.configured),
+      isOpen: participationState.isOpen,
+      summary: participationState.summary,
+      streamers: streamerState.streamers,
+      ...(streamerState.selectedStreamerId ? { selectedStreamerId: streamerState.selectedStreamerId } : {}),
+      queue,
+      ...(viewerEntry ? { viewerEntry } : {}),
+      maxQueueSize: PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async function joinPublicParticipation(req: IncomingMessage): Promise<PublicParticipationJoinResponse> {
+    if (!input.publicTwitchAuth) {
+      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
+    }
+    const status = await getPublicTwitchViewerStatus(req);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 참여 등록을 할 수 있습니다." });
+    }
+    if (!input.store.getParticipationState().isOpen) {
+      throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다." });
+    }
+
+    const body = await readJsonBody<{ riotId?: unknown; role?: unknown; streamerId?: unknown }>(req);
+    const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
+    if (requestedStreamerId) {
+      const streamerState = await publicParticipationStreamers(input.store.getParticipationState(), requestedStreamerId);
+      if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
+        throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
+      }
+    }
+    if (typeof body.riotId !== "string") {
+      throw new HttpRequestError(400, { error: "Riot ID를 입력해주세요." });
+    }
+    const parsed = parseRiotIdDetailed(body.riotId);
+    if (!parsed.ok) {
+      throw new HttpRequestError(400, { error: parsed.message });
+    }
+    const normalizedRole = normalizeLolRole(typeof body.role === "string" ? body.role : undefined);
+    const role: LolRole = normalizedRole === "unknown" ? "fill" : normalizedRole;
+    const duplicateBefore = input.store.findParticipationDuplicate({
+      twitchUserId: status.user.id,
+      riotGameName: parsed.gameName,
+      riotTagLine: parsed.tagLine
+    });
+    if (duplicateBefore) {
+      const state = await getPublicParticipationState(req, status);
+      return {
+        ok: true,
+        alreadyJoined: true,
+        reused: false,
+        state,
+        ...(state.viewerEntry ? { entry: state.viewerEntry } : {})
+      };
+    }
+    if (input.store.getActiveParticipationCount() >= PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE) {
+      throw new HttpRequestError(409, { error: "참여 대기열이 가득 찼습니다." });
+    }
+
+    const previousProfile = input.store.findReusableParticipationProfile({
+      riotGameName: parsed.gameName,
+      riotTagLine: parsed.tagLine
+    });
+    const profileReady = previousProfile?.profileStatus === "ready" || Boolean(previousProfile?.rankedStats);
+    const entry = input.store.makeParticipationEntry({
+      twitchUserId: status.user.id,
+      twitchUserName: status.user.displayName || status.user.login,
+      riotGameName: parsed.gameName,
+      riotTagLine: parsed.tagLine,
+      ...(previousProfile?.riotPuuid ? { riotPuuid: previousProfile.riotPuuid } : {}),
+      requestedRole: role,
+      preferredRole: role,
+      ...(previousProfile?.verifiedRank ? { verifiedRank: previousProfile.verifiedRank } : {}),
+      ...(previousProfile?.rankedStats ? { rankedStats: previousProfile.rankedStats } : {}),
+      profileStatus: previousProfile?.profileStatus ?? "pending",
+      ...(previousProfile?.profileFailureReason ? { profileFailureReason: previousProfile.profileFailureReason } : {}),
+      ...(previousProfile?.mainRole ? { mainRole: previousProfile.mainRole } : {}),
+      ...(typeof previousProfile?.mainRoleConfidence === "number" ? { mainRoleConfidence: previousProfile.mainRoleConfidence } : {}),
+      ...(previousProfile?.topChampions?.length ? { topChampions: previousProfile.topChampions.map((champion) => ({ ...champion })) } : {}),
+      ...(previousProfile?.profileAnalyzedAt ? { profileAnalyzedAt: previousProfile.profileAnalyzedAt } : {}),
+      status: profileReady ? "verified" : "waitlisted",
+      source: "dashboard"
+    });
+    const saved = input.store.reactivateReusableParticipation(entry);
+    await broadcastParticipationSnapshot({ store: input.store, actions: input.actions }, "recruiting", "public.participation_join")
+      .catch(() => undefined);
+    if (input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
+      void input.refreshLolProfile(saved.entry.id).catch(() => undefined);
+    }
+    const state = await getPublicParticipationState(req, status);
+    return {
+      ok: true,
+      alreadyJoined: false,
+      reused: saved.reused,
+      state,
+      ...(state.viewerEntry ? { entry: state.viewerEntry } : {})
+    };
+  }
+
+  async function cancelPublicParticipation(req: IncomingMessage): Promise<PublicParticipationCancelResponse> {
+    if (!input.publicTwitchAuth) {
+      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
+    }
+    const status = await getPublicTwitchViewerStatus(req);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 참여 취소를 할 수 있습니다." });
+    }
+    const body = await readJsonBody<{ streamerId?: unknown }>(req);
+    const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
+    if (requestedStreamerId) {
+      const streamerState = await publicParticipationStreamers(input.store.getParticipationState(), requestedStreamerId);
+      if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
+        throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
+      }
+    }
+    const result = input.store.cancelParticipationByUser(status.user.id, "시청자가 웹 참여 화면에서 참가를 취소했습니다.");
+    if (!result.ok) {
+      const error = result.reason === "in_game"
+        ? "이미 게임 진행 상태라 참여 취소를 할 수 없습니다."
+        : "취소할 참여 신청을 찾지 못했습니다.";
+      throw new HttpRequestError(result.reason === "in_game" ? 409 : 404, { error });
+    }
+    await broadcastParticipationSnapshot({ store: input.store, actions: input.actions }, "recruiting", "public.participation_cancel")
+      .catch(() => undefined);
+    return {
+      ok: true,
+      state: await getPublicParticipationState(req, status)
     };
   }
 
@@ -4226,7 +4495,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
             ? oauthLimiter
-            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname === "/api/public/locale"
+            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -4351,6 +4620,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const postId = decodeURIComponent(communityCommentMatch[1] ?? "");
         const post = await createPublicCommunityComment(req, postId);
         return sendJson(req, res, 201, { post, posts: listCommunityPosts(50, post.category) });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public/participation/state") {
+        return sendJson(req, res, 200, await getPublicParticipationState(req));
+      }
+      if (req.method === "POST" && url.pathname === "/api/public/participation/join") {
+        return sendJson(req, res, 200, await joinPublicParticipation(req));
+      }
+      if (req.method === "POST" && url.pathname === "/api/public/participation/cancel") {
+        return sendJson(req, res, 200, await cancelPublicParticipation(req));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/status") {
         return sendJson(req, res, 200, await getPublicTwitchViewerStatus(req));

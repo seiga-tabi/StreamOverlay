@@ -11,11 +11,8 @@ const i18n = {
     follow: "팔로우 알림",
     cheer: "비트 알림",
     subscription: "구독 알림",
-    subtitle: "자막",
-    question: "질문",
     participation: "시참 대기열",
-    soloRank: "솔로랭크 전적",
-    mission: "미션"
+    soloRank: "솔로랭크 전적"
   },
   ja: {
     title: "Overlay テスト",
@@ -26,11 +23,8 @@ const i18n = {
     follow: "フォロー通知",
     cheer: "ビッツ通知",
     subscription: "サブスク通知",
-    subtitle: "字幕",
-    question: "質問",
     participation: "参加待機列",
-    soloRank: "ソロランク戦績",
-    mission: "ミッション"
+    soloRank: "ソロランク戦績"
   }
 } as const;
 
@@ -121,30 +115,6 @@ const testActions: OverlayTestItem[] = [
     }
   },
   {
-    label: t.subtitle,
-    action: {
-      type: "overlay.subtitle",
-      sourceLanguage: "ko",
-      targetLanguage: "ja",
-      original: "오늘은 롤 시참을 해볼게요.",
-      translated: "今日はLoL参加型配信をやってみます。",
-      isFinal: true,
-      durationMs: 6000,
-      source: "dashboard.overlay_ops"
-    }
-  },
-  {
-    label: t.question,
-    action: {
-      type: "overlay.question",
-      userName: "ViewerTest",
-      question: "오늘 첫 게임 목표는 무엇인가요?",
-      translatedQuestion: "今日の最初の試合の目標は何ですか？",
-      durationMs: 9000,
-      source: "dashboard.overlay_ops"
-    }
-  },
-  {
     label: t.participation,
     action: {
       type: "overlay.participationQueue",
@@ -162,19 +132,6 @@ const testActions: OverlayTestItem[] = [
   {
     label: t.soloRank,
     endpoint: "/api/participation/streamer-profile/refresh"
-  },
-  {
-    label: t.mission,
-    action: {
-      type: "overlay.mission",
-      title: "오늘의 미션",
-      missions: [
-        { id: "win", text: "첫 승 달성", done: false },
-        { id: "team", text: "시청자 5인 팀 완성", done: true },
-        { id: "clip", text: "하이라이트 3개 기록", done: false }
-      ],
-      source: "dashboard.overlay_ops"
-    }
   }
 ];
 

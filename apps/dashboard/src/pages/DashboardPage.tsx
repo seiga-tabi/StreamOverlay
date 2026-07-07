@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { TwitchConnectionStatus, TwitchEventSubWebSocketState } from "@streamops/shared";
 import { StatusCard } from "../components/StatusCard";
 import { EventLog } from "../components/EventLog";
-import { QuestionQueue } from "../components/QuestionQueue";
 import { ActionTester } from "../components/ActionTester";
 import { apiBase, apiGet } from "../api/client";
 import { uiText } from "../i18n";
@@ -78,10 +77,11 @@ export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { s
         <StatusCard label={t.statusLabels.obs} value={status.obs} />
         <StatusCard label={t.statusLabels.participation} value={status.participation} />
       </div>
-      <div className="grid dashboard-grid">
-        <EventLog events={snapshot.events ?? []} />
-        <QuestionQueue questions={snapshot.questions ?? []} />
-      </div>
+      {role === "admin" ? (
+        <div className="grid dashboard-grid">
+          <EventLog events={snapshot.events ?? []} />
+        </div>
+      ) : null}
       {role === "admin" ? <ActionTester /> : null}
     </>
   );

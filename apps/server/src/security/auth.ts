@@ -188,6 +188,9 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     pathname === "/api/public/twitch/followed-lol" ||
     pathname === "/api/public/twitch/riot-id-request" ||
     pathname === "/api/public/twitch/logout" ||
+    (pathname === "/api/public/participation/state" && method === "GET") ||
+    (pathname === "/api/public/participation/join" && method === "POST") ||
+    (pathname === "/api/public/participation/cancel" && method === "POST") ||
     (pathname === "/api/public/community/posts" && (method === "GET" || method === "POST")) ||
     (method === "PATCH" && /^\/api\/public\/community\/posts\/[^/]+$/.test(pathname)) ||
     (method === "POST" && /^\/api\/public\/community\/posts\/[^/]+\/comments$/.test(pathname)) ||
@@ -240,16 +243,11 @@ const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "GET", path: "/api/alerts/config" },
   { method: "POST", path: "/api/alerts/config" },
   { method: "POST", path: "/api/alerts/assets" },
-  { method: "GET", path: "/api/events/recent" },
   { method: "GET", path: "/api/actions/recent" },
-  { method: "GET", path: "/api/questions" },
   { method: "GET", path: "/api/highlights" },
   { method: "GET", path: "/api/followers" },
   { method: "GET", path: "/api/twitch/status" },
   { method: "POST", path: "/api/followers/refresh" },
-  { method: "GET", path: "/api/tournaments" },
-  { method: "POST", path: "/api/tournaments" },
-  { method: "DELETE", prefix: "/api/tournaments/" },
   { method: "GET", path: "/api/participation/queue" },
   { method: "GET", path: "/api/participation/state" },
   { method: "GET", path: "/api/participation/game-monitor" },

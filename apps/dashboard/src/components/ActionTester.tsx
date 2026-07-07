@@ -27,30 +27,6 @@ function safeActions() {
       }
     },
     {
-      label: t.actions.subtitle,
-      action: {
-        type: "overlay.subtitle",
-        sourceLanguage: "ko",
-        targetLanguage: "ja",
-        original: "오늘은 롤 시참을 해볼게요.",
-        translated: "今日はLoL参加型配信をやってみます。",
-        isFinal: true,
-        durationMs: 6000,
-        source: "dashboard.test"
-      }
-    },
-    {
-      label: t.actions.question,
-      action: {
-        type: "overlay.question",
-        userName: "ViewerTest",
-        question: "오늘 첫 게임 목표는 무엇인가요?",
-        translatedQuestion: "今日の最初の試合の目標は何ですか？",
-        durationMs: 9000,
-        source: "dashboard.test"
-      }
-    },
-    {
       label: t.actions.participation,
       action: {
         type: "overlay.participationQueue",
@@ -61,19 +37,6 @@ function safeActions() {
           { position: 3, twitchUserName: "MidViewer", preferredRole: "mid", status: "pending" },
           { position: 4, twitchUserName: "AdcViewer", preferredRole: "adc", status: "waitlisted" },
           { position: 5, twitchUserName: "SupportViewer", preferredRole: "support", status: "waitlisted" }
-        ],
-        source: "dashboard.test"
-      }
-    },
-    {
-      label: t.actions.mission,
-      action: {
-        type: "overlay.mission",
-        title: "오늘의 미션",
-        missions: [
-          { id: "win", text: "첫 승 달성", done: false },
-          { id: "team", text: "시청자 5인 팀 완성", done: true },
-          { id: "highlight", text: "하이라이트 3개 만들기", done: false }
         ],
         source: "dashboard.test"
       }

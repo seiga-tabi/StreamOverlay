@@ -51,7 +51,6 @@ export const dashboardI18n = {
       soloRank: { label: "솔로랭크 설정", short: "솔로랭크" },
       followers: { label: "팔로워 관리", short: "팔로워" },
       events: { label: "이벤트 로그", short: "이벤트" },
-      questions: { label: "질문 큐", short: "질문" },
       participation: { label: "시참 관리", short: "시참" },
       tournaments: { label: "대회 관리", short: "대회" },
       streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
@@ -96,10 +95,6 @@ export const dashboardI18n = {
       empty: "이벤트가 없습니다.",
       count: "건"
     },
-    questionQueue: {
-      title: "질문 큐",
-      empty: "등록된 질문이 없습니다."
-    },
     actionTester: {
       title: "안전한 액션 테스트",
       description: "허용된 action만 버튼으로 노출합니다. 임의 action 입력은 제공하지 않습니다.",
@@ -108,7 +103,6 @@ export const dashboardI18n = {
       actions: {
         banner: "오버레이 배너 테스트",
         subtitle: "자막 테스트",
-        question: "질문 테스트",
         participation: "시참 대기열 테스트",
         mission: "미션 테스트",
         replay: "리플레이 버퍼 저장",
@@ -190,10 +184,6 @@ export const dashboardI18n = {
       snapshot: "마지막 목록 확인",
       total: "Twitch total",
       truncated: "일부만 조회됨"
-    },
-    questionsPage: {
-      title: "질문 큐",
-      description: "방송 중 접수된 질문과 번역 상태를 빠르게 확인합니다."
     },
     settingsPage: {
       title: "설정 / OBS URL",
@@ -307,7 +297,6 @@ export const dashboardI18n = {
       soloRank: { label: "ソロランク設定", short: "ソロランク" },
       followers: { label: "フォロワー管理", short: "フォロワー" },
       events: { label: "イベントログ", short: "イベント" },
-      questions: { label: "質問キュー", short: "質問" },
       participation: { label: "参加管理", short: "参加" },
       tournaments: { label: "大会管理", short: "大会" },
       streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },
@@ -352,10 +341,6 @@ export const dashboardI18n = {
       empty: "イベントはありません。",
       count: "件"
     },
-    questionQueue: {
-      title: "質問キュー",
-      empty: "登録された質問はありません。"
-    },
     actionTester: {
       title: "安全なアクションテスト",
       description: "許可された action だけをボタンで表示します。任意 action 入力は提供しません。",
@@ -364,7 +349,6 @@ export const dashboardI18n = {
       actions: {
         banner: "オーバーレイバナーテスト",
         subtitle: "字幕テスト",
-        question: "質問テスト",
         participation: "参加待機列テスト",
         mission: "ミッションテスト",
         replay: "リプレイバッファ保存",
@@ -446,10 +430,6 @@ export const dashboardI18n = {
       snapshot: "最終一覧確認",
       total: "Twitch total",
       truncated: "一部のみ取得"
-    },
-    questionsPage: {
-      title: "質問キュー",
-      description: "配信中に受け付けた質問と翻訳状態をすばやく確認します。"
     },
     settingsPage: {
       title: "設定 / OBS URL",

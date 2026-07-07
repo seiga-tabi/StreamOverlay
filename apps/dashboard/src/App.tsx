@@ -9,7 +9,6 @@ import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
 
 const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
 const EventsPage = lazy(async () => ({ default: (await import("./pages/EventsPage")).EventsPage }));
-const QuestionsPage = lazy(async () => ({ default: (await import("./pages/QuestionsPage")).QuestionsPage }));
 const MyRiotAccountPage = lazy(async () => ({ default: (await import("./pages/MyRiotAccountPage")).MyRiotAccountPage }));
 const SoloRankPage = lazy(async () => ({ default: (await import("./pages/SoloRankPage")).SoloRankPage }));
 const ParticipationPage = lazy(async () => ({ default: (await import("./pages/ParticipationPage")).ParticipationPage }));
@@ -24,7 +23,6 @@ const initialSnapshot = {
   status: { server: "offline", twitch: "disabled", stream: "unknown", bridge: "disconnected", obs: "unknown", participation: "closed" },
   events: [],
   actions: [],
-  questions: [],
   participationQueue: [],
   participationState: {
     isOpen: false,
@@ -87,7 +85,7 @@ function StreamerDashboardEntryPage({
     <main className="auth-shell">
       <section className="auth-card">
         <div className="brand-block auth-brand">
-          <img className="brand-logo" src="/images/seigagg-logo.png" alt="Seiga.GG" />
+          <img className="brand-logo" src="/images/yorogg-logo.png" alt="YORO.gg" />
         </div>
         <span className="eyebrow" data-ko={streamerEntryI18n.ko.eyebrow} data-ja={streamerEntryI18n.ja.eyebrow}>{streamerEntryText.eyebrow}</span>
         <h1 data-ko={streamerEntryI18n.ko.title} data-ja={streamerEntryI18n.ja.title}>{streamerEntryText.title}</h1>
@@ -314,12 +312,11 @@ export default function App() {
         {page === "overlayRewards" && dashboardRole === "admin" ? <OverlayOpsPage view="rewards" /> : null}
         {page === "overlayAlerts" ? <OverlayOpsPage view="alerts" /> : null}
         {page === "followers" ? <FollowersPage /> : null}
-        {page === "events" ? <EventsPage snapshot={snapshot} /> : null}
-        {page === "questions" ? <QuestionsPage snapshot={snapshot} /> : null}
+        {page === "events" && dashboardRole === "admin" ? <EventsPage snapshot={snapshot} /> : null}
         {page === "myRiotAccount" ? <MyRiotAccountPage streamer={dashboardStreamer} onStreamerChange={setDashboardStreamer} /> : null}
         {page === "soloRank" ? <SoloRankPage /> : null}
         {page === "participation" ? <ParticipationPage snapshot={snapshot} /> : null}
-        {page === "tournaments" ? <TournamentsPage /> : null}
+        {page === "tournaments" && dashboardRole === "admin" ? <TournamentsPage /> : null}
         {page === "streamerRiotRequests" && dashboardRole === "admin" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
         {page === "settings" && dashboardRole === "admin" ? <SettingsPage /> : null}
       </Suspense>

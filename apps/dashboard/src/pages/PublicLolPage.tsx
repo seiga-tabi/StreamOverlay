@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import type { CommunityPost, CommunityPostCategory, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRoleAnalysis, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
+import type { CommunityPost, CommunityPostCategory, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 
@@ -284,6 +284,73 @@ type PublicTwitchFollowedLolResponse = {
   channels: PublicTwitchFollowedLolChannel[];
 };
 
+type PublicParticipationQueueItem = {
+  position: number;
+  twitchUserName: string;
+  preferredRole?: LolRole;
+  requestedRole?: LolRole;
+  status: ParticipationStatus;
+  profileStatus?: string;
+  mainRole?: string;
+  mainRoleConfidence?: number;
+  rankedStats?: LolRankedStats;
+  topChampions?: LolChampionSummary[];
+  isViewer: boolean;
+};
+
+type PublicParticipationViewerEntry = PublicParticipationQueueItem & {
+  riotId: string;
+  source: string;
+};
+
+type PublicParticipationStreamer = {
+  id: string;
+  twitchUserId?: string;
+  twitchLogin?: string;
+  twitchDisplayName: string;
+  twitchProfileImageUrl?: string;
+  riotId?: string;
+  riotGameName?: string;
+  riotTagLine?: string;
+  isOpen: boolean;
+  queueSize: number;
+  updatedAt: string;
+};
+
+type PublicParticipationStateResponse = {
+  connected: boolean;
+  configured: boolean;
+  isOpen: boolean;
+  summary: {
+    total: number;
+    active: number;
+    waiting: number;
+    selected: number;
+    checkedIn: number;
+    noShow: number;
+    played: number;
+  };
+  streamers: PublicParticipationStreamer[];
+  selectedStreamerId?: string;
+  queue: PublicParticipationQueueItem[];
+  viewerEntry?: PublicParticipationViewerEntry;
+  maxQueueSize: number;
+  updatedAt: string;
+};
+
+type PublicParticipationJoinResponse = {
+  ok: true;
+  alreadyJoined: boolean;
+  reused: boolean;
+  state: PublicParticipationStateResponse;
+  entry?: PublicParticipationViewerEntry;
+};
+
+type PublicParticipationCancelResponse = {
+  ok: true;
+  state: PublicParticipationStateResponse;
+};
+
 function isRegisteredStreamerRequest(request: StreamerRiotIdRequest | undefined): request is StreamerRiotIdRequest {
   return request?.status === "approved" && Boolean(request.overlaySlug && request.overlayKey);
 }
@@ -442,7 +509,7 @@ type SearchSuggestion = {
 };
 
 type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
-type PublicMainPage = "search" | "favorites" | "subscriptions" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule";
+type PublicMainPage = "search" | "favorites" | "subscriptions" | "followJoin" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule" | "privacy" | "terms" | "contact";
 type PublicProfileTab = "overview" | "champions" | "ingame";
 type PublicExpandedMatchView = "record" | "build";
 type PublicTheme = "light" | "dark";
@@ -474,6 +541,10 @@ const PUBLIC_SUMMONER_ROUTE_PREFIX = "/lol/summoners/jp/";
 const PUBLIC_TOURNAMENT_ROUTE_PREFIX = "/lol/tournaments/";
 const PUBLIC_TOURNAMENT_LIST_PATH = "/lol/tournaments";
 const PUBLIC_TOURNAMENT_CALENDAR_PATH = "/lol/tournaments/calendar";
+const PUBLIC_PRIVACY_PATH = "/privacy";
+const PUBLIC_TERMS_PATH = "/terms";
+const PUBLIC_CONTACT_PATH = "/contact";
+const PUBLIC_CONTACT_EMAIL = "support@yoro.gg";
 const DEFAULT_MATCH_FILTERS: PublicMatchFilters = {
   queue: "all",
   championId: "all",
@@ -499,7 +570,7 @@ const SUMMONER_SPELL_FILE_BY_ID: Record<number, string> = {
 };
 const publicI18n = {
   ko: {
-    brand: "Seiga.GG",
+    brand: "YORO.gg",
     tagline: "JP 서버 전적 검색과 방송 분석을 한 화면에서 확인합니다.",
     searchPlaceholder: "JP 서버 닉네임#태그 검색",
     search: "검색",
@@ -527,7 +598,7 @@ const publicI18n = {
     liveGame: "라이브게임",
     filter: "필터",
     online: "온라인",
-    premiumTitle: "Seiga.GG Premium",
+    premiumTitle: "YORO.gg Premium",
     premiumBody: "광고 제거, 상세 통계, 프로 리플레이 등 프리미엄 기능을 경험해보세요.",
     premiumCta: "프리미엄 업그레이드",
     version: "버전",
@@ -771,6 +842,44 @@ const publicI18n = {
     savedData: "저장된 데이터",
     cachedRanking: "저장된 검색 기반 랭킹",
     liveDataNotice: "실시간 친구/전체 자동완성은 Riot 공개 API 제한으로 자체 DB가 쌓인 데이터만 표시합니다.",
+    followMenu: "팔로우",
+    followJoin: "참여하기",
+    followJoinTitle: "시청자 참여",
+    followJoinSubtitle: "방송인이 시청자 참여를 열면 현재 대기열을 확인하고 Twitch 로그인 후 참여할 수 있습니다.",
+    participationOpen: "참여 대기열 열림",
+    participationClosed: "참여 대기열 닫힘",
+    participationStreamerTitle: "참여 중인 방송인",
+    participationStreamerSubtitle: "시청자 참여를 시작한 방송인을 선택하면 해당 대기열을 확인할 수 있습니다.",
+    participationStreamerCount: "명",
+    participationStreamerOpen: "참여 중",
+    participationNoOpenStreamer: "현재 시청자 참여를 시작한 방송인이 없습니다.",
+    participationQueueTitle: "참여 대기열",
+    participationQueueEmpty: "아직 참여자가 없습니다.",
+    participationNeedLogin: "Twitch 로그인 후 참여 등록을 할 수 있습니다.",
+    participationJoinTitle: "참여 등록",
+    participationRiotIdLabel: "Riot ID",
+    participationRiotIdPlaceholder: "소환사명#태그",
+    participationRoleLabel: "희망 포지션",
+    participationRoleFill: "상관없음",
+    participationSubmit: "참여하기",
+    participationSubmitting: "등록 중",
+    participationCancel: "참여 취소",
+    participationCancelling: "취소 중",
+    participationRefresh: "새로고침",
+    participationLoadFailed: "참여 대기열을 불러오지 못했습니다.",
+    participationJoinFailed: "참여 등록에 실패했습니다.",
+    participationCancelFailed: "참여 취소에 실패했습니다.",
+    participationJoinComplete: "참여 대기열에 등록되었습니다.",
+    participationAlreadyJoined: "이미 참여 대기열에 등록되어 있습니다.",
+    participationCancelComplete: "참여 신청을 취소했습니다.",
+    participationPosition: "대기 순번",
+    participationViewerBadge: "내 신청",
+    participationRankPending: "전적 확인 대기",
+    roleTop: "탑",
+    roleJungle: "정글",
+    roleMid: "미드",
+    roleAdc: "원딜",
+    roleSupport: "서포터",
     subscriptionStatus: "구독현황",
     subscriptionsTitle: "구독 중인 방송인",
     subscriptionsSubtitle: "최근 Twitch 팔로우 기준",
@@ -894,11 +1003,56 @@ const publicI18n = {
     currentGameAverageTier: "평균 티어",
     currentGameReady: "분석 준비",
     currentGameBot: "봇",
+    footerPrivacy: "개인정보 처리 방침",
+    footerTerms: "이용약관",
+    footerContact: "문의하기",
+    footerRiotDisclaimer: "YORO.gg는 Riot Games의 공식 서비스가 아니며 Riot Games의 견해를 대변하지 않습니다. League of Legends 및 Riot Games는 Riot Games, Inc.의 상표입니다.",
+    footerCopyright: "Copyright © YORO.gg. All rights reserved.",
+    privacyTitle: "개인정보 처리 방침",
+    termsTitle: "이용약관",
+    contactTitle: "문의하기",
+    legalEffectiveDate: "시행일: 2026. 07. 07.",
+    legalDraftNotice: "본 문서는 운영 정보가 확정되기 전까지 사용하는 서비스 정책 초안입니다. 운영자 정보, 보관 기간, 위탁·국외 이전 여부는 배포 전 최종 확인이 필요합니다.",
+    privacyIntro: "YORO.gg는 전적 검색, Twitch 로그인, 방송인 기능, 커뮤니티와 대회 기능을 제공하기 위해 필요한 범위에서만 개인정보를 처리합니다.",
+    privacyCollectedTitle: "처리하는 개인정보 항목",
+    privacyCollectedBody: "Twitch 로그인 시 Twitch 사용자 ID, 표시 이름, 프로필 이미지, 팔로우·구독 여부와 권한 범위를 처리할 수 있습니다. Riot ID, 게임 전적, 랭크, 챔피언 통계, 커뮤니티 게시글·댓글·이미지, 즐겨찾기, 참여 대기열, 접속 로그와 쿠키 같은 서비스 이용 기록도 처리될 수 있습니다.",
+    privacyPurposeTitle: "처리 목적",
+    privacyPurposeBody: "회원 식별, 전적 검색과 분석 제공, 스트리머 등록 및 오버레이 제공, 팔로우·구독 현황 표시, 시청자 참여 대기열 운영, 커뮤니티·대회 기능 제공, 부정 이용 방지, 문의 응답에 사용합니다.",
+    privacyRetentionTitle: "보유 및 이용 기간",
+    privacyRetentionBody: "계정 연결 정보는 사용자가 Twitch 연결을 해제하거나 삭제를 요청할 때까지 보관합니다. 게시글과 댓글은 삭제 요청 또는 운영 정책에 따른 삭제 시까지 보관합니다. 보안·오류 로그는 안정적인 운영을 위해 필요한 기간 동안 보관하며, 법령상 보존 의무가 있는 경우 해당 기간을 따릅니다.",
+    privacyThirdPartyTitle: "외부 서비스 및 제공",
+    privacyThirdPartyBody: "전적과 게임 정보는 Riot Games API, 로그인과 방송 상태는 Twitch API를 통해 조회합니다. 사용자의 개인정보를 판매하지 않으며, 법령상 의무 또는 사용자가 요청한 기능 제공에 필요한 경우를 제외하고 제3자에게 제공하지 않습니다.",
+    privacyRightsTitle: "이용자의 권리",
+    privacyRightsBody: "이용자는 자신의 개인정보 열람, 정정, 삭제, 처리 정지를 요청할 수 있습니다. Twitch 연결 해제, 게시글 삭제, Riot ID 연결 변경은 서비스 화면 또는 문의를 통해 요청할 수 있습니다.",
+    privacySecurityTitle: "안전성 확보 조치",
+    privacySecurityBody: "토큰과 인증 정보는 접근 권한을 제한하고, 공개 응답에 민감 정보가 노출되지 않도록 처리합니다. 서비스 운영에 필요한 최소 권한 원칙을 적용합니다.",
+    privacyChangesTitle: "방침 변경",
+    privacyChangesBody: "개인정보 처리 방침이 변경되는 경우 서비스 화면 또는 공지사항을 통해 변경 내용을 안내합니다.",
+    termsIntro: "본 약관은 YORO.gg가 제공하는 전적 검색, Twitch 연동, 커뮤니티, 대회 및 방송 지원 기능의 이용 조건을 정합니다.",
+    termsAccountTitle: "계정 및 로그인",
+    termsAccountBody: "일부 기능은 Twitch 로그인이 필요합니다. 사용자는 본인의 계정만 사용해야 하며, 계정 권한을 부정하게 사용하거나 타인의 정보를 등록해서는 안 됩니다.",
+    termsServiceTitle: "서비스 제공",
+    termsServiceBody: "전적, 랭크, 방송 상태, 팔로우·구독 정보는 Riot Games와 Twitch API 상태에 따라 지연되거나 제공되지 않을 수 있습니다. YORO.gg는 서비스 안정성을 위해 기능을 변경하거나 일시 중단할 수 있습니다.",
+    termsUserContentTitle: "게시물과 커뮤니티",
+    termsUserContentBody: "사용자는 자신이 작성한 게시글, 댓글, 이미지에 대한 책임을 집니다. 불법, 혐오, 사칭, 개인정보 침해, 저작권 침해, 광고성 도배 게시물은 제한되거나 삭제될 수 있습니다.",
+    termsProhibitedTitle: "금지 행위",
+    termsProhibitedBody: "서비스 장애를 유발하는 자동화 요청, 인증 우회, 무단 크롤링, 타인의 계정·전적 사칭, 방송 운영을 방해하는 행위, 법령 또는 플랫폼 정책을 위반하는 행위를 금지합니다.",
+    termsDataTitle: "게임 및 플랫폼 데이터",
+    termsDataBody: "YORO.gg는 Riot Games 또는 Twitch의 공식 서비스가 아니며, 각 플랫폼의 정책과 API 제한을 준수합니다. 표시되는 데이터는 참고용이며 경기 결과나 랭크를 보장하지 않습니다.",
+    termsLiabilityTitle: "책임 제한",
+    termsLiabilityBody: "서비스는 가능한 범위에서 안정적으로 제공되지만 외부 API 장애, 네트워크 장애, 사용자 입력 오류로 인한 손해에 대해 법령이 허용하는 범위 내에서 책임이 제한될 수 있습니다.",
+    termsChangesTitle: "약관 변경",
+    termsChangesBody: "약관 변경 시 적용일과 주요 내용을 서비스 화면 또는 공지사항에 안내합니다. 변경 후 서비스를 계속 이용하면 변경 약관에 동의한 것으로 볼 수 있습니다.",
+    contactIntro: "서비스 오류, 권리 요청, 제휴, 법적 문의는 아래 이메일로 보내주세요.",
+    contactEmailLabel: "문의 이메일",
+    contactEmailButton: "이메일 보내기",
+    contactMailSubject: "YORO.gg 문의",
+    contactTemporaryNotice: "현재는 임시 문의 연결이며, 정식 문의 폼과 운영자 정보는 추후 확정됩니다.",
     blueTeam: "블루 팀",
     redTeam: "레드 팀"
   },
   ja: {
-    brand: "Seiga.GG",
+    brand: "YORO.gg",
     tagline: "JP サーバー戦績検索と配信分析を一つの画面で確認します。",
     searchPlaceholder: "JP サーバー ニックネーム#タグ検索",
     search: "検索",
@@ -926,7 +1080,7 @@ const publicI18n = {
     liveGame: "ライブゲーム",
     filter: "フィルター",
     online: "オンライン",
-    premiumTitle: "Seiga.GG Premium",
+    premiumTitle: "YORO.gg Premium",
     premiumBody: "広告非表示、詳細統計、プロリプレイなどのプレミアム機能を体験できます。",
     premiumCta: "プレミアムにアップグレード",
     version: "バージョン",
@@ -1170,6 +1324,44 @@ const publicI18n = {
     savedData: "保存データ",
     cachedRanking: "保存済み検索ベースランキング",
     liveDataNotice: "リアルタイム友達/全体オートコンプリートは Riot 公開 API の制限により、蓄積済みデータのみ表示します。",
+    followMenu: "フォロー",
+    followJoin: "参加する",
+    followJoinTitle: "視聴者参加",
+    followJoinSubtitle: "配信者が視聴者参加を開始すると、待機列を確認してTwitchログイン後に参加できます。",
+    participationOpen: "参加待機列オープン",
+    participationClosed: "参加待機列クローズ",
+    participationStreamerTitle: "参加受付中の配信者",
+    participationStreamerSubtitle: "視聴者参加を開始した配信者を選ぶと、その待機列を確認できます。",
+    participationStreamerCount: "名",
+    participationStreamerOpen: "受付中",
+    participationNoOpenStreamer: "現在、視聴者参加を開始している配信者はいません。",
+    participationQueueTitle: "参加待機列",
+    participationQueueEmpty: "まだ参加者はいません。",
+    participationNeedLogin: "Twitchログイン後に参加登録できます。",
+    participationJoinTitle: "参加登録",
+    participationRiotIdLabel: "Riot ID",
+    participationRiotIdPlaceholder: "サモナー名#タグ",
+    participationRoleLabel: "希望ロール",
+    participationRoleFill: "どこでも",
+    participationSubmit: "参加する",
+    participationSubmitting: "登録中",
+    participationCancel: "参加取消",
+    participationCancelling: "取消中",
+    participationRefresh: "更新",
+    participationLoadFailed: "参加待機列を読み込めませんでした。",
+    participationJoinFailed: "参加登録に失敗しました。",
+    participationCancelFailed: "参加取消に失敗しました。",
+    participationJoinComplete: "参加待機列に登録しました。",
+    participationAlreadyJoined: "すでに参加待機列に登録されています。",
+    participationCancelComplete: "参加申請を取り消しました。",
+    participationPosition: "待機順",
+    participationViewerBadge: "自分",
+    participationRankPending: "戦績確認待ち",
+    roleTop: "トップ",
+    roleJungle: "ジャングル",
+    roleMid: "ミッド",
+    roleAdc: "ボット",
+    roleSupport: "サポート",
     subscriptionStatus: "サブスク状況",
     subscriptionsTitle: "サブスク中の配信者",
     subscriptionsSubtitle: "最近の Twitch フォロー基準",
@@ -1293,6 +1485,51 @@ const publicI18n = {
     currentGameAverageTier: "平均ティア",
     currentGameReady: "分析準備",
     currentGameBot: "ボット",
+    footerPrivacy: "プライバシーポリシー",
+    footerTerms: "利用規約",
+    footerContact: "お問い合わせ",
+    footerRiotDisclaimer: "YORO.ggはRiot Gamesの公式サービスではなく、Riot Gamesの見解を代表するものではありません。League of LegendsおよびRiot GamesはRiot Games, Inc.の商標です。",
+    footerCopyright: "Copyright © YORO.gg. All rights reserved.",
+    privacyTitle: "プライバシーポリシー",
+    termsTitle: "利用規約",
+    contactTitle: "お問い合わせ",
+    legalEffectiveDate: "施行日: 2026. 07. 07.",
+    legalDraftNotice: "本書は運営情報が確定するまで使用するサービス方針の草案です。運営者情報、保存期間、委託・国外移転の有無は公開前に最終確認が必要です。",
+    privacyIntro: "YORO.ggは、戦績検索、Twitchログイン、配信者機能、コミュニティ、大会機能を提供するために必要な範囲で個人情報を取り扱います。",
+    privacyCollectedTitle: "取り扱う個人情報の項目",
+    privacyCollectedBody: "Twitchログイン時にTwitchユーザーID、表示名、プロフィール画像、フォロー・サブスク状況、許可された権限範囲を取り扱う場合があります。Riot ID、ゲーム戦績、ランク、チャンピオン統計、コミュニティ投稿・コメント・画像、お気に入り、参加キュー、接続ログ、Cookieなどの利用記録も取り扱う場合があります。",
+    privacyPurposeTitle: "利用目的",
+    privacyPurposeBody: "ユーザー識別、戦績検索と分析、配信者登録とオーバーレイ提供、フォロー・サブスク状況表示、視聴者参加キュー運営、コミュニティ・大会機能提供、不正利用防止、問い合わせ対応に利用します。",
+    privacyRetentionTitle: "保存期間",
+    privacyRetentionBody: "アカウント連携情報は、利用者がTwitch連携を解除するか削除を要請するまで保存します。投稿とコメントは削除要請または運営方針による削除まで保存します。セキュリティ・エラーログは安定運用に必要な期間保存し、法令上の保存義務がある場合はその期間に従います。",
+    privacyThirdPartyTitle: "外部サービスおよび提供",
+    privacyThirdPartyBody: "戦績とゲーム情報はRiot Games API、ログインと配信状態はTwitch APIを通じて取得します。利用者の個人情報を販売せず、法令上の義務または利用者が求める機能提供に必要な場合を除き第三者へ提供しません。",
+    privacyRightsTitle: "利用者の権利",
+    privacyRightsBody: "利用者は自身の個人情報の開示、訂正、削除、利用停止を要請できます。Twitch連携解除、投稿削除、Riot ID連携変更はサービス画面または問い合わせから要請できます。",
+    privacySecurityTitle: "安全管理措置",
+    privacySecurityBody: "トークンと認証情報はアクセス権限を制限し、公開レスポンスに機密情報が露出しないよう処理します。サービス運営に必要な最小権限の原則を適用します。",
+    privacyChangesTitle: "方針の変更",
+    privacyChangesBody: "プライバシーポリシーが変更される場合、サービス画面またはお知らせで変更内容を案内します。",
+    termsIntro: "本規約は、YORO.ggが提供する戦績検索、Twitch連携、コミュニティ、大会、配信支援機能の利用条件を定めます。",
+    termsAccountTitle: "アカウントとログイン",
+    termsAccountBody: "一部機能にはTwitchログインが必要です。利用者は本人のアカウントのみを使用し、権限を不正利用したり他人の情報を登録してはいけません。",
+    termsServiceTitle: "サービス提供",
+    termsServiceBody: "戦績、ランク、配信状態、フォロー・サブスク情報はRiot GamesおよびTwitch APIの状態により遅延または提供できない場合があります。YORO.ggは安定運用のため機能を変更または一時停止できます。",
+    termsUserContentTitle: "投稿とコミュニティ",
+    termsUserContentBody: "利用者は自分が作成した投稿、コメント、画像について責任を負います。違法、ヘイト、なりすまし、個人情報侵害、著作権侵害、広告スパム投稿は制限または削除される場合があります。",
+    termsProhibitedTitle: "禁止行為",
+    termsProhibitedBody: "サービス障害を引き起こす自動化リクエスト、認証回避、無断クローリング、他人のアカウント・戦績のなりすまし、配信運営を妨害する行為、法令またはプラットフォームポリシー違反を禁止します。",
+    termsDataTitle: "ゲームおよびプラットフォームデータ",
+    termsDataBody: "YORO.ggはRiot GamesまたはTwitchの公式サービスではなく、各プラットフォームのポリシーとAPI制限を遵守します。表示データは参考用であり、試合結果やランクを保証するものではありません。",
+    termsLiabilityTitle: "責任の制限",
+    termsLiabilityBody: "サービスは可能な範囲で安定提供しますが、外部API障害、ネットワーク障害、利用者入力の誤りによる損害については法令で認められる範囲で責任が制限される場合があります。",
+    termsChangesTitle: "規約の変更",
+    termsChangesBody: "規約変更時は適用日と主な内容をサービス画面またはお知らせで案内します。変更後もサービスを利用し続ける場合、変更後の規約に同意したものとみなされます。",
+    contactIntro: "サービス不具合、権利要請、提携、法的問い合わせは下記メールへお送りください。",
+    contactEmailLabel: "問い合わせメール",
+    contactEmailButton: "メールを送る",
+    contactMailSubject: "YORO.gg お問い合わせ",
+    contactTemporaryNotice: "現在は仮の問い合わせ導線です。正式な問い合わせフォームと運営者情報は後日確定します。",
     blueTeam: "ブルーチーム",
     redTeam: "レッドチーム"
   }
@@ -1300,6 +1537,8 @@ const publicI18n = {
 
 type PublicLocale = keyof typeof publicI18n;
 type PublicText = (typeof publicI18n)[PublicLocale];
+type PublicTextKey = keyof typeof publicI18n.ko;
+type PublicLegalPageKey = Extract<PublicMainPage, "privacy" | "terms" | "contact">;
 type PublicLocalizedOption = {
   value: string;
   ko: string;
@@ -1310,6 +1549,18 @@ let activePublicLocale: PublicLocale = "ko";
 
 function t(): PublicText {
   return publicI18n[activePublicLocale];
+}
+
+function publicText(key: PublicTextKey): string {
+  return publicI18n[activePublicLocale][key];
+}
+
+function publicKoText(key: PublicTextKey): string {
+  return publicI18n.ko[key];
+}
+
+function publicJaText(key: PublicTextKey): string {
+  return publicI18n.ja[key];
 }
 
 const PARTY_TIER_OPTIONS: PublicLocalizedOption[] = [
@@ -1628,6 +1879,37 @@ async function getPublicTwitchFollowedLol(): Promise<PublicTwitchFollowedLolResp
   return (await response.json()) as PublicTwitchFollowedLolResponse;
 }
 
+async function getPublicParticipationState(streamerId?: string): Promise<PublicParticipationStateResponse> {
+  const query = streamerId ? `?streamerId=${encodeURIComponent(streamerId)}` : "";
+  const response = await fetch(`${apiBase}/api/public/participation/state${query}`, {
+    credentials: "include"
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return (await response.json()) as PublicParticipationStateResponse;
+}
+
+async function postPublicParticipationJoin(input: { riotId: string; role: LolRole; streamerId?: string }): Promise<PublicParticipationJoinResponse> {
+  const response = await fetch(`${apiBase}/api/public/participation/join`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return (await response.json()) as PublicParticipationJoinResponse;
+}
+
+async function postPublicParticipationCancel(input: { streamerId?: string }): Promise<PublicParticipationCancelResponse> {
+  const response = await fetch(`${apiBase}/api/public/participation/cancel`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return (await response.json()) as PublicParticipationCancelResponse;
+}
+
 async function getPublicTournaments(): Promise<StreamerTournament[]> {
   const response = await fetch(`${apiBase}/api/public/tournaments`, {
     credentials: "include"
@@ -1855,6 +2137,21 @@ function tournamentRouteFromPublicPath(pathname: string = window.location.pathna
     tab === "schedule" ? "tournamentSchedule" :
     "tournamentBracket";
   return { page, slug: decodeURIComponent(slug) };
+}
+
+function legalPageFromPublicPath(pathname: string = window.location.pathname): PublicLegalPageKey | undefined {
+  const normalized = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  if (normalized === PUBLIC_PRIVACY_PATH) return "privacy";
+  if (normalized === PUBLIC_TERMS_PATH) return "terms";
+  if (normalized === PUBLIC_CONTACT_PATH) return "contact";
+  return undefined;
+}
+
+function publicLegalPath(page: PublicMainPage): string | undefined {
+  if (page === "privacy") return PUBLIC_PRIVACY_PATH;
+  if (page === "terms") return PUBLIC_TERMS_PATH;
+  if (page === "contact") return PUBLIC_CONTACT_PATH;
+  return undefined;
 }
 
 function publicTournamentDetailPath(slug: string, page: PublicMainPage = "tournamentBracket"): string {
@@ -3213,13 +3510,7 @@ function SeigaSearchLoader() {
           <div className="loader-ring ring-outer" />
           <div className="loader-ring ring-inner" />
           <div className="loader-scan" />
-          <div className="seiga-mark">
-            <span className="mark-wing mark-left" />
-            <span className="mark-wing mark-right" />
-            <span className="mark-core" />
-            <span className="mark-blade" />
-            <span className="mark-gem" />
-          </div>
+          <img className="seiga-mark" src="/images/yorogg-mark.png" alt="" />
         </div>
         <strong data-ko={publicI18n.ko.searching} data-ja={publicI18n.ja.searching}>{t().searching}</strong>
       </div>
@@ -3818,9 +4109,9 @@ function PublicSidebar({
   return (
     <aside className="public-sidebar">
       <button className="public-sidebar-brand" type="button" onClick={onHome}>
-        <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
+        <img className="public-brand-logo" src="/images/yorogg-mark.png" alt={t().brand} />
       </button>
-      <nav aria-label="Seiga.GG">
+      <nav aria-label="YORO.gg">
         {items.map((item, index) => (
           <button className={activeTarget === item.target ? "active" : ""} type="button" onClick={() => onNavigate(item.target)} key={`${item.target}:${item.label}:${index}`}>
             <span aria-hidden="true">{item.icon}</span>
@@ -4046,13 +4337,6 @@ function PublicHeaderMenu({
     ja: publicI18n.ja.favoritesTitle,
     label: t().favoritesTitle
   };
-  const subscriptionsItem: { key: PublicMainPage; icon: string; ko: string; ja: string; label: string } = {
-    key: "subscriptions",
-    icon: "◆",
-    ko: publicI18n.ko.subscriptionStatus,
-    ja: publicI18n.ja.subscriptionStatus,
-    label: t().subscriptionStatus
-  };
   const contentPages: PublicMainPage[] = ["tournamentCalendar", "tournamentList", "tournamentNews", "tournamentTeams", "tournamentBracket", "tournamentSchedule"];
   const contentItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
     { page: "tournamentCalendar", icon: "◷", ko: publicI18n.ko.tournamentCalendar, ja: publicI18n.ja.tournamentCalendar, label: t().tournamentCalendar },
@@ -4063,9 +4347,14 @@ function PublicHeaderMenu({
     { page: "patch", icon: "▤", ko: publicI18n.ko.communityServerRecruit, ja: publicI18n.ja.communityServerRecruit, label: t().communityServerRecruit },
     { page: "communityParty", icon: "♙", ko: publicI18n.ko.communityPartyRecruit, ja: publicI18n.ja.communityPartyRecruit, label: t().communityPartyRecruit }
   ];
+  const followPages: PublicMainPage[] = showSubscriptions ? ["subscriptions", "followJoin"] : ["followJoin"];
+  const followItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
+    ...(showSubscriptions ? [{ page: "subscriptions" as const, icon: "◆", ko: publicI18n.ko.subscriptionStatus, ja: publicI18n.ja.subscriptionStatus, label: t().subscriptionStatus }] : []),
+    { page: "followJoin", icon: "＋", ko: publicI18n.ko.followJoin, ja: publicI18n.ja.followJoin, label: t().followJoin }
+  ];
 
   return (
-    <nav className="public-header-nav" aria-label="Seiga.GG">
+    <nav className="public-header-nav" aria-label="YORO.gg">
       <button className={activePage === "search" && activeTarget === "search" ? "active" : ""} type="button" onClick={() => onPage("search")}>
         <span aria-hidden="true">{searchItem.icon}</span>
         <strong data-ko={searchItem.ko} data-ja={searchItem.ja}>{searchItem.label}</strong>
@@ -4112,12 +4401,25 @@ function PublicHeaderMenu({
           ))}
         </div>
       </div>
-      {showSubscriptions ? (
-        <button className={activePage === subscriptionsItem.key ? "active" : ""} type="button" onClick={() => onPage(subscriptionsItem.key)}>
-          <span aria-hidden="true">{subscriptionsItem.icon}</span>
-          <strong data-ko={subscriptionsItem.ko} data-ja={subscriptionsItem.ja}>{subscriptionsItem.label}</strong>
+      <div className="public-header-menu-item">
+        <button
+          className={followPages.includes(activePage) ? "active" : ""}
+          type="button"
+          aria-haspopup="menu"
+          onClick={() => onPage(showSubscriptions ? "subscriptions" : "followJoin")}
+        >
+          <span aria-hidden="true">◆</span>
+          <strong data-ko={publicI18n.ko.followMenu} data-ja={publicI18n.ja.followMenu}>{t().followMenu}</strong>
         </button>
-      ) : null}
+        <div className="public-header-submenu" role="menu" aria-label={t().followMenu}>
+          {followItems.map((item) => (
+            <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
+              <span aria-hidden="true">{item.icon}</span>
+              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
+            </button>
+          ))}
+        </div>
+      </div>
     </nav>
   );
 }
@@ -4209,7 +4511,7 @@ function PublicAppHeader({
   return (
     <header id={showSearch ? "public-search" : undefined} className={`public-app-header ${showSearch ? "" : "home"} ${mobileMenuOpen ? "mobile-menu-open" : ""}`}>
       <div className="public-header-brand">
-        <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
+        <img className="public-brand-logo" src="/images/yorogg-mark.png" alt={t().brand} />
       </div>
       <button
         className="public-mobile-menu-toggle"
@@ -4380,11 +4682,229 @@ function PublicStreamerRegistrationScreen({
   );
 }
 
+const PUBLIC_PARTICIPATION_ROLES: LolRole[] = ["fill", "top", "jungle", "mid", "adc", "support"];
+
+function publicParticipationRoleLabel(role?: LolRole | string): string {
+  switch (role) {
+    case "top":
+      return t().roleTop;
+    case "jungle":
+      return t().roleJungle;
+    case "mid":
+      return t().roleMid;
+    case "adc":
+      return t().roleAdc;
+    case "support":
+      return t().roleSupport;
+    case "fill":
+    default:
+      return t().participationRoleFill;
+  }
+}
+
+function publicParticipationRankText(item: PublicParticipationQueueItem): string {
+  if (!item.rankedStats || item.rankedStats.tier === "UNRANKED") return t().participationRankPending;
+  return rankLabel(item.rankedStats);
+}
+
+function PublicParticipationJoinPage({
+  status,
+  participation,
+  loading,
+  error,
+  riotId,
+  role,
+  joining,
+  cancelling,
+  message,
+  selectedStreamerId,
+  onLogin,
+  onLogout,
+  onRefresh,
+  onStreamerSelect,
+  onRiotIdChange,
+  onRoleChange,
+  onSubmit,
+  onCancel
+}: {
+  status: PublicTwitchViewerStatus;
+  participation: PublicParticipationStateResponse | null;
+  loading: boolean;
+  error: string;
+  riotId: string;
+  role: LolRole;
+  joining: boolean;
+  cancelling: boolean;
+  message: string;
+  selectedStreamerId: string;
+  onLogin: () => void;
+  onLogout: () => void;
+  onRefresh: () => void;
+  onStreamerSelect: (streamerId: string) => void;
+  onRiotIdChange: (value: string) => void;
+  onRoleChange: (value: LolRole) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCancel: () => void;
+}) {
+  const queue = participation?.queue ?? [];
+  const isOpen = Boolean(participation?.isOpen);
+  const viewerEntry = participation?.viewerEntry;
+  const streamers = participation?.streamers ?? [];
+  const selectedStreamer = streamers.find((streamer) => streamer.id === selectedStreamerId)
+    ?? streamers.find((streamer) => streamer.id === participation?.selectedStreamerId)
+    ?? streamers[0];
+  const effectiveSelectedStreamerId = selectedStreamer?.id ?? "";
+  const canJoin = isOpen && Boolean(selectedStreamer);
+
+  return (
+    <section className="public-panel public-menu-page-panel public-participation-page">
+      <div className="public-section-head">
+        <div>
+          <h2 data-ko={publicI18n.ko.followJoinTitle} data-ja={publicI18n.ja.followJoinTitle}>{t().followJoinTitle}</h2>
+          <p data-ko={publicI18n.ko.followJoinSubtitle} data-ja={publicI18n.ja.followJoinSubtitle}>{t().followJoinSubtitle}</p>
+        </div>
+        <div className="public-participation-actions">
+          {status.connected ? (
+            <>
+              <button className="secondary" type="button" onClick={onRefresh} disabled={loading}>
+                {loading ? t().searching : t().participationRefresh}
+              </button>
+              <button className="secondary" type="button" onClick={onLogout}>{t().twitchViewerLogout}</button>
+            </>
+          ) : (
+            <button type="button" onClick={onLogin} disabled={!status.configured}>{t().twitchViewerLogin}</button>
+          )}
+        </div>
+      </div>
+
+      {!status.configured ? <p className="public-empty">{t().twitchNotConfigured}</p> : null}
+      <article className="public-participation-streamer-select">
+        <div className="public-participation-streamer-head">
+          <div>
+            <strong>{t().participationStreamerTitle}</strong>
+            <p>{t().participationStreamerSubtitle}</p>
+          </div>
+          <span>{streamers.length > 0 ? `${formatNumber(streamers.length)} ${t().participationStreamerCount}` : t().participationNoOpenStreamer}</span>
+        </div>
+        <div className="public-participation-streamer-list">
+          {streamers.map((streamer) => (
+            <button
+              type="button"
+              key={streamer.id}
+              className={`public-participation-streamer-card ${streamer.id === effectiveSelectedStreamerId ? "active" : ""}`}
+              onClick={() => onStreamerSelect(streamer.id)}
+            >
+              <span className="public-participation-streamer-avatar">
+                {streamer.twitchProfileImageUrl ? (
+                  <img src={assetUrl(streamer.twitchProfileImageUrl)} alt="" />
+                ) : (
+                  (streamer.twitchDisplayName || streamer.riotId || "S").slice(0, 1)
+                )}
+              </span>
+              <span className="public-participation-streamer-info">
+                <strong>{streamer.twitchDisplayName}</strong>
+                <small>{streamer.riotId ?? t().participationRankPending}</small>
+              </span>
+              <span className="public-participation-streamer-meta">
+                <em>{t().participationStreamerOpen}</em>
+                <small>{formatNumber(streamer.queueSize)} / {formatNumber(participation?.maxQueueSize ?? 0)}</small>
+              </span>
+            </button>
+          ))}
+          {streamers.length === 0 ? (
+            <div className="public-participation-no-streamer">{t().participationNoOpenStreamer}</div>
+          ) : null}
+        </div>
+      </article>
+
+      {error ? <p className="public-error">{error}</p> : null}
+      {message ? <p className="public-participation-message">{message}</p> : null}
+
+      <div className="public-participation-layout">
+        <article className="public-participation-card">
+          <h3>{t().participationJoinTitle}</h3>
+          {!status.connected ? (
+            <div className="public-participation-current">
+              <strong>{t().participationNeedLogin}</strong>
+              <button type="button" onClick={onLogin} disabled={!status.configured}>{t().twitchViewerLogin}</button>
+            </div>
+          ) : viewerEntry ? (
+            <div className="public-participation-current">
+              <span>{t().participationViewerBadge}</span>
+              <strong>{viewerEntry.riotId}</strong>
+              <small>{t().participationPosition} {formatNumber(viewerEntry.position)} · {publicParticipationRoleLabel(viewerEntry.preferredRole ?? viewerEntry.requestedRole)}</small>
+              <button className="danger" type="button" onClick={onCancel} disabled={cancelling}>
+                {cancelling ? t().participationCancelling : t().participationCancel}
+              </button>
+            </div>
+          ) : (
+            <form className="public-participation-form" onSubmit={onSubmit}>
+              <label>
+                <span>{t().participationRiotIdLabel}</span>
+                <input
+                  value={riotId}
+                  onChange={(event) => onRiotIdChange(event.currentTarget.value)}
+                  placeholder={t().participationRiotIdPlaceholder}
+                  autoComplete="off"
+                  disabled={!canJoin || joining}
+                />
+              </label>
+              <label>
+                <span>{t().participationRoleLabel}</span>
+                <select value={role} onChange={(event) => onRoleChange(event.currentTarget.value as LolRole)} disabled={!canJoin || joining}>
+                  {PUBLIC_PARTICIPATION_ROLES.map((item) => (
+                    <option key={item} value={item}>{publicParticipationRoleLabel(item)}</option>
+                  ))}
+                </select>
+              </label>
+              <button type="submit" disabled={!canJoin || joining || !riotId.trim()}>
+                {joining ? t().participationSubmitting : t().participationSubmit}
+              </button>
+            </form>
+          )}
+        </article>
+
+        <article className="public-participation-card">
+          <h3>{selectedStreamer ? `${selectedStreamer.twitchDisplayName} · ${t().participationQueueTitle}` : t().participationQueueTitle}</h3>
+          {queue.length === 0 && !loading ? <p className="public-empty">{t().participationQueueEmpty}</p> : null}
+          <div className="public-participation-queue-list">
+            {queue.map((item) => (
+              <div className={`public-participation-queue-row ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`}>
+                <span className="public-participation-position">{item.position}</span>
+                <div className="public-participation-queue-main">
+                  <strong>{item.twitchUserName}</strong>
+                  <div className="public-participation-queue-tags">
+                    <span>{publicParticipationRankText(item)}</span>
+                    <span>{publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}</span>
+                    {item.isViewer ? <span className="viewer">{t().participationViewerBadge}</span> : null}
+                  </div>
+                </div>
+                <div className="public-participation-queue-champions" aria-hidden="true">
+                  {(item.topChampions ?? []).slice(0, 3).map((champion) => (
+                    <img key={champion.championId} src={assetUrl(champion.iconUrl)} alt="" />
+                  ))}
+                  {(item.topChampions ?? []).length === 0 ? <em>?</em> : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function PublicTwitchFollowedPanel({
   status,
   followed,
   loading,
   error,
+  title = t().twitchFollowedTitle,
+  titleKo = publicI18n.ko.twitchFollowedTitle,
+  titleJa = publicI18n.ja.twitchFollowedTitle,
+  subtitle = t().twitchFollowedSubtitle,
+  subtitleKo = publicI18n.ko.twitchFollowedSubtitle,
+  subtitleJa = publicI18n.ja.twitchFollowedSubtitle,
   onLogin,
   onLogout,
   onRefresh,
@@ -4394,6 +4914,12 @@ function PublicTwitchFollowedPanel({
   followed: PublicTwitchFollowedLolResponse | null;
   loading: boolean;
   error: string;
+  title?: string;
+  titleKo?: string;
+  titleJa?: string;
+  subtitle?: string;
+  subtitleKo?: string;
+  subtitleJa?: string;
   onLogin: () => void;
   onLogout: () => void;
   onRefresh: () => void;
@@ -4406,8 +4932,8 @@ function PublicTwitchFollowedPanel({
     <section id="public-twitch-followed" className="public-panel public-twitch-followed-panel">
       <div className="public-section-head">
         <div>
-          <h2 data-ko={publicI18n.ko.twitchFollowedTitle} data-ja={publicI18n.ja.twitchFollowedTitle}>{t().twitchFollowedTitle}</h2>
-          <p data-ko={publicI18n.ko.twitchFollowedSubtitle} data-ja={publicI18n.ja.twitchFollowedSubtitle}>{t().twitchFollowedSubtitle}</p>
+          <h2 data-ko={titleKo} data-ja={titleJa}>{title}</h2>
+          <p data-ko={subtitleKo} data-ja={subtitleJa}>{subtitle}</p>
         </div>
         <div className="public-twitch-followed-actions">
           {status.connected ? (
@@ -5113,7 +5639,7 @@ function PublicCommunityDetailPage({
       <div className="public-section-head">
         <div>
           <h2 data-ko={publicI18n.ko.communityDetailTitle} data-ja={publicI18n.ja.communityDetailTitle}>{t().communityDetailTitle}</h2>
-          <span>{post ? formatTournamentDateTime(post.createdAt) : "Seiga.GG"}</span>
+          <span>{post ? formatTournamentDateTime(post.createdAt) : "YORO.gg"}</span>
         </div>
         <button className="public-back-button" type="button" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>{t().communityBackToList}</button>
       </div>
@@ -6142,6 +6668,103 @@ function TournamentNoticeCard({ notices }: { notices: Array<{ title: string; dat
         </div>
       ))}
     </article>
+  );
+}
+
+const PUBLIC_PRIVACY_SECTIONS: Array<{ title: PublicTextKey; body: PublicTextKey }> = [
+  { title: "privacyCollectedTitle", body: "privacyCollectedBody" },
+  { title: "privacyPurposeTitle", body: "privacyPurposeBody" },
+  { title: "privacyRetentionTitle", body: "privacyRetentionBody" },
+  { title: "privacyThirdPartyTitle", body: "privacyThirdPartyBody" },
+  { title: "privacyRightsTitle", body: "privacyRightsBody" },
+  { title: "privacySecurityTitle", body: "privacySecurityBody" },
+  { title: "privacyChangesTitle", body: "privacyChangesBody" }
+];
+
+const PUBLIC_TERMS_SECTIONS: Array<{ title: PublicTextKey; body: PublicTextKey }> = [
+  { title: "termsAccountTitle", body: "termsAccountBody" },
+  { title: "termsServiceTitle", body: "termsServiceBody" },
+  { title: "termsUserContentTitle", body: "termsUserContentBody" },
+  { title: "termsProhibitedTitle", body: "termsProhibitedBody" },
+  { title: "termsDataTitle", body: "termsDataBody" },
+  { title: "termsLiabilityTitle", body: "termsLiabilityBody" },
+  { title: "termsChangesTitle", body: "termsChangesBody" }
+];
+
+function PublicLegalText({ textKey, as = "p" }: { textKey: PublicTextKey; as?: "p" | "span" | "strong" | "h1" | "h2" }) {
+  const props = { "data-ko": publicKoText(textKey), "data-ja": publicJaText(textKey) };
+  const content = publicText(textKey);
+  if (as === "h1") return <h1 {...props}>{content}</h1>;
+  if (as === "h2") return <h2 {...props}>{content}</h2>;
+  if (as === "span") return <span {...props}>{content}</span>;
+  if (as === "strong") return <strong {...props}>{content}</strong>;
+  return <p {...props}>{content}</p>;
+}
+
+function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
+  const titleKey: PublicTextKey = page === "privacy" ? "privacyTitle" : page === "terms" ? "termsTitle" : "contactTitle";
+  const introKey: PublicTextKey = page === "privacy" ? "privacyIntro" : page === "terms" ? "termsIntro" : "contactIntro";
+  const sections = page === "privacy" ? PUBLIC_PRIVACY_SECTIONS : page === "terms" ? PUBLIC_TERMS_SECTIONS : [];
+  const mailHref = `mailto:${PUBLIC_CONTACT_EMAIL}?subject=${encodeURIComponent(publicText("contactMailSubject"))}`;
+
+  return (
+    <section className="public-legal-page public-panel">
+      <div className="public-legal-hero">
+        <span className="public-section-kicker" data-ko={publicI18n.ko.brand} data-ja={publicI18n.ja.brand}>{t().brand}</span>
+        <PublicLegalText textKey={titleKey} as="h1" />
+        <PublicLegalText textKey={introKey} />
+        <PublicLegalText textKey="legalEffectiveDate" as="span" />
+      </div>
+
+      {page === "contact" ? (
+        <div className="public-contact-card">
+          <PublicLegalText textKey="contactTemporaryNotice" />
+          <div>
+            <PublicLegalText textKey="contactEmailLabel" as="strong" />
+            <a href={mailHref}>{PUBLIC_CONTACT_EMAIL}</a>
+          </div>
+          <a className="public-contact-mail-button" href={mailHref} data-ko={publicI18n.ko.contactEmailButton} data-ja={publicI18n.ja.contactEmailButton}>
+            {t().contactEmailButton}
+          </a>
+        </div>
+      ) : (
+        <div className="public-legal-sections">
+          <aside className="public-legal-notice">
+            <PublicLegalText textKey="legalDraftNotice" />
+          </aside>
+          {sections.map((section) => (
+            <article key={section.title}>
+              <PublicLegalText textKey={section.title} as="h2" />
+              <PublicLegalText textKey={section.body} />
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PublicSiteFooter({ onPage }: { onPage: (page: PublicMainPage) => void }) {
+  return (
+    <footer className="public-site-footer">
+      <nav className="public-site-footer-nav" aria-label="public footer">
+        <button type="button" onClick={() => onPage("privacy")} data-ko={publicI18n.ko.footerPrivacy} data-ja={publicI18n.ja.footerPrivacy}>
+          {t().footerPrivacy}
+        </button>
+        <button type="button" onClick={() => onPage("terms")} data-ko={publicI18n.ko.footerTerms} data-ja={publicI18n.ja.footerTerms}>
+          {t().footerTerms}
+        </button>
+        <button type="button" onClick={() => onPage("contact")} data-ko={publicI18n.ko.footerContact} data-ja={publicI18n.ja.footerContact}>
+          {t().footerContact}
+        </button>
+      </nav>
+      <div className="public-site-footer-brand" aria-label="YORO.gg">
+        <span className="public-site-footer-brand-mark" aria-hidden="true">よろ</span>
+        <span className="public-site-footer-brand-word">YORO.gg</span>
+      </div>
+      <p data-ko={publicI18n.ko.footerRiotDisclaimer} data-ja={publicI18n.ja.footerRiotDisclaimer}>{t().footerRiotDisclaimer}</p>
+      <strong data-ko={publicI18n.ko.footerCopyright} data-ja={publicI18n.ja.footerCopyright}>{t().footerCopyright}</strong>
+    </footer>
   );
 }
 
@@ -7584,9 +8207,9 @@ function PublicTopbar({
   return (
     <header className="public-topbar">
       <button className="public-brand" type="button" onClick={onHome}>
-        <img className="public-brand-logo" src="/images/seigagg-logo.png" alt={t().brand} />
+        <img className="public-brand-logo" src="/images/yorogg-mark.png" alt={t().brand} />
       </button>
-      <nav aria-label="Seiga.GG">
+      <nav aria-label="YORO.gg">
         <button type="button" onClick={() => onNavigate("search")} data-ko={publicI18n.ko.searchNav} data-ja={publicI18n.ja.searchNav}>{t().searchNav}</button>
         <button type="button" onClick={() => onNavigate("ranking")} data-ko={publicI18n.ko.ranking} data-ja={publicI18n.ja.ranking}>{t().ranking}</button>
         <button type="button" onClick={() => onNavigate("champion")} data-ko={publicI18n.ko.championAnalysis} data-ja={publicI18n.ja.championAnalysis}>{t().championAnalysis}</button>
@@ -7605,7 +8228,7 @@ function PublicTopbar({
 
 function PublicMobileNav({ onNavigate }: { onNavigate: (target: PublicNavTarget) => void }) {
   return (
-    <nav className="public-mobile-nav" aria-label="Seiga.GG mobile">
+    <nav className="public-mobile-nav" aria-label="YORO.gg mobile">
       <button type="button" onClick={() => onNavigate("search")}>
         <span aria-hidden="true">⌂</span>
         <strong data-ko={publicI18n.ko.searchNav} data-ja={publicI18n.ja.searchNav}>{t().searchNav}</strong>
@@ -7665,6 +8288,15 @@ export function PublicLolPage({
   const [followedLol, setFollowedLol] = useState<PublicTwitchFollowedLolResponse | null>(null);
   const [followedLoading, setFollowedLoading] = useState(false);
   const [followedError, setFollowedError] = useState("");
+  const [publicParticipation, setPublicParticipation] = useState<PublicParticipationStateResponse | null>(null);
+  const [publicParticipationLoading, setPublicParticipationLoading] = useState(false);
+  const [publicParticipationError, setPublicParticipationError] = useState("");
+  const [publicParticipationJoinRiotId, setPublicParticipationJoinRiotId] = useState("");
+  const [publicParticipationJoinRole, setPublicParticipationJoinRole] = useState<LolRole>("fill");
+  const [publicParticipationJoining, setPublicParticipationJoining] = useState(false);
+  const [publicParticipationCancelling, setPublicParticipationCancelling] = useState(false);
+  const [publicParticipationMessage, setPublicParticipationMessage] = useState("");
+  const [publicParticipationStreamerId, setPublicParticipationStreamerId] = useState("");
   const [publicTournaments, setPublicTournaments] = useState<StreamerTournament[]>([]);
   const [publicTournamentSlug, setPublicTournamentSlug] = useState<string | undefined>(() => tournamentRouteFromPublicPath()?.slug);
   const [publicTournamentLoading, setPublicTournamentLoading] = useState(false);
@@ -7749,6 +8381,15 @@ export function PublicLolPage({
   }, [activeMainPage, twitchStatus.connected, followedLol, followedLoading]);
 
   useEffect(() => {
+    if (activeMainPage !== "followJoin") return undefined;
+    void loadPublicParticipationState();
+    const timer = window.setInterval(() => {
+      void loadPublicParticipationState(true);
+    }, 15_000);
+    return () => window.clearInterval(timer);
+  }, [activeMainPage, twitchStatus.connected, publicParticipationStreamerId]);
+
+  useEffect(() => {
     if (!activeMainPage.startsWith("tournament")) return;
     if (publicTournaments.length > 0 || publicTournamentLoading) return;
     if (publicTournamentError) return;
@@ -7789,6 +8430,13 @@ export function PublicLolPage({
 
   useEffect(() => {
     const loadFromPath = (replaceUrl = true) => {
+      const legalRoute = legalPageFromPublicPath();
+      if (legalRoute) {
+        setActiveMainPage(legalRoute);
+        setActiveNav("search");
+        setStreamerRegisterOpen(false);
+        return;
+      }
       const tournamentRoute = tournamentRouteFromPublicPath();
       if (tournamentRoute) {
         setActiveMainPage(tournamentRoute.page);
@@ -7804,6 +8452,15 @@ export function PublicLolPage({
     };
     loadFromPath(true);
     const handlePopState = () => {
+      const legalRoute = legalPageFromPublicPath();
+      if (legalRoute) {
+        setProfile(null);
+        setError("");
+        setStreamerRegisterOpen(false);
+        setActiveMainPage(legalRoute);
+        setActiveNav("search");
+        return;
+      }
       const tournamentRoute = tournamentRouteFromPublicPath();
       if (tournamentRoute) {
         setActiveMainPage(tournamentRoute.page);
@@ -7868,6 +8525,8 @@ export function PublicLolPage({
         await loadFollowedLol();
       } else {
         setFollowedLol(null);
+        setPublicParticipation(null);
+        setPublicParticipationMessage("");
       }
     } catch (requestError) {
       setFollowedError(requestError instanceof Error ? requestError.message : t().searchFailed);
@@ -7887,6 +8546,68 @@ export function PublicLolPage({
       setFollowedError(requestError instanceof Error ? requestError.message : t().searchFailed);
     } finally {
       setFollowedLoading(false);
+    }
+  }
+
+  async function loadPublicParticipationState(silent = false): Promise<void> {
+    if (!silent) setPublicParticipationLoading(true);
+    setPublicParticipationError("");
+    try {
+      const response = await getPublicParticipationState(publicParticipationStreamerId || undefined);
+      setPublicParticipation(response);
+      if (response.selectedStreamerId && response.selectedStreamerId !== publicParticipationStreamerId) {
+        setPublicParticipationStreamerId(response.selectedStreamerId);
+      } else if (!response.isOpen && publicParticipationStreamerId) {
+        setPublicParticipationStreamerId("");
+      }
+      setTwitchStatus((current) => current.connected === response.connected ? current : { ...current, connected: response.connected });
+    } catch (requestError) {
+      if (!silent) {
+        setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationLoadFailed);
+      }
+    } finally {
+      if (!silent) setPublicParticipationLoading(false);
+    }
+  }
+
+  async function submitPublicParticipation(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    setPublicParticipationJoining(true);
+    setPublicParticipationError("");
+    setPublicParticipationMessage("");
+    try {
+      const streamerId = publicParticipationStreamerId || publicParticipation?.selectedStreamerId;
+      const response = await postPublicParticipationJoin({
+        riotId: publicParticipationJoinRiotId,
+        role: publicParticipationJoinRole,
+        ...(streamerId ? { streamerId } : {})
+      });
+      setPublicParticipation(response.state);
+      if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);
+      setPublicParticipationMessage(response.alreadyJoined ? t().participationAlreadyJoined : t().participationJoinComplete);
+    } catch (requestError) {
+      setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationJoinFailed);
+    } finally {
+      setPublicParticipationJoining(false);
+    }
+  }
+
+  async function cancelPublicParticipation(): Promise<void> {
+    setPublicParticipationCancelling(true);
+    setPublicParticipationError("");
+    setPublicParticipationMessage("");
+    try {
+      const streamerId = publicParticipationStreamerId || publicParticipation?.selectedStreamerId;
+      const response = await postPublicParticipationCancel({
+        ...(streamerId ? { streamerId } : {})
+      });
+      setPublicParticipation(response.state);
+      if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);
+      setPublicParticipationMessage(t().participationCancelComplete);
+    } catch (requestError) {
+      setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationCancelFailed);
+    } finally {
+      setPublicParticipationCancelling(false);
     }
   }
 
@@ -8048,8 +8769,16 @@ export function PublicLolPage({
     }
     setActiveMainPage(page);
     setStreamerRegisterOpen(false);
-    setActiveNav("community");
-    if (page.startsWith("tournament")) {
+    const legalPath = publicLegalPath(page);
+    if (legalPath) {
+      setActiveNav("search");
+      setPublicPath(legalPath);
+    } else {
+      setActiveNav("community");
+    }
+    if (legalPath) {
+      // 법적 페이지는 공개 정적 성격의 화면이라 별도 데이터 로딩이 필요하지 않습니다.
+    } else if (page.startsWith("tournament")) {
       const nextSlug = publicTournamentSlug || publicTournaments[0]?.slug;
       if (page === "tournamentCalendar") {
         setPublicPath(PUBLIC_TOURNAMENT_CALENDAR_PATH);
@@ -8074,6 +8803,9 @@ export function PublicLolPage({
       missingScopes: ["user:read:follows", "user:read:subscriptions"]
     });
     setFollowedLol(null);
+    setPublicParticipation(null);
+    setPublicParticipationMessage("");
+    setPublicParticipationJoinRiotId("");
     setStreamerRegisterOpen(false);
   }
 
@@ -8215,6 +8947,9 @@ export function PublicLolPage({
   }
 
   function renderMainMenuPage() {
+    if (activeMainPage === "privacy" || activeMainPage === "terms" || activeMainPage === "contact") {
+      return <PublicLegalPage page={activeMainPage} />;
+    }
     if (activeMainPage === "favorites") {
       return <PublicFavoritesPage favorites={favorites} onPick={pickSuggestion} />;
     }
@@ -8229,6 +8964,30 @@ export function PublicLolPage({
           onLogout={() => void disconnectTwitchViewer()}
           onRefresh={() => void loadFollowedLol()}
           onSearch={searchFollowedRiotId}
+        />
+      );
+    }
+    if (activeMainPage === "followJoin") {
+      return (
+        <PublicParticipationJoinPage
+          status={twitchStatus}
+          participation={publicParticipation}
+          loading={publicParticipationLoading}
+          error={publicParticipationError}
+          riotId={publicParticipationJoinRiotId}
+          role={publicParticipationJoinRole}
+          joining={publicParticipationJoining}
+          cancelling={publicParticipationCancelling}
+          message={publicParticipationMessage}
+          selectedStreamerId={publicParticipationStreamerId}
+          onLogin={startTwitchLogin}
+          onLogout={() => void disconnectTwitchViewer()}
+          onRefresh={() => void loadPublicParticipationState()}
+          onStreamerSelect={setPublicParticipationStreamerId}
+          onRiotIdChange={setPublicParticipationJoinRiotId}
+          onRoleChange={setPublicParticipationJoinRole}
+          onSubmit={submitPublicParticipation}
+          onCancel={() => void cancelPublicParticipation()}
         />
       );
     }
@@ -8371,6 +9130,7 @@ export function PublicLolPage({
             }}
           />
         </section>
+        <PublicSiteFooter onPage={changeMainPage} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </main>
     );
@@ -8424,6 +9184,7 @@ export function PublicLolPage({
             {error ? <p className="public-error">{error}</p> : null}
           </section>
         </section>
+        <PublicSiteFooter onPage={changeMainPage} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </main>
     );
@@ -8470,6 +9231,7 @@ export function PublicLolPage({
             </div>
           </div>
         </section>
+        <PublicSiteFooter onPage={changeMainPage} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </main>
     );
@@ -8568,6 +9330,7 @@ export function PublicLolPage({
           </div>
         </div>
       </section>
+      <PublicSiteFooter onPage={changeMainPage} />
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
     </main>
   );

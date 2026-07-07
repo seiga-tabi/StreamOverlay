@@ -136,7 +136,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-public-lol-route-"));
   try {
-    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>Seiga.GG</title><div id=\"root\"></div>");
+    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>YORO.gg</title><div id=\"root\"></div>");
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
       store: {},
@@ -152,7 +152,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
 
     assert.equal(res.statusCode, 200);
     assert.match(res.headers["Content-Type"], /text\/html/);
-    assert.match(res.body, /Seiga\.GG/);
+    assert.match(res.body, /YORO\.gg/);
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });
@@ -164,7 +164,7 @@ test("공개 dashboard 이미지 asset은 /images 경로로 서빙된다", async
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-dashboard-images-"));
   try {
     mkdirSync(path.join(dir, "images"));
-    writeFileSync(path.join(dir, "images", "seigagg-logo.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    writeFileSync(path.join(dir, "images", "yorogg-logo.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
       store: {},
@@ -174,7 +174,7 @@ test("공개 dashboard 이미지 asset은 /images 경로로 서빙된다", async
       }
     });
 
-    const req = createRequest("GET", "/images/seigagg-logo.png");
+    const req = createRequest("GET", "/images/yorogg-logo.png");
     const res = createResponse();
     await handler(req, res);
 
