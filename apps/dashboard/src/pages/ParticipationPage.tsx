@@ -2,6 +2,54 @@ import { useEffect, useState, type FormEvent } from "react";
 import type { LolChampionSummary, ParticipationDashboardQueueEntry, ParticipationState, ParticipationStatus } from "@streamops/shared";
 import { apiPost } from "../api/client";
 import { createDashboardLocaleProxy, dashboardLocale } from "../i18n";
+import {
+  AppShell,
+  AppShellHeader,
+  AppShellMain,
+} from "../shared/ui/AppShell";
+import { Button } from "../shared/ui/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../shared/ui/Card";
+import {
+  EmptyState,
+  EmptyStateDescription,
+  EmptyStateIcon,
+  EmptyStateTitle,
+} from "../shared/ui/EmptyState";
+import { FormControl, FormField, FormLabel, Input, Select } from "../shared/ui/Form";
+import {
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../shared/ui/Modal";
+import {
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderDescription,
+  PageHeaderEyebrow,
+  PageHeaderStatus,
+  PageHeaderTitle,
+} from "../shared/ui/PageHeader";
+import { SkeletonCard, SkeletonText } from "../shared/ui/Skeleton";
+import { Badge, Metric, StatusPill, type StatusTone } from "../shared/ui/Status";
+import {
+  Toast,
+  ToastCloseButton,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  type ToastTone,
+} from "../shared/ui/Toast";
 
 type DashboardSnapshot = {
   participationState?: ParticipationState;
@@ -23,6 +71,17 @@ const i18n = {
     checkedIn: "확인 완료",
     noShow: "노쇼",
     played: "완료",
+    studio: "Participation Studio",
+    current: "현재",
+    close: "닫기",
+    confirm: "확인",
+    cancelAction: "취소",
+    confirmTitle: "작업 확인",
+    confirmManualDescription: "방송 중 대기열 상태가 즉시 변경됩니다. 계속 진행할까요?",
+    confirmStatusDescription: "참가자 상태를 변경합니다. 오버레이와 대기열 표시가 함께 갱신될 수 있습니다.",
+    confirmInviteDescription: "Twitch 채팅으로 안내 메시지를 전송합니다.",
+    skipLink: "시참 관리 본문으로 이동",
+    loading: "시참 대기열을 불러오는 중입니다.",
     manualControlTitle: "수동 상태 제어",
     manualControlHelp: "자동 게임 감지가 늦거나 챔피언 선택 단계일 때 대기열 표시 상태를 직접 전환합니다.",
     manualOpen: "모집 시작",
@@ -150,6 +209,17 @@ const i18n = {
     checkedIn: "確認完了",
     noShow: "不在",
     played: "完了",
+    studio: "Participation Studio",
+    current: "現在",
+    close: "閉じる",
+    confirm: "確認",
+    cancelAction: "キャンセル",
+    confirmTitle: "操作確認",
+    confirmManualDescription: "配信中の待機列状態がすぐに変更されます。続行しますか？",
+    confirmStatusDescription: "参加者の状態を変更します。オーバーレイと待機列表示も更新される場合があります。",
+    confirmInviteDescription: "Twitch チャットに案内メッセージを送信します。",
+    skipLink: "参加管理本文へ移動",
+    loading: "参加待機列を読み込んでいます。",
     manualControlTitle: "手動状態制御",
     manualControlHelp: "自動試合検知が遅い場合やチャンピオン選択中に、待機列の表示状態を手動で切り替えます。",
     manualOpen: "募集開始",
@@ -287,6 +357,82 @@ const ENTRY_STATUS_OPTIONS: ParticipationStatus[] = [
 ];
 type ManualParticipationAction = "open" | "show_queue" | "mark_in_game" | "finish_game" | "close";
 
+type ParticipationToast = {
+  id: number;
+  title: string;
+  description?: string;
+  tone: ToastTone;
+};
+
+type PendingParticipationAction =
+  | {
+      kind: "manual";
+      action: ManualParticipationAction;
+      title: string;
+      description: string;
+      confirmLabel: string;
+      tone: "danger" | "primary" | "secondary";
+    }
+  | {
+      kind: "entryStatus";
+      entry: ParticipationDashboardQueueEntry;
+      status: ParticipationStatus;
+      title: string;
+      description: string;
+      confirmLabel: string;
+      tone: "danger" | "primary" | "secondary";
+    }
+  | {
+      kind: "invite";
+      entry: ParticipationDashboardQueueEntry;
+      message: string;
+      title: string;
+      description: string;
+      confirmLabel: string;
+      tone: "danger" | "primary" | "secondary";
+    }
+  | {
+      kind: "bulkInvite";
+      message: string;
+      title: string;
+      description: string;
+      confirmLabel: string;
+      tone: "danger" | "primary" | "secondary";
+    };
+
+function manualActionLabel(action: ManualParticipationAction): string {
+  if (action === "open") return t.manualOpen;
+  if (action === "show_queue") return t.manualShowQueue;
+  if (action === "mark_in_game") return t.manualMarkInGame;
+  if (action === "finish_game") return t.manualFinishGame;
+  return t.manualClose;
+}
+
+function manualActionTone(action: ManualParticipationAction): "danger" | "primary" | "secondary" {
+  if (action === "close" || action === "mark_in_game" || action === "finish_game") return "danger";
+  if (action === "open") return "primary";
+  return "secondary";
+}
+
+function participationStatusTone(status: string | undefined): StatusTone {
+  if (status === "verified" || status === "checked_in" || status === "played") return "success";
+  if (status === "selected" || status === "invited" || status === "in_game") return "info";
+  if (status === "no_show" || status === "skipped" || status === "rejected" || status === "blocked" || status === "cancelled") return "danger";
+  if (status === "pending" || status === "waitlisted") return "warning";
+  return "neutral";
+}
+
+function profileStatusTone(status: string | undefined): StatusTone {
+  if (status === "ready") return "success";
+  if (status === "failed" || status === "rate_limited") return "danger";
+  if (status === "analyzing") return "info";
+  return "neutral";
+}
+
+function isDestructiveStatus(status: ParticipationStatus): boolean {
+  return ["cancelled", "no_show", "rejected", "blocked", "skipped"].includes(status);
+}
+
 function roleLabel(role: string | undefined): string {
   if (!role) return t.roles.unknown;
   return t.roles[role as keyof typeof t.roles] ?? role;
@@ -369,6 +515,8 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
   const state = localState;
   const queue = state.queue ?? [];
   const summary = state.summary;
+  const cancelledCount = queue.filter((entry) => entry.status === "cancelled").length;
+  const isSnapshotLoading = !snapshot.participationState && !snapshot.participationQueue && !snapshot.status?.participation;
   const [inviteDrafts, setInviteDrafts] = useState<Record<string, string>>({});
   const [inviteBusyId, setInviteBusyId] = useState<string | null>(null);
   const [inviteMessages, setInviteMessages] = useState<Record<string, string>>({});
@@ -379,19 +527,25 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
   const [manualMessage, setManualMessage] = useState("");
   const [entryStatusBusyId, setEntryStatusBusyId] = useState<string | null>(null);
   const [entryStatusMessages, setEntryStatusMessages] = useState<Record<string, string>>({});
+  const [pendingAction, setPendingAction] = useState<PendingParticipationAction | null>(null);
+  const [toast, setToast] = useState<ParticipationToast | null>(null);
   const bulkInviteTargets = queue.filter((entry) => INVITE_TARGET_STATUSES.has(entry.status));
 
   useEffect(() => {
     setLocalState(snapshot.participationState ?? fallbackState(snapshot));
   }, [snapshot]);
 
+  function showToast(tone: ToastTone, title: string, description?: string): void {
+    setToast({ id: Date.now(), tone, title, description });
+  }
+
   async function refreshProfile(entryId: string) {
     try {
       const nextState = await apiPost<ParticipationState>("/api/participation/profile/refresh", { entryId });
       setLocalState(nextState);
-      alert(t.refreshing);
+      showToast("success", t.refreshing);
     } catch {
-      alert(t.refreshFailed);
+      showToast("danger", t.refreshFailed);
     }
   }
 
@@ -399,9 +553,9 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
     try {
       const nextState = await apiPost<ParticipationState>("/api/participation/role-override", { entryId, role });
       setLocalState(nextState);
-      alert(t.roleUpdated);
+      showToast("success", t.roleUpdated);
     } catch {
-      alert(t.roleUpdateFailed);
+      showToast("danger", t.roleUpdateFailed);
     }
   }
 
@@ -412,8 +566,11 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
       const result = await apiPost<{ ok: boolean; action: ManualParticipationAction; phase: string; state: ParticipationState }>("/api/participation/manual-control", { action });
       setLocalState(result.state);
       setManualMessage(t.manualControlSaved);
+      showToast("success", t.manualControlSaved, manualActionLabel(action));
     } catch (error) {
-      setManualMessage(apiErrorDetail(error, "/api/participation/manual-control", t.manualControlFailed));
+      const message = apiErrorDetail(error, "/api/participation/manual-control", t.manualControlFailed);
+      setManualMessage(message);
+      showToast("danger", t.manualControlFailed, message);
     } finally {
       setManualBusyAction(null);
     }
@@ -427,17 +584,17 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
       const nextState = await apiPost<ParticipationState>("/api/participation/entry-status", { entryId: entry.id, status });
       setLocalState(nextState);
       setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: t.entryStatusUpdated }));
+      showToast("success", t.entryStatusUpdated, `${entry.twitchUserName} · ${statusLabel(status)}`);
     } catch (error) {
-      setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: apiErrorDetail(error, "/api/participation/entry-status", t.entryStatusUpdateFailed) }));
+      const message = apiErrorDetail(error, "/api/participation/entry-status", t.entryStatusUpdateFailed);
+      setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: message }));
+      showToast("danger", t.entryStatusUpdateFailed, message);
     } finally {
       setEntryStatusBusyId(null);
     }
   }
 
-  async function sendInviteMessage(event: FormEvent<HTMLFormElement>, entry: ParticipationDashboardQueueEntry) {
-    event.preventDefault();
-    const message = (inviteDrafts[entry.id] ?? "").trim();
-    if (!message) return;
+  async function sendInviteMessage(entry: ParticipationDashboardQueueEntry, message: string) {
     setInviteBusyId(entry.id);
     setInviteMessages((previous) => ({ ...previous, [entry.id]: "" }));
     try {
@@ -446,18 +603,20 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
         message
       });
       setInviteMessages((previous) => ({ ...previous, [entry.id]: t.inviteSent }));
+      showToast("success", t.inviteSent, entry.twitchUserName);
     } catch (error) {
-      setInviteMessages((previous) => ({ ...previous, [entry.id]: apiErrorDetail(error, "/api/participation/invite-message", t.inviteFailed) }));
+      const detail = apiErrorDetail(error, "/api/participation/invite-message", t.inviteFailed);
+      setInviteMessages((previous) => ({ ...previous, [entry.id]: detail }));
+      showToast("danger", t.inviteFailed, detail);
     } finally {
       setInviteBusyId(null);
     }
   }
 
-  async function sendBulkInviteMessage(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const message = bulkInviteDraft.trim();
+  async function sendBulkInviteMessage(message: string) {
     if (!message || bulkInviteTargets.length === 0) {
       setBulkInviteMessage(t.bulkInviteNoTargets);
+      showToast("warning", t.bulkInviteNoTargets);
       return;
     }
     setBulkInviteSending(true);
@@ -467,146 +626,349 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
         entryIds: bulkInviteTargets.map((entry) => entry.id),
         message
       });
-      setBulkInviteMessage(t.bulkInviteSent(result.targetCount, result.sentMessages));
+      const resultMessage = t.bulkInviteSent(result.targetCount, result.sentMessages);
+      setBulkInviteMessage(resultMessage);
+      showToast("success", resultMessage);
     } catch (error) {
-      setBulkInviteMessage(apiErrorDetail(error, "/api/participation/invite-message/bulk", t.inviteFailed));
+      const detail = apiErrorDetail(error, "/api/participation/invite-message/bulk", t.inviteFailed);
+      setBulkInviteMessage(detail);
+      showToast("danger", t.inviteFailed, detail);
     } finally {
       setBulkInviteSending(false);
     }
   }
 
+  function requestManualControl(action: ManualParticipationAction): void {
+    setPendingAction({
+      kind: "manual",
+      action,
+      title: manualActionLabel(action),
+      description: t.confirmManualDescription,
+      confirmLabel: manualActionLabel(action),
+      tone: manualActionTone(action)
+    });
+  }
+
+  function requestEntryStatus(entry: ParticipationDashboardQueueEntry, status: ParticipationStatus): void {
+    if (entry.status === status) return;
+    setPendingAction({
+      kind: "entryStatus",
+      entry,
+      status,
+      title: `${entry.twitchUserName} · ${statusLabel(status)}`,
+      description: t.confirmStatusDescription,
+      confirmLabel: t.confirm,
+      tone: isDestructiveStatus(status) ? "danger" : "primary"
+    });
+  }
+
+  function requestInviteMessage(event: FormEvent<HTMLFormElement>, entry: ParticipationDashboardQueueEntry): void {
+    event.preventDefault();
+    const message = (inviteDrafts[entry.id] ?? "").trim();
+    if (!message) return;
+    setPendingAction({
+      kind: "invite",
+      entry,
+      message,
+      title: `${entry.twitchUserName} · ${t.sendInvite}`,
+      description: t.confirmInviteDescription,
+      confirmLabel: t.sendInvite,
+      tone: "primary"
+    });
+  }
+
+  function requestBulkInviteMessage(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    const message = bulkInviteDraft.trim();
+    if (!message || bulkInviteTargets.length === 0) {
+      setBulkInviteMessage(t.bulkInviteNoTargets);
+      showToast("warning", t.bulkInviteNoTargets);
+      return;
+    }
+    setPendingAction({
+      kind: "bulkInvite",
+      message,
+      title: t.bulkInviteTitle,
+      description: t.confirmInviteDescription,
+      confirmLabel: t.sendBulkInvite,
+      tone: "primary"
+    });
+  }
+
+  async function confirmPendingAction(): Promise<void> {
+    if (!pendingAction) return;
+    const action = pendingAction;
+    if (action.kind === "manual") {
+      await applyManualControl(action.action);
+    } else if (action.kind === "entryStatus") {
+      await updateEntryStatus(action.entry, action.status);
+    } else if (action.kind === "invite") {
+      await sendInviteMessage(action.entry, action.message);
+    } else {
+      await sendBulkInviteMessage(action.message);
+    }
+    setPendingAction(null);
+  }
+
+  const pendingActionBusy = manualBusyAction !== null || entryStatusBusyId !== null || inviteBusyId !== null || bulkInviteSending;
+
   return (
     <>
-      <div className="page-title-row page-header compact">
-        <div>
-          <h1>{t.title}</h1>
-          <p className="muted">{t.commandHint}</p>
-        </div>
-        <span className={`queue-status ${state.isOpen ? "good" : "neutral"}`}>{state.isOpen ? t.open : t.closed}</span>
-      </div>
+      <AppShell
+        as="section"
+        className="participation-shared-shell"
+        mainId="participation-shared-main"
+        skipLinkLabel={t.skipLink}
+        variant="streamer"
+      >
+        <AppShellHeader className="participation-shared-header">
+          <PageHeader className="participation-shared-page-header" layout="split">
+            <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
+            <PageHeaderTitle>{t.title}</PageHeaderTitle>
+            <PageHeaderDescription>{t.commandHint}</PageHeaderDescription>
+            <PageHeaderStatus>
+              <StatusPill tone={state.isOpen ? "success" : "neutral"}>
+                {state.isOpen ? t.open : t.closed}
+              </StatusPill>
+            </PageHeaderStatus>
+            <PageHeaderActions>
+              <Badge tone="info">{t.current}</Badge>
+            </PageHeaderActions>
+          </PageHeader>
+        </AppShellHeader>
 
-      <div className="participation-summary">
-        <div><span>{t.active}</span><strong>{summary.active}</strong></div>
-        <div><span>{t.waiting}</span><strong>{summary.waiting}</strong></div>
-        <div><span>{t.selected}</span><strong>{summary.selected}</strong></div>
-        <div><span>{t.checkedIn}</span><strong>{summary.checkedIn}</strong></div>
-        <div><span>{t.noShow}</span><strong>{summary.noShow}</strong></div>
-        <div><span>{t.played}</span><strong>{summary.played}</strong></div>
-      </div>
-
-      <div className="card participation-manual-card">
-        <div>
-          <h2>{t.manualControlTitle}</h2>
-          <p className="muted">{t.manualControlHelp}</p>
-        </div>
-        <div className="participation-manual-actions">
-          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("open")}>{manualBusyAction === "open" ? t.sendingInvite : t.manualOpen}</button>
-          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("show_queue")}>{manualBusyAction === "show_queue" ? t.sendingInvite : t.manualShowQueue}</button>
-          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("mark_in_game")}>{manualBusyAction === "mark_in_game" ? t.sendingInvite : t.manualMarkInGame}</button>
-          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("finish_game")}>{manualBusyAction === "finish_game" ? t.sendingInvite : t.manualFinishGame}</button>
-          <button className="secondary compact-button" disabled={manualBusyAction !== null} onClick={() => void applyManualControl("close")}>{manualBusyAction === "close" ? t.sendingInvite : t.manualClose}</button>
-        </div>
-        {manualMessage ? <p className="form-message">{manualMessage}</p> : null}
-      </div>
-
-      <div className="card">
-        <h2>{t.queueTitle}</h2>
-        {queue.length === 0 ? <p className="muted">{t.empty}</p> : null}
-        {queue.length > 0 ? (
-          <form className="queue-bulk-invite" onSubmit={(event) => void sendBulkInviteMessage(event)}>
-            <div className="queue-bulk-invite-heading">
-              <strong>{t.bulkInviteTitle}</strong>
-              <span>{t.bulkInviteTargetCount(bulkInviteTargets.length)}</span>
+        <AppShellMain className="participation-shared-main" id="participation-shared-main">
+          <div className="participation-shared-grid">
+            <div className="participation-shared-metrics" aria-label={t.queueTitle}>
+              <Metric label={t.active} value={summary.active} tone="info" />
+              <Metric label={t.waiting} value={summary.waiting} tone="warning" />
+              <Metric label={t.selected} value={summary.selected} tone="streamer" />
+              <Metric label={t.checkedIn} value={summary.checkedIn} tone="success" />
+              <Metric label={t.noShow} value={summary.noShow} tone="danger" />
+              <Metric label={t.played} value={summary.played} tone="neutral" />
+              <Metric label={t.statuses.cancelled} value={cancelledCount} tone={cancelledCount > 0 ? "danger" : "neutral"} />
             </div>
-            <label className="field">
-              <span>{t.inviteMessage}</span>
-              <input
-                value={bulkInviteDraft}
-                placeholder={t.bulkInvitePlaceholder}
-                onChange={(event) => setBulkInviteDraft(event.target.value)}
-                autoComplete="off"
-              />
-            </label>
-            <button className="secondary compact-button" disabled={bulkInviteSending || !bulkInviteDraft.trim() || bulkInviteTargets.length === 0} type="submit">
-              {bulkInviteSending ? t.sendingInvite : t.sendBulkInvite}
-            </button>
-            {bulkInviteMessage ? <p className="form-message">{bulkInviteMessage}</p> : null}
-          </form>
-        ) : null}
-        {queue.length > 0 ? (
-          <div className="participation-table">
-            {queue.map((entry) => (
-              <div className="participation-row" key={entry.id}>
-                <div className="queue-champion-card">
-                  <span>#{entry.position}</span>
-                  {championArtUrl(primaryChampion(entry.topChampions)) ? (
-                    <img src={championArtUrl(primaryChampion(entry.topChampions))} alt="" />
-                  ) : null}
-                  <strong>{primaryChampion(entry.topChampions) ? championDisplayName(primaryChampion(entry.topChampions)) : t.topChampions}</strong>
+
+            {isSnapshotLoading ? (
+              <SkeletonCard loadingLabel={t.loading} size="lg">
+                <SkeletonText lines={4} size="md" />
+              </SkeletonCard>
+            ) : null}
+
+            <Card as="section" className="participation-shared-card participation-shared-control" id="participation-shared-control" padding="lg" variant="glass">
+              <CardHeader className="participation-shared-card-header">
+                <div>
+                  <CardTitle as="h2">{t.manualControlTitle}</CardTitle>
+                  <CardDescription>{t.manualControlHelp}</CardDescription>
                 </div>
-                <div className="queue-user">
-                  <strong>{entry.twitchUserName}</strong>
-                  <span>{t.riotId}: {entry.riotId}</span>
-                  <span>{t.profileStatus}: {profileStatusLabel(entry.profileStatus)}</span>
-                  {entry.profileFailureReason ? <span>{t.profileFailureReason}: {entry.profileFailureReason}</span> : null}
-                  <span>{t.mainRole}: {mainRoleLabel(entry.mainRole, entry.mainRoleConfidence)}</span>
-                  <span>{t.topChampions}: {championLabel(entry.topChampions)}</span>
-                </div>
-                <div className="queue-role">
-                  <span>{t.roleOverride}</span>
-                  <select
-                    aria-label={t.roleOverride}
-                    value={entry.preferredRole ?? "unknown"}
-                    onChange={(event) => void overrideRole(entry.id, event.target.value)}
-                  >
-                    {Object.keys(t.roles).map((role) => (
-                      <option value={role} key={role}>{roleLabel(role)}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="queue-status-control">
-                  <span className={`queue-status ${entry.status}`}>{statusLabel(entry.status)}</span>
-                  <label className="queue-status-select">
-                    <span>{t.entryStatusOverride}</span>
-                    <select
-                      aria-label={t.entryStatusOverride}
-                      value={entry.status}
-                      disabled={entryStatusBusyId === entry.id}
-                      onChange={(event) => void updateEntryStatus(entry, event.target.value as ParticipationStatus)}
+                <StatusPill tone={state.isOpen ? "success" : "neutral"}>{state.isOpen ? t.open : t.closed}</StatusPill>
+              </CardHeader>
+              <CardContent>
+                <div className="participation-shared-action-row">
+                  {(["open", "show_queue", "mark_in_game", "finish_game", "close"] as const).map((action) => (
+                    <Button
+                      key={action}
+                      disabled={manualBusyAction !== null}
+                      loading={manualBusyAction === action}
+                      onClick={() => requestManualControl(action)}
+                      variant={manualActionTone(action)}
                     >
-                      {ENTRY_STATUS_OPTIONS.map((status) => (
-                        <option value={status} key={status}>{statusLabel(status)}</option>
-                      ))}
-                    </select>
-                  </label>
-                  {entryStatusMessages[entry.id] ? <p className="form-message">{entryStatusMessages[entry.id]}</p> : null}
+                      {manualBusyAction === action ? t.sendingInvite : manualActionLabel(action)}
+                    </Button>
+                  ))}
                 </div>
-                <div className="queue-meta">
-                  <span>{t.source}: {sourceLabel(entry.source)}</span>
-                  <span>{t.checkInUntil}: {formatTime(entry.checkInExpiresAt)}</span>
-                  <span>{t.createdAt}: {formatTime(entry.createdAt)}</span>
-                  <button className="secondary compact-button" onClick={() => void refreshProfile(entry.id)}>{t.refreshProfile}</button>
+                {manualMessage ? <StatusPill tone={manualMessage === t.manualControlSaved ? "success" : "danger"}>{manualMessage}</StatusPill> : null}
+              </CardContent>
+            </Card>
+
+            <Card as="section" className="participation-shared-card participation-shared-queue-card" id="participation-shared-queue" padding="lg" variant="glass">
+              <CardHeader className="participation-shared-card-header">
+                <div>
+                  <CardTitle as="h2">{t.queueTitle}</CardTitle>
+                  <CardDescription>{t.bulkInviteTargetCount(bulkInviteTargets.length)}</CardDescription>
                 </div>
-                <form className="queue-invite" onSubmit={(event) => void sendInviteMessage(event, entry)}>
-                  <label className="field">
-                    <span>{t.inviteMessage}</span>
-                    <input
-                      value={inviteDrafts[entry.id] ?? ""}
-                      placeholder={t.invitePlaceholder}
-                      onChange={(event) => setInviteDrafts((previous) => ({ ...previous, [entry.id]: event.target.value }))}
-                      autoComplete="off"
-                    />
-                  </label>
-                  <button className="secondary compact-button" disabled={inviteBusyId === entry.id || !(inviteDrafts[entry.id] ?? "").trim()} type="submit">
-                    {inviteBusyId === entry.id ? t.sendingInvite : t.sendInvite}
-                  </button>
-                  {inviteMessages[entry.id] ? <p className="form-message">{inviteMessages[entry.id]}</p> : null}
-                </form>
-              </div>
-            ))}
+                <Badge tone={queue.length > 0 ? "streamer" : "neutral"}>{queue.length}</Badge>
+              </CardHeader>
+              <CardContent className="participation-shared-queue-content">
+                {queue.length === 0 ? (
+                  <EmptyState className="participation-shared-empty" variant="streamer">
+                    <EmptyStateIcon>Q</EmptyStateIcon>
+                    <EmptyStateTitle as="h3">{t.empty}</EmptyStateTitle>
+                    <EmptyStateDescription>{t.commandHint}</EmptyStateDescription>
+                  </EmptyState>
+                ) : null}
+
+                {queue.length > 0 ? (
+                  <form className="participation-shared-bulk-invite" id="participation-shared-invite" onSubmit={requestBulkInviteMessage}>
+                    <div className="participation-shared-bulk-head">
+                      <strong>{t.bulkInviteTitle}</strong>
+                      <Badge tone={bulkInviteTargets.length > 0 ? "info" : "warning"}>{t.bulkInviteTargetCount(bulkInviteTargets.length)}</Badge>
+                    </div>
+                    <FormField className="participation-shared-form-field" controlId="participation-bulk-invite">
+                      <FormLabel>{t.inviteMessage}</FormLabel>
+                      <FormControl>
+                        <Input
+                          autoComplete="off"
+                          id="participation-bulk-invite"
+                          onChange={(event) => setBulkInviteDraft(event.target.value)}
+                          placeholder={t.bulkInvitePlaceholder}
+                          value={bulkInviteDraft}
+                        />
+                      </FormControl>
+                    </FormField>
+                    <Button disabled={bulkInviteSending || !bulkInviteDraft.trim() || bulkInviteTargets.length === 0} loading={bulkInviteSending} type="submit" variant="secondary">
+                      {bulkInviteSending ? t.sendingInvite : t.sendBulkInvite}
+                    </Button>
+                    {bulkInviteMessage ? <StatusPill tone={bulkInviteMessage === t.bulkInviteNoTargets || bulkInviteMessage === t.inviteFailed ? "warning" : "success"}>{bulkInviteMessage}</StatusPill> : null}
+                  </form>
+                ) : null}
+
+                {queue.length > 0 ? (
+                  <div className="participation-shared-queue-list">
+                    {queue.map((entry) => {
+                      const champion = primaryChampion(entry.topChampions);
+                      const artUrl = championArtUrl(champion);
+                      return (
+                        <Card as="article" className="participation-shared-queue-row" key={entry.id} padding="md" variant="elevated">
+                          <div className="participation-shared-champion-card">
+                            <span>#{entry.position}</span>
+                            {artUrl ? <img src={artUrl} alt="" /> : null}
+                            <strong>{champion ? championDisplayName(champion) : t.topChampions}</strong>
+                          </div>
+
+                          <div className="participation-shared-user">
+                            <strong>{entry.twitchUserName}</strong>
+                            <span>{t.riotId}: {entry.riotId}</span>
+                            <div className="participation-shared-chip-row">
+                              <StatusPill size="sm" tone={participationStatusTone(entry.status)}>{statusLabel(entry.status)}</StatusPill>
+                              <Badge size="sm" tone={profileStatusTone(entry.profileStatus)}>{profileStatusLabel(entry.profileStatus)}</Badge>
+                              <Badge size="sm" tone="info">{mainRoleLabel(entry.mainRole, entry.mainRoleConfidence)}</Badge>
+                            </div>
+                            {entry.profileFailureReason ? <span>{t.profileFailureReason}: {entry.profileFailureReason}</span> : null}
+                            <span>{t.topChampions}: {championLabel(entry.topChampions)}</span>
+                          </div>
+
+                          <div className="participation-shared-controls">
+                            <FormField controlId={`participation-role-${entry.id}`}>
+                              <FormLabel>{t.roleOverride}</FormLabel>
+                              <FormControl>
+                                <Select
+                                  aria-label={t.roleOverride}
+                                  id={`participation-role-${entry.id}`}
+                                  onChange={(event) => void overrideRole(entry.id, event.target.value)}
+                                  value={entry.preferredRole ?? "unknown"}
+                                >
+                                  {Object.keys(t.roles).map((role) => (
+                                    <option value={role} key={role}>{roleLabel(role)}</option>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </FormField>
+                            <FormField controlId={`participation-status-${entry.id}`} loading={entryStatusBusyId === entry.id}>
+                              <FormLabel>{t.entryStatusOverride}</FormLabel>
+                              <FormControl>
+                                <Select
+                                  aria-label={t.entryStatusOverride}
+                                  disabled={entryStatusBusyId === entry.id}
+                                  id={`participation-status-${entry.id}`}
+                                  onChange={(event) => requestEntryStatus(entry, event.target.value as ParticipationStatus)}
+                                  value={entry.status}
+                                >
+                                  {ENTRY_STATUS_OPTIONS.map((status) => (
+                                    <option value={status} key={status}>{statusLabel(status)}</option>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </FormField>
+                            {entryStatusMessages[entry.id] ? <StatusPill size="sm" tone={entryStatusMessages[entry.id] === t.entryStatusUpdated ? "success" : "danger"}>{entryStatusMessages[entry.id]}</StatusPill> : null}
+                          </div>
+
+                          <div className="participation-shared-meta">
+                            <span>{t.source}: {sourceLabel(entry.source)}</span>
+                            <span>{t.checkInUntil}: {formatTime(entry.checkInExpiresAt)}</span>
+                            <span>{t.createdAt}: {formatTime(entry.createdAt)}</span>
+                            <Button onClick={() => void refreshProfile(entry.id)} size="sm" variant="secondary">
+                              {t.refreshProfile}
+                            </Button>
+                          </div>
+
+                          <form className="participation-shared-invite" onSubmit={(event) => requestInviteMessage(event, entry)}>
+                            <FormField className="participation-shared-form-field" controlId={`participation-invite-${entry.id}`}>
+                              <FormLabel>{t.inviteMessage}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  autoComplete="off"
+                                  id={`participation-invite-${entry.id}`}
+                                  onChange={(event) => setInviteDrafts((previous) => ({ ...previous, [entry.id]: event.target.value }))}
+                                  placeholder={t.invitePlaceholder}
+                                  value={inviteDrafts[entry.id] ?? ""}
+                                />
+                              </FormControl>
+                            </FormField>
+                            <Button disabled={inviteBusyId === entry.id || !(inviteDrafts[entry.id] ?? "").trim()} loading={inviteBusyId === entry.id} size="sm" type="submit" variant="secondary">
+                              {inviteBusyId === entry.id ? t.sendingInvite : t.sendInvite}
+                            </Button>
+                            {inviteMessages[entry.id] ? <StatusPill size="sm" tone={inviteMessages[entry.id] === t.inviteSent ? "success" : "danger"}>{inviteMessages[entry.id]}</StatusPill> : null}
+                          </form>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
           </div>
-        ) : null}
-      </div>
+        </AppShellMain>
+      </AppShell>
+
+      <Modal
+        closeOnBackdrop
+        onOpenChange={(open) => {
+          if (!open && !pendingActionBusy) setPendingAction(null);
+        }}
+        open={Boolean(pendingAction)}
+        size="md"
+      >
+        <ModalHeader>
+          <ModalTitle>{pendingAction?.title ?? t.confirmTitle}</ModalTitle>
+          <ModalDescription>{pendingAction?.description ?? t.confirmManualDescription}</ModalDescription>
+        </ModalHeader>
+        <ModalContent>
+          {pendingAction?.kind === "invite" || pendingAction?.kind === "bulkInvite" ? (
+            <div className="participation-shared-modal-message">
+              <Badge tone="info">{t.inviteMessage}</Badge>
+              <p>{pendingAction.message}</p>
+            </div>
+          ) : null}
+        </ModalContent>
+        <ModalFooter>
+          <Button disabled={!pendingAction} loading={pendingActionBusy} onClick={() => void confirmPendingAction()} variant={pendingAction?.tone ?? "primary"}>
+            {pendingAction?.confirmLabel ?? t.confirm}
+          </Button>
+          <ModalCloseButton aria-label={t.close} disabled={pendingActionBusy}>
+            {t.cancelAction}
+          </ModalCloseButton>
+        </ModalFooter>
+      </Modal>
+
+      <ToastProvider position="bottom-right">
+        <ToastViewport className="participation-shared-toast-viewport">
+          {toast ? (
+            <Toast
+              autoDismiss
+              key={toast.id}
+              onOpenChange={(open) => {
+                if (!open) setToast(null);
+              }}
+              tone={toast.tone}
+            >
+              <ToastTitle>{toast.title}</ToastTitle>
+              {toast.description ? <ToastDescription>{toast.description}</ToastDescription> : null}
+              <ToastCloseButton aria-label={t.close}>×</ToastCloseButton>
+            </Toast>
+          ) : null}
+        </ToastViewport>
+      </ToastProvider>
     </>
   );
 }

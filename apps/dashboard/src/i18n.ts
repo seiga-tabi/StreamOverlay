@@ -41,6 +41,7 @@ export const dashboardI18n = {
       backToPublic: "전적 검색으로 돌아가기"
     },
     pages: {
+      serverStatus: { label: "서버 현황", short: "서버" },
       dashboard: { label: "운영 현황", short: "대시보드" },
       twitch: { label: "Twitch 연결", short: "Twitch" },
       overlayStatus: { label: "Overlay 연결", short: "연결" },
@@ -54,6 +55,7 @@ export const dashboardI18n = {
       participation: { label: "시참 관리", short: "시참" },
       tournaments: { label: "대회 관리", short: "대회" },
       streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
+      supportInbox: { label: "문의 메일", short: "메일" },
       settings: { label: "시스템 설정", short: "설정" }
     },
     dashboard: {
@@ -287,6 +289,7 @@ export const dashboardI18n = {
       backToPublic: "戦績検索に戻る"
     },
     pages: {
+      serverStatus: { label: "サーバー状況", short: "サーバー" },
       dashboard: { label: "運用状況", short: "ダッシュボード" },
       twitch: { label: "Twitch 接続", short: "Twitch" },
       overlayStatus: { label: "Overlay 接続", short: "接続" },
@@ -300,6 +303,7 @@ export const dashboardI18n = {
       participation: { label: "参加管理", short: "参加" },
       tournaments: { label: "大会管理", short: "大会" },
       streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },
+      supportInbox: { label: "お問い合わせメール", short: "メール" },
       settings: { label: "システム設定", short: "設定" }
     },
     dashboard: {

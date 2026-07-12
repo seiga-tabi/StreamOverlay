@@ -1,0 +1,8 @@
+:root {
+  --yoro-z-base: 0;
+  --yoro-z-raised: 1;
+  --yoro-z-sticky: 10;
+  --yoro-z-overlay: 20;
+  --yoro-z-modal: 50;
+  --yoro-z-toast: 60;
+}

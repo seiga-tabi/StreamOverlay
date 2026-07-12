@@ -10,11 +10,84 @@ import type {
   TournamentUpsertInput
 } from "@streamops/shared";
 import { deleteDashboardTournament, getDashboardTournaments, saveDashboardTournament } from "../api/client";
+import {
+  AppShell,
+  AppShellHeader,
+  AppShellMain,
+  AppShellSidebar,
+} from "../shared/ui/AppShell";
+import { Button } from "../shared/ui/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../shared/ui/Card";
+import {
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateDescription,
+  EmptyStateIcon,
+  EmptyStateTitle,
+} from "../shared/ui/EmptyState";
+import { FormControl, FormField, FormHint, FormLabel, Input, Select, Textarea } from "../shared/ui/Form";
+import {
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../shared/ui/Modal";
+import {
+  Navigation,
+  NavigationBadge,
+  NavigationItem,
+  NavigationSection,
+} from "../shared/ui/Navigation";
+import {
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderDescription,
+  PageHeaderEyebrow,
+  PageHeaderStatus,
+  PageHeaderTitle,
+} from "../shared/ui/PageHeader";
+import { SkeletonCard, SkeletonText } from "../shared/ui/Skeleton";
+import { Badge, Metric, StatusPill, type StatusTone } from "../shared/ui/Status";
+import {
+  Toast,
+  ToastCloseButton,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from "../shared/ui/Toast";
 
 const pageText = {
   ko: {
+    eyebrow: "스트리머 콘텐츠",
     title: "대회 관리",
     description: "승인된 스트리머 계정으로 공개 대회 페이지에 표시할 대진표, 일정, 뉴스를 관리합니다.",
+    studio: "Tournament Studio",
+    navLabel: "대회 관리 섹션",
+    navTitle: "오늘 대회 운영",
+    listNav: "대회 목록",
+    formNav: "대회 작성",
+    teamsMetric: "참가팀",
+    matchesMetric: "경기",
+    scheduleMetric: "일정",
+    visibilityMetric: "공개 상태",
+    loading: "대회 목록을 불러오는 중입니다.",
+    successTitle: "작업 완료",
+    errorTitle: "작업 실패",
+    closeToast: "알림 닫기",
+    deleteTitle: "대회 삭제",
+    cancel: "취소",
+    confirmDelete: "삭제 확인",
     listTitle: "대회 목록",
     empty: "생성된 대회가 없습니다.",
     formTitleCreate: "대회 생성",
@@ -96,8 +169,25 @@ const pageText = {
     support: "서포터"
   },
   ja: {
+    eyebrow: "配信者コンテンツ",
     title: "大会管理",
     description: "承認済み配信者アカウントで、公開大会ページに表示するトーナメント表、日程、ニュースを管理します。",
+    studio: "Tournament Studio",
+    navLabel: "大会管理セクション",
+    navTitle: "今日の大会運営",
+    listNav: "大会リスト",
+    formNav: "大会作成",
+    teamsMetric: "参加チーム",
+    matchesMetric: "試合",
+    scheduleMetric: "日程",
+    visibilityMetric: "公開状態",
+    loading: "大会リストを読み込み中です。",
+    successTitle: "完了",
+    errorTitle: "失敗",
+    closeToast: "通知を閉じる",
+    deleteTitle: "大会削除",
+    cancel: "キャンセル",
+    confirmDelete: "削除する",
     listTitle: "大会リスト",
     empty: "作成された大会がありません。",
     formTitleCreate: "大会作成",
@@ -376,6 +466,16 @@ function shuffledTeams(teams: TournamentTeam[]): TournamentTeam[] {
   return [...teams].sort(() => Math.random() - 0.5);
 }
 
+function visibilityTone(visibility: StreamerTournament["visibility"] | FormState["visibility"]): StatusTone {
+  return visibility === "public" ? "success" : "neutral";
+}
+
+function matchStatusTone(status: TournamentMatchStatus): StatusTone {
+  if (status === "live") return "live";
+  if (status === "completed") return "success";
+  return "info";
+}
+
 export function TournamentsPage() {
   const text = localeText();
   const [tournaments, setTournaments] = useState<StreamerTournament[]>([]);
@@ -386,6 +486,7 @@ export function TournamentsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [step, setStep] = useState<TournamentFormStep>("basic");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const selected = useMemo(() => tournaments.find((tournament) => tournament.id === form.id), [form.id, tournaments]);
   const savedTeams = useMemo(() => cleanTeams(form.teams), [form.teams]);
   const stepIndex = formSteps.findIndex((item) => item.key === step);
@@ -586,7 +687,6 @@ export function TournamentsPage() {
 
   async function removeSelected(): Promise<void> {
     if (!form.id) return;
-    if (!window.confirm(text.deleteConfirm)) return;
     setDeleting(true);
     setMessage("");
     setError("");
@@ -594,6 +694,8 @@ export function TournamentsPage() {
       const next = await deleteDashboardTournament(form.id);
       setTournaments(next);
       setForm(emptyForm);
+      setStep("basic");
+      setDeleteModalOpen(false);
       setMessage(text.deleted);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : text.deleteFailed);
@@ -603,299 +705,547 @@ export function TournamentsPage() {
   }
 
   return (
-    <section className="dashboard-tournament-page">
-      <div className="section-heading">
-        <span className="eyebrow" data-ko="스트리머 콘텐츠" data-ja="配信者コンテンツ">스트리머 콘텐츠</span>
-        <h1 data-ko={pageText.ko.title} data-ja={pageText.ja.title}>{text.title}</h1>
-        <p data-ko={pageText.ko.description} data-ja={pageText.ja.description}>{text.description}</p>
-      </div>
+    <ToastProvider position="top-right">
+      <AppShell
+        as="section"
+        className="dashboard-tournament-page tournament-shared-shell"
+        mainId="tournament-shared-main"
+        skipLinkLabel={text.title}
+        variant="streamer"
+      >
+        <AppShellHeader className="tournament-shared-header">
+          <PageHeader className="tournament-shared-page-header" layout="split">
+            <PageHeaderEyebrow data-ko={pageText.ko.eyebrow} data-ja={pageText.ja.eyebrow}>
+              {text.eyebrow}
+            </PageHeaderEyebrow>
+            <PageHeaderTitle data-ko={pageText.ko.title} data-ja={pageText.ja.title}>
+              {text.title}
+            </PageHeaderTitle>
+            <PageHeaderDescription data-ko={pageText.ko.description} data-ja={pageText.ja.description}>
+              {text.description}
+            </PageHeaderDescription>
+            <PageHeaderStatus>
+              <StatusPill tone={form.visibility === "public" ? "success" : "neutral"}>
+                {form.visibility === "public" ? text.public : text.draft}
+              </StatusPill>
+            </PageHeaderStatus>
+            <PageHeaderActions>
+              <Button type="button" variant="secondary" onClick={() => void load()} loading={loading}>
+                {text.refresh}
+              </Button>
+              <Button type="button" variant="primary" onClick={resetForm}>
+                {text.newButton}
+              </Button>
+            </PageHeaderActions>
+          </PageHeader>
+        </AppShellHeader>
 
-      {message ? <div className="status-banner success">{message}</div> : null}
-      {error ? <div className="status-banner danger">{error}</div> : null}
-
-      <div className="dashboard-tournament-grid">
-        <article className="card dashboard-tournament-list">
-          <div className="card-heading-row">
-            <h2 data-ko={pageText.ko.listTitle} data-ja={pageText.ja.listTitle}>{text.listTitle}</h2>
-            <div className="button-row">
-              <button className="secondary" type="button" onClick={() => void load()} disabled={loading}>{text.refresh}</button>
-              <button className="primary" type="button" onClick={resetForm}>{text.newButton}</button>
-            </div>
-          </div>
-          {loading ? <p className="muted">{text.refresh}</p> : null}
-          {!loading && tournaments.length === 0 ? <p className="muted">{text.empty}</p> : null}
-          <div className="dashboard-tournament-items">
-            {tournaments.map((tournament) => (
-              <button
-                type="button"
-                className={tournament.id === form.id ? "active" : ""}
-                key={tournament.id}
-                onClick={() => selectTournament(tournament)}
+        <AppShellSidebar as="nav" className="tournament-shared-sidebar">
+          <Navigation aria-label={text.navLabel} variant="streamer">
+            <NavigationSection title={text.navTitle}>
+              <NavigationItem
+                as="a"
+                href="#tournament-list"
+                badge={<NavigationBadge>{tournaments.length}</NavigationBadge>}
               >
-                <span className={`visibility-pill ${tournament.visibility}`}>{tournament.visibility === "public" ? text.public : text.draft}</span>
-                <strong>{tournament.title}</strong>
-                <small>{text.updatedAt} {compactDate(tournament.updatedAt)}</small>
-              </button>
-            ))}
-          </div>
-        </article>
-
-        <form className="card dashboard-tournament-form" onSubmit={(event) => void submit(event)}>
-          <div className="card-heading-row">
-            <h2>{selected ? text.formTitleEdit : text.formTitleCreate}</h2>
-            <div className="button-row dashboard-tournament-actions">
-              {selected?.visibility === "public" ? (
-                <a className="secondary link-button" href={`/lol/tournaments/${encodeURIComponent(selected.slug)}`} target="_blank" rel="noreferrer">{text.openPublic}</a>
-              ) : null}
-              {selected ? (
-                <button className="secondary danger-button" type="button" onClick={() => void removeSelected()} disabled={deleting || saving}>
-                  {deleting ? text.deleting : text.deleteButton}
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <nav className="dashboard-tournament-stepper" aria-label={text.contentInfoTitle}>
-            {formSteps.map((item, index) => (
-              <button
-                type="button"
-                key={item.key}
-                className={step === item.key ? "active" : ""}
-                onClick={() => goToStep(item.key)}
+                {text.listNav}
+              </NavigationItem>
+              <NavigationItem
+                as="a"
+                href="#tournament-editor"
+                badge={<NavigationBadge>{selected ? text.formTitleEdit : text.formTitleCreate}</NavigationBadge>}
               >
-                <span>{index + 1}</span>
-                <strong>{text[item.labelKey]}</strong>
-              </button>
-            ))}
-          </nav>
+                {text.formNav}
+              </NavigationItem>
+            </NavigationSection>
+            <NavigationSection title={text.contentInfoTitle}>
+              {formSteps.map((item) => (
+                <NavigationItem
+                  active={step === item.key}
+                  as="button"
+                  disabled={saving || deleting}
+                  key={item.key}
+                  onClick={() => goToStep(item.key)}
+                >
+                  {text[item.labelKey]}
+                </NavigationItem>
+              ))}
+            </NavigationSection>
+          </Navigation>
+        </AppShellSidebar>
 
-          {step === "basic" ? (
-          <div className="dashboard-tournament-form-section">
-            <h3>{text.basicInfoTitle}</h3>
-            <div className="form-grid two">
-              <label>
-                <span>{text.titleLabel}</span>
-                <input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
-              </label>
-              <label>
-                <span>{text.visibilityLabel}</span>
-                <select value={form.visibility} onChange={(event) => setForm((current) => ({ ...current, visibility: event.target.value === "public" ? "public" : "draft" }))}>
-                  <option value="draft">{text.draft}</option>
-                  <option value="public">{text.public}</option>
-                </select>
-              </label>
-              <label>
-                <span>{text.startsAtLabel}</span>
-                <input type="datetime-local" value={form.startsAt} onChange={(event) => setForm((current) => ({ ...current, startsAt: event.target.value }))} />
-              </label>
-              <label>
-                <span>{text.endsAtLabel}</span>
-                <input type="datetime-local" value={form.endsAt} onChange={(event) => setForm((current) => ({ ...current, endsAt: event.target.value }))} />
-              </label>
-              <label>
-                <span>{text.formatLabel}</span>
-                <input value={form.formatLabel} onChange={(event) => setForm((current) => ({ ...current, formatLabel: event.target.value }))} />
-              </label>
-              <label>
-                <span>{text.prizeLabel}</span>
-                <input value={form.prizeLabel} onChange={(event) => setForm((current) => ({ ...current, prizeLabel: event.target.value }))} />
-              </label>
-            </div>
-            <label>
-              <span>{text.descriptionLabel}</span>
-              <textarea rows={3} value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} />
-            </label>
+        <AppShellMain className="tournament-shared-main" id="tournament-shared-main">
+          <div className="tournament-shared-summary-grid">
+            <Metric label={text.teamsMetric} value={savedTeams.length} tone="streamer" size="sm" />
+            <Metric label={text.matchesMetric} value={form.matches.length} tone="info" size="sm" />
+            <Metric
+              description={form.startsAt ? compactDate(form.startsAt) : "-"}
+              label={text.scheduleMetric}
+              value={form.endsAt ? compactDate(form.endsAt) : "-"}
+              tone="neutral"
+              size="sm"
+            />
+            <Metric
+              label={text.visibilityMetric}
+              status={<StatusPill size="sm" tone={visibilityTone(form.visibility)}>{form.visibility === "public" ? text.public : text.draft}</StatusPill>}
+              value={form.visibility === "public" ? text.public : text.draft}
+              tone={visibilityTone(form.visibility)}
+              size="sm"
+            />
           </div>
-          ) : null}
 
-          {step === "teams" ? (
-          <div className="dashboard-tournament-form-section">
-            <div className="dashboard-tournament-section-header">
-              <div>
-                <h3>{text.teamsTitle}</h3>
-                <p>{text.teamsHelp}</p>
-              </div>
-              <button className="secondary" type="button" onClick={addTeam}>{text.addTeam}</button>
-            </div>
-            {form.teams.length === 0 ? <p className="dashboard-tournament-empty">{text.noTeams}</p> : null}
-            <div className="dashboard-tournament-team-builder">
-              {form.teams.map((team, teamIndex) => (
-                <article className="dashboard-tournament-team-card" key={team.id}>
-                  <div className="dashboard-tournament-team-head">
-                    <strong>{team.name || `${text.teamsTitle} ${teamIndex + 1}`}</strong>
-                    <button className="secondary danger-button" type="button" onClick={() => removeTeam(team.id)}>{text.removeTeam}</button>
-                  </div>
-                  <div className="form-grid tournament-team-grid">
-                    <label>
-                      <span>{text.teamName}</span>
-                      <input value={team.name} onChange={(event) => updateTeam(team.id, { name: event.target.value })} placeholder="SEIGA Team" />
-                    </label>
-                    <label>
-                      <span>{text.teamSeed}</span>
-                      <input
-                        type="number"
-                        min={1}
-                        value={team.seed ?? teamIndex + 1}
-                        onChange={(event) => updateTeam(team.id, { seed: Number(event.target.value) || teamIndex + 1 })}
-                      />
-                    </label>
-                    <label>
-                      <span>{text.teamImage}</span>
-                      <input value={team.avatarUrl ?? ""} onChange={(event) => updateTeam(team.id, { avatarUrl: event.target.value })} placeholder="https://..." />
-                    </label>
-                  </div>
-                  <div className="dashboard-tournament-player-list">
-                    <div className="dashboard-tournament-player-heading">
-                      <span>{text.playersTitle}</span>
-                      <button className="secondary compact-button" type="button" onClick={() => addPlayer(team.id)}>{text.addPlayer}</button>
-                    </div>
-                    {(team.players ?? []).map((player) => (
-                      <div className="dashboard-tournament-player-row" key={player.id}>
-                        <select value={player.role} onChange={(event) => updatePlayer(team.id, player.id, { role: event.target.value as TournamentPlayerRole })}>
-                          {roleOptions.map((role) => (
-                            <option key={role.value} value={role.value}>{text[role.key]}</option>
-                          ))}
-                        </select>
-                        <input
-                          value={player.riotId}
-                          onChange={(event) => updatePlayer(team.id, player.id, { riotId: event.target.value })}
-                          placeholder="Hide on bush#KR1"
-                        />
-                        <label className="checkbox-label tournament-leader-check">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(player.leader)}
-                            onChange={(event) => updatePlayer(team.id, player.id, { leader: event.target.checked })}
-                          />
-                          <span>{text.leaderLabel}</span>
-                        </label>
-                        <button className="secondary compact-button" type="button" onClick={() => removePlayer(team.id, player.id)}>{text.removePlayer}</button>
+          <div className="dashboard-tournament-grid tournament-shared-grid">
+            <Card as="section" className="dashboard-tournament-list tournament-shared-list" id="tournament-list" padding="lg" variant="glass">
+              <CardHeader className="tournament-shared-card-header">
+                <div>
+                  <CardTitle as="h2" data-ko={pageText.ko.listTitle} data-ja={pageText.ja.listTitle}>
+                    {text.listTitle}
+                  </CardTitle>
+                  <CardDescription>{tournaments.length} {text.matchesMetric}</CardDescription>
+                </div>
+                <Button type="button" variant="secondary" size="sm" onClick={() => void load()} loading={loading}>
+                  {text.refresh}
+                </Button>
+              </CardHeader>
+              <CardContent className="dashboard-tournament-items tournament-shared-list-items">
+                {loading ? (
+                  <>
+                    <SkeletonCard loadingLabel={text.loading} />
+                    <SkeletonCard loadingLabel={text.loading} />
+                  </>
+                ) : null}
+                {!loading && tournaments.length === 0 ? (
+                  <EmptyState variant={error ? "error" : "tournament"} as="div">
+                    <EmptyStateIcon>{error ? "!" : "+"}</EmptyStateIcon>
+                    <EmptyStateTitle as="h3">{error ? text.loadFailed : text.empty}</EmptyStateTitle>
+                    {error ? <EmptyStateDescription>{error}</EmptyStateDescription> : null}
+                    <EmptyStateActions>
+                      <Button type="button" variant="secondary" size="sm" onClick={() => void load()}>
+                        {text.refresh}
+                      </Button>
+                    </EmptyStateActions>
+                  </EmptyState>
+                ) : null}
+                {!loading && tournaments.map((tournament) => (
+                  <Card
+                    className="tournament-shared-list-card"
+                    key={tournament.id}
+                    onClick={() => selectTournament(tournament)}
+                    padding="sm"
+                    variant={tournament.id === form.id ? "elevated" : "interactive"}
+                  >
+                    <CardHeader className="tournament-shared-list-card-header">
+                      <StatusPill size="sm" tone={visibilityTone(tournament.visibility)}>
+                        {tournament.visibility === "public" ? text.public : text.draft}
+                      </StatusPill>
+                      <Badge size="sm" tone="neutral">{text.updatedAt} {compactDate(tournament.updatedAt)}</Badge>
+                    </CardHeader>
+                    <CardContent>
+                      <strong className="tournament-shared-list-card-title">{tournament.title}</strong>
+                      <div className="tournament-shared-list-card-metrics">
+                        <Metric label={text.teamsMetric} value={tournament.teams.length} tone="streamer" size="sm" />
+                        <Metric label={text.matchesMetric} value={tournament.matches.length} tone="info" size="sm" />
                       </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card
+              as="section"
+              className="dashboard-tournament-form tournament-shared-editor"
+              id="tournament-editor"
+              padding="lg"
+              variant="glass"
+            >
+              <form className="tournament-shared-editor-form" onSubmit={(event) => void submit(event)}>
+                <CardHeader className="tournament-shared-card-header">
+                  <div>
+                    <CardTitle as="h2">{selected ? text.formTitleEdit : text.formTitleCreate}</CardTitle>
+                    <CardDescription>{text.streamerOnly}</CardDescription>
+                  </div>
+                  <div className="button-row dashboard-tournament-actions tournament-shared-actions">
+                    {selected?.visibility === "public" ? (
+                      <Button
+                        as="a"
+                        href={`/lol/tournaments/${encodeURIComponent(selected.slug)}`}
+                        rel="noreferrer"
+                        target="_blank"
+                        variant="secondary"
+                        size="sm"
+                      >
+                        {text.openPublic}
+                      </Button>
+                    ) : null}
+                    {selected ? (
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setDeleteModalOpen(true)}
+                        disabled={deleting || saving}
+                      >
+                        {deleting ? text.deleting : text.deleteButton}
+                      </Button>
+                    ) : null}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="tournament-shared-editor-content">
+                  <nav className="dashboard-tournament-stepper tournament-shared-stepper" aria-label={text.contentInfoTitle}>
+                    {formSteps.map((item, index) => (
+                      <Button
+                        type="button"
+                        key={item.key}
+                        variant={step === item.key ? "primary" : "ghost"}
+                        size="sm"
+                        onClick={() => goToStep(item.key)}
+                      >
+                        <span>{index + 1}</span>
+                        <strong>{text[item.labelKey]}</strong>
+                      </Button>
                     ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-          ) : null}
+                  </nav>
 
-          {step === "matches" ? (
-          <div className="dashboard-tournament-form-section">
-            <div className="dashboard-tournament-section-header">
-              <div>
-                <h3>{text.matchesTitle}</h3>
-                <p>{text.matchesHelp}</p>
-              </div>
-              <button className="secondary" type="button" onClick={() => addMatch()}>{text.addMatch}</button>
-            </div>
-            <div className="dashboard-tournament-match-tools">
-              <label>
-                <span>{text.matchDate}</span>
-                <input type="datetime-local" value={form.matchDraftDate} onChange={(event) => setForm((current) => ({ ...current, matchDraftDate: event.target.value }))} />
-              </label>
-              <label>
-                <span>{text.matchFormat}</span>
-                <select value={form.matchDraftFormat} onChange={(event) => setForm((current) => ({ ...current, matchDraftFormat: event.target.value === "BO5" ? "BO5" : "BO3" }))}>
-                  <option value="BO3">BO3</option>
-                  <option value="BO5">BO5</option>
-                </select>
-              </label>
-              <button className="secondary" type="button" onClick={() => generateMatches("random")} disabled={savedTeams.length < 2}>{text.randomBracket}</button>
-              <button className="secondary" type="button" onClick={() => generateMatches("ordered")} disabled={savedTeams.length < 2}>{text.orderedBracket}</button>
-            </div>
-            {form.matches.length === 0 ? <p className="dashboard-tournament-empty">{text.noMatches}</p> : null}
-            <div className="dashboard-tournament-match-builder">
-              {form.matches.map((match, matchIndex) => (
-                <article className="dashboard-tournament-match-card" key={match.id}>
-                  <div className="dashboard-tournament-match-head">
-                    <strong>{match.round || `${matchIndex + 1}경기`}</strong>
-                    <button className="secondary danger-button compact-button" type="button" onClick={() => removeMatch(match.id)}>{text.removeMatch}</button>
-                  </div>
-                  <div className="form-grid tournament-match-grid">
-                    <label>
-                      <span>{text.roundLabel}</span>
-                      <input value={match.round} onChange={(event) => updateMatch(match.id, { round: event.target.value })} />
-                    </label>
-                    <label>
-                      <span>{text.teamA}</span>
-                      <select value={match.teamAId ?? ""} onChange={(event) => updateMatch(match.id, { teamAId: event.target.value || undefined })}>
-                        <option value="">{text.selectTeam}</option>
-                        {savedTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
-                      </select>
-                    </label>
-                    <label>
-                      <span>{text.teamB}</span>
-                      <select value={match.teamBId ?? ""} onChange={(event) => updateMatch(match.id, { teamBId: event.target.value || undefined })}>
-                        <option value="">{text.selectTeam}</option>
-                        {savedTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
-                      </select>
-                    </label>
-                    <label>
-                      <span>{text.matchDate}</span>
-                      <input type="datetime-local" value={asLocalDateInput(match.scheduledAt)} onChange={(event) => updateMatch(match.id, { scheduledAt: event.target.value })} />
-                    </label>
-                    <label>
-                      <span>{text.matchFormat}</span>
-                      <select value={match.format ?? "BO3"} onChange={(event) => updateMatch(match.id, { format: event.target.value })}>
-                        <option value="BO3">BO3</option>
-                        <option value="BO5">BO5</option>
-                      </select>
-                    </label>
-                    <label>
-                      <span>{text.statusLabel}</span>
-                      <select value={match.status} onChange={(event) => updateMatch(match.id, { status: event.target.value as TournamentMatchStatus })}>
-                        <option value="scheduled">{text.scheduled}</option>
-                        <option value="live">{text.live}</option>
-                        <option value="completed">{text.completed}</option>
-                      </select>
-                    </label>
-                    <label>
-                      <span>{text.scoreLabel} A</span>
-                      <input type="number" min={0} value={match.scoreA ?? ""} onChange={(event) => updateMatchScore(match.id, "scoreA", event.target.value)} />
-                    </label>
-                    <label>
-                      <span>{text.scoreLabel} B</span>
-                      <input type="number" min={0} value={match.scoreB ?? ""} onChange={(event) => updateMatchScore(match.id, "scoreB", event.target.value)} />
-                    </label>
-                    <label>
-                      <span>{text.winnerLabel}</span>
-                      <select value={match.winnerTeamId ?? ""} onChange={(event) => updateMatch(match.id, { winnerTeamId: event.target.value || undefined })}>
-                        <option value="">{text.noWinner}</option>
-                        {match.teamAId ? <option value={match.teamAId}>{teamLabel(savedTeams, match.teamAId, text.teamA)}</option> : null}
-                        {match.teamBId ? <option value={match.teamBId}>{teamLabel(savedTeams, match.teamBId, text.teamB)}</option> : null}
-                      </select>
-                    </label>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-          ) : null}
+                  {step === "basic" ? (
+                    <Card className="dashboard-tournament-form-section tournament-shared-section" padding="md" variant="elevated">
+                      <CardHeader>
+                        <CardTitle as="h3">{text.basicInfoTitle}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="form-grid two tournament-shared-form-grid">
+                        <FormField required>
+                          <FormLabel>{text.titleLabel}</FormLabel>
+                          <FormControl>
+                            <Input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
+                          </FormControl>
+                        </FormField>
+                        <FormField>
+                          <FormLabel>{text.visibilityLabel}</FormLabel>
+                          <FormControl>
+                            <Select value={form.visibility} onChange={(event) => setForm((current) => ({ ...current, visibility: event.target.value === "public" ? "public" : "draft" }))}>
+                              <option value="draft">{text.draft}</option>
+                              <option value="public">{text.public}</option>
+                            </Select>
+                          </FormControl>
+                        </FormField>
+                        <FormField>
+                          <FormLabel>{text.startsAtLabel}</FormLabel>
+                          <FormControl>
+                            <Input type="datetime-local" value={form.startsAt} onChange={(event) => setForm((current) => ({ ...current, startsAt: event.target.value }))} />
+                          </FormControl>
+                        </FormField>
+                        <FormField>
+                          <FormLabel>{text.endsAtLabel}</FormLabel>
+                          <FormControl>
+                            <Input type="datetime-local" value={form.endsAt} onChange={(event) => setForm((current) => ({ ...current, endsAt: event.target.value }))} />
+                          </FormControl>
+                        </FormField>
+                        <FormField>
+                          <FormLabel>{text.formatLabel}</FormLabel>
+                          <FormControl>
+                            <Input value={form.formatLabel} onChange={(event) => setForm((current) => ({ ...current, formatLabel: event.target.value }))} />
+                          </FormControl>
+                        </FormField>
+                        <FormField>
+                          <FormLabel>{text.prizeLabel}</FormLabel>
+                          <FormControl>
+                            <Input value={form.prizeLabel} onChange={(event) => setForm((current) => ({ ...current, prizeLabel: event.target.value }))} />
+                          </FormControl>
+                        </FormField>
+                        <FormField className="tournament-shared-form-grid-full">
+                          <FormLabel>{text.descriptionLabel}</FormLabel>
+                          <FormControl>
+                            <Textarea rows={3} value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} />
+                          </FormControl>
+                        </FormField>
+                      </CardContent>
+                    </Card>
+                  ) : null}
 
-          {step === "news" ? (
-          <div className="dashboard-tournament-form-section">
-            <label>
-              <span>{text.newsLabel}</span>
-              <small>{text.newsHelp}</small>
-              <textarea rows={5} value={form.newsText} onChange={(event) => setForm((current) => ({ ...current, newsText: event.target.value }))} />
-            </label>
-          </div>
-          ) : null}
+                  {step === "teams" ? (
+                    <Card className="dashboard-tournament-form-section tournament-shared-section" padding="md" variant="elevated">
+                      <CardHeader className="dashboard-tournament-section-header tournament-shared-section-header">
+                        <div>
+                          <CardTitle as="h3">{text.teamsTitle}</CardTitle>
+                          <CardDescription>{text.teamsHelp}</CardDescription>
+                        </div>
+                        <Button type="button" variant="secondary" size="sm" onClick={addTeam}>{text.addTeam}</Button>
+                      </CardHeader>
+                      <CardContent className="dashboard-tournament-team-builder tournament-shared-builder">
+                        {form.teams.length === 0 ? (
+                          <EmptyState variant="tournament" as="div">
+                            <EmptyStateIcon>+</EmptyStateIcon>
+                            <EmptyStateTitle as="h3">{text.noTeams}</EmptyStateTitle>
+                          </EmptyState>
+                        ) : null}
+                        {form.teams.map((team, teamIndex) => (
+                          <Card className="dashboard-tournament-team-card tournament-shared-team-card" key={team.id} padding="md" variant="default">
+                            <CardHeader className="dashboard-tournament-team-head">
+                              <CardTitle as="h4">{team.name || `${text.teamsTitle} ${teamIndex + 1}`}</CardTitle>
+                              <Button type="button" variant="danger" size="sm" onClick={() => removeTeam(team.id)}>{text.removeTeam}</Button>
+                            </CardHeader>
+                            <CardContent className="form-grid tournament-team-grid tournament-shared-form-grid">
+                              <FormField>
+                                <FormLabel>{text.teamName}</FormLabel>
+                                <FormControl>
+                                  <Input value={team.name} onChange={(event) => updateTeam(team.id, { name: event.target.value })} placeholder="SEIGA Team" />
+                                </FormControl>
+                              </FormField>
+                              <FormField>
+                                <FormLabel>{text.teamSeed}</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    min={1}
+                                    value={team.seed ?? teamIndex + 1}
+                                    onChange={(event) => updateTeam(team.id, { seed: Number(event.target.value) || teamIndex + 1 })}
+                                  />
+                                </FormControl>
+                              </FormField>
+                              <FormField>
+                                <FormLabel>{text.teamImage}</FormLabel>
+                                <FormControl>
+                                  <Input value={team.avatarUrl ?? ""} onChange={(event) => updateTeam(team.id, { avatarUrl: event.target.value })} placeholder="https://..." />
+                                </FormControl>
+                              </FormField>
+                            </CardContent>
+                            <CardFooter className="dashboard-tournament-player-heading">
+                              <span>{text.playersTitle}</span>
+                              <Button type="button" variant="secondary" size="sm" onClick={() => addPlayer(team.id)}>{text.addPlayer}</Button>
+                            </CardFooter>
+                            <div className="dashboard-tournament-player-list">
+                              {(team.players ?? []).map((player) => (
+                                <div className="dashboard-tournament-player-row tournament-shared-player-row" key={player.id}>
+                                  <Select value={player.role} onChange={(event) => updatePlayer(team.id, player.id, { role: event.target.value as TournamentPlayerRole })}>
+                                    {roleOptions.map((role) => (
+                                      <option key={role.value} value={role.value}>{text[role.key]}</option>
+                                    ))}
+                                  </Select>
+                                  <Input
+                                    value={player.riotId}
+                                    onChange={(event) => updatePlayer(team.id, player.id, { riotId: event.target.value })}
+                                    placeholder="Hide on bush#KR1"
+                                  />
+                                  <label className="checkbox-label tournament-leader-check tournament-shared-checkbox">
+                                    <input
+                                      type="checkbox"
+                                      checked={Boolean(player.leader)}
+                                      onChange={(event) => updatePlayer(team.id, player.id, { leader: event.target.checked })}
+                                    />
+                                    <span>{text.leaderLabel}</span>
+                                  </label>
+                                  <Button type="button" variant="ghost" size="sm" onClick={() => removePlayer(team.id, player.id)}>{text.removePlayer}</Button>
+                                </div>
+                              ))}
+                            </div>
+                          </Card>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ) : null}
 
-          <div className="form-actions dashboard-tournament-step-actions">
-            <span className="muted">{text.streamerOnly}</span>
-            <div className="button-row">
-              <button className="secondary" type="button" onClick={() => moveStep(-1)} disabled={isFirstStep || saving || deleting}>{text.prevStep}</button>
-              {!isLastStep ? (
-                <button className="primary" type="button" onClick={() => moveStep(1)} disabled={saving || deleting}>{text.nextStep}</button>
-              ) : null}
-              <button className={isLastStep ? "primary" : "secondary"} type="submit" disabled={saving || deleting}>
-                {saving ? text.saving : selected ? text.saveButton : text.createButton}
-              </button>
-            </div>
+                  {step === "matches" ? (
+                    <Card className="dashboard-tournament-form-section tournament-shared-section" padding="md" variant="elevated">
+                      <CardHeader className="dashboard-tournament-section-header tournament-shared-section-header">
+                        <div>
+                          <CardTitle as="h3">{text.matchesTitle}</CardTitle>
+                          <CardDescription>{text.matchesHelp}</CardDescription>
+                        </div>
+                        <Button type="button" variant="secondary" size="sm" onClick={() => addMatch()}>{text.addMatch}</Button>
+                      </CardHeader>
+                      <CardContent className="tournament-shared-builder">
+                        <div className="dashboard-tournament-match-tools tournament-shared-match-tools">
+                          <FormField>
+                            <FormLabel>{text.matchDate}</FormLabel>
+                            <FormControl>
+                              <Input type="datetime-local" value={form.matchDraftDate} onChange={(event) => setForm((current) => ({ ...current, matchDraftDate: event.target.value }))} />
+                            </FormControl>
+                          </FormField>
+                          <FormField>
+                            <FormLabel>{text.matchFormat}</FormLabel>
+                            <FormControl>
+                              <Select value={form.matchDraftFormat} onChange={(event) => setForm((current) => ({ ...current, matchDraftFormat: event.target.value === "BO5" ? "BO5" : "BO3" }))}>
+                                <option value="BO3">BO3</option>
+                                <option value="BO5">BO5</option>
+                              </Select>
+                            </FormControl>
+                          </FormField>
+                          <Button type="button" variant="secondary" size="sm" onClick={() => generateMatches("random")} disabled={savedTeams.length < 2}>{text.randomBracket}</Button>
+                          <Button type="button" variant="secondary" size="sm" onClick={() => generateMatches("ordered")} disabled={savedTeams.length < 2}>{text.orderedBracket}</Button>
+                        </div>
+                        {form.matches.length === 0 ? (
+                          <EmptyState variant="tournament" as="div">
+                            <EmptyStateIcon>+</EmptyStateIcon>
+                            <EmptyStateTitle as="h3">{text.noMatches}</EmptyStateTitle>
+                          </EmptyState>
+                        ) : null}
+                        <div className="dashboard-tournament-match-builder tournament-shared-builder">
+                          {form.matches.map((match, matchIndex) => (
+                            <Card className="dashboard-tournament-match-card tournament-shared-match-card" key={match.id} padding="md" variant="default">
+                              <CardHeader className="dashboard-tournament-match-head">
+                                <div>
+                                  <CardTitle as="h4">{match.round || `${matchIndex + 1}경기`}</CardTitle>
+                                  <StatusPill size="sm" tone={matchStatusTone(match.status)}>
+                                    {match.status === "live" ? text.live : match.status === "completed" ? text.completed : text.scheduled}
+                                  </StatusPill>
+                                </div>
+                                <Button type="button" variant="danger" size="sm" onClick={() => removeMatch(match.id)}>{text.removeMatch}</Button>
+                              </CardHeader>
+                              <CardContent className="form-grid tournament-match-grid tournament-shared-form-grid">
+                                <FormField>
+                                  <FormLabel>{text.roundLabel}</FormLabel>
+                                  <FormControl>
+                                    <Input value={match.round} onChange={(event) => updateMatch(match.id, { round: event.target.value })} />
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.teamA}</FormLabel>
+                                  <FormControl>
+                                    <Select value={match.teamAId ?? ""} onChange={(event) => updateMatch(match.id, { teamAId: event.target.value || undefined })}>
+                                      <option value="">{text.selectTeam}</option>
+                                      {savedTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                                    </Select>
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.teamB}</FormLabel>
+                                  <FormControl>
+                                    <Select value={match.teamBId ?? ""} onChange={(event) => updateMatch(match.id, { teamBId: event.target.value || undefined })}>
+                                      <option value="">{text.selectTeam}</option>
+                                      {savedTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                                    </Select>
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.matchDate}</FormLabel>
+                                  <FormControl>
+                                    <Input type="datetime-local" value={asLocalDateInput(match.scheduledAt)} onChange={(event) => updateMatch(match.id, { scheduledAt: event.target.value })} />
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.matchFormat}</FormLabel>
+                                  <FormControl>
+                                    <Select value={match.format ?? "BO3"} onChange={(event) => updateMatch(match.id, { format: event.target.value })}>
+                                      <option value="BO3">BO3</option>
+                                      <option value="BO5">BO5</option>
+                                    </Select>
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.statusLabel}</FormLabel>
+                                  <FormControl>
+                                    <Select value={match.status} onChange={(event) => updateMatch(match.id, { status: event.target.value as TournamentMatchStatus })}>
+                                      <option value="scheduled">{text.scheduled}</option>
+                                      <option value="live">{text.live}</option>
+                                      <option value="completed">{text.completed}</option>
+                                    </Select>
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.scoreLabel} A</FormLabel>
+                                  <FormControl>
+                                    <Input type="number" min={0} value={match.scoreA ?? ""} onChange={(event) => updateMatchScore(match.id, "scoreA", event.target.value)} />
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.scoreLabel} B</FormLabel>
+                                  <FormControl>
+                                    <Input type="number" min={0} value={match.scoreB ?? ""} onChange={(event) => updateMatchScore(match.id, "scoreB", event.target.value)} />
+                                  </FormControl>
+                                </FormField>
+                                <FormField>
+                                  <FormLabel>{text.winnerLabel}</FormLabel>
+                                  <FormControl>
+                                    <Select value={match.winnerTeamId ?? ""} onChange={(event) => updateMatch(match.id, { winnerTeamId: event.target.value || undefined })}>
+                                      <option value="">{text.noWinner}</option>
+                                      {match.teamAId ? <option value={match.teamAId}>{teamLabel(savedTeams, match.teamAId, text.teamA)}</option> : null}
+                                      {match.teamBId ? <option value={match.teamBId}>{teamLabel(savedTeams, match.teamBId, text.teamB)}</option> : null}
+                                    </Select>
+                                  </FormControl>
+                                </FormField>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : null}
+
+                  {step === "news" ? (
+                    <Card className="dashboard-tournament-form-section tournament-shared-section" padding="md" variant="elevated">
+                      <CardHeader>
+                        <CardTitle as="h3">{text.newsLabel}</CardTitle>
+                        <Badge tone="neutral">{text.contentInfoTitle}</Badge>
+                      </CardHeader>
+                      <CardContent>
+                        <FormField>
+                          <FormLabel>{text.newsLabel}</FormLabel>
+                          <FormHint>{text.newsHelp}</FormHint>
+                          <FormControl>
+                            <Textarea rows={5} value={form.newsText} onChange={(event) => setForm((current) => ({ ...current, newsText: event.target.value }))} />
+                          </FormControl>
+                        </FormField>
+                      </CardContent>
+                    </Card>
+                  ) : null}
+                </CardContent>
+
+                <CardFooter className="form-actions dashboard-tournament-step-actions tournament-shared-footer-actions">
+                  <StatusPill tone={error ? "danger" : "neutral"}>{error || text.streamerOnly}</StatusPill>
+                  <div className="button-row">
+                    <Button type="button" variant="secondary" onClick={() => moveStep(-1)} disabled={isFirstStep || saving || deleting}>
+                      {text.prevStep}
+                    </Button>
+                    {!isLastStep ? (
+                      <Button type="button" variant="primary" onClick={() => moveStep(1)} disabled={saving || deleting}>
+                        {text.nextStep}
+                      </Button>
+                    ) : null}
+                    <Button type="submit" variant={isLastStep ? "primary" : "secondary"} loading={saving} disabled={deleting}>
+                      {saving ? text.saving : selected ? text.saveButton : text.createButton}
+                    </Button>
+                  </div>
+                </CardFooter>
+              </form>
+            </Card>
           </div>
-        </form>
-      </div>
-    </section>
+        </AppShellMain>
+      </AppShell>
+
+      <Modal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        closeDisabled={deleting}
+        loading={deleting}
+        size="sm"
+      >
+        <ModalHeader>
+          <ModalTitle>{text.deleteTitle}</ModalTitle>
+          <ModalCloseButton aria-label={text.cancel} disabled={deleting}>×</ModalCloseButton>
+        </ModalHeader>
+        <ModalContent>
+          <ModalDescription>{text.deleteConfirm}</ModalDescription>
+        </ModalContent>
+        <ModalFooter>
+          <Button type="button" variant="secondary" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+            {text.cancel}
+          </Button>
+          <Button type="button" variant="danger" onClick={() => void removeSelected()} loading={deleting}>
+            {text.confirmDelete}
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      <ToastViewport>
+        {message || error ? (
+          <Toast autoDismiss onDismiss={() => { setMessage(""); setError(""); }} tone={error ? "danger" : "success"}>
+            <ToastTitle>{error ? text.errorTitle : text.successTitle}</ToastTitle>
+            <ToastDescription>{error || message}</ToastDescription>
+            <ToastCloseButton aria-label={text.closeToast}>×</ToastCloseButton>
+          </Toast>
+        ) : null}
+      </ToastViewport>
+    </ToastProvider>
   );
 }

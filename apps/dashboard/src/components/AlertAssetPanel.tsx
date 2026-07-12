@@ -1,6 +1,31 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { apiBase, apiGet, apiPost, apiPostForm } from "../api/client";
 import { createDashboardLocaleProxy } from "../i18n";
+import { Button } from "../shared/ui/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../shared/ui/Card";
+import {
+  EmptyState,
+  EmptyStateDescription,
+  EmptyStateIcon,
+  EmptyStateTitle,
+} from "../shared/ui/EmptyState";
+import { FormControl, FormField, FormHint, FormLabel, Input } from "../shared/ui/Form";
+import { SkeletonCard, SkeletonText } from "../shared/ui/Skeleton";
+import { Badge, StatusPill } from "../shared/ui/Status";
+import {
+  Toast,
+  ToastCloseButton,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from "../shared/ui/Toast";
 
 type AlertOverlayKey = "follow" | "cheer" | "subscription";
 
@@ -42,7 +67,10 @@ const i18n = {
     upload: "등록",
     uploading: "등록 중",
     clear: "해제",
+    close: "닫기",
     current: "현재 GIF",
+    configured: "설정됨",
+    loading: "알림 GIF 설정을 불러오는 중입니다.",
     none: "등록된 GIF 없음",
     noFile: "등록할 GIF 파일을 먼저 선택해주세요.",
     saved: "GIF 설정을 저장했습니다.",
@@ -79,7 +107,10 @@ const i18n = {
     upload: "登録",
     uploading: "登録中",
     clear: "解除",
+    close: "閉じる",
     current: "現在の GIF",
+    configured: "設定済み",
+    loading: "通知 GIF 設定を読み込んでいます。",
     none: "登録された GIF はありません",
     noFile: "登録する GIF ファイルを先に選択してください。",
     saved: "GIF 設定を保存しました。",
@@ -136,6 +167,7 @@ export function AlertAssetPanel() {
   const [busyKey, setBusyKey] = useState<AlertOverlayKey | "reload" | undefined>();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   function applyResponse(response: AlertConfigResponse): void {
     setConfig(response.config);
@@ -144,12 +176,14 @@ export function AlertAssetPanel() {
 
   async function refresh(): Promise<void> {
     setBusyKey("reload");
+    setLoading(true);
     setError("");
     try {
       applyResponse(await apiGet<AlertConfigResponse>("/api/alerts/config"));
     } catch {
       setError(t.loadFailed);
     } finally {
+      setLoading(false);
       setBusyKey(undefined);
     }
   }
@@ -218,71 +252,122 @@ export function AlertAssetPanel() {
   }
 
   return (
-    <div className="card alert-asset-panel">
-      <div className="card-title-row">
-        <div>
-          <h2>{t.title}</h2>
-          <p className="muted">{t.description}</p>
-        </div>
-        <button className="secondary compact-button" type="button" onClick={() => void refresh()} disabled={busyKey === "reload"}>{t.reload}</button>
-      </div>
-      <p className="scope-warning compact-warning">{t.fileHint}</p>
-      {message ? <p className="success-text">{message}</p> : null}
-      {error ? <p className="error-text">{error}</p> : null}
-
-      <div className="alert-asset-list">
-        {alertEvents().map((item) => {
-          const preset = config[item.key];
-          const mediaUrl = preset?.mediaUrl ?? "";
-          const selectedFile = selectedFiles[item.key];
-          const busy = busyKey === item.key;
-          return (
-            <div className="alert-asset-row" key={item.key}>
-              <div className="alert-asset-info">
-                <strong>{item.label}</strong>
-                <p className="muted">{item.description}</p>
-              </div>
-              <div className="alert-preview">
-                {mediaUrl ? <img src={absoluteAssetUrl(mediaUrl)} alt={preset?.mediaAlt ?? item.mediaAlt} /> : <span>{t.none}</span>}
-                <small className="muted">{t.current}</small>
-              </div>
-              <div className="alert-upload-controls">
-                <label className="field">
-                  {t.chooseFile}
-                  <input type="file" accept="image/gif,.gif" onChange={(event) => selectFile(item.key, event)} />
-                </label>
-                {selectedFile ? <span className="selected-file-name">{selectedFile.name}</span> : null}
-                <div className="button-row inline-buttons">
-                  <button type="button" onClick={() => void uploadGif(item.key, item.mediaAlt)} disabled={busy}>
-                    {busy ? t.uploading : t.upload}
-                  </button>
-                  <button className="secondary" type="button" onClick={() => void clearGif(item.key)} disabled={busy || !mediaUrl}>
-                    {t.clear}
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="asset-library">
-        <div className="card-title-row">
-          <h3>{t.availableAssets}</h3>
-          <span className="count-badge">{assets.length}</span>
-        </div>
-        {assets.length === 0 ? <p className="muted empty-state">{t.noAssets}</p> : null}
-        {assets.map((asset) => (
-          <div className="asset-library-row" key={asset.fileName}>
-            <img src={absoluteAssetUrl(asset.url)} alt={asset.fileName} />
-            <div>
-              <strong>{asset.fileName}</strong>
-              <p className="muted">{asset.size} {t.bytes} · {formatDate(asset.updatedAt)}</p>
-            </div>
-            <code>{asset.url}</code>
+    <>
+      <Card as="section" className="overlay-studio-card overlay-studio-alert-panel" padding="lg" variant="glass">
+        <CardHeader className="overlay-studio-card-header">
+          <div>
+            <CardTitle as="h2">{t.title}</CardTitle>
+            <CardDescription>{t.description}</CardDescription>
           </div>
-        ))}
-      </div>
-    </div>
+          <Button loading={busyKey === "reload"} onClick={() => void refresh()} size="sm" variant="secondary">
+            {t.reload}
+          </Button>
+        </CardHeader>
+        <CardContent className="overlay-studio-alert-content">
+          <StatusPill tone="warning">{t.fileHint}</StatusPill>
+
+          {loading ? (
+            <SkeletonCard loadingLabel={t.loading} size="md">
+              <SkeletonText lines={4} size="md" />
+            </SkeletonCard>
+          ) : null}
+
+          <div className="overlay-studio-alert-list">
+            {alertEvents().map((item) => {
+              const preset = config[item.key];
+              const mediaUrl = preset?.mediaUrl ?? "";
+              const selectedFile = selectedFiles[item.key];
+              const busy = busyKey === item.key;
+              return (
+                <Card as="article" className="overlay-studio-alert-row" key={item.key} padding="md" variant="elevated">
+                  <div className="overlay-studio-alert-info">
+                    <strong>{item.label}</strong>
+                    <p>{item.description}</p>
+                    <Badge tone={mediaUrl ? "success" : "neutral"}>{mediaUrl ? t.configured : t.none}</Badge>
+                  </div>
+                  <div className="alert-preview overlay-studio-alert-preview">
+                    {mediaUrl ? <img src={absoluteAssetUrl(mediaUrl)} alt={preset?.mediaAlt ?? item.mediaAlt} /> : <span>{t.none}</span>}
+                    <small>{t.current}</small>
+                  </div>
+                  <FormField
+                    className="overlay-studio-alert-form"
+                    controlId={`overlay-alert-${item.key}-file`}
+                    loading={busy}
+                  >
+                    <FormLabel>{t.chooseFile}</FormLabel>
+                    <FormControl>
+                      <Input
+                        accept="image/gif,.gif"
+                        id={`overlay-alert-${item.key}-file`}
+                        onChange={(event) => selectFile(item.key, event as ChangeEvent<HTMLInputElement>)}
+                        type="file"
+                      />
+                    </FormControl>
+                    <FormHint>{selectedFile ? selectedFile.name : t.fileHint}</FormHint>
+                    <div className="overlay-studio-action-row">
+                      <Button loading={busy} onClick={() => void uploadGif(item.key, item.mediaAlt)} variant="primary">
+                        {busy ? t.uploading : t.upload}
+                      </Button>
+                      <Button disabled={busy || !mediaUrl} onClick={() => void clearGif(item.key)} variant="danger">
+                        {t.clear}
+                      </Button>
+                    </div>
+                  </FormField>
+                </Card>
+              );
+            })}
+          </div>
+
+          <Card as="section" className="overlay-studio-asset-library" padding="md" variant="default">
+            <CardHeader className="overlay-studio-card-header">
+              <CardTitle as="h3">{t.availableAssets}</CardTitle>
+              <Badge tone={assets.length > 0 ? "success" : "neutral"}>{assets.length}</Badge>
+            </CardHeader>
+            <CardContent>
+              {assets.length === 0 ? (
+                <EmptyState className="overlay-studio-empty" variant="streamer">
+                  <EmptyStateIcon>GIF</EmptyStateIcon>
+                  <EmptyStateTitle as="h3">{t.noAssets}</EmptyStateTitle>
+                  <EmptyStateDescription>{t.description}</EmptyStateDescription>
+                </EmptyState>
+              ) : null}
+              <div className="overlay-studio-asset-list">
+                {assets.map((asset) => (
+                  <Card as="article" className="overlay-studio-asset-row" key={asset.fileName} padding="sm" variant="elevated">
+                    <img src={absoluteAssetUrl(asset.url)} alt={asset.fileName} />
+                    <div>
+                      <strong>{asset.fileName}</strong>
+                      <p>{asset.size} {t.bytes} · {formatDate(asset.updatedAt)}</p>
+                    </div>
+                    <code>{asset.url}</code>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+
+      <ToastProvider position="bottom-right">
+        <ToastViewport className="overlay-studio-toast-viewport">
+          {message || error ? (
+            <Toast
+              autoDismiss
+              onOpenChange={(open) => {
+                if (!open) {
+                  setMessage("");
+                  setError("");
+                }
+              }}
+              tone={error ? "danger" : "success"}
+            >
+              <ToastTitle>{error ? t.saveFailed : t.saved}</ToastTitle>
+              <ToastDescription>{error || message}</ToastDescription>
+              <ToastCloseButton aria-label={t.close}>×</ToastCloseButton>
+            </Toast>
+          ) : null}
+        </ToastViewport>
+      </ToastProvider>
+    </>
   );
 }

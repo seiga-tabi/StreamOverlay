@@ -1,0 +1,114 @@
+name: Production Readiness
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20.20.1
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Check bundle budgets
+        run: npm run check:budgets
+
+      - name: Validate JSON config
+        run: npm run validate:config
+
+      - name: Validate production runtime config
+        run: |
+          install -m 600 /dev/null /tmp/streamops-ci.env
+          npm run validate:runtime
+        env:
+          DOTENV_CONFIG_PATH: /tmp/streamops-ci.env
+          NODE_ENV: production
+          STREAMOPS_LOCAL_NO_AUTH: "false"
+          PUBLIC_BASE_URL: https://ci.yoro.invalid
+          DASHBOARD_BASE_URL: https://ci.yoro.invalid/dashboard
+          OVERLAY_BASE_URL: https://ci.yoro.invalid/overlay
+          TWITCH_REDIRECT_URI: https://ci.yoro.invalid/api/twitch/auth/callback
+          TWITCH_PUBLIC_REDIRECT_URI: https://ci.yoro.invalid/api/public/twitch/auth/callback
+          CORS_ORIGINS: https://ci.yoro.invalid
+          DASHBOARD_AUTH_TOKEN: A7c4N9p2Q6v8M3x5R1k7T4w9Y2d6F8h3
+          OVERLAY_ACCESS_TOKEN: B9f2L6r4U8z1C7n5P3m9V6x2K4q8D1s7
+          BRIDGE_SHARED_SECRET: C5h8W2j7E4p9R1y6N3t8G5k2M7v4Q9d1
+          LEGAL_OPERATOR_NAME: YORO CI Operations
+          LEGAL_CONTACT_ADDRESS: 1 Continuous Integration Avenue, Tokyo
+          LEGAL_PRIVACY_OFFICER_NAME: YORO CI Privacy Officer
+          LEGAL_CONTACT_EMAIL: legal@ci.yoro.invalid
+          LEGAL_EFFECTIVE_DATE: 2026-01-01
+          LEGAL_MINIMUM_AGE: "14"
+          LEGAL_GOVERNING_LAW_KO: 대한민국 법률
+          LEGAL_GOVERNING_LAW_JA: 日本国法令
+          LEGAL_DISPUTE_VENUE_KO: 대한민국 관할 법원
+          LEGAL_DISPUTE_VENUE_JA: 日本国内の管轄裁判所
+          LEGAL_PROCESSORS_KO: Cloudflare 기반 콘텐츠 전달 및 보안 처리
+          LEGAL_PROCESSORS_JA: Cloudflareによるコンテンツ配信およびセキュリティ処理
+          LEGAL_CROSS_BORDER_TRANSFER_KO: 암호화된 네트워크를 통한 미국 소재 시스템 처리
+          LEGAL_CROSS_BORDER_TRANSFER_JA: 暗号化通信による米国所在システムでの処理
+
+      - name: Rehearse backup and restore
+        run: node scripts/rehearse-backup-restore.mjs
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: quality
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build production image
+        run: |
+          docker build \
+            --build-arg APP_VERSION=ci-${GITHUB_RUN_NUMBER} \
+            --build-arg GIT_SHA=${GITHUB_SHA} \
+            --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+            --tag yoro-server:ci \
+            --file apps/server/Dockerfile .
+
+      - name: Reject React development artifact
+        run: |
+          if docker run --rm --entrypoint sh yoro-server:ci -c \
+            "grep -R -F 'Download the React DevTools' /app/apps/dashboard/dist/assets"; then
+            echo "React development artifact detected"
+            exit 1
+          fi
+
+      - name: Record image metadata
+        run: docker image inspect yoro-server:ci --format '{{json .Config.Labels}}'

@@ -64,6 +64,7 @@ export const PUBLIC_TWITCH_VIEWER_SESSION_COOKIE = "loltrace_twitch_viewer_sessi
 const TOKEN_REFRESH_SKEW_MS = 60 * 1000;
 const DEFAULT_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const PUBLIC_TWITCH_OAUTH_STATE_PREFIX = "public:";
+const MAX_PUBLIC_TWITCH_SESSIONS = 10_000;
 
 function parseCookies(req: IncomingMessage): Record<string, string> {
   const header = req.headers.cookie;
@@ -131,6 +132,11 @@ export class PublicTwitchViewerSessionStore {
       updatedAt: now
     };
     this.sessions.set(session.id, session);
+    while (this.sessions.size > MAX_PUBLIC_TWITCH_SESSIONS) {
+      const oldestId = this.sessions.keys().next().value as string | undefined;
+      if (!oldestId) break;
+      this.sessions.delete(oldestId);
+    }
     return { ...session };
   }
 
@@ -288,6 +294,7 @@ export class PublicTwitchAuthService {
     });
     const response = await this.fetchImpl("https://id.twitch.tv/oauth2/token", {
       method: "POST",
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });
@@ -305,6 +312,7 @@ export class PublicTwitchAuthService {
     });
     const response = await this.fetchImpl("https://id.twitch.tv/oauth2/token", {
       method: "POST",
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });
@@ -321,6 +329,7 @@ export class PublicTwitchAuthService {
 
   private async fetchViewerInfo(accessToken: string): Promise<TwitchBroadcasterInfo> {
     const response = await this.fetchImpl("https://api.twitch.tv/helix/users", {
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: {
         "Client-Id": this.config.clientId,
         Authorization: `Bearer ${accessToken}`

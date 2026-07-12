@@ -1,6 +1,11 @@
 .git
 .gitignore
 .DS_Store
+.github
+.ai
+docs
+scripts
+*.md
 
 node_modules
 **/node_modules
@@ -8,8 +13,13 @@ dist
 **/dist
 coverage
 reports
+qa
 **/coverage
 **/reports
+.wrangler
+**/.wrangler
+.vite
+**/.vite
 
 .env
 **/.env

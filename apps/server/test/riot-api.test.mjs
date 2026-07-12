@@ -418,3 +418,22 @@ test("RiotApiClient는 network 실패에 원인 code와 host를 포함한다", a
     }
   );
 });
+
+test("RiotApiClient는 응답이 없는 외부 요청을 timeout으로 중단한다", async () => {
+  const previousTimeout = appConfig.riot.apiTimeoutMs;
+  const keepAlive = setTimeout(() => undefined, 1_000);
+  appConfig.riot.apiTimeoutMs = 10;
+  globalThis.fetch = async (_url, init) => new Promise((_resolve, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(init.signal.reason), { once: true });
+  });
+  try {
+    const client = new RiotApiClient();
+    await assert.rejects(
+      () => client.getAccountByRiotId("Timeout", "JP1"),
+      (error) => error instanceof RiotApiNetworkError && /timed out|timeout/i.test(error.message)
+    );
+  } finally {
+    clearTimeout(keepAlive);
+    appConfig.riot.apiTimeoutMs = previousTimeout;
+  }
+});

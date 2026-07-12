@@ -1,5 +1,52 @@
+import { useState } from "react";
 import { apiPost } from "../api/client";
-import { uiText } from "../i18n";
+import { createDashboardLocaleProxy, uiText } from "../i18n";
+import { Button } from "../shared/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../shared/ui/Card";
+import { FormControl, FormField, FormLabel } from "../shared/ui/Form";
+import {
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../shared/ui/Modal";
+import { StatusPill } from "../shared/ui/Status";
+import {
+  Toast,
+  ToastCloseButton,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  type ToastTone,
+} from "../shared/ui/Toast";
+
+const actionTesterUi = createDashboardLocaleProxy({
+  ko: {
+    actionGroup: "안전한 테스트 액션",
+    close: "닫기",
+    failureTitle: "전송 실패",
+    resultTitle: "테스트 결과",
+    successTitle: "전송 완료"
+  },
+  ja: {
+    actionGroup: "安全なテストアクション",
+    close: "閉じる",
+    failureTitle: "送信失敗",
+    resultTitle: "テスト結果",
+    successTitle: "送信完了"
+  }
+});
+
+type ActionFeedback = {
+  id: number;
+  description: string;
+  title: string;
+  tone: ToastTone;
+};
 
 function championArt(championKey: string) {
   return {
@@ -52,28 +99,123 @@ function safeActions() {
   ];
 }
 
-export function ActionTester() {
+export function ActionTester({ id }: { id?: string }) {
   const t = uiText.actionTester;
+  const ui = actionTesterUi;
   const actions = safeActions();
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<ActionFeedback | null>(null);
+  const [result, setResult] = useState<ActionFeedback | null>(null);
 
-  async function run(action: unknown) {
+  async function run(label: string, action: unknown) {
+    setBusyAction(label);
     try {
       await apiPost("/api/actions/test", { action });
-      alert(t.sent);
+      const nextFeedback = {
+        description: `${label} · ${t.sent}`,
+        id: Date.now(),
+        title: ui.successTitle,
+        tone: "success" as const
+      };
+      setFeedback(nextFeedback);
+      setResult(nextFeedback);
     } catch (error) {
-      alert(`${t.failPrefix}: ${String(error)}`);
+      const nextFeedback = {
+        description: `${label} · ${t.failPrefix}: ${String(error)}`,
+        id: Date.now(),
+        title: ui.failureTitle,
+        tone: "danger" as const
+      };
+      setFeedback(nextFeedback);
+      setResult(nextFeedback);
+    } finally {
+      setBusyAction(null);
     }
   }
 
   return (
-    <div className="card">
-      <h2>{t.title}</h2>
-      <p className="muted">{t.description}</p>
-      <div className="button-row">
-        {actions.map((item) => (
-          <button key={item.label} onClick={() => void run(item.action)}>{item.label}</button>
-        ))}
-      </div>
-    </div>
+    <>
+      <Card as="section" className="dashboard-shared-action-tester" id={id} padding="lg" variant="glass">
+        <CardHeader>
+          <CardTitle as="h2">{t.title}</CardTitle>
+          <CardDescription>{t.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={(event) => event.preventDefault()}>
+            <FormField controlId="dashboard-action-buttons">
+              <FormLabel className="dashboard-shared-visually-hidden">{ui.actionGroup}</FormLabel>
+              <FormControl>
+                <div
+                  className="button-row dashboard-shared-action-buttons"
+                  id="dashboard-action-buttons"
+                  role="group"
+                  aria-label={ui.actionGroup}
+                >
+                  {actions.map((item) => (
+                    <Button
+                      disabled={busyAction === item.label}
+                      key={item.label}
+                      loading={busyAction === item.label}
+                      onClick={() => void run(item.label, item.action)}
+                      variant="primary"
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </FormControl>
+            </FormField>
+          </form>
+        </CardContent>
+      </Card>
+
+      <ToastProvider position="bottom-right">
+        <ToastViewport className="dashboard-shared-toast-viewport">
+          {feedback ? (
+            <Toast
+              autoDismiss
+              key={feedback.id}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setFeedback(null);
+                }
+              }}
+              tone={feedback.tone}
+            >
+              <ToastTitle>{feedback.title}</ToastTitle>
+              <ToastDescription>{feedback.description}</ToastDescription>
+              <ToastCloseButton aria-label={ui.close}>×</ToastCloseButton>
+            </Toast>
+          ) : null}
+        </ToastViewport>
+      </ToastProvider>
+
+      <Modal
+        closeOnBackdrop
+        onOpenChange={(open) => {
+          if (!open) {
+            setResult(null);
+          }
+        }}
+        open={Boolean(result)}
+        size="md"
+      >
+        <ModalHeader>
+          <ModalTitle>{ui.resultTitle}</ModalTitle>
+          <ModalDescription>{t.description}</ModalDescription>
+        </ModalHeader>
+        {result ? (
+          <ModalContent>
+            <div className="dashboard-shared-result-status">
+              <StatusPill tone={result.tone}>{result.title}</StatusPill>
+              <p>{result.description}</p>
+            </div>
+          </ModalContent>
+        ) : null}
+        <ModalFooter>
+          <ModalCloseButton aria-label={ui.close}>{ui.close}</ModalCloseButton>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 }

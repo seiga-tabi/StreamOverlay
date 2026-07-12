@@ -1,10 +1,19 @@
 import { useState, type ReactNode } from "react";
 import { dashboardI18n, type DashboardLocale } from "../i18n";
 
-const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests", "followers", "events", "settings"] as const;
+const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "serverStatus", "tournaments", "streamerRiotRequests", "followers", "events", "supportInbox", "settings"] as const;
 
 export type Page = (typeof pages)[number];
 export type DashboardRole = "admin" | "streamer";
+
+export const ADMIN_ALLOWED_PAGES: Page[] = [
+  "serverStatus",
+  "tournaments",
+  "streamerRiotRequests",
+  "events",
+  "supportInbox",
+  "settings"
+];
 
 export const STREAMER_ALLOWED_PAGES: Page[] = [
   "dashboard",
@@ -17,15 +26,20 @@ export const STREAMER_ALLOWED_PAGES: Page[] = [
 ];
 
 export function pageAllowedForRole(page: Page, role: DashboardRole): boolean {
-  return role === "admin" || STREAMER_ALLOWED_PAGES.includes(page);
+  const allowedPages = role === "admin" ? ADMIN_ALLOWED_PAGES : STREAMER_ALLOWED_PAGES;
+  return allowedPages.includes(page);
+}
+
+export function defaultPageForRole(role: DashboardRole): Page {
+  return role === "admin" ? "serverStatus" : "dashboard";
 }
 
 const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
-  { key: "operations", items: ["dashboard", "twitch"] },
+  { key: "operations", items: ["serverStatus", "dashboard", "twitch"] },
   { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
   { key: "lol", items: ["myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests"] },
   { key: "community", items: ["followers", "events"] },
-  { key: "system", items: ["settings"] }
+  { key: "system", items: ["supportInbox", "settings"] }
 ];
 
 function DashboardLocaleSelector({
@@ -104,19 +118,26 @@ export function Layout({
   children: ReactNode;
 }) {
   const uiText = dashboardI18n[locale];
-  const currentPage = uiText.pages[page];
   const visibleNavSections = navSections
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => pageAllowedForRole(item, role))
     }))
     .filter((section) => section.items.length > 0);
+  const topActions = (
+    <div className="top-actions dashboard-menu-actions">
+      <DashboardLocaleSelector locale={locale} onLocaleChange={onLocaleChange} />
+      {onPublicHome ? <button className="secondary top-action" onClick={onPublicHome} data-ko={dashboardI18n.ko.app.publicHome} data-ja={dashboardI18n.ja.app.publicHome}>{uiText.app.publicHome}</button> : null}
+      {onLogout ? <button className="secondary top-action" onClick={onLogout} data-ko={dashboardI18n.ko.app.logout} data-ja={dashboardI18n.ja.app.logout}>{uiText.app.logout}</button> : null}
+      <span className="top-chip" data-ko={dashboardI18n.ko.app.liveSafety} data-ja={dashboardI18n.ja.app.liveSafety}>{uiText.app.liveSafety}</span>
+    </div>
+  );
 
   return (
-    <div className="app-shell" data-locale={locale} lang={locale === "ja" ? "ja" : "ko"}>
+    <div className={`app-shell app-shell-${page}`} data-locale={locale} data-page={page} lang={locale === "ja" ? "ja" : "ko"}>
       <aside className="app-sidebar">
         <div className="brand-block">
-          <img className="brand-logo" src="/images/yorogg-logo.png" alt="YORO.gg" />
+          <img className="brand-logo" src="/images/yorogg-topbar-logo.png" alt="YORO.gg" />
         </div>
         <div className="sidebar-profile">
           <span data-ko={dashboardI18n.ko.app.workspaceKicker} data-ja={dashboardI18n.ja.app.workspaceKicker}>{uiText.app.workspaceKicker}</span>
@@ -150,21 +171,9 @@ export function Layout({
             </div>
           ))}
         </nav>
+        {topActions}
       </aside>
       <main className="app-main">
-        <div className="top-bar">
-          <div>
-            <span className="eyebrow" data-ko={dashboardI18n.ko.app.currentView} data-ja={dashboardI18n.ja.app.currentView}>{uiText.app.currentView}</span>
-            <strong data-ko={dashboardI18n.ko.pages[page].short} data-ja={dashboardI18n.ja.pages[page].short}>{currentPage.short}</strong>
-          </div>
-          <div className="top-actions">
-            <DashboardLocaleSelector locale={locale} onLocaleChange={onLocaleChange} />
-            {onPublicHome ? <button className="secondary top-action" onClick={onPublicHome} data-ko={dashboardI18n.ko.app.publicHome} data-ja={dashboardI18n.ja.app.publicHome}>{uiText.app.publicHome}</button> : null}
-            {role === "admin" ? <button className="secondary top-action" onClick={() => setPage("settings")} data-ko={dashboardI18n.ko.app.quickSettings} data-ja={dashboardI18n.ja.app.quickSettings}>{uiText.app.quickSettings}</button> : null}
-            {onLogout ? <button className="secondary top-action" onClick={onLogout} data-ko={dashboardI18n.ko.app.logout} data-ja={dashboardI18n.ja.app.logout}>{uiText.app.logout}</button> : null}
-            <span className="top-chip" data-ko={dashboardI18n.ko.app.liveSafety} data-ja={dashboardI18n.ja.app.liveSafety}>{uiText.app.liveSafety}</span>
-          </div>
-        </div>
         <section className="content-shell">{children}</section>
       </main>
     </div>

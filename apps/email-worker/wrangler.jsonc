@@ -1,0 +1,8 @@
+{
+  "name": "yoro-support-mail-inbound",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-10",
+  "vars": {
+    "SUPPORT_MAILBOX_ADDRESS": "support@yoro.gg"
+  }
+}

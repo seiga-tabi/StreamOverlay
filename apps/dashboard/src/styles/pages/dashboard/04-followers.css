@@ -1,0 +1,517 @@
+/* 팔로워 관리: 대시보드 회색 톤과 텍스트 대비 통일 */
+.app-shell[data-page="followers"] {
+  --surface: var(--public-gray-surface);
+  --surface-muted: var(--public-gray-surface-strong);
+  --surface-strong: var(--public-gray-surface-strong);
+  --text: var(--public-gray-text);
+  --text-strong: var(--public-gray-text);
+  --muted: var(--public-gray-muted);
+  --line: var(--public-gray-border);
+  --line-strong: var(--public-gray-border-strong);
+  color-scheme: dark;
+}
+
+.app-shell[data-page="followers"] .app-main {
+  background: transparent;
+}
+
+.app-shell[data-page="followers"] .content-shell {
+  gap: var(--yoro-space-6);
+  width: min(100%, calc(var(--yoro-space-12) * 30));
+}
+
+.app-shell[data-page="followers"] .page-header {
+  align-items: center;
+  padding-bottom: var(--yoro-space-5);
+  border-bottom: 1px solid var(--public-gray-border);
+}
+
+.app-shell[data-page="followers"] .page-header h1,
+.app-shell[data-page="followers"] .card h2,
+.app-shell[data-page="followers"] .follower-identity .queue-user strong {
+  color: var(--public-gray-text);
+}
+
+.app-shell[data-page="followers"] .page-header .muted,
+.app-shell[data-page="followers"] .follower-identity .queue-user span,
+.app-shell[data-page="followers"] .follower-row > span,
+.app-shell[data-page="followers"] .ops-note,
+.app-shell[data-page="followers"] .ops-note ul {
+  color: var(--public-gray-muted);
+}
+
+.app-shell[data-page="followers"] .page-header .button-row {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+.app-shell[data-page="followers"] .page-header .button-row button {
+  min-height: var(--yoro-size-touch-target);
+  border-color: var(--yoro-color-secondary);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-secondary-strong);
+  color: var(--public-gray-text);
+  box-shadow: var(--yoro-shadow-none);
+}
+
+.app-shell[data-page="followers"] .page-header .button-row button:hover:not(:disabled) {
+  border-color: var(--yoro-color-primary);
+  background: var(--yoro-color-primary-strong);
+}
+
+.app-shell[data-page="followers"] .scope-warning {
+  display: grid;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  border-color: var(--yoro-color-warning);
+  background: var(--public-gray-surface-strong);
+  color: var(--public-gray-text);
+  box-shadow: var(--yoro-shadow-none);
+}
+
+.app-shell[data-page="followers"] .scope-warning > div:first-child {
+  color: var(--yoro-color-bg-soft);
+}
+
+.app-shell[data-page="followers"] .scope-warning .hint {
+  color: var(--public-gray-muted);
+}
+
+.app-shell[data-page="followers"] .form-message {
+  color: var(--yoro-color-primary);
+}
+
+.app-shell[data-page="followers"] .participation-summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--yoro-space-4);
+}
+
+.app-shell[data-page="followers"] .participation-summary > div {
+  display: grid;
+  align-content: center;
+  min-height: calc(var(--yoro-size-touch-target) * 2);
+  padding: var(--yoro-space-4);
+  border-color: var(--public-gray-border);
+  background: var(--public-gray-surface-strong);
+  box-shadow: var(--yoro-shadow-none);
+  backdrop-filter: none;
+}
+
+.app-shell[data-page="followers"] .participation-summary span {
+  color: var(--public-gray-muted);
+}
+
+.app-shell[data-page="followers"] .participation-summary strong {
+  color: var(--public-gray-text);
+}
+
+.app-shell[data-page="followers"] .grid.two {
+  align-items: start;
+  gap: var(--yoro-space-4);
+}
+
+.app-shell[data-page="followers"] .card {
+  padding: var(--yoro-space-6);
+  border-color: var(--public-gray-border);
+  background: var(--public-gray-surface);
+  color: var(--public-gray-text);
+  box-shadow: var(--yoro-shadow-none);
+  backdrop-filter: none;
+}
+
+.app-shell[data-page="followers"] .card-title-row {
+  padding-bottom: var(--yoro-space-3);
+  border-bottom: 1px solid var(--public-gray-border);
+}
+
+.app-shell[data-page="followers"] .count-badge {
+  border: 1px solid var(--public-gray-border);
+  background: var(--public-gray-surface-strong);
+  color: var(--yoro-color-primary);
+  box-shadow: var(--yoro-shadow-none);
+}
+
+.app-shell[data-page="followers"] .follower-mini-row,
+.app-shell[data-page="followers"] .follower-row,
+.app-shell[data-page="followers"] .genre-bar-row,
+.app-shell[data-page="followers"] .ops-note,
+.app-shell[data-page="followers"] .empty-state {
+  border-color: var(--public-gray-border);
+  background: var(--public-gray-surface-strong);
+  color: var(--public-gray-text);
+  box-shadow: var(--yoro-shadow-none);
+}
+
+.app-shell[data-page="followers"] .follower-mini-row {
+  min-height: var(--yoro-size-touch-target);
+}
+
+.app-shell[data-page="followers"] .follower-mini-row:hover,
+.app-shell[data-page="followers"] .follower-row:not(.follower-head):hover {
+  border-color: var(--public-gray-border-strong);
+  background: var(--public-gray-surface);
+}
+
+.app-shell[data-page="followers"] .follower-riot-id,
+.app-shell[data-page="followers"] .genre-bar-row span,
+.app-shell[data-page="followers"] .genre-bar-row strong {
+  color: var(--public-gray-text);
+}
+
+.app-shell[data-page="followers"] .follower-head {
+  border-color: var(--public-gray-border-strong);
+  background: var(--public-gray-surface);
+  color: var(--yoro-color-primary);
+}
+
+.app-shell[data-page="followers"] .follower-mini-row .queue-status,
+.app-shell[data-page="followers"] .follower-row .queue-status {
+  min-height: var(--yoro-space-8);
+  border: 1px solid currentColor;
+}
+
+.app-shell[data-page="followers"] .follower-table {
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 1023px) {
+  .app-shell[data-page="followers"] .participation-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .app-shell[data-page="followers"] .content-shell,
+  .app-shell[data-page="followers"] .card {
+    padding: var(--yoro-space-4);
+  }
+
+  .app-shell[data-page="followers"] .page-header {
+    align-items: stretch;
+  }
+
+  .app-shell[data-page="followers"] .page-header .button-row,
+  .app-shell[data-page="followers"] .page-header .button-row button {
+    width: 100%;
+  }
+
+  .app-shell[data-page="followers"] .participation-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.public-dashboard-shell.public-home-shell,
+.public-dashboard-shell.public-home-shell.theme-dark,
+.public-dashboard-shell.public-home-shell.public-home-shared-shell {
+  background:
+    radial-gradient(circle at 50% 8%, rgba(248, 249, 250, .22), transparent 30%),
+    linear-gradient(180deg, #868e96 0%, #7b838b 44%, #6c757d 100%) !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell.public-home-shell::before,
+.public-dashboard-shell.public-home-shell::after,
+.public-home-shared-shell.public-dashboard-shell.public-home-shell::before,
+.public-home-shared-shell.public-dashboard-shell.public-home-shell::after {
+  background:
+    radial-gradient(circle at 50% 26%, rgba(248, 249, 250, .18), transparent 34%),
+    linear-gradient(180deg, transparent 44%, rgba(73, 80, 87, .28) 100%) !important;
+}
+
+.public-lol-shell .public-topbar,
+.public-dashboard-shell .public-app-header,
+.public-dashboard-shell .public-app-header.home,
+.public-home-shared-shell .public-home-shared-header.yoro-app-shell__header,
+.public-profile-shared-shell .public-profile-shared-header.yoro-app-shell__header {
+  border-color: var(--public-gray-border) !important;
+  background: rgba(73, 80, 87, .72) !important;
+  color: var(--public-gray-text) !important;
+  box-shadow: 0 14px 34px rgba(33, 37, 41, .16) !important;
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+.public-dashboard-shell .public-header-nav button,
+.public-dashboard-shell .public-header-menu-item > button,
+.public-dashboard-shell .public-locale-button,
+.public-dashboard-shell .public-twitch-login-chip {
+  border-color: var(--public-gray-border) !important;
+  background: rgba(52, 58, 64, .46) !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-header-nav button:hover,
+.public-dashboard-shell .public-header-nav button.active,
+.public-dashboard-shell .public-header-menu-item > button:hover,
+.public-dashboard-shell .public-header-menu-item > button.active {
+  background: rgba(248, 249, 250, .14) !important;
+  color: #ffffff !important;
+}
+
+.public-dashboard-shell .public-header-submenu,
+.public-dashboard-shell .public-twitch-profile-menu,
+.public-dashboard-shell .public-locale-popover,
+.public-dashboard-shell .public-popover,
+.public-dashboard-shell .public-dialog {
+  border-color: var(--public-gray-border) !important;
+  background: rgba(73, 80, 87, .96) !important;
+  color: var(--public-gray-text) !important;
+  box-shadow: 0 20px 48px rgba(33, 37, 41, .18) !important;
+}
+
+.public-dashboard-shell .public-header-submenu button,
+.public-dashboard-shell .public-twitch-profile-menu button,
+.public-dashboard-shell .public-locale-popover button {
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-header-submenu button:hover,
+.public-dashboard-shell .public-header-submenu button.active,
+.public-dashboard-shell .public-twitch-profile-menu button:hover,
+.public-dashboard-shell .public-locale-popover button:hover,
+.public-dashboard-shell .public-locale-popover button.active {
+  background: rgba(248, 249, 250, .14) !important;
+}
+
+.public-dashboard-shell .public-search-form,
+.public-home-shared-shell .public-home-shared-search-form.public-search-form,
+.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-form,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form {
+  border-color: var(--public-gray-border-strong) !important;
+  background: rgba(52, 58, 64, .88) !important;
+  box-shadow: 0 16px 36px rgba(33, 37, 41, .2) !important;
+}
+
+.public-dashboard-shell .public-server-pill,
+.public-dashboard-shell .public-search-icon-button,
+.public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button,
+.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-server-pill {
+  border-color: rgba(222, 226, 230, .2) !important;
+  background: rgba(33, 37, 41, .42) !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-search-field input,
+.public-home-shared-shell .public-home-shared-input.yoro-input,
+.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
+  background: var(--public-gray-field) !important;
+  color: var(--public-gray-field-text) !important;
+}
+
+.public-dashboard-shell .public-search-field input::placeholder,
+.public-home-shared-shell .public-home-shared-input.yoro-input::placeholder,
+.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input::placeholder {
+  color: #6c757d !important;
+}
+
+.public-dashboard-shell .public-suggestion-panel,
+.public-dashboard-shell .public-search-wrap .public-suggestion-list,
+.public-home-shared-shell .public-home-shared-search .public-suggestion-panel,
+.public-home-shared-shell .public-home-shared-search .public-suggestion-list {
+  border-color: var(--public-gray-border) !important;
+  background: rgba(73, 80, 87, .96) !important;
+  color: var(--public-gray-text) !important;
+  box-shadow: 0 22px 48px rgba(33, 37, 41, .2) !important;
+}
+
+.public-dashboard-shell .public-suggestion-list button,
+.public-home-shared-shell .public-home-shared-search .public-suggestion-list button {
+  border-color: rgba(222, 226, 230, .18) !important;
+  background: transparent !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-suggestion-list button:hover,
+.public-dashboard-shell .public-suggestion-list button:focus-visible,
+.public-home-shared-shell .public-home-shared-search .public-suggestion-list button:hover,
+.public-home-shared-shell .public-home-shared-search .public-suggestion-list button:focus-visible {
+  background: rgba(248, 249, 250, .14) !important;
+}
+
+.public-dashboard-shell .public-panel,
+.public-dashboard-shell .public-profile-tabs,
+.public-dashboard-shell .public-profile-top-grid,
+.public-dashboard-shell .public-profile-top-side,
+.public-dashboard-shell .public-dashboard-empty-card,
+.public-dashboard-shell .public-rank-overview-card,
+.public-dashboard-shell .public-stream-overview-card,
+.public-dashboard-shell .public-profile-metric-card,
+.public-dashboard-shell .public-overview-dashboard-panel > .public-panel,
+.public-dashboard-shell .public-matches-panel.public-panel,
+.public-dashboard-shell .public-match-filter-bar,
+.public-dashboard-shell .public-match-row,
+.public-dashboard-shell .public-match-expanded,
+.public-dashboard-shell .public-team-card,
+.public-dashboard-shell .public-team-player,
+.public-dashboard-shell .public-team-stat,
+.public-dashboard-shell .public-match-expanded-tabs,
+.public-dashboard-shell .public-subscriptions-card,
+.public-dashboard-shell .public-subscription-row,
+.public-dashboard-shell .public-twitch-followed-summary,
+.public-dashboard-shell .public-twitch-followed-list article,
+.public-dashboard-shell .public-streamers-shared-card.yoro-card,
+.public-dashboard-shell .public-participation-shared-streamer-card.yoro-card,
+.public-dashboard-shell .public-participation-queue-row.yoro-card,
+.public-dashboard-shell .public-community-shared-shell.yoro-app-shell,
+.public-dashboard-shell .public-menu-page-panel.public-community-shared-shell,
+.public-dashboard-shell .public-community-shared-post-card.yoro-card,
+.public-dashboard-shell .public-community-shared-compose.yoro-card,
+.public-dashboard-shell .public-community-shared-detail-article.yoro-card,
+.public-dashboard-shell .public-community-shared-record-card.yoro-card,
+.public-dashboard-shell .public-community-shared-comments.yoro-card,
+.public-dashboard-shell .public-community-comment.yoro-card,
+.public-dashboard-shell .public-tournament-list-card,
+.public-dashboard-shell .public-tournament-calendar-card,
+.public-dashboard-shell .public-tournament-upcoming-card {
+  border-color: var(--public-gray-border) !important;
+  background: var(--public-gray-surface) !important;
+  color: var(--public-gray-text) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 18px 42px rgba(33, 37, 41, .16) !important;
+}
+
+.public-profile-shared-shell .public-profile-shared-top.yoro-card,
+.public-profile-shared-shell .public-overview-dashboard-panel > .public-panel,
+.public-profile-shared-shell .public-matches-panel.public-panel,
+.public-profile-shared-shell .public-aggregate-card,
+.public-profile-shared-shell .public-lp-trend-card,
+.public-profile-shared-shell .public-role-win-card,
+.public-profile-shared-shell .public-overview-metric-card,
+.public-profile-shared-shell .public-champion-analysis-card,
+.public-profile-shared-shell .public-champion-top-card,
+.public-home-shared-shell .public-home-shared-search-card.yoro-card,
+.public-home-shared-shell .public-home-live-card,
+.public-home-shared-shell .public-home-live-empty.yoro-empty-state {
+  border-color: var(--public-gray-border) !important;
+  background: var(--public-gray-surface) !important;
+  color: var(--public-gray-text) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 18px 42px rgba(33, 37, 41, .16) !important;
+}
+
+.public-dashboard-shell .public-profile-top-grid.has-mastery-art::after,
+.public-dashboard-shell.theme-dark .public-profile-top-grid.has-mastery-art::after {
+  background:
+    linear-gradient(90deg, rgba(52, 58, 64, .66), rgba(73, 80, 87, .38) 48%, rgba(52, 58, 64, .7)),
+    linear-gradient(180deg, rgba(134, 142, 150, .18), rgba(52, 58, 64, .12)) !important;
+}
+
+.public-dashboard-shell .public-profile-top-grid.has-mastery-art .public-profile-top-side,
+.public-dashboard-shell .public-profile-top-grid.has-mastery-art .public-profile-metric-strip,
+.public-dashboard-shell .public-profile-top-grid.has-mastery-art .public-rank-overview-card,
+.public-profile-shared-shell .public-aggregate-hero,
+.public-profile-shared-shell .public-lp-chart,
+.public-profile-shared-shell .public-match-expanded,
+.public-profile-shared-shell .public-team-card,
+.public-profile-shared-shell .public-team-player,
+.public-profile-shared-shell .public-team-stat,
+.public-profile-shared-shell .public-match-expanded-tabs {
+  border-color: var(--public-gray-border) !important;
+  background: rgba(52, 58, 64, .58) !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-match-row.win,
+.public-dashboard-shell .public-match-row.loss,
+.public-profile-shared-shell .public-match-row,
+.public-profile-shared-shell .public-match-row.win,
+.public-profile-shared-shell .public-match-row.loss {
+  background: rgba(73, 80, 87, .76) !important;
+}
+
+.public-dashboard-shell .public-match-score,
+.public-dashboard-shell .public-score-pill,
+.public-dashboard-shell .public-match-impact,
+.public-profile-shared-shell .public-match-score,
+.public-profile-shared-shell .public-score-pill,
+.public-profile-shared-shell .public-match-impact {
+  border-color: rgba(222, 226, 230, .2) !important;
+  background: rgba(52, 58, 64, .62) !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-section-head h2,
+.public-dashboard-shell .public-profile-title-row h2,
+.public-dashboard-shell .public-rank-overview-card strong,
+.public-dashboard-shell .public-stream-overview-card strong,
+.public-dashboard-shell .public-profile-metric-card > strong,
+.public-dashboard-shell .public-match-row strong,
+.public-dashboard-shell .public-community-post h3,
+.public-dashboard-shell .public-party-post h3,
+.public-dashboard-shell .public-community-card-head strong,
+.public-dashboard-shell .public-community-record-main strong,
+.public-dashboard-shell .public-community-comments-head strong,
+.public-dashboard-shell .public-twitch-channel-main strong,
+.public-dashboard-shell .public-twitch-channel-meta span,
+.public-dashboard-shell .yoro-card__title,
+.public-dashboard-shell .yoro-metric__value,
+.public-home-shared-shell .public-home-live-head h2,
+.public-home-shared-shell .public-home-live-card strong {
+  color: var(--public-gray-text) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell .public-section-head span,
+.public-dashboard-shell .public-profile-title-row span,
+.public-dashboard-shell .public-refresh-updated-at,
+.public-dashboard-shell .public-rank-overview-card span,
+.public-dashboard-shell .public-rank-overview-card small,
+.public-dashboard-shell .public-stream-overview-card small,
+.public-dashboard-shell .public-profile-metric-detail,
+.public-dashboard-shell .public-profile-metric-scale,
+.public-dashboard-shell .public-match-row small,
+.public-dashboard-shell .public-match-row span,
+.public-dashboard-shell .public-community-post p,
+.public-dashboard-shell .public-party-post p,
+.public-dashboard-shell .public-community-comment p,
+.public-dashboard-shell .yoro-card__description,
+.public-dashboard-shell .yoro-metric__label,
+.public-dashboard-shell .yoro-metric__description,
+.public-home-shared-shell .public-home-live-card small,
+.public-home-shared-shell .public-home-live-card em,
+.public-home-shared-shell .public-home-live-head button {
+  color: var(--public-gray-muted) !important;
+}
+
+.public-dashboard-shell .public-profile-tabs button,
+.public-dashboard-shell .public-match-filter-bar select,
+.public-dashboard-shell .public-community-shared-form .yoro-input,
+.public-dashboard-shell .public-community-shared-form .yoro-textarea,
+.public-dashboard-shell .public-community-shared-form .yoro-select,
+.public-dashboard-shell .public-community-comment-form .yoro-textarea,
+.public-streamer-detail-shared-page .public-participation-form .yoro-input,
+.public-streamer-detail-shared-page .public-participation-form .yoro-select {
+  border-color: rgba(222, 226, 230, .2) !important;
+  background: rgba(52, 58, 64, .56) !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-profile-tabs button:hover,
+.public-dashboard-shell .public-profile-tabs button.active {
+  background: rgba(248, 249, 250, .16) !important;
+  color: #ffffff !important;
+}
+
+.public-home-shared-shell .public-home-live-card > .public-home-live-action,
+.public-dashboard-shell .public-refresh-button,
+.public-dashboard-shell .public-secondary-action,
+.public-dashboard-shell .public-twitch-channel-actions a,
+.public-dashboard-shell .public-twitch-channel-actions .yoro-button,
+.public-dashboard-shell .public-participation-actions .yoro-button {
+  border-color: rgba(222, 226, 230, .2) !important;
+  background: rgba(52, 58, 64, .56) !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .public-refresh-button,
+.public-home-shared-shell .public-home-live-card > .public-home-live-action,
+.public-dashboard-shell .yoro-button[data-variant="primary"],
+.public-dashboard-shell .public-twitch-login-chip:not(.connected) {
+  border-color: transparent !important;
+  background: #6c63ff !important;
+  color: #ffffff !important;
+}
+

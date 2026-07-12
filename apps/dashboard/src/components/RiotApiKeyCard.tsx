@@ -1,6 +1,14 @@
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { apiGet, apiPost } from "../api/client";
-import { uiText } from "../i18n";
+import { createDashboardLocaleProxy, uiText } from "../i18n";
+import { Button } from "../shared/ui/Button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../shared/ui/Card";
+import { EmptyState, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../shared/ui/EmptyState";
+import { FormControl, FormField, FormHint, FormLabel, Input } from "../shared/ui/Form";
+import { Modal, ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "../shared/ui/Modal";
+import { SkeletonCard, SkeletonText } from "../shared/ui/Skeleton";
+import { Metric, StatusPill } from "../shared/ui/Status";
+import { Toast, ToastCloseButton, ToastDescription, ToastProvider, ToastTitle, ToastViewport, type ToastTone } from "../shared/ui/Toast";
 
 type RiotApiKeyStatus = {
   configured: boolean;
@@ -11,12 +19,36 @@ type RiotApiKeyStatus = {
   lolPlatform: string;
 };
 
+type RiotSettingsToast = {
+  id: number;
+  title: string;
+  description?: string;
+  tone: ToastTone;
+};
+
 const emptyStatus: RiotApiKeyStatus = {
   configured: false,
   source: "none",
   accountRegion: "-",
   lolPlatform: "-"
 };
+
+const localI18n = {
+  ko: {
+    confirmClearTitle: "Riot API key 삭제",
+    confirmClearDescription: "웹에 저장된 Riot API key를 삭제합니다. .env key가 없다면 전적/랭크 조회가 중단될 수 있습니다.",
+    cancel: "취소",
+    close: "닫기"
+  },
+  ja: {
+    confirmClearTitle: "Riot API key 削除",
+    confirmClearDescription: "Web に保存された Riot API key を削除します。.env key がない場合、戦績・ランク取得が停止する可能性があります。",
+    cancel: "キャンセル",
+    close: "閉じる"
+  }
+} as const;
+
+const localText = createDashboardLocaleProxy(localI18n);
 
 function formatDate(value?: string): string {
   if (!value) return "-";
@@ -34,6 +66,12 @@ export function RiotApiKeyCard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [toast, setToast] = useState<RiotSettingsToast | null>(null);
+
+  function showToast(tone: ToastTone, title: string, description?: string): void {
+    setToast({ id: Date.now(), tone, title, description });
+  }
 
   async function loadStatus() {
     setLoading(true);
@@ -41,7 +79,9 @@ export function RiotApiKeyCard() {
       setStatus(await apiGet<RiotApiKeyStatus>("/api/riot/settings"));
       setError("");
     } catch (err) {
-      setError(`${t.loadFailed}: ${String(err)}`);
+      const detail = `${t.loadFailed}: ${String(err)}`;
+      setError(detail);
+      showToast("danger", t.loadFailed, String(err));
     } finally {
       setLoading(false);
     }
@@ -61,8 +101,11 @@ export function RiotApiKeyCard() {
       setStatus(next);
       setApiKey("");
       setMessage(t.saved);
+      showToast("success", t.saved);
     } catch (err) {
-      setError(`${t.saveFailed}: ${String(err)}`);
+      const detail = `${t.saveFailed}: ${String(err)}`;
+      setError(detail);
+      showToast("danger", t.saveFailed, String(err));
     } finally {
       setSaving(false);
     }
@@ -75,76 +118,111 @@ export function RiotApiKeyCard() {
     try {
       const next = await apiPost<RiotApiKeyStatus>("/api/riot/api-key/delete", {});
       setStatus(next);
+      setClearOpen(false);
       setMessage(t.cleared);
+      showToast("success", t.cleared);
     } catch (err) {
-      setError(`${t.clearFailed}: ${String(err)}`);
+      const detail = `${t.clearFailed}: ${String(err)}`;
+      setError(detail);
+      showToast("danger", t.clearFailed, String(err));
     } finally {
       setClearing(false);
     }
   }
 
   return (
-    <section className="card riot-key-card">
-      <div className="section-title-row">
-        <div>
-          <h2>{t.title}</h2>
-          <p className="muted">{t.description}</p>
-        </div>
-        <span className={`status-pill ${status.configured ? "good" : "muted-pill"}`}>
-          {status.configured ? t.configured : t.notConfigured}
-        </span>
-      </div>
+    <ToastProvider position="top-right">
+      <Card as="section" className="settings-shared-card riot-key-card" padding="lg" variant="glass">
+        <CardHeader className="settings-shared-card-header">
+          <div>
+            <CardTitle as="h2">{t.title}</CardTitle>
+            <CardDescription>{t.description}</CardDescription>
+          </div>
+          <StatusPill tone={status.configured ? "success" : "warning"}>
+            {status.configured ? t.configured : t.notConfigured}
+          </StatusPill>
+        </CardHeader>
 
-      <div className="riot-key-status-grid">
-        <div>
-          <span>{t.source}</span>
-          <strong>{t.sources[status.source]}</strong>
-        </div>
-        <div>
-          <span>{t.maskedKey}</span>
-          <strong>{status.maskedKey ?? "-"}</strong>
-        </div>
-        <div>
-          <span>{t.accountRegion}</span>
-          <strong>{status.accountRegion}</strong>
-        </div>
-        <div>
-          <span>{t.lolPlatform}</span>
-          <strong>{status.lolPlatform}</strong>
-        </div>
-        <div>
-          <span>{t.updatedAt}</span>
-          <strong>{formatDate(status.updatedAt)}</strong>
-        </div>
-      </div>
+        <CardContent className="settings-shared-card-content">
+          {loading ? (
+            <SkeletonCard loadingLabel={t.title} size="md">
+              <SkeletonText lines={3} size="md" />
+            </SkeletonCard>
+          ) : (
+            <div className="settings-shared-metric-grid settings-shared-metric-grid--compact">
+              <Metric label={t.source} value={t.sources[status.source]} tone={status.configured ? "success" : "warning"} size="sm" />
+              <Metric label={t.maskedKey} value={status.maskedKey ?? "-"} tone="neutral" size="sm" />
+              <Metric label={t.accountRegion} value={status.accountRegion} tone="info" size="sm" />
+              <Metric label={t.lolPlatform} value={status.lolPlatform} tone="streamer" size="sm" />
+              <Metric label={t.updatedAt} value={formatDate(status.updatedAt)} tone="neutral" size="sm" />
+            </div>
+          )}
 
-      <form className="riot-key-form" onSubmit={save}>
-        <label className="field">
-          {t.inputLabel}
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(event) => setApiKey(event.target.value)}
-            placeholder={t.placeholder}
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </label>
-        <div className="button-row inline-buttons">
-          <button type="submit" disabled={saving || loading || !apiKey.trim()}>
-            {saving ? t.saving : t.save}
-          </button>
-          <button type="button" className="secondary" onClick={clearRuntimeKey} disabled={clearing || status.source !== "runtime"}>
-            {clearing ? t.clearing : t.clear}
-          </button>
-        </div>
-      </form>
+          {error ? (
+            <EmptyState className="settings-shared-empty-inline" variant="error">
+              <EmptyStateIcon>!</EmptyStateIcon>
+              <EmptyStateTitle as="h3">{t.loadFailed}</EmptyStateTitle>
+              <EmptyStateDescription>{error}</EmptyStateDescription>
+            </EmptyState>
+          ) : null}
 
-      <ul className="settings-note-list">
-        {t.notes.map((note) => <li key={note}>{note}</li>)}
-      </ul>
-      {message ? <p className="success-text">{message}</p> : null}
-      {error ? <p className="error-text">{error}</p> : null}
-    </section>
+          <form className="settings-shared-form" onSubmit={save}>
+            <FormField controlId="riot-api-key-input" disabled={saving || loading} required>
+              <FormLabel>{t.inputLabel}</FormLabel>
+              <FormControl>
+                <Input
+                  id="riot-api-key-input"
+                  type="password"
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  placeholder={t.placeholder}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              </FormControl>
+              <FormHint>{t.notes[0]}</FormHint>
+            </FormField>
+
+            <CardFooter className="settings-shared-actions settings-shared-actions--flush">
+              <Button type="submit" loading={saving} disabled={saving || loading || !apiKey.trim()}>
+                {saving ? t.saving : t.save}
+              </Button>
+              <Button type="button" variant="danger" loading={clearing} onClick={() => setClearOpen(true)} disabled={clearing || status.source !== "runtime"}>
+                {clearing ? t.clearing : t.clear}
+              </Button>
+            </CardFooter>
+          </form>
+
+          <ul className="settings-shared-note-list">
+            {t.notes.map((note) => <li key={note}>{note}</li>)}
+          </ul>
+          {message ? <StatusPill tone="success">{message}</StatusPill> : null}
+        </CardContent>
+      </Card>
+
+      <Modal open={clearOpen} onOpenChange={setClearOpen} size="sm" loading={clearing}>
+        <ModalHeader>
+          <ModalTitle>{localText.confirmClearTitle}</ModalTitle>
+          <ModalDescription>{localText.confirmClearDescription}</ModalDescription>
+        </ModalHeader>
+        <ModalContent>
+          <StatusPill tone="danger">{t.clear}</StatusPill>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="danger" loading={clearing} onClick={() => void clearRuntimeKey()}>{t.clear}</Button>
+          <Button variant="secondary" disabled={clearing} onClick={() => setClearOpen(false)}>{localText.cancel}</Button>
+        </ModalFooter>
+      </Modal>
+
+      <ToastViewport className="settings-shared-toast-viewport">
+        {toast ? (
+          <Toast key={toast.id} autoDismiss tone={toast.tone} onDismiss={() => setToast(null)}>
+            <ToastTitle>{toast.title}</ToastTitle>
+            {toast.description ? <ToastDescription>{toast.description}</ToastDescription> : null}
+            <ToastCloseButton aria-label={localText.close}>×</ToastCloseButton>
+          </Toast>
+        ) : null}
+      </ToastViewport>
+    </ToastProvider>
   );
 }

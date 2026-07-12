@@ -81,10 +81,12 @@ function createResponse() {
 test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공된다", async () => {
   const previousConfig = {
     publicBaseUrl: appConfig.publicBaseUrl,
-    overlayBaseUrl: appConfig.overlayBaseUrl
+    overlayBaseUrl: appConfig.overlayBaseUrl,
+    legalOperatorName: appConfig.legal.operatorName
   };
   appConfig.publicBaseUrl = "http://localhost:3000";
   appConfig.overlayBaseUrl = "http://localhost:3000/overlay";
+  appConfig.legal.operatorName = "</script><script>alert(1)</script>";
 
   try {
     const handler = createHttpHandler({
@@ -101,10 +103,15 @@ test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공
 
     assert.equal(dashboardRes.statusCode, 200);
     assert.match(dashboardRes.headers["Content-Type"], /text\/javascript/);
-    assert.match(dashboardRes.headers["Cache-Control"], /no-cache/);
+    assert.equal(dashboardRes.headers["Cache-Control"], "no-store, max-age=0");
+    assert.equal(dashboardRes.headers["Cloudflare-CDN-Cache-Control"], "no-store");
     assert.match(dashboardRes.body, /apiBase/);
     assert.match(dashboardRes.body, /wsBase/);
     assert.match(dashboardRes.body, /overlayBase/);
+    assert.match(dashboardRes.body, /legal/);
+    assert.match(dashboardRes.body, /configured/);
+    assert.match(dashboardRes.body, /\\u003c\/script>/);
+    assert.doesNotMatch(dashboardRes.body, /<\/script><script>/);
     assert.match(dashboardRes.body, /window\.location\.origin \+ "\/overlay"/);
     assert.doesNotMatch(dashboardRes.body, /localhost:5174/);
 
@@ -123,13 +130,83 @@ test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공
 
     assert.equal(overlayRes.statusCode, 200);
     assert.match(overlayRes.headers["Content-Type"], /text\/javascript/);
-    assert.match(overlayRes.headers["Cache-Control"], /no-cache/);
+    assert.equal(overlayRes.headers["Cache-Control"], "no-store, max-age=0");
     assert.match(overlayRes.body, /wsBase/);
     assert.doesNotMatch(overlayRes.body, /overlayBase/);
   } finally {
     appConfig.publicBaseUrl = previousConfig.publicBaseUrl;
     appConfig.overlayBaseUrl = previousConfig.overlayBaseUrl;
+    appConfig.legal.operatorName = previousConfig.legalOperatorName;
   }
+});
+
+test("readiness는 의존성 실패와 종료 중 상태를 503으로 반환한다", async () => {
+  const dependencyHandler = createHttpHandler({
+    store: {},
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+    readiness: () => ({ ok: false, checks: { persistenceHealthy: false }, errors: ["runtime:save"] })
+  });
+  const dependencyReq = createRequest("GET", "/health/ready");
+  const dependencyRes = createResponse();
+  await dependencyHandler(dependencyReq, dependencyRes);
+  assert.equal(dependencyRes.statusCode, 503);
+  assert.equal(JSON.parse(dependencyRes.body).checks.persistenceHealthy, false);
+
+  const shutdownHandler = createHttpHandler({
+    store: {},
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+    readiness: () => ({ ok: true, checks: { persistenceHealthy: true } }),
+    isShuttingDown: () => true
+  });
+  const shutdownReq = createRequest("GET", "/health/ready");
+  const shutdownRes = createResponse();
+  await shutdownHandler(shutdownReq, shutdownRes);
+  assert.equal(shutdownRes.statusCode, 503);
+  assert.equal(JSON.parse(shutdownRes.body).checks.acceptingRequests, false);
+});
+
+test("관리자 서버 현황은 민감정보 없이 현재 런타임 상태를 반환한다", async () => {
+  const handler = createHttpHandler({
+    store: {
+      getStatus() {
+        return {
+          server: "online",
+          twitch: "connected",
+          stream: "offline",
+          bridge: "connected",
+          obs: "connected",
+          participation: "closed",
+          startedAt: "2026-07-11T00:00:00.000Z"
+        };
+      }
+    },
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+    readiness: () => ({ ok: true, checks: { persistenceHealthy: true }, errors: [] }),
+    connectionStatus: () => ({
+      http: 3,
+      dashboardWebSocket: 2,
+      overlayWebSocket: 4,
+      bridge: true
+    })
+  });
+  const req = createRequest("GET", "/api/dashboard/server-status");
+  const res = createResponse();
+
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.equal(body.status, "ready");
+  assert.equal(body.readiness.checks.persistenceHealthy, true);
+  assert.equal(body.connections.dashboardWebSocket, 2);
+  assert.equal(body.connections.overlayWebSocket, 4);
+  assert.equal(body.services.twitch, "connected");
+  assert.ok(body.uptimeSeconds >= 0);
+  assert.ok(body.memory.rssBytes > 0);
+  assert.doesNotMatch(res.body, /DASHBOARD_AUTH_TOKEN|BRIDGE_SHARED_SECRET|OVERLAY_ACCESS_TOKEN/);
 });
 
 test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => {
@@ -153,6 +230,11 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(res.statusCode, 200);
     assert.match(res.headers["Content-Type"], /text\/html/);
     assert.match(res.body, /YORO\.gg/);
+
+    const legalRes = createResponse();
+    await handler(createRequest("GET", "/privacy"), legalRes);
+    assert.equal(legalRes.statusCode, 200);
+    assert.equal(legalRes.headers["X-Robots-Tag"], "noindex, nofollow");
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });
@@ -181,6 +263,36 @@ test("공개 dashboard 이미지 asset은 /images 경로로 서빙된다", async
     assert.equal(res.statusCode, 200);
     assert.match(res.headers["Content-Type"], /image\/png/);
     assert.equal(Buffer.from(res.body, "binary").length > 0, true);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("favicon과 sitemap은 dashboard public asset으로 서빙된다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-dashboard-public-"));
+  try {
+    writeFileSync(path.join(dir, "favicon.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    writeFileSync(path.join(dir, "sitemap.xml"), "<?xml version=\"1.0\"?><urlset></urlset>");
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const faviconResponse = createResponse();
+    await handler(createRequest("GET", "/favicon.png"), faviconResponse);
+    assert.equal(faviconResponse.statusCode, 200);
+    assert.equal(faviconResponse.headers["Content-Type"], "image/png");
+
+    const sitemapResponse = createResponse();
+    await handler(createRequest("GET", "/sitemap.xml"), sitemapResponse);
+    assert.equal(sitemapResponse.statusCode, 200);
+    assert.equal(sitemapResponse.headers["Content-Type"], "application/xml; charset=utf-8");
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });
@@ -463,6 +575,33 @@ test("API 응답은 기본 보안 헤더를 포함한다", async () => {
   assert.equal(res.headers["X-Content-Type-Options"], "nosniff");
   assert.equal(res.headers["Referrer-Policy"], "no-referrer");
   assert.equal(res.headers["X-Permitted-Cross-Domain-Policies"], "none");
+});
+
+test("production HTTP는 HTTPS로 redirect하고 HTTPS 응답은 HSTS를 포함한다", async () => {
+  const previous = {
+    nodeEnv: appConfig.nodeEnv,
+    publicBaseUrl: appConfig.publicBaseUrl,
+    trustProxy: appConfig.security.trustProxy
+  };
+  appConfig.nodeEnv = "production";
+  appConfig.publicBaseUrl = "https://gg.seigatabi.com";
+  appConfig.security.trustProxy = true;
+  try {
+    const handler = createHttpHandler({ store: {}, twitchAuth: {}, actions: {} });
+    const redirectRes = createResponse();
+    await handler(createRequest("GET", "/", undefined, { "x-forwarded-proto": "http" }), redirectRes);
+    assert.equal(redirectRes.statusCode, 308);
+    assert.equal(redirectRes.headers.Location, "https://gg.seigatabi.com/");
+
+    const secureRes = createResponse();
+    await handler(createRequest("GET", "/health/live", undefined, { "x-forwarded-proto": "https" }), secureRes);
+    assert.equal(secureRes.statusCode, 200);
+    assert.equal(secureRes.headers["Strict-Transport-Security"], "max-age=15552000; includeSubDomains");
+  } finally {
+    appConfig.nodeEnv = previous.nodeEnv;
+    appConfig.publicBaseUrl = previous.publicBaseUrl;
+    appConfig.security.trustProxy = previous.trustProxy;
+  }
 });
 
 test("reward mapping API는 token 없이 read-only summary를 반환한다", async () => {

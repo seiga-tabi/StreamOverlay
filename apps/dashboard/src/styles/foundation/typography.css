@@ -1,0 +1,17 @@
+:root {
+  --yoro-font-family-base: Inter, Pretendard, "Noto Sans JP", "Noto Sans KR", "Apple SD Gothic Neo", "Hiragino Sans", "Yu Gothic", Meiryo, "Malgun Gothic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --yoro-font-family-ja: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --yoro-font-size-xs: .75rem;
+  --yoro-font-size-sm: .875rem;
+  --yoro-font-size-md: 1rem;
+  --yoro-font-size-lg: 1.125rem;
+  --yoro-font-size-xl: 1.5rem;
+  --yoro-font-size-2xl: 2rem;
+  --yoro-line-height-tight: 1.2;
+  --yoro-line-height-base: 1.5;
+  --yoro-line-height-relaxed: 1.6;
+  --yoro-font-weight-regular: 400;
+  --yoro-font-weight-medium: 700;
+  --yoro-font-weight-bold: 850;
+  --yoro-font-weight-black: 900;
+}

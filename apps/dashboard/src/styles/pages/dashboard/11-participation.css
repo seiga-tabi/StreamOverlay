@@ -1,0 +1,291 @@
+/* 시참 관리: 중복 운영 메뉴 제거 후 방송 운영용 다크 그레이 화면으로 통일 */
+.participation-shared-shell.yoro-app-shell {
+  --yoro-color-bg: hsl(210 8% 25%);
+  --yoro-color-bg-soft: hsl(210 8% 28%);
+  --yoro-color-surface: hsl(210 8% 29%);
+  --yoro-color-surface-muted: hsl(210 8% 26%);
+  --yoro-color-surface-strong: hsl(210 8% 22%);
+  --yoro-color-text: hsl(210 14% 92%);
+  --yoro-color-text-strong: hsl(0 0% 100%);
+  --yoro-color-text-muted: hsl(210 10% 76%);
+  --yoro-color-border: hsl(210 12% 86% / .16);
+  --yoro-color-border-strong: hsl(210 16% 90% / .28);
+  --yoro-color-primary: hsl(252 100% 68%);
+  --yoro-color-primary-strong: hsl(252 100% 76%);
+  --yoro-color-secondary: hsl(254 92% 78%);
+  --yoro-color-secondary-strong: hsl(254 100% 84%);
+  --yoro-color-success: hsl(161 62% 72%);
+  --yoro-color-success-bg: hsl(161 42% 30% / .54);
+  --yoro-color-warning: hsl(42 88% 74%);
+  --yoro-color-warning-bg: hsl(42 48% 31% / .52);
+  --yoro-color-danger: hsl(349 88% 74%);
+  --yoro-color-danger-bg: hsl(349 48% 30% / .5);
+  --yoro-color-info: hsl(211 92% 76%);
+  --yoro-color-info-bg: hsl(211 48% 31% / .5);
+  grid-template-areas:
+    "header"
+    "main" !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--yoro-color-border-strong);
+  border-radius: 20px;
+  background: var(--yoro-color-bg);
+  color: var(--yoro-color-text);
+  box-shadow: 0 18px 42px hsl(210 20% 10% / .18);
+}
+
+.participation-shared-header.yoro-app-shell__header {
+  padding: var(--yoro-space-6);
+  border-block-end-color: var(--yoro-color-border);
+  background: var(--yoro-color-surface-strong);
+}
+
+.participation-shared-page-header .yoro-page-header__eyebrow {
+  color: var(--yoro-color-primary-strong);
+}
+
+.participation-shared-page-header .yoro-page-header__title {
+  color: var(--yoro-color-text-strong);
+}
+
+.participation-shared-page-header .yoro-page-header__description {
+  max-width: min(100%, 980px);
+  color: var(--yoro-color-text-muted);
+}
+
+.participation-shared-main.yoro-app-shell__main {
+  grid-area: main !important;
+  padding: var(--yoro-space-6);
+  background: var(--yoro-color-bg);
+}
+
+.participation-shared-metrics {
+  grid-template-columns: repeat(7, minmax(104px, 1fr));
+}
+
+.participation-shared-metrics .yoro-metric {
+  min-height: 104px;
+  border-color: var(--yoro-status-border);
+  background: var(--yoro-status-background);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .05);
+}
+
+.participation-shared-metrics .yoro-metric__label {
+  color: var(--yoro-status-text);
+}
+
+.participation-shared-metrics .yoro-metric__value {
+  color: var(--yoro-color-text-strong);
+}
+
+.participation-shared-card.yoro-card,
+.participation-shared-queue-row.yoro-card,
+.participation-shared-bulk-invite {
+  border-color: var(--yoro-color-border);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-text);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .05);
+  backdrop-filter: none;
+}
+
+.participation-shared-card-header.yoro-card__header {
+  padding-bottom: var(--yoro-space-3);
+  border-bottom: 1px solid var(--yoro-color-border);
+}
+
+.participation-shared-card .yoro-card__title,
+.participation-shared-card .yoro-card__description,
+.participation-shared-queue-row .yoro-card__title,
+.participation-shared-user strong,
+.participation-shared-bulk-head strong {
+  color: var(--yoro-color-text-strong);
+}
+
+.participation-shared-card .yoro-card__description,
+.participation-shared-user span,
+.participation-shared-meta span,
+.participation-shared-empty .yoro-empty-state__description {
+  color: var(--yoro-color-text-muted);
+}
+
+.participation-shared-action-row {
+  gap: var(--yoro-space-3);
+}
+
+.participation-shared-action-row .yoro-button {
+  min-height: var(--yoro-size-touch-target);
+  box-shadow: none;
+}
+
+.participation-shared-empty.yoro-empty-state {
+  min-height: 176px;
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text);
+}
+
+.participation-shared-empty .yoro-empty-state__icon {
+  border-color: hsl(252 100% 76% / .48);
+  background: hsl(252 72% 60% / .16);
+  color: var(--yoro-color-primary-strong);
+}
+
+.participation-shared-empty .yoro-empty-state__title {
+  color: var(--yoro-color-text-strong);
+}
+
+.participation-shared-form-field .yoro-form-label {
+  color: var(--yoro-color-text-muted);
+}
+
+.participation-shared-form-field .yoro-input,
+.participation-shared-controls .yoro-select {
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface-strong);
+  color: var(--yoro-color-text-strong);
+}
+
+.participation-shared-form-field .yoro-input::placeholder {
+  color: hsl(210 9% 62%);
+}
+
+@media (max-width: 1180px) {
+  .participation-shared-metrics {
+    grid-template-columns: repeat(4, minmax(104px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .participation-shared-header.yoro-app-shell__header,
+  .participation-shared-main.yoro-app-shell__main {
+    padding: var(--yoro-space-4);
+  }
+
+  .participation-shared-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .participation-shared-page-header.yoro-page-header[data-layout="split"] {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 430px) {
+  .participation-shared-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Dashboard 상단 메뉴: 메뉴와 계정 액션을 한 줄로 통합 */
+.app-sidebar {
+  grid-template-columns: 152px minmax(0, 1fr) max-content !important;
+  column-gap: 22px !important;
+  align-items: center !important;
+}
+
+.app-sidebar .brand-block {
+  min-width: 0;
+}
+
+.app-sidebar .brand-logo {
+  width: 136px !important;
+  max-height: 44px !important;
+}
+
+.dashboard-menu-actions {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  min-width: max-content;
+}
+
+.dashboard-menu-actions .dashboard-locale-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.dashboard-menu-actions .dashboard-locale-button,
+.dashboard-menu-actions .top-action,
+.dashboard-menu-actions .top-chip {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-menu-actions .top-action {
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+}
+
+.dashboard-menu-actions .top-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+}
+
+.dashboard-menu-actions .dashboard-locale-popover {
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 120 !important;
+}
+
+.app-main {
+  margin-top: 18px !important;
+}
+
+@media (max-width: 1280px) {
+  .app-sidebar {
+    grid-template-columns: 128px minmax(0, 1fr) max-content !important;
+    column-gap: 14px !important;
+    padding-inline: 16px !important;
+  }
+
+  .app-sidebar .brand-logo {
+    width: 118px !important;
+  }
+
+  .app-sidebar nav {
+    justify-content: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-menu-actions {
+    gap: 8px !important;
+  }
+
+  .dashboard-menu-actions .top-action,
+  .dashboard-menu-actions .top-chip {
+    padding-inline: 12px !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .app-sidebar {
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    row-gap: 12px !important;
+  }
+
+  .app-sidebar .brand-block {
+    grid-area: brand;
+  }
+
+  .app-sidebar nav {
+    grid-area: nav;
+    width: 100%;
+  }
+
+  .dashboard-menu-actions {
+    grid-area: actions;
+  }
+}
+

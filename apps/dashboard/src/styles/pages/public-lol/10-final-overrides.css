@@ -1,0 +1,311 @@
+/* LP 변화 추이: SVG 텍스트 비율 왜곡 제거 및 차트 영역 확장 */
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  min-height: 224px !important;
+  padding: 16px 16px 14px !important;
+  overflow: hidden !important;
+  border-color: rgba(248, 249, 250, .18) !important;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .76), rgba(52, 58, 64, .66)) !important;
+  background-size: auto !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-line {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: 320 / 168 !important;
+  overflow: visible !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-y-axis {
+  display: none !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-axis {
+  position: static !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  color: rgba(248, 249, 250, .82) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-axis span:nth-child(2) {
+  text-align: center;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-axis span:last-child {
+  text-align: right;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band {
+  opacity: .28 !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-iron,
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-unranked {
+  fill: rgba(173, 181, 189, .1) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-bronze {
+  fill: rgba(185, 121, 75, .12) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-silver {
+  fill: rgba(206, 212, 218, .11) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-gold {
+  fill: rgba(255, 212, 59, .13) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-platinum {
+  fill: rgba(76, 201, 184, .15) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-emerald {
+  fill: rgba(81, 207, 102, .14) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-diamond {
+  fill: rgba(116, 192, 252, .14) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-master,
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-grandmaster,
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-challenger {
+  fill: rgba(177, 151, 252, .14) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-boundary {
+  stroke: rgba(248, 249, 250, .24) !important;
+  stroke-dasharray: 5 7 !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band-label {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  fill: rgba(248, 249, 250, .88) !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  dominant-baseline: middle;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-area {
+  fill: rgba(92, 205, 189, .14) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-stroke {
+  stroke-width: 3.6 !important;
+  filter: drop-shadow(0 0 3px rgba(92, 205, 189, .42)) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-point.latest circle {
+  stroke-width: 3 !important;
+  filter: drop-shadow(0 0 6px rgba(92, 205, 189, .54)) !important;
+}
+
+@media (max-width: 720px) {
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart {
+    min-height: 196px !important;
+    padding: 12px 12px 12px !important;
+  }
+
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-axis {
+    font-size: 11px !important;
+  }
+
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band-label {
+    font-size: 10px !important;
+  }
+}
+
+/* Public 상단바 최종 통일: 검색 결과와 일반 메뉴 화면의 폭, 정렬, active 표현을 동일하게 유지 */
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
+  display: grid !important;
+  grid-template-columns: 154px minmax(300px, auto) minmax(440px, 720px) max-content !important;
+  grid-template-areas: "brand nav search tools" !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  width: min(1720px, calc(100% - 96px)) !important;
+  min-height: 86px !important;
+  margin: 18px auto 0 !important;
+  padding: 0 30px !important;
+  column-gap: clamp(28px, 3vw, 56px) !important;
+  border: 1px solid rgba(248, 249, 250, .14) !important;
+  border-radius: 34px !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(123, 92, 255, .1), transparent 34%),
+    linear-gradient(90deg, rgba(89, 97, 106, .76), rgba(61, 68, 76, .78)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 18px 44px rgba(33, 37, 41, .18) !important;
+  backdrop-filter: blur(20px) saturate(125%) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
+  grid-area: brand !important;
+  justify-self: start !important;
+  width: 154px !important;
+  min-width: 154px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
+  grid-area: nav !important;
+  justify-self: start !important;
+  align-self: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: clamp(26px, 2.6vw, 46px) !important;
+  width: auto !important;
+  max-width: none !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(248, 249, 250, .86) !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:focus-visible,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:focus-visible,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button.active,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:hover,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:hover,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:focus-visible,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:focus-visible,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button.active,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button::after,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button::after,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button::after,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button::after {
+  right: 0 !important;
+  bottom: 4px !important;
+  left: 0 !important;
+  width: 30px !important;
+  height: 3px !important;
+  margin: 0 auto !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button.active::after,
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button.active::after,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after {
+  background: #7b5cff !important;
+  box-shadow: 0 0 12px rgba(123, 92, 255, .34) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
+  grid-area: search !important;
+  justify-self: end !important;
+  align-self: center !important;
+  width: min(720px, 38vw) !important;
+  min-width: 440px !important;
+  max-width: 720px !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
+  grid-area: tools !important;
+  justify-self: end !important;
+  align-self: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+@media (max-width: 1320px) {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
+    grid-template-columns: 138px minmax(240px, auto) minmax(340px, 1fr) max-content !important;
+    width: min(1220px, calc(100% - 48px)) !important;
+    padding: 0 22px !important;
+    column-gap: 22px !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
+    width: min(560px, 36vw) !important;
+    min-width: 340px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
+    justify-self: center !important;
+    gap: 22px !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
+    justify-self: center !important;
+    width: min(100%, 720px) !important;
+    min-width: 0 !important;
+  }
+}
+

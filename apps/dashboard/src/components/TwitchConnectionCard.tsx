@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
-import type { TwitchConnectionStatus } from "@streamops/shared";
+import type { TwitchConnectionStatus, TwitchEventSubStatus } from "@streamops/shared";
 import { apiBase, apiGet, apiPost } from "../api/client";
 import { createDashboardLocaleProxy } from "../i18n";
+import { Button } from "../shared/ui/Button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../shared/ui/Card";
+import { EmptyState, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../shared/ui/EmptyState";
+import { Modal, ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "../shared/ui/Modal";
+import { SkeletonCard, SkeletonText } from "../shared/ui/Skeleton";
+import { Badge, Metric, StatusPill, type StatusTone } from "../shared/ui/Status";
+import { Toast, ToastCloseButton, ToastDescription, ToastProvider, ToastTitle, ToastViewport, type ToastTone } from "../shared/ui/Toast";
 
 const i18n = {
   ko: {
@@ -47,7 +54,12 @@ const i18n = {
     chatThrottle: "전송 간격",
     chatCooldown: "반복 cooldown",
     recentChatFailures: "최근 채팅 실패",
-    noChatFailures: "최근 실패 없음"
+    noChatFailures: "최근 실패 없음",
+    confirmDisconnectTitle: "Twitch 연결 해제",
+    confirmDisconnectDescription: "OAuth token을 해제하면 EventSub와 채팅 API가 즉시 사용할 수 없게 됩니다.",
+    confirm: "확인",
+    cancel: "취소",
+    close: "닫기"
   },
   ja: {
     title: "Twitch アカウント接続",
@@ -92,11 +104,23 @@ const i18n = {
     chatThrottle: "送信間隔",
     chatCooldown: "重複 cooldown",
     recentChatFailures: "最近のチャット失敗",
-    noChatFailures: "最近の失敗なし"
+    noChatFailures: "最近の失敗なし",
+    confirmDisconnectTitle: "Twitch 接続解除",
+    confirmDisconnectDescription: "OAuth token を解除すると EventSub とチャット API がすぐに使用できなくなります。",
+    confirm: "確認",
+    cancel: "キャンセル",
+    close: "閉じる"
   }
 } as const;
 
 const t = createDashboardLocaleProxy(i18n);
+
+type SettingsToast = {
+  id: number;
+  title: string;
+  description?: string;
+  tone: ToastTone;
+};
 
 function statusLabel(status: TwitchConnectionStatus["state"]): string {
   if (status === "connected") return t.connected;
@@ -105,10 +129,10 @@ function statusLabel(status: TwitchConnectionStatus["state"]): string {
   return t.disconnected;
 }
 
-function statusClass(status: TwitchConnectionStatus["state"]): string {
-  if (status === "connected") return "good";
-  if (status === "missing_scopes" || status === "token_expired") return "neutral";
-  return "bad";
+function statusTone(status: TwitchConnectionStatus["state"]): StatusTone {
+  if (status === "connected") return "success";
+  if (status === "missing_scopes" || status === "token_expired") return "warning";
+  return "danger";
 }
 
 function websocketLabel(status: TwitchConnectionStatus["eventSub"]): string {
@@ -119,11 +143,16 @@ function websocketLabel(status: TwitchConnectionStatus["eventSub"]): string {
   return t.websocketDisconnected;
 }
 
-function websocketClass(status: TwitchConnectionStatus["eventSub"]): string {
-  if (status?.websocket === "connected") return "good";
-  if (status?.websocket === "reconnecting") return "neutral";
-  if (status?.websocket === "disabled") return "neutral";
-  return "bad";
+function websocketTone(status: TwitchConnectionStatus["eventSub"]): StatusTone {
+  if (status?.websocket === "connected") return "success";
+  if (status?.websocket === "reconnecting" || status?.websocket === "disabled") return "warning";
+  return "danger";
+}
+
+function subscriptionTone(status: string): StatusTone {
+  if (status === "active") return "success";
+  if (status === "failed") return "danger";
+  return "warning";
 }
 
 function formatLastEvent(value?: string): string {
@@ -131,20 +160,39 @@ function formatLastEvent(value?: string): string {
   return new Date(value).toLocaleString("ko-KR");
 }
 
+function eventSubStatusText(status?: TwitchEventSubStatus): string {
+  return status?.websocket ?? "unknown";
+}
+
 export function TwitchConnectionCard() {
   const [status, setStatus] = useState<TwitchConnectionStatus>();
   const [error, setError] = useState<string>();
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<SettingsToast | null>(null);
+  const [disconnectOpen, setDisconnectOpen] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const eventSubDisabled = status?.eventSub?.websocket === "disabled";
 
-  async function loadStatus() {
+  function showToast(tone: ToastTone, title: string, description?: string): void {
+    setToast({ id: Date.now(), tone, title, description });
+  }
+
+  async function loadStatus(silent = false) {
+    if (!silent) setLoading(true);
     setError(undefined);
-    setStatus(await apiGet<TwitchConnectionStatus>("/api/twitch/status"));
+    try {
+      setStatus(await apiGet<TwitchConnectionStatus>("/api/twitch/status"));
+    } catch {
+      setError(t.actionFailed);
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }
 
   useEffect(() => {
-    void loadStatus().catch(() => setError(t.actionFailed));
+    void loadStatus();
     const timer = window.setInterval(() => {
-      void loadStatus().catch(() => setError(t.actionFailed));
+      void loadStatus(true);
     }, 5000);
     return () => window.clearInterval(timer);
   }, []);
@@ -155,12 +203,17 @@ export function TwitchConnectionCard() {
   }
 
   async function disconnect() {
+    setDisconnecting(true);
     try {
       const next = await apiPost<TwitchConnectionStatus>("/api/twitch/auth/disconnect", {});
       setStatus(next);
-      alert(t.disconnectDone);
+      setDisconnectOpen(false);
+      showToast("success", t.disconnectDone);
     } catch {
       setError(t.actionFailed);
+      showToast("danger", t.actionFailed);
+    } finally {
+      setDisconnecting(false);
     }
   }
 
@@ -168,9 +221,10 @@ export function TwitchConnectionCard() {
     try {
       const next = await apiPost<TwitchConnectionStatus>("/api/twitch/token/refresh", {});
       setStatus(next);
-      alert(t.refreshDone);
+      showToast("success", t.refreshDone);
     } catch {
       setError(t.actionFailed);
+      showToast("danger", t.actionFailed);
     }
   }
 
@@ -178,144 +232,168 @@ export function TwitchConnectionCard() {
     try {
       const next = await apiPost<TwitchConnectionStatus>("/api/twitch/eventsub/reconnect", {});
       setStatus(next);
-      alert(t.refreshDone);
+      showToast("success", t.refreshDone);
     } catch {
       setError(t.actionFailed);
+      showToast("danger", t.actionFailed);
     }
   }
 
   return (
-    <div className="card twitch-connection-card">
-      <div className="card-title-row">
-        <div>
-          <h2>{t.title}</h2>
-          <p className="muted">{t.description}</p>
-        </div>
-        {status ? <span className={`queue-status ${statusClass(status.state)}`}>{statusLabel(status.state)}</span> : null}
-      </div>
+    <ToastProvider position="top-right">
+      <Card as="section" className="settings-shared-card twitch-connection-card" padding="lg" variant="glass">
+        <CardHeader className="settings-shared-card-header">
+          <div>
+            <CardTitle as="h2">{t.title}</CardTitle>
+            <CardDescription>{t.description}</CardDescription>
+          </div>
+          {status ? <StatusPill tone={statusTone(status.state)}>{statusLabel(status.state)}</StatusPill> : <StatusPill tone="warning">{t.loading}</StatusPill>}
+        </CardHeader>
 
-      {!status ? <p className="muted empty-state">{error ?? t.loading}</p> : null}
+        <CardContent className="settings-shared-card-content">
+          {loading && !status ? (
+            <SkeletonCard loadingLabel={t.loading} size="md">
+              <SkeletonText lines={4} size="md" />
+            </SkeletonCard>
+          ) : null}
 
-      {status ? (
-        <div className="twitch-status-grid">
-          <div>
-            <span className="muted">{t.broadcaster}</span>
-            <strong>{status.broadcaster?.displayName ?? status.broadcaster?.login ?? t.none}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.broadcasterId}</span>
-            <code>{status.broadcaster?.id ?? t.none}</code>
-          </div>
-          <div>
-            <span className="muted">{t.tokenExpiry}</span>
-            <strong>{formatLastEvent(status.tokenExpiresAt)}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.requiredScopes}</span>
-            <div className="chips">{status.requiredScopes.map((scope) => <code key={scope}>{scope}</code>)}</div>
-          </div>
-          <div>
-            <span className="muted">{t.grantedScopes}</span>
-            <div className="chips">
-              {status.grantedScopes.length > 0 ? status.grantedScopes.map((scope) => <code key={scope}>{scope}</code>) : <code>{t.none}</code>}
+          {!loading && !status ? (
+            <EmptyState className="settings-shared-empty" variant="error">
+              <EmptyStateIcon>!</EmptyStateIcon>
+              <EmptyStateTitle as="h3">{error ?? t.actionFailed}</EmptyStateTitle>
+              <EmptyStateDescription>{t.description}</EmptyStateDescription>
+            </EmptyState>
+          ) : null}
+
+          {status ? (
+            <>
+              <div className="settings-shared-metric-grid">
+                <Metric label={t.broadcaster} value={status.broadcaster?.displayName ?? status.broadcaster?.login ?? t.none} tone="streamer" size="sm" />
+                <Metric label={t.broadcasterId} value={status.broadcaster?.id ?? t.none} tone="neutral" size="sm" />
+                <Metric label={t.tokenExpiry} value={formatLastEvent(status.tokenExpiresAt)} tone={status.state === "token_expired" ? "danger" : "info"} size="sm" />
+                <Metric label={t.eventSub} value={websocketLabel(status.eventSub)} tone={websocketTone(status.eventSub)} status={<StatusPill size="sm" tone={websocketTone(status.eventSub)}>{eventSubStatusText(status.eventSub)}</StatusPill>} size="sm" />
+                <Metric label={t.activeSubscriptions} value={status.eventSub?.activeSubscriptions ?? 0} tone="success" size="sm" />
+                <Metric label={t.failedSubscriptions} value={status.eventSub?.failedSubscriptions.length ?? 0} tone={status.eventSub?.failedSubscriptions.length ? "danger" : "neutral"} size="sm" />
+                <Metric label={t.lastEventAt} value={formatLastEvent(status.eventSub?.lastEventAt)} tone="neutral" size="sm" />
+                <Metric label={t.chatSender} value={status.chat?.mode ?? t.none} tone="info" size="sm" />
+                <Metric label={t.chatQueue} value={status.chat?.queueSize ?? 0} tone="streamer" size="sm" />
+                <Metric label={t.chatThrottle} value={status.chat ? `${status.chat.throttleMs}ms` : t.none} tone="neutral" size="sm" />
+                <Metric label={t.chatCooldown} value={status.chat ? `${status.chat.cooldownMs}ms` : t.none} tone="neutral" size="sm" />
+              </div>
+
+              <div className="settings-shared-scope-grid">
+                <Card as="div" className="settings-shared-inline-card" padding="sm" variant="elevated">
+                  <CardTitle as="h3">{t.requiredScopes}</CardTitle>
+                  <div className="settings-shared-chip-row">
+                    {status.requiredScopes.map((scope) => <Badge key={scope} tone="info" size="sm">{scope}</Badge>)}
+                  </div>
+                </Card>
+                <Card as="div" className="settings-shared-inline-card" padding="sm" variant="elevated">
+                  <CardTitle as="h3">{t.grantedScopes}</CardTitle>
+                  <div className="settings-shared-chip-row">
+                    {status.grantedScopes.length > 0 ? status.grantedScopes.map((scope) => <Badge key={scope} tone="streamer" size="sm">{scope}</Badge>) : <Badge tone="warning" size="sm">{t.none}</Badge>}
+                  </div>
+                </Card>
+              </div>
+            </>
+          ) : null}
+
+          {status?.missingScopes.length ? (
+            <Card className="settings-shared-inline-card" padding="md" variant="warning">
+              <CardTitle as="h3">{t.missingScopeWarning}</CardTitle>
+              <div className="settings-shared-chip-row">{status.missingScopes.map((scope) => <Badge key={scope} tone="warning" size="sm">{scope}</Badge>)}</div>
+            </Card>
+          ) : null}
+
+          {status?.error ? (
+            <Card className="settings-shared-inline-card" padding="md" variant="danger">
+              <CardTitle as="h3">{t.tokenRefreshWarning}</CardTitle>
+              <CardDescription>{status.error}</CardDescription>
+              <CardDescription>{t.reconnectRequired}</CardDescription>
+            </Card>
+          ) : null}
+
+          {status?.eventSub?.missingScopes.length ? (
+            <Card className="settings-shared-inline-card" padding="md" variant="warning">
+              <CardTitle as="h3">{t.eventSubMissingScopes}</CardTitle>
+              <div className="settings-shared-chip-row">{status.eventSub.missingScopes.map((scope) => <Badge key={scope} tone="warning" size="sm">{scope}</Badge>)}</div>
+            </Card>
+          ) : null}
+
+          {eventSubDisabled ? (
+            <Card className="settings-shared-inline-card" padding="md" variant="warning">
+              <CardTitle as="h3">{t.eventSubDisabledWarning}</CardTitle>
+            </Card>
+          ) : null}
+
+          {status?.eventSub?.subscriptions.length ? (
+            <div className="settings-shared-list">
+              <strong>{t.subscriptions}</strong>
+              {status.eventSub.subscriptions.map((subscription) => (
+                <div className="settings-shared-list-row" key={subscription.type}>
+                  <code>{subscription.type}</code>
+                  <StatusPill tone={subscriptionTone(subscription.status)} size="sm">{subscription.status}</StatusPill>
+                </div>
+              ))}
             </div>
-          </div>
-          <div>
-            <span className="muted">{t.eventSub}</span>
-            <strong className={websocketClass(status.eventSub)}>{websocketLabel(status.eventSub)}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.activeSubscriptions}</span>
-            <strong>{status.eventSub?.activeSubscriptions ?? 0}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.failedSubscriptions}</span>
-            <strong>{status.eventSub?.failedSubscriptions.length ?? 0}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.lastEventAt}</span>
-            <strong>{formatLastEvent(status.eventSub?.lastEventAt)}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.chatSender}</span>
-            <strong>{status.chat?.mode ?? t.none}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.chatQueue}</span>
-            <strong>{status.chat?.queueSize ?? 0}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.chatThrottle}</span>
-            <strong>{status.chat ? `${status.chat.throttleMs}ms` : t.none}</strong>
-          </div>
-          <div>
-            <span className="muted">{t.chatCooldown}</span>
-            <strong>{status.chat ? `${status.chat.cooldownMs}ms` : t.none}</strong>
-          </div>
-        </div>
-      ) : null}
+          ) : null}
 
-      {status?.missingScopes.length ? (
-        <div className="scope-warning">
-          <strong>{t.missingScopeWarning}</strong>
-          <div className="chips">{status.missingScopes.map((scope) => <code key={scope}>{scope}</code>)}</div>
-        </div>
-      ) : null}
-      {status?.error ? (
-        <div className="scope-warning">
-          <strong>{t.tokenRefreshWarning}</strong>
-          <p className="muted">{status.error}</p>
-          <p className="muted">{t.reconnectRequired}</p>
-        </div>
-      ) : null}
-      {status?.eventSub?.missingScopes.length ? (
-        <div className="scope-warning">
-          <strong>{t.eventSubMissingScopes}</strong>
-          <div className="chips">{status.eventSub.missingScopes.map((scope) => <code key={scope}>{scope}</code>)}</div>
-        </div>
-      ) : null}
-      {eventSubDisabled ? (
-        <div className="scope-warning">
-          <strong>{t.eventSubDisabledWarning}</strong>
-        </div>
-      ) : null}
-      {status?.eventSub?.subscriptions.length ? (
-        <div className="subscription-list">
-          <span className="muted">{t.subscriptions}</span>
-          {status.eventSub.subscriptions.map((subscription) => (
-            <div className="subscription-row" key={subscription.type}>
-              <code>{subscription.type}</code>
-              <span className={`queue-status ${subscription.status === "active" ? "good" : subscription.status === "failed" ? "bad" : "neutral"}`}>
-                {subscription.status}
-              </span>
+          {status?.chat ? (
+            <div className="settings-shared-list">
+              <strong>{t.recentChatFailures}</strong>
+              {status.chat.recentFailures.length > 0 ? status.chat.recentFailures.map((failure) => (
+                <div className="settings-shared-list-row" key={failure.id}>
+                  <span>
+                    <strong>{failure.reason}</strong>
+                    <small>{failure.messagePreview}</small>
+                  </span>
+                  <StatusPill tone="danger" size="sm">{new Date(failure.createdAt).toLocaleTimeString("ko-KR")}</StatusPill>
+                </div>
+              )) : (
+                <EmptyState className="settings-shared-empty-inline" variant="default">
+                  <EmptyStateIcon>0</EmptyStateIcon>
+                  <EmptyStateTitle as="h3">{t.noChatFailures}</EmptyStateTitle>
+                </EmptyState>
+              )}
             </div>
-          ))}
-        </div>
-      ) : null}
-      {status?.chat ? (
-        <div className="subscription-list">
-          <span className="muted">{t.recentChatFailures}</span>
-          {status.chat.recentFailures.length > 0 ? status.chat.recentFailures.map((failure) => (
-            <div className="subscription-row" key={failure.id}>
-              <span>
-                <strong>{failure.reason}</strong>
-                <small className="muted">{failure.messagePreview}</small>
-              </span>
-              <span className="queue-status bad">{new Date(failure.createdAt).toLocaleTimeString("ko-KR")}</span>
-            </div>
-          )) : <p className="muted empty-state">{t.noChatFailures}</p>}
-        </div>
-      ) : null}
-      {status?.legacyConfigured ? <p className="muted">{t.legacyConfigured}</p> : null}
-      {error ? <p className="bad-text">{error}</p> : null}
+          ) : null}
 
-      <div className="button-row">
-        <button onClick={() => connect(false)}>{status?.connected ? t.reconnect : t.connect}</button>
-        <button className="secondary" onClick={() => connect(true)}>{t.forceReconnect}</button>
-        <button className="secondary" onClick={() => void refresh()} disabled={!status || status.source !== "oauth"}>{t.refresh}</button>
-        <button className="secondary" onClick={() => void reconnectEventSub()} disabled={!status}>{t.eventSubReconnect}</button>
-        <button className="secondary" onClick={() => void disconnect()} disabled={!status || status.source !== "oauth"}>{t.disconnect}</button>
-      </div>
-    </div>
+          {status?.legacyConfigured ? <StatusPill tone="info">{t.legacyConfigured}</StatusPill> : null}
+          {error ? <StatusPill tone="danger">{error}</StatusPill> : null}
+        </CardContent>
+
+        <CardFooter className="settings-shared-actions">
+          <Button onClick={() => connect(false)}>{status?.connected ? t.reconnect : t.connect}</Button>
+          <Button variant="secondary" onClick={() => connect(true)}>{t.forceReconnect}</Button>
+          <Button variant="tertiary" onClick={() => void refresh()} disabled={!status || status.source !== "oauth"}>{t.refresh}</Button>
+          <Button variant="tertiary" onClick={() => void reconnectEventSub()} disabled={!status}>{t.eventSubReconnect}</Button>
+          <Button variant="danger" onClick={() => setDisconnectOpen(true)} disabled={!status || status.source !== "oauth"}>{t.disconnect}</Button>
+        </CardFooter>
+      </Card>
+
+      <Modal open={disconnectOpen} onOpenChange={setDisconnectOpen} size="sm" loading={disconnecting}>
+        <ModalHeader>
+          <ModalTitle>{t.confirmDisconnectTitle}</ModalTitle>
+          <ModalDescription>{t.confirmDisconnectDescription}</ModalDescription>
+        </ModalHeader>
+        <ModalContent>
+          <StatusPill tone="danger">{t.disconnect}</StatusPill>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="danger" loading={disconnecting} onClick={() => void disconnect()}>{t.disconnect}</Button>
+          <Button variant="secondary" disabled={disconnecting} onClick={() => setDisconnectOpen(false)}>{t.cancel}</Button>
+        </ModalFooter>
+      </Modal>
+
+      <ToastViewport className="settings-shared-toast-viewport">
+        {toast ? (
+          <Toast key={toast.id} autoDismiss tone={toast.tone} onDismiss={() => setToast(null)}>
+            <ToastTitle>{toast.title}</ToastTitle>
+            {toast.description ? <ToastDescription>{toast.description}</ToastDescription> : null}
+            <ToastCloseButton aria-label={t.close}>×</ToastCloseButton>
+          </Toast>
+        ) : null}
+      </ToastViewport>
+    </ToastProvider>
   );
 }

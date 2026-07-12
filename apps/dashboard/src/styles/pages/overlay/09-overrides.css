@@ -1,0 +1,278 @@
+/* Overlay 연결 화면: 밝은 관리자 카드 톤을 현재 YORO 그레이 다크 톤으로 통일 */
+.overlay-studio-shell.yoro-app-shell {
+  overflow: hidden;
+  border: 1px solid rgba(248, 249, 250, .14) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 78% 0%, rgba(123, 92, 255, .13), transparent 30%),
+    linear-gradient(180deg, rgba(52, 58, 64, .94), rgba(33, 37, 41, .9)) !important;
+  color: #f8f9fa !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .07),
+    0 22px 54px rgba(33, 37, 41, .18) !important;
+}
+
+.overlay-studio-header.yoro-app-shell__header {
+  padding: 28px 32px !important;
+  border-bottom: 1px solid rgba(248, 249, 250, .12) !important;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .46), rgba(52, 58, 64, .18)) !important;
+}
+
+.overlay-studio-sidebar.yoro-app-shell__sidebar {
+  padding: 18px !important;
+  border-right: 1px solid rgba(248, 249, 250, .12) !important;
+  background: rgba(33, 37, 41, .26) !important;
+}
+
+.overlay-studio-main.yoro-app-shell__main {
+  padding: 24px 28px 32px !important;
+  background: transparent !important;
+}
+
+.overlay-studio-page-header .yoro-page-header__eyebrow,
+.overlay-studio-sidebar .yoro-navigation-section__title {
+  color: #aebcff !important;
+}
+
+.overlay-studio-page-header .yoro-page-header__title,
+.overlay-studio-section-title h3,
+.overlay-studio-card .yoro-card__title,
+.overlay-studio-source-row strong,
+.overlay-studio-access strong,
+.overlay-studio-obs-guide strong {
+  color: #ffffff !important;
+}
+
+.overlay-studio-page-header .yoro-page-header__description,
+.overlay-studio-card .yoro-card__description,
+.overlay-studio-access p,
+.overlay-studio-obs-guide ul,
+.overlay-studio-section-title p,
+.overlay-studio-message-row small {
+  color: rgba(248, 249, 250, .7) !important;
+}
+
+.overlay-studio-sidebar .yoro-navigation {
+  gap: 12px;
+}
+
+.overlay-studio-sidebar .yoro-navigation-section__items {
+  gap: 8px;
+}
+
+.overlay-studio-sidebar .yoro-navigation-item {
+  min-height: 44px;
+  border-color: rgba(248, 249, 250, .1) !important;
+  border-radius: 14px;
+  background: rgba(52, 58, 64, .48) !important;
+  color: rgba(248, 249, 250, .82) !important;
+}
+
+.overlay-studio-sidebar .yoro-navigation-item:hover {
+  border-color: rgba(248, 249, 250, .18) !important;
+  background: rgba(73, 80, 87, .62) !important;
+}
+
+.overlay-studio-sidebar .yoro-navigation-item[data-active="true"] {
+  border-color: rgba(123, 92, 255, .52) !important;
+  background: rgba(123, 92, 255, .18) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.overlay-studio-card.yoro-card,
+.overlay-studio-card .yoro-card,
+.overlay-studio-access.yoro-card,
+.overlay-studio-obs-guide.yoro-card,
+.overlay-studio-preview-tile.yoro-card,
+.overlay-studio-message-row.yoro-card,
+.overlay-studio-source-row.yoro-card,
+.overlay-studio-reward-row.yoro-card,
+.overlay-studio-alert-row.yoro-card,
+.overlay-studio-asset-row.yoro-card {
+  border: 1px solid rgba(248, 249, 250, .13) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .74), rgba(52, 58, 64, .68)) !important;
+  color: #f8f9fa !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+.overlay-studio-card-header.yoro-card__header,
+.overlay-studio-section-title,
+.overlay-studio-preview-head.yoro-card__header {
+  align-items: center !important;
+}
+
+.overlay-studio-metrics {
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+}
+
+.overlay-studio-metrics .yoro-metric {
+  min-height: 118px;
+  padding: 18px;
+  border: 1px solid rgba(248, 249, 250, .12);
+  border-radius: 18px;
+  background: rgba(33, 37, 41, .46);
+  color: #f8f9fa;
+}
+
+.overlay-studio-metrics .yoro-metric__label {
+  color: rgba(218, 226, 235, .7) !important;
+}
+
+.overlay-studio-metrics .yoro-metric__value {
+  color: #ffffff !important;
+}
+
+.overlay-studio-source-row.yoro-card {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 12px;
+}
+
+.overlay-studio-source-row code,
+.overlay-studio-modal-content code,
+.overlay-access-grid code {
+  padding: 10px 12px;
+  border: 1px solid rgba(248, 249, 250, .12);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, .44);
+  color: #dbe7ff !important;
+}
+
+.overlay-access-grid {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.overlay-access-grid span {
+  color: rgba(218, 226, 235, .7);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.overlay-studio-obs-guide {
+  border-color: rgba(123, 92, 255, .22) !important;
+  background: rgba(123, 92, 255, .08) !important;
+}
+
+.overlay-studio-preview-frame.overlay-preview-frame {
+  border-color: rgba(248, 249, 250, .14) !important;
+  background: rgba(33, 37, 41, .72) !important;
+}
+
+.overlay-studio-shell .yoro-button[data-variant="primary"] {
+  box-shadow: none !important;
+}
+
+@media (max-width: 1180px) {
+  .app-sidebar {
+    grid-template-columns: 132px minmax(0, 1fr);
+    width: min(100% - 28px, 1120px);
+    padding-inline: 16px !important;
+  }
+
+  .brand-logo {
+    width: 124px !important;
+  }
+
+  .nav-group,
+  .nav-group-items {
+    gap: 6px;
+  }
+
+  .nav-item {
+    padding-inline: 10px !important;
+    font-size: 13px;
+  }
+
+  .app-main {
+    width: min(100% - 28px, 1120px);
+  }
+
+  .top-bar {
+    top: 96px !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .app-sidebar {
+    position: static !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: calc(100% - 20px);
+    margin-top: 10px;
+    border-radius: 24px;
+  }
+
+  .brand-block {
+    justify-content: center;
+  }
+
+  .app-sidebar nav {
+    justify-content: flex-start;
+  }
+
+  .app-main {
+    width: calc(100% - 20px);
+    margin-top: 14px;
+  }
+
+  .top-bar {
+    position: static !important;
+    display: grid !important;
+    align-items: start;
+    gap: 12px;
+    padding: 16px !important;
+  }
+
+  .top-actions {
+    justify-content: flex-start;
+  }
+
+  .overlay-studio-shell.yoro-app-shell {
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "main" !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .overlay-studio-sidebar.yoro-app-shell__sidebar {
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(248, 249, 250, .12) !important;
+  }
+
+  .overlay-studio-sidebar .yoro-navigation-section__items {
+    display: flex !important;
+    flex-wrap: wrap;
+  }
+
+  .overlay-studio-source-row.yoro-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .overlay-studio-source-row .yoro-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .overlay-studio-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .overlay-studio-header.yoro-app-shell__header,
+  .overlay-studio-main.yoro-app-shell__main {
+    padding: 18px !important;
+  }
+
+  .overlay-access-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+

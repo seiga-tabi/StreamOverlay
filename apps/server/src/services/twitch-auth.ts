@@ -47,6 +47,7 @@ type FetchLike = typeof fetch;
 
 const DEFAULT_STATE_TTL_MS = 10 * 60 * 1000;
 const TOKEN_REFRESH_SKEW_MS = 60 * 1000;
+const MAX_OAUTH_STATES = 10_000;
 
 export function resolveTwitchScopes(extraScopes: readonly string[] = []): {
   requiredScopes: string[];
@@ -71,6 +72,11 @@ export class TwitchOAuthStateStore {
     this.cleanup();
     const state = randomBytes(24).toString("base64url");
     this.states.set(state, { state, expiresAt: this.now() + this.ttlMs, metadata });
+    while (this.states.size > MAX_OAUTH_STATES) {
+      const oldestState = this.states.keys().next().value as string | undefined;
+      if (!oldestState) break;
+      this.states.delete(oldestState);
+    }
     return state;
   }
 
@@ -256,6 +262,7 @@ export class TwitchAuthService {
 
   async fetchBroadcasterInfo(accessToken: string): Promise<TwitchBroadcasterInfo> {
     const response = await this.fetchImpl("https://api.twitch.tv/helix/users", {
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: {
         "Client-Id": this.config.clientId,
         Authorization: `Bearer ${accessToken}`
@@ -286,6 +293,7 @@ export class TwitchAuthService {
     });
     const response = await this.fetchImpl("https://id.twitch.tv/oauth2/token", {
       method: "POST",
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });
@@ -311,6 +319,7 @@ export class TwitchAuthService {
     });
     const response = await this.fetchImpl("https://id.twitch.tv/oauth2/token", {
       method: "POST",
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });

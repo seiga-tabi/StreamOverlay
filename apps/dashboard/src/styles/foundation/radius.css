@@ -1,0 +1,14 @@
+:root {
+  --yoro-radius-xs: .375rem;
+  --yoro-radius-sm: .5rem;
+  --yoro-radius-md: .75rem;
+  --yoro-radius-lg: 1rem;
+  --yoro-radius-xl: 1.5rem;
+  --yoro-radius-pill: 62.4375rem;
+  --yoro-radius-circle: 50%;
+
+  --radius-sm: var(--yoro-radius-sm);
+  --radius-md: var(--yoro-radius-md);
+  --radius-lg: var(--yoro-radius-lg);
+  --radius-xl: var(--yoro-radius-xl);
+}

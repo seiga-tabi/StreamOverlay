@@ -1,0 +1,1162 @@
+/* 메인 검색 화면: Card와 Form이 동시에 만드는 이중 캡슐 테두리 제거 */
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-card.yoro-card {
+  width: min(100%, 760px) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-card .yoro-card__content {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search.public-search-wrap {
+  width: 100% !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form.public-search-form {
+  grid-template-columns: 92px minmax(0, 1fr) auto !important;
+  gap: 0 !important;
+  min-height: 60px !important;
+  padding: 0 8px 0 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(248, 249, 250, .18) !important;
+  border-radius: 26px !important;
+  background: rgba(52, 58, 64, .92) !important;
+  box-shadow: 0 14px 30px rgba(33, 37, 41, .18) !important;
+  outline: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form .public-search-server {
+  align-self: stretch !important;
+  min-width: 92px !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button {
+  align-self: stretch !important;
+  width: 92px !important;
+  min-width: 92px !important;
+  min-height: 60px !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(248, 249, 250, .14) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-server.public-server-pill .yoro-status,
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-server.public-server-pill .yoro-status__label {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-field.public-search-field.yoro-form-field,
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-control.yoro-form-control,
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-input.yoro-input {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-input.yoro-input {
+  min-height: 60px !important;
+  padding: 0 20px !important;
+  color: #f8f9fa !important;
+  caret-color: #f8f9fa !important;
+  -webkit-text-fill-color: #f8f9fa !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-input.yoro-input::placeholder {
+  color: rgba(248, 249, 250, .58) !important;
+  -webkit-text-fill-color: rgba(248, 249, 250, .58) !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit.yoro-button {
+  align-self: center !important;
+  min-width: 74px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 16px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: #7b5cff !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit.yoro-button:disabled,
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit.yoro-button[aria-disabled="true"] {
+  opacity: .62 !important;
+}
+
+@media (max-width: 760px) {
+  .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form.public-search-form {
+    grid-template-columns: 74px minmax(0, 1fr) auto !important;
+    min-height: 54px !important;
+    border-radius: 22px !important;
+  }
+
+  .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form .public-search-server,
+  .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button {
+    width: 74px !important;
+    min-width: 74px !important;
+    min-height: 54px !important;
+    padding: 0 12px !important;
+  }
+
+  .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-input.yoro-input {
+    min-height: 54px !important;
+    padding: 0 14px !important;
+    font-size: 15px !important;
+  }
+
+  .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit.yoro-button {
+    min-width: 46px !important;
+    width: 46px !important;
+    height: 42px !important;
+    padding: 0 !important;
+  }
+
+  .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit .yoro-button__label > strong {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* 메인 검색 화면: 상단바 뒤 full-width band가 본문 배경과 다르게 보이지 않도록 제거 */
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-header.yoro-app-shell__header {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 대회 일정/리스트: 공개 페이지 회색 톤과 글자 대비 최종 정리 */
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-page.public-panel,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-page.public-panel {
+  border-color: rgba(248, 249, 250, .18) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(248, 249, 250, .1), transparent 34%),
+    rgba(52, 58, 64, .78) !important;
+  color: #f8f9fa !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 18px 42px rgba(33, 37, 41, .16) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-page .public-section-kicker,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-page .public-section-kicker,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page-head span,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card > div:first-child span {
+  background: rgba(123, 92, 255, .2) !important;
+  color: #d8d0ff !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-page h1,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-page h2,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-page h1,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-page h2,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page-head h1,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page-head h2,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-title strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card strong {
+  color: #f8f9fa !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-page p,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-page p,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page-head p,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-title span,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card time,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card span,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card small,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card p,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card dt {
+  color: rgba(248, 249, 250, .72) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page-head > button,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-page .public-ghost-button,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card > button {
+  border-color: rgba(248, 249, 250, .22) !important;
+  background: rgba(73, 80, 87, .8) !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page-head > button:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-page .public-ghost-button:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card > button:hover {
+  border-color: rgba(123, 92, 255, .58) !important;
+  background: rgba(123, 92, 255, .72) !important;
+  color: #ffffff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-card,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-list-card {
+  border-color: rgba(248, 249, 250, .18) !important;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .88), rgba(52, 58, 64, .88)) !important;
+  color: #f8f9fa !important;
+  box-shadow: inset 0 1px 0 rgba(248, 249, 250, .08) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-grid {
+  border-color: rgba(248, 249, 250, .16) !important;
+  background: rgba(33, 37, 41, .54) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-grid > b {
+  border-color: rgba(248, 249, 250, .12) !important;
+  background: rgba(33, 37, 41, .48) !important;
+  color: rgba(248, 249, 250, .82) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day {
+  border-color: rgba(248, 249, 250, .1) !important;
+  background: rgba(73, 80, 87, .36) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day.outside {
+  background: rgba(33, 37, 41, .34) !important;
+  opacity: 1 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day.today {
+  background: rgba(73, 80, 87, .56) !important;
+  box-shadow: inset 0 0 0 2px rgba(123, 92, 255, .58) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day > strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day i {
+  color: rgba(248, 249, 250, .82) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day.outside > strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day.outside i {
+  color: rgba(248, 249, 250, .42) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card > button {
+  border-color: rgba(123, 92, 255, .42) !important;
+  background: rgba(33, 37, 41, .62) !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card > button:hover {
+  border-color: rgba(123, 92, 255, .68) !important;
+  background: rgba(123, 92, 255, .18) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button.live {
+  border-color: rgba(255, 107, 129, .56) !important;
+  background: rgba(255, 107, 129, .14) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button.completed {
+  border-color: rgba(248, 249, 250, .16) !important;
+  background: rgba(33, 37, 41, .48) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button em,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button span,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-upcoming-card > button strong {
+  color: #f8f9fa !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-calendar-day button small {
+  color: rgba(248, 249, 250, .68) !important;
+}
+
+/* 대회 상세/대진표: light override 이후 상세 화면 전용 톤과 배열 최종 정리 */
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page.public-panel.public-tournament-shared-shell {
+  border-color: rgba(248, 249, 250, .18) !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(248, 249, 250, .09), transparent 34%),
+    radial-gradient(circle at 82% 8%, rgba(123, 92, 255, .12), transparent 28%),
+    rgba(52, 58, 64, .82) !important;
+  color: #f8f9fa !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 18px 42px rgba(33, 37, 41, .18) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-header.yoro-app-shell__header,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-sidebar.yoro-app-shell__sidebar,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-main.yoro-app-shell__main {
+  border-color: rgba(248, 249, 250, .12) !important;
+  background: rgba(33, 37, 41, .36) !important;
+  color: #f8f9fa !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-sidebar.yoro-app-shell__sidebar {
+  background: rgba(33, 37, 41, .42) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-page-header__eyebrow,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-navigation-section__title,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-navigation-group__title {
+  color: #9ecbff !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-page-header__title,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-card__title,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-title-row h2,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-round > strong,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card b,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-name,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-info-grid strong {
+  color: #f8f9fa !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-page-header__description,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-card__description,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-title-row p,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-round > strong small,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card time,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card time small,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card time em,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-info-grid small {
+  color: rgba(248, 249, 250, .7) !important;
+  text-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-navigation-item {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: rgba(248, 249, 250, .82) !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-navigation-item:hover,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-navigation-item[data-active="true"] {
+  border-color: rgba(123, 92, 255, .48) !important;
+  background: rgba(73, 80, 87, .78) !important;
+  color: #ffffff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .yoro-navigation-badge {
+  border-color: rgba(248, 249, 250, .18) !important;
+  background: rgba(73, 80, 87, .78) !important;
+  color: #f8f9fa !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-selector.yoro-form-field {
+  min-width: min(320px, 100%) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-selector .yoro-form-label {
+  color: rgba(248, 249, 250, .86) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-selector .yoro-select {
+  border-color: rgba(248, 249, 250, .18) !important;
+  background: rgba(33, 37, 41, .72) !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero.public-tournament-shared-hero.yoro-card {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 520px) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+  margin: 0 !important;
+  border-color: rgba(248, 249, 250, .16) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(123, 92, 255, .14), transparent 34%),
+    linear-gradient(180deg, rgba(73, 80, 87, .86), rgba(52, 58, 64, .9)) !important;
+  color: #f8f9fa !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 14px 32px rgba(33, 37, 41, .14) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero .yoro-card__header {
+  align-items: center !important;
+  min-width: 0 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero-stats.public-tournament-shared-metrics {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero-stats .yoro-metric {
+  min-height: 96px !important;
+  padding: 14px !important;
+  border-color: rgba(248, 249, 250, .16) !important;
+  background: rgba(33, 37, 41, .42) !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero-stats .yoro-metric__label,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero-stats .yoro-metric__description,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero-stats .yoro-metric__status {
+  color: rgba(248, 249, 250, .68) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero-stats .yoro-metric__value {
+  color: #f8f9fa !important;
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-layout {
+  padding: 0 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-title-row {
+  align-items: start !important;
+  padding-top: 0 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket {
+  --bracket-connector: 30px !important;
+  --bracket-row-gap: 18px !important;
+  display: grid !important;
+  gap: 32px !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  padding: 18px 8px 30px !important;
+  scrollbar-color: rgba(123, 92, 255, .48) transparent !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-1 {
+  grid-template-columns: minmax(260px, 420px) 72px !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-2 {
+  grid-template-columns: repeat(2, minmax(240px, 1fr)) 72px !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-3 {
+  grid-template-columns: repeat(3, minmax(230px, 1fr)) 72px !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-4 {
+  grid-template-columns: repeat(4, minmax(220px, 1fr)) 72px !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-round {
+  gap: var(--bracket-row-gap) !important;
+  min-width: 0 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-round > strong {
+  display: grid !important;
+  gap: 4px !important;
+  min-height: 70px !important;
+  align-content: center !important;
+  padding: 14px 16px !important;
+  border: 1px solid rgba(248, 249, 250, .16) !important;
+  border-radius: 10px !important;
+  background: rgba(33, 37, 41, .72) !important;
+  box-shadow: inset 0 1px 0 rgba(248, 249, 250, .08) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card.tbd {
+  --bracket-line-color: rgba(123, 92, 255, .6) !important;
+  --bracket-line-glow: 0 0 12px rgba(123, 92, 255, .18) !important;
+  gap: 0 !important;
+  min-height: 124px !important;
+  padding: 32px 0 0 !important;
+  overflow: visible !important;
+  border-color: rgba(248, 249, 250, .18) !important;
+  border-radius: 10px !important;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .92), rgba(52, 58, 64, .9)) !important;
+  color: #f8f9fa !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 12px 24px rgba(33, 37, 41, .12) !important;
+  opacity: 1 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card.advanced {
+  --bracket-line-color: rgba(94, 234, 212, .72) !important;
+  --bracket-line-glow: 0 0 14px rgba(94, 234, 212, .2) !important;
+  border-color: rgba(94, 234, 212, .34) !important;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .94), rgba(52, 58, 64, .92)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card::before,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card::after {
+  background: var(--bracket-line-color) !important;
+  box-shadow: var(--bracket-line-glow) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-result-label {
+  position: absolute !important;
+  top: 10px !important;
+  left: 12px !important;
+  color: rgba(248, 249, 250, .68) !important;
+  font-size: 11px !important;
+  transform: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card .public-tournament-match-team,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card.tbd .public-tournament-match-team {
+  display: grid !important;
+  grid-template-columns: 28px 34px minmax(0, 1fr) auto 36px !important;
+  gap: 8px !important;
+  align-items: center !important;
+  min-height: 42px !important;
+  padding: 0 0 0 10px !important;
+  border-top: 1px solid rgba(248, 249, 250, .1) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card .public-tournament-match-team.winner {
+  background: linear-gradient(90deg, rgba(94, 234, 212, .14), transparent 72%) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card .public-tournament-match-team.loser {
+  opacity: .74 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card i {
+  display: grid !important;
+  place-items: center !important;
+  width: 34px !important;
+  min-height: 42px !important;
+  border-left: 1px solid rgba(248, 249, 250, .1) !important;
+  background: rgba(33, 37, 41, .34) !important;
+  color: #f8f9fa !important;
+  font-style: normal !important;
+  font-weight: 950 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-vs {
+  position: absolute !important;
+  top: 62px !important;
+  left: 66px !important;
+  z-index: 2 !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 999px !important;
+  background: rgba(123, 92, 255, .78) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  transform: translateY(-50%) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card time {
+  top: 10px !important;
+  right: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 !important;
+  color: rgba(248, 249, 250, .72) !important;
+  font-size: 11px !important;
+  transform: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card time small {
+  padding: 2px 6px !important;
+  border-radius: 999px !important;
+  background: rgba(123, 92, 255, .2) !important;
+  color: #d8d0ff !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-card time em {
+  display: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-point,
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-match-check {
+  display: inline-grid !important;
+  place-items: center !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  border-radius: 999px !important;
+  background: rgba(94, 234, 212, .78) !important;
+  color: #12362e !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-winner {
+  display: grid !important;
+  place-items: center !important;
+  width: 56px !important;
+  height: 56px !important;
+  align-self: center !important;
+  border: 1px solid rgba(255, 216, 76, .35) !important;
+  border-radius: 16px !important;
+  background: rgba(33, 37, 41, .72) !important;
+  font-size: 28px !important;
+  filter: none !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-info-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  padding: 16px !important;
+  border-color: rgba(248, 249, 250, .16) !important;
+  border-radius: 12px !important;
+  background: rgba(33, 37, 41, .5) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-info-grid article {
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  gap: 4px 12px !important;
+  align-items: center !important;
+  min-height: 76px !important;
+  padding: 14px !important;
+  border-color: rgba(248, 249, 250, .16) !important;
+  background: rgba(73, 80, 87, .72) !important;
+  color: #f8f9fa !important;
+  box-shadow: inset 0 1px 0 rgba(248, 249, 250, .06) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-info-grid article > span {
+  background: rgba(123, 92, 255, .28) !important;
+  color: #d8d0ff !important;
+}
+
+@media (max-width: 1100px) {
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero.public-tournament-shared-hero.yoro-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-3,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-4 {
+    grid-template-columns: repeat(3, minmax(230px, 1fr)) 72px !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-header.yoro-app-shell__header,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-sidebar.yoro-app-shell__sidebar,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-shared-main.yoro-app-shell__main {
+    padding: 16px !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-hero-stats.public-tournament-shared-metrics,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-info-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-1,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-2,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-3,
+  .public-dashboard-shell:not(.public-home-shell) .public-tournament-page .public-tournament-bracket.rounds-4 {
+    grid-template-columns: minmax(240px, 1fr) 56px !important;
+    gap: 22px !important;
+  }
+}
+
+/* Public 상단바 통합: 메인/검색결과/구독/콘텐츠 화면이 같은 헤더 구조를 쓰도록 최종 보정 */
+.public-dashboard-shell .public-home-shared-header.yoro-app-shell__header,
+.public-dashboard-shell .public-profile-shared-header.yoro-app-shell__header {
+  min-height: auto !important;
+  padding: 18px 0 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-app-header,
+.public-dashboard-shell .public-app-header.home,
+.public-dashboard-shell .public-app-header:not(.home) {
+  position: relative !important;
+  z-index: 90 !important;
+  display: grid !important;
+  align-items: center !important;
+  width: min(1720px, calc(100% - 96px)) !important;
+  min-height: 86px !important;
+  margin: 18px auto 0 !important;
+  padding: 0 30px !important;
+  border: 1px solid rgba(248, 249, 250, .14) !important;
+  border-radius: 34px !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(123, 92, 255, .12), transparent 34%),
+    linear-gradient(90deg, rgba(89, 97, 106, .78), rgba(61, 68, 76, .8)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(248, 249, 250, .08),
+    0 18px 44px rgba(33, 37, 41, .18) !important;
+  backdrop-filter: blur(20px) saturate(125%) !important;
+}
+
+.public-dashboard-shell .public-app-header.home {
+  grid-template-columns: 180px minmax(360px, 1fr) max-content !important;
+  grid-template-areas: "brand nav tools" !important;
+  column-gap: clamp(32px, 5vw, 96px) !important;
+}
+
+.public-dashboard-shell .public-app-header:not(.home) {
+  grid-template-columns: 180px max-content minmax(420px, 720px) max-content !important;
+  grid-template-areas: "brand nav search tools" !important;
+  column-gap: clamp(24px, 3vw, 56px) !important;
+  justify-content: stretch !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-brand,
+.public-dashboard-shell .public-app-header.home .public-header-brand,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-brand {
+  grid-area: brand !important;
+  justify-self: start !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 154px !important;
+  min-width: 154px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo,
+.public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-full,
+.public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-topbar {
+  display: block !important;
+  width: 154px !important;
+  max-width: 154px !important;
+  height: auto !important;
+  max-height: 42px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  object-fit: contain !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav,
+.public-dashboard-shell .public-app-header.home .public-header-nav,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav {
+  grid-area: nav !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  justify-self: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  align-self: center !important;
+  gap: clamp(28px, 3vw, 52px) !important;
+  width: auto !important;
+  max-width: none !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  transform: none !important;
+}
+
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav {
+  justify-self: start !important;
+  gap: clamp(22px, 2.2vw, 42px) !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-menu-item,
+.public-dashboard-shell .public-app-header.home .public-header-menu-item,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-menu-item {
+  align-items: center !important;
+  align-self: center !important;
+  height: 58px !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav > button,
+.public-dashboard-shell .public-app-header .public-header-menu-item > button,
+.public-dashboard-shell .public-app-header.home .public-header-nav > button,
+.public-dashboard-shell .public-app-header.home .public-header-menu-item > button,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav > button,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-menu-item > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(248, 249, 250, .86) !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav > button:hover,
+.public-dashboard-shell .public-app-header .public-header-menu-item > button:hover,
+.public-dashboard-shell .public-app-header .public-header-nav > button:focus-visible,
+.public-dashboard-shell .public-app-header .public-header-menu-item > button:focus-visible,
+.public-dashboard-shell .public-app-header .public-header-nav > button.active,
+.public-dashboard-shell .public-app-header .public-header-menu-item > button.active {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav button strong,
+.public-dashboard-shell .public-app-header.home .public-header-nav button strong,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav button strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: auto !important;
+  color: inherit !important;
+  font-size: 16px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  transform: none !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav button span,
+.public-dashboard-shell .public-app-header.home .public-header-nav button span,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav button span {
+  width: 18px !important;
+  height: 18px !important;
+  color: #8d73ff !important;
+  font-size: 14px !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav button::after,
+.public-dashboard-shell .public-app-header.home .public-header-nav button::after,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav button::after {
+  right: 0 !important;
+  bottom: 4px !important;
+  left: 0 !important;
+  width: 30px !important;
+  height: 3px !important;
+  margin: 0 auto !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav button.active::after,
+.public-dashboard-shell .public-app-header.home .public-header-nav button.active::after,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav button.active::after {
+  background: #7b5cff !important;
+  box-shadow: 0 0 12px rgba(123, 92, 255, .34) !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap,
+.public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap {
+  grid-area: search !important;
+  justify-self: end !important;
+  width: min(720px, 38vw) !important;
+  min-width: 420px !important;
+  max-width: 720px !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-form,
+.public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap .public-search-form {
+  display: grid !important;
+  grid-template-columns: 96px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  min-height: 56px !important;
+  height: 56px !important;
+  padding: 0 6px 0 0 !important;
+  overflow: visible !important;
+  border: 1px solid rgba(248, 249, 250, .18) !important;
+  border-radius: 18px !important;
+  background: rgba(33, 37, 41, .68) !important;
+  box-shadow: inset 0 1px 0 rgba(248, 249, 250, .06) !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-server,
+.public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap .public-search-server {
+  display: block !important;
+  min-width: 0 !important;
+  height: 100% !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-server-pill,
+.public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap .public-server-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 96px !important;
+  min-width: 96px !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(248, 249, 250, .14) !important;
+  border-radius: 17px 0 0 17px !important;
+  background: rgba(33, 37, 41, .42) !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-field,
+.public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field {
+  min-width: 0 !important;
+  height: 100% !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-field input,
+.public-dashboard-shell .public-app-header > .public-search-wrap input[type="search"],
+.public-dashboard-shell .public-app-header > .public-search-wrap .yoro-input,
+.public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input,
+.public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap input[type="search"] {
+  min-height: 54px !important;
+  height: 54px !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #f8f9fa !important;
+  caret-color: #f8f9fa !important;
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+  -webkit-text-fill-color: #f8f9fa !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-field input::placeholder,
+.public-dashboard-shell .public-app-header > .public-search-wrap input[type="search"]::placeholder,
+.public-dashboard-shell .public-app-header > .public-search-wrap .yoro-input::placeholder {
+  color: rgba(248, 249, 250, .54) !important;
+  -webkit-text-fill-color: rgba(248, 249, 250, .54) !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-actions {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 100% !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-icon-button,
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-home-shared-icon-button,
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-ranking-shared-icon-button {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  color: #f8f9fa !important;
+}
+
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-search-submit,
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-home-shared-submit,
+.public-dashboard-shell .public-app-header > .public-search-wrap .public-ranking-shared-submit {
+  background: #7b5cff !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-tools,
+.public-dashboard-shell .public-app-header.home .public-header-tools,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-tools {
+  grid-area: tools !important;
+  justify-self: end !important;
+  align-self: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  min-width: max-content !important;
+  min-height: 58px !important;
+  height: 58px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.public-dashboard-shell .public-app-header .public-locale-button,
+.public-dashboard-shell .public-app-header .public-twitch-login-chip,
+.public-dashboard-shell .public-app-header.home .public-locale-button,
+.public-dashboard-shell .public-app-header.home .public-twitch-login-chip,
+.public-dashboard-shell .public-app-header:not(.home) .public-locale-button,
+.public-dashboard-shell .public-app-header:not(.home) .public-twitch-login-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 48px !important;
+  height: 48px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(248, 249, 250, .14) !important;
+  border-radius: 16px !important;
+  background: rgba(33, 37, 41, .62) !important;
+  color: #f8f9fa !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.public-dashboard-shell .public-app-header .public-twitch-login-chip.connected {
+  background: #7b5cff !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 1280px) {
+  .public-dashboard-shell .public-app-header:not(.home) {
+    grid-template-columns: 150px max-content minmax(340px, 1fr) max-content !important;
+    column-gap: 20px !important;
+  }
+
+  .public-dashboard-shell .public-app-header > .public-search-wrap,
+  .public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap {
+    width: min(560px, 36vw) !important;
+    min-width: 340px !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-brand,
+  .public-dashboard-shell .public-app-header:not(.home) .public-header-brand {
+    width: 138px !important;
+    min-width: 138px !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo,
+  .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-full,
+  .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-topbar {
+    width: 138px !important;
+    max-width: 138px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .public-dashboard-shell .public-app-header,
+  .public-dashboard-shell .public-app-header.home,
+  .public-dashboard-shell .public-app-header:not(.home) {
+    width: min(980px, calc(100% - 28px)) !important;
+    min-height: auto !important;
+    padding: 14px 18px !important;
+    grid-template-columns: max-content minmax(0, 1fr) max-content !important;
+    grid-template-areas:
+      "brand nav tools"
+      "search search search" !important;
+    row-gap: 12px !important;
+    column-gap: 16px !important;
+  }
+
+  .public-dashboard-shell .public-app-header.home {
+    grid-template-areas: "brand nav tools" !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-nav,
+  .public-dashboard-shell .public-app-header.home .public-header-nav,
+  .public-dashboard-shell .public-app-header:not(.home) .public-header-nav {
+    justify-self: center !important;
+    gap: 22px !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .public-dashboard-shell .public-app-header > .public-search-wrap,
+  .public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap {
+    justify-self: center !important;
+    width: min(100%, 720px) !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .public-dashboard-shell .public-app-header,
+  .public-dashboard-shell .public-app-header.home,
+  .public-dashboard-shell .public-app-header:not(.home) {
+    width: calc(100% - 20px) !important;
+    border-radius: 24px !important;
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+    grid-template-areas:
+      "brand tools"
+      "nav nav"
+      "search search" !important;
+  }
+
+  .public-dashboard-shell .public-app-header.home {
+    grid-template-areas:
+      "brand tools"
+      "nav nav" !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-nav,
+  .public-dashboard-shell .public-app-header.home .public-header-nav,
+  .public-dashboard-shell .public-app-header:not(.home) .public-header-nav {
+    justify-self: start !important;
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    gap: 18px !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-nav > button,
+  .public-dashboard-shell .public-app-header .public-header-menu-item > button,
+  .public-dashboard-shell .public-app-header.home .public-header-nav > button,
+  .public-dashboard-shell .public-app-header:not(.home) .public-header-nav > button {
+    height: 48px !important;
+    min-height: 48px !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-tools,
+  .public-dashboard-shell .public-app-header.home .public-header-tools,
+  .public-dashboard-shell .public-app-header:not(.home) .public-header-tools {
+    min-width: 0 !important;
+  }
+
+  .public-dashboard-shell .public-app-header > .public-search-wrap .public-search-form,
+  .public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap .public-search-form {
+    grid-template-columns: 78px minmax(0, 1fr) auto !important;
+  }
+
+  .public-dashboard-shell .public-app-header > .public-search-wrap .public-server-pill,
+  .public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap .public-server-pill {
+    width: 78px !important;
+    min-width: 78px !important;
+  }
+}
+

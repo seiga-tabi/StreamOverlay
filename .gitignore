@@ -5,10 +5,15 @@ dist/
 !.env.example
 logs/
 .streamops/
+.streamops-backups/
+.streamops-pre-restore-*/
 *.log
 .DS_Store
 coverage/
 .vite/
+.wrangler/
+.dev.vars
+.dev.vars.*
 *.tsbuildinfo
 *.wav.tmp
 secrets/

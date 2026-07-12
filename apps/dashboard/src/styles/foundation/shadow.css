@@ -1,0 +1,11 @@
+:root {
+  --yoro-shadow-none: none;
+  --yoro-shadow-soft: 0 .625rem 1.875rem hsl(230 25% 50% / .12);
+  --yoro-shadow-panel: 0 1.125rem 3rem hsl(222 33% 38% / .14);
+  --yoro-shadow-focus: 0 0 0 var(--yoro-focus-ring-width) var(--yoro-color-focus-ring);
+  --yoro-effect-glass-blur: blur(1.375rem) saturate(145%);
+
+  --glass-blur: var(--yoro-effect-glass-blur);
+  --panel-shadow: var(--yoro-shadow-panel);
+  --soft-shadow: var(--yoro-shadow-soft);
+}

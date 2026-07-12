@@ -1,0 +1,180 @@
+.yoro-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--yoro-size-touch-target);
+  min-height: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-2);
+  border: thin solid transparent;
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-primary);
+  color: var(--yoro-color-text-strong);
+  box-shadow: var(--yoro-shadow-none);
+  font-family: var(--yoro-font-family-base);
+  font-weight: var(--yoro-font-weight-bold);
+  line-height: var(--yoro-line-height-tight);
+  letter-spacing: 0;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    box-shadow var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.yoro-button--full-width {
+  width: 100%;
+}
+
+.yoro-button[data-size="sm"] {
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.yoro-button[data-size="md"] {
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  font-size: var(--yoro-font-size-md);
+}
+
+.yoro-button[data-size="lg"] {
+  min-height: var(--yoro-space-12);
+  padding: var(--yoro-space-3) var(--yoro-space-6);
+  border-radius: var(--yoro-radius-lg);
+  font-size: var(--yoro-font-size-lg);
+}
+
+.yoro-button[data-variant="primary"] {
+  border-color: var(--yoro-color-primary);
+  background: var(--yoro-color-primary);
+  color: var(--yoro-color-text-strong);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.yoro-button[data-variant="secondary"] {
+  border-color: var(--yoro-color-secondary);
+  background: var(--yoro-color-secondary);
+  color: var(--yoro-color-text-strong);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.yoro-button[data-variant="tertiary"] {
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface-strong);
+  color: var(--yoro-color-text-strong);
+}
+
+.yoro-button[data-variant="ghost"] {
+  border-color: transparent;
+  background: transparent;
+  color: var(--yoro-color-text);
+}
+
+.yoro-button[data-variant="danger"] {
+  border-color: var(--yoro-color-danger);
+  background: var(--yoro-color-danger);
+  color: var(--yoro-color-bg);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.yoro-button:not([aria-disabled="true"]):hover {
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.yoro-button:not([aria-disabled="true"])[data-variant="primary"]:hover {
+  border-color: var(--yoro-color-primary-strong);
+  background: var(--yoro-color-primary-strong);
+}
+
+.yoro-button:not([aria-disabled="true"])[data-variant="secondary"]:hover {
+  border-color: var(--yoro-color-secondary-strong);
+  background: var(--yoro-color-secondary-strong);
+}
+
+.yoro-button:not([aria-disabled="true"])[data-variant="tertiary"]:hover,
+.yoro-button:not([aria-disabled="true"])[data-variant="ghost"]:hover {
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface-muted);
+}
+
+.yoro-button:not([aria-disabled="true"])[data-variant="danger"]:hover {
+  border-color: var(--yoro-color-danger);
+  background: color-mix(in srgb, var(--yoro-color-danger), var(--yoro-color-text-strong));
+}
+
+.yoro-button:not([aria-disabled="true"]):active {
+  box-shadow: var(--yoro-shadow-none);
+}
+
+.yoro-button:focus-visible {
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
+}
+
+.yoro-button[aria-disabled="true"],
+.yoro-button:disabled {
+  border-color: var(--yoro-color-border);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-muted);
+  box-shadow: var(--yoro-shadow-none);
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: .58;
+}
+
+.yoro-button[data-loading="true"] {
+  cursor: progress;
+}
+
+.yoro-button__icon,
+.yoro-button__spinner {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.yoro-button__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yoro-button__loading-label {
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.yoro-button__spinner {
+  width: 1em;
+  height: 1em;
+  border: thin solid currentColor;
+  border-block-start-color: transparent;
+  border-radius: var(--yoro-radius-circle);
+  animation: yoro-button-spin calc(var(--yoro-motion-duration-slow) * 3) linear infinite;
+}
+
+@keyframes yoro-button-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yoro-button {
+    transition: none;
+  }
+
+  .yoro-button__spinner {
+    animation: none;
+  }
+}

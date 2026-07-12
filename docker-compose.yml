@@ -1,8 +1,13 @@
 services:
   server:
+    image: ${YORO_SERVER_IMAGE:-streamops-server:local}
     build:
       context: .
       dockerfile: apps/server/Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-0.1.0}
+        GIT_SHA: ${GIT_SHA:-unknown}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
     container_name: streamops-server
     restart: unless-stopped
     environment:
@@ -33,6 +38,7 @@ services:
       TWITCH_CHAT_MAX_QUEUE: ${TWITCH_CHAT_MAX_QUEUE:-20}
       TWITCH_CHAT_MAX_LENGTH: ${TWITCH_CHAT_MAX_LENGTH:-500}
       TWITCH_CHAT_TEMPLATE_VALUE_MAX_LENGTH: ${TWITCH_CHAT_TEMPLATE_VALUE_MAX_LENGTH:-120}
+      TWITCH_API_TIMEOUT_MS: ${TWITCH_API_TIMEOUT_MS:-10000}
       BRIDGE_SHARED_SECRET: ${BRIDGE_SHARED_SECRET:-}
       BRIDGE_SHARED_SECRET_FILE: ${BRIDGE_SHARED_SECRET_FILE:-}
       RIOT_API_KEY: ${RIOT_API_KEY:-}
@@ -42,6 +48,7 @@ services:
       RIOT_RATE_LIMIT_PER_SECOND: ${RIOT_RATE_LIMIT_PER_SECOND:-20}
       RIOT_RATE_LIMIT_PER_TWO_MINUTES: ${RIOT_RATE_LIMIT_PER_TWO_MINUTES:-100}
       RIOT_RATE_LIMIT_QUEUE_MAX: ${RIOT_RATE_LIMIT_QUEUE_MAX:-500}
+      RIOT_API_TIMEOUT_MS: ${RIOT_API_TIMEOUT_MS:-10000}
       LOCAL_TTS_ENABLED: ${LOCAL_TTS_ENABLED:-true}
       LOCAL_TTS_PROVIDER: ${LOCAL_TTS_PROVIDER:-seoya}
       LOCAL_TTS_BASE_URL: ${LOCAL_TTS_BASE_URL:-http://tts-engine:8787}
@@ -52,6 +59,8 @@ services:
       LOCAL_TTS_CACHE_DIR: ${LOCAL_TTS_CACHE_DIR:-/app/.streamops/tts-cache}
       LOCAL_TTS_PUBLIC_PATH: ${LOCAL_TTS_PUBLIC_PATH:-/tts}
       STREAMOPS_LOGS_DIR: /app/logs
+      LOG_MAX_BYTES: ${LOG_MAX_BYTES:-10485760}
+      LOG_MAX_FILES: ${LOG_MAX_FILES:-5}
       STREAMOPS_STATE_DIR: /app/.streamops
       STREAMOPS_REPORTS_DIR: /app/reports
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
@@ -60,6 +69,33 @@ services:
       DASHBOARD_SESSION_TTL_MS: ${DASHBOARD_SESSION_TTL_MS:-28800000}
       OVERLAY_ACCESS_TOKEN: ${OVERLAY_ACCESS_TOKEN:-}
       OVERLAY_ACCESS_TOKEN_FILE: ${OVERLAY_ACCESS_TOKEN_FILE:-}
+      SUPPORT_MAILBOX_ENABLED: ${SUPPORT_MAILBOX_ENABLED:-false}
+      SUPPORT_MAILBOX_ADDRESS: ${SUPPORT_MAILBOX_ADDRESS:-support@yoro.gg}
+      SUPPORT_MAILBOX_WEBHOOK_SECRET: ${SUPPORT_MAILBOX_WEBHOOK_SECRET:-}
+      SUPPORT_MAILBOX_WEBHOOK_SECRET_FILE: ${SUPPORT_MAILBOX_WEBHOOK_SECRET_FILE:-}
+      SUPPORT_MAILBOX_ENCRYPTION_KEY: ${SUPPORT_MAILBOX_ENCRYPTION_KEY:-}
+      SUPPORT_MAILBOX_ENCRYPTION_KEY_FILE: ${SUPPORT_MAILBOX_ENCRYPTION_KEY_FILE:-}
+      SUPPORT_MAILBOX_STATE_PATH: ${SUPPORT_MAILBOX_STATE_PATH:-/app/.streamops/support-mailbox.json.enc}
+      SUPPORT_MAILBOX_RETENTION_DAYS: ${SUPPORT_MAILBOX_RETENTION_DAYS:-90}
+      SUPPORT_MAILBOX_MAX_MESSAGES: ${SUPPORT_MAILBOX_MAX_MESSAGES:-1000}
+      LEGAL_OPERATOR_NAME: ${LEGAL_OPERATOR_NAME:-}
+      LEGAL_CONTACT_ADDRESS: ${LEGAL_CONTACT_ADDRESS:-}
+      LEGAL_PRIVACY_OFFICER_NAME: ${LEGAL_PRIVACY_OFFICER_NAME:-}
+      LEGAL_CONTACT_EMAIL: ${LEGAL_CONTACT_EMAIL:-support@yoro.gg}
+      LEGAL_CONTACT_PHONE: ${LEGAL_CONTACT_PHONE:-}
+      LEGAL_EFFECTIVE_DATE: ${LEGAL_EFFECTIVE_DATE:-}
+      LEGAL_MINIMUM_AGE: ${LEGAL_MINIMUM_AGE:-14}
+      LEGAL_GOVERNING_LAW_KO: ${LEGAL_GOVERNING_LAW_KO:-}
+      LEGAL_GOVERNING_LAW_JA: ${LEGAL_GOVERNING_LAW_JA:-}
+      LEGAL_DISPUTE_VENUE_KO: ${LEGAL_DISPUTE_VENUE_KO:-}
+      LEGAL_DISPUTE_VENUE_JA: ${LEGAL_DISPUTE_VENUE_JA:-}
+      LEGAL_PROCESSORS_KO: ${LEGAL_PROCESSORS_KO:-}
+      LEGAL_PROCESSORS_JA: ${LEGAL_PROCESSORS_JA:-}
+      LEGAL_CROSS_BORDER_TRANSFER_KO: ${LEGAL_CROSS_BORDER_TRANSFER_KO:-}
+      LEGAL_CROSS_BORDER_TRANSFER_JA: ${LEGAL_CROSS_BORDER_TRANSFER_JA:-}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      GIT_SHA: ${GIT_SHA:-unknown}
+      BUILD_TIME: ${BUILD_TIME:-unknown}
     read_only: true
     tmpfs:
       - /tmp
@@ -68,7 +104,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "${HOST_PORT:-3000}:${PORT:-3000}"
+      - "${HOST_BIND:-127.0.0.1}:${HOST_PORT:-3000}:${PORT:-3000}"
     volumes:
       - ./logs:/app/logs
       - ./apps/server/config:/app/apps/server/config:ro
@@ -81,6 +117,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   tts-engine:
     build:
@@ -112,6 +154,11 @@ services:
       timeout: 8s
       retries: 5
       start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   voicevox:
     image: ${VOICEVOX_IMAGE:-voicevox/voicevox_engine:cpu-ubuntu20.04-latest}
@@ -119,6 +166,11 @@ services:
     restart: unless-stopped
     expose:
       - "50021"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -130,6 +182,11 @@ services:
     depends_on:
       server:
         condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 volumes:
   streamops_state:

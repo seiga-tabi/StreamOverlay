@@ -30,7 +30,7 @@ import type {
   TwitchEventSubStatus,
   TwitchEventSubSubscriptionStatus
 } from "@streamops/shared";
-import { OVERLAY_CHANNELS, formatRiotId, isActiveParticipationStatus, isWaitingParticipationStatus, newId, normalizeRiotIdKey, nowIso, type ParticipationStreamerProfile } from "@streamops/shared";
+import { OVERLAY_CHANNELS, formatRiotId, isActiveParticipationStatus, isWaitingParticipationStatus, newId, normalizeRiotIdKey, nowIso, toSafeErrorMessage, type ParticipationStreamerProfile } from "@streamops/shared";
 
 export type QuestionEntry = {
   id: string;
@@ -115,6 +115,21 @@ export type StoreOptions = {
   streamerRiotIdStatePath?: string;
   tournamentStatePath?: string;
   communityStatePath?: string;
+  runtimeStatePath?: string;
+  onPersistenceError?: (failure: StorePersistenceFailure) => void;
+};
+
+export type StorePersistenceFailure = {
+  scope: "followers" | "streamer_riot_ids" | "tournaments" | "community" | "runtime";
+  operation: "load" | "save" | "readiness";
+  filePath: string;
+  error: string;
+};
+
+export type StoreReadiness = {
+  ok: boolean;
+  checks: Record<string, boolean>;
+  errors: string[];
 };
 
 export type TwitchStreamLiveStatus = {
@@ -154,6 +169,12 @@ const CANCELLABLE_PARTICIPATION_STATUSES = new Set<ParticipationEntry["status"]>
   "checked_in",
   "invited"
 ]);
+const PERSISTED_PARTICIPATION_STATUSES = new Set<ParticipationEntry["status"]>([
+  "pending", "verified", "waitlisted", "selected", "checked_in", "invited", "in_game", "played",
+  "skipped", "cancelled", "no_show", "rejected", "blocked"
+]);
+const PERSISTED_PARTICIPATION_SOURCES = new Set<ParticipationEntry["source"]>(["chat_command", "channel_point", "dashboard"]);
+const PERSISTED_LOL_ROLES = new Set<ParticipationEntry["preferredRole"]>(["top", "jungle", "mid", "adc", "support", "fill", "unknown"]);
 const PARTICIPATION_OVERLAY_VISIBLE_LIMIT = 4;
 
 function isCheckInExpired(entry: ParticipationEntry, now = new Date()): boolean {
@@ -237,6 +258,57 @@ function optionalString(value: unknown): string | undefined {
 function optionalNumber(value: unknown): number | undefined {
   const numberValue = Number(value);
   return Number.isFinite(numberValue) ? numberValue : undefined;
+}
+
+function normalizedParticipationEntry(value: unknown): ParticipationEntry | undefined {
+  const input = objectRecord(value);
+  const id = optionalString(input?.id);
+  const twitchUserId = optionalString(input?.twitchUserId);
+  const twitchUserName = optionalString(input?.twitchUserName);
+  const riotGameName = optionalString(input?.riotGameName);
+  const riotTagLine = optionalString(input?.riotTagLine);
+  const status = optionalString(input?.status) as ParticipationEntry["status"] | undefined;
+  const source = optionalString(input?.source) as ParticipationEntry["source"] | undefined;
+  const preferredRole = optionalString(input?.preferredRole) as ParticipationEntry["preferredRole"] | undefined;
+  const createdAt = optionalString(input?.createdAt);
+  const updatedAt = optionalString(input?.updatedAt);
+  if (!id || !twitchUserId || !twitchUserName || !riotGameName || !riotTagLine || !status || !source || !preferredRole || !createdAt || !updatedAt) return undefined;
+  if (!PERSISTED_PARTICIPATION_STATUSES.has(status) || !PERSISTED_PARTICIPATION_SOURCES.has(source) || !PERSISTED_LOL_ROLES.has(preferredRole)) return undefined;
+  return {
+    ...(input as ParticipationEntry),
+    id,
+    twitchUserId,
+    twitchUserName,
+    riotGameName,
+    riotTagLine,
+    status,
+    source,
+    preferredRole,
+    createdAt,
+    updatedAt,
+    topChampions: Array.isArray(input?.topChampions)
+      ? input.topChampions.map((champion) => objectRecord(champion)).filter((champion): champion is Record<string, unknown> => Boolean(champion)).map((champion) => ({ ...champion })) as ParticipationEntry["topChampions"]
+      : undefined
+  };
+}
+
+function cloneParticipationEntry(entry: ParticipationEntry): ParticipationEntry {
+  return {
+    ...entry,
+    rankedStats: entry.rankedStats ? { ...entry.rankedStats } : undefined,
+    topChampions: entry.topChampions?.map((champion) => ({ ...champion }))
+  };
+}
+
+function cloneParticipationStreamerProfile(profile: ParticipationStreamerProfile | undefined): ParticipationStreamerProfile | undefined {
+  return profile ? {
+    ...profile,
+    topChampions: profile.topChampions?.map((champion) => ({ ...champion })),
+    rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
+    performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
+    recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
+    rankHistory: profile.rankHistory?.map((point) => ({ ...point }))
+  } : undefined;
 }
 
 function normalizedFollowerActivity(value: unknown): FollowerActivity {
@@ -683,6 +755,7 @@ export class Store {
   private tournaments: StreamerTournament[] = [];
   private communityPosts: CommunityPost[] = [];
   private communityCleanupTimer?: NodeJS.Timeout;
+  private readonly persistenceFailures = new Map<string, StorePersistenceFailure>();
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
   private overlayStatus: OverlayStatus = {
     clientCount: 0,
@@ -720,8 +793,78 @@ export class Store {
     this.loadStreamerRiotIdState();
     this.loadTournamentState();
     this.loadCommunityState();
+    this.loadRuntimeState();
     this.cleanupExpiredPartyCommunityPosts();
     this.startCommunityCleanupTimer();
+  }
+
+  private reportPersistenceFailure(failure: StorePersistenceFailure): void {
+    this.persistenceFailures.set(failure.scope, failure);
+    this.options.onPersistenceError?.(failure);
+  }
+
+  private clearPersistenceFailure(scope: StorePersistenceFailure["scope"]): void {
+    this.persistenceFailures.delete(scope);
+  }
+
+  private isMissingStateFile(error: unknown): boolean {
+    return error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT";
+  }
+
+  getReadiness(): StoreReadiness {
+    const paths = [
+      ["followers", this.options.followerStatePath],
+      ["streamer_riot_ids", this.options.streamerRiotIdStatePath],
+      ["tournaments", this.options.tournamentStatePath],
+      ["community", this.options.communityStatePath],
+      ["runtime", this.options.runtimeStatePath]
+    ].filter((entry): entry is [StorePersistenceFailure["scope"], string] => Boolean(entry[1]));
+    let statePathsWritable = true;
+    for (const [scope, filePath] of paths) {
+      try {
+        const dir = path.dirname(filePath);
+        fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+        fs.accessSync(dir, fs.constants.W_OK);
+      } catch (error) {
+        statePathsWritable = false;
+        this.reportPersistenceFailure({
+          scope,
+          operation: "readiness",
+          filePath,
+          error: toSafeErrorMessage(error)
+        });
+      }
+    }
+    const errors = [...this.persistenceFailures.values()].map((failure) => `${failure.scope}:${failure.operation}`);
+    return {
+      ok: statePathsWritable && errors.length === 0,
+      checks: {
+        statePathsConfigured: paths.length > 0,
+        statePathsWritable,
+        persistenceHealthy: errors.length === 0
+      },
+      errors
+    };
+  }
+
+  flush(): void {
+    if (this.followerPersistTimer) {
+      clearTimeout(this.followerPersistTimer);
+      this.followerPersistTimer = undefined;
+    }
+    this.persistFollowerState();
+    this.persistStreamerRiotIdState();
+    this.persistTournamentState();
+    this.persistCommunityState();
+    this.persistRuntimeState();
+  }
+
+  close(): void {
+    if (this.communityCleanupTimer) {
+      clearInterval(this.communityCleanupTimer);
+      this.communityCleanupTimer = undefined;
+    }
+    this.flush();
   }
 
   getStatus(): BotStatus {
@@ -1068,11 +1211,15 @@ export class Store {
       this.lastFollowerSnapshotAt = optionalString(parsed?.lastFollowerSnapshotAt);
       this.lastFollowerSnapshotTotal = typeof parsed?.lastFollowerSnapshotTotal === "number" ? parsed.lastFollowerSnapshotTotal : undefined;
       this.lastFollowerSnapshotTruncated = typeof parsed?.lastFollowerSnapshotTruncated === "boolean" ? parsed.lastFollowerSnapshotTruncated : undefined;
-    } catch {
+      this.clearPersistenceFailure("followers");
+    } catch (error) {
       this.followers.clear();
       this.lastFollowerSnapshotAt = undefined;
       this.lastFollowerSnapshotTotal = undefined;
       this.lastFollowerSnapshotTruncated = undefined;
+      if (!this.isMissingStateFile(error)) {
+        this.reportPersistenceFailure({ scope: "followers", operation: "load", filePath: this.options.followerStatePath, error: toSafeErrorMessage(error) });
+      }
     }
   }
 
@@ -1091,8 +1238,9 @@ export class Store {
       };
       fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       fs.renameSync(tmpPath, this.options.followerStatePath);
-    } catch {
-      // 방송 중 파일 저장 실패가 runtime 동작을 막지 않도록 무시합니다.
+      this.clearPersistenceFailure("followers");
+    } catch (error) {
+      this.reportPersistenceFailure({ scope: "followers", operation: "save", filePath: this.options.followerStatePath, error: toSafeErrorMessage(error) });
     }
   }
 
@@ -1114,8 +1262,12 @@ export class Store {
       this.streamerRiotIdRequests = requests
         .map(normalizedStreamerRiotIdRequest)
         .filter((request): request is StreamerRiotIdRequest => Boolean(request));
-    } catch {
+      this.clearPersistenceFailure("streamer_riot_ids");
+    } catch (error) {
       this.streamerRiotIdRequests = [];
+      if (!this.isMissingStateFile(error)) {
+        this.reportPersistenceFailure({ scope: "streamer_riot_ids", operation: "load", filePath: this.options.streamerRiotIdStatePath, error: toSafeErrorMessage(error) });
+      }
     }
   }
 
@@ -1131,8 +1283,9 @@ export class Store {
       };
       fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       fs.renameSync(tmpPath, this.options.streamerRiotIdStatePath);
-    } catch {
-      // 방송 중 등록 요청 저장 실패가 runtime 동작을 막지 않도록 무시합니다.
+      this.clearPersistenceFailure("streamer_riot_ids");
+    } catch (error) {
+      this.reportPersistenceFailure({ scope: "streamer_riot_ids", operation: "save", filePath: this.options.streamerRiotIdStatePath, error: toSafeErrorMessage(error) });
     }
   }
 
@@ -1145,8 +1298,12 @@ export class Store {
       this.tournaments = tournaments
         .map(normalizedStreamerTournament)
         .filter((tournament): tournament is StreamerTournament => Boolean(tournament));
-    } catch {
+      this.clearPersistenceFailure("tournaments");
+    } catch (error) {
       this.tournaments = [];
+      if (!this.isMissingStateFile(error)) {
+        this.reportPersistenceFailure({ scope: "tournaments", operation: "load", filePath: this.options.tournamentStatePath, error: toSafeErrorMessage(error) });
+      }
     }
   }
 
@@ -1162,8 +1319,9 @@ export class Store {
       };
       fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       fs.renameSync(tmpPath, this.options.tournamentStatePath);
-    } catch {
-      // 대회 정보 저장 실패가 방송 중 runtime 동작을 막지 않도록 무시합니다.
+      this.clearPersistenceFailure("tournaments");
+    } catch (error) {
+      this.reportPersistenceFailure({ scope: "tournaments", operation: "save", filePath: this.options.tournamentStatePath, error: toSafeErrorMessage(error) });
     }
   }
 
@@ -1176,8 +1334,12 @@ export class Store {
       this.communityPosts = posts
         .map(normalizedCommunityPost)
         .filter((post): post is CommunityPost => Boolean(post));
-    } catch {
+      this.clearPersistenceFailure("community");
+    } catch (error) {
       this.communityPosts = [];
+      if (!this.isMissingStateFile(error)) {
+        this.reportPersistenceFailure({ scope: "community", operation: "load", filePath: this.options.communityStatePath, error: toSafeErrorMessage(error) });
+      }
     }
   }
 
@@ -1193,8 +1355,58 @@ export class Store {
       };
       fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       fs.renameSync(tmpPath, this.options.communityStatePath);
-    } catch {
-      // 커뮤니티 저장 실패가 공개 전적 검색과 방송 기능을 막지 않도록 무시합니다.
+      this.clearPersistenceFailure("community");
+    } catch (error) {
+      this.reportPersistenceFailure({ scope: "community", operation: "save", filePath: this.options.communityStatePath, error: toSafeErrorMessage(error) });
+    }
+  }
+
+  private loadRuntimeState(): void {
+    if (!this.options.runtimeStatePath) return;
+    try {
+      const raw = fs.readFileSync(this.options.runtimeStatePath, "utf8");
+      const parsed = objectRecord(JSON.parse(raw));
+      const participation = objectRecord(parsed?.participation);
+      const queue = Array.isArray(participation?.queue) ? participation.queue : [];
+      this.participationQueue = queue
+        .map(normalizedParticipationEntry)
+        .filter((entry): entry is ParticipationEntry => Boolean(entry))
+        .slice(-2000);
+      this.status.participation = participation?.isOpen === true ? "open" : "closed";
+      const streamerProfile = objectRecord(participation?.streamerProfile);
+      this.participationStreamerProfile = streamerProfile
+        ? cloneParticipationStreamerProfile(streamerProfile as ParticipationStreamerProfile)
+        : undefined;
+      this.clearPersistenceFailure("runtime");
+    } catch (error) {
+      this.participationQueue = [];
+      this.participationStreamerProfile = undefined;
+      this.status.participation = "closed";
+      if (!this.isMissingStateFile(error)) {
+        this.reportPersistenceFailure({ scope: "runtime", operation: "load", filePath: this.options.runtimeStatePath, error: toSafeErrorMessage(error) });
+      }
+    }
+  }
+
+  private persistRuntimeState(): void {
+    if (!this.options.runtimeStatePath) return;
+    try {
+      const dir = path.dirname(this.options.runtimeStatePath);
+      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+      const tmpPath = `${this.options.runtimeStatePath}.${process.pid}.${Date.now()}.tmp`;
+      const payload = {
+        version: 1,
+        participation: {
+          isOpen: this.status.participation === "open",
+          queue: this.participationQueue.map(cloneParticipationEntry),
+          streamerProfile: cloneParticipationStreamerProfile(this.participationStreamerProfile)
+        }
+      };
+      fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+      fs.renameSync(tmpPath, this.options.runtimeStatePath);
+      this.clearPersistenceFailure("runtime");
+    } catch (error) {
+      this.reportPersistenceFailure({ scope: "runtime", operation: "save", filePath: this.options.runtimeStatePath, error: toSafeErrorMessage(error) });
     }
   }
 
@@ -1629,27 +1841,13 @@ export class Store {
   }
 
   setParticipationStreamerProfile(profile: ParticipationStreamerProfile | undefined): ParticipationStreamerProfile | undefined {
-    this.participationStreamerProfile = profile ? {
-      ...profile,
-      topChampions: profile.topChampions?.map((champion) => ({ ...champion })),
-      rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
-      performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
-      recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
-      rankHistory: profile.rankHistory?.map((point) => ({ ...point }))
-    } : undefined;
+    this.participationStreamerProfile = cloneParticipationStreamerProfile(profile);
+    this.persistRuntimeState();
     return this.getParticipationStreamerProfile();
   }
 
   getParticipationStreamerProfile(): ParticipationStreamerProfile | undefined {
-    const profile = this.participationStreamerProfile;
-    return profile ? {
-      ...profile,
-      topChampions: profile.topChampions?.map((champion) => ({ ...champion })),
-      rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
-      performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
-      recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
-      rankHistory: profile.rankHistory?.map((point) => ({ ...point }))
-    } : undefined;
+    return cloneParticipationStreamerProfile(this.participationStreamerProfile);
   }
 
   getActiveParticipationQueue(): ParticipationEntry[] {
@@ -1738,6 +1936,7 @@ export class Store {
 
   addParticipation(entry: ParticipationEntry): ParticipationEntry {
     this.participationQueue.push(entry);
+    this.persistRuntimeState();
     return entry;
   }
 
@@ -1749,6 +1948,7 @@ export class Store {
 
     if (!reusable) {
       this.participationQueue.push(entry);
+      this.persistRuntimeState();
       return { entry, reused: false };
     }
 
@@ -1784,6 +1984,7 @@ export class Store {
       updatedAt: nowIso()
     };
     this.participationQueue[reusable.index] = reactivated;
+    this.persistRuntimeState();
     return { entry: reactivated, reused: true };
   }
 
@@ -1798,14 +1999,17 @@ export class Store {
       const previous = this.participationQueue[existingIndex]!;
       const next = { ...previous, ...entry, id: previous.id, updatedAt: nowIso() };
       this.participationQueue[existingIndex] = next;
+      this.persistRuntimeState();
       return next;
     }
     this.participationQueue.push(entry);
+    this.persistRuntimeState();
     return entry;
   }
 
   setParticipationOpen(open: boolean): void {
     this.patchStatus({ participation: open ? "open" : "closed" });
+    this.persistRuntimeState();
   }
 
   selectNextParticipant(checkInSeconds: number): ParticipationEntry | undefined {
@@ -1816,6 +2020,7 @@ export class Store {
     next.selectedAt = nowIso();
     next.checkInExpiresAt = new Date(Date.now() + checkInSeconds * 1000).toISOString();
     next.updatedAt = nowIso();
+    this.persistRuntimeState();
     return next;
   }
 
@@ -1829,6 +2034,7 @@ export class Store {
     entry.status = "no_show";
     entry.updatedAt = nowIso();
     if (note) entry.notes = entry.notes ? `${entry.notes}\n${note}` : note;
+    this.persistRuntimeState();
     return entry;
   }
 
@@ -1851,6 +2057,7 @@ export class Store {
     }
     entry.status = "checked_in";
     entry.updatedAt = nowIso();
+    this.persistRuntimeState();
     return { ok: true, entry };
   }
 
@@ -1868,6 +2075,7 @@ export class Store {
     entry.checkInExpiresAt = undefined;
     entry.updatedAt = nowIso();
     if (note) entry.notes = entry.notes ? `${entry.notes}\n${note}` : note;
+    this.persistRuntimeState();
     return { ok: true, entry };
   }
 
@@ -1887,6 +2095,7 @@ export class Store {
     } else {
       entry.playedAt = undefined;
     }
+    this.persistRuntimeState();
     return entry;
   }
 
@@ -1899,6 +2108,7 @@ export class Store {
       entry.updatedAt = nowIso();
       entries.push(entry);
     }
+    if (entries.length > 0) this.persistRuntimeState();
     return entries;
   }
 
@@ -1930,6 +2140,7 @@ export class Store {
         if (!entry.riotPuuid || !participantPuuids.has(entry.riotPuuid)) continue;
         markInGame(entry);
       }
+      if (entries.length > 0) this.persistRuntimeState();
       return entries;
     }
 
@@ -1938,6 +2149,7 @@ export class Store {
       markInGame(entry);
     }
 
+    if (entries.length > 0) this.persistRuntimeState();
     return entries;
   }
 
@@ -1950,6 +2162,7 @@ export class Store {
       entry.updatedAt = nowIso();
       entries.push(entry);
     }
+    if (entries.length > 0) this.persistRuntimeState();
     return entries;
   }
 
@@ -1964,6 +2177,7 @@ export class Store {
       topChampions: patch.topChampions ? patch.topChampions.map((champion) => ({ ...champion })) : patch.topChampions,
       updatedAt: nowIso()
     });
+    this.persistRuntimeState();
     return { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined };
   }
 
@@ -1973,6 +2187,7 @@ export class Store {
     entry.requestedRole = role;
     entry.preferredRole = role;
     entry.updatedAt = nowIso();
+    this.persistRuntimeState();
     return { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined };
   }
 

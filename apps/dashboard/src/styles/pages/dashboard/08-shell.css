@@ -1,0 +1,171 @@
+/* Dashboard 앱 공통: 좌측 관리자 메뉴를 방송 운영용 상단 고정 메뉴로 정리 */
+.app-shell {
+  display: block !important;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(123, 92, 255, .14), transparent 34%),
+    linear-gradient(180deg, #868e96 0%, #727b84 42%, #5f676f 100%) !important;
+  color: #f8f9fa;
+}
+
+.app-sidebar {
+  position: sticky !important;
+  top: 14px !important;
+  z-index: 70;
+  display: grid !important;
+  grid-template-columns: 152px minmax(0, 1fr);
+  align-items: center;
+  width: min(1720px, calc(100% - 48px));
+  height: auto !important;
+  min-height: 72px;
+  margin: 14px auto 0;
+  padding: 12px 20px !important;
+  overflow: visible !important;
+  border: 1px solid rgba(248, 249, 250, .12) !important;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .88), rgba(52, 58, 64, .84)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 18px 44px rgba(33, 37, 41, .18) !important;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.brand-block {
+  align-items: center;
+  margin: 0 !important;
+}
+
+.brand-logo {
+  width: 138px !important;
+  max-height: 46px !important;
+  border-radius: 0 !important;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .22));
+}
+
+.sidebar-profile {
+  display: none !important;
+}
+
+.app-sidebar nav {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.app-sidebar nav::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-group,
+.nav-group-items {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  min-width: max-content;
+}
+
+.nav-section-title {
+  display: none !important;
+}
+
+.nav-item {
+  grid-template-columns: 6px auto !important;
+  width: auto !important;
+  min-height: 44px;
+  padding: 0 14px !important;
+  border: 1px solid transparent !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+  color: rgba(248, 249, 250, .82) !important;
+  font-size: 14px;
+  font-weight: 850;
+  white-space: nowrap;
+  box-shadow: none !important;
+}
+
+.nav-item:hover {
+  border-color: rgba(248, 249, 250, .12) !important;
+  background: rgba(248, 249, 250, .06) !important;
+}
+
+.nav-item.active {
+  border-color: rgba(123, 92, 255, .42) !important;
+  background: rgba(123, 92, 255, .16) !important;
+  color: #ffffff !important;
+}
+
+.nav-marker {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 999px;
+  background: rgba(248, 249, 250, .28) !important;
+}
+
+.nav-item.active .nav-marker {
+  background: #7b5cff !important;
+  box-shadow: 0 0 12px rgba(123, 92, 255, .54) !important;
+}
+
+.app-main {
+  width: min(1720px, calc(100% - 48px));
+  min-height: calc(100vh - 104px);
+  margin: 18px auto 0;
+  background: transparent !important;
+}
+
+.top-bar {
+  position: sticky !important;
+  top: 100px !important;
+  z-index: 55;
+  min-height: 64px !important;
+  margin-bottom: 18px;
+  padding: 12px 24px !important;
+  border: 1px solid rgba(248, 249, 250, .12) !important;
+  border-radius: 24px;
+  background: rgba(52, 58, 64, .82) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 14px 30px rgba(33, 37, 41, .14) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.top-bar strong {
+  color: #ffffff !important;
+}
+
+.top-bar .eyebrow {
+  color: rgba(218, 226, 235, .74) !important;
+}
+
+.top-actions {
+  align-items: center;
+}
+
+.dashboard-locale-button,
+.top-action {
+  border-color: rgba(248, 249, 250, .16) !important;
+  background: rgba(33, 37, 41, .58) !important;
+  color: #f8f9fa !important;
+  box-shadow: none !important;
+}
+
+.top-chip {
+  border-color: rgba(76, 217, 174, .32) !important;
+  background: rgba(76, 217, 174, .13) !important;
+  color: #b6f7df !important;
+  box-shadow: none !important;
+}
+
+.content-shell {
+  width: min(100%, 1500px);
+  padding: 0 0 56px !important;
+}
+

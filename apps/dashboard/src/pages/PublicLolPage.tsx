@@ -1,550 +1,215 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
 import type { CommunityPost, CommunityPostCategory, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
 import { apiBase } from "../api/client";
+import { publicLegalRuntimeConfig } from "../runtime-config";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
-
-type PublicLolMatchParticipant = {
-  participantId?: number;
-  riotId?: string;
-  isTarget: boolean;
-  champion: LolChampionSummary;
-  twitchStream?: PublicLolTwitchStream;
-  championLevel?: number;
-  position?: string;
-  kills: number;
-  deaths: number;
-  assists: number;
-  kda: number;
-  cs?: number;
-  csPerMinute?: number;
-  killParticipation?: number;
-  goldEarned?: number;
-  goldShare?: number;
-  damageDealtToChampions?: number;
-  damageShare?: number;
-  damageDealtToObjectives?: number;
-  damageObjectiveShare?: number;
-  damageTaken?: number;
-  damageTakenShare?: number;
-  visionScore?: number;
-  visionScorePerMinute?: number;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
-  summonerSpells: number[];
-  runes: Array<{
-    runeId: number;
-    nameKo?: string;
-    nameJa?: string;
-    iconUrl?: string;
-    kind: "primary" | "secondary" | "stat";
-    category?: "style" | "keystone" | "perk" | "offense" | "flex" | "defense";
-  }>;
-  badges?: PublicLolMatchBadge[];
-};
-
-type PublicLolMatchTeamDetail = {
-  teamId: number;
-  result: "win" | "loss" | "unknown";
-  kills: number;
-  deaths: number;
-  assists: number;
-  goldEarned: number;
-  damageDealtToChampions: number;
-  damageDealtToObjectives: number;
-  damageTaken: number;
-  objectives: Record<string, number>;
-  players: PublicLolMatchParticipant[];
-};
-
-type PublicLolMatchRankParticipant = {
-  riotId?: string;
-  teamId?: number;
-  championId: number;
-  position?: string;
-  rankedStats?: LolRankedStats;
-};
-
-type PublicLolMatchRankResponse = {
-  status: "ready";
-  matchId: string;
-  participants: PublicLolMatchRankParticipant[];
-  fetchedAt: string;
-};
-
-type PublicLolMatchBuildItemEvent = {
-  itemId: number;
-  iconUrl?: string;
-  timestampMs: number;
-};
-
-type PublicLolMatchBuildSkillEvent = {
-  slot: number;
-  key: "Q" | "W" | "E" | "R";
-  level: number;
-  timestampMs: number;
-  nameKo?: string;
-  nameJa?: string;
-  iconUrl?: string;
-};
-
-type PublicLolMatchBuildParticipant = {
-  participantId?: number;
-  riotId?: string;
-  teamId?: number;
-  result: "win" | "loss" | "unknown";
-  champion: LolChampionSummary;
-  score: number;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
-  itemEvents: PublicLolMatchBuildItemEvent[];
-  skillOrder: PublicLolMatchBuildSkillEvent[];
-  runes: PublicLolMatchParticipant["runes"];
-  summonerSpells: number[];
-  badges: PublicLolMatchBadge[];
-};
-
-type PublicLolMatchBuildResponse = {
-  status: "ready";
-  matchId: string;
-  dataDragonVersion?: string;
-  participants: PublicLolMatchBuildParticipant[];
-  fetchedAt: string;
-};
-
-type PublicLolMatchBadgeCode = "mvp" | "ace" | "unstoppable" | "tenacity" | "damage_carry" | "objective" | "vision";
-
-type PublicLolMatchBadge = {
-  code: PublicLolMatchBadgeCode;
-  score?: number;
-  rank?: number;
-};
-
-type PublicLolRecentMatch = {
-  matchId: string;
-  champion: LolChampionSummary;
-  queueId?: number;
-  gameMode?: string;
-  gameType?: string;
-  mapId?: number;
-  startedAt?: string;
-  durationSeconds?: number;
-  result: "win" | "loss" | "unknown";
-  kills: number;
-  deaths: number;
-  assists: number;
-  kda: number;
-  championLevel?: number;
-  cs?: number;
-  csPerMinute?: number;
-  killParticipation?: number;
-  goldEarned?: number;
-  goldPerMinute?: number;
-  damageDealtToChampions?: number;
-  damageTaken?: number;
-  damagePerMinute?: number;
-  damageShare?: number;
-  visionScore?: number;
-  visionScorePerMinute?: number;
-  wardsPlaced?: number;
-  wardsKilled?: number;
-  controlWardsPlaced?: number;
-  largestMultiKill?: number;
-  soloKills?: number;
-  turretKills?: number;
-  inhibitorKills?: number;
-  objectivesStolen?: number;
-  totalTimeSpentDead?: number;
-  position?: string;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
-  summonerSpells: number[];
-  badges?: PublicLolMatchBadge[];
-  team?: {
-    teamId: number;
-    kills: number;
-    deaths: number;
-    goldEarned: number;
-    damageDealtToChampions: number;
-    objectives: Record<string, number>;
-  };
-  opponent?: {
-    riotId?: string;
-    champion: LolChampionSummary;
-    kills: number;
-    deaths: number;
-    assists: number;
-    kda: number;
-  };
-  teams: PublicLolMatchTeamDetail[];
-};
-
-type PublicLolChampionPerformance = {
-  champion: LolChampionSummary;
-  games: number;
-  wins: number;
-  winRate: number;
-  averageKda: number;
-  averageCsPerMinute?: number;
-  averageDamagePerMinute?: number;
-};
-
-type PublicChampionAnalysisRow = {
-  champion: LolChampionSummary;
-  masteryRank?: number;
-  masteryLevel?: number;
-  masteryPoints?: number;
-  performance?: PublicLolChampionPerformance;
-};
-
-type PublicLolRolePerformance = {
-  role: string;
-  games: number;
-  wins: number;
-  winRate: number;
-  averageKda: number;
-};
-
-type PublicProfileLink = {
-  id?: string;
-  url: string;
-  label: string;
-  platform?: string;
-};
-
-type PublicLolTwitchStream = {
-  matched: true;
-  isLive: boolean;
-  twitchUserId: string;
-  twitchLogin?: string;
-  twitchDisplayName: string;
-  profileImageUrl?: string;
-  profileLinkUrl?: string;
-  profileLinkLabel?: string;
-  profileLinks?: PublicProfileLink[];
-  channelUrl?: string;
-  title?: string;
-  gameName?: string;
-  viewerCount?: number;
-  startedAt?: string;
-  thumbnailUrl?: string;
-  source: "participation" | "connected_streamer" | "approved_streamer";
-};
-
-type PublicTwitchViewerStatus = {
-  connected: boolean;
-  configured: boolean;
-  requiredScopes: string[];
-  missingScopes: string[];
-  user?: {
-    id: string;
-    login: string;
-    displayName: string;
-    profileImageUrl?: string;
-  };
-  tokenExpiresAt?: string;
-  streamerRiotRequest?: StreamerRiotIdRequest;
-};
-
-type PublicTwitchFollowedLolChannel = {
-  twitchUserId: string;
-  twitchLogin: string;
-  twitchDisplayName: string;
-  profileImageUrl?: string;
-  followedAt: string;
-  isLive: boolean;
-  channelUrl?: string;
-  title?: string;
-  gameName?: string;
-  viewerCount?: number;
-  startedAt?: string;
-  thumbnailUrl?: string;
-  riotId?: string;
-  riotGameName?: string;
-  riotTagLine?: string;
-  rankedStats?: LolRankedStats;
-  source?: "participation" | "connected_streamer" | "approved_streamer";
-};
-
-type PublicTwitchSubscriptionChannel = {
-  twitchUserId: string;
-  twitchLogin: string;
-  twitchDisplayName: string;
-  profileImageUrl?: string;
-  channelUrl?: string;
-  tier: string;
-  tierLabel: string;
-  isGift: boolean;
-  gifterName?: string;
-};
-
-type PublicTwitchFollowedLolResponse = {
-  connected: boolean;
-  total?: number;
-  truncated: boolean;
-  matchedCount: number;
-  subscriptionScopeGranted: boolean;
-  subscriptions: PublicTwitchSubscriptionChannel[];
-  channels: PublicTwitchFollowedLolChannel[];
-};
-
-type PublicParticipationQueueItem = {
-  position: number;
-  twitchUserName: string;
-  preferredRole?: LolRole;
-  requestedRole?: LolRole;
-  status: ParticipationStatus;
-  profileStatus?: string;
-  mainRole?: string;
-  mainRoleConfidence?: number;
-  rankedStats?: LolRankedStats;
-  topChampions?: LolChampionSummary[];
-  isViewer: boolean;
-};
-
-type PublicParticipationViewerEntry = PublicParticipationQueueItem & {
-  riotId: string;
-  source: string;
-};
-
-type PublicParticipationStreamer = {
-  id: string;
-  twitchUserId?: string;
-  twitchLogin?: string;
-  twitchDisplayName: string;
-  twitchProfileImageUrl?: string;
-  riotId?: string;
-  riotGameName?: string;
-  riotTagLine?: string;
-  isOpen: boolean;
-  queueSize: number;
-  updatedAt: string;
-};
-
-type PublicParticipationStateResponse = {
-  connected: boolean;
-  configured: boolean;
-  isOpen: boolean;
-  summary: {
-    total: number;
-    active: number;
-    waiting: number;
-    selected: number;
-    checkedIn: number;
-    noShow: number;
-    played: number;
-  };
-  streamers: PublicParticipationStreamer[];
-  selectedStreamerId?: string;
-  queue: PublicParticipationQueueItem[];
-  viewerEntry?: PublicParticipationViewerEntry;
-  maxQueueSize: number;
-  updatedAt: string;
-};
-
-type PublicParticipationJoinResponse = {
-  ok: true;
-  alreadyJoined: boolean;
-  reused: boolean;
-  state: PublicParticipationStateResponse;
-  entry?: PublicParticipationViewerEntry;
-};
-
-type PublicParticipationCancelResponse = {
-  ok: true;
-  state: PublicParticipationStateResponse;
-};
-
-function isRegisteredStreamerRequest(request: StreamerRiotIdRequest | undefined): request is StreamerRiotIdRequest {
-  return request?.status === "approved" && Boolean(request.overlaySlug && request.overlayKey);
-}
-
-type PublicLolCurrentGameParticipant = {
-  riotId?: string;
-  isTarget: boolean;
-  teamId: number;
-  summonerSpells: number[];
-  profileIconUrl?: string;
-  rankedStats?: LolRankedStats;
-  bot?: boolean;
-  champion: LolChampionSummary;
-};
-
-type PublicLolCurrentGame = {
-  isLive: boolean;
-  status: "live" | "not_found" | "unavailable";
-  message?: string;
-  errorCode?: string;
-  lolPlatform?: string;
-  gameId?: string;
-  queueId?: number;
-  gameMode?: string;
-  gameType?: string;
-  mapId?: number;
-  startedAt?: string;
-  gameLengthSeconds?: number;
-  participants: PublicLolCurrentGameParticipant[];
-  fetchedAt: string;
-};
-
-type PublicLolMatchPageResponse = {
-  status: "ready";
-  riotId: string;
-  gameName: string;
-  tagLine: string;
-  accountRegion: string;
-  lolPlatform: string;
-  recentMatches: PublicLolRecentMatch[];
-  recentMatchStart: number;
-  nextRecentMatchStart?: number;
-  hasMoreRecentMatches: boolean;
-  fetchedAt: string;
-};
-
-type PublicRecentRecord = {
-  title: string;
-  value: number | undefined;
-  unit: string;
-  match?: PublicLolRecentMatch;
-  champion?: LolChampionSummary;
-};
-
-type PublicTrendPoint = {
-  key: string;
-  x: number;
-  y: number;
-  value: number;
-  label: string;
-  result: PublicLolRecentMatch["result"];
-};
-
-type PublicTrendLine = {
-  points: PublicTrendPoint[];
-  linePoints: string;
-  areaPath: string;
-  yLabels: string[];
-  startLabel: string;
-  middleLabel: string;
-  endLabel: string;
-};
-
-type PublicRecentChampionSummary = {
-  champion: LolChampionSummary;
-  games: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-  averageKda: number;
-};
-
-type PublicLolProfile = {
-  status: "ready";
-  riotId: string;
-  gameName: string;
-  tagLine: string;
-  accountRegion: string;
-  lolPlatform: string;
-  profileIconUrl?: string;
-  summonerLevel?: number;
-  ladderRank?: number;
-  rankedStats?: LolRankedStats;
-  rankedQueues?: {
-    solo?: LolRankedStats;
-    flex?: LolRankedStats;
-    ranked5v5?: LolRankedStats;
-  };
-  rankHistory?: LolRankHistoryPoint[];
-  twitchStream?: PublicLolTwitchStream;
-  performanceStats?: LolPerformanceStats;
-  roleAnalysis?: LolRoleAnalysis;
-  topChampions: LolChampionSummary[];
-  recentMatches: PublicLolRecentMatch[];
-  liveGame: PublicLolCurrentGame;
-  recentMatchStart: number;
-  nextRecentMatchStart?: number;
-  hasMoreRecentMatches: boolean;
-  summary: {
-    recentGames: number;
-    recentWins: number;
-    recentWinRate: number;
-    averageKda?: number;
-    averageCsPerMinute?: number;
-    averageKillParticipation?: number;
-    averageDamagePerMinute?: number;
-    averageDamageShare?: number;
-    averageGoldPerMinute?: number;
-    averageVisionScore?: number;
-    totalKills: number;
-    totalDeaths: number;
-    totalAssists: number;
-  };
-  championPerformance: PublicLolChampionPerformance[];
-  rolePerformance: PublicLolRolePerformance[];
-  fetchedAt: string;
-  refreshAvailableAt?: string;
-};
-
-type TournamentPlayerProfileState = {
-  status: "loading" | "ready" | "error";
-  profile?: PublicLolProfile;
-  error?: string;
-};
-
-type CommunityPostProfileState = {
-  riotId?: string;
-  status: "idle" | "loading" | "ready" | "error";
-  profile?: PublicLolProfile;
-  error?: string;
-};
+import { AppShell, AppShellFooter, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
+import { Button } from "../shared/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../shared/ui/Card";
+import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../shared/ui/EmptyState";
+import { FormControl, FormField, FormHint, FormLabel, Input, Select, Textarea } from "../shared/ui/Form";
+import {
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../shared/ui/Modal";
+import { Navigation, NavigationBadge, NavigationItem, NavigationSection } from "../shared/ui/Navigation";
+import { PageHeader, PageHeaderActions, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../shared/ui/PageHeader";
+import { Skeleton, SkeletonAvatar, SkeletonButton, SkeletonCard, SkeletonText } from "../shared/ui/Skeleton";
+import { Badge, Metric, StatusPill } from "../shared/ui/Status";
+import {
+  Toast,
+  ToastCloseButton,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  type ToastTone,
+} from "../shared/ui/Toast";
+import {
+  PublicHomeSearchPanel,
+  PublicAppHeader as FeaturePublicAppHeader,
+  PublicLocaleSelector,
+  PublicSiteFooter,
+  PlayerItemBuild as FeaturePlayerItemBuild,
+  PlayerLoadoutBuild as FeaturePlayerLoadoutBuild,
+  PublicMatchFilterBar as FeaturePublicMatchFilterBar,
+  ProfileMetricStrip as FeatureProfileMetricStrip,
+  ProfileRecentChampionsCard as FeatureProfileRecentChampionsCard,
+  ProfileTopPanel as FeatureProfileTopPanel,
+  MatchTeamCompare as FeatureMatchTeamCompare,
+  MatchTeamDetails as FeatureMatchTeamDetails,
+  LpTrendLineChart,
+  RecentMatchBuildPanel as FeatureRecentMatchBuildPanel,
+  RecentMatchExpandedPanel as FeatureRecentMatchExpandedPanel,
+  RecentMatchRow as FeatureRecentMatchRow,
+  RecentMatchesPanel as FeatureRecentMatchesPanel,
+  SearchForm as FeatureSearchForm,
+  SearchableRiotId as FeatureSearchableRiotId,
+  type PublicMatchFilterBarText,
+  type ProfileRecentChampionItem,
+  type ProfileRecentChampionsCardText,
+  type ProfileRecentChampionsStreamInfo,
+  type ProfileRecentChampionsStreamStatus,
+  type ProfileTopPanelText,
+  type PublicHomeLiveStreamer,
+  type PublicHomeSearchPanelText,
+  type PublicSiteFooterText,
+  type MatchTeamCompareMetricViewModel,
+  type MatchTeamCompareObjectiveViewModel,
+  type MatchTeamCompareTeamViewModel,
+  type MatchTeamCompareViewModel,
+  type MatchTeamDetailsTeam,
+  type PlayerItemBuildSlotViewModel,
+  type PlayerItemBuildViewModel,
+  type PlayerLoadoutBuildSlotViewModel,
+  type PlayerLoadoutBuildViewModel,
+  type PublicTeamMetricStatViewModel,
+  type RecentMatchBuildBadge,
+  type RecentMatchBuildRuneColumn,
+  type RecentMatchBuildRuneRow,
+  type RecentMatchBuildRuneSlot,
+  type RecentMatchBuildViewModel,
+  type RecentMatchExpandedPanelText,
+  type RecentMatchRowMediaItem,
+  type RecentMatchesPanelText,
+  type SearchFormProps,
+  type SearchFormPanelRequest,
+  type SearchFormText,
+  type SearchableRiotIdBadgeViewModel,
+  type SearchableRiotIdViewModel,
+  type TeamChampionAvatarViewModel,
+} from "../features/public-lol";
+import {
+  activePublicLocale,
+  publicI18n,
+  publicJaText,
+  publicKoText,
+  publicText,
+  setActivePublicLocale,
+  t,
+  type PublicLocale,
+  type PublicTextKey,
+} from "../features/public-lol/i18n/public-lol-i18n";
+import type {
+  PublicLolMatchParticipant,
+  PublicLolMatchTeamDetail,
+  PublicLolMatchRankParticipant,
+  PublicLolMatchRankResponse,
+  PublicLolMatchBuildItemEvent,
+  PublicLolMatchBuildSkillEvent,
+  PublicLolMatchBuildParticipant,
+  PublicLolMatchBuildResponse,
+  PublicLolMatchBadgeCode,
+  PublicLolMatchBadge,
+  PublicLolRecentMatch,
+  PublicLolChampionPerformance,
+  PublicLolRolePerformance,
+  PublicProfileLink,
+  PublicLolTwitchStream,
+  PublicTwitchViewerStatus,
+  PublicTwitchFollowedLolChannel,
+  PublicTwitchSubscriptionChannel,
+  PublicTwitchFollowedLolResponse,
+  PublicParticipationQueueItem,
+  PublicParticipationViewerEntry,
+  PublicParticipationStreamer,
+  PublicParticipationStateResponse,
+  PublicParticipationJoinResponse,
+  PublicParticipationCancelResponse,
+  PublicLolCurrentGameParticipant,
+  PublicLolCurrentGame,
+  PublicLolMatchPageResponse,
+  PublicRecentRecord,
+  PublicRecentChampionSummary,
+  PublicLolProfile,
+  TournamentPlayerProfileState,
+  CommunityPostProfileState,
+  SearchSuggestion,
+  PublicNavTarget,
+  PublicMainPage,
+  PublicProfileTab,
+  PublicExpandedMatchView,
+  PublicTheme,
+  MatchQueueFilter,
+  MatchPeriodFilter,
+  PublicMatchFilters,
+  PublicFavorite,
+} from "../features/public-lol/types/public-lol";
+import {
+  buildSuggestions,
+  jpRiotIdQuery,
+  normalizeRiotId,
+  normalizeSuggestionKey,
+  normalizedTagLine,
+  publicSummonerPath,
+  riotIdFromPublicSummonerPath,
+  searchTextForMatch,
+  splitRiotIdText,
+  suggestionRiotId,
+} from "../features/public-lol/utils/riot-id";
+import { formatCooldown, formatDecimal, formatDuration, formatNumber, formatPercent, refreshRemainingMs } from "../features/public-lol/utils/format";
+import {
+  isPublicLocale,
+} from "../features/public-lol/utils/locale";
+import {
+  PUBLIC_TOURNAMENT_CALENDAR_PATH,
+  PUBLIC_TOURNAMENT_LIST_PATH,
+  legalPageFromPublicPath,
+  publicLegalPath,
+  publicTournamentDetailPath,
+  setPublicPath,
+  tournamentRouteFromPublicPath,
+  type PublicLegalPageKey,
+} from "../features/public-lol/utils/routes";
+import {
+  favoriteFromProfile,
+  isFavoriteProfile,
+  prependFavorite,
+  readFavorites,
+  readRecentSearches,
+  saveRecentSearch,
+  writeFavorites,
+} from "../features/public-lol/utils/storage";
+import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
+import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
+import {
+  championAnalysisMax,
+  championAnalysisRows,
+  filteredMatches,
+  hasActiveFilters,
+  kdaFromTotals,
+  profileWithAdditionalMatchPage,
+  profileWithDynamicState,
+  profileWithMatches,
+  roundTo,
+  safeRecordValue,
+  summarizeMatches,
+  winRateFromTotals,
+} from "../features/public-lol/utils/match";
+import {
+  RECENT_ANALYSIS_MATCH_LIMIT,
+  averageTierLabel,
+  matchRankBadgeLabel,
+  rankBadgeClass,
+  rankLabel,
+  rankScore,
+  rankTierClass,
+  rankTrendTierClass,
+  shortRankLabel,
+  totalGames,
+} from "../features/public-lol/utils/rank";
 
 const TOURNAMENT_PLAYER_PROFILE_LIMIT = 30;
 const TOURNAMENT_PLAYER_PROFILE_CONCURRENCY = 3;
 const tournamentPlayerProfileCache = new Map<string, TournamentPlayerProfileState>();
 
-type SearchSuggestion = {
-  gameName: string;
-  tagLine: string;
-  source: "input" | "recommended" | "recent" | "verified";
-  profileIconUrl?: string;
-  summonerLevel?: number;
-  lolPlatform?: string;
-  rankedStats?: LolRankedStats;
-  lastSeenAt?: string;
-};
-
-type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
-type PublicMainPage = "search" | "favorites" | "subscriptions" | "followJoin" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule" | "privacy" | "terms" | "contact";
-type PublicProfileTab = "overview" | "champions" | "ingame";
-type PublicExpandedMatchView = "record" | "build";
-type PublicTheme = "light" | "dark";
-type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram";
-type MatchPeriodFilter = "all" | "7d" | "30d";
-type PublicMatchFilters = {
-  queue: MatchQueueFilter;
-  championId: string;
-  period: MatchPeriodFilter;
-};
-type PublicFavorite = SearchSuggestion & {
-  recentGames?: number;
-  recentWins?: number;
-  recentWinRate?: number;
-  averageKda?: number;
-};
-
-const RECENT_SEARCH_STORAGE_KEY = "loltrace.recent.jp";
-const FAVORITE_STORAGE_KEY = "loltrace.favorites.jp";
-const THEME_STORAGE_KEY = "loltrace.theme";
-const LOCALE_STORAGE_KEY = "loltrace.locale";
-const MAX_RECENT_SEARCHES = 8;
-const MAX_FAVORITES = 24;
-const MAX_SEARCH_SUGGESTIONS = 6;
-const RECENT_ANALYSIS_MATCH_LIMIT = 20;
-const LP_TREND_WINDOW_DAYS = 30;
-const LP_TREND_WINDOW_MS = LP_TREND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
-const PUBLIC_SUMMONER_ROUTE_PREFIX = "/lol/summoners/jp/";
-const PUBLIC_TOURNAMENT_ROUTE_PREFIX = "/lol/tournaments/";
-const PUBLIC_TOURNAMENT_LIST_PATH = "/lol/tournaments";
-const PUBLIC_TOURNAMENT_CALENDAR_PATH = "/lol/tournaments/calendar";
-const PUBLIC_PRIVACY_PATH = "/privacy";
-const PUBLIC_TERMS_PATH = "/terms";
-const PUBLIC_CONTACT_PATH = "/contact";
-const PUBLIC_CONTACT_EMAIL = "support@yoro.gg";
+const PUBLIC_LEGAL_CONFIG = publicLegalRuntimeConfig();
+const PUBLIC_CONTACT_EMAIL = PUBLIC_LEGAL_CONFIG.contactEmail || "support@yoro.gg";
 const DEFAULT_MATCH_FILTERS: PublicMatchFilters = {
   queue: "all",
   championId: "all",
@@ -568,1000 +233,12 @@ const SUMMONER_SPELL_FILE_BY_ID: Record<number, string> = {
   54: "Summoner_UltBookPlaceholder",
   55: "Summoner_UltBookSmitePlaceholder"
 };
-const publicI18n = {
-  ko: {
-    brand: "YORO.gg",
-    tagline: "JP 서버 전적 검색과 방송 분석을 한 화면에서 확인합니다.",
-    searchPlaceholder: "JP 서버 닉네임#태그 검색",
-    search: "검색",
-    searching: "검색 중",
-    clearSearch: "검색어 지우기",
-    searchServer: "검색 서버",
-    jpServer: "일본 서버",
-    language: "언어",
-    languageMenu: "언어 선택",
-    languageKo: "한국어",
-    languageJa: "일본어",
-    mobileMenu: "메뉴",
-    summonerResults: "소환사",
-    relatedSummoners: "연관 닉네임",
-    inputSearch: "입력값",
-    verifiedSearch: "확인됨",
-    recommended: "추천",
-    recentSearch: "최근 검색",
-    login: "방송 관리 로그인",
-    heroTitle: "소환사 전적을 빠르게 찾고, 핵심 흐름만 읽으세요.",
-    heroDescription: "랭크, 최근 경기, 챔피언 숙련도, 포지션 성향을 검색 결과 화면에 정리합니다.",
-    sample: "예시 검색",
-    jpOnly: "JP 서버 고정 · 태그 자유",
-    home: "홈",
-    liveGame: "라이브게임",
-    filter: "필터",
-    online: "온라인",
-    premiumTitle: "YORO.gg Premium",
-    premiumBody: "광고 제거, 상세 통계, 프로 리플레이 등 프리미엄 기능을 경험해보세요.",
-    premiumCta: "프리미엄 업그레이드",
-    version: "버전",
-    profileSummary: "플레이어 요약",
-    recentGames: "최근 게임",
-    recent20Games: "최근 20게임",
-    justNow: "방금 전",
-    minutesAgo: "분 전",
-    hoursAgo: "시간 전",
-    daysAgo: "일 전",
-    topChampions: "챔피언 숙련도",
-    analysis: "핵심 분석",
-    detailAnalysis: "상세 분석",
-    matchDetails: "경기 상세",
-    matchRecordTab: "전적",
-    matchBuildTab: "빌드",
-    riotIdMaskOn: "가리기 ON",
-    riotIdMaskOff: "가리기 OFF",
-    buildLoading: "빌드 불러오는 중",
-    buildLoadFailed: "빌드 정보를 불러오지 못했습니다.",
-    expandMatch: "경기 상세 펼치기",
-    collapseMatch: "경기 상세 접기",
-    aiScore: "점수",
-    recentChampionsTitle: "플레이한 챔피언",
-    recentChampionsPeriod: "최근 20게임",
-    recentChampionsEmpty: "최근 챔피언 기록 없음",
-    rating: "평점",
-    mvpBadge: "MVP",
-    aceBadge: "ACE",
-    unstoppableBadge: "저지불가",
-    tenacityBadge: "강인함",
-    damageCarryBadge: "딜량 우수",
-    objectiveBadge: "오브젝트",
-    visionBadge: "시야 장악",
-    teamDetails: "팀 상세",
-    allyTeam: "아군 팀",
-    enemyTeam: "상대 팀",
-    tier: "티어",
-    averageTier: "평균 티어",
-    tierLoading: "티어 불러오는 중",
-    tierUnavailable: "티어 확인 불가",
-    knownTier: "확인된 티어",
-    roleDistribution: "포지션 분포",
-    recentRecords: "최근 최고 기록",
-    bestKills: "최고 킬",
-    bestKda: "최고 KDA",
-    bestDamage: "최고 딜량",
-    bestCs: "최고 CS",
-    bestVision: "최고 시야",
-    unitKill: "킬",
-    unitDamage: "딜",
-    unitPoint: "점",
-    total: "합계",
-    perMinute: "분당",
-    teamShare: "팀 비중",
-    totalKill: "총 킬",
-    totalGold: "총 골드",
-    champion: "챔피언",
-    gamesPlayed: "게임 수",
-    wins: "승리",
-    championPerformance: "챔피언별 최근 성과",
-    rolePerformance: "포지션별 최근 성과",
-    opponent: "상대",
-    items: "아이템",
-    runes: "룬",
-    summonerSpells: "소환사 주문",
-    damage: "딜량",
-    totalDamage: "총피해량",
-    damageTaken: "받은 피해",
-    damageShare: "팀 딜 비중",
-    gold: "골드",
-    vision: "시야",
-    objectives: "오브젝트",
-    wards: "와드",
-    deathTime: "사망 시간",
-    popularChampions: "인기 챔피언",
-    lpTrend: "LP 변화 추이",
-    aggregatePerformance: "종합 성과",
-    aggregateGrade: "종합 등급",
-    championMasteryTop5: "챔피언 숙련도 TOP 5",
-    masteryBasis: "숙련도 기준",
-    championDetailStats: "상세 분석",
-    recentChampionStats: "최근 챔피언 성과",
-    roleWinRate: "포지션별 승률",
-    details: "자세히 보기",
-    searchNav: "검색",
-    contentMenu: "컨텐츠",
-    tournamentCalendar: "대회일정",
-    tournamentList: "대회 리스트",
-    tournamentCalendarTitle: "대회 일정",
-    tournamentListTitle: "전체 대회 리스트",
-    tournamentCalendarSubtitle: "공개된 스트리머 대회의 경기 일정을 달력에서 확인하고 바로 상세 페이지로 이동할 수 있습니다.",
-    tournamentListSubtitle: "현재 공개된 스트리머 대회를 한 곳에서 확인하고 대진표, 일정·순위, 뉴스를 볼 수 있습니다.",
-    tournamentOpenDetail: "대회 보기",
-    tournamentCalendarEmpty: "표시할 대회 일정이 없습니다.",
-    tournamentListEmpty: "공개된 대회가 없습니다.",
-    tournamentMatchCount: "경기",
-    tournamentUpcoming: "예정 경기",
-    tournamentLive: "진행 중",
-    tournamentCompleted: "종료",
-    tournamentBracket: "대진표",
-    tournamentScheduleRanking: "일정·순위",
-    tournamentNews: "뉴스",
-    tournamentEmpty: "공개된 대회가 없습니다.",
-    tournamentSelect: "대회 선택",
-    tournamentTitle: "SEIGA CUP",
-    tournamentSubtitle: "League of Legends 스트리머 토너먼트",
-    tournamentBracketIntro: "총 16개 팀이 참가하는 스트리머 롤 토너먼트입니다. 최강의 스트리머 팀을 가려보세요.",
-    tournamentScheduleTitle: "경기 일정",
-    tournamentStandingsTitle: "순위",
-    tournamentNewsTitle: "대회 뉴스",
-    tournamentInfo: "대회 정보",
-    tournamentPeriod: "대회 기간",
-    tournamentTeams: "참가 팀",
-    tournamentTeamUnit: "팀",
-    tournamentAllTeams: "전체 팀",
-    tournamentTeamGroups: "참가팀 현황",
-    tournamentSeed: "시드",
-    tournamentUpcomingMatch: "다음 경기",
-    tournamentNoMatch: "예정 경기 없음",
-    tournamentFormat: "경기 방식",
-    tournamentPrize: "총 상금",
-    tournamentTbd: "미정",
-    tournamentVs: "VS",
-    tournamentLiveShort: "LIVE",
-    tournamentNotice: "최근 공지사항",
-    tournamentAllView: "전체 보기",
-    tournamentDownloadBracket: "전체 대진표 다운로드",
-    tournamentFinalResult: "최종결과",
-    tournamentPointPerPick: "포인트 / 픽",
-    tournamentRound16: "16강",
-    tournamentRound8: "8강",
-    tournamentRound4: "4강",
-    tournamentFinal: "결승",
-    tournamentWin: "승",
-    tournamentLoss: "패",
-    tournamentPoint: "득실",
-    tournamentTeamRecord: "팀원 전적",
-    tournamentPlayerColumn: "선수",
-    tournamentPlayerTier: "티어",
-    tournamentPlayerWinRate: "승률",
-    tournamentPlayerRole: "포지션",
-    tournamentPlayerMost: "모스트",
-    tournamentPlayerHighTier: "최고 티어",
-    tournamentPlayerScore: "점수",
-    tournamentLeader: "팀장",
-    tournamentPlayerRecordLoading: "전적 로딩 중",
-    tournamentPlayerRecordFailed: "전적 확인 실패",
-    tournamentNoPlayers: "등록된 선수가 없습니다.",
-    ranking: "랭킹",
-    overview: "종합",
-    championAnalysis: "챔피언 분석",
-    ingame: "인게임",
-    stats: "통계",
-    spectate: "관전하기",
-    patchNotes: "커뮤니티",
-    promotion: "프로모션",
-    community: "커뮤니티",
-    communityServerRecruit: "서버모집",
-    communityPartyRecruit: "파티모집",
-    multimatch: "멀티서치",
-    darkMode: "다크 모드",
-    moreMenu: "더보기",
-    favorite: "즐겨찾기",
-    refreshProfile: "전적 갱신",
-    moreFeatures: "더 많은 기능",
-    aiFeatureTitle: "분석",
-    aiFeatureBody: "최근 20게임을 분석하여 플레이 스타일과 개선점을 정리합니다.",
-    positionFeatureTitle: "포지션 분석",
-    positionFeatureBody: "포지션별 플레이 성향과 승률, KDA를 확인합니다.",
-    overlayFeatureTitle: "스트리머 오버레이",
-    overlayFeatureBody: "방송에 사용할 전적 오버레이를 생성할 수 있습니다.",
-    shareFeatureTitle: "전적 공유 카드",
-    shareFeatureBody: "SNS에 공유할 깔끔한 전적 카드를 만듭니다.",
-    viewAnalysis: "분석 보기",
-    checkFeature: "확인하기",
-    createFeature: "만들기",
-    folded: "접기",
-    killParticipation: "킬 관여율",
-    supportBannerTitle: "이 자리는 여러분의 응원을 위한 공간입니다.",
-    supportBannerBody: "선수 생일, 스트리머 홍보, 팬 배너를 노출할 수 있는 영역입니다.",
-    supportBannerCta: "배너 신청",
-    currentSeason: "현재 시즌",
-    flexRank: "자유랭크",
-    ranked5v5: "5v5 랭크",
-    rankTrend: "랭크 흐름",
-    emptyTitle: "JP 서버 Riot ID를 입력하면 전적 카드가 열립니다.",
-    emptyDescription: "tagLine은 JP1 외 다른 값도 검색할 수 있습니다.",
-    win: "승리",
-    loss: "패배",
-    unknown: "기록 없음",
-    unranked: "언랭크",
-    level: "레벨",
-    ladderRank: "래더 순위",
-    noData: "표시할 데이터가 없습니다.",
-    kda: "KDA",
-    winRate: "승률",
-    average: "평균",
-    averageCsPerMinute: "평균 CS/분",
-    perMinuteCs: "분당 CS",
-    recentFlowBasis: "최근 흐름 기준",
-    topPercentPrefix: "상위",
-    mainRole: "주 포지션",
-    confidence: "신뢰도",
-    mastery: "숙련도",
-    masteryPoint: "숙련도 점수",
-    games: "게임",
-    live: "준비됨",
-    soloRank: "솔로랭크",
-    fetchedAt: "갱신",
-    route: "서버",
-    queue: "큐",
-    queueType: "큐 타입",
-    recentForm: "최근 흐름",
-    searchFailed: "검색에 실패했습니다.",
-    riotMissing: "Riot API key가 설정되어 있지 않습니다. 방송 관리 로그인 후 설정 화면에서 key를 저장해주세요.",
-    filterTitle: "전적 필터",
-    queueFilter: "큐 필터",
-    championFilter: "챔피언 필터",
-    periodFilter: "기간 필터",
-    allQueues: "전체 큐",
-    soloQueue: "솔로랭크",
-    flexQueue: "자유랭크",
-    normalQueue: "일반",
-    aramQueue: "칼바람",
-    allChampions: "모든 챔피언",
-    periodAll: "전체 기간",
-    period7: "최근 7일",
-    period30: "최근 30일",
-    resetFilter: "필터 초기화",
-    activeFilter: "필터 적용 중",
-    favoritesTitle: "즐겨찾기",
-    noFavorites: "저장된 즐겨찾기가 없습니다.",
-    favoriteAdd: "즐겨찾기 추가",
-    favoriteRemove: "즐겨찾기 해제",
-    favoriteAdded: "즐겨찾기에 추가했습니다.",
-    favoriteRemoved: "즐겨찾기에서 해제했습니다.",
-    premiumNoticeTitle: "프리미엄 기능 안내",
-    premiumNoticeBody: "결제/구독은 아직 연결되지 않았습니다. 현재는 방송 관리 로그인으로 이동합니다.",
-    openStreamerLogin: "방송 관리 열기",
-    savedData: "저장된 데이터",
-    cachedRanking: "저장된 검색 기반 랭킹",
-    liveDataNotice: "실시간 친구/전체 자동완성은 Riot 공개 API 제한으로 자체 DB가 쌓인 데이터만 표시합니다.",
-    followMenu: "팔로우",
-    followJoin: "참여하기",
-    followJoinTitle: "시청자 참여",
-    followJoinSubtitle: "방송인이 시청자 참여를 열면 현재 대기열을 확인하고 Twitch 로그인 후 참여할 수 있습니다.",
-    participationOpen: "참여 대기열 열림",
-    participationClosed: "참여 대기열 닫힘",
-    participationStreamerTitle: "참여 중인 방송인",
-    participationStreamerSubtitle: "시청자 참여를 시작한 방송인을 선택하면 해당 대기열을 확인할 수 있습니다.",
-    participationStreamerCount: "명",
-    participationStreamerOpen: "참여 중",
-    participationNoOpenStreamer: "현재 시청자 참여를 시작한 방송인이 없습니다.",
-    participationQueueTitle: "참여 대기열",
-    participationQueueEmpty: "아직 참여자가 없습니다.",
-    participationNeedLogin: "Twitch 로그인 후 참여 등록을 할 수 있습니다.",
-    participationJoinTitle: "참여 등록",
-    participationRiotIdLabel: "Riot ID",
-    participationRiotIdPlaceholder: "소환사명#태그",
-    participationRoleLabel: "희망 포지션",
-    participationRoleFill: "상관없음",
-    participationSubmit: "참여하기",
-    participationSubmitting: "등록 중",
-    participationCancel: "참여 취소",
-    participationCancelling: "취소 중",
-    participationRefresh: "새로고침",
-    participationLoadFailed: "참여 대기열을 불러오지 못했습니다.",
-    participationJoinFailed: "참여 등록에 실패했습니다.",
-    participationCancelFailed: "참여 취소에 실패했습니다.",
-    participationJoinComplete: "참여 대기열에 등록되었습니다.",
-    participationAlreadyJoined: "이미 참여 대기열에 등록되어 있습니다.",
-    participationCancelComplete: "참여 신청을 취소했습니다.",
-    participationPosition: "대기 순번",
-    participationViewerBadge: "내 신청",
-    participationRankPending: "전적 확인 대기",
-    roleTop: "탑",
-    roleJungle: "정글",
-    roleMid: "미드",
-    roleAdc: "원딜",
-    roleSupport: "서포터",
-    subscriptionStatus: "구독현황",
-    subscriptionsTitle: "구독 중인 방송인",
-    subscriptionsSubtitle: "최근 Twitch 팔로우 기준",
-    subscriptionsEmpty: "팔로우 목록에서 구독 중인 방송인을 찾지 못했습니다.",
-    subscriptionMissingScope: "구독 상태 확인 권한이 필요합니다. Twitch를 다시 로그인해주세요.",
-    subscriptionGift: "선물 구독",
-    patchNotesPreparing: "커뮤니티 게시판을 준비 중입니다.",
-    patchNotesPreparingBody: "Twitch 로그인 후 게시글을 작성할 수 있습니다.",
-    communitySubtitle: "Twitch 로그인 후 자유롭게 글을 작성할 수 있습니다.",
-    communityServerSubtitle: "커뮤니티 서버와 클랜 모집 글을 확인하고 등록할 수 있습니다.",
-    communityPartySubtitle: "같이 게임할 파티원을 찾고 현재 모집 조건을 공유할 수 있습니다.",
-    communityWriteTitle: "게시글 작성",
-    communityEditTitle: "게시글 수정",
-    communityPartyWriteTitle: "파티 모집 작성",
-    communityServerWriteButton: "서버모집 작성",
-    communityPartyWriteButton: "파티모집 작성",
-    communityEditButton: "내 글 수정",
-    communityListTitle: "최근 게시글",
-    communityPartyListTitle: "최근 파티 모집",
-    communityLoginRequired: "게시글 작성은 Twitch 로그인 후 사용할 수 있습니다.",
-    communityPartyPrompt: "어떤 파티를 찾고 계신가요?",
-    communityTitleLabel: "제목",
-    communityBodyLabel: "내용",
-    communityRiotIdLabel: "전적 Riot ID",
-    communityTagsLabel: "태그",
-    communityImageLabel: "대표 이미지",
-    communityTitlePlaceholder: "제목을 입력하세요",
-    communityBodyPlaceholder: "내용을 입력하세요",
-    communityPartyTitlePlaceholder: "예: 시참! 즐겁게 게임하실 분 구해요",
-    communityPartyBodyPlaceholder: "모집 조건, 선호 포지션, 연락 방법을 입력하세요",
-    communityRiotIdPlaceholder: "소환사명#태그",
-    communityTagsPlaceholder: "클랜, 협곡, 즐겜",
-    communityImageHelp: "PNG/JPG/GIF/WEBP, 5MB 이하",
-    communityImageReplaceHelp: "새 이미지를 선택하면 기존 대표 이미지가 교체됩니다.",
-    communitySelectPlaceholder: "선택해주세요",
-    communityRiotIdCheck: "확인",
-    communityRiotIdChecking: "확인 중",
-    communityRiotIdValid: "전적이 확인되었습니다.",
-    communityRiotIdInvalid: "전적을 확인하지 못했습니다.",
-    communityImageChoose: "이미지 선택",
-    communityImageSelected: "선택됨",
-    communityImageEmpty: "선택된 파일 없음",
-    communityAlreadyPosted: "이미 이 게시판에 게시글을 작성했습니다. 게시판별 계정당 1개만 등록할 수 있습니다.",
-    communityPartyLimitReached: "파티 모집글은 하루에 2개까지 작성할 수 있습니다.",
-    communityPartyAutoDeleteNotice: "파티 모집글은 작성 후 24시간이 지나면 자동 삭제됩니다.",
-    communityRecordLabel: "전적",
-    communityPartyTierLabel: "티어",
-    communityPartyRoleLabel: "역할",
-    communityPartyModeLabel: "모드",
-    communityPartyVoiceLabel: "음성 채팅",
-    communityPartyCapacityLabel: "모집 인원",
-    communityPartyTierPlaceholder: "예: 다이아 IV",
-    communityPartyRolePlaceholder: "예: 미드, 정글",
-    communityPartyModePlaceholder: "예: 랭크 게임",
-    communityPartyVoicePlaceholder: "예: 디스코드",
-    communityDetailTitle: "게시글 상세",
-    communityBackToList: "목록으로",
-    communityRecordPreview: "등록 전적",
-    communityRecordMissing: "게시글에 연결된 Riot ID가 없습니다.",
-    communityRecordLoading: "전적을 불러오는 중입니다.",
-    communityRecordFailed: "전적을 불러오지 못했습니다.",
-    communityCommentsTitle: "댓글",
-    communityCommentPlaceholder: "댓글을 입력하세요",
-    communityCommentLoginRequired: "댓글 작성은 Twitch 로그인 후 사용할 수 있습니다.",
-    communityCommentSubmit: "댓글 작성",
-    communityCommentSubmitting: "작성 중",
-    communityCommentEmpty: "아직 댓글이 없습니다.",
-    communityCommentFailed: "댓글을 작성하지 못했습니다.",
-    communitySubmit: "게시하기",
-    communityUpdateSubmit: "수정하기",
-    communitySubmitting: "게시 중",
-    communityUpdating: "수정 중",
-    communityEmpty: "아직 게시글이 없습니다.",
-    communityLoadFailed: "게시글을 불러오지 못했습니다.",
-    refreshAvailableIn: "후 가능",
-    twitchLive: "방송 중",
-    twitchOffline: "스트리머 오프라인",
-    twitchOnlineShort: "온라인",
-    twitchOfflineShort: "오프라인",
-    twitchStreamer: "Twitch 스트리머",
-    twitchViewers: "시청자",
-    openTwitch: "Twitch 열기",
-    profileLinks: "프로필 링크",
-    twitchViewerLogin: "Twitch 로그인",
-    twitchViewerLogout: "Twitch 로그아웃",
-    twitchFollowedTitle: "팔로우 방송인 전적",
-    twitchFollowedSubtitle: "Twitch에서 팔로우 중인 방송인 중 Riot ID가 연결된 채널을 보여줍니다.",
-    twitchFollowedLinked: "전적 연결",
-    twitchFollowedRefresh: "새로고침",
-    twitchFollowedEmpty: "팔로우 목록에서 전적이 연결된 방송인을 찾지 못했습니다.",
-    twitchFollowedNoRiot: "Riot ID 미연결",
-    twitchLoginRequired: "Twitch 로그인 후 팔로우 중인 방송인의 전적을 확인할 수 있습니다.",
-    twitchNotConfigured: "Twitch 공개 로그인이 아직 설정되지 않았습니다.",
-    streamerRiotRequestTitle: "내 Riot ID 등록 요청",
-    streamerRiotRequestBody: "관리자가 확인하면 팔로워들이 Twitch 팔로우 목록에서 내 전적을 바로 볼 수 있습니다.",
-    streamerRiotRequestPlaceholder: "게임명#태그",
-    streamerRiotRequestSubmit: "등록 요청",
-    streamerRiotRequestSubmitting: "요청 중",
-    streamerRiotRequestSent: "등록 요청을 보냈습니다. 관리자 승인 후 반영됩니다.",
-    streamerRiotRequestApproved: "이미 승인된 Riot ID입니다.",
-    streamerRiotRegister: "스트리머 등록",
-    streamerRiotRegisterDescription: "내 Twitch 계정과 Riot ID를 연결해 팔로워에게 전적과 오버레이를 보여줍니다.",
-    streamerRiotRegisterBack: "돌아가기",
-    streamerDashboardOpen: "대시보드 열기",
-    streamerRecordOpen: "내 전적 보기",
-    twitchProfileMenu: "Twitch 프로필 메뉴",
-    viewRecord: "전적 보기",
-    loadMoreMatches: "더보기",
-    loadingMoreMatches: "불러오는 중",
-    noMoreMatches: "더 이상 표시할 전적이 없습니다.",
-    currentGameStatus: "실시간 게임 상태",
-    currentlyInGame: "게임중입니다",
-    notInGame: "게임중이 아닙니다",
-    currentGameUnavailable: "인게임 정보를 불러오지 못했습니다.",
-    currentGameUnavailableDetail: "인게임 정보는 Riot Spectator API로 별도 조회됩니다.",
-    currentGamePlatform: "조회 서버",
-    currentGameParticipants: "참가자",
-    currentGameMode: "모드",
-    currentGameDuration: "진행 시간",
-    currentGameUpdated: "마지막 업데이트",
-    currentGameAverageTier: "평균 티어",
-    currentGameReady: "분석 준비",
-    currentGameBot: "봇",
-    footerPrivacy: "개인정보 처리 방침",
-    footerTerms: "이용약관",
-    footerContact: "문의하기",
-    footerRiotDisclaimer: "YORO.gg는 Riot Games의 공식 서비스가 아니며 Riot Games의 견해를 대변하지 않습니다. League of Legends 및 Riot Games는 Riot Games, Inc.의 상표입니다.",
-    footerCopyright: "Copyright © YORO.gg. All rights reserved.",
-    privacyTitle: "개인정보 처리 방침",
-    termsTitle: "이용약관",
-    contactTitle: "문의하기",
-    legalEffectiveDate: "시행일: 2026. 07. 07.",
-    legalDraftNotice: "본 문서는 운영 정보가 확정되기 전까지 사용하는 서비스 정책 초안입니다. 운영자 정보, 보관 기간, 위탁·국외 이전 여부는 배포 전 최종 확인이 필요합니다.",
-    privacyIntro: "YORO.gg는 전적 검색, Twitch 로그인, 방송인 기능, 커뮤니티와 대회 기능을 제공하기 위해 필요한 범위에서만 개인정보를 처리합니다.",
-    privacyCollectedTitle: "처리하는 개인정보 항목",
-    privacyCollectedBody: "Twitch 로그인 시 Twitch 사용자 ID, 표시 이름, 프로필 이미지, 팔로우·구독 여부와 권한 범위를 처리할 수 있습니다. Riot ID, 게임 전적, 랭크, 챔피언 통계, 커뮤니티 게시글·댓글·이미지, 즐겨찾기, 참여 대기열, 접속 로그와 쿠키 같은 서비스 이용 기록도 처리될 수 있습니다.",
-    privacyPurposeTitle: "처리 목적",
-    privacyPurposeBody: "회원 식별, 전적 검색과 분석 제공, 스트리머 등록 및 오버레이 제공, 팔로우·구독 현황 표시, 시청자 참여 대기열 운영, 커뮤니티·대회 기능 제공, 부정 이용 방지, 문의 응답에 사용합니다.",
-    privacyRetentionTitle: "보유 및 이용 기간",
-    privacyRetentionBody: "계정 연결 정보는 사용자가 Twitch 연결을 해제하거나 삭제를 요청할 때까지 보관합니다. 게시글과 댓글은 삭제 요청 또는 운영 정책에 따른 삭제 시까지 보관합니다. 보안·오류 로그는 안정적인 운영을 위해 필요한 기간 동안 보관하며, 법령상 보존 의무가 있는 경우 해당 기간을 따릅니다.",
-    privacyThirdPartyTitle: "외부 서비스 및 제공",
-    privacyThirdPartyBody: "전적과 게임 정보는 Riot Games API, 로그인과 방송 상태는 Twitch API를 통해 조회합니다. 사용자의 개인정보를 판매하지 않으며, 법령상 의무 또는 사용자가 요청한 기능 제공에 필요한 경우를 제외하고 제3자에게 제공하지 않습니다.",
-    privacyRightsTitle: "이용자의 권리",
-    privacyRightsBody: "이용자는 자신의 개인정보 열람, 정정, 삭제, 처리 정지를 요청할 수 있습니다. Twitch 연결 해제, 게시글 삭제, Riot ID 연결 변경은 서비스 화면 또는 문의를 통해 요청할 수 있습니다.",
-    privacySecurityTitle: "안전성 확보 조치",
-    privacySecurityBody: "토큰과 인증 정보는 접근 권한을 제한하고, 공개 응답에 민감 정보가 노출되지 않도록 처리합니다. 서비스 운영에 필요한 최소 권한 원칙을 적용합니다.",
-    privacyChangesTitle: "방침 변경",
-    privacyChangesBody: "개인정보 처리 방침이 변경되는 경우 서비스 화면 또는 공지사항을 통해 변경 내용을 안내합니다.",
-    termsIntro: "본 약관은 YORO.gg가 제공하는 전적 검색, Twitch 연동, 커뮤니티, 대회 및 방송 지원 기능의 이용 조건을 정합니다.",
-    termsAccountTitle: "계정 및 로그인",
-    termsAccountBody: "일부 기능은 Twitch 로그인이 필요합니다. 사용자는 본인의 계정만 사용해야 하며, 계정 권한을 부정하게 사용하거나 타인의 정보를 등록해서는 안 됩니다.",
-    termsServiceTitle: "서비스 제공",
-    termsServiceBody: "전적, 랭크, 방송 상태, 팔로우·구독 정보는 Riot Games와 Twitch API 상태에 따라 지연되거나 제공되지 않을 수 있습니다. YORO.gg는 서비스 안정성을 위해 기능을 변경하거나 일시 중단할 수 있습니다.",
-    termsUserContentTitle: "게시물과 커뮤니티",
-    termsUserContentBody: "사용자는 자신이 작성한 게시글, 댓글, 이미지에 대한 책임을 집니다. 불법, 혐오, 사칭, 개인정보 침해, 저작권 침해, 광고성 도배 게시물은 제한되거나 삭제될 수 있습니다.",
-    termsProhibitedTitle: "금지 행위",
-    termsProhibitedBody: "서비스 장애를 유발하는 자동화 요청, 인증 우회, 무단 크롤링, 타인의 계정·전적 사칭, 방송 운영을 방해하는 행위, 법령 또는 플랫폼 정책을 위반하는 행위를 금지합니다.",
-    termsDataTitle: "게임 및 플랫폼 데이터",
-    termsDataBody: "YORO.gg는 Riot Games 또는 Twitch의 공식 서비스가 아니며, 각 플랫폼의 정책과 API 제한을 준수합니다. 표시되는 데이터는 참고용이며 경기 결과나 랭크를 보장하지 않습니다.",
-    termsLiabilityTitle: "책임 제한",
-    termsLiabilityBody: "서비스는 가능한 범위에서 안정적으로 제공되지만 외부 API 장애, 네트워크 장애, 사용자 입력 오류로 인한 손해에 대해 법령이 허용하는 범위 내에서 책임이 제한될 수 있습니다.",
-    termsChangesTitle: "약관 변경",
-    termsChangesBody: "약관 변경 시 적용일과 주요 내용을 서비스 화면 또는 공지사항에 안내합니다. 변경 후 서비스를 계속 이용하면 변경 약관에 동의한 것으로 볼 수 있습니다.",
-    contactIntro: "서비스 오류, 권리 요청, 제휴, 법적 문의는 아래 이메일로 보내주세요.",
-    contactEmailLabel: "문의 이메일",
-    contactEmailButton: "이메일 보내기",
-    contactMailSubject: "YORO.gg 문의",
-    contactTemporaryNotice: "현재는 임시 문의 연결이며, 정식 문의 폼과 운영자 정보는 추후 확정됩니다.",
-    blueTeam: "블루 팀",
-    redTeam: "레드 팀"
-  },
-  ja: {
-    brand: "YORO.gg",
-    tagline: "JP サーバー戦績検索と配信分析を一つの画面で確認します。",
-    searchPlaceholder: "JP サーバー ニックネーム#タグ検索",
-    search: "検索",
-    searching: "検索中",
-    clearSearch: "検索語を削除",
-    searchServer: "検索サーバー",
-    jpServer: "日本サーバー",
-    language: "言語",
-    languageMenu: "言語選択",
-    languageKo: "韓国語",
-    languageJa: "日本語",
-    mobileMenu: "メニュー",
-    summonerResults: "サモナー",
-    relatedSummoners: "関連ニックネーム",
-    inputSearch: "入力値",
-    verifiedSearch: "確認済み",
-    recommended: "おすすめ",
-    recentSearch: "最近の検索",
-    login: "配信管理ログイン",
-    heroTitle: "サモナー戦績を素早く見つけ、重要な流れだけを読み取れます。",
-    heroDescription: "ランク、最近の試合、チャンピオン熟練度、ポジション傾向を検索結果に整理します。",
-    sample: "検索例",
-    jpOnly: "JP サーバー固定 · タグ自由",
-    home: "ホーム",
-    liveGame: "ライブゲーム",
-    filter: "フィルター",
-    online: "オンライン",
-    premiumTitle: "YORO.gg Premium",
-    premiumBody: "広告非表示、詳細統計、プロリプレイなどのプレミアム機能を体験できます。",
-    premiumCta: "プレミアムにアップグレード",
-    version: "バージョン",
-    profileSummary: "プレイヤー概要",
-    recentGames: "最近の試合",
-    recent20Games: "最近20試合",
-    justNow: "たった今",
-    minutesAgo: "分前",
-    hoursAgo: "時間前",
-    daysAgo: "日前",
-    topChampions: "チャンピオン熟練度",
-    analysis: "主要分析",
-    detailAnalysis: "詳細分析",
-    matchDetails: "試合詳細",
-    matchRecordTab: "戦績",
-    matchBuildTab: "ビルド",
-    riotIdMaskOn: "非表示 ON",
-    riotIdMaskOff: "非表示 OFF",
-    buildLoading: "ビルド読み込み中",
-    buildLoadFailed: "ビルド情報を読み込めませんでした。",
-    expandMatch: "試合詳細を開く",
-    collapseMatch: "試合詳細を閉じる",
-    aiScore: "スコア",
-    recentChampionsTitle: "プレイしたチャンピオン",
-    recentChampionsPeriod: "直近20試合",
-    recentChampionsEmpty: "最近のチャンピオン記録なし",
-    rating: "評価",
-    mvpBadge: "MVP",
-    aceBadge: "ACE",
-    unstoppableBadge: "止められない",
-    tenacityBadge: "粘り強さ",
-    damageCarryBadge: "ダメージ優秀",
-    objectiveBadge: "オブジェクト",
-    visionBadge: "視界掌握",
-    teamDetails: "チーム詳細",
-    allyTeam: "味方チーム",
-    enemyTeam: "相手チーム",
-    tier: "ティア",
-    averageTier: "平均ティア",
-    tierLoading: "ティア読み込み中",
-    tierUnavailable: "ティア確認不可",
-    knownTier: "確認済みティア",
-    roleDistribution: "ポジション分布",
-    recentRecords: "最近の最高記録",
-    bestKills: "最高キル",
-    bestKda: "最高 KDA",
-    bestDamage: "最高ダメージ",
-    bestCs: "最高 CS",
-    bestVision: "最高視界",
-    unitKill: "キル",
-    unitDamage: "ダメージ",
-    unitPoint: "点",
-    total: "合計",
-    perMinute: "分あたり",
-    teamShare: "チーム比率",
-    totalKill: "総キル",
-    totalGold: "総ゴールド",
-    champion: "チャンピオン",
-    gamesPlayed: "試合数",
-    wins: "勝利",
-    championPerformance: "チャンピオン別最近成績",
-    rolePerformance: "ポジション別最近成績",
-    opponent: "相手",
-    items: "アイテム",
-    runes: "ルーン",
-    summonerSpells: "サモナースペル",
-    damage: "ダメージ",
-    totalDamage: "総ダメージ",
-    damageTaken: "受けたダメージ",
-    damageShare: "チームダメージ比率",
-    gold: "ゴールド",
-    vision: "視界",
-    objectives: "オブジェクト",
-    wards: "ワード",
-    deathTime: "死亡時間",
-    popularChampions: "人気チャンピオン",
-    lpTrend: "LP推移",
-    aggregatePerformance: "総合成績",
-    aggregateGrade: "総合グレード",
-    championMasteryTop5: "チャンピオン熟練度 TOP 5",
-    masteryBasis: "熟練度基準",
-    championDetailStats: "詳細分析",
-    recentChampionStats: "最近のチャンピオン成績",
-    roleWinRate: "ポジション別勝率",
-    details: "詳細を見る",
-    searchNav: "検索",
-    contentMenu: "コンテンツ",
-    tournamentCalendar: "大会日程",
-    tournamentList: "大会リスト",
-    tournamentCalendarTitle: "大会日程",
-    tournamentListTitle: "全大会リスト",
-    tournamentCalendarSubtitle: "公開中の配信者大会の日程をカレンダーで確認し、詳細ページへ移動できます。",
-    tournamentListSubtitle: "公開中の配信者大会を一覧で確認し、トーナメント表・日程順位・ニュースを見られます。",
-    tournamentOpenDetail: "大会を見る",
-    tournamentCalendarEmpty: "表示できる大会日程がありません。",
-    tournamentListEmpty: "公開中の大会がありません。",
-    tournamentMatchCount: "試合",
-    tournamentUpcoming: "予定試合",
-    tournamentLive: "進行中",
-    tournamentCompleted: "終了",
-    tournamentBracket: "トーナメント表",
-    tournamentScheduleRanking: "日程・順位",
-    tournamentNews: "ニュース",
-    tournamentEmpty: "公開中の大会がありません。",
-    tournamentSelect: "大会選択",
-    tournamentTitle: "SEIGA CUP",
-    tournamentSubtitle: "League of Legends 配信者トーナメント",
-    tournamentBracketIntro: "全16チームが参加する配信者 LoL トーナメントです。最強の配信者チームを決めましょう。",
-    tournamentScheduleTitle: "試合日程",
-    tournamentStandingsTitle: "順位",
-    tournamentNewsTitle: "大会ニュース",
-    tournamentInfo: "大会情報",
-    tournamentPeriod: "大会期間",
-    tournamentTeams: "参加チーム",
-    tournamentTeamUnit: "チーム",
-    tournamentAllTeams: "全チーム",
-    tournamentTeamGroups: "参加チーム状況",
-    tournamentSeed: "シード",
-    tournamentUpcomingMatch: "次の試合",
-    tournamentNoMatch: "予定試合なし",
-    tournamentFormat: "試合形式",
-    tournamentPrize: "賞金総額",
-    tournamentTbd: "未定",
-    tournamentVs: "VS",
-    tournamentLiveShort: "LIVE",
-    tournamentNotice: "最近のお知らせ",
-    tournamentAllView: "すべて見る",
-    tournamentDownloadBracket: "全トーナメント表をダウンロード",
-    tournamentFinalResult: "最終結果",
-    tournamentPointPerPick: "ポイント / ピック",
-    tournamentRound16: "ベスト16",
-    tournamentRound8: "ベスト8",
-    tournamentRound4: "準決勝",
-    tournamentFinal: "決勝",
-    tournamentWin: "勝",
-    tournamentLoss: "敗",
-    tournamentPoint: "得失",
-    tournamentTeamRecord: "チームメンバー戦績",
-    tournamentPlayerColumn: "選手",
-    tournamentPlayerTier: "ティア",
-    tournamentPlayerWinRate: "勝率",
-    tournamentPlayerRole: "ポジション",
-    tournamentPlayerMost: "得意",
-    tournamentPlayerHighTier: "最高ティア",
-    tournamentPlayerScore: "スコア",
-    tournamentLeader: "リーダー",
-    tournamentPlayerRecordLoading: "戦績読み込み中",
-    tournamentPlayerRecordFailed: "戦績確認失敗",
-    tournamentNoPlayers: "登録済みの選手がいません。",
-    ranking: "ランキング",
-    overview: "総合",
-    championAnalysis: "チャンピオン分析",
-    ingame: "インゲーム",
-    stats: "統計",
-    spectate: "観戦",
-    patchNotes: "コミュニティ",
-    promotion: "プロモーション",
-    community: "コミュニティ",
-    communityServerRecruit: "サーバー募集",
-    communityPartyRecruit: "パーティー募集",
-    multimatch: "マルチサーチ",
-    darkMode: "ダークモード",
-    moreMenu: "もっと見る",
-    favorite: "お気に入り",
-    refreshProfile: "戦績更新",
-    moreFeatures: "さらに使える機能",
-    aiFeatureTitle: "分析",
-    aiFeatureBody: "最近20試合からプレイスタイルと改善点を整理します。",
-    positionFeatureTitle: "ポジション分析",
-    positionFeatureBody: "ポジション別の傾向、勝率、KDAを確認します。",
-    overlayFeatureTitle: "配信者オーバーレイ",
-    overlayFeatureBody: "配信で使える戦績オーバーレイを生成できます。",
-    shareFeatureTitle: "戦績共有カード",
-    shareFeatureBody: "SNSで共有できる見やすい戦績カードを作ります。",
-    viewAnalysis: "分析を見る",
-    checkFeature: "確認する",
-    createFeature: "作成する",
-    folded: "閉じる",
-    killParticipation: "キル関与率",
-    supportBannerTitle: "この枠は皆さんの応援のためのスペースです。",
-    supportBannerBody: "選手の誕生日、配信者PR、ファンバナーを表示できます。",
-    supportBannerCta: "バナー申請",
-    currentSeason: "現在のシーズン",
-    flexRank: "フレックスランク",
-    ranked5v5: "5v5 ランク",
-    rankTrend: "ランク推移",
-    emptyTitle: "JP サーバー Riot ID を入力すると戦績カードが開きます。",
-    emptyDescription: "tagLine は JP1 以外の値も検索できます。",
-    win: "勝利",
-    loss: "敗北",
-    unknown: "記録なし",
-    unranked: "アンランク",
-    level: "レベル",
-    ladderRank: "ラダー順位",
-    noData: "表示できるデータがありません。",
-    kda: "KDA",
-    winRate: "勝率",
-    average: "平均",
-    averageCsPerMinute: "平均CS/分",
-    perMinuteCs: "分あたりCS",
-    recentFlowBasis: "最近の流れ基準",
-    topPercentPrefix: "上位",
-    mainRole: "メインロール",
-    confidence: "信頼度",
-    mastery: "熟練度",
-    masteryPoint: "熟練度ポイント",
-    games: "試合",
-    live: "準備済み",
-    soloRank: "ソロランク",
-    fetchedAt: "更新",
-    route: "サーバー",
-    queue: "キュー",
-    queueType: "キュータイプ",
-    recentForm: "最近の流れ",
-    searchFailed: "検索に失敗しました。",
-    riotMissing: "Riot API key が設定されていません。配信管理にログインして設定画面から key を保存してください。",
-    filterTitle: "戦績フィルター",
-    queueFilter: "キューフィルター",
-    championFilter: "チャンピオンフィルター",
-    periodFilter: "期間フィルター",
-    allQueues: "全キュー",
-    soloQueue: "ソロランク",
-    flexQueue: "フレックスランク",
-    normalQueue: "ノーマル",
-    aramQueue: "ARAM",
-    allChampions: "すべてのチャンピオン",
-    periodAll: "全期間",
-    period7: "直近7日",
-    period30: "直近30日",
-    resetFilter: "フィルター初期化",
-    activeFilter: "フィルター適用中",
-    favoritesTitle: "お気に入り",
-    noFavorites: "保存されたお気に入りがありません。",
-    favoriteAdd: "お気に入り追加",
-    favoriteRemove: "お気に入り解除",
-    favoriteAdded: "お気に入りに追加しました。",
-    favoriteRemoved: "お気に入りから解除しました。",
-    premiumNoticeTitle: "プレミアム機能案内",
-    premiumNoticeBody: "決済/購読はまだ接続されていません。現在は配信管理ログインへ移動します。",
-    openStreamerLogin: "配信管理を開く",
-    savedData: "保存データ",
-    cachedRanking: "保存済み検索ベースランキング",
-    liveDataNotice: "リアルタイム友達/全体オートコンプリートは Riot 公開 API の制限により、蓄積済みデータのみ表示します。",
-    followMenu: "フォロー",
-    followJoin: "参加する",
-    followJoinTitle: "視聴者参加",
-    followJoinSubtitle: "配信者が視聴者参加を開始すると、待機列を確認してTwitchログイン後に参加できます。",
-    participationOpen: "参加待機列オープン",
-    participationClosed: "参加待機列クローズ",
-    participationStreamerTitle: "参加受付中の配信者",
-    participationStreamerSubtitle: "視聴者参加を開始した配信者を選ぶと、その待機列を確認できます。",
-    participationStreamerCount: "名",
-    participationStreamerOpen: "受付中",
-    participationNoOpenStreamer: "現在、視聴者参加を開始している配信者はいません。",
-    participationQueueTitle: "参加待機列",
-    participationQueueEmpty: "まだ参加者はいません。",
-    participationNeedLogin: "Twitchログイン後に参加登録できます。",
-    participationJoinTitle: "参加登録",
-    participationRiotIdLabel: "Riot ID",
-    participationRiotIdPlaceholder: "サモナー名#タグ",
-    participationRoleLabel: "希望ロール",
-    participationRoleFill: "どこでも",
-    participationSubmit: "参加する",
-    participationSubmitting: "登録中",
-    participationCancel: "参加取消",
-    participationCancelling: "取消中",
-    participationRefresh: "更新",
-    participationLoadFailed: "参加待機列を読み込めませんでした。",
-    participationJoinFailed: "参加登録に失敗しました。",
-    participationCancelFailed: "参加取消に失敗しました。",
-    participationJoinComplete: "参加待機列に登録しました。",
-    participationAlreadyJoined: "すでに参加待機列に登録されています。",
-    participationCancelComplete: "参加申請を取り消しました。",
-    participationPosition: "待機順",
-    participationViewerBadge: "自分",
-    participationRankPending: "戦績確認待ち",
-    roleTop: "トップ",
-    roleJungle: "ジャングル",
-    roleMid: "ミッド",
-    roleAdc: "ボット",
-    roleSupport: "サポート",
-    subscriptionStatus: "サブスク状況",
-    subscriptionsTitle: "サブスク中の配信者",
-    subscriptionsSubtitle: "最近の Twitch フォロー基準",
-    subscriptionsEmpty: "フォロー一覧からサブスク中の配信者を見つけられませんでした。",
-    subscriptionMissingScope: "サブスク状態の確認権限が必要です。Twitch に再ログインしてください。",
-    subscriptionGift: "ギフトサブスク",
-    patchNotesPreparing: "コミュニティ掲示板を準備中です。",
-    patchNotesPreparingBody: "Twitchログイン後、投稿を作成できます。",
-    communitySubtitle: "Twitchログイン後、自由に投稿を作成できます。",
-    communityServerSubtitle: "コミュニティサーバーやクラン募集を確認・登録できます。",
-    communityPartySubtitle: "一緒にプレイするメンバーを探し、募集条件を共有できます。",
-    communityWriteTitle: "投稿作成",
-    communityEditTitle: "投稿編集",
-    communityPartyWriteTitle: "パーティー募集作成",
-    communityServerWriteButton: "サーバー募集を書く",
-    communityPartyWriteButton: "パーティー募集を書く",
-    communityEditButton: "自分の投稿を編集",
-    communityListTitle: "最近の投稿",
-    communityPartyListTitle: "最近のパーティー募集",
-    communityLoginRequired: "投稿作成は Twitch ログイン後に利用できます。",
-    communityPartyPrompt: "どんなパーティーを探していますか？",
-    communityTitleLabel: "タイトル",
-    communityBodyLabel: "内容",
-    communityRiotIdLabel: "戦績 Riot ID",
-    communityTagsLabel: "タグ",
-    communityImageLabel: "代表画像",
-    communityTitlePlaceholder: "タイトルを入力してください",
-    communityBodyPlaceholder: "内容を入力してください",
-    communityPartyTitlePlaceholder: "例: 楽しく一緒にプレイできる方募集",
-    communityPartyBodyPlaceholder: "募集条件、希望ロール、連絡方法を入力してください",
-    communityRiotIdPlaceholder: "サモナー名#タグ",
-    communityTagsPlaceholder: "クラン, ランク, 募集",
-    communityImageHelp: "PNG/JPG/GIF/WEBP、5MB以下",
-    communityImageReplaceHelp: "新しい画像を選択すると、既存の代表画像が差し替えられます。",
-    communitySelectPlaceholder: "選択してください",
-    communityRiotIdCheck: "確認",
-    communityRiotIdChecking: "確認中",
-    communityRiotIdValid: "戦績を確認しました。",
-    communityRiotIdInvalid: "戦績を確認できませんでした。",
-    communityImageChoose: "画像を選択",
-    communityImageSelected: "選択済み",
-    communityImageEmpty: "選択されたファイルなし",
-    communityAlreadyPosted: "すでにこの掲示板に投稿済みです。掲示板ごとに1アカウント1件のみ登録できます。",
-    communityPartyLimitReached: "パーティー募集は1日2件まで作成できます。",
-    communityPartyAutoDeleteNotice: "パーティー募集は投稿から24時間後に自動削除されます。",
-    communityRecordLabel: "戦績",
-    communityPartyTierLabel: "ティア",
-    communityPartyRoleLabel: "役割",
-    communityPartyModeLabel: "モード",
-    communityPartyVoiceLabel: "ボイスチャット",
-    communityPartyCapacityLabel: "募集人数",
-    communityPartyTierPlaceholder: "例: ダイヤ IV",
-    communityPartyRolePlaceholder: "例: ミッド、ジャングル",
-    communityPartyModePlaceholder: "例: ランクゲーム",
-    communityPartyVoicePlaceholder: "例: Discord",
-    communityDetailTitle: "投稿詳細",
-    communityBackToList: "一覧へ",
-    communityRecordPreview: "登録戦績",
-    communityRecordMissing: "投稿に連携された Riot ID がありません。",
-    communityRecordLoading: "戦績を読み込み中です。",
-    communityRecordFailed: "戦績を読み込めませんでした。",
-    communityCommentsTitle: "コメント",
-    communityCommentPlaceholder: "コメントを入力してください",
-    communityCommentLoginRequired: "コメント作成は Twitch ログイン後に利用できます。",
-    communityCommentSubmit: "コメント作成",
-    communityCommentSubmitting: "作成中",
-    communityCommentEmpty: "まだコメントがありません。",
-    communityCommentFailed: "コメントを作成できませんでした。",
-    communitySubmit: "投稿する",
-    communityUpdateSubmit: "更新する",
-    communitySubmitting: "投稿中",
-    communityUpdating: "更新中",
-    communityEmpty: "まだ投稿がありません。",
-    communityLoadFailed: "投稿を読み込めませんでした。",
-    refreshAvailableIn: "後に可能",
-    twitchLive: "配信中",
-    twitchOffline: "配信者オフライン",
-    twitchOnlineShort: "オンライン",
-    twitchOfflineShort: "オフライン",
-    twitchStreamer: "Twitch 配信者",
-    twitchViewers: "視聴者",
-    openTwitch: "Twitch を開く",
-    profileLinks: "プロフィールリンク",
-    twitchViewerLogin: "Twitch ログイン",
-    twitchViewerLogout: "Twitch ログアウト",
-    twitchFollowedTitle: "フォロー配信者の戦績",
-    twitchFollowedSubtitle: "Twitchでフォロー中の配信者から Riot ID が紐づいたチャンネルを表示します。",
-    twitchFollowedLinked: "戦績連携",
-    twitchFollowedRefresh: "更新",
-    twitchFollowedEmpty: "フォロー一覧から戦績連携済みの配信者が見つかりません。",
-    twitchFollowedNoRiot: "Riot ID 未連携",
-    twitchLoginRequired: "Twitchログイン後、フォロー中の配信者の戦績を確認できます。",
-    twitchNotConfigured: "Twitch公開ログインがまだ設定されていません。",
-    streamerRiotRequestTitle: "自分の Riot ID 登録申請",
-    streamerRiotRequestBody: "管理者が確認すると、フォロワーの Twitch フォロー一覧からあなたの戦績を見られます。",
-    streamerRiotRequestPlaceholder: "ゲーム名#タグ",
-    streamerRiotRequestSubmit: "登録申請",
-    streamerRiotRequestSubmitting: "申請中",
-    streamerRiotRequestSent: "登録申請を送信しました。管理者承認後に反映されます。",
-    streamerRiotRequestApproved: "すでに承認済みの Riot ID です。",
-    streamerRiotRegister: "配信者登録",
-    streamerRiotRegisterDescription: "自分の Twitch アカウントと Riot ID を連携し、フォロワーに戦績とオーバーレイを表示します。",
-    streamerRiotRegisterBack: "戻る",
-    streamerDashboardOpen: "ダッシュボードを開く",
-    streamerRecordOpen: "自分の戦績を見る",
-    twitchProfileMenu: "Twitch プロフィールメニュー",
-    viewRecord: "戦績を見る",
-    loadMoreMatches: "もっと見る",
-    loadingMoreMatches: "読み込み中",
-    noMoreMatches: "これ以上表示できる戦績はありません。",
-    currentGameStatus: "リアルタイムゲーム状態",
-    currentlyInGame: "ゲーム中です",
-    notInGame: "ゲーム中ではありません",
-    currentGameUnavailable: "ゲーム中情報を読み込めませんでした。",
-    currentGameUnavailableDetail: "ゲーム中情報は Riot Spectator API で別途取得します。",
-    currentGamePlatform: "照会サーバー",
-    currentGameParticipants: "参加者",
-    currentGameMode: "モード",
-    currentGameDuration: "進行時間",
-    currentGameUpdated: "最終更新",
-    currentGameAverageTier: "平均ティア",
-    currentGameReady: "分析準備",
-    currentGameBot: "ボット",
-    footerPrivacy: "プライバシーポリシー",
-    footerTerms: "利用規約",
-    footerContact: "お問い合わせ",
-    footerRiotDisclaimer: "YORO.ggはRiot Gamesの公式サービスではなく、Riot Gamesの見解を代表するものではありません。League of LegendsおよびRiot GamesはRiot Games, Inc.の商標です。",
-    footerCopyright: "Copyright © YORO.gg. All rights reserved.",
-    privacyTitle: "プライバシーポリシー",
-    termsTitle: "利用規約",
-    contactTitle: "お問い合わせ",
-    legalEffectiveDate: "施行日: 2026. 07. 07.",
-    legalDraftNotice: "本書は運営情報が確定するまで使用するサービス方針の草案です。運営者情報、保存期間、委託・国外移転の有無は公開前に最終確認が必要です。",
-    privacyIntro: "YORO.ggは、戦績検索、Twitchログイン、配信者機能、コミュニティ、大会機能を提供するために必要な範囲で個人情報を取り扱います。",
-    privacyCollectedTitle: "取り扱う個人情報の項目",
-    privacyCollectedBody: "Twitchログイン時にTwitchユーザーID、表示名、プロフィール画像、フォロー・サブスク状況、許可された権限範囲を取り扱う場合があります。Riot ID、ゲーム戦績、ランク、チャンピオン統計、コミュニティ投稿・コメント・画像、お気に入り、参加キュー、接続ログ、Cookieなどの利用記録も取り扱う場合があります。",
-    privacyPurposeTitle: "利用目的",
-    privacyPurposeBody: "ユーザー識別、戦績検索と分析、配信者登録とオーバーレイ提供、フォロー・サブスク状況表示、視聴者参加キュー運営、コミュニティ・大会機能提供、不正利用防止、問い合わせ対応に利用します。",
-    privacyRetentionTitle: "保存期間",
-    privacyRetentionBody: "アカウント連携情報は、利用者がTwitch連携を解除するか削除を要請するまで保存します。投稿とコメントは削除要請または運営方針による削除まで保存します。セキュリティ・エラーログは安定運用に必要な期間保存し、法令上の保存義務がある場合はその期間に従います。",
-    privacyThirdPartyTitle: "外部サービスおよび提供",
-    privacyThirdPartyBody: "戦績とゲーム情報はRiot Games API、ログインと配信状態はTwitch APIを通じて取得します。利用者の個人情報を販売せず、法令上の義務または利用者が求める機能提供に必要な場合を除き第三者へ提供しません。",
-    privacyRightsTitle: "利用者の権利",
-    privacyRightsBody: "利用者は自身の個人情報の開示、訂正、削除、利用停止を要請できます。Twitch連携解除、投稿削除、Riot ID連携変更はサービス画面または問い合わせから要請できます。",
-    privacySecurityTitle: "安全管理措置",
-    privacySecurityBody: "トークンと認証情報はアクセス権限を制限し、公開レスポンスに機密情報が露出しないよう処理します。サービス運営に必要な最小権限の原則を適用します。",
-    privacyChangesTitle: "方針の変更",
-    privacyChangesBody: "プライバシーポリシーが変更される場合、サービス画面またはお知らせで変更内容を案内します。",
-    termsIntro: "本規約は、YORO.ggが提供する戦績検索、Twitch連携、コミュニティ、大会、配信支援機能の利用条件を定めます。",
-    termsAccountTitle: "アカウントとログイン",
-    termsAccountBody: "一部機能にはTwitchログインが必要です。利用者は本人のアカウントのみを使用し、権限を不正利用したり他人の情報を登録してはいけません。",
-    termsServiceTitle: "サービス提供",
-    termsServiceBody: "戦績、ランク、配信状態、フォロー・サブスク情報はRiot GamesおよびTwitch APIの状態により遅延または提供できない場合があります。YORO.ggは安定運用のため機能を変更または一時停止できます。",
-    termsUserContentTitle: "投稿とコミュニティ",
-    termsUserContentBody: "利用者は自分が作成した投稿、コメント、画像について責任を負います。違法、ヘイト、なりすまし、個人情報侵害、著作権侵害、広告スパム投稿は制限または削除される場合があります。",
-    termsProhibitedTitle: "禁止行為",
-    termsProhibitedBody: "サービス障害を引き起こす自動化リクエスト、認証回避、無断クローリング、他人のアカウント・戦績のなりすまし、配信運営を妨害する行為、法令またはプラットフォームポリシー違反を禁止します。",
-    termsDataTitle: "ゲームおよびプラットフォームデータ",
-    termsDataBody: "YORO.ggはRiot GamesまたはTwitchの公式サービスではなく、各プラットフォームのポリシーとAPI制限を遵守します。表示データは参考用であり、試合結果やランクを保証するものではありません。",
-    termsLiabilityTitle: "責任の制限",
-    termsLiabilityBody: "サービスは可能な範囲で安定提供しますが、外部API障害、ネットワーク障害、利用者入力の誤りによる損害については法令で認められる範囲で責任が制限される場合があります。",
-    termsChangesTitle: "規約の変更",
-    termsChangesBody: "規約変更時は適用日と主な内容をサービス画面またはお知らせで案内します。変更後もサービスを利用し続ける場合、変更後の規約に同意したものとみなされます。",
-    contactIntro: "サービス不具合、権利要請、提携、法的問い合わせは下記メールへお送りください。",
-    contactEmailLabel: "問い合わせメール",
-    contactEmailButton: "メールを送る",
-    contactMailSubject: "YORO.gg お問い合わせ",
-    contactTemporaryNotice: "現在は仮の問い合わせ導線です。正式な問い合わせフォームと運営者情報は後日確定します。",
-    blueTeam: "ブルーチーム",
-    redTeam: "レッドチーム"
-  }
-} as const;
 
-type PublicLocale = keyof typeof publicI18n;
-type PublicText = (typeof publicI18n)[PublicLocale];
-type PublicTextKey = keyof typeof publicI18n.ko;
-type PublicLegalPageKey = Extract<PublicMainPage, "privacy" | "terms" | "contact">;
 type PublicLocalizedOption = {
   value: string;
   ko: string;
   ja: string;
 };
-
-let activePublicLocale: PublicLocale = "ko";
-
-function t(): PublicText {
-  return publicI18n[activePublicLocale];
-}
-
-function publicText(key: PublicTextKey): string {
-  return publicI18n[activePublicLocale][key];
-}
-
-function publicKoText(key: PublicTextKey): string {
-  return publicI18n.ko[key];
-}
-
-function publicJaText(key: PublicTextKey): string {
-  return publicI18n.ja[key];
-}
 
 const PARTY_TIER_OPTIONS: PublicLocalizedOption[] = [
   { value: "any", ko: "티어 무관", ja: "ティア不問" },
@@ -1639,44 +316,6 @@ function matchHighlightClass(badges: PublicLolMatchBadge[] | undefined): string 
   return highlight ? `highlight-${highlight}` : "";
 }
 
-function isPublicLocale(value: unknown): value is PublicLocale {
-  return value === "ko" || value === "ja";
-}
-
-function readStoredLocale(): PublicLocale | undefined {
-  try {
-    const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-    return isPublicLocale(stored) ? stored : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function saveStoredLocale(locale: PublicLocale): void {
-  try {
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  } catch {
-    // 언어 저장 실패는 화면 사용을 막지 않습니다.
-  }
-}
-
-function clearStoredLocale(): void {
-  try {
-    window.localStorage.removeItem(LOCALE_STORAGE_KEY);
-  } catch {
-    // 언어 저장소 삭제 실패는 화면 사용을 막지 않습니다.
-  }
-}
-
-function detectBrowserPublicLocale(): PublicLocale {
-  const lang = document.documentElement.lang || navigator.language || "";
-  return lang.toLocaleLowerCase().startsWith("ja") ? "ja" : "ko";
-}
-
-function detectPublicLocale(): PublicLocale {
-  return readStoredLocale() ?? detectBrowserPublicLocale();
-}
-
 async function loadPublicLocalePreference(signal?: AbortSignal): Promise<PublicLocale | undefined> {
   const response = await fetch(`${apiBase}/api/public/locale`, {
     credentials: "include",
@@ -1686,20 +325,6 @@ async function loadPublicLocalePreference(signal?: AbortSignal): Promise<PublicL
   const body = await response.json() as { locale?: unknown };
   return isPublicLocale(body.locale) ? body.locale : undefined;
 }
-
-const tierLabels: Record<string, string> = {
-  IRON: "Iron",
-  BRONZE: "Bronze",
-  SILVER: "Silver",
-  GOLD: "Gold",
-  PLATINUM: "Platinum",
-  EMERALD: "Emerald",
-  DIAMOND: "Diamond",
-  MASTER: "Master",
-  GRANDMASTER: "Grandmaster",
-  CHALLENGER: "Challenger",
-  UNRANKED: "Unranked"
-};
 
 const queueLabels: Record<PublicLocale, Record<number, string>> = {
   ko: {
@@ -2058,270 +683,6 @@ async function logoutPublicTwitch(): Promise<void> {
   });
 }
 
-function normalizedTagLine(value: string): string {
-  return value.trim().normalize("NFKC").toUpperCase();
-}
-
-function looksLikeSpaceSeparatedTagLine(value: string): boolean {
-  const tagLine = normalizedTagLine(value);
-  return tagLine.length > 0 && tagLine.length <= 10 && /^[\p{L}\p{N}_-]+$/u.test(tagLine) && /[\p{N}_-]/u.test(tagLine);
-}
-
-function jpRiotIdQuery(value: string): string {
-  const normalized = value.trim().normalize("NFKC").replace(/＃/g, "#");
-  if (!normalized) return "";
-  if (normalized.includes("#")) {
-    const hashIndex = normalized.lastIndexOf("#");
-    const gameName = normalized.slice(0, hashIndex).trim().replace(/\s+/g, " ");
-    const tagLine = normalizedTagLine(normalized.slice(hashIndex + 1));
-    return gameName && tagLine ? `${gameName}#${tagLine}` : normalized;
-  }
-  const parts = normalized.split(/\s+/);
-  const possibleTag = parts.at(-1);
-  if (possibleTag && looksLikeSpaceSeparatedTagLine(possibleTag) && parts.length > 1) {
-    return `${parts.slice(0, -1).join(" ")}#${normalizedTagLine(possibleTag)}`;
-  }
-  return `${normalized.replace(/\s+/g, " ")}#JP1`;
-}
-
-function splitRiotIdText(riotId: string): { gameName: string; tagLine: string } | undefined {
-  const normalized = riotId.trim().normalize("NFKC").replace(/＃/g, "#");
-  const hashIndex = normalized.lastIndexOf("#");
-  if (hashIndex <= 0 || hashIndex === normalized.length - 1) return undefined;
-  const gameName = normalized.slice(0, hashIndex).trim().replace(/\s+/g, " ");
-  const tagLine = normalizedTagLine(normalized.slice(hashIndex + 1));
-  return gameName && tagLine ? { gameName, tagLine } : undefined;
-}
-
-function normalizeRiotId(riotId: string): string {
-  return riotId.trim().normalize("NFKC").replace(/＃/g, "#").toLocaleLowerCase();
-}
-
-function publicSummonerPath(riotId: string): string {
-  const parsed = splitRiotIdText(jpRiotIdQuery(riotId));
-  if (!parsed) return "/";
-  return `${PUBLIC_SUMMONER_ROUTE_PREFIX}${encodeURIComponent(`${parsed.gameName}-${parsed.tagLine}`)}`;
-}
-
-function riotIdFromPublicSummonerPath(pathname: string = window.location.pathname): string | undefined {
-  if (!pathname.startsWith(PUBLIC_SUMMONER_ROUTE_PREFIX)) return undefined;
-  const slug = pathname.slice(PUBLIC_SUMMONER_ROUTE_PREFIX.length).split("/")[0];
-  if (!slug) return undefined;
-  const decoded = decodeURIComponent(slug).trim().normalize("NFKC").replace(/＃/g, "#");
-  if (decoded.includes("#")) return jpRiotIdQuery(decoded);
-  const separatorIndex = decoded.lastIndexOf("-");
-  if (separatorIndex <= 0 || separatorIndex === decoded.length - 1) return undefined;
-  const gameName = decoded.slice(0, separatorIndex).trim();
-  const tagLine = normalizedTagLine(decoded.slice(separatorIndex + 1));
-  return gameName && tagLine ? `${gameName}#${tagLine}` : undefined;
-}
-
-type PublicTournamentRoute = {
-  page: Extract<PublicMainPage, "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule">;
-  slug?: string;
-};
-
-function tournamentRouteFromPublicPath(pathname: string = window.location.pathname): PublicTournamentRoute | undefined {
-  if (pathname === PUBLIC_TOURNAMENT_LIST_PATH || pathname === `${PUBLIC_TOURNAMENT_LIST_PATH}/`) {
-    return { page: "tournamentList" };
-  }
-  if (pathname === PUBLIC_TOURNAMENT_CALENDAR_PATH || pathname === `${PUBLIC_TOURNAMENT_CALENDAR_PATH}/`) {
-    return { page: "tournamentCalendar" };
-  }
-  if (!pathname.startsWith(PUBLIC_TOURNAMENT_ROUTE_PREFIX)) return undefined;
-  const [slug, tab] = pathname.slice(PUBLIC_TOURNAMENT_ROUTE_PREFIX.length).split("/");
-  if (!slug) return { page: "tournamentList" };
-  const page =
-    tab === "news" ? "tournamentNews" :
-    tab === "teams" ? "tournamentTeams" :
-    tab === "schedule" ? "tournamentSchedule" :
-    "tournamentBracket";
-  return { page, slug: decodeURIComponent(slug) };
-}
-
-function legalPageFromPublicPath(pathname: string = window.location.pathname): PublicLegalPageKey | undefined {
-  const normalized = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
-  if (normalized === PUBLIC_PRIVACY_PATH) return "privacy";
-  if (normalized === PUBLIC_TERMS_PATH) return "terms";
-  if (normalized === PUBLIC_CONTACT_PATH) return "contact";
-  return undefined;
-}
-
-function publicLegalPath(page: PublicMainPage): string | undefined {
-  if (page === "privacy") return PUBLIC_PRIVACY_PATH;
-  if (page === "terms") return PUBLIC_TERMS_PATH;
-  if (page === "contact") return PUBLIC_CONTACT_PATH;
-  return undefined;
-}
-
-function publicTournamentDetailPath(slug: string, page: PublicMainPage = "tournamentBracket"): string {
-  const suffix =
-    page === "tournamentNews" ? "/news" :
-    page === "tournamentTeams" ? "/teams" :
-    page === "tournamentSchedule" ? "/schedule" :
-    "";
-  return `${PUBLIC_TOURNAMENT_ROUTE_PREFIX}${encodeURIComponent(slug)}${suffix}`;
-}
-
-function setPublicPath(pathname: string, replace = false): void {
-  const nextPath = pathname || "/";
-  if (window.location.pathname === nextPath) return;
-  if (replace) {
-    window.history.replaceState({}, "", nextPath);
-    return;
-  }
-  window.history.pushState({}, "", nextPath);
-}
-
-function suggestionRiotId(suggestion: SearchSuggestion): string {
-  return `${suggestion.gameName}#${suggestion.tagLine}`;
-}
-
-function normalizeSuggestionKey(suggestion: SearchSuggestion): string {
-  return suggestionRiotId(suggestion).toLocaleLowerCase();
-}
-
-function readRecentSearches(): SearchSuggestion[] {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(RECENT_SEARCH_STORAGE_KEY) ?? "[]") as Array<Partial<SearchSuggestion>>;
-    return parsed
-      .map((item) => ({
-        gameName: typeof item.gameName === "string" ? item.gameName.trim() : "",
-        tagLine: typeof item.tagLine === "string" ? normalizedTagLine(item.tagLine) : "JP1",
-        source: "recent" as const,
-        profileIconUrl: typeof item.profileIconUrl === "string" ? item.profileIconUrl : undefined,
-        summonerLevel: typeof item.summonerLevel === "number" ? item.summonerLevel : undefined,
-        lolPlatform: typeof item.lolPlatform === "string" ? item.lolPlatform : undefined,
-        rankedStats: item.rankedStats && typeof item.rankedStats === "object" ? item.rankedStats as LolRankedStats : undefined,
-        lastSeenAt: typeof item.lastSeenAt === "string" ? item.lastSeenAt : undefined
-      }))
-      .filter((item) => item.gameName && item.tagLine)
-      .slice(0, MAX_RECENT_SEARCHES);
-  } catch {
-    return [];
-  }
-}
-
-function saveRecentSearch(profile: PublicLolProfile): void {
-  try {
-    const next: SearchSuggestion = {
-      gameName: profile.gameName,
-      tagLine: normalizedTagLine(profile.tagLine),
-      source: "recent",
-      profileIconUrl: profile.profileIconUrl,
-      summonerLevel: profile.summonerLevel,
-      lolPlatform: profile.lolPlatform,
-      rankedStats: profile.rankedStats,
-      lastSeenAt: profile.fetchedAt
-    };
-    const recent = readRecentSearches().filter((item) => normalizeSuggestionKey(item) !== normalizeSuggestionKey(next));
-    window.localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify([next, ...recent].slice(0, MAX_RECENT_SEARCHES)));
-  } catch {
-    // 최근 검색 저장 실패는 전적 조회 흐름을 막지 않습니다.
-  }
-}
-
-function readStoredTheme(): PublicTheme {
-  try {
-    return window.localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light";
-  } catch {
-    return "light";
-  }
-}
-
-function readFavorites(): PublicFavorite[] {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(FAVORITE_STORAGE_KEY) ?? "[]") as Array<Partial<PublicFavorite>>;
-    return parsed
-      .map((item) => ({
-        gameName: typeof item.gameName === "string" ? item.gameName.trim() : "",
-        tagLine: typeof item.tagLine === "string" ? normalizedTagLine(item.tagLine) : "JP1",
-        source: "recent" as const,
-        profileIconUrl: typeof item.profileIconUrl === "string" ? item.profileIconUrl : undefined,
-        summonerLevel: typeof item.summonerLevel === "number" ? item.summonerLevel : undefined,
-        lolPlatform: typeof item.lolPlatform === "string" ? item.lolPlatform : undefined,
-        rankedStats: item.rankedStats && typeof item.rankedStats === "object" ? item.rankedStats as LolRankedStats : undefined,
-        lastSeenAt: typeof item.lastSeenAt === "string" ? item.lastSeenAt : undefined,
-        recentGames: typeof item.recentGames === "number" ? item.recentGames : undefined,
-        recentWins: typeof item.recentWins === "number" ? item.recentWins : undefined,
-        recentWinRate: typeof item.recentWinRate === "number" ? item.recentWinRate : undefined,
-        averageKda: typeof item.averageKda === "number" ? item.averageKda : undefined
-      }))
-      .filter((item) => item.gameName && item.tagLine)
-      .slice(0, MAX_FAVORITES);
-  } catch {
-    return [];
-  }
-}
-
-function writeFavorites(favorites: PublicFavorite[]): void {
-  try {
-    window.localStorage.setItem(FAVORITE_STORAGE_KEY, JSON.stringify(favorites.slice(0, MAX_FAVORITES)));
-  } catch {
-    // 즐겨찾기 저장 실패는 전적 화면 사용을 막지 않습니다.
-  }
-}
-
-function favoriteFromProfile(profile: PublicLolProfile): PublicFavorite {
-  return {
-    gameName: profile.gameName,
-    tagLine: normalizedTagLine(profile.tagLine),
-    source: "recent",
-    profileIconUrl: profile.profileIconUrl,
-    summonerLevel: profile.summonerLevel,
-    lolPlatform: profile.lolPlatform,
-    rankedStats: profile.rankedStats,
-    lastSeenAt: profile.fetchedAt,
-    recentGames: profile.summary.recentGames,
-    recentWins: profile.summary.recentWins,
-    recentWinRate: profile.summary.recentWinRate,
-    averageKda: profile.summary.averageKda
-  };
-}
-
-function isFavoriteProfile(favorites: PublicFavorite[], profile: PublicLolProfile): boolean {
-  const key = normalizeSuggestionKey(favoriteFromProfile(profile));
-  return favorites.some((favorite) => normalizeSuggestionKey(favorite) === key);
-}
-
-function searchTextForMatch(value: string): string {
-  return value.trim().normalize("NFKC").replace("＃", "#").toLocaleLowerCase();
-}
-
-function inputSuggestion(query: string): SearchSuggestion | undefined {
-  const riotId = jpRiotIdQuery(query);
-  const hashIndex = riotId.lastIndexOf("#");
-  if (hashIndex <= 0 || hashIndex === riotId.length - 1) return undefined;
-  const gameName = riotId.slice(0, hashIndex).trim();
-  const tagLine = normalizedTagLine(riotId.slice(hashIndex + 1));
-  if (!gameName || !tagLine) return undefined;
-  return { gameName, tagLine, source: "input" };
-}
-
-function buildSuggestions(query: string, recentSearches: SearchSuggestion[], remoteSuggestions: SearchSuggestion[]): SearchSuggestion[] {
-  const searchText = searchTextForMatch(query);
-  const direct = inputSuggestion(query);
-  const merged = [...remoteSuggestions, direct, ...recentSearches].filter((suggestion): suggestion is SearchSuggestion => Boolean(suggestion));
-  const unique = new Map<string, SearchSuggestion>();
-  for (const suggestion of merged) {
-    const key = normalizeSuggestionKey(suggestion);
-    if (!unique.has(key)) unique.set(key, suggestion);
-  }
-  const values = [...unique.values()];
-  if (!searchText) return values.slice(0, MAX_SEARCH_SUGGESTIONS);
-  const tagOnly = searchText.startsWith("#") ? searchText.slice(1) : "";
-  return values
-    .filter((suggestion) => {
-      if (suggestion.source === "input") return true;
-      const riotId = suggestionRiotId(suggestion).toLocaleLowerCase();
-      const gameName = suggestion.gameName.toLocaleLowerCase();
-      const tagLine = suggestion.tagLine.toLocaleLowerCase();
-      if (tagOnly) return tagLine.includes(tagOnly);
-      return riotId.includes(searchText) || gameName.includes(searchText) || tagLine.includes(searchText);
-    })
-    .slice(0, MAX_SEARCH_SUGGESTIONS);
-}
-
 function suggestionSourceLabel(suggestion: SearchSuggestion): string {
   if (suggestion.source === "verified") return t().verifiedSearch;
   if (suggestion.source === "recent") return t().recentSearch;
@@ -2333,118 +694,6 @@ function assetUrl(url: string | undefined): string | undefined {
   if (!url) return undefined;
   if (/^https?:\/\//i.test(url)) return url;
   return `${apiBase}${url}`;
-}
-
-function rankLabel(stats: LolRankedStats | undefined): string {
-  if (!stats || stats.tier === "UNRANKED") return t().unranked;
-  return `${tierLabels[stats.tier] ?? stats.tier} ${stats.rank ?? ""} ${stats.leaguePoints} LP`.trim();
-}
-
-function rankPointLabel(point: LolRankHistoryPoint | undefined): string {
-  if (!point || point.tier === "UNRANKED") return t().unranked;
-  return `${tierLabels[point.tier] ?? point.tier} ${point.rank ?? ""} ${point.leaguePoints} LP`.trim();
-}
-
-function shortRankLabel(stats: LolRankedStats | undefined, emptyLabel = "JP", unrankedLabel = emptyLabel): string {
-  if (!stats) return emptyLabel;
-  if (stats.tier === "UNRANKED") return unrankedLabel;
-  const tierInitials: Record<string, string> = {
-    IRON: "I",
-    BRONZE: "B",
-    SILVER: "S",
-    GOLD: "G",
-    PLATINUM: "P",
-    EMERALD: "E",
-    DIAMOND: "D",
-    MASTER: "M",
-    GRANDMASTER: "GM",
-    CHALLENGER: "C"
-  };
-  const rankNumbers: Record<string, string> = {
-    I: "1",
-    II: "2",
-    III: "3",
-    IV: "4"
-  };
-  const tier = tierInitials[stats.tier] ?? stats.tier.slice(0, 1);
-  return `${tier}${stats.rank ? rankNumbers[stats.rank] ?? stats.rank : ""}`;
-}
-
-function rankBadgeClass(stats: LolRankedStats | undefined): string {
-  return `public-suggestion-rank ${stats?.tier ? stats.tier.toLocaleLowerCase() : "platform"}`;
-}
-
-function rankTierClass(stats: LolRankedStats | undefined, state: "ready" | "loading" | "unknown" = "ready"): string {
-  if (state === "loading") return "public-team-rank-badge loading";
-  if (!stats) return "public-team-rank-badge unknown";
-  return `public-team-rank-badge ${stats?.tier ? stats.tier.toLocaleLowerCase() : "unranked"}`;
-}
-
-function rankTrendTierClass(stats: LolRankedStats | undefined): string {
-  return `tier-${stats?.tier ? stats.tier.toLocaleLowerCase() : "unranked"}`;
-}
-
-function matchRankBadgeLabel(stats: LolRankedStats | undefined, loading = false): string {
-  if (loading) return "...";
-  return shortRankLabel(stats, "-", "U");
-}
-
-function totalGames(stats: LolRankedStats | undefined): number {
-  return (stats?.wins ?? 0) + (stats?.losses ?? 0);
-}
-
-function rankScore(stats: LolRankedStats | undefined): number {
-  if (!stats || stats.tier === "UNRANKED") return 0;
-  const tierScore: Record<string, number> = {
-    IRON: 0,
-    BRONZE: 400,
-    SILVER: 800,
-    GOLD: 1200,
-    PLATINUM: 1600,
-    EMERALD: 2000,
-    DIAMOND: 2400,
-    MASTER: 2800,
-    GRANDMASTER: 3200,
-    CHALLENGER: 3600
-  };
-  const divisionScore: Record<string, number> = {
-    IV: 0,
-    III: 100,
-    II: 200,
-    I: 300
-  };
-  return (tierScore[stats.tier] ?? 0) + (stats.rank ? divisionScore[stats.rank] ?? 0 : 0) + stats.leaguePoints;
-}
-
-function rankLabelFromScore(score: number): string {
-  if (!Number.isFinite(score) || score <= 0) return t().unranked;
-  const tiers = [
-    { tier: "IRON", base: 0 },
-    { tier: "BRONZE", base: 400 },
-    { tier: "SILVER", base: 800 },
-    { tier: "GOLD", base: 1200 },
-    { tier: "PLATINUM", base: 1600 },
-    { tier: "EMERALD", base: 2000 },
-    { tier: "DIAMOND", base: 2400 },
-    { tier: "MASTER", base: 2800 },
-    { tier: "GRANDMASTER", base: 3200 },
-    { tier: "CHALLENGER", base: 3600 }
-  ];
-  const tier = [...tiers].reverse().find((item) => score >= item.base) ?? { tier: "IRON", base: 0 };
-  if (tier.tier === "MASTER" || tier.tier === "GRANDMASTER" || tier.tier === "CHALLENGER") {
-    return tierLabels[tier.tier] ?? tier.tier;
-  }
-  const remainder = Math.max(0, score - tier.base);
-  const divisions = ["IV", "III", "II", "I"];
-  const division = divisions[Math.min(3, Math.floor(remainder / 100))] ?? "IV";
-  return `${tierLabels[tier.tier] ?? tier.tier} ${division}`;
-}
-
-function averageTierLabel(stats: Array<LolRankedStats | undefined>): string {
-  const ranked = stats.filter((item): item is LolRankedStats => Boolean(item && item.tier !== "UNRANKED"));
-  if (ranked.length === 0) return t().unranked;
-  const averageScore = ranked.reduce((sum, item) => sum + rankScore(item), 0) / ranked.length;
-  return rankLabelFromScore(averageScore);
 }
 
 function matchRoleOrder(role: string | undefined): number {
@@ -2483,28 +732,11 @@ function resultLabel(result: PublicLolRecentMatch["result"]): string {
   return t().unknown;
 }
 
-function formatNumber(value: number | undefined): string {
-  if (value === undefined || !Number.isFinite(value)) return "-";
-  return new Intl.NumberFormat("ko-KR").format(value);
-}
-
-function formatDecimal(value: number | undefined, digits = 2): string {
-  if (value === undefined || !Number.isFinite(value)) return "-";
-  return value.toFixed(digits);
-}
-
 function formatDate(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "-";
   return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(date);
-}
-
-function formatShortDate(value: string | undefined): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return "-";
-  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "numeric", day: "numeric" }).format(date);
 }
 
 function formatRelativeDate(value: string | undefined): string {
@@ -2520,35 +752,10 @@ function formatRelativeDate(value: string | undefined): string {
   return `${Math.floor(hours / 24)}${t().daysAgo}`;
 }
 
-function formatDuration(seconds: number | undefined): string {
-  if (seconds === undefined || !Number.isFinite(seconds)) return "-";
-  const minutes = Math.floor(seconds / 60);
-  const rest = Math.max(0, Math.floor(seconds % 60));
-  return `${minutes}:${String(rest).padStart(2, "0")}`;
-}
-
 function formatBuildMinute(timestampMs: number | undefined): string {
   if (timestampMs === undefined || !Number.isFinite(timestampMs)) return "-";
   const minutes = Math.max(0, Math.floor(timestampMs / 60_000));
   return activePublicLocale === "ja" ? `${minutes}分` : `${minutes}분`;
-}
-
-function refreshRemainingMs(profile: PublicLolProfile | null, now: number): number {
-  const availableAt = profile?.refreshAvailableAt ? Date.parse(profile.refreshAvailableAt) : 0;
-  if (!Number.isFinite(availableAt)) return 0;
-  return Math.max(0, availableAt - now);
-}
-
-function formatCooldown(ms: number): string {
-  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-function formatPercent(value: number | undefined, digits = 0): string {
-  if (value === undefined || !Number.isFinite(value)) return "-";
-  return `${value.toFixed(digits)}%`;
 }
 
 function KdaMetricText({ value, digits = 2 }: { value: number | undefined; digits?: number }) {
@@ -2570,9 +777,22 @@ function KillParticipationMetricText({ value }: { value: number | undefined }) {
 }
 
 type MetricTone = "excellent" | "good" | "neutral" | "warning" | "bad";
+type SharedProfileTone = "neutral" | "info" | "success" | "warning" | "danger";
 
 function metricToneClass(tone: MetricTone | undefined): string {
   return `metric-tone-${tone ?? "neutral"}`;
+}
+
+function sharedMetricTone(tone: MetricTone | undefined): SharedProfileTone {
+  if (tone === "excellent" || tone === "good") return "success";
+  if (tone === "warning") return "warning";
+  if (tone === "bad") return "danger";
+  return "neutral";
+}
+
+function sharedRankTone(stats: LolRankedStats | undefined, fallback = false): SharedProfileTone {
+  if (fallback || !stats || stats.tier === "UNRANKED") return "neutral";
+  return "info";
 }
 
 function kdaTone(value: number | undefined): MetricTone {
@@ -2709,213 +929,6 @@ const objectiveShortLabels: Record<PublicLocale, Record<(typeof teamCompareObjec
     tower: "タワー"
   }
 };
-
-function safeRecordValue(value: number | undefined): number {
-  return value !== undefined && Number.isFinite(value) ? value : -1;
-}
-
-function roundTo(value: number, digits: number): number {
-  const factor = 10 ** digits;
-  return Math.round(value * factor) / factor;
-}
-
-function averageNumbers(values: Array<number | undefined>, digits: number): number | undefined {
-  const numeric = values.filter((value): value is number => value !== undefined && Number.isFinite(value));
-  if (numeric.length === 0) return undefined;
-  return roundTo(numeric.reduce((sum, value) => sum + value, 0) / numeric.length, digits);
-}
-
-function kdaFromTotals(kills: number, deaths: number, assists: number): number {
-  return roundTo(deaths <= 0 ? kills + assists : (kills + assists) / deaths, 2);
-}
-
-function winRateFromTotals(wins: number, games: number): number {
-  if (games <= 0) return 0;
-  return Math.round((wins / games) * 100);
-}
-
-function summarizeMatches(matches: PublicLolRecentMatch[]): PublicLolProfile["summary"] {
-  const recentWins = matches.filter((match) => match.result === "win").length;
-  const totalKills = matches.reduce((sum, match) => sum + match.kills, 0);
-  const totalDeaths = matches.reduce((sum, match) => sum + match.deaths, 0);
-  const totalAssists = matches.reduce((sum, match) => sum + match.assists, 0);
-  return {
-    recentGames: matches.length,
-    recentWins,
-    recentWinRate: winRateFromTotals(recentWins, matches.length),
-    averageKda: matches.length > 0 ? kdaFromTotals(totalKills, totalDeaths, totalAssists) : undefined,
-    averageCsPerMinute: averageNumbers(matches.map((match) => match.csPerMinute), 1),
-    averageKillParticipation: averageNumbers(matches.map((match) => match.killParticipation), 0),
-    averageDamagePerMinute: averageNumbers(matches.map((match) => match.damagePerMinute), 0),
-    averageDamageShare: averageNumbers(matches.map((match) => match.damageShare), 1),
-    averageGoldPerMinute: averageNumbers(matches.map((match) => match.goldPerMinute), 0),
-    averageVisionScore: averageNumbers(matches.map((match) => match.visionScore), 1),
-    totalKills,
-    totalDeaths,
-    totalAssists
-  };
-}
-
-function championPerformanceFromMatches(matches: PublicLolRecentMatch[]): PublicLolChampionPerformance[] {
-  const grouped = new Map<number, {
-    champion: LolChampionSummary;
-    games: number;
-    wins: number;
-    kills: number;
-    deaths: number;
-    assists: number;
-    csPerMinute: Array<number | undefined>;
-    damagePerMinute: Array<number | undefined>;
-  }>();
-  for (const match of matches) {
-    const existing = grouped.get(match.champion.championId) ?? {
-      champion: match.champion,
-      games: 0,
-      wins: 0,
-      kills: 0,
-      deaths: 0,
-      assists: 0,
-      csPerMinute: [],
-      damagePerMinute: []
-    };
-    existing.games += 1;
-    existing.wins += match.result === "win" ? 1 : 0;
-    existing.kills += match.kills;
-    existing.deaths += match.deaths;
-    existing.assists += match.assists;
-    existing.csPerMinute.push(match.csPerMinute);
-    existing.damagePerMinute.push(match.damagePerMinute);
-    grouped.set(match.champion.championId, existing);
-  }
-  return [...grouped.values()]
-    .sort((a, b) => b.games - a.games || b.wins - a.wins)
-    .map((item) => ({
-      champion: item.champion,
-      games: item.games,
-      wins: item.wins,
-      winRate: winRateFromTotals(item.wins, item.games),
-      averageKda: kdaFromTotals(item.kills, item.deaths, item.assists),
-      averageCsPerMinute: averageNumbers(item.csPerMinute, 1),
-      averageDamagePerMinute: averageNumbers(item.damagePerMinute, 0)
-	    }));
-}
-
-function championAnalysisRows(profile: PublicLolProfile): PublicChampionAnalysisRow[] {
-  const rows = new Map<number, PublicChampionAnalysisRow>();
-  profile.topChampions.forEach((champion, index) => {
-    rows.set(champion.championId, {
-      champion,
-      masteryRank: index + 1,
-      masteryLevel: champion.masteryLevel,
-      masteryPoints: champion.masteryPoints
-    });
-  });
-  profile.championPerformance.forEach((performance) => {
-    const existing = rows.get(performance.champion.championId);
-    rows.set(performance.champion.championId, {
-      champion: existing?.champion ?? performance.champion,
-      masteryRank: existing?.masteryRank,
-      masteryLevel: existing?.masteryLevel ?? performance.champion.masteryLevel,
-      masteryPoints: existing?.masteryPoints ?? performance.champion.masteryPoints,
-      performance
-    });
-  });
-  return [...rows.values()].sort((a, b) => {
-    const rankDiff = (a.masteryRank ?? 999) - (b.masteryRank ?? 999);
-    if (rankDiff !== 0) return rankDiff;
-    return (b.performance?.games ?? 0) - (a.performance?.games ?? 0) || (b.masteryPoints ?? 0) - (a.masteryPoints ?? 0);
-  });
-}
-
-function championAnalysisMax(rows: PublicChampionAnalysisRow[], value: (row: PublicChampionAnalysisRow) => number | undefined): number {
-  return Math.max(1, ...rows.map((row) => value(row) ?? 0));
-}
-
-function rolePerformanceFromMatches(matches: PublicLolRecentMatch[]): PublicLolRolePerformance[] {
-  const grouped = new Map<string, { role: string; games: number; wins: number; kills: number; deaths: number; assists: number }>();
-  for (const match of matches) {
-    const role = match.position || "UNKNOWN";
-    const existing = grouped.get(role) ?? { role, games: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
-    existing.games += 1;
-    existing.wins += match.result === "win" ? 1 : 0;
-    existing.kills += match.kills;
-    existing.deaths += match.deaths;
-    existing.assists += match.assists;
-    grouped.set(role, existing);
-  }
-  return [...grouped.values()]
-    .sort((a, b) => b.games - a.games || b.wins - a.wins)
-    .map((item) => ({
-      role: item.role,
-      games: item.games,
-      wins: item.wins,
-      winRate: winRateFromTotals(item.wins, item.games),
-      averageKda: kdaFromTotals(item.kills, item.deaths, item.assists)
-    }));
-}
-
-function queueMatchesFilter(match: PublicLolRecentMatch, queue: MatchQueueFilter): boolean {
-  if (queue === "all") return true;
-  if (queue === "solo") return match.queueId === 420;
-  if (queue === "flex") return match.queueId === 440;
-  if (queue === "ranked5v5") return match.queueId === 42 || match.queueId === 6;
-  if (queue === "normal") return match.queueId === 400 || match.queueId === 430;
-  if (queue === "aram") return match.queueId === 450;
-  return true;
-}
-
-function periodMatchesFilter(match: PublicLolRecentMatch, period: MatchPeriodFilter): boolean {
-  if (period === "all") return true;
-  const startedAt = Date.parse(match.startedAt ?? "");
-  if (!Number.isFinite(startedAt)) return false;
-  const days = period === "7d" ? 7 : 30;
-  return Date.now() - startedAt <= days * 24 * 60 * 60 * 1000;
-}
-
-function filteredMatches(profile: PublicLolProfile, filters: PublicMatchFilters): PublicLolRecentMatch[] {
-  return profile.recentMatches.filter((match) => (
-    queueMatchesFilter(match, filters.queue) &&
-    periodMatchesFilter(match, filters.period) &&
-    (filters.championId === "all" || String(match.champion.championId) === filters.championId)
-  ));
-}
-
-function profileWithMatches(profile: PublicLolProfile, matches: PublicLolRecentMatch[]): PublicLolProfile {
-  return {
-    ...profile,
-    recentMatches: matches,
-    summary: summarizeMatches(matches),
-    championPerformance: championPerformanceFromMatches(matches),
-    rolePerformance: rolePerformanceFromMatches(matches)
-  };
-}
-
-function profileWithAdditionalMatchPage(profile: PublicLolProfile, page: PublicLolMatchPageResponse): PublicLolProfile {
-  const matches = new Map<string, PublicLolRecentMatch>();
-  for (const match of profile.recentMatches) matches.set(match.matchId, match);
-  for (const match of page.recentMatches) matches.set(match.matchId, match);
-  return profileWithMatches({
-    ...profile,
-    fetchedAt: page.fetchedAt,
-    recentMatchStart: 0,
-    nextRecentMatchStart: page.nextRecentMatchStart,
-    hasMoreRecentMatches: page.hasMoreRecentMatches
-  }, [...matches.values()]);
-}
-
-function profileWithDynamicState(profile: PublicLolProfile, next: PublicLolProfile): PublicLolProfile {
-  if (profile.riotId !== next.riotId) return profile;
-  return {
-    ...profile,
-    twitchStream: next.twitchStream,
-    liveGame: next.liveGame,
-    refreshAvailableAt: next.refreshAvailableAt
-  };
-}
-
-function hasActiveFilters(filters: PublicMatchFilters): boolean {
-  return filters.queue !== "all" || filters.championId !== "all" || filters.period !== "all";
-}
 
 function recentRecord(matches: PublicLolRecentMatch[], title: string, unit: string, value: (match: PublicLolRecentMatch) => number | undefined): PublicRecentRecord {
   const match = matches.reduce<PublicLolRecentMatch | undefined>((best, current) => {
@@ -3144,201 +1157,7 @@ function recentChampionSummaries(matches: PublicLolRecentMatch[]): PublicRecentC
     }));
 }
 
-function estimatedLpDelta(match: PublicLolRecentMatch): number {
-  if (match.result === "win") return 20;
-  if (match.result === "loss") return -18;
-  return 0;
-}
-
-const rankTrendTierSteps = [
-  { tier: "IRON", base: 0, code: "I" },
-  { tier: "BRONZE", base: 400, code: "B" },
-  { tier: "SILVER", base: 800, code: "S" },
-  { tier: "GOLD", base: 1200, code: "G" },
-  { tier: "PLATINUM", base: 1600, code: "P" },
-  { tier: "EMERALD", base: 2000, code: "E" },
-  { tier: "DIAMOND", base: 2400, code: "D" },
-  { tier: "MASTER", base: 2800, code: "M" },
-  { tier: "GRANDMASTER", base: 3200, code: "GM" },
-  { tier: "CHALLENGER", base: 3600, code: "C" }
-];
-
-function rankTrendStepForScore(score: number): { tier: string; base: number; code: string } {
-  return [...rankTrendTierSteps].reverse().find((item) => score >= item.base) ?? rankTrendTierSteps[0]!;
-}
-
-function rankTrendDivisionLabel(score: number): string {
-  if (!Number.isFinite(score) || score <= 0) return "U";
-  const step = rankTrendStepForScore(score);
-  if (step.tier === "MASTER" || step.tier === "GRANDMASTER" || step.tier === "CHALLENGER") return step.code;
-  const divisions = ["4", "3", "2", "1"];
-  const division = divisions[Math.min(3, Math.floor(Math.max(0, score - step.base) / 100))] ?? "4";
-  return `${step.code}${division}`;
-}
-
-function rankTrendPointLabel(score: number): string {
-  const step = rankTrendStepForScore(score);
-  const lp = Math.max(0, Math.round(score - step.base));
-  if (step.tier === "MASTER" || step.tier === "GRANDMASTER" || step.tier === "CHALLENGER") {
-    return `${rankTrendDivisionLabel(score)} ${lp} LP`;
-  }
-  return `${rankTrendDivisionLabel(score)} ${Math.min(99, lp % 100)} LP`;
-}
-
-function rankTrendAxisLabels(minScore: number, maxScore: number): string[] {
-  const minTick = Math.floor(minScore / 100) * 100;
-  const maxTick = Math.ceil(maxScore / 100) * 100;
-  const middleTick = Math.round(((minTick + maxTick) / 2) / 100) * 100;
-  return [maxTick, middleTick, minTick]
-    .filter((value, index, values) => values.indexOf(value) === index)
-    .map(rankTrendDivisionLabel);
-}
-
-function recentMatchesWithinWindow(matches: PublicLolRecentMatch[], windowMs: number): PublicLolRecentMatch[] {
-  const cutoff = Date.now() - windowMs;
-  return matches.filter((match) => {
-    if (!match.startedAt) return false;
-    const time = Date.parse(match.startedAt);
-    return Number.isFinite(time) && time >= cutoff;
-  });
-}
-
-function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
-  const windowEnd = Date.now();
-  const windowStart = windowEnd - LP_TREND_WINDOW_MS;
-  const windowMiddle = windowStart + (LP_TREND_WINDOW_MS / 2);
-  const currentRankScore = rankScore(profile.rankedStats);
-
-  const storedRankSamples = (profile.rankHistory ?? [])
-    .map((point, index) => {
-      const startedAtMs = Date.parse(point.date);
-      const value = Number.isFinite(point.rankScore) ? point.rankScore : undefined;
-      if (!Number.isFinite(startedAtMs) || value === undefined) return undefined;
-      return {
-        key: `${profile.riotId}:rank-history:${point.date}:${index}`,
-        value,
-        label: rankTrendPointLabel(value),
-        result: "unknown" as PublicLolRecentMatch["result"],
-        startedAtMs
-      };
-    })
-    .filter((point): point is NonNullable<typeof point> => Boolean(point))
-    .sort((a, b) => a.startedAtMs - b.startedAtMs);
-  const baselineRankSample = storedRankSamples
-    .filter((point) => point.startedAtMs < windowStart)
-    .at(-1);
-  const historySamples = [
-    ...(baselineRankSample ? [{
-      ...baselineRankSample,
-      key: `${baselineRankSample.key}:window-start`,
-      startedAtMs: windowStart
-    }] : []),
-    ...storedRankSamples.filter((point) => point.startedAtMs >= windowStart && point.startedAtMs <= windowEnd)
-  ];
-  const samples = historySamples.length >= 2 ? historySamples : (() => {
-    const filteredMatches = recentMatchesWithinWindow(profile.recentMatches, LP_TREND_WINDOW_MS);
-    const matches = (filteredMatches.length > 0 ? filteredMatches : profile.recentMatches.slice(0, RECENT_ANALYSIS_MATCH_LIMIT)).slice().reverse();
-    if (matches.length === 0 && currentRankScore <= 0) return [];
-    const totalDelta = matches.reduce((sum, match) => sum + estimatedLpDelta(match), 0);
-    const startingRankScore = Math.max(0, currentRankScore - totalDelta);
-    let runningRankScore = startingRankScore;
-    const fallbackStepMs = matches.length > 1 ? LP_TREND_WINDOW_MS / (matches.length - 1) : 0;
-    const matchSamples = matches.map((match, index) => {
-      runningRankScore += estimatedLpDelta(match);
-      const displayValue = Math.max(0, runningRankScore);
-      const parsedStartedAt = Date.parse(match.startedAt ?? "");
-      const startedAtMs = Number.isFinite(parsedStartedAt)
-        ? parsedStartedAt
-        : matches.length === 1 ? windowEnd : windowStart + fallbackStepMs * index;
-      return {
-        key: `${match.matchId}:lp:${index}`,
-        value: displayValue,
-        label: `${resultLabel(match.result)} · ${rankTrendPointLabel(displayValue)}`,
-        result: match.result,
-        startedAtMs
-      };
-    });
-    const currentDisplayRankScore = currentRankScore > 0
-      ? currentRankScore
-      : matchSamples[matchSamples.length - 1]?.value ?? 0;
-    return matchSamples.length > 0
-      ? [
-          {
-            key: `${profile.riotId}:lp:start`,
-            value: startingRankScore,
-            label: rankTrendPointLabel(startingRankScore),
-            result: "unknown" as PublicLolRecentMatch["result"],
-            startedAtMs: windowStart
-          },
-          ...matchSamples,
-          {
-            key: `${profile.riotId}:lp:current`,
-            value: currentDisplayRankScore,
-            label: rankTrendPointLabel(currentDisplayRankScore),
-            result: "unknown" as PublicLolRecentMatch["result"],
-            startedAtMs: windowEnd
-          }
-        ]
-      : [
-          {
-            key: `${profile.riotId}:lp:start`,
-            value: currentRankScore,
-            label: rankTrendPointLabel(currentRankScore),
-            result: "unknown" as PublicLolRecentMatch["result"],
-            startedAtMs: windowStart
-          },
-          {
-            key: `${profile.riotId}:lp:current`,
-            value: currentRankScore,
-            label: rankTrendPointLabel(currentRankScore),
-            result: "unknown" as PublicLolRecentMatch["result"],
-            startedAtMs: windowEnd
-          }
-        ];
-  })();
-
-  if (samples.length === 0) return undefined;
-  const width = 320;
-  const height = 112;
-  const padX = 26;
-  const padY = 18;
-  const rawMin = Math.min(...samples.map((point) => point.value));
-  const rawMax = Math.max(...samples.map((point) => point.value));
-  const min = Math.floor(rawMin / 100) * 100;
-  const max = Math.ceil(rawMax / 100) * 100;
-  const range = Math.max(1, max - min);
-  const points = samples.map((point): PublicTrendPoint => {
-    const rawTimeRatio = Number.isFinite(point.startedAtMs) ? (point.startedAtMs - windowStart) / LP_TREND_WINDOW_MS : 0;
-    const timeRatio = Math.max(0, Math.min(1, rawTimeRatio));
-    const x = padX + timeRatio * (width - padX * 2);
-    const y = padY + (1 - ((point.value - min) / range)) * (height - padY * 2);
-    return {
-      key: point.key,
-      x: roundTo(x, 1),
-      y: roundTo(y, 1),
-      value: point.value,
-      label: point.label,
-      result: point.result
-    };
-  });
-  const linePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
-  const baseY = height - padY;
-  const areaPath = points.length === 1
-    ? `M ${points[0]!.x} ${baseY} L ${points[0]!.x} ${points[0]!.y} L ${points[0]!.x} ${baseY} Z`
-    : `M ${points[0]!.x} ${baseY} L ${points.map((point) => `${point.x} ${point.y}`).join(" L ")} L ${points[points.length - 1]!.x} ${baseY} Z`;
-
-  return {
-    points,
-    linePoints,
-    areaPath,
-    yLabels: rankTrendAxisLabels(rawMin, rawMax),
-    startLabel: formatShortDate(new Date(windowStart).toISOString()),
-    middleLabel: formatShortDate(new Date(windowMiddle).toISOString()),
-    endLabel: formatShortDate(new Date(windowEnd).toISOString())
-  };
-}
-
-function PublicTeamMetricStat({
+function publicTeamMetricStatViewModel({
   value,
   total,
   tone,
@@ -3348,16 +1167,16 @@ function PublicTeamMetricStat({
   value: number | undefined;
   total: number;
   tone: "damage" | "cs" | "vision";
-  label: ReactNode;
+  label: string;
   labelClassName?: string;
-}) {
-  return (
-    <div className={`public-team-stat metric-bar ${tone}`}>
-      <i className="public-team-stat-fill" style={{ width: barWidth(value, total) }} aria-hidden="true" />
-      <strong>{formatNumber(value)}</strong>
-      <span className={labelClassName}>{label}</span>
-    </div>
-  );
+}): PublicTeamMetricStatViewModel {
+  return {
+    tone,
+    fillWidth: barWidth(value, total),
+    valueLabel: formatNumber(value),
+    label,
+    labelClassName
+  };
 }
 
 function playerDisplayName(player: PublicLolMatchParticipant): string {
@@ -3381,123 +1200,64 @@ function maskedRiotIdName(riotId: string | undefined, fallback: string): string 
   return "*".repeat(Math.max(1, nameLength));
 }
 
-function SearchForm({
-  query,
-  loading,
-  onQuery,
-  onClear,
-  onSubmit,
-  suggestions,
-  onPickSuggestion
-}: {
-  query: string;
-  loading: boolean;
-  onQuery: (value: string) => void;
-  onClear: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  suggestions: SearchSuggestion[];
-  onPickSuggestion: (suggestion: SearchSuggestion) => void;
-}) {
-  const [serverMenuOpen, setServerMenuOpen] = useState(false);
-  const hasQuery = query.trim().length > 0;
-  function submitFromKeyboard(event: KeyboardEvent<HTMLInputElement>): void {
-    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
-    event.preventDefault();
-    event.currentTarget.form?.requestSubmit();
-  }
+function searchFormText(): SearchFormText {
+  return {
+    searchServer: t().searchServer,
+    jpServer: {
+      label: t().jpServer,
+      ko: publicI18n.ko.jpServer,
+      ja: publicI18n.ja.jpServer
+    },
+    searchPlaceholder: {
+      label: t().searchPlaceholder,
+      ko: publicI18n.ko.searchPlaceholder,
+      ja: publicI18n.ja.searchPlaceholder
+    },
+    clearSearch: t().clearSearch,
+    searching: t().searching,
+    search: t().search,
+    summonerResults: {
+      label: t().summonerResults,
+      ko: publicI18n.ko.summonerResults,
+      ja: publicI18n.ja.summonerResults
+    },
+    recentSearches: {
+      label: t().recentSearch,
+      ko: publicI18n.ko.recentSearch,
+      ja: publicI18n.ja.recentSearch
+    },
+    favorites: {
+      label: t().favoritesTitle,
+      ko: publicI18n.ko.favoritesTitle,
+      ja: publicI18n.ja.favoritesTitle
+    },
+    noRecentSearches: {
+      label: t().noRecentSearches,
+      ko: publicI18n.ko.noRecentSearches,
+      ja: publicI18n.ja.noRecentSearches
+    },
+    noFavorites: {
+      label: t().noFavorites,
+      ko: publicI18n.ko.noFavorites,
+      ja: publicI18n.ja.noFavorites
+    },
+    relatedSummoners: t().relatedSummoners
+  };
+}
 
+function SearchForm(props: Omit<SearchFormProps<SearchSuggestion>, "helpers" | "text">) {
   return (
-    <div className="public-search-wrap">
-      <form className="public-search-form" onSubmit={onSubmit}>
-        <div className="public-search-server">
-          <button
-            type="button"
-            className="public-server-pill"
-            aria-label={t().searchServer}
-            aria-expanded={serverMenuOpen}
-            onClick={() => setServerMenuOpen((open) => !open)}
-            disabled={loading}
-          >
-            <strong>JP</strong>
-            <span aria-hidden="true" />
-          </button>
-          {serverMenuOpen ? (
-            <div className="public-server-menu" role="listbox" aria-label={t().searchServer}>
-              <button type="button" role="option" aria-selected="true" onClick={() => setServerMenuOpen(false)}>
-                <strong>JP</strong>
-                <span data-ko={publicI18n.ko.jpServer} data-ja={publicI18n.ja.jpServer}>{t().jpServer}</span>
-              </button>
-            </div>
-          ) : null}
-        </div>
-        <label className="public-search-field">
-          <span className="sr-only" data-ko={publicI18n.ko.searchPlaceholder} data-ja={publicI18n.ja.searchPlaceholder}>{t().searchPlaceholder}</span>
-          <input
-            id="public-search-input"
-            name="riotId"
-            type="search"
-            value={query}
-            placeholder={t().searchPlaceholder}
-            data-ko={publicI18n.ko.searchPlaceholder}
-            data-ja={publicI18n.ja.searchPlaceholder}
-            enterKeyHint="search"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            onChange={(event) => onQuery(event.target.value)}
-            onKeyDown={submitFromKeyboard}
-            disabled={loading}
-          />
-        </label>
-        <div className="public-search-actions">
-          {hasQuery ? (
-            <button
-              type="button"
-              className="public-search-icon-button public-search-clear"
-              aria-label={t().clearSearch}
-              onClick={onClear}
-              disabled={loading}
-            >
-              <span aria-hidden="true" />
-            </button>
-          ) : null}
-          <button
-            type="submit"
-            className={`public-search-icon-button public-search-submit ${loading ? "loading" : ""}`}
-            aria-label={loading ? t().searching : t().search}
-            disabled={loading || !hasQuery}
-          >
-            <span aria-hidden="true" />
-          </button>
-        </div>
-      </form>
-      {!loading && suggestions.length > 0 ? (
-        <div className="public-suggestion-panel">
-          <div className="public-suggestion-title" data-ko={publicI18n.ko.summonerResults} data-ja={publicI18n.ja.summonerResults}>{t().summonerResults}</div>
-          <div className="public-suggestion-list" role="listbox" aria-label={t().relatedSummoners}>
-            {suggestions.map((suggestion) => (
-              <button
-                type="button"
-                role="option"
-                key={`${suggestion.source}:${suggestionRiotId(suggestion)}`}
-                aria-label={`${suggestionRiotId(suggestion)} ${suggestionSourceLabel(suggestion)}`}
-                title={suggestionSourceLabel(suggestion)}
-                onClick={() => onPickSuggestion(suggestion)}
-              >
-                <span className="public-suggestion-avatar">
-                  {suggestion.profileIconUrl ? <img src={assetUrl(suggestion.profileIconUrl)} alt="" /> : suggestion.gameName.slice(0, 1).toUpperCase()}
-                </span>
-                <span className={rankBadgeClass(suggestion.rankedStats)}>{shortRankLabel(suggestion.rankedStats)}</span>
-                <span className="public-suggestion-name">
-                  <span>{suggestion.gameName}</span>
-                  <strong>#{suggestion.tagLine}</strong>
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </div>
+    <FeatureSearchForm
+      {...props}
+      helpers={{
+        assetUrl,
+        rankBadgeClass,
+        shortRankLabel,
+        suggestionRiotId,
+        suggestionSourceLabel
+      }}
+      text={searchFormText()}
+    />
   );
 }
 
@@ -3516,6 +1276,88 @@ function SeigaSearchLoader() {
       </div>
     </div>
   );
+}
+
+function publicHomeSearchPanelText(): PublicHomeSearchPanelText {
+  return {
+    eyebrow: {
+      label: "YORO.gg",
+      ko: "YORO.gg",
+      ja: "YORO.gg",
+    },
+    title: {
+      label: t().emptyTitle,
+      ko: publicI18n.ko.emptyTitle,
+      ja: publicI18n.ja.emptyTitle,
+    },
+    description: {
+      label: t().emptyDescription,
+      ko: publicI18n.ko.emptyDescription,
+      ja: publicI18n.ja.emptyDescription,
+    },
+    loadingStatus: {
+      label: t().searching,
+      ko: publicI18n.ko.searching,
+      ja: publicI18n.ja.searching,
+    },
+    readyStatus: {
+      label: t().jpServer,
+      ko: publicI18n.ko.jpServer,
+      ja: publicI18n.ja.jpServer,
+    },
+    errorTitle: {
+      label: t().searchFailed,
+      ko: publicI18n.ko.searchFailed,
+      ja: publicI18n.ja.searchFailed,
+    },
+    emptyTitle: {
+      label: t().noData,
+      ko: publicI18n.ko.noData,
+      ja: publicI18n.ja.noData,
+    },
+    emptyDescription: {
+      label: t().emptyDescription,
+      ko: publicI18n.ko.emptyDescription,
+      ja: publicI18n.ja.emptyDescription,
+    },
+    guideTitle: {
+      label: t().searchNav,
+      ko: publicI18n.ko.searchNav,
+      ja: publicI18n.ja.searchNav,
+    },
+    guideDescription: {
+      label: t().searchPlaceholder,
+      ko: publicI18n.ko.searchPlaceholder,
+      ja: publicI18n.ja.searchPlaceholder,
+    },
+    liveTitle: {
+      label: activePublicLocale === "ja" ? "現在LIVE配信者" : "현재 LIVE 스트리머",
+      ko: "현재 LIVE 스트리머",
+      ja: "現在LIVE配信者",
+    },
+    liveViewAll: {
+      label: activePublicLocale === "ja" ? "すべて見る" : "전체 보기",
+      ko: "전체 보기",
+      ja: "すべて見る",
+    },
+    liveWatch: {
+      label: activePublicLocale === "ja" ? "配信を見る" : "방송 보기",
+      ko: "방송 보기",
+      ja: "配信を見る",
+    },
+    liveEmptyTitle: {
+      label: activePublicLocale === "ja" ? "現在登録済みのLIVE配信者はいません。" : "현재 등록된 LIVE 스트리머가 없습니다.",
+      ko: "현재 등록된 LIVE 스트리머가 없습니다.",
+      ja: "現在登録済みのLIVE配信者はいません。",
+    },
+    liveEmptyDescription: {
+      label: activePublicLocale === "ja"
+        ? "登録済みの配信者がLIVE配信を開始すると、ここに表示されます。"
+        : "등록된 스트리머가 LIVE 방송을 시작하면 여기에 표시됩니다.",
+      ko: "등록된 스트리머가 LIVE 방송을 시작하면 여기에 표시됩니다.",
+      ja: "登録済みの配信者がLIVE配信を開始すると、ここに表示されます。",
+    },
+  };
 }
 
 function SummaryCards({ profile }: { profile: PublicLolProfile }) {
@@ -3563,201 +1405,108 @@ function SummaryCards({ profile }: { profile: PublicLolProfile }) {
   );
 }
 
-function ProfileSeasonBadges({ profile }: { profile: PublicLolProfile }) {
-  const historyBadges = [...(profile.rankHistory ?? [])]
-    .filter((point) => Number.isFinite(Date.parse(point.date)))
-    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-    .reduce<Array<{ year: string; label: string; tier?: string }>>((items, point) => {
-      const year = String(new Date(point.date).getFullYear());
-      if (!items.some((item) => item.year === year)) items.push({ year, label: rankPointLabel(point), tier: point.tier });
-      return items;
-    }, []);
-  const fetchedYear = new Date(profile.fetchedAt).getFullYear();
-  const seasonLabel = Number.isFinite(fetchedYear) ? `${fetchedYear}` : t().currentSeason;
-  const badges = historyBadges.length > 0
-    ? historyBadges
-    : [{ year: seasonLabel, label: rankLabel(profile.rankedStats), tier: profile.rankedStats?.tier }];
-  return (
-    <div className="public-season-badges" aria-label={t().rankTrend}>
-      {badges.map((badge) => (
-        <span className={`tier-${badge.tier ? badge.tier.toLocaleLowerCase() : "unranked"}`} key={`${badge.year}:${badge.label}`}>
-          {badge.year} {badge.label}
-        </span>
-      ))}
-      <span className="recent-form">{t().recentForm} {winLossText(profile.summary.recentWins, profile.summary.recentGames)}</span>
-    </div>
-  );
-}
-
-function RankOverviewCard({
-  title,
-  stats,
-  fallback = false
-}: {
-  title: string;
-  stats: LolRankedStats | undefined;
-  fallback?: boolean;
-}) {
-  const tierIcon = assetUrl(stats?.tierIconUrl);
-  const unranked = fallback || !stats || stats.tier === "UNRANKED";
-  return (
-    <article className="public-rank-overview-card">
-      {tierIcon ? <img src={tierIcon} alt="" /> : <div className="public-rank-fallback">{unranked ? "U" : stats?.tier?.slice(0, 1) ?? "U"}</div>}
-      <div>
-        <span>{title}</span>
-        <strong>{unranked ? t().unranked : rankLabel(stats)}</strong>
-        <small>
-          {stats ? (
-            <>
-              {stats.leaguePoints} LP · <span className={metricToneClass(percentTone(stats.winRate))}>{t().winRate} {stats.winRate}%</span>
-            </>
-          ) : t().noData}
-        </small>
-      </div>
-    </article>
-  );
-}
-
-function TwitchStreamOverviewCard({ stream }: { stream: PublicLolTwitchStream | undefined }) {
-  if (!stream) return null;
-  const categoryLabel = stream.isLive ? stream.gameName : undefined;
-  const viewerLabel = stream.isLive && stream.viewerCount !== undefined ? `${formatNumber(stream.viewerCount)} ${t().twitchViewers}` : undefined;
-  const offlineLabel = !stream.isLive ? stream.twitchDisplayName : undefined;
-  return (
-    <article className={`public-rank-overview-card public-stream-overview-card ${stream.isLive ? "live" : "offline"}`}>
-      {stream.profileImageUrl ? (
-        <img src={assetUrl(stream.profileImageUrl)} alt="" />
-      ) : (
-        <div className={`public-rank-fallback public-stream-fallback ${stream.isLive ? "live" : ""}`}>TV</div>
-      )}
-      <div>
-        <span data-ko={publicI18n.ko.twitchStreamer} data-ja={publicI18n.ja.twitchStreamer}>{t().twitchStreamer}</span>
-        <strong data-ko={stream.isLive ? publicI18n.ko.twitchOnlineShort : publicI18n.ko.twitchOfflineShort} data-ja={stream.isLive ? publicI18n.ja.twitchOnlineShort : publicI18n.ja.twitchOfflineShort}>
-          {stream.isLive ? t().twitchOnlineShort : t().twitchOfflineShort}
-        </strong>
-        <span className="public-stream-meta">
-          {categoryLabel ? <small title={categoryLabel}>{categoryLabel}</small> : null}
-          {viewerLabel ? <small title={viewerLabel}>{viewerLabel}</small> : null}
-          {offlineLabel ? <small title={offlineLabel}>{offlineLabel}</small> : null}
-        </span>
-      </div>
-    </article>
-  );
-}
-
-function ProfileRecentChampionsCard({ champions }: { champions: PublicRecentChampionSummary[] }) {
+function ProfileRecentChampionsCard({ champions, stream }: { champions: PublicRecentChampionSummary[]; stream?: PublicLolTwitchStream }) {
   const winLabel = activePublicLocale === "ja" ? "勝" : "승";
   const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  const visibleStream = visibleStreamerStream(stream);
+  const streamStatus: ProfileRecentChampionsStreamStatus | undefined = visibleStream ? {
+    label: visibleStream.isLive ? t().twitchLive : t().twitchOfflineShort,
+    ko: visibleStream.isLive ? publicI18n.ko.twitchLive : publicI18n.ko.twitchOfflineShort,
+    ja: visibleStream.isLive ? publicI18n.ja.twitchLive : publicI18n.ja.twitchOfflineShort,
+    tone: visibleStream.isLive ? "live" : "neutral",
+    title: `${visibleStream.twitchDisplayName} · ${visibleStream.isLive ? t().twitchLive : t().twitchOfflineShort}`
+  } : undefined;
+  const streamInfo: ProfileRecentChampionsStreamInfo | undefined = visibleStream && streamStatus ? {
+    isLive: visibleStream.isLive,
+    displayName: visibleStream.twitchDisplayName,
+    login: visibleStream.twitchLogin,
+    avatarUrl: assetUrl(visibleStream.profileImageUrl),
+    avatarFallback: visibleStream.twitchDisplayName.slice(0, 1),
+    title: visibleStream.title,
+    gameName: visibleStream.gameName,
+    viewerLabel: visibleStream.isLive && visibleStream.viewerCount !== undefined ? `${formatNumber(visibleStream.viewerCount)} ${t().twitchViewers}` : undefined,
+    status: streamStatus
+  } : undefined;
+  const championItems: ProfileRecentChampionItem[] = champions.map((item) => {
+    const name = championName(item.champion);
+    const iconUrl = assetUrl(item.champion.iconUrl);
+    return {
+      key: item.champion.championId,
+      name,
+      iconUrl,
+      fallbackLabel: name.slice(0, 1),
+      recordLabel: `${formatPercent(item.winRate)} (${item.wins}${winLabel} / ${item.losses}${lossLabel})`,
+      score: formatDecimal(item.averageKda),
+      scoreClassName: metricToneClass(kdaTone(item.averageKda)),
+      ratingLabel: `${t().kda} ${t().rating}`
+    };
+  });
+  const text: ProfileRecentChampionsCardText = {
+    title: {
+      label: streamInfo ? (activePublicLocale === "ja" ? "配信情報" : "방송 정보") : t().recentChampionsTitle,
+      ko: streamInfo ? "방송 정보" : publicI18n.ko.recentChampionsTitle,
+      ja: streamInfo ? "配信情報" : publicI18n.ja.recentChampionsTitle
+    },
+    period: t().recentChampionsPeriod,
+    emptyTitle: {
+      label: t().noData,
+      ko: publicI18n.ko.noData,
+      ja: publicI18n.ja.noData
+    },
+    emptyDescription: {
+      label: t().recentChampionsEmpty,
+      ko: publicI18n.ko.recentChampionsEmpty,
+      ja: publicI18n.ja.recentChampionsEmpty
+    }
+  };
   return (
-    <article className="public-profile-metric-card blue public-recent-champions-card">
-      <div className="public-profile-metric-head">
-        <span className="public-profile-metric-icon" aria-hidden="true">◇</span>
-        <span className="public-profile-metric-label">
-          <span data-ko={publicI18n.ko.recentChampionsTitle} data-ja={publicI18n.ja.recentChampionsTitle}>{t().recentChampionsTitle}</span>
-          <small>{t().recentChampionsPeriod}</small>
-        </span>
-      </div>
-      {champions.length > 0 ? (
-        <div className="public-recent-champion-list">
-          {champions.map((item) => {
-            const name = championName(item.champion);
-            const iconUrl = assetUrl(item.champion.iconUrl);
-            return (
-              <div className="public-recent-champion-row" key={item.champion.championId}>
-                {iconUrl ? (
-                  <img src={iconUrl} alt="" loading="lazy" />
-                ) : (
-                  <span className="public-recent-champion-fallback" aria-hidden="true">{name.slice(0, 1)}</span>
-                )}
-                <div className="public-recent-champion-main">
-                  <strong title={name}>{name}</strong>
-                  <small>{formatPercent(item.winRate)} ({item.wins}{winLabel} / {item.losses}{lossLabel})</small>
-                </div>
-                <div className="public-recent-champion-score">
-                  <strong className={metricToneClass(kdaTone(item.averageKda))}>{formatDecimal(item.averageKda)}</strong>
-                  <small>{t().kda} {t().rating}</small>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <p className="public-recent-champions-empty" data-ko={publicI18n.ko.recentChampionsEmpty} data-ja={publicI18n.ja.recentChampionsEmpty}>
-          {t().recentChampionsEmpty}
-        </p>
-      )}
-    </article>
+    <FeatureProfileRecentChampionsCard champions={championItems} streamInfo={streamInfo} streamStatus={streamStatus} text={text} />
   );
 }
 
 function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
-  const recentLosses = Math.max(0, profile.summary.recentGames - profile.summary.recentWins);
-  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
-  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
   const recentChampions = recentChampionSummaries(profile.recentMatches);
+  const rankMetricCard = ({
+    key,
+    tone,
+    icon,
+    title,
+    stats
+  }: {
+    key: string;
+    tone: string;
+    icon: string;
+    title: string;
+    stats: LolRankedStats | undefined;
+  }) => {
+    const unranked = !stats || stats.tier === "UNRANKED";
+    return {
+      key,
+      tone,
+      icon,
+      imageUrl: assetUrl(stats?.tierIconUrl),
+      imageFallbackLabel: unranked ? "U" : stats?.tier.slice(0, 1) ?? icon,
+      title,
+      value: unranked ? t().unranked : rankLabel(stats),
+      valueTone: metricToneClass(unranked ? "neutral" : "good"),
+      statusTone: unranked ? "neutral" : sharedMetricTone(percentTone(stats.winRate)),
+      detail: unranked ? t().noData : gamesText(totalGames(stats)),
+      rank: unranked ? undefined : `${t().winRate} ${formatPercent(stats.winRate)}`
+    };
+  };
+
   const metricCards = [
-    {
-      key: "kda",
-      tone: "purple",
-      icon: "K",
-      title: `${t().average} ${t().kda}`,
-      value: formatDecimal(profile.summary.averageKda),
-      valueTone: metricToneClass(kdaTone(profile.summary.averageKda)),
-      detail: `${profile.summary.totalKills} / ${profile.summary.totalDeaths} / ${profile.summary.totalAssists}`,
-      progress: metricProgress(profile.summary.averageKda, 6),
-      scale: ["0", "2.0", "4.0", "6.0+"],
-      rank: topPercentText(metricTopPercent(profile.summary.averageKda, 3, 72))
-    },
-    {
-      key: "cs",
-      tone: "green",
-      icon: "CS",
-      title: t().averageCsPerMinute,
-      value: formatDecimal(profile.summary.averageCsPerMinute, 1),
-      valueTone: metricToneClass(csTone(profile.summary.averageCsPerMinute)),
-      detail: t().perMinuteCs,
-      progress: metricProgress(profile.summary.averageCsPerMinute, 8),
-      scale: ["0", "4.0", "6.0", "8.0+"],
-      rank: topPercentText(metricTopPercent(profile.summary.averageCsPerMinute, 7, 72))
-    },
-    {
-      key: "win",
-      tone: "blue",
-      icon: activePublicLocale === "ja" ? "勝" : "승",
-      title: t().winRate,
-      value: formatPercent(profile.summary.recentWinRate),
-      valueTone: metricToneClass(percentTone(profile.summary.recentWinRate)),
-      detail: `${profile.summary.recentWins}${winLabel} ${recentLosses}${lossLabel}`,
-      progress: metricProgress(profile.summary.recentWinRate, 100),
-      scale: ["0%", "25%", "50%", "75%", "100%"],
-      rank: topPercentText(metricTopPercent(profile.summary.recentWinRate, 95, 100))
-    }
+    rankMetricCard({ key: "solo-rank", tone: "blue", icon: "S", title: t().soloRank, stats: soloRankStats(profile) }),
+    rankMetricCard({ key: "flex-rank", tone: "green", icon: "F", title: t().flexRank, stats: flexRankStats(profile) }),
+    rankMetricCard({ key: "ranked-5v5", tone: "purple", icon: "5", title: t().ranked5v5, stats: ranked5v5Stats(profile) })
   ];
 
   return (
-    <div className="public-profile-metric-strip" aria-label={t().profileSummary}>
-      <ProfileRecentChampionsCard champions={recentChampions} />
-      {metricCards.map((card) => (
-        <article className={`public-profile-metric-card ${card.tone}`} key={card.key}>
-          <div className="public-profile-metric-head">
-            <span className="public-profile-metric-icon" aria-hidden="true">{card.icon}</span>
-            <span className="public-profile-metric-label">
-              <span>{card.title}</span>
-              <small aria-hidden="true">?</small>
-            </span>
-          </div>
-          <strong className={card.valueTone}>{card.value}</strong>
-          <small className="public-profile-metric-detail">{card.detail}</small>
-          <div className="public-profile-metric-bar" aria-hidden="true">
-            <i style={{ width: card.progress }} />
-          </div>
-          <div className="public-profile-metric-scale" aria-hidden="true">
-            {card.scale.map((label) => <span key={`${card.key}:${label}`}>{label}</span>)}
-          </div>
-          <em>{card.rank}</em>
-        </article>
-      ))}
-    </div>
+    <FeatureProfileMetricStrip
+      ariaLabel={t().profileSummary}
+      cards={metricCards}
+      recentChampionsCard={<ProfileRecentChampionsCard champions={recentChampions} stream={profile.twitchStream} />}
+    />
   );
 }
 
@@ -3797,48 +1546,53 @@ function ProfileLinkIcons({ links }: { links: PublicProfileLink[] }) {
   );
 }
 
-function LpTrendLineChart({ profile, compact = false }: { profile: PublicLolProfile; compact?: boolean }) {
-  const trend = rankTrendLine(profile);
-  if (!trend) return <p className="public-empty">{t().noData}</p>;
-  const latestPoint = trend.points[trend.points.length - 1];
-
-  return (
-    <>
-      <svg className={`public-lp-line ${compact ? "compact" : ""}`} viewBox="0 0 320 112" role="img" aria-label={t().lpTrend} preserveAspectRatio="none">
-        <path className="public-lp-line-area" d={trend.areaPath} />
-        <polyline className="public-lp-line-stroke" points={trend.linePoints} />
-        {trend.points.map((point) => (
-          <g className={`public-lp-line-point ${point.result} ${point.key === latestPoint?.key ? "latest" : ""}`} key={point.key}>
-            <circle cx={point.x} cy={point.y} r="4" />
-            <title>{point.label}</title>
-          </g>
-        ))}
-      </svg>
-      {compact ? null : <div className="public-lp-chart-y-axis" aria-hidden="true">
-        {trend.yLabels.map((label) => <span key={label}>{label}</span>)}
-      </div>}
-      {compact ? null : <div className="public-lp-chart-axis" aria-hidden="true">
-        <span>{trend.startLabel}</span>
-        <span>{trend.middleLabel}</span>
-        <span>{trend.endLabel}</span>
-      </div>}
-    </>
-  );
+function profileTopPanelText(): ProfileTopPanelText {
+  return {
+    ranking: t().ranking,
+    cachedRanking: {
+      label: t().cachedRanking,
+      ko: publicI18n.ko.cachedRanking,
+      ja: publicI18n.ja.cachedRanking
+    },
+    liveDataNotice: {
+      label: t().liveDataNotice,
+      ko: publicI18n.ko.liveDataNotice,
+      ja: publicI18n.ja.liveDataNotice
+    },
+    serverLabel: t().jpServer,
+    searching: t().searching
+  };
 }
 
 function ProfileTopPanel({
   profile,
   loading,
   favoriteActive,
+  query,
+  suggestions,
+  recentSearches = [],
+  favorites = [],
   refreshRemaining,
+  onClear,
+  onPickSuggestion,
+  onQuery,
   onRefresh,
+  onSubmit,
   onToggleFavorite
 }: {
   profile: PublicLolProfile;
   loading: boolean;
   favoriteActive: boolean;
+  query: string;
+  suggestions: SearchSuggestion[];
+  recentSearches?: SearchSuggestion[];
+  favorites?: PublicFavorite[];
   refreshRemaining: number;
+  onClear: () => void;
+  onPickSuggestion: (suggestion: SearchSuggestion) => void;
+  onQuery: (value: string) => void;
   onRefresh: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onToggleFavorite: () => void;
 }) {
   const refreshDisabled = loading || refreshRemaining > 0;
@@ -3849,65 +1603,54 @@ function ProfileTopPanel({
   const masteryChampionArt = assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl);
   const registeredStreamerStream = visibleStreamerStream(profile.twitchStream);
   const profileLinks = profileLinksFromStream(registeredStreamerStream);
+  const primaryRank = soloStats ?? flexStats ?? rank5v5Stats ?? profile.rankedStats;
+  const primaryRankClassName = `tier-${primaryRank?.tier ? primaryRank.tier.toLocaleLowerCase() : "unranked"}`;
+  const fetchedAtText = `${t().fetchedAt} ${formatDate(profile.fetchedAt)}`;
+  const streamerProfileIconUrl = assetUrl(registeredStreamerStream?.profileImageUrl);
   return (
-    <section id="public-ranking" className={`public-profile-top-grid ${masteryChampionArt ? "has-mastery-art" : ""}`}>
-      {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
-      <div className="public-profile-top-main">
-        <ProfileSeasonBadges profile={profile} />
-        <div className="public-profile-top-content">
-          <div className="public-avatar square">
-            {profile.profileIconUrl ? <img src={assetUrl(profile.profileIconUrl)} alt="" /> : <span>{profile.gameName.slice(0, 1).toUpperCase()}</span>}
-          </div>
-          <div className="public-profile-top-copy">
-            <div className="public-profile-title-row">
-              <h2>{profile.gameName}</h2>
-              <span>#{profile.tagLine}</span>
-              <button
-                type="button"
-                className={`public-favorite-button ${favoriteActive ? "active" : ""}`}
-                aria-label={favoriteActive ? t().favoriteRemove : t().favoriteAdd}
-                aria-pressed={favoriteActive}
-                onClick={onToggleFavorite}
-              >
-                ★
-              </button>
-            </div>
-            <div className="public-profile-actions">
-              <div className="public-refresh-stack">
-                <ProfileLinkIcons links={profileLinks} />
-                <button
-                  type="button"
-                  className={`public-refresh-button ${refreshCoolingDown ? "cooldown" : ""}`}
-                  onClick={onRefresh}
-                  disabled={refreshDisabled}
-                  title={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
-                >
-                  {refreshCoolingDown ? (
-                    <strong>{formatCooldown(refreshRemaining)}</strong>
-                  ) : (
-                    <>
-                      <span aria-hidden="true">↻</span>
-                      <strong>{loading ? t().searching : t().refreshProfile}</strong>
-                    </>
-                  )}
-                </button>
-                <span className="public-refresh-updated-at">{t().fetchedAt} {formatDate(profile.fetchedAt)}</span>
-              </div>
-              <button type="button" className="public-secondary-action" onClick={onToggleFavorite}>
-                {favoriteActive ? t().favoriteRemove : t().favoriteAdd}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <aside className={`public-profile-top-side ${registeredStreamerStream ? "has-stream-status" : ""}`} aria-label={t().ranking}>
-        <RankOverviewCard title={t().soloRank} stats={soloStats} fallback={!soloStats} />
-        <RankOverviewCard title={t().flexRank} stats={flexStats} fallback={!flexStats} />
-        <RankOverviewCard title={t().ranked5v5} stats={rank5v5Stats} fallback={!rank5v5Stats} />
-        <TwitchStreamOverviewCard stream={registeredStreamerStream} />
-      </aside>
-      <ProfileMetricStrip profile={profile} />
-    </section>
+    <FeatureProfileTopPanel
+      displayName={profile.gameName}
+      displayTagLabel={`#${profile.tagLine}`}
+      favoriteActionLabel={favoriteActive ? t().favoriteRemove : t().favoriteAdd}
+      favoriteActive={favoriteActive}
+      favoriteAriaLabel={favoriteActive ? t().favoriteRemove : t().favoriteAdd}
+      fetchedAtText={fetchedAtText}
+      gameName={profile.gameName}
+      loading={loading}
+      masteryChampionArt={masteryChampionArt}
+      metricStrip={<ProfileMetricStrip profile={profile} />}
+      onRefresh={onRefresh}
+      onToggleFavorite={onToggleFavorite}
+      primaryRankClassName={primaryRankClassName}
+      primaryRankLabel={rankLabel(primaryRank)}
+      primaryRankTone={sharedRankTone(primaryRank)}
+      profileIconUrl={streamerProfileIconUrl ?? assetUrl(profile.profileIconUrl)}
+      profileMetaLabel={undefined}
+      profileLinks={<ProfileLinkIcons links={profileLinks} />}
+      refreshButtonLabel={loading ? t().searching : t().refreshProfile}
+      refreshCooldownLabel={formatCooldown(refreshRemaining)}
+      refreshCoolingDown={refreshCoolingDown}
+      refreshDisabled={refreshDisabled}
+      refreshTitle={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
+      searchForm={(
+        <SearchForm
+          controlId="public-ranking-search-input"
+          loading={loading}
+          onClear={onClear}
+          onPickSuggestion={onPickSuggestion}
+          onQuery={onQuery}
+          onSubmit={onSubmit}
+          query={query}
+          suggestions={suggestions}
+          recentSearches={recentSearches}
+          favorites={favorites}
+          variant="rankingShared"
+        />
+      )}
+      seasonBadges={null}
+      tagLine={profile.tagLine}
+      text={profileTopPanelText()}
+    />
   );
 }
 
@@ -3949,10 +1692,23 @@ function PublicProfileTabs({
 }) {
   return (
     <nav className="public-profile-tabs" aria-label={t().profileSummary}>
-      <button type="button" className={activeTab === "overview" ? "active" : ""} onClick={() => onChange("overview")} data-ko={publicI18n.ko.overview} data-ja={publicI18n.ja.overview}>{t().overview}</button>
-      <button type="button" className={activeTab === "champions" ? "active" : ""} onClick={() => onChange("champions")} data-ko={publicI18n.ko.championAnalysis} data-ja={publicI18n.ja.championAnalysis}>{t().championAnalysis}</button>
-      <button type="button" className={activeTab === "ingame" ? "active" : ""} onClick={() => onChange("ingame")} data-ko={publicI18n.ko.ingame} data-ja={publicI18n.ja.ingame}>{t().ingame}</button>
+      <Button type="button" className={activeTab === "overview" ? "active" : ""} onClick={() => onChange("overview")} data-ko={publicI18n.ko.overview} data-ja={publicI18n.ja.overview} size="md" variant={activeTab === "overview" ? "secondary" : "ghost"}>{t().overview}</Button>
+      <Button type="button" className={activeTab === "champions" ? "active" : ""} onClick={() => onChange("champions")} data-ko={publicI18n.ko.championAnalysis} data-ja={publicI18n.ja.championAnalysis} size="md" variant={activeTab === "champions" ? "secondary" : "ghost"}>{t().championAnalysis}</Button>
+      <Button type="button" className={activeTab === "ingame" ? "active" : ""} onClick={() => onChange("ingame")} data-ko={publicI18n.ko.ingame} data-ja={publicI18n.ja.ingame} size="md" variant={activeTab === "ingame" ? "secondary" : "ghost"}>{t().ingame}</Button>
     </nav>
+  );
+}
+
+function PublicProfileErrorState({ error }: { error: string }) {
+  if (!error) return null;
+  return (
+    <EmptyState className="public-profile-shared-error" variant="error">
+      <EmptyStateIcon>!</EmptyStateIcon>
+      <EmptyStateTitle as="h2" data-ko={publicI18n.ko.searchFailed} data-ja={publicI18n.ja.searchFailed}>
+        {t().searchFailed}
+      </EmptyStateTitle>
+      <EmptyStateDescription>{error}</EmptyStateDescription>
+    </EmptyState>
   );
 }
 
@@ -4013,13 +1769,13 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const winRate = Math.max(0, Math.min(100, aggregateSummary.recentWinRate));
   return (
     <section id="public-stats" className="public-overview-dashboard-panel">
-      <article className="public-panel public-aggregate-card">
+      <Card as="article" className="public-panel public-aggregate-card public-profile-shared-card" padding="md" variant="elevated">
         <div className="public-section-head">
           <h2 data-ko={publicI18n.ko.aggregatePerformance} data-ja={publicI18n.ja.aggregatePerformance}>
             <span className="public-aggregate-title-icon" aria-hidden="true"><i /><i /><i /></span>
             {t().aggregatePerformance}
           </h2>
-          <span>{aggregateSummary.recentGames}{t().games}</span>
+          <Badge size="sm" tone="info">{aggregateSummary.recentGames}{t().games}</Badge>
         </div>
         <div className="public-aggregate-hero">
           <div className="public-aggregate-emblem" aria-hidden="true">
@@ -4045,23 +1801,29 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
             </div>
           </div>
         </div>
-      </article>
-      <article className="public-panel public-lp-trend-card">
+      </Card>
+      <Card as="article" className="public-panel public-lp-trend-card public-profile-shared-card" padding="md" variant="elevated">
         <div className="public-section-head">
           <h2 data-ko={publicI18n.ko.lpTrend} data-ja={publicI18n.ja.lpTrend}>{t().lpTrend}</h2>
-          <span data-ko={publicI18n.ko.period30} data-ja={publicI18n.ja.period30}>{t().period30}</span>
+          <StatusPill size="sm" tone="info" data-ko={publicI18n.ko.period30} data-ja={publicI18n.ja.period30}>{t().period30}</StatusPill>
         </div>
         <div className={`public-lp-chart ${rankTrendTierClass(profile.rankedStats)}`}>
           <LpTrendLineChart profile={profile} />
         </div>
-      </article>
-      <article className="public-panel public-role-win-card">
+      </Card>
+      <Card as="article" className="public-panel public-role-win-card public-profile-shared-card" padding="md" variant="elevated">
         <div className="public-section-head">
           <h2 data-ko={publicI18n.ko.roleWinRate} data-ja={publicI18n.ja.roleWinRate}>{t().roleWinRate}</h2>
-          <span>{profile.summary.recentGames}{t().games}</span>
+          <Badge size="sm" tone="info">{profile.summary.recentGames}{t().games}</Badge>
         </div>
         <div className="public-role-win-list">
-          {roles.length === 0 ? <p className="public-empty">{t().noData}</p> : roles.map((role) => (
+          {roles.length === 0 ? (
+            <EmptyState className="public-profile-shared-empty-inline" variant="search">
+              <EmptyStateIcon>?</EmptyStateIcon>
+              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.noData} data-ja={publicI18n.ja.noData}>{t().noData}</EmptyStateTitle>
+              <EmptyStateDescription>{t().roleWinRate}</EmptyStateDescription>
+            </EmptyState>
+          ) : roles.map((role) => (
             <div key={role.role}>
               <span className="public-role-win-label" title={mainRoleLabel(role.role)}>
                 <RoleIcon role={role.role} />
@@ -4073,7 +1835,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
             </div>
           ))}
         </div>
-      </article>
+      </Card>
     </section>
   );
 }
@@ -4217,210 +1979,59 @@ function PublicMatchFilterBar({
   onReset: () => void;
 }) {
   const filterActive = hasActiveFilters(filters);
-  return (
-    <div className={`public-match-filter-bar ${filterActive ? "active" : ""}`}>
-      <div className="public-match-filter-title">
-        <span aria-hidden="true">▽</span>
-        <strong data-ko={publicI18n.ko.filter} data-ja={publicI18n.ja.filter}>{filterActive ? t().activeFilter : t().filter}</strong>
-      </div>
-      <label>
-        <span data-ko={publicI18n.ko.queueFilter} data-ja={publicI18n.ja.queueFilter}>{t().queueFilter}</span>
-        <select value={filters.queue} onChange={(event) => onChange({ ...filters, queue: event.target.value as MatchQueueFilter })}>
-          <option value="all">{t().allQueues}</option>
-          <option value="solo">{t().soloQueue}</option>
-          <option value="flex">{t().flexQueue}</option>
-          <option value="ranked5v5">{t().ranked5v5}</option>
-          <option value="normal">{t().normalQueue}</option>
-          <option value="aram">{t().aramQueue}</option>
-        </select>
-      </label>
-      <label>
-        <span data-ko={publicI18n.ko.championFilter} data-ja={publicI18n.ja.championFilter}>{t().championFilter}</span>
-        <select value={filters.championId} onChange={(event) => onChange({ ...filters, championId: event.target.value })}>
-          <option value="all">{t().allChampions}</option>
-          {champions.map((champion) => (
-            <option value={String(champion.championId)} key={champion.championId}>{championName(champion)}</option>
-          ))}
-        </select>
-      </label>
-      <label>
-        <span data-ko={publicI18n.ko.periodFilter} data-ja={publicI18n.ja.periodFilter}>{t().periodFilter}</span>
-        <select value={filters.period} onChange={(event) => onChange({ ...filters, period: event.target.value as MatchPeriodFilter })}>
-          <option value="all">{t().periodAll}</option>
-          <option value="7d">{t().period7}</option>
-          <option value="30d">{t().period30}</option>
-        </select>
-      </label>
-      <button type="button" onClick={onReset} disabled={!filterActive} data-ko={publicI18n.ko.resetFilter} data-ja={publicI18n.ja.resetFilter}>
-        {t().resetFilter}
-      </button>
-    </div>
-  );
-}
-
-function PublicLocaleSelector({
-  locale,
-  onLocale,
-  onAutoLocale: _onAutoLocale
-}: {
-  locale: PublicLocale;
-  onLocale: (locale: PublicLocale) => void;
-  onAutoLocale?: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const options: Array<{ locale: PublicLocale; code: string; label: string }> = [
-    { locale: "ko", code: "KR", label: t().languageKo },
-    { locale: "ja", code: "JP", label: t().languageJa }
-  ];
-  const activeCode = locale === "ja" ? "JP" : "KR";
-  function selectLocale(nextLocale: PublicLocale): void {
-    onLocale(nextLocale);
-    setOpen(false);
-  }
-  return (
-    <div className="public-locale-menu">
-      <button
-        className="public-locale-button"
-        type="button"
-        aria-label={t().languageMenu}
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="public-globe-icon" aria-hidden="true"><span /></span>
-        <strong>{activeCode}</strong>
-        <i aria-hidden="true" />
-      </button>
-      {open ? (
-        <div className="public-locale-popover" role="menu" aria-label={t().language}>
-          {options.map((option) => (
-            <button
-              key={option.locale}
-              type="button"
-              className={option.locale === locale ? "active" : ""}
-              role="menuitemradio"
-              aria-checked={option.locale === locale}
-              aria-label={`${option.code} ${option.label}`}
-              onClick={() => selectLocale(option.locale)}
-            >
-              <strong>{option.code}</strong>
-              <em aria-hidden="true">✓</em>
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function PublicHeaderMenu({
-  activePage,
-  activeTarget,
-  showSubscriptions,
-  onPage
-}: {
-  activePage: PublicMainPage;
-  activeTarget: PublicNavTarget;
-  showSubscriptions: boolean;
-  onPage: (page: PublicMainPage) => void;
-}) {
-  const searchItem: { key: PublicMainPage; icon: string; ko: string; ja: string; label: string } = {
-    key: "search",
-    icon: "⌕",
-    ko: publicI18n.ko.searchNav,
-    ja: publicI18n.ja.searchNav,
-    label: t().searchNav
+  const championOptions = champions.map((champion) => ({
+    value: String(champion.championId),
+    label: championName(champion)
+  }));
+  const text: PublicMatchFilterBarText = {
+    filter: {
+      label: t().filter,
+      ko: publicI18n.ko.filter,
+      ja: publicI18n.ja.filter
+    },
+    activeFilter: t().activeFilter,
+    queueFilter: {
+      label: t().queueFilter,
+      ko: publicI18n.ko.queueFilter,
+      ja: publicI18n.ja.queueFilter
+    },
+    championFilter: {
+      label: t().championFilter,
+      ko: publicI18n.ko.championFilter,
+      ja: publicI18n.ja.championFilter
+    },
+    periodFilter: {
+      label: t().periodFilter,
+      ko: publicI18n.ko.periodFilter,
+      ja: publicI18n.ja.periodFilter
+    },
+    resetFilter: {
+      label: t().resetFilter,
+      ko: publicI18n.ko.resetFilter,
+      ja: publicI18n.ja.resetFilter
+    },
+    allQueues: t().allQueues,
+    soloQueue: t().soloQueue,
+    flexQueue: t().flexQueue,
+    ranked5v5: t().ranked5v5,
+    normalQueue: t().normalQueue,
+    aramQueue: t().aramQueue,
+    allChampions: t().allChampions,
+    periodAll: t().periodAll,
+    period7: t().period7,
+    period30: t().period30
   };
-  const favoritesItem: { key: PublicMainPage; icon: string; ko: string; ja: string; label: string } = {
-    key: "favorites",
-    icon: "☆",
-    ko: publicI18n.ko.favoritesTitle,
-    ja: publicI18n.ja.favoritesTitle,
-    label: t().favoritesTitle
-  };
-  const contentPages: PublicMainPage[] = ["tournamentCalendar", "tournamentList", "tournamentNews", "tournamentTeams", "tournamentBracket", "tournamentSchedule"];
-  const contentItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
-    { page: "tournamentCalendar", icon: "◷", ko: publicI18n.ko.tournamentCalendar, ja: publicI18n.ja.tournamentCalendar, label: t().tournamentCalendar },
-    { page: "tournamentList", icon: "▣", ko: publicI18n.ko.tournamentList, ja: publicI18n.ja.tournamentList, label: t().tournamentList }
-  ];
-  const communityPages: PublicMainPage[] = ["patch", "communityParty", "communityServerWrite", "communityPartyWrite", "communityDetail"];
-  const communityItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
-    { page: "patch", icon: "▤", ko: publicI18n.ko.communityServerRecruit, ja: publicI18n.ja.communityServerRecruit, label: t().communityServerRecruit },
-    { page: "communityParty", icon: "♙", ko: publicI18n.ko.communityPartyRecruit, ja: publicI18n.ja.communityPartyRecruit, label: t().communityPartyRecruit }
-  ];
-  const followPages: PublicMainPage[] = showSubscriptions ? ["subscriptions", "followJoin"] : ["followJoin"];
-  const followItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
-    ...(showSubscriptions ? [{ page: "subscriptions" as const, icon: "◆", ko: publicI18n.ko.subscriptionStatus, ja: publicI18n.ja.subscriptionStatus, label: t().subscriptionStatus }] : []),
-    { page: "followJoin", icon: "＋", ko: publicI18n.ko.followJoin, ja: publicI18n.ja.followJoin, label: t().followJoin }
-  ];
-
   return (
-    <nav className="public-header-nav" aria-label="YORO.gg">
-      <button className={activePage === "search" && activeTarget === "search" ? "active" : ""} type="button" onClick={() => onPage("search")}>
-        <span aria-hidden="true">{searchItem.icon}</span>
-        <strong data-ko={searchItem.ko} data-ja={searchItem.ja}>{searchItem.label}</strong>
-      </button>
-      <button className={activePage === favoritesItem.key ? "active" : ""} type="button" onClick={() => onPage(favoritesItem.key)}>
-        <span aria-hidden="true">{favoritesItem.icon}</span>
-        <strong data-ko={favoritesItem.ko} data-ja={favoritesItem.ja}>{favoritesItem.label}</strong>
-      </button>
-      <div className="public-header-menu-item">
-        <button
-          className={contentPages.includes(activePage) ? "active" : ""}
-          type="button"
-          aria-haspopup="menu"
-          onClick={() => onPage("tournamentCalendar")}
-        >
-          <span aria-hidden="true">▦</span>
-          <strong data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>{t().contentMenu}</strong>
-        </button>
-        <div className="public-header-submenu" role="menu" aria-label={t().contentMenu}>
-          {contentItems.map((item) => (
-            <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
-              <span aria-hidden="true">{item.icon}</span>
-              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="public-header-menu-item">
-        <button
-          className={communityPages.includes(activePage) ? "active" : ""}
-          type="button"
-          aria-haspopup="menu"
-          onClick={() => onPage("patch")}
-        >
-          <span aria-hidden="true">▣</span>
-          <strong data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</strong>
-        </button>
-        <div className="public-header-submenu" role="menu" aria-label={t().community}>
-          {communityItems.map((item) => (
-            <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
-              <span aria-hidden="true">{item.icon}</span>
-              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="public-header-menu-item">
-        <button
-          className={followPages.includes(activePage) ? "active" : ""}
-          type="button"
-          aria-haspopup="menu"
-          onClick={() => onPage(showSubscriptions ? "subscriptions" : "followJoin")}
-        >
-          <span aria-hidden="true">◆</span>
-          <strong data-ko={publicI18n.ko.followMenu} data-ja={publicI18n.ja.followMenu}>{t().followMenu}</strong>
-        </button>
-        <div className="public-header-submenu" role="menu" aria-label={t().followMenu}>
-          {followItems.map((item) => (
-            <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
-              <span aria-hidden="true">{item.icon}</span>
-              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
-            </button>
-          ))}
-        </div>
-      </div>
-    </nav>
+    <FeaturePublicMatchFilterBar
+      championOptions={championOptions}
+      filterActive={filterActive}
+      filters={filters}
+      onChampionChange={(championId) => onChange({ ...filters, championId })}
+      onPeriodChange={(period) => onChange({ ...filters, period: period as MatchPeriodFilter })}
+      onQueueChange={(queue) => onChange({ ...filters, queue: queue as MatchQueueFilter })}
+      onReset={onReset}
+      text={text}
+    />
   );
 }
 
@@ -4435,8 +2046,12 @@ function PublicAppHeader({
   query,
   loading,
   suggestions,
+  recentSearches = [],
+  favorites = [],
+  searchPanelRequest,
   filters,
   champions,
+  onHome,
   onQuery,
   onClear,
   onSubmit,
@@ -4462,8 +2077,12 @@ function PublicAppHeader({
   query: string;
   loading: boolean;
   suggestions: SearchSuggestion[];
+  recentSearches?: SearchSuggestion[];
+  favorites?: PublicFavorite[];
+  searchPanelRequest?: SearchFormPanelRequest;
   filters: PublicMatchFilters;
   champions: LolChampionSummary[];
+  onHome: () => void;
   onQuery: (value: string) => void;
   onClear: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -4479,52 +2098,16 @@ function PublicAppHeader({
   onFilters: (filters: PublicMatchFilters) => void;
   onResetFilters: () => void;
 }) {
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const twitchMenuCloseTimer = useRef<number | undefined>(undefined);
-  const filterActive = hasActiveFilters(filters);
-  const registeredStreamerRequest = isRegisteredStreamerRequest(twitchStatus.streamerRiotRequest) ? twitchStatus.streamerRiotRequest : undefined;
-  const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved" && twitchStatus.streamerRiotRequest?.status !== "pending";
-  const canOpenStreamerDashboard = registeredStreamerRequest?.dashboardEnabled === true;
-  const handleMenuPage = (page: PublicMainPage) => {
-    onPage(page);
-    setMobileMenuOpen(false);
-  };
-
-  function clearTwitchMenuCloseTimer(): void {
-    if (twitchMenuCloseTimer.current === undefined) return;
-    window.clearTimeout(twitchMenuCloseTimer.current);
-    twitchMenuCloseTimer.current = undefined;
-  }
-
-  function scheduleTwitchMenuClose(): void {
-    clearTwitchMenuCloseTimer();
-    twitchMenuCloseTimer.current = window.setTimeout(() => {
-      setTwitchMenuOpen(false);
-      twitchMenuCloseTimer.current = undefined;
-    }, 160);
-  }
-
-  useEffect(() => () => clearTwitchMenuCloseTimer(), []);
-
   return (
-    <header id={showSearch ? "public-search" : undefined} className={`public-app-header ${showSearch ? "" : "home"} ${mobileMenuOpen ? "mobile-menu-open" : ""}`}>
-      <div className="public-header-brand">
-        <img className="public-brand-logo" src="/images/yorogg-mark.png" alt={t().brand} />
-      </div>
-      <button
-        className="public-mobile-menu-toggle"
-        type="button"
-        aria-label={t().mobileMenu}
-        aria-expanded={mobileMenuOpen}
-        onClick={() => setMobileMenuOpen((open) => !open)}
-      >
-        <span aria-hidden="true" />
-        <strong data-ko={publicI18n.ko.mobileMenu} data-ja={publicI18n.ja.mobileMenu}>{t().mobileMenu}</strong>
-      </button>
-      <PublicHeaderMenu activePage={activePage} activeTarget={activeTarget} showSubscriptions={twitchStatus.connected} onPage={handleMenuPage} />
-      {showSearch ? (
+    <FeaturePublicAppHeader
+      locale={locale}
+      twitchStatus={twitchStatus}
+      activePage={activePage}
+      activeTarget={activeTarget}
+      showSearch={showSearch}
+      showFilters={showFilters}
+      filterActive={hasActiveFilters(filters)}
+      searchContent={showSearch ? (
         <SearchForm
           query={query}
           loading={loading}
@@ -4532,70 +2115,23 @@ function PublicAppHeader({
           onClear={onClear}
           onSubmit={onSubmit}
           suggestions={suggestions}
+          recentSearches={recentSearches}
+          favorites={favorites}
+          panelRequest={searchPanelRequest}
           onPickSuggestion={onPickSuggestion}
         />
-      ) : null}
-      <div className="public-header-tools">
-        <PublicLocaleSelector locale={locale} onLocale={onLocale} onAutoLocale={onAutoLocale} />
-        <div className="public-twitch-profile-wrap" onMouseEnter={clearTwitchMenuCloseTimer} onMouseLeave={scheduleTwitchMenuClose}>
-          <button
-            className={`public-twitch-login-chip ${twitchStatus.connected ? "connected" : ""}`}
-            type="button"
-            onClick={() => {
-              if (!twitchStatus.connected) {
-                onTwitchLogin();
-                return;
-              }
-              setTwitchMenuOpen((open) => !open);
-            }}
-            disabled={!twitchStatus.configured}
-            aria-expanded={twitchMenuOpen}
-            title={twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchLoginRequired}
-          >
-            {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
-            <strong>{twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchViewerLogin}</strong>
-          </button>
-          {twitchStatus.connected && twitchMenuOpen ? (
-            <div className="public-twitch-profile-menu" role="menu" aria-label={t().twitchProfileMenu}>
-              <div className="public-twitch-profile-menu-head">
-                {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
-                <div>
-                  <strong>{twitchStatus.user?.displayName ?? twitchStatus.user?.login}</strong>
-                  <small>@{twitchStatus.user?.login}</small>
-                </div>
-              </div>
-              {canRegisterStreamer ? (
-                <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerRegister(); }}>
-                  {t().streamerRiotRegister}
-                </button>
-              ) : null}
-              {canOpenStreamerDashboard ? (
-                <button className="dashboard" type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerDashboard(); }}>
-                  {t().streamerDashboardOpen}
-                </button>
-              ) : null}
-              {registeredStreamerRequest ? (
-                <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerRecord(); }}>
-                  {t().streamerRecordOpen}
-                </button>
-              ) : null}
-              <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onTwitchLogout(); }}>
-                {t().twitchViewerLogout}
-              </button>
-            </div>
-          ) : null}
-        </div>
-        {showFilters ? <div className="public-header-popover-wrap">
-          <button className={`public-filter-button ${filterActive ? "active" : ""}`} type="button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>
-            <span aria-hidden="true">▽</span>
-            <strong data-ko={publicI18n.ko.filter} data-ja={publicI18n.ja.filter}>{filterActive ? t().activeFilter : t().filter}</strong>
-          </button>
-          {filterOpen ? (
-            <PublicFilterPanel filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />
-          ) : null}
-        </div> : null}
-      </div>
-    </header>
+      ) : undefined}
+      filterContent={<PublicFilterPanel filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />}
+      onHome={onHome}
+      onPage={onPage}
+      onLocale={onLocale}
+      onAutoLocale={onAutoLocale}
+      onTwitchLogin={onTwitchLogin}
+      onStreamerRegister={onStreamerRegister}
+      onStreamerDashboard={onStreamerDashboard}
+      onStreamerRecord={onStreamerRecord}
+      onTwitchLogout={onTwitchLogout}
+    />
   );
 }
 
@@ -4707,6 +2243,26 @@ function publicParticipationRankText(item: PublicParticipationQueueItem): string
   return rankLabel(item.rankedStats);
 }
 
+function publicParticipationStatusTone(status: ParticipationStatus): "neutral" | "info" | "success" | "warning" | "danger" {
+  if (status === "verified" || status === "checked_in" || status === "played") return "success";
+  if (status === "selected" || status === "invited" || status === "in_game") return "info";
+  if (status === "pending" || status === "waitlisted") return "warning";
+  if (status === "cancelled" || status === "no_show" || status === "rejected" || status === "blocked" || status === "skipped") return "danger";
+  return "neutral";
+}
+
+function publicParticipationIsActiveStatus(status: ParticipationStatus): boolean {
+  return status === "pending"
+    || status === "verified"
+    || status === "waitlisted"
+    || status === "selected"
+    || status === "checked_in"
+    || status === "invited"
+    || status === "in_game";
+}
+
+type PublicParticipationConfirmAction = "join" | "cancel";
+
 function PublicParticipationJoinPage({
   status,
   participation,
@@ -4718,8 +2274,6 @@ function PublicParticipationJoinPage({
   cancelling,
   message,
   selectedStreamerId,
-  onLogin,
-  onLogout,
   onRefresh,
   onStreamerSelect,
   onRiotIdChange,
@@ -4737,62 +2291,108 @@ function PublicParticipationJoinPage({
   cancelling: boolean;
   message: string;
   selectedStreamerId: string;
-  onLogin: () => void;
-  onLogout: () => void;
   onRefresh: () => void;
   onStreamerSelect: (streamerId: string) => void;
   onRiotIdChange: (value: string) => void;
   onRoleChange: (value: LolRole) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: () => void;
   onCancel: () => void;
 }) {
+  const feedbackKey = error || message;
+  const [pendingAction, setPendingAction] = useState<PublicParticipationConfirmAction | null>(null);
+  const [dismissedFeedbackKey, setDismissedFeedbackKey] = useState("");
+  const previousViewerEntryRef = useRef<PublicParticipationViewerEntry | null>(null);
   const queue = participation?.queue ?? [];
   const isOpen = Boolean(participation?.isOpen);
   const viewerEntry = participation?.viewerEntry;
+  const activeViewerEntry = viewerEntry && publicParticipationIsActiveStatus(viewerEntry.status) ? viewerEntry : undefined;
   const streamers = participation?.streamers ?? [];
   const selectedStreamer = streamers.find((streamer) => streamer.id === selectedStreamerId)
     ?? streamers.find((streamer) => streamer.id === participation?.selectedStreamerId)
     ?? streamers[0];
   const effectiveSelectedStreamerId = selectedStreamer?.id ?? "";
   const canJoin = isOpen && Boolean(selectedStreamer);
+  const streamerCountLabel = streamers.length > 0
+    ? `${formatNumber(streamers.length)} ${t().participationStreamerCount}`
+    : t().participationNoOpenStreamer;
+  const isStreamerSelectionLoading = loading && streamers.length === 0;
+  const isQueueLoading = loading && queue.length === 0;
+  const confirmTitle = pendingAction === "join" ? t().participationJoinConfirmTitle : t().participationCancelConfirmTitle;
+  const confirmDescription = pendingAction === "join" ? t().participationJoinConfirmDescription : t().participationCancelConfirmDescription;
+  const canRejoin = status.connected && canJoin && !activeViewerEntry && Boolean(previousViewerEntryRef.current || viewerEntry);
+  const submitLabel = canRejoin ? t().participationRejoin : t().participationSubmit;
+
+  useEffect(() => {
+    if (feedbackKey) setDismissedFeedbackKey("");
+  }, [feedbackKey]);
+
+  useEffect(() => {
+    if (!viewerEntry) return;
+    previousViewerEntryRef.current = viewerEntry;
+    if (!riotId.trim()) onRiotIdChange(viewerEntry.riotId);
+    const nextRole = viewerEntry.preferredRole ?? viewerEntry.requestedRole;
+    if (nextRole && role !== nextRole) onRoleChange(nextRole as LolRole);
+  }, [onRiotIdChange, onRoleChange, riotId, role, viewerEntry]);
+
+  function requestJoin(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    setPendingAction("join");
+  }
+
+  function confirmPendingAction(): void {
+    if (pendingAction === "join") onSubmit();
+    if (pendingAction === "cancel") onCancel();
+    setPendingAction(null);
+  }
 
   return (
-    <section className="public-panel public-menu-page-panel public-participation-page">
-      <div className="public-section-head">
-        <div>
-          <h2 data-ko={publicI18n.ko.followJoinTitle} data-ja={publicI18n.ja.followJoinTitle}>{t().followJoinTitle}</h2>
-          <p data-ko={publicI18n.ko.followJoinSubtitle} data-ja={publicI18n.ja.followJoinSubtitle}>{t().followJoinSubtitle}</p>
-        </div>
-        <div className="public-participation-actions">
-          {status.connected ? (
-            <>
-              <button className="secondary" type="button" onClick={onRefresh} disabled={loading}>
-                {loading ? t().searching : t().participationRefresh}
-              </button>
-              <button className="secondary" type="button" onClick={onLogout}>{t().twitchViewerLogout}</button>
-            </>
-          ) : (
-            <button type="button" onClick={onLogin} disabled={!status.configured}>{t().twitchViewerLogin}</button>
-          )}
-        </div>
-      </div>
+    <section className="public-panel public-menu-page-panel public-participation-page public-streamer-detail-shared-page">
+      <PageHeader className="public-section-head public-participation-shared-header" layout="split">
+        <PageHeaderTitle as="h2" data-ko={publicI18n.ko.followJoinTitle} data-ja={publicI18n.ja.followJoinTitle}>{t().followJoinTitle}</PageHeaderTitle>
+        <PageHeaderDescription data-ko={publicI18n.ko.followJoinSubtitle} data-ja={publicI18n.ja.followJoinSubtitle}>{t().followJoinSubtitle}</PageHeaderDescription>
+        <PageHeaderActions className="public-participation-actions">
+          <Button className="public-participation-shared-action" variant="secondary" size="sm" type="button" onClick={onRefresh} loading={loading} disabled={loading}>
+            {loading ? t().searching : t().participationRefresh}
+          </Button>
+        </PageHeaderActions>
+      </PageHeader>
 
-      {!status.configured ? <p className="public-empty">{t().twitchNotConfigured}</p> : null}
-      <article className="public-participation-streamer-select">
+      {!status.configured ? (
+        <EmptyState className="public-participation-shared-empty" variant="streamer">
+          <EmptyStateIcon>!</EmptyStateIcon>
+          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchNotConfigured} data-ja={publicI18n.ja.twitchNotConfigured}>{t().twitchNotConfigured}</EmptyStateTitle>
+        </EmptyState>
+      ) : null}
+      <section className="public-participation-streamer-select public-participation-shared-select" aria-busy={isStreamerSelectionLoading ? true : undefined}>
         <div className="public-participation-streamer-head">
           <div>
             <strong>{t().participationStreamerTitle}</strong>
             <p>{t().participationStreamerSubtitle}</p>
           </div>
-          <span>{streamers.length > 0 ? `${formatNumber(streamers.length)} ${t().participationStreamerCount}` : t().participationNoOpenStreamer}</span>
+          <Badge size="md" tone={streamers.length > 0 ? "streamer" : "warning"}>{streamerCountLabel}</Badge>
         </div>
         <div className="public-participation-streamer-list">
-          {streamers.map((streamer) => (
-            <button
-              type="button"
+          {isStreamerSelectionLoading ? (
+            Array.from({ length: 3 }, (_, index) => (
+              <SkeletonCard className="public-participation-streamer-card public-participation-shared-streamer-skeleton" key={index} loadingLabel={t().searching} size="md">
+                <SkeletonAvatar size="md" />
+                <SkeletonText lines={2} size="sm" />
+                <SkeletonButton size="sm" />
+              </SkeletonCard>
+            ))
+          ) : streamers.map((streamer) => (
+            <Card
               key={streamer.id}
-              className={`public-participation-streamer-card ${streamer.id === effectiveSelectedStreamerId ? "active" : ""}`}
+              aria-pressed={streamer.id === effectiveSelectedStreamerId}
+              className={`public-participation-streamer-card public-participation-shared-streamer-card ${streamer.id === effectiveSelectedStreamerId ? "active" : ""}`}
               onClick={() => onStreamerSelect(streamer.id)}
+              padding="md"
+              renderRoot={({ children, className, ...rootProps }) => (
+                <button {...rootProps} className={className} type="button">
+                  {children}
+                </button>
+              )}
+              variant="interactive"
             >
               <span className="public-participation-streamer-avatar">
                 {streamer.twitchProfileImageUrl ? (
@@ -4806,77 +2406,122 @@ function PublicParticipationJoinPage({
                 <small>{streamer.riotId ?? t().participationRankPending}</small>
               </span>
               <span className="public-participation-streamer-meta">
-                <em>{t().participationStreamerOpen}</em>
-                <small>{formatNumber(streamer.queueSize)} / {formatNumber(participation?.maxQueueSize ?? 0)}</small>
+                <StatusPill size="sm" tone={streamer.isOpen ? "success" : "warning"}>{t().participationStreamerOpen}</StatusPill>
+                <Metric
+                  label={t().participationQueueTitle}
+                  value={`${formatNumber(streamer.queueSize)} / ${formatNumber(participation?.maxQueueSize ?? 0)}`}
+                  tone={streamer.queueSize > 0 ? "info" : "neutral"}
+                  size="sm"
+                />
               </span>
-            </button>
+            </Card>
           ))}
-          {streamers.length === 0 ? (
-            <div className="public-participation-no-streamer">{t().participationNoOpenStreamer}</div>
+          {!isStreamerSelectionLoading && streamers.length === 0 ? (
+            <EmptyState as="div" className="public-participation-no-streamer public-participation-shared-empty" variant="streamer">
+              <EmptyStateIcon>?</EmptyStateIcon>
+              <EmptyStateTitle as="h3">{t().participationNoOpenStreamer}</EmptyStateTitle>
+            </EmptyState>
           ) : null}
         </div>
-      </article>
+      </section>
 
-      {error ? <p className="public-error">{error}</p> : null}
-      {message ? <p className="public-participation-message">{message}</p> : null}
+      {error ? (
+        <EmptyState as="div" className="public-participation-shared-empty public-participation-shared-error" variant="error">
+          <EmptyStateIcon>!</EmptyStateIcon>
+          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.searchFailed} data-ja={publicI18n.ja.searchFailed}>{t().searchFailed}</EmptyStateTitle>
+          <EmptyStateDescription>{error}</EmptyStateDescription>
+        </EmptyState>
+      ) : null}
+      {message ? <StatusPill className="public-participation-message" tone="success">{message}</StatusPill> : null}
 
       <div className="public-participation-layout">
-        <article className="public-participation-card">
-          <h3>{t().participationJoinTitle}</h3>
+        <Card as="article" className="public-participation-card public-participation-shared-card" padding="lg" variant="glass">
+          <CardHeader>
+            <CardTitle as="h3">{t().participationJoinTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
           {!status.connected ? (
             <div className="public-participation-current">
               <strong>{t().participationNeedLogin}</strong>
-              <button type="button" onClick={onLogin} disabled={!status.configured}>{t().twitchViewerLogin}</button>
             </div>
-          ) : viewerEntry ? (
+          ) : activeViewerEntry ? (
             <div className="public-participation-current">
-              <span>{t().participationViewerBadge}</span>
-              <strong>{viewerEntry.riotId}</strong>
-              <small>{t().participationPosition} {formatNumber(viewerEntry.position)} · {publicParticipationRoleLabel(viewerEntry.preferredRole ?? viewerEntry.requestedRole)}</small>
-              <button className="danger" type="button" onClick={onCancel} disabled={cancelling}>
+              <Badge tone="streamer">{t().participationViewerBadge}</Badge>
+              <strong>{activeViewerEntry.riotId}</strong>
+              <small>{t().participationPosition} {formatNumber(activeViewerEntry.position)} · {publicParticipationRoleLabel(activeViewerEntry.preferredRole ?? activeViewerEntry.requestedRole)}</small>
+              <Button variant="danger" type="button" onClick={() => setPendingAction("cancel")} loading={cancelling} disabled={cancelling}>
                 {cancelling ? t().participationCancelling : t().participationCancel}
-              </button>
+              </Button>
             </div>
           ) : (
-            <form className="public-participation-form" onSubmit={onSubmit}>
-              <label>
-                <span>{t().participationRiotIdLabel}</span>
-                <input
-                  value={riotId}
-                  onChange={(event) => onRiotIdChange(event.currentTarget.value)}
-                  placeholder={t().participationRiotIdPlaceholder}
-                  autoComplete="off"
-                  disabled={!canJoin || joining}
-                />
-              </label>
-              <label>
-                <span>{t().participationRoleLabel}</span>
-                <select value={role} onChange={(event) => onRoleChange(event.currentTarget.value as LolRole)} disabled={!canJoin || joining}>
+            <form className="public-participation-form" onSubmit={requestJoin}>
+              {canRejoin ? (
+                <div className="public-participation-rejoin-note">
+                  <Badge tone="streamer">{t().participationRejoin}</Badge>
+                  <span>{t().participationEndedRejoin}</span>
+                </div>
+              ) : null}
+              <FormField controlId="public-participation-riot-id" disabled={!canJoin || joining} required>
+                <FormLabel>{t().participationRiotIdLabel}</FormLabel>
+                <FormControl>
+                  <Input
+                    autoComplete="off"
+                    disabled={!canJoin || joining}
+                    id="public-participation-riot-id"
+                    onChange={(event) => onRiotIdChange(event.currentTarget.value)}
+                    placeholder={t().participationRiotIdPlaceholder}
+                    value={riotId}
+                  />
+                </FormControl>
+              </FormField>
+              <FormField controlId="public-participation-role" disabled={!canJoin || joining}>
+                <FormLabel>{t().participationRoleLabel}</FormLabel>
+                <FormControl>
+                  <Select id="public-participation-role" value={role} onChange={(event) => onRoleChange(event.currentTarget.value as LolRole)} disabled={!canJoin || joining}>
                   {PUBLIC_PARTICIPATION_ROLES.map((item) => (
                     <option key={item} value={item}>{publicParticipationRoleLabel(item)}</option>
                   ))}
-                </select>
-              </label>
-              <button type="submit" disabled={!canJoin || joining || !riotId.trim()}>
-                {joining ? t().participationSubmitting : t().participationSubmit}
-              </button>
+                  </Select>
+                </FormControl>
+              </FormField>
+              <Button type="submit" loading={joining} disabled={!canJoin || joining || !riotId.trim()}>
+                {joining ? t().participationSubmitting : submitLabel}
+              </Button>
             </form>
           )}
-        </article>
+          </CardContent>
+        </Card>
 
-        <article className="public-participation-card">
-          <h3>{selectedStreamer ? `${selectedStreamer.twitchDisplayName} · ${t().participationQueueTitle}` : t().participationQueueTitle}</h3>
-          {queue.length === 0 && !loading ? <p className="public-empty">{t().participationQueueEmpty}</p> : null}
+        <Card as="article" className="public-participation-card public-participation-shared-card" padding="lg" variant="glass">
+          <CardHeader>
+            <CardTitle as="h3">{selectedStreamer ? `${selectedStreamer.twitchDisplayName} · ${t().participationQueueTitle}` : t().participationQueueTitle}</CardTitle>
+            {selectedStreamer ? (
+              <CardDescription>{selectedStreamer.riotId ?? t().participationRankPending}</CardDescription>
+            ) : null}
+          </CardHeader>
+          <CardContent>
+          {isQueueLoading ? (
+            <SkeletonCard className="public-participation-shared-queue-skeleton" loadingLabel={t().searching} size="md">
+              <SkeletonText lines={3} size="md" />
+            </SkeletonCard>
+          ) : null}
+          {queue.length === 0 && !loading ? (
+            <EmptyState as="div" className="public-participation-shared-empty" variant="streamer">
+              <EmptyStateIcon>?</EmptyStateIcon>
+              <EmptyStateTitle as="h3">{t().participationQueueEmpty}</EmptyStateTitle>
+            </EmptyState>
+          ) : null}
           <div className="public-participation-queue-list">
             {queue.map((item) => (
-              <div className={`public-participation-queue-row ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`}>
+              <Card as="article" className={`public-participation-queue-row ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`} padding="sm" variant={item.isViewer ? "interactive" : "default"}>
                 <span className="public-participation-position">{item.position}</span>
                 <div className="public-participation-queue-main">
                   <strong>{item.twitchUserName}</strong>
                   <div className="public-participation-queue-tags">
-                    <span>{publicParticipationRankText(item)}</span>
-                    <span>{publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}</span>
-                    {item.isViewer ? <span className="viewer">{t().participationViewerBadge}</span> : null}
+                    <StatusPill size="sm" tone={publicParticipationStatusTone(item.status)}>{item.status}</StatusPill>
+                    <Badge size="sm" tone={sharedRankTone(item.rankedStats, !item.rankedStats)}>{publicParticipationRankText(item)}</Badge>
+                    <Badge size="sm" tone="info">{publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}</Badge>
+                    {item.isViewer ? <Badge className="viewer" size="sm" tone="streamer">{t().participationViewerBadge}</Badge> : null}
                   </div>
                 </div>
                 <div className="public-participation-queue-champions" aria-hidden="true">
@@ -4885,11 +2530,75 @@ function PublicParticipationJoinPage({
                   ))}
                   {(item.topChampions ?? []).length === 0 ? <em>?</em> : null}
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
-        </article>
+          </CardContent>
+        </Card>
       </div>
+
+      <Modal
+        closeOnBackdrop
+        onOpenChange={(open) => {
+          if (!open && !joining && !cancelling) setPendingAction(null);
+        }}
+        open={Boolean(pendingAction)}
+        size="md"
+      >
+        <ModalHeader>
+          <ModalTitle>{confirmTitle}</ModalTitle>
+          <ModalDescription>{confirmDescription}</ModalDescription>
+        </ModalHeader>
+        <ModalContent>
+          <div className="public-participation-confirm-summary">
+            {pendingAction === "join" ? (
+              <>
+                <Badge tone="streamer">{selectedStreamer?.twitchDisplayName ?? t().participationStreamerTitle}</Badge>
+                <strong>{riotId}</strong>
+                <span>{publicParticipationRoleLabel(role)}</span>
+              </>
+            ) : viewerEntry ? (
+              <>
+                <Badge tone="danger">{t().participationCancel}</Badge>
+                <strong>{viewerEntry.riotId}</strong>
+                <span>{t().participationPosition} {formatNumber(viewerEntry.position)}</span>
+              </>
+            ) : null}
+          </div>
+        </ModalContent>
+        <ModalFooter>
+          <Button
+            disabled={!pendingAction}
+            loading={pendingAction === "join" ? joining : cancelling}
+            onClick={confirmPendingAction}
+            variant={pendingAction === "cancel" ? "danger" : "primary"}
+          >
+            {t().participationConfirm}
+          </Button>
+          <ModalCloseButton aria-label={t().participationClose} disabled={joining || cancelling}>
+            {t().participationClose}
+          </ModalCloseButton>
+        </ModalFooter>
+      </Modal>
+
+      <ToastProvider position="bottom-right">
+        <ToastViewport className="public-participation-toast-viewport">
+          {feedbackKey && dismissedFeedbackKey !== feedbackKey ? (
+            <Toast
+              autoDismiss
+              key={feedbackKey}
+              onOpenChange={(open) => {
+                if (!open) setDismissedFeedbackKey(feedbackKey);
+              }}
+              tone={error ? "danger" : "success"}
+            >
+              <ToastTitle>{error ? t().searchFailed : t().participationJoinTitle}</ToastTitle>
+              <ToastDescription>{feedbackKey}</ToastDescription>
+              <ToastCloseButton aria-label={t().participationClose}>×</ToastCloseButton>
+            </Toast>
+          ) : null}
+        </ToastViewport>
+      </ToastProvider>
     </section>
   );
 }
@@ -4906,7 +2615,6 @@ function PublicTwitchFollowedPanel({
   subtitleKo = publicI18n.ko.twitchFollowedSubtitle,
   subtitleJa = publicI18n.ja.twitchFollowedSubtitle,
   onLogin,
-  onLogout,
   onRefresh,
   onSearch
 }: {
@@ -4921,48 +2629,70 @@ function PublicTwitchFollowedPanel({
   subtitleKo?: string;
   subtitleJa?: string;
   onLogin: () => void;
-  onLogout: () => void;
   onRefresh: () => void;
   onSearch: (riotId: string) => void;
 }) {
-  const linkedChannels = followed?.channels.filter((channel) => Boolean(channel.riotId)) ?? [];
   const visibleChannels = followed?.channels.slice(0, 8) ?? [];
+  const isFollowedLoading = loading && status.connected && visibleChannels.length === 0;
 
   return (
-    <section id="public-twitch-followed" className="public-panel public-twitch-followed-panel">
-      <div className="public-section-head">
-        <div>
-          <h2 data-ko={titleKo} data-ja={titleJa}>{title}</h2>
-          <p data-ko={subtitleKo} data-ja={subtitleJa}>{subtitle}</p>
-        </div>
-        <div className="public-twitch-followed-actions">
+    <section id="public-twitch-followed" className="public-panel public-twitch-followed-panel public-streamers-shared-panel">
+      <PageHeader className="public-section-head public-streamers-shared-header" layout="split">
+        <PageHeaderEyebrow>
+          <StatusPill size="sm" tone={status.connected ? "streamer" : "warning"}>
+            {status.connected ? status.user?.displayName ?? "Twitch" : t().twitchViewerLogin}
+          </StatusPill>
+        </PageHeaderEyebrow>
+        <PageHeaderTitle as="h2" data-ko={titleKo} data-ja={titleJa}>{title}</PageHeaderTitle>
+        <PageHeaderDescription data-ko={subtitleKo} data-ja={subtitleJa}>{subtitle}</PageHeaderDescription>
+        <PageHeaderActions className="public-twitch-followed-actions">
           {status.connected ? (
-            <>
-              <button type="button" onClick={onRefresh} disabled={loading}>{loading ? t().searching : t().twitchFollowedRefresh}</button>
-              <button type="button" onClick={onLogout}>{t().twitchViewerLogout}</button>
-            </>
+            <Button type="button" variant="primary" size="sm" onClick={onRefresh} loading={loading} disabled={loading}>{loading ? t().searching : t().twitchFollowedRefresh}</Button>
           ) : (
-            <button type="button" onClick={onLogin} disabled={!status.configured}>{t().twitchViewerLogin}</button>
+            <Button type="button" variant="primary" size="sm" onClick={onLogin} disabled={!status.configured}>{t().twitchViewerLogin}</Button>
           )}
-        </div>
-      </div>
+        </PageHeaderActions>
+      </PageHeader>
 
       {!status.configured ? (
-        <p className="public-empty" data-ko={publicI18n.ko.twitchNotConfigured} data-ja={publicI18n.ja.twitchNotConfigured}>{t().twitchNotConfigured}</p>
+        <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
+          <EmptyStateIcon>!</EmptyStateIcon>
+          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchNotConfigured} data-ja={publicI18n.ja.twitchNotConfigured}>{t().twitchNotConfigured}</EmptyStateTitle>
+        </EmptyState>
       ) : !status.connected ? (
-        <p className="public-empty" data-ko={publicI18n.ko.twitchLoginRequired} data-ja={publicI18n.ja.twitchLoginRequired}>{t().twitchLoginRequired}</p>
+        <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
+          <EmptyStateIcon>?</EmptyStateIcon>
+          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchLoginRequired} data-ja={publicI18n.ja.twitchLoginRequired}>{t().twitchLoginRequired}</EmptyStateTitle>
+        </EmptyState>
       ) : (
         <>
-          <div className="public-twitch-followed-summary">
-            <span>{status.user?.displayName ?? status.user?.login}</span>
-            <strong>{t().twitchFollowedLinked} {linkedChannels.length}</strong>
-            <small>{followed?.total !== undefined ? `${formatNumber(followed.total)} Twitch` : ""}</small>
-          </div>
-          {error ? <p className="public-error">{error}</p> : null}
-          {visibleChannels.length === 0 && !loading ? <p className="public-empty">{t().twitchFollowedEmpty}</p> : null}
+          {error ? (
+            <EmptyState as="div" className="public-streamers-shared-empty public-streamers-shared-error" variant="error">
+              <EmptyStateIcon>!</EmptyStateIcon>
+              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.searchFailed} data-ja={publicI18n.ja.searchFailed}>{t().searchFailed}</EmptyStateTitle>
+              <EmptyStateDescription>{error}</EmptyStateDescription>
+            </EmptyState>
+          ) : null}
+          {isFollowedLoading ? (
+            <div className="public-twitch-followed-list public-streamers-shared-loading" aria-busy="true">
+              {Array.from({ length: 4 }, (_, index) => (
+                <SkeletonCard className="public-streamers-shared-skeleton-card" key={index} loadingLabel={t().searching} size="md">
+                  <SkeletonAvatar size="md" />
+                  <SkeletonText lines={2} size="sm" />
+                  <SkeletonButton size="sm" />
+                </SkeletonCard>
+              ))}
+            </div>
+          ) : null}
+          {visibleChannels.length === 0 && !loading ? (
+            <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
+              <EmptyStateIcon>?</EmptyStateIcon>
+              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchFollowedEmpty} data-ja={publicI18n.ja.twitchFollowedEmpty}>{t().twitchFollowedEmpty}</EmptyStateTitle>
+            </EmptyState>
+          ) : null}
           <div className="public-twitch-followed-list">
             {visibleChannels.map((channel) => (
-              <article className={channel.riotId ? "linked" : ""} key={channel.twitchUserId}>
+              <Card as="article" className={`public-streamers-shared-card ${channel.riotId ? "linked" : ""}`} key={channel.twitchUserId} padding="md" variant={channel.riotId ? "interactive" : "default"}>
                 <div className="public-twitch-channel-main">
                   <span className="public-twitch-channel-avatar">
                     {channel.profileImageUrl ? <img src={channel.profileImageUrl} alt="" /> : channel.twitchDisplayName.slice(0, 1).toUpperCase()}
@@ -4970,90 +2700,29 @@ function PublicTwitchFollowedPanel({
                   </span>
                   <div>
                     <strong>{channel.twitchDisplayName}</strong>
-                    <small>@{channel.twitchLogin} · {channel.isLive ? t().twitchLive : formatDate(channel.followedAt)}</small>
+                    <small>@{channel.twitchLogin}</small>
+                    <StatusPill size="sm" tone={channel.isLive ? "live" : "neutral"}>{channel.isLive ? t().twitchLive : formatDate(channel.followedAt)}</StatusPill>
                   </div>
                 </div>
                 <div className="public-twitch-channel-meta">
                   {channel.riotId ? (
                     <>
-                      <span>{channel.riotGameName}<small>#{channel.riotTagLine}</small></span>
-                      <em>{rankLabel(channel.rankedStats)}</em>
+                      <span>{channel.riotGameName ?? channel.riotId}{channel.riotTagLine ? <small>#{channel.riotTagLine}</small> : null}</span>
+                      <Badge size="sm" tone={sharedRankTone(channel.rankedStats)}>{rankLabel(channel.rankedStats)}</Badge>
                     </>
                   ) : (
-                    <span className="muted">{t().twitchFollowedNoRiot}</span>
+                    <Badge className="muted" size="sm" tone="warning">{t().twitchFollowedNoRiot}</Badge>
                   )}
                 </div>
                 <div className="public-twitch-channel-actions">
-                  {channel.channelUrl ? <a href={channel.channelUrl} target="_blank" rel="noreferrer">{t().openTwitch}</a> : null}
-                  {channel.riotId ? <button type="button" onClick={() => onSearch(channel.riotId!)}>{t().viewRecord}</button> : null}
+                  {channel.channelUrl ? <Button as="a" href={channel.channelUrl} target="_blank" rel="noreferrer" variant="secondary" size="sm">{t().openTwitch}</Button> : null}
+                  {channel.riotId ? <Button type="button" variant="primary" size="sm" onClick={() => onSearch(channel.riotId!)}>{t().viewRecord}</Button> : null}
                 </div>
-              </article>
+              </Card>
             ))}
           </div>
         </>
       )}
-    </section>
-  );
-}
-
-function PublicFavoritesPage({
-  favorites,
-  onPick
-}: {
-  favorites: PublicFavorite[];
-  onPick: (suggestion: SearchSuggestion) => void;
-}) {
-  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
-  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
-
-  return (
-    <section className="public-panel public-saved-data-panel public-menu-page-panel">
-      <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.favoritesTitle} data-ja={publicI18n.ja.favoritesTitle}>{t().favoritesTitle}</h2>
-        <span>{favorites.length}</span>
-      </div>
-      <div className="public-saved-grid single">
-        <article className="public-favorites-card">
-          <div className="public-favorites-card-head">
-            <strong data-ko={publicI18n.ko.favoritesTitle} data-ja={publicI18n.ja.favoritesTitle}>{t().favoritesTitle}</strong>
-            <span>{favorites.length}</span>
-          </div>
-          {favorites.length === 0 ? <p className="public-empty">{t().noFavorites}</p> : (
-            <div className="public-favorite-list">
-              {favorites.map((favorite) => {
-                const recentGames = favorite.recentGames ?? 0;
-                const recentWins = favorite.recentWins ?? 0;
-                const recentLosses = Math.max(0, recentGames - recentWins);
-                const hasRecentSummary = recentGames > 0;
-                return (
-                  <button className="public-favorite-row" type="button" onClick={() => onPick(favorite)} key={`favorite:${normalizeSuggestionKey(favorite)}`}>
-                    {favorite.profileIconUrl ? <img src={assetUrl(favorite.profileIconUrl)} alt="" /> : <em>{favorite.gameName.slice(0, 1).toUpperCase()}</em>}
-                    <span className="public-favorite-main">
-                      <strong className="public-favorite-name">
-                        {favorite.gameName}
-                        <small>#{favorite.tagLine}</small>
-                      </strong>
-                      <span className="public-favorite-recent">
-                        {hasRecentSummary ? (
-                          <>
-                            <b>{t().recentGames} {recentGames}{t().games}</b>
-                            <i>{recentWins}{winLabel} {recentLosses}{lossLabel}</i>
-                            {typeof favorite.averageKda === "number" ? <i>{formatDecimal(favorite.averageKda)} {t().kda}</i> : null}
-                            {typeof favorite.recentWinRate === "number" ? <i>{t().winRate} {formatPercent(favorite.recentWinRate)}</i> : null}
-                          </>
-                        ) : (
-                          <i>{t().noData}</i>
-                        )}
-                      </span>
-                    </span>
-                    <span className="public-favorite-rank">{rankLabel(favorite.rankedStats)}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </article>
-      </div>
     </section>
   );
 }
@@ -5064,7 +2733,6 @@ function PublicSubscriptionsPage({
   loading,
   error,
   onLogin,
-  onLogout,
   onRefresh,
   onSearch
 }: {
@@ -5073,7 +2741,6 @@ function PublicSubscriptionsPage({
   loading: boolean;
   error: string;
   onLogin: () => void;
-  onLogout: () => void;
   onRefresh: () => void;
   onSearch: (riotId: string) => void;
 }) {
@@ -5111,7 +2778,6 @@ function PublicSubscriptionsPage({
           loading={loading}
           error={error}
           onLogin={onLogin}
-          onLogout={onLogout}
           onRefresh={onRefresh}
           onSearch={onSearch}
         />
@@ -5132,6 +2798,12 @@ type CommunityPostSubmitInput = {
   partyMode?: string;
   partyVoice?: string;
   partyCapacity?: number;
+};
+
+type CommunityToast = {
+  title: string;
+  description: string;
+  tone: ToastTone;
 };
 
 function communityPostLimitState(category: CommunityPostCategory, twitchStatus: PublicTwitchViewerStatus, posts: CommunityPost[]) {
@@ -5158,135 +2830,231 @@ function communityPostLimitState(category: CommunityPostCategory, twitchStatus: 
   };
 }
 
+function CommunityToastLayer({
+  toast,
+  onDismiss
+}: {
+  toast: CommunityToast | null;
+  onDismiss: () => void;
+}) {
+  return (
+    <ToastProvider position="bottom-right">
+      <ToastViewport className="public-community-shared-toast-viewport">
+        {toast ? (
+          <Toast autoDismiss onDismiss={onDismiss} tone={toast.tone}>
+            <ToastTitle>{toast.title}</ToastTitle>
+            <ToastDescription>{toast.description}</ToastDescription>
+            <ToastCloseButton aria-label={t().participationClose}>×</ToastCloseButton>
+          </Toast>
+        ) : null}
+      </ToastViewport>
+    </ToastProvider>
+  );
+}
+
 function PublicCommunityPage({
   category,
   twitchStatus,
   posts,
   loading,
   error,
+  toast,
   onRefresh,
   onWrite,
-  onOpenPost
+  onOpenPost,
+  onDismissToast
 }: {
   category: CommunityPostCategory;
   twitchStatus: PublicTwitchViewerStatus;
   posts: CommunityPost[];
   loading: boolean;
   error: string;
+  toast: CommunityToast | null;
   onRefresh: () => void;
   onWrite: () => void;
   onOpenPost: (post: CommunityPost) => void;
+  onDismissToast: () => void;
 }) {
   const isParty = category === "party";
   const visiblePosts = posts.filter((post) => communityPostCategory(post) === category);
   const hasOwnServerPost = !isParty && Boolean(twitchStatus.user && visiblePosts.some((post) => post.authorTwitchUserId === twitchStatus.user?.id));
+  const commentCount = visiblePosts.reduce((sum, post) => sum + (post.comments?.length ?? 0), 0);
+  const tagCount = visiblePosts.reduce((sum, post) => sum + post.tags.length, 0);
+  const pageTitle = isParty ? t().communityPartyRecruit : t().communityServerRecruit;
+  const pageSubtitle = isParty ? t().communityPartySubtitle : t().communityServerSubtitle;
+  const listTitle = isParty ? t().communityPartyListTitle : t().communityListTitle;
+  const writeLabel = isParty ? t().communityPartyWriteButton : hasOwnServerPost ? t().communityEditButton : t().communityServerWriteButton;
 
   return (
-    <section className={`public-panel public-menu-page-panel public-community-page list-only ${isParty ? "party" : "server"}`}>
-      <div className="public-section-head">
-        <h2
-          data-ko={isParty ? publicI18n.ko.communityPartyRecruit : publicI18n.ko.communityServerRecruit}
-          data-ja={isParty ? publicI18n.ja.communityPartyRecruit : publicI18n.ja.communityServerRecruit}
-        >
-          {isParty ? t().communityPartyRecruit : t().communityServerRecruit}
-        </h2>
-      </div>
-      <p
-        className="public-community-lead"
-        data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
-        data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
-      >
-        {isParty ? t().communityPartySubtitle : t().communityServerSubtitle}
-      </p>
-      <div className="public-community-card-head public-community-toolbar">
-        <strong
-          data-ko={isParty ? publicI18n.ko.communityPartyListTitle : publicI18n.ko.communityListTitle}
-          data-ja={isParty ? publicI18n.ja.communityPartyListTitle : publicI18n.ja.communityListTitle}
-        >
-          {isParty ? t().communityPartyListTitle : t().communityListTitle}
-        </strong>
-        <div className="public-community-card-actions">
-          <button type="button" onClick={onRefresh} disabled={loading} data-ko={publicI18n.ko.twitchFollowedRefresh} data-ja={publicI18n.ja.twitchFollowedRefresh}>{t().twitchFollowedRefresh}</button>
-          <button
-            type="button"
-            className="primary"
-            onClick={onWrite}
-            data-ko={isParty ? publicI18n.ko.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ko.communityEditButton : publicI18n.ko.communityServerWriteButton}
-            data-ja={isParty ? publicI18n.ja.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ja.communityEditButton : publicI18n.ja.communityServerWriteButton}
+    <AppShell
+      as="section"
+      className={`public-panel public-menu-page-panel public-community-page public-community-shared-shell list-only ${isParty ? "party" : "server"}`}
+      mainId={`public-community-${category}-main`}
+      showSkipLink={false}
+      sidebarMode="drawer"
+      variant="public"
+    >
+      <AppShellHeader className="public-community-shared-header">
+        <PageHeader layout="split">
+          <PageHeaderEyebrow data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>
+            {t().community}
+          </PageHeaderEyebrow>
+          <PageHeaderTitle
+            as="h2"
+            data-ko={isParty ? publicI18n.ko.communityPartyRecruit : publicI18n.ko.communityServerRecruit}
+            data-ja={isParty ? publicI18n.ja.communityPartyRecruit : publicI18n.ja.communityServerRecruit}
           >
-            {isParty ? t().communityPartyWriteButton : hasOwnServerPost ? t().communityEditButton : t().communityServerWriteButton}
-          </button>
-        </div>
-      </div>
-      {error ? <p className="public-community-error">{error}</p> : null}
-      {loading ? (
-        <p className="public-empty" data-ko={publicI18n.ko.tournamentPlayerRecordLoading} data-ja={publicI18n.ja.tournamentPlayerRecordLoading}>{t().tournamentPlayerRecordLoading}</p>
-      ) : visiblePosts.length === 0 ? (
-        <p className="public-empty" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>{t().communityEmpty}</p>
-      ) : (
-        <div className={isParty ? "public-party-post-list" : "public-community-post-grid"}>
-          {visiblePosts.map((post) => (
-            <button
+            {pageTitle}
+          </PageHeaderTitle>
+          <PageHeaderDescription
+            data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
+            data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
+          >
+            {pageSubtitle}
+          </PageHeaderDescription>
+          <PageHeaderStatus>
+            <StatusPill tone={isParty ? "streamer" : "info"}>
+              {isParty ? t().communityPartyRecruit : t().communityServerRecruit}
+            </StatusPill>
+          </PageHeaderStatus>
+          <PageHeaderActions>
+            <Button type="button" variant="secondary" loading={loading} onClick={onRefresh} data-ko={publicI18n.ko.twitchFollowedRefresh} data-ja={publicI18n.ja.twitchFollowedRefresh}>
+              {t().twitchFollowedRefresh}
+            </Button>
+            <Button
               type="button"
-              className={isParty ? "public-party-post" : post.imageUrl ? "public-community-post has-image" : "public-community-post"}
-              key={post.id}
-              onClick={() => onOpenPost(post)}
+              variant="primary"
+              onClick={onWrite}
+              data-ko={isParty ? publicI18n.ko.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ko.communityEditButton : publicI18n.ko.communityServerWriteButton}
+              data-ja={isParty ? publicI18n.ja.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ja.communityEditButton : publicI18n.ja.communityServerWriteButton}
             >
-              {isParty ? (
-                <>
-                  <header>
-                    <span className="public-community-avatar">
-                      {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
-                    </span>
-                    <strong>{post.authorDisplayName}<small>@{post.authorTwitchLogin} · {formatRelativeDate(post.createdAt)}</small></strong>
-                    <em aria-hidden="true">...</em>
-                  </header>
-                  <h3>{post.title}</h3>
-                  <p>{post.body}</p>
-                  <div className="public-party-tags">
-                    {(post.tags.length ? post.tags : [post.partyMode, post.partyRole].filter((tag): tag is string => Boolean(tag))).slice(0, 4).map((tag) => <span key={`${post.id}:party:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</span>)}
-                  </div>
-                  <div className="public-party-meta">
-                    {post.partyTier ? <span>♕ {publicOptionLabel(PARTY_TIER_OPTIONS, post.partyTier)}</span> : null}
-                    {post.partyRole ? <span>⌁ {publicOptionLabel(PARTY_ROLE_OPTIONS, post.partyRole)}</span> : null}
-                    {post.partyCapacity ? <span>♙ 1 / {post.partyCapacity}</span> : null}
-                    {post.partyVoice ? <span>◉ {publicOptionLabel(PARTY_VOICE_OPTIONS, post.partyVoice)}</span> : null}
-                  </div>
-                </>
-              ) : (
-                <>
-                  {post.imageUrl ? (
+              {writeLabel}
+            </Button>
+          </PageHeaderActions>
+        </PageHeader>
+      </AppShellHeader>
+
+      <AppShellSidebar as="nav" className="public-community-shared-sidebar">
+        <Navigation aria-label={t().community} variant="public">
+          <NavigationSection title={t().community}>
+            <NavigationItem active={!isParty} as="button" disabled={isParty} badge={<NavigationBadge>{!isParty ? visiblePosts.length : ""}</NavigationBadge>}>
+              {t().communityServerRecruit}
+            </NavigationItem>
+            <NavigationItem active={isParty} as="button" disabled={!isParty} badge={<NavigationBadge>{isParty ? visiblePosts.length : ""}</NavigationBadge>}>
+              {t().communityPartyRecruit}
+            </NavigationItem>
+          </NavigationSection>
+          <NavigationSection title={listTitle}>
+            <NavigationItem as="button" onClick={onRefresh} disabled={loading} badge={<NavigationBadge>{commentCount}</NavigationBadge>}>
+              {t().communityCommentsTitle}
+            </NavigationItem>
+          </NavigationSection>
+        </Navigation>
+      </AppShellSidebar>
+
+      <AppShellMain className="public-community-shared-main" id={`public-community-${category}-main`}>
+        <div className="public-community-shared-metrics">
+          <Metric label={listTitle} value={visiblePosts.length} tone={isParty ? "streamer" : "info"} size="sm" />
+          <Metric label={t().communityCommentsTitle} value={commentCount} tone="neutral" size="sm" />
+          <Metric label={t().communityTagsLabel} value={tagCount} tone="success" size="sm" />
+        </div>
+
+        {loading ? (
+          <div className={isParty ? "public-party-post-list" : "public-community-post-grid"} role="status" aria-label={t().tournamentPlayerRecordLoading}>
+            <SkeletonCard loadingLabel={t().tournamentPlayerRecordLoading} />
+            <SkeletonCard loadingLabel={t().tournamentPlayerRecordLoading} />
+            <SkeletonCard loadingLabel={t().tournamentPlayerRecordLoading} />
+          </div>
+        ) : null}
+
+        {!loading && error ? (
+          <EmptyState variant="error" as="div">
+            <EmptyStateIcon>!</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{t().communityLoadFailed}</EmptyStateTitle>
+            <EmptyStateDescription>{error}</EmptyStateDescription>
+            <EmptyStateActions>
+              <Button type="button" variant="secondary" onClick={onRefresh}>{t().twitchFollowedRefresh}</Button>
+            </EmptyStateActions>
+          </EmptyState>
+        ) : null}
+
+        {!loading && !error && visiblePosts.length === 0 ? (
+          <EmptyState variant="community" as="div">
+            <EmptyStateIcon>+</EmptyStateIcon>
+            <EmptyStateTitle as="h3" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>
+              {t().communityEmpty}
+            </EmptyStateTitle>
+            <EmptyStateDescription>{pageSubtitle}</EmptyStateDescription>
+            <EmptyStateActions>
+              <Button type="button" variant="primary" onClick={onWrite}>{writeLabel}</Button>
+            </EmptyStateActions>
+          </EmptyState>
+        ) : null}
+
+        {!loading && !error && visiblePosts.length > 0 ? (
+          <div className={isParty ? "public-party-post-list public-community-shared-post-list" : "public-community-post-grid public-community-shared-post-grid"}>
+            {visiblePosts.map((post) => {
+              const postTags = post.tags.length ? post.tags : [post.partyMode, post.partyRole].filter((tag): tag is string => Boolean(tag));
+              return (
+                <Card
+                  className={isParty ? "public-party-post public-community-shared-post-card" : post.imageUrl ? "public-community-post public-community-shared-post-card has-image" : "public-community-post public-community-shared-post-card"}
+                  key={post.id}
+                  onClick={() => onOpenPost(post)}
+                  padding="lg"
+                  variant="interactive"
+                >
+                  {post.imageUrl && !isParty ? (
                     <div className="public-community-post-media" aria-hidden="true">
                       <img src={assetUrl(post.imageUrl)} alt="" />
                     </div>
                   ) : null}
-                  <div className="public-community-post-content">
-                    <header>
-                      <span className="public-community-avatar">
-                        {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
-                      </span>
-                      <strong>
-                        {post.authorDisplayName}
-                        <small>@{post.authorTwitchLogin}{post.authorRiotGameName && post.authorRiotTagLine ? ` · ${post.authorRiotGameName}#${post.authorRiotTagLine}` : ""}</small>
-                      </strong>
-                      <time>{formatTournamentDateTime(post.createdAt)}</time>
-                    </header>
-                    <div className="public-community-post-main">
-                      <h3>{post.title}</h3>
-                      <p>{post.body}</p>
+                  <CardHeader className="public-community-shared-post-header">
+                    <span className="public-community-avatar">
+                      {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
+                    </span>
+                    <div>
+                      <CardTitle as="h3">{post.title}</CardTitle>
+                      <CardDescription>@{post.authorTwitchLogin} · {formatRelativeDate(post.createdAt)}</CardDescription>
                     </div>
+                    <StatusPill size="sm" tone={isParty ? "streamer" : "info"}>
+                      {isParty ? t().communityPartyRecruit : t().communityServerRecruit}
+                    </StatusPill>
+                  </CardHeader>
+                  <CardContent className="public-community-shared-post-content">
+                    <p>{post.body}</p>
                     <div className="public-community-post-meta">
-                      {post.riotGameName && post.riotTagLine ? <span>{t().communityRecordLabel} {post.riotGameName}#{post.riotTagLine}</span> : null}
-                      {post.tags.map((tag) => <em key={`${post.id}:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</em>)}
+                      {post.riotGameName && post.riotTagLine ? <Badge tone="info">{t().communityRecordLabel} {post.riotGameName}#{post.riotTagLine}</Badge> : null}
+                      {postTags.slice(0, 4).map((tag) => <Badge tone="neutral" key={`${post.id}:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</Badge>)}
                     </div>
-                  </div>
-                </>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </section>
+                    <div className="public-community-shared-card-metrics">
+                      <Metric label={t().communityCommentsTitle} value={post.comments?.length ?? 0} tone="neutral" size="sm" />
+                      <Metric label={t().communityTagsLabel} value={postTags.length} tone="success" size="sm" />
+                      {isParty ? (
+                        <Metric label={t().communityPartyCapacityLabel} value={post.partyCapacity ? `1 / ${post.partyCapacity}` : "-"} tone="streamer" size="sm" />
+                      ) : (
+                        <Metric label={t().communityRecordLabel} value={post.riotGameName && post.riotTagLine ? "OK" : "-"} tone={post.riotGameName && post.riotTagLine ? "info" : "neutral"} size="sm" />
+                      )}
+                    </div>
+                  </CardContent>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={(event: MouseEvent<HTMLButtonElement>) => {
+                      event.stopPropagation();
+                      onOpenPost(post);
+                    }}
+                  >
+                    {t().viewAnalysis}
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+        ) : null}
+      </AppShellMain>
+      <CommunityToastLayer toast={toast} onDismiss={onDismissToast} />
+    </AppShell>
   );
 }
 
@@ -5297,9 +3065,11 @@ function PublicCommunityWritePage({
   editingPost,
   error,
   submitting,
+  toast,
   onLogin,
   onBack,
-  onSubmit
+  onSubmit,
+  onDismissToast
 }: {
   category: CommunityPostCategory;
   twitchStatus: PublicTwitchViewerStatus;
@@ -5307,9 +3077,11 @@ function PublicCommunityWritePage({
   editingPost?: CommunityPost;
   error: string;
   submitting: boolean;
+  toast: CommunityToast | null;
   onLogin: () => void;
   onBack: () => void;
   onSubmit: (input: CommunityPostSubmitInput) => Promise<boolean>;
+  onDismissToast: () => void;
 }) {
   const isParty = category === "party";
   const [title, setTitle] = useState("");
@@ -5325,6 +3097,7 @@ function PublicCommunityWritePage({
   const [partyCapacity, setPartyCapacity] = useState("4");
   const [riotCheckStatus, setRiotCheckStatus] = useState<"idle" | "checking" | "valid" | "invalid">("idle");
   const [riotCheckMessage, setRiotCheckMessage] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const { myPost, recentPartyPostCount, postLimitReached, partyLimitReached } = communityPostLimitState(category, twitchStatus, posts);
   const isEditingServerPost = !isParty && Boolean(editingPost);
@@ -5389,29 +3162,35 @@ function PublicCommunityWritePage({
     }
   }
 
-  async function submitPost(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-    if (!canSubmit) return;
-    const created = await onSubmit({
+  function communitySubmitInput(): CommunityPostSubmitInput {
+    return {
       category,
-	      title,
-	      body,
-	      riotId,
-	      tags: isParty ? selectedTags.join(",") : tags,
-	      imageFile,
+      title,
+      body,
+      riotId,
+      tags: isParty ? selectedTags.join(",") : tags,
+      imageFile,
       partyTier: isParty ? partyTier : undefined,
       partyRole: isParty ? partyRole : undefined,
       partyMode: isParty ? partyMode : undefined,
       partyVoice: isParty ? partyVoice : undefined,
       partyCapacity: isParty ? Number(partyCapacity) || undefined : undefined
+    };
+  }
+
+  async function submitConfirmed(): Promise<void> {
+    if (!canSubmit) return;
+    const created = await onSubmit({
+      ...communitySubmitInput()
     });
     if (!created) return;
+    setConfirmOpen(false);
     setTitle("");
     setBody("");
-	    setRiotId("");
-	    setTags("");
-	    setSelectedTags([]);
-	    setImageFile(null);
+    setRiotId("");
+    setTags("");
+    setSelectedTags([]);
+    setImageFile(null);
     setPartyTier("");
     setPartyRole("");
     setPartyMode("");
@@ -5421,180 +3200,272 @@ function PublicCommunityWritePage({
     onBack();
   }
 
+  function submitPost(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    if (!canSubmit) return;
+    setConfirmOpen(true);
+  }
+
   return (
-    <section className={`public-panel public-menu-page-panel public-community-write-page ${isParty ? "party" : "server"}`}>
-      <div className="public-section-head">
-        <h2
-          data-ko={isParty ? publicI18n.ko.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ko.communityEditTitle : publicI18n.ko.communityWriteTitle}
-          data-ja={isParty ? publicI18n.ja.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ja.communityEditTitle : publicI18n.ja.communityWriteTitle}
-        >
-          {isParty ? t().communityPartyWriteTitle : isEditingServerPost ? t().communityEditTitle : t().communityWriteTitle}
-        </h2>
-        <button className="public-back-button" type="button" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>{t().communityBackToList}</button>
-      </div>
-      <p
-        className="public-community-lead"
-        data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
-        data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
-      >
-        {isParty ? t().communityPartySubtitle : t().communityServerSubtitle}
-      </p>
-      <article className="public-community-compose standalone">
-        {!twitchStatus.connected ? (
-          <div className="public-community-login">
-            <p data-ko={publicI18n.ko.communityLoginRequired} data-ja={publicI18n.ja.communityLoginRequired}>{t().communityLoginRequired}</p>
-            <button type="button" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>{t().twitchViewerLogin}</button>
-          </div>
-        ) : postLimitReached && !isEditingServerPost ? (
-          <div className="public-community-already-posted">
-            <strong>{partyLimitReached ? t().communityPartyLimitReached : t().communityAlreadyPosted}</strong>
-            {isParty ? (
-              <p>{recentPartyPostCount} / {PARTY_COMMUNITY_POST_LIMIT} · {t().communityPartyAutoDeleteNotice}</p>
-            ) : myPost ? (
-              <p>{myPost.title}</p>
-            ) : null}
-          </div>
-        ) : (
-          <form className="public-community-form" onSubmit={submitPost}>
-            {error ? <p className="public-community-error">{error}</p> : null}
-            {isParty ? (
-              <p className="public-community-policy-note" data-ko={publicI18n.ko.communityPartyAutoDeleteNotice} data-ja={publicI18n.ja.communityPartyAutoDeleteNotice}>{t().communityPartyAutoDeleteNotice}</p>
-            ) : null}
-            <label>
-              <span data-ko={publicI18n.ko.communityTitleLabel} data-ja={publicI18n.ja.communityTitleLabel}>{t().communityTitleLabel}</span>
-              <input
-                value={title}
-                onChange={(event) => setTitle(event.currentTarget.value)}
-                maxLength={80}
-                placeholder={isParty ? t().communityPartyTitlePlaceholder : t().communityTitlePlaceholder}
-                data-ko={isParty ? publicI18n.ko.communityPartyTitlePlaceholder : publicI18n.ko.communityTitlePlaceholder}
-                data-ja={isParty ? publicI18n.ja.communityPartyTitlePlaceholder : publicI18n.ja.communityTitlePlaceholder}
-                required
-              />
-            </label>
-            <label>
-              <span data-ko={publicI18n.ko.communityBodyLabel} data-ja={publicI18n.ja.communityBodyLabel}>{t().communityBodyLabel}</span>
-              <textarea
-                value={body}
-                onChange={(event) => setBody(event.currentTarget.value)}
-                maxLength={1000}
-                rows={isParty ? 5 : 6}
-                placeholder={isParty ? t().communityPartyBodyPlaceholder : t().communityBodyPlaceholder}
-                data-ko={isParty ? publicI18n.ko.communityPartyBodyPlaceholder : publicI18n.ko.communityBodyPlaceholder}
-                data-ja={isParty ? publicI18n.ja.communityPartyBodyPlaceholder : publicI18n.ja.communityBodyPlaceholder}
-                required
-              />
-            </label>
-            {isParty ? (
-              <div className="public-party-option-grid">
-	                <label>
-	                  <span data-ko={publicI18n.ko.communityPartyTierLabel} data-ja={publicI18n.ja.communityPartyTierLabel}>{t().communityPartyTierLabel}</span>
-	                  <select value={partyTier} onChange={(event) => setPartyTier(event.currentTarget.value)}>
-	                    <option value="">{t().communitySelectPlaceholder}</option>
-	                    {PARTY_TIER_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
-	                  </select>
-	                </label>
-	                <label>
-	                  <span data-ko={publicI18n.ko.communityPartyRoleLabel} data-ja={publicI18n.ja.communityPartyRoleLabel}>{t().communityPartyRoleLabel}</span>
-	                  <select value={partyRole} onChange={(event) => setPartyRole(event.currentTarget.value)}>
-	                    <option value="">{t().communitySelectPlaceholder}</option>
-	                    {PARTY_ROLE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
-	                  </select>
-	                </label>
-	                <label>
-	                  <span data-ko={publicI18n.ko.communityPartyModeLabel} data-ja={publicI18n.ja.communityPartyModeLabel}>{t().communityPartyModeLabel}</span>
-	                  <select value={partyMode} onChange={(event) => setPartyMode(event.currentTarget.value)}>
-	                    <option value="">{t().communitySelectPlaceholder}</option>
-	                    {PARTY_MODE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
-	                  </select>
-	                </label>
-	                <label>
-	                  <span data-ko={publicI18n.ko.communityPartyVoiceLabel} data-ja={publicI18n.ja.communityPartyVoiceLabel}>{t().communityPartyVoiceLabel}</span>
-	                  <select value={partyVoice} onChange={(event) => setPartyVoice(event.currentTarget.value)}>
-	                    <option value="">{t().communitySelectPlaceholder}</option>
-	                    {PARTY_VOICE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
-	                  </select>
-	                </label>
-                <label>
-                  <span data-ko={publicI18n.ko.communityPartyCapacityLabel} data-ja={publicI18n.ja.communityPartyCapacityLabel}>{t().communityPartyCapacityLabel}</span>
-                  <input type="number" min={2} max={10} value={partyCapacity} onChange={(event) => setPartyCapacity(event.currentTarget.value)} />
-                </label>
-              </div>
-            ) : null}
-            <label>
-	              <span data-ko={publicI18n.ko.communityRiotIdLabel} data-ja={publicI18n.ja.communityRiotIdLabel}>{t().communityRiotIdLabel}</span>
-	              <div className={`public-community-riot-check ${riotCheckStatus}`}>
-	                <input
-	                  value={riotId}
-	                  onChange={(event) => updateRiotId(event.currentTarget.value)}
-	                  maxLength={80}
-	                  placeholder={t().communityRiotIdPlaceholder}
-	                  data-ko={publicI18n.ko.communityRiotIdPlaceholder}
-	                  data-ja={publicI18n.ja.communityRiotIdPlaceholder}
-	                />
-	                <button type="button" onClick={checkRiotId} disabled={!riotId.trim() || riotCheckStatus === "checking"}>
-	                  {riotCheckStatus === "checking" ? t().communityRiotIdChecking : t().communityRiotIdCheck}
-	                </button>
-	              </div>
-	              {riotCheckMessage ? <small className={`public-community-riot-message ${riotCheckStatus}`}>{riotCheckMessage}</small> : null}
-	            </label>
-	            {isParty ? (
-	              <label>
-	                <span data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</span>
-	                <div className="public-community-tag-picker">
-	                  {PARTY_TAG_OPTIONS.map((option) => (
-	                    <button
-	                      className={selectedTags.includes(option.value) ? "active" : ""}
-	                      type="button"
-	                      onClick={() => togglePartyTag(option.value)}
-	                      key={option.value}
-	                    >
-	                      #{option[activePublicLocale]}
-	                    </button>
-	                  ))}
-	                </div>
-	              </label>
-	            ) : (
-	            <label>
-	              <span data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</span>
-	              <input
-	                value={tags}
-                onChange={(event) => setTags(event.currentTarget.value)}
-                maxLength={120}
-                placeholder={t().communityTagsPlaceholder}
-                data-ko={publicI18n.ko.communityTagsPlaceholder}
-	                data-ja={publicI18n.ja.communityTagsPlaceholder}
-	              />
-	            </label>
-	            )}
-	            <label className="public-community-file-field">
-	              <span data-ko={publicI18n.ko.communityImageLabel} data-ja={publicI18n.ja.communityImageLabel}>{t().communityImageLabel}</span>
-	              <div className="public-community-file-control">
-	                <button type="button" onClick={() => imageInputRef.current?.click()}>
-	                  {t().communityImageChoose}
-	                </button>
-	                <strong>{imageFile ? `${t().communityImageSelected}: ${imageFile.name}` : t().communityImageEmpty}</strong>
-	              </div>
-	              <input
-	                ref={imageInputRef}
-	                type="file"
-	                accept="image/png,image/jpeg,image/gif,image/webp"
-	                onChange={(event) => setImageFile(event.currentTarget.files?.[0] ?? null)}
-	              />
-              <small
-                data-ko={isEditingServerPost ? publicI18n.ko.communityImageReplaceHelp : publicI18n.ko.communityImageHelp}
-                data-ja={isEditingServerPost ? publicI18n.ja.communityImageReplaceHelp : publicI18n.ja.communityImageHelp}
-              >
-                {isEditingServerPost ? t().communityImageReplaceHelp : t().communityImageHelp}
-              </small>
-            </label>
-            <button type="submit" disabled={!canSubmit}>
-              {submitting ? (isEditingServerPost ? t().communityUpdating : t().communitySubmitting) : isEditingServerPost ? t().communityUpdateSubmit : t().communitySubmit}
-            </button>
-          </form>
-        )}
-      </article>
-    </section>
+    <AppShell
+      as="section"
+      className={`public-panel public-menu-page-panel public-community-write-page public-community-shared-shell ${isParty ? "party" : "server"}`}
+      mainId="public-community-write-main"
+      showSkipLink={false}
+      sidebarMode="drawer"
+      variant="public"
+    >
+      <AppShellHeader className="public-community-shared-header">
+        <PageHeader layout="split">
+          <PageHeaderEyebrow data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</PageHeaderEyebrow>
+          <PageHeaderTitle
+            as="h2"
+            data-ko={isParty ? publicI18n.ko.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ko.communityEditTitle : publicI18n.ko.communityWriteTitle}
+            data-ja={isParty ? publicI18n.ja.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ja.communityEditTitle : publicI18n.ja.communityWriteTitle}
+          >
+            {isParty ? t().communityPartyWriteTitle : isEditingServerPost ? t().communityEditTitle : t().communityWriteTitle}
+          </PageHeaderTitle>
+          <PageHeaderDescription
+            data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
+            data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
+          >
+            {isParty ? t().communityPartySubtitle : t().communityServerSubtitle}
+          </PageHeaderDescription>
+          <PageHeaderStatus>
+            <StatusPill tone={isParty ? "streamer" : "info"}>
+              {isEditingServerPost ? t().communityEditTitle : isParty ? t().communityPartyRecruit : t().communityServerRecruit}
+            </StatusPill>
+          </PageHeaderStatus>
+          <PageHeaderActions>
+            <Button type="button" variant="secondary" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>
+              {t().communityBackToList}
+            </Button>
+          </PageHeaderActions>
+        </PageHeader>
+      </AppShellHeader>
+
+      <AppShellSidebar as="nav" className="public-community-shared-sidebar">
+        <Navigation aria-label={t().community} variant="public">
+          <NavigationSection title={t().community}>
+            <NavigationItem active as="button" badge={<NavigationBadge>{isParty ? t().communityPartyRecruit : t().communityServerRecruit}</NavigationBadge>}>
+              {isEditingServerPost ? t().communityEditTitle : t().communityWriteTitle}
+            </NavigationItem>
+          </NavigationSection>
+        </Navigation>
+      </AppShellSidebar>
+
+      <AppShellMain className="public-community-shared-main" id="public-community-write-main">
+        <Card className="public-community-compose standalone public-community-shared-compose" padding="lg" variant="glass">
+          {!twitchStatus.connected ? (
+            <EmptyState variant="community" as="div">
+              <EmptyStateIcon>TV</EmptyStateIcon>
+              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.communityLoginRequired} data-ja={publicI18n.ja.communityLoginRequired}>
+                {t().communityLoginRequired}
+              </EmptyStateTitle>
+              <EmptyStateActions>
+                <Button type="button" variant="primary" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>
+                  {t().twitchViewerLogin}
+                </Button>
+              </EmptyStateActions>
+            </EmptyState>
+          ) : postLimitReached && !isEditingServerPost ? (
+            <EmptyState variant="community" as="div">
+              <EmptyStateIcon>!</EmptyStateIcon>
+              <EmptyStateTitle as="h3">{partyLimitReached ? t().communityPartyLimitReached : t().communityAlreadyPosted}</EmptyStateTitle>
+              <EmptyStateDescription>
+                {isParty ? `${recentPartyPostCount} / ${PARTY_COMMUNITY_POST_LIMIT} · ${t().communityPartyAutoDeleteNotice}` : myPost?.title ?? t().communityAlreadyPosted}
+              </EmptyStateDescription>
+              <EmptyStateActions>
+                <Button type="button" variant="secondary" onClick={onBack}>{t().communityBackToList}</Button>
+              </EmptyStateActions>
+            </EmptyState>
+          ) : (
+            <form className="public-community-form public-community-shared-form" onSubmit={submitPost}>
+              {error ? (
+                <EmptyState variant="error" as="div">
+                  <EmptyStateIcon>!</EmptyStateIcon>
+                  <EmptyStateTitle as="h3">{t().searchFailed}</EmptyStateTitle>
+                  <EmptyStateDescription>{error}</EmptyStateDescription>
+                </EmptyState>
+              ) : null}
+              {isParty ? (
+                <StatusPill tone="info" data-ko={publicI18n.ko.communityPartyAutoDeleteNotice} data-ja={publicI18n.ja.communityPartyAutoDeleteNotice}>
+                  {t().communityPartyAutoDeleteNotice}
+                </StatusPill>
+              ) : null}
+              <FormField required>
+                <FormLabel data-ko={publicI18n.ko.communityTitleLabel} data-ja={publicI18n.ja.communityTitleLabel}>{t().communityTitleLabel}</FormLabel>
+                <FormControl>
+                  <Input
+                    value={title}
+                    onChange={(event) => setTitle(event.currentTarget.value)}
+                    maxLength={80}
+                    placeholder={isParty ? t().communityPartyTitlePlaceholder : t().communityTitlePlaceholder}
+                    data-ko={isParty ? publicI18n.ko.communityPartyTitlePlaceholder : publicI18n.ko.communityTitlePlaceholder}
+                    data-ja={isParty ? publicI18n.ja.communityPartyTitlePlaceholder : publicI18n.ja.communityTitlePlaceholder}
+                    required
+                  />
+                </FormControl>
+              </FormField>
+              <FormField required>
+                <FormLabel data-ko={publicI18n.ko.communityBodyLabel} data-ja={publicI18n.ja.communityBodyLabel}>{t().communityBodyLabel}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    value={body}
+                    onChange={(event) => setBody(event.currentTarget.value)}
+                    maxLength={1000}
+                    rows={isParty ? 5 : 6}
+                    placeholder={isParty ? t().communityPartyBodyPlaceholder : t().communityBodyPlaceholder}
+                    data-ko={isParty ? publicI18n.ko.communityPartyBodyPlaceholder : publicI18n.ko.communityBodyPlaceholder}
+                    data-ja={isParty ? publicI18n.ja.communityPartyBodyPlaceholder : publicI18n.ja.communityBodyPlaceholder}
+                    required
+                  />
+                </FormControl>
+              </FormField>
+              {isParty ? (
+                <div className="public-party-option-grid public-community-shared-option-grid">
+                  <FormField>
+                    <FormLabel data-ko={publicI18n.ko.communityPartyTierLabel} data-ja={publicI18n.ja.communityPartyTierLabel}>{t().communityPartyTierLabel}</FormLabel>
+                    <FormControl>
+                      <Select value={partyTier} onChange={(event) => setPartyTier(event.currentTarget.value)}>
+                        <option value="">{t().communitySelectPlaceholder}</option>
+                        {PARTY_TIER_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+                      </Select>
+                    </FormControl>
+                  </FormField>
+                  <FormField>
+                    <FormLabel data-ko={publicI18n.ko.communityPartyRoleLabel} data-ja={publicI18n.ja.communityPartyRoleLabel}>{t().communityPartyRoleLabel}</FormLabel>
+                    <FormControl>
+                      <Select value={partyRole} onChange={(event) => setPartyRole(event.currentTarget.value)}>
+                        <option value="">{t().communitySelectPlaceholder}</option>
+                        {PARTY_ROLE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+                      </Select>
+                    </FormControl>
+                  </FormField>
+                  <FormField>
+                    <FormLabel data-ko={publicI18n.ko.communityPartyModeLabel} data-ja={publicI18n.ja.communityPartyModeLabel}>{t().communityPartyModeLabel}</FormLabel>
+                    <FormControl>
+                      <Select value={partyMode} onChange={(event) => setPartyMode(event.currentTarget.value)}>
+                        <option value="">{t().communitySelectPlaceholder}</option>
+                        {PARTY_MODE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+                      </Select>
+                    </FormControl>
+                  </FormField>
+                  <FormField>
+                    <FormLabel data-ko={publicI18n.ko.communityPartyVoiceLabel} data-ja={publicI18n.ja.communityPartyVoiceLabel}>{t().communityPartyVoiceLabel}</FormLabel>
+                    <FormControl>
+                      <Select value={partyVoice} onChange={(event) => setPartyVoice(event.currentTarget.value)}>
+                        <option value="">{t().communitySelectPlaceholder}</option>
+                        {PARTY_VOICE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option[activePublicLocale]}</option>)}
+                      </Select>
+                    </FormControl>
+                  </FormField>
+                  <FormField>
+                    <FormLabel data-ko={publicI18n.ko.communityPartyCapacityLabel} data-ja={publicI18n.ja.communityPartyCapacityLabel}>{t().communityPartyCapacityLabel}</FormLabel>
+                    <FormControl>
+                      <Input type="number" min={2} max={10} value={partyCapacity} onChange={(event) => setPartyCapacity(event.currentTarget.value)} />
+                    </FormControl>
+                  </FormField>
+                </div>
+              ) : null}
+              <FormField>
+                <FormLabel data-ko={publicI18n.ko.communityRiotIdLabel} data-ja={publicI18n.ja.communityRiotIdLabel}>{t().communityRiotIdLabel}</FormLabel>
+                <FormControl className={`public-community-riot-check ${riotCheckStatus}`}>
+                  <Input
+                    value={riotId}
+                    onChange={(event) => updateRiotId(event.currentTarget.value)}
+                    maxLength={80}
+                    placeholder={t().communityRiotIdPlaceholder}
+                    data-ko={publicI18n.ko.communityRiotIdPlaceholder}
+                    data-ja={publicI18n.ja.communityRiotIdPlaceholder}
+                  />
+                  <Button type="button" variant="secondary" onClick={checkRiotId} disabled={!riotId.trim() || riotCheckStatus === "checking"}>
+                    {riotCheckStatus === "checking" ? t().communityRiotIdChecking : t().communityRiotIdCheck}
+                  </Button>
+                </FormControl>
+                {riotCheckMessage ? <FormHint className={`public-community-riot-message ${riotCheckStatus}`}>{riotCheckMessage}</FormHint> : null}
+              </FormField>
+              {isParty ? (
+                <FormField>
+                  <FormLabel data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</FormLabel>
+                  <FormControl className="public-community-tag-picker">
+                    {PARTY_TAG_OPTIONS.map((option) => (
+                      <Button
+                        className={selectedTags.includes(option.value) ? "active" : ""}
+                        type="button"
+                        variant={selectedTags.includes(option.value) ? "primary" : "ghost"}
+                        size="sm"
+                        onClick={() => togglePartyTag(option.value)}
+                        key={option.value}
+                      >
+                        #{option[activePublicLocale]}
+                      </Button>
+                    ))}
+                  </FormControl>
+                </FormField>
+              ) : (
+                <FormField>
+                  <FormLabel data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</FormLabel>
+                  <FormControl>
+                    <Input
+                      value={tags}
+                      onChange={(event) => setTags(event.currentTarget.value)}
+                      maxLength={120}
+                      placeholder={t().communityTagsPlaceholder}
+                      data-ko={publicI18n.ko.communityTagsPlaceholder}
+                      data-ja={publicI18n.ja.communityTagsPlaceholder}
+                    />
+                  </FormControl>
+                </FormField>
+              )}
+              <FormField className="public-community-file-field">
+                <FormLabel data-ko={publicI18n.ko.communityImageLabel} data-ja={publicI18n.ja.communityImageLabel}>{t().communityImageLabel}</FormLabel>
+                <FormControl className="public-community-file-control">
+                  <Button type="button" variant="secondary" onClick={() => imageInputRef.current?.click()}>
+                    {t().communityImageChoose}
+                  </Button>
+                  <strong>{imageFile ? `${t().communityImageSelected}: ${imageFile.name}` : t().communityImageEmpty}</strong>
+                </FormControl>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/gif,image/webp"
+                  onChange={(event) => setImageFile(event.currentTarget.files?.[0] ?? null)}
+                />
+                <FormHint
+                  data-ko={isEditingServerPost ? publicI18n.ko.communityImageReplaceHelp : publicI18n.ko.communityImageHelp}
+                  data-ja={isEditingServerPost ? publicI18n.ja.communityImageReplaceHelp : publicI18n.ja.communityImageHelp}
+                >
+                  {isEditingServerPost ? t().communityImageReplaceHelp : t().communityImageHelp}
+                </FormHint>
+              </FormField>
+              <Button type="submit" variant="primary" loading={submitting} disabled={!canSubmit}>
+                {submitting ? (isEditingServerPost ? t().communityUpdating : t().communitySubmitting) : isEditingServerPost ? t().communityUpdateSubmit : t().communitySubmit}
+              </Button>
+            </form>
+          )}
+        </Card>
+      </AppShellMain>
+
+      <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} closeDisabled={submitting} loading={submitting} size="sm">
+        <ModalHeader>
+          <ModalTitle>{isEditingServerPost ? t().communityUpdateSubmit : t().communitySubmit}</ModalTitle>
+          <ModalCloseButton aria-label={t().participationClose} disabled={submitting}>×</ModalCloseButton>
+        </ModalHeader>
+        <ModalContent>
+          <ModalDescription>{title}</ModalDescription>
+        </ModalContent>
+        <ModalFooter>
+          <Button type="button" variant="secondary" onClick={() => setConfirmOpen(false)} disabled={submitting}>
+            {t().participationClose}
+          </Button>
+          <Button type="button" variant="primary" loading={submitting} onClick={() => void submitConfirmed()}>
+            {t().participationConfirm}
+          </Button>
+        </ModalFooter>
+      </Modal>
+      <CommunityToastLayer toast={toast} onDismiss={onDismissToast} />
+    </AppShell>
   );
 }
 
@@ -5604,20 +3475,24 @@ function PublicCommunityDetailPage({
   twitchStatus,
   commentSubmitting,
   commentError,
+  toast,
   onLogin,
   onBack,
   onSearchRiotId,
-  onSubmitComment
+  onSubmitComment,
+  onDismissToast
 }: {
   post: CommunityPost | undefined;
   profileState: CommunityPostProfileState;
   twitchStatus: PublicTwitchViewerStatus;
   commentSubmitting: boolean;
   commentError: string;
+  toast: CommunityToast | null;
   onLogin: () => void;
   onBack: () => void;
   onSearchRiotId: (riotId: string) => void;
   onSubmitComment: (postId: string, body: string) => Promise<void>;
+  onDismissToast: () => void;
 }) {
   const [commentBody, setCommentBody] = useState("");
   const riotId = communityPostRiotId(post);
@@ -5635,28 +3510,84 @@ function PublicCommunityDetailPage({
   }
 
   return (
-    <section className="public-panel public-menu-page-panel public-community-detail-page">
-      <div className="public-section-head">
-        <div>
-          <h2 data-ko={publicI18n.ko.communityDetailTitle} data-ja={publicI18n.ja.communityDetailTitle}>{t().communityDetailTitle}</h2>
-          <span>{post ? formatTournamentDateTime(post.createdAt) : "YORO.gg"}</span>
-        </div>
-        <button className="public-back-button" type="button" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>{t().communityBackToList}</button>
-      </div>
+    <AppShell
+      as="section"
+      className="public-panel public-menu-page-panel public-community-detail-page public-community-shared-shell"
+      mainId="public-community-detail-main"
+      showSkipLink={false}
+      sidebarMode="drawer"
+      variant="public"
+    >
+      <AppShellHeader className="public-community-shared-header">
+        <PageHeader layout="split">
+          <PageHeaderEyebrow data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</PageHeaderEyebrow>
+          <PageHeaderTitle as="h2" data-ko={publicI18n.ko.communityDetailTitle} data-ja={publicI18n.ja.communityDetailTitle}>
+            {t().communityDetailTitle}
+          </PageHeaderTitle>
+          <PageHeaderDescription>
+            {post ? `${post.authorDisplayName} · ${formatTournamentDateTime(post.createdAt)}` : "YORO.gg"}
+          </PageHeaderDescription>
+          <PageHeaderStatus>
+            <StatusPill tone={isParty ? "streamer" : "info"}>
+              {isParty ? t().communityPartyRecruit : t().communityServerRecruit}
+            </StatusPill>
+          </PageHeaderStatus>
+          <PageHeaderActions>
+            <Button type="button" variant="secondary" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>
+              {t().communityBackToList}
+            </Button>
+          </PageHeaderActions>
+        </PageHeader>
+      </AppShellHeader>
+
+      <AppShellSidebar as="nav" className="public-community-shared-sidebar">
+        <Navigation aria-label={t().communityDetailTitle} variant="public">
+          <NavigationSection title={t().community}>
+            <NavigationItem active as="button" badge={<NavigationBadge>{isParty ? t().communityPartyRecruit : t().communityServerRecruit}</NavigationBadge>}>
+              {t().communityDetailTitle}
+            </NavigationItem>
+            <NavigationItem as="button" disabled badge={<NavigationBadge>{comments.length}</NavigationBadge>}>
+              {t().communityCommentsTitle}
+            </NavigationItem>
+          </NavigationSection>
+        </Navigation>
+      </AppShellSidebar>
+
+      <AppShellMain className="public-community-shared-main" id="public-community-detail-main">
       {!post ? (
-        <p className="public-empty" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>{t().communityEmpty}</p>
+        <EmptyState variant="community" as="div">
+          <EmptyStateIcon>!</EmptyStateIcon>
+          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>
+            {t().communityEmpty}
+          </EmptyStateTitle>
+          <EmptyStateActions>
+            <Button type="button" variant="secondary" onClick={onBack}>{t().communityBackToList}</Button>
+          </EmptyStateActions>
+        </EmptyState>
       ) : (
-        <div className="public-community-detail-layout">
+        <div className="public-community-detail-layout public-community-shared-detail-layout">
           {riotId ? (
-            <aside className="public-community-record-strip">
-              <div className="public-community-card-head">
-                <strong data-ko={publicI18n.ko.communityRecordPreview} data-ja={publicI18n.ja.communityRecordPreview}>{t().communityRecordPreview}</strong>
-                <button type="button" onClick={() => onSearchRiotId(riotId)} data-ko={publicI18n.ko.viewRecord} data-ja={publicI18n.ja.viewRecord}>{t().viewRecord}</button>
-              </div>
+            <Card as="aside" className="public-community-record-strip public-community-shared-record-card" padding="lg" variant="glass">
+              <CardHeader className="public-community-shared-record-head">
+                <div>
+                  <CardTitle as="h3" data-ko={publicI18n.ko.communityRecordPreview} data-ja={publicI18n.ja.communityRecordPreview}>
+                    {t().communityRecordPreview}
+                  </CardTitle>
+                  <CardDescription>{riotId}</CardDescription>
+                </div>
+                <Button type="button" variant="secondary" size="sm" onClick={() => onSearchRiotId(riotId)} data-ko={publicI18n.ko.viewRecord} data-ja={publicI18n.ja.viewRecord}>
+                  {t().viewRecord}
+                </Button>
+              </CardHeader>
+              <CardContent>
               {profileState.status === "loading" ? (
-                <p className="public-empty" data-ko={publicI18n.ko.communityRecordLoading} data-ja={publicI18n.ja.communityRecordLoading}>{t().communityRecordLoading}</p>
+                <SkeletonCard loadingLabel={t().communityRecordLoading} />
               ) : profileState.status === "error" ? (
-                <p className="public-community-error">{profileState.error || t().communityRecordFailed}</p>
+                <EmptyState variant="error" as="div">
+                  <EmptyStateIcon>!</EmptyStateIcon>
+                  <EmptyStateTitle as="h3">{t().communityRecordFailed}</EmptyStateTitle>
+                  <EmptyStateDescription>{profileState.error || t().communityRecordFailed}</EmptyStateDescription>
+                </EmptyState>
               ) : profile ? (
                 <div className="public-community-record-inline">
                   <div className="public-community-record-main">
@@ -5666,17 +3597,21 @@ function PublicCommunityDetailPage({
                       <em>{rankLabel(primaryRank)}</em>
                     </div>
                   </div>
-                  <div className="public-community-record-stats compact">
-                    <span>
-                      <small>{t().recentGames}</small>
-                      <b>{profile.summary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"} {Math.max(0, profile.summary.recentGames - profile.summary.recentWins)}{activePublicLocale === "ja" ? "敗" : "패"}</b>
-                      <em className={metricToneClass(percentTone(profile.summary.recentWinRate))}>{formatPercent(profile.summary.recentWinRate)}</em>
-                    </span>
-                    <span>
-                      <small>{t().kda}</small>
-                      <b className={metricToneClass(kdaTone(profile.summary.averageKda))}>{formatDecimal(profile.summary.averageKda)}</b>
-                      <em>{profile.summary.totalKills} / {profile.summary.totalDeaths} / {profile.summary.totalAssists}</em>
-                    </span>
+                  <div className="public-community-record-stats compact public-community-shared-card-metrics">
+                    <Metric
+                      label={t().recentGames}
+                      value={`${profile.summary.recentWins}${activePublicLocale === "ja" ? "勝" : "승"} ${Math.max(0, profile.summary.recentGames - profile.summary.recentWins)}${activePublicLocale === "ja" ? "敗" : "패"}`}
+                      description={formatPercent(profile.summary.recentWinRate)}
+                      tone={profile.summary.recentWinRate >= 55 ? "success" : profile.summary.recentWinRate >= 45 ? "neutral" : "warning"}
+                      size="sm"
+                    />
+                    <Metric
+                      label={t().kda}
+                      value={formatDecimal(profile.summary.averageKda)}
+                      description={`${profile.summary.totalKills} / ${profile.summary.totalDeaths} / ${profile.summary.totalAssists}`}
+                      tone={(profile.summary.averageKda ?? 0) >= 3 ? "success" : (profile.summary.averageKda ?? 0) >= 2 ? "neutral" : "warning"}
+                      size="sm"
+                    />
                   </div>
                   <div className="public-community-record-champions">
                     {topChampions.length > 0 ? topChampions.map((champion) => (
@@ -5685,21 +3620,30 @@ function PublicCommunityDetailPage({
                   </div>
                 </div>
               ) : (
-                <p className="public-empty">{t().noData}</p>
+                <EmptyState variant="search" as="div">
+                  <EmptyStateIcon>?</EmptyStateIcon>
+                  <EmptyStateTitle as="h3">{t().noData}</EmptyStateTitle>
+                </EmptyState>
               )}
-            </aside>
+              </CardContent>
+            </Card>
           ) : null}
-          <article className="public-community-detail-article">
-            <header>
+          <Card as="article" className="public-community-detail-article public-community-shared-detail-article" padding="lg" variant="glass">
+            <CardHeader className="public-community-shared-detail-head">
               <span className="public-community-avatar">
                 {post.authorProfileImageUrl ? <img src={post.authorProfileImageUrl} alt="" /> : <em>{post.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
               </span>
               <div>
-                <strong>{post.authorDisplayName}</strong>
-                <small>@{post.authorTwitchLogin}{post.authorRiotGameName && post.authorRiotTagLine ? ` · ${post.authorRiotGameName}#${post.authorRiotTagLine}` : ""}</small>
+                <CardTitle as="h3">{post.title}</CardTitle>
+                <CardDescription>
+                  {post.authorDisplayName} · @{post.authorTwitchLogin}{post.authorRiotGameName && post.authorRiotTagLine ? ` · ${post.authorRiotGameName}#${post.authorRiotTagLine}` : ""}
+                </CardDescription>
               </div>
-            </header>
-            <h3>{post.title}</h3>
+              <StatusPill size="sm" tone={isParty ? "streamer" : "info"}>
+                {isParty ? t().communityPartyRecruit : t().communityServerRecruit}
+              </StatusPill>
+            </CardHeader>
+            <CardContent className="public-community-shared-detail-content">
             <p>{post.body}</p>
             {post.imageUrl ? (
               <div className="public-community-detail-media">
@@ -5707,19 +3651,28 @@ function PublicCommunityDetailPage({
               </div>
             ) : null}
             <div className="public-community-post-meta">
-              {riotId ? <span>{t().communityRecordLabel} {riotId}</span> : null}
-              {post.tags.map((tag) => <em key={`${post.id}:detail:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</em>)}
+              {riotId ? <Badge tone="info">{t().communityRecordLabel} {riotId}</Badge> : null}
+              {post.tags.map((tag) => <Badge tone="neutral" key={`${post.id}:detail:${tag}`}>#{publicOptionLabel(PARTY_TAG_OPTIONS, tag)}</Badge>)}
+            </div>
+            <div className="public-community-shared-card-metrics">
+              <Metric label={t().communityCommentsTitle} value={comments.length} tone="neutral" size="sm" />
+              <Metric label={t().communityTagsLabel} value={post.tags.length} tone="success" size="sm" />
+              {isParty ? (
+                <Metric label={t().communityPartyCapacityLabel} value={post.partyCapacity ? `1 / ${post.partyCapacity}` : "-"} tone="streamer" size="sm" />
+              ) : (
+                <Metric label={t().communityRecordLabel} value={riotId ? "OK" : "-"} tone={riotId ? "info" : "neutral"} size="sm" />
+              )}
             </div>
             {isParty ? (
-              <section className="public-community-comments">
-                <div className="public-community-comments-head">
-                  <strong data-ko={publicI18n.ko.communityCommentsTitle} data-ja={publicI18n.ja.communityCommentsTitle}>{t().communityCommentsTitle}</strong>
-                  <span>{comments.length}</span>
-                </div>
+              <Card as="section" className="public-community-comments public-community-shared-comments" padding="md" variant="default">
+                <CardHeader className="public-community-comments-head">
+                  <CardTitle as="h4" data-ko={publicI18n.ko.communityCommentsTitle} data-ja={publicI18n.ja.communityCommentsTitle}>{t().communityCommentsTitle}</CardTitle>
+                  <Badge tone="info">{comments.length}</Badge>
+                </CardHeader>
                 {comments.length > 0 ? (
                   <div className="public-community-comment-list">
                     {comments.map((comment) => (
-                      <article className="public-community-comment" key={comment.id}>
+                      <Card as="article" className="public-community-comment" padding="sm" variant="glass" key={comment.id}>
                         <span className="public-community-avatar">
                           {comment.authorProfileImageUrl ? <img src={comment.authorProfileImageUrl} alt="" /> : <em>{comment.authorDisplayName.slice(0, 1).toUpperCase()}</em>}
                         </span>
@@ -5730,43 +3683,69 @@ function PublicCommunityDetailPage({
                           </header>
                           <p>{comment.body}</p>
                         </div>
-                      </article>
+                      </Card>
                     ))}
                   </div>
                 ) : (
-                  <p className="public-empty" data-ko={publicI18n.ko.communityCommentEmpty} data-ja={publicI18n.ja.communityCommentEmpty}>{t().communityCommentEmpty}</p>
+                  <EmptyState variant="community" as="div">
+                    <EmptyStateIcon>+</EmptyStateIcon>
+                    <EmptyStateTitle as="h4" data-ko={publicI18n.ko.communityCommentEmpty} data-ja={publicI18n.ja.communityCommentEmpty}>
+                      {t().communityCommentEmpty}
+                    </EmptyStateTitle>
+                  </EmptyState>
                 )}
-                {commentError ? <p className="public-community-error">{commentError}</p> : null}
+                {commentError ? (
+                  <EmptyState variant="error" as="div">
+                    <EmptyStateIcon>!</EmptyStateIcon>
+                    <EmptyStateTitle as="h4">{t().communityCommentFailed}</EmptyStateTitle>
+                    <EmptyStateDescription>{commentError}</EmptyStateDescription>
+                  </EmptyState>
+                ) : null}
                 {twitchStatus.connected ? (
-                  <form className="public-community-comment-form" onSubmit={submitComment}>
+                  <form className="public-community-comment-form public-community-shared-form" onSubmit={submitComment}>
                     <span className="public-community-avatar">
                       {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <em>{twitchStatus.user?.displayName?.slice(0, 1).toUpperCase() ?? "T"}</em>}
                     </span>
-                    <textarea
-                      value={commentBody}
-                      onChange={(event) => setCommentBody(event.currentTarget.value)}
-                      maxLength={500}
-                      rows={3}
-                      placeholder={t().communityCommentPlaceholder}
-                      data-ko={publicI18n.ko.communityCommentPlaceholder}
-                      data-ja={publicI18n.ja.communityCommentPlaceholder}
-                    />
-                    <button type="submit" disabled={!commentBody.trim() || commentSubmitting}>
+                    <FormField required>
+                      <FormControl>
+                        <Textarea
+                          value={commentBody}
+                          onChange={(event) => setCommentBody(event.currentTarget.value)}
+                          maxLength={500}
+                          rows={3}
+                          placeholder={t().communityCommentPlaceholder}
+                          data-ko={publicI18n.ko.communityCommentPlaceholder}
+                          data-ja={publicI18n.ja.communityCommentPlaceholder}
+                          required
+                        />
+                      </FormControl>
+                    </FormField>
+                    <Button type="submit" variant="primary" loading={commentSubmitting} disabled={!commentBody.trim() || commentSubmitting}>
                       {commentSubmitting ? t().communityCommentSubmitting : t().communityCommentSubmit}
-                    </button>
+                    </Button>
                   </form>
                 ) : (
-                  <div className="public-community-login public-community-comment-login">
-                    <p data-ko={publicI18n.ko.communityCommentLoginRequired} data-ja={publicI18n.ja.communityCommentLoginRequired}>{t().communityCommentLoginRequired}</p>
-                    <button type="button" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>{t().twitchViewerLogin}</button>
-                  </div>
+                  <EmptyState variant="community" as="div" className="public-community-login public-community-comment-login">
+                    <EmptyStateIcon>TV</EmptyStateIcon>
+                    <EmptyStateTitle as="h4" data-ko={publicI18n.ko.communityCommentLoginRequired} data-ja={publicI18n.ja.communityCommentLoginRequired}>
+                      {t().communityCommentLoginRequired}
+                    </EmptyStateTitle>
+                    <EmptyStateActions>
+                      <Button type="button" variant="primary" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>
+                        {t().twitchViewerLogin}
+                      </Button>
+                    </EmptyStateActions>
+                  </EmptyState>
                 )}
-              </section>
+              </Card>
             ) : null}
-          </article>
+            </CardContent>
+          </Card>
         </div>
       )}
-    </section>
+      </AppShellMain>
+      <CommunityToastLayer toast={toast} onDismiss={onDismissToast} />
+    </AppShell>
   );
 }
 
@@ -6094,58 +4073,122 @@ function PublicTournamentCalendarPage({
   const upcoming = events.filter((event) => event.status !== "completed").slice(0, 6);
 
   return (
-    <section className="public-panel public-menu-page-panel public-tournament-calendar-page">
-      <div className="public-tournament-page-head">
-        <div>
-          <span data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>{t().contentMenu}</span>
-          <h2 data-ko={publicI18n.ko.tournamentCalendarTitle} data-ja={publicI18n.ja.tournamentCalendarTitle}>{t().tournamentCalendarTitle}</h2>
-          <p data-ko={publicI18n.ko.tournamentCalendarSubtitle} data-ja={publicI18n.ja.tournamentCalendarSubtitle}>{t().tournamentCalendarSubtitle}</p>
-        </div>
-        <button type="button" onClick={onOpenList} data-ko={publicI18n.ko.tournamentList} data-ja={publicI18n.ja.tournamentList}>{t().tournamentList}</button>
-      </div>
-      {loading ? <div className="public-tournament-empty">{t().searching}</div> : null}
-      {error ? <div className="public-tournament-empty error">{error}</div> : null}
-      {!loading && !error && events.length === 0 ? <div className="public-tournament-empty">{t().tournamentCalendarEmpty}</div> : null}
-      <div className="public-tournament-calendar-layout">
-        <article className="public-tournament-calendar-card">
-          <div className="public-tournament-calendar-title">
-            <strong>{tournamentMonthTitle(baseDate)}</strong>
-            <span>{events.length} {t().tournamentMatchCount}</span>
+    <AppShell
+      as="section"
+      className="public-panel public-menu-page-panel public-tournament-calendar-page public-tournament-shared-shell"
+      mainId="public-tournament-calendar-main"
+      showSkipLink={false}
+      sidebarMode="drawer"
+      variant="public"
+    >
+      <AppShellHeader className="public-tournament-shared-header">
+        <PageHeader layout="split">
+          <PageHeaderEyebrow data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>
+            {t().contentMenu}
+          </PageHeaderEyebrow>
+          <PageHeaderTitle as="h2" data-ko={publicI18n.ko.tournamentCalendarTitle} data-ja={publicI18n.ja.tournamentCalendarTitle}>
+            {t().tournamentCalendarTitle}
+          </PageHeaderTitle>
+          <PageHeaderDescription data-ko={publicI18n.ko.tournamentCalendarSubtitle} data-ja={publicI18n.ja.tournamentCalendarSubtitle}>
+            {t().tournamentCalendarSubtitle}
+          </PageHeaderDescription>
+          <PageHeaderStatus>
+            <Badge tone="info">{events.length} {t().tournamentMatchCount}</Badge>
+          </PageHeaderStatus>
+          <PageHeaderActions>
+            <Button type="button" variant="secondary" onClick={onOpenList} data-ko={publicI18n.ko.tournamentList} data-ja={publicI18n.ja.tournamentList}>
+              {t().tournamentList}
+            </Button>
+          </PageHeaderActions>
+        </PageHeader>
+      </AppShellHeader>
+      <AppShellMain className="public-tournament-shared-main" id="public-tournament-calendar-main">
+        {loading ? (
+          <div className="public-tournament-shared-loading" role="status" aria-label={t().searching}>
+            <SkeletonCard loadingLabel={t().searching} />
+            <SkeletonCard loadingLabel={t().searching} />
           </div>
-          <div className="public-tournament-calendar-grid">
-            {tournamentCalendarWeekdays().map((weekday) => <b key={weekday}>{weekday}</b>)}
-            {days.map((day) => (
-              <div className={`public-tournament-calendar-day ${day.outside ? "outside" : ""} ${day.today ? "today" : ""}`} key={tournamentDateKey(day.date)}>
-                <strong>{day.date.getDate()}</strong>
-                <div>
-                  {day.events.slice(0, 3).map((event) => (
-                    <button className={event.status} type="button" onClick={() => onSelectTournament(event.tournament.slug)} key={event.id}>
-                      <span>{event.time}</span>
-                      <em>{event.tournament.title}</em>
-                      <small>{event.round}</small>
-                    </button>
-                  ))}
-                  {day.events.length > 3 ? <i>+{day.events.length - 3}</i> : null}
-                </div>
-              </div>
-            ))}
+        ) : null}
+        {!loading && error ? (
+          <EmptyState variant="error" as="div">
+            <EmptyStateIcon>!</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{t().tournamentCalendarTitle}</EmptyStateTitle>
+            <EmptyStateDescription>{error}</EmptyStateDescription>
+            <EmptyStateActions>
+              <Button type="button" variant="secondary" onClick={onOpenList}>{t().tournamentList}</Button>
+            </EmptyStateActions>
+          </EmptyState>
+        ) : null}
+        {!loading && !error && events.length === 0 ? (
+          <EmptyState variant="tournament" as="div">
+            <EmptyStateIcon>+</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{t().tournamentCalendarEmpty}</EmptyStateTitle>
+          </EmptyState>
+        ) : null}
+        {!loading && !error && events.length > 0 ? (
+          <div className="public-tournament-calendar-layout public-tournament-shared-calendar-layout">
+            <Card as="section" className="public-tournament-calendar-card" padding="lg" variant="glass">
+              <CardHeader className="public-tournament-calendar-title">
+                <CardTitle as="h3">{tournamentMonthTitle(baseDate)}</CardTitle>
+                <Badge tone="neutral">{events.length} {t().tournamentMatchCount}</Badge>
+              </CardHeader>
+              <CardContent className="public-tournament-calendar-grid">
+                {tournamentCalendarWeekdays().map((weekday) => <b key={weekday}>{weekday}</b>)}
+                {days.map((day) => (
+                  <div className={`public-tournament-calendar-day ${day.outside ? "outside" : ""} ${day.today ? "today" : ""}`} key={tournamentDateKey(day.date)}>
+                    <strong>{day.date.getDate()}</strong>
+                    <div>
+                      {day.events.slice(0, 3).map((event) => (
+                        <Button
+                          className={event.status}
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onSelectTournament(event.tournament.slug)}
+                          key={event.id}
+                        >
+                          <span>{event.time}</span>
+                          <em>{event.tournament.title}</em>
+                          <small>{event.round}</small>
+                        </Button>
+                      ))}
+                      {day.events.length > 3 ? <i>+{day.events.length - 3}</i> : null}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card as="aside" className="public-tournament-upcoming-card" padding="lg" variant="elevated">
+              <CardHeader className="public-tournament-card-head">
+                <CardTitle as="h3" data-ko={publicI18n.ko.tournamentUpcoming} data-ja={publicI18n.ja.tournamentUpcoming}>
+                  {t().tournamentUpcoming}
+                </CardTitle>
+                <StatusPill tone="info">{upcoming.length}</StatusPill>
+              </CardHeader>
+              <CardContent className="public-tournament-shared-upcoming-list">
+                {upcoming.length === 0 ? (
+                  <EmptyState variant="tournament" as="div">
+                    <EmptyStateTitle as="h3">{t().tournamentCalendarEmpty}</EmptyStateTitle>
+                  </EmptyState>
+                ) : upcoming.map((event) => (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    fullWidth
+                    onClick={() => onSelectTournament(event.tournament.slug)}
+                    key={event.id}
+                  >
+                    <time>{formatTournamentDateTime(event.startsAt.toISOString())}</time>
+                    <strong>{event.title}</strong>
+                    <span>{event.tournament.title} · {event.round}</span>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
           </div>
-        </article>
-        <aside className="public-tournament-upcoming-card">
-          <div className="public-tournament-card-head">
-            <strong data-ko={publicI18n.ko.tournamentUpcoming} data-ja={publicI18n.ja.tournamentUpcoming}>{t().tournamentUpcoming}</strong>
-            <span>{upcoming.length}</span>
-          </div>
-          {upcoming.length === 0 ? <p className="public-empty">{t().tournamentCalendarEmpty}</p> : upcoming.map((event) => (
-            <button type="button" onClick={() => onSelectTournament(event.tournament.slug)} key={event.id}>
-              <time>{formatTournamentDateTime(event.startsAt.toISOString())}</time>
-              <strong>{event.title}</strong>
-              <span>{event.tournament.title} · {event.round}</span>
-            </button>
-          ))}
-        </aside>
-      </div>
-    </section>
+        ) : null}
+      </AppShellMain>
+    </AppShell>
   );
 }
 
@@ -6163,40 +4206,90 @@ function PublicTournamentListPage({
   onOpenCalendar: () => void;
 }) {
   return (
-    <section className="public-panel public-menu-page-panel public-tournament-list-page">
-      <div className="public-tournament-page-head">
-        <div>
-          <span data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>{t().contentMenu}</span>
-          <h2 data-ko={publicI18n.ko.tournamentListTitle} data-ja={publicI18n.ja.tournamentListTitle}>{t().tournamentListTitle}</h2>
-          <p data-ko={publicI18n.ko.tournamentListSubtitle} data-ja={publicI18n.ja.tournamentListSubtitle}>{t().tournamentListSubtitle}</p>
-        </div>
-        <button type="button" onClick={onOpenCalendar} data-ko={publicI18n.ko.tournamentCalendar} data-ja={publicI18n.ja.tournamentCalendar}>{t().tournamentCalendar}</button>
-      </div>
-      {loading ? <div className="public-tournament-empty">{t().searching}</div> : null}
-      {error ? <div className="public-tournament-empty error">{error}</div> : null}
-      {!loading && !error && tournaments.length === 0 ? <div className="public-tournament-empty">{t().tournamentListEmpty}</div> : null}
-      <div className="public-tournament-list-grid">
-        {tournaments.map((tournament) => {
-          const liveCount = tournament.matches.filter((match) => match.status === "live").length;
-          const completedCount = tournament.matches.filter((match) => match.status === "completed").length;
-          return (
-            <article className="public-tournament-list-card" key={tournament.id}>
-              <div>
-                <span>{liveCount > 0 ? t().tournamentLive : completedCount === tournament.matches.length && tournament.matches.length > 0 ? t().tournamentCompleted : t().tournamentUpcoming}</span>
-                <strong>{tournament.title}</strong>
-                <p>{tournamentDescriptionText(tournament.description, t().tournamentSubtitle)}</p>
-              </div>
-              <dl>
-                <div><dt>{t().tournamentPeriod}</dt><dd>{formatTournamentDate(tournament.startsAt)} ~ {formatTournamentDate(tournament.endsAt)}</dd></div>
-                <div><dt>{t().tournamentTeams}</dt><dd>{tournament.teams.length} {t().tournamentTeamUnit}</dd></div>
-                <div><dt>{t().tournamentMatchCount}</dt><dd>{tournament.matches.length}</dd></div>
-              </dl>
-              <button type="button" onClick={() => onSelectTournament(tournament.slug)} data-ko={publicI18n.ko.tournamentOpenDetail} data-ja={publicI18n.ja.tournamentOpenDetail}>{t().tournamentOpenDetail}</button>
-            </article>
-          );
-        })}
-      </div>
-    </section>
+    <AppShell
+      as="section"
+      className="public-panel public-menu-page-panel public-tournament-list-page public-tournament-shared-shell"
+      mainId="public-tournament-list-main"
+      showSkipLink={false}
+      sidebarMode="drawer"
+      variant="public"
+    >
+      <AppShellHeader className="public-tournament-shared-header">
+        <PageHeader layout="split">
+          <PageHeaderEyebrow data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>
+            {t().contentMenu}
+          </PageHeaderEyebrow>
+          <PageHeaderTitle as="h2" data-ko={publicI18n.ko.tournamentListTitle} data-ja={publicI18n.ja.tournamentListTitle}>
+            {t().tournamentListTitle}
+          </PageHeaderTitle>
+          <PageHeaderDescription data-ko={publicI18n.ko.tournamentListSubtitle} data-ja={publicI18n.ja.tournamentListSubtitle}>
+            {t().tournamentListSubtitle}
+          </PageHeaderDescription>
+          <PageHeaderStatus>
+            <Badge tone="streamer">{tournaments.length} {t().tournamentTeamUnit}</Badge>
+          </PageHeaderStatus>
+          <PageHeaderActions>
+            <Button type="button" variant="secondary" onClick={onOpenCalendar} data-ko={publicI18n.ko.tournamentCalendar} data-ja={publicI18n.ja.tournamentCalendar}>
+              {t().tournamentCalendar}
+            </Button>
+          </PageHeaderActions>
+        </PageHeader>
+      </AppShellHeader>
+      <AppShellMain className="public-tournament-shared-main" id="public-tournament-list-main">
+        {loading ? (
+          <div className="public-tournament-list-grid">
+            <SkeletonCard loadingLabel={t().searching} />
+            <SkeletonCard loadingLabel={t().searching} />
+            <SkeletonCard loadingLabel={t().searching} />
+          </div>
+        ) : null}
+        {!loading && error ? (
+          <EmptyState variant="error" as="div">
+            <EmptyStateIcon>!</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{t().tournamentListTitle}</EmptyStateTitle>
+            <EmptyStateDescription>{error}</EmptyStateDescription>
+          </EmptyState>
+        ) : null}
+        {!loading && !error && tournaments.length === 0 ? (
+          <EmptyState variant="tournament" as="div">
+            <EmptyStateIcon>+</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{t().tournamentListEmpty}</EmptyStateTitle>
+            <EmptyStateActions>
+              <Button type="button" variant="secondary" onClick={onOpenCalendar}>{t().tournamentCalendar}</Button>
+            </EmptyStateActions>
+          </EmptyState>
+        ) : null}
+        {!loading && !error && tournaments.length > 0 ? (
+          <div className="public-tournament-list-grid">
+            {tournaments.map((tournament) => {
+              const liveCount = tournament.matches.filter((match) => match.status === "live").length;
+              const completedCount = tournament.matches.filter((match) => match.status === "completed").length;
+              const statusLabel = liveCount > 0 ? t().tournamentLive : completedCount === tournament.matches.length && tournament.matches.length > 0 ? t().tournamentCompleted : t().tournamentUpcoming;
+              const statusTone = liveCount > 0 ? "live" : completedCount === tournament.matches.length && tournament.matches.length > 0 ? "success" : "info";
+              return (
+                <Card className="public-tournament-list-card" key={tournament.id} padding="lg" variant="interactive">
+                  <CardHeader>
+                    <div>
+                      <StatusPill size="sm" tone={statusTone}>{statusLabel}</StatusPill>
+                      <CardTitle as="h3">{tournament.title}</CardTitle>
+                      <CardDescription>{tournamentDescriptionText(tournament.description, t().tournamentSubtitle)}</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="public-tournament-shared-metrics">
+                    <Metric label={t().tournamentPeriod} value={`${formatTournamentDate(tournament.startsAt)} ~ ${formatTournamentDate(tournament.endsAt)}`} tone="neutral" size="sm" />
+                    <Metric label={t().tournamentTeams} value={`${tournament.teams.length} ${t().tournamentTeamUnit}`} tone="streamer" size="sm" />
+                    <Metric label={t().tournamentMatchCount} value={tournament.matches.length} tone="info" size="sm" />
+                  </CardContent>
+                  <Button type="button" onClick={() => onSelectTournament(tournament.slug)} data-ko={publicI18n.ko.tournamentOpenDetail} data-ja={publicI18n.ja.tournamentOpenDetail}>
+                    {t().tournamentOpenDetail}
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+        ) : null}
+      </AppShellMain>
+    </AppShell>
   );
 }
 
@@ -6307,52 +4400,110 @@ function PublicTournamentPage({
       </span>
     );
   };
+  const liveMatchCount = tournament?.matches.filter((match) => match.status === "live").length ?? 0;
+  const completedMatchCount = tournament?.matches.filter((match) => match.status === "completed").length ?? 0;
+  const tournamentStatusLabel = liveMatchCount > 0
+    ? t().tournamentLive
+    : tournament && completedMatchCount === tournament.matches.length && tournament.matches.length > 0
+      ? t().tournamentCompleted
+      : t().tournamentUpcoming;
+  const tournamentStatusTone = liveMatchCount > 0
+    ? "live"
+    : tournament && completedMatchCount === tournament.matches.length && tournament.matches.length > 0
+      ? "success"
+      : "info";
 
   return (
-    <section className="public-panel public-menu-page-panel public-tournament-page">
-      <div className="public-tournament-head">
-        <div className="public-tournament-brand">
-          <span aria-hidden="true">♕</span>
-          <div>
-            <strong>{tournament?.title ?? t().tournamentTitle}</strong>
-            <small>{tournamentDescriptionText(tournament?.description, t().tournamentSubtitle)}</small>
-          </div>
-        </div>
-        <nav className="public-tournament-tabs" aria-label={t().contentMenu}>
-          {tabs.map((tab) => (
-            <button className={page === tab.page ? "active" : ""} type="button" onClick={() => onPage(tab.page)} key={tab.page}>
-              <span data-ko={tab.ko} data-ja={tab.ja}>{tab.label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+    <AppShell
+      as="section"
+      className="public-panel public-menu-page-panel public-tournament-page public-tournament-shared-shell"
+      mainId="public-tournament-detail-main"
+      showSkipLink={false}
+      variant="public"
+    >
+      <AppShellHeader className="public-tournament-shared-header">
+        <PageHeader layout="split">
+          <PageHeaderEyebrow data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>
+            {t().contentMenu}
+          </PageHeaderEyebrow>
+          <PageHeaderTitle as="h2">{tournament?.title ?? t().tournamentTitle}</PageHeaderTitle>
+          <PageHeaderDescription>
+            {tournamentDescriptionText(tournament?.description, t().tournamentSubtitle)}
+          </PageHeaderDescription>
+          <PageHeaderStatus>
+            <StatusPill tone={tournamentStatusTone}>{tournamentStatusLabel}</StatusPill>
+          </PageHeaderStatus>
+          <PageHeaderActions>
+            <FormField className="public-tournament-shared-selector">
+              <FormLabel data-ko={publicI18n.ko.tournamentSelect} data-ja={publicI18n.ja.tournamentSelect}>
+                {t().tournamentSelect}
+              </FormLabel>
+              <FormControl>
+                <Select value={tournament?.slug ?? ""} onChange={(event) => onSelectTournament(event.target.value)} disabled={loading || tournaments.length === 0}>
+                  {tournaments.map((item) => <option value={item.slug} key={item.id}>{item.title}</option>)}
+                </Select>
+              </FormControl>
+            </FormField>
+          </PageHeaderActions>
+        </PageHeader>
+      </AppShellHeader>
 
-      <div className="public-tournament-selector">
-        <span data-ko={publicI18n.ko.tournamentSelect} data-ja={publicI18n.ja.tournamentSelect}>{t().tournamentSelect}</span>
-        <select value={tournament?.slug ?? ""} onChange={(event) => onSelectTournament(event.target.value)} disabled={loading || tournaments.length === 0}>
-          {tournaments.map((item) => <option value={item.slug} key={item.id}>{item.title}</option>)}
-        </select>
-      </div>
+      <AppShellSidebar as="nav" className="public-tournament-shared-sidebar">
+        <Navigation aria-label={t().contentMenu} variant="public">
+          <NavigationSection title={t().tournamentTitle}>
+            {tabs.map((tab) => (
+              <NavigationItem active={page === tab.page} as="button" onClick={() => onPage(tab.page)} key={tab.page}>
+                <span data-ko={tab.ko} data-ja={tab.ja}>{tab.label}</span>
+              </NavigationItem>
+            ))}
+          </NavigationSection>
+          <NavigationSection title={t().tournamentScheduleTitle}>
+            <NavigationItem as="button" onClick={() => onPage("tournamentSchedule")} badge={<NavigationBadge>{scheduleItems.length}</NavigationBadge>}>
+              {t().tournamentMatchCount}
+            </NavigationItem>
+          </NavigationSection>
+        </Navigation>
+      </AppShellSidebar>
 
-      {loading ? <div className="public-tournament-empty">{t().searching}</div> : null}
-      {error ? <div className="public-tournament-empty error">{error}</div> : null}
-      {!loading && !error && !tournament ? <div className="public-tournament-empty" data-ko={publicI18n.ko.tournamentEmpty} data-ja={publicI18n.ja.tournamentEmpty}>{t().tournamentEmpty}</div> : null}
+      <AppShellMain className="public-tournament-shared-main" id="public-tournament-detail-main">
+        {loading ? (
+          <div className="public-tournament-shared-loading" role="status" aria-label={t().searching}>
+            <SkeletonCard loadingLabel={t().searching} />
+            <SkeletonText lines={4} />
+          </div>
+        ) : null}
+        {!loading && error ? (
+          <EmptyState variant="error" as="div">
+            <EmptyStateIcon>!</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{t().tournamentTitle}</EmptyStateTitle>
+            <EmptyStateDescription>{error}</EmptyStateDescription>
+          </EmptyState>
+        ) : null}
+        {!loading && !error && !tournament ? (
+          <EmptyState variant="tournament" as="div" data-ko={publicI18n.ko.tournamentEmpty} data-ja={publicI18n.ja.tournamentEmpty}>
+            <EmptyStateIcon>+</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{t().tournamentEmpty}</EmptyStateTitle>
+          </EmptyState>
+        ) : null}
 
-      {tournament ? (
-        <div className="public-tournament-hero">
-          <div>
-            <span>{t().contentMenu}</span>
-            <h2>{tournament.title}</h2>
-            <p>{tournamentDescriptionText(tournament.description, t().tournamentSubtitle)}</p>
-          </div>
-          <div className="public-tournament-hero-stats">
-            <article><small>{t().tournamentPeriod}</small><strong>{formatTournamentDate(tournament.startsAt)} ~ {formatTournamentDate(tournament.endsAt)}</strong></article>
-            <article><small>{t().tournamentTeams}</small><strong>{tournament.teams.length} {t().tournamentTeamUnit}</strong></article>
-            <article><small>{t().tournamentFormat}</small><strong>{tournament.formatLabel || "-"}</strong></article>
-            <article><small>{t().tournamentPrize}</small><strong>{tournament.prizeLabel || "-"}</strong></article>
-          </div>
-        </div>
-      ) : null}
+        {tournament ? (
+          <Card className="public-tournament-hero public-tournament-shared-hero" padding="lg" variant="glass">
+            <CardHeader>
+              <div>
+                <Badge tone="streamer">{t().contentMenu}</Badge>
+                <CardTitle as="h3">{tournament.title}</CardTitle>
+                <CardDescription>{tournamentDescriptionText(tournament.description, t().tournamentSubtitle)}</CardDescription>
+              </div>
+              <StatusPill tone={tournamentStatusTone}>{tournamentStatusLabel}</StatusPill>
+            </CardHeader>
+            <CardContent className="public-tournament-hero-stats public-tournament-shared-metrics">
+              <Metric label={t().tournamentPeriod} value={`${formatTournamentDate(tournament.startsAt)} ~ ${formatTournamentDate(tournament.endsAt)}`} tone="neutral" size="sm" />
+              <Metric label={t().tournamentTeams} value={`${tournament.teams.length} ${t().tournamentTeamUnit}`} tone="streamer" size="sm" />
+              <Metric label={t().tournamentFormat} value={tournament.formatLabel || "-"} tone="info" size="sm" />
+              <Metric label={t().tournamentPrize} value={tournament.prizeLabel || "-"} tone="warning" size="sm" />
+            </CardContent>
+          </Card>
+        ) : null}
 
       {tournament && page === "tournamentBracket" ? (
         <div className="public-tournament-layout public-tournament-layout--full">
@@ -6451,11 +4602,12 @@ function PublicTournamentPage({
       {tournament && page === "tournamentSchedule" ? (
         <div className="public-tournament-two-column">
           <TournamentScheduleCard upcoming={scheduleItems} avatar={avatar} expanded />
-          <article className="public-tournament-card public-tournament-standings">
-            <div className="public-tournament-card-head">
-              <strong data-ko={publicI18n.ko.tournamentStandingsTitle} data-ja={publicI18n.ja.tournamentStandingsTitle}>{t().tournamentStandingsTitle}</strong>
-              <span>{tournament.title}</span>
-            </div>
+          <Card className="public-tournament-card public-tournament-standings" padding="lg" variant="glass">
+            <CardHeader className="public-tournament-card-head">
+              <CardTitle as="h3" data-ko={publicI18n.ko.tournamentStandingsTitle} data-ja={publicI18n.ja.tournamentStandingsTitle}>{t().tournamentStandingsTitle}</CardTitle>
+              <Badge tone="neutral">{tournament.title}</Badge>
+            </CardHeader>
+            <CardContent>
             {standings.map((team) => (
               <div className="public-tournament-standing-row" key={team.team}>
                 <b>{team.rank}</b>
@@ -6465,24 +4617,30 @@ function PublicTournamentPage({
                 <em>{team.point}</em>
               </div>
             ))}
-          </article>
+            </CardContent>
+          </Card>
         </div>
       ) : null}
 
       {tournament && page === "tournamentNews" ? (
         <div className="public-tournament-news-grid">
           {news.map((item, index) => (
-            <article className="public-tournament-news-card" key={item.title}>
-              <span>NEWS {index + 1}</span>
-              <strong>{item.title}</strong>
-              <p>{item.body}</p>
-              <time>{formatTournamentDate(item.publishedAt)}</time>
-            </article>
+            <Card className="public-tournament-news-card" key={item.title} padding="lg" variant="glass">
+              <CardHeader>
+                <Badge tone="info">NEWS {index + 1}</Badge>
+                <time>{formatTournamentDate(item.publishedAt)}</time>
+              </CardHeader>
+              <CardContent>
+                <CardTitle as="h3">{item.title}</CardTitle>
+                <CardDescription>{item.body}</CardDescription>
+              </CardContent>
+            </Card>
           ))}
           <TournamentNoticeCard notices={notices} />
         </div>
       ) : null}
-    </section>
+      </AppShellMain>
+    </AppShell>
   );
 }
 
@@ -6496,11 +4654,12 @@ function TournamentScheduleCard({
   expanded?: boolean;
 }) {
   return (
-    <article className={`public-tournament-card public-tournament-schedule ${expanded ? "expanded" : ""}`}>
-      <div className="public-tournament-card-head">
-        <strong data-ko={publicI18n.ko.tournamentScheduleTitle} data-ja={publicI18n.ja.tournamentScheduleTitle}>{t().tournamentScheduleTitle}</strong>
-        <button type="button" data-ko={publicI18n.ko.tournamentAllView} data-ja={publicI18n.ja.tournamentAllView}>{t().tournamentAllView} ›</button>
-      </div>
+    <Card className={`public-tournament-card public-tournament-schedule ${expanded ? "expanded" : ""}`} padding="lg" variant="glass">
+      <CardHeader className="public-tournament-card-head">
+        <CardTitle as="h3" data-ko={publicI18n.ko.tournamentScheduleTitle} data-ja={publicI18n.ja.tournamentScheduleTitle}>{t().tournamentScheduleTitle}</CardTitle>
+        <Button type="button" variant="ghost" size="sm" data-ko={publicI18n.ko.tournamentAllView} data-ja={publicI18n.ja.tournamentAllView}>{t().tournamentAllView} ›</Button>
+      </CardHeader>
+      <CardContent>
       {upcoming.map((match) => (
         <div className="public-tournament-schedule-row" key={match.id}>
           <time>{match.time}<small>{match.round} {match.format}</small></time>
@@ -6512,7 +4671,8 @@ function TournamentScheduleCard({
           <b>{match.score}</b>
         </div>
       ))}
-    </article>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -6530,12 +4690,12 @@ function TournamentTeamsPanel({
   avatar: (team: string) => ReactNode;
 }) {
   return (
-    <article className="public-tournament-card public-tournament-team-panel">
-      <div className="public-tournament-card-head">
-        <strong data-ko={publicI18n.ko.tournamentTeamGroups} data-ja={publicI18n.ja.tournamentTeamGroups}>{t().tournamentTeamGroups}</strong>
-        <span>{tournament.teams.length} {t().tournamentTeamUnit}</span>
-      </div>
-      <div className="public-tournament-team-groups">
+    <Card className="public-tournament-card public-tournament-team-panel" padding="lg" variant="glass">
+      <CardHeader className="public-tournament-card-head">
+        <CardTitle as="h3" data-ko={publicI18n.ko.tournamentTeamGroups} data-ja={publicI18n.ja.tournamentTeamGroups}>{t().tournamentTeamGroups}</CardTitle>
+        <StatusPill tone="streamer">{tournament.teams.length} {t().tournamentTeamUnit}</StatusPill>
+      </CardHeader>
+      <CardContent className="public-tournament-team-groups">
         {groups.map((group) => (
           <section className="public-tournament-team-group" key={group.label}>
             <h3>{group.label}</h3>
@@ -6583,8 +4743,8 @@ function TournamentTeamsPanel({
             </div>
           </section>
         ))}
-      </div>
-    </article>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -6656,39 +4816,56 @@ function TournamentPlayerRecordRow({
 
 function TournamentNoticeCard({ notices }: { notices: Array<{ title: string; date: string }> }) {
   return (
-    <article className="public-tournament-card public-tournament-notices">
-      <div className="public-tournament-card-head">
-        <strong data-ko={publicI18n.ko.tournamentNotice} data-ja={publicI18n.ja.tournamentNotice}>{t().tournamentNotice}</strong>
-        <button type="button" data-ko={publicI18n.ko.tournamentAllView} data-ja={publicI18n.ja.tournamentAllView}>{t().tournamentAllView} ›</button>
-      </div>
+    <Card className="public-tournament-card public-tournament-notices" padding="lg" variant="glass">
+      <CardHeader className="public-tournament-card-head">
+        <CardTitle as="h3" data-ko={publicI18n.ko.tournamentNotice} data-ja={publicI18n.ja.tournamentNotice}>{t().tournamentNotice}</CardTitle>
+        <Button type="button" variant="ghost" size="sm" data-ko={publicI18n.ko.tournamentAllView} data-ja={publicI18n.ja.tournamentAllView}>{t().tournamentAllView} ›</Button>
+      </CardHeader>
+      <CardContent>
       {notices.map((notice) => (
         <div className="public-tournament-notice-row" key={notice.title}>
           <span>{notice.title}</span>
           <time>{notice.date}</time>
         </div>
       ))}
-    </article>
+      </CardContent>
+    </Card>
   );
 }
 
 const PUBLIC_PRIVACY_SECTIONS: Array<{ title: PublicTextKey; body: PublicTextKey }> = [
   { title: "privacyCollectedTitle", body: "privacyCollectedBody" },
+  { title: "privacyCollectionMethodTitle", body: "privacyCollectionMethodBody" },
   { title: "privacyPurposeTitle", body: "privacyPurposeBody" },
+  { title: "privacyLegalBasisTitle", body: "privacyLegalBasisBody" },
   { title: "privacyRetentionTitle", body: "privacyRetentionBody" },
+  { title: "privacyDeletionTitle", body: "privacyDeletionBody" },
   { title: "privacyThirdPartyTitle", body: "privacyThirdPartyBody" },
+  { title: "privacyProcessorsTitle", body: "privacyProcessorsBody" },
+  { title: "privacyCookiesTitle", body: "privacyCookiesBody" },
   { title: "privacyRightsTitle", body: "privacyRightsBody" },
+  { title: "privacyChildrenTitle", body: "privacyChildrenBody" },
   { title: "privacySecurityTitle", body: "privacySecurityBody" },
+  { title: "privacyAutomatedDecisionTitle", body: "privacyAutomatedDecisionBody" },
+  { title: "privacyIncidentTitle", body: "privacyIncidentBody" },
   { title: "privacyChangesTitle", body: "privacyChangesBody" }
 ];
 
 const PUBLIC_TERMS_SECTIONS: Array<{ title: PublicTextKey; body: PublicTextKey }> = [
+  { title: "termsAcceptanceTitle", body: "termsAcceptanceBody" },
+  { title: "termsEligibilityTitle", body: "termsEligibilityBody" },
   { title: "termsAccountTitle", body: "termsAccountBody" },
   { title: "termsServiceTitle", body: "termsServiceBody" },
   { title: "termsUserContentTitle", body: "termsUserContentBody" },
   { title: "termsProhibitedTitle", body: "termsProhibitedBody" },
+  { title: "termsParticipationTitle", body: "termsParticipationBody" },
   { title: "termsDataTitle", body: "termsDataBody" },
+  { title: "termsIntellectualPropertyTitle", body: "termsIntellectualPropertyBody" },
+  { title: "termsSuspensionTitle", body: "termsSuspensionBody" },
   { title: "termsLiabilityTitle", body: "termsLiabilityBody" },
-  { title: "termsChangesTitle", body: "termsChangesBody" }
+  { title: "termsChangesTitle", body: "termsChangesBody" },
+  { title: "termsGoverningLawTitle", body: "termsGoverningLawBody" },
+  { title: "termsContactTitle", body: "termsContactBody" }
 ];
 
 function PublicLegalText({ textKey, as = "p" }: { textKey: PublicTextKey; as?: "p" | "span" | "strong" | "h1" | "h2" }) {
@@ -6701,11 +4878,72 @@ function PublicLegalText({ textKey, as = "p" }: { textKey: PublicTextKey; as?: "
   return <p {...props}>{content}</p>;
 }
 
+function publicLegalRuntimeValue(valueKo: string, valueJa = valueKo): { ko: string; ja: string; current: string } {
+  const ko = valueKo.trim() || publicI18n.ko.legalNotConfigured;
+  const ja = valueJa.trim() || publicI18n.ja.legalNotConfigured;
+  return { ko, ja, current: activePublicLocale === "ja" ? ja : ko };
+}
+
+function PublicLegalRuntimeLine({
+  labelKey,
+  valueKo,
+  valueJa
+}: {
+  labelKey: PublicTextKey;
+  valueKo: string;
+  valueJa?: string;
+}) {
+  const value = publicLegalRuntimeValue(valueKo, valueJa);
+  return (
+    <div className="public-legal-runtime-row">
+      <PublicLegalText textKey={labelKey} as="strong" />
+      <span data-ko={value.ko} data-ja={value.ja}>{value.current}</span>
+    </div>
+  );
+}
+
+function PublicLegalRuntimeDetails({ page }: { page: Exclude<PublicLegalPageKey, "contact"> }) {
+  const minimumAgeKo = `만 ${PUBLIC_LEGAL_CONFIG.minimumAge}세 이상`;
+  const minimumAgeJa = `${PUBLIC_LEGAL_CONFIG.minimumAge}歳以上`;
+  const retentionKo = `${PUBLIC_LEGAL_CONFIG.supportMailboxRetentionDays}일`;
+  const retentionJa = `${PUBLIC_LEGAL_CONFIG.supportMailboxRetentionDays}日`;
+
+  return (
+    <article className="public-legal-runtime-details">
+      <PublicLegalText textKey="legalOperatorTitle" as="h2" />
+      <div className="public-legal-runtime-grid">
+        <PublicLegalRuntimeLine labelKey="legalOperatorNameLabel" valueKo={PUBLIC_LEGAL_CONFIG.operatorName} />
+        <PublicLegalRuntimeLine labelKey="legalContactAddressLabel" valueKo={PUBLIC_LEGAL_CONFIG.contactAddress} />
+        <PublicLegalRuntimeLine labelKey="legalPrivacyOfficerLabel" valueKo={PUBLIC_LEGAL_CONFIG.privacyOfficerName} />
+        <PublicLegalRuntimeLine labelKey="legalContactEmailLabel" valueKo={PUBLIC_CONTACT_EMAIL} />
+        {PUBLIC_LEGAL_CONFIG.contactPhone ? (
+          <PublicLegalRuntimeLine labelKey="legalContactPhoneLabel" valueKo={PUBLIC_LEGAL_CONFIG.contactPhone} />
+        ) : null}
+        <PublicLegalRuntimeLine labelKey="legalMinimumAgeLabel" valueKo={minimumAgeKo} valueJa={minimumAgeJa} />
+        <PublicLegalRuntimeLine labelKey="legalSupportRetentionLabel" valueKo={retentionKo} valueJa={retentionJa} />
+        {page === "privacy" ? (
+          <>
+            <PublicLegalRuntimeLine labelKey="legalProcessorsLabel" valueKo={PUBLIC_LEGAL_CONFIG.processorsKo} valueJa={PUBLIC_LEGAL_CONFIG.processorsJa} />
+            <PublicLegalRuntimeLine labelKey="legalCrossBorderLabel" valueKo={PUBLIC_LEGAL_CONFIG.crossBorderTransferKo} valueJa={PUBLIC_LEGAL_CONFIG.crossBorderTransferJa} />
+          </>
+        ) : (
+          <>
+            <PublicLegalRuntimeLine labelKey="legalGoverningLawLabel" valueKo={PUBLIC_LEGAL_CONFIG.governingLawKo} valueJa={PUBLIC_LEGAL_CONFIG.governingLawJa} />
+            <PublicLegalRuntimeLine labelKey="legalDisputeVenueLabel" valueKo={PUBLIC_LEGAL_CONFIG.disputeVenueKo} valueJa={PUBLIC_LEGAL_CONFIG.disputeVenueJa} />
+          </>
+        )}
+      </div>
+    </article>
+  );
+}
+
 function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
   const titleKey: PublicTextKey = page === "privacy" ? "privacyTitle" : page === "terms" ? "termsTitle" : "contactTitle";
   const introKey: PublicTextKey = page === "privacy" ? "privacyIntro" : page === "terms" ? "termsIntro" : "contactIntro";
   const sections = page === "privacy" ? PUBLIC_PRIVACY_SECTIONS : page === "terms" ? PUBLIC_TERMS_SECTIONS : [];
   const mailHref = `mailto:${PUBLIC_CONTACT_EMAIL}?subject=${encodeURIComponent(publicText("contactMailSubject"))}`;
+  const effectiveDateKo = `${publicI18n.ko.legalEffectiveDate}: ${PUBLIC_LEGAL_CONFIG.effectiveDate || publicI18n.ko.legalNotConfigured}`;
+  const effectiveDateJa = `${publicI18n.ja.legalEffectiveDate}: ${PUBLIC_LEGAL_CONFIG.effectiveDate || publicI18n.ja.legalNotConfigured}`;
 
   return (
     <section className="public-legal-page public-panel">
@@ -6713,7 +4951,7 @@ function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
         <span className="public-section-kicker" data-ko={publicI18n.ko.brand} data-ja={publicI18n.ja.brand}>{t().brand}</span>
         <PublicLegalText textKey={titleKey} as="h1" />
         <PublicLegalText textKey={introKey} />
-        <PublicLegalText textKey="legalEffectiveDate" as="span" />
+        <span data-ko={effectiveDateKo} data-ja={effectiveDateJa}>{activePublicLocale === "ja" ? effectiveDateJa : effectiveDateKo}</span>
       </div>
 
       {page === "contact" ? (
@@ -6730,8 +4968,9 @@ function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
       ) : (
         <div className="public-legal-sections">
           <aside className="public-legal-notice">
-            <PublicLegalText textKey="legalDraftNotice" />
+            <PublicLegalText textKey={PUBLIC_LEGAL_CONFIG.configured ? "legalOperationalNotice" : "legalDraftNotice"} />
           </aside>
+          <PublicLegalRuntimeDetails page={page} />
           {sections.map((section) => (
             <article key={section.title}>
               <PublicLegalText textKey={section.title} as="h2" />
@@ -6744,28 +4983,34 @@ function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
   );
 }
 
-function PublicSiteFooter({ onPage }: { onPage: (page: PublicMainPage) => void }) {
-  return (
-    <footer className="public-site-footer">
-      <nav className="public-site-footer-nav" aria-label="public footer">
-        <button type="button" onClick={() => onPage("privacy")} data-ko={publicI18n.ko.footerPrivacy} data-ja={publicI18n.ja.footerPrivacy}>
-          {t().footerPrivacy}
-        </button>
-        <button type="button" onClick={() => onPage("terms")} data-ko={publicI18n.ko.footerTerms} data-ja={publicI18n.ja.footerTerms}>
-          {t().footerTerms}
-        </button>
-        <button type="button" onClick={() => onPage("contact")} data-ko={publicI18n.ko.footerContact} data-ja={publicI18n.ja.footerContact}>
-          {t().footerContact}
-        </button>
-      </nav>
-      <div className="public-site-footer-brand" aria-label="YORO.gg">
-        <span className="public-site-footer-brand-mark" aria-hidden="true">よろ</span>
-        <span className="public-site-footer-brand-word">YORO.gg</span>
-      </div>
-      <p data-ko={publicI18n.ko.footerRiotDisclaimer} data-ja={publicI18n.ja.footerRiotDisclaimer}>{t().footerRiotDisclaimer}</p>
-      <strong data-ko={publicI18n.ko.footerCopyright} data-ja={publicI18n.ja.footerCopyright}>{t().footerCopyright}</strong>
-    </footer>
-  );
+function publicSiteFooterText(): PublicSiteFooterText {
+  return {
+    privacy: {
+      label: t().footerPrivacy,
+      ko: publicI18n.ko.footerPrivacy,
+      ja: publicI18n.ja.footerPrivacy,
+    },
+    terms: {
+      label: t().footerTerms,
+      ko: publicI18n.ko.footerTerms,
+      ja: publicI18n.ja.footerTerms,
+    },
+    contact: {
+      label: t().footerContact,
+      ko: publicI18n.ko.footerContact,
+      ja: publicI18n.ja.footerContact,
+    },
+    riotDisclaimer: {
+      label: t().footerRiotDisclaimer,
+      ko: publicI18n.ko.footerRiotDisclaimer,
+      ja: publicI18n.ja.footerRiotDisclaimer,
+    },
+    copyright: {
+      label: t().footerCopyright,
+      ko: publicI18n.ko.footerCopyright,
+      ja: publicI18n.ja.footerCopyright,
+    },
+  };
 }
 
 function PublicPremiumDialog({
@@ -7067,15 +5312,11 @@ function findRuneStyle(
   return catalog?.find((style) => style.slots?.some((slot) => slot.runes?.some((rune) => selectedIds.has(rune.id))));
 }
 
-function RuneTreeColumn({
-  kind,
-  runes,
-  catalog
-}: {
-  kind: "primary" | "secondary";
-  runes: PublicLolMatchParticipant["runes"];
-  catalog: PublicRuneCatalogStyle[] | undefined;
-}) {
+function runeTreeColumnViewModel(
+  kind: "primary" | "secondary",
+  runes: PublicLolMatchParticipant["runes"],
+  catalog: PublicRuneCatalogStyle[] | undefined
+): RecentMatchBuildRuneColumn {
   const style = findRuneStyle(catalog, runes, kind);
   const styleRune = runes.find((rune) => rune.kind === kind && rune.category === "style");
   const selectedIds = new Set(runes.filter((rune) => rune.kind === kind && rune.category !== "style").map((rune) => rune.runeId));
@@ -7088,40 +5329,47 @@ function RuneTreeColumn({
   const title = style?.name ?? runeName(styleRune) ?? (kind === "primary" ? (activePublicLocale === "ja" ? "メインルーン" : "주 룬") : (activePublicLocale === "ja" ? "サブルーン" : "부 룬"));
   const styleIcon = dataDragonRuneAssetUrl(style?.icon) ?? styleRune?.iconUrl;
 
-  return (
-    <div className={`public-match-rune-column ${kind}`}>
-      <strong className="public-match-rune-title">
-        <span className={`public-match-rune-style ${styleIcon ? "selected" : ""}`} title={title}>
-          {styleIcon ? <img src={styleIcon} alt="" /> : <i>{title.slice(0, 1)}</i>}
-        </span>
-        <em>{title}</em>
-      </strong>
-      {runeSlots.length ? runeSlots.map((slot, slotIndex) => (
-        <div className="public-match-rune-row" key={`${kind}:slot:${slotIndex}`}>
-          {(slot.runes ?? []).map((rune) => {
-            const selected = selectedIds.has(rune.id);
-            const iconUrl = dataDragonRuneAssetUrl(rune.icon);
-            return (
-              <span className={selected ? "selected" : ""} title={rune.name ?? `Rune ${rune.id}`} key={`${kind}:rune:${rune.id}`}>
-                {iconUrl ? <img src={iconUrl} alt="" /> : <i>{rune.id}</i>}
-              </span>
-            );
-          })}
-        </div>
-      )) : (
-        <div className="public-match-rune-row fallback">
-          {fallbackRunes.map((rune) => (
-            <span className="selected" title={runeName(rune)} key={`${kind}:fallback:${rune.runeId}`}>
-              {rune.iconUrl ? <img src={rune.iconUrl} alt="" /> : <i>{rune.runeId}</i>}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  const rows: RecentMatchBuildRuneRow[] = runeSlots.length ? runeSlots.map((slot, slotIndex) => ({
+    key: `${kind}:slot:${slotIndex}`,
+    className: "public-match-rune-row",
+    slots: (slot.runes ?? []).map((rune): RecentMatchBuildRuneSlot => {
+      const selected = selectedIds.has(rune.id);
+      return {
+        key: `${kind}:rune:${rune.id}`,
+        className: selected ? "selected" : "",
+        title: rune.name ?? `Rune ${rune.id}`,
+        iconUrl: dataDragonRuneAssetUrl(rune.icon),
+        fallbackLabel: String(rune.id)
+      };
+    })
+  })) : [{
+    key: `${kind}:fallback`,
+    className: "public-match-rune-row fallback",
+    slots: fallbackRunes.map((rune): RecentMatchBuildRuneSlot => ({
+      key: `${kind}:fallback:${rune.runeId}`,
+      className: "selected",
+      title: runeName(rune),
+      iconUrl: rune.iconUrl,
+      fallbackLabel: String(rune.runeId)
+    }))
+  }];
+
+  return {
+    key: `rune-column:${kind}`,
+    className: `public-match-rune-column ${kind}`,
+    titleClassName: "public-match-rune-title",
+    title,
+    titleIcon: {
+      className: `public-match-rune-style ${styleIcon ? "selected" : ""}`,
+      title,
+      iconUrl: styleIcon,
+      fallbackLabel: title.slice(0, 1)
+    },
+    rows
+  };
 }
 
-function RuneShardColumn({ runes }: { runes: PublicLolMatchParticipant["runes"] }) {
+function runeShardColumnViewModel(runes: PublicLolMatchParticipant["runes"]): RecentMatchBuildRuneColumn {
   const selectedByCategory = new Map(
     runes
       .filter((rune) => rune.kind === "stat")
@@ -7129,46 +5377,174 @@ function RuneShardColumn({ runes }: { runes: PublicLolMatchParticipant["runes"] 
   );
   const categories: Array<PublicStatShardOption["category"]> = ["offense", "flex", "defense"];
   const shardTitle = activePublicLocale === "ja" ? "ステータスシャード" : "능력치 파편";
-  return (
-    <div className="public-match-rune-column shards">
-      <strong className="public-match-rune-title text-only">
-        <em>{shardTitle}</em>
-      </strong>
-      {categories.map((category) => {
-        const selected = selectedByCategory.get(category);
-        return (
-          <div className="public-match-rune-row shard-row" key={`shard:${category}`}>
-            {STAT_SHARD_OPTIONS.filter((option) => option.category === category).map((option) => {
-              const active = selected ? [option.runeId, ...(option.matchRuneIds ?? [])].includes(selected.runeId) : false;
-              const label = activePublicLocale === "ja" ? option.nameJa : option.nameKo;
-              return (
-                <span className={active ? "selected" : ""} title={label} key={`${category}:${option.runeId}`}>
-                  <img src={option.iconUrl} alt="" />
-                </span>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
-  );
+  return {
+    key: "rune-column:shards",
+    className: "public-match-rune-column shards",
+    titleClassName: "public-match-rune-title text-only",
+    title: shardTitle,
+    rows: categories.map((category) => {
+      const selected = selectedByCategory.get(category);
+      return {
+        key: `shard:${category}`,
+        className: "public-match-rune-row shard-row",
+        slots: STAT_SHARD_OPTIONS.filter((option) => option.category === category).map((option): RecentMatchBuildRuneSlot => {
+          const active = selected ? [option.runeId, ...(option.matchRuneIds ?? [])].includes(selected.runeId) : false;
+          const label = activePublicLocale === "ja" ? option.nameJa : option.nameKo;
+          return {
+            key: `${category}:${option.runeId}`,
+            className: active ? "selected" : "",
+            title: label,
+            iconUrl: option.iconUrl,
+            fallbackLabel: String(option.runeId)
+          };
+        })
+      };
+    })
+  };
 }
 
-function MatchRuneBoard({
-  runes,
-  catalog
+function matchRuneBoardViewModel(
+  runes: PublicLolMatchParticipant["runes"],
+  catalog: PublicRuneCatalogStyle[] | undefined
+): RecentMatchBuildRuneColumn[] {
+  if (runes.length === 0) return [];
+  return [
+    runeTreeColumnViewModel("primary", runes, catalog),
+    runeTreeColumnViewModel("secondary", runes, catalog),
+    runeShardColumnViewModel(runes)
+  ];
+}
+
+function buildPanelBadgeViewModels(badges: PublicLolMatchBadge[] | undefined): RecentMatchBuildBadge[] {
+  const allBadges = badges ?? [];
+  const orderedBadges = allBadges;
+  const maxVisibleBadges = 4;
+  const visibleBadges = orderedBadges.slice(0, maxVisibleBadges);
+  const overflowCount = Math.max(0, orderedBadges.length - visibleBadges.length);
+  const badgeViewModels: RecentMatchBuildBadge[] = visibleBadges.map((badge) => ({
+    key: `${badge.code}:${badge.score ?? ""}:${badge.rank ?? ""}`,
+    className: `public-match-badge ${badge.code}`,
+    label: matchBadgeLabel(badge.code),
+    ko: matchBadgeLabel(badge.code, "ko"),
+    ja: matchBadgeLabel(badge.code, "ja")
+  }));
+  if (overflowCount > 0) {
+    badgeViewModels.push({
+      key: `more:${overflowCount}`,
+      className: "public-match-badge more",
+      label: "...",
+      ariaLabel: `${overflowCount} more`
+    });
+  }
+  return badgeViewModels;
+}
+
+function recentMatchBuildViewModel({
+  match,
+  build,
+  loading,
+  error,
+  selectedKey,
+  hideRiotIds,
+  runeCatalog
 }: {
-  runes: PublicLolMatchParticipant["runes"];
-  catalog: PublicRuneCatalogStyle[] | undefined;
-}) {
-  if (runes.length === 0) return <p className="public-empty">{t().noData}</p>;
-  return (
-    <div className="public-match-rune-board">
-      <RuneTreeColumn kind="primary" runes={runes} catalog={catalog} />
-      <RuneTreeColumn kind="secondary" runes={runes} catalog={catalog} />
-      <RuneShardColumn runes={runes} />
-    </div>
-  );
+  match: PublicLolRecentMatch;
+  build: PublicLolMatchBuildResponse | undefined;
+  loading: boolean;
+  error: string;
+  selectedKey: string | undefined;
+  hideRiotIds: boolean;
+  runeCatalog: PublicRuneCatalogStyle[] | undefined;
+}): RecentMatchBuildViewModel {
+  if (loading && !build) return { state: "loading", message: t().buildLoading };
+  if (error && !build) return { state: "error", message: error };
+  const participants = build?.participants ?? [];
+  const activeKey = selectedKey ?? defaultBuildParticipantKey(match, build);
+  const selectedParticipant = participants.find((participant) => buildParticipantKey(participant) === activeKey) ?? participants[0];
+  if (!selectedParticipant) return { state: "empty", message: t().noData };
+  const selectedParticipantKey = buildParticipantKey(selectedParticipant);
+  const selectedItems = selectedParticipant.items ?? [];
+  const selectedItemEvents = selectedParticipant.itemEvents ?? [];
+  const selectedSkillOrder = selectedParticipant.skillOrder ?? [];
+  const selectedRunes = selectedParticipant.runes ?? [];
+  const itemEvents = selectedItemEvents.length > 0
+    ? selectedItemEvents
+    : fixedRecentItemSlots(selectedItems, 7)
+      .filter((item): item is PublicLolMatchBuildParticipant["items"][number] => Boolean(item))
+      .map((item) => ({ itemId: item.itemId, iconUrl: item.iconUrl, timestampMs: Number.NaN }));
+  const visibleSkillIcons = [...new Map(selectedSkillOrder.map((skill) => [skill.key, skill])).values()].slice(0, 4);
+  const selectedParticipantLabel = selectedParticipant.riotId ?? championName(selectedParticipant.champion);
+  return {
+    state: "ready",
+    ariaLabel: t().matchBuildTab,
+    championAriaLabel: t().champion,
+    itemsLabel: {
+      label: t().items,
+      ko: publicI18n.ko.items,
+      ja: publicI18n.ja.items
+    },
+    skillBuildLabel: {
+      label: activePublicLocale === "ja" ? "スキルビルド" : "스킬 빌드",
+      ko: publicI18n.ko.matchBuildTab,
+      ja: publicI18n.ja.matchBuildTab
+    },
+    runesLabel: {
+      label: t().runes,
+      ko: publicI18n.ko.runes,
+      ja: publicI18n.ja.runes
+    },
+    skillOrderLabel: activePublicLocale === "ja" ? "スキル順" : "스킬 순서",
+    noDataLabel: t().noData,
+    participants: participants.map((participant) => {
+      const key = buildParticipantKey(participant);
+      const participantLabel = participant.riotId ?? championName(participant.champion);
+      return {
+        key,
+        active: key === selectedParticipantKey,
+        title: hideRiotIds ? maskedRiotIdName(participant.riotId, participantLabel) : participantLabel,
+        championIconUrl: participant.champion.iconUrl,
+        championFallback: championName(participant.champion).slice(0, 1),
+        score: participant.score,
+        scoreClassName: metricToneClass(scoreTone(participant.score))
+      };
+    }),
+    itemSlots: itemEvents.slice(0, 24).map((item, index) => ({
+      key: `${match.matchId}:build-event:${selectedParticipant.participantId ?? selectedParticipant.riotId}:${index}:${item.itemId}`,
+      iconUrl: item.iconUrl,
+      label: String(item.itemId),
+      minuteLabel: formatBuildMinute(item.timestampMs)
+    })),
+    skillIcons: visibleSkillIcons.map((skill) => ({
+      key: `${selectedParticipant.participantId}:skill-icon:${skill.key}`,
+      title: abilityName(skill),
+      iconUrl: skill.iconUrl,
+      fallbackLabel: skill.key,
+      skillKey: skill.key
+    })),
+    skillRows: (["Q", "W", "E", "R"] as const).map((key) => ({
+      key,
+      cells: Array.from({ length: 18 }).map((_, index) => {
+        const level = index + 1;
+        const skill = selectedSkillOrder.find((item) => item.level === level && item.key === key);
+        return {
+          key: `${selectedParticipant.participantId}:skill-level:${key}:${level}`,
+          className: skill ? key.toLowerCase() : "",
+          title: skill ? `${level} · ${abilityName(skill)}` : `${level}`,
+          label: skill ? String(level) : ""
+        };
+      })
+    })),
+    runeColumns: matchRuneBoardViewModel(selectedRunes, runeCatalog),
+    summary: {
+      participantLabel: hideRiotIds ? maskedRiotIdName(selectedParticipant.riotId, selectedParticipantLabel) : selectedParticipantLabel,
+      championLabel: championName(selectedParticipant.champion),
+      scoreLabel: t().aiScore,
+      badges: buildPanelBadgeViewModels(selectedParticipant.badges),
+      metrics: {
+        score: selectedParticipant.score
+      }
+    }
+  };
 }
 
 function RecentMatchBuildPanel({
@@ -7190,94 +5566,16 @@ function RecentMatchBuildPanel({
 }) {
   const dataDragonVersion = build?.dataDragonVersion ?? recentMatchDataDragonVersion(match);
   const runeCatalog = useRuneCatalog(dataDragonVersion);
-  if (loading && !build) return <div className="public-match-build-state">{t().buildLoading}</div>;
-  if (error && !build) return <div className="public-match-build-state error">{error}</div>;
-  const participants = build?.participants ?? [];
-  const activeKey = selectedKey ?? defaultBuildParticipantKey(match, build);
-  const selectedParticipant = participants.find((participant) => buildParticipantKey(participant) === activeKey) ?? participants[0];
-  if (!selectedParticipant) return <div className="public-match-build-state">{t().noData}</div>;
-  const selectedItems = selectedParticipant.items ?? [];
-  const selectedItemEvents = selectedParticipant.itemEvents ?? [];
-  const selectedSkillOrder = selectedParticipant.skillOrder ?? [];
-  const selectedRunes = selectedParticipant.runes ?? [];
-  const itemEvents = selectedItemEvents.length > 0
-    ? selectedItemEvents
-    : fixedRecentItemSlots(selectedItems, 7)
-      .filter((item): item is PublicLolMatchBuildParticipant["items"][number] => Boolean(item))
-      .map((item) => ({ itemId: item.itemId, iconUrl: item.iconUrl, timestampMs: Number.NaN }));
-  const visibleSkillIcons = [...new Map(selectedSkillOrder.map((skill) => [skill.key, skill])).values()].slice(0, 4);
-  const selectedParticipantLabel = selectedParticipant.riotId ?? championName(selectedParticipant.champion);
-  return (
-    <section className="public-match-build-panel" aria-label={t().matchBuildTab}>
-      <div className="public-match-build-picker" role="listbox" aria-label={t().champion}>
-        {participants.map((participant) => {
-          const key = buildParticipantKey(participant);
-          const participantLabel = participant.riotId ?? championName(participant.champion);
-          return (
-            <button
-              type="button"
-              className={key === buildParticipantKey(selectedParticipant) ? "active" : ""}
-              key={key}
-              onClick={() => onSelect(key)}
-              title={hideRiotIds ? maskedRiotIdName(participant.riotId, participantLabel) : participantLabel}
-            >
-              {participant.champion.iconUrl ? <img src={participant.champion.iconUrl} alt="" /> : <span>{championName(participant.champion).slice(0, 1)}</span>}
-              <strong className={metricToneClass(scoreTone(participant.score))}>{participant.score}</strong>
-            </button>
-          );
-        })}
-      </div>
-      <div className="public-match-build-group items">
-        <span data-ko={publicI18n.ko.items} data-ja={publicI18n.ja.items}>{t().items}</span>
-        <div className="public-match-build-timeline">
-          {itemEvents.length > 0 ? itemEvents.slice(0, 24).map((item, index) => (
-            <div key={`${match.matchId}:build-event:${selectedParticipant.participantId ?? selectedParticipant.riotId}:${index}:${item.itemId}`}>
-              <span>{item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId}</span>
-              <small>{formatBuildMinute(item.timestampMs)}</small>
-            </div>
-          )) : <p className="public-empty">{t().noData}</p>}
-        </div>
-      </div>
-      <div className="public-match-build-group skills">
-        <span data-ko={publicI18n.ko.matchBuildTab} data-ja={publicI18n.ja.matchBuildTab}>{activePublicLocale === "ja" ? "スキルビルド" : "스킬 빌드"}</span>
-        <div className="public-match-skill-build">
-          <div className="public-match-skill-icons">
-            {visibleSkillIcons.map((skill) => (
-              <span key={`${selectedParticipant.participantId}:skill-icon:${skill.key}`} title={abilityName(skill)}>
-                {skill.iconUrl ? <img src={skill.iconUrl} alt="" /> : skill.key}
-                <b>{skill.key}</b>
-              </span>
-            ))}
-          </div>
-          <div className="public-match-skill-grid" aria-label={activePublicLocale === "ja" ? "スキル順" : "스킬 순서"}>
-            {(["Q", "W", "E", "R"] as const).map((key) => (
-              <Fragment key={`skill-row:${key}`}>
-                <strong>{key}</strong>
-                {Array.from({ length: 18 }).map((_, index) => {
-                  const level = index + 1;
-                  const skill = selectedSkillOrder.find((item) => item.level === level && item.key === key);
-                  return (
-                    <span className={skill ? key.toLowerCase() : ""} key={`${selectedParticipant.participantId}:skill-level:${key}:${level}`} title={skill ? `${level} · ${abilityName(skill)}` : `${level}`}>
-                      {skill ? level : ""}
-                    </span>
-                  );
-                })}
-              </Fragment>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="public-match-build-group runes">
-        <span data-ko={publicI18n.ko.runes} data-ja={publicI18n.ja.runes}>{t().runes}</span>
-        <MatchRuneBoard runes={selectedRunes} catalog={runeCatalog} />
-        <div className="public-match-build-summary">
-          <strong>{hideRiotIds ? maskedRiotIdName(selectedParticipant.riotId, selectedParticipantLabel) : selectedParticipantLabel}</strong>
-          <small>{championName(selectedParticipant.champion)} · {t().aiScore} {selectedParticipant.score}</small>
-          <MatchBadges badges={selectedParticipant.badges} />
-        </div>
-      </div>
-    </section>
-  );
+  const viewModel = recentMatchBuildViewModel({
+    match,
+    build,
+    loading,
+    error,
+    selectedKey,
+    hideRiotIds,
+    runeCatalog
+  });
+  return <FeatureRecentMatchBuildPanel viewModel={viewModel} onSelectParticipant={onSelect} />;
 }
 
 function fixedTeamItemSlots(items: PublicLolMatchParticipant["items"]): Array<PublicLolMatchParticipant["items"][number] | undefined> {
@@ -7289,19 +5587,44 @@ function fixedTeamItemSlots(items: PublicLolMatchParticipant["items"]): Array<Pu
   return [0, 1, 2, 6, 3, 4, 5].map((slot) => slots[slot]);
 }
 
-function PlayerItemBuild({ items, itemKey }: { items: PublicLolMatchParticipant["items"]; itemKey: string }) {
+function playerItemBuildSlotsViewModel(
+  items: PublicLolMatchParticipant["items"],
+  itemKey: string
+): PlayerItemBuildSlotViewModel[] {
   const itemSlots = fixedTeamItemSlots(items);
-  return (
-    <div className="public-team-item-build" aria-label={t().items}>
-      {itemSlots.map((item, index) => item ? (
-        <span className="public-team-item-slot" key={`${itemKey}:${index}:${item.slot}:${item.itemId}`}>
-          {item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId}
-        </span>
-      ) : (
-        <span className="public-team-item-empty" key={`${itemKey}:${index}:empty`} aria-hidden="true" />
-      ))}
-    </div>
-  );
+  return itemSlots.map((item, index) => {
+    if (!item) {
+      return {
+        key: `${itemKey}:${index}:empty`,
+        className: "public-team-item-empty",
+        ariaHidden: true
+      };
+    }
+    return {
+      key: `${itemKey}:${index}:${item.slot}:${item.itemId}`,
+      className: "public-team-item-slot",
+      iconUrl: item.iconUrl,
+      fallbackLabel: String(item.itemId)
+    };
+  });
+}
+
+function playerItemBuildViewModel({
+  items,
+  itemKey
+}: {
+  items: PublicLolMatchParticipant["items"];
+  itemKey: string;
+}): PlayerItemBuildViewModel {
+  return {
+    ariaLabel: t().items,
+    slots: playerItemBuildSlotsViewModel(items, itemKey)
+  };
+}
+
+function PlayerItemBuild({ items, itemKey }: { items: PublicLolMatchParticipant["items"]; itemKey: string }) {
+  const viewModel = playerItemBuildViewModel({ items, itemKey });
+  return <FeaturePlayerItemBuild viewModel={viewModel} />;
 }
 
 function runeName(rune: PublicLolMatchParticipant["runes"][number] | undefined): string {
@@ -7310,31 +5633,30 @@ function runeName(rune: PublicLolMatchParticipant["runes"][number] | undefined):
   return rune.nameKo ?? rune.nameJa ?? `Rune ${rune.runeId}`;
 }
 
-function PlayerSpellBuild({
-  spells,
-  dataDragonVersion
-}: {
-  spells: number[] | undefined;
-  dataDragonVersion: string | undefined;
-}) {
+function playerSpellBuildSlotsViewModel(
+  spells: number[] | undefined,
+  dataDragonVersion: string | undefined
+): PlayerLoadoutBuildSlotViewModel[] {
   const slots = [spells?.[0], spells?.[1]];
-  return (
-    <div className="public-team-spell-build" aria-label={t().summonerSpells}>
-      {slots.map((spellId, index) => {
-        const iconUrl = spellId ? summonerSpellIconUrl(spellId, dataDragonVersion) : undefined;
-        return spellId ? (
-          <span className="public-team-spell-slot" key={`${spellId}:${index}`} title={`Spell ${spellId}`}>
-            {iconUrl ? <img src={iconUrl} alt="" /> : <b>{spellId}</b>}
-          </span>
-        ) : (
-          <span className="public-team-spell-empty" key={`empty:${index}`} aria-hidden="true" />
-        );
-      })}
-    </div>
-  );
+  return slots.map((spellId, index) => {
+    if (!spellId) {
+      return {
+        key: `empty:${index}`,
+        className: "public-team-spell-empty",
+        ariaHidden: true
+      };
+    }
+    return {
+      key: `${spellId}:${index}`,
+      className: "public-team-spell-slot",
+      title: `Spell ${spellId}`,
+      iconUrl: summonerSpellIconUrl(spellId, dataDragonVersion),
+      fallbackLabel: String(spellId)
+    };
+  });
 }
 
-function PlayerRuneBuild({ runes }: { runes: PublicLolMatchParticipant["runes"] | undefined }) {
+function playerRuneBuildSlotsViewModel(runes: PublicLolMatchParticipant["runes"] | undefined): PlayerLoadoutBuildSlotViewModel[] {
   const primary = runes?.find((rune) => rune.kind === "primary" && rune.category === "keystone") ??
     runes?.find((rune) => rune.kind === "primary" && rune.category !== "style") ??
     runes?.find((rune) => rune.kind === "primary") ??
@@ -7344,17 +5666,40 @@ function PlayerRuneBuild({ runes }: { runes: PublicLolMatchParticipant["runes"] 
     runes?.find((rune) => rune.kind === "secondary") ??
     runes?.find((rune) => rune !== primary);
   const slots = [primary, secondary];
-  return (
-    <div className="public-team-rune-build" aria-label={t().runes}>
-      {slots.map((rune, index) => rune ? (
-        <span className={`public-team-rune-slot rune-${rune.kind}`} key={`${rune.runeId}:${rune.kind}:${rune.category ?? "unknown"}`} title={runeName(rune)}>
-          {rune.iconUrl ? <img src={rune.iconUrl} alt="" /> : <b>{rune.runeId}</b>}
-        </span>
-      ) : (
-        <span className="public-team-rune-empty" key={`empty:${index}`} aria-hidden="true" />
-      ))}
-    </div>
-  );
+  return slots.map((rune, index) => {
+    if (!rune) {
+      return {
+        key: `empty:${index}`,
+        className: "public-team-rune-empty",
+        ariaHidden: true
+      };
+    }
+    return {
+      key: `${rune.runeId}:${rune.kind}:${rune.category ?? "unknown"}`,
+      className: `public-team-rune-slot rune-${rune.kind}`,
+      title: runeName(rune),
+      iconUrl: rune.iconUrl,
+      fallbackLabel: String(rune.runeId)
+    };
+  });
+}
+
+function playerLoadoutBuildViewModel({
+  spells,
+  runes,
+  dataDragonVersion
+}: {
+  spells: number[] | undefined;
+  runes: PublicLolMatchParticipant["runes"] | undefined;
+  dataDragonVersion: string | undefined;
+}): PlayerLoadoutBuildViewModel {
+  return {
+    ariaLabel: `${t().summonerSpells} / ${t().runes}`,
+    spellsAriaLabel: t().summonerSpells,
+    runesAriaLabel: t().runes,
+    spellSlots: playerSpellBuildSlotsViewModel(spells, dataDragonVersion),
+    runeSlots: playerRuneBuildSlotsViewModel(runes)
+  };
 }
 
 function PlayerLoadoutBuild({
@@ -7366,31 +5711,19 @@ function PlayerLoadoutBuild({
   runes: PublicLolMatchParticipant["runes"] | undefined;
   dataDragonVersion: string | undefined;
 }) {
-  return (
-    <div className="public-team-loadout-build" aria-label={`${t().summonerSpells} / ${t().runes}`}>
-      <PlayerSpellBuild spells={spells} dataDragonVersion={dataDragonVersion} />
-      <PlayerRuneBuild runes={runes} />
-    </div>
-  );
+  const viewModel = playerLoadoutBuildViewModel({ spells, runes, dataDragonVersion });
+  return <FeaturePlayerLoadoutBuild viewModel={viewModel} />;
 }
 
-function RiotIdAwardBadges({ badges }: { badges?: PublicLolMatchBadge[] }) {
+function riotIdAwardBadgeViewModels(badges?: PublicLolMatchBadge[]): SearchableRiotIdBadgeViewModel[] {
   const visibleBadges = matchHighlightBadges(badges);
-  if (visibleBadges.length === 0) return null;
-  return (
-    <span className="public-riot-award-badges">
-      {visibleBadges.map((badge) => (
-        <span
-          className={`public-riot-award-badge ${badge.code}`}
-          key={`${badge.code}:${badge.score ?? ""}:${badge.rank ?? ""}`}
-          data-ko={matchBadgeLabel(badge.code, "ko")}
-          data-ja={matchBadgeLabel(badge.code, "ja")}
-        >
-          {matchBadgeLabel(badge.code)}
-        </span>
-      ))}
-    </span>
-  );
+  return visibleBadges.map((badge) => ({
+    key: `${badge.code}:${badge.score ?? ""}:${badge.rank ?? ""}`,
+    className: `public-riot-award-badge ${badge.code}`,
+    label: matchBadgeLabel(badge.code),
+    ko: matchBadgeLabel(badge.code, "ko"),
+    ja: matchBadgeLabel(badge.code, "ja")
+  }));
 }
 
 function teamCompareTeams(match: PublicLolRecentMatch): [PublicLolMatchTeamDetail, PublicLolMatchTeamDetail] | undefined {
@@ -7410,132 +5743,122 @@ function teamComparePercent(value: number, total: number): number {
   return Math.max(12, Math.min(88, (value / total) * 100));
 }
 
-function TeamCompareObjectiveList({
-  team,
-  side
-}: {
-  team: PublicLolMatchTeamDetail;
-  side: "left" | "right";
-}) {
-  return (
-    <div className={`public-team-compare-objectives ${side}`} aria-label={`${teamLabel(team)} ${t().objectives}`}>
-      {teamCompareObjectiveKeys.map((key) => (
-        <span className={`public-team-compare-objective ${key}`} key={`${team.teamId}:${key}`} title={objectiveLabels[activePublicLocale][key]}>
-          <i aria-hidden="true">{objectiveShortLabels[activePublicLocale][key]}</i>
-          <b>{team.objectives?.[key] ?? 0}</b>
-        </span>
-      ))}
-    </div>
-  );
+function matchTeamCompareObjectivesViewModel(
+  team: PublicLolMatchTeamDetail,
+  side: "left" | "right"
+): MatchTeamCompareTeamViewModel {
+  return {
+    side,
+    label: teamLabel(team),
+    resultSummary: `${resultLabel(team.result)} · ${team.kills}/${team.deaths}/${team.assists}`,
+    objectivesAriaLabel: `${teamLabel(team)} ${t().objectives}`,
+    objectives: teamCompareObjectiveKeys.map((key): MatchTeamCompareObjectiveViewModel => ({
+      key: `${team.teamId}:${key}`,
+      className: `public-team-compare-objective ${key}`,
+      title: objectiveLabels[activePublicLocale][key] ?? key,
+      shortLabel: objectiveShortLabels[activePublicLocale][key],
+      value: team.objectives?.[key] ?? 0
+    }))
+  };
 }
 
-function TeamCompareMetric({
-  label,
-  leftValue,
-  rightValue
-}: {
-  label: string;
-  leftValue: number;
-  rightValue: number;
-}) {
+function matchTeamCompareMetricViewModel(
+  key: string,
+  label: string,
+  leftValue: number,
+  rightValue: number
+): MatchTeamCompareMetricViewModel {
   const total = Math.max(0, leftValue) + Math.max(0, rightValue);
   const leftWidth = teamComparePercent(leftValue, total);
   const rightWidth = total <= 0 ? 50 : Math.max(0, 100 - leftWidth);
-  return (
-    <div className="public-team-compare-metric">
-      <span className="public-team-compare-track">
-        <i className="left" style={{ width: `${leftWidth}%` }}>
-          <b>{formatNumber(leftValue)}</b>
-        </i>
-        <i className="right" style={{ width: `${rightWidth}%` }}>
-          <b>{formatNumber(rightValue)}</b>
-        </i>
-        <em>{label}</em>
-      </span>
-    </div>
-  );
+  return {
+    key,
+    label,
+    leftValueLabel: formatNumber(leftValue),
+    rightValueLabel: formatNumber(rightValue),
+    leftWidth,
+    rightWidth
+  };
+}
+
+function matchTeamCompareViewModel(match: PublicLolRecentMatch): MatchTeamCompareViewModel | undefined {
+  const teams = teamCompareTeams(match);
+  if (!teams) return undefined;
+  const [leftTeam, rightTeam] = teams;
+  return {
+    ariaLabel: t().teamDetails,
+    leftTeam: matchTeamCompareObjectivesViewModel(leftTeam, "left"),
+    rightTeam: matchTeamCompareObjectivesViewModel(rightTeam, "right"),
+    metrics: [
+      matchTeamCompareMetricViewModel("kills", t().totalKill, leftTeam.kills, rightTeam.kills),
+      matchTeamCompareMetricViewModel("damage", t().totalDamage, leftTeam.damageDealtToChampions, rightTeam.damageDealtToChampions)
+    ]
+  };
 }
 
 function MatchTeamCompare({ match }: { match: PublicLolRecentMatch }) {
-  const teams = teamCompareTeams(match);
-  if (!teams) return null;
-  const [leftTeam, rightTeam] = teams;
-  return (
-    <section className="public-team-compare" aria-label={t().teamDetails}>
-      <div className="public-team-compare-label left">
-        <strong>{teamLabel(leftTeam)}</strong>
-        <span>{resultLabel(leftTeam.result)} · {leftTeam.kills}/{leftTeam.deaths}/{leftTeam.assists}</span>
-      </div>
-      <div className="public-team-compare-label right">
-        <strong>{teamLabel(rightTeam)}</strong>
-        <span>{resultLabel(rightTeam.result)} · {rightTeam.kills}/{rightTeam.deaths}/{rightTeam.assists}</span>
-      </div>
-      <TeamCompareObjectiveList team={leftTeam} side="left" />
-      <div className="public-team-compare-bars">
-        <TeamCompareMetric label={t().totalKill} leftValue={leftTeam.kills} rightValue={rightTeam.kills} />
-        <TeamCompareMetric label={t().totalGold} leftValue={leftTeam.goldEarned} rightValue={rightTeam.goldEarned} />
-        <TeamCompareMetric label={t().totalDamage} leftValue={leftTeam.damageDealtToChampions} rightValue={rightTeam.damageDealtToChampions} />
-      </div>
-      <TeamCompareObjectiveList team={rightTeam} side="right" />
-    </section>
-  );
+  const viewModel = matchTeamCompareViewModel(match);
+  return viewModel ? <FeatureMatchTeamCompare viewModel={viewModel} /> : null;
 }
 
-function SearchableRiotId({
+function searchableRiotIdViewModel({
   riotId,
   fallback,
   badges,
-  streamer,
-  onSearch
+  streamer
 }: {
+  riotId: string | undefined;
+  fallback: string;
+  badges?: PublicLolMatchBadge[];
+  streamer?: PublicLolTwitchStream;
+}): SearchableRiotIdViewModel {
+  const display = splitRiotId(riotId, fallback);
+  const visibleStreamer = visibleStreamerStream(streamer);
+  const title = riotId
+    ? visibleStreamer
+      ? `${t().twitchStreamer} · ${visibleStreamer.isLive ? t().twitchOnlineShort : t().twitchOfflineShort} · ${riotId}`
+      : `${t().search}: ${riotId}`
+    : undefined;
+  return {
+    kind: riotId ? "button" : "static",
+    className: `${riotId ? "public-riot-id-link" : "public-riot-id-static"} ${visibleStreamer ? "streamer" : ""}`,
+    name: display.name,
+    tag: display.tag,
+    riotId,
+    title,
+    badges: riotIdAwardBadgeViewModels(badges)
+  };
+}
+
+function SearchableRiotId(props: {
   riotId: string | undefined;
   fallback: string;
   badges?: PublicLolMatchBadge[];
   streamer?: PublicLolTwitchStream;
   onSearch: (riotId: string) => void;
 }) {
-  const display = splitRiotId(riotId, fallback);
-  const visibleStreamer = visibleStreamerStream(streamer);
-  if (!riotId) {
-    return (
-      <strong className={`public-riot-id-static ${visibleStreamer ? "streamer" : ""}`}>
-        <span className="public-riot-name">{display.name}</span>
-        <RiotIdAwardBadges badges={badges} />
-      </strong>
-    );
-  }
+  const viewModel = searchableRiotIdViewModel(props);
   return (
-    <button
-      className={`public-riot-id-link ${visibleStreamer ? "streamer" : ""}`}
-      type="button"
-      onClick={() => onSearch(riotId)}
-      title={visibleStreamer ? `${t().twitchStreamer} · ${visibleStreamer.isLive ? t().twitchOnlineShort : t().twitchOfflineShort} · ${riotId}` : `${t().search}: ${riotId}`}
-    >
-      <span className="public-riot-name">{display.name}</span>
-      {display.tag ? <span className="public-riot-tag-badge">{display.tag}</span> : null}
-      <RiotIdAwardBadges badges={badges} />
-    </button>
+    <FeatureSearchableRiotId viewModel={viewModel} onSearch={props.onSearch} />
   );
 }
 
-function TeamChampionAvatar({
-  player,
+function teamChampionAvatarViewModel(
+  player: PublicLolMatchParticipant,
   hideStreamerStatus = false
-}: {
-  player: PublicLolMatchParticipant;
-  hideStreamerStatus?: boolean;
-}) {
+): TeamChampionAvatarViewModel {
   const stream = hideStreamerStatus ? undefined : visibleStreamerStream(player.twitchStream);
   const streamLabel = stream ? (stream.isLive ? t().twitchOnlineShort : t().twitchOfflineShort) : "";
   const streamStatusLabel = stream ? `${stream.twitchDisplayName} · ${streamLabel}` : "";
-  return (
-    <span className={`public-team-champion-avatar ${stream ? "streamer" : ""} ${stream?.isLive ? "live" : stream ? "offline" : ""}`}>
-      {player.champion.iconUrl ? <img src={player.champion.iconUrl} alt="" /> : <span>{championName(player.champion).slice(0, 1)}</span>}
-      {stream ? (
-        <em title={streamStatusLabel} aria-label={streamStatusLabel} role="img" />
-      ) : null}
-    </span>
-  );
+  return {
+    className: `public-team-champion-avatar ${stream ? "streamer" : ""} ${stream?.isLive ? "live" : stream ? "offline" : ""}`,
+    championIconUrl: player.champion.iconUrl,
+    fallbackLabel: championName(player.champion).slice(0, 1),
+    streamBadge: stream ? {
+      title: streamStatusLabel,
+      ariaLabel: streamStatusLabel
+    } : undefined
+  };
 }
 
 function MatchTeamDetails({
@@ -7556,100 +5879,95 @@ function MatchTeamDetails({
   const maxCs = matchTeamTotal(match, (player) => player.cs);
   const maxVision = matchTeamTotal(match, (player) => player.visionScore);
   const dataDragonVersion = recentMatchDataDragonVersion(match);
+  const teams: MatchTeamDetailsTeam[] = match.teams.map((team, teamIndex) => {
+    const teamRankStats = team.players.map((player, index) => matchRankForPlayer(rankDetail, team.teamId, player, index));
+    const tierSummary = rankLoading
+      ? t().tierLoading
+      : rankDetail
+        ? `${t().averageTier} ${averageTierLabel(teamRankStats)}`
+        : t().tierUnavailable;
+    return {
+      key: `${match.matchId}:${team.teamId}`,
+      className: `public-team-card ${team.players.some((player) => player.isTarget) ? "ally" : "enemy"}`,
+      label: teamLabel(team),
+      resultSummary: `${resultLabel(team.result)} · ${team.kills}/${team.deaths}/${team.assists}`,
+      summary: (
+        <>
+          {t().totalGold} {formatNumber(team.goldEarned)} · {t().totalDamage} {formatNumber(team.damageDealtToChampions)} · {t().totalKill} {formatNumber(team.kills)}
+        </>
+      ),
+      tierSummary,
+      players: team.players.map((player, index) => {
+        const rankedStats = teamRankStats[index];
+        const playerHighlightClass = matchHighlightClass(player.badges);
+        const playerHighlightBadges = matchHighlightBadges(player.badges);
+        const visibleStreamer = hideRiotIds ? undefined : visibleStreamerStream(player.twitchStream);
+        const streamerBadgeTitle = visibleStreamer
+          ? `${t().twitchStreamer} · ${visibleStreamer.isLive ? t().twitchOnlineShort : t().twitchOfflineShort}`
+          : undefined;
+        return {
+          key: `${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`,
+          className: `public-team-player ${player.isTarget ? "target" : ""} ${playerHighlightClass}`,
+          championAvatar: teamChampionAvatarViewModel(player, hideRiotIds),
+          loadout: <PlayerLoadoutBuild spells={player.summonerSpells} runes={player.runes} dataDragonVersion={dataDragonVersion} />,
+          rank: {
+            className: rankTierClass(rankedStats, rankLoading ? "loading" : rankedStats ? "ready" : "unknown"),
+            title: rankLoading ? t().tierLoading : rankedStats ? rankLabel(rankedStats) : t().tierUnavailable,
+            label: matchRankBadgeLabel(rankedStats, rankLoading)
+          },
+          streamerBadge: visibleStreamer && streamerBadgeTitle ? {
+            title: streamerBadgeTitle,
+            label: "T",
+            ko: "T",
+            ja: "T"
+          } : undefined,
+          riotId: searchableRiotIdViewModel({
+            riotId: hideRiotIds ? undefined : player.riotId,
+            fallback: hideRiotIds ? maskedRiotIdName(player.riotId, playerDisplayName(player)) : playerDisplayName(player),
+            badges: playerHighlightBadges,
+            streamer: hideRiotIds ? undefined : player.twitchStream
+          }),
+          mobileKda: {
+            score: `${player.kills}/${player.deaths}/${player.assists}`,
+            metric: <KdaMetricText value={player.kda} />
+          },
+          itemBuild: <PlayerItemBuild items={player.items} itemKey={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`} />,
+          kda: {
+            score: `${player.kills}/${player.deaths}/${player.assists}`,
+            metric: <KdaMetricText value={player.kda} />
+          },
+          stats: {
+            damage: publicTeamMetricStatViewModel({
+              value: player.damageDealtToChampions,
+              total: maxDamage,
+              tone: "damage",
+              label: t().totalDamage,
+              labelClassName: metricToneClass(teamShareTone(player.damageShare))
+            }),
+            cs: publicTeamMetricStatViewModel({
+              value: player.cs,
+              total: maxCs,
+              tone: "cs",
+              label: activePublicLocale === "ja" ? `CS · ${formatDecimal(player.csPerMinute, 1)}/分` : `CS · ${formatDecimal(player.csPerMinute, 1)}/분`,
+              labelClassName: metricToneClass(csTone(player.csPerMinute))
+            }),
+            vision: publicTeamMetricStatViewModel({
+              value: player.visionScore,
+              total: maxVision,
+              tone: "vision",
+              label: `${t().vision} · ${activePublicLocale === "ja" ? `${formatDecimal(player.visionScorePerMinute, 2)}/分` : `${formatDecimal(player.visionScorePerMinute, 2)}/분`}`
+            })
+          }
+        };
+      }),
+      compareAfter: teamIndex === 0 && match.teams.length > 1 ? <MatchTeamCompare match={match} /> : undefined
+    };
+  });
+
   return (
-    <div className="public-team-detail" aria-label={t().teamDetails}>
-      {match.teams.map((team, teamIndex) => (
-        <Fragment key={`${match.matchId}:${team.teamId}`}>
-        <section className={`public-team-card ${team.players.some((player) => player.isTarget) ? "ally" : "enemy"}`}>
-          {(() => {
-            const teamRankStats = team.players.map((player, index) => matchRankForPlayer(rankDetail, team.teamId, player, index));
-            const tierSummary = rankLoading
-              ? t().tierLoading
-              : rankDetail
-                ? `${t().averageTier} ${averageTierLabel(teamRankStats)}`
-                : t().tierUnavailable;
-            return (
-              <>
-          <div className="public-team-head">
-            <strong>{teamLabel(team)}</strong>
-            <span>{resultLabel(team.result)} · {team.kills}/{team.deaths}/{team.assists}</span>
-            <div className="public-team-head-summary">
-              <small>{t().totalGold} {formatNumber(team.goldEarned)} · {t().totalDamage} {formatNumber(team.damageDealtToChampions)} · {t().totalKill} {formatNumber(team.kills)}</small>
-            </div>
-            <em>{tierSummary}</em>
-          </div>
-	          <div className="public-team-player-list">
-	            {team.players.map((player, index) => {
-	              const rankedStats = teamRankStats[index];
-	              const playerHighlightClass = matchHighlightClass(player.badges);
-	              const playerHighlightBadges = matchHighlightBadges(player.badges);
-	              return (
-	                <article className={`public-team-player ${player.isTarget ? "target" : ""} ${playerHighlightClass}`} key={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`}>
-	                  <div className="public-team-player-main">
-		                    <TeamChampionAvatar player={player} hideStreamerStatus={hideRiotIds} />
-                      <PlayerLoadoutBuild spells={player.summonerSpells} runes={player.runes} dataDragonVersion={dataDragonVersion} />
-	                    <div className="public-team-player-copy">
-	                      <div className="public-team-player-id-line">
-	                        <span
-                            className={rankTierClass(rankedStats, rankLoading ? "loading" : rankedStats ? "ready" : "unknown")}
-                            title={rankLoading ? t().tierLoading : rankedStats ? rankLabel(rankedStats) : t().tierUnavailable}
-                          >
-                            {matchRankBadgeLabel(rankedStats, rankLoading)}
-                          </span>
-                          <span className="public-team-player-id-stack">
-	                          <SearchableRiotId
-                              riotId={hideRiotIds ? undefined : player.riotId}
-                              fallback={hideRiotIds ? maskedRiotIdName(player.riotId, playerDisplayName(player)) : playerDisplayName(player)}
-                              badges={playerHighlightBadges}
-	                              streamer={hideRiotIds ? undefined : player.twitchStream}
-                              onSearch={onSearchRiotId}
-                            />
-                            <span className="public-team-mobile-kda" aria-label={t().kda}>
-                              <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
-                              <span><KdaMetricText value={player.kda} /></span>
-                            </span>
-                          </span>
-	                      </div>
-	                    </div>
-	                  </div>
-	                  <PlayerItemBuild items={player.items} itemKey={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`} />
-	                  <div className="public-team-stat kda">
-	                    <strong>{player.kills}/{player.deaths}/{player.assists}</strong>
-	                    <span><KdaMetricText value={player.kda} /></span>
-	                  </div>
-                <PublicTeamMetricStat
-                  value={player.damageDealtToChampions}
-                  total={maxDamage}
-                  tone="damage"
-                  label={t().totalDamage}
-                  labelClassName={metricToneClass(teamShareTone(player.damageShare))}
-                />
-                <PublicTeamMetricStat
-                  value={player.cs}
-                  total={maxCs}
-                  tone="cs"
-                  label={activePublicLocale === "ja" ? `CS · ${formatDecimal(player.csPerMinute, 1)}/分` : `CS · ${formatDecimal(player.csPerMinute, 1)}/분`}
-                  labelClassName={metricToneClass(csTone(player.csPerMinute))}
-                />
-                <PublicTeamMetricStat
-                  value={player.visionScore}
-                  total={maxVision}
-                  tone="vision"
-                  label={`${t().vision} · ${activePublicLocale === "ja" ? `${formatDecimal(player.visionScorePerMinute, 2)}/分` : `${formatDecimal(player.visionScorePerMinute, 2)}/분`}`}
-                />
-              </article>
-            );})}
-          </div>
-              </>
-            );
-          })()}
-        </section>
-        {teamIndex === 0 && match.teams.length > 1 ? <MatchTeamCompare match={match} /> : null}
-        </Fragment>
-      ))}
-    </div>
-	  );
-	}
+    <FeatureMatchTeamDetails ariaLabel={t().teamDetails} kdaLabel={t().kda} onSearchRiotId={onSearchRiotId} teams={teams} />
+  );
+}
 
 function currentGameTeamLabel(teamId: number): string {
   if (teamId === 100) return t().blueTeam;
@@ -7865,15 +6183,7 @@ function RecentMatches({
     }
   }
 
-  return (
-    <section className="public-panel public-matches-panel">
-      <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.recentGames} data-ja={publicI18n.ja.recentGames}>{t().recentGames}</h2>
-        <span>{profile.summary.recentGames}{t().games}</span>
-      </div>
-      <PublicMatchFilterBar filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />
-      <div className="public-match-list">
-        {profile.recentMatches.length === 0 ? <p className="public-empty">{t().noData}</p> : profile.recentMatches.map((match) => {
+  const matchRows = profile.recentMatches.map((match) => {
           const expanded = expandedMatchId === match.matchId;
           const expandedView = expandedMatchViews[match.matchId] ?? "record";
           const highlightClass = matchHighlightClass(match.badges);
@@ -7886,154 +6196,150 @@ function RecentMatches({
           const dataDragonVersion = recentMatchDataDragonVersion(match);
           const recentItemSlots = fixedRecentItemSlots(match.items, 6);
           const aiScore = matchAiScore(match);
+          const spellItems: RecentMatchRowMediaItem[] = match.summonerSpells.slice(0, 2).map((spellId) => {
+            const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
+            return {
+              key: `${match.matchId}:spell:${spellId}`,
+              content: iconUrl ? <img src={iconUrl} alt="" /> : spellId
+            };
+          });
+          const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
+            key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
+            className: item ? "" : "empty",
+            content: item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId : null
+          }));
+          const expandedPanelText: RecentMatchExpandedPanelText = {
+            matchDetails: t().matchDetails,
+            recordTab: {
+              label: t().matchRecordTab,
+              ko: publicI18n.ko.matchRecordTab,
+              ja: publicI18n.ja.matchRecordTab
+            },
+            buildTab: {
+              label: t().matchBuildTab,
+              ko: publicI18n.ko.matchBuildTab,
+              ja: publicI18n.ja.matchBuildTab
+            },
+            maskToggle: {
+              label: hideRiotIds ? t().riotIdMaskOn : t().riotIdMaskOff,
+              ko: hideRiotIds ? publicI18n.ko.riotIdMaskOn : publicI18n.ko.riotIdMaskOff,
+              ja: hideRiotIds ? publicI18n.ja.riotIdMaskOn : publicI18n.ja.riotIdMaskOff
+            }
+          };
+          const expandedPanel = expanded ? (
+            <FeatureRecentMatchExpandedPanel
+              activeView={expandedView}
+              content={expandedView === "record" ? (
+                <MatchTeamDetails match={match} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
+              ) : (
+                <RecentMatchBuildPanel
+                  match={match}
+                  build={build}
+                  loading={buildLoading}
+                  error={buildError}
+                  selectedKey={selectedBuildParticipantKeys[match.matchId]}
+                  hideRiotIds={hideRiotIds}
+                  onSelect={(key) => setSelectedBuildParticipantKeys((current) => ({ ...current, [match.matchId]: key }))}
+                />
+              )}
+              hideRiotIds={hideRiotIds}
+              onBuild={() => {
+                setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "build" }));
+                void ensureMatchBuild(match);
+              }}
+              onRecord={() => {
+                setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
+                void ensureMatchRanks(match.matchId);
+              }}
+              onToggleMask={() => setHiddenRiotIdMatches((current) => ({ ...current, [match.matchId]: !current[match.matchId] }))}
+              text={expandedPanelText}
+            />
+          ) : undefined;
           return (
-            <article className={`public-match-row ${match.result} ${highlightClass} ${expanded ? "expanded" : ""}`} key={match.matchId}>
-              <div className="public-match-summary">
-                <div className="public-result">
-                  <b className={`public-match-result-pill ${match.result}`}>{resultLabel(match.result)}</b>
-                  <strong>{match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}</strong>
-                  <span className="public-match-started">{formatDate(match.startedAt)}</span>
-                  <small>{resultLabel(match.result)} · {formatDuration(match.durationSeconds)}</small>
-                  <em className="public-match-relative">{formatRelativeDate(match.startedAt)}</em>
-                </div>
-                <div className={`public-champion-cell ${highlightClass}`}>
-                  {match.champion.iconUrl ? <img src={match.champion.iconUrl} alt="" /> : <span>{championName(match.champion).slice(0, 1)}</span>}
-                  {match.summonerSpells.length > 0 ? (
-                    <div className="public-match-mobile-spells" aria-label={t().summonerSpells}>
-                      {match.summonerSpells.slice(0, 2).map((spellId) => {
-                        const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
-                        return (
-                          <span key={`${match.matchId}:spell:${spellId}`}>
-                            {iconUrl ? <img src={iconUrl} alt="" /> : spellId}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                  <div>
-                    <strong>{championName(match.champion)}</strong>
-                    <small>{mainRoleLabel(match.position)} · Lv.{formatNumber(match.championLevel)}</small>
-                  </div>
-                </div>
-                <div className="public-kda">
-                  <strong>{match.kills} / {match.deaths} / {match.assists}</strong>
-                  <span><KdaMetricText value={match.kda} /></span>
-                  <MatchBadges badges={match.badges} compact />
-                </div>
-                <div className={`public-match-score ${metricToneClass(scoreTone(aiScore))}`}>
-                  <span data-ko={publicI18n.ko.aiScore} data-ja={publicI18n.ja.aiScore}>{t().aiScore}</span>
-                  <strong>{aiScore}</strong>
-                </div>
-                <div className="public-match-meta">
-                  <span>CS {formatNumber(match.cs)}</span>
-                  <span><CsPerMinuteMetricText value={match.csPerMinute} /></span>
-                  <span><KillParticipationMetricText value={match.killParticipation} /></span>
-                </div>
-                <div className="public-match-inline-items" aria-label={t().items}>
-                  {recentItemSlots.map((item, index) => (
-                    <span className={item ? "" : "empty"} key={`${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`}>
-                      {item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId : null}
-                    </span>
-                  ))}
-                </div>
-                <div className={`public-match-impact ${match.result} ${metricToneClass(scoreTone(aiScore))}`}>
-                  <strong>{aiScore}</strong>
-                  <span>{t().aiScore}</span>
-                </div>
-                <button
-                  type="button"
-                  className="public-match-expand"
-                  aria-expanded={expanded}
-                  aria-label={expanded ? t().collapseMatch : t().expandMatch}
-                  onClick={() => {
-                    const opening = expandedMatchId !== match.matchId;
-                    setExpandedMatchId(opening ? match.matchId : null);
-                    if (opening) {
-                      setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
-                      void ensureMatchRanks(match.matchId);
-                    }
-                  }}
-                >
-                  <span aria-hidden="true" />
-                </button>
-              </div>
-
-              {expanded ? (
-                <div className="public-match-expanded">
-                  <div className="public-match-expanded-toolbar">
-                    <div className="public-match-expanded-tabs" role="tablist" aria-label={t().matchDetails}>
-                      <button
-                        type="button"
-                        className={expandedView === "record" ? "active" : ""}
-                        role="tab"
-                        aria-selected={expandedView === "record"}
-                        onClick={() => {
-                          setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
-                          void ensureMatchRanks(match.matchId);
-                        }}
-                        data-ko={publicI18n.ko.matchRecordTab}
-                        data-ja={publicI18n.ja.matchRecordTab}
-                      >
-                        {t().matchRecordTab}
-                      </button>
-                      <button
-                        type="button"
-                        className={expandedView === "build" ? "active" : ""}
-                        role="tab"
-                        aria-selected={expandedView === "build"}
-                        onClick={() => {
-                          setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "build" }));
-                          void ensureMatchBuild(match);
-                        }}
-                        data-ko={publicI18n.ko.matchBuildTab}
-                        data-ja={publicI18n.ja.matchBuildTab}
-                      >
-                        {t().matchBuildTab}
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      className={`public-match-id-mask-toggle ${hideRiotIds ? "active" : ""}`}
-                      aria-pressed={hideRiotIds}
-                      onClick={() => setHiddenRiotIdMatches((current) => ({ ...current, [match.matchId]: !current[match.matchId] }))}
-                      data-ko={hideRiotIds ? publicI18n.ko.riotIdMaskOn : publicI18n.ko.riotIdMaskOff}
-                      data-ja={hideRiotIds ? publicI18n.ja.riotIdMaskOn : publicI18n.ja.riotIdMaskOff}
-                    >
-                      {hideRiotIds ? t().riotIdMaskOn : t().riotIdMaskOff}
-                    </button>
-                  </div>
-                  {expandedView === "record" ? (
-                    <MatchTeamDetails match={match} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
-                  ) : (
-                    <RecentMatchBuildPanel
-                      match={match}
-                      build={build}
-                      loading={buildLoading}
-                      error={buildError}
-                      selectedKey={selectedBuildParticipantKeys[match.matchId]}
-                      hideRiotIds={hideRiotIds}
-                      onSelect={(key) => setSelectedBuildParticipantKeys((current) => ({ ...current, [match.matchId]: key }))}
-                    />
-                  )}
-	                </div>
-              ) : null}
-            </article>
+            <FeatureRecentMatchRow
+              aiScore={aiScore}
+              aiScoreText={{
+                label: t().aiScore,
+                ko: publicI18n.ko.aiScore,
+                ja: publicI18n.ja.aiScore
+              }}
+              badges={<MatchBadges badges={match.badges} compact />}
+              championFallback={championName(match.champion).slice(0, 1)}
+              championIconUrl={match.champion.iconUrl}
+              championName={championName(match.champion)}
+              championRoleLevel={`${mainRoleLabel(match.position)} · Lv.${formatNumber(match.championLevel)}`}
+              csLabel={`CS ${formatNumber(match.cs)}`}
+              csPerMinuteMetric={<CsPerMinuteMetricText value={match.csPerMinute} />}
+              expanded={expanded}
+              expandedPanel={expandedPanel}
+              expandAriaLabel={expanded ? t().collapseMatch : t().expandMatch}
+              highlightClass={highlightClass}
+              itemSlots={inlineItemSlots}
+              itemsLabel={t().items}
+              kdaMetric={<KdaMetricText value={match.kda} />}
+              kdaScore={`${match.kills} / ${match.deaths} / ${match.assists}`}
+              key={match.matchId}
+              killParticipationMetric={<KillParticipationMetricText value={match.killParticipation} />}
+              onToggleExpand={() => {
+                const opening = expandedMatchId !== match.matchId;
+                setExpandedMatchId(opening ? match.matchId : null);
+                if (opening) {
+                  setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
+                  void ensureMatchRanks(match.matchId);
+                }
+              }}
+              queueLabel={match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
+              relativeLabel={formatRelativeDate(match.startedAt)}
+              result={match.result}
+              resultDurationLabel={`${resultLabel(match.result)} · ${formatDuration(match.durationSeconds)}`}
+              resultLabel={resultLabel(match.result)}
+              scoreClassName={metricToneClass(scoreTone(aiScore))}
+              spellItems={spellItems}
+              startedAtLabel={formatDate(match.startedAt)}
+              summonerSpellsLabel={t().summonerSpells}
+            />
 	          );
-	        })}
-	      </div>
-      {moreError ? <p className="public-match-more-error">{moreError}</p> : null}
-      {profile.hasMoreRecentMatches && onLoadMore ? (
-        <div className="public-match-more">
-          <button type="button" onClick={onLoadMore} disabled={loadingMore}>
-            {loadingMore ? t().loadingMoreMatches : t().loadMoreMatches}
-          </button>
-        </div>
-      ) : profile.recentMatches.length >= 20 ? (
-        <p className="public-match-more-done" data-ko={publicI18n.ko.noMoreMatches} data-ja={publicI18n.ja.noMoreMatches}>{t().noMoreMatches}</p>
-      ) : null}
-	    </section>
-	  );
-	}
+	        });
+  const text: RecentMatchesPanelText = {
+    title: {
+      label: t().recentGames,
+      ko: publicI18n.ko.recentGames,
+      ja: publicI18n.ja.recentGames
+    },
+    emptyTitle: {
+      label: t().noData,
+      ko: publicI18n.ko.noData,
+      ja: publicI18n.ja.noData
+    },
+    emptyDescription: {
+      label: t().recentGames,
+      ko: publicI18n.ko.recentGames,
+      ja: publicI18n.ja.recentGames
+    },
+    loadingMoreMatches: t().loadingMoreMatches,
+    loadMoreMatches: t().loadMoreMatches,
+    noMoreMatches: {
+      label: t().noMoreMatches,
+      ko: publicI18n.ko.noMoreMatches,
+      ja: publicI18n.ja.noMoreMatches
+    }
+  };
+  const canLoadMore = Boolean(profile.hasMoreRecentMatches && onLoadMore);
+  return (
+    <FeatureRecentMatchesPanel
+      canLoadMore={canLoadMore}
+      filterBar={<PublicMatchFilterBar filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />}
+      isEmpty={profile.recentMatches.length === 0}
+      loadingMore={loadingMore}
+      matchCount={`${profile.summary.recentGames}${t().games}`}
+      matchRows={matchRows}
+      moreError={moreError}
+      onLoadMore={onLoadMore}
+      showNoMore={!canLoadMore && profile.recentMatches.length >= 20}
+      text={text}
+    />
+  );
+}
 
 function ChampionMastery({ profile }: { profile: PublicLolProfile }) {
   const rows = championAnalysisRows(profile).slice(0, 5);
@@ -8260,8 +6566,8 @@ export function PublicLolPage({
   onOpenAdmin: () => void;
   onOpenStreamerDashboard: () => void;
 }) {
-  const [locale, setLocaleState] = useState<PublicLocale>(() => detectPublicLocale());
-  activePublicLocale = locale;
+  const { locale, changeLocale, autoDetectLocale } = usePublicLocale(loadPublicLocalePreference);
+  setActivePublicLocale(locale);
   const [query, setQuery] = useState("");
   const [profile, setProfile] = useState<PublicLolProfile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -8270,9 +6576,10 @@ export function PublicLolPage({
   const [error, setError] = useState("");
   const [recentSearches, setRecentSearches] = useState<SearchSuggestion[]>(() => readRecentSearches());
   const [favorites, setFavorites] = useState<PublicFavorite[]>(() => readFavorites());
-  const [theme, setTheme] = useState<PublicTheme>(() => readStoredTheme());
+  const { theme, toggleTheme } = usePublicTheme();
   const [filters, setFilters] = useState<PublicMatchFilters>(DEFAULT_MATCH_FILTERS);
   const [remoteSuggestions, setRemoteSuggestions] = useState<SearchSuggestion[]>([]);
+  const [searchPanelRequest, setSearchPanelRequest] = useState<SearchFormPanelRequest>();
   const [profileTab, setProfileTab] = useState<PublicProfileTab>("overview");
   const [activeMainPage, setActiveMainPage] = useState<PublicMainPage>("search");
   const [activeNav, setActiveNav] = useState<PublicNavTarget>("search");
@@ -8288,6 +6595,7 @@ export function PublicLolPage({
   const [followedLol, setFollowedLol] = useState<PublicTwitchFollowedLolResponse | null>(null);
   const [followedLoading, setFollowedLoading] = useState(false);
   const [followedError, setFollowedError] = useState("");
+  const followedLolRequestRef = useRef<Promise<void> | null>(null);
   const [publicParticipation, setPublicParticipation] = useState<PublicParticipationStateResponse | null>(null);
   const [publicParticipationLoading, setPublicParticipationLoading] = useState(false);
   const [publicParticipationError, setPublicParticipationError] = useState("");
@@ -8307,6 +6615,7 @@ export function PublicLolPage({
   const [communityCommentSubmitting, setCommunityCommentSubmitting] = useState(false);
   const [communityError, setCommunityError] = useState("");
   const [communityCommentError, setCommunityCommentError] = useState("");
+  const [communityToast, setCommunityToast] = useState<CommunityToast | null>(null);
   const [selectedCommunityPostId, setSelectedCommunityPostId] = useState<string | undefined>();
   const [communityPostProfile, setCommunityPostProfile] = useState<CommunityPostProfileState>({ status: "idle" });
   const storedSuggestions = useMemo(() => {
@@ -8319,6 +6628,31 @@ export function PublicLolPage({
   }, [favorites, recentSearches]);
   const suggestions = useMemo(() => buildSuggestions(query, storedSuggestions, remoteSuggestions), [query, storedSuggestions, remoteSuggestions]);
   const visibleSuggestions = query.trim() && query.trim() !== profile?.riotId ? suggestions : [];
+  const homeLiveStreamers = useMemo<PublicHomeLiveStreamer[]>(() => {
+    const streamers = new Map<string, PublicHomeLiveStreamer>();
+    for (const channel of followedLol?.channels ?? []) {
+      if (!channel.isLive) continue;
+      const key = channel.twitchUserId || channel.riotId || channel.twitchLogin;
+      if (!key) continue;
+      streamers.set(key, {
+        id: key,
+        name: channel.twitchDisplayName,
+        nameJa: channel.twitchDisplayName,
+        primaryMeta: channel.rankedStats ? rankLabel(channel.rankedStats) : channel.riotId ?? channel.gameName ?? "League of Legends",
+        primaryMetaJa: channel.rankedStats ? rankLabel(channel.rankedStats) : channel.riotId ?? channel.gameName ?? "League of Legends",
+        secondaryMeta: channel.viewerCount !== undefined ? `${formatNumber(channel.viewerCount)} ${t().twitchViewers}` : channel.title,
+        secondaryMetaJa: channel.viewerCount !== undefined ? `${formatNumber(channel.viewerCount)} ${t().twitchViewers}` : channel.title,
+        server: channel.riotTagLine ? `${channel.riotTagLine} Server` : "JP Server",
+        avatarLabel: channel.twitchDisplayName.slice(0, 1),
+        avatarUrl: assetUrl(channel.profileImageUrl),
+        channelUrl: channel.channelUrl ?? (channel.twitchLogin ? `https://www.twitch.tv/${channel.twitchLogin}` : undefined),
+        statusLabel: "LIVE",
+        statusKo: "LIVE",
+        statusJa: "LIVE",
+      });
+    }
+    return [...streamers.values()].slice(0, 12);
+  }, [followedLol, locale]);
   const visibleProfile = useMemo(() => {
     if (!profile) return null;
     return profileWithMatches(profile, filteredMatches(profile, filters));
@@ -8336,49 +6670,33 @@ export function PublicLolPage({
     return [...unique.values()].sort((a, b) => championName(a).localeCompare(championName(b)));
   }, [profile]);
 
-  function changeLocale(nextLocale: PublicLocale): void {
-    setLocaleState(nextLocale);
-    saveStoredLocale(nextLocale);
-  }
-
-  function autoDetectLocale(): void {
-    clearStoredLocale();
-    void loadPublicLocalePreference()
-      .then((preferredLocale) => {
-        setLocaleState(preferredLocale ?? detectBrowserPublicLocale());
-      })
-      .catch(() => {
-        setLocaleState(detectBrowserPublicLocale());
-      });
-  }
-
   useEffect(() => {
-    document.documentElement.lang = locale === "ja" ? "ja" : "ko";
-  }, [locale]);
-
-  useEffect(() => {
-    if (readStoredLocale()) return undefined;
-    const controller = new AbortController();
-    void loadPublicLocalePreference(controller.signal)
-      .then((preferredLocale) => {
-        if (!preferredLocale || readStoredLocale()) return;
-        setLocaleState(preferredLocale);
-      })
-      .catch(() => {
-        // 지역 기반 언어 추정 실패 시 브라우저 언어 기본값을 유지합니다.
-      });
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const viewerConnected = params.get("viewer_twitch") === "connected";
     void loadTwitchViewer();
+    let retryTimer: number | undefined;
+    if (viewerConnected) {
+      retryTimer = window.setTimeout(() => {
+        void loadTwitchViewer();
+      }, 350);
+      params.delete("viewer_twitch");
+      const nextQuery = params.toString();
+      const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
+    return () => {
+      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
+    };
   }, []);
 
   useEffect(() => {
-    if (activeMainPage !== "subscriptions") return;
+    if (!twitchStatus.connected) {
+      setFollowedLol(null);
+      return;
+    }
     if (!twitchStatus.connected || followedLol || followedLoading) return;
     void loadFollowedLol();
-  }, [activeMainPage, twitchStatus.connected, followedLol, followedLoading]);
+  }, [twitchStatus.connected, followedLol, followedLoading]);
 
   useEffect(() => {
     if (activeMainPage !== "followJoin") return undefined;
@@ -8487,15 +6805,6 @@ export function PublicLolPage({
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.publicTheme = theme;
-    try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    } catch {
-      // 테마 저장 실패는 화면 사용을 막지 않습니다.
-    }
-  }, [theme]);
-
-  useEffect(() => {
     const normalizedQuery = query.trim();
     if (normalizedQuery.length < 2 || normalizedQuery === profile?.riotId) {
       setRemoteSuggestions([]);
@@ -8534,6 +6843,8 @@ export function PublicLolPage({
   }
 
   async function loadFollowedLol(): Promise<void> {
+    if (followedLolRequestRef.current) return followedLolRequestRef.current;
+    const request = (async () => {
     setFollowedLoading(true);
     setFollowedError("");
     try {
@@ -8546,6 +6857,13 @@ export function PublicLolPage({
       setFollowedError(requestError instanceof Error ? requestError.message : t().searchFailed);
     } finally {
       setFollowedLoading(false);
+    }
+    })();
+    followedLolRequestRef.current = request;
+    try {
+      await request;
+    } finally {
+      if (followedLolRequestRef.current === request) followedLolRequestRef.current = null;
     }
   }
 
@@ -8570,8 +6888,7 @@ export function PublicLolPage({
     }
   }
 
-  async function submitPublicParticipation(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
+  async function submitPublicParticipation(): Promise<void> {
     setPublicParticipationJoining(true);
     setPublicParticipationError("");
     setPublicParticipationMessage("");
@@ -8636,7 +6953,13 @@ export function PublicLolPage({
     try {
       setCommunityPosts(await getPublicCommunityPosts(category));
     } catch (requestError) {
-      setCommunityError(requestError instanceof Error ? requestError.message : t().communityLoadFailed);
+      const message = requestError instanceof Error ? requestError.message : t().communityLoadFailed;
+      setCommunityError(message);
+      setCommunityToast({
+        title: t().communityLoadFailed,
+        description: message,
+        tone: "danger"
+      });
     } finally {
       setCommunityLoading(false);
     }
@@ -8666,9 +6989,20 @@ export function PublicLolPage({
     setCommunityError("");
     try {
       setCommunityPosts(await createPublicCommunityPost(input));
+      setCommunityToast({
+        title: t().communitySubmit,
+        description: input.title,
+        tone: "success"
+      });
       return true;
     } catch (requestError) {
-      setCommunityError(requestError instanceof Error ? requestError.message : t().searchFailed);
+      const message = requestError instanceof Error ? requestError.message : t().searchFailed;
+      setCommunityError(message);
+      setCommunityToast({
+        title: t().searchFailed,
+        description: message,
+        tone: "danger"
+      });
       return false;
     } finally {
       setCommunitySubmitting(false);
@@ -8680,9 +7014,20 @@ export function PublicLolPage({
     setCommunityError("");
     try {
       setCommunityPosts(await updatePublicCommunityPost(postId, input));
+      setCommunityToast({
+        title: t().communityUpdateSubmit,
+        description: input.title,
+        tone: "success"
+      });
       return true;
     } catch (requestError) {
-      setCommunityError(requestError instanceof Error ? requestError.message : t().searchFailed);
+      const message = requestError instanceof Error ? requestError.message : t().searchFailed;
+      setCommunityError(message);
+      setCommunityToast({
+        title: t().searchFailed,
+        description: message,
+        tone: "danger"
+      });
       return false;
     } finally {
       setCommunitySubmitting(false);
@@ -8694,8 +7039,19 @@ export function PublicLolPage({
     setCommunityCommentError("");
     try {
       setCommunityPosts(await createPublicCommunityComment(postId, body));
+      setCommunityToast({
+        title: t().communityCommentSubmit,
+        description: t().communityCommentsTitle,
+        tone: "success"
+      });
     } catch (requestError) {
-      setCommunityCommentError(requestError instanceof Error ? requestError.message : t().communityCommentFailed);
+      const message = requestError instanceof Error ? requestError.message : t().communityCommentFailed;
+      setCommunityCommentError(message);
+      setCommunityToast({
+        title: t().communityCommentFailed,
+        description: message,
+        tone: "danger"
+      });
     } finally {
       setCommunityCommentSubmitting(false);
     }
@@ -8751,6 +7107,25 @@ export function PublicLolPage({
     setActiveNav("community");
     void loadCommunityPostProfile(post);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+  }
+
+  function openSearchPanelTab(tab: SearchFormPanelRequest["tab"]): void {
+    setStreamerRegisterOpen(false);
+    setSelectedCommunityPostId(undefined);
+    setCommunityPostProfile({ status: "idle" });
+    setCommunityCommentError("");
+    setActiveMainPage("search");
+    setActiveNav("search");
+    if (!profile) setPublicPath("/");
+    setSearchPanelRequest((current) => ({
+      tab,
+      nonce: (current?.nonce ?? 0) + 1
+    }));
+    window.setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      document.getElementById("public-search-input")?.focus();
+      document.getElementById("public-ranking-search-input")?.focus();
+    }, 0);
   }
 
   function changeMainPage(page: PublicMainPage): void {
@@ -8809,17 +7184,13 @@ export function PublicLolPage({
     setStreamerRegisterOpen(false);
   }
 
-  function toggleTheme(): void {
-    setTheme((current) => current === "dark" ? "light" : "dark");
-  }
-
   function toggleFavorite(): void {
     if (!profile) return;
     const favorite = favoriteFromProfile(profile);
     const active = isFavoriteProfile(favorites, profile);
     const next = active
       ? favorites.filter((item) => normalizeSuggestionKey(item) !== normalizeSuggestionKey(favorite))
-      : [favorite, ...favorites.filter((item) => normalizeSuggestionKey(item) !== normalizeSuggestionKey(favorite))].slice(0, MAX_FAVORITES);
+      : prependFavorite(favorites, favorite);
     writeFavorites(next);
     setFavorites(next);
   }
@@ -8849,9 +7220,8 @@ export function PublicLolPage({
       setRecentSearches(readRecentSearches());
       setFavorites((current) => {
         const favorite = favoriteFromProfile(result);
-        const favoriteKey = normalizeSuggestionKey(favorite);
-        if (!current.some((item) => normalizeSuggestionKey(item) === favoriteKey)) return current;
-        const next = [favorite, ...current.filter((item) => normalizeSuggestionKey(item) !== favoriteKey)].slice(0, MAX_FAVORITES);
+        if (!current.some((item) => normalizeSuggestionKey(item) === normalizeSuggestionKey(favorite))) return current;
+        const next = prependFavorite(current, favorite);
         writeFavorites(next);
         return next;
       });
@@ -8950,9 +7320,6 @@ export function PublicLolPage({
     if (activeMainPage === "privacy" || activeMainPage === "terms" || activeMainPage === "contact") {
       return <PublicLegalPage page={activeMainPage} />;
     }
-    if (activeMainPage === "favorites") {
-      return <PublicFavoritesPage favorites={favorites} onPick={pickSuggestion} />;
-    }
     if (activeMainPage === "subscriptions") {
       return (
         <PublicSubscriptionsPage
@@ -8961,7 +7328,6 @@ export function PublicLolPage({
           loading={followedLoading}
           error={followedError}
           onLogin={startTwitchLogin}
-          onLogout={() => void disconnectTwitchViewer()}
           onRefresh={() => void loadFollowedLol()}
           onSearch={searchFollowedRiotId}
         />
@@ -8980,8 +7346,6 @@ export function PublicLolPage({
           cancelling={publicParticipationCancelling}
           message={publicParticipationMessage}
           selectedStreamerId={publicParticipationStreamerId}
-          onLogin={startTwitchLogin}
-          onLogout={() => void disconnectTwitchViewer()}
           onRefresh={() => void loadPublicParticipationState()}
           onStreamerSelect={setPublicParticipationStreamerId}
           onRiotIdChange={setPublicParticipationJoinRiotId}
@@ -9000,9 +7364,11 @@ export function PublicLolPage({
           posts={communityPosts}
           loading={communityLoading}
           error={communityError}
+          toast={communityToast}
           onRefresh={() => void loadCommunityPosts(category)}
           onWrite={() => changeMainPage(category === "party" ? "communityPartyWrite" : "communityServerWrite")}
           onOpenPost={openCommunityPost}
+          onDismissToast={() => setCommunityToast(null)}
         />
       );
     }
@@ -9019,9 +7385,11 @@ export function PublicLolPage({
           editingPost={editingPost}
           error={communityError}
           submitting={communitySubmitting}
+          toast={communityToast}
           onLogin={startTwitchLogin}
           onBack={() => changeMainPage(category === "party" ? "communityParty" : "patch")}
           onSubmit={(input) => editingPost ? updateCommunityServerPost(editingPost.id, input) : submitCommunityPost(input)}
+          onDismissToast={() => setCommunityToast(null)}
         />
       );
     }
@@ -9033,10 +7401,12 @@ export function PublicLolPage({
           twitchStatus={twitchStatus}
           commentSubmitting={communityCommentSubmitting}
           commentError={communityCommentError}
+          toast={communityToast}
           onLogin={startTwitchLogin}
           onBack={() => changeMainPage(communityPostCategory(selectedCommunityPost) === "party" ? "communityParty" : "patch")}
           onSearchRiotId={searchFollowedRiotId}
           onSubmitComment={submitCommunityComment}
+          onDismissToast={() => setCommunityToast(null)}
         />
       );
     }
@@ -9098,11 +7468,15 @@ export function PublicLolPage({
             twitchStatus={twitchStatus}
             activePage={activeMainPage}
             activeTarget={activeNav}
+            onHome={() => changeMainPage("search")}
             showSearch={false}
             showFilters={false}
             query={query}
             loading={loading}
             suggestions={visibleSuggestions}
+            recentSearches={recentSearches}
+            favorites={favorites}
+            searchPanelRequest={searchPanelRequest}
             filters={filters}
             champions={availableChampions}
             onQuery={setQuery}
@@ -9130,7 +7504,7 @@ export function PublicLolPage({
             }}
           />
         </section>
-        <PublicSiteFooter onPage={changeMainPage} />
+        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </main>
     );
@@ -9138,19 +7512,28 @@ export function PublicLolPage({
 
   if (!profile && activeMainPage === "search") {
     return (
-      <main className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}>
-        <section className="public-app-main">
+      <AppShell
+        className={`public-lol-shell public-dashboard-shell public-home-shell public-home-shared-shell theme-${theme}`}
+        renderRoot={({ children, ...rootProps }) => <main {...rootProps}>{children}</main>}
+        showSkipLink={false}
+        variant="public"
+      >
+        <AppShellHeader as="div" className="public-home-shared-header">
           <PublicAppHeader
             locale={locale}
             profile={profile}
             twitchStatus={twitchStatus}
             activePage={activeMainPage}
             activeTarget={activeNav}
+            onHome={() => changeMainPage("search")}
             showSearch={false}
             showFilters={false}
             query={query}
             loading={loading}
             suggestions={visibleSuggestions}
+            recentSearches={recentSearches}
+            favorites={favorites}
+            searchPanelRequest={searchPanelRequest}
             filters={filters}
             champions={availableChampions}
             onQuery={setQuery}
@@ -9168,29 +7551,42 @@ export function PublicLolPage({
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
           />
-          {loading ? <SeigaSearchLoader /> : null}
-          <section id="public-search" className="public-home-content public-dashboard-home">
-            <div className="public-home-search-stage">
+        </AppShellHeader>
+        <AppShellMain className="public-home-shared-main" id="public-search-main">
+          <PublicHomeSearchPanel
+            error={error}
+            liveLoading={followedLoading}
+            liveStreamers={homeLiveStreamers}
+            loading={loading}
+            onShowStreamers={() => changeMainPage("subscriptions")}
+            searchForm={
               <SearchForm
-                query={query}
                 loading={loading}
-                onQuery={setQuery}
                 onClear={clearSearch}
-                onSubmit={(event) => void submit(event)}
-                suggestions={visibleSuggestions}
                 onPickSuggestion={pickSuggestion}
+                onQuery={setQuery}
+                onSubmit={(event) => void submit(event)}
+                query={query}
+                suggestions={visibleSuggestions}
+                recentSearches={recentSearches}
+                favorites={favorites}
+                panelRequest={searchPanelRequest}
+                variant="homeShared"
               />
-            </div>
-            {error ? <p className="public-error">{error}</p> : null}
-          </section>
-        </section>
-        <PublicSiteFooter onPage={changeMainPage} />
+            }
+            showEmptyResult={query.trim().length > 0 && !loading && !error && visibleSuggestions.length === 0}
+            text={publicHomeSearchPanelText()}
+          />
+        </AppShellMain>
+        <AppShellFooter as="div" className="public-home-shared-footer">
+          <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
+        </AppShellFooter>
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
-      </main>
+      </AppShell>
     );
   }
 
-  if (!profile) {
+  if (activeMainPage !== "search" || !profile) {
     return (
       <main className={`public-lol-shell public-dashboard-shell theme-${theme}`}>
         <section className="public-app-main">
@@ -9200,10 +7596,14 @@ export function PublicLolPage({
             twitchStatus={twitchStatus}
             activePage={activeMainPage}
             activeTarget={activeNav}
+            onHome={() => changeMainPage("search")}
             showFilters={false}
             query={query}
             loading={loading}
             suggestions={visibleSuggestions}
+            recentSearches={recentSearches}
+            favorites={favorites}
+            searchPanelRequest={searchPanelRequest}
             filters={filters}
             champions={availableChampions}
             onQuery={setQuery}
@@ -9231,7 +7631,7 @@ export function PublicLolPage({
             </div>
           </div>
         </section>
-        <PublicSiteFooter onPage={changeMainPage} />
+        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </main>
     );
@@ -9241,18 +7641,27 @@ export function PublicLolPage({
   const favoriteActive = isFavoriteProfile(favorites, profile);
 
   return (
-    <main className={`public-lol-shell public-dashboard-shell theme-${theme}`}>
-      <section className="public-app-main">
+    <AppShell
+      className={`public-lol-shell public-dashboard-shell public-profile-shared-shell theme-${theme}`}
+      mainId="public-profile-main"
+      renderRoot={({ children, ...rootProps }) => <main {...rootProps}>{children}</main>}
+      variant="public"
+    >
+      <AppShellHeader as="div" className="public-profile-shared-header">
         <PublicAppHeader
           locale={locale}
           profile={profile}
           twitchStatus={twitchStatus}
           activePage={activeMainPage}
           activeTarget={activeNav}
+          onHome={() => changeMainPage("search")}
           showFilters={false}
           query={query}
           loading={loading}
           suggestions={visibleSuggestions}
+          recentSearches={recentSearches}
+          favorites={favorites}
+          searchPanelRequest={searchPanelRequest}
           filters={filters}
           champions={availableChampions}
           onQuery={setQuery}
@@ -9270,8 +7679,8 @@ export function PublicLolPage({
           onFilters={setFilters}
           onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
         />
-        {loading ? <SeigaSearchLoader /> : null}
-
+      </AppShellHeader>
+      <AppShellMain className="public-profile-shared-main" id="public-profile-main">
         <div className="public-profile-layout">
           <div className="public-dashboard-content-grid">
             <section className="public-dashboard-center">
@@ -9281,11 +7690,19 @@ export function PublicLolPage({
                     profile={activeProfile}
                     loading={loading}
                     favoriteActive={favoriteActive}
+                    query={query}
+                    suggestions={visibleSuggestions}
+                    recentSearches={recentSearches}
+                    favorites={favorites}
                     refreshRemaining={refreshRemaining}
+                    onClear={clearSearch}
+                    onPickSuggestion={pickSuggestion}
+                    onQuery={setQuery}
                     onRefresh={() => void runSearch(profile.riotId, { refresh: true })}
+                    onSubmit={(event) => void submit(event)}
                     onToggleFavorite={toggleFavorite}
                   />
-                  {error ? <p className="public-error">{error}</p> : null}
+                  <PublicProfileErrorState error={error} />
                   <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} />
 
 	                {profileTab === "overview" ? (
@@ -9322,16 +7739,18 @@ export function PublicLolPage({
                 </>
               ) : (
                 <>
-                  {error ? <p className="public-error">{error}</p> : null}
+                  <PublicProfileErrorState error={error} />
                   {renderMainMenuPage()}
                 </>
               )}
             </section>
           </div>
         </div>
-      </section>
-      <PublicSiteFooter onPage={changeMainPage} />
+      </AppShellMain>
+      <AppShellFooter as="div" className="public-profile-shared-footer">
+        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
+      </AppShellFooter>
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
-    </main>
+    </AppShell>
   );
 }

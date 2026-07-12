@@ -28,8 +28,11 @@ import {
   type ParticipationPhase,
   type ParticipationStreamerProfile,
   type ParticipationStatus,
+  type DashboardServerStatus,
   type StreamerProfileLink,
   type StreamerRiotIdRequest,
+  type SupportMailAttachmentSummary,
+  type SupportMailInboundPayload,
   type StreamerTournament,
   type TournamentUpsertInput
 } from "@streamops/shared";
@@ -44,7 +47,7 @@ import {
 import { RiotApiHttpError, RiotRateLimitError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant, type RiotMatchTimeline } from "../services/riot-api.js";
 import type { DataDragonService, LolChampionAbilitySummary, LolRuneSummary } from "../services/data-dragon.js";
 import type { LolProfileCacheEntry, LolProfileRepository } from "../services/lol-profile-store.js";
-import { appConfig } from "../config.js";
+import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
 import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
 import { getRewardMappingSummaries } from "../modules/rewards.module.js";
@@ -52,6 +55,7 @@ import { loadGameMonitorConfig, refreshActiveStreamerProfile, restartActiveLolGa
 import { loadLolParticipationProfileSettings, saveLolParticipationProfileSettings, type LolParticipationProfileSettings } from "../modules/lol-profile-enrichment.module.js";
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
+import type { SupportMailboxFilter, SupportMailboxStore } from "../services/support-mailbox-store.js";
 import {
   ALERT_OVERLAY_KEYS,
   alertAssetRoot,
@@ -72,11 +76,15 @@ import {
   dashboardSessionIdFromRequest,
   type DashboardRole
 } from "../security/auth.js";
-import { dashboardApiLimiter, dashboardLoginLimiter, oauthLimiter, publicLolApiLimiter } from "../security/rate-limit.js";
+import { dashboardApiLimiter, dashboardLoginLimiter, inboundEmailLimiter, oauthLimiter, publicLolApiLimiter } from "../security/rate-limit.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
 const MAX_COMMUNITY_IMAGE_BYTES = 5_000_000;
+const MAX_INBOUND_EMAIL_WEBHOOK_BYTES = 250_000;
+const MAX_SUPPORT_MAIL_TEXT_LENGTH = 100_000;
+const MAX_SUPPORT_MAIL_ATTACHMENTS = 20;
+const INBOUND_EMAIL_SIGNATURE_MAX_AGE_SECONDS = 5 * 60;
 const MAX_PARTICIPATION_INVITE_MESSAGE_LENGTH = 360;
 const MAX_PARTICIPATION_INVITE_BULK_TARGETS = 20;
 const MAX_TWITCH_CHAT_MESSAGE_LENGTH = 500;
@@ -101,6 +109,9 @@ const PUBLIC_LOL_MATCH_RANK_CACHE_TTL_MS = 5 * 60_000;
 const PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX = 1000;
+const PUBLIC_LOL_PROFILE_CACHE_MAX = 500;
+const PUBLIC_LOL_CURRENT_GAME_CACHE_MAX = 500;
+const PUBLIC_LOL_MATCH_CACHE_MAX = 1000;
 const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 5 * 60_000;
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
@@ -647,7 +658,7 @@ function noStoreHeaders(): Record<string, string> {
 function sendJson(req: IncomingMessage, res: ServerResponse, status: number, payload: unknown, headers: Record<string, string | string[]> = {}): void {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
-    ...SECURITY_HEADERS,
+    ...securityHeadersForRequest(req),
     ...noStoreHeaders(),
     ...corsHeaders(req),
     ...headers
@@ -712,13 +723,27 @@ function isLocalHostHeader(host: string | undefined): boolean {
 function requestProtocol(req: IncomingMessage): "http" | "https" {
   const forwardedProto = appConfig.security.trustProxy ? headerFirstValue(req.headers["x-forwarded-proto"]) : undefined;
   if (forwardedProto === "http" || forwardedProto === "https") return forwardedProto;
-  if (isLocalHostHeader(headerFirstValue(req.headers.host))) return "http";
-  try {
-    const protocol = new URL(appConfig.publicBaseUrl).protocol.replace(":", "");
-    return protocol === "https" ? "https" : "http";
-  } catch {
-    return "http";
+  const encrypted = Boolean((req.socket as IncomingMessage["socket"] & { encrypted?: boolean } | undefined)?.encrypted);
+  return encrypted ? "https" : "http";
+}
+
+function securityHeadersForRequest(req: IncomingMessage): Record<string, string> {
+  const headers: Record<string, string> = { ...SECURITY_HEADERS };
+  if (appConfig.nodeEnv === "production" && requestProtocol(req) === "https") {
+    headers["Strict-Transport-Security"] = "max-age=15552000; includeSubDomains";
   }
+  return headers;
+}
+
+function shouldRedirectToHttps(req: IncomingMessage, pathname: string): boolean {
+  if (appConfig.nodeEnv !== "production" || requestProtocol(req) === "https") return false;
+  return pathname !== "/health" && pathname !== "/health/live" && pathname !== "/health/ready";
+}
+
+function sendHttpsRedirect(res: ServerResponse, requestUrl: string): void {
+  const target = new URL(requestUrl, appConfig.publicBaseUrl).toString();
+  res.writeHead(308, { ...SECURITY_HEADERS, "Cache-Control": "no-store", Location: target });
+  res.end();
 }
 
 function requestOrigin(req: IncomingMessage): string | undefined {
@@ -894,10 +919,7 @@ function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay", req?: 
 }
 
 function staticSecurityHeaders(req: IncomingMessage, filePath: string): Record<string, string> {
-  const headers: Record<string, string> = { ...SECURITY_HEADERS };
-  if (appConfig.nodeEnv === "production" && appConfig.publicBaseUrl.startsWith("https://")) {
-    headers["Strict-Transport-Security"] = "max-age=15552000; includeSubDomains";
-  }
+  const headers = securityHeadersForRequest(req);
   if (filePath.endsWith("index.html")) {
     if (filePath.includes(`${path.sep}dashboard${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/dashboard", req);
     if (filePath.includes(`${path.sep}overlay${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/overlay", req);
@@ -913,13 +935,26 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
+function serializeRuntimeConfigValue(value: unknown): string {
+  return JSON.stringify(value)
+    .replaceAll("<", "\\u003c")
+    .replaceAll("\u2028", "\\u2028")
+    .replaceAll("\u2029", "\\u2029");
+}
+
 function dashboardRuntimeConfig(req: IncomingMessage): string {
   void req;
+  const legal = serializeRuntimeConfigValue({
+    ...appConfig.legal,
+    supportMailboxRetentionDays: appConfig.supportMailbox.retentionDays,
+    configured: legalRuntimeConfigReady()
+  });
   return `window.__STREAMOPS_CONFIG__ = {
   apiBase: "",
   wsBase: (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host,
   overlayBase: window.location.origin + "/overlay",
-  dashboardAuthRequired: ${appConfig.security.localNoAuth ? "false" : "true"}
+  dashboardAuthRequired: ${appConfig.security.localNoAuth ? "false" : "true"},
+  legal: ${legal}
 };\n`;
 }
 
@@ -946,6 +981,8 @@ function contentTypeFor(filePath: string): string {
   if (ext === ".js" || ext === ".mjs") return "text/javascript; charset=utf-8";
   if (ext === ".css") return "text/css; charset=utf-8";
   if (ext === ".json") return "application/json; charset=utf-8";
+  if (ext === ".xml") return "application/xml; charset=utf-8";
+  if (ext === ".txt") return "text/plain; charset=utf-8";
   if (ext === ".svg") return "image/svg+xml";
   if (ext === ".png") return "image/png";
   if (ext === ".gif") return "image/gif";
@@ -971,6 +1008,84 @@ function headerValue(headers: Record<string, string>, name: string): string | un
 function requestHeaderValue(req: IncomingMessage, name: string): string | undefined {
   const value = req.headers[name.toLowerCase()];
   return Array.isArray(value) ? value[0] : value;
+}
+
+export function verifyInboundEmailSignature(req: IncomingMessage, body: Buffer, secret: string, nowSeconds = Math.floor(Date.now() / 1000)): boolean {
+  const timestamp = requestHeaderValue(req, "x-yoro-email-timestamp")?.trim() ?? "";
+  const signature = requestHeaderValue(req, "x-yoro-email-signature")?.trim() ?? "";
+  if (!/^\d{10,}$/.test(timestamp) || !/^sha256=[a-f0-9]{64}$/i.test(signature) || !secret) return false;
+  const timestampSeconds = Number(timestamp);
+  if (!Number.isSafeInteger(timestampSeconds) || Math.abs(nowSeconds - timestampSeconds) > INBOUND_EMAIL_SIGNATURE_MAX_AGE_SECONDS) return false;
+  const expected = crypto.createHmac("sha256", secret).update(timestamp).update(".").update(body).digest();
+  const candidate = Buffer.from(signature.slice("sha256=".length), "hex");
+  return candidate.byteLength === expected.byteLength && crypto.timingSafeEqual(candidate, expected);
+}
+
+function supportMailString(value: unknown, maxLength: number, required = false): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.replace(/\u0000/g, "").trim().slice(0, maxLength);
+  return normalized || (required ? undefined : "");
+}
+
+function supportMailAddress(value: unknown): string | undefined {
+  const normalized = supportMailString(value, 320, true)?.toLowerCase();
+  return normalized && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized) ? normalized : undefined;
+}
+
+function supportMailAttachment(value: unknown): SupportMailAttachmentSummary | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const fileName = supportMailString(record.fileName, 240, true);
+  const mimeType = supportMailString(record.mimeType, 120, true);
+  const sizeBytes = Number(record.sizeBytes);
+  if (!fileName || !mimeType || !Number.isFinite(sizeBytes) || sizeBytes < 0) return undefined;
+  return { fileName, mimeType, sizeBytes: Math.trunc(sizeBytes) };
+}
+
+function parseSupportMailInboundPayload(body: Buffer): SupportMailInboundPayload {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(body.toString("utf8"));
+  } catch {
+    throw new HttpRequestError(400, { error: "올바른 inbound email JSON body가 아닙니다." });
+  }
+  if (!raw || typeof raw !== "object") throw new HttpRequestError(400, { error: "inbound email payload가 필요합니다." });
+  const record = raw as Record<string, unknown>;
+  const providerMessageId = supportMailString(record.providerMessageId, 500, true);
+  const envelopeFrom = supportMailAddress(record.envelopeFrom);
+  const envelopeTo = supportMailAddress(record.envelopeTo);
+  const fromAddress = supportMailAddress(record.fromAddress);
+  const receivedAt = supportMailString(record.receivedAt, 40, true);
+  const sizeBytes = Number(record.sizeBytes);
+  if (
+    record.version !== 1 || record.provider !== "cloudflare" || !providerMessageId || !envelopeFrom || !envelopeTo || !fromAddress
+    || !receivedAt || !Number.isFinite(Date.parse(receivedAt)) || !Number.isFinite(sizeBytes) || sizeBytes <= 0
+  ) {
+    throw new HttpRequestError(400, { error: "inbound email payload 형식이 올바르지 않습니다." });
+  }
+  const attachments = Array.isArray(record.attachments)
+    ? record.attachments.slice(0, MAX_SUPPORT_MAIL_ATTACHMENTS).map(supportMailAttachment).filter((item): item is SupportMailAttachmentSummary => Boolean(item))
+    : [];
+  const replyTo = record.replyTo ? supportMailAddress(record.replyTo) : undefined;
+  return {
+    version: 1,
+    provider: "cloudflare",
+    providerMessageId,
+    envelopeFrom,
+    envelopeTo,
+    fromAddress,
+    fromName: supportMailString(record.fromName, 200, true),
+    replyTo,
+    subject: supportMailString(record.subject, 300) ?? "",
+    text: supportMailString(record.text, MAX_SUPPORT_MAIL_TEXT_LENGTH) ?? "",
+    receivedAt: new Date(receivedAt).toISOString(),
+    sizeBytes: Math.trunc(sizeBytes),
+    attachments
+  };
+}
+
+function supportMailboxFilter(value: string | null): SupportMailboxFilter {
+  return value === "unread" || value === "read" ? value : "all";
 }
 
 function localeFromCountryCode(country: string | undefined): PublicLocale | undefined {
@@ -1214,6 +1329,14 @@ function sortedJson(value: Record<string, unknown>): string {
   return JSON.stringify(Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))));
 }
 
+function pruneMapToMax<K, V>(cache: Map<K, V>, maxSize: number): void {
+  while (cache.size > maxSize) {
+    const oldestKey = cache.keys().next().value as K | undefined;
+    if (oldestKey === undefined) break;
+    cache.delete(oldestKey);
+  }
+}
+
 function retryAfterSeconds(until: number): string {
   return String(Math.max(1, Math.ceil((until - Date.now()) / 1000)));
 }
@@ -1231,19 +1354,30 @@ function isNotModified(req: IncomingMessage, etag: string, mtime: Date): boolean
   return Number.isFinite(since) && mtime.getTime() <= since;
 }
 
-async function sendStaticFile(req: IncomingMessage, res: ServerResponse, filePath: string): Promise<void> {
+async function sendStaticFile(
+  req: IncomingMessage,
+  res: ServerResponse,
+  filePath: string,
+  extraHeaders: Record<string, string> = {}
+): Promise<void> {
   try {
     const stat = await fs.stat(filePath);
     if (!stat.isFile()) throw new Error("not found");
     const etag = staticEtag(stat.size, stat.mtimeMs);
     const lastModified = stat.mtime.toUTCString();
-    const cacheControl = filePath.endsWith("index.html") ? "no-cache" : "public, max-age=31536000, immutable";
+    const publicMetadata = ["robots.txt", "sitemap.xml", "favicon.png", "favicon.svg"].includes(path.basename(filePath));
+    const cacheControl = filePath.endsWith("index.html")
+      ? "no-cache"
+      : publicMetadata
+        ? "public, max-age=3600"
+        : "public, max-age=31536000, immutable";
     const baseHeaders = {
       "Content-Type": contentTypeFor(filePath),
       "Cache-Control": cacheControl,
       "ETag": etag,
       "Last-Modified": lastModified,
-      ...staticSecurityHeaders(req, filePath)
+      ...staticSecurityHeaders(req, filePath),
+      ...extraHeaders
     };
     if (isNotModified(req, etag, stat.mtime)) {
       res.writeHead(304, baseHeaders);
@@ -1300,7 +1434,14 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
   if (pathname !== mountPath && !pathname.startsWith(`${mountPath}/`)) return false;
   if (pathname === `${mountPath}/config.js`) {
     const body = mountPath === "/overlay" ? overlayRuntimeConfig(req) : dashboardRuntimeConfig(req);
-    res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-cache", ...SECURITY_HEADERS });
+    res.writeHead(200, {
+      "Content-Type": "text/javascript; charset=utf-8",
+      "Cache-Control": "no-store, max-age=0",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      ...securityHeadersForRequest(req)
+    });
     if (req.method === "HEAD") {
       res.end();
       return true;
@@ -1328,6 +1469,20 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
     return true;
   }
   await sendStaticFile(req, res, candidate);
+  return true;
+}
+
+const PUBLIC_DASHBOARD_ASSETS = new Map([
+  ["/favicon.png", "favicon.png"],
+  ["/favicon.svg", "favicon.svg"],
+  ["/robots.txt", "robots.txt"],
+  ["/sitemap.xml", "sitemap.xml"]
+]);
+
+async function sendPublicDashboardAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
+  const relativePath = PUBLIC_DASHBOARD_ASSETS.get(pathname);
+  if (!relativePath) return false;
+  await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, relativePath));
   return true;
 }
 
@@ -1452,6 +1607,10 @@ type HttpHandlerInput = {
   logger?: Pick<JsonlLogger, "error">;
   refreshLolProfile?: (entryId: string) => Promise<boolean>;
   sessions?: DashboardSessionStore;
+  supportMailbox?: SupportMailboxStore;
+  readiness?: () => { ok: boolean; checks?: Record<string, boolean>; errors?: string[] };
+  isShuttingDown?: () => boolean;
+  connectionStatus?: () => DashboardServerStatus["connections"];
 };
 
 function roundTo(value: number, digits: number): number {
@@ -3935,6 +4094,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           response,
           expiresAt: Date.now() + currentGameCacheTtl(response)
         });
+        pruneMapToMax(publicLolCurrentGameCache, PUBLIC_LOL_CURRENT_GAME_CACHE_MAX);
         return response;
       })
       .finally(() => {
@@ -3970,6 +4130,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const responseCacheKey = publicLolProfileCacheKey(account.gameName || parsed.gameName, account.tagLine || parsed.tagLine);
     publicLolProfilePuuidCache.set(requestedCacheKey, account.puuid);
     publicLolProfilePuuidCache.set(responseCacheKey, account.puuid);
+    pruneMapToMax(publicLolProfilePuuidCache, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
     const rankedQueuesRequest: Promise<PublicLolRankedQueues> = typeof input.riot.getRankedQueueStatsByPuuid === "function"
       ? input.riot.getRankedQueueStatsByPuuid(account.puuid).catch((): PublicLolRankedQueues => ({}))
       : input.riot.getRankedStatsByPuuid(account.puuid).then((stats): PublicLolRankedQueues => ({
@@ -4062,6 +4223,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   function invalidatePublicLolProfileCaches(key: string): void {
     publicLolProfileCacheGeneration.set(key, (publicLolProfileCacheGeneration.get(key) ?? 0) + 1);
+    pruneMapToMax(publicLolProfileCacheGeneration, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
     publicLolProfileCache.delete(key);
     publicLolProfileInFlight.delete(key);
     publicLolProfilePuuidCache.delete(key);
@@ -4101,6 +4263,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         });
       }
       publicLolProfileRefreshAvailableAt.set(key, now + PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS);
+      pruneMapToMax(publicLolProfileRefreshAvailableAt, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
       invalidatePublicLolProfileCaches(key);
     }
     const cached = publicLolProfileCache.get(key);
@@ -4120,6 +4283,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             response,
             expiresAt: Date.now() + PUBLIC_LOL_PROFILE_CACHE_TTL_MS
           });
+          pruneMapToMax(publicLolProfileCache, PUBLIC_LOL_PROFILE_CACHE_MAX);
         }
         return response;
       })
@@ -4177,6 +4341,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           response,
           expiresAt: Date.now() + PUBLIC_LOL_PROFILE_CACHE_TTL_MS
         });
+        pruneMapToMax(publicLolMatchPageCache, PUBLIC_LOL_MATCH_CACHE_MAX);
         return response;
       })
       .finally(() => {
@@ -4342,6 +4507,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           response,
           expiresAt: Date.now() + PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS
         });
+        pruneMapToMax(publicLolMatchBuildCache, PUBLIC_LOL_MATCH_CACHE_MAX);
         return response;
       })
       .finally(() => {
@@ -4371,6 +4537,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           response,
           expiresAt: Date.now() + PUBLIC_LOL_MATCH_RANK_CACHE_TTL_MS
         });
+        pruneMapToMax(publicLolMatchRankCache, PUBLIC_LOL_MATCH_CACHE_MAX);
         return response;
       })
       .finally(() => {
@@ -4468,11 +4635,20 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const url = new URL(req.url, "http://localhost");
     const ip = clientIp(req);
 
+    if (shouldRedirectToHttps(req, url.pathname)) {
+      sendHttpsRedirect(res, req.url);
+      return;
+    }
+
     try {
       if (req.method === "GET" || req.method === "HEAD") {
         if (url.pathname === "/dashborad" || url.pathname === "/dashborad/") return sendRedirect(res, "/");
+        if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         if (url.pathname === "/" || isPublicLolAppRoute(url.pathname)) {
-          await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, "index.html"));
+          const legalDraftHeaders = url.pathname === "/privacy" || url.pathname === "/terms"
+            ? { "X-Robots-Tag": "noindex, nofollow" }
+            : undefined;
+          await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, "index.html"), legalDraftHeaders);
           return;
         }
       }
@@ -4491,7 +4667,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
       if (url.pathname.startsWith("/api/")) {
         const limitKey = `${ip}:${url.pathname}`;
-        const limiter = url.pathname.startsWith("/api/dashboard/auth/")
+        const limiter = url.pathname === "/api/inbound-email/cloudflare"
+          ? inboundEmailLimiter
+          : url.pathname.startsWith("/api/dashboard/auth/")
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
             ? oauthLimiter
@@ -4507,9 +4685,50 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, auth.status, { error: auth.message, code: auth.code });
       }
 
-      if (req.method === "GET" && url.pathname === "/health") return sendJson(req, res, 200, { ok: true });
-      if (req.method === "GET" && url.pathname === "/health/live") return sendJson(req, res, 200, { ok: true, status: "live" });
-      if (req.method === "GET" && url.pathname === "/health/ready") return sendJson(req, res, 200, { ok: true, status: "ready" });
+      if (req.method === "POST" && url.pathname === "/api/inbound-email/cloudflare") {
+        if (!appConfig.supportMailbox.enabled || !input.supportMailbox) {
+          return sendJson(req, res, 503, { error: "지원 메일함이 활성화되지 않았습니다." });
+        }
+        const body = await readRawBody(req, MAX_INBOUND_EMAIL_WEBHOOK_BYTES);
+        if (!verifyInboundEmailSignature(req, body, appConfig.supportMailbox.webhookSecret)) {
+          return sendJson(req, res, 401, { error: "inbound email signature가 올바르지 않습니다." });
+        }
+        const payload = parseSupportMailInboundPayload(body);
+        if (payload.envelopeTo !== appConfig.supportMailbox.address) {
+          return sendJson(req, res, 400, { error: "허용되지 않은 지원 메일 수신 주소입니다." });
+        }
+        const saved = await input.supportMailbox.add(payload);
+        return sendJson(req, res, saved.deduplicated ? 200 : 202, {
+          ok: true,
+          id: saved.message.id,
+          deduplicated: saved.deduplicated
+        });
+      }
+
+      if (req.method === "GET" && url.pathname === "/health") {
+        return sendJson(req, res, 200, { ok: true, build: appConfig.build });
+      }
+      if (req.method === "GET" && url.pathname === "/health/live") {
+        return sendJson(req, res, 200, { ok: true, status: "live", build: appConfig.build });
+      }
+      if (req.method === "GET" && url.pathname === "/health/ready") {
+        const shuttingDown = input.isShuttingDown?.() ?? false;
+        let readiness = { ok: true, checks: {} as Record<string, boolean>, errors: [] as string[] };
+        try {
+          const result = input.readiness?.();
+          if (result) readiness = { ok: result.ok, checks: result.checks ?? {}, errors: result.errors ?? [] };
+        } catch {
+          readiness = { ok: false, checks: {}, errors: ["readiness 검사에 실패했습니다."] };
+        }
+        const ready = readiness.ok && !shuttingDown;
+        return sendJson(req, res, ready ? 200 : 503, {
+          ok: ready,
+          status: ready ? "ready" : "not_ready",
+          checks: { ...readiness.checks, acceptingRequests: !shuttingDown },
+          errors: readiness.errors,
+          build: appConfig.build
+        });
+      }
       if (req.method === "GET" && url.pathname === "/api/dashboard/auth/status") {
         const surface = dashboardAuthSurface(url.searchParams.get("surface"));
         const principal = authenticateDashboardRequest(req, sessions, surface);
@@ -4568,6 +4787,112 @@ export function createHttpHandler(input: HttpHandlerInput) {
         !dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId)
       ) {
         return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다.", code: "STREAMER_DASHBOARD_DISABLED" });
+      }
+      if (url.pathname === "/api/dashboard/server-status" && req.method === "GET") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        const shuttingDown = input.isShuttingDown?.() ?? false;
+        let readiness = { ok: true, checks: {} as Record<string, boolean>, errors: [] as string[] };
+        try {
+          const result = input.readiness?.();
+          if (result) readiness = { ok: result.ok, checks: result.checks ?? {}, errors: result.errors ?? [] };
+        } catch {
+          readiness = { ok: false, checks: {}, errors: ["readiness 검사에 실패했습니다."] };
+        }
+        const ready = readiness.ok && !shuttingDown;
+        const services = input.store.getStatus();
+        const uptimeSeconds = Math.max(0, Math.floor(process.uptime()));
+        const memory = process.memoryUsage();
+        const connections = input.connectionStatus?.() ?? {
+          http: 0,
+          dashboardWebSocket: 0,
+          overlayWebSocket: 0,
+          bridge: services.bridge === "connected"
+        };
+        const response: DashboardServerStatus = {
+          collectedAt: new Date().toISOString(),
+          status: shuttingDown ? "shutting_down" : ready ? "ready" : "degraded",
+          uptimeSeconds,
+          startedAt: services.startedAt ?? new Date(Date.now() - uptimeSeconds * 1000).toISOString(),
+          build: { ...appConfig.build },
+          runtime: {
+            nodeEnv: appConfig.nodeEnv,
+            nodeVersion: process.version
+          },
+          memory: {
+            rssBytes: memory.rss,
+            heapUsedBytes: memory.heapUsed,
+            heapTotalBytes: memory.heapTotal,
+            externalBytes: memory.external
+          },
+          readiness: {
+            ok: ready,
+            checks: { ...readiness.checks, acceptingRequests: !shuttingDown },
+            errors: readiness.errors
+          },
+          connections,
+          services
+        };
+        return sendJson(req, res, 200, response);
+      }
+      if (url.pathname === "/api/support-mailbox" && req.method === "GET") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        if (!appConfig.supportMailbox.enabled || !input.supportMailbox) {
+          return sendJson(req, res, 200, {
+            enabled: false,
+            address: appConfig.supportMailbox.address,
+            retentionDays: appConfig.supportMailbox.retentionDays,
+            totalCount: 0,
+            unreadCount: 0,
+            messages: []
+          });
+        }
+        const filter = supportMailboxFilter(url.searchParams.get("filter"));
+        const limit = Math.max(1, Math.min(200, Math.trunc(Number(url.searchParams.get("limit")) || 100)));
+        const messages = await input.supportMailbox.list(filter, limit);
+        const counts = await input.supportMailbox.counts();
+        return sendJson(req, res, 200, {
+          enabled: true,
+          address: appConfig.supportMailbox.address,
+          retentionDays: appConfig.supportMailbox.retentionDays,
+          ...counts,
+          messages
+        });
+      }
+      const supportMailboxDetailMatch = url.pathname.match(/^\/api\/support-mailbox\/([^/]+)$/);
+      if (req.method === "GET" && supportMailboxDetailMatch) {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        if (!input.supportMailbox) return sendJson(req, res, 503, { error: "지원 메일함이 활성화되지 않았습니다." });
+        const id = decodeURIComponent(supportMailboxDetailMatch[1] ?? "").trim();
+        const message = id ? await input.supportMailbox.get(id) : undefined;
+        if (!message) return sendJson(req, res, 404, { error: "문의 메일을 찾을 수 없습니다." });
+        return sendJson(req, res, 200, { message });
+      }
+      const supportMailboxReadMatch = url.pathname.match(/^\/api\/support-mailbox\/([^/]+)\/read$/);
+      if (req.method === "POST" && supportMailboxReadMatch) {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        if (!input.supportMailbox) return sendJson(req, res, 503, { error: "지원 메일함이 활성화되지 않았습니다." });
+        const body = await readJsonBody<{ read?: unknown }>(req);
+        if (typeof body.read !== "boolean") return sendJson(req, res, 400, { error: "read는 boolean이어야 합니다." });
+        const message = await input.supportMailbox.setRead(decodeURIComponent(supportMailboxReadMatch[1] ?? ""), body.read);
+        if (!message) return sendJson(req, res, 404, { error: "문의 메일을 찾을 수 없습니다." });
+        return sendJson(req, res, 200, { message });
+      }
+      if (req.method === "DELETE" && supportMailboxDetailMatch) {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        if (!input.supportMailbox) return sendJson(req, res, 503, { error: "지원 메일함이 활성화되지 않았습니다." });
+        const deleted = await input.supportMailbox.delete(decodeURIComponent(supportMailboxDetailMatch[1] ?? ""));
+        if (!deleted) return sendJson(req, res, 404, { error: "문의 메일을 찾을 수 없습니다." });
+        return sendJson(req, res, 200, { ok: true });
       }
       if (req.method === "GET" && url.pathname === "/api/lol/profile") {
         const refresh = url.searchParams.get("refresh") === "1" || url.searchParams.get("refresh") === "true";

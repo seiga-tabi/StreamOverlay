@@ -246,15 +246,15 @@ export function SoloRankPage() {
   }
 
   return (
-    <>
-      <div className="page-title-row page-header compact">
+    <section className="solo-rank-settings-page">
+      <div className="page-title-row page-header compact solo-rank-settings-header">
         <div>
           <h1 data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</h1>
           <p className="muted" data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</p>
         </div>
       </div>
 
-      <div className="card participation-monitor-card">
+      <div className="card participation-monitor-card solo-rank-settings-card solo-rank-monitor-card">
         <div className="card-title-row">
           <h2 data-ko={i18n.ko.gameMonitorTitle} data-ja={i18n.ja.gameMonitorTitle}>{t.gameMonitorTitle}</h2>
           <span className={`queue-status ${monitorEnabled && streamerRiotId.trim() ? "good" : "neutral"}`}>
@@ -285,20 +285,22 @@ export function SoloRankPage() {
           </label>
           <button className="secondary compact-button" disabled={monitorSaving} type="submit">{t.saveGameMonitor}</button>
         </form>
-        <p className="muted">{gameMonitor?.streamerRiotId ? gameMonitor.streamerRiotId : t.gameMonitorWaiting}</p>
-        <button
-          className="secondary compact-button"
-          disabled={profileRefreshing || !streamerRiotId.trim()}
-          onClick={() => void refreshStreamerProfile()}
-          type="button"
-        >
-          {profileRefreshing ? t.refreshingStreamerProfile : t.refreshStreamerProfile}
-        </button>
+        <div className="solo-rank-monitor-footer">
+          <p className="muted">{gameMonitor?.streamerRiotId ? gameMonitor.streamerRiotId : t.gameMonitorWaiting}</p>
+          <button
+            className="secondary compact-button"
+            disabled={profileRefreshing || !streamerRiotId.trim()}
+            onClick={() => void refreshStreamerProfile()}
+            type="button"
+          >
+            {profileRefreshing ? t.refreshingStreamerProfile : t.refreshStreamerProfile}
+          </button>
+        </div>
         {monitorMessage ? <p className="form-message">{monitorMessage}</p> : null}
         {profileRefreshMessage ? <p className="form-message">{profileRefreshMessage}</p> : null}
       </div>
 
-      <div className="card participation-monitor-card">
+      <div className="card participation-monitor-card solo-rank-settings-card solo-rank-skins-card">
         <div className="card-title-row">
           <h2 data-ko={i18n.ko.profileSettingsTitle} data-ja={i18n.ja.profileSettingsTitle}>{t.profileSettingsTitle}</h2>
           <button className="secondary compact-button" disabled={skinOptionsLoading} onClick={() => void loadSkinOptions()} type="button">
@@ -335,6 +337,6 @@ export function SoloRankPage() {
         ) : null}
         {profileSettingsMessage ? <p className="form-message">{profileSettingsMessage}</p> : null}
       </div>
-    </>
+    </section>
   );
 }

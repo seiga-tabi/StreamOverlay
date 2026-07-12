@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import crypto from "node:crypto";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
@@ -141,6 +142,92 @@ test("공개 LoL 전적 API는 dashboard 세션 없이 접근할 수 있다", as
 
     assert.equal(res.statusCode, 503);
     assert.match(JSON.parse(res.body).error, /Riot API client/);
+  });
+});
+
+test("Cloudflare inbound email webhook은 유효한 HMAC 서명만 허용한다", async () => {
+  await withAuthConfig(async () => {
+    const previous = { ...appConfig.supportMailbox };
+    const webhookSecret = "support_webhook_secret_for_tests_12345678901234567890";
+    appConfig.supportMailbox.enabled = true;
+    appConfig.supportMailbox.address = "support@yoro.gg";
+    appConfig.supportMailbox.webhookSecret = webhookSecret;
+    const received = [];
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore(),
+      supportMailbox: {
+        async add(payload) {
+          received.push(payload);
+          return { message: { id: "mail-1" }, deduplicated: false };
+        }
+      }
+    });
+    const payload = {
+      version: 1,
+      provider: "cloudflare",
+      providerMessageId: "message-1@example.test",
+      envelopeFrom: "viewer@example.test",
+      envelopeTo: "support@yoro.gg",
+      fromAddress: "viewer@example.test",
+      subject: "문의",
+      text: "본문",
+      receivedAt: new Date().toISOString(),
+      sizeBytes: 100,
+      attachments: []
+    };
+    const serialized = JSON.stringify(payload);
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const signature = crypto.createHmac("sha256", webhookSecret).update(`${timestamp}.${serialized}`).digest("hex");
+    try {
+      const validReq = createRequest("POST", "/api/inbound-email/cloudflare", payload, {
+        "content-type": "application/json",
+        "x-yoro-email-timestamp": timestamp,
+        "x-yoro-email-signature": `sha256=${signature}`
+      });
+      const validRes = createResponse();
+      await handler(validReq, validRes);
+      assert.equal(validRes.statusCode, 202);
+      assert.equal(received.length, 1);
+
+      const invalidReq = createRequest("POST", "/api/inbound-email/cloudflare", payload, {
+        "content-type": "application/json",
+        "x-yoro-email-timestamp": timestamp,
+        "x-yoro-email-signature": `sha256=${"0".repeat(64)}`
+      });
+      const invalidRes = createResponse();
+      await handler(invalidReq, invalidRes);
+      assert.equal(invalidRes.statusCode, 401);
+      assert.equal(received.length, 1);
+
+      const staleTimestamp = (Number(timestamp) - 600).toString();
+      const staleSignature = crypto.createHmac("sha256", webhookSecret).update(`${staleTimestamp}.${serialized}`).digest("hex");
+      const staleReq = createRequest("POST", "/api/inbound-email/cloudflare", payload, {
+        "content-type": "application/json",
+        "x-yoro-email-timestamp": staleTimestamp,
+        "x-yoro-email-signature": `sha256=${staleSignature}`
+      });
+      const staleRes = createResponse();
+      await handler(staleReq, staleRes);
+      assert.equal(staleRes.statusCode, 401);
+
+      const wrongRecipientPayload = { ...payload, envelopeTo: "other@yoro.gg" };
+      const wrongRecipientSerialized = JSON.stringify(wrongRecipientPayload);
+      const wrongRecipientSignature = crypto.createHmac("sha256", webhookSecret).update(`${timestamp}.${wrongRecipientSerialized}`).digest("hex");
+      const wrongRecipientReq = createRequest("POST", "/api/inbound-email/cloudflare", wrongRecipientPayload, {
+        "content-type": "application/json",
+        "x-yoro-email-timestamp": timestamp,
+        "x-yoro-email-signature": `sha256=${wrongRecipientSignature}`
+      });
+      const wrongRecipientRes = createResponse();
+      await handler(wrongRecipientReq, wrongRecipientRes);
+      assert.equal(wrongRecipientRes.statusCode, 400);
+      assert.equal(received.length, 1);
+    } finally {
+      Object.assign(appConfig.supportMailbox, previous);
+    }
   });
 });
 
@@ -2198,7 +2285,7 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     assert.equal(blocked.status, 403);
     assert.equal(blocked.code, "FORBIDDEN");
 
-    for (const pathname of ["/api/events/recent", "/api/questions", "/api/tournaments"]) {
+    for (const pathname of ["/api/events/recent", "/api/questions", "/api/tournaments", "/api/support-mailbox", "/api/dashboard/server-status"]) {
       const adminOnlyReq = createRequest("GET", pathname, undefined, {
         cookie,
         "x-streamops-dashboard-surface": "streamer"

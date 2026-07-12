@@ -35,6 +35,22 @@ test.after(() => {
   globalThis.fetch = originalFetch;
 });
 
+test("TwitchApiClient는 응답이 없는 외부 요청을 timeout으로 중단한다", async () => {
+  const previousTimeout = appConfig.twitch.apiTimeoutMs;
+  const keepAlive = setTimeout(() => undefined, 1_000);
+  appConfig.twitch.apiTimeoutMs = 10;
+  globalThis.fetch = async (_url, init) => new Promise((_resolve, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(init.signal.reason), { once: true });
+  });
+  try {
+    const client = new TwitchApiClient(createAuth());
+    await assert.rejects(() => client.getUserProfile("123"), /timed out|timeout/i);
+  } finally {
+    clearTimeout(keepAlive);
+    appConfig.twitch.apiTimeoutMs = previousTimeout;
+  }
+});
+
 test("TwitchApiClient는 channel followers를 pagination으로 조회한다", async () => {
   const calls = [];
   globalThis.fetch = async (url, init) => {

@@ -1,0 +1,18 @@
+[Unit]
+Description=YORO.gg persistent state backup
+After=local-fs.target
+
+[Service]
+Type=oneshot
+User=yoro
+Group=yoro
+WorkingDirectory=/srv/yoro/app
+EnvironmentFile=/etc/yoro/operations.env
+UMask=0077
+ExecStart=/usr/bin/node /srv/yoro/app/scripts/backup-state.mjs --state-dir=${STREAMOPS_STATE_DIR} --output-dir=${STREAMOPS_BACKUP_DIR}
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/srv/yoro/state
+ReadWritePaths=/srv/yoro/backups

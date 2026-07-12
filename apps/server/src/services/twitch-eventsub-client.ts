@@ -81,6 +81,7 @@ export class TwitchEventSubClient {
   private readonly webSocketFactory: WebSocketFactory;
   private readonly reconnectDelayMs: number;
   private readonly subscriptions: string[];
+  private stopped = false;
 
   constructor(
     private readonly events: EventBus,
@@ -95,6 +96,7 @@ export class TwitchEventSubClient {
   }
 
   start(): void {
+    this.stopped = false;
     if (!appConfig.twitch.enableEventSub) {
       this.store.patchStatus({ twitch: "disabled" });
       this.store.patchTwitchEventSubStatus({ websocket: "disabled" });
@@ -105,6 +107,7 @@ export class TwitchEventSubClient {
   }
 
   reconnect(reason = "manual"): void {
+    if (this.stopped) return;
     if (!appConfig.twitch.enableEventSub) {
       this.store.patchTwitchEventSubStatus({ websocket: "disabled" });
       this.logger.event({ type: "twitch.eventsub.reconnect_skipped", reason, enabled: false });
@@ -129,6 +132,7 @@ export class TwitchEventSubClient {
   }
 
   private connect(url = DEFAULT_EVENTSUB_URL, previousSocket?: EventSubSocket): void {
+    if (this.stopped) return;
     const socket = this.webSocketFactory(url);
     if (previousSocket) {
       this.reconnectingSocket = socket;
@@ -165,11 +169,27 @@ export class TwitchEventSubClient {
   }
 
   private scheduleReconnect(): void {
-    if (this.reconnectTimer) return;
+    if (this.stopped || this.reconnectTimer) return;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = undefined;
       this.connect();
     }, this.reconnectDelayMs);
+  }
+
+  stop(): void {
+    this.stopped = true;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = undefined;
+    }
+    for (const socket of [this.socket, this.reconnectingSocket]) {
+      if (!socket) continue;
+      this.suppressedCloseSockets.add(socket);
+      socket.close();
+    }
+    this.socket = undefined;
+    this.reconnectingSocket = undefined;
+    this.store.patchTwitchEventSubStatus({ websocket: "disabled" });
   }
 
   private async handleMessage(raw: string, socket: EventSubSocket, previousSocket?: EventSubSocket): Promise<void> {

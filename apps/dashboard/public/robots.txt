@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /privacy
+Disallow: /terms
+
+Sitemap: https://gg.seigatabi.com/sitemap.xml

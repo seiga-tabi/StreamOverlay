@@ -2,6 +2,15 @@ import { useEffect, useState, type FormEvent } from "react";
 import { updateStreamerProfileLink, updateStreamerRiotId, type DashboardStreamerInfo, type DashboardStreamerProfileLink } from "../api/client";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl } from "../components/ProfileLinkIcon";
 import { createDashboardLocaleProxy } from "../i18n";
+import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
+import { Button } from "../shared/ui/Button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../shared/ui/Card";
+import { EmptyState, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../shared/ui/EmptyState";
+import { FormControl, FormField, FormHint, FormLabel, Input } from "../shared/ui/Form";
+import { Modal, ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "../shared/ui/Modal";
+import { PageHeader, PageHeaderActions, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../shared/ui/PageHeader";
+import { Badge, Metric, StatusPill } from "../shared/ui/Status";
+import { Toast, ToastCloseButton, ToastDescription, ToastProvider, ToastTitle, ToastViewport, type ToastTone } from "../shared/ui/Toast";
 
 const PROFILE_LINK_LIMIT = 5;
 
@@ -11,12 +20,21 @@ type ProfileLinkDraft = {
   label: string;
 };
 
+type AccountToast = {
+  id: number;
+  title: string;
+  description?: string;
+  tone: ToastTone;
+};
+
 const i18n = {
   ko: {
     title: "내 Riot ID 등록 현황",
     description: "Twitch 계정에 승인되어 연결된 Riot ID와 스트리머 전용 overlay 접근 정보를 확인합니다.",
+    studio: "Account Studio",
     status: "등록 상태",
     approved: "승인 완료",
+    current: "현재",
     twitchAccount: "Twitch 계정",
     riotAccount: "등록된 Riot ID",
     riotAccountDescription: "Riot 닉네임이나 태그가 변경되면 새 Riot ID를 적용합니다.",
@@ -47,13 +65,24 @@ const i18n = {
     openTwitch: "Twitch 열기",
     noRegistration: "등록된 Riot ID가 없습니다.",
     noRegistrationBody: "공개 전적 화면에서 Twitch 로그인 후 스트리머 등록 요청을 보내고, 관리자가 승인하면 이 화면에 표시됩니다.",
+    accountNav: "계정",
+    riotNav: "Riot ID",
+    linkNav: "링크",
+    overlayNav: "Overlay",
+    confirmClearTitle: "프로필 링크 삭제",
+    confirmClearDescription: "공개 전적 프로필에 표시되는 모든 프로필 링크를 삭제합니다.",
+    confirm: "확인",
+    cancel: "취소",
+    close: "닫기",
     none: "없음"
   },
   ja: {
     title: "自分の Riot ID 登録状況",
     description: "Twitchアカウントに承認連携された Riot ID と配信者専用 overlay 接続情報を確認します。",
+    studio: "Account Studio",
     status: "登録状態",
     approved: "承認済み",
+    current: "現在",
     twitchAccount: "Twitch アカウント",
     riotAccount: "登録済み Riot ID",
     riotAccountDescription: "Riot のニックネームやタグが変わった場合、新しい Riot ID を適用します。",
@@ -84,6 +113,15 @@ const i18n = {
     openTwitch: "Twitch を開く",
     noRegistration: "登録済み Riot ID がありません。",
     noRegistrationBody: "公開戦績画面で Twitch ログイン後に配信者登録申請を送り、管理者が承認するとこの画面に表示されます。",
+    accountNav: "アカウント",
+    riotNav: "Riot ID",
+    linkNav: "リンク",
+    overlayNav: "Overlay",
+    confirmClearTitle: "プロフィールリンク削除",
+    confirmClearDescription: "公開戦績プロフィールに表示されるすべてのプロフィールリンクを削除します。",
+    confirm: "確認",
+    cancel: "キャンセル",
+    close: "閉じる",
     none: "なし"
   }
 } as const;
@@ -144,6 +182,8 @@ export function MyRiotAccountPage({
   const [profileLinks, setProfileLinks] = useState<ProfileLinkDraft[]>(() => profileLinkDraftsFromStreamer(streamer));
   const [profileLinkBusy, setProfileLinkBusy] = useState(false);
   const [profileLinkMessage, setProfileLinkMessage] = useState("");
+  const [profileLinkClearOpen, setProfileLinkClearOpen] = useState(false);
+  const [toast, setToast] = useState<AccountToast | null>(null);
 
   useEffect(() => {
     setRiotIdDraft(streamer ? `${streamer.riotGameName}#${streamer.riotTagLine}` : "");
@@ -152,6 +192,10 @@ export function MyRiotAccountPage({
   useEffect(() => {
     setProfileLinks(profileLinkDraftsFromStreamer(streamer));
   }, [streamer?.profileLinkUrl, streamer?.profileLinkLabel, streamer?.profileLinks]);
+
+  function showToast(tone: ToastTone, title: string, description?: string): void {
+    setToast({ id: Date.now(), tone, title, description });
+  }
 
   async function saveRiotId(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -165,8 +209,11 @@ export function MyRiotAccountPage({
       onStreamerChange?.(updated);
       setRiotIdDraft(`${updated.riotGameName}#${updated.riotTagLine}`);
       setRiotIdMessage(t.riotIdSaved);
+      showToast("success", t.riotIdSaved);
     } catch (error) {
-      setRiotIdMessage(apiErrorDetail(error, t.riotIdSaveFailed));
+      const detail = apiErrorDetail(error, t.riotIdSaveFailed);
+      setRiotIdMessage(detail);
+      showToast("danger", t.riotIdSaveFailed, detail);
     } finally {
       setRiotIdBusy(false);
     }
@@ -189,9 +236,13 @@ export function MyRiotAccountPage({
       });
       onStreamerChange?.(updated);
       setProfileLinks(profileLinkDraftsFromStreamer(updated));
-      setProfileLinkMessage(updated.profileLinks?.length ? t.profileLinkSaved : t.profileLinkCleared);
+      const message = updated.profileLinks?.length ? t.profileLinkSaved : t.profileLinkCleared;
+      setProfileLinkMessage(message);
+      showToast("success", message);
     } catch (error) {
-      setProfileLinkMessage(apiErrorDetail(error, t.profileLinkSaveFailed));
+      const detail = apiErrorDetail(error, t.profileLinkSaveFailed);
+      setProfileLinkMessage(detail);
+      showToast("danger", t.profileLinkSaveFailed, detail);
     } finally {
       setProfileLinkBusy(false);
     }
@@ -206,8 +257,12 @@ export function MyRiotAccountPage({
       const updated = await updateStreamerProfileLink({ profileLinks: [] });
       onStreamerChange?.(updated);
       setProfileLinkMessage(t.profileLinkCleared);
+      setProfileLinkClearOpen(false);
+      showToast("success", t.profileLinkCleared);
     } catch (error) {
-      setProfileLinkMessage(apiErrorDetail(error, t.profileLinkSaveFailed));
+      const detail = apiErrorDetail(error, t.profileLinkSaveFailed);
+      setProfileLinkMessage(detail);
+      showToast("danger", t.profileLinkSaveFailed, detail);
     } finally {
       setProfileLinkBusy(false);
     }
@@ -230,156 +285,224 @@ export function MyRiotAccountPage({
 
   if (!streamer) {
     return (
-      <>
-        <div className="page-title-row page-header compact">
-          <div>
-            <h1 data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</h1>
-            <p className="muted" data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</p>
-          </div>
-          <span className="queue-status neutral" data-ko={i18n.ko.none} data-ja={i18n.ja.none}>{t.none}</span>
-        </div>
-        <div className="card my-riot-account-empty">
-          <strong data-ko={i18n.ko.noRegistration} data-ja={i18n.ja.noRegistration}>{t.noRegistration}</strong>
-          <p className="muted" data-ko={i18n.ko.noRegistrationBody} data-ja={i18n.ja.noRegistrationBody}>{t.noRegistrationBody}</p>
-        </div>
-      </>
+      <AppShell as="section" className="settings-shared-shell my-riot-account-shell" mainId="my-riot-account-main" skipLinkLabel={t.title} variant="streamer">
+        <AppShellHeader className="settings-shared-header">
+          <PageHeader className="settings-shared-page-header" layout="split">
+            <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
+            <PageHeaderTitle data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</PageHeaderTitle>
+            <PageHeaderDescription data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</PageHeaderDescription>
+            <PageHeaderStatus>
+              <StatusPill tone="warning" data-ko={i18n.ko.none} data-ja={i18n.ja.none}>{t.none}</StatusPill>
+            </PageHeaderStatus>
+          </PageHeader>
+        </AppShellHeader>
+        <AppShellMain className="settings-shared-main" id="my-riot-account-main">
+          <EmptyState className="settings-shared-empty" variant="streamer">
+            <EmptyStateIcon>R</EmptyStateIcon>
+            <EmptyStateTitle as="h2" data-ko={i18n.ko.noRegistration} data-ja={i18n.ja.noRegistration}>{t.noRegistration}</EmptyStateTitle>
+            <EmptyStateDescription data-ko={i18n.ko.noRegistrationBody} data-ja={i18n.ja.noRegistrationBody}>{t.noRegistrationBody}</EmptyStateDescription>
+          </EmptyState>
+        </AppShellMain>
+      </AppShell>
     );
   }
 
   return (
-    <>
-      <div className="page-title-row page-header compact">
-        <div>
-          <h1 data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</h1>
-          <p className="muted" data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</p>
-        </div>
-        <span className="queue-status good" data-ko={i18n.ko.approved} data-ja={i18n.ja.approved}>{t.approved}</span>
-      </div>
+    <ToastProvider position="top-right">
+      <AppShell
+        as="section"
+        className="settings-shared-shell my-riot-account-shell"
+        mainId="my-riot-account-main"
+        skipLinkLabel={t.title}
+        variant="streamer"
+      >
+        <AppShellHeader className="settings-shared-header">
+          <PageHeader className="settings-shared-page-header" layout="split">
+            <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
+            <PageHeaderTitle data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</PageHeaderTitle>
+            <PageHeaderDescription data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</PageHeaderDescription>
+            <PageHeaderStatus>
+              <StatusPill tone="success" data-ko={i18n.ko.approved} data-ja={i18n.ja.approved}>{t.approved}</StatusPill>
+            </PageHeaderStatus>
+            <PageHeaderActions>
+              <Badge tone="streamer">{t.current}</Badge>
+            </PageHeaderActions>
+          </PageHeader>
+        </AppShellHeader>
 
-      <div className="my-riot-account-grid">
-        <section className="card my-riot-account-profile">
-          <span className="my-riot-avatar">
-            {streamer.twitchProfileImageUrl ? <img src={streamer.twitchProfileImageUrl} alt="" /> : streamer.twitchDisplayName.slice(0, 1).toUpperCase()}
-          </span>
-          <div>
-            <span data-ko={i18n.ko.twitchAccount} data-ja={i18n.ja.twitchAccount}>{t.twitchAccount}</span>
-            <strong>{streamer.twitchDisplayName}</strong>
-            <small>@{streamer.twitchLogin}</small>
-          </div>
-          <a className="secondary compact-button" href={twitchChannelUrl(streamer)} target="_blank" rel="noreferrer" data-ko={i18n.ko.openTwitch} data-ja={i18n.ja.openTwitch}>
-            {t.openTwitch}
-          </a>
-        </section>
+        <AppShellMain className="settings-shared-main" id="my-riot-account-main">
+          <div className="settings-shared-grid my-riot-account-grid">
+            <Card as="section" className="settings-shared-card my-riot-account-profile" id="my-riot-account-profile" padding="lg" variant="glass">
+              <span className="my-riot-avatar">
+                {streamer.twitchProfileImageUrl ? <img src={streamer.twitchProfileImageUrl} alt="" /> : streamer.twitchDisplayName.slice(0, 1).toUpperCase()}
+              </span>
+              <div className="my-riot-account-profile-copy">
+                <StatusPill tone="success" size="sm" data-ko={i18n.ko.twitchAccount} data-ja={i18n.ja.twitchAccount}>{t.twitchAccount}</StatusPill>
+                <strong>{streamer.twitchDisplayName}</strong>
+                <small>@{streamer.twitchLogin}</small>
+              </div>
+              <Button as="a" href={twitchChannelUrl(streamer)} target="_blank" rel="noreferrer" variant="secondary" size="sm" data-ko={i18n.ko.openTwitch} data-ja={i18n.ja.openTwitch}>
+                {t.openTwitch}
+              </Button>
+            </Card>
 
-        <section className="card my-riot-account-card">
-          <span data-ko={i18n.ko.status} data-ja={i18n.ja.status}>{t.status}</span>
-          <strong data-ko={i18n.ko.approved} data-ja={i18n.ja.approved}>{t.approved}</strong>
-        </section>
+            <Card as="section" className="settings-shared-card my-riot-account-card my-riot-account-status-card" padding="lg" variant="elevated">
+              <Metric label={t.status} value={t.approved} tone="success" status={<StatusPill tone="success" size="sm">{t.approved}</StatusPill>} />
+            </Card>
 
-        <section className="card my-riot-account-card featured">
-          <span data-ko={i18n.ko.riotAccount} data-ja={i18n.ja.riotAccount}>{t.riotAccount}</span>
-          <strong>{streamer.riotGameName}<small>#{streamer.riotTagLine}</small></strong>
-          <p className="muted" data-ko={i18n.ko.riotAccountDescription} data-ja={i18n.ja.riotAccountDescription}>{t.riotAccountDescription}</p>
-          <form className="my-riot-id-form" onSubmit={(event) => void saveRiotId(event)}>
-            <label>
-              <span data-ko={i18n.ko.riotIdInput} data-ja={i18n.ja.riotIdInput}>{t.riotIdInput}</span>
-              <input
-                value={riotIdDraft}
-                placeholder={t.riotIdPlaceholder}
-                onChange={(event) => setRiotIdDraft(event.target.value)}
-                disabled={riotIdBusy}
-              />
-            </label>
-            <div className="my-riot-profile-link-actions">
-              <button className="primary compact-button" type="submit" disabled={riotIdBusy}>{t.applyRiotId}</button>
-              <a className="secondary compact-button" href={publicSummonerPath(streamer)} target="_blank" rel="noreferrer" data-ko={i18n.ko.openRecord} data-ja={i18n.ja.openRecord}>
-                {t.openRecord}
-              </a>
-            </div>
-          </form>
-          {riotIdMessage ? <p className="form-message">{riotIdMessage}</p> : null}
-        </section>
-
-        <section className="card my-riot-account-card wide">
-          <span data-ko={i18n.ko.profileLink} data-ja={i18n.ja.profileLink}>{t.profileLink}</span>
-          <p className="muted" data-ko={i18n.ko.profileLinkDescription} data-ja={i18n.ja.profileLinkDescription}>{t.profileLinkDescription}</p>
-          <form className="my-riot-profile-link-form" onSubmit={(event) => void saveProfileLink(event)}>
-            <div className="my-riot-profile-link-list">
-              {profileLinks.map((link, index) => (
-                <div className="my-riot-profile-link-row" key={link.id}>
-                  <ProfileLinkIcon
-                    url={link.url}
-                    platform={profileLinkPlatformFromUrl(link.url)}
-                    label={link.label || t.profileLink}
-                    className="my-riot-profile-link-preview"
-                  />
-                  <label>
-                    <span data-ko={i18n.ko.profileLinkUrl} data-ja={i18n.ja.profileLinkUrl}>{t.profileLinkUrl}</span>
-                    <input
-                      value={link.url}
-                      placeholder={t.profileLinkUrlPlaceholder}
-                      onChange={(event) => updateProfileLinkDraft(index, "url", event.target.value)}
-                      disabled={profileLinkBusy}
-                    />
-                  </label>
-                  <label>
-                    <span data-ko={i18n.ko.profileLinkLabel} data-ja={i18n.ja.profileLinkLabel}>{t.profileLinkLabel}</span>
-                    <input
-                      value={link.label}
-                      placeholder={t.profileLinkLabelPlaceholder}
-                      maxLength={40}
-                      onChange={(event) => updateProfileLinkDraft(index, "label", event.target.value)}
-                      disabled={profileLinkBusy}
-                    />
-                  </label>
-                  <button
-                    className="secondary compact-button"
-                    type="button"
-                    onClick={() => removeProfileLinkDraft(index)}
-                    disabled={profileLinkBusy}
-                    data-ko={i18n.ko.removeProfileLink}
-                    data-ja={i18n.ja.removeProfileLink}
-                  >
-                    {t.removeProfileLink}
-                  </button>
+            <Card as="section" className="settings-shared-card my-riot-account-card featured" id="my-riot-account-riot" padding="lg" variant="glass">
+              <CardHeader className="settings-shared-card-header">
+                <div>
+                  <CardTitle as="h2" data-ko={i18n.ko.riotAccount} data-ja={i18n.ja.riotAccount}>{t.riotAccount}</CardTitle>
+                  <CardDescription data-ko={i18n.ko.riotAccountDescription} data-ja={i18n.ja.riotAccountDescription}>{t.riotAccountDescription}</CardDescription>
                 </div>
-              ))}
-              <button
-                className="my-riot-profile-link-add"
-                type="button"
-                onClick={addProfileLinkDraft}
-                disabled={profileLinkBusy || profileLinks.length >= PROFILE_LINK_LIMIT}
-                data-ko={i18n.ko.addProfileLink}
-                data-ja={i18n.ja.addProfileLink}
-              >
-                + {t.addProfileLink}
-              </button>
-              <small className="muted" data-ko={i18n.ko.profileLinksLimit} data-ja={i18n.ja.profileLinksLimit}>{t.profileLinksLimit}</small>
-            </div>
-            <div className="my-riot-profile-link-actions">
-              <button className="primary compact-button" type="submit" disabled={profileLinkBusy}>{t.saveProfileLink}</button>
-              <button className="secondary compact-button" type="button" onClick={() => void clearProfileLink()} disabled={profileLinkBusy || (!profileLinks.some((link) => link.url.trim()) && !streamer.profileLinkUrl)}>
-                {t.clearProfileLink}
-              </button>
-            </div>
-          </form>
-          {profileLinkMessage ? <p className="form-message">{profileLinkMessage}</p> : null}
-        </section>
+                <StatusPill tone="info">{streamer.riotTagLine}</StatusPill>
+              </CardHeader>
+              <CardContent className="settings-shared-card-content">
+                <Metric label={t.riotAccount} value={`${streamer.riotGameName}#${streamer.riotTagLine}`} tone="streamer" />
+                <form className="settings-shared-form my-riot-id-form" onSubmit={(event) => void saveRiotId(event)}>
+                  <FormField controlId="my-riot-id-input" disabled={riotIdBusy} required>
+                    <FormLabel data-ko={i18n.ko.riotIdInput} data-ja={i18n.ja.riotIdInput}>{t.riotIdInput}</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="my-riot-id-input"
+                        value={riotIdDraft}
+                        placeholder={t.riotIdPlaceholder}
+                        onChange={(event) => setRiotIdDraft(event.target.value)}
+                        disabled={riotIdBusy}
+                      />
+                    </FormControl>
+                    <FormHint>{t.riotAccountDescription}</FormHint>
+                  </FormField>
+                  <CardFooter className="settings-shared-actions settings-shared-actions--flush">
+                    <Button type="submit" loading={riotIdBusy} disabled={riotIdBusy}>{t.applyRiotId}</Button>
+                    <Button as="a" href={publicSummonerPath(streamer)} target="_blank" rel="noreferrer" variant="secondary" data-ko={i18n.ko.openRecord} data-ja={i18n.ja.openRecord}>
+                      {t.openRecord}
+                    </Button>
+                  </CardFooter>
+                </form>
+                {riotIdMessage ? <StatusPill tone={riotIdMessage === t.riotIdSaved ? "success" : "danger"}>{riotIdMessage}</StatusPill> : null}
+              </CardContent>
+            </Card>
 
-        <section className="card my-riot-account-card wide">
-          <span data-ko={i18n.ko.overlayAccess} data-ja={i18n.ja.overlayAccess}>{t.overlayAccess}</span>
-          <div className="my-riot-overlay-detail">
-            <div>
-              <small data-ko={i18n.ko.overlaySlug} data-ja={i18n.ja.overlaySlug}>{t.overlaySlug}</small>
-              <code>{overlayPath(streamer)}</code>
-            </div>
-            <div>
-              <small data-ko={i18n.ko.overlayKey} data-ja={i18n.ja.overlayKey}>{t.overlayKey}</small>
-              <code>{streamer.overlayKey ?? t.none}</code>
-            </div>
+            <Card as="section" className="settings-shared-card my-riot-account-card wide" id="my-riot-account-links" padding="lg" variant="glass">
+              <CardHeader className="settings-shared-card-header">
+                <div>
+                  <CardTitle as="h2" data-ko={i18n.ko.profileLink} data-ja={i18n.ja.profileLink}>{t.profileLink}</CardTitle>
+                  <CardDescription data-ko={i18n.ko.profileLinkDescription} data-ja={i18n.ja.profileLinkDescription}>{t.profileLinkDescription}</CardDescription>
+                </div>
+                <Badge tone="info">{profileLinks.length}/{PROFILE_LINK_LIMIT}</Badge>
+              </CardHeader>
+              <CardContent className="settings-shared-card-content">
+                <form className="settings-shared-form my-riot-profile-link-form" onSubmit={(event) => void saveProfileLink(event)}>
+                  <div className="my-riot-profile-link-list">
+                    {profileLinks.map((link, index) => (
+                      <Card as="div" className="my-riot-profile-link-row" key={link.id} padding="sm" variant="elevated">
+                        <ProfileLinkIcon
+                          url={link.url}
+                          platform={profileLinkPlatformFromUrl(link.url)}
+                          label={link.label || t.profileLink}
+                          className="my-riot-profile-link-preview"
+                        />
+                        <FormField controlId={`my-riot-profile-link-url-${link.id}`} disabled={profileLinkBusy}>
+                          <FormLabel data-ko={i18n.ko.profileLinkUrl} data-ja={i18n.ja.profileLinkUrl}>{t.profileLinkUrl}</FormLabel>
+                          <FormControl>
+                            <Input
+                              id={`my-riot-profile-link-url-${link.id}`}
+                              value={link.url}
+                              placeholder={t.profileLinkUrlPlaceholder}
+                              onChange={(event) => updateProfileLinkDraft(index, "url", event.target.value)}
+                              disabled={profileLinkBusy}
+                            />
+                          </FormControl>
+                        </FormField>
+                        <FormField controlId={`my-riot-profile-link-label-${link.id}`} disabled={profileLinkBusy}>
+                          <FormLabel data-ko={i18n.ko.profileLinkLabel} data-ja={i18n.ja.profileLinkLabel}>{t.profileLinkLabel}</FormLabel>
+                          <FormControl>
+                            <Input
+                              id={`my-riot-profile-link-label-${link.id}`}
+                              value={link.label}
+                              placeholder={t.profileLinkLabelPlaceholder}
+                              maxLength={40}
+                              onChange={(event) => updateProfileLinkDraft(index, "label", event.target.value)}
+                              disabled={profileLinkBusy}
+                            />
+                          </FormControl>
+                        </FormField>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => removeProfileLinkDraft(index)}
+                          disabled={profileLinkBusy}
+                          data-ko={i18n.ko.removeProfileLink}
+                          data-ja={i18n.ja.removeProfileLink}
+                        >
+                          {t.removeProfileLink}
+                        </Button>
+                      </Card>
+                    ))}
+                    <Button
+                      className="my-riot-profile-link-add"
+                      type="button"
+                      variant="tertiary"
+                      onClick={addProfileLinkDraft}
+                      disabled={profileLinkBusy || profileLinks.length >= PROFILE_LINK_LIMIT}
+                      data-ko={i18n.ko.addProfileLink}
+                      data-ja={i18n.ja.addProfileLink}
+                    >
+                      + {t.addProfileLink}
+                    </Button>
+                    <small className="settings-shared-muted" data-ko={i18n.ko.profileLinksLimit} data-ja={i18n.ja.profileLinksLimit}>{t.profileLinksLimit}</small>
+                  </div>
+                  <CardFooter className="settings-shared-actions settings-shared-actions--flush">
+                    <Button type="submit" loading={profileLinkBusy} disabled={profileLinkBusy}>{t.saveProfileLink}</Button>
+                    <Button type="button" variant="danger" onClick={() => setProfileLinkClearOpen(true)} disabled={profileLinkBusy || (!profileLinks.some((link) => link.url.trim()) && !streamer.profileLinkUrl)}>
+                      {t.clearProfileLink}
+                    </Button>
+                  </CardFooter>
+                </form>
+                {profileLinkMessage ? <StatusPill tone={profileLinkMessage === t.profileLinkSaved || profileLinkMessage === t.profileLinkCleared ? "success" : "danger"}>{profileLinkMessage}</StatusPill> : null}
+              </CardContent>
+            </Card>
+
+            <Card as="section" className="settings-shared-card my-riot-account-card wide" id="my-riot-account-overlay" padding="lg" variant="glass">
+              <CardHeader className="settings-shared-card-header">
+                <CardTitle as="h2" data-ko={i18n.ko.overlayAccess} data-ja={i18n.ja.overlayAccess}>{t.overlayAccess}</CardTitle>
+                <Badge tone={streamer.overlayKey ? "streamer" : "warning"}>{t.overlayNav}</Badge>
+              </CardHeader>
+              <CardContent className="my-riot-overlay-detail">
+                <Metric label={t.overlaySlug} value={overlayPath(streamer)} tone={streamer.overlaySlug ? "info" : "warning"} />
+                <Metric label={t.overlayKey} value={streamer.overlayKey ?? t.none} tone={streamer.overlayKey ? "streamer" : "warning"} />
+              </CardContent>
+            </Card>
           </div>
-        </section>
-      </div>
-    </>
+        </AppShellMain>
+      </AppShell>
+
+      <Modal open={profileLinkClearOpen} onOpenChange={setProfileLinkClearOpen} size="sm" loading={profileLinkBusy}>
+        <ModalHeader>
+          <ModalTitle>{t.confirmClearTitle}</ModalTitle>
+          <ModalDescription>{t.confirmClearDescription}</ModalDescription>
+        </ModalHeader>
+        <ModalContent>
+          <StatusPill tone="danger">{t.clearProfileLink}</StatusPill>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="danger" loading={profileLinkBusy} onClick={() => void clearProfileLink()}>{t.clearProfileLink}</Button>
+          <Button variant="secondary" disabled={profileLinkBusy} onClick={() => setProfileLinkClearOpen(false)}>{t.cancel}</Button>
+        </ModalFooter>
+      </Modal>
+
+      <ToastViewport className="settings-shared-toast-viewport">
+        {toast ? (
+          <Toast key={toast.id} autoDismiss tone={toast.tone} onDismiss={() => setToast(null)}>
+            <ToastTitle>{toast.title}</ToastTitle>
+            {toast.description ? <ToastDescription>{toast.description}</ToastDescription> : null}
+            <ToastCloseButton aria-label={t.close}>×</ToastCloseButton>
+          </Toast>
+        ) : null}
+      </ToastViewport>
+    </ToastProvider>
   );
 }

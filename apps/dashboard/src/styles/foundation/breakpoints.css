@@ -1,0 +1,6 @@
+:root {
+  --yoro-breakpoint-mobile: 30rem;
+  --yoro-breakpoint-tablet: 48rem;
+  --yoro-breakpoint-desktop: 64rem;
+  --yoro-breakpoint-wide: 90rem;
+}

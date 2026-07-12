@@ -1,5 +1,18 @@
+import { useState } from "react";
 import { apiPost } from "../api/client";
 import { createDashboardLocaleProxy } from "../i18n";
+import { Button } from "../shared/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../shared/ui/Card";
+import { Badge, StatusPill } from "../shared/ui/Status";
+import {
+  Toast,
+  ToastCloseButton,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  type ToastTone,
+} from "../shared/ui/Toast";
 
 const i18n = {
   ko: {
@@ -7,6 +20,11 @@ const i18n = {
     description: "고정된 안전 payload만 전송합니다. 솔로랭크 전적은 방송자 Riot ID 기준 실제 데이터를 갱신합니다.",
     sent: "Overlay 테스트 메시지를 전송했습니다.",
     failed: "Overlay 테스트 전송에 실패했습니다.",
+    close: "닫기",
+    ready: "대기 중",
+    sending: "전송 중",
+    actionTypeApi: "API 갱신",
+    actionTypeOverlay: "Overlay 이벤트",
     banner: "배너",
     follow: "팔로우 알림",
     cheer: "비트 알림",
@@ -19,6 +37,11 @@ const i18n = {
     description: "固定された安全な payload のみ送信します。ソロランク戦績は配信者 Riot ID 基準の実データを更新します。",
     sent: "Overlay テストメッセージを送信しました。",
     failed: "Overlay テスト送信に失敗しました。",
+    close: "閉じる",
+    ready: "待機中",
+    sending: "送信中",
+    actionTypeApi: "API 更新",
+    actionTypeOverlay: "Overlay イベント",
     banner: "バナー",
     follow: "フォロー通知",
     cheer: "ビッツ通知",
@@ -135,29 +158,83 @@ const testActions: OverlayTestItem[] = [
   }
 ];
 
+type OverlayTestFeedback = {
+  id: number;
+  message: string;
+  tone: ToastTone;
+};
+
 export function OverlayTestPanel() {
+  const [busyLabel, setBusyLabel] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<OverlayTestFeedback | null>(null);
+
   async function run(item: (typeof testActions)[number]) {
+    setBusyLabel(item.label);
     try {
       if (item.endpoint !== undefined) {
         await apiPost(item.endpoint, {});
       } else {
         await apiPost("/api/actions/test", { action: item.action });
       }
-      alert(t.sent);
+      setFeedback({ id: Date.now(), message: `${item.label} · ${t.sent}`, tone: "success" });
     } catch {
-      alert(t.failed);
+      setFeedback({ id: Date.now(), message: `${item.label} · ${t.failed}`, tone: "danger" });
+    } finally {
+      setBusyLabel(null);
     }
   }
 
   return (
-    <div className="card">
-      <h2>{t.title}</h2>
-      <p className="muted">{t.description}</p>
-      <div className="button-row">
-        {testActions.map((item) => (
-          <button key={item.label} onClick={() => void run(item)}>{item.label}</button>
-        ))}
-      </div>
-    </div>
+    <>
+      <Card as="section" className="overlay-studio-card overlay-studio-test-panel" padding="lg" variant="glass">
+        <CardHeader className="overlay-studio-card-header">
+          <div>
+            <CardTitle as="h2">{t.title}</CardTitle>
+            <CardDescription>{t.description}</CardDescription>
+          </div>
+          <StatusPill tone={busyLabel ? "warning" : "success"}>
+            {busyLabel ? t.sending : t.ready}
+          </StatusPill>
+        </CardHeader>
+        <CardContent>
+          <div className="overlay-studio-test-grid" role="group" aria-label={t.title}>
+            {testActions.map((item) => (
+              <Card as="article" className="overlay-studio-test-item" key={item.label} padding="md" variant="elevated">
+                <strong>{item.label}</strong>
+                <Badge tone={item.endpoint ? "info" : "streamer"}>
+                  {item.endpoint ? t.actionTypeApi : t.actionTypeOverlay}
+                </Badge>
+                <Button
+                  loading={busyLabel === item.label}
+                  onClick={() => void run(item)}
+                  variant={item.endpoint ? "secondary" : "primary"}
+                >
+                  {item.label}
+                </Button>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <ToastProvider position="bottom-right">
+        <ToastViewport className="overlay-studio-toast-viewport">
+          {feedback ? (
+            <Toast
+              autoDismiss
+              key={feedback.id}
+              onOpenChange={(open) => {
+                if (!open) setFeedback(null);
+              }}
+              tone={feedback.tone}
+            >
+              <ToastTitle>{feedback.tone === "success" ? t.sent : t.failed}</ToastTitle>
+              <ToastDescription>{feedback.message}</ToastDescription>
+              <ToastCloseButton aria-label={t.close}>×</ToastCloseButton>
+            </Toast>
+          ) : null}
+        </ToastViewport>
+      </ToastProvider>
+    </>
   );
 }

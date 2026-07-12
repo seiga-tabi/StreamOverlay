@@ -1,0 +1,20 @@
+/* 제품 공통 회색 톤 오버라이드 */
+.public-lol-shell,
+.public-dashboard-shell,
+.app-shell[data-page="followers"] {
+  --public-gray-page: #868e96;
+  --public-gray-page-deep: #747b83;
+  --public-gray-surface: rgba(73, 80, 87, .78);
+  --public-gray-surface-strong: rgba(52, 58, 64, .84);
+  --public-gray-border: rgba(222, 226, 230, .24);
+  --public-gray-border-strong: rgba(248, 249, 250, .34);
+  --public-gray-text: #f8f9fa;
+  --public-gray-muted: #dee2e6;
+  --public-gray-field: #f1f3f5;
+  --public-gray-field-text: #212529;
+  background:
+    radial-gradient(circle at 50% -12%, rgba(248, 249, 250, .2), transparent 32%),
+    linear-gradient(180deg, var(--public-gray-page) 0%, #7d858d 46%, var(--public-gray-page-deep) 100%) !important;
+  color: var(--public-gray-text) !important;
+}
+

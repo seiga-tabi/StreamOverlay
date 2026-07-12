@@ -17,12 +17,24 @@
     "build:bridge": "npm --workspace apps/bridge run build",
     "build:dashboard": "npm --workspace apps/dashboard run build",
     "build:overlay": "npm --workspace apps/overlay run build",
-    "build": "npm run build:shared && npm run build:server && npm run build:bridge && npm run build:dashboard && npm run build:overlay",
+    "build:email-worker": "npm --workspace apps/email-worker run build",
+    "build": "npm run build:shared && npm run build:server && npm run build:bridge && npm run build:dashboard && npm run build:overlay && npm run build:email-worker",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "npm run build:shared && npm run typecheck --workspaces --if-present",
+    "check:budgets": "node scripts/check-bundle-budget.mjs",
     "validate:config": "npm --workspace apps/server run validate:config",
+    "validate:runtime": "npm --workspace apps/server run validate:runtime",
     "test:run": "npm --workspace packages/shared run test:run && npm --workspace apps/server run test:run && npm --workspace apps/bridge run test:run",
     "test": "npm run build:shared && npm --workspace packages/shared run test:run && npm run build:server && npm --workspace apps/server run test:run && npm run build:bridge && npm --workspace apps/bridge run test:run",
     "start:server": "npm --workspace apps/server run start",
-    "start:bridge": "npm --workspace apps/bridge run start"
+    "start:bridge": "npm --workspace apps/bridge run start",
+    "backup:state": "node scripts/backup-state.mjs",
+    "restore:state": "node scripts/restore-state.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.6.0",
+    "typescript-eslint": "^8.63.0"
   },
   "engines": {
     "node": ">=20.0.0"

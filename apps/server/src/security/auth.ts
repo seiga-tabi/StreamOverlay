@@ -35,6 +35,7 @@ export const ADMIN_DASHBOARD_SESSION_COOKIE = "streamops_admin_session";
 export const STREAMER_DASHBOARD_SESSION_COOKIE = "streamops_streamer_session";
 
 const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const MAX_DASHBOARD_SESSIONS = 10_000;
 
 export class DashboardSessionStore {
   private readonly sessions = new Map<string, DashboardSession>();
@@ -49,6 +50,11 @@ export class DashboardSessionStore {
       twitchUserId: input.twitchUserId
     };
     this.sessions.set(session.id, session);
+    while (this.sessions.size > MAX_DASHBOARD_SESSIONS) {
+      const oldestId = this.sessions.keys().next().value as string | undefined;
+      if (!oldestId) break;
+      this.sessions.delete(oldestId);
+    }
     return session;
   }
 
@@ -174,6 +180,7 @@ export function authenticateDashboardRequest(req: IncomingMessage, sessions: Das
 
 export function requiredHttpPrincipal(method: string | undefined, pathname: string): PrincipalType {
   if (pathname === "/health" || pathname === "/health/live" || pathname === "/health/ready") return "PUBLIC";
+  if (method === "POST" && pathname === "/api/inbound-email/cloudflare") return "PUBLIC";
   if (pathname === "/api/dashboard/auth/status" || pathname === "/api/dashboard/auth/check") return "PUBLIC";
   if (method === "GET" && (
     pathname === "/api/lol/profile" ||

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run YORO.gg persistent state backup every day
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+RandomizedDelaySec=10m
+Unit=yoro-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+:root {
+  --yoro-motion-duration-instant: 80ms;
+  --yoro-motion-duration-fast: 140ms;
+  --yoro-motion-duration-base: 220ms;
+  --yoro-motion-duration-slow: 360ms;
+  --yoro-motion-ease-standard: cubic-bezier(.2, .8, .2, 1);
+  --yoro-motion-ease-emphasized: cubic-bezier(.2, .9, .18, 1);
+}

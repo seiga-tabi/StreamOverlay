@@ -1,0 +1,57 @@
+name: Production Edge Monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "점검할 production HTTPS URL"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-edge-monitor
+  cancel-in-progress: true
+
+jobs:
+  verify-edge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.1
+
+      - name: Resolve production URL
+        env:
+          PRODUCTION_BASE_URL: ${{ inputs.base_url || vars.PRODUCTION_BASE_URL }}
+        run: |
+          if [ -z "$PRODUCTION_BASE_URL" ]; then
+            echo "PRODUCTION_BASE_URL repository variable 또는 workflow input이 필요합니다."
+            exit 1
+          fi
+
+      - name: Verify edge, health, runtime config, and static assets
+        env:
+          PRODUCTION_BASE_URL: ${{ inputs.base_url || vars.PRODUCTION_BASE_URL }}
+          OPS_ALERT_WEBHOOK_URL: ${{ secrets.OPS_ALERT_WEBHOOK_URL }}
+          OPS_ALERT_REPEAT_MINUTES: "60"
+        run: |
+          node scripts/verify-production-edge.mjs \
+            --base-url="$PRODUCTION_BASE_URL" \
+            --report=qa/production-edge-report.json
+
+      - name: Upload edge report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-edge-report-${{ github.run_id }}
+          path: qa/production-edge-report.json
+          if-no-files-found: warn
+          retention-days: 30

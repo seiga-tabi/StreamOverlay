@@ -1,0 +1,93 @@
+.yoro-page-header {
+  display: grid;
+  gap: var(--yoro-space-4);
+  min-width: 0;
+  color: var(--yoro-color-text);
+  font-family: var(--yoro-font-family-base);
+}
+
+.yoro-page-header[data-layout="compact"] {
+  gap: var(--yoro-space-2);
+}
+
+.yoro-page-header[data-layout="split"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--yoro-space-4);
+}
+
+.yoro-page-header__main {
+  display: grid;
+  flex: 1 1 auto;
+  gap: var(--yoro-space-2);
+  min-width: 0;
+}
+
+.yoro-page-header[data-layout="split"] .yoro-page-header__main {
+  flex-basis: var(--yoro-breakpoint-mobile);
+}
+
+.yoro-page-header__eyebrow,
+.yoro-page-header__title,
+.yoro-page-header__description {
+  margin: var(--yoro-space-0);
+}
+
+.yoro-page-header__eyebrow {
+  color: var(--yoro-color-primary-strong);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  line-height: var(--yoro-line-height-tight);
+  letter-spacing: 0;
+}
+
+.yoro-page-header__title {
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-2xl);
+  font-weight: var(--yoro-font-weight-black);
+  line-height: var(--yoro-line-height-tight);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.yoro-page-header[data-layout="compact"] .yoro-page-header__title {
+  font-size: var(--yoro-font-size-xl);
+}
+
+.yoro-page-header__description {
+  max-width: var(--yoro-breakpoint-tablet);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-md);
+  line-height: var(--yoro-line-height-relaxed);
+}
+
+.yoro-page-header__actions,
+.yoro-page-header__status {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  max-width: 100%;
+  min-width: 0;
+}
+
+.yoro-page-header__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.yoro-page-header__status {
+  flex-wrap: wrap;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  line-height: var(--yoro-line-height-base);
+}
+
+.yoro-page-header[data-layout="default"] .yoro-page-header__actions,
+.yoro-page-header[data-layout="default"] .yoro-page-header__status,
+.yoro-page-header[data-layout="compact"] .yoro-page-header__actions,
+.yoro-page-header[data-layout="compact"] .yoro-page-header__status {
+  justify-content: flex-start;
+}

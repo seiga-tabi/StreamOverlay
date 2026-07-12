@@ -1,0 +1,136 @@
+.yoro-form-field {
+  display: grid;
+  gap: var(--yoro-space-2);
+  min-width: 0;
+  color: var(--yoro-color-text);
+  font-family: var(--yoro-font-family-base);
+}
+
+.yoro-form-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-1);
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  line-height: var(--yoro-line-height-tight);
+  letter-spacing: 0;
+}
+
+.yoro-form-label[data-required="true"]::after {
+  color: var(--yoro-color-danger);
+  content: "*";
+}
+
+.yoro-form-control {
+  display: grid;
+  gap: var(--yoro-space-2);
+  min-width: 0;
+}
+
+.yoro-input,
+.yoro-textarea,
+.yoro-select {
+  width: 100%;
+  min-height: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-strong);
+  color: var(--yoro-color-text);
+  box-shadow: var(--yoro-shadow-none);
+  font-family: var(--yoro-font-family-base);
+  font-size: var(--yoro-font-size-md);
+  line-height: var(--yoro-line-height-base);
+  letter-spacing: 0;
+  outline: none;
+  transition:
+    background-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    box-shadow var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.yoro-input::placeholder,
+.yoro-textarea::placeholder {
+  color: var(--yoro-color-text-muted);
+}
+
+.yoro-input:focus-visible,
+.yoro-textarea:focus-visible,
+.yoro-select:focus-visible {
+  border-color: var(--yoro-color-primary);
+  box-shadow: var(--yoro-shadow-focus);
+}
+
+.yoro-input[aria-invalid="true"],
+.yoro-textarea[aria-invalid="true"],
+.yoro-select[aria-invalid="true"],
+.yoro-form-control[data-invalid="true"] .yoro-input,
+.yoro-form-control[data-invalid="true"] .yoro-textarea,
+.yoro-form-control[data-invalid="true"] .yoro-select {
+  border-color: var(--yoro-color-danger);
+}
+
+.yoro-input:disabled,
+.yoro-textarea:disabled,
+.yoro-select:disabled,
+.yoro-form-field[data-disabled="true"] .yoro-input,
+.yoro-form-field[data-disabled="true"] .yoro-textarea,
+.yoro-form-field[data-disabled="true"] .yoro-select {
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-muted);
+  cursor: not-allowed;
+  opacity: .58;
+}
+
+.yoro-input[readonly],
+.yoro-textarea[readonly],
+.yoro-select[data-readonly="true"],
+.yoro-form-field[data-readonly="true"] .yoro-input,
+.yoro-form-field[data-readonly="true"] .yoro-textarea,
+.yoro-form-field[data-readonly="true"] .yoro-select {
+  background: var(--yoro-color-surface-muted);
+}
+
+.yoro-input[data-loading="true"],
+.yoro-textarea[data-loading="true"],
+.yoro-select[data-loading="true"],
+.yoro-form-field[data-loading="true"] .yoro-input,
+.yoro-form-field[data-loading="true"] .yoro-textarea,
+.yoro-form-field[data-loading="true"] .yoro-select {
+  cursor: progress;
+}
+
+.yoro-textarea {
+  min-block-size: calc(var(--yoro-size-touch-target) * 3);
+  resize: vertical;
+}
+
+.yoro-select {
+  appearance: none;
+}
+
+.yoro-form-hint,
+.yoro-form-error {
+  margin: var(--yoro-space-0);
+  font-size: var(--yoro-font-size-sm);
+  line-height: var(--yoro-line-height-relaxed);
+}
+
+.yoro-form-hint {
+  color: var(--yoro-color-text-muted);
+}
+
+.yoro-form-error {
+  color: var(--yoro-color-danger);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yoro-input,
+  .yoro-textarea,
+  .yoro-select {
+    transition: none;
+  }
+}

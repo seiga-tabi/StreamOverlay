@@ -614,6 +614,7 @@ export class RiotApiClient {
     try {
       const apiKey = this.apiKey;
       response = await fetch(url, {
+        signal: AbortSignal.timeout(appConfig.riot.apiTimeoutMs),
         headers: {
           "X-Riot-Token": apiKey
         }

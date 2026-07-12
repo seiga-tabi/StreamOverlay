@@ -148,6 +148,7 @@ const STREAM_STATUS_LIVE_CACHE_TTL_MS = 10 * 1000;
 const STREAM_STATUS_OFFLINE_CACHE_TTL_MS = 30 * 1000;
 const DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000;
 const APP_ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000;
+const TWITCH_MEMORY_CACHE_MAX = 2000;
 
 function sleepMs(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -184,6 +185,14 @@ export class TwitchApiClient {
   constructor(private readonly auth?: TwitchAuthService, options: TwitchApiClientOptions = {}) {
     this.now = options.now ?? (() => Date.now());
     this.sleep = options.sleep ?? sleepMs;
+  }
+
+  private pruneCache<K, V>(cache: Map<K, V>, maxSize = TWITCH_MEMORY_CACHE_MAX): void {
+    while (cache.size > maxSize) {
+      const oldestKey = cache.keys().next().value as K | undefined;
+      if (oldestKey === undefined) break;
+      cache.delete(oldestKey);
+    }
   }
 
   isConfigured(): boolean {
@@ -277,6 +286,7 @@ export class TwitchApiClient {
       })
       .finally(() => {
         this.userProfileRequests.delete(safeUserId);
+        this.pruneCache(this.userProfileCache);
       });
     this.userProfileRequests.set(safeUserId, request);
     return request;
@@ -318,6 +328,7 @@ export class TwitchApiClient {
       }
     }
 
+    this.pruneCache(this.userProfileCache);
     return profiles;
   }
 
@@ -327,6 +338,7 @@ export class TwitchApiClient {
       this.streamStatusCache.delete(safeUserId);
       this.streamStatusRequests.delete(safeUserId);
       this.streamStatusCacheVersions.set(safeUserId, (this.streamStatusCacheVersions.get(safeUserId) ?? 0) + 1);
+      this.pruneCache(this.streamStatusCacheVersions);
       return;
     }
     this.streamStatusCache.clear();
@@ -358,6 +370,7 @@ export class TwitchApiClient {
       })
       .finally(() => {
         this.streamStatusRequests.delete(safeUserId);
+        this.pruneCache(this.streamStatusCache);
       });
     this.streamStatusRequests.set(safeUserId, request);
     return request;
@@ -387,6 +400,7 @@ export class TwitchApiClient {
       })
       .finally(() => {
         this.streamStatusRequests.delete(cacheKey);
+        this.pruneCache(this.streamStatusCache);
       });
     this.streamStatusRequests.set(cacheKey, request);
     return request;
@@ -558,6 +572,7 @@ export class TwitchApiClient {
       if (subscription) subscriptions.set(broadcasterId, subscription);
     }
 
+    this.pruneCache(this.userSubscriptionCache);
     return subscriptions;
   }
 
@@ -670,6 +685,7 @@ export class TwitchApiClient {
     });
     const response = await fetch(url, {
       method: "POST",
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });
@@ -714,6 +730,7 @@ export class TwitchApiClient {
 
     const response = await fetch(url, {
       ...init,
+      signal: init.signal ?? AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: {
         "Client-Id": authContext.clientId,
         Authorization: `Bearer ${authContext.accessToken}`,
@@ -731,6 +748,7 @@ export class TwitchApiClient {
     await this.waitForRateLimit(host);
     const retryResponse = await fetch(url, {
       ...init,
+      signal: init.signal ?? AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: {
         "Client-Id": retryContext.clientId,
         Authorization: `Bearer ${retryContext.accessToken}`,
@@ -747,6 +765,7 @@ export class TwitchApiClient {
     await this.waitForRateLimit(host);
     const response = await fetch(url, {
       ...init,
+      signal: init.signal ?? AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: {
         "Client-Id": context.clientId,
         Authorization: `Bearer ${context.accessToken}`,

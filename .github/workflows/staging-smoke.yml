@@ -1,0 +1,66 @@
+name: Staging Integration Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "점검할 staging HTTPS URL"
+        required: true
+        type: string
+      require_obs:
+        description: "OBS bridge와 OBS 연결까지 필수로 검사"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-integration-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.1
+
+      - name: Verify staging edge
+        env:
+          STAGING_BASE_URL: ${{ inputs.base_url }}
+        run: >-
+          node scripts/verify-production-edge.mjs
+          --base-url="$STAGING_BASE_URL"
+          --report=qa/staging-edge-report.json
+
+      - name: Run authenticated integration smoke
+        env:
+          STAGING_BASE_URL: ${{ inputs.base_url }}
+          STAGING_RIOT_ID: ${{ secrets.STAGING_RIOT_ID }}
+          STAGING_DASHBOARD_TOKEN: ${{ secrets.STAGING_DASHBOARD_TOKEN }}
+        run: |
+          OBS_FLAG=""
+          if [ "${{ inputs.require_obs }}" = "true" ]; then
+            OBS_FLAG="--require-obs"
+          fi
+          node scripts/staging-smoke.mjs \
+            --base-url="$STAGING_BASE_URL" \
+            --require-integrations \
+            $OBS_FLAG \
+            --report=qa/staging-smoke-report.json
+
+      - name: Upload staging reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-smoke-report-${{ github.run_id }}
+          path: qa/*report.json
+          if-no-files-found: warn
+          retention-days: 90

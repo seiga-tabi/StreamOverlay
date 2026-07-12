@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/index.js",
     "validate:config": "tsx src/scripts/validate-config.ts",
+    "validate:runtime": "tsx src/scripts/validate-runtime-config.ts",
     "test:run": "node --test test/*.test.mjs",
     "test": "npm run build && npm run test:run"
   },

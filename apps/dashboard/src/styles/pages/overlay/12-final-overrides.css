@@ -1,0 +1,12 @@
+/* Overlay Studio 내부 작업 메뉴 제거 후 본문을 전체 폭으로 사용 */
+.overlay-studio-shell.yoro-app-shell {
+  grid-template-areas:
+    "header"
+    "main" !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.overlay-studio-main.yoro-app-shell__main {
+  grid-area: main !important;
+}
+

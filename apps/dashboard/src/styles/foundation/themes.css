@@ -1,0 +1,7 @@
+:root {
+  --yoro-theme-color-scheme: light;
+  --yoro-theme-backdrop-glass: var(--yoro-effect-glass-blur);
+  --yoro-theme-page-background: var(--yoro-color-bg);
+
+  color-scheme: var(--yoro-theme-color-scheme);
+}

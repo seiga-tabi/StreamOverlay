@@ -1,12 +1,12 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { checkDashboardAuthToken, getDashboardAuthStatus, logoutDashboardSession, setDashboardAuthSurface, type DashboardAuthSurface, type DashboardStreamerInfo } from "./api/client";
 import { connectDashboardSocket } from "./api/socket";
-import { Layout, pageAllowedForRole, type DashboardRole, type Page } from "./components/Layout";
+import { defaultPageForRole, Layout, pageAllowedForRole, type DashboardRole, type Page } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { applyDashboardLocale, dashboardI18n, detectDashboardLocale, setDashboardLocale as saveDashboardLocale, type DashboardLocale } from "./i18n";
-import { PublicLolPage } from "./pages/PublicLolPage";
 import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
 
+const PublicLolPage = lazy(async () => ({ default: (await import("./pages/PublicLolPage")).PublicLolPage }));
 const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
 const EventsPage = lazy(async () => ({ default: (await import("./pages/EventsPage")).EventsPage }));
 const MyRiotAccountPage = lazy(async () => ({ default: (await import("./pages/MyRiotAccountPage")).MyRiotAccountPage }));
@@ -18,6 +18,8 @@ const SettingsPage = lazy(async () => ({ default: (await import("./pages/Setting
 const TwitchConnectionPage = lazy(async () => ({ default: (await import("./pages/TwitchConnectionPage")).TwitchConnectionPage }));
 const OverlayOpsPage = lazy(async () => ({ default: (await import("./pages/OverlayOpsPage")).OverlayOpsPage }));
 const FollowersPage = lazy(async () => ({ default: (await import("./pages/FollowersPage")).FollowersPage }));
+const SupportInboxPage = lazy(async () => ({ default: (await import("./pages/SupportInboxPage")).SupportInboxPage }));
+const ServerStatusPage = lazy(async () => ({ default: (await import("./pages/ServerStatusPage")).ServerStatusPage }));
 
 const initialSnapshot = {
   status: { server: "offline", twitch: "disabled", stream: "unknown", bridge: "disconnected", obs: "unknown", participation: "closed" },
@@ -234,7 +236,7 @@ export default function App() {
 
   useEffect(() => {
     if (authState !== "authenticated") return;
-    if (!pageAllowedForRole(page, dashboardRole)) setPage("dashboard");
+    if (!pageAllowedForRole(page, dashboardRole)) setPage(defaultPageForRole(dashboardRole));
   }, [authState, dashboardRole, page]);
 
   async function login(token: string): Promise<void> {
@@ -291,7 +293,11 @@ export default function App() {
   }
 
   if (surface === "public") {
-    return <PublicLolPage onOpenAdmin={openAdmin} onOpenStreamerDashboard={openStreamerDashboard} />;
+    return (
+      <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
+        <PublicLolPage onOpenAdmin={openAdmin} onOpenStreamerDashboard={openStreamerDashboard} />
+      </Suspense>
+    );
   }
 
   if (surface === "streamer" && authState !== "authenticated") {
@@ -305,6 +311,7 @@ export default function App() {
   return (
     <Layout page={page} setPage={setPage} role={dashboardRole} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
+        {page === "serverStatus" && dashboardRole === "admin" ? <ServerStatusPage /> : null}
         {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} role={dashboardRole} /> : null}
         {page === "twitch" && dashboardRole === "admin" ? <TwitchConnectionPage /> : null}
         {page === "overlayStatus" ? <OverlayOpsPage view="status" streamer={dashboardStreamer} /> : null}
@@ -318,6 +325,7 @@ export default function App() {
         {page === "participation" ? <ParticipationPage snapshot={snapshot} /> : null}
         {page === "tournaments" && dashboardRole === "admin" ? <TournamentsPage /> : null}
         {page === "streamerRiotRequests" && dashboardRole === "admin" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
+        {page === "supportInbox" && dashboardRole === "admin" ? <SupportInboxPage /> : null}
         {page === "settings" && dashboardRole === "admin" ? <SettingsPage /> : null}
       </Suspense>
     </Layout>

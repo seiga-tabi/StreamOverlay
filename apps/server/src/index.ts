@@ -1,4 +1,5 @@
 import http from "node:http";
+import type { Socket } from "node:net";
 import type { Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { appConfig, assertRuntimeConfig, originAllowed } from "./config.js";
@@ -21,6 +22,7 @@ import { DataDragonService } from "./services/data-dragon.js";
 import { LolProfileEnrichmentService } from "./services/lol-profile-enrichment.js";
 import { LocalJsonLolProfileRepository } from "./services/lol-profile-store.js";
 import { LocalTtsService } from "./services/local-tts-service.js";
+import { SupportMailboxStore } from "./services/support-mailbox-store.js";
 import { createHttpHandler } from "./routes/http-api.js";
 import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMatches, type DashboardRole } from "./security/auth.js";
 import { websocketLimiter } from "./security/rate-limit.js";
@@ -30,12 +32,24 @@ import { newId, nowIso, toSafeErrorMessage } from "@streamops/shared";
 
 assertRuntimeConfig();
 
-const logger = new JsonlLogger(appConfig.paths.logs);
+const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
+const supportMailbox = appConfig.supportMailbox.enabled
+  ? new SupportMailboxStore({
+      filePath: appConfig.supportMailbox.statePath,
+      encryptionKey: appConfig.supportMailbox.encryptionKey,
+      retentionDays: appConfig.supportMailbox.retentionDays,
+      maxMessages: appConfig.supportMailbox.maxMessages
+    })
+  : undefined;
 const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
   streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
   tournamentStatePath: `${appConfig.paths.state}/tournaments.json`,
-  communityStatePath: `${appConfig.paths.state}/community-posts.json`
+  communityStatePath: `${appConfig.paths.state}/community-posts.json`,
+  runtimeStatePath: `${appConfig.paths.state}/runtime-state.json`,
+  onPersistenceError: (failure) => {
+    logger.error({ type: "store.persistence_failed", ...failure });
+  }
 });
 const sessions = new DashboardSessionStore();
 const events = new EventBus();
@@ -115,6 +129,7 @@ events.onHandlerError(({ type, error }) => {
 });
 
 const twitchEventSub = new TwitchEventSubClient(events, twitch, store, logger);
+let shuttingDown = false;
 const server = http.createServer(createHttpHandler({
   store,
   actions,
@@ -127,12 +142,27 @@ const server = http.createServer(createHttpHandler({
   eventSub: twitchEventSub,
   logger,
   refreshLolProfile: (entryId) => refreshLolProfileForEntry(moduleContext, entryId),
-  sessions
+  sessions,
+  supportMailbox,
+  readiness: () => store.getReadiness(),
+  isShuttingDown: () => shuttingDown,
+  connectionStatus: () => ({
+    http: httpSockets.size,
+    dashboardWebSocket: dashboard.count(),
+    overlayWebSocket: overlay.count(),
+    bridge: bridge.isConnected()
+  })
 }));
 
 const bridgeWss = new WebSocketServer({ noServer: true });
 const dashboardWss = new WebSocketServer({ noServer: true });
 const overlayWss = new WebSocketServer({ noServer: true });
+const httpSockets = new Set<Socket>();
+
+server.on("connection", (socket) => {
+  httpSockets.add(socket);
+  socket.once("close", () => httpSockets.delete(socket));
+});
 
 function tokenFromAuthorization(req: http.IncomingMessage): string | undefined {
   const authorization = req.headers.authorization;
@@ -294,8 +324,48 @@ overlayWss.on("connection", (socket, req) => {
 
 twitchEventSub.start();
 
+function closeWebSocketServer(wss: WebSocketServer): void {
+  for (const client of wss.clients) client.close(1001, "server shutdown");
+  wss.close();
+}
+
+function shutdown(signal: NodeJS.Signals): void {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  logger.event({ type: "server.shutdown_started", signal });
+  twitchEventSub.stop();
+  closeWebSocketServer(bridgeWss);
+  closeWebSocketServer(dashboardWss);
+  closeWebSocketServer(overlayWss);
+  let forceTimer: NodeJS.Timeout;
+  server.close((error) => {
+    clearTimeout(forceTimer);
+    store.close();
+    if (error) {
+      logger.error({ type: "server.shutdown_failed", signal, error: toSafeErrorMessage(error) });
+      process.exitCode = 1;
+      return;
+    }
+    logger.event({ type: "server.shutdown_completed", signal });
+    process.exitCode = 0;
+  });
+  server.closeIdleConnections?.();
+
+  forceTimer = setTimeout(() => {
+    for (const socket of httpSockets) socket.destroy();
+    server.closeAllConnections?.();
+    store.close();
+    logger.error({ type: "server.shutdown_timeout", signal });
+    process.exit(1);
+  }, 25_000);
+  forceTimer.unref();
+}
+
+process.once("SIGTERM", shutdown);
+process.once("SIGINT", shutdown);
+
 server.listen(appConfig.port, () => {
-  logger.event({ type: "server.started", port: appConfig.port });
+  logger.event({ type: "server.started", port: appConfig.port, build: appConfig.build });
   console.log(`StreamOps server listening on http://localhost:${appConfig.port}`);
   console.log(`Bridge WS: ws://localhost:${appConfig.port}/bridge?name=main`);
 });

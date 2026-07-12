@@ -1,0 +1,317 @@
+/* 대시보드: 밝은 관리자 화면 톤을 방송 운영용 다크 그레이 UI로 정리 */
+.app-shell[data-page="dashboard"] {
+  background:
+    radial-gradient(circle at 24% 0%, rgba(123, 92, 255, .16), transparent 34%),
+    linear-gradient(180deg, #6f7780 0%, #5f676f 46%, #525960 100%);
+  color: #f8f9fa;
+}
+
+.app-shell[data-page="dashboard"] .app-sidebar {
+  border-right: 1px solid rgba(248, 249, 250, .14);
+  background:
+    linear-gradient(180deg, rgba(52, 58, 64, .94), rgba(33, 37, 41, .92));
+  box-shadow: 18px 0 42px rgba(33, 37, 41, .18);
+}
+
+.app-shell[data-page="dashboard"] .brand-block {
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.app-shell[data-page="dashboard"] .brand-logo {
+  width: min(100%, 150px);
+  max-height: 68px;
+  border-radius: 0;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .18));
+}
+
+.app-shell[data-page="dashboard"] .sidebar-profile {
+  border: 1px solid rgba(248, 249, 250, .14);
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .78), rgba(52, 58, 64, .72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+.app-shell[data-page="dashboard"] .sidebar-profile span,
+.app-shell[data-page="dashboard"] .nav-section-title,
+.app-shell[data-page="dashboard"] .eyebrow {
+  color: #aebcff;
+}
+
+.app-shell[data-page="dashboard"] .sidebar-profile strong,
+.app-shell[data-page="dashboard"] .top-bar strong {
+  color: #ffffff;
+}
+
+.app-shell[data-page="dashboard"] .sidebar-profile p {
+  color: rgba(248, 249, 250, .68);
+}
+
+.app-shell[data-page="dashboard"] .nav-item {
+  color: rgba(248, 249, 250, .78);
+}
+
+.app-shell[data-page="dashboard"] .nav-item:hover {
+  border-color: rgba(248, 249, 250, .14);
+  background: rgba(248, 249, 250, .07);
+  box-shadow: none;
+}
+
+.app-shell[data-page="dashboard"] .nav-item.active {
+  border-color: rgba(123, 92, 255, .52);
+  background: rgba(123, 92, 255, .16);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+.app-shell[data-page="dashboard"] .nav-marker {
+  background: rgba(248, 249, 250, .18);
+}
+
+.app-shell[data-page="dashboard"] .nav-item.active .nav-marker {
+  background: linear-gradient(180deg, #8c7aff, #5f73ff);
+  box-shadow: 0 0 14px rgba(123, 92, 255, .38);
+}
+
+.app-shell[data-page="dashboard"] .app-main {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(248, 249, 250, .16), transparent 34%),
+    linear-gradient(180deg, rgba(134, 142, 150, .72), rgba(73, 80, 87, .84));
+}
+
+.app-shell[data-page="dashboard"] .top-bar {
+  min-height: 72px;
+  border-bottom: 1px solid rgba(248, 249, 250, .14);
+  background: rgba(52, 58, 64, .86);
+  box-shadow: 0 16px 34px rgba(33, 37, 41, .14);
+}
+
+.app-shell[data-page="dashboard"] .top-actions {
+  align-items: center;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-locale-button,
+.app-shell[data-page="dashboard"] .top-action {
+  border-color: rgba(248, 249, 250, .18);
+  background: rgba(33, 37, 41, .62);
+  color: #f8f9fa;
+  box-shadow: none;
+}
+
+.app-shell[data-page="dashboard"] .top-chip {
+  border-color: rgba(76, 217, 174, .28);
+  background: rgba(76, 217, 174, .12);
+  color: #9bf2d6;
+  box-shadow: none;
+}
+
+.app-shell[data-page="dashboard"] .content-shell {
+  width: min(100%, 1500px);
+  padding: 32px;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-shell.yoro-app-shell {
+  grid-template-areas:
+    "header"
+    "sidebar"
+    "main";
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(248, 249, 250, .16);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(52, 58, 64, .9), rgba(33, 37, 41, .88));
+  color: #f8f9fa;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 22px 52px rgba(33, 37, 41, .2);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-header.yoro-app-shell__header {
+  padding: 28px 32px 24px;
+  border-bottom: 1px solid rgba(248, 249, 250, .12);
+  background:
+    radial-gradient(circle at 92% 18%, rgba(123, 92, 255, .16), transparent 30%),
+    rgba(33, 37, 41, .22);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-page-header.yoro-page-header {
+  align-items: center;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-page-header .yoro-page-header__eyebrow {
+  color: #aebcff;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-page-header .yoro-page-header__title {
+  color: #ffffff;
+  font-size: clamp(32px, 2.4vw, 44px);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-page-header .yoro-page-header__description {
+  color: rgba(248, 249, 250, .7);
+  font-weight: 700;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-sidebar.yoro-app-shell__sidebar {
+  padding: 14px 24px;
+  border-right: 0;
+  border-bottom: 1px solid rgba(248, 249, 250, .12);
+  background: rgba(33, 37, 41, .28);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-sidebar .yoro-navigation-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-sidebar .yoro-navigation-section__title {
+  flex: 0 0 auto;
+  color: rgba(248, 249, 250, .58);
+  font-weight: 850;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-sidebar .yoro-navigation-section__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-sidebar .yoro-navigation-item {
+  min-height: 40px;
+  border-color: rgba(248, 249, 250, .12);
+  border-radius: 14px;
+  background: rgba(52, 58, 64, .66);
+  color: rgba(248, 249, 250, .82);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-sidebar .yoro-navigation-item[data-active="true"] {
+  border-color: rgba(123, 92, 255, .5);
+  background: rgba(123, 92, 255, .2);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-sidebar .yoro-navigation-badge {
+  border-color: rgba(248, 249, 250, .12);
+  background: rgba(33, 37, 41, .6);
+  color: rgba(248, 249, 250, .72);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-main.yoro-app-shell__main {
+  gap: 22px;
+  padding: 24px 32px 32px;
+  background: transparent;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-grid {
+  grid-template-columns: repeat(3, minmax(190px, 1fr));
+  gap: 16px;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-card.yoro-card,
+.app-shell[data-page="dashboard"] .dashboard-shared-event-log.yoro-card,
+.app-shell[data-page="dashboard"] .dashboard-shared-action-tester.yoro-card,
+.app-shell[data-page="dashboard"] .dashboard-shared-status-skeleton.yoro-skeleton-card {
+  border: 1px solid rgba(248, 249, 250, .14);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(73, 80, 87, .78), rgba(52, 58, 64, .72));
+  color: #f8f9fa;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-card[data-variant="danger"] {
+  border-color: rgba(255, 107, 129, .52);
+  background:
+    linear-gradient(180deg, rgba(255, 107, 129, .2), rgba(52, 58, 64, .74));
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-card[data-variant="warning"] {
+  border-color: rgba(255, 212, 122, .46);
+  background:
+    linear-gradient(180deg, rgba(255, 212, 122, .16), rgba(52, 58, 64, .74));
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-card .yoro-metric {
+  color: #f8f9fa;
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-card .yoro-metric__label,
+.app-shell[data-page="dashboard"] .dashboard-shared-status-hint,
+.app-shell[data-page="dashboard"] .dashboard-shared-event-row,
+.app-shell[data-page="dashboard"] .dashboard-shared-result-status p {
+  color: rgba(248, 249, 250, .68);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-card .yoro-metric__value {
+  color: #ffffff;
+  font-size: clamp(24px, 2vw, 32px);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-status-card .yoro-status,
+.app-shell[data-page="dashboard"] .dashboard-shared-page-header .yoro-status {
+  border-color: rgba(248, 249, 250, .16);
+  background: rgba(33, 37, 41, .5);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-event-row {
+  border-color: rgba(248, 249, 250, .12);
+  background: rgba(33, 37, 41, .42);
+}
+
+.app-shell[data-page="dashboard"] .dashboard-shared-event-row code {
+  color: #ffffff;
+}
+
+@media (max-width: 1180px) {
+  .app-shell[data-page="dashboard"] .dashboard-shared-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .app-shell[data-page="dashboard"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell[data-page="dashboard"] .app-sidebar {
+    position: static;
+    height: auto;
+    padding: 18px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(248, 249, 250, .14);
+  }
+
+  .app-shell[data-page="dashboard"] .brand-block,
+  .app-shell[data-page="dashboard"] .sidebar-profile {
+    margin-bottom: 16px;
+  }
+
+  .app-shell[data-page="dashboard"] .top-bar,
+  .app-shell[data-page="dashboard"] .content-shell,
+  .app-shell[data-page="dashboard"] .dashboard-shared-header.yoro-app-shell__header,
+  .app-shell[data-page="dashboard"] .dashboard-shared-main.yoro-app-shell__main {
+    padding-inline: 18px;
+  }
+
+  .app-shell[data-page="dashboard"] .top-bar {
+    position: static;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-shell[data-page="dashboard"] .top-actions {
+    justify-content: flex-start;
+  }
+
+  .app-shell[data-page="dashboard"] .dashboard-shared-status-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell[data-page="dashboard"] .dashboard-shared-sidebar .yoro-navigation-section {
+    display: grid;
+  }
+}
+

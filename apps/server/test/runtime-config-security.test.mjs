@@ -13,21 +13,37 @@ function strongSecret(label) {
   return `${label}_${"a".repeat(48)}`;
 }
 
-function runConfigValidation(envPatch) {
+function runConfigValidation(envPatch, dotenvMode = 0o600) {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-runtime-config-"));
   const emptyEnv = path.join(dir, ".env");
-  writeFileSync(emptyEnv, "", "utf8");
+  writeFileSync(emptyEnv, "", { encoding: "utf8", mode: dotenvMode });
   const env = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
     DOTENV_CONFIG_PATH: emptyEnv,
     NODE_ENV: "production",
     PUBLIC_BASE_URL: "https://bot.example.com",
+    DASHBOARD_BASE_URL: "https://bot.example.com",
+    OVERLAY_BASE_URL: "https://bot.example.com/overlay",
     TWITCH_REDIRECT_URI: "https://bot.example.com/api/twitch/auth/callback",
     CORS_ORIGINS: "https://bot.example.com",
     DASHBOARD_AUTH_TOKEN: strongSecret("dashboard"),
     OVERLAY_ACCESS_TOKEN: strongSecret("overlay"),
     BRIDGE_SHARED_SECRET: strongSecret("bridge"),
+    LEGAL_OPERATOR_NAME: "Yoro Individual Service Operator",
+    LEGAL_CONTACT_ADDRESS: "1-2-3 Chiyoda, Tokyo, Japan",
+    LEGAL_PRIVACY_OFFICER_NAME: "Privacy Operations Lead",
+    LEGAL_CONTACT_EMAIL: "support@yoro.gg",
+    LEGAL_EFFECTIVE_DATE: "2026-07-11",
+    LEGAL_MINIMUM_AGE: "14",
+    LEGAL_GOVERNING_LAW_KO: "운영자 소재지의 법률과 이용자 거주지의 강행규정",
+    LEGAL_GOVERNING_LAW_JA: "運営者所在地の法令および利用者居住地の強行法規",
+    LEGAL_DISPUTE_VENUE_KO: "우선 협의 후 운영자 소재지의 관할 법원",
+    LEGAL_DISPUTE_VENUE_JA: "事前協議後、運営者所在地を管轄する裁判所",
+    LEGAL_PROCESSORS_KO: "호스팅, CDN 보안 및 이메일 수신 수탁자를 공개 고지",
+    LEGAL_PROCESSORS_JA: "ホスティング、CDNセキュリティおよびメール受信委託先を公開",
+    LEGAL_CROSS_BORDER_TRANSFER_KO: "이전받는 자, 국가, 항목, 목적, 방법과 보유기간을 공개 고지",
+    LEGAL_CROSS_BORDER_TRANSFER_JA: "移転先、国、項目、目的、方法および保存期間を公開",
     ...envPatch
   };
   const script = `
@@ -56,7 +72,7 @@ function runConfigValidation(envPatch) {
 function runConfigSnapshot(envPatch) {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-runtime-config-snapshot-"));
   const emptyEnv = path.join(dir, ".env");
-  writeFileSync(emptyEnv, "", "utf8");
+  writeFileSync(emptyEnv, "", { encoding: "utf8", mode: 0o600 });
   const env = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
@@ -95,6 +111,54 @@ test("production 설정은 강한 secret과 https origin이면 통과한다", ()
   const result = runConfigValidation({});
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.deepEqual(JSON.parse(result.stdout), { ok: true });
+});
+
+test("production 설정은 확정된 공개 법적 운영정보를 요구한다", () => {
+  const result = runConfigValidation({
+    LEGAL_OPERATOR_NAME: "초안 운영자 정보",
+    LEGAL_CONTACT_ADDRESS: undefined,
+    LEGAL_EFFECTIVE_DATE: "2026-02-31",
+    LEGAL_CONTACT_EMAIL: "invalid-address",
+    LEGAL_CROSS_BORDER_TRANSFER_JA: "未定"
+  });
+
+  assert.equal(result.status, 2, result.stderr || result.stdout);
+  assert.match(result.stdout, /LEGAL_OPERATOR_NAME/);
+  assert.match(result.stdout, /LEGAL_CONTACT_ADDRESS/);
+  assert.match(result.stdout, /LEGAL_EFFECTIVE_DATE/);
+  assert.match(result.stdout, /LEGAL_CONTACT_EMAIL/);
+  assert.match(result.stdout, /LEGAL_CROSS_BORDER_TRANSFER_JA/);
+  assert.doesNotMatch(result.stdout, /초안 운영자 정보/);
+});
+
+test("production 설정은 너무 열린 dotenv 파일 권한을 거부한다", () => {
+  const result = runConfigValidation({}, 0o644);
+  assert.equal(result.status, 2, result.stderr || result.stdout);
+  const validation = JSON.parse(result.stdout);
+  assert.equal(validation.ok, false);
+  assert.ok(validation.errors.some((error) => error.includes("0600")));
+});
+
+test("production 지원 메일함은 webhook secret과 32바이트 암호화 key를 요구한다", () => {
+  const valid = runConfigValidation({
+    SUPPORT_MAILBOX_ENABLED: "true",
+    SUPPORT_MAILBOX_ADDRESS: "support@yoro.gg",
+    SUPPORT_MAILBOX_WEBHOOK_SECRET: strongSecret("support_webhook"),
+    SUPPORT_MAILBOX_ENCRYPTION_KEY: Buffer.alloc(32, 5).toString("base64")
+  });
+  assert.equal(valid.status, 0, valid.stderr || valid.stdout);
+
+  const invalid = runConfigValidation({
+    SUPPORT_MAILBOX_ENABLED: "true",
+    SUPPORT_MAILBOX_ADDRESS: "not-an-email",
+    SUPPORT_MAILBOX_WEBHOOK_SECRET: "weak",
+    SUPPORT_MAILBOX_ENCRYPTION_KEY: "invalid"
+  });
+  assert.equal(invalid.status, 2);
+  assert.match(invalid.stdout, /SUPPORT_MAILBOX_WEBHOOK_SECRET/);
+  assert.match(invalid.stdout, /SUPPORT_MAILBOX_ADDRESS/);
+  assert.match(invalid.stdout, /SUPPORT_MAILBOX_ENCRYPTION_KEY/);
+  assert.doesNotMatch(invalid.stdout, /support_webhook/);
 });
 
 test("production 설정은 약한 secret, http URL, wildcard CORS를 거부하고 secret 값을 출력하지 않는다", () => {

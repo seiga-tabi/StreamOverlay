@@ -1,0 +1,23 @@
+:root {
+  --yoro-space-0: 0;
+  --yoro-space-1: .25rem;
+  --yoro-space-2: .5rem;
+  --yoro-space-3: .75rem;
+  --yoro-space-4: 1rem;
+  --yoro-space-5: 1.25rem;
+  --yoro-space-6: 1.5rem;
+  --yoro-space-8: 2rem;
+  --yoro-space-10: 2.5rem;
+  --yoro-space-12: 3rem;
+  --yoro-size-touch-target: 2.75rem;
+  --yoro-size-sr-only: .0625rem;
+  --yoro-focus-ring-width: .1875rem;
+  --yoro-focus-ring-offset: .125rem;
+
+  --space-1: var(--yoro-space-1);
+  --space-2: var(--yoro-space-2);
+  --space-3: var(--yoro-space-3);
+  --space-4: var(--yoro-space-4);
+  --space-6: var(--yoro-space-6);
+  --space-8: var(--yoro-space-8);
+}
