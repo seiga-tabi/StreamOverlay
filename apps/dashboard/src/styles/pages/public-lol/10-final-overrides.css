@@ -622,11 +622,6 @@
 
   .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    grid-template-columns: minmax(var(--yoro-size-public-header-mobile-track), 1fr) var(--yoro-size-touch-target) auto !important;
-    grid-template-areas:
-      "brand toggle tools"
-      "nav nav nav"
-      "search search search" !important;
     gap: var(--yoro-space-2) !important;
     padding: var(--yoro-space-2) var(--yoro-space-3) !important;
   }
@@ -845,5 +840,151 @@
 @media (max-width: 48rem) {
   .public-dashboard-shell .public-champion-filter-options {
     max-height: min(44dvh, var(--yoro-size-champion-filter-menu-max-height));
+  }
+}
+
+/* 모바일 헤더와 최근 경기 상세의 최종 배치 보정 */
+@media (max-width: 48rem) {
+  .public-dashboard-shell .public-app-header,
+  .public-dashboard-shell .public-app-header.home,
+  .public-dashboard-shell .public-app-header:not(.home) {
+    isolation: isolate;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
+    grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "toggle empty tools"
+      "nav nav nav"
+      "search search search" !important;
+  }
+
+  .public-dashboard-shell .public-mobile-menu-toggle {
+    position: relative !important;
+    z-index: var(--yoro-z-overlay) !important;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-mobile-menu-toggle {
+    border-color: var(--yoro-color-secondary) !important;
+    background: var(--public-gray-surface) !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav,
+  .public-dashboard-shell .public-app-header.home.mobile-menu-open .public-header-nav,
+  .public-dashboard-shell .public-app-header:not(.home).mobile-menu-open .public-header-nav {
+    position: relative !important;
+    inset: auto !important;
+    z-index: var(--yoro-z-overlay) !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: var(--yoro-space-2) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    height: auto !important;
+    padding: var(--yoro-space-2) !important;
+    overflow: visible !important;
+    border: var(--yoro-size-sr-only) solid var(--public-gray-border-strong) !important;
+    border-radius: var(--yoro-radius-md) !important;
+    background: var(--public-gray-surface-strong) !important;
+    box-shadow: var(--yoro-shadow-panel) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav > button {
+    display: grid !important;
+    grid-column: auto !important;
+    min-width: var(--yoro-space-0) !important;
+    pointer-events: auto !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav > button,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item > button {
+    position: relative !important;
+    z-index: var(--yoro-z-base) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: var(--yoro-space-2) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding-inline: var(--yoro-space-3) !important;
+    border-radius: var(--yoro-radius-sm) !important;
+    color: var(--public-gray-text) !important;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav > button:hover,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav > button:focus-visible,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item > button:hover,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item > button:focus-visible,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav > button.active,
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-menu-item > button.active {
+    background: var(--public-gray-surface) !important;
+    color: var(--yoro-color-text-on-dark) !important;
+  }
+
+  .public-profile-shared-shell .public-match-summary {
+    grid-template-columns:
+      minmax(calc(var(--yoro-space-8) + var(--yoro-space-8)), auto)
+      minmax(calc(var(--yoro-space-8) + var(--yoro-space-6)), 1fr)
+      minmax(var(--yoro-size-touch-target), auto)
+      minmax(calc(var(--yoro-space-8) + var(--yoro-space-8)), 1fr)
+      var(--yoro-size-touch-target) !important;
+  }
+
+  .public-profile-shared-shell .public-match-expand {
+    grid-column: 5 !important;
+    grid-row: 1 / 3 !important;
+    align-self: center !important;
+    justify-self: end !important;
+    width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    margin: var(--yoro-space-0) !important;
+    padding: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--yoro-space-1) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack > .public-riot-id-static,
+  .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack > .public-riot-id-link {
+    flex: 1 1 auto !important;
+    min-width: var(--yoro-space-0) !important;
+    overflow: hidden !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack .public-riot-name {
+    min-width: var(--yoro-space-0) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: baseline !important;
+    justify-content: flex-start !important;
+    justify-self: auto !important;
+    gap: var(--yoro-space-1) !important;
+    margin: var(--yoro-space-0) !important;
+    line-height: var(--yoro-line-height-tight) !important;
+    white-space: nowrap !important;
   }
 }
