@@ -10626,7 +10626,7 @@ code {
   background:
     linear-gradient(90deg, rgba(5, 10, 22, .92) 0%, rgba(8, 16, 32, .72) 42%, rgba(8, 14, 26, .78) 100%),
     linear-gradient(180deg, rgba(6, 12, 24, .45) 0%, rgba(6, 12, 24, .86) 100%),
-    url("/images/lol-home-zed.jpg") center / cover no-repeat;
+    var(--yoro-image-home-background) center / cover no-repeat;
   color: #f8fbff;
 }
 
@@ -17412,7 +17412,7 @@ code {
   background:
     linear-gradient(90deg, rgba(5, 10, 22, .92) 0%, rgba(8, 16, 32, .72) 42%, rgba(8, 14, 26, .78) 100%),
     linear-gradient(180deg, rgba(6, 12, 24, .45) 0%, rgba(6, 12, 24, .86) 100%),
-    url("/images/lol-home-zed.jpg") center / cover no-repeat;
+    var(--yoro-image-home-background) center / cover no-repeat;
 }
 
 .public-dashboard-shell.theme-dark .public-sidebar,
@@ -19975,4 +19975,3 @@ code {
     height: 10px;
   }
 }
-

@@ -1,5 +1,5 @@
 import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../runtime-config";
-import type { StreamerTournament, TournamentUpsertInput } from "@streamops/shared";
+import type { CommunityModerationSnapshot, StreamerTournament, TournamentUpsertInput } from "@streamops/shared";
 
 const API_BASE = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
 
@@ -178,6 +178,34 @@ export async function saveDashboardTournament(body: TournamentUpsertInput): Prom
 export async function deleteDashboardTournament(id: string): Promise<StreamerTournament[]> {
   const result = await apiDelete<{ tournaments: StreamerTournament[] }>(`/api/tournaments/${encodeURIComponent(id)}`);
   return result.tournaments;
+}
+
+export async function getCommunityModeration(): Promise<CommunityModerationSnapshot> {
+  return apiGet<CommunityModerationSnapshot>("/api/community/moderation");
+}
+
+export async function updateCommunityPostVisibility(input: {
+  postId: string;
+  visibility: "visible" | "hidden";
+  reason?: string;
+}): Promise<CommunityModerationSnapshot> {
+  return apiPost<CommunityModerationSnapshot>(
+    `/api/community/moderation/posts/${encodeURIComponent(input.postId)}/visibility`,
+    { visibility: input.visibility, reason: input.reason }
+  );
+}
+
+export async function updateCommunityUserSanction(input: {
+  twitchUserId: string;
+  twitchLogin?: string;
+  active: boolean;
+  reason?: string;
+  expiresAt?: string;
+}): Promise<CommunityModerationSnapshot> {
+  return apiPost<CommunityModerationSnapshot>(
+    `/api/community/moderation/users/${encodeURIComponent(input.twitchUserId)}/sanction`,
+    input
+  );
 }
 
 export const apiBase = API_BASE;

@@ -1,33 +1,34 @@
 # P1 Frontend Release Risks
 
-이번 P0 작업에서는 대규모 CSS/React 분해를 하지 않는다. 아래 항목은 release candidate에서 별도 PR과 visual regression을 거쳐야 한다.
+P1/P2 개선 이후에도 대규모 CSS/React 분해는 작은 PR과 visual regression을 거쳐 진행한다.
 
 ## Bundle Baseline
 
-- Dashboard JS total: 약 661KB, largest chunk 약 489KB
-- Dashboard CSS total: 약 962KB
+- Dashboard JS total: 약 723KB, gzip total 약 215KB, largest chunk 약 310KB
+- Dashboard CSS total: 약 979KB
 - Overlay JS total: 약 199KB
 - Overlay CSS total: 약 64KB
-- `index.css`: 38,080줄
-- `PublicLolPage.tsx`: 10,395줄
+- `styles/index.css`: import entry 13줄
+- 주요 legacy CSS: `01-core.css` 19,977줄, `02-legacy.css` 10,354줄, `05-overrides.css` 4,474줄
+- `PublicLolPage.tsx`: 7,755줄
 
-CI `npm run check:budgets`는 현재 production baseline보다 커지는 회귀를 차단한다. 목표 budget은 별도 리팩터링에서 단계적으로 낮춘다.
+CI `npm run check:budgets`는 raw build footprint, gzip 전송량, largest chunk를 함께 검사한다. 목표 budget은 feature 분리와 CSS 정리 작업에서 단계적으로 낮춘다.
+
+`npm run check:tokens`는 Shared UI, 신규 관리자 화면, 최종 Public override에 raw 색상·gradient·shadow·px가 다시 추가되는 것을 차단한다. 과거 legacy CSS의 raw 값은 visual regression을 동반한 페이지 단위 PR로 이전한다.
 
 ## Asset Candidates
 
-삭제 전 사용처와 시각 회귀를 확인한다.
+중복 원본은 사용처 확인 후 제거했고 실행 자산은 다음 형식으로 교체했다.
 
-- `yorogg-horizontal-logo.png`: 약 1.25MB
-- `yorogg-logo.png`: 약 789KB
-- `seigagg.png`: 약 789KB
-- `seigagg-logo.png`: 약 789KB
-- `yorogg-og.png`: 약 631KB
+- 로고: lossless WebP
+- 홈 배경: AVIF 우선, WebP fallback
+- `yorogg-og.png`: SNS 공유용 원본 유지
 
-동일 binary 중복 여부, 실제 import/URL 사용 여부, WebP/AVIF 또는 최적화 PNG 대체를 별도 PR에서 검토한다.
+향후 신규 이미지는 WebP/AVIF를 우선하고, OG 이미지처럼 플랫폼 호환성이 필요한 경우에만 PNG를 유지한다.
 
 ## Touch Target Priority
 
-현재 CSS 정적 검사에서 44px 미만의 interactive 후보가 다수 확인됐다. icon 자체 크기와 hit area를 구분해 Playwright로 실제 bounding box를 측정해야 한다.
+Public Home과 Community를 1440px/390px에서 실측했으며 보이는 control은 최소 `44x44 CSS px`, horizontal overflow는 0이었다. Dashboard와 Overlay의 페이지별 전체 audit는 계속 유지한다.
 
 우선순위:
 

@@ -1,13 +1,21 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
-import type { CommunityPost, CommunityPostCategory, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
+import type { CommunityPost, CommunityPostCategory, CommunityPostReportCreateInput, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { publicLegalRuntimeConfig } from "../runtime-config";
+import {
+  createPublicCommunityComment,
+  createPublicCommunityPost,
+  createPublicCommunityReport,
+  getPublicCommunityPosts,
+  updatePublicCommunityPost,
+  type CommunityPostSubmitInput
+} from "../features/public-lol/api/community";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellFooter, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../shared/ui/Card";
 import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../shared/ui/EmptyState";
-import { FormControl, FormField, FormHint, FormLabel, Input, Select, Textarea } from "../shared/ui/Form";
+import { FormControl, FormError, FormField, FormHint, FormLabel, Input, Select, Textarea } from "../shared/ui/Form";
 import {
   Modal,
   ModalCloseButton,
@@ -34,6 +42,7 @@ import {
   PublicHomeSearchPanel,
   PublicAppHeader as FeaturePublicAppHeader,
   PublicLocaleSelector,
+  ChampionFilterSelect,
   PublicSiteFooter,
   PlayerItemBuild as FeaturePlayerItemBuild,
   PlayerLoadoutBuild as FeaturePlayerLoadoutBuild,
@@ -159,8 +168,9 @@ import {
 import {
   PUBLIC_TOURNAMENT_CALENDAR_PATH,
   PUBLIC_TOURNAMENT_LIST_PATH,
-  legalPageFromPublicPath,
   publicLegalPath,
+  publicPageRouteFromPath,
+  publicPathForPage,
   publicTournamentDetailPath,
   setPublicPath,
   tournamentRouteFromPublicPath,
@@ -552,98 +562,6 @@ async function getPublicTournament(slug: string): Promise<StreamerTournament> {
   const body = await response.json() as { tournament?: StreamerTournament };
   if (!body.tournament) throw new Error(t().searchFailed);
   return body.tournament;
-}
-
-async function getPublicCommunityPosts(category?: CommunityPostCategory): Promise<CommunityPost[]> {
-  const params = new URLSearchParams({ limit: "50" });
-  if (category) params.set("category", category);
-  const response = await fetch(`${apiBase}/api/public/community/posts?${params.toString()}`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  const body = await response.json() as { posts?: CommunityPost[] };
-  return Array.isArray(body.posts) ? body.posts : [];
-}
-
-async function createPublicCommunityPost(input: {
-  category: CommunityPostCategory;
-  title: string;
-  body: string;
-  riotId: string;
-  tags: string;
-  imageFile?: File | null;
-  partyTier?: string;
-  partyRole?: string;
-  partyMode?: string;
-  partyVoice?: string;
-  partyCapacity?: number;
-}): Promise<CommunityPost[]> {
-  const formData = new FormData();
-  formData.set("category", input.category);
-  formData.set("title", input.title);
-  formData.set("body", input.body);
-  if (input.riotId.trim()) formData.set("riotId", input.riotId.trim());
-  if (input.tags.trim()) formData.set("tags", input.tags.trim());
-  if (input.partyTier?.trim()) formData.set("partyTier", input.partyTier.trim());
-  if (input.partyRole?.trim()) formData.set("partyRole", input.partyRole.trim());
-  if (input.partyMode?.trim()) formData.set("partyMode", input.partyMode.trim());
-  if (input.partyVoice?.trim()) formData.set("partyVoice", input.partyVoice.trim());
-  if (input.partyCapacity) formData.set("partyCapacity", String(input.partyCapacity));
-  if (input.imageFile) formData.set("image", input.imageFile);
-  const response = await fetch(`${apiBase}/api/public/community/posts`, {
-    method: "POST",
-    credentials: "include",
-    body: formData
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  const body = await response.json() as { post?: CommunityPost; posts?: CommunityPost[] };
-  if (Array.isArray(body.posts)) return body.posts;
-  const refreshedPosts = await getPublicCommunityPosts(input.category);
-  if (refreshedPosts.length > 0) return refreshedPosts;
-  return body.post ? [body.post] : [];
-}
-
-async function updatePublicCommunityPost(postId: string, input: {
-  category: CommunityPostCategory;
-  title: string;
-  body: string;
-  riotId: string;
-  tags: string;
-  imageFile?: File | null;
-}): Promise<CommunityPost[]> {
-  const formData = new FormData();
-  formData.set("category", input.category);
-  formData.set("title", input.title);
-  formData.set("body", input.body);
-  if (input.riotId.trim()) formData.set("riotId", input.riotId.trim());
-  if (input.tags.trim()) formData.set("tags", input.tags.trim());
-  if (input.imageFile) formData.set("image", input.imageFile);
-  const response = await fetch(`${apiBase}/api/public/community/posts/${encodeURIComponent(postId)}`, {
-    method: "PATCH",
-    credentials: "include",
-    body: formData
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  const body = await response.json() as { post?: CommunityPost; posts?: CommunityPost[] };
-  if (Array.isArray(body.posts)) return body.posts;
-  const refreshedPosts = await getPublicCommunityPosts(input.category);
-  if (refreshedPosts.length > 0) return refreshedPosts;
-  return body.post ? [body.post] : [];
-}
-
-async function createPublicCommunityComment(postId: string, body: string): Promise<CommunityPost[]> {
-  const response = await fetch(`${apiBase}/api/public/community/posts/${encodeURIComponent(postId)}/comments`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ body })
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  const responseBody = await response.json() as { post?: CommunityPost; posts?: CommunityPost[] };
-  if (Array.isArray(responseBody.posts)) return responseBody.posts;
-  const refreshedPosts = await getPublicCommunityPosts("party");
-  if (refreshedPosts.length > 0) return refreshedPosts;
-  return responseBody.post ? [responseBody.post] : [];
 }
 
 function communityPostRiotId(post: CommunityPost | undefined): string | undefined {
@@ -1560,7 +1478,10 @@ function profileTopPanelText(): ProfileTopPanelText {
       ja: publicI18n.ja.liveDataNotice
     },
     serverLabel: t().jpServer,
-    searching: t().searching
+    searching: t().searching,
+    showDetails: { label: t().details, ko: publicI18n.ko.details, ja: publicI18n.ja.details },
+    hideDetails: { label: t().folded, ko: publicI18n.ko.folded, ja: publicI18n.ja.folded },
+    recentMatches: { label: t().recentGames, ko: publicI18n.ko.recentGames, ja: publicI18n.ja.recentGames }
   };
 }
 
@@ -1946,15 +1867,20 @@ function PublicFilterPanel({
           <option value="aram">{t().aramQueue}</option>
         </select>
       </label>
-      <label>
-        <span data-ko={publicI18n.ko.championFilter} data-ja={publicI18n.ja.championFilter}>{t().championFilter}</span>
-        <select value={filters.championId} onChange={(event) => onChange({ ...filters, championId: event.target.value })}>
-          <option value="all">{t().allChampions}</option>
-          {champions.map((champion) => (
-            <option value={String(champion.championId)} key={champion.championId}>{championName(champion)}</option>
-          ))}
-        </select>
-      </label>
+      <ChampionFilterSelect
+        allLabel={t().allChampions}
+        label={t().championFilter}
+        labelJa={publicI18n.ja.championFilter}
+        labelKo={publicI18n.ko.championFilter}
+        onChange={(championId) => onChange({ ...filters, championId })}
+        options={champions.map((champion) => ({
+          value: String(champion.championId),
+          label: championName(champion),
+          iconUrl: assetUrl(champion.iconUrl),
+          fallbackLabel: championName(champion).slice(0, 1)
+        }))}
+        value={filters.championId}
+      />
       <label>
         <span data-ko={publicI18n.ko.periodFilter} data-ja={publicI18n.ja.periodFilter}>{t().periodFilter}</span>
         <select value={filters.period} onChange={(event) => onChange({ ...filters, period: event.target.value as MatchPeriodFilter })}>
@@ -1981,7 +1907,9 @@ function PublicMatchFilterBar({
   const filterActive = hasActiveFilters(filters);
   const championOptions = champions.map((champion) => ({
     value: String(champion.championId),
-    label: championName(champion)
+    label: championName(champion),
+    iconUrl: assetUrl(champion.iconUrl),
+    fallbackLabel: championName(champion).slice(0, 1)
   }));
   const text: PublicMatchFilterBarText = {
     filter: {
@@ -2632,8 +2560,8 @@ function PublicTwitchFollowedPanel({
   onRefresh: () => void;
   onSearch: (riotId: string) => void;
 }) {
-  const visibleChannels = followed?.channels.slice(0, 8) ?? [];
-  const isFollowedLoading = loading && status.connected && visibleChannels.length === 0;
+  const followedChannels = followed?.channels ?? [];
+  const isFollowedLoading = loading && status.connected && followedChannels.length === 0;
 
   return (
     <section id="public-twitch-followed" className="public-panel public-twitch-followed-panel public-streamers-shared-panel">
@@ -2684,14 +2612,19 @@ function PublicTwitchFollowedPanel({
               ))}
             </div>
           ) : null}
-          {visibleChannels.length === 0 && !loading ? (
+          {followedChannels.length === 0 && !loading ? (
             <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
               <EmptyStateIcon>?</EmptyStateIcon>
               <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchFollowedEmpty} data-ja={publicI18n.ja.twitchFollowedEmpty}>{t().twitchFollowedEmpty}</EmptyStateTitle>
             </EmptyState>
           ) : null}
-          <div className="public-twitch-followed-list">
-            {visibleChannels.map((channel) => (
+          <div
+            aria-label={title}
+            className="public-twitch-followed-list public-twitch-followed-scroll"
+            role="region"
+            tabIndex={followedChannels.length > 0 ? 0 : undefined}
+          >
+            {followedChannels.map((channel) => (
               <Card as="article" className={`public-streamers-shared-card ${channel.riotId ? "linked" : ""}`} key={channel.twitchUserId} padding="md" variant={channel.riotId ? "interactive" : "default"}>
                 <div className="public-twitch-channel-main">
                   <span className="public-twitch-channel-avatar">
@@ -2785,20 +2718,6 @@ function PublicSubscriptionsPage({
     </section>
   );
 }
-
-type CommunityPostSubmitInput = {
-  category: CommunityPostCategory;
-  title: string;
-  body: string;
-  riotId: string;
-  tags: string;
-  imageFile?: File | null;
-  partyTier?: string;
-  partyRole?: string;
-  partyMode?: string;
-  partyVoice?: string;
-  partyCapacity?: number;
-};
 
 type CommunityToast = {
   title: string;
@@ -3475,11 +3394,14 @@ function PublicCommunityDetailPage({
   twitchStatus,
   commentSubmitting,
   commentError,
+  reportSubmitting,
+  reportError,
   toast,
   onLogin,
   onBack,
   onSearchRiotId,
   onSubmitComment,
+  onSubmitReport,
   onDismissToast
 }: {
   post: CommunityPost | undefined;
@@ -3487,14 +3409,20 @@ function PublicCommunityDetailPage({
   twitchStatus: PublicTwitchViewerStatus;
   commentSubmitting: boolean;
   commentError: string;
+  reportSubmitting: boolean;
+  reportError: string;
   toast: CommunityToast | null;
   onLogin: () => void;
   onBack: () => void;
   onSearchRiotId: (riotId: string) => void;
   onSubmitComment: (postId: string, body: string) => Promise<void>;
+  onSubmitReport: (postId: string, input: CommunityPostReportCreateInput) => Promise<boolean>;
   onDismissToast: () => void;
 }) {
   const [commentBody, setCommentBody] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState<CommunityPostReportCreateInput["reason"]>("spam");
+  const [reportDetail, setReportDetail] = useState("");
   const riotId = communityPostRiotId(post);
   const profile = profileState.profile;
   const primaryRank = profile ? soloRankStats(profile) ?? flexRankStats(profile) ?? ranked5v5Stats(profile) ?? profile.rankedStats : undefined;
@@ -3507,6 +3435,16 @@ function PublicCommunityDetailPage({
     if (!post || !commentBody.trim() || commentSubmitting) return;
     await onSubmitComment(post.id, commentBody);
     setCommentBody("");
+  }
+
+  async function submitReport(): Promise<void> {
+    if (!post || reportSubmitting) return;
+    const submitted = await onSubmitReport(post.id, { reason: reportReason, detail: reportDetail.trim() || undefined });
+    if (submitted) {
+      setReportOpen(false);
+      setReportDetail("");
+      setReportReason("spam");
+    }
   }
 
   return (
@@ -3533,6 +3471,17 @@ function PublicCommunityDetailPage({
             </StatusPill>
           </PageHeaderStatus>
           <PageHeaderActions>
+            {post && twitchStatus.user?.id !== post.authorTwitchUserId ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => twitchStatus.connected ? setReportOpen(true) : onLogin()}
+                data-ko={publicI18n.ko.communityReport}
+                data-ja={publicI18n.ja.communityReport}
+              >
+                {t().communityReport}
+              </Button>
+            ) : null}
             <Button type="button" variant="secondary" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>
               {t().communityBackToList}
             </Button>
@@ -3744,6 +3693,45 @@ function PublicCommunityDetailPage({
         </div>
       )}
       </AppShellMain>
+      <Modal open={reportOpen} loading={reportSubmitting} onClose={() => setReportOpen(false)} size="sm">
+        <ModalHeader>
+          <ModalTitle>{t().communityReportTitle}</ModalTitle>
+          <ModalCloseButton aria-label={t().participationClose} onClick={() => setReportOpen(false)}>×</ModalCloseButton>
+        </ModalHeader>
+        <ModalContent>
+          <ModalDescription>{t().communityReportDescription}</ModalDescription>
+          {reportError ? <FormError>{reportError}</FormError> : null}
+          <FormField required>
+            <FormLabel>{t().communityReportReason}</FormLabel>
+            <FormControl>
+              <Select value={reportReason} onChange={(event) => setReportReason(event.currentTarget.value as CommunityPostReportCreateInput["reason"])}>
+                <option value="spam">{t().communityReportSpam}</option>
+                <option value="harassment">{t().communityReportHarassment}</option>
+                <option value="privacy">{t().communityReportPrivacy}</option>
+                <option value="other">{t().communityReportOther}</option>
+              </Select>
+            </FormControl>
+          </FormField>
+          <FormField>
+            <FormLabel>{t().communityReportDetail}</FormLabel>
+            <FormControl>
+              <Textarea
+                value={reportDetail}
+                onChange={(event) => setReportDetail(event.currentTarget.value)}
+                maxLength={500}
+                rows={4}
+                placeholder={t().communityReportDetailPlaceholder}
+              />
+            </FormControl>
+          </FormField>
+        </ModalContent>
+        <ModalFooter>
+          <Button type="button" variant="secondary" disabled={reportSubmitting} onClick={() => setReportOpen(false)}>{t().participationClose}</Button>
+          <Button type="button" variant="danger" loading={reportSubmitting} onClick={() => void submitReport()}>
+            {reportSubmitting ? t().communityReportSubmitting : t().communityReportSubmit}
+          </Button>
+        </ModalFooter>
+      </Modal>
       <CommunityToastLayer toast={toast} onDismiss={onDismissToast} />
     </AppShell>
   );
@@ -6581,7 +6569,8 @@ export function PublicLolPage({
   const [remoteSuggestions, setRemoteSuggestions] = useState<SearchSuggestion[]>([]);
   const [searchPanelRequest, setSearchPanelRequest] = useState<SearchFormPanelRequest>();
   const [profileTab, setProfileTab] = useState<PublicProfileTab>("overview");
-  const [activeMainPage, setActiveMainPage] = useState<PublicMainPage>("search");
+  const initialPublicRoute = publicPageRouteFromPath();
+  const [activeMainPage, setActiveMainPage] = useState<PublicMainPage>(initialPublicRoute?.page ?? "search");
   const [activeNav, setActiveNav] = useState<PublicNavTarget>("search");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [streamerRegisterOpen, setStreamerRegisterOpen] = useState(false);
@@ -6613,10 +6602,12 @@ export function PublicLolPage({
   const [communityLoading, setCommunityLoading] = useState(false);
   const [communitySubmitting, setCommunitySubmitting] = useState(false);
   const [communityCommentSubmitting, setCommunityCommentSubmitting] = useState(false);
+  const [communityReportSubmitting, setCommunityReportSubmitting] = useState(false);
   const [communityError, setCommunityError] = useState("");
   const [communityCommentError, setCommunityCommentError] = useState("");
+  const [communityReportError, setCommunityReportError] = useState("");
   const [communityToast, setCommunityToast] = useState<CommunityToast | null>(null);
-  const [selectedCommunityPostId, setSelectedCommunityPostId] = useState<string | undefined>();
+  const [selectedCommunityPostId, setSelectedCommunityPostId] = useState<string | undefined>(initialPublicRoute?.postId);
   const [communityPostProfile, setCommunityPostProfile] = useState<CommunityPostProfileState>({ status: "idle" });
   const storedSuggestions = useMemo(() => {
     const unique = new Map<string, SearchSuggestion>();
@@ -6748,57 +6739,47 @@ export function PublicLolPage({
 
   useEffect(() => {
     const loadFromPath = (replaceUrl = true) => {
-      const legalRoute = legalPageFromPublicPath();
-      if (legalRoute) {
-        setActiveMainPage(legalRoute);
-        setActiveNav("search");
+      const route = publicPageRouteFromPath();
+      if (route && route.page !== "search") {
+        setProfile(null);
+        setError("");
+        setActiveMainPage(route.page);
+        setActiveNav(route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
         setStreamerRegisterOpen(false);
-        return;
-      }
-      const tournamentRoute = tournamentRouteFromPublicPath();
-      if (tournamentRoute) {
-        setActiveMainPage(tournamentRoute.page);
-        setActiveNav("community");
-        setPublicTournamentSlug(tournamentRoute.slug);
-        void loadPublicTournaments(tournamentRoute.slug);
+        if (route.slug || route.page.startsWith("tournament")) {
+          setPublicTournamentSlug(route.slug);
+          void loadPublicTournaments(route.slug);
+        }
+        if (route.postId) {
+          setSelectedCommunityPostId(route.postId);
+          void getPublicCommunityPosts().then((posts) => {
+            setCommunityPosts(posts);
+            const post = posts.find((candidate) => candidate.id === route.postId);
+            if (post) void loadCommunityPostProfile(post);
+          }).catch((requestError) => {
+            setCommunityError(requestError instanceof Error ? requestError.message : t().communityLoadFailed);
+          });
+        }
         return;
       }
       const riotId = riotIdFromPublicSummonerPath();
-      if (!riotId) return;
+      if (!riotId) {
+        setProfile(null);
+        setError("");
+        setFilters(DEFAULT_MATCH_FILTERS);
+        setStreamerRegisterOpen(false);
+        setSelectedCommunityPostId(undefined);
+        setCommunityPostProfile({ status: "idle" });
+        setActiveMainPage("search");
+        setActiveNav("search");
+        return;
+      }
       setQuery(riotId);
       void runSearch(riotId, { replaceUrl });
     };
     loadFromPath(true);
     const handlePopState = () => {
-      const legalRoute = legalPageFromPublicPath();
-      if (legalRoute) {
-        setProfile(null);
-        setError("");
-        setStreamerRegisterOpen(false);
-        setActiveMainPage(legalRoute);
-        setActiveNav("search");
-        return;
-      }
-      const tournamentRoute = tournamentRouteFromPublicPath();
-      if (tournamentRoute) {
-        setActiveMainPage(tournamentRoute.page);
-        setActiveNav("community");
-        setPublicTournamentSlug(tournamentRoute.slug);
-        void loadPublicTournaments(tournamentRoute.slug);
-        return;
-      }
-      const riotId = riotIdFromPublicSummonerPath();
-      if (riotId) {
-        setQuery(riotId);
-        void runSearch(riotId, { updateUrl: false });
-        return;
-      }
-      setProfile(null);
-      setError("");
-      setFilters(DEFAULT_MATCH_FILTERS);
-      setStreamerRegisterOpen(false);
-      setActiveMainPage("search");
-      setActiveNav("search");
+      loadFromPath(false);
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
@@ -7057,6 +7038,31 @@ export function PublicLolPage({
     }
   }
 
+  async function submitCommunityReport(postId: string, input: CommunityPostReportCreateInput): Promise<boolean> {
+    setCommunityReportSubmitting(true);
+    setCommunityReportError("");
+    try {
+      await createPublicCommunityReport(postId, input);
+      setCommunityToast({
+        title: t().communityReport,
+        description: t().communityReportSuccess,
+        tone: "success"
+      });
+      return true;
+    } catch (requestError) {
+      const message = requestError instanceof Error ? requestError.message : t().communityReportFailed;
+      setCommunityReportError(message);
+      setCommunityToast({
+        title: t().communityReportFailed,
+        description: message,
+        tone: "danger"
+      });
+      return false;
+    } finally {
+      setCommunityReportSubmitting(false);
+    }
+  }
+
   function startTwitchLogin(): void {
     window.location.href = `${apiBase}/api/public/twitch/auth/start`;
   }
@@ -7105,6 +7111,7 @@ export function PublicLolPage({
     setCommunityCommentError("");
     setActiveMainPage("communityDetail");
     setActiveNav("community");
+    setPublicPath(publicPathForPage("communityDetail", { postId: post.id }) ?? "/community/server");
     void loadCommunityPostProfile(post);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
   }
@@ -7150,6 +7157,8 @@ export function PublicLolPage({
       setPublicPath(legalPath);
     } else {
       setActiveNav("community");
+      const pagePath = publicPathForPage(page);
+      if (pagePath) setPublicPath(pagePath);
     }
     if (legalPath) {
       // 법적 페이지는 공개 정적 성격의 화면이라 별도 데이터 로딩이 필요하지 않습니다.
@@ -7401,11 +7410,14 @@ export function PublicLolPage({
           twitchStatus={twitchStatus}
           commentSubmitting={communityCommentSubmitting}
           commentError={communityCommentError}
+          reportSubmitting={communityReportSubmitting}
+          reportError={communityReportError}
           toast={communityToast}
           onLogin={startTwitchLogin}
           onBack={() => changeMainPage(communityPostCategory(selectedCommunityPost) === "party" ? "communityParty" : "patch")}
           onSearchRiotId={searchFollowedRiotId}
           onSubmitComment={submitCommunityComment}
+          onSubmitReport={submitCommunityReport}
           onDismissToast={() => setCommunityToast(null)}
         />
       );

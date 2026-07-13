@@ -6,6 +6,7 @@
   --yoro-radius-xl: 1.5rem;
   --yoro-radius-pill: 62.4375rem;
   --yoro-radius-circle: 50%;
+  --yoro-radius-public-header: 2.125rem;
 
   --radius-sm: var(--yoro-radius-sm);
   --radius-md: var(--yoro-radius-md);

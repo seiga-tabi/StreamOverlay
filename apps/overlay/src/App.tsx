@@ -15,8 +15,9 @@ import type {
   SubtitleBoostMessage,
   SubtitleUpdateMessage
 } from "@streamops/shared";
-import { normalizeOverlayChannel, validateOverlayMessage } from "@streamops/shared";
+import { validateOverlayMessage } from "@streamops/shared";
 import { connectOverlaySocket } from "./socket";
+import { overlayDuration, overlayMockMode, overlayMode, overlayPreviewMode, shouldShowOverlay } from "./overlay-runtime";
 
 const EventOverlay = lazy(async () => ({ default: (await import("./overlays/EventOverlay")).EventOverlay }));
 const SubtitleOverlay = lazy(async () => ({ default: (await import("./overlays/SubtitleOverlay")).SubtitleOverlay }));
@@ -58,26 +59,15 @@ type CachedSoloRankState = {
 };
 
 function currentMode(): OverlayChannel {
-  const params = new URLSearchParams(window.location.search);
-  return normalizeOverlayChannel(params.get("mode"));
+  return overlayMode(window.location.search);
 }
 
 function isMockMode(): boolean {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("mock") === "1" || params.get("mock") === "true" || import.meta.env.VITE_OVERLAY_MOCK === "true";
+  return overlayMockMode(window.location.search, import.meta.env.VITE_OVERLAY_MOCK === "true");
 }
 
 function isPreviewMode(): boolean {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("preview") === "1" || params.get("preview") === "true";
-}
-
-function shouldShow(mode: OverlayChannel, target: OverlayChannel): boolean {
-  return mode === "all" || mode === target;
-}
-
-function duration(message: { durationMs?: number } | undefined, fallback: number): number {
-  return message?.durationMs ?? fallback;
+  return overlayPreviewMode(window.location.search);
 }
 
 function validateCachedMessage<T extends OverlayMessage["type"]>(
@@ -314,18 +304,18 @@ export default function App() {
     if (message.type === "subtitle.update") {
       setState((previous) => ({ ...previous, subtitle: message }));
       if (message.isFinal) {
-        scheduleTimeout(() => setState((previous) => previous.subtitle === message ? { ...previous, subtitle: undefined } : previous), duration(message, 8000));
+        scheduleTimeout(() => setState((previous) => previous.subtitle === message ? { ...previous, subtitle: undefined } : previous), overlayDuration(message, 8000));
       }
       return;
     }
     if (message.type === "subtitle.boost") {
       setState((previous) => ({ ...previous, subtitleBoost: message }));
-      scheduleTimeout(() => setState((previous) => previous.subtitleBoost === message ? { ...previous, subtitleBoost: undefined } : previous), duration(message, 7000));
+      scheduleTimeout(() => setState((previous) => previous.subtitleBoost === message ? { ...previous, subtitleBoost: undefined } : previous), overlayDuration(message, 7000));
       return;
     }
     if (message.type === "question.show") {
       setState((previous) => ({ ...previous, question: message }));
-      scheduleTimeout(() => setState((previous) => previous.question === message ? { ...previous, question: undefined } : previous), duration(message, 12_000));
+      scheduleTimeout(() => setState((previous) => previous.question === message ? { ...previous, question: undefined } : previous), overlayDuration(message, 12_000));
       return;
     }
     if (message.type === "question.clear") {
@@ -415,13 +405,13 @@ export default function App() {
   return (
     <div className={`overlay-root mode-${mode}`}>
       <Suspense fallback={null}>
-        {shouldShow(mode, "events") ? <EventOverlay banner={state.banner} emergency={state.emergency} onBannerComplete={clearCompletedBanner} /> : null}
-        {shouldShow(mode, "subtitles") ? <SubtitleOverlay subtitle={state.subtitle} boost={state.subtitleBoost} /> : null}
-        {shouldShow(mode, "questions") ? <QuestionOverlay question={state.question} /> : null}
-        {shouldShow(mode, "chat") ? <ChatOverlay messages={state.chatMessages} /> : null}
-        {shouldShow(mode, "mission") ? <MissionOverlay mission={state.mission} /> : null}
-        {shouldShow(mode, "solo-rank") ? <SoloRankOverlay profile={state.soloRankProfile} /> : null}
-        {shouldShow(mode, "participation") ? (
+        {shouldShowOverlay(mode, "events") ? <EventOverlay banner={state.banner} emergency={state.emergency} onBannerComplete={clearCompletedBanner} /> : null}
+        {shouldShowOverlay(mode, "subtitles") ? <SubtitleOverlay subtitle={state.subtitle} boost={state.subtitleBoost} /> : null}
+        {shouldShowOverlay(mode, "questions") ? <QuestionOverlay question={state.question} /> : null}
+        {shouldShowOverlay(mode, "chat") ? <ChatOverlay messages={state.chatMessages} /> : null}
+        {shouldShowOverlay(mode, "mission") ? <MissionOverlay mission={state.mission} /> : null}
+        {shouldShowOverlay(mode, "solo-rank") ? <SoloRankOverlay profile={state.soloRankProfile} /> : null}
+        {shouldShowOverlay(mode, "participation") ? (
           <ParticipationOverlay
             queue={state.participationQueue?.queue ?? []}
             queueIsOpen={state.participationQueue?.isOpen}

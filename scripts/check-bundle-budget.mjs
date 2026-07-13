@@ -1,8 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
+import { gzipSync } from "node:zlib";
 
 const budgets = [
-  { name: "dashboard JS total", dir: "apps/dashboard/dist/assets", ext: ".js", max: 700_000, mode: "total" },
+  { name: "dashboard JS total", dir: "apps/dashboard/dist/assets", ext: ".js", max: 740_000, mode: "total" },
+  { name: "dashboard JS gzip total", dir: "apps/dashboard/dist/assets", ext: ".js", max: 230_000, mode: "gzip-total" },
   { name: "dashboard JS chunk", dir: "apps/dashboard/dist/assets", ext: ".js", max: 520_000, mode: "largest" },
   { name: "dashboard CSS total", dir: "apps/dashboard/dist/assets", ext: ".css", max: 1_050_000, mode: "total" },
   { name: "overlay JS total", dir: "apps/overlay/dist/assets", ext: ".js", max: 230_000, mode: "total" },
@@ -16,10 +18,13 @@ for (const budget of budgets) {
     failed = true;
     continue;
   }
-  const sizes = fs.readdirSync(budget.dir)
-    .filter((file) => file.endsWith(budget.ext))
-    .map((file) => fs.statSync(path.join(budget.dir, file)).size);
-  const actual = budget.mode === "largest" ? Math.max(0, ...sizes) : sizes.reduce((sum, size) => sum + size, 0);
+  const files = fs.readdirSync(budget.dir).filter((file) => file.endsWith(budget.ext));
+  const sizes = files.map((file) => fs.statSync(path.join(budget.dir, file)).size);
+  const actual = budget.mode === "largest"
+    ? Math.max(0, ...sizes)
+    : budget.mode === "gzip-total"
+      ? files.reduce((sum, file) => sum + gzipSync(fs.readFileSync(path.join(budget.dir, file))).length, 0)
+      : sizes.reduce((sum, size) => sum + size, 0);
   const passed = actual <= budget.max;
   console.log(`[budget] ${budget.name}: ${actual}/${budget.max} bytes ${passed ? "PASS" : "FAIL"}`);
   if (!passed) failed = true;

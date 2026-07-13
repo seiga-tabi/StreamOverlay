@@ -5,6 +5,8 @@ import { filteredMatches, summarizeMatches } from "../src/features/public-lol/ut
 import { rankScore, rankTrendLine, shortRankLabel } from "../src/features/public-lol/utils/rank";
 import { buildSuggestions, jpRiotIdQuery, publicSummonerPath, riotIdFromPublicSummonerPath } from "../src/features/public-lol/utils/riot-id";
 import { parseFavorites, parseRecentSearches } from "../src/features/public-lol/utils/storage";
+import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
+import { dashboardPageFromPath, dashboardPathForPage } from "../src/routing/dashboard-routes";
 import type { PublicLolProfile, PublicLolRecentMatch, SearchSuggestion } from "../src/features/public-lol/types/public-lol";
 
 test("Riot ID를 기존 JP 검색 규칙으로 정규화한다", () => {
@@ -17,6 +19,26 @@ test("공개 소환사 경로를 동일한 Riot ID로 왕복 변환한다", () =
   const path = publicSummonerPath("せいが#sei");
   assert.equal(path, "/lol/summoners/jp/%E3%81%9B%E3%81%84%E3%81%8C-SEI");
   assert.equal(riotIdFromPublicSummonerPath(path), "せいが#SEI");
+});
+
+test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () => {
+  assert.equal(publicPageRouteFromPath("/community/server")?.page, "patch");
+  assert.equal(publicPageRouteFromPath("/community/party/")?.page, "communityParty");
+  assert.deepEqual(publicPageRouteFromPath("/community/posts/post%201"), {
+    page: "communityDetail",
+    postId: "post 1"
+  });
+  assert.equal(publicPathForPage("communityDetail", { postId: "post 1" }), "/community/posts/post%201");
+  assert.equal(publicPathForPage("followJoin"), "/participation");
+});
+
+test("Dashboard 역할별 경로를 페이지 상태와 왕복 변환한다", () => {
+  assert.equal(dashboardPathForPage("overlayStatus", "streamer"), "/dashboard/overlay");
+  assert.equal(dashboardPageFromPath("/dashboard/overlay/", "streamer"), "overlayStatus");
+  assert.equal(dashboardPathForPage("supportInbox", "admin"), "/admin/support");
+  assert.equal(dashboardPageFromPath("/admin/support", "admin"), "supportInbox");
+  assert.equal(dashboardPageFromPath("/admin/community", "admin"), "communityModeration");
+  assert.equal(dashboardPageFromPath("/admin/unknown", "admin"), "serverStatus");
 });
 
 test("검색 제안은 중복을 제거하고 최대 6개로 제한한다", () => {

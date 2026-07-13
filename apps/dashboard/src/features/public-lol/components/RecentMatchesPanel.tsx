@@ -44,7 +44,7 @@ export function RecentMatchesPanel({
   onLoadMore
 }: RecentMatchesPanelProps) {
   return (
-    <section className="public-panel public-matches-panel">
+    <section id="public-recent-matches" className="public-panel public-matches-panel">
       <div className="public-section-head">
         <h2 data-ko={text.title.ko} data-ja={text.title.ja}>{text.title.label}</h2>
         <Badge size="sm" tone="info">{matchCount}</Badge>

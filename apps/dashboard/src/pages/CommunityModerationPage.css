@@ -1,0 +1,99 @@
+.community-moderation-page {
+  display: grid;
+  gap: var(--yoro-space-5);
+}
+
+.community-moderation-error {
+  margin: var(--yoro-space-0);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  border: thin solid var(--yoro-color-danger);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-danger-bg);
+  color: var(--yoro-color-danger);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.community-moderation-metrics,
+.community-moderation-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--yoro-space-3);
+}
+
+.community-moderation-secondary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.community-moderation-section > .yoro-card__header,
+.community-moderation-row > .yoro-card__header,
+.community-moderation-secondary-grid .yoro-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-3);
+}
+
+.community-moderation-list,
+.community-moderation-compact-list {
+  display: grid;
+  gap: var(--yoro-space-3);
+}
+
+.community-moderation-row > .yoro-card__content {
+  display: grid;
+  gap: var(--yoro-space-2);
+}
+
+.community-moderation-row p,
+.community-moderation-row small,
+.community-moderation-compact-row small {
+  margin: var(--yoro-space-0);
+  color: var(--yoro-color-text-muted);
+}
+
+.community-moderation-row > .yoro-card__footer,
+.community-moderation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--yoro-space-2);
+}
+
+.community-moderation-compact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-3);
+  min-height: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.community-moderation-compact-row > div:first-child {
+  display: grid;
+  gap: var(--yoro-space-1);
+  min-width: var(--yoro-space-0);
+}
+
+@media (max-width: 48rem) {
+  .community-moderation-metrics,
+  .community-moderation-secondary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .community-moderation-compact-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .community-moderation-actions {
+    justify-content: stretch;
+  }
+
+  .community-moderation-actions .yoro-button {
+    flex: 1 1 auto;
+  }
+}

@@ -2,14 +2,50 @@
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart {
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
-  gap: 8px !important;
-  min-height: 224px !important;
-  padding: 16px 16px 14px !important;
+  gap: var(--yoro-space-2) !important;
+  min-height: var(--yoro-size-rank-chart-min) !important;
+  padding: var(--yoro-space-4) !important;
   overflow: hidden !important;
-  border-color: rgba(248, 249, 250, .18) !important;
-  background:
-    linear-gradient(180deg, rgba(73, 80, 87, .76), rgba(52, 58, 64, .66)) !important;
+  border-color: var(--yoro-color-border-on-dark-strong) !important;
+  background: var(--yoro-theme-rank-chart-background) !important;
   background-size: auto !important;
+}
+
+/* 팔로우 방송인 전적: 전체 목록을 제한된 영역에서 탐색 */
+.public-dashboard-shell:not(.public-home-shell) .public-subscriptions-layout .public-twitch-followed-list.public-twitch-followed-scroll {
+  max-height: min(62vh, var(--yoro-size-followed-list-max-height)) !important;
+  max-height: min(62dvh, var(--yoro-size-followed-list-max-height)) !important;
+  padding-inline-end: var(--yoro-space-2) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  scrollbar-color: var(--yoro-color-border-strong) var(--yoro-color-surface-muted);
+  scrollbar-gutter: stable;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-subscriptions-layout .public-twitch-followed-list.public-twitch-followed-scroll:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-offset);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-subscriptions-layout .public-twitch-followed-list.public-twitch-followed-scroll::-webkit-scrollbar {
+  width: var(--yoro-space-2);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-subscriptions-layout .public-twitch-followed-list.public-twitch-followed-scroll::-webkit-scrollbar-track {
+  background: var(--yoro-color-surface-muted);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-subscriptions-layout .public-twitch-followed-list.public-twitch-followed-scroll::-webkit-scrollbar-thumb {
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-border-strong);
+}
+
+@media (max-width: 48rem) {
+  .public-dashboard-shell:not(.public-home-shell) .public-subscriptions-layout .public-twitch-followed-list.public-twitch-followed-scroll {
+    max-height: min(58vh, var(--yoro-size-followed-list-max-height-mobile)) !important;
+    max-height: min(58dvh, var(--yoro-size-followed-list-max-height-mobile)) !important;
+  }
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-line {
@@ -29,10 +65,10 @@
   position: static !important;
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-  color: rgba(248, 249, 250, .82) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
+  gap: var(--yoro-space-3) !important;
+  color: var(--yoro-color-text-on-dark-muted) !important;
+  font-size: var(--yoro-font-size-xs) !important;
+  font-weight: var(--yoro-font-weight-black) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-axis span:nth-child(2) {
@@ -44,84 +80,84 @@
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band {
-  opacity: .28 !important;
+  opacity: var(--yoro-opacity-rank-band) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-iron,
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-unranked {
-  fill: rgba(173, 181, 189, .1) !important;
+  fill: var(--yoro-color-rank-band-neutral) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-bronze {
-  fill: rgba(185, 121, 75, .12) !important;
+  fill: var(--yoro-color-rank-band-bronze) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-silver {
-  fill: rgba(206, 212, 218, .11) !important;
+  fill: var(--yoro-color-rank-band-silver) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-gold {
-  fill: rgba(255, 212, 59, .13) !important;
+  fill: var(--yoro-color-rank-band-gold) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-platinum {
-  fill: rgba(76, 201, 184, .15) !important;
+  fill: var(--yoro-color-rank-band-platinum) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-emerald {
-  fill: rgba(81, 207, 102, .14) !important;
+  fill: var(--yoro-color-rank-band-emerald) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-diamond {
-  fill: rgba(116, 192, 252, .14) !important;
+  fill: var(--yoro-color-rank-band-diamond) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-master,
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-grandmaster,
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-challenger {
-  fill: rgba(177, 151, 252, .14) !important;
+  fill: var(--yoro-color-rank-band-master) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-boundary {
-  stroke: rgba(248, 249, 250, .24) !important;
-  stroke-dasharray: 5 7 !important;
+  stroke: var(--yoro-color-divider-on-dark) !important;
+  stroke-dasharray: var(--yoro-size-rank-boundary-dash) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band-label {
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  fill: rgba(248, 249, 250, .88) !important;
+  font-size: var(--yoro-font-size-xs) !important;
+  font-weight: var(--yoro-font-weight-black) !important;
+  fill: var(--yoro-color-text-on-dark-strong) !important;
   writing-mode: horizontal-tb !important;
   text-orientation: mixed !important;
   dominant-baseline: middle;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-area {
-  fill: rgba(92, 205, 189, .14) !important;
+  fill: var(--yoro-color-rank-trend-area) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-stroke {
-  stroke-width: 3.6 !important;
-  filter: drop-shadow(0 0 3px rgba(92, 205, 189, .42)) !important;
+  stroke-width: var(--yoro-size-rank-line-stroke) !important;
+  filter: var(--yoro-filter-rank-line) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-point.latest circle {
-  stroke-width: 3 !important;
-  filter: drop-shadow(0 0 6px rgba(92, 205, 189, .54)) !important;
+  stroke-width: var(--yoro-size-rank-point-stroke) !important;
+  filter: var(--yoro-filter-rank-point) !important;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 48rem) {
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart {
-    min-height: 196px !important;
-    padding: 12px 12px 12px !important;
+    min-height: var(--yoro-size-rank-chart-min-mobile) !important;
+    padding: var(--yoro-space-3) !important;
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-axis {
-    font-size: 11px !important;
+    font-size: var(--yoro-font-size-xs) !important;
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band-label {
-    font-size: 10px !important;
+    font-size: var(--yoro-font-size-xs) !important;
   }
 }
 
@@ -129,34 +165,30 @@
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
   display: grid !important;
-  grid-template-columns: 154px minmax(300px, auto) minmax(440px, 720px) max-content !important;
+  grid-template-columns: var(--yoro-size-public-header-brand) minmax(var(--yoro-size-public-header-medium-nav), auto) minmax(var(--yoro-size-public-header-search-min), var(--yoro-size-public-header-search-max)) max-content !important;
   grid-template-areas: "brand nav search tools" !important;
   align-items: center !important;
   justify-content: stretch !important;
-  width: min(1720px, calc(100% - 96px)) !important;
-  min-height: 86px !important;
-  margin: 18px auto 0 !important;
-  padding: 0 30px !important;
-  column-gap: clamp(28px, 3vw, 56px) !important;
-  border: 1px solid rgba(248, 249, 250, .14) !important;
-  border-radius: 34px !important;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(123, 92, 255, .1), transparent 34%),
-    linear-gradient(90deg, rgba(89, 97, 106, .76), rgba(61, 68, 76, .78)) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(248, 249, 250, .08),
-    0 18px 44px rgba(33, 37, 41, .18) !important;
-  backdrop-filter: blur(20px) saturate(125%) !important;
+  width: min(var(--yoro-size-public-header-max), calc(100% - var(--yoro-size-public-header-inline-inset))) !important;
+  min-height: var(--yoro-size-public-header-height) !important;
+  margin: var(--yoro-size-public-header-margin-top) auto var(--yoro-space-0) !important;
+  padding: var(--yoro-space-0) var(--yoro-size-public-header-padding-inline) !important;
+  column-gap: clamp(var(--yoro-space-8), 3vw, var(--yoro-size-public-header-nav-gap-max)) !important;
+  border: thin solid var(--yoro-color-border-on-dark) !important;
+  border-radius: var(--yoro-radius-public-header) !important;
+  background: var(--yoro-theme-public-header-background) !important;
+  box-shadow: var(--yoro-shadow-public-header) !important;
+  backdrop-filter: var(--yoro-effect-public-header-blur) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
   grid-area: brand !important;
   justify-self: start !important;
-  width: 154px !important;
-  min-width: 154px !important;
-  height: 48px !important;
-  min-height: 48px !important;
+  width: var(--yoro-size-public-header-brand) !important;
+  min-width: var(--yoro-size-public-header-brand) !important;
+  height: calc(var(--yoro-size-touch-target) + var(--yoro-space-1)) !important;
+  min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-1)) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
@@ -166,14 +198,14 @@
   align-self: center !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: clamp(26px, 2.6vw, 46px) !important;
+  gap: clamp(var(--yoro-size-public-header-nav-gap-min), 2.6vw, var(--yoro-size-public-header-nav-gap-max)) !important;
   width: auto !important;
   max-width: none !important;
-  height: 58px !important;
-  min-height: 58px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
+  height: var(--yoro-size-public-header-control) !important;
+  min-height: var(--yoro-size-public-header-control) !important;
+  padding: var(--yoro-space-0) !important;
+  border: var(--yoro-space-0) !important;
+  border-radius: var(--yoro-space-0) !important;
   background: transparent !important;
   box-shadow: none !important;
   overflow: visible !important;
@@ -183,11 +215,11 @@
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item {
   display: inline-flex !important;
   align-items: center !important;
-  height: 58px !important;
-  min-height: 58px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
+  height: var(--yoro-size-public-header-control) !important;
+  min-height: var(--yoro-size-public-header-control) !important;
+  padding: var(--yoro-space-0) !important;
+  border: var(--yoro-space-0) !important;
+  border-radius: var(--yoro-space-0) !important;
   background: transparent !important;
   box-shadow: none !important;
 }
@@ -200,14 +232,14 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
-  height: 58px !important;
-  min-height: 58px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
+  gap: var(--yoro-space-2) !important;
+  height: var(--yoro-size-public-header-control) !important;
+  min-height: var(--yoro-size-public-header-control) !important;
+  padding: var(--yoro-space-0) !important;
+  border: var(--yoro-space-0) !important;
+  border-radius: var(--yoro-space-0) !important;
   background: transparent !important;
-  color: rgba(248, 249, 250, .86) !important;
+  color: var(--yoro-color-text-on-dark-soft) !important;
   line-height: 1 !important;
   box-shadow: none !important;
   transform: none !important;
@@ -226,20 +258,20 @@
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button.active,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active {
   background: transparent !important;
-  color: #ffffff !important;
+  color: var(--yoro-color-text-on-dark) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button::after,
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button::after {
-  right: 0 !important;
-  bottom: 4px !important;
-  left: 0 !important;
-  width: 30px !important;
-  height: 3px !important;
-  margin: 0 auto !important;
-  border-radius: 999px !important;
+  right: var(--yoro-space-0) !important;
+  bottom: var(--yoro-space-1) !important;
+  left: var(--yoro-space-0) !important;
+  width: var(--yoro-size-public-nav-indicator-width) !important;
+  height: var(--yoro-focus-ring-width) !important;
+  margin: var(--yoro-space-0) auto !important;
+  border-radius: var(--yoro-radius-pill) !important;
   background: transparent !important;
   box-shadow: none !important;
 }
@@ -248,8 +280,8 @@
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button.active::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after {
-  background: #7b5cff !important;
-  box-shadow: 0 0 12px rgba(123, 92, 255, .34) !important;
+  background: var(--yoro-color-public-primary) !important;
+  box-shadow: var(--yoro-shadow-public-nav-active) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
@@ -257,9 +289,9 @@
   grid-area: search !important;
   justify-self: end !important;
   align-self: center !important;
-  width: min(720px, 38vw) !important;
-  min-width: 440px !important;
-  max-width: 720px !important;
+  width: min(var(--yoro-size-public-header-search-max), 38vw) !important;
+  min-width: var(--yoro-size-public-header-search-min) !important;
+  max-width: var(--yoro-size-public-header-search-max) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
@@ -269,34 +301,34 @@
   align-self: center !important;
   display: inline-flex !important;
   align-items: center !important;
-  height: 58px !important;
-  min-height: 58px !important;
-  margin: 0 !important;
+  height: var(--yoro-size-public-header-control) !important;
+  min-height: var(--yoro-size-public-header-control) !important;
+  margin: var(--yoro-space-0) !important;
   transform: none !important;
 }
 
-@media (max-width: 1320px) {
+@media (max-width: 82.5rem) {
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    grid-template-columns: 138px minmax(240px, auto) minmax(340px, 1fr) max-content !important;
-    width: min(1220px, calc(100% - 48px)) !important;
-    padding: 0 22px !important;
-    column-gap: 22px !important;
+    grid-template-columns: var(--yoro-size-public-header-medium-brand) minmax(var(--yoro-size-public-header-medium-nav), auto) minmax(var(--yoro-size-public-header-medium-search-min), 1fr) max-content !important;
+    width: min(var(--yoro-size-public-header-medium-max), calc(100% - var(--yoro-space-12))) !important;
+    padding: var(--yoro-space-0) var(--yoro-space-6) !important;
+    column-gap: var(--yoro-space-6) !important;
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
-    width: min(560px, 36vw) !important;
-    min-width: 340px !important;
+    width: min(var(--yoro-size-public-header-medium-search-max), 36vw) !important;
+    min-width: var(--yoro-size-public-header-medium-search-min) !important;
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 68.75rem) {
 
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
     justify-self: center !important;
-    gap: 22px !important;
+    gap: var(--yoro-space-6) !important;
     max-width: 100% !important;
     overflow-x: auto !important;
   }
@@ -304,8 +336,506 @@
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
     justify-self: center !important;
-    width: min(100%, 720px) !important;
-    min-width: 0 !important;
+    width: min(100%, var(--yoro-size-public-header-search-max)) !important;
+    min-width: var(--yoro-space-0) !important;
   }
 }
 
+/* P1 사용자 경험: 검색 우선 Hero, Profile 요약, 모바일 Header를 하나의 최종 규칙으로 관리 */
+.public-home-shared-shell .public-home-shared-main.yoro-app-shell__main {
+  min-height: auto !important;
+}
+
+.public-home-shared-shell .public-dashboard-home.public-home-shared-content,
+.public-home-shared-shell .public-home-shared-content {
+  min-height: auto !important;
+  padding: var(--yoro-space-6) var(--yoro-space-4) var(--yoro-space-10) !important;
+}
+
+.public-home-shared-shell .public-home-shared-inner {
+  gap: var(--yoro-space-5) !important;
+}
+
+.public-home-shared-shell .public-home-brand-hero {
+  width: min(100%, var(--yoro-size-home-brand)) !important;
+  margin: var(--yoro-space-0) auto var(--yoro-space-2) !important;
+}
+
+.public-home-shared-shell .public-home-brand-logo-image {
+  max-height: var(--yoro-size-home-brand-height);
+}
+
+.public-home-shared-shell .public-home-live-section {
+  margin-top: var(--yoro-space-4) !important;
+  padding-top: var(--yoro-space-6) !important;
+}
+
+.public-home-shared-shell .public-home-live-empty .yoro-empty-state__title {
+  color: var(--yoro-color-on-dark-primary) !important;
+}
+
+.public-home-shared-shell .public-home-live-empty .yoro-empty-state__description {
+  color: var(--yoro-color-on-dark-secondary) !important;
+}
+
+.public-profile-shared-top.details-collapsed.yoro-card {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.public-profile-summary-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--yoro-space-2);
+}
+
+.public-profile-summary-controls .yoro-button {
+  min-height: var(--yoro-size-touch-target);
+}
+
+#public-recent-matches {
+  scroll-margin-top: calc(var(--yoro-size-touch-target) + var(--yoro-space-4));
+}
+
+.public-dashboard-shell .public-app-header button,
+.public-dashboard-shell .public-app-header [role="button"],
+.public-dashboard-shell .public-site-footer button {
+  min-height: var(--yoro-size-touch-target) !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-nav > button,
+.public-dashboard-shell .public-app-header .public-header-menu-item > button,
+.public-dashboard-shell .public-app-header.home .public-header-nav > button,
+.public-dashboard-shell .public-app-header.home .public-header-menu-item > button,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-nav > button,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-menu-item > button,
+.public-dashboard-shell .public-app-header button[aria-label] {
+  min-height: var(--yoro-size-touch-target) !important;
+  min-width: var(--yoro-size-touch-target) !important;
+}
+
+.public-dashboard-shell .public-app-header .public-header-submenu button,
+.public-dashboard-shell .public-app-header.home .public-header-submenu button,
+.public-dashboard-shell .public-app-header:not(.home) .public-header-submenu button,
+.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-brand {
+  min-height: var(--yoro-size-touch-target) !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-app-header.home .public-header-nav > button,
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-app-header.home .public-header-menu-item > button {
+  min-width: var(--yoro-size-touch-target) !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-app-header.home .public-header-submenu button {
+  height: var(--yoro-size-touch-target) !important;
+  min-height: var(--yoro-size-touch-target) !important;
+}
+
+.public-home-shared-shell.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-brand {
+  height: calc(var(--yoro-size-touch-target) + var(--yoro-space-1)) !important;
+  min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-1)) !important;
+}
+
+@media (max-width: 48rem) {
+  .public-home-shared-shell .public-dashboard-home.public-home-shared-content,
+  .public-home-shared-shell .public-home-shared-content {
+    padding: var(--yoro-space-5) var(--yoro-space-3) var(--yoro-space-8) !important;
+  }
+
+  .public-home-shared-shell .public-home-brand-hero {
+    width: min(100%, var(--yoro-size-home-brand-mobile)) !important;
+    margin-bottom: var(--yoro-space-1) !important;
+  }
+
+  .public-home-shared-shell .public-home-brand-logo-image {
+    max-height: var(--yoro-size-home-brand-height-mobile);
+  }
+
+  .public-dashboard-shell .public-app-header,
+  .public-dashboard-shell .public-app-header.home,
+  .public-dashboard-shell .public-app-header:not(.home) {
+    position: sticky !important;
+    top: var(--yoro-space-0) !important;
+    z-index: var(--yoro-z-overlay) !important;
+    grid-template-columns: minmax(var(--yoro-size-public-header-mobile-track), 1fr) var(--yoro-size-touch-target) auto !important;
+    grid-template-areas:
+      "brand toggle tools"
+      "nav nav nav"
+      "search search search" !important;
+    gap: var(--yoro-space-2) !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: var(--yoro-space-0) !important;
+    padding: var(--yoro-space-2) var(--yoro-space-3) !important;
+    border-width: 0 0 thin !important;
+    border-radius: var(--yoro-radius-xs) !important;
+  }
+
+  .public-dashboard-shell .public-app-header.home {
+    grid-template-areas:
+      "brand toggle tools"
+      "nav nav nav" !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-brand {
+    grid-area: brand !important;
+    width: var(--yoro-size-public-header-brand-mobile) !important;
+    min-width: var(--yoro-size-public-header-brand-mobile) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo,
+  .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-full,
+  .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-topbar {
+    width: var(--yoro-size-public-header-brand-mobile) !important;
+    min-width: var(--yoro-size-public-header-brand-mobile) !important;
+    height: auto !important;
+  }
+
+  .public-dashboard-shell .public-mobile-menu-toggle {
+    grid-area: toggle !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-nav,
+  .public-dashboard-shell .public-app-header.home .public-header-nav,
+  .public-dashboard-shell .public-app-header:not(.home) .public-header-nav {
+    grid-area: nav !important;
+    display: none !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: var(--yoro-space-1) !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding-top: var(--yoro-space-2) !important;
+    overflow: visible !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-nav {
+    display: grid !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-menu-item,
+  .public-dashboard-shell .public-app-header .public-header-nav > button,
+  .public-dashboard-shell .public-app-header .public-header-menu-item > button {
+    width: 100% !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-submenu {
+    display: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-header-tools,
+  .public-dashboard-shell .public-app-header.home .public-header-tools,
+  .public-dashboard-shell .public-app-header:not(.home) .public-header-tools {
+    grid-area: tools !important;
+    gap: var(--yoro-space-1) !important;
+    min-width: var(--yoro-space-0) !important;
+    width: auto !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-locale-menu,
+  .public-dashboard-shell .public-app-header .public-locale-button {
+    display: inline-flex !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-locale-button {
+    width: var(--yoro-size-public-locale-mobile) !important;
+    min-width: var(--yoro-size-public-locale-mobile) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding-inline: var(--yoro-space-2) !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-twitch-login-chip {
+    width: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell .public-app-header .public-twitch-login-chip strong {
+    position: absolute !important;
+    width: var(--yoro-size-sr-only) !important;
+    height: var(--yoro-size-sr-only) !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+  }
+
+  .public-dashboard-shell .public-app-header > .public-search-wrap,
+  .public-dashboard-shell .public-app-header:not(.home) > .public-search-wrap {
+    grid-area: search !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell button,
+  .public-dashboard-shell [role="button"],
+  .public-dashboard-shell input,
+  .public-dashboard-shell select,
+  .public-dashboard-shell .yoro-button,
+  .public-dashboard-shell .public-home-live-action {
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell button[aria-label],
+  .public-dashboard-shell .public-match-expand,
+  .public-dashboard-shell .public-search-icon-button {
+    min-width: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-profile-shared-top.yoro-card,
+  .public-profile-shared-top.details-open.yoro-card,
+  .public-profile-shared-top.details-collapsed.yoro-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .public-profile-summary-controls {
+    justify-content: stretch;
+  }
+
+  .public-profile-summary-controls .yoro-button {
+    flex: 1 1 var(--yoro-size-profile-control-basis);
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
+    grid-template-columns: minmax(var(--yoro-size-public-header-mobile-track), 1fr) var(--yoro-size-touch-target) auto !important;
+    grid-template-areas:
+      "brand toggle tools"
+      "nav nav nav"
+      "search search search" !important;
+    gap: var(--yoro-space-2) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    margin: var(--yoro-space-0) !important;
+    padding: var(--yoro-space-2) var(--yoro-space-3) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    margin: var(--yoro-space-0) !important;
+    border-radius: var(--yoro-radius-xs) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
+    grid-area: brand !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-brand,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
+    display: inline-flex !important;
+    width: var(--yoro-size-public-header-brand-mobile) !important;
+    min-width: var(--yoro-size-public-header-brand-mobile) !important;
+  }
+
+  .public-dashboard-shell .public-mobile-menu-toggle strong {
+    display: none !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
+    grid-area: nav !important;
+    display: none !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav {
+    display: grid !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
+    grid-area: search !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
+    grid-area: tools !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-profile-layout,
+  .public-dashboard-shell:not(.public-home-shell) .public-dashboard-content-grid,
+  .public-dashboard-shell:not(.public-home-shell) .public-dashboard-center {
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    max-width: 100% !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-search-form button,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-search-form button {
+    min-width: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form .public-search-submit,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form .public-search-submit {
+    width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+}
+
+/* 최근 게임 챔피언 필터: 이미지가 포함된 목록형 선택 컨트롤 */
+.public-dashboard-shell .public-match-filter-field {
+  position: relative;
+  display: grid;
+  gap: var(--yoro-space-1);
+  min-width: var(--yoro-space-0);
+  color: var(--public-gray-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.public-dashboard-shell .public-match-filter-field > span {
+  min-width: var(--yoro-space-0);
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--yoro-space-2) !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: var(--yoro-space-0) !important;
+  min-height: var(--yoro-size-touch-target) !important;
+  padding: var(--yoro-space-1) var(--yoro-space-3) !important;
+  border: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
+  border-radius: var(--yoro-radius-sm) !important;
+  background: var(--public-gray-surface-strong) !important;
+  color: var(--public-gray-text) !important;
+  box-shadow: var(--yoro-shadow-none) !important;
+  text-align: start;
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger:hover,
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger[aria-expanded="true"] {
+  border-color: var(--yoro-color-secondary) !important;
+  background: var(--public-gray-surface) !important;
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger:focus-visible,
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring) !important;
+  outline-offset: var(--yoro-focus-ring-offset);
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger strong,
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option strong {
+  min-width: var(--yoro-space-0);
+  overflow: hidden;
+  color: inherit;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-dashboard-shell .public-champion-filter-media {
+  display: grid;
+  place-items: center;
+  width: var(--yoro-size-champion-filter-icon);
+  height: var(--yoro-size-champion-filter-icon);
+  overflow: hidden;
+  border: var(--yoro-size-sr-only) solid var(--public-gray-border);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--public-gray-surface);
+  color: var(--public-gray-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.public-dashboard-shell .public-champion-filter-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-dashboard-shell .public-champion-filter-chevron {
+  color: var(--public-gray-muted);
+  font-size: var(--yoro-font-size-md);
+  transition: transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger[aria-expanded="true"] .public-champion-filter-chevron {
+  transform: rotate(180deg);
+}
+
+.public-dashboard-shell .public-champion-filter-options {
+  position: absolute;
+  z-index: var(--yoro-z-overlay);
+  inset-block-start: calc(100% + var(--yoro-space-1));
+  inset-inline: var(--yoro-space-0);
+  display: grid;
+  gap: var(--yoro-space-1);
+  max-height: var(--yoro-size-champion-filter-menu-max-height);
+  padding: var(--yoro-space-2);
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: var(--yoro-size-sr-only) solid var(--public-gray-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--public-gray-surface-strong);
+  box-shadow: var(--yoro-shadow-panel);
+  overscroll-behavior: contain;
+  scrollbar-color: var(--yoro-color-border-strong) var(--public-gray-surface-strong);
+  scrollbar-gutter: stable;
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--yoro-space-2) !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: var(--yoro-space-0) !important;
+  min-height: var(--yoro-size-touch-target) !important;
+  padding: var(--yoro-space-1) var(--yoro-space-2) !important;
+  border: 0 !important;
+  border-radius: var(--yoro-radius-sm) !important;
+  background: transparent !important;
+  color: var(--public-gray-text) !important;
+  box-shadow: var(--yoro-shadow-none) !important;
+  text-align: start;
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option:hover,
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option:focus-visible {
+  background: var(--public-gray-surface) !important;
+}
+
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option[aria-selected="true"] {
+  background: var(--yoro-color-secondary-strong) !important;
+  color: var(--yoro-color-text-on-dark) !important;
+}
+
+.public-dashboard-shell .public-champion-filter-check {
+  width: var(--yoro-space-4);
+  color: inherit;
+  font-weight: var(--yoro-font-weight-black);
+  text-align: center;
+}
+
+@media (max-width: 48rem) {
+  .public-dashboard-shell .public-champion-filter-options {
+    max-height: min(44dvh, var(--yoro-size-champion-filter-menu-max-height));
+  }
+}

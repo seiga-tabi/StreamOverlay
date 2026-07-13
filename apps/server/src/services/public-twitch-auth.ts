@@ -188,11 +188,11 @@ export class PublicTwitchAuthService {
     private readonly fetchImpl: FetchLike = fetch
   ) {}
 
-  createAuthorizationUrl(forceVerify = false, redirectUri = this.config.redirectUri): string {
+  createAuthorizationUrl(forceVerify = false, redirectUri = this.config.redirectUri, returnUrl = ""): string {
     if (!this.config.clientId || !redirectUri) {
       throw new Error("Twitch 공개 로그인 client ID 또는 redirect URI가 설정되지 않았습니다.");
     }
-    const state = `${PUBLIC_TWITCH_OAUTH_STATE_PREFIX}${this.stateStore.create({ redirectUri })}`;
+    const state = `${PUBLIC_TWITCH_OAUTH_STATE_PREFIX}${this.stateStore.create({ redirectUri, returnUrl })}`;
     const url = new URL("https://id.twitch.tv/oauth2/authorize");
     url.searchParams.set("response_type", "code");
     url.searchParams.set("client_id", this.config.clientId);
@@ -211,11 +211,11 @@ export class PublicTwitchAuthService {
     return Boolean(this.consumeState(state));
   }
 
-  consumeState(state: string | null | undefined): { redirectUri?: string } | undefined {
+  consumeState(state: string | null | undefined): { redirectUri?: string; returnUrl?: string } | undefined {
     if (!this.isPublicState(state)) return undefined;
     const record = this.stateStore.consumeRecord(state?.slice(PUBLIC_TWITCH_OAUTH_STATE_PREFIX.length));
     if (!record) return undefined;
-    return { redirectUri: record.metadata?.redirectUri };
+    return { redirectUri: record.metadata?.redirectUri, returnUrl: record.metadata?.returnUrl };
   }
 
   async connectWithCode(code: string, redirectUri = this.config.redirectUri): Promise<PublicTwitchViewerSession> {

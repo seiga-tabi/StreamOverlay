@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 const args = new Set(process.argv.slice(2));
+const testAlertMode = args.has("--test-alert");
 
 function readOption(name, fallback = "") {
   const prefix = `${name}=`;
@@ -24,6 +25,7 @@ const diskUsedPercentMax = positiveNumber(process.env.OPS_DISK_USED_PERCENT_MAX,
 const monitorStateFile = process.env.OPS_MONITOR_STATE_FILE || "";
 const alertWebhookUrl = process.env.OPS_ALERT_WEBHOOK_URL || "";
 const alertRepeatMinutes = positiveNumber(process.env.OPS_ALERT_REPEAT_MINUTES, 60);
+const restartAlertEnabled = process.env.OPS_RESTART_ALERT_ENABLED === "true";
 const checks = [];
 
 function record(name, ok, detail) {
@@ -158,10 +160,53 @@ async function notifyIfNeeded(result, previousState) {
   }
 }
 
-if (!baseUrlValue) {
-  console.error("[edge] --base-url=https://host 또는 PRODUCTION_BASE_URL이 필요합니다.");
-  process.exit(1);
+async function sendTestAlert() {
+  if (!alertWebhookUrl) {
+    console.error("[edge] OPS_ALERT_WEBHOOK_URL이 필요합니다.");
+    return false;
+  }
+  let webhook;
+  try {
+    webhook = new URL(alertWebhookUrl);
+  } catch {
+    console.error("[edge] OPS_ALERT_WEBHOOK_URL 형식이 올바르지 않습니다.");
+    return false;
+  }
+  if (webhook.protocol !== "https:") {
+    console.error("[edge] alert webhook은 https:// URL이어야 합니다.");
+    return false;
+  }
+  const checkedAt = new Date().toISOString();
+  try {
+    const response = await request(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: "YORO.gg 운영 알림 테스트",
+        content: "YORO.gg 운영 알림 테스트",
+        service: "YORO.gg",
+        ok: true,
+        test: true,
+        checkedAt,
+        failures: []
+      })
+    });
+    console.log(`[edge] ${response.ok ? "PASS" : "FAIL"} alert webhook test: HTTP ${response.status}`);
+    return response.ok;
+  } catch (error) {
+    console.error(`[edge] alert webhook test 실패: ${error instanceof Error ? error.message : "요청 실패"}`);
+    return false;
+  }
 }
+
+if (testAlertMode) {
+  if (!await sendTestAlert()) process.exitCode = 1;
+} else {
+
+  if (!baseUrlValue) {
+    console.error("[edge] --base-url=https://host 또는 PRODUCTION_BASE_URL이 필요합니다.");
+    process.exit(1);
+  }
 
 let baseUrl;
 try {
@@ -173,6 +218,8 @@ try {
 
 record("production URL scheme", baseUrl.protocol === "https:", baseUrl.protocol);
 const origin = baseUrl.origin;
+const previousState = await readPreviousState();
+let observedInstanceStartedAt = "";
 
 try {
   const httpUrl = new URL(origin);
@@ -204,10 +251,22 @@ for (const endpoint of ["/health/live", "/health/ready"]) {
     if (endpoint === "/health/live" && response.ok) {
       const gitSha = typeof body?.build?.gitSha === "string" ? body.build.gitSha : "";
       record("build metadata", Boolean(gitSha && gitSha !== "unknown"), gitSha ? "Git SHA 확인" : "Git SHA 없음");
+      observedInstanceStartedAt = typeof body?.startedAt === "string" ? body.startedAt : "";
+      record("instance metadata", Boolean(Date.parse(observedInstanceStartedAt)), observedInstanceStartedAt ? "startedAt 확인" : "startedAt 없음");
     }
   } catch (error) {
     record(endpoint, false, error instanceof Error ? error.message : "요청 실패");
   }
+}
+
+if (restartAlertEnabled) {
+  const previousInstanceStartedAt = typeof previousState?.instanceStartedAt === "string" ? previousState.instanceStartedAt : "";
+  const restarted = Boolean(previousInstanceStartedAt && observedInstanceStartedAt && previousInstanceStartedAt !== observedInstanceStartedAt);
+  record(
+    "server restart",
+    Boolean(observedInstanceStartedAt) && !restarted,
+    restarted ? "이전 점검 이후 instance startedAt이 변경되었습니다." : "instance 변경 없음"
+  );
 }
 
 try {
@@ -230,7 +289,6 @@ await checkDiskUsage();
 
 const failuresBeforeAlert = checks.filter((check) => !check.ok).map((check) => check.name);
 const checkedAt = new Date().toISOString();
-const previousState = await readPreviousState();
 const result = { ok: failuresBeforeAlert.length === 0, checkedAt, failures: failuresBeforeAlert };
 const lastNotifiedAt = await notifyIfNeeded(result, previousState);
 const finalFailures = checks.filter((check) => !check.ok).map((check) => check.name);
@@ -241,7 +299,13 @@ const finalResult = {
   failures: finalFailures,
   checks
 };
-await writeMonitorState({ ok: finalResult.ok, checkedAt, failures: finalFailures, lastNotifiedAt });
+await writeMonitorState({
+  ok: finalResult.ok,
+  checkedAt,
+  failures: finalFailures,
+  lastNotifiedAt,
+  instanceStartedAt: observedInstanceStartedAt || previousState?.instanceStartedAt
+});
 
 if (reportPath) {
   const absolutePath = path.resolve(reportPath);
@@ -250,9 +314,10 @@ if (reportPath) {
   console.log(`[edge] report 저장: ${absolutePath}`);
 }
 
-if (finalFailures.length) {
-  console.error(`[edge] 운영 점검 실패: ${finalFailures.join(", ")}`);
-  process.exitCode = 1;
-} else {
-  console.log("[edge] 운영 edge, health, 정적 파일 점검을 통과했습니다.");
+  if (finalFailures.length) {
+    console.error(`[edge] 운영 점검 실패: ${finalFailures.join(", ")}`);
+    process.exitCode = 1;
+  } else {
+    console.log("[edge] 운영 edge, health, 정적 파일 점검을 통과했습니다.");
+  }
 }

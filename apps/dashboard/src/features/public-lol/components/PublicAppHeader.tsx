@@ -89,7 +89,7 @@ export function PublicAppHeader({
   return (
     <header id={showSearch ? "public-search" : undefined} className={`public-app-header ${showSearch ? "" : "home"} ${mobileMenuOpen ? "mobile-menu-open" : ""}`}>
       <button className="public-header-brand" type="button" onClick={handleHome} aria-label={t().home}>
-        <img className="public-brand-logo public-brand-logo-full public-brand-logo-topbar" src="/images/yorogg-topbar-logo.png" alt={t().brand} />
+        <img className="public-brand-logo public-brand-logo-full public-brand-logo-topbar" src="/images/yorogg-topbar-logo.webp" alt={t().brand} />
       </button>
       <button
         className="public-mobile-menu-toggle"

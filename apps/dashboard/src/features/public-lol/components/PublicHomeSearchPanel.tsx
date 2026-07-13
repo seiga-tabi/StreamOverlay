@@ -69,7 +69,7 @@ export function PublicHomeSearchPanel({
     <section id="public-search" className="public-home-content public-dashboard-home public-home-shared-content">
       <div className="public-home-shared-inner">
         <div className="public-home-brand-hero" aria-labelledby="public-home-title">
-          <img className="public-home-brand-logo-image" src="/images/yorogg-home-logo.png" alt="" aria-hidden="true" />
+          <img className="public-home-brand-logo-image" src="/images/yorogg-home-logo.webp" alt="" aria-hidden="true" />
           <h1 id="public-home-title" className="sr-only" data-ko={text.title.ko} data-ja={text.title.ja}>{text.title.label}</h1>
           <p className="sr-only" data-ko={text.description.ko} data-ja={text.description.ja}>{text.description.label}</p>
         </div>

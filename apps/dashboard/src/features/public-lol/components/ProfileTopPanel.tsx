@@ -1,4 +1,5 @@
-import { isValidElement, type ReactElement, type ReactNode } from "react";
+import { isValidElement, useState, type ReactElement, type ReactNode } from "react";
+import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import { type StatusTone } from "../../../shared/ui/Status";
 import { ProfileTopActions, type ProfileTopActionLink } from "./ProfileTopActions";
@@ -18,6 +19,9 @@ export type ProfileTopPanelText = {
   profileLinksLabel?: ProfileTopPanelLocalizedText;
   serverLabel: string;
   searching: string;
+  showDetails: ProfileTopPanelLocalizedText;
+  hideDetails: ProfileTopPanelLocalizedText;
+  recentMatches: ProfileTopPanelLocalizedText;
 };
 
 export type ProfileTopPanelProps = {
@@ -120,6 +124,7 @@ export function ProfileTopPanel({
   tagLine,
   text,
 }: ProfileTopPanelProps) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const actionProfileLinks = profileTopActionLinksFromNode(profileLinks);
   const renderSeasonBadges = profileTopSeasonBadgesRendererFromNode(seasonBadges);
   const renderSearchForm = profileTopSearchRendererFromNode(searchForm);
@@ -146,7 +151,7 @@ export function ProfileTopPanel({
   );
 
   return (
-    <Card as="section" id="public-ranking" className={`public-profile-top-grid public-profile-shared-top ${masteryChampionArt ? "has-mastery-art" : ""}`} padding="none" variant="glass">
+    <Card as="section" id="public-ranking" className={`public-profile-top-grid public-profile-shared-top ${detailsOpen ? "details-open" : "details-collapsed"} ${masteryChampionArt ? "has-mastery-art" : ""}`} padding="none" variant="glass">
       {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
       <div className="public-profile-top-main">
         <ProfileTopIdentity
@@ -175,8 +180,23 @@ export function ProfileTopPanel({
             serverLabel: text.serverLabel,
           }}
         />
+        <div className="public-profile-summary-controls">
+          <Button type="button" size="sm" variant="tertiary" aria-expanded={detailsOpen} onClick={() => setDetailsOpen((open) => !open)}>
+            <span data-ko={detailsOpen ? text.hideDetails.ko : text.showDetails.ko} data-ja={detailsOpen ? text.hideDetails.ja : text.showDetails.ja}>
+              {detailsOpen ? text.hideDetails.label : text.showDetails.label}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
+            onClick={() => document.getElementById("public-recent-matches")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          >
+            <span data-ko={text.recentMatches.ko} data-ja={text.recentMatches.ja}>{text.recentMatches.label}</span>
+          </Button>
+        </div>
       </div>
-      {metricStrip}
+      {detailsOpen ? metricStrip : null}
     </Card>
   );
 }

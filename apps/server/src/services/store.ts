@@ -8,6 +8,12 @@ import type {
   CommunityPostComment,
   CommunityPostCommentCreateInput,
   CommunityPostCreateInput,
+  CommunityPostReport,
+  CommunityPostReportCreateInput,
+  CommunityPostModeration,
+  CommunityReportReason,
+  CommunityModerationSnapshot,
+  CommunitySanction,
   InternalEvent,
   OverlayChannel,
   OverlayMessageLogEntry,
@@ -615,8 +621,17 @@ function cloneCommunityPost(post: CommunityPost): CommunityPost {
   return {
     ...post,
     tags: [...post.tags],
-    comments: post.comments.map((comment) => ({ ...comment }))
+    comments: post.comments.map((comment) => ({ ...comment })),
+    moderation: post.moderation ? { ...post.moderation } : undefined
   };
+}
+
+function cloneCommunityReport(report: CommunityPostReport): CommunityPostReport {
+  return { ...report };
+}
+
+function cloneCommunitySanction(sanction: CommunitySanction): CommunitySanction {
+  return { ...sanction };
 }
 
 function normalizedCommunityTags(value: unknown): string[] {
@@ -676,6 +691,17 @@ function normalizedCommunityPost(value: unknown): CommunityPost | undefined {
   const authorDisplayName = optionalString(input?.authorDisplayName);
   if (!id || !title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
   const createdAt = optionalString(input?.createdAt) || nowIso();
+  const moderationInput = objectRecord(input?.moderation);
+  const moderationUpdatedAt = optionalString(moderationInput?.updatedAt);
+  const moderationUpdatedBy = optionalString(moderationInput?.updatedBy);
+  const moderation: CommunityPostModeration | undefined = moderationUpdatedAt && moderationUpdatedBy
+    ? {
+        visibility: moderationInput?.visibility === "hidden" ? "hidden" : "visible",
+        reason: optionalString(moderationInput?.reason),
+        updatedAt: moderationUpdatedAt,
+        updatedBy: moderationUpdatedBy
+      }
+    : undefined;
   return {
     id,
     category: normalizedCommunityCategory(input?.category),
@@ -698,8 +724,58 @@ function normalizedCommunityPost(value: unknown): CommunityPost | undefined {
     authorRiotGameName: optionalString(input?.authorRiotGameName),
     authorRiotTagLine: optionalString(input?.authorRiotTagLine),
     comments: normalizedCommunityComments(input?.comments),
+    moderation,
     createdAt,
     updatedAt: optionalString(input?.updatedAt) || createdAt
+  };
+}
+
+function normalizedCommunityReportReason(value: unknown): CommunityReportReason {
+  return value === "harassment" || value === "privacy" || value === "other" ? value : "spam";
+}
+
+function normalizedCommunityReport(value: unknown): CommunityPostReport | undefined {
+  const input = objectRecord(value);
+  const id = optionalString(input?.id);
+  const postId = optionalString(input?.postId);
+  const reporterTwitchUserId = optionalString(input?.reporterTwitchUserId);
+  const reporterTwitchLogin = optionalString(input?.reporterTwitchLogin);
+  const reporterDisplayName = optionalString(input?.reporterDisplayName);
+  if (!id || !postId || !reporterTwitchUserId || !reporterTwitchLogin || !reporterDisplayName) return undefined;
+  return {
+    id,
+    postId,
+    reason: normalizedCommunityReportReason(input?.reason),
+    detail: optionalString(input?.detail),
+    reporterTwitchUserId,
+    reporterTwitchLogin,
+    reporterDisplayName,
+    status: input?.status === "resolved" ? "resolved" : "open",
+    createdAt: optionalString(input?.createdAt) || nowIso(),
+    resolvedAt: optionalString(input?.resolvedAt),
+    resolvedBy: optionalString(input?.resolvedBy),
+    resolutionNote: optionalString(input?.resolutionNote)
+  };
+}
+
+function normalizedCommunitySanction(value: unknown): CommunitySanction | undefined {
+  const input = objectRecord(value);
+  const id = optionalString(input?.id);
+  const twitchUserId = optionalString(input?.twitchUserId);
+  const reason = optionalString(input?.reason);
+  const createdBy = optionalString(input?.createdBy);
+  if (!id || !twitchUserId || !reason || !createdBy) return undefined;
+  return {
+    id,
+    twitchUserId,
+    twitchLogin: optionalString(input?.twitchLogin),
+    action: "posting_suspension",
+    reason,
+    createdAt: optionalString(input?.createdAt) || nowIso(),
+    createdBy,
+    expiresAt: optionalString(input?.expiresAt),
+    revokedAt: optionalString(input?.revokedAt),
+    revokedBy: optionalString(input?.revokedBy)
   };
 }
 
@@ -754,6 +830,8 @@ export class Store {
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
   private tournaments: StreamerTournament[] = [];
   private communityPosts: CommunityPost[] = [];
+  private communityReports: CommunityPostReport[] = [];
+  private communitySanctions: CommunitySanction[] = [];
   private communityCleanupTimer?: NodeJS.Timeout;
   private readonly persistenceFailures = new Map<string, StorePersistenceFailure>();
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
@@ -1334,9 +1412,19 @@ export class Store {
       this.communityPosts = posts
         .map(normalizedCommunityPost)
         .filter((post): post is CommunityPost => Boolean(post));
+      const reports = Array.isArray(parsed?.reports) ? parsed.reports : [];
+      this.communityReports = reports
+        .map(normalizedCommunityReport)
+        .filter((report): report is CommunityPostReport => Boolean(report));
+      const sanctions = Array.isArray(parsed?.sanctions) ? parsed.sanctions : [];
+      this.communitySanctions = sanctions
+        .map(normalizedCommunitySanction)
+        .filter((sanction): sanction is CommunitySanction => Boolean(sanction));
       this.clearPersistenceFailure("community");
     } catch (error) {
       this.communityPosts = [];
+      this.communityReports = [];
+      this.communitySanctions = [];
       if (!this.isMissingStateFile(error)) {
         this.reportPersistenceFailure({ scope: "community", operation: "load", filePath: this.options.communityStatePath, error: toSafeErrorMessage(error) });
       }
@@ -1350,8 +1438,10 @@ export class Store {
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
       const tmpPath = `${this.options.communityStatePath}.${process.pid}.${Date.now()}.tmp`;
       const payload = {
-        version: 1,
-        posts: this.communityPosts.map(cloneCommunityPost)
+        version: 2,
+        posts: this.communityPosts.map(cloneCommunityPost),
+        reports: this.communityReports.map(cloneCommunityReport),
+        sanctions: this.communitySanctions.map(cloneCommunitySanction)
       };
       fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       fs.renameSync(tmpPath, this.options.communityStatePath);
@@ -1436,7 +1526,7 @@ export class Store {
     this.cleanupExpiredPartyCommunityPosts();
     const safeLimit = Math.max(1, Math.min(100, Math.trunc(Number(limit) || 50)));
     return this.communityPosts
-      .filter((post) => !category || post.category === category)
+      .filter((post) => post.moderation?.visibility !== "hidden" && (!category || post.category === category))
       .map(cloneCommunityPost)
       .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
       .slice(0, safeLimit);
@@ -1461,8 +1551,152 @@ export class Store {
     this.cleanupExpiredPartyCommunityPosts();
     const safePostId = postId?.trim();
     if (!safePostId) return undefined;
-    const post = this.communityPosts.find((item) => item.id === safePostId);
+    const post = this.communityPosts.find((item) => item.id === safePostId && item.moderation?.visibility !== "hidden");
     return post ? cloneCommunityPost(post) : undefined;
+  }
+
+  getCommunityModerationSnapshot(limit = 200): CommunityModerationSnapshot {
+    this.cleanupExpiredPartyCommunityPosts();
+    const safeLimit = Math.max(1, Math.min(500, Math.trunc(Number(limit) || 200)));
+    return {
+      posts: this.communityPosts
+        .map(cloneCommunityPost)
+        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+        .slice(0, safeLimit),
+      reports: this.communityReports
+        .map(cloneCommunityReport)
+        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+        .slice(0, safeLimit),
+      sanctions: this.communitySanctions
+        .map(cloneCommunitySanction)
+        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+        .slice(0, safeLimit)
+    };
+  }
+
+  isCommunityUserSanctioned(twitchUserId: string | undefined, referenceMs = Date.now()): boolean {
+    const safeUserId = twitchUserId?.trim();
+    if (!safeUserId) return false;
+    return this.communitySanctions.some((sanction) => {
+      if (sanction.twitchUserId !== safeUserId || sanction.revokedAt) return false;
+      if (!sanction.expiresAt) return true;
+      const expiresAt = Date.parse(sanction.expiresAt);
+      return Number.isFinite(expiresAt) && expiresAt > referenceMs;
+    });
+  }
+
+  reportCommunityPost(input: CommunityPostReportCreateInput & {
+    postId: string;
+    reporterTwitchUserId: string;
+    reporterTwitchLogin: string;
+    reporterDisplayName: string;
+  }): CommunityPostReport | undefined {
+    const postId = input.postId.trim();
+    const reporterTwitchUserId = input.reporterTwitchUserId.trim();
+    const reporterTwitchLogin = input.reporterTwitchLogin.trim();
+    const reporterDisplayName = input.reporterDisplayName.trim();
+    const post = this.communityPosts.find((item) => item.id === postId && item.moderation?.visibility !== "hidden");
+    if (!post || !reporterTwitchUserId || !reporterTwitchLogin || !reporterDisplayName) return undefined;
+    const duplicate = this.communityReports.find((report) => (
+      report.postId === postId &&
+      report.reporterTwitchUserId === reporterTwitchUserId &&
+      report.status === "open"
+    ));
+    if (duplicate) return cloneCommunityReport(duplicate);
+    const report: CommunityPostReport = {
+      id: newId("community_report"),
+      postId,
+      reason: normalizedCommunityReportReason(input.reason),
+      detail: input.detail?.trim().slice(0, 500) || undefined,
+      reporterTwitchUserId,
+      reporterTwitchLogin,
+      reporterDisplayName,
+      status: "open",
+      createdAt: nowIso()
+    };
+    this.communityReports = [report, ...this.communityReports].slice(0, 2000);
+    this.persistCommunityState();
+    return cloneCommunityReport(report);
+  }
+
+  setCommunityPostVisibility(input: {
+    postId: string;
+    visibility: "visible" | "hidden";
+    reason?: string;
+    updatedBy: string;
+  }): CommunityPost | undefined {
+    const postId = input.postId.trim();
+    const updatedBy = input.updatedBy.trim();
+    const postIndex = this.communityPosts.findIndex((post) => post.id === postId);
+    const post = this.communityPosts[postIndex];
+    if (postIndex < 0 || !post || !updatedBy) return undefined;
+    const updatedAt = nowIso();
+    const updatedPost: CommunityPost = {
+      ...post,
+      moderation: {
+        visibility: input.visibility,
+        reason: input.reason?.trim().slice(0, 300) || undefined,
+        updatedAt,
+        updatedBy
+      },
+      updatedAt
+    };
+    this.communityPosts = this.communityPosts.map((item, index) => index === postIndex ? updatedPost : item);
+    this.communityReports = this.communityReports.map((report) => (
+      report.postId === postId && report.status === "open"
+        ? {
+            ...report,
+            status: "resolved",
+            resolvedAt: updatedAt,
+            resolvedBy: updatedBy,
+            resolutionNote: input.reason?.trim().slice(0, 300) || input.visibility
+          }
+        : report
+    ));
+    this.persistCommunityState();
+    return cloneCommunityPost(updatedPost);
+  }
+
+  setCommunityUserSanction(input: {
+    twitchUserId: string;
+    twitchLogin?: string;
+    active: boolean;
+    reason?: string;
+    expiresAt?: string;
+    updatedBy: string;
+  }): CommunitySanction | undefined {
+    const twitchUserId = input.twitchUserId.trim();
+    const updatedBy = input.updatedBy.trim();
+    if (!twitchUserId || !updatedBy) return undefined;
+    const now = nowIso();
+    if (!input.active) {
+      let revoked: CommunitySanction | undefined;
+      this.communitySanctions = this.communitySanctions.map((sanction) => {
+        if (sanction.twitchUserId !== twitchUserId || sanction.revokedAt) return sanction;
+        const next = { ...sanction, revokedAt: now, revokedBy: updatedBy };
+        revoked ??= next;
+        return next;
+      });
+      if (revoked) this.persistCommunityState();
+      return revoked ? cloneCommunitySanction(revoked) : undefined;
+    }
+    const activeSanction = this.communitySanctions.find((sanction) => (
+      sanction.twitchUserId === twitchUserId && !sanction.revokedAt && (!sanction.expiresAt || Date.parse(sanction.expiresAt) > Date.now())
+    ));
+    if (activeSanction) return cloneCommunitySanction(activeSanction);
+    const sanction: CommunitySanction = {
+      id: newId("community_sanction"),
+      twitchUserId,
+      twitchLogin: input.twitchLogin?.trim() || undefined,
+      action: "posting_suspension",
+      reason: input.reason?.trim().slice(0, 300) || "community moderation",
+      createdAt: now,
+      createdBy: updatedBy,
+      expiresAt: input.expiresAt?.trim() || undefined
+    };
+    this.communitySanctions = [sanction, ...this.communitySanctions].slice(0, 1000);
+    this.persistCommunityState();
+    return cloneCommunitySanction(sanction);
   }
 
   createCommunityPost(input: CommunityPostCreateInput & CommunityPostAuthorInput): CommunityPost | undefined {
@@ -1472,7 +1706,7 @@ export class Store {
     const authorTwitchUserId = input.authorTwitchUserId.trim();
     const authorTwitchLogin = input.authorTwitchLogin.trim();
     const authorDisplayName = input.authorDisplayName.trim();
-    if (!title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
+    if (!title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName || this.isCommunityUserSanctioned(authorTwitchUserId)) return undefined;
     this.cleanupExpiredPartyCommunityPosts();
     if (category === "party") {
       if (this.countCommunityPostsByAuthor(authorTwitchUserId, category) >= Store.maxPartyCommunityPostsPerDay) return undefined;
@@ -1547,11 +1781,11 @@ export class Store {
     const authorTwitchUserId = input.authorTwitchUserId.trim();
     const authorTwitchLogin = input.authorTwitchLogin.trim();
     const authorDisplayName = input.authorDisplayName.trim();
-    if (!safePostId || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
+    if (!safePostId || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName || this.isCommunityUserSanctioned(authorTwitchUserId)) return undefined;
     const postIndex = this.communityPosts.findIndex((item) => item.id === safePostId);
     if (postIndex < 0) return undefined;
     const post = this.communityPosts[postIndex];
-    if (!post || post.category !== "party") return undefined;
+    if (!post || post.category !== "party" || post.moderation?.visibility === "hidden") return undefined;
     const comment: CommunityPostComment = {
       id: newId("comment"),
       body,

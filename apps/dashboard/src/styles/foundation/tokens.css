@@ -24,6 +24,25 @@
   --yoro-color-accent-rose: hsl(334 78% 72%);
   --yoro-color-accent-gold: hsl(38 86% 63%);
   --yoro-color-focus-ring: hsl(224 78% 61% / .24);
+  --yoro-color-text-on-dark: hsl(210 17% 98%);
+  --yoro-color-text-on-dark-muted: hsl(210 17% 98% / .82);
+  --yoro-color-text-on-dark-soft: hsl(210 17% 98% / .86);
+  --yoro-color-text-on-dark-strong: hsl(210 17% 98% / .88);
+  --yoro-color-border-on-dark: hsl(210 17% 98% / .14);
+  --yoro-color-border-on-dark-strong: hsl(210 17% 98% / .18);
+  --yoro-color-divider-on-dark: hsl(210 17% 98% / .24);
+  --yoro-color-public-primary: hsl(252 100% 68%);
+  --yoro-color-rank-trend: hsl(171 55% 58%);
+  --yoro-color-rank-trend-area: hsl(171 55% 58% / .14);
+  --yoro-color-rank-band-neutral: hsl(210 7% 71% / .1);
+  --yoro-color-rank-band-bronze: hsl(24 38% 51% / .12);
+  --yoro-color-rank-band-silver: hsl(210 14% 83% / .11);
+  --yoro-color-rank-band-gold: hsl(49 100% 62% / .13);
+  --yoro-color-rank-band-platinum: hsl(171 55% 54% / .15);
+  --yoro-color-rank-band-emerald: hsl(131 59% 56% / .14);
+  --yoro-color-rank-band-diamond: hsl(207 93% 72% / .14);
+  --yoro-color-rank-band-master: hsl(255 91% 80% / .14);
+  --yoro-opacity-rank-band: .28;
 
   --bg: var(--yoro-color-bg);
   --bg-soft: var(--yoro-color-bg-soft);

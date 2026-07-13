@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { checkDashboardAuthToken, getDashboardAuthStatus, logoutDashboardSession, setDashboardAuthSurface, type DashboardAuthSurface, type DashboardStreamerInfo } from "./api/client";
 import { connectDashboardSocket } from "./api/socket";
-import { defaultPageForRole, Layout, pageAllowedForRole, type DashboardRole, type Page } from "./components/Layout";
+import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { applyDashboardLocale, dashboardI18n, detectDashboardLocale, setDashboardLocale as saveDashboardLocale, type DashboardLocale } from "./i18n";
 import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
+import { dashboardPageFromPath, defaultPageForRole, pageAllowedForRole, setDashboardPath, type DashboardRole, type Page } from "./routing/dashboard-routes";
 
 const PublicLolPage = lazy(async () => ({ default: (await import("./pages/PublicLolPage")).PublicLolPage }));
 const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
@@ -20,6 +21,7 @@ const OverlayOpsPage = lazy(async () => ({ default: (await import("./pages/Overl
 const FollowersPage = lazy(async () => ({ default: (await import("./pages/FollowersPage")).FollowersPage }));
 const SupportInboxPage = lazy(async () => ({ default: (await import("./pages/SupportInboxPage")).SupportInboxPage }));
 const ServerStatusPage = lazy(async () => ({ default: (await import("./pages/ServerStatusPage")).ServerStatusPage }));
+const CommunityModerationPage = lazy(async () => ({ default: (await import("./pages/CommunityModerationPage")).CommunityModerationPage }));
 
 const initialSnapshot = {
   status: { server: "offline", twitch: "disabled", stream: "unknown", bridge: "disconnected", obs: "unknown", participation: "closed" },
@@ -44,6 +46,7 @@ const streamerEntryI18n = {
     title: "Twitch 로그인으로 접속합니다.",
     description: "승인된 스트리머는 전적 검색 화면에서 Twitch 로그인 후 프로필 메뉴의 대시보드를 열어주세요.",
     checking: "스트리머 등록 상태를 확인하는 중입니다.",
+    twitchLogin: "Twitch로 로그인",
     publicHome: "전적 검색으로 돌아가기",
     adminLogin: "관리자 로그인"
   },
@@ -52,6 +55,7 @@ const streamerEntryI18n = {
     title: "Twitch ログインでアクセスします。",
     description: "承認済みの配信者は、戦績検索画面で Twitch ログイン後、プロフィールメニューからダッシュボードを開いてください。",
     checking: "配信者登録状態を確認しています。",
+    twitchLogin: "Twitch でログイン",
     publicHome: "戦績検索に戻る",
     adminLogin: "管理者ログイン"
   }
@@ -75,11 +79,13 @@ function StreamerDashboardEntryPage({
   checking,
   locale,
   onBackToPublic,
+  onTwitchLogin,
   onOpenAdmin
 }: {
   checking: boolean;
   locale: DashboardLocale;
   onBackToPublic: () => void;
+  onTwitchLogin: () => void;
   onOpenAdmin: () => void;
 }) {
   const streamerEntryText = streamerEntryI18n[locale];
@@ -87,13 +93,16 @@ function StreamerDashboardEntryPage({
     <main className="auth-shell">
       <section className="auth-card">
         <div className="brand-block auth-brand">
-          <img className="brand-logo" src="/images/yorogg-logo.png" alt="YORO.gg" />
+          <img className="brand-logo" src="/images/yorogg-logo.webp" alt="YORO.gg" />
         </div>
         <span className="eyebrow" data-ko={streamerEntryI18n.ko.eyebrow} data-ja={streamerEntryI18n.ja.eyebrow}>{streamerEntryText.eyebrow}</span>
         <h1 data-ko={streamerEntryI18n.ko.title} data-ja={streamerEntryI18n.ja.title}>{streamerEntryText.title}</h1>
         <p className="muted" data-ko={streamerEntryI18n.ko.description} data-ja={streamerEntryI18n.ja.description}>{streamerEntryText.description}</p>
         {checking ? <p className="hint" data-ko={streamerEntryI18n.ko.checking} data-ja={streamerEntryI18n.ja.checking}>{streamerEntryText.checking}</p> : null}
         <div className="auth-form">
+          <button className="primary" type="button" onClick={onTwitchLogin} data-ko={streamerEntryI18n.ko.twitchLogin} data-ja={streamerEntryI18n.ja.twitchLogin}>
+            {streamerEntryText.twitchLogin}
+          </button>
           <button className="secondary" type="button" onClick={onBackToPublic} data-ko={streamerEntryI18n.ko.publicHome} data-ja={streamerEntryI18n.ja.publicHome}>
             {streamerEntryText.publicHome}
           </button>
@@ -108,11 +117,13 @@ function StreamerDashboardEntryPage({
 
 export default function App() {
   const initialAuthRequired = runtimeConfig().dashboardAuthRequired !== false;
+  const initialSurface = surfaceForLocation();
+  const initialRole: DashboardRole = initialSurface === "admin" ? "admin" : "streamer";
   const [surface, setSurface] = useState<AppSurface>(() => surfaceForLocation());
   const [dashboardLocale, setDashboardLocaleState] = useState<DashboardLocale>(() => detectDashboardLocale());
   const [authRequired, setAuthRequired] = useState(initialAuthRequired);
-  const [page, setPage] = useState<Page>("dashboard");
-  const [dashboardRole, setDashboardRole] = useState<DashboardRole>("admin");
+  const [page, setPage] = useState<Page>(() => dashboardPageFromPath(window.location.pathname, initialRole));
+  const [dashboardRole, setDashboardRole] = useState<DashboardRole>(initialRole);
   const [dashboardStreamer, setDashboardStreamer] = useState<DashboardStreamerInfo | undefined>();
   const [snapshot, setSnapshot] = useState<any>(initialSnapshot);
   const [socketConnected, setSocketConnected] = useState(false);
@@ -158,6 +169,7 @@ export default function App() {
       setSurface(nextSurface);
       if (isManagedSurface(nextSurface)) {
         setDashboardAuthSurface(authSurfaceFor(nextSurface));
+        setPage(dashboardPageFromPath(window.location.pathname, nextSurface === "admin" ? "admin" : "streamer"));
         setAuthState("checking");
       }
       if (nextSurface === "public") {
@@ -236,8 +248,26 @@ export default function App() {
 
   useEffect(() => {
     if (authState !== "authenticated") return;
-    if (!pageAllowedForRole(page, dashboardRole)) setPage(defaultPageForRole(dashboardRole));
+    if (!pageAllowedForRole(page, dashboardRole)) {
+      const pathPage = dashboardPageFromPath(window.location.pathname, dashboardRole);
+      const nextPage = pageAllowedForRole(pathPage, dashboardRole) ? pathPage : defaultPageForRole(dashboardRole);
+      setPage(nextPage);
+      setDashboardPath(nextPage, dashboardRole, true);
+    }
   }, [authState, dashboardRole, page]);
+
+  function changeDashboardPage(nextPage: Page): void {
+    if (!pageAllowedForRole(nextPage, dashboardRole)) return;
+    setPage(nextPage);
+    setDashboardPath(nextPage, dashboardRole);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function startStreamerTwitchLogin(): void {
+    const base = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
+    const params = new URLSearchParams({ return_to: "/dashboard" });
+    window.location.href = `${base}/api/public/twitch/auth/start?${params.toString()}`;
+  }
 
   async function login(token: string): Promise<void> {
     if (loginDisabled) return;
@@ -301,7 +331,7 @@ export default function App() {
   }
 
   if (surface === "streamer" && authState !== "authenticated") {
-    return <StreamerDashboardEntryPage checking={authState === "checking"} locale={dashboardLocale} onBackToPublic={openPublic} onOpenAdmin={openAdmin} />;
+    return <StreamerDashboardEntryPage checking={authState === "checking"} locale={dashboardLocale} onBackToPublic={openPublic} onTwitchLogin={startStreamerTwitchLogin} onOpenAdmin={openAdmin} />;
   }
 
   if (authState !== "authenticated") {
@@ -309,7 +339,7 @@ export default function App() {
   }
 
   return (
-    <Layout page={page} setPage={setPage} role={dashboardRole} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
+    <Layout page={page} setPage={changeDashboardPage} role={dashboardRole} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "serverStatus" && dashboardRole === "admin" ? <ServerStatusPage /> : null}
         {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} role={dashboardRole} /> : null}
@@ -325,6 +355,7 @@ export default function App() {
         {page === "participation" ? <ParticipationPage snapshot={snapshot} /> : null}
         {page === "tournaments" && dashboardRole === "admin" ? <TournamentsPage /> : null}
         {page === "streamerRiotRequests" && dashboardRole === "admin" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
+        {page === "communityModeration" && dashboardRole === "admin" ? <CommunityModerationPage /> : null}
         {page === "supportInbox" && dashboardRole === "admin" ? <SupportInboxPage /> : null}
         {page === "settings" && dashboardRole === "admin" ? <SettingsPage /> : null}
       </Suspense>

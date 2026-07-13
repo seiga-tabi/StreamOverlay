@@ -2015,7 +2015,7 @@
     radial-gradient(circle at 50% 38%, rgba(213, 241, 255, .56), transparent 30%),
     linear-gradient(90deg, rgba(243, 247, 251, .88) 0%, rgba(213, 241, 255, .66) 45%, rgba(191, 227, 255, .72) 100%),
     linear-gradient(180deg, rgba(243, 247, 251, .45), rgba(243, 247, 251, .9)),
-    url("/images/lol-home-zed.jpg") center / cover no-repeat,
+    var(--yoro-image-home-background) center / cover no-repeat,
     var(--seiga-pastel-bg) !important;
 }
 
@@ -3695,7 +3695,7 @@
   .public-dashboard-shell.public-home-shell {
     background:
       linear-gradient(180deg, rgba(243, 247, 251, .76), rgba(243, 247, 251, .92)),
-      url("/images/lol-home-zed.jpg") center top / cover no-repeat,
+      var(--yoro-image-home-background) center top / cover no-repeat,
       var(--seiga-pastel-bg) !important;
   }
 

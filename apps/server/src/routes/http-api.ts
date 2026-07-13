@@ -17,6 +17,7 @@ import {
   type CommunityPostCategory,
   type CommunityPostCommentCreateInput,
   type CommunityPostCreateInput,
+  type CommunityPostReport,
   type LolChampionSkinOption,
   type LolChampionSummary,
   type LolPerformanceStats,
@@ -77,6 +78,8 @@ import {
   type DashboardRole
 } from "../security/auth.js";
 import { dashboardApiLimiter, dashboardLoginLimiter, inboundEmailLimiter, oauthLimiter, publicLolApiLimiter } from "../security/rate-limit.js";
+import { isPublicDashboardAppRoute } from "../routing/public-dashboard-routes.js";
+import { CommunityModerationService, CommunityModerationServiceError } from "../services/community-moderation-service.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
@@ -113,6 +116,7 @@ const PUBLIC_LOL_PROFILE_CACHE_MAX = 500;
 const PUBLIC_LOL_CURRENT_GAME_CACHE_MAX = 500;
 const PUBLIC_LOL_MATCH_CACHE_MAX = 1000;
 const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 5 * 60_000;
+const SERVER_PROCESS_STARTED_AT = new Date(Date.now() - process.uptime() * 1000).toISOString();
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
 const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
@@ -875,6 +879,15 @@ function publicLolReturnUrlForRequest(req: IncomingMessage): string {
   return url.toString();
 }
 
+function publicTwitchReturnUrlForRequest(req: IncomingMessage, requestedPath: string | null): string {
+  const fallback = publicLolReturnUrlForRequest(req);
+  if (!requestedPath?.startsWith("/") || requestedPath.startsWith("//")) return fallback;
+  if (requestedPath !== "/dashboard" && !requestedPath.startsWith("/dashboard/")) return fallback;
+  const returnUrl = new URL(requestedPath, publicOriginForRequest(req));
+  returnUrl.searchParams.set("viewer_twitch", "connected");
+  return returnUrl.toString();
+}
+
 function cspConnectSrcForRequest(req: IncomingMessage | undefined): string {
   const requestPublicOrigin = req ? trustedPublicOriginForRequest(req) : originFromUrl(appConfig.publicBaseUrl);
   return [
@@ -1486,17 +1499,6 @@ async function sendPublicDashboardAsset(req: IncomingMessage, res: ServerRespons
   return true;
 }
 
-function isPublicLolAppRoute(pathname: string): boolean {
-  return pathname === "/lol" ||
-    pathname === "/lol/" ||
-    pathname.startsWith("/lol/summoners/") ||
-    pathname === "/privacy" ||
-    pathname === "/terms" ||
-    pathname === "/contact" ||
-    pathname === "/lol/tournaments" ||
-    pathname.startsWith("/lol/tournaments/");
-}
-
 async function sendOverlayAlertAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
   if (!pathname.startsWith("/alerts/")) return false;
   const uploadPrefix = "/alerts/uploads/";
@@ -1604,7 +1606,7 @@ type HttpHandlerInput = {
   twitchAuth: TwitchAuthService;
   publicTwitchAuth?: PublicTwitchAuthService;
   eventSub?: TwitchEventSubClient;
-  logger?: Pick<JsonlLogger, "error">;
+  logger?: Pick<JsonlLogger, "error"> & Partial<Pick<JsonlLogger, "event">>;
   refreshLolProfile?: (entryId: string) => Promise<boolean>;
   sessions?: DashboardSessionStore;
   supportMailbox?: SupportMailboxStore;
@@ -2435,6 +2437,7 @@ function publicLolTwitchStreamFromCandidate(
 
 export function createHttpHandler(input: HttpHandlerInput) {
   const sessions = input.sessions ?? new DashboardSessionStore();
+  const communityModeration = new CommunityModerationService(input.store);
   let followerRefreshInFlight: Promise<FollowerManagementState> | undefined;
   let followerRefreshAvailableAt = 0;
   let lastFollowerRefreshState: FollowerManagementState | undefined;
@@ -3536,6 +3539,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!status.connected || !status.user) {
       throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 작성할 수 있습니다." });
     }
+    if (communityModeration.isUserSanctioned(status.user.id)) {
+      throw new HttpRequestError(403, { error: "커뮤니티 작성이 제한된 계정입니다. 관리자에게 문의해주세요." });
+    }
     const contentType = requestHeaderValue(req, "content-type") ?? "";
     let category: CommunityPostCategory = "server";
     let title = "";
@@ -3648,6 +3654,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (currentPost.authorTwitchUserId !== status.user.id) {
       throw new HttpRequestError(403, { error: "본인이 작성한 게시글만 수정할 수 있습니다." });
     }
+    if (communityModeration.isUserSanctioned(status.user.id)) {
+      throw new HttpRequestError(403, { error: "커뮤니티 작성이 제한된 계정입니다. 관리자에게 문의해주세요." });
+    }
 
     const contentType = requestHeaderValue(req, "content-type") ?? "";
     let title = "";
@@ -3724,6 +3733,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!status.connected || !status.user) {
       throw new HttpRequestError(401, { error: "Twitch 로그인 후 댓글을 작성할 수 있습니다." });
     }
+    if (communityModeration.isUserSanctioned(status.user.id)) {
+      throw new HttpRequestError(403, { error: "커뮤니티 작성이 제한된 계정입니다. 관리자에게 문의해주세요." });
+    }
     const body = await readJsonBody<CommunityPostCommentCreateInput>(req);
     const commentBody = communityText(body.body, 500);
     if (!commentBody) {
@@ -3736,6 +3748,41 @@ export function createHttpHandler(input: HttpHandlerInput) {
       authorDisplayName: status.user.displayName || status.user.login,
       authorProfileImageUrl: status.user.profileImageUrl
     });
+  }
+
+  async function createPublicCommunityReport(req: IncomingMessage, postId: string): Promise<CommunityPostReport> {
+    if (!input.publicTwitchAuth) {
+      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
+    }
+    const status = await getPublicTwitchViewerStatus(req);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 신고할 수 있습니다." });
+    }
+    const post = getCommunityPostById(postId);
+    if (!post) throw new HttpRequestError(404, { error: "신고할 게시글을 찾을 수 없습니다." });
+    if (post.authorTwitchUserId === status.user.id) {
+      throw new HttpRequestError(409, { error: "본인이 작성한 게시글은 신고할 수 없습니다." });
+    }
+    const body = await readJsonBody<{ reason?: unknown; detail?: unknown }>(req);
+    const reason = body.reason;
+    if (reason !== "spam" && reason !== "harassment" && reason !== "privacy" && reason !== "other") {
+      throw new HttpRequestError(400, { error: "신고 사유를 선택해주세요." });
+    }
+    const report = communityModeration.reportPost({
+      postId,
+      reason,
+      detail: communityText(body.detail, 500) || undefined,
+      reporterTwitchUserId: status.user.id,
+      reporterTwitchLogin: status.user.login,
+      reporterDisplayName: status.user.displayName || status.user.login
+    });
+    input.logger?.event?.({
+      type: "community.post.reported",
+      reportId: report.id,
+      postId: report.postId,
+      reason: report.reason
+    });
+    return report;
   }
 
   async function getPublicTwitchViewerStatus(req: IncomingMessage): Promise<PublicTwitchViewerStatusResponse> {
@@ -3766,7 +3813,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!code) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
     try {
       const session = await input.publicTwitchAuth.connectWithCode(code, state.redirectUri ?? publicTwitchCallbackUrlForRequest(req));
-      return sendRedirect(res, publicLolReturnUrlForRequest(req), { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
+      return sendRedirect(res, state.returnUrl || publicLolReturnUrlForRequest(req), { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
     } catch {
       return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch token 교환 또는 사용자 정보 조회에 실패했습니다. 서버 설정을 확인한 뒤 다시 시도해주세요.");
     }
@@ -4644,7 +4691,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" || req.method === "HEAD") {
         if (url.pathname === "/dashborad" || url.pathname === "/dashborad/") return sendRedirect(res, "/");
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
-        if (url.pathname === "/" || isPublicLolAppRoute(url.pathname)) {
+        if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
           const legalDraftHeaders = url.pathname === "/privacy" || url.pathname === "/terms"
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
@@ -4709,7 +4756,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, { ok: true, build: appConfig.build });
       }
       if (req.method === "GET" && url.pathname === "/health/live") {
-        return sendJson(req, res, 200, { ok: true, status: "live", build: appConfig.build });
+        return sendJson(req, res, 200, {
+          ok: true,
+          status: "live",
+          startedAt: SERVER_PROCESS_STARTED_AT,
+          uptimeSeconds: Math.max(0, Math.floor(process.uptime())),
+          build: appConfig.build
+        });
       }
       if (req.method === "GET" && url.pathname === "/health/ready") {
         const shuttingDown = input.isShuttingDown?.() ?? false;
@@ -4946,6 +4999,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const post = await createPublicCommunityComment(req, postId);
         return sendJson(req, res, 201, { post, posts: listCommunityPosts(50, post.category) });
       }
+      const communityReportMatch = url.pathname.match(/^\/api\/public\/community\/posts\/([^/]+)\/reports$/);
+      if (req.method === "POST" && communityReportMatch) {
+        const postId = decodeURIComponent(communityReportMatch[1] ?? "");
+        const report = await createPublicCommunityReport(req, postId);
+        return sendJson(req, res, 201, { report });
+      }
       if (req.method === "GET" && url.pathname === "/api/public/participation/state") {
         return sendJson(req, res, 200, await getPublicParticipationState(req));
       }
@@ -4968,7 +5027,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/public/twitch/auth/start") {
         if (!input.publicTwitchAuth) return sendJson(req, res, 503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
         const forceVerify = url.searchParams.get("force_verify") === "1" || url.searchParams.get("force_verify") === "true";
-        return sendRedirect(res, input.publicTwitchAuth.createAuthorizationUrl(forceVerify, publicTwitchCallbackUrlForRequest(req)));
+        const returnUrl = publicTwitchReturnUrlForRequest(req, url.searchParams.get("return_to"));
+        return sendRedirect(res, input.publicTwitchAuth.createAuthorizationUrl(forceVerify, publicTwitchCallbackUrlForRequest(req), returnUrl));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/auth/callback") {
         return handlePublicTwitchAuthCallback(req, res, url);
@@ -5087,6 +5147,55 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/questions") return sendJson(req, res, 200, input.store.getQuestions());
       if (req.method === "GET" && url.pathname === "/api/highlights") return sendJson(req, res, 200, input.store.getHighlights());
       if (req.method === "GET" && url.pathname === "/api/followers") return sendJson(req, res, 200, input.store.getFollowerManagementState());
+      if (req.method === "GET" && url.pathname === "/api/community/moderation") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        return sendJson(req, res, 200, communityModeration.snapshot());
+      }
+      const communityVisibilityMatch = url.pathname.match(/^\/api\/community\/moderation\/posts\/([^/]+)\/visibility$/);
+      if (req.method === "POST" && communityVisibilityMatch) {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        const body = await readJsonBody<{ visibility?: unknown; reason?: unknown }>(req);
+        if (body.visibility !== "visible" && body.visibility !== "hidden") {
+          return sendJson(req, res, 400, { error: "visibility는 visible 또는 hidden이어야 합니다." });
+        }
+        const post = communityModeration.setPostVisibility({
+          postId: decodeURIComponent(communityVisibilityMatch[1] ?? ""),
+          visibility: body.visibility,
+          reason: communityText(body.reason, 300) || undefined,
+          updatedBy: "dashboard-admin"
+        });
+        input.logger?.event?.({ type: "community.post.visibility_changed", postId: post.id, visibility: body.visibility });
+        return sendJson(req, res, 200, { post, ...communityModeration.snapshot() });
+      }
+      const communitySanctionMatch = url.pathname.match(/^\/api\/community\/moderation\/users\/([^/]+)\/sanction$/);
+      if (req.method === "POST" && communitySanctionMatch) {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        const body = await readJsonBody<{ active?: unknown; twitchLogin?: unknown; reason?: unknown; expiresAt?: unknown }>(req);
+        if (typeof body.active !== "boolean") return sendJson(req, res, 400, { error: "active는 boolean이어야 합니다." });
+        const expiresAt = communityText(body.expiresAt, 40) || undefined;
+        if (expiresAt && !Number.isFinite(Date.parse(expiresAt))) {
+          return sendJson(req, res, 400, { error: "expiresAt은 올바른 날짜여야 합니다." });
+        }
+        const twitchUserId = decodeURIComponent(communitySanctionMatch[1] ?? "").trim();
+        if (!twitchUserId) return sendJson(req, res, 400, { error: "Twitch 사용자 ID가 필요합니다." });
+        const sanction = communityModeration.setUserSanction({
+          twitchUserId,
+          twitchLogin: communityText(body.twitchLogin, 80) || undefined,
+          active: body.active,
+          reason: communityText(body.reason, 300) || undefined,
+          expiresAt,
+          updatedBy: "dashboard-admin"
+        });
+        if (body.active && !sanction) return sendJson(req, res, 400, { error: "제재를 적용하지 못했습니다." });
+        input.logger?.event?.({ type: "community.user.sanction_changed", twitchUserId, active: body.active });
+        return sendJson(req, res, 200, { sanction, ...communityModeration.snapshot() });
+      }
       if (req.method === "GET" && url.pathname === "/api/tournaments") {
         if (auth.principal.type !== "DASHBOARD_ADMIN") return sendJson(req, res, 403, { error: "대시보드 인증이 필요합니다." });
         if (auth.principal.role === "streamer" && !dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId)) {
@@ -5510,6 +5619,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return sendJson(req, res, 404, { error: "not found" });
     } catch (error) {
       if (error instanceof HttpRequestError) return sendJson(req, res, error.status, error.payload);
+      if (error instanceof CommunityModerationServiceError) {
+        return sendJson(req, res, error.status, { error: error.publicMessage });
+      }
       input.logger?.error({
         type: "http_api.unhandled_error",
         path: url.pathname,

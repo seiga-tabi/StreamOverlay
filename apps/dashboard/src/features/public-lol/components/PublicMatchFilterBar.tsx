@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ChampionFilterSelect } from "./ChampionFilterSelect";
 
 export type PublicMatchFilterBarLocalizedText = {
   label: ReactNode;
@@ -15,6 +16,8 @@ export type PublicMatchFilterBarFilters = {
 export type PublicMatchFilterChampionOption = {
   value: string;
   label: ReactNode;
+  iconUrl?: string;
+  fallbackLabel?: string;
 };
 
 export type PublicMatchFilterBarText = {
@@ -76,15 +79,15 @@ export function PublicMatchFilterBar({
           <option value="aram">{text.aramQueue}</option>
         </select>
       </label>
-      <label>
-        <span data-ko={text.championFilter.ko} data-ja={text.championFilter.ja}>{text.championFilter.label}</span>
-        <select value={filters.championId} onChange={(event) => onChampionChange(event.target.value)}>
-          <option value="all">{text.allChampions}</option>
-          {championOptions.map((champion) => (
-            <option value={champion.value} key={champion.value}>{champion.label}</option>
-          ))}
-        </select>
-      </label>
+      <ChampionFilterSelect
+        allLabel={text.allChampions}
+        label={text.championFilter.label}
+        labelJa={text.championFilter.ja}
+        labelKo={text.championFilter.ko}
+        onChange={onChampionChange}
+        options={championOptions}
+        value={filters.championId}
+      />
       <label>
         <span data-ko={text.periodFilter.ko} data-ja={text.periodFilter.ja}>{text.periodFilter.label}</span>
         <select value={filters.period} onChange={(event) => onPeriodChange(event.target.value)}>

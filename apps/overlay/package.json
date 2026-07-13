@@ -7,6 +7,7 @@
     "dev": "vite --host 0.0.0.0 --port 5174",
     "build": "tsc -p tsconfig.json && vite build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:run": "node --no-warnings --import tsx --loader ../../scripts/css-module-loader.mjs --test test/*.test.ts test/*.test.tsx",
     "preview": "vite preview --port 5174"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "typescript": "^5.5.4",
+    "tsx": "^4.22.4",
     "vite": "^8.0.16"
   }
 }

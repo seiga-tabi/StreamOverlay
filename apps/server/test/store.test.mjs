@@ -456,6 +456,72 @@ test("Store는 파티 모집글을 최근 24시간 2개까지 허용하고 오�
   }
 });
 
+test("Store는 커뮤니티 신고·숨김·작성 제재를 영속화한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-community-moderation-"));
+  const communityPath = path.join(dir, "community.json");
+  try {
+    const store = new Store({ communityStatePath: communityPath });
+    const post = store.createCommunityPost({
+      category: "server",
+      title: "서버 모집",
+      body: "테스트 게시글",
+      authorTwitchUserId: "author-1",
+      authorTwitchLogin: "author",
+      authorDisplayName: "Author"
+    });
+    assert.ok(post);
+
+    const report = store.reportCommunityPost({
+      postId: post.id,
+      reason: "spam",
+      detail: "반복 게시글",
+      reporterTwitchUserId: "viewer-1",
+      reporterTwitchLogin: "viewer",
+      reporterDisplayName: "Viewer"
+    });
+    assert.ok(report);
+    assert.equal(store.getCommunityModerationSnapshot().reports.length, 1);
+
+    const hidden = store.setCommunityPostVisibility({
+      postId: post.id,
+      visibility: "hidden",
+      reason: "신고 확인",
+      updatedBy: "admin"
+    });
+    assert.equal(hidden?.moderation?.visibility, "hidden");
+    assert.equal(store.listCommunityPosts().length, 0);
+    assert.equal(store.getCommunityModerationSnapshot().reports[0]?.status, "resolved");
+
+    const sanction = store.setCommunityUserSanction({
+      twitchUserId: "author-1",
+      twitchLogin: "author",
+      active: true,
+      reason: "반복 스팸",
+      updatedBy: "admin"
+    });
+    assert.ok(sanction);
+    assert.equal(store.isCommunityUserSanctioned("author-1"), true);
+    assert.equal(store.createCommunityPost({
+      category: "party",
+      title: "차단 대상",
+      body: "작성 불가",
+      authorTwitchUserId: "author-1",
+      authorTwitchLogin: "author",
+      authorDisplayName: "Author"
+    }), undefined);
+
+    store.close();
+    const restartedStore = new Store({ communityStatePath: communityPath });
+    const snapshot = restartedStore.getCommunityModerationSnapshot();
+    assert.equal(snapshot.posts[0]?.moderation?.visibility, "hidden");
+    assert.equal(snapshot.reports[0]?.status, "resolved");
+    assert.equal(restartedStore.isCommunityUserSanctioned("author-1"), true);
+    restartedStore.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", () => {
   const store = new Store();
 

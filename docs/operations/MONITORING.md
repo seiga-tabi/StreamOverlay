@@ -16,7 +16,7 @@
 - liveness/readiness 및 build Git SHA
 - runtime config `no-store`와 legal configured 상태
 - privacy/terms/favicon/robots/sitemap
-- 선택적으로 backup 최신성 및 disk 사용률
+- 선택적으로 backup 최신성, disk 사용률, instance 재시작 감지
 
 ```bash
 node scripts/verify-production-edge.mjs \
@@ -25,6 +25,12 @@ node scripts/verify-production-edge.mjs \
 ```
 
 `.github/workflows/edge-monitor.yml`은 15분마다 같은 검사를 실행한다. 이 workflow가 GitHub에서 실행되려면 `.github` 파일이 commit/push되어야 하며 repository variable `PRODUCTION_BASE_URL`을 설정해야 한다.
+
+실제 수신 채널 연결 후 secret 값을 출력하지 않고 test alert를 전송한다.
+
+```bash
+OPS_ALERT_WEBHOOK_URL='<secret store에서 주입>' npm run ops:test-alert
+```
 
 ## Required Alerts
 
@@ -41,7 +47,7 @@ node scripts/verify-production-edge.mjs \
 
 ## 실제 Alert 연동
 
-`deploy/systemd/yoro-edge-monitor.timer`는 5분마다 edge, backup, disk 검사를 수행한다. `OPS_ALERT_WEBHOOK_URL`을 HTTPS webhook으로 설정하면 실패 발생, 복구, 반복 경보 주기에 JSON 알림을 전송한다. URL은 secret이므로 저장소나 shell history에 기록하지 않는다.
+`deploy/systemd/yoro-edge-monitor.timer`는 5분마다 edge, backup, disk 검사를 수행한다. `OPS_RESTART_ALERT_ENABLED=true`이면 `/health/live`의 `startedAt`을 이전 점검과 비교해 instance 재시작도 감지한다. `OPS_ALERT_WEBHOOK_URL`을 HTTPS webhook으로 설정하면 실패 발생, 복구, 반복 경보 주기에 JSON 알림을 전송한다. URL은 secret이므로 저장소나 shell history에 기록하지 않는다.
 
 ```bash
 sudo install -d -o yoro -g yoro -m 700 /var/lib/yoro-monitor
@@ -53,7 +59,7 @@ sudo systemctl start yoro-edge-monitor.service
 systemctl status yoro-edge-monitor.service --no-pager
 ```
 
-이 webhook monitor만으로 HTTP 5xx 비율, p95 latency, container restart와 memory를 집계할 수는 없다. 해당 지표는 Cloudflare Analytics와 host/container monitoring agent를 실제 수신 채널에 연결하고 test alert 증적을 남겨야 GO로 인정한다.
+이 webhook monitor만으로 HTTP 5xx 비율, p95 latency와 memory를 집계할 수는 없다. 또한 `startedAt` 비교는 재시작 발생 여부만 감지하며 container runtime의 누적 restart count를 대체하지 않는다. 해당 지표는 Cloudflare Analytics와 host/container monitoring agent를 실제 수신 채널에 연결하고 test alert 증적을 남겨야 GO로 인정한다.
 
 ## Log Retention
 

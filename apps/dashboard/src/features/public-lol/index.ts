@@ -3,6 +3,7 @@ export { PublicAppHeader } from "./components/PublicAppHeader";
 export { PublicHeaderMenu } from "./components/PublicHeaderMenu";
 export { PublicLocaleSelector } from "./components/PublicLocaleSelector";
 export { PublicMatchFilterBar } from "./components/PublicMatchFilterBar";
+export { ChampionFilterSelect } from "./components/ChampionFilterSelect";
 export { PublicSiteFooter } from "./components/PublicSiteFooter";
 export { ProfileMetricCardItem } from "./components/ProfileMetricCardItem";
 export { ProfileMetricStrip } from "./components/ProfileMetricStrip";
@@ -217,6 +218,10 @@ export type {
   PublicHomeSearchPanelLocalizedText,
   PublicHomeSearchPanelText,
 } from "./components/PublicHomeSearchPanel";
+export type {
+  ChampionFilterOption,
+  ChampionFilterSelectProps,
+} from "./components/ChampionFilterSelect";
 export type {
   PublicMatchFilterBarFilters,
   PublicMatchFilterBarLocalizedText,

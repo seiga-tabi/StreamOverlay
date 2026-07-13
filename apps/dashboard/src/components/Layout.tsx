@@ -1,44 +1,14 @@
 import { useState, type ReactNode } from "react";
 import { dashboardI18n, type DashboardLocale } from "../i18n";
+import { pageAllowedForRole, type DashboardRole, type Page } from "../routing/dashboard-routes";
 
-const pages = ["dashboard", "twitch", "overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts", "myRiotAccount", "soloRank", "participation", "serverStatus", "tournaments", "streamerRiotRequests", "followers", "events", "supportInbox", "settings"] as const;
-
-export type Page = (typeof pages)[number];
-export type DashboardRole = "admin" | "streamer";
-
-export const ADMIN_ALLOWED_PAGES: Page[] = [
-  "serverStatus",
-  "tournaments",
-  "streamerRiotRequests",
-  "events",
-  "supportInbox",
-  "settings"
-];
-
-export const STREAMER_ALLOWED_PAGES: Page[] = [
-  "dashboard",
-  "overlayStatus",
-  "overlayAlerts",
-  "myRiotAccount",
-  "soloRank",
-  "participation",
-  "followers"
-];
-
-export function pageAllowedForRole(page: Page, role: DashboardRole): boolean {
-  const allowedPages = role === "admin" ? ADMIN_ALLOWED_PAGES : STREAMER_ALLOWED_PAGES;
-  return allowedPages.includes(page);
-}
-
-export function defaultPageForRole(role: DashboardRole): Page {
-  return role === "admin" ? "serverStatus" : "dashboard";
-}
+export type { DashboardRole, Page } from "../routing/dashboard-routes";
 
 const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
   { key: "operations", items: ["serverStatus", "dashboard", "twitch"] },
   { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
   { key: "lol", items: ["myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests"] },
-  { key: "community", items: ["followers", "events"] },
+  { key: "community", items: ["followers", "communityModeration", "events"] },
   { key: "system", items: ["supportInbox", "settings"] }
 ];
 
@@ -137,7 +107,7 @@ export function Layout({
     <div className={`app-shell app-shell-${page}`} data-locale={locale} data-page={page} lang={locale === "ja" ? "ja" : "ko"}>
       <aside className="app-sidebar">
         <div className="brand-block">
-          <img className="brand-logo" src="/images/yorogg-topbar-logo.png" alt="YORO.gg" />
+          <img className="brand-logo" src="/images/yorogg-topbar-logo.webp" alt="YORO.gg" />
         </div>
         <div className="sidebar-profile">
           <span data-ko={dashboardI18n.ko.app.workspaceKicker} data-ja={dashboardI18n.ja.app.workspaceKicker}>{uiText.app.workspaceKicker}</span>

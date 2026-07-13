@@ -6,6 +6,20 @@ export const PUBLIC_TOURNAMENT_CALENDAR_PATH = "/lol/tournaments/calendar";
 const PUBLIC_PRIVACY_PATH = "/privacy";
 const PUBLIC_TERMS_PATH = "/terms";
 const PUBLIC_CONTACT_PATH = "/contact";
+const PUBLIC_PAGE_PATHS: Partial<Record<PublicMainPage, string>> = {
+  search: "/",
+  subscriptions: "/follow",
+  followJoin: "/participation",
+  patch: "/community/server",
+  communityParty: "/community/party",
+  communityServerWrite: "/community/server/write",
+  communityPartyWrite: "/community/party/write",
+  tournamentCalendar: PUBLIC_TOURNAMENT_CALENDAR_PATH,
+  tournamentList: PUBLIC_TOURNAMENT_LIST_PATH,
+  privacy: PUBLIC_PRIVACY_PATH,
+  terms: PUBLIC_TERMS_PATH,
+  contact: PUBLIC_CONTACT_PATH,
+};
 
 export type PublicTournamentRoute = {
   page: Extract<PublicMainPage, "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule">;
@@ -13,6 +27,34 @@ export type PublicTournamentRoute = {
 };
 
 export type PublicLegalPageKey = Extract<PublicMainPage, "privacy" | "terms" | "contact">;
+
+export type PublicPageRoute = {
+  page: PublicMainPage;
+  postId?: string;
+  slug?: string;
+};
+
+function normalizedPublicPath(pathname: string): string {
+  if (!pathname || pathname === "/") return "/";
+  return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+}
+
+export function publicPageRouteFromPath(pathname: string = window.location.pathname): PublicPageRoute | undefined {
+  const normalized = normalizedPublicPath(pathname);
+  const legalRoute = legalPageFromPublicPath(normalized);
+  if (legalRoute) return { page: legalRoute };
+  const tournamentRoute = tournamentRouteFromPublicPath(normalized);
+  if (tournamentRoute) return tournamentRoute;
+  const communityDetail = normalized.match(/^\/community\/posts\/([^/]+)$/);
+  if (communityDetail?.[1]) return { page: "communityDetail", postId: decodeURIComponent(communityDetail[1]) };
+  const page = (Object.entries(PUBLIC_PAGE_PATHS) as Array<[PublicMainPage, string]>).find(([, path]) => path === normalized)?.[0];
+  return page ? { page } : undefined;
+}
+
+export function publicPathForPage(page: PublicMainPage, options: { postId?: string } = {}): string | undefined {
+  if (page === "communityDetail" && options.postId) return `/community/posts/${encodeURIComponent(options.postId)}`;
+  return PUBLIC_PAGE_PATHS[page];
+}
 
 export function tournamentRouteFromPublicPath(pathname: string = window.location.pathname): PublicTournamentRoute | undefined {
   if (pathname === PUBLIC_TOURNAMENT_LIST_PATH || pathname === `${PUBLIC_TOURNAMENT_LIST_PATH}/`) return { page: "tournamentList" };

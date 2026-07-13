@@ -2,6 +2,9 @@
   --yoro-theme-color-scheme: light;
   --yoro-theme-backdrop-glass: var(--yoro-effect-glass-blur);
   --yoro-theme-page-background: var(--yoro-color-bg);
+  --yoro-theme-rank-chart-background: linear-gradient(180deg, hsl(210 7% 31% / .76), hsl(210 10% 23% / .66));
+  --yoro-theme-public-header-background: radial-gradient(circle at 18% 0%, hsl(252 100% 68% / .1), transparent 34%), linear-gradient(90deg, hsl(210 9% 38% / .76), hsl(211 11% 27% / .78));
+  --yoro-image-home-background: image-set(url("/images/lol-home-zed.avif") type("image/avif"), url("/images/lol-home-zed.webp") type("image/webp"));
 
   color-scheme: var(--yoro-theme-color-scheme);
 }
