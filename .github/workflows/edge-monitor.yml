@@ -41,6 +41,7 @@ jobs:
         env:
           PRODUCTION_BASE_URL: ${{ inputs.base_url || vars.PRODUCTION_BASE_URL }}
           OPS_ALERT_WEBHOOK_URL: ${{ secrets.OPS_ALERT_WEBHOOK_URL }}
+          OPS_ALERT_WEBHOOK_SECRET: ${{ secrets.OPS_ALERT_WEBHOOK_SECRET }}
           OPS_ALERT_REPEAT_MINUTES: "60"
         run: |
           node scripts/verify-production-edge.mjs \

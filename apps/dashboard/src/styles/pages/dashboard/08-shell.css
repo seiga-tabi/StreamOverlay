@@ -13,8 +13,6 @@
   top: 14px !important;
   z-index: 70;
   display: grid !important;
-  grid-template-columns: 152px minmax(0, 1fr);
-  align-items: center;
   width: min(1720px, calc(100% - 48px));
   height: auto !important;
   min-height: 72px;

@@ -39,7 +39,7 @@ import {
 } from "../shared/ui/Toast";
 
 const OVERLAY_BASE = runtimeConfig().overlayBase ?? import.meta.env.VITE_OVERLAY_BASE ?? "http://localhost:5174";
-const DASHBOARD_OVERLAY_CHANNELS = ["events", "chat", "participation", "solo-rank"] as const;
+const DASHBOARD_OVERLAY_CHANNELS = ["events", "participation"] as const;
 
 const i18n = {
   ko: {
@@ -77,9 +77,7 @@ const i18n = {
     ],
     modes: {
       events: "이벤트",
-      chat: "채팅",
-      participation: "시참",
-      "solo-rank": "솔로랭크 전적"
+      participation: "시참"
     }
   },
   ja: {
@@ -117,9 +115,7 @@ const i18n = {
     ],
     modes: {
       events: "イベント",
-      chat: "チャット",
-      participation: "参加",
-      "solo-rank": "ソロランク戦績"
+      participation: "参加"
     }
   }
 } as const;

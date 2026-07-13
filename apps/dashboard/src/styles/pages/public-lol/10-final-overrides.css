@@ -162,10 +162,10 @@
 }
 
 /* Public 상단바 최종 통일: 검색 결과와 일반 메뉴 화면의 폭, 정렬, active 표현을 동일하게 유지 */
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
   display: grid !important;
-  grid-template-columns: var(--yoro-size-public-header-brand) minmax(var(--yoro-size-public-header-medium-nav), auto) minmax(var(--yoro-size-public-header-search-min), var(--yoro-size-public-header-search-max)) max-content !important;
+  grid-template-columns: var(--yoro-size-public-header-brand) max-content minmax(var(--yoro-size-public-header-search-min), 1fr) max-content !important;
   grid-template-areas: "brand nav search tools" !important;
   align-items: center !important;
   justify-content: stretch !important;
@@ -181,7 +181,7 @@
   backdrop-filter: var(--yoro-effect-public-header-blur) !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-brand,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
   grid-area: brand !important;
   justify-self: start !important;
@@ -191,7 +191,7 @@
   min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-1)) !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
   grid-area: nav !important;
   justify-self: start !important;
@@ -211,7 +211,7 @@
   overflow: visible !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-menu-item,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item {
   display: inline-flex !important;
   align-items: center !important;
@@ -224,8 +224,8 @@
   box-shadow: none !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav > button,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-menu-item > button,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button {
   position: relative !important;
@@ -245,12 +245,12 @@
   transform: none !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:hover,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:hover,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:focus-visible,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:focus-visible,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button.active,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav > button:hover,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-menu-item > button:hover,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav > button:focus-visible,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-menu-item > button:focus-visible,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav > button.active,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-menu-item > button.active,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:hover,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:hover,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:focus-visible,
@@ -261,8 +261,8 @@
   color: var(--yoro-color-text-on-dark) !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button::after,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button::after,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav button::after,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-menu-item > button::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button::after {
   right: var(--yoro-space-0) !important;
@@ -276,25 +276,25 @@
   box-shadow: none !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button.active::after,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav button.active::after,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button.active::after,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after {
   background: var(--yoro-color-public-primary) !important;
   box-shadow: var(--yoro-shadow-public-nav-active) !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
   grid-area: search !important;
   justify-self: end !important;
   align-self: center !important;
-  width: min(var(--yoro-size-public-header-search-max), 38vw) !important;
+  width: 100% !important;
   min-width: var(--yoro-size-public-header-search-min) !important;
   max-width: var(--yoro-size-public-header-search-max) !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-tools,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
   grid-area: tools !important;
   justify-self: end !important;
@@ -308,24 +308,29 @@
 }
 
 @media (max-width: 82.5rem) {
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    grid-template-columns: var(--yoro-size-public-header-medium-brand) minmax(var(--yoro-size-public-header-medium-nav), auto) minmax(var(--yoro-size-public-header-medium-search-min), 1fr) max-content !important;
+    grid-template-columns: var(--yoro-size-public-header-medium-brand) max-content minmax(var(--yoro-size-public-header-medium-search-min), 1fr) max-content !important;
     width: min(var(--yoro-size-public-header-medium-max), calc(100% - var(--yoro-space-12))) !important;
     padding: var(--yoro-space-0) var(--yoro-space-6) !important;
     column-gap: var(--yoro-space-6) !important;
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
-    width: min(var(--yoro-size-public-header-medium-search-max), 36vw) !important;
+    width: 100% !important;
     min-width: var(--yoro-size-public-header-medium-search-min) !important;
   }
 }
 
 @media (max-width: 68.75rem) {
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
+    column-gap: var(--yoro-space-4) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
     justify-self: center !important;
     gap: var(--yoro-space-6) !important;
@@ -333,7 +338,7 @@
     overflow-x: auto !important;
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
     justify-self: center !important;
     width: min(100%, var(--yoro-size-public-header-search-max)) !important;
@@ -414,10 +419,14 @@
   min-width: var(--yoro-size-touch-target) !important;
 }
 
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu button,
+.public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu button,
+.public-dashboard-shell .public-app-header.mobile-menu-open .public-header-submenu button,
 .public-dashboard-shell .public-app-header .public-header-submenu button,
 .public-dashboard-shell .public-app-header.home .public-header-submenu button,
 .public-dashboard-shell .public-app-header:not(.home) .public-header-submenu button,
 .public-dashboard-shell.public-home-shell .public-app-header.home .public-header-brand {
+  height: var(--yoro-size-touch-target) !important;
   min-height: var(--yoro-size-touch-target) !important;
 }
 
@@ -453,7 +462,9 @@
 
   .public-dashboard-shell .public-app-header,
   .public-dashboard-shell .public-app-header.home,
-  .public-dashboard-shell .public-app-header:not(.home) {
+  .public-dashboard-shell .public-app-header:not(.home),
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
     position: sticky !important;
     top: var(--yoro-space-0) !important;
     z-index: var(--yoro-z-overlay) !important;
@@ -609,7 +620,7 @@
     flex: 1 1 var(--yoro-size-profile-control-basis);
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
     grid-template-columns: minmax(var(--yoro-size-public-header-mobile-track), 1fr) var(--yoro-size-touch-target) auto !important;
     grid-template-areas:
@@ -617,9 +628,6 @@
       "nav nav nav"
       "search search search" !important;
     gap: var(--yoro-space-2) !important;
-    width: 100% !important;
-    min-width: var(--yoro-space-0) !important;
-    margin: var(--yoro-space-0) !important;
     padding: var(--yoro-space-2) var(--yoro-space-3) !important;
   }
 
@@ -638,7 +646,7 @@
 
   .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-brand,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
-    display: inline-flex !important;
+    display: none !important;
     width: var(--yoro-size-public-header-brand-mobile) !important;
     min-width: var(--yoro-size-public-header-brand-mobile) !important;
   }
@@ -647,25 +655,25 @@
     display: none !important;
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-nav,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
     grid-area: nav !important;
     display: none !important;
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav,
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav {
     display: grid !important;
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
     grid-area: search !important;
     width: 100% !important;
     min-width: var(--yoro-space-0) !important;
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
+  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-tools,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
     grid-area: tools !important;
   }

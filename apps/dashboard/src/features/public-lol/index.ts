@@ -1,3 +1,11 @@
+export {
+  getPublicLolMatchBuild,
+  getPublicLolMatchPage,
+  getPublicLolMatchRanks,
+  readPublicApiErrorMessage,
+  searchProfile,
+  searchSuggestions,
+} from "./api/lol";
 export { PublicHomeSearchPanel } from "./components/PublicHomeSearchPanel";
 export { PublicAppHeader } from "./components/PublicAppHeader";
 export { PublicHeaderMenu } from "./components/PublicHeaderMenu";

@@ -39,6 +39,9 @@ import {
   type ToastTone,
 } from "../shared/ui/Toast";
 import {
+  getPublicLolMatchBuild,
+  getPublicLolMatchPage,
+  getPublicLolMatchRanks,
   PublicHomeSearchPanel,
   PublicAppHeader as FeaturePublicAppHeader,
   PublicLocaleSelector,
@@ -59,6 +62,9 @@ import {
   RecentMatchesPanel as FeatureRecentMatchesPanel,
   SearchForm as FeatureSearchForm,
   SearchableRiotId as FeatureSearchableRiotId,
+  searchProfile,
+  searchSuggestions,
+  readPublicApiErrorMessage as readErrorMessage,
   type PublicMatchFilterBarText,
   type ProfileRecentChampionItem,
   type ProfileRecentChampionsCardText,
@@ -441,62 +447,6 @@ const objectiveLabels: Record<PublicLocale, Record<string, string>> = {
     tower: "タワー"
   }
 };
-
-async function readErrorMessage(response: Response): Promise<string> {
-  try {
-    const body = await response.json() as { error?: unknown; message?: unknown };
-    if (typeof body.error === "string") return body.error.includes("Riot API key") ? t().riotMissing : body.error;
-    if (typeof body.message === "string") return body.message;
-  } catch {
-    return `${response.status}`;
-  }
-  return `${response.status}`;
-}
-
-async function searchProfile(riotId: string, options: { refresh?: boolean } = {}): Promise<PublicLolProfile> {
-  const params = new URLSearchParams({ riotId });
-  if (options.refresh) params.set("refresh", "1");
-  const response = await fetch(`${apiBase}/api/lol/profile?${params.toString()}`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicLolProfile;
-}
-
-async function getPublicLolMatchPage(riotId: string, start: number): Promise<PublicLolMatchPageResponse> {
-  const params = new URLSearchParams({ riotId, start: String(Math.max(0, Math.trunc(start))) });
-  const response = await fetch(`${apiBase}/api/lol/matches?${params.toString()}`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicLolMatchPageResponse;
-}
-
-async function getPublicLolMatchRanks(matchId: string): Promise<PublicLolMatchRankResponse> {
-  const response = await fetch(`${apiBase}/api/lol/match-ranks?matchId=${encodeURIComponent(matchId)}`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicLolMatchRankResponse;
-}
-
-async function getPublicLolMatchBuild(matchId: string): Promise<PublicLolMatchBuildResponse> {
-  const response = await fetch(`${apiBase}/api/lol/match-build?matchId=${encodeURIComponent(matchId)}`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicLolMatchBuildResponse;
-}
-
-async function searchSuggestions(query: string, signal: AbortSignal): Promise<SearchSuggestion[]> {
-  const response = await fetch(`${apiBase}/api/lol/suggestions?q=${encodeURIComponent(query)}`, {
-    credentials: "include",
-    signal
-  });
-  if (!response.ok) return [];
-  const body = await response.json() as { suggestions?: SearchSuggestion[] };
-  return Array.isArray(body.suggestions) ? body.suggestions : [];
-}
 
 async function getPublicTwitchStatus(): Promise<PublicTwitchViewerStatus> {
   const response = await fetch(`${apiBase}/api/public/twitch/status`, {
@@ -7601,7 +7551,7 @@ export function PublicLolPage({
   if (activeMainPage !== "search" || !profile) {
     return (
       <main className={`public-lol-shell public-dashboard-shell theme-${theme}`}>
-        <section className="public-app-main">
+        <div className="public-standard-header-frame">
           <PublicAppHeader
             locale={locale}
             profile={profile}
@@ -7633,6 +7583,8 @@ export function PublicLolPage({
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
           />
+        </div>
+        <section className="public-app-main">
           {loading ? <SeigaSearchLoader /> : null}
           <div className="public-profile-layout">
             <div className="public-dashboard-content-grid">
@@ -7659,7 +7611,7 @@ export function PublicLolPage({
       renderRoot={({ children, ...rootProps }) => <main {...rootProps}>{children}</main>}
       variant="public"
     >
-      <AppShellHeader as="div" className="public-profile-shared-header">
+      <AppShellHeader as="div" className="public-profile-shared-header public-standard-header-frame">
         <PublicAppHeader
           locale={locale}
           profile={profile}

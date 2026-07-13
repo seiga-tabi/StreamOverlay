@@ -106,7 +106,6 @@
 .public-dashboard-shell.public-profile-shared-shell .public-match-row.highlight-ace::before,
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-match-row.highlight-mvp::before,
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-match-row.highlight-ace::before {
-  background: rgba(222, 226, 230, .24) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-top-grid.public-profile-shared-top.yoro-card,
@@ -431,7 +430,6 @@
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-refresh-button.yoro-button:not(.cooldown) {
   display: inline-flex !important;
   min-height: 42px !important;
-  padding: 0 16px !important;
   gap: 8px !important;
   align-items: center !important;
   justify-content: center !important;
@@ -682,8 +680,6 @@
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-subscriptions-page .public-twitch-channel-main .yoro-status {
   grid-column: 2;
   grid-row: 1 / 3;
-  align-self: center;
-  justify-self: center;
   max-width: none !important;
   min-width: 58px;
   min-height: 22px;
@@ -927,8 +923,6 @@
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-  grid-template-columns: 44px 54px minmax(0, 1fr) minmax(96px, auto) 24px !important;
-  grid-template-areas: "avatar tier name rank mark";
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-favorite-mark {
@@ -2166,72 +2160,53 @@
 
 /* LP 변화 추이: 외부 축을 제거하고 내부 그래프가 카드 전체를 쓰도록 정리 */
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart {
-  padding: 18px 16px 30px !important;
-  overflow: hidden !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart-axis {
   right: 16px !important;
   left: 16px !important;
-  color: rgba(248, 249, 250, .72) !important;
-  font-size: 11px !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band {
-  opacity: .42 !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-iron,
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-unranked {
-  fill: rgba(148, 163, 184, .1) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-bronze {
-  fill: rgba(185, 121, 75, .13) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-silver {
-  fill: rgba(203, 213, 225, .12) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-gold {
-  fill: rgba(240, 189, 72, .14) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-platinum {
-  fill: rgba(92, 205, 189, .18) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-emerald {
-  fill: rgba(72, 201, 138, .19) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-diamond {
-  fill: rgba(114, 183, 255, .17) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-master,
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-grandmaster,
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band.tier-challenger {
-  fill: rgba(181, 140, 255, .18) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-boundary {
-  stroke: rgba(248, 249, 250, .16) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-tier-band-label {
-  fill: rgba(248, 249, 250, .76) !important;
-  font-size: 9px !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-area {
-  fill: rgba(92, 205, 189, .12) !important;
 }
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-lp-chart .public-lp-line-stroke {
-  stroke-width: 3.4 !important;
-  filter: drop-shadow(0 0 4px var(--public-lp-glow-color)) !important;
 }
 
 /* 메인 검색 상단바: 배경 박스와 메뉴 pill을 제거해 첫 화면을 더 가볍게 정리 */
@@ -2366,8 +2341,6 @@ html[lang="ja"] .public-dashboard-shell .public-app-header .public-header-submen
 .public-dashboard-shell .public-app-header > .public-search-wrap .yoro-input::placeholder,
 .public-dashboard-shell .public-app-header > .public-search-wrap .public-home-shared-input::placeholder,
 .public-dashboard-shell .public-app-header > .public-search-wrap .public-ranking-shared-input::placeholder {
-  color: rgba(248, 249, 250, .58) !important;
-  -webkit-text-fill-color: rgba(248, 249, 250, .58) !important;
 }
 
 .public-dashboard-shell.public-home-shell .public-app-header.home .public-header-nav .public-header-menu-item .public-header-submenu button > span,
@@ -2404,14 +2377,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 .public-dashboard-shell .public-app-header.home .public-header-menu-item > button,
 .public-dashboard-shell .public-app-header:not(.home) .public-header-nav > button,
 .public-dashboard-shell .public-app-header:not(.home) .public-header-menu-item > button {
-  height: 42px !important;
-  min-height: 42px !important;
-  padding: 0 2px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: rgba(248, 249, 250, .9) !important;
-  box-shadow: none !important;
 }
 
 .public-dashboard-shell .public-app-header .public-header-nav > button > span,
@@ -2426,10 +2391,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 .public-dashboard-shell .public-app-header .public-header-nav button strong,
 .public-dashboard-shell .public-app-header.home .public-header-nav button strong,
 .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button strong {
-  color: inherit !important;
-  font-size: 13px !important;
-  font-weight: 850 !important;
-  line-height: 1 !important;
 }
 
 .public-dashboard-shell .public-app-header .public-header-nav > button:hover,
@@ -2909,7 +2870,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 .public-dashboard-shell .public-app-header,
 .public-dashboard-shell .public-app-header.home,
 .public-dashboard-shell .public-app-header:not(.home) {
-  align-items: center !important;
 }
 
 .public-dashboard-shell .public-app-header .public-header-brand,
@@ -2940,13 +2900,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo,
 .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-full,
 .public-dashboard-shell .public-app-header .public-header-brand .public-brand-logo-topbar {
-  display: block !important;
-  height: 34px !important;
-  max-height: 34px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
   filter: none !important;
 }
 
@@ -2963,24 +2916,13 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 .public-dashboard-shell .public-app-header.home .public-header-menu-item > button,
 .public-dashboard-shell .public-app-header:not(.home) .public-header-nav > button,
 .public-dashboard-shell .public-app-header:not(.home) .public-header-menu-item > button {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  height: 42px !important;
-  min-height: 42px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  line-height: 1.2 !important;
 }
 
 .public-dashboard-shell .public-app-header .public-header-nav button strong,
 .public-dashboard-shell .public-app-header.home .public-header-nav button strong,
 .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button strong {
-  display: inline-flex !important;
-  align-items: center !important;
-  height: 100% !important;
-  line-height: 1.2 !important;
-  transform: translateY(1px);
 }
 
 /* 시청자 참여 공개 화면 최종 보정: 회색 톤 제품 디자인에 맞춰 정리 */
@@ -3295,14 +3237,11 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 @media (min-width: 1180px) {
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    grid-template-columns: auto max-content minmax(520px, 720px) max-content !important;
     gap: 16px !important;
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
-    width: min(44vw, 720px) !important;
-    min-width: 520px !important;
   }
 }
 

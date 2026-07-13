@@ -700,7 +700,8 @@
 
 /* Public 상단바 통합: 메인/검색결과/구독/콘텐츠 화면이 같은 헤더 구조를 쓰도록 최종 보정 */
 .public-dashboard-shell .public-home-shared-header.yoro-app-shell__header,
-.public-dashboard-shell .public-profile-shared-header.yoro-app-shell__header {
+.public-dashboard-shell .public-profile-shared-header.yoro-app-shell__header,
+.public-dashboard-shell .public-standard-header-frame {
   min-height: auto !important;
   padding: 18px 0 0 !important;
   border: 0 !important;
@@ -1159,4 +1160,3 @@
     min-width: 78px !important;
   }
 }
-

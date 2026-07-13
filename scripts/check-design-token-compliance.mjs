@@ -4,6 +4,7 @@ import path from "node:path";
 const managedTargets = [
   "apps/dashboard/src/shared/ui",
   "apps/dashboard/src/pages/CommunityModerationPage.css",
+  "apps/dashboard/src/styles/legacy/03-product-gray.css",
   "apps/dashboard/src/styles/pages/public-lol/10-final-overrides.css",
 ];
 

@@ -43,6 +43,20 @@
   --yoro-color-rank-band-diamond: hsl(207 93% 72% / .14);
   --yoro-color-rank-band-master: hsl(255 91% 80% / .14);
   --yoro-opacity-rank-band: .28;
+  --yoro-color-product-gray-page: #868e96;
+  --yoro-color-product-gray-page-deep: #747b83;
+  --yoro-color-product-gray-page-middle: #7d858d;
+  --yoro-color-product-gray-surface: rgba(73, 80, 87, .78);
+  --yoro-color-product-gray-surface-strong: rgba(52, 58, 64, .84);
+  --yoro-color-product-gray-border: rgba(222, 226, 230, .24);
+  --yoro-color-product-gray-border-strong: rgba(248, 249, 250, .34);
+  --yoro-color-product-gray-text: #f8f9fa;
+  --yoro-color-product-gray-muted: #dee2e6;
+  --yoro-color-product-gray-field: #f1f3f5;
+  --yoro-color-product-gray-field-text: #212529;
+  --yoro-background-product-gray-page:
+    radial-gradient(circle at 50% -12%, rgba(248, 249, 250, .2), transparent 32%),
+    linear-gradient(180deg, var(--yoro-color-product-gray-page) 0%, var(--yoro-color-product-gray-page-middle) 46%, var(--yoro-color-product-gray-page-deep) 100%);
 
   --bg: var(--yoro-color-bg);
   --bg-soft: var(--yoro-color-bg-soft);

@@ -26,11 +26,15 @@ node scripts/verify-production-edge.mjs \
 
 `.github/workflows/edge-monitor.yml`은 15분마다 같은 검사를 실행한다. 이 workflow가 GitHub에서 실행되려면 `.github` 파일이 commit/push되어야 하며 repository variable `PRODUCTION_BASE_URL`을 설정해야 한다.
 
-실제 수신 채널 연결 후 secret 값을 출력하지 않고 test alert를 전송한다.
+실제 수신 채널 연결 후 URL과 32자 이상의 서명 secret을 secret store에서 주입한다. 알림 본문에는 secret이 포함되지 않으며, 수신기는 `X-Yoro-Alert-Timestamp`와 `X-Yoro-Alert-Signature`(`v1=<HMAC-SHA256>`)를 검증한다. 다음 명령은 정상/실패 테스트 알림을 각각 보내고 수신 endpoint의 HTTP 2xx 응답을 확인한다.
 
 ```bash
-OPS_ALERT_WEBHOOK_URL='<secret store에서 주입>' npm run ops:test-alert
+OPS_ALERT_WEBHOOK_URL='<secret store에서 주입>' \
+OPS_ALERT_WEBHOOK_SECRET='<secret store에서 주입>' \
+npm run ops:test-alert
 ```
+
+실제 채널 화면에서 두 알림이 모두 도착했는지 확인하고 시간·수신 채널·담당자를 변경 관리 기록에 남긴다. HTTP 2xx는 receiver가 요청을 수락했다는 의미이며, 사람의 채널 확인을 대체하지 않는다.
 
 ## Required Alerts
 
@@ -47,7 +51,7 @@ OPS_ALERT_WEBHOOK_URL='<secret store에서 주입>' npm run ops:test-alert
 
 ## 실제 Alert 연동
 
-`deploy/systemd/yoro-edge-monitor.timer`는 5분마다 edge, backup, disk 검사를 수행한다. `OPS_RESTART_ALERT_ENABLED=true`이면 `/health/live`의 `startedAt`을 이전 점검과 비교해 instance 재시작도 감지한다. `OPS_ALERT_WEBHOOK_URL`을 HTTPS webhook으로 설정하면 실패 발생, 복구, 반복 경보 주기에 JSON 알림을 전송한다. URL은 secret이므로 저장소나 shell history에 기록하지 않는다.
+`deploy/systemd/yoro-edge-monitor.timer`는 5분마다 edge, backup, disk 검사를 수행한다. `OPS_RESTART_ALERT_ENABLED=true`이면 `/health/live`의 `startedAt`을 이전 점검과 비교해 instance 재시작도 감지한다. `OPS_ALERT_WEBHOOK_URL`과 `OPS_ALERT_WEBHOOK_SECRET`을 설정하면 실패 발생, 복구, 반복 경보 주기에 서명된 JSON 알림을 전송한다. 두 값은 저장소나 shell history에 기록하지 않는다.
 
 ```bash
 sudo install -d -o yoro -g yoro -m 700 /var/lib/yoro-monitor
@@ -85,6 +89,8 @@ docker compose logs --tail=200 server
 ## Launch Gate
 
 - [ ] `OPS_ALERT_WEBHOOK_URL`을 운영 secret store에 등록했다.
+- [ ] `OPS_ALERT_WEBHOOK_SECRET`을 운영 secret store에 등록하고 수신기에서 HMAC 검증을 활성화했다.
+- [ ] `npm run ops:test-alert`의 정상/실패 알림 두 건을 실제 채널에서 확인했다.
 - [ ] 의도적으로 잘못된 점검 URL을 사용해 test alert 수신을 확인했다.
 - [ ] 정상 URL 복구 후 recovery alert 수신을 확인했다.
 - [ ] backup을 26시간 이상 오래된 것으로 격리 시뮬레이션해 backup alert를 확인했다.

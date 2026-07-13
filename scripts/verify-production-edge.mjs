@@ -1,8 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { buildAlertPayload, sendAlertWebhook, validateAlertWebhookConfig } from "./lib/alert-webhook.mjs";
 
 const args = new Set(process.argv.slice(2));
-const testAlertMode = args.has("--test-alert");
+const testAlertOption = [...args].find((arg) => arg === "--test-alert" || arg.startsWith("--test-alert="));
+const testAlertMode = testAlertOption
+  ? testAlertOption.includes("=") ? testAlertOption.split("=", 2)[1] : "all"
+  : "";
 
 function readOption(name, fallback = "") {
   const prefix = `${name}=`;
@@ -24,6 +28,7 @@ const diskPath = process.env.OPS_DISK_PATH || "";
 const diskUsedPercentMax = positiveNumber(process.env.OPS_DISK_USED_PERCENT_MAX, 85);
 const monitorStateFile = process.env.OPS_MONITOR_STATE_FILE || "";
 const alertWebhookUrl = process.env.OPS_ALERT_WEBHOOK_URL || "";
+const alertWebhookSecret = process.env.OPS_ALERT_WEBHOOK_SECRET || "";
 const alertRepeatMinutes = positiveNumber(process.env.OPS_ALERT_REPEAT_MINUTES, 60);
 const restartAlertEnabled = process.env.OPS_RESTART_ALERT_ENABLED === "true";
 const checks = [];
@@ -118,15 +123,9 @@ async function writeMonitorState(state) {
 
 async function notifyIfNeeded(result, previousState) {
   if (!alertWebhookUrl) return undefined;
-  let webhook;
-  try {
-    webhook = new URL(alertWebhookUrl);
-  } catch {
-    record("alert webhook", false, "OPS_ALERT_WEBHOOK_URL 형식이 올바르지 않습니다.");
-    return undefined;
-  }
-  if (webhook.protocol !== "https:") {
-    record("alert webhook", false, "alert webhook은 https:// URL이어야 합니다.");
+  const validation = validateAlertWebhookConfig(alertWebhookUrl, alertWebhookSecret);
+  if (!validation.ok) {
+    record("alert webhook", false, validation.error);
     return undefined;
   }
 
@@ -136,71 +135,53 @@ async function notifyIfNeeded(result, previousState) {
   if (result.ok && !changed) return previousState?.lastNotifiedAt;
   if (!result.ok && !changed && !repeatElapsed) return previousState?.lastNotifiedAt;
 
-  const summary = result.ok
-    ? "YORO.gg 운영 상태가 정상으로 복구되었습니다."
-    : `YORO.gg 운영 점검 실패: ${result.failures.join(", ")}`;
-  try {
-    const response = await request(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: summary,
-        content: summary,
-        service: "YORO.gg",
-        ok: result.ok,
-        checkedAt: result.checkedAt,
-        failures: result.failures
-      })
-    });
-    record("alert webhook", response.ok, `HTTP ${response.status}`);
-    return response.ok ? new Date().toISOString() : previousState?.lastNotifiedAt;
-  } catch (error) {
-    record("alert webhook", false, error instanceof Error ? error.message : "alert 전송 실패");
-    return previousState?.lastNotifiedAt;
-  }
+  const delivery = await sendAlertWebhook({
+    url: alertWebhookUrl,
+    secret: alertWebhookSecret,
+    payload: buildAlertPayload(result),
+    timeoutMs
+  });
+  record("alert webhook", delivery.ok, delivery.status ? `HTTP ${delivery.status}` : delivery.error);
+  return delivery.ok ? new Date().toISOString() : previousState?.lastNotifiedAt;
 }
 
-async function sendTestAlert() {
+async function sendTestAlert(ok) {
   if (!alertWebhookUrl) {
     console.error("[edge] OPS_ALERT_WEBHOOK_URL이 필요합니다.");
     return false;
   }
-  let webhook;
-  try {
-    webhook = new URL(alertWebhookUrl);
-  } catch {
-    console.error("[edge] OPS_ALERT_WEBHOOK_URL 형식이 올바르지 않습니다.");
-    return false;
-  }
-  if (webhook.protocol !== "https:") {
-    console.error("[edge] alert webhook은 https:// URL이어야 합니다.");
+  const validation = validateAlertWebhookConfig(alertWebhookUrl, alertWebhookSecret);
+  if (!validation.ok) {
+    console.error(`[edge] ${validation.error}`);
     return false;
   }
   const checkedAt = new Date().toISOString();
-  try {
-    const response = await request(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: "YORO.gg 운영 알림 테스트",
-        content: "YORO.gg 운영 알림 테스트",
-        service: "YORO.gg",
-        ok: true,
-        test: true,
-        checkedAt,
-        failures: []
-      })
-    });
-    console.log(`[edge] ${response.ok ? "PASS" : "FAIL"} alert webhook test: HTTP ${response.status}`);
-    return response.ok;
-  } catch (error) {
-    console.error(`[edge] alert webhook test 실패: ${error instanceof Error ? error.message : "요청 실패"}`);
-    return false;
-  }
+  const delivery = await sendAlertWebhook({
+    url: alertWebhookUrl,
+    secret: alertWebhookSecret,
+    payload: buildAlertPayload({
+      ok,
+      checkedAt,
+      failures: ok ? [] : ["의도된 운영 실패 알림 검증"],
+      test: true
+    }),
+    timeoutMs
+  });
+  const label = ok ? "정상" : "실패";
+  console.log(`[edge] ${delivery.ok ? "PASS" : "FAIL"} ${label} alert webhook test: ${delivery.status ? `HTTP ${delivery.status}` : delivery.error}`);
+  return delivery.ok;
 }
 
 if (testAlertMode) {
-  if (!await sendTestAlert()) process.exitCode = 1;
+  if (!["all", "success", "failure"].includes(testAlertMode)) {
+    console.error("[edge] --test-alert는 success, failure, all 중 하나여야 합니다.");
+    process.exitCode = 1;
+  } else {
+    const results = [];
+    if (testAlertMode === "all" || testAlertMode === "success") results.push(await sendTestAlert(true));
+    if (testAlertMode === "all" || testAlertMode === "failure") results.push(await sendTestAlert(false));
+    if (results.some((ok) => !ok)) process.exitCode = 1;
+  }
 } else {
 
   if (!baseUrlValue) {

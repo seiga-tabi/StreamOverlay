@@ -1,4 +1,6 @@
 node_modules/
+qa/visual-regression/results/
+qa/visual-regression/report/
 dist/
 .env
 .env.*

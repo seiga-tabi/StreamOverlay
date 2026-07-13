@@ -79,6 +79,12 @@ import {
 } from "../security/auth.js";
 import { dashboardApiLimiter, dashboardLoginLimiter, inboundEmailLimiter, oauthLimiter, publicLolApiLimiter } from "../security/rate-limit.js";
 import { isPublicDashboardAppRoute } from "../routing/public-dashboard-routes.js";
+import {
+  buildLivenessResponse,
+  buildReadinessResponse,
+  resolveReadiness,
+  type ReadinessCheck
+} from "../routing/health-responses.js";
 import { CommunityModerationService, CommunityModerationServiceError } from "../services/community-moderation-service.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
@@ -1610,7 +1616,7 @@ type HttpHandlerInput = {
   refreshLolProfile?: (entryId: string) => Promise<boolean>;
   sessions?: DashboardSessionStore;
   supportMailbox?: SupportMailboxStore;
-  readiness?: () => { ok: boolean; checks?: Record<string, boolean>; errors?: string[] };
+  readiness?: ReadinessCheck;
   isShuttingDown?: () => boolean;
   connectionStatus?: () => DashboardServerStatus["connections"];
 };
@@ -4756,31 +4762,21 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, { ok: true, build: appConfig.build });
       }
       if (req.method === "GET" && url.pathname === "/health/live") {
-        return sendJson(req, res, 200, {
-          ok: true,
-          status: "live",
+        return sendJson(req, res, 200, buildLivenessResponse({
           startedAt: SERVER_PROCESS_STARTED_AT,
           uptimeSeconds: Math.max(0, Math.floor(process.uptime())),
           build: appConfig.build
-        });
+        }));
       }
       if (req.method === "GET" && url.pathname === "/health/ready") {
         const shuttingDown = input.isShuttingDown?.() ?? false;
-        let readiness = { ok: true, checks: {} as Record<string, boolean>, errors: [] as string[] };
-        try {
-          const result = input.readiness?.();
-          if (result) readiness = { ok: result.ok, checks: result.checks ?? {}, errors: result.errors ?? [] };
-        } catch {
-          readiness = { ok: false, checks: {}, errors: ["readiness 검사에 실패했습니다."] };
-        }
-        const ready = readiness.ok && !shuttingDown;
-        return sendJson(req, res, ready ? 200 : 503, {
-          ok: ready,
-          status: ready ? "ready" : "not_ready",
-          checks: { ...readiness.checks, acceptingRequests: !shuttingDown },
-          errors: readiness.errors,
-          build: appConfig.build
-        });
+        const readiness = resolveReadiness(input.readiness, shuttingDown);
+        return sendJson(
+          req,
+          res,
+          readiness.ok ? 200 : 503,
+          buildReadinessResponse(readiness, appConfig.build)
+        );
       }
       if (req.method === "GET" && url.pathname === "/api/dashboard/auth/status") {
         const surface = dashboardAuthSurface(url.searchParams.get("surface"));
@@ -4846,14 +4842,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
         }
         const shuttingDown = input.isShuttingDown?.() ?? false;
-        let readiness = { ok: true, checks: {} as Record<string, boolean>, errors: [] as string[] };
-        try {
-          const result = input.readiness?.();
-          if (result) readiness = { ok: result.ok, checks: result.checks ?? {}, errors: result.errors ?? [] };
-        } catch {
-          readiness = { ok: false, checks: {}, errors: ["readiness 검사에 실패했습니다."] };
-        }
-        const ready = readiness.ok && !shuttingDown;
+        const readiness = resolveReadiness(input.readiness, shuttingDown);
         const services = input.store.getStatus();
         const uptimeSeconds = Math.max(0, Math.floor(process.uptime()));
         const memory = process.memoryUsage();
@@ -4865,7 +4854,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         };
         const response: DashboardServerStatus = {
           collectedAt: new Date().toISOString(),
-          status: shuttingDown ? "shutting_down" : ready ? "ready" : "degraded",
+          status: shuttingDown ? "shutting_down" : readiness.ok ? "ready" : "degraded",
           uptimeSeconds,
           startedAt: services.startedAt ?? new Date(Date.now() - uptimeSeconds * 1000).toISOString(),
           build: { ...appConfig.build },
@@ -4880,8 +4869,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
             externalBytes: memory.external
           },
           readiness: {
-            ok: ready,
-            checks: { ...readiness.checks, acceptingRequests: !shuttingDown },
+            ok: readiness.ok,
+            checks: readiness.checks,
             errors: readiness.errors
           },
           connections,
