@@ -289,3 +289,112 @@
   }
 }
 
+/* 모바일 Dashboard shell: 후순위 데스크톱 grid가 viewport를 확장하지 않도록 제한 */
+@media (max-width: 48rem) {
+  .app-shell {
+    width: 100%;
+    max-width: 100%;
+    min-width: var(--yoro-space-0);
+    overflow-x: clip;
+  }
+
+  .app-sidebar {
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
+    grid-template-areas:
+      "brand"
+      "actions"
+      "nav" !important;
+    gap: var(--yoro-space-2) var(--yoro-space-0) !important;
+    width: calc(100% - var(--yoro-space-4)) !important;
+    min-width: var(--yoro-space-0) !important;
+    padding: var(--yoro-space-3) !important;
+  }
+
+  .app-sidebar .brand-block {
+    grid-area: brand;
+    justify-content: center;
+    width: 100%;
+    min-width: var(--yoro-space-0);
+  }
+
+  .app-sidebar .brand-logo {
+    max-width: 100%;
+  }
+
+  .dashboard-menu-actions {
+    grid-area: actions;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
+    gap: var(--yoro-space-2) !important;
+    width: 100%;
+    min-width: var(--yoro-space-0);
+  }
+
+  .dashboard-menu-actions .dashboard-locale-menu,
+  .dashboard-menu-actions .dashboard-locale-button,
+  .dashboard-menu-actions .top-action,
+  .dashboard-menu-actions .top-chip {
+    width: 100%;
+    min-width: var(--yoro-space-0);
+    min-height: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+  }
+
+  .dashboard-menu-actions .top-action,
+  .dashboard-menu-actions .top-chip {
+    justify-content: center;
+    padding-inline: var(--yoro-space-2) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dashboard-menu-actions .top-chip {
+    grid-column: 1 / -1;
+  }
+
+  .app-sidebar nav {
+    grid-area: nav;
+    justify-content: flex-start !important;
+    gap: var(--yoro-space-2) !important;
+    width: 100%;
+    min-width: var(--yoro-space-0);
+    padding-inline: var(--yoro-space-0);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: var(--yoro-space-2);
+  }
+
+  .app-sidebar nav .nav-group,
+  .app-sidebar nav .nav-group-items {
+    flex: 0 0 auto;
+    min-width: max-content;
+  }
+
+  .app-main {
+    width: calc(100% - var(--yoro-space-4)) !important;
+    min-width: var(--yoro-space-0) !important;
+    margin-top: var(--yoro-space-3) !important;
+  }
+
+  .content-shell,
+  .content-shell > * {
+    width: 100%;
+    max-width: 100%;
+    min-width: var(--yoro-space-0);
+  }
+
+  .content-shell input,
+  .content-shell select,
+  .content-shell textarea,
+  .content-shell code,
+  .content-shell pre {
+    min-width: var(--yoro-space-0);
+    max-width: 100%;
+  }
+
+  .content-shell code,
+  .content-shell pre {
+    overflow-wrap: anywhere;
+  }
+}

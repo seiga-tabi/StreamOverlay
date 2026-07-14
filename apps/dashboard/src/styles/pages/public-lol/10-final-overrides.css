@@ -1328,14 +1328,30 @@
     background: var(--public-gray-surface-strong) !important;
   }
 
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-tabs {
+    overflow-x: hidden !important;
+  }
+
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-tabs .yoro-button {
+    flex: 1 1 var(--yoro-space-0) !important;
+    width: auto !important;
+    min-width: var(--yoro-space-0) !important;
+    padding-inline: var(--yoro-space-1) !important;
+  }
+
   .public-profile-shared-shell .public-team-head {
     min-height: var(--yoro-size-touch-target) !important;
     padding: var(--yoro-space-2) !important;
     border-bottom: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
   }
 
-  .public-profile-shared-shell .public-team-player {
-    grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto !important;
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
+    grid-template-columns:
+      minmax(var(--yoro-space-0), 1fr)
+      calc(
+        var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) +
+        var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
+      ) !important;
     grid-template-rows: auto !important;
     align-items: center !important;
     gap: var(--yoro-space-2) !important;
@@ -1346,25 +1362,25 @@
   }
 
   .public-profile-shared-shell .public-team-player-main {
-    grid-template-columns: var(--yoro-space-10) var(--yoro-space-8) minmax(var(--yoro-space-0), 1fr) !important;
-    gap: var(--yoro-space-1) !important;
+    grid-template-columns: var(--yoro-space-12) calc(var(--yoro-space-8) + var(--yoro-space-1)) minmax(var(--yoro-space-0), 1fr) !important;
+    gap: var(--yoro-space-2) !important;
     min-width: var(--yoro-space-0) !important;
   }
 
   .public-profile-shared-shell .public-team-player-main .public-team-champion-avatar {
-    width: var(--yoro-space-10) !important;
-    height: var(--yoro-space-10) !important;
+    width: var(--yoro-space-12) !important;
+    height: var(--yoro-space-12) !important;
   }
 
   .public-profile-shared-shell .public-team-loadout-build {
-    grid-template-columns: repeat(2, var(--yoro-space-3)) !important;
-    width: var(--yoro-space-8) !important;
+    grid-template-columns: repeat(2, var(--yoro-space-4)) !important;
+    width: calc(var(--yoro-space-8) + var(--yoro-space-1)) !important;
     gap: var(--yoro-space-1) !important;
   }
 
   .public-profile-shared-shell .public-team-spell-build,
   .public-profile-shared-shell .public-team-rune-build {
-    grid-template-rows: repeat(2, var(--yoro-space-3)) !important;
+    grid-template-rows: repeat(2, var(--yoro-space-4)) !important;
     gap: var(--yoro-space-1) !important;
   }
 
@@ -1372,20 +1388,22 @@
   .public-profile-shared-shell .public-team-spell-empty,
   .public-profile-shared-shell .public-team-rune-slot,
   .public-profile-shared-shell .public-team-rune-empty {
-    width: var(--yoro-space-3) !important;
-    min-width: var(--yoro-space-3) !important;
-    height: var(--yoro-space-3) !important;
-    min-height: var(--yoro-space-3) !important;
+    width: var(--yoro-space-4) !important;
+    min-width: var(--yoro-space-4) !important;
+    height: var(--yoro-space-4) !important;
+    min-height: var(--yoro-space-4) !important;
     border-radius: var(--yoro-radius-xs) !important;
   }
 
   .public-profile-shared-shell .public-team-player-copy,
   .public-profile-shared-shell .public-team-player-id-line {
-    gap: var(--yoro-space-1) !important;
+    width: 100% !important;
     min-width: var(--yoro-space-0) !important;
   }
 
   .public-profile-shared-shell .public-team-player-id-line {
+    gap: var(--yoro-space-1) !important;
+    align-items: center !important;
     flex-wrap: nowrap !important;
   }
 
@@ -1394,8 +1412,8 @@
     display: grid !important;
     grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
     grid-template-rows:
-      calc(var(--yoro-size-touch-target) - var(--yoro-space-4))
-      var(--yoro-space-4) !important;
+      calc(var(--yoro-size-touch-target) - var(--yoro-space-5))
+      var(--yoro-space-5) !important;
     align-items: stretch !important;
     gap: var(--yoro-space-0) !important;
     min-width: var(--yoro-space-0) !important;
@@ -1406,12 +1424,24 @@
   .public-profile-shared-shell .public-team-player-id-stack .public-riot-id-link {
     grid-column: 1 !important;
     grid-row: 1 / 3 !important;
-    align-items: flex-start !important;
+    align-items: center !important;
+    gap: var(--yoro-space-1) !important;
     min-width: var(--yoro-space-0) !important;
     min-height: var(--yoro-size-touch-target) !important;
-    padding-block: var(--yoro-space-1) var(--yoro-space-4) !important;
+    padding-block: var(--yoro-space-0) var(--yoro-space-5) !important;
     overflow: hidden !important;
     font-size: var(--yoro-font-size-xs) !important;
+  }
+
+  .public-profile-shared-shell .public-team-player-id-stack .public-riot-name {
+    flex: 1 1 auto !important;
+    min-width: var(--yoro-space-0) !important;
+  }
+
+  .public-profile-shared-shell .public-team-player-id-stack .public-riot-tag-badge,
+  .public-profile-shared-shell .public-team-player-id-stack .public-riot-award-badges {
+    flex: 0 0 auto !important;
+    align-self: center !important;
   }
 
   .public-profile-shared-shell .public-team-mobile-kda {
@@ -1439,15 +1469,18 @@
   .public-profile-shared-shell .public-team-item-build {
     grid-column: 2 !important;
     grid-row: 1 !important;
-    grid-template-columns: repeat(4, var(--yoro-space-4)) !important;
+    grid-template-columns: repeat(4, var(--yoro-space-5)) !important;
     gap: var(--yoro-space-1) !important;
-    width: calc((var(--yoro-space-4) * 4) + (var(--yoro-space-1) * 3)) !important;
+    width: calc(
+      var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) +
+      var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
+    ) !important;
   }
 
   .public-profile-shared-shell .public-team-item-slot,
   .public-profile-shared-shell .public-team-item-empty {
-    width: var(--yoro-space-4) !important;
-    height: var(--yoro-space-4) !important;
+    width: var(--yoro-space-5) !important;
+    height: var(--yoro-space-5) !important;
     border-radius: var(--yoro-radius-xs) !important;
   }
 }
@@ -1478,12 +1511,25 @@
   }
 
   .public-profile-shared-shell .public-team-player-main {
-    grid-template-columns: var(--yoro-space-10) var(--yoro-space-8) minmax(var(--yoro-space-0), 1fr) !important;
+    grid-template-columns: var(--yoro-space-10) calc(var(--yoro-space-8) + var(--yoro-space-1)) minmax(var(--yoro-space-0), 1fr) !important;
+    gap: var(--yoro-space-1) !important;
+  }
+
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
+    grid-template-columns:
+      minmax(var(--yoro-space-0), 1fr)
+      calc(
+        var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) +
+        var(--yoro-space-1) + var(--yoro-space-1)
+      ) !important;
   }
 
   .public-profile-shared-shell .public-team-item-build {
     grid-template-columns: repeat(3, var(--yoro-space-4)) !important;
-    width: calc((var(--yoro-space-4) * 3) + (var(--yoro-space-1) * 2)) !important;
+    width: calc(
+      var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) +
+      var(--yoro-space-1) + var(--yoro-space-1)
+    ) !important;
   }
 }
 
@@ -1555,21 +1601,22 @@
 
   .public-profile-shared-shell .public-matches-panel .public-match-summary {
     grid-template-columns:
-      calc(var(--yoro-space-12) + var(--yoro-space-8))
+      calc(var(--yoro-space-12) + var(--yoro-space-12))
       minmax(var(--yoro-space-10), 1fr)
       var(--yoro-size-touch-target)
       calc(var(--yoro-space-12) + var(--yoro-space-6))
-      var(--yoro-space-10) !important;
+      var(--yoro-size-touch-target) !important;
     grid-template-rows: var(--yoro-space-8) calc(var(--yoro-space-12) + var(--yoro-space-4)) !important;
-    gap: var(--yoro-space-0) var(--yoro-space-2) !important;
-    padding: var(--yoro-space-0) var(--yoro-space-1) var(--yoro-space-2) var(--yoro-space-2) !important;
+    gap: var(--yoro-space-0) var(--yoro-space-1) !important;
+    padding: var(--yoro-space-0) var(--yoro-space-2) var(--yoro-space-2) !important;
   }
 
   .public-profile-shared-shell .public-matches-panel .public-result {
     grid-column: 1 / 5 !important;
     gap: var(--yoro-space-2) !important;
+    min-width: var(--yoro-space-0) !important;
     height: var(--yoro-space-8) !important;
-    margin-inline: calc(var(--yoro-space-2) * -1) calc(var(--yoro-space-1) * -1) !important;
+    margin-inline: calc(var(--yoro-space-2) * -1) !important;
     padding-inline: var(--yoro-space-2) !important;
     background: var(--yoro-color-match-loss-header) !important;
   }
@@ -1597,8 +1644,15 @@
   .public-profile-shared-shell .public-matches-panel .public-result strong,
   .public-profile-shared-shell .public-matches-panel .public-result small,
   .public-profile-shared-shell .public-matches-panel .public-match-relative {
+    min-width: var(--yoro-space-0) !important;
     color: var(--yoro-color-text-on-dark-muted) !important;
     font-size: var(--yoro-font-size-xs) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-result strong {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 
   .public-profile-shared-shell .public-matches-panel .public-match-started {
@@ -1686,6 +1740,266 @@
 
   .public-profile-shared-shell .public-matches-panel .public-match-expand {
     grid-column: 5 !important;
+    width: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
     color: var(--yoro-color-text-on-dark-muted) !important;
+  }
+}
+
+@media (max-width: 22.5rem) {
+  .public-profile-shared-shell .public-matches-panel .public-match-summary {
+    grid-template-columns:
+      calc(var(--yoro-space-12) + var(--yoro-space-10))
+      minmax(var(--yoro-space-8), 1fr)
+      var(--yoro-size-touch-target)
+      calc(var(--yoro-space-12) + var(--yoro-space-1))
+      var(--yoro-size-touch-target) !important;
+    gap: var(--yoro-space-0) var(--yoro-space-1) !important;
+    padding-inline: var(--yoro-space-1) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-result {
+    margin-inline: calc(var(--yoro-space-1) * -1) !important;
+    padding-inline: var(--yoro-space-1) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-champion-cell .public-match-mobile-spells {
+    grid-template-columns: repeat(2, var(--yoro-space-4)) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-mobile-spells span,
+  .public-profile-shared-shell .public-matches-panel .public-match-inline-items span {
+    width: var(--yoro-space-4) !important;
+    height: var(--yoro-space-4) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-inline-items {
+    grid-template-columns: repeat(3, var(--yoro-space-4)) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-kda strong {
+    font-size: var(--yoro-font-size-sm) !important;
+  }
+}
+
+/* 전적 결과 모바일 헤더: 검색과 주요 도구를 한 줄에 유지하고 메뉴는 콘텐츠 위에 표시 */
+@media (max-width: 48rem) {
+  .public-profile-shared-shell .public-profile-shared-header.yoro-app-shell__header,
+  .public-profile-shared-shell .public-standard-header-frame {
+    min-height: var(--yoro-size-touch-target) !important;
+    padding: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
+    position: sticky !important;
+    top: var(--yoro-space-0) !important;
+    isolation: isolate;
+    grid-template-columns: var(--yoro-size-touch-target) minmax(var(--yoro-space-0), 1fr) auto !important;
+    grid-template-areas: "toggle search tools" !important;
+    gap: var(--yoro-space-1) !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-4)) !important;
+    margin: var(--yoro-space-0) !important;
+    padding: var(--yoro-space-2) !important;
+    overflow: visible !important;
+    border-radius: var(--yoro-radius-xs) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
+    grid-area: search !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    max-width: none !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form {
+    grid-template-columns: var(--yoro-size-touch-target) minmax(var(--yoro-space-0), 1fr) auto !important;
+    gap: var(--yoro-space-0) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding: var(--yoro-space-0) !important;
+    overflow: visible !important;
+    border-radius: var(--yoro-radius-pill) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-server {
+    display: block !important;
+    width: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-server-pill {
+    display: inline-flex !important;
+    gap: var(--yoro-space-1) !important;
+    width: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding: var(--yoro-space-0) !important;
+    border-radius: var(--yoro-radius-pill) var(--yoro-space-0) var(--yoro-space-0) var(--yoro-radius-pill) !important;
+    font-size: var(--yoro-font-size-xs) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
+    min-width: var(--yoro-space-0) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
+    padding-inline: var(--yoro-space-2) !important;
+    overflow: hidden !important;
+    font-size: var(--yoro-font-size-xs) !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-actions {
+    gap: var(--yoro-space-0) !important;
+    height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-actions button {
+    width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
+    grid-area: tools !important;
+    gap: var(--yoro-space-1) !important;
+    width: auto !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-locale-button,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-twitch-login-chip {
+    width: var(--yoro-size-touch-target) !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-locale-button .public-globe-icon {
+    display: none !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav {
+    position: absolute !important;
+    top: calc(100% + var(--yoro-space-1)) !important;
+    right: var(--yoro-space-2) !important;
+    bottom: auto !important;
+    left: var(--yoro-space-2) !important;
+    z-index: var(--yoro-z-modal) !important;
+    display: grid !important;
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
+    gap: var(--yoro-space-1) !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: calc(100dvh - var(--yoro-size-touch-target) - var(--yoro-space-8)) !important;
+    align-content: start !important;
+    justify-self: stretch !important;
+    padding: var(--yoro-space-2) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border: var(--yoro-size-sr-only) solid var(--public-gray-border-strong) !important;
+    border-radius: var(--yoro-radius-md) !important;
+    background: var(--public-gray-surface-strong) !important;
+    box-shadow: var(--yoro-shadow-panel) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button {
+    position: static !important;
+    display: grid !important;
+    grid-column: 1 / -1 !important;
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
+    gap: var(--yoro-space-1) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    height: auto !important;
+    min-height: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item > button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: var(--yoro-space-3) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding-inline: var(--yoro-space-3) !important;
+    color: var(--yoro-color-text-on-dark) !important;
+    text-align: start !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button::after,
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item > button::after {
+    display: none !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav button span {
+    display: inline-grid !important;
+    flex: 0 0 var(--yoro-space-6) !important;
+    place-items: center !important;
+    width: var(--yoro-space-6) !important;
+    color: var(--yoro-color-secondary) !important;
+    font-size: var(--yoro-font-size-md) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav button strong {
+    color: inherit !important;
+    font-size: var(--yoro-font-size-sm) !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr)) !important;
+    gap: var(--yoro-space-1) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    height: auto !important;
+    padding: var(--yoro-space-0) !important;
+    border: var(--yoro-space-0) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--yoro-space-2) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    min-height: var(--yoro-size-touch-target) !important;
+    padding-inline: var(--yoro-space-2) !important;
+    border: var(--yoro-size-sr-only) solid var(--public-gray-border-strong) !important;
+    border-radius: var(--yoro-radius-sm) !important;
+    background: var(--public-gray-surface) !important;
+    color: var(--yoro-color-text-on-dark) !important;
+    text-align: center !important;
   }
 }
