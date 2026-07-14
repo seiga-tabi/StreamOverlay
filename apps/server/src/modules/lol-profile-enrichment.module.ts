@@ -22,6 +22,7 @@ const PROFILE_ANALYSIS_PRIORITIES = {
 
 type ProfileAnalysisJob = {
   key: string;
+  streamerId?: string;
   ctx: ModuleContext;
   config: LolParticipationProfileConfig;
   entryIds: Set<string>;
@@ -122,38 +123,44 @@ export function saveLolParticipationProfileSettings(settings: Partial<LolPartici
   return loadLolParticipationProfileSettings();
 }
 
-async function broadcastQueue(ctx: ModuleContext, reason: string): Promise<void> {
+async function broadcastQueue(ctx: ModuleContext, reason: string, streamerId?: string): Promise<void> {
   await ctx.actions.dispatchOne({
     type: "overlay.participationQueue",
-    isOpen: ctx.store.getStatus().participation === "open",
-    queue: ctx.store.getParticipationOverlayQueue()
+    isOpen: ctx.store.getParticipationState(streamerId).isOpen,
+    queue: ctx.store.getParticipationOverlayQueue(undefined, streamerId)
   }, {}, reason);
   ctx.dashboard.broadcastSnapshot();
 }
 
-function applyPatch(ctx: ModuleContext, entryId: string, patch: LolProfilePatch): void {
-  ctx.store.patchParticipationProfile(entryId, patch);
+function applyPatch(ctx: ModuleContext, entryId: string, patch: LolProfilePatch, streamerId?: string): void {
+  ctx.store.patchParticipationProfile(entryId, patch, streamerId);
 }
 
-async function analyzeEntry(ctx: ModuleContext, config: LolParticipationProfileConfig, entryId: string, force = false): Promise<boolean> {
+async function analyzeEntry(
+  ctx: ModuleContext,
+  config: LolParticipationProfileConfig,
+  entryId: string,
+  force = false,
+  streamerId?: string
+): Promise<boolean> {
   if (!ctx.lolProfileEnrichment) return false;
-  const entry = ctx.store.getParticipationEntryById(entryId);
+  const entry = ctx.store.getParticipationEntryById(entryId, streamerId);
   if (!entry) return false;
 
   if (!force) {
     const cached = ctx.lolProfileEnrichment.getCachedPatch(entry, config);
     if (cached) {
-      applyPatch(ctx, entryId, cached);
-      await broadcastQueue(ctx, "lol_profile.cache_hit");
+      applyPatch(ctx, entryId, cached, streamerId);
+      await broadcastQueue(ctx, "lol_profile.cache_hit", streamerId);
       return true;
     }
   }
 
-  applyPatch(ctx, entryId, { profileStatus: "analyzing" });
-  await broadcastQueue(ctx, "lol_profile.analyzing");
+  applyPatch(ctx, entryId, { profileStatus: "analyzing" }, streamerId);
+  await broadcastQueue(ctx, "lol_profile.analyzing", streamerId);
   const patch = await ctx.lolProfileEnrichment.enrich(entry, config, force);
-  applyPatch(ctx, entryId, patch);
-  await broadcastQueue(ctx, "lol_profile.ready");
+  applyPatch(ctx, entryId, patch, streamerId);
+  await broadcastQueue(ctx, "lol_profile.ready", streamerId);
   return true;
 }
 
@@ -163,8 +170,8 @@ function profileIdentityKey(entry: ParticipationEntry): string {
   return `riot:${normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine)}`;
 }
 
-function visibleQueuePriority(ctx: ModuleContext, entryId: string): number {
-  const index = ctx.store.getParticipationQueue().findIndex((entry) => entry.id === entryId);
+function visibleQueuePriority(ctx: ModuleContext, entryId: string, streamerId?: string): number {
+  const index = ctx.store.getParticipationQueue(streamerId).findIndex((entry) => entry.id === entryId);
   return index >= 0 && index < PROFILE_ANALYSIS_VISIBLE_LIMIT
     ? PROFILE_ANALYSIS_PRIORITIES.visibleQueue
     : PROFILE_ANALYSIS_PRIORITIES.background;
@@ -180,13 +187,14 @@ class LolProfileAnalysisQueue {
     ctx: ModuleContext,
     config: LolParticipationProfileConfig,
     entryId: string,
-    options: { force?: boolean; priority?: number; delayMs?: number } = {}
+    options: { force?: boolean; priority?: number; delayMs?: number } = {},
+    streamerId?: string
   ): Promise<boolean> {
-    const entry = ctx.store.getParticipationEntryById(entryId);
+    const entry = ctx.store.getParticipationEntryById(entryId, streamerId);
     if (!entry) return Promise.resolve(false);
 
-    const key = profileIdentityKey(entry);
-    const priority = options.priority ?? visibleQueuePriority(ctx, entryId);
+    const key = `${streamerId ?? "legacy"}:${profileIdentityKey(entry)}`;
+    const priority = options.priority ?? visibleQueuePriority(ctx, entryId, streamerId);
     const notBefore = Date.now() + Math.max(0, options.delayMs ?? 0);
     const existing = this.jobs.get(key);
 
@@ -201,6 +209,7 @@ class LolProfileAnalysisQueue {
       } else {
         this.jobs.set(key, {
           key,
+          streamerId,
           ctx,
           config,
           entryIds: new Set([entryId]),
@@ -268,12 +277,12 @@ class LolProfileAnalysisQueue {
 
   private async runJob(job: ProfileAnalysisJob): Promise<boolean> {
     const entryIds = [...job.entryIds];
-    const primaryEntryId = entryIds.find((entryId) => job.ctx.store.getParticipationEntryById(entryId));
+    const primaryEntryId = entryIds.find((entryId) => job.ctx.store.getParticipationEntryById(entryId, job.streamerId));
     if (!primaryEntryId) return false;
-    let analyzed = await analyzeEntry(job.ctx, job.config, primaryEntryId, job.force);
+    let analyzed = await analyzeEntry(job.ctx, job.config, primaryEntryId, job.force, job.streamerId);
     for (const entryId of entryIds) {
       if (entryId === primaryEntryId) continue;
-      analyzed = await analyzeEntry(job.ctx, job.config, entryId, false) || analyzed;
+      analyzed = await analyzeEntry(job.ctx, job.config, entryId, false, job.streamerId) || analyzed;
     }
     return analyzed;
   }
@@ -306,12 +315,12 @@ export const lolProfileEnrichmentModule: BotModule = {
   }
 };
 
-export async function refreshLolProfileForEntry(ctx: ModuleContext, entryId: string): Promise<boolean> {
+export async function refreshLolProfileForEntry(ctx: ModuleContext, entryId: string, streamerId?: string): Promise<boolean> {
   const config = loadLolParticipationProfileConfig();
-  if (!activeProfileAnalysisQueue) return analyzeEntry(ctx, config, entryId, true);
+  if (!activeProfileAnalysisQueue) return analyzeEntry(ctx, config, entryId, true, streamerId);
   return activeProfileAnalysisQueue.enqueue(ctx, config, entryId, {
     force: true,
     priority: PROFILE_ANALYSIS_PRIORITIES.manual,
     delayMs: 0
-  });
+  }, streamerId);
 }

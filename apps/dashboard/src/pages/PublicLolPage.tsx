@@ -332,6 +332,14 @@ function matchHighlightClass(badges: PublicLolMatchBadge[] | undefined): string 
   return highlight ? `highlight-${highlight}` : "";
 }
 
+function matchPlacementLabel(badges: PublicLolMatchBadge[] | undefined, locale: PublicLocale = activePublicLocale): string {
+  const highlight = matchHighlightBadges(badges)[0];
+  if (highlight) return matchBadgeLabel(highlight.code, locale);
+  const rank = (badges ?? []).map((badge) => badge.rank).find((value): value is number => Number.isFinite(value));
+  if (rank === undefined) return publicI18n[locale].aiScore;
+  return locale === "ja" ? `${rank}位` : `${rank}등`;
+}
+
 async function loadPublicLocalePreference(signal?: AbortSignal): Promise<PublicLocale | undefined> {
   const response = await fetch(`${apiBase}/api/public/locale`, {
     credentials: "include",
@@ -6159,6 +6167,7 @@ function RecentMatches({
           const dataDragonVersion = recentMatchDataDragonVersion(match);
           const recentItemSlots = fixedRecentItemSlots(match.items, 6);
           const aiScore = matchAiScore(match);
+          const targetRunes = match.teams.flatMap((team) => team.players).find((player) => player.isTarget)?.runes ?? [];
           const spellItems: RecentMatchRowMediaItem[] = match.summonerSpells.slice(0, 2).map((spellId) => {
             const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
             return {
@@ -6166,6 +6175,15 @@ function RecentMatches({
               content: iconUrl ? <img src={iconUrl} alt="" /> : spellId
             };
           });
+          targetRunes
+            .filter((rune) => rune.kind !== "stat" && rune.iconUrl)
+            .slice(0, 2)
+            .forEach((rune) => spellItems.push({
+              key: `${match.matchId}:rune:${rune.runeId}`,
+              className: "rune",
+              content: <img src={rune.iconUrl} alt="" />
+            }));
+          const placementLabel = matchPlacementLabel(match.badges);
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
             key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
             className: item ? "" : "empty",
@@ -6222,9 +6240,9 @@ function RecentMatches({
             <FeatureRecentMatchRow
               aiScore={aiScore}
               aiScoreText={{
-                label: t().aiScore,
-                ko: publicI18n.ko.aiScore,
-                ja: publicI18n.ja.aiScore
+                label: placementLabel,
+                ko: matchPlacementLabel(match.badges, "ko"),
+                ja: matchPlacementLabel(match.badges, "ja")
               }}
               badges={<MatchBadges badges={match.badges} compact />}
               championFallback={championName(match.champion).slice(0, 1)}
@@ -6240,7 +6258,11 @@ function RecentMatches({
               itemSlots={inlineItemSlots}
               itemsLabel={t().items}
               kdaMetric={<KdaMetricText value={match.kda} />}
-              kdaScore={`${match.kills} / ${match.deaths} / ${match.assists}`}
+              kdaScore={(
+                <>
+                  <span>{match.kills}</span><i>/</i><span className="deaths">{match.deaths}</span><i>/</i><span>{match.assists}</span>
+                </>
+              )}
               key={match.matchId}
               killParticipationMetric={<KillParticipationMetricText value={match.killParticipation} />}
               onToggleExpand={() => {
@@ -6254,7 +6276,7 @@ function RecentMatches({
               queueLabel={match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
               relativeLabel={formatRelativeDate(match.startedAt)}
               result={match.result}
-              resultDurationLabel={`${resultLabel(match.result)} · ${formatDuration(match.durationSeconds)}`}
+              resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={resultLabel(match.result)}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               spellItems={spellItems}

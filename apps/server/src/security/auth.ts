@@ -272,7 +272,8 @@ const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "POST", path: "/api/participation/invite-message" },
   { method: "POST", path: "/api/participation/invite-message/bulk" },
   { method: "POST", path: "/api/participation/role-override" },
-  { method: "POST", path: "/api/participation/entry-status" }
+  { method: "POST", path: "/api/participation/entry-status" },
+  { prefix: "/api/lol-operations" }
 ];
 
 export function streamerDashboardRequestAllowed(method: string | undefined, pathname: string): boolean {

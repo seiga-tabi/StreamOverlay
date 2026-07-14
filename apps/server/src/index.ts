@@ -28,6 +28,7 @@ import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMat
 import { websocketLimiter } from "./security/rate-limit.js";
 import { getEnabledModules } from "./modules/index.js";
 import { refreshLolProfileForEntry } from "./modules/lol-profile-enrichment.module.js";
+import { closeLolGameMonitors } from "./modules/lol-game-monitor.module.js";
 import { newId, nowIso, toSafeErrorMessage } from "@streamops/shared";
 
 assertRuntimeConfig();
@@ -141,7 +142,7 @@ const server = http.createServer(createHttpHandler({
   publicTwitchAuth,
   eventSub: twitchEventSub,
   logger,
-  refreshLolProfile: (entryId) => refreshLolProfileForEntry(moduleContext, entryId),
+  refreshLolProfile: (entryId, streamerId) => refreshLolProfileForEntry(moduleContext, entryId, streamerId),
   sessions,
   supportMailbox,
   readiness: () => store.getReadiness(),
@@ -308,7 +309,12 @@ dashboardWss.on("connection", (socket, req) => {
     : roleHint === "admin" && tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url))
       ? "admin"
       : roleHint;
-  dashboard.add(socket, role);
+  dashboard.add(socket, {
+    role,
+    ...(principal?.type === "DASHBOARD_ADMIN" && principal.twitchUserId
+      ? { twitchUserId: principal.twitchUserId }
+      : {})
+  });
 });
 overlayWss.on("connection", (socket, req) => {
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
@@ -334,6 +340,7 @@ function shutdown(signal: NodeJS.Signals): void {
   shuttingDown = true;
   logger.event({ type: "server.shutdown_started", signal });
   twitchEventSub.stop();
+  closeLolGameMonitors();
   closeWebSocketServer(bridgeWss);
   closeWebSocketServer(dashboardWss);
   closeWebSocketServer(overlayWss);

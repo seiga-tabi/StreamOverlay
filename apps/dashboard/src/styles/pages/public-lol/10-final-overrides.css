@@ -1486,3 +1486,206 @@
     width: calc((var(--yoro-space-4) * 3) + (var(--yoro-space-1) * 2)) !important;
   }
 }
+
+/* 스크린샷 기준 전적 카드: 결과 색상, 정보 위계, 모바일 고밀도 배치를 한 카드 안에 유지합니다. */
+.public-profile-shared-shell .public-matches-panel .public-match-row {
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark) !important;
+  border-radius: var(--yoro-radius-md) !important;
+  background: var(--yoro-color-match-loss-surface) !important;
+  box-shadow: var(--yoro-shadow-sm) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-row.win {
+  background: var(--yoro-color-match-win-surface) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-mvp,
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-ace {
+  border-color: var(--yoro-color-border-on-dark-strong) !important;
+  box-shadow: var(--yoro-shadow-md) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-mvp {
+  background: var(--yoro-theme-match-mvp-background) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-ace {
+  background: var(--yoro-theme-match-ace-background) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-kda strong {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: var(--yoro-space-2) !important;
+  color: var(--yoro-color-text-on-dark) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-kda strong i {
+  color: var(--yoro-color-text-on-dark-muted) !important;
+  font-style: normal !important;
+  font-weight: var(--yoro-font-weight-regular) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-kda strong .deaths {
+  color: var(--yoro-color-match-loss-accent) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-excellent,
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-good {
+  background: var(--yoro-color-match-score-good) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-warning,
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-bad {
+  background: var(--yoro-color-match-score-bad) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-impact {
+  background: var(--yoro-color-match-score-best) !important;
+}
+
+@media (max-width: 48rem) {
+  .public-profile-shared-shell .public-matches-panel .public-match-list {
+    gap: var(--yoro-space-2) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-row {
+    border-inline-start-width: var(--yoro-size-sr-only) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-summary {
+    grid-template-columns:
+      calc(var(--yoro-space-12) + var(--yoro-space-8))
+      minmax(var(--yoro-space-10), 1fr)
+      var(--yoro-size-touch-target)
+      calc(var(--yoro-space-12) + var(--yoro-space-6))
+      var(--yoro-space-10) !important;
+    grid-template-rows: var(--yoro-space-8) calc(var(--yoro-space-12) + var(--yoro-space-4)) !important;
+    gap: var(--yoro-space-0) var(--yoro-space-2) !important;
+    padding: var(--yoro-space-0) var(--yoro-space-1) var(--yoro-space-2) var(--yoro-space-2) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-result {
+    grid-column: 1 / 5 !important;
+    gap: var(--yoro-space-2) !important;
+    height: var(--yoro-space-8) !important;
+    margin-inline: calc(var(--yoro-space-2) * -1) calc(var(--yoro-space-1) * -1) !important;
+    padding-inline: var(--yoro-space-2) !important;
+    background: var(--yoro-color-match-loss-header) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .win .public-result {
+    background: var(--yoro-color-match-win-header) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-result-pill {
+    flex-basis: calc(var(--yoro-space-12) - var(--yoro-space-1)) !important;
+    height: var(--yoro-space-8) !important;
+    margin-inline-start: calc(var(--yoro-space-2) * -1) !important;
+    border-radius: var(--yoro-radius-md) var(--yoro-space-0) var(--yoro-radius-sm) var(--yoro-space-0) !important;
+    font-size: var(--yoro-font-size-sm) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-result-pill.win {
+    background: var(--yoro-color-match-win-accent) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-result-pill.loss {
+    background: var(--yoro-color-match-loss-accent) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-result strong,
+  .public-profile-shared-shell .public-matches-panel .public-result small,
+  .public-profile-shared-shell .public-matches-panel .public-match-relative {
+    color: var(--yoro-color-text-on-dark-muted) !important;
+    font-size: var(--yoro-font-size-xs) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-started {
+    display: none !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-result small {
+    display: inline !important;
+    margin-inline-end: auto !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-relative {
+    margin-inline-start: auto !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-champion-cell {
+    grid-column: 1 !important;
+    align-self: end !important;
+    height: var(--yoro-space-12) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-champion-cell > img,
+  .public-profile-shared-shell .public-matches-panel .public-champion-cell > span {
+    width: var(--yoro-space-12) !important;
+    height: var(--yoro-space-12) !important;
+    border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-champion-cell > div:last-child {
+    display: none !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-champion-cell .public-match-mobile-spells {
+    top: var(--yoro-space-0) !important;
+    left: calc(var(--yoro-space-12) + var(--yoro-space-1)) !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, var(--yoro-space-5)) !important;
+    gap: var(--yoro-space-1) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-mobile-spells span {
+    width: var(--yoro-space-5) !important;
+    height: var(--yoro-space-5) !important;
+    overflow: hidden !important;
+    border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-kda {
+    justify-items: center !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-kda strong {
+    gap: var(--yoro-space-1) !important;
+    font-size: var(--yoro-font-size-lg) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-kda > span {
+    color: var(--yoro-color-text-on-dark-muted) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-kda .public-match-badges.compact {
+    display: none !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-impact {
+    grid-column: 3 !important;
+    min-width: var(--yoro-size-touch-target) !important;
+    border: var(--yoro-space-0) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-impact strong,
+  .public-profile-shared-shell .public-matches-panel .public-match-impact span {
+    color: var(--yoro-color-text-on-dark) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-inline-items {
+    grid-column: 4 !important;
+    grid-template-columns: repeat(3, var(--yoro-space-5)) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-inline-items span {
+    border-color: var(--yoro-color-border-on-dark) !important;
+    background: var(--yoro-color-border-on-dark) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-expand {
+    grid-column: 5 !important;
+    color: var(--yoro-color-text-on-dark-muted) !important;
+  }
+}

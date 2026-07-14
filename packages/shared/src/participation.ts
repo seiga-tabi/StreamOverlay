@@ -128,6 +128,8 @@ export type ParticipationStatus =
 
 export type ParticipationEntry = {
   id: string;
+  streamerId?: string;
+  sessionId?: string;
   twitchUserId: string;
   twitchUserName: string;
   riotGameName: string;
@@ -175,6 +177,46 @@ export type LolGameMonitorSettings = {
   gameEndDebounceMs: number;
   autoSelectNextAfterGame: boolean;
   announceInChat: boolean;
+};
+
+export type StreamerRiotIdentity = {
+  twitchUserId: string;
+  riotGameName: string;
+  riotTagLine: string;
+  normalizedRiotId: string;
+  approvalStatus: StreamerRiotIdRequestStatus;
+  profileStatus?: LolProfileStatus;
+  updatedAt: string;
+};
+
+export type LolAutomationSettings = {
+  streamerId: string;
+  enabled: boolean;
+  autoSelectNextAfterGame: boolean;
+  announceInChat: boolean;
+  pollIntervalMs: number;
+  gameEndDebounceMs: number;
+  updatedAt: string;
+};
+
+export type ParticipationSessionStatus = "closed" | "recruiting" | "in_game" | "completed";
+
+export type StreamerProfileSnapshot = {
+  riotGameName: string;
+  riotTagLine: string;
+  normalizedRiotId: string;
+  profile?: ParticipationStreamerProfile;
+  capturedAt: string;
+};
+
+export type ParticipationSession = {
+  streamerId: string;
+  sessionId: string;
+  status: ParticipationSessionStatus;
+  profileSnapshot?: StreamerProfileSnapshot;
+  createdAt: string;
+  updatedAt: string;
+  endedAt?: string;
 };
 
 export type ParticipationPublicQueueEntry = {
@@ -262,10 +304,25 @@ export type ParticipationSummary = {
 };
 
 export type ParticipationState = {
+  streamerId?: string;
+  session?: ParticipationSession;
   isOpen: boolean;
   queue: ParticipationDashboardQueueEntry[];
   activeQueue: ParticipationDashboardQueueEntry[];
   summary: ParticipationSummary;
+};
+
+export type LolOperationsState = {
+  identity?: StreamerRiotIdentity;
+  automation: LolAutomationSettings;
+  participation: ParticipationState;
+  summary: {
+    riotApprovalStatus: StreamerRiotIdRequestStatus | "missing";
+    gameMonitorStatus: "disabled" | "waiting_for_approval" | "monitoring";
+    currentGameStatus: "idle" | "in_game" | "unknown";
+    participationStatus: ParticipationSessionStatus;
+    waitingCount: number;
+  };
 };
 
 export const PARTICIPATION_ACTIVE_STATUSES = [

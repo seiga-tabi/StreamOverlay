@@ -114,7 +114,13 @@ function apiErrorDetail(error: unknown, path: string, fallback: string): string 
   return error.message.replace(new RegExp(`^${escapedPath} failed: \\d+(?: - )?`), "") || fallback;
 }
 
-export function SoloRankPage() {
+export function SoloRankPage({
+  embedded = false,
+  showMonitorSettings = true,
+}: {
+  embedded?: boolean;
+  showMonitorSettings?: boolean;
+} = {}) {
   const [gameMonitor, setGameMonitor] = useState<LolGameMonitorSettings | null>(null);
   const [streamerRiotId, setStreamerRiotId] = useState("");
   const [monitorEnabled, setMonitorEnabled] = useState(true);
@@ -132,18 +138,20 @@ export function SoloRankPage() {
 
   useEffect(() => {
     let mounted = true;
-    void apiGet<LolGameMonitorSettings>("/api/participation/game-monitor")
-      .then((settings) => {
-        if (!mounted) return;
-        setGameMonitor(settings);
-        setStreamerRiotId(settings.streamerRiotId);
-        setMonitorEnabled(settings.enabled);
-        setAutoSelectNextAfterGame(settings.autoSelectNextAfterGame);
-        setAnnounceInChat(settings.announceInChat);
-      })
-      .catch(() => {
-        if (mounted) setMonitorMessage(t.gameMonitorLoadFailed);
-      });
+    if (showMonitorSettings) {
+      void apiGet<LolGameMonitorSettings>("/api/participation/game-monitor")
+        .then((settings) => {
+          if (!mounted) return;
+          setGameMonitor(settings);
+          setStreamerRiotId(settings.streamerRiotId);
+          setMonitorEnabled(settings.enabled);
+          setAutoSelectNextAfterGame(settings.autoSelectNextAfterGame);
+          setAnnounceInChat(settings.announceInChat);
+        })
+        .catch(() => {
+          if (mounted) setMonitorMessage(t.gameMonitorLoadFailed);
+        });
+    }
     void apiGet<LolProfileSettings>("/api/participation/profile-settings")
       .then((settings) => {
         if (mounted) setProfileSettings(settings);
@@ -155,7 +163,7 @@ export function SoloRankPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [showMonitorSettings]);
 
   async function saveGameMonitor(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -246,15 +254,17 @@ export function SoloRankPage() {
   }
 
   return (
-    <section className="solo-rank-settings-page">
-      <div className="page-title-row page-header compact solo-rank-settings-header">
-        <div>
-          <h1 data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</h1>
-          <p className="muted" data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</p>
+    <section className={`solo-rank-settings-page${embedded ? " lol-operations-embedded" : ""}`}>
+      {!embedded ? (
+        <div className="page-title-row page-header compact solo-rank-settings-header">
+          <div>
+            <h1 data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</h1>
+            <p className="muted" data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</p>
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      <div className="card participation-monitor-card solo-rank-settings-card solo-rank-monitor-card">
+      {showMonitorSettings ? <div className="card participation-monitor-card solo-rank-settings-card solo-rank-monitor-card">
         <div className="card-title-row">
           <h2 data-ko={i18n.ko.gameMonitorTitle} data-ja={i18n.ja.gameMonitorTitle}>{t.gameMonitorTitle}</h2>
           <span className={`queue-status ${monitorEnabled && streamerRiotId.trim() ? "good" : "neutral"}`}>
@@ -298,7 +308,7 @@ export function SoloRankPage() {
         </div>
         {monitorMessage ? <p className="form-message">{monitorMessage}</p> : null}
         {profileRefreshMessage ? <p className="form-message">{profileRefreshMessage}</p> : null}
-      </div>
+      </div> : null}
 
       <div className="card participation-monitor-card solo-rank-settings-card solo-rank-skins-card">
         <div className="card-title-row">

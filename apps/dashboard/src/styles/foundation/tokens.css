@@ -34,6 +34,17 @@
   --yoro-color-public-primary: hsl(252 100% 68%);
   --yoro-color-rank-trend: hsl(171 55% 58%);
   --yoro-color-rank-trend-area: hsl(171 55% 58% / .14);
+  --yoro-color-match-win-surface: hsl(222 39% 28%);
+  --yoro-color-match-win-header: hsl(221 48% 35%);
+  --yoro-color-match-win-accent: hsl(213 94% 63%);
+  --yoro-color-match-loss-surface: hsl(354 30% 26%);
+  --yoro-color-match-loss-header: hsl(354 38% 31%);
+  --yoro-color-match-loss-accent: hsl(358 86% 64%);
+  --yoro-color-match-score-good: hsl(171 46% 57%);
+  --yoro-color-match-score-bad: hsl(358 75% 68%);
+  --yoro-color-match-score-best: hsl(36 100% 58%);
+  --yoro-theme-match-mvp-background: linear-gradient(100deg, hsl(222 44% 27%), hsl(263 47% 46%), hsl(350 67% 40%));
+  --yoro-theme-match-ace-background: linear-gradient(100deg, hsl(354 34% 27%), hsl(352 42% 35%), hsl(222 38% 28%));
   --yoro-color-rank-band-neutral: hsl(210 7% 71% / .1);
   --yoro-color-rank-band-bronze: hsl(24 38% 51% / .12);
   --yoro-color-rank-band-silver: hsl(210 14% 83% / .11);

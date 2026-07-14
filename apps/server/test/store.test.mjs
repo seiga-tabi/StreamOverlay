@@ -169,6 +169,82 @@ test("Store는 참여 운영 상태를 atomic JSON 파일에서 복원한다", (
   }
 });
 
+test("Store는 스트리머별 참여 대기열과 자동화 설정을 격리한다", () => {
+  const store = new Store();
+  const streamerA = "streamer-a";
+  const streamerB = "streamer-b";
+
+  store.setParticipationOpen(true, streamerA);
+  store.setParticipationOpen(true, streamerB);
+  const entryA = store.addParticipation(store.makeParticipationEntry({
+    streamerId: streamerA,
+    twitchUserId: "viewer-a",
+    twitchUserName: "ViewerA",
+    riotGameName: "ViewerA",
+    riotTagLine: "JP1",
+    preferredRole: "mid",
+    status: "waitlisted",
+    source: "dashboard"
+  }), streamerA);
+  store.addParticipation(store.makeParticipationEntry({
+    streamerId: streamerB,
+    twitchUserId: "viewer-b",
+    twitchUserName: "ViewerB",
+    riotGameName: "ViewerB",
+    riotTagLine: "KR1",
+    preferredRole: "jungle",
+    status: "waitlisted",
+    source: "dashboard"
+  }), streamerB);
+
+  store.setLolAutomationSettings(streamerA, { enabled: true, autoSelectNextAfterGame: true });
+  store.setLolAutomationSettings(streamerB, { enabled: false, autoSelectNextAfterGame: false });
+
+  assert.deepEqual(store.getParticipationQueue(streamerA).map((entry) => entry.twitchUserName), ["ViewerA"]);
+  assert.deepEqual(store.getParticipationQueue(streamerB).map((entry) => entry.twitchUserName), ["ViewerB"]);
+  assert.equal(store.getParticipationEntryById(entryA.id, streamerB), undefined);
+  assert.equal(store.getLolAutomationSettings(streamerA).enabled, true);
+  assert.equal(store.getLolAutomationSettings(streamerB).enabled, false);
+});
+
+test("Store는 스트리머별 참여 session과 설정을 재시작 후 복원한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-scoped-runtime-state-"));
+  const filePath = path.join(dir, "runtime-state.json");
+  const streamerId = "streamer-persisted";
+  try {
+    const firstStore = new Store({ runtimeStatePath: filePath });
+    firstStore.setParticipationOpen(true, streamerId);
+    const session = firstStore.startParticipationSession(streamerId, {
+      riotGameName: "Streamer",
+      riotTagLine: "JP1",
+      normalizedRiotId: "streamer#jp1",
+      capturedAt: "2026-07-14T00:00:00.000Z"
+    });
+    firstStore.addParticipation(firstStore.makeParticipationEntry({
+      streamerId,
+      sessionId: session.sessionId,
+      twitchUserId: "viewer-persisted",
+      twitchUserName: "ViewerPersisted",
+      riotGameName: "Viewer",
+      riotTagLine: "JP1",
+      preferredRole: "fill",
+      status: "waitlisted",
+      source: "dashboard"
+    }), streamerId);
+    firstStore.setLolAutomationSettings(streamerId, { enabled: true, announceInChat: false });
+    firstStore.close();
+
+    const restartedStore = new Store({ runtimeStatePath: filePath });
+    assert.equal(restartedStore.getParticipationState(streamerId).isOpen, true);
+    assert.equal(restartedStore.getParticipationState(streamerId).session?.sessionId, session.sessionId);
+    assert.equal(restartedStore.getParticipationQueue(streamerId)[0]?.sessionId, session.sessionId);
+    assert.equal(restartedStore.getLolAutomationSettings(streamerId).announceInChat, false);
+    restartedStore.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("Store는 대회와 커뮤니티 저장 실패를 callback과 readiness에 노출한다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-persistence-failure-"));
   const failures = [];

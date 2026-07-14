@@ -4,6 +4,7 @@ import { StatusCard } from "../components/StatusCard";
 import { EventLog } from "../components/EventLog";
 import { ActionTester } from "../components/ActionTester";
 import { apiBase, apiGet } from "../api/client";
+import { resolveTwitchDashboardOAuthAction } from "../features/dashboard/twitch-oauth";
 import { createDashboardLocaleProxy, uiText } from "../i18n";
 import {
   AppShell,
@@ -68,10 +69,17 @@ export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { s
     : twitchStatusFailed
       ? t.twitchStatusUnavailable
       : undefined;
-  const twitchReconnectRequired = twitchStatus?.state === "token_expired" || Boolean(twitchStatus?.error);
+  const twitchOAuthAction = resolveTwitchDashboardOAuthAction(twitchStatus);
+  const twitchOAuthActionLabel = twitchOAuthAction === "connect"
+    ? t.twitchConnectAction
+    : twitchOAuthAction === "renew"
+      ? t.twitchReconnectAction
+      : undefined;
 
-  function reconnectTwitch() {
-    window.location.href = `${apiBase}/api/twitch/auth/start?force_verify=1`;
+  function openTwitchOAuth() {
+    const query = new URLSearchParams({ return_to: "/dashboard" });
+    if (twitchOAuthAction === "renew") query.set("force_verify", "1");
+    window.location.href = `${apiBase}/api/twitch/auth/start?${query.toString()}`;
   }
 
   useEffect(() => {
@@ -152,11 +160,11 @@ export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { s
         <section className="dashboard-shared-status-grid" id="dashboard-status">
           <StatusCard label={t.statusLabels.server} value={status.server} />
           <StatusCard
-            actionLabel={twitchReconnectRequired ? t.twitchReconnectAction : undefined}
+            actionLabel={twitchOAuthActionLabel}
             hint={twitchCardHint}
             label={t.statusLabels.twitch}
             loading={twitchStatus === null && !twitchStatusFailed}
-            onAction={twitchReconnectRequired ? reconnectTwitch : undefined}
+            onAction={twitchOAuthAction ? openTwitchOAuth : undefined}
             value={twitchCardValue}
           />
           <StatusCard label={t.statusLabels.stream} value={status.stream} />

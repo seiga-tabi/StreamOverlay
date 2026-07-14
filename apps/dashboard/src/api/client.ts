@@ -1,5 +1,11 @@
 import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../runtime-config";
-import type { CommunityModerationSnapshot, StreamerTournament, TournamentUpsertInput } from "@streamops/shared";
+import type {
+  CommunityModerationSnapshot,
+  LolAutomationSettings,
+  LolOperationsState,
+  StreamerTournament,
+  TournamentUpsertInput,
+} from "@streamops/shared";
 
 const API_BASE = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
 
@@ -163,6 +169,16 @@ export async function updateStreamerProfileLink(body: {
 export async function updateStreamerRiotId(riotId: string): Promise<DashboardStreamerInfo> {
   const result = await apiPost<{ streamer: DashboardStreamerInfo }>("/api/participation/streamer-riot-id", { riotId });
   return result.streamer;
+}
+
+export async function getLolOperationsState(): Promise<LolOperationsState> {
+  return apiGet<LolOperationsState>("/api/lol-operations");
+}
+
+export async function updateLolAutomationSettings(
+  patch: Pick<LolAutomationSettings, "enabled" | "autoSelectNextAfterGame" | "announceInChat">
+): Promise<{ settings: LolAutomationSettings; state: LolOperationsState }> {
+  return apiPost<{ settings: LolAutomationSettings; state: LolOperationsState }>("/api/lol-operations/automation", patch);
 }
 
 export async function getDashboardTournaments(): Promise<StreamerTournament[]> {

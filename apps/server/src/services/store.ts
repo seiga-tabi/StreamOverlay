@@ -15,14 +15,17 @@ import type {
   CommunityModerationSnapshot,
   CommunitySanction,
   InternalEvent,
+  LolAutomationSettings,
   OverlayChannel,
   OverlayMessageLogEntry,
   OverlayStatus,
   ParticipationDashboardQueueEntry,
   ParticipationEntry,
   ParticipationPublicQueueEntry,
+  ParticipationSession,
   ParticipationState,
   StreamerProfileLink,
+  StreamerProfileSnapshot,
   StreamerRiotIdRequest,
   StreamerTournament,
   TournamentMatch,
@@ -315,6 +318,60 @@ function cloneParticipationStreamerProfile(profile: ParticipationStreamerProfile
     recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
     rankHistory: profile.rankHistory?.map((point) => ({ ...point }))
   } : undefined;
+}
+
+function normalizedParticipationSession(value: unknown, streamerId: string): ParticipationSession | undefined {
+  const input = objectRecord(value);
+  const sessionId = optionalString(input?.sessionId);
+  const status = optionalString(input?.status) as ParticipationSession["status"] | undefined;
+  const createdAt = optionalString(input?.createdAt);
+  const updatedAt = optionalString(input?.updatedAt);
+  if (!sessionId || !status || !createdAt || !updatedAt || !["closed", "recruiting", "in_game", "completed"].includes(status)) return undefined;
+  const rawSnapshot = objectRecord(input?.profileSnapshot);
+  const profileSnapshot = rawSnapshot && optionalString(rawSnapshot.riotGameName) && optionalString(rawSnapshot.riotTagLine)
+    ? {
+        ...(rawSnapshot as StreamerProfileSnapshot),
+        riotGameName: optionalString(rawSnapshot.riotGameName)!,
+        riotTagLine: optionalString(rawSnapshot.riotTagLine)!,
+        normalizedRiotId: optionalString(rawSnapshot.normalizedRiotId) ?? normalizeRiotIdKey(optionalString(rawSnapshot.riotGameName)!, optionalString(rawSnapshot.riotTagLine)!),
+        capturedAt: optionalString(rawSnapshot.capturedAt) ?? createdAt,
+        profile: cloneParticipationStreamerProfile(rawSnapshot.profile as ParticipationStreamerProfile | undefined)
+      }
+    : undefined;
+  return {
+    streamerId,
+    sessionId,
+    status,
+    profileSnapshot,
+    createdAt,
+    updatedAt,
+    endedAt: optionalString(input?.endedAt)
+  };
+}
+
+function cloneParticipationSession(session: ParticipationSession | undefined): ParticipationSession | undefined {
+  return session ? {
+    ...session,
+    profileSnapshot: session.profileSnapshot ? {
+      ...session.profileSnapshot,
+      profile: cloneParticipationStreamerProfile(session.profileSnapshot.profile)
+    } : undefined
+  } : undefined;
+}
+
+function normalizedLolAutomationSettings(value: unknown, streamerId: string): LolAutomationSettings {
+  const input = objectRecord(value);
+  const pollIntervalMs = Number(input?.pollIntervalMs);
+  const gameEndDebounceMs = Number(input?.gameEndDebounceMs);
+  return {
+    streamerId,
+    enabled: typeof input?.enabled === "boolean" ? input.enabled : DEFAULT_LOL_AUTOMATION_SETTINGS.enabled,
+    autoSelectNextAfterGame: typeof input?.autoSelectNextAfterGame === "boolean" ? input.autoSelectNextAfterGame : DEFAULT_LOL_AUTOMATION_SETTINGS.autoSelectNextAfterGame,
+    announceInChat: typeof input?.announceInChat === "boolean" ? input.announceInChat : DEFAULT_LOL_AUTOMATION_SETTINGS.announceInChat,
+    pollIntervalMs: Number.isFinite(pollIntervalMs) ? Math.max(10_000, Math.trunc(pollIntervalMs)) : DEFAULT_LOL_AUTOMATION_SETTINGS.pollIntervalMs,
+    gameEndDebounceMs: Number.isFinite(gameEndDebounceMs) ? Math.max(0, Math.trunc(gameEndDebounceMs)) : DEFAULT_LOL_AUTOMATION_SETTINGS.gameEndDebounceMs,
+    updatedAt: optionalString(input?.updatedAt) ?? nowIso()
+  };
 }
 
 function normalizedFollowerActivity(value: unknown): FollowerActivity {
@@ -805,6 +862,21 @@ type CommunityPostCommentAuthorInput = {
   authorProfileImageUrl?: string;
 };
 
+type ScopedParticipationRuntime = {
+  isOpen: boolean;
+  queue: ParticipationEntry[];
+  streamerProfile?: ParticipationStreamerProfile;
+  session?: ParticipationSession;
+};
+
+const DEFAULT_LOL_AUTOMATION_SETTINGS = {
+  enabled: false,
+  autoSelectNextAfterGame: true,
+  announceInChat: true,
+  pollIntervalMs: 45_000,
+  gameEndDebounceMs: 90_000
+} as const;
+
 export class Store {
   private static readonly maxSeenTwitchMessageIds = 5000;
   private static readonly maxEvents = 200;
@@ -827,6 +899,8 @@ export class Store {
   private followerPersistTimer?: NodeJS.Timeout;
   private participationQueue: ParticipationEntry[] = [];
   private participationStreamerProfile?: ParticipationStreamerProfile;
+  private readonly participationByStreamer = new Map<string, ScopedParticipationRuntime>();
+  private readonly lolAutomationByStreamer = new Map<string, LolAutomationSettings>();
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
   private tournaments: StreamerTournament[] = [];
   private communityPosts: CommunityPost[] = [];
@@ -874,6 +948,36 @@ export class Store {
     this.loadRuntimeState();
     this.cleanupExpiredPartyCommunityPosts();
     this.startCommunityCleanupTimer();
+  }
+
+  private scopedParticipationRuntime(streamerId: string, create = true): ScopedParticipationRuntime | undefined {
+    const normalizedStreamerId = streamerId.trim();
+    if (!normalizedStreamerId) return undefined;
+    const existing = this.participationByStreamer.get(normalizedStreamerId);
+    if (existing || !create) return existing;
+    const runtime: ScopedParticipationRuntime = { isOpen: false, queue: [] };
+    this.participationByStreamer.set(normalizedStreamerId, runtime);
+    return runtime;
+  }
+
+  private participationQueueFor(streamerId?: string): ParticipationEntry[] {
+    if (!streamerId) return this.participationQueue;
+    return this.scopedParticipationRuntime(streamerId)?.queue ?? [];
+  }
+
+  private participationOpenFor(streamerId?: string): boolean {
+    if (!streamerId) return this.status.participation === "open";
+    return this.scopedParticipationRuntime(streamerId, false)?.isOpen === true;
+  }
+
+  private ownedParticipationEntry(entry: ParticipationEntry, streamerId?: string): ParticipationEntry {
+    if (!streamerId) return entry;
+    const runtime = this.scopedParticipationRuntime(streamerId);
+    return {
+      ...entry,
+      streamerId,
+      sessionId: entry.sessionId ?? runtime?.session?.sessionId
+    };
   }
 
   private reportPersistenceFailure(failure: StorePersistenceFailure): void {
@@ -1467,10 +1571,36 @@ export class Store {
       this.participationStreamerProfile = streamerProfile
         ? cloneParticipationStreamerProfile(streamerProfile as ParticipationStreamerProfile)
         : undefined;
+      this.participationByStreamer.clear();
+      const scopedParticipation = objectRecord(parsed?.participationByStreamer);
+      for (const [streamerId, rawRuntime] of Object.entries(scopedParticipation ?? {})) {
+        const runtime = objectRecord(rawRuntime);
+        if (!streamerId.trim() || !runtime) continue;
+        const scopedQueue = (Array.isArray(runtime.queue) ? runtime.queue : [])
+          .map(normalizedParticipationEntry)
+          .filter((entry): entry is ParticipationEntry => Boolean(entry))
+          .slice(-2000)
+          .map((entry) => ({ ...entry, streamerId }));
+        const scopedProfile = objectRecord(runtime.streamerProfile);
+        this.participationByStreamer.set(streamerId, {
+          isOpen: runtime.isOpen === true,
+          queue: scopedQueue,
+          streamerProfile: scopedProfile ? cloneParticipationStreamerProfile(scopedProfile as ParticipationStreamerProfile) : undefined,
+          session: normalizedParticipationSession(runtime.session, streamerId)
+        });
+      }
+      this.lolAutomationByStreamer.clear();
+      const automationByStreamer = objectRecord(parsed?.lolAutomationByStreamer);
+      for (const [streamerId, rawSettings] of Object.entries(automationByStreamer ?? {})) {
+        if (!streamerId.trim()) continue;
+        this.lolAutomationByStreamer.set(streamerId, normalizedLolAutomationSettings(rawSettings, streamerId));
+      }
       this.clearPersistenceFailure("runtime");
     } catch (error) {
       this.participationQueue = [];
       this.participationStreamerProfile = undefined;
+      this.participationByStreamer.clear();
+      this.lolAutomationByStreamer.clear();
       this.status.participation = "closed";
       if (!this.isMissingStateFile(error)) {
         this.reportPersistenceFailure({ scope: "runtime", operation: "load", filePath: this.options.runtimeStatePath, error: toSafeErrorMessage(error) });
@@ -1485,12 +1615,19 @@ export class Store {
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
       const tmpPath = `${this.options.runtimeStatePath}.${process.pid}.${Date.now()}.tmp`;
       const payload = {
-        version: 1,
+        version: 2,
         participation: {
           isOpen: this.status.participation === "open",
           queue: this.participationQueue.map(cloneParticipationEntry),
           streamerProfile: cloneParticipationStreamerProfile(this.participationStreamerProfile)
-        }
+        },
+        participationByStreamer: Object.fromEntries([...this.participationByStreamer.entries()].map(([streamerId, runtime]) => [streamerId, {
+          isOpen: runtime.isOpen,
+          queue: runtime.queue.map((entry) => cloneParticipationEntry({ ...entry, streamerId })),
+          streamerProfile: cloneParticipationStreamerProfile(runtime.streamerProfile),
+          session: cloneParticipationSession(runtime.session)
+        }])),
+        lolAutomationByStreamer: Object.fromEntries([...this.lolAutomationByStreamer.entries()].map(([streamerId, settings]) => [streamerId, { ...settings }]))
       };
       fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       fs.renameSync(tmpPath, this.options.runtimeStatePath);
@@ -2070,63 +2207,75 @@ export class Store {
     return cloneStreamerRiotIdRequest(request);
   }
 
-  getParticipationQueue(): ParticipationEntry[] {
-    return [...this.participationQueue];
+  getParticipationQueue(streamerId?: string): ParticipationEntry[] {
+    return this.participationQueueFor(streamerId).map(cloneParticipationEntry);
   }
 
-  setParticipationStreamerProfile(profile: ParticipationStreamerProfile | undefined): ParticipationStreamerProfile | undefined {
-    this.participationStreamerProfile = cloneParticipationStreamerProfile(profile);
+  setParticipationStreamerProfile(profile: ParticipationStreamerProfile | undefined, streamerId?: string): ParticipationStreamerProfile | undefined {
+    if (streamerId) {
+      const runtime = this.scopedParticipationRuntime(streamerId);
+      if (!runtime) return undefined;
+      runtime.streamerProfile = cloneParticipationStreamerProfile(profile);
+    } else {
+      this.participationStreamerProfile = cloneParticipationStreamerProfile(profile);
+    }
     this.persistRuntimeState();
-    return this.getParticipationStreamerProfile();
+    return this.getParticipationStreamerProfile(streamerId);
   }
 
-  getParticipationStreamerProfile(): ParticipationStreamerProfile | undefined {
-    return cloneParticipationStreamerProfile(this.participationStreamerProfile);
+  getParticipationStreamerProfile(streamerId?: string): ParticipationStreamerProfile | undefined {
+    const profile = streamerId
+      ? this.scopedParticipationRuntime(streamerId, false)?.streamerProfile
+      : this.participationStreamerProfile;
+    return cloneParticipationStreamerProfile(profile);
   }
 
-  getActiveParticipationQueue(): ParticipationEntry[] {
-    return this.participationQueue.filter((entry) => isActiveParticipationStatus(entry.status));
+  getActiveParticipationQueue(streamerId?: string): ParticipationEntry[] {
+    return this.participationQueueFor(streamerId).filter((entry) => isActiveParticipationStatus(entry.status));
   }
 
-  getWaitingParticipationQueue(): ParticipationEntry[] {
-    return this.participationQueue.filter((entry) => isWaitingParticipationStatus(entry.status));
+  getWaitingParticipationQueue(streamerId?: string): ParticipationEntry[] {
+    return this.participationQueueFor(streamerId).filter((entry) => isWaitingParticipationStatus(entry.status));
   }
 
-  getParticipationOverlayQueue(limit = PARTICIPATION_OVERLAY_VISIBLE_LIMIT): ParticipationPublicQueueEntry[] {
-    return this.getWaitingParticipationQueue()
+  getParticipationOverlayQueue(limit = PARTICIPATION_OVERLAY_VISIBLE_LIMIT, streamerId?: string): ParticipationPublicQueueEntry[] {
+    return this.getWaitingParticipationQueue(streamerId)
       .slice(0, Math.max(0, Math.trunc(limit)))
       .map((entry, index) => toPublicQueueEntry(entry, index + 1));
   }
 
-  getNextWaitingParticipationOverlayEntry(): ParticipationPublicQueueEntry | undefined {
-    const entry = this.getWaitingParticipationQueue()[0];
+  getNextWaitingParticipationOverlayEntry(streamerId?: string): ParticipationPublicQueueEntry | undefined {
+    const entry = this.getWaitingParticipationQueue(streamerId)[0];
     return entry ? toPublicQueueEntry(entry, 1) : undefined;
   }
 
-  getParticipationState(): ParticipationState {
-    const activeQueue = this.getActiveParticipationQueue();
+  getParticipationState(streamerId?: string): ParticipationState {
+    const queue = this.participationQueueFor(streamerId);
+    const activeQueue = this.getActiveParticipationQueue(streamerId);
     return {
-      isOpen: this.status.participation === "open",
-      queue: this.participationQueue.map((entry, index) => toDashboardQueueEntry(entry, index + 1)),
+      streamerId,
+      session: streamerId ? cloneParticipationSession(this.scopedParticipationRuntime(streamerId, false)?.session) : undefined,
+      isOpen: this.participationOpenFor(streamerId),
+      queue: queue.map((entry, index) => toDashboardQueueEntry(entry, index + 1)),
       activeQueue: activeQueue.map((entry, index) => toDashboardQueueEntry(entry, index + 1)),
       summary: {
-        total: this.participationQueue.length,
+        total: queue.length,
         active: activeQueue.length,
-        waiting: this.getWaitingParticipationQueue().length,
-        selected: this.participationQueue.filter((entry) => entry.status === "selected").length,
-        checkedIn: this.participationQueue.filter((entry) => entry.status === "checked_in").length,
-        noShow: this.participationQueue.filter((entry) => entry.status === "no_show").length,
-        played: this.participationQueue.filter((entry) => entry.status === "played").length
+        waiting: this.getWaitingParticipationQueue(streamerId).length,
+        selected: queue.filter((entry) => entry.status === "selected").length,
+        checkedIn: queue.filter((entry) => entry.status === "checked_in").length,
+        noShow: queue.filter((entry) => entry.status === "no_show").length,
+        played: queue.filter((entry) => entry.status === "played").length
       }
     };
   }
 
-  getActiveParticipationCount(): number {
-    return this.getActiveParticipationQueue().length;
+  getActiveParticipationCount(streamerId?: string): number {
+    return this.getActiveParticipationQueue(streamerId).length;
   }
 
-  getParticipationEntryById(id: string): ParticipationEntry | undefined {
-    const entry = this.participationQueue.find((candidate) => candidate.id === id);
+  getParticipationEntryById(id: string, streamerId?: string): ParticipationEntry | undefined {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.id === id);
     return entry ? { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined } : undefined;
   }
 
@@ -2134,9 +2283,9 @@ export class Store {
     riotGameName: string;
     riotTagLine: string;
     riotPuuid?: string;
-  }): ParticipationEntry | undefined {
+  }, streamerId?: string): ParticipationEntry | undefined {
     const riotIdKey = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
-    const reusable = this.participationQueue
+    const reusable = this.participationQueueFor(streamerId)
       .filter((candidate) => {
         if (isActiveParticipationStatus(candidate.status)) return false;
         if (!candidate.profileStatus && !candidate.rankedStats && !candidate.topChampions?.length) return false;
@@ -2156,9 +2305,9 @@ export class Store {
     riotGameName: string;
     riotTagLine: string;
     riotPuuid?: string;
-  }): ParticipationDuplicate | undefined {
+  }, streamerId?: string): ParticipationDuplicate | undefined {
     const riotIdKey = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
-    return this.getActiveParticipationQueue().reduce<ParticipationDuplicate | undefined>((found, candidate) => {
+    return this.getActiveParticipationQueue(streamerId).reduce<ParticipationDuplicate | undefined>((found, candidate) => {
       if (found) return found;
       if (candidate.twitchUserId === input.twitchUserId) return { reason: "twitch_user", entry: candidate };
       if (input.riotPuuid && candidate.riotPuuid && candidate.riotPuuid === input.riotPuuid) return { reason: "riot_id", entry: candidate };
@@ -2168,22 +2317,26 @@ export class Store {
     }, undefined);
   }
 
-  addParticipation(entry: ParticipationEntry): ParticipationEntry {
-    this.participationQueue.push(entry);
+  addParticipation(entry: ParticipationEntry, streamerId?: string): ParticipationEntry {
+    const queue = this.participationQueueFor(streamerId);
+    const ownedEntry = this.ownedParticipationEntry(entry, streamerId);
+    queue.push(ownedEntry);
     this.persistRuntimeState();
-    return entry;
+    return cloneParticipationEntry(ownedEntry);
   }
 
-  reactivateReusableParticipation(entry: ParticipationEntry): { entry: ParticipationEntry; reused: boolean } {
-    const reusable = this.participationQueue
+  reactivateReusableParticipation(entry: ParticipationEntry, streamerId?: string): { entry: ParticipationEntry; reused: boolean } {
+    const queue = this.participationQueueFor(streamerId);
+    const ownedEntry = this.ownedParticipationEntry(entry, streamerId);
+    const reusable = queue
       .map((candidate, index) => ({ candidate, index }))
       .filter(({ candidate }) => candidate.twitchUserId === entry.twitchUserId && !isActiveParticipationStatus(candidate.status))
       .sort((a, b) => Date.parse(b.candidate.updatedAt) - Date.parse(a.candidate.updatedAt))[0];
 
     if (!reusable) {
-      this.participationQueue.push(entry);
+      queue.push(ownedEntry);
       this.persistRuntimeState();
-      return { entry, reused: false };
+      return { entry: cloneParticipationEntry(ownedEntry), reused: false };
     }
 
     const previous = reusable.candidate;
@@ -2192,63 +2345,160 @@ export class Store {
     const profileFallback = sameRiotIdentity ? previous : undefined;
     const reactivated: ParticipationEntry = {
       ...previous,
-      twitchUserId: entry.twitchUserId,
-      twitchUserName: entry.twitchUserName,
-      riotGameName: entry.riotGameName,
-      riotTagLine: entry.riotTagLine,
-      riotPuuid: entry.riotPuuid ?? profileFallback?.riotPuuid,
-      requestedRole: entry.requestedRole,
-      preferredRole: entry.preferredRole,
-      secondaryRole: entry.secondaryRole,
-      declaredRank: entry.declaredRank,
-      verifiedRank: entry.verifiedRank ?? profileFallback?.verifiedRank,
-      rankedStats: entry.rankedStats ?? profileFallback?.rankedStats,
-      profileStatus: entry.profileStatus ?? profileFallback?.profileStatus,
-      profileFailureReason: entry.profileFailureReason ?? profileFallback?.profileFailureReason,
-      mainRole: entry.mainRole ?? profileFallback?.mainRole,
-      mainRoleConfidence: entry.mainRoleConfidence ?? profileFallback?.mainRoleConfidence,
-      topChampions: entry.topChampions ?? profileFallback?.topChampions,
-      profileAnalyzedAt: entry.profileAnalyzedAt ?? profileFallback?.profileAnalyzedAt,
-      status: entry.status,
-      source: entry.source,
-      redemptionId: entry.redemptionId,
+      ...ownedEntry,
+      id: previous.id,
+      createdAt: previous.createdAt,
+      riotPuuid: ownedEntry.riotPuuid ?? profileFallback?.riotPuuid,
+      verifiedRank: ownedEntry.verifiedRank ?? profileFallback?.verifiedRank,
+      rankedStats: ownedEntry.rankedStats ?? profileFallback?.rankedStats,
+      profileStatus: ownedEntry.profileStatus ?? profileFallback?.profileStatus,
+      profileFailureReason: ownedEntry.profileFailureReason ?? profileFallback?.profileFailureReason,
+      mainRole: ownedEntry.mainRole ?? profileFallback?.mainRole,
+      mainRoleConfidence: ownedEntry.mainRoleConfidence ?? profileFallback?.mainRoleConfidence,
+      topChampions: ownedEntry.topChampions ?? profileFallback?.topChampions,
+      profileAnalyzedAt: ownedEntry.profileAnalyzedAt ?? profileFallback?.profileAnalyzedAt,
       selectedAt: undefined,
       checkInExpiresAt: undefined,
       playedAt: undefined,
       updatedAt: nowIso()
     };
-    this.participationQueue[reusable.index] = reactivated;
+    queue[reusable.index] = reactivated;
     this.persistRuntimeState();
     return { entry: reactivated, reused: true };
   }
 
-  addOrUpdateParticipation(entry: ParticipationEntry): ParticipationEntry {
-    const existingIndex = this.participationQueue.findIndex(
+  addOrUpdateParticipation(entry: ParticipationEntry, streamerId?: string): ParticipationEntry {
+    const queue = this.participationQueueFor(streamerId);
+    const ownedEntry = this.ownedParticipationEntry(entry, streamerId);
+    const existingIndex = queue.findIndex(
       (candidate) =>
-        candidate.twitchUserId === entry.twitchUserId ||
-        normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine) === normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine) ||
-        Boolean(entry.riotPuuid && candidate.riotPuuid === entry.riotPuuid)
+        candidate.twitchUserId === ownedEntry.twitchUserId ||
+        normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine) === normalizeRiotIdKey(ownedEntry.riotGameName, ownedEntry.riotTagLine) ||
+        Boolean(ownedEntry.riotPuuid && candidate.riotPuuid === ownedEntry.riotPuuid)
     );
     if (existingIndex >= 0) {
-      const previous = this.participationQueue[existingIndex]!;
-      const next = { ...previous, ...entry, id: previous.id, updatedAt: nowIso() };
-      this.participationQueue[existingIndex] = next;
+      const previous = queue[existingIndex]!;
+      const next = { ...previous, ...ownedEntry, id: previous.id, updatedAt: nowIso() };
+      queue[existingIndex] = next;
       this.persistRuntimeState();
       return next;
     }
-    this.participationQueue.push(entry);
+    queue.push(ownedEntry);
     this.persistRuntimeState();
-    return entry;
+    return cloneParticipationEntry(ownedEntry);
   }
 
-  setParticipationOpen(open: boolean): void {
-    this.patchStatus({ participation: open ? "open" : "closed" });
+  setParticipationOpen(open: boolean, streamerId?: string): void {
+    if (streamerId) {
+      const runtime = this.scopedParticipationRuntime(streamerId);
+      if (!runtime) return;
+      runtime.isOpen = open;
+      if (open && !runtime.session) {
+        const timestamp = nowIso();
+        runtime.session = {
+          streamerId,
+          sessionId: newId("partsession"),
+          status: "recruiting",
+          createdAt: timestamp,
+          updatedAt: timestamp
+        };
+      } else if (runtime.session) {
+        runtime.session.status = open ? "recruiting" : "closed";
+        runtime.session.updatedAt = nowIso();
+        if (!open) runtime.session.endedAt = nowIso();
+      }
+    } else {
+      this.patchStatus({ participation: open ? "open" : "closed" });
+    }
     this.persistRuntimeState();
   }
 
-  selectNextParticipant(checkInSeconds: number): ParticipationEntry | undefined {
-    if (this.getPendingSelectedParticipant()) return undefined;
-    const next = this.participationQueue.find((entry) => entry.status === "waitlisted" || entry.status === "verified" || entry.status === "pending");
+  getLolAutomationSettings(streamerId: string): LolAutomationSettings {
+    const normalizedStreamerId = streamerId.trim();
+    return {
+      ...normalizedLolAutomationSettings(this.lolAutomationByStreamer.get(normalizedStreamerId), normalizedStreamerId)
+    };
+  }
+
+  listLolAutomationSettings(): LolAutomationSettings[] {
+    return [...this.lolAutomationByStreamer.keys()]
+      .map((streamerId) => this.getLolAutomationSettings(streamerId));
+  }
+
+  setLolAutomationSettings(
+    streamerId: string,
+    patch: Partial<Omit<LolAutomationSettings, "streamerId" | "updatedAt">>
+  ): LolAutomationSettings {
+    const normalizedStreamerId = streamerId.trim();
+    if (!normalizedStreamerId) throw new Error("스트리머 식별자가 필요합니다.");
+    const current = this.getLolAutomationSettings(normalizedStreamerId);
+    const next = normalizedLolAutomationSettings({
+      ...current,
+      ...patch,
+      updatedAt: nowIso()
+    }, normalizedStreamerId);
+    this.lolAutomationByStreamer.set(normalizedStreamerId, next);
+    this.persistRuntimeState();
+    return { ...next };
+  }
+
+  getParticipationSession(streamerId: string): ParticipationSession | undefined {
+    return cloneParticipationSession(this.scopedParticipationRuntime(streamerId, false)?.session);
+  }
+
+  listParticipationSessions(): ParticipationSession[] {
+    return [...this.participationByStreamer.values()]
+      .map((runtime) => cloneParticipationSession(runtime.session))
+      .filter((session): session is ParticipationSession => Boolean(session));
+  }
+
+  startParticipationSession(streamerId: string, profileSnapshot?: StreamerProfileSnapshot): ParticipationSession {
+    const normalizedStreamerId = streamerId.trim();
+    if (!normalizedStreamerId) throw new Error("스트리머 식별자가 필요합니다.");
+    const runtime = this.scopedParticipationRuntime(normalizedStreamerId);
+    if (!runtime) throw new Error("시참 세션을 생성할 수 없습니다.");
+    const timestamp = nowIso();
+    const snapshot = profileSnapshot ? {
+      ...profileSnapshot,
+      profile: cloneParticipationStreamerProfile(profileSnapshot.profile)
+    } : undefined;
+    runtime.session = {
+      streamerId: normalizedStreamerId,
+      sessionId: newId("partsession"),
+      status: "recruiting",
+      profileSnapshot: snapshot,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    runtime.isOpen = true;
+    this.persistRuntimeState();
+    return cloneParticipationSession(runtime.session)!;
+  }
+
+  updateParticipationSessionStatus(
+    streamerId: string,
+    status: ParticipationSession["status"]
+  ): ParticipationSession | undefined {
+    const runtime = this.scopedParticipationRuntime(streamerId, false);
+    if (!runtime?.session) return undefined;
+    runtime.session.status = status;
+    runtime.session.updatedAt = nowIso();
+    if (status === "recruiting") runtime.isOpen = true;
+    if (status === "closed" || status === "completed") {
+      runtime.isOpen = false;
+      runtime.session.endedAt = nowIso();
+    }
+    this.persistRuntimeState();
+    return cloneParticipationSession(runtime.session);
+  }
+
+  endParticipationSession(streamerId: string): ParticipationSession | undefined {
+    return this.updateParticipationSessionStatus(streamerId, "completed");
+  }
+
+  selectNextParticipant(checkInSeconds: number, streamerId?: string): ParticipationEntry | undefined {
+    if (this.getPendingSelectedParticipant(new Date(), streamerId)) return undefined;
+    const next = this.participationQueueFor(streamerId).find((entry) => entry.status === "waitlisted" || entry.status === "verified" || entry.status === "pending");
     if (!next) return undefined;
     next.status = "selected";
     next.selectedAt = nowIso();
@@ -2258,12 +2508,12 @@ export class Store {
     return next;
   }
 
-  getPendingSelectedParticipant(now = new Date()): ParticipationEntry | undefined {
-    return this.participationQueue.find((entry) => entry.status === "selected" && !isCheckInExpired(entry, now));
+  getPendingSelectedParticipant(now = new Date(), streamerId?: string): ParticipationEntry | undefined {
+    return this.participationQueueFor(streamerId).find((entry) => entry.status === "selected" && !isCheckInExpired(entry, now));
   }
 
-  markParticipantNoShow(id: string, note?: string): ParticipationEntry | undefined {
-    const entry = this.participationQueue.find((candidate) => candidate.id === id);
+  markParticipantNoShow(id: string, note?: string, streamerId?: string): ParticipationEntry | undefined {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.id === id);
     if (!entry) return undefined;
     entry.status = "no_show";
     entry.updatedAt = nowIso();
@@ -2272,21 +2522,21 @@ export class Store {
     return entry;
   }
 
-  markExpiredSelectedNoShows(now = new Date()): ParticipationEntry[] {
+  markExpiredSelectedNoShows(now = new Date(), streamerId?: string): ParticipationEntry[] {
     const expired: ParticipationEntry[] = [];
-    for (const entry of this.participationQueue) {
+    for (const entry of this.participationQueueFor(streamerId)) {
       if (entry.status !== "selected" || !isCheckInExpired(entry, now)) continue;
-      const marked = this.markParticipantNoShow(entry.id, "참가 확인 시간이 만료되었습니다.");
+      const marked = this.markParticipantNoShow(entry.id, "참가 확인 시간이 만료되었습니다.", streamerId);
       if (marked) expired.push(marked);
     }
     return expired;
   }
 
-  checkInSelectedParticipant(twitchUserId: string, now = new Date()): ParticipationCheckInResult {
-    const entry = this.participationQueue.find((candidate) => candidate.twitchUserId === twitchUserId && candidate.status === "selected");
+  checkInSelectedParticipant(twitchUserId: string, now = new Date(), streamerId?: string): ParticipationCheckInResult {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.twitchUserId === twitchUserId && candidate.status === "selected");
     if (!entry) return { ok: false, reason: "missing" };
     if (isCheckInExpired(entry, now)) {
-      const marked = this.markParticipantNoShow(entry.id, "만료 후 참가 확인을 시도했습니다.");
+      const marked = this.markParticipantNoShow(entry.id, "만료 후 참가 확인을 시도했습니다.", streamerId);
       return { ok: false, reason: "expired", entry: marked ?? entry };
     }
     entry.status = "checked_in";
@@ -2295,14 +2545,14 @@ export class Store {
     return { ok: true, entry };
   }
 
-  checkInParticipant(twitchUserId: string): ParticipationEntry | undefined {
-    const result = this.checkInSelectedParticipant(twitchUserId);
+  checkInParticipant(twitchUserId: string, streamerId?: string): ParticipationEntry | undefined {
+    const result = this.checkInSelectedParticipant(twitchUserId, new Date(), streamerId);
     if (!result.ok) return undefined;
     return result.entry;
   }
 
-  cancelParticipationByUser(twitchUserId: string, note?: string): ParticipationCancelResult {
-    const entry = this.participationQueue.find((candidate) => candidate.twitchUserId === twitchUserId && isActiveParticipationStatus(candidate.status));
+  cancelParticipationByUser(twitchUserId: string, note?: string, streamerId?: string): ParticipationCancelResult {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.twitchUserId === twitchUserId && isActiveParticipationStatus(candidate.status));
     if (!entry) return { ok: false, reason: "missing" };
     if (!CANCELLABLE_PARTICIPATION_STATUSES.has(entry.status)) return { ok: false, reason: "in_game" };
     entry.status = "cancelled";
@@ -2313,8 +2563,8 @@ export class Store {
     return { ok: true, entry };
   }
 
-  markParticipant(id: string, status: ParticipationEntry["status"]): ParticipationEntry | undefined {
-    const entry = this.participationQueue.find((candidate) => candidate.id === id);
+  markParticipant(id: string, status: ParticipationEntry["status"], streamerId?: string): ParticipationEntry | undefined {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.id === id);
     if (!entry) return undefined;
     entry.status = status;
     entry.updatedAt = nowIso();
@@ -2333,9 +2583,9 @@ export class Store {
     return entry;
   }
 
-  markReadyParticipantsInGame(): ParticipationEntry[] {
+  markReadyParticipantsInGame(streamerId?: string): ParticipationEntry[] {
     const entries: ParticipationEntry[] = [];
-    for (const entry of this.participationQueue) {
+    for (const entry of this.participationQueueFor(streamerId)) {
       if (!["selected", "checked_in", "invited"].includes(entry.status)) continue;
       entry.status = "in_game";
       entry.checkInExpiresAt = undefined;
@@ -2347,7 +2597,8 @@ export class Store {
   }
 
   markVisibleParticipationQueueInGame(
-    input: number | { limit?: number; participantPuuids?: Iterable<string | undefined> } = PARTICIPATION_OVERLAY_VISIBLE_LIMIT
+    input: number | { limit?: number; participantPuuids?: Iterable<string | undefined> } = PARTICIPATION_OVERLAY_VISIBLE_LIMIT,
+    streamerId?: string
   ): ParticipationEntry[] {
     const entries: ParticipationEntry[] = [];
     const seenIds = new Set<string>();
@@ -2364,13 +2615,13 @@ export class Store {
       entries.push(entry);
     };
 
-    for (const entry of this.participationQueue) {
+    for (const entry of this.participationQueueFor(streamerId)) {
       if (!["selected", "checked_in", "invited"].includes(entry.status)) continue;
       markInGame(entry);
     }
 
     if (participantPuuids && participantPuuids.size > 0) {
-      for (const entry of this.getWaitingParticipationQueue()) {
+      for (const entry of this.getWaitingParticipationQueue(streamerId)) {
         if (!entry.riotPuuid || !participantPuuids.has(entry.riotPuuid)) continue;
         markInGame(entry);
       }
@@ -2379,7 +2630,7 @@ export class Store {
     }
 
     const maxWaiting = Math.max(0, Math.trunc(limit));
-    for (const entry of this.getWaitingParticipationQueue().slice(0, maxWaiting)) {
+    for (const entry of this.getWaitingParticipationQueue(streamerId).slice(0, maxWaiting)) {
       markInGame(entry);
     }
 
@@ -2387,9 +2638,9 @@ export class Store {
     return entries;
   }
 
-  markInGameParticipantsPlayed(): ParticipationEntry[] {
+  markInGameParticipantsPlayed(streamerId?: string): ParticipationEntry[] {
     const entries: ParticipationEntry[] = [];
-    for (const entry of this.participationQueue) {
+    for (const entry of this.participationQueueFor(streamerId)) {
       if (entry.status !== "in_game") continue;
       entry.status = "played";
       entry.playedAt = nowIso();
@@ -2403,8 +2654,8 @@ export class Store {
   patchParticipationProfile(id: string, patch: Pick<
     Partial<ParticipationEntry>,
     "profileStatus" | "profileFailureReason" | "mainRole" | "mainRoleConfidence" | "topChampions" | "rankedStats" | "verifiedRank" | "profileAnalyzedAt" | "riotPuuid"
-  >): ParticipationEntry | undefined {
-    const entry = this.participationQueue.find((candidate) => candidate.id === id);
+  >, streamerId?: string): ParticipationEntry | undefined {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.id === id);
     if (!entry) return undefined;
     Object.assign(entry, {
       ...patch,
@@ -2415,8 +2666,8 @@ export class Store {
     return { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined };
   }
 
-  setParticipationRequestedRole(id: string, role: ParticipationEntry["preferredRole"]): ParticipationEntry | undefined {
-    const entry = this.participationQueue.find((candidate) => candidate.id === id);
+  setParticipationRequestedRole(id: string, role: ParticipationEntry["preferredRole"], streamerId?: string): ParticipationEntry | undefined {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.id === id);
     if (!entry) return undefined;
     entry.requestedRole = role;
     entry.preferredRole = role;

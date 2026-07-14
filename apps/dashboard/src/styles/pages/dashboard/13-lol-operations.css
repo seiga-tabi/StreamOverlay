@@ -1,0 +1,305 @@
+.lol-operations-page {
+  --yoro-color-bg: var(--yoro-color-product-gray-surface-strong);
+  --yoro-color-bg-soft: var(--yoro-color-product-gray-surface);
+  --yoro-color-surface: var(--yoro-color-product-gray-surface);
+  --yoro-color-surface-muted: var(--yoro-color-product-gray-surface-strong);
+  --yoro-color-surface-strong: var(--yoro-color-product-gray-surface-strong);
+  --yoro-color-text: var(--yoro-color-product-gray-text);
+  --yoro-color-text-strong: var(--yoro-color-product-gray-text);
+  --yoro-color-text-muted: var(--yoro-color-product-gray-muted);
+  --yoro-color-border: var(--yoro-color-product-gray-border);
+  --yoro-color-border-strong: var(--yoro-color-product-gray-border-strong);
+
+  display: grid;
+  min-width: 0;
+  gap: var(--yoro-space-6);
+  color: var(--yoro-color-text);
+}
+
+.lol-operations-loading,
+.lol-operations-empty {
+  min-height: calc(var(--yoro-size-touch-target) * 5);
+}
+
+.lol-operations-header.yoro-page-header {
+  padding: var(--yoro-space-6);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.lol-operations-header .yoro-page-header__eyebrow,
+.lol-operations-header .yoro-page-header__title {
+  color: var(--yoro-color-text-strong);
+}
+
+.lol-operations-header .yoro-page-header__description {
+  color: var(--yoro-color-text-muted);
+}
+
+.lol-operations-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--yoro-space-3);
+}
+
+.lol-operations-summary .yoro-metric {
+  min-height: calc(var(--yoro-size-touch-target) * 2);
+  border-color: var(--yoro-status-border);
+  background: var(--yoro-color-surface);
+}
+
+.lol-operations-summary .yoro-metric__value {
+  font-size: var(--yoro-font-size-lg);
+}
+
+.lol-operations-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  min-width: 0;
+  padding: var(--yoro-space-2);
+  overflow-x: auto;
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-strong);
+  scrollbar-width: thin;
+}
+
+.lol-operations-tabs .yoro-button {
+  flex: 1 0 auto;
+  min-height: var(--yoro-size-touch-target);
+  box-shadow: var(--yoro-shadow-none);
+}
+
+.lol-operations-panel {
+  min-width: 0;
+  padding: var(--yoro-space-6);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-bg);
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.lol-operations-automation {
+  display: grid;
+  min-width: 0;
+  gap: var(--yoro-space-6);
+}
+
+.lol-operations-automation-card.yoro-card,
+.lol-operations-skin-boundary {
+  border-color: var(--yoro-color-border);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-text);
+  box-shadow: var(--yoro-shadow-none);
+  backdrop-filter: none;
+}
+
+.lol-operations-automation-card .yoro-card__title,
+.lol-operations-section-heading h2,
+.lol-operations-toggle-row strong {
+  color: var(--yoro-color-text-strong);
+}
+
+.lol-operations-automation-card .yoro-card__description,
+.lol-operations-section-heading p,
+.lol-operations-toggle-row small {
+  color: var(--yoro-color-text-muted);
+}
+
+.lol-operations-automation-form {
+  display: grid;
+  gap: var(--yoro-space-5);
+}
+
+.lol-operations-automation-form .yoro-input {
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface-strong);
+  color: var(--yoro-color-text-strong);
+}
+
+.lol-operations-approval-required,
+.lol-operations-automation-actions,
+.lol-operations-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-3);
+  min-width: 0;
+}
+
+.lol-operations-toggle-list {
+  display: grid;
+  gap: var(--yoro-space-3);
+}
+
+.lol-operations-toggle-row {
+  display: grid;
+  grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr);
+  align-items: center;
+  min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-4));
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-strong);
+  cursor: pointer;
+}
+
+.lol-operations-toggle-row > span {
+  display: grid;
+  min-width: 0;
+  gap: var(--yoro-space-1);
+}
+
+.lol-operations-toggle-row small {
+  font-size: var(--yoro-font-size-sm);
+  line-height: var(--yoro-line-height-base);
+}
+
+.lol-operations-toggle-input.yoro-input {
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-5);
+  min-block-size: var(--yoro-space-5);
+  margin: auto;
+  padding: var(--yoro-space-0);
+  accent-color: var(--yoro-color-primary-strong);
+}
+
+.lol-operations-skin-boundary {
+  display: grid;
+  gap: var(--yoro-space-4);
+  padding: var(--yoro-space-6);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+}
+
+.lol-operations-section-heading h2,
+.lol-operations-section-heading p {
+  margin: var(--yoro-space-0);
+}
+
+.lol-operations-section-heading h2 {
+  font-size: var(--yoro-font-size-xl);
+}
+
+.lol-operations-section-heading p {
+  margin-top: var(--yoro-space-1);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.lol-operations-panel .lol-operations-embedded.yoro-app-shell {
+  display: block;
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: var(--yoro-shadow-none);
+}
+
+.lol-operations-panel .lol-operations-embedded .yoro-app-shell__main {
+  padding: var(--yoro-space-0);
+  background: transparent;
+}
+
+.lol-operations-panel .my-riot-account-grid,
+.lol-operations-panel .participation-shared-grid {
+  max-width: none;
+}
+
+.lol-operations-panel .solo-rank-settings-page.lol-operations-embedded {
+  display: grid;
+  gap: var(--yoro-space-4);
+}
+
+.lol-operations-panel .yoro-input:not([type="checkbox"]) {
+  min-height: var(--yoro-size-touch-target);
+}
+
+@media (max-width: 64rem) {
+  .lol-operations-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  .lol-operations-page {
+    gap: var(--yoro-space-4);
+  }
+
+  .lol-operations-header.yoro-page-header,
+  .lol-operations-panel,
+  .lol-operations-skin-boundary {
+    padding: var(--yoro-space-4);
+  }
+
+  .lol-operations-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lol-operations-tabs {
+    align-items: stretch;
+  }
+
+  .lol-operations-tabs .yoro-button {
+    flex-basis: calc(var(--yoro-size-touch-target) * 3);
+  }
+
+  .lol-operations-approval-required,
+  .lol-operations-automation-actions,
+  .lol-operations-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 30rem) {
+  .app-shell-lolAccount .app-sidebar,
+  .app-shell-lolAutomation .app-sidebar,
+  .app-shell-lolParticipation .app-sidebar {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "brand"
+      "actions"
+      "nav";
+  }
+
+  .app-shell-lolAccount .dashboard-menu-actions,
+  .app-shell-lolAutomation .dashboard-menu-actions,
+  .app-shell-lolParticipation .dashboard-menu-actions {
+    width: 100%;
+    min-width: 0;
+    justify-content: center !important;
+  }
+
+  .app-shell-lolAccount .dashboard-menu-actions .top-chip,
+  .app-shell-lolAutomation .dashboard-menu-actions .top-chip,
+  .app-shell-lolParticipation .dashboard-menu-actions .top-chip {
+    display: none !important;
+  }
+
+  .app-shell-lolAccount .dashboard-menu-actions .dashboard-locale-button,
+  .app-shell-lolAccount .dashboard-menu-actions .top-action,
+  .app-shell-lolAutomation .dashboard-menu-actions .dashboard-locale-button,
+  .app-shell-lolAutomation .dashboard-menu-actions .top-action,
+  .app-shell-lolParticipation .dashboard-menu-actions .dashboard-locale-button,
+  .app-shell-lolParticipation .dashboard-menu-actions .top-action {
+    min-height: var(--yoro-size-touch-target) !important;
+    height: var(--yoro-size-touch-target) !important;
+  }
+
+  .lol-operations-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lol-operations-summary .yoro-metric {
+    min-height: var(--yoro-size-touch-target);
+  }
+
+  .lol-operations-toggle-row {
+    padding-inline: var(--yoro-space-3);
+  }
+}

@@ -51,7 +51,7 @@ import {
   type ToastTone,
 } from "../shared/ui/Toast";
 
-type DashboardSnapshot = {
+export type DashboardSnapshot = {
   participationState?: ParticipationState;
   participationQueue?: ParticipationDashboardQueueEntry[];
   status?: {
@@ -509,7 +509,15 @@ function fallbackState(snapshot: DashboardSnapshot): ParticipationState {
   };
 }
 
-export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot }) {
+export function ParticipationPage({
+  snapshot,
+  embedded = false,
+  onStateChange,
+}: {
+  snapshot: DashboardSnapshot;
+  embedded?: boolean;
+  onStateChange?: (state: ParticipationState) => void;
+}) {
   const snapshotState = snapshot.participationState ?? fallbackState(snapshot);
   const [localState, setLocalState] = useState<ParticipationState>(snapshotState);
   const state = localState;
@@ -534,6 +542,10 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
   useEffect(() => {
     setLocalState(snapshot.participationState ?? fallbackState(snapshot));
   }, [snapshot]);
+
+  useEffect(() => {
+    onStateChange?.(localState);
+  }, [localState, onStateChange]);
 
   function showToast(tone: ToastTone, title: string, description?: string): void {
     setToast({ id: Date.now(), tone, title, description });
@@ -716,26 +728,28 @@ export function ParticipationPage({ snapshot }: { snapshot: DashboardSnapshot })
     <>
       <AppShell
         as="section"
-        className="participation-shared-shell"
+        className={`participation-shared-shell${embedded ? " lol-operations-embedded" : ""}`}
         mainId="participation-shared-main"
         skipLinkLabel={t.skipLink}
         variant="streamer"
       >
-        <AppShellHeader className="participation-shared-header">
-          <PageHeader className="participation-shared-page-header" layout="split">
-            <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
-            <PageHeaderTitle>{t.title}</PageHeaderTitle>
-            <PageHeaderDescription>{t.commandHint}</PageHeaderDescription>
-            <PageHeaderStatus>
-              <StatusPill tone={state.isOpen ? "success" : "neutral"}>
-                {state.isOpen ? t.open : t.closed}
-              </StatusPill>
-            </PageHeaderStatus>
-            <PageHeaderActions>
-              <Badge tone="info">{t.current}</Badge>
-            </PageHeaderActions>
-          </PageHeader>
-        </AppShellHeader>
+        {!embedded ? (
+          <AppShellHeader className="participation-shared-header">
+            <PageHeader className="participation-shared-page-header" layout="split">
+              <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
+              <PageHeaderTitle>{t.title}</PageHeaderTitle>
+              <PageHeaderDescription>{t.commandHint}</PageHeaderDescription>
+              <PageHeaderStatus>
+                <StatusPill tone={state.isOpen ? "success" : "neutral"}>
+                  {state.isOpen ? t.open : t.closed}
+                </StatusPill>
+              </PageHeaderStatus>
+              <PageHeaderActions>
+                <Badge tone="info">{t.current}</Badge>
+              </PageHeaderActions>
+            </PageHeader>
+          </AppShellHeader>
+        ) : null}
 
         <AppShellMain className="participation-shared-main" id="participation-shared-main">
           <div className="participation-shared-grid">

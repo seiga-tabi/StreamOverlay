@@ -172,3 +172,45 @@ test("LolGameMonitorController는 방송자 Riot 계정 조회 실패 시 설정
   assert.equal(logger.errors.at(-1)?.type, "lol_game_monitor.disabled");
   assert.match(logger.errors.at(-1)?.reason, /Unknown apikey/);
 });
+
+test("LolGameMonitorController는 해당 스트리머의 게임 종료만 해당 대기열에 반영한다", async () => {
+  const { ctx } = createHarness();
+  const streamerA = "streamer-a";
+  const streamerB = "streamer-b";
+  ctx.store.setParticipationOpen(true, streamerA);
+  ctx.store.setParticipationOpen(true, streamerB);
+  for (const streamerId of [streamerA, streamerB]) {
+    ctx.store.addParticipation(ctx.store.makeParticipationEntry({
+      streamerId,
+      twitchUserId: `viewer-${streamerId}`,
+      twitchUserName: `Viewer-${streamerId}`,
+      riotGameName: `Viewer-${streamerId}`,
+      riotTagLine: "JP1",
+      riotPuuid: `viewer-${streamerId}-puuid`,
+      preferredRole: "fill",
+      status: "in_game",
+      source: "dashboard"
+    }), streamerId);
+  }
+
+  const controller = new LolGameMonitorController(ctx, {
+    enabled: true,
+    streamerRiotId: "Streamer#KR1",
+    pollIntervalMs: 60000,
+    gameEndDebounceMs: 0,
+    autoSelectNextAfterGame: false,
+    announceInChat: false
+  }, { mode: "normal5", checkInSeconds: 30 }, () => Date.now(), streamerA);
+
+  await controller.start();
+  controller.stop();
+  assert.equal(ctx.store.getParticipationSession(streamerA)?.status, "in_game");
+  assert.equal(ctx.store.getParticipationSession(streamerB)?.status, "recruiting");
+  ctx.riot.currentGame = null;
+  await controller.pollOnce();
+
+  assert.equal(ctx.store.getParticipationQueue(streamerA)[0]?.status, "played");
+  assert.equal(ctx.store.getParticipationQueue(streamerB)[0]?.status, "in_game");
+  assert.equal(ctx.store.getParticipationSession(streamerA)?.status, "recruiting");
+  assert.equal(ctx.store.getParticipationSession(streamerB)?.status, "recruiting");
+});

@@ -171,10 +171,14 @@ function apiErrorDetail(error: unknown, fallback: string): string {
 
 export function MyRiotAccountPage({
   streamer,
-  onStreamerChange
+  onStreamerChange,
+  onIdentityChange,
+  embedded = false,
 }: {
   streamer?: DashboardStreamerInfo;
   onStreamerChange?: (streamer: DashboardStreamerInfo) => void;
+  onIdentityChange?: () => void;
+  embedded?: boolean;
 }) {
   const [riotIdDraft, setRiotIdDraft] = useState(streamer ? `${streamer.riotGameName}#${streamer.riotTagLine}` : "");
   const [riotIdBusy, setRiotIdBusy] = useState(false);
@@ -207,6 +211,7 @@ export function MyRiotAccountPage({
     try {
       const updated = await updateStreamerRiotId(riotId);
       onStreamerChange?.(updated);
+      onIdentityChange?.();
       setRiotIdDraft(`${updated.riotGameName}#${updated.riotTagLine}`);
       setRiotIdMessage(t.riotIdSaved);
       showToast("success", t.riotIdSaved);
@@ -285,17 +290,19 @@ export function MyRiotAccountPage({
 
   if (!streamer) {
     return (
-      <AppShell as="section" className="settings-shared-shell my-riot-account-shell" mainId="my-riot-account-main" skipLinkLabel={t.title} variant="streamer">
-        <AppShellHeader className="settings-shared-header">
-          <PageHeader className="settings-shared-page-header" layout="split">
-            <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
-            <PageHeaderTitle data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</PageHeaderTitle>
-            <PageHeaderDescription data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</PageHeaderDescription>
-            <PageHeaderStatus>
-              <StatusPill tone="warning" data-ko={i18n.ko.none} data-ja={i18n.ja.none}>{t.none}</StatusPill>
-            </PageHeaderStatus>
-          </PageHeader>
-        </AppShellHeader>
+      <AppShell as="section" className={`settings-shared-shell my-riot-account-shell${embedded ? " lol-operations-embedded" : ""}`} mainId="my-riot-account-main" skipLinkLabel={t.title} variant="streamer">
+        {!embedded ? (
+          <AppShellHeader className="settings-shared-header">
+            <PageHeader className="settings-shared-page-header" layout="split">
+              <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
+              <PageHeaderTitle data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</PageHeaderTitle>
+              <PageHeaderDescription data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</PageHeaderDescription>
+              <PageHeaderStatus>
+                <StatusPill tone="warning" data-ko={i18n.ko.none} data-ja={i18n.ja.none}>{t.none}</StatusPill>
+              </PageHeaderStatus>
+            </PageHeader>
+          </AppShellHeader>
+        ) : null}
         <AppShellMain className="settings-shared-main" id="my-riot-account-main">
           <EmptyState className="settings-shared-empty" variant="streamer">
             <EmptyStateIcon>R</EmptyStateIcon>
@@ -311,24 +318,26 @@ export function MyRiotAccountPage({
     <ToastProvider position="top-right">
       <AppShell
         as="section"
-        className="settings-shared-shell my-riot-account-shell"
+        className={`settings-shared-shell my-riot-account-shell${embedded ? " lol-operations-embedded" : ""}`}
         mainId="my-riot-account-main"
         skipLinkLabel={t.title}
         variant="streamer"
       >
-        <AppShellHeader className="settings-shared-header">
-          <PageHeader className="settings-shared-page-header" layout="split">
-            <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
-            <PageHeaderTitle data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</PageHeaderTitle>
-            <PageHeaderDescription data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</PageHeaderDescription>
-            <PageHeaderStatus>
-              <StatusPill tone="success" data-ko={i18n.ko.approved} data-ja={i18n.ja.approved}>{t.approved}</StatusPill>
-            </PageHeaderStatus>
-            <PageHeaderActions>
-              <Badge tone="streamer">{t.current}</Badge>
-            </PageHeaderActions>
-          </PageHeader>
-        </AppShellHeader>
+        {!embedded ? (
+          <AppShellHeader className="settings-shared-header">
+            <PageHeader className="settings-shared-page-header" layout="split">
+              <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
+              <PageHeaderTitle data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</PageHeaderTitle>
+              <PageHeaderDescription data-ko={i18n.ko.description} data-ja={i18n.ja.description}>{t.description}</PageHeaderDescription>
+              <PageHeaderStatus>
+                <StatusPill tone="success" data-ko={i18n.ko.approved} data-ja={i18n.ja.approved}>{t.approved}</StatusPill>
+              </PageHeaderStatus>
+              <PageHeaderActions>
+                <Badge tone="streamer">{t.current}</Badge>
+              </PageHeaderActions>
+            </PageHeader>
+          </AppShellHeader>
+        ) : null}
 
         <AppShellMain className="settings-shared-main" id="my-riot-account-main">
           <div className="settings-shared-grid my-riot-account-grid">

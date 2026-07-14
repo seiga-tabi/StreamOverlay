@@ -5,14 +5,12 @@ import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { applyDashboardLocale, dashboardI18n, detectDashboardLocale, setDashboardLocale as saveDashboardLocale, type DashboardLocale } from "./i18n";
 import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
-import { dashboardPageFromPath, defaultPageForRole, pageAllowedForRole, setDashboardPath, type DashboardRole, type Page } from "./routing/dashboard-routes";
+import { dashboardPageFromPath, defaultPageForRole, isLolOperationsPage, pageAllowedForRole, setDashboardPath, type DashboardRole, type Page } from "./routing/dashboard-routes";
 
 const PublicLolPage = lazy(async () => ({ default: (await import("./pages/PublicLolPage")).PublicLolPage }));
 const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
 const EventsPage = lazy(async () => ({ default: (await import("./pages/EventsPage")).EventsPage }));
-const MyRiotAccountPage = lazy(async () => ({ default: (await import("./pages/MyRiotAccountPage")).MyRiotAccountPage }));
-const SoloRankPage = lazy(async () => ({ default: (await import("./pages/SoloRankPage")).SoloRankPage }));
-const ParticipationPage = lazy(async () => ({ default: (await import("./pages/ParticipationPage")).ParticipationPage }));
+const LolOperationsPage = lazy(async () => ({ default: (await import("./pages/LolOperationsPage")).LolOperationsPage }));
 const TournamentsPage = lazy(async () => ({ default: (await import("./pages/TournamentsPage")).TournamentsPage }));
 const StreamerRiotRequestsPage = lazy(async () => ({ default: (await import("./pages/StreamerRiotRequestsPage")).StreamerRiotRequestsPage }));
 const SettingsPage = lazy(async () => ({ default: (await import("./pages/SettingsPage")).SettingsPage }));
@@ -350,9 +348,16 @@ export default function App() {
         {page === "overlayAlerts" ? <OverlayOpsPage view="alerts" /> : null}
         {page === "followers" ? <FollowersPage /> : null}
         {page === "events" && dashboardRole === "admin" ? <EventsPage snapshot={snapshot} /> : null}
-        {page === "myRiotAccount" ? <MyRiotAccountPage streamer={dashboardStreamer} onStreamerChange={setDashboardStreamer} /> : null}
-        {page === "soloRank" ? <SoloRankPage /> : null}
-        {page === "participation" ? <ParticipationPage snapshot={snapshot} /> : null}
+        {isLolOperationsPage(page) ? (
+          <LolOperationsPage
+            activePage={page}
+            onPageChange={changeDashboardPage}
+            snapshot={snapshot}
+            socketConnected={socketConnected}
+            streamer={dashboardStreamer}
+            onStreamerChange={setDashboardStreamer}
+          />
+        ) : null}
         {page === "tournaments" && dashboardRole === "admin" ? <TournamentsPage /> : null}
         {page === "streamerRiotRequests" && dashboardRole === "admin" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
         {page === "communityModeration" && dashboardRole === "admin" ? <CommunityModerationPage /> : null}

@@ -9070,12 +9070,10 @@ html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button s
   }
 
   .public-home-shared-shell .public-home-shared-search .public-suggestion-list button {
-    grid-template-columns: 44px minmax(0, 1fr) minmax(72px, auto) 24px;
-    grid-template-areas:
-      "avatar name rank mark"
-      "tier name rank mark";
-    gap: 8px 12px;
-    min-height: 74px;
+    grid-template-columns: 44px 32px minmax(0, 1fr) minmax(72px, auto) 24px;
+    grid-template-areas: "avatar tier name rank mark";
+    gap: 8px;
+    min-height: 68px;
     padding: 12px;
     border-right: 0;
     border-bottom: 1px solid rgba(38, 42, 54, .74);

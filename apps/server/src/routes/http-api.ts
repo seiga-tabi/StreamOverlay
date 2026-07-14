@@ -20,6 +20,8 @@ import {
   type CommunityPostReport,
   type LolChampionSkinOption,
   type LolChampionSummary,
+  type LolAutomationSettings,
+  type LolOperationsState,
   type LolPerformanceStats,
   type LolRankHistoryPoint,
   type LolRankedStats,
@@ -31,6 +33,7 @@ import {
   type ParticipationStatus,
   type DashboardServerStatus,
   type StreamerProfileLink,
+  type StreamerRiotIdentity,
   type StreamerRiotIdRequest,
   type SupportMailAttachmentSummary,
   type SupportMailInboundPayload,
@@ -52,7 +55,15 @@ import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
 import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
 import { getRewardMappingSummaries } from "../modules/rewards.module.js";
-import { loadGameMonitorConfig, refreshActiveStreamerProfile, restartActiveLolGameMonitor, saveGameMonitorConfig, type LolGameMonitorConfig } from "../modules/lol-game-monitor.module.js";
+import {
+  loadGameMonitorConfig,
+  refreshActiveStreamerProfile,
+  refreshStreamerProfileForOwner,
+  restartActiveLolGameMonitor,
+  restartStreamerLolGameMonitor,
+  saveGameMonitorConfig,
+  type LolGameMonitorConfig
+} from "../modules/lol-game-monitor.module.js";
 import { loadLolParticipationProfileSettings, saveLolParticipationProfileSettings, type LolParticipationProfileSettings } from "../modules/lol-profile-enrichment.module.js";
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
@@ -75,6 +86,7 @@ import {
   clientIp,
   dashboardSessionCookie,
   dashboardSessionIdFromRequest,
+  type AuthPrincipal,
   type DashboardRole
 } from "../security/auth.js";
 import { dashboardApiLimiter, dashboardLoginLimiter, inboundEmailLimiter, oauthLimiter, publicLolApiLimiter } from "../security/rate-limit.js";
@@ -859,7 +871,14 @@ function twitchCallbackUrlForRequest(req: IncomingMessage): string {
   }
 }
 
-function dashboardReturnUrlForRequest(req: IncomingMessage): string {
+function safeDashboardReturnPath(value: string | null | undefined): string | undefined {
+  if (!value?.startsWith("/") || value.startsWith("//")) return undefined;
+  if (value === "/dashboard" || value.startsWith("/dashboard/")) return value;
+  if (value === "/admin" || value.startsWith("/admin/")) return value;
+  return undefined;
+}
+
+function dashboardReturnUrlForRequest(req: IncomingMessage, requestedPath?: string | null): string {
   const fallbackOrigin = originFromUrl(appConfig.dashboardBaseUrl) ??
     originFromUrl(appConfig.publicBaseUrl) ??
     "http://localhost:5173";
@@ -874,7 +893,7 @@ function dashboardReturnUrlForRequest(req: IncomingMessage): string {
   );
   const requestedOrigin = refererOrigin(req);
   const origin = requestedOrigin && allowedOrigins.has(requestedOrigin) ? requestedOrigin : fallbackOrigin;
-  const returnUrl = new URL("/", origin);
+  const returnUrl = new URL(safeDashboardReturnPath(requestedPath) ?? "/", origin);
   returnUrl.searchParams.set("twitch", "connected");
   return returnUrl.toString();
 }
@@ -1286,20 +1305,21 @@ function buildParticipationInviteChatMessages(entries: Array<{ twitchUserName: s
 async function broadcastParticipationSnapshot(input: {
   store: Store;
   actions: ActionDispatcher;
-}, phase: ParticipationPhase, reason: string): Promise<void> {
-  const isOpen = input.store.getStatus().participation === "open";
+}, phase: ParticipationPhase, reason: string, streamerId?: string): Promise<void> {
+  const state = input.store.getParticipationState(streamerId);
+  const isOpen = state.isOpen;
   await input.actions.dispatchOne({
     type: "overlay.participationStatus",
     isOpen,
     phase,
-    nextCandidate: input.store.getNextWaitingParticipationOverlayEntry(),
-    streamerProfile: input.store.getParticipationStreamerProfile(),
+    nextCandidate: input.store.getNextWaitingParticipationOverlayEntry(streamerId),
+    streamerProfile: input.store.getParticipationStreamerProfile(streamerId),
     source: reason
   }, { user: "dashboard", input: "" }, reason);
   await input.actions.dispatchOne({
     type: "overlay.participationQueue",
     isOpen,
-    queue: input.store.getParticipationOverlayQueue(),
+    queue: input.store.getParticipationOverlayQueue(undefined, streamerId),
     source: reason
   }, { user: "dashboard", input: "" }, reason);
 }
@@ -1307,28 +1327,30 @@ async function broadcastParticipationSnapshot(input: {
 async function applyManualParticipationAction(input: {
   store: Store;
   actions: ActionDispatcher;
-}, action: string): Promise<ParticipationPhase> {
+}, action: string, streamerId?: string): Promise<ParticipationPhase> {
   switch (action) {
     case "open":
-      input.store.setParticipationOpen(true);
-      await broadcastParticipationSnapshot(input, "recruiting", "dashboard.participation_manual.open");
+      input.store.setParticipationOpen(true, streamerId);
+      await broadcastParticipationSnapshot(input, "recruiting", "dashboard.participation_manual.open", streamerId);
       return "recruiting";
     case "show_queue": {
-      const phase = input.store.getStatus().participation === "open" ? "recruiting" : "closed";
-      await broadcastParticipationSnapshot(input, phase, "dashboard.participation_manual.show_queue");
+      const phase = input.store.getParticipationState(streamerId).isOpen ? "recruiting" : "closed";
+      await broadcastParticipationSnapshot(input, phase, "dashboard.participation_manual.show_queue", streamerId);
       return phase;
     }
     case "mark_in_game":
-      input.store.markVisibleParticipationQueueInGame();
-      await broadcastParticipationSnapshot(input, "in_game", "dashboard.participation_manual.mark_in_game");
+      input.store.markVisibleParticipationQueueInGame(undefined, streamerId);
+      if (streamerId) input.store.updateParticipationSessionStatus(streamerId, "in_game");
+      await broadcastParticipationSnapshot(input, "in_game", "dashboard.participation_manual.mark_in_game", streamerId);
       return "in_game";
     case "finish_game":
-      input.store.markInGameParticipantsPlayed();
-      await broadcastParticipationSnapshot(input, "game_ended", "dashboard.participation_manual.finish_game");
+      input.store.markInGameParticipantsPlayed(streamerId);
+      if (streamerId) input.store.updateParticipationSessionStatus(streamerId, "recruiting");
+      await broadcastParticipationSnapshot(input, "game_ended", "dashboard.participation_manual.finish_game", streamerId);
       return "game_ended";
     case "close":
-      input.store.setParticipationOpen(false);
-      await broadcastParticipationSnapshot(input, "closed", "dashboard.participation_manual.close");
+      input.store.setParticipationOpen(false, streamerId);
+      await broadcastParticipationSnapshot(input, "closed", "dashboard.participation_manual.close", streamerId);
       return "closed";
     default:
       throw new HttpRequestError(400, { error: "허용되지 않은 시참 수동 조작입니다." });
@@ -1613,7 +1635,7 @@ type HttpHandlerInput = {
   publicTwitchAuth?: PublicTwitchAuthService;
   eventSub?: TwitchEventSubClient;
   logger?: Pick<JsonlLogger, "error"> & Partial<Pick<JsonlLogger, "event">>;
-  refreshLolProfile?: (entryId: string) => Promise<boolean>;
+  refreshLolProfile?: (entryId: string, streamerId?: string) => Promise<boolean>;
   sessions?: DashboardSessionStore;
   supportMailbox?: SupportMailboxStore;
   readiness?: ReadinessCheck;
@@ -2882,6 +2904,133 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return storeWithRegistry.updateApprovedStreamerRiotId(request);
   }
 
+  function authenticatedStreamerOwnerId(principal: AuthPrincipal): string | undefined {
+    if (principal.type !== "DASHBOARD_ADMIN" || principal.role !== "streamer") return undefined;
+    const ownerId = principal.twitchUserId?.trim();
+    return ownerId || undefined;
+  }
+
+  function requireAuthenticatedStreamerOwner(principal: AuthPrincipal): string {
+    const ownerId = authenticatedStreamerOwnerId(principal);
+    if (!ownerId) {
+      throw new HttpRequestError(403, { error: "승인된 스트리머 세션이 필요합니다." });
+    }
+    return ownerId;
+  }
+
+  function streamerRiotIdentityForOwner(streamerId: string): StreamerRiotIdentity | undefined {
+    const request = currentStreamerRiotIdRequestForTwitchUser(streamerId);
+    if (!request) return undefined;
+    const profile = input.store.getParticipationStreamerProfile(streamerId);
+    return {
+      twitchUserId: streamerId,
+      riotGameName: request.riotGameName,
+      riotTagLine: request.riotTagLine,
+      normalizedRiotId: request.normalizedRiotId,
+      approvalStatus: request.status,
+      ...(profile?.profileStatus ? { profileStatus: profile.profileStatus } : {}),
+      updatedAt: request.updatedAt
+    };
+  }
+
+  function approvedStreamerIdentityForOwner(streamerId: string): StreamerRiotIdRequest | undefined {
+    const request = currentStreamerRiotIdRequestForTwitchUser(streamerId);
+    return request?.status === "approved" ? request : undefined;
+  }
+
+  function lolOperationsStateForOwner(streamerId: string): LolOperationsState {
+    const identity = streamerRiotIdentityForOwner(streamerId);
+    const automation = input.store.getLolAutomationSettings(streamerId);
+    const participation = input.store.getParticipationState(streamerId);
+    const currentGameStatus = participation.session?.status === "in_game"
+      || participation.activeQueue.some((entry) => entry.status === "in_game")
+      ? "in_game"
+      : participation.session
+        ? "idle"
+        : "unknown";
+    return {
+      ...(identity ? { identity } : {}),
+      automation,
+      participation,
+      summary: {
+        riotApprovalStatus: identity?.approvalStatus ?? "missing",
+        gameMonitorStatus: !automation.enabled
+          ? "disabled"
+          : identity?.approvalStatus === "approved"
+            ? "monitoring"
+            : "waiting_for_approval",
+        currentGameStatus,
+        participationStatus: participation.session?.status ?? (participation.isOpen ? "recruiting" : "closed"),
+        waitingCount: participation.summary.waiting
+      }
+    };
+  }
+
+  function startParticipationSessionForOwner(streamerId: string) {
+    const identity = approvedStreamerIdentityForOwner(streamerId);
+    if (!identity) {
+      throw new HttpRequestError(409, { error: "승인된 Riot ID가 있어야 시참 모집을 시작할 수 있습니다." });
+    }
+    return input.store.startParticipationSession(streamerId, {
+      riotGameName: identity.riotGameName,
+      riotTagLine: identity.riotTagLine,
+      normalizedRiotId: identity.normalizedRiotId,
+      profile: input.store.getParticipationStreamerProfile(streamerId),
+      capturedAt: new Date().toISOString()
+    });
+  }
+
+  function legacyGameMonitorConfigForOwner(streamerId: string): LolGameMonitorConfig {
+    const identity = approvedStreamerIdentityForOwner(streamerId);
+    const settings = input.store.getLolAutomationSettings(streamerId);
+    return {
+      enabled: settings.enabled,
+      streamerRiotId: identity ? formatRiotId(identity.riotGameName, identity.riotTagLine) : "",
+      pollIntervalMs: settings.pollIntervalMs,
+      gameEndDebounceMs: settings.gameEndDebounceMs,
+      autoSelectNextAfterGame: settings.autoSelectNextAfterGame,
+      announceInChat: settings.announceInChat
+    };
+  }
+
+  async function updateStreamerRiotIdentityForOwner(streamerId: string, rawRiotId: unknown): Promise<{
+    request: StreamerRiotIdRequest;
+    identity: StreamerRiotIdentity;
+    streamerProfile?: ParticipationStreamerProfile;
+  }> {
+    if (typeof rawRiotId !== "string") {
+      throw new HttpRequestError(400, { error: "riotId는 gameName#tagLine 문자열이어야 합니다." });
+    }
+    const previous = approvedStreamerIdentityForOwner(streamerId);
+    if (!previous) {
+      throw new HttpRequestError(409, { error: "승인된 Riot ID가 있어야 변경할 수 있습니다." });
+    }
+    const parsed = parseRiotIdDetailed(rawRiotId);
+    if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message });
+    const request = updateApprovedStreamerRiotId({
+      twitchUserId: streamerId,
+      riotGameName: parsed.gameName,
+      riotTagLine: parsed.tagLine
+    });
+    if (!request) {
+      throw new HttpRequestError(404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
+    }
+    invalidatePublicLolProfileCachesForStreamer(previous);
+    invalidatePublicLolProfileCachesForStreamer(request);
+    const automation = input.store.getLolAutomationSettings(streamerId);
+    await restartStreamerLolGameMonitor(streamerId, request, automation);
+    const streamerProfile = automation.enabled
+      ? await refreshStreamerProfileForOwner(streamerId, true).catch(() => undefined)
+      : undefined;
+    const identity = streamerRiotIdentityForOwner(streamerId);
+    if (!identity) throw new HttpRequestError(500, { error: "Riot ID 변경 결과를 불러오지 못했습니다." });
+    return {
+      request,
+      identity,
+      ...(streamerProfile ? { streamerProfile } : {})
+    };
+  }
+
   function listPublicTournaments(): StreamerTournament[] {
     const storeWithTournaments = input.store as Store & { listPublicTournaments?: () => StreamerTournament[] };
     return typeof storeWithTournaments.listPublicTournaments === "function"
@@ -3310,16 +3459,51 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   async function publicParticipationStreamers(
-    participationState: ReturnType<Store["getParticipationState"]>,
     selectedStreamerId?: string
-  ): Promise<{ streamers: PublicParticipationStreamer[]; selectedStreamerId?: string }> {
+  ): Promise<{
+    streamers: PublicParticipationStreamer[];
+    selectedStreamerId?: string;
+    scopeStreamerId?: string;
+  }> {
+    const approvedStreamers = listApprovedStreamerRiotIds();
+    const approvedByOwner = new Map(approvedStreamers.map((request) => [request.twitchUserId, request]));
+    const activeSessions = input.store.listParticipationSessions()
+      .filter((session) => session.status === "recruiting" || session.status === "in_game");
+    if (activeSessions.length > 0) {
+      const streamers = activeSessions.map<PublicParticipationStreamer>((session) => {
+        const participationState = input.store.getParticipationState(session.streamerId);
+        const approved = approvedByOwner.get(session.streamerId);
+        const snapshot = session.profileSnapshot;
+        const profile = snapshot?.profile ?? input.store.getParticipationStreamerProfile(session.streamerId);
+        const riotGameName = snapshot?.riotGameName ?? approved?.riotGameName ?? profile?.displayName;
+        const riotTagLine = snapshot?.riotTagLine ?? approved?.riotTagLine ?? profile?.riotTagLine;
+        return {
+          id: session.streamerId,
+          twitchUserId: session.streamerId,
+          ...(approved?.twitchLogin ? { twitchLogin: approved.twitchLogin } : {}),
+          twitchDisplayName: approved?.twitchDisplayName || profile?.displayName || riotGameName || "YORO.gg",
+          ...(approved?.twitchProfileImageUrl ? { twitchProfileImageUrl: approved.twitchProfileImageUrl } : {}),
+          ...(riotGameName ? { riotGameName } : {}),
+          ...(riotTagLine ? { riotTagLine } : {}),
+          ...(riotGameName ? { riotId: formatRiotId(riotGameName, riotTagLine || "JP1") } : {}),
+          isOpen: participationState.isOpen,
+          queueSize: participationState.summary.active,
+          updatedAt: session.updatedAt
+        };
+      });
+      const selected = streamers.find((streamer) => streamer.id === selectedStreamerId) ?? streamers[0];
+      return selected
+        ? { streamers, selectedStreamerId: selected.id, scopeStreamerId: selected.id }
+        : { streamers };
+    }
+
+    const participationState = input.store.getParticipationState();
     if (!participationState.isOpen) {
       return { streamers: [] };
     }
     const now = new Date().toISOString();
     const streamerProfile = input.store.getParticipationStreamerProfile();
     const monitorRiotId = parseRiotIdDetailed(loadGameMonitorConfig().streamerRiotId);
-    const approvedStreamers = listApprovedStreamerRiotIds();
     const monitorKey = monitorRiotId.ok ? normalizeRiotIdKey(monitorRiotId.gameName, monitorRiotId.tagLine) : undefined;
     const matchedApproved = monitorKey
       ? approvedStreamers.find((request) => request.normalizedRiotId === monitorKey)
@@ -3355,15 +3539,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   async function getPublicParticipationState(
     req: IncomingMessage,
-    knownStatus?: PublicTwitchViewerStatusResponse
+    knownStatus?: PublicTwitchViewerStatusResponse,
+    selectedStreamerIdOverride?: string
   ): Promise<PublicParticipationStateResponse> {
     const status = knownStatus ?? await getPublicTwitchViewerStatus(req);
     const viewerId = status.connected ? status.user?.id : undefined;
-    const participationState = input.store.getParticipationState();
     const url = new URL(req.url ?? "/", "http://localhost");
-    const requestedStreamerId = url.searchParams.get("streamerId")?.trim() || undefined;
-    const streamerState = await publicParticipationStreamers(participationState, requestedStreamerId);
-    const activeEntries = input.store.getActiveParticipationQueue();
+    const requestedStreamerId = selectedStreamerIdOverride ?? (url.searchParams.get("streamerId")?.trim() || undefined);
+    const streamerState = await publicParticipationStreamers(requestedStreamerId);
+    const participationState = input.store.getParticipationState(streamerState.scopeStreamerId);
+    const activeEntries = input.store.getActiveParticipationQueue(streamerState.scopeStreamerId);
     const queue = participationState.isOpen
       ? activeEntries
         .slice(0, PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE)
@@ -3395,17 +3580,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!status.connected || !status.user) {
       throw new HttpRequestError(401, { error: "Twitch 로그인 후 참여 등록을 할 수 있습니다." });
     }
-    if (!input.store.getParticipationState().isOpen) {
-      throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다." });
-    }
-
     const body = await readJsonBody<{ riotId?: unknown; role?: unknown; streamerId?: unknown }>(req);
     const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
-    if (requestedStreamerId) {
-      const streamerState = await publicParticipationStreamers(input.store.getParticipationState(), requestedStreamerId);
-      if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
-        throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
-      }
+    const streamerState = await publicParticipationStreamers(requestedStreamerId || undefined);
+    if (requestedStreamerId && !streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
+      throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
+    }
+    if (!streamerState.selectedStreamerId || !input.store.getParticipationState(streamerState.scopeStreamerId).isOpen) {
+      throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다." });
     }
     if (typeof body.riotId !== "string") {
       throw new HttpRequestError(400, { error: "Riot ID를 입력해주세요." });
@@ -3420,9 +3602,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       twitchUserId: status.user.id,
       riotGameName: parsed.gameName,
       riotTagLine: parsed.tagLine
-    });
+    }, streamerState.scopeStreamerId);
     if (duplicateBefore) {
-      const state = await getPublicParticipationState(req, status);
+      const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId);
       return {
         ok: true,
         alreadyJoined: true,
@@ -3431,14 +3613,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
         ...(state.viewerEntry ? { entry: state.viewerEntry } : {})
       };
     }
-    if (input.store.getActiveParticipationCount() >= PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE) {
+    if (input.store.getActiveParticipationCount(streamerState.scopeStreamerId) >= PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE) {
       throw new HttpRequestError(409, { error: "참여 대기열이 가득 찼습니다." });
     }
 
     const previousProfile = input.store.findReusableParticipationProfile({
       riotGameName: parsed.gameName,
       riotTagLine: parsed.tagLine
-    });
+    }, streamerState.scopeStreamerId);
     const profileReady = previousProfile?.profileStatus === "ready" || Boolean(previousProfile?.rankedStats);
     const entry = input.store.makeParticipationEntry({
       twitchUserId: status.user.id,
@@ -3459,13 +3641,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
       status: profileReady ? "verified" : "waitlisted",
       source: "dashboard"
     });
-    const saved = input.store.reactivateReusableParticipation(entry);
-    await broadcastParticipationSnapshot({ store: input.store, actions: input.actions }, "recruiting", "public.participation_join")
+    const saved = input.store.reactivateReusableParticipation(entry, streamerState.scopeStreamerId);
+    await broadcastParticipationSnapshot(
+      { store: input.store, actions: input.actions },
+      "recruiting",
+      "public.participation_join",
+      streamerState.scopeStreamerId
+    )
       .catch(() => undefined);
     if (input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
-      void input.refreshLolProfile(saved.entry.id).catch(() => undefined);
+      void input.refreshLolProfile(saved.entry.id, streamerState.scopeStreamerId).catch(() => undefined);
     }
-    const state = await getPublicParticipationState(req, status);
+    const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId);
     return {
       ok: true,
       alreadyJoined: false,
@@ -3485,24 +3672,34 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const body = await readJsonBody<{ streamerId?: unknown }>(req);
     const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
-    if (requestedStreamerId) {
-      const streamerState = await publicParticipationStreamers(input.store.getParticipationState(), requestedStreamerId);
-      if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
-        throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
-      }
+    const streamerState = await publicParticipationStreamers(requestedStreamerId || undefined);
+    if (requestedStreamerId && !streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
+      throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
     }
-    const result = input.store.cancelParticipationByUser(status.user.id, "시청자가 웹 참여 화면에서 참가를 취소했습니다.");
+    if (!streamerState.selectedStreamerId) {
+      throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
+    }
+    const result = input.store.cancelParticipationByUser(
+      status.user.id,
+      "시청자가 웹 참여 화면에서 참가를 취소했습니다.",
+      streamerState.scopeStreamerId
+    );
     if (!result.ok) {
       const error = result.reason === "in_game"
         ? "이미 게임 진행 상태라 참여 취소를 할 수 없습니다."
         : "취소할 참여 신청을 찾지 못했습니다.";
       throw new HttpRequestError(result.reason === "in_game" ? 409 : 404, { error });
     }
-    await broadcastParticipationSnapshot({ store: input.store, actions: input.actions }, "recruiting", "public.participation_cancel")
+    await broadcastParticipationSnapshot(
+      { store: input.store, actions: input.actions },
+      "recruiting",
+      "public.participation_cancel",
+      streamerState.scopeStreamerId
+    )
       .catch(() => undefined);
     return {
       ok: true,
-      state: await getPublicParticipationState(req, status)
+      state: await getPublicParticipationState(req, status, streamerState.selectedStreamerId)
     };
   }
 
@@ -5056,7 +5253,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const forceVerify = url.searchParams.get("force_verify") === "1" || url.searchParams.get("force_verify") === "true";
         return sendRedirect(res, input.twitchAuth.createAuthorizationUrl(forceVerify, {
           redirectUri: twitchCallbackUrlForRequest(req),
-          returnUrl: dashboardReturnUrlForRequest(req)
+          returnUrl: dashboardReturnUrlForRequest(req, url.searchParams.get("return_to"))
         }));
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/callback") {
@@ -5220,10 +5417,117 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!input.riot) return sendJson(req, res, 503, { error: "Riot API client를 사용할 수 없습니다." });
         return sendJson(req, res, 200, input.riot.credentialStatus());
       }
-      if (req.method === "GET" && url.pathname === "/api/participation/queue") return sendJson(req, res, 200, input.store.getParticipationQueue());
-      if (req.method === "GET" && url.pathname === "/api/participation/state") return sendJson(req, res, 200, input.store.getParticipationState());
-      if (req.method === "GET" && url.pathname === "/api/participation/game-monitor") return sendJson(req, res, 200, loadGameMonitorConfig());
-      if (req.method === "GET" && url.pathname === "/api/participation/streamer-profile") return sendJson(req, res, 200, { profile: input.store.getParticipationStreamerProfile() });
+      if (req.method === "GET" && url.pathname === "/api/lol-operations") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        return sendJson(req, res, 200, lolOperationsStateForOwner(streamerId));
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol-operations/identity") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        return sendJson(req, res, 200, {
+          identity: streamerRiotIdentityForOwner(streamerId),
+          request: currentStreamerRiotIdRequestForTwitchUser(streamerId)
+        });
+      }
+      if (req.method === "POST" && url.pathname === "/api/lol-operations/identity") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        const body = await readJsonBody<{ riotId?: unknown }>(req);
+        const result = await updateStreamerRiotIdentityForOwner(streamerId, body.riotId);
+        return sendJson(req, res, 200, {
+          ...result,
+          state: lolOperationsStateForOwner(streamerId)
+        });
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol-operations/automation") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        return sendJson(req, res, 200, {
+          settings: input.store.getLolAutomationSettings(streamerId),
+          identity: streamerRiotIdentityForOwner(streamerId)
+        });
+      }
+      if (req.method === "POST" && url.pathname === "/api/lol-operations/automation") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        const body = await readJsonBody<Record<string, unknown>>(req);
+        if (body.streamerRiotId !== undefined) {
+          return sendJson(req, res, 400, { error: "Riot ID는 계정 연결 탭에서만 변경할 수 있습니다." });
+        }
+        const patch: Partial<Omit<LolAutomationSettings, "streamerId" | "updatedAt">> = {};
+        for (const key of ["enabled", "autoSelectNextAfterGame", "announceInChat"] as const) {
+          if (body[key] === undefined) continue;
+          if (typeof body[key] !== "boolean") return sendJson(req, res, 400, { error: `${key}는 boolean이어야 합니다.` });
+          patch[key] = body[key];
+        }
+        for (const key of ["pollIntervalMs", "gameEndDebounceMs"] as const) {
+          if (body[key] === undefined) continue;
+          const value = Number(body[key]);
+          if (!Number.isFinite(value) || value < 0) return sendJson(req, res, 400, { error: `${key}는 0 이상의 숫자여야 합니다.` });
+          patch[key] = Math.trunc(value);
+        }
+        const identity = approvedStreamerIdentityForOwner(streamerId);
+        if (patch.enabled === true && !identity) {
+          return sendJson(req, res, 409, { error: "승인된 Riot ID가 있어야 게임 감시를 시작할 수 있습니다." });
+        }
+        const settings = input.store.setLolAutomationSettings(streamerId, patch);
+        await restartStreamerLolGameMonitor(streamerId, identity, settings);
+        return sendJson(req, res, 200, {
+          settings,
+          state: lolOperationsStateForOwner(streamerId)
+        });
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol-operations/participation") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        return sendJson(req, res, 200, input.store.getParticipationState(streamerId));
+      }
+      if (req.method === "POST" && url.pathname === "/api/lol-operations/participation/session") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        const body = await readJsonBody<{ action?: unknown }>(req);
+        if (typeof body.action !== "string") return sendJson(req, res, 400, { error: "action이 필요합니다." });
+        if (body.action === "start") {
+          startParticipationSessionForOwner(streamerId);
+          await broadcastParticipationSnapshot(input, "recruiting", "dashboard.lol_operations.session_start", streamerId);
+        } else if (body.action === "finish") {
+          input.store.setParticipationOpen(false, streamerId);
+          input.store.endParticipationSession(streamerId);
+          await broadcastParticipationSnapshot(input, "closed", "dashboard.lol_operations.session_finish", streamerId);
+        } else if (PARTICIPATION_MANUAL_ACTIONS.has(body.action)) {
+          if (body.action === "open" && !input.store.getParticipationSession(streamerId)) {
+            startParticipationSessionForOwner(streamerId);
+          }
+          await applyManualParticipationAction(input, body.action, streamerId);
+        } else {
+          return sendJson(req, res, 400, { error: "허용되지 않은 시참 세션 조작입니다." });
+        }
+        return sendJson(req, res, 200, {
+          ok: true,
+          action: body.action,
+          state: lolOperationsStateForOwner(streamerId)
+        });
+      }
+      if (req.method === "POST" && url.pathname === "/api/lol-operations/participation/entry-status") {
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
+        const body = await readJsonBody<{ entryId?: unknown; status?: unknown }>(req);
+        if (typeof body.entryId !== "string" || !body.entryId.trim()) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
+        if (typeof body.status !== "string" || !PARTICIPATION_ENTRY_STATUSES.has(body.status as ParticipationStatus)) {
+          return sendJson(req, res, 400, { error: "허용되지 않은 참가자 상태입니다." });
+        }
+        const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, streamerId);
+        if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
+        await broadcastParticipationSnapshot(input, "recruiting", "dashboard.lol_operations.entry_status", streamerId);
+        return sendJson(req, res, 200, input.store.getParticipationState(streamerId));
+      }
+
+      const compatibilityStreamerId = authenticatedStreamerOwnerId(auth.principal);
+      if (req.method === "GET" && url.pathname === "/api/participation/queue") {
+        return sendJson(req, res, 200, input.store.getParticipationQueue(compatibilityStreamerId));
+      }
+      if (req.method === "GET" && url.pathname === "/api/participation/state") {
+        return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId));
+      }
+      if (req.method === "GET" && url.pathname === "/api/participation/game-monitor") {
+        return sendJson(req, res, 200, compatibilityStreamerId ? legacyGameMonitorConfigForOwner(compatibilityStreamerId) : loadGameMonitorConfig());
+      }
+      if (req.method === "GET" && url.pathname === "/api/participation/streamer-profile") {
+        return sendJson(req, res, 200, { profile: input.store.getParticipationStreamerProfile(compatibilityStreamerId) });
+      }
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-profile-link") {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
           return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
@@ -5239,44 +5543,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, { streamer: publicStreamerDashboardInfo(request), request });
       }
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id") {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
-          return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
-        }
-        const previous = dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
-        if (!previous) return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
+        const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
         const body = await readJsonBody<{ riotId?: unknown }>(req);
-        if (typeof body.riotId !== "string") {
-          return sendJson(req, res, 400, { error: "riotId는 gameName#tagLine 문자열이어야 합니다." });
-        }
-        const parsed = parseRiotIdDetailed(body.riotId);
-        if (!parsed.ok) return sendJson(req, res, 400, { error: parsed.message });
-        const request = updateApprovedStreamerRiotId({
-          twitchUserId: auth.principal.twitchUserId,
-          riotGameName: parsed.gameName,
-          riotTagLine: parsed.tagLine
-        });
-        if (!request) return sendJson(req, res, 404, { error: "승인된 스트리머 등록 정보를 찾을 수 없습니다." });
-        invalidatePublicLolProfileCachesForStreamer(previous);
-        invalidatePublicLolProfileCachesForStreamer(request);
-
-        const monitorConfig = loadGameMonitorConfig();
-        const monitorRiotId = parseRiotIdDetailed(monitorConfig.streamerRiotId);
-        let gameMonitor: LolGameMonitorConfig | undefined;
-        let streamerProfile: ParticipationStreamerProfile | undefined;
-        if (
-          monitorRiotId.ok &&
-          normalizeRiotIdKey(monitorRiotId.gameName, monitorRiotId.tagLine) === previous.normalizedRiotId
-        ) {
-          gameMonitor = saveGameMonitorConfig({ streamerRiotId: `${request.riotGameName}#${request.riotTagLine}` });
-          await restartActiveLolGameMonitor(gameMonitor);
-          streamerProfile = await refreshActiveStreamerProfile(true).catch(() => undefined);
-        }
+        const result = await updateStreamerRiotIdentityForOwner(streamerId, body.riotId);
 
         return sendJson(req, res, 200, {
-          streamer: publicStreamerDashboardInfo(request),
-          request,
-          gameMonitor,
-          streamerProfile
+          streamer: publicStreamerDashboardInfo(result.request),
+          request: result.request,
+          gameMonitor: legacyGameMonitorConfigForOwner(streamerId),
+          streamerProfile: result.streamerProfile
         });
       }
       if (req.method === "GET" && url.pathname === "/api/participation/streamer-riot-id-requests") {
@@ -5297,6 +5572,40 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
       if (req.method === "POST" && url.pathname === "/api/participation/game-monitor") {
         const body = await readJsonBody<Partial<LolGameMonitorConfig>>(req);
+        if (compatibilityStreamerId) {
+          const identity = approvedStreamerIdentityForOwner(compatibilityStreamerId);
+          if (body.streamerRiotId !== undefined) {
+            if (typeof body.streamerRiotId !== "string") {
+              return sendJson(req, res, 400, { error: "streamerRiotId는 문자열이어야 합니다." });
+            }
+            const requestedRiotId = body.streamerRiotId.trim();
+            if (requestedRiotId) {
+              const parsed = parseRiotIdDetailed(requestedRiotId);
+              if (!parsed.ok) return sendJson(req, res, 400, { error: parsed.message });
+              if (!identity || normalizeRiotIdKey(parsed.gameName, parsed.tagLine) !== identity.normalizedRiotId) {
+                return sendJson(req, res, 409, { error: "Riot ID는 LoL 방송 운영의 계정 연결 탭에서만 변경할 수 있습니다." });
+              }
+            }
+          }
+          const scopedPatch: Partial<Omit<LolAutomationSettings, "streamerId" | "updatedAt">> = {};
+          for (const key of ["enabled", "autoSelectNextAfterGame", "announceInChat"] as const) {
+            if (body[key] === undefined) continue;
+            if (typeof body[key] !== "boolean") return sendJson(req, res, 400, { error: `${key}는 boolean이어야 합니다.` });
+            scopedPatch[key] = body[key];
+          }
+          for (const key of ["pollIntervalMs", "gameEndDebounceMs"] as const) {
+            if (body[key] === undefined) continue;
+            const value = Number(body[key]);
+            if (!Number.isFinite(value) || value < 0) return sendJson(req, res, 400, { error: `${key}는 0 이상의 숫자여야 합니다.` });
+            scopedPatch[key] = Math.trunc(value);
+          }
+          if (scopedPatch.enabled === true && !identity) {
+            return sendJson(req, res, 409, { error: "승인된 Riot ID가 있어야 게임 감시를 시작할 수 있습니다." });
+          }
+          const settings = input.store.setLolAutomationSettings(compatibilityStreamerId, scopedPatch);
+          await restartStreamerLolGameMonitor(compatibilityStreamerId, identity, settings);
+          return sendJson(req, res, 200, legacyGameMonitorConfigForOwner(compatibilityStreamerId));
+        }
         const patch: Partial<LolGameMonitorConfig> = {};
         if (body.streamerRiotId !== undefined) {
           if (typeof body.streamerRiotId !== "string") return sendJson(req, res, 400, { error: "streamerRiotId는 문자열이어야 합니다." });
@@ -5376,12 +5685,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (typeof body.action !== "string" || !PARTICIPATION_MANUAL_ACTIONS.has(body.action)) {
           return sendJson(req, res, 400, { error: "허용되지 않은 시참 수동 조작입니다." });
         }
-        const phase = await applyManualParticipationAction(input, body.action);
+        if (compatibilityStreamerId && body.action === "open" && !input.store.getParticipationSession(compatibilityStreamerId)) {
+          startParticipationSessionForOwner(compatibilityStreamerId);
+        }
+        const phase = await applyManualParticipationAction(input, body.action, compatibilityStreamerId);
         return sendJson(req, res, 200, {
           ok: true,
           action: body.action,
           phase,
-          state: input.store.getParticipationState()
+          state: input.store.getParticipationState(compatibilityStreamerId)
         });
       }
 
@@ -5397,6 +5709,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-profile/refresh") {
+        if (compatibilityStreamerId) {
+          const profile = await refreshStreamerProfileForOwner(compatibilityStreamerId, true).catch(() => undefined);
+          if (!profile) return sendJson(req, res, 404, { error: "방송자 프로필 갱신을 사용할 수 없습니다. Riot API key와 승인된 Riot ID를 확인하세요." });
+          return sendJson(req, res, 200, { profile });
+        }
         const key = currentStreamerRefreshKey();
         const cachedProfile = key && streamerProfileRefreshKey === key
           ? lastStreamerProfileRefresh ?? input.store.getParticipationStreamerProfile()
@@ -5434,33 +5751,36 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const body = await readJsonBody<{ entryId?: string }>(req);
         if (typeof body.entryId !== "string" || !body.entryId.trim()) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
         const entryId = body.entryId.trim();
+        if (!input.store.getParticipationEntryById(entryId, compatibilityStreamerId)) {
+          return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
+        }
         const currentRefresh = entryProfileRefreshInFlight.get(entryId);
         if (currentRefresh) {
           const refreshed = await currentRefresh;
           if (!refreshed) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없거나 refresh를 사용할 수 없습니다." });
-          return sendJson(req, res, 200, input.store.getParticipationState(), { "X-StreamOps-Cache": "in-flight" });
+          return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId), { "X-StreamOps-Cache": "in-flight" });
         }
         const availableAt = entryProfileRefreshAvailableAt.get(entryId) ?? 0;
         if (Date.now() < availableAt) {
-          return sendJson(req, res, 200, input.store.getParticipationState(), {
+          return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId), {
             "X-StreamOps-Cache": "cooldown",
             "Retry-After": retryAfterSeconds(availableAt)
           });
         }
-        const refresh = input.refreshLolProfile?.(entryId) ?? Promise.resolve(false);
+        const refresh = input.refreshLolProfile?.(entryId, compatibilityStreamerId) ?? Promise.resolve(false);
         entryProfileRefreshInFlight.set(entryId, refresh);
         const refreshed = await refresh.finally(() => {
           entryProfileRefreshInFlight.delete(entryId);
         });
         if (!refreshed) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없거나 refresh를 사용할 수 없습니다." });
         entryProfileRefreshAvailableAt.set(entryId, Date.now() + PROFILE_REFRESH_COOLDOWN_MS);
-        return sendJson(req, res, 200, input.store.getParticipationState());
+        return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId));
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/invite-message") {
         const body = await readJsonBody<{ entryId?: unknown; message?: unknown }>(req);
         if (typeof body.entryId !== "string" || !body.entryId.trim()) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
-        const entry = input.store.getParticipationEntryById(body.entryId.trim());
+        const entry = input.store.getParticipationEntryById(body.entryId.trim(), compatibilityStreamerId);
         if (!entry) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
         const validation = validateParticipationInviteMessage(body.message);
         if (!validation.ok) return sendJson(req, res, 400, { error: validation.error });
@@ -5483,7 +5803,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (entryIds.length > MAX_PARTICIPATION_INVITE_BULK_TARGETS) {
           return sendJson(req, res, 400, { error: `일괄 전송 대상은 최대 ${MAX_PARTICIPATION_INVITE_BULK_TARGETS}명입니다.` });
         }
-        const entries = entryIds.map((entryId) => input.store.getParticipationEntryById(entryId));
+        const entries = entryIds.map((entryId) => input.store.getParticipationEntryById(entryId, compatibilityStreamerId));
         if (entries.some((entry) => !entry)) return sendJson(req, res, 404, { error: "일부 시참 entry를 찾을 수 없습니다." });
         const targets = entries
           .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
@@ -5554,14 +5874,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!body.entryId || !body.role) return sendJson(req, res, 400, { error: "entryId와 role이 필요합니다." });
         const role = normalizeLolRole(body.role);
         if (role === "unknown") return sendJson(req, res, 400, { error: "허용되지 않은 role입니다." });
-        const updated = input.store.setParticipationRequestedRole(body.entryId, role);
+        const updated = input.store.setParticipationRequestedRole(body.entryId, role, compatibilityStreamerId);
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
         await input.actions.dispatchOne({
           type: "overlay.participationQueue",
-          isOpen: input.store.getStatus().participation === "open",
-          queue: input.store.getParticipationOverlayQueue()
+          isOpen: input.store.getParticipationState(compatibilityStreamerId).isOpen,
+          queue: input.store.getParticipationOverlayQueue(undefined, compatibilityStreamerId)
         }, {}, "dashboard.role_override");
-        return sendJson(req, res, 200, input.store.getParticipationState());
+        return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId));
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/entry-status") {
@@ -5570,15 +5890,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (typeof body.status !== "string" || !PARTICIPATION_ENTRY_STATUSES.has(body.status as ParticipationStatus)) {
           return sendJson(req, res, 400, { error: "허용되지 않은 참가자 상태입니다." });
         }
-        const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus);
+        const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, compatibilityStreamerId);
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
         await input.actions.dispatchOne({
           type: "overlay.participationQueue",
-          isOpen: input.store.getStatus().participation === "open",
-          queue: input.store.getParticipationOverlayQueue(),
+          isOpen: input.store.getParticipationState(compatibilityStreamerId).isOpen,
+          queue: input.store.getParticipationOverlayQueue(undefined, compatibilityStreamerId),
           source: "dashboard.participation_entry_status"
         }, { user: "dashboard", input: "" }, "dashboard.participation_entry_status");
-        return sendJson(req, res, 200, input.store.getParticipationState());
+        return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId));
       }
 
       if (req.method === "POST" && url.pathname === "/api/actions/test") {

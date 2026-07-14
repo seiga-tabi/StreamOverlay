@@ -1,13 +1,13 @@
 import { useState, type ReactNode } from "react";
 import { dashboardI18n, type DashboardLocale } from "../i18n";
-import { pageAllowedForRole, type DashboardRole, type Page } from "../routing/dashboard-routes";
+import { isLolOperationsPage, pageAllowedForRole, type DashboardRole, type Page } from "../routing/dashboard-routes";
 
 export type { DashboardRole, Page } from "../routing/dashboard-routes";
 
 const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
   { key: "operations", items: ["serverStatus", "dashboard", "twitch"] },
   { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
-  { key: "lol", items: ["myRiotAccount", "soloRank", "participation", "tournaments", "streamerRiotRequests"] },
+  { key: "lol", items: ["lolAccount", "tournaments", "streamerRiotRequests"] },
   { key: "community", items: ["followers", "communityModeration", "events"] },
   { key: "system", items: ["supportInbox", "settings"] }
 ];
@@ -128,7 +128,7 @@ export function Layout({
                 {section.items.map((item) => (
                   <button
                     key={item}
-                    className={`nav-item ${page === item ? "active" : ""}`}
+                    className={`nav-item ${page === item || (item === "lolAccount" && isLolOperationsPage(page)) ? "active" : ""}`}
                     data-ko={dashboardI18n.ko.pages[item].label}
                     data-ja={dashboardI18n.ja.pages[item].label}
                     onClick={() => setPage(item)}

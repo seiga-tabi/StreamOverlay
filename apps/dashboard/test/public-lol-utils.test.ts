@@ -6,7 +6,7 @@ import { rankScore, rankTrendLine, shortRankLabel } from "../src/features/public
 import { buildSuggestions, jpRiotIdQuery, publicSummonerPath, riotIdFromPublicSummonerPath } from "../src/features/public-lol/utils/riot-id";
 import { parseFavorites, parseRecentSearches } from "../src/features/public-lol/utils/storage";
 import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
-import { dashboardPageFromPath, dashboardPathForPage } from "../src/routing/dashboard-routes";
+import { dashboardPageFromPath, dashboardPathForPage, isLolOperationsPage } from "../src/routing/dashboard-routes";
 import type { PublicLolProfile, PublicLolRecentMatch, SearchSuggestion } from "../src/features/public-lol/types/public-lol";
 
 test("Riot ID를 기존 JP 검색 규칙으로 정규화한다", () => {
@@ -35,6 +35,18 @@ test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () =>
 test("Dashboard 역할별 경로를 페이지 상태와 왕복 변환한다", () => {
   assert.equal(dashboardPathForPage("overlayStatus", "streamer"), "/dashboard/overlay");
   assert.equal(dashboardPageFromPath("/dashboard/overlay/", "streamer"), "overlayStatus");
+  assert.equal(dashboardPathForPage("lolAccount", "streamer"), "/dashboard/lol/account");
+  assert.equal(dashboardPathForPage("lolAutomation", "streamer"), "/dashboard/lol/automation");
+  assert.equal(dashboardPathForPage("lolParticipation", "streamer"), "/dashboard/lol/participation");
+  assert.equal(dashboardPageFromPath("/dashboard/lol", "streamer"), "lolAccount");
+  assert.equal(dashboardPageFromPath("/dashboard/riot-account", "streamer"), "lolAccount");
+  assert.equal(dashboardPageFromPath("/dashboard/solo-rank", "streamer"), "lolAutomation");
+  assert.equal(dashboardPageFromPath("/dashboard/participation", "streamer"), "lolParticipation");
+  assert.equal(dashboardPathForPage("myRiotAccount", "streamer"), "/dashboard/lol/account");
+  assert.equal(dashboardPathForPage("soloRank", "streamer"), "/dashboard/lol/automation");
+  assert.equal(dashboardPathForPage("participation", "streamer"), "/dashboard/lol/participation");
+  assert.equal(isLolOperationsPage("lolParticipation"), true);
+  assert.equal(isLolOperationsPage("overlayStatus"), false);
   assert.equal(dashboardPathForPage("supportInbox", "admin"), "/admin/support");
   assert.equal(dashboardPageFromPath("/admin/support", "admin"), "supportInbox");
   assert.equal(dashboardPageFromPath("/admin/community", "admin"), "communityModeration");

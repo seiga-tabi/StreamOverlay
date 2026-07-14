@@ -271,7 +271,7 @@ test("로컬 Twitch OAuth 시작은 운영 PUBLIC_BASE_URL이 있어도 localhos
         },
         actions: { async dispatchOne() {} }
       });
-      const req = createRequest("GET", "/api/twitch/auth/start", undefined, {
+      const req = createRequest("GET", "/api/twitch/auth/start?return_to=/dashboard", undefined, {
         host: "localhost:3000",
         referer: "http://localhost:5173/dashboard"
       });
@@ -281,7 +281,7 @@ test("로컬 Twitch OAuth 시작은 운영 PUBLIC_BASE_URL이 있어도 localhos
 
       assert.equal(res.statusCode, 302);
       assert.equal(captured.options.redirectUri, "http://localhost:3000/api/twitch/auth/callback");
-      assert.equal(captured.options.returnUrl, "http://localhost:5173/?twitch=connected");
+      assert.equal(captured.options.returnUrl, "http://localhost:5173/dashboard?twitch=connected");
       assert.match(res.headers.Location, /redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Ftwitch%2Fauth%2Fcallback/);
     } finally {
       appConfig.publicBaseUrl = previous.publicBaseUrl;
@@ -319,7 +319,7 @@ test("운영 Twitch OAuth 시작은 프록시 host가 달라도 설정된 callba
         },
         actions: { async dispatchOne() {} }
       });
-      const req = createRequest("GET", "/api/twitch/auth/start", undefined, {
+      const req = createRequest("GET", "/api/twitch/auth/start?return_to=https%3A%2F%2Fevil.example", undefined, {
         host: "streamoverlay-server:3000",
         "x-forwarded-proto": "https",
         "x-forwarded-host": "m.gg.seigatabi.com",
@@ -331,6 +331,7 @@ test("운영 Twitch OAuth 시작은 프록시 host가 달라도 설정된 callba
 
       assert.equal(res.statusCode, 302);
       assert.equal(captured.options.redirectUri, "https://gg.seigatabi.com/api/twitch/auth/callback");
+      assert.equal(captured.options.returnUrl, "https://gg.seigatabi.com/?twitch=connected");
       assert.match(res.headers.Location, /redirect_uri=https%3A%2F%2Fgg\.seigatabi\.com%2Fapi%2Ftwitch%2Fauth%2Fcallback/);
     } finally {
       appConfig.publicBaseUrl = previous.publicBaseUrl;

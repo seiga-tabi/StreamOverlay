@@ -118,6 +118,34 @@ test("participation.open action은 시참 상태와 대기열 overlay를 함께 
   assert.deepEqual(queue.queue, []);
 });
 
+test("DashboardHub는 스트리머별 시참 WebSocket snapshot을 격리한다", () => {
+  const store = new Store();
+  const dashboard = new DashboardHub(store);
+  for (const streamerId of ["streamer-a", "streamer-b"]) {
+    store.setParticipationOpen(true, streamerId);
+    store.addParticipation(store.makeParticipationEntry({
+      streamerId,
+      twitchUserId: `viewer-${streamerId}`,
+      twitchUserName: `Viewer-${streamerId}`,
+      riotGameName: `Viewer-${streamerId}`,
+      riotTagLine: "JP1",
+      preferredRole: "fill",
+      status: "waitlisted",
+      source: "dashboard"
+    }), streamerId);
+  }
+
+  const socketA = new FakeSocket();
+  const socketB = new FakeSocket();
+  dashboard.add(socketA, { role: "streamer", twitchUserId: "streamer-a" });
+  dashboard.add(socketB, { role: "streamer", twitchUserId: "streamer-b" });
+
+  assert.deepEqual(socketA.sent[0]?.participationQueue.map((entry) => entry.twitchUserName), ["Viewer-streamer-a"]);
+  assert.deepEqual(socketB.sent[0]?.participationQueue.map((entry) => entry.twitchUserName), ["Viewer-streamer-b"]);
+  assert.equal(socketA.sent[0]?.participationState.session?.streamerId, "streamer-a");
+  assert.equal(socketB.sent[0]?.participationState.session?.streamerId, "streamer-b");
+});
+
 test("!질문 명령은 질문 큐에 저장되고 question overlay를 표시한다", async () => {
   const { events, store, socket, ctx } = createHarness();
   chatCommandsModule.setup(ctx);
