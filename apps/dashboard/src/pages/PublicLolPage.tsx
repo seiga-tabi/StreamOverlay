@@ -2129,6 +2129,26 @@ function publicParticipationStatusTone(status: ParticipationStatus): "neutral" |
   return "neutral";
 }
 
+const PUBLIC_PARTICIPATION_STATUS_LABEL_KEYS: Record<ParticipationStatus, PublicTextKey> = {
+  pending: "participationStatusPending",
+  verified: "participationStatusVerified",
+  waitlisted: "participationStatusWaitlisted",
+  selected: "participationStatusSelected",
+  checked_in: "participationStatusCheckedIn",
+  invited: "participationStatusInvited",
+  in_game: "participationStatusInGame",
+  played: "participationStatusPlayed",
+  skipped: "participationStatusSkipped",
+  cancelled: "participationStatusCancelled",
+  no_show: "participationStatusNoShow",
+  rejected: "participationStatusRejected",
+  blocked: "participationStatusBlocked",
+};
+
+function publicParticipationStatusLabel(status: ParticipationStatus): string {
+  return publicText(PUBLIC_PARTICIPATION_STATUS_LABEL_KEYS[status]);
+}
+
 function publicParticipationIsActiveStatus(status: ParticipationStatus): boolean {
   return status === "pending"
     || status === "verified"
@@ -2392,11 +2412,16 @@ function PublicParticipationJoinPage({
           <div className="public-participation-queue-list">
             {queue.map((item) => (
               <Card as="article" className={`public-participation-queue-row ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`} padding="sm" variant={item.isViewer ? "interactive" : "default"}>
-                <span className="public-participation-position">{item.position}</span>
+                <span
+                  aria-label={`${t().participationPosition} ${formatNumber(item.position)}`}
+                  className="public-participation-position"
+                >
+                  #{formatNumber(item.position)}
+                </span>
                 <div className="public-participation-queue-main">
                   <strong>{item.twitchUserName}</strong>
                   <div className="public-participation-queue-tags">
-                    <StatusPill size="sm" tone={publicParticipationStatusTone(item.status)}>{item.status}</StatusPill>
+                    <StatusPill size="sm" tone={publicParticipationStatusTone(item.status)}>{publicParticipationStatusLabel(item.status)}</StatusPill>
                     <Badge size="sm" tone={sharedRankTone(item.rankedStats, !item.rankedStats)}>{publicParticipationRankText(item)}</Badge>
                     <Badge size="sm" tone="info">{publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}</Badge>
                     {item.isViewer ? <Badge className="viewer" size="sm" tone="streamer">{t().participationViewerBadge}</Badge> : null}
