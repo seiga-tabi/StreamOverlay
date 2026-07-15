@@ -74,10 +74,10 @@ export function MatchTeamDetailsPlayerRow({
             ) : null}
             <span className="public-team-player-id-stack">
               <SearchableRiotId viewModel={player.riotId} onSearch={onSearchRiotId} />
-              <span className="public-team-mobile-kda" aria-label={kdaLabel}>
-                <strong>{player.mobileKda.score}</strong>
-                <span>{player.mobileKda.metric}</span>
-              </span>
+            </span>
+            <span className="public-team-mobile-kda" aria-label={kdaLabel}>
+              <strong>{player.mobileKda.score}</strong>
+              <span>{player.mobileKda.metric}</span>
             </span>
           </div>
         </div>
