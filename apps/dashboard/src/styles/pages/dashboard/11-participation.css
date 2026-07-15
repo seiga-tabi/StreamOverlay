@@ -89,6 +89,64 @@
   backdrop-filter: none;
 }
 
+/* 대기열 행: 프로필 요약과 두 수동 제어를 한 줄에 배치해 세로 밀도를 높인다. */
+.participation-shared-queue-row.yoro-card {
+  grid-template-columns:
+    calc(var(--yoro-space-12) * 2)
+    minmax(calc(var(--yoro-space-12) * 3), .8fr)
+    minmax(calc(var(--yoro-space-12) * 6), 1.4fr);
+  grid-template-areas:
+    "champion user controls"
+    "champion invite invite";
+  align-items: start;
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-3);
+}
+
+.participation-shared-champion-card {
+  grid-area: champion;
+  gap: var(--yoro-space-1);
+}
+
+.participation-shared-user {
+  grid-area: user;
+  gap: var(--yoro-space-1);
+}
+
+.participation-shared-controls {
+  grid-area: controls;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: var(--yoro-space-2);
+}
+
+.participation-shared-controls > .yoro-form-field {
+  min-width: 0;
+}
+
+.participation-shared-controls > .yoro-status-pill {
+  grid-column: 1 / -1;
+}
+
+.participation-shared-refresh-button {
+  align-self: end;
+  min-height: var(--yoro-size-touch-target);
+  white-space: nowrap;
+}
+
+.participation-shared-created-at {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  line-height: var(--yoro-line-height-tight);
+  white-space: nowrap;
+}
+
+.participation-shared-invite {
+  grid-area: invite;
+  grid-column: auto;
+  gap: var(--yoro-space-2);
+}
+
 .participation-shared-card-header.yoro-card__header {
   padding-bottom: var(--yoro-space-3);
   border-bottom: 1px solid var(--yoro-color-border);
@@ -154,6 +212,14 @@
   .participation-shared-metrics {
     grid-template-columns: repeat(4, minmax(104px, 1fr));
   }
+
+  .participation-shared-queue-row.yoro-card {
+    grid-template-columns: calc(var(--yoro-space-12) * 2) minmax(0, 1fr);
+    grid-template-areas:
+      "champion user"
+      "controls controls"
+      "invite invite";
+  }
 }
 
 @media (max-width: 760px) {
@@ -168,6 +234,25 @@
 
   .participation-shared-page-header.yoro-page-header[data-layout="split"] {
     align-items: flex-start;
+  }
+
+  .participation-shared-queue-row.yoro-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "champion"
+      "user"
+      "controls"
+      "invite";
+  }
+
+  .participation-shared-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .participation-shared-refresh-button {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: center;
   }
 }
 

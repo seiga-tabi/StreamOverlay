@@ -22,10 +22,14 @@ export type SearchableRiotIdProps = {
 };
 
 export function SearchableRiotId({ viewModel, onSearch }: SearchableRiotIdProps) {
+  const displayRiotId = viewModel.tag
+    ? `${viewModel.name}#${viewModel.tag.replace(/^#/, "")}`
+    : viewModel.name;
+
   if (viewModel.kind === "static" || !viewModel.riotId) {
     return (
       <strong className={viewModel.className}>
-        <span className="public-riot-name">{viewModel.name}</span>
+        <span className="public-riot-name">{displayRiotId}</span>
         <SearchableRiotIdBadges badges={viewModel.badges} />
       </strong>
     );
@@ -39,8 +43,7 @@ export function SearchableRiotId({ viewModel, onSearch }: SearchableRiotIdProps)
       onClick={() => onSearch?.(riotId)}
       title={viewModel.title}
     >
-      <span className="public-riot-name">{viewModel.name}</span>
-      {viewModel.tag ? <span className="public-riot-tag-badge">{viewModel.tag}</span> : null}
+      <span className="public-riot-name">{displayRiotId}</span>
       <SearchableRiotIdBadges badges={viewModel.badges} />
     </button>
   );

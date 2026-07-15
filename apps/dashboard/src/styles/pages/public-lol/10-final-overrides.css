@@ -1049,11 +1049,6 @@
     color: var(--yoro-color-text-on-dark) !important;
   }
 
-  .public-profile-shared-shell .public-match-expand {
-    margin: var(--yoro-space-0) !important;
-    padding: var(--yoro-space-0) !important;
-  }
-
   .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack {
     display: grid !important;
     grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
@@ -1298,12 +1293,14 @@
   .public-profile-shared-shell .public-match-expand {
     grid-column: 5 !important;
     grid-row: 1 / 3 !important;
-    align-self: stretch !important;
-    justify-self: end !important;
+    align-self: center !important;
+    justify-self: center !important;
     width: var(--yoro-size-touch-target) !important;
-    height: auto !important;
+    height: var(--yoro-size-touch-target) !important;
     min-width: var(--yoro-size-touch-target) !important;
     min-height: var(--yoro-size-touch-target) !important;
+    margin: var(--yoro-space-0) !important;
+    padding: var(--yoro-space-0) !important;
     border-radius: var(--yoro-radius-sm) !important;
     background: transparent !important;
     color: var(--public-gray-muted) !important;
@@ -1354,7 +1351,7 @@
       ) !important;
     grid-template-rows: auto !important;
     align-items: center !important;
-    gap: var(--yoro-space-2) !important;
+    gap: var(--yoro-space-1) !important;
     min-height: calc(var(--yoro-space-12) + var(--yoro-space-3)) !important;
     padding: var(--yoro-space-2) !important;
     border-top: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
@@ -1362,8 +1359,8 @@
   }
 
   .public-profile-shared-shell .public-team-player-main {
-    grid-template-columns: var(--yoro-space-12) calc(var(--yoro-space-8) + var(--yoro-space-1)) minmax(var(--yoro-space-0), 1fr) !important;
-    gap: var(--yoro-space-2) !important;
+    grid-template-columns: var(--yoro-space-12) calc(var(--yoro-space-12) + var(--yoro-space-1)) minmax(var(--yoro-space-0), 1fr) !important;
+    gap: var(--yoro-space-1) !important;
     min-width: var(--yoro-space-0) !important;
   }
 
@@ -1373,14 +1370,14 @@
   }
 
   .public-profile-shared-shell .public-team-loadout-build {
-    grid-template-columns: repeat(2, var(--yoro-space-4)) !important;
-    width: calc(var(--yoro-space-8) + var(--yoro-space-1)) !important;
+    grid-template-columns: repeat(2, var(--yoro-space-6)) !important;
+    width: calc(var(--yoro-space-12) + var(--yoro-space-1)) !important;
     gap: var(--yoro-space-1) !important;
   }
 
   .public-profile-shared-shell .public-team-spell-build,
   .public-profile-shared-shell .public-team-rune-build {
-    grid-template-rows: repeat(2, var(--yoro-space-4)) !important;
+    grid-template-rows: repeat(2, var(--yoro-space-6)) !important;
     gap: var(--yoro-space-1) !important;
   }
 
@@ -1388,10 +1385,10 @@
   .public-profile-shared-shell .public-team-spell-empty,
   .public-profile-shared-shell .public-team-rune-slot,
   .public-profile-shared-shell .public-team-rune-empty {
-    width: var(--yoro-space-4) !important;
-    min-width: var(--yoro-space-4) !important;
-    height: var(--yoro-space-4) !important;
-    min-height: var(--yoro-space-4) !important;
+    width: var(--yoro-space-6) !important;
+    min-width: var(--yoro-space-6) !important;
+    height: var(--yoro-space-6) !important;
+    min-height: var(--yoro-space-6) !important;
     border-radius: var(--yoro-radius-xs) !important;
   }
 
@@ -1405,6 +1402,12 @@
     gap: var(--yoro-space-1) !important;
     align-items: center !important;
     flex-wrap: nowrap !important;
+  }
+
+  .public-profile-shared-shell .public-team-player-id-line .public-team-rank-badge {
+    min-width: var(--yoro-space-5) !important;
+    max-width: var(--yoro-space-6) !important;
+    padding-inline: var(--yoro-space-1) !important;
   }
 
   .public-profile-shared-shell .public-team-player-id-stack {
@@ -1511,8 +1514,33 @@
   }
 
   .public-profile-shared-shell .public-team-player-main {
-    grid-template-columns: var(--yoro-space-10) calc(var(--yoro-space-8) + var(--yoro-space-1)) minmax(var(--yoro-space-0), 1fr) !important;
+    grid-template-columns: var(--yoro-space-10) calc(var(--yoro-space-10) + var(--yoro-space-1)) minmax(var(--yoro-space-0), 1fr) !important;
     gap: var(--yoro-space-1) !important;
+  }
+
+  .public-profile-shared-shell .public-team-player-main .public-team-champion-avatar {
+    width: var(--yoro-space-10) !important;
+    height: var(--yoro-space-10) !important;
+  }
+
+  .public-profile-shared-shell .public-team-loadout-build {
+    grid-template-columns: repeat(2, var(--yoro-space-5)) !important;
+    width: calc(var(--yoro-space-10) + var(--yoro-space-1)) !important;
+  }
+
+  .public-profile-shared-shell .public-team-spell-build,
+  .public-profile-shared-shell .public-team-rune-build {
+    grid-template-rows: repeat(2, var(--yoro-space-5)) !important;
+  }
+
+  .public-profile-shared-shell .public-team-spell-slot,
+  .public-profile-shared-shell .public-team-spell-empty,
+  .public-profile-shared-shell .public-team-rune-slot,
+  .public-profile-shared-shell .public-team-rune-empty {
+    width: var(--yoro-space-5) !important;
+    min-width: var(--yoro-space-5) !important;
+    height: var(--yoro-space-5) !important;
+    min-height: var(--yoro-space-5) !important;
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
@@ -1893,7 +1921,11 @@
     display: none !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open {
+    overflow: visible !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav {
     position: absolute !important;
     top: calc(100% + var(--yoro-space-1)) !important;
     right: var(--yoro-space-2) !important;
@@ -1922,8 +1954,8 @@
     transform: none !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item,
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button {
     position: static !important;
     display: grid !important;
     grid-column: 1 / -1 !important;
@@ -1935,8 +1967,8 @@
     min-height: var(--yoro-space-0) !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item > button {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button,
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item > button {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
@@ -1950,12 +1982,12 @@
     text-align: start !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button::after,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item > button::after {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav > button::after,
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-menu-item > button::after {
     display: none !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav button span {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav button span {
     display: inline-grid !important;
     flex: 0 0 var(--yoro-space-6) !important;
     place-items: center !important;
@@ -1964,12 +1996,12 @@
     font-size: var(--yoro-font-size-md) !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav button strong {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-nav button strong {
     color: inherit !important;
     font-size: var(--yoro-font-size-sm) !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu {
     position: static !important;
     display: grid !important;
     grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr)) !important;
@@ -1987,7 +2019,7 @@
     transform: none !important;
   }
 
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu button {
+  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home).mobile-menu-open .public-header-submenu button {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;

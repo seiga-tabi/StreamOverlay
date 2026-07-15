@@ -192,6 +192,12 @@ const i18n = {
       rejected: "거절",
       blocked: "차단"
     },
+    manualStatuses: {
+      waitlisted: "대기 중",
+      in_game: "게임 중",
+      played: "완료",
+      cancelled: "취소"
+    },
     sources: {
       chat_command: "채팅",
       channel_point: "채널 포인트",
@@ -330,6 +336,12 @@ const i18n = {
       rejected: "拒否",
       blocked: "ブロック"
     },
+    manualStatuses: {
+      waitlisted: "待機中",
+      in_game: "ゲーム中",
+      played: "完了",
+      cancelled: "取消"
+    },
     sources: {
       chat_command: "チャット",
       channel_point: "チャンネルポイント",
@@ -340,21 +352,9 @@ const i18n = {
 
 const t = createDashboardLocaleProxy(i18n);
 const INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
-const ENTRY_STATUS_OPTIONS: ParticipationStatus[] = [
-  "pending",
-  "verified",
-  "waitlisted",
-  "selected",
-  "checked_in",
-  "invited",
-  "in_game",
-  "played",
-  "skipped",
-  "cancelled",
-  "no_show",
-  "rejected",
-  "blocked"
-];
+type ManualEntryStatus = Extract<ParticipationStatus, "waitlisted" | "in_game" | "played" | "cancelled">;
+const ENTRY_STATUS_OPTIONS: ManualEntryStatus[] = ["waitlisted", "in_game", "played", "cancelled"];
+const CANCELLED_ENTRY_STATUSES = new Set<ParticipationStatus>(["skipped", "cancelled", "no_show", "rejected", "blocked"]);
 type ManualParticipationAction = "open" | "show_queue" | "mark_in_game" | "finish_game" | "close";
 
 type ParticipationToast = {
@@ -438,14 +438,14 @@ function roleLabel(role: string | undefined): string {
   return t.roles[role as keyof typeof t.roles] ?? role;
 }
 
-function statusLabel(status: string | undefined): string {
-  if (!status) return t.none;
-  return t.statuses[status as keyof typeof t.statuses] ?? status;
+function normalizeManualEntryStatus(status: ParticipationStatus): ManualEntryStatus {
+  if (status === "in_game" || status === "played") return status;
+  if (CANCELLED_ENTRY_STATUSES.has(status)) return "cancelled";
+  return "waitlisted";
 }
 
-function sourceLabel(source: string | undefined): string {
-  if (!source) return t.none;
-  return t.sources[source as keyof typeof t.sources] ?? source;
+function manualStatusLabel(status: ManualEntryStatus): string {
+  return t.manualStatuses[status];
 }
 
 function formatTime(value: string | undefined): string {
@@ -470,11 +470,6 @@ function championDisplayName(champion: LolChampionSummary | undefined): string {
   if (!champion) return t.none;
   if (dashboardLocale === "ja") return champion.nameJa ?? champion.nameKo ?? champion.championKey ?? String(champion.championId);
   return champion.nameKo ?? champion.nameJa ?? champion.championKey ?? String(champion.championId);
-}
-
-function championLabel(champions: LolChampionSummary[] | undefined): string {
-  if (!champions?.length) return t.none;
-  return champions.slice(0, 3).map((champion) => championDisplayName(champion)).join(", ");
 }
 
 function primaryChampion(champions: LolChampionSummary[] | undefined): LolChampionSummary | undefined {
@@ -596,7 +591,7 @@ export function ParticipationPage({
       const nextState = await apiPost<ParticipationState>("/api/participation/entry-status", { entryId: entry.id, status });
       setLocalState(nextState);
       setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: t.entryStatusUpdated }));
-      showToast("success", t.entryStatusUpdated, `${entry.twitchUserName} · ${statusLabel(status)}`);
+      showToast("success", t.entryStatusUpdated, `${entry.twitchUserName} · ${manualStatusLabel(normalizeManualEntryStatus(status))}`);
     } catch (error) {
       const message = apiErrorDetail(error, "/api/participation/entry-status", t.entryStatusUpdateFailed);
       setEntryStatusMessages((previous) => ({ ...previous, [entry.id]: message }));
@@ -667,7 +662,7 @@ export function ParticipationPage({
       kind: "entryStatus",
       entry,
       status,
-      title: `${entry.twitchUserName} · ${statusLabel(status)}`,
+      title: `${entry.twitchUserName} · ${manualStatusLabel(normalizeManualEntryStatus(status))}`,
       description: t.confirmStatusDescription,
       confirmLabel: t.confirm,
       tone: isDestructiveStatus(status) ? "danger" : "primary"
@@ -842,24 +837,25 @@ export function ParticipationPage({
                     {queue.map((entry) => {
                       const champion = primaryChampion(entry.topChampions);
                       const artUrl = championArtUrl(champion);
+                      const manualStatus = normalizeManualEntryStatus(entry.status);
                       return (
                         <Card as="article" className="participation-shared-queue-row" key={entry.id} padding="md" variant="elevated">
                           <div className="participation-shared-champion-card">
                             <span>#{entry.position}</span>
                             {artUrl ? <img src={artUrl} alt="" /> : null}
-                            <strong>{champion ? championDisplayName(champion) : t.topChampions}</strong>
+                            {champion ? <strong>{championDisplayName(champion)}</strong> : null}
                           </div>
 
                           <div className="participation-shared-user">
                             <strong>{entry.twitchUserName}</strong>
                             <span>{t.riotId}: {entry.riotId}</span>
                             <div className="participation-shared-chip-row">
-                              <StatusPill size="sm" tone={participationStatusTone(entry.status)}>{statusLabel(entry.status)}</StatusPill>
+                              <StatusPill size="sm" tone={participationStatusTone(manualStatus)}>{manualStatusLabel(manualStatus)}</StatusPill>
                               <Badge size="sm" tone={profileStatusTone(entry.profileStatus)}>{profileStatusLabel(entry.profileStatus)}</Badge>
                               <Badge size="sm" tone="info">{mainRoleLabel(entry.mainRole, entry.mainRoleConfidence)}</Badge>
+                              <span className="participation-shared-created-at">{t.createdAt}: {formatTime(entry.createdAt)}</span>
                             </div>
                             {entry.profileFailureReason ? <span>{t.profileFailureReason}: {entry.profileFailureReason}</span> : null}
-                            <span>{t.topChampions}: {championLabel(entry.topChampions)}</span>
                           </div>
 
                           <div className="participation-shared-controls">
@@ -885,25 +881,19 @@ export function ParticipationPage({
                                   aria-label={t.entryStatusOverride}
                                   disabled={entryStatusBusyId === entry.id}
                                   id={`participation-status-${entry.id}`}
-                                  onChange={(event) => requestEntryStatus(entry, event.target.value as ParticipationStatus)}
-                                  value={entry.status}
+                                  onChange={(event) => requestEntryStatus(entry, event.target.value as ManualEntryStatus)}
+                                  value={manualStatus}
                                 >
                                   {ENTRY_STATUS_OPTIONS.map((status) => (
-                                    <option value={status} key={status}>{statusLabel(status)}</option>
+                                    <option value={status} key={status}>{manualStatusLabel(status)}</option>
                                   ))}
                                 </Select>
                               </FormControl>
                             </FormField>
-                            {entryStatusMessages[entry.id] ? <StatusPill size="sm" tone={entryStatusMessages[entry.id] === t.entryStatusUpdated ? "success" : "danger"}>{entryStatusMessages[entry.id]}</StatusPill> : null}
-                          </div>
-
-                          <div className="participation-shared-meta">
-                            <span>{t.source}: {sourceLabel(entry.source)}</span>
-                            <span>{t.checkInUntil}: {formatTime(entry.checkInExpiresAt)}</span>
-                            <span>{t.createdAt}: {formatTime(entry.createdAt)}</span>
-                            <Button onClick={() => void refreshProfile(entry.id)} size="sm" variant="secondary">
+                            <Button className="participation-shared-refresh-button" onClick={() => void refreshProfile(entry.id)} size="sm" variant="secondary">
                               {t.refreshProfile}
                             </Button>
+                            {entryStatusMessages[entry.id] ? <StatusPill size="sm" tone={entryStatusMessages[entry.id] === t.entryStatusUpdated ? "success" : "danger"}>{entryStatusMessages[entry.id]}</StatusPill> : null}
                           </div>
 
                           <form className="participation-shared-invite" onSubmit={(event) => requestInviteMessage(event, entry)}>

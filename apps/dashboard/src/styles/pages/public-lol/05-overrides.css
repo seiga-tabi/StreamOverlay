@@ -3273,19 +3273,37 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 
 @media (max-width: 760px) {
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-panel {
+    display: flex !important;
+    flex-direction: column;
     min-width: min(100vw - 24px, 100%) !important;
     max-width: min(100vw - 24px, 100%) !important;
+    overflow: hidden !important;
+    overscroll-behavior: contain;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list {
+    flex: 1 1 auto;
+    min-height: var(--yoro-space-0) !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-    grid-template-columns: 40px minmax(0, 1fr) minmax(74px, max-content) !important;
-    grid-template-areas:
-      "avatar name rank"
-      "tier name rank" !important;
+    grid-template-columns:
+      var(--yoro-space-10)
+      var(--yoro-space-8)
+      minmax(var(--yoro-space-12), 1fr)
+      minmax(calc(var(--yoro-space-12) + var(--yoro-space-6)), max-content)
+      var(--yoro-space-6) !important;
+    grid-template-areas: "avatar tier name rank mark" !important;
+    gap: var(--yoro-space-2) !important;
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy {
-    min-width: 74px !important;
+    min-width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
   }
 }
 
@@ -4410,4 +4428,3 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
     padding: 18px !important;
   }
 }
-
