@@ -45,6 +45,8 @@
   --yoro-color-match-score-best: hsl(36 100% 58%);
   --yoro-theme-match-mvp-background: linear-gradient(100deg, hsl(222 39% 28%) 0%, hsl(43 58% 35%) 52%, hsl(222 38% 28%) 100%);
   --yoro-theme-match-ace-background: linear-gradient(100deg, hsl(354 34% 27%) 0%, hsl(354 52% 40%) 52%, hsl(222 38% 28%) 100%);
+  --yoro-theme-match-mvp-border: linear-gradient(110deg, var(--yoro-color-match-win-accent) 0%, var(--yoro-color-match-score-best) 50%, var(--yoro-color-accent-gold) 100%);
+  --yoro-theme-match-ace-border: linear-gradient(110deg, var(--yoro-color-match-loss-accent) 0%, var(--yoro-color-match-score-bad) 50%, var(--yoro-color-accent-rose) 100%);
   --yoro-color-rank-band-neutral: hsl(210 7% 71% / .1);
   --yoro-color-rank-band-bronze: hsl(24 38% 51% / .12);
   --yoro-color-rank-band-silver: hsl(210 14% 83% / .11);

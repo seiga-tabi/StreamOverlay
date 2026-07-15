@@ -232,7 +232,10 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-public-lol-route-"));
   try {
-    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>YORO.gg</title><div id=\"root\"></div>");
+    writeFileSync(
+      path.join(dir, "index.html"),
+      "<!doctype html><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title><div id=\"root\"></div>"
+    );
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
       store: {},
@@ -249,6 +252,13 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(res.statusCode, 200);
     assert.match(res.headers["Content-Type"], /text\/html/);
     assert.match(res.body, /YORO\.gg/);
+    assert.equal(res.headers["Cache-Control"], "no-store");
+    assert.equal(res.headers.ETag, undefined);
+    const nonce = /script-src 'nonce-([^']+)'/.exec(res.headers["Content-Security-Policy"])?.[1];
+    assert.ok(nonce);
+    assert.match(res.headers["Content-Security-Policy"], /'strict-dynamic'/);
+    assert.match(res.body, new RegExp(`nonce=\"${nonce}\"`));
+    assert.doesNotMatch(res.body, /__STREAMOPS_CSP_NONCE__/);
 
     const legalRes = createResponse();
     await handler(createRequest("GET", "/privacy"), legalRes);

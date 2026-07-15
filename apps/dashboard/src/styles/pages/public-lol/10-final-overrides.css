@@ -1444,25 +1444,34 @@
 
   .public-profile-shared-shell .public-team-player-id-stack .public-riot-id-static,
   .public-profile-shared-shell .public-team-player-id-stack .public-riot-id-link {
+    display: grid !important;
     grid-column: 1 !important;
     grid-row: 1 / 3 !important;
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto !important;
+    grid-template-rows:
+      calc(var(--yoro-size-touch-target) - var(--yoro-space-5))
+      var(--yoro-space-5) !important;
     align-items: center !important;
     gap: var(--yoro-space-1) !important;
     min-width: var(--yoro-space-0) !important;
     min-height: var(--yoro-size-touch-target) !important;
-    padding-block: var(--yoro-space-0) var(--yoro-space-5) !important;
+    padding-block: var(--yoro-space-0) !important;
     overflow: hidden !important;
     font-size: var(--yoro-font-size-xs) !important;
   }
 
   .public-profile-shared-shell .public-team-player-id-stack .public-riot-name {
-    flex: 1 1 auto !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
     min-width: var(--yoro-space-0) !important;
+    line-height: var(--yoro-line-height-tight) !important;
   }
 
   .public-profile-shared-shell .public-team-player-id-stack .public-riot-tag-badge,
   .public-profile-shared-shell .public-team-player-id-stack .public-riot-award-badges {
-    flex: 0 0 auto !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
     align-self: center !important;
   }
 
@@ -1594,16 +1603,27 @@
 
 .public-profile-shared-shell .public-matches-panel .public-match-row.highlight-mvp,
 .public-profile-shared-shell .public-matches-panel .public-match-row.highlight-ace {
-  border-color: var(--yoro-color-border-on-dark-strong) !important;
-  box-shadow: var(--yoro-shadow-md) !important;
+  border-color: transparent !important;
+  box-shadow: var(--yoro-shadow-sm) !important;
 }
 
 .public-profile-shared-shell .public-matches-panel .public-match-row.highlight-mvp {
-  background: var(--yoro-theme-match-mvp-background) !important;
+  background:
+    var(--yoro-theme-match-mvp-background) padding-box,
+    var(--yoro-theme-match-mvp-border) border-box !important;
 }
 
 .public-profile-shared-shell .public-matches-panel .public-match-row.highlight-ace {
-  background: var(--yoro-theme-match-ace-background) !important;
+  background:
+    var(--yoro-theme-match-ace-background) padding-box,
+    var(--yoro-theme-match-ace-border) border-box !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-mvp::before,
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-mvp::after,
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-ace::before,
+.public-profile-shared-shell .public-matches-panel .public-match-row.highlight-ace::after {
+  content: none !important;
 }
 
 .public-profile-shared-shell .public-matches-panel .public-kda strong {
@@ -1752,8 +1772,20 @@
   }
 
   .public-profile-shared-shell .public-matches-panel .public-kda strong {
-    gap: var(--yoro-space-1) !important;
+    gap: var(--yoro-size-sr-only) !important;
     font-size: var(--yoro-font-size-xl) !important;
+    line-height: var(--yoro-line-height-tight) !important;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-kda strong > span {
+    font-size: var(--yoro-font-size-xl) !important;
+    font-weight: var(--yoro-font-weight-bold) !important;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-kda strong > i {
+    align-self: center !important;
+    font-size: var(--yoro-font-size-xs) !important;
     line-height: var(--yoro-line-height-tight) !important;
   }
 
@@ -1843,7 +1875,7 @@
     display: grid !important;
   }
 
-  .public-profile-shared-shell .public-matches-panel .public-kda strong {
+  .public-profile-shared-shell .public-matches-panel .public-kda strong > span {
     font-size: var(--yoro-font-size-lg) !important;
   }
 }

@@ -927,17 +927,27 @@ function cspConnectSrcForRequest(req: IncomingMessage | undefined): string {
     .join(" ");
 }
 
-function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay", req?: IncomingMessage): string {
+const DASHBOARD_CSP_NONCE_PLACEHOLDER = "__STREAMOPS_CSP_NONCE__";
+
+function cspForStaticApp(
+  mountPath: "/admin" | "/dashboard" | "/overlay",
+  req?: IncomingMessage,
+  nonce?: string
+): string {
   if (mountPath === "/admin" || mountPath === "/dashboard") {
+    const scriptSrc = nonce
+      ? `script-src 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:`
+      : "script-src 'self'";
     return [
       "default-src 'self'",
       "base-uri 'none'",
       "object-src 'none'",
-      "script-src 'self'",
-      "style-src 'self'",
+      scriptSrc,
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
-      `connect-src ${cspConnectSrcForRequest(req)}`,
-      `frame-src 'self' ${originFor(appConfig.overlayBaseUrl)}`,
+      `connect-src ${cspConnectSrcForRequest(req)} https:`,
+      `frame-src 'self' ${originFor(appConfig.overlayBaseUrl)} https:`,
+      "fenced-frame-src https:",
       "frame-ancestors 'self'",
       "form-action 'self'"
     ].join("; ");
@@ -956,11 +966,23 @@ function cspForStaticApp(mountPath: "/admin" | "/dashboard" | "/overlay", req?: 
   ].join("; ");
 }
 
-function staticSecurityHeaders(req: IncomingMessage, filePath: string): Record<string, string> {
+function staticSecurityHeaders(
+  req: IncomingMessage,
+  filePath: string,
+  mountPath?: "/admin" | "/dashboard" | "/overlay",
+  nonce?: string
+): Record<string, string> {
   const headers = securityHeadersForRequest(req);
   if (filePath.endsWith("index.html")) {
-    if (filePath.includes(`${path.sep}dashboard${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/dashboard", req);
-    if (filePath.includes(`${path.sep}overlay${path.sep}`)) headers["Content-Security-Policy"] = cspForStaticApp("/overlay", req);
+    const resolvedMountPath = mountPath
+      ?? (filePath.includes(`${path.sep}dashboard${path.sep}`)
+        ? "/dashboard"
+        : filePath.includes(`${path.sep}overlay${path.sep}`)
+          ? "/overlay"
+          : undefined);
+    if (resolvedMountPath) {
+      headers["Content-Security-Policy"] = cspForStaticApp(resolvedMountPath, req, nonce);
+    }
   }
   return headers;
 }
@@ -1399,15 +1421,21 @@ async function sendStaticFile(
   req: IncomingMessage,
   res: ServerResponse,
   filePath: string,
-  extraHeaders: Record<string, string> = {}
+  extraHeaders: Record<string, string> = {},
+  mountPath?: "/admin" | "/dashboard" | "/overlay"
 ): Promise<void> {
   try {
     const stat = await fs.stat(filePath);
     if (!stat.isFile()) throw new Error("not found");
+    const isDashboardHtml = filePath.endsWith("index.html")
+      && (mountPath === "/admin" || mountPath === "/dashboard" || filePath.includes(`${path.sep}dashboard${path.sep}`));
+    const cspNonce = isDashboardHtml ? crypto.randomBytes(18).toString("base64url") : undefined;
     const etag = staticEtag(stat.size, stat.mtimeMs);
     const lastModified = stat.mtime.toUTCString();
     const publicMetadata = ["robots.txt", "sitemap.xml", "favicon.png", "favicon.svg"].includes(path.basename(filePath));
-    const cacheControl = filePath.endsWith("index.html")
+    const cacheControl = cspNonce
+      ? "no-store"
+      : filePath.endsWith("index.html")
       ? "no-cache"
       : publicMetadata
         ? "public, max-age=3600"
@@ -1415,17 +1443,19 @@ async function sendStaticFile(
     const baseHeaders = {
       "Content-Type": contentTypeFor(filePath),
       "Cache-Control": cacheControl,
-      "ETag": etag,
-      "Last-Modified": lastModified,
-      ...staticSecurityHeaders(req, filePath),
+      ...(cspNonce ? {} : { "ETag": etag, "Last-Modified": lastModified }),
+      ...staticSecurityHeaders(req, filePath, mountPath, cspNonce),
       ...extraHeaders
     };
-    if (isNotModified(req, etag, stat.mtime)) {
+    if (!cspNonce && isNotModified(req, etag, stat.mtime)) {
       res.writeHead(304, baseHeaders);
       res.end();
       return;
     }
-    const body = await fs.readFile(filePath);
+    const fileBody = await fs.readFile(filePath);
+    const body = cspNonce
+      ? Buffer.from(fileBody.toString("utf8").replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce), "utf8")
+      : fileBody;
     res.writeHead(200, baseHeaders);
     if (req.method === "HEAD") {
       res.end();
@@ -1498,7 +1528,7 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
     return true;
   }
   if (mountPath === "/overlay" && relative && !path.extname(relative)) {
-    await sendStaticFile(req, res, path.resolve(staticDir, "index.html"));
+    await sendStaticFile(req, res, path.resolve(staticDir, "index.html"), {}, mountPath);
     return true;
   }
   const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
@@ -1509,7 +1539,7 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
     res.end(JSON.stringify({ error: "forbidden" }));
     return true;
   }
-  await sendStaticFile(req, res, candidate);
+  await sendStaticFile(req, res, candidate, {}, mountPath);
   return true;
 }
 
@@ -4898,7 +4928,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           const legalDraftHeaders = url.pathname === "/privacy" || url.pathname === "/terms"
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
-          await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, "index.html"), legalDraftHeaders);
+          await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, "index.html"), legalDraftHeaders, "/dashboard");
           return;
         }
       }
