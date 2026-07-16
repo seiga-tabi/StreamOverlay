@@ -1312,6 +1312,30 @@
     background: var(--public-gray-surface-strong) !important;
   }
 
+  .public-profile-shared-shell .public-match-expanded-toolbar {
+    gap: var(--yoro-space-1) !important;
+  }
+
+  .public-profile-shared-shell .public-match-expanded-tabs {
+    padding: var(--yoro-size-sr-only) !important;
+  }
+
+  .public-profile-shared-shell .public-match-expanded-tabs button,
+  .public-profile-shared-shell .public-match-id-mask-toggle {
+    min-height: calc(var(--yoro-space-8) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
+    height: calc(var(--yoro-space-8) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
+    padding-inline: var(--yoro-space-2) !important;
+    font-size: var(--yoro-font-size-xs) !important;
+  }
+
+  .public-profile-shared-shell .public-match-expanded-tabs button {
+    min-width: var(--yoro-space-0) !important;
+  }
+
+  .public-profile-shared-shell .public-match-id-mask-toggle {
+    min-width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
+  }
+
   .public-profile-shared-shell .public-team-detail,
   .public-profile-shared-shell .public-team-player-list {
     gap: var(--yoro-space-1) !important;
@@ -1352,33 +1376,33 @@
     grid-template-rows: auto !important;
     align-items: center !important;
     gap: var(--yoro-space-1) !important;
-    min-height: calc(var(--yoro-space-12) + var(--yoro-space-3)) !important;
+    min-height: calc(var(--yoro-space-10) + var(--yoro-space-3)) !important;
     padding: var(--yoro-space-2) !important;
     border-top: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
     background: transparent !important;
   }
 
   .public-profile-shared-shell .public-team-player-main {
-    grid-template-columns: var(--yoro-space-12) calc(var(--yoro-space-12) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) minmax(var(--yoro-space-0), 1fr) !important;
+    grid-template-columns: var(--yoro-space-10) calc(var(--yoro-space-10) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) minmax(var(--yoro-space-0), 1fr) !important;
     gap: var(--yoro-space-1) !important;
     min-width: var(--yoro-space-0) !important;
   }
 
   .public-profile-shared-shell .public-team-player-main .public-team-champion-avatar {
-    width: var(--yoro-space-12) !important;
-    height: var(--yoro-space-12) !important;
+    width: var(--yoro-space-10) !important;
+    height: var(--yoro-space-10) !important;
   }
 
   .public-profile-shared-shell .public-team-loadout-build {
-    grid-template-columns: repeat(2, var(--yoro-space-6)) !important;
-    width: calc(var(--yoro-space-12) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
+    grid-template-columns: repeat(2, var(--yoro-space-5)) !important;
+    width: calc(var(--yoro-space-10) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
     column-gap: calc(var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
     row-gap: var(--yoro-space-1) !important;
   }
 
   .public-profile-shared-shell .public-team-spell-build,
   .public-profile-shared-shell .public-team-rune-build {
-    grid-template-rows: repeat(2, var(--yoro-space-6)) !important;
+    grid-template-rows: repeat(2, var(--yoro-space-5)) !important;
     gap: var(--yoro-space-1) !important;
   }
 
@@ -1386,10 +1410,10 @@
   .public-profile-shared-shell .public-team-spell-empty,
   .public-profile-shared-shell .public-team-rune-slot,
   .public-profile-shared-shell .public-team-rune-empty {
-    width: var(--yoro-space-6) !important;
-    min-width: var(--yoro-space-6) !important;
-    height: var(--yoro-space-6) !important;
-    min-height: var(--yoro-space-6) !important;
+    width: var(--yoro-space-5) !important;
+    min-width: var(--yoro-space-5) !important;
+    height: var(--yoro-space-5) !important;
+    min-height: var(--yoro-space-5) !important;
     border-radius: var(--yoro-radius-xs) !important;
   }
 
@@ -1541,36 +1565,6 @@
     grid-column: 4 !important;
   }
 
-  .public-profile-shared-shell .public-team-player-main {
-    grid-template-columns: var(--yoro-space-10) calc(var(--yoro-space-10) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) minmax(var(--yoro-space-0), 1fr) !important;
-    gap: var(--yoro-space-1) !important;
-  }
-
-  .public-profile-shared-shell .public-team-player-main .public-team-champion-avatar {
-    width: var(--yoro-space-10) !important;
-    height: var(--yoro-space-10) !important;
-  }
-
-  .public-profile-shared-shell .public-team-loadout-build {
-    grid-template-columns: repeat(2, var(--yoro-space-5)) !important;
-    width: calc(var(--yoro-space-10) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
-  }
-
-  .public-profile-shared-shell .public-team-spell-build,
-  .public-profile-shared-shell .public-team-rune-build {
-    grid-template-rows: repeat(2, var(--yoro-space-5)) !important;
-  }
-
-  .public-profile-shared-shell .public-team-spell-slot,
-  .public-profile-shared-shell .public-team-spell-empty,
-  .public-profile-shared-shell .public-team-rune-slot,
-  .public-profile-shared-shell .public-team-rune-empty {
-    width: var(--yoro-space-5) !important;
-    min-width: var(--yoro-space-5) !important;
-    height: var(--yoro-space-5) !important;
-    min-height: var(--yoro-space-5) !important;
-  }
-
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
     grid-template-columns:
       minmax(var(--yoro-space-0), 1fr)
@@ -1641,20 +1635,6 @@
 
 .public-profile-shared-shell .public-matches-panel .public-kda strong .deaths {
   color: var(--yoro-color-match-loss-accent) !important;
-}
-
-.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-excellent,
-.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-good {
-  background: var(--yoro-color-match-score-good) !important;
-}
-
-.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-warning,
-.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-bad {
-  background: var(--yoro-color-match-score-bad) !important;
-}
-
-.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-impact {
-  background: var(--yoro-color-match-score-best) !important;
 }
 
 @media (max-width: 48rem) {
@@ -1878,6 +1858,61 @@
   .public-profile-shared-shell .public-matches-panel .public-kda strong > span {
     font-size: var(--yoro-font-size-md) !important;
   }
+}
+
+/* PC와 모바일 점수 표시는 동일한 상태 색상과 대비를 사용합니다. */
+.public-profile-shared-shell .public-matches-panel .public-match-score,
+.public-profile-shared-shell .public-matches-panel .public-match-impact {
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark-strong) !important;
+  background: var(--yoro-theme-match-score-neutral-background) !important;
+  color: var(--yoro-color-text-on-dark) !important;
+  box-shadow: var(--yoro-shadow-sm) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-score.metric-tone-excellent,
+.public-profile-shared-shell .public-matches-panel .public-match-score.metric-tone-good,
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-excellent,
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-good {
+  border-color: var(--yoro-color-match-score-good) !important;
+  background: var(--yoro-theme-match-score-good-background) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-score.metric-tone-warning,
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-warning {
+  border-color: var(--yoro-color-match-score-best) !important;
+  background: var(--yoro-theme-match-score-warning-background) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-score.metric-tone-bad,
+.public-profile-shared-shell .public-matches-panel .public-match-impact.metric-tone-bad {
+  border-color: var(--yoro-color-match-score-bad) !important;
+  background: var(--yoro-theme-match-score-bad-background) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-score,
+.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-impact {
+  border-color: var(--yoro-color-match-score-best) !important;
+  background: var(--yoro-theme-match-score-mvp-background) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .highlight-ace .public-match-score,
+.public-profile-shared-shell .public-matches-panel .highlight-ace .public-match-impact {
+  border-color: var(--yoro-color-match-score-bad) !important;
+  background: var(--yoro-theme-match-score-ace-background) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-score strong,
+.public-profile-shared-shell .public-matches-panel .public-match-score span,
+.public-profile-shared-shell .public-matches-panel .public-match-impact strong,
+.public-profile-shared-shell .public-matches-panel .public-match-impact span {
+  color: var(--yoro-color-text-on-dark) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-score strong,
+.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-score span,
+.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-impact strong,
+.public-profile-shared-shell .public-matches-panel .highlight-mvp .public-match-impact span {
+  color: var(--yoro-color-match-score-on-bright) !important;
 }
 
 /* 전적 결과 모바일 헤더: 검색과 주요 도구를 한 줄에 유지하고 메뉴는 콘텐츠 위에 표시 */
