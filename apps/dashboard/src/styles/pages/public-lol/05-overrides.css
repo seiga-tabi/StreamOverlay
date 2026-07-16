@@ -3123,6 +3123,79 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
     padding: 16px !important;
   }
 
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-page :where(
+    .public-participation-shared-header,
+    .yoro-page-header__main,
+    .yoro-page-header__description,
+    .yoro-page-header__actions,
+    .public-participation-streamer-select,
+    .public-participation-streamer-head,
+    .public-participation-streamer-head > div,
+    .public-participation-streamer-list,
+    .public-participation-streamer-card,
+    .public-participation-streamer-info,
+    .public-participation-streamer-meta,
+    .public-participation-layout,
+    .public-participation-card,
+    .yoro-card__header,
+    .yoro-card__content,
+    .public-participation-form,
+    .public-participation-rejoin-note
+  ) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-page :where(
+    .public-participation-shared-header,
+    .yoro-page-header__main,
+    .yoro-page-header__description,
+    .yoro-page-header__actions,
+    .public-participation-streamer-select,
+    .public-participation-streamer-list,
+    .public-participation-streamer-card,
+    .public-participation-layout,
+    .public-participation-card,
+    .public-participation-form
+  ) {
+    width: 100% !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-page :where(
+    .yoro-page-header__description,
+    .public-participation-streamer-head p,
+    .yoro-card__description,
+    .public-participation-rejoin-note span
+  ) {
+    word-break: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-shared-streamer-card.yoro-card {
+    grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-shared-streamer-card .public-participation-streamer-meta {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    justify-items: start;
+    gap: var(--yoro-space-2);
+    width: 100%;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-streamer-meta .yoro-metric {
+    flex: 0 1 auto;
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-actions .yoro-button {
+    width: 100%;
+  }
+
   .public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-note {
     align-items: flex-start;
     flex-direction: column;

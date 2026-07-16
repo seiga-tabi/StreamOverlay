@@ -5,4 +5,4 @@ Disallow: /dashboard
 Disallow: /privacy
 Disallow: /terms
 
-Sitemap: https://gg.seigatabi.com/sitemap.xml
+Sitemap: https://yoro.gg/sitemap.xml

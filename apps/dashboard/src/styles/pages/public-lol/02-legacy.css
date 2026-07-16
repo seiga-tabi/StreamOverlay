@@ -10131,7 +10131,6 @@ html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button s
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-    gap: 6px 10px;
     min-height: 72px !important;
     padding: 10px 12px !important;
   }

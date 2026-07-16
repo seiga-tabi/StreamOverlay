@@ -5,6 +5,7 @@ import type { LolRankTier } from "@streamops/shared";
 import { appConfig } from "../config.js";
 
 const RANKED_EMBLEMS_ZIP_URL = "https://static.developer.riotgames.com/docs/lol/ranked-emblems-latest.zip";
+const RANKED_EMBLEMS_DOWNLOAD_TIMEOUT_MS = 10_000;
 const RANKED_EMBLEM_TITLES: Record<Exclude<LolRankTier, "UNRANKED">, string> = {
   IRON: "Iron",
   BRONZE: "Bronze",
@@ -49,7 +50,9 @@ async function exists(filePath: string): Promise<boolean> {
 
 async function ensureZip(zipPath: string): Promise<Buffer> {
   if (await exists(zipPath)) return fs.readFile(zipPath);
-  const response = await fetch(RANKED_EMBLEMS_ZIP_URL);
+  const response = await fetch(RANKED_EMBLEMS_ZIP_URL, {
+    signal: AbortSignal.timeout(RANKED_EMBLEMS_DOWNLOAD_TIMEOUT_MS)
+  });
   if (!response.ok) throw new Error(`Riot ranked emblems download failed: ${response.status}`);
   const buffer = Buffer.from(await response.arrayBuffer());
   const tempPath = `${zipPath}.${process.pid}.${Date.now()}.tmp`;

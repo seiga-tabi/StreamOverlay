@@ -69,7 +69,7 @@ https://bot.example.com/overlay/?mode=participation
 https://bot.example.com/api/twitch/status
 ```
 
-자세한 서버 준비, reverse proxy, OBS URL, 영구 볼륨 설명은 [docs/DEPLOYMENT_DOCKER.md](docs/DEPLOYMENT_DOCKER.md)를 확인하세요. 실제 key를 예시 파일이나 커밋에 넣었다면 [docs/SECRETS_ROTATION.md](docs/SECRETS_ROTATION.md)의 절차대로 즉시 교체하세요.
+자세한 서버 준비, reverse proxy, OBS URL, 영구 볼륨 설명은 [docs/DEPLOYMENT_DOCKER.md](docs/DEPLOYMENT_DOCKER.md)를 확인하세요. 배포 전에는 [릴리즈 체크리스트](docs/RELEASE_CHECKLIST.md)를 통과하고 [롤백 절차](docs/ROLLBACK.md)를 준비해야 합니다. 실제 key를 예시 파일이나 커밋에 넣었다면 [secret rotation 절차](docs/SECRETS_ROTATION.md)에 따라 즉시 교체하세요.
 
 ## OBS 연결
 

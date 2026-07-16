@@ -4,15 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="YORO.gg에서 League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 확인하세요." />
-    <link rel="canonical" href="https://gg.seigatabi.com/" />
+    <link rel="canonical" href="https://yoro.gg/" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="YORO.gg" />
     <meta property="og:title" content="YORO.gg" />
     <meta property="og:description" content="League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 한 곳에서 확인하세요." />
-    <meta property="og:url" content="https://gg.seigatabi.com/" />
-    <meta property="og:image" content="https://gg.seigatabi.com/images/yorogg-og.png" />
-    <meta property="og:image:secure_url" content="https://gg.seigatabi.com/images/yorogg-og.png" />
+    <meta property="og:url" content="https://yoro.gg/" />
+    <meta property="og:image" content="https://yoro.gg/images/yorogg-og.png" />
+    <meta property="og:image:secure_url" content="https://yoro.gg/images/yorogg-og.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -20,15 +20,33 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="YORO.gg" />
     <meta name="twitter:description" content="League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 한 곳에서 확인하세요." />
-    <meta name="twitter:image" content="https://gg.seigatabi.com/images/yorogg-og.png" />
+    <meta name="twitter:image" content="https://yoro.gg/images/yorogg-og.png" />
     <meta name="twitter:image:alt" content="YORO.gg logo" />
     <script nonce="__STREAMOPS_CSP_NONCE__" src="/dashboard/config.js"></script>
-    <script
-      nonce="__STREAMOPS_CSP_NONCE__"
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880271953912430"
-      crossorigin="anonymous"
-    ></script>
+    <script nonce="__STREAMOPS_CSP_NONCE__">
+      (() => {
+        const consentKey = "yoro.ads.consent";
+        const scriptSelector = "script[data-yoro-adsense]";
+        const loadAdsense = () => {
+          if (document.querySelector(scriptSelector)) return;
+          const script = document.createElement("script");
+          script.async = true;
+          script.crossOrigin = "anonymous";
+          script.dataset.yoroAdsense = "true";
+          script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880271953912430";
+          document.head.append(script);
+        };
+
+        try {
+          if (window.localStorage.getItem(consentKey) === "granted") loadAdsense();
+        } catch {
+          // 저장소 접근이 차단된 환경에서는 동의 전 상태를 유지합니다.
+        }
+        window.addEventListener("yoro:ads-consent", (event) => {
+          if (event instanceof CustomEvent && event.detail?.granted === true) loadAdsense();
+        });
+      })();
+    </script>
     <title>YORO.gg</title>
   </head>
   <body>

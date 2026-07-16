@@ -1773,13 +1773,13 @@
 
   .public-profile-shared-shell .public-matches-panel .public-kda strong {
     gap: var(--yoro-size-sr-only) !important;
-    font-size: var(--yoro-font-size-xl) !important;
+    font-size: var(--yoro-font-size-lg) !important;
     line-height: var(--yoro-line-height-tight) !important;
     font-variant-numeric: tabular-nums;
   }
 
   .public-profile-shared-shell .public-matches-panel .public-kda strong > span {
-    font-size: var(--yoro-font-size-xl) !important;
+    font-size: var(--yoro-font-size-lg) !important;
     font-weight: var(--yoro-font-weight-bold) !important;
   }
 
@@ -1876,7 +1876,7 @@
   }
 
   .public-profile-shared-shell .public-matches-panel .public-kda strong > span {
-    font-size: var(--yoro-font-size-lg) !important;
+    font-size: var(--yoro-font-size-md) !important;
   }
 }
 

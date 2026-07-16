@@ -1481,7 +1481,12 @@ function sendInvalidStaticPath(req: IncomingMessage, res: ServerResponse): void 
   res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "잘못된 정적 파일 경로입니다." }));
 }
 
-async function sendRankedEmblemAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
+async function sendRankedEmblemAsset(
+  req: IncomingMessage,
+  res: ServerResponse,
+  pathname: string,
+  logger?: Pick<JsonlLogger, "error">
+): Promise<boolean> {
   const match = /^\/riot\/ranked-emblems\/([a-z]+)\.png$/i.exec(pathname);
   if (!match?.[1]) return false;
   try {
@@ -1494,7 +1499,11 @@ async function sendRankedEmblemAsset(req: IncomingMessage, res: ServerResponse, 
     await sendStaticFile(req, res, filePath);
     return true;
   } catch (error) {
-    void error;
+    logger?.error({
+      type: "riot.ranked_emblem_asset_failed",
+      tier: match[1].toUpperCase(),
+      error: toSafeErrorMessage(error)
+    });
     res.writeHead(502, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
     res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "랭크 아이콘을 불러오지 못했습니다." }));
     return true;
@@ -4935,7 +4944,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if ((req.method === "GET" || req.method === "HEAD") && await sendOverlayAlertAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendCommunityAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendLocalTtsAsset(req, res, url.pathname)) return;
-      if ((req.method === "GET" || req.method === "HEAD") && await sendRankedEmblemAsset(req, res, url.pathname)) return;
+      if (
+        (req.method === "GET" || req.method === "HEAD") &&
+        await sendRankedEmblemAsset(req, res, url.pathname, input.logger)
+      ) return;
       if (
         (req.method === "GET" || req.method === "HEAD") &&
         url.pathname.startsWith("/images/") &&

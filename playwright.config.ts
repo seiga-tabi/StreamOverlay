@@ -1,12 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const dashboardPort = 4173;
-const baselinePlatform = process.platform;
+const overlayPort = 4174;
 
 export default defineConfig({
   testDir: "./qa/visual-regression",
   outputDir: "./qa/visual-regression/results",
-  snapshotPathTemplate: `{testDir}/baselines/${baselinePlatform}/{projectName}/{arg}{ext}`,
+  // CI와 로컬이 같은 Chromium/Linux 기준선을 사용해 플랫폼별 baseline 분기를 방지합니다.
+  snapshotPathTemplate: `{testDir}/baselines/linux/{projectName}/{arg}{ext}`,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
@@ -46,10 +47,18 @@ export default defineConfig({
       }
     }
   ],
-  webServer: {
-    command: `npm --workspace apps/dashboard run dev -- --host 127.0.0.1 --port ${dashboardPort} --strictPort`,
-    url: `http://127.0.0.1:${dashboardPort}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000
-  }
+  webServer: [
+    {
+      command: `npm --workspace apps/dashboard run dev -- --host 127.0.0.1 --port ${dashboardPort} --strictPort`,
+      url: `http://127.0.0.1:${dashboardPort}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000
+    },
+    {
+      command: `npm --workspace apps/overlay run dev -- --host 127.0.0.1 --port ${overlayPort} --strictPort`,
+      url: `http://127.0.0.1:${overlayPort}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000
+    }
+  ]
 });

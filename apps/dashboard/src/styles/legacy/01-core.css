@@ -2375,14 +2375,10 @@ code {
 
 .participation-shared-queue-row.yoro-card {
   display: grid;
-  grid-template-columns: calc(var(--yoro-space-12) * 2.25) minmax(0, 1.1fr) minmax(0, .9fr) minmax(0, .8fr);
-  align-items: start;
-  gap: var(--yoro-space-4);
 }
 
 .participation-shared-champion-card {
   display: grid;
-  gap: var(--yoro-space-2);
   min-width: 0;
 }
 
@@ -2426,11 +2422,9 @@ code {
 }
 
 .participation-shared-invite {
-  grid-column: 2 / -1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  gap: var(--yoro-space-3);
   min-width: 0;
 }
 
