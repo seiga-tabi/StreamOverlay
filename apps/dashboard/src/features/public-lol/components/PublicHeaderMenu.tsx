@@ -41,7 +41,7 @@ export function PublicHeaderMenu({
     <nav className="public-header-nav" aria-label="YORO.gg">
       <button className={activePage === "search" && activeTarget === "search" ? "active" : ""} type="button" onClick={() => onPage("search")}>
         <span aria-hidden="true">{searchItem.icon}</span>
-        <strong data-ko={searchItem.ko} data-ja={searchItem.ja}>{searchItem.label}</strong>
+        <strong  >{searchItem.label}</strong>
       </button>
       <div className="public-header-menu-item">
         <button
@@ -51,13 +51,13 @@ export function PublicHeaderMenu({
           onClick={() => onPage("tournamentCalendar")}
         >
           <span aria-hidden="true">▦</span>
-          <strong data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>{t().contentMenu}</strong>
+          <strong  >{t().contentMenu}</strong>
         </button>
         <div className="public-header-submenu" role="menu" aria-label={t().contentMenu}>
           {contentItems.map((item) => (
             <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
               <span aria-hidden="true">{item.icon}</span>
-              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
+              <strong  >{item.label}</strong>
             </button>
           ))}
         </div>
@@ -70,13 +70,13 @@ export function PublicHeaderMenu({
           onClick={() => onPage("patch")}
         >
           <span aria-hidden="true">▣</span>
-          <strong data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</strong>
+          <strong  >{t().community}</strong>
         </button>
         <div className="public-header-submenu" role="menu" aria-label={t().community}>
           {communityItems.map((item) => (
             <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
               <span aria-hidden="true">{item.icon}</span>
-              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
+              <strong  >{item.label}</strong>
             </button>
           ))}
         </div>
@@ -89,13 +89,13 @@ export function PublicHeaderMenu({
           onClick={() => onPage(showSubscriptions ? "subscriptions" : "followJoin")}
         >
           <span aria-hidden="true">◆</span>
-          <strong data-ko={publicI18n.ko.followMenu} data-ja={publicI18n.ja.followMenu}>{t().followMenu}</strong>
+          <strong  >{t().followMenu}</strong>
         </button>
         <div className="public-header-submenu" role="menu" aria-label={t().followMenu}>
           {followItems.map((item) => (
             <button className={activePage === item.page ? "active" : ""} type="button" role="menuitem" onClick={() => onPage(item.page)} key={item.page}>
               <span aria-hidden="true">{item.icon}</span>
-              <strong data-ko={item.ko} data-ja={item.ja}>{item.label}</strong>
+              <strong  >{item.label}</strong>
             </button>
           ))}
         </div>

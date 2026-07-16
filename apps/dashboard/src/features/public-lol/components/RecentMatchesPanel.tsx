@@ -46,7 +46,7 @@ export function RecentMatchesPanel({
   return (
     <section id="public-recent-matches" className="public-panel public-matches-panel">
       <div className="public-section-head">
-        <h2 data-ko={text.title.ko} data-ja={text.title.ja}>{text.title.label}</h2>
+        <h2  >{text.title.label}</h2>
         <Badge size="sm" tone="info">{matchCount}</Badge>
       </div>
       {filterBar}
@@ -54,8 +54,8 @@ export function RecentMatchesPanel({
         {isEmpty ? (
           <EmptyState className="public-profile-shared-empty-inline" variant="search">
             <EmptyStateIcon>?</EmptyStateIcon>
-            <EmptyStateTitle as="h3" data-ko={text.emptyTitle.ko} data-ja={text.emptyTitle.ja}>{text.emptyTitle.label}</EmptyStateTitle>
-            <EmptyStateDescription data-ko={text.emptyDescription.ko} data-ja={text.emptyDescription.ja}>
+            <EmptyStateTitle as="h3"  >{text.emptyTitle.label}</EmptyStateTitle>
+            <EmptyStateDescription  >
               {text.emptyDescription.label}
             </EmptyStateDescription>
           </EmptyState>
@@ -69,7 +69,7 @@ export function RecentMatchesPanel({
           </Button>
         </div>
       ) : showNoMore ? (
-        <p className="public-match-more-done" data-ko={text.noMoreMatches.ko} data-ja={text.noMoreMatches.ja}>{text.noMoreMatches.label}</p>
+        <p className="public-match-more-done"  >{text.noMoreMatches.label}</p>
       ) : null}
     </section>
   );

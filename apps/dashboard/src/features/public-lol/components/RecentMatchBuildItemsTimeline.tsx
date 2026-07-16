@@ -24,7 +24,7 @@ export function RecentMatchBuildItemsTimeline({
 }: RecentMatchBuildItemsTimelineProps) {
   return (
     <div className="public-match-build-group items">
-      <span data-ko={label.ko} data-ja={label.ja}>{label.label}</span>
+      <span  >{label.label}</span>
       <div className="public-match-build-timeline">
         {itemSlots.length > 0 ? itemSlots.map((item) => (
           <div key={item.key}>

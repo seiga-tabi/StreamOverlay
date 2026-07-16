@@ -6,6 +6,7 @@ import path from "node:path";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
+const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
 const { Store } = await import("../dist/services/store.js");
 
 const previousAuthConfig = {
@@ -554,6 +555,215 @@ test("participation entry-status API는 참가자 상태를 수동 변경한다"
   assert.equal(res.statusCode, 200);
   assert.equal(store.getParticipationQueue()[0].status, "invited");
   assert.ok(dispatched.some((item) => item.reason === "dashboard.participation_entry_status"));
+});
+
+test("게임 중 공개 참가 신청은 오버레이 상태를 모집 중으로 덮어쓰지 않는다", async () => {
+  const store = new Store();
+  const streamerId = "1001";
+  store.startParticipationSession(streamerId, {
+    riotGameName: "Streamer",
+    riotTagLine: "JP1",
+    capturedAt: new Date().toISOString()
+  });
+  store.updateParticipationSessionStatus(streamerId, "in_game");
+  store.setTwitchStreamLiveStatus({
+    twitchUserId: streamerId,
+    isLive: true,
+    source: "eventsub"
+  });
+
+  const dispatched = [];
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    publicTwitchAuth: {
+      async getStatus(sessionId) {
+        assert.equal(sessionId, "viewer-session");
+        return {
+          connected: true,
+          configured: true,
+          requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+          missingScopes: [],
+          user: {
+            id: "viewer-1",
+            login: "viewer-one",
+            displayName: "ViewerOne"
+          }
+        };
+      }
+    },
+    actions: {
+      async dispatchOne(action, ctx, reason) {
+        dispatched.push({ action, ctx, reason });
+      }
+    }
+  });
+
+  const req = createRequest("POST", "/api/public/participation/join", {
+    streamerId,
+    riotId: "ViewerOne#JP1",
+    role: "mid"
+  }, {
+    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`
+  });
+  const res = createResponse();
+  await handler(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(store.getParticipationSession(streamerId)?.status, "in_game");
+  assert.ok(dispatched.some((item) => item.action.type === "overlay.participationQueue" && item.reason === "public.participation_join"));
+  assert.equal(dispatched.some((item) => item.action.type === "overlay.participationStatus"), false);
+});
+
+test("완료된 공개 참가자는 상태 조회 후 기존 항목으로 재참여할 수 있다", async () => {
+  const store = new Store();
+  const streamerId = "1002";
+  store.startParticipationSession(streamerId, {
+    riotGameName: "Streamer",
+    riotTagLine: "JP1",
+    capturedAt: new Date().toISOString()
+  });
+  store.setTwitchStreamLiveStatus({
+    twitchUserId: streamerId,
+    isLive: true,
+    source: "eventsub"
+  });
+  const completed = store.addParticipation(store.makeParticipationEntry({
+    twitchUserId: "viewer-rejoin",
+    twitchUserName: "ViewerRejoin",
+    riotGameName: "ViewerRejoin",
+    riotTagLine: "JP1",
+    preferredRole: "mid",
+    status: "played",
+    source: "dashboard"
+  }), streamerId);
+  const publicTwitchAuth = {
+    async getStatus(sessionId) {
+      assert.equal(sessionId, "viewer-rejoin-session");
+      return {
+        connected: true,
+        configured: true,
+        requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+        missingScopes: [],
+        user: {
+          id: "viewer-rejoin",
+          login: "viewer-rejoin",
+          displayName: "ViewerRejoin"
+        }
+      };
+    }
+  };
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    publicTwitchAuth,
+    actions: {
+      async dispatchOne() {}
+    }
+  });
+  const headers = {
+    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-rejoin-session`
+  };
+
+  const stateReq = createRequest("GET", `/api/public/participation/state?streamerId=${streamerId}`, undefined, headers);
+  const stateRes = createResponse();
+  await handler(stateReq, stateRes);
+
+  assert.equal(stateRes.statusCode, 200);
+  const state = JSON.parse(stateRes.body);
+  assert.equal(state.viewerEntry?.status, "played");
+  assert.equal(state.viewerEntry?.riotId, "ViewerRejoin#JP1");
+  assert.equal(state.queue.length, 0);
+
+  const joinReq = createRequest("POST", "/api/public/participation/join", {
+    streamerId,
+    riotId: "ViewerRejoin#JP1",
+    role: "top"
+  }, headers);
+  const joinRes = createResponse();
+  await handler(joinReq, joinRes);
+
+  assert.equal(joinRes.statusCode, 200);
+  const joined = JSON.parse(joinRes.body);
+  assert.equal(joined.alreadyJoined, false);
+  assert.equal(joined.reused, true);
+  assert.equal(joined.entry?.status, "waitlisted");
+  assert.equal(store.getParticipationQueue(streamerId).length, 1);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.id, completed.id);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.requestedRole, "top");
+});
+
+test("공개 참여 상태는 라이브 방송인만 노출하고 명시 선택 전 대기열을 숨긴다", async () => {
+  const store = new Store();
+  const liveStreamerId = "2001";
+  const offlineStreamerId = "2002";
+  for (const streamerId of [liveStreamerId, offlineStreamerId]) {
+    store.startParticipationSession(streamerId, {
+      riotGameName: `Streamer${streamerId}`,
+      riotTagLine: "JP1",
+      capturedAt: new Date().toISOString()
+    });
+  }
+  store.setTwitchStreamLiveStatus({
+    twitchUserId: liveStreamerId,
+    isLive: true,
+    source: "eventsub"
+  });
+  store.setTwitchStreamLiveStatus({
+    twitchUserId: offlineStreamerId,
+    isLive: false,
+    source: "eventsub"
+  });
+  store.addParticipation(store.makeParticipationEntry({
+    twitchUserId: "viewer-live",
+    twitchUserName: "ViewerLive",
+    riotGameName: "ViewerLive",
+    riotTagLine: "JP1",
+    preferredRole: "mid",
+    status: "waitlisted",
+    source: "dashboard"
+  }), liveStreamerId);
+
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    actions: {
+      async dispatchOne() {}
+    }
+  });
+
+  const unselectedReq = createRequest("GET", "/api/public/participation/state");
+  const unselectedRes = createResponse();
+  await handler(unselectedReq, unselectedRes);
+
+  assert.equal(unselectedRes.statusCode, 200);
+  const unselectedState = JSON.parse(unselectedRes.body);
+  assert.deepEqual(unselectedState.streamers.map((streamer) => streamer.id), [liveStreamerId]);
+  assert.equal(unselectedState.selectedStreamerId, undefined);
+  assert.equal(unselectedState.isOpen, false);
+  assert.equal(unselectedState.summary.active, 0);
+  assert.deepEqual(unselectedState.queue, []);
+
+  const selectedReq = createRequest("GET", `/api/public/participation/state?streamerId=${liveStreamerId}`);
+  const selectedRes = createResponse();
+  await handler(selectedReq, selectedRes);
+
+  assert.equal(selectedRes.statusCode, 200);
+  const selectedState = JSON.parse(selectedRes.body);
+  assert.equal(selectedState.selectedStreamerId, liveStreamerId);
+  assert.equal(selectedState.isOpen, true);
+  assert.equal(selectedState.queue.length, 1);
+
+  const offlineReq = createRequest("GET", `/api/public/participation/state?streamerId=${offlineStreamerId}`);
+  const offlineRes = createResponse();
+  await handler(offlineReq, offlineRes);
+
+  assert.equal(offlineRes.statusCode, 200);
+  const offlineState = JSON.parse(offlineRes.body);
+  assert.deepEqual(offlineState.streamers.map((streamer) => streamer.id), [liveStreamerId]);
+  assert.equal(offlineState.selectedStreamerId, undefined);
+  assert.equal(offlineState.isOpen, false);
+  assert.deepEqual(offlineState.queue, []);
 });
 
 test("POST API는 올바르지 않은 JSON body를 400으로 반환한다", async () => {

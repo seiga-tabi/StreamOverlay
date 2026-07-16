@@ -64,12 +64,12 @@ export function PublicMatchFilterBar({
     <div className={`public-match-filter-bar ${filterActive ? "active" : ""}`}>
       <div className="public-match-filter-title">
         <span aria-hidden="true">▽</span>
-        <strong data-ko={text.filter.ko} data-ja={text.filter.ja}>
+        <strong  >
           {filterActive ? text.activeFilter : text.filter.label}
         </strong>
       </div>
       <label>
-        <span data-ko={text.queueFilter.ko} data-ja={text.queueFilter.ja}>{text.queueFilter.label}</span>
+        <span  >{text.queueFilter.label}</span>
         <select value={filters.queue} onChange={(event) => onQueueChange(event.target.value)}>
           <option value="all">{text.allQueues}</option>
           <option value="solo">{text.soloQueue}</option>
@@ -89,14 +89,14 @@ export function PublicMatchFilterBar({
         value={filters.championId}
       />
       <label>
-        <span data-ko={text.periodFilter.ko} data-ja={text.periodFilter.ja}>{text.periodFilter.label}</span>
+        <span  >{text.periodFilter.label}</span>
         <select value={filters.period} onChange={(event) => onPeriodChange(event.target.value)}>
           <option value="all">{text.periodAll}</option>
           <option value="7d">{text.period7}</option>
           <option value="30d">{text.period30}</option>
         </select>
       </label>
-      <button type="button" onClick={onReset} disabled={!filterActive} data-ko={text.resetFilter.ko} data-ja={text.resetFilter.ja}>
+      <button type="button" onClick={onReset} disabled={!filterActive}  >
         {text.resetFilter.label}
       </button>
     </div>

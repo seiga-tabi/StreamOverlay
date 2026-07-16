@@ -259,14 +259,14 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
             <div className="public-server-menu" role="listbox" aria-label={text.searchServer}>
               <button type="button" role="option" aria-selected="true" onClick={() => setServerMenuOpen(false)}>
                 <strong>JP</strong>
-                <span data-ko={text.jpServer.ko} data-ja={text.jpServer.ja}>{text.jpServer.label}</span>
+                <span  >{text.jpServer.label}</span>
               </button>
             </div>
           ) : null}
         </div>
         {isShared ? (
           <FormField className={`public-search-field ${sharedClassPrefix}-field`} controlId={controlId} loading={loading}>
-            <FormLabel className="sr-only" data-ko={placeholderText.ko} data-ja={placeholderText.ja}>{placeholderText.label}</FormLabel>
+            <FormLabel className="sr-only"  >{placeholderText.label}</FormLabel>
             <FormControl className={`${sharedClassPrefix}-control`} loading={loading}>
               <Input
                 className={`${sharedClassPrefix}-input`}
@@ -275,8 +275,8 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
                 type="search"
                 value={query}
                 placeholder={placeholderText.label}
-                data-ko={placeholderText.ko}
-                data-ja={placeholderText.ja}
+
+
                 enterKeyHint="search"
                 autoCapitalize="none"
                 autoCorrect="off"
@@ -290,15 +290,15 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
           </FormField>
         ) : (
           <label className="public-search-field">
-            <span className="sr-only" data-ko={text.searchPlaceholder.ko} data-ja={text.searchPlaceholder.ja}>{text.searchPlaceholder.label}</span>
+            <span className="sr-only"  >{text.searchPlaceholder.label}</span>
             <input
               id={controlId}
               name="riotId"
               type="search"
               value={query}
               placeholder={text.searchPlaceholder.label}
-              data-ko={text.searchPlaceholder.ko}
-              data-ja={text.searchPlaceholder.ja}
+
+
               enterKeyHint="search"
               autoCapitalize="none"
               autoCorrect="off"
@@ -346,7 +346,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               variant="primary"
             >
               <span aria-hidden="true" />
-              {isHomeShared ? <strong data-ko="검색" data-ja="検索">{text.search}</strong> : null}
+              {isHomeShared ? <strong  >{text.search}</strong> : null}
             </Button>
           ) : (
             <button
@@ -372,17 +372,17 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
                 aria-selected={resolvedPanelTab === tab.key}
                 onClick={() => setActivePanelTab(tab.key)}
               >
-                <span data-ko={tab.label.ko} data-ja={tab.label.ja}>{tab.label.label}</span>
+                <span  >{tab.label.label}</span>
                 <em>{tab.count}</em>
               </button>
             ))}
           </div>
-          <div className="public-suggestion-title" data-ko={activePanelLabel.ko} data-ja={activePanelLabel.ja}>{activePanelLabel.label}</div>
+          <div className="public-suggestion-title"  >{activePanelLabel.label}</div>
           <div className="public-suggestion-list" role="listbox" aria-label={text.relatedSummoners}>
             {activePanelItems.length > 0 ? (
               activePanelItems.map((suggestion) => renderSuggestionButton(suggestion, resolvedPanelTab))
             ) : (
-              <div className="public-suggestion-empty" role="status" data-ko={activeEmptyText.ko} data-ja={activeEmptyText.ja}>
+              <div className="public-suggestion-empty" role="status"  >
                 {activeEmptyText.label}
               </div>
             )}

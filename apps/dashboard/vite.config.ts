@@ -7,6 +7,7 @@ export default defineConfig(({ command }) => ({
     cspNonce: "__STREAMOPS_CSP_NONCE__"
   },
   build: {
+    cssMinify: "lightningcss",
     rollupOptions: {
       output: {
         manualChunks(id) {

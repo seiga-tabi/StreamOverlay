@@ -39,8 +39,8 @@ export function RecentMatchExpandedToolbar({
           role="tab"
           aria-selected={activeView === "record"}
           onClick={onRecord}
-          data-ko={text.recordTab.ko}
-          data-ja={text.recordTab.ja}
+
+
         >
           {text.recordTab.label}
         </button>
@@ -50,8 +50,8 @@ export function RecentMatchExpandedToolbar({
           role="tab"
           aria-selected={activeView === "build"}
           onClick={onBuild}
-          data-ko={text.buildTab.ko}
-          data-ja={text.buildTab.ja}
+
+
         >
           {text.buildTab.label}
         </button>
@@ -61,8 +61,8 @@ export function RecentMatchExpandedToolbar({
         className={`public-match-id-mask-toggle ${hideRiotIds ? "active" : ""}`}
         aria-pressed={hideRiotIds}
         onClick={onToggleMask}
-        data-ko={text.maskToggle.ko}
-        data-ja={text.maskToggle.ja}
+
+
       >
         {text.maskToggle.label}
       </button>

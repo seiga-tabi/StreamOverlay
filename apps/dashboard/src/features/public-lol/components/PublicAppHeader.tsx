@@ -99,7 +99,7 @@ export function PublicAppHeader({
         onClick={() => setMobileMenuOpen((open) => !open)}
       >
         <span aria-hidden="true" />
-        <strong data-ko={publicI18n.ko.mobileMenu} data-ja={publicI18n.ja.mobileMenu}>{t().mobileMenu}</strong>
+        <strong  >{t().mobileMenu}</strong>
       </button>
       <PublicHeaderMenu activePage={activePage} activeTarget={activeTarget} showSubscriptions={twitchStatus.connected} onPage={handleMenuPage} />
       {showSearch ? searchContent : null}
@@ -157,7 +157,7 @@ export function PublicAppHeader({
           <div className="public-header-popover-wrap">
             <button className={`public-filter-button ${filterActive ? "active" : ""}`} type="button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>
               <span aria-hidden="true">▽</span>
-              <strong data-ko={publicI18n.ko.filter} data-ja={publicI18n.ja.filter}>{filterActive ? t().activeFilter : t().filter}</strong>
+              <strong  >{filterActive ? t().activeFilter : t().filter}</strong>
             </button>
             {filterOpen ? filterContent : null}
           </div>

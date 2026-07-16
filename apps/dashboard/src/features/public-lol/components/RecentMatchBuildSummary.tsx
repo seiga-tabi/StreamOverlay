@@ -35,7 +35,7 @@ export function RecentMatchBuildSummary({ summary }: RecentMatchBuildSummaryProp
       {summary.badges.length > 0 ? (
         <div className="public-match-badges">
           {summary.badges.map((badge) => (
-            <span className={badge.className} key={badge.key} aria-label={badge.ariaLabel} data-ko={badge.ko} data-ja={badge.ja}>
+            <span className={badge.className} key={badge.key} aria-label={badge.ariaLabel}  >
               {badge.label}
             </span>
           ))}

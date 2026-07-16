@@ -59,9 +59,9 @@ export function ProfileRecentChampionsCard({
       <CardHeader className="public-profile-metric-head">
         <span className="public-profile-metric-icon" aria-hidden="true">◇</span>
         <span className="public-profile-metric-label">
-          <span data-ko={text.title.ko} data-ja={text.title.ja}>{text.title.label}</span>
+          <span  >{text.title.label}</span>
           {streamStatus ? (
-            <StatusPill className="public-profile-stream-status" data-ko={streamStatus.ko} data-ja={streamStatus.ja} size="sm" title={streamStatus.title} tone={streamStatus.tone}>
+            <StatusPill className="public-profile-stream-status"   size="sm" title={streamStatus.title} tone={streamStatus.tone}>
               {streamStatus.label}
             </StatusPill>
           ) : (
@@ -82,7 +82,7 @@ export function ProfileRecentChampionsCard({
             <strong>{streamInfo.displayName}</strong>
             {streamInfo.login ? <small>@{streamInfo.login}</small> : null}
             <span className="public-profile-stream-summary-meta">
-              <StatusPill className="public-profile-stream-summary-status" data-ko={streamInfo.status.ko} data-ja={streamInfo.status.ja} size="md" title={streamInfo.status.title} tone={streamInfo.status.tone}>
+              <StatusPill className="public-profile-stream-summary-status"   size="md" title={streamInfo.status.title} tone={streamInfo.status.tone}>
                 {streamInfo.status.label}
               </StatusPill>
               {streamInfo.viewerLabel ? <em>{streamInfo.viewerLabel}</em> : null}
@@ -100,8 +100,8 @@ export function ProfileRecentChampionsCard({
       ) : (
         <EmptyState className="public-profile-shared-empty-inline" variant="search">
           <EmptyStateIcon>?</EmptyStateIcon>
-          <EmptyStateTitle as="h3" data-ko={text.emptyTitle.ko} data-ja={text.emptyTitle.ja}>{text.emptyTitle.label}</EmptyStateTitle>
-          <EmptyStateDescription data-ko={text.emptyDescription.ko} data-ja={text.emptyDescription.ja}>
+          <EmptyStateTitle as="h3"  >{text.emptyTitle.label}</EmptyStateTitle>
+          <EmptyStateDescription  >
             {text.emptyDescription.label}
           </EmptyStateDescription>
         </EmptyState>

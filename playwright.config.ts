@@ -2,12 +2,17 @@ import { defineConfig, devices } from "@playwright/test";
 
 const dashboardPort = 4173;
 const overlayPort = 4174;
+const snapshotPlatform = process.platform === "darwin"
+  ? "darwin"
+  : process.platform === "linux"
+    ? "linux"
+    : process.platform;
 
 export default defineConfig({
   testDir: "./qa/visual-regression",
   outputDir: "./qa/visual-regression/results",
-  // CI와 로컬이 같은 Chromium/Linux 기준선을 사용해 플랫폼별 baseline 분기를 방지합니다.
-  snapshotPathTemplate: `{testDir}/baselines/linux/{projectName}/{arg}{ext}`,
+  // 운영 CI(Linux)와 로컬(macOS)의 글꼴 렌더링 차이를 UI 회귀로 오판하지 않습니다.
+  snapshotPathTemplate: `{testDir}/baselines/${snapshotPlatform}/{projectName}/{arg}{ext}`,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,

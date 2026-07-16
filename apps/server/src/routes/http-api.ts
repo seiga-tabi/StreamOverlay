@@ -1338,6 +1338,14 @@ async function broadcastParticipationSnapshot(input: {
     streamerProfile: input.store.getParticipationStreamerProfile(streamerId),
     source: reason
   }, { user: "dashboard", input: "" }, reason);
+  await broadcastParticipationQueue(input, reason, streamerId);
+}
+
+async function broadcastParticipationQueue(input: {
+  store: Store;
+  actions: ActionDispatcher;
+}, reason: string, streamerId?: string): Promise<void> {
+  const isOpen = input.store.getParticipationState(streamerId).isOpen;
   await input.actions.dispatchOne({
     type: "overlay.participationQueue",
     isOpen,
@@ -2594,6 +2602,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
   }
 
+  async function isPublicParticipationStreamerLive(twitchUserId: string): Promise<boolean> {
+    if (twitchEventSubLiveFallback(twitchUserId)) return true;
+    return Boolean(await lookupTwitchStreamByUserId(twitchUserId));
+  }
+
   async function lookupTwitchStreamForCandidate(candidate: PublicLolTwitchCandidate): Promise<TwitchStreamStatus | undefined> {
     const streamById = await lookupTwitchStreamByUserId(candidate.twitchUserId);
     if (streamById) return streamById;
@@ -3509,7 +3522,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const activeSessions = input.store.listParticipationSessions()
       .filter((session) => session.status === "recruiting" || session.status === "in_game");
     if (activeSessions.length > 0) {
-      const streamers = activeSessions.map<PublicParticipationStreamer>((session) => {
+      const streamers = (await Promise.all(activeSessions.map(async (session) => {
+        if (!await isPublicParticipationStreamerLive(session.streamerId)) return undefined;
         const participationState = input.store.getParticipationState(session.streamerId);
         const approved = approvedByOwner.get(session.streamerId);
         const snapshot = session.profileSnapshot;
@@ -3529,8 +3543,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
           queueSize: participationState.summary.active,
           updatedAt: session.updatedAt
         };
-      });
-      const selected = streamers.find((streamer) => streamer.id === selectedStreamerId) ?? streamers[0];
+      }))).filter((streamer): streamer is NonNullable<typeof streamer> => streamer !== undefined);
+      const selected = selectedStreamerId
+        ? streamers.find((streamer) => streamer.id === selectedStreamerId)
+        : undefined;
       return selected
         ? { streamers, selectedStreamerId: selected.id, scopeStreamerId: selected.id }
         : { streamers };
@@ -3552,6 +3568,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       ? approvedStreamers.find((request) => request.twitchUserId === connectedStreamer.twitchUserId)
       : undefined;
     const activeStreamer = matchedApproved ?? connectedApproved;
+    if (!activeStreamer?.twitchUserId || !await isPublicParticipationStreamerLive(activeStreamer.twitchUserId)) {
+      return { streamers: [] };
+    }
     const riotGameName = activeStreamer?.riotGameName ?? (monitorRiotId.ok ? monitorRiotId.gameName : streamerProfile?.displayName);
     const riotTagLine = activeStreamer?.riotTagLine ?? (monitorRiotId.ok ? monitorRiotId.tagLine : streamerProfile?.riotTagLine);
     const fallbackDisplayName = riotGameName
@@ -3571,9 +3590,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       updatedAt: now
     };
     const streamers = [streamer];
-    const hasSelected = selectedStreamerId && streamers.some((item) => item.id === selectedStreamerId);
-    const nextSelectedStreamerId = hasSelected ? selectedStreamerId : streamers[0]?.id;
-    return nextSelectedStreamerId ? { streamers, selectedStreamerId: nextSelectedStreamerId } : { streamers };
+    const selected = selectedStreamerId
+      ? streamers.find((item) => item.id === selectedStreamerId)
+      : undefined;
+    return selected
+      ? { streamers, selectedStreamerId: selected.id, scopeStreamerId: selected.id }
+      : { streamers };
   }
 
   async function getPublicParticipationState(
@@ -3586,22 +3608,44 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const url = new URL(req.url ?? "/", "http://localhost");
     const requestedStreamerId = selectedStreamerIdOverride ?? (url.searchParams.get("streamerId")?.trim() || undefined);
     const streamerState = await publicParticipationStreamers(requestedStreamerId);
-    const participationState = input.store.getParticipationState(streamerState.scopeStreamerId);
-    const activeEntries = input.store.getActiveParticipationQueue(streamerState.scopeStreamerId);
-    const queue = participationState.isOpen
+    const selectedScopeStreamerId = streamerState.scopeStreamerId;
+    const participationState = selectedScopeStreamerId
+      ? input.store.getParticipationState(selectedScopeStreamerId)
+      : undefined;
+    const activeEntries = selectedScopeStreamerId
+      ? input.store.getActiveParticipationQueue(selectedScopeStreamerId)
+      : [];
+    const queue = participationState?.isOpen
       ? activeEntries
         .slice(0, PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE)
         .map((entry, index) => publicParticipationQueueItem(entry, index + 1, viewerId))
       : [];
     const viewerIndex = viewerId ? activeEntries.findIndex((entry) => entry.twitchUserId === viewerId) : -1;
-    const viewerEntry = viewerIndex >= 0 && activeEntries[viewerIndex]
+    const activeViewerEntry = viewerIndex >= 0 && activeEntries[viewerIndex]
       ? publicParticipationViewerEntry(activeEntries[viewerIndex], viewerIndex + 1)
       : undefined;
+    const completedViewerEntry = !activeViewerEntry && viewerId && selectedScopeStreamerId
+      ? input.store.getParticipationQueue(selectedScopeStreamerId)
+        .map((entry, index) => ({ entry, position: index + 1 }))
+        .filter(({ entry }) => entry.twitchUserId === viewerId && entry.status === "played")
+        .sort((a, b) => Date.parse(b.entry.updatedAt) - Date.parse(a.entry.updatedAt))[0]
+      : undefined;
+    const viewerEntry = activeViewerEntry ?? (completedViewerEntry
+      ? publicParticipationViewerEntry(completedViewerEntry.entry, completedViewerEntry.position)
+      : undefined);
     return {
       connected: Boolean(status.connected),
       configured: Boolean(status.configured),
-      isOpen: participationState.isOpen,
-      summary: participationState.summary,
+      isOpen: Boolean(participationState?.isOpen),
+      summary: participationState?.summary ?? {
+        total: 0,
+        active: 0,
+        waiting: 0,
+        selected: 0,
+        checkedIn: 0,
+        noShow: 0,
+        played: 0
+      },
       streamers: streamerState.streamers,
       ...(streamerState.selectedStreamerId ? { selectedStreamerId: streamerState.selectedStreamerId } : {}),
       queue,
@@ -3621,8 +3665,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const body = await readJsonBody<{ riotId?: unknown; role?: unknown; streamerId?: unknown }>(req);
     const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
-    const streamerState = await publicParticipationStreamers(requestedStreamerId || undefined);
-    if (requestedStreamerId && !streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
+    if (!requestedStreamerId) {
+      throw new HttpRequestError(400, { error: "참여할 방송인을 선택해주세요." });
+    }
+    const streamerState = await publicParticipationStreamers(requestedStreamerId);
+    if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
       throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
     }
     if (!streamerState.selectedStreamerId || !input.store.getParticipationState(streamerState.scopeStreamerId).isOpen) {
@@ -3681,9 +3728,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       source: "dashboard"
     });
     const saved = input.store.reactivateReusableParticipation(entry, streamerState.scopeStreamerId);
-    await broadcastParticipationSnapshot(
+    await broadcastParticipationQueue(
       { store: input.store, actions: input.actions },
-      "recruiting",
       "public.participation_join",
       streamerState.scopeStreamerId
     )
@@ -3711,8 +3757,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const body = await readJsonBody<{ streamerId?: unknown }>(req);
     const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
-    const streamerState = await publicParticipationStreamers(requestedStreamerId || undefined);
-    if (requestedStreamerId && !streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
+    if (!requestedStreamerId) {
+      throw new HttpRequestError(400, { error: "참여할 방송인을 선택해주세요." });
+    }
+    const streamerState = await publicParticipationStreamers(requestedStreamerId);
+    if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
       throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
     }
     if (!streamerState.selectedStreamerId) {
@@ -3729,9 +3778,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         : "취소할 참여 신청을 찾지 못했습니다.";
       throw new HttpRequestError(result.reason === "in_game" ? 409 : 404, { error });
     }
-    await broadcastParticipationSnapshot(
+    await broadcastParticipationQueue(
       { store: input.store, actions: input.actions },
-      "recruiting",
       "public.participation_cancel",
       streamerState.scopeStreamerId
     )
@@ -5553,7 +5601,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, streamerId);
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
-        await broadcastParticipationSnapshot(input, "recruiting", "dashboard.lol_operations.entry_status", streamerId);
+        await broadcastParticipationQueue(input, "dashboard.lol_operations.entry_status", streamerId);
         return sendJson(req, res, 200, input.store.getParticipationState(streamerId));
       }
 

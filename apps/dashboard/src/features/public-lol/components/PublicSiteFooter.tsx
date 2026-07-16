@@ -24,13 +24,13 @@ export function PublicSiteFooter({
   return (
     <footer className="public-site-footer">
       <nav className="public-site-footer-nav" aria-label="public footer">
-        <button type="button" onClick={() => onPage("privacy")} data-ko={text.privacy.ko} data-ja={text.privacy.ja}>
+        <button type="button" onClick={() => onPage("privacy")}  >
           {text.privacy.label}
         </button>
-        <button type="button" onClick={() => onPage("terms")} data-ko={text.terms.ko} data-ja={text.terms.ja}>
+        <button type="button" onClick={() => onPage("terms")}  >
           {text.terms.label}
         </button>
-        <button type="button" onClick={() => onPage("contact")} data-ko={text.contact.ko} data-ja={text.contact.ja}>
+        <button type="button" onClick={() => onPage("contact")}  >
           {text.contact.label}
         </button>
       </nav>
@@ -38,8 +38,8 @@ export function PublicSiteFooter({
         <span className="public-site-footer-brand-mark" aria-hidden="true">よろ</span>
         <span className="public-site-footer-brand-word">YORO.gg</span>
       </div>
-      <p data-ko={text.riotDisclaimer.ko} data-ja={text.riotDisclaimer.ja}>{text.riotDisclaimer.label}</p>
-      <strong data-ko={text.copyright.ko} data-ja={text.copyright.ja}>{text.copyright.label}</strong>
+      <p  >{text.riotDisclaimer.label}</p>
+      <strong  >{text.copyright.label}</strong>
     </footer>
   );
 }

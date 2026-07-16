@@ -28,8 +28,8 @@ export function ProfileTopSearchToolbar({
     <div className="public-ranking-shared-toolbar" aria-label={toolbar.ariaLabel}>
       <div className="public-ranking-shared-toolbar-head">
         <div>
-          <strong data-ko={toolbar.cachedRanking.ko} data-ja={toolbar.cachedRanking.ja}>{toolbar.cachedRanking.label}</strong>
-          <span className="public-ranking-shared-toolbar-note" data-ko={toolbar.liveDataNotice.ko} data-ja={toolbar.liveDataNotice.ja}>{toolbar.liveDataNotice.label}</span>
+          <strong  >{toolbar.cachedRanking.label}</strong>
+          <span className="public-ranking-shared-toolbar-note"  >{toolbar.liveDataNotice.label}</span>
         </div>
         <Badge size="sm" tone="info">{toolbar.serverLabel}</Badge>
       </div>

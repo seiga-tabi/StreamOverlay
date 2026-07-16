@@ -39,7 +39,7 @@ export function RecentMatchBuildSkillGrid({
 }: RecentMatchBuildSkillGridProps) {
   return (
     <div className="public-match-build-group skills">
-      <span data-ko={label.ko} data-ja={label.ja}>{label.label}</span>
+      <span  >{label.label}</span>
       <div className="public-match-skill-build">
         <div className="public-match-skill-icons">
           {skillIcons.map((skill) => (

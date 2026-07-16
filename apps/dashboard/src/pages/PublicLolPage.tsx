@@ -1148,7 +1148,7 @@ function SeigaSearchLoader() {
           <div className="loader-scan" />
           <img className="seiga-mark" src="/images/yorogg-mark.png" alt="" />
         </div>
-        <strong data-ko={publicI18n.ko.searching} data-ja={publicI18n.ja.searching}>{t().searching}</strong>
+        <strong  >{t().searching}</strong>
       </div>
     </div>
   );
@@ -1263,7 +1263,7 @@ function SummaryCards({ profile }: { profile: PublicLolProfile }) {
         <p>{gamesText(summary.recentGames)} · {winsText(summary.recentWins)} · {summary.totalKills}/{summary.totalDeaths}/{summary.totalAssists}</p>
       </article>
       <article className="public-stat-card">
-        <span data-ko={publicI18n.ko.damage} data-ja={publicI18n.ja.damage}>{t().damage}</span>
+        <span  >{t().damage}</span>
         <strong className={metricToneClass(damagePerMinuteTone(summary.averageDamagePerMinute))}>{formatNumber(summary.averageDamagePerMinute)}</strong>
         <p>{perMinuteText(t().damage, summary.averageDamagePerMinute)} · {t().damageShare} {formatPercent(summary.averageDamageShare, 1)}</p>
       </article>
@@ -1273,7 +1273,7 @@ function SummaryCards({ profile }: { profile: PublicLolProfile }) {
         <p>{perMinuteText("CS", summary.averageCsPerMinute, 1)} · {perMinuteText(t().gold, summary.averageGoldPerMinute)}</p>
       </article>
       <article className="public-stat-card">
-        <span data-ko={publicI18n.ko.vision} data-ja={publicI18n.ja.vision}>{t().vision}</span>
+        <span  >{t().vision}</span>
         <strong>{formatDecimal(summary.averageVisionScore, 1)}</strong>
         <p>{t().average} {t().vision} · {killParticipationText(summary.averageKillParticipation)}</p>
       </article>
@@ -1543,8 +1543,8 @@ function PublicMoreFeatures() {
   return (
     <section id="public-more-features" className="public-panel public-more-features">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.moreFeatures} data-ja={publicI18n.ja.moreFeatures}>{t().moreFeatures}</h2>
-        <span data-ko={publicI18n.ko.folded} data-ja={publicI18n.ja.folded}>{t().folded}</span>
+        <h2  >{t().moreFeatures}</h2>
+        <span  >{t().folded}</span>
       </div>
       <div className="public-more-feature-grid">
         {features.map((feature, index) => (
@@ -1571,9 +1571,9 @@ function PublicProfileTabs({
 }) {
   return (
     <nav className="public-profile-tabs" aria-label={t().profileSummary}>
-      <Button type="button" className={activeTab === "overview" ? "active" : ""} onClick={() => onChange("overview")} data-ko={publicI18n.ko.overview} data-ja={publicI18n.ja.overview} size="md" variant={activeTab === "overview" ? "secondary" : "ghost"}>{t().overview}</Button>
-      <Button type="button" className={activeTab === "champions" ? "active" : ""} onClick={() => onChange("champions")} data-ko={publicI18n.ko.championAnalysis} data-ja={publicI18n.ja.championAnalysis} size="md" variant={activeTab === "champions" ? "secondary" : "ghost"}>{t().championAnalysis}</Button>
-      <Button type="button" className={activeTab === "ingame" ? "active" : ""} onClick={() => onChange("ingame")} data-ko={publicI18n.ko.ingame} data-ja={publicI18n.ja.ingame} size="md" variant={activeTab === "ingame" ? "secondary" : "ghost"}>{t().ingame}</Button>
+      <Button type="button" className={activeTab === "overview" ? "active" : ""} onClick={() => onChange("overview")}   size="md" variant={activeTab === "overview" ? "secondary" : "ghost"}>{t().overview}</Button>
+      <Button type="button" className={activeTab === "champions" ? "active" : ""} onClick={() => onChange("champions")}   size="md" variant={activeTab === "champions" ? "secondary" : "ghost"}>{t().championAnalysis}</Button>
+      <Button type="button" className={activeTab === "ingame" ? "active" : ""} onClick={() => onChange("ingame")}   size="md" variant={activeTab === "ingame" ? "secondary" : "ghost"}>{t().ingame}</Button>
     </nav>
   );
 }
@@ -1583,7 +1583,7 @@ function PublicProfileErrorState({ error }: { error: string }) {
   return (
     <EmptyState className="public-profile-shared-error" variant="error">
       <EmptyStateIcon>!</EmptyStateIcon>
-      <EmptyStateTitle as="h2" data-ko={publicI18n.ko.searchFailed} data-ja={publicI18n.ja.searchFailed}>
+      <EmptyStateTitle as="h2"  >
         {t().searchFailed}
       </EmptyStateTitle>
       <EmptyStateDescription>{error}</EmptyStateDescription>
@@ -1597,7 +1597,7 @@ function RankSummaryPanel({ profile }: { profile: PublicLolProfile }) {
   return (
     <section className="public-panel public-rank-summary-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.soloRank} data-ja={publicI18n.ja.soloRank}>{t().soloRank}</h2>
+        <h2  >{t().soloRank}</h2>
         <span>{stats ? `${stats.wins}${activePublicLocale === "ja" ? "勝" : "승"} ${stats.losses}${activePublicLocale === "ja" ? "敗" : "패"}` : t().noData}</span>
       </div>
       <div className="public-rank-summary-main">
@@ -1624,7 +1624,7 @@ function FlexRankPlaceholder() {
   return (
     <section className="public-panel public-rank-summary-panel compact">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.flexRank} data-ja={publicI18n.ja.flexRank}>{t().flexRank}</h2>
+        <h2  >{t().flexRank}</h2>
       </div>
       <div className="public-rank-summary-main">
         <div className="public-rank-fallback">U</div>
@@ -1650,7 +1650,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
     <section id="public-stats" className="public-overview-dashboard-panel">
       <Card as="article" className="public-panel public-aggregate-card public-profile-shared-card" padding="md" variant="elevated">
         <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.aggregatePerformance} data-ja={publicI18n.ja.aggregatePerformance}>
+          <h2  >
             <span className="public-aggregate-title-icon" aria-hidden="true"><i /><i /><i /></span>
             {t().aggregatePerformance}
           </h2>
@@ -1661,7 +1661,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
             {aggregateTierIcon ? <img src={aggregateTierIcon} alt="" /> : <span>{aggregateGrade}</span>}
           </div>
           <div className="public-aggregate-grade">
-            <span data-ko={publicI18n.ko.aggregateGrade} data-ja={publicI18n.ja.aggregateGrade}>{t().aggregateGrade}</span>
+            <span  >{t().aggregateGrade}</span>
             <strong className={metricToneClass(scoreTone(aggregateScore))}>{aggregateGrade}</strong>
             <div className="public-aggregate-record">
               <b>{aggregateSummary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"}</b>
@@ -1683,8 +1683,8 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
       </Card>
       <Card as="article" className="public-panel public-lp-trend-card public-profile-shared-card" padding="md" variant="elevated">
         <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.lpTrend} data-ja={publicI18n.ja.lpTrend}>{t().lpTrend}</h2>
-          <StatusPill size="sm" tone="info" data-ko={publicI18n.ko.period30} data-ja={publicI18n.ja.period30}>{t().period30}</StatusPill>
+          <h2  >{t().lpTrend}</h2>
+          <StatusPill size="sm" tone="info"  >{t().period30}</StatusPill>
         </div>
         <div className={`public-lp-chart ${rankTrendTierClass(profile.rankedStats)}`}>
           <LpTrendLineChart profile={profile} />
@@ -1692,14 +1692,14 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
       </Card>
       <Card as="article" className="public-panel public-role-win-card public-profile-shared-card" padding="md" variant="elevated">
         <div className="public-section-head">
-          <h2 data-ko={publicI18n.ko.roleWinRate} data-ja={publicI18n.ja.roleWinRate}>{t().roleWinRate}</h2>
+          <h2  >{t().roleWinRate}</h2>
           <Badge size="sm" tone="info">{profile.summary.recentGames}{t().games}</Badge>
         </div>
         <div className="public-role-win-list">
           {roles.length === 0 ? (
             <EmptyState className="public-profile-shared-empty-inline" variant="search">
               <EmptyStateIcon>?</EmptyStateIcon>
-              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.noData} data-ja={publicI18n.ja.noData}>{t().noData}</EmptyStateTitle>
+              <EmptyStateTitle as="h3"  >{t().noData}</EmptyStateTitle>
               <EmptyStateDescription>{t().roleWinRate}</EmptyStateDescription>
             </EmptyState>
           ) : roles.map((role) => (
@@ -1763,11 +1763,11 @@ function PublicSidebar({
       </nav>
       <section className="public-sidebar-favorites" aria-label={t().favoritesTitle}>
         <div>
-          <strong data-ko={publicI18n.ko.favoritesTitle} data-ja={publicI18n.ja.favoritesTitle}>{t().favoritesTitle}</strong>
+          <strong  >{t().favoritesTitle}</strong>
           <span>{favorites.length}</span>
         </div>
         {favorites.length === 0 ? (
-          <p data-ko={publicI18n.ko.noFavorites} data-ja={publicI18n.ja.noFavorites}>{t().noFavorites}</p>
+          <p  >{t().noFavorites}</p>
         ) : (
           <ul>
             {favorites.slice(0, 5).map((favorite) => (
@@ -1785,9 +1785,9 @@ function PublicSidebar({
         )}
       </section>
       <div className="public-premium-card">
-        <strong data-ko={publicI18n.ko.premiumTitle} data-ja={publicI18n.ja.premiumTitle}>{t().premiumTitle}</strong>
-        <p data-ko={publicI18n.ko.premiumBody} data-ja={publicI18n.ja.premiumBody}>{t().premiumBody}</p>
-        <button type="button" onClick={onOpenPremium} data-ko={publicI18n.ko.premiumCta} data-ja={publicI18n.ja.premiumCta}>{t().premiumCta}</button>
+        <strong  >{t().premiumTitle}</strong>
+        <p  >{t().premiumBody}</p>
+        <button type="button" onClick={onOpenPremium}  >{t().premiumCta}</button>
       </div>
       <div className="public-sidebar-footer">
         <span>{t().version} 25.10</span>
@@ -1811,11 +1811,11 @@ function PublicFilterPanel({
   return (
     <div className="public-popover public-filter-popover">
       <div className="public-popover-head">
-        <strong data-ko={publicI18n.ko.filterTitle} data-ja={publicI18n.ja.filterTitle}>{t().filterTitle}</strong>
-        <button type="button" onClick={onReset} data-ko={publicI18n.ko.resetFilter} data-ja={publicI18n.ja.resetFilter}>{t().resetFilter}</button>
+        <strong  >{t().filterTitle}</strong>
+        <button type="button" onClick={onReset}  >{t().resetFilter}</button>
       </div>
       <label>
-        <span data-ko={publicI18n.ko.queueFilter} data-ja={publicI18n.ja.queueFilter}>{t().queueFilter}</span>
+        <span  >{t().queueFilter}</span>
         <select value={filters.queue} onChange={(event) => onChange({ ...filters, queue: event.target.value as MatchQueueFilter })}>
           <option value="all">{t().allQueues}</option>
           <option value="solo">{t().soloQueue}</option>
@@ -1840,7 +1840,7 @@ function PublicFilterPanel({
         value={filters.championId}
       />
       <label>
-        <span data-ko={publicI18n.ko.periodFilter} data-ja={publicI18n.ja.periodFilter}>{t().periodFilter}</span>
+        <span  >{t().periodFilter}</span>
         <select value={filters.period} onChange={(event) => onChange({ ...filters, period: event.target.value as MatchPeriodFilter })}>
           <option value="all">{t().periodAll}</option>
           <option value="7d">{t().period7}</option>
@@ -2080,8 +2080,8 @@ function PublicStreamerRegistrationScreen({
         ) : (
           <form className="public-streamer-riot-request standalone" onSubmit={(event) => void submitStreamerRiotIdRequest(event)}>
             <div>
-              <strong data-ko={publicI18n.ko.streamerRiotRequestTitle} data-ja={publicI18n.ja.streamerRiotRequestTitle}>{t().streamerRiotRequestTitle}</strong>
-              <small data-ko={publicI18n.ko.streamerRiotRequestBody} data-ja={publicI18n.ja.streamerRiotRequestBody}>{t().streamerRiotRequestBody}</small>
+              <strong  >{t().streamerRiotRequestTitle}</strong>
+              <small  >{t().streamerRiotRequestBody}</small>
             </div>
             <label>
               <span className="sr-only">{t().streamerRiotRequestPlaceholder}</span>
@@ -2208,15 +2208,20 @@ function PublicParticipationJoinPage({
   const [pendingAction, setPendingAction] = useState<PublicParticipationConfirmAction | null>(null);
   const [dismissedFeedbackKey, setDismissedFeedbackKey] = useState("");
   const previousViewerEntryRef = useRef<PublicParticipationViewerEntry | null>(null);
-  const queue = participation?.queue ?? [];
-  const isOpen = Boolean(participation?.isOpen);
-  const viewerEntry = participation?.viewerEntry;
-  const activeViewerEntry = viewerEntry && publicParticipationIsActiveStatus(viewerEntry.status) ? viewerEntry : undefined;
   const streamers = participation?.streamers ?? [];
-  const selectedStreamer = streamers.find((streamer) => streamer.id === selectedStreamerId)
-    ?? streamers.find((streamer) => streamer.id === participation?.selectedStreamerId)
-    ?? streamers[0];
+  const selectedStreamer = selectedStreamerId
+    ? streamers.find((streamer) => streamer.id === selectedStreamerId)
+    : undefined;
   const effectiveSelectedStreamerId = selectedStreamer?.id ?? "";
+  const hasSelectedParticipationState = Boolean(
+    effectiveSelectedStreamerId && participation?.selectedStreamerId === effectiveSelectedStreamerId
+  );
+  const queue = hasSelectedParticipationState ? participation?.queue ?? [] : [];
+  const isOpen = hasSelectedParticipationState && Boolean(participation?.isOpen);
+  const viewerEntry = hasSelectedParticipationState
+    ? participation?.viewerEntry
+    : undefined;
+  const activeViewerEntry = viewerEntry && publicParticipationIsActiveStatus(viewerEntry.status) ? viewerEntry : undefined;
   const canJoin = isOpen && Boolean(selectedStreamer);
   const streamerCountLabel = streamers.length > 0
     ? `${formatNumber(streamers.length)} ${t().participationStreamerCount}`
@@ -2231,6 +2236,10 @@ function PublicParticipationJoinPage({
   useEffect(() => {
     if (feedbackKey) setDismissedFeedbackKey("");
   }, [feedbackKey]);
+
+  useEffect(() => {
+    previousViewerEntryRef.current = null;
+  }, [effectiveSelectedStreamerId]);
 
   useEffect(() => {
     if (!viewerEntry) return;
@@ -2254,8 +2263,8 @@ function PublicParticipationJoinPage({
   return (
     <section className="public-panel public-menu-page-panel public-participation-page public-streamer-detail-shared-page">
       <PageHeader className="public-section-head public-participation-shared-header" layout="split">
-        <PageHeaderTitle as="h2" data-ko={publicI18n.ko.followJoinTitle} data-ja={publicI18n.ja.followJoinTitle}>{t().followJoinTitle}</PageHeaderTitle>
-        <PageHeaderDescription data-ko={publicI18n.ko.followJoinSubtitle} data-ja={publicI18n.ja.followJoinSubtitle}>{t().followJoinSubtitle}</PageHeaderDescription>
+        <PageHeaderTitle as="h2"  >{t().followJoinTitle}</PageHeaderTitle>
+        <PageHeaderDescription  >{t().followJoinSubtitle}</PageHeaderDescription>
         <PageHeaderActions className="public-participation-actions">
           <Button className="public-participation-shared-action" variant="secondary" size="sm" type="button" onClick={onRefresh} loading={loading} disabled={loading}>
             {loading ? t().searching : t().participationRefresh}
@@ -2266,7 +2275,7 @@ function PublicParticipationJoinPage({
       {!status.configured ? (
         <EmptyState className="public-participation-shared-empty" variant="streamer">
           <EmptyStateIcon>!</EmptyStateIcon>
-          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchNotConfigured} data-ja={publicI18n.ja.twitchNotConfigured}>{t().twitchNotConfigured}</EmptyStateTitle>
+          <EmptyStateTitle as="h3"  >{t().twitchNotConfigured}</EmptyStateTitle>
         </EmptyState>
       ) : null}
       <section className="public-participation-streamer-select public-participation-shared-select" aria-busy={isStreamerSelectionLoading ? true : undefined}>
@@ -2334,12 +2343,13 @@ function PublicParticipationJoinPage({
       {error ? (
         <EmptyState as="div" className="public-participation-shared-empty public-participation-shared-error" variant="error">
           <EmptyStateIcon>!</EmptyStateIcon>
-          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.searchFailed} data-ja={publicI18n.ja.searchFailed}>{t().searchFailed}</EmptyStateTitle>
+          <EmptyStateTitle as="h3"  >{t().searchFailed}</EmptyStateTitle>
           <EmptyStateDescription>{error}</EmptyStateDescription>
         </EmptyState>
       ) : null}
       {message ? <StatusPill className="public-participation-message" tone="success">{message}</StatusPill> : null}
 
+      {selectedStreamer ? (
       <div className="public-participation-layout">
         <Card as="article" className="public-participation-card public-participation-shared-card" padding="lg" variant="glass">
           <CardHeader>
@@ -2447,6 +2457,13 @@ function PublicParticipationJoinPage({
           </CardContent>
         </Card>
       </div>
+      ) : streamers.length > 0 && !loading ? (
+        <EmptyState as="div" className="public-participation-shared-empty" variant="streamer">
+          <EmptyStateIcon>?</EmptyStateIcon>
+          <EmptyStateTitle as="h3">{t().participationSelectStreamerTitle}</EmptyStateTitle>
+          <EmptyStateDescription>{t().participationSelectStreamerDescription}</EmptyStateDescription>
+        </EmptyState>
+      ) : null}
 
       <Modal
         closeOnBackdrop
@@ -2554,8 +2571,8 @@ function PublicTwitchFollowedPanel({
             {status.connected ? status.user?.displayName ?? "Twitch" : t().twitchViewerLogin}
           </StatusPill>
         </PageHeaderEyebrow>
-        <PageHeaderTitle as="h2" data-ko={titleKo} data-ja={titleJa}>{title}</PageHeaderTitle>
-        <PageHeaderDescription data-ko={subtitleKo} data-ja={subtitleJa}>{subtitle}</PageHeaderDescription>
+        <PageHeaderTitle as="h2"  >{title}</PageHeaderTitle>
+        <PageHeaderDescription  >{subtitle}</PageHeaderDescription>
         <PageHeaderActions className="public-twitch-followed-actions">
           {status.connected ? (
             <Button type="button" variant="primary" size="sm" onClick={onRefresh} loading={loading} disabled={loading}>{loading ? t().searching : t().twitchFollowedRefresh}</Button>
@@ -2568,19 +2585,19 @@ function PublicTwitchFollowedPanel({
       {!status.configured ? (
         <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
           <EmptyStateIcon>!</EmptyStateIcon>
-          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchNotConfigured} data-ja={publicI18n.ja.twitchNotConfigured}>{t().twitchNotConfigured}</EmptyStateTitle>
+          <EmptyStateTitle as="h3"  >{t().twitchNotConfigured}</EmptyStateTitle>
         </EmptyState>
       ) : !status.connected ? (
         <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
           <EmptyStateIcon>?</EmptyStateIcon>
-          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchLoginRequired} data-ja={publicI18n.ja.twitchLoginRequired}>{t().twitchLoginRequired}</EmptyStateTitle>
+          <EmptyStateTitle as="h3"  >{t().twitchLoginRequired}</EmptyStateTitle>
         </EmptyState>
       ) : (
         <>
           {error ? (
             <EmptyState as="div" className="public-streamers-shared-empty public-streamers-shared-error" variant="error">
               <EmptyStateIcon>!</EmptyStateIcon>
-              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.searchFailed} data-ja={publicI18n.ja.searchFailed}>{t().searchFailed}</EmptyStateTitle>
+              <EmptyStateTitle as="h3"  >{t().searchFailed}</EmptyStateTitle>
               <EmptyStateDescription>{error}</EmptyStateDescription>
             </EmptyState>
           ) : null}
@@ -2598,7 +2615,7 @@ function PublicTwitchFollowedPanel({
           {followedChannels.length === 0 && !loading ? (
             <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
               <EmptyStateIcon>?</EmptyStateIcon>
-              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.twitchFollowedEmpty} data-ja={publicI18n.ja.twitchFollowedEmpty}>{t().twitchFollowedEmpty}</EmptyStateTitle>
+              <EmptyStateTitle as="h3"  >{t().twitchFollowedEmpty}</EmptyStateTitle>
             </EmptyState>
           ) : null}
           <div
@@ -2664,13 +2681,13 @@ function PublicSubscriptionsPage({
   return (
     <section className="public-panel public-saved-data-panel public-menu-page-panel public-subscriptions-page">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.subscriptionStatus} data-ja={publicI18n.ja.subscriptionStatus}>{t().subscriptionStatus}</h2>
+        <h2  >{t().subscriptionStatus}</h2>
         <span>{subscriptions.length}</span>
       </div>
       <div className="public-subscriptions-layout">
         <article className="public-subscriptions-card">
-          <strong data-ko={publicI18n.ko.subscriptionsTitle} data-ja={publicI18n.ja.subscriptionsTitle}>{t().subscriptionsTitle}</strong>
-          <p data-ko={publicI18n.ko.subscriptionsSubtitle} data-ja={publicI18n.ja.subscriptionsSubtitle}>{t().subscriptionsSubtitle}</p>
+          <strong  >{t().subscriptionsTitle}</strong>
+          <p  >{t().subscriptionsSubtitle}</p>
           {!twitchStatus.connected ? (
             <p className="public-empty">{t().twitchLoginRequired}</p>
           ) : followed && !followed.subscriptionScopeGranted ? (
@@ -2798,19 +2815,19 @@ function PublicCommunityPage({
     >
       <AppShellHeader className="public-community-shared-header">
         <PageHeader layout="split">
-          <PageHeaderEyebrow data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>
+          <PageHeaderEyebrow  >
             {t().community}
           </PageHeaderEyebrow>
           <PageHeaderTitle
             as="h2"
-            data-ko={isParty ? publicI18n.ko.communityPartyRecruit : publicI18n.ko.communityServerRecruit}
-            data-ja={isParty ? publicI18n.ja.communityPartyRecruit : publicI18n.ja.communityServerRecruit}
+
+
           >
             {pageTitle}
           </PageHeaderTitle>
           <PageHeaderDescription
-            data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
-            data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
+
+
           >
             {pageSubtitle}
           </PageHeaderDescription>
@@ -2820,15 +2837,15 @@ function PublicCommunityPage({
             </StatusPill>
           </PageHeaderStatus>
           <PageHeaderActions>
-            <Button type="button" variant="secondary" loading={loading} onClick={onRefresh} data-ko={publicI18n.ko.twitchFollowedRefresh} data-ja={publicI18n.ja.twitchFollowedRefresh}>
+            <Button type="button" variant="secondary" loading={loading} onClick={onRefresh}  >
               {t().twitchFollowedRefresh}
             </Button>
             <Button
               type="button"
               variant="primary"
               onClick={onWrite}
-              data-ko={isParty ? publicI18n.ko.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ko.communityEditButton : publicI18n.ko.communityServerWriteButton}
-              data-ja={isParty ? publicI18n.ja.communityPartyWriteButton : hasOwnServerPost ? publicI18n.ja.communityEditButton : publicI18n.ja.communityServerWriteButton}
+
+
             >
               {writeLabel}
             </Button>
@@ -2883,7 +2900,7 @@ function PublicCommunityPage({
         {!loading && !error && visiblePosts.length === 0 ? (
           <EmptyState variant="community" as="div">
             <EmptyStateIcon>+</EmptyStateIcon>
-            <EmptyStateTitle as="h3" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>
+            <EmptyStateTitle as="h3"  >
               {t().communityEmpty}
             </EmptyStateTitle>
             <EmptyStateDescription>{pageSubtitle}</EmptyStateDescription>
@@ -3119,17 +3136,17 @@ function PublicCommunityWritePage({
     >
       <AppShellHeader className="public-community-shared-header">
         <PageHeader layout="split">
-          <PageHeaderEyebrow data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</PageHeaderEyebrow>
+          <PageHeaderEyebrow  >{t().community}</PageHeaderEyebrow>
           <PageHeaderTitle
             as="h2"
-            data-ko={isParty ? publicI18n.ko.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ko.communityEditTitle : publicI18n.ko.communityWriteTitle}
-            data-ja={isParty ? publicI18n.ja.communityPartyWriteTitle : isEditingServerPost ? publicI18n.ja.communityEditTitle : publicI18n.ja.communityWriteTitle}
+
+
           >
             {isParty ? t().communityPartyWriteTitle : isEditingServerPost ? t().communityEditTitle : t().communityWriteTitle}
           </PageHeaderTitle>
           <PageHeaderDescription
-            data-ko={isParty ? publicI18n.ko.communityPartySubtitle : publicI18n.ko.communityServerSubtitle}
-            data-ja={isParty ? publicI18n.ja.communityPartySubtitle : publicI18n.ja.communityServerSubtitle}
+
+
           >
             {isParty ? t().communityPartySubtitle : t().communityServerSubtitle}
           </PageHeaderDescription>
@@ -3139,7 +3156,7 @@ function PublicCommunityWritePage({
             </StatusPill>
           </PageHeaderStatus>
           <PageHeaderActions>
-            <Button type="button" variant="secondary" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>
+            <Button type="button" variant="secondary" onClick={onBack}  >
               {t().communityBackToList}
             </Button>
           </PageHeaderActions>
@@ -3161,11 +3178,11 @@ function PublicCommunityWritePage({
           {!twitchStatus.connected ? (
             <EmptyState variant="community" as="div">
               <EmptyStateIcon>TV</EmptyStateIcon>
-              <EmptyStateTitle as="h3" data-ko={publicI18n.ko.communityLoginRequired} data-ja={publicI18n.ja.communityLoginRequired}>
+              <EmptyStateTitle as="h3"  >
                 {t().communityLoginRequired}
               </EmptyStateTitle>
               <EmptyStateActions>
-                <Button type="button" variant="primary" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>
+                <Button type="button" variant="primary" onClick={onLogin}  >
                   {t().twitchViewerLogin}
                 </Button>
               </EmptyStateActions>
@@ -3191,26 +3208,26 @@ function PublicCommunityWritePage({
                 </EmptyState>
               ) : null}
               {isParty ? (
-                <StatusPill tone="info" data-ko={publicI18n.ko.communityPartyAutoDeleteNotice} data-ja={publicI18n.ja.communityPartyAutoDeleteNotice}>
+                <StatusPill tone="info"  >
                   {t().communityPartyAutoDeleteNotice}
                 </StatusPill>
               ) : null}
               <FormField required>
-                <FormLabel data-ko={publicI18n.ko.communityTitleLabel} data-ja={publicI18n.ja.communityTitleLabel}>{t().communityTitleLabel}</FormLabel>
+                <FormLabel  >{t().communityTitleLabel}</FormLabel>
                 <FormControl>
                   <Input
                     value={title}
                     onChange={(event) => setTitle(event.currentTarget.value)}
                     maxLength={80}
                     placeholder={isParty ? t().communityPartyTitlePlaceholder : t().communityTitlePlaceholder}
-                    data-ko={isParty ? publicI18n.ko.communityPartyTitlePlaceholder : publicI18n.ko.communityTitlePlaceholder}
-                    data-ja={isParty ? publicI18n.ja.communityPartyTitlePlaceholder : publicI18n.ja.communityTitlePlaceholder}
+
+
                     required
                   />
                 </FormControl>
               </FormField>
               <FormField required>
-                <FormLabel data-ko={publicI18n.ko.communityBodyLabel} data-ja={publicI18n.ja.communityBodyLabel}>{t().communityBodyLabel}</FormLabel>
+                <FormLabel  >{t().communityBodyLabel}</FormLabel>
                 <FormControl>
                   <Textarea
                     value={body}
@@ -3218,8 +3235,8 @@ function PublicCommunityWritePage({
                     maxLength={1000}
                     rows={isParty ? 5 : 6}
                     placeholder={isParty ? t().communityPartyBodyPlaceholder : t().communityBodyPlaceholder}
-                    data-ko={isParty ? publicI18n.ko.communityPartyBodyPlaceholder : publicI18n.ko.communityBodyPlaceholder}
-                    data-ja={isParty ? publicI18n.ja.communityPartyBodyPlaceholder : publicI18n.ja.communityBodyPlaceholder}
+
+
                     required
                   />
                 </FormControl>
@@ -3227,7 +3244,7 @@ function PublicCommunityWritePage({
               {isParty ? (
                 <div className="public-party-option-grid public-community-shared-option-grid">
                   <FormField>
-                    <FormLabel data-ko={publicI18n.ko.communityPartyTierLabel} data-ja={publicI18n.ja.communityPartyTierLabel}>{t().communityPartyTierLabel}</FormLabel>
+                    <FormLabel  >{t().communityPartyTierLabel}</FormLabel>
                     <FormControl>
                       <Select value={partyTier} onChange={(event) => setPartyTier(event.currentTarget.value)}>
                         <option value="">{t().communitySelectPlaceholder}</option>
@@ -3236,7 +3253,7 @@ function PublicCommunityWritePage({
                     </FormControl>
                   </FormField>
                   <FormField>
-                    <FormLabel data-ko={publicI18n.ko.communityPartyRoleLabel} data-ja={publicI18n.ja.communityPartyRoleLabel}>{t().communityPartyRoleLabel}</FormLabel>
+                    <FormLabel  >{t().communityPartyRoleLabel}</FormLabel>
                     <FormControl>
                       <Select value={partyRole} onChange={(event) => setPartyRole(event.currentTarget.value)}>
                         <option value="">{t().communitySelectPlaceholder}</option>
@@ -3245,7 +3262,7 @@ function PublicCommunityWritePage({
                     </FormControl>
                   </FormField>
                   <FormField>
-                    <FormLabel data-ko={publicI18n.ko.communityPartyModeLabel} data-ja={publicI18n.ja.communityPartyModeLabel}>{t().communityPartyModeLabel}</FormLabel>
+                    <FormLabel  >{t().communityPartyModeLabel}</FormLabel>
                     <FormControl>
                       <Select value={partyMode} onChange={(event) => setPartyMode(event.currentTarget.value)}>
                         <option value="">{t().communitySelectPlaceholder}</option>
@@ -3254,7 +3271,7 @@ function PublicCommunityWritePage({
                     </FormControl>
                   </FormField>
                   <FormField>
-                    <FormLabel data-ko={publicI18n.ko.communityPartyVoiceLabel} data-ja={publicI18n.ja.communityPartyVoiceLabel}>{t().communityPartyVoiceLabel}</FormLabel>
+                    <FormLabel  >{t().communityPartyVoiceLabel}</FormLabel>
                     <FormControl>
                       <Select value={partyVoice} onChange={(event) => setPartyVoice(event.currentTarget.value)}>
                         <option value="">{t().communitySelectPlaceholder}</option>
@@ -3263,7 +3280,7 @@ function PublicCommunityWritePage({
                     </FormControl>
                   </FormField>
                   <FormField>
-                    <FormLabel data-ko={publicI18n.ko.communityPartyCapacityLabel} data-ja={publicI18n.ja.communityPartyCapacityLabel}>{t().communityPartyCapacityLabel}</FormLabel>
+                    <FormLabel  >{t().communityPartyCapacityLabel}</FormLabel>
                     <FormControl>
                       <Input type="number" min={2} max={10} value={partyCapacity} onChange={(event) => setPartyCapacity(event.currentTarget.value)} />
                     </FormControl>
@@ -3271,15 +3288,15 @@ function PublicCommunityWritePage({
                 </div>
               ) : null}
               <FormField>
-                <FormLabel data-ko={publicI18n.ko.communityRiotIdLabel} data-ja={publicI18n.ja.communityRiotIdLabel}>{t().communityRiotIdLabel}</FormLabel>
+                <FormLabel  >{t().communityRiotIdLabel}</FormLabel>
                 <FormControl className={`public-community-riot-check ${riotCheckStatus}`}>
                   <Input
                     value={riotId}
                     onChange={(event) => updateRiotId(event.currentTarget.value)}
                     maxLength={80}
                     placeholder={t().communityRiotIdPlaceholder}
-                    data-ko={publicI18n.ko.communityRiotIdPlaceholder}
-                    data-ja={publicI18n.ja.communityRiotIdPlaceholder}
+
+
                   />
                   <Button type="button" variant="secondary" onClick={checkRiotId} disabled={!riotId.trim() || riotCheckStatus === "checking"}>
                     {riotCheckStatus === "checking" ? t().communityRiotIdChecking : t().communityRiotIdCheck}
@@ -3289,7 +3306,7 @@ function PublicCommunityWritePage({
               </FormField>
               {isParty ? (
                 <FormField>
-                  <FormLabel data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</FormLabel>
+                  <FormLabel  >{t().communityTagsLabel}</FormLabel>
                   <FormControl className="public-community-tag-picker">
                     {PARTY_TAG_OPTIONS.map((option) => (
                       <Button
@@ -3307,21 +3324,21 @@ function PublicCommunityWritePage({
                 </FormField>
               ) : (
                 <FormField>
-                  <FormLabel data-ko={publicI18n.ko.communityTagsLabel} data-ja={publicI18n.ja.communityTagsLabel}>{t().communityTagsLabel}</FormLabel>
+                  <FormLabel  >{t().communityTagsLabel}</FormLabel>
                   <FormControl>
                     <Input
                       value={tags}
                       onChange={(event) => setTags(event.currentTarget.value)}
                       maxLength={120}
                       placeholder={t().communityTagsPlaceholder}
-                      data-ko={publicI18n.ko.communityTagsPlaceholder}
-                      data-ja={publicI18n.ja.communityTagsPlaceholder}
+
+
                     />
                   </FormControl>
                 </FormField>
               )}
               <FormField className="public-community-file-field">
-                <FormLabel data-ko={publicI18n.ko.communityImageLabel} data-ja={publicI18n.ja.communityImageLabel}>{t().communityImageLabel}</FormLabel>
+                <FormLabel  >{t().communityImageLabel}</FormLabel>
                 <FormControl className="public-community-file-control">
                   <Button type="button" variant="secondary" onClick={() => imageInputRef.current?.click()}>
                     {t().communityImageChoose}
@@ -3335,8 +3352,8 @@ function PublicCommunityWritePage({
                   onChange={(event) => setImageFile(event.currentTarget.files?.[0] ?? null)}
                 />
                 <FormHint
-                  data-ko={isEditingServerPost ? publicI18n.ko.communityImageReplaceHelp : publicI18n.ko.communityImageHelp}
-                  data-ja={isEditingServerPost ? publicI18n.ja.communityImageReplaceHelp : publicI18n.ja.communityImageHelp}
+
+
                 >
                   {isEditingServerPost ? t().communityImageReplaceHelp : t().communityImageHelp}
                 </FormHint>
@@ -3441,8 +3458,8 @@ function PublicCommunityDetailPage({
     >
       <AppShellHeader className="public-community-shared-header">
         <PageHeader layout="split">
-          <PageHeaderEyebrow data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</PageHeaderEyebrow>
-          <PageHeaderTitle as="h2" data-ko={publicI18n.ko.communityDetailTitle} data-ja={publicI18n.ja.communityDetailTitle}>
+          <PageHeaderEyebrow  >{t().community}</PageHeaderEyebrow>
+          <PageHeaderTitle as="h2"  >
             {t().communityDetailTitle}
           </PageHeaderTitle>
           <PageHeaderDescription>
@@ -3459,13 +3476,13 @@ function PublicCommunityDetailPage({
                 type="button"
                 variant="ghost"
                 onClick={() => twitchStatus.connected ? setReportOpen(true) : onLogin()}
-                data-ko={publicI18n.ko.communityReport}
-                data-ja={publicI18n.ja.communityReport}
+
+
               >
                 {t().communityReport}
               </Button>
             ) : null}
-            <Button type="button" variant="secondary" onClick={onBack} data-ko={publicI18n.ko.communityBackToList} data-ja={publicI18n.ja.communityBackToList}>
+            <Button type="button" variant="secondary" onClick={onBack}  >
               {t().communityBackToList}
             </Button>
           </PageHeaderActions>
@@ -3489,7 +3506,7 @@ function PublicCommunityDetailPage({
       {!post ? (
         <EmptyState variant="community" as="div">
           <EmptyStateIcon>!</EmptyStateIcon>
-          <EmptyStateTitle as="h3" data-ko={publicI18n.ko.communityEmpty} data-ja={publicI18n.ja.communityEmpty}>
+          <EmptyStateTitle as="h3"  >
             {t().communityEmpty}
           </EmptyStateTitle>
           <EmptyStateActions>
@@ -3502,12 +3519,12 @@ function PublicCommunityDetailPage({
             <Card as="aside" className="public-community-record-strip public-community-shared-record-card" padding="lg" variant="glass">
               <CardHeader className="public-community-shared-record-head">
                 <div>
-                  <CardTitle as="h3" data-ko={publicI18n.ko.communityRecordPreview} data-ja={publicI18n.ja.communityRecordPreview}>
+                  <CardTitle as="h3"  >
                     {t().communityRecordPreview}
                   </CardTitle>
                   <CardDescription>{riotId}</CardDescription>
                 </div>
-                <Button type="button" variant="secondary" size="sm" onClick={() => onSearchRiotId(riotId)} data-ko={publicI18n.ko.viewRecord} data-ja={publicI18n.ja.viewRecord}>
+                <Button type="button" variant="secondary" size="sm" onClick={() => onSearchRiotId(riotId)}  >
                   {t().viewRecord}
                 </Button>
               </CardHeader>
@@ -3598,7 +3615,7 @@ function PublicCommunityDetailPage({
             {isParty ? (
               <Card as="section" className="public-community-comments public-community-shared-comments" padding="md" variant="default">
                 <CardHeader className="public-community-comments-head">
-                  <CardTitle as="h4" data-ko={publicI18n.ko.communityCommentsTitle} data-ja={publicI18n.ja.communityCommentsTitle}>{t().communityCommentsTitle}</CardTitle>
+                  <CardTitle as="h4"  >{t().communityCommentsTitle}</CardTitle>
                   <Badge tone="info">{comments.length}</Badge>
                 </CardHeader>
                 {comments.length > 0 ? (
@@ -3621,7 +3638,7 @@ function PublicCommunityDetailPage({
                 ) : (
                   <EmptyState variant="community" as="div">
                     <EmptyStateIcon>+</EmptyStateIcon>
-                    <EmptyStateTitle as="h4" data-ko={publicI18n.ko.communityCommentEmpty} data-ja={publicI18n.ja.communityCommentEmpty}>
+                    <EmptyStateTitle as="h4"  >
                       {t().communityCommentEmpty}
                     </EmptyStateTitle>
                   </EmptyState>
@@ -3646,8 +3663,8 @@ function PublicCommunityDetailPage({
                           maxLength={500}
                           rows={3}
                           placeholder={t().communityCommentPlaceholder}
-                          data-ko={publicI18n.ko.communityCommentPlaceholder}
-                          data-ja={publicI18n.ja.communityCommentPlaceholder}
+
+
                           required
                         />
                       </FormControl>
@@ -3659,11 +3676,11 @@ function PublicCommunityDetailPage({
                 ) : (
                   <EmptyState variant="community" as="div" className="public-community-login public-community-comment-login">
                     <EmptyStateIcon>TV</EmptyStateIcon>
-                    <EmptyStateTitle as="h4" data-ko={publicI18n.ko.communityCommentLoginRequired} data-ja={publicI18n.ja.communityCommentLoginRequired}>
+                    <EmptyStateTitle as="h4"  >
                       {t().communityCommentLoginRequired}
                     </EmptyStateTitle>
                     <EmptyStateActions>
-                      <Button type="button" variant="primary" onClick={onLogin} data-ko={publicI18n.ko.twitchViewerLogin} data-ja={publicI18n.ja.twitchViewerLogin}>
+                      <Button type="button" variant="primary" onClick={onLogin}  >
                         {t().twitchViewerLogin}
                       </Button>
                     </EmptyStateActions>
@@ -4054,20 +4071,20 @@ function PublicTournamentCalendarPage({
     >
       <AppShellHeader className="public-tournament-shared-header">
         <PageHeader layout="split">
-          <PageHeaderEyebrow data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>
+          <PageHeaderEyebrow  >
             {t().contentMenu}
           </PageHeaderEyebrow>
-          <PageHeaderTitle as="h2" data-ko={publicI18n.ko.tournamentCalendarTitle} data-ja={publicI18n.ja.tournamentCalendarTitle}>
+          <PageHeaderTitle as="h2"  >
             {t().tournamentCalendarTitle}
           </PageHeaderTitle>
-          <PageHeaderDescription data-ko={publicI18n.ko.tournamentCalendarSubtitle} data-ja={publicI18n.ja.tournamentCalendarSubtitle}>
+          <PageHeaderDescription  >
             {t().tournamentCalendarSubtitle}
           </PageHeaderDescription>
           <PageHeaderStatus>
             <Badge tone="info">{events.length} {t().tournamentMatchCount}</Badge>
           </PageHeaderStatus>
           <PageHeaderActions>
-            <Button type="button" variant="secondary" onClick={onOpenList} data-ko={publicI18n.ko.tournamentList} data-ja={publicI18n.ja.tournamentList}>
+            <Button type="button" variant="secondary" onClick={onOpenList}  >
               {t().tournamentList}
             </Button>
           </PageHeaderActions>
@@ -4131,7 +4148,7 @@ function PublicTournamentCalendarPage({
             </Card>
             <Card as="aside" className="public-tournament-upcoming-card" padding="lg" variant="elevated">
               <CardHeader className="public-tournament-card-head">
-                <CardTitle as="h3" data-ko={publicI18n.ko.tournamentUpcoming} data-ja={publicI18n.ja.tournamentUpcoming}>
+                <CardTitle as="h3"  >
                   {t().tournamentUpcoming}
                 </CardTitle>
                 <StatusPill tone="info">{upcoming.length}</StatusPill>
@@ -4187,20 +4204,20 @@ function PublicTournamentListPage({
     >
       <AppShellHeader className="public-tournament-shared-header">
         <PageHeader layout="split">
-          <PageHeaderEyebrow data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>
+          <PageHeaderEyebrow  >
             {t().contentMenu}
           </PageHeaderEyebrow>
-          <PageHeaderTitle as="h2" data-ko={publicI18n.ko.tournamentListTitle} data-ja={publicI18n.ja.tournamentListTitle}>
+          <PageHeaderTitle as="h2"  >
             {t().tournamentListTitle}
           </PageHeaderTitle>
-          <PageHeaderDescription data-ko={publicI18n.ko.tournamentListSubtitle} data-ja={publicI18n.ja.tournamentListSubtitle}>
+          <PageHeaderDescription  >
             {t().tournamentListSubtitle}
           </PageHeaderDescription>
           <PageHeaderStatus>
             <Badge tone="streamer">{tournaments.length} {t().tournamentTeamUnit}</Badge>
           </PageHeaderStatus>
           <PageHeaderActions>
-            <Button type="button" variant="secondary" onClick={onOpenCalendar} data-ko={publicI18n.ko.tournamentCalendar} data-ja={publicI18n.ja.tournamentCalendar}>
+            <Button type="button" variant="secondary" onClick={onOpenCalendar}  >
               {t().tournamentCalendar}
             </Button>
           </PageHeaderActions>
@@ -4251,7 +4268,7 @@ function PublicTournamentListPage({
                     <Metric label={t().tournamentTeams} value={`${tournament.teams.length} ${t().tournamentTeamUnit}`} tone="streamer" size="sm" />
                     <Metric label={t().tournamentMatchCount} value={tournament.matches.length} tone="info" size="sm" />
                   </CardContent>
-                  <Button type="button" onClick={() => onSelectTournament(tournament.slug)} data-ko={publicI18n.ko.tournamentOpenDetail} data-ja={publicI18n.ja.tournamentOpenDetail}>
+                  <Button type="button" onClick={() => onSelectTournament(tournament.slug)}  >
                     {t().tournamentOpenDetail}
                   </Button>
                 </Card>
@@ -4394,7 +4411,7 @@ function PublicTournamentPage({
     >
       <AppShellHeader className="public-tournament-shared-header">
         <PageHeader layout="split">
-          <PageHeaderEyebrow data-ko={publicI18n.ko.contentMenu} data-ja={publicI18n.ja.contentMenu}>
+          <PageHeaderEyebrow  >
             {t().contentMenu}
           </PageHeaderEyebrow>
           <PageHeaderTitle as="h2">{tournament?.title ?? t().tournamentTitle}</PageHeaderTitle>
@@ -4406,7 +4423,7 @@ function PublicTournamentPage({
           </PageHeaderStatus>
           <PageHeaderActions>
             <FormField className="public-tournament-shared-selector">
-              <FormLabel data-ko={publicI18n.ko.tournamentSelect} data-ja={publicI18n.ja.tournamentSelect}>
+              <FormLabel  >
                 {t().tournamentSelect}
               </FormLabel>
               <FormControl>
@@ -4424,7 +4441,7 @@ function PublicTournamentPage({
           <NavigationSection title={t().tournamentTitle}>
             {tabs.map((tab) => (
               <NavigationItem active={page === tab.page} as="button" onClick={() => onPage(tab.page)} key={tab.page}>
-                <span data-ko={tab.ko} data-ja={tab.ja}>{tab.label}</span>
+                <span  >{tab.label}</span>
               </NavigationItem>
             ))}
           </NavigationSection>
@@ -4451,7 +4468,7 @@ function PublicTournamentPage({
           </EmptyState>
         ) : null}
         {!loading && !error && !tournament ? (
-          <EmptyState variant="tournament" as="div" data-ko={publicI18n.ko.tournamentEmpty} data-ja={publicI18n.ja.tournamentEmpty}>
+          <EmptyState variant="tournament" as="div"  >
             <EmptyStateIcon>+</EmptyStateIcon>
             <EmptyStateTitle as="h3">{t().tournamentEmpty}</EmptyStateTitle>
           </EmptyState>
@@ -4481,7 +4498,7 @@ function PublicTournamentPage({
           <div className="public-tournament-main">
             <div className="public-tournament-title-row">
               <div>
-                <h2 data-ko={publicI18n.ko.tournamentBracket} data-ja={publicI18n.ja.tournamentBracket}>{t().tournamentBracket}</h2>
+                <h2  >{t().tournamentBracket}</h2>
                 <p>{tournamentDescriptionText(tournament.description, t().tournamentBracketIntro)}</p>
               </div>
             </div>
@@ -4575,7 +4592,7 @@ function PublicTournamentPage({
           <TournamentScheduleCard upcoming={scheduleItems} avatar={avatar} expanded />
           <Card className="public-tournament-card public-tournament-standings" padding="lg" variant="glass">
             <CardHeader className="public-tournament-card-head">
-              <CardTitle as="h3" data-ko={publicI18n.ko.tournamentStandingsTitle} data-ja={publicI18n.ja.tournamentStandingsTitle}>{t().tournamentStandingsTitle}</CardTitle>
+              <CardTitle as="h3"  >{t().tournamentStandingsTitle}</CardTitle>
               <Badge tone="neutral">{tournament.title}</Badge>
             </CardHeader>
             <CardContent>
@@ -4627,8 +4644,8 @@ function TournamentScheduleCard({
   return (
     <Card className={`public-tournament-card public-tournament-schedule ${expanded ? "expanded" : ""}`} padding="lg" variant="glass">
       <CardHeader className="public-tournament-card-head">
-        <CardTitle as="h3" data-ko={publicI18n.ko.tournamentScheduleTitle} data-ja={publicI18n.ja.tournamentScheduleTitle}>{t().tournamentScheduleTitle}</CardTitle>
-        <Button type="button" variant="ghost" size="sm" data-ko={publicI18n.ko.tournamentAllView} data-ja={publicI18n.ja.tournamentAllView}>{t().tournamentAllView} ›</Button>
+        <CardTitle as="h3"  >{t().tournamentScheduleTitle}</CardTitle>
+        <Button type="button" variant="ghost" size="sm"  >{t().tournamentAllView} ›</Button>
       </CardHeader>
       <CardContent>
       {upcoming.map((match) => (
@@ -4663,7 +4680,7 @@ function TournamentTeamsPanel({
   return (
     <Card className="public-tournament-card public-tournament-team-panel" padding="lg" variant="glass">
       <CardHeader className="public-tournament-card-head">
-        <CardTitle as="h3" data-ko={publicI18n.ko.tournamentTeamGroups} data-ja={publicI18n.ja.tournamentTeamGroups}>{t().tournamentTeamGroups}</CardTitle>
+        <CardTitle as="h3"  >{t().tournamentTeamGroups}</CardTitle>
         <StatusPill tone="streamer">{tournament.teams.length} {t().tournamentTeamUnit}</StatusPill>
       </CardHeader>
       <CardContent className="public-tournament-team-groups">
@@ -4789,8 +4806,8 @@ function TournamentNoticeCard({ notices }: { notices: Array<{ title: string; dat
   return (
     <Card className="public-tournament-card public-tournament-notices" padding="lg" variant="glass">
       <CardHeader className="public-tournament-card-head">
-        <CardTitle as="h3" data-ko={publicI18n.ko.tournamentNotice} data-ja={publicI18n.ja.tournamentNotice}>{t().tournamentNotice}</CardTitle>
-        <Button type="button" variant="ghost" size="sm" data-ko={publicI18n.ko.tournamentAllView} data-ja={publicI18n.ja.tournamentAllView}>{t().tournamentAllView} ›</Button>
+        <CardTitle as="h3"  >{t().tournamentNotice}</CardTitle>
+        <Button type="button" variant="ghost" size="sm"  >{t().tournamentAllView} ›</Button>
       </CardHeader>
       <CardContent>
       {notices.map((notice) => (
@@ -4868,7 +4885,7 @@ function PublicLegalRuntimeLine({
   return (
     <div className="public-legal-runtime-row">
       <PublicLegalText textKey={labelKey} as="strong" />
-      <span data-ko={value.ko} data-ja={value.ja}>{value.current}</span>
+      <span  >{value.current}</span>
     </div>
   );
 }
@@ -4919,10 +4936,10 @@ function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
   return (
     <section className="public-legal-page public-panel">
       <div className="public-legal-hero">
-        <span className="public-section-kicker" data-ko={publicI18n.ko.brand} data-ja={publicI18n.ja.brand}>{t().brand}</span>
+        <span className="public-section-kicker"  >{t().brand}</span>
         <PublicLegalText textKey={titleKey} as="h1" />
         <PublicLegalText textKey={introKey} />
-        <span data-ko={effectiveDateKo} data-ja={effectiveDateJa}>{activePublicLocale === "ja" ? effectiveDateJa : effectiveDateKo}</span>
+        <span  >{activePublicLocale === "ja" ? effectiveDateJa : effectiveDateKo}</span>
       </div>
 
       {page === "contact" ? (
@@ -4932,7 +4949,7 @@ function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
             <PublicLegalText textKey="contactEmailLabel" as="strong" />
             <a href={mailHref}>{PUBLIC_CONTACT_EMAIL}</a>
           </div>
-          <a className="public-contact-mail-button" href={mailHref} data-ko={publicI18n.ko.contactEmailButton} data-ja={publicI18n.ja.contactEmailButton}>
+          <a className="public-contact-mail-button" href={mailHref}  >
             {t().contactEmailButton}
           </a>
         </div>
@@ -4998,13 +5015,13 @@ function PublicPremiumDialog({
     <div className="public-dialog-backdrop" role="presentation" onMouseDown={onClose}>
       <section className="public-dialog" role="dialog" aria-modal="true" aria-labelledby="public-premium-title" onMouseDown={(event) => event.stopPropagation()}>
         <div className="public-section-head">
-          <h2 id="public-premium-title" data-ko={publicI18n.ko.premiumNoticeTitle} data-ja={publicI18n.ja.premiumNoticeTitle}>{t().premiumNoticeTitle}</h2>
+          <h2 id="public-premium-title"  >{t().premiumNoticeTitle}</h2>
           <button type="button" onClick={onClose} aria-label={t().clearSearch}>×</button>
         </div>
-        <p data-ko={publicI18n.ko.premiumNoticeBody} data-ja={publicI18n.ja.premiumNoticeBody}>{t().premiumNoticeBody}</p>
+        <p  >{t().premiumNoticeBody}</p>
         <div className="public-dialog-actions">
-          <button type="button" onClick={onOpenAdmin} data-ko={publicI18n.ko.openStreamerLogin} data-ja={publicI18n.ja.openStreamerLogin}>{t().openStreamerLogin}</button>
-          <button type="button" onClick={onClose} data-ko={publicI18n.ko.folded} data-ja={publicI18n.ja.folded}>{t().folded}</button>
+          <button type="button" onClick={onOpenAdmin}  >{t().openStreamerLogin}</button>
+          <button type="button" onClick={onClose}  >{t().folded}</button>
         </div>
       </section>
     </div>
@@ -5016,7 +5033,7 @@ function RoleDistribution({ profile }: { profile: PublicLolProfile }) {
   return (
     <section className="public-panel public-role-distribution">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.roleDistribution} data-ja={publicI18n.ja.roleDistribution}>{t().roleDistribution}</h2>
+        <h2  >{t().roleDistribution}</h2>
         <span>{profile.summary.recentGames}{t().games}</span>
       </div>
       <div className="public-role-bars">
@@ -5040,7 +5057,7 @@ function RecentRecords({ profile }: { profile: PublicLolProfile }) {
   return (
     <section className="public-panel public-record-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.recentRecords} data-ja={publicI18n.ja.recentRecords}>{t().recentRecords}</h2>
+        <h2  >{t().recentRecords}</h2>
         <span>{profile.summary.recentGames}{t().games}</span>
       </div>
       <div className="public-record-list">
@@ -5073,8 +5090,8 @@ function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge
         <span
           className={`public-match-badge ${badge.code}`}
           key={`${badge.code}:${badge.score ?? ""}:${badge.rank ?? ""}`}
-          data-ko={matchBadgeLabel(badge.code, "ko")}
-          data-ja={matchBadgeLabel(badge.code, "ja")}
+
+
         >
           {matchBadgeLabel(badge.code)}
         </span>
@@ -5965,7 +5982,7 @@ function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; o
     <section id="public-ingame" className={`public-panel public-ingame-panel ${isLive ? "live" : isUnavailable ? "unavailable" : "offline"}`}>
       <div className="public-ingame-status-head">
         <div>
-          <h2 data-ko={publicI18n.ko.currentGameStatus} data-ja={publicI18n.ja.currentGameStatus}>{t().currentGameStatus}</h2>
+          <h2  >{t().currentGameStatus}</h2>
           <span className={`public-ingame-live-state ${isLive ? "live" : isUnavailable ? "unavailable" : "offline"}`}>
             <i />
             {isLive ? t().currentlyInGame : isUnavailable ? t().currentGameUnavailable : t().notInGame}
@@ -5975,7 +5992,7 @@ function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; o
       </div>
       {!isLive ? (
         <div className="public-ingame-empty">
-          <strong data-ko={isUnavailable ? publicI18n.ko.currentGameUnavailable : publicI18n.ko.notInGame} data-ja={isUnavailable ? publicI18n.ja.currentGameUnavailable : publicI18n.ja.notInGame}>
+          <strong  >
             {isUnavailable ? t().currentGameUnavailable : t().notInGame}
           </strong>
           {isUnavailable ? <small>{t().currentGameUnavailableDetail}</small> : null}
@@ -6332,8 +6349,8 @@ function ChampionMastery({ profile }: { profile: PublicLolProfile }) {
   return (
     <section id="public-champions" className="public-panel public-champion-mastery-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.championMasteryTop5} data-ja={publicI18n.ja.championMasteryTop5}>{t().championMasteryTop5}</h2>
-        <span data-ko={publicI18n.ko.masteryBasis} data-ja={publicI18n.ja.masteryBasis}>{t().masteryBasis}</span>
+        <h2  >{t().championMasteryTop5}</h2>
+        <span  >{t().masteryBasis}</span>
       </div>
       <div className="public-champion-top-grid">
         {rows.length === 0 ? <p className="public-empty">{t().noData}</p> : rows.map((row, index) => {
@@ -6372,7 +6389,7 @@ function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
   return (
     <section className="public-panel public-detail-analysis-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.championDetailStats} data-ja={publicI18n.ja.championDetailStats}>{t().championDetailStats}</h2>
+        <h2  >{t().championDetailStats}</h2>
         <span>{profile.summary.recentGames}{t().games}</span>
       </div>
       <div className="public-champion-analysis-table" aria-label={t().recentChampionStats}>
@@ -6426,7 +6443,7 @@ function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
         })}
       </div>
       <div className="public-performance-block">
-        <h3 data-ko={publicI18n.ko.rolePerformance} data-ja={publicI18n.ja.rolePerformance}>{t().rolePerformance}</h3>
+        <h3  >{t().rolePerformance}</h3>
         <div className="public-role-chip-list">
           {profile.rolePerformance.length === 0 ? <p className="public-empty">{t().noData}</p> : profile.rolePerformance.map((item) => (
             <article className="public-role-chip" key={item.role}>
@@ -6452,7 +6469,7 @@ function AnalysisPanel({ profile }: { profile: PublicLolProfile }) {
   return (
     <section id="public-ingame" className="public-panel public-analysis-panel">
       <div className="public-section-head">
-        <h2 data-ko={publicI18n.ko.analysis} data-ja={publicI18n.ja.analysis}>{t().analysis}</h2>
+        <h2  >{t().analysis}</h2>
       </div>
       <div className="public-insight-list">
         <article>
@@ -6501,17 +6518,17 @@ function PublicTopbar({
         <img className="public-brand-logo" src="/images/yorogg-mark.png" alt={t().brand} />
       </button>
       <nav aria-label="YORO.gg">
-        <button type="button" onClick={() => onNavigate("search")} data-ko={publicI18n.ko.searchNav} data-ja={publicI18n.ja.searchNav}>{t().searchNav}</button>
-        <button type="button" onClick={() => onNavigate("ranking")} data-ko={publicI18n.ko.ranking} data-ja={publicI18n.ja.ranking}>{t().ranking}</button>
-        <button type="button" onClick={() => onNavigate("champion")} data-ko={publicI18n.ko.championAnalysis} data-ja={publicI18n.ja.championAnalysis}>{t().championAnalysis}</button>
-        <button type="button" onClick={() => onNavigate("stats")} data-ko={publicI18n.ko.stats} data-ja={publicI18n.ja.stats}>{t().stats}</button>
-        <button type="button" onClick={() => onNavigate("promotion")} data-ko={publicI18n.ko.promotion} data-ja={publicI18n.ja.promotion}>{t().promotion}</button>
-        <button type="button" onClick={() => onNavigate("community")} data-ko={publicI18n.ko.community} data-ja={publicI18n.ja.community}>{t().community}</button>
+        <button type="button" onClick={() => onNavigate("search")}  >{t().searchNav}</button>
+        <button type="button" onClick={() => onNavigate("ranking")}  >{t().ranking}</button>
+        <button type="button" onClick={() => onNavigate("champion")}  >{t().championAnalysis}</button>
+        <button type="button" onClick={() => onNavigate("stats")}  >{t().stats}</button>
+        <button type="button" onClick={() => onNavigate("promotion")}  >{t().promotion}</button>
+        <button type="button" onClick={() => onNavigate("community")}  >{t().community}</button>
       </nav>
       <div className="public-top-actions">
         <PublicLocaleSelector locale={locale} onLocale={onLocale} onAutoLocale={onAutoLocale} />
         <button className="public-theme-button" type="button" aria-label={t().darkMode}>●</button>
-        <button className="public-login-button" type="button" onClick={onOpenAdmin} data-ko={publicI18n.ko.login} data-ja={publicI18n.ja.login}>{t().login}</button>
+        <button className="public-login-button" type="button" onClick={onOpenAdmin}  >{t().login}</button>
       </div>
     </header>
   );
@@ -6522,23 +6539,23 @@ function PublicMobileNav({ onNavigate }: { onNavigate: (target: PublicNavTarget)
     <nav className="public-mobile-nav" aria-label="YORO.gg mobile">
       <button type="button" onClick={() => onNavigate("search")}>
         <span aria-hidden="true">⌂</span>
-        <strong data-ko={publicI18n.ko.searchNav} data-ja={publicI18n.ja.searchNav}>{t().searchNav}</strong>
+        <strong  >{t().searchNav}</strong>
       </button>
       <button type="button" onClick={() => onNavigate("ranking")}>
         <span aria-hidden="true">◴</span>
-        <strong data-ko={publicI18n.ko.ranking} data-ja={publicI18n.ja.ranking}>{t().ranking}</strong>
+        <strong  >{t().ranking}</strong>
       </button>
       <button type="button" onClick={() => onNavigate("champion")}>
         <span aria-hidden="true">♛</span>
-        <strong data-ko={publicI18n.ko.championAnalysis} data-ja={publicI18n.ja.championAnalysis}>{t().championAnalysis}</strong>
+        <strong  >{t().championAnalysis}</strong>
       </button>
       <button type="button" onClick={() => onNavigate("ingame")}>
         <span aria-hidden="true">▣</span>
-        <strong data-ko={publicI18n.ko.ingame} data-ja={publicI18n.ja.ingame}>{t().ingame}</strong>
+        <strong  >{t().ingame}</strong>
       </button>
       <button type="button" onClick={() => onNavigate("community")}>
         <span aria-hidden="true">⋯</span>
-        <strong data-ko={publicI18n.ko.moreMenu} data-ja={publicI18n.ja.moreMenu}>{t().moreMenu}</strong>
+        <strong  >{t().moreMenu}</strong>
       </button>
     </nav>
   );
@@ -6851,11 +6868,9 @@ export function PublicLolPage({
     try {
       const response = await getPublicParticipationState(publicParticipationStreamerId || undefined);
       setPublicParticipation(response);
-      if (response.selectedStreamerId && response.selectedStreamerId !== publicParticipationStreamerId) {
-        setPublicParticipationStreamerId(response.selectedStreamerId);
-      } else if (!response.isOpen && publicParticipationStreamerId) {
-        setPublicParticipationStreamerId("");
-      }
+      setPublicParticipationStreamerId((current) => (
+        current && !response.streamers.some((streamer) => streamer.id === current) ? "" : current
+      ));
       setTwitchStatus((current) => current.connected === response.connected ? current : { ...current, connected: response.connected });
     } catch (requestError) {
       if (!silent) {
@@ -6867,15 +6882,18 @@ export function PublicLolPage({
   }
 
   async function submitPublicParticipation(): Promise<void> {
+    if (!publicParticipationStreamerId) {
+      setPublicParticipationError(t().participationSelectStreamerTitle);
+      return;
+    }
     setPublicParticipationJoining(true);
     setPublicParticipationError("");
     setPublicParticipationMessage("");
     try {
-      const streamerId = publicParticipationStreamerId || publicParticipation?.selectedStreamerId;
       const response = await postPublicParticipationJoin({
         riotId: publicParticipationJoinRiotId,
         role: publicParticipationJoinRole,
-        ...(streamerId ? { streamerId } : {})
+        streamerId: publicParticipationStreamerId
       });
       setPublicParticipation(response.state);
       if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);
@@ -6888,13 +6906,16 @@ export function PublicLolPage({
   }
 
   async function cancelPublicParticipation(): Promise<void> {
+    if (!publicParticipationStreamerId) {
+      setPublicParticipationError(t().participationSelectStreamerTitle);
+      return;
+    }
     setPublicParticipationCancelling(true);
     setPublicParticipationError("");
     setPublicParticipationMessage("");
     try {
-      const streamerId = publicParticipationStreamerId || publicParticipation?.selectedStreamerId;
       const response = await postPublicParticipationCancel({
-        ...(streamerId ? { streamerId } : {})
+        streamerId: publicParticipationStreamerId
       });
       setPublicParticipation(response.state);
       if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);

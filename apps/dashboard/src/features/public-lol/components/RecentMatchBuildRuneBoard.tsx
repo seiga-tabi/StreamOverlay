@@ -47,7 +47,7 @@ export function RecentMatchBuildRuneBoard({
 }: RecentMatchBuildRuneBoardProps) {
   return (
     <>
-      <span data-ko={label.ko} data-ja={label.ja}>{label.label}</span>
+      <span  >{label.label}</span>
       {runeColumns.length > 0 ? (
         <div className="public-match-rune-board">
           {runeColumns.map((column) => (

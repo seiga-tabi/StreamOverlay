@@ -36,8 +36,8 @@ export function TwitchStreamOverviewRow({
       )}
       <Metric
         className="public-profile-shared-rank-metric"
-        label={<span data-ko={stream.label.ko} data-ja={stream.label.ja}>{stream.label.label}</span>}
-        value={<span data-ko={stream.value.ko} data-ja={stream.value.ja}>{stream.value.label}</span>}
+        label={<span  >{stream.label.label}</span>}
+        value={<span  >{stream.value.label}</span>}
         tone={stream.metricTone}
         status={<StatusPill size="sm" tone={stream.statusTone}>{stream.statusLabel}</StatusPill>}
         description={

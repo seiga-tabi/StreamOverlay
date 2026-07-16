@@ -66,8 +66,8 @@ export function MatchTeamDetailsPlayerRow({
               <span
                 className="public-team-rank-badge streamer-tier-badge"
                 title={player.streamerBadge.title}
-                data-ko={player.streamerBadge.ko}
-                data-ja={player.streamerBadge.ja}
+
+
               >
                 {player.streamerBadge.label}
               </span>

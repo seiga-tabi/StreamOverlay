@@ -182,7 +182,7 @@ export function ProfileTopPanel({
         />
         <div className="public-profile-summary-controls">
           <Button type="button" size="sm" variant="tertiary" aria-expanded={detailsOpen} onClick={() => setDetailsOpen((open) => !open)}>
-            <span data-ko={detailsOpen ? text.hideDetails.ko : text.showDetails.ko} data-ja={detailsOpen ? text.hideDetails.ja : text.showDetails.ja}>
+            <span  >
               {detailsOpen ? text.hideDetails.label : text.showDetails.label}
             </span>
           </Button>
@@ -192,7 +192,7 @@ export function ProfileTopPanel({
             variant="primary"
             onClick={() => document.getElementById("public-recent-matches")?.scrollIntoView({ behavior: "smooth", block: "start" })}
           >
-            <span data-ko={text.recentMatches.ko} data-ja={text.recentMatches.ja}>{text.recentMatches.label}</span>
+            <span  >{text.recentMatches.label}</span>
           </Button>
         </div>
       </div>

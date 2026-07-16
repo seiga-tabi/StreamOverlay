@@ -99,7 +99,7 @@ export function ChampionFilterSelect({
       }}
       ref={rootRef}
     >
-      <span id={labelId} data-ko={labelKo} data-ja={labelJa}>{label}</span>
+      <span id={labelId}  >{label}</span>
       <button
         aria-controls={listboxId}
         aria-expanded={open}

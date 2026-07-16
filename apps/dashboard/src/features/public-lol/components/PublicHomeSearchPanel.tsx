@@ -70,8 +70,8 @@ export function PublicHomeSearchPanel({
       <div className="public-home-shared-inner">
         <div className="public-home-brand-hero" aria-labelledby="public-home-title">
           <img className="public-home-brand-logo-image" src="/images/yorogg-home-logo.webp" alt="" aria-hidden="true" />
-          <h1 id="public-home-title" className="sr-only" data-ko={text.title.ko} data-ja={text.title.ja}>{text.title.label}</h1>
-          <p className="sr-only" data-ko={text.description.ko} data-ja={text.description.ja}>{text.description.label}</p>
+          <h1 id="public-home-title" className="sr-only"  >{text.title.label}</h1>
+          <p className="sr-only"  >{text.description.label}</p>
         </div>
 
         <Card as="section" className="public-home-shared-search-card" padding="lg" variant="glass">
@@ -83,7 +83,7 @@ export function PublicHomeSearchPanel({
         {error ? (
           <EmptyState className="public-home-shared-empty" variant="error">
             <EmptyStateIcon>!</EmptyStateIcon>
-            <EmptyStateTitle as="h2" data-ko={text.errorTitle.ko} data-ja={text.errorTitle.ja}>
+            <EmptyStateTitle as="h2"  >
               {text.errorTitle.label}
             </EmptyStateTitle>
             <EmptyStateDescription>{error}</EmptyStateDescription>
@@ -91,20 +91,20 @@ export function PublicHomeSearchPanel({
         ) : showEmptyResult ? (
           <EmptyState className="public-home-shared-empty" variant="search">
             <EmptyStateIcon>?</EmptyStateIcon>
-            <EmptyStateTitle as="h2" data-ko={text.emptyTitle.ko} data-ja={text.emptyTitle.ja}>
+            <EmptyStateTitle as="h2"  >
               {text.emptyTitle.label}
             </EmptyStateTitle>
-            <EmptyStateDescription data-ko={text.emptyDescription.ko} data-ja={text.emptyDescription.ja}>
+            <EmptyStateDescription  >
               {text.emptyDescription.label}
             </EmptyStateDescription>
           </EmptyState>
         ) : (
           <section className="public-home-live-section" aria-labelledby="public-home-live-title">
             <div className="public-home-live-head">
-              <h2 id="public-home-live-title" data-ko={text.liveTitle.ko} data-ja={text.liveTitle.ja}>
+              <h2 id="public-home-live-title"  >
                 {text.liveTitle.label}
               </h2>
-              <button type="button" onClick={onShowStreamers} data-ko={text.liveViewAll.ko} data-ja={text.liveViewAll.ja}>
+              <button type="button" onClick={onShowStreamers}  >
                 {text.liveViewAll.label}
                 <span aria-hidden="true">›</span>
               </button>
@@ -120,14 +120,14 @@ export function PublicHomeSearchPanel({
                 ))
               ) : liveStreamers.length > 0 ? liveStreamers.map((streamer) => (
                 <article className="public-home-live-card" key={streamer.id}>
-                  <StatusPill className="public-home-live-pill" size="sm" tone="live" data-ko={streamer.statusKo} data-ja={streamer.statusJa}>{streamer.statusLabel}</StatusPill>
+                  <StatusPill className="public-home-live-pill" size="sm" tone="live"  >{streamer.statusLabel}</StatusPill>
                   <span className="public-home-live-avatar" aria-hidden="true">
                     {streamer.avatarUrl ? <img src={streamer.avatarUrl} alt="" /> : streamer.avatarLabel}
                   </span>
-                  <strong data-ko={streamer.name} data-ja={streamer.nameJa ?? streamer.name}>{streamer.name}</strong>
-                  <small data-ko={streamer.primaryMeta} data-ja={streamer.primaryMetaJa ?? streamer.primaryMeta}>{streamer.primaryMeta}</small>
+                  <strong  >{streamer.name}</strong>
+                  <small  >{streamer.primaryMeta}</small>
                   {streamer.secondaryMeta ? (
-                    <small data-ko={streamer.secondaryMeta} data-ja={streamer.secondaryMetaJa ?? streamer.secondaryMeta}>{streamer.secondaryMeta}</small>
+                    <small  >{streamer.secondaryMeta}</small>
                   ) : null}
                   {streamer.server ? <em>{streamer.server}</em> : null}
                   {streamer.channelUrl ? (
@@ -136,8 +136,8 @@ export function PublicHomeSearchPanel({
                       href={streamer.channelUrl}
                       target="_blank"
                       rel="noreferrer"
-                      data-ko={text.liveWatch.ko}
-                      data-ja={text.liveWatch.ja}
+
+
                     >
                       {text.liveWatch.label}
                     </a>
@@ -146,8 +146,8 @@ export function PublicHomeSearchPanel({
                       className="public-home-live-action"
                       type="button"
                       onClick={onShowStreamers}
-                      data-ko={text.liveWatch.ko}
-                      data-ja={text.liveWatch.ja}
+
+
                     >
                       {text.liveWatch.label}
                     </button>
@@ -156,10 +156,10 @@ export function PublicHomeSearchPanel({
               )) : (
                 <EmptyState className="public-home-live-empty" variant="streamer">
                   <EmptyStateIcon>?</EmptyStateIcon>
-                  <EmptyStateTitle as="h3" data-ko={text.liveEmptyTitle.ko} data-ja={text.liveEmptyTitle.ja}>
+                  <EmptyStateTitle as="h3"  >
                     {text.liveEmptyTitle.label}
                   </EmptyStateTitle>
-                  <EmptyStateDescription data-ko={text.liveEmptyDescription.ko} data-ja={text.liveEmptyDescription.ja}>
+                  <EmptyStateDescription  >
                     {text.liveEmptyDescription.label}
                   </EmptyStateDescription>
                 </EmptyState>

@@ -54,7 +54,7 @@ function SearchableRiotIdBadges({ badges }: { badges: SearchableRiotIdBadgeViewM
   return (
     <span className="public-riot-award-badges">
       {badges.map((badge) => (
-        <span className={badge.className} key={badge.key} data-ko={badge.ko} data-ja={badge.ja}>
+        <span className={badge.className} key={badge.key}  >
           {badge.label}
         </span>
       ))}
