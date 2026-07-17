@@ -169,6 +169,23 @@ test("Store는 참여 운영 상태를 atomic JSON 파일에서 복원한다", (
   }
 });
 
+test("Store는 시청자 참여 프로필의 상위 챔피언을 오버레이 계약상 3개로 제한한다", () => {
+  const store = new Store();
+  const topChampions = Array.from({ length: 4 }, (_, index) => ({
+    championId: index + 1,
+    nameKo: `챔피언${index + 1}`
+  }));
+
+  const profile = store.setParticipationStreamerProfile({
+    displayName: "Streamer",
+    topChampions
+  });
+
+  assert.deepEqual(profile?.topChampions?.map((champion) => champion.championId), [1, 2, 3]);
+  assert.equal(topChampions.length, 4);
+  assert.deepEqual(store.getParticipationStreamerProfile()?.topChampions?.map((champion) => champion.championId), [1, 2, 3]);
+});
+
 test("Store는 스트리머별 참여 대기열과 자동화 설정을 격리한다", () => {
   const store = new Store();
   const streamerA = "streamer-a";

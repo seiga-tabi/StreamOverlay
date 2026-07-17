@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { publicI18n, t } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget } from "../types/public-lol";
 
@@ -14,13 +15,30 @@ export function PublicHeaderMenu({
   showSubscriptions,
   onPage
 }: PublicHeaderMenuProps) {
-  const searchItem: { key: PublicMainPage; icon: string; ko: string; ja: string; label: string } = {
-    key: "search",
-    icon: "⌕",
-    ko: publicI18n.ko.searchNav,
-    ja: publicI18n.ja.searchNav,
-    label: t().searchNav
-  };
+  const [gameMenuOpen, setGameMenuOpen] = useState(false);
+  const searchPages: PublicMainPage[] = ["search", "palworld"];
+  const searchItems: Array<{
+    page: Extract<PublicMainPage, "search" | "palworld">;
+    logo: string;
+    ko: string;
+    ja: string;
+    label: string;
+  }> = [
+    {
+      page: "search",
+      logo: "/images/games/league-of-legends.png",
+      ko: publicI18n.ko.leagueOfLegends,
+      ja: publicI18n.ja.leagueOfLegends,
+      label: t().leagueOfLegends
+    },
+    {
+      page: "palworld",
+      logo: "/images/games/palworld.png",
+      ko: publicI18n.ko.palworld,
+      ja: publicI18n.ja.palworld,
+      label: t().palworld
+    }
+  ];
   const contentPages: PublicMainPage[] = ["tournamentCalendar", "tournamentList", "tournamentNews", "tournamentTeams", "tournamentBracket", "tournamentSchedule"];
   const contentItems: Array<{ page: PublicMainPage; icon: string; ko: string; ja: string; label: string }> = [
     { page: "tournamentCalendar", icon: "◷", ko: publicI18n.ko.tournamentCalendar, ja: publicI18n.ja.tournamentCalendar, label: t().tournamentCalendar },
@@ -39,10 +57,50 @@ export function PublicHeaderMenu({
 
   return (
     <nav className="public-header-nav" aria-label="YORO.gg">
-      <button className={activePage === "search" && activeTarget === "search" ? "active" : ""} type="button" onClick={() => onPage("search")}>
-        <span aria-hidden="true">{searchItem.icon}</span>
-        <strong  >{searchItem.label}</strong>
-      </button>
+      <div
+        className={`public-header-menu-item public-header-game-menu${gameMenuOpen ? " is-open" : ""}`}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setGameMenuOpen(false);
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setGameMenuOpen(false);
+          }
+        }}
+      >
+        <button
+          className={searchPages.includes(activePage) && (activePage === "palworld" || activeTarget === "search") ? "active" : ""}
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={gameMenuOpen}
+          onClick={() => setGameMenuOpen((open) => !open)}
+        >
+          <span aria-hidden="true">⌕</span>
+          <strong>{t().searchNav}</strong>
+        </button>
+        <div className="public-header-submenu" role="menu" aria-label={t().gameSearchMenu}>
+          {searchItems.map((item) => (
+            <button
+              className={activePage === item.page ? "active" : ""}
+              type="button"
+              role="menuitem"
+              aria-current={activePage === item.page ? "page" : undefined}
+              data-ko={item.ko}
+              data-ja={item.ja}
+              onClick={() => {
+                setGameMenuOpen(false);
+                onPage(item.page);
+              }}
+              key={item.page}
+            >
+              <img className="public-header-game-logo" src={item.logo} alt="" aria-hidden="true" />
+              <strong>{item.label}</strong>
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="public-header-menu-item">
         <button
           className={contentPages.includes(activePage) ? "active" : ""}

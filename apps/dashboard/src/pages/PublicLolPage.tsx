@@ -6758,7 +6758,7 @@ export function PublicLolPage({
         setProfile(null);
         setError("");
         setActiveMainPage(route.page);
-        setActiveNav(route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
+        setActiveNav(route.page === "palworld" || route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
         setStreamerRegisterOpen(false);
         if (route.slug || route.page.startsWith("tournament")) {
           setPublicTournamentSlug(route.slug);
@@ -7174,7 +7174,7 @@ export function PublicLolPage({
       setActiveNav("search");
       setPublicPath(legalPath);
     } else {
-      setActiveNav("community");
+      setActiveNav(page === "palworld" ? "search" : "community");
       const pagePath = publicPathForPage(page);
       if (pagePath) setPublicPath(pagePath);
     }
@@ -7344,6 +7344,16 @@ export function PublicLolPage({
   }
 
   function renderMainMenuPage() {
+    if (activeMainPage === "palworld") {
+      return (
+        <section
+          className="public-game-empty-page"
+          aria-label={t().palworld}
+          data-ko={publicI18n.ko.palworld}
+          data-ja={publicI18n.ja.palworld}
+        />
+      );
+    }
     if (activeMainPage === "privacy" || activeMainPage === "terms" || activeMainPage === "contact") {
       return <PublicLegalPage page={activeMainPage} />;
     }

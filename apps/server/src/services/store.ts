@@ -185,6 +185,15 @@ const PERSISTED_PARTICIPATION_STATUSES = new Set<ParticipationEntry["status"]>([
 const PERSISTED_PARTICIPATION_SOURCES = new Set<ParticipationEntry["source"]>(["chat_command", "channel_point", "dashboard"]);
 const PERSISTED_LOL_ROLES = new Set<ParticipationEntry["preferredRole"]>(["top", "jungle", "mid", "adc", "support", "fill", "unknown"]);
 const PARTICIPATION_OVERLAY_VISIBLE_LIMIT = 4;
+const PARTICIPATION_TOP_CHAMPION_LIMIT = 3;
+
+function cloneParticipationTopChampions(
+  topChampions: ParticipationEntry["topChampions"]
+): ParticipationEntry["topChampions"] {
+  return topChampions
+    ?.slice(0, PARTICIPATION_TOP_CHAMPION_LIMIT)
+    .map((champion) => ({ ...champion }));
+}
 
 function isCheckInExpired(entry: ParticipationEntry, now = new Date()): boolean {
   if (!entry.checkInExpiresAt) return false;
@@ -204,7 +213,7 @@ function toDashboardQueueEntry(entry: ParticipationEntry, position: number): Par
     profileStatus: entry.profileStatus,
     mainRole: entry.mainRole,
     mainRoleConfidence: entry.mainRoleConfidence,
-    topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined,
+    topChampions: cloneParticipationTopChampions(entry.topChampions),
     rankedStats: entry.rankedStats,
     verifiedRank: entry.verifiedRank,
     profileAnalyzedAt: entry.profileAnalyzedAt,
@@ -228,7 +237,7 @@ function toPublicQueueEntry(entry: ParticipationEntry, position: number): Partic
     profileStatus: entry.profileStatus,
     mainRole: entry.mainRole,
     mainRoleConfidence: entry.mainRoleConfidence,
-    topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined,
+    topChampions: cloneParticipationTopChampions(entry.topChampions),
     rankedStats: entry.rankedStats
   };
 }
@@ -296,7 +305,11 @@ function normalizedParticipationEntry(value: unknown): ParticipationEntry | unde
     createdAt,
     updatedAt,
     topChampions: Array.isArray(input?.topChampions)
-      ? input.topChampions.map((champion) => objectRecord(champion)).filter((champion): champion is Record<string, unknown> => Boolean(champion)).map((champion) => ({ ...champion })) as ParticipationEntry["topChampions"]
+      ? input.topChampions
+        .map((champion) => objectRecord(champion))
+        .filter((champion): champion is Record<string, unknown> => Boolean(champion))
+        .slice(0, PARTICIPATION_TOP_CHAMPION_LIMIT)
+        .map((champion) => ({ ...champion })) as ParticipationEntry["topChampions"]
       : undefined
   };
 }
@@ -305,14 +318,14 @@ function cloneParticipationEntry(entry: ParticipationEntry): ParticipationEntry 
   return {
     ...entry,
     rankedStats: entry.rankedStats ? { ...entry.rankedStats } : undefined,
-    topChampions: entry.topChampions?.map((champion) => ({ ...champion }))
+    topChampions: cloneParticipationTopChampions(entry.topChampions)
   };
 }
 
 function cloneParticipationStreamerProfile(profile: ParticipationStreamerProfile | undefined): ParticipationStreamerProfile | undefined {
   return profile ? {
     ...profile,
-    topChampions: profile.topChampions?.map((champion) => ({ ...champion })),
+    topChampions: cloneParticipationTopChampions(profile.topChampions),
     rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
     performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
     recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
@@ -2276,7 +2289,7 @@ export class Store {
 
   getParticipationEntryById(id: string, streamerId?: string): ParticipationEntry | undefined {
     const entry = this.participationQueueFor(streamerId).find((candidate) => candidate.id === id);
-    return entry ? { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined } : undefined;
+    return entry ? cloneParticipationEntry(entry) : undefined;
   }
 
   findReusableParticipationProfile(input: {
@@ -2293,11 +2306,7 @@ export class Store {
         return normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine) === riotIdKey;
       })
       .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
-    return reusable ? {
-      ...reusable,
-      topChampions: reusable.topChampions ? reusable.topChampions.map((champion) => ({ ...champion })) : undefined,
-      rankedStats: reusable.rankedStats ? { ...reusable.rankedStats } : undefined
-    } : undefined;
+    return reusable ? cloneParticipationEntry(reusable) : undefined;
   }
 
   findParticipationDuplicate(input: {
@@ -2659,11 +2668,11 @@ export class Store {
     if (!entry) return undefined;
     Object.assign(entry, {
       ...patch,
-      topChampions: patch.topChampions ? patch.topChampions.map((champion) => ({ ...champion })) : patch.topChampions,
+      topChampions: cloneParticipationTopChampions(patch.topChampions),
       updatedAt: nowIso()
     });
     this.persistRuntimeState();
-    return { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined };
+    return cloneParticipationEntry(entry);
   }
 
   setParticipationRequestedRole(id: string, role: ParticipationEntry["preferredRole"], streamerId?: string): ParticipationEntry | undefined {
@@ -2673,7 +2682,7 @@ export class Store {
     entry.preferredRole = role;
     entry.updatedAt = nowIso();
     this.persistRuntimeState();
-    return { ...entry, topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined };
+    return cloneParticipationEntry(entry);
   }
 
   makeParticipationEntry(input: Omit<ParticipationEntry, "id" | "createdAt" | "updatedAt">): ParticipationEntry {

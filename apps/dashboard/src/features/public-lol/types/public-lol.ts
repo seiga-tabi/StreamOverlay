@@ -518,7 +518,7 @@ export type SearchSuggestion = {
 
 export type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
 
-export type PublicMainPage = "search" | "subscriptions" | "followJoin" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule" | "privacy" | "terms" | "contact";
+export type PublicMainPage = "search" | "palworld" | "subscriptions" | "followJoin" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule" | "privacy" | "terms" | "contact";
 
 export type PublicProfileTab = "overview" | "champions" | "ingame";
 

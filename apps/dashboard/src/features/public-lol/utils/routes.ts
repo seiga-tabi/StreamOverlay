@@ -8,6 +8,7 @@ const PUBLIC_TERMS_PATH = "/terms";
 const PUBLIC_CONTACT_PATH = "/contact";
 const PUBLIC_PAGE_PATHS: Partial<Record<PublicMainPage, string>> = {
   search: "/",
+  palworld: "/palworld",
   subscriptions: "/follow",
   followJoin: "/participation",
   patch: "/community/server",

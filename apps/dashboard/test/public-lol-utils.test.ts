@@ -22,6 +22,7 @@ test("공개 소환사 경로를 동일한 Riot ID로 왕복 변환한다", () =
 });
 
 test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () => {
+  assert.equal(publicPageRouteFromPath("/palworld")?.page, "palworld");
   assert.equal(publicPageRouteFromPath("/community/server")?.page, "patch");
   assert.equal(publicPageRouteFromPath("/community/party/")?.page, "communityParty");
   assert.deepEqual(publicPageRouteFromPath("/community/posts/post%201"), {
@@ -29,6 +30,7 @@ test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () =>
     postId: "post 1"
   });
   assert.equal(publicPathForPage("communityDetail", { postId: "post 1" }), "/community/posts/post%201");
+  assert.equal(publicPathForPage("palworld"), "/palworld");
   assert.equal(publicPathForPage("followJoin"), "/participation");
 });
 

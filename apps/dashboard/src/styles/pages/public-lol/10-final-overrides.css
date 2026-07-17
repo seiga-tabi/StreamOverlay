@@ -558,6 +558,44 @@
   min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-1)) !important;
 }
 
+.public-dashboard-shell .public-header-game-menu .public-header-submenu {
+  min-width: calc(var(--yoro-size-touch-target) * 5) !important;
+}
+
+.public-dashboard-shell .public-header-game-menu.is-open > .public-header-submenu {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translate(-50%, var(--yoro-space-0)) !important;
+}
+
+.public-dashboard-shell .public-header-game-menu .public-header-submenu button {
+  justify-content: flex-start !important;
+  gap: var(--yoro-space-2) !important;
+}
+
+.public-dashboard-shell .public-header-game-menu .public-header-game-logo {
+  flex: 0 0 auto;
+  width: calc(var(--yoro-space-8) + var(--yoro-space-2));
+  height: var(--yoro-space-6);
+  padding: var(--yoro-space-1);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--yoro-color-text-on-dark);
+  object-fit: contain;
+}
+
+.public-dashboard-shell .public-header-game-menu .public-header-submenu button strong {
+  min-width: var(--yoro-space-0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-dashboard-shell .public-game-empty-page {
+  width: 100%;
+  min-height: min(60vh, calc(var(--yoro-size-touch-target) * 12));
+}
+
 @media (max-width: 48rem) {
   .public-home-shared-shell .public-dashboard-home.public-home-shared-content,
   .public-home-shared-shell .public-home-shared-content {
@@ -654,6 +692,23 @@
 
   .public-dashboard-shell .public-app-header .public-header-submenu {
     display: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-game-menu .public-header-submenu {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  .public-dashboard-shell .public-app-header.mobile-menu-open .public-header-game-menu .public-header-submenu button {
+    justify-content: flex-start !important;
+    text-align: start !important;
   }
 
   .public-dashboard-shell .public-app-header .public-header-tools,

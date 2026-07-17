@@ -489,6 +489,13 @@ test("participation invite bulk message API는 전송 가능한 참가자를 한
 test("participation manual control API는 앞 4명을 게임 중으로 전환하고 오버레이를 갱신한다", async () => {
   const store = new Store();
   store.setParticipationOpen(true);
+  store.setParticipationStreamerProfile({
+    displayName: "Streamer",
+    topChampions: Array.from({ length: 4 }, (_, index) => ({
+      championId: index + 1,
+      nameKo: `챔피언${index + 1}`
+    }))
+  });
   for (let index = 1; index <= 5; index += 1) {
     store.addParticipation(store.makeParticipationEntry({
       twitchUserId: `viewer-${index}`,
@@ -521,7 +528,9 @@ test("participation manual control API는 앞 4명을 게임 중으로 전환하
   assert.equal(body.phase, "in_game");
   assert.deepEqual(store.getParticipationQueue().slice(0, 4).map((entry) => entry.status), ["in_game", "in_game", "in_game", "in_game"]);
   assert.equal(store.getParticipationQueue()[4].status, "waitlisted");
-  assert.ok(dispatched.some((item) => item.action.type === "overlay.participationStatus" && item.action.phase === "in_game"));
+  const statusUpdate = dispatched.find((item) => item.action.type === "overlay.participationStatus" && item.action.phase === "in_game");
+  assert.ok(statusUpdate);
+  assert.deepEqual(statusUpdate.action.streamerProfile.topChampions.map((champion) => champion.championId), [1, 2, 3]);
   assert.ok(dispatched.some((item) => item.action.type === "overlay.participationQueue" && item.action.queue.length === 1 && item.action.queue[0].twitchUserName === "Viewer5"));
 });
 
