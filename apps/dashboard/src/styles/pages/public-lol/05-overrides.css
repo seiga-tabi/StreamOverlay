@@ -8,16 +8,6 @@
   color: var(--public-gray-text) !important;
 }
 
-.public-dashboard-shell.public-profile-shared-shell .public-app-header,
-.public-dashboard-shell.public-profile-shared-shell .public-app-header:not(.home),
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) {
-  border-color: var(--public-gray-border) !important;
-  background: rgba(73, 80, 87, .76) !important;
-  color: var(--public-gray-text) !important;
-  box-shadow: 0 14px 34px rgba(33, 37, 41, .16) !important;
-}
-
 .public-dashboard-shell.public-profile-shared-shell .public-profile-shared-top.yoro-card,
 .public-dashboard-shell.public-profile-shared-shell .public-profile-top-grid,
 .public-dashboard-shell.public-profile-shared-shell .public-profile-top-grid.has-mastery-art {
@@ -1254,86 +1244,6 @@
   text-shadow: none !important;
 }
 
-/* 비홈 상단바 메뉴와 검색 입력 색상 최종 보정 */
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
-  gap: 22px !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button {
-  min-height: 36px !important;
-  padding: 0 8px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: rgba(248, 249, 250, .86) !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:hover,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button:focus-visible,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:hover,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button:focus-visible {
-  border-radius: 10px !important;
-  background: rgba(248, 249, 250, .08) !important;
-  color: #ffffff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button.active,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active {
-  background: transparent !important;
-  color: #ffffff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button.active::after,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button.active::after {
-  height: 3px !important;
-  background: #7b5cff !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button span {
-  display: inline-grid !important;
-  width: 18px !important;
-  min-width: 18px !important;
-  height: 18px !important;
-  place-items: center;
-  color: #9b8cff !important;
-  font-size: 15px !important;
-  line-height: 1 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button strong {
-  color: inherit !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-submenu {
-  border: 1px solid rgba(248, 249, 250, .16) !important;
-  background: rgba(33, 37, 41, .96) !important;
-  box-shadow: 0 18px 36px rgba(33, 37, 41, .22) !important;
-  backdrop-filter: blur(16px) saturate(120%);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-submenu button {
-  min-height: 42px !important;
-  padding: 10px 12px !important;
-  border-radius: 10px !important;
-  background: transparent !important;
-  color: rgba(248, 249, 250, .86) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-submenu button:hover,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-submenu button.active {
-  background: rgba(123, 92, 255, .16) !important;
-  color: #ffffff !important;
-}
-
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form {
   background: rgba(33, 37, 41, .9) !important;
 }
@@ -1391,14 +1301,6 @@
   -webkit-text-fill-color: #f8f9fa !important;
 }
 
-.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-nav button span,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav button span {
-  width: 20px !important;
-  min-width: 20px !important;
-  height: 20px !important;
-  font-size: 16px !important;
-}
-
 .public-dashboard-shell .public-search-form .public-search-field,
 .public-dashboard-shell .public-search-form .public-search-field input,
 .public-dashboard-shell .public-search-form .public-home-shared-input.yoro-input,
@@ -1446,103 +1348,6 @@
 .public-home-shared-shell .public-home-shared-search-card input.public-home-shared-input.yoro-input:-webkit-autofill:focus {
   box-shadow: 0 0 0 1000px rgba(33, 37, 41, .9) inset !important;
   -webkit-text-fill-color: #f8f9fa !important;
-}
-
-/* 상단바 최종 디자인 보정: 각진 gray block을 부드러운 glass container로 정리 */
-.public-dashboard-shell .public-app-header,
-.public-dashboard-shell .public-app-header.home,
-.public-dashboard-shell.public-profile-shared-shell .public-app-header,
-.public-dashboard-shell.public-profile-shared-shell .public-app-header:not(.home),
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) {
-  width: min(calc(100% - 32px), 1184px) !important;
-  margin: 8px auto 0 !important;
-  padding: 10px 18px 12px !important;
-  border: 1px solid rgba(248, 249, 250, .14) !important;
-  border-radius: 26px !important;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(123, 92, 255, .14), transparent 34%),
-    linear-gradient(180deg, rgba(73, 80, 87, .72), rgba(52, 58, 64, .58)) !important;
-  color: #f8f9fa !important;
-  box-shadow:
-    0 18px 42px rgba(33, 37, 41, .2),
-    inset 0 1px 0 rgba(255, 255, 255, .08) !important;
-  backdrop-filter: blur(22px) saturate(118%) !important;
-  overflow: visible;
-}
-
-.public-dashboard-shell .public-header-brand {
-  min-height: 46px;
-  padding: 6px 10px !important;
-  border: 1px solid rgba(248, 249, 250, .1);
-  border-radius: 18px !important;
-  background: rgba(33, 37, 41, .34);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
-}
-
-.public-dashboard-shell .public-header-brand .public-brand-logo-full,
-.public-dashboard-shell .public-header-brand .public-brand-logo-topbar {
-  border-radius: 12px !important;
-  object-fit: contain !important;
-}
-
-.public-dashboard-shell .public-header-nav,
-.public-dashboard-shell .public-app-header.home .public-header-nav,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
-  gap: 6px !important;
-  padding: 4px 6px !important;
-  border: 1px solid rgba(248, 249, 250, .1) !important;
-  border-radius: 999px !important;
-  background: rgba(33, 37, 41, .22) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05) !important;
-}
-
-.public-dashboard-shell .public-header-nav > button,
-.public-dashboard-shell .public-header-menu-item > button,
-.public-dashboard-shell .public-app-header.home .public-header-nav > button,
-.public-dashboard-shell .public-app-header.home .public-header-menu-item > button,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button {
-  min-height: 34px !important;
-  padding: 0 12px !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  background: transparent !important;
-  color: rgba(248, 249, 250, .82) !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell .public-header-nav > button:hover,
-.public-dashboard-shell .public-header-nav > button:focus-visible,
-.public-dashboard-shell .public-header-menu-item > button:hover,
-.public-dashboard-shell .public-header-menu-item > button:focus-visible,
-.public-dashboard-shell .public-header-nav > button.active,
-.public-dashboard-shell .public-header-menu-item > button.active {
-  background: rgba(248, 249, 250, .1) !important;
-  color: #ffffff !important;
-}
-
-.public-dashboard-shell .public-header-nav > button.active::after,
-.public-dashboard-shell .public-header-menu-item > button.active::after,
-.public-dashboard-shell .public-app-header:not(.home) .public-header-nav > button.active::after,
-.public-dashboard-shell .public-app-header:not(.home) .public-header-menu-item > button.active::after {
-  right: 14px !important;
-  bottom: -5px !important;
-  left: 14px !important;
-  height: 3px !important;
-  border-radius: 999px !important;
-  background: linear-gradient(90deg, #8b6cff, #74a7ff) !important;
-  box-shadow: 0 0 10px rgba(123, 92, 255, .32) !important;
-}
-
-.public-dashboard-shell .public-locale-button,
-.public-dashboard-shell .public-twitch-login-chip {
-  min-height: 38px !important;
-  border: 1px solid rgba(248, 249, 250, .14) !important;
-  border-radius: 999px !important;
-  background: rgba(33, 37, 41, .3) !important;
-  color: #f8f9fa !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
 }
 
 .public-dashboard-shell .public-search-form,
@@ -1904,73 +1709,6 @@
   overflow: visible !important;
 }
 
-@media (max-width: 760px) {
-  .public-dashboard-shell .public-app-header,
-  .public-dashboard-shell .public-app-header.home,
-  .public-dashboard-shell.public-profile-shared-shell .public-app-header,
-  .public-dashboard-shell.public-profile-shared-shell .public-app-header:not(.home),
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header,
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) {
-    width: min(calc(100% - 20px), 100%) !important;
-    margin-top: 6px !important;
-    padding: 10px 12px !important;
-    border-radius: 22px !important;
-  }
-}
-
-/* 상단 검색 화면 헤더 최종 보정: 로고-메뉴-검색-계정 도구를 한 줄에 배치 */
-@media (min-width: 861px) {
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    display: grid !important;
-    grid-template-columns: auto max-content minmax(280px, 520px) max-content !important;
-    grid-auto-flow: column !important;
-    align-items: center !important;
-    gap: 12px !important;
-    min-height: 66px !important;
-    padding: 10px 16px !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
-    display: inline-flex !important;
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    justify-self: start !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    justify-self: start !important;
-    width: auto !important;
-    max-width: none !important;
-    order: 0 !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-    justify-self: end !important;
-    align-self: center !important;
-    width: min(100%, 520px) !important;
-    min-width: 280px !important;
-    order: 0 !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
-    grid-column: 4 !important;
-    grid-row: 1 !important;
-    justify-self: end !important;
-    align-self: center !important;
-    width: auto !important;
-    order: 0 !important;
-  }
-}
-
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form,
 .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form {
   grid-template-columns: 68px minmax(0, 1fr) auto !important;
@@ -2305,12 +2043,12 @@ html[lang="ja"] .public-dashboard-shell .public-app-header .public-header-submen
 .public-dashboard-shell.public-home-shell .public-app-header.home .public-header-menu-item > button,
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav > button,
 .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-menu-item > button {
-  min-height: 38px !important;
-  padding: 0 2px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
+  min-height: var(--yoro-size-public-header-control) !important;
+  padding: var(--yoro-space-0) var(--yoro-space-2) !important;
+  border: var(--yoro-space-0) !important;
+  border-radius: var(--yoro-space-0) !important;
   background: transparent !important;
-  color: rgba(248, 249, 250, .9) !important;
+  color: var(--yoro-color-product-gray-field-text) !important;
   box-shadow: none !important;
 }
 
@@ -2786,12 +2524,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 }
 
 @media (max-width: 1180px) and (min-width: 861px) {
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    grid-template-columns: auto minmax(0, 1fr) minmax(260px, 420px) max-content !important;
-    gap: 8px !important;
-  }
-
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
     overflow-x: auto !important;
@@ -2801,33 +2533,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav::-webkit-scrollbar,
   .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav::-webkit-scrollbar {
     display: none;
-  }
-}
-
-@media (min-width: 861px) {
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home),
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    grid-template-rows: minmax(0, auto) !important;
-    min-height: 66px !important;
-    row-gap: 0 !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-    justify-self: end !important;
-    align-self: center !important;
-    width: min(100%, 520px) !important;
-    min-width: 280px !important;
-    order: 0 !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) .public-header-tools {
-    grid-column: 4 !important;
-    grid-row: 1 !important;
-    justify-self: end !important;
-    width: auto !important;
-    order: 0 !important;
   }
 }
 
@@ -3306,18 +3011,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   -webkit-text-fill-color: #ffffff !important;
 }
 
-/* 비홈 상단 검색 연관검색: Riot ID가 잘리지 않도록 검색 영역과 리스트 컬럼 확장 */
-@media (min-width: 1180px) {
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    gap: 16px !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
-  }
-}
-
 .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-panel {
   width: 100% !important;
   min-width: min(100vw - 32px, 560px) !important;
@@ -3519,95 +3212,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
     inset 0 0 18px rgba(255, 107, 107, .08) !important;
 }
 
-/* 비홈 상단바 검색 겹침 보정: 메뉴와 검색 입력을 명확한 grid 영역으로 분리 */
-@media (min-width: 1180px) {
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    width: min(calc(100% - 32px), 1680px) !important;
-    grid-template-columns: max-content max-content minmax(320px, 1fr) max-content !important;
-    grid-template-areas: "brand nav search tools" !important;
-    grid-auto-flow: row !important;
-    column-gap: clamp(18px, 2.4vw, 40px) !important;
-    row-gap: 0 !important;
-    justify-content: stretch !important;
-    align-items: center !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
-    grid-area: brand !important;
-    justify-self: start !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
-    grid-area: nav !important;
-    justify-self: start !important;
-    min-width: max-content !important;
-    max-width: none !important;
-    overflow: visible !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
-    grid-area: search !important;
-    justify-self: end !important;
-    width: clamp(320px, 36vw, 720px) !important;
-    min-width: 0 !important;
-    max-width: 720px !important;
-    position: relative !important;
-    z-index: 1 !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
-    grid-area: tools !important;
-    justify-self: end !important;
-    min-width: max-content !important;
-  }
-}
-
-@media (min-width: 861px) and (max-width: 1179px) {
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home),
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) {
-    grid-template-columns: max-content minmax(0, 1fr) max-content !important;
-    grid-template-areas:
-      "brand nav tools"
-      "search search search" !important;
-    grid-auto-flow: row !important;
-    column-gap: 18px !important;
-    row-gap: 12px !important;
-    min-height: 118px !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-brand {
-    grid-area: brand !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-nav {
-    grid-area: nav !important;
-    justify-self: center !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) > .public-search-wrap {
-    grid-area: search !important;
-    justify-self: center !important;
-    width: min(100%, 760px) !important;
-    min-width: 0 !important;
-    max-width: 760px !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools,
-  .public-dashboard-shell.public-profile-shared-shell:not(.public-home-shell) .public-app-header:not(.home) .public-header-tools {
-    grid-area: tools !important;
-  }
-}
-
 /* Public footer 최종 보정: 밝은 법적 고지 카드 톤을 현재 회색 다크 테마와 통일 */
 .public-dashboard-shell .public-site-footer {
   max-width: min(1680px, calc(100% - 32px)) !important;
@@ -3705,9 +3309,7 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   transform: none !important;
 }
 
-.public-dashboard-shell.public-home-shell .public-app-header.home .public-locale-button,
 .public-dashboard-shell.public-home-shell .public-app-header.home .public-twitch-login-chip,
-.public-home-shared-shell.public-dashboard-shell.public-home-shell .public-app-header.home .public-locale-button,
 .public-home-shared-shell.public-dashboard-shell.public-home-shell .public-app-header.home .public-twitch-login-chip {
   display: inline-flex !important;
   align-items: center !important;

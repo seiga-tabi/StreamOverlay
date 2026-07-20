@@ -2835,6 +2835,10 @@ code {
   display: inline-flex;
 }
 
+.mobile-language-label {
+  display: none;
+}
+
 .public-globe-icon {
   position: relative;
   display: inline-grid;
@@ -9434,15 +9438,6 @@ code {
   min-height: 52px;
 }
 
-.public-app-header.home .public-locale-button,
-.public-app-header.home .public-twitch-login-chip {
-  min-height: 44px;
-  border-radius: 10px;
-}
-
-.public-app-header.home .public-twitch-login-chip {
-}
-
 @media (max-width: 1440px) and (min-width: 1181px) {
   .public-app-header:not(.home) {
     grid-template-columns: minmax(0, auto) minmax(300px, 1fr) max-content;
@@ -9516,47 +9511,98 @@ code {
   box-shadow: 0 10px 26px rgba(58, 76, 113, .06);
 }
 
-.public-app-header .public-locale-button {
-  min-width: 72px;
-  min-height: 36px;
-  padding: 0 10px;
-  border-color: rgba(109, 124, 160, .36) !important;
-  border-radius: 10px;
-  background: rgba(8, 13, 29, .78) !important;
-  color: #e8eefc !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .06),
-    0 10px 24px rgba(3, 7, 18, .22);
+.public-app-header .public-app-locale-menu .public-locale-button {
+  gap: var(--yoro-space-2);
+  width: auto;
+  min-width: calc(var(--yoro-size-touch-target) + var(--yoro-space-4));
+  min-height: var(--yoro-size-touch-target);
+  height: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-0) var(--yoro-space-3);
+  border-color: var(--yoro-color-border-on-dark-strong) !important;
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-product-gray-surface-strong) !important;
+  color: var(--yoro-color-text-on-dark) !important;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: var(--yoro-shadow-public-header);
 }
 
-.public-app-header:not(.home) .public-locale-button {
-  min-height: 36px;
-  border-color: rgba(109, 124, 160, .36) !important;
-  background: rgba(8, 13, 29, .82) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .06),
-    0 10px 24px rgba(3, 7, 18, .2);
+.public-app-locale-menu .public-locale-current-code {
+  min-width: 0;
+  overflow: visible;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  letter-spacing: 0;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
-.public-app-header .public-locale-popover {
-  border-color: rgba(109, 124, 160, .34);
-  background: rgba(8, 13, 29, .96);
-  box-shadow: 0 22px 48px rgba(3, 7, 18, .38);
+.public-app-locale-menu .public-locale-chevron {
+  width: var(--yoro-space-0);
+  height: var(--yoro-space-0);
+  border-top: var(--yoro-space-1) solid currentColor;
+  border-right: var(--yoro-space-1) solid transparent;
+  border-left: var(--yoro-space-1) solid transparent;
+  opacity: .58;
 }
 
-.public-app-header .public-locale-popover button {
-  color: #dbe6f7;
+.public-app-header .public-app-locale-menu .public-locale-popover {
+  top: calc(100% + var(--yoro-space-2));
+  right: var(--yoro-space-0);
+  gap: var(--yoro-space-1);
+  width: max-content;
+  min-width: max-content;
+  max-width: calc(100vw - (var(--yoro-space-4) + var(--yoro-space-4)));
+  padding: var(--yoro-space-2);
+  border-color: var(--yoro-color-border-on-dark-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-product-gray-surface-strong);
+  box-shadow: var(--yoro-shadow-panel);
 }
 
-.public-app-header .public-locale-popover button:hover,
-.public-app-header .public-locale-popover button.active {
-  background: rgba(96, 107, 255, .16);
-  color: #ffffff;
+.public-app-header .public-app-locale-menu .public-locale-popover button {
+  grid-template-columns: minmax(0, 1fr) auto var(--yoro-space-4);
+  gap: var(--yoro-space-2);
+  min-height: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  color: var(--yoro-color-text-on-dark-muted);
+  text-align: start;
 }
 
-.public-app-header .public-locale-popover button span {
-  background: rgba(96, 107, 255, .2);
-  color: #b9c2ff;
+.public-app-header .public-app-locale-menu .public-locale-popover button:hover,
+.public-app-header .public-app-locale-menu .public-locale-popover button.active {
+  background: var(--yoro-color-product-gray-surface);
+  color: var(--yoro-color-text-on-dark);
+}
+
+.public-app-header .public-app-locale-menu .public-locale-option-label {
+  display: block;
+  min-width: 0;
+  min-height: auto;
+  overflow: hidden;
+  background: transparent;
+  color: inherit;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-app-header .public-app-locale-menu .public-locale-option-code {
+  min-width: calc(var(--yoro-space-4) + var(--yoro-space-2));
+  padding: var(--yoro-space-1) var(--yoro-space-2);
+  overflow: visible;
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-product-gray-surface);
+  color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-xs);
+  text-align: center;
+  text-overflow: clip;
+}
+
+.public-app-header .public-app-locale-menu .public-locale-option-check {
+  width: var(--yoro-space-4);
+  justify-self: center;
 }
 
 .public-filter-button strong {
@@ -14954,7 +15000,6 @@ code {
 .public-dashboard-shell.theme-dark .public-app-header .public-search-form,
 .public-dashboard-shell.theme-dark .public-home-search-stage .public-search-form,
 .public-dashboard-shell.theme-dark .public-header-select,
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-button,
 .public-dashboard-shell.theme-dark .public-filter-button,
 .public-dashboard-shell.theme-dark .public-filter-popover select,
 .public-dashboard-shell.theme-dark .public-subscriptions-card,
@@ -14968,42 +15013,6 @@ code {
   border-color: #2c3b54;
   background: #101827;
   color: #dbe6f7;
-}
-
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover {
-  border-color: #2c3b54;
-  background: #101827;
-  box-shadow: 0 22px 50px rgba(0, 0, 0, .38);
-}
-
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-button {
-  border-color: #2c3b54 !important;
-  background: #101827 !important;
-  color: #dbe6f7 !important;
-}
-
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover button {
-  color: #dbe6f7;
-}
-
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover button:hover,
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover button.active {
-  background: #182842;
-  color: #8fb7ff;
-}
-
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover button span {
-  background: #182842;
-  color: #8fb7ff;
-}
-
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover .public-locale-auto {
-  border-top-color: #23334c;
-}
-
-.public-dashboard-shell.theme-dark .public-app-header .public-locale-popover .public-locale-auto span {
-  background: #111b2d;
-  color: #9fb0c9;
 }
 
 .public-dashboard-shell.theme-dark .public-app-header:not(.home) {
@@ -15023,12 +15032,6 @@ code {
   box-shadow:
     inset 0 0 0 1px rgba(119, 92, 255, .2),
     0 0 18px rgba(104, 92, 255, .2);
-}
-
-.public-dashboard-shell.theme-dark .public-app-header:not(.home) .public-locale-button {
-  border-color: rgba(107, 86, 255, .4) !important;
-  background: rgba(8, 13, 29, .82) !important;
-  color: #e8eefc !important;
 }
 
 .public-dashboard-shell.theme-dark .public-app-header:not(.home) .public-twitch-login-chip {
@@ -15521,13 +15524,11 @@ code {
   }
 
   .public-header-select,
-  .public-app-header .public-locale-menu,
   .public-twitch-login-chip,
   .public-filter-button {
     flex: 1 1 0;
   }
 
-  .public-app-header .public-locale-button,
   .public-twitch-login-chip,
   .public-filter-button {
     min-height: 40px;
@@ -16952,12 +16953,6 @@ code {
   .public-app-header.home .public-header-brand .public-brand-logo {
     width: 40px;
     height: 40px;
-  }
-
-  .public-app-header.home .public-locale-button {
-    width: 72px;
-    min-width: 72px;
-    padding: 0 8px;
   }
 
   .public-app-header.home .public-twitch-login-chip {
