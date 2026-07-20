@@ -81,7 +81,7 @@ function createHarness() {
 }
 
 test("LolGameMonitorController는 게임 시작 시 current game에 있는 참가자만 in_game으로 표시한다", async () => {
-  const { ctx, overlayMessages } = createHarness();
+  const { ctx, overlayMessages, chatActions } = createHarness();
   for (let index = 1; index <= 5; index += 1) {
     ctx.store.addParticipation(ctx.store.makeParticipationEntry({
       twitchUserId: `viewer-${index}`,
@@ -110,8 +110,14 @@ test("LolGameMonitorController는 게임 시작 시 current game에 있는 참�
   const queue = ctx.store.getParticipationQueue();
   assert.deepEqual(queue.slice(0, 4).map((entry) => entry.status), ["in_game", "in_game", "in_game", "in_game"]);
   assert.equal(queue[4].status, "waitlisted");
-  assert.ok(overlayMessages.some((message) => message.type === "participation.status.update" && message.phase === "in_game" && message.nextCandidate?.twitchUserName === "Viewer5"));
-  assert.ok(overlayMessages.some((message) => message.type === "participation.queue.update" && message.queue.length === 1 && message.queue[0].position === 1 && message.queue[0].twitchUserName === "Viewer5"));
+  assert.ok(chatActions.some(({ action }) => (
+    action.type === "overlay.participationSnapshot"
+    && action.status.phase === "in_game"
+    && action.status.nextCandidate?.twitchUserName === "Viewer5"
+    && action.queue.length === 1
+    && action.queue[0].position === 1
+    && action.queue[0].twitchUserName === "Viewer5"
+  )));
   assert.equal(overlayMessages.some((message) => message.type === "participation.selected.clear"), false);
 });
 
@@ -147,9 +153,13 @@ test("LolGameMonitorController는 게임 종료 후 in_game을 played로 바꾸�
   const queue = ctx.store.getParticipationQueue();
   assert.deepEqual(queue.slice(0, 4).map((entry) => entry.status), ["played", "played", "played", "played"]);
   assert.equal(queue[4].status, "selected");
-  assert.ok(overlayMessages.some((message) => message.type === "participation.status.update" && message.phase === "game_ended" && message.nextCandidate?.twitchUserName === "Viewer5"));
+  assert.ok(chatActions.some(({ action }) => (
+    action.type === "overlay.participationSnapshot"
+    && action.status.phase === "game_ended"
+    && action.status.nextCandidate?.twitchUserName === "Viewer5"
+  )));
   assert.equal(overlayMessages.some((message) => message.type === "participation.selected.show"), false);
-  assert.equal(chatActions.some((item) => item.reason === "lol_game_monitor.game_ended"), false);
+  assert.equal(chatActions.some(({ action }) => action.type === "twitch.chat"), false);
 });
 
 test("LolGameMonitorController는 방송자 Riot 계정 조회 실패 시 설정 저장 흐름을 깨지 않는다", async () => {

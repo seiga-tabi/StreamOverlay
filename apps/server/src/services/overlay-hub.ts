@@ -15,6 +15,7 @@ import type { Store } from "./store.js";
 type OverlayClient = {
   socket: WebSocket;
   channel: OverlayChannel;
+  streamerId?: string;
 };
 
 type RetainedOverlayMessage = {
@@ -35,15 +36,16 @@ export class OverlayHub {
     this.patchClientStatus();
   }
 
-  add(client: WebSocket, channelInput?: string | null): void {
+  add(client: WebSocket, channelInput?: string | null, streamerId?: string): void {
     const channel = normalizeOverlayChannel(channelInput);
-    this.clients.set(client, { socket: client, channel });
+    const overlayClient = { socket: client, channel, streamerId };
+    this.clients.set(client, overlayClient);
     client.on("close", () => {
       this.clients.delete(client);
       this.patchClientStatus();
     });
     this.patchClientStatus();
-    this.sendRetainedMessages(client, channel);
+    this.sendRetainedMessages(overlayClient);
   }
 
   broadcast(message: OverlayMessage): boolean {
@@ -68,7 +70,7 @@ export class OverlayHub {
 
     const payload = JSON.stringify(message);
     for (const client of this.clients.values()) {
-      if (client.socket.readyState === client.socket.OPEN && overlayMessageMatchesChannel(message, client.channel)) {
+      if (client.socket.readyState === client.socket.OPEN && this.messageMatchesClient(message, client)) {
         this.sendToClient(client, payload);
       }
     }
@@ -86,13 +88,22 @@ export class OverlayHub {
     return counts;
   }
 
-  private sendRetainedMessages(client: WebSocket, channel: OverlayChannel): void {
+  private sendRetainedMessages(client: OverlayClient): void {
     this.pruneExpiredRetainedMessages();
-    for (const retained of this.retainedMessages.values()) {
-      if (client.readyState === client.OPEN && overlayMessageMatchesChannel(retained.message, channel)) {
-        this.sendToClient({ socket: client, channel }, JSON.stringify(retained.message));
+    const retainedMessages = [...this.retainedMessages.values()]
+      .sort((a, b) => this.retainedReplayPriority(a.message) - this.retainedReplayPriority(b.message));
+    for (const retained of retainedMessages) {
+      if (client.socket.readyState === client.socket.OPEN && this.messageMatchesClient(retained.message, client)) {
+        this.sendToClient(client, JSON.stringify(retained.message));
       }
     }
+  }
+
+  private messageMatchesClient(message: OverlayMessage, client: OverlayClient): boolean {
+    if (!overlayMessageMatchesChannel(message, client.channel)) return false;
+    const streamerId = this.participationStreamerId(message);
+    if (streamerId) return client.streamerId === streamerId;
+    return true;
   }
 
   private sendToClient(client: OverlayClient, payload: string): void {
@@ -100,7 +111,12 @@ export class OverlayHub {
       client.socket.send(payload);
     } catch (error) {
       this.clients.delete(client.socket);
-      this.logger.error({ type: "overlay.client_send_failed", channel: client.channel, error: error instanceof Error ? error.message : String(error) });
+      this.logger.error({
+        type: "overlay.client_send_failed",
+        channel: client.channel,
+        streamerId: client.streamerId,
+        error: error instanceof Error ? error.message : String(error)
+      });
       this.patchClientStatus();
     }
   }
@@ -116,11 +132,31 @@ export class OverlayHub {
     }
 
     const ttlMs = this.retainTtlMs(message);
-    this.retainedMessages.set(message.type, {
+    this.retainedMessages.set(this.retainedKey(message), {
       message,
       channel,
       expiresAt: ttlMs ? Date.now() + ttlMs : undefined
     });
+  }
+
+  private retainedKey(message: OverlayMessage): string {
+    const streamerId = this.participationStreamerId(message);
+    return streamerId ? `${message.type}:${streamerId}` : message.type;
+  }
+
+  private participationStreamerId(message: OverlayMessage): string | undefined {
+    if (
+      message.type === "participation.snapshot.update"
+      || message.type === "participation.status.update"
+      || message.type === "participation.queue.update"
+    ) {
+      return message.streamerId;
+    }
+    return undefined;
+  }
+
+  private retainedReplayPriority(message: OverlayMessage): number {
+    return message.type === "participation.snapshot.update" ? 1 : 0;
   }
 
   private retainedKeyForClear(type: OverlayMessage["type"]): string {
@@ -160,6 +196,7 @@ export class OverlayHub {
     if (message.type === "chat.message.add") return `${message.userName}: ${message.message}`.slice(0, 120);
     if (message.type === "mission.update") return `${message.missions.length}개 미션`;
     if (message.type === "participation.queue.update") return `${message.queue.length}명 대기`;
+    if (message.type === "participation.snapshot.update") return `${message.queue.length}명 대기 / revision ${message.revision}`;
     if (message.type === "participation.selected.show") return message.twitchUserName;
     if (message.type === "participation.status.update") return message.message;
     if (message.type === "solo-rank.profile.update") return message.profile.displayName;

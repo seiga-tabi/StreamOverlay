@@ -8,6 +8,8 @@ import { join } from "node:path";
 process.env.CHAT_TRANSLATION_PROVIDER = "mock";
 process.env.CHAT_TRANSLATION_ENABLED = "true";
 
+const TEST_BROADCASTER_ID = "broadcaster-1";
+
 const { ActionDispatcher } = await import("../dist/core/action-dispatcher.js");
 const { EventBus } = await import("../dist/core/event-bus.js");
 const { JsonlLogger } = await import("../dist/logging/jsonl-logger.js");
@@ -52,7 +54,7 @@ function createHarness(options = {}) {
   const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, undefined, options.localTts);
   const events = new EventBus();
   const socket = new FakeSocket();
-  overlay.add(socket, "all");
+  overlay.add(socket, "all", TEST_BROADCASTER_ID);
   const riot = options.riot ?? {
     isConfigured: () => false,
     getAccountByRiotId: async () => null,
@@ -454,6 +456,40 @@ test("overlay action은 동일 메시지 cooldown을 적용한다", async () => 
   assert.deepEqual(statuses, ["ok", "skipped"]);
 });
 
+test("시참 snapshot은 cooldown 안에서도 최신 revision을 모두 전달한다", async () => {
+  const { actions, socket } = createHarness();
+  const baseAction = {
+    type: "overlay.participationSnapshot",
+    streamerId: TEST_BROADCASTER_ID,
+    sessionId: "session-latest",
+    status: {
+      isOpen: true,
+      mode: "normal5",
+      phase: "recruiting",
+      message: "롤 시참 모집 중"
+    },
+    queue: [],
+    source: "test.snapshot.latest"
+  };
+
+  await actions.dispatchOne({
+    ...baseAction,
+    revision: 1,
+    emittedAt: "2026-07-20T00:00:00.000Z"
+  }, {}, "snapshot.latest");
+  await actions.dispatchOne({
+    ...baseAction,
+    revision: 2,
+    emittedAt: "2026-07-20T00:00:00.100Z"
+  }, {}, "snapshot.latest");
+
+  const sent = socket.sent.filter(
+    (message) => message.type === "participation.snapshot.update"
+      && message.sessionId === "session-latest"
+  );
+  assert.deepEqual(sent.map((message) => message.revision), [1, 2]);
+});
+
 test("overlay.banner는 로컬 TTS 생성이 지연되어도 배너 전송을 오래 막지 않는다", async () => {
   const previousLocalTts = { ...appConfig.localTts };
   try {
@@ -577,7 +613,7 @@ test("!시참 신청은 Riot 프로필 분석 결과를 안전한 overlay queue�
   await settle();
   await settle();
 
-  const entry = store.getParticipationQueue()[0];
+  const entry = store.getParticipationQueue(TEST_BROADCASTER_ID)[0];
   const queueMessages = socket.sent.filter((message) => message.type === "participation.queue.update" && message.queue.length > 0);
   const queueMessage = queueMessages[queueMessages.length - 1];
 
@@ -593,7 +629,7 @@ test("!시참 신청은 Riot 프로필 분석 결과를 안전한 overlay queue�
   assert.equal("riotId" in queueMessage.queue[0], false);
   assert.equal("riotPuuid" in queueMessage.queue[0], false);
 
-  assert.ok(store.selectNextParticipant(30));
+  assert.ok(store.selectNextParticipant(30, TEST_BROADCASTER_ID));
 
   events.emit({
     type: "twitch.chatMessage",
@@ -606,7 +642,7 @@ test("!시참 신청은 Riot 프로필 분석 결과를 안전한 overlay queue�
   });
   await settle();
 
-  assert.equal(store.getParticipationQueue()[0].status, "checked_in");
+  assert.equal(store.getParticipationQueue(TEST_BROADCASTER_ID)[0].status, "checked_in");
   const lastQueueMessage = socket.sent.filter((message) => message.type === "participation.queue.update").at(-1);
   const retainedStatus = socket.sent.filter((message) => message.type === "participation.status.update").at(-1);
   assert.ok(lastQueueMessage);
@@ -614,6 +650,76 @@ test("!시참 신청은 Riot 프로필 분석 결과를 안전한 overlay queue�
   assert.equal(lastQueueMessage.queue.length, 0);
   assert.ok(retainedStatus);
   assert.equal(retainedStatus.isOpen, true);
+});
+
+test("Riot 검증이 지연되어도 pending snapshot을 먼저 전송하고 검증 후 승격한다", async () => {
+  let resolveAccount;
+  const accountPromise = new Promise((resolve) => {
+    resolveAccount = resolve;
+  });
+  const { events, store, socket, ctx } = createHarness({
+    riot: {
+      isConfigured: () => true,
+      getAccountByRiotId: () => accountPromise,
+      getRankedStatsByPuuid: async () => undefined
+    }
+  });
+  participationModule.setup(ctx);
+
+  events.emit({
+    type: "twitch.chatMessage",
+    id: "chat-delayed-open-1",
+    broadcasterUserId: TEST_BROADCASTER_ID,
+    chatterUserId: TEST_BROADCASTER_ID,
+    chatterUserName: "Streamer",
+    message: "!queueopen",
+    createdAt: new Date().toISOString()
+  });
+  await settleUntil(() => store.getParticipationState(TEST_BROADCASTER_ID).isOpen === true);
+
+  const sentBeforeApply = socket.sent.length;
+  events.emit({
+    type: "twitch.chatMessage",
+    id: "chat-delayed-apply-1",
+    broadcasterUserId: TEST_BROADCASTER_ID,
+    chatterUserId: "user-delayed",
+    chatterUserName: "DelayedViewer",
+    message: "！参加 HideOnBush#KR1",
+    createdAt: new Date().toISOString()
+  });
+  await settleUntil(
+    () => store.getParticipationQueue(TEST_BROADCASTER_ID)[0]?.status === "pending"
+  );
+
+  const pendingSnapshot = socket.sent.slice(sentBeforeApply).find((message) => (
+    message.type === "participation.snapshot.update"
+    && message.queue[0]?.status === "pending"
+  ));
+  assert.ok(pendingSnapshot);
+
+  resolveAccount({
+    puuid: "puuid-delayed",
+    gameName: "HideOnBush",
+    tagLine: "KR1"
+  });
+  await settleUntil(() => (
+    store.getParticipationQueue(TEST_BROADCASTER_ID)[0]?.status === "verified"
+    && socket.sent.some((message) => (
+      message.type === "participation.snapshot.update"
+      && message.sessionId === pendingSnapshot.sessionId
+      && message.queue[0]?.status === "verified"
+    ))
+  ), 100);
+
+  const verifiedSnapshot = socket.sent
+    .filter((message) => (
+      message.type === "participation.snapshot.update"
+      && message.sessionId === pendingSnapshot.sessionId
+    ))
+    .at(-1);
+  assert.ok(verifiedSnapshot);
+  assert.equal(verifiedSnapshot.queue[0]?.status, "verified");
+  assert.ok(verifiedSnapshot.revision > pendingSnapshot.revision);
 });
 
 test("!시참시작 명령이 반복되어도 Twitch 안내 채팅은 한 번만 전송한다", async () => {
@@ -634,7 +740,7 @@ test("!시참시작 명령이 반복되어도 Twitch 안내 채팅은 한 번만
   events.emit({ ...baseEvent, id: "chat-open-once-2" });
   await settle();
 
-  assert.equal(store.getStatus().participation, "open");
+  assert.equal(store.getParticipationState(TEST_BROADCASTER_ID).isOpen, true);
   assert.equal(sentChatMessages.length, 1);
   assert.match(sentChatMessages[0].message, /参加案内/);
 });
@@ -665,16 +771,22 @@ test("!시참 신청은 이전 비활성 참가 기록을 새로 만들지 않�
   events.emit({ ...firstApply, id: "chat-reuse-apply-1" });
   await settle();
 
-  const firstEntry = store.getParticipationQueue()[0];
+  const firstEntry = store.getParticipationQueue(TEST_BROADCASTER_ID)[0];
   assert.ok(firstEntry);
-  store.markParticipant(firstEntry.id, "played");
-  assert.equal(store.getParticipationQueue()[0].status, "played");
+  store.markParticipant(firstEntry.id, "played", TEST_BROADCASTER_ID);
+  assert.equal(store.getParticipationQueue(TEST_BROADCASTER_ID)[0].status, "played");
 
   events.emit({ ...firstApply, id: "chat-reuse-apply-2", chatterUserName: "ReuseViewerRenamed" });
-  await settleUntil(() => store.getParticipationQueue()[0]?.twitchUserName === "ReuseViewerRenamed");
+  await settleUntil(() => (
+    store.getParticipationQueue(TEST_BROADCASTER_ID)[0]?.twitchUserName === "ReuseViewerRenamed"
+    && socket.sent.some((message) => (
+      message.type === "participation.snapshot.update"
+      && message.queue[0]?.twitchUserName === "ReuseViewerRenamed"
+    ))
+  ));
 
-  const queue = store.getParticipationQueue();
-  const lastQueueMessage = socket.sent.filter((message) => message.type === "participation.queue.update").at(-1);
+  const queue = store.getParticipationQueue(TEST_BROADCASTER_ID);
+  const lastQueueMessage = socket.sent.filter((message) => message.type === "participation.snapshot.update").at(-1);
 
   assert.equal(queue.length, 1);
   assert.equal(queue[0].id, firstEntry.id);
@@ -713,8 +825,8 @@ test("!시참취소 명령은 본인 신청을 취소하고 overlay 대기열에
   });
   await settle();
 
-  assert.equal(store.getParticipationQueue()[0].status, "waitlisted");
-  assert.equal(store.getParticipationOverlayQueue().length, 1);
+  assert.equal(store.getParticipationQueue(TEST_BROADCASTER_ID)[0].status, "waitlisted");
+  assert.equal(store.getParticipationOverlayQueue(undefined, TEST_BROADCASTER_ID).length, 1);
 
   events.emit({
     type: "twitch.chatMessage",
@@ -727,8 +839,8 @@ test("!시참취소 명령은 본인 신청을 취소하고 overlay 대기열에
   });
   await settle();
 
-  assert.equal(store.getParticipationQueue()[0].status, "cancelled");
-  assert.equal(store.getParticipationOverlayQueue().length, 0);
+  assert.equal(store.getParticipationQueue(TEST_BROADCASTER_ID)[0].status, "cancelled");
+  assert.equal(store.getParticipationOverlayQueue(undefined, TEST_BROADCASTER_ID).length, 0);
 
   const lastQueueMessage = socket.sent.filter((message) => message.type === "participation.queue.update").at(-1);
   assert.ok(lastQueueMessage);

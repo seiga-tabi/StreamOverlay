@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { URL } from "node:url";
 import type { Store } from "../services/store.js";
+import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
   formatRiotId,
@@ -137,7 +138,7 @@ const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 5 * 60_000;
 const SERVER_PROCESS_STARTED_AT = new Date(Date.now() - process.uptime() * 1000).toISOString();
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
-const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
+const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["verified", "waitlisted", "selected", "checked_in", "invited"]);
 const PARTICIPATION_MANUAL_ACTIONS = new Set(["open", "show_queue", "mark_in_game", "finish_game", "close"]);
 const PARTICIPATION_ENTRY_STATUSES = new Set<ParticipationStatus>([
   "pending",
@@ -1327,36 +1328,30 @@ function buildParticipationInviteChatMessages(entries: Array<{ twitchUserName: s
 async function broadcastParticipationSnapshot(input: {
   store: Store;
   actions: ActionDispatcher;
+  logger?: Partial<Pick<JsonlLogger, "event" | "error">>;
 }, phase: ParticipationPhase, reason: string, streamerId?: string): Promise<void> {
-  const state = input.store.getParticipationState(streamerId);
-  const isOpen = state.isOpen;
-  await input.actions.dispatchOne({
-    type: "overlay.participationStatus",
-    isOpen,
+  await publishAtomicParticipationSnapshot(input, {
     phase,
-    nextCandidate: input.store.getNextWaitingParticipationOverlayEntry(streamerId),
-    streamerProfile: input.store.getParticipationStreamerProfile(streamerId),
-    source: reason
-  }, { user: "dashboard", input: "" }, reason);
-  await broadcastParticipationQueue(input, reason, streamerId);
+    reason,
+    streamerId
+  });
 }
 
 async function broadcastParticipationQueue(input: {
   store: Store;
   actions: ActionDispatcher;
+  logger?: Partial<Pick<JsonlLogger, "event" | "error">>;
 }, reason: string, streamerId?: string): Promise<void> {
-  const isOpen = input.store.getParticipationState(streamerId).isOpen;
-  await input.actions.dispatchOne({
-    type: "overlay.participationQueue",
-    isOpen,
-    queue: input.store.getParticipationOverlayQueue(undefined, streamerId),
-    source: reason
-  }, { user: "dashboard", input: "" }, reason);
+  await publishAtomicParticipationSnapshot(input, {
+    reason,
+    streamerId
+  });
 }
 
 async function applyManualParticipationAction(input: {
   store: Store;
   actions: ActionDispatcher;
+  logger?: Partial<Pick<JsonlLogger, "event" | "error">>;
 }, action: string, streamerId?: string): Promise<ParticipationPhase> {
   switch (action) {
     case "open":

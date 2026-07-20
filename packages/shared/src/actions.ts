@@ -5,9 +5,12 @@ import {
   MAX_RECENT_MATCH_CHAMPIONS,
   OVERLAY_BANNER_EVENT_KINDS,
   OVERLAY_SPEECH_LANGUAGES,
+  validateOverlayMessage,
   type OverlayBannerEventKind,
   type OverlaySpeechLanguage,
-  type ParticipationPhase
+  type ParticipationPhase,
+  type ParticipationQueueEntry,
+  type ParticipationSnapshotStatus
 } from "./overlay.js";
 
 export const ALLOWED_ACTION_TYPES = [
@@ -27,6 +30,7 @@ export const ALLOWED_ACTION_TYPES = [
   "overlay.mission",
   "overlay.participationQueue",
   "overlay.participationStatus",
+  "overlay.participationSnapshot",
   "overlay.participationSelected",
   "overlay.participationTeams",
   "overlay.soloRankProfile",
@@ -184,6 +188,9 @@ export type OverlayMissionAction = {
 
 export type OverlayParticipationQueueAction = {
   type: "overlay.participationQueue";
+  streamerId?: string;
+  sessionId?: string;
+  revision?: number;
   isOpen?: boolean;
   queue: Array<{
     position: number;
@@ -204,6 +211,9 @@ export type OverlayParticipationQueueAction = {
 
 export type OverlayParticipationStatusAction = {
   type: "overlay.participationStatus";
+  streamerId?: string;
+  sessionId?: string;
+  revision?: number;
   isOpen: boolean;
   mode?: "normal5" | "custom5v5" | "aram" | "onevone";
   phase?: ParticipationPhase;
@@ -221,6 +231,20 @@ export type OverlayParticipationStatusAction = {
     rankedStats?: LolRankedStats;
   };
   streamerProfile?: ParticipationStreamerProfile;
+  durationMs?: number;
+  variant?: "info" | "success" | "warning" | "danger";
+  source?: string;
+};
+
+export type OverlayParticipationSnapshotAction = {
+  type: "overlay.participationSnapshot";
+  streamerId: string;
+  sessionId: string;
+  revision: number;
+  status: ParticipationSnapshotStatus;
+  queue: ParticipationQueueEntry[];
+  emittedAt: string;
+  traceId?: string;
   durationMs?: number;
   variant?: "info" | "success" | "warning" | "danger";
   source?: string;
@@ -318,6 +342,7 @@ export type BotAction =
   | OverlayMissionAction
   | OverlayParticipationQueueAction
   | OverlayParticipationStatusAction
+  | OverlayParticipationSnapshotAction
   | OverlayParticipationSelectedAction
   | OverlayParticipationTeamsAction
   | OverlaySoloRankProfileAction
@@ -1009,18 +1034,34 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
       return validateMissionList(candidate.missions);
     }
     case "overlay.participationQueue": {
-      const keyResult = validateKeys(candidate, ["isOpen", "queue", "durationMs", "variant", "source"], options);
+      const keyResult = validateKeys(candidate, ["streamerId", "sessionId", "revision", "isOpen", "queue", "durationMs", "variant", "source"], options);
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
       if (!common.ok) return common;
+      const streamerId = optionalString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
+      const sessionId = optionalString(candidate.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
+      if (!sessionId.ok) return sessionId;
+      if (candidate.revision !== undefined) {
+        const revision = integerInRange(candidate.revision, 1, Number.MAX_SAFE_INTEGER, "revision");
+        if (!revision.ok) return revision;
+      }
       if (candidate.isOpen !== undefined && typeof candidate.isOpen !== "boolean") return fail("isOpen은 boolean이어야 합니다.");
       return validateParticipationQueue(candidate.queue);
     }
     case "overlay.participationStatus": {
-      const keyResult = validateKeys(candidate, ["isOpen", "mode", "phase", "message", "nextCandidate", "streamerProfile", "durationMs", "variant", "source"], options);
+      const keyResult = validateKeys(candidate, ["streamerId", "sessionId", "revision", "isOpen", "mode", "phase", "message", "nextCandidate", "streamerProfile", "durationMs", "variant", "source"], options);
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
       if (!common.ok) return common;
+      const streamerId = optionalString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
+      const sessionId = optionalString(candidate.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
+      if (!sessionId.ok) return sessionId;
+      if (candidate.revision !== undefined) {
+        const revision = integerInRange(candidate.revision, 1, Number.MAX_SAFE_INTEGER, "revision");
+        if (!revision.ok) return revision;
+      }
       if (typeof candidate.isOpen !== "boolean") return fail("isOpen은 boolean이어야 합니다.");
       const modeResult = optionalExactString(candidate.mode, PARTICIPATION_MODES, "mode");
       if (!modeResult.ok) return modeResult;
@@ -1033,6 +1074,33 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
         if (!nextCandidate.ok) return nextCandidate;
       }
       return validateParticipationStreamerProfile(candidate.streamerProfile);
+    }
+    case "overlay.participationSnapshot": {
+      const keyResult = validateKeys(candidate, [
+        "streamerId",
+        "sessionId",
+        "revision",
+        "status",
+        "queue",
+        "emittedAt",
+        "traceId",
+        "durationMs",
+        "variant",
+        "source"
+      ], options);
+      if (!keyResult.ok) return keyResult;
+      const common = validateOverlayCommonFields(candidate);
+      if (!common.ok) return common;
+      return validateOverlayMessage({
+        type: "participation.snapshot.update",
+        streamerId: candidate.streamerId,
+        sessionId: candidate.sessionId,
+        revision: candidate.revision,
+        status: candidate.status,
+        queue: candidate.queue,
+        emittedAt: candidate.emittedAt,
+        traceId: candidate.traceId
+      });
     }
     case "overlay.participationSelected": {
       const keyResult = validateKeys(candidate, [

@@ -130,17 +130,45 @@ export class ActionDispatcher {
           actionStatus = this.broadcastOverlay({ type: "mission.update", title: action.title, missions: action.missions, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
           break;
         case "overlay.participationQueue":
-          actionStatus = this.broadcastOverlay({ type: "participation.queue.update", isOpen: action.isOpen, queue: action.queue, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
+          actionStatus = this.broadcastOverlay({
+            type: "participation.queue.update",
+            streamerId: action.streamerId,
+            sessionId: action.sessionId,
+            revision: action.revision,
+            isOpen: action.isOpen,
+            queue: action.queue,
+            durationMs: action.durationMs,
+            variant: action.variant,
+            source: action.source ?? reason
+          });
           break;
         case "overlay.participationStatus":
           actionStatus = this.broadcastOverlay({
             type: "participation.status.update",
+            streamerId: action.streamerId,
+            sessionId: action.sessionId,
+            revision: action.revision,
             isOpen: action.isOpen,
             mode: action.mode,
             phase: action.phase,
             message: action.message,
             nextCandidate: action.nextCandidate,
             streamerProfile: action.streamerProfile,
+            durationMs: action.durationMs,
+            variant: action.variant,
+            source: action.source ?? reason
+          });
+          break;
+        case "overlay.participationSnapshot":
+          actionStatus = this.broadcastOverlay({
+            type: "participation.snapshot.update",
+            streamerId: action.streamerId,
+            sessionId: action.sessionId,
+            revision: action.revision,
+            status: action.status,
+            queue: action.queue,
+            emittedAt: action.emittedAt,
+            traceId: action.traceId,
             durationMs: action.durationMs,
             variant: action.variant,
             source: action.source ?? reason
@@ -291,16 +319,17 @@ export class ActionDispatcher {
       throw new Error(`Overlay message validation failed: ${message.type}`);
     }
 
+    const bypassCooldown = message.type === "participation.snapshot.update";
     const cooldownKey = this.overlayCooldownKey(message);
     const now = Date.now();
     const lastSentAt = this.lastOverlaySentAtByKey.get(cooldownKey) ?? 0;
-    if (now - lastSentAt < OVERLAY_COOLDOWN_MS) {
+    if (!bypassCooldown && now - lastSentAt < OVERLAY_COOLDOWN_MS) {
       this.logger.event({ type: "overlay.cooldown_skipped", messageType: message.type, source: message.source });
       return "skipped";
     }
 
     if (!this.overlay.broadcast(message)) throw new Error(`Overlay message validation failed: ${message.type}`);
-    this.lastOverlaySentAtByKey.set(cooldownKey, now);
+    if (!bypassCooldown) this.lastOverlaySentAtByKey.set(cooldownKey, now);
     return "ok";
   }
 

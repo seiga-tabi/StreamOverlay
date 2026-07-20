@@ -72,6 +72,62 @@ test("OverlayHub는 reconnect client에 마지막 안전 상태를 복구한다"
   assert.equal(reconnectSocket.sent[0].missions[0].text, "첫 승 하기");
 });
 
+test("OverlayHub는 시참 snapshot을 스트리머별 client에만 전송한다", () => {
+  const { hub } = createHub();
+  const streamerASocket = new FakeSocket();
+  const streamerBSocket = new FakeSocket();
+  hub.add(streamerASocket, "participation", "streamer-a");
+  hub.add(streamerBSocket, "participation", "streamer-b");
+
+  hub.broadcast({
+    type: "participation.snapshot.update",
+    streamerId: "streamer-a",
+    sessionId: "session-a",
+    revision: 1,
+    status: {
+      isOpen: true,
+      phase: "recruiting",
+      message: "스트리머 A 대기열"
+    },
+    queue: [],
+    emittedAt: "2026-07-20T00:00:00.000Z"
+  });
+
+  assert.equal(streamerASocket.sent.length, 1);
+  assert.equal(streamerASocket.sent[0].streamerId, "streamer-a");
+  assert.equal(streamerBSocket.sent.length, 0);
+});
+
+test("OverlayHub는 reconnect 시 해당 스트리머의 최신 revision snapshot만 복구한다", () => {
+  const { hub } = createHub();
+
+  for (const revision of [1, 2]) {
+    hub.broadcast({
+      type: "participation.snapshot.update",
+      streamerId: "streamer-a",
+      sessionId: "session-a",
+      revision,
+      status: {
+        isOpen: true,
+        phase: "recruiting",
+        message: `revision ${revision}`
+      },
+      queue: [],
+      emittedAt: `2026-07-20T00:00:0${revision}.000Z`
+    });
+  }
+
+  const streamerAReconnect = new FakeSocket();
+  const streamerBReconnect = new FakeSocket();
+  hub.add(streamerAReconnect, "participation", "streamer-a");
+  hub.add(streamerBReconnect, "participation", "streamer-b");
+
+  const snapshots = streamerAReconnect.sent.filter((message) => message.type === "participation.snapshot.update");
+  assert.equal(snapshots.length, 1);
+  assert.equal(snapshots[0].revision, 2);
+  assert.equal(streamerBReconnect.sent.length, 0);
+});
+
 test("OverlayHub는 게임 중 상태에서 이전 시참 팀 retained message를 지운다", () => {
   const { hub } = createHub();
   const firstSocket = new FakeSocket();

@@ -117,18 +117,37 @@ export type ParticipationQueueEntry = {
 
 export type ParticipationQueueUpdateMessage = OverlayMessageBase & {
   type: "participation.queue.update";
+  streamerId?: string;
+  sessionId?: string;
+  revision?: number;
   isOpen?: boolean;
   queue: ParticipationQueueEntry[];
 };
 
 export type ParticipationStatusUpdateMessage = OverlayMessageBase & {
   type: "participation.status.update";
+  streamerId?: string;
+  sessionId?: string;
+  revision?: number;
   isOpen: boolean;
   mode?: "normal5" | "custom5v5" | "aram" | "onevone";
   phase?: ParticipationPhase;
   message?: string;
   nextCandidate?: ParticipationQueueEntry;
   streamerProfile?: ParticipationStreamerProfile;
+};
+
+export type ParticipationSnapshotStatus = Omit<ParticipationStatusUpdateMessage, "type" | keyof OverlayMessageBase>;
+
+export type ParticipationSnapshotUpdateMessage = OverlayMessageBase & {
+  type: "participation.snapshot.update";
+  streamerId: string;
+  sessionId: string;
+  revision: number;
+  status: ParticipationSnapshotStatus;
+  queue: ParticipationQueueEntry[];
+  emittedAt: string;
+  traceId?: string;
 };
 
 export type SoloRankProfileUpdateMessage = OverlayMessageBase & {
@@ -184,6 +203,7 @@ export type OverlayMessage =
   | MissionUpdateMessage
   | ParticipationQueueUpdateMessage
   | ParticipationStatusUpdateMessage
+  | ParticipationSnapshotUpdateMessage
   | SoloRankProfileUpdateMessage
   | ParticipationSelectedShowMessage
   | ParticipationSelectedClearMessage
@@ -679,6 +699,24 @@ function validateParticipationStreamerProfile(value: unknown): OverlayValidation
   return validateLolRankHistory(value.rankHistory, "streamerProfile.rankHistory");
 }
 
+function validateParticipationSnapshotStatus(value: unknown): OverlayValidationResult {
+  if (!isRecord(value)) return fail("status는 객체여야 합니다.");
+  const keys = validateExactObjectKeys(value, ["isOpen", "mode", "phase", "message", "nextCandidate", "streamerProfile"]);
+  if (!keys.ok) return keys;
+  if (typeof value.isOpen !== "boolean") return fail("status.isOpen은 boolean이어야 합니다.");
+  const mode = optionalExactString(value.mode, PARTICIPATION_MODES, "status.mode");
+  if (!mode.ok) return mode;
+  const phase = optionalExactString(value.phase, PARTICIPATION_PHASES, "status.phase");
+  if (!phase.ok) return phase;
+  const messageResult = optionalString(value.message, MAX_MESSAGE_LENGTH, "status.message");
+  if (!messageResult.ok) return messageResult;
+  if (value.nextCandidate !== undefined) {
+    const nextCandidateResult = validateParticipationQueue([value.nextCandidate]);
+    if (!nextCandidateResult.ok) return nextCandidateResult;
+  }
+  return validateParticipationStreamerProfile(value.streamerProfile);
+}
+
 function validateTeams(value: unknown): OverlayValidationResult {
   if (!isRecord(value)) return fail("teams는 객체여야 합니다.");
   const keys = validateExactObjectKeys(value, ["a", "b"]);
@@ -865,14 +903,30 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
       return validateMissionList(message.missions);
     }
     case "participation.queue.update": {
-      const keys = validateKeys(message, ["isOpen", "queue"]);
+      const keys = validateKeys(message, ["streamerId", "sessionId", "revision", "isOpen", "queue"]);
       if (!keys.ok) return keys;
+      const streamerId = optionalString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
+      const sessionId = optionalString(message.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
+      if (!sessionId.ok) return sessionId;
+      if (message.revision !== undefined) {
+        const revision = integerInRange(message.revision, 1, Number.MAX_SAFE_INTEGER, "revision");
+        if (!revision.ok) return revision;
+      }
       if (message.isOpen !== undefined && typeof message.isOpen !== "boolean") return fail("isOpen은 boolean이어야 합니다.");
       return validateParticipationQueue(message.queue);
     }
     case "participation.status.update": {
-      const keys = validateKeys(message, ["isOpen", "mode", "phase", "message", "nextCandidate", "streamerProfile"]);
+      const keys = validateKeys(message, ["streamerId", "sessionId", "revision", "isOpen", "mode", "phase", "message", "nextCandidate", "streamerProfile"]);
       if (!keys.ok) return keys;
+      const streamerId = optionalString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
+      const sessionId = optionalString(message.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
+      if (!sessionId.ok) return sessionId;
+      if (message.revision !== undefined) {
+        const revision = integerInRange(message.revision, 1, Number.MAX_SAFE_INTEGER, "revision");
+        if (!revision.ok) return revision;
+      }
       if (typeof message.isOpen !== "boolean") return fail("isOpen은 boolean이어야 합니다.");
       const mode = optionalExactString(message.mode, PARTICIPATION_MODES, "mode");
       if (!mode.ok) return mode;
@@ -885,6 +939,20 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
         if (!nextCandidateResult.ok) return nextCandidateResult;
       }
       return validateParticipationStreamerProfile(message.streamerProfile);
+    }
+    case "participation.snapshot.update": {
+      const keys = validateKeys(message, ["streamerId", "sessionId", "revision", "status", "queue", "emittedAt", "traceId"]);
+      if (!keys.ok) return keys;
+      if (!nonEmptyString(message.streamerId, MAX_SHORT_TEXT_LENGTH)) return fail("streamerId는 필수 문자열입니다.");
+      if (!nonEmptyString(message.sessionId, MAX_SHORT_TEXT_LENGTH)) return fail("sessionId는 필수 문자열입니다.");
+      const revision = integerInRange(message.revision, 1, Number.MAX_SAFE_INTEGER, "revision");
+      if (!revision.ok) return revision;
+      const status = validateParticipationSnapshotStatus(message.status);
+      if (!status.ok) return status;
+      const queue = validateParticipationQueue(message.queue);
+      if (!queue.ok) return queue;
+      if (!nonEmptyString(message.emittedAt, MAX_SHORT_TEXT_LENGTH)) return fail("emittedAt은 필수 문자열입니다.");
+      return optionalString(message.traceId, MAX_SHORT_TEXT_LENGTH, "traceId");
     }
     case "solo-rank.profile.update": {
       const keys = validateKeys(message, ["profile", "region", "queueLabel", "ladderRank"]);

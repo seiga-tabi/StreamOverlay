@@ -3,41 +3,8 @@ import { validateOverlayMessage } from "@streamops/shared";
 import { runtimeConfig } from "./runtime-config";
 
 const WS_BASE = runtimeConfig().wsBase ?? import.meta.env.VITE_WS_BASE ?? "ws://localhost:3000";
-const RECONNECT_DELAY_MS = 1500;
-const RELOAD_COOLDOWN_MS = 30_000;
-const LAST_RELOAD_AT_KEY = "streamops.overlay.lastReloadAt";
-
-function autoReloadEnabled(): boolean {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("reload") === "0" || params.get("autoReload") === "0") return false;
-  return import.meta.env.VITE_OVERLAY_AUTO_RELOAD !== "false";
-}
-
-function lastReloadAt(): number {
-  try {
-    const value = Number(window.sessionStorage.getItem(LAST_RELOAD_AT_KEY) ?? "0");
-    return Number.isFinite(value) ? value : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function markReload(now: number): void {
-  try {
-    window.sessionStorage.setItem(LAST_RELOAD_AT_KEY, String(now));
-  } catch {
-    // OBS Browser Source 환경에서 storage 접근이 막혀도 reload 기능은 계속 동작합니다.
-  }
-}
-
-function reloadAfterRecoveredConnection(): boolean {
-  if (!autoReloadEnabled()) return false;
-  const now = Date.now();
-  if (now - lastReloadAt() < RELOAD_COOLDOWN_MS) return false;
-  markReload(now);
-  window.setTimeout(() => window.location.reload(), 100);
-  return true;
-}
+const INITIAL_RECONNECT_DELAY_MS = 500;
+const MAX_RECONNECT_DELAY_MS = 10_000;
 
 function overlayTokenFromFragment(): string {
   const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
@@ -64,12 +31,13 @@ export function connectOverlaySocket(
   let stopped = false;
   let ws: WebSocket | undefined;
   let reconnectTimer: number | undefined;
-  let hadConnectionLoss = false;
+  let reconnectDelayMs = INITIAL_RECONNECT_DELAY_MS;
 
   function scheduleReconnect() {
     if (stopped) return;
     if (reconnectTimer) window.clearTimeout(reconnectTimer);
-    reconnectTimer = window.setTimeout(connect, RECONNECT_DELAY_MS);
+    reconnectTimer = window.setTimeout(connect, reconnectDelayMs);
+    reconnectDelayMs = Math.min(MAX_RECONNECT_DELAY_MS, reconnectDelayMs * 2);
   }
 
   function connect() {
@@ -81,26 +49,20 @@ export function connectOverlaySocket(
     try {
       ws = new WebSocket(`${WS_BASE}/ws/overlay?${params.toString()}`);
     } catch {
-      hadConnectionLoss = true;
       onStatus?.(false);
       scheduleReconnect();
       return;
     }
     ws.onopen = () => {
+      reconnectDelayMs = INITIAL_RECONNECT_DELAY_MS;
       if (token) ws?.send(JSON.stringify({ type: "overlay.auth", token }));
       onStatus?.(true);
-      if (hadConnectionLoss) {
-        hadConnectionLoss = false;
-        reloadAfterRecoveredConnection();
-      }
     };
     ws.onclose = () => {
-      hadConnectionLoss = true;
       onStatus?.(false);
       scheduleReconnect();
     };
     ws.onerror = () => {
-      hadConnectionLoss = true;
       onStatus?.(false);
     };
     ws.onmessage = (event) => {

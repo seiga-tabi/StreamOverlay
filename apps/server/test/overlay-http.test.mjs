@@ -620,8 +620,17 @@ test("게임 중 공개 참가 신청은 오버레이 상태를 모집 중으로
 
   assert.equal(res.statusCode, 200);
   assert.equal(store.getParticipationSession(streamerId)?.status, "in_game");
-  assert.ok(dispatched.some((item) => item.action.type === "overlay.participationQueue" && item.reason === "public.participation_join"));
-  assert.equal(dispatched.some((item) => item.action.type === "overlay.participationStatus"), false);
+  assert.ok(dispatched.some((item) => (
+    item.action.type === "overlay.participationSnapshot"
+    && item.reason === "public.participation_join"
+    && item.action.streamerId === streamerId
+    && item.action.status.phase === "in_game"
+    && item.action.queue.length === 1
+  )));
+  assert.equal(dispatched.some((item) => (
+    item.action.type === "overlay.participationStatus"
+    && item.action.phase === "recruiting"
+  )), false);
 });
 
 test("완료된 공개 참가자는 상태 조회 후 기존 항목으로 재참여할 수 있다", async () => {

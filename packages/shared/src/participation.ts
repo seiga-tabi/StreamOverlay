@@ -305,6 +305,7 @@ export type ParticipationSummary = {
 
 export type ParticipationState = {
   streamerId?: string;
+  revision?: number;
   session?: ParticipationSession;
   isOpen: boolean;
   queue: ParticipationDashboardQueueEntry[];
@@ -335,7 +336,7 @@ export const PARTICIPATION_ACTIVE_STATUSES = [
   "in_game"
 ] as const satisfies readonly ParticipationStatus[];
 
-export const PARTICIPATION_WAITING_STATUSES = ["pending", "verified", "waitlisted"] as const satisfies readonly ParticipationStatus[];
+export const PARTICIPATION_WAITING_STATUSES = ["verified", "waitlisted"] as const satisfies readonly ParticipationStatus[];
 
 export function isActiveParticipationStatus(status: ParticipationStatus): boolean {
   return (PARTICIPATION_ACTIVE_STATUSES as readonly ParticipationStatus[]).includes(status);

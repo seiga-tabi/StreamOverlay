@@ -6,6 +6,7 @@ import type {
   OverlayBannerMessage,
   OverlayChannel,
   OverlayMessage,
+  ParticipationSnapshotUpdateMessage,
   ParticipationStreamerProfile,
   ParticipationQueueUpdateMessage,
   ParticipationStatusUpdateMessage,
@@ -36,6 +37,8 @@ type OverlayState = {
   mission?: MissionUpdateMessage;
   participationQueue?: ParticipationQueueUpdateMessage;
   participationStatus?: ParticipationStatusUpdateMessage;
+  participationRevision?: number;
+  participationSessionId?: string;
   teams?: ParticipationTeamsUpdateMessage;
   soloRankProfile?: SoloRankProfileUpdateMessage;
   emergency?: EmergencyShowMessage;
@@ -50,6 +53,8 @@ type CachedParticipationState = {
   savedAt: number;
   participationQueue?: ParticipationQueueUpdateMessage;
   participationStatus?: ParticipationStatusUpdateMessage;
+  participationRevision?: number;
+  participationSessionId?: string;
   teams?: ParticipationTeamsUpdateMessage;
 };
 
@@ -80,18 +85,36 @@ function validateCachedMessage<T extends OverlayMessage["type"]>(
   return message.type === type ? message as Extract<OverlayMessage, { type: T }> : undefined;
 }
 
-function loadCachedParticipationState(): Partial<OverlayState> {
+function participationCacheKey(): string {
+  const segments = window.location.pathname.split("/").filter(Boolean);
+  const overlayIndex = segments.indexOf("overlay");
+  const rawScope = overlayIndex >= 0 ? segments[overlayIndex + 1] : undefined;
+  if (!rawScope) return PARTICIPATION_CACHE_KEY;
+
   try {
-    const raw = window.localStorage.getItem(PARTICIPATION_CACHE_KEY);
+    const scope = decodeURIComponent(rawScope).trim().toLowerCase();
+    return scope ? `${PARTICIPATION_CACHE_KEY}:${encodeURIComponent(scope)}` : PARTICIPATION_CACHE_KEY;
+  } catch {
+    const scope = rawScope.trim().toLowerCase();
+    return scope ? `${PARTICIPATION_CACHE_KEY}:${encodeURIComponent(scope)}` : PARTICIPATION_CACHE_KEY;
+  }
+}
+
+function loadCachedParticipationState(): Partial<OverlayState> {
+  const cacheKey = participationCacheKey();
+  try {
+    const raw = window.localStorage.getItem(cacheKey);
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Partial<CachedParticipationState>;
     if (typeof parsed.savedAt !== "number" || Date.now() - parsed.savedAt > PARTICIPATION_CACHE_TTL_MS) {
-      window.localStorage.removeItem(PARTICIPATION_CACHE_KEY);
+      window.localStorage.removeItem(cacheKey);
       return {};
     }
     return {
       participationQueue: validateCachedMessage(parsed.participationQueue, "participation.queue.update"),
       participationStatus: validateCachedMessage(parsed.participationStatus, "participation.status.update"),
+      participationRevision: typeof parsed.participationRevision === "number" ? parsed.participationRevision : undefined,
+      participationSessionId: typeof parsed.participationSessionId === "string" ? parsed.participationSessionId : undefined,
       teams: validateCachedMessage(parsed.teams, "participation.teams.update")
     };
   } catch {
@@ -105,12 +128,39 @@ function saveCachedParticipationState(state: OverlayState): void {
       savedAt: Date.now(),
       participationQueue: state.participationQueue,
       participationStatus: state.participationStatus,
+      participationRevision: state.participationRevision,
+      participationSessionId: state.participationSessionId,
       teams: state.teams
     };
-    window.localStorage.setItem(PARTICIPATION_CACHE_KEY, JSON.stringify(cache));
+    window.localStorage.setItem(participationCacheKey(), JSON.stringify(cache));
   } catch {
     // OBS Browser Source에서 storage가 막힌 경우에도 실시간 overlay 동작은 유지합니다.
   }
+}
+
+function participationMessagesFromSnapshot(message: ParticipationSnapshotUpdateMessage): {
+  participationQueue: ParticipationQueueUpdateMessage;
+  participationStatus: ParticipationStatusUpdateMessage;
+} {
+  const scope = {
+    streamerId: message.streamerId,
+    sessionId: message.sessionId,
+    revision: message.revision,
+    source: message.source
+  };
+  return {
+    participationQueue: {
+      type: "participation.queue.update",
+      ...scope,
+      isOpen: message.status.isOpen,
+      queue: message.queue
+    },
+    participationStatus: {
+      type: "participation.status.update",
+      ...scope,
+      ...message.status
+    }
+  };
 }
 
 function loadCachedSoloRankState(): Partial<OverlayState> {
@@ -334,17 +384,53 @@ export default function App() {
       setState((previous) => ({ ...previous, mission: message }));
       return;
     }
+    if (message.type === "participation.snapshot.update") {
+      setState((previous) => {
+        if (typeof previous.participationRevision === "number" && message.revision <= previous.participationRevision) {
+          return previous;
+        }
+        const participation = participationMessagesFromSnapshot(message);
+        const shouldClearTeams = !participation.participationStatus.isOpen
+          || participation.participationStatus.phase === "in_game"
+          || participation.participationStatus.phase === "game_ended"
+          || participation.participationStatus.phase === "closed";
+        return {
+          ...previous,
+          ...participation,
+          participationRevision: message.revision,
+          participationSessionId: message.sessionId,
+          teams: shouldClearTeams ? undefined : previous.teams
+        };
+      });
+      return;
+    }
     if (message.type === "participation.queue.update") {
-      setState((previous) => ({ ...previous, participationQueue: message }));
+      setState((previous) => {
+        if (
+          typeof previous.participationRevision === "number"
+          && (typeof message.revision !== "number" || message.revision <= previous.participationRevision)
+        ) {
+          return previous;
+        }
+        return { ...previous, participationQueue: message };
+      });
       return;
     }
     if (message.type === "participation.status.update") {
       const shouldClearTeams = !message.isOpen || message.phase === "in_game" || message.phase === "game_ended" || message.phase === "closed";
-      setState((previous) => ({
-        ...previous,
-        participationStatus: message,
-        teams: shouldClearTeams ? undefined : previous.teams
-      }));
+      setState((previous) => {
+        if (
+          typeof previous.participationRevision === "number"
+          && (typeof message.revision !== "number" || message.revision <= previous.participationRevision)
+        ) {
+          return previous;
+        }
+        return {
+          ...previous,
+          participationStatus: message,
+          teams: shouldClearTeams ? undefined : previous.teams
+        };
+      });
       return;
     }
     if (message.type === "solo-rank.profile.update") {
@@ -389,7 +475,15 @@ export default function App() {
     if (mockMode) return;
     if (mode !== "all" && mode !== "participation") return;
     saveCachedParticipationState(state);
-  }, [mockMode, mode, state.participationQueue, state.participationStatus, state.teams]);
+  }, [
+    mockMode,
+    mode,
+    state.participationQueue,
+    state.participationRevision,
+    state.participationSessionId,
+    state.participationStatus,
+    state.teams
+  ]);
 
   useEffect(() => {
     if (mockMode) return;

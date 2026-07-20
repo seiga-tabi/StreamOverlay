@@ -7,9 +7,11 @@ import type {
   TwitchChatMessageInternalEvent,
   TwitchRewardRedemptionInternalEvent
 } from "@streamops/shared";
-import { formatBilingualNotice, formatRiotId, newId, normalizeLolRole, nowIso, parseRiotIdDetailed, toSafeErrorMessage } from "@streamops/shared";
+import { formatBilingualNotice, newId, normalizeLolRole, nowIso, parseRiotIdDetailed, toSafeErrorMessage } from "@streamops/shared";
 import type { BotModule, ModuleContext } from "../core/module.js";
 import { appConfig } from "../config.js";
+import { createParticipationTrace, publishParticipationSnapshot, type ParticipationTrace } from "../services/participation-snapshot.js";
+import { RiotRateLimitError } from "../services/riot-api.js";
 
 type ParticipationSettingsFile = ParticipationSettings & {
   channelPointRewardTitles: string[];
@@ -84,6 +86,8 @@ const PARTICIPATION_COMMANDS: Record<ParticipationCommandKind, readonly string[]
 };
 
 const OPERATOR_COMMAND_KINDS = new Set<ParticipationCommandKind>(["open", "close"]);
+const RIOT_VERIFICATION_RETRY_DELAYS_MS = [0, 500, 1_500] as const;
+const pendingRiotVerifications = new Map<string, Promise<void>>();
 
 function normalizeCommandToken(command: string): string {
   return command.trim().normalize("NFKC").toLowerCase();
@@ -102,43 +106,212 @@ function loadSettings(): ParticipationSettingsFile {
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as ParticipationSettingsFile;
 }
 
-function publicQueue(ctx: ModuleContext) {
-  return ctx.store.getParticipationOverlayQueue();
+function isParticipationOpen(ctx: ModuleContext, streamerId?: string): boolean {
+  return ctx.store.getParticipationState(streamerId).isOpen;
 }
 
-function isParticipationOpen(ctx: ModuleContext): boolean {
-  return ctx.store.getStatus().participation === "open";
-}
-
-function queueAction(ctx: ModuleContext) {
-  return { type: "overlay.participationQueue" as const, isOpen: isParticipationOpen(ctx), queue: publicQueue(ctx) };
-}
-
-function statusAction(ctx: ModuleContext, settings: ParticipationSettingsFile, isOpen: boolean, message: string) {
-  return {
-    type: "overlay.participationStatus" as const,
-    isOpen,
+async function publishState(
+  ctx: ModuleContext,
+  settings: ParticipationSettingsFile,
+  input: {
+    message?: string;
+    reason: string;
+    streamerId?: string;
+    trace?: ParticipationTrace;
+  }
+): Promise<void> {
+  await publishParticipationSnapshot({
+    store: ctx.store,
+    actions: ctx.actions,
+    logger: ctx.logger
+  }, {
+    message: input.message,
     mode: settings.mode,
-    phase: isOpen ? "recruiting" as const : "closed" as const,
-    message,
-    streamerProfile: ctx.store.getParticipationStreamerProfile()
-  };
+    reason: input.reason,
+    streamerId: input.streamerId,
+    trace: input.trace
+  });
 }
 
-function logEntry(entry: ParticipationEntry): Record<string, unknown> {
+function logEntry(entry: ParticipationEntry, streamerId?: string): Record<string, unknown> {
   return {
     id: entry.id,
-    twitchUserId: entry.twitchUserId,
-    twitchUserName: entry.twitchUserName,
-    riotId: formatRiotId(entry.riotGameName, entry.riotTagLine),
+    streamerId: streamerId ?? entry.streamerId,
     preferredRole: entry.preferredRole,
     status: entry.status,
-    verifiedRank: entry.verifiedRank,
-    rankedStats: entry.rankedStats,
     source: entry.source,
     selectedAt: entry.selectedAt,
     checkInExpiresAt: entry.checkInExpiresAt
   };
+}
+
+function sleep(delayMs: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+}
+
+function emitEntryCreated(ctx: ModuleContext, entry: ParticipationEntry, streamerId?: string): void {
+  ctx.events.emit({
+    type: "participation.entryCreated",
+    id: newId("event"),
+    entryId: entry.id,
+    streamerId,
+    twitchUserId: entry.twitchUserId,
+    twitchUserName: entry.twitchUserName,
+    riotGameName: entry.riotGameName,
+    riotTagLine: entry.riotTagLine,
+    riotPuuid: entry.riotPuuid,
+    requestedRole: entry.requestedRole,
+    createdAt: nowIso()
+  });
+}
+
+async function resolveRiotAccount(ctx: ModuleContext, entry: ParticipationEntry) {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < RIOT_VERIFICATION_RETRY_DELAYS_MS.length; attempt += 1) {
+    const configuredDelayMs = RIOT_VERIFICATION_RETRY_DELAYS_MS[attempt] ?? 0;
+    if (configuredDelayMs > 0) await sleep(configuredDelayMs);
+
+    try {
+      return await ctx.riot.getAccountByRiotId(entry.riotGameName, entry.riotTagLine);
+    } catch (error) {
+      lastError = error;
+      if (attempt >= RIOT_VERIFICATION_RETRY_DELAYS_MS.length - 1) break;
+      if (error instanceof RiotRateLimitError && error.retryAfterMs) {
+        await sleep(Math.min(Math.max(error.retryAfterMs, 0), 5_000));
+      }
+    }
+  }
+
+  throw lastError ?? new Error("Riot 계정 확인에 실패했습니다.");
+}
+
+async function verifyPendingParticipation(
+  ctx: ModuleContext,
+  settings: ParticipationSettingsFile,
+  entry: ParticipationEntry,
+  streamerId: string | undefined,
+  trace: ParticipationTrace
+): Promise<void> {
+  try {
+    const account = await resolveRiotAccount(ctx, entry);
+    const riotResolvedAt = nowIso();
+    trace.riotResolvedAt = riotResolvedAt;
+    const current = ctx.store.getParticipationEntryById(entry.id, streamerId);
+    if (!current || current.status !== "pending") return;
+
+    if (!account) {
+      const rejected = ctx.store.markParticipant(entry.id, "rejected", streamerId);
+      ctx.logger.event({
+        type: "participation.verification_rejected",
+        reason: "riot_account_not_found",
+        entry: rejected ? logEntry(rejected, streamerId) : { id: entry.id, streamerId }
+      });
+      await publishState(ctx, settings, {
+        message: chatGuide(
+          "Riot IDを確認できませんでした。入力内容を確認してもう一度申請してください。",
+          "Riot ID를 확인할 수 없습니다. 입력 내용을 확인한 뒤 다시 신청해주세요.",
+          "確認失敗",
+          "확인 실패"
+        ),
+        reason: "participation.verification_rejected",
+        streamerId,
+        trace
+      });
+      ctx.dashboard.broadcastSnapshot();
+      return;
+    }
+
+    const duplicate = ctx.store.findParticipationDuplicate({
+      twitchUserId: current.twitchUserId,
+      riotGameName: current.riotGameName,
+      riotTagLine: current.riotTagLine,
+      riotPuuid: account.puuid,
+      excludeEntryId: current.id
+    }, streamerId);
+    if (duplicate) {
+      const rejected = ctx.store.markParticipant(entry.id, "rejected", streamerId);
+      ctx.logger.event({
+        type: "participation.verification_rejected",
+        reason: duplicate.reason,
+        existingEntryId: duplicate.entry.id,
+        entry: rejected ? logEntry(rejected, streamerId) : { id: entry.id, streamerId }
+      });
+      await publishState(ctx, settings, {
+        message: duplicateMessage(duplicate.reason, current.twitchUserName),
+        reason: "participation.verification_duplicate",
+        streamerId,
+        trace
+      });
+      ctx.dashboard.broadcastSnapshot();
+      return;
+    }
+
+    ctx.store.patchParticipationProfile(entry.id, { riotPuuid: account.puuid }, streamerId);
+    const verified = ctx.store.markParticipant(entry.id, "verified", streamerId);
+    if (!verified) return;
+
+    emitEntryCreated(ctx, verified, streamerId);
+    ctx.logger.event({
+      type: "participation.verification_completed",
+      verificationDurationMs: Date.parse(riotResolvedAt) - Date.parse(trace.requestReceivedAt),
+      entry: logEntry(verified, streamerId)
+    });
+    await publishState(ctx, settings, {
+      reason: "participation.verification_completed",
+      streamerId,
+      trace
+    });
+    ctx.dashboard.broadcastSnapshot();
+  } catch (error) {
+    trace.riotResolvedAt = nowIso();
+    ctx.logger.error({
+      type: "participation.verification_deferred",
+      entryId: entry.id,
+      streamerId,
+      error: toSafeErrorMessage(error)
+    });
+    await publishState(ctx, settings, {
+      message: chatGuide(
+        "Riot IDの確認が遅延しています。申請は受け付け済みです。",
+        "Riot ID 확인이 지연되고 있습니다. 신청은 접수된 상태입니다.",
+        "確認待機",
+        "확인 대기"
+      ),
+      reason: "participation.verification_deferred",
+      streamerId,
+      trace
+    });
+    ctx.dashboard.broadcastSnapshot();
+  }
+}
+
+function scheduleRiotVerification(
+  ctx: ModuleContext,
+  settings: ParticipationSettingsFile,
+  entry: ParticipationEntry,
+  streamerId: string | undefined,
+  trace: ParticipationTrace
+): void {
+  const key = `${streamerId ?? "default"}:${entry.id}`;
+  if (pendingRiotVerifications.has(key)) return;
+
+  const task = verifyPendingParticipation(ctx, settings, entry, streamerId, trace)
+    .catch((error) => {
+      ctx.logger.error({
+        type: "participation.verification_task_failed",
+        entryId: entry.id,
+        streamerId,
+        error: toSafeErrorMessage(error)
+      });
+    })
+    .finally(() => {
+      pendingRiotVerifications.delete(key);
+    });
+  pendingRiotVerifications.set(key, task);
+  void task;
 }
 
 function chatGuide(ja: string, ko: string, titleJa = "案内", titleKo = "안내"): string {
@@ -229,14 +402,21 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
   twitchUserName: string;
   source: ParticipationApplySource;
   redemptionId?: string;
+  streamerId?: string;
 }) {
-  if (ctx.store.getStatus().participation !== "open") {
+  const trace = createParticipationTrace();
+  if (!isParticipationOpen(ctx, input.streamerId)) {
     return;
   }
 
   const parsed = parseParticipationInput(input.text);
   if (!parsed.ok) {
-    ctx.logger.event({ type: "participation.apply_rejected", reason: "invalid_riot_id", twitchUserId: input.twitchUserId, twitchUserName: input.twitchUserName });
+    ctx.logger.event({
+      type: "participation.apply_rejected",
+      reason: "invalid_riot_id",
+      streamerId: input.streamerId,
+      traceId: trace.traceId
+    });
     return;
   }
   const parsedInput = parsed.input;
@@ -245,75 +425,37 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
     twitchUserId: input.twitchUserId,
     riotGameName: parsedInput.riotId.gameName,
     riotTagLine: parsedInput.riotId.tagLine
-  });
+  }, input.streamerId);
   if (duplicateBeforeLookup) {
     ctx.logger.event({
       type: "participation.apply_rejected",
       reason: duplicateBeforeLookup.reason,
-      twitchUserId: input.twitchUserId,
-      twitchUserName: input.twitchUserName,
-      existingEntryId: duplicateBeforeLookup.entry.id
+      existingEntryId: duplicateBeforeLookup.entry.id,
+      streamerId: input.streamerId,
+      traceId: trace.traceId
     });
     return;
   }
 
-  if (ctx.store.getActiveParticipationCount() >= settings.maxQueueSize) {
-    ctx.logger.event({ type: "participation.apply_rejected", reason: "queue_full", twitchUserId: input.twitchUserId, twitchUserName: input.twitchUserName });
-    return;
-  }
-
-  let riotPuuid: string | undefined;
-  let verification: "format_only" | "verified" | "lookup_failed" = ctx.riot.isConfigured() ? "lookup_failed" : "format_only";
-
-  if (ctx.riot.isConfigured()) {
-    try {
-      const account = await ctx.riot.getAccountByRiotId(parsedInput.riotId.gameName, parsedInput.riotId.tagLine);
-      if (!account) {
-        ctx.logger.event({
-          type: "participation.apply_rejected",
-          reason: "riot_account_not_found",
-          twitchUserId: input.twitchUserId,
-          twitchUserName: input.twitchUserName,
-          riotId: formatRiotId(parsedInput.riotId.gameName, parsedInput.riotId.tagLine)
-        });
-        return;
-      }
-      riotPuuid = account.puuid;
-      verification = "verified";
-    } catch (error) {
-      ctx.logger.error({
-        type: "riot.lookup_failed",
-        error: toSafeErrorMessage(error),
-        riotId: formatRiotId(parsedInput.riotId.gameName, parsedInput.riotId.tagLine)
-      });
-    }
-  }
-
-  const duplicateAfterLookup = ctx.store.findParticipationDuplicate({
-    twitchUserId: input.twitchUserId,
-    riotGameName: parsedInput.riotId.gameName,
-    riotTagLine: parsedInput.riotId.tagLine,
-    riotPuuid
-  });
-  if (duplicateAfterLookup) {
+  if (ctx.store.getActiveParticipationCount(input.streamerId) >= settings.maxQueueSize) {
     ctx.logger.event({
       type: "participation.apply_rejected",
-      reason: duplicateAfterLookup.reason,
-      twitchUserId: input.twitchUserId,
-      twitchUserName: input.twitchUserName,
-      existingEntryId: duplicateAfterLookup.entry.id
+      reason: "queue_full",
+      streamerId: input.streamerId,
+      traceId: trace.traceId
     });
     return;
   }
 
   const previousProfile = ctx.store.findReusableParticipationProfile({
     riotGameName: parsedInput.riotId.gameName,
-    riotTagLine: parsedInput.riotId.tagLine,
-    riotPuuid
-  });
+    riotTagLine: parsedInput.riotId.tagLine
+  }, input.streamerId);
   const reusedProfile = reusableProfilePatch(previousProfile);
-  const resolvedRiotPuuid = riotPuuid ?? reusedProfile.riotPuuid;
+  const resolvedRiotPuuid = reusedProfile.riotPuuid;
+  const requiresRiotVerification = ctx.riot.isConfigured() && !resolvedRiotPuuid;
   const entry = ctx.store.makeParticipationEntry({
+    streamerId: input.streamerId,
     twitchUserId: input.twitchUserId,
     twitchUserName: input.twitchUserName,
     riotGameName: parsedInput.riotId.gameName,
@@ -329,36 +471,49 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
     rankedStats: reusedProfile.rankedStats,
     verifiedRank: reusedProfile.verifiedRank,
     profileAnalyzedAt: reusedProfile.profileAnalyzedAt,
-    status: resolvedRiotPuuid ? "verified" : "waitlisted",
+    status: resolvedRiotPuuid ? "verified" : requiresRiotVerification ? "pending" : "waitlisted",
     source: input.source,
     redemptionId: input.redemptionId
   });
 
-  const savedResult = ctx.store.reactivateReusableParticipation(entry);
+  const savedResult = ctx.store.reactivateReusableParticipation(entry, input.streamerId);
   const saved = savedResult.entry;
-  ctx.logger.event({ type: "participation.applied", verification, reusedProfile: Boolean(previousProfile), reusedEntry: savedResult.reused, entry: logEntry(saved) });
-  ctx.events.emit({
-    type: "participation.entryCreated",
-    id: newId("event"),
-    entryId: saved.id,
-    twitchUserId: saved.twitchUserId,
-    twitchUserName: saved.twitchUserName,
-    riotGameName: saved.riotGameName,
-    riotTagLine: saved.riotTagLine,
-    riotPuuid: saved.riotPuuid,
-    requestedRole: saved.requestedRole,
-    createdAt: nowIso()
+  await publishState(ctx, settings, {
+    reason: "participation.applied",
+    streamerId: input.streamerId,
+    trace
   });
-  await ctx.actions.dispatch([queueAction(ctx)], {}, "participation.applied");
   ctx.dashboard.broadcastSnapshot();
+
+  ctx.logger.event({
+    type: "participation.applied",
+    verification: requiresRiotVerification ? "pending" : resolvedRiotPuuid ? "reused" : "format_only",
+    reusedProfile: Boolean(previousProfile),
+    reusedEntry: savedResult.reused,
+    traceId: trace.traceId,
+    entry: logEntry(saved, input.streamerId)
+  });
+
+  if (saved.status === "pending") {
+    scheduleRiotVerification(ctx, settings, saved, input.streamerId, trace);
+    return;
+  }
+  emitEntryCreated(ctx, saved, input.streamerId);
 }
 
-async function handleCheckIn(ctx: ModuleContext, event: TwitchChatMessageInternalEvent): Promise<void> {
-  const result = ctx.store.checkInSelectedParticipant(event.chatterUserId);
+async function handleCheckIn(ctx: ModuleContext, settings: ParticipationSettingsFile, event: TwitchChatMessageInternalEvent): Promise<void> {
+  const result = ctx.store.checkInSelectedParticipant(event.chatterUserId, new Date(), event.broadcasterUserId);
   if (!result.ok) {
     if (result.reason === "expired" && result.entry) {
-      ctx.logger.event({ type: "participation.no_show", reason: "checkin_expired", entry: logEntry(result.entry) });
-      await ctx.actions.dispatch([queueAction(ctx)], {}, "participation.checkin_expired");
+      ctx.logger.event({
+        type: "participation.no_show",
+        reason: "checkin_expired",
+        entry: logEntry(result.entry, event.broadcasterUserId)
+      });
+      await publishState(ctx, settings, {
+        reason: "participation.checkin_expired",
+        streamerId: event.broadcasterUserId
+      });
       ctx.dashboard.broadcastSnapshot();
       return;
     }
@@ -366,22 +521,34 @@ async function handleCheckIn(ctx: ModuleContext, event: TwitchChatMessageInterna
     return;
   }
 
-  ctx.logger.event({ type: "participation.checked_in", entry: logEntry(result.entry) });
-  await ctx.actions.dispatch([
-    { type: "overlay.banner", message: `${event.chatterUserName}님 참가 확인 완료!`, variant: "success", durationMs: 4000 },
-    queueAction(ctx)
-  ], {}, "participation.checked_in");
+  ctx.logger.event({ type: "participation.checked_in", entry: logEntry(result.entry, event.broadcasterUserId) });
+  await publishState(ctx, settings, {
+    reason: "participation.checked_in",
+    streamerId: event.broadcasterUserId
+  });
   ctx.dashboard.broadcastSnapshot();
+  void ctx.actions.dispatch([
+    { type: "overlay.banner", message: `${event.chatterUserName}님 참가 확인 완료!`, variant: "success", durationMs: 4000 }
+  ], {}, "participation.checked_in").catch((error) => {
+    ctx.logger.error({ type: "participation.banner_failed", error: toSafeErrorMessage(error) });
+  });
 }
 
-async function handleCancel(ctx: ModuleContext, event: TwitchChatMessageInternalEvent): Promise<void> {
-  const result = ctx.store.cancelParticipationByUser(event.chatterUserId, "시청자가 채팅 명령어로 참가를 취소했습니다.");
+async function handleCancel(ctx: ModuleContext, settings: ParticipationSettingsFile, event: TwitchChatMessageInternalEvent): Promise<void> {
+  const result = ctx.store.cancelParticipationByUser(
+    event.chatterUserId,
+    "시청자가 채팅 명령어로 참가를 취소했습니다.",
+    event.broadcasterUserId
+  );
   if (!result.ok) {
     return;
   }
 
-  ctx.logger.event({ type: "participation.cancelled", entry: logEntry(result.entry) });
-  await ctx.actions.dispatch([queueAction(ctx)], {}, "participation.cancelled");
+  ctx.logger.event({ type: "participation.cancelled", entry: logEntry(result.entry, event.broadcasterUserId) });
+  await publishState(ctx, settings, {
+    reason: "participation.cancelled",
+    streamerId: event.broadcasterUserId
+  });
   ctx.dashboard.broadcastSnapshot();
 }
 
@@ -395,13 +562,18 @@ export const participationModule: BotModule = {
     }
 
     if (settings.openByDefault) {
-      ctx.store.setParticipationOpen(true);
-      ctx.logger.event({ type: "participation.opened", reason: "open_by_default" });
-      void ctx.actions.dispatch([
-        statusAction(ctx, settings, true, "롤 시참 모집 중"),
-        queueAction(ctx)
-      ], {}, "participation.open_by_default");
-      ctx.dashboard.broadcastSnapshot();
+      const streamerId = appConfig.twitch.broadcasterId?.trim() || undefined;
+      ctx.store.setParticipationOpen(true, streamerId);
+      ctx.logger.event({ type: "participation.opened", reason: "open_by_default", streamerId });
+      void publishState(ctx, settings, {
+        message: "롤 시참 모집 중",
+        reason: "participation.open_by_default",
+        streamerId
+      }).then(() => {
+        ctx.dashboard.broadcastSnapshot();
+      }).catch((error) => {
+        ctx.logger.error({ type: "participation.publish_failed", reason: "open_by_default", error: toSafeErrorMessage(error) });
+      });
     }
 
     ctx.events.on<TwitchChatMessageInternalEvent>("twitch.chatMessage", async (event) => {
@@ -412,47 +584,61 @@ export const participationModule: BotModule = {
 
       if (OPERATOR_COMMAND_KINDS.has(commandKind)) {
         if (!isOperatorCommandAllowed(event)) {
-          ctx.logger.event({ type: "participation.operator_command_denied", command, twitchUserId: event.chatterUserId, twitchUserName: event.chatterUserName });
+          ctx.logger.event({
+            type: "participation.operator_command_denied",
+            command,
+            streamerId: event.broadcasterUserId
+          });
           return;
         }
       }
 
       if (commandKind === "open") {
-        if (isParticipationOpen(ctx)) {
-          ctx.logger.event({ type: "participation.open_ignored", reason: "already_open", twitchUserId: event.chatterUserId, twitchUserName: event.chatterUserName });
+        if (isParticipationOpen(ctx, event.broadcasterUserId)) {
+          ctx.logger.event({
+            type: "participation.open_ignored",
+            reason: "already_open",
+            streamerId: event.broadcasterUserId
+          });
           return;
         }
 
-        ctx.store.setParticipationOpen(true);
-        ctx.logger.event({ type: "participation.opened", twitchUserId: event.chatterUserId, twitchUserName: event.chatterUserName });
-        await ctx.actions.dispatch([
-          { type: "overlay.banner", message: "参加募集を開始しました。", variant: "success", durationMs: 5000 },
-          statusAction(ctx, settings, true, "롤 시참 모집 중"),
-          { type: "twitch.chat", message: settings.guideMessage },
-          queueAction(ctx)
-        ], {}, "participation.open");
+        ctx.store.setParticipationOpen(true, event.broadcasterUserId);
+        ctx.logger.event({ type: "participation.opened", streamerId: event.broadcasterUserId });
+        await publishState(ctx, settings, {
+          message: "롤 시참 모집 중",
+          reason: "participation.open",
+          streamerId: event.broadcasterUserId
+        });
         ctx.dashboard.broadcastSnapshot();
+        void ctx.actions.dispatch([
+          { type: "overlay.banner", message: "参加募集を開始しました。", variant: "success", durationMs: 5000 },
+          { type: "twitch.chat", message: settings.guideMessage }
+        ], {}, "participation.open").catch((error) => {
+          ctx.logger.error({ type: "participation.followup_failed", reason: "open", error: toSafeErrorMessage(error) });
+        });
         return;
       }
 
       if (commandKind === "close") {
-        ctx.store.setParticipationOpen(false);
-        ctx.logger.event({ type: "participation.closed", twitchUserId: event.chatterUserId, twitchUserName: event.chatterUserName });
-        await ctx.actions.dispatch([
-          statusAction(ctx, settings, false, "롤 시참 모집 종료"),
-          queueAction(ctx)
-        ], {}, "participation.close");
+        ctx.store.setParticipationOpen(false, event.broadcasterUserId);
+        ctx.logger.event({ type: "participation.closed", streamerId: event.broadcasterUserId });
+        await publishState(ctx, settings, {
+          message: "롤 시참 모집 종료",
+          reason: "participation.close",
+          streamerId: event.broadcasterUserId
+        });
         ctx.dashboard.broadcastSnapshot();
         return;
       }
 
       if (commandKind === "checkIn") {
-        await handleCheckIn(ctx, event);
+        await handleCheckIn(ctx, settings, event);
         return;
       }
 
       if (commandKind === "cancel") {
-        await handleCancel(ctx, event);
+        await handleCancel(ctx, settings, event);
         return;
       }
 
@@ -461,7 +647,8 @@ export const participationModule: BotModule = {
           text: rest.join(" "),
           twitchUserId: event.chatterUserId,
           twitchUserName: event.chatterUserName,
-          source: "chat_command"
+          source: "chat_command",
+          streamerId: event.broadcasterUserId
         });
       }
     });
@@ -473,7 +660,8 @@ export const participationModule: BotModule = {
         twitchUserId: event.userId,
         twitchUserName: event.userName,
         source: "channel_point",
-        redemptionId: event.id
+        redemptionId: event.id,
+        streamerId: event.broadcasterUserId
       });
     });
   }

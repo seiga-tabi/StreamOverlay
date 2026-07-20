@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { LolAutomationSettings, LolGameMonitorSettings, ParticipationEntry, ParticipationPublicQueueEntry, ParticipationStreamerProfile, StreamerRiotIdRequest } from "@streamops/shared";
+import type { LolAutomationSettings, LolGameMonitorSettings, ParticipationEntry, ParticipationPhase, ParticipationPublicQueueEntry, ParticipationStreamerProfile, StreamerRiotIdRequest } from "@streamops/shared";
 import { formatRiotId, parseRiotIdDetailed, toSafeErrorMessage } from "@streamops/shared";
 import type { BotModule, ModuleContext } from "../core/module.js";
 import { appConfig } from "../config.js";
+import { publishParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { RiotCurrentGameInfo } from "../services/riot-api.js";
 import type { LolProfilePatch } from "../services/lol-profile-enrichment.js";
 import { loadLolParticipationProfileConfig } from "./lol-profile-enrichment.module.js";
@@ -134,7 +135,7 @@ function overlayEntryFromParticipation(entry: ParticipationEntry, position: numb
     profileStatus: entry.profileStatus,
     mainRole: entry.mainRole,
     mainRoleConfidence: entry.mainRoleConfidence,
-    topChampions: entry.topChampions ? entry.topChampions.map((champion) => ({ ...champion })) : undefined,
+    topChampions: entry.topChampions?.map((champion) => ({ ...champion })),
     rankedStats: entry.rankedStats
   };
 }
@@ -295,7 +296,10 @@ export class LolGameMonitorController {
     const profileConfig = loadLolParticipationProfileConfig();
     if (!profileConfig.enabled) return;
     this.ctx.store.setParticipationStreamerProfile({ displayName: gameName, riotTagLine: tagLine, profileStatus: "analyzing" }, this.streamerId);
-    this.broadcastStatus(this.inGame ? "in_game" : "recruiting", this.ctx.store.getNextWaitingParticipationOverlayEntry(this.streamerId));
+    await this.publishParticipationState(
+      this.inGame ? "in_game" : "recruiting",
+      "lol.game_monitor.profile_analyzing"
+    );
     this.broadcastSoloRankProfile(regionFromTagLine(tagLine));
     const now = new Date().toISOString();
     const profileEntry: ParticipationEntry = {
@@ -315,7 +319,10 @@ export class LolGameMonitorController {
     const patch = cached ?? await this.ctx.lolProfileEnrichment.enrich(profileEntry, profileConfig, force);
     const profile = this.ctx.store.setParticipationStreamerProfile(streamerProfileFromPatch(gameName, tagLine, patch), this.streamerId);
     this.ctx.logger.event({ type: "lol_game_monitor.streamer_profile_ready", streamerId: this.streamerId, riotId: formatRiotId(gameName, tagLine), profileStatus: profile?.profileStatus, mainRole: profile?.mainRole });
-    this.broadcastStatus(this.inGame ? "in_game" : "recruiting", this.ctx.store.getNextWaitingParticipationOverlayEntry(this.streamerId));
+    await this.publishParticipationState(
+      this.inGame ? "in_game" : "recruiting",
+      "lol.game_monitor.profile_ready"
+    );
     this.broadcastSoloRankProfile(regionFromTagLine(tagLine));
     this.ctx.dashboard.broadcastSnapshot();
     return profile;
@@ -335,10 +342,8 @@ export class LolGameMonitorController {
       }
     }
     const changed = this.ctx.store.markVisibleParticipationQueueInGame({ participantPuuids: currentGameParticipantPuuids(game) }, this.streamerId);
-    const nextCandidate = this.ctx.store.getNextWaitingParticipationOverlayEntry(this.streamerId);
     this.ctx.logger.event({ type: "lol_game_monitor.game_started", streamerId: this.streamerId, gameId, changedEntries: changed.map((entry) => entry.id) });
-    this.broadcastStatus("in_game", nextCandidate);
-    this.broadcastQueue();
+    await this.publishParticipationState("in_game", "lol.game_monitor.game_started");
     this.ctx.dashboard.broadcastSnapshot();
   }
 
@@ -360,11 +365,9 @@ export class LolGameMonitorController {
     this.missingSince = undefined;
 
     const played = this.ctx.store.markInGameParticipantsPlayed(this.streamerId);
-    const nextBeforeSelection = this.ctx.store.getNextWaitingParticipationOverlayEntry(this.streamerId);
     const selected = this.config.autoSelectNextAfterGame && isParticipationOpen(this.ctx, this.streamerId)
       ? this.ctx.store.selectNextParticipant(this.settings.checkInSeconds, this.streamerId)
       : undefined;
-    const nextCandidate = selected ? overlayEntryFromParticipation(selected, 1) : nextBeforeSelection;
     if (this.streamerId && this.ctx.store.getParticipationSession(this.streamerId)?.status === "in_game") {
       this.ctx.store.updateParticipationSessionStatus(this.streamerId, "recruiting");
     }
@@ -378,30 +381,30 @@ export class LolGameMonitorController {
       autoSelectNextAfterGame: this.config.autoSelectNextAfterGame
     });
 
-    this.broadcastStatus("game_ended", nextCandidate);
-    this.broadcastQueue();
+    await this.publishParticipationState(
+      "game_ended",
+      "lol.game_monitor.game_ended",
+      selected ? overlayEntryFromParticipation(selected, 1) : undefined
+    );
 
     this.ctx.dashboard.broadcastSnapshot();
   }
 
-  private broadcastStatus(phase: "recruiting" | "in_game" | "game_ended", nextCandidate?: ParticipationPublicQueueEntry): void {
-    this.ctx.overlay.broadcast({
-      type: "participation.status.update",
-      isOpen: isParticipationOpen(this.ctx, this.streamerId),
+  private async publishParticipationState(
+    phase: ParticipationPhase,
+    reason: string,
+    nextCandidate?: ParticipationPublicQueueEntry
+  ): Promise<void> {
+    await publishParticipationSnapshot({
+      store: this.ctx.store,
+      actions: this.ctx.actions,
+      logger: this.ctx.logger
+    }, {
+      streamerId: this.streamerId,
       mode: this.settings.mode,
-      phase,
       nextCandidate,
-      streamerProfile: this.ctx.store.getParticipationStreamerProfile(this.streamerId),
-      source: "lol.game_monitor"
-    });
-  }
-
-  private broadcastQueue(): void {
-    this.ctx.overlay.broadcast({
-      type: "participation.queue.update",
-      isOpen: isParticipationOpen(this.ctx, this.streamerId),
-      queue: this.ctx.store.getParticipationOverlayQueue(undefined, this.streamerId),
-      source: "lol.game_monitor"
+      phase,
+      reason
     });
   }
 

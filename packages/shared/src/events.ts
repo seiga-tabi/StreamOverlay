@@ -116,6 +116,7 @@ export type ParticipationEntryCreatedInternalEvent = {
   type: "participation.entryCreated";
   id: string;
   entryId: string;
+  streamerId?: string;
   twitchUserId: string;
   twitchUserName: string;
   riotGameName: string;

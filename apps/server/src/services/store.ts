@@ -269,6 +269,10 @@ function objectRecord(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
 }
 
+function normalizedNonNegativeInteger(value: unknown): number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : 0;
+}
+
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined;
 }
@@ -877,6 +881,7 @@ type CommunityPostCommentAuthorInput = {
 
 type ScopedParticipationRuntime = {
   isOpen: boolean;
+  revision: number;
   queue: ParticipationEntry[];
   streamerProfile?: ParticipationStreamerProfile;
   session?: ParticipationSession;
@@ -911,9 +916,14 @@ export class Store {
   private lastFollowerSnapshotTruncated?: boolean;
   private followerPersistTimer?: NodeJS.Timeout;
   private participationQueue: ParticipationEntry[] = [];
+  private participationRevision = 0;
   private participationStreamerProfile?: ParticipationStreamerProfile;
   private readonly participationByStreamer = new Map<string, ScopedParticipationRuntime>();
   private readonly lolAutomationByStreamer = new Map<string, LolAutomationSettings>();
+  private runtimePersistRequestedGeneration = 0;
+  private runtimePersistCompletedGeneration = 0;
+  private runtimePersistTask?: Promise<void>;
+  private runtimePersistLastError?: { generation: number; error: Error };
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
   private tournaments: StreamerTournament[] = [];
   private communityPosts: CommunityPost[] = [];
@@ -968,7 +978,7 @@ export class Store {
     if (!normalizedStreamerId) return undefined;
     const existing = this.participationByStreamer.get(normalizedStreamerId);
     if (existing || !create) return existing;
-    const runtime: ScopedParticipationRuntime = { isOpen: false, queue: [] };
+    const runtime: ScopedParticipationRuntime = { isOpen: false, revision: 0, queue: [] };
     this.participationByStreamer.set(normalizedStreamerId, runtime);
     return runtime;
   }
@@ -1054,12 +1064,27 @@ export class Store {
     this.persistRuntimeState();
   }
 
+  async flushRuntimeState(): Promise<void> {
+    if (!this.options.runtimeStatePath) return;
+    const generation = this.persistRuntimeState();
+    await this.waitForRuntimePersistence(generation);
+  }
+
   close(): void {
     if (this.communityCleanupTimer) {
       clearInterval(this.communityCleanupTimer);
       this.communityCleanupTimer = undefined;
     }
     this.flush();
+  }
+
+  async closeAsync(): Promise<void> {
+    if (this.communityCleanupTimer) {
+      clearInterval(this.communityCleanupTimer);
+      this.communityCleanupTimer = undefined;
+    }
+    this.flush();
+    await this.waitForRuntimePersistence(this.runtimePersistRequestedGeneration);
   }
 
   getStatus(): BotStatus {
@@ -1574,6 +1599,7 @@ export class Store {
       const raw = fs.readFileSync(this.options.runtimeStatePath, "utf8");
       const parsed = objectRecord(JSON.parse(raw));
       const participation = objectRecord(parsed?.participation);
+      this.participationRevision = normalizedNonNegativeInteger(participation?.revision);
       const queue = Array.isArray(participation?.queue) ? participation.queue : [];
       this.participationQueue = queue
         .map(normalizedParticipationEntry)
@@ -1597,6 +1623,7 @@ export class Store {
         const scopedProfile = objectRecord(runtime.streamerProfile);
         this.participationByStreamer.set(streamerId, {
           isOpen: runtime.isOpen === true,
+          revision: normalizedNonNegativeInteger(runtime.revision),
           queue: scopedQueue,
           streamerProfile: scopedProfile ? cloneParticipationStreamerProfile(scopedProfile as ParticipationStreamerProfile) : undefined,
           session: normalizedParticipationSession(runtime.session, streamerId)
@@ -1611,6 +1638,7 @@ export class Store {
       this.clearPersistenceFailure("runtime");
     } catch (error) {
       this.participationQueue = [];
+      this.participationRevision = 0;
       this.participationStreamerProfile = undefined;
       this.participationByStreamer.clear();
       this.lolAutomationByStreamer.clear();
@@ -1621,32 +1649,82 @@ export class Store {
     }
   }
 
-  private persistRuntimeState(): void {
+  private runtimeStatePayload(): string {
+    const payload = {
+      version: 3,
+      participation: {
+        isOpen: this.status.participation === "open",
+        revision: this.participationRevision,
+        queue: this.participationQueue.map(cloneParticipationEntry),
+        streamerProfile: cloneParticipationStreamerProfile(this.participationStreamerProfile)
+      },
+      participationByStreamer: Object.fromEntries([...this.participationByStreamer.entries()].map(([streamerId, runtime]) => [streamerId, {
+        isOpen: runtime.isOpen,
+        revision: runtime.revision,
+        queue: runtime.queue.map((entry) => cloneParticipationEntry({ ...entry, streamerId })),
+        streamerProfile: cloneParticipationStreamerProfile(runtime.streamerProfile),
+        session: cloneParticipationSession(runtime.session)
+      }])),
+      lolAutomationByStreamer: Object.fromEntries([...this.lolAutomationByStreamer.entries()].map(([streamerId, settings]) => [streamerId, { ...settings }]))
+    };
+    return `${JSON.stringify(payload, null, 2)}\n`;
+  }
+
+  private persistRuntimeState(): number {
+    if (!this.options.runtimeStatePath) return 0;
+    const generation = ++this.runtimePersistRequestedGeneration;
+    this.startRuntimePersistWorker();
+    return generation;
+  }
+
+  private startRuntimePersistWorker(): void {
+    if (!this.options.runtimeStatePath || this.runtimePersistTask) return;
+    this.runtimePersistTask = this.runRuntimePersistWorker().finally(() => {
+      this.runtimePersistTask = undefined;
+      if (this.runtimePersistCompletedGeneration < this.runtimePersistRequestedGeneration) {
+        this.startRuntimePersistWorker();
+      }
+    });
+  }
+
+  private async runRuntimePersistWorker(): Promise<void> {
     if (!this.options.runtimeStatePath) return;
-    try {
+    while (this.runtimePersistCompletedGeneration < this.runtimePersistRequestedGeneration) {
+      const generation = this.runtimePersistRequestedGeneration;
+      const payload = this.runtimeStatePayload();
       const dir = path.dirname(this.options.runtimeStatePath);
-      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-      const tmpPath = `${this.options.runtimeStatePath}.${process.pid}.${Date.now()}.tmp`;
-      const payload = {
-        version: 2,
-        participation: {
-          isOpen: this.status.participation === "open",
-          queue: this.participationQueue.map(cloneParticipationEntry),
-          streamerProfile: cloneParticipationStreamerProfile(this.participationStreamerProfile)
-        },
-        participationByStreamer: Object.fromEntries([...this.participationByStreamer.entries()].map(([streamerId, runtime]) => [streamerId, {
-          isOpen: runtime.isOpen,
-          queue: runtime.queue.map((entry) => cloneParticipationEntry({ ...entry, streamerId })),
-          streamerProfile: cloneParticipationStreamerProfile(runtime.streamerProfile),
-          session: cloneParticipationSession(runtime.session)
-        }])),
-        lolAutomationByStreamer: Object.fromEntries([...this.lolAutomationByStreamer.entries()].map(([streamerId, settings]) => [streamerId, { ...settings }]))
-      };
-      fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-      fs.renameSync(tmpPath, this.options.runtimeStatePath);
-      this.clearPersistenceFailure("runtime");
-    } catch (error) {
-      this.reportPersistenceFailure({ scope: "runtime", operation: "save", filePath: this.options.runtimeStatePath, error: toSafeErrorMessage(error) });
+      const tmpPath = `${this.options.runtimeStatePath}.${process.pid}.${generation}.tmp`;
+      try {
+        await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 });
+        await fs.promises.writeFile(tmpPath, payload, { encoding: "utf8", mode: 0o600 });
+        await fs.promises.rename(tmpPath, this.options.runtimeStatePath);
+        this.runtimePersistLastError = undefined;
+        this.clearPersistenceFailure("runtime");
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(toSafeErrorMessage(error));
+        this.runtimePersistLastError = { generation, error: normalizedError };
+        this.reportPersistenceFailure({
+          scope: "runtime",
+          operation: "save",
+          filePath: this.options.runtimeStatePath,
+          error: toSafeErrorMessage(error)
+        });
+        await fs.promises.rm(tmpPath, { force: true }).catch(() => undefined);
+      } finally {
+        this.runtimePersistCompletedGeneration = generation;
+      }
+    }
+  }
+
+  private async waitForRuntimePersistence(generation: number): Promise<void> {
+    if (!this.options.runtimeStatePath || generation <= 0) return;
+    while (this.runtimePersistCompletedGeneration < generation) {
+      const task = this.runtimePersistTask;
+      if (!task) break;
+      await task;
+    }
+    if (this.runtimePersistLastError && this.runtimePersistLastError.generation >= generation) {
+      throw this.runtimePersistLastError.error;
     }
   }
 
@@ -2257,6 +2335,13 @@ export class Store {
       .map((entry, index) => toPublicQueueEntry(entry, index + 1));
   }
 
+  getParticipationOverlaySnapshotQueue(limit = PARTICIPATION_OVERLAY_VISIBLE_LIMIT, streamerId?: string): ParticipationPublicQueueEntry[] {
+    return this.participationQueueFor(streamerId)
+      .filter((entry) => entry.status === "pending" || isWaitingParticipationStatus(entry.status))
+      .slice(0, Math.max(0, Math.trunc(limit)))
+      .map((entry, index) => toPublicQueueEntry(entry, index + 1));
+  }
+
   getNextWaitingParticipationOverlayEntry(streamerId?: string): ParticipationPublicQueueEntry | undefined {
     const entry = this.getWaitingParticipationQueue(streamerId)[0];
     return entry ? toPublicQueueEntry(entry, 1) : undefined;
@@ -2267,6 +2352,7 @@ export class Store {
     const activeQueue = this.getActiveParticipationQueue(streamerId);
     return {
       streamerId,
+      revision: this.getParticipationRevision(streamerId),
       session: streamerId ? cloneParticipationSession(this.scopedParticipationRuntime(streamerId, false)?.session) : undefined,
       isOpen: this.participationOpenFor(streamerId),
       queue: queue.map((entry, index) => toDashboardQueueEntry(entry, index + 1)),
@@ -2281,6 +2367,24 @@ export class Store {
         played: queue.filter((entry) => entry.status === "played").length
       }
     };
+  }
+
+  getParticipationRevision(streamerId?: string): number {
+    if (!streamerId) return this.participationRevision;
+    return this.scopedParticipationRuntime(streamerId, false)?.revision ?? 0;
+  }
+
+  advanceParticipationRevision(streamerId?: string): number {
+    if (!streamerId) {
+      this.participationRevision += 1;
+      this.persistRuntimeState();
+      return this.participationRevision;
+    }
+    const runtime = this.scopedParticipationRuntime(streamerId);
+    if (!runtime) return 0;
+    runtime.revision += 1;
+    this.persistRuntimeState();
+    return runtime.revision;
   }
 
   getActiveParticipationCount(streamerId?: string): number {
@@ -2314,10 +2418,12 @@ export class Store {
     riotGameName: string;
     riotTagLine: string;
     riotPuuid?: string;
+    excludeEntryId?: string;
   }, streamerId?: string): ParticipationDuplicate | undefined {
     const riotIdKey = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
     return this.getActiveParticipationQueue(streamerId).reduce<ParticipationDuplicate | undefined>((found, candidate) => {
       if (found) return found;
+      if (candidate.id === input.excludeEntryId) return undefined;
       if (candidate.twitchUserId === input.twitchUserId) return { reason: "twitch_user", entry: candidate };
       if (input.riotPuuid && candidate.riotPuuid && candidate.riotPuuid === input.riotPuuid) return { reason: "riot_id", entry: candidate };
       const candidateRiotIdKey = normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine);
@@ -2507,7 +2613,7 @@ export class Store {
 
   selectNextParticipant(checkInSeconds: number, streamerId?: string): ParticipationEntry | undefined {
     if (this.getPendingSelectedParticipant(new Date(), streamerId)) return undefined;
-    const next = this.participationQueueFor(streamerId).find((entry) => entry.status === "waitlisted" || entry.status === "verified" || entry.status === "pending");
+    const next = this.participationQueueFor(streamerId).find((entry) => entry.status === "waitlisted" || entry.status === "verified");
     if (!next) return undefined;
     next.status = "selected";
     next.selectedAt = nowIso();

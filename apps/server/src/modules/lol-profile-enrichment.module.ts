@@ -305,11 +305,16 @@ export const lolProfileEnrichmentModule: BotModule = {
     activeProfileAnalysisQueue = new LolProfileAnalysisQueue();
 
     ctx.events.on<ParticipationEntryCreatedInternalEvent>("participation.entryCreated", (event) => {
-      const priority = visibleQueuePriority(ctx, event.entryId);
+      const priority = visibleQueuePriority(ctx, event.entryId, event.streamerId);
       const delayMs = priority >= PROFILE_ANALYSIS_PRIORITIES.visibleQueue ? 0 : PROFILE_ANALYSIS_DEFER_MS;
-      void activeProfileAnalysisQueue?.enqueue(ctx, config, event.entryId, { priority, delayMs }).catch((error) => {
+      void activeProfileAnalysisQueue?.enqueue(ctx, config, event.entryId, { priority, delayMs }, event.streamerId).catch((error) => {
         const message = error instanceof Error ? error.message : String(error);
-        ctx.logger.error({ type: "lol_profile.background_failed", entryId: event.entryId, error: message });
+        ctx.logger.error({
+          type: "lol_profile.background_failed",
+          entryId: event.entryId,
+          streamerId: event.streamerId,
+          error: message
+        });
       });
     });
   }

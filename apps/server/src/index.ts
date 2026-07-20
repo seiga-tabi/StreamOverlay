@@ -218,19 +218,35 @@ function overlayStreamerSlugFromUrl(url: URL): string | undefined {
   return raw?.trim().toLowerCase() || undefined;
 }
 
-function overlayAccessTokenMatches(token: string | undefined, streamerSlug?: string): boolean {
-  if (!token) return false;
-  if (tokenMatches(appConfig.security.overlayAccessToken, token)) return true;
-  return store.listApprovedStreamerRiotIds().some((request) => {
-    if (!request.overlayKey || !tokenMatches(request.overlayKey, token)) return false;
-    const slug = request.overlaySlug ?? request.twitchLogin.toLowerCase();
-    return !streamerSlug || slug === streamerSlug || request.twitchLogin.toLowerCase() === streamerSlug;
+type OverlayAccessIdentity = {
+  streamerId?: string;
+};
+
+function approvedOverlayStreamer(streamerSlug?: string) {
+  if (!streamerSlug) return undefined;
+  return store.listApprovedStreamerRiotIds().find((request) => {
+    const slug = (request.overlaySlug ?? request.twitchLogin).trim().toLowerCase();
+    return slug === streamerSlug || request.twitchLogin.trim().toLowerCase() === streamerSlug;
   });
+}
+
+function resolveOverlayAccess(token: string | undefined, streamerSlug?: string): OverlayAccessIdentity | undefined {
+  if (!token) return undefined;
+  if (tokenMatches(appConfig.security.overlayAccessToken, token)) {
+    return { streamerId: approvedOverlayStreamer(streamerSlug)?.twitchUserId };
+  }
+  const request = store.listApprovedStreamerRiotIds().find((candidate) => {
+    if (!candidate.overlayKey || !tokenMatches(candidate.overlayKey, token)) return false;
+    if (!streamerSlug) return true;
+    const slug = (candidate.overlaySlug ?? candidate.twitchLogin).trim().toLowerCase();
+    return slug === streamerSlug || candidate.twitchLogin.trim().toLowerCase() === streamerSlug;
+  });
+  return request ? { streamerId: request.twitchUserId } : undefined;
 }
 
 function attachOverlayAfterAuthentication(socket: import("ws").WebSocket, channel: string | null, streamerSlug?: string): void {
   if (!appConfig.security.overlayAccessToken && store.listApprovedStreamerRiotIds().every((request) => !request.overlayKey)) {
-    overlay.add(socket, channel);
+    overlay.add(socket, channel, approvedOverlayStreamer(streamerSlug)?.twitchUserId);
     return;
   }
 
@@ -241,13 +257,16 @@ function attachOverlayAfterAuthentication(socket: import("ws").WebSocket, channe
   const authenticate = (raw: import("ws").RawData) => {
     try {
       const parsed = JSON.parse(raw.toString()) as { type?: unknown; token?: unknown };
-      if (parsed.type !== "overlay.auth" || typeof parsed.token !== "string" || !overlayAccessTokenMatches(parsed.token, streamerSlug)) {
+      const identity = parsed.type === "overlay.auth" && typeof parsed.token === "string"
+        ? resolveOverlayAccess(parsed.token, streamerSlug)
+        : undefined;
+      if (!identity) {
         socket.close(1008, "authentication failed");
         return;
       }
       clearTimeout(timer);
       socket.off("message", authenticate);
-      overlay.add(socket, channel);
+      overlay.add(socket, channel, identity.streamerId);
     } catch {
       socket.close(1008, "authentication failed");
     }
@@ -321,8 +340,9 @@ overlayWss.on("connection", (socket, req) => {
   const channel = url.searchParams.get("channel") ?? url.searchParams.get("mode");
   const streamerSlug = overlayStreamerSlugFromUrl(url);
   const legacyToken = legacyQueryToken(url);
-  if (legacyToken && overlayAccessTokenMatches(legacyToken, streamerSlug)) {
-    overlay.add(socket, channel);
+  const identity = resolveOverlayAccess(legacyToken, streamerSlug);
+  if (identity) {
+    overlay.add(socket, channel, identity.streamerId);
     return;
   }
   attachOverlayAfterAuthentication(socket, channel, streamerSlug);
@@ -347,14 +367,24 @@ function shutdown(signal: NodeJS.Signals): void {
   let forceTimer: NodeJS.Timeout;
   server.close((error) => {
     clearTimeout(forceTimer);
-    store.close();
-    if (error) {
-      logger.error({ type: "server.shutdown_failed", signal, error: toSafeErrorMessage(error) });
-      process.exitCode = 1;
-      return;
-    }
-    logger.event({ type: "server.shutdown_completed", signal });
-    process.exitCode = 0;
+    void store.closeAsync()
+      .then(() => {
+        if (error) {
+          logger.error({ type: "server.shutdown_failed", signal, error: toSafeErrorMessage(error) });
+          process.exitCode = 1;
+          return;
+        }
+        logger.event({ type: "server.shutdown_completed", signal });
+        process.exitCode = 0;
+      })
+      .catch((closeError: unknown) => {
+        logger.error({
+          type: "server.shutdown_persistence_failed",
+          signal,
+          error: toSafeErrorMessage(closeError)
+        });
+        process.exitCode = 1;
+      });
   });
   server.closeIdleConnections?.();
 
