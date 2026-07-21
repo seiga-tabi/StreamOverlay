@@ -95,6 +95,7 @@ export function PublicPalworldPage() {
       mainId="palworld-main"
       renderRoot={({ children, ...rootProps }) => <main {...rootProps}>{children}</main>}
       showSkipLink={false}
+      sidebarMode="drawer"
       variant="public"
     >
       <AppShellHeader as="div" className="palworld-shell-header">

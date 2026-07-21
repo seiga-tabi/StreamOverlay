@@ -589,6 +589,28 @@ test("통합 검색은 한국어와 일본어 이름 결과를 표시한다", as
   await assertHealthyDocument(page, errors);
 });
 
+test("PC 화면에서 모든 펠월드 페이지 본문을 중앙 정렬한다", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const routes = [
+    "/palworld",
+    "/palworld/pals",
+    "/palworld/breeding",
+    "/palworld/items",
+    `/palworld/search?q=${encodeURIComponent("아누비스")}`,
+  ];
+
+  for (const route of routes) {
+    await page.goto(route);
+    const main = page.locator(".palworld-main");
+    await expect(main).toBeVisible();
+    const bounds = await main.boundingBox();
+    expect(bounds, `${route} 본문 영역을 측정할 수 있어야 합니다.`).not.toBeNull();
+    const viewportCenter = (page.viewportSize()?.width ?? 0) / 2;
+    const mainCenter = bounds!.x + (bounds!.width / 2);
+    expect(Math.abs(mainCenter - viewportCenter), `${route} 본문 중심이 viewport 중심과 일치해야 합니다.`).toBeLessThanOrEqual(1);
+  }
+});
+
 test("요구 화면 크기에서 페이지 overflow 없이 첫·마지막 메뉴를 선택한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   const viewports = [
