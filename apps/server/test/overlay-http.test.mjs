@@ -356,6 +356,33 @@ test("관리자 URL은 dashboard 앱 index를 서빙한다", async () => {
   }
 });
 
+test("스트리머 tenant 중첩 URL을 직접 열어도 dashboard 앱 index를 서빙한다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-streamer-tenant-route-"));
+  try {
+    writeFileSync(path.join(dir, "index.html"), "<!doctype html><title>Streamer Dashboard</title><div id=\"root\"></div>");
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const req = createRequest("GET", "/dashboard/seiga/sdk_test/lol/participation");
+    const res = createResponse();
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.match(res.headers["Content-Type"], /text\/html/);
+    assert.match(res.body, /Streamer Dashboard/);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("dashboard overlay test action은 /api/actions/test에서 검증 후 dispatch된다", async () => {
   const dispatched = [];
   const handler = createHttpHandler({

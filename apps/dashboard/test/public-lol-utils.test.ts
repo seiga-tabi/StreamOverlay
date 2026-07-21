@@ -6,7 +6,15 @@ import { rankScore, rankTrendLine, shortRankLabel } from "../src/features/public
 import { buildSuggestions, jpRiotIdQuery, publicSummonerPath, riotIdFromPublicSummonerPath } from "../src/features/public-lol/utils/riot-id";
 import { parseFavorites, parseRecentSearches } from "../src/features/public-lol/utils/storage";
 import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
-import { dashboardPageFromPath, dashboardPathForPage, isLolOperationsPage } from "../src/routing/dashboard-routes";
+import {
+  dashboardPageFromPath,
+  dashboardPathForPage,
+  isLolOperationsPage,
+  pageAllowedForRole,
+  streamerDashboardBasePath,
+  streamerDashboardTenantFromPath,
+  streamerDashboardTenantMatches
+} from "../src/routing/dashboard-routes";
 import type { PublicLolProfile, PublicLolRecentMatch, SearchSuggestion } from "../src/features/public-lol/types/public-lol";
 
 test("Riot ID를 기존 JP 검색 규칙으로 정규화한다", () => {
@@ -35,6 +43,10 @@ test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () =>
 });
 
 test("Dashboard 역할별 경로를 페이지 상태와 왕복 변환한다", () => {
+  const tenant = {
+    streamerSlug: "streamer_name",
+    dashboardKey: "sdk_0123456789abcdefghijklmnopqrstuv"
+  };
   assert.equal(dashboardPathForPage("overlayStatus", "streamer"), "/dashboard/overlay");
   assert.equal(dashboardPageFromPath("/dashboard/overlay/", "streamer"), "overlayStatus");
   assert.equal(dashboardPathForPage("lolAccount", "streamer"), "/dashboard/lol/account");
@@ -53,6 +65,25 @@ test("Dashboard 역할별 경로를 페이지 상태와 왕복 변환한다", ()
   assert.equal(dashboardPageFromPath("/admin/support", "admin"), "supportInbox");
   assert.equal(dashboardPageFromPath("/admin/community", "admin"), "communityModeration");
   assert.equal(dashboardPageFromPath("/admin/unknown", "admin"), "serverStatus");
+  assert.equal(streamerDashboardBasePath(tenant), `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}`);
+  assert.equal(
+    dashboardPathForPage("overlayStatus", "streamer", tenant),
+    `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/overlay`
+  );
+  assert.equal(
+    dashboardPathForPage("lolParticipation", "streamer", tenant),
+    `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/lol/participation`
+  );
+  assert.equal(
+    dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/lol/automation`, "streamer"),
+    "lolAutomation"
+  );
+  assert.deepEqual(streamerDashboardTenantFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/alerts`), tenant);
+  assert.equal(streamerDashboardTenantMatches(streamerDashboardTenantFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}`), tenant), true);
+  assert.equal(streamerDashboardTenantFromPath("/dashboard/streamer_name/not-a-dashboard-key"), undefined);
+  assert.equal(streamerDashboardTenantFromPath("/dashboard/lol/account"), undefined);
+  assert.equal(pageAllowedForRole("overlayAlerts", "streamer"), false);
+  assert.equal(pageAllowedForRole("followers", "streamer"), false);
 });
 
 test("검색 제안은 중복을 제거하고 최대 6개로 제한한다", () => {

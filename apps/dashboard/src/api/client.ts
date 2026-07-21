@@ -29,6 +29,9 @@ export type DashboardStreamerInfo = {
   profileLinkLabel?: string;
   profileLinks?: DashboardStreamerProfileLink[];
   dashboardEnabled?: boolean;
+  dashboardSlug?: string;
+  dashboardKey?: string;
+  dashboardPath?: string;
 };
 
 export type DashboardAuthStatus = {
@@ -42,15 +45,29 @@ export type DashboardAuthStatus = {
 };
 
 export type DashboardAuthSurface = "admin" | "streamer";
+export type DashboardTenantContext = {
+  streamerSlug: string;
+  dashboardKey: string;
+};
 
 let dashboardAuthSurface: DashboardAuthSurface = "admin";
+let dashboardTenantContext: DashboardTenantContext | undefined;
 
 export function setDashboardAuthSurface(surface: DashboardAuthSurface): void {
   dashboardAuthSurface = surface;
 }
 
+export function setDashboardTenantContext(context: DashboardTenantContext | undefined): void {
+  dashboardTenantContext = context;
+}
+
 function surfaceHeaders(surface: DashboardAuthSurface = dashboardAuthSurface): Record<string, string> {
-  return { "X-StreamOps-Dashboard-Surface": surface };
+  const headers: Record<string, string> = { "X-StreamOps-Dashboard-Surface": surface };
+  if (surface === "streamer" && dashboardTenantContext) {
+    headers["X-StreamOps-Streamer-Slug"] = dashboardTenantContext.streamerSlug;
+    headers["X-StreamOps-Dashboard-Key"] = dashboardTenantContext.dashboardKey;
+  }
+  return headers;
 }
 
 function csrfHeaders(): Record<string, string> {
@@ -115,8 +132,12 @@ export async function apiPostForm<T>(path: string, body: FormData): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function getDashboardAuthStatus(surface: DashboardAuthSurface = dashboardAuthSurface): Promise<DashboardAuthStatus> {
+export async function getDashboardAuthStatus(
+  surface: DashboardAuthSurface = dashboardAuthSurface,
+  tenantContext?: DashboardTenantContext
+): Promise<DashboardAuthStatus> {
   setDashboardAuthSurface(surface);
+  setDashboardTenantContext(surface === "streamer" ? tenantContext : undefined);
   const query = new URLSearchParams({ surface });
   const response = await fetch(`${API_BASE}/api/dashboard/auth/status?${query.toString()}`, {
     credentials: "include",

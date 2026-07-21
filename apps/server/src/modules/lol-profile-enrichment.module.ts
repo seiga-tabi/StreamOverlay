@@ -126,6 +126,7 @@ export function saveLolParticipationProfileSettings(settings: Partial<LolPartici
 async function broadcastQueue(ctx: ModuleContext, reason: string, streamerId?: string): Promise<void> {
   await ctx.actions.dispatchOne({
     type: "overlay.participationQueue",
+    streamerId,
     isOpen: ctx.store.getParticipationState(streamerId).isOpen,
     queue: ctx.store.getParticipationOverlayQueue(undefined, streamerId)
   }, {}, reason);

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import type { LolChampionSummary, ParticipationDashboardQueueEntry, ParticipationState, ParticipationStatus } from "@streamops/shared";
 import { apiPost } from "../api/client";
 import { createDashboardLocaleProxy, dashboardLocale } from "../i18n";
@@ -21,11 +21,10 @@ import {
   EmptyStateIcon,
   EmptyStateTitle,
 } from "../shared/ui/EmptyState";
-import { FormControl, FormField, FormLabel, Input, Select } from "../shared/ui/Form";
+import { FormControl, FormField, FormLabel, Select } from "../shared/ui/Form";
 import {
   Modal,
   ModalCloseButton,
-  ModalContent,
   ModalDescription,
   ModalFooter,
   ModalHeader,
@@ -79,7 +78,7 @@ const i18n = {
     confirmTitle: "작업 확인",
     confirmManualDescription: "방송 중 대기열 상태가 즉시 변경됩니다. 계속 진행할까요?",
     confirmStatusDescription: "참가자 상태를 변경합니다. 오버레이와 대기열 표시가 함께 갱신될 수 있습니다.",
-    confirmInviteDescription: "Twitch 채팅으로 안내 메시지를 전송합니다.",
+    processing: "처리 중",
     skipLink: "시참 관리 본문으로 이동",
     loading: "시참 대기열을 불러오는 중입니다.",
     manualControlTitle: "수동 상태 제어",
@@ -103,7 +102,6 @@ const i18n = {
     streamerRiotId: "방송자 Riot ID",
     gameMonitorEnabled: "자동 감시 사용",
     autoSelectNext: "게임 종료 후 다음 참가자 자동 선정",
-    announceInChat: "채팅 안내 사용",
     saveGameMonitor: "저장",
     gameMonitorSaved: "게임 감시 설정을 저장했습니다.",
     gameMonitorSaveFailed: "게임 감시 설정 저장에 실패했습니다.",
@@ -140,18 +138,6 @@ const i18n = {
     entryStatusOverride: "수동 상태 변경",
     entryStatusUpdated: "참가자 상태를 변경했습니다.",
     entryStatusUpdateFailed: "참가자 상태 변경에 실패했습니다.",
-    inviteMessage: "초대 링크/안내 메시지",
-    invitePlaceholder: "초대 링크 또는 안내 메시지 입력",
-    sendInvite: "전송",
-    sendingInvite: "전송 중",
-    inviteSent: "채팅으로 전송했습니다.",
-    inviteFailed: "메시지 전송에 실패했습니다.",
-    bulkInviteTitle: "대기열 일괄 전송",
-    bulkInviteTargetCount: (count: number) => `대상 ${count}명`,
-    bulkInvitePlaceholder: "대기열 참가자에게 보낼 공통 링크 또는 안내 메시지",
-    sendBulkInvite: "대기열 일괄 전송",
-    bulkInviteSent: (count: number, messages: number) => `${count}명에게 ${messages}개 채팅 메시지로 전송했습니다.`,
-    bulkInviteNoTargets: "전송 가능한 대기열 참가자가 없습니다.",
     mainRoles: {
       TOP: "탑",
       JUNGLE: "정글",
@@ -223,7 +209,7 @@ const i18n = {
     confirmTitle: "操作確認",
     confirmManualDescription: "配信中の待機列状態がすぐに変更されます。続行しますか？",
     confirmStatusDescription: "参加者の状態を変更します。オーバーレイと待機列表示も更新される場合があります。",
-    confirmInviteDescription: "Twitch チャットに案内メッセージを送信します。",
+    processing: "処理中",
     skipLink: "参加管理本文へ移動",
     loading: "参加待機列を読み込んでいます。",
     manualControlTitle: "手動状態制御",
@@ -247,7 +233,6 @@ const i18n = {
     streamerRiotId: "配信者 Riot ID",
     gameMonitorEnabled: "自動監視を使用",
     autoSelectNext: "試合終了後に次の参加者を自動選出",
-    announceInChat: "チャット案内を使用",
     saveGameMonitor: "保存",
     gameMonitorSaved: "試合監視設定を保存しました。",
     gameMonitorSaveFailed: "試合監視設定の保存に失敗しました。",
@@ -284,18 +269,6 @@ const i18n = {
     entryStatusOverride: "手動状態変更",
     entryStatusUpdated: "参加者の状態を変更しました。",
     entryStatusUpdateFailed: "参加者の状態変更に失敗しました。",
-    inviteMessage: "招待リンク/案内メッセージ",
-    invitePlaceholder: "招待リンクまたは案内メッセージを入力",
-    sendInvite: "送信",
-    sendingInvite: "送信中",
-    inviteSent: "チャットに送信しました。",
-    inviteFailed: "メッセージ送信に失敗しました。",
-    bulkInviteTitle: "待機列一括送信",
-    bulkInviteTargetCount: (count: number) => `対象 ${count}人`,
-    bulkInvitePlaceholder: "待機列の参加者に送る共通リンクまたは案内メッセージ",
-    sendBulkInvite: "待機列に一括送信",
-    bulkInviteSent: (count: number, messages: number) => `${count}人に${messages}件のチャットメッセージで送信しました。`,
-    bulkInviteNoTargets: "送信可能な待機列参加者がいません。",
     mainRoles: {
       TOP: "トップ",
       JUNGLE: "ジャングル",
@@ -351,7 +324,6 @@ const i18n = {
 } as const;
 
 const t = createDashboardLocaleProxy(i18n);
-const INVITE_TARGET_STATUSES = new Set(["pending", "verified", "waitlisted", "selected", "checked_in", "invited"]);
 type ManualEntryStatus = Extract<ParticipationStatus, "waitlisted" | "in_game" | "played" | "cancelled">;
 const ENTRY_STATUS_OPTIONS: ManualEntryStatus[] = ["waitlisted", "in_game", "played", "cancelled"];
 const CANCELLED_ENTRY_STATUSES = new Set<ParticipationStatus>(["skipped", "cancelled", "no_show", "rejected", "blocked"]);
@@ -377,23 +349,6 @@ type PendingParticipationAction =
       kind: "entryStatus";
       entry: ParticipationDashboardQueueEntry;
       status: ParticipationStatus;
-      title: string;
-      description: string;
-      confirmLabel: string;
-      tone: "danger" | "primary" | "secondary";
-    }
-  | {
-      kind: "invite";
-      entry: ParticipationDashboardQueueEntry;
-      message: string;
-      title: string;
-      description: string;
-      confirmLabel: string;
-      tone: "danger" | "primary" | "secondary";
-    }
-  | {
-      kind: "bulkInvite";
-      message: string;
       title: string;
       description: string;
       confirmLabel: string;
@@ -520,19 +475,12 @@ export function ParticipationPage({
   const summary = state.summary;
   const cancelledCount = queue.filter((entry) => entry.status === "cancelled").length;
   const isSnapshotLoading = !snapshot.participationState && !snapshot.participationQueue && !snapshot.status?.participation;
-  const [inviteDrafts, setInviteDrafts] = useState<Record<string, string>>({});
-  const [inviteBusyId, setInviteBusyId] = useState<string | null>(null);
-  const [inviteMessages, setInviteMessages] = useState<Record<string, string>>({});
-  const [bulkInviteDraft, setBulkInviteDraft] = useState("");
-  const [bulkInviteSending, setBulkInviteSending] = useState(false);
-  const [bulkInviteMessage, setBulkInviteMessage] = useState("");
   const [manualBusyAction, setManualBusyAction] = useState<ManualParticipationAction | null>(null);
   const [manualMessage, setManualMessage] = useState("");
   const [entryStatusBusyId, setEntryStatusBusyId] = useState<string | null>(null);
   const [entryStatusMessages, setEntryStatusMessages] = useState<Record<string, string>>({});
   const [pendingAction, setPendingAction] = useState<PendingParticipationAction | null>(null);
   const [toast, setToast] = useState<ParticipationToast | null>(null);
-  const bulkInviteTargets = queue.filter((entry) => INVITE_TARGET_STATUSES.has(entry.status));
 
   useEffect(() => {
     setLocalState(snapshot.participationState ?? fallbackState(snapshot));
@@ -601,50 +549,6 @@ export function ParticipationPage({
     }
   }
 
-  async function sendInviteMessage(entry: ParticipationDashboardQueueEntry, message: string) {
-    setInviteBusyId(entry.id);
-    setInviteMessages((previous) => ({ ...previous, [entry.id]: "" }));
-    try {
-      await apiPost<{ ok: boolean }>("/api/participation/invite-message", {
-        entryId: entry.id,
-        message
-      });
-      setInviteMessages((previous) => ({ ...previous, [entry.id]: t.inviteSent }));
-      showToast("success", t.inviteSent, entry.twitchUserName);
-    } catch (error) {
-      const detail = apiErrorDetail(error, "/api/participation/invite-message", t.inviteFailed);
-      setInviteMessages((previous) => ({ ...previous, [entry.id]: detail }));
-      showToast("danger", t.inviteFailed, detail);
-    } finally {
-      setInviteBusyId(null);
-    }
-  }
-
-  async function sendBulkInviteMessage(message: string) {
-    if (!message || bulkInviteTargets.length === 0) {
-      setBulkInviteMessage(t.bulkInviteNoTargets);
-      showToast("warning", t.bulkInviteNoTargets);
-      return;
-    }
-    setBulkInviteSending(true);
-    setBulkInviteMessage("");
-    try {
-      const result = await apiPost<{ ok: boolean; targetCount: number; sentMessages: number }>("/api/participation/invite-message/bulk", {
-        entryIds: bulkInviteTargets.map((entry) => entry.id),
-        message
-      });
-      const resultMessage = t.bulkInviteSent(result.targetCount, result.sentMessages);
-      setBulkInviteMessage(resultMessage);
-      showToast("success", resultMessage);
-    } catch (error) {
-      const detail = apiErrorDetail(error, "/api/participation/invite-message/bulk", t.inviteFailed);
-      setBulkInviteMessage(detail);
-      showToast("danger", t.inviteFailed, detail);
-    } finally {
-      setBulkInviteSending(false);
-    }
-  }
-
   function requestManualControl(action: ManualParticipationAction): void {
     setPendingAction({
       kind: "manual",
@@ -669,55 +573,18 @@ export function ParticipationPage({
     });
   }
 
-  function requestInviteMessage(event: FormEvent<HTMLFormElement>, entry: ParticipationDashboardQueueEntry): void {
-    event.preventDefault();
-    const message = (inviteDrafts[entry.id] ?? "").trim();
-    if (!message) return;
-    setPendingAction({
-      kind: "invite",
-      entry,
-      message,
-      title: `${entry.twitchUserName} · ${t.sendInvite}`,
-      description: t.confirmInviteDescription,
-      confirmLabel: t.sendInvite,
-      tone: "primary"
-    });
-  }
-
-  function requestBulkInviteMessage(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    const message = bulkInviteDraft.trim();
-    if (!message || bulkInviteTargets.length === 0) {
-      setBulkInviteMessage(t.bulkInviteNoTargets);
-      showToast("warning", t.bulkInviteNoTargets);
-      return;
-    }
-    setPendingAction({
-      kind: "bulkInvite",
-      message,
-      title: t.bulkInviteTitle,
-      description: t.confirmInviteDescription,
-      confirmLabel: t.sendBulkInvite,
-      tone: "primary"
-    });
-  }
-
   async function confirmPendingAction(): Promise<void> {
     if (!pendingAction) return;
     const action = pendingAction;
     if (action.kind === "manual") {
       await applyManualControl(action.action);
-    } else if (action.kind === "entryStatus") {
-      await updateEntryStatus(action.entry, action.status);
-    } else if (action.kind === "invite") {
-      await sendInviteMessage(action.entry, action.message);
     } else {
-      await sendBulkInviteMessage(action.message);
+      await updateEntryStatus(action.entry, action.status);
     }
     setPendingAction(null);
   }
 
-  const pendingActionBusy = manualBusyAction !== null || entryStatusBusyId !== null || inviteBusyId !== null || bulkInviteSending;
+  const pendingActionBusy = manualBusyAction !== null || entryStatusBusyId !== null;
 
   return (
     <>
@@ -782,7 +649,7 @@ export function ParticipationPage({
                       onClick={() => requestManualControl(action)}
                       variant={manualActionTone(action)}
                     >
-                      {manualBusyAction === action ? t.sendingInvite : manualActionLabel(action)}
+                      {manualBusyAction === action ? t.processing : manualActionLabel(action)}
                     </Button>
                   ))}
                 </div>
@@ -794,7 +661,6 @@ export function ParticipationPage({
               <CardHeader className="participation-shared-card-header">
                 <div>
                   <CardTitle as="h2">{t.queueTitle}</CardTitle>
-                  <CardDescription>{t.bulkInviteTargetCount(bulkInviteTargets.length)}</CardDescription>
                 </div>
                 <Badge tone={queue.length > 0 ? "streamer" : "neutral"}>{queue.length}</Badge>
               </CardHeader>
@@ -805,31 +671,6 @@ export function ParticipationPage({
                     <EmptyStateTitle as="h3">{t.empty}</EmptyStateTitle>
                     <EmptyStateDescription>{t.commandHint}</EmptyStateDescription>
                   </EmptyState>
-                ) : null}
-
-                {queue.length > 0 ? (
-                  <form className="participation-shared-bulk-invite" id="participation-shared-invite" onSubmit={requestBulkInviteMessage}>
-                    <div className="participation-shared-bulk-head">
-                      <strong>{t.bulkInviteTitle}</strong>
-                      <Badge tone={bulkInviteTargets.length > 0 ? "info" : "warning"}>{t.bulkInviteTargetCount(bulkInviteTargets.length)}</Badge>
-                    </div>
-                    <FormField className="participation-shared-form-field" controlId="participation-bulk-invite">
-                      <FormLabel>{t.inviteMessage}</FormLabel>
-                      <FormControl>
-                        <Input
-                          autoComplete="off"
-                          id="participation-bulk-invite"
-                          onChange={(event) => setBulkInviteDraft(event.target.value)}
-                          placeholder={t.bulkInvitePlaceholder}
-                          value={bulkInviteDraft}
-                        />
-                      </FormControl>
-                    </FormField>
-                    <Button disabled={bulkInviteSending || !bulkInviteDraft.trim() || bulkInviteTargets.length === 0} loading={bulkInviteSending} type="submit" variant="secondary">
-                      {bulkInviteSending ? t.sendingInvite : t.sendBulkInvite}
-                    </Button>
-                    {bulkInviteMessage ? <StatusPill tone={bulkInviteMessage === t.bulkInviteNoTargets || bulkInviteMessage === t.inviteFailed ? "warning" : "success"}>{bulkInviteMessage}</StatusPill> : null}
-                  </form>
                 ) : null}
 
                 {queue.length > 0 ? (
@@ -896,24 +737,6 @@ export function ParticipationPage({
                             {entryStatusMessages[entry.id] ? <StatusPill size="sm" tone={entryStatusMessages[entry.id] === t.entryStatusUpdated ? "success" : "danger"}>{entryStatusMessages[entry.id]}</StatusPill> : null}
                           </div>
 
-                          <form className="participation-shared-invite" onSubmit={(event) => requestInviteMessage(event, entry)}>
-                            <FormField className="participation-shared-form-field" controlId={`participation-invite-${entry.id}`}>
-                              <FormLabel>{t.inviteMessage}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  autoComplete="off"
-                                  id={`participation-invite-${entry.id}`}
-                                  onChange={(event) => setInviteDrafts((previous) => ({ ...previous, [entry.id]: event.target.value }))}
-                                  placeholder={t.invitePlaceholder}
-                                  value={inviteDrafts[entry.id] ?? ""}
-                                />
-                              </FormControl>
-                            </FormField>
-                            <Button disabled={inviteBusyId === entry.id || !(inviteDrafts[entry.id] ?? "").trim()} loading={inviteBusyId === entry.id} size="sm" type="submit" variant="secondary">
-                              {inviteBusyId === entry.id ? t.sendingInvite : t.sendInvite}
-                            </Button>
-                            {inviteMessages[entry.id] ? <StatusPill size="sm" tone={inviteMessages[entry.id] === t.inviteSent ? "success" : "danger"}>{inviteMessages[entry.id]}</StatusPill> : null}
-                          </form>
                         </Card>
                       );
                     })}
@@ -937,14 +760,6 @@ export function ParticipationPage({
           <ModalTitle>{pendingAction?.title ?? t.confirmTitle}</ModalTitle>
           <ModalDescription>{pendingAction?.description ?? t.confirmManualDescription}</ModalDescription>
         </ModalHeader>
-        <ModalContent>
-          {pendingAction?.kind === "invite" || pendingAction?.kind === "bulkInvite" ? (
-            <div className="participation-shared-modal-message">
-              <Badge tone="info">{t.inviteMessage}</Badge>
-              <p>{pendingAction.message}</p>
-            </div>
-          ) : null}
-        </ModalContent>
         <ModalFooter>
           <Button disabled={!pendingAction} loading={pendingActionBusy} onClick={() => void confirmPendingAction()} variant={pendingAction?.tone ?? "primary"}>
             {pendingAction?.confirmLabel ?? t.confirm}

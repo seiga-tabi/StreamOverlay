@@ -1,13 +1,36 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { checkDashboardAuthToken, getDashboardAuthStatus, logoutDashboardSession, setDashboardAuthSurface, type DashboardAuthSurface, type DashboardStreamerInfo } from "./api/client";
+import {
+  checkDashboardAuthToken,
+  getDashboardAuthStatus,
+  logoutDashboardSession,
+  setDashboardAuthSurface,
+  setDashboardTenantContext,
+  type DashboardAuthStatus,
+  type DashboardAuthSurface,
+  type DashboardStreamerInfo
+} from "./api/client";
 import { connectDashboardSocket } from "./api/socket";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { applyDashboardLocale, dashboardI18n, detectDashboardLocale, setDashboardLocale as saveDashboardLocale, type DashboardLocale } from "./i18n";
 import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
-import { dashboardPageFromPath, defaultPageForRole, isLolOperationsPage, pageAllowedForRole, setDashboardPath, type DashboardRole, type Page } from "./routing/dashboard-routes";
+import {
+  dashboardPageFromPath,
+  dashboardPathForPage,
+  defaultPageForRole,
+  isLolOperationsPage,
+  pageAllowedForRole,
+  setDashboardPath,
+  streamerDashboardTenantFromPath,
+  streamerDashboardTenantMatches,
+  type DashboardRole,
+  type Page,
+  type StreamerDashboardTenant
+} from "./routing/dashboard-routes";
+import { isPalworldPath } from "./features/public-palworld/utils/routes";
 
 const PublicLolPage = lazy(async () => ({ default: (await import("./pages/PublicLolPage")).PublicLolPage }));
+const PublicPalworldPage = lazy(async () => ({ default: (await import("./pages/PublicPalworldPage")).PublicPalworldPage }));
 const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
 const EventsPage = lazy(async () => ({ default: (await import("./pages/EventsPage")).EventsPage }));
 const LolOperationsPage = lazy(async () => ({ default: (await import("./pages/LolOperationsPage")).LolOperationsPage }));
@@ -44,6 +67,8 @@ const streamerEntryI18n = {
     title: "Twitch 로그인으로 접속합니다.",
     description: "승인된 스트리머는 전적 검색 화면에서 Twitch 로그인 후 프로필 메뉴의 대시보드를 열어주세요.",
     checking: "스트리머 등록 상태를 확인하는 중입니다.",
+    unavailable: "스트리머 대시보드 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    tenantUnavailable: "전용 대시보드 주소가 아직 준비되지 않았습니다. 관리자에게 스트리머 등록 상태를 확인해 주세요.",
     twitchLogin: "Twitch로 로그인",
     publicHome: "전적 검색으로 돌아가기",
     adminLogin: "관리자 로그인"
@@ -53,6 +78,8 @@ const streamerEntryI18n = {
     title: "Twitch ログインでアクセスします。",
     description: "承認済みの配信者は、戦績検索画面で Twitch ログイン後、プロフィールメニューからダッシュボードを開いてください。",
     checking: "配信者登録状態を確認しています。",
+    unavailable: "配信者ダッシュボード情報を確認できません。しばらくしてからもう一度お試しください。",
+    tenantUnavailable: "専用ダッシュボード URL の準備ができていません。管理者に配信者登録状態を確認してください。",
     twitchLogin: "Twitch でログイン",
     publicHome: "戦績検索に戻る",
     adminLogin: "管理者ログイン"
@@ -73,14 +100,22 @@ function authSurfaceFor(surface: AppSurface): DashboardAuthSurface {
   return surface === "streamer" ? "streamer" : "admin";
 }
 
+function tenantForStreamer(streamer: DashboardStreamerInfo | undefined): StreamerDashboardTenant | undefined {
+  const streamerSlug = streamer?.dashboardSlug?.trim();
+  const dashboardKey = streamer?.dashboardKey?.trim();
+  return streamerSlug && dashboardKey ? { streamerSlug, dashboardKey } : undefined;
+}
+
 function StreamerDashboardEntryPage({
   checking,
+  error,
   locale,
   onBackToPublic,
   onTwitchLogin,
   onOpenAdmin
 }: {
   checking: boolean;
+  error?: "unavailable" | "tenantUnavailable" | "";
   locale: DashboardLocale;
   onBackToPublic: () => void;
   onTwitchLogin: () => void;
@@ -97,6 +132,7 @@ function StreamerDashboardEntryPage({
         <h1 data-ko={streamerEntryI18n.ko.title} data-ja={streamerEntryI18n.ja.title}>{streamerEntryText.title}</h1>
         <p className="muted" data-ko={streamerEntryI18n.ko.description} data-ja={streamerEntryI18n.ja.description}>{streamerEntryText.description}</p>
         {checking ? <p className="hint" data-ko={streamerEntryI18n.ko.checking} data-ja={streamerEntryI18n.ja.checking}>{streamerEntryText.checking}</p> : null}
+        {error ? <p className="auth-error" role="alert" data-ko={streamerEntryI18n.ko[error]} data-ja={streamerEntryI18n.ja[error]}>{streamerEntryText[error]}</p> : null}
         <div className="auth-form">
           <button className="primary" type="button" onClick={onTwitchLogin} data-ko={streamerEntryI18n.ko.twitchLogin} data-ja={streamerEntryI18n.ja.twitchLogin}>
             {streamerEntryText.twitchLogin}
@@ -123,11 +159,14 @@ export default function App() {
   const [page, setPage] = useState<Page>(() => dashboardPageFromPath(window.location.pathname, initialRole));
   const [dashboardRole, setDashboardRole] = useState<DashboardRole>(initialRole);
   const [dashboardStreamer, setDashboardStreamer] = useState<DashboardStreamerInfo | undefined>();
+  const [dashboardTenant, setDashboardTenant] = useState<StreamerDashboardTenant | undefined>(() => streamerDashboardTenantFromPath(window.location.pathname));
   const [snapshot, setSnapshot] = useState<any>(initialSnapshot);
   const [socketConnected, setSocketConnected] = useState(false);
   const [authState, setAuthState] = useState<AuthState>(() => isManagedSurface(surfaceForLocation()) ? "checking" : "login");
   const [authErrorKey, setAuthErrorKey] = useState<AuthErrorKey>("");
   const [loginDisabled, setLoginDisabled] = useState(false);
+  const [streamerEntryError, setStreamerEntryError] = useState<"unavailable" | "tenantUnavailable" | "">("");
+  const [routeRevision, setRouteRevision] = useState(0);
   const currentText = dashboardI18n[dashboardLocale];
   const authError = authErrorKey ? currentText.authPage[authErrorKey] : "";
 
@@ -163,30 +202,56 @@ export default function App() {
   useEffect(() => {
     const syncSurface = () => {
       const nextSurface = surfaceForLocation();
+      setRouteRevision((revision) => revision + 1);
       if (isManagedSurface(nextSurface)) syncDashboardLocalePreference();
       setSurface(nextSurface);
       if (isManagedSurface(nextSurface)) {
         setDashboardAuthSurface(authSurfaceFor(nextSurface));
+        const nextTenant = nextSurface === "streamer" ? streamerDashboardTenantFromPath(window.location.pathname) : undefined;
+        setDashboardTenant(nextTenant);
+        setDashboardTenantContext(nextTenant);
         setPage(dashboardPageFromPath(window.location.pathname, nextSurface === "admin" ? "admin" : "streamer"));
         setAuthState("checking");
       }
       if (nextSurface === "public") {
         setSocketConnected(false);
+        setDashboardTenant(undefined);
+        setDashboardTenantContext(undefined);
         clearDashboardCsrfToken();
       }
     };
     window.addEventListener("popstate", syncSurface);
-    return () => window.removeEventListener("popstate", syncSurface);
+    window.addEventListener("publicroutechange", syncSurface);
+    return () => {
+      window.removeEventListener("popstate", syncSurface);
+      window.removeEventListener("publicroutechange", syncSurface);
+    };
   }, []);
 
   useEffect(() => {
     if (!isManagedSurface(surface)) return undefined;
     let mounted = true;
     const authSurface = authSurfaceFor(surface);
+    const requestedTenant = surface === "streamer" ? streamerDashboardTenantFromPath(window.location.pathname) : undefined;
     setDashboardAuthSurface(authSurface);
+    setDashboardTenantContext(requestedTenant);
     setAuthState("checking");
-    void getDashboardAuthStatus(authSurface)
-      .then((status) => {
+    setStreamerEntryError("");
+
+    const failAuthentication = () => {
+      if (!mounted) return;
+      clearDashboardCsrfToken();
+      setDashboardTenantContext(undefined);
+      setLoginDisabled(false);
+      setAuthErrorKey("unavailable");
+      setDashboardRole("admin");
+      setDashboardStreamer(undefined);
+      setDashboardTenant(undefined);
+      setStreamerEntryError(surface === "streamer" ? "unavailable" : "");
+      setAuthState(surface === "streamer" ? "streamerAccess" : "login");
+    };
+
+    const applyStatus = (status: DashboardAuthStatus) => {
         if (!mounted) return;
         setAuthRequired(status.required);
         if (!status.required || status.authenticated) {
@@ -194,6 +259,8 @@ export default function App() {
           if (surface === "admin" && role !== "admin") {
             setDashboardRole("admin");
             setDashboardStreamer(undefined);
+            setDashboardTenant(undefined);
+            setDashboardTenantContext(undefined);
             clearDashboardCsrfToken();
             setLoginDisabled(false);
             setAuthErrorKey("adminOnly");
@@ -203,46 +270,83 @@ export default function App() {
           if (surface === "streamer" && role !== "streamer") {
             setDashboardRole("admin");
             setDashboardStreamer(undefined);
+            setDashboardTenant(undefined);
+            setDashboardTenantContext(undefined);
             clearDashboardCsrfToken();
             setAuthErrorKey("");
             setLoginDisabled(false);
             setAuthState("streamerAccess");
             return;
           }
+          const authenticatedTenant = role === "streamer" ? tenantForStreamer(status.streamer) : undefined;
+          if (role === "streamer" && !authenticatedTenant) {
+            setDashboardRole("streamer");
+            setDashboardStreamer(status.streamer);
+            setDashboardTenant(undefined);
+            setDashboardTenantContext(undefined);
+            setAuthErrorKey("");
+            setLoginDisabled(false);
+            setStreamerEntryError("tenantUnavailable");
+            setAuthState("streamerAccess");
+            return;
+          }
           setDashboardRole(role);
           setDashboardStreamer(status.streamer);
+          setDashboardTenant(authenticatedTenant);
+          setDashboardTenantContext(authenticatedTenant);
           setAuthErrorKey("");
           setLoginDisabled(false);
+          setStreamerEntryError("");
+          if (role === "streamer" && authenticatedTenant) {
+            const requestedPage = dashboardPageFromPath(window.location.pathname, "streamer");
+            const nextPage = pageAllowedForRole(requestedPage, "streamer") ? requestedPage : defaultPageForRole("streamer");
+            setPage(nextPage);
+            const canonicalPath = dashboardPathForPage(nextPage, "streamer", authenticatedTenant);
+            if (!streamerDashboardTenantMatches(requestedTenant, authenticatedTenant) || window.location.pathname !== canonicalPath) {
+              setDashboardPath(nextPage, "streamer", true, authenticatedTenant);
+            }
+          }
           setAuthState("authenticated");
         } else {
           setDashboardRole("admin");
           setDashboardStreamer(undefined);
+          setDashboardTenant(undefined);
+          setDashboardTenantContext(undefined);
           clearDashboardCsrfToken();
           setLoginDisabled(status.configured === false);
           setAuthErrorKey(status.configured === false ? "notConfigured" : "");
+          setStreamerEntryError("");
           setAuthState(surface === "streamer" ? "streamerAccess" : "login");
         }
-      })
-      .catch(() => {
-        if (!mounted) return;
-        clearDashboardCsrfToken();
-        setLoginDisabled(false);
-        setAuthErrorKey("unavailable");
-        setDashboardRole("admin");
-        setDashboardStreamer(undefined);
-        setAuthState(surface === "streamer" ? "streamerAccess" : "login");
-      });
+    };
+
+    void (async () => {
+      try {
+        applyStatus(await getDashboardAuthStatus(authSurface, requestedTenant));
+      } catch {
+        if (surface !== "streamer" || !requestedTenant) {
+          failAuthentication();
+          return;
+        }
+        try {
+          // 다른 tenant URL로 접근했더라도 인증된 사용자의 canonical URL로 안전하게 복구한다.
+          applyStatus(await getDashboardAuthStatus("streamer"));
+        } catch {
+          failAuthentication();
+        }
+      }
+    })();
     return () => {
       mounted = false;
     };
-  }, [surface]);
+  }, [surface, routeRevision]);
 
   useEffect(() => {
     if (!isManagedSurface(surface) || authState !== "authenticated") return undefined;
     return connectDashboardSocket((message) => {
       if (message.type === "dashboard.snapshot") setSnapshot(message);
-    }, setSocketConnected, authSurfaceFor(surface));
-  }, [surface, authState]);
+    }, setSocketConnected, authSurfaceFor(surface), surface === "streamer" ? dashboardTenant : undefined);
+  }, [surface, authState, dashboardTenant]);
 
   useEffect(() => {
     if (authState !== "authenticated") return;
@@ -250,20 +354,21 @@ export default function App() {
       const pathPage = dashboardPageFromPath(window.location.pathname, dashboardRole);
       const nextPage = pageAllowedForRole(pathPage, dashboardRole) ? pathPage : defaultPageForRole(dashboardRole);
       setPage(nextPage);
-      setDashboardPath(nextPage, dashboardRole, true);
+      setDashboardPath(nextPage, dashboardRole, true, dashboardRole === "streamer" ? dashboardTenant : undefined);
     }
-  }, [authState, dashboardRole, page]);
+  }, [authState, dashboardRole, dashboardTenant, page]);
 
   function changeDashboardPage(nextPage: Page): void {
     if (!pageAllowedForRole(nextPage, dashboardRole)) return;
     setPage(nextPage);
-    setDashboardPath(nextPage, dashboardRole);
+    setDashboardPath(nextPage, dashboardRole, false, dashboardRole === "streamer" ? dashboardTenant : undefined);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function startStreamerTwitchLogin(): void {
     const base = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
-    const params = new URLSearchParams({ return_to: "/dashboard" });
+    const returnPath = streamerDashboardTenantFromPath(window.location.pathname) ? window.location.pathname : "/dashboard";
+    const params = new URLSearchParams({ return_to: returnPath });
     window.location.href = `${base}/api/public/twitch/auth/start?${params.toString()}`;
   }
 
@@ -296,19 +401,24 @@ export default function App() {
     setSnapshot(initialSnapshot);
     setDashboardRole("admin");
     setDashboardStreamer(undefined);
+    setDashboardTenant(undefined);
+    setDashboardTenantContext(undefined);
     setAuthState(surface === "streamer" ? "streamerAccess" : authRequired ? "login" : "authenticated");
   }
 
   function openAdmin(): void {
     syncDashboardLocalePreference();
     if (surfaceForLocation() !== "admin") window.history.pushState({}, "", "/admin");
+    setDashboardTenant(undefined);
+    setDashboardTenantContext(undefined);
     setSurface("admin");
     setAuthState("checking");
   }
 
   function openStreamerDashboard(): void {
     syncDashboardLocalePreference();
-    if (surfaceForLocation() !== "streamer") window.history.pushState({}, "", "/dashboard");
+    const nextPath = dashboardTenant ? dashboardPathForPage("dashboard", "streamer", dashboardTenant) : "/dashboard";
+    if (window.location.pathname !== nextPath) window.history.pushState({}, "", nextPath);
     setSurface("streamer");
     setAuthState("checking");
   }
@@ -316,6 +426,8 @@ export default function App() {
   function openPublic(): void {
     if (surfaceForLocation() !== "public") window.history.pushState({}, "", "/");
     setSocketConnected(false);
+    setDashboardTenant(undefined);
+    setDashboardTenantContext(undefined);
     setSurface("public");
     clearDashboardCsrfToken();
   }
@@ -323,13 +435,15 @@ export default function App() {
   if (surface === "public") {
     return (
       <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
-        <PublicLolPage onOpenAdmin={openAdmin} onOpenStreamerDashboard={openStreamerDashboard} />
+        {isPalworldPath(window.location.pathname)
+          ? <PublicPalworldPage />
+          : <PublicLolPage onOpenAdmin={openAdmin} onOpenStreamerDashboard={openStreamerDashboard} />}
       </Suspense>
     );
   }
 
   if (surface === "streamer" && authState !== "authenticated") {
-    return <StreamerDashboardEntryPage checking={authState === "checking"} locale={dashboardLocale} onBackToPublic={openPublic} onTwitchLogin={startStreamerTwitchLogin} onOpenAdmin={openAdmin} />;
+    return <StreamerDashboardEntryPage checking={authState === "checking"} error={streamerEntryError} locale={dashboardLocale} onBackToPublic={openPublic} onTwitchLogin={startStreamerTwitchLogin} onOpenAdmin={openAdmin} />;
   }
 
   if (authState !== "authenticated") {
@@ -340,7 +454,7 @@ export default function App() {
     <Layout page={page} setPage={changeDashboardPage} role={dashboardRole} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "serverStatus" && dashboardRole === "admin" ? <ServerStatusPage /> : null}
-        {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} role={dashboardRole} /> : null}
+        {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} role={dashboardRole} returnPath={dashboardPathForPage("dashboard", dashboardRole, dashboardTenant)} /> : null}
         {page === "twitch" && dashboardRole === "admin" ? <TwitchConnectionPage /> : null}
         {page === "overlayStatus" ? <OverlayOpsPage view="status" streamer={dashboardStreamer} /> : null}
         {page === "overlayTest" && dashboardRole === "admin" ? <OverlayOpsPage view="test" /> : null}

@@ -15,6 +15,11 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
     "/community/posts/post-1",
     "/lol/tournaments",
     "/lol/tournaments/cup/bracket",
+    "/palworld",
+    "/palworld/pals",
+    "/palworld/breeding",
+    "/palworld/items",
+    "/palworld/search",
     "/privacy",
     "/terms",
     "/contact"
@@ -24,7 +29,7 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
 });
 
 test("API와 Dashboard 내부 URL은 공개 SPA 경로로 오인하지 않는다", () => {
-  for (const pathname of ["/api/public/community/posts", "/dashboard", "/admin", "/overlay"]) {
+  for (const pathname of ["/api/public/community/posts", "/palworldish", "/dashboard", "/admin", "/overlay"]) {
     assert.equal(isPublicDashboardAppRoute(pathname), false, pathname);
   }
 });

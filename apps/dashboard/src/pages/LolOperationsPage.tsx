@@ -38,7 +38,6 @@ import {
 } from "../shared/ui";
 import { MyRiotAccountPage } from "./MyRiotAccountPage";
 import { ParticipationPage, type DashboardSnapshot } from "./ParticipationPage";
-import { SoloRankPage } from "./SoloRankPage";
 
 type LolOperationsPageProps = {
   activePage: LolOperationsPageId;
@@ -90,15 +89,10 @@ const i18n = {
     monitorEnabledHelp: "승인된 Riot ID의 게임 시작과 종료를 감시합니다.",
     autoSelectNext: "게임 종료 후 다음 참가자 자동 선택",
     autoSelectNextHelp: "현재 게임이 끝나면 해당 스트리머 대기열의 다음 참가자만 선택합니다.",
-    announceInChat: "채팅 안내 사용",
-    announceInChatHelp: "시참 상태 변경을 연결된 Twitch 채팅에 안내합니다.",
     saveAutomation: "자동화 설정 저장",
     automationSaved: "자동화 설정을 저장했습니다.",
     automationSaveFailed: "자동화 설정을 저장하지 못했습니다.",
     approvalRequired: "게임 감시를 켜려면 먼저 Riot ID 승인이 필요합니다.",
-    skinTitle: "프로필 스킨",
-    skinDescription: "전적 프로필에 표시할 챔피언 스킨을 관리합니다.",
-    current: "현재",
   },
   ja: {
     eyebrow: "Streamer Studio",
@@ -140,15 +134,10 @@ const i18n = {
     monitorEnabledHelp: "承認済み Riot ID のゲーム開始と終了を監視します。",
     autoSelectNext: "ゲーム終了後に次の参加者を自動選択",
     autoSelectNextHelp: "現在のゲーム終了後、この配信者の待機列から次の参加者だけを選択します。",
-    announceInChat: "チャット案内を使用",
-    announceInChatHelp: "参加状態の変更を連携済み Twitch チャットへ案内します。",
     saveAutomation: "自動化設定を保存",
     automationSaved: "自動化設定を保存しました。",
     automationSaveFailed: "自動化設定を保存できませんでした。",
     approvalRequired: "ゲーム監視を有効にするには、先に Riot ID の承認が必要です。",
-    skinTitle: "プロフィールスキン",
-    skinDescription: "戦績プロフィールに表示するチャンピオンスキンを管理します。",
-    current: "現在",
   },
 } as const;
 
@@ -209,10 +198,9 @@ export function LolOperationsPage({
   const [state, setState] = useState<LolOperationsState | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [automation, setAutomation] = useState<Pick<LolAutomationSettings, "enabled" | "autoSelectNextAfterGame" | "announceInChat">>({
+  const [automation, setAutomation] = useState<Pick<LolAutomationSettings, "enabled" | "autoSelectNextAfterGame">>({
     enabled: false,
     autoSelectNextAfterGame: true,
-    announceInChat: true,
   });
   const [automationSaving, setAutomationSaving] = useState(false);
   const [automationMessage, setAutomationMessage] = useState("");
@@ -226,7 +214,6 @@ export function LolOperationsPage({
       setAutomation({
         enabled: nextState.automation.enabled,
         autoSelectNextAfterGame: nextState.automation.autoSelectNextAfterGame,
-        announceInChat: nextState.automation.announceInChat,
       });
     } catch (error) {
       setLoadError(apiErrorDetail(error, t.loadFailed));
@@ -266,12 +253,11 @@ export function LolOperationsPage({
     setAutomationSaving(true);
     setAutomationMessage("");
     try {
-      const result = await updateLolAutomationSettings(automation);
+      const result = await updateLolAutomationSettings({ ...automation, announceInChat: false });
       setState(result.state);
       setAutomation({
         enabled: result.settings.enabled,
         autoSelectNextAfterGame: result.settings.autoSelectNextAfterGame,
-        announceInChat: result.settings.announceInChat,
       });
       setAutomationMessage(t.automationSaved);
     } catch (error) {
@@ -407,18 +393,6 @@ export function LolOperationsPage({
                         <small data-ko={i18n.ko.autoSelectNextHelp} data-ja={i18n.ja.autoSelectNextHelp}>{t.autoSelectNextHelp}</small>
                       </span>
                     </label>
-                    <label className="lol-operations-toggle-row">
-                      <Input
-                        className="lol-operations-toggle-input"
-                        type="checkbox"
-                        checked={automation.announceInChat}
-                        onChange={(event) => setAutomation((current) => ({ ...current, announceInChat: event.target.checked }))}
-                      />
-                      <span>
-                        <strong data-ko={i18n.ko.announceInChat} data-ja={i18n.ja.announceInChat}>{t.announceInChat}</strong>
-                        <small data-ko={i18n.ko.announceInChatHelp} data-ja={i18n.ja.announceInChatHelp}>{t.announceInChatHelp}</small>
-                      </span>
-                    </label>
                   </div>
 
                   <div className="lol-operations-automation-actions">
@@ -429,16 +403,6 @@ export function LolOperationsPage({
               </CardContent>
             </Card>
 
-            <section className="lol-operations-skin-boundary" aria-labelledby="lol-operations-skin-title">
-              <div className="lol-operations-section-heading">
-                <div>
-                  <h2 id="lol-operations-skin-title" data-ko={i18n.ko.skinTitle} data-ja={i18n.ja.skinTitle}>{t.skinTitle}</h2>
-                  <p data-ko={i18n.ko.skinDescription} data-ja={i18n.ja.skinDescription}>{t.skinDescription}</p>
-                </div>
-                <Badge tone="streamer">{t.current}</Badge>
-              </div>
-              <SoloRankPage embedded showMonitorSettings={false} />
-            </section>
           </div>
         ) : null}
 

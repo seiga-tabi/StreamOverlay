@@ -252,6 +252,7 @@ export type OverlayParticipationSnapshotAction = {
 
 export type OverlayParticipationSelectedAction = {
   type: "overlay.participationSelected";
+  streamerId?: string;
   twitchUserName: string;
   preferredRole?: string;
   checkInSeconds: number;
@@ -267,6 +268,7 @@ export type OverlayParticipationSelectedAction = {
 
 export type OverlayParticipationTeamsAction = {
   type: "overlay.participationTeams";
+  streamerId?: string;
   teams: {
     a: Array<{ twitchUserName: string; preferredRole?: string }>;
     b: Array<{ twitchUserName: string; preferredRole?: string }>;
@@ -278,6 +280,7 @@ export type OverlayParticipationTeamsAction = {
 
 export type OverlaySoloRankProfileAction = {
   type: "overlay.soloRankProfile";
+  streamerId?: string;
   profile: ParticipationStreamerProfile;
   region?: string;
   queueLabel?: string;
@@ -453,6 +456,11 @@ function nonEmptyString(value: unknown, maxLength: number): value is string {
 function optionalString(value: unknown, maxLength: number, fieldName: string): ValidationResult {
   if (value === undefined) return ok();
   return stringWithin(value, maxLength) ? ok() : fail(`${fieldName}은 ${maxLength}자 이하 문자열이어야 합니다.`);
+}
+
+function optionalNonEmptyString(value: unknown, maxLength: number, fieldName: string): ValidationResult {
+  if (value === undefined) return ok();
+  return nonEmptyString(value, maxLength) ? ok() : fail(`${fieldName}은 비어 있지 않은 ${maxLength}자 이하 문자열이어야 합니다.`);
 }
 
 function optionalOverlayAssetUrl(value: unknown, maxLength: number, fieldName: string): ValidationResult {
@@ -1038,7 +1046,7 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
       if (!common.ok) return common;
-      const streamerId = optionalString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      const streamerId = optionalNonEmptyString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
       if (!streamerId.ok) return streamerId;
       const sessionId = optionalString(candidate.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
       if (!sessionId.ok) return sessionId;
@@ -1054,7 +1062,7 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
       if (!common.ok) return common;
-      const streamerId = optionalString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      const streamerId = optionalNonEmptyString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
       if (!streamerId.ok) return streamerId;
       const sessionId = optionalString(candidate.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
       if (!sessionId.ok) return sessionId;
@@ -1104,6 +1112,7 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
     }
     case "overlay.participationSelected": {
       const keyResult = validateKeys(candidate, [
+        "streamerId",
         "twitchUserName",
         "preferredRole",
         "checkInSeconds",
@@ -1119,6 +1128,8 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
       if (!common.ok) return common;
+      const streamerId = optionalNonEmptyString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
       if (!nonEmptyString(candidate.twitchUserName, MAX_NAME_LENGTH)) return fail("twitchUserName은 필수 문자열입니다.");
       const roleResult = optionalString(candidate.preferredRole, MAX_SHORT_TEXT_LENGTH, "preferredRole");
       if (!roleResult.ok) return roleResult;
@@ -1137,17 +1148,21 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
       return validateLolRankedStats(candidate.rankedStats, "rankedStats");
     }
     case "overlay.participationTeams": {
-      const keyResult = validateKeys(candidate, ["teams", "durationMs", "variant", "source"], options);
+      const keyResult = validateKeys(candidate, ["streamerId", "teams", "durationMs", "variant", "source"], options);
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
       if (!common.ok) return common;
+      const streamerId = optionalNonEmptyString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
       return validateParticipationTeams(candidate.teams);
     }
     case "overlay.soloRankProfile": {
-      const keyResult = validateKeys(candidate, ["profile", "region", "queueLabel", "ladderRank", "durationMs", "variant", "source"], options);
+      const keyResult = validateKeys(candidate, ["streamerId", "profile", "region", "queueLabel", "ladderRank", "durationMs", "variant", "source"], options);
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
       if (!common.ok) return common;
+      const streamerId = optionalNonEmptyString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
       if (!isRecord(candidate.profile)) return fail("profile은 객체여야 합니다.");
       const profile = validateParticipationStreamerProfile(candidate.profile);
       if (!profile.ok) return profile;

@@ -73,6 +73,18 @@ export class DashboardSessionStore {
     if (id) this.sessions.delete(id);
   }
 
+  revokeByTwitchUserId(twitchUserId: string): number {
+    const normalizedUserId = twitchUserId.trim();
+    if (!normalizedUserId) return 0;
+    let revoked = 0;
+    for (const [id, session] of this.sessions) {
+      if (session.role !== "streamer" || session.twitchUserId !== normalizedUserId) continue;
+      this.sessions.delete(id);
+      revoked += 1;
+    }
+    return revoked;
+  }
+
   clear(): void {
     this.sessions.clear();
   }
@@ -182,6 +194,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (pathname === "/health" || pathname === "/health/live" || pathname === "/health/ready") return "PUBLIC";
   if (method === "POST" && pathname === "/api/inbound-email/cloudflare") return "PUBLIC";
   if (pathname === "/api/dashboard/auth/status" || pathname === "/api/dashboard/auth/check") return "PUBLIC";
+  if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";
   if (method === "GET" && (
     pathname === "/api/lol/profile" ||
     pathname === "/api/lol/suggestions" ||
@@ -246,16 +259,7 @@ type StreamerDashboardRule = {
 const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "GET", path: "/api/dashboard/auth/status" },
   { method: "POST", path: "/api/dashboard/auth/logout" },
-  { method: "GET", path: "/api/status" },
   { method: "GET", path: "/api/overlay/status" },
-  { method: "GET", path: "/api/alerts/config" },
-  { method: "POST", path: "/api/alerts/config" },
-  { method: "POST", path: "/api/alerts/assets" },
-  { method: "GET", path: "/api/actions/recent" },
-  { method: "GET", path: "/api/highlights" },
-  { method: "GET", path: "/api/followers" },
-  { method: "GET", path: "/api/twitch/status" },
-  { method: "POST", path: "/api/followers/refresh" },
   { method: "GET", path: "/api/participation/queue" },
   { method: "GET", path: "/api/participation/state" },
   { method: "GET", path: "/api/participation/game-monitor" },
@@ -264,13 +268,8 @@ const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "POST", path: "/api/participation/streamer-riot-id" },
   { method: "POST", path: "/api/participation/streamer-profile-link" },
   { method: "POST", path: "/api/participation/streamer-profile/refresh" },
-  { method: "GET", path: "/api/participation/profile-settings" },
-  { method: "POST", path: "/api/participation/profile-settings" },
-  { method: "GET", path: "/api/participation/profile-settings/skin-options" },
   { method: "POST", path: "/api/participation/manual-control" },
   { method: "POST", path: "/api/participation/profile/refresh" },
-  { method: "POST", path: "/api/participation/invite-message" },
-  { method: "POST", path: "/api/participation/invite-message/bulk" },
   { method: "POST", path: "/api/participation/role-override" },
   { method: "POST", path: "/api/participation/entry-status" },
   { prefix: "/api/lol-operations" }
@@ -281,7 +280,7 @@ export function streamerDashboardRequestAllowed(method: string | undefined, path
   return STREAMER_DASHBOARD_API_RULES.some((rule) => {
     if (rule.method && rule.method !== requestMethod) return false;
     if (rule.path && rule.path === pathname) return true;
-    return Boolean(rule.prefix && pathname.startsWith(rule.prefix));
+    return Boolean(rule.prefix && (pathname === rule.prefix || pathname.startsWith(`${rule.prefix}/`)));
   });
 }
 

@@ -67,6 +67,7 @@ export class ActionDispatcher {
       this.recordAction({ id: actionId, type: String((action as { type?: string }).type), status: "failed", error: validation.error, createdAt: new Date().toISOString() });
       return;
     }
+    const overlayStreamerId = this.resolveOverlayStreamerId(action, ctx);
 
     try {
       let actionStatus: ActionRecord["status"] = "ok";
@@ -84,6 +85,7 @@ export class ActionDispatcher {
         case "overlay.banner": {
           const message: OverlayBannerMessage = {
             type: "overlay.banner",
+            streamerId: overlayStreamerId,
             title: action.title,
             subtitle: action.subtitle,
             message: action.message,
@@ -110,6 +112,7 @@ export class ActionDispatcher {
         case "overlay.subtitle":
           actionStatus = this.broadcastOverlay({
             type: "subtitle.update",
+            streamerId: overlayStreamerId,
             sourceLanguage: action.sourceLanguage,
             targetLanguage: action.targetLanguage,
             original: action.original,
@@ -121,18 +124,18 @@ export class ActionDispatcher {
           });
           break;
         case "overlay.subtitleBoost":
-          actionStatus = this.broadcastOverlay({ type: "subtitle.boost", title: action.title, message: action.message, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
+          actionStatus = this.broadcastOverlay({ type: "subtitle.boost", streamerId: overlayStreamerId, title: action.title, message: action.message, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
           break;
         case "overlay.question":
-          actionStatus = this.broadcastOverlay({ type: "question.show", userName: action.userName, question: action.question, translatedQuestion: action.translatedQuestion, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
+          actionStatus = this.broadcastOverlay({ type: "question.show", streamerId: overlayStreamerId, userName: action.userName, question: action.question, translatedQuestion: action.translatedQuestion, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
           break;
         case "overlay.mission":
-          actionStatus = this.broadcastOverlay({ type: "mission.update", title: action.title, missions: action.missions, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
+          actionStatus = this.broadcastOverlay({ type: "mission.update", streamerId: overlayStreamerId, title: action.title, missions: action.missions, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
           break;
         case "overlay.participationQueue":
           actionStatus = this.broadcastOverlay({
             type: "participation.queue.update",
-            streamerId: action.streamerId,
+            streamerId: overlayStreamerId,
             sessionId: action.sessionId,
             revision: action.revision,
             isOpen: action.isOpen,
@@ -145,7 +148,7 @@ export class ActionDispatcher {
         case "overlay.participationStatus":
           actionStatus = this.broadcastOverlay({
             type: "participation.status.update",
-            streamerId: action.streamerId,
+            streamerId: overlayStreamerId,
             sessionId: action.sessionId,
             revision: action.revision,
             isOpen: action.isOpen,
@@ -162,7 +165,7 @@ export class ActionDispatcher {
         case "overlay.participationSnapshot":
           actionStatus = this.broadcastOverlay({
             type: "participation.snapshot.update",
-            streamerId: action.streamerId,
+            streamerId: overlayStreamerId ?? action.streamerId,
             sessionId: action.sessionId,
             revision: action.revision,
             status: action.status,
@@ -177,6 +180,7 @@ export class ActionDispatcher {
         case "overlay.participationSelected":
           actionStatus = this.broadcastOverlay({
             type: "participation.selected.show",
+            streamerId: overlayStreamerId,
             twitchUserName: action.twitchUserName,
             preferredRole: action.preferredRole,
             checkInSeconds: action.checkInSeconds,
@@ -191,11 +195,12 @@ export class ActionDispatcher {
           });
           break;
         case "overlay.participationTeams":
-          actionStatus = this.broadcastOverlay({ type: "participation.teams.update", teams: action.teams, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
+          actionStatus = this.broadcastOverlay({ type: "participation.teams.update", streamerId: overlayStreamerId, teams: action.teams, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
           break;
         case "overlay.soloRankProfile":
           actionStatus = this.broadcastOverlay({
             type: "solo-rank.profile.update",
+            streamerId: overlayStreamerId,
             profile: action.profile,
             region: action.region,
             queueLabel: action.queueLabel,
@@ -207,8 +212,8 @@ export class ActionDispatcher {
           break;
         case "overlay.emergency":
           actionStatus = this.broadcastOverlay(action.active === false
-            ? { type: "emergency.clear", durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason }
-            : { type: "emergency.show", title: action.title, message: action.message, durationMs: action.durationMs, variant: action.variant ?? "danger", source: action.source ?? reason });
+            ? { type: "emergency.clear", streamerId: overlayStreamerId, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason }
+            : { type: "emergency.show", streamerId: overlayStreamerId, title: action.title, message: action.message, durationMs: action.durationMs, variant: action.variant ?? "danger", source: action.source ?? reason });
           break;
         case "queue.question": {
           const question = this.store.addQuestion({ userName: action.userName ?? "unknown", question: action.question, translatedQuestion: action.translatedQuestion });
@@ -221,39 +226,43 @@ export class ActionDispatcher {
           break;
         }
         case "participation.open":
-          this.store.setParticipationOpen(true);
-          actionStatus = this.broadcastOverlay({ type: "overlay.banner", title: "参加募集", message: "参加募集を開始しました。", variant: "success", durationMs: 5000, source: reason });
+          this.store.setParticipationOpen(true, overlayStreamerId);
+          actionStatus = this.broadcastOverlay({ type: "overlay.banner", streamerId: overlayStreamerId, title: "参加募集", message: "参加募集を開始しました。", variant: "success", durationMs: 5000, source: reason });
           this.broadcastOverlay({
             type: "participation.status.update",
+            streamerId: overlayStreamerId,
             isOpen: true,
             mode: action.mode,
             phase: "recruiting",
             message: "롤 시참 모집 중",
-            streamerProfile: this.store.getParticipationStreamerProfile(),
+            streamerProfile: this.store.getParticipationStreamerProfile(overlayStreamerId),
             source: reason
           });
           this.broadcastOverlay({
             type: "participation.queue.update",
+            streamerId: overlayStreamerId,
             isOpen: true,
-            queue: this.store.getParticipationOverlayQueue(),
+            queue: this.store.getParticipationOverlayQueue(undefined, overlayStreamerId),
             source: reason
           });
           break;
         case "participation.close":
-          this.store.setParticipationOpen(false);
-          actionStatus = this.broadcastOverlay({ type: "overlay.banner", title: "시참 모집", message: "롤 시참 모집을 종료합니다.", variant: "info", durationMs: 5000, source: reason });
+          this.store.setParticipationOpen(false, overlayStreamerId);
+          actionStatus = this.broadcastOverlay({ type: "overlay.banner", streamerId: overlayStreamerId, title: "시참 모집", message: "롤 시참 모집을 종료합니다.", variant: "info", durationMs: 5000, source: reason });
           this.broadcastOverlay({
             type: "participation.status.update",
+            streamerId: overlayStreamerId,
             isOpen: false,
             phase: "closed",
             message: "롤 시참 모집 종료",
-            streamerProfile: this.store.getParticipationStreamerProfile(),
+            streamerProfile: this.store.getParticipationStreamerProfile(overlayStreamerId),
             source: reason
           });
           this.broadcastOverlay({
             type: "participation.queue.update",
+            streamerId: overlayStreamerId,
             isOpen: false,
-            queue: this.store.getParticipationOverlayQueue(),
+            queue: this.store.getParticipationOverlayQueue(undefined, overlayStreamerId),
             source: reason
           });
           break;
@@ -278,6 +287,16 @@ export class ActionDispatcher {
       };
     }
     return renderObjectTemplates(rawAction, ctx) as BotAction;
+  }
+
+  private resolveOverlayStreamerId(action: BotAction, ctx: TemplateContext): string | undefined {
+    if (typeof ctx.streamerId === "string" && ctx.streamerId.trim()) {
+      return ctx.streamerId.trim();
+    }
+    if ("streamerId" in action && typeof action.streamerId === "string" && action.streamerId.trim()) {
+      return action.streamerId.trim();
+    }
+    return undefined;
   }
 
   private async attachOverlaySpeech(message: OverlayBannerMessage): Promise<void> {
@@ -334,6 +353,9 @@ export class ActionDispatcher {
   }
 
   private overlayCooldownKey(message: OverlayMessage): string {
+    const streamerScope = "streamerId" in message && typeof message.streamerId === "string" && message.streamerId.trim()
+      ? `streamer:${message.streamerId.trim()}`
+      : "global";
     if (message.type === "participation.queue.update") {
       const queueKey = message.queue
         .map((entry) => [
@@ -345,25 +367,25 @@ export class ActionDispatcher {
           entry.mainRole ?? ""
         ].join(":"))
         .join("|");
-      return `${message.type}:${message.source ?? ""}:${message.isOpen ?? ""}:${queueKey}`;
+      return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.isOpen ?? ""}:${queueKey}`;
     }
     if (message.type === "participation.status.update") {
       const nextCandidateKey = message.nextCandidate
         ? `${message.nextCandidate.position}:${message.nextCandidate.twitchUserName}:${message.nextCandidate.status}`
         : "";
-      return `${message.type}:${message.source ?? ""}:${message.isOpen}:${message.phase ?? ""}:${message.message ?? ""}:${nextCandidateKey}`;
+      return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.isOpen}:${message.phase ?? ""}:${message.message ?? ""}:${nextCandidateKey}`;
     }
     if (message.type === "participation.teams.update") {
       const teamKey = [
         message.teams.a.map((player) => `${player.twitchUserName}:${player.preferredRole ?? ""}`).join(","),
         message.teams.b.map((player) => `${player.twitchUserName}:${player.preferredRole ?? ""}`).join(",")
       ].join("|");
-      return `${message.type}:${message.source ?? ""}:${teamKey}`;
+      return `${streamerScope}:${message.type}:${message.source ?? ""}:${teamKey}`;
     }
-    if ("message" in message && typeof message.message === "string") return `${message.type}:${message.source ?? ""}:${message.message}`;
-    if (message.type === "question.show") return `${message.type}:${message.source ?? ""}:${message.userName}:${message.question}`;
-    if (message.type === "subtitle.update") return `${message.type}:${message.source ?? ""}:${message.translated}`;
-    return `${message.type}:${message.source ?? ""}`;
+    if ("message" in message && typeof message.message === "string") return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.message}`;
+    if (message.type === "question.show") return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.userName}:${message.question}`;
+    if (message.type === "subtitle.update") return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.translated}`;
+    return `${streamerScope}:${message.type}:${message.source ?? ""}`;
   }
 
   private recordAction(record: ActionRecord): void {

@@ -144,6 +144,8 @@ const server = http.createServer(createHttpHandler({
   logger,
   refreshLolProfile: (entryId, streamerId) => refreshLolProfileForEntry(moduleContext, entryId, streamerId),
   sessions,
+  disconnectStreamerDashboard: (twitchUserId) => dashboard.disconnectStreamer(twitchUserId),
+  overlayStatusForStreamer: (twitchUserId) => overlay.statusForStreamer(twitchUserId),
   supportMailbox,
   readiness: () => store.getReadiness(),
   isShuttingDown: () => shuttingDown,
@@ -184,10 +186,33 @@ function dashboardWsRoleFromUrl(url: URL): DashboardRole {
   return url.searchParams.get("surface") === "streamer" ? "streamer" : "admin";
 }
 
+function dashboardStreamerTenantMatches(url: URL, request: import("@streamops/shared").StreamerRiotIdRequest): boolean {
+  const slug = url.searchParams.get("streamerSlug");
+  const key = url.searchParams.get("dashboardKey");
+  if (slug === null && key === null) return true;
+  if (slug === null || key === null) return false;
+  const expectedSlug = request.dashboardSlug?.trim().toLowerCase();
+  const expectedKey = request.dashboardKey?.trim();
+  return Boolean(
+    expectedSlug &&
+    expectedKey &&
+    slug.trim().toLowerCase() === expectedSlug &&
+    tokenMatches(expectedKey, key.trim())
+  );
+}
+
 function hasDashboardWsAuth(req: http.IncomingMessage, url: URL): boolean {
   const role = dashboardWsRoleFromUrl(url);
-  return Boolean(authenticateDashboardRequest(req, sessions, role))
-    || (role === "admin" && tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url)));
+  const principal = authenticateDashboardRequest(req, sessions, role);
+  if (role === "streamer") {
+    if (principal?.type !== "DASHBOARD_ADMIN" || principal.role !== "streamer" || !principal.twitchUserId) return false;
+    const request = store.listApprovedStreamerRiotIds().find((candidate) =>
+      candidate.twitchUserId === principal.twitchUserId && candidate.dashboardEnabled === true
+    );
+    return Boolean(request && dashboardStreamerTenantMatches(url, request));
+  }
+  return Boolean(principal)
+    || tokenMatches(appConfig.security.dashboardAuthToken, legacyQueryToken(url));
 }
 
 function hasBridgeWsAuth(req: http.IncomingMessage, url: URL): boolean {

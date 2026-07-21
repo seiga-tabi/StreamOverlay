@@ -384,7 +384,8 @@ function normalizedLolAutomationSettings(value: unknown, streamerId: string): Lo
     streamerId,
     enabled: typeof input?.enabled === "boolean" ? input.enabled : DEFAULT_LOL_AUTOMATION_SETTINGS.enabled,
     autoSelectNextAfterGame: typeof input?.autoSelectNextAfterGame === "boolean" ? input.autoSelectNextAfterGame : DEFAULT_LOL_AUTOMATION_SETTINGS.autoSelectNextAfterGame,
-    announceInChat: typeof input?.announceInChat === "boolean" ? input.announceInChat : DEFAULT_LOL_AUTOMATION_SETTINGS.announceInChat,
+    // 등록 스트리머별 Twitch chat token이 분리되기 전에는 서버 전역 채팅으로의 전송을 허용하지 않습니다.
+    announceInChat: false,
     pollIntervalMs: Number.isFinite(pollIntervalMs) ? Math.max(10_000, Math.trunc(pollIntervalMs)) : DEFAULT_LOL_AUTOMATION_SETTINGS.pollIntervalMs,
     gameEndDebounceMs: Number.isFinite(gameEndDebounceMs) ? Math.max(0, Math.trunc(gameEndDebounceMs)) : DEFAULT_LOL_AUTOMATION_SETTINGS.gameEndDebounceMs,
     updatedAt: optionalString(input?.updatedAt) ?? nowIso()
@@ -481,10 +482,20 @@ function newStreamerOverlayKey(): string {
   return `sok_${crypto.randomBytes(24).toString("base64url")}`;
 }
 
+function newStreamerDashboardKey(): string {
+  return `sdk_${crypto.randomBytes(24).toString("base64url")}`;
+}
+
 function ensureApprovedStreamerOverlayAccess(request: StreamerRiotIdRequest): void {
   if (request.status !== "approved") return;
   request.overlaySlug = request.overlaySlug || streamerOverlaySlug(request.twitchLogin, request.twitchUserId);
   request.overlayKey = request.overlayKey || newStreamerOverlayKey();
+}
+
+function ensureApprovedStreamerDashboardAccess(request: StreamerRiotIdRequest): void {
+  if (request.status !== "approved" || request.dashboardEnabled !== true) return;
+  request.dashboardSlug = request.dashboardSlug || streamerOverlaySlug(request.twitchLogin, request.twitchUserId);
+  request.dashboardKey = request.dashboardKey || newStreamerDashboardKey();
 }
 
 function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest | undefined {
@@ -514,6 +525,8 @@ function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest 
     normalizedRiotId: normalizeRiotIdKey(riotGameName, riotTagLine),
     overlaySlug: optionalString(input?.overlaySlug) ?? streamerOverlaySlug(twitchLogin, twitchUserId),
     overlayKey: optionalString(input?.overlayKey),
+    dashboardSlug: optionalString(input?.dashboardSlug),
+    dashboardKey: optionalString(input?.dashboardKey),
     profileLinkUrl: primaryProfileLink?.url ?? profileLinkUrl,
     profileLinkLabel: primaryProfileLink?.label ?? profileLinkLabel,
     profileLinks,
@@ -526,6 +539,7 @@ function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest 
     note: optionalString(input?.note)
   };
   ensureApprovedStreamerOverlayAccess(request);
+  ensureApprovedStreamerDashboardAccess(request);
   return request;
 }
 
@@ -890,7 +904,7 @@ type ScopedParticipationRuntime = {
 const DEFAULT_LOL_AUTOMATION_SETTINGS = {
   enabled: false,
   autoSelectNextAfterGame: true,
-  announceInChat: true,
+  announceInChat: false,
   pollIntervalMs: 45_000,
   gameEndDebounceMs: 90_000
 } as const;
@@ -1479,10 +1493,17 @@ export class Store {
       const raw = fs.readFileSync(this.options.streamerRiotIdStatePath, "utf8");
       const parsed = objectRecord(JSON.parse(raw));
       const requests = Array.isArray(parsed?.requests) ? parsed.requests : [];
+      const needsDashboardAccessMigration = requests.some((value) => {
+        const request = objectRecord(value);
+        return request?.status === "approved" &&
+          request.dashboardEnabled === true &&
+          (!optionalString(request.dashboardSlug) || !optionalString(request.dashboardKey));
+      });
       this.streamerRiotIdRequests = requests
         .map(normalizedStreamerRiotIdRequest)
         .filter((request): request is StreamerRiotIdRequest => Boolean(request));
       this.clearPersistenceFailure("streamer_riot_ids");
+      if (needsDashboardAccessMigration) this.persistStreamerRiotIdState();
     } catch (error) {
       this.streamerRiotIdRequests = [];
       if (!this.isMissingStateFile(error)) {
@@ -2147,6 +2168,7 @@ export class Store {
         updatedAt: now
       });
       ensureApprovedStreamerOverlayAccess(approvedSame);
+      ensureApprovedStreamerDashboardAccess(approvedSame);
       this.persistStreamerRiotIdState();
       return cloneStreamerRiotIdRequest(approvedSame);
     }
@@ -2218,6 +2240,8 @@ export class Store {
       );
       request.overlaySlug = request.overlaySlug || previousApproved?.overlaySlug;
       request.overlayKey = request.overlayKey || previousApproved?.overlayKey;
+      request.dashboardSlug = request.dashboardSlug || previousApproved?.dashboardSlug;
+      request.dashboardKey = request.dashboardKey || previousApproved?.dashboardKey;
       request.dashboardEnabled = previousApproved?.dashboardEnabled === true;
       request.profileLinks = request.profileLinks?.length
         ? cloneStreamerProfileLinks(request.profileLinks)
@@ -2227,6 +2251,7 @@ export class Store {
       request.profileLinkLabel = request.profileLinkLabel || primaryProfileLink?.label || previousApproved?.profileLinkLabel;
       request.profileLinks = normalizedStreamerProfileLinks(request.profileLinks, request.profileLinkUrl, request.profileLinkLabel);
       ensureApprovedStreamerOverlayAccess(request);
+      ensureApprovedStreamerDashboardAccess(request);
       for (const candidate of this.streamerRiotIdRequests) {
         if (candidate.id === request.id || candidate.twitchUserId !== request.twitchUserId || candidate.status !== "approved") continue;
         candidate.status = "rejected";
@@ -2251,6 +2276,7 @@ export class Store {
     if (!request || request.status !== "approved") return undefined;
     const now = nowIso();
     request.dashboardEnabled = input.dashboardEnabled;
+    ensureApprovedStreamerDashboardAccess(request);
     request.updatedAt = now;
     request.reviewedAt = now;
     request.reviewer = input.reviewer;

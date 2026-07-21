@@ -39,18 +39,55 @@ export class DashboardHub {
     return this.clients.size;
   }
 
+  disconnectStreamer(twitchUserId: string): number {
+    const normalizedTwitchUserId = twitchUserId.trim();
+    if (!normalizedTwitchUserId) return 0;
+    let disconnected = 0;
+    for (const [client, context] of this.clients) {
+      if (context.role !== "streamer" || context.twitchUserId !== normalizedTwitchUserId) continue;
+      this.clients.delete(client);
+      disconnected += 1;
+      try {
+        client.close(1008, "스트리머 대시보드 권한이 해제되었습니다.");
+      } catch {
+        // close 실패 여부와 관계없이 권한이 해제된 client는 hub에서 즉시 제거한다.
+      }
+    }
+    return disconnected;
+  }
+
   private snapshotPayload(context: DashboardClientContext): string {
     const streamerId = context.role === "streamer" ? context.twitchUserId : undefined;
     const participationState = this.store.getParticipationState(streamerId);
+    const status = this.store.getStatus();
+    const overlayStatus = this.store.getOverlayStatus();
+    const streamerEvents = streamerId
+      ? this.store.recentEvents(200).filter((event) =>
+        event.type === "participation.entryCreated" && event.streamerId === streamerId
+      ).slice(0, 20)
+      : this.store.recentEvents(20);
     const payload = {
       type: "dashboard.snapshot",
       status: streamerId
-        ? { ...this.store.getStatus(), participation: participationState.isOpen ? "open" : "closed" }
-        : this.store.getStatus(),
-      events: this.store.recentEvents(20),
-      actions: this.store.recentActions(20),
-      overlay: this.store.getOverlayStatus(),
-      questions: this.store.getQuestions(),
+        ? {
+            server: status.server,
+            twitch: "disabled",
+            stream: "unknown",
+            bridge: "disconnected",
+            obs: "unknown",
+            participation: participationState.isOpen ? "open" : "closed"
+          }
+        : status,
+      events: streamerEvents,
+      actions: streamerId ? [] : this.store.recentActions(20),
+      overlay: streamerId
+        ? {
+            clientCount: 0,
+            clientsByChannel: Object.fromEntries(Object.keys(overlayStatus.clientsByChannel).map((channel) => [channel, 0])),
+            recentMessages: []
+          }
+        : overlayStatus,
+      questions: streamerId ? [] : this.store.getQuestions(),
       participationQueue: this.store.getParticipationQueue(streamerId),
       participationState
     };

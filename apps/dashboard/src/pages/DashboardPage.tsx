@@ -55,21 +55,34 @@ function statusLabel(value: string): string {
   return uiText.statusValues[value as StatusValue] ?? value;
 }
 
-export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { snapshot: any; socketConnected: boolean; role?: "admin" | "streamer" }) {
+export function DashboardPage({
+  snapshot,
+  socketConnected,
+  role = "admin",
+  returnPath = "/dashboard"
+}: {
+  snapshot: any;
+  socketConnected: boolean;
+  role?: "admin" | "streamer";
+  returnPath?: string;
+}) {
   const status = snapshot.status ?? { server: "offline", twitch: "disabled", stream: "unknown", bridge: "disconnected", obs: "unknown", participation: "closed" };
   const t = uiText.dashboard;
   const sharedT = dashboardSharedUi;
   const [twitchStatus, setTwitchStatus] = useState<TwitchConnectionStatus | null>(null);
   const [twitchStatusFailed, setTwitchStatusFailed] = useState(false);
+  const canReadGlobalTwitchStatus = role === "admin";
   const twitchEventSubState: TwitchEventSubWebSocketState | undefined = twitchStatus?.eventSub?.websocket;
-  const twitchCardValue = twitchStatus?.connected ? "connected" : twitchStatus?.state ?? status.twitch;
+  const twitchCardValue = canReadGlobalTwitchStatus
+    ? twitchStatus?.connected ? "connected" : twitchStatus?.state ?? status.twitch
+    : status.twitch;
   const twitchErrorHint = twitchStatus?.error ? ` · ${t.twitchStatusError}: ${twitchStatus.error}` : "";
-  const twitchCardHint = twitchStatus
+  const twitchCardHint = canReadGlobalTwitchStatus && twitchStatus
     ? `${t.twitchOAuth}: ${statusLabel(twitchCardValue)} · ${t.twitchEventSub}: ${statusLabel(twitchEventSubState ?? status.twitch)}${twitchErrorHint}`
-    : twitchStatusFailed
+    : canReadGlobalTwitchStatus && twitchStatusFailed
       ? t.twitchStatusUnavailable
       : undefined;
-  const twitchOAuthAction = resolveTwitchDashboardOAuthAction(twitchStatus);
+  const twitchOAuthAction = canReadGlobalTwitchStatus ? resolveTwitchDashboardOAuthAction(twitchStatus) : null;
   const twitchOAuthActionLabel = twitchOAuthAction === "connect"
     ? t.twitchConnectAction
     : twitchOAuthAction === "renew"
@@ -77,12 +90,17 @@ export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { s
       : undefined;
 
   function openTwitchOAuth() {
-    const query = new URLSearchParams({ return_to: "/dashboard" });
+    const query = new URLSearchParams({ return_to: returnPath });
     if (twitchOAuthAction === "renew") query.set("force_verify", "1");
     window.location.href = `${apiBase}/api/twitch/auth/start?${query.toString()}`;
   }
 
   useEffect(() => {
+    if (!canReadGlobalTwitchStatus) {
+      setTwitchStatus(null);
+      setTwitchStatusFailed(false);
+      return undefined;
+    }
     let active = true;
 
     apiGet<TwitchConnectionStatus>("/api/twitch/status")
@@ -99,7 +117,7 @@ export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { s
     return () => {
       active = false;
     };
-  }, [status.twitch]);
+  }, [canReadGlobalTwitchStatus, status.twitch]);
 
   return (
     <AppShell
@@ -163,7 +181,7 @@ export function DashboardPage({ snapshot, socketConnected, role = "admin" }: { s
             actionLabel={twitchOAuthActionLabel}
             hint={twitchCardHint}
             label={t.statusLabels.twitch}
-            loading={twitchStatus === null && !twitchStatusFailed}
+            loading={canReadGlobalTwitchStatus && twitchStatus === null && !twitchStatusFailed}
             onAction={twitchOAuthAction ? openTwitchOAuth : undefined}
             value={twitchCardValue}
           />

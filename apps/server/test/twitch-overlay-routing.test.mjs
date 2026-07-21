@@ -29,9 +29,16 @@ class FakeSocket extends EventEmitter {
   OPEN = 1;
   readyState = 1;
   sent = [];
+  closed = [];
 
   send(payload) {
     this.sent.push(JSON.parse(payload));
+  }
+
+  close(code, reason) {
+    this.readyState = 3;
+    this.closed.push({ code, reason });
+    this.emit("close");
   }
 }
 
@@ -54,7 +61,7 @@ function createHarness(options = {}) {
   const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, undefined, options.localTts);
   const events = new EventBus();
   const socket = new FakeSocket();
-  overlay.add(socket, "all", TEST_BROADCASTER_ID);
+  overlay.add(socket, "all", options.legacyOverlay ? undefined : TEST_BROADCASTER_ID);
   const riot = options.riot ?? {
     isConfigured: () => false,
     getAccountByRiotId: async () => null,
@@ -104,7 +111,7 @@ test("channel point redemption은 reward config를 거쳐 overlay.banner를 표�
 });
 
 test("participation.open action은 시참 상태와 대기열 overlay를 함께 갱신한다", async () => {
-  const { actions, store, socket } = createHarness();
+  const { actions, store, socket } = createHarness({ legacyOverlay: true });
 
   await actions.dispatchOne({ type: "participation.open", mode: "normal5" }, {}, "test.participation_open");
 
@@ -136,16 +143,105 @@ test("DashboardHub는 스트리머별 시참 WebSocket snapshot을 격리한다"
       source: "dashboard"
     }), streamerId);
   }
+  for (const streamerId of ["streamer-a", "streamer-b"]) {
+    store.addEvent({
+      type: "participation.entryCreated",
+      id: `event-${streamerId}`,
+      entryId: `entry-${streamerId}`,
+      streamerId,
+      twitchUserId: `viewer-${streamerId}`,
+      twitchUserName: `Viewer-${streamerId}`,
+      riotGameName: `Viewer-${streamerId}`,
+      riotTagLine: "JP1",
+      createdAt: "2026-07-21T00:00:00.000Z"
+    });
+  }
+  store.addEvent({
+    type: "twitch.chatMessage",
+    id: "global-chat-event",
+    broadcasterUserId: "main-broadcaster",
+    chatterUserId: "global-viewer",
+    chatterUserName: "GlobalViewer",
+    message: "다른 방송의 채팅",
+    createdAt: "2026-07-21T00:00:00.000Z"
+  });
+  store.addAction({
+    id: "global-action",
+    type: "overlay.banner",
+    status: "ok",
+    createdAt: "2026-07-21T00:00:00.000Z"
+  });
+  store.addQuestion({ userName: "GlobalViewer", question: "다른 방송의 질문" });
+  store.addOverlayMessageLog({
+    id: "global-overlay-message",
+    type: "overlay.banner",
+    channel: "events",
+    messagePreview: "다른 방송의 알림",
+    createdAt: "2026-07-21T00:00:00.000Z"
+  });
+  store.patchStatus({
+    twitch: "connected",
+    stream: "online",
+    bridge: "connected",
+    obs: "connected"
+  });
 
   const socketA = new FakeSocket();
   const socketB = new FakeSocket();
+  const adminSocket = new FakeSocket();
   dashboard.add(socketA, { role: "streamer", twitchUserId: "streamer-a" });
   dashboard.add(socketB, { role: "streamer", twitchUserId: "streamer-b" });
+  dashboard.add(adminSocket, { role: "admin" });
 
   assert.deepEqual(socketA.sent[0]?.participationQueue.map((entry) => entry.twitchUserName), ["Viewer-streamer-a"]);
   assert.deepEqual(socketB.sent[0]?.participationQueue.map((entry) => entry.twitchUserName), ["Viewer-streamer-b"]);
   assert.equal(socketA.sent[0]?.participationState.session?.streamerId, "streamer-a");
   assert.equal(socketB.sent[0]?.participationState.session?.streamerId, "streamer-b");
+  assert.deepEqual(socketA.sent[0]?.events.map((event) => event.id), ["event-streamer-a"]);
+  assert.deepEqual(socketB.sent[0]?.events.map((event) => event.id), ["event-streamer-b"]);
+  assert.deepEqual(socketA.sent[0]?.actions, []);
+  assert.deepEqual(socketA.sent[0]?.questions, []);
+  assert.deepEqual(socketA.sent[0]?.overlay.recentMessages, []);
+  assert.equal(socketA.sent[0]?.overlay.clientCount, 0);
+  assert.deepEqual(socketA.sent[0]?.status, {
+    server: "online",
+    twitch: "disabled",
+    stream: "unknown",
+    bridge: "disconnected",
+    obs: "unknown",
+    participation: "open"
+  });
+  assert.equal(adminSocket.sent[0]?.events.some((event) => event.id === "global-chat-event"), true);
+  assert.equal(adminSocket.sent[0]?.actions[0]?.id, "global-action");
+  assert.equal(adminSocket.sent[0]?.questions[0]?.question, "다른 방송의 질문");
+  assert.equal(adminSocket.sent[0]?.overlay.recentMessages[0]?.id, "global-overlay-message");
+  assert.equal(adminSocket.sent[0]?.status.twitch, "connected");
+  assert.equal(adminSocket.sent[0]?.status.stream, "online");
+  assert.equal(adminSocket.sent[0]?.status.bridge, "connected");
+  assert.equal(adminSocket.sent[0]?.status.obs, "connected");
+});
+
+test("DashboardHub는 권한이 해제된 스트리머의 WebSocket만 종료한다", () => {
+  const store = new Store();
+  const dashboard = new DashboardHub(store);
+  const streamerAFirst = new FakeSocket();
+  const streamerASecond = new FakeSocket();
+  const streamerB = new FakeSocket();
+  const admin = new FakeSocket();
+
+  dashboard.add(streamerAFirst, { role: "streamer", twitchUserId: "streamer-a" });
+  dashboard.add(streamerASecond, { role: "streamer", twitchUserId: "streamer-a" });
+  dashboard.add(streamerB, { role: "streamer", twitchUserId: "streamer-b" });
+  dashboard.add(admin, { role: "admin" });
+
+  assert.equal(dashboard.disconnectStreamer(" streamer-a "), 2);
+  assert.equal(dashboard.count(), 2);
+  assert.deepEqual(streamerAFirst.closed, [{ code: 1008, reason: "스트리머 대시보드 권한이 해제되었습니다." }]);
+  assert.deepEqual(streamerASecond.closed, [{ code: 1008, reason: "스트리머 대시보드 권한이 해제되었습니다." }]);
+  assert.deepEqual(streamerB.closed, []);
+  assert.deepEqual(admin.closed, []);
+  assert.equal(dashboard.disconnectStreamer(""), 0);
+  assert.equal(dashboard.disconnectStreamer("streamer-a"), 0);
 });
 
 test("!질문 명령은 질문 큐에 저장되고 question overlay를 표시한다", async () => {
@@ -438,7 +534,7 @@ test("twitch.subscriptionMessage 이벤트는 누적 개월과 댓글을 TTS 문
 });
 
 test("overlay action은 동일 메시지 cooldown을 적용한다", async () => {
-  const { actions, store, socket } = createHarness();
+  const { actions, store, socket } = createHarness({ legacyOverlay: true });
   const action = {
     type: "overlay.banner",
     title: "중복 테스트",
@@ -454,6 +550,74 @@ test("overlay action은 동일 메시지 cooldown을 적용한다", async () => 
   const statuses = store.recentActions(2).map((record) => record.status).sort();
   assert.equal(sent.length, 1);
   assert.deepEqual(statuses, ["ok", "skipped"]);
+});
+
+test("tenant overlay action은 streamerId를 전달하고 A/B별 cooldown을 독립 적용한다", async () => {
+  const { actions, socket: socketA, ctx } = createHarness();
+  const socketB = new FakeSocket();
+  ctx.overlay.add(socketB, "all", "streamer-b");
+  const queue = [{ position: 1, twitchUserName: "SameViewer", status: "waitlisted" }];
+
+  await actions.dispatchOne({
+    type: "overlay.participationQueue",
+    streamerId: TEST_BROADCASTER_ID,
+    isOpen: true,
+    queue,
+    source: "test.tenant.cooldown"
+  }, {}, "tenant.cooldown.a");
+  await actions.dispatchOne({
+    type: "overlay.participationQueue",
+    streamerId: "streamer-b",
+    isOpen: true,
+    queue,
+    source: "test.tenant.cooldown"
+  }, {}, "tenant.cooldown.b");
+  await actions.dispatchOne({
+    type: "overlay.participationSelected",
+    streamerId: TEST_BROADCASTER_ID,
+    twitchUserName: "SelectedA",
+    checkInSeconds: 30,
+    source: "test.tenant.selected"
+  }, {}, "tenant.selected.a");
+  await actions.dispatchOne({
+    type: "overlay.participationTeams",
+    streamerId: TEST_BROADCASTER_ID,
+    teams: { a: [{ twitchUserName: "A1" }], b: [{ twitchUserName: "B1" }] },
+    source: "test.tenant.teams"
+  }, {}, "tenant.teams.a");
+  await actions.dispatchOne({
+    type: "overlay.soloRankProfile",
+    streamerId: TEST_BROADCASTER_ID,
+    profile: { displayName: "StreamerA" },
+    source: "test.tenant.solo"
+  }, {}, "tenant.solo.a");
+
+  const queueA = socketA.sent.find((message) => message.type === "participation.queue.update" && message.source === "test.tenant.cooldown");
+  const queueB = socketB.sent.find((message) => message.type === "participation.queue.update" && message.source === "test.tenant.cooldown");
+  assert.equal(queueA?.streamerId, TEST_BROADCASTER_ID);
+  assert.equal(queueB?.streamerId, "streamer-b");
+  assert.equal(socketB.sent.some((message) => message.streamerId === TEST_BROADCASTER_ID), false);
+  assert.equal(socketA.sent.find((message) => message.type === "participation.selected.show")?.streamerId, TEST_BROADCASTER_ID);
+  assert.equal(socketA.sent.find((message) => message.type === "participation.teams.update")?.streamerId, TEST_BROADCASTER_ID);
+  assert.equal(socketA.sent.find((message) => message.type === "solo-rank.profile.update")?.streamerId, TEST_BROADCASTER_ID);
+});
+
+test("신뢰 가능한 event context의 streamerId는 정적 action scope보다 우선한다", async () => {
+  const { actions, socket: socketA, ctx } = createHarness();
+  const socketB = new FakeSocket();
+  ctx.overlay.add(socketB, "all", "streamer-b");
+
+  await actions.dispatchOne({
+    type: "overlay.participationQueue",
+    streamerId: "streamer-b",
+    isOpen: true,
+    queue: [],
+    source: "test.trusted_scope"
+  }, { streamerId: TEST_BROADCASTER_ID }, "test.trusted_scope");
+
+  const messageA = socketA.sent.find((message) => message.source === "test.trusted_scope");
+  assert.equal(messageA?.streamerId, TEST_BROADCASTER_ID);
+  assert.equal(socketB.sent.some((message) => message.source === "test.trusted_scope"), false);
 });
 
 test("시참 snapshot은 cooldown 안에서도 최신 revision을 모두 전달한다", async () => {
@@ -496,6 +660,7 @@ test("overlay.banner는 로컬 TTS 생성이 지연되어도 배너 전송을 �
     appConfig.localTts.enabled = true;
     appConfig.localTts.broadcastWaitMs = 500;
     const { actions, socket } = createHarness({
+      legacyOverlay: true,
       localTts: {
         async synthesizeOverlaySpeech() {
           return new Promise(() => {});
@@ -530,6 +695,7 @@ test("overlay.banner는 설정된 대기 시간 안에 생성된 로컬 TTS URL�
     appConfig.localTts.enabled = true;
     appConfig.localTts.broadcastWaitMs = 1000;
     const { actions, socket } = createHarness({
+      legacyOverlay: true,
       localTts: {
         async synthesizeOverlaySpeech() {
           await new Promise((resolve) => setTimeout(resolve, 20));
@@ -622,6 +788,7 @@ test("!시참 신청은 Riot 프로필 분석 결과를 안전한 overlay queue�
   assert.equal(entry.mainRole, "MIDDLE");
   assert.equal(entry.rankedStats?.tier, "DIAMOND");
   assert.ok(queueMessage);
+  assert.equal(queueMessage.streamerId, TEST_BROADCASTER_ID);
   assert.equal(queueMessage.queue[0].twitchUserName, "RankViewer");
   assert.equal(queueMessage.queue[0].rankedStats.tier, "DIAMOND");
   assert.equal(queueMessage.queue[0].mainRole, "MIDDLE");

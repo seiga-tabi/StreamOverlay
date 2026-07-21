@@ -181,6 +181,7 @@ export const twitchOverlayModule: BotModule = {
     ctx.events.on<TwitchSubscriptionInternalEvent>("twitch.subscription", async (event) => {
       const user = sanitizeDisplayName(event.userName);
       await ctx.actions.dispatch(subscriptionMessage(event), {
+        streamerId: event.broadcasterUserId,
         user,
         tier: subscriptionTierLabel(event.tier),
         isGift: event.isGift
@@ -191,6 +192,7 @@ export const twitchOverlayModule: BotModule = {
       const user = sanitizeDisplayName(event.userName);
       const message = sanitizeViewerInput(event.message ?? "", DISPLAY_COMMENT_MAX_LENGTH);
       await ctx.actions.dispatch(resubscriptionMessage(event), {
+        streamerId: event.broadcasterUserId,
         user,
         tier: subscriptionTierLabel(event.tier),
         months: Math.max(1, Math.trunc(event.cumulativeMonths || 1)),
@@ -203,6 +205,7 @@ export const twitchOverlayModule: BotModule = {
       const bits = Math.max(0, Math.trunc(event.bits));
       const message = sanitizeViewerInput(event.message ?? "", DISPLAY_COMMENT_MAX_LENGTH);
       await ctx.actions.dispatch(cheerMessage(event), {
+        streamerId: event.broadcasterUserId,
         user,
         bits,
         message
@@ -210,11 +213,11 @@ export const twitchOverlayModule: BotModule = {
     });
 
     ctx.events.on<TwitchRaidInternalEvent>("twitch.raid", async (event) => {
-      await ctx.actions.dispatch(raidMessage(event), {}, "twitch.raid");
+      await ctx.actions.dispatch(raidMessage(event), { streamerId: event.toBroadcasterUserId }, "twitch.raid");
     });
 
     ctx.events.on<TwitchFollowInternalEvent>("twitch.follow", async (event) => {
-      await ctx.actions.dispatch(followMessage(event), {}, "twitch.follow");
+      await ctx.actions.dispatch(followMessage(event), { streamerId: event.broadcasterUserId }, "twitch.follow");
     });
   }
 };

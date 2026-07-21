@@ -150,6 +150,7 @@ export const rewardsModule: BotModule = {
         ...(defaultOverlayBanner ? [defaultOverlayBanner] : []),
         ...rewardConfig.actions
       ], {
+        streamerId: event.broadcasterUserId,
         user: sanitizeDisplayName(event.userName),
         userId: event.userId,
         input: sanitizeViewerInput(event.userInput ?? ""),

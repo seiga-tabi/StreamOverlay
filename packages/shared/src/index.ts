@@ -2,6 +2,7 @@ export * from "./actions.js";
 export * from "./community.js";
 export * from "./events.js";
 export * from "./overlay.js";
+export * from "./palworld.js";
 export * from "./participation.js";
 export * from "./server-status.js";
 export * from "./support-mail.js";

@@ -92,7 +92,7 @@ test("LoL 방송 운영 API는 인증 세션 기준으로 스트리머 데이터
     const store = new Store();
     approveStreamer(store, "streamer-a", "StreamerA");
     approveStreamer(store, "streamer-b", "StreamerB");
-    store.setLolAutomationSettings("streamer-b", { announceInChat: false });
+    store.setLolAutomationSettings("streamer-b", { autoSelectNextAfterGame: true });
     store.startParticipationSession("streamer-b", {
       riotGameName: "StreamerB",
       riotTagLine: "JP1",
@@ -110,10 +110,11 @@ test("LoL 방송 운영 API는 인증 세션 기준으로 스트리머 데이터
 
     const sessions = new DashboardSessionStore();
     const streamerASession = sessions.create({ role: "streamer", twitchUserId: "streamer-a" });
+    const dispatched = [];
     const handler = createHttpHandler({
       store,
       twitchAuth: {},
-      actions: { async dispatchOne() {} },
+      actions: { async dispatchOne(action, _ctx, reason) { dispatched.push({ action, reason }); } },
       sessions
     });
 
@@ -123,13 +124,51 @@ test("LoL 방송 운영 API는 인증 세션 기준으로 스트리머 데이터
     assert.equal(initialState.identity.twitchUserId, "streamer-a");
     assert.equal(initialState.participation.queue.length, 0);
 
+    store.startParticipationSession("streamer-a", {
+      riotGameName: "StreamerA",
+      riotTagLine: "JP1",
+      capturedAt: new Date().toISOString()
+    });
+    const streamerAEntry = store.addParticipation(store.makeParticipationEntry({
+      twitchUserId: "viewer-a",
+      twitchUserName: "ViewerA",
+      riotGameName: "ViewerA",
+      riotTagLine: "JP1",
+      preferredRole: "fill",
+      status: "waitlisted",
+      source: "dashboard"
+    }), "streamer-a");
+
+    const roleOverrideRes = await request(handler, streamerASession, "POST", "/api/participation/role-override", {
+      entryId: streamerAEntry.id,
+      role: "top"
+    });
+    assert.equal(roleOverrideRes.statusCode, 200);
+    assert.equal(dispatched.at(-1)?.action.type, "overlay.participationQueue");
+    assert.equal(dispatched.at(-1)?.action.streamerId, "streamer-a");
+
+    const legacyEntryStatusRes = await request(handler, streamerASession, "POST", "/api/participation/entry-status", {
+      entryId: streamerAEntry.id,
+      status: "checked_in"
+    });
+    assert.equal(legacyEntryStatusRes.statusCode, 200);
+    assert.equal(dispatched.at(-1)?.action.type, "overlay.participationQueue");
+    assert.equal(dispatched.at(-1)?.action.streamerId, "streamer-a");
+
     const updateRes = await request(handler, streamerASession, "POST", "/api/lol-operations/automation", {
       streamerId: "streamer-b",
-      announceInChat: true
+      autoSelectNextAfterGame: false
     });
     assert.equal(updateRes.statusCode, 200);
-    assert.equal(store.getLolAutomationSettings("streamer-a").announceInChat, true);
-    assert.equal(store.getLolAutomationSettings("streamer-b").announceInChat, false);
+    assert.equal(store.getLolAutomationSettings("streamer-a").autoSelectNextAfterGame, false);
+    assert.equal(store.getLolAutomationSettings("streamer-b").autoSelectNextAfterGame, true);
+
+    const chatAnnouncementRes = await request(handler, streamerASession, "POST", "/api/lol-operations/automation", {
+      announceInChat: true
+    });
+    assert.equal(chatAnnouncementRes.statusCode, 409);
+    assert.equal(JSON.parse(chatAnnouncementRes.body).code, "STREAMER_CHAT_NOT_ISOLATED");
+    assert.equal(store.getLolAutomationSettings("streamer-a").announceInChat, false);
 
     const foreignEntryRes = await request(handler, streamerASession, "POST", "/api/lol-operations/participation/entry-status", {
       entryId: streamerBEntry.id,

@@ -96,6 +96,135 @@ test("OverlayHub는 시참 snapshot을 스트리머별 client에만 전송한다
   assert.equal(streamerASocket.sent.length, 1);
   assert.equal(streamerASocket.sent[0].streamerId, "streamer-a");
   assert.equal(streamerBSocket.sent.length, 0);
+  assert.equal(hub.statusForStreamer("streamer-a").clientCount, 1);
+  assert.equal(hub.statusForStreamer("streamer-a").clientsByChannel.participation, 1);
+  assert.equal(hub.statusForStreamer("streamer-b").clientCount, 1);
+  assert.equal(hub.statusForStreamer("streamer-c").clientCount, 0);
+  assert.deepEqual(hub.statusForStreamer("streamer-a").recentMessages, []);
+});
+
+test("OverlayHub는 A/B 스트리머의 실시간 메시지와 retained replay/clear를 완전히 격리한다", () => {
+  const { hub } = createHub();
+  const liveA = new FakeSocket();
+  const liveB = new FakeSocket();
+  hub.add(liveA, "all", "streamer-a");
+  hub.add(liveB, "all", "streamer-b");
+
+  for (const streamerId of ["streamer-a", "streamer-b"]) {
+    hub.broadcast({
+      type: "participation.queue.update",
+      streamerId,
+      isOpen: true,
+      queue: [{ position: 1, twitchUserName: `Viewer-${streamerId}`, status: "waitlisted" }]
+    });
+    hub.broadcast({
+      type: "solo-rank.profile.update",
+      streamerId,
+      profile: { displayName: `Profile-${streamerId}` },
+      region: "JP"
+    });
+    hub.broadcast({
+      type: "participation.teams.update",
+      streamerId,
+      teams: {
+        a: [{ twitchUserName: `TeamA-${streamerId}` }],
+        b: [{ twitchUserName: `TeamB-${streamerId}` }]
+      }
+    });
+    hub.broadcast({
+      type: "participation.selected.show",
+      streamerId,
+      twitchUserName: `Selected-${streamerId}`,
+      checkInSeconds: 30
+    });
+  }
+
+  assert.equal(liveA.sent.every((message) => message.streamerId === "streamer-a"), true);
+  assert.equal(liveB.sent.every((message) => message.streamerId === "streamer-b"), true);
+  assert.deepEqual(liveA.sent.map((message) => message.type), [
+    "participation.queue.update",
+    "solo-rank.profile.update",
+    "participation.teams.update",
+    "participation.selected.show"
+  ]);
+  assert.deepEqual(liveB.sent.map((message) => message.type), [
+    "participation.queue.update",
+    "solo-rank.profile.update",
+    "participation.teams.update",
+    "participation.selected.show"
+  ]);
+
+  hub.broadcast({ type: "participation.selected.clear", streamerId: "streamer-a" });
+  hub.broadcast({
+    type: "participation.status.update",
+    streamerId: "streamer-a",
+    isOpen: false,
+    phase: "closed",
+    message: "A 모집 종료"
+  });
+
+  assert.equal(liveA.sent.some((message) => message.type === "participation.selected.clear"), true);
+  assert.equal(liveB.sent.some((message) => message.type === "participation.selected.clear"), false);
+  assert.equal(liveB.sent.some((message) => message.type === "participation.status.update"), false);
+
+  const reconnectA = new FakeSocket();
+  const reconnectB = new FakeSocket();
+  hub.add(reconnectA, "all", "streamer-a");
+  hub.add(reconnectB, "all", "streamer-b");
+
+  assert.equal(reconnectA.sent.every((message) => message.streamerId === "streamer-a"), true);
+  assert.equal(reconnectB.sent.every((message) => message.streamerId === "streamer-b"), true);
+  assert.equal(reconnectA.sent.some((message) => message.type === "participation.selected.show"), false);
+  assert.equal(reconnectA.sent.some((message) => message.type === "participation.teams.update"), false);
+  assert.equal(reconnectA.sent.some((message) => message.type === "participation.status.update"), true);
+  assert.equal(reconnectB.sent.some((message) => message.type === "participation.selected.show"), true);
+  assert.equal(reconnectB.sent.some((message) => message.type === "participation.teams.update"), true);
+  assert.equal(reconnectB.sent.some((message) => message.type === "participation.status.update"), false);
+  assert.equal(reconnectA.sent.find((message) => message.type === "solo-rank.profile.update")?.profile.displayName, "Profile-streamer-a");
+  assert.equal(reconnectB.sent.find((message) => message.type === "solo-rank.profile.update")?.profile.displayName, "Profile-streamer-b");
+});
+
+test("OverlayHub는 legacy 전역과 A/B tenant의 실시간 및 retained replay를 서로 격리한다", () => {
+  const { hub } = createHub();
+  const liveLegacy = new FakeSocket();
+  const liveA = new FakeSocket();
+  const liveB = new FakeSocket();
+  hub.add(liveLegacy, "all");
+  hub.add(liveA, "all", "streamer-a");
+  hub.add(liveB, "all", "streamer-b");
+
+  hub.broadcast({
+    type: "mission.update",
+    title: "전역 미션",
+    missions: [{ id: "global-mission", text: "legacy 전용", done: false }]
+  });
+  hub.broadcast({
+    type: "participation.queue.update",
+    streamerId: "streamer-a",
+    isOpen: true,
+    queue: [{ position: 1, twitchUserName: "ViewerA", status: "waitlisted" }]
+  });
+  hub.broadcast({
+    type: "participation.queue.update",
+    streamerId: "streamer-b",
+    isOpen: true,
+    queue: [{ position: 1, twitchUserName: "ViewerB", status: "waitlisted" }]
+  });
+
+  assert.deepEqual(liveLegacy.sent.map((message) => message.type), ["mission.update"]);
+  assert.deepEqual(liveA.sent.map((message) => message.streamerId), ["streamer-a"]);
+  assert.deepEqual(liveB.sent.map((message) => message.streamerId), ["streamer-b"]);
+
+  const replayLegacy = new FakeSocket();
+  const replayA = new FakeSocket();
+  const replayB = new FakeSocket();
+  hub.add(replayLegacy, "all");
+  hub.add(replayA, "all", "streamer-a");
+  hub.add(replayB, "all", "streamer-b");
+
+  assert.deepEqual(replayLegacy.sent.map((message) => message.type), ["mission.update"]);
+  assert.deepEqual(replayA.sent.map((message) => message.streamerId), ["streamer-a"]);
+  assert.deepEqual(replayB.sent.map((message) => message.streamerId), ["streamer-b"]);
 });
 
 test("OverlayHub는 reconnect 시 해당 스트리머의 최신 revision snapshot만 복구한다", () => {

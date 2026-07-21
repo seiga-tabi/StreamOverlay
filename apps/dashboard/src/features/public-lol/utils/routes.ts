@@ -100,7 +100,9 @@ export function setPublicPath(pathname: string, replace = false): void {
   if (window.location.pathname === nextPath) return;
   if (replace) {
     window.history.replaceState({}, "", nextPath);
+    window.dispatchEvent(new CustomEvent("publicroutechange"));
     return;
   }
   window.history.pushState({}, "", nextPath);
+  window.dispatchEvent(new CustomEvent("publicroutechange"));
 }

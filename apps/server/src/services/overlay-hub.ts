@@ -1,5 +1,5 @@
 import type WebSocket from "ws";
-import type { OverlayChannel, OverlayMessage } from "@streamops/shared";
+import type { OverlayChannel, OverlayMessage, OverlayStatus } from "@streamops/shared";
 import {
   OVERLAY_CHANNELS,
   newId,
@@ -38,7 +38,8 @@ export class OverlayHub {
 
   add(client: WebSocket, channelInput?: string | null, streamerId?: string): void {
     const channel = normalizeOverlayChannel(channelInput);
-    const overlayClient = { socket: client, channel, streamerId };
+    const normalizedStreamerId = streamerId?.trim() || undefined;
+    const overlayClient = { socket: client, channel, streamerId: normalizedStreamerId };
     this.clients.set(client, overlayClient);
     client.on("close", () => {
       this.clients.delete(client);
@@ -88,6 +89,20 @@ export class OverlayHub {
     return counts;
   }
 
+  statusForStreamer(streamerId: string): OverlayStatus {
+    const normalizedStreamerId = streamerId.trim();
+    const clientsByChannel = Object.fromEntries(OVERLAY_CHANNELS.map((channel) => [channel, 0])) as Record<OverlayChannel, number>;
+    if (!normalizedStreamerId) return { clientCount: 0, clientsByChannel, recentMessages: [] };
+    for (const client of this.clients.values()) {
+      if (client.streamerId === normalizedStreamerId) clientsByChannel[client.channel] += 1;
+    }
+    return {
+      clientCount: Object.values(clientsByChannel).reduce((total, count) => total + count, 0),
+      clientsByChannel,
+      recentMessages: []
+    };
+  }
+
   private sendRetainedMessages(client: OverlayClient): void {
     this.pruneExpiredRetainedMessages();
     const retainedMessages = [...this.retainedMessages.values()]
@@ -101,9 +116,10 @@ export class OverlayHub {
 
   private messageMatchesClient(message: OverlayMessage, client: OverlayClient): boolean {
     if (!overlayMessageMatchesChannel(message, client.channel)) return false;
-    const streamerId = this.participationStreamerId(message);
+    const streamerId = this.streamerIdForMessage(message);
     if (streamerId) return client.streamerId === streamerId;
-    return true;
+    // streamerId가 없는 기존 전역 메시지는 tenant에 연결되지 않은 legacy overlay에만 전달합니다.
+    return client.streamerId === undefined;
   }
 
   private sendToClient(client: OverlayClient, payload: string): void {
@@ -124,11 +140,11 @@ export class OverlayHub {
   private rememberMessage(message: OverlayMessage, channel: OverlayChannel): void {
     this.pruneExpiredRetainedMessages();
     if (message.type.endsWith(".clear")) {
-      this.retainedMessages.delete(this.retainedKeyForClear(message.type));
+      this.retainedMessages.delete(this.retainedKeyForClear(message));
       return;
     }
     if (message.type === "participation.status.update" && (!message.isOpen || message.phase === "in_game" || message.phase === "game_ended" || message.phase === "closed")) {
-      this.retainedMessages.delete("participation.teams.update");
+      this.retainedMessages.delete(this.scopedRetainedKey("participation.teams.update", this.streamerIdForMessage(message)));
     }
 
     const ttlMs = this.retainTtlMs(message);
@@ -140,31 +156,32 @@ export class OverlayHub {
   }
 
   private retainedKey(message: OverlayMessage): string {
-    const streamerId = this.participationStreamerId(message);
-    return streamerId ? `${message.type}:${streamerId}` : message.type;
+    return this.scopedRetainedKey(message.type, this.streamerIdForMessage(message));
   }
 
-  private participationStreamerId(message: OverlayMessage): string | undefined {
-    if (
-      message.type === "participation.snapshot.update"
-      || message.type === "participation.status.update"
-      || message.type === "participation.queue.update"
-    ) {
-      return message.streamerId;
-    }
-    return undefined;
+  private scopedRetainedKey(type: OverlayMessage["type"], streamerId?: string): string {
+    return streamerId ? `${type}:${streamerId}` : type;
+  }
+
+  private streamerIdForMessage(message: OverlayMessage): string | undefined {
+    return message.streamerId?.trim() || undefined;
   }
 
   private retainedReplayPriority(message: OverlayMessage): number {
     return message.type === "participation.snapshot.update" ? 1 : 0;
   }
 
-  private retainedKeyForClear(type: OverlayMessage["type"]): string {
-    if (type === "question.clear") return "question.show";
-    if (type === "chat.clear") return "chat.message.add";
-    if (type === "participation.selected.clear") return "participation.selected.show";
-    if (type === "emergency.clear") return "emergency.show";
-    return type;
+  private retainedKeyForClear(message: OverlayMessage): string {
+    const retainedType = message.type === "question.clear"
+      ? "question.show"
+      : message.type === "chat.clear"
+        ? "chat.message.add"
+        : message.type === "participation.selected.clear"
+          ? "participation.selected.show"
+          : message.type === "emergency.clear"
+            ? "emergency.show"
+            : message.type;
+    return this.scopedRetainedKey(retainedType, this.streamerIdForMessage(message));
   }
 
   private retainTtlMs(message: OverlayMessage): number | undefined {

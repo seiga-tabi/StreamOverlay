@@ -413,6 +413,7 @@ export class LolGameMonitorController {
     if (!profile) return;
     this.ctx.overlay.broadcast({
       type: "solo-rank.profile.update",
+      streamerId: this.streamerId,
       profile,
       region,
       queueLabel: soloRankQueueLabel(profile),

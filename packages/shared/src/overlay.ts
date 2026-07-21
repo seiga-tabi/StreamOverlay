@@ -16,6 +16,7 @@ export type OverlaySpeechLanguage = (typeof OVERLAY_SPEECH_LANGUAGES)[number];
 export type ParticipationPhase = (typeof PARTICIPATION_PHASES)[number];
 
 export type OverlayMessageBase = {
+  streamerId?: string;
   durationMs?: number;
   variant?: OverlayVariant;
   source?: string;
@@ -152,6 +153,7 @@ export type ParticipationSnapshotUpdateMessage = OverlayMessageBase & {
 
 export type SoloRankProfileUpdateMessage = OverlayMessageBase & {
   type: "solo-rank.profile.update";
+  streamerId?: string;
   profile: ParticipationStreamerProfile;
   region?: string;
   queueLabel?: string;
@@ -160,6 +162,7 @@ export type SoloRankProfileUpdateMessage = OverlayMessageBase & {
 
 export type ParticipationSelectedShowMessage = OverlayMessageBase & {
   type: "participation.selected.show";
+  streamerId?: string;
   twitchUserName: string;
   preferredRole?: string;
   checkInSeconds: number;
@@ -172,10 +175,12 @@ export type ParticipationSelectedShowMessage = OverlayMessageBase & {
 
 export type ParticipationSelectedClearMessage = OverlayMessageBase & {
   type: "participation.selected.clear";
+  streamerId?: string;
 };
 
 export type ParticipationTeamsUpdateMessage = OverlayMessageBase & {
   type: "participation.teams.update";
+  streamerId?: string;
   teams: {
     a: Array<{ twitchUserName: string; preferredRole?: string }>;
     b: Array<{ twitchUserName: string; preferredRole?: string }>;
@@ -281,6 +286,11 @@ function optionalString(value: unknown, maxLength: number, fieldName: string): O
   return stringWithin(value, maxLength) ? ok() : fail(`${fieldName}은 ${maxLength}자 이하 문자열이어야 합니다.`);
 }
 
+function optionalNonEmptyString(value: unknown, maxLength: number, fieldName: string): OverlayValidationResult {
+  if (value === undefined) return ok();
+  return nonEmptyString(value, maxLength) ? ok() : fail(`${fieldName}은 비어 있지 않은 ${maxLength}자 이하 문자열이어야 합니다.`);
+}
+
 function optionalHttpsUrl(value: unknown, maxLength: number, fieldName: string): OverlayValidationResult {
   if (value === undefined) return ok();
   if (!stringWithin(value, maxLength)) return fail(`${fieldName}은 ${maxLength}자 이하 문자열이어야 합니다.`);
@@ -353,10 +363,12 @@ function optionalExactString<T extends readonly string[]>(value: unknown, values
 }
 
 function validateKeys(candidate: Record<string, unknown>, allowedKeys: readonly string[]): OverlayValidationResult {
-  const allowed = new Set(["type", "durationMs", "variant", "source", ...allowedKeys]);
+  const allowed = new Set(["type", "streamerId", "durationMs", "variant", "source", ...allowedKeys]);
   for (const key of Object.keys(candidate)) {
     if (!allowed.has(key)) return fail(`허용되지 않는 overlay message 필드입니다: ${key}`);
   }
+  const streamerIdResult = optionalNonEmptyString(candidate.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+  if (!streamerIdResult.ok) return streamerIdResult;
   const durationResult = optionalDuration(candidate.durationMs);
   if (!durationResult.ok) return durationResult;
   const variantResult = optionalVariant(candidate.variant);
@@ -905,7 +917,7 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
     case "participation.queue.update": {
       const keys = validateKeys(message, ["streamerId", "sessionId", "revision", "isOpen", "queue"]);
       if (!keys.ok) return keys;
-      const streamerId = optionalString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      const streamerId = optionalNonEmptyString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
       if (!streamerId.ok) return streamerId;
       const sessionId = optionalString(message.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
       if (!sessionId.ok) return sessionId;
@@ -919,7 +931,7 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
     case "participation.status.update": {
       const keys = validateKeys(message, ["streamerId", "sessionId", "revision", "isOpen", "mode", "phase", "message", "nextCandidate", "streamerProfile"]);
       if (!keys.ok) return keys;
-      const streamerId = optionalString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      const streamerId = optionalNonEmptyString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
       if (!streamerId.ok) return streamerId;
       const sessionId = optionalString(message.sessionId, MAX_SHORT_TEXT_LENGTH, "sessionId");
       if (!sessionId.ok) return sessionId;
@@ -955,8 +967,10 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
       return optionalString(message.traceId, MAX_SHORT_TEXT_LENGTH, "traceId");
     }
     case "solo-rank.profile.update": {
-      const keys = validateKeys(message, ["profile", "region", "queueLabel", "ladderRank"]);
+      const keys = validateKeys(message, ["streamerId", "profile", "region", "queueLabel", "ladderRank"]);
       if (!keys.ok) return keys;
+      const streamerId = optionalNonEmptyString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
       if (!isRecord(message.profile)) return fail("profile은 객체여야 합니다.");
       const profile = validateParticipationStreamerProfile(message.profile);
       if (!profile.ok) return profile;
@@ -969,6 +983,7 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
     }
     case "participation.selected.show": {
       const keys = validateKeys(message, [
+        "streamerId",
         "twitchUserName",
         "preferredRole",
         "checkInSeconds",
@@ -979,6 +994,8 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
         "rankedStats"
       ]);
       if (!keys.ok) return keys;
+      const streamerId = optionalNonEmptyString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
       if (!nonEmptyString(message.twitchUserName, MAX_SHORT_TEXT_LENGTH)) return fail("twitchUserName은 필수 문자열입니다.");
       const role = optionalString(message.preferredRole, MAX_SHORT_TEXT_LENGTH, "preferredRole");
       if (!role.ok) return role;
@@ -997,11 +1014,15 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
       return validateLolRankedStats(message.rankedStats, "rankedStats");
     }
     case "participation.selected.clear": {
-      return validateKeys(message, []);
+      const keys = validateKeys(message, ["streamerId"]);
+      if (!keys.ok) return keys;
+      return optionalNonEmptyString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
     }
     case "participation.teams.update": {
-      const keys = validateKeys(message, ["teams"]);
+      const keys = validateKeys(message, ["streamerId", "teams"]);
       if (!keys.ok) return keys;
+      const streamerId = optionalNonEmptyString(message.streamerId, MAX_SHORT_TEXT_LENGTH, "streamerId");
+      if (!streamerId.ok) return streamerId;
       return validateTeams(message.teams);
     }
     case "emergency.show": {

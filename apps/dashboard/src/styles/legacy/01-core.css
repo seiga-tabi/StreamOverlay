@@ -9019,8 +9019,7 @@ code {
 }
 
 .public-app-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 50;
   display: grid;
   grid-template-columns: minmax(118px, auto) minmax(0, auto) minmax(300px, 1fr) max-content;

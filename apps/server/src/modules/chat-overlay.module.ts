@@ -102,6 +102,7 @@ export const chatOverlayModule: BotModule = {
       const fragments = safeChatFragments(event, config.maxMessageLength);
       ctx.overlay.broadcast({
         type: "chat.message.add",
+        streamerId: event.broadcasterUserId,
         id: event.id,
         userName: sanitizeDisplayName(event.chatterUserName),
         ...(profileImageUrl ? { profileImageUrl } : {}),

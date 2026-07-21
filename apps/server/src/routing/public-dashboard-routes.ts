@@ -10,6 +10,8 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/privacy",
   "/terms",
   "/contact",
+  "/palworld",
+  "/palworld/",
   "/lol/tournaments"
 ]);
 
@@ -18,7 +20,8 @@ const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/lol/tournaments/",
   "/community/server",
   "/community/party",
-  "/community/posts/"
+  "/community/posts/",
+  "/palworld/"
 ];
 
 export function isPublicDashboardAppRoute(pathname: string): boolean {

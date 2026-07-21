@@ -529,7 +529,7 @@ async function handleCheckIn(ctx: ModuleContext, settings: ParticipationSettings
   ctx.dashboard.broadcastSnapshot();
   void ctx.actions.dispatch([
     { type: "overlay.banner", message: `${event.chatterUserName}님 참가 확인 완료!`, variant: "success", durationMs: 4000 }
-  ], {}, "participation.checked_in").catch((error) => {
+  ], { streamerId: event.broadcasterUserId }, "participation.checked_in").catch((error) => {
     ctx.logger.error({ type: "participation.banner_failed", error: toSafeErrorMessage(error) });
   });
 }
@@ -614,7 +614,7 @@ export const participationModule: BotModule = {
         void ctx.actions.dispatch([
           { type: "overlay.banner", message: "参加募集を開始しました。", variant: "success", durationMs: 5000 },
           { type: "twitch.chat", message: settings.guideMessage }
-        ], {}, "participation.open").catch((error) => {
+        ], { streamerId: event.broadcasterUserId }, "participation.open").catch((error) => {
           ctx.logger.error({ type: "participation.followup_failed", reason: "open", error: toSafeErrorMessage(error) });
         });
         return;

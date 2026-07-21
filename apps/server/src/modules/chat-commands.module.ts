@@ -55,6 +55,7 @@ export const chatCommandsModule: BotModule = {
       if (!actions) return;
       const input = sanitizeViewerInput(rest.join(" "));
       await ctx.actions.dispatch(actions, {
+        streamerId: event.broadcasterUserId,
         user: sanitizeDisplayName(event.chatterUserName),
         userId: event.chatterUserId,
         input,

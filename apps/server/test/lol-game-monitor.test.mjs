@@ -224,3 +224,44 @@ test("LolGameMonitorController는 해당 스트리머의 게임 종료만 해당
   assert.equal(ctx.store.getParticipationSession(streamerA)?.status, "recruiting");
   assert.equal(ctx.store.getParticipationSession(streamerB)?.status, "recruiting");
 });
+
+test("LolGameMonitorController는 solo-rank profile에 소유 streamerId를 포함한다", async () => {
+  const { ctx, overlayMessages } = createHarness();
+  ctx.lolProfileEnrichment = {
+    getCachedPatch() {
+      return {
+        profileStatus: "ready",
+        mainRole: "MIDDLE",
+        mainRoleConfidence: 80,
+        topChampions: [],
+        rankedStats: {
+          queueType: "RANKED_SOLO_5x5",
+          tier: "DIAMOND",
+          rank: "I",
+          leaguePoints: 50,
+          wins: 10,
+          losses: 5,
+          winRate: 67,
+          fetchedAt: "2026-07-21T00:00:00.000Z"
+        }
+      };
+    },
+    async enrich() {
+      throw new Error("cache가 사용되어야 합니다.");
+    }
+  };
+  const controller = new LolGameMonitorController(ctx, {
+    enabled: true,
+    streamerRiotId: "Streamer#KR1",
+    pollIntervalMs: 60000,
+    gameEndDebounceMs: 0,
+    autoSelectNextAfterGame: false,
+    announceInChat: false
+  }, { mode: "normal5", checkInSeconds: 30 }, () => Date.now(), "streamer-a");
+
+  await controller.refreshStreamerProfileFromConfig(false);
+
+  const soloRankMessages = overlayMessages.filter((message) => message.type === "solo-rank.profile.update");
+  assert.equal(soloRankMessages.length, 2);
+  assert.equal(soloRankMessages.every((message) => message.streamerId === "streamer-a"), true);
+});

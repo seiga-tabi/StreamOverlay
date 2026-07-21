@@ -266,6 +266,8 @@ export type StreamerRiotIdRequest = {
   normalizedRiotId: string;
   overlaySlug?: string;
   overlayKey?: string;
+  dashboardSlug?: string;
+  dashboardKey?: string;
   profileLinkUrl?: string;
   profileLinkLabel?: string;
   profileLinks?: StreamerProfileLink[];

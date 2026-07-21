@@ -145,7 +145,10 @@ async function installDashboardApiFixtures(page: Page): Promise<void> {
           twitchLogin: "yoro_visual",
           twitchDisplayName: "YORO Visual",
           riotGameName: "YORO QA",
-          riotTagLine: "JP1"
+          riotTagLine: "JP1",
+          dashboardSlug: "yoro_visual",
+          dashboardKey: "sdk_visual_dashboard_fixture",
+          dashboardPath: "/dashboard/yoro_visual/sdk_visual_dashboard_fixture"
         }
       });
       return;

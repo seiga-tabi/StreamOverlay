@@ -7,6 +7,7 @@ import type { Store } from "../services/store.js";
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
+  OVERLAY_CHANNELS,
   formatRiotId,
   normalizeRiotIdKey,
   normalizeLolRole,
@@ -33,6 +34,7 @@ import {
   type ParticipationStreamerProfile,
   type ParticipationStatus,
   type DashboardServerStatus,
+  type OverlayStatus,
   type StreamerProfileLink,
   type StreamerRiotIdentity,
   type StreamerRiotIdRequest,
@@ -87,6 +89,7 @@ import {
   clientIp,
   dashboardSessionCookie,
   dashboardSessionIdFromRequest,
+  tokenMatches,
   type AuthPrincipal,
   type DashboardRole
 } from "../security/auth.js";
@@ -99,6 +102,20 @@ import {
   type ReadinessCheck
 } from "../routing/health-responses.js";
 import { CommunityModerationService, CommunityModerationServiceError } from "../services/community-moderation-service.js";
+import {
+  PALWORLD_PUBLIC_CACHE_CONTROL,
+  PalworldRecordNotFoundError,
+  palworldDataService
+} from "../services/palworld-data.js";
+import {
+  PalworldQueryError,
+  parsePalworldBreedingParentsQuery,
+  parsePalworldBreedingQuery,
+  parsePalworldId,
+  parsePalworldItemListQuery,
+  parsePalworldPalListQuery,
+  parsePalworldSearchQuery
+} from "../services/palworld-query.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
@@ -160,6 +177,12 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "no-referrer",
   "X-Permitted-Cross-Domain-Policies": "none",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+};
+
+const PALWORLD_CACHE_HEADERS = {
+  "Cache-Control": PALWORLD_PUBLIC_CACHE_CONTROL,
+  "X-Palworld-Data-Version": palworldDataService.meta().metadata.gameVersion,
+  "X-Palworld-Data-Revision": palworldDataService.meta().metadata.sourceRevision
 };
 
 type SkinOptionsResponse = {
@@ -659,7 +682,7 @@ function corsHeaders(req: IncomingMessage): Record<string, string> {
   const origin = requestHeaders.origin;
   const responseHeaders: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-Dashboard-Surface, X-StreamOps-CSRF",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-Dashboard-Surface, X-StreamOps-Streamer-Slug, X-StreamOps-Dashboard-Key, X-StreamOps-CSRF",
     "Vary": "Origin"
   };
   if (typeof origin === "string") {
@@ -1539,7 +1562,7 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
     sendInvalidStaticPath(req, res);
     return true;
   }
-  if (mountPath === "/overlay" && relative && !path.extname(relative)) {
+  if (relative && !path.extname(relative)) {
     await sendStaticFile(req, res, path.resolve(staticDir, "index.html"), {}, mountPath);
     return true;
   }
@@ -1683,6 +1706,8 @@ type HttpHandlerInput = {
   readiness?: ReadinessCheck;
   isShuttingDown?: () => boolean;
   connectionStatus?: () => DashboardServerStatus["connections"];
+  disconnectStreamerDashboard?: (twitchUserId: string) => void;
+  overlayStatusForStreamer?: (twitchUserId: string) => OverlayStatus;
 };
 
 function roundTo(value: number, digits: number): number {
@@ -2847,6 +2872,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
     riotTagLine: string;
     overlaySlug?: string;
     overlayKey?: string;
+    dashboardSlug?: string;
+    dashboardKey?: string;
+    dashboardPath?: string;
     profileLinkUrl?: string;
     profileLinkLabel?: string;
     profileLinks?: StreamerProfileLink[];
@@ -2861,11 +2889,53 @@ export function createHttpHandler(input: HttpHandlerInput) {
       riotTagLine: request.riotTagLine,
       overlaySlug: request.overlaySlug,
       overlayKey: request.overlayKey,
+      dashboardSlug: request.dashboardSlug,
+      dashboardKey: request.dashboardKey,
+      dashboardPath: streamerDashboardPath(request),
       profileLinkUrl: request.profileLinkUrl,
       profileLinkLabel: request.profileLinkLabel,
       profileLinks: request.profileLinks?.map((link) => ({ ...link })),
       dashboardEnabled: request.dashboardEnabled === true
     };
+  }
+
+  function streamerDashboardPath(request: StreamerRiotIdRequest): string | undefined {
+    const slug = request.dashboardSlug?.trim();
+    const key = request.dashboardKey?.trim();
+    if (!slug || !key) return undefined;
+    return `/dashboard/${encodeURIComponent(slug)}/${encodeURIComponent(key)}`;
+  }
+
+  function streamerDashboardTenantMatches(req: IncomingMessage, request: StreamerRiotIdRequest): boolean {
+    const rawSlug = headerFirstValue(req.headers["x-streamops-streamer-slug"]);
+    const rawKey = headerFirstValue(req.headers["x-streamops-dashboard-key"]);
+    if (rawSlug === undefined && rawKey === undefined) return true;
+    if (rawSlug === undefined || rawKey === undefined) return false;
+    const expectedSlug = request.dashboardSlug?.trim().toLowerCase();
+    const expectedKey = request.dashboardKey?.trim();
+    const providedSlug = rawSlug.trim().toLowerCase();
+    const providedKey = rawKey.trim();
+    return Boolean(
+      expectedSlug &&
+      expectedKey &&
+      providedSlug === expectedSlug &&
+      tokenMatches(expectedKey, providedKey)
+    );
+  }
+
+  function sendStreamerDashboardTenantMismatch(
+    req: IncomingMessage,
+    res: ServerResponse,
+    request: StreamerRiotIdRequest
+  ): void {
+    sendJson(req, res, 403, {
+      error: "대시보드 URL이 현재 스트리머 세션과 일치하지 않습니다.",
+      code: "STREAMER_TENANT_MISMATCH",
+      authenticated: true,
+      role: "streamer",
+      streamer: publicStreamerDashboardInfo(request),
+      canonicalPath: streamerDashboardPath(request)
+    });
   }
 
   function listStreamerRiotIdRequests(): StreamerRiotIdRequest[] {
@@ -5001,14 +5071,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/overlay", appConfig.paths.overlayStatic)) return;
 
       if (url.pathname.startsWith("/api/")) {
-        const limitKey = `${ip}:${url.pathname}`;
+        const rateLimitPath = url.pathname.startsWith("/api/palworld/") ? "/api/palworld" : url.pathname;
+        const limitKey = `${ip}:${rateLimitPath}`;
         const limiter = url.pathname === "/api/inbound-email/cloudflare"
           ? inboundEmailLimiter
           : url.pathname.startsWith("/api/dashboard/auth/")
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
             ? oauthLimiter
-            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
+            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/palworld/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -5060,6 +5131,53 @@ export function createHttpHandler(input: HttpHandlerInput) {
           buildReadinessResponse(readiness, appConfig.build)
         );
       }
+      if (req.method === "GET" && url.pathname === "/api/palworld/meta") {
+        return sendJson(req, res, 200, palworldDataService.meta(), PALWORLD_CACHE_HEADERS);
+      }
+      if (req.method === "GET" && url.pathname === "/api/palworld/search") {
+        const query = parsePalworldSearchQuery(url.searchParams);
+        return sendJson(req, res, 200, palworldDataService.search(query.q, query.limit), PALWORLD_CACHE_HEADERS);
+      }
+      if (req.method === "GET" && url.pathname === "/api/palworld/pals") {
+        const query = parsePalworldPalListQuery(url.searchParams);
+        return sendJson(req, res, 200, palworldDataService.listPals(query), PALWORLD_CACHE_HEADERS);
+      }
+      const palworldPalDetailMatch = url.pathname.match(/^\/api\/palworld\/pals\/([^/]+)$/);
+      if (req.method === "GET" && palworldPalDetailMatch?.[1]) {
+        const decodedId = decodeUrlPathSegment(palworldPalDetailMatch[1]);
+        if (decodedId === undefined) throw new PalworldQueryError("Pal ID 인코딩이 올바르지 않습니다.");
+        return sendJson(
+          req,
+          res,
+          200,
+          palworldDataService.getPal(parsePalworldId(decodedId, "Pal ID")),
+          PALWORLD_CACHE_HEADERS
+        );
+      }
+      if (req.method === "GET" && url.pathname === "/api/palworld/items") {
+        const query = parsePalworldItemListQuery(url.searchParams);
+        return sendJson(req, res, 200, palworldDataService.listItems(query), PALWORLD_CACHE_HEADERS);
+      }
+      const palworldItemDetailMatch = url.pathname.match(/^\/api\/palworld\/items\/([^/]+)$/);
+      if (req.method === "GET" && palworldItemDetailMatch?.[1]) {
+        const decodedId = decodeUrlPathSegment(palworldItemDetailMatch[1]);
+        if (decodedId === undefined) throw new PalworldQueryError("아이템 ID 인코딩이 올바르지 않습니다.");
+        return sendJson(
+          req,
+          res,
+          200,
+          palworldDataService.getItem(parsePalworldId(decodedId, "아이템 ID")),
+          PALWORLD_CACHE_HEADERS
+        );
+      }
+      if (req.method === "GET" && url.pathname === "/api/palworld/breeding/parents") {
+        const query = parsePalworldBreedingParentsQuery(url.searchParams);
+        return sendJson(req, res, 200, palworldDataService.breedingParents(query), PALWORLD_CACHE_HEADERS);
+      }
+      if (req.method === "GET" && url.pathname === "/api/palworld/breeding") {
+        const query = parsePalworldBreedingQuery(url.searchParams);
+        return sendJson(req, res, 200, palworldDataService.breeding(query), PALWORLD_CACHE_HEADERS);
+      }
       if (req.method === "GET" && url.pathname === "/api/dashboard/auth/status") {
         const surface = dashboardAuthSurface(url.searchParams.get("surface"));
         const principal = authenticateDashboardRequest(req, sessions, surface);
@@ -5073,6 +5191,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
               configured: Boolean(input.publicTwitchAuth),
               authenticated: false
             }, { "Set-Cookie": clearDashboardSessionCookie("streamer") });
+          }
+          if (streamer && !streamerDashboardTenantMatches(req, streamer)) {
+            sendStreamerDashboardTenantMismatch(req, res, streamer);
+            return;
           }
           return sendJson(req, res, 200, {
             required: !appConfig.security.localNoAuth,
@@ -5091,6 +5213,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
             ? dashboardEnabledStreamerRiotIdForTwitchUser(publicTwitchStatus.user?.id)
             : undefined;
           if (approvedStreamer && publicTwitchStatus.user) {
+            if (!streamerDashboardTenantMatches(req, approvedStreamer)) {
+              sendStreamerDashboardTenantMismatch(req, res, approvedStreamer);
+              return;
+            }
             const session = sessions.create({ role: "streamer", twitchUserId: publicTwitchStatus.user.id });
             return sendJson(req, res, 200, {
               required: !appConfig.security.localNoAuth,
@@ -5114,10 +5240,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (
         auth.principal.type === "DASHBOARD_ADMIN" &&
         auth.principal.role === "streamer" &&
-        url.pathname !== "/api/dashboard/auth/logout" &&
-        !dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId)
+        url.pathname !== "/api/dashboard/auth/logout"
       ) {
-        return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다.", code: "STREAMER_DASHBOARD_DISABLED" });
+        const streamer = dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
+        if (!streamer) {
+          return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다.", code: "STREAMER_DASHBOARD_DISABLED" });
+        }
+        if (!streamerDashboardTenantMatches(req, streamer)) {
+          sendStreamerDashboardTenantMismatch(req, res, streamer);
+          return;
+        }
       }
       if (url.pathname === "/api/dashboard/server-status" && req.method === "GET") {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
@@ -5363,8 +5495,30 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/twitch/status") return sendJson(req, res, 200, await getTwitchStatus());
       if (req.method === "GET" && url.pathname === "/api/twitch/scopes") return sendJson(req, res, 200, input.twitchAuth.getScopes());
-      if (req.method === "GET" && url.pathname === "/api/status") return sendJson(req, res, 200, input.store.getStatus());
-      if (req.method === "GET" && url.pathname === "/api/overlay/status") return sendJson(req, res, 200, input.store.getOverlayStatus());
+      if (req.method === "GET" && url.pathname === "/api/status") {
+        const streamerId = authenticatedStreamerOwnerId(auth.principal);
+        const status = input.store.getStatus();
+        return sendJson(req, res, 200, streamerId
+          ? {
+              server: status.server,
+              twitch: "disabled",
+              stream: "unknown",
+              bridge: "disconnected",
+              obs: "unknown",
+              participation: input.store.getParticipationState(streamerId).isOpen ? "open" : "closed"
+            }
+          : status);
+      }
+      if (req.method === "GET" && url.pathname === "/api/overlay/status") {
+        const streamerId = authenticatedStreamerOwnerId(auth.principal);
+        return sendJson(req, res, 200, streamerId
+          ? input.overlayStatusForStreamer?.(streamerId) ?? {
+              clientCount: 0,
+              clientsByChannel: Object.fromEntries(OVERLAY_CHANNELS.map((channel) => [channel, 0])),
+              recentMessages: []
+            }
+          : input.store.getOverlayStatus());
+      }
       if (req.method === "GET" && url.pathname === "/api/rewards/mappings") return sendJson(req, res, 200, getRewardMappingSummaries());
       if (req.method === "GET" && url.pathname === "/api/alerts/config") {
         return sendJson(req, res, 200, {
@@ -5535,6 +5689,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (body.streamerRiotId !== undefined) {
           return sendJson(req, res, 400, { error: "Riot ID는 계정 연결 탭에서만 변경할 수 있습니다." });
         }
+        if (body.announceInChat === true) {
+          return sendJson(req, res, 409, {
+            error: "스트리머별 Twitch 채팅 연결이 지원되기 전에는 채팅 안내를 활성화할 수 없습니다.",
+            code: "STREAMER_CHAT_NOT_ISOLATED"
+          });
+        }
         const patch: Partial<Omit<LolAutomationSettings, "streamerId" | "updatedAt">> = {};
         for (const key of ["enabled", "autoSelectNextAfterGame", "announceInChat"] as const) {
           if (body[key] === undefined) continue;
@@ -5659,6 +5819,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const body = await readJsonBody<Partial<LolGameMonitorConfig>>(req);
         if (compatibilityStreamerId) {
           const identity = approvedStreamerIdentityForOwner(compatibilityStreamerId);
+          if (body.announceInChat === true) {
+            return sendJson(req, res, 409, {
+              error: "스트리머별 Twitch 채팅 연결이 지원되기 전에는 채팅 안내를 활성화할 수 없습니다.",
+              code: "STREAMER_CHAT_NOT_ISOLATED"
+            });
+          }
           if (body.streamerRiotId !== undefined) {
             if (typeof body.streamerRiotId !== "string") {
               return sendJson(req, res, 400, { error: "streamerRiotId는 문자열이어야 합니다." });
@@ -5737,6 +5903,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
           note
         });
         if (!request) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
+        if (request.status !== "approved" || request.dashboardEnabled !== true) {
+          sessions.revokeByTwitchUserId(request.twitchUserId);
+          input.disconnectStreamerDashboard?.(request.twitchUserId);
+        }
         invalidatePublicLolProfileCachesForStreamer(request);
         for (const previousRequest of previousApprovedRequests) invalidatePublicLolProfileCachesForStreamer(previousRequest);
         return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
@@ -5761,6 +5931,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
           note
         });
         if (!request) return sendJson(req, res, 404, { error: "승인된 등록 요청을 찾을 수 없습니다." });
+        if (!request.dashboardEnabled) {
+          sessions.revokeByTwitchUserId(request.twitchUserId);
+          input.disconnectStreamerDashboard?.(request.twitchUserId);
+        }
         invalidatePublicLolProfileCachesForStreamer(request);
         return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
       }
@@ -5963,6 +6137,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
         await input.actions.dispatchOne({
           type: "overlay.participationQueue",
+          streamerId: compatibilityStreamerId,
           isOpen: input.store.getParticipationState(compatibilityStreamerId).isOpen,
           queue: input.store.getParticipationOverlayQueue(undefined, compatibilityStreamerId)
         }, {}, "dashboard.role_override");
@@ -5979,6 +6154,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
         await input.actions.dispatchOne({
           type: "overlay.participationQueue",
+          streamerId: compatibilityStreamerId,
           isOpen: input.store.getParticipationState(compatibilityStreamerId).isOpen,
           queue: input.store.getParticipationOverlayQueue(undefined, compatibilityStreamerId),
           source: "dashboard.participation_entry_status"
@@ -6013,6 +6189,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return sendJson(req, res, 404, { error: "not found" });
     } catch (error) {
       if (error instanceof HttpRequestError) return sendJson(req, res, error.status, error.payload);
+      if (error instanceof PalworldQueryError) {
+        return sendJson(req, res, 400, { error: error.publicMessage, code: error.code });
+      }
+      if (error instanceof PalworldRecordNotFoundError) {
+        return sendJson(req, res, 404, { error: error.message, code: error.code });
+      }
       if (error instanceof CommunityModerationServiceError) {
         return sendJson(req, res, error.status, { error: error.publicMessage });
       }

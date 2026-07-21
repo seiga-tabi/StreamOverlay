@@ -278,8 +278,8 @@
 .public-dashboard-shell .public-app-header,
 .public-dashboard-shell .public-app-header.home,
 .public-dashboard-shell .public-app-header:not(.home) {
-  position: sticky !important;
-  top: var(--yoro-space-0) !important;
+  position: relative !important;
+  top: auto !important;
   z-index: var(--yoro-z-sticky) !important;
   display: block !important;
   width: 100% !important;

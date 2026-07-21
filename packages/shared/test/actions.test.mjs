@@ -190,6 +190,7 @@ test("overlay.participationStatus action은 방송자 프로필 표시 정보를
 test("overlay.soloRankProfile action은 방송자 전적 표시 payload를 허용한다", () => {
   const valid = validateBotAction({
     type: "overlay.soloRankProfile",
+    streamerId: "streamer-a",
     region: "KR",
     queueLabel: "Solo/Duo",
     profile: {
@@ -236,6 +237,18 @@ test("overlay.soloRankProfile action은 방송자 전적 표시 payload를 허�
     }
   });
   assert.equal(valid.ok, true);
+
+  for (const action of [
+    { type: "overlay.participationSelected", streamerId: "streamer-a", twitchUserName: "ViewerA", checkInSeconds: 30 },
+    { type: "overlay.participationTeams", streamerId: "streamer-a", teams: { a: [], b: [] } }
+  ]) {
+    assert.equal(validateBotAction(action).ok, true);
+  }
+  assert.equal(validateBotAction({
+    type: "overlay.soloRankProfile",
+    streamerId: "   ",
+    profile: { displayName: "Streamer" }
+  }).ok, false);
 
   const invalid = validateBotAction({
     type: "overlay.soloRankProfile",
