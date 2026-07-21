@@ -79,6 +79,10 @@ test("Dashboard 역할별 경로를 페이지 상태와 왕복 변환한다", ()
     `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/followers`
   );
   assert.equal(
+    dashboardPathForPage("palworldServer", "streamer", tenant),
+    `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/palworld/server`
+  );
+  assert.equal(
     dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/lol/automation`, "streamer"),
     "lolAutomation"
   );
@@ -86,12 +90,18 @@ test("Dashboard 역할별 경로를 페이지 상태와 왕복 변환한다", ()
     dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/followers`, "streamer"),
     "followers"
   );
+  assert.equal(
+    dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/palworld/server`, "streamer"),
+    "palworldServer"
+  );
   assert.deepEqual(streamerDashboardTenantFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/alerts`), tenant);
   assert.equal(streamerDashboardTenantMatches(streamerDashboardTenantFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}`), tenant), true);
   assert.equal(streamerDashboardTenantFromPath("/dashboard/streamer_name/not-a-dashboard-key"), undefined);
   assert.equal(streamerDashboardTenantFromPath("/dashboard/lol/account"), undefined);
   assert.equal(pageAllowedForRole("overlayAlerts", "streamer"), false);
   assert.equal(pageAllowedForRole("followers", "streamer"), true);
+  assert.equal(pageAllowedForRole("palworldServer", "streamer"), true);
+  assert.equal(pageAllowedForRole("palworldServer", "admin"), false);
 });
 
 test("검색 제안은 중복을 제거하고 최대 6개로 제한한다", () => {

@@ -1,0 +1,425 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import type {
+  PalworldServerConnectionInput,
+  PalworldServerDashboardResponse,
+  PalworldServerTestResponse
+} from "@streamops/shared";
+import {
+  getPalworldServerDashboard,
+  refreshPalworldServerStatus,
+  removePalworldServerConnection,
+  savePalworldServerConnection,
+  testPalworldServerConnection
+} from "../features/palworld-server/api";
+import { PalworldServerConnectionForm } from "../features/palworld-server/components/PalworldServerConnectionForm";
+import { canReusePalworldServerPassword } from "../features/palworld-server/connection";
+import {
+  PalworldServerStatusPanel,
+  palworldServerErrorCodeLabel,
+  palworldServerStatusLabel,
+  palworldServerStatusTone
+} from "../features/palworld-server/components/PalworldServerStatusPanel";
+import { palworldServerText } from "../features/palworld-server/i18n";
+import { dashboardLocale } from "../i18n";
+import {
+  Badge,
+  Button,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateDescription,
+  EmptyStateIcon,
+  EmptyStateTitle,
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderDescription,
+  PageHeaderEyebrow,
+  PageHeaderStatus,
+  PageHeaderTitle,
+  SkeletonCard,
+  StatusPill,
+  Toast,
+  ToastCloseButton,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  type ToastTone
+} from "../shared/ui";
+import "../features/palworld-server/PalworldServerPage.css";
+
+type Operation = "testing" | "saving" | "refreshing" | "removing";
+
+type Feedback = {
+  id: number;
+  tone: ToastTone;
+  title: string;
+  description: string;
+};
+
+function mergeTestResponse(
+  current: PalworldServerDashboardResponse | undefined,
+  response: PalworldServerTestResponse
+): PalworldServerDashboardResponse {
+  return {
+    enabled: current?.enabled ?? true,
+    pollIntervalSeconds: current?.pollIntervalSeconds ?? 30,
+    connection: current?.connection ?? response.connection,
+    status: response.status
+  };
+}
+
+export function PalworldServerPage() {
+  const locale = dashboardLocale;
+  const text = palworldServerText(locale);
+  const mountedRef = useRef(true);
+  const pollingRef = useRef(false);
+  const operationRef = useRef<Operation>();
+  const feedbackIdRef = useRef(0);
+  const [dashboard, setDashboard] = useState<PalworldServerDashboardResponse>();
+  const [baseUrl, setBaseUrl] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [baseUrlError, setBaseUrlError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [operation, setOperation] = useState<Operation>();
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback>();
+  const [announcement, setAnnouncement] = useState("");
+
+  operationRef.current = operation;
+
+  const showFeedback = useCallback((tone: ToastTone, title: string, description: string) => {
+    feedbackIdRef.current += 1;
+    setFeedback({ id: feedbackIdRef.current, tone, title, description });
+    setAnnouncement(`${title} ${description}`);
+  }, []);
+
+  const applyDashboard = useCallback((next: PalworldServerDashboardResponse, clearPassword = false) => {
+    setDashboard(next);
+    setBaseUrl(next.connection.baseUrl ?? "");
+    if (clearPassword) setAdminPassword("");
+    setBaseUrlError("");
+    setPasswordError("");
+  }, []);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const response = await getPalworldServerDashboard();
+      if (!mountedRef.current) return;
+      applyDashboard(response, true);
+    } catch {
+      if (mountedRef.current) setLoadFailed(true);
+    } finally {
+      if (mountedRef.current) setLoading(false);
+    }
+  }, [applyDashboard]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    void load();
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [load]);
+
+  useEffect(() => {
+    if (!dashboard?.enabled || !dashboard.connection.configured) return undefined;
+    const intervalMs = Math.max(5, dashboard.pollIntervalSeconds) * 1_000;
+    const timer = window.setInterval(() => {
+      if (!mountedRef.current || pollingRef.current || operationRef.current) return;
+      pollingRef.current = true;
+      void getPalworldServerDashboard()
+        .then((response) => {
+          if (mountedRef.current && !operationRef.current) setDashboard(response);
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          pollingRef.current = false;
+        });
+    }, intervalMs);
+    return () => window.clearInterval(timer);
+  }, [dashboard?.connection.configured, dashboard?.enabled, dashboard?.pollIntervalSeconds]);
+
+  function connectionInput(): PalworldServerConnectionInput | undefined {
+    const normalizedBaseUrl = baseUrl.trim();
+    const nextBaseUrlError = normalizedBaseUrl ? "" : text.baseUrlRequired;
+    const canReusePassword = canReusePalworldServerPassword(
+      dashboard?.connection.baseUrl,
+      normalizedBaseUrl,
+      dashboard?.connection.passwordConfigured ?? false
+    );
+    const nextPasswordError = canReusePassword || adminPassword.length > 0
+      ? ""
+      : dashboard?.connection.passwordConfigured
+        ? text.passwordRequiredForUrlChange
+        : text.passwordRequired;
+    setBaseUrlError(nextBaseUrlError);
+    setPasswordError(nextPasswordError);
+    if (nextBaseUrlError || nextPasswordError) return undefined;
+    return {
+      baseUrl: normalizedBaseUrl,
+      ...(adminPassword.length > 0 ? { adminPassword } : {})
+    };
+  }
+
+  function operationDescription(response: PalworldServerTestResponse, fallback: string): string {
+    return response.status.errorCode
+      ? palworldServerErrorCodeLabel(response.status.errorCode, text)
+      : fallback;
+  }
+
+  async function testConnection(): Promise<void> {
+    const input = connectionInput();
+    if (!input || operationRef.current) return;
+    operationRef.current = "testing";
+    setOperation("testing");
+    try {
+      const response = await testPalworldServerConnection(input);
+      if (!mountedRef.current) return;
+      setDashboard((current) => mergeTestResponse(current, response));
+      const tone: ToastTone = response.status.state === "online" ? "success" : "warning";
+      showFeedback(
+        tone,
+        text.testSuccessTitle,
+        operationDescription(response, text.testSuccessDescription)
+      );
+    } catch {
+      if (mountedRef.current) {
+        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+      }
+    } finally {
+      operationRef.current = undefined;
+      if (mountedRef.current) setOperation(undefined);
+    }
+  }
+
+  async function saveConnection(): Promise<void> {
+    const input = connectionInput();
+    if (!input || operationRef.current) return;
+    operationRef.current = "saving";
+    setOperation("saving");
+    try {
+      const response = await savePalworldServerConnection(input);
+      if (!mountedRef.current) return;
+      if (response.connection.configured && response.status.state === "online") {
+        applyDashboard(response, true);
+        showFeedback("success", text.saveSuccessTitle, text.saveSuccessDescription);
+      } else {
+        setDashboard(response);
+        showFeedback(
+          "warning",
+          text.saveRejectedTitle,
+          operationDescription(response, text.saveRejectedDescription)
+        );
+      }
+    } catch {
+      if (mountedRef.current) {
+        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+      }
+    } finally {
+      operationRef.current = undefined;
+      if (mountedRef.current) setOperation(undefined);
+    }
+  }
+
+  async function refreshStatus(): Promise<void> {
+    if (!dashboard?.connection.configured || operationRef.current || pollingRef.current) return;
+    operationRef.current = "refreshing";
+    setOperation("refreshing");
+    try {
+      const response = await refreshPalworldServerStatus();
+      if (!mountedRef.current) return;
+      setDashboard(response);
+      const tone: ToastTone = response.status.state === "online" ? "success" : "warning";
+      showFeedback(
+        tone,
+        text.refreshSuccessTitle,
+        operationDescription(response, text.refreshSuccessDescription)
+      );
+    } catch {
+      if (mountedRef.current) {
+        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+      }
+    } finally {
+      operationRef.current = undefined;
+      if (mountedRef.current) setOperation(undefined);
+    }
+  }
+
+  async function removeConnection(): Promise<void> {
+    if (operationRef.current) return;
+    operationRef.current = "removing";
+    setOperation("removing");
+    try {
+      const response = await removePalworldServerConnection();
+      if (!mountedRef.current) return;
+      applyDashboard(response, true);
+      setRemoveOpen(false);
+      showFeedback("success", text.removeSuccessTitle, text.removeSuccessDescription);
+    } catch {
+      if (mountedRef.current) {
+        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+      }
+    } finally {
+      operationRef.current = undefined;
+      if (mountedRef.current) setOperation(undefined);
+    }
+  }
+
+  const status = dashboard?.status;
+  const statusLabel = status ? palworldServerStatusLabel(status.state, text) : text.status.unknown;
+  const showTestStatus = status && status.state !== "not_configured";
+
+  return (
+    <ToastProvider position="bottom-right">
+      <div className="palworld-server-page">
+        <PageHeader layout="split">
+          <PageHeaderEyebrow>{text.eyebrow}</PageHeaderEyebrow>
+          <PageHeaderTitle>{text.title}</PageHeaderTitle>
+          <PageHeaderDescription>{text.description}</PageHeaderDescription>
+          <PageHeaderStatus>
+            <StatusPill tone={palworldServerStatusTone(status?.state ?? "unknown")}>{statusLabel}</StatusPill>
+            {dashboard?.pollIntervalSeconds ? (
+              <Badge tone="neutral">
+                {text.autoRefreshInterval} {dashboard.pollIntervalSeconds}{text.second}
+              </Badge>
+            ) : null}
+          </PageHeaderStatus>
+          <PageHeaderActions>
+            <Button
+              disabled={!dashboard?.enabled || !dashboard.connection.configured || loading || Boolean(operation)}
+              loading={operation === "refreshing"}
+              loadingLabel={text.refreshing}
+              onClick={() => void refreshStatus()}
+              variant="secondary"
+            >
+              {text.refresh}
+            </Button>
+          </PageHeaderActions>
+        </PageHeader>
+
+        <p className="yoro-u-sr-only" aria-live="polite" aria-atomic="true">{announcement}</p>
+
+        {loading ? (
+          <div className="palworld-server-skeletons">
+            <SkeletonCard loadingLabel={text.loading} size="lg" />
+            <SkeletonCard size="lg" />
+            <SkeletonCard size="lg" />
+          </div>
+        ) : null}
+
+        {!loading && loadFailed && !dashboard ? (
+          <EmptyState variant="error">
+            <EmptyStateIcon>!</EmptyStateIcon>
+            <EmptyStateTitle>{text.loadErrorTitle}</EmptyStateTitle>
+            <EmptyStateDescription>{text.loadErrorDescription}</EmptyStateDescription>
+            <EmptyStateActions><Button onClick={() => void load()}>{text.retry}</Button></EmptyStateActions>
+          </EmptyState>
+        ) : null}
+
+        {!loading && dashboard && !dashboard.enabled ? (
+          <EmptyState variant="error">
+            <EmptyStateIcon>!</EmptyStateIcon>
+            <EmptyStateTitle>{text.featureDisabledTitle}</EmptyStateTitle>
+            <EmptyStateDescription>{text.featureDisabledDescription}</EmptyStateDescription>
+          </EmptyState>
+        ) : null}
+
+        {!loading && dashboard?.enabled ? (
+          <>
+            {!dashboard.connection.configured ? (
+              <EmptyState className="palworld-server-unconfigured" variant="streamer">
+                <EmptyStateIcon>⚙</EmptyStateIcon>
+                <EmptyStateTitle>{text.notConfiguredTitle}</EmptyStateTitle>
+                <EmptyStateDescription>{text.notConfiguredDescription}</EmptyStateDescription>
+              </EmptyState>
+            ) : null}
+
+            {showTestStatus ? (
+              <PalworldServerStatusPanel
+                connection={dashboard.connection}
+                locale={locale}
+                status={dashboard.status}
+                text={text}
+              />
+            ) : null}
+
+            <PalworldServerConnectionForm
+              adminPassword={adminPassword}
+              baseUrl={baseUrl}
+              baseUrlError={baseUrlError}
+              connection={dashboard.connection}
+              disabled={operation === "refreshing"}
+              onAdminPasswordChange={(value) => {
+                setAdminPassword(value);
+                if (value) setPasswordError("");
+              }}
+              onBaseUrlChange={(value) => {
+                setBaseUrl(value);
+                if (value.trim()) setBaseUrlError("");
+              }}
+              onRemove={() => setRemoveOpen(true)}
+              onSave={() => void saveConnection()}
+              onTest={() => void testConnection()}
+              operation={operation === "refreshing" ? undefined : operation}
+              passwordError={passwordError}
+              passwordRequired={!canReusePalworldServerPassword(
+                dashboard.connection.baseUrl,
+                baseUrl,
+                dashboard.connection.passwordConfigured
+              )}
+              text={text}
+            />
+          </>
+        ) : null}
+
+        <Modal
+          closeDisabled={operation === "removing"}
+          loading={operation === "removing"}
+          onOpenChange={setRemoveOpen}
+          open={removeOpen}
+          size="sm"
+        >
+          <ModalHeader>
+            <ModalTitle>{text.removeTitle}</ModalTitle>
+            <ModalCloseButton aria-label={text.cancel} disabled={operation === "removing"}>×</ModalCloseButton>
+          </ModalHeader>
+          <ModalContent><ModalDescription>{text.removeDescription}</ModalDescription></ModalContent>
+          <ModalFooter>
+            <Button
+              loading={operation === "removing"}
+              loadingLabel={text.removing}
+              onClick={() => void removeConnection()}
+              variant="danger"
+            >
+              {text.removeConfirm}
+            </Button>
+            <Button disabled={operation === "removing"} onClick={() => setRemoveOpen(false)} variant="secondary">
+              {text.cancel}
+            </Button>
+          </ModalFooter>
+        </Modal>
+
+        <ToastViewport className="palworld-server-toast-viewport">
+          {feedback ? (
+            <Toast key={feedback.id} autoDismiss onDismiss={() => setFeedback(undefined)} tone={feedback.tone}>
+              <ToastTitle>{feedback.title}</ToastTitle>
+              <ToastDescription>{feedback.description}</ToastDescription>
+              <ToastCloseButton aria-label={text.close}>×</ToastCloseButton>
+            </Toast>
+          ) : null}
+        </ToastViewport>
+      </div>
+    </ToastProvider>
+  );
+}

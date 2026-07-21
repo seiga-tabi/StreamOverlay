@@ -42,6 +42,7 @@ const OverlayOpsPage = lazy(async () => ({ default: (await import("./pages/Overl
 const FollowersPage = lazy(async () => ({ default: (await import("./pages/FollowersPage")).FollowersPage }));
 const SupportInboxPage = lazy(async () => ({ default: (await import("./pages/SupportInboxPage")).SupportInboxPage }));
 const ServerStatusPage = lazy(async () => ({ default: (await import("./pages/ServerStatusPage")).ServerStatusPage }));
+const PalworldServerPage = lazy(async () => ({ default: (await import("./pages/PalworldServerPage")).PalworldServerPage }));
 const CommunityModerationPage = lazy(async () => ({ default: (await import("./pages/CommunityModerationPage")).CommunityModerationPage }));
 
 const initialSnapshot = {
@@ -454,6 +455,7 @@ export default function App() {
     <Layout page={page} setPage={changeDashboardPage} role={dashboardRole} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "serverStatus" && dashboardRole === "admin" ? <ServerStatusPage /> : null}
+        {page === "palworldServer" && dashboardRole === "streamer" ? <PalworldServerPage /> : null}
         {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} role={dashboardRole} returnPath={dashboardPathForPage("dashboard", dashboardRole, dashboardTenant)} /> : null}
         {page === "twitch" && dashboardRole === "admin" ? <TwitchConnectionPage /> : null}
         {page === "overlayStatus" ? <OverlayOpsPage view="status" streamer={dashboardStreamer} /> : null}

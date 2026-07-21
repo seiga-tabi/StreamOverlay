@@ -8,11 +8,15 @@ import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } fr
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
   OVERLAY_CHANNELS,
+  PALWORLD_SERVER_DIAGNOSTIC_KEYS,
   formatRiotId,
   normalizeRiotIdKey,
   normalizeLolRole,
   parseRiotIdDetailed,
   toSafeErrorMessage,
+  validatePalworldServerConnectionInput,
+  validatePalworldServerDashboardResponse,
+  validatePalworldServerTestResponse,
   validateBotAction,
   type BotAction,
   type CommunityPost,
@@ -33,6 +37,9 @@ import {
   type ParticipationPhase,
   type ParticipationStreamerProfile,
   type ParticipationStatus,
+  type PalworldServerConnectionInput,
+  type PalworldServerDashboardResponse,
+  type PalworldServerTestResponse,
   type DashboardServerStatus,
   type FollowerManagementResponse,
   type OverlayStatus,
@@ -57,6 +64,11 @@ import {
   publicTwitchViewerSessionIdFromRequest
 } from "../services/public-twitch-auth.js";
 import { RiotApiHttpError, RiotRateLimitError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant, type RiotMatchTimeline } from "../services/riot-api.js";
+import {
+  PalworldServerMonitorInputError,
+  PalworldServerMonitorRateLimitError,
+  type PalworldServerMonitor
+} from "../services/palworld-server-monitor.js";
 import type { DataDragonService, LolChampionAbilitySummary, LolRuneSummary } from "../services/data-dragon.js";
 import type { LolProfileCacheEntry, LolProfileRepository } from "../services/lol-profile-store.js";
 import { appConfig, legalRuntimeConfigReady } from "../config.js";
@@ -1727,7 +1739,107 @@ type HttpHandlerInput = {
   connectionStatus?: () => DashboardServerStatus["connections"];
   disconnectStreamerDashboard?: (twitchUserId: string) => void;
   overlayStatusForStreamer?: (twitchUserId: string) => OverlayStatus;
+  palworldServerMonitor?: PalworldServerMonitor;
 };
+
+const PALWORLD_SERVER_DASHBOARD_PATH = "/api/dashboard/palworld-server";
+const PALWORLD_SERVER_DASHBOARD_ENDPOINTS = new Set([
+  PALWORLD_SERVER_DASHBOARD_PATH,
+  `${PALWORLD_SERVER_DASHBOARD_PATH}/test`,
+  `${PALWORLD_SERVER_DASHBOARD_PATH}/save`,
+  `${PALWORLD_SERVER_DASHBOARD_PATH}/refresh`,
+  `${PALWORLD_SERVER_DASHBOARD_PATH}/remove`
+]);
+const PALWORLD_SERVER_OWNER_SELECTOR_HEADERS = [
+  "x-broadcaster-id",
+  "x-broadcaster-user-id",
+  "x-streamer-id",
+  "x-streamops-streamer-id",
+  "x-twitch-user-id",
+  "x-owner-id"
+] as const;
+
+function disabledPalworldServerDashboardResponse(): PalworldServerDashboardResponse {
+  return {
+    enabled: false,
+    pollIntervalSeconds: 5,
+    connection: {
+      configured: false,
+      passwordConfigured: false
+    },
+    status: {
+      state: "not_configured",
+      errorCode: "disabled",
+      consecutiveFailures: 0,
+      diagnostics: PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({ key, state: "skipped" }))
+    }
+  };
+}
+
+function hasPalworldServerOwnerSelectorHeader(req: IncomingMessage): boolean {
+  const headerNames = Object.keys(req.headers).map((header) => header.toLowerCase());
+  return headerNames.some((header) => {
+    if ((PALWORLD_SERVER_OWNER_SELECTOR_HEADERS as readonly string[]).includes(header)) return true;
+    if (header === "x-streamops-streamer-slug" || header === "x-streamops-dashboard-key") return false;
+    return /(?:^|-)(?:broadcaster|owner-id|streamer-(?:user-)?id|twitch-user-id)(?:-|$)/.test(header);
+  });
+}
+
+function palworldServerInputErrorMessage(code: string): string {
+  if (code === "disabled") return "Palworld 서버 상태 기능이 비활성화되어 있습니다.";
+  if (code === "password_required") return "Palworld 서버 관리자 비밀번호가 필요합니다.";
+  if (code === "invalid_url" || code === "origin_not_allowed" || code === "address_blocked") {
+    return "허용된 Palworld REST API URL을 입력해야 합니다.";
+  }
+  return "Palworld 서버 연결 입력이 올바르지 않습니다.";
+}
+
+function normalizePalworldServerConnectionBody(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const record = value as Record<string, unknown>;
+  if (typeof record.adminPassword !== "string" || record.adminPassword.trim().length > 0) return value;
+  const normalized = { ...record };
+  delete normalized.adminPassword;
+  return normalized;
+}
+
+async function readPalworldServerConnectionInput(req: IncomingMessage): Promise<PalworldServerConnectionInput> {
+  const raw = normalizePalworldServerConnectionBody(await readJsonBody<unknown>(req));
+  const validation = validatePalworldServerConnectionInput(raw);
+  if (!validation.ok) {
+    throw new HttpRequestError(400, {
+      error: "Palworld 서버 연결 입력이 올바르지 않습니다.",
+      code: "invalid_request"
+    });
+  }
+  return validation.data;
+}
+
+async function requireEmptyPalworldServerBody(req: IncomingMessage): Promise<void> {
+  const body = await readJsonBody<unknown>(req);
+  if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).length > 0) {
+    throw new HttpRequestError(400, {
+      error: "요청 body에는 필드를 포함할 수 없습니다.",
+      code: "invalid_request"
+    });
+  }
+}
+
+function validatedPalworldServerDashboardResponse(value: unknown): PalworldServerDashboardResponse {
+  const validation = validatePalworldServerDashboardResponse(value);
+  if (!validation.ok) {
+    throw new HttpRequestError(500, { error: "서버 내부 오류" });
+  }
+  return validation.data;
+}
+
+function validatedPalworldServerTestResponse(value: unknown): PalworldServerTestResponse {
+  const validation = validatePalworldServerTestResponse(value);
+  if (!validation.ok) {
+    throw new HttpRequestError(500, { error: "서버 내부 오류" });
+  }
+  return validation.data;
+}
 
 function roundTo(value: number, digits: number): number {
   const factor = 10 ** digits;
@@ -3050,6 +3162,103 @@ export function createHttpHandler(input: HttpHandlerInput) {
       throw new HttpRequestError(403, { error: "승인된 스트리머 세션이 필요합니다." });
     }
     return ownerId;
+  }
+
+  async function handlePalworldServerDashboardApi(
+    req: IncomingMessage,
+    res: ServerResponse,
+    url: URL,
+    principal: AuthPrincipal
+  ): Promise<boolean> {
+    if (!PALWORLD_SERVER_DASHBOARD_ENDPOINTS.has(url.pathname)) return false;
+
+    const ownerId = requireAuthenticatedStreamerOwner(principal);
+    if (url.searchParams.size > 0 || hasPalworldServerOwnerSelectorHeader(req)) {
+      throw new HttpRequestError(400, {
+        error: "스트리머 선택 값은 요청에 포함할 수 없습니다.",
+        code: "invalid_request"
+      });
+    }
+
+    const expectedMethod = url.pathname === PALWORLD_SERVER_DASHBOARD_PATH ? "GET" : "POST";
+    if (req.method !== expectedMethod) {
+      sendJson(req, res, 404, { error: "not found" });
+      return true;
+    }
+
+    try {
+      if (url.pathname === PALWORLD_SERVER_DASHBOARD_PATH) {
+        const response = input.palworldServerMonitor?.getDashboardResponse(ownerId)
+          ?? disabledPalworldServerDashboardResponse();
+        sendJson(req, res, 200, validatedPalworldServerDashboardResponse(response));
+        return true;
+      }
+
+      if (url.pathname === `${PALWORLD_SERVER_DASHBOARD_PATH}/test`) {
+        const connection = await readPalworldServerConnectionInput(req);
+        if (!input.palworldServerMonitor) {
+          throw new PalworldServerMonitorInputError(
+            "disabled",
+            "Palworld 서버 상태 기능이 비활성화되어 있습니다."
+          );
+        }
+        const response = await input.palworldServerMonitor.testConnection(ownerId, connection);
+        sendJson(req, res, 200, validatedPalworldServerTestResponse(response));
+        return true;
+      }
+
+      if (url.pathname === `${PALWORLD_SERVER_DASHBOARD_PATH}/save`) {
+        const connection = await readPalworldServerConnectionInput(req);
+        if (!input.palworldServerMonitor) {
+          throw new PalworldServerMonitorInputError(
+            "disabled",
+            "Palworld 서버 상태 기능이 비활성화되어 있습니다."
+          );
+        }
+        const response = await input.palworldServerMonitor.saveConnection(ownerId, connection);
+        sendJson(req, res, 200, validatedPalworldServerDashboardResponse(response));
+        return true;
+      }
+
+      await requireEmptyPalworldServerBody(req);
+      if (!input.palworldServerMonitor) {
+        throw new PalworldServerMonitorInputError(
+          "disabled",
+          "Palworld 서버 상태 기능이 비활성화되어 있습니다."
+        );
+      }
+      const response = url.pathname === `${PALWORLD_SERVER_DASHBOARD_PATH}/refresh`
+        ? await input.palworldServerMonitor.refresh(ownerId)
+        : await input.palworldServerMonitor.removeConnection(ownerId);
+      sendJson(req, res, 200, validatedPalworldServerDashboardResponse(response));
+      return true;
+    } catch (error) {
+      if (error instanceof HttpRequestError) throw error;
+      if (error instanceof PalworldServerMonitorRateLimitError) {
+        const retryAfterSeconds = Number.isSafeInteger(error.retryAfterSeconds) && error.retryAfterSeconds > 0
+          ? error.retryAfterSeconds
+          : 1;
+        sendJson(
+          req,
+          res,
+          429,
+          { error: "Palworld 서버 상태 확인 요청이 너무 많습니다.", code: "rate_limited" },
+          { "Retry-After": String(retryAfterSeconds) }
+        );
+        return true;
+      }
+      if (error instanceof PalworldServerMonitorInputError) {
+        sendJson(req, res, 400, { error: palworldServerInputErrorMessage(error.code), code: error.code });
+        return true;
+      }
+      input.logger?.error({
+        type: "palworld_server.http_failed",
+        path: url.pathname,
+        errorCode: "internal_error"
+      });
+      sendJson(req, res, 500, { error: "서버 내부 오류", code: "internal_error" });
+      return true;
+    }
   }
 
   function streamerRiotIdentityForOwner(streamerId: string): StreamerRiotIdentity | undefined {
@@ -5384,6 +5593,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return;
         }
       }
+      if (await handlePalworldServerDashboardApi(req, res, url, auth.principal)) return;
       if (url.pathname === "/api/dashboard/server-status" && req.method === "GET") {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });

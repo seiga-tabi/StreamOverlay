@@ -8,6 +8,7 @@ export const DASHBOARD_PAGES = [
   "lolAccount",
   "lolAutomation",
   "lolParticipation",
+  "palworldServer",
   "myRiotAccount",
   "soloRank",
   "participation",
@@ -45,6 +46,7 @@ export const STREAMER_ALLOWED_PAGES: Page[] = [
   "lolAccount",
   "lolAutomation",
   "lolParticipation",
+  "palworldServer",
   "followers",
 ];
 
@@ -65,6 +67,7 @@ const STREAMER_PAGE_PATHS: Partial<Record<Page, string>> = {
   lolAccount: "/dashboard/lol/account",
   lolAutomation: "/dashboard/lol/automation",
   lolParticipation: "/dashboard/lol/participation",
+  palworldServer: "/dashboard/palworld/server",
   followers: "/dashboard/followers",
 };
 

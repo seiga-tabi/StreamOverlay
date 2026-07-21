@@ -161,6 +161,72 @@ test("production 지원 메일함은 webhook secret과 32바이트 암호화 key
   assert.doesNotMatch(invalid.stdout, /support_webhook/);
 });
 
+test("production Palworld 서버 상태 기능은 별도 32바이트 key와 destination allowlist를 요구한다", () => {
+  const palworldKey = Buffer.from(Array.from({ length: 32 }, (_, index) => index + 1)).toString("base64");
+  const valid = runConfigValidation({
+    PALWORLD_SERVER_STATUS_ENABLED: "true",
+    PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY: palworldKey,
+    PALWORLD_REST_ALLOWED_ORIGINS: "https://pal.example.com:8212,http://10.0.0.15:8212,10.0.0.0/24"
+  });
+  assert.equal(valid.status, 0, valid.stderr || valid.stdout);
+
+  const invalid = runConfigValidation({
+    PALWORLD_SERVER_STATUS_ENABLED: "true",
+    PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY: "invalid",
+    PALWORLD_REST_ALLOWED_ORIGINS: "*"
+  });
+  assert.equal(invalid.status, 2, invalid.stderr || invalid.stdout);
+  assert.match(invalid.stdout, /PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY/);
+  assert.match(invalid.stdout, /PALWORLD_REST_ALLOWED_ORIGINS/);
+  assert.doesNotMatch(invalid.stdout, /pal\.example\.com/);
+
+  const cidrOnly = runConfigValidation({
+    PALWORLD_SERVER_STATUS_ENABLED: "true",
+    PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY: palworldKey,
+    PALWORLD_REST_ALLOWED_ORIGINS: "10.0.0.0/24"
+  });
+  assert.equal(cidrOnly.status, 2, cidrOnly.stderr || cidrOnly.stdout);
+  assert.match(cidrOnly.stdout, /exact origin/);
+});
+
+test("Palworld 암호화 key는 다른 secret과 재사용하거나 직접 값과 _FILE을 동시에 사용할 수 없다", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "streamops-palworld-key-file-"));
+  const keyPath = path.join(directory, "palworld_key");
+  const key = Buffer.from(Array.from({ length: 32 }, (_, index) => index + 11)).toString("base64");
+  writeFileSync(keyPath, `${key}\n`, "utf8");
+  try {
+    const fromFile = runConfigValidation({
+      PALWORLD_SERVER_STATUS_ENABLED: "true",
+      PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY: undefined,
+      PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY_FILE: keyPath,
+      PALWORLD_REST_ALLOWED_ORIGINS: "https://pal.example.com:8212"
+    });
+    assert.equal(fromFile.status, 0, fromFile.stderr || fromFile.stdout);
+
+    const conflict = runConfigValidation({
+      PALWORLD_SERVER_STATUS_ENABLED: "true",
+      PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY: key,
+      PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY_FILE: keyPath,
+      PALWORLD_REST_ALLOWED_ORIGINS: "https://pal.example.com:8212"
+    });
+    assert.equal(conflict.status, 3);
+    assert.match(conflict.stderr, /PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY.*PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY_FILE/);
+    assert.equal(conflict.stderr.includes(key), false);
+
+    const reused = runConfigValidation({
+      PALWORLD_SERVER_STATUS_ENABLED: "true",
+      PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY: key,
+      PALWORLD_REST_ALLOWED_ORIGINS: "https://pal.example.com:8212",
+      DASHBOARD_AUTH_TOKEN: key
+    });
+    assert.equal(reused.status, 2);
+    assert.match(reused.stdout, /같은 값을 재사용/);
+    assert.equal(reused.stdout.includes(key), false);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("production 설정은 약한 secret, http URL, wildcard CORS를 거부하고 secret 값을 출력하지 않는다", () => {
   const result = runConfigValidation({
     BRIDGE_SHARED_SECRET: "dev-secret-change-me",

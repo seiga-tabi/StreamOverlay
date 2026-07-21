@@ -20,6 +20,7 @@ export const dashboardI18n = {
         operations: "운영",
         overlay: "Overlay",
         lol: "LoL 방송",
+        palworld: "펠월드",
         community: "커뮤니티",
         system: "시스템"
       },
@@ -51,6 +52,7 @@ export const dashboardI18n = {
       lolAccount: { label: "LoL 방송 운영", short: "LoL 운영" },
       lolAutomation: { label: "자동화 설정", short: "자동화" },
       lolParticipation: { label: "시참 운영", short: "시참" },
+      palworldServer: { label: "서버 상태", short: "서버" },
       myRiotAccount: { label: "내 Riot ID", short: "내 Riot ID" },
       soloRank: { label: "솔로랭크 설정", short: "솔로랭크" },
       followers: { label: "팔로워 관리", short: "팔로워" },
@@ -304,6 +306,7 @@ export const dashboardI18n = {
         operations: "運用",
         overlay: "Overlay",
         lol: "LoL 配信",
+        palworld: "パルワールド",
         community: "コミュニティ",
         system: "システム"
       },
@@ -335,6 +338,7 @@ export const dashboardI18n = {
       lolAccount: { label: "LoL 配信運営", short: "LoL 運営" },
       lolAutomation: { label: "自動化設定", short: "自動化" },
       lolParticipation: { label: "参加運営", short: "参加" },
+      palworldServer: { label: "サーバー状態", short: "サーバー" },
       myRiotAccount: { label: "自分の Riot ID", short: "Riot ID" },
       soloRank: { label: "ソロランク設定", short: "ソロランク" },
       followers: { label: "フォロワー管理", short: "フォロワー" },

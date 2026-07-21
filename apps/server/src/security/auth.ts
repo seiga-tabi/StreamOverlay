@@ -259,6 +259,11 @@ type StreamerDashboardRule = {
 const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "GET", path: "/api/dashboard/auth/status" },
   { method: "POST", path: "/api/dashboard/auth/logout" },
+  { method: "GET", path: "/api/dashboard/palworld-server" },
+  { method: "POST", path: "/api/dashboard/palworld-server/test" },
+  { method: "POST", path: "/api/dashboard/palworld-server/save" },
+  { method: "POST", path: "/api/dashboard/palworld-server/refresh" },
+  { method: "POST", path: "/api/dashboard/palworld-server/remove" },
   { method: "GET", path: "/api/followers" },
   { method: "POST", path: "/api/followers/refresh" },
   { method: "POST", path: "/api/followers/oauth/start" },

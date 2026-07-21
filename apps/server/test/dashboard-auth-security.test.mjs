@@ -2343,6 +2343,33 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     const allowedFollowers = authorizeHttpRequest(allowedFollowersReq, "/api/followers", sessions);
     assert.equal(allowedFollowers.ok, true);
 
+    const allowedPalworldServerGetReq = createRequest("GET", "/api/dashboard/palworld-server", undefined, {
+      cookie,
+      "x-streamops-dashboard-surface": "streamer"
+    });
+    const allowedPalworldServerGet = authorizeHttpRequest(
+      allowedPalworldServerGetReq,
+      "/api/dashboard/palworld-server",
+      sessions
+    );
+    assert.equal(allowedPalworldServerGet.ok, true);
+
+    for (const pathname of [
+      "/api/dashboard/palworld-server/test",
+      "/api/dashboard/palworld-server/save",
+      "/api/dashboard/palworld-server/refresh",
+      "/api/dashboard/palworld-server/remove"
+    ]) {
+      const allowedPalworldServerWriteReq = createRequest("POST", pathname, {}, {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "x-streamops-dashboard-surface": "streamer",
+        "x-streamops-csrf": session.csrfToken
+      });
+      const allowedPalworldServerWrite = authorizeHttpRequest(allowedPalworldServerWriteReq, pathname, sessions);
+      assert.equal(allowedPalworldServerWrite.ok, true, pathname);
+    }
+
     for (const pathname of ["/api/followers/refresh", "/api/followers/oauth/start"]) {
       const allowedFollowerWriteReq = createRequest("POST", pathname, {}, {
         cookie,
@@ -2430,7 +2457,10 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     for (const [method, pathname] of [
       ["POST", "/api/followers"],
       ["GET", "/api/followers/refresh"],
-      ["GET", "/api/followers/oauth/start"]
+      ["GET", "/api/followers/oauth/start"],
+      ["POST", "/api/dashboard/palworld-server"],
+      ["GET", "/api/dashboard/palworld-server/test"],
+      ["DELETE", "/api/dashboard/palworld-server/remove"]
     ]) {
       const methodMismatchReq = createRequest(method, pathname, method === "POST" ? {} : undefined, {
         cookie,

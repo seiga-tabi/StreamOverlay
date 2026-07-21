@@ -8,6 +8,7 @@ const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; ite
   { key: "operations", items: ["serverStatus", "dashboard", "twitch"] },
   { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
   { key: "lol", items: ["lolAccount", "tournaments", "streamerRiotRequests"] },
+  { key: "palworld", items: ["palworldServer"] },
   { key: "community", items: ["followers", "communityModeration", "events"] },
   { key: "system", items: ["supportInbox", "settings"] }
 ];

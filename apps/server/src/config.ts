@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
+import crypto from "node:crypto";
 import fs from "node:fs";
+import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -168,6 +170,14 @@ export const appConfig = {
     retentionDays: Math.max(1, intEnv("SUPPORT_MAILBOX_RETENTION_DAYS", 90)),
     maxMessages: Math.max(1, intEnv("SUPPORT_MAILBOX_MAX_MESSAGES", 1000))
   },
+  palworldServerStatus: {
+    enabled: boolEnv("PALWORLD_SERVER_STATUS_ENABLED", false),
+    encryptionKey: envOrFile("PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY"),
+    statePath: env("PALWORLD_SERVER_CONNECTIONS_STATE_PATH", path.resolve(defaultStateDir, "palworld-server-connections.json.enc")),
+    allowedOrigins: listEnv("PALWORLD_REST_ALLOWED_ORIGINS"),
+    timeoutMs: Math.max(1000, Math.min(30_000, intEnv("PALWORLD_REST_TIMEOUT_MS", 5_000))),
+    pollIntervalMs: Math.max(5_000, Math.min(5 * 60_000, intEnv("PALWORLD_REST_POLL_INTERVAL_MS", 30_000)))
+  },
   legal: {
     operatorName: env("LEGAL_OPERATOR_NAME").trim(),
     contactAddress: env("LEGAL_CONTACT_ADDRESS").trim(),
@@ -278,14 +288,62 @@ function validateDotenvPermissions(errors: string[]): void {
   }
 }
 
-function isValidMailboxEncryptionKey(value: string): boolean {
+function encryptionKeyBytes(value: string): Buffer | undefined {
   const trimmed = value.trim();
-  if (/^[a-f0-9]{64}$/i.test(trimmed)) return true;
+  if (/^[a-f0-9]{64}$/i.test(trimmed)) return Buffer.from(trimmed, "hex");
   try {
-    return Buffer.from(trimmed, "base64").byteLength === 32;
+    const decoded = Buffer.from(trimmed, "base64");
+    return decoded.byteLength === 32 ? decoded : undefined;
   } catch {
-    return false;
+    return undefined;
   }
+}
+
+function isValidEncryptionKey(value: string): boolean {
+  return encryptionKeyBytes(value)?.byteLength === 32;
+}
+
+function isWeakEncryptionKey(value: string): boolean {
+  const key = encryptionKeyBytes(value);
+  if (!key) return true;
+  return isWeakSecret(value) || new Set(key).size < 8;
+}
+
+function secretMaterial(value: string): Buffer {
+  return encryptionKeyBytes(value) ?? Buffer.from(value, "utf8");
+}
+
+function secretsEqual(left: string, right: string): boolean {
+  const leftMaterial = secretMaterial(left);
+  const rightMaterial = secretMaterial(right);
+  return leftMaterial.byteLength === rightMaterial.byteLength
+    && crypto.timingSafeEqual(leftMaterial, rightMaterial);
+}
+
+function validPalworldAllowedDestination(value: string): boolean {
+  if (!value || value === "*" || value.length > 2048) return false;
+  if (value.includes("://")) {
+    try {
+      const parsed = new URL(value);
+      return (parsed.protocol === "https:" || parsed.protocol === "http:")
+        && !parsed.username
+        && !parsed.password
+        && parsed.pathname === "/"
+        && !parsed.search
+        && !parsed.hash
+        && parsed.origin === value.replace(/\/$/, "");
+    } catch {
+      return false;
+    }
+  }
+  const separator = value.lastIndexOf("/");
+  if (separator <= 0) return false;
+  const address = value.slice(0, separator);
+  const prefix = Number(value.slice(separator + 1));
+  const family = net.isIP(address);
+  return Number.isSafeInteger(prefix)
+    && ((family === 4 && prefix >= 0 && prefix <= 32)
+      || (family === 6 && prefix >= 0 && prefix <= 128));
 }
 
 const LEGAL_PLACEHOLDER_PATTERNS = [
@@ -359,13 +417,16 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
             ["SUPPORT_MAILBOX_WEBHOOK_SECRET", appConfig.supportMailbox.webhookSecret] as [string, string],
             ["SUPPORT_MAILBOX_ENCRYPTION_KEY", appConfig.supportMailbox.encryptionKey] as [string, string]
           ]
+        : []),
+      ...(appConfig.palworldServerStatus.enabled
+        ? [["PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY", appConfig.palworldServerStatus.encryptionKey] as [string, string]]
         : [])
     ].filter((entry): entry is [string, string] => Boolean(entry[1]));
     for (let i = 0; i < secrets.length; i += 1) {
       const [leftName, leftValue] = secrets[i]!;
       for (let j = i + 1; j < secrets.length; j += 1) {
         const [rightName, rightValue] = secrets[j]!;
-        if (leftValue === rightValue) errors.push(`${leftName}와 ${rightName}는 같은 값을 재사용할 수 없습니다.`);
+        if (secretsEqual(leftValue, rightValue)) errors.push(`${leftName}와 ${rightName}는 같은 값을 재사용할 수 없습니다.`);
       }
     }
     validateHttpsUrl(errors, "PUBLIC_BASE_URL", appConfig.publicBaseUrl);
@@ -381,8 +442,25 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(appConfig.supportMailbox.address)) {
         errors.push("SUPPORT_MAILBOX_ADDRESS가 올바른 이메일 주소가 아닙니다.");
       }
-      if (!isValidMailboxEncryptionKey(appConfig.supportMailbox.encryptionKey)) {
+      if (!isValidEncryptionKey(appConfig.supportMailbox.encryptionKey)) {
         errors.push("SUPPORT_MAILBOX_ENCRYPTION_KEY는 32바이트 base64 또는 64자리 hex 값이어야 합니다.");
+      }
+    }
+    if (appConfig.palworldServerStatus.enabled) {
+      if (!isValidEncryptionKey(appConfig.palworldServerStatus.encryptionKey)) {
+        errors.push("PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY는 32바이트 base64 또는 64자리 hex 값이어야 합니다.");
+      } else if (isWeakEncryptionKey(appConfig.palworldServerStatus.encryptionKey)) {
+        errors.push("PALWORLD_SERVER_CREDENTIALS_ENCRYPTION_KEY는 예측하기 어려운 별도 랜덤 키여야 합니다.");
+      }
+      if (appConfig.palworldServerStatus.allowedOrigins.length === 0) {
+        errors.push("PALWORLD_REST_ALLOWED_ORIGINS에는 허용할 exact origin이 하나 이상 필요합니다.");
+      } else if (!appConfig.palworldServerStatus.allowedOrigins.some((destination) => destination.includes("://"))) {
+        errors.push("PALWORLD_REST_ALLOWED_ORIGINS에는 CIDR과 별도로 exact origin이 하나 이상 필요합니다.");
+      }
+      for (const destination of appConfig.palworldServerStatus.allowedOrigins) {
+        if (!validPalworldAllowedDestination(destination)) {
+          errors.push("PALWORLD_REST_ALLOWED_ORIGINS에는 wildcard 없이 exact origin 또는 CIDR만 설정할 수 있습니다.");
+        }
       }
     }
   }

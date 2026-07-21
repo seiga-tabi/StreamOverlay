@@ -25,6 +25,9 @@ import { LolProfileEnrichmentService } from "./services/lol-profile-enrichment.j
 import { LocalJsonLolProfileRepository } from "./services/lol-profile-store.js";
 import { LocalTtsService } from "./services/local-tts-service.js";
 import { SupportMailboxStore } from "./services/support-mailbox-store.js";
+import { PalworldServerClient } from "./services/palworld-server-client.js";
+import { PalworldServerConnectionStore } from "./services/palworld-server-connection-store.js";
+import { PalworldServerMonitor } from "./services/palworld-server-monitor.js";
 import { recordFollowerManagementEvent } from "./services/follower-event-recorder.js";
 import { createHttpHandler } from "./routes/http-api.js";
 import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMatches, type DashboardRole } from "./security/auth.js";
@@ -43,6 +46,23 @@ const supportMailbox = appConfig.supportMailbox.enabled
       encryptionKey: appConfig.supportMailbox.encryptionKey,
       retentionDays: appConfig.supportMailbox.retentionDays,
       maxMessages: appConfig.supportMailbox.maxMessages
+    })
+  : undefined;
+const palworldServerDestinations = appConfig.palworldServerStatus.allowedOrigins;
+const palworldServerMonitor = appConfig.palworldServerStatus.enabled
+  ? new PalworldServerMonitor({
+      store: new PalworldServerConnectionStore({
+        filePath: appConfig.palworldServerStatus.statePath,
+        encryptionKey: appConfig.palworldServerStatus.encryptionKey
+      }),
+      client: new PalworldServerClient({
+        allowedOrigins: palworldServerDestinations.filter((destination) => destination.includes("://")),
+        allowedCidrs: palworldServerDestinations.filter((destination) => !destination.includes("://")),
+        timeoutMs: appConfig.palworldServerStatus.timeoutMs
+      }),
+      enabled: true,
+      pollIntervalMs: appConfig.palworldServerStatus.pollIntervalMs,
+      logger
     })
   : undefined;
 const store = new Store({
@@ -135,6 +155,7 @@ const server = http.createServer(createHttpHandler({
   disconnectStreamerDashboard: (twitchUserId) => dashboard.disconnectStreamer(twitchUserId),
   overlayStatusForStreamer: (twitchUserId) => overlay.statusForStreamer(twitchUserId),
   supportMailbox,
+  palworldServerMonitor,
   readiness: () => store.getReadiness(),
   isShuttingDown: () => shuttingDown,
   connectionStatus: () => ({
@@ -383,6 +404,7 @@ overlayWss.on("connection", (socket, req) => {
 });
 
 twitchEventSub.start();
+palworldServerMonitor?.start();
 
 function closeWebSocketServer(wss: WebSocketServer): void {
   for (const client of wss.clients) client.close(1001, "server shutdown");
@@ -394,6 +416,7 @@ function shutdown(signal: NodeJS.Signals): void {
   shuttingDown = true;
   logger.event({ type: "server.shutdown_started", signal });
   twitchEventSub.stop();
+  palworldServerMonitor?.stop();
   closeLolGameMonitors();
   closeWebSocketServer(bridgeWss);
   closeWebSocketServer(dashboardWss);
