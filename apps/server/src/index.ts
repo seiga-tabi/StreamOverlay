@@ -340,8 +340,29 @@ server.on("upgrade", (req, socket, head) => {
 bridgeWss.on("connection", (socket, req) => {
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
   const name = url.searchParams.get("name") ?? "broadcast-pc";
-  bridge.attach(socket, name);
-  events.emit({ type: "bridge.connected", id: newId("event"), createdAt: nowIso(), payload: { name } });
+  const streamerId = url.searchParams.get("streamerId")?.trim() || undefined;
+  if (url.searchParams.getAll("name").length > 1 || url.searchParams.getAll("streamerId").length > 1) {
+    socket.close(1008, "Bridge 식별자 중복");
+    return;
+  }
+  if (streamerId) {
+    const configuredBroadcasterId = appConfig.twitch.broadcasterId.trim().toLowerCase();
+    const normalizedStreamerId = streamerId.toLowerCase();
+    const isRegistered = configuredBroadcasterId === normalizedStreamerId
+      || store.listApprovedStreamerRiotIds().some((request) => request.twitchUserId.toLowerCase() === normalizedStreamerId);
+    if (!isRegistered) {
+      logger.error({ type: "bridge.streamer_unapproved", streamerId: normalizedStreamerId });
+      socket.close(1008, "등록되지 않은 Bridge 스트리머");
+      return;
+    }
+  }
+  try {
+    bridge.attach(socket, name, streamerId);
+    events.emit({ type: "bridge.connected", id: newId("event"), createdAt: nowIso(), payload: { name, streamerId } });
+  } catch (error) {
+    logger.error({ type: "bridge.identity_invalid", error: toSafeErrorMessage(error) });
+    socket.close(1008, "잘못된 Bridge 식별자");
+  }
 });
 
 dashboardWss.on("connection", (socket, req) => {

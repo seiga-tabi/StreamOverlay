@@ -78,6 +78,18 @@ OBS Studio에서 WebSocket을 켜고 비밀번호를 설정하세요.
 - 기본 주소: `ws://127.0.0.1:4455`
 - 비밀번호: `apps/bridge/.env`의 `OBS_WEBSOCKET_PASSWORD`와 동일하게 설정
 
+여러 방송 PC를 같은 서버에 연결할 때는 각 PC의 `apps/bridge/.env`를 다음처럼 구분합니다.
+
+```dotenv
+BRIDGE_NAME=broadcast-pc-01
+BRIDGE_STREAMER_ID=등록된_Twitch_user_ID
+```
+
+- `BRIDGE_NAME`은 PC마다 고유하게 설정합니다. 미설정하거나 빈 값이면 해당 PC의 hostname을 사용합니다.
+- `BRIDGE_STREAMER_ID`는 해당 PC가 제어할 등록 스트리머의 Twitch user ID입니다.
+- 기존 단일 PC 환경은 `BRIDGE_STREAMER_ID`를 비워도 동작합니다.
+- 여러 Bridge가 연결된 상태에서 대상 스트리머를 확인할 수 없는 OBS 명령은 다른 PC로 잘못 보내지 않고 안전하게 실패합니다.
+
 OBS Browser Source에는 overlay 개발 서버 URL을 넣습니다.
 
 ```text

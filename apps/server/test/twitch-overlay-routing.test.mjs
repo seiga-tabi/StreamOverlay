@@ -47,7 +47,13 @@ function createHarness(options = {}) {
   const logger = new JsonlLogger(mkdtempSync(join(tmpdir(), "streamops-twitch-overlay-routing-")));
   const dashboard = new DashboardHub(store);
   const overlay = new OverlayHub(logger, store);
-  const bridge = { send: () => "cmd-test" };
+  const bridgeCommands = [];
+  const bridge = {
+    send(action, reason, targetStreamerId) {
+      bridgeCommands.push({ action, reason, targetStreamerId });
+      return "cmd-test";
+    }
+  };
   const sentChatMessages = [];
   const twitchChat = {
     renderMessageTemplate(template, ctx) {
@@ -69,7 +75,7 @@ function createHarness(options = {}) {
   };
   const twitch = options.twitch ?? {};
   const ctx = { events, actions, logger, store, overlay, dashboard, twitch, riot, lolProfileEnrichment: options.lolProfileEnrichment };
-  return { events, actions, store, socket, ctx, sentChatMessages };
+  return { events, actions, store, socket, ctx, sentChatMessages, bridgeCommands };
 }
 
 async function settle() {
@@ -108,6 +114,22 @@ test("channel point redemption은 reward config를 거쳐 overlay.banner를 표�
   assert.equal(banner.speechEnabled, true);
   assert.equal(banner.speechLanguage, "ja-JP");
   assert.doesNotMatch(banner.message, /[<>]/);
+});
+
+test("OBS action은 ctx.streamerId를 Bridge target으로 전달한다", async () => {
+  const { actions, bridgeCommands } = createHarness();
+
+  await actions.dispatchOne(
+    { type: "obs.setScene", sceneName: "메인" },
+    { streamerId: "streamer-a" },
+    "test.obs_target"
+  );
+
+  assert.deepEqual(bridgeCommands, [{
+    action: { type: "obs.setScene", sceneName: "메인" },
+    reason: "test.obs_target",
+    targetStreamerId: "streamer-a"
+  }]);
 });
 
 test("participation.open action은 시참 상태와 대기열 overlay를 함께 갱신한다", async () => {

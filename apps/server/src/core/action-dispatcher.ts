@@ -72,7 +72,7 @@ export class ActionDispatcher {
     try {
       let actionStatus: ActionRecord["status"] = "ok";
       if (isObsAction(action)) {
-        const commandId = this.bridge.send(action, reason);
+        const commandId = this.bridge.send(action, reason, this.resolveBridgeStreamerId(ctx));
         this.logger.action({ id: actionId, type: action.type, status: "sent_to_bridge", commandId, reason });
         this.recordAction({ id: actionId, type: action.type, status: "ok", createdAt: new Date().toISOString() });
         return;
@@ -297,6 +297,12 @@ export class ActionDispatcher {
       return action.streamerId.trim();
     }
     return undefined;
+  }
+
+  private resolveBridgeStreamerId(ctx: TemplateContext): string | undefined {
+    return typeof ctx.streamerId === "string" && ctx.streamerId.trim()
+      ? ctx.streamerId.trim()
+      : undefined;
   }
 
   private async attachOverlaySpeech(message: OverlayBannerMessage): Promise<void> {

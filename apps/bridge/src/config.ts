@@ -1,8 +1,21 @@
 import "dotenv/config";
 import fs from "node:fs";
+import os from "node:os";
 
 function env(name: string, fallback = ""): string {
   return process.env[name] ?? fallback;
+}
+
+function optionalEnv(name: string): string | undefined {
+  return process.env[name]?.trim() || undefined;
+}
+
+function defaultBridgeName(): string {
+  const hostName = os.hostname()
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/gu, "-")
+    .slice(0, 64);
+  return hostName || "main-streaming-pc";
 }
 
 function envOrFile(name: string, fallback = ""): string {
@@ -21,7 +34,8 @@ function envOrFile(name: string, fallback = ""): string {
 
 export const bridgeConfig = {
   serverWsUrl: env("SERVER_WS_URL", "ws://localhost:3000/bridge"),
-  bridgeName: env("BRIDGE_NAME", "main-streaming-pc"),
+  bridgeName: optionalEnv("BRIDGE_NAME") ?? defaultBridgeName(),
+  streamerId: optionalEnv("BRIDGE_STREAMER_ID"),
   sharedSecret: envOrFile("BRIDGE_SHARED_SECRET", "dev-secret-change-me"),
   obsUrl: env("OBS_WEBSOCKET_URL", "ws://127.0.0.1:4455"),
   obsPassword: env("OBS_WEBSOCKET_PASSWORD")

@@ -6166,7 +6166,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const body = await readJsonBody<{ action: BotAction }>(req);
         const validation = validateBotAction(body.action);
         if (!validation.ok) return sendJson(req, res, 400, validation);
-        await input.actions.dispatchOne(body.action, { user: "dashboard", input: "" }, "dashboard.test");
+        const streamerId = authenticatedStreamerOwnerId(auth.principal);
+        await input.actions.dispatchOne(body.action, {
+          user: "dashboard",
+          input: "",
+          ...(streamerId ? { streamerId } : {})
+        }, "dashboard.test");
         return sendJson(req, res, 200, { ok: true });
       }
 
