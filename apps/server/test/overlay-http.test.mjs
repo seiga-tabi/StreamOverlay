@@ -940,69 +940,6 @@ test("EventSub reconnect API는 client reconnect를 호출하고 status를 반�
   assert.equal(JSON.parse(res.body).eventSub.websocket, "reconnecting");
 });
 
-test("follower refresh API는 Twitch follower snapshot을 Store에 반영한다", async () => {
-  const calls = [];
-  let twitchCalls = 0;
-  let followerState;
-  const handler = createHttpHandler({
-    store: {
-      reconcileFollowerSnapshot(input) {
-        calls.push(input);
-        followerState = {
-          summary: { knownFollowers: input.followers.length, activeFollowers: input.followers.length, unfollowed: 0, newFollowers7d: 1, observedGenreFollowers: 0 },
-          followers: input.followers,
-          recentFollowers: input.followers,
-          recentUnfollowers: [],
-          topObservedGenres: [],
-          lastSnapshotTotal: input.total,
-          lastSnapshotTruncated: input.truncated,
-          dataNotes: []
-        };
-        return followerState;
-      }
-    },
-    twitch: {
-      async getChannelFollowers(limit) {
-        twitchCalls += 1;
-        assert.equal(limit, 50);
-        return {
-          followers: [{
-            userId: "100",
-            userLogin: "viewer100",
-            userName: "Viewer100",
-            profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/viewer100.png",
-            followedAt: "2026-06-01T00:00:00.000Z"
-          }],
-          total: 1,
-          truncated: false
-        };
-      }
-    },
-    twitchAuth: {},
-    actions: {}
-  });
-
-  const req = createRequest("POST", "/api/followers/refresh?limit=50", {});
-  const res = createResponse();
-  await handler(req, res);
-
-  assert.equal(res.statusCode, 200);
-  assert.equal(calls.length, 1);
-  assert.equal(twitchCalls, 1);
-  assert.equal(calls[0].followers[0].userName, "Viewer100");
-  assert.equal(calls[0].followers[0].profileImageUrl, "https://static-cdn.jtvnw.net/jtv_user_pictures/viewer100.png");
-  assert.equal(JSON.parse(res.body).summary.activeFollowers, 1);
-
-  const cooldownReq = createRequest("POST", "/api/followers/refresh?limit=50", {});
-  const cooldownRes = createResponse();
-  await handler(cooldownReq, cooldownRes);
-
-  assert.equal(cooldownRes.statusCode, 200);
-  assert.equal(twitchCalls, 1);
-  assert.equal(cooldownRes.headers["X-StreamOps-Cache"], "cooldown");
-  assert.equal(JSON.parse(cooldownRes.body).summary.activeFollowers, 1);
-});
-
 test("participation profile refresh API는 같은 entry의 연속 강제 갱신을 쿨다운한다", async () => {
   let refreshCalls = 0;
   const handler = createHttpHandler({
@@ -1037,26 +974,6 @@ test("participation profile refresh API는 같은 entry의 연속 강제 갱신�
   assert.equal(refreshCalls, 1);
   assert.equal(secondRes.headers["X-StreamOps-Cache"], "cooldown");
   assert.ok(Number(secondRes.headers["Retry-After"]) > 0);
-});
-
-test("follower refresh API는 scope 부족 오류를 400으로 반환한다", async () => {
-  const handler = createHttpHandler({
-    store: {},
-    twitch: {
-      async getChannelFollowers() {
-        throw new Error("moderator:read:followers scope가 필요합니다.");
-      }
-    },
-    twitchAuth: {},
-    actions: {}
-  });
-
-  const req = createRequest("POST", "/api/followers/refresh", {});
-  const res = createResponse();
-  await handler(req, res);
-
-  assert.equal(res.statusCode, 400);
-  assert.match(JSON.parse(res.body).error, /moderator:read:followers/);
 });
 
 test("Riot API key 설정 API는 key 원문을 응답하지 않는다", async () => {

@@ -1,62 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import type { FollowerManagementResponse, FollowerOAuthStatus } from "@streamops/shared";
 import { apiGet, apiPost } from "../api/client";
 import { dashboardLocale, uiText } from "../i18n";
+import {
+  Badge,
+  Button,
+  Card,
+  CardDescription,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateDescription,
+  EmptyStateIcon,
+  EmptyStateTitle,
+  SkeletonCard,
+  SkeletonText,
+  StatusPill,
+} from "../shared/ui";
 
-type FollowerRecord = {
-  userId: string;
-  userLogin?: string;
-  userName: string;
-  profileImageUrl?: string;
-  riotGameName?: string;
-  riotTagLine?: string;
-  riotPuuid?: string;
-  riotIdUpdatedAt?: string;
-  followedAt?: string;
-  firstSeenAt: string;
-  lastSeenAt: string;
-  status: "following" | "unfollowed";
-  unfollowedAt?: string;
-  activity: {
-    chatMessages: number;
-    participationEntries: number;
-    total: number;
-    genres: Record<string, number>;
-    lastActivityAt?: string;
-  };
-};
+type FollowerRecord = FollowerManagementResponse["followers"][number];
 
-type FollowerState = {
-  summary: {
-    knownFollowers: number;
-    activeFollowers: number;
-    unfollowed: number;
-    newFollowers7d: number;
-    observedGenreFollowers: number;
-  };
-  followers: FollowerRecord[];
-  recentFollowers: FollowerRecord[];
-  recentUnfollowers: FollowerRecord[];
-  topObservedGenres: Array<{ name: string; count: number }>;
-  lastSnapshotAt?: string;
-  lastSnapshotTotal?: number;
-  lastSnapshotTruncated?: boolean;
-  dataNotes: string[];
-};
-
-const emptyState: FollowerState = {
-  summary: {
-    knownFollowers: 0,
-    activeFollowers: 0,
-    unfollowed: 0,
-    newFollowers7d: 0,
-    observedGenreFollowers: 0
-  },
-  followers: [],
-  recentFollowers: [],
-  recentUnfollowers: [],
-  topObservedGenres: [],
-  dataNotes: []
-};
+const TWITCH_OAUTH_HOST = "id.twitch.tv";
+const FOLLOWER_SCOPE = "moderator:read:followers";
 
 function formatDate(value?: string): string {
   if (!value) return "-";
@@ -72,7 +36,14 @@ function formatDate(value?: string): string {
 
 function mainGenre(record: FollowerRecord): string {
   const [first] = Object.entries(record.activity.genres).sort((a, b) => b[1] - a[1]);
-  return first ? `${first[0]} ${first[1]}` : "-";
+  return first ? `${localizedGenre(first[0])} ${first[1]}` : "-";
+}
+
+function localizedGenre(name: string): string {
+  const genres = uiText.followersPage.genres;
+  if (name === "채팅 참여") return genres.chat;
+  if (name === "League of Legends 시참") return genres.participation;
+  return name;
 }
 
 function statusClass(status: FollowerRecord["status"]): string {
@@ -86,6 +57,23 @@ function followerInitial(record: FollowerRecord): string {
 function followerRiotId(record: FollowerRecord): string | undefined {
   if (!record.riotGameName || !record.riotTagLine) return undefined;
   return `${record.riotGameName}#${record.riotTagLine}`;
+}
+
+export function safeFollowerOAuthUrl(value: string): string | undefined {
+  try {
+    const url = new URL(value);
+    if (
+      url.protocol !== "https:" ||
+      url.hostname.toLowerCase() !== TWITCH_OAUTH_HOST ||
+      url.port !== "" ||
+      url.username !== "" ||
+      url.password !== "" ||
+      url.pathname !== "/oauth2/authorize"
+    ) return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
 }
 
 function FollowerAvatar({ record }: { record: FollowerRecord }) {
@@ -108,9 +96,18 @@ function FollowerIdentity({ record }: { record: FollowerRecord }) {
   );
 }
 
+export function FollowerEmptyState({ text }: { text: string }) {
+  return (
+    <EmptyState as="div" className="followers-inline-empty" variant="default">
+      <EmptyStateIcon>0</EmptyStateIcon>
+      <EmptyStateTitle as="h3">{text}</EmptyStateTitle>
+    </EmptyState>
+  );
+}
+
 function FollowerMiniList({ items, empty }: { items: FollowerRecord[]; empty: string }) {
   const t = uiText.followersPage;
-  if (items.length === 0) return <p className="empty-state">{empty}</p>;
+  if (items.length === 0) return <FollowerEmptyState text={empty} />;
   return (
     <div className="follower-mini-list">
       {items.map((item) => (
@@ -125,45 +122,137 @@ function FollowerMiniList({ items, empty }: { items: FollowerRecord[]; empty: st
   );
 }
 
+function oauthStatusLabel(state: FollowerOAuthStatus["state"]): string {
+  const t = uiText.followersPage.oauth;
+  if (state === "connected") return t.connected;
+  if (state === "missing_scopes") return t.missingScopesTitle;
+  if (state === "token_expired") return t.tokenExpiredTitle;
+  return t.disconnectedTitle;
+}
+
+function oauthStatusTone(state: FollowerOAuthStatus["state"]): "success" | "warning" | "danger" {
+  if (state === "connected") return "success";
+  if (state === "missing_scopes" || state === "token_expired") return "warning";
+  return "danger";
+}
+
+export function FollowerOAuthNotice({
+  connecting,
+  oauth,
+  onConnect,
+}: {
+  connecting: boolean;
+  oauth: FollowerOAuthStatus;
+  onConnect: () => void;
+}) {
+  const t = uiText.followersPage.oauth;
+  if (oauth.state === "connected") return null;
+
+  const title = oauth.state === "missing_scopes"
+    ? t.missingScopesTitle
+    : oauth.state === "token_expired"
+      ? t.tokenExpiredTitle
+      : t.disconnectedTitle;
+  const description = oauth.state === "missing_scopes"
+    ? t.missingScopesDescription
+    : oauth.state === "token_expired"
+      ? t.tokenExpiredDescription
+      : t.disconnectedDescription;
+  const action = oauth.state === "missing_scopes"
+    ? t.reauthorize
+    : oauth.state === "token_expired"
+      ? t.reconnect
+      : t.connect;
+  const missingScopes = oauth.missingScopes.length > 0 ? oauth.missingScopes : [FOLLOWER_SCOPE];
+
+  return (
+    <EmptyState
+      className="followers-oauth-state"
+      data-oauth-state={oauth.state}
+      role="status"
+      variant={oauth.state === "token_expired" ? "error" : "streamer"}
+    >
+      <EmptyStateIcon>!</EmptyStateIcon>
+      <EmptyStateTitle>{title}</EmptyStateTitle>
+      <EmptyStateDescription>{description}</EmptyStateDescription>
+      {oauth.state === "missing_scopes" ? (
+        <div className="followers-oauth-scopes" aria-label={t.requiredScope}>
+          {missingScopes.map((scope) => (
+            <Badge key={scope} size="sm" tone="warning">{scope}</Badge>
+          ))}
+        </div>
+      ) : null}
+      <EmptyStateActions>
+        <Button loading={connecting} loadingLabel={t.connecting} onClick={onConnect}>
+          {action}
+        </Button>
+      </EmptyStateActions>
+    </EmptyState>
+  );
+}
+
 export function FollowersPage() {
   const t = uiText.followersPage;
-  const [state, setState] = useState<FollowerState>(emptyState);
+  const [state, setState] = useState<FollowerManagementResponse>();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [message, setMessage] = useState("");
+  const [connecting, setConnecting] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [message, setMessage] = useState<{ tone: "success" | "danger"; text: string }>();
 
   async function load() {
-    const next = await apiGet<FollowerState>("/api/followers");
-    setState(next);
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      setState(await apiGet<FollowerManagementResponse>("/api/followers"));
+    } catch {
+      setLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function refresh() {
+    if (state?.oauth.state !== "connected") return;
     setRefreshing(true);
-    setMessage("");
+    setMessage(undefined);
     try {
-      const next = await apiPost<FollowerState>("/api/followers/refresh?limit=5000", {});
-      setState(next);
-      setMessage(t.refreshDone);
-    } catch (error) {
-      setMessage(`${t.refreshFailed}: ${String(error)}`);
+      setState(await apiPost<FollowerManagementResponse>("/api/followers/refresh?limit=5000", {}));
+      setMessage({ tone: "success", text: t.refreshDone });
+    } catch {
+      setMessage({ tone: "danger", text: t.refreshFailed });
+      void load();
     } finally {
       setRefreshing(false);
     }
   }
 
+  async function connectFollowerOAuth() {
+    setConnecting(true);
+    setMessage(undefined);
+    try {
+      const result = await apiPost<{ url: string }>("/api/followers/oauth/start", {});
+      const destination = safeFollowerOAuthUrl(result.url);
+      if (!destination) throw new Error("invalid Twitch OAuth URL");
+      window.location.assign(destination);
+    } catch {
+      setConnecting(false);
+      setMessage({ tone: "danger", text: t.oauth.connectFailed });
+    }
+  }
+
   useEffect(() => {
-    void load()
-      .catch((error) => setMessage(String(error)))
-      .finally(() => setLoading(false));
+    void load();
   }, []);
 
-  const metrics = useMemo(() => [
+  const metrics = state ? [
     { label: t.metrics.activeFollowers, value: state.summary.activeFollowers },
     { label: t.metrics.knownFollowers, value: state.summary.knownFollowers },
     { label: t.metrics.unfollowed, value: state.summary.unfollowed },
     { label: t.metrics.newFollowers7d, value: state.summary.newFollowers7d },
     { label: t.metrics.observedGenreFollowers, value: state.summary.observedGenreFollowers }
-  ], [state.summary, t]);
+  ] : [];
+  const oauthConnected = state?.oauth.state === "connected";
 
   return (
     <>
@@ -173,109 +262,154 @@ export function FollowersPage() {
           <p className="muted">{t.description}</p>
         </div>
         <div className="button-row">
-          <button onClick={() => void refresh()} disabled={refreshing}>
-            {refreshing ? t.refreshing : t.refresh}
-          </button>
+          {state ? (
+            <StatusPill size="sm" tone={oauthStatusTone(state.oauth.state)}>
+              {oauthStatusLabel(state.oauth.state)}
+            </StatusPill>
+          ) : null}
+          <Button
+            disabled={!oauthConnected || loading || connecting}
+            loading={refreshing}
+            loadingLabel={t.refreshing}
+            onClick={() => void refresh()}
+          >
+            {t.refresh}
+          </Button>
         </div>
       </header>
 
-      <div className="scope-warning">
-        <div>{t.scopeHint}</div>
-        <div className="hint">{t.dataLimit}</div>
-      </div>
+      {loading && !state ? (
+        <SkeletonCard className="followers-loading" loadingLabel={t.loading} size="lg">
+          <SkeletonText lines={5} size="lg" />
+        </SkeletonCard>
+      ) : null}
 
-      {message ? <p className="form-message">{message}</p> : null}
+      {!loading && loadFailed && !state ? (
+        <EmptyState className="followers-load-error" variant="error">
+          <EmptyStateIcon>!</EmptyStateIcon>
+          <EmptyStateTitle>{t.loadFailed}</EmptyStateTitle>
+          <EmptyStateDescription>{t.description}</EmptyStateDescription>
+          <EmptyStateActions>
+            <Button onClick={() => void load()}>{t.retry}</Button>
+          </EmptyStateActions>
+        </EmptyState>
+      ) : null}
 
-      <section className="participation-summary">
-        {metrics.map((metric) => (
-          <div key={metric.label}>
-            <span>{metric.label}</span>
-            <strong>{loading ? "-" : metric.value}</strong>
-          </div>
-        ))}
-      </section>
+      {state ? (
+        <>
+          <FollowerOAuthNotice
+            connecting={connecting}
+            oauth={state.oauth}
+            onConnect={() => void connectFollowerOAuth()}
+          />
 
-      <section className="grid two">
-        <div className="card">
-          <div className="card-title-row">
-            <h2>{t.sections.recentFollowers}</h2>
-            <span className="count-badge">{state.recentFollowers.length}</span>
-          </div>
-          <FollowerMiniList items={state.recentFollowers} empty={t.empty.followers} />
-        </div>
+          <Card as="aside" className="scope-warning" padding="md" variant="warning">
+            <CardDescription>{t.scopeHint}</CardDescription>
+            <CardDescription className="hint">{t.dataLimit}</CardDescription>
+          </Card>
 
-        <div className="card">
-          <div className="card-title-row">
-            <h2>{t.sections.recentUnfollowers}</h2>
-            <span className="count-badge">{state.recentUnfollowers.length}</span>
-          </div>
-          <FollowerMiniList items={state.recentUnfollowers} empty={t.empty.unfollowers} />
-        </div>
-      </section>
+          {message ? (
+            <StatusPill className="form-message" role={message.tone === "danger" ? "alert" : "status"} tone={message.tone}>
+              {message.text}
+            </StatusPill>
+          ) : null}
 
-      <section className="grid two">
-        <div className="card">
-          <div className="card-title-row">
-            <h2>{t.sections.topGenres}</h2>
-            <span className="count-badge">{state.topObservedGenres.length}</span>
-          </div>
-          {state.topObservedGenres.length === 0 ? (
-            <p className="empty-state">{t.empty.genres}</p>
-          ) : (
-            <div className="genre-bar-list">
-              {state.topObservedGenres.map((genre) => (
-                <div className="genre-bar-row" key={genre.name}>
-                  <span>{genre.name}</span>
-                  <strong>{genre.count}</strong>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="card">
-          <h2>{t.sections.notes}</h2>
-          <div className="ops-note">
-            <span>{t.snapshot}: {formatDate(state.lastSnapshotAt)}</span>
-            <span>{t.total}: {state.lastSnapshotTotal ?? "-"}</span>
-            <span>{t.truncated}: {state.lastSnapshotTruncated ? "true" : "false"}</span>
-            <ul>
-              {state.dataNotes.map((note) => <li key={note}>{note}</li>)}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="card">
-        <div className="card-title-row">
-          <h2>{t.sections.allFollowers}</h2>
-          <span className="count-badge">{state.followers.length}</span>
-        </div>
-        {state.followers.length === 0 ? (
-          <p className="empty-state">{t.empty.followers}</p>
-        ) : (
-          <div className="follower-table">
-            <div className="follower-row follower-head">
-              <span>{t.columns.user}</span>
-              <span>{t.columns.riotId}</span>
-              <span>{t.columns.status}</span>
-              <span>{t.columns.followedAt}</span>
-              <span>{t.columns.activity}</span>
-              <span>{t.columns.genre}</span>
-            </div>
-            {state.followers.map((follower) => (
-              <div className="follower-row" key={follower.userId}>
-                <FollowerIdentity record={follower} />
-                <span className="follower-riot-id">{followerRiotId(follower) ?? t.riotIdMissing}</span>
-                <span className={`queue-status ${statusClass(follower.status)}`}>{t.statuses[follower.status]}</span>
-                <span>{formatDate(follower.followedAt ?? follower.firstSeenAt)}</span>
-                <span>{follower.activity.total}</span>
-                <span>{mainGenre(follower)}</span>
+          <section className="participation-summary">
+            {metrics.map((metric) => (
+              <div key={metric.label}>
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
               </div>
             ))}
-          </div>
-        )}
-      </section>
+          </section>
+
+          <section className="grid two">
+            <div className="card">
+              <div className="card-title-row">
+                <h2>{t.sections.recentFollowers}</h2>
+                <span className="count-badge">{state.recentFollowers.length}</span>
+              </div>
+              <FollowerMiniList items={state.recentFollowers} empty={t.empty.followers} />
+            </div>
+
+            <div className="card">
+              <div className="card-title-row">
+                <h2>{t.sections.recentUnfollowers}</h2>
+                <span className="count-badge">{state.recentUnfollowers.length}</span>
+              </div>
+              <FollowerMiniList items={state.recentUnfollowers} empty={t.empty.unfollowers} />
+            </div>
+          </section>
+
+          <section className="grid two">
+            <div className="card">
+              <div className="card-title-row">
+                <h2>{t.sections.topGenres}</h2>
+                <span className="count-badge">{state.topObservedGenres.length}</span>
+              </div>
+              {state.topObservedGenres.length === 0 ? (
+                <FollowerEmptyState text={t.empty.genres} />
+              ) : (
+                <div className="genre-bar-list">
+                  {state.topObservedGenres.map((genre) => (
+                    <div className="genre-bar-row" key={genre.name}>
+                      <span>{localizedGenre(genre.name)}</span>
+                      <strong>{genre.count}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="card">
+              <h2>{t.sections.notes}</h2>
+              <div className="ops-note">
+                <span>{t.snapshot}: {formatDate(state.lastSnapshotAt)}</span>
+                <span>{t.total}: {state.lastSnapshotTotal ?? "-"}</span>
+                <span>
+                  {t.truncated}: {state.lastSnapshotTruncated === undefined
+                    ? "-"
+                    : state.lastSnapshotTruncated ? t.yes : t.no}
+                </span>
+                <ul>
+                  {t.dataNotes.map((note) => <li key={note}>{note}</li>)}
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-title-row">
+              <h2>{t.sections.allFollowers}</h2>
+              <span className="count-badge">{state.followers.length}</span>
+            </div>
+            {state.followers.length === 0 ? (
+              <FollowerEmptyState text={t.empty.followers} />
+            ) : (
+              <div className="follower-table">
+                <div className="follower-row follower-head">
+                  <span>{t.columns.user}</span>
+                  <span>{t.columns.riotId}</span>
+                  <span>{t.columns.status}</span>
+                  <span>{t.columns.followedAt}</span>
+                  <span>{t.columns.activity}</span>
+                  <span>{t.columns.genre}</span>
+                </div>
+                {state.followers.map((follower) => (
+                  <div className="follower-row" key={follower.userId}>
+                    <FollowerIdentity record={follower} />
+                    <span className="follower-riot-id">{followerRiotId(follower) ?? t.riotIdMissing}</span>
+                    <span className={`queue-status ${statusClass(follower.status)}`}>{t.statuses[follower.status]}</span>
+                    <span>{formatDate(follower.followedAt ?? follower.firstSeenAt)}</span>
+                    <span>{follower.activity.total}</span>
+                    <span>{mainGenre(follower)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </>
+      ) : null}
     </>
   );
 }

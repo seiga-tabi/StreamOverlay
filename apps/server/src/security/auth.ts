@@ -259,6 +259,9 @@ type StreamerDashboardRule = {
 const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "GET", path: "/api/dashboard/auth/status" },
   { method: "POST", path: "/api/dashboard/auth/logout" },
+  { method: "GET", path: "/api/followers" },
+  { method: "POST", path: "/api/followers/refresh" },
+  { method: "POST", path: "/api/followers/oauth/start" },
   { method: "GET", path: "/api/overlay/status" },
   { method: "GET", path: "/api/participation/queue" },
   { method: "GET", path: "/api/participation/state" },

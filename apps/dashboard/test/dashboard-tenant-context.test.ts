@@ -19,7 +19,8 @@ test("스트리머 API와 WebSocket 요청에 URL tenant 식별자를 함께 전
     return new Response(JSON.stringify({
       required: true,
       authenticated: true,
-      role: "streamer"
+      role: "streamer",
+      csrfToken: "csrf-test"
     }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
@@ -27,7 +28,7 @@ test("스트리머 API와 WebSocket 요청에 URL tenant 식별자를 함께 전
   }) as typeof fetch;
 
   try {
-    const { apiGet, getDashboardAuthStatus } = await import("../src/api/client");
+    const { apiGet, apiPost, getDashboardAuthStatus } = await import("../src/api/client");
     const socketUrls: string[] = [];
     class TestWebSocket {
       onopen: (() => void) | null = null;
@@ -50,14 +51,29 @@ test("스트리머 API와 WebSocket 요청에 URL tenant 식별자를 함께 전
 
     await getDashboardAuthStatus("streamer", tenant);
     await apiGet("/api/lol-operations");
+    await apiGet("/api/followers");
+    await apiPost("/api/followers/oauth/start", {});
+    await apiPost("/api/followers/refresh", {});
     const closeSocket = connectDashboardSocket(() => undefined, undefined, "streamer", tenant);
 
-    assert.equal(requests.length, 2);
+    assert.equal(requests.length, 5);
     assert.equal(requests[0]?.headers.get("X-StreamOps-Dashboard-Surface"), "streamer");
     assert.equal(requests[0]?.headers.get("X-StreamOps-Streamer-Slug"), tenant.streamerSlug);
     assert.equal(requests[0]?.headers.get("X-StreamOps-Dashboard-Key"), tenant.dashboardKey);
+    assert.equal(requests[1]?.url, "http://dashboard.test/api/lol-operations");
     assert.equal(requests[1]?.headers.get("X-StreamOps-Streamer-Slug"), tenant.streamerSlug);
     assert.equal(requests[1]?.headers.get("X-StreamOps-Dashboard-Key"), tenant.dashboardKey);
+    assert.equal(requests[2]?.url, "http://dashboard.test/api/followers");
+    assert.equal(requests[2]?.headers.get("X-StreamOps-Streamer-Slug"), tenant.streamerSlug);
+    assert.equal(requests[2]?.headers.get("X-StreamOps-Dashboard-Key"), tenant.dashboardKey);
+    assert.equal(requests[3]?.url, "http://dashboard.test/api/followers/oauth/start");
+    assert.equal(requests[3]?.headers.get("X-StreamOps-Streamer-Slug"), tenant.streamerSlug);
+    assert.equal(requests[3]?.headers.get("X-StreamOps-Dashboard-Key"), tenant.dashboardKey);
+    assert.equal(requests[3]?.headers.get("X-StreamOps-CSRF"), "csrf-test");
+    assert.equal(requests[4]?.url, "http://dashboard.test/api/followers/refresh");
+    assert.equal(requests[4]?.headers.get("X-StreamOps-Streamer-Slug"), tenant.streamerSlug);
+    assert.equal(requests[4]?.headers.get("X-StreamOps-Dashboard-Key"), tenant.dashboardKey);
+    assert.equal(requests[4]?.headers.get("X-StreamOps-CSRF"), "csrf-test");
     assert.equal(
       socketUrls[0],
       `ws://dashboard.test/ws/dashboard?surface=streamer&streamerSlug=${tenant.streamerSlug}&dashboardKey=${tenant.dashboardKey}`

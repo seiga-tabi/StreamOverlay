@@ -34,6 +34,7 @@ import {
   type ParticipationStreamerProfile,
   type ParticipationStatus,
   type DashboardServerStatus,
+  type FollowerManagementResponse,
   type OverlayStatus,
   type StreamerProfileLink,
   type StreamerRiotIdentity,
@@ -44,7 +45,11 @@ import {
   type TournamentUpsertInput
 } from "@streamops/shared";
 import type { TwitchAuthService } from "../services/twitch-auth.js";
-import type { TwitchApiClient, TwitchStreamStatus } from "../services/twitch-api.js";
+import { TwitchFollowerLookupError, type TwitchApiClient, type TwitchStreamStatus } from "../services/twitch-api.js";
+import {
+  StreamerFollowerAuthError,
+  type StreamerFollowerAuthService
+} from "../services/streamer-follower-auth.js";
 import type { PublicTwitchAuthService } from "../services/public-twitch-auth.js";
 import {
   clearPublicTwitchViewerSessionCookie,
@@ -633,7 +638,11 @@ type PublicParticipationCancelResponse = {
   state: PublicParticipationStateResponse;
 };
 
-type FollowerManagementState = ReturnType<Store["getFollowerManagementState"]>;
+type FollowerRefreshRuntime = {
+  inFlight?: Promise<FollowerManagementResponse>;
+  availableAt: number;
+  lastState?: FollowerManagementResponse;
+};
 
 class HttpRequestError extends Error {
   constructor(
@@ -920,6 +929,15 @@ function dashboardReturnUrlForRequest(req: IncomingMessage, requestedPath?: stri
   const returnUrl = new URL(safeDashboardReturnPath(requestedPath) ?? "/", origin);
   returnUrl.searchParams.set("twitch", "connected");
   return returnUrl.toString();
+}
+
+function followerOAuthReturnUrlForRequest(req: IncomingMessage, storedReturnUrl: string): string {
+  try {
+    const stored = new URL(storedReturnUrl);
+    return dashboardReturnUrlForRequest(req, safeDashboardReturnPath(stored.pathname));
+  } catch {
+    return dashboardReturnUrlForRequest(req);
+  }
 }
 
 function publicLolReturnUrlForRequest(req: IncomingMessage): string {
@@ -1697,6 +1715,7 @@ type HttpHandlerInput = {
   dataDragon?: DataDragonService;
   profileRepository?: LolProfileRepository;
   twitchAuth: TwitchAuthService;
+  streamerFollowerAuth?: StreamerFollowerAuthService;
   publicTwitchAuth?: PublicTwitchAuthService;
   eventSub?: TwitchEventSubClient;
   logger?: Pick<JsonlLogger, "error"> & Partial<Pick<JsonlLogger, "event">>;
@@ -2533,9 +2552,7 @@ function publicLolTwitchStreamFromCandidate(
 export function createHttpHandler(input: HttpHandlerInput) {
   const sessions = input.sessions ?? new DashboardSessionStore();
   const communityModeration = new CommunityModerationService(input.store);
-  let followerRefreshInFlight: Promise<FollowerManagementState> | undefined;
-  let followerRefreshAvailableAt = 0;
-  let lastFollowerRefreshState: FollowerManagementState | undefined;
+  const followerRefreshByBroadcaster = new Map<string, FollowerRefreshRuntime>();
   let streamerProfileRefreshInFlight: Promise<ParticipationStreamerProfile | undefined> | undefined;
   let streamerProfileRefreshAvailableAt = 0;
   let streamerProfileRefreshKey = "";
@@ -4953,17 +4970,133 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return loadGameMonitorConfig().streamerRiotId.trim().toLocaleLowerCase();
   }
 
-  async function refreshFollowerSnapshot(limit: number): Promise<FollowerManagementState> {
-    if (!input.twitch) throw new Error("Twitch API client를 사용할 수 없습니다.");
-    const snapshot = await input.twitch.getChannelFollowers(Number.isFinite(limit) ? limit : 5000);
-    const state = input.store.reconcileFollowerSnapshot({
+  function followerRefreshRuntime(broadcasterUserId: string): FollowerRefreshRuntime {
+    const existing = followerRefreshByBroadcaster.get(broadcasterUserId);
+    if (existing) return existing;
+    const runtime: FollowerRefreshRuntime = { availableAt: 0 };
+    followerRefreshByBroadcaster.set(broadcasterUserId, runtime);
+    return runtime;
+  }
+
+  function followerAuthHttpError(error: unknown): HttpRequestError {
+    if (!(error instanceof StreamerFollowerAuthError)) {
+      return new HttpRequestError(503, {
+        error: "스트리머별 Twitch 팔로워 관리 권한을 확인할 수 없습니다.",
+        code: "FOLLOWER_AUTH_UNAVAILABLE"
+      });
+    }
+    if (error.code === "NOT_CONNECTED") {
+      return new HttpRequestError(409, { error: error.message, code: "FOLLOWER_OAUTH_REQUIRED" });
+    }
+    if (error.code === "MISSING_SCOPES") {
+      return new HttpRequestError(403, {
+        error: error.message,
+        code: "FOLLOWER_SCOPE_MISSING",
+        missingScopes: error.missingScopes
+      });
+    }
+    if (error.code === "TOKEN_EXPIRED") {
+      return new HttpRequestError(409, { error: error.message, code: "FOLLOWER_TOKEN_EXPIRED" });
+    }
+    if (error.code === "OWNER_MISMATCH") {
+      return new HttpRequestError(403, { error: error.message, code: "FOLLOWER_OAUTH_OWNER_MISMATCH" });
+    }
+    if (error.code === "INVALID_INPUT") {
+      return new HttpRequestError(403, { error: "스트리머 계정 정보가 올바르지 않습니다.", code: "FOLLOWER_OWNER_INVALID" });
+    }
+    return new HttpRequestError(502, { error: error.message, code: "FOLLOWER_OAUTH_FAILED" });
+  }
+
+  function requireStreamerFollowerAuth(): StreamerFollowerAuthService {
+    if (!input.streamerFollowerAuth) {
+      throw new HttpRequestError(503, {
+        error: "스트리머별 Twitch 팔로워 관리 권한 서비스를 사용할 수 없습니다.",
+        code: "FOLLOWER_AUTH_UNAVAILABLE"
+      });
+    }
+    return input.streamerFollowerAuth;
+  }
+
+  async function followerManagementResponse(broadcasterUserId: string): Promise<FollowerManagementResponse> {
+    const followerAuth = requireStreamerFollowerAuth();
+    try {
+      return {
+        ...input.store.getFollowerManagementState(broadcasterUserId),
+        oauth: await followerAuth.getStatus(broadcasterUserId)
+      };
+    } catch (error) {
+      throw followerAuthHttpError(error);
+    }
+  }
+
+  async function followerSnapshotForBroadcaster(broadcasterUserId: string, limit: number) {
+    if (!input.twitch) {
+      throw new HttpRequestError(503, {
+        error: "Twitch API client를 사용할 수 없습니다.",
+        code: "FOLLOWER_TWITCH_UNAVAILABLE"
+      });
+    }
+    const followerAuth = requireStreamerFollowerAuth();
+    try {
+      let context = await followerAuth.getAccessContext(broadcasterUserId);
+      try {
+        return await input.twitch.getChannelFollowersForBroadcaster(context, broadcasterUserId, limit);
+      } catch (error) {
+        if (!(error instanceof TwitchFollowerLookupError) || error.status !== 401) throw error;
+        context = await followerAuth.getAccessContext(broadcasterUserId, { forceRefresh: true });
+        try {
+          return await input.twitch.getChannelFollowersForBroadcaster(context, broadcasterUserId, limit);
+        } catch (retryError) {
+          if (retryError instanceof TwitchFollowerLookupError && retryError.status === 401) {
+            await followerAuth.markAccessTokenRejected(broadcasterUserId, context.accessToken);
+          }
+          throw retryError;
+        }
+      }
+    } catch (error) {
+      if (error instanceof StreamerFollowerAuthError) throw followerAuthHttpError(error);
+      if (error instanceof TwitchFollowerLookupError && error.status === 401) {
+        throw new HttpRequestError(409, {
+          error: "Twitch 팔로워 관리 token이 만료되었거나 취소되었습니다. 다시 연결해주세요.",
+          code: "FOLLOWER_TOKEN_EXPIRED"
+        });
+      }
+      if (error instanceof TwitchFollowerLookupError && error.status === 403) {
+        throw new HttpRequestError(403, {
+          error: "Twitch 팔로워 조회 권한이 부족합니다. 운영 권한을 다시 승인해주세요.",
+          code: "FOLLOWER_SCOPE_MISSING",
+          missingScopes: ["moderator:read:followers"]
+        });
+      }
+      if (error instanceof TwitchFollowerLookupError && error.status === 429) {
+        throw new HttpRequestError(429, {
+          error: "Twitch API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.",
+          code: "FOLLOWER_TWITCH_RATE_LIMITED"
+        });
+      }
+      throw new HttpRequestError(502, {
+        error: "Twitch 팔로워 목록을 조회하지 못했습니다.",
+        code: "FOLLOWER_TWITCH_LOOKUP_FAILED"
+      });
+    }
+  }
+
+  async function refreshFollowerSnapshot(
+    broadcasterUserId: string,
+    limit: number,
+    runtime: FollowerRefreshRuntime
+  ): Promise<FollowerManagementResponse> {
+    const snapshot = await followerSnapshotForBroadcaster(broadcasterUserId, limit);
+    input.store.reconcileFollowerSnapshot({
+      broadcasterUserId,
       followers: snapshot.followers,
       total: snapshot.total,
       truncated: snapshot.truncated
     });
-    lastFollowerRefreshState = state;
-    followerRefreshAvailableAt = Date.now() + FOLLOWER_REFRESH_COOLDOWN_MS;
-    return state;
+    const response = await followerManagementResponse(broadcasterUserId);
+    runtime.lastState = response;
+    runtime.availableAt = Date.now() + FOLLOWER_REFRESH_COOLDOWN_MS;
+    return response;
   }
 
   async function loadFreshSkinOptions(): Promise<SkinOptionsResponse> {
@@ -5466,6 +5599,27 @@ export function createHttpHandler(input: HttpHandlerInput) {
         sessions.revoke(dashboardSessionIdFromRequest(req, surface));
         return sendJson(req, res, 200, { ok: true }, { "Set-Cookie": clearDashboardSessionCookie(surface) });
       }
+      if (req.method === "POST" && url.pathname === "/api/followers/oauth/start") {
+        const broadcasterUserId = requireAuthenticatedStreamerOwner(auth.principal);
+        const streamer = dashboardEnabledStreamerRiotIdForTwitchUser(broadcasterUserId);
+        const dashboardPath = streamer ? streamerDashboardPath(streamer) : undefined;
+        if (!dashboardPath) {
+          return sendJson(req, res, 403, {
+            error: "스트리머 대시보드 URL을 확인할 수 없습니다.",
+            code: "STREAMER_DASHBOARD_DISABLED"
+          });
+        }
+        try {
+          const authorizationUrl = requireStreamerFollowerAuth().createAuthorizationUrl(broadcasterUserId, {
+            redirectUri: twitchCallbackUrlForRequest(req),
+            returnUrl: dashboardReturnUrlForRequest(req, `${dashboardPath}/followers`),
+            forceVerify: true
+          });
+          return sendJson(req, res, 200, { url: authorizationUrl });
+        } catch (error) {
+          throw followerAuthHttpError(error);
+        }
+      }
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/start") {
         const forceVerify = url.searchParams.get("force_verify") === "1" || url.searchParams.get("force_verify") === "true";
         return sendRedirect(res, input.twitchAuth.createAuthorizationUrl(forceVerify, {
@@ -5476,6 +5630,35 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/twitch/auth/callback") {
         if (input.publicTwitchAuth?.isPublicState(url.searchParams.get("state"))) {
           return handlePublicTwitchAuthCallback(req, res, url);
+        }
+        if (input.streamerFollowerAuth?.isFollowerState(url.searchParams.get("state"))) {
+          const followerState = input.streamerFollowerAuth.consumeState(url.searchParams.get("state"));
+          if (!followerState) {
+            return sendSafeOAuthHtml(res, 400, "Twitch 팔로워 권한 연결 실패", "OAuth state 검증에 실패했습니다. 팔로워 관리 화면에서 다시 연결을 시작해주세요.");
+          }
+          if (url.searchParams.get("error")) {
+            return sendSafeOAuthHtml(res, 400, "Twitch 팔로워 권한 연결 실패", twitchOAuthErrorMessage(url, "Twitch 팔로워 관리 권한 승인이 완료되지 않았습니다."));
+          }
+          const code = url.searchParams.get("code");
+          if (!code) {
+            return sendSafeOAuthHtml(res, 400, "Twitch 팔로워 권한 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
+          }
+          try {
+            await input.streamerFollowerAuth.connectWithCode(code, {
+              ownerId: followerState.ownerId,
+              redirectUri: followerState.redirectUri
+            });
+          } catch (error) {
+            const message = error instanceof StreamerFollowerAuthError && error.code === "OWNER_MISMATCH"
+              ? error.message
+              : "Twitch 팔로워 관리 권한 연결에 실패했습니다. 팔로워 관리 화면에서 다시 시도해주세요.";
+            input.logger?.error({
+              type: "followers.oauth_callback_failed",
+              error: error instanceof StreamerFollowerAuthError ? error.code : toSafeErrorMessage(error)
+            });
+            return sendSafeOAuthHtml(res, 400, "Twitch 팔로워 권한 연결 실패", message);
+          }
+          return sendRedirect(res, followerOAuthReturnUrlForRequest(req, followerState.returnUrl));
         }
         const error = url.searchParams.get("error");
         if (error) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", twitchOAuthErrorMessage(url, "Twitch 권한 승인이 완료되지 않았습니다. 대시보드에서 다시 시도해주세요."));
@@ -5571,7 +5754,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/actions/recent") return sendJson(req, res, 200, input.store.recentActions(50));
       if (req.method === "GET" && url.pathname === "/api/questions") return sendJson(req, res, 200, input.store.getQuestions());
       if (req.method === "GET" && url.pathname === "/api/highlights") return sendJson(req, res, 200, input.store.getHighlights());
-      if (req.method === "GET" && url.pathname === "/api/followers") return sendJson(req, res, 200, input.store.getFollowerManagementState());
+      if (req.method === "GET" && url.pathname === "/api/followers") {
+        const broadcasterUserId = requireAuthenticatedStreamerOwner(auth.principal);
+        return sendJson(req, res, 200, await followerManagementResponse(broadcasterUserId));
+      }
       if (req.method === "GET" && url.pathname === "/api/community/moderation") {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
@@ -6083,32 +6269,44 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
 
       if (req.method === "POST" && url.pathname === "/api/followers/refresh") {
-        if (!input.twitch) return sendJson(req, res, 503, { error: "Twitch API client를 사용할 수 없습니다." });
-        const limit = Number(url.searchParams.get("limit") ?? "5000");
-        if (followerRefreshInFlight) {
-          if (lastFollowerRefreshState) {
-            return sendJson(req, res, 200, lastFollowerRefreshState, { "X-StreamOps-Cache": "in-flight" });
+        const broadcasterUserId = requireAuthenticatedStreamerOwner(auth.principal);
+        const rawLimit = url.searchParams.get("limit");
+        if (rawLimit !== null && !/^\d{1,5}$/.test(rawLimit)) {
+          return sendJson(req, res, 400, { error: "limit은 1 이상 5000 이하의 정수여야 합니다.", code: "INVALID_FOLLOWER_LIMIT" });
+        }
+        const limit = rawLimit === null ? 5000 : Number(rawLimit);
+        if (!Number.isSafeInteger(limit) || limit < 1 || limit > 5000) {
+          return sendJson(req, res, 400, { error: "limit은 1 이상 5000 이하의 정수여야 합니다.", code: "INVALID_FOLLOWER_LIMIT" });
+        }
+        const runtime = followerRefreshRuntime(broadcasterUserId);
+        if (runtime.inFlight) {
+          if (runtime.lastState) {
+            runtime.lastState = await followerManagementResponse(broadcasterUserId);
+            return sendJson(req, res, 200, runtime.lastState, { "X-StreamOps-Cache": "in-flight" });
           }
           try {
-            return sendJson(req, res, 200, await followerRefreshInFlight, { "X-StreamOps-Cache": "in-flight" });
+            return sendJson(req, res, 200, await runtime.inFlight, { "X-StreamOps-Cache": "in-flight" });
           } catch (error) {
-            return sendJson(req, res, 400, { error: toSafeErrorMessage(error) });
+            if (error instanceof HttpRequestError) throw error;
+            throw new HttpRequestError(502, { error: "Twitch 팔로워 목록을 갱신하지 못했습니다.", code: "FOLLOWER_REFRESH_FAILED" });
           }
         }
-        if (lastFollowerRefreshState && Date.now() < followerRefreshAvailableAt) {
-          return sendJson(req, res, 200, lastFollowerRefreshState, {
+        if (runtime.lastState && Date.now() < runtime.availableAt) {
+          runtime.lastState = await followerManagementResponse(broadcasterUserId);
+          return sendJson(req, res, 200, runtime.lastState, {
             "X-StreamOps-Cache": "cooldown",
-            "Retry-After": retryAfterSeconds(followerRefreshAvailableAt)
+            "Retry-After": retryAfterSeconds(runtime.availableAt)
           });
         }
-        followerRefreshInFlight = refreshFollowerSnapshot(limit)
-          .finally(() => {
-            followerRefreshInFlight = undefined;
-          });
+        const refresh = refreshFollowerSnapshot(broadcasterUserId, limit, runtime);
+        runtime.inFlight = refresh;
         try {
-          return sendJson(req, res, 200, await followerRefreshInFlight);
+          return sendJson(req, res, 200, await refresh);
         } catch (error) {
-          return sendJson(req, res, 400, { error: toSafeErrorMessage(error) });
+          if (error instanceof HttpRequestError) throw error;
+          throw new HttpRequestError(502, { error: "Twitch 팔로워 목록을 갱신하지 못했습니다.", code: "FOLLOWER_REFRESH_FAILED" });
+        } finally {
+          if (runtime.inFlight === refresh) runtime.inFlight = undefined;
         }
       }
 

@@ -94,6 +94,70 @@ test("TwitchApiClient는 channel followers를 pagination으로 조회한다", as
   assert.ok(calls.every((call) => call.authorization === "Bearer access-token"));
 });
 
+test("TwitchApiClient는 broadcaster별 follower 조회에서 명시적 context만 사용한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    const target = new URL(String(url));
+    calls.push({ url: target, authorization: init?.headers?.Authorization });
+    if (target.pathname === "/helix/users") {
+      return jsonResponse({
+        data: [{
+          id: "900",
+          login: "viewer900",
+          display_name: "Viewer 900",
+          profile_image_url: "https://static-cdn.jtvnw.net/jtv_user_pictures/viewer900.png"
+        }]
+      });
+    }
+    return jsonResponse({
+      total: 1,
+      data: [{ user_id: "900", user_login: "viewer900", user_name: "Viewer 900", followed_at: "2026-07-01T00:00:00Z" }],
+      pagination: {}
+    });
+  };
+  const client = new TwitchApiClient({
+    async getAccessContext() {
+      throw new Error("전역 Twitch auth를 사용하면 안 됩니다.");
+    }
+  });
+
+  const result = await client.getChannelFollowersForBroadcaster({
+    clientId: "scoped-client-id",
+    accessToken: "scoped-access-token",
+    scopes: ["moderator:read:followers"],
+    broadcasterId: "101"
+  }, "101", 100);
+
+  assert.equal(result.followers[0]?.profileImageUrl, "https://static-cdn.jtvnw.net/jtv_user_pictures/viewer900.png");
+  assert.equal(calls[0]?.url.searchParams.get("broadcaster_id"), "101");
+  assert.ok(calls.every((call) => call.authorization === "Bearer scoped-access-token"));
+});
+
+test("TwitchApiClient는 scoped context owner 불일치와 scope 부족을 외부 요청 전에 거부한다", async () => {
+  let fetchCalls = 0;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return jsonResponse({ data: [] });
+  };
+  const client = new TwitchApiClient();
+  const context = {
+    clientId: "scoped-client-id",
+    accessToken: "scoped-access-token",
+    scopes: ["moderator:read:followers"],
+    broadcasterId: "101"
+  };
+
+  await assert.rejects(
+    () => client.getChannelFollowersForBroadcaster(context, "202"),
+    /소유자/
+  );
+  await assert.rejects(
+    () => client.getChannelFollowersForBroadcaster({ ...context, scopes: [] }, "101"),
+    /moderator:read:followers/
+  );
+  assert.equal(fetchCalls, 0);
+});
+
 test("TwitchApiClient는 로그인 사용자가 팔로우 중인 채널을 조회한다", async () => {
   const calls = [];
   globalThis.fetch = async (url, init) => {

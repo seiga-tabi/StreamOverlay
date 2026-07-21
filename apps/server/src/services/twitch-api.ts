@@ -14,6 +14,17 @@ export type TwitchApiAccessContext = {
   scopes: string[];
 };
 
+export type TwitchBroadcasterApiAccessContext = TwitchApiAccessContext & {
+  broadcasterId: string;
+};
+
+export class TwitchFollowerLookupError extends Error {
+  constructor(readonly status: number | "not_configured") {
+    super(`Twitch follower lookup failed: ${status}`);
+    this.name = "TwitchFollowerLookupError";
+  }
+}
+
 type TwitchUsersResponse = {
   data?: Array<{
     id: string;
@@ -448,6 +459,51 @@ export class TwitchApiClient {
       throw new Error("moderator:read:followers scope가 필요합니다.");
     }
 
+    return this.fetchChannelFollowers(
+      authContext.broadcasterId,
+      limit,
+      (url, init) => this.request(url, init)
+    );
+  }
+
+  async getChannelFollowersForBroadcaster(
+    context: TwitchBroadcasterApiAccessContext,
+    broadcasterId: string,
+    limit = 5000
+  ): Promise<{
+    followers: TwitchChannelFollower[];
+    total?: number;
+    truncated: boolean;
+  }> {
+    const safeBroadcasterId = broadcasterId.trim();
+    if (!/^\d{1,32}$/.test(safeBroadcasterId)) {
+      throw new Error("Twitch broadcaster_id가 유효하지 않습니다.");
+    }
+    if (context.broadcasterId.trim() !== safeBroadcasterId) {
+      throw new Error("Twitch follower 조회 context의 소유자가 broadcaster_id와 일치하지 않습니다.");
+    }
+    if (!context.scopes.includes("moderator:read:followers")) {
+      throw new Error("moderator:read:followers scope가 필요합니다.");
+    }
+
+    return this.fetchChannelFollowers(
+      safeBroadcasterId,
+      limit,
+      (url, init) => this.requestWithAccessContext(url, init, context),
+      context
+    );
+  }
+
+  private async fetchChannelFollowers(
+    broadcasterId: string,
+    limit: number,
+    request: (url: URL, init: RequestInit) => Promise<Response | undefined>,
+    profileContext?: TwitchApiAccessContext
+  ): Promise<{
+    followers: TwitchChannelFollower[];
+    total?: number;
+    truncated: boolean;
+  }> {
     const followers: TwitchChannelFollower[] = [];
     let cursor: string | undefined;
     let total: number | undefined;
@@ -455,12 +511,12 @@ export class TwitchApiClient {
 
     do {
       const url = new URL("https://api.twitch.tv/helix/channels/followers");
-      url.searchParams.set("broadcaster_id", authContext.broadcasterId);
+      url.searchParams.set("broadcaster_id", broadcasterId);
       url.searchParams.set("first", String(Math.min(100, max - followers.length)));
       if (cursor) url.searchParams.set("after", cursor);
 
-      const response = await this.request(url, { method: "GET" });
-      if (!response?.ok) throw new Error(`Twitch follower lookup failed: ${response?.status ?? "not_configured"}`);
+      const response = await request(url, { method: "GET" });
+      if (!response?.ok) throw new TwitchFollowerLookupError(response?.status ?? "not_configured");
       const body = (await response.json()) as TwitchChannelFollowersResponse;
       total = typeof body.total === "number" ? body.total : total;
 
@@ -476,7 +532,7 @@ export class TwitchApiClient {
       cursor = body.pagination?.cursor;
     } while (cursor && followers.length < max);
 
-    const profiles = await this.getUserProfiles(followers.map((follower) => follower.userId));
+    const profiles = await this.getUserProfiles(followers.map((follower) => follower.userId), profileContext);
     for (const follower of followers) {
       follower.profileImageUrl = profiles.get(follower.userId)?.profileImageUrl;
     }

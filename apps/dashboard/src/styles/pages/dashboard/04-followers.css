@@ -81,6 +81,24 @@
   color: var(--yoro-color-primary);
 }
 
+.app-shell[data-page="followers"] .followers-oauth-state,
+.app-shell[data-page="followers"] .followers-load-error,
+.app-shell[data-page="followers"] .followers-loading,
+.app-shell[data-page="followers"] .followers-inline-empty {
+  min-width: 0;
+}
+
+.app-shell[data-page="followers"] .followers-oauth-scopes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--yoro-space-2);
+}
+
+.app-shell[data-page="followers"] .followers-inline-empty {
+  margin-top: var(--yoro-space-3);
+}
+
 .app-shell[data-page="followers"] .participation-summary {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--yoro-space-4);
@@ -514,4 +532,3 @@
   background: #6c63ff !important;
   color: #ffffff !important;
 }
-

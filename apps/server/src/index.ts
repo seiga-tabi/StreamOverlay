@@ -16,6 +16,8 @@ import { TwitchAuthChatTokenProvider, TwitchChatService } from "./services/twitc
 import { TwitchAuthService, TwitchOAuthStateStore } from "./services/twitch-auth.js";
 import { PublicTwitchAuthService, PublicTwitchViewerSessionStore } from "./services/public-twitch-auth.js";
 import { LocalJsonTwitchTokenStore } from "./services/twitch-token-store.js";
+import { LocalJsonStreamerFollowerTokenStore } from "./services/streamer-follower-token-store.js";
+import { StreamerFollowerAuthService } from "./services/streamer-follower-auth.js";
 import { RiotApiClient } from "./services/riot-api.js";
 import { LocalJsonRiotApiKeyStore } from "./services/riot-api-key-store.js";
 import { DataDragonService } from "./services/data-dragon.js";
@@ -23,6 +25,7 @@ import { LolProfileEnrichmentService } from "./services/lol-profile-enrichment.j
 import { LocalJsonLolProfileRepository } from "./services/lol-profile-store.js";
 import { LocalTtsService } from "./services/local-tts-service.js";
 import { SupportMailboxStore } from "./services/support-mailbox-store.js";
+import { recordFollowerManagementEvent } from "./services/follower-event-recorder.js";
 import { createHttpHandler } from "./routes/http-api.js";
 import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMatches, type DashboardRole } from "./security/auth.js";
 import { websocketLimiter } from "./security/rate-limit.js";
@@ -59,6 +62,13 @@ const overlay = new OverlayHub(logger, store, () => dashboard.broadcastSnapshot(
 const bridge = new BridgeManager(logger, store, dashboard);
 const twitchTokenStore = new LocalJsonTwitchTokenStore(appConfig.twitch.tokenStorePath);
 const twitchAuth = new TwitchAuthService(twitchTokenStore, new TwitchOAuthStateStore());
+const streamerFollowerTokenStore = new LocalJsonStreamerFollowerTokenStore(
+  `${appConfig.paths.state}/streamer-follower-oauth-tokens.json`
+);
+const streamerFollowerAuth = new StreamerFollowerAuthService(
+  streamerFollowerTokenStore,
+  new TwitchOAuthStateStore()
+);
 const publicTwitchAuth = new PublicTwitchAuthService(new PublicTwitchViewerSessionStore(), new TwitchOAuthStateStore());
 const twitch = new TwitchApiClient(twitchAuth);
 const twitchChat = new TwitchChatService(new TwitchAuthChatTokenProvider(twitchAuth), logger, store);
@@ -70,6 +80,7 @@ const lolProfileRepository = new LocalJsonLolProfileRepository(`${appConfig.path
 const lolProfileEnrichment = new LolProfileEnrichmentService(riot, dataDragon, lolProfileRepository, logger);
 const localTts = new LocalTtsService(logger);
 const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, () => dashboard.broadcastSnapshot(), localTts);
+const loggedMissingFollowerScopes = new Set<string>();
 
 const moduleContext = { events, actions, logger, store, overlay, dashboard, twitch, riot, lolProfileEnrichment };
 for (const module of getEnabledModules()) {
@@ -79,48 +90,24 @@ for (const module of getEnabledModules()) {
 
 events.onAny((event) => {
   store.addEvent(event);
-  if (event.type === "twitch.follow") {
-    store.recordFollower({
-      userId: event.userId,
-      userName: event.userName,
-      followedAt: event.followedAt ?? event.createdAt,
-      source: "eventsub"
-    });
-    void twitch.getUserProfileImageUrl(event.userId)
-      .then((profileImageUrl) => {
-        if (!profileImageUrl) return;
-        store.recordFollower({
-          userId: event.userId,
-          userName: event.userName,
-          profileImageUrl,
-          followedAt: event.followedAt ?? event.createdAt,
-          source: "eventsub"
-        });
-        dashboard.broadcastSnapshot();
-      })
-      .catch((error) => {
-        logger.error({ type: "followers.profile_image_lookup_failed", userId: event.userId, error: toSafeErrorMessage(error) });
+  recordFollowerManagementEvent(event, {
+    store,
+    getProfileImageUrl: (userId) => twitch.getUserProfileImageUrl(userId),
+    onStateChanged: () => dashboard.broadcastSnapshot(),
+    onFailure: (failure) => {
+      if (failure.type === "scope_missing") {
+        if (loggedMissingFollowerScopes.has(failure.eventType)) return;
+        loggedMissingFollowerScopes.add(failure.eventType);
+        logger.error({ type: "followers.event_scope_missing", eventType: failure.eventType });
+        return;
+      }
+      logger.error({
+        type: "followers.profile_image_lookup_failed",
+        userId: failure.userId,
+        error: toSafeErrorMessage(failure.error)
       });
-  }
-  if (event.type === "twitch.chatMessage") {
-    store.recordFollowerActivity({
-      userId: event.chatterUserId,
-      userName: event.chatterUserName,
-      kind: "chat",
-      genre: "채팅 참여"
-    });
-  }
-  if (event.type === "participation.entryCreated") {
-    store.recordFollowerActivity({
-      userId: event.twitchUserId,
-      userName: event.twitchUserName,
-      kind: "participation",
-      genre: "League of Legends 시참",
-      riotGameName: event.riotGameName,
-      riotTagLine: event.riotTagLine,
-      riotPuuid: event.riotPuuid
-    });
-  }
+    }
+  });
   logger.event({ eventType: event.type, event });
   dashboard.broadcastSnapshot();
 });
@@ -139,6 +126,7 @@ const server = http.createServer(createHttpHandler({
   dataDragon,
   profileRepository: lolProfileRepository,
   twitchAuth,
+  streamerFollowerAuth,
   publicTwitchAuth,
   eventSub: twitchEventSub,
   logger,

@@ -45,6 +45,7 @@ export const STREAMER_ALLOWED_PAGES: Page[] = [
   "lolAccount",
   "lolAutomation",
   "lolParticipation",
+  "followers",
 ];
 
 const ADMIN_PAGE_PATHS: Partial<Record<Page, string>> = {

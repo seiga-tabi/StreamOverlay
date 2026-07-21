@@ -150,12 +150,30 @@ export const dashboardI18n = {
     followersPage: {
       title: "팔로워 관리",
       description: "새 팔로워, 팔로우 취소 추정, StreamOps 관측 활동을 한눈에 확인합니다.",
+      loading: "팔로워 정보를 불러오는 중입니다.",
+      loadFailed: "팔로워 정보를 불러오지 못했습니다.",
+      retry: "다시 시도",
       refresh: "팔로워 목록 새로고침",
       refreshing: "새로고침 중",
       refreshDone: "팔로워 목록을 갱신했습니다.",
       refreshFailed: "팔로워 목록 갱신 실패",
-      scopeHint: "전체 목록과 팔로우 취소 추정에는 Twitch OAuth scope moderator:read:followers가 필요합니다. 서버 .env의 TWITCH_EXTRA_SCOPES에 추가한 뒤 서버를 재시작하고 Twitch를 다시 연결해야 반영됩니다.",
+      scopeHint: "전체 목록과 팔로우 취소 추정에는 스트리머 계정의 Twitch OAuth scope moderator:read:followers가 필요합니다.",
       dataLimit: "Twitch는 시청자의 장르별 시청 이력을 제공하지 않습니다. 장르는 StreamOps가 관측한 채팅/시참 활동 기준입니다.",
+      oauth: {
+        connected: "운영 권한 연결됨",
+        requiredScope: "필수 권한",
+        disconnectedTitle: "팔로워 관리 권한을 연결해주세요.",
+        disconnectedDescription: "본인 Twitch 채널의 팔로워 목록을 조회하려면 별도의 운영 권한 연결이 필요합니다.",
+        missingScopesTitle: "팔로워 조회 권한이 부족합니다.",
+        missingScopesDescription: "moderator:read:followers 권한을 다시 승인해주세요.",
+        tokenExpiredTitle: "Twitch 운영 권한이 만료되었습니다.",
+        tokenExpiredDescription: "팔로워 목록을 계속 관리하려면 Twitch 계정을 다시 연결해주세요.",
+        connect: "Twitch 운영 권한 연결",
+        reauthorize: "권한 다시 승인",
+        reconnect: "Twitch 다시 연결",
+        connecting: "연결 준비 중",
+        connectFailed: "Twitch 운영 권한 연결을 시작하지 못했습니다."
+      },
       metrics: {
         activeFollowers: "현재 팔로워",
         knownFollowers: "기록된 사용자",
@@ -188,9 +206,22 @@ export const dashboardI18n = {
         following: "팔로우 중",
         unfollowed: "취소 추정"
       },
+      genres: {
+        chat: "채팅 참여",
+        participation: "League of Legends 시참"
+      },
       snapshot: "마지막 목록 확인",
       total: "Twitch total",
-      truncated: "일부만 조회됨"
+      truncated: "일부만 조회됨",
+      yes: "예",
+      no: "아니요",
+      dataNotes: [
+        "새 팔로워는 Twitch EventSub channel.follow 이벤트와 팔로워 목록 확인에서 기록합니다.",
+        "팔로우 취소는 Twitch가 실시간 이벤트를 제공하지 않아 전체 팔로워 목록 비교로만 추정합니다.",
+        "첫 팔로워 목록 저장 이후 다음 전체 새로고침부터 팔로우 취소 추정이 가능합니다.",
+        "일부만 조회된 경우 누락을 팔로우 취소로 오인하지 않도록 취소 추정을 하지 않습니다.",
+        "시청 장르 이력은 Twitch API가 제공하지 않으므로 StreamOps가 관측한 채팅·시참 활동만 표시합니다."
+      ]
     },
     settingsPage: {
       title: "설정 / OBS URL",
@@ -403,12 +434,30 @@ export const dashboardI18n = {
     followersPage: {
       title: "フォロワー管理",
       description: "新規フォロワー、フォロー解除推定、StreamOps が観測した活動を一覧で確認します。",
+      loading: "フォロワー情報を読み込んでいます。",
+      loadFailed: "フォロワー情報を読み込めませんでした。",
+      retry: "再試行",
       refresh: "フォロワー一覧を更新",
       refreshing: "更新中",
       refreshDone: "フォロワー一覧を更新しました。",
       refreshFailed: "フォロワー一覧の更新に失敗しました",
-      scopeHint: "全体一覧とフォロー解除推定には Twitch OAuth scope moderator:read:followers が必要です。サーバー .env の TWITCH_EXTRA_SCOPES に追加し、サーバー再起動後に Twitch を再接続すると反映されます。",
+      scopeHint: "全体一覧とフォロー解除推定には、配信者アカウントの Twitch OAuth scope moderator:read:followers が必要です。",
       dataLimit: "Twitch は視聴者のジャンル別視聴履歴を提供しません。ジャンルは StreamOps が観測したチャット/参加活動基準です。",
+      oauth: {
+        connected: "運用権限接続済み",
+        requiredScope: "必須権限",
+        disconnectedTitle: "フォロワー管理権限を接続してください。",
+        disconnectedDescription: "ご自身の Twitch チャンネルのフォロワー一覧を取得するには、別途運用権限の接続が必要です。",
+        missingScopesTitle: "フォロワー取得権限が不足しています。",
+        missingScopesDescription: "moderator:read:followers 権限を再承認してください。",
+        tokenExpiredTitle: "Twitch 運用権限の有効期限が切れました。",
+        tokenExpiredDescription: "フォロワー一覧の管理を続けるには、Twitch アカウントを再接続してください。",
+        connect: "Twitch 運用権限を接続",
+        reauthorize: "権限を再承認",
+        reconnect: "Twitch を再接続",
+        connecting: "接続を準備中",
+        connectFailed: "Twitch 運用権限の接続を開始できませんでした。"
+      },
       metrics: {
         activeFollowers: "現在のフォロワー",
         knownFollowers: "記録済みユーザー",
@@ -441,9 +490,22 @@ export const dashboardI18n = {
         following: "フォロー中",
         unfollowed: "解除推定"
       },
+      genres: {
+        chat: "チャット参加",
+        participation: "League of Legends 参加"
+      },
       snapshot: "最終一覧確認",
       total: "Twitch total",
-      truncated: "一部のみ取得"
+      truncated: "一部のみ取得",
+      yes: "はい",
+      no: "いいえ",
+      dataNotes: [
+        "新規フォロワーは Twitch EventSub channel.follow イベントとフォロワー一覧の確認から記録します。",
+        "Twitch はフォロー解除のリアルタイムイベントを提供しないため、全フォロワー一覧の比較から推定します。",
+        "最初のフォロワー一覧保存後、次回の全件更新からフォロー解除を推定できます。",
+        "一部のみ取得した場合は、未取得のユーザーを解除と誤認しないよう解除推定を行いません。",
+        "視聴ジャンル履歴は Twitch API から取得できないため、StreamOps が観測したチャット・参加活動のみ表示します。"
+      ]
     },
     settingsPage: {
       title: "設定 / OBS URL",

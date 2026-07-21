@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -702,6 +702,7 @@ test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", ()
   const store = new Store();
 
   store.reconcileFollowerSnapshot({
+    broadcasterUserId: "broadcaster-a",
     followers: [
       { userId: "1", userLogin: "alpha", userName: "Alpha", profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/alpha.png", followedAt: "2026-01-01T00:00:00.000Z" },
       { userId: "2", userLogin: "bravo", userName: "Bravo", followedAt: "2026-01-02T00:00:00.000Z" }
@@ -709,8 +710,9 @@ test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", ()
     total: 2,
     truncated: false
   });
-  store.recordFollowerActivity({ userId: "1", userName: "Alpha", kind: "chat", genre: "채팅 참여" });
+  store.recordFollowerActivity({ broadcasterUserId: "broadcaster-a", userId: "1", userName: "Alpha", kind: "chat", genre: "채팅 참여" });
   store.recordFollowerActivity({
+    broadcasterUserId: "broadcaster-a",
     userId: "1",
     userName: "Alpha",
     kind: "participation",
@@ -721,6 +723,7 @@ test("Store는 follower snapshot 차이로 팔로우 취소를 추정한다", ()
   });
 
   const state = store.reconcileFollowerSnapshot({
+    broadcasterUserId: "broadcaster-a",
     followers: [
       { userId: "1", userLogin: "alpha", userName: "Alpha", followedAt: "2026-01-01T00:00:00.000Z" }
     ],
@@ -745,6 +748,7 @@ test("Store는 truncated follower snapshot으로 언팔로우를 추정하지 �
   const store = new Store();
 
   store.reconcileFollowerSnapshot({
+    broadcasterUserId: "broadcaster-a",
     followers: [
       { userId: "1", userName: "Alpha" },
       { userId: "2", userName: "Bravo" }
@@ -753,6 +757,7 @@ test("Store는 truncated follower snapshot으로 언팔로우를 추정하지 �
   });
 
   const state = store.reconcileFollowerSnapshot({
+    broadcasterUserId: "broadcaster-a",
     followers: [{ userId: "1", userName: "Alpha" }],
     truncated: true
   });
@@ -768,6 +773,7 @@ test("Store는 follower snapshot을 저장하고 재시작 후 팔로우 취소�
   try {
     const firstStore = new Store({ followerStatePath: filePath });
     firstStore.reconcileFollowerSnapshot({
+      broadcasterUserId: "broadcaster-a",
       followers: [
         { userId: "1", userLogin: "alpha", userName: "Alpha", followedAt: "2026-01-01T00:00:00.000Z" },
         { userId: "2", userLogin: "bravo", userName: "Bravo", followedAt: "2026-01-02T00:00:00.000Z" }
@@ -778,6 +784,7 @@ test("Store는 follower snapshot을 저장하고 재시작 후 팔로우 취소�
 
     const restartedStore = new Store({ followerStatePath: filePath });
     const state = restartedStore.reconcileFollowerSnapshot({
+      broadcasterUserId: "broadcaster-a",
       followers: [
         { userId: "1", userLogin: "alpha", userName: "Alpha", followedAt: "2026-01-01T00:00:00.000Z" }
       ],
@@ -788,6 +795,132 @@ test("Store는 follower snapshot을 저장하고 재시작 후 팔로우 취소�
     assert.equal(state.summary.activeFollowers, 1);
     assert.equal(state.summary.unfollowed, 1);
     assert.equal(state.recentUnfollowers[0].userId, "2");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("Store는 broadcaster별 follower와 활동 및 snapshot을 완전히 격리한다", () => {
+  const store = new Store();
+
+  store.reconcileFollowerSnapshot({
+    broadcasterUserId: "broadcaster-a",
+    followers: [
+      { userId: "shared-viewer", userName: "Alpha Viewer" },
+      { userId: "a-only", userName: "A Only" }
+    ],
+    total: 2,
+    truncated: false
+  });
+  store.reconcileFollowerSnapshot({
+    broadcasterUserId: "broadcaster-b",
+    followers: [
+      { userId: "shared-viewer", userName: "Bravo Viewer" },
+      { userId: "b-only", userName: "B Only" }
+    ],
+    total: 2,
+    truncated: false
+  });
+
+  store.recordFollowerActivity({
+    broadcasterUserId: "broadcaster-a",
+    userId: "shared-viewer",
+    kind: "chat",
+    genre: "채팅 참여"
+  });
+  const stateA = store.reconcileFollowerSnapshot({
+    broadcasterUserId: "broadcaster-a",
+    followers: [{ userId: "shared-viewer", userName: "Alpha Viewer" }],
+    total: 1,
+    truncated: false
+  });
+  const stateB = store.getFollowerManagementState("broadcaster-b");
+
+  assert.equal(stateA.summary.unfollowed, 1);
+  assert.equal(stateA.followers.find((follower) => follower.userId === "shared-viewer")?.activity.chatMessages, 1);
+  assert.equal(stateB.summary.unfollowed, 0);
+  assert.equal(stateB.followers.find((follower) => follower.userId === "shared-viewer")?.userName, "Bravo Viewer");
+  assert.equal(stateB.followers.find((follower) => follower.userId === "shared-viewer")?.activity.chatMessages, 0);
+  assert.equal(stateB.followers.find((follower) => follower.userId === "b-only")?.status, "following");
+});
+
+test("Store는 빈 broadcasterUserId로 follower scope를 만들지 않는다", () => {
+  const store = new Store();
+
+  assert.throws(() => store.recordFollower({
+    broadcasterUserId: " ",
+    userId: "viewer-1",
+    userName: "Viewer 1",
+    source: "eventsub"
+  }), /broadcasterUserId/);
+  assert.throws(() => store.getFollowerManagementState(""), /broadcasterUserId/);
+});
+
+test("Store는 v1 follower 상태를 owner에 자동 배정하지 않고 v2 unassignedLegacy로 보존한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-followers-v1-"));
+  const filePath = path.join(dir, "followers.json");
+  try {
+    writeFileSync(filePath, `${JSON.stringify({
+      version: 1,
+      followers: [{
+        userId: "legacy-viewer",
+        userName: "Legacy Viewer",
+        firstSeenAt: "2026-01-01T00:00:00.000Z",
+        lastSeenAt: "2026-01-01T00:00:00.000Z",
+        status: "following",
+        source: "snapshot",
+        activity: { chatMessages: 0, participationEntries: 0, total: 0, genres: {} }
+      }],
+      lastFollowerSnapshotAt: "2026-01-01T00:00:00.000Z",
+      lastFollowerSnapshotTotal: 1,
+      lastFollowerSnapshotTruncated: false
+    }, null, 2)}\n`, { mode: 0o600 });
+
+    const store = new Store({ followerStatePath: filePath });
+    assert.equal(store.getFollowerManagementState("broadcaster-a").summary.knownFollowers, 0);
+    const persisted = JSON.parse(readFileSync(filePath, "utf8"));
+    assert.equal(persisted.version, 2);
+    assert.deepEqual(persisted.scopes, []);
+    assert.equal(persisted.unassignedLegacy.sourceVersion, 1);
+    assert.equal(persisted.unassignedLegacy.reason, "owner_unverified");
+    assert.equal(persisted.unassignedLegacy.followers[0].userId, "legacy-viewer");
+    assert.equal(persisted.unassignedLegacy.lastFollowerSnapshotTotal, 1);
+    store.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("Store는 손상되거나 미래 버전인 follower 상태 파일을 덮어쓰지 않는다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-followers-invalid-"));
+  try {
+    const invalidStates = [
+      "{ invalid json\n",
+      `${JSON.stringify({ version: 99, sentinel: "preserve-me" }, null, 2)}\n`
+    ];
+    for (const [index, original] of invalidStates.entries()) {
+      const filePath = path.join(dir, `followers-${index}.json`);
+      writeFileSync(filePath, original, { mode: 0o600 });
+      const failures = [];
+      const store = new Store({
+        followerStatePath: filePath,
+        onPersistenceError(failure) {
+          failures.push(failure);
+        }
+      });
+
+      store.recordFollower({
+        broadcasterUserId: "broadcaster-a",
+        userId: "new-viewer",
+        userName: "New Viewer",
+        source: "eventsub"
+      });
+      store.close();
+
+      assert.equal(readFileSync(filePath, "utf8"), original);
+      assert.equal(failures[0]?.scope, "followers");
+      assert.equal(failures[0]?.operation, "load");
+    }
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

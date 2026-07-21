@@ -14,6 +14,11 @@ import type {
   CommunityReportReason,
   CommunityModerationSnapshot,
   CommunitySanction,
+  FollowerActivity,
+  FollowerActivityKind,
+  FollowerManagementState,
+  FollowerRecord,
+  FollowerSnapshotInput,
   InternalEvent,
   LolAutomationSettings,
   OverlayChannel,
@@ -65,60 +70,6 @@ export type ActionRecord = {
   createdAt: string;
 };
 
-export type FollowerActivityKind = "chat" | "participation";
-
-export type FollowerActivity = {
-  chatMessages: number;
-  participationEntries: number;
-  total: number;
-  genres: Record<string, number>;
-  lastActivityAt?: string;
-};
-
-export type FollowerRecord = {
-  userId: string;
-  userLogin?: string;
-  userName: string;
-  profileImageUrl?: string;
-  riotGameName?: string;
-  riotTagLine?: string;
-  riotPuuid?: string;
-  riotIdUpdatedAt?: string;
-  followedAt?: string;
-  firstSeenAt: string;
-  lastSeenAt: string;
-  status: "following" | "unfollowed";
-  unfollowedAt?: string;
-  source: "eventsub" | "snapshot";
-  activity: FollowerActivity;
-};
-
-export type FollowerSnapshotInput = {
-  userId: string;
-  userLogin?: string;
-  userName: string;
-  profileImageUrl?: string;
-  followedAt?: string;
-};
-
-export type FollowerManagementState = {
-  summary: {
-    knownFollowers: number;
-    activeFollowers: number;
-    unfollowed: number;
-    newFollowers7d: number;
-    observedGenreFollowers: number;
-  };
-  followers: FollowerRecord[];
-  recentFollowers: FollowerRecord[];
-  recentUnfollowers: FollowerRecord[];
-  topObservedGenres: Array<{ name: string; count: number }>;
-  lastSnapshotAt?: string;
-  lastSnapshotTotal?: number;
-  lastSnapshotTruncated?: boolean;
-  dataNotes: string[];
-};
-
 export type StoreOptions = {
   followerStatePath?: string;
   streamerRiotIdStatePath?: string;
@@ -126,6 +77,18 @@ export type StoreOptions = {
   communityStatePath?: string;
   runtimeStatePath?: string;
   onPersistenceError?: (failure: StorePersistenceFailure) => void;
+};
+
+type ScopedFollowerState = {
+  followers: Map<string, FollowerRecord>;
+  lastSnapshotAt?: string;
+  lastSnapshotTotal?: number;
+  lastSnapshotTruncated?: boolean;
+};
+
+type UnassignedLegacyFollowerState = ScopedFollowerState & {
+  sourceVersion: 1;
+  reason: "owner_unverified";
 };
 
 export type StorePersistenceFailure = {
@@ -432,6 +395,55 @@ function normalizedFollowerRecord(value: unknown): FollowerRecord | undefined {
     unfollowedAt: status === "unfollowed" ? optionalString(input?.unfollowedAt) : undefined,
     source,
     activity: normalizedFollowerActivity(input?.activity)
+  };
+}
+
+function requiredBroadcasterUserId(value: unknown): string {
+  const broadcasterUserId = optionalString(value)?.trim();
+  if (!broadcasterUserId) throw new Error("broadcasterUserId는 필수입니다.");
+  return broadcasterUserId;
+}
+
+function normalizedFollowerState(value: unknown, label: string): ScopedFollowerState {
+  const input = objectRecord(value);
+  if (!input || !Array.isArray(input.followers)) {
+    throw new Error(`${label} follower 상태 형식이 올바르지 않습니다.`);
+  }
+  const followers = new Map<string, FollowerRecord>();
+  for (const value of input.followers) {
+    const follower = normalizedFollowerRecord(value);
+    if (!follower || followers.has(follower.userId)) {
+      throw new Error(`${label} follower 레코드가 올바르지 않습니다.`);
+    }
+    followers.set(follower.userId, follower);
+  }
+  const rawTotal = input.lastFollowerSnapshotTotal;
+  if (rawTotal !== undefined && (typeof rawTotal !== "number" || !Number.isSafeInteger(rawTotal) || rawTotal < 0)) {
+    throw new Error(`${label} follower snapshot 전체 수가 올바르지 않습니다.`);
+  }
+  const rawTruncated = input.lastFollowerSnapshotTruncated;
+  if (rawTruncated !== undefined && typeof rawTruncated !== "boolean") {
+    throw new Error(`${label} follower snapshot 일부 조회 상태가 올바르지 않습니다.`);
+  }
+  return {
+    followers,
+    lastSnapshotAt: optionalString(input.lastFollowerSnapshotAt),
+    lastSnapshotTotal: rawTotal as number | undefined,
+    lastSnapshotTruncated: rawTruncated as boolean | undefined
+  };
+}
+
+function serializedFollowerState(state: ScopedFollowerState): {
+  followers: FollowerRecord[];
+  lastFollowerSnapshotAt?: string;
+  lastFollowerSnapshotTotal?: number;
+  lastFollowerSnapshotTruncated?: boolean;
+} {
+  return {
+    followers: [...state.followers.values()].map(cloneFollowerRecord),
+    lastFollowerSnapshotAt: state.lastSnapshotAt,
+    lastFollowerSnapshotTotal: state.lastSnapshotTotal,
+    lastFollowerSnapshotTruncated: state.lastSnapshotTruncated
   };
 }
 
@@ -924,10 +936,9 @@ export class Store {
   private readonly actions: ActionRecord[] = [];
   private readonly questions: QuestionEntry[] = [];
   private readonly highlights: HighlightEntry[] = [];
-  private readonly followers = new Map<string, FollowerRecord>();
-  private lastFollowerSnapshotAt?: string;
-  private lastFollowerSnapshotTotal?: number;
-  private lastFollowerSnapshotTruncated?: boolean;
+  private readonly followersByBroadcaster = new Map<string, ScopedFollowerState>();
+  private unassignedLegacyFollowerState?: UnassignedLegacyFollowerState;
+  private followerPersistenceBlocked = false;
   private followerPersistTimer?: NodeJS.Timeout;
   private participationQueue: ParticipationEntry[] = [];
   private participationRevision = 0;
@@ -985,6 +996,15 @@ export class Store {
     this.loadRuntimeState();
     this.cleanupExpiredPartyCommunityPosts();
     this.startCommunityCleanupTimer();
+  }
+
+  private scopedFollowerState(broadcasterUserId: string, create = true): ScopedFollowerState | undefined {
+    const normalizedBroadcasterUserId = requiredBroadcasterUserId(broadcasterUserId);
+    const existing = this.followersByBroadcaster.get(normalizedBroadcasterUserId);
+    if (existing || !create) return existing;
+    const state: ScopedFollowerState = { followers: new Map<string, FollowerRecord>() };
+    this.followersByBroadcaster.set(normalizedBroadcasterUserId, state);
+    return state;
   }
 
   private scopedParticipationRuntime(streamerId: string, create = true): ScopedParticipationRuntime | undefined {
@@ -1297,13 +1317,18 @@ export class Store {
     return [...this.highlights];
   }
 
-  recordFollower(input: FollowerSnapshotInput & { source: "eventsub" | "snapshot" }): FollowerRecord {
-    return this.upsertFollower(input, true);
+  recordFollower(input: FollowerSnapshotInput & { broadcasterUserId: string; source: "eventsub" | "snapshot" }): FollowerRecord {
+    const state = this.scopedFollowerState(input.broadcasterUserId)!;
+    return this.upsertFollower(state, input, true);
   }
 
-  private upsertFollower(input: FollowerSnapshotInput & { source: "eventsub" | "snapshot" }, persist: boolean): FollowerRecord {
+  private upsertFollower(
+    state: ScopedFollowerState,
+    input: FollowerSnapshotInput & { source: "eventsub" | "snapshot" },
+    persist: boolean
+  ): FollowerRecord {
     const now = nowIso();
-    const previous = this.followers.get(input.userId);
+    const previous = state.followers.get(input.userId);
     const next: FollowerRecord = {
       userId: input.userId,
       userLogin: input.userLogin ?? previous?.userLogin,
@@ -1323,12 +1348,13 @@ export class Store {
         genres: { ...previous.activity.genres }
       } : emptyFollowerActivity()
     };
-    this.followers.set(input.userId, next);
+    state.followers.set(input.userId, next);
     if (persist) this.persistFollowerState();
     return cloneFollowerRecord(next);
   }
 
   recordFollowerActivity(input: {
+    broadcasterUserId: string;
     userId: string;
     userName?: string;
     kind: FollowerActivityKind;
@@ -1337,7 +1363,8 @@ export class Store {
     riotTagLine?: string;
     riotPuuid?: string;
   }): FollowerRecord | undefined {
-    const previous = this.followers.get(input.userId);
+    const state = this.scopedFollowerState(input.broadcasterUserId, false);
+    const previous = state?.followers.get(input.userId);
     if (!previous || previous.status !== "following") return undefined;
     const now = nowIso();
     previous.userName = input.userName || previous.userName;
@@ -1358,19 +1385,21 @@ export class Store {
   }
 
   reconcileFollowerSnapshot(input: {
+    broadcasterUserId: string;
     followers: FollowerSnapshotInput[];
     total?: number;
     truncated?: boolean;
   }): FollowerManagementState {
+    const state = this.scopedFollowerState(input.broadcasterUserId)!;
     const now = nowIso();
     const snapshotIds = new Set<string>();
     for (const follower of input.followers) {
       snapshotIds.add(follower.userId);
-      this.upsertFollower({ ...follower, source: "snapshot" }, false);
+      this.upsertFollower(state, { ...follower, source: "snapshot" }, false);
     }
 
     if (!input.truncated) {
-      for (const record of this.followers.values()) {
+      for (const record of state.followers.values()) {
         if (record.status !== "following" || snapshotIds.has(record.userId)) continue;
         record.status = "unfollowed";
         record.unfollowedAt = now;
@@ -1378,15 +1407,16 @@ export class Store {
       }
     }
 
-    this.lastFollowerSnapshotAt = now;
-    this.lastFollowerSnapshotTotal = input.total;
-    this.lastFollowerSnapshotTruncated = Boolean(input.truncated);
+    state.lastSnapshotAt = now;
+    state.lastSnapshotTotal = input.total;
+    state.lastSnapshotTruncated = Boolean(input.truncated);
     this.persistFollowerState();
-    return this.getFollowerManagementState();
+    return this.getFollowerManagementState(input.broadcasterUserId);
   }
 
-  getFollowerManagementState(): FollowerManagementState {
-    const followers = [...this.followers.values()]
+  getFollowerManagementState(broadcasterUserId: string): FollowerManagementState {
+    const state = this.scopedFollowerState(broadcasterUserId, false);
+    const followers = (state ? [...state.followers.values()] : [])
       .map(cloneFollowerRecord)
       .sort((a, b) => followerSortTime(b) - followerSortTime(a));
     const activeFollowers = followers.filter((record) => record.status === "following");
@@ -1418,9 +1448,9 @@ export class Store {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 8)
         .map(([name, count]) => ({ name, count })),
-      lastSnapshotAt: this.lastFollowerSnapshotAt,
-      lastSnapshotTotal: this.lastFollowerSnapshotTotal,
-      lastSnapshotTruncated: this.lastFollowerSnapshotTruncated,
+      lastSnapshotAt: state?.lastSnapshotAt,
+      lastSnapshotTotal: state?.lastSnapshotTotal,
+      lastSnapshotTruncated: state?.lastSnapshotTruncated,
       dataNotes: [
         "새 팔로워는 Twitch EventSub channel.follow 이벤트와 follower snapshot에서 기록합니다.",
         "팔로우 취소는 Twitch가 실시간 이벤트를 제공하지 않아 전체 follower snapshot 비교로만 추정합니다.",
@@ -1433,53 +1463,112 @@ export class Store {
 
   private loadFollowerState(): void {
     if (!this.options.followerStatePath) return;
+    this.followersByBroadcaster.clear();
+    this.unassignedLegacyFollowerState = undefined;
+    this.followerPersistenceBlocked = false;
     try {
       const raw = fs.readFileSync(this.options.followerStatePath, "utf8");
       const parsed = objectRecord(JSON.parse(raw));
-      const followers = Array.isArray(parsed?.followers) ? parsed.followers : [];
-      this.followers.clear();
-      for (const follower of followers) {
-        const record = normalizedFollowerRecord(follower);
-        if (record) this.followers.set(record.userId, record);
+      if (!parsed) throw new Error("follower 상태 파일 형식이 올바르지 않습니다.");
+
+      if (parsed.version === 1) {
+        const legacyState = normalizedFollowerState(parsed, "v1");
+        this.unassignedLegacyFollowerState = {
+          ...legacyState,
+          sourceVersion: 1,
+          reason: "owner_unverified"
+        };
+        this.clearPersistenceFailure("followers");
+        this.persistFollowerState();
+        return;
       }
-      this.lastFollowerSnapshotAt = optionalString(parsed?.lastFollowerSnapshotAt);
-      this.lastFollowerSnapshotTotal = typeof parsed?.lastFollowerSnapshotTotal === "number" ? parsed.lastFollowerSnapshotTotal : undefined;
-      this.lastFollowerSnapshotTruncated = typeof parsed?.lastFollowerSnapshotTruncated === "boolean" ? parsed.lastFollowerSnapshotTruncated : undefined;
+
+      if (parsed.version !== 2) {
+        throw new Error(`지원하지 않는 follower 상태 버전입니다: ${String(parsed.version ?? "missing")}`);
+      }
+      if (!Array.isArray(parsed.scopes)) {
+        throw new Error("v2 follower scope 목록 형식이 올바르지 않습니다.");
+      }
+      for (const rawScope of parsed.scopes) {
+        const scope = objectRecord(rawScope);
+        const broadcasterUserId = requiredBroadcasterUserId(scope?.broadcasterUserId);
+        if (this.followersByBroadcaster.has(broadcasterUserId)) {
+          throw new Error(`중복된 follower broadcaster scope입니다: ${broadcasterUserId}`);
+        }
+        this.followersByBroadcaster.set(
+          broadcasterUserId,
+          normalizedFollowerState(scope, `broadcaster ${broadcasterUserId}`)
+        );
+      }
+
+      if (parsed.unassignedLegacy !== undefined) {
+        const legacy = objectRecord(parsed.unassignedLegacy);
+        if (legacy?.sourceVersion !== 1 || legacy.reason !== "owner_unverified") {
+          throw new Error("미할당 legacy follower 상태 형식이 올바르지 않습니다.");
+        }
+        this.unassignedLegacyFollowerState = {
+          ...normalizedFollowerState(legacy, "unassigned legacy"),
+          sourceVersion: 1,
+          reason: "owner_unverified"
+        };
+      }
       this.clearPersistenceFailure("followers");
     } catch (error) {
-      this.followers.clear();
-      this.lastFollowerSnapshotAt = undefined;
-      this.lastFollowerSnapshotTotal = undefined;
-      this.lastFollowerSnapshotTruncated = undefined;
-      if (!this.isMissingStateFile(error)) {
+      this.followersByBroadcaster.clear();
+      this.unassignedLegacyFollowerState = undefined;
+      const missingStateFile = this.isMissingStateFile(error);
+      this.followerPersistenceBlocked = !missingStateFile;
+      if (missingStateFile) {
+        this.clearPersistenceFailure("followers");
+      } else {
         this.reportPersistenceFailure({ scope: "followers", operation: "load", filePath: this.options.followerStatePath, error: toSafeErrorMessage(error) });
       }
     }
   }
 
   private persistFollowerState(): void {
-    if (!this.options.followerStatePath) return;
+    if (!this.options.followerStatePath || this.followerPersistenceBlocked) return;
+    let tmpPath: string | undefined;
     try {
       const dir = path.dirname(this.options.followerStatePath);
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-      const tmpPath = `${this.options.followerStatePath}.${process.pid}.${Date.now()}.tmp`;
+      fs.chmodSync(dir, 0o700);
+      tmpPath = `${this.options.followerStatePath}.${process.pid}.${Date.now()}.tmp`;
       const payload = {
-        version: 1,
-        followers: [...this.followers.values()].map(cloneFollowerRecord),
-        lastFollowerSnapshotAt: this.lastFollowerSnapshotAt,
-        lastFollowerSnapshotTotal: this.lastFollowerSnapshotTotal,
-        lastFollowerSnapshotTruncated: this.lastFollowerSnapshotTruncated
+        version: 2,
+        scopes: [...this.followersByBroadcaster.entries()]
+          .sort(([left], [right]) => left.localeCompare(right))
+          .map(([broadcasterUserId, state]) => ({
+            broadcasterUserId,
+            ...serializedFollowerState(state)
+          })),
+        ...(this.unassignedLegacyFollowerState ? {
+          unassignedLegacy: {
+            sourceVersion: this.unassignedLegacyFollowerState.sourceVersion,
+            reason: this.unassignedLegacyFollowerState.reason,
+            ...serializedFollowerState(this.unassignedLegacyFollowerState)
+          }
+        } : {})
       };
       fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       fs.renameSync(tmpPath, this.options.followerStatePath);
+      fs.chmodSync(this.options.followerStatePath, 0o600);
+      tmpPath = undefined;
       this.clearPersistenceFailure("followers");
     } catch (error) {
+      if (tmpPath) {
+        try {
+          fs.rmSync(tmpPath, { force: true });
+        } catch {
+          // 임시 파일 정리 실패는 원본 상태 파일 보존에 영향을 주지 않습니다.
+        }
+      }
       this.reportPersistenceFailure({ scope: "followers", operation: "save", filePath: this.options.followerStatePath, error: toSafeErrorMessage(error) });
     }
   }
 
   private queueFollowerStatePersist(): void {
-    if (!this.options.followerStatePath || this.followerPersistTimer) return;
+    if (!this.options.followerStatePath || this.followerPersistenceBlocked || this.followerPersistTimer) return;
     this.followerPersistTimer = setTimeout(() => {
       this.followerPersistTimer = undefined;
       this.persistFollowerState();

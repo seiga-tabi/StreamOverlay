@@ -2336,6 +2336,42 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     const allowedRiotIdUpdate = authorizeHttpRequest(allowedRiotIdUpdateReq, "/api/participation/streamer-riot-id", sessions);
     assert.equal(allowedRiotIdUpdate.ok, true);
 
+    const allowedFollowersReq = createRequest("GET", "/api/followers", undefined, {
+      cookie,
+      "x-streamops-dashboard-surface": "streamer"
+    });
+    const allowedFollowers = authorizeHttpRequest(allowedFollowersReq, "/api/followers", sessions);
+    assert.equal(allowedFollowers.ok, true);
+
+    for (const pathname of ["/api/followers/refresh", "/api/followers/oauth/start"]) {
+      const allowedFollowerWriteReq = createRequest("POST", pathname, {}, {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "x-streamops-dashboard-surface": "streamer",
+        "x-streamops-csrf": session.csrfToken
+      });
+      const allowedFollowerWrite = authorizeHttpRequest(allowedFollowerWriteReq, pathname, sessions);
+      assert.equal(allowedFollowerWrite.ok, true);
+    }
+
+    const missingFollowerOriginReq = createRequest("POST", "/api/followers/refresh", {}, {
+      cookie,
+      "x-streamops-dashboard-surface": "streamer",
+      "x-streamops-csrf": session.csrfToken
+    });
+    const missingFollowerOrigin = authorizeHttpRequest(missingFollowerOriginReq, "/api/followers/refresh", sessions);
+    assert.equal(missingFollowerOrigin.ok, false);
+    assert.equal(missingFollowerOrigin.code, "ORIGIN_DENIED");
+
+    const missingFollowerCsrfReq = createRequest("POST", "/api/followers/oauth/start", {}, {
+      cookie,
+      origin: DASHBOARD_ORIGIN,
+      "x-streamops-dashboard-surface": "streamer"
+    });
+    const missingFollowerCsrf = authorizeHttpRequest(missingFollowerCsrfReq, "/api/followers/oauth/start", sessions);
+    assert.equal(missingFollowerCsrf.ok, false);
+    assert.equal(missingFollowerCsrf.code, "CSRF_REQUIRED");
+
     const blockedReq = createRequest("POST", "/api/actions/test", { action: testAction }, {
       cookie,
       origin: DASHBOARD_ORIGIN,
@@ -2357,7 +2393,7 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
       "/api/alerts/config",
       "/api/actions/recent",
       "/api/highlights",
-      "/api/followers",
+      "/api/followers/oauth/status",
       "/api/twitch/status",
       "/api/participation/profile-settings",
       "/api/participation/profile-settings/skin-options"
@@ -2375,7 +2411,6 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     for (const pathname of [
       "/api/alerts/config",
       "/api/alerts/assets",
-      "/api/followers/refresh",
       "/api/participation/profile-settings",
       "/api/participation/invite-message",
       "/api/participation/invite-message/bulk"
@@ -2390,6 +2425,23 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
       assert.equal(singletonWrite.ok, false);
       assert.equal(singletonWrite.status, 403);
       assert.equal(singletonWrite.code, "FORBIDDEN");
+    }
+
+    for (const [method, pathname] of [
+      ["POST", "/api/followers"],
+      ["GET", "/api/followers/refresh"],
+      ["GET", "/api/followers/oauth/start"]
+    ]) {
+      const methodMismatchReq = createRequest(method, pathname, method === "POST" ? {} : undefined, {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "x-streamops-dashboard-surface": "streamer",
+        "x-streamops-csrf": session.csrfToken
+      });
+      const methodMismatch = authorizeHttpRequest(methodMismatchReq, pathname, sessions);
+      assert.equal(methodMismatch.ok, false);
+      assert.equal(methodMismatch.status, 403);
+      assert.equal(methodMismatch.code, "FORBIDDEN");
     }
   });
 });

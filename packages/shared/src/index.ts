@@ -1,6 +1,7 @@
 export * from "./actions.js";
 export * from "./community.js";
 export * from "./events.js";
+export * from "./followers.js";
 export * from "./overlay.js";
 export * from "./palworld.js";
 export * from "./participation.js";
