@@ -120,7 +120,7 @@ diff-palworld-paldex
 - 동일 입력 재생성 결과가 byte-for-byte 동일
 - `paldex.json`, `manifest.json`, `images-manifest.json`의 release/revision 일치
 
-`imageAssetGate`는 이미지 권리와 로컬 파일을 별도로 검증한다. 현재 상태는 `blocked_by_license`, `readyImages: 0`, `fallbackPals: 287`이다. `blocked_by_license`는 이미지 포함 완료를 의미하지 않으며, 권리 승인 전에는 `imageUrl`이나 이미지 파일을 추가하지 않는다. 따라서 Pal 텍스트·수치 데이터는 활성화하되 이미지 포함 release validator는 통과하지 못한다.
+`imageAssetGate`는 기술 검증과 권리 확인을 분리한다. 고정 `image-use-policy.json`의 사용 상태는 `operator_acknowledged`, `usageBasis: operator_reference_use`, `rightsVerified: false`이며, 이는 라이선스 승인·권리 확인 완료를 뜻하지 않는다. 현재는 실제 source 이미지와 완성 mapping이 제공되지 않아 runtime 상태가 `blocked_by_license`, `readyImages: 0`, `fallbackPals: 287`이다. 따라서 Pal 텍스트·수치 데이터는 활성화하되 전체 이미지 release validator는 통과하지 못한다.
 
 ## Domain별 coverage와 provenance
 
@@ -138,8 +138,8 @@ Pal runtime 전환 절차는 다음과 같다.
 2. 별도의 작업 디렉터리에서 checksum과 전체 validator를 실행한다.
 3. 서버가 새 snapshot을 읽어 source·mapping·artifact checksum, Shared schema와 `dataIntegrityGate`를 다시 확인한다.
 4. `/api/palworld/meta`에서 게임 버전, revision, 287개 수량과 domain별 coverage/provenance를 확인한다.
-5. 이미지 manifest가 `blocked_by_license`이면 `readyImages: 0`, `fallbackPals: 287`과 화면 fallback을 확인한다.
-6. 이미지 manifest가 향후 `ready`가 되면 모든 정적 파일을 snapshot보다 먼저 배포한다.
+5. 이미지 manifest가 `blocked_by_license`이면 `readyImages: 0`, `fallbackPals: 287`과 화면 fallback을 확인한다. 운영자 확인 artifact만 있고 파일이 없을 때도 이 상태를 유지한다.
+6. 이미지 manifest가 향후 `operator_acknowledged`, `partial` 또는 `ready`로 활성화되면 모든 content-hash 정적 파일을 snapshot보다 먼저 배포한다. `operator_acknowledged`와 `partial`은 권리 확인 완료를 의미하지 않는다.
 7. 첫·중간·마지막 일반종과 변종 상세 화면을 확인한다.
 8. LoL, Dashboard, Overlay와 OBS Bridge 회귀 검증을 수행한다.
 9. 문제가 있으면 Pal API만 503으로 격리하고 artifact와 이미지 manifest를 이전 검증 release로 함께 되돌린다.

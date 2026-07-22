@@ -44,6 +44,21 @@ export const PALWORLD_ITEM_CATEGORIES = [
 export const PALWORLD_ACQUISITION_TYPES = ["craft", "drop", "merchant", "chest", "gathering", "quest", "other"] as const;
 export const PALWORLD_GENDERS = ["any", "male", "female"] as const;
 export const PALWORLD_DOMAIN_STATUSES = ["ready", "sample", "incomplete"] as const;
+export const PALWORLD_IMAGE_ASSET_STATUSES = [
+  "blocked_by_license",
+  "operator_acknowledged",
+  "partial",
+  "ready"
+] as const;
+export const PALWORLD_IMAGE_POLICY_STATUSES = [
+  "missing",
+  "blocked_by_license",
+  "operator_acknowledged",
+  "rights_verified"
+] as const;
+export const PALWORLD_IMAGE_USAGE_BASES = ["none", "operator_reference_use", "rights_verified"] as const;
+export const PALWORLD_PUBLIC_NOTICE_KO = "비공식 팰월드 데이터베이스 · 데이터/이미지 출처 Palworld · Pocketpair";
+export const PALWORLD_PUBLIC_NOTICE_JA = "非公式パルワールドデータベース · データ・画像出典 Palworld · Pocketpair";
 
 export type PalworldElement = (typeof PALWORLD_ELEMENTS)[number];
 export type PalworldWorkSuitabilityType = (typeof PALWORLD_WORK_SUITABILITY_TYPES)[number];
@@ -53,6 +68,9 @@ export type PalworldItemCategory = (typeof PALWORLD_ITEM_CATEGORIES)[number];
 export type PalworldAcquisitionType = (typeof PALWORLD_ACQUISITION_TYPES)[number];
 export type PalworldGender = (typeof PALWORLD_GENDERS)[number];
 export type PalworldDomainStatus = (typeof PALWORLD_DOMAIN_STATUSES)[number];
+export type PalworldImageAssetStatus = (typeof PALWORLD_IMAGE_ASSET_STATUSES)[number];
+export type PalworldImagePolicyStatus = (typeof PALWORLD_IMAGE_POLICY_STATUSES)[number];
+export type PalworldImageUsageBasis = (typeof PALWORLD_IMAGE_USAGE_BASES)[number];
 
 export type PalworldDataMetadata = {
   gameVersion: string;
@@ -84,10 +102,15 @@ export type PalworldRuntimeGates = {
     status: "ready" | "unavailable";
   };
   imageAssets: {
-    passed: boolean;
-    status: "ready" | "partial" | "blocked_by_license";
+    status: PalworldImageAssetStatus;
+    policyStatus: PalworldImagePolicyStatus;
+    technicalPassed: boolean;
+    publicActivationAllowed: boolean;
+    rightsVerified: boolean;
+    usageBasis: PalworldImageUsageBasis;
     readyImages: number;
     fallbackPals: number;
+    publicNoticeRequired: boolean;
   };
 };
 
@@ -986,16 +1009,29 @@ export function validatePalworldMetaResponse(value: unknown): PalworldValidation
     return invalid("response.gates.dataIntegrity", "passed와 status가 일치해야 합니다.");
   }
   const imageAssets = recordAt(gates.data.imageAssets, "response.gates.imageAssets", [
-    "passed",
     "status",
+    "policyStatus",
+    "technicalPassed",
+    "publicActivationAllowed",
+    "rightsVerified",
+    "usageBasis",
     "readyImages",
-    "fallbackPals"
+    "fallbackPals",
+    "publicNoticeRequired"
   ]);
   if (!imageAssets.ok) return imageAssets;
-  const imageAssetsPassed = booleanAt(imageAssets.data.passed, "response.gates.imageAssets.passed");
-  if (!imageAssetsPassed.ok) return imageAssetsPassed;
-  if (!["ready", "partial", "blocked_by_license"].includes(String(imageAssets.data.status))) {
+  if (!(PALWORLD_IMAGE_ASSET_STATUSES as readonly unknown[]).includes(imageAssets.data.status)) {
     return invalid("response.gates.imageAssets.status", "허용된 이미지 상태가 아닙니다.");
+  }
+  if (!(PALWORLD_IMAGE_POLICY_STATUSES as readonly unknown[]).includes(imageAssets.data.policyStatus)) {
+    return invalid("response.gates.imageAssets.policyStatus", "허용된 이미지 정책 상태가 아닙니다.");
+  }
+  for (const field of ["technicalPassed", "publicActivationAllowed", "rightsVerified", "publicNoticeRequired"] as const) {
+    const result = booleanAt(imageAssets.data[field], `response.gates.imageAssets.${field}`);
+    if (!result.ok) return result;
+  }
+  if (!(PALWORLD_IMAGE_USAGE_BASES as readonly unknown[]).includes(imageAssets.data.usageBasis)) {
+    return invalid("response.gates.imageAssets.usageBasis", "허용된 이미지 사용 근거가 아닙니다.");
   }
   for (const field of ["readyImages", "fallbackPals"] as const) {
     const result = integerAt(imageAssets.data[field], `response.gates.imageAssets.${field}`, 0, 100_000_000);
@@ -1004,8 +1040,41 @@ export function validatePalworldMetaResponse(value: unknown): PalworldValidation
   if ((imageAssets.data.readyImages as number) + (imageAssets.data.fallbackPals as number) !== counts.data.pals) {
     return invalid("response.gates.imageAssets", "readyImages와 fallbackPals의 합은 Pal 수와 같아야 합니다.");
   }
-  if (imageAssetsPassed.data !== (imageAssets.data.status === "ready" && imageAssets.data.fallbackPals === 0)) {
-    return invalid("response.gates.imageAssets", "passed와 이미지 상태가 일치해야 합니다.");
+  const status = imageAssets.data.status as PalworldImageAssetStatus;
+  const policyStatus = imageAssets.data.policyStatus as PalworldImagePolicyStatus;
+  const technicalPassed = imageAssets.data.technicalPassed as boolean;
+  const publicActivationAllowed = imageAssets.data.publicActivationAllowed as boolean;
+  const rightsVerified = imageAssets.data.rightsVerified as boolean;
+  const usageBasis = imageAssets.data.usageBasis as PalworldImageUsageBasis;
+  const readyImages = imageAssets.data.readyImages as number;
+  const fallbackPals = imageAssets.data.fallbackPals as number;
+  if (imageAssets.data.publicNoticeRequired !== true) {
+    return invalid("response.gates.imageAssets.publicNoticeRequired", "공개 Palworld 페이지에는 출처 공지가 필요합니다.");
+  }
+  if (status === "blocked_by_license") {
+    const blockedUsageIsConsistent = policyStatus === "missing"
+      ? usageBasis === "none"
+      : policyStatus === "blocked_by_license"
+        ? usageBasis === "none"
+        : policyStatus === "operator_acknowledged"
+          ? !rightsVerified && usageBasis === "operator_reference_use"
+          : policyStatus === "rights_verified" && rightsVerified && usageBasis === "rights_verified";
+    if (technicalPassed || publicActivationAllowed || !blockedUsageIsConsistent || readyImages !== 0) {
+      return invalid("response.gates.imageAssets", "blocked_by_license 상태와 기술·권리·공개 사용 정보가 일치해야 합니다.");
+    }
+  } else if (status === "partial") {
+    const partialUsageIsConsistent = policyStatus === "operator_acknowledged"
+      ? !rightsVerified && usageBasis === "operator_reference_use"
+      : policyStatus === "rights_verified" && rightsVerified && usageBasis === "rights_verified";
+    if (!technicalPassed || !publicActivationAllowed || !partialUsageIsConsistent || readyImages === 0 || fallbackPals === 0) {
+      return invalid("response.gates.imageAssets", "partial 상태는 검증된 일부 이미지만 공개 가능한 상태여야 합니다.");
+    }
+  } else if (status === "operator_acknowledged") {
+    if (policyStatus !== "operator_acknowledged" || !technicalPassed || !publicActivationAllowed || rightsVerified || usageBasis !== "operator_reference_use" || fallbackPals !== 0) {
+      return invalid("response.gates.imageAssets", "operator_acknowledged 상태는 권리 검증 없이 운영자 사용 확인과 전체 기술 검증만 통과해야 합니다.");
+    }
+  } else if (policyStatus !== "rights_verified" || !technicalPassed || !publicActivationAllowed || !rightsVerified || usageBasis !== "rights_verified" || fallbackPals !== 0) {
+    return invalid("response.gates.imageAssets", "ready 상태는 별도 권리 검증과 전체 기술 검증을 모두 통과해야 합니다.");
   }
   return valid(record.data as PalworldMetaResponse);
 }

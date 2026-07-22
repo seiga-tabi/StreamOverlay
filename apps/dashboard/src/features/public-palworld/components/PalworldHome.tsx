@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { PalworldMetaResponse } from "@streamops/shared";
+import type { PalworldImageAssetStatus, PalworldImagePolicyStatus, PalworldMetaResponse } from "@streamops/shared";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../shared/ui/Card";
 import { Badge, Metric } from "../../../shared/ui/Status";
 import { getPalworldMeta } from "../api/palworld";
@@ -14,6 +14,22 @@ const shortcuts = [
   { page: "breeding" as const, symbol: "∞", titleKey: "breeding" as const, descriptionKey: "breedingDescription" as const },
   { page: "items" as const, symbol: "◇", titleKey: "items" as const, descriptionKey: "itemsDescription" as const },
 ];
+
+function imageStatusLabel(status: PalworldImageAssetStatus, locale: PalworldLocale): string {
+  const text = palworldI18n[locale];
+  if (status === "blocked_by_license") return text.blockedByLicense;
+  if (status === "operator_acknowledged") return text.operatorAcknowledged;
+  if (status === "partial") return text.partiallyReady;
+  return text.rightsVerified;
+}
+
+function imagePolicyLabel(status: PalworldImagePolicyStatus, locale: PalworldLocale): string {
+  const text = palworldI18n[locale];
+  if (status === "blocked_by_license") return text.blockedByLicense;
+  if (status === "operator_acknowledged") return text.operatorAcknowledged;
+  if (status === "rights_verified") return text.rightsVerified;
+  return text.imagePolicyMissing;
+}
 
 export function PalworldHome({
   locale,
@@ -84,19 +100,28 @@ export function PalworldHome({
         />
         <Metric
           label={<span data-ko={palworldI18n.ko.imageCoverage} data-ja={palworldI18n.ja.imageCoverage}>{text.imageCoverage}</span>}
-          value={meta.gates.imageAssets.fallbackPals.toLocaleString()}
-          description={<span data-ko={palworldI18n.ko.fallbackPals} data-ja={palworldI18n.ja.fallbackPals}>{text.fallbackPals}</span>}
+          value={meta.gates.imageAssets.readyImages.toLocaleString()}
+          description={(
+            <span className="palworld-image-gate-details">
+              <span data-ko={palworldI18n.ko.readyImages} data-ja={palworldI18n.ja.readyImages}>{text.readyImages}: {meta.gates.imageAssets.readyImages.toLocaleString()}</span>
+              <span data-ko={palworldI18n.ko.fallbackPals} data-ja={palworldI18n.ja.fallbackPals}>{text.fallbackPals}: {meta.gates.imageAssets.fallbackPals.toLocaleString()}</span>
+              <span data-ko={imagePolicyLabel(meta.gates.imageAssets.policyStatus, "ko")} data-ja={imagePolicyLabel(meta.gates.imageAssets.policyStatus, "ja")}>{imagePolicyLabel(meta.gates.imageAssets.policyStatus, locale)}</span>
+              <span data-ko={meta.gates.imageAssets.technicalPassed ? palworldI18n.ko.imageTechnicalPassed : palworldI18n.ko.imageTechnicalPending} data-ja={meta.gates.imageAssets.technicalPassed ? palworldI18n.ja.imageTechnicalPassed : palworldI18n.ja.imageTechnicalPending}>{meta.gates.imageAssets.technicalPassed ? text.imageTechnicalPassed : text.imageTechnicalPending}</span>
+              <span data-ko={meta.gates.imageAssets.publicActivationAllowed ? palworldI18n.ko.publicDisplayEnabled : palworldI18n.ko.publicDisplayDisabled} data-ja={meta.gates.imageAssets.publicActivationAllowed ? palworldI18n.ja.publicDisplayEnabled : palworldI18n.ja.publicDisplayDisabled}>{meta.gates.imageAssets.publicActivationAllowed ? text.publicDisplayEnabled : text.publicDisplayDisabled}</span>
+              <span data-ko={meta.gates.imageAssets.rightsVerified ? palworldI18n.ko.rightsVerified : palworldI18n.ko.rightsNotVerified} data-ja={meta.gates.imageAssets.rightsVerified ? palworldI18n.ja.rightsVerified : palworldI18n.ja.rightsNotVerified}>{meta.gates.imageAssets.rightsVerified ? text.rightsVerified : text.rightsNotVerified}</span>
+            </span>
+          )}
           status={(
             <Badge
-              data-ko={meta.gates.imageAssets.status === "blocked_by_license" ? palworldI18n.ko.blockedByLicense : meta.gates.imageAssets.status === "partial" ? palworldI18n.ko.partiallyReady : palworldI18n.ko.ready}
-              data-ja={meta.gates.imageAssets.status === "blocked_by_license" ? palworldI18n.ja.blockedByLicense : meta.gates.imageAssets.status === "partial" ? palworldI18n.ja.partiallyReady : palworldI18n.ja.ready}
+              data-ko={imageStatusLabel(meta.gates.imageAssets.status, "ko")}
+              data-ja={imageStatusLabel(meta.gates.imageAssets.status, "ja")}
               size="sm"
               tone={meta.gates.imageAssets.status === "ready" ? "success" : "warning"}
             >
-              {meta.gates.imageAssets.status === "blocked_by_license" ? text.blockedByLicense : meta.gates.imageAssets.status === "partial" ? text.partiallyReady : text.ready}
+              {imageStatusLabel(meta.gates.imageAssets.status, locale)}
             </Badge>
           )}
-          tone="warning"
+          tone={meta.gates.imageAssets.status === "ready" ? "success" : "warning"}
         />
       </> : null}
     </section>

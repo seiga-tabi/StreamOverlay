@@ -1,8 +1,14 @@
 import {
   PALWORLD_ELEMENTS,
+  PALWORLD_IMAGE_ASSET_STATUSES,
+  PALWORLD_IMAGE_POLICY_STATUSES,
+  PALWORLD_IMAGE_USAGE_BASES,
   PALWORLD_WORK_SUITABILITY_TYPES,
   validatePalworldPalDetail,
   type PalworldElement,
+  type PalworldImageAssetStatus,
+  type PalworldImagePolicyStatus,
+  type PalworldImageUsageBasis,
   type PalworldPalStats,
   type PalworldWorkSuitability,
   type PalworldWorkSuitabilityType
@@ -58,11 +64,13 @@ export type PalworldPaldexArtifact = {
 export type PalworldImageManifestEntry = {
   palId: string;
   sourceInternalId: string;
-  status: "ready" | "blocked_by_license";
+  status: "blocked_by_license" | "operator_acknowledged" | "ready";
   sourceName: string;
-  sourceUrl: string;
+  sourceUrl?: string;
+  sourceReference?: string;
   sourceRevision: string;
   license: string;
+  usageBasis: PalworldImageUsageBasis;
   retrievedAt: string | null;
   originalSha256: string | null;
   generatedSha256: string | null;
@@ -79,9 +87,9 @@ export type PalworldImagesManifest = {
   schemaVersion: 1;
   release: string;
   revision: string;
-  status: "ready" | "partial" | "blocked_by_license";
+  status: PalworldImageAssetStatus;
   rightsReview: {
-    status: "approved" | "blocked_by_license";
+    status: "blocked_by_license" | "operator_acknowledged" | "ready";
     reviewedAt: string;
     reasonCode: string;
     evidenceUrls: string[];
@@ -97,6 +105,8 @@ export type PalworldPaldexReleaseManifest = {
   paldexSha256: string;
   imagesManifestSha256: string;
   importReportSha256: string;
+  imageUsePolicySha256: string | null;
+  imageSourceMapSha256: string | null;
   mappingSha256: {
     publicIdMap: string;
     elements: string;
@@ -135,10 +145,16 @@ export type PalworldPaldexReleaseManifest = {
   };
   imageAssetGate: {
     passed: boolean;
-    status: "ready" | "blocked_by_license";
+    status: PalworldImageAssetStatus;
+    policyStatus: PalworldImagePolicyStatus;
     failures: string[];
+    technicalPassed: boolean;
+    publicActivationAllowed: boolean;
+    rightsVerified: boolean;
+    usageBasis: PalworldImageUsageBasis;
     readyImages: number;
     fallbackPals: number;
+    publicNoticeRequired: boolean;
   };
   runtimeActivation: boolean;
 };
@@ -360,20 +376,26 @@ export function assertPalworldImagesManifest(value: unknown, paldex: PalworldPal
   if (manifest.schemaVersion !== 1) fail("imagesManifest.schemaVersion", "1이어야 합니다.");
   if (manifest.release !== PALWORLD_PALDEX_RELEASE) fail("imagesManifest.release", "고정 release와 일치해야 합니다.");
   stringAt(manifest.revision, "imagesManifest.revision", 256);
-  if (!["ready", "partial", "blocked_by_license"].includes(String(manifest.status))) fail("imagesManifest.status", "허용된 상태가 아닙니다.");
+  if (!(PALWORLD_IMAGE_ASSET_STATUSES as readonly unknown[]).includes(manifest.status)) fail("imagesManifest.status", "허용된 상태가 아닙니다.");
   const rights = recordAt(manifest.rightsReview, "imagesManifest.rightsReview", ["status", "reviewedAt", "reasonCode", "evidenceUrls"]);
-  if (rights.status !== "approved" && rights.status !== "blocked_by_license") fail("imagesManifest.rightsReview.status", "허용된 상태가 아닙니다.");
+  if (!["blocked_by_license", "operator_acknowledged", "ready"].includes(String(rights.status))) fail("imagesManifest.rightsReview.status", "허용된 상태가 아닙니다.");
   isoDateAt(rights.reviewedAt, "imagesManifest.rightsReview.reviewedAt");
   stringAt(rights.reasonCode, "imagesManifest.rightsReview.reasonCode", 128);
   const evidenceUrls = assertArray(rights.evidenceUrls, "imagesManifest.rightsReview.evidenceUrls", 16);
-  if (evidenceUrls.length === 0) fail("imagesManifest.rightsReview.evidenceUrls", "권리 판단 근거가 하나 이상 필요합니다.");
+  if (
+    rights.status === "blocked_by_license"
+    && rights.reasonCode !== "OPERATOR_PUBLIC_DISPLAY_DISABLED"
+    && evidenceUrls.length === 0
+  ) fail("imagesManifest.rightsReview.evidenceUrls", "차단 판단 근거가 하나 이상 필요합니다.");
   evidenceUrls.forEach((url, index) => httpsUrlAt(url, `imagesManifest.rightsReview.evidenceUrls[${index}]`));
 
   const entries = assertArray(manifest.entries, "imagesManifest.entries", PALWORLD_PALDEX_EXPECTED_COUNT);
   if (entries.length !== paldex.records.length) fail("imagesManifest.entries", "모든 Pal의 명시적 이미지 mapping이 필요합니다.");
   const palById = new Map(paldex.records.map((pal) => [pal.id, pal]));
   const seen = new Set<string>();
-  let readyCount = 0;
+  let activatedCount = 0;
+  let operatorCount = 0;
+  let rightsReadyCount = 0;
   let blockedCount = 0;
   for (const [index, rawEntry] of entries.entries()) {
     const path = `imagesManifest.entries[${index}]`;
@@ -383,8 +405,10 @@ export function assertPalworldImagesManifest(value: unknown, paldex: PalworldPal
       "status",
       "sourceName",
       "sourceUrl",
+      "sourceReference",
       "sourceRevision",
       "license",
+      "usageBasis",
       "retrievedAt",
       "originalSha256",
       "generatedSha256",
@@ -404,13 +428,35 @@ export function assertPalworldImagesManifest(value: unknown, paldex: PalworldPal
     seen.add(palId);
     if (entry.sourceInternalId !== pal.sourceInternalId) fail(`${path}.sourceInternalId`, "도감 internal ID와 일치해야 합니다.");
     stringAt(entry.sourceName, `${path}.sourceName`, 256);
-    httpsUrlAt(entry.sourceUrl, `${path}.sourceUrl`);
+    if ((entry.sourceUrl === undefined) === (entry.sourceReference === undefined)) {
+      fail(path, "sourceUrl 또는 sourceReference 중 정확히 하나가 필요합니다.");
+    }
+    if (entry.sourceUrl !== undefined) httpsUrlAt(entry.sourceUrl, `${path}.sourceUrl`);
+    if (entry.sourceReference !== undefined) {
+      const reference = stringAt(entry.sourceReference, `${path}.sourceReference`, 256);
+      if (reference.includes("\0") || reference.includes("/") || reference.includes("\\") || reference.includes("..") || reference.includes("%") || reference.includes("://")) {
+        fail(`${path}.sourceReference`, "공개 가능한 불투명 source reference여야 합니다.");
+      }
+    }
     stringAt(entry.sourceRevision, `${path}.sourceRevision`, 128);
     stringAt(entry.license, `${path}.license`, 256);
+    if (!(PALWORLD_IMAGE_USAGE_BASES as readonly unknown[]).includes(entry.usageBasis)) fail(`${path}.usageBasis`, "허용된 사용 근거가 아닙니다.");
     stringAt(entry.originalFileName, `${path}.originalFileName`, 256);
 
-    if (entry.status === "ready") {
-      readyCount += 1;
+    if (entry.status === "operator_acknowledged" || entry.status === "ready") {
+      activatedCount += 1;
+      if (entry.status === "operator_acknowledged") {
+        operatorCount += 1;
+        if (entry.usageBasis !== "operator_reference_use" || entry.license !== "RIGHTS_NOT_INDEPENDENTLY_VERIFIED") {
+          fail(path, "운영자 확인 이미지는 비독립 권리 검증 상태와 operator_reference_use만 사용할 수 있습니다.");
+        }
+        if (entry.sourceUrl !== undefined || entry.sourceReference === undefined) {
+          fail(path, "운영자 관리 서버 export는 외부 URL 대신 sourceReference를 사용해야 합니다.");
+        }
+      } else {
+        rightsReadyCount += 1;
+        if (entry.usageBasis !== "rights_verified") fail(`${path}.usageBasis`, "ready 이미지는 rights_verified여야 합니다.");
+      }
       isoDateAt(entry.retrievedAt, `${path}.retrievedAt`);
       sha256At(entry.originalSha256, `${path}.originalSha256`);
       const generatedSha = sha256At(entry.generatedSha256, `${path}.generatedSha256`);
@@ -425,6 +471,7 @@ export function assertPalworldImagesManifest(value: unknown, paldex: PalworldPal
       if (pal.imageUrl !== imageUrl) fail(`${path}.imageUrl`, "도감 imageUrl과 일치해야 합니다.");
     } else if (entry.status === "blocked_by_license") {
       blockedCount += 1;
+      if (entry.usageBasis !== "none") fail(`${path}.usageBasis`, "차단된 이미지는 사용 근거가 none이어야 합니다.");
       for (const field of [
         "retrievedAt",
         "originalSha256",
@@ -440,13 +487,19 @@ export function assertPalworldImagesManifest(value: unknown, paldex: PalworldPal
       }
       if (pal.imageUrl !== undefined) fail(`${path}.imageUrl`, "권리 차단 Pal에는 imageUrl을 넣을 수 없습니다.");
     } else {
-      fail(`${path}.status`, "ready 또는 blocked_by_license여야 합니다.");
+      fail(`${path}.status`, "blocked_by_license, operator_acknowledged 또는 ready여야 합니다.");
     }
   }
-  if (manifest.status === "ready" && readyCount !== entries.length) fail("imagesManifest.status", "모든 이미지가 ready여야 합니다.");
+  if (manifest.status === "ready" && rightsReadyCount !== entries.length) fail("imagesManifest.status", "모든 이미지가 권리 검증 ready여야 합니다.");
+  if (manifest.status === "operator_acknowledged" && operatorCount !== entries.length) fail("imagesManifest.status", "모든 이미지가 운영자 확인 상태여야 합니다.");
   if (manifest.status === "blocked_by_license" && blockedCount !== entries.length) fail("imagesManifest.status", "모든 이미지가 권리 차단 상태여야 합니다.");
-  if (manifest.status === "partial" && (readyCount === 0 || blockedCount === 0)) fail("imagesManifest.status", "ready와 blocked_by_license entry가 모두 있어야 합니다.");
-  if (rights.status === "blocked_by_license" && readyCount > 0) fail("imagesManifest.rightsReview.status", "권리 승인 전 이미지를 포함할 수 없습니다.");
+  if (
+    manifest.status === "partial"
+    && (activatedCount === 0 || blockedCount === 0 || (operatorCount > 0 && rightsReadyCount > 0))
+  ) fail("imagesManifest.status", "한 가지 사용 근거로 검증된 이미지와 fallback entry가 모두 있어야 합니다.");
+  if (rights.status === "blocked_by_license" && activatedCount > 0) fail("imagesManifest.rightsReview.status", "공개 사용 확인 전 이미지를 포함할 수 없습니다.");
+  if (rights.status === "operator_acknowledged" && (rightsReadyCount > 0 || activatedCount !== operatorCount)) fail("imagesManifest.rightsReview.status", "운영자 확인 상태에서 권리 검증 ready 이미지를 포함할 수 없습니다.");
+  if (rights.status === "ready" && (operatorCount > 0 || activatedCount !== rightsReadyCount || rightsReadyCount === 0)) fail("imagesManifest.rightsReview.status", "권리 검증 상태에서는 활성 이미지가 모두 ready여야 합니다.");
   return value as PalworldImagesManifest;
 }
 
@@ -459,6 +512,8 @@ export function assertPalworldPaldexReleaseManifest(value: unknown): PalworldPal
     "paldexSha256",
     "imagesManifestSha256",
     "importReportSha256",
+    "imageUsePolicySha256",
+    "imageSourceMapSha256",
     "mappingSha256",
     "counts",
     "dataIntegrityGate",
@@ -470,6 +525,9 @@ export function assertPalworldPaldexReleaseManifest(value: unknown): PalworldPal
   isoDateAt(manifest.generatedAt, "manifest.generatedAt");
   for (const field of ["sourceLockSha256", "paldexSha256", "imagesManifestSha256", "importReportSha256"] as const) {
     sha256At(manifest[field], `manifest.${field}`);
+  }
+  for (const field of ["imageUsePolicySha256", "imageSourceMapSha256"] as const) {
+    if (manifest[field] !== null) sha256At(manifest[field], `manifest.${field}`);
   }
   const mappingSha256 = recordAt(manifest.mappingSha256, "manifest.mappingSha256", [
     "publicIdMap",
@@ -528,16 +586,69 @@ export function assertPalworldPaldexReleaseManifest(value: unknown): PalworldPal
     booleanAt(dataChecks[field], `manifest.dataIntegrityGate.checks.${field}`);
   }
 
-  const imageGate = recordAt(manifest.imageAssetGate, "manifest.imageAssetGate", ["passed", "status", "failures", "readyImages", "fallbackPals"]);
+  const imageGate = recordAt(manifest.imageAssetGate, "manifest.imageAssetGate", [
+    "passed",
+    "status",
+    "policyStatus",
+    "failures",
+    "technicalPassed",
+    "publicActivationAllowed",
+    "rightsVerified",
+    "usageBasis",
+    "readyImages",
+    "fallbackPals",
+    "publicNoticeRequired"
+  ]);
   booleanAt(imageGate.passed, "manifest.imageAssetGate.passed");
-  if (imageGate.status !== "ready" && imageGate.status !== "blocked_by_license") fail("manifest.imageAssetGate.status", "허용된 상태가 아닙니다.");
+  if (!(PALWORLD_IMAGE_ASSET_STATUSES as readonly unknown[]).includes(imageGate.status)) fail("manifest.imageAssetGate.status", "허용된 상태가 아닙니다.");
+  if (!(PALWORLD_IMAGE_POLICY_STATUSES as readonly unknown[]).includes(imageGate.policyStatus)) fail("manifest.imageAssetGate.policyStatus", "허용된 정책 상태가 아닙니다.");
   const imageFailures = assertArray(imageGate.failures, "manifest.imageAssetGate.failures", 64);
   imageFailures.forEach((failure, index) => stringAt(failure, `manifest.imageAssetGate.failures[${index}]`, 256));
-  if (imageGate.passed !== (imageGate.status === "ready")) fail("manifest.imageAssetGate", "passed와 status가 일치해야 합니다.");
-  if (imageGate.passed && imageFailures.length > 0) fail("manifest.imageAssetGate.failures", "ready 상태에서는 비어 있어야 합니다.");
-  if (!imageGate.passed && imageFailures.length === 0) fail("manifest.imageAssetGate.failures", "차단 사유가 하나 이상 필요합니다.");
-  integerAt(imageGate.readyImages, "manifest.imageAssetGate.readyImages", 0, PALWORLD_PALDEX_EXPECTED_COUNT);
-  integerAt(imageGate.fallbackPals, "manifest.imageAssetGate.fallbackPals", 0, PALWORLD_PALDEX_EXPECTED_COUNT);
+  for (const field of ["technicalPassed", "publicActivationAllowed", "rightsVerified", "publicNoticeRequired"] as const) {
+    booleanAt(imageGate[field], `manifest.imageAssetGate.${field}`);
+  }
+  if (!(PALWORLD_IMAGE_USAGE_BASES as readonly unknown[]).includes(imageGate.usageBasis)) fail("manifest.imageAssetGate.usageBasis", "허용된 사용 근거가 아닙니다.");
+  const readyImages = integerAt(imageGate.readyImages, "manifest.imageAssetGate.readyImages", 0, PALWORLD_PALDEX_EXPECTED_COUNT);
+  const fallbackPals = integerAt(imageGate.fallbackPals, "manifest.imageAssetGate.fallbackPals", 0, PALWORLD_PALDEX_EXPECTED_COUNT);
+  if (readyImages + fallbackPals !== counts.pals) fail("manifest.imageAssetGate", "readyImages와 fallbackPals의 합이 Pal 수와 일치해야 합니다.");
+  if (imageGate.publicNoticeRequired !== true) fail("manifest.imageAssetGate.publicNoticeRequired", "공개 Palworld 출처 공지가 필요합니다.");
+  if (imageGate.passed !== (imageGate.technicalPassed && imageGate.publicActivationAllowed)) {
+    fail("manifest.imageAssetGate.passed", "기술 검증과 공개 활성화 상태가 일치해야 합니다.");
+  }
+  const policyStatus = imageGate.policyStatus as PalworldImagePolicyStatus;
+  if (policyStatus === "missing") {
+    if (manifest.imageUsePolicySha256 !== null || imageGate.usageBasis !== "none" || imageGate.status !== "blocked_by_license") {
+      fail("manifest.imageAssetGate.policyStatus", "policy 누락 상태와 hash·사용 근거·차단 상태가 일치해야 합니다.");
+    }
+  } else if (manifest.imageUsePolicySha256 === null) {
+    fail("manifest.imageUsePolicySha256", "policy 상태에는 고정 policy checksum이 필요합니다.");
+  }
+  if (readyImages > 0 && manifest.imageSourceMapSha256 === null) {
+    fail("manifest.imageSourceMapSha256", "활성 이미지에는 고정 source mapping checksum이 필요합니다.");
+  }
+  if (imageGate.status === "blocked_by_license") {
+    const usageMatchesPolicy = policyStatus === "operator_acknowledged"
+      ? imageGate.usageBasis === "operator_reference_use"
+      : policyStatus === "rights_verified"
+        ? imageGate.rightsVerified && imageGate.usageBasis === "rights_verified"
+        : (policyStatus === "missing" || policyStatus === "blocked_by_license") && !imageGate.rightsVerified && imageGate.usageBasis === "none";
+    if (imageGate.technicalPassed || imageGate.publicActivationAllowed || !usageMatchesPolicy || readyImages !== 0 || imageFailures.length === 0) {
+      fail("manifest.imageAssetGate", "차단 상태의 기술·권리·coverage 정보가 일치하지 않습니다.");
+    }
+  } else if (imageGate.status === "partial") {
+    const partialUsageIsConsistent = policyStatus === "operator_acknowledged"
+      ? !imageGate.rightsVerified && imageGate.usageBasis === "operator_reference_use"
+      : policyStatus === "rights_verified" && imageGate.rightsVerified && imageGate.usageBasis === "rights_verified";
+    if (!imageGate.technicalPassed || !imageGate.publicActivationAllowed || !partialUsageIsConsistent || readyImages === 0 || fallbackPals === 0 || imageFailures.length === 0) {
+      fail("manifest.imageAssetGate", "partial 상태는 한 가지 사용 근거의 일부 이미지만 기술 검증을 통과해야 합니다.");
+    }
+  } else if (imageGate.status === "operator_acknowledged") {
+    if (policyStatus !== "operator_acknowledged" || !imageGate.technicalPassed || !imageGate.publicActivationAllowed || imageGate.rightsVerified || imageGate.usageBasis !== "operator_reference_use" || fallbackPals !== 0 || imageFailures.length > 0) {
+      fail("manifest.imageAssetGate", "운영자 확인 상태의 기술·권리·coverage 정보가 일치하지 않습니다.");
+    }
+  } else if (policyStatus !== "rights_verified" || !imageGate.technicalPassed || !imageGate.publicActivationAllowed || !imageGate.rightsVerified || imageGate.usageBasis !== "rights_verified" || fallbackPals !== 0 || imageFailures.length > 0) {
+    fail("manifest.imageAssetGate", "ready 상태는 별도 권리 검증과 전체 기술 검증을 통과해야 합니다.");
+  }
 
   const runtimeActivation = booleanAt(manifest.runtimeActivation, "manifest.runtimeActivation");
   if (runtimeActivation !== dataGate.passed) {

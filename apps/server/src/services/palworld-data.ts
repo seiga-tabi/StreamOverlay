@@ -189,15 +189,27 @@ export class PalworldDataService {
         metadata: this.supplementalSnapshot.metadata
       }
     };
+    const readyImages = this.snapshot.pals.filter((pal) => pal.imageUrl !== undefined).length;
     this.gates = options.gates ?? {
       dataIntegrity: { passed: true, status: "ready" },
       imageAssets: {
-        passed: this.snapshot.pals.every((pal) => pal.imageUrl !== undefined),
-        status: this.snapshot.pals.every((pal) => pal.imageUrl !== undefined) ? "ready" : "partial",
-        readyImages: this.snapshot.pals.filter((pal) => pal.imageUrl !== undefined).length,
-        fallbackPals: this.snapshot.pals.filter((pal) => pal.imageUrl === undefined).length
+        status: "blocked_by_license",
+        policyStatus: "missing",
+        technicalPassed: false,
+        publicActivationAllowed: false,
+        rightsVerified: false,
+        usageBasis: "none",
+        readyImages: 0,
+        fallbackPals: this.snapshot.pals.length,
+        publicNoticeRequired: true
       }
     };
+    if (readyImages !== this.gates.imageAssets.readyImages) {
+      throw new TypeError("Palworld runtime 이미지 수와 image asset gate가 일치하지 않습니다.");
+    }
+    if (!this.gates.imageAssets.publicActivationAllowed && readyImages > 0) {
+      throw new TypeError("공개 활성화가 차단된 Palworld imageUrl을 runtime에 전달할 수 없습니다.");
+    }
     const metaValidation = validatePalworldMetaResponse(this.meta());
     if (!metaValidation.ok) {
       throw new TypeError(`Palworld runtime metadata 검증에 실패했습니다. ${metaValidation.error}`);
@@ -389,10 +401,15 @@ function runtimeGates(input: {
       status: input.dataIntegrityGate.status
     },
     imageAssets: {
-      passed: input.imageAssetGate.passed,
       status: input.imageAssetGate.status,
+      policyStatus: input.imageAssetGate.policyStatus,
+      technicalPassed: input.imageAssetGate.technicalPassed,
+      publicActivationAllowed: input.imageAssetGate.publicActivationAllowed,
+      rightsVerified: input.imageAssetGate.rightsVerified,
+      usageBasis: input.imageAssetGate.usageBasis,
       readyImages: input.imageAssetGate.readyImages,
-      fallbackPals: input.imageAssetGate.fallbackPals
+      fallbackPals: input.imageAssetGate.fallbackPals,
+      publicNoticeRequired: input.imageAssetGate.publicNoticeRequired
     }
   };
 }

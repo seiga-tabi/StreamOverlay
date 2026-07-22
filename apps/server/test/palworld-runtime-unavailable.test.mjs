@@ -118,6 +118,41 @@ test("artifact 누락·JSON 손상·paldex 및 mapping checksum 오류는 servic
   }
 });
 
+test("policy·image manifest 오류는 Pal 텍스트를 유지하고 이미지 gate만 fallback으로 낮춘다", async () => {
+  const missingPolicy = fixture();
+  rmSync(path.join(missingPolicy.releaseRoot, "image-use-policy.json"));
+
+  const invalidPolicy = fixture();
+  writeFileSync(path.join(invalidPolicy.releaseRoot, "image-use-policy.json"), "{손상된 policy", "utf8");
+
+  const invalidImages = fixture();
+  writeFileSync(path.join(invalidImages.releaseRoot, "images-manifest.json"), "{손상된 image manifest", "utf8");
+
+  const imageChecksum = fixture();
+  appendFileSync(path.join(imageChecksum.releaseRoot, "images-manifest.json"), "\n", "utf8");
+
+  const missingImageOverride = fixture();
+  rmSync(path.join(missingImageOverride.mappingRoot, "image-overrides.json"));
+
+  for (const [options, expectedPolicyStatus] of [
+    [missingPolicy, "missing"],
+    [invalidPolicy, "missing"],
+    [invalidImages, "operator_acknowledged"],
+    [imageChecksum, "operator_acknowledged"],
+    [missingImageOverride, "operator_acknowledged"]
+  ]) {
+    const service = await loadPalworldDataService(options);
+    const meta = service.meta();
+    assert.equal(meta.counts.pals, 287);
+    assert.equal(meta.gates.dataIntegrity.status, "ready");
+    assert.equal(meta.gates.imageAssets.status, "blocked_by_license");
+    assert.equal(meta.gates.imageAssets.policyStatus, expectedPolicyStatus);
+    assert.equal(meta.gates.imageAssets.readyImages, 0);
+    assert.equal(meta.gates.imageAssets.fallbackPals, 287);
+    assert.equal(service.getPal("lamball").imageUrl, undefined);
+  }
+});
+
 test("Palworld 데이터가 없으면 Palworld GET API만 고정 503이고 health와 public API는 정상이다", async () => {
   const handler = unavailableHandler();
   const paths = [

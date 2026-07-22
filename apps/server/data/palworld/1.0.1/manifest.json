@@ -4,8 +4,10 @@
   "generatedAt": "2026-07-15T07:03:54.1507828+00:00",
   "sourceLockSha256": "690a38bfd2e02f79c17cfc842c230adf385f69141c4e6660f18f7bf25bcb36be",
   "paldexSha256": "4a6baf9e3a85ee165850289839ad91d95dfd5f22c8937f4e5628c30bb3198ad5",
-  "imagesManifestSha256": "bb66f2b0a2e085bc74310e9d65a5bceeeb7678a9316a498633e32cff763e3457",
-  "importReportSha256": "2e00381e2613a595865c9c538fb307c66c85d4571f86b515930925e62c563f14",
+  "imagesManifestSha256": "9932c8318961736b23c371f44e70874db1e767600c6cc42fb148686b350be416",
+  "importReportSha256": "5f293de2b1e512136a656cb040c2c2e7fccc4beda92c7c74dc632dbea247bf88",
+  "imageUsePolicySha256": "29aed1ffea7dc3002ffbc258c354ae544913fed509d19f9da81a8cf56840e378",
+  "imageSourceMapSha256": "b3e8c963f3021f00a32025b5bbecd3cca8920082bf896e6477258ae6e67b3266",
   "mappingSha256": {
     "publicIdMap": "174d68027ae7f7c54ecd3158f0d98a03eb644c4f70cfe2aba70aeddbe7a67acd",
     "elements": "2ad974b1579429f89cdbd6b9551bddecbf000d7da459922cd98aa325f0faa00a",
@@ -45,12 +47,17 @@
   "imageAssetGate": {
     "passed": false,
     "status": "blocked_by_license",
+    "policyStatus": "operator_acknowledged",
     "failures": [
-      "PAL_IMAGE_REDISTRIBUTION_PERMISSION_NOT_VERIFIED",
-      "PAL_IMAGE_FILES_NOT_INCLUDED"
+      "PAL_IMAGE_FILES_NOT_PROVIDED"
     ],
+    "technicalPassed": false,
+    "publicActivationAllowed": false,
+    "rightsVerified": false,
+    "usageBasis": "operator_reference_use",
     "readyImages": 0,
-    "fallbackPals": 287
+    "fallbackPals": 287,
+    "publicNoticeRequired": true
   },
   "runtimeActivation": true
 }

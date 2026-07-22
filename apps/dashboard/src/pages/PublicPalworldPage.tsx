@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { AppShell, AppShellFooter, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
+import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import {
   Toast,
   ToastCloseButton,
@@ -19,6 +19,7 @@ import { PalworldItemsPage } from "../features/public-palworld/components/Palwor
 import { PalworldPalsPage } from "../features/public-palworld/components/PalworldPalsPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
 import { PalworldSearchResults } from "../features/public-palworld/components/PalworldSearchResults";
+import { PalworldSourceFooter } from "../features/public-palworld/components/PalworldSourceFooter";
 import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i18n/palworld-i18n";
 import { PALWORLD_VERSION_MISMATCH_EVENT } from "../features/public-palworld/api/palworld";
 import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldRoute";
@@ -108,12 +109,7 @@ export function PublicPalworldPage() {
         {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} /> : null}
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
       </AppShellMain>
-      <AppShellFooter as="div" className="palworld-footer">
-        <strong>YORO.gg</strong>
-        <span data-ko="펠월드 데이터는 버전이 고정된 검증 스냅샷을 사용합니다." data-ja="パルワールドデータはバージョン固定の検証済みスナップショットを使用します。">
-          {locale === "ja" ? "パルワールドデータはバージョン固定の検証済みスナップショットを使用します。" : "펠월드 데이터는 버전이 고정된 검증 스냅샷을 사용합니다."}
-        </span>
-      </AppShellFooter>
+      <PalworldSourceFooter locale={locale} />
       <PalDetailModal palId={selectedPalId} locale={locale} onClose={closeDetail} onOpenItem={openItemPage} />
       <ItemDetailModal itemId={selectedItemId} locale={locale} onClose={closeDetail} onOpenPal={openPalPage} onOpenItem={openItemPage} />
       <ToastProvider position="bottom-right">

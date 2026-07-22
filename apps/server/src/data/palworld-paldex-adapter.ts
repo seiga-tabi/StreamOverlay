@@ -1,19 +1,19 @@
 import {
   assertPalworldDataSnapshot,
   type PalworldDataSnapshot,
-  type PalworldPalDetail
+  type PalworldPalDetail,
+  type PalworldRuntimeGates
 } from "@streamops/shared";
 import {
   PALWORLD_PALDEX_EXPECTED_COUNT,
   PALWORLD_PALDEX_EXPECTED_NORMAL_COUNT,
   PALWORLD_PALDEX_EXPECTED_VARIANT_COUNT,
   assertPalworldPaldexArtifact,
-  type PalworldImagesManifest,
   type PalworldPaldexArtifact,
   type PalworldPaldexReleaseManifest
 } from "./palworld-paldex-artifact.js";
 import {
-  loadPalworldPaldexStagedRelease,
+  loadPalworldPaldexRuntimeSource,
   type PalworldPaldexStagedRelease
 } from "./palworld-paldex-loader.js";
 
@@ -34,12 +34,7 @@ export type PalworldDataIntegrityGate = {
   checksumsVerified: true;
 };
 
-export type PalworldImageAssetGate = {
-  passed: boolean;
-  status: PalworldImagesManifest["status"];
-  readyImages: number;
-  fallbackPals: number;
-};
+export type PalworldImageAssetGate = PalworldRuntimeGates["imageAssets"];
 
 export type PalworldPaldexAdapterResult = {
   snapshot: PalworldDataSnapshot;
@@ -47,7 +42,7 @@ export type PalworldPaldexAdapterResult = {
 };
 
 export type PalworldPaldexAdapterOptions = {
-  approvedImageUrls?: Readonly<Record<string, string>>;
+  activatedImageUrls?: Readonly<Record<string, string>>;
 };
 
 export type PalworldPaldexRuntimeRelease = PalworldPaldexAdapterResult & {
@@ -95,9 +90,9 @@ export function adaptPalworldPaldexArtifact(
   const sourceInternalIds: Record<string, string> = {};
   const pals: PalworldPalDetail[] = validatedArtifact.records.map((record) => {
     sourceInternalIds[record.id] = record.sourceInternalId;
-    const approvedImageUrl = options.approvedImageUrls?.[record.id];
-    if (approvedImageUrl !== undefined && approvedImageUrl !== record.imageUrl) {
-      throw new TypeError(`Palworld 승인 이미지 mapping이 artifact와 일치하지 않습니다: ${record.id}`);
+    const activatedImageUrl = options.activatedImageUrls?.[record.id];
+    if (activatedImageUrl !== undefined && activatedImageUrl !== record.imageUrl) {
+      throw new TypeError(`Palworld 공개 이미지 mapping이 artifact와 일치하지 않습니다: ${record.id}`);
     }
     return {
       id: record.id,
@@ -105,7 +100,7 @@ export function adaptPalworldPaldexArtifact(
       nameKo: record.nameKo,
       nameJa: record.nameJa,
       nameEn: record.nameEn,
-      ...(approvedImageUrl === undefined ? {} : { imageUrl: approvedImageUrl }),
+      ...(activatedImageUrl === undefined ? {} : { imageUrl: activatedImageUrl }),
       elements: [...record.elements],
       rarity: record.rarity,
       variantType: record.variantType,
@@ -133,7 +128,10 @@ export function adaptPalworldPaldexArtifact(
   });
 }
 
-function runtimeGates(release: PalworldPaldexStagedRelease): {
+function runtimeGates(release: Pick<
+  PalworldPaldexStagedRelease,
+  "dataIntegrityReady" | "manifest" | "runtimeImageAssetGate"
+>): {
   dataIntegrityGate: PalworldDataIntegrityGate;
   imageAssetGate: PalworldImageAssetGate;
 } {
@@ -183,10 +181,7 @@ function runtimeGates(release: PalworldPaldexStagedRelease): {
       checksumsVerified: true
     },
     imageAssetGate: {
-      passed: release.imageAssetsReady,
-      status: release.manifest.imageAssetGate.status,
-      readyImages: release.manifest.imageAssetGate.readyImages,
-      fallbackPals: release.manifest.imageAssetGate.fallbackPals
+      ...release.runtimeImageAssetGate
     }
   };
 }
@@ -196,13 +191,8 @@ export async function loadPalworldPaldexRuntimeRelease(options: {
   imageRoot?: string;
   mappingRoot?: string;
 } = {}): Promise<PalworldPaldexRuntimeRelease> {
-  const release = await loadPalworldPaldexStagedRelease(options);
-  const approvedImageUrls = release.imagesManifest.rightsReview.status === "approved"
-    ? Object.fromEntries(release.imagesManifest.entries
-        .filter((entry) => entry.status === "ready")
-        .map((entry) => [entry.palId, entry.imageUrl!]))
-    : {};
-  const adapted = adaptPalworldPaldexArtifact(release.artifact, { approvedImageUrls });
+  const release = await loadPalworldPaldexRuntimeSource(options);
+  const adapted = adaptPalworldPaldexArtifact(release.artifact, { activatedImageUrls: release.runtimeImageUrls });
   const gates = runtimeGates(release);
   return deepFreeze({
     ...adapted,

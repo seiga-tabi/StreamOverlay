@@ -12,6 +12,8 @@
     "validate:runtime": "tsx src/scripts/validate-runtime-config.ts",
     "fetch:palworld-data": "tsx src/scripts/fetch-palworld-paldex.ts",
     "generate:palworld-data": "tsx src/scripts/generate-palworld-paldex.ts",
+    "import:palworld-images": "tsx src/scripts/import-palworld-images.ts",
+    "rollback:palworld-images": "tsx src/scripts/rollback-palworld-images.ts --release 1.0.1",
     "validate:palworld-data": "tsx src/scripts/validate-palworld-paldex.ts",
     "validate:palworld-data:release": "tsx src/scripts/validate-palworld-paldex.ts --release",
     "diff:palworld-data": "tsx src/scripts/diff-palworld-paldex.ts",
@@ -26,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^20.14.10",
     "@types/ws": "^8.5.10",
+    "sharp": "0.35.3",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
   }

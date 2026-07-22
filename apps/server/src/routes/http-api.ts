@@ -1601,7 +1601,7 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
     sendInvalidStaticPath(req, res);
     return true;
   }
-  if (relative && !path.extname(relative)) {
+  if (relative && !path.extname(relative) && !relative.startsWith("images/")) {
     await sendStaticFile(req, res, path.resolve(staticDir, "index.html"), {}, mountPath);
     return true;
   }

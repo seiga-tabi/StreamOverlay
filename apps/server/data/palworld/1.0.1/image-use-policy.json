@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "operator_acknowledged",
+  "usageBasis": "operator_reference_use",
+  "sourceType": "operator_controlled_server_export",
+  "sourceDescription": "운영자가 관리하는 서버에서 export한 Palworld Pal 이미지",
+  "acknowledgedAt": "2026-07-22T00:00:00.000Z",
+  "publicNoticeKo": "비공식 팰월드 데이터베이스 · 데이터/이미지 출처 Palworld · Pocketpair",
+  "publicNoticeJa": "非公式パルワールドデータベース · データ・画像出典 Palworld · Pocketpair",
+  "takedownContact": "support@yoro.gg",
+  "allowPublicDisplay": true,
+  "allowSelfHosting": true,
+  "allowResize": true,
+  "allowWebpConversion": true,
+  "rightsVerified": false
+}

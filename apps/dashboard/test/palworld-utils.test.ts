@@ -162,7 +162,17 @@ test("서로 다른 API 데이터 버전을 받으면 불일치 UI 이벤트를 
         },
         gates: {
           dataIntegrity: { passed: true, status: "ready" },
-          imageAssets: { passed: false, status: "blocked_by_license", readyImages: 0, fallbackPals: 1 },
+          imageAssets: {
+            status: "blocked_by_license",
+            policyStatus: "operator_acknowledged",
+            technicalPassed: false,
+            publicActivationAllowed: false,
+            rightsVerified: false,
+            usageBasis: "operator_reference_use",
+            readyImages: 0,
+            fallbackPals: 1,
+            publicNoticeRequired: true,
+          },
         },
       }), { status: 200, headers: { "content-type": "application/json" } });
     },

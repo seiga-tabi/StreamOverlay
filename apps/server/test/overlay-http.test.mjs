@@ -299,6 +299,43 @@ test("공개 dashboard 이미지 asset은 /images 경로로 서빙된다", async
   }
 });
 
+test("Palworld content-hash WebP는 immutable로 서빙하고 누락·directory 요청은 404를 반환한다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-palworld-images-"));
+  const hash = "a".repeat(64);
+  try {
+    const imageDir = path.join(dir, "images", "palworld", "1.0.1", "pals");
+    mkdirSync(imageDir, { recursive: true });
+    writeFileSync(path.join(imageDir, `${hash}.webp`), Buffer.from("UklGRh4AAABXRUJQVlA4TBEAAAAvAAAAAAfQ//73v/+BiOh/AAA=", "base64"));
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const imageResponse = createResponse();
+    await handler(createRequest("GET", `/images/palworld/1.0.1/pals/${hash}.webp`), imageResponse);
+    assert.equal(imageResponse.statusCode, 200);
+    assert.equal(imageResponse.headers["Content-Type"], "image/webp");
+    assert.equal(imageResponse.headers["Cache-Control"], "public, max-age=31536000, immutable");
+
+    const missingResponse = createResponse();
+    await handler(createRequest("GET", `/images/palworld/1.0.1/pals/${"b".repeat(64)}.webp`), missingResponse);
+    assert.equal(missingResponse.statusCode, 404);
+
+    const directoryResponse = createResponse();
+    await handler(createRequest("GET", "/images/palworld/1.0.1/pals/"), directoryResponse);
+    assert.equal(directoryResponse.statusCode, 404);
+    assert.doesNotMatch(directoryResponse.body, /<!doctype html>/i);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("favicon과 sitemap은 dashboard public asset으로 서빙된다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-dashboard-public-"));

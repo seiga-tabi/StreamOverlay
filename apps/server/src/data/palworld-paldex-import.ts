@@ -18,12 +18,14 @@ import {
 const REPOSITORY_ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
 export const PALWORLD_PALDEX_RELEASE_ROOT = path.join(REPOSITORY_ROOT, "apps/server/data/palworld", PALWORLD_PALDEX_RELEASE);
 export const PALWORLD_PALDEX_MAPPING_ROOT = path.join(REPOSITORY_ROOT, "apps/server/src/data/palworld-mappings");
-export const PALWORLD_PALDEX_IMAGE_ROOT = path.join(
+export const PALWORLD_PALDEX_PUBLIC_IMAGE_ROOT = path.join(
   REPOSITORY_ROOT,
   "apps/dashboard/public/images/palworld",
   PALWORLD_PALDEX_RELEASE,
   "pals"
 );
+// 기존 build-time 호출자 호환용 alias다. runtime은 DASHBOARD_STATIC_DIR 아래 dist 경로를 사용해야 한다.
+export const PALWORLD_PALDEX_IMAGE_ROOT = PALWORLD_PALDEX_PUBLIC_IMAGE_ROOT;
 export const PALWORLD_PALDEX_SOURCE_CACHE_ROOT = path.join(tmpdir(), "streamoverlay-palworld-paldex", PALWORLD_PALDEX_RELEASE);
 
 const ATLAS_RECORD_KEYS = [
@@ -758,6 +760,7 @@ export function importPalworldPaldex(input: {
         sourceUrl: `${candidateFileBaseUrl}/${encodedFileName}`,
         sourceRevision: input.sourceLock.imageRightsReview.candidateSourceRevision,
         license: input.sourceLock.imageRightsReview.license,
+        usageBasis: "none",
         retrievedAt: null,
         originalSha256: null,
         generatedSha256: null,

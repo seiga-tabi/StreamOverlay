@@ -1,4 +1,5 @@
 import http from "node:http";
+import path from "node:path";
 import type { Socket } from "node:net";
 import type { Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
@@ -52,7 +53,9 @@ assertRuntimeConfig();
 const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
 let palworldDataService: PalworldDataService | undefined;
 try {
-  palworldDataService = await loadPalworldDataService();
+  palworldDataService = await loadPalworldDataService({
+    imageRoot: path.join(appConfig.paths.dashboardStatic, "images", "palworld", "1.0.1", "pals")
+  });
   const meta = palworldDataService.meta();
   logger.event({
     type: "palworld_data.runtime_ready",

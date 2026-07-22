@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import type { PalworldRuntimeGates } from "@streamops/shared";
 import {
   PALWORLD_PALDEX_EXPECTED_COUNT,
   PalworldPaldexValidationError,
@@ -10,7 +11,14 @@ import {
   type PalworldPaldexArtifact,
   type PalworldPaldexReleaseManifest
 } from "./palworld-paldex-artifact.js";
-import { validatePalworldImageFiles } from "./palworld-image-import.js";
+import { collectPalworldRuntimeImageUrls, validatePalworldImageFiles } from "./palworld-image-import.js";
+import {
+  PALWORLD_IMAGE_POLICY_FILE_NAME,
+  PALWORLD_IMAGE_SOURCE_MAP_FILE_NAME,
+  assertPalworldImageSourceMap,
+  assertPalworldImageUsePolicy,
+  type PalworldImageUsePolicy
+} from "./palworld-image-policy.js";
 import {
   PALWORLD_PALDEX_IMAGE_ROOT,
   PALWORLD_PALDEX_MAPPING_ROOT,
@@ -27,32 +35,76 @@ export type PalworldPaldexStagedRelease = {
   dataIntegrityReady: boolean;
   imageAssetsReady: boolean;
   releaseReady: boolean;
+  runtimeImageUrls: Readonly<Record<string, string>>;
+  runtimeImageAssetGate: PalworldRuntimeGates["imageAssets"];
 };
+
+export type PalworldPaldexRuntimeSource = Pick<
+  PalworldPaldexStagedRelease,
+  "artifact" | "manifest" | "dataIntegrityReady" | "runtimeImageUrls" | "runtimeImageAssetGate"
+>;
 
 async function readJsonWithBytes(filePath: string): Promise<{ bytes: Buffer; value: unknown }> {
   const bytes = await readFile(filePath);
   return { bytes, value: JSON.parse(bytes.toString("utf8")) as unknown };
 }
 
+async function readOptionalJsonWithBytes(filePath: string): Promise<{ bytes: Buffer; value: unknown } | undefined> {
+  try {
+    return await readJsonWithBytes(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
 export function assertPalworldImageRightsGate(input: {
   sourceLock: PalworldPaldexSourceLock;
   imagesManifest: PalworldImagesManifest;
   manifest: PalworldPaldexReleaseManifest;
+  policy?: PalworldImageUsePolicy;
 }): void {
+  const activatedEntries = input.imagesManifest.entries.filter((entry) =>
+    entry.status === "operator_acknowledged" || entry.status === "ready"
+  );
+  if (activatedEntries.length > 0) {
+    if (!input.policy || input.policy.status === "blocked_by_license") {
+      throw new PalworldPaldexValidationError("운영자 image-use-policy 없이 이미지를 공개할 수 없습니다.");
+    }
+    if (input.policy.status === "operator_acknowledged" && activatedEntries.some((entry) => entry.status !== "operator_acknowledged")) {
+      throw new PalworldPaldexValidationError("운영자 확인 policy에서 권리 검증 ready 이미지를 공개할 수 없습니다.");
+    }
+    if (input.policy.status === "ready" && activatedEntries.some((entry) => entry.status !== "ready")) {
+      throw new PalworldPaldexValidationError("권리 검증 policy와 이미지 entry 상태가 일치하지 않습니다.");
+    }
+    return;
+  }
   if (input.sourceLock.imageRightsReview.status !== "blocked_by_license") return;
   const expectedEvidenceUrls = input.sourceLock.imageRightsReview.evidence.map((evidence) => evidence.url);
   const candidateFileBaseUrl = `${input.sourceLock.imageRightsReview.candidateDirectoryUrl.replace("/tree/", "/blob/")}/`;
+  const usesLegacyBlockedCandidates = input.imagesManifest.entries.every((entry) =>
+    entry.status === "blocked_by_license"
+    && entry.sourceName === input.sourceLock.imageRightsReview.candidateSourceName
+    && entry.sourceRevision === input.sourceLock.imageRightsReview.candidateSourceRevision
+    && entry.license === input.sourceLock.imageRightsReview.license
+    && entry.sourceUrl?.startsWith(candidateFileBaseUrl)
+  );
+  if (!usesLegacyBlockedCandidates) {
+    if (
+      !input.policy
+      || input.imagesManifest.status !== "blocked_by_license"
+      || input.manifest.imageAssetGate.status !== "blocked_by_license"
+      || input.manifest.imageAssetGate.publicActivationAllowed
+      || input.manifest.imageAssetGate.readyImages !== 0
+    ) {
+      throw new PalworldPaldexValidationError("운영자 policy가 차단한 이미지 artifact 상태가 일치하지 않습니다.");
+    }
+    return;
+  }
   const rightsGateWasBypassed = input.imagesManifest.status !== "blocked_by_license"
     || input.imagesManifest.rightsReview.status !== "blocked_by_license"
     || input.imagesManifest.rightsReview.reasonCode !== input.sourceLock.imageRightsReview.reasonCode
     || JSON.stringify(input.imagesManifest.rightsReview.evidenceUrls) !== JSON.stringify(expectedEvidenceUrls)
-    || input.imagesManifest.entries.some((entry) =>
-      entry.status !== "blocked_by_license"
-      || entry.sourceName !== input.sourceLock.imageRightsReview.candidateSourceName
-      || entry.sourceRevision !== input.sourceLock.imageRightsReview.candidateSourceRevision
-      || entry.license !== input.sourceLock.imageRightsReview.license
-      || !entry.sourceUrl.startsWith(candidateFileBaseUrl)
-    )
     || input.manifest.imageAssetGate.passed
     || input.manifest.imageAssetGate.status !== "blocked_by_license";
   if (rightsGateWasBypassed) {
@@ -85,10 +137,9 @@ function assertManifestCounts(input: {
   if (expected.pals !== PALWORLD_PALDEX_EXPECTED_COUNT) throw new PalworldPaldexValidationError("최종 Pal 수가 287개가 아닙니다.");
 }
 
-function assertGateCoverage(input: {
+function assertDataGateCoverage(input: {
   artifact: PalworldPaldexArtifact;
   manifest: PalworldPaldexReleaseManifest;
-  readyImages: number;
 }): void {
   const records = input.artifact.records;
   const expectedChecks: PalworldPaldexReleaseManifest["dataIntegrityGate"]["checks"] = {
@@ -114,7 +165,15 @@ function assertGateCoverage(input: {
       throw new PalworldPaldexValidationError(`manifest.dataIntegrityGate.checks.${field}: 실제 검증 결과와 일치하지 않습니다.`);
     }
   }
-  const fallbackPals = records.length - input.readyImages;
+}
+
+function assertGateCoverage(input: {
+  artifact: PalworldPaldexArtifact;
+  manifest: PalworldPaldexReleaseManifest;
+  readyImages: number;
+}): void {
+  assertDataGateCoverage(input);
+  const fallbackPals = input.artifact.records.length - input.readyImages;
   if (input.manifest.imageAssetGate.readyImages !== input.readyImages) {
     throw new PalworldPaldexValidationError("manifest.imageAssetGate.readyImages: 실제 이미지 수와 일치하지 않습니다.");
   }
@@ -123,11 +182,53 @@ function assertGateCoverage(input: {
   }
 }
 
+function imagePolicyStatus(policy: PalworldImageUsePolicy | undefined): PalworldRuntimeGates["imageAssets"]["policyStatus"] {
+  if (!policy) return "missing";
+  if (policy.status === "ready") return "rights_verified";
+  return policy.status;
+}
+
+function runtimeImageAssetGate(input: {
+  policy?: PalworldImageUsePolicy;
+  readyImages: number;
+  totalPals: number;
+}): PalworldRuntimeGates["imageAssets"] {
+  const policyStatus = imagePolicyStatus(input.policy);
+  const fallbackPals = input.totalPals - input.readyImages;
+  const usageBasis = input.policy?.usageBasis ?? "none";
+  const rightsVerified = input.policy?.rightsVerified ?? false;
+  const policyAllowsPublicDisplay = input.policy !== undefined
+    && input.policy.status !== "blocked_by_license"
+    && input.policy.allowPublicDisplay
+    && input.policy.allowSelfHosting;
+  const technicalPassed = input.readyImages > 0;
+  const publicActivationAllowed = technicalPassed && policyAllowsPublicDisplay;
+  const status = !publicActivationAllowed
+    ? "blocked_by_license"
+    : fallbackPals > 0
+      ? "partial"
+      : rightsVerified
+        ? "ready"
+        : "operator_acknowledged";
+  return {
+    status,
+    policyStatus,
+    technicalPassed,
+    publicActivationAllowed,
+    rightsVerified,
+    usageBasis,
+    readyImages: publicActivationAllowed ? input.readyImages : 0,
+    fallbackPals: publicActivationAllowed ? fallbackPals : input.totalPals,
+    publicNoticeRequired: true
+  };
+}
+
 export async function loadPalworldPaldexStagedRelease(options: {
   releaseRoot?: string;
   imageRoot?: string;
   mappingRoot?: string;
   requireReleaseReady?: boolean;
+  imageFailureMode?: "throw" | "fallback";
 } = {}): Promise<PalworldPaldexStagedRelease> {
   const releaseRoot = options.releaseRoot ?? PALWORLD_PALDEX_RELEASE_ROOT;
   const imageRoot = options.imageRoot ?? PALWORLD_PALDEX_IMAGE_ROOT;
@@ -142,7 +243,9 @@ export async function loadPalworldPaldexStagedRelease(options: {
     elementsFile,
     workSuitabilitiesFile,
     exclusionsFile,
-    overridesFile
+    overridesFile,
+    policyFile,
+    imageSourceMapFile
   ] = await Promise.all([
     readJsonWithBytes(path.join(releaseRoot, "sources.lock.json")),
     readJsonWithBytes(path.join(releaseRoot, "paldex.json")),
@@ -153,22 +256,69 @@ export async function loadPalworldPaldexStagedRelease(options: {
     readJsonWithBytes(path.join(mappingRoot, "elements.json")),
     readJsonWithBytes(path.join(mappingRoot, "work-suitabilities.json")),
     readJsonWithBytes(path.join(mappingRoot, "exclusions.json")),
-    readJsonWithBytes(path.join(mappingRoot, "image-overrides.json"))
+    readJsonWithBytes(path.join(mappingRoot, "image-overrides.json")),
+    readOptionalJsonWithBytes(path.join(releaseRoot, PALWORLD_IMAGE_POLICY_FILE_NAME)),
+    readOptionalJsonWithBytes(path.join(mappingRoot, PALWORLD_IMAGE_SOURCE_MAP_FILE_NAME))
   ]);
   const sourceLock = assertPalworldPaldexSourceLock(sourceLockFile.value);
   const artifact = assertPalworldPaldexArtifact(paldexFile.value);
   const imagesManifest = assertPalworldImagesManifest(imagesFile.value, artifact);
   const manifest = assertPalworldPaldexReleaseManifest(manifestFile.value);
-  assertPalworldImageRightsGate({ sourceLock, imagesManifest, manifest });
+  const policy = policyFile ? assertPalworldImageUsePolicy(policyFile.value) : undefined;
+  const imageSourceMap = imageSourceMapFile ? assertPalworldImageSourceMap(imageSourceMapFile.value, artifact) : undefined;
+  const actualPolicyHash = policyFile ? sha256Bytes(policyFile.bytes) : null;
+  const actualSourceMapHash = imageSourceMapFile ? sha256Bytes(imageSourceMapFile.bytes) : null;
+  if (manifest.imageUsePolicySha256 !== actualPolicyHash) {
+    throw new PalworldPaldexValidationError("manifest.imageUsePolicySha256: policy checksum이 일치하지 않습니다.");
+  }
+  if (manifest.imageSourceMapSha256 !== actualSourceMapHash) {
+    throw new PalworldPaldexValidationError("manifest.imageSourceMapSha256: image source mapping checksum이 일치하지 않습니다.");
+  }
+  const expectedPolicyStatus = imagePolicyStatus(policy);
+  if (
+    manifest.imageAssetGate.policyStatus !== expectedPolicyStatus
+    || manifest.imageAssetGate.usageBasis !== (policy?.usageBasis ?? "none")
+    || manifest.imageAssetGate.rightsVerified !== (policy?.rightsVerified ?? false)
+  ) {
+    throw new PalworldPaldexValidationError("manifest.imageAssetGate: 고정 image-use-policy와 일치하지 않습니다.");
+  }
+  if (manifest.imageAssetGate.readyImages > 0 && !imageSourceMap) {
+    throw new PalworldPaldexValidationError("활성 이미지에는 검증된 image-source-map.json이 필요합니다.");
+  }
+  if (imageSourceMap) {
+    const imageEntriesByPalId = new Map(imagesManifest.entries.map((entry) => [entry.palId, entry]));
+    for (const [index, mapping] of imageSourceMap.entries.entries()) {
+      const entry = imageEntriesByPalId.get(mapping.palId);
+      if (
+        !entry
+        || entry.palId !== mapping.palId
+        || entry.sourceInternalId !== mapping.sourceInternalId
+        || entry.originalFileName !== mapping.sourceFileName
+        || entry.sourceRevision !== mapping.sourceRevision
+        || entry.sourceReference !== `operator-export-${mapping.sourceInternalId}`
+      ) {
+        throw new PalworldPaldexValidationError(`imagesManifest.entries[${index}]: image source mapping provenance가 일치하지 않습니다.`);
+      }
+    }
+  }
+  assertPalworldImageRightsGate({ sourceLock, imagesManifest, manifest, policy });
   const atlasSource = sourceLock.sources.find((source) => source.id === "atlas-pals")!;
   const palCalcSource = sourceLock.sources.find((source) => source.id === "palcalc-db")!;
   const expectedDataRevision = `atlas@${atlasSource.sourceRevision}+palcalc@${palCalcSource.sourceRevision}`;
-  const expectedImageRevision = `palcalc-icons@${sourceLock.imageRightsReview.candidateSourceRevision}`;
+  const expectedLegacyImageRevision = `palcalc-icons@${sourceLock.imageRightsReview.candidateSourceRevision}`;
+  const legacyCandidateBaseUrl = `${sourceLock.imageRightsReview.candidateDirectoryUrl.replace("/tree/", "/blob/")}/`;
+  const usesOnlyLegacyBlockedEntries = imagesManifest.entries.every((entry) =>
+    entry.status === "blocked_by_license" && entry.sourceUrl?.startsWith(legacyCandidateBaseUrl)
+  );
+  const expectedOperatorImageRevision = manifest.imageSourceMapSha256 === null
+    ? "operator-images-unmapped"
+    : `operator-images@${manifest.imageSourceMapSha256}`;
   if (
     artifact.metadata.sourceRevision !== expectedDataRevision
     || artifact.metadata.extractedAt !== sourceLock.artifactTimestamp
     || artifact.metadata.verifiedAt !== sourceLock.verifiedAt
-    || imagesManifest.revision !== expectedImageRevision
+    || (usesOnlyLegacyBlockedEntries && imagesManifest.revision !== expectedLegacyImageRevision)
+    || (!usesOnlyLegacyBlockedEntries && imagesManifest.revision !== expectedOperatorImageRevision)
     || manifest.generatedAt !== sourceLock.artifactTimestamp
   ) {
     throw new PalworldPaldexValidationError("snapshot·image manifest·source lock revision이 일치하지 않습니다.");
@@ -196,21 +346,66 @@ export async function loadPalworldPaldexStagedRelease(options: {
       throw new PalworldPaldexValidationError(`manifest.mappingSha256.${field}: mapping checksum이 일치하지 않습니다.`);
     }
   }
-  const imageCounts = await validatePalworldImageFiles({ manifest: imagesManifest, imageRoot, overrides: overridesFile.value });
-  assertManifestCounts({ artifact, imagesManifest, manifest, ...imageCounts });
-  assertGateCoverage({ artifact, manifest, readyImages: imageCounts.readyImages });
+  const activatedEntries = imagesManifest.entries.filter((entry) =>
+    entry.status === "operator_acknowledged" || entry.status === "ready"
+  );
+  const declaredImageCounts = {
+    readyImages: activatedEntries.length,
+    uniqueImageFiles: new Set(activatedEntries.map((entry) => entry.generatedSha256)).size
+  };
+  assertManifestCounts({ artifact, imagesManifest, manifest, ...declaredImageCounts });
+  assertGateCoverage({ artifact, manifest, readyImages: declaredImageCounts.readyImages });
+  let runtimeImages: Awaited<ReturnType<typeof collectPalworldRuntimeImageUrls>>;
+  if (options.imageFailureMode === "fallback") {
+    runtimeImages = manifest.imageAssetGate.publicActivationAllowed
+      ? await collectPalworldRuntimeImageUrls({ manifest: imagesManifest, imageRoot })
+      : { imageUrls: {}, readyImages: 0, uniqueImageFiles: 0 };
+  } else {
+    const verifiedImageCounts = await validatePalworldImageFiles({ manifest: imagesManifest, imageRoot, overrides: overridesFile.value });
+    if (
+      verifiedImageCounts.readyImages !== declaredImageCounts.readyImages
+      || verifiedImageCounts.uniqueImageFiles !== declaredImageCounts.uniqueImageFiles
+    ) {
+      throw new PalworldPaldexValidationError("manifest 이미지 수와 검증된 정적 파일 수가 일치하지 않습니다.");
+    }
+    runtimeImages = {
+      imageUrls: manifest.imageAssetGate.publicActivationAllowed
+        ? Object.freeze(Object.fromEntries(activatedEntries.map((entry) => [entry.palId, entry.imageUrl!])))
+        : {},
+      ...verifiedImageCounts
+    };
+  }
   const dataIntegrityReady = manifest.dataIntegrityGate.passed
     && manifest.dataIntegrityGate.status === "ready"
     && manifest.runtimeActivation;
   if (!dataIntegrityReady) {
     throw new PalworldPaldexValidationError("PALWORLD_DATA_INTEGRITY_GATE_FAILED");
   }
-  const imageAssetsReady = manifest.imageAssetGate.passed
-    && imagesManifest.status === "ready"
-    && imageCounts.readyImages === PALWORLD_PALDEX_EXPECTED_COUNT;
-  if (imageAssetsReady !== (manifest.imageAssetGate.status === "ready")) {
-    throw new PalworldPaldexValidationError("image asset gate 상태와 이미지 artifact 상태가 일치하지 않습니다.");
+  const runtimeGate = runtimeImageAssetGate({
+    policy,
+    readyImages: runtimeImages.readyImages,
+    totalPals: artifact.records.length
+  });
+  if (options.imageFailureMode !== "fallback") {
+    for (const field of [
+      "status",
+      "policyStatus",
+      "technicalPassed",
+      "publicActivationAllowed",
+      "rightsVerified",
+      "usageBasis",
+      "readyImages",
+      "fallbackPals",
+      "publicNoticeRequired"
+    ] as const) {
+      if (runtimeGate[field] !== manifest.imageAssetGate[field]) {
+        throw new PalworldPaldexValidationError(`manifest.imageAssetGate.${field}: 검증된 policy·이미지 상태와 일치하지 않습니다.`);
+      }
+    }
   }
+  const imageAssetsReady = runtimeGate.publicActivationAllowed
+    && runtimeGate.readyImages === PALWORLD_PALDEX_EXPECTED_COUNT
+    && runtimeGate.fallbackPals === 0;
   if (options.requireReleaseReady && !imageAssetsReady) {
     throw new PalworldPaldexValidationError("PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE");
   }
@@ -220,6 +415,116 @@ export async function loadPalworldPaldexStagedRelease(options: {
     manifest,
     dataIntegrityReady,
     imageAssetsReady,
-    releaseReady: imageAssetsReady
+    releaseReady: imageAssetsReady,
+    runtimeImageUrls: runtimeImages.imageUrls,
+    runtimeImageAssetGate: runtimeGate
   };
+}
+
+async function loadPalworldPaldexDataOnlyRuntimeFallback(options: {
+  releaseRoot?: string;
+  mappingRoot?: string;
+}): Promise<PalworldPaldexRuntimeSource> {
+  const releaseRoot = options.releaseRoot ?? PALWORLD_PALDEX_RELEASE_ROOT;
+  const mappingRoot = options.mappingRoot ?? PALWORLD_PALDEX_MAPPING_ROOT;
+  const [
+    sourceLockFile,
+    paldexFile,
+    reportFile,
+    manifestFile,
+    publicIdMapFile,
+    elementsFile,
+    workSuitabilitiesFile,
+    exclusionsFile
+  ] = await Promise.all([
+    readJsonWithBytes(path.join(releaseRoot, "sources.lock.json")),
+    readJsonWithBytes(path.join(releaseRoot, "paldex.json")),
+    readFile(path.join(releaseRoot, "import-report.json")),
+    readJsonWithBytes(path.join(releaseRoot, "manifest.json")),
+    readJsonWithBytes(path.join(mappingRoot, "public-id-map.json")),
+    readJsonWithBytes(path.join(mappingRoot, "elements.json")),
+    readJsonWithBytes(path.join(mappingRoot, "work-suitabilities.json")),
+    readJsonWithBytes(path.join(mappingRoot, "exclusions.json"))
+  ]);
+  const sourceLock = assertPalworldPaldexSourceLock(sourceLockFile.value);
+  const artifact = assertPalworldPaldexArtifact(paldexFile.value);
+  const manifest = assertPalworldPaldexReleaseManifest(manifestFile.value);
+  const atlasSource = sourceLock.sources.find((source) => source.id === "atlas-pals")!;
+  const palCalcSource = sourceLock.sources.find((source) => source.id === "palcalc-db")!;
+  const expectedRevision = `atlas@${atlasSource.sourceRevision}+palcalc@${palCalcSource.sourceRevision}`;
+  if (
+    artifact.metadata.sourceRevision !== expectedRevision
+    || artifact.metadata.extractedAt !== sourceLock.artifactTimestamp
+    || artifact.metadata.verifiedAt !== sourceLock.verifiedAt
+    || manifest.generatedAt !== sourceLock.artifactTimestamp
+  ) {
+    throw new PalworldPaldexValidationError("Palworld data snapshot과 고정 source revision이 일치하지 않습니다.");
+  }
+  const dataHashes = {
+    sourceLockSha256: sha256Bytes(sourceLockFile.bytes),
+    paldexSha256: sha256Bytes(paldexFile.bytes),
+    importReportSha256: sha256Bytes(reportFile)
+  };
+  for (const [field, hash] of Object.entries(dataHashes)) {
+    if (manifest[field as keyof typeof dataHashes] !== hash) {
+      throw new PalworldPaldexValidationError(`manifest.${field}: data checksum이 일치하지 않습니다.`);
+    }
+  }
+  const mappingHashes = {
+    publicIdMap: sha256Bytes(publicIdMapFile.bytes),
+    elements: sha256Bytes(elementsFile.bytes),
+    workSuitabilities: sha256Bytes(workSuitabilitiesFile.bytes),
+    exclusions: sha256Bytes(exclusionsFile.bytes)
+  };
+  for (const [field, hash] of Object.entries(mappingHashes)) {
+    if (manifest.mappingSha256[field as keyof typeof mappingHashes] !== hash) {
+      throw new PalworldPaldexValidationError(`manifest.mappingSha256.${field}: mapping checksum이 일치하지 않습니다.`);
+    }
+  }
+  const normal = artifact.records.filter((pal) => pal.variantType === "normal").length;
+  if (
+    manifest.counts.pals !== artifact.records.length
+    || manifest.counts.normal !== normal
+    || manifest.counts.variant !== artifact.records.length - normal
+  ) {
+    throw new PalworldPaldexValidationError("manifest.counts: Pal 텍스트 artifact 집계와 일치하지 않습니다.");
+  }
+  assertDataGateCoverage({ artifact, manifest });
+  const dataIntegrityReady = manifest.dataIntegrityGate.passed
+    && manifest.dataIntegrityGate.status === "ready"
+    && manifest.runtimeActivation;
+  if (!dataIntegrityReady) throw new PalworldPaldexValidationError("PALWORLD_DATA_INTEGRITY_GATE_FAILED");
+
+  let policy: PalworldImageUsePolicy | undefined;
+  try {
+    const policyFile = await readOptionalJsonWithBytes(path.join(releaseRoot, PALWORLD_IMAGE_POLICY_FILE_NAME));
+    if (policyFile && manifest.imageUsePolicySha256 === sha256Bytes(policyFile.bytes)) {
+      policy = assertPalworldImageUsePolicy(policyFile.value);
+    }
+  } catch {
+    policy = undefined;
+  }
+  return {
+    artifact,
+    manifest,
+    dataIntegrityReady,
+    runtimeImageUrls: {},
+    runtimeImageAssetGate: runtimeImageAssetGate({
+      policy,
+      readyImages: 0,
+      totalPals: artifact.records.length
+    })
+  };
+}
+
+export async function loadPalworldPaldexRuntimeSource(options: {
+  releaseRoot?: string;
+  imageRoot?: string;
+  mappingRoot?: string;
+} = {}): Promise<PalworldPaldexRuntimeSource> {
+  try {
+    return await loadPalworldPaldexStagedRelease({ ...options, imageFailureMode: "fallback" });
+  } catch {
+    return loadPalworldPaldexDataOnlyRuntimeFallback(options);
+  }
 }

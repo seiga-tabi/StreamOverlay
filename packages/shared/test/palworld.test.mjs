@@ -138,10 +138,15 @@ test("Palworld meta는 도메인별 coverage와 provenance를 검증한다", () 
     gates: {
       dataIntegrity: { passed: true, status: "ready" },
       imageAssets: {
-        passed: false,
         status: "blocked_by_license",
+        policyStatus: "missing",
+        technicalPassed: false,
+        publicActivationAllowed: false,
+        rightsVerified: false,
+        usageBasis: "none",
         readyImages: 0,
-        fallbackPals: 287
+        fallbackPals: 287,
+        publicNoticeRequired: true
       }
     }
   };
@@ -157,6 +162,84 @@ test("Palworld meta는 도메인별 coverage와 provenance를 검증한다", () 
   assert.equal(validatePalworldMetaResponse({
     ...response,
     gates: { ...response.gates, imageAssets: { ...response.gates.imageAssets, fallbackPals: 286 } }
+  }).ok, false);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    gates: {
+      ...response.gates,
+      imageAssets: {
+        ...response.gates.imageAssets,
+        status: "operator_acknowledged",
+        policyStatus: "operator_acknowledged",
+        technicalPassed: true,
+        publicActivationAllowed: true,
+        usageBasis: "operator_reference_use",
+        readyImages: 287,
+        fallbackPals: 0
+      }
+    }
+  }).ok, true);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    gates: {
+      ...response.gates,
+      imageAssets: {
+        ...response.gates.imageAssets,
+        policyStatus: "operator_acknowledged",
+        usageBasis: "operator_reference_use"
+      }
+    }
+  }).ok, true);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    gates: {
+      ...response.gates,
+      imageAssets: {
+        ...response.gates.imageAssets,
+        status: "partial",
+        policyStatus: "rights_verified",
+        technicalPassed: true,
+        publicActivationAllowed: true,
+        rightsVerified: true,
+        usageBasis: "rights_verified",
+        readyImages: 286,
+        fallbackPals: 1
+      }
+    }
+  }).ok, true);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    gates: {
+      ...response.gates,
+      imageAssets: {
+        ...response.gates.imageAssets,
+        status: "operator_acknowledged",
+        policyStatus: "operator_acknowledged",
+        technicalPassed: true,
+        publicActivationAllowed: true,
+        rightsVerified: true,
+        usageBasis: "operator_reference_use",
+        readyImages: 287,
+        fallbackPals: 0
+      }
+    }
+  }).ok, false);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    gates: {
+      ...response.gates,
+      imageAssets: {
+        ...response.gates.imageAssets,
+        status: "ready",
+        policyStatus: "rights_verified",
+        technicalPassed: true,
+        publicActivationAllowed: true,
+        rightsVerified: false,
+        usageBasis: "rights_verified",
+        readyImages: 287,
+        fallbackPals: 0
+      }
+    }
   }).ok, false);
 });
 
