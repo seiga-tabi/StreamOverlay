@@ -3,6 +3,7 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 const canonicalPath = "/dashboard/test_streamer/sdk_testdashboard123/palworld/server";
 const dashboardPath = "/dashboard/test_streamer/sdk_testdashboard123";
 const serverUrl = "https://palworld.example.com:8212";
+const rejectedServerUrl = "https://blocked-palworld.example.com";
 const testSecret = "qa-only-admin-secret";
 const csrfToken = "palworld-qa-csrf";
 const checkedAt = "2026-07-22T03:04:05.000Z";
@@ -167,6 +168,11 @@ function dashboardResponse(mode: ServerMode) {
   return {
     enabled: true,
     pollIntervalSeconds: 5,
+    registrationPolicy: {
+      publicHttpsSelfService: true,
+      publicHttpsPort: 443,
+      privateNetworkRequiresOperatorApproval: true
+    },
     connection: connection(configured),
     status: statusForMode(mode)
   };
@@ -304,6 +310,14 @@ async function installPalworldApiFixture(
     }
 
     if (url.pathname === "/api/dashboard/palworld-server/test") {
+      const body = JSON.parse(request.postData() ?? "{}") as { baseUrl?: unknown };
+      if (body.baseUrl === rejectedServerUrl) {
+        await fulfillJson(route, {
+          error: "허용된 Palworld REST API URL을 입력해야 합니다.",
+          code: "origin_not_allowed"
+        }, responseBodies, 400);
+        return;
+      }
       await fulfillJson(route, {
         connection: {
           configured: false,
@@ -455,14 +469,16 @@ test("Palworld 서버 등록·검사·저장·갱신·삭제와 tenant 보안 �
   await expect(page).toHaveURL(new RegExp(`${canonicalPath.replaceAll("/", "\\/")}$`));
 
   const baseUrlInput = page.getByLabel("REST API 주소");
-  const passwordInput = page.getByLabel("관리자 비밀번호");
+  const passwordInput = page.getByLabel("Palworld AdminPassword");
   await baseUrlInput.fill(serverUrl);
   await passwordInput.fill(testSecret);
   await page.getByRole("button", { name: "연결 테스트" }).click();
   await expect(page.getByText("연결 테스트 완료", { exact: true })).toBeVisible();
   await expect(page.getByText("YORO Palworld QA")).toBeVisible();
   await expect(page.locator(".palworld-server-metrics").getByText("10 / 32")).toBeVisible();
+  await expect(passwordInput).toHaveValue("");
 
+  await passwordInput.fill(testSecret);
   await page.getByRole("button", { name: "설정 저장" }).click();
   await expect(page.getByText("연결 설정 저장 완료", { exact: true })).toBeVisible();
   await expect(passwordInput).toHaveValue("");
@@ -513,7 +529,7 @@ test("Palworld 확인 중·degraded·인증 실패·연결 불가 상태를 안�
   await page.goto(canonicalPath);
   await expect(page.getByText("인증 실패", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("alert")).toContainText("auth_failed");
-  await expect(page.getByRole("alert")).toContainText("관리자 비밀번호 인증에 실패했습니다.");
+  await expect(page.getByRole("alert")).toContainText("Palworld AdminPassword 인증에 실패했습니다.");
 
   fixture.setMode("checking");
   await page.reload();
@@ -532,6 +548,33 @@ test("Palworld 확인 중·degraded·인증 실패·연결 불가 상태를 안�
   await expect(page.getByRole("alert")).toContainText("전용 서버에 연결하지 못했습니다.");
   assertTenantHeaders(fixture);
   expect(errors).toEqual([]);
+});
+
+test("Palworld AdminPassword는 요청 실패와 페이지 unmount 후 다시 표시되지 않는다", async ({ page }) => {
+  const fixture = await preparePage(page, "unconfigured");
+  const errors = runtimeErrors(page);
+
+  await page.goto(canonicalPath);
+  const baseUrlInput = page.getByLabel("REST API 주소");
+  const passwordInput = page.getByLabel("Palworld AdminPassword");
+  await baseUrlInput.fill(rejectedServerUrl);
+  await passwordInput.fill(testSecret);
+  await page.getByRole("button", { name: "연결 테스트" }).click();
+  await expect(page.getByRole("alert")).toContainText("공개 HTTPS 자가 등록 조건을 충족하지 않습니다");
+  await expect(passwordInput).toHaveValue("");
+  expect(await page.content()).not.toContain(testSecret);
+
+  await passwordInput.fill(testSecret);
+  await page.getByRole("button", { name: "운영 현황", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`${dashboardPath.replaceAll("/", "\\/")}$`));
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`${canonicalPath.replaceAll("/", "\\/")}$`));
+  await expect(page.getByLabel("Palworld AdminPassword")).toHaveValue("");
+  expect(await page.content()).not.toContain(testSecret);
+  assertTenantHeaders(fixture);
+  expect(errors).toEqual([
+    "console: Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  ]);
 });
 
 test("Palworld 서버 상태 화면은 지정 viewport에서 가로 overflow와 잘린 버튼이 없다", async ({ page }) => {

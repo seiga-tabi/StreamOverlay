@@ -3,6 +3,7 @@ import {
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
   PALWORLD_SERVER_DIAGNOSTIC_STATES,
   PALWORLD_SERVER_ERROR_CODES,
+  PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   validatePalworldServerConnectionInput,
   validatePalworldServerStatus,
   type PalworldServerConnectionInput,
@@ -13,6 +14,7 @@ import {
   type PalworldServerErrorCode,
   type PalworldServerInfo,
   type PalworldServerMetrics,
+  type PalworldServerRegistrationPolicy,
   type PalworldServerStatus,
   type PalworldServerTestResponse
 } from "@streamops/shared";
@@ -54,6 +56,8 @@ export type PalworldServerMonitorOptions = {
   manualRefreshCooldownMs?: number;
   candidateProbeLimit?: number;
   candidateProbeWindowMs?: number;
+  candidateProbeConcurrencyLimit?: number;
+  registrationPolicy?: PalworldServerRegistrationPolicy;
   maxBackoffMs?: number;
   staleAfterMs?: number;
   jitterRatio?: number;
@@ -73,6 +77,7 @@ type InFlightProbe = {
 
 type ProbeOptions = {
   updateCache: boolean;
+  candidate?: boolean;
   previousStatus?: PalworldServerStatus;
 };
 
@@ -86,6 +91,7 @@ const DEFAULT_POLL_INTERVAL_MS = 30_000;
 const DEFAULT_MANUAL_REFRESH_COOLDOWN_MS = 10_000;
 const DEFAULT_CANDIDATE_PROBE_LIMIT = 5;
 const DEFAULT_CANDIDATE_PROBE_WINDOW_MS = 60_000;
+const DEFAULT_CANDIDATE_PROBE_CONCURRENCY_LIMIT = 8;
 const DEFAULT_MAX_BACKOFF_MS = 5 * 60_000;
 const DEFAULT_JITTER_RATIO = 0.1;
 const MAX_OWNER_ID_LENGTH = 128;
@@ -241,6 +247,8 @@ export class PalworldServerMonitor {
   private readonly manualRefreshCooldownMs: number;
   private readonly candidateProbeLimit: number;
   private readonly candidateProbeWindowMs: number;
+  private readonly candidateProbeConcurrencyLimit: number;
+  private readonly registrationPolicy: PalworldServerRegistrationPolicy;
   private readonly maxBackoffMs: number;
   private readonly staleAfterMs: number;
   private readonly jitterRatio: number;
@@ -254,6 +262,7 @@ export class PalworldServerMonitor {
   private readonly lastManualRefreshAt = new Map<string, number>();
   private readonly candidateProbeTimestamps = new Map<string, number[]>();
   private readonly ownerEpochs = new Map<string, number>();
+  private activeCandidateProbes = 0;
   private running = false;
 
   constructor(private readonly options: PalworldServerMonitorOptions) {
@@ -268,6 +277,13 @@ export class PalworldServerMonitor {
       options.candidateProbeWindowMs,
       DEFAULT_CANDIDATE_PROBE_WINDOW_MS
     );
+    this.candidateProbeConcurrencyLimit = positiveInteger(
+      options.candidateProbeConcurrencyLimit,
+      DEFAULT_CANDIDATE_PROBE_CONCURRENCY_LIMIT
+    );
+    this.registrationPolicy = {
+      ...(options.registrationPolicy ?? PALWORLD_SERVER_SAFE_REGISTRATION_POLICY)
+    };
     this.maxBackoffMs = Math.max(
       this.pollIntervalMs,
       positiveInteger(options.maxBackoffMs, DEFAULT_MAX_BACKOFF_MS)
@@ -365,6 +381,7 @@ export class PalworldServerMonitor {
     return {
       enabled: this.enabled,
       pollIntervalSeconds: Math.max(5, Math.round(this.pollIntervalMs / 1_000)),
+      registrationPolicy: { ...this.registrationPolicy },
       connection: this.connectionSummary(connection),
       status: this.currentStatus(ownerId, connection)
     };
@@ -562,16 +579,30 @@ export class PalworldServerMonitor {
           return cloneStatus(status);
         });
       }
-      return existing.promise.then(
-        () => this.probeConnection(ownerId, credentials, probeOptions),
-        () => this.probeConnection(ownerId, credentials, probeOptions)
-      );
+      if (!probeOptions.candidate) {
+        return existing.promise.then(
+          () => this.probeConnection(ownerId, credentials, probeOptions),
+          () => this.probeConnection(ownerId, credentials, probeOptions)
+        );
+      }
+      return Promise.reject(new PalworldServerMonitorRateLimitError(1));
     }
 
     const previous = probeOptions.previousStatus ?? this.cache.get(ownerId);
     const ownerEpoch = this.ownerEpochs.get(ownerId) ?? 0;
+    const usesCandidateSlot = probeOptions.candidate === true;
+    if (usesCandidateSlot && this.activeCandidateProbes >= this.candidateProbeConcurrencyLimit) {
+      return Promise.reject(new PalworldServerMonitorRateLimitError(1));
+    }
+    if (usesCandidateSlot) this.activeCandidateProbes += 1;
     if (probeOptions.updateCache) this.cache.set(ownerId, this.checkingStatus(previous));
-    const promise = this.options.client.probe(credentials)
+    let clientProbe: Promise<PalworldServerClientProbeResult>;
+    try {
+      clientProbe = this.options.client.probe(credentials);
+    } catch (error) {
+      clientProbe = Promise.reject(error);
+    }
+    const promise = clientProbe
       .then((result) => this.statusFromProbe(result, previous))
       .catch((error: unknown) => this.failureStatus(error, previous))
       .then((status) => probeOptions.updateCache
@@ -580,6 +611,7 @@ export class PalworldServerMonitor {
         ? this.commitStatus(ownerId, status, previous)
         : cloneStatus(status))
       .finally(() => {
+        if (usesCandidateSlot) this.activeCandidateProbes -= 1;
         const current = this.inFlight.get(ownerId);
         if (current?.promise === promise) this.inFlight.delete(ownerId);
       });
@@ -606,6 +638,7 @@ export class PalworldServerMonitor {
       : undefined;
     const status = await this.probeConnection(ownerId, candidate, {
       updateCache: false,
+      candidate: true,
       ...(previous === undefined ? {} : { previousStatus: previous })
     });
     return {
@@ -629,6 +662,7 @@ export class PalworldServerMonitor {
       : undefined;
     const status = await this.probeConnection(ownerId, candidate, {
       updateCache: false,
+      candidate: true,
       ...(previous === undefined ? {} : { previousStatus: previous })
     });
     if (ownerEpoch !== (this.ownerEpochs.get(ownerId) ?? 0)) {
@@ -645,6 +679,7 @@ export class PalworldServerMonitor {
       return {
         enabled: true,
         pollIntervalSeconds: Math.max(5, Math.round(this.pollIntervalMs / 1_000)),
+        registrationPolicy: { ...this.registrationPolicy },
         connection: this.connectionSummary(candidate.existing),
         status
       };
@@ -674,6 +709,7 @@ export class PalworldServerMonitor {
     return {
       enabled: true,
       pollIntervalSeconds: Math.max(5, Math.round(this.pollIntervalMs / 1_000)),
+      registrationPolicy: { ...this.registrationPolicy },
       connection: this.connectionSummary(saved),
       status: cloneStatus(status)
     };
@@ -699,7 +735,6 @@ export class PalworldServerMonitor {
     await this.options.store.remove(ownerId);
     this.cache.delete(ownerId);
     this.lastManualRefreshAt.delete(ownerId);
-    this.candidateProbeTimestamps.delete(ownerId);
     this.options.logger?.event({
       type: "palworld_server.connection_removed",
       ownerId

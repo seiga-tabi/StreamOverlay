@@ -138,6 +138,37 @@
   min-width: var(--yoro-space-0);
 }
 
+.palworld-server-registration-policy {
+  display: grid;
+  gap: var(--yoro-space-2);
+  min-width: var(--yoro-space-0);
+  margin-bottom: var(--yoro-space-5);
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text);
+}
+
+.palworld-server-registration-policy > strong {
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-server-registration-policy p,
+.palworld-server-registration-policy ul {
+  margin: var(--yoro-space-0);
+  font-size: var(--yoro-font-size-sm);
+  line-height: var(--yoro-line-height-relaxed);
+  overflow-wrap: anywhere;
+}
+
+.palworld-server-registration-policy ul {
+  display: grid;
+  gap: var(--yoro-space-1);
+  padding-inline-start: var(--yoro-space-5);
+}
+
 .palworld-server-form .yoro-form-control,
 .palworld-server-form .yoro-input {
   min-width: var(--yoro-space-0);

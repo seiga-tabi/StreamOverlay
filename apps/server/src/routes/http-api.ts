@@ -10,6 +10,7 @@ import {
   OVERLAY_CHANNELS,
   PALWORLD_SERVER_AVAILABILITY_ERROR_CODES,
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
+  PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   formatRiotId,
   normalizeRiotIdKey,
   normalizeLolRole,
@@ -1817,6 +1818,7 @@ function disabledPalworldServerDashboardResponse(
   return {
     enabled: false,
     pollIntervalSeconds: 5,
+    registrationPolicy: { ...PALWORLD_SERVER_SAFE_REGISTRATION_POLICY },
     connection: {
       configured: false,
       passwordConfigured: false

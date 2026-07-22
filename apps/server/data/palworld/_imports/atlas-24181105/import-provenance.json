@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "status": "quarantined",
+  "runtimeActivation": false,
+  "verifiedAt": "2026-07-22T00:00:00.000Z",
+  "archive": {
+    "fileName": "palworld-atlas-data-main.zip",
+    "sha256": "8869d768d80d24e8443e6a82a3be338a092b4a656d77d6938a5265c3e2a164bb",
+    "integrityTest": "passed",
+    "pathSafetyCheck": "passed"
+  },
+  "upstream": {
+    "sourceName": "Awy64/palworld-atlas-data",
+    "sourceUrl": "https://github.com/Awy64/palworld-atlas-data",
+    "sourceRevision": "0385b3fd8bd757240d4a2c79615145122669abd5",
+    "steamBuildId": "24181105",
+    "generatedAt": "2026-07-15T07:03:54.1507828+00:00",
+    "license": "MIT"
+  },
+  "includedFiles": [
+    {
+      "id": "atlas-pals",
+      "path": "pals/index.json",
+      "archiveMember": "palworld-atlas-data-main/published/v1/builds/24181105/pals/index.json",
+      "bytes": 81803,
+      "sha256": "57fb4bf837061c1160d5f72755152245fe793e1b0073328714efd63c65ba5b47",
+      "recordCount": 289
+    },
+    {
+      "id": "atlas-items",
+      "path": "items/index.json",
+      "archiveMember": "palworld-atlas-data-main/published/v1/builds/24181105/items/index.json",
+      "bytes": 671359,
+      "sha256": "7a48993c911a09a1030a92b9dbe454e3cbcc287b51fc9e3c94fe82d941a6c5a8",
+      "recordCount": 1891
+    },
+    {
+      "id": "atlas-breeding",
+      "path": "breeding.json",
+      "archiveMember": "palworld-atlas-data-main/published/v1/builds/24181105/breeding.json",
+      "bytes": 23833,
+      "sha256": "dc39e4c8646eaa7f61573d832dcb854d31184713dfc815e0221dc83d947ae559",
+      "recordCount": 257
+    },
+    {
+      "id": "atlas-manifest",
+      "path": "upstream-manifest.json",
+      "archiveMember": "palworld-atlas-data-main/published/v1/builds/24181105/manifest.json",
+      "bytes": 5511,
+      "sha256": "96cd205e176f910ee91f084bba2a65df5201041094f53b10e6c423103d808e9c"
+    },
+    {
+      "id": "atlas-pal-schema",
+      "path": "schemas/pal.schema.json",
+      "archiveMember": "palworld-atlas-data-main/schemas/pal.schema.json",
+      "bytes": 1137,
+      "sha256": "541a061faf5d22356cf7de85f1ffa3a2de7e161c6b23f8fef99c72e3f668e2a5"
+    },
+    {
+      "id": "atlas-item-schema",
+      "path": "schemas/item.schema.json",
+      "archiveMember": "palworld-atlas-data-main/schemas/item.schema.json",
+      "bytes": 766,
+      "sha256": "86b2e6b2a5c3cdd64930626b4606266daa30c03fe7c4dd60e305380f0a841b55"
+    },
+    {
+      "id": "atlas-license",
+      "path": "LICENSE",
+      "archiveMember": "palworld-atlas-data-main/LICENSE",
+      "bytes": 1068,
+      "sha256": "46c6b7eae9ee308e80c8876a72cc277e8ef32891dea4e2c4eb440e43c2b4dbeb"
+    }
+  ],
+  "excludedContent": [
+    {
+      "path": "published/v1/builds/24088465",
+      "reasonCode": "PREVIOUS_BUILD"
+    },
+    {
+      "path": "published/v1/builds/24181105/maps",
+      "reasonCode": "MAP_FEATURE_NOT_IMPLEMENTED"
+    },
+    {
+      "path": "published/v1/builds/24181105/pals/*.json",
+      "reasonCode": "DUPLICATED_BY_PAL_INDEX"
+    },
+    {
+      "path": ".github, src, scripts, tests",
+      "reasonCode": "EXTRACTOR_SOURCE_NOT_RUNTIME_DATA"
+    }
+  ],
+  "qualityReport": {
+    "pals": {
+      "sourceRecords": 289,
+      "currentRuntimeRecords": 287,
+      "alreadyImported": true
+    },
+    "items": {
+      "sourceRecords": 1891,
+      "englishOnlyRecords": 1891,
+      "placeholderNameRecords": 44,
+      "zeroRarityRecords": 438,
+      "markupDescriptionRecords": 1303,
+      "actualImageFiles": 0
+    },
+    "breeding": {
+      "uniqueSpecialPairs": 257,
+      "currentPublicPaldexExactPairs": 182,
+      "currentPublicPaldexUnresolvedPairs": 75,
+      "genderConditionalPairs": 2,
+      "sameSpeciesProducesSelf": true,
+      "generalPairTableIncluded": false,
+      "unresolvedInternalIds": [
+        "BeardedDragon",
+        "BlackFurDragon",
+        "Blueplatypus",
+        "DarkMutant",
+        "ElecLion",
+        "GrassDragon",
+        "PinkKangaroo",
+        "WaterLizard",
+        "YakushimaBoss001",
+        "YakushimaBoss001_Small",
+        "YakushimaMonster001",
+        "YakushimaMonster001_Blue",
+        "YakushimaMonster001_Pink",
+        "YakushimaMonster001_Purple",
+        "YakushimaMonster001_Rainbow",
+        "YakushimaMonster001_Red",
+        "YakushimaMonster002",
+        "YakushimaMonster003",
+        "YakushimaMonster003_Purple"
+      ]
+    },
+    "images": {
+      "includedFiles": 0,
+      "itemIconValuesAreAssetKeys": true
+    }
+  },
+  "runtimeActivationBlockers": [
+    "ITEM_LOCALIZATION_KO_JA_MISSING",
+    "ITEM_DETAIL_RELATIONS_MISSING",
+    "ITEM_RARITY_ZERO_SCHEMA_INCOMPATIBLE",
+    "BREEDING_GENERAL_PAIR_TABLE_MISSING",
+    "BREEDING_PUBLIC_ID_REFERENCES_UNRESOLVED",
+    "IMAGE_ASSETS_NOT_INCLUDED"
+  ]
+}

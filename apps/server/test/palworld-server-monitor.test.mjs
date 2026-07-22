@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const {
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
+  PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   validatePalworldServerDashboardResponse,
   validatePalworldServerTestResponse
 } = await import("@streamops/shared");
@@ -149,11 +150,29 @@ test("등록되지 않은 tenant는 비밀정보 없는 not_configured 응답을
   assert.equal(response.connection.passwordConfigured, false);
   assert.equal(response.status.state, "not_configured");
   assert.equal(response.status.errorCode, "not_configured");
+  assert.deepEqual(response.registrationPolicy, PALWORLD_SERVER_SAFE_REGISTRATION_POLICY);
   assert.equal(validatePalworldServerDashboardResponse(response).ok, true);
   assert.throws(
     () => context.monitor.getDashboardResponse(""),
     (error) => error instanceof PalworldServerMonitorInputError && error.code === "invalid_request"
   );
+});
+
+test("Dashboard 응답은 allowlist 값을 숨기고 공개 HTTPS 등록 정책 metadata만 반환한다", () => {
+  const context = fixture({
+    monitorOptions: {
+      registrationPolicy: {
+        publicHttpsSelfService: true,
+        publicHttpsPort: 443,
+        privateNetworkRequiresOperatorApproval: true
+      }
+    }
+  });
+  assert.deepEqual(context.monitor.getDashboardResponse("streamer-a").registrationPolicy, {
+    publicHttpsSelfService: true,
+    publicHttpsPort: 443,
+    privateNetworkRequiresOperatorApproval: true
+  });
 });
 
 test("연결 테스트는 저장하지 않으며 tenant당 분당 5회로 제한된다", async () => {
@@ -196,6 +215,92 @@ test("동일 tenant와 동일 후보의 동시 probe는 하나의 single-flight�
   const [firstResult, secondResult] = await Promise.all([first, second]);
   assert.equal(firstResult.status.state, "online");
   assert.equal(secondResult.status.state, "online");
+});
+
+test("동일 tenant의 다른 후보는 진행 중 probe 뒤에 대기열로 쌓지 않는다", async () => {
+  let release;
+  const context = fixture();
+  context.client.setHandler(() => new Promise((resolve) => {
+    release = resolve;
+  }));
+  const first = context.monitor.testConnection("streamer-a", {
+    baseUrl: "https://pal-a.example.com",
+    adminPassword: "password-a"
+  });
+  await Promise.resolve();
+  await assert.rejects(
+    () => context.monitor.testConnection("streamer-a", {
+      baseUrl: "https://pal-b.example.com",
+      adminPassword: "password-b"
+    }),
+    (error) => error instanceof PalworldServerMonitorRateLimitError && error.retryAfterSeconds === 1
+  );
+  assert.equal(context.client.calls.length, 1);
+  release(onlineResult(context.now));
+  await first;
+});
+
+test("진행 중 후보와 충돌한 저장 connection refresh는 후보 완료 후 안전하게 재개한다", async () => {
+  const releases = new Map();
+  const context = fixture();
+  await context.store.set({
+    ownerId: "streamer-a",
+    baseUrl: "https://saved-pal.example.com",
+    adminPassword: "saved-password"
+  });
+  context.client.setHandler((input) => new Promise((resolve) => {
+    releases.set(input.baseUrl, resolve);
+  }));
+
+  const candidate = context.monitor.testConnection("streamer-a", {
+    baseUrl: "https://candidate-pal.example.com",
+    adminPassword: "candidate-password"
+  });
+  await Promise.resolve();
+  const refresh = context.monitor.refresh("streamer-a");
+  await Promise.resolve();
+  assert.equal(context.client.calls.length, 1);
+
+  releases.get("https://candidate-pal.example.com")?.(onlineResult(context.now));
+  await candidate;
+  await Promise.resolve();
+  assert.equal(context.client.calls.length, 2);
+  releases.get("https://saved-pal.example.com")?.(onlineResult(context.now));
+  const refreshed = await refresh;
+  assert.equal(refreshed.status.state, "online");
+});
+
+test("후보 probe는 전역 동시 실행 한도를 적용하고 완료 후 slot을 반환한다", async () => {
+  const releases = new Map();
+  const context = fixture({
+    monitorOptions: { candidateProbeConcurrencyLimit: 2 }
+  });
+  context.client.setHandler((input) => new Promise((resolve) => {
+    releases.set(input.baseUrl, resolve);
+  }));
+
+  const candidate = (name) => ({
+    baseUrl: `https://${name}.example.com`,
+    adminPassword: `password-${name}`
+  });
+  const first = context.monitor.testConnection("streamer-a", candidate("pal-a"));
+  const second = context.monitor.testConnection("streamer-b", candidate("pal-b"));
+  await Promise.resolve();
+  assert.equal(context.client.calls.length, 2);
+  await assert.rejects(
+    () => context.monitor.testConnection("streamer-c", candidate("pal-c")),
+    (error) => error instanceof PalworldServerMonitorRateLimitError && error.retryAfterSeconds === 1
+  );
+  assert.equal(context.client.calls.length, 2);
+
+  releases.get("https://pal-a.example.com")?.(onlineResult(context.now));
+  await first;
+  const third = context.monitor.testConnection("streamer-c", candidate("pal-c"));
+  await Promise.resolve();
+  assert.equal(context.client.calls.length, 3);
+  releases.get("https://pal-b.example.com")?.(onlineResult(context.now));
+  releases.get("https://pal-c.example.com")?.(onlineResult(context.now));
+  await Promise.all([second, third]);
 });
 
 test("저장은 online 재검사 성공 시에만 수행하고 degraded 후보는 보존하지 않는다", async () => {
@@ -375,6 +480,22 @@ test("등록 삭제는 tenant cache와 timer 상태를 함께 제거한다", asy
   assert.equal(removed.connection.configured, false);
   assert.equal(removed.status.state, "not_configured");
   assert.equal(context.store.get("streamer-a"), undefined);
+});
+
+test("연결 삭제는 tenant 후보 probe rate-limit 기록을 초기화하지 않는다", async () => {
+  const context = fixture();
+  const input = {
+    baseUrl: "https://palworld.example.com",
+    adminPassword: "candidate-password"
+  };
+  for (let index = 0; index < 5; index += 1) {
+    await context.monitor.testConnection("streamer-a", input);
+  }
+  await context.monitor.removeConnection("streamer-a");
+  await assert.rejects(
+    () => context.monitor.testConnection("streamer-a", input),
+    (error) => error instanceof PalworldServerMonitorRateLimitError && error.retryAfterSeconds === 60
+  );
 });
 
 test("저장 재검사 실패는 기존 connection 응답과 암호화 저장 record를 변경하지 않는다", async () => {

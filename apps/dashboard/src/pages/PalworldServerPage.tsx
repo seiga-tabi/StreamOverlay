@@ -4,6 +4,8 @@ import type {
   PalworldServerDashboardResponse,
   PalworldServerTestResponse
 } from "@streamops/shared";
+import { PALWORLD_SERVER_SAFE_REGISTRATION_POLICY } from "@streamops/shared";
+import { DashboardApiError } from "../api/client";
 import {
   getPalworldServerDashboard,
   refreshPalworldServerStatus,
@@ -17,14 +19,18 @@ import {
   palworldServerAvailabilityCode,
   palworldServerAvailabilityTone
 } from "../features/palworld-server/components/PalworldServerAvailabilityNotice";
-import { canReusePalworldServerPassword } from "../features/palworld-server/connection";
+import {
+  canReusePalworldServerPassword,
+  createTransientPalworldAdminPasswordState,
+  type TransientPalworldAdminPasswordState
+} from "../features/palworld-server/connection";
 import {
   PalworldServerStatusPanel,
   palworldServerErrorCodeLabel,
   palworldServerStatusLabel,
   palworldServerStatusTone
 } from "../features/palworld-server/components/PalworldServerStatusPanel";
-import { palworldServerText } from "../features/palworld-server/i18n";
+import { palworldServerText, type PalworldServerText } from "../features/palworld-server/i18n";
 import { dashboardLocale } from "../i18n";
 import {
   Badge,
@@ -68,6 +74,38 @@ type Feedback = {
   description: string;
 };
 
+const REGISTRATION_POLICY_ERROR_CODES = new Set([
+  "invalid_url",
+  "origin_not_allowed",
+  "address_blocked"
+]);
+
+export function palworldServerOperationFailureDescription(
+  error: unknown,
+  text: PalworldServerText
+): string {
+  if (!(error instanceof DashboardApiError)) return text.operationFailedDescription;
+  if (error.code && REGISTRATION_POLICY_ERROR_CODES.has(error.code)) {
+    return text.registrationPolicyRejected;
+  }
+  if (error.code === "rate_limited") return text.errorCodes.rate_limited;
+  if (error.code === "password_required") return text.errorCodes.password_required;
+  if (error.code === "key_missing") return text.errorCodes.key_missing;
+  if (error.code === "key_invalid") return text.errorCodes.key_invalid;
+  return text.operationFailedDescription;
+}
+
+export function palworldServerOperationStatusDescription(
+  response: PalworldServerTestResponse,
+  text: PalworldServerText,
+  fallback: string
+): string {
+  if (!response.status.errorCode) return fallback;
+  return REGISTRATION_POLICY_ERROR_CODES.has(response.status.errorCode)
+    ? text.registrationPolicyRejected
+    : palworldServerErrorCodeLabel(response.status.errorCode, text);
+}
+
 function mergeTestResponse(
   current: PalworldServerDashboardResponse | undefined,
   response: PalworldServerTestResponse
@@ -75,6 +113,7 @@ function mergeTestResponse(
   return {
     enabled: current?.enabled ?? true,
     pollIntervalSeconds: current?.pollIntervalSeconds ?? 30,
+    registrationPolicy: current?.registrationPolicy ?? PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
     connection: current?.connection ?? response.connection,
     status: response.status
   };
@@ -98,6 +137,11 @@ export function PalworldServerPage() {
   const [removeOpen, setRemoveOpen] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>();
   const [announcement, setAnnouncement] = useState("");
+  const passwordStateRef = useRef<TransientPalworldAdminPasswordState>();
+
+  if (!passwordStateRef.current) {
+    passwordStateRef.current = createTransientPalworldAdminPasswordState(setAdminPassword);
+  }
 
   operationRef.current = operation;
 
@@ -110,7 +154,7 @@ export function PalworldServerPage() {
   const applyDashboard = useCallback((next: PalworldServerDashboardResponse, clearPassword = false) => {
     setDashboard(next);
     setBaseUrl(next.connection.baseUrl ?? "");
-    if (clearPassword) setAdminPassword("");
+    if (clearPassword) passwordStateRef.current?.finishOperation();
     setBaseUrlError("");
     setPasswordError("");
   }, []);
@@ -134,6 +178,7 @@ export function PalworldServerPage() {
     void load();
     return () => {
       mountedRef.current = false;
+      passwordStateRef.current?.dispose();
     };
   }, [load]);
 
@@ -183,9 +228,7 @@ export function PalworldServerPage() {
   }
 
   function operationDescription(response: PalworldServerTestResponse, fallback: string): string {
-    return response.status.errorCode
-      ? palworldServerErrorCodeLabel(response.status.errorCode, text)
-      : fallback;
+    return palworldServerOperationStatusDescription(response, text, fallback);
   }
 
   async function testConnection(): Promise<void> {
@@ -203,13 +246,18 @@ export function PalworldServerPage() {
         text.testSuccessTitle,
         operationDescription(response, text.testSuccessDescription)
       );
-    } catch {
+    } catch (error) {
       if (mountedRef.current) {
-        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+        showFeedback("danger", text.operationFailedTitle, palworldServerOperationFailureDescription(error, text));
       }
     } finally {
       operationRef.current = undefined;
-      if (mountedRef.current) setOperation(undefined);
+      if (mountedRef.current) {
+        passwordStateRef.current?.finishOperation();
+        setOperation(undefined);
+      } else {
+        passwordStateRef.current?.dispose();
+      }
     }
   }
 
@@ -232,13 +280,18 @@ export function PalworldServerPage() {
           operationDescription(response, text.saveRejectedDescription)
         );
       }
-    } catch {
+    } catch (error) {
       if (mountedRef.current) {
-        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+        showFeedback("danger", text.operationFailedTitle, palworldServerOperationFailureDescription(error, text));
       }
     } finally {
       operationRef.current = undefined;
-      if (mountedRef.current) setOperation(undefined);
+      if (mountedRef.current) {
+        passwordStateRef.current?.finishOperation();
+        setOperation(undefined);
+      } else {
+        passwordStateRef.current?.dispose();
+      }
     }
   }
 
@@ -256,9 +309,9 @@ export function PalworldServerPage() {
         text.refreshSuccessTitle,
         operationDescription(response, text.refreshSuccessDescription)
       );
-    } catch {
+    } catch (error) {
       if (mountedRef.current) {
-        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+        showFeedback("danger", text.operationFailedTitle, palworldServerOperationFailureDescription(error, text));
       }
     } finally {
       operationRef.current = undefined;
@@ -276,9 +329,9 @@ export function PalworldServerPage() {
       applyDashboard(response, true);
       setRemoveOpen(false);
       showFeedback("success", text.removeSuccessTitle, text.removeSuccessDescription);
-    } catch {
+    } catch (error) {
       if (mountedRef.current) {
-        showFeedback("danger", text.operationFailedTitle, text.operationFailedDescription);
+        showFeedback("danger", text.operationFailedTitle, palworldServerOperationFailureDescription(error, text));
       }
     } finally {
       operationRef.current = undefined;
@@ -373,9 +426,10 @@ export function PalworldServerPage() {
               baseUrl={baseUrl}
               baseUrlError={baseUrlError}
               connection={dashboard.connection}
+              registrationPolicy={dashboard.registrationPolicy}
               disabled={operation === "refreshing"}
               onAdminPasswordChange={(value) => {
-                setAdminPassword(value);
+                passwordStateRef.current?.update(value);
                 if (value) setPasswordError("");
               }}
               onBaseUrlChange={(value) => {

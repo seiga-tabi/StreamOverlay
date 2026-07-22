@@ -9,8 +9,9 @@ export const PALWORLD_SERVER_CONNECTIONS_STATE_FILE = "palworld-server-connectio
 export const PALWORLD_SERVER_CREDENTIALS_SECRET_PATH = "/run/secrets/palworld-server-credentials-encryption-key";
 
 export type PalworldServerStatusFileConfig = {
-  version: 1;
+  version: 1 | 2;
   enabled: boolean;
+  publicHttpsSelfService: boolean;
   allowedOrigins: string[];
   allowedCidrs: string[];
   timeoutMs: number;
@@ -85,9 +86,18 @@ type ParsedCidr = ParsedIpAddress & {
   source: string;
 };
 
-const CONFIG_KEYS = [
+const CONFIG_V1_KEYS = [
   "version",
   "enabled",
+  "allowedOrigins",
+  "allowedCidrs",
+  "timeoutMs",
+  "pollIntervalMs"
+] as const;
+const CONFIG_V2_KEYS = [
+  "version",
+  "enabled",
+  "publicHttpsSelfService",
   "allowedOrigins",
   "allowedCidrs",
   "timeoutMs",
@@ -160,12 +170,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function exactConfigRecord(value: unknown): value is Record<(typeof CONFIG_KEYS)[number], unknown> {
+function exactConfigRecord(value: unknown, expectedKeys: readonly string[]): value is Record<string, unknown> {
   if (!isRecord(value)) return false;
   const keys = Object.keys(value);
-  return keys.length === CONFIG_KEYS.length
-    && keys.every((key) => (CONFIG_KEYS as readonly string[]).includes(key))
-    && CONFIG_KEYS.every((key) => Object.hasOwn(value, key));
+  return keys.length === expectedKeys.length
+    && keys.every((key) => expectedKeys.includes(key))
+    && expectedKeys.every((key) => Object.hasOwn(value, key));
 }
 
 function integerInRange(value: unknown, minimum: number, maximum: number): value is number {
@@ -315,9 +325,10 @@ function stripIpv6Brackets(hostname: string): string {
 function normalizePolicies(
   origins: string[],
   cidrSources: string[],
-  enabled: boolean
+  enabled: boolean,
+  publicHttpsSelfService: boolean
 ): { allowedOrigins: string[]; allowedCidrs: string[] } {
-  if (enabled && origins.length === 0) configError("policy_missing");
+  if (enabled && !publicHttpsSelfService && origins.length === 0) configError("policy_missing");
   const cidrs = cidrSources.map(parsePrivateCidr);
   if (cidrs.some((cidr) => cidr === undefined)) configError("policy_invalid");
   if (new Set(cidrSources).size !== cidrSources.length) configError("policy_invalid");
@@ -369,19 +380,34 @@ function parseFileConfig(raw: string): PalworldServerStatusFileConfig {
   } catch {
     return configError("config_invalid_json");
   }
-  if (!exactConfigRecord(parsed)) configError("config_invalid_schema");
-  if (parsed.version !== 1) configError("config_version_unsupported");
+  if (!isRecord(parsed)) configError("config_invalid_schema");
+  if (!Object.hasOwn(parsed, "version")
+    || typeof parsed.version !== "number"
+    || !Number.isSafeInteger(parsed.version)) {
+    configError("config_invalid_schema");
+  }
+  if (parsed.version !== 1 && parsed.version !== 2) configError("config_version_unsupported");
+  const expectedKeys = parsed.version === 1 ? CONFIG_V1_KEYS : CONFIG_V2_KEYS;
+  if (!exactConfigRecord(parsed, expectedKeys)) configError("config_invalid_schema");
   if (typeof parsed.enabled !== "boolean"
+    || parsed.version === 2 && typeof parsed.publicHttpsSelfService !== "boolean"
     || !stringArray(parsed.allowedOrigins)
     || !stringArray(parsed.allowedCidrs)
     || !integerInRange(parsed.timeoutMs, MIN_TIMEOUT_MS, MAX_TIMEOUT_MS)
     || !integerInRange(parsed.pollIntervalMs, MIN_POLL_INTERVAL_MS, MAX_POLL_INTERVAL_MS)) {
     configError("config_invalid_schema");
   }
-  const policies = normalizePolicies(parsed.allowedOrigins, parsed.allowedCidrs, parsed.enabled);
+  const publicHttpsSelfService = parsed.version === 2 ? parsed.publicHttpsSelfService as boolean : false;
+  const policies = normalizePolicies(
+    parsed.allowedOrigins,
+    parsed.allowedCidrs,
+    parsed.enabled,
+    publicHttpsSelfService
+  );
   return {
-    version: 1,
+    version: parsed.version,
     enabled: parsed.enabled,
+    publicHttpsSelfService,
     ...policies,
     timeoutMs: parsed.timeoutMs,
     pollIntervalMs: parsed.pollIntervalMs

@@ -43,6 +43,7 @@ export type PalworldResolvedAddress = {
 export type PalworldServerClientConfig = {
   allowedOrigins: readonly string[];
   allowedCidrs?: readonly string[];
+  publicHttpsSelfService?: boolean;
   timeoutMs?: number;
   maxResponseBytes?: number;
   maxUrlLength?: number;
@@ -119,7 +120,8 @@ export class PalworldServerClientError extends Error {
   constructor(
     readonly code: PalworldServerErrorCode,
     readonly stage: PalworldServerDiagnosticKey,
-    readonly diagnostics: PalworldServerDiagnostic[]
+    readonly diagnostics: PalworldServerDiagnostic[],
+    readonly policyReason?: PalworldUrlPolicyFailureReason | PalworldNetworkPolicyFailureReason
   ) {
     super(SAFE_ERROR_MESSAGES[code]);
     this.name = "PalworldServerClientError";
@@ -138,6 +140,54 @@ type ParsedCidr = {
   network: bigint;
   prefix: number;
   bits: 32 | 128;
+};
+
+export type PalworldTargetPolicyBasis = "operator_allowlist" | "public_https_self_service";
+
+export type PalworldUrlPolicyFailureReason =
+  | "invalid_input"
+  | "ambiguous_encoding"
+  | "ambiguous_port"
+  | "unsupported_protocol"
+  | "userinfo_not_allowed"
+  | "root_path_required"
+  | "query_not_allowed"
+  | "fragment_not_allowed"
+  | "ambiguous_ip_literal"
+  | "self_service_disabled"
+  | "self_service_https_required"
+  | "self_service_default_port_required"
+  | "self_service_hostname_required";
+
+export type PalworldUrlPolicyResult = {
+  ok: true;
+  baseUrl: string;
+  hostname: string;
+  protocol: "http:" | "https:";
+  basis: PalworldTargetPolicyBasis;
+} | {
+  ok: false;
+  errorCode: "invalid_url" | "origin_not_allowed";
+  reason: PalworldUrlPolicyFailureReason;
+};
+
+export type PalworldNetworkPolicyFailureReason =
+  | "no_addresses"
+  | "too_many_addresses"
+  | "invalid_address"
+  | "always_blocked_address"
+  | "self_service_mapped_ipv4_address"
+  | "self_service_non_public_address"
+  | "operator_private_cidr_required"
+  | "public_http_blocked";
+
+type PalworldNetworkPolicyResult = {
+  ok: true;
+  pinnedAddress: PalworldResolvedAddress;
+} | {
+  ok: false;
+  errorCode: "dns_failed" | "address_blocked";
+  reason: PalworldNetworkPolicyFailureReason;
 };
 
 type PreparedTarget = {
@@ -192,11 +242,12 @@ function skipPendingDiagnostics(diagnostics: PalworldServerDiagnostic[]): void {
 function clientError(
   code: PalworldServerErrorCode,
   stage: PalworldServerDiagnosticKey,
-  diagnostics: PalworldServerDiagnostic[]
+  diagnostics: PalworldServerDiagnostic[],
+  policyReason?: PalworldUrlPolicyFailureReason | PalworldNetworkPolicyFailureReason
 ): PalworldServerClientError {
   updateDiagnostic(diagnostics, stage, "failed", code);
   skipPendingDiagnostics(diagnostics);
-  return new PalworldServerClientError(code, stage, copyDiagnostics(diagnostics));
+  return new PalworldServerClientError(code, stage, copyDiagnostics(diagnostics), policyReason);
 }
 
 function isFiniteIntegerInRange(value: number, min: number, max: number): boolean {
@@ -351,10 +402,15 @@ function stripIpv6Brackets(hostname: string): string {
   return hostname.startsWith("[") && hostname.endsWith("]") ? hostname.slice(1, -1) : hostname;
 }
 
-function rawHostname(input: string): string | undefined {
+function rawAuthority(input: string): string | undefined {
   const schemeEnd = input.indexOf("://");
   if (schemeEnd < 0) return undefined;
   const authority = input.slice(schemeEnd + 3).split(/[/?#]/, 1)[0];
+  return authority || undefined;
+}
+
+function rawHostname(input: string): string | undefined {
+  const authority = rawAuthority(input);
   if (!authority) return undefined;
   const withoutUserInfo = authority.slice(authority.lastIndexOf("@") + 1);
   if (withoutUserInfo.startsWith("[")) {
@@ -363,6 +419,20 @@ function rawHostname(input: string): string | undefined {
   }
   const lastColon = withoutUserInfo.lastIndexOf(":");
   return lastColon >= 0 ? withoutUserInfo.slice(0, lastColon) : withoutUserInfo;
+}
+
+function isSelfServiceHostname(hostname: string): boolean {
+  if (hostname.length === 0
+    || hostname.length > 253
+    || !hostname.includes(".")
+    || hostname.endsWith(".")) {
+    return false;
+  }
+  return hostname.split(".").every((label) => (
+    label.length > 0
+    && label.length <= 63
+    && /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label)
+  ));
 }
 
 function normalizeConfiguredOrigin(input: string): string | undefined {
@@ -493,6 +563,7 @@ async function defaultRequestPinned(request: PalworldPinnedRequest): Promise<Pal
 export class PalworldServerClient {
   readonly #allowedOrigins: ReadonlySet<string>;
   readonly #allowedCidrs: readonly ParsedCidr[];
+  readonly #publicHttpsSelfService: boolean;
   readonly #timeoutMs: number;
   readonly #maxResponseBytes: number;
   readonly #maxUrlLength: number;
@@ -525,9 +596,13 @@ export class PalworldServerClient {
     if (allowedCidrs.some((cidr) => cidr === undefined)) {
       throw new TypeError("Palworld REST CIDR allowlist 설정이 올바르지 않습니다.");
     }
+    if (config.publicHttpsSelfService !== undefined && typeof config.publicHttpsSelfService !== "boolean") {
+      throw new TypeError("Palworld REST 공개 HTTPS 자가 등록 설정은 boolean이어야 합니다.");
+    }
 
     this.#allowedOrigins = new Set(allowedOrigins as string[]);
     this.#allowedCidrs = allowedCidrs as ParsedCidr[];
+    this.#publicHttpsSelfService = config.publicHttpsSelfService ?? false;
     this.#timeoutMs = timeoutMs;
     this.#maxResponseBytes = maxResponseBytes;
     this.#maxUrlLength = maxUrlLength;
@@ -541,7 +616,11 @@ export class PalworldServerClient {
 
   normalizeBaseUrl(input: string): string {
     const diagnostics = createDiagnostics();
-    return this.#normalizeBaseUrl(input, diagnostics);
+    return this.#normalizeBaseUrl(input, diagnostics).baseUrl;
+  }
+
+  evaluateBaseUrlPolicy(input: string): PalworldUrlPolicyResult {
+    return this.#evaluateUrlPolicy(input);
   }
 
   async probe(input: PalworldServerProbeInput): Promise<PalworldServerProbeResult> {
@@ -549,14 +628,15 @@ export class PalworldServerClient {
     const start = this.#monotonicNow();
     const deadline = start + this.#timeoutMs;
     const checkedAt = this.#now().toISOString();
-    const baseUrl = this.#normalizeBaseUrl(input.baseUrl, diagnostics);
+    const normalizedTarget = this.#normalizeBaseUrl(input.baseUrl, diagnostics);
+    const baseUrl = normalizedTarget.baseUrl;
     if (typeof input.adminPassword !== "string"
       || input.adminPassword.trim().length === 0
       || input.adminPassword.length > MAX_PASSWORD_LENGTH) {
       throw clientError("password_required", "basic_auth", diagnostics);
     }
 
-    const target = await this.#prepareTarget(baseUrl, diagnostics, deadline);
+    const target = await this.#prepareTarget(normalizedTarget, diagnostics, deadline);
     const authorization = `Basic ${Buffer.from(`admin:${input.adminPassword}`, "utf8").toString("base64")}`;
     const infoResponse = await this.#requestEndpoint(
       target,
@@ -618,61 +698,135 @@ export class PalworldServerClient {
     }
   }
 
-  #normalizeBaseUrl(input: string, diagnostics: PalworldServerDiagnostic[]): string {
+  #normalizeBaseUrl(
+    input: string,
+    diagnostics: PalworldServerDiagnostic[]
+  ): Extract<PalworldUrlPolicyResult, { ok: true }> {
+    const result = this.#evaluateUrlPolicy(input);
+    if (!result.ok) {
+      throw clientError(result.errorCode, "url_policy", diagnostics, result.reason);
+    }
+    updateDiagnostic(diagnostics, "url_policy", "passed");
+    return result;
+  }
+
+  #evaluateUrlPolicy(input: string): PalworldUrlPolicyResult {
     if (typeof input !== "string"
       || input.length === 0
       || input.length > this.#maxUrlLength
       || input !== input.trim()
       || /[\u0000-\u001f\u007f]/.test(input)) {
-      throw clientError("invalid_url", "url_policy", diagnostics);
+      return { ok: false, errorCode: "invalid_url", reason: "invalid_input" };
+    }
+    if (input.includes("\\") || input.includes("%")) {
+      return { ok: false, errorCode: "invalid_url", reason: "ambiguous_encoding" };
     }
 
     let parsed: URL;
     try {
       parsed = new URL(input);
     } catch {
-      throw clientError("invalid_url", "url_policy", diagnostics);
+      return { ok: false, errorCode: "invalid_url", reason: "invalid_input" };
     }
-    if ((parsed.protocol !== "http:" && parsed.protocol !== "https:")
-      || parsed.username.length > 0
-      || parsed.password.length > 0
-      || parsed.pathname !== "/"
-      || parsed.search.length > 0
-      || parsed.hash.length > 0) {
-      throw clientError("invalid_url", "url_policy", diagnostics);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return { ok: false, errorCode: "invalid_url", reason: "unsupported_protocol" };
+    }
+    const originalAuthority = rawAuthority(input);
+    if (!originalAuthority) {
+      return { ok: false, errorCode: "invalid_url", reason: "invalid_input" };
+    }
+    if (parsed.username.length > 0 || parsed.password.length > 0 || originalAuthority.includes("@")) {
+      return { ok: false, errorCode: "invalid_url", reason: "userinfo_not_allowed" };
+    }
+    if (originalAuthority.endsWith(":")) {
+      return { ok: false, errorCode: "invalid_url", reason: "ambiguous_port" };
+    }
+    if (parsed.pathname !== "/") {
+      return { ok: false, errorCode: "invalid_url", reason: "root_path_required" };
+    }
+    if (parsed.search.length > 0 || input.includes("?")) {
+      return { ok: false, errorCode: "invalid_url", reason: "query_not_allowed" };
+    }
+    if (parsed.hash.length > 0 || input.includes("#")) {
+      return { ok: false, errorCode: "invalid_url", reason: "fragment_not_allowed" };
     }
 
-    const normalizedHostname = stripIpv6Brackets(parsed.hostname);
+    const hostname = stripIpv6Brackets(parsed.hostname);
     const originalHostname = rawHostname(input);
-    if (!originalHostname) throw clientError("invalid_url", "url_policy", diagnostics);
-    if (isIP(normalizedHostname) === 4 && originalHostname.toLowerCase() !== normalizedHostname.toLowerCase()) {
-      throw clientError("invalid_url", "url_policy", diagnostics);
+    if (!originalHostname) {
+      return { ok: false, errorCode: "invalid_url", reason: "invalid_input" };
     }
-    if (!this.#allowedOrigins.has(parsed.origin)) {
-      throw clientError("origin_not_allowed", "url_policy", diagnostics);
+    if (isIP(hostname) === 4 && originalHostname.toLowerCase() !== hostname.toLowerCase()) {
+      return { ok: false, errorCode: "invalid_url", reason: "ambiguous_ip_literal" };
     }
-    updateDiagnostic(diagnostics, "url_policy", "passed");
-    return parsed.origin;
+
+    if (this.#allowedOrigins.has(parsed.origin)) {
+      return {
+        ok: true,
+        baseUrl: parsed.origin,
+        hostname,
+        protocol: parsed.protocol,
+        basis: "operator_allowlist"
+      };
+    }
+    if (!this.#publicHttpsSelfService) {
+      return { ok: false, errorCode: "origin_not_allowed", reason: "self_service_disabled" };
+    }
+    if (parsed.protocol !== "https:") {
+      return { ok: false, errorCode: "origin_not_allowed", reason: "self_service_https_required" };
+    }
+    if (parsed.port !== "") {
+      return { ok: false, errorCode: "origin_not_allowed", reason: "self_service_default_port_required" };
+    }
+    if (isIP(hostname) !== 0 || !isSelfServiceHostname(hostname)) {
+      return { ok: false, errorCode: "origin_not_allowed", reason: "self_service_hostname_required" };
+    }
+    return {
+      ok: true,
+      baseUrl: parsed.origin,
+      hostname,
+      protocol: "https:",
+      basis: "public_https_self_service"
+    };
   }
 
   async #prepareTarget(
-    baseUrl: string,
+    targetPolicy: Extract<PalworldUrlPolicyResult, { ok: true }>,
     diagnostics: PalworldServerDiagnostic[],
     deadline: number
   ): Promise<PreparedTarget> {
-    const parsed = new URL(baseUrl);
-    const hostname = stripIpv6Brackets(parsed.hostname);
     let resolved: readonly PalworldResolvedAddress[];
     try {
-      resolved = await this.#runWithinDeadline(deadline, () => this.#resolveHostname(hostname));
+      resolved = await this.#runWithinDeadline(deadline, () => this.#resolveHostname(targetPolicy.hostname));
     } catch (error) {
       if (error instanceof PalworldPinnedTransportError && error.code === "request_timeout") {
         throw clientError("request_timeout", "dns_tcp", diagnostics);
       }
       throw clientError("dns_failed", "dns_tcp", diagnostics);
     }
-    if (resolved.length === 0 || resolved.length > MAX_DNS_ADDRESSES) {
-      throw clientError("dns_failed", "dns_tcp", diagnostics);
+    const networkPolicy = this.#evaluateNetworkPolicy(targetPolicy, resolved);
+    if (!networkPolicy.ok) {
+      throw clientError(networkPolicy.errorCode, "dns_tcp", diagnostics, networkPolicy.reason);
+    }
+    if (this.#remainingMs(deadline) <= 0) {
+      throw clientError("request_timeout", "dns_tcp", diagnostics);
+    }
+    return {
+      baseUrl: targetPolicy.baseUrl,
+      protocol: targetPolicy.protocol,
+      pinnedAddress: networkPolicy.pinnedAddress
+    };
+  }
+
+  #evaluateNetworkPolicy(
+    targetPolicy: Extract<PalworldUrlPolicyResult, { ok: true }>,
+    resolved: readonly PalworldResolvedAddress[]
+  ): PalworldNetworkPolicyResult {
+    if (resolved.length === 0) {
+      return { ok: false, errorCode: "dns_failed", reason: "no_addresses" };
+    }
+    if (resolved.length > MAX_DNS_ADDRESSES) {
+      return { ok: false, errorCode: "dns_failed", reason: "too_many_addresses" };
     }
 
     const uniqueAddresses = new Map<string, PalworldResolvedAddress>();
@@ -680,15 +834,24 @@ export class PalworldServerClient {
     for (const record of resolved) {
       const address = parseIpAddress(record.address);
       if (!address || address.family !== record.family) {
-        throw clientError("dns_failed", "dns_tcp", diagnostics);
+        return { ok: false, errorCode: "dns_failed", reason: "invalid_address" };
+      }
+      if (targetPolicy.basis === "public_https_self_service" && address.mappedIpv4) {
+        return { ok: false, errorCode: "address_blocked", reason: "self_service_mapped_ipv4_address" };
       }
       if (isAlwaysBlockedAddress(address)) {
-        throw clientError("address_blocked", "dns_tcp", diagnostics);
+        return { ok: false, errorCode: "address_blocked", reason: "always_blocked_address" };
       }
-      const isPrivate = isPrivateAddress(address);
-      allPrivate &&= isPrivate;
-      if (isPrivate && !addressMatchesAnyCidr(address, this.#allowedCidrs)) {
-        throw clientError("address_blocked", "dns_tcp", diagnostics);
+
+      const privateAddress = isPrivateAddress(address);
+      allPrivate &&= privateAddress;
+      if (targetPolicy.basis === "public_https_self_service" && privateAddress) {
+        return { ok: false, errorCode: "address_blocked", reason: "self_service_non_public_address" };
+      }
+      if (targetPolicy.basis === "operator_allowlist"
+        && privateAddress
+        && !addressMatchesAnyCidr(address, this.#allowedCidrs)) {
+        return { ok: false, errorCode: "address_blocked", reason: "operator_private_cidr_required" };
       }
       uniqueAddresses.set(`${record.family}:${record.address}`, {
         address: record.address,
@@ -696,19 +859,13 @@ export class PalworldServerClient {
       });
     }
 
-    if (parsed.protocol === "http:" && !allPrivate) {
-      throw clientError("address_blocked", "dns_tcp", diagnostics);
+    if (targetPolicy.protocol === "http:" && !allPrivate) {
+      return { ok: false, errorCode: "address_blocked", reason: "public_http_blocked" };
     }
     const pinnedAddress = uniqueAddresses.values().next().value as PalworldResolvedAddress | undefined;
-    if (!pinnedAddress) throw clientError("dns_failed", "dns_tcp", diagnostics);
-    if (this.#remainingMs(deadline) <= 0) {
-      throw clientError("request_timeout", "dns_tcp", diagnostics);
-    }
-    return {
-      baseUrl,
-      protocol: parsed.protocol as "http:" | "https:",
-      pinnedAddress
-    };
+    return pinnedAddress
+      ? { ok: true, pinnedAddress }
+      : { ok: false, errorCode: "dns_failed", reason: "no_addresses" };
   }
 
   async #requestEndpoint<T extends PalworldRestInfoResponse | PalworldRestMetricsResponse>(

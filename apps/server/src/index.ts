@@ -46,7 +46,14 @@ import { websocketLimiter } from "./security/rate-limit.js";
 import { getEnabledModules } from "./modules/index.js";
 import { refreshLolProfileForEntry } from "./modules/lol-profile-enrichment.module.js";
 import { closeLolGameMonitors } from "./modules/lol-game-monitor.module.js";
-import { newId, nowIso, toSafeErrorMessage, type PalworldServerAvailabilityErrorCode } from "@streamops/shared";
+import {
+  PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
+  newId,
+  nowIso,
+  toSafeErrorMessage,
+  type PalworldServerAvailabilityErrorCode,
+  type PalworldServerRegistrationPolicy
+} from "@streamops/shared";
 
 assertRuntimeConfig();
 
@@ -101,6 +108,9 @@ const palworldReusedSecrets = [
 
 let palworldServerMonitor: PalworldServerMonitor | undefined;
 let palworldServerUnavailableCode: PalworldServerAvailabilityErrorCode | undefined;
+let palworldServerRegistrationPolicy: PalworldServerRegistrationPolicy = {
+  ...PALWORLD_SERVER_SAFE_REGISTRATION_POLICY
+};
 try {
   const palworldConfig = loadPalworldServerStatusConfig({
     configDir: appConfig.paths.config,
@@ -112,6 +122,11 @@ try {
   } else if (!palworldConfig.encryptionKey) {
     palworldServerUnavailableCode = "key_missing";
   } else {
+    palworldServerRegistrationPolicy = {
+      publicHttpsSelfService: palworldConfig.publicHttpsSelfService,
+      publicHttpsPort: 443,
+      privateNetworkRequiresOperatorApproval: true
+    };
     palworldServerMonitor = new PalworldServerMonitor({
       store: new PalworldServerConnectionStore({
         filePath: palworldConfig.statePath,
@@ -120,10 +135,12 @@ try {
       client: new PalworldServerClient({
         allowedOrigins: palworldConfig.allowedOrigins,
         allowedCidrs: palworldConfig.allowedCidrs,
+        publicHttpsSelfService: palworldConfig.publicHttpsSelfService,
         timeoutMs: palworldConfig.timeoutMs
       }),
       enabled: true,
       pollIntervalMs: palworldConfig.pollIntervalMs,
+      registrationPolicy: palworldServerRegistrationPolicy,
       logger
     });
     logger.event({ type: "palworld_server.subsystem_ready" });

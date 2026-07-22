@@ -53,6 +53,18 @@ export type DashboardTenantContext = {
 let dashboardAuthSurface: DashboardAuthSurface = "admin";
 let dashboardTenantContext: DashboardTenantContext | undefined;
 
+export class DashboardApiError extends Error {
+  readonly name = "DashboardApiError";
+
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code?: string
+  ) {
+    super(message);
+  }
+}
+
 export function setDashboardAuthSurface(surface: DashboardAuthSurface): void {
   dashboardAuthSurface = surface;
 }
@@ -75,19 +87,22 @@ function csrfHeaders(): Record<string, string> {
   return csrfToken ? { "X-StreamOps-CSRF": csrfToken } : {};
 }
 
-async function errorMessage(path: string, response: Response): Promise<string> {
+async function responseError(path: string, response: Response): Promise<DashboardApiError> {
   const fallback = `${path} failed: ${response.status}`;
   const contentType = response.headers.get("content-type") ?? "";
   try {
     if (contentType.includes("application/json")) {
-      const body = (await response.json()) as { error?: unknown; message?: unknown };
+      const body = (await response.json()) as { code?: unknown; error?: unknown; message?: unknown };
       const detail = typeof body.message === "string" ? body.message : typeof body.error === "string" ? body.error : "";
-      return detail ? `${fallback} - ${detail}` : fallback;
+      const code = typeof body.code === "string" && /^[a-z0-9_]{1,64}$/i.test(body.code)
+        ? body.code
+        : undefined;
+      return new DashboardApiError(detail ? `${fallback} - ${detail}` : fallback, response.status, code);
     }
     const detail = (await response.text()).trim();
-    return detail ? `${fallback} - ${detail}` : fallback;
+    return new DashboardApiError(detail ? `${fallback} - ${detail}` : fallback, response.status);
   } catch {
-    return fallback;
+    return new DashboardApiError(fallback, response.status);
   }
 }
 
@@ -96,7 +111,7 @@ export async function apiGet<T>(path: string): Promise<T> {
     credentials: "include",
     headers: { ...surfaceHeaders() }
   });
-  if (!response.ok) throw new Error(await errorMessage(path, response));
+  if (!response.ok) throw await responseError(path, response);
   return (await response.json()) as T;
 }
 
@@ -107,7 +122,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
     headers: { "Content-Type": "application/json", ...surfaceHeaders(), ...csrfHeaders() },
     body: JSON.stringify(body)
   });
-  if (!response.ok) throw new Error(await errorMessage(path, response));
+  if (!response.ok) throw await responseError(path, response);
   return (await response.json()) as T;
 }
 
@@ -117,7 +132,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
     credentials: "include",
     headers: { ...surfaceHeaders(), ...csrfHeaders() }
   });
-  if (!response.ok) throw new Error(await errorMessage(path, response));
+  if (!response.ok) throw await responseError(path, response);
   return (await response.json()) as T;
 }
 
@@ -128,7 +143,7 @@ export async function apiPostForm<T>(path: string, body: FormData): Promise<T> {
     headers: { ...surfaceHeaders(), ...csrfHeaders() },
     body
   });
-  if (!response.ok) throw new Error(await errorMessage(path, response));
+  if (!response.ok) throw await responseError(path, response);
   return (await response.json()) as T;
 }
 
@@ -143,7 +158,7 @@ export async function getDashboardAuthStatus(
     credentials: "include",
     headers: { ...surfaceHeaders(surface) }
   });
-  if (!response.ok) throw new Error(await errorMessage("/api/dashboard/auth/status", response));
+  if (!response.ok) throw await responseError("/api/dashboard/auth/status", response);
   const status = (await response.json()) as DashboardAuthStatus;
   if (status.csrfToken) setDashboardCsrfToken(status.csrfToken);
   return status;
@@ -157,7 +172,7 @@ export async function checkDashboardAuthToken(token: string): Promise<DashboardA
     headers: { "Content-Type": "application/json", ...surfaceHeaders("admin") },
     body: JSON.stringify({ token })
   });
-  if (!response.ok) throw new Error(await errorMessage("/api/dashboard/auth/check", response));
+  if (!response.ok) throw await responseError("/api/dashboard/auth/check", response);
   const status = (await response.json()) as DashboardAuthStatus;
   if (status.csrfToken) setDashboardCsrfToken(status.csrfToken);
   return status;

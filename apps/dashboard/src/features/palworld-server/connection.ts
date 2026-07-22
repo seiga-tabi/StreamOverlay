@@ -19,3 +19,32 @@ export function canReusePalworldServerPassword(
   const next = canonicalBaseUrl(nextBaseUrl);
   return Boolean(saved && next && saved === next);
 }
+
+export type TransientPalworldAdminPasswordState = {
+  current: () => string;
+  update: (value: string) => void;
+  finishOperation: () => void;
+  dispose: () => void;
+};
+
+export function createTransientPalworldAdminPasswordState(
+  commit: (value: string) => void
+): TransientPalworldAdminPasswordState {
+  let value = "";
+
+  return {
+    current: () => value,
+    update: (nextValue) => {
+      value = nextValue;
+      commit(nextValue);
+    },
+    finishOperation: () => {
+      value = "";
+      commit("");
+    },
+    dispose: () => {
+      // unmount 뒤에는 React state를 갱신하지 않고 보관 중인 민감값만 즉시 비운다.
+      value = "";
+    }
+  };
+}

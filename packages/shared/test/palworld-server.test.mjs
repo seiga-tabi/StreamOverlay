@@ -4,6 +4,7 @@ import {
   PALWORLD_SERVER_AVAILABILITY_ERROR_CODES,
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
   PALWORLD_SERVER_ERROR_CODES,
+  PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   assertPalworldRestInfoResponse,
   assertPalworldRestMetricsResponse,
   validatePalworldRestInfoResponse,
@@ -12,6 +13,7 @@ import {
   validatePalworldServerConnectionSummary,
   validatePalworldServerDashboardResponse,
   validatePalworldServerMetrics,
+  validatePalworldServerRegistrationPolicy,
   validatePalworldServerStatus,
   validatePalworldServerTestResponse
 } from "../dist/index.js";
@@ -52,6 +54,12 @@ const connection = {
   baseUrl: "https://palworld.internal.example:8212/",
   passwordConfigured: true,
   updatedAt: "2026-07-22T01:00:00.000Z"
+};
+
+const registrationPolicy = {
+  publicHttpsSelfService: true,
+  publicHttpsPort: 443,
+  privateNetworkRequiresOperatorApproval: true
 };
 
 test("Palworld 서버 연결 입력은 안전한 base URL 형태와 비밀번호 길이를 검증한다", () => {
@@ -224,11 +232,22 @@ test("Test 및 Dashboard 응답은 nested object까지 엄격하게 검증한다
   const dashboardResponse = {
     enabled: true,
     pollIntervalSeconds: 30,
+    registrationPolicy,
     ...testResponse
   };
   assert.equal(validatePalworldServerDashboardResponse(dashboardResponse).ok, true);
   assert.equal(validatePalworldServerDashboardResponse({ ...dashboardResponse, pollIntervalSeconds: 1 }).ok, false);
   assert.equal(validatePalworldServerDashboardResponse({ ...dashboardResponse, debug: true }).ok, false);
+  assert.equal(validatePalworldServerDashboardResponse({
+    ...dashboardResponse,
+    registrationPolicy: { ...registrationPolicy, publicHttpsPort: 8212 }
+  }).ok, false);
+  assert.equal(validatePalworldServerDashboardResponse({
+    ...dashboardResponse,
+    registrationPolicy: { ...registrationPolicy, allowedCidrs: [] }
+  }).ok, false);
+  const { registrationPolicy: _registrationPolicy, ...withoutRegistrationPolicy } = dashboardResponse;
+  assert.equal(validatePalworldServerDashboardResponse(withoutRegistrationPolicy).ok, false);
   assert.equal(validatePalworldServerDashboardResponse({
     ...dashboardResponse,
     enabled: true,
@@ -237,6 +256,7 @@ test("Test 및 Dashboard 응답은 nested object까지 엄격하게 검증한다
   assert.equal(validatePalworldServerDashboardResponse({
     enabled: false,
     pollIntervalSeconds: 5,
+    registrationPolicy: PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
     connection: { configured: false, passwordConfigured: false },
     status: {
       state: "not_configured",
@@ -248,5 +268,41 @@ test("Test 및 Dashboard 응답은 nested object까지 엄격하게 검증한다
   assert.equal(validatePalworldServerDashboardResponse({
     ...dashboardResponse,
     enabled: false
+  }).ok, false);
+});
+
+test("Dashboard 전용 등록 정책은 exact schema와 비활성 안전 기본값을 강제한다", () => {
+  assert.deepEqual(PALWORLD_SERVER_SAFE_REGISTRATION_POLICY, {
+    publicHttpsSelfService: false,
+    publicHttpsPort: 443,
+    privateNetworkRequiresOperatorApproval: true
+  });
+  assert.equal(validatePalworldServerRegistrationPolicy(registrationPolicy).ok, true);
+  assert.equal(validatePalworldServerRegistrationPolicy({
+    ...registrationPolicy,
+    publicHttpsPort443: true
+  }).ok, false);
+  assert.equal(validatePalworldServerRegistrationPolicy({
+    publicHttpsSelfService: true,
+    publicHttpsPort: 443,
+    privateNetworkRequiresOperatorApproval: true,
+    ownerApprovalUi: true
+  }).ok, false);
+  assert.equal(validatePalworldServerRegistrationPolicy({
+    ...registrationPolicy,
+    privateNetworkRequiresOperatorApproval: false
+  }).ok, false);
+
+  assert.equal(validatePalworldServerDashboardResponse({
+    enabled: false,
+    pollIntervalSeconds: 5,
+    registrationPolicy,
+    connection: { configured: false, passwordConfigured: false },
+    status: {
+      state: "not_configured",
+      errorCode: "disabled",
+      consecutiveFailures: 0,
+      diagnostics: PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({ key, state: "skipped" }))
+    }
   }).ok, false);
 });

@@ -43,6 +43,12 @@ const enabledConfig = {
   pollIntervalMs: 30_000
 };
 
+const enabledSelfServiceConfig = {
+  ...enabledConfig,
+  version: 2,
+  publicHttpsSelfService: true
+};
+
 function fixture() {
   const directory = mkdtempSync(path.join(tmpdir(), "streamops-palworld-status-config-"));
   const configDir = path.join(directory, "config");
@@ -104,13 +110,15 @@ test("저장소 기본 config는 고정 allowlist를 secret 조회 없이 안전
   assert.deepEqual({
     version: config.version,
     enabled: config.enabled,
+    publicHttpsSelfService: config.publicHttpsSelfService,
     allowedOrigins: config.allowedOrigins,
     allowedCidrs: config.allowedCidrs,
     timeoutMs: config.timeoutMs,
     pollIntervalMs: config.pollIntervalMs
   }, {
-    version: 1,
+    version: 2,
     enabled: true,
+    publicHttpsSelfService: true,
     allowedOrigins: ["https://seigatabi.com"],
     allowedCidrs: [],
     timeoutMs: 5_000,
@@ -190,6 +198,7 @@ test("file-only loader는 활성 JSON도 secret 없이 schema와 정책만 검�
       ...mappedFileSystem(context)
     });
     assert.equal(config.enabled, true);
+    assert.equal(config.publicHttpsSelfService, false);
     assert.deepEqual(config.allowedOrigins, enabledConfig.allowedOrigins);
     assert.equal(config.allowedCidrs[0], "10.0.0.0/8");
     assert.equal(lstatSync(context.secretPath, { throwIfNoEntry: false }), undefined);
@@ -198,13 +207,53 @@ test("file-only loader는 활성 JSON도 secret 없이 schema와 정책만 검�
   }
 });
 
-test("config는 exact schema와 version 및 숫자 범위를 강제한다", () => {
+test("config v1은 exact schema를 유지하고 self-service를 false로 정규화한다", () => {
   const context = fixture();
   try {
+    writeConfig(context);
+    const config = loadPalworldServerStatusFileConfig(context.configDir);
+    assert.equal(config.version, 1);
+    assert.equal(config.publicHttpsSelfService, false);
+
+    writeConfig(context, { ...enabledConfig, publicHttpsSelfService: true });
+    assertConfigError(() => loadFixture(context), "config_invalid_schema");
     writeConfig(context, { ...enabledConfig, debug: true });
     assertConfigError(() => loadFixture(context), "config_invalid_schema");
-    writeConfig(context, { ...enabledConfig, version: 2 });
+  } finally {
+    context.dispose();
+  }
+});
+
+test("config v2는 publicHttpsSelfService 필수 boolean과 exact schema를 강제한다", () => {
+  const context = fixture();
+  try {
+    writeConfig(context, enabledSelfServiceConfig);
+    const config = loadPalworldServerStatusFileConfig(context.configDir);
+    assert.equal(config.version, 2);
+    assert.equal(config.publicHttpsSelfService, true);
+
+    const { publicHttpsSelfService: _selfService, ...missing } = enabledSelfServiceConfig;
+    writeConfig(context, missing);
+    assertConfigError(() => loadFixture(context), "config_invalid_schema");
+    writeConfig(context, { ...enabledSelfServiceConfig, publicHttpsSelfService: "true" });
+    assertConfigError(() => loadFixture(context), "config_invalid_schema");
+    writeConfig(context, { ...enabledSelfServiceConfig, debug: true });
+    assertConfigError(() => loadFixture(context), "config_invalid_schema");
+    const { version: _version, ...withoutVersion } = enabledSelfServiceConfig;
+    writeConfig(context, withoutVersion);
+    assertConfigError(() => loadFixture(context), "config_invalid_schema");
+    writeConfig(context, { ...enabledSelfServiceConfig, version: "2" });
+    assertConfigError(() => loadFixture(context), "config_invalid_schema");
+    writeConfig(context, { ...enabledSelfServiceConfig, version: 3 });
     assertConfigError(() => loadFixture(context), "config_version_unsupported");
+  } finally {
+    context.dispose();
+  }
+});
+
+test("config는 숫자 범위와 JSON 형식을 강제한다", () => {
+  const context = fixture();
+  try {
     const { pollIntervalMs: _pollIntervalMs, ...missing } = enabledConfig;
     writeConfig(context, missing);
     assertConfigError(() => loadFixture(context), "config_invalid_schema");
@@ -240,11 +289,26 @@ test("config는 symlink와 group 또는 world writable 파일을 거부한다", 
   }
 });
 
-test("활성 설정은 비어 있지 않은 destination 정책을 요구한다", () => {
+test("활성 설정은 self-service가 꺼진 경우에만 비어 있지 않은 destination 정책을 요구한다", () => {
   const context = fixture();
   try {
     writeConfig(context, { ...enabledConfig, allowedOrigins: [] });
     assertConfigError(() => loadFixture(context), "policy_missing");
+
+    writeConfig(context, { ...enabledSelfServiceConfig, allowedOrigins: [] });
+    const selfServiceConfig = loadPalworldServerStatusFileConfig(context.configDir);
+    assert.equal(selfServiceConfig.publicHttpsSelfService, true);
+    assert.deepEqual(selfServiceConfig.allowedOrigins, []);
+
+    writeConfig(context, {
+      ...enabledSelfServiceConfig,
+      publicHttpsSelfService: false,
+      allowedOrigins: []
+    });
+    assertConfigError(() => loadPalworldServerStatusFileConfig(context.configDir), "policy_missing");
+
+    writeConfig(context, { ...enabledConfig, enabled: false, allowedOrigins: [] });
+    assert.deepEqual(loadPalworldServerStatusFileConfig(context.configDir).allowedOrigins, []);
   } finally {
     context.dispose();
   }

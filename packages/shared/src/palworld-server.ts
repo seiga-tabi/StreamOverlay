@@ -133,9 +133,22 @@ export type PalworldServerTestResponse = {
   status: PalworldServerStatus;
 };
 
+export type PalworldServerRegistrationPolicy = {
+  publicHttpsSelfService: boolean;
+  publicHttpsPort: 443;
+  privateNetworkRequiresOperatorApproval: true;
+};
+
+export const PALWORLD_SERVER_SAFE_REGISTRATION_POLICY: Readonly<PalworldServerRegistrationPolicy> = Object.freeze({
+  publicHttpsSelfService: false,
+  publicHttpsPort: 443,
+  privateNetworkRequiresOperatorApproval: true
+});
+
 export type PalworldServerDashboardResponse = PalworldServerTestResponse & {
   enabled: boolean;
   pollIntervalSeconds: number;
+  registrationPolicy: PalworldServerRegistrationPolicy;
 };
 
 export type PalworldServerValidationResult<T> =
@@ -536,6 +549,33 @@ function validateTestResponseAt(
   return status.ok ? valid(record.data as PalworldServerTestResponse) : status;
 }
 
+function validateRegistrationPolicyAt(
+  value: unknown,
+  path: string
+): PalworldServerValidationResult<PalworldServerRegistrationPolicy> {
+  const record = recordAt(value, path, [
+    "publicHttpsSelfService",
+    "publicHttpsPort",
+    "privateNetworkRequiresOperatorApproval"
+  ]);
+  if (!record.ok) return record;
+  const publicHttpsSelfService = booleanAt(
+    record.data.publicHttpsSelfService,
+    `${path}.publicHttpsSelfService`
+  );
+  if (!publicHttpsSelfService.ok) return publicHttpsSelfService;
+  if (record.data.publicHttpsPort !== 443) {
+    return invalid(`${path}.publicHttpsPort`, "공개 HTTPS 직접 등록 포트는 443이어야 합니다.");
+  }
+  if (record.data.privateNetworkRequiresOperatorApproval !== true) {
+    return invalid(
+      `${path}.privateNetworkRequiresOperatorApproval`,
+      "사설망은 운영자 승인이 필요해야 합니다."
+    );
+  }
+  return valid(record.data as PalworldServerRegistrationPolicy);
+}
+
 export function validatePalworldServerConnectionInput(
   value: unknown
 ): PalworldServerValidationResult<PalworldServerConnectionInput> {
@@ -584,10 +624,22 @@ export function validatePalworldServerTestResponse(
   return validateTestResponseAt(value, "response");
 }
 
+export function validatePalworldServerRegistrationPolicy(
+  value: unknown
+): PalworldServerValidationResult<PalworldServerRegistrationPolicy> {
+  return validateRegistrationPolicyAt(value, "registrationPolicy");
+}
+
 export function validatePalworldServerDashboardResponse(
   value: unknown
 ): PalworldServerValidationResult<PalworldServerDashboardResponse> {
-  const record = recordAt(value, "response", ["enabled", "pollIntervalSeconds", "connection", "status"]);
+  const record = recordAt(value, "response", [
+    "enabled",
+    "pollIntervalSeconds",
+    "registrationPolicy",
+    "connection",
+    "status"
+  ]);
   if (!record.ok) return record;
   const enabled = booleanAt(record.data.enabled, "response.enabled");
   if (!enabled.ok) return enabled;
@@ -598,6 +650,11 @@ export function validatePalworldServerDashboardResponse(
     MAX_POLL_INTERVAL_SECONDS
   );
   if (!pollInterval.ok) return pollInterval;
+  const registrationPolicy = validateRegistrationPolicyAt(
+    record.data.registrationPolicy,
+    "response.registrationPolicy"
+  );
+  if (!registrationPolicy.ok) return registrationPolicy;
   const connection = validateConnectionSummaryAt(record.data.connection, "response.connection");
   if (!connection.ok) return connection;
   const status = validateStatusAt(record.data.status, "response.status");
@@ -612,6 +669,12 @@ export function validatePalworldServerDashboardResponse(
   }
   if (!enabled.data && connection.data.configured) {
     return invalid("response.connection.configured", "비활성 응답에는 연결 정보를 포함할 수 없습니다.");
+  }
+  if (!enabled.data && registrationPolicy.data.publicHttpsSelfService) {
+    return invalid(
+      "response.registrationPolicy.publicHttpsSelfService",
+      "비활성 응답에서는 공개 HTTPS 직접 등록을 허용할 수 없습니다."
+    );
   }
   if (enabled.data && availabilityError) {
     return invalid("response.status.errorCode", "활성 응답에는 운영 준비 상태 오류 코드를 포함할 수 없습니다.");

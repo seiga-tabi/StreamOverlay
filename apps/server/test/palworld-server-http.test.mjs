@@ -20,6 +20,11 @@ const DASHBOARD_ORIGIN = "http://localhost:3000";
 const STREAMER_A_ID = "palworld-owner-a";
 const STREAMER_B_ID = "palworld-owner-b";
 const DIAGNOSTIC_KEYS = ["url_policy", "dns_tcp", "tls", "basic_auth", "info", "metrics", "schema"];
+const REGISTRATION_POLICY = {
+  publicHttpsSelfService: true,
+  publicHttpsPort: 443,
+  privateNetworkRequiresOperatorApproval: true
+};
 
 const previousConfig = {
   localNoAuth: appConfig.security.localNoAuth,
@@ -165,6 +170,7 @@ function configuredResponse(ownerId, status = onlineStatus(ownerId)) {
   return {
     enabled: true,
     pollIntervalSeconds: 30,
+    registrationPolicy: REGISTRATION_POLICY,
     connection: {
       configured: true,
       baseUrl: `https://${ownerId}.example.com:8212`,
@@ -179,6 +185,7 @@ function removedResponse() {
   return {
     enabled: true,
     pollIntervalSeconds: 30,
+    registrationPolicy: REGISTRATION_POLICY,
     connection: { configured: false, passwordConfigured: false },
     status: {
       state: "not_configured",
@@ -261,6 +268,7 @@ test("GET API는 인증 principal의 owner만 monitor에 전달하고 tenant별 
   assert.equal(responseB.statusCode, 200);
   assert.equal(JSON.parse(responseA.body).status.info.serverName, `server-${STREAMER_A_ID}`);
   assert.equal(JSON.parse(responseB.body).status.info.serverName, `server-${STREAMER_B_ID}`);
+  assert.deepEqual(JSON.parse(responseA.body).registrationPolicy, REGISTRATION_POLICY);
   assert.deepEqual(monitor.calls.map((call) => call.ownerId), [STREAMER_A_ID, STREAMER_B_ID]);
   assert.equal(responseA.headers["Cache-Control"], "no-store");
   assert.equal(responseB.headers["Cache-Control"], "no-store");
@@ -553,6 +561,11 @@ test("monitor 미주입 시 strict disabled 응답을 반환하고 공개 Palwor
   assert.equal(disabledBody.enabled, false);
   assert.equal(disabledBody.connection.configured, false);
   assert.equal(disabledBody.status.errorCode, "disabled");
+  assert.deepEqual(disabledBody.registrationPolicy, {
+    publicHttpsSelfService: false,
+    publicHttpsPort: 443,
+    privateNetworkRequiresOperatorApproval: true
+  });
   assert.equal(disabledBody.status.diagnostics.length, DIAGNOSTIC_KEYS.length);
   assert.equal(disabled.headers["Cache-Control"], "no-store");
   assert.equal(publicMeta.statusCode, 200);

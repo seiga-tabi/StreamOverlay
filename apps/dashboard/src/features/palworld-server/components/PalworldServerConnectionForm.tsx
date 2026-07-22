@@ -1,5 +1,8 @@
 import type { FormEvent } from "react";
-import type { PalworldServerConnectionSummary } from "@streamops/shared";
+import type {
+  PalworldServerConnectionSummary,
+  PalworldServerRegistrationPolicy
+} from "@streamops/shared";
 import {
   Button,
   Card,
@@ -19,6 +22,7 @@ import type { PalworldServerText } from "../i18n";
 
 type PalworldServerConnectionFormProps = {
   connection: PalworldServerConnectionSummary;
+  registrationPolicy: PalworldServerRegistrationPolicy;
   baseUrl: string;
   adminPassword: string;
   baseUrlError?: string;
@@ -36,6 +40,7 @@ type PalworldServerConnectionFormProps = {
 
 export function PalworldServerConnectionForm({
   connection,
+  registrationPolicy,
   baseUrl,
   adminPassword,
   baseUrlError,
@@ -64,6 +69,27 @@ export function PalworldServerConnectionForm({
         <CardDescription>{text.connectionDescription}</CardDescription>
       </CardHeader>
       <CardContent>
+        <aside className="palworld-server-registration-policy" aria-label={text.registrationPolicyTitle}>
+          <strong>{text.registrationPolicyTitle}</strong>
+          <p>{text.registrationServerValidation}</p>
+          <p>
+            {registrationPolicy.publicHttpsSelfService
+              ? text.registrationSelfServiceEnabled
+              : text.registrationSelfServiceDisabled}
+          </p>
+          <ul>
+            <li>
+              {registrationPolicy.publicHttpsSelfService
+                ? text.registrationPublicHttps.replace(
+                    "{port}",
+                    String(registrationPolicy.publicHttpsPort)
+                  )
+                : text.registrationPublicApproval}
+            </li>
+            <li>{text.registrationPrivateApproval}</li>
+            <li>{text.registrationPublicHttpBlocked}</li>
+          </ul>
+        </aside>
         <form className="palworld-server-form" id="palworld-server-connection-form" onSubmit={submit}>
           <FormField required invalid={Boolean(baseUrlError)} disabled={busy || disabled}>
             <FormLabel>{text.baseUrlLabel}</FormLabel>
@@ -81,7 +107,11 @@ export function PalworldServerConnectionForm({
                 value={baseUrl}
               />
             </FormControl>
-            <FormHint>{text.baseUrlHint}</FormHint>
+            <FormHint>
+              {registrationPolicy.publicHttpsSelfService
+                ? text.baseUrlHint
+                : text.baseUrlOperatorApprovalHint}
+            </FormHint>
             {baseUrlError ? <FormError>{baseUrlError}</FormError> : null}
           </FormField>
 
