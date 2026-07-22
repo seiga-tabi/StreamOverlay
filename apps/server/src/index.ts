@@ -25,6 +25,8 @@ import { LolProfileEnrichmentService } from "./services/lol-profile-enrichment.j
 import { LocalJsonLolProfileRepository } from "./services/lol-profile-store.js";
 import { LocalTtsService } from "./services/local-tts-service.js";
 import { SupportMailboxStore } from "./services/support-mailbox-store.js";
+import { loadPalworldDataService, type PalworldDataService } from "./services/palworld-data.js";
+import { PalworldPaldexValidationError } from "./data/palworld-paldex-artifact.js";
 import { PalworldServerClient } from "./services/palworld-server-client.js";
 import {
   PalworldServerConnectionStore,
@@ -48,6 +50,32 @@ import { newId, nowIso, toSafeErrorMessage, type PalworldServerAvailabilityError
 assertRuntimeConfig();
 
 const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
+let palworldDataService: PalworldDataService | undefined;
+try {
+  palworldDataService = await loadPalworldDataService();
+  const meta = palworldDataService.meta();
+  logger.event({
+    type: "palworld_data.runtime_ready",
+    gameVersion: meta.metadata.gameVersion,
+    sourceRevision: meta.metadata.sourceRevision,
+    pals: meta.counts.pals,
+    dataIntegrityGate: meta.gates.dataIntegrity.status,
+    imageAssetGate: meta.gates.imageAssets.status,
+    fallbackPals: meta.gates.imageAssets.fallbackPals
+  });
+} catch (error) {
+  const errorCode = error instanceof PalworldPaldexValidationError
+    ? error.code
+    : error instanceof SyntaxError
+      ? "PALWORLD_DATA_JSON_INVALID"
+      : (error as NodeJS.ErrnoException).code === "ENOENT"
+        ? "PALWORLD_DATA_ARTIFACT_MISSING"
+        : "PALWORLD_DATA_INITIALIZATION_FAILED";
+  logger.error({
+    type: "palworld_data.runtime_unavailable",
+    errorCode
+  });
+}
 const supportMailbox = appConfig.supportMailbox.enabled
   ? new SupportMailboxStore({
       filePath: appConfig.supportMailbox.statePath,
@@ -202,6 +230,7 @@ const server = http.createServer(createHttpHandler({
   disconnectStreamerDashboard: (twitchUserId) => dashboard.disconnectStreamer(twitchUserId),
   overlayStatusForStreamer: (twitchUserId) => overlay.statusForStreamer(twitchUserId),
   supportMailbox,
+  palworldDataService,
   palworldServerMonitor,
   palworldServerUnavailableCode,
   readiness: () => store.getReadiness(),

@@ -294,6 +294,35 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.palworld-coverage-notice {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-4);
+  border: thin solid color-mix(in srgb, var(--yoro-color-warning) 42%, var(--yoro-color-border));
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-warning-bg);
+  color: var(--yoro-color-text);
+}
+
+.palworld-coverage-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-coverage-notice p,
+.palworld-coverage-notice small {
+  margin: 0;
+}
+
+.palworld-coverage-notice small {
+  color: var(--yoro-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
 .palworld-shortcuts .yoro-card {
   min-inline-size: 0;
 }
@@ -512,6 +541,16 @@
 
 .palworld-section-title h2 {
   margin: 0;
+}
+
+.palworld-search-domain-section {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+}
+
+.palworld-search-domain-section .palworld-section-title {
+  margin-block-end: 0;
 }
 
 .palworld-pagination {

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import type { PalworldMetaResponse } from "@streamops/shared";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../shared/ui/Card";
-import { Metric } from "../../../shared/ui/Status";
+import { Badge, Metric } from "../../../shared/ui/Status";
 import { getPalworldMeta } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, setPalworldUrl } from "../utils/routes";
 import { PalworldError, PalworldLoading } from "./PalworldStates";
 import { PalworldSearchForm } from "./PalworldSearchForm";
+import { domainCoverage, PalworldDomainStatusBadge } from "./PalworldCoverageNotice";
 
 const shortcuts = [
   { page: "pals" as const, symbol: "P", titleKey: "pals" as const, descriptionKey: "palsDescription" as const },
@@ -52,7 +53,7 @@ export function PalworldHome({
     </section>
     <section className="palworld-shortcuts" aria-label={text.browse}>
       {shortcuts.map((shortcut) => <Card variant="interactive" onClick={() => setPalworldUrl(palworldPathForPage(shortcut.page))} key={shortcut.page}>
-        <CardHeader><span className="palworld-shortcut-icon" aria-hidden="true">{shortcut.symbol}</span><CardTitle data-ko={palworldI18n.ko[shortcut.titleKey]} data-ja={palworldI18n.ja[shortcut.titleKey]}>{text[shortcut.titleKey]}</CardTitle></CardHeader>
+        <CardHeader><span className="palworld-shortcut-icon" aria-hidden="true">{shortcut.symbol}</span><CardTitle data-ko={palworldI18n.ko[shortcut.titleKey]} data-ja={palworldI18n.ja[shortcut.titleKey]}>{text[shortcut.titleKey]}</CardTitle><PalworldDomainStatusBadge coverage={domainCoverage(meta, shortcut.page)} locale={locale} /></CardHeader>
         <CardContent><CardDescription data-ko={palworldI18n.ko[shortcut.descriptionKey]} data-ja={palworldI18n.ja[shortcut.descriptionKey]}>{text[shortcut.descriptionKey]}</CardDescription><strong className="palworld-shortcut-link">{text.browse} →</strong></CardContent>
       </Card>)}
     </section>
@@ -60,10 +61,43 @@ export function PalworldHome({
       {error ? <PalworldError locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
       {!meta && !error ? <PalworldLoading locale={locale} count={4} /> : null}
       {meta ? <>
-        <Metric label={text.registeredPals} value={meta.counts.pals.toLocaleString()} tone="success" />
-        <Metric label={text.registeredItems} value={meta.counts.items.toLocaleString()} tone="info" />
-        <Metric label={text.breedingPairs} value={meta.counts.breedingPairs.toLocaleString()} tone="warning" />
-        <Metric label={text.dataVersion} value={meta.metadata.gameVersion} description={`${meta.metadata.sourceName} · ${meta.metadata.sourceRevision}`} />
+        <Metric
+          label={<span data-ko={palworldI18n.ko.registeredPals} data-ja={palworldI18n.ja.registeredPals}>{text.registeredPals}</span>}
+          value={meta.domains.pals.recordCount.toLocaleString()}
+          description={`${meta.domains.pals.metadata.gameVersion} · ${meta.domains.pals.metadata.sourceName} · ${meta.domains.pals.metadata.sourceRevision}`}
+          status={<PalworldDomainStatusBadge coverage={meta.domains.pals} locale={locale} />}
+          tone="success"
+        />
+        <Metric
+          label={<span data-ko={palworldI18n.ko.registeredItems} data-ja={palworldI18n.ja.registeredItems}>{text.registeredItems}</span>}
+          value={meta.domains.items.recordCount.toLocaleString()}
+          description={`${meta.domains.items.metadata.gameVersion} · ${meta.domains.items.metadata.sourceName} · ${meta.domains.items.metadata.sourceRevision}`}
+          status={<PalworldDomainStatusBadge coverage={meta.domains.items} locale={locale} />}
+          tone="warning"
+        />
+        <Metric
+          label={<span data-ko={palworldI18n.ko.breedingPairs} data-ja={palworldI18n.ja.breedingPairs}>{text.breedingPairs}</span>}
+          value={meta.domains.breeding.recordCount.toLocaleString()}
+          description={`${meta.domains.breeding.metadata.gameVersion} · ${meta.domains.breeding.metadata.sourceName} · ${meta.domains.breeding.metadata.sourceRevision}`}
+          status={<PalworldDomainStatusBadge coverage={meta.domains.breeding} locale={locale} />}
+          tone="warning"
+        />
+        <Metric
+          label={<span data-ko={palworldI18n.ko.imageCoverage} data-ja={palworldI18n.ja.imageCoverage}>{text.imageCoverage}</span>}
+          value={meta.gates.imageAssets.fallbackPals.toLocaleString()}
+          description={<span data-ko={palworldI18n.ko.fallbackPals} data-ja={palworldI18n.ja.fallbackPals}>{text.fallbackPals}</span>}
+          status={(
+            <Badge
+              data-ko={meta.gates.imageAssets.status === "blocked_by_license" ? palworldI18n.ko.blockedByLicense : meta.gates.imageAssets.status === "partial" ? palworldI18n.ko.partiallyReady : palworldI18n.ko.ready}
+              data-ja={meta.gates.imageAssets.status === "blocked_by_license" ? palworldI18n.ja.blockedByLicense : meta.gates.imageAssets.status === "partial" ? palworldI18n.ja.partiallyReady : palworldI18n.ja.ready}
+              size="sm"
+              tone={meta.gates.imageAssets.status === "ready" ? "success" : "warning"}
+            >
+              {meta.gates.imageAssets.status === "blocked_by_license" ? text.blockedByLicense : meta.gates.imageAssets.status === "partial" ? text.partiallyReady : text.ready}
+            </Badge>
+          )}
+          tone="warning"
+        />
       </> : null}
     </section>
   </>;

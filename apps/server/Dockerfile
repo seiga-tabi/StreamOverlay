@@ -51,8 +51,11 @@ RUN npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shar
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/apps/server/config ./apps/server/config
+COPY --from=build /app/apps/server/data/palworld/1.0.1 ./apps/server/data/palworld/1.0.1
+COPY --from=build /app/apps/server/src/data/palworld-mappings ./apps/server/src/data/palworld-mappings
 COPY --from=build /app/apps/dashboard/dist ./apps/dashboard/dist
 COPY --from=build /app/apps/overlay/dist ./apps/overlay/dist
+RUN node apps/server/dist/scripts/smoke-palworld-runtime-artifacts.js
 RUN groupadd --gid 10001 streamops \
   && useradd --uid 10001 --gid streamops --home-dir /app --shell /usr/sbin/nologin --no-create-home streamops \
   && mkdir -p /app/logs /app/.streamops /app/reports \

@@ -32,6 +32,8 @@
     "configure:production": "node scripts/configure-production-runtime.mjs",
     "validate:config": "npm --workspace apps/server run validate:config",
     "validate:runtime": "npm --workspace apps/server run validate:runtime",
+    "validate:palworld-data": "npm --workspace apps/server run validate:palworld-data",
+    "validate:palworld-data:release": "npm --workspace apps/server run validate:palworld-data:release",
     "test:run": "npm --workspace packages/shared run test:run && npm --workspace apps/server run test:run && npm --workspace apps/bridge run test:run && npm --workspace apps/dashboard run test:run && npm --workspace apps/overlay run test:run && npm run test:ops && npm run check:tokens && npm run check:css-overrides && npm run test:visual:baseline && npm run test:visual:diff",
     "test": "npm run build:shared && npm --workspace packages/shared run test:run && npm run build:server && npm --workspace apps/server run test:run && npm run build:bridge && npm --workspace apps/bridge run test:run && npm --workspace apps/dashboard run test:run && npm --workspace apps/overlay run test:run && npm run test:ops && npm run check:tokens && npm run check:css-overrides && npm run test:visual:baseline && npm run test:visual:diff",
     "start:server": "npm --workspace apps/server run start",

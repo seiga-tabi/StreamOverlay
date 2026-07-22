@@ -83,6 +83,7 @@ export function PalDetailModal({
               <DataRow locale={locale} labelKo={palworldI18n.ko.defense} labelJa={palworldI18n.ja.defense}>{detail.stats.defense}</DataRow>
               <DataRow locale={locale} labelKo={palworldI18n.ko.moveSpeed} labelJa={palworldI18n.ja.moveSpeed}>{detail.stats.moveSpeed}</DataRow>
               <DataRow locale={locale} labelKo={palworldI18n.ko.stamina} labelJa={palworldI18n.ja.stamina}>{detail.stats.stamina}</DataRow>
+              <DataRow locale={locale} labelKo={palworldI18n.ko.nocturnal} labelJa={palworldI18n.ja.nocturnal}><span data-ko={detail.nocturnal ? palworldI18n.ko.yes : palworldI18n.ko.no} data-ja={detail.nocturnal ? palworldI18n.ja.yes : palworldI18n.ja.no}>{detail.nocturnal ? text.yes : text.no}</span></DataRow>
             </dl></section>
             <section><h4 data-ko={palworldI18n.ko.workSuitabilities} data-ja={palworldI18n.ja.workSuitabilities}>{text.workSuitabilities}</h4><div className="palworld-badge-row">{detail.workSuitabilities.map((work) => <Badge tone="success" key={work.type}>{workLabel(work.type, locale)} Lv.{work.level}</Badge>)}</div></section>
             <section><h4 data-ko={palworldI18n.ko.partnerSkill} data-ja={palworldI18n.ja.partnerSkill}>{text.partnerSkill}</h4><p>{detail.partnerSkill ? referenceName(detail.partnerSkill, locale) : text.none}</p></section>

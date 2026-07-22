@@ -11,6 +11,16 @@ import type {
 } from "@streamops/shared";
 
 const metadata: PalworldDataMetadata = {
+  gameVersion: "1.0.1",
+  sourceName: "Palworld fixed release artifact",
+  sourceUrl: "https://github.com/seiga-tabi/StreamOverlay/blob/main/apps/server/data/palworld/1.0.1/sources.lock.json",
+  sourceRevision: "fixed-source-revision",
+  extractedAt: "2026-07-21T00:00:00.000Z",
+  verifiedAt: "2026-07-21T00:00:00.000Z",
+  license: "Test-only Pal text fixture",
+};
+
+const sampleMetadata: PalworldDataMetadata = {
   gameVersion: "sample-baseline",
   sourceName: "StreamOverlay curated sample snapshot",
   sourceUrl: "https://github.com/seiga-tabi/StreamOverlay/blob/main/apps/server/src/data/PALWORLD_DATA.md",
@@ -35,6 +45,7 @@ const pals: PalworldPalDetail[] = [
       { type: "mining", level: 2 },
     ],
     stats: { hp: 95, attack: 95, defense: 95, moveSpeed: 450, stamina: 100 },
+    nocturnal: false,
     partnerSkill: {
       id: "penking-partner-skill",
       type: "partner",
@@ -63,6 +74,7 @@ const pals: PalworldPalDetail[] = [
       { type: "lumbering", level: 3 },
     ],
     stats: { hp: 80, attack: 125, defense: 80, moveSpeed: 600, stamina: 100 },
+    nocturnal: false,
     partnerSkill: {
       id: "bushi-partner-skill",
       type: "partner",
@@ -91,6 +103,7 @@ const pals: PalworldPalDetail[] = [
       { type: "mining", level: 3 },
     ],
     stats: { hp: 120, attack: 130, defense: 100, moveSpeed: 800, stamina: 100 },
+    nocturnal: true,
     partnerSkill: {
       id: "anubis-partner-skill",
       type: "partner",
@@ -170,7 +183,7 @@ const items: PalworldItemDetail[] = [
       },
     ],
     relatedItems: [],
-    metadata,
+    metadata: sampleMetadata,
   },
   {
     id: "ancient-technology-parts",
@@ -193,7 +206,7 @@ const items: PalworldItemDetail[] = [
       },
     ],
     relatedItems: [],
-    metadata,
+    metadata: sampleMetadata,
   },
 ];
 
@@ -263,7 +276,7 @@ function matches(query: string, values: Array<string | number>): boolean {
   return values.some((value) => normalize(String(value)).includes(term));
 }
 
-function pageResponse<T>(allItems: T[], url: URL): PalworldPaginatedResponse<T> {
+function pageResponse<T>(allItems: T[], url: URL, responseMetadata = metadata): PalworldPaginatedResponse<T> {
   const requestedPage = Number(url.searchParams.get("page") ?? "1");
   const pageSize = Number(url.searchParams.get("limit") ?? "24");
   const totalPages = Math.ceil(allItems.length / pageSize);
@@ -278,7 +291,7 @@ function pageResponse<T>(allItems: T[], url: URL): PalworldPaginatedResponse<T> 
       hasNextPage: page < totalPages,
       hasPreviousPage: page > 1,
     },
-    metadata,
+    metadata: responseMetadata,
   };
 }
 
@@ -342,7 +355,16 @@ async function installApiFixtures(page: Page): Promise<void> {
     if (url.pathname === "/api/palworld/meta") {
       await json(route, {
         metadata,
-        counts: { pals: pals.length, items: items.length, breedingPairs: 1 },
+        counts: { pals: 287, items: 10, breedingPairs: 3 },
+        domains: {
+          pals: { status: "ready", recordCount: 287, metadata },
+          items: { status: "sample", recordCount: 10, metadata: sampleMetadata },
+          breeding: { status: "sample", recordCount: 3, metadata: sampleMetadata },
+        },
+        gates: {
+          dataIntegrity: { passed: true, status: "ready" },
+          imageAssets: { passed: false, status: "blocked_by_license", readyImages: 0, fallbackPals: 287 },
+        },
       });
       return;
     }
@@ -356,6 +378,10 @@ async function installApiFixtures(page: Page): Promise<void> {
         pals: matchedPals,
         items: matchedItems,
         metadata,
+        domains: {
+          pals: { status: "ready", recordCount: 287, metadata },
+          items: { status: "sample", recordCount: 10, metadata: sampleMetadata },
+        },
       });
       return;
     }
@@ -364,14 +390,14 @@ async function installApiFixtures(page: Page): Promise<void> {
       return;
     }
     if (url.pathname === "/api/palworld/items") {
-      await json(route, pageResponse(filteredItems(url), url));
+      await json(route, pageResponse(filteredItems(url), url, sampleMetadata));
       return;
     }
     if (url.pathname === "/api/palworld/breeding/parents") {
       const child = aliases(url.searchParams.get("child") ?? "").find((id) => id === "anubis");
       await json(route, {
         child: palReference(child ?? "anubis"),
-        ...pageResponse(child ? [breedingPair] : [], url),
+        ...pageResponse(child ? [breedingPair] : [], url, sampleMetadata),
       });
       return;
     }
@@ -388,7 +414,7 @@ async function installApiFixtures(page: Page): Promise<void> {
         parentA: palReference(parentAId),
         parentB: palReference(parentBId),
         result: isSupported ? breedingPair : null,
-        metadata,
+        metadata: sampleMetadata,
       });
       return;
     }
@@ -491,6 +517,16 @@ test("펠월드 홈은 Hero 검색만 표시하고 게임 선택으로 LoL과 �
   await expect(page.getByTestId("hero-search")).toBeVisible();
   await expect(page.getByTestId("header-search")).toHaveCount(0);
   await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
+  const summaryMetrics = page.locator(".palworld-summary .yoro-metric");
+  await expect(summaryMetrics).toHaveCount(4);
+  await expect(summaryMetrics.nth(0)).toContainText("287");
+  await expect(summaryMetrics.nth(0)).toContainText("준비 완료");
+  await expect(summaryMetrics.nth(1)).toContainText("10");
+  await expect(summaryMetrics.nth(1)).toContainText("샘플");
+  await expect(summaryMetrics.nth(2)).toContainText("3");
+  await expect(summaryMetrics.nth(2)).toContainText("샘플");
+  await expect(summaryMetrics.nth(3)).toContainText("287");
+  await expect(summaryMetrics.nth(3)).toContainText("라이선스 승인 대기");
   await assertHealthyDocument(page, errors);
 
   await chooseGame(page, "league");
@@ -527,7 +563,16 @@ test("Pal 필터 query를 유지하고 카드·ESC·직접 URL 상세 Modal을 �
   const directDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" });
   await expect(directDialog).toBeVisible();
   await expect(directDialog).toContainText("アヌビス");
+  const koreanNocturnal = directDialog.locator(".palworld-data-row").filter({ hasText: "야행성" });
+  await expect(koreanNocturnal).toContainText("예");
   await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/pals/anubis");
+  await page.keyboard.press("Escape");
+  await page.locator(".public-locale-button").click();
+  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await page.getByTestId("pal-card").filter({ hasText: "アヌビス" }).click();
+  const japaneseDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "アヌビス" });
+  const japaneseNocturnal = japaneseDialog.locator(".palworld-data-row").filter({ hasText: "夜行性" });
+  await expect(japaneseNocturnal).toContainText("はい");
   await assertHealthyDocument(page, errors);
 });
 
@@ -540,13 +585,23 @@ test("underscore 아이템 ID의 직접 URL로 아이템 상세 Modal을 연다"
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("パルスフィア");
   await expect(dialog.getByText("pal-sphere", { exact: true })).toBeVisible();
+  const coverage = page.getByTestId("palworld-items-coverage");
+  await expect(coverage).toContainText("샘플");
+  await expect(coverage).toContainText("Pal 1.0.1 전체 아이템 데이터가 아닙니다");
+  await expect(coverage).toContainText("StreamOverlay curated sample snapshot");
   await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/items/pal_sphere");
+  await expect(page.getByText("응답 데이터 버전이 서로 다릅니다. 새로고침해 주세요.")).toHaveCount(0);
   await assertHealthyDocument(page, errors);
 });
 
 test("부모 Pal 자동완성으로 교배 결과를 조회하고 부모 위치를 교환한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld/breeding");
+
+  const coverage = page.getByTestId("palworld-breeding-coverage");
+  await expect(coverage).toContainText("샘플");
+  await expect(coverage).toContainText("Pal 1.0.1 전체 교배 데이터가 아닙니다");
+  await expect(coverage).toContainText("StreamOverlay curated sample snapshot");
 
   const parentA = page.getByTestId("breeding-parent-a");
   const parentB = page.getByTestId("breeding-parent-b");
@@ -586,6 +641,11 @@ test("통합 검색은 한국어와 일본어 이름 결과를 표시한다", as
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("パルスフィア");
   await expect(page.getByRole("heading", { name: "パルスフィア", level: 1 })).toBeVisible();
   await expect(page.getByTestId("item-card").filter({ hasText: "パルスフィア" })).toBeVisible();
+  const itemCoverage = page.getByTestId("palworld-items-coverage");
+  await expect(itemCoverage).toContainText("サンプル");
+  await expect(itemCoverage).toContainText("パル1.0.1の全アイテムデータではありません");
+  await expect(itemCoverage).toContainText("StreamOverlay curated sample snapshot");
+  await expect(page.getByText("応答データのバージョンが一致しません。更新してください。")).toHaveCount(0);
   await assertHealthyDocument(page, errors);
 });
 

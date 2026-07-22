@@ -7,6 +7,7 @@ import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { acquisitionLabel, categoryLabel } from "../utils/labels";
 import { setPalworldUrl } from "../utils/routes";
 import { ItemCard } from "./PalworldCards";
+import { PalworldDomainCoverageNotice, usePalworldDomainCoverage } from "./PalworldCoverageNotice";
 import { Pagination } from "./Pagination";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 
@@ -17,6 +18,7 @@ export function PalworldItemsPage({ locale, onOpenItem, params }: { locale: Palw
   const [error, setError] = useState(false);
   const [revision, setRevision] = useState(0);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
+  const coverage = usePalworldDomainCoverage("items");
   const text = palworldI18n[locale];
   const routeQuery = FILTER_KEYS.map((key) => `${key}=${params.get(key) ?? ""}`).join("&");
 
@@ -46,6 +48,7 @@ export function PalworldItemsPage({ locale, onOpenItem, params }: { locale: Palw
 
   return <section className="palworld-page-section">
     <header className="palworld-page-heading"><div><span aria-hidden="true">ITEMS</span><h1 data-ko={palworldI18n.ko.items} data-ja={palworldI18n.ja.items}>{text.items}</h1><p data-ko={palworldI18n.ko.itemsDescription} data-ja={palworldI18n.ja.itemsDescription}>{text.itemsDescription}</p></div></header>
+    <PalworldDomainCoverageNotice coverage={coverage} domain="items" locale={locale} />
     <form className="palworld-filter-bar" onSubmit={submit} aria-label={text.filter}>
       <label><span>{text.nameSearch}</span><Input type="search" value={nameQuery} onChange={(event) => setNameQuery(event.target.value)} /></label>
       <label><span>{text.category}</span><Select value={params.get("category") ?? ""} onChange={(event) => update("category", event.target.value)}><option value="">{text.all}</option>{PALWORLD_ITEM_CATEGORIES.map((value) => <option value={value} key={value}>{categoryLabel(value, locale)}</option>)}</Select></label>

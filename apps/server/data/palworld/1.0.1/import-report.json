@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "generatedAt": "2026-07-15T07:03:54.1507828+00:00",
+  "sourceCounts": {
+    "atlas": 289,
+    "palCalc": 299
+  },
+  "joins": {
+    "exactInternalId": 288,
+    "unmatchedIncluded": 0
+  },
+  "exclusions": {
+    "declared": 13,
+    "atlasExcluded": [
+      "PlantSlime_Flower",
+      "WorldTreeDragon"
+    ],
+    "palCalcOnlyExcluded": [
+      "YakushimaBoss001",
+      "YakushimaBoss001_Small",
+      "YakushimaMonster001",
+      "YakushimaMonster001_Blue",
+      "YakushimaMonster001_Pink",
+      "YakushimaMonster001_Purple",
+      "YakushimaMonster001_Rainbow",
+      "YakushimaMonster001_Red",
+      "YakushimaMonster002",
+      "YakushimaMonster003",
+      "YakushimaMonster003_Purple"
+    ]
+  },
+  "output": {
+    "pals": 287,
+    "normal": 203,
+    "variant": 84,
+    "missingNameKo": 0,
+    "missingNameJa": 0,
+    "missingNameEn": 0,
+    "unknownEnums": 0,
+    "missingRequiredStats": 0,
+    "missingBreedingPower": 0,
+    "idCollisions": 0,
+    "aliasCollisions": 0
+  },
+  "images": {
+    "status": "blocked_by_license",
+    "mappedPals": 287,
+    "readyImages": 0,
+    "uniqueImageFiles": 0,
+    "fallbackPals": 287
+  },
+  "dataIntegrityGate": {
+    "passed": true,
+    "status": "ready",
+    "failures": [],
+    "checks": {
+      "pals": 287,
+      "normal": 203,
+      "variant": 84,
+      "missingNameKo": 0,
+      "missingNameJa": 0,
+      "missingNameEn": 0,
+      "missingRequiredStats": 0,
+      "missingBreedingPower": 0,
+      "unknownEnums": 0,
+      "idCollisions": 0,
+      "aliasCollisions": 0,
+      "sourceChecksumVerified": true,
+      "mappingChecksumsVerified": true,
+      "artifactChecksumsVerified": true
+    }
+  },
+  "imageAssetGate": {
+    "passed": false,
+    "status": "blocked_by_license",
+    "failures": [
+      "PAL_IMAGE_REDISTRIBUTION_PERMISSION_NOT_VERIFIED",
+      "PAL_IMAGE_FILES_NOT_INCLUDED"
+    ],
+    "readyImages": 0,
+    "fallbackPals": 287
+  },
+  "runtimeActivation": true
+}

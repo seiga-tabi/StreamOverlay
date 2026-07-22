@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "release": "1.0.1",
+  "steamBuildId": "24181105",
+  "artifactTimestamp": "2026-07-15T07:03:54.1507828+00:00",
+  "verifiedAt": "2026-07-22T00:00:00.000Z",
+  "sources": [
+    {
+      "id": "atlas-pals",
+      "sourceName": "Awy64/palworld-atlas-data",
+      "sourceUrl": "https://github.com/Awy64/palworld-atlas-data",
+      "sourceRevision": "0385b3fd8bd757240d4a2c79615145122669abd5",
+      "inputPath": "published/v1/builds/24181105/pals/index.json",
+      "downloadUrl": "https://raw.githubusercontent.com/Awy64/palworld-atlas-data/0385b3fd8bd757240d4a2c79615145122669abd5/published/v1/builds/24181105/pals/index.json",
+      "sha256": "57fb4bf837061c1160d5f72755152245fe793e1b0073328714efd63c65ba5b47",
+      "bytes": 81803,
+      "recordCount": 289,
+      "license": "MIT",
+      "licenseUrl": "https://github.com/Awy64/palworld-atlas-data/blob/0385b3fd8bd757240d4a2c79615145122669abd5/LICENSE",
+      "licenseSha256": "46c6b7eae9ee308e80c8876a72cc277e8ef32891dea4e2c4eb440e43c2b4dbeb"
+    },
+    {
+      "id": "palcalc-db",
+      "sourceName": "tylercamp/palcalc",
+      "sourceUrl": "https://github.com/tylercamp/palcalc",
+      "sourceRevision": "211dd9fe520cbff9c5e3b9f8ec4f132669869714",
+      "sourceRelease": "v1.17.7",
+      "inputPath": "PalCalc.Model/db.json",
+      "downloadUrl": "https://raw.githubusercontent.com/tylercamp/palcalc/211dd9fe520cbff9c5e3b9f8ec4f132669869714/PalCalc.Model/db.json",
+      "sha256": "803d891afdb18bd00e24332844a7276bbe5c0855170ef90ef142f2f4d7698ed1",
+      "bytes": 1588212,
+      "recordCount": 299,
+      "databaseVersion": "v26",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/tylercamp/palcalc/blob/211dd9fe520cbff9c5e3b9f8ec4f132669869714/LICENSE.txt",
+      "licenseSha256": "60768557719376acb654991ff138d1b6ce5e9bf872582566b3f82b22e51ad5a4"
+    }
+  ],
+  "imageRightsReview": {
+    "status": "blocked_by_license",
+    "candidateSourceName": "tylercamp/palcalc Pal icons",
+    "candidateSourceRevision": "211dd9fe520cbff9c5e3b9f8ec4f132669869714",
+    "candidateDirectoryUrl": "https://github.com/tylercamp/palcalc/tree/211dd9fe520cbff9c5e3b9f8ec4f132669869714/PalCalc.UI/Resources/Pals",
+    "license": "UNVERIFIED_FOR_POCKETPAIR_GAME_ASSETS",
+    "reviewedAt": "2026-07-22T00:00:00.000Z",
+    "reasonCode": "REDISTRIBUTION_PERMISSION_NOT_VERIFIED",
+    "evidence": [
+      {
+        "url": "https://github.com/tylercamp/palcalc/blob/211dd9fe520cbff9c5e3b9f8ec4f132669869714/PalCalc.UI/View/AboutWindow.xaml",
+        "sha256": "b251a81e7f64f86f442904ba113326cf8dec9fe375bfae303ebbcef1ddd586fe",
+        "finding": "Palworld 자산은 Pocket Pair 소유이며 Pal 아이콘 출처가 Paldb.cc라고 명시되어 있습니다."
+      },
+      {
+        "url": "https://github.com/tylercamp/palcalc/blob/211dd9fe520cbff9c5e3b9f8ec4f132669869714/PalCalc.GenDB/README.md",
+        "sha256": "c2262c63e8a08f1e2dd9e0dd11a677eaca3a1b7eab10e389fec2f4121b7b76a3",
+        "finding": "Pal 아이콘을 Palworld 게임 파일에서 추출한다고 설명되어 있습니다."
+      }
+    ]
+  }
+}

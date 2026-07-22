@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "entries": [
+    { "atlas": "EmitFlame", "palcalc": "Kindling", "shared": "kindling" },
+    { "atlas": "Watering", "palcalc": "Watering", "shared": "watering" },
+    { "atlas": "Seeding", "palcalc": "Planting", "shared": "planting" },
+    { "atlas": "GenerateElectricity", "palcalc": "GenerateElectricity", "shared": "generating_electricity" },
+    { "atlas": "Handcraft", "palcalc": "Handiwork", "shared": "handiwork" },
+    { "atlas": "Collection", "palcalc": "Gathering", "shared": "gathering" },
+    { "atlas": "Deforest", "palcalc": "Lumbering", "shared": "lumbering" },
+    { "atlas": "Mining", "palcalc": "Mining", "shared": "mining" },
+    { "atlas": "ProductMedicine", "palcalc": "MedicineProduction", "shared": "medicine_production" },
+    { "atlas": "Cool", "palcalc": "Cooling", "shared": "cooling" },
+    { "atlas": "Transport", "palcalc": "Transporting", "shared": "transporting" },
+    { "atlas": "MonsterFarm", "palcalc": "Farming", "shared": "farming" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "entries": {
+    "Normal": "neutral",
+    "Fire": "fire",
+    "Water": "water",
+    "Electricity": "electric",
+    "Leaf": "grass",
+    "Ice": "ice",
+    "Earth": "ground",
+    "Dark": "dark",
+    "Dragon": "dragon"
+  }
+}

@@ -6,7 +6,9 @@ import {
   validatePalworldBreedingResultResponse,
   validatePalworldDataMetadata,
   validatePalworldDataSnapshot,
+  validatePalworldMetaResponse,
   validatePalworldPaginatedResponse,
+  validatePalworldPalDetail,
   validatePalworldPalSummary,
   validatePalworldSearchResult
 } from "../dist/index.js";
@@ -21,13 +23,21 @@ const metadata = {
   license: "MIT (교배 데이터), 자체 보유 게임 데이터 (나머지 데이터)"
 };
 
+const searchDomains = {
+  pals: { status: "ready", recordCount: 1, metadata },
+  items: { status: "sample", recordCount: 1, metadata }
+};
+
+const palImageHash = "a".repeat(64);
+const palImageUrl = `/images/palworld/${metadata.gameVersion}/pals/${palImageHash}.webp`;
+
 const palReference = {
   id: "anubis",
   number: 100,
   nameKo: "아누비스",
   nameJa: "アヌビス",
   nameEn: "Anubis",
-  imageUrl: "/palworld/pals/anubis.webp",
+  imageUrl: palImageUrl,
   elements: ["ground"]
 };
 
@@ -48,6 +58,7 @@ const pal = {
     { type: "mining", level: 3 }
   ],
   stats: { hp: 120, attack: 130, defense: 100, moveSpeed: 800, stamina: 100 },
+  nocturnal: false,
   partnerSkill: {
     id: "guardian_of_the_desert",
     type: "partner",
@@ -114,6 +125,41 @@ test("Palworld 메타데이터는 출처와 버전 검증 정보를 요구한다
   assert.equal(validatePalworldDataMetadata({ ...metadata, verifiedAt: "잘못된 날짜" }).ok, false);
 });
 
+test("Palworld meta는 도메인별 coverage와 provenance를 검증한다", () => {
+  const sampleMetadata = { ...metadata, gameVersion: "sample-baseline", sourceRevision: "sample-revision" };
+  const response = {
+    metadata,
+    counts: { pals: 287, items: 10, breedingPairs: 3 },
+    domains: {
+      pals: { status: "ready", recordCount: 287, metadata },
+      items: { status: "sample", recordCount: 10, metadata: sampleMetadata },
+      breeding: { status: "sample", recordCount: 3, metadata: sampleMetadata }
+    },
+    gates: {
+      dataIntegrity: { passed: true, status: "ready" },
+      imageAssets: {
+        passed: false,
+        status: "blocked_by_license",
+        readyImages: 0,
+        fallbackPals: 287
+      }
+    }
+  };
+  assert.equal(validatePalworldMetaResponse(response).ok, true);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    domains: { ...response.domains, pals: { ...response.domains.pals, recordCount: 286 } }
+  }).ok, false);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    domains: { ...response.domains, items: { ...response.domains.items, status: "complete" } }
+  }).ok, false);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    gates: { ...response.gates, imageAssets: { ...response.gates.imageAssets, fallbackPals: 286 } }
+  }).ok, false);
+});
+
 test("Pal summary는 한국어·일본어·영어 이름과 안전한 로컬 이미지를 검증한다", () => {
   const summary = {
     ...palReference,
@@ -122,10 +168,31 @@ test("Pal summary는 한국어·일본어·영어 이름과 안전한 로컬 이
     workSuitabilities: [{ type: "handiwork", level: 4 }]
   };
   assert.equal(validatePalworldPalSummary(summary).ok, true);
-  assert.equal(validatePalworldPalSummary({ ...summary, imageUrl: "https://unapproved.example/anubis.webp" }).ok, false);
+  for (const imageUrl of [
+    "https://unapproved.example/anubis.webp",
+    `/palworld/pals/${palImageHash}.webp`,
+    `/images/palworld/${metadata.gameVersion}/items/${palImageHash}.webp`,
+    `/images/palworld/${metadata.gameVersion}/pals/${palImageHash}.png`,
+    `/images/palworld/${metadata.gameVersion}/pals/not-a-content-hash.webp`,
+    `/images/palworld/${metadata.gameVersion}/pals/${palImageHash}.webp?cache=1`,
+    `/images/palworld/${metadata.gameVersion}/pals/${palImageHash}.webp#fragment`,
+    `/images/palworld/${metadata.gameVersion}/pals/../${palImageHash}.webp`,
+    `/images/palworld/${metadata.gameVersion}/pals/%2e%2e/${palImageHash}.webp`
+  ]) {
+    assert.equal(validatePalworldPalSummary({ ...summary, imageUrl }).ok, false, imageUrl);
+  }
   assert.equal(validatePalworldPalSummary({ ...summary, workSuitabilities: [{ type: "shell", level: 5 }] }).ok, false);
+  assert.equal(validatePalworldPalSummary({ ...summary, workSuitabilities: [{ type: "handiwork", level: 8 }] }).ok, true);
+  assert.equal(validatePalworldPalSummary({ ...summary, workSuitabilities: [{ type: "handiwork", level: 9 }] }).ok, false);
   assert.equal(validatePalworldPalSummary({ ...summary, id: "Anubis" }).ok, false);
   assert.equal(validatePalworldPalSummary({ ...summary, id: `a${"b".repeat(80)}` }).ok, false);
+});
+
+test("Pal 상세는 nocturnal boolean을 필수로 검증한다", () => {
+  assert.equal(validatePalworldPalDetail(pal).ok, true);
+  const { nocturnal: _nocturnal, ...withoutNocturnal } = pal;
+  assert.equal(validatePalworldPalDetail(withoutNocturnal).ok, false);
+  assert.equal(validatePalworldPalDetail({ ...pal, nocturnal: "false" }).ok, false);
 });
 
 test("Palworld 스냅샷은 정규화된 상세 데이터와 참조 무결성을 검증한다", () => {
@@ -161,6 +228,18 @@ test("Palworld 스냅샷은 정규화된 상세 데이터와 참조 무결성을
   const aliasCollision = validatePalworldDataSnapshot({ ...snapshot, pals: [pal, aliasA, aliasB] });
   assert.equal(aliasCollision.ok, false);
   assert.match(aliasCollision.ok ? "" : aliasCollision.error, /ID alias 충돌/);
+});
+
+test("Pal 이미지 경로 버전은 snapshot gameVersion과 일치해야 한다", () => {
+  const mismatchedMetadata = { ...metadata, gameVersion: "0.6.3" };
+  const result = validatePalworldDataSnapshot({
+    ...snapshot,
+    metadata: mismatchedMetadata,
+    pals: [{ ...pal, metadata: mismatchedMetadata }],
+    items: [{ ...item, metadata: mismatchedMetadata }]
+  });
+  assert.equal(result.ok, false);
+  assert.match(result.ok ? "" : result.error, /imageUrl.*metadata\.gameVersion/);
 });
 
 test("스냅샷 내 Pal과 아이템 참조는 canonical 레코드 필드와 일치해야 한다", () => {
@@ -232,18 +311,29 @@ test("통합 검색 응답 total은 반환된 Pal과 아이템 결과 수 이상
     total: 2,
     pals: [palSummary],
     items: [itemSummary],
-    metadata
+    metadata,
+    domains: searchDomains
   }).ok, true);
   assert.equal(validatePalworldSearchResult({
     query: "아누비스",
     total: 3,
     pals: [palSummary],
     items: [itemSummary],
-    metadata
+    metadata,
+    domains: searchDomains
   }).ok, true);
   assert.equal(validatePalworldSearchResult({
     query: "아누비스",
     total: 1,
+    pals: [palSummary],
+    items: [itemSummary],
+    metadata,
+    domains: searchDomains
+  }).ok, false);
+
+  assert.equal(validatePalworldSearchResult({
+    query: "아누비스",
+    total: 2,
     pals: [palSummary],
     items: [itemSummary],
     metadata

@@ -47,10 +47,15 @@ async function readError(response: Response): Promise<string> {
   } catch {
     // JSON 오류 본문이 아니면 아래의 안정적인 상태 메시지를 사용합니다.
   }
-  return `Palworld API failed: ${response.status}`;
+  return `Palworld API 요청 실패: ${response.status}`;
 }
 
-async function publicGet<T>(path: string, signal: AbortSignal | undefined, validate: PalworldValidator<T>): Promise<T> {
+async function publicGet<T>(
+  path: string,
+  signal: AbortSignal | undefined,
+  validate: PalworldValidator<T>,
+  observeActivePalVersion = true,
+): Promise<T> {
   const configuredBase = typeof window === "undefined" ? undefined : runtimeConfig().apiBase;
   const apiBase = configuredBase ?? import.meta.env?.VITE_API_BASE ?? "http://localhost:3000";
   const response = await fetch(`${apiBase}${path}`, {
@@ -61,8 +66,9 @@ async function publicGet<T>(path: string, signal: AbortSignal | undefined, valid
   if (!response.ok) throw new Error(await readError(response));
   const body: unknown = await response.json();
   const validated = validate(body);
-  if (!validated.ok) throw new Error(`Palworld API response invalid: ${validated.error}`);
-  observeGameVersion(validated.data);
+  if (!validated.ok) throw new Error(`Palworld API 응답 검증 실패: ${validated.error}`);
+  // 아이템·교배는 Pal 도감과 별도의 샘플 출처를 유지하므로 의도적인 버전 차이를 오류로 취급하지 않습니다.
+  if (observeActivePalVersion) observeGameVersion(validated.data);
   return validated.data;
 }
 
@@ -91,19 +97,19 @@ export function getPalworldPal(id: string, signal?: AbortSignal): Promise<Palwor
 }
 
 export function getPalworldItems(params: URLSearchParams, signal?: AbortSignal): Promise<PalworldPaginatedResponse<PalworldItemSummary>> {
-  return publicGet(queryPath("/api/palworld/items", params), signal, (value) => validatePalworldPaginatedResponse(value, validatePalworldItemSummary));
+  return publicGet(queryPath("/api/palworld/items", params), signal, (value) => validatePalworldPaginatedResponse(value, validatePalworldItemSummary), false);
 }
 
 export function getPalworldItem(id: string, signal?: AbortSignal): Promise<PalworldItemDetail> {
-  return publicGet(`/api/palworld/items/${encodeURIComponent(id)}`, signal, validatePalworldItemDetail);
+  return publicGet(`/api/palworld/items/${encodeURIComponent(id)}`, signal, validatePalworldItemDetail, false);
 }
 
 export function getPalworldBreeding(parentA: string, parentB: string, signal?: AbortSignal): Promise<PalworldBreedingResultResponse> {
   const params = new URLSearchParams({ parentA, parentB });
-  return publicGet(queryPath("/api/palworld/breeding", params), signal, validatePalworldBreedingResultResponse);
+  return publicGet(queryPath("/api/palworld/breeding", params), signal, validatePalworldBreedingResultResponse, false);
 }
 
 export function getPalworldBreedingParents(child: string, page = 1, pageSize = 12, signal?: AbortSignal): Promise<PalworldBreedingParentsResponse> {
   const params = new URLSearchParams({ child, page: String(page), limit: String(pageSize) });
-  return publicGet(queryPath("/api/palworld/breeding/parents", params), signal, validatePalworldBreedingParentsResponse);
+  return publicGet(queryPath("/api/palworld/breeding/parents", params), signal, validatePalworldBreedingParentsResponse, false);
 }

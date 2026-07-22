@@ -50,7 +50,16 @@ function parseEnv(text) {
   );
 }
 
-test("production 설정 도구는 secret을 노출하지 않고 검증된 파일만 0600으로 기록한다", async () => {
+async function skipWhenPalworldExternalSecretIsRequired(context) {
+  const configPath = path.join(projectRoot, "apps/server/config/palworld-server-status.json");
+  const config = JSON.parse(await readFile(configPath, "utf8"));
+  if (!config.enabled) return false;
+  context.skip("활성 Palworld 서버 상태 설정의 실제 외부 secret을 읽지 않도록 production 설정 통합 테스트를 건너뜁니다.");
+  return true;
+}
+
+test("production 설정 도구는 secret을 노출하지 않고 검증된 파일만 0600으로 기록한다", async (context) => {
+  if (await skipWhenPalworldExternalSecretIsRequired(context)) return;
   const directory = await mkdtemp(path.join(os.tmpdir(), "yoro-runtime-"));
   const envFile = path.join(directory, ".env");
   await writeFile(
@@ -86,7 +95,8 @@ test("production 설정 도구는 secret을 노출하지 않고 검증된 파일
   assert.equal((await stat(envFile)).mode & 0o777, 0o600);
 });
 
-test("production 설정 도구는 법적 운영정보가 미완료이면 원본을 변경하지 않는다", async () => {
+test("production 설정 도구는 법적 운영정보가 미완료이면 원본을 변경하지 않는다", async (context) => {
+  if (await skipWhenPalworldExternalSecretIsRequired(context)) return;
   const directory = await mkdtemp(path.join(os.tmpdir(), "yoro-runtime-invalid-"));
   const envFile = path.join(directory, ".env");
   const original = "NODE_ENV=development\nOVERLAY_ACCESS_TOKEN=\n";

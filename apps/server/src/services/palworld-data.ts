@@ -1,8 +1,11 @@
 import {
   assertPalworldDataSnapshot,
+  validatePalworldMetaResponse,
+  type PalworldBreedingPair,
   type PalworldBreedingParentsResponse,
   type PalworldBreedingResultResponse,
   type PalworldDataSnapshot,
+  type PalworldDomainCoverageMap,
   type PalworldItemDetail,
   type PalworldItemSummary,
   type PalworldMetaResponse,
@@ -11,9 +14,15 @@ import {
   type PalworldPalDetail,
   type PalworldPalReference,
   type PalworldPalSummary,
+  type PalworldRuntimeGates,
   type PalworldSearchResult
 } from "@streamops/shared";
 import { PALWORLD_SNAPSHOT } from "../data/palworld-snapshot.js";
+import {
+  loadPalworldPaldexRuntimeRelease,
+  type PalworldDataIntegrityGate,
+  type PalworldImageAssetGate
+} from "../data/palworld-paldex-adapter.js";
 import {
   normalizePalworldSearchTerm,
   type PalworldBreedingParentsQuery,
@@ -141,13 +150,58 @@ function pageItems<T>(items: T[], page: number, pageSize: number): T[] {
 
 export class PalworldDataService {
   private readonly snapshot: PalworldDataSnapshot;
+  private readonly supplementalSnapshot: PalworldDataSnapshot;
   private readonly palsById: ReadonlyMap<string, PalworldPalDetail>;
   private readonly itemsById: ReadonlyMap<string, PalworldItemDetail>;
+  private readonly sourceInternalIds: Readonly<Record<string, string>>;
+  private readonly domains: PalworldDomainCoverageMap;
+  private readonly gates: PalworldRuntimeGates;
 
-  constructor(snapshot: unknown = PALWORLD_SNAPSHOT) {
+  constructor(snapshot: unknown, options: {
+    supplementalSnapshot?: unknown;
+    sourceInternalIds?: Readonly<Record<string, string>>;
+    domains?: PalworldDomainCoverageMap;
+    gates?: PalworldRuntimeGates;
+  } = {}) {
     this.snapshot = assertPalworldDataSnapshot(snapshot);
+    this.supplementalSnapshot = options.supplementalSnapshot === undefined
+      ? this.snapshot
+      : assertPalworldDataSnapshot(options.supplementalSnapshot);
     this.palsById = this.indexByIdAliases(this.snapshot.pals);
-    this.itemsById = this.indexByIdAliases(this.snapshot.items);
+    this.itemsById = this.indexByIdAliases(this.supplementalSnapshot.items);
+    this.sourceInternalIds = options.sourceInternalIds ?? {};
+    const snapshotIsSample = this.snapshot.metadata.gameVersion === "sample-baseline";
+    const supplementalIsSample = this.supplementalSnapshot.metadata.gameVersion === "sample-baseline";
+    this.domains = options.domains ?? {
+      pals: {
+        status: snapshotIsSample ? "sample" : "ready",
+        recordCount: this.snapshot.pals.length,
+        metadata: this.snapshot.metadata
+      },
+      items: {
+        status: supplementalIsSample ? "sample" : "ready",
+        recordCount: this.supplementalSnapshot.items.length,
+        metadata: this.supplementalSnapshot.metadata
+      },
+      breeding: {
+        status: supplementalIsSample ? "sample" : "ready",
+        recordCount: this.supplementalSnapshot.breedingPairs.length,
+        metadata: this.supplementalSnapshot.metadata
+      }
+    };
+    this.gates = options.gates ?? {
+      dataIntegrity: { passed: true, status: "ready" },
+      imageAssets: {
+        passed: this.snapshot.pals.every((pal) => pal.imageUrl !== undefined),
+        status: this.snapshot.pals.every((pal) => pal.imageUrl !== undefined) ? "ready" : "partial",
+        readyImages: this.snapshot.pals.filter((pal) => pal.imageUrl !== undefined).length,
+        fallbackPals: this.snapshot.pals.filter((pal) => pal.imageUrl === undefined).length
+      }
+    };
+    const metaValidation = validatePalworldMetaResponse(this.meta());
+    if (!metaValidation.ok) {
+      throw new TypeError(`Palworld runtime metadata 검증에 실패했습니다. ${metaValidation.error}`);
+    }
   }
 
   private indexByIdAliases<T extends { id: string }>(entries: T[]): ReadonlyMap<string, T> {
@@ -169,10 +223,24 @@ export class PalworldDataService {
       metadata: this.snapshot.metadata,
       counts: {
         pals: this.snapshot.pals.length,
-        items: this.snapshot.items.length,
-        breedingPairs: this.snapshot.breedingPairs.length
+        items: this.supplementalSnapshot.items.length,
+        breedingPairs: this.supplementalSnapshot.breedingPairs.length
+      },
+      domains: {
+        pals: { ...this.domains.pals, metadata: { ...this.domains.pals.metadata } },
+        items: { ...this.domains.items, metadata: { ...this.domains.items.metadata } },
+        breeding: { ...this.domains.breeding, metadata: { ...this.domains.breeding.metadata } }
+      },
+      gates: {
+        dataIntegrity: { ...this.gates.dataIntegrity },
+        imageAssets: { ...this.gates.imageAssets }
       }
     };
+  }
+
+  sourceInternalIdForPal(id: string): string | undefined {
+    const pal = identifierAliases(id).map((alias) => this.palsById.get(alias)).find(Boolean);
+    return pal ? this.sourceInternalIds[pal.id] : undefined;
   }
 
   search(rawQuery: string, limit: number): PalworldSearchResult {
@@ -188,7 +256,7 @@ export class PalworldDataService {
     const pals = matchedPals
       .slice(0, limit)
       .map(({ pal }) => palSummary(pal));
-    const matchedItems = this.snapshot.items
+    const matchedItems = this.supplementalSnapshot.items
       .map((item) => ({ item, score: matchScore(term, [...identifierAliases(item.id), item.nameKo, item.nameJa, item.nameEn]) }))
       .filter((entry): entry is { item: PalworldItemDetail; score: number } => entry.score !== undefined)
       .sort((left, right) => left.score - right.score || compareText(left.item.nameEn, right.item.nameEn));
@@ -200,7 +268,11 @@ export class PalworldDataService {
       total: matchedPals.length + matchedItems.length,
       pals,
       items,
-      metadata: this.snapshot.metadata
+      metadata: this.snapshot.metadata,
+      domains: {
+        pals: { ...this.domains.pals, metadata: { ...this.domains.pals.metadata } },
+        items: { ...this.domains.items, metadata: { ...this.domains.items.metadata } }
+      }
     };
   }
 
@@ -236,7 +308,7 @@ export class PalworldDataService {
 
   listItems(query: PalworldItemListQuery): PalworldPaginatedResponse<PalworldItemSummary> {
     const term = query.q ? normalizePalworldSearchTerm(query.q) : undefined;
-    const filtered = this.snapshot.items
+    const filtered = this.supplementalSnapshot.items
       .filter((item) => term === undefined || matchScore(term, [...identifierAliases(item.id), item.nameKo, item.nameJa, item.nameEn]) !== undefined)
       .filter((item) => query.category === undefined || item.category === query.category)
       .filter((item) => query.rarity === undefined || item.rarity === query.rarity)
@@ -257,7 +329,7 @@ export class PalworldDataService {
     return {
       items: pageItems(filtered, pageInfo.page, query.limit).map(itemSummary),
       pagination: pageInfo,
-      metadata: this.snapshot.metadata
+      metadata: this.supplementalSnapshot.metadata
     };
   }
 
@@ -270,29 +342,87 @@ export class PalworldDataService {
   breeding(query: PalworldBreedingQuery): PalworldBreedingResultResponse {
     const parentA = this.getPal(query.parentA);
     const parentB = this.getPal(query.parentB);
-    const result = this.snapshot.breedingPairs.find((pair) =>
+    const sampleResult = this.supplementalSnapshot.breedingPairs.find((pair) =>
       (pair.parentA.id === parentA.id && pair.parentB.id === parentB.id) ||
       (pair.parentA.id === parentB.id && pair.parentB.id === parentA.id)
     ) ?? null;
+    const result = sampleResult ? this.withActivePalReferences(sampleResult) : null;
     return {
       parentA: palReference(parentA),
       parentB: palReference(parentB),
       result,
-      metadata: this.snapshot.metadata
+      metadata: this.supplementalSnapshot.metadata
     };
   }
 
   breedingParents(query: PalworldBreedingParentsQuery): PalworldBreedingParentsResponse {
     const child = this.getPal(query.child);
-    const pairs = this.snapshot.breedingPairs.filter((pair) => pair.child.id === child.id);
+    const pairs = this.supplementalSnapshot.breedingPairs
+      .filter((pair) => pair.child.id === child.id)
+      .map((pair) => this.withActivePalReferences(pair));
     const pageInfo = pagination(query.page, query.limit, pairs.length);
     return {
       child: palReference(child),
       items: pageItems(pairs, pageInfo.page, query.limit),
       pagination: pageInfo,
-      metadata: this.snapshot.metadata
+      metadata: this.supplementalSnapshot.metadata
+    };
+  }
+
+  private withActivePalReferences(pair: PalworldBreedingPair): PalworldBreedingPair {
+    return {
+      ...pair,
+      parentA: palReference(this.getPal(pair.parentA.id)),
+      parentB: palReference(this.getPal(pair.parentB.id)),
+      child: palReference(this.getPal(pair.child.id))
     };
   }
 }
 
-export const palworldDataService = new PalworldDataService();
+function runtimeGates(input: {
+  dataIntegrityGate: PalworldDataIntegrityGate;
+  imageAssetGate: PalworldImageAssetGate;
+}): PalworldRuntimeGates {
+  return {
+    dataIntegrity: {
+      passed: input.dataIntegrityGate.passed,
+      status: input.dataIntegrityGate.status
+    },
+    imageAssets: {
+      passed: input.imageAssetGate.passed,
+      status: input.imageAssetGate.status,
+      readyImages: input.imageAssetGate.readyImages,
+      fallbackPals: input.imageAssetGate.fallbackPals
+    }
+  };
+}
+
+export async function loadPalworldDataService(options: {
+  releaseRoot?: string;
+  imageRoot?: string;
+  mappingRoot?: string;
+} = {}): Promise<PalworldDataService> {
+  const release = await loadPalworldPaldexRuntimeRelease(options);
+  return new PalworldDataService(release.snapshot, {
+    supplementalSnapshot: PALWORLD_SNAPSHOT,
+    sourceInternalIds: release.sourceInternalIds,
+    domains: {
+      pals: {
+        status: "ready",
+        recordCount: release.snapshot.pals.length,
+        metadata: release.snapshot.metadata
+      },
+      items: {
+        status: "sample",
+        recordCount: PALWORLD_SNAPSHOT.items.length,
+        metadata: PALWORLD_SNAPSHOT.metadata
+      },
+      breeding: {
+        status: "sample",
+        recordCount: PALWORLD_SNAPSHOT.breedingPairs.length,
+        metadata: PALWORLD_SNAPSHOT.metadata
+      }
+    },
+    gates: runtimeGates(release)
+  });
+}

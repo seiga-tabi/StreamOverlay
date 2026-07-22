@@ -1,10 +1,12 @@
 # 펠월드 데이터 스냅샷 안내
 
-`palworld-snapshot.ts`는 공개 페이지와 API 동작을 검증하기 위한 **소규모 기준 샘플**이다. 현재 게임 전체 데이터나 최신 게임 버전을 나타내지 않으며, 실제 운영용 전체 스냅샷으로 교체하기 전까지 `gameVersion`을 `sample-baseline`으로 표시한다.
+`palworld-snapshot.ts`는 공개 페이지와 API 동작을 검증하기 위한 **소규모 기준 샘플**이다. Pal 287종의 운영 데이터 출처로 사용하지 않으며, 아직 전체 데이터가 없는 아이템과 교배 domain만 `sample-baseline` provenance와 `sample`/`incomplete` coverage로 격리해 제공한다.
+
+Palworld 1.0.1의 검증된 287종 Pal 텍스트·수치 데이터는 `apps/server/data/palworld/1.0.1/`의 immutable release artifact에서 읽는다. `dataIntegrityGate`가 `ready`이면 Pal domain을 runtime에 활성화한다. 이미지 재배포 권리는 별도 `imageAssetGate`로 관리하며, 현재 `blocked_by_license`, `readyImages: 0`, `fallbackPals: 287` 상태이므로 모든 화면은 기존 fallback 그래픽을 사용한다. `npm run validate:palworld-data:release`가 이 이미지 제한 때문에 실패하는 것은 의도된 동작이다. 반입·검증·운영 전환 절차는 `docs/PALWORLD_DATA_IMPORT.md`와 `docs/PALWORLD_IMAGE_ASSETS.md`를 따른다.
 
 ## 출처와 재현성
 
-- Pal 및 아이템 레코드는 StreamOverlay 저장소에서 직접 정규화한 샘플이다.
+- Pal 287종은 고정 source와 mapping에서 결정적으로 생성하며, 아이템·교배 샘플은 StreamOverlay 저장소에서 직접 정규화한다.
 - 교배 계산 구조는 MIT 라이선스 프로젝트 `tylercamp/palcalc`의 commit `59d70fecd99698021809b09760fa0a57adaefea2`를 참고했다.
 - `mlg404/palworld-paldex-api`는 오래된 데이터일 수 있어 API 스키마 비교에만 참고하며, 이 스냅샷의 데이터 출처로 사용하지 않는다.
 - 다른 DB 사이트의 HTML을 scraping하거나 런타임에 외부 커뮤니티 API를 호출하지 않는다.

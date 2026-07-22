@@ -124,7 +124,7 @@ import { CommunityModerationService, CommunityModerationServiceError } from "../
 import {
   PALWORLD_PUBLIC_CACHE_CONTROL,
   PalworldRecordNotFoundError,
-  palworldDataService
+  type PalworldDataService
 } from "../services/palworld-data.js";
 import {
   PalworldQueryError,
@@ -198,11 +198,18 @@ const SECURITY_HEADERS = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
 };
 
-const PALWORLD_CACHE_HEADERS = {
-  "Cache-Control": PALWORLD_PUBLIC_CACHE_CONTROL,
-  "X-Palworld-Data-Version": palworldDataService.meta().metadata.gameVersion,
-  "X-Palworld-Data-Revision": palworldDataService.meta().metadata.sourceRevision
-};
+const PALWORLD_DATA_UNAVAILABLE_RESPONSE = {
+  error: "PALWORLD_DATA_UNAVAILABLE",
+  message: "Palworld 데이터를 사용할 수 없습니다."
+} as const;
+
+function palworldCacheHeaders(metadata: { gameVersion: string; sourceRevision: string }): Record<string, string> {
+  return {
+    "Cache-Control": PALWORLD_PUBLIC_CACHE_CONTROL,
+    "X-Palworld-Data-Version": metadata.gameVersion,
+    "X-Palworld-Data-Revision": metadata.sourceRevision
+  };
+}
 
 type SkinOptionsResponse = {
   status: "ready" | "missing_streamer" | "riot_not_configured" | "invalid_streamer" | "not_found" | "no_mastery";
@@ -1741,6 +1748,7 @@ type HttpHandlerInput = {
   connectionStatus?: () => DashboardServerStatus["connections"];
   disconnectStreamerDashboard?: (twitchUserId: string) => void;
   overlayStatusForStreamer?: (twitchUserId: string) => OverlayStatus;
+  palworldDataService?: PalworldDataService;
   palworldServerMonitor?: PalworldServerMonitor;
   palworldServerUnavailableCode?: PalworldServerAvailabilityErrorCode;
 };
@@ -5488,52 +5496,55 @@ export function createHttpHandler(input: HttpHandlerInput) {
           buildReadinessResponse(readiness, appConfig.build)
         );
       }
-      if (req.method === "GET" && url.pathname === "/api/palworld/meta") {
-        return sendJson(req, res, 200, palworldDataService.meta(), PALWORLD_CACHE_HEADERS);
-      }
-      if (req.method === "GET" && url.pathname === "/api/palworld/search") {
-        const query = parsePalworldSearchQuery(url.searchParams);
-        return sendJson(req, res, 200, palworldDataService.search(query.q, query.limit), PALWORLD_CACHE_HEADERS);
-      }
-      if (req.method === "GET" && url.pathname === "/api/palworld/pals") {
-        const query = parsePalworldPalListQuery(url.searchParams);
-        return sendJson(req, res, 200, palworldDataService.listPals(query), PALWORLD_CACHE_HEADERS);
-      }
-      const palworldPalDetailMatch = url.pathname.match(/^\/api\/palworld\/pals\/([^/]+)$/);
-      if (req.method === "GET" && palworldPalDetailMatch?.[1]) {
-        const decodedId = decodeUrlPathSegment(palworldPalDetailMatch[1]);
-        if (decodedId === undefined) throw new PalworldQueryError("Pal ID 인코딩이 올바르지 않습니다.");
-        return sendJson(
-          req,
-          res,
-          200,
-          palworldDataService.getPal(parsePalworldId(decodedId, "Pal ID")),
-          PALWORLD_CACHE_HEADERS
-        );
-      }
-      if (req.method === "GET" && url.pathname === "/api/palworld/items") {
-        const query = parsePalworldItemListQuery(url.searchParams);
-        return sendJson(req, res, 200, palworldDataService.listItems(query), PALWORLD_CACHE_HEADERS);
-      }
-      const palworldItemDetailMatch = url.pathname.match(/^\/api\/palworld\/items\/([^/]+)$/);
-      if (req.method === "GET" && palworldItemDetailMatch?.[1]) {
-        const decodedId = decodeUrlPathSegment(palworldItemDetailMatch[1]);
-        if (decodedId === undefined) throw new PalworldQueryError("아이템 ID 인코딩이 올바르지 않습니다.");
-        return sendJson(
-          req,
-          res,
-          200,
-          palworldDataService.getItem(parsePalworldId(decodedId, "아이템 ID")),
-          PALWORLD_CACHE_HEADERS
-        );
-      }
-      if (req.method === "GET" && url.pathname === "/api/palworld/breeding/parents") {
-        const query = parsePalworldBreedingParentsQuery(url.searchParams);
-        return sendJson(req, res, 200, palworldDataService.breedingParents(query), PALWORLD_CACHE_HEADERS);
-      }
-      if (req.method === "GET" && url.pathname === "/api/palworld/breeding") {
-        const query = parsePalworldBreedingQuery(url.searchParams);
-        return sendJson(req, res, 200, palworldDataService.breeding(query), PALWORLD_CACHE_HEADERS);
+      if (req.method === "GET" && url.pathname.startsWith("/api/palworld/")) {
+        const palworldData = input.palworldDataService;
+        if (!palworldData) {
+          return sendJson(req, res, 503, PALWORLD_DATA_UNAVAILABLE_RESPONSE, { "Cache-Control": "no-store" });
+        }
+        const activeMeta = palworldData.meta();
+        const cacheHeaders = palworldCacheHeaders(activeMeta.metadata);
+        if (url.pathname === "/api/palworld/meta") {
+          return sendJson(req, res, 200, activeMeta, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/search") {
+          const query = parsePalworldSearchQuery(url.searchParams);
+          const response = palworldData.search(query.q, query.limit);
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/pals") {
+          const query = parsePalworldPalListQuery(url.searchParams);
+          const response = palworldData.listPals(query);
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        const palworldPalDetailMatch = url.pathname.match(/^\/api\/palworld\/pals\/([^/]+)$/);
+        if (palworldPalDetailMatch?.[1]) {
+          const decodedId = decodeUrlPathSegment(palworldPalDetailMatch[1]);
+          if (decodedId === undefined) throw new PalworldQueryError("Pal ID 인코딩이 올바르지 않습니다.");
+          const response = palworldData.getPal(parsePalworldId(decodedId, "Pal ID"));
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/items") {
+          const query = parsePalworldItemListQuery(url.searchParams);
+          const response = palworldData.listItems(query);
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        const palworldItemDetailMatch = url.pathname.match(/^\/api\/palworld\/items\/([^/]+)$/);
+        if (palworldItemDetailMatch?.[1]) {
+          const decodedId = decodeUrlPathSegment(palworldItemDetailMatch[1]);
+          if (decodedId === undefined) throw new PalworldQueryError("아이템 ID 인코딩이 올바르지 않습니다.");
+          const response = palworldData.getItem(parsePalworldId(decodedId, "아이템 ID"));
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/breeding/parents") {
+          const query = parsePalworldBreedingParentsQuery(url.searchParams);
+          const response = palworldData.breedingParents(query);
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/breeding") {
+          const query = parsePalworldBreedingQuery(url.searchParams);
+          const response = palworldData.breeding(query);
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
       }
       if (req.method === "GET" && url.pathname === "/api/dashboard/auth/status") {
         const surface = dashboardAuthSurface(url.searchParams.get("surface"));

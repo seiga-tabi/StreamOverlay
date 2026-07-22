@@ -2,6 +2,7 @@ import test, { after, before, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
+const { loadPalworldDataService } = await import("../dist/services/palworld-data.js");
 const { appConfig } = await import("../dist/config.js");
 const {
   ADMIN_DASHBOARD_SESSION_COOKIE,
@@ -13,6 +14,7 @@ const {
   PalworldServerMonitorRateLimitError
 } = await import("../dist/services/palworld-server-monitor.js");
 const { Store } = await import("../dist/services/store.js");
+const palworldDataService = await loadPalworldDataService();
 
 const DASHBOARD_ORIGIN = "http://localhost:3000";
 const STREAMER_A_ID = "palworld-owner-a";
@@ -230,6 +232,7 @@ function handlerInput(store, sessions, monitor, logger, extra = {}) {
     logger,
     twitchAuth: {},
     actions: { async dispatchOne() {} },
+    palworldDataService,
     ...extra
   };
 }

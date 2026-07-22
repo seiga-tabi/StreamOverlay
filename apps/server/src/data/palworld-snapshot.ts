@@ -438,6 +438,7 @@ const PALS: PalworldPalDetail[] = PAL_SUMMARIES.map((pal) => {
   if (!seed) throw new TypeError(`Pal 상세 seed를 찾을 수 없습니다: ${pal.id}`);
   return {
     ...pal,
+    nocturnal: false,
     stats: seed.stats,
     partnerSkill: partnerSkill(pal),
     activeSkills: [seed.activeSkill],

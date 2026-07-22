@@ -56,6 +56,53 @@ test("빈 통합 검색어는 네트워크 요청 전에 거부한다", async ()
   await assert.rejects(searchPalworld("   "), /검색어/);
 });
 
+test("통합 검색 응답은 Pal과 샘플 아이템의 상태·출처를 분리해 검증한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  const metadata = {
+    gameVersion: "1.0.1",
+    sourceName: "고정 Pal 데이터",
+    sourceUrl: "https://example.com/palworld-source",
+    sourceRevision: "fixed-source-revision",
+    extractedAt: "2026-07-01T00:00:00.000Z",
+    verifiedAt: "2026-07-02T00:00:00.000Z",
+    license: "테스트 전용",
+  };
+  const sampleMetadata = {
+    ...metadata,
+    gameVersion: "sample-baseline",
+    sourceName: "샘플 아이템 데이터",
+    sourceRevision: "sample-revision",
+  };
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: () => true,
+    } as unknown as Window,
+    fetch: async () => new Response(JSON.stringify({
+      query: "Pal 스피어",
+      total: 1,
+      pals: [],
+      items: [palSphere],
+      metadata,
+      domains: {
+        pals: { status: "ready", recordCount: 287, metadata },
+        items: { status: "sample", recordCount: 10, metadata: sampleMetadata },
+      },
+    }), { status: 200, headers: { "content-type": "application/json" } }),
+  });
+  try {
+    const result = await searchPalworld("Pal 스피어");
+    assert.equal(result.domains.pals.status, "ready");
+    assert.equal(result.domains.pals.metadata.gameVersion, "1.0.1");
+    assert.equal(result.domains.items.status, "sample");
+    assert.equal(result.domains.items.metadata.gameVersion, "sample-baseline");
+    assert.equal(result.domains.items.metadata.sourceRevision, "sample-revision");
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
+});
+
 test("교배 부모 위치 교환은 동일 부모도 안정적으로 처리한다", () => {
   assert.deepEqual(swapBreedingParents("a", "b"), ["b", "a"]);
   assert.deepEqual(swapBreedingParents("a", "a"), ["a", "a"]);
@@ -94,18 +141,31 @@ test("서로 다른 API 데이터 버전을 받으면 불일치 UI 이벤트를 
       __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
       dispatchEvent: (event: Event) => { events.push(event.type); return true; },
     } as unknown as Window,
-    fetch: async () => new Response(JSON.stringify({
-      metadata: {
-        gameVersion: versions.shift(),
+    fetch: async () => {
+      const gameVersion = versions.shift() ?? "v0.5.5";
+      const metadata = {
+        gameVersion,
         sourceName: "Curated test snapshot",
         sourceUrl: "https://example.com/source",
         sourceRevision: "test-revision",
         extractedAt: "2026-07-01T00:00:00.000Z",
         verifiedAt: "2026-07-02T00:00:00.000Z",
         license: "Test-only fixture",
-      },
-      counts: { pals: 1, items: 1, breedingPairs: 1 },
-    }), { status: 200, headers: { "content-type": "application/json" } }),
+      };
+      return new Response(JSON.stringify({
+        metadata,
+        counts: { pals: 1, items: 1, breedingPairs: 1 },
+        domains: {
+          pals: { status: "ready", recordCount: 1, metadata },
+          items: { status: "sample", recordCount: 1, metadata },
+          breeding: { status: "sample", recordCount: 1, metadata },
+        },
+        gates: {
+          dataIntegrity: { passed: true, status: "ready" },
+          imageAssets: { passed: false, status: "blocked_by_license", readyImages: 0, fallbackPals: 1 },
+        },
+      }), { status: 200, headers: { "content-type": "application/json" } });
+    },
   });
   try {
     await getPalworldMeta();

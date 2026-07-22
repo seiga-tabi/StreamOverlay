@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "release": "1.0.1",
+  "entries": [
+    {
+      "source": "atlas-and-palcalc",
+      "sourceInternalId": "PlantSlime_Flower",
+      "reasonCode": "DUPLICATE_PALDEX_APPEARANCE",
+      "reasonKo": "PlantSlime과 동일한 도감 번호·이름·핵심 수치를 공유하는 Gumoss 외형 중복 레코드입니다."
+    },
+    {
+      "source": "atlas-only",
+      "sourceInternalId": "WorldTreeDragon",
+      "reasonCode": "PUBLIC_PALDEX_STATUS_UNVERIFIED",
+      "reasonKo": "Atlas에만 존재하며 공개 도감 포함 여부와 현지화 이름이 확인되지 않았습니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster001",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster001_Blue",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster001_Red",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster001_Purple",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster001_Pink",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster001_Rainbow",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster002",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster003",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaMonster003_Purple",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaBoss001",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    },
+    {
+      "source": "palcalc-only",
+      "sourceInternalId": "YakushimaBoss001_Small",
+      "reasonCode": "EVENT_COLLAB_RECORD",
+      "reasonKo": "도감 번호 10000 이상인 이벤트·콜라보 전용 레코드입니다."
+    }
+  ]
+}

@@ -10,6 +10,11 @@
     "start": "node dist/index.js",
     "validate:config": "tsx src/scripts/validate-config.ts",
     "validate:runtime": "tsx src/scripts/validate-runtime-config.ts",
+    "fetch:palworld-data": "tsx src/scripts/fetch-palworld-paldex.ts",
+    "generate:palworld-data": "tsx src/scripts/generate-palworld-paldex.ts",
+    "validate:palworld-data": "tsx src/scripts/validate-palworld-paldex.ts",
+    "validate:palworld-data:release": "tsx src/scripts/validate-palworld-paldex.ts --release",
+    "diff:palworld-data": "tsx src/scripts/diff-palworld-paldex.ts",
     "test:run": "node --test test/*.test.mjs",
     "test": "npm run build && npm run test:run"
   },

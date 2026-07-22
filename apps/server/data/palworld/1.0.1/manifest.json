@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "generatedAt": "2026-07-15T07:03:54.1507828+00:00",
+  "sourceLockSha256": "690a38bfd2e02f79c17cfc842c230adf385f69141c4e6660f18f7bf25bcb36be",
+  "paldexSha256": "4a6baf9e3a85ee165850289839ad91d95dfd5f22c8937f4e5628c30bb3198ad5",
+  "imagesManifestSha256": "bb66f2b0a2e085bc74310e9d65a5bceeeb7678a9316a498633e32cff763e3457",
+  "importReportSha256": "2e00381e2613a595865c9c538fb307c66c85d4571f86b515930925e62c563f14",
+  "mappingSha256": {
+    "publicIdMap": "174d68027ae7f7c54ecd3158f0d98a03eb644c4f70cfe2aba70aeddbe7a67acd",
+    "elements": "2ad974b1579429f89cdbd6b9551bddecbf000d7da459922cd98aa325f0faa00a",
+    "workSuitabilities": "f9f9ace45fe15a509b287b7371c8c4bbf96184693090371ffc63582eebb7c79a",
+    "exclusions": "3c9a0a61a15d44e85047ff2f8382cc1d70fedea3110c0aa2d1737e7b603722bb",
+    "imageOverrides": "132961597726bd7807227c02e191e59fadf25ee3aca7e3d2805b6ae763c2c729"
+  },
+  "counts": {
+    "pals": 287,
+    "normal": 203,
+    "variant": 84,
+    "imageMappings": 287,
+    "readyImages": 0,
+    "uniqueImageFiles": 0
+  },
+  "dataIntegrityGate": {
+    "passed": true,
+    "status": "ready",
+    "failures": [],
+    "checks": {
+      "pals": 287,
+      "normal": 203,
+      "variant": 84,
+      "missingNameKo": 0,
+      "missingNameJa": 0,
+      "missingNameEn": 0,
+      "missingRequiredStats": 0,
+      "missingBreedingPower": 0,
+      "unknownEnums": 0,
+      "idCollisions": 0,
+      "aliasCollisions": 0,
+      "sourceChecksumVerified": true,
+      "mappingChecksumsVerified": true,
+      "artifactChecksumsVerified": true
+    }
+  },
+  "imageAssetGate": {
+    "passed": false,
+    "status": "blocked_by_license",
+    "failures": [
+      "PAL_IMAGE_REDISTRIBUTION_PERMISSION_NOT_VERIFIED",
+      "PAL_IMAGE_FILES_NOT_INCLUDED"
+    ],
+    "readyImages": 0,
+    "fallbackPals": 287
+  },
+  "runtimeActivation": true
+}

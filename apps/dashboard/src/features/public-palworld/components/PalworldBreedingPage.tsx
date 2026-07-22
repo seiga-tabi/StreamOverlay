@@ -11,6 +11,7 @@ import { formatPalNumber } from "../utils/search";
 import { swapBreedingParents } from "../utils/breeding";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldPalPicker } from "./PalworldPalPicker";
+import { PalworldDomainCoverageNotice, usePalworldDomainCoverage } from "./PalworldCoverageNotice";
 import { PalworldEmpty, PalworldError } from "./PalworldStates";
 import { Pagination } from "./Pagination";
 
@@ -33,6 +34,7 @@ export function PalworldBreedingPage({ locale, onOpenPal }: { locale: PalworldLo
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [revision, setRevision] = useState(0);
+  const coverage = usePalworldDomainCoverage("breeding");
   const text = palworldI18n[locale];
 
   useEffect(() => {
@@ -71,6 +73,7 @@ export function PalworldBreedingPage({ locale, onOpenPal }: { locale: PalworldLo
 
   return <section className="palworld-page-section">
     <header className="palworld-page-heading"><div><span aria-hidden="true">BREEDING</span><h1 data-ko={palworldI18n.ko.breeding} data-ja={palworldI18n.ja.breeding}>{text.breeding}</h1><p data-ko={palworldI18n.ko.breedingDescription} data-ja={palworldI18n.ja.breedingDescription}>{text.breedingDescription}</p></div></header>
+    <PalworldDomainCoverageNotice coverage={coverage} domain="breeding" locale={locale} />
     <div className="palworld-tabs" role="tablist"><button className={tab === "parents" ? "active" : ""} role="tab" aria-selected={tab === "parents"} onClick={() => setTab("parents")}>{text.parentsToChild}</button><button className={tab === "child" ? "active" : ""} role="tab" aria-selected={tab === "child"} onClick={() => setTab("child")}>{text.childToParents}</button></div>
     {tab === "parents" ? <>
       <Card className="palworld-breeding-input-card"><CardContent><div className="palworld-breeding-pickers"><PalworldPalPicker label={text.parentA} locale={locale} selected={parentA} onChange={setParentA} testId="breeding-parent-a" /><Button className="palworld-swap-button" variant="secondary" aria-label={text.swapParents} data-testid="breeding-swap" disabled={!parentA && !parentB} onClick={() => { const [nextA, nextB] = swapBreedingParents(parentA, parentB); setParentA(nextA); setParentB(nextB); }}>⇄</Button><PalworldPalPicker label={text.parentB} locale={locale} selected={parentB} onChange={setParentB} testId="breeding-parent-b" /></div><div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div></CardContent></Card>
