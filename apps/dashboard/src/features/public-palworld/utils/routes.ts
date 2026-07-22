@@ -1,9 +1,10 @@
 export const PALWORLD_ROUTE_EVENT = "palworldroutechange";
 
-export type PalworldPage = "home" | "pals" | "breeding" | "items" | "search";
+export type PalworldPage = "home" | "streamers" | "pals" | "breeding" | "items" | "search";
 
 const PAGE_PATHS: Record<PalworldPage, string> = {
   home: "/palworld",
+  streamers: "/palworld/streamers",
   pals: "/palworld/pals",
   breeding: "/palworld/breeding",
   items: "/palworld/items",
@@ -33,6 +34,15 @@ export function palworldPathForPage(page: PalworldPage): string {
 export function palworldUrl(page: PalworldPage, params?: URLSearchParams): string {
   const query = params?.toString();
   return `${palworldPathForPage(page)}${query ? `?${query}` : ""}`;
+}
+
+export function palworldTwitchReturnTo(pathname: string, search = ""): string {
+  const path = normalizePath(pathname);
+  if (!Object.values(PAGE_PATHS).includes(path)) return PAGE_PATHS.home;
+  const params = new URLSearchParams(search);
+  params.delete("viewer_twitch");
+  const query = params.toString();
+  return `${path}${query ? `?${query}` : ""}`;
 }
 
 export function setPalworldUrl(url: string, replace = false): void {

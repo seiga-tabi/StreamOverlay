@@ -685,17 +685,18 @@
 }
 
 .public-dashboard-shell .public-game-selector-logo {
+  display: block;
   flex: 0 0 auto;
-  width: calc(var(--yoro-space-8) + var(--yoro-space-2));
-  height: var(--yoro-space-6);
-  padding: var(--yoro-space-1);
-  border-radius: var(--yoro-radius-sm);
-  background: var(--yoro-color-surface-strong);
+  width: var(--yoro-space-8);
+  height: var(--yoro-space-8);
+  padding: var(--yoro-space-0);
+  border-radius: var(--yoro-radius-circle);
+  background: transparent;
   object-fit: contain;
 }
 
 .public-dashboard-shell .public-game-selector-logo.is-palworld {
-  background: var(--yoro-color-product-gray-field);
+  background: transparent;
 }
 
 .public-dashboard-shell .public-game-selector-label {
@@ -1024,7 +1025,7 @@
     grid-template:
       "product spacer tools toggle" auto
       "tray tray tray tray" auto
-      / var(--yoro-size-touch-target) minmax(var(--yoro-space-0), 1fr) auto var(--yoro-size-touch-target) !important;
+      / var(--yoro-size-public-header-brand-mobile) minmax(var(--yoro-space-0), 1fr) auto var(--yoro-size-touch-target) !important;
     gap: var(--yoro-space-2) !important;
     width: calc(100% - var(--yoro-space-6)) !important;
     min-width: var(--yoro-space-0);
@@ -1034,8 +1035,8 @@
 
   .public-dashboard-shell .public-header-product-cluster {
     grid-area: product !important;
-    width: var(--yoro-size-touch-target);
-    min-width: var(--yoro-size-touch-target);
+    width: var(--yoro-size-public-header-brand-mobile);
+    min-width: var(--yoro-size-public-header-brand-mobile);
   }
 
   .public-dashboard-shell .public-header-product-cluster > .public-game-selector,
@@ -1047,16 +1048,17 @@
 
   .public-dashboard-shell .public-header-brand {
     display: inline-flex !important;
-    width: var(--yoro-size-touch-target) !important;
-    min-width: var(--yoro-size-touch-target) !important;
+    width: var(--yoro-size-public-header-brand-mobile) !important;
+    min-width: var(--yoro-size-public-header-brand-mobile) !important;
     min-height: var(--yoro-size-touch-target) !important;
     padding: var(--yoro-space-1) !important;
   }
 
   .public-dashboard-shell .public-app-header-v2 .public-header-brand .public-brand-mark {
     display: block !important;
-    width: calc(var(--yoro-space-8) + var(--yoro-space-1));
+    width: 100%;
     max-width: 100%;
+    max-height: var(--yoro-size-touch-target);
     height: auto;
     object-fit: contain;
   }
@@ -1142,7 +1144,7 @@
 
   .public-dashboard-shell .public-game-selector-tray-list .public-game-selector-option {
     flex: 0 0 auto;
-    grid-template-columns: var(--yoro-size-public-game-mark) auto;
+    grid-template-columns: var(--yoro-space-8) auto;
     width: auto;
     min-width: calc(var(--yoro-size-touch-target) * 3);
     min-height: var(--yoro-size-touch-target);

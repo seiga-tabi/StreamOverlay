@@ -342,7 +342,200 @@ test("운영 Twitch OAuth 시작은 프록시 host가 달라도 설정된 callba
   });
 });
 
-test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송인 Riot ID를 매칭한다", async () => {
+test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀 URL에 보존한다", async () => {
+  await withAuthConfig(async () => {
+    const captured = [];
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      publicTwitchAuth: {
+        createAuthorizationUrl(forceVerify, redirectUri, returnUrl) {
+          captured.push({ forceVerify, redirectUri, returnUrl });
+          return "https://id.twitch.tv/oauth2/authorize?state=public%3Atest";
+        }
+      },
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore()
+    });
+    const allowedPaths = [
+      "/palworld",
+      "/palworld/streamers",
+      "/palworld/pals",
+      "/palworld/breeding",
+      "/palworld/items",
+      "/palworld/search?q=%ED%8C%94%20100%25&pal=pal-1",
+      "/dashboard",
+      "/dashboard/seiga/key"
+    ];
+
+    for (const returnTo of allowedPaths) {
+      const req = createRequest(
+        "GET",
+        `/api/public/twitch/auth/start?return_to=${encodeURIComponent(returnTo)}`,
+        undefined,
+        { host: "localhost:3000" }
+      );
+      const res = createResponse();
+      await handler(req, res);
+      assert.equal(res.statusCode, 302);
+    }
+
+    assert.equal(captured.length, allowedPaths.length);
+    for (let index = 0; index < captured.length; index += 1) {
+      const expected = new URL(allowedPaths[index], "http://localhost:3000");
+      const actual = new URL(captured[index].returnUrl);
+      assert.equal(actual.origin, "http://localhost:3000");
+      assert.equal(actual.pathname, expected.pathname);
+      assert.equal(actual.searchParams.get("viewer_twitch"), "connected");
+    }
+    const searchReturnUrl = new URL(captured[5].returnUrl);
+    assert.equal(searchReturnUrl.searchParams.get("q"), "팔 100%");
+    assert.equal(searchReturnUrl.searchParams.get("pal"), "pal-1");
+  });
+});
+
+test("공개 Twitch OAuth 복귀 URL은 신뢰되지 않은 Host를 설정된 public origin으로 대체한다", async () => {
+  await withAuthConfig(async () => {
+    let capturedReturnUrl = "";
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      publicTwitchAuth: {
+        createAuthorizationUrl(_forceVerify, _redirectUri, returnUrl) {
+          capturedReturnUrl = returnUrl;
+          return "https://id.twitch.tv/oauth2/authorize?state=public%3Atest";
+        }
+      },
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore()
+    });
+    const req = createRequest(
+      "GET",
+      "/api/public/twitch/auth/start?return_to=%2Fpalworld%2Fstreamers",
+      undefined,
+      { host: "evil.example" }
+    );
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 302);
+    assert.equal(capturedReturnUrl, "http://localhost:3000/palworld/streamers?viewer_twitch=connected");
+  });
+});
+
+test("공개 Twitch OAuth는 외부·정규화·userinfo 우회 복귀 경로를 LoL로 대체한다", async () => {
+  await withAuthConfig(async () => {
+    const captured = [];
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      publicTwitchAuth: {
+        createAuthorizationUrl(_forceVerify, _redirectUri, returnUrl) {
+          captured.push(returnUrl);
+          return "https://id.twitch.tv/oauth2/authorize?state=public%3Atest";
+        }
+      },
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore()
+    });
+    let deeplyEncodedBackslash = "\\";
+    for (let depth = 0; depth < 8; depth += 1) deeplyEncodedBackslash = encodeURIComponent(deeplyEncodedBackslash);
+    const rejectedPaths = [
+      "https://evil.example/palworld",
+      "//evil.example/palworld",
+      "//user:password@evil.example/palworld",
+      "/palworld\\@evil.example",
+      "/palworld%5c@evil.example",
+      `/palworld${deeplyEncodedBackslash}@evil.example`,
+      "/palworld\u000astreamers",
+      "/palworld/../dashboard",
+      "/palworld/search?q=%250a",
+      "/palworld#streamers",
+      "/community"
+    ];
+
+    for (const returnTo of rejectedPaths) {
+      const req = createRequest(
+        "GET",
+        `/api/public/twitch/auth/start?return_to=${encodeURIComponent(returnTo)}`,
+        undefined,
+        { host: "localhost:3000" }
+      );
+      const res = createResponse();
+      await handler(req, res);
+      assert.equal(res.statusCode, 302);
+    }
+
+    assert.deepEqual(captured, rejectedPaths.map(() => "http://localhost:3000/lol?viewer_twitch=connected"));
+  });
+});
+
+test("공개 Twitch callback은 Palworld query와 연결 표시를 보존하고 공용 Path cookie를 발급한다", async () => {
+  await withAuthConfig(async () => {
+    let storedReturnUrl = "";
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      publicTwitchAuth: {
+        createAuthorizationUrl(_forceVerify, _redirectUri, returnUrl) {
+          storedReturnUrl = returnUrl;
+          return "https://id.twitch.tv/oauth2/authorize?state=public%3Atest-state";
+        },
+        consumeState(state) {
+          assert.equal(state, "public:test-state");
+          return {
+            redirectUri: "http://localhost:3000/api/public/twitch/auth/callback",
+            returnUrl: storedReturnUrl
+          };
+        },
+        async connectWithCode(code, redirectUri) {
+          assert.equal(code, "oauth-code");
+          assert.equal(redirectUri, "http://localhost:3000/api/public/twitch/auth/callback");
+          return {
+            id: "viewer-session",
+            expiresAt: new Date(Date.now() + 60_000).toISOString()
+          };
+        }
+      },
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore()
+    });
+    const returnTo = "/palworld/search?q=%ED%8C%94&pal=pal-1";
+    const startReq = createRequest(
+      "GET",
+      `/api/public/twitch/auth/start?return_to=${encodeURIComponent(returnTo)}`,
+      undefined,
+      { host: "localhost:3000" }
+    );
+    const startRes = createResponse();
+    await handler(startReq, startRes);
+    assert.equal(startRes.statusCode, 302);
+
+    const callbackReq = createRequest(
+      "GET",
+      "/api/public/twitch/auth/callback?code=oauth-code&state=public%3Atest-state",
+      undefined,
+      { host: "localhost:3000" }
+    );
+    const callbackRes = createResponse();
+    await handler(callbackReq, callbackRes);
+
+    assert.equal(callbackRes.statusCode, 302);
+    const location = new URL(callbackRes.headers.Location);
+    assert.equal(location.pathname, "/palworld/search");
+    assert.equal(location.searchParams.get("q"), "팔");
+    assert.equal(location.searchParams.get("pal"), "pal-1");
+    assert.equal(location.searchParams.get("viewer_twitch"), "connected");
+    const setCookie = callbackRes.headers["Set-Cookie"];
+    assert.match(setCookie, new RegExp(`^${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session;`));
+    assert.match(setCookie, /Path=\//);
+    assert.match(setCookie, /HttpOnly/);
+    assert.match(setCookie, /SameSite=Lax/);
+  });
+});
+
+test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지하고 매칭 정보만 선택적으로 더한다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({
       store: {
@@ -381,19 +574,28 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
           assert.equal(context.userId, "999");
           assert.equal(limit, 100);
           return {
-            total: 1,
+            total: 2,
             truncated: false,
-            channels: [{
-              broadcasterId: "55",
-              broadcasterLogin: "streamer",
-              broadcasterName: "Streamer",
-              profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/streamer.png",
-              followedAt: "2026-06-26T00:00:00Z"
-            }]
+            channels: [
+              {
+                broadcasterId: "55",
+                broadcasterLogin: "streamer",
+                broadcasterName: "Streamer",
+                profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/streamer.png",
+                followedAt: "2026-06-26T00:00:00Z"
+              },
+              {
+                broadcasterId: "77",
+                broadcasterLogin: "variety_streamer",
+                broadcasterName: "Variety Streamer",
+                profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/variety.png",
+                followedAt: "2026-06-25T00:00:00Z"
+              }
+            ]
           };
         },
         async getStreamsByUserIds(_context, userIds) {
-          assert.deepEqual(userIds, ["55"]);
+          assert.deepEqual(userIds, ["55", "77"]);
           return new Map([["55", {
             userId: "55",
             userLogin: "streamer",
@@ -406,7 +608,7 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
         },
         async checkUserSubscriptions(context, broadcasterIds) {
           assert.equal(context.userId, "999");
-          assert.deepEqual(broadcasterIds, ["55"]);
+          assert.deepEqual(broadcasterIds, ["55", "77"]);
           return new Map([["55", {
             broadcasterId: "55",
             broadcasterLogin: "streamer",
@@ -432,11 +634,16 @@ test("공개 Twitch 팔로우 전적 API는 viewer 세션으로 팔로우 방송
     assert.equal(res.statusCode, 200);
     const body = JSON.parse(res.body);
     assert.equal(body.connected, true);
+    assert.equal(body.total, 2);
     assert.equal(body.matchedCount, 1);
+    assert.equal(body.channels.length, 2);
     assert.equal(body.channels[0].riotId, "Seiga#JP1");
     assert.equal(body.channels[0].isLive, true);
     assert.equal(body.channels[0].profileImageUrl, "https://static-cdn.jtvnw.net/jtv_user_pictures/streamer.png");
     assert.equal(body.channels[0].rankedStats.tier, "DIAMOND");
+    assert.equal(body.channels[1].twitchUserId, "77");
+    assert.equal(body.channels[1].riotId, undefined);
+    assert.equal(body.channels[1].isLive, false);
     assert.equal(body.subscriptionScopeGranted, true);
     assert.equal(body.subscriptions[0].twitchUserId, "55");
     assert.equal(body.subscriptions[0].tierLabel, "Tier 1");

@@ -3,10 +3,13 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ChampionFilterSelect } from "../src/features/public-lol/components/ChampionFilterSelect";
+import { PublicAppHeader } from "../src/features/public-lol/components/PublicAppHeader";
+import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
 import { Button } from "../src/shared/ui/Button";
 import { StatusPill } from "../src/shared/ui/Status";
+import { PublicTwitchAccountChip } from "../src/shared/PublicTwitchAccountChip";
 
 test("Shared Button loading 상태가 중복 클릭 방지와 접근성 속성을 함께 출력한다", () => {
   const html = renderToStaticMarkup(<Button loading loadingLabel="검색 중">검색</Button>);
@@ -22,6 +25,153 @@ test("Shared Status가 tone과 size 계약을 마크업에 유지한다", () => 
   assert.match(html, /data-tone="live"/);
   assert.match(html, /data-size="sm"/);
   assert.match(html, />LIVE</);
+});
+
+test("공통 Twitch account chip이 프로필과 접근 가능한 메뉴 action을 렌더링한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicTwitchAccountChip
+      configured
+      connected
+      loginLabel="Twitch 로그인"
+      loginTitle="Twitch 로그인이 필요합니다."
+      logoutLabel="Twitch 로그아웃"
+      menuActions={[{
+        id: "dashboard",
+        label: "대시보드 열기",
+        onSelect: () => undefined,
+        variant: "dashboard"
+      }]}
+      menuLabel="Twitch 프로필 메뉴"
+      onLogin={() => undefined}
+      onLogout={() => undefined}
+      onOpenChange={() => undefined}
+      open
+      user={{
+        login: "yorogg",
+        displayName: "YORO",
+        profileImageUrl: "https://example.com/avatar.png"
+      }}
+    />
+  );
+
+  assert.match(html, /aria-haspopup="menu"/);
+  assert.match(html, /aria-expanded="true"/);
+  assert.match(html, /role="menu" aria-label="Twitch 프로필 메뉴"/);
+  assert.equal((html.match(/role="menuitem"/g) ?? []).length, 2);
+  assert.match(html, /src="https:\/\/example\.com\/avatar\.png"/);
+  assert.match(html, />YORO</);
+  assert.match(html, /class="dashboard"/);
+  assert.match(html, />Twitch 로그아웃</);
+});
+
+test("공통 Twitch account chip이 미로그인 상태에서 token 없이 로그인 동작만 노출한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicTwitchAccountChip
+      configured
+      connected={false}
+      loginLabel="Twitch ログイン"
+      loginTitle="Twitch ログインが必要です。"
+      logoutLabel="Twitch ログアウト"
+      menuLabel="Twitch プロフィールメニュー"
+      onLogin={() => undefined}
+      onLogout={() => undefined}
+      onOpenChange={() => undefined}
+      open={false}
+    />
+  );
+
+  assert.match(html, /aria-expanded="false"/);
+  assert.match(html, />Twitch ログイン</);
+  assert.doesNotMatch(html, /role="menu"/);
+  assert.doesNotMatch(html, /Twitch ログアウト/);
+});
+
+test("LoL PublicAppHeader가 공통 Twitch account chip으로 기존 프로필을 표시한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicAppHeader
+      activePage="search"
+      activeTarget="search"
+      filterActive={false}
+      locale="ko"
+      onAutoLocale={() => undefined}
+      onHome={() => undefined}
+      onLocale={() => undefined}
+      onPage={() => undefined}
+      onStreamerDashboard={() => undefined}
+      onStreamerRecord={() => undefined}
+      onStreamerRegister={() => undefined}
+      onTwitchLogin={() => undefined}
+      onTwitchLogout={() => undefined}
+      showFilters={false}
+      showSearch={false}
+      twitchStatus={{
+        configured: true,
+        connected: true,
+        missingScopes: [],
+        requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+        user: {
+          id: "viewer-1",
+          login: "yorogg",
+          displayName: "YORO",
+          profileImageUrl: "https://example.com/avatar.png"
+        }
+      }}
+    />
+  );
+
+  assert.match(html, /public-twitch-login-chip connected/);
+  assert.match(html, /aria-expanded="false"/);
+  assert.match(html, /src="https:\/\/example\.com\/avatar\.png"/);
+  assert.match(html, />YORO</);
+  assert.match(html, /class="public-brand-mark public-brand-mobile-logo" src="\/images\/yorogg-home-logo\.webp" alt="" aria-hidden="true"/);
+  assert.doesNotMatch(html, /src="\/images\/yorogg-mark\.png"/);
+});
+
+test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기 동작을 유지한다", () => {
+  const localized = (label: string) => ({ label, ko: label, ja: `JA ${label}` });
+  const text: PublicHomeSearchPanelText = {
+    eyebrow: localized("전적 검색"),
+    title: localized("YORO.gg"),
+    description: localized("소환사 검색"),
+    loadingStatus: localized("불러오는 중"),
+    readyStatus: localized("준비 완료"),
+    errorTitle: localized("오류"),
+    emptyTitle: localized("검색 결과 없음"),
+    emptyDescription: localized("다시 검색하세요"),
+    guideTitle: localized("검색 안내"),
+    guideDescription: localized("Riot ID를 입력하세요"),
+    liveTitle: localized("팔로우 중인 LIVE 스트리머"),
+    liveViewAll: localized("전체 보기"),
+    liveWatch: localized("방송 보기"),
+    liveEmptyTitle: localized("LIVE 방송 없음"),
+    liveEmptyDescription: localized("방송이 시작되면 표시됩니다"),
+  };
+  const html = renderToStaticMarkup(
+    <PublicHomeSearchPanel
+      error=""
+      liveLoading={false}
+      liveStreamers={[{
+        id: "streamer-1",
+        name: "LoL Streamer",
+        primaryMeta: "League of Legends",
+        avatarLabel: "L",
+        channelUrl: "https://www.twitch.tv/lol_streamer",
+        statusLabel: "LIVE",
+      }]}
+      loading={false}
+      onShowStreamers={() => undefined}
+      searchForm={<form aria-label="소환사 검색" />}
+      showEmptyResult={false}
+      text={text}
+    />
+  );
+
+  assert.match(html, /data-testid="public-live-streamer-rail"/u);
+  assert.match(html, /class="public-home-brand-logo-image" src="\/images\/yorogg-home-logo\.webp"/u);
+  assert.match(html, /LoL Streamer/u);
+  assert.match(html, /League of Legends/u);
+  assert.match(html, /href="https:\/\/www\.twitch\.tv\/lol_streamer"/u);
+  assert.match(html, /전체 보기/u);
 });
 
 test("챔피언 필터가 선택된 챔피언 이미지와 목록형 선택 접근성 정보를 출력한다", () => {

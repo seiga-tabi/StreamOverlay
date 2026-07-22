@@ -962,16 +962,57 @@ function followerOAuthReturnUrlForRequest(req: IncomingMessage, storedReturnUrl:
 }
 
 function publicLolReturnUrlForRequest(req: IncomingMessage): string {
-  const url = new URL("/lol", publicOriginForRequest(req));
+  const url = new URL("/lol", trustedPublicOriginForRequest(req));
   url.searchParams.set("viewer_twitch", "connected");
   return url.toString();
+}
+
+const PUBLIC_TWITCH_PALWORLD_RETURN_PATHS = new Set([
+  "/palworld",
+  "/palworld/streamers",
+  "/palworld/pals",
+  "/palworld/breeding",
+  "/palworld/items",
+  "/palworld/search"
+]);
+
+function hasUnsafePublicTwitchReturnValue(value: string): boolean {
+  if (value.length > 4_096) return true;
+  let decoded = value;
+  for (let depth = 0; depth < 8; depth += 1) {
+    if (/[\\\u0000-\u001f\u007f]/u.test(decoded)) return true;
+    const next = decoded.replace(/%([0-9a-f]{2})/giu, (_match, hex: string) =>
+      String.fromCharCode(Number.parseInt(hex, 16))
+    );
+    if (next === decoded) return false;
+    decoded = next;
+  }
+  return /[\\\u0000-\u001f\u007f]/u.test(decoded) || /%[0-9a-f]{2}/iu.test(decoded);
 }
 
 function publicTwitchReturnUrlForRequest(req: IncomingMessage, requestedPath: string | null): string {
   const fallback = publicLolReturnUrlForRequest(req);
   if (!requestedPath?.startsWith("/") || requestedPath.startsWith("//")) return fallback;
-  if (requestedPath !== "/dashboard" && !requestedPath.startsWith("/dashboard/")) return fallback;
-  const returnUrl = new URL(requestedPath, publicOriginForRequest(req));
+  if (hasUnsafePublicTwitchReturnValue(requestedPath)) return fallback;
+  const origin = trustedPublicOriginForRequest(req);
+  let returnUrl: URL;
+  try {
+    returnUrl = new URL(requestedPath, origin);
+  } catch {
+    return fallback;
+  }
+  const rawPathname = requestedPath.split(/[?#]/u, 1)[0];
+  if (
+    returnUrl.origin !== origin ||
+    returnUrl.username ||
+    returnUrl.password ||
+    returnUrl.hash ||
+    rawPathname !== returnUrl.pathname
+  ) {
+    return fallback;
+  }
+  const dashboardPath = returnUrl.pathname === "/dashboard" || returnUrl.pathname.startsWith("/dashboard/");
+  if (!dashboardPath && !PUBLIC_TWITCH_PALWORLD_RETURN_PATHS.has(returnUrl.pathname)) return fallback;
   returnUrl.searchParams.set("viewer_twitch", "connected");
   return returnUrl.toString();
 }

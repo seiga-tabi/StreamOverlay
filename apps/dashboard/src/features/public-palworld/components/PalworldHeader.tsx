@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { PublicMainPage } from "../../public-lol/types/public-lol";
+import type { PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
+import { PublicTwitchAccountChip, type PublicTwitchAccountMenuAction } from "../../../shared/PublicTwitchAccountChip";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, setPalworldUrl, type PalworldPage } from "../utils/routes";
 
 const navItems: Array<{ page: Exclude<PalworldPage, "search">; ko: string; ja: string }> = [
   { page: "home", ko: palworldI18n.ko.home, ja: palworldI18n.ja.home },
+  { page: "streamers", ko: palworldI18n.ko.streamers, ja: palworldI18n.ja.streamers },
   { page: "pals", ko: palworldI18n.ko.pals, ja: palworldI18n.ja.pals },
   { page: "breeding", ko: palworldI18n.ko.breeding, ja: palworldI18n.ja.breeding },
   { page: "items", ko: palworldI18n.ko.items, ja: palworldI18n.ja.items },
@@ -17,19 +20,29 @@ export function PalworldHeader({
   onLocale,
   page,
   searchContent,
+  twitchStatus = { connected: false, configured: false, requiredScopes: [], missingScopes: [] },
+  onStreamerDashboard = () => undefined,
+  onTwitchLogin = () => undefined,
+  onTwitchLogout = () => undefined,
 }: {
   locale: PalworldLocale;
   onLocale: (locale: PalworldLocale) => void;
   page: PalworldPage;
   searchContent?: ReactNode;
+  twitchStatus?: PublicTwitchViewerStatus;
+  onStreamerDashboard?: () => void;
+  onTwitchLogin?: () => void;
+  onTwitchLogout?: () => void;
 }) {
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
+  const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
   const closeMenus = useCallback(() => {
     setGameMenuOpen(false);
     setLocaleMenuOpen(false);
+    setTwitchMenuOpen(false);
   }, []);
 
   useEffect(() => {
@@ -39,6 +52,16 @@ export function PalworldHeader({
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [closeMenus]);
+
+  const twitchMenuActions: PublicTwitchAccountMenuAction[] = twitchStatus.streamerRiotRequest?.status === "approved"
+    && twitchStatus.streamerRiotRequest.dashboardEnabled === true
+    ? [{
+      id: "dashboard",
+      label: <span data-ko={palworldI18n.ko.streamerDashboardOpen} data-ja={palworldI18n.ja.streamerDashboardOpen}>{palworldI18n[locale].streamerDashboardOpen}</span>,
+      onSelect: onStreamerDashboard,
+      variant: "dashboard",
+    }]
+    : [];
 
   function handleGame(page: PublicMainPage): void {
     closeMenus();
@@ -57,20 +80,57 @@ export function PalworldHeader({
           <div className="public-header-product-cluster">
             <button className="public-header-brand" type="button" onClick={() => setPalworldUrl("/palworld")} aria-label={palworldI18n[locale].home}>
               <img className="public-brand-logo public-brand-logo-full public-brand-logo-topbar" src="/images/yorogg-topbar-logo.webp" alt="YORO.gg" />
-              <img className="public-brand-mark" src="/images/yorogg-mark.png" alt="" aria-hidden="true" />
+              <img className="public-brand-mark public-brand-mobile-logo" src="/images/yorogg-home-logo.webp" alt="" aria-hidden="true" />
             </button>
             <PublicGameSelector activePage="palworld" onPage={handleGame} open={gameMenuOpen} onOpenChange={(open) => {
               setGameMenuOpen(open);
-              if (open) setLocaleMenuOpen(false);
+              if (open) {
+                setLocaleMenuOpen(false);
+                setTwitchMenuOpen(false);
+              }
             }} />
           </div>
           <div className="public-header-tools">
             <PublicLocaleSelector locale={locale} onLocale={onLocale} open={localeMenuOpen} onOpenChange={(open) => {
               setLocaleMenuOpen(open);
-              if (open) setGameMenuOpen(false);
+              if (open) {
+                setGameMenuOpen(false);
+                setTwitchMenuOpen(false);
+              }
             }} />
+            <PublicTwitchAccountChip
+              configured={twitchStatus.configured}
+              connected={twitchStatus.connected}
+              loginLabel={palworldI18n[locale].twitchLogin}
+              loginLabelJa={palworldI18n.ja.twitchLogin}
+              loginLabelKo={palworldI18n.ko.twitchLogin}
+              loginTitle={palworldI18n[locale].twitchLoginTitle}
+              logoutLabel={palworldI18n[locale].twitchLogout}
+              logoutLabelJa={palworldI18n.ja.twitchLogout}
+              logoutLabelKo={palworldI18n.ko.twitchLogout}
+              menuActions={twitchMenuActions}
+              menuLabel={palworldI18n[locale].twitchProfileMenu}
+              onLogin={onTwitchLogin}
+              onLogout={onTwitchLogout}
+              onOpenChange={(open) => {
+                setTwitchMenuOpen(open);
+                if (open) {
+                  setGameMenuOpen(false);
+                  setLocaleMenuOpen(false);
+                }
+              }}
+              open={twitchMenuOpen}
+              user={twitchStatus.user}
+            />
           </div>
-          <button className="public-mobile-menu-toggle" type="button" aria-label={palworldI18n[locale].gameMenu} aria-expanded={gameMenuOpen} onClick={() => setGameMenuOpen((open) => !open)}>
+          <button className="public-mobile-menu-toggle" type="button" aria-label={palworldI18n[locale].gameMenu} aria-expanded={gameMenuOpen} onClick={() => setGameMenuOpen((open) => {
+            const nextOpen = !open;
+            if (nextOpen) {
+              setLocaleMenuOpen(false);
+              setTwitchMenuOpen(false);
+            }
+            return nextOpen;
+          })}>
             <span aria-hidden="true" />
             <strong data-ko={palworldI18n.ko.gameMenu} data-ja={palworldI18n.ja.gameMenu}>{palworldI18n[locale].gameMenu}</strong>
           </button>

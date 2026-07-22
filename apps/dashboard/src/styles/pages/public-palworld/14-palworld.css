@@ -48,7 +48,9 @@
 
 .palworld-secondary-row {
   min-inline-size: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
 }
 
 .palworld-header-nav {
@@ -269,29 +271,283 @@
   box-shadow: var(--yoro-shadow-panel);
 }
 
-.palworld-hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--yoro-space-3) var(--yoro-space-6);
-  color: var(--yoro-color-text-muted);
-  font-size: var(--yoro-font-size-sm);
-}
-
-.palworld-shortcuts,
-.palworld-summary {
+.palworld-shell .public-home-live-section {
   display: grid;
   min-inline-size: 0;
-  gap: var(--yoro-space-5);
+  gap: var(--yoro-space-4);
   margin-block-start: var(--yoro-space-8);
+  padding-block-start: var(--yoro-space-2);
 }
 
-.palworld-shortcuts {
+.palworld-shell .public-home-live-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 100%;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-shell .public-home-live-head h2 {
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  margin: 0;
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-shell .public-home-live-head h2::before {
+  flex: none;
+  inline-size: var(--yoro-space-2);
+  block-size: var(--yoro-space-2);
+  border-radius: var(--yoro-radius-circle);
+  background: var(--yoro-color-danger);
+  box-shadow: none;
+  content: "";
+}
+
+.palworld-shell .public-home-live-head button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-2);
+  padding-inline: var(--yoro-space-3);
+  border: 0;
+  background: transparent;
+  color: var(--palworld-accent);
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-shell .public-home-live-rail {
+  display: flex;
+  inline-size: 100%;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+  margin: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-block-end: var(--yoro-space-2);
+  scroll-padding-inline: var(--yoro-space-1);
+  scroll-snap-type: inline proximity;
+  scrollbar-width: thin;
+}
+
+.palworld-shell .public-home-live-card {
+  display: flex;
+  flex: 0 0 min(18rem, 78vw);
+  align-items: flex-start;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 19rem;
+  padding: var(--yoro-space-5);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface);
+  box-shadow: var(--yoro-shadow-sm);
+  color: var(--yoro-color-text);
+  text-align: start;
+  scroll-snap-align: start;
+}
+
+.palworld-shell .public-home-live-pill.yoro-status {
+  position: static;
+  align-self: flex-end;
+  background: var(--yoro-color-danger-bg);
+  color: var(--yoro-color-danger);
+}
+
+.palworld-shell .public-home-live-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 4rem;
+  block-size: 4rem;
+  margin-block-start: var(--yoro-space-2);
+  overflow: hidden;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-circle);
+  background: var(--palworld-accent-soft);
+  color: var(--palworld-accent);
+  font-weight: var(--yoro-font-weight-black);
+  box-shadow: none;
+}
+
+.palworld-shell .public-home-live-avatar img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.palworld-shell .public-home-live-card strong,
+.palworld-shell .public-home-live-card small,
+.palworld-shell .public-home-live-card em {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palworld-shell .public-home-live-card strong {
+  margin-block-start: var(--yoro-space-3);
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-shell .public-home-live-card small,
+.palworld-shell .public-home-live-card em {
+  margin-block-start: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-style: normal;
+}
+
+.palworld-shell .public-home-live-card > .public-home-live-action {
+  inline-size: 100%;
+  min-block-size: var(--yoro-size-touch-target);
+  margin-block-start: auto;
+  border: thin solid var(--palworld-accent);
+  border-radius: var(--yoro-radius-md);
+  background: var(--palworld-accent);
+  color: var(--yoro-color-text-on-dark);
+  box-shadow: none;
+}
+
+.palworld-shell .public-home-live-empty.yoro-empty-state {
+  flex: 0 0 100%;
+  min-inline-size: 0;
+  min-block-size: 14rem;
+  border: thin solid var(--yoro-color-border);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-text);
+  box-shadow: var(--yoro-shadow-sm);
+}
+
+.palworld-shell .public-home-live-pagination {
+  display: flex;
+  justify-content: center;
+  gap: var(--yoro-space-2);
+  margin: 0;
+}
+
+.palworld-shell .public-home-live-pagination span {
+  inline-size: var(--yoro-space-2);
+  block-size: var(--yoro-space-2);
+  border-radius: var(--yoro-radius-circle);
+  background: var(--yoro-color-border-strong);
+}
+
+.palworld-shell .public-home-live-pagination span.active {
+  background: var(--palworld-accent);
+  box-shadow: none;
+}
+
+.palworld-streamers-heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-streamers-live-empty {
+  margin: 0;
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-streamer-grid {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
 }
 
-.palworld-summary {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.palworld-streamer-card {
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.palworld-streamer-card .yoro-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-streamer-identity {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-streamer-identity > div {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-streamer-identity h2,
+.palworld-streamer-identity h3,
+.palworld-streamer-identity small {
+  max-inline-size: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palworld-streamer-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  overflow: hidden;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-circle);
+  background: var(--palworld-accent-soft);
+  color: var(--palworld-accent);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.palworld-streamer-avatar img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.palworld-streamer-card .yoro-card__content {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-streamer-card .yoro-card__content p {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+  margin: 0;
+}
+
+.palworld-streamer-card .yoro-card__content p strong {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.palworld-streamer-card .yoro-card__content p span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .palworld-coverage-notice {
@@ -321,34 +577,6 @@
 .palworld-coverage-notice small {
   color: var(--yoro-color-text-muted);
   overflow-wrap: anywhere;
-}
-
-.palworld-shortcuts .yoro-card {
-  min-inline-size: 0;
-}
-
-.palworld-shortcuts .yoro-card__header {
-  display: flex;
-  align-items: center;
-  gap: var(--yoro-space-3);
-}
-
-.palworld-shortcut-icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  inline-size: var(--yoro-size-touch-target);
-  block-size: var(--yoro-size-touch-target);
-  border-radius: var(--yoro-radius-circle);
-  background: var(--palworld-accent-soft);
-  color: var(--palworld-accent);
-  font-weight: var(--yoro-font-weight-black);
-}
-
-.palworld-shortcut-link {
-  display: inline-block;
-  margin-block-start: var(--yoro-space-4);
-  color: var(--palworld-accent);
 }
 
 .palworld-page-section {
@@ -859,13 +1087,6 @@
   text-align: end;
 }
 
-.palworld-image-gate-details {
-  display: grid;
-  min-inline-size: 0;
-  gap: var(--yoro-space-1);
-  overflow-wrap: anywhere;
-}
-
 .palworld-footer a {
   color: var(--yoro-color-text-strong);
   text-decoration: underline;
@@ -913,10 +1134,6 @@
     scrollbar-width: thin;
   }
 
-  .palworld-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .palworld-pair-flow {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -924,6 +1141,10 @@
   .palworld-pair-flow > span {
     transform: rotate(90deg);
     text-align: center;
+  }
+
+  .palworld-streamer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -952,12 +1173,28 @@
     padding-block: var(--yoro-space-10);
   }
 
-  .palworld-search-submit {
-    padding-inline: var(--yoro-space-3);
+  .palworld-shell .public-home-live-head {
+    align-items: flex-start;
   }
 
-  .palworld-shortcuts {
+  .palworld-shell .public-home-live-head h2 {
+    font-size: var(--yoro-font-size-lg);
+  }
+
+  .palworld-shell .public-home-live-card {
+    flex-basis: min(17rem, calc(100vw - (var(--yoro-space-6) * 2)));
+  }
+
+  .palworld-streamers-heading-actions {
+    justify-content: flex-start;
+  }
+
+  .palworld-streamer-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-search-submit {
+    padding-inline: var(--yoro-space-3);
   }
 
   .palworld-entity-grid,
@@ -1029,8 +1266,7 @@
 @media (max-width: 22rem) {
   .palworld-entity-grid,
   .palworld-skeleton-grid,
-  .palworld-filter-bar,
-  .palworld-summary {
+  .palworld-filter-bar {
     grid-template-columns: minmax(0, 1fr);
   }
 

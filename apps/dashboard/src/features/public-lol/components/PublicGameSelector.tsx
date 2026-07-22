@@ -28,7 +28,7 @@ const games: PublicGameOption[] = [
   {
     id: "league-of-legends",
     page: "search",
-    logo: "/images/games/league-of-legends.png",
+    logo: "/images/games/league-of-legends-f01a628bbea2.png",
     ko: publicI18n.ko.leagueOfLegends,
     ja: publicI18n.ja.leagueOfLegends,
     subtitleKo: publicI18n.ko.leagueOfLegendsSubtitle,
@@ -37,7 +37,7 @@ const games: PublicGameOption[] = [
   {
     id: "palworld",
     page: "palworld",
-    logo: "/images/games/palworld.png",
+    logo: "/images/games/palworld-a88d83f86cfe.png",
     ko: publicI18n.ko.palworld,
     ja: publicI18n.ja.palworld,
     subtitleKo: publicI18n.ko.palworldSubtitle,

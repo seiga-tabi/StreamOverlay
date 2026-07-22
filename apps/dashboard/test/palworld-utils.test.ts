@@ -4,8 +4,10 @@ import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared"
 import { getPalworldMeta, PALWORLD_VERSION_MISMATCH_EVENT, searchPalworld } from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
 import { swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
-import { isPalworldPath, palworldPageFromPath, palworldPathForPage, palworldUrl } from "../src/features/public-palworld/utils/routes";
+import { isPalworldPath, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
 import { matchesPalworldItem, matchesPalworldPal, normalizePalworldSearch } from "../src/features/public-palworld/utils/search";
+import { palworldHomeLiveStreamerCards, sortedFollowedTwitchChannels } from "../src/features/public-palworld/utils/streamers";
+import { getPublicTwitchFollowedChannels, getPublicTwitchStatus, logoutPublicTwitch, publicTwitchLoginUrl } from "../src/features/public-twitch/api";
 
 const anubis: PalworldPalSummary = {
   id: "anubis",
@@ -32,14 +34,100 @@ const palSphere: PalworldItemSummary = {
 
 test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한다", () => {
   assert.equal(palworldPageFromPath("/palworld"), "home");
+  assert.equal(palworldPageFromPath("/palworld/streamers"), "streamers");
   assert.equal(palworldPageFromPath("/palworld/pals/"), "pals");
   assert.equal(palworldPageFromPath("/palworld/breeding"), "breeding");
   assert.equal(palworldPageFromPath("/palworld/items"), "items");
   assert.equal(palworldPageFromPath("/palworld/search"), "search");
   assert.equal(palworldPathForPage("pals"), "/palworld/pals");
+  assert.equal(palworldPathForPage("streamers"), "/palworld/streamers");
   assert.equal(palworldUrl("search", new URLSearchParams({ q: "아누비스" })), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
   assert.equal(isPalworldPath("/palworld/items"), true);
   assert.equal(isPalworldPath("/lol/summoners/jp/test-JP1"), false);
+});
+
+test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query만 보존한다", () => {
+  assert.equal(palworldTwitchReturnTo("/palworld", ""), "/palworld");
+  assert.equal(palworldTwitchReturnTo("/palworld/streamers", "?view=all"), "/palworld/streamers?view=all");
+  assert.equal(palworldTwitchReturnTo("/palworld/search", "?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4&viewer_twitch=connected"), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
+  assert.equal(palworldTwitchReturnTo("//evil.example", "?q=x"), "/palworld");
+  assert.equal(palworldTwitchReturnTo("/palworld\\streamers", ""), "/palworld");
+  assert.match(publicTwitchLoginUrl("/palworld/search?q=Pal"), /\/api\/public\/twitch\/auth\/start\?return_to=%2Fpalworld%2Fsearch%3Fq%3DPal$/u);
+});
+
+test("Palworld LIVE 목록은 Twitch user ID로 중복 제거하고 LIVE만 최대 12개 표시한다", () => {
+  const channels = Array.from({ length: 14 }, (_, index) => ({
+    twitchUserId: `user-${index}`,
+    twitchLogin: `streamer_${index}`,
+    twitchDisplayName: `Streamer ${index}`,
+    followedAt: "2026-07-22T00:00:00.000Z",
+    isLive: index !== 13,
+    gameName: index % 2 === 0 ? "Palworld" : "Just Chatting",
+    title: `방송 ${index}`,
+    viewerCount: index * 10,
+  }));
+  channels.splice(1, 0, { ...channels[0], twitchDisplayName: "중복 채널" });
+  const cards = palworldHomeLiveStreamerCards(channels, "ko");
+  assert.equal(cards.length, 12);
+  assert.equal(cards.filter((card) => card.id === "user-0").length, 1);
+  assert.equal(cards[0]?.primaryMeta, "Palworld");
+  assert.match(cards[0]?.secondaryMeta ?? "", /방송 0 · 0명 시청/u);
+  assert.equal(cards.some((card) => card.id === "user-13"), false);
+
+  const sorted = sortedFollowedTwitchChannels([channels.at(-1)!, channels[2]]);
+  assert.equal(sorted[0]?.isLive, true);
+  assert.equal(sorted.at(-1)?.isLive, false);
+});
+
+test("공개 Twitch 상태·팔로우·로그아웃 요청은 공유 session cookie를 포함한다", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; init?: RequestInit }> = [];
+  Object.assign(globalThis, {
+    fetch: async (url: string | URL | Request, init?: RequestInit) => {
+      requests.push({ url: String(url), init });
+      if (String(url).endsWith("/status")) return new Response(JSON.stringify({ connected: false, configured: true, requiredScopes: [], missingScopes: [] }), { status: 200 });
+      if (String(url).includes("followed-lol")) return new Response(JSON.stringify({ connected: true, truncated: false, matchedCount: 0, subscriptionScopeGranted: false, subscriptions: [], channels: [] }), { status: 200 });
+      return new Response(null, { status: 204 });
+    },
+  });
+  try {
+    await getPublicTwitchStatus();
+    await getPublicTwitchFollowedChannels();
+    await logoutPublicTwitch();
+    assert.deepEqual(requests.map((request) => request.init?.credentials), ["include", "include", "include"]);
+    assert.equal(requests[2]?.init?.method, "POST");
+    assert.match(requests[1]?.url ?? "", /followed-lol\?limit=100$/u);
+  } finally {
+    Object.assign(globalThis, { fetch: originalFetch });
+  }
+});
+
+test("손상된 Twitch 성공 응답은 렌더 데이터로 전달하지 않고 안전하게 거부한다", async () => {
+  const originalFetch = globalThis.fetch;
+  let responseKind: "status" | "followed" = "status";
+  Object.assign(globalThis, {
+    fetch: async () => new Response(JSON.stringify(responseKind === "status" ? {
+      connected: true,
+      configured: true,
+      requiredScopes: [],
+      missingScopes: [],
+      user: { id: "viewer", login: null, displayName: "Viewer" },
+    } : {
+      connected: true,
+      truncated: false,
+      matchedCount: 0,
+      subscriptionScopeGranted: false,
+      subscriptions: [],
+      channels: [{ twitchUserId: null, twitchLogin: "broken", twitchDisplayName: "Broken", followedAt: "2026-07-22T00:00:00.000Z", isLive: true }],
+    }), { status: 200 }),
+  });
+  try {
+    await assert.rejects(getPublicTwitchStatus(), /사용자 응답 형식/u);
+    responseKind = "followed";
+    await assert.rejects(getPublicTwitchFollowedChannels(), /팔로우 채널 응답 형식/u);
+  } finally {
+    Object.assign(globalThis, { fetch: originalFetch });
+  }
 });
 
 test("한국어·일본어·영어·ID·도감 번호 통합 검색을 정규화한다", () => {

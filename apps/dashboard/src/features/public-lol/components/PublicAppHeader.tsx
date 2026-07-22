@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { StreamerRiotIdRequest } from "@streamops/shared";
+import { PublicTwitchAccountChip, type PublicTwitchAccountMenuAction } from "../../../shared/PublicTwitchAccountChip";
 import { t, type PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget, PublicTwitchViewerStatus } from "../types/public-lol";
 import { PublicGameSelector } from "./PublicGameSelector";
@@ -56,7 +57,6 @@ export function PublicAppHeader({
   const [filterOpen, setFilterOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
-  const twitchMenuCloseTimer = useRef<number | undefined>(undefined);
   const registeredStreamerRequest = isRegisteredStreamerRequest(twitchStatus.streamerRiotRequest) ? twitchStatus.streamerRiotRequest : undefined;
   const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved" && twitchStatus.streamerRiotRequest?.status !== "pending";
   const canOpenStreamerDashboard = registeredStreamerRequest?.dashboardEnabled === true;
@@ -78,20 +78,6 @@ export function PublicAppHeader({
     closeMenus();
   };
 
-  function clearTwitchMenuCloseTimer(): void {
-    if (twitchMenuCloseTimer.current === undefined) return;
-    window.clearTimeout(twitchMenuCloseTimer.current);
-    twitchMenuCloseTimer.current = undefined;
-  }
-
-  function scheduleTwitchMenuClose(): void {
-    clearTwitchMenuCloseTimer();
-    twitchMenuCloseTimer.current = window.setTimeout(() => {
-      setTwitchMenuOpen(false);
-      twitchMenuCloseTimer.current = undefined;
-    }, 320);
-  }
-
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
       if (!headerRef.current?.contains(event.target as Node)) {
@@ -107,11 +93,21 @@ export function PublicAppHeader({
     document.addEventListener("pointerdown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      clearTwitchMenuCloseTimer();
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [closeMenus]);
+
+  const twitchMenuActions: PublicTwitchAccountMenuAction[] = [];
+  if (canRegisterStreamer) {
+    twitchMenuActions.push({ id: "register", label: t().streamerRiotRegister, onSelect: onStreamerRegister });
+  }
+  if (canOpenStreamerDashboard) {
+    twitchMenuActions.push({ id: "dashboard", label: t().streamerDashboardOpen, onSelect: onStreamerDashboard, variant: "dashboard" });
+  }
+  if (registeredStreamerRequest) {
+    twitchMenuActions.push({ id: "record", label: t().streamerRecordOpen, onSelect: onStreamerRecord });
+  }
 
   return (
     <header
@@ -124,7 +120,7 @@ export function PublicAppHeader({
           <div className="public-header-product-cluster">
             <button className="public-header-brand" type="button" onClick={handleHome} aria-label={t().home}>
               <img className="public-brand-logo public-brand-logo-full public-brand-logo-topbar" src="/images/yorogg-topbar-logo.webp" alt={t().brand} />
-              <img className="public-brand-mark" src="/images/yorogg-mark.png" alt="" aria-hidden="true" />
+              <img className="public-brand-mark public-brand-mobile-logo" src="/images/yorogg-home-logo.webp" alt="" aria-hidden="true" />
             </button>
             <PublicGameSelector
               activePage={activePage}
@@ -155,62 +151,27 @@ export function PublicAppHeader({
                 }
               }}
             />
-            <div className={`public-twitch-profile-wrap ${twitchMenuOpen ? "menu-open" : ""}`} onMouseEnter={clearTwitchMenuCloseTimer} onMouseLeave={scheduleTwitchMenuClose}>
-              <button
-                className={`public-twitch-login-chip ${twitchStatus.connected ? "connected" : ""}`}
-                type="button"
-                onClick={() => {
-                  if (!twitchStatus.connected) {
-                    onTwitchLogin();
-                    return;
-                  }
-                  setTwitchMenuOpen((open) => {
-                    const nextOpen = !open;
-                    if (nextOpen) {
-                      setGameMenuOpen(false);
-                      setLocaleMenuOpen(false);
-                      setFilterOpen(false);
-                    }
-                    return nextOpen;
-                  });
-                }}
-                disabled={!twitchStatus.configured}
-                aria-expanded={twitchMenuOpen}
-                title={twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchLoginRequired}
-              >
-                {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
-                <strong>{twitchStatus.connected ? twitchStatus.user?.displayName ?? t().twitchViewerLogin : t().twitchViewerLogin}</strong>
-              </button>
-              {twitchStatus.connected && twitchMenuOpen ? (
-                <div className="public-twitch-profile-menu" role="menu" aria-label={t().twitchProfileMenu}>
-                  <div className="public-twitch-profile-menu-head">
-                    {twitchStatus.user?.profileImageUrl ? <img src={twitchStatus.user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
-                    <div>
-                      <strong>{twitchStatus.user?.displayName ?? twitchStatus.user?.login}</strong>
-                      <small>@{twitchStatus.user?.login}</small>
-                    </div>
-                  </div>
-                  {canRegisterStreamer ? (
-                    <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerRegister(); }}>
-                      {t().streamerRiotRegister}
-                    </button>
-                  ) : null}
-                  {canOpenStreamerDashboard ? (
-                    <button className="dashboard" type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerDashboard(); }}>
-                      {t().streamerDashboardOpen}
-                    </button>
-                  ) : null}
-                  {registeredStreamerRequest ? (
-                    <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onStreamerRecord(); }}>
-                      {t().streamerRecordOpen}
-                    </button>
-                  ) : null}
-                  <button type="button" role="menuitem" onClick={() => { setTwitchMenuOpen(false); onTwitchLogout(); }}>
-                    {t().twitchViewerLogout}
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <PublicTwitchAccountChip
+              configured={twitchStatus.configured}
+              connected={twitchStatus.connected}
+              loginLabel={t().twitchViewerLogin}
+              loginTitle={t().twitchLoginRequired}
+              logoutLabel={t().twitchViewerLogout}
+              menuActions={twitchMenuActions}
+              menuLabel={t().twitchProfileMenu}
+              onLogin={onTwitchLogin}
+              onLogout={onTwitchLogout}
+              onOpenChange={(open) => {
+                setTwitchMenuOpen(open);
+                if (open) {
+                  setGameMenuOpen(false);
+                  setLocaleMenuOpen(false);
+                  setFilterOpen(false);
+                }
+              }}
+              open={twitchMenuOpen}
+              user={twitchStatus.user}
+            />
             {showFilters ? (
               <div className="public-header-popover-wrap">
                 <button

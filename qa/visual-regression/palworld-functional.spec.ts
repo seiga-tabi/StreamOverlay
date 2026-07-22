@@ -476,6 +476,22 @@ async function installApiFixtures(page: Page): Promise<void> {
       });
       return;
     }
+    if (url.pathname === "/api/public/twitch/followed-lol") {
+      await json(route, {
+        connected: false,
+        total: 0,
+        truncated: false,
+        matchedCount: 0,
+        subscriptionScopeGranted: false,
+        subscriptions: [],
+        channels: [],
+      });
+      return;
+    }
+    if (url.pathname === "/api/public/twitch/logout") {
+      await route.fulfill({ status: 204 });
+      return;
+    }
     if (url.pathname === "/api/public/tournaments") {
       await json(route, { tournaments: [] });
       return;
@@ -486,6 +502,96 @@ async function installApiFixtures(page: Page): Promise<void> {
     }
     await json(route, {});
   });
+}
+
+async function installConnectedTwitchFixtures(page: Page, { longContent = false } = {}) {
+  let connected = true;
+  let statusRequests = 0;
+  let followedRequests = 0;
+  const channels = [
+    {
+      twitchUserId: "55",
+      twitchLogin: "live_pal",
+      twitchDisplayName: longContent ? "아주 긴 이름을 사용하는 Palworld LIVE 스트리머" : "Live Pal",
+      profileImageUrl: "/images/yorogg-mark.png",
+      followedAt: "2026-07-20T00:00:00.000Z",
+      isLive: true,
+      channelUrl: "https://www.twitch.tv/live_pal",
+      gameName: longContent ? "Palworld 장시간 협동 탐험과 기지 건설 방송" : "Palworld",
+      title: longContent ? "아주 긴 방송 제목도 모바일 페이지 전체 너비를 확장하지 않아야 합니다" : "오늘도 팰 모험",
+      viewerCount: 321,
+    },
+    {
+      twitchUserId: "55",
+      twitchLogin: "live_pal_duplicate",
+      twitchDisplayName: "중복 Live Pal",
+      followedAt: "2026-07-20T00:00:00.000Z",
+      isLive: true,
+    },
+    {
+      twitchUserId: "77",
+      twitchLogin: "offline_pal",
+      twitchDisplayName: "Offline Pal",
+      profileImageUrl: "/images/yorogg-mark.png",
+      followedAt: "2026-07-19T00:00:00.000Z",
+      isLive: false,
+      channelUrl: "https://www.twitch.tv/offline_pal",
+    },
+  ];
+
+  await page.route("**/api/public/twitch/status", async (route) => {
+    statusRequests += 1;
+    await json(route, connected ? {
+      connected: true,
+      configured: true,
+      requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+      missingScopes: [],
+      user: {
+        id: "viewer-1",
+        login: "pal_viewer",
+        displayName: longContent ? "아주 긴 Twitch 프로필 표시 이름" : "Pal Viewer",
+        profileImageUrl: "/images/yorogg-mark.png",
+      },
+      streamerRiotRequest: {
+        id: "request-1",
+        twitchUserId: "viewer-1",
+        twitchLogin: "pal_viewer",
+        twitchDisplayName: "Pal Viewer",
+        riotGameName: "Viewer",
+        riotTagLine: "JP1",
+        status: "approved",
+        requestedAt: "2026-07-20T00:00:00.000Z",
+        updatedAt: "2026-07-20T00:00:00.000Z",
+        dashboardEnabled: true,
+      },
+    } : {
+      connected: false,
+      configured: true,
+      requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+      missingScopes: ["user:read:follows", "user:read:subscriptions"],
+    });
+  });
+  await page.route("**/api/public/twitch/followed-lol?limit=100", async (route) => {
+    followedRequests += 1;
+    await json(route, {
+      connected,
+      total: connected ? 2 : 0,
+      truncated: false,
+      matchedCount: connected ? channels.length : 0,
+      subscriptionScopeGranted: true,
+      subscriptions: [],
+      channels: connected ? channels : [],
+    });
+  });
+  await page.route("**/api/public/twitch/logout", async (route) => {
+    connected = false;
+    await route.fulfill({ status: 204 });
+  });
+  return {
+    followedRequestCount: () => followedRequests,
+    isConnected: () => connected,
+    statusRequestCount: () => statusRequests,
+  };
 }
 
 function collectRuntimeErrors(page: Page): string[] {
@@ -533,7 +639,7 @@ test.beforeEach(async ({ page }) => {
   await installApiFixtures(page);
 });
 
-test("펠월드 홈은 Hero 검색만 표시하고 게임 선택으로 LoL과 왕복 이동한다", async ({ page }) => {
+test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고 게임 선택으로 LoL과 왕복 이동한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld");
 
@@ -542,19 +648,11 @@ test("펠월드 홈은 Hero 검색만 표시하고 게임 선택으로 LoL과 �
   await expect(page.getByTestId("hero-search")).toBeVisible();
   await expect(page.getByTestId("header-search")).toHaveCount(0);
   await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
-  const summaryMetrics = page.locator(".palworld-summary .yoro-metric");
-  await expect(summaryMetrics).toHaveCount(4);
-  await expect(summaryMetrics.nth(0)).toContainText("287");
-  await expect(summaryMetrics.nth(0)).toContainText("준비 완료");
-  await expect(summaryMetrics.nth(1)).toContainText("10");
-  await expect(summaryMetrics.nth(1)).toContainText("샘플");
-  await expect(summaryMetrics.nth(2)).toContainText("3");
-  await expect(summaryMetrics.nth(2)).toContainText("샘플");
-  await expect(summaryMetrics.nth(3)).toContainText("1");
-  await expect(summaryMetrics.nth(3)).toContainText("286");
-  await expect(summaryMetrics.nth(3)).toContainText("일부 이미지만 사용");
-  await expect(summaryMetrics.nth(3)).toContainText("운영자 확인에 따른 사용");
-  await expect(summaryMetrics.nth(3)).toContainText("독립적인 권리 확인 없음");
+  await expect(page.locator(".palworld-hero-meta, .palworld-shortcuts, .palworld-summary")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "팔로우 중인 LIVE 스트리머" })).toBeVisible();
+  await expect(page.getByText("Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다.")).toBeVisible();
+  await expect(page.getByTestId("public-live-streamer-rail").getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button")).toHaveCount(5);
   await assertHealthyDocument(page, errors);
 
   await chooseGame(page, "league");
@@ -566,6 +664,183 @@ test("펠월드 홈은 Hero 검색만 표시하고 게임 선택으로 LoL과 �
   await expect(page.locator(".palworld-shell")).toBeVisible();
   await expect(page.getByTestId("hero-search")).toBeVisible();
   await assertHealthyDocument(page, errors);
+});
+
+test("LoL의 공개 Twitch session은 Palworld 프로필과 LIVE 목록에 그대로 연결된다", async ({ page }) => {
+  const fixture = await installConnectedTwitchFixtures(page);
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+
+  await chooseGame(page, "palworld");
+  await expect(page).toHaveURL(/\/palworld$/u);
+  const accountButton = page.getByRole("button", { name: "Pal Viewer" });
+  await expect(accountButton).toBeVisible();
+  await accountButton.click();
+  await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toBeVisible();
+  const dashboardMenuItem = page.getByRole("menuitem", { name: "Dashboard 열기" });
+  const logoutMenuItem = page.getByRole("menuitem", { name: "로그아웃" });
+  await expect(dashboardMenuItem).toBeVisible();
+  await expect(dashboardMenuItem).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(logoutMenuItem).toBeFocused();
+  await page.keyboard.press("ArrowUp");
+  await expect(dashboardMenuItem).toBeFocused();
+  await expect(page.getByRole("menu").getByText(/Riot ID|내 전적/u)).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
+  await accountButton.click();
+  await page.getByRole("heading", { name: "펠월드 데이터베이스" }).click();
+  await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
+  await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("public-live-streamer-rail").getByText("Offline Pal", { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("public-live-streamer-rail").getByText("중복 Live Pal", { exact: true })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "전체 보기" }).click();
+  await expect(page).toHaveURL(/\/palworld\/streamers$/u);
+  await expect(page.getByTestId("header-search")).toBeVisible();
+  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "스트리머" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByTestId("palworld-streamer-list").locator(".palworld-streamer-card")).toHaveCount(2);
+  await expect(page.getByTestId("palworld-streamer-list").locator(".palworld-streamer-card").nth(0)).toContainText("Live Pal");
+  await expect(page.getByTestId("palworld-streamer-list")).toContainText("Offline Pal");
+  await expect(page.getByText("팔로우 채널 2")).toBeVisible();
+  await expect(page.getByText(/Riot ID|랭크|전적 보기/u)).toHaveCount(0);
+
+  const beforeRefresh = fixture.followedRequestCount();
+  await page.getByRole("button", { name: "새로고침" }).evaluate((button: HTMLButtonElement) => {
+    button.click();
+    button.click();
+  });
+  await expect.poll(() => fixture.followedRequestCount()).toBe(beforeRefresh + 1);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/palworld$/u);
+  await page.goForward();
+  await expect(page).toHaveURL(/\/palworld\/streamers$/u);
+  await assertHealthyDocument(page, errors);
+});
+
+test("Palworld 하위 데이터 페이지는 Twitch 상태만 조회하고 홈 진입 시 팔로우 목록을 지연 조회한다", async ({ page }) => {
+  const fixture = await installConnectedTwitchFixtures(page);
+  await page.goto("/palworld/pals");
+  await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  expect(fixture.followedRequestCount()).toBe(0);
+
+  await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" }).click();
+  await expect(page).toHaveURL(/\/palworld$/u);
+  await expect.poll(() => fixture.followedRequestCount()).toBe(1);
+  await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
+});
+
+test("Twitch 상태 API 오류는 미설정으로 오표시하지 않고 Palworld 검색과 분리된다", async ({ page }) => {
+  await page.route("**/api/public/twitch/status", async (route) => {
+    await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "unavailable" }) });
+  });
+  await page.goto("/palworld/streamers");
+  await expect(page.getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
+  await expect(page.getByText("Twitch 기능이 설정되지 않았습니다.")).toHaveCount(0);
+  const search = page.getByTestId("header-search").getByRole("searchbox");
+  await search.fill("펭킹");
+  await expect(page.getByTestId("header-search").getByRole("option", { name: /펭킹/u })).toBeVisible();
+});
+
+test("Twitch 팔로우 API 오류가 발생해도 Palworld 홈 검색은 계속 동작한다", async ({ page }) => {
+  await installConnectedTwitchFixtures(page);
+  await page.route("**/api/public/twitch/followed-lol?limit=100", async (route) => {
+    await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "unavailable" }) });
+  });
+  await page.goto("/palworld");
+  await expect(page.getByTestId("public-live-streamer-rail").getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
+  const search = page.getByTestId("hero-search").getByRole("searchbox");
+  await search.fill("펭킹");
+  await expect(page.getByTestId("hero-search").getByRole("option", { name: /펭킹/u })).toBeVisible();
+});
+
+test("Palworld pending Twitch 요청은 화면 전환 시 abort되고 늦은 응답이 LoL 화면을 갱신하지 않는다", async ({ page }) => {
+  let palworldConnected = true;
+  let followedAborted = false;
+  let resolveFollowedStarted!: () => void;
+  let releaseFollowed!: () => void;
+  const followedStarted = new Promise<void>((resolve) => { resolveFollowedStarted = resolve; });
+  const followedRelease = new Promise<void>((resolve) => { releaseFollowed = resolve; });
+  page.on("requestfailed", (request) => {
+    if (new URL(request.url()).pathname === "/api/public/twitch/followed-lol") followedAborted = true;
+  });
+  await page.route("**/api/public/twitch/status", async (route) => {
+    await json(route, palworldConnected ? {
+      connected: true,
+      configured: true,
+      requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+      missingScopes: [],
+      user: { id: "viewer-1", login: "pal_viewer", displayName: "Pal Viewer" },
+    } : {
+      connected: false,
+      configured: true,
+      requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+      missingScopes: ["user:read:follows", "user:read:subscriptions"],
+    });
+  });
+  await page.route("**/api/public/twitch/followed-lol?limit=100", async (route) => {
+    resolveFollowedStarted();
+    await followedRelease;
+    if (route.request().failure()) return;
+    await json(route, {
+      connected: true,
+      total: 1,
+      truncated: false,
+      matchedCount: 0,
+      subscriptionScopeGranted: true,
+      subscriptions: [],
+      channels: [],
+    });
+  });
+
+  await page.goto("/palworld");
+  await followedStarted;
+  palworldConnected = false;
+  await chooseGame(page, "league");
+  await expect(page).toHaveURL(/\/$/u);
+  await expect.poll(() => followedAborted).toBe(true);
+  releaseFollowed();
+  await expect(page.locator(".public-home-shared-shell")).toBeVisible();
+  await expect(page.locator(".palworld-shell")).toHaveCount(0);
+});
+
+test("Palworld OAuth marker는 기존 검색 query를 보존해 제거하고 현재 경로를 return_to로 전달한다", async ({ page }) => {
+  await page.goto(`/palworld/search?q=${encodeURIComponent("아누비스")}&pal=anubis&viewer_twitch=connected`);
+  await expect.poll(() => new URL(page.url()).searchParams.has("viewer_twitch")).toBe(false);
+  expect(new URL(page.url()).searchParams.get("q")).toBe("아누비스");
+  expect(new URL(page.url()).searchParams.get("pal")).toBe("anubis");
+  await page.keyboard.press("Escape");
+
+  const authRequestPromise = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/public/twitch/auth/start");
+  await page.getByRole("button", { name: "Twitch 로그인" }).first().click();
+  const authRequest = await authRequestPromise;
+  const returnTo = new URL(authRequest.url()).searchParams.get("return_to");
+  expect(returnTo).toBe(`/palworld/search?q=${encodeURIComponent("아누비스")}`);
+});
+
+test("Palworld OAuth callback 표시 후 공유 Twitch 상태를 재조회하고 marker만 제거한다", async ({ page }) => {
+  const fixture = await installConnectedTwitchFixtures(page);
+  await page.goto("/palworld/streamers?view=all&viewer_twitch=connected");
+  await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  await expect.poll(() => fixture.statusRequestCount()).toBeGreaterThanOrEqual(2);
+  const currentUrl = new URL(page.url());
+  expect(currentUrl.pathname).toBe("/palworld/streamers");
+  expect(currentUrl.searchParams.get("view")).toBe("all");
+  expect(currentUrl.searchParams.has("viewer_twitch")).toBe(false);
+});
+
+test("Palworld 로그아웃은 공유 session을 제거해 LoL에서도 미로그인 상태가 된다", async ({ page }) => {
+  const fixture = await installConnectedTwitchFixtures(page);
+  await page.goto("/palworld");
+  await page.getByRole("button", { name: "Pal Viewer" }).click();
+  await page.getByRole("menuitem", { name: "로그아웃" }).click();
+  await expect.poll(() => fixture.isConnected()).toBe(false);
+  await expect(page.getByRole("button", { name: "Twitch 로그인" }).first()).toBeVisible();
+
+  await chooseGame(page, "league");
+  await expect(page).toHaveURL(/\/$/u);
+  await expect(page.getByRole("button", { name: /Twitch/u }).first()).toBeVisible();
 });
 
 test("Pal 필터 query를 유지하고 카드·ESC·직접 URL 상세 Modal을 지원한다", async ({ page }) => {
@@ -717,6 +992,7 @@ test("PC 화면에서 모든 펠월드 페이지 본문을 중앙 정렬한다",
   await page.setViewportSize({ width: 1440, height: 1000 });
   const routes = [
     "/palworld",
+    "/palworld/streamers",
     "/palworld/pals",
     "/palworld/breeding",
     "/palworld/items",
@@ -738,6 +1014,7 @@ test("PC 화면에서 모든 펠월드 페이지 본문을 중앙 정렬한다",
 test("모든 Palworld 공개 경로 하단에 한국어·일본어 비공식 출처 공지를 표시한다", async ({ page }) => {
   const routes = [
     "/palworld",
+    "/palworld/streamers",
     "/palworld/pals",
     "/palworld/breeding",
     "/palworld/items",
@@ -800,8 +1077,9 @@ test("Palworld 화면은 외부 origin 이미지 요청 없이 카드·자동완
   expect(imageRequests.filter((requestUrl) => new URL(requestUrl).origin !== pageOrigin)).toEqual([]);
 });
 
-test("요구 화면 크기에서 페이지 overflow 없이 첫·마지막 메뉴를 선택한다", async ({ page }) => {
+test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목록과 메뉴가 페이지 overflow를 만들지 않는다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
+  await installConnectedTwitchFixtures(page, { longContent: true });
   const viewports = [
     { width: 360, height: 800 },
     { width: 390, height: 844 },
@@ -812,7 +1090,32 @@ test("요구 화면 크기에서 페이지 overflow 없이 첫·마지막 메뉴
 
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
-    await page.goto("/palworld/pals");
+    await page.goto("/palworld");
+    const localeButton = page.locator(".public-locale-button");
+    const profileButton = page.locator(".public-twitch-login-chip");
+    await expect(localeButton).toBeVisible();
+    await expect(profileButton).toBeVisible();
+    const [localeBounds, profileBounds] = await Promise.all([localeButton.boundingBox(), profileButton.boundingBox()]);
+    expect(localeBounds).not.toBeNull();
+    expect(profileBounds).not.toBeNull();
+    expect(localeBounds!.x + localeBounds!.width).toBeLessThanOrEqual(profileBounds!.x);
+    await expect(page.getByTestId("public-live-streamer-rail").locator(".public-home-live-card")).toHaveCount(1);
+    await assertHealthyDocument(page, errors);
+
+    await page.getByRole("button", { name: "전체 보기" }).click();
+    const streamerCards = page.getByTestId("palworld-streamer-list").locator(".palworld-streamer-card");
+    await expect(streamerCards).toHaveCount(2);
+    await streamerCards.first().focus();
+    await expect(streamerCards.first()).toBeFocused();
+    await streamerCards.last().focus();
+    await expect(streamerCards.last()).toBeFocused();
+    const watchLinks = page.getByTestId("palworld-streamer-list").getByRole("link", { name: "방송 보기" });
+    await watchLinks.first().focus();
+    await expect(watchLinks.first()).toBeFocused();
+    await watchLinks.last().focus();
+    await expect(watchLinks.last()).toBeFocused();
+    await assertHealthyDocument(page, errors);
+
     await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" })).toBeVisible();
     await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "아이템" }).click();
     await expect(page).toHaveURL(/\/palworld\/items$/u);

@@ -437,7 +437,7 @@ export default function App() {
     return (
       <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
         {isPalworldPath(window.location.pathname)
-          ? <PublicPalworldPage />
+          ? <PublicPalworldPage onOpenStreamerDashboard={openStreamerDashboard} />
           : <PublicLolPage onOpenAdmin={openAdmin} onOpenStreamerDashboard={openStreamerDashboard} />}
       </Suspense>
     );
