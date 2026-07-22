@@ -46,7 +46,8 @@
         }
       ],
       "breedingPower": 3050,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/bc3c8509e97b670998d26d66e0143cb5661a5ea731c2273808a8c93ddc9e446b.webp"
     },
     {
       "id": "cattiva",
@@ -86,7 +87,8 @@
         }
       ],
       "breedingPower": 2760,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f468288fdbba28ab6c32c88306bd9902ccf1689cfd46326421b8011b41179ef3.webp"
     },
     {
       "id": "chikipi",
@@ -118,7 +120,8 @@
         }
       ],
       "breedingPower": 3080,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/210101aafd74c86d1c5546b35b5987bda019fc36598da15bf54fc25f3f622278.webp"
     },
     {
       "id": "lifmunk",
@@ -162,7 +165,8 @@
         }
       ],
       "breedingPower": 3020,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/89be6bc618c5bd10190b415b0d044f60721856357715a58b37bf7fd744bab5e5.webp"
     },
     {
       "id": "fuack",
@@ -198,7 +202,8 @@
         }
       ],
       "breedingPower": 2980,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/de076d5b4d537abd8ba07f13d17ed997a5571988a18d3d8f8abc502afe8af4a6.webp"
     },
     {
       "id": "fuack-ignis",
@@ -239,7 +244,8 @@
         }
       ],
       "breedingPower": 2300,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/866fc77cf2a14573d4a5b3191a041fc6f8c8d61742edce71d9cb72e2b7f78441.webp"
     },
     {
       "id": "vixy",
@@ -271,7 +277,8 @@
         }
       ],
       "breedingPower": 3060,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/9784110421989ed79c082068c06e1be3b8b5e495444dd39563c7814c56997bde.webp"
     },
     {
       "id": "celaray",
@@ -303,7 +310,8 @@
         }
       ],
       "breedingPower": 2740,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/da851cd5eb8157cf1edd83e3b22e098a252a1eaf25ace2e702a4e13abd2b39b1.webp"
     },
     {
       "id": "celaray-lux",
@@ -340,7 +348,8 @@
         }
       ],
       "breedingPower": 2380,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/8e6dd20e5cc8e2e0845299c339caaef366ff709048753b5dc4d7f49115bc00fc.webp"
     },
     {
       "id": "cremis",
@@ -372,7 +381,8 @@
         }
       ],
       "breedingPower": 2890,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/fbc514b6de18f723fcb3c8d5eb4c55c6346adb507656962c88fab431c67b9b9a.webp"
     },
     {
       "id": "croajiro",
@@ -412,7 +422,8 @@
         }
       ],
       "breedingPower": 2600,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/3f9e4da673dca6434238b8f4095c0ea601f3bf084fd01713b70d4e11c832e599.webp"
     },
     {
       "id": "croajiro-noct",
@@ -453,7 +464,8 @@
         }
       ],
       "breedingPower": 1860,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/bb9689c7c41759289b465b49d33799d326349eb448e9e9181d8479a087dcf2a0.webp"
     },
     {
       "id": "herbil",
@@ -490,7 +502,8 @@
         }
       ],
       "breedingPower": 2630,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/6dbc9b1bb00f43ed4cc30a2c54cd1fd1a56f3eb7020727be461e5587f365d7c6.webp"
     },
     {
       "id": "teafant",
@@ -518,7 +531,8 @@
         }
       ],
       "breedingPower": 3070,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b8e6dad3a32e24419b4c95f249684fca6ab9bf4bf3056763bebfe85e3f75cc1e.webp"
     },
     {
       "id": "gumoss",
@@ -547,7 +561,8 @@
         }
       ],
       "breedingPower": 2950,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/62fe1f2f1ae34dcb91f40d6038c692ecfe05991aa3125926a8e5ba12a28daf67.webp"
     },
     {
       "id": "pupperai",
@@ -583,7 +598,8 @@
         }
       ],
       "breedingPower": 2930,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/55961d57bac1158ab5b4ac4b15390c83b128c59aa2c11b6d7dc0ad1b1632e763.webp"
     },
     {
       "id": "clovee",
@@ -616,7 +632,8 @@
         }
       ],
       "breedingPower": 2970,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/638f59550ec75c20582bf147bb9f58dd90ef90a282c9b2ac51f87a898a369a68.webp"
     },
     {
       "id": "jolthog",
@@ -644,7 +661,8 @@
         }
       ],
       "breedingPower": 3030,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/666985324df295f95f47ab74016a485e58075cf70a45f5d5e802609d0e562b9f.webp"
     },
     {
       "id": "jolthog-cryst",
@@ -672,7 +690,8 @@
         }
       ],
       "breedingPower": 2850,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f29545430927050fdfd23b91a8cfe67cb91e2c648795ce4e0fe8f681333efc54.webp"
     },
     {
       "id": "depresso",
@@ -712,7 +731,8 @@
         }
       ],
       "breedingPower": 3000,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/43ef07c6740d597ee17c3bc972c0435e3e3b3e31683ad83fad96fd5fbd25c97b.webp"
     },
     {
       "id": "pengullet",
@@ -753,7 +773,8 @@
         }
       ],
       "breedingPower": 2960,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/ffdae30e56b7e8b6d94605909322e6d76083d11a04cc6beecc9398bc37219989.webp"
     },
     {
       "id": "pengullet-lux",
@@ -794,7 +815,8 @@
         }
       ],
       "breedingPower": 2490,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/04380400a50846975cd531d02fdb9e0008178d520f9f6f9b296437bbe9270b18.webp"
     },
     {
       "id": "penking",
@@ -839,7 +861,8 @@
         }
       ],
       "breedingPower": 2070,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/515864440806f859f42ed9fa857fc5b10a2d50bda34517f666bf42f64638bf7f.webp"
     },
     {
       "id": "penking-lux",
@@ -884,7 +907,8 @@
         }
       ],
       "breedingPower": 1850,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/497058a2a6ed28d6f5aca9a862f09513745c8ef10af78b2254d6fb02489b140d.webp"
     },
     {
       "id": "hoocrates",
@@ -912,7 +936,8 @@
         }
       ],
       "breedingPower": 2940,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/840629b94d037897af155be69be674e3b11e44952971594c8526d03f64967c8c.webp"
     },
     {
       "id": "melpaca",
@@ -940,7 +965,8 @@
         }
       ],
       "breedingPower": 2720,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/7fe69ec6f6539c288f0cda0ddb93101ce76a75ef5c4582cac194ee8f5fe77fe7.webp"
     },
     {
       "id": "kingpaca",
@@ -968,7 +994,8 @@
         }
       ],
       "breedingPower": 2220,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/555265ea0c10221075bd331ee2f1cb7c4bd52db3fe78774ed1b76216826b5a2d.webp"
     },
     {
       "id": "kingpaca-cryst",
@@ -1000,7 +1027,8 @@
         }
       ],
       "breedingPower": 1530,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/55c5c1818088632ba3ea974c997075b7a833b7024d40dcefc157d9751209ae0a.webp"
     },
     {
       "id": "daedream",
@@ -1036,7 +1064,8 @@
         }
       ],
       "breedingPower": 2910,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/d88cc2cef4259b62f8a37f4b24fde6c79d254d35238a05681e8d1c9ac09f2df3.webp"
     },
     {
       "id": "tanzee",
@@ -1080,7 +1109,8 @@
         }
       ],
       "breedingPower": 2900,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/6bc584510def01276561e4900ec3c982626fe00b77d73a727cbf7082c45f7f5d.webp"
     },
     {
       "id": "tanzee-ignis",
@@ -1120,7 +1150,8 @@
         }
       ],
       "breedingPower": 2830,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d46211fc95345c3dbdc17f158926e64322ad5a0301fba4e4edc848feb2759dcc.webp"
     },
     {
       "id": "nox",
@@ -1148,7 +1179,8 @@
         }
       ],
       "breedingPower": 2920,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/d1cd7ca842e67a3181f08a3d1f5427047482dd29199ea55ab22d45e9c1ab0cbd.webp"
     },
     {
       "id": "flambelle",
@@ -1188,7 +1220,8 @@
         }
       ],
       "breedingPower": 2700,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f666a5db76dadc3e9888431118251b466b0c61793c6b1aab80764d47711a94e1.webp"
     },
     {
       "id": "rooby",
@@ -1220,7 +1253,8 @@
         }
       ],
       "breedingPower": 2870,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/76924c501b025cf364aaaccf79d8283d3a9bfeacbb25f1d16df99500aa372f70.webp"
     },
     {
       "id": "mau",
@@ -1252,7 +1286,8 @@
         }
       ],
       "breedingPower": 3040,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/46ea311cd6960636ef6a7244ee869c50cb2594c1dfdd1b956ef8fc3eefe176e0.webp"
     },
     {
       "id": "mau-cryst",
@@ -1284,7 +1319,8 @@
         }
       ],
       "breedingPower": 2750,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/0225c2f6dd1af98629f1be391215c7c2bf86cd16a629f0660cf84fd1bdd01a0d.webp"
     },
     {
       "id": "rushoar",
@@ -1312,7 +1348,8 @@
         }
       ],
       "breedingPower": 2880,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/48c78af78661b1e7cf659c227bc7e32c4867a9954393c184c7d309c0e25bea8e.webp"
     },
     {
       "id": "foxparks",
@@ -1340,7 +1377,8 @@
         }
       ],
       "breedingPower": 2990,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/cbc5008c71780ac6a54434e4d7d57339998a3c5d199401aced8e12ca9d65d9b8.webp"
     },
     {
       "id": "foxparks-cryst",
@@ -1368,7 +1406,8 @@
         }
       ],
       "breedingPower": 2500,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/5b04b4ff4021421718d54c31853024ed83b2bd2ebe49e91482cea6e7deaba040.webp"
     },
     {
       "id": "killamari",
@@ -1405,7 +1444,8 @@
         }
       ],
       "breedingPower": 2770,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/0929d873892ebb685382e81bd0dda8fee0aab10a9931632e6b29050827ed6641.webp"
     },
     {
       "id": "killamari-primo",
@@ -1442,7 +1482,8 @@
         }
       ],
       "breedingPower": 2540,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/654f5de144c2dc6403139256c511d3050dc22245875ee9170851690dbbe02190.webp"
     },
     {
       "id": "fuddler",
@@ -1478,7 +1519,8 @@
         }
       ],
       "breedingPower": 2790,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/daa0d6e9934fb69694b82cb4df5c51596f54cc4da1308e940e9f884aa34c83fe.webp"
     },
     {
       "id": "eikthyrdeer",
@@ -1506,7 +1548,8 @@
         }
       ],
       "breedingPower": 2710,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d03fa78ce0b4584b567ad71ae3cff4141ee4bdef944b19aefdc60dc173362114.webp"
     },
     {
       "id": "eikthyrdeer-terra",
@@ -1534,7 +1577,8 @@
         }
       ],
       "breedingPower": 2580,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/19abd14483824dee945c4803e7daf95291d3ec23e90ee5e9a9be51c9bd9df260.webp"
     },
     {
       "id": "direhowl",
@@ -1562,7 +1606,8 @@
         }
       ],
       "breedingPower": 2680,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/41f8aa1f8dbeb38fa44ea45b3df1d55548b6a295fe7352a70f32520f0fbd14bf.webp"
     },
     {
       "id": "caprity",
@@ -1594,7 +1639,8 @@
         }
       ],
       "breedingPower": 2610,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/01dfacfdde506698b2f628c7743601cfcbbdf5df3bc9df6dd828718ae29756d3.webp"
     },
     {
       "id": "caprity-noct",
@@ -1626,7 +1672,8 @@
         }
       ],
       "breedingPower": 1940,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/d93156a610b3c2df07cebcfef1a9b6c0823b94406f61bdbd70aadb29bb5c17b7.webp"
     },
     {
       "id": "swee",
@@ -1658,7 +1705,8 @@
         }
       ],
       "breedingPower": 2840,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/bfca4b59e4dcac1ac50b29fe200f7a92c382571dda800aedacaea40d16392a95.webp"
     },
     {
       "id": "sweepa",
@@ -1690,7 +1738,8 @@
         }
       ],
       "breedingPower": 2150,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/984e82a20ef013dc17fbface008a2998207e4126c3ee7eec062578ccb6c6f5e8.webp"
     },
     {
       "id": "turtacle",
@@ -1726,7 +1775,8 @@
         }
       ],
       "breedingPower": 2410,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/c105f95cbbf35ead01bf8c235c53b425ad0d739425db315affe314083386c8ee.webp"
     },
     {
       "id": "turtacle-terra",
@@ -1763,7 +1813,8 @@
         }
       ],
       "breedingPower": 1330,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/95237910602dba197ae728c44cbc7b6a0d437b0e2ae347cddb7bfeb31c98a516.webp"
     },
     {
       "id": "hangyu",
@@ -1799,7 +1850,8 @@
         }
       ],
       "breedingPower": 2780,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/68821633daa60e11c387f9a7e27baa226322ec3e0dbcbfff5bc00d2e6689b568.webp"
     },
     {
       "id": "hangyu-cryst",
@@ -1839,7 +1891,8 @@
         }
       ],
       "breedingPower": 2510,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/48f6106cea3f180aa714c639a713fbbf1f3c63ed1fd12d89b3610ae4d5ea1871.webp"
     },
     {
       "id": "woolipop",
@@ -1867,7 +1920,8 @@
         }
       ],
       "breedingPower": 2820,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/abf668319299896f02b11850e62a0085b11ef58bb434f16c8644849262b1ae07.webp"
     },
     {
       "id": "woolipop-terra",
@@ -1895,7 +1949,8 @@
         }
       ],
       "breedingPower": 2030,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/82355948ee8987e496af70fa184bcace7d015d40dd8f8a91da7bc0ccad4f34d3.webp"
     },
     {
       "id": "mozzarina",
@@ -1923,7 +1978,8 @@
         }
       ],
       "breedingPower": 2800,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/33d6dc7d72c6095f3830729c5d03aae2eb1e983042a11367a89bc7f83cfb0b93.webp"
     },
     {
       "id": "azurobe",
@@ -1952,7 +2008,8 @@
         }
       ],
       "breedingPower": 1830,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/9f5726a9c7230233b7acce1889075a7cea514e343888b5630ba5486f219022b1.webp"
     },
     {
       "id": "azurobe-cryst",
@@ -1981,7 +2038,8 @@
         }
       ],
       "breedingPower": 1220,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/57322034470379baa561e1a90f443c8e5ec1333c6f6a6d9e3e543e4f4c8e3e3d.webp"
     },
     {
       "id": "sparkit",
@@ -2021,7 +2079,8 @@
         }
       ],
       "breedingPower": 3010,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/56eb7459570b48b35f349d0cd00dd51c8c5740964e3eebc5588c30aaf9d3bc63.webp"
     },
     {
       "id": "kelpsea",
@@ -2053,7 +2112,8 @@
         }
       ],
       "breedingPower": 2810,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/2f1f22058cd3505d6cd1db5f199e6702f567b6f0e8c88a7fe46f97861f1cec63.webp"
     },
     {
       "id": "kelpsea-ignis",
@@ -2085,7 +2145,8 @@
         }
       ],
       "breedingPower": 2470,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d5e420419f480f8b6bf27483e0bcdc585501c26d36deab280b5332470c51ad02.webp"
     },
     {
       "id": "ribbuny",
@@ -2121,7 +2182,8 @@
         }
       ],
       "breedingPower": 2860,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/4d4f56dcb093d723241c338622179946c8d99b5f4299f61b15ae8322a0d4f45a.webp"
     },
     {
       "id": "ribbuny-botan",
@@ -2161,7 +2223,8 @@
         }
       ],
       "breedingPower": 2460,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/5d54593b34e3214bb94b18e18995c5c12e79f0fd82232958bc0dd6d7133f9f17.webp"
     },
     {
       "id": "jelliette",
@@ -2274,7 +2337,8 @@
         }
       ],
       "breedingPower": 2520,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/da951c443f863c2e0823f169dc7fa393e507c81900816db7664ad7e5d2ee4dd4.webp"
     },
     {
       "id": "gloopie",
@@ -2348,7 +2412,8 @@
         }
       ],
       "breedingPower": 1630,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/cb76bbc21f03c9d36c95d9c9bbf0a2ce9e3d031e6750efb23c7d2f0674ed081d.webp"
     },
     {
       "id": "galeclaw",
@@ -2376,7 +2441,8 @@
         }
       ],
       "breedingPower": 2570,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/950c2e23a494e0603c7a59ee64bba4dacf7f21dd7e6d7b1a6a7cd115ee33c4bb.webp"
     },
     {
       "id": "wispaw",
@@ -2416,7 +2482,8 @@
         }
       ],
       "breedingPower": 2250,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/0782acff51c302ccd7c6be7a206fe1c4215c894d440ce51027ae39c6ff663906.webp"
     },
     {
       "id": "nitewing",
@@ -2444,7 +2511,8 @@
         }
       ],
       "breedingPower": 2560,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/88ddfc1630d0179fc5f8b4f169e0542515100a4e0fff9f657f36e8e4387d1de0.webp"
     },
     {
       "id": "tombat",
@@ -2480,7 +2548,8 @@
         }
       ],
       "breedingPower": 2340,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/fddfe19782524983243ab7628d6d4958b554a1c89c8169c0eb183b9982b7f11f.webp"
     },
     {
       "id": "tocotoco",
@@ -2508,7 +2577,8 @@
         }
       ],
       "breedingPower": 2730,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/3fdc8ce057f7a47c48cd90dcddd63ffe3d6ef6008a8e6b58de2034bd729b5aa0.webp"
     },
     {
       "id": "univolt",
@@ -2540,7 +2610,8 @@
         }
       ],
       "breedingPower": 2270,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/df4cc7a5200fdd012055f4ba14ca3534a0e5f5bd9dc384101d798c571a36ae35.webp"
     },
     {
       "id": "univolt-cryst",
@@ -2572,7 +2643,8 @@
         }
       ],
       "breedingPower": 540,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/4ce67ee329d17277ca4ac6384a746eee0104d0e6d68160adc6aa15c8055c3feb.webp"
     },
     {
       "id": "gobfin",
@@ -2608,7 +2680,8 @@
         }
       ],
       "breedingPower": 2550,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b7bb4d15320e4a3bdcb09b0611a4d8cc4ba75d85957fca7765d2dc316a96f1c4.webp"
     },
     {
       "id": "gobfin-ignis",
@@ -2644,7 +2717,8 @@
         }
       ],
       "breedingPower": 2430,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/8712de8be883227bbd9d16f5614dfb1b13e532fa4ae112fd9560872b8318bfda.webp"
     },
     {
       "id": "loupmoon",
@@ -2672,7 +2746,8 @@
         }
       ],
       "breedingPower": 2110,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/624e4ec135030382c45abe6a209e9e09aa3dfead1345b3056be11b471a23ac78.webp"
     },
     {
       "id": "loupmoon-cryst",
@@ -2704,7 +2779,8 @@
         }
       ],
       "breedingPower": 1290,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/c5f0912be48be6aae046e7f888ff0d84119703167d52c8bd47e142508436b604.webp"
     },
     {
       "id": "cawgnito",
@@ -2736,7 +2812,8 @@
         }
       ],
       "breedingPower": 2370,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/0826387dacccec83810da4c64c4a07a818684043f2999954cfd40506268e9b8b.webp"
     },
     {
       "id": "arsox",
@@ -2768,7 +2845,8 @@
         }
       ],
       "breedingPower": 2320,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/73d88cb09283961fab7bb19c8d2c7b9769d0f416a8bb8867bd3d6c78a6036380.webp"
     },
     {
       "id": "muffly",
@@ -2800,7 +2878,8 @@
         }
       ],
       "breedingPower": 2480,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f853beb6727c36f1b9d8ac79f23d8cbc71c4099b0e02ee86be1acdd353509cdc.webp"
     },
     {
       "id": "bristla",
@@ -2844,7 +2923,8 @@
         }
       ],
       "breedingPower": 2690,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/3204001f1c56e665b3f14c50760e2f6dca17f8d14da93b95fa0c694584bcb1f3.webp"
     },
     {
       "id": "cinnamoth",
@@ -2880,7 +2960,8 @@
         }
       ],
       "breedingPower": 2620,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/fce6aca9cf47eb0659e6a8aa6145f2d6cb665adb2b36a1992b77b869a0c06c97.webp"
     },
     {
       "id": "puffolt",
@@ -2912,7 +2993,8 @@
         }
       ],
       "breedingPower": 2360,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b61e1750be43fe8426155f50b66274717ad09d1e14fb98a3d6936e62928f50c0.webp"
     },
     {
       "id": "elphidran",
@@ -2940,7 +3022,8 @@
         }
       ],
       "breedingPower": 2280,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b33277c6b853cc90d9fe865e33460299cbbf4e012c374792bd8e5e2ab3eeca1c.webp"
     },
     {
       "id": "elphidran-aqua",
@@ -2973,7 +3056,8 @@
         }
       ],
       "breedingPower": 1640,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/2a17f4372776069b02fca22172208218fbeef72517f785c996e8ab978f6b7312.webp"
     },
     {
       "id": "vanwyrm",
@@ -3006,7 +3090,8 @@
         }
       ],
       "breedingPower": 1650,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/4b11b6b81cb4bda1f3b77b3e3baa40b707a2ffe3939944e3179d87cec267fb12.webp"
     },
     {
       "id": "vanwyrm-cryst",
@@ -3039,7 +3124,8 @@
         }
       ],
       "breedingPower": 1430,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/f355e3905454641f05052c725374cc1882d929fde46dae14b6d68ce7746994d0.webp"
     },
     {
       "id": "felbat",
@@ -3067,7 +3153,8 @@
         }
       ],
       "breedingPower": 1570,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/028298ff9afb576271118f2f6a956cb775d987aa347634854c124dfae250fadb.webp"
     },
     {
       "id": "vaelet",
@@ -3115,7 +3202,8 @@
         }
       ],
       "breedingPower": 1480,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d38c29f754ddc67894ddb4b1a904093b809eb2f4f1443fab837c54b136c66a2e.webp"
     },
     {
       "id": "beegarde",
@@ -3167,7 +3255,8 @@
         }
       ],
       "breedingPower": 2350,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/efca1c21304b9e0386c86bc723b3731f5b5d7d62bf944ead7bac1d31c06b337d.webp"
     },
     {
       "id": "elizabee",
@@ -3211,7 +3300,8 @@
         }
       ],
       "breedingPower": 1790,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/04dcfe3061015c97ea444b89d14bfa1f882d8ae69e41f5c4baa43169fd42d158.webp"
     },
     {
       "id": "lovander",
@@ -3251,7 +3341,8 @@
         }
       ],
       "breedingPower": 2090,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/4d41069237ec8f52d054da13ece0e973196d24dbe9e6615fd5b347abf8f9eab1.webp"
     },
     {
       "id": "grintale",
@@ -3279,7 +3370,8 @@
         }
       ],
       "breedingPower": 2120,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/5c10385975680720b42905f5ea43409a33b7e6e6467ef79669bf4b23b8cd452b.webp"
     },
     {
       "id": "tarantriss",
@@ -3352,7 +3444,8 @@
         }
       ],
       "breedingPower": 1660,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d9bf4cc3fb87d26102ff589bb044fe37b4c2ecabb749eb39c55ddb0487de0cce.webp"
     },
     {
       "id": "polapup-terra",
@@ -3385,7 +3478,8 @@
         }
       ],
       "breedingPower": 1100,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/90ad20553ec611c1c8a7ff22d9a4deaa2b0020f04bb4af1ca1b911d352a68f25.webp"
     },
     {
       "id": "leezpunk",
@@ -3421,7 +3515,8 @@
         }
       ],
       "breedingPower": 2670,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/f59555b454ba741d3bc81ba2d825c710eed0b7ea902faa71925c66fb98fa20f2.webp"
     },
     {
       "id": "leezpunk-ignis",
@@ -3461,7 +3556,8 @@
         }
       ],
       "breedingPower": 2640,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/7f6165b1ac77b0ebd154633b087c922053cc6572a53067a5013bfbc000299977.webp"
     },
     {
       "id": "gorirat",
@@ -3497,7 +3593,8 @@
         }
       ],
       "breedingPower": 2140,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e8626499c699ac22dc530fe9d384d7e8c46272855293e2c3c0dcf181a44e30d8.webp"
     },
     {
       "id": "gorirat-terra",
@@ -3533,7 +3630,8 @@
         }
       ],
       "breedingPower": 1880,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e77082412264810144fbc0f624e90d62206a6698854f5131cc71665086b63203.webp"
     },
     {
       "id": "surfent",
@@ -3565,7 +3663,8 @@
         }
       ],
       "breedingPower": 2440,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/54f427e42c1a01e6a9fab094e2ccabbc84ee61ce378ee5a64d9d43f02b228b36.webp"
     },
     {
       "id": "surfent-terra",
@@ -3593,7 +3692,8 @@
         }
       ],
       "breedingPower": 1840,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/24eb12b6a936f80cb026258acaef147d3e5e9848ba3d16e2201d5c7b0aa8cc2b.webp"
     },
     {
       "id": "robinquill",
@@ -3641,7 +3741,8 @@
         }
       ],
       "breedingPower": 2260,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/cf7be1bd187b10a5af7d0071cd67ecaa5507243508b6112dd01d5cf430c6846f.webp"
     },
     {
       "id": "robinquill-terra",
@@ -3686,7 +3787,8 @@
         }
       ],
       "breedingPower": 2050,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e0376d9b9cc0d5dc1530bd5e962a64ec7c02f850b2763ea3b541321ed1c02743.webp"
     },
     {
       "id": "flopie",
@@ -3730,7 +3832,8 @@
         }
       ],
       "breedingPower": 2660,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/5da0aaaf9d187036f548008db6d903e26019807f4dd0c718375db33245e535ce.webp"
     },
     {
       "id": "wixen",
@@ -3766,7 +3869,8 @@
         }
       ],
       "breedingPower": 2080,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d8a169e6736992fb14c6e00fd51584a8bf9bfcdb18292adb9be8ed3de4b8ed04.webp"
     },
     {
       "id": "wixen-noct",
@@ -3803,7 +3907,8 @@
         }
       ],
       "breedingPower": 1490,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/1f9ba7d68e22256fc001f2a88fb516b5e75badf5eec68c8b5c438629d9007274.webp"
     },
     {
       "id": "katress",
@@ -3839,7 +3944,8 @@
         }
       ],
       "breedingPower": 2040,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/2906c693fa19bc3126f9704b908bda108be87b2c64a903655a66a8711f2dece0.webp"
     },
     {
       "id": "katress-ignis",
@@ -3880,7 +3986,8 @@
         }
       ],
       "breedingPower": 1800,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/72684bc875fcc1febd43ae5b3d50821e04a1bc91f2b2ece96884f9e780ff0d09.webp"
     },
     {
       "id": "helzephyr",
@@ -3908,7 +4015,8 @@
         }
       ],
       "breedingPower": 1130,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/2c79a267b63c9b34c582f727642c4b0e0e33dec2594b9d46c226b4a4232de8ac.webp"
     },
     {
       "id": "helzephyr-lux",
@@ -3941,7 +4049,8 @@
         }
       ],
       "breedingPower": 960,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/4bbe51ab2667ead19e55b3cfda1781599ab4bacb829cb755506e2250be741748.webp"
     },
     {
       "id": "elgrove",
@@ -3985,7 +4094,8 @@
         }
       ],
       "breedingPower": 2020,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/abe93fe6cb09b4444886173bdbc084f518c7cea8641ecfe9413f8062e305d33f.webp"
     },
     {
       "id": "elgrove-cryst",
@@ -4025,7 +4135,8 @@
         }
       ],
       "breedingPower": 440,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/8e5a207a36a339441cf7049bc8e91b25b6c2ead0ed826ee665d56b21cf343ab0.webp"
     },
     {
       "id": "lunaris",
@@ -4061,7 +4172,8 @@
         }
       ],
       "breedingPower": 2010,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f53f60ccd8fd65eebc1dd430978f98cb4b52283d36a34ab6c3bb79691888a875.webp"
     },
     {
       "id": "fenglope",
@@ -4089,7 +4201,8 @@
         }
       ],
       "breedingPower": 1960,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/a3888f7ed3aadaa1c2538c0b9ba63e0d06427460efa9829dae24a35a9eb79ebe.webp"
     },
     {
       "id": "fenglope-lux",
@@ -4121,7 +4234,8 @@
         }
       ],
       "breedingPower": 900,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/891007cd9977d9158a0467ae7d8d9170966a55cdb99af643f891a62a28328be1.webp"
     },
     {
       "id": "dinossom",
@@ -4154,7 +4268,8 @@
         }
       ],
       "breedingPower": 2100,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/08f1563705b9d6d3b07bb111db3069dd98fd20d80383f86495580baf28bc364d.webp"
     },
     {
       "id": "dinossom-lux",
@@ -4187,7 +4302,8 @@
         }
       ],
       "breedingPower": 1890,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1fd32b0a0093e40236348930bead4e86c37a836ae2f824529cc8c13dd9b1b717.webp"
     },
     {
       "id": "bushi",
@@ -4231,7 +4347,8 @@
         }
       ],
       "breedingPower": 1560,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/eb746262769a02611ffa76694be11751fc940d6d8157b5894dc2ea68d0ee67d3.webp"
     },
     {
       "id": "bushi-noct",
@@ -4276,7 +4393,8 @@
         }
       ],
       "breedingPower": 840,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/f133b931a3a5e0d30c9f81dfcbcb1a89a474594035e954c054707baff3a54ac3.webp"
     },
     {
       "id": "munchill",
@@ -4313,7 +4431,8 @@
         }
       ],
       "breedingPower": 2130,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/be496ece7beb64e825206c892e86fa4b5456a3f6a075fb3896123ebcc7eeba2c.webp"
     },
     {
       "id": "mammorest",
@@ -4350,7 +4469,8 @@
         }
       ],
       "breedingPower": 1340,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/39ed18cb632be66e04011f6670e3902106cc554ee7395506d4471d889a093ced.webp"
     },
     {
       "id": "mammorest-cryst",
@@ -4387,7 +4507,8 @@
         }
       ],
       "breedingPower": 1070,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1a70e562a1b8c31f1c5397e30fca98820d85c2a49f14195647f95463f8364a57.webp"
     },
     {
       "id": "finsider",
@@ -4419,7 +4540,8 @@
         }
       ],
       "breedingPower": 2450,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/63d4eecf845de822fd74c1242f0d1a982582cf57703aa6bed0eea6b3ec2e201c.webp"
     },
     {
       "id": "finsider-ignis",
@@ -4456,7 +4578,8 @@
         }
       ],
       "breedingPower": 2240,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/377ce974a7c1a7e8c86fef47f73998aa66880b68f87e5d44fc6d752b0447e441.webp"
     },
     {
       "id": "petallia",
@@ -4500,7 +4623,8 @@
         }
       ],
       "breedingPower": 1720,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/a577bdcbad9ca4734e02b42566ccd2b03b5e2a1e142871813d6e73774c4586a4.webp"
     },
     {
       "id": "petallia-ignis",
@@ -4545,7 +4669,8 @@
         }
       ],
       "breedingPower": 820,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1c434758b9e63435b44f9971b7e3238fe43eb6ad988fb11221a932969781fb71.webp"
     },
     {
       "id": "leafan",
@@ -4585,7 +4710,8 @@
         }
       ],
       "breedingPower": 1410,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/7170278967c0ea35f43ac23f02dce094dd0a0964be4d389d5cd36249b22e1fc7.webp"
     },
     {
       "id": "incineram",
@@ -4626,7 +4752,8 @@
         }
       ],
       "breedingPower": 1470,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/70870e5169597035d87b40c29f525b915820a60b072d8d67255cd52336887fa3.webp"
     },
     {
       "id": "incineram-noct",
@@ -4662,7 +4789,8 @@
         }
       ],
       "breedingPower": 1310,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/8d6d967821d8e95d1ce4fffe6d1374304231a0a06112fd0b180fa4d1ff17fa63.webp"
     },
     {
       "id": "dazzi",
@@ -4698,7 +4826,8 @@
         }
       ],
       "breedingPower": 2400,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b641228e1e7267d7b8f97b8b298c3294edee49e0c0e46bece2758cc7d961238c.webp"
     },
     {
       "id": "dazzi-noct",
@@ -4739,7 +4868,8 @@
         }
       ],
       "breedingPower": 1910,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/737c919f5d24d3c139350d1295aab4a26c0eb290913b4146812ba020607b5d3c.webp"
     },
     {
       "id": "pyrin",
@@ -4771,7 +4901,8 @@
         }
       ],
       "breedingPower": 1980,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/00d925c1aea1991a2d6fc874bda8463ae848a630077c8f24089023f7d6a8511f.webp"
     },
     {
       "id": "pyrin-noct",
@@ -4804,7 +4935,8 @@
         }
       ],
       "breedingPower": 1870,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/58f4da428d33dbfec69d1486683385baec1c34ac1d14df75532891f99af2e13a.webp"
     },
     {
       "id": "relaxaurus",
@@ -4837,7 +4969,8 @@
         }
       ],
       "breedingPower": 1090,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/87eec49aabd9c8b67ecd9b5b1f92113e304930f346430136489bcc6833044ecd.webp"
     },
     {
       "id": "relaxaurus-lux",
@@ -4870,7 +5003,8 @@
         }
       ],
       "breedingPower": 770,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/fdb5f06c3159a91235120002264733127bf8f7cf98cf92e7e4203578a05784d6.webp"
     },
     {
       "id": "foxcicle",
@@ -4902,7 +5036,8 @@
         }
       ],
       "breedingPower": 1970,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b3177b93e7f9f16edeadca36935c99cf6cd4a4244f718b3d93425ad253c766c6.webp"
     },
     {
       "id": "beakon",
@@ -4938,7 +5073,8 @@
         }
       ],
       "breedingPower": 1690,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/6636218e037b92e7dab5af5d13e17abdbb909cac9604606056c457a63865916f.webp"
     },
     {
       "id": "beakon-cryst",
@@ -4974,7 +5110,8 @@
         }
       ],
       "breedingPower": 580,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/8f3e63943c4cf0ba6fb0ee49ecbce5b3b82b3bb9a4a6843febcbcd46118739a3.webp"
     },
     {
       "id": "ghangler",
@@ -5007,7 +5144,8 @@
         }
       ],
       "breedingPower": 880,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/93f6a88df17098d26e88f826de6960409ee0eb0de3b411a5f44af7ffd2b05fef.webp"
     },
     {
       "id": "ghangler-ignis",
@@ -5044,7 +5182,8 @@
         }
       ],
       "breedingPower": 720,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e512e8733b4f271edd0b4f012c1caf7ce64b5e70a5bfb434f8018ad0e5c4b532.webp"
     },
     {
       "id": "rayhound",
@@ -5072,7 +5211,8 @@
         }
       ],
       "breedingPower": 1920,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/52d9ab79fc16c4d9ef95946a789aa1d7085da5165b5337c4cd8509dab22ca2de.webp"
     },
     {
       "id": "rayhound-cryst",
@@ -5100,7 +5240,8 @@
         }
       ],
       "breedingPower": 1600,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d9b3d1266e32724f3ea2e03d892a1535a7ca05ddcd12928bbf9d737fe4d8b6e4.webp"
     },
     {
       "id": "menasting",
@@ -5133,7 +5274,8 @@
         }
       ],
       "breedingPower": 1120,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/5aea2c059b53fff57bf35c1bad1c4d7205d08103898d627aaa8201bd46d4879e.webp"
     },
     {
       "id": "menasting-terra",
@@ -5165,7 +5307,8 @@
         }
       ],
       "breedingPower": 640,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/03260fffcc7fdb9731f98ceafd862ea2ed7fe1d92831b9054395bb43a1e0a36f.webp"
     },
     {
       "id": "needoll",
@@ -5201,7 +5344,8 @@
         }
       ],
       "breedingPower": 2420,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/08a7875631f051b6503e0da60da851c579a492db2141147c8cf8ef7c7491fb30.webp"
     },
     {
       "id": "needoll-noct",
@@ -5238,7 +5382,8 @@
         }
       ],
       "breedingPower": 1580,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/0c29d5145ec773a27fd8335ef5abc7eda8ccdcf95b51254295acd3cd0f570309.webp"
     },
     {
       "id": "reindrix",
@@ -5270,7 +5415,8 @@
         }
       ],
       "breedingPower": 1930,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/62db988b49d6347fc799ab2920397e5cc6532a637e2e184a8ad8ffb68452ebc3.webp"
     },
     {
       "id": "mossanda",
@@ -5310,7 +5456,8 @@
         }
       ],
       "breedingPower": 2060,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/4194ed64c2087d3782dcf9b32ff29de596e956cb0f16829b2885f60e886aca1d.webp"
     },
     {
       "id": "mossanda-lux",
@@ -5350,7 +5497,8 @@
         }
       ],
       "breedingPower": 1440,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/87fe9a8758c4b4deedcca21507ae29065191586df93b293d442fea90a84e100c.webp"
     },
     {
       "id": "chillet",
@@ -5383,7 +5531,8 @@
         }
       ],
       "breedingPower": 2330,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/3eff2e5349df5fb7f860ae8d04000ec12295bea8dc9dbea9b936861422bdb5b8.webp"
     },
     {
       "id": "chillet-ignis",
@@ -5416,7 +5565,8 @@
         }
       ],
       "breedingPower": 1950,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f3a4a818b4c825757103c6be09e06da573775453b7bd21e12a27d9c4fed9e7ae.webp"
     },
     {
       "id": "ragnahawk",
@@ -5448,7 +5598,8 @@
         }
       ],
       "breedingPower": 1050,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/0055d5f45273b701c1c9d957e4660dc3b9e772006bc1949032bf1d027b46f64c.webp"
     },
     {
       "id": "moldron",
@@ -5481,7 +5632,8 @@
         }
       ],
       "breedingPower": 750,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/21a38c8f433036407db6c36678d6e6ab1669cb42c1b4ef14e7eeb25c5f732af3.webp"
     },
     {
       "id": "moldron-cryst",
@@ -5514,7 +5666,8 @@
         }
       ],
       "breedingPower": 380,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f00fcf24c70f311d79eb6da286976a0e70078d6f8f63e13221fe118746759b4e.webp"
     },
     {
       "id": "palumba",
@@ -5550,7 +5703,8 @@
         }
       ],
       "breedingPower": 1240,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/271dffae45340855aaa9ea5895cb6fa48a8852afc940062b96ed816d17bb7a3f.webp"
     },
     {
       "id": "digtoise",
@@ -5578,7 +5732,8 @@
         }
       ],
       "breedingPower": 1550,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/28149c0d1158d6a38d185400082d73e4aba6f2ce6666d7ae8662cfbd136c2f7e.webp"
     },
     {
       "id": "broncherry",
@@ -5606,7 +5761,8 @@
         }
       ],
       "breedingPower": 1380,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b552c1e8a0c4ff9e904428e67979522897fa1abe009dfc49889bb300091996ea.webp"
     },
     {
       "id": "broncherry-aqua",
@@ -5635,7 +5791,8 @@
         }
       ],
       "breedingPower": 1080,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/6ebb6952a5809e034d2b67473791574f6163855ecf2c10ab0749273b0a0639d0.webp"
     },
     {
       "id": "dumud",
@@ -5676,7 +5833,8 @@
         }
       ],
       "breedingPower": 2290,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/065d2e77b9087a8327204784663f0cac5877902625696e497d81e12209957f06.webp"
     },
     {
       "id": "dumud-gild",
@@ -5717,7 +5875,8 @@
         }
       ],
       "breedingPower": 1620,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f525050cf77463675900eed81755c73203ab03d1f077fce50b59a9fd4b4bf4b0.webp"
     },
     {
       "id": "braloha",
@@ -5754,7 +5913,8 @@
         }
       ],
       "breedingPower": 1030,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/dc94cb8a8e94476aa70b228785d8291f0708cc74f2363bfec0601925248bc937.webp"
     },
     {
       "id": "kitsun",
@@ -5782,7 +5942,8 @@
         }
       ],
       "breedingPower": 1670,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d3e31268219c1665c125f90fa6ebb6f662404b56ad8e89b8239f6403a2267a55.webp"
     },
     {
       "id": "kitsun-noct",
@@ -5810,7 +5971,8 @@
         }
       ],
       "breedingPower": 800,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/c68a000e21854076c97c0f3bbd8564b010cc243e098d05d16c9f43d53253c834.webp"
     },
     {
       "id": "blazehowl",
@@ -5842,7 +6004,8 @@
         }
       ],
       "breedingPower": 1360,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/de33b1340b982176596c8945c4a94a6d2358987b33f14397a9fdeec3ed5c8602.webp"
     },
     {
       "id": "blazehowl-noct",
@@ -5875,7 +6038,8 @@
         }
       ],
       "breedingPower": 1270,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/8b70fdb76a5637da58775405a9aa8e5119126e934a6e6a0f92910fb3320e6144.webp"
     },
     {
       "id": "warsect",
@@ -5916,7 +6080,8 @@
         }
       ],
       "breedingPower": 1280,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1cb756cb27ab51346f0622a0351ae3e87b5277d3faf9f4e0a44af8de4a7dcba0.webp"
     },
     {
       "id": "warsect-terra",
@@ -5952,7 +6117,8 @@
         }
       ],
       "breedingPower": 630,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f951d63a019ab6afea0f31d2d6cf3a16d61e69c77dc8d3f2f2f5cac8b105ade5.webp"
     },
     {
       "id": "frostplume",
@@ -5984,7 +6150,8 @@
         }
       ],
       "breedingPower": 860,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/4b9549aa33931ce85803a65134b5433eb0b10ba96e0e233fb1a1cd2bd9a9d173.webp"
     },
     {
       "id": "majex",
@@ -6025,7 +6192,8 @@
         }
       ],
       "breedingPower": 1010,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/87d772d11dc9c501c5a0942959d04c902ca8644598df7c2b8824aa66d0bed54b.webp"
     },
     {
       "id": "sibelyx",
@@ -6061,7 +6229,8 @@
         }
       ],
       "breedingPower": 1810,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1189220c4b871c1aa763912577155fdc012a3754ff3cdc1845e31d7420ef4717.webp"
     },
     {
       "id": "sibelyx-primo",
@@ -6093,7 +6262,8 @@
         }
       ],
       "breedingPower": 650,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/6406623393140f8e7063741bcc97b6b15a940572e9c9a57a5bc76312c89ca686.webp"
     },
     {
       "id": "maraith",
@@ -6125,7 +6295,8 @@
         }
       ],
       "breedingPower": 1710,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/38391f6ce1b3a873ba0cf71c9d8bda6d2f1dfe04dec77f885f3fbe04eaf4f5a6.webp"
     },
     {
       "id": "shroomer",
@@ -6169,7 +6340,8 @@
         }
       ],
       "breedingPower": 1520,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d48e1ec45b69aefc04449c212abdc97a5e27cc24e7021589f5490d87067e047f.webp"
     },
     {
       "id": "shroomer-noct",
@@ -6210,7 +6382,8 @@
         }
       ],
       "breedingPower": 1450,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/3f3709dc0798324f5f5a6308af2c9ad83a3d14432f5c752279dfb568cf969121.webp"
     },
     {
       "id": "icelyn",
@@ -6250,7 +6423,8 @@
         }
       ],
       "breedingPower": 1260,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/5fafa456ceb18d6a5d952810aa37fecfd2cadf0d9049a1e0a4e74027ad1e034f.webp"
     },
     {
       "id": "gildra",
@@ -6287,7 +6461,8 @@
         }
       ],
       "breedingPower": 1170,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/f2a62e6875b8b96bd113783e203d6202a3e9370289398da7ea2e958e2c7d20a5.webp"
     },
     {
       "id": "jormuntide",
@@ -6316,7 +6491,8 @@
         }
       ],
       "breedingPower": 590,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/23f0cf9b87abfcf8f8d63e4ea0cda12bf3c9159fa3525935f966d33cf1eb528a.webp"
     },
     {
       "id": "jormuntide-ignis",
@@ -6345,7 +6521,8 @@
         }
       ],
       "breedingPower": 170,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/da90f047a0025c4453cac8fabf15ae139b4efc16f8a8c3dcc47cc1932a8ef18e.webp"
     },
     {
       "id": "suzaku",
@@ -6373,7 +6550,8 @@
         }
       ],
       "breedingPower": 1200,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/8edc1461e7d19c366381f6804bbdb9a0003fcce085a9116f4a68dd035a22e7df.webp"
     },
     {
       "id": "suzaku-aqua",
@@ -6401,7 +6579,8 @@
         }
       ],
       "breedingPower": 740,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/7a6e939b7096c43cc3616581d06719c270233af259b4d841ba48713ad13eb657.webp"
     },
     {
       "id": "dazemu",
@@ -6429,7 +6608,8 @@
         }
       ],
       "breedingPower": 2210,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/057fad445ce081e188515370084e68708528fdd81bc8c673f9e84c2368bffce7.webp"
     },
     {
       "id": "quivern",
@@ -6469,7 +6649,8 @@
         }
       ],
       "breedingPower": 1210,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/fe7bc9e919e9f1f7ede0c7d0ddd7257235a80543687f76828a9a5ee240894c35.webp"
     },
     {
       "id": "quivern-botan",
@@ -6514,7 +6695,8 @@
         }
       ],
       "breedingPower": 1300,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/2ffce6e3bed9b6b164ae5abd6cd3fcbbfcc4e1e8f490031b27db85e713697f1c.webp"
     },
     {
       "id": "lullu",
@@ -6554,7 +6736,8 @@
         }
       ],
       "breedingPower": 1990,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/01bb83fc08b3b5c49737466a28aa67224332b7dfd75fb5a7adb524daa1a4e097.webp"
     },
     {
       "id": "kikit",
@@ -6582,7 +6765,8 @@
         }
       ],
       "breedingPower": 2310,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/0a5ba9a0cf5c5e7ccbbb8ce5178de9ce417c87ea3ff5272f963b7e970fa89d4d.webp"
     },
     {
       "id": "yakumo",
@@ -6610,7 +6794,8 @@
         }
       ],
       "breedingPower": 2230,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/821fad1a0894267e561299f86995eb4127c10a679526a884255c61b0e333b3b8.webp"
     },
     {
       "id": "skutlass",
@@ -6646,7 +6831,8 @@
         }
       ],
       "breedingPower": 1420,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/feee86abe9ca74ecee27655f45a15bb94e3dcd6fcfb48294581c157d002061bb.webp"
     },
     {
       "id": "skutlass-ignis",
@@ -6687,7 +6873,8 @@
         }
       ],
       "breedingPower": 1590,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/46b2e23f1750fb1465081217ca675cf537a7fd5e297b78c2a1503881167435ba.webp"
     },
     {
       "id": "reptyro",
@@ -6720,7 +6907,8 @@
         }
       ],
       "breedingPower": 1060,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e6ba19091e6e4b7cc35943507a30ac778204c16da74fb735152918f16a927605.webp"
     },
     {
       "id": "reptyro-cryst",
@@ -6753,7 +6941,8 @@
         }
       ],
       "breedingPower": 600,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/00ef82af19aea79ffb6d6096dd30835ed4ad7aac2d68e64e0c6d79b87fc70315.webp"
     },
     {
       "id": "starryon",
@@ -6781,7 +6970,8 @@
         }
       ],
       "breedingPower": 1150,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/81bbe85f7f2fc25cd9c41d81972d2061d3da7fe0407b2ff917e6e95a82af8d14.webp"
     },
     {
       "id": "starryon-primo",
@@ -6809,7 +6999,8 @@
         }
       ],
       "breedingPower": 430,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/890ec40fe52a961c9c1cd2eab48f16001e578dc562ec4788eb1237d074100380.webp"
     },
     {
       "id": "pierdon",
@@ -6869,7 +7060,8 @@
         }
       ],
       "breedingPower": 460,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e04739d187e00f0485dd2652bf551ad75c2b05d566895c39874a4ca856405dcd.webp"
     },
     {
       "id": "cryolinx",
@@ -6909,7 +7101,8 @@
         }
       ],
       "breedingPower": 1040,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/62c7fdc13363143b41cd73c63450796dfa381b0b0d86586d6797e927111e43aa.webp"
     },
     {
       "id": "cryolinx-terra",
@@ -6949,7 +7142,8 @@
         }
       ],
       "breedingPower": 470,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/736826f5b59ba55f43776068b154c33e5dc50a05e0d8cfed8fbc50929f10d855.webp"
     },
     {
       "id": "snugloo",
@@ -6989,7 +7183,8 @@
         }
       ],
       "breedingPower": 2390,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/fe63704004568017919feba0e132384e7cc0323cb74353d836b1dfc29464833c.webp"
     },
     {
       "id": "wumpo",
@@ -7029,7 +7224,8 @@
         }
       ],
       "breedingPower": 830,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/9c148fa0560a57b3f03a1cbbceb9458a123d866c1cb22d092d6535e7570e0704.webp"
     },
     {
       "id": "wumpo-botan",
@@ -7069,7 +7265,8 @@
         }
       ],
       "breedingPower": 610,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/5ea3a719177e8538f627cdb36baaecedd8b62c053b748cc73c85bd717fc03109.webp"
     },
     {
       "id": "sootseer",
@@ -7114,7 +7311,8 @@
         }
       ],
       "breedingPower": 980,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/85507375672eedd9e57af856a5bbc63ab8b00cc7b1186882dab4c550b618ba90.webp"
     },
     {
       "id": "carnibora",
@@ -7154,7 +7352,8 @@
         }
       ],
       "breedingPower": 1700,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/390f89e78baf101ba0dc99721e93d46df436a51414bb784a3adf02af5c6924ad.webp"
     },
     {
       "id": "blazamut",
@@ -7186,7 +7385,8 @@
         }
       ],
       "breedingPower": 410,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/b05609072df73459248317ff289413d244796423d3ea7fb07971a412e75aef5e.webp"
     },
     {
       "id": "blazamut-ryu",
@@ -7219,7 +7419,8 @@
         }
       ],
       "breedingPower": 100,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/6a7473d96da2320ce610ac6de4e972f9001917a336f9b8cc73505effb6efe2a4.webp"
     },
     {
       "id": "dualith",
@@ -7264,7 +7465,8 @@
         }
       ],
       "breedingPower": 510,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/07c91c5548d8408d99f94eba001480c7a6ee7b730b7ba9c353368b51ceb8e9dc.webp"
     },
     {
       "id": "dualith-noct",
@@ -7309,7 +7511,8 @@
         }
       ],
       "breedingPower": 250,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/4b2ba3b2fa210c4eaf9ab4111c24b51cd5b61269be2eb2847b080e7d45f0ded4.webp"
     },
     {
       "id": "anubis",
@@ -7345,7 +7548,8 @@
         }
       ],
       "breedingPower": 480,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/26f7b751a700e4805a3744aa847c6d1d7214fd451f5ad8dc81b64d326ad679aa.webp"
     },
     {
       "id": "sekhmet",
@@ -7418,7 +7622,8 @@
         }
       ],
       "breedingPower": 1510,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/c0a1acd306a703462b397157782732ce9a0e560d4071866781dafa4aca3ec3ad.webp"
     },
     {
       "id": "prixter-lux",
@@ -7459,7 +7664,8 @@
         }
       ],
       "breedingPower": 850,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/694991ab5d501f75b896284dfbb34eb66d2a4eb38c141105fd038f123ab39207.webp"
     },
     {
       "id": "tetroise",
@@ -7487,7 +7693,8 @@
         }
       ],
       "breedingPower": 790,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1ffb552b61023b1e5bf4965db0b2734b43de5a93cdeca9fc3b3b724643c9bd23.webp"
     },
     {
       "id": "tetroise-primo",
@@ -7515,7 +7722,8 @@
         }
       ],
       "breedingPower": 200,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/5ab51990acd13a6c4eb675f15f38b158b947eb4c368a59e8691a4ad8fa0b48cd.webp"
     },
     {
       "id": "nyafia",
@@ -7555,7 +7763,8 @@
         }
       ],
       "breedingPower": 1250,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/f50252e17eeb2c2528a6b02f301421bd0db1034d85de0726c477aa5fec0d58c2.webp"
     },
     {
       "id": "mimog",
@@ -7587,7 +7796,8 @@
         }
       ],
       "breedingPower": 1740,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/809bd1e628d008e51f0b26d869b0e8753c2a27d5e2f80d9aafff8b6351adc96e.webp"
     },
     {
       "id": "xenovader",
@@ -7619,7 +7829,8 @@
         }
       ],
       "breedingPower": 1820,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/c50ea04ce42b6217856781a85e75170d059c14df033d9d7cb419044217da31eb.webp"
     },
     {
       "id": "xenogard",
@@ -7647,7 +7858,8 @@
         }
       ],
       "breedingPower": 990,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/ace9b6c9dca724f97e37b84b5aef9d7d10bd56cfe5d5342c1b36861dc108a465.webp"
     },
     {
       "id": "prunelia",
@@ -7692,7 +7904,8 @@
         }
       ],
       "breedingPower": 1390,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/f2467b1dbede1271513c763d04b1e4880d805840e18ac3d09222dd3e80cdbbb8.webp"
     },
     {
       "id": "nitemary",
@@ -7724,7 +7937,8 @@
         }
       ],
       "breedingPower": 1230,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/e90e0bdf6378525089c427b294c94305c835e1920ea76c39a60bde01cb6d896b.webp"
     },
     {
       "id": "nitemary-botan",
@@ -7760,7 +7974,8 @@
         }
       ],
       "breedingPower": 1320,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1389eef792841f754605b2b0a925448c87e4987eaaac330c50c328e69e989d32.webp"
     },
     {
       "id": "smokie",
@@ -7821,7 +8036,8 @@
         }
       ],
       "breedingPower": 1610,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/b122c5aa37effac873dea9452763789440404f921f0f4f806c12dad5550036fc.webp"
     },
     {
       "id": "omascul",
@@ -7915,7 +8131,8 @@
         }
       ],
       "breedingPower": 370,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d8c1cd71000c695b8873612732c0f7706af2f96b9a8c265097b18c04739a528e.webp"
     },
     {
       "id": "verdash",
@@ -7959,7 +8176,8 @@
         }
       ],
       "breedingPower": 1160,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/0f3784c74204c277962ef25657fec708b673b8eb996849191670b9a61d8f33ad.webp"
     },
     {
       "id": "splatterina",
@@ -8027,7 +8245,8 @@
         }
       ],
       "breedingPower": 730,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/8459ead9ff537e55220efa77b27ba48095ab161cef6d5217c3f9df96f9122073.webp"
     },
     {
       "id": "dogen",
@@ -8071,7 +8290,8 @@
         }
       ],
       "breedingPower": 1460,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/1fe7cf5ca839398732637fe50771098517afa0da2afc93256983cbbec3c3ae60.webp"
     },
     {
       "id": "bulldosu",
@@ -8103,7 +8323,8 @@
         }
       ],
       "breedingPower": 1190,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/2eb0af65bfacca1b7e6362669fdb3b3f65eaa4440430d5049e46923c400a83a6.webp"
     },
     {
       "id": "celesdir",
@@ -8167,7 +8388,8 @@
         }
       ],
       "breedingPower": 270,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/56a08c8656ed8f4e608f14e8a1f88c5dd88387202d6c9ba26c917dfd6983b218.webp"
     },
     {
       "id": "astegon",
@@ -8200,7 +8422,8 @@
         }
       ],
       "breedingPower": 490,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/d01fe71d9981252d2e9ff483ef2d68133a66216e8a25c16c3bc93e617b902abd.webp"
     },
     {
       "id": "knocklem",
@@ -8236,7 +8459,8 @@
         }
       ],
       "breedingPower": 260,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/dbcacb5694addc023a013f6b735dc4f34c1d63f9babab658391da9037eb061f9.webp"
     },
     {
       "id": "knocklem-ignis",
@@ -8272,7 +8496,8 @@
         }
       ],
       "breedingPower": 210,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/2e3750bad414e060b03116c33b9152c37c19a4691f0a2285266953780f77505c.webp"
     },
     {
       "id": "silvegis",
@@ -8356,7 +8581,8 @@
         }
       ],
       "breedingPower": 1900,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/32712dc646b6492327d940237b622415c32c64062a0e5d6e60f8f9de12000692.webp"
     },
     {
       "id": "snock",
@@ -8384,7 +8610,8 @@
         }
       ],
       "breedingPower": 1780,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/35c759d5b86f584cb8e023995ed461760b6a0a0145820871d813e46954ef3e10.webp"
     },
     {
       "id": "snock-lux",
@@ -8413,7 +8640,8 @@
         }
       ],
       "breedingPower": 1500,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/a85d127495aba849f82be8b0bd83572a5dbbaf3cebbdbc74a0920191e1586851.webp"
     },
     {
       "id": "souffline",
@@ -8445,7 +8673,8 @@
         }
       ],
       "breedingPower": 2000,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d6ddc636ff6e88f7a24a658112828be812b276b06b8a814df4017c110acaa159.webp"
     },
     {
       "id": "lapiron",
@@ -8485,7 +8714,8 @@
         }
       ],
       "breedingPower": 1680,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/49186e01f87f62f00bcef296cbd87787e7cd0883a30b11c0b107824c9f6d720c.webp"
     },
     {
       "id": "hoodle",
@@ -8581,7 +8811,8 @@
         }
       ],
       "breedingPower": 1540,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/8fa02d16e1781aaf7de6982a7449e9cc10609252b616a40ea0d92c6a34f2b512.webp"
     },
     {
       "id": "solmora",
@@ -8609,7 +8840,8 @@
         }
       ],
       "breedingPower": 1370,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/74e54ef9642a369fcab821ea78c86add308abdc6e9b0759290a2af99776a7b75.webp"
     },
     {
       "id": "solmora-lux",
@@ -8642,7 +8874,8 @@
         }
       ],
       "breedingPower": 1000,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/89d3e36516c790e13a90f81db49fea96211671e7de8b87b2f63b0660e6d36d9f.webp"
     },
     {
       "id": "lapure",
@@ -8674,7 +8907,8 @@
         }
       ],
       "breedingPower": 810,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f4b243ca05e8c21942eec23fe648fbda74f6f3fb5c9b56d1da3ed62261e6e4a4.webp"
     },
     {
       "id": "eidrolon",
@@ -8703,7 +8937,8 @@
         }
       ],
       "breedingPower": 300,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/316e007f6af81b9b980b4f07668570a7c4d61b121513fba28b478fa4795e13cb.webp"
     },
     {
       "id": "eidrolon-ignis",
@@ -8736,7 +8971,8 @@
         }
       ],
       "breedingPower": 140,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/d13b9a84ea8cfab7f4f74f7b9440805c764f684b60e4eb77087beaa00712ccfc.webp"
     },
     {
       "id": "dynamoff",
@@ -8772,7 +9008,8 @@
         }
       ],
       "breedingPower": 1400,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/aa08bedcc576cc034751f7b15e174d14beb7b55bbe8b97b583a1032f636d6857.webp"
     },
     {
       "id": "tropicaw",
@@ -8804,7 +9041,8 @@
         }
       ],
       "breedingPower": 1350,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/fc2d4b3c112d7512392a75fcc31d5a732c98e49a4c316892f428f233eb52a5d8.webp"
     },
     {
       "id": "flaracle",
@@ -8840,7 +9078,8 @@
         }
       ],
       "breedingPower": 390,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/faa9c68092a0fb1ed090b1b9d0cbecaac8376d619e05def5fd0ff66694963e93.webp"
     },
     {
       "id": "ophydia",
@@ -8873,7 +9112,8 @@
         }
       ],
       "breedingPower": 230,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/36770e3d38c028c00f63e071532c37d7b3d8ab78c61045d8a9cee70aa096212d.webp"
     },
     {
       "id": "dupin",
@@ -8913,7 +9153,8 @@
         }
       ],
       "breedingPower": 520,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/ccc527f5a0734fad36419920ab0acb493b821d3e24f10c2fee7f7bbb22ee321e.webp"
     },
     {
       "id": "roujay",
@@ -8945,7 +9186,8 @@
         }
       ],
       "breedingPower": 530,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/8153e17148507323dff06808c4753a1abbd7d0448b71bfdcedaf907c666fd208.webp"
     },
     {
       "id": "venusa",
@@ -8985,7 +9227,8 @@
         }
       ],
       "breedingPower": 970,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/7152a72187fc923303cf11cbbfdfc3cac76ea4db51ba4e6355720dd665dedb9e.webp"
     },
     {
       "id": "mycora",
@@ -9025,7 +9268,8 @@
         }
       ],
       "breedingPower": 760,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/753252fdc816843e735365b560f940fecc5bde738eb7178d69d94834d8110bbd.webp"
     },
     {
       "id": "loomen",
@@ -9062,7 +9306,8 @@
         }
       ],
       "breedingPower": 890,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/889b530bb30578f6e82d91da2033e89d7820ff47d125b6a6f74ca72dfc9b3104.webp"
     },
     {
       "id": "wistella",
@@ -9098,7 +9343,8 @@
         }
       ],
       "breedingPower": 1180,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/6cb19241c1e04b0aa4995f9fd3c60eef84eae48df94f4385d8d583d0ca6d6ed6.webp"
     },
     {
       "id": "solenne",
@@ -9135,7 +9381,8 @@
         }
       ],
       "breedingPower": 280,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/0df21fa898eaac99cc19cafb090d8e31db7cae47aa016dba57085695a9b540f6.webp"
     },
     {
       "id": "renjishi",
@@ -9175,7 +9422,8 @@
         }
       ],
       "breedingPower": 290,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/009f9987f234d87a4ca99bd666526f7fb33f89c293b16b4c3ee90379ec106edc.webp"
     },
     {
       "id": "aegidron",
@@ -9204,7 +9452,8 @@
         }
       ],
       "breedingPower": 30,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/2f25c193e141edc16f47f6aa7c76a55deb2b5c462cd90b4b4e293016defba607.webp"
     },
     {
       "id": "grizzbolt",
@@ -9244,7 +9493,8 @@
         }
       ],
       "breedingPower": 1020,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e5810ddfb6ecbd18858aedc9541a5e0f92729a52c702d188fcb84f156e63dfa6.webp"
     },
     {
       "id": "lyleen",
@@ -9284,7 +9534,8 @@
         }
       ],
       "breedingPower": 240,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f21af1601a831805cd310d073772ee2449b202eda05a46c07bed1042831904fe.webp"
     },
     {
       "id": "lyleen-noct",
@@ -9320,7 +9571,8 @@
         }
       ],
       "breedingPower": 220,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/4ea59dd2ff16bcb43eade0ae86bacca599c9fb3fffccb2ae1b579e7b24230723.webp"
     },
     {
       "id": "orserk",
@@ -9357,7 +9609,8 @@
         }
       ],
       "breedingPower": 120,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/9ad869efe2fb8089e27add0ecc287794641e535d72c229c8a7d6599452f88ee9.webp"
     },
     {
       "id": "faleris",
@@ -9389,7 +9642,8 @@
         }
       ],
       "breedingPower": 500,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/f1d0a01a6843facec5dd7e068ffd07c68a7b2c6ee9733bee6dabbb58c0209f87.webp"
     },
     {
       "id": "faleris-aqua",
@@ -9421,7 +9675,8 @@
         }
       ],
       "breedingPower": 450,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/e8331523e0d5f0bb76345cdfd5db7bb17bc729b55481968130befca5051d5dd6.webp"
     },
     {
       "id": "shadowbeak",
@@ -9449,7 +9704,8 @@
         }
       ],
       "breedingPower": 550,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/f4a09dcd156bce3f0b8adf258c978c0bad045696b22384ac0a173eee0c9d921a.webp"
     },
     {
       "id": "selyne",
@@ -9486,7 +9742,8 @@
         }
       ],
       "breedingPower": 360,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/41ecdf4a09e5d748489b6189abea8cc6512b5edafe85edee5fa086443db42a59.webp"
     },
     {
       "id": "bastigor",
@@ -9522,7 +9779,8 @@
         }
       ],
       "breedingPower": 50,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/08809477ab355334aee8ee3e5f95d90d6725b7d63c9c32cae5c9d8e39915ae83.webp"
     },
     {
       "id": "shaolong",
@@ -9555,7 +9813,8 @@
         }
       ],
       "breedingPower": 40,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/714f0f097721ea296dc39805eb1d0a7152a1b0946fd41b746fb019ded1311c4e.webp"
     },
     {
       "id": "silvance",
@@ -9599,7 +9858,8 @@
         }
       ],
       "breedingPower": 80,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/0b64a1a0e7fd2d86fca5220e86de2a8cdf690c3b376078209330a8f380296983.webp"
     },
     {
       "id": "dandilord",
@@ -9644,7 +9904,8 @@
         }
       ],
       "breedingPower": 60,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/deab7aa1caf6ca2f9fa89a45ec7e8d8ce5d236f365319941d984cc0cb3895bae.webp"
     },
     {
       "id": "bellanoir",
@@ -9680,7 +9941,8 @@
         }
       ],
       "breedingPower": 620,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/35663e07bf604c22d9d20a7503e5b2472a91b617b5a8b7d04afa1b655a95d8a4.webp"
     },
     {
       "id": "bellanoir-libero",
@@ -9716,7 +9978,8 @@
         }
       ],
       "breedingPower": 130,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/57f756174cc3773254887d07b938196b4588f826158b59c91e1584f1e66a03e2.webp"
     },
     {
       "id": "xenolord",
@@ -9745,7 +10008,8 @@
         }
       ],
       "breedingPower": 400,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/cc0ea144a04ba517dc7f3757bbb72c092773c143cf978cb3db6d10c4d696b2e3.webp"
     },
     {
       "id": "hartalis",
@@ -9777,7 +10041,8 @@
         }
       ],
       "breedingPower": 90,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/68c659a296a4620150cdf275914eb61899c821813598235e662dc8fa52bdb01e.webp"
     },
     {
       "id": "paladius",
@@ -9809,7 +10074,8 @@
         }
       ],
       "breedingPower": 180,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/2ee3d93c43cd8265cfb9565530d9f5340dcf1587302e4f49c3c018e4c08f5f10.webp"
     },
     {
       "id": "necromus",
@@ -9841,7 +10107,8 @@
         }
       ],
       "breedingPower": 190,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/1d2e85220d4c85182d0dd8093aa30728402affab28044955d496eb3670cdf9e7.webp"
     },
     {
       "id": "frostallion",
@@ -9869,7 +10136,8 @@
         }
       ],
       "breedingPower": 150,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/61724b26feb06490de7a81166301a495cf9eb5663449e6de6b8f9d04f16803d2.webp"
     },
     {
       "id": "frostallion-noct",
@@ -9897,7 +10165,8 @@
         }
       ],
       "breedingPower": 110,
-      "nocturnal": true
+      "nocturnal": true,
+      "imageUrl": "/images/palworld/1.0.1/pals/a37743aef1d1ac5e7a3e046ad02a19a52baa26f559d799f23d002311dc1cc1c2.webp"
     },
     {
       "id": "neptilius",
@@ -9925,7 +10194,8 @@
         }
       ],
       "breedingPower": 160,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/0f38666384d8102cec5b07934dbad2438df701e06c67808de3394dee3f5bbb5a.webp"
     },
     {
       "id": "jetragon",
@@ -9953,7 +10223,8 @@
         }
       ],
       "breedingPower": 70,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/67476a15ae6a8572f43deb0722490ea1a0f0294505d3b56a90c3e21fa7b3ffec.webp"
     },
     {
       "id": "panthalus",
@@ -9976,7 +10247,8 @@
       },
       "workSuitabilities": [],
       "breedingPower": 20,
-      "nocturnal": false
+      "nocturnal": false,
+      "imageUrl": "/images/palworld/1.0.1/pals/ce27f90c2e8078dc0347790dc8b9f05c5e783e6dfeae71e75f67ec931baa6059.webp"
     }
   ]
 }

@@ -10,6 +10,7 @@ import {
 import {
   assertPalworldImageSourceMap,
   assertPalworldImageUsePolicy,
+  palworldImageSourceReference,
   type PalworldImageSourceMap,
   type PalworldImageUsePolicy
 } from "./palworld-image-policy.js";
@@ -58,13 +59,16 @@ function buildEntry(input: {
   imported?: ImportedPalworldImage;
   policy: PalworldImageUsePolicy;
 }): PalworldImageManifestEntry {
-  const sourceRevision = input.mapping?.sourceRevision ?? "operator-export-unmapped";
+  const sourcePrefix = input.policy.sourceType === "operator_provided_archive"
+    ? "operator-archive"
+    : "operator-export";
+  const sourceRevision = input.mapping?.sourceRevision ?? `${sourcePrefix}-unmapped`;
   const originalFileName = input.mapping?.sourceFileName ?? "not-mapped";
   const common = {
     palId: input.pal.id,
     sourceInternalId: input.pal.sourceInternalId,
     sourceName: input.policy.sourceDescription,
-    sourceReference: `operator-export-${input.pal.sourceInternalId}`,
+    sourceReference: palworldImageSourceReference(input.policy.sourceType, input.pal.sourceInternalId),
     sourceRevision,
     license: "RIGHTS_NOT_INDEPENDENTLY_VERIFIED",
     originalFileName
@@ -120,6 +124,9 @@ export function buildPalworldImageRelease(input: {
   const policy = assertPalworldImageUsePolicy(input.policy);
   const baseArtifact = assertPalworldPaldexArtifact(input.baseArtifact);
   const sourceMap = assertPalworldImageSourceMap(input.sourceMap, baseArtifact);
+  if (sourceMap.entries.some((entry) => entry.sourceKind !== policy.sourceType)) {
+    fail("image source mapping과 image-use-policy의 출처 종류가 일치하지 않습니다.");
+  }
   const mappingByPalId = new Map(sourceMap.entries.map((entry) => [entry.palId, entry]));
   for (const [palId, imported] of input.importedImages) {
     if (!mappingByPalId.has(palId)) fail(`${palId}: source mapping이 없는 import 결과입니다.`);
@@ -253,7 +260,9 @@ export function buildPalworldImageRollback(input: {
       sourceInternalId: entry.sourceInternalId,
       status: "blocked_by_license",
       sourceName: entry.sourceName,
-      ...(entry.sourceReference ? { sourceReference: entry.sourceReference } : { sourceReference: `operator-export-${entry.sourceInternalId}` }),
+      ...(entry.sourceReference
+        ? { sourceReference: entry.sourceReference }
+        : { sourceReference: palworldImageSourceReference(policy.sourceType, entry.sourceInternalId) }),
       sourceRevision: entry.sourceRevision,
       license: entry.license,
       usageBasis: "none",

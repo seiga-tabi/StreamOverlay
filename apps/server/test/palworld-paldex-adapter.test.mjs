@@ -66,14 +66,14 @@ test("runtime release는 data gate와 image gate를 독립적으로 노출한다
   );
   assert.equal(release.dataIntegrityGate.checksumsVerified, true);
   assert.deepEqual(release.imageAssetGate, {
-    status: "blocked_by_license",
+    status: "partial",
     policyStatus: "operator_acknowledged",
-    technicalPassed: false,
-    publicActivationAllowed: false,
+    technicalPassed: true,
+    publicActivationAllowed: true,
     rightsVerified: false,
     usageBasis: "operator_reference_use",
-    readyImages: 0,
-    fallbackPals: 287,
+    readyImages: 272,
+    fallbackPals: 15,
     publicNoticeRequired: true
   });
 });

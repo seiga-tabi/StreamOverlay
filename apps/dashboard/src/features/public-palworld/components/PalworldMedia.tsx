@@ -2,10 +2,19 @@ import { useEffect, useState } from "react";
 import type { PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldI18n } from "../i18n/palworld-i18n";
 
-const LOCAL_PALWORLD_IMAGE_PATTERN = /^\/images\/palworld\/1\.0\.1\/pals\/[0-9a-f]{64}\.webp$/u;
+const LOCAL_PALWORLD_IMAGE_PATTERNS = {
+  pal: /^\/images\/palworld\/1\.0\.1\/pals\/[0-9a-f]{64}\.webp$/u,
+  item: /^\/images\/palworld\/1\.0\.1\/items\/[0-9a-f]{64}\.webp$/u,
+} as const;
 
-export function isLocalPalworldImageUrl(imageUrl: string | undefined): imageUrl is string {
-  return typeof imageUrl === "string" && LOCAL_PALWORLD_IMAGE_PATTERN.test(imageUrl);
+export function isLocalPalworldImageUrl(
+  imageUrl: string | undefined,
+  kind?: "pal" | "item"
+): imageUrl is string {
+  if (typeof imageUrl !== "string") return false;
+  return kind
+    ? LOCAL_PALWORLD_IMAGE_PATTERNS[kind].test(imageUrl)
+    : Object.values(LOCAL_PALWORLD_IMAGE_PATTERNS).some((pattern) => pattern.test(imageUrl));
 }
 
 export function PalworldMedia({
@@ -21,7 +30,7 @@ export function PalworldMedia({
 }) {
   const [failed, setFailed] = useState(false);
   const fallback = palworldI18n[locale].imageFallback;
-  const safeImageUrl = isLocalPalworldImageUrl(imageUrl) ? imageUrl : undefined;
+  const safeImageUrl = isLocalPalworldImageUrl(imageUrl, kind) ? imageUrl : undefined;
 
   useEffect(() => {
     setFailed(false);

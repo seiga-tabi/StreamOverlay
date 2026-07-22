@@ -13,13 +13,19 @@ export { PALWORLD_PUBLIC_NOTICE_JA, PALWORLD_PUBLIC_NOTICE_KO };
 
 export const PALWORLD_IMAGE_POLICY_FILE_NAME = "image-use-policy.json";
 export const PALWORLD_IMAGE_SOURCE_MAP_FILE_NAME = "image-source-map.json";
+export const PALWORLD_IMAGE_SOURCE_TYPES = [
+  "operator_controlled_server_export",
+  "operator_provided_archive"
+] as const;
+
+export type PalworldImageSourceType = (typeof PALWORLD_IMAGE_SOURCE_TYPES)[number];
 
 export type PalworldImageUsePolicy = {
   schemaVersion: 1;
   release: "1.0.1";
   status: "blocked_by_license" | "operator_acknowledged" | "ready";
   usageBasis: "none" | "operator_reference_use" | "rights_verified";
-  sourceType: "operator_controlled_server_export";
+  sourceType: PalworldImageSourceType;
   sourceDescription: string;
   acknowledgedAt: string;
   publicNoticeKo: string;
@@ -37,7 +43,7 @@ export type PalworldImageSourceMapEntry = {
   sourceInternalId: string;
   sourceFileName: string;
   sourceRevision: string;
-  sourceKind: "operator_controlled_server_export";
+  sourceKind: PalworldImageSourceType;
 };
 
 export type PalworldImageSourceMap = {
@@ -45,6 +51,16 @@ export type PalworldImageSourceMap = {
   release: "1.0.1";
   entries: PalworldImageSourceMapEntry[];
 };
+
+export function palworldImageSourceReference(
+  sourceType: PalworldImageSourceType,
+  sourceInternalId: string
+): string {
+  const prefix = sourceType === "operator_provided_archive"
+    ? "operator-archive"
+    : "operator-export";
+  return `${prefix}-${sourceInternalId}`;
+}
 
 function fail(pathName: string, message: string): never {
   throw new PalworldPaldexValidationError(`${pathName}: ${message}`);
@@ -106,8 +122,8 @@ export function assertPalworldImageUsePolicy(value: unknown): PalworldImageUsePo
   if (!(["none", "operator_reference_use", "rights_verified"] as const).includes(policy.usageBasis as never)) {
     fail("imageUsePolicy.usageBasis", "허용된 사용 근거가 아닙니다.");
   }
-  if (policy.sourceType !== "operator_controlled_server_export") {
-    fail("imageUsePolicy.sourceType", "운영자 관리 서버 export만 허용됩니다.");
+  if (!(PALWORLD_IMAGE_SOURCE_TYPES as readonly unknown[]).includes(policy.sourceType)) {
+    fail("imageUsePolicy.sourceType", "허용된 운영자 제공 이미지 출처가 아닙니다.");
   }
   stringAt(policy.sourceDescription, "imageUsePolicy.sourceDescription", 512);
   isoDateAt(policy.acknowledgedAt, "imageUsePolicy.acknowledgedAt");
@@ -158,7 +174,7 @@ function assertSafeSourceFileName(value: unknown, pathName: string): string {
     || fileName.trim() !== fileName
     || !/\.(?:png|webp)$/u.test(fileName)
   ) {
-    fail(pathName, "경로 요소나 우회 문자가 없는 소문자 .png 또는 .webp basename이어야 합니다.");
+    fail(pathName, "경로 요소나 우회 문자가 없는 .png 또는 .webp basename이어야 합니다.");
   }
   return fileName;
 }
@@ -196,8 +212,8 @@ export function assertPalworldImageSourceMap(
     ) {
       fail(`${pathName}.sourceRevision`, "고정된 opaque revision이어야 하며 branch/latest/URL은 허용되지 않습니다.");
     }
-    if (entry.sourceKind !== "operator_controlled_server_export") {
-      fail(`${pathName}.sourceKind`, "운영자 관리 서버 export만 허용됩니다.");
+    if (!(PALWORLD_IMAGE_SOURCE_TYPES as readonly unknown[]).includes(entry.sourceKind)) {
+      fail(`${pathName}.sourceKind`, "허용된 운영자 제공 이미지 출처가 아닙니다.");
     }
     const canonical = palById.get(palId);
     if (!canonical || canonical.pal.sourceInternalId !== sourceInternalId) {

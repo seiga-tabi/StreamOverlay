@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "archiveName": "pyPalworldAPI-0.2.0.zip",
+    "archiveSha256": "42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+    "archiveBytes": 1344549567,
+    "archiveRevision": "db70ea654aea70c4b1a4b0045bccfe58164cf01a",
+    "upstreamRelease": "0.2.0",
+    "gameDataVersion": "1.0.1.100619",
+    "sqlSha256": "aaa759027e63f13c33a1d581fd1efd4bf434472053a46e6967aad94333811f0d",
+    "licenseFileSha256": "137420df458b2e85256b56dbbf850fbe6d847febb7af9d25fd460b5912d1c765",
+    "verifiedAt": "2026-07-22T00:00:00.000Z"
+  },
+  "archiveValidation": {
+    "entries": 2623,
+    "files": 2595,
+    "directories": 28,
+    "uncompressedBytes": 1354019330,
+    "crcPassed": true,
+    "encryptedEntries": 0,
+    "unsafePaths": 0,
+    "symbolicLinks": 0,
+    "duplicateEntries": 0
+  },
+  "dataInventory": {
+    "pals": 271,
+    "bossPals": 297,
+    "items": 1790,
+    "legalItems": 1446,
+    "craftingRecipes": 913,
+    "breedingRows": 36901,
+    "technologyRows": 586,
+    "buildObjects": 491,
+    "mapLocations": 777,
+    "mapImages": 821,
+    "localizedLanguages": [
+      "zh-Hans"
+    ],
+    "koreanRows": 0,
+    "japaneseRows": 0
+  },
+  "palCompatibility": {
+    "canonicalPals": 287,
+    "exactCoreDataMatches": 270,
+    "coreDataMismatches": 0,
+    "sourceOnlyInternalIds": [
+      "WorldTreeDragon"
+    ],
+    "decision": "기존 Atlas와 PalCalc 기반 canonical Pal 데이터를 유지하고 archive는 이미지 보조 출처로만 사용합니다."
+  },
+  "palImageImport": {
+    "matchingMethod": "canonical sourceInternalId와 T_<sourceInternalId>_icon_normal.png의 대소문자 구분 exact join",
+    "sourceMappings": 272,
+    "sourcePngBytes": 4513062,
+    "generatedWebpFiles": 272,
+    "generatedWebpBytes": 1360994,
+    "fallbackPals": 15,
+    "missingPalIds": [
+      "jelliette",
+      "jellroy",
+      "gloopie",
+      "tarantriss",
+      "pierdon",
+      "sekhmet",
+      "smokie",
+      "omascul",
+      "whalaska",
+      "splatterina",
+      "celesdir",
+      "silvegis",
+      "azurmane",
+      "hoodle",
+      "slowatt"
+    ],
+    "fuzzyMatchingUsed": false,
+    "variantSubstitutionUsed": false
+  },
+  "mapImageImport": {
+    "sourceFileName": "map_locations_fast_travel_world.png",
+    "sourceSha256": "7cc1e96731ad18ebfaf8b86ab29c762b3e5a895248d0abdc78bd3b91f615778a",
+    "sourceBytes": 26772375,
+    "sourceWidth": 8192,
+    "sourceHeight": 8192,
+    "selection": "World 빠른 이동 지점 157개가 표시된 고정 합성 지도 한 장만 선별했습니다.",
+    "converter": {
+      "name": "sharp",
+      "version": "0.35.3",
+      "resizeWidth": 4096,
+      "resizeHeight": 4096,
+      "format": "webp",
+      "quality": 82,
+      "effort": 6,
+      "metadataStripped": true
+    },
+    "outputFileName": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
+    "outputSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+    "outputBytes": 956292,
+    "outputWidth": 4096,
+    "outputHeight": 4096,
+    "usageBasis": "operator_reference_use",
+    "rightsVerified": false,
+    "publicNoticeRequired": true,
+    "rejectedSources": [
+      {
+        "sourceFileName": "map_locations_fast_travel_tree.png",
+        "sourceSha256": "8538a624297d37f4f6c98afa6dd2c9f183713430a680fc6bbd234f8b793647c7",
+        "reasonCode": "PNG_DECODER_VALIDATION_FAILED"
+      }
+    ],
+    "runtimeActivated": true
+  },
+  "itemImageAssessment": {
+    "canonicalAtlasItems": 1891,
+    "directExactMappings": 1446,
+    "singleIconExactPropagations": 360,
+    "candidateMappings": 1806,
+    "uniqueSourcePngFiles": 697,
+    "sourcePngBytes": 27054714,
+    "fallbackItems": 85,
+    "runtimeActivated": false,
+    "reason": "한국어와 일본어 전체 아이템 데이터, item 전용 manifest와 content-hash gate가 준비되지 않아 이미지 단독 공개를 차단합니다."
+  },
+  "breedingAssessment": {
+    "rows": 36901,
+    "rowsWithCanonicalReferences": 36630,
+    "unresolvedRows": 271,
+    "duplicateUnorderedParentPairs": 46,
+    "conflictingResults": 38,
+    "runtimeActivated": false,
+    "reason": "단일 결과 API에서 충돌 조합을 임의 선택할 수 없고 성별 조건도 없어 PalCalc 기준을 유지합니다."
+  },
+  "excluded": [
+    "미선택 지도 이미지 820개",
+    "strict decoder 검증에 실패한 map_locations_fast_travel_tree.png",
+    "Boss Pal과 지도 위치 데이터",
+    "bLegalInGame=false 아이템 344개",
+    "외부 Fandom 및 Wikia URL",
+    "FastAPI, MySQL, Docker 실행 코드",
+    "한국어와 일본어가 없는 스킬 및 설명의 runtime 활성화"
+  ],
+  "rights": {
+    "repositoryLicense": "MIT",
+    "gameAssetRightsVerified": false,
+    "usageBasis": "operator_reference_use",
+    "noticeRequired": true,
+    "note": "MIT 파일은 pyPalworldAPI 코드 라이선스이며 Pocketpair 게임 데이터와 이미지 재배포 권리를 독립적으로 확인하지 않습니다."
+  }
+}

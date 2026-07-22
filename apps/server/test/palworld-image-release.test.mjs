@@ -44,8 +44,8 @@ function partialRelease() {
         palId: first.id,
         sourceInternalId: first.sourceInternalId,
         sourceFileName: "lamball.webp",
-        sourceRevision: "operator-export-1.0.1-r1",
-        sourceKind: "operator_controlled_server_export"
+        sourceRevision: "pypalworldapi-0.2.0-fixture",
+        sourceKind: policy.sourceType
       }]
     },
     sourceMapSha256: hashB,
@@ -74,7 +74,7 @@ test("partial image release는 검증된 URL만 병합하고 기존 미검증 UR
   assert.equal(release.artifact.records[0].imageUrl?.endsWith(`${inspection.sha256}.webp`), true);
   assert.equal(release.artifact.records[1].imageUrl, undefined);
   assert.equal(release.imagesManifest.entries[0].sourceUrl, undefined);
-  assert.equal(release.imagesManifest.entries[0].sourceReference, `operator-export-${artifact.records[0].sourceInternalId}`);
+  assert.equal(release.imagesManifest.entries[0].sourceReference, `operator-archive-${artifact.records[0].sourceInternalId}`);
   assert.equal(release.imagesManifest.entries[0].license, "RIGHTS_NOT_INDEPENDENTLY_VERIFIED");
   assert.equal(release.imagesManifest.entries[0].usageBasis, "operator_reference_use");
   assert.equal(release.report.images.converter.tool, "sharp@0.35.3");

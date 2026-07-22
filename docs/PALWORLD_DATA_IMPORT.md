@@ -2,7 +2,7 @@
 
 이 문서는 Palworld 1.0.1 도감 데이터의 고정 원본, 정규화 규칙, 검증 절차와 운영 전환 조건을 정의한다. 데이터 생성 도구만 외부 원본을 내려받을 수 있으며, StreamOverlay 런타임은 네트워크 대신 검증이 끝난 immutable snapshot만 읽는다.
 
-Pal 텍스트·수치 데이터와 이미지 자산의 gate는 독립적으로 적용한다. `dataIntegrityGate`가 통과한 287종 Pal artifact는 runtime에 활성화할 수 있다. 이미지 자산은 [PALWORLD_IMAGE_ASSETS.md](./PALWORLD_IMAGE_ASSETS.md)의 `imageAssetGate`를 적용하며, 현재 `blocked_by_license`이므로 287종 모두 fallback을 사용한다. 아이템과 교배 domain은 전체 1.0.1 데이터가 준비될 때까지 `sample-baseline` provenance와 `sample`/`incomplete` coverage로 격리한다.
+Pal 텍스트·수치 데이터와 이미지 자산의 gate는 독립적으로 적용한다. `dataIntegrityGate`가 통과한 287종 Pal artifact는 runtime에 활성화할 수 있다. 이미지 자산은 [PALWORLD_IMAGE_ASSETS.md](./PALWORLD_IMAGE_ASSETS.md)의 `imageAssetGate`를 적용하며, 현재 272종은 운영자 제공 archive에서 검증되어 활성화되고 15종은 fallback을 사용한다. `/palworld/map`의 월드 지도는 같은 archive에서 strict 검증한 빠른 이동 지도 한 장만 별도 content-hash WebP로 제공한다. 아이템과 교배 domain은 전체 1.0.1 데이터가 준비될 때까지 `sample-baseline` provenance와 `sample`/`incomplete` coverage로 격리한다.
 
 ## 고정 원본
 
@@ -90,7 +90,7 @@ diff-palworld-paldex
 
 일반 빌드와 서버 시작 과정은 `fetch`를 실행하지 않는다. CI와 운영 배포는 커밋된 정규화 artifact를 네트워크 없이 검증할 수 있어야 한다.
 
-`npm run validate:palworld-data`는 Pal artifact의 source·mapping·artifact checksum과 `dataIntegrityGate`를 검증한다. `npm run validate:palworld-data:release`는 이미지가 포함된 전체 release 준비 상태까지 검증하며, 현재처럼 이미지 권리가 `blocked_by_license`이거나 287개 파일 중 하나라도 준비되지 않으면 `PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE`로 반드시 실패한다. 이 예상 실패는 이미 검증된 Pal 텍스트·수치 데이터의 runtime 활성화를 막지 않는다.
+`npm run validate:palworld-data`는 Pal artifact의 source·mapping·artifact checksum과 `dataIntegrityGate`를 검증한다. `npm run validate:palworld-data:release`는 이미지가 포함된 287종 전체 release 준비 상태까지 검증하며, 현재처럼 15개가 fallback인 `partial` 상태에서는 전체 이미지 release가 준비되지 않았다는 오류로 실패한다. 이 예상 실패는 검증된 Pal 텍스트·수치 데이터와 272개 이미지의 runtime 활성화를 막지 않는다.
 
 ## 결정적 생성
 
@@ -120,7 +120,7 @@ diff-palworld-paldex
 - 동일 입력 재생성 결과가 byte-for-byte 동일
 - `paldex.json`, `manifest.json`, `images-manifest.json`의 release/revision 일치
 
-`imageAssetGate`는 기술 검증과 권리 확인을 분리한다. 고정 `image-use-policy.json`의 사용 상태는 `operator_acknowledged`, `usageBasis: operator_reference_use`, `rightsVerified: false`이며, 이는 라이선스 승인·권리 확인 완료를 뜻하지 않는다. 현재는 실제 source 이미지와 완성 mapping이 제공되지 않아 runtime 상태가 `blocked_by_license`, `readyImages: 0`, `fallbackPals: 287`이다. 따라서 Pal 텍스트·수치 데이터는 활성화하되 전체 이미지 release validator는 통과하지 못한다.
+`imageAssetGate`는 기술 검증과 권리 확인을 분리한다. 고정 `image-use-policy.json`의 사용 상태는 `operator_acknowledged`, `usageBasis: operator_reference_use`, `rightsVerified: false`이며, 이는 라이선스 승인·권리 확인 완료를 뜻하지 않는다. 현재는 운영자가 제공한 고정 archive에서 272종을 canonical exact join해 반입했으며 runtime 상태는 `partial`, `readyImages: 272`, `fallbackPals: 15`이다. Pal 텍스트·수치 데이터와 검증된 이미지 272개는 활성화하고 누락 15개는 UI fallback을 유지한다.
 
 ## Domain별 coverage와 provenance
 
@@ -138,7 +138,7 @@ Pal runtime 전환 절차는 다음과 같다.
 2. 별도의 작업 디렉터리에서 checksum과 전체 validator를 실행한다.
 3. 서버가 새 snapshot을 읽어 source·mapping·artifact checksum, Shared schema와 `dataIntegrityGate`를 다시 확인한다.
 4. `/api/palworld/meta`에서 게임 버전, revision, 287개 수량과 domain별 coverage/provenance를 확인한다.
-5. 이미지 manifest가 `blocked_by_license`이면 `readyImages: 0`, `fallbackPals: 287`과 화면 fallback을 확인한다. 운영자 확인 artifact만 있고 파일이 없을 때도 이 상태를 유지한다.
+5. 이미지 manifest가 `partial`이면 `readyImages: 272`, `fallbackPals: 15`와 누락 Pal의 화면 fallback을 확인한다. policy가 차단되면 전체가 `blocked_by_license`로 돌아가는지도 확인한다.
 6. 이미지 manifest가 향후 `operator_acknowledged`, `partial` 또는 `ready`로 활성화되면 모든 content-hash 정적 파일을 snapshot보다 먼저 배포한다. `operator_acknowledged`와 `partial`은 권리 확인 완료를 의미하지 않는다.
 7. 첫·중간·마지막 일반종과 변종 상세 화면을 확인한다.
 8. LoL, Dashboard, Overlay와 OBS Bridge 회귀 검증을 수행한다.

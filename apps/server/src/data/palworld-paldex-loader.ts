@@ -17,6 +17,7 @@ import {
   PALWORLD_IMAGE_SOURCE_MAP_FILE_NAME,
   assertPalworldImageSourceMap,
   assertPalworldImageUsePolicy,
+  palworldImageSourceReference,
   type PalworldImageUsePolicy
 } from "./palworld-image-policy.js";
 import {
@@ -286,6 +287,9 @@ export async function loadPalworldPaldexStagedRelease(options: {
     throw new PalworldPaldexValidationError("활성 이미지에는 검증된 image-source-map.json이 필요합니다.");
   }
   if (imageSourceMap) {
+    if (policy && imageSourceMap.entries.some((mapping) => mapping.sourceKind !== policy.sourceType)) {
+      throw new PalworldPaldexValidationError("image source mapping과 image-use-policy의 출처 종류가 일치하지 않습니다.");
+    }
     const imageEntriesByPalId = new Map(imagesManifest.entries.map((entry) => [entry.palId, entry]));
     for (const [index, mapping] of imageSourceMap.entries.entries()) {
       const entry = imageEntriesByPalId.get(mapping.palId);
@@ -295,7 +299,7 @@ export async function loadPalworldPaldexStagedRelease(options: {
         || entry.sourceInternalId !== mapping.sourceInternalId
         || entry.originalFileName !== mapping.sourceFileName
         || entry.sourceRevision !== mapping.sourceRevision
-        || entry.sourceReference !== `operator-export-${mapping.sourceInternalId}`
+        || entry.sourceReference !== palworldImageSourceReference(mapping.sourceKind, mapping.sourceInternalId)
       ) {
         throw new PalworldPaldexValidationError(`imagesManifest.entries[${index}]: image source mapping provenance가 일치하지 않습니다.`);
       }

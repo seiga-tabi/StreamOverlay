@@ -13,6 +13,7 @@ const navItems: Array<{ page: Exclude<PalworldPage, "search">; ko: string; ja: s
   { page: "pals", ko: palworldI18n.ko.pals, ja: palworldI18n.ja.pals },
   { page: "breeding", ko: palworldI18n.ko.breeding, ja: palworldI18n.ja.breeding },
   { page: "items", ko: palworldI18n.ko.items, ja: palworldI18n.ja.items },
+  { page: "map", ko: palworldI18n.ko.map, ja: palworldI18n.ja.map },
 ];
 
 export function PalworldHeader({

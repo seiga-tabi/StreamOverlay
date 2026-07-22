@@ -451,7 +451,7 @@ export function assertPalworldImagesManifest(value: unknown, paldex: PalworldPal
           fail(path, "운영자 확인 이미지는 비독립 권리 검증 상태와 operator_reference_use만 사용할 수 있습니다.");
         }
         if (entry.sourceUrl !== undefined || entry.sourceReference === undefined) {
-          fail(path, "운영자 관리 서버 export는 외부 URL 대신 sourceReference를 사용해야 합니다.");
+          fail(path, "운영자가 제공한 로컬 이미지 출처는 외부 URL 대신 sourceReference를 사용해야 합니다.");
         }
       } else {
         rightsReadyCount += 1;

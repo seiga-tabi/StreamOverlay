@@ -17,6 +17,7 @@ import { ItemDetailModal, PalDetailModal } from "../features/public-palworld/com
 import { PalworldHeader } from "../features/public-palworld/components/PalworldHeader";
 import { PalworldHome } from "../features/public-palworld/components/PalworldHome";
 import { PalworldItemsPage } from "../features/public-palworld/components/PalworldItemsPage";
+import { PalworldMapPage } from "../features/public-palworld/components/PalworldMapPage";
 import { PalworldPalsPage } from "../features/public-palworld/components/PalworldPalsPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
 import { PalworldSearchResults } from "../features/public-palworld/components/PalworldSearchResults";
@@ -334,6 +335,7 @@ export function PublicPalworldPage({
         {page === "pals" ? <PalworldPalsPage locale={locale} params={params} onOpenPal={openPalHere} /> : null}
         {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} /> : null}
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
+        {page === "map" ? <PalworldMapPage locale={locale} /> : null}
       </AppShellMain>
       <PalworldSourceFooter locale={locale} />
       <PalDetailModal palId={selectedPalId} locale={locale} onClose={closeDetail} onOpenItem={openItemPage} />

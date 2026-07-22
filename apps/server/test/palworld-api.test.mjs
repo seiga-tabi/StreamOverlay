@@ -66,7 +66,8 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(body.domains.pals.status, "ready");
   assert.equal(body.domains.items.status, "sample");
   assert.equal(body.domains.breeding.status, "sample");
-  assert.equal(body.gates.imageAssets.fallbackPals, 287);
+  assert.equal(body.gates.imageAssets.readyImages, 272);
+  assert.equal(body.gates.imageAssets.fallbackPals, 15);
 });
 
 test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 반환한다", async () => {
@@ -118,11 +119,12 @@ test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드�
   assert.equal(item.body.id, "pal-sphere");
 });
 
-test("첫 번째·중간·마지막 Pal 상세는 release 원본 수치와 fallback 상태를 반환한다", async () => {
+test("첫 번째·중간·마지막 Pal 상세는 검증된 로컬 이미지를, 누락 Pal은 fallback 상태를 반환한다", async () => {
   const handler = createHandler();
   const first = await request(handler, "/api/palworld/pals/lamball");
   const middle = await request(handler, "/api/palworld/pals/rayhound");
   const last = await request(handler, "/api/palworld/pals/panthalus");
+  const missingImage = await request(handler, "/api/palworld/pals/smokie");
   const nocturnal = await request(handler, "/api/palworld/pals/depresso");
   assert.deepEqual(
     [first.body.number, middle.body.number, last.body.number],
@@ -132,7 +134,8 @@ test("첫 번째·중간·마지막 Pal 상세는 release 원본 수치와 fallb
     [first.body.nameKo, middle.body.nameJa, last.body.nameEn],
     ["도로롱", "イヌズマ", "Panthalus"]
   );
-  assert.equal([first.body, middle.body, last.body].every((pal) => pal.imageUrl === undefined), true);
+  assert.equal([first.body, middle.body, last.body].every((pal) => /^\/images\/palworld\/1\.0\.1\/pals\/[a-f0-9]{64}\.webp$/u.test(pal.imageUrl)), true);
+  assert.equal(missingImage.body.imageUrl, undefined);
   assert.equal(typeof first.body.nocturnal, "boolean");
   assert.equal(nocturnal.body.nocturnal, true);
   assert.deepEqual(first.body.activeSkills, []);

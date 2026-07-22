@@ -7,6 +7,7 @@ import {
   validatePalworldDataMetadata,
   validatePalworldDataSnapshot,
   validatePalworldMetaResponse,
+  validatePalworldItemSummary,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
   validatePalworldPalSummary,
@@ -30,6 +31,8 @@ const searchDomains = {
 
 const palImageHash = "a".repeat(64);
 const palImageUrl = `/images/palworld/${metadata.gameVersion}/pals/${palImageHash}.webp`;
+const itemImageHash = "b".repeat(64);
+const itemImageUrl = `/images/palworld/${metadata.gameVersion}/items/${itemImageHash}.webp`;
 
 const palReference = {
   id: "anubis",
@@ -46,7 +49,7 @@ const itemReference = {
   nameKo: "팰 스피어",
   nameJa: "パルスフィア",
   nameEn: "Pal Sphere",
-  imageUrl: "/palworld/items/pal-sphere.webp"
+  imageUrl: itemImageUrl
 };
 
 const pal = {
@@ -276,6 +279,34 @@ test("Pal 상세는 nocturnal boolean을 필수로 검증한다", () => {
   const { nocturnal: _nocturnal, ...withoutNocturnal } = pal;
   assert.equal(validatePalworldPalDetail(withoutNocturnal).ok, false);
   assert.equal(validatePalworldPalDetail({ ...pal, nocturnal: "false" }).ok, false);
+});
+
+test("아이템 summary는 rarity 0과 고정 버전 item content-hash WebP만 허용한다", () => {
+  const summary = {
+    id: item.id,
+    nameKo: item.nameKo,
+    nameJa: item.nameJa,
+    nameEn: item.nameEn,
+    imageUrl: itemImageUrl,
+    category: item.category,
+    rarity: 0,
+    descriptionKo: item.descriptionKo,
+    descriptionJa: item.descriptionJa,
+    descriptionEn: item.descriptionEn,
+    sellPrice: item.sellPrice,
+    technologyLevel: item.technologyLevel
+  };
+  assert.equal(validatePalworldItemSummary(summary).ok, true);
+  for (const imageUrl of [
+    "https://unapproved.example/item.webp",
+    `/images/palworld/${metadata.gameVersion}/pals/${itemImageHash}.webp`,
+    `/images/palworld/${metadata.gameVersion}/items/${itemImageHash}.png`,
+    `/images/palworld/${metadata.gameVersion}/items/not-a-content-hash.webp`,
+    `/images/palworld/${metadata.gameVersion}/items/${itemImageHash}.webp?cache=1`
+  ]) {
+    assert.equal(validatePalworldItemSummary({ ...summary, imageUrl }).ok, false, imageUrl);
+  }
+  assert.equal(validatePalworldItemSummary({ ...summary, rarity: -1 }).ok, false);
 });
 
 test("Palworld 스냅샷은 정규화된 상세 데이터와 참조 무결성을 검증한다", () => {

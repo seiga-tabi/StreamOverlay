@@ -29,6 +29,7 @@ test("운영자 image-use-policy는 exact schema와 공개 공지를 검증한�
   const policy = assertPalworldImageUsePolicy(operatorPolicy);
   assert.equal(policy.status, "operator_acknowledged");
   assert.equal(policy.usageBasis, "operator_reference_use");
+  assert.equal(policy.sourceType, "operator_provided_archive");
   assert.equal(policy.rightsVerified, false);
   assert.equal(policy.publicNoticeKo, PALWORLD_PUBLIC_NOTICE_KO);
   assert.equal(policy.publicNoticeJa, PALWORLD_PUBLIC_NOTICE_JA);

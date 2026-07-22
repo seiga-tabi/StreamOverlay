@@ -363,6 +363,7 @@ test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀
       "/palworld/pals",
       "/palworld/breeding",
       "/palworld/items",
+      "/palworld/map",
       "/palworld/search?q=%ED%8C%94%20100%25&pal=pal-1",
       "/dashboard",
       "/dashboard/seiga/key"
@@ -388,7 +389,11 @@ test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀
       assert.equal(actual.pathname, expected.pathname);
       assert.equal(actual.searchParams.get("viewer_twitch"), "connected");
     }
-    const searchReturnUrl = new URL(captured[5].returnUrl);
+    const searchCapture = captured.find(
+      ({ returnUrl }) => new URL(returnUrl).pathname === "/palworld/search"
+    );
+    assert.ok(searchCapture);
+    const searchReturnUrl = new URL(searchCapture.returnUrl);
     assert.equal(searchReturnUrl.searchParams.get("q"), "팔 100%");
     assert.equal(searchReturnUrl.searchParams.get("pal"), "pal-1");
   });

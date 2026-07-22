@@ -1,23 +1,24 @@
-# Palworld 운영자 이미지 반입 정책
+# Palworld 운영자 제공 이미지 반입 정책
 
-이 문서는 Palworld 1.0.1 공개 도감에 운영자가 관리하는 서버 export 이미지를 반입하는 유지보수 절차를 정의한다. 이 절차는 Pocketpair의 서면 라이선스 취득이나 공식 제휴를 의미하지 않는다.
+이 문서는 Palworld 1.0.1 공개 도감에 운영자가 제공한 로컬 이미지를 반입하는 유지보수 절차를 정의한다. 출처는 운영자 관리 서버 export 또는 운영자가 직접 제공한 고정 archive일 수 있다. 이 절차는 Pocketpair의 서면 라이선스 취득이나 공식 제휴를 의미하지 않는다.
 
 ## 현재 상태와 blocker
 
 - 운영자 사용 정책: `operator_acknowledged`
 - 사용 근거: `operator_reference_use`
 - 독립적인 권리 확인: `rightsVerified: false`
-- 실제 제공된 source directory: 없음
-- 실제 image source mapping: 없음
-- 기술 검증 이미지: 0개
-- fallback: 287개
-- runtime image gate: `blocked_by_license`
+- 고정 source archive: `pyPalworldAPI-0.2.0.zip` (`SHA-256 42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115`)
+- 실제 image source mapping: canonical exact join 272개
+- 기술 검증 이미지: 272개
+- fallback: 15개
+- runtime image gate: `partial`
+- 공개 월드 지도: 빠른 이동 지점 합성 지도 1개, 4096×4096 content-hash WebP
 
-운영자 결정은 [image-use-policy.json](../apps/server/data/palworld/1.0.1/image-use-policy.json)에 고정되어 있다. 이 artifact는 권리자 허가서가 아니다. 실제 이미지와 exact mapping이 모두 없으므로 현재 release에는 `imageUrl`을 추가하지 않는다. 다른 Palworld DB, 게임 추출 URL, 외부 hotlink 또는 임의 API로 누락 파일을 보충하지 않는다.
+운영자 결정은 [image-use-policy.json](../apps/server/data/palworld/1.0.1/image-use-policy.json)에 고정되어 있다. 이 artifact는 권리자 허가서가 아니다. archive에 존재하고 canonical `sourceInternalId`와 정확히 일치한 272개만 `imageUrl`을 활성화한다. 누락된 15개는 fallback이며 다른 Palworld DB, 게임 추출 URL, 외부 hotlink, 변종 이미지 또는 임의 API로 보충하지 않는다. archive 분석 근거는 [import-provenance.json](../apps/server/data/palworld/_imports/pypalworldapi-0.2.0/import-provenance.json)에 고정한다.
 
 ## 운영자 source 제공
 
-Codex나 CI가 운영 서버에 임의로 SSH 접속하지 않는다. 운영자는 PNG 또는 WebP export 디렉터리를 다음 중 하나로 제공한다.
+Codex나 CI가 운영 서버에 임의로 SSH 접속하지 않는다. 운영자는 PNG 또는 WebP export 디렉터리나 고정 archive를 다음 중 하나로 제공한다.
 
 1. workspace 밖의 read-only mount
 2. CI job이 읽을 수 있는 read-only volume
@@ -43,9 +44,9 @@ rollback policy는 `blocked_by_license`, `usageBasis: none`, 네 허용값 `fals
 - `sourceInternalId`
 - `sourceFileName`
 - `sourceRevision`
-- `sourceKind: operator_controlled_server_export`
+- `sourceKind: operator_controlled_server_export` 또는 `operator_provided_archive`
 
-mapping은 이름 fuzzy match를 하지 않는다. `palId`와 `sourceInternalId`를 1.0.1 canonical 도감에 exact join한다. subset mapping은 나머지 Pal을 fallback으로 계산한다. 같은 파일 또는 같은 output hash가 여러 Pal에 대응하면 `image-overrides.json`에 정확한 Pal 목록과 한국어 사유가 있어야 한다. 일반종과 변종을 임의로 공유하지 않는다.
+mapping은 이름 fuzzy match를 하지 않는다. `palId`와 `sourceInternalId`를 1.0.1 canonical 도감에 exact join하고 policy의 `sourceType`과 각 entry의 `sourceKind`가 일치해야 한다. subset mapping은 나머지 Pal을 fallback으로 계산한다. 같은 파일 또는 같은 output hash가 여러 Pal에 대응하면 `image-overrides.json`에 정확한 Pal 목록과 한국어 사유가 있어야 한다. 일반종과 변종을 임의로 공유하지 않는다.
 
 ## Maintenance CLI
 
@@ -91,6 +92,16 @@ API에는 같은 origin의 아래 URL만 기록한다. 외부 URL, base64/data U
 /images/palworld/1.0.1/pals/<64-hex-sha256>.webp
 ```
 
+## 월드 지도 자산
+
+`pyPalworldAPI-0.2.0.zip`의 지도 821개 약 1.27GB를 전체 반입하지 않는다. 공개 `/palworld/map`은 strict decoder 검증을 통과한 `map_locations_fast_travel_world.png` 한 장만 사용한다. 원본 8192×8192 PNG를 `sharp@0.35.3`, WebP quality 82, effort 6으로 4096×4096까지 축소하고 metadata를 제거했다.
+
+```text
+/images/palworld/1.0.1/maps/<64-hex-sha256>.webp
+```
+
+선택·변환 결과는 [import-provenance.json](../apps/server/data/palworld/_imports/pypalworldapi-0.2.0/import-provenance.json)에 고정한다. Pal 전용 importer의 크기·pixel 제한을 완화하지 않으며 지도는 코드가 소유한 고정 allowlist 경로로만 노출한다. `map_locations_fast_travel_tree.png`는 ZIP CRC와 header는 정상이지만 strict decoder 검증에 실패하므로 공개하지 않는다. 나머지 Pal별 주야간 분포도와 장소별 합성 지도는 별도 lazy-load·좌표·권리 검증 기능이 준비되기 전까지 격리한다.
+
 ## 검증과 publish 순서
 
 1. policy와 source mapping의 exact schema/checksum을 검증한다.
@@ -107,7 +118,7 @@ API에는 같은 origin의 아래 URL만 기록한다. 외부 URL, base64/data U
 
 ## Manifest provenance
 
-운영자 이미지 entry는 외부 `sourceUrl` 대신 공개 가능한 opaque `sourceReference`를 쓴다. 절대경로는 기록하지 않는다.
+운영자 이미지 entry는 외부 `sourceUrl` 대신 공개 가능한 opaque `sourceReference`를 쓴다. 서버 export는 `operator-export-*`, 제공 archive는 `operator-archive-*`를 사용하며 절대경로는 기록하지 않는다.
 
 - `status: operator_acknowledged`
 - `license: RIGHTS_NOT_INDEPENDENTLY_VERIFIED`

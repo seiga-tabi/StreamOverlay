@@ -388,31 +388,15 @@ function httpsUrlAt(value: unknown, path: string): PalworldValidationResult<stri
   }
 }
 
-function optionalAssetPathAt(value: unknown, path: string): PalworldValidationResult<string | undefined> {
-  if (value === undefined) return valid(undefined);
-  const stringResult = stringAt(value, path, MAX_URL_LENGTH);
-  if (!stringResult.ok) return stringResult;
-  try {
-    const decoded = decodeURIComponent(stringResult.data);
-    if (
-      stringResult.data.startsWith("/") &&
-      !stringResult.data.startsWith("//") &&
-      !decoded.includes("..") &&
-      !decoded.includes("\\") &&
-      !decoded.includes("\0")
-    ) {
-      return stringResult;
-    }
-  } catch {
-    return invalid(path, "올바른 asset 경로여야 합니다.");
-  }
-  return invalid(path, "외부 hotlink가 아닌 안전한 동일 출처 절대 경로여야 합니다.");
-}
-
 const PALWORLD_PAL_IMAGE_PATH_PATTERN = /^\/images\/palworld\/((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))\/pals\/[a-f0-9]{64}\.webp$/u;
+const PALWORLD_ITEM_IMAGE_PATH_PATTERN = /^\/images\/palworld\/((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))\/items\/[a-f0-9]{64}\.webp$/u;
 
 function palImageVersion(value: string): string | undefined {
   return value.match(PALWORLD_PAL_IMAGE_PATH_PATTERN)?.[1];
+}
+
+function itemImageVersion(value: string): string | undefined {
+  return value.match(PALWORLD_ITEM_IMAGE_PATH_PATTERN)?.[1];
 }
 
 function optionalPalImagePathAt(value: unknown, path: string): PalworldValidationResult<string | undefined> {
@@ -421,6 +405,15 @@ function optionalPalImagePathAt(value: unknown, path: string): PalworldValidatio
   if (!stringResult.ok) return stringResult;
   return palImageVersion(stringResult.data) === undefined
     ? invalid(path, "Pal 이미지는 버전과 SHA-256 content hash가 포함된 허용 경로의 WebP 파일이어야 합니다.")
+    : stringResult;
+}
+
+function optionalItemImagePathAt(value: unknown, path: string): PalworldValidationResult<string | undefined> {
+  if (value === undefined) return valid(undefined);
+  const stringResult = stringAt(value, path, MAX_URL_LENGTH);
+  if (!stringResult.ok) return stringResult;
+  return itemImageVersion(stringResult.data) === undefined
+    ? invalid(path, "고정 버전의 동일 출처 item content-hash WebP 경로여야 합니다.")
     : stringResult;
 }
 
@@ -563,7 +556,7 @@ function validateItemReferenceAt(value: unknown, path: string): PalworldValidati
     const result = stringAt(candidate[field], `${path}.${field}`);
     if (!result.ok) return result;
   }
-  const imageUrl = optionalAssetPathAt(candidate.imageUrl, `${path}.imageUrl`);
+  const imageUrl = optionalItemImagePathAt(candidate.imageUrl, `${path}.imageUrl`);
   return imageUrl.ok ? valid(candidate as PalworldItemReference) : imageUrl;
 }
 
@@ -736,7 +729,7 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
   if (!reference.ok) return reference;
   const category = enumAt(candidate.category, `${path}.category`, PALWORLD_ITEM_CATEGORIES);
   if (!category.ok) return category;
-  const rarity = integerAt(candidate.rarity, `${path}.rarity`, 1, MAX_RARITY);
+  const rarity = integerAt(candidate.rarity, `${path}.rarity`, 0, MAX_RARITY);
   if (!rarity.ok) return rarity;
   for (const field of ["descriptionKo", "descriptionJa"] as const) {
     const result = stringAt(candidate[field], `${path}.${field}`, MAX_DESCRIPTION_LENGTH);
@@ -1271,6 +1264,12 @@ export function validatePalworldDataSnapshot(value: unknown): PalworldValidation
   for (const [index, item] of items.data.entries()) {
     if (!sameSnapshotMetadata(metadata.data, item.metadata)) {
       return invalid(`snapshot.items[${index}].metadata`, "snapshot과 gameVersion/sourceRevision이 같아야 합니다.");
+    }
+    if (item.imageUrl !== undefined && itemImageVersion(item.imageUrl) !== metadata.data.gameVersion) {
+      return invalid(
+        `snapshot.items[${index}].imageUrl`,
+        "아이템 이미지 경로 버전은 snapshot metadata.gameVersion과 같아야 합니다."
+      );
     }
     for (const [materialIndex, material] of item.craftingMaterials.entries()) {
       const canonicalItem = itemsById.get(material.item.id);

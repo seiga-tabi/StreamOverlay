@@ -974,6 +974,7 @@ const PUBLIC_TWITCH_PALWORLD_RETURN_PATHS = new Set([
   "/palworld/pals",
   "/palworld/breeding",
   "/palworld/items",
+  "/palworld/map",
   "/palworld/search"
 ]);
 
