@@ -13,6 +13,11 @@ export const PALWORLD_SERVER_CONNECTION_STATES = [
 
 export const PALWORLD_SERVER_ERROR_CODES = [
   "disabled",
+  "config_missing",
+  "config_invalid",
+  "key_missing",
+  "key_invalid",
+  "policy_missing",
   "not_configured",
   "invalid_request",
   "invalid_url",
@@ -34,6 +39,15 @@ export const PALWORLD_SERVER_ERROR_CODES = [
   "internal_error"
 ] as const;
 
+export const PALWORLD_SERVER_AVAILABILITY_ERROR_CODES = [
+  "disabled",
+  "config_missing",
+  "config_invalid",
+  "key_missing",
+  "key_invalid",
+  "policy_missing"
+] as const satisfies readonly (typeof PALWORLD_SERVER_ERROR_CODES)[number][];
+
 export const PALWORLD_SERVER_DIAGNOSTIC_KEYS = [
   "url_policy",
   "dns_tcp",
@@ -48,6 +62,7 @@ export const PALWORLD_SERVER_DIAGNOSTIC_STATES = ["pending", "passed", "failed",
 
 export type PalworldServerConnectionState = (typeof PALWORLD_SERVER_CONNECTION_STATES)[number];
 export type PalworldServerErrorCode = (typeof PALWORLD_SERVER_ERROR_CODES)[number];
+export type PalworldServerAvailabilityErrorCode = (typeof PALWORLD_SERVER_AVAILABILITY_ERROR_CODES)[number];
 export type PalworldServerDiagnosticKey = (typeof PALWORLD_SERVER_DIAGNOSTIC_KEYS)[number];
 export type PalworldServerDiagnosticState = (typeof PALWORLD_SERVER_DIAGNOSTIC_STATES)[number];
 
@@ -586,7 +601,22 @@ export function validatePalworldServerDashboardResponse(
   const connection = validateConnectionSummaryAt(record.data.connection, "response.connection");
   if (!connection.ok) return connection;
   const status = validateStatusAt(record.data.status, "response.status");
-  return status.ok ? valid(record.data as PalworldServerDashboardResponse) : status;
+  if (!status.ok) return status;
+  const availabilityError = status.data.errorCode !== undefined
+    && (PALWORLD_SERVER_AVAILABILITY_ERROR_CODES as readonly string[]).includes(status.data.errorCode);
+  if (!enabled.data && !availabilityError) {
+    return invalid("response.status.errorCode", "비활성 응답에는 운영 준비 상태 오류 코드가 필요합니다.");
+  }
+  if (!enabled.data && status.data.state !== "not_configured") {
+    return invalid("response.status.state", "비활성 응답은 not_configured 상태여야 합니다.");
+  }
+  if (!enabled.data && connection.data.configured) {
+    return invalid("response.connection.configured", "비활성 응답에는 연결 정보를 포함할 수 없습니다.");
+  }
+  if (enabled.data && availabilityError) {
+    return invalid("response.status.errorCode", "활성 응답에는 운영 준비 상태 오류 코드를 포함할 수 없습니다.");
+  }
+  return valid(record.data as PalworldServerDashboardResponse);
 }
 
 export function assertPalworldRestInfoResponse(value: unknown): PalworldRestInfoResponse {

@@ -222,14 +222,15 @@ function monitorStub(overrides = {}) {
   };
 }
 
-function handlerInput(store, sessions, monitor, logger) {
+function handlerInput(store, sessions, monitor, logger, extra = {}) {
   return {
     store,
     sessions,
     palworldServerMonitor: monitor,
     logger,
     twitchAuth: {},
-    actions: { async dispatchOne() {} }
+    actions: { async dispatchOne() {} },
+    ...extra
   };
 }
 
@@ -553,4 +554,50 @@ test("monitor 미주입 시 strict disabled 응답을 반환하고 공개 Palwor
   assert.equal(disabled.headers["Cache-Control"], "no-store");
   assert.equal(publicMeta.statusCode, 200);
   assert.ok(JSON.parse(publicMeta.body).metadata);
+});
+
+test("Palworld subsystem 준비 실패는 안전한 운영 상태별 응답으로 구분한다", async () => {
+  const { store, tenantA, sessions, sessionA } = setupTenants();
+  const headers = streamerHeaders(sessionA, tenantA);
+
+  for (const errorCode of ["config_missing", "config_invalid", "policy_missing", "key_missing", "key_invalid"]) {
+    const handler = createHttpHandler(handlerInput(store, sessions, undefined, undefined, {
+      palworldServerUnavailableCode: errorCode
+    }));
+    const response = await send(handler, "GET", "/api/dashboard/palworld-server", undefined, headers);
+    const body = JSON.parse(response.body);
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(body.enabled, false);
+    assert.equal(body.status.errorCode, errorCode);
+    assert.doesNotMatch(response.body, /\/run\/secrets|\/app\/\.streamops|ciphertext|authorization/i);
+
+    const postResponse = await send(
+      handler,
+      "POST",
+      "/api/dashboard/palworld-server/refresh",
+      {},
+      streamerHeaders(sessionA, tenantA, true)
+    );
+    assert.equal(postResponse.statusCode, 503, postResponse.body);
+    assert.equal(JSON.parse(postResponse.body).code, errorCode);
+    assert.equal(postResponse.headers["Cache-Control"], "no-store");
+  }
+});
+
+test("Palworld config 오류와 원격 probe 오류는 health readiness에 포함되지 않는다", async () => {
+  const { store, sessions } = setupTenants();
+  const monitor = monitorStub({
+    async refresh() {
+      throw new Error("upstream unavailable");
+    }
+  });
+  const handler = createHttpHandler(handlerInput(store, sessions, monitor, undefined, {
+    palworldServerUnavailableCode: "config_invalid",
+    readiness: () => ({ ok: true, checks: { persistenceHealthy: true }, errors: [] })
+  }));
+
+  const response = await send(handler, "GET", "/health/ready");
+  assert.equal(response.statusCode, 200);
+  assert.equal(JSON.parse(response.body).status, "ready");
 });

@@ -31,6 +31,14 @@ function makeConfigDir(chatCommands) {
     enabledQueues: [420, 440],
     rateLimit: { backoffMs: 60000, maxBackoffMs: 900000 }
   });
+  writeJson(path.join(dir, "palworld-server-status.json"), {
+    version: 1,
+    enabled: false,
+    allowedOrigins: [],
+    allowedCidrs: [],
+    timeoutMs: 5000,
+    pollIntervalMs: 30000
+  });
   return dir;
 }
 
@@ -78,6 +86,42 @@ test("config validator는 안전한 viewer 템플릿 위치를 허용한다", ()
   try {
     const result = runValidateConfig(dir);
     assert.equal(result.status, 0, result.stderr);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("config validator는 Palworld 상태 설정 파일 누락을 거부한다", () => {
+  const dir = makeConfigDir({});
+  rmSync(path.join(dir, "palworld-server-status.json"));
+
+  try {
+    const result = runValidateConfig(dir);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /palworld-server-status\.json/);
+    assert.match(result.stderr, /config_missing/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("config validator는 Palworld 상태 설정의 unknown field를 거부한다", () => {
+  const dir = makeConfigDir({});
+  writeJson(path.join(dir, "palworld-server-status.json"), {
+    version: 1,
+    enabled: false,
+    allowedOrigins: [],
+    allowedCidrs: [],
+    timeoutMs: 5000,
+    pollIntervalMs: 30000,
+    unexpected: true
+  });
+
+  try {
+    const result = runValidateConfig(dir);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /palworld-server-status\.json/);
+    assert.match(result.stderr, /config_invalid_schema/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

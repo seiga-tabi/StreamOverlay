@@ -26,8 +26,16 @@ import { LocalJsonLolProfileRepository } from "./services/lol-profile-store.js";
 import { LocalTtsService } from "./services/local-tts-service.js";
 import { SupportMailboxStore } from "./services/support-mailbox-store.js";
 import { PalworldServerClient } from "./services/palworld-server-client.js";
-import { PalworldServerConnectionStore } from "./services/palworld-server-connection-store.js";
+import {
+  PalworldServerConnectionStore,
+  PalworldServerConnectionStoreError
+} from "./services/palworld-server-connection-store.js";
 import { PalworldServerMonitor } from "./services/palworld-server-monitor.js";
+import {
+  PalworldServerStatusConfigError,
+  loadPalworldServerStatusConfig,
+  palworldServerStatusAvailabilityCode
+} from "./services/palworld-server-status-config.js";
 import { recordFollowerManagementEvent } from "./services/follower-event-recorder.js";
 import { createHttpHandler } from "./routes/http-api.js";
 import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMatches, type DashboardRole } from "./security/auth.js";
@@ -35,7 +43,7 @@ import { websocketLimiter } from "./security/rate-limit.js";
 import { getEnabledModules } from "./modules/index.js";
 import { refreshLolProfileForEntry } from "./modules/lol-profile-enrichment.module.js";
 import { closeLolGameMonitors } from "./modules/lol-game-monitor.module.js";
-import { newId, nowIso, toSafeErrorMessage } from "@streamops/shared";
+import { newId, nowIso, toSafeErrorMessage, type PalworldServerAvailabilityErrorCode } from "@streamops/shared";
 
 assertRuntimeConfig();
 
@@ -48,23 +56,62 @@ const supportMailbox = appConfig.supportMailbox.enabled
       maxMessages: appConfig.supportMailbox.maxMessages
     })
   : undefined;
-const palworldServerDestinations = appConfig.palworldServerStatus.allowedOrigins;
-const palworldServerMonitor = appConfig.palworldServerStatus.enabled
-  ? new PalworldServerMonitor({
+
+const palworldReusedSecrets = [
+  appConfig.security.dashboardAuthToken,
+  appConfig.security.overlayAccessToken,
+  appConfig.bridge.sharedSecret,
+  appConfig.twitch.clientSecret,
+  appConfig.twitch.userAccessToken,
+  appConfig.riot.apiKey,
+  appConfig.supportMailbox.webhookSecret,
+  appConfig.supportMailbox.encryptionKey
+].filter((value): value is string => Boolean(value));
+
+let palworldServerMonitor: PalworldServerMonitor | undefined;
+let palworldServerUnavailableCode: PalworldServerAvailabilityErrorCode | undefined;
+try {
+  const palworldConfig = loadPalworldServerStatusConfig({
+    configDir: appConfig.paths.config,
+    stateDir: appConfig.paths.state,
+    reusedSecrets: palworldReusedSecrets
+  });
+  if (!palworldConfig.enabled) {
+    palworldServerUnavailableCode = "disabled";
+  } else if (!palworldConfig.encryptionKey) {
+    palworldServerUnavailableCode = "key_missing";
+  } else {
+    palworldServerMonitor = new PalworldServerMonitor({
       store: new PalworldServerConnectionStore({
-        filePath: appConfig.palworldServerStatus.statePath,
-        encryptionKey: appConfig.palworldServerStatus.encryptionKey
+        filePath: palworldConfig.statePath,
+        encryptionKey: palworldConfig.encryptionKey
       }),
       client: new PalworldServerClient({
-        allowedOrigins: palworldServerDestinations.filter((destination) => destination.includes("://")),
-        allowedCidrs: palworldServerDestinations.filter((destination) => !destination.includes("://")),
-        timeoutMs: appConfig.palworldServerStatus.timeoutMs
+        allowedOrigins: palworldConfig.allowedOrigins,
+        allowedCidrs: palworldConfig.allowedCidrs,
+        timeoutMs: palworldConfig.timeoutMs
       }),
       enabled: true,
-      pollIntervalMs: appConfig.palworldServerStatus.pollIntervalMs,
+      pollIntervalMs: palworldConfig.pollIntervalMs,
       logger
-    })
-  : undefined;
+    });
+    logger.event({ type: "palworld_server.subsystem_ready" });
+  }
+} catch (error) {
+  const safeInternalCode = error instanceof PalworldServerConnectionStoreError
+    ? error.code
+    : error instanceof PalworldServerStatusConfigError
+      ? error.code
+      : "initialization_failed";
+  palworldServerUnavailableCode = error instanceof PalworldServerConnectionStoreError
+    ? "key_invalid"
+    : palworldServerStatusAvailabilityCode(error);
+  logger.error({
+    type: "palworld_server.subsystem_unavailable",
+    errorCode: safeInternalCode,
+    publicStatus: palworldServerUnavailableCode
+  });
+}
 const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
   streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
@@ -156,6 +203,7 @@ const server = http.createServer(createHttpHandler({
   overlayStatusForStreamer: (twitchUserId) => overlay.statusForStreamer(twitchUserId),
   supportMailbox,
   palworldServerMonitor,
+  palworldServerUnavailableCode,
   readiness: () => store.getReadiness(),
   isShuttingDown: () => shuttingDown,
   connectionStatus: () => ({

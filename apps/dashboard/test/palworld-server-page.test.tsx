@@ -4,9 +4,14 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type {
   PalworldServerConnectionSummary,
+  PalworldServerDashboardResponse,
   PalworldServerStatus
 } from "@streamops/shared";
 import { Layout } from "../src/components/Layout";
+import {
+  PalworldServerAvailabilityNotice,
+  palworldServerAvailabilityCode
+} from "../src/features/palworld-server/components/PalworldServerAvailabilityNotice";
 import { PalworldServerConnectionForm } from "../src/features/palworld-server/components/PalworldServerConnectionForm";
 import { PalworldServerStatusPanel } from "../src/features/palworld-server/components/PalworldServerStatusPanel";
 import { canReusePalworldServerPassword } from "../src/features/palworld-server/connection";
@@ -133,6 +138,56 @@ test("저장된 비밀번호는 같은 canonical URL에서만 재사용한다", 
     canReusePalworldServerPassword("https://palworld.example.com:8212/", "https://palworld.example.com:8212/", false),
     false
   );
+});
+
+test("운영 준비 오류는 연결 미설정과 구분해 한국어·일본어 안내를 표시한다", () => {
+  const cases = [
+    ["disabled", "전용 서버 상태 확인이 비활성화되어 있습니다", "専用サーバーの状態確認が無効です"],
+    ["config_missing", "전용 서버 연동 설정이 준비되지 않았습니다", "専用サーバー連携の設定が準備されていません"],
+    ["config_invalid", "전용 서버 연동 설정을 확인해야 합니다", "専用サーバー連携の設定を確認してください"],
+    ["key_missing", "자격 증명 보호 설정이 준비되지 않았습니다", "認証情報の保護設定が準備されていません"],
+    ["key_invalid", "자격 증명 보호 설정을 확인해야 합니다", "認証情報の保護設定を確認してください"],
+    ["policy_missing", "전용 서버 접속 허용 정책이 준비되지 않았습니다", "専用サーバーの接続許可ポリシーが準備されていません"]
+  ] as const;
+
+  for (const [code, koreanTitle, japaneseTitle] of cases) {
+    const korean = renderToStaticMarkup(
+      <PalworldServerAvailabilityNotice code={code} text={palworldServerText("ko")} />
+    );
+    const japanese = renderToStaticMarkup(
+      <PalworldServerAvailabilityNotice code={code} text={palworldServerText("ja")} />
+    );
+    assert.match(korean, new RegExp(`data-availability-code="${code}"`));
+    assert.match(korean, new RegExp(koreanTitle));
+    assert.match(japanese, new RegExp(japaneseTitle));
+    assert.doesNotMatch(korean, /type="password"|adminPassword|\/run\/secrets|\.streamops/);
+    assert.doesNotMatch(japanese, /type="password"|adminPassword|\/run\/secrets|\.streamops/);
+  }
+});
+
+test("feature 준비 상태와 스트리머 연결 미설정 상태를 혼동하지 않는다", () => {
+  const baseResponse: PalworldServerDashboardResponse = {
+    enabled: true,
+    pollIntervalSeconds: 30,
+    connection: { configured: false, passwordConfigured: false },
+    status: {
+      state: "not_configured",
+      errorCode: "not_configured",
+      consecutiveFailures: 0,
+      diagnostics: status.diagnostics.map((entry) => ({ ...entry, state: "skipped" }))
+    }
+  };
+
+  assert.equal(palworldServerAvailabilityCode(baseResponse), undefined);
+  assert.equal(palworldServerAvailabilityCode({
+    ...baseResponse,
+    enabled: false,
+    status: { ...baseResponse.status, errorCode: "disabled" }
+  }), "disabled");
+  assert.equal(palworldServerAvailabilityCode({
+    ...baseResponse,
+    status: { ...baseResponse.status, errorCode: "key_missing" }
+  }), "key_missing");
 });
 
 test("서버 상태 패널은 지표와 단계별 진단을 한국어와 일본어로 표시한다", () => {

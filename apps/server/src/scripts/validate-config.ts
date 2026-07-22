@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { appConfig } from "../config.js";
+import {
+  PALWORLD_SERVER_STATUS_CONFIG_FILE,
+  PalworldServerStatusConfigError,
+  loadPalworldServerStatusFileConfig
+} from "../services/palworld-server-status-config.js";
 import { validateBotAction } from "@streamops/shared";
 
 type ActionGroup = {
@@ -299,6 +304,15 @@ function validateLolParticipationConfig(configDir: string): void {
   }
 }
 
+function validatePalworldServerStatusConfig(configDir: string): void {
+  try {
+    loadPalworldServerStatusFileConfig(configDir);
+  } catch (error) {
+    const code = error instanceof PalworldServerStatusConfigError ? error.code : "config_invalid_file";
+    fail(PALWORLD_SERVER_STATUS_CONFIG_FILE, `Palworld 서버 상태 설정 검증에 실패했습니다: ${code}`);
+  }
+}
+
 function collectArrayConfig(fileName: string, parsed: unknown, viewerTriggered: boolean): ActionGroup[] {
   if (!isRecord(parsed)) {
     fail(fileName, "최상위 JSON은 객체여야 합니다.");
@@ -417,6 +431,7 @@ for (const spec of specs) {
 
 validateLolParticipationConfig(configDir);
 validateAlertOverlayConfig(configDir);
+validatePalworldServerStatusConfig(configDir);
 
 if (failures.length > 0) {
   for (const failure of failures) console.error(failure);

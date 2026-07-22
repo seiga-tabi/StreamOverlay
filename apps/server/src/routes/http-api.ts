@@ -8,6 +8,7 @@ import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } fr
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
   OVERLAY_CHANNELS,
+  PALWORLD_SERVER_AVAILABILITY_ERROR_CODES,
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
   formatRiotId,
   normalizeRiotIdKey,
@@ -37,6 +38,7 @@ import {
   type ParticipationPhase,
   type ParticipationStreamerProfile,
   type ParticipationStatus,
+  type PalworldServerAvailabilityErrorCode,
   type PalworldServerConnectionInput,
   type PalworldServerDashboardResponse,
   type PalworldServerTestResponse,
@@ -1740,6 +1742,7 @@ type HttpHandlerInput = {
   disconnectStreamerDashboard?: (twitchUserId: string) => void;
   overlayStatusForStreamer?: (twitchUserId: string) => OverlayStatus;
   palworldServerMonitor?: PalworldServerMonitor;
+  palworldServerUnavailableCode?: PalworldServerAvailabilityErrorCode;
 };
 
 const PALWORLD_SERVER_DASHBOARD_PATH = "/api/dashboard/palworld-server";
@@ -1759,7 +1762,9 @@ const PALWORLD_SERVER_OWNER_SELECTOR_HEADERS = [
   "x-owner-id"
 ] as const;
 
-function disabledPalworldServerDashboardResponse(): PalworldServerDashboardResponse {
+function disabledPalworldServerDashboardResponse(
+  errorCode: PalworldServerAvailabilityErrorCode = "disabled"
+): PalworldServerDashboardResponse {
   return {
     enabled: false,
     pollIntervalSeconds: 5,
@@ -1769,7 +1774,7 @@ function disabledPalworldServerDashboardResponse(): PalworldServerDashboardRespo
     },
     status: {
       state: "not_configured",
-      errorCode: "disabled",
+      errorCode,
       consecutiveFailures: 0,
       diagnostics: PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({ key, state: "skipped" }))
     }
@@ -1787,6 +1792,13 @@ function hasPalworldServerOwnerSelectorHeader(req: IncomingMessage): boolean {
 
 function palworldServerInputErrorMessage(code: string): string {
   if (code === "disabled") return "Palworld 서버 상태 기능이 비활성화되어 있습니다.";
+  if (code === "config_missing" || code === "config_invalid") {
+    return "Palworld 서버 상태 운영 설정을 확인해야 합니다.";
+  }
+  if (code === "policy_missing") return "Palworld 서버 접속 허용 정책을 확인해야 합니다.";
+  if (code === "key_missing" || code === "key_invalid") {
+    return "Palworld 서버 자격 증명 보호 설정을 확인해야 합니다.";
+  }
   if (code === "password_required") return "Palworld 서버 관리자 비밀번호가 필요합니다.";
   if (code === "invalid_url" || code === "origin_not_allowed" || code === "address_blocked") {
     return "허용된 Palworld REST API URL을 입력해야 합니다.";
@@ -3189,7 +3201,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     try {
       if (url.pathname === PALWORLD_SERVER_DASHBOARD_PATH) {
         const response = input.palworldServerMonitor?.getDashboardResponse(ownerId)
-          ?? disabledPalworldServerDashboardResponse();
+          ?? disabledPalworldServerDashboardResponse(input.palworldServerUnavailableCode);
         sendJson(req, res, 200, validatedPalworldServerDashboardResponse(response));
         return true;
       }
@@ -3198,8 +3210,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const connection = await readPalworldServerConnectionInput(req);
         if (!input.palworldServerMonitor) {
           throw new PalworldServerMonitorInputError(
-            "disabled",
-            "Palworld 서버 상태 기능이 비활성화되어 있습니다."
+            input.palworldServerUnavailableCode ?? "disabled",
+            "Palworld 서버 상태 기능을 사용할 수 없습니다."
           );
         }
         const response = await input.palworldServerMonitor.testConnection(ownerId, connection);
@@ -3211,8 +3223,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const connection = await readPalworldServerConnectionInput(req);
         if (!input.palworldServerMonitor) {
           throw new PalworldServerMonitorInputError(
-            "disabled",
-            "Palworld 서버 상태 기능이 비활성화되어 있습니다."
+            input.palworldServerUnavailableCode ?? "disabled",
+            "Palworld 서버 상태 기능을 사용할 수 없습니다."
           );
         }
         const response = await input.palworldServerMonitor.saveConnection(ownerId, connection);
@@ -3223,8 +3235,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       await requireEmptyPalworldServerBody(req);
       if (!input.palworldServerMonitor) {
         throw new PalworldServerMonitorInputError(
-          "disabled",
-          "Palworld 서버 상태 기능이 비활성화되어 있습니다."
+          input.palworldServerUnavailableCode ?? "disabled",
+          "Palworld 서버 상태 기능을 사용할 수 없습니다."
         );
       }
       const response = url.pathname === `${PALWORLD_SERVER_DASHBOARD_PATH}/refresh`
@@ -3248,7 +3260,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return true;
       }
       if (error instanceof PalworldServerMonitorInputError) {
-        sendJson(req, res, 400, { error: palworldServerInputErrorMessage(error.code), code: error.code });
+        const statusCode = (PALWORLD_SERVER_AVAILABILITY_ERROR_CODES as readonly string[]).includes(error.code)
+          ? 503
+          : 400;
+        sendJson(req, res, statusCode, { error: palworldServerInputErrorMessage(error.code), code: error.code });
         return true;
       }
       input.logger?.error({

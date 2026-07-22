@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "enabled": false,
+  "allowedOrigins": [],
+  "allowedCidrs": [],
+  "timeoutMs": 5000,
+  "pollIntervalMs": 30000
+}

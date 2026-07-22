@@ -12,6 +12,11 @@ import {
   testPalworldServerConnection
 } from "../features/palworld-server/api";
 import { PalworldServerConnectionForm } from "../features/palworld-server/components/PalworldServerConnectionForm";
+import {
+  PalworldServerAvailabilityNotice,
+  palworldServerAvailabilityCode,
+  palworldServerAvailabilityTone
+} from "../features/palworld-server/components/PalworldServerAvailabilityNotice";
 import { canReusePalworldServerPassword } from "../features/palworld-server/connection";
 import {
   PalworldServerStatusPanel,
@@ -133,7 +138,7 @@ export function PalworldServerPage() {
   }, [load]);
 
   useEffect(() => {
-    if (!dashboard?.enabled || !dashboard.connection.configured) return undefined;
+    if (!dashboard || palworldServerAvailabilityCode(dashboard) || !dashboard.connection.configured) return undefined;
     const intervalMs = Math.max(5, dashboard.pollIntervalSeconds) * 1_000;
     const timer = window.setInterval(() => {
       if (!mountedRef.current || pollingRef.current || operationRef.current) return;
@@ -148,7 +153,12 @@ export function PalworldServerPage() {
         });
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [dashboard?.connection.configured, dashboard?.enabled, dashboard?.pollIntervalSeconds]);
+  }, [
+    dashboard?.connection.configured,
+    dashboard?.enabled,
+    dashboard?.pollIntervalSeconds,
+    dashboard?.status.errorCode
+  ]);
 
   function connectionInput(): PalworldServerConnectionInput | undefined {
     const normalizedBaseUrl = baseUrl.trim();
@@ -277,7 +287,15 @@ export function PalworldServerPage() {
   }
 
   const status = dashboard?.status;
-  const statusLabel = status ? palworldServerStatusLabel(status.state, text) : text.status.unknown;
+  const availabilityCode = dashboard ? palworldServerAvailabilityCode(dashboard) : undefined;
+  const statusLabel = availabilityCode
+    ? text.availability[availabilityCode].label
+    : status
+      ? palworldServerStatusLabel(status.state, text)
+      : text.status.unknown;
+  const statusTone = availabilityCode
+    ? palworldServerAvailabilityTone(availabilityCode)
+    : palworldServerStatusTone(status?.state ?? "unknown");
   const showTestStatus = status && status.state !== "not_configured";
 
   return (
@@ -288,8 +306,8 @@ export function PalworldServerPage() {
           <PageHeaderTitle>{text.title}</PageHeaderTitle>
           <PageHeaderDescription>{text.description}</PageHeaderDescription>
           <PageHeaderStatus>
-            <StatusPill tone={palworldServerStatusTone(status?.state ?? "unknown")}>{statusLabel}</StatusPill>
-            {dashboard?.pollIntervalSeconds ? (
+            <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
+            {dashboard?.pollIntervalSeconds && !availabilityCode ? (
               <Badge tone="neutral">
                 {text.autoRefreshInterval} {dashboard.pollIntervalSeconds}{text.second}
               </Badge>
@@ -297,7 +315,7 @@ export function PalworldServerPage() {
           </PageHeaderStatus>
           <PageHeaderActions>
             <Button
-              disabled={!dashboard?.enabled || !dashboard.connection.configured || loading || Boolean(operation)}
+              disabled={Boolean(availabilityCode) || !dashboard?.connection.configured || loading || Boolean(operation)}
               loading={operation === "refreshing"}
               loadingLabel={text.refreshing}
               onClick={() => void refreshStatus()}
@@ -327,15 +345,11 @@ export function PalworldServerPage() {
           </EmptyState>
         ) : null}
 
-        {!loading && dashboard && !dashboard.enabled ? (
-          <EmptyState variant="error">
-            <EmptyStateIcon>!</EmptyStateIcon>
-            <EmptyStateTitle>{text.featureDisabledTitle}</EmptyStateTitle>
-            <EmptyStateDescription>{text.featureDisabledDescription}</EmptyStateDescription>
-          </EmptyState>
+        {!loading && availabilityCode ? (
+          <PalworldServerAvailabilityNotice code={availabilityCode} text={text} />
         ) : null}
 
-        {!loading && dashboard?.enabled ? (
+        {!loading && dashboard && !availabilityCode ? (
           <>
             {!dashboard.connection.configured ? (
               <EmptyState className="palworld-server-unconfigured" variant="streamer">

@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  PALWORLD_SERVER_AVAILABILITY_ERROR_CODES,
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
+  PALWORLD_SERVER_ERROR_CODES,
   assertPalworldRestInfoResponse,
   assertPalworldRestMetricsResponse,
   validatePalworldRestInfoResponse,
@@ -175,6 +177,25 @@ test("상태 validator는 전체 진단 단계와 online 상태 불변식을 검
   }).ok, false);
 });
 
+test("운영 준비 상태 오류 code를 연결 미설정 상태와 구분해 검증한다", () => {
+  for (const errorCode of PALWORLD_SERVER_AVAILABILITY_ERROR_CODES) {
+    assert.equal(PALWORLD_SERVER_ERROR_CODES.includes(errorCode), true, errorCode);
+    const result = validatePalworldServerStatus({
+      state: "not_configured",
+      errorCode,
+      consecutiveFailures: 0,
+      diagnostics: PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({ key, state: "skipped" }))
+    });
+    assert.equal(result.ok, true, result.ok ? errorCode : result.error);
+  }
+  assert.equal(validatePalworldServerStatus({
+    state: "not_configured",
+    errorCode: "unknown_configuration_state",
+    consecutiveFailures: 0,
+    diagnostics: PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({ key, state: "skipped" }))
+  }).ok, false);
+});
+
 test("degraded 상태는 info 성공과 metrics 실패를 부분 결과로 표현할 수 있다", () => {
   const degradedDiagnostics = diagnostics.map((entry) => entry.key === "metrics"
     ? { key: entry.key, state: "failed", errorCode: "request_timeout" }
@@ -208,4 +229,24 @@ test("Test 및 Dashboard 응답은 nested object까지 엄격하게 검증한다
   assert.equal(validatePalworldServerDashboardResponse(dashboardResponse).ok, true);
   assert.equal(validatePalworldServerDashboardResponse({ ...dashboardResponse, pollIntervalSeconds: 1 }).ok, false);
   assert.equal(validatePalworldServerDashboardResponse({ ...dashboardResponse, debug: true }).ok, false);
+  assert.equal(validatePalworldServerDashboardResponse({
+    ...dashboardResponse,
+    enabled: true,
+    status: { ...onlineStatus, state: "degraded", errorCode: "key_missing" }
+  }).ok, false);
+  assert.equal(validatePalworldServerDashboardResponse({
+    enabled: false,
+    pollIntervalSeconds: 5,
+    connection: { configured: false, passwordConfigured: false },
+    status: {
+      state: "not_configured",
+      errorCode: "key_missing",
+      consecutiveFailures: 0,
+      diagnostics: PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({ key, state: "skipped" }))
+    }
+  }).ok, true);
+  assert.equal(validatePalworldServerDashboardResponse({
+    ...dashboardResponse,
+    enabled: false
+  }).ok, false);
 });

@@ -27,6 +27,11 @@ export const palworldServerI18n = {
     },
     errorCodes: {
       disabled: "서버 상태 확인 기능이 비활성화되어 있습니다.",
+      config_missing: "전용 서버 연동에 필요한 운영 설정이 없습니다.",
+      config_invalid: "전용 서버 연동 운영 설정이 올바르지 않습니다.",
+      key_missing: "자격 증명 암호화 키가 설정되지 않았습니다.",
+      key_invalid: "자격 증명 암호화 키를 사용할 수 없습니다.",
+      policy_missing: "전용 서버 접속 허용 정책이 설정되지 않았습니다.",
       not_configured: "연결 정보가 설정되지 않았습니다.",
       invalid_request: "요청 입력값이 올바르지 않습니다.",
       invalid_url: "REST API 주소 형식이 올바르지 않습니다.",
@@ -47,11 +52,41 @@ export const palworldServerI18n = {
       rate_limited: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
       internal_error: "서버 내부 오류로 상태를 확인하지 못했습니다."
     },
+    availability: {
+      disabled: {
+        label: "기능 비활성",
+        title: "전용 서버 상태 확인이 비활성화되어 있습니다.",
+        description: "서버 운영자가 펠월드 전용 서버 연동 기능을 활성화한 뒤 이용할 수 있습니다."
+      },
+      config_missing: {
+        label: "운영 설정 필요",
+        title: "전용 서버 연동 설정이 준비되지 않았습니다.",
+        description: "필수 운영 설정이 없어 연결 정보를 등록할 수 없습니다. 서버 운영자에게 설정 완료를 요청해 주세요."
+      },
+      config_invalid: {
+        label: "운영 설정 오류",
+        title: "전용 서버 연동 설정을 확인해야 합니다.",
+        description: "운영 설정 검증에 실패하여 연결 기능을 안전하게 중지했습니다. 서버 운영자의 점검이 필요합니다."
+      },
+      key_missing: {
+        label: "암호화 키 필요",
+        title: "자격 증명 보호 설정이 준비되지 않았습니다.",
+        description: "관리자 비밀번호를 안전하게 저장할 암호화 키가 없어 연결 정보를 등록할 수 없습니다."
+      },
+      key_invalid: {
+        label: "암호화 키 오류",
+        title: "자격 증명 보호 설정을 확인해야 합니다.",
+        description: "암호화 키 검증에 실패하여 관리자 비밀번호 저장과 서버 연결을 안전하게 차단했습니다."
+      },
+      policy_missing: {
+        label: "접속 정책 필요",
+        title: "전용 서버 접속 허용 정책이 준비되지 않았습니다.",
+        description: "허용된 REST API 대상을 확인할 정책이 없어 외부 서버 연결을 안전하게 차단했습니다."
+      }
+    },
     loadErrorTitle: "서버 상태를 불러오지 못했습니다.",
     loadErrorDescription: "네트워크 연결을 확인한 뒤 다시 시도해 주세요.",
     retry: "다시 시도",
-    featureDisabledTitle: "전용 서버 상태 확인이 비활성화되어 있습니다.",
-    featureDisabledDescription: "서버 운영자가 펠월드 전용 서버 연동 기능을 활성화한 뒤 이용할 수 있습니다.",
     notConfiguredTitle: "전용 서버 연결 정보가 없습니다.",
     notConfiguredDescription: "Palworld REST API 주소와 관리자 비밀번호를 등록하면 상태 확인을 시작합니다.",
     connectionTitle: "연결 설정",
@@ -163,6 +198,11 @@ export const palworldServerI18n = {
     },
     errorCodes: {
       disabled: "サーバー状態確認機能が無効です。",
+      config_missing: "専用サーバー連携に必要な運用設定がありません。",
+      config_invalid: "専用サーバー連携の運用設定が正しくありません。",
+      key_missing: "認証情報の暗号化キーが設定されていません。",
+      key_invalid: "認証情報の暗号化キーを使用できません。",
+      policy_missing: "専用サーバー接続の許可ポリシーが設定されていません。",
       not_configured: "接続情報が設定されていません。",
       invalid_request: "リクエストの入力内容が正しくありません。",
       invalid_url: "REST API URL の形式が正しくありません。",
@@ -183,11 +223,41 @@ export const palworldServerI18n = {
       rate_limited: "リクエストが多すぎます。しばらくしてから再度お試しください。",
       internal_error: "サーバー内部エラーにより状態を確認できませんでした。"
     },
+    availability: {
+      disabled: {
+        label: "機能無効",
+        title: "専用サーバーの状態確認が無効です。",
+        description: "サーバー管理者がパルワールド専用サーバー連携を有効にすると利用できます。"
+      },
+      config_missing: {
+        label: "運用設定が必要",
+        title: "専用サーバー連携の設定が準備されていません。",
+        description: "必須の運用設定がないため接続情報を登録できません。サーバー管理者に設定の完了を依頼してください。"
+      },
+      config_invalid: {
+        label: "運用設定エラー",
+        title: "専用サーバー連携の設定を確認してください。",
+        description: "運用設定の検証に失敗したため、接続機能を安全に停止しました。サーバー管理者による確認が必要です。"
+      },
+      key_missing: {
+        label: "暗号化キーが必要",
+        title: "認証情報の保護設定が準備されていません。",
+        description: "管理者パスワードを安全に保存する暗号化キーがないため、接続情報を登録できません。"
+      },
+      key_invalid: {
+        label: "暗号化キーエラー",
+        title: "認証情報の保護設定を確認してください。",
+        description: "暗号化キーの検証に失敗したため、管理者パスワードの保存とサーバー接続を安全にブロックしました。"
+      },
+      policy_missing: {
+        label: "接続ポリシーが必要",
+        title: "専用サーバーの接続許可ポリシーが準備されていません。",
+        description: "許可された REST API の接続先を確認するポリシーがないため、外部サーバーへの接続を安全にブロックしました。"
+      }
+    },
     loadErrorTitle: "サーバー状態を取得できませんでした。",
     loadErrorDescription: "ネットワーク接続を確認してから、もう一度お試しください。",
     retry: "再試行",
-    featureDisabledTitle: "専用サーバーの状態確認が無効です。",
-    featureDisabledDescription: "サーバー管理者がパルワールド専用サーバー連携を有効にすると利用できます。",
     notConfiguredTitle: "専用サーバーの接続情報がありません。",
     notConfiguredDescription: "Palworld REST API の URL と管理者パスワードを登録すると状態確認を開始します。",
     connectionTitle: "接続設定",

@@ -90,6 +90,11 @@ export type PalworldServerProbeResult = {
 const SAFE_ERROR_MESSAGES: Record<PalworldServerErrorCode, string> = {
   disabled: "Palworld 서버 상태 기능이 비활성화되어 있습니다.",
   not_configured: "Palworld 서버가 등록되어 있지 않습니다.",
+  config_missing: "Palworld 서버 상태 설정이 준비되지 않았습니다.",
+  config_invalid: "Palworld 서버 상태 설정이 올바르지 않습니다.",
+  key_missing: "Palworld 서버 자격 증명 암호화 키가 준비되지 않았습니다.",
+  key_invalid: "Palworld 서버 자격 증명 암호화 키가 올바르지 않습니다.",
+  policy_missing: "Palworld 서버 네트워크 허용 정책이 준비되지 않았습니다.",
   invalid_request: "Palworld 서버 상태 확인 요청이 올바르지 않습니다.",
   invalid_url: "올바른 Palworld REST API URL이 아닙니다.",
   password_required: "AdminPassword가 필요합니다.",
@@ -427,6 +432,13 @@ async function defaultRequestPinned(request: PalworldPinnedRequest): Promise<Pal
         Connection: "close"
       },
       lookup: (_hostname, _options, callback) => {
+        if (_options.all === true) {
+          callback(null, [{
+            address: request.pinnedAddress.address,
+            family: request.pinnedAddress.family
+          }]);
+          return;
+        }
         callback(null, request.pinnedAddress.address, request.pinnedAddress.family);
       }
     };

@@ -1,11 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { createServer } from "node:http";
+import { createServer as createHttpsServer } from "node:https";
+import { networkInterfaces } from "node:os";
 
 const {
   PalworldPinnedTransportError,
   PalworldServerClient,
   PalworldServerClientError
 } = await import("../dist/services/palworld-server-client.js");
+
+// 저장소에 공개된 통합 테스트 전용 인증서입니다. 운영 secret 또는 신뢰 anchor로 사용하지 않습니다.
+const TEST_TLS_KEY = readFileSync(new URL("./fixtures/palworld-test-tls-key.pem", import.meta.url));
+const TEST_TLS_CERT = readFileSync(new URL("./fixtures/palworld-test-tls-cert.pem", import.meta.url));
 
 const VALID_INFO = {
   version: "v1.0.0",
@@ -65,6 +73,46 @@ function assertClientError(error, code, stage) {
   assert.equal(error.message.includes("8.8.8.8"), false);
   assert.equal(error.message.includes("secret-password"), false);
   return true;
+}
+
+function nonLoopbackPrivateIpv4() {
+  for (const records of Object.values(networkInterfaces())) {
+    for (const record of records ?? []) {
+      const family = record.family === "IPv4" || record.family === 4 ? 4 : 6;
+      if (family !== 4 || record.internal) continue;
+      const octets = record.address.split(".").map(Number);
+      if (octets.length !== 4) continue;
+      if (octets[0] === 10
+        || (octets[0] === 172 && (octets[1] ?? 0) >= 16 && (octets[1] ?? 0) <= 31)
+        || (octets[0] === 192 && octets[1] === 168)
+        || (octets[0] === 100 && (octets[1] ?? 0) >= 64 && (octets[1] ?? 0) <= 127)) {
+        return record.address;
+      }
+    }
+  }
+  return undefined;
+}
+
+function listen(server, host) {
+  return new Promise((resolve, reject) => {
+    const onError = (error) => {
+      server.off("listening", onListening);
+      reject(error);
+    };
+    const onListening = () => {
+      server.off("error", onError);
+      resolve();
+    };
+    server.once("error", onError);
+    server.once("listening", onListening);
+    server.listen(0, host);
+  });
+}
+
+function close(server) {
+  return new Promise((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve());
+  });
 }
 
 test("PalworldServerClient는 origin을 canonical URL로 정규화한다", () => {
@@ -498,5 +546,127 @@ test("PalworldServerClient는 DNS와 두 endpoint가 하나의 합산 deadline�
     assert.equal(requestTimeouts[1] < requestTimeouts[0], true, "/metrics는 /info 이후 남은 시간만 사용해야 합니다.");
   } finally {
     for (const timer of operationTimers) clearTimeout(timer);
+  }
+});
+
+test("기본 Node HTTP transport는 hostname을 유지하며 검증된 사설 IP 하나에만 연결한다", async (context) => {
+  const address = nonLoopbackPrivateIpv4();
+  if (!address) {
+    context.skip("실제 hostname 전송에 사용할 non-loopback 사설 IPv4 인터페이스가 없습니다.");
+    return;
+  }
+
+  const received = [];
+  const expectedAuthorization = `Basic ${Buffer.from("admin:integration-secret").toString("base64")}`;
+  const server = createServer((request, response) => {
+    received.push({
+      method: request.method,
+      url: request.url,
+      host: request.headers.host,
+      authorization: request.headers.authorization,
+      remoteAddress: request.socket.remoteAddress
+    });
+    const body = request.url === "/v1/api/info"
+      ? VALID_INFO
+      : request.url === "/v1/api/metrics"
+        ? VALID_METRICS
+        : { error: "not_found" };
+    response.writeHead(request.url === "/v1/api/info" || request.url === "/v1/api/metrics" ? 200 : 404, {
+      "Content-Type": "application/json; charset=utf-8"
+    });
+    response.end(JSON.stringify(body));
+  });
+
+  try {
+    try {
+      await listen(server, address);
+    } catch (error) {
+      if (error?.code === "EPERM" || error?.code === "EACCES") {
+        context.skip("실행 환경이 non-loopback local listen을 허용하지 않습니다.");
+        return;
+      }
+      throw error;
+    }
+    const serverAddress = server.address();
+    assert.equal(typeof serverAddress, "object");
+    const port = serverAddress.port;
+    const hostname = "palworld-pinned.integration.invalid";
+    const client = new PalworldServerClient({
+      allowedOrigins: [`http://${hostname}:${port}`],
+      allowedCidrs: [`${address}/32`],
+      timeoutMs: 5_000
+    }, {
+      resolveHostname: async (requestedHostname) => {
+        assert.equal(requestedHostname, hostname);
+        return [{ address, family: 4 }];
+      }
+    });
+
+    const result = await client.probe({
+      baseUrl: `http://${hostname}:${port}`,
+      adminPassword: "integration-secret"
+    });
+    assert.equal(result.state, "online");
+    assert.deepEqual(received.map((request) => request.method), ["GET", "GET"]);
+    assert.deepEqual(received.map((request) => request.url), ["/v1/api/info", "/v1/api/metrics"]);
+    assert.deepEqual(received.map((request) => request.host), [
+      `${hostname}:${port}`,
+      `${hostname}:${port}`
+    ]);
+    assert.equal(received.every((request) => request.authorization === expectedAuthorization), true);
+    assert.equal(received.every((request) => request.remoteAddress === address), true);
+  } finally {
+    if (server.listening) await close(server);
+  }
+});
+
+test("기본 Node HTTPS transport는 pinned hostname의 신뢰되지 않은 인증서를 tls_failed로 변환한다", async (context) => {
+  const address = nonLoopbackPrivateIpv4();
+  if (!address) {
+    context.skip("실제 HTTPS 전송에 사용할 non-loopback 사설 IPv4 인터페이스가 없습니다.");
+    return;
+  }
+
+  let requestCount = 0;
+  const server = createHttpsServer({ key: TEST_TLS_KEY, cert: TEST_TLS_CERT }, (_request, response) => {
+    requestCount += 1;
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(VALID_INFO));
+  });
+
+  try {
+    try {
+      await listen(server, address);
+    } catch (error) {
+      if (error?.code === "EPERM" || error?.code === "EACCES") {
+        context.skip("실행 환경이 non-loopback local TLS listen을 허용하지 않습니다.");
+        return;
+      }
+      throw error;
+    }
+    const serverAddress = server.address();
+    assert.equal(typeof serverAddress, "object");
+    const hostname = "palworld-pinned.integration.invalid";
+    const client = new PalworldServerClient({
+      allowedOrigins: [`https://${hostname}:${serverAddress.port}`],
+      allowedCidrs: [`${address}/32`],
+      timeoutMs: 5_000
+    }, {
+      resolveHostname: async (requestedHostname) => {
+        assert.equal(requestedHostname, hostname);
+        return [{ address, family: 4 }];
+      }
+    });
+
+    await assert.rejects(
+      client.probe({
+        baseUrl: `https://${hostname}:${serverAddress.port}`,
+        adminPassword: "integration-secret"
+      }),
+      (error) => assertClientError(error, "tls_failed", "tls")
+    );
+    assert.equal(requestCount, 0, "TLS 검증 실패 전에 HTTP 요청 본문을 보내면 안 됩니다.");
+  } finally {
+    if (server.listening) await close(server);
   }
 });
