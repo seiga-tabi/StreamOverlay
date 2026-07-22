@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../shared/ui/Car
 import { Badge } from "../../../shared/ui/Status";
 import { getPalworldBreeding, getPalworldBreedingParents } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
-import { elementLabel } from "../utils/labels";
 import { genderLabel } from "../utils/labels";
 import { formatPalNumber } from "../utils/search";
 import { swapBreedingParents } from "../utils/breeding";
 import { PalworldMedia } from "./PalworldMedia";
+import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldPalPicker } from "./PalworldPalPicker";
 import { PalworldDomainCoverageNotice, usePalworldDomainCoverage } from "./PalworldCoverageNotice";
 import { PalworldEmpty, PalworldError } from "./PalworldStates";
@@ -20,7 +20,7 @@ type BreedingTab = "parents" | "child";
 
 function PairPal({ locale, pal, role }: { locale: PalworldLocale; pal: PalworldPalReference; role: string }) {
   const name = locale === "ja" ? pal.nameJa : pal.nameKo;
-  return <div className="palworld-breeding-pal"><span><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name} locale={locale} /></span><div><small>{role} · {formatPalNumber(pal.number)}</small><strong>{name}</strong><div className="palworld-badge-row">{pal.elements.map((element) => <Badge size="sm" tone="info" key={element}>{elementLabel(element, locale)}</Badge>)}</div></div></div>;
+  return <div className="palworld-breeding-pal"><span><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name} locale={locale} /></span><div><small>{role} · {formatPalNumber(pal.number)}</small><strong>{name}</strong><div className="palworld-badge-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</div></div></div>;
 }
 
 export function PalworldBreedingPage({ locale, onOpenPal }: { locale: PalworldLocale; onOpenPal: (id: string) => void }) {

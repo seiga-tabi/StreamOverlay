@@ -1,8 +1,11 @@
 import {
-  assertPalworldDataSnapshot,
-  type PalworldDataSnapshot,
-  type PalworldPalDetail,
-  type PalworldRuntimeGates
+  type PalworldDataMetadata,
+  type PalworldElement,
+  type PalworldPalStats,
+  type PalworldRuntimeGates,
+  type PalworldSkill,
+  type PalworldVariantType,
+  type PalworldWorkSuitability
 } from "@streamops/shared";
 import {
   PALWORLD_PALDEX_EXPECTED_COUNT,
@@ -10,6 +13,7 @@ import {
   PALWORLD_PALDEX_EXPECTED_VARIANT_COUNT,
   assertPalworldPaldexArtifact,
   type PalworldPaldexArtifact,
+  type PalworldPaldexDropRecord,
   type PalworldPaldexReleaseManifest
 } from "./palworld-paldex-artifact.js";
 import {
@@ -37,12 +41,40 @@ export type PalworldDataIntegrityGate = {
 export type PalworldImageAssetGate = PalworldRuntimeGates["imageAssets"];
 
 export type PalworldPaldexAdapterResult = {
-  snapshot: PalworldDataSnapshot;
+  metadata: PalworldDataMetadata;
+  pals: ReadonlyArray<{
+    id: string;
+    number: number;
+    nameKo: string;
+    nameJa: string;
+    nameEn: string;
+    imageUrl?: string;
+    imageWidth?: number;
+    imageHeight?: number;
+    elements: PalworldElement[];
+    rarity: number;
+    variantType: PalworldVariantType;
+    workSuitabilities: PalworldWorkSuitability[];
+    stats: PalworldPalStats;
+    nocturnal: boolean;
+    breedingPower: number;
+    descriptionEn?: string;
+    partnerSkill?: PalworldSkill;
+    activeSkills: PalworldSkill[];
+    rawDrops: PalworldPaldexDropRecord[];
+    specialParentPairs: Array<{
+      parentAId: string;
+      parentBId: string;
+      parentAGender?: "male" | "female";
+      parentBGender?: "male" | "female";
+    }>;
+  }>;
   sourceInternalIds: Readonly<Record<string, string>>;
 };
 
 export type PalworldPaldexAdapterOptions = {
   activatedImageUrls?: Readonly<Record<string, string>>;
+  activatedImageDimensions?: Readonly<Record<string, { width: number; height: number }>>;
 };
 
 export type PalworldPaldexRuntimeRelease = PalworldPaldexAdapterResult & {
@@ -80,6 +112,24 @@ function assertAliasIntegrity(artifact: PalworldPaldexArtifact): void {
   }
 }
 
+function adaptedSkill(skill: PalworldPaldexArtifact["records"][number]["activeSkills"][number]): PalworldSkill {
+  return {
+    id: skill.id,
+    type: skill.type,
+    nameEn: skill.nameEn,
+    ...(skill.descriptionEn === undefined ? {} : { descriptionEn: skill.descriptionEn }),
+    ...(skill.element === undefined ? {} : { element: skill.element }),
+    ...(skill.power === undefined ? {} : { power: skill.power }),
+    ...(skill.cooldownSeconds === undefined ? {} : { cooldownSeconds: skill.cooldownSeconds }),
+    ...(skill.unlockLevel === undefined ? {} : { unlockLevel: skill.unlockLevel }),
+    localization: {
+      sourceLanguage: "en",
+      ko: "source_language_fallback",
+      ja: "source_language_fallback"
+    }
+  };
+}
+
 export function adaptPalworldPaldexArtifact(
   artifact: PalworldPaldexArtifact,
   options: PalworldPaldexAdapterOptions = {}
@@ -88,9 +138,10 @@ export function adaptPalworldPaldexArtifact(
   assertAliasIntegrity(validatedArtifact);
   const metadata = { ...validatedArtifact.metadata };
   const sourceInternalIds: Record<string, string> = {};
-  const pals: PalworldPalDetail[] = validatedArtifact.records.map((record) => {
+  const pals = validatedArtifact.records.map((record) => {
     sourceInternalIds[record.id] = record.sourceInternalId;
     const activatedImageUrl = options.activatedImageUrls?.[record.id];
+    const activatedImageDimensions = options.activatedImageDimensions?.[record.id];
     if (activatedImageUrl !== undefined && activatedImageUrl !== record.imageUrl) {
       throw new TypeError(`Palworld 공개 이미지 mapping이 artifact와 일치하지 않습니다: ${record.id}`);
     }
@@ -101,29 +152,27 @@ export function adaptPalworldPaldexArtifact(
       nameJa: record.nameJa,
       nameEn: record.nameEn,
       ...(activatedImageUrl === undefined ? {} : { imageUrl: activatedImageUrl }),
+      ...(activatedImageDimensions === undefined ? {} : {
+        imageWidth: activatedImageDimensions.width,
+        imageHeight: activatedImageDimensions.height
+      }),
       elements: [...record.elements],
       rarity: record.rarity,
       variantType: record.variantType,
       workSuitabilities: record.workSuitabilities.map((work) => ({ ...work })),
       stats: { ...record.stats },
       nocturnal: record.nocturnal,
-      activeSkills: [],
-      drops: [],
-      breeding: {
-        breedingPower: record.breedingPower,
-        specialParentPairs: []
-      },
-      metadata
+      breedingPower: record.breedingPower,
+      ...(record.descriptionEn === undefined ? {} : { descriptionEn: record.descriptionEn }),
+      ...(record.partnerSkill === undefined ? {} : { partnerSkill: adaptedSkill(record.partnerSkill) }),
+      activeSkills: record.activeSkills.map(adaptedSkill),
+      rawDrops: record.drops.map((drop) => ({ ...drop })),
+      specialParentPairs: record.specialParentPairs.map((pair) => ({ ...pair }))
     };
   });
-  const snapshot = assertPalworldDataSnapshot({
+  return deepFreeze({
     metadata,
     pals,
-    items: [],
-    breedingPairs: []
-  });
-  return deepFreeze({
-    snapshot,
     sourceInternalIds
   });
 }
@@ -192,7 +241,10 @@ export async function loadPalworldPaldexRuntimeRelease(options: {
   mappingRoot?: string;
 } = {}): Promise<PalworldPaldexRuntimeRelease> {
   const release = await loadPalworldPaldexRuntimeSource(options);
-  const adapted = adaptPalworldPaldexArtifact(release.artifact, { activatedImageUrls: release.runtimeImageUrls });
+  const adapted = adaptPalworldPaldexArtifact(release.artifact, {
+    activatedImageUrls: release.runtimeImageUrls,
+    activatedImageDimensions: release.runtimeImageDimensions
+  });
   const gates = runtimeGates(release);
   return deepFreeze({
     ...adapted,

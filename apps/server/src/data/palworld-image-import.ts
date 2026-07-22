@@ -14,6 +14,7 @@ import {
   assertPalworldImageUsePolicy,
   type PalworldImageUsePolicy
 } from "./palworld-image-policy.js";
+import { crc32 } from "./palworld-source-archive.js";
 
 const WEBP_METADATA_CHUNKS = new Set(["EXIF", "XMP ", "ICCP", "ANIM", "ANMF"]);
 const WEBP_ALLOWED_CHUNKS = new Set(["VP8X", "VP8 ", "VP8L", "ALPH"]);
@@ -78,6 +79,9 @@ function inspectPngContainer(buffer: Buffer): { width: number; height: number } 
     const dataOffset = offset + 8;
     const nextOffset = dataOffset + chunkSize + 4;
     if (nextOffset > buffer.length) fail("PNG chunk 범위가 파일을 벗어납니다.");
+    const expectedCrc = buffer.readUInt32BE(dataOffset + chunkSize);
+    const actualCrc = crc32(buffer.subarray(offset + 4, dataOffset + chunkSize));
+    if (actualCrc !== expectedCrc) fail(`PNG ${chunkType} chunk CRC32가 일치하지 않습니다.`);
     if (offset === 8 && (chunkType !== "IHDR" || chunkSize !== 13)) fail("PNG IHDR가 올바르지 않습니다.");
     if (chunkType === "IHDR") {
       if (dimensions) fail("PNG IHDR가 중복됩니다.");

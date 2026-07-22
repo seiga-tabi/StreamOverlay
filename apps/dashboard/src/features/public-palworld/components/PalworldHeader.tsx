@@ -13,6 +13,7 @@ const navItems: Array<{ page: Exclude<PalworldPage, "search">; ko: string; ja: s
   { page: "pals", ko: palworldI18n.ko.pals, ja: palworldI18n.ja.pals },
   { page: "breeding", ko: palworldI18n.ko.breeding, ja: palworldI18n.ja.breeding },
   { page: "items", ko: palworldI18n.ko.items, ja: palworldI18n.ja.items },
+  { page: "skills", ko: palworldI18n.ko.skills, ja: palworldI18n.ja.skills },
   { page: "map", ko: palworldI18n.ko.map, ja: palworldI18n.ja.map },
 ];
 
@@ -39,6 +40,7 @@ export function PalworldHeader({
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   const closeMenus = useCallback(() => {
     setGameMenuOpen(false);
@@ -53,6 +55,11 @@ export function PalworldHeader({
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [closeMenus]);
+
+  useEffect(() => {
+    const activeItem = navRef.current?.querySelector<HTMLElement>("[aria-current='page']");
+    activeItem?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [page]);
 
   const twitchMenuActions: PublicTwitchAccountMenuAction[] = twitchStatus.streamerRiotRequest?.status === "approved"
     && twitchStatus.streamerRiotRequest.dashboardEnabled === true
@@ -142,11 +149,20 @@ export function PalworldHeader({
         <div className="public-header-bottom-row palworld-header-bottom-row">
           {searchContent}
           <div className="public-header-secondary-row palworld-secondary-row">
-            <nav className="public-header-nav palworld-header-nav" aria-label={palworldI18n[locale].brand} data-testid="palworld-secondary-nav">
+            <nav className="public-header-nav palworld-header-nav" aria-label={palworldI18n[locale].brand} data-testid="palworld-secondary-nav" ref={navRef}>
               {navItems.map((item) => {
                 const active = item.page === page || (page === "search" && item.page === "home");
                 return (
-                  <button className={active ? "active" : ""} type="button" aria-current={active ? "page" : undefined} data-ko={item.ko} data-ja={item.ja} onClick={() => setPalworldUrl(palworldPathForPage(item.page))} key={item.page}>
+                  <button
+                    className={active ? "active" : ""}
+                    type="button"
+                    aria-current={active ? "page" : undefined}
+                    data-ko={item.ko}
+                    data-ja={item.ja}
+                    onClick={() => setPalworldUrl(palworldPathForPage(item.page))}
+                    onFocus={(event) => event.currentTarget.scrollIntoView({ block: "nearest", inline: "nearest" })}
+                    key={item.page}
+                  >
                     <strong>{locale === "ja" ? item.ja : item.ko}</strong>
                   </button>
                 );

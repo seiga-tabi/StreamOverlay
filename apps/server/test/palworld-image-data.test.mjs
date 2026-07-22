@@ -14,6 +14,7 @@ const {
   readPalworldSourceImage,
   validatePalworldImageFiles
 } = await import("../dist/data/palworld-image-import.js");
+const { crc32 } = await import("../dist/data/palworld-source-archive.js");
 
 const ONE_BY_ONE_WEBP = Buffer.from("UklGRh4AAABXRUJQVlA4TBEAAAAvAAAAAAfQ//73v/+BiOh/AAA=", "base64");
 const ONE_BY_ONE_PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
@@ -27,7 +28,7 @@ const operatorPolicy = {
   sourceDescription: "운영자 테스트 이미지",
   acknowledgedAt: "2026-07-22T00:00:00.000Z",
   publicNoticeKo: "비공식 팰월드 데이터베이스 · 데이터/이미지 출처 Palworld · Pocketpair",
-  publicNoticeJa: "非公式パルワールドデータベース · データ・画像出典 Palworld · Pocketpair",
+  publicNoticeJa: "非公式パルワールドデータベース・データ／画像出典 Palworld・Pocketpair",
   takedownContact: "support@yoro.gg",
   allowPublicDisplay: true,
   allowSelfHosting: true,
@@ -256,11 +257,13 @@ test("원본 PNG/WebP signature·animation·크기 상한을 변환 전에 검�
 
   const oversizedPng = Buffer.from(ONE_BY_ONE_PNG);
   oversizedPng.writeUInt32BE(8193, 16);
+  oversizedPng.writeUInt32BE(crc32(oversizedPng.subarray(12, 29)), 29);
   await assert.rejects(inspectPalworldSourceImage(oversizedPng, "pal.png"), /각 변 8192px 이하/);
 
   const animationChunk = Buffer.alloc(20);
   animationChunk.writeUInt32BE(8, 0);
   animationChunk.write("acTL", 4, "ascii");
+  animationChunk.writeUInt32BE(crc32(animationChunk.subarray(4, 16)), 16);
   const animatedPng = Buffer.concat([ONE_BY_ONE_PNG.subarray(0, ONE_BY_ONE_PNG.length - 12), animationChunk, ONE_BY_ONE_PNG.subarray(ONE_BY_ONE_PNG.length - 12)]);
   await assert.rejects(inspectPalworldSourceImage(animatedPng, "pal.png"), /animated PNG/);
 });

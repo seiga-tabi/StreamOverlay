@@ -708,7 +708,10 @@ export function importPalworldPaldex(input: {
       },
       workSuitabilities: normalizedWork,
       breedingPower: atlasPal.breedingRank,
-      nocturnal: atlasPal.nocturnal
+      nocturnal: atlasPal.nocturnal,
+      activeSkills: [],
+      drops: [],
+      specialParentPairs: []
     });
   }
   records.sort(palworldPaldexRecordOrder);
@@ -720,7 +723,7 @@ export function importPalworldPaldex(input: {
   if (!atlasSource || !palCalcSource) fail("sources.lock", "두 고정 source가 필요합니다.");
   const sourceRevision = `atlas@${atlasSource.sourceRevision}+palcalc@${palCalcSource.sourceRevision}`;
   const artifact = assertPalworldPaldexArtifact({
-    schemaVersion: 1,
+    schemaVersion: 2,
     release: PALWORLD_PALDEX_RELEASE,
     steamBuildId: PALWORLD_PALDEX_STEAM_BUILD_ID,
     metadata: {

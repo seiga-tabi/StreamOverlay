@@ -5,6 +5,7 @@ import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { formatPalNumber, itemName, palName } from "../utils/search";
 import { categoryLabel } from "../utils/labels";
 import { PalworldMedia } from "./PalworldMedia";
+import { PalworldElementBadge } from "./PalworldElementBadge";
 
 export function PalworldSearchForm({
   initialQuery = "",
@@ -118,7 +119,7 @@ export function PalworldSearchForm({
                   onPal(pal);
                 }} key={`pal-${pal.id}`}>
                   <span className="palworld-autocomplete-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={palName(pal, locale)} locale={locale} /></span>
-                  <span><strong>{palName(pal, locale)}</strong><small>{formatPalNumber(pal.number)} · Pal</small></span>
+                  <span><strong>{palName(pal, locale)}</strong><small>{formatPalNumber(pal.number)} · Pal</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
                 </button>
               );
             }

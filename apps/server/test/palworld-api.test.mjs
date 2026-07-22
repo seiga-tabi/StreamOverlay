@@ -5,6 +5,13 @@ const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { loadPalworldDataService } = await import("../dist/services/palworld-data.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 const { requiredHttpPrincipal } = await import("../dist/security/auth.js");
+const {
+  validatePalworldItemDetail,
+  validatePalworldItemSummary,
+  validatePalworldPaginatedResponse,
+  validatePalworldSkillDetail,
+  validatePalworldSkillSummary
+} = await import("@streamops/shared");
 const palworldDataService = await loadPalworldDataService();
 
 function createRequest(method, url) {
@@ -52,6 +59,8 @@ beforeEach(() => resetSecurityRateLimiters());
 test("펠월드 GET API만 공개하고 유사 prefix나 쓰기 요청은 공개하지 않는다", () => {
   assert.equal(requiredHttpPrincipal("GET", "/api/palworld/meta"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("GET", "/api/palworld/items/pal-sphere"), "PUBLIC");
+  assert.equal(requiredHttpPrincipal("GET", "/api/palworld/skills/active-absolute-frost-8b7feb098a"), "PUBLIC");
+  assert.equal(requiredHttpPrincipal("POST", "/api/palworld/skills"), "DASHBOARD_ADMIN");
   assert.equal(requiredHttpPrincipal("POST", "/api/palworld/items"), "DASHBOARD_ADMIN");
   assert.equal(requiredHttpPrincipal("GET", "/api/palworldish/meta"), "DASHBOARD_ADMIN");
 });
@@ -63,9 +72,21 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(res.headers["X-Palworld-Data-Version"], "1.0.1");
   assert.equal(res.headers["X-Palworld-Data-Revision"], body.metadata.sourceRevision);
   assert.equal(body.counts.pals, 287);
+  assert.equal(body.counts.items, 1_847);
+  assert.equal(body.counts.skills, 566);
   assert.equal(body.domains.pals.status, "ready");
-  assert.equal(body.domains.items.status, "sample");
+  assert.equal(body.domains.items.status, "incomplete");
+  assert.equal(body.domains.items.metadata.gameVersion, "1.0.1.100619");
+  assert.match(body.domains.items.metadata.sourceChecksum, /^[a-f0-9]{64}$/u);
   assert.equal(body.domains.breeding.status, "sample");
+  assert.equal(body.domains.breeding.metadata.gameVersion, "sample-baseline");
+  assert.equal(body.domains.skills.status, "incomplete");
+  assert.equal(body.domains.skills.metadata.gameVersion, "1.0.1.100619");
+  assert.equal(body.domains.skills.metadata.sourceRevision, body.domains.items.metadata.sourceRevision);
+  assert.deepEqual(body.coverage.palDetails, { available: 270, missing: 17, total: 287 });
+  assert.deepEqual(body.coverage.itemImages, { available: 1_762, missing: 85, total: 1_847 });
+  assert.deepEqual(body.coverage.skillDetails, { available: 564, missing: 2, total: 566 });
+  assert.deepEqual(body.coverage.elementImages, { available: 9, missing: 0, total: 9 });
   assert.equal(body.gates.imageAssets.readyImages, 272);
   assert.equal(body.gates.imageAssets.fallbackPals, 15);
 });
@@ -77,15 +98,19 @@ test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 �
   const english = await request(handler, "/api/palworld/search?q=ANUBIS");
   const idAlias = await request(handler, "/api/palworld/search?q=relaxaurus_lux");
   const number = await request(handler, "/api/palworld/search?q=%23139");
+  const palInternalId = await request(handler, "/api/palworld/search?q=SheepBall");
+  const itemInternalId = await request(handler, "/api/palworld/search?q=PalSphere");
   assert.equal(korean.body.pals[0].id, "anubis");
   assert.equal(japanese.body.items[0].id, "pal-sphere");
   assert.equal(english.body.pals[0].id, "anubis");
   assert.equal(idAlias.body.pals[0].id, "relaxaurus-lux");
   assert.equal(number.body.pals[0].id, "anubis");
+  assert.equal(palInternalId.body.pals[0].id, "lamball");
+  assert.equal(itemInternalId.body.items.some((item) => item.id === "pal-sphere"), true);
   assert.equal(japanese.body.domains.pals.status, "ready");
   assert.equal(japanese.body.domains.pals.metadata.gameVersion, "1.0.1");
-  assert.equal(japanese.body.domains.items.status, "sample");
-  assert.equal(japanese.body.domains.items.metadata.gameVersion, "sample-baseline");
+  assert.equal(japanese.body.domains.items.status, "incomplete");
+  assert.equal(japanese.body.domains.items.metadata.gameVersion, "1.0.1.100619");
 
   const limited = await request(handler, "/api/palworld/search?q=a&limit=1");
   assert.equal(limited.body.pals.length <= 1, true);
@@ -98,14 +123,27 @@ test("Pal과 아이템 목록 API는 filter와 pagination을 적용한다", asyn
   const pals = await request(handler, "/api/palworld/pals?element=ground&work=mining&sort=number&page=1&limit=5");
   const rarityVariants = await request(handler, "/api/palworld/pals?rarity=10&variant=variant&sort=number&page=1&limit=100");
   const items = await request(handler, "/api/palworld/items?category=sphere&acquisition=craft&sort=technologyLevel&order=desc&page=1&limit=5");
+  const zeroRarityItems = await request(handler, "/api/palworld/items?rarity=0&page=1&limit=5");
+  const palInternalId = await request(handler, "/api/palworld/pals?q=SheepBall&sort=number&page=1&limit=10");
+  const itemInternalId = await request(handler, "/api/palworld/items?q=PalSphere&sort=name&page=1&limit=10");
   assert.equal(pals.body.items.length, 5);
   assert.equal(pals.body.items.every((pal) => pal.elements.includes("ground")), true);
   assert.equal(pals.body.items.every((pal) => pal.workSuitabilities.some((work) => work.type === "mining")), true);
   assert.equal(rarityVariants.body.items.length, 4);
   assert.equal(rarityVariants.body.items.every((pal) => pal.rarity === 10 && pal.variantType === "variant"), true);
-  assert.deepEqual(items.body.items.map((item) => item.id), ["mega-sphere", "pal-sphere"]);
+  assert.equal(items.body.items.length, 5);
+  assert.equal(items.body.items.every((item) => item.category === "sphere"), true);
+  assert.equal(items.body.items.every((item) => item.imageWidth === 256 && item.imageHeight === 256), true);
+  assert.equal(items.body.items.every((item) => !("sourceInternalId" in item)), true);
+  assert.equal(items.body.items.every((item, index, entries) => index === 0 || entries[index - 1].technologyLevel >= item.technologyLevel), true);
+  assert.equal(validatePalworldPaginatedResponse(items.body, validatePalworldItemSummary).ok, true);
   assert.equal(items.body.pagination.pageSize, 5);
-  assert.equal(items.body.metadata.gameVersion, "sample-baseline");
+  assert.equal(zeroRarityItems.res.statusCode, 200);
+  assert.equal(zeroRarityItems.body.items.length, 5);
+  assert.equal(zeroRarityItems.body.items.every((item) => item.rarity === 0), true);
+  assert.deepEqual(palInternalId.body.items.map((pal) => pal.id), ["lamball"]);
+  assert.equal(itemInternalId.body.items.some((item) => item.id === "pal-sphere"), true);
+  assert.equal(items.body.metadata.gameVersion, "1.0.1.100619");
   assert.equal(items.res.headers["X-Palworld-Data-Version"], "1.0.1");
 });
 
@@ -117,6 +155,73 @@ test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드�
   assert.equal(pal.body.nameJa, "アヌビス");
   assert.equal(item.res.statusCode, 200);
   assert.equal(item.body.id, "pal-sphere");
+  assert.equal(item.body.sourceInternalId, "PalSphere");
+  assert.match(item.body.imageUrl, /^\/images\/palworld\/1\.0\.1\/items\/[a-f0-9]{64}\.webp$/u);
+  assert.equal(item.body.imageWidth, 256);
+  assert.equal(item.body.imageHeight, 256);
+  assert.equal(item.body.descriptionEn.length > 0, true);
+  assert.equal(item.body.maxStack > 0, true);
+  assert.equal(item.body.craftingMaterials.length > 0, true);
+  assert.equal(validatePalworldItemDetail(item.body).ok, true);
+});
+
+test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 Shared schema를 적용한다", async () => {
+  const handler = createHandler();
+  const active = await request(
+    handler,
+    "/api/palworld/skills?q=absolute%20frost&type=active&element=ice&sort=power&order=desc&page=1&limit=5"
+  );
+  assert.equal(active.res.statusCode, 200);
+  assert.equal(active.body.items[0].id, "active-absolute-frost-8b7feb098a");
+  assert.equal(active.body.items[0].descriptionEn.includes("icicles"), true);
+  assert.deepEqual(active.body.items[0].localization, {
+    sourceLanguage: "en",
+    ko: "source_language_fallback",
+    ja: "source_language_fallback"
+  });
+  assert.match(active.res.headers["Cache-Control"], /^public,/u);
+  assert.equal(
+    validatePalworldPaginatedResponse(active.body, validatePalworldSkillSummary).ok,
+    true
+  );
+
+  const description = await request(handler, "/api/palworld/skills?q=acidic%20clouds&page=1&limit=10");
+  assert.equal(description.body.items.some((skill) => skill.id === "active-acid-rain-b29ac863a8"), true);
+
+  const passive = await request(handler, "/api/palworld/skills?type=passive&sort=name&order=asc&page=1&limit=3");
+  assert.equal(passive.body.pagination.total, 79);
+  assert.equal(passive.body.items.length, 3);
+  assert.equal(passive.body.items.every((skill) => skill.type === "passive"), true);
+});
+
+test("스킬 상세 API는 canonical ID와 underscore alias, 관련 Pal과 없는 ID를 처리한다", async () => {
+  const handler = createHandler();
+  const canonical = await request(handler, "/api/palworld/skills/active-absolute-frost-8b7feb098a");
+  const alias = await request(handler, "/api/palworld/skills/active_absolute_frost_8b7feb098a");
+  const missing = await request(handler, "/api/palworld/skills/not-found");
+  assert.equal(canonical.res.statusCode, 200);
+  assert.equal(alias.res.statusCode, 200);
+  assert.equal(alias.body.id, canonical.body.id);
+  assert.equal(canonical.body.relatedPalCount, 1);
+  assert.equal(canonical.body.relatedPals[0].pal.id, "univolt-cryst");
+  assert.equal(canonical.body.relatedPals[0].unlockLevel, 50);
+  assert.equal(validatePalworldSkillDetail(canonical.body).ok, true);
+  assert.equal(missing.res.statusCode, 404);
+  assert.equal(missing.body.code, "PALWORLD_NOT_FOUND");
+});
+
+test("스킬 API는 unknown query와 허용되지 않은 filter를 안정적인 400으로 거부한다", async () => {
+  const handler = createHandler();
+  for (const url of [
+    "/api/palworld/skills?type=ultimate",
+    "/api/palworld/skills?sort=rarity",
+    "/api/palworld/skills?redirect=https%3A%2F%2Fexample.com",
+    "/api/palworld/skills?limit=201"
+  ]) {
+    const response = await request(handler, url);
+    assert.equal(response.res.statusCode, 400, url);
+    assert.equal(response.body.code, "PALWORLD_INVALID_QUERY", url);
+  }
 });
 
 test("첫 번째·중간·마지막 Pal 상세는 검증된 로컬 이미지를, 누락 Pal은 fallback 상태를 반환한다", async () => {
@@ -138,9 +243,16 @@ test("첫 번째·중간·마지막 Pal 상세는 검증된 로컬 이미지를,
   assert.equal(missingImage.body.imageUrl, undefined);
   assert.equal(typeof first.body.nocturnal, "boolean");
   assert.equal(nocturnal.body.nocturnal, true);
-  assert.deepEqual(first.body.activeSkills, []);
-  assert.deepEqual(first.body.drops, []);
-  assert.deepEqual(first.body.breeding.specialParentPairs, []);
+  assert.equal(first.body.descriptionEn.includes("food chain"), true);
+  assert.equal(first.body.partnerSkill.nameEn, "Fluffy Shield");
+  assert.equal(first.body.activeSkills.length, 7);
+  assert.equal(first.body.activeSkills.every((skill) => skill.descriptionEn && skill.localization.sourceLanguage === "en"), true);
+  assert.deepEqual(first.body.drops.map((drop) => drop.id), ["wool", "meat-sheep-ball"]);
+  assert.deepEqual(first.body.dropDetails.map((drop) => [drop.item.id, drop.minQuantity, drop.maxQuantity, drop.dropRatePercent]), [
+    ["wool", 1, 3, 100],
+    ["meat-sheep-ball", 1, 1, 100]
+  ]);
+  assert.equal(first.body.breeding.breedingPower, 3050);
 });
 
 test("교배 API는 부모 위치 교환, 결과 없음과 부모 역검색을 지원한다", async () => {
@@ -160,6 +272,7 @@ test("교배 API는 부모 위치 교환, 결과 없음과 부모 역검색을 �
   assert.equal(outsideSampleParents.body.child.id, "panthalus");
   assert.deepEqual(outsideSampleParents.body.items, []);
   assert.equal(forward.body.metadata.gameVersion, "sample-baseline");
+  assert.equal(parents.body.metadata.gameVersion, "sample-baseline");
   assert.equal(forward.res.headers["X-Palworld-Data-Version"], "1.0.1");
 });
 
@@ -170,10 +283,12 @@ test("잘못된 query와 존재하지 않는 ID는 안정적인 오류 code를 �
   const missing = await request(handler, "/api/palworld/pals/not-found");
   assert.equal(invalid.res.statusCode, 400);
   assert.equal(invalid.body.code, "PALWORLD_INVALID_QUERY");
+  assert.equal(invalid.res.headers["Cache-Control"], "no-store");
   assert.equal(traversal.res.statusCode, 400);
   assert.equal(traversal.body.code, "PALWORLD_INVALID_QUERY");
   assert.equal(missing.res.statusCode, 404);
   assert.equal(missing.body.code, "PALWORLD_NOT_FOUND");
+  assert.equal(missing.res.headers["Cache-Control"], "no-store");
 });
 
 test("펠월드 API rate limit은 상세 ID를 바꿔도 하나의 공개 bucket으로 제한한다", async () => {

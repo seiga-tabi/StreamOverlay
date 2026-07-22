@@ -4,18 +4,22 @@ import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { PalworldDomainCoverage } from "@streamops/shared";
+import type { PalworldDomainCoverage, PalworldSkillDetail, PalworldSkillSummary } from "@streamops/shared";
 import { PublicGameSelector } from "../src/features/public-lol/components/PublicGameSelector";
 import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
 import { PalworldHeader } from "../src/features/public-palworld/components/PalworldHeader";
 import { PalworldHome } from "../src/features/public-palworld/components/PalworldHome";
-import { PalCard } from "../src/features/public-palworld/components/PalworldCards";
+import { ItemCard, PalCard } from "../src/features/public-palworld/components/PalworldCards";
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
 import { isLocalPalworldMapUrl, PALWORLD_WORLD_MAP_IMAGE_URL, PalworldMapPage } from "../src/features/public-palworld/components/PalworldMapPage";
 import { PalworldDomainCoverageNotice } from "../src/features/public-palworld/components/PalworldCoverageNotice";
 import { PalworldPalsPage } from "../src/features/public-palworld/components/PalworldPalsPage";
+import { PalworldItemsPage } from "../src/features/public-palworld/components/PalworldItemsPage";
 import { PalworldSourceFooter } from "../src/features/public-palworld/components/PalworldSourceFooter";
 import { PalworldStreamersPage } from "../src/features/public-palworld/components/PalworldStreamersPage";
+import { PalworldSkillCard, PalworldSkillDetailView, PalworldSkillsPage } from "../src/features/public-palworld/components/PalworldSkillsPage";
+import { PalworldElementBadge } from "../src/features/public-palworld/components/PalworldElementBadge";
+import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../src/features/public-palworld/utils/element-images";
 
 const gameAssetUrl = (fileName: string) => new URL(`../public/images/games/${fileName}`, import.meta.url);
 
@@ -57,16 +61,66 @@ test("펠월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 
   assert.doesNotMatch(home, /src="\/images\/yorogg-mark\.png"/);
 });
 
-test("Palworld 2행 메뉴는 한국어·일본어 6개 순서와 스트리머 활성 상태를 유지한다", () => {
+test("Palworld 2행 메뉴는 한국어·일본어 7개 순서와 스트리머 활성 상태를 유지한다", () => {
   const korean = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="streamers" searchContent={<div data-testid="header-search">검색</div>} />);
   const japanese = renderToStaticMarkup(<PalworldHeader locale="ja" onLocale={() => undefined} page="home" />);
+  const skills = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="skills" searchContent={<div data-testid="header-search">검색</div>} />);
   const map = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="map" searchContent={<div data-testid="header-search">검색</div>} />);
   assert.equal((korean.match(/<nav[^>]*data-testid="palworld-secondary-nav"[\s\S]*?<button/gu) ?? []).length > 0, true);
-  assert.equal((korean.match(/data-ko="(?:홈|스트리머|Pal 도감|교배 조합|아이템|지도)"/gu) ?? []).length, 6);
-  assert.match(korean, /홈[\s\S]*스트리머[\s\S]*Pal 도감[\s\S]*교배 조합[\s\S]*아이템[\s\S]*지도/u);
+  assert.equal((korean.match(/data-ko="(?:홈|스트리머|Pal 도감|교배 조합|아이템|스킬|지도)"/gu) ?? []).length, 7);
+  assert.match(korean, /홈[\s\S]*스트리머[\s\S]*Pal 도감[\s\S]*교배 조합[\s\S]*아이템[\s\S]*스킬[\s\S]*지도/u);
   assert.match(korean, /aria-current="page"[^>]*data-ko="스트리머"/u);
-  assert.match(japanese, /ホーム[\s\S]*配信者[\s\S]*パル図鑑[\s\S]*配合組み合わせ[\s\S]*アイテム[\s\S]*マップ/u);
+  assert.match(japanese, /ホーム[\s\S]*配信者[\s\S]*パル図鑑[\s\S]*配合組み合わせ[\s\S]*アイテム[\s\S]*スキル[\s\S]*マップ/u);
+  assert.match(skills, /aria-current="page"[^>]*data-ko="스킬"/u);
   assert.match(map, /aria-current="page"[^>]*data-ko="지도"/u);
+});
+
+test("스킬 카드와 상세는 설명·수치·관련 Pal과 영어 원문 fallback을 다국어로 표시한다", () => {
+  const metadata = {
+    gameVersion: "1.0.1.100619",
+    sourceName: "pyPalworldAPI 0.2.0 fixed archive",
+    sourceUrl: "https://github.com/cheahjs/palworld-save-tools",
+    sourceRevision: "db70ea654aea70c4b1a4b0045bccfe58164cf01a",
+    extractedAt: "2026-07-22T00:00:00.000Z",
+    verifiedAt: "2026-07-22T00:00:00.000Z",
+    license: "operator_reference_use",
+  };
+  const skill: PalworldSkillSummary = {
+    id: "active-fire-ball-fire-45-2",
+    type: "active",
+    nameEn: "Fire Ball",
+    descriptionEn: "Creates a giant ball of flame and hurls it at an enemy.",
+    element: "fire",
+    power: 150,
+    cooldownSeconds: 55,
+    unlockLevel: 50,
+    relatedPalCount: 1,
+    localization: { sourceLanguage: "en", ko: "source_language_fallback", ja: "source_language_fallback" },
+  };
+  const detail: PalworldSkillDetail = {
+    ...skill,
+    relatedPals: [{ pal: { id: "jetragon", number: 111, nameKo: "제트래곤", nameJa: "ジェッドラン", nameEn: "Jetragon", elements: ["dragon"] }, unlockLevel: 50 }],
+    metadata,
+  };
+  const korean = renderToStaticMarkup(<PalworldSkillCard locale="ko" onOpen={() => undefined} skill={skill} />);
+  const japanese = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ja" onOpenPal={() => undefined} />);
+  assert.match(korean, /Fire Ball/u);
+  assert.match(korean, /Creates a giant ball of flame/u);
+  assert.match(korean, /data-ko="영문 원문"/u);
+  assert.match(korean, /위력 150/u);
+  assert.match(korean, /관련 Pal 수[\s\S]*1/u);
+  assert.match(japanese, /data-ja="英語原文"/u);
+  assert.match(japanese, /ジェッドラン/u);
+  assert.match(japanese, /解放レベル 50/u);
+});
+
+test("스킬 페이지는 URL query 필터를 선택 상태로 복원한다", () => {
+  const html = renderToStaticMarkup(<PalworldSkillsPage locale="ja" onOpenPal={() => undefined} params={new URLSearchParams("type=passive&element=dark&sort=power&order=desc")} />);
+  assert.match(html, /Palworld スキル/u);
+  assert.match(html, /value="passive" selected=""/u);
+  assert.match(html, /value="dark" selected=""/u);
+  assert.match(html, /value="power" selected=""/u);
+  assert.match(html, /value="desc" selected=""/u);
 });
 
 test("Palworld 헤더는 공유 Twitch 프로필과 Dashboard·로그아웃 메뉴를 렌더한다", () => {
@@ -182,6 +236,30 @@ test("Pal 필터는 URL query 값을 선택 상태로 렌더하고 전체 희귀
   assert.match(html, /パル図鑑/);
 });
 
+test("아이템 필터는 실제 데이터의 희귀도 0을 선택 상태로 복원한다", () => {
+  const html = renderToStaticMarkup(<PalworldItemsPage locale="ko" params={new URLSearchParams("rarity=0&sort=rarity")} onOpenItem={() => undefined} />);
+  assert.match(html, /value="0" selected=""/u);
+  assert.match(html, /value="20"/u);
+  assert.match(html, /아이템/u);
+});
+
+test("현지화가 없는 아이템 카드는 영문 원문 Badge와 영어 이름·설명을 표시한다", () => {
+  const html = renderToStaticMarkup(<ItemCard
+    item={{
+      id: "english-only-item",
+      nameEn: "English Only Item",
+      category: "material",
+      rarity: 0,
+      descriptionEn: "Source English description.",
+    }}
+    locale="ko"
+    onOpen={() => undefined}
+  />);
+  assert.match(html, /English Only Item/u);
+  assert.match(html, /Source English description/u);
+  assert.match(html, /data-ko="영문 원문"/u);
+});
+
 test("이미지 없는 Pal은 카드 높이를 유지하는 한국어·일본어 대체 표시를 렌더한다", () => {
   const korean = renderToStaticMarkup(<PalworldMedia alt="도로롱" locale="ko" kind="pal" />);
   const japanese = renderToStaticMarkup(<PalworldMedia alt="モコロン" locale="ja" kind="pal" />);
@@ -209,6 +287,58 @@ test("Pal 카드 이미지 alt는 현재 locale 이름을 사용하고 동일 �
   const japanese = renderToStaticMarkup(<PalCard locale="ja" pal={pal} onOpen={() => undefined} />);
   assert.match(korean, new RegExp(`src="${imageUrl.replaceAll("/", "\\/")}" alt="도로롱"`));
   assert.match(japanese, /alt="モコロン"/);
+});
+
+test("첫 화면 Pal 이미지만 eager·high priority로 요청하고 고정 크기로 layout shift를 방지한다", () => {
+  const imageUrl = `/images/palworld/1.0.1/pals/${"c".repeat(64)}.webp`;
+  const priority = renderToStaticMarkup(<PalworldMedia alt="도로롱" imageUrl={imageUrl} locale="ko" kind="pal" priority />);
+  const deferred = renderToStaticMarkup(<PalworldMedia alt="도로롱" imageUrl={imageUrl} locale="ko" kind="pal" />);
+  assert.match(priority, /fetchpriority="high"/u);
+  assert.match(priority, /loading="eager"/u);
+  assert.match(priority, /width="128"/u);
+  assert.match(priority, /height="128"/u);
+  assert.match(priority, /class="palworld-media-image is-low-resolution"/u);
+  assert.match(deferred, /fetchpriority="auto"/u);
+  assert.match(deferred, /loading="lazy"/u);
+});
+
+test("Palworld 9개 속성 Badge는 검증된 content-hash 이미지와 접근 가능한 텍스트를 함께 표시한다", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../../server/data/palworld/1.0.1/element-images-manifest.json", import.meta.url), "utf8")) as {
+    sourceArchiveSha256: string;
+    entries: Array<{ id: keyof typeof PALWORLD_ELEMENT_IMAGES; imageUrl: string; outputWidth: number; outputHeight: number }>;
+  };
+  assert.equal(manifest.sourceArchiveSha256, "42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115");
+  assert.equal(manifest.entries.length, 9);
+  for (const entry of manifest.entries) {
+    assert.deepEqual(PALWORLD_ELEMENT_IMAGES[entry.id], { imageUrl: entry.imageUrl, width: entry.outputWidth, height: entry.outputHeight });
+  }
+  assert.equal(Object.keys(PALWORLD_ELEMENT_IMAGES).length, 9);
+  for (const [element, asset] of Object.entries(PALWORLD_ELEMENT_IMAGES)) {
+    assert.equal(isLocalPalworldElementImageUrl(asset.imageUrl), true, `${element} 이미지 경로`);
+    assert.equal(asset.width, 48);
+    assert.equal(asset.height, 48);
+    const outputFileName = asset.imageUrl.split("/").at(-1)!;
+    const outputBytes = readFileSync(new URL(`../public/images/palworld/1.0.1/elements/${outputFileName}`, import.meta.url));
+    assert.equal(createHash("sha256").update(outputBytes).digest("hex"), outputFileName.replace(".webp", ""));
+    assert.equal(outputBytes.subarray(0, 4).toString("ascii"), "RIFF");
+    assert.equal(outputBytes.subarray(8, 12).toString("ascii"), "WEBP");
+  }
+  assert.equal(isLocalPalworldElementImageUrl("https://example.com/fire.webp"), false);
+  const korean = renderToStaticMarkup(<PalworldElementBadge element="fire" locale="ko" />);
+  const japanese = renderToStaticMarkup(<PalworldElementBadge element="water" locale="ja" />);
+  assert.match(korean, /<img[^>]*class="palworld-element-icon"/u);
+  assert.match(korean, /<img[^>]*alt=""[^>]*aria-hidden="true"/u);
+  assert.match(korean, /불/u);
+  assert.match(japanese, /水/u);
+});
+
+test("Palworld 2행 메뉴는 세로 overflow와 표시 scrollbar를 만들지 않는다", () => {
+  const css = readFileSync(new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url), "utf8");
+  const secondaryRule = css.match(/\.palworld-secondary-row\s*\{[\s\S]*?\}/u)?.[0] ?? "";
+  assert.match(secondaryRule, /overflow-y:\s*hidden/u);
+  assert.match(secondaryRule, /scrollbar-width:\s*none/u);
+  assert.match(css, /\.palworld-secondary-row::-webkit-scrollbar\s*\{[\s\S]*?display:\s*none/u);
+  assert.match(css, /\.palworld-shell\.public-dashboard-shell[\s\S]*?button\.active::after\s*\{[\s\S]*?bottom:\s*var\(--yoro-space-1\)\s*!important/u);
 });
 
 test("Pal과 아이템 이미지는 종류별 고정 release content-hash WebP 경로만 요청한다", () => {
@@ -256,8 +386,8 @@ test("공통 footer는 정확한 한국어·일본어 비공식 출처 공지와
   const japanese = renderToStaticMarkup(<PalworldSourceFooter locale="ja" />);
   assert.match(korean, /비공식 팰월드 데이터베이스 · 데이터\/이미지 출처 <a[^>]+>Palworld<\/a> · <a[^>]+>Pocketpair<\/a>/u);
   assert.match(korean, /data-ko="비공식 팰월드 데이터베이스 · 데이터\/이미지 출처 Palworld · Pocketpair"/u);
-  assert.match(japanese, /非公式パルワールドデータベース · データ・画像出典 <a[^>]+>Palworld<\/a> · <a[^>]+>Pocketpair<\/a>/u);
-  assert.match(japanese, /data-ja="非公式パルワールドデータベース · データ・画像出典 Palworld · Pocketpair"/u);
+  assert.match(japanese, /非公式パルワールドデータベース・データ／画像出典 <a[^>]+>Palworld<\/a>・<a[^>]+>Pocketpair<\/a>/u);
+  assert.match(japanese, /data-ja="非公式パルワールドデータベース・データ／画像出典 Palworld・Pocketpair"/u);
   assert.equal((korean.match(/target="_blank"/gu) ?? []).length, 2);
   assert.equal((korean.match(/rel="noopener noreferrer"/gu) ?? []).length, 2);
   assert.match(korean, /aria-label="Palworld · 외부 사이트, 새 창에서 열기"/u);
@@ -273,7 +403,7 @@ test("이미지 URL이 없는 Pal 287종은 모두 접근 가능한 대체 이�
   assert.doesNotMatch(html, /<img/u);
 });
 
-test("아이템과 교배의 샘플 출처를 한국어·일본어 안내와 배지로 표시한다", () => {
+test("아이템과 교배의 데이터 범위·출처를 한국어·일본어 안내와 배지로 표시한다", () => {
   const metadata = {
     gameVersion: "sample-baseline",
     sourceName: "StreamOverlay curated sample snapshot",
@@ -290,7 +420,7 @@ test("아이템과 교배의 샘플 출처를 한국어·일본어 안내와 배
   const unknown = renderToStaticMarkup(<PalworldDomainCoverageNotice domain="items" locale="ko" />);
   assert.match(korean, /data-testid="palworld-items-coverage"/);
   assert.match(korean, /data-ko="샘플"/);
-  assert.match(korean, /Pal 1.0.1 전체 아이템 데이터가 아닙니다/);
+  assert.match(korean, /고정 출처에서 검증된 아이템만 제공/u);
   assert.match(korean, /StreamOverlay curated sample snapshot · sample-revision/);
   assert.match(japanese, /data-testid="palworld-breeding-coverage"/);
   assert.match(japanese, /data-ja="サンプル"/);

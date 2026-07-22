@@ -134,6 +134,7 @@ import {
   parsePalworldId,
   parsePalworldItemListQuery,
   parsePalworldPalListQuery,
+  parsePalworldSkillListQuery,
   parsePalworldSearchQuery
 } from "../services/palworld-query.js";
 
@@ -974,6 +975,7 @@ const PUBLIC_TWITCH_PALWORLD_RETURN_PATHS = new Set([
   "/palworld/pals",
   "/palworld/breeding",
   "/palworld/items",
+  "/palworld/skills",
   "/palworld/map",
   "/palworld/search"
 ]);
@@ -5577,6 +5579,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
           const decodedId = decodeUrlPathSegment(palworldItemDetailMatch[1]);
           if (decodedId === undefined) throw new PalworldQueryError("아이템 ID 인코딩이 올바르지 않습니다.");
           const response = palworldData.getItem(parsePalworldId(decodedId, "아이템 ID"));
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/skills") {
+          const query = parsePalworldSkillListQuery(url.searchParams);
+          const response = palworldData.listSkills(query);
+          return sendJson(req, res, 200, response, cacheHeaders);
+        }
+        const palworldSkillDetailMatch = url.pathname.match(/^\/api\/palworld\/skills\/([^/]+)$/);
+        if (palworldSkillDetailMatch?.[1]) {
+          const decodedId = decodeUrlPathSegment(palworldSkillDetailMatch[1]);
+          if (decodedId === undefined) throw new PalworldQueryError("스킬 ID 인코딩이 올바르지 않습니다.");
+          const response = palworldData.getSkill(parsePalworldId(decodedId, "스킬 ID"));
           return sendJson(req, res, 200, response, cacheHeaders);
         }
         if (url.pathname === "/api/palworld/breeding/parents") {

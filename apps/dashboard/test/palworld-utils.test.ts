@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared";
-import { getPalworldMeta, PALWORLD_VERSION_MISMATCH_EVENT, searchPalworld } from "../src/features/public-palworld/api/palworld";
+import { getPalworldMeta, getPalworldSkill, getPalworldSkills, PALWORLD_VERSION_MISMATCH_EVENT, searchPalworld } from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
 import { swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
 import { isPalworldPath, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
@@ -38,11 +38,13 @@ test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(palworldPageFromPath("/palworld/pals/"), "pals");
   assert.equal(palworldPageFromPath("/palworld/breeding"), "breeding");
   assert.equal(palworldPageFromPath("/palworld/items"), "items");
+  assert.equal(palworldPageFromPath("/palworld/skills"), "skills");
   assert.equal(palworldPageFromPath("/palworld/map"), "map");
   assert.equal(palworldPageFromPath("/palworld/search"), "search");
   assert.equal(palworldPathForPage("pals"), "/palworld/pals");
   assert.equal(palworldPathForPage("streamers"), "/palworld/streamers");
   assert.equal(palworldPathForPage("map"), "/palworld/map");
+  assert.equal(palworldPathForPage("skills"), "/palworld/skills");
   assert.equal(palworldUrl("search", new URLSearchParams({ q: "아누비스" })), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
   assert.equal(isPalworldPath("/palworld/items"), true);
   assert.equal(isPalworldPath("/lol/summoners/jp/test-JP1"), false);
@@ -52,6 +54,7 @@ test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query�
   assert.equal(palworldTwitchReturnTo("/palworld", ""), "/palworld");
   assert.equal(palworldTwitchReturnTo("/palworld/streamers", "?view=all"), "/palworld/streamers?view=all");
   assert.equal(palworldTwitchReturnTo("/palworld/map", ""), "/palworld/map");
+  assert.equal(palworldTwitchReturnTo("/palworld/skills", "?type=active"), "/palworld/skills?type=active");
   assert.equal(palworldTwitchReturnTo("/palworld/search", "?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4&viewer_twitch=connected"), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
   assert.equal(palworldTwitchReturnTo("//evil.example", "?q=x"), "/palworld");
   assert.equal(palworldTwitchReturnTo("/palworld\\streamers", ""), "/palworld");
@@ -145,6 +148,52 @@ test("한국어·일본어·영어·ID·도감 번호 통합 검색을 정규화
 
 test("빈 통합 검색어는 네트워크 요청 전에 거부한다", async () => {
   await assert.rejects(searchPalworld("   "), /검색어/);
+});
+
+test("스킬 목록과 상세 API는 shared validator를 통과한 데이터만 반환한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  const metadata = {
+    gameVersion: "1.0.1.100619",
+    sourceName: "고정 스킬 데이터",
+    sourceUrl: "https://example.com/palworld-skills",
+    sourceRevision: "db70ea654aea70c4b1a4b0045bccfe58164cf01a",
+    extractedAt: "2026-07-22T00:00:00.000Z",
+    verifiedAt: "2026-07-22T00:00:00.000Z",
+    license: "테스트 전용",
+  };
+  const summary = {
+    id: "active-fire-ball-fire-45-2",
+    type: "active",
+    nameEn: "Fire Ball",
+    descriptionEn: "Flame attack",
+    element: "fire",
+    power: 45,
+    cooldownSeconds: 2,
+    relatedPalCount: 1,
+    localization: { sourceLanguage: "en", ko: "source_language_fallback", ja: "source_language_fallback" },
+  };
+  const requested: string[] = [];
+  Object.assign(globalThis, {
+    window: { __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" }, dispatchEvent: () => true } as unknown as Window,
+    fetch: async (url: string | URL | Request) => {
+      requested.push(String(url));
+      const body = String(url).includes("/skills/")
+        ? { ...summary, relatedPals: [{ pal: { id: "foxparks", number: 5, nameKo: "파비오", nameJa: "キツネビ", nameEn: "Foxparks", elements: ["fire"] } }], metadata }
+        : { items: [summary], pagination: { page: 1, pageSize: 24, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false }, metadata };
+      return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
+    },
+  });
+  try {
+    const list = await getPalworldSkills(new URLSearchParams("type=active&element=fire&sort=power&order=desc&limit=24"));
+    const detail = await getPalworldSkill(summary.id);
+    assert.equal(list.items[0]?.nameEn, "Fire Ball");
+    assert.equal(detail.relatedPals[0]?.pal.id, "foxparks");
+    assert.match(requested[0] ?? "", /\/api\/palworld\/skills\?type=active&element=fire&sort=power&order=desc&limit=24$/u);
+    assert.match(requested[1] ?? "", /\/api\/palworld\/skills\/active-fire-ball-fire-45-2$/u);
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
 });
 
 test("통합 검색 응답은 Pal과 샘플 아이템의 상태·출처를 분리해 검증한다", async () => {

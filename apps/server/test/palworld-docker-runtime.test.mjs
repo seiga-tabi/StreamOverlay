@@ -18,7 +18,11 @@ const releaseFiles = [
   "manifest.json",
   "images-manifest.json",
   "import-report.json",
-  "image-use-policy.json"
+  "image-use-policy.json",
+  "catalog.json",
+  "catalog-manifest.json",
+  "item-images-manifest.json",
+  "element-images-manifest.json"
 ];
 const mappingFiles = [
   "public-id-map.json",
@@ -54,6 +58,8 @@ test("container 형태에서 release JSON·mapping·운영 dist 이미지를 검
   const releaseTarget = path.join(runtimeRoot, "apps/server/data/palworld/1.0.1");
   const mappingTarget = path.join(runtimeRoot, "apps/server/src/data/palworld-mappings");
   const imageTarget = path.join(runtimeRoot, "apps/dashboard/dist/images/palworld/1.0.1/pals");
+  const itemImageTarget = path.join(runtimeRoot, "apps/dashboard/dist/images/palworld/1.0.1/items");
+  const elementImageTarget = path.join(runtimeRoot, "apps/dashboard/dist/images/palworld/1.0.1/elements");
   await mkdir(releaseTarget, { recursive: true });
   await mkdir(mappingTarget, { recursive: true });
   await Promise.all(releaseFiles.map((fileName) => copyFile(
@@ -65,18 +71,22 @@ test("container 형태에서 release JSON·mapping·운영 dist 이미지를 검
     path.join(mappingTarget, fileName)
   )));
   try {
-    await cp(path.join(repositoryRoot, "apps/dashboard/public/images/palworld/1.0.1/pals"), imageTarget, { recursive: true });
+    await Promise.all([
+      cp(path.join(repositoryRoot, "apps/dashboard/public/images/palworld/1.0.1/pals"), imageTarget, { recursive: true }),
+      cp(path.join(repositoryRoot, "apps/dashboard/public/images/palworld/1.0.1/items"), itemImageTarget, { recursive: true }),
+      cp(path.join(repositoryRoot, "apps/dashboard/public/images/palworld/1.0.1/elements"), elementImageTarget, { recursive: true })
+    ]);
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
 
   await smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot });
 
-  await mkdir(imageTarget, { recursive: true });
-  await writeFile(path.join(imageTarget, "operator-source.png"), "runtime에 포함되면 안 되는 source 원본");
+  await mkdir(itemImageTarget, { recursive: true });
+  await writeFile(path.join(itemImageTarget, "operator-source.png"), "runtime에 포함되면 안 되는 source 원본");
   await assert.rejects(
     smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot }),
-    /허용되지 않은 이미지 파일/u
+    /manifest에 없는 파일|허용되지 않은 형식/u
   );
 });
 

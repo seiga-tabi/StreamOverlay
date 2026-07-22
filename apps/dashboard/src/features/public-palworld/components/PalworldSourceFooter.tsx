@@ -3,7 +3,6 @@ import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 
 const PALWORLD_OFFICIAL_URL = "https://www.palworldgame.com/";
 const POCKETPAIR_OFFICIAL_URL = "https://www.pocketpair.jp/";
-const SOURCE_NOTICE_LINK_SUFFIX = "Palworld · Pocketpair";
 
 function ExternalSourceLink({
   children,
@@ -30,7 +29,10 @@ function ExternalSourceLink({
 
 export function PalworldSourceFooter({ locale }: { locale: PalworldLocale }) {
   const text = palworldI18n[locale];
-  const noticePrefix = text.sourceNotice.slice(0, -SOURCE_NOTICE_LINK_SUFFIX.length);
+  const palworldLabelStart = text.sourceNotice.indexOf("Palworld");
+  const pocketpairLabelStart = text.sourceNotice.indexOf("Pocketpair", palworldLabelStart);
+  const noticePrefix = text.sourceNotice.slice(0, palworldLabelStart);
+  const sourceSeparator = text.sourceNotice.slice(palworldLabelStart + "Palworld".length, pocketpairLabelStart);
   return (
     <AppShellFooter
       aria-label={text.footerLabel}
@@ -44,7 +46,7 @@ export function PalworldSourceFooter({ locale }: { locale: PalworldLocale }) {
       >
         {noticePrefix}
         <ExternalSourceLink href={PALWORLD_OFFICIAL_URL} locale={locale}>Palworld</ExternalSourceLink>
-        {" · "}
+        {sourceSeparator}
         <ExternalSourceLink href={POCKETPAIR_OFFICIAL_URL} locale={locale}>Pocketpair</ExternalSourceLink>
       </p>
     </AppShellFooter>

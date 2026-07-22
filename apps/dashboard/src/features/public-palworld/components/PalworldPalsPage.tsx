@@ -61,6 +61,6 @@ export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: Palwor
     {!response && !error ? <PalworldLoading locale={locale} /> : null}
     {error ? <PalworldError locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
     {response?.items.length === 0 ? <PalworldEmpty locale={locale} title={text.palListEmpty} /> : null}
-    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-entity-grid">{response.items.map((pal) => <PalCard key={pal.id} pal={pal} locale={locale} onOpen={(selected) => onOpenPal(selected.id)} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
+    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-entity-grid">{response.items.map((pal, index) => <PalCard key={pal.id} pal={pal} locale={locale} priority={index < 4} onOpen={(selected) => onOpenPal(selected.id)} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
   </section>;
 }

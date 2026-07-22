@@ -46,24 +46,37 @@
   gap: var(--yoro-space-5) !important;
 }
 
+.palworld-header.home .palworld-header-bottom-row {
+  justify-content: center !important;
+}
+
 .palworld-secondary-row {
   min-inline-size: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+
+.palworld-secondary-row::-webkit-scrollbar {
+  display: none;
 }
 
 .palworld-header-nav {
   display: flex !important;
   min-inline-size: max-content;
   overflow: visible;
-  gap: var(--yoro-space-6) !important;
+  gap: clamp(var(--yoro-space-2), 1vw, var(--yoro-space-5)) !important;
 }
 
 .palworld-header-nav > button {
   flex: none;
   min-block-size: var(--yoro-size-touch-target);
   white-space: nowrap;
+}
+
+.palworld-shell.public-dashboard-shell .palworld-header.public-app-header .palworld-header-nav.public-header-nav > button.active::after {
+  bottom: var(--yoro-space-1) !important;
 }
 
 .palworld-search-form {
@@ -780,6 +793,8 @@
 }
 
 .palworld-entity-media {
+  display: grid;
+  place-items: center;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: color-mix(in srgb, var(--palworld-accent-soft) 54%, var(--yoro-color-surface-muted));
@@ -790,6 +805,12 @@
   inline-size: 100%;
   block-size: 100%;
   object-fit: contain;
+}
+
+.palworld-media-image.is-low-resolution {
+  inline-size: min(100%, 8rem);
+  block-size: min(100%, 8rem);
+  margin: auto;
 }
 
 .palworld-media-fallback {
@@ -832,6 +853,145 @@
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.palworld-element-icon {
+  inline-size: 1.15em;
+  block-size: 1.15em;
+  object-fit: contain;
+}
+
+.palworld-compact-element-row {
+  gap: var(--yoro-space-1);
+  margin-block-start: var(--yoro-space-1);
+}
+
+.palworld-skill-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+}
+
+.palworld-skill-card {
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.palworld-skill-card .yoro-card__content {
+  display: grid;
+  min-block-size: 100%;
+  gap: var(--yoro-space-4);
+}
+
+.palworld-skill-card h2,
+.palworld-skill-card p {
+  min-inline-size: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.palworld-skill-card h2 {
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-lg);
+}
+
+.palworld-skill-description {
+  display: -webkit-box;
+  color: var(--yoro-color-text-muted);
+  line-height: var(--yoro-line-height-relaxed);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.palworld-skill-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-3);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-skill-metrics strong {
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-skill-card .yoro-button {
+  justify-self: start;
+  margin-block-start: auto;
+}
+
+.palworld-skill-detail-list {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palworld-skill-detail-list > li,
+.palworld-skill-detail-copy {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-skill-detail-list > li {
+  padding: var(--yoro-space-3);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-skill-detail-copy p {
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-drop-list {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-drop-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-3);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-drop-row button {
+  min-block-size: var(--yoro-size-touch-target);
+  padding-inline: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface);
+  color: var(--palworld-accent);
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-drop-row span {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-skill-related-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-skill-related-list .palworld-related-pal-link {
+  inline-size: 100%;
+  border-radius: var(--yoro-radius-md);
 }
 
 .palworld-entity-card h3 {
@@ -1077,6 +1237,8 @@
 }
 
 .palworld-detail-media {
+  display: grid;
+  place-items: center;
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: var(--yoro-radius-xl);
@@ -1121,6 +1283,13 @@
 
 .palworld-link-list {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-special-parent-pair {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: var(--yoro-space-2);
 }
@@ -1225,6 +1394,10 @@
   .palworld-skeleton-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .palworld-skill-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 60rem) {
@@ -1240,7 +1413,8 @@
   .palworld-secondary-row {
     inline-size: 100%;
     overflow-x: auto;
-    scrollbar-width: thin;
+    overflow-y: hidden;
+    scrollbar-width: none;
   }
 
   .palworld-pair-flow {
@@ -1374,6 +1548,11 @@
 
   .palworld-stat-grid,
   .palworld-detail-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-skill-grid,
+  .palworld-skill-related-list {
     grid-template-columns: minmax(0, 1fr);
   }
 

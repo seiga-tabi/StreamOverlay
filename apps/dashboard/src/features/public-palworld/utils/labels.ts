@@ -3,6 +3,7 @@ import type {
   PalworldElement,
   PalworldItemCategory,
   PalworldGender,
+  PalworldSkillType,
   PalworldWorkSuitabilityType,
 } from "@streamops/shared";
 import type { PalworldLocale } from "../i18n/palworld-i18n";
@@ -34,6 +35,10 @@ const genderLabels: Record<PalworldGender, [string, string]> = {
   any: ["성별 무관", "性別不問"], male: ["수컷", "オス"], female: ["암컷", "メス"],
 };
 
+const skillTypeLabels: Record<PalworldSkillType, [string, string]> = {
+  active: ["액티브", "アクティブ"], partner: ["파트너", "パートナー"], passive: ["패시브", "パッシブ"],
+};
+
 function translated<T extends string>(values: Record<T, [string, string]>, value: T, locale: PalworldLocale): string {
   return values[value]?.[locale === "ja" ? 1 : 0] ?? value;
 }
@@ -43,3 +48,4 @@ export const workLabel = (value: PalworldWorkSuitabilityType, locale: PalworldLo
 export const categoryLabel = (value: PalworldItemCategory, locale: PalworldLocale) => translated(categoryLabels, value, locale);
 export const acquisitionLabel = (value: PalworldAcquisitionType, locale: PalworldLocale) => translated(acquisitionLabels, value, locale);
 export const genderLabel = (value: PalworldGender, locale: PalworldLocale) => translated(genderLabels, value, locale);
+export const skillTypeLabel = (value: PalworldSkillType, locale: PalworldLocale) => translated(skillTypeLabels, value, locale);

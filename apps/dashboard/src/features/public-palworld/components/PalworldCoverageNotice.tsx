@@ -4,7 +4,7 @@ import { Badge } from "../../../shared/ui/Status";
 import { getPalworldMeta } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 
-export type PalworldSampleDomain = "items" | "breeding";
+export type PalworldSampleDomain = "items" | "breeding" | "skills";
 
 function statusLabel(status: PalworldDomainStatus | undefined, locale: PalworldLocale): string {
   const text = palworldI18n[locale];
@@ -72,8 +72,8 @@ export function PalworldDomainCoverageNotice({
   if (coverage?.status === "ready") return null;
 
   const text = palworldI18n[locale];
-  const noticeKo = domain === "items" ? palworldI18n.ko.itemsCoverageNotice : palworldI18n.ko.breedingCoverageNotice;
-  const noticeJa = domain === "items" ? palworldI18n.ja.itemsCoverageNotice : palworldI18n.ja.breedingCoverageNotice;
+  const noticeKo = domain === "items" ? palworldI18n.ko.itemsCoverageNotice : domain === "skills" ? palworldI18n.ko.skillsCoverageNotice : palworldI18n.ko.breedingCoverageNotice;
+  const noticeJa = domain === "items" ? palworldI18n.ja.itemsCoverageNotice : domain === "skills" ? palworldI18n.ja.skillsCoverageNotice : palworldI18n.ja.breedingCoverageNotice;
   const notice = coverage ? (locale === "ja" ? noticeJa : noticeKo) : text.coverageUnavailable;
 
   return (

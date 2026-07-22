@@ -6,17 +6,18 @@ export function normalizePalworldSearch(value: string): string {
 }
 
 export function palName(pal: PalworldPalSummary, locale: PalworldLocale): string {
-  return locale === "ja" ? pal.nameJa : pal.nameKo;
+  return (locale === "ja" ? pal.nameJa : pal.nameKo)?.trim() || pal.nameEn;
 }
 
 export function itemName(item: PalworldItemSummary, locale: PalworldLocale): string {
-  return locale === "ja" ? item.nameJa : item.nameKo;
+  return (locale === "ja" ? item.nameJa : item.nameKo)?.trim() || item.nameEn;
 }
 
 export function matchesPalworldPal(pal: PalworldPalSummary, query: string): boolean {
   const normalized = normalizePalworldSearch(query);
   if (!normalized) return true;
   return [pal.id, String(pal.number), pal.nameKo, pal.nameJa, pal.nameEn]
+    .filter((candidate): candidate is string => typeof candidate === "string")
     .some((candidate) => normalizePalworldSearch(candidate).includes(normalized));
 }
 
@@ -24,6 +25,7 @@ export function matchesPalworldItem(item: PalworldItemSummary, query: string): b
   const normalized = normalizePalworldSearch(query);
   if (!normalized) return true;
   return [item.id, item.nameKo, item.nameJa, item.nameEn]
+    .filter((candidate): candidate is string => typeof candidate === "string")
     .some((candidate) => normalizePalworldSearch(candidate).includes(normalized));
 }
 

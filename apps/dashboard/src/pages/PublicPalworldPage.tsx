@@ -21,6 +21,7 @@ import { PalworldMapPage } from "../features/public-palworld/components/Palworld
 import { PalworldPalsPage } from "../features/public-palworld/components/PalworldPalsPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
 import { PalworldSearchResults } from "../features/public-palworld/components/PalworldSearchResults";
+import { PalworldSkillsPage } from "../features/public-palworld/components/PalworldSkillsPage";
 import { PalworldSourceFooter } from "../features/public-palworld/components/PalworldSourceFooter";
 import { PalworldStreamersPage } from "../features/public-palworld/components/PalworldStreamersPage";
 import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i18n/palworld-i18n";
@@ -149,6 +150,8 @@ export function PublicPalworldPage({
 
   useEffect(() => {
     mountedRef.current = true;
+    let disposed = false;
+    let retryTimer: number | undefined;
     const query = new URLSearchParams(window.location.search);
     const viewerConnected = query.get("viewer_twitch") === "connected";
     if (viewerConnected) {
@@ -156,9 +159,13 @@ export function PublicPalworldPage({
       const nextQuery = query.toString();
       window.history.replaceState({}, "", `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`);
     }
-    void refreshTwitchStatus();
-    const retryTimer = viewerConnected ? window.setTimeout(() => void refreshTwitchStatus(), 350) : undefined;
+    void refreshTwitchStatus().finally(() => {
+      if (viewerConnected && !disposed) {
+        retryTimer = window.setTimeout(() => void refreshTwitchStatus(), 350);
+      }
+    });
     return () => {
+      disposed = true;
       mountedRef.current = false;
       statusAbortRef.current?.abort();
       followedAbortRef.current?.abort();
@@ -335,6 +342,7 @@ export function PublicPalworldPage({
         {page === "pals" ? <PalworldPalsPage locale={locale} params={params} onOpenPal={openPalHere} /> : null}
         {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} /> : null}
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
+        {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} onOpenPal={openPalPage} /> : null}
         {page === "map" ? <PalworldMapPage locale={locale} /> : null}
       </AppShellMain>
       <PalworldSourceFooter locale={locale} />

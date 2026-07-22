@@ -7,6 +7,7 @@ const {
   parsePalworldBreedingQuery,
   parsePalworldItemListQuery,
   parsePalworldPalListQuery,
+  parsePalworldSkillListQuery,
   parsePalworldSearchQuery
 } = await import("../dist/services/palworld-query.js");
 
@@ -35,14 +36,43 @@ test("Pal 목록 query는 allowlist 필터, 정렬과 pagination만 허용한다
 
 test("아이템 목록 query는 허용된 필터와 정렬을 해석한다", () => {
   const query = parsePalworldItemListQuery(new URLSearchParams(
-    "category=sphere&acquisition=craft&sort=technologyLevel&page=3&limit=10"
+    "category=sphere&acquisition=craft&rarity=0&sort=technologyLevel&page=3&limit=10"
   ));
 
   assert.equal(query.category, "sphere");
   assert.equal(query.acquisition, "craft");
+  assert.equal(query.rarity, 0);
   assert.equal(query.sort, "technologyLevel");
   assert.equal(query.page, 3);
   assert.equal(query.limit, 10);
+  assert.throws(
+    () => parsePalworldPalListQuery(new URLSearchParams("rarity=0")),
+    PalworldQueryError
+  );
+});
+
+test("스킬 목록 query는 종류·속성·정렬과 pagination만 허용한다", () => {
+  const query = parsePalworldSkillListQuery(new URLSearchParams(
+    "q=Flame&type=active&element=fire&sort=power&order=desc&page=2&limit=12"
+  ));
+
+  assert.deepEqual(query, {
+    q: "Flame",
+    type: "active",
+    element: "fire",
+    sort: "power",
+    order: "desc",
+    page: 2,
+    limit: 12
+  });
+  assert.throws(
+    () => parsePalworldSkillListQuery(new URLSearchParams("type=unknown")),
+    PalworldQueryError
+  );
+  assert.throws(
+    () => parsePalworldSkillListQuery(new URLSearchParams("q=fire&redirect=https%3A%2F%2Fexample.com")),
+    PalworldQueryError
+  );
 });
 
 test("검색과 교배 query는 빈 값, 중복 값, 알 수 없는 필드와 비정상 ID를 거부한다", () => {

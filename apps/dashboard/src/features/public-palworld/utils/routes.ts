@@ -1,6 +1,6 @@
 export const PALWORLD_ROUTE_EVENT = "palworldroutechange";
 
-export type PalworldPage = "home" | "streamers" | "pals" | "breeding" | "items" | "map" | "search";
+export type PalworldPage = "home" | "streamers" | "pals" | "breeding" | "items" | "skills" | "map" | "search";
 
 const PAGE_PATHS: Record<PalworldPage, string> = {
   home: "/palworld",
@@ -8,6 +8,7 @@ const PAGE_PATHS: Record<PalworldPage, string> = {
   pals: "/palworld/pals",
   breeding: "/palworld/breeding",
   items: "/palworld/items",
+  skills: "/palworld/skills",
   map: "/palworld/map",
   search: "/palworld/search",
 };

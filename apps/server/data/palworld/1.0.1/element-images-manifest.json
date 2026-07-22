@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "kind": "elements",
+  "sourceArchiveSha256": "42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+  "usageBasis": "operator_reference_use",
+  "rightsVerified": false,
+  "entries": [
+    {
+      "id": "dark",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_05.png",
+      "sourceSha256": "c016b3804b94f17e9f0200df545c52f8c41c238a0d37520e2e72be25deafd547",
+      "outputSha256": "91f0e913d19fa4c185bc43fc9351ac2d16afc159d418ac07f955c0af0d7f3159",
+      "outputFileName": "91f0e913d19fa4c185bc43fc9351ac2d16afc159d418ac07f955c0af0d7f3159.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 944,
+      "imageUrl": "/images/palworld/1.0.1/elements/91f0e913d19fa4c185bc43fc9351ac2d16afc159d418ac07f955c0af0d7f3159.webp"
+    },
+    {
+      "id": "dragon",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_06.png",
+      "sourceSha256": "75e973738d901e30eaf19af296ac4d2d0e1bff46a104f57fe7aee171833444e5",
+      "outputSha256": "4b267fc44f551e27ed83e90061b2b3bee9421dbf491397cd393cca31b979530f",
+      "outputFileName": "4b267fc44f551e27ed83e90061b2b3bee9421dbf491397cd393cca31b979530f.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 832,
+      "imageUrl": "/images/palworld/1.0.1/elements/4b267fc44f551e27ed83e90061b2b3bee9421dbf491397cd393cca31b979530f.webp"
+    },
+    {
+      "id": "electric",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_03.png",
+      "sourceSha256": "50ec6ff342d880d3ff3ce66869b7f2ee5deef15ae20132afad1c24a951363d05",
+      "outputSha256": "02e61246439c77da962825402eae51a4586d2875d8a2e077d62fe770b0aa0062",
+      "outputFileName": "02e61246439c77da962825402eae51a4586d2875d8a2e077d62fe770b0aa0062.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 636,
+      "imageUrl": "/images/palworld/1.0.1/elements/02e61246439c77da962825402eae51a4586d2875d8a2e077d62fe770b0aa0062.webp"
+    },
+    {
+      "id": "fire",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_01.png",
+      "sourceSha256": "8e0b4177b9cef219f78c6811ff2283f27442b1685ff0912d2d24634ddc8be638",
+      "outputSha256": "a0104f033275025b26e3ce2665565262872b12f6434934b6f1d9e0d2c53f531a",
+      "outputFileName": "a0104f033275025b26e3ce2665565262872b12f6434934b6f1d9e0d2c53f531a.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 828,
+      "imageUrl": "/images/palworld/1.0.1/elements/a0104f033275025b26e3ce2665565262872b12f6434934b6f1d9e0d2c53f531a.webp"
+    },
+    {
+      "id": "grass",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_04.png",
+      "sourceSha256": "d6ec3f06d848710d2a63cd9f209e90551a0b5ecb0e297a6767e064adcba9ca78",
+      "outputSha256": "ffe422a5b47592f421346a87a558329d7dda6c086120fc8df7c49e7f6625eb79",
+      "outputFileName": "ffe422a5b47592f421346a87a558329d7dda6c086120fc8df7c49e7f6625eb79.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 770,
+      "imageUrl": "/images/palworld/1.0.1/elements/ffe422a5b47592f421346a87a558329d7dda6c086120fc8df7c49e7f6625eb79.webp"
+    },
+    {
+      "id": "ground",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_07.png",
+      "sourceSha256": "6bff1663520097c13059b211b76d9b639e5d388104eed609b63875e2e66dbff0",
+      "outputSha256": "fd559c7b81374007983d0cd4e4ff85062da804beca41810ffd2e27c9ecbed5c3",
+      "outputFileName": "fd559c7b81374007983d0cd4e4ff85062da804beca41810ffd2e27c9ecbed5c3.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 736,
+      "imageUrl": "/images/palworld/1.0.1/elements/fd559c7b81374007983d0cd4e4ff85062da804beca41810ffd2e27c9ecbed5c3.webp"
+    },
+    {
+      "id": "ice",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_08.png",
+      "sourceSha256": "9fba55243f7740db5e6445c6e45689e5259fb4e715c6f2c04a9620b55a3e0138",
+      "outputSha256": "6233481df822a59542b71d2d9589117895a9246b040a4444733031994e021c11",
+      "outputFileName": "6233481df822a59542b71d2d9589117895a9246b040a4444733031994e021c11.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 930,
+      "imageUrl": "/images/palworld/1.0.1/elements/6233481df822a59542b71d2d9589117895a9246b040a4444733031994e021c11.webp"
+    },
+    {
+      "id": "neutral",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_00.png",
+      "sourceSha256": "113cf8d8a8423a975120817083f394beec947fc525ce523cf8ca5a813e567fd5",
+      "outputSha256": "ab38c4cd2fc1f9ac5683c1401b5f6aee305a73f26e3d59a33f3392d8c85ac842",
+      "outputFileName": "ab38c4cd2fc1f9ac5683c1401b5f6aee305a73f26e3d59a33f3392d8c85ac842.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 874,
+      "imageUrl": "/images/palworld/1.0.1/elements/ab38c4cd2fc1f9ac5683c1401b5f6aee305a73f26e3d59a33f3392d8c85ac842.webp"
+    },
+    {
+      "id": "water",
+      "sourceFileName": "pyPalworldAPI-0.2.0/pyPalworldAPI/public/images/elements/T_Icon_element_s_02.png",
+      "sourceSha256": "361a6182daeaffb59c35569920b7401b6e5d842b34f1d5f67d8809e832a2250c",
+      "outputSha256": "9814f74c34f9e71e55f23fbecec1d8b744821c0fda82f5f02a6471c3a00785b5",
+      "outputFileName": "9814f74c34f9e71e55f23fbecec1d8b744821c0fda82f5f02a6471c3a00785b5.webp",
+      "outputWidth": 48,
+      "outputHeight": 48,
+      "outputBytes": 746,
+      "imageUrl": "/images/palworld/1.0.1/elements/9814f74c34f9e71e55f23fbecec1d8b744821c0fda82f5f02a6471c3a00785b5.webp"
+    }
+  ]
+}

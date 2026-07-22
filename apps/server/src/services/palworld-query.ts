@@ -2,6 +2,7 @@ import {
   PALWORLD_ACQUISITION_TYPES,
   PALWORLD_ELEMENTS,
   PALWORLD_ITEM_CATEGORIES,
+  PALWORLD_SKILL_TYPES,
   PALWORLD_VARIANT_TYPES,
   PALWORLD_WORK_SUITABILITY_TYPES
 } from "@streamops/shared";
@@ -31,6 +32,15 @@ const ITEM_LIST_QUERY_KEYS = new Set([
   "page",
   "limit"
 ]);
+const SKILL_LIST_QUERY_KEYS = new Set([
+  "q",
+  "type",
+  "element",
+  "sort",
+  "order",
+  "page",
+  "limit"
+]);
 const SEARCH_QUERY_KEYS = new Set(["q", "limit"]);
 const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB"]);
 const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "page", "limit"]);
@@ -38,6 +48,7 @@ const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "page", "limit"]);
 export const PALWORLD_WORK_TYPES = PALWORLD_WORK_SUITABILITY_TYPES;
 export const PALWORLD_PAL_SORTS = ["number", "name", "rarity"] as const;
 export const PALWORLD_ITEM_SORTS = ["name", "rarity", "price", "technologyLevel"] as const;
+export const PALWORLD_SKILL_SORTS = ["name", "power", "unlockLevel"] as const;
 
 export {
   PALWORLD_ACQUISITION_TYPES,
@@ -66,6 +77,16 @@ export type PalworldItemListQuery = {
   rarity?: number;
   acquisition?: (typeof PALWORLD_ACQUISITION_TYPES)[number];
   sort: (typeof PALWORLD_ITEM_SORTS)[number];
+  order: PalworldSortOrder;
+  page: number;
+  limit: number;
+};
+
+export type PalworldSkillListQuery = {
+  q?: string;
+  type?: (typeof PALWORLD_SKILL_TYPES)[number];
+  element?: (typeof PALWORLD_ELEMENTS)[number];
+  sort: (typeof PALWORLD_SKILL_SORTS)[number];
   order: PalworldSortOrder;
   page: number;
   limit: number;
@@ -158,13 +179,13 @@ function integerParam(
   return value;
 }
 
-function optionalRarity(params: URLSearchParams): number | undefined {
+function optionalRarity(params: URLSearchParams, min: 0 | 1): number | undefined {
   const raw = params.get("rarity");
   if (raw === null || !raw.trim()) return undefined;
   if (!/^\d+$/u.test(raw)) throw new PalworldQueryError("rarity 값은 정수여야 합니다.");
   const value = Number(raw);
-  if (!Number.isSafeInteger(value) || value < 1 || value > 20) {
-    throw new PalworldQueryError("rarity 값은 1 이상 20 이하여야 합니다.");
+  if (!Number.isSafeInteger(value) || value < min || value > 20) {
+    throw new PalworldQueryError(`rarity 값은 ${min} 이상 20 이하여야 합니다.`);
   }
   return value;
 }
@@ -190,7 +211,7 @@ export function parsePalworldPalListQuery(params: URLSearchParams): PalworldPalL
     q: optionalText(params, "q"),
     element: optionalEnum(params, "element", PALWORLD_ELEMENTS),
     work: optionalEnum(params, "work", PALWORLD_WORK_TYPES),
-    rarity: optionalRarity(params),
+    rarity: optionalRarity(params, 1),
     variant: optionalEnum(params, "variant", PALWORLD_VARIANT_TYPES),
     sort: optionalEnum(params, "sort", PALWORLD_PAL_SORTS) ?? "number",
     order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
@@ -203,9 +224,21 @@ export function parsePalworldItemListQuery(params: URLSearchParams): PalworldIte
   return {
     q: optionalText(params, "q"),
     category: optionalEnum(params, "category", PALWORLD_ITEM_CATEGORIES),
-    rarity: optionalRarity(params),
+    rarity: optionalRarity(params, 0),
     acquisition: optionalEnum(params, "acquisition", PALWORLD_ACQUISITION_TYPES),
     sort: optionalEnum(params, "sort", PALWORLD_ITEM_SORTS) ?? "name",
+    order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
+    ...pagination(params, 24)
+  };
+}
+
+export function parsePalworldSkillListQuery(params: URLSearchParams): PalworldSkillListQuery {
+  assertKnownKeys(params, SKILL_LIST_QUERY_KEYS);
+  return {
+    q: optionalText(params, "q"),
+    type: optionalEnum(params, "type", PALWORLD_SKILL_TYPES),
+    element: optionalEnum(params, "element", PALWORLD_ELEMENTS),
+    sort: optionalEnum(params, "sort", PALWORLD_SKILL_SORTS) ?? "name",
     order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
     ...pagination(params, 24)
   };

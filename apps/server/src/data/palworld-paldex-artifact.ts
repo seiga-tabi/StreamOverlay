@@ -4,7 +4,6 @@ import {
   PALWORLD_IMAGE_POLICY_STATUSES,
   PALWORLD_IMAGE_USAGE_BASES,
   PALWORLD_WORK_SUITABILITY_TYPES,
-  validatePalworldPalDetail,
   type PalworldElement,
   type PalworldImageAssetStatus,
   type PalworldImagePolicyStatus,
@@ -28,6 +27,26 @@ const PUBLIC_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const INTERNAL_ID_PATTERN = /^[A-Za-z0-9_]+$/u;
 const IMAGE_URL_PATTERN = /^\/images\/palworld\/1\.0\.1\/pals\/([a-f0-9]{64})\.webp$/u;
 
+export type PalworldPaldexSkillRecord = {
+  id: string;
+  type: "active" | "partner";
+  nameEn: string;
+  descriptionEn?: string;
+  element?: PalworldElement;
+  power?: number;
+  cooldownSeconds?: number;
+  unlockLevel?: number;
+};
+
+export type PalworldPaldexDropRecord = {
+  itemId?: string;
+  itemSourceInternalId?: string;
+  nameEn: string;
+  minimum: number;
+  maximum: number;
+  rate: number;
+};
+
 export type PalworldPaldexRecord = {
   id: string;
   sourceInternalId: string;
@@ -42,11 +61,21 @@ export type PalworldPaldexRecord = {
   workSuitabilities: PalworldWorkSuitability[];
   breedingPower: number;
   nocturnal: boolean;
+  descriptionEn?: string;
+  partnerSkill?: PalworldPaldexSkillRecord;
+  activeSkills: PalworldPaldexSkillRecord[];
+  drops: PalworldPaldexDropRecord[];
+  specialParentPairs: Array<{
+    parentAId: string;
+    parentBId: string;
+    parentAGender?: "male" | "female";
+    parentBGender?: "male" | "female";
+  }>;
   imageUrl?: string;
 };
 
 export type PalworldPaldexArtifact = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   release: string;
   steamBuildId: string;
   metadata: {
@@ -57,6 +86,22 @@ export type PalworldPaldexArtifact = {
     extractedAt: string;
     verifiedAt: string;
     license: string;
+  };
+  detailProvenance?: {
+    sourceName: string;
+    sourceRevision: string;
+    sourceChecksum: string;
+    gameVersion: string;
+    license: string;
+    rightsVerified: false;
+    breedingSourceName: string;
+    breedingSourceRevision: string;
+    breedingSourceChecksum: string;
+    exactPalDetails: number;
+    palDetailsWithoutSource: number;
+    specialBreedingPairs: number;
+    unresolvedBreedingReferences: number;
+    genderedBreedingPairs: number;
   };
   records: PalworldPaldexRecord[];
 };
@@ -196,6 +241,13 @@ function integerAt(value: unknown, path: string, min: number, max: number): numb
   return value as number;
 }
 
+function numberAt(value: unknown, path: string, min: number, max: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) {
+    fail(path, `${min} 이상 ${max} 이하 유한 숫자여야 합니다.`);
+  }
+  return value;
+}
+
 function booleanAt(value: unknown, path: string): boolean {
   if (typeof value !== "boolean") fail(path, "boolean이어야 합니다.");
   return value;
@@ -242,6 +294,46 @@ function codePointCompare(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
+function assertPaldexSkillRecord(
+  value: unknown,
+  path: string,
+  expectedType: "active" | "partner"
+): PalworldPaldexSkillRecord {
+  const skill = recordAt(value, path, [
+    "id",
+    "type",
+    "nameEn",
+    "descriptionEn",
+    "element",
+    "power",
+    "cooldownSeconds",
+    "unlockLevel"
+  ]);
+  const id = stringAt(skill.id, `${path}.id`, 128);
+  if (!PUBLIC_ID_PATTERN.test(id)) fail(`${path}.id`, "안정적인 소문자 kebab-case skill ID여야 합니다.");
+  if (skill.type !== expectedType) fail(`${path}.type`, `${expectedType}여야 합니다.`);
+  stringAt(skill.nameEn, `${path}.nameEn`, 256);
+  if (skill.descriptionEn !== undefined) stringAt(skill.descriptionEn, `${path}.descriptionEn`, 8_192);
+  if (skill.element !== undefined) {
+    if (typeof skill.element !== "string" || !(PALWORLD_ELEMENTS as readonly string[]).includes(skill.element)) {
+      fail(`${path}.element`, "알 수 없는 속성입니다.");
+    }
+  }
+  if (expectedType === "active") {
+    integerAt(skill.power, `${path}.power`, 0, 100_000);
+    numberAt(skill.cooldownSeconds, `${path}.cooldownSeconds`, 0, 100_000);
+    integerAt(skill.unlockLevel, `${path}.unlockLevel`, 0, 1_000);
+  } else if (
+    skill.element !== undefined
+    || skill.power !== undefined
+    || skill.cooldownSeconds !== undefined
+    || skill.unlockLevel !== undefined
+  ) {
+    fail(path, "partner skill에는 active skill 전용 수치를 지정할 수 없습니다.");
+  }
+  return value as PalworldPaldexSkillRecord;
+}
+
 export function assertPalworldPaldexRecord(value: unknown, path = "record"): PalworldPaldexRecord {
   const record = recordAt(value, path, [
     "id",
@@ -257,6 +349,11 @@ export function assertPalworldPaldexRecord(value: unknown, path = "record"): Pal
     "workSuitabilities",
     "breedingPower",
     "nocturnal",
+    "descriptionEn",
+    "partnerSkill",
+    "activeSkills",
+    "drops",
+    "specialParentPairs",
     "imageUrl"
   ]);
   const id = stringAt(record.id, `${path}.id`, 96);
@@ -297,6 +394,45 @@ export function assertPalworldPaldexRecord(value: unknown, path = "record"): Pal
   }
   integerAt(record.breedingPower, `${path}.breedingPower`, 0, 1_000_000);
   booleanAt(record.nocturnal, `${path}.nocturnal`);
+  if (record.descriptionEn !== undefined) stringAt(record.descriptionEn, `${path}.descriptionEn`, 8_192);
+  if (record.partnerSkill !== undefined) assertPaldexSkillRecord(record.partnerSkill, `${path}.partnerSkill`, "partner");
+  const activeSkillIds: string[] = [];
+  for (const [index, skill] of assertArray(record.activeSkills, `${path}.activeSkills`, 64).entries()) {
+    activeSkillIds.push(assertPaldexSkillRecord(skill, `${path}.activeSkills[${index}]`, "active").id);
+  }
+  const activeSkillSet = new Set(activeSkillIds);
+  if (activeSkillSet.size !== activeSkillIds.length) fail(`${path}.activeSkills`, "중복 active skill 배정입니다.");
+  for (const [index, rawDrop] of assertArray(record.drops, `${path}.drops`, 128).entries()) {
+    const dropPath = `${path}.drops[${index}]`;
+    const drop = recordAt(rawDrop, dropPath, ["itemId", "itemSourceInternalId", "nameEn", "minimum", "maximum", "rate"]);
+    if ((drop.itemId === undefined) !== (drop.itemSourceInternalId === undefined)) {
+      fail(dropPath, "itemId와 itemSourceInternalId는 함께 제공해야 합니다.");
+    }
+    if (drop.itemId !== undefined) {
+      const itemId = stringAt(drop.itemId, `${dropPath}.itemId`, 128);
+      if (!PUBLIC_ID_PATTERN.test(itemId)) fail(`${dropPath}.itemId`, "안정적인 소문자 kebab-case item ID여야 합니다.");
+      const itemSourceInternalId = stringAt(drop.itemSourceInternalId, `${dropPath}.itemSourceInternalId`, 128);
+      if (!INTERNAL_ID_PATTERN.test(itemSourceInternalId)) fail(`${dropPath}.itemSourceInternalId`, "고정 원본 internal ID 형식이 아닙니다.");
+    }
+    stringAt(drop.nameEn, `${dropPath}.nameEn`, 256);
+    const minimum = integerAt(drop.minimum, `${dropPath}.minimum`, 0, 1_000_000);
+    const maximum = integerAt(drop.maximum, `${dropPath}.maximum`, 0, 1_000_000);
+    if (maximum < minimum) fail(dropPath, "maximum은 minimum 이상이어야 합니다.");
+    numberAt(drop.rate, `${dropPath}.rate`, 0, 100);
+  }
+  for (const [index, rawPair] of assertArray(record.specialParentPairs, `${path}.specialParentPairs`, 128).entries()) {
+    const pairPath = `${path}.specialParentPairs[${index}]`;
+    const pair = recordAt(rawPair, pairPath, ["parentAId", "parentBId", "parentAGender", "parentBGender"]);
+    for (const field of ["parentAId", "parentBId"] as const) {
+      const parentId = stringAt(pair[field], `${pairPath}.${field}`, 128);
+      if (!PUBLIC_ID_PATTERN.test(parentId)) fail(`${pairPath}.${field}`, "안정적인 소문자 kebab-case Pal ID여야 합니다.");
+    }
+    for (const field of ["parentAGender", "parentBGender"] as const) {
+      if (pair[field] !== undefined && pair[field] !== "male" && pair[field] !== "female") {
+        fail(`${pairPath}.${field}`, "male 또는 female이어야 합니다.");
+      }
+    }
+  }
   if (record.imageUrl !== undefined) {
     const imageUrl = stringAt(record.imageUrl, `${path}.imageUrl`, 256);
     if (!IMAGE_URL_PATTERN.test(imageUrl)) fail(`${path}.imageUrl`, "고정 release의 content-hash WebP 경로여야 합니다.");
@@ -305,8 +441,8 @@ export function assertPalworldPaldexRecord(value: unknown, path = "record"): Pal
 }
 
 export function assertPalworldPaldexArtifact(value: unknown): PalworldPaldexArtifact {
-  const artifact = recordAt(value, "paldex", ["schemaVersion", "release", "steamBuildId", "metadata", "records"]);
-  if (artifact.schemaVersion !== 1) fail("paldex.schemaVersion", "1이어야 합니다.");
+  const artifact = recordAt(value, "paldex", ["schemaVersion", "release", "steamBuildId", "metadata", "detailProvenance", "records"]);
+  if (artifact.schemaVersion !== 2) fail("paldex.schemaVersion", "2여야 합니다.");
   if (artifact.release !== PALWORLD_PALDEX_RELEASE) fail("paldex.release", `${PALWORLD_PALDEX_RELEASE}이어야 합니다.`);
   if (artifact.steamBuildId !== PALWORLD_PALDEX_STEAM_BUILD_ID) fail("paldex.steamBuildId", "고정 Steam Build ID와 일치해야 합니다.");
   const metadata = recordAt(artifact.metadata, "paldex.metadata", [
@@ -323,6 +459,42 @@ export function assertPalworldPaldexArtifact(value: unknown): PalworldPaldexArti
   httpsUrlAt(metadata.sourceUrl, "paldex.metadata.sourceUrl");
   isoDateAt(metadata.extractedAt, "paldex.metadata.extractedAt");
   isoDateAt(metadata.verifiedAt, "paldex.metadata.verifiedAt");
+  let expectedDetailedRecords: number | undefined;
+  let expectedSpecialBreedingPairs: number | undefined;
+  let expectedGenderedBreedingPairs: number | undefined;
+  if (artifact.detailProvenance !== undefined) {
+    const provenance = recordAt(artifact.detailProvenance, "paldex.detailProvenance", [
+      "sourceName",
+      "sourceRevision",
+      "sourceChecksum",
+      "gameVersion",
+      "license",
+      "rightsVerified",
+      "breedingSourceName",
+      "breedingSourceRevision",
+      "breedingSourceChecksum",
+      "exactPalDetails",
+      "palDetailsWithoutSource",
+      "specialBreedingPairs",
+      "unresolvedBreedingReferences",
+      "genderedBreedingPairs"
+    ]);
+    for (const field of ["sourceName", "sourceRevision", "gameVersion", "license"] as const) {
+      stringAt(provenance[field], `paldex.detailProvenance.${field}`, 512);
+    }
+    sha256At(provenance.sourceChecksum, "paldex.detailProvenance.sourceChecksum");
+    stringAt(provenance.breedingSourceName, "paldex.detailProvenance.breedingSourceName", 512);
+    stringAt(provenance.breedingSourceRevision, "paldex.detailProvenance.breedingSourceRevision", 128);
+    sha256At(provenance.breedingSourceChecksum, "paldex.detailProvenance.breedingSourceChecksum");
+    if (provenance.rightsVerified !== false) fail("paldex.detailProvenance.rightsVerified", "독립 권리 확인 전에는 false여야 합니다.");
+    const exact = integerAt(provenance.exactPalDetails, "paldex.detailProvenance.exactPalDetails", 0, PALWORLD_PALDEX_EXPECTED_COUNT);
+    const missing = integerAt(provenance.palDetailsWithoutSource, "paldex.detailProvenance.palDetailsWithoutSource", 0, PALWORLD_PALDEX_EXPECTED_COUNT);
+    if (exact + missing !== PALWORLD_PALDEX_EXPECTED_COUNT) fail("paldex.detailProvenance", "Pal 상세 coverage 합계가 287이어야 합니다.");
+    expectedSpecialBreedingPairs = integerAt(provenance.specialBreedingPairs, "paldex.detailProvenance.specialBreedingPairs", 0, 1_000);
+    integerAt(provenance.unresolvedBreedingReferences, "paldex.detailProvenance.unresolvedBreedingReferences", 0, 1_000);
+    expectedGenderedBreedingPairs = integerAt(provenance.genderedBreedingPairs, "paldex.detailProvenance.genderedBreedingPairs", 0, 1_000);
+    expectedDetailedRecords = exact;
+  }
 
   const records = assertArray(artifact.records, "paldex.records", PALWORLD_PALDEX_EXPECTED_COUNT);
   if (records.length !== PALWORLD_PALDEX_EXPECTED_COUNT) fail("paldex.records", `${PALWORLD_PALDEX_EXPECTED_COUNT}개여야 합니다.`);
@@ -331,30 +503,18 @@ export function assertPalworldPaldexArtifact(value: unknown): PalworldPaldexArti
   const internalIds = new Set<string>();
   let normal = 0;
   let variant = 0;
+  let detailedRecords = 0;
   for (const [index, entry] of validated.entries()) {
-    const sharedValidation = validatePalworldPalDetail({
-      id: entry.id,
-      number: entry.number,
-      nameKo: entry.nameKo,
-      nameJa: entry.nameJa,
-      nameEn: entry.nameEn,
-      ...(entry.imageUrl === undefined ? {} : { imageUrl: entry.imageUrl }),
-      elements: entry.elements,
-      rarity: entry.rarity,
-      variantType: entry.variantType,
-      workSuitabilities: entry.workSuitabilities,
-      stats: entry.stats,
-      nocturnal: entry.nocturnal,
-      activeSkills: [],
-      drops: [],
-      breeding: { breedingPower: entry.breedingPower, specialParentPairs: [] },
-      metadata
-    });
-    if (!sharedValidation.ok) fail(`paldex.records[${index}]`, `Shared PalworldPalDetail schema 검증 실패: ${sharedValidation.error}`);
     if (ids.has(entry.id)) fail(`paldex.records[${index}].id`, "중복 public ID입니다.");
     if (internalIds.has(entry.sourceInternalId)) fail(`paldex.records[${index}].sourceInternalId`, "중복 internal ID입니다.");
     ids.add(entry.id);
     internalIds.add(entry.sourceInternalId);
+    if (
+      entry.descriptionEn !== undefined
+      || entry.partnerSkill !== undefined
+      || entry.activeSkills.length > 0
+      || entry.drops.length > 0
+    ) detailedRecords += 1;
     if (entry.variantType === "normal") normal += 1;
     else variant += 1;
     if (index > 0) {
@@ -367,6 +527,24 @@ export function assertPalworldPaldexArtifact(value: unknown): PalworldPaldexArti
   }
   if (normal !== PALWORLD_PALDEX_EXPECTED_NORMAL_COUNT || variant !== PALWORLD_PALDEX_EXPECTED_VARIANT_COUNT) {
     fail("paldex.records", `일반종 ${PALWORLD_PALDEX_EXPECTED_NORMAL_COUNT}개와 변종 ${PALWORLD_PALDEX_EXPECTED_VARIANT_COUNT}개여야 합니다.`);
+  }
+  if (expectedDetailedRecords !== undefined && detailedRecords !== expectedDetailedRecords) {
+    fail("paldex.detailProvenance.exactPalDetails", "실제 상세 record 수와 일치해야 합니다.");
+  }
+  const specialParentPairs = validated.flatMap((record) => record.specialParentPairs);
+  for (const [index, pair] of specialParentPairs.entries()) {
+    if (!ids.has(pair.parentAId) || !ids.has(pair.parentBId)) {
+      fail(`paldex.specialParentPairs[${index}]`, "도감에 없는 부모 Pal 참조입니다.");
+    }
+  }
+  if (expectedSpecialBreedingPairs !== undefined && expectedGenderedBreedingPairs !== undefined) {
+    if (specialParentPairs.length !== expectedSpecialBreedingPairs) {
+      fail("paldex.detailProvenance.specialBreedingPairs", "실제 특수 교배 수와 일치해야 합니다.");
+    }
+    const gendered = specialParentPairs.filter((pair) => pair.parentAGender || pair.parentBGender).length;
+    if (gendered !== expectedGenderedBreedingPairs) {
+      fail("paldex.detailProvenance.genderedBreedingPairs", "실제 성별 조건 교배 수와 일치해야 합니다.");
+    }
   }
   return value as PalworldPaldexArtifact;
 }

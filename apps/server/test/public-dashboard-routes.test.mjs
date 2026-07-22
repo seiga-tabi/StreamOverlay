@@ -19,6 +19,7 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
     "/palworld/pals",
     "/palworld/breeding",
     "/palworld/items",
+    "/palworld/skills",
     "/palworld/map",
     "/palworld/search",
     "/privacy",

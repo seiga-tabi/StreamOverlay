@@ -37,12 +37,13 @@ export type PalworldPaldexStagedRelease = {
   imageAssetsReady: boolean;
   releaseReady: boolean;
   runtimeImageUrls: Readonly<Record<string, string>>;
+  runtimeImageDimensions: Readonly<Record<string, { width: number; height: number }>>;
   runtimeImageAssetGate: PalworldRuntimeGates["imageAssets"];
 };
 
 export type PalworldPaldexRuntimeSource = Pick<
   PalworldPaldexStagedRelease,
-  "artifact" | "manifest" | "dataIntegrityReady" | "runtimeImageUrls" | "runtimeImageAssetGate"
+  "artifact" | "manifest" | "dataIntegrityReady" | "runtimeImageUrls" | "runtimeImageDimensions" | "runtimeImageAssetGate"
 >;
 
 async function readJsonWithBytes(filePath: string): Promise<{ bytes: Buffer; value: unknown }> {
@@ -421,6 +422,11 @@ export async function loadPalworldPaldexStagedRelease(options: {
     imageAssetsReady,
     releaseReady: imageAssetsReady,
     runtimeImageUrls: runtimeImages.imageUrls,
+    runtimeImageDimensions: Object.freeze(Object.fromEntries(
+      activatedEntries
+        .filter((entry) => Object.hasOwn(runtimeImages.imageUrls, entry.palId))
+        .map((entry) => [entry.palId, { width: entry.outputWidth!, height: entry.outputHeight! }])
+    )),
     runtimeImageAssetGate: runtimeGate
   };
 }
@@ -513,6 +519,7 @@ async function loadPalworldPaldexDataOnlyRuntimeFallback(options: {
     manifest,
     dataIntegrityReady,
     runtimeImageUrls: {},
+    runtimeImageDimensions: {},
     runtimeImageAssetGate: runtimeImageAssetGate({
       policy,
       readyImages: 0,

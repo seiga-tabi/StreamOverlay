@@ -22,15 +22,26 @@ export function PalworldMedia({
   imageUrl,
   locale,
   kind,
+  intrinsicHeight,
+  intrinsicWidth,
+  loading = "lazy",
+  priority = false,
 }: {
   alt: string;
   imageUrl?: string;
   locale: PalworldLocale;
   kind: "pal" | "item";
+  intrinsicHeight?: number;
+  intrinsicWidth?: number;
+  loading?: "eager" | "lazy";
+  priority?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const fallback = palworldI18n[locale].imageFallback;
   const safeImageUrl = isLocalPalworldImageUrl(imageUrl, kind) ? imageUrl : undefined;
+  const width = Number.isInteger(intrinsicWidth) && (intrinsicWidth ?? 0) > 0 ? intrinsicWidth! : kind === "pal" ? 128 : 256;
+  const height = Number.isInteger(intrinsicHeight) && (intrinsicHeight ?? 0) > 0 ? intrinsicHeight! : kind === "pal" ? 128 : 256;
+  const lowResolution = kind === "pal" && Math.max(width, height) <= 128;
 
   useEffect(() => {
     setFailed(false);
@@ -44,5 +55,15 @@ export function PalworldMedia({
       </div>
     );
   }
-  return <img className="palworld-media-image" src={safeImageUrl} alt={alt} decoding="async" loading="lazy" onError={() => setFailed(true)} />;
+  return <img
+    {...{ fetchpriority: priority ? "high" : "auto" }}
+    className={`palworld-media-image${lowResolution ? " is-low-resolution" : ""}`}
+    src={safeImageUrl}
+    alt={alt}
+    decoding="async"
+    height={height}
+    loading={priority ? "eager" : loading}
+    onError={() => setFailed(true)}
+    width={width}
+  />;
 }

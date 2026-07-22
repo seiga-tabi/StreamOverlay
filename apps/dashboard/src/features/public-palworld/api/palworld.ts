@@ -8,6 +8,8 @@ import type {
   PalworldPalDetail,
   PalworldPalSummary,
   PalworldSearchResult,
+  PalworldSkillDetail,
+  PalworldSkillSummary,
   PalworldValidator,
 } from "@streamops/shared";
 import {
@@ -20,6 +22,8 @@ import {
   validatePalworldPalDetail,
   validatePalworldPalSummary,
   validatePalworldSearchResult,
+  validatePalworldSkillDetail,
+  validatePalworldSkillSummary,
 } from "@streamops/shared";
 import { runtimeConfig } from "../../../runtime-config";
 
@@ -67,7 +71,7 @@ async function publicGet<T>(
   const body: unknown = await response.json();
   const validated = validate(body);
   if (!validated.ok) throw new Error(`Palworld API 응답 검증 실패: ${validated.error}`);
-  // 아이템·교배는 Pal 도감과 별도의 샘플 출처를 유지하므로 의도적인 버전 차이를 오류로 취급하지 않습니다.
+  // 아이템·스킬·교배는 Pal 도감과 별도의 고정 출처를 유지하므로 의도적인 버전 차이를 오류로 취급하지 않습니다.
   if (observeActivePalVersion) observeGameVersion(validated.data);
   return validated.data;
 }
@@ -102,6 +106,14 @@ export function getPalworldItems(params: URLSearchParams, signal?: AbortSignal):
 
 export function getPalworldItem(id: string, signal?: AbortSignal): Promise<PalworldItemDetail> {
   return publicGet(`/api/palworld/items/${encodeURIComponent(id)}`, signal, validatePalworldItemDetail, false);
+}
+
+export function getPalworldSkills(params: URLSearchParams, signal?: AbortSignal): Promise<PalworldPaginatedResponse<PalworldSkillSummary>> {
+  return publicGet(queryPath("/api/palworld/skills", params), signal, (value) => validatePalworldPaginatedResponse(value, validatePalworldSkillSummary), false);
+}
+
+export function getPalworldSkill(id: string, signal?: AbortSignal): Promise<PalworldSkillDetail> {
+  return publicGet(`/api/palworld/skills/${encodeURIComponent(id)}`, signal, validatePalworldSkillDetail, false);
 }
 
 export function getPalworldBreeding(parentA: string, parentB: string, signal?: AbortSignal): Promise<PalworldBreedingResultResponse> {
