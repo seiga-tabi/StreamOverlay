@@ -1,0 +1,2700 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "エネルギーラウンドを発射するショットガン。 急速な火災に優れた、その近距離火力は本当に異世界です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6000b8d722b8e75488083350851eb045a5df74011dc69d4559245444320f9c21",
+          "status": "machine_assisted",
+          "text": "エネルギーショットガン2"
+        }
+      },
+      "id": "energy-shotgun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "エネルギーラウンドを発射するショットガン。 急速な火災に優れた、その近距離火力は本当に異世界です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4faac3a1c773a475a8d8254a495048928073019e17027bf00a0598cfdeee1224",
+          "status": "machine_assisted",
+          "text": "エネルギーショットガン 3"
+        }
+      },
+      "id": "energy-shotgun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "エネルギーラウンドを発射するショットガン。 急速な火災に優れた、その近距離火力は本当に異世界です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "81e4e328dfc638d9924d1c5e9e0d3054524c588947f76933f631db403d1ae87f",
+          "status": "machine_assisted",
+          "text": "エネルギーショットガン 4"
+        }
+      },
+      "id": "energy-shotgun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "エネルギーラウンドを発射するショットガン。 急速な火災に優れた、その近距離火力は本当に異世界です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb2957b969d84219312accf995beae106ffe771dfd0dbb5c7e8dcd91558876e9",
+          "status": "machine_assisted",
+          "text": "エネルギーショットガン 5"
+        }
+      },
+      "id": "energy-shotgun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d37f796e32c9976c782e79e383ebe434c54b8dc9ecb88fe823192d588e0f21c",
+          "status": "machine_assisted",
+          "text": "エネルギーショットガン弾薬"
+        }
+      },
+      "id": "energy-shotgun-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7a3222bdc75bb9a73afcf6ba85cbf74f67f76f07a33709bb6af6d96cebbfc593",
+          "status": "machine_assisted",
+          "text": "少量のトレーニングマニュアル。 パルで読み込むと EXPの値になります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "31be54b5b61dac7c166f45e28293adbada98e89e32db4e188ce58e6f8bdec09d",
+          "status": "machine_assisted",
+          "text": "訓練マニュアル(S)"
+        }
+      },
+      "id": "exp-boost-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c7af2a34ed3476947214b8d8217987bf829ac0518478eb2e925e60a33b6ef9d9",
+          "status": "machine_assisted",
+          "text": "少量のトレーニングマニュアル。 パルで読み込むと EXPの値になります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e27611616d3e70a923c9f0bd77be315813a7267b65f31b2196b8b5bc26226ea0",
+          "status": "machine_assisted",
+          "text": "訓練マニュアル(M)"
+        }
+      },
+      "id": "exp-boost-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "622d7274dc9a833fb5c9045ae570ec59852963a2a5f80b0192f999857673b0e6",
+          "status": "machine_assisted",
+          "text": "大量のトレーニングマニュアル。 パルで読み込むと EXPの値になります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "013d47e686a7c465e38c1c1a8dde88148d3e2f8a6bfc00f20089355d26b5add7",
+          "status": "machine_assisted",
+          "text": "訓練マニュアル(L)"
+        }
+      },
+      "id": "exp-boost-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7f29c6df069e395c6679d8f4023e6f5618e462654b67ea5a57be78423131317e",
+          "status": "machine_assisted",
+          "text": "かなりの量のトレーニングマニュアル。 パルで読み込むと EXPの値になります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7d47af48afa695b11e0a19ca09710a80f332249ac7ad244971770e65b22bf727",
+          "status": "machine_assisted",
+          "text": "トレーニングマニュアル(XL)"
+        }
+      },
+      "id": "exp-boost-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a0af9f4419105e2c1c509827a551973bcaaf65af6f3a5d8a46ba69ccdeb3c5e9",
+          "status": "machine_assisted",
+          "text": "ロケット夏期マックス 弾薬"
+        }
+      },
+      "id": "explosive-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "437dc50ebe573b8359c76617624a48b057e18d673c0d233e8e8a31ab3c4c2d12",
+          "status": "machine_assisted",
+          "text": "木から集めた繊維。 弓などを作るときに用いる素材。"
+        }
+      },
+      "id": "fiber",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2fd7cc6225d81427aec70cd839321b8f8baab64e6dcc298b9b006a427dcd243e",
+          "status": "machine_assisted",
+          "text": "パルから入手できる材料。 作り方などにも使える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e3cd7d4bd04558dc12068d1c757308efa87994c236a615f19e67f3f7710efb43",
+          "status": "machine_assisted",
+          "text": "火炎器"
+        }
+      },
+      "id": "fire-organ",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e14349975c3f266fb0079fc0bda390f1ef2887b1e87dcffd772b2f1043af78b4",
+          "status": "machine_assisted",
+          "text": "夏期マックスに誘い込むのに使われる基本的な釣り餌。 釣りに必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a83ec8afbf4d82da0331a8a121a9d30410bd1f61f97ea2ac4cec9b583e89e6a1",
+          "status": "machine_assisted",
+          "text": "簡易餌"
+        }
+      },
+      "id": "fishing-bait-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0209c294048f358d47097dcfe4dbdedf6b0ffd9bc951c735b08934e4b3a71276",
+          "status": "machine_assisted",
+          "text": "パルに潜む餌。 パルが餌を噛む可能性を高めるために改善されました。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f8dab84fc86fc95260040526c0b8721d2d9f8d4610a31f4b8d34ec31c0e84824",
+          "status": "machine_assisted",
+          "text": "高品質餌"
+        }
+      },
+      "id": "fishing-bait-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ff038ac53cae8053f84a37ae11c593bf395175259bad5057a2fe46d8a6d042d2",
+          "status": "machine_assisted",
+          "text": "パルに潜む餌。 釣りミニゲームでバーのサイズをわずかに拡大するように改善。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8299ef392857e9bc62be8c584ade10dae97c96f38ce9534c31e8c97822c972c4",
+          "status": "machine_assisted",
+          "text": "デラックスベイト"
+        }
+      },
+      "id": "fishing-bait-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1f832f49f8da8446e7b7279889aa9b5f5434dd6110bf0ce045c1f3522e322936",
+          "status": "machine_assisted",
+          "text": "パルに潜む餌。 釣りミニゲームでバーのサイズを拡大し、漁から得られるアイテムの数を増やすように改善。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2e7580601f232040b9320ebca53f0f71b7cc7c34fd169cc25484d3f73e990b2b",
+          "status": "machine_assisted",
+          "text": "魅力的な餌"
+        }
+      },
+      "id": "fishing-bait-3-a",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ecf6926ba977776c4566719df20a00e4a1d3236235461e532bc97f250e906ca1",
+          "status": "machine_assisted",
+          "text": "パルを捕らえるための釣り。 魚釣りを始めるために影が見える水辺の餌と一緒にそれを使用してください。 初心者に最適で、低レベルのパルでのリーリングに最適です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b49afcc9864c16d9b9056ab266c93f140381995aba0a5ba65af0c66d09c0d298",
+          "status": "machine_assisted",
+          "text": "ビギナー釣り(オコチョ)"
+        }
+      },
+      "id": "fishing-rod-01-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "f9b9cb454d53015f363bdef0c9eb76fc57851a33f4d0a2f48f9b3651a18c6434",
+          "status": "machine_assisted",
+          "text": "パルを捕らえるための釣り。 頑丈で、パフォーマンスが若干優れています。 [原文欠落]。 初心者に最適で、低レベルのパルでのリーリングに最適です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "edd8a82942b3dfe93ec32241dcb73cec6ea3cf1b371b3212c8cac7d5d55823f5",
+          "status": "machine_assisted",
+          "text": "ビギナー釣り(ナエモチ)"
+        }
+      },
+      "id": "fishing-rod-01-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1c8dbd7bfbdd7f9e9001d263a01612ec4467ca8c4819438e1417a2a42d8958ce",
+          "status": "machine_assisted",
+          "text": "パルを捕らえるための釣り。 魚釣りを始めるために影が見える水辺の餌と一緒にそれを使用してください。 パフォーマンスが向上し、キャッチが少し楽になります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "792f0680eb6216a842360eac279dc50b3bdc9de23e28c3a047e6f29e57a51457",
+          "status": "machine_assisted",
+          "text": "中型漁(ツッパニャン)"
+        }
+      },
+      "id": "fishing-rod-02-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "342dff61477b815f62ff6385105bba5cad98c850c6f1d211c2643d9f42f5b639",
+          "status": "machine_assisted",
+          "text": "パルを捕らえるための釣り。 頑丈で、パフォーマンスが若干優れています。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ce609b4ead2c6d55c6111e57c40e55f3f7254ee996a94279efba58a041e1314e",
+          "status": "machine_assisted",
+          "text": "中型漁(ブシガエル)"
+        }
+      },
+      "id": "fishing-rod-02-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "141d8726b48798555cb5a88f5f92076f620ba8009c69ee9dcf2fcb5ca3a2bada",
+          "status": "machine_assisted",
+          "text": "パルを捕らえるための釣り。 魚釣りを始めるために影が見える水辺の餌と一緒にそれを使用してください。 性能が向上し、キャッチがはるかに簡単になります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76e88fd518972e6812246d47f73af56c719de602f2aac6958f8a3a9154b9b301",
+          "status": "machine_assisted",
+          "text": "先端釣り(ペンタマ)"
+        }
+      },
+      "id": "fishing-rod-03-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "342dff61477b815f62ff6385105bba5cad98c850c6f1d211c2643d9f42f5b639",
+          "status": "machine_assisted",
+          "text": "パルを捕らえるための釣り。 頑丈で、パフォーマンスが若干優れています。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "567d3c18b4da9c73f10349ce120d01a4a203013970bc03d3c5db5369b32bd199",
+          "status": "machine_assisted",
+          "text": "先端釣り(ンダコアラ)"
+        }
+      },
+      "id": "fishing-rod-03-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "長距離の炎を放ちます 敵を火にかけることができる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3c07f870ddf7e92b119fa7e1c68f7a8a9feef488959ca32b8c9392962665e740",
+          "status": "machine_assisted",
+          "text": "火炎放射器"
+        }
+      },
+      "id": "flame-thrower",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "長距離の炎を放ちます 敵を火にかけることができる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "87e04447941b7fbace7b3aa5e9ae653562fe5fdfbd11662bb8ef4d6517c46b66",
+          "status": "machine_assisted",
+          "text": "火炎放射体2"
+        }
+      },
+      "id": "flame-thrower-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "長距離の炎を放ちます 敵を火にかけることができる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0511db3fc45e45136bdb469c4387306fb70d863f2f95ecf0068d988f7d3bac59",
+          "status": "machine_assisted",
+          "text": "火炎放射体3"
+        }
+      },
+      "id": "flame-thrower-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "長距離の炎を放ちます 敵を火にかけることができる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0b60d6aa6a943a001ff07ca7adf840af67a21411137e70848a4152a76395b51c",
+          "status": "machine_assisted",
+          "text": "火炎放射体4"
+        }
+      },
+      "id": "flame-thrower-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "長距離の炎を放ちます 敵を火にかけることができる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "99e04f27d87d58e6b4e1d5040ffd3f749de31db69c996bac75763fb56e8ba287",
+          "status": "machine_assisted",
+          "text": "火炎放射体5"
+        }
+      },
+      "id": "flame-thrower-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c3ba1bee19eb15946c4cc791510e7d0b5731b5b0d6cb3ab85549e136f9baadcf",
+          "status": "machine_assisted",
+          "text": "火炎放射燃料"
+        }
+      },
+      "id": "flamethrower-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6cb2db80165839b3fe63c2d17be16b49d4ef0f17d4bfef0ce4ed94c52880f54a",
+          "status": "machine_assisted",
+          "text": "研削で出来ている [原文欠落]。 原料として使用することができる。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c234cbffc5ef6544813625ec10bd5b7d6398f3b3a9e3a7295ac7d9dfbced79c",
+          "status": "machine_assisted",
+          "text": "床"
+        }
+      },
+      "id": "flour",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、敵にダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5d38df4b2da8b77e9f95bc43f8354b93d562481cf614f4df3144b4a3a0e88116",
+          "status": "machine_assisted",
+          "text": "弾"
+        }
+      },
+      "id": "frag-grenade",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、敵にダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "47a2ec851365652c2208979c664d5576b6481fa07febf2f72ff6229705bf9d3f",
+          "status": "machine_assisted",
+          "text": "西日本大震災 闇"
+        }
+      },
+      "id": "frag-grenade-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、敵にダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed5b4c58cee12ba3c63381e2b7bd1bdba778c6122953b514ff0059319897d468",
+          "status": "machine_assisted",
+          "text": "西日本大震災 竜"
+        }
+      },
+      "id": "frag-grenade-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9942934f013e41a2a8251dd60950cd6b1440065b8ab2951eeb1c8ce1aa036e26",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、爆風半径のすべてを電気的に切断します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "de4211d4d0a89829305b122d3cb1ca929c98f7273b008c1fef87b34a1487037e",
+          "status": "machine_assisted",
+          "text": "衝撃手弾"
+        }
+      },
+      "id": "frag-grenade-elec",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "501f5a3e785b4cde325dd3697680ceddc3071c2c653246afa91c5f03eb0a88af",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、周辺地域が火災に見舞われます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8fabf4f9c724fb33d72366a429cf8240b432595a6ad932e8079f5a3c10562626",
+          "status": "machine_assisted",
+          "text": "火葬場"
+        }
+      },
+      "id": "frag-grenade-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、敵にダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "26d0355daf3c650d54a76a1ad790aed3696d3b53e45ef870bca68db931446805",
+          "status": "machine_assisted",
+          "text": "西日本大震災 地"
+        }
+      },
+      "id": "frag-grenade-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "67c3feaeafc6d455bcf8753c4c410887c05a836544a0cacdf53a67b0717f4d69",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、周囲の地域を凍結します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6a6b2955a6afe605a5d6c6aca75ed5c45ba95f3856bd79890662b87d7862d54c",
+          "status": "machine_assisted",
+          "text": "西日本大震災 氷"
+        }
+      },
+      "id": "frag-grenade-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、敵にダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "36bcfa43ce9d0ca51633ab4dc12afaeb425cf0ca55e7cc3d2beb1f5b764f8b6f",
+          "status": "machine_assisted",
+          "text": "西日本大震災 草"
+        }
+      },
+      "id": "frag-grenade-leaf",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "db8cdf76b5682cfcfa3e8d53cd798d86465b02bf20df51892e741aac9f399cb0",
+          "status": "machine_assisted",
+          "text": "改良されたフラッグ手弾。 投げられた数秒後に爆発し、敵に大きなダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "18cdb513dfa03184de9aa505d57a44cc5577def8487be80f3b3c6756daef8289",
+          "status": "machine_assisted",
+          "text": "フラッググレネードMk2"
+        }
+      },
+      "id": "frag-grenade-super",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "中距離戦闘に便利です。 投げられた数秒後に爆発し、敵にダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "92814989280f2c41fe7e0b2a8cbbb4bafd37b3b7a60bde3886d20e2f62d53f44",
+          "status": "machine_assisted",
+          "text": "西日本大震災 水"
+        }
+      },
+      "id": "frag-grenade-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d3fef0289af13d3f61152ceea9e963ce3b0b2a03f3fec8718b37bdd67a272e63",
+          "status": "machine_assisted",
+          "text": "うまみのあるジューシーな家。 食べると作業スピードが若干上がります。 SANを一定期間遅くするのです"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ce67acd186a27c824a70615c6eab0c290209f6a7a81f14c96413ac6f5812bb63",
+          "status": "machine_assisted",
+          "text": "フライド・クワッドマックス"
+        }
+      },
+      "id": "fried-chicken",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40acae4a9b3a8b306c5715b62c5f88c0d27955529413923515b6e3d0505d6238",
+          "status": "machine_assisted",
+          "text": "揚げて、さらにおいしい。 空腹をなくすのに最適です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "46356211ccca7c2540c1a0dc71319b48381a4c6df5691dcac711d20e8928dc19",
+          "status": "machine_assisted",
+          "text": "卵を揚げる"
+        }
+      },
+      "id": "fried-eggs",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af3b815868bd43da6b789639bcf29b766d531d419278c9a6de60090f77075e40",
+          "status": "machine_assisted",
+          "text": "クッキーフライドバッターは、ケルピスのふっくらとした美しさを完璧に強調します。 食べると+10%増えます。 SANを一定期間遅くするのです"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74bfc9e4839d62bf1e600d9fbd7cb92ac6e917cacc46e99dd4bfcdb96bf64fbd",
+          "status": "machine_assisted",
+          "text": "フライド・クワッドマックス"
+        }
+      },
+      "id": "fried-kelpie",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cced832757dc23c8b4d565b14260d8aa3c2488d88459e2a17392c649499533b4",
+          "status": "machine_assisted",
+          "text": "非常に入手が難しい貴重な果物。 パルの攻撃をわずかに増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "62907a0cbe54634731e4baa4be4e6533b4cb27a35b0eddff568b19d2edc9e3aa",
+          "status": "machine_assisted",
+          "text": "パワーフルーツ"
+        }
+      },
+      "id": "fruit-attack-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a817cec50aab5cf6865778a57698c0e64d94205d8075195db8741c75b11515b",
+          "status": "machine_assisted",
+          "text": "非常に入手が難しい貴重な果物。 パルの防御をわずかに増やします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2a716d598596b0d60181e1b10b71799c904195d3a834bae2c459ae04beafd117",
+          "status": "machine_assisted",
+          "text": "スタウトフルーツ"
+        }
+      },
+      "id": "fruit-defense-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c9fc8d82510a53f0ffd7ce511ce18a2c102c0857436b6a3d582633251e83186a",
+          "status": "machine_assisted",
+          "text": "非常に入手が難しい貴重な果物。 パルの健康をわずかに増やします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cbbb54421d1e7e1ddeb7584a1786e8da665275e99ead3276422f6454dbc6d08",
+          "status": "machine_assisted",
+          "text": "生の果実"
+        }
+      },
+      "id": "fruit-hp-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "028db8828ba698d2e7d019fdb6b1aed58c249c1d6728f98df049acb71210db5c",
+          "status": "machine_assisted",
+          "text": "[原文欠落]。 温かみと防御力が向上した。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b489eadabc715879a3689b55e2df55ee8dd09e202303a2fabb9080a15368f64a",
+          "status": "machine_assisted",
+          "text": "ペルト・クワッドマックス 防具"
+        }
+      },
+      "id": "fur-armor",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f11beb53437fdbcf65814b3d7a2437db422924bf178f1001aa475ab0f27e2f8c",
+          "status": "machine_assisted",
+          "text": "耐寒性ベルト防具"
+        }
+      },
+      "id": "fur-armor-cold",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e79bd70abeab5520e5ac325a8ba35275e8e1a859e05e16f97af648a64cf8de3f",
+          "status": "machine_assisted",
+          "text": "ファーアーマーコールド2"
+        }
+      },
+      "id": "fur-armor-cold-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ecb4f4749d082383a54c4162ae388dc979f5f2bc2678e7611899e88ee0dbb3db",
+          "status": "machine_assisted",
+          "text": "ファーアーマーコールド3"
+        }
+      },
+      "id": "fur-armor-cold-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3e0ac93de03035cdcb94badb1a6305702f9d90119f5013e026fdf260939e4dd1",
+          "status": "machine_assisted",
+          "text": "ファーアーマーコールド4"
+        }
+      },
+      "id": "fur-armor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bed7bdb39af9de4f3703ffae10eaefdf09292d5333cd2998ff5d269a1224497b",
+          "status": "machine_assisted",
+          "text": "ファーアーマーコールド5"
+        }
+      },
+      "id": "fur-armor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b8bdd8b379d078f667b7f61aba2c1baf06fcfa645891bf1aa0984ef0fd8d05f8",
+          "status": "machine_assisted",
+          "text": "耐熱ベルト防具"
+        }
+      },
+      "id": "fur-armor-heat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f65ccd227724a6c01516a3e3c820204a8f1a4c07dc37826bac8bdc19309d1a56",
+          "status": "machine_assisted",
+          "text": "毛皮熱 2"
+        }
+      },
+      "id": "fur-armor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e4027ae0d212e734e8adf3465e74233ca7a2887f02fddeb339bf17db03b065be",
+          "status": "machine_assisted",
+          "text": "毛皮熱3"
+        }
+      },
+      "id": "fur-armor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ec949f46842308296a470c6484236ded7f1b4e8dc5a34a9a0e1d142f9cd03fee",
+          "status": "machine_assisted",
+          "text": "毛皮熱4"
+        }
+      },
+      "id": "fur-armor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "63a1a55752f8074fb6c3bb59b78da7167501b2da9771080e70be28cec0553d73",
+          "status": "machine_assisted",
+          "text": "毛皮熱 5"
+        }
+      },
+      "id": "fur-armor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "美しい羽毛のヘッドバンド。 あり得ないが、なんとか致命傷から身を守るようだ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "60a31d2ca9b8eeada2a6be90c02304ef7314424c675251ade5f9068a9bf2ba46",
+          "status": "machine_assisted",
+          "text": "羽毛ヘアバンド"
+        }
+      },
+      "id": "fur-helmet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "美しい羽毛のヘッドバンド。 あり得ないが、なんとか致命傷から身を守るようだ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7921be86ee6e4763574ceb9bf562625b1ec0ae038afd28d28806c392f70c1515",
+          "status": "machine_assisted",
+          "text": "ファーヘルメット2"
+        }
+      },
+      "id": "fur-helmet-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "美しい羽毛のヘッドバンド。 あり得ないが、なんとか致命傷から身を守るようだ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "906733c98eab16c6e9378f589c188cab72f4d10338265f7a6d3dab0319acc2df",
+          "status": "machine_assisted",
+          "text": "ファーヘルメット3"
+        }
+      },
+      "id": "fur-helmet-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "美しい羽毛のヘッドバンド。 あり得ないが、なんとか致命傷から身を守るようだ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bfaabe3a6a316e0b2ee2af44d848edd8c80c7ea592cdf669534563ffe5955278",
+          "status": "machine_assisted",
+          "text": "ファーヘルメット4"
+        }
+      },
+      "id": "fur-helmet-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "美しい羽毛のヘッドバンド。 あり得ないが、なんとか致命傷から身を守るようだ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76c9e560e5df61e46360bf0dcce0ef7e71c4d5b1efae79da53d71fd6fd67fffc",
+          "status": "machine_assisted",
+          "text": "ファーヘルメット5"
+        }
+      },
+      "id": "fur-helmet-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "096bae47c8ff1d7aecf0d02da02ca5507663169a19ad3b1c24cd91130650224d",
+          "status": "machine_assisted",
+          "text": "特殊なろ過システムを備えたマスク。 腐食性ミストによる損傷を否定します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f970646bfdd3342378e3679678423085af44c27769f6169e6fcd9a08193fc8e3",
+          "status": "machine_assisted",
+          "text": "腐食性ミストマスク"
+        }
+      },
+      "id": "gas-mask",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "01a7a1a88510b5cf76bc708611f37c05daf40935c29541d579e1caf04a6c19d3",
+          "status": "machine_assisted",
+          "text": "ガトリングガン弾薬"
+        }
+      },
+      "id": "gatling-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "速射が可能なガトリングガン。 敵を撃退する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cb6f2c6f917bd9cb26ba2d12195505d5c8c223b8b7503b9dfb723f2680ec0f82",
+          "status": "machine_assisted",
+          "text": "ガトリングガン"
+        }
+      },
+      "id": "gatling-gun",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "速射が可能なガトリングガン。 敵を撃退する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b3caff7839d99be16893a0bbad75bcbec4005451242151e2211b0f327da5f8f4",
+          "status": "machine_assisted",
+          "text": "ギャトリングガン2"
+        }
+      },
+      "id": "gatling-gun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "速射が可能なガトリングガン。 敵を撃退する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "08a3651d154fbcebbe5116dd8b224863f0e6442f1d3aeac80942c38204d002f3",
+          "status": "machine_assisted",
+          "text": "ガトリングガン3"
+        }
+      },
+      "id": "gatling-gun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "速射が可能なガトリングガン。 敵を撃退する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "651d6f8ee85617647d25a36560d9fe7b81fc623d28e0c98262e5a151cd476d62",
+          "status": "machine_assisted",
+          "text": "ガトリングガン4"
+        }
+      },
+      "id": "gatling-gun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "速射が可能なガトリングガン。 敵を撃退する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c429e1d4628b0254e942e66d461ec1cc9afdd7c2a628c6b3daa2297d7ad59d8e",
+          "status": "machine_assisted",
+          "text": "ギャトリングガン5"
+        }
+      },
+      "id": "gatling-gun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "82f92ca47c5055d2442c05c2144c52170c14b912f6c2cc4185b2f9100cb88375",
+          "status": "machine_assisted",
+          "text": "マリネしたマトンはグリルでゆっくりと調理されます。 食べると作業スピードが若干上がります。 SANを少しゆっくり減らすことができます"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f66aa50b0439017bbad14df919959ce0238a6b8892dd769b45cabc4e6e6fd62a",
+          "status": "machine_assisted",
+          "text": "焼き香ばしい夏マックス"
+        }
+      },
+      "id": "genghis-khan",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "91568c2d4cafc3e6cc26ac88d1cfd2304d731f9757aeab34c0e5732b54794708",
+          "status": "machine_assisted",
+          "text": "空中を飛び回るグライダー。 量産型の商用モデルなので、かなり速い。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "88d3349b90f8dd6e3c364ea57137eb312a5743af3cefa13d112840f3c937c6c9",
+          "status": "machine_assisted",
+          "text": "メガグライダー"
+        }
+      },
+      "id": "glider-good",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fc670df5717d2cffdc9dc91a5e257830af7d8ffc073f2670d951597366e4b0e8",
+          "status": "machine_assisted",
+          "text": "空中を飛び回るグライダー。 安く作れたので、あまり速くない。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "350140a6555be5f77836d148d0162d586dd42511e6f293c0c6c321d8bf6ca1fb",
+          "status": "machine_assisted",
+          "text": "パラシュート"
+        }
+      },
+      "id": "glider-old",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "95b8973e07d13dcc991bf0cd97e88c5d24ccaac60146a038f4005e4b38988738",
+          "status": "machine_assisted",
+          "text": "空中を飛び回るグライダー。 性能が向上し、高速で上昇する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "adcf1875783b89ed165b216b6163b75eb8904706af990afd78eba2895a32b723",
+          "status": "machine_assisted",
+          "text": "ギガグライダー"
+        }
+      },
+      "id": "glider-super",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "102707c049ad7727b28b8c72c0d8da18bf49188002927cf7046fc53979a234d0",
+          "status": "machine_assisted",
+          "text": "空中を飛び回るグライダー。 性能は向上し、スピードとリフトが向上しました。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0bbb22801f10df8cbc75c19b3a5b9133bbd497e117a8acbcf3ff8a55e8b5b105",
+          "status": "machine_assisted",
+          "text": "グライダーテラ"
+        }
+      },
+      "id": "glider-tera",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1f9afd470250fdc7c13ef0424ee3a4ffe5de038e198e799fcb51c34ad00ec3c4",
+          "status": "machine_assisted",
+          "text": "遠方のターゲットにラッチするフックを発射し、ユーザーの体を目標に向かって引っ張ります。 標高の異なる場所間の移動が簡単になります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25a70a27c25fe45db3607dabfee2dac75d1952f6cd777a8f48e7b6a5a4fd3f22",
+          "status": "machine_assisted",
+          "text": "銃の扱い"
+        }
+      },
+      "id": "grappling-gun",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "186778ce8d10d2cc08985106df6bff6aba9eef6ca940587419bbc198c4750871",
+          "status": "machine_assisted",
+          "text": "遠方のターゲットにラッチするフックを発射し、ユーザーの体を目標に向かって引っ張ります。 アップグレードされたので、より広い範囲に展開しました。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee6f06a0a035feb69bdcc8924c405729bd446b094986de0b3b0f55acca4641ae",
+          "status": "machine_assisted",
+          "text": "銃2の扱い"
+        }
+      },
+      "id": "grappling-gun2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e26fba7a7ba53d6e1c533e300918a1d13c35fea9b85722846339f6d53e929ee1",
+          "status": "machine_assisted",
+          "text": "遠方のターゲットにラッチするフックを発射し、ユーザーの体を目標に向かって引っ張ります。 プロトタイプバージョンのデータを使用して、その能力はさらに向上しました。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "48f100c6fd9afdafd4c66b553982869eafce6d66b89228ba634eace1c6e44677",
+          "status": "machine_assisted",
+          "text": "銃3号機に挑む"
+        }
+      },
+      "id": "grappling-gun3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "759ebefe2b9f3cafa45ff4667dee8cf3e71a29864bff9188a12d55395c51877c",
+          "status": "machine_assisted",
+          "text": "遠方のターゲットにラッチするフックを発射し、ユーザーの体を目標に向かって引っ張ります。 研究の結果、圧倒的なモビリティを達成しました。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "13bb7250e0bd355679f4f3d308349ba1629ba3f536d913947e112958f4a921ba",
+          "status": "machine_assisted",
+          "text": "銃4号機"
+        }
+      },
+      "id": "grappling-gun4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9c235467575d5c7e4cca4a70577cd746054dd4a3b929358f4ef124c018214b1",
+          "status": "machine_assisted",
+          "text": "遠方のターゲットにラッチするフックを発射し、ユーザーの体を目標に向かって引っ張ります。 新規材料では冷却時間が著しく短縮されました。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca90b23b0946c9ad3a559e4c8a96caa48cad5e8e462158b1301a63096d3b7a4d",
+          "status": "machine_assisted",
+          "text": "銃5号機"
+        }
+      },
+      "id": "grappling-gun5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c7f3307365bada0cc06573f395691aeef25c311f8c40bc36080149bea2f8ae43",
+          "status": "machine_assisted",
+          "text": "ソースでジャガイモをコーティングし、完璧に焼いた料理。 暑くて新鮮で最高です。 食べると、持続的な満腹感が得られて一定期間10%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6d5a5fbfeb293b57d776b73e10584f6508552e3f23c4c0625d870bb45a71405b",
+          "status": "machine_assisted",
+          "text": "グラタン"
+        }
+      },
+      "id": "gratin",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4678cba6499793d937efc9177804a90e228f3f0639ffbf47e16cb704ce4f3114",
+          "status": "machine_assisted",
+          "text": "手弾弾薬"
+        }
+      },
+      "id": "grenade-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "広範囲の爆発を引き起こす火弾。 多数の敵を扱う際に便利です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "da6a8268b875d982ebe684ffa0a9f2bd60660133ace22711523baab76fcb763a",
+          "status": "machine_assisted",
+          "text": "手弾発射装置"
+        }
+      },
+      "id": "grenade-launcher",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "広範囲の爆発を引き起こす火弾。 多数の敵を扱う際に便利です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aed293ff7483e9046f7972738b90af2a02381a955e2d8c93772b7c74766fe16",
+          "status": "machine_assisted",
+          "text": "グレネードランチャー2"
+        }
+      },
+      "id": "grenade-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "広範囲の爆発を引き起こす火弾。 多数の敵を扱う際に便利です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "81cb541404fe98074445cd35eca9a14e5832b0196071c9098052e898b6e55dfb",
+          "status": "machine_assisted",
+          "text": "グレネードランチャー3"
+        }
+      },
+      "id": "grenade-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "広範囲の爆発を引き起こす火弾。 多数の敵を扱う際に便利です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "97d66c7212a6e1b51ba9581a4e81280f7ac3c01138f089558e2c7c17f96a53eb",
+          "status": "machine_assisted",
+          "text": "グレネードランチャー4"
+        }
+      },
+      "id": "grenade-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "広範囲の爆発を引き起こす火弾。 多数の敵を扱う際に便利です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8bfe98dffa295974aa530d2616308bf920ce345431182f2297b284846ef27610",
+          "status": "machine_assisted",
+          "text": "グレネードランチャー5"
+        }
+      },
+      "id": "grenade-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "edb40a3945ae8ee15d4ff070b959604beda181badcf8c0773f8c63408a46c06e",
+          "status": "machine_assisted",
+          "text": "新鮮な果実が豊富にふるまう 独特の香りが漂う、香り豊かな香り。 食べると一定期間+10%増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6e7958a9cea40af707c3d8f130b508f189bb806fe0d4ff81088941f10c2756a5",
+          "status": "machine_assisted",
+          "text": "ハーブローストモコロン"
+        }
+      },
+      "id": "grilled-sheep-herbs",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0e9fdc13f382fdf6e4da3e9def10857a6e03099ba123d99d4c91be12cc95df20",
+          "status": "machine_assisted",
+          "text": "塩漬けにし、簡単な料理で焼き上げた新鮮なフィレット。 食べると、一定期間ノックバックやひっくり返される。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "69e62f9244798c2e2c94b428d059da93bc3196859faecd2088b792aeb744c46f",
+          "status": "machine_assisted",
+          "text": "塩焼きオオタチウオ"
+        }
+      },
+      "id": "grilled-sword-cutlass-fish",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "敵を自動的に追跡し追撃するミサイルを発射します。 ミサイルは衝撃で爆発し、広範囲に損傷を与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2fa76acff31a64bda0234f70efce18cd5e985a143585e87f49c96fb709fe1c5d",
+          "status": "machine_assisted",
+          "text": "ミサイル発射装置"
+        }
+      },
+      "id": "guided-missile-launcher",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "敵を自動的に追跡し追撃するミサイルを発射します。 ミサイルは衝撃で爆発し、広範囲に損傷を与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6c9be2f2d15bf105692760cfdfa81be7d5a3f8f02dc1950d6f397476d600c5cb",
+          "status": "machine_assisted",
+          "text": "ミサイル発射装置2"
+        }
+      },
+      "id": "guided-missile-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "敵を自動的に追跡し追撃するミサイルを発射します。 ミサイルは衝撃で爆発し、広範囲に損傷を与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "602e39236efbad11eb76402c06beb8eb2cbbaf544ee9c9cc7381cada7831c956",
+          "status": "machine_assisted",
+          "text": "ミサイル発射装置ガイド3"
+        }
+      },
+      "id": "guided-missile-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "敵を自動的に追跡し追撃するミサイルを発射します。 ミサイルは衝撃で爆発し、広範囲に損傷を与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "568bd8b2d3743fd4caca850d633627a2dbedf535eef739055ac6cc413d92553d",
+          "status": "machine_assisted",
+          "text": "ミサイル発射装置ガイド4"
+        }
+      },
+      "id": "guided-missile-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "敵を自動的に追跡し追撃するミサイルを発射します。 ミサイルは衝撃で爆発し、広範囲に損傷を与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "557f4309b5f25c847ea82888329c6fd20052f1fe0b4d884e0e138053b5a2c7d8",
+          "status": "machine_assisted",
+          "text": "ミサイル発射装置5"
+        }
+      },
+      "id": "guided-missile-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ec7aed9eac88b9a2ba80283877ca3f31d3522800feea0a215275c45891ce2b86",
+          "status": "machine_assisted",
+          "text": "弾薬を発射するのに使われました 弾丸を作るために必要。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed9485dca097b7107f171beb207b125931b58e86fe121d335e7778bf31d95482",
+          "status": "machine_assisted",
+          "text": "火薬"
+        }
+      },
+      "id": "gunpowder2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "44ca3dc17c1604604239095411b81f20fe2e11e0073272ac40ff7ec57654a11e",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使用してマーカスのようにドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f4a6abc5dbbd188b60462d09c702e31fdb63b643230b333abf56b2925a8a347e",
+          "status": "machine_assisted",
+          "text": "マーカス・ハット"
+        }
+      },
+      "id": "gym-head-desert",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2b3464a94131d5e3f594c656f55e0b900fda8abaa427a0866b40919a929a5a17",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使ってアクセルのようにドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fcdd6575bc6bdc09ef77724f6d4adc53161afd11f0c54596dc6442f936137e84",
+          "status": "machine_assisted",
+          "text": "アクセルハット"
+        }
+      },
+      "id": "gym-head-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1a7ea235d3fb0bb737c87e47facae076296eab8005e7c3071770730be69bbba9",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使用してリリーのようにドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddbe2a260ee39186b497d953315d50376269a3b661b8ec89ea4c42a0a8a42167",
+          "status": "machine_assisted",
+          "text": "リリー・ハット"
+        }
+      },
+      "id": "gym-head-forest",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5d462e190571483a9892f7ac1545af2c95f04da4f029d72eefd003f1e90e535b",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使って、ゾーイのようなドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "57862460ce8ea180a01e8244ace493b25d5cb99bfa0ccdf2dc75879bfc146d35",
+          "status": "machine_assisted",
+          "text": "ゾーイハット"
+        }
+      },
+      "id": "gym-head-grass",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "12201e897d05274593ff157a109da9bae402a9cc7c00d0c789f176b34dcff5a4",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使って、サヤのようにドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "071ce19ec9e70e491cbf3e57234ae8604ee847f7c8d36c2c03941ed3d28517d4",
+          "status": "machine_assisted",
+          "text": "さや帽子"
+        }
+      },
+      "id": "gym-head-sakurajima",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b9b4f331021cbc9f8bad46f788626bbcd23bf97e3e09146b47e0c6bd955b8e60",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使用してビクターのようにドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "69f91e087ba579b10c2e5b84369d453df9fb5569355e3d3136c5f2ce0f463c1b",
+          "status": "machine_assisted",
+          "text": "ビクターハット"
+        }
+      },
+      "id": "gym-head-snow",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3225df55f6bd6243cbf6619f8f59a556998872a63f936dd4060a0e3297dd811b",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使ってビヨンのようなドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b28fbb8544ed608369b011d527361655a07b58dcaceaad9f947894a63f0fc77",
+          "status": "machine_assisted",
+          "text": "ビヨルンハット"
+        }
+      },
+      "id": "gym-head-viking",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1103ccf2e694c21fa1dd89936eb5653ef179116b49cc2f6a0d8a63556193549e",
+          "status": "machine_assisted",
+          "text": "きのこと肉を小麦粉で包んで煮込んだ料理。 噛みつきの食感は、とんでもない。 食べると一定期間10%改善します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9898e4ab1b14cff2e1d9877895310906b17dc46c27231022da3e04a828cf3558",
+          "status": "machine_assisted",
+          "text": "夏期マックス座"
+        }
+      },
+      "id": "gyoza",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6f1e0ebe655671baa01b8479ae20b340cf0d8bc7c3dba7c644d82edff202d586",
+          "status": "machine_assisted",
+          "text": "牛肉の旨みが豊かで、パン本来の甘さに調和したこの名作。 食べると作業スピードが上がります。 SANを少しゆっくり減らすことができます"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f9c09053591a5274080209beda11b654244c0b6ff865de3cb002bc903a5a88ed",
+          "status": "machine_assisted",
+          "text": "カスターマックスハンバーガー"
+        }
+      },
+      "id": "hamburger-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "719b89f47c300792da41226de6f69f32e890445547ec0dae9894d3de360c0f83",
+          "status": "machine_assisted",
+          "text": "能力と速射性能を向上させたハンドガン。 火力よりも 即効性があります [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c1fdc3b9f61b9776898a1ecc045acf853d9eba6b64a3e5efe27d09485c7ad90b",
+          "status": "machine_assisted",
+          "text": "拳銃"
+        }
+      },
+      "id": "hand-gun-default",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "31534b3d98dbf1a328d916a0f0ec03d487616a7057ca232152c9976fdc8a7928",
+          "status": "machine_assisted",
+          "text": "拳銃弾薬"
+        }
+      },
+      "id": "handgun-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0015fbd44495253a06661eff9ed07e002e0e1ccb74fff553d43b3f9672ae53c7",
+          "status": "machine_assisted",
+          "text": "ベラルージュ(Ultra)のパワーを発揮。 まれにしか得られない幸運なこと。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6cb90bbd720349c8687608ff92a8bcc69aaa2fd68b1c7f08c322763ce994cd95",
+          "status": "machine_assisted",
+          "text": "魔女の王冠"
+        }
+      },
+      "id": "head-equip001-purple",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "a343f0f120feaef1f5d0ad024fae695dfa97fe36a3f34dea7705b82f5fec2820",
+          "status": "machine_assisted",
+          "text": "花のヘアアクセサリー。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bcfbf6f4a69fe82ef6ed86eaa4851747fec89d18ca972705d1ccf32a908b1e29",
+          "status": "machine_assisted",
+          "text": "エクスカスターマックスアクセサリー"
+        }
+      },
+      "id": "head-equip023",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "32d553814cd8c9590d3a223b73805f0e44c5b21a1c145983384ba57e8b7f81f3",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip024",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "34576bed8b8beb1a89eea9ed86a2f54e30faa25f3e3ef5308cc1e8f12a6c4a19",
+          "status": "machine_assisted",
+          "text": "形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d87e7c72efb43da72c95df5a18198e83ad7e5e2ff530b6340e81ba38fb1dfe33",
+          "status": "machine_assisted",
+          "text": "クワッドマックスフード"
+        }
+      },
+      "id": "head-equip025",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842",
+          "status": "machine_assisted",
+          "text": "キャップ形状 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a88d442ae0afb192cb43f32b11a7a1d4619d00bafa3de6036800a256f3d78181",
+          "status": "machine_assisted",
+          "text": "クワッドマックスキャップ"
+        }
+      },
+      "id": "head-equip026",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4699d48b4a346f1dbad56eca992e070b360280f54fc5c0179a531a6b8f5efa93",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip027",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf",
+          "status": "machine_assisted",
+          "text": "ヘッドバンドの形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "340d22663cad109709b1667436f542a1922bfb65f737fc8ba339310f30af246b",
+          "status": "machine_assisted",
+          "text": "カスターマックスヘッドバンド"
+        }
+      },
+      "id": "head-equip028",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "25dd83ed6c59a7ddecbbaa37989d6161ebbc0838f163ab4ee308752a9a9ffb6f",
+          "status": "machine_assisted",
+          "text": "形に。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b05ec280ac4c40effe1a3c92ac6f8b0aefc56754901e8e311ae7c04e92d0a4ea",
+          "status": "machine_assisted",
+          "text": "クアッドマックスのヘルム"
+        }
+      },
+      "id": "head-equip029",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "25dd83ed6c59a7ddecbbaa37989d6161ebbc0838f163ab4ee308752a9a9ffb6f",
+          "status": "machine_assisted",
+          "text": "形に。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fe43df6f10135b9a11b357b26afa8763c006a5aaaaa7901839ee86e2942d9cf",
+          "status": "machine_assisted",
+          "text": "クアッドマックスのヘルム"
+        }
+      },
+      "id": "head-equip030",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842",
+          "status": "machine_assisted",
+          "text": "キャップ形状 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7814c306a9096e7886e7eb75981d20712a4c20869dee6487111337acba9808c4",
+          "status": "machine_assisted",
+          "text": "クワッドマックスキャップ"
+        }
+      },
+      "id": "head-equip031",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "56cbceff5a4dad2ae34401ae7e2037ed674683fc771f077c11562159fd938146",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip032",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "29d6fa310899f1a041e88cae8bedce852c0aa6e910776fde27a8a587ce22375d",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip033",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c14d0285cdcb53b3659a608dfd8cdf2fc2f6698356da9752df4f7ed8625dd017",
+          "status": "machine_assisted",
+          "text": "ボルドラゴ(Ultra)のパワーを発揮。 まれにしか得られない幸運なこと。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca8e24ac30745c64098c2274cf01b1cc36387f13bfe444982822b90dc4c3c227",
+          "status": "machine_assisted",
+          "text": "超越の角"
+        }
+      },
+      "id": "head-equip041",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3fe0e6ad890bb5e1a301fb5ff22e8eecb2d3163e716f119f1408df70a36f91de",
+          "status": "machine_assisted",
+          "text": "ヘッドギアは、まるで [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a5f5ae092bc79693775f5f69d192e9b7d7841120a4a185a70596e770aaa29d6f",
+          "status": "machine_assisted",
+          "text": "カスターマックスの頭"
+        }
+      },
+      "id": "head-equip044",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "019c914d98165f91b4941d7b3d0a96a3a3e67a15778961acfc5dcf3f2d0a6cea",
+          "status": "machine_assisted",
+          "text": "ンダコアラをモデルにしたコスチュームヘッドピース。 入ってくるダークダメージをわずかに減らします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a42e16deaa751fe96c18eb8f1cc8d937edb3e6978fb9370abe247d1a2f0c580c",
+          "status": "machine_assisted",
+          "text": "クアッドマックスヘルメット"
+        }
+      },
+      "id": "head-equip045",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "17b7360efea526af7ec5f22c5cce1f39322d35f7e85ed062abbe91b4221f7101",
+          "status": "machine_assisted",
+          "text": "レジェンディア(Ultra)のパワーを発揮。 まれにしか得られない幸運なこと。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2f5012015094da2d59ae9f628d7c647b9e607a7bae37e28aa38c687a9fcdce92",
+          "status": "machine_assisted",
+          "text": "救世冠"
+        }
+      },
+      "id": "head-equip046",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4639e9d73a33e081792fad94e5f48660447c5266a34fca7783d661bc46627dab",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使って、アウリのようにドレスアップ!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4e0b026bfad49c4df44c340c46d41401b800d94b6d56eb09aca4983a75326607",
+          "status": "machine_assisted",
+          "text": "青織帽子"
+        }
+      },
+      "id": "head-equip048",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b4e17f64fb2d62ef1d2793e011a9e871ab5c97a5ce89cb74d464e0239b1573c8",
+          "status": "machine_assisted",
+          "text": "この特別なヘッドピースを使ってゼナーラのようにドレスアップ! まれにしか得られない幸運なこと。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a81fa67b39753f029d5c38df729c776bcd58a682eb218389b3d979d04e35eab4",
+          "status": "machine_assisted",
+          "text": "善良帽子"
+        }
+      },
+      "id": "head-equip049",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf",
+          "status": "machine_assisted",
+          "text": "ヘッドバンドの形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0d07b7be1c2bc25a272e056a7b31337a03e83db279debb9accb11cab4bdd8d61",
+          "status": "machine_assisted",
+          "text": "カスターマックスヘッドバンド"
+        }
+      },
+      "id": "head-equip050",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf",
+          "status": "machine_assisted",
+          "text": "ヘッドバンドの形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8cc10d28d8a8c2bd6411d7c48dd2b3bcfa77edcd1ac6a47a24a58973f75c6898",
+          "status": "machine_assisted",
+          "text": "カスターマックスヘッドバンド"
+        }
+      },
+      "id": "head-equip051",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f747ba3f3b69b377f1d9740670f6b17ed9656f4b05cd9359106d2a37acb22aff",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip052",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e7b0c310a3c1c7df44c4a62fe5ebb523bf479b1374112b6bbc5d8d846a7f296e",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip053",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2cce66fda377150f11dec034e5c66b8fc5a18f0a7711ddb0d631c843909afd09",
+          "status": "machine_assisted",
+          "text": "クワッドマックスキャップ"
+        }
+      },
+      "id": "head-equip054",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "02cff75159f0f17612fe421044b4f8fc5d9fbe4dd0f8f57ae8faa1f8bd242e63",
+          "status": "machine_assisted",
+          "text": "クワッドマックスキャップ"
+        }
+      },
+      "id": "head-equip055",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "632a3acad658b0338de37f4bcfb47a902678e595054bd36c1a0aac37ff809af1",
+          "status": "machine_assisted",
+          "text": "クワッドマックスキャップ"
+        }
+      },
+      "id": "head-equip056",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "37178db5abc0d537efd1e08f07f59552a8d4878703c91ae3a1e9ee12dc35f332",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip057",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ceb73f7720bab92644aeae87003c7bec7755da2a71fe8982326edcf7d1daa9ac",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip058",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "591e4175d688cac374cfbc497bf0d67220caebf4c313dc341577e40a51c40684",
+          "status": "machine_assisted",
+          "text": "ヘアアクセサリー。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "003ed2f27de694cdb7181ab03c2f46a5cf7dbc980ec3f5de4b3e50586c384416",
+          "status": "machine_assisted",
+          "text": "エクスカスターマックスアクセサリー"
+        }
+      },
+      "id": "head-equip059",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "21839fa7f480a9a8fffe83f1c6fa031d95f589b717342d4b65663da8d5f51d33",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip060",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1b650d2e3d0a224a8d372b51472369b3aabb0a219543ac299e9b210b207bc8d9",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip061",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "帽子の形 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cc6a5ac99ca112722670cc098a8f9404e9c092f17ed0e2ab1fb448cbde6efadc",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子"
+        }
+      },
+      "id": "head-equip062",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "16738083c32f8d2c26ea70175cd34267d162e4faaf1314c9c7721430ae25fe8b",
+          "status": "machine_assisted",
+          "text": "上位の人のための冠。 かなり重いので、実用には適していません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8b4bb3ab526bab76aeec76ef3dbbfeb968091a70fc5ef2ee2279fe85493546e2",
+          "status": "machine_assisted",
+          "text": "君主の冠"
+        }
+      },
+      "id": "head001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "51809825a99561b271b135c69509a2a2bdb9d298eac9ecc3d14497987394e361",
+          "status": "machine_assisted",
+          "text": "珍しい黄金の冠。 着るだけで王族のように感じる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bd585f713ad9bcf638f027cb5af78fa7bac2ba11cfcbea8cd0e7599a0cce8aea",
+          "status": "machine_assisted",
+          "text": "金冠"
+        }
+      },
+      "id": "head002",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "8acb11f3ff828ce6575712e5697bb9c90f117625a38ec2e1f2b19024ded361f6",
+          "status": "machine_assisted",
+          "text": "耳を模したかわいいヘッドバンド。 [原文欠落]。 頭部を保護するものではありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8332899c719d51a518e412563852608c737106235295c9043f2ad462b060194e",
+          "status": "machine_assisted",
+          "text": "長耳ヘッドバンド"
+        }
+      },
+      "id": "head003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "323123be4e00b7aacd8405a8088dcbad75cbfc0926e9d2e1c853753bfe17012d",
+          "status": "machine_assisted",
+          "text": "または、を模した帽子 [原文欠落]。 パルのスキルを使えるように感じさせます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e0d13476ac66870b3a9ed62aca52492e4d7ea3efe6c04f49a7d5cdc523f8e4e5",
+          "status": "machine_assisted",
+          "text": "魔女の帽子"
+        }
+      },
+      "id": "head004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "976babd7ef7923a4d7e8965dd50a0fff512232cf675b54f74f11b301a60298a7",
+          "status": "machine_assisted",
+          "text": "日常使用に最適な軽くて柔軟なキャップ。 ファッショナブルな、それはかつて 島で人気のアイテム。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "375cae4596ee034d3db28bcb68ebf8034efbfc75ce6fb6926d4ca4f16eba3c81",
+          "status": "machine_assisted",
+          "text": "ソフトハット"
+        }
+      },
+      "id": "head005",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "89ec0c1ef46d766676a3940c396735048c45e954b4667f6514a04787f0a7c6aa",
+          "status": "machine_assisted",
+          "text": "着用者の頭を保護するヘルメット。 多くの人が頭を負傷した後に作られたそうです 転倒を起こした後 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a47fdf6415fc436ee65ac597251edfa2e58a5ea60b53e65d2886ea6cb17ba374",
+          "status": "machine_assisted",
+          "text": "ヘルメット"
+        }
+      },
+      "id": "head006",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d987241e9bced983db8230364bc55932ae117d8cc863185c07acec3b22c848e1",
+          "status": "machine_assisted",
+          "text": "男の帽子。 素材から作られたものは高級品と考えられています。 しかし、材料から作られたものは品質が低くより一般的に見つかっています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "63595db7606182f0fd047a949ab8e1351fb4acbf248017df6074b03aef5c1900",
+          "status": "machine_assisted",
+          "text": "シルクハット"
+        }
+      },
+      "id": "head007",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d70f7f1b8c37965c7c5537c6652084d16d5470058a9fe60961b574450c116e77",
+          "status": "machine_assisted",
+          "text": "戦うのが大好きな人のための帽子。 前の所有者は 絶滅に至りました"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b33f2650640a812fa2b09aa606fd84168a4b8a3ab7558ed9322f6a4388a3cc55",
+          "status": "machine_assisted",
+          "text": "トリコーン"
+        }
+      },
+      "id": "head008",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f734ad99e44810ae22a4756447fce5ae769ec73cc37a48b84632c70370bacb0c",
+          "status": "machine_assisted",
+          "text": "探検家のための帽子。 太陽の明るい光線から保護します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d28b9a60af4cffc605bb010696490836d06ea624af2b9be26959fe41d07e8045",
+          "status": "machine_assisted",
+          "text": "探検家キャップ"
+        }
+      },
+      "id": "head009",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1dc9311b1a04a580a9014e6f4e5d0cb10f30f2ed2b006bc89309588db272f6ad",
+          "status": "machine_assisted",
+          "text": "着用者にスマートな気分を与えるキャップ。 この島に学校はかつてありましたか。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4197966c1209bbc719c05a7c20103bd33404703d286dfe4d286932718ccaca4d",
+          "status": "machine_assisted",
+          "text": "卒業生キャップ"
+        }
+      },
+      "id": "head010",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9579037754d298e166871be96a6428d7f7e4078d155a7c614be52b6926367c24",
+          "status": "machine_assisted",
+          "text": "フィールドで働くための帽子。 太陽の明るい光線から保護します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddf4c02972036d02ec72a2403d04a27ab95ad61536bf51bd87b5be0a58dfd9eb",
+          "status": "machine_assisted",
+          "text": "クワッドマックスの帽子 牧場"
+        }
+      },
+      "id": "head011",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b59819ea165866eaf323c6e16f1a6049d0b1c363f552748f0d4c194e1626c4ce",
+          "status": "machine_assisted",
+          "text": "丈夫で丸い帽子。 壊れない保証付きで販売されました たとえ踏みつけたとしても"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5743bf08237d187256f2c2ed16e4e1bc00b77ea29be094b07214c8ac9d6ac763",
+          "status": "machine_assisted",
+          "text": "ボウラーハット"
+        }
+      },
+      "id": "head012",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "9363fb2b6a8ff79f26795e96624a94e44bcb40f47bc5ceebe0dc4321bf56d10e",
+          "status": "machine_assisted",
+          "text": "キャップ形状 [原文欠落]。 その華やかなデザインは遠くから見えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1e01032809ab8b781e551c78d465b2d6339a34ce4b58b2ecf351eb4f811d6f2d",
+          "status": "machine_assisted",
+          "text": "クワッドマックスキャップ"
+        }
+      },
+      "id": "head013",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "22e2cf66eb81a40b55a61efae03d4ec2d6b6224d86ee35d828a94bf4e47950f6",
+          "status": "machine_assisted",
+          "text": "キャップ形状 [原文欠落]。 身に着けている人は、コントロールできないほどに笑う。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6da9de1b9066b78160941560fb5e4c9770405506560f5ba17bf2aa698d36caea",
+          "status": "machine_assisted",
+          "text": "めくクルットリキャップ。"
+        }
+      },
+      "id": "head014",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842",
+          "status": "machine_assisted",
+          "text": "キャップ形状 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9d7924a450bc6dd2c3b986a34ac522644e4ed4b813074232ba2634fd4187ac35",
+          "status": "machine_assisted",
+          "text": "クワッドマックスキャップ"
+        }
+      },
+      "id": "head015",
+      "kind": "item"
+    }
+  ],
+  "schemaVersion": 1
+}

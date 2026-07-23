@@ -1,0 +1,2706 @@
+{
+  "locale": "ko",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "824436271e21bc3a6cd0d2ab216168cafe9ce1eb9ae776778ebe368a1bbf32f5",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Plasteel 방어구 개요 3"
+        }
+      },
+      "id": "blueprint-plastic-armor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d1e3432fcd8b24de311693f57c250fe8cd1f5b1347b672edba0e68e7ec32ab72",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Plasteel 방어구 개요 4"
+        }
+      },
+      "id": "blueprint-plastic-armor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a31d233ca9a95408fbfe80a52160de11884745cd8d02430177f3ee3796706d69",
+          "status": "machine_assisted",
+          "text": "방열 Plasteel 방어구 개요 1"
+        }
+      },
+      "id": "blueprint-plastic-armor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d45da78d75497faed98300d227e1d87261b09cbb77edc62c11851790fa8b4872",
+          "status": "machine_assisted",
+          "text": "방열 Plasteel 방어구 스키마틱 2"
+        }
+      },
+      "id": "blueprint-plastic-armor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9c3ae6e38e68fe76a7f07db0687f91d5c1543b2e203e4c1945418823698d40df",
+          "status": "machine_assisted",
+          "text": "방열 Plasteel 방어구 스키마 3"
+        }
+      },
+      "id": "blueprint-plastic-armor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a13d9c420055c53abb7ca5dfdb0e63c54569521385249e0f7e0e8457271e3f4d",
+          "status": "machine_assisted",
+          "text": "방열 Plasteel 방어구 스키마 4"
+        }
+      },
+      "id": "blueprint-plastic-armor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bbd9d492c4a35362f85e2ec38c31cdaf0226cfb2e70aab786d2cc77e3d5ba3e9",
+          "status": "machine_assisted",
+          "text": "경량 Plasteel 방어구 스키마 1"
+        }
+      },
+      "id": "blueprint-plastic-armor-weight-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7dee3e12d94b0653bce54d4eee225e6b1359983f17328ffcca920fc1312662cb",
+          "status": "machine_assisted",
+          "text": "경량 플라스틸 방어구 스키마틱 2"
+        }
+      },
+      "id": "blueprint-plastic-armor-weight-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "150f4246c53e70b4c5af6cce9ca017eefa2855069a7feae646b3caf4ac659477",
+          "status": "machine_assisted",
+          "text": "경량 Plasteel 방어구 스키마 3"
+        }
+      },
+      "id": "blueprint-plastic-armor-weight-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4a8b0d0c67cec37d203a1311ebb485af3f5f4159a44f533e7d9cb86334c0bbd6",
+          "status": "machine_assisted",
+          "text": "경량 Plasteel 방어구 스키마 4"
+        }
+      },
+      "id": "blueprint-plastic-armor-weight-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3f8ae6243b85b700473efbba3786fb81537c5fbf6eb928b70351535738ee37fa",
+          "status": "machine_assisted",
+          "text": "Plasteel 헬멧 구조상 1"
+        }
+      },
+      "id": "blueprint-plastic-helmet-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d915d6165df2130136d8794a35670ee1857564314427985406e4063cd59d1b16",
+          "status": "machine_assisted",
+          "text": "플라스틸 헬멧 스키마틱 2"
+        }
+      },
+      "id": "blueprint-plastic-helmet-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca329782025f80995e98c54ac54606107a83540c305aed97f6c6cddca0cbb4e9",
+          "status": "machine_assisted",
+          "text": "Plasteel 헬멧 스키마 3"
+        }
+      },
+      "id": "blueprint-plastic-helmet-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "335d000aecac2a0b554d55a6bb00d81a88197d16685a9a73fe51d199b65c2e37",
+          "status": "machine_assisted",
+          "text": "Plasteel 헬멧 구조상 4"
+        }
+      },
+      "id": "blueprint-plastic-helmet-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76c88549b651d9d1673ab15d80572c28abaf64c8d71a35fe5c460e857364244d",
+          "status": "machine_assisted",
+          "text": "펌프 액션 샷건 스키마틱 1"
+        }
+      },
+      "id": "blueprint-pump-action-shotgun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1de8fd65974cae39a8fd7822fdf9964c7620eaf1964485e4ba92d67d6e93a8a5",
+          "status": "machine_assisted",
+          "text": "펌프 액션 샷건 스키마틱 2"
+        }
+      },
+      "id": "blueprint-pump-action-shotgun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "75cad67944cbc2d263e5c2a71c472bf8f13ef15490ee89986fb60623f0cb35dd",
+          "status": "machine_assisted",
+          "text": "펌프 액션 샷건 스키마 3"
+        }
+      },
+      "id": "blueprint-pump-action-shotgun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e488f4aa53ba38b395a81e154ab835484860fa7265c8322be75335fbdd0ffcf5",
+          "status": "machine_assisted",
+          "text": "펌프 액션 샷건 스키마 4"
+        }
+      },
+      "id": "blueprint-pump-action-shotgun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "95a9d3f061165de8bf6c5271357528ed04b767519eb4b43337b6c2a9abed92ca",
+          "status": "machine_assisted",
+          "text": "반자동 소총 스키마틱 1"
+        }
+      },
+      "id": "blueprint-semi-auto-rifle-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "02bc860c907edd1c6bb7bb6de3482472d26dbcc6324a1af53285823fc7349106",
+          "status": "machine_assisted",
+          "text": "반자동 소총 스키마틱 2"
+        }
+      },
+      "id": "blueprint-semi-auto-rifle-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3d9aa8a5f1ca08b8c1902bae03a1a6731edc6e4d78a4b50f9c224e48f60d5570",
+          "status": "machine_assisted",
+          "text": "반자동 소총 스키마 3"
+        }
+      },
+      "id": "blueprint-semi-auto-rifle-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "84e4a1b0c1c00921a9676187a76da1c6145ab5c02517a983bb15baca196f3de6",
+          "status": "machine_assisted",
+          "text": "반자동 소총 스키마틱 4"
+        }
+      },
+      "id": "blueprint-semi-auto-rifle-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f8356cdeefd09eeeb74b9383e29d4a5cc6416a34b3f0cf5f8e8994cbd5f5705f",
+          "status": "machine_assisted",
+          "text": "반자동 샷건 스키마틱 1"
+        }
+      },
+      "id": "blueprint-semi-auto-shotgun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "43c5da3ebe30d7d2023dc4f31327f6b4343d9d399c39c1c2681b11d4b702b8b1",
+          "status": "machine_assisted",
+          "text": "반자동 샷건 스키마틱 2"
+        }
+      },
+      "id": "blueprint-semi-auto-shotgun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7acbd84eb0fa260d93e147933af1a26b0dd5a3d98bd8e86888a73e6faa97c9b7",
+          "status": "machine_assisted",
+          "text": "반자동 샷건 스키마 3"
+        }
+      },
+      "id": "blueprint-semi-auto-shotgun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e7ec18702ac087171c0abae1dd94bab74834d4642e3733396d97cbe31ae29802",
+          "status": "machine_assisted",
+          "text": "반자동 샷건 스키마 4"
+        }
+      },
+      "id": "blueprint-semi-auto-shotgun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82",
+          "status": "machine_assisted",
+          "text": "인벤토리에 있거나베이스에 저장하면 빌드 할 수 있다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bcafd9c02dbbd863595c1fdc141afa101e5e482b7d27af9d4a375aadbc71061c",
+          "status": "machine_assisted",
+          "text": "실험실 의자 Schematic"
+        }
+      },
+      "id": "blueprint-sf-chair",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82",
+          "status": "machine_assisted",
+          "text": "인벤토리에 있거나베이스에 저장하면 빌드 할 수 있다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c40b6edd7246c80d53bd8d27e06c7eb85eb1171767cbcbb1bd26253a4b0af82a",
+          "status": "machine_assisted",
+          "text": "실험실 책상 Schematic"
+        }
+      },
+      "id": "blueprint-sf-desk",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a92ee77282eeac16a3e0e5eb85f7b0588a252f760ec34bbfe3fedaa5b7ad0915",
+          "status": "machine_assisted",
+          "text": "Hexolite 방어구 스키마 1"
+        }
+      },
+      "id": "blueprint-sfarmor-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "871a0ae7b25e6dc10a96e051b939173508d753758e95e5c7346d0c0a9bcc6784",
+          "status": "machine_assisted",
+          "text": "Hexolite 방어구 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sfarmor-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "05a6300d86a9c073765798623f8b4088d412ca25711ff79ef6d761a55237cecb",
+          "status": "machine_assisted",
+          "text": "Hexolite 방어구 스키마 3"
+        }
+      },
+      "id": "blueprint-sfarmor-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fcbbf8baf1c4a8f419274f65d5283466fb48e2af291b8b9909ece6e98a89025b",
+          "status": "machine_assisted",
+          "text": "Hexolite 방어구 스키마틱 4"
+        }
+      },
+      "id": "blueprint-sfarmor-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8f98019439ad06fcd2fa2932b4a8908e0ea36cfd336a5c8a0d03a329054bd557",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Hexolite 방어구 개요 1"
+        }
+      },
+      "id": "blueprint-sfarmor-cold-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8335f534a5d972ff5ea28edb8ea633c832b3e629ab601e0aa07b2d4bce41f922",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Hexolite 방어구 개요 2"
+        }
+      },
+      "id": "blueprint-sfarmor-cold-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a829ee217701d93262aa374a1804a4f16745a86cbaa3187e327a0bc83e37836a",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Hexolite 방어구 스키마 3"
+        }
+      },
+      "id": "blueprint-sfarmor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "96c30bfb80081ee484851d67738abc92b1615b2e7816813dfc60126a182f23f6",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Hexolite 방어구 개요 4"
+        }
+      },
+      "id": "blueprint-sfarmor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "66996febeee1dd8a769c9c6f265829dd51866679d1857fde08699868f5b921fc",
+          "status": "machine_assisted",
+          "text": "방열 Hexolite 방어구 개요 1"
+        }
+      },
+      "id": "blueprint-sfarmor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "774d8f844d7cb77fec8858f391b05353bf01a427705db2006a78ba0d4a9880ee",
+          "status": "machine_assisted",
+          "text": "내열성 Hexolite 방어구 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sfarmor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "45d7d008fb6ee909805dd25f028962d69c7349d48ce9cb29a12f41b23bc9d2be",
+          "status": "machine_assisted",
+          "text": "방열 Hexolite 방어구 스키마 3"
+        }
+      },
+      "id": "blueprint-sfarmor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5eaa770ee6e1a741d064be9fc102e20a1ec9059e45c36a3bd2a54ce973e72b20",
+          "status": "machine_assisted",
+          "text": "내열성 Hexolite 방어구 스키마틱 4"
+        }
+      },
+      "id": "blueprint-sfarmor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "49c9ddec13438f74fedf846e3f089c778e3a149cf9d538d4809d9a5c81524ee0",
+          "status": "machine_assisted",
+          "text": "경량 Hexolite 방어구 스키마틱 1"
+        }
+      },
+      "id": "blueprint-sfarmor-weight-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff3bb3c41e1705e3e949a7fc691ca9f9281d4df8d5548ad8f153b3f0cbbe4168",
+          "status": "machine_assisted",
+          "text": "경량 Hexolite 방어구 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sfarmor-weight-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "717c4918f34b4f8666dcfd2f76c17ff734d62698253d35e6129b92e6ec31706e",
+          "status": "machine_assisted",
+          "text": "경량 Hexolite 방어구 스키마 3"
+        }
+      },
+      "id": "blueprint-sfarmor-weight-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "06c6e8f2dd7dbf93accf4d79e2f0adc5e9b20ce4d9e681ff449c9ef1bd9ef1eb",
+          "status": "machine_assisted",
+          "text": "경량 Hexolite 방어구 스키마틱 4"
+        }
+      },
+      "id": "blueprint-sfarmor-weight-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "40e50f78915b520505a400931aaac0765cd9114c5406bebe6a9000840ca12926",
+          "status": "machine_assisted",
+          "text": "고급 보우 스키마틱 1"
+        }
+      },
+      "id": "blueprint-sfbow-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c0a1f9e6e290807675517e4dab72b693b292c592924c6da02632e9c60dc4dcd6",
+          "status": "machine_assisted",
+          "text": "고급 보우 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sfbow-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "95475c76445705bf66a7146adda608165493ee2af0b5c3cbaac53e3d21121303",
+          "status": "machine_assisted",
+          "text": "고급 보우 스키마틱 3"
+        }
+      },
+      "id": "blueprint-sfbow-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8536cecfb0ab3134512dfb4196c4d6627be2d1edbd743cd6e3fb157305dd7834",
+          "status": "machine_assisted",
+          "text": "고급 보우 스키마틱 4"
+        }
+      },
+      "id": "blueprint-sfbow-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3f4106098bcb1fbe13c5005934678ce9d599624bf4da3f791140ef9c775af623",
+          "status": "machine_assisted",
+          "text": "Hexolite 헬멧 구조상 1"
+        }
+      },
+      "id": "blueprint-sfhelmet-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eb27e79b5edcae97e4e1774adfd79ebea8f617872526bdede94d7c3f7608ee3a",
+          "status": "machine_assisted",
+          "text": "Hexolite 헬멧 스키마 2"
+        }
+      },
+      "id": "blueprint-sfhelmet-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d08aa049cf4c53128a6dc35a26f61a61630e07acd6eb2e78339a77902b840158",
+          "status": "machine_assisted",
+          "text": "Hexolite 헬멧 스키마 3"
+        }
+      },
+      "id": "blueprint-sfhelmet-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "426fdcc67c11cb898b50d43f15fb145ea1207370e1fb60e244c00f32ff5f1204",
+          "status": "machine_assisted",
+          "text": "Hexolite 헬멧 스키마 4"
+        }
+      },
+      "id": "blueprint-sfhelmet-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82",
+          "status": "machine_assisted",
+          "text": "인벤토리에 있거나베이스에 저장하면 빌드 할 수 있다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "80522ca6e6ffaac86a6c455f75cce80675ac066ae68cba965e935ef4d9c362bc",
+          "status": "machine_assisted",
+          "text": "빨간 나무로 되는 손전등 Schematic"
+        }
+      },
+      "id": "blueprint-shrine-lantern",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ae7df8a1ba013807d48bdd4613c4e5553478b276b9ef43e9cfd8601f9bb3cd0a",
+          "status": "machine_assisted",
+          "text": "단일 샷 소총 Schematic 1"
+        }
+      },
+      "id": "blueprint-single-shot-rifle-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ae0ca45ddeeb3f58a00d82652e967aebdf6009b26efa79ff83682d19f3c4fbeb",
+          "status": "machine_assisted",
+          "text": "단발 소총 스키마틱 2"
+        }
+      },
+      "id": "blueprint-single-shot-rifle-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f7d582c8d5b00aaf02d5022956768acaee9dcd7011c10dcfcac9405f28dec36",
+          "status": "machine_assisted",
+          "text": "단일 샷 소총 Schematic 3"
+        }
+      },
+      "id": "blueprint-single-shot-rifle-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d02d70ff8cfdc601725643f17c9ae47cb305a5fc23be477b4a056d7565a5c327",
+          "status": "machine_assisted",
+          "text": "단일 샷 소총 스키마 4"
+        }
+      },
+      "id": "blueprint-single-shot-rifle-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b2c7c85331954d3c1b1334e25139ad9c7a1b9b4fc0ae93bea2fb94929b3c8ee6",
+          "status": "machine_assisted",
+          "text": "무거운 돌격 소총 Schematic 1"
+        }
+      },
+      "id": "blueprint-sky-assault-rifle-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a40c027732099248aa66fa43b82369e0181f970277abb22d2c06602db0969b51",
+          "status": "machine_assisted",
+          "text": "무거운 돌격 소총 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sky-assault-rifle-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5f56eaefa2f4c30eecc5ddd25eea49688115ae4f806f4eb78b02b3dd8c0e68b5",
+          "status": "machine_assisted",
+          "text": "무거운 돌격 소총 Schematic 3"
+        }
+      },
+      "id": "blueprint-sky-assault-rifle-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dcacc6b8f657eaa28ce886f69ef86276922058485a6292fd891ea2c308d8b4e",
+          "status": "machine_assisted",
+          "text": "무거운 돌격 소총 Schematic 4"
+        }
+      },
+      "id": "blueprint-sky-assault-rifle-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0770a62e6f632d33b4e999dfefc951490b95aa2967eed57311dade87f8bd6465",
+          "status": "machine_assisted",
+          "text": "레이저 칼 스키마틱 1"
+        }
+      },
+      "id": "blueprint-sky-beam-sword-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "99056d4031fb312fa2c13b3822b7e9a17c69ffe54256a843a71a037dcb8a9854",
+          "status": "machine_assisted",
+          "text": "레이저 칼 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sky-beam-sword-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "871f35c19e8457e315a58cf736a9ac5a73deb892b4644bcd79c65275c6cc5549",
+          "status": "machine_assisted",
+          "text": "레이저 칼 스키마 3"
+        }
+      },
+      "id": "blueprint-sky-beam-sword-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b43db5487cc81ef63d2760363399fb4cc50ccc479298ce90c841a3ddd976224d",
+          "status": "machine_assisted",
+          "text": "레이저 칼 스키마 4"
+        }
+      },
+      "id": "blueprint-sky-beam-sword-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bc5c292087ef48d005c895b15c5704e200367b79e8b79f90d6e6b181628d1767",
+          "status": "machine_assisted",
+          "text": "기계식 보우 스키마틱 1"
+        }
+      },
+      "id": "blueprint-sky-bow-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5e52de353e6876f2bc9d1285924fe9933abdd7478afcbe99c16a935ed219b4fa",
+          "status": "machine_assisted",
+          "text": "기계식 보우 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sky-bow-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8c43a4f8e3b81fdd18a7fb5c1784f9d51efec62b9b3b248afb9a7ecc768a2d85",
+          "status": "machine_assisted",
+          "text": "기계식 보우 스키마틱 3"
+        }
+      },
+      "id": "blueprint-sky-bow-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b2df19497cfbfd8946bccd8c36fd8b6025f59d76ac68303b84e32a139f9859b4",
+          "status": "machine_assisted",
+          "text": "기계식 보우 스키마틱 4"
+        }
+      },
+      "id": "blueprint-sky-bow-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9644b1ee9047f6e499e73d08201d321af72a6b24e32cf11d0ab63684a029f34c",
+          "status": "machine_assisted",
+          "text": "전술 수류탄 발사기 Schematic 1"
+        }
+      },
+      "id": "blueprint-sky-grenade-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b78c4a0c71bac51ba30773d4c619cbd2d42f1ac6db27d21bac8b4b5686d3c0a7",
+          "status": "machine_assisted",
+          "text": "전술 수류탄 실행기 스키매틱 2"
+        }
+      },
+      "id": "blueprint-sky-grenade-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c45bc1e7992f34a912025568945c77fa695a6c1a4c3e31911530fe41321616b2",
+          "status": "machine_assisted",
+          "text": "전술 수류탄 실행기 스키마 3"
+        }
+      },
+      "id": "blueprint-sky-grenade-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "48c8a0cb494064fc8032a63c913b2f617084234fc3e4f0d6c8140a4a16e4a820",
+          "status": "machine_assisted",
+          "text": "전술 수류탄 실행기 스키마 4"
+        }
+      },
+      "id": "blueprint-sky-grenade-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f5af136f00ec5c015d85c384857b9e56aa5f33e0a073c3509d84e6556a96da58",
+          "status": "machine_assisted",
+          "text": "프로토 타입 Shotgun 스키마 1"
+        }
+      },
+      "id": "blueprint-sky-shotgun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb383007ec57497e9ae78615e76926219687265f064cc93ed7d8960ff180ffcf",
+          "status": "machine_assisted",
+          "text": "프로토 타입 Shotgun 스키마 2"
+        }
+      },
+      "id": "blueprint-sky-shotgun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "357953fc1a40cc2c9e04108c13e03f0b9663c6b197c449d669e67f9a83144ba0",
+          "status": "machine_assisted",
+          "text": "프로토 타입 Shotgun 스키마 3"
+        }
+      },
+      "id": "blueprint-sky-shotgun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9bbb9c6b00eb66914d3409bb995e97521d29180f4d401fab3953948e0ea210a5",
+          "status": "machine_assisted",
+          "text": "프로토 타입 Shotgun 스키마 4"
+        }
+      },
+      "id": "blueprint-sky-shotgun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1bd1492df0e07b325d40c57e9b0579628869ba181e90616dd31b75b6206e01b6",
+          "status": "machine_assisted",
+          "text": "전투 SMG 스키마 1"
+        }
+      },
+      "id": "blueprint-sky-submachine-gun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1948ee3d0222f619aacfa1d081ff34a11499ec90c17556555088aaca36d2baae",
+          "status": "machine_assisted",
+          "text": "전투 SMG 스키마 2"
+        }
+      },
+      "id": "blueprint-sky-submachine-gun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2b073b07f0f95da8ffd33c3e63694908a99318c5a829ed7160b4a9b1ab9cbc8f",
+          "status": "machine_assisted",
+          "text": "전투 SMG 스키마 3"
+        }
+      },
+      "id": "blueprint-sky-submachine-gun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eda500ea1bba4ad3eca31027241a86997f65846a08ead7059ce78b548efc40dd",
+          "status": "machine_assisted",
+          "text": "전투 SMG 스키마 4"
+        }
+      },
+      "id": "blueprint-sky-submachine-gun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3e576cfd0e362edf1adf34f97807958a1eed2228d1d1750f3ee5794da8501739",
+          "status": "machine_assisted",
+          "text": "릴리의 창 Schematic 4"
+        }
+      },
+      "id": "blueprint-spear-forest-boss-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "68f7acb2009612b6e6b6b876a4ff4b44afad5babeb246a824c9745e24f0befcc",
+          "status": "machine_assisted",
+          "text": "Lily's Spear Schematic (릴리의 창 스키매틱) 4"
+        }
+      },
+      "id": "blueprint-spear-forest-boss2-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eeae86609729a64c6135acec9945142451497f29e725e7c7b89e41488c3b6e08",
+          "status": "machine_assisted",
+          "text": "Pal 금속 방어구 스키마 1"
+        }
+      },
+      "id": "blueprint-steal-armor-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "db751db7b3f50f769551513bc516a5494becbdff8a5fb3c37bccc04df84fa2b7",
+          "status": "machine_assisted",
+          "text": "Pal 금속 방어구 스키마 2"
+        }
+      },
+      "id": "blueprint-steal-armor-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "27ded566fe87e59b120c056d17ed4978c8d62a70ee3dde1be2e1f04e6334a946",
+          "status": "machine_assisted",
+          "text": "Pal 금속 방어구 스키마 3"
+        }
+      },
+      "id": "blueprint-steal-armor-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5595d590d0521b90110ce39b0d7afb70c49ae16c14f90b5cc5e931bb4e939656",
+          "status": "machine_assisted",
+          "text": "Pal 금속 방어구 스키마 4"
+        }
+      },
+      "id": "blueprint-steal-armor-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "69b37975c014e135fea246362b234625705999496a30f5974378a76f24b92b59",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Pal 금속 방어구 도식 1"
+        }
+      },
+      "id": "blueprint-steal-armor-cold-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "adc0a7d0c22d923d69ec4499447c33dea138763d5d338ce25ae8d6d4ee48fd74",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Pal 금속 방어구 도식 2"
+        }
+      },
+      "id": "blueprint-steal-armor-cold-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "12a9a517cf18c212d48f8e8fd1620a6017071ac621358db8953aa3de8ec340c6",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Pal 금속 방어구 도식 3"
+        }
+      },
+      "id": "blueprint-steal-armor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4d82411134ff31946d2d7add2000e97031cac885753add54b96e3aa6f5a2c5e2",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 Pal 금속 방어구 도식 4"
+        }
+      },
+      "id": "blueprint-steal-armor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bd3fe0e7f420cfc47750875ad5487eaf2e860f6d85c74ee9548359a07aec297a",
+          "status": "machine_assisted",
+          "text": "방열 Pal 금속 방어구 도식 1"
+        }
+      },
+      "id": "blueprint-steal-armor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "943f8e8d8cdb56626284984fc9138da094d39666a2be276829862fd40a931e40",
+          "status": "machine_assisted",
+          "text": "방열 Pal 금속 방어구 개요 2"
+        }
+      },
+      "id": "blueprint-steal-armor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ac69a9ab36d75ed277bf5382256e00c78bc8266dea62568fff859b2800aaf034",
+          "status": "machine_assisted",
+          "text": "방열 Pal 금속 방어구 도식 3"
+        }
+      },
+      "id": "blueprint-steal-armor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e4bfbe27582df8e4cda9da00df3575ac5e165b7d47d7fc3a98d9356aeee6813f",
+          "status": "machine_assisted",
+          "text": "방열 Pal 금속 방어구 개요 4"
+        }
+      },
+      "id": "blueprint-steal-armor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a5c0db51e54e88c0de74f131fb4e1eac2d58825e3e1a163698a854219d54a51c",
+          "status": "machine_assisted",
+          "text": "Pal 금속 조타계 1"
+        }
+      },
+      "id": "blueprint-steal-helmet-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b5d1a68599eb4c6351c07c98ce8ddd2bbbfece431f30002cdc9cac20c6c6ae4c",
+          "status": "machine_assisted",
+          "text": "Pal 메탈 헬름 스키마틱 2"
+        }
+      },
+      "id": "blueprint-steal-helmet-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c439edb829c4e4bca241f7366fff2edcca845cbc9602b5aa30ff52dbace27fec",
+          "status": "machine_assisted",
+          "text": "Pal 메탈 헬름 스키마틱 3"
+        }
+      },
+      "id": "blueprint-steal-helmet-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b3baef6056f7c701b1f400874756f2edf29eaa8e019072a36f6770963a3a0145",
+          "status": "machine_assisted",
+          "text": "Pal 금속 조타계 4"
+        }
+      },
+      "id": "blueprint-steal-helmet-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "02e69af6f014098b5a6157f8b35f30f97ae2d9dcaac0e860d7f4bfc5e3028858",
+          "status": "machine_assisted",
+          "text": "SMG 스키마 1"
+        }
+      },
+      "id": "blueprint-submachine-gun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "197dab7616cf4bef69bac0d0b9500f87551cf80e3d75f6fc6ff23abb6b296a2d",
+          "status": "machine_assisted",
+          "text": "SMG 스키마 2"
+        }
+      },
+      "id": "blueprint-submachine-gun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0ee43cf745a72e572a9d06c0ab0db4f28ab0ed500cce22667c29f03c7eb7422b",
+          "status": "machine_assisted",
+          "text": "SMG 회로도 3"
+        }
+      },
+      "id": "blueprint-submachine-gun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d1a765b764ddf285ab855e18d2ed828a49cf77da00e139f99b1a9cfbfb66bf6d",
+          "status": "machine_assisted",
+          "text": "SMG 스키마 4"
+        }
+      },
+      "id": "blueprint-submachine-gun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff53908fa589a6ca2cb29efc8af955ddb2491b2fecd67bf7c06faa950744122f",
+          "status": "machine_assisted",
+          "text": "소드 스키마틱 1"
+        }
+      },
+      "id": "blueprint-sword-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "48c51c6b69e02b8d9d83cbb43bb32ed09045bf6056361914db1d8215ac69bba1",
+          "status": "machine_assisted",
+          "text": "소드 스키마틱 2"
+        }
+      },
+      "id": "blueprint-sword-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eb4af7287f83a0e4bee06c636f553a7cf67fc3d70718cfcf84f5de8246f62d72",
+          "status": "machine_assisted",
+          "text": "검 도식 3"
+        }
+      },
+      "id": "blueprint-sword-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8f4461e39508267ce9b4183380a498c21589a9787319a5ba3de605bab9dc02dc",
+          "status": "machine_assisted",
+          "text": "소드 스키마틱 4"
+        }
+      },
+      "id": "blueprint-sword-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82",
+          "status": "machine_assisted",
+          "text": "인벤토리에 있거나베이스에 저장하면 빌드 할 수 있다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5af650044dc0243288f1d3567ad3ef7fed90d18e91250ef939b51984fd6056dc",
+          "status": "machine_assisted",
+          "text": "장엄한 벽 토치 스키매틱"
+        }
+      },
+      "id": "blueprint-wall-torch02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bf54b0ba1546837c25522205bb9b0a8e192e9f891842a8af1da583906ae22834",
+          "status": "machine_assisted",
+          "text": "올드 보우 스키마틱 1"
+        }
+      },
+      "id": "blueprint-weaker-bow-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ceefe44678145839af47a5974bfbb791d72da9799935c218536b4d6ce9b3c3f4",
+          "status": "machine_assisted",
+          "text": "올드 보우 스키마틱 2"
+        }
+      },
+      "id": "blueprint-weaker-bow-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6f418290470ae8b7f7daf4eb831c1e58811734e38fc1277bf40f3a32a77954a7",
+          "status": "machine_assisted",
+          "text": "올드 보우 스키마틱 3"
+        }
+      },
+      "id": "blueprint-weaker-bow-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5fe66839dfbf97b90ae11db11a3d2875c3b48777d7e850bedf718837f385fb01",
+          "status": "machine_assisted",
+          "text": "올드 보우 스키마틱 4"
+        }
+      },
+      "id": "blueprint-weaker-bow-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b536766f61795764243e37e8d01cd5b7305b894fab91fbed406fd8dce3c17e8c",
+          "status": "machine_assisted",
+          "text": "빔 스캐터 스키매틱 1"
+        }
+      },
+      "id": "blueprint-wide-penetrate-shotgun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ef8745fd13af52b2350f52f2ffb5964de03276b1e4d92939d805562ad9f1d892",
+          "status": "machine_assisted",
+          "text": "빔 스캐터 스키매틱 2"
+        }
+      },
+      "id": "blueprint-wide-penetrate-shotgun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "73cbe06e7cdcc364ccb4695399d7cb41fb7e9edb61040bb144a53f9bd6724b88",
+          "status": "machine_assisted",
+          "text": "빔 스캐터 스키매틱 3"
+        }
+      },
+      "id": "blueprint-wide-penetrate-shotgun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2ee9ea2c1c5ca1c978778d88e2a9eec39a7521172da3d9f007fb7eef2122a095",
+          "status": "machine_assisted",
+          "text": "빔 분산 스키마 4"
+        }
+      },
+      "id": "blueprint-wide-penetrate-shotgun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82",
+          "status": "machine_assisted",
+          "text": "인벤토리에 있거나베이스에 저장하면 빌드 할 수 있다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f440914691ef6a800f3ea6a27500905f56de7f0dd5abc6e1f07b68cd26fc025c",
+          "status": "machine_assisted",
+          "text": "철사 담 Schematic"
+        }
+      },
+      "id": "blueprint-wire-fence",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82",
+          "status": "machine_assisted",
+          "text": "인벤토리에 있거나베이스에 저장하면 빌드 할 수 있다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c2fab670ac1ea3333135924200314709d2963231cd33f781ee3ebd3470151b05",
+          "status": "machine_assisted",
+          "text": "나무로 되는 바리케이드 Schematic"
+        }
+      },
+      "id": "blueprint-wooden-barricade",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "071414f261daf518d925b2f5ff0415636abc935fc6d538101e772bd3980f279a",
+          "status": "machine_assisted",
+          "text": "Holowed 판 우편물 Schematic"
+        }
+      },
+      "id": "blueprint-yakushima-armor001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0542a107a8acd4de4b7099311098502b525eeaa0c54893f1b089ce010d5c4116",
+          "status": "machine_assisted",
+          "text": "신성한 접시 메일 스키마 1"
+        }
+      },
+      "id": "blueprint-yakushima-armor001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7cb644619d2628bada306c54ba1111ecb79f8668e8f4fc6669eb960b2855c5e2",
+          "status": "machine_assisted",
+          "text": "신성한 접시 메일 스키마틱 2"
+        }
+      },
+      "id": "blueprint-yakushima-armor001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "66ce559b7784d1538f14fd69c9fb7e823ab5ccea00ff404cac20903a057d6705",
+          "status": "machine_assisted",
+          "text": "신성한 접시 메일 스키마 3"
+        }
+      },
+      "id": "blueprint-yakushima-armor001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "79c0c20445af09c42fdaa34ac354c562e130b7b950c0ac13681e1935f9df1ba8",
+          "status": "machine_assisted",
+          "text": "신성한 접시 메일 스키마 4"
+        }
+      },
+      "id": "blueprint-yakushima-armor001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4a61f492b6484cce61969ced8dddff5c8f37d2a184e0feb5bd7d3c766e2387f4",
+          "status": "machine_assisted",
+          "text": "테라 블레이드 스키마"
+        }
+      },
+      "id": "blueprint-yakushima-blade002",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "47cf0d62922a6a557b7c3ba721b66f3f7ededb9f683e34e1aaea5f4ce00fe6c6",
+          "status": "machine_assisted",
+          "text": "테라 블레이드 스키마 1"
+        }
+      },
+      "id": "blueprint-yakushima-blade002-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f89e122e42ee3bc4ee41b5bbdd8419843e07a2c260caf2974dcc1a98855f4891",
+          "status": "machine_assisted",
+          "text": "테라 블레이드 스키마틱 2"
+        }
+      },
+      "id": "blueprint-yakushima-blade002-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "05d00d73382b2767fbfcd0d77dc0c6f95ff548cf10d512fc017f86a6a01c6932",
+          "status": "machine_assisted",
+          "text": "테라 블레이드 스키마 3"
+        }
+      },
+      "id": "blueprint-yakushima-blade002-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "61a9777f04b77388cc50a38c14059bbe678e30bd6c5d424a8e51dc8002a40c31",
+          "status": "machine_assisted",
+          "text": "테라 블레이드 스키마 4"
+        }
+      },
+      "id": "blueprint-yakushima-blade002-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f7c22ece47319a70b20f171eda0a148176ad277c9226ce64f9f0c18898be0d22",
+          "status": "machine_assisted",
+          "text": "Terraprisma 스키매틱"
+        }
+      },
+      "id": "blueprint-yakushima-blade003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bbb0f2dd0a680706167cd76fcc867a2ec6e18c7052a20a46bac9e2ca283862bd",
+          "status": "machine_assisted",
+          "text": "Terraprisma 스키마 1"
+        }
+      },
+      "id": "blueprint-yakushima-blade003-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "10c90b6969b2071d9be47bcccc97146a604d059254176eac3649f6b9d4a1a713",
+          "status": "machine_assisted",
+          "text": "Terraprisma 스키마 2"
+        }
+      },
+      "id": "blueprint-yakushima-blade003-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4f757eecaf2f1120cf324177a30a1621c15c3f6035b294fb83f03a539cd07bc9",
+          "status": "machine_assisted",
+          "text": "Terraprisma 스키마 3"
+        }
+      },
+      "id": "blueprint-yakushima-blade003-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "55de278e2b1d430e3323980c151584ea093c0f234ff567993a5bfcd63519b456",
+          "status": "machine_assisted",
+          "text": "Terraprisma 스키마 4"
+        }
+      },
+      "id": "blueprint-yakushima-blade003-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7fc3bfc043fd0107dfee01f97a6cb197b09da7c5917c0076754009f517360a44",
+          "status": "machine_assisted",
+          "text": "엑스칼리버 스키매틱"
+        }
+      },
+      "id": "blueprint-yakushima-blade004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "116c7757cda76b987892216e8d9500f7b8bea4e75d5273fc87dee2d06043673f",
+          "status": "machine_assisted",
+          "text": "엑스칼리버 스키매틱 1"
+        }
+      },
+      "id": "blueprint-yakushima-blade004-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7425eb2ce14cf950c3c3b145f43e3feb19a6f94b7f2388702be19a324a44e708",
+          "status": "machine_assisted",
+          "text": "엑스칼리버 스키매틱 2"
+        }
+      },
+      "id": "blueprint-yakushima-blade004-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6e1c7ddc521497c6b1290fab743eb8210bb18e1bb5470f6f982f6817207a2559",
+          "status": "machine_assisted",
+          "text": "엑스칼리버 스키매틱 3"
+        }
+      },
+      "id": "blueprint-yakushima-blade004-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "03a5c6cdc1cb30ff3ca69965b4ca95dbf0535a796f23d9f129711550a7710d9e",
+          "status": "machine_assisted",
+          "text": "엑스칼리버 스키매틱 4"
+        }
+      },
+      "id": "blueprint-yakushima-blade004-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "136d361996ed09e821837b2d8955759c61c50e8a39c1ceee843585476ff4b590",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에 있거나베이스에 저장하면 빌드 할 수 있다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "beec5413a65486a43f1473be3af1b5910130243e12d8d119a4904e12dc0fdd98",
+          "status": "machine_assisted",
+          "text": "문로드 동상 Schematic"
+        }
+      },
+      "id": "blueprint-yakushima-boss002-relic",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dd95da6cd30e3372f6a4c964969c3cb3d6f3f3c45f5b62f91cb824b62eca264e",
+          "status": "machine_assisted",
+          "text": "볼텍스 비터 스키매틱"
+        }
+      },
+      "id": "blueprint-yakushima-gun001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c0c0b32ce2091addb63f1dee8e14c60385be6e64310ae807526835732dad5bf2",
+          "status": "machine_assisted",
+          "text": "볼텍스 비터 스키매틱 1"
+        }
+      },
+      "id": "blueprint-yakushima-gun001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "047cbd3f2b5f5c2a03592970812e314c87522b178bf1830570dbe658fcb7b81e",
+          "status": "machine_assisted",
+          "text": "볼텍스 비터 스키매틱 2"
+        }
+      },
+      "id": "blueprint-yakushima-gun001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e1385df66a5973b5b7272360e66360ae734a5da0c38d4ce67ee3b831ef26df6c",
+          "status": "machine_assisted",
+          "text": "볼텍스 비터 스키매틱 3"
+        }
+      },
+      "id": "blueprint-yakushima-gun001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4a1fca96ccdacdc468d5466b59d463df8922ed998124628e3176455d785842dd",
+          "status": "machine_assisted",
+          "text": "볼텍스 비터 스키매틱 4"
+        }
+      },
+      "id": "blueprint-yakushima-gun001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5ae9c000762a332f1e87c0f145ab755d9905387eb0d4414d1f324bec8167c539",
+          "status": "machine_assisted",
+          "text": "Holowed 마스크 스키마틱"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f3816d9b831aaaa1c9d0153b9039f1bb9ccb1a917eea56727d36bf0514b87535",
+          "status": "machine_assisted",
+          "text": "할로윈 마스크 Schematic 1"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5e3fc26fc1aff268236f93d55383167f3703de39c81f3c912a0272f94677b5b4",
+          "status": "machine_assisted",
+          "text": "신성한 마스크 스키마틱 2"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "41430f5b4bf5279f66e68d5f73da7d86d9b7df053f80b5081d8a2480c785b097",
+          "status": "machine_assisted",
+          "text": "할로윈 마스크 Schematic 3"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a22db600c10000f17944fa562787f22e34ca7918d848bd83886dd1873f65f7fb",
+          "status": "machine_assisted",
+          "text": "할로윈 마스크 Schematic 4"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 인벤토리에있을 때, 조리법의 잠금을 해제 [원문 누락] . . 니다. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4ff4651ceb51f5415dc0551ed2ce607eedb62722d732d0114f1f51888cb76221",
+          "status": "machine_assisted",
+          "text": "Holowed 헤드기어 스키매틱"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip002",
+      "kind": "item"
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 12,
+  "records": [
+    {
+      "id": "sky-bow-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyBow 5",
+          "sourceSha256": "fb6eaec6f283c594922aa5b63d2bdaa59a0c0f95aac97535e102679d8f27b0f1"
+        },
+        "description": {
+          "sourceText": "A bow crafted from Soralite Ingots.\nWith greatly enhanced initial velocity and piercing power, this high-precision weapon excels at ranged combat.",
+          "sourceSha256": "8a395db60805bb4716b37b662645c215843fd697e812c504ef61dc7990c4f5e4"
+        }
+      }
+    },
+    {
+      "id": "sky-bow-arrow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mechanical Bow Ammo",
+          "sourceSha256": "ba8260ff370524fcc14d2db61a94da116a85dc8439b5743476f3101764d48537"
+        },
+        "description": {
+          "sourceText": "Enhanced arrows for shooting with .\nCan be crafted at .",
+          "sourceSha256": "70ed34fbcea548c0a42837f2272cfda398d8cf9a7f9b0c938fcc01bf04afca40"
+        }
+      }
+    },
+    {
+      "id": "sky-grenade-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tactical Grenade Launcher",
+          "sourceSha256": "10bcede68890d8b8c2d91860ec0cf4a03a4c44c64970f92ffc96e8cef2606b1a"
+        },
+        "description": {
+          "sourceText": "A grenade launcher made from Soralite Ingots.\nImproved trajectory stability allows for precise long-range bombings.",
+          "sourceSha256": "a5e987a2df338b2061d0aa745c9ad552af560e3d1f92e890e5b4e79cdf0170e1"
+        }
+      }
+    },
+    {
+      "id": "sky-grenade-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyGrenadeLauncher 2",
+          "sourceSha256": "92414655ce5e000446dbd7baa6ad29d85918eb585145f33e683fc3ae31844e1b"
+        },
+        "description": {
+          "sourceText": "A grenade launcher made from Soralite Ingots.\nImproved trajectory stability allows for precise long-range bombings.",
+          "sourceSha256": "a5e987a2df338b2061d0aa745c9ad552af560e3d1f92e890e5b4e79cdf0170e1"
+        }
+      }
+    },
+    {
+      "id": "sky-grenade-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyGrenadeLauncher 3",
+          "sourceSha256": "12d075ee1148890a12a9f9c6f14a0ef1a5cb939f4d51733f1566d71cee92ea4a"
+        },
+        "description": {
+          "sourceText": "A grenade launcher made from Soralite Ingots.\nImproved trajectory stability allows for precise long-range bombings.",
+          "sourceSha256": "a5e987a2df338b2061d0aa745c9ad552af560e3d1f92e890e5b4e79cdf0170e1"
+        }
+      }
+    },
+    {
+      "id": "sky-grenade-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyGrenadeLauncher 4",
+          "sourceSha256": "ffdb7c934d4c6f2b6fda55ddce99f74fe3129a9d08384f1f5a86b7ea67f68bdc"
+        },
+        "description": {
+          "sourceText": "A grenade launcher made from Soralite Ingots.\nImproved trajectory stability allows for precise long-range bombings.",
+          "sourceSha256": "a5e987a2df338b2061d0aa745c9ad552af560e3d1f92e890e5b4e79cdf0170e1"
+        }
+      }
+    },
+    {
+      "id": "sky-grenade-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyGrenadeLauncher 5",
+          "sourceSha256": "b1f60b311b4e25bd6780219ba93585cae68afa667e414f6fc2df8854de4c230a"
+        },
+        "description": {
+          "sourceText": "A grenade launcher made from Soralite Ingots.\nImproved trajectory stability allows for precise long-range bombings.",
+          "sourceSha256": "a5e987a2df338b2061d0aa745c9ad552af560e3d1f92e890e5b4e79cdf0170e1"
+        }
+      }
+    },
+    {
+      "id": "sky-grenade-launcher-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tactical Grenade Launcher Ammo",
+          "sourceSha256": "118d6434d6a48c023d642ec77ed49a4ea3599ea887b1fcb7132b94246485f0c3"
+        },
+        "description": {
+          "sourceText": "Ammo for the .\nCan be crafted at .",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec"
+        }
+      }
+    },
+    {
+      "id": "sky-island-ore",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Soralite",
+          "sourceSha256": "b0e1b22ad1bd0cd47d0d028cc5a3980651d7bba19c5d6434adea70f3ff501e51"
+        },
+        "description": {
+          "sourceText": "A rare ore produced only in Sunreach.\nWithin its host rock of overwhelming density resides a mysterious pattern and radiance.",
+          "sourceSha256": "c586cc1e51d1bf999947090c0bb56f60c11b9a5cac593ed5b731e988c950b9f5"
+        }
+      }
+    },
+    {
+      "id": "sky-shotgun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Prototype Shotgun",
+          "sourceSha256": "073ed939d9536a89df292bc6dcf77b275d4415ce5b0d561cf43d1b42ef69c76c"
+        },
+        "description": {
+          "sourceText": "A shotgun made from Soralite Ingots.\nIt delivers overwhelming firepower at close range, and its special magazine also provides high sustained combat capability.",
+          "sourceSha256": "d6ddb83ca4fc16a8f92d6d594a60a193c045b13b1dd5a606985a50a96ae9614b"
+        }
+      }
+    },
+    {
+      "id": "sky-shotgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyShotgun 2",
+          "sourceSha256": "f5711126d178858e19da058fe6cb9e351f47df3ebcff78c3e2c1b147896f69d4"
+        },
+        "description": {
+          "sourceText": "A shotgun made from Soralite Ingots.\nIt delivers overwhelming firepower at close range, and its special magazine also provides high sustained combat capability.",
+          "sourceSha256": "d6ddb83ca4fc16a8f92d6d594a60a193c045b13b1dd5a606985a50a96ae9614b"
+        }
+      }
+    },
+    {
+      "id": "sky-shotgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyShotgun 3",
+          "sourceSha256": "a1cd0e8557008518b6136455da949cb5917e06735087928a11089d3962905f34"
+        },
+        "description": {
+          "sourceText": "A shotgun made from Soralite Ingots.\nIt delivers overwhelming firepower at close range, and its special magazine also provides high sustained combat capability.",
+          "sourceSha256": "d6ddb83ca4fc16a8f92d6d594a60a193c045b13b1dd5a606985a50a96ae9614b"
+        }
+      }
+    },
+    {
+      "id": "sky-shotgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyShotgun 4",
+          "sourceSha256": "5e88cd55438ff99bbcd942858eff1fb6aacf05b5fddcbb05e6166b3ce23cc56b"
+        },
+        "description": {
+          "sourceText": "A shotgun made from Soralite Ingots.\nIt delivers overwhelming firepower at close range, and its special magazine also provides high sustained combat capability.",
+          "sourceSha256": "d6ddb83ca4fc16a8f92d6d594a60a193c045b13b1dd5a606985a50a96ae9614b"
+        }
+      }
+    },
+    {
+      "id": "sky-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkyShotgun 5",
+          "sourceSha256": "b7ce1349939528075fed6887ebf773b90e63835d8aeb4545073642549f497e32"
+        },
+        "description": {
+          "sourceText": "A shotgun made from Soralite Ingots.\nIt delivers overwhelming firepower at close range, and its special magazine also provides high sustained combat capability.",
+          "sourceSha256": "d6ddb83ca4fc16a8f92d6d594a60a193c045b13b1dd5a606985a50a96ae9614b"
+        }
+      }
+    },
+    {
+      "id": "sky-shotgun-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Prototype Shotgun Ammo",
+          "sourceSha256": "876e4737ad999712cf6330a443b3558b4cfc0988d081f327e7ea8e7d0f4f438f"
+        },
+        "description": {
+          "sourceText": "Ammo for the .\nCan be crafted at .",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec"
+        }
+      }
+    },
+    {
+      "id": "sky-submachine-gun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Combat SMG",
+          "sourceSha256": "292088b723686a24ea39d8a884aff784cbb28f774048d940fa906914356faf6d"
+        },
+        "description": {
+          "sourceText": "A submachine gun made from Soralite Ingots.\nIts improved magazine and ammunition enhance its suppression power.",
+          "sourceSha256": "731e9432544986da201950e6281316f5057b82f28a278fb4ad5ca88e7a466d1a"
+        }
+      }
+    },
+    {
+      "id": "sky-submachine-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkySubmachineGun 2",
+          "sourceSha256": "7824c0b35f3f8f49a2ec28a1c523fb35afc03051bbd319a47767e2db5cb5af16"
+        },
+        "description": {
+          "sourceText": "A submachine gun made from Soralite Ingots.\nIts improved magazine and ammunition enhance its suppression power.",
+          "sourceSha256": "731e9432544986da201950e6281316f5057b82f28a278fb4ad5ca88e7a466d1a"
+        }
+      }
+    },
+    {
+      "id": "sky-submachine-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkySubmachineGun 3",
+          "sourceSha256": "74f27d0f92583ec532fc2643bba0358082c2cf7cf4817791ca5e83d8472ccb56"
+        },
+        "description": {
+          "sourceText": "A submachine gun made from Soralite Ingots.\nIts improved magazine and ammunition enhance its suppression power.",
+          "sourceSha256": "731e9432544986da201950e6281316f5057b82f28a278fb4ad5ca88e7a466d1a"
+        }
+      }
+    },
+    {
+      "id": "sky-submachine-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkySubmachineGun 4",
+          "sourceSha256": "d9cb379c2f4c77f2de959fc7e6f01a32f7ebed5265fb160afd43c65f92821697"
+        },
+        "description": {
+          "sourceText": "A submachine gun made from Soralite Ingots.\nIts improved magazine and ammunition enhance its suppression power.",
+          "sourceSha256": "731e9432544986da201950e6281316f5057b82f28a278fb4ad5ca88e7a466d1a"
+        }
+      }
+    },
+    {
+      "id": "sky-submachine-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SkySubmachineGun 5",
+          "sourceSha256": "0019b179a5155ed550a30d5f20f367d3091efa25d06b0cbbc5bb6342aab5f8bb"
+        },
+        "description": {
+          "sourceText": "A submachine gun made from Soralite Ingots.\nIts improved magazine and ammunition enhance its suppression power.",
+          "sourceSha256": "731e9432544986da201950e6281316f5057b82f28a278fb4ad5ca88e7a466d1a"
+        }
+      }
+    },
+    {
+      "id": "sky-submachine-gun-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Combat SMG Ammo",
+          "sourceSha256": "baf4148f77ac35dba8979cf35dd14e88c3dc3a25c94461262810630fa15cfa28"
+        },
+        "description": {
+          "sourceText": "Ammo for the .\nCan be crafted at .",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec"
+        }
+      }
+    },
+    {
+      "id": "skyisland-ingot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Soralite Ingot",
+          "sourceSha256": "292aa039e673c754c719d3a1eccfb20602fe551f31eb98f0ed0f63978ce8d354"
+        },
+        "description": {
+          "sourceText": "An ancient metal refined from ore that slumbers in Sunreach.\nA rare processed material, forming the foundation of high-grade equipment and structures.\nCan be refined at .",
+          "sourceSha256": "71166b15d1f11175b031f83d7b37c975f04f18ed804093cbb1a70bb5365a8bef"
+        }
+      }
+    },
+    {
+      "id": "spear",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Stone Spear",
+          "sourceSha256": "a15e7d5481ffc64d37ea8cf5c16924e5d51816f6250076978b78be122d001fde"
+        },
+        "description": {
+          "sourceText": "Useful for close-range combat.\nIts length allows you to stand further away when attacking.",
+          "sourceSha256": "fafc23c6817a846d11f9f2f34a2832f0e0459c9af7f54f60c5d2df5957787ffc"
+        }
+      }
+    },
+    {
+      "id": "spear-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Metal Spear",
+          "sourceSha256": "07208060aff836d0f9f4b0354b0a4c4fe6a82e5b5f14d03974cf739e90fd50bd"
+        },
+        "description": {
+          "sourceText": "Useful for close-range combat.\nThe metal tip give it an increased attack power.\nIts length allows you to stand further away when attacking.",
+          "sourceSha256": "5719886f1eeb265c95bbc84a81980a5f50ab2b41eaab2f22c61f7542ac969d4f"
+        }
+      }
+    },
+    {
+      "id": "spear-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Spear",
+          "sourceSha256": "864046dbf51db75b3d4264ce5baef19bdae5c36c7b042afe99b3805ada7dbd68"
+        },
+        "description": {
+          "sourceText": "Useful for close-range combat.\nThe high-quality metal tip give it an increased attack power.\nIts length allows you to stand further away when attacking.",
+          "sourceSha256": "1e6864c8b9a63398b6cebf81854842acc0c6bba86980da79ce3b02ed2eefeded"
+        }
+      }
+    },
+    {
+      "id": "spear-forest-boss",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lily's Spear",
+          "sourceSha256": "bd8c47fd1eb84ccee5bdf317bf5b00e4c8e281b33b6318529ce28f9ec746ca87"
+        },
+        "description": {
+          "sourceText": "The spear cherished by Lily.\nPunishes those who neglect their Pals.",
+          "sourceSha256": "3912fb8a8e1d8c301b2ded16d35ca56a525b98d1729fc9adbcb01a3a8a8e59cb"
+        }
+      }
+    },
+    {
+      "id": "spear-forest-boss-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Spear ForestBoss 5",
+          "sourceSha256": "f84ff099c6357ac7c5670c29cd91f5f59e82ba1c11bf5f8317a8c4b6d40d9527"
+        },
+        "description": {
+          "sourceText": "The spear cherished by Lily.\nPunishes those who neglect their Pals.",
+          "sourceSha256": "3912fb8a8e1d8c301b2ded16d35ca56a525b98d1729fc9adbcb01a3a8a8e59cb"
+        }
+      }
+    },
+    {
+      "id": "spear-forest-boss2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Enhanced Lily's Spear",
+          "sourceSha256": "f35d730fad1bd21c09076720616d872323b20e955d04a9e522b78816b7bf1ed9"
+        },
+        "description": {
+          "sourceText": "An enhanced version of Lily's beloved spear.\nPierces those who neglect their Pals.",
+          "sourceSha256": "2c4a7ad3042d1d32be7353b873b681ac59f59d6fcf8720ec9020d91d42a5fb8a"
+        }
+      }
+    },
+    {
+      "id": "spear-forest-boss2-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Spear ForestBoss2 5",
+          "sourceSha256": "ce4a7900a5b30a8b61433abb953735ed3fa2c05b0c945c037c46f644d249f16f"
+        },
+        "description": {
+          "sourceText": "An enhanced version of Lily's beloved spear.\nPierces those who neglect their Pals.",
+          "sourceSha256": "2c4a7ad3042d1d32be7353b873b681ac59f59d6fcf8720ec9020d91d42a5fb8a"
+        }
+      }
+    },
+    {
+      "id": "spear-queen-bee",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Elizabee's Staff",
+          "sourceSha256": "beb59e1c3b8f5d0a4e4296737a8ec0410c2e89ddeb00cc1aa492bd2c9588480d"
+        },
+        "description": {
+          "sourceText": "A spear made from 's staff, altered for human use.\nIt is imbued with 's indomitable spirit.",
+          "sourceSha256": "6cb433bbeb2e48d8e1a16f3448be58b4f92b5ae5d4b8d71d59fb05edd59d688b"
+        }
+      }
+    },
+    {
+      "id": "sphere-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Scatter Sphere Launcher",
+          "sourceSha256": "d7df085fc0a1e4799097ee1228225783b6488e9ce20f97665761e1708e399e44"
+        },
+        "description": {
+          "sourceText": "A new type of launcher that fires a large number of spheres.\nIt can easily capture a herd of Pals.",
+          "sourceSha256": "4e1abfcabeb9befce60160b3ec7862fcd8becb008705c2e74d88219692a7c28b"
+        }
+      }
+    },
+    {
+      "id": "sphere-launcher-once",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Single-Shot Sphere Launcher",
+          "sourceSha256": "e20025f8c5acf86300843defdfb65e6b8e44dedc03400e5a6b286dab25ed80e2"
+        },
+        "description": {
+          "sourceText": "A launcher that fires spheres.\nIt can capture Pals from a greater distance.",
+          "sourceSha256": "cb0f87eb4cdc5a8881f89500cfc4f62a0fdea41609a5280fdacca218dbc8d851"
+        }
+      }
+    },
+    {
+      "id": "sphere-module-curve",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Curve Module",
+          "sourceSha256": "4d29393db736f142d27d30dcad9560b6a246c9406ad5f1475f313cb6d8ebf60c"
+        },
+        "description": {
+          "sourceText": "Equipping it causes the sphere to spin with a curved trajectory.\nIt becomes easier to catch Pals off guard, and increases capture power.",
+          "sourceSha256": "3d32027669f40ccf9f386ed60695053ab3aef9b7d40a84eb9b71c2209e84fc2f"
+        }
+      }
+    },
+    {
+      "id": "sphere-module-curve2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Slider Module",
+          "sourceSha256": "099f4bad8890d02e6ff18e36a37a6ecbae85294cc91a93d7727cd279ddc8adf4"
+        },
+        "description": {
+          "sourceText": "Equipping it adds a slider spin to the sphere.\nThe sphere curves at a sharp angle, making it easier to catch Pals off guard and increasing capture power.",
+          "sourceSha256": "199eedf0fdf67f7fcdb07f13e3bf4991753d811b08e3c5e933c0b4f6de61ec10"
+        }
+      }
+    },
+    {
+      "id": "sphere-module-heavy",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heavy Weight Module",
+          "sourceSha256": "2f7496222dd2c0bc2ffdfed253ac518e785917e59aa8ef8515e5f95c1f961775"
+        },
+        "description": {
+          "sourceText": "Equipping it makes the sphere heavier, reducing its range but increasing its capture power.",
+          "sourceSha256": "3b76358401e8a39b829cbaf867921c4e95d635722bac7bd80c8192a608f84918"
+        }
+      }
+    },
+    {
+      "id": "sphere-module-homing",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Homing Module",
+          "sourceSha256": "d5ab4fc2e18a9e77465d77d9c39be717e0333a9598ebc699654240dd228cb208"
+        },
+        "description": {
+          "sourceText": "Equipping it makes the sphere home in on Pals, further increasing capture power.",
+          "sourceSha256": "f60c33d1abbd35fa8024d5d6d5be30f74cdd250df4c309b07470cd230aa14826"
+        }
+      }
+    },
+    {
+      "id": "sphere-module-sniper",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sniper Module",
+          "sourceSha256": "0370000a4e132769c2cc762547aeb9559891ed344909437205bb78a7b13b6686"
+        },
+        "description": {
+          "sourceText": "Equipping it increases the sphere's range, allowing it to sharply capture Pals and enhancing capture power.",
+          "sourceSha256": "7819e6acdf040ebb355ac0a556c13a309b857b3a8816bde5a393b22224e263b7"
+        }
+      }
+    },
+    {
+      "id": "sphere-module-sniper2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sniper Module II",
+          "sourceSha256": "46ae5c317bf7df2c7b3b51bdd159fbb6f248be7f162d69ed7f0c7e168e85fdf8"
+        },
+        "description": {
+          "sourceText": "Equipping it significantly increases the sphere's range, allowing it to sharply capture Pals and enhancing capture power.",
+          "sourceSha256": "6d15f949a3ecd98aed9520fe3342f8e792f3b4032d62cc50b1f1e6379938f622"
+        }
+      }
+    },
+    {
+      "id": "spring-rolls",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Spring Rolls",
+          "sourceSha256": "7c0faa524b0d60d352f1cff6645a245704ae056c672bb6063c70cd4d0adb8391"
+        },
+        "description": {
+          "sourceText": "A dish made by wrapping vegetables and mushrooms in a thin skin and deep-frying them.\nThe crispy texture is delightful. Eating it will make it harder for your SAN value to decrease and increase your by 10% for a period of time.",
+          "sourceSha256": "86bd9dfd66a2474e4cc5f505075115c16ddb470068317df0f7e3e6950310fdaa"
+        }
+      }
+    },
+    {
+      "id": "stainless-steel",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hexolite",
+          "sourceSha256": "4cfcbb1cdbb9cff95870a1957d914a4eb7ca6fe4c28a239ac75923a013bb4186"
+        },
+        "description": {
+          "sourceText": "An alloy of and .\nUsed for building advanced equipment and structures.\nCan be refined at .",
+          "sourceSha256": "bda3ba043cee11757b4b4f9063592bc94d91851b15ed09f2704e2e58fa79530d"
+        }
+      }
+    },
+    {
+      "id": "status-point-reset-san",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Memory Wiping Medicine",
+          "sourceSha256": "8a024ad7ca26518d8562ec3ffbd835ac9d2f9f42c050409b766f6523346fe89c"
+        },
+        "description": {
+          "sourceText": "A potion that allows the player to reset their status points when consumed.\nIt has no effect if consumed by a Pal.",
+          "sourceSha256": "d8591398b4bcc16ac3ebc3b5c7687677ddac2cbc8e29675bf05204aeb65ab4c7"
+        }
+      }
+    },
+    {
+      "id": "steal-armor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Metal Armor",
+          "sourceSha256": "1b3cf320de7d4a8b83696c5e422e8c685934ee27713e898894988a20ef7937fa"
+        },
+        "description": {
+          "sourceText": "Armor made from .\nHigh defense, but extremely heavy.\nEquipment for a hero, it exudes bravery.",
+          "sourceSha256": "a9348799e9b7e2294a5d3c9f6dde1d38ad5d3deacd4e60ee2e46eb5d1da986dd"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-cold",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Pal Metal Armor",
+          "sourceSha256": "9be7ef5f6d0a45d8af887eec45a9e69e2506dcacab449b17cc1d0cfdb0ec2b40"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-cold-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorCold 2",
+          "sourceSha256": "a61ac2513690351c3918d397dca6126b73c8d4a2e326728960db28f8111957fd"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-cold-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorCold 3",
+          "sourceSha256": "d172342c78afe2bd093fdce3cd70990432b84fa6a4554255bc97acc613c8f520"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-cold-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorCold 4",
+          "sourceSha256": "36a650b4a82057806593bdac13b338b6f6b6f64464e073d693b93f152c1ddc43"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-cold-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorCold 5",
+          "sourceSha256": "647e0e1b745f3a38226708d681195bf406be9e40fd634ced6c0d58d8fd84ffdb"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-heat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Pal Metal Armor",
+          "sourceSha256": "0a5e394992ca5c9092f34524b48c58d6264044c5ae9b04fd7cc5e73382aec124"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-heat-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorHeat 2",
+          "sourceSha256": "e385e5d77cabcc608c49f115cf4c7846e87d6460ea829a2f1a3fbdb5f2a70288"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-heat-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorHeat 3",
+          "sourceSha256": "c4a434e602b243b683ade8b7e52c21507deca7d8c49e8ec9f8f921eb28660a31"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-heat-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorHeat 4",
+          "sourceSha256": "618ecd5125ba28162c1c4beb91833f40ce929d690ebce3c443b09b8e61317aa7"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "steal-armor-heat-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealArmorHeat 5",
+          "sourceSha256": "0c4f49120b388257ad8228c4bd141466b5bcbac9b04b84fe72646cea0c353f56"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "steal-helmet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Metal Helm",
+          "sourceSha256": "2e769cd6f8303b2c41c0f1e7b6527d74c59400194e0027307ff8bbc8dbbb136e"
+        },
+        "description": {
+          "sourceText": "A helm made from .\nEnvied for its immaculate quality, it is proof of a chosen warrior.",
+          "sourceSha256": "d874feb80df24c0550e3d5a3d2c2db4b03057a52db419aa612782d7507bd567b"
+        }
+      }
+    },
+    {
+      "id": "steal-helmet-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealHelmet 2",
+          "sourceSha256": "c97f34016ca23fd1bcecf100717ee8b56e5d1d74b6a3ed5c4965449623779a9c"
+        },
+        "description": {
+          "sourceText": "A helm made from .\nEnvied for its immaculate quality, it is proof of a chosen warrior.",
+          "sourceSha256": "d874feb80df24c0550e3d5a3d2c2db4b03057a52db419aa612782d7507bd567b"
+        }
+      }
+    },
+    {
+      "id": "steal-helmet-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealHelmet 3",
+          "sourceSha256": "a19354a4d2c7f193b76d08b8a4193d399604f668b5dd376752c9f77a5787fd67"
+        },
+        "description": {
+          "sourceText": "A helm made from .\nEnvied for its immaculate quality, it is proof of a chosen warrior.",
+          "sourceSha256": "d874feb80df24c0550e3d5a3d2c2db4b03057a52db419aa612782d7507bd567b"
+        }
+      }
+    },
+    {
+      "id": "steal-helmet-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealHelmet 4",
+          "sourceSha256": "f2afb8ef9cd0a6fae2c99a08c64c32e41bbd5eddf547423d61dd8cc06d0109fc"
+        },
+        "description": {
+          "sourceText": "A helm made from .\nEnvied for its immaculate quality, it is proof of a chosen warrior.",
+          "sourceSha256": "d874feb80df24c0550e3d5a3d2c2db4b03057a52db419aa612782d7507bd567b"
+        }
+      }
+    },
+    {
+      "id": "steal-helmet-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "StealHelmet 5",
+          "sourceSha256": "ec510e0a18c78e4134cbfe4e85262129f13b939cb48e2ca5eee33e563f9a9bed"
+        },
+        "description": {
+          "sourceText": "A helm made from .\nEnvied for its immaculate quality, it is proof of a chosen warrior.",
+          "sourceSha256": "d874feb80df24c0550e3d5a3d2c2db4b03057a52db419aa612782d7507bd567b"
+        }
+      }
+    },
+    {
+      "id": "steal-ingot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Metal Ingot",
+          "sourceSha256": "c8e9c23aaca90394659220dd6db6b8047ccce7b38a661dae1f51a25798d2ce89"
+        },
+        "description": {
+          "sourceText": "A material required to create Pal Metal weapons and armor.\nStrengthened by creating an alloy incorporating Paldium.",
+          "sourceSha256": "cf39c14cc85a48a3277821acfbbfd4f47f853d76d8e4fb4b59faffcfabdfdcd2"
+        }
+      }
+    },
+    {
+      "id": "stewed-ice-deer",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Reindrix Stew",
+          "sourceSha256": "f9eb52c5157922ae98d0a18c861fe791a741d3a2049800c04ebaba9c9e40af82"
+        },
+        "description": {
+          "sourceText": "Stewed vegetables and venison that was reared in a frigid environment.\nThe meat's soft texture melts away to reveal a delicate sweetness.\nEating it will stay full slightly longer for a period of time.",
+          "sourceSha256": "0d8a7907955cc84b3a9cbed185ae61af03bf9666196109efea7144c5192efa65"
+        }
+      }
+    },
+    {
+      "id": "stir-fried-vegetables",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Stir-Fried Vegetables",
+          "sourceSha256": "73260e728a4b7053b778c522c296f74db8f81488d40939bfade474a9f25908a5"
+        },
+        "description": {
+          "sourceText": "A dish made by stir-frying and .\nA simple and delicious way to enjoy vegetables. Eating it will slightly increase your work speed and improve your by 10% for a period of time.",
+          "sourceSha256": "0256d0175a3855959395aa5cb8a07153c6f23577bc5f9f15d1e38b6fedf920f2"
+        }
+      }
+    },
+    {
+      "id": "stone",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Stone",
+          "sourceSha256": "6ffa6b8b1c9fa11cb67a0a54b7e3e175dfb7edcb8e8d322148a3b00affc4a842"
+        },
+        "description": {
+          "sourceText": "Material for structures and items.\nCan be obtained by mining rocks.",
+          "sourceSha256": "dddf395bb4df538656e4ad26431b155ffb69e152a4daeadf860b30ee096f119e"
+        }
+      }
+    },
+    {
+      "id": "submachine-gun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SMG",
+          "sourceSha256": "3dba798451964a4445520cd6ce5bc71e5f119e3a1e5be3c7bd6204d92dd8425d"
+        },
+        "description": {
+          "sourceText": "A submachine gun with exceptional rate of fire.\nIt’s easy to handle and effective in close-range combat.",
+          "sourceSha256": "b5dd3894c59b332384b645264a28804785e4136489dac20202160668c8d0bd86"
+        }
+      }
+    },
+    {
+      "id": "submachine-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SubmachineGun 2",
+          "sourceSha256": "e6f46d9e0bcf125f42b74aba39a453f3f4ea514ba34d75195724b8270a9b17c7"
+        },
+        "description": {
+          "sourceText": "A submachine gun with exceptional rate of fire.\nIt’s easy to handle and effective in close-range combat.",
+          "sourceSha256": "b5dd3894c59b332384b645264a28804785e4136489dac20202160668c8d0bd86"
+        }
+      }
+    },
+    {
+      "id": "submachine-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SubmachineGun 3",
+          "sourceSha256": "d20bba4731e9e887bdc112a15cb9dd095030703c147d8ae03a697f1f61db4cb3"
+        },
+        "description": {
+          "sourceText": "A submachine gun with exceptional rate of fire.\nIt’s easy to handle and effective in close-range combat.",
+          "sourceSha256": "b5dd3894c59b332384b645264a28804785e4136489dac20202160668c8d0bd86"
+        }
+      }
+    },
+    {
+      "id": "submachine-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SubmachineGun 4",
+          "sourceSha256": "36f673bf896bb94e332c856e866e6e5ea1524345ed411ef95af3307843114d94"
+        },
+        "description": {
+          "sourceText": "A submachine gun with exceptional rate of fire.\nIt’s easy to handle and effective in close-range combat.",
+          "sourceSha256": "b5dd3894c59b332384b645264a28804785e4136489dac20202160668c8d0bd86"
+        }
+      }
+    },
+    {
+      "id": "submachine-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SubmachineGun 5",
+          "sourceSha256": "27c981eb45e6f8f766158e79a63d69b14899321554a00fae9bad8167a0f20675"
+        },
+        "description": {
+          "sourceText": "A submachine gun with exceptional rate of fire.\nIt’s easy to handle and effective in close-range combat.",
+          "sourceSha256": "b5dd3894c59b332384b645264a28804785e4136489dac20202160668c8d0bd86"
+        }
+      }
+    },
+    {
+      "id": "sulfur",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sulfur",
+          "sourceSha256": "2c5cc137169abef6de5ea1cbd62cbeac1577e926ec4903dc25e1698e19a4ef26"
+        },
+        "description": {
+          "sourceText": "that can be found in volcanoes and such.\nNecessary for making .",
+          "sourceSha256": "9b9c1ee7dcaf35d8fc9505d275cb4872193a710729a29405e37186499489c622"
+        }
+      }
+    },
+    {
+      "id": "supplement",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Nutrient Tonic",
+          "sourceSha256": "c1243a573c8ad2a6c82cbe2b11ce986020e43e9148a3bbb44e937d4d7dd3b49d"
+        },
+        "description": {
+          "sourceText": "A nutrient-rich that prevents hunger for a period of time.\nA concentrated, flavorful blend of nutrients ideal for long journeys.",
+          "sourceSha256": "af8bfd75041f0a461cac12dd43dc27a4f9e866aa83d7899b19bfd2aba240eb17"
+        }
+      }
+    },
+    {
+      "id": "sweet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cotton Candy",
+          "sourceSha256": "a8a8d2fa3e4d921ef3bfb59507b2ec65491964269304cbe5526568b84568caf8"
+        },
+        "description": {
+          "sourceText": "Cotton candy collected from .\nIts sweetness fluffily melts away in your mouth.",
+          "sourceSha256": "a05d5205c8c74634928f9dd4934f486df0eb16ff5a5c9470a186e55ed734f830"
+        }
+      }
+    },
+    {
+      "id": "sweet-caramel",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Caramel Cotton Candy",
+          "sourceSha256": "e72920e185b6edb80d9afdcbf6f9bd4ade9ee192e919a9e854375f4ac4a88afc"
+        },
+        "description": {
+          "sourceText": "Caramel cotton candy collected from .\nIts fluffy sweetness melts away in your mouth.",
+          "sourceSha256": "40799cbd6945ad88213aa2231318bdee379fd74e3a129703349ea7bb7c2f62b4"
+        }
+      }
+    },
+    {
+      "id": "sword",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sword",
+          "sourceSha256": "d0b9cd97fa22d3eb6903686b58febacbf778ec7435e82181e698ccd37b58d768"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nThe blade is extremely sharp! Mightier than a pen, for sure.\nRequires to craft.",
+          "sourceSha256": "f66bcaaf410a08b93eb97f24405e2a997fde86fc58a545ab849bfe7e1eb7d273"
+        }
+      }
+    },
+    {
+      "id": "sword-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sword 2",
+          "sourceSha256": "0d4ebb2863492851ad6a80fda64f515bbf179481940afcbabac48ebf0550cbd9"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nThe blade is extremely sharp! Mightier than a pen, for sure.\nRequires to craft.",
+          "sourceSha256": "f66bcaaf410a08b93eb97f24405e2a997fde86fc58a545ab849bfe7e1eb7d273"
+        }
+      }
+    },
+    {
+      "id": "sword-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sword 3",
+          "sourceSha256": "fa1ed3cdcb7c2b403f45bf7eba7771fc415e0af06a8ababd62c02838afeb5836"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nThe blade is extremely sharp! Mightier than a pen, for sure.\nRequires to craft.",
+          "sourceSha256": "f66bcaaf410a08b93eb97f24405e2a997fde86fc58a545ab849bfe7e1eb7d273"
+        }
+      }
+    },
+    {
+      "id": "sword-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sword 4",
+          "sourceSha256": "3d830241be212a3b133f765ea13bd3af8fb93843ab9f088ec0a1f88e2f907ab9"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nThe blade is extremely sharp! Mightier than a pen, for sure.\nRequires to craft.",
+          "sourceSha256": "f66bcaaf410a08b93eb97f24405e2a997fde86fc58a545ab849bfe7e1eb7d273"
+        }
+      }
+    },
+    {
+      "id": "sword-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sword 5",
+          "sourceSha256": "aaf73e4ed9608c1140972552bf942e06d0a39a3f1a033224d9e60ff5f2d23f6f"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nThe blade is extremely sharp! Mightier than a pen, for sure.\nRequires to craft.",
+          "sourceSha256": "f66bcaaf410a08b93eb97f24405e2a997fde86fc58a545ab849bfe7e1eb7d273"
+        }
+      }
+    },
+    {
+      "id": "technology-book-g1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Advanced Technical Manual",
+          "sourceSha256": "797390730c03d4488b94aed47dcd6d357a52bf00bf4ec17c9ac2c912875fe3c1"
+        },
+        "description": {
+          "sourceText": "A book that contains secrets of amazing technology.\nUse it to obtain a few Technology Points.",
+          "sourceSha256": "51e66408a2f20e1d36a22005515a90e6257e87732f7f295aacfcad0c65d68320"
+        }
+      }
+    },
+    {
+      "id": "technology-book-g2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Innovative Technical Manual",
+          "sourceSha256": "0da5c56f5e5b18ebf8dab5fde36c94af19214d337253f5f8bf2ad144d3314b9e"
+        },
+        "description": {
+          "sourceText": "A book that contains secrets of cutting-edge technology.\nUse it to obtain Technology Points.",
+          "sourceSha256": "2abb5cfd49b4a2bbc67cebaad5da92efd50566df8f136a0336bc6b150af1a9e6"
+        }
+      }
+    },
+    {
+      "id": "technology-book-g3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Futuristic Technical Manual",
+          "sourceSha256": "d733545aa7fb4ccafc67af1304091bc210a1533a2fc905a3f5b0f013a3944a2d"
+        },
+        "description": {
+          "sourceText": "A book that contains secrets of technology beyond current day comprehension.\nUse it to obtain lots of Technology Points.",
+          "sourceSha256": "f9d389ac8f42e31357bf00335c08a571ed09f72683947f9f9bf9a47c7ad4d38d"
+        }
+      }
+    },
+    {
+      "id": "thermal-core",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Thermal Core",
+          "sourceSha256": "02e11d181f059cf2515a29a86fc338c5787dd730cbe1d99120764c37168926f7"
+        },
+        "description": {
+          "sourceText": "A high-temperature reaction core containing vast thermal energy.\nUsed as a power component in advanced devices.\nCan be crafted at .",
+          "sourceSha256": "ff43670da97e8b998949781a1164f53d2409808b0ffcc50d57df9e68ffa1e8e9"
+        }
+      }
+    },
+    {
+      "id": "tomato",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tomato",
+          "sourceSha256": "8289a9844fd5125f9ecc55b600da78766f44f8477d0a908e2962fbd77eb78372"
+        },
+        "description": {
+          "sourceText": "A fresh ingredient that brightens any dish.\nFilled with lycopene, they’re also very healthy.",
+          "sourceSha256": "c3b05ee2ba901454a69d4e569a0779a6d034b6c3c451016689bd961c3506b140"
+        }
+      }
+    },
+    {
+      "id": "tomato-seeds",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tomato Seeds",
+          "sourceSha256": "4c8e9dce94b758dc36b1dcdb87327c7fe3a1cfda06aed5c04c46d29c46dcfc6f"
+        },
+        "description": {
+          "sourceText": "Seeds that produce .\nNecessary for starting a farm.\nCan be purchased from a merchant.",
+          "sourceSha256": "704936db34335a14d05d8e9e92c7c6a30eff304c7fb88c99b5f0a62ab0b8bab8"
+        }
+      }
+    },
+    {
+      "id": "torch",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hand-Held Torch",
+          "sourceSha256": "c5c9552db6877b4031a87fa557b98bc8c9af75db2f10bb3925c399f0f5de89b1"
+        },
+        "description": {
+          "sourceText": "Lights up dark areas and keeps you warm.\nCan also be used for close range combat in a pinch.",
+          "sourceSha256": "bdee025a7b7dab953d7298c3ce417ee17b99bdca32b26942a499208cfb144a64"
+        }
+      }
+    },
+    {
+      "id": "treasure-box-key01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Copper Key",
+          "sourceSha256": "841daeaf6342d3ef977c1cfd413f6794a41464b649eee807565cf7904e6d6609"
+        },
+        "description": {
+          "sourceText": "A key that can be used to open locked treasure chests.",
+          "sourceSha256": "fd8d8b9ba104b470ed8dee14d4830f22193ac7cd2f6a4f727a7cb6f4f937dd2d"
+        }
+      }
+    },
+    {
+      "id": "treasure-box-key02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Silver Key",
+          "sourceSha256": "be96c06c9e73a455efec3fb65fb5d1d27f83e3d47596fba8304c974c650b9ac2"
+        },
+        "description": {
+          "sourceText": "A key that can be used to open locked treasure chests.",
+          "sourceSha256": "fd8d8b9ba104b470ed8dee14d4830f22193ac7cd2f6a4f727a7cb6f4f937dd2d"
+        }
+      }
+    },
+    {
+      "id": "treasure-box-key03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gold Key",
+          "sourceSha256": "b6a888e7d7fe9d6392ff5e2411c40461b72eb893d6405f637220916f051cae77"
+        },
+        "description": {
+          "sourceText": "A key that can be used to open locked treasure chests.",
+          "sourceSha256": "fd8d8b9ba104b470ed8dee14d4830f22193ac7cd2f6a4f727a7cb6f4f937dd2d"
+        }
+      }
+    },
+    {
+      "id": "treasure-map01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Treasure Map",
+          "sourceSha256": "e5d55bbd74efbd84e45bd6814dc32a522161e362bfdb6fc2bec3a2a08905cd6c"
+        },
+        "description": {
+          "sourceText": "A weathered map showing where treasure lies.\nUsing it places a marker on your map.",
+          "sourceSha256": "b8f4889078b9e39f217a7db2462e2570d11cd16833705563d363a86415b87f71"
+        }
+      }
+    },
+    {
+      "id": "treasure-map02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "TreasureMap02",
+          "sourceSha256": "7c6308d0f6c2880e8be3c17b38ba2df9f795fc4ea4211f0dfcfc468d4b56f213"
+        },
+        "description": {
+          "sourceText": "A weathered map showing where treasure lies.\nUsing it places a marker on your map.",
+          "sourceSha256": "b8f4889078b9e39f217a7db2462e2570d11cd16833705563d363a86415b87f71"
+        }
+      }
+    },
+    {
+      "id": "treasure-map03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "TreasureMap03",
+          "sourceSha256": "3d0bcf6425d0fd4c2dedc6c67620ee12d4c745a86b0bbf1060a8f10b7ab07dab"
+        },
+        "description": {
+          "sourceText": "A weathered map showing where treasure lies.\nUsing it places a marker on your map.",
+          "sourceSha256": "b8f4889078b9e39f217a7db2462e2570d11cd16833705563d363a86415b87f71"
+        }
+      }
+    },
+    {
+      "id": "treasure-map04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "TreasureMap04",
+          "sourceSha256": "39d529482dd4df0f765119c7a125f0a0f866be719ebe1c2709276a4a2a69d68d"
+        },
+        "description": {
+          "sourceText": "A weathered map showing where treasure lies.\nUsing it places a marker on your map.",
+          "sourceSha256": "b8f4889078b9e39f217a7db2462e2570d11cd16833705563d363a86415b87f71"
+        }
+      }
+    },
+    {
+      "id": "treasure-map05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "TreasureMap05",
+          "sourceSha256": "338daeafe9d910734b525e79c602edf2c907c1cb628a4a4a7f96958d07ac70e6"
+        },
+        "description": {
+          "sourceText": "A weathered map showing where treasure lies.\nUsing it places a marker on your map.",
+          "sourceSha256": "b8f4889078b9e39f217a7db2462e2570d11cd16833705563d363a86415b87f71"
+        }
+      }
+    },
+    {
+      "id": "unique-material-flower-prince",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Toxin Filtering Membrane",
+          "sourceSha256": "f04fce1ab89ff7e27a59ce6b3e86ca7cb7c7a13a984ec5fb18e0fcfafdfb7fae"
+        },
+        "description": {
+          "sourceText": "An organ that protects from the corrosive mist it emits.\nIt filters and neutralizes the corrosive mist.",
+          "sourceSha256": "1ca9ab86edcf172de7e919c9a5655f4f53f73f557d78c26b65145080a78ce113"
+        }
+      }
+    },
+    {
+      "id": "unique-material-mothman",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Explosion-Resistant Fiber",
+          "sourceSha256": "9625bcc6880f8e64fcd7e442628c0111f745fe02b0cbc0c00621d0f93b6bc5d2"
+        },
+        "description": {
+          "sourceText": "Fibers taken from the surface of a ’s body.\nIt can reduce the impact of explosions.",
+          "sourceSha256": "ace2e4b46322a9ad93bc63b58c5e1f60b485bf5e5ebb246ca475a9c8bec90bb6"
+        }
+      }
+    },
+    {
+      "id": "unlock-equipment-slot-accessory-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mysterious Accessory Box",
+          "sourceSha256": "967623b4186e4b2b76f009782d04408cd1986efc03e18cfcb2c40574fa22cf8d"
+        },
+        "description": {
+          "sourceText": "A mysterious box whose interior synchronizes with the owner's body.\nAccessory equipment slots increase by 1.\nCarrying one is enough.",
+          "sourceSha256": "6aa0467b084b1bf17d30cd4fc5de0fcc1faaf8a7373ad453c460ee2bc34c9e6a"
+        }
+      }
+    },
+    {
+      "id": "unlock-equipment-slot-accessory-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mystic Accessory Box",
+          "sourceSha256": "de41f53870cf33c05876c4bf3dc131d164217ff350f19e663edc41eacb0170df"
+        },
+        "description": {
+          "sourceText": "A mysterious box whose interior synchronizes with the owner's body.\nAccessory equipment slots further increase by 1.\nCarrying one is enough.",
+          "sourceSha256": "f1d5f57d9a4e6e4cd6e1580edb6ffd14ccd5e82369b7a3623684ce3ed8cf38ff"
+        }
+      }
+    },
+    {
+      "id": "unlock-equipment-slot-weapon-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Extra Weapon Holster",
+          "sourceSha256": "2a4df55ef56aad12375d808bee61141e195b2ff94312da98cdc612edbd9860de"
+        },
+        "description": {
+          "sourceText": "A holster that allows an additional weapon to be equipped.\nWhile in possession, it increases weapon equip slots by 1.\nCarrying one is enough.",
+          "sourceSha256": "1dd89d8c7448bc2f2443345befa5b253d32a413368599d28079560241225fa28"
+        }
+      }
+    },
+    {
+      "id": "unlock-equipment-slot-weapon-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Extra Weapon Holster 2",
+          "sourceSha256": "6778882e2a438f43f07d92de02e5cb73d69ac05cdbdae6646b996397d5ff7759"
+        },
+        "description": {
+          "sourceText": "A holster that lets you equip additional weapons.\nWhen in inventory, adds an extra weapon slot.\nCarrying one is enough.",
+          "sourceSha256": "b2fc84bd7e3767f33c9bb3fb783eef2d3effda626ad0fefc5d6c15a6fa8b54e5"
+        }
+      }
+    },
+    {
+      "id": "unlock-picking-tier1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lockpicking Tool v1",
+          "sourceSha256": "188105b19c8d101a80f5b0c6cbc2747ab3c4bcc1eed7293a1f3261f769c1b8ab"
+        },
+        "description": {
+          "sourceText": "No key? No problem! These tools will allow you to try and pry open any treasure chest that would normally require a .",
+          "sourceSha256": "1d2d9cd3d78a5be871ec18401eeff602763fa7cd60c99c0b2d50e0b66abfbde1"
+        }
+      }
+    },
+    {
+      "id": "unlock-picking-tier2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lockpicking Tool v2",
+          "sourceSha256": "c2e13438e79b9c28f8e9c8d650fddeb164ae56f6af70ccfac079d4b7b5cce27f"
+        },
+        "description": {
+          "sourceText": "No key? No problem! These tools will allow you to try and pry open any treasure chest that would normally require a .",
+          "sourceSha256": "1d2d9cd3d78a5be871ec18401eeff602763fa7cd60c99c0b2d50e0b66abfbde1"
+        }
+      }
+    },
+    {
+      "id": "unlock-picking-tier3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lockpicking Tool v3",
+          "sourceSha256": "fb768b0bd987b778ec7b9ac14c5c405c9b97266a737dbdaeec1d3a403634c292"
+        },
+        "description": {
+          "sourceText": "No key? No problem! These tools will allow you to try and pry open any treasure chest that would normally require a .",
+          "sourceSha256": "1d2d9cd3d78a5be871ec18401eeff602763fa7cd60c99c0b2d50e0b66abfbde1"
+        }
+      }
+    },
+    {
+      "id": "venom",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Venom Gland",
+          "sourceSha256": "bc789e2f7b9a697f9dc1d52d6efc8f0cc57d55fee1a906a44f14ae2c5531308c"
+        },
+        "description": {
+          "sourceText": "Material obtainable from poisonous Pals.\nCan be used to make and more.",
+          "sourceSha256": "04e17972378368a71da758f97416e86ff51e69cddb27f5b33884f40705efdcb8"
+        }
+      }
+    },
+    {
+      "id": "water-build-kit",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Aquatic Construction Kit",
+          "sourceSha256": "dd71ff63f21123e157429c6d9fca19156288f614194ee2ece7a441648af7a737"
+        },
+        "description": {
+          "sourceText": "Construction kit that allows foundations\nto be placed on water.",
+          "sourceSha256": "af373d5c7b2480869d6dff06079d70c35d5e21b7de359c31e27578d0a13586eb"
+        }
+      }
+    },
+    {
+      "id": "weaker-bow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Old Bow",
+          "sourceSha256": "06fecc55b1db4bf1b2ea82e11321d43a19ebc8d77518aff3d90ef5e820744ccd"
+        },
+        "description": {
+          "sourceText": "Primitive long range weapon.\nHastily put together, it isn't very powerful.",
+          "sourceSha256": "0927223d09f02e6eccba36f4d91faa02d4c0fb7fa7034d24b4bab9db46483f2e"
+        }
+      }
+    },
+    {
+      "id": "whale-whistle-fragment-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Marine Echobone",
+          "sourceSha256": "938e186906fc3a826718b2b45c9c9fe976f8b23ae2578d9afed51f424db67032"
+        },
+        "description": {
+          "sourceText": "A mysterious bone fragment.\nIf you listen closely, a faint sound can be heard.\nA sound of gentle, rhythmic waves.",
+          "sourceSha256": "5697968f8f2e1377fe4fd7ac71068ad9a01960e50da865d1e3a44085dbb4fee6"
+        }
+      }
+    },
+    {
+      "id": "whale-whistle-fragment-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Silent Echobone",
+          "sourceSha256": "5b7c48cf254fc70bfaa754819abbe926b2277dfe6f9f685090ec28ad0465f814"
+        },
+        "description": {
+          "sourceText": "A mysterious bone fragment.\nIf you listen closely, a faint sound can be heard.\nA sound of silence once encountered.",
+          "sourceSha256": "7c9d14e6afec071089bbbb9722bbb4ec3eee236a955d10beddf79468246daab2"
+        }
+      }
+    },
+    {
+      "id": "whale-whistle-fragment-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Seafoam Echobone",
+          "sourceSha256": "23f33235ed565873b0a4d70286e3f58e3a89faa9f5064ba2c8cd65f3be984a6b"
+        },
+        "description": {
+          "sourceText": "A mysterious bone fragment.\nIf you listen closely, a faint sound can be heard.\nA sound of fleeting water bubbles popping.",
+          "sourceSha256": "803d9cdecf3806b0dac01b7a93886eebf4cb7ab76f7cd7b6f40ce7961e438b5b"
+        }
+      }
+    },
+    {
+      "id": "whale-whistle-fragment-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tidewind Echobone",
+          "sourceSha256": "7b69f1efa00bacd05c27c53cce57576885b4a855e2066531c9c7379bc34e1fed"
+        },
+        "description": {
+          "sourceText": "A mysterious bone fragment.\nIf you listen closely, a faint sound can be heard.\nThe sound of a gentle sea breeze.",
+          "sourceSha256": "fa8fc5beaa7c40cd372088b7745cb9b8c58b9933429ba9e7fe3024a32c93c958"
+        }
+      }
+    },
+    {
+      "id": "wheat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wheat",
+          "sourceSha256": "cca303e99f5f821dfd9d74b81b18be6a03a7ee271123158a9d6a7092f326b1bf"
+        },
+        "description": {
+          "sourceText": "An ingredient that forms the base of various dishes.\nis a common crop in many parts of the world.",
+          "sourceSha256": "4b53850c1be7bdab79b512b5aaebc586b2a97f3fea3cc6dcb3c88bec6bd2d578"
+        }
+      }
+    },
+    {
+      "id": "wheat-seeds",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wheat Seeds",
+          "sourceSha256": "3b31cae7f38f53af86129893dd8f2230f55ac14f524eb9a58bfec4c713201cb2"
+        },
+        "description": {
+          "sourceText": "Seeds that produce .\nNecessary for starting a farm.\nCan be purchased from a merchant.",
+          "sourceSha256": "704936db34335a14d05d8e9e92c7c6a30eff304c7fb88c99b5f0a62ab0b8bab8"
+        }
+      }
+    },
+    {
+      "id": "wide-penetrate-shotgun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Scatter",
+          "sourceSha256": "b14b52cbf2e1c0b5327d8af0ea21e7d33ddfd1dc2435f9fe9bd95c35dda5f7b4"
+        },
+        "description": {
+          "sourceText": "A specialized beam weapon for close-range combat.\nIt fires compressed energy in a wide, scattering blast.",
+          "sourceSha256": "8f35ba526693051065c562621071da9f281d185990cfedf089873ab0d43fd891"
+        }
+      }
+    },
+    {
+      "id": "wide-penetrate-shotgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "WidePenetrateShotgun 2",
+          "sourceSha256": "9c0d6125a928f3c9a6d03565439a85dacc6465058649c801b24505164d07d93b"
+        },
+        "description": {
+          "sourceText": "A specialized beam weapon for close-range combat.\nIt fires compressed energy in a wide, scattering blast.",
+          "sourceSha256": "8f35ba526693051065c562621071da9f281d185990cfedf089873ab0d43fd891"
+        }
+      }
+    },
+    {
+      "id": "wide-penetrate-shotgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "WidePenetrateShotgun 3",
+          "sourceSha256": "8807414d2c15617201bbe11d17d0dd7967018509539c5066a8f9f3bb2f285844"
+        },
+        "description": {
+          "sourceText": "A specialized beam weapon for close-range combat.\nIt fires compressed energy in a wide, scattering blast.",
+          "sourceSha256": "8f35ba526693051065c562621071da9f281d185990cfedf089873ab0d43fd891"
+        }
+      }
+    },
+    {
+      "id": "wide-penetrate-shotgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "WidePenetrateShotgun 4",
+          "sourceSha256": "a5d754ea227bb1f85d44fad0eaa4241c911f50403b60da5a15473fccc6a98d30"
+        },
+        "description": {
+          "sourceText": "A specialized beam weapon for close-range combat.\nIt fires compressed energy in a wide, scattering blast.",
+          "sourceSha256": "8f35ba526693051065c562621071da9f281d185990cfedf089873ab0d43fd891"
+        }
+      }
+    },
+    {
+      "id": "wide-penetrate-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "WidePenetrateShotgun 5",
+          "sourceSha256": "accf16909ef70f878b43960eeda86f9cc1441cf656b1d300f1ccd648916c399a"
+        },
+        "description": {
+          "sourceText": "A specialized beam weapon for close-range combat.\nIt fires compressed energy in a wide, scattering blast.",
+          "sourceSha256": "8f35ba526693051065c562621071da9f281d185990cfedf089873ab0d43fd891"
+        }
+      }
+    },
+    {
+      "id": "wide-penetrate-shotgun-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Scatter Ammo",
+          "sourceSha256": "90ab879d34a6b2980700549ee736b7cfe45ccf71dd6760cdfcf84fa14b81a075"
+        },
+        "description": {
+          "sourceText": "Ammo for the .\nCan be crafted at .",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec"
+        }
+      }
+    },
+    {
+      "id": "wing-glider",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wing Pack",
+          "sourceSha256": "72be87bcdec45e9f8b939dcf039cc4849d22387ab1467fb7569822663847afcd"
+        },
+        "description": {
+          "sourceText": "A portable glider that enables flight.\nConsumes to propel the user through the skies.",
+          "sourceSha256": "24a0ffcfc3966a91b2306b373172897bf460773db3c102874b0c7ac1418c0291"
+        }
+      }
+    },
+    {
+      "id": "wing-glider-fuel",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wing Cell",
+          "sourceSha256": "5e91de316e0fd985a02a1f3d02375374262056fc36656320371c2c743ddc9be2"
+        },
+        "description": {
+          "sourceText": "The fuel required to power the .",
+          "sourceSha256": "3c2fe23cd884a56c0e27b506ed8d6e739a48a168d88372db47545d20fb1ef6bf"
+        }
+      }
+    },
+    {
+      "id": "wood",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wood",
+          "sourceSha256": "731140284eac4aca18aa8cfd15ad56f45d4423067910729caccaf21683e013e1"
+        },
+        "description": {
+          "sourceText": "Material for structures and items.\nCan be obtained by cutting trees.",
+          "sourceSha256": "6a4b7ff9f77fbf1a70a014c3efe4f812c4e17029cb3ae97aad7b13fff358a1de"
+        }
+      }
+    },
+    {
+      "id": "wood-ancient",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Bark",
+          "sourceSha256": "3df8b217198dc1e85b3a958c80f05d6bee43888f5401c1e8ebe8ba122305acf9"
+        },
+        "description": {
+          "sourceText": "The bark of a tree that has lived for many years in extreme environments.\nEven the thin bark evokes a sense of boundless vitality.",
+          "sourceSha256": "d5a3a8cdd5f1b4149e69e6571ac5bb233a73c5ec7bacc985bb3d7315edabd075"
+        }
+      }
+    },
+    {
+      "id": "wood-fine",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hardwood",
+          "sourceSha256": "7d540a95c1bc7d061bd343815fcadf9de86cc9a2833eca51f408e47efd7efaa4"
+        },
+        "description": {
+          "sourceText": "High-quality wood carefully selected from sturdy trees grown in harsh environments such as deserts, volcanic regions, and snowy mountains.",
+          "sourceSha256": "bb68086fc372f347a3933f229c325bf782d4135acb2fde43a3decd22a29c8c38"
+        }
+      }
+    },
+    {
+      "id": "wood-world-tree",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mythical Wood",
+          "sourceSha256": "2b691dea86edceae8891906b50fbfee60dec7f4e1e102246b0931bf29908fbfa"
+        },
+        "description": {
+          "sourceText": "Rare wood imbued with the power of the World Tree.\nOnly skilled craftsmen are able to process it.",
+          "sourceSha256": "728dce2f17f79d67575fd75acb311d78e28e862e2febdc7e938e7c2c09220e9c"
+        }
+      }
+    },
+    {
+      "id": "wool",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wool",
+          "sourceSha256": "5f91efa41797d91df4b8c624612f9f64b336bcdbc2e8dd0df43331992d07c3e5"
+        },
+        "description": {
+          "sourceText": "Material sheared from sheep Pals.\nA necessity for creating bedding, and more.",
+          "sourceSha256": "e5737dd2fa25046b43c478941eb5d3629ffb9e7998fe5fe4afb954f127ccb61a"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-collection",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Gathering Handbook I",
+          "sourceSha256": "9b76a41db922b76799050a8a19b468798528149c3f4e9923145443ea0d2710bb"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-cool",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Cooling Handbook I",
+          "sourceSha256": "02d6df820c43a5b6212545671458d5bff60ccb82b15c5385b2c98b716880bbaa"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-deforest",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Lumbering Handbook I",
+          "sourceSha256": "e0f8e44d59131019db44e35146cb75a44ce5e6beb01a030e4cc2d2f4a98da339"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-emit-flame",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Kindling Handbook I",
+          "sourceSha256": "cf33bc49ff03d4cd4029536c5ad630302f3d4342ac635012e5dda84a30407478"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-generate-electricity",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Generating Electricity Handbook I",
+          "sourceSha256": "8745cc7de7db63c1b4459959c9438a20b8d1c286c3aa490d788e16dafc460de1"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-handcraft",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Handiwork Handbook I",
+          "sourceSha256": "f34278e6461b69f125f58a78bbdabdaa7b1fc0306b3ee4f897c56f6caf1a7962"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-mining",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Mining Handbook I",
+          "sourceSha256": "47100d64c4d7a3b1abac9c5d977b517e59aeaa85d8ab57edeae6e160623c9941"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-monster-farm",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Ranching Handbook I",
+          "sourceSha256": "8268492e451dd0e9243dfe2902a8fbf6ce44d9da4644e5ff04834902037d57a2"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-product-medicine",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Medicine Production Handbook I",
+          "sourceSha256": "cc0e064d7b5ae63f67a7c6965f6b700996ca5feff847db2fc95278bf5a59ea54"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-seeding",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Planting Handbook I",
+          "sourceSha256": "d169c8071b49fc4f9fa4a4e77650ead288f1fd829be19c57716052a5b75221f8"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-transport",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Transporting Handbook I",
+          "sourceSha256": "6592e92b35114e3884bc730fea1f685be3247ed11ea77b400339a60c26f2da3d"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "work-suitability-add-ticket-watering",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Applied Watering Handbook I",
+          "sourceSha256": "820028b4e1b32b8eb51c52cf103740a99a8842dd825909b4a03dc20b34293dcc"
+        },
+        "description": {
+          "sourceText": "A rare book written about the secrets of .\nAllowing a Pal to read it permanently increases their affinity by +1.",
+          "sourceSha256": "a699f90e67882ecc6cd90acd794d80a54f542f732465e4cdef29c6c60b92eda0"
+        }
+      }
+    },
+    {
+      "id": "world-tree-holy-water",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "World Tree Holy Water",
+          "sourceSha256": "e97dc3e94473df579694a88f721cee8d64a3df147fbe74b1f1723073390c5bee"
+        },
+        "description": {
+          "sourceText": "Sacred water brimming with the energy of the World Tree.\nIt purifies all things and awakens latent powers.\nWhen consumed, World Tree resources will not vanish when approached for a period of time.",
+          "sourceSha256": "5a8795bba7b046b982bb5d2da07ebf5f09debea5af6d62c728dd4bfa8714d908"
+        }
+      }
+    },
+    {
+      "id": "world-tree-ingot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Paloxite Ingot",
+          "sourceSha256": "12d18e43c32cdb92b111721c83c389cfda194b398e300fb9824b64b51614f527"
+        },
+        "description": {
+          "sourceText": "An indomitable alloy created by fusing and .\nA highly rare material, crystallizing the technology of ancient civilization and the power of the World Tree.\nIt is vital for crafting the highest-grade equipment and structures.",
+          "sourceSha256": "6bbd354138e6dea3247d72f550d7b01c5757ad2117c82b75823d05f62c789f6f"
+        }
+      }
+    },
+    {
+      "id": "world-tree-ore",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Paloxite",
+          "sourceSha256": "7a611b06b7c98705965fc38773d68beaf4e1708359a67a2b464b8e25eacd4dd4"
+        },
+        "description": {
+          "sourceText": "Energy leaking from the World Tree that has crystallized after many years.\nThose without protection who touch it will instantly rust and decay.\nOnly those who can master its delicacy can reach the pinnacle of ancient technology.",
+          "sourceSha256": "ca2f25de4d3bbfcae828dc846d065d43b1d0f67beb6302486e040ff741922026"
+        }
+      }
+    },
+    {
+      "id": "world-tree-relic-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Decayed Ancient Relic",
+          "sourceSha256": "333d51efb0d2f3d60b81cf354e9f29830db4f463fbb08cd0db8804f58219aea3"
+        },
+        "description": {
+          "sourceText": "Fragments of structures and tools from an ancient civilization.\nCompletely decayed, with no energy remaining.",
+          "sourceSha256": "dd2416e5b0df321a25ba383a3e0821afa7431ccc7f40bd1547ffbdf7c977f0c3"
+        }
+      }
+    },
+    {
+      "id": "world-tree-relic-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dormant Ancient Relic",
+          "sourceSha256": "2e10d9a5a16ffbff63d51bf3dd5e6e1183cfd14ba77badf7630b7da8eca50d96"
+        },
+        "description": {
+          "sourceText": "Fragments of structures and tools from an ancient civilization.\nIn decent condition, but almost no energy remains.",
+          "sourceSha256": "72556115a189317d55acd86971491d5f536075154821b31f9eab2ccde8c12f16"
+        }
+      }
+    },
+    {
+      "id": "world-tree-relic-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gorgeous Ancient Relic",
+          "sourceSha256": "40feb17e6abe4598065b2b65805d031712311b2b4df0f30666e8ed048630001a"
+        },
+        "description": {
+          "sourceText": "Fragments of structures and tools from an ancient civilization.\nIn good condition, and you can feel the energy flowing.",
+          "sourceSha256": "0ea25c00a7430572cb36eb564f22fc7be21c2f469c70864ab61297ea0781ca0e"
+        }
+      }
+    },
+    {
+      "id": "world-tree-relic-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Glowing Ancient Relic",
+          "sourceSha256": "d0d8243d62b3aa53bb297607c3052a20d974a83bf1ca719dbd820e36d6c6b6c1"
+        },
+        "description": {
+          "sourceText": "Fragments of structures and tools from an ancient civilization.\nIn very good condition, light is leaking from within.",
+          "sourceSha256": "5714fc56c4e5111601d3cc2b8e2fe74a22cf28ea704310d3b3c5364769b30123"
+        }
+      }
+    },
+    {
+      "id": "world-tree-relic-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Glistening Ancient Relic",
+          "sourceSha256": "ceb8ca2f6a59b0cb334c498c690701b604c8717948215834d738e8f8f8a6ecf3"
+        },
+        "description": {
+          "sourceText": "Fragments of structures and tools from an ancient civilization.\nIn very good condition, light is leaking from within.\nIt is overflowing with energy and emitting a glow.",
+          "sourceSha256": "4c9ca10773e5fb93a751b6fbd9c4413965403f7710dac4214654942d12728019"
+        }
+      }
+    },
+    {
+      "id": "yakisoba",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Broncherry Fried Noodles",
+          "sourceSha256": "dbae7666d72f88896dac8b30358c6fb0c4a9397a7585917cfa32e1a665e53205"
+        },
+        "description": {
+          "sourceText": "A dish made by stir-frying noodles with vegetables and meat.\nThe rich seasoning pairs perfectly with the thick cuts of meat. Eating it will increase your by 20% for a period of time.",
+          "sourceSha256": "e49a031b965c157ed465f2adcffc449f12fdf329c0f326a1dbd59eaee492e54c"
+        }
+      }
+    },
+    {
+      "id": "yakushima-armor001",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hallowed Plate Mail",
+          "sourceSha256": "f33ac68365d6accb24a69d5dab8dcb13d32942d9a04896f3234d67ea2ab703f9"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nArmor forged from .\nEnveloped in divine power, it lessens damage from [Tides of Terraria] monsters.",
+          "sourceSha256": "18757bafe71629cdf5425223bf0652fe08ef68dda915cf297f9161477c0d9f23"
+        }
+      }
+    },
+    {
+      "id": "yakushima-armor001-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaArmor001 2",
+          "sourceSha256": "34cf621a25de8ed64e3dc7906ae632dd36ce23108a67863630077f69a14359c6"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nArmor forged from .\nEnveloped in divine power, it lessens damage from [Tides of Terraria] monsters.",
+          "sourceSha256": "18757bafe71629cdf5425223bf0652fe08ef68dda915cf297f9161477c0d9f23"
+        }
+      }
+    },
+    {
+      "id": "yakushima-armor001-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaArmor001 3",
+          "sourceSha256": "a8a53f3d0a14d972c3b1762adfa0285464baa5d9435476cf0c065125fee81804"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nArmor forged from .\nEnveloped in divine power, it lessens damage from [Tides of Terraria] monsters.",
+          "sourceSha256": "18757bafe71629cdf5425223bf0652fe08ef68dda915cf297f9161477c0d9f23"
+        }
+      }
+    },
+    {
+      "id": "yakushima-armor001-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaArmor001 4",
+          "sourceSha256": "c527db30f79aaa51bf063bc61148bc2e93387549c5b7eb2c2697b0347572bcad"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nArmor forged from .\nEnveloped in divine power, it lessens damage from [Tides of Terraria] monsters.",
+          "sourceSha256": "18757bafe71629cdf5425223bf0652fe08ef68dda915cf297f9161477c0d9f23"
+        }
+      }
+    },
+    {
+      "id": "yakushima-armor001-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaArmor001 5",
+          "sourceSha256": "2f21b4eb4abb6b9f7e58b8d68df768f6dae5e4d8dcdbb3d407e4b110dfcd5462"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nArmor forged from .\nEnveloped in divine power, it lessens damage from [Tides of Terraria] monsters.",
+          "sourceSha256": "18757bafe71629cdf5425223bf0652fe08ef68dda915cf297f9161477c0d9f23"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Meowmere",
+          "sourceSha256": "dad37f2baaf493d08caaba6f0adc15584424b1e793e9172a3850fdc537817fa8"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nAccording to the legend, this sword was brought back from a distant land by .\nWhy? We have no idea...\nFires a bouncing cat projectile with each swing to attack enemies.",
+          "sourceSha256": "9863039577b8c41311544b2a81c1a36d31fc698271c0b3b8bd93473f0307607f"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade002",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Terra Blade",
+          "sourceSha256": "9a727e083a0142f6aed8c29a4c2d5e8429763025605f3e63bd01b42830de4817"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nThis curious sword releases vibrant green shockwaves with each strike, allowing you to hit enemies from afar despite being a melee weapon.",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade002-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade002 2",
+          "sourceSha256": "fdb299f6120698e667455d9458d044b0999e57d2d283061c009a918d84e6e7e4"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nThis curious sword releases vibrant green shockwaves with each strike, allowing you to hit enemies from afar despite being a melee weapon.",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377"
+        }
+      }
+    }
+  ]
+}

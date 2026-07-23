@@ -2,10 +2,12 @@ import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import type { PalworldItemSummary, PalworldPalSummary, PalworldSearchResult } from "@streamops/shared";
 import { searchPalworld } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
-import { formatPalNumber, itemName, palName } from "../utils/search";
+import { formatPalNumber } from "../utils/search";
 import { categoryLabel } from "../utils/labels";
+import { resolvePalworldName } from "../utils/localization";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
+import { PalworldTranslationBadge } from "./PalworldTranslationBadge";
 
 export function PalworldSearchForm({
   initialQuery = "",
@@ -113,24 +115,26 @@ export function PalworldSearchForm({
           {!loading && suggestions.map((suggestion) => {
             if (suggestion.type === "pal") {
               const pal = suggestion.pal;
+              const name = resolvePalworldName(pal, locale);
               return (
                 <button type="button" role="option" aria-selected="false" onClick={() => {
                   setFocused(false);
                   onPal(pal);
                 }} key={`pal-${pal.id}`}>
-                  <span className="palworld-autocomplete-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={palName(pal, locale)} locale={locale} /></span>
-                  <span><strong>{palName(pal, locale)}</strong><small>{formatPalNumber(pal.number)} · Pal</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
+                  <span className="palworld-autocomplete-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span>
+                  <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(pal.number)} · Pal</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
                 </button>
               );
             }
             const item = suggestion.item;
+            const name = resolvePalworldName(item, locale);
             return (
               <button type="button" role="option" aria-selected="false" onClick={() => {
                 setFocused(false);
                 onItem(item);
               }} key={`item-${item.id}`}>
-                <span className="palworld-autocomplete-media"><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={itemName(item, locale)} locale={locale} /></span>
-                <span><strong>{itemName(item, locale)}</strong><small>{categoryLabel(item.category, locale)} · {text.items}</small></span>
+                <span className="palworld-autocomplete-media"><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={name.text} locale={locale} /></span>
+                <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{categoryLabel(item.category, locale)} · {text.items}</small></span>
               </button>
             );
           })}

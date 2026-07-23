@@ -5,6 +5,7 @@ import {
   type PalworldSkill,
   type PalworldSkillDetail,
   type PalworldSkillSummary,
+  type PalworldTranslationDisplayStatus,
 } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { Card, CardContent } from "../../../shared/ui/Card";
@@ -18,38 +19,39 @@ import { usePalworldSkills } from "../hooks/usePalworldSkills";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { elementLabel, skillTypeLabel } from "../utils/labels";
 import { formatPalNumber } from "../utils/search";
+import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalworldName } from "../utils/localization";
 import { setPalworldUrl, withQueryParam } from "../utils/routes";
 import { Pagination } from "./Pagination";
 import { PalworldDomainCoverageNotice, usePalworldDomainCoverage } from "./PalworldCoverageNotice";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
+import { PalworldTranslationBadges } from "./PalworldTranslationBadge";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 
 function skillName(skill: PalworldSkill, locale: PalworldLocale): string {
-  return (locale === "ja" ? skill.nameJa : skill.nameKo)?.trim() || skill.nameEn;
+  return resolvePalworldName(skill, locale).text;
 }
 
-function relatedPalName(pal: { nameKo: string; nameJa: string; nameEn: string }, locale: PalworldLocale): string {
-  return (locale === "ja" ? pal.nameJa : pal.nameKo)?.trim() || pal.nameEn;
+function relatedPalName(pal: PalworldSkillDetail["relatedPals"][number]["pal"], locale: PalworldLocale): string {
+  return resolvePalworldName(pal, locale).text;
 }
 
-function skillDescription(skill: PalworldSkill, locale: PalworldLocale): { text: string; englishFallback: boolean } {
-  const localized = (locale === "ja" ? skill.descriptionJa : skill.descriptionKo)?.trim();
-  if (localized) return { text: localized, englishFallback: false };
-  const english = skill.descriptionEn?.trim();
-  return { text: english ?? "", englishFallback: Boolean(english) };
+function skillDescription(skill: PalworldSkill, locale: PalworldLocale) {
+  return resolvePalworldDescription(skill, locale);
 }
 
-function usesEnglishSkillFallback(skill: PalworldSkill, locale: PalworldLocale): boolean {
-  const localizedName = (locale === "ja" ? skill.nameJa : skill.nameKo)?.trim();
-  return (!localizedName && Boolean(skill.nameEn.trim()))
-    || skillDescription(skill, locale).englishFallback
-    || Boolean(skill.passiveAbility?.trim());
+function skillPassiveAbility(skill: PalworldSkill, locale: PalworldLocale) {
+  return resolvePalworldLocalizedText(
+    skill,
+    "passiveAbility",
+    locale,
+    locale === "ja" ? skill.passiveAbilityJa : skill.passiveAbilityKo,
+    skill.passiveAbility,
+  );
 }
 
-function EnglishOriginalBadge({ locale }: { locale: PalworldLocale }) {
-  const text = palworldI18n[locale];
-  return <Badge size="sm" tone="neutral" data-ko={palworldI18n.ko.englishOriginal} data-ja={palworldI18n.ja.englishOriginal}>{text.englishOriginal}</Badge>;
+function skillVisibleTranslationStatuses(skill: PalworldSkill, locale: PalworldLocale): PalworldTranslationDisplayStatus[] {
+  return [resolvePalworldName(skill, locale).status, skillDescription(skill, locale).status];
 }
 
 function SkillBadges({ locale, skill }: { locale: PalworldLocale; skill: PalworldSkill }) {
@@ -69,8 +71,8 @@ export function PalworldSkillCard({ locale, onOpen, skill }: { locale: PalworldL
   return <Card className="palworld-skill-card"><CardContent>
     <SkillBadges locale={locale} skill={skill} />
     <h2>{skillName(skill, locale)}</h2>
-    {usesEnglishSkillFallback(skill, locale) ? <div><EnglishOriginalBadge locale={locale} /></div> : null}
-    <p className="palworld-skill-description">{description.text || text.originalDataUnavailable}</p>
+    <PalworldTranslationBadges locale={locale} statuses={skillVisibleTranslationStatuses(skill, locale)} />
+    <p className="palworld-skill-description palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
     <div className="palworld-skill-metrics"><span>{text.relatedPalCount} <strong>{skill.relatedPalCount.toLocaleString()}</strong></span>{skill.passiveTier !== undefined ? <span>{text.passiveTier} <strong>{skill.passiveTier}</strong></span> : null}</div>
     <Button size="sm" variant="secondary" onClick={() => onOpen(skill.id)}>{text.viewSkill}</Button>
   </CardContent></Card>;
@@ -79,13 +81,15 @@ export function PalworldSkillCard({ locale, onOpen, skill }: { locale: PalworldL
 export function PalworldSkillDetailView({ detail, locale, onOpenPal }: { detail: PalworldSkillDetail; locale: PalworldLocale; onOpenPal: (id: string) => void }) {
   const text = palworldI18n[locale];
   const description = skillDescription(detail, locale);
+  const passiveAbility = skillPassiveAbility(detail, locale);
+  const relatedPalStatuses = detail.relatedPals.map(({ pal }) => resolvePalworldName(pal, locale).status);
   return <article className="palworld-detail">
-    <div><SkillBadges locale={locale} skill={detail} /><h3>{skillName(detail, locale)}</h3>{usesEnglishSkillFallback(detail, locale) ? <EnglishOriginalBadge locale={locale} /> : null}<p>{description.text || text.originalDataUnavailable}</p></div>
-    {detail.passiveAbility ? <section><h4>{text.passiveAbility}</h4><p>{detail.passiveAbility}</p></section> : null}
-    <section><h4>{text.relatedPals}</h4>{detail.relatedPals.length ? <div className="palworld-link-list palworld-skill-related-list">{detail.relatedPals.map(({ pal, unlockLevel }) => {
+    <div><SkillBadges locale={locale} skill={detail} /><h3>{skillName(detail, locale)}</h3><PalworldTranslationBadges locale={locale} statuses={skillVisibleTranslationStatuses(detail, locale)} /><p className="palworld-localized-copy">{description.text || text.originalDataUnavailable}</p></div>
+    {detail.type === "passive" ? <section><h4>{text.passiveAbility}</h4><PalworldTranslationBadges locale={locale} statuses={[passiveAbility.status]} /><p className="palworld-localized-copy">{passiveAbility.text || text.originalDataUnavailable}</p></section> : null}
+    <section><h4>{text.relatedPals}</h4>{detail.relatedPals.length ? <><div className="palworld-link-list palworld-skill-related-list">{detail.relatedPals.map(({ pal, unlockLevel }) => {
       const displayName = relatedPalName(pal, locale);
       return <button className="palworld-related-pal-link" type="button" onClick={() => onOpenPal(pal.id)} key={pal.id}><span className="palworld-related-pal-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} intrinsicWidth={pal.imageWidth} intrinsicHeight={pal.imageHeight} alt={displayName} locale={locale} /></span><span>{formatPalNumber(pal.number)} · {displayName}{unlockLevel !== undefined ? ` · ${text.unlockLevel} ${unlockLevel}` : ""}</span></button>;
-    })}</div> : <p>{text.originalDataUnavailable}</p>}</section>
+    })}</div><PalworldTranslationBadges locale={locale} statuses={relatedPalStatuses} /></> : <p>{text.originalDataUnavailable}</p>}</section>
     <section className="palworld-source"><h4>{text.source}</h4><p>{detail.metadata.sourceName} · {detail.metadata.sourceRevision}</p><p>{text.gameVersion}: {detail.metadata.gameVersion} · {text.license}: {detail.metadata.license}</p></section>
   </article>;
 }

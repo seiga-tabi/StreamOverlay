@@ -18,6 +18,7 @@ import { PalworldHeader } from "../features/public-palworld/components/PalworldH
 import { PalworldHome } from "../features/public-palworld/components/PalworldHome";
 import { PalworldItemsPage } from "../features/public-palworld/components/PalworldItemsPage";
 import { PalworldMapPage } from "../features/public-palworld/components/PalworldMapPage";
+import { PalworldNotFoundPage } from "../features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldPalsPage } from "../features/public-palworld/components/PalworldPalsPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
 import { PalworldSearchResults } from "../features/public-palworld/components/PalworldSearchResults";
@@ -28,7 +29,7 @@ import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i
 import { PALWORLD_VERSION_MISMATCH_EVENT } from "../features/public-palworld/api/palworld";
 import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldRoute";
 import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
-import { palworldTwitchReturnTo, palworldUrl, setPalworldUrl, withQueryParam } from "../features/public-palworld/utils/routes";
+import { isKnownPalworldPagePath, palworldTwitchReturnTo, palworldUrl, setPalworldUrl, withQueryParam } from "../features/public-palworld/utils/routes";
 import {
   getPublicTwitchFollowedChannels,
   getPublicTwitchStatus,
@@ -53,6 +54,7 @@ export function PublicPalworldPage({
   const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
   const { theme } = usePublicTheme();
   const { page, params } = usePalworldRoute();
+  const knownPage = isKnownPalworldPagePath(window.location.pathname);
   const text = palworldI18n[locale];
   const [versionMismatch, setVersionMismatch] = useState(false);
   const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>(EMPTY_TWITCH_STATUS);
@@ -310,6 +312,8 @@ export function PublicPalworldPage({
         />
       </AppShellHeader>
       <AppShellMain className="palworld-main" id="palworld-main">
+        {!knownPage ? <PalworldNotFoundPage locale={locale} /> : null}
+        {knownPage ? <>
         {page === "home" ? (
           <PalworldHome
             liveError={twitchError}
@@ -340,10 +344,11 @@ export function PublicPalworldPage({
         ) : null}
         {page === "search" ? <PalworldSearchResults locale={locale} query={params.get("q") ?? ""} onOpenPal={openPalHere} onOpenItem={openItemHere} /> : null}
         {page === "pals" ? <PalworldPalsPage locale={locale} params={params} onOpenPal={openPalHere} /> : null}
-        {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} /> : null}
+        {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} params={params} /> : null}
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
         {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} onOpenPal={openPalPage} /> : null}
         {page === "map" ? <PalworldMapPage locale={locale} /> : null}
+        </> : null}
       </AppShellMain>
       <PalworldSourceFooter locale={locale} />
       <PalDetailModal palId={selectedPalId} locale={locale} onClose={closeDetail} onOpenItem={openItemPage} />

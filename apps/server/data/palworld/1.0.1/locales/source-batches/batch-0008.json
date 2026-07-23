@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 8,
+  "records": [
+    {
+      "id": "old-revolver-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OldRevolver 2",
+          "sourceSha256": "7b6bf6c643403a07f39d96458553df16e5a0d0917a8092a0b7f2955f2e54b011"
+        },
+        "description": {
+          "sourceText": "A slightly outdated revolving handgun.\nCompared to , it excels in single-shot power.",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb"
+        }
+      }
+    },
+    {
+      "id": "old-revolver-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OldRevolver 3",
+          "sourceSha256": "d32755125279fe1ea05173242c4f87c690213fc7d6f79a6c14098258fcf51a25"
+        },
+        "description": {
+          "sourceText": "A slightly outdated revolving handgun.\nCompared to , it excels in single-shot power.",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb"
+        }
+      }
+    },
+    {
+      "id": "old-revolver-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OldRevolver 4",
+          "sourceSha256": "36a9b0e9ab0b728fcd09edb37bed0aa9d92d10e0eeeec0c36c9e61ce76d80d6f"
+        },
+        "description": {
+          "sourceText": "A slightly outdated revolving handgun.\nCompared to , it excels in single-shot power.",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb"
+        }
+      }
+    },
+    {
+      "id": "old-revolver-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OldRevolver 5",
+          "sourceSha256": "483e87232eb67326f4ef809858d628fe0cb598a0686c81445b52f7b4686db918"
+        },
+        "description": {
+          "sourceText": "A slightly outdated revolving handgun.\nCompared to , it excels in single-shot power.",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb"
+        }
+      }
+    },
+    {
+      "id": "omelet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Omelet",
+          "sourceSha256": "cdbebc6e9e8c1be27b1fe57cab80074479aee63cc751c5a38a24b2a2a332dc7b"
+        },
+        "description": {
+          "sourceText": "A dish made by frying an and topping it with ketchup.\nEating it improves by +10% for a period of time.",
+          "sourceSha256": "cde2e5135cf8ff83b9f76bd9b15be3d0271942883bc74fa14d545d1bb6b5c386"
+        }
+      }
+    },
+    {
+      "id": "onion",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Onion",
+          "sourceSha256": "cc278ed65b2d4d792808abde8bcf79848ad5c13f4f9f540eb4cfef3d74902029"
+        },
+        "description": {
+          "sourceText": "A cherished and easy-to-grow vegetable with a rich history.\nNot suitable for eating raw.",
+          "sourceSha256": "37dc3bfabfe70b5db28c8c190b4ef14a54322e1d16f0b5c280e89d916f6be387"
+        }
+      }
+    },
+    {
+      "id": "onion-seeds",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Onion Seeds",
+          "sourceSha256": "199cb1c488fd759af819d83063a49b5a74e6aa7fec1537780de025dc901f765a"
+        },
+        "description": {
+          "sourceText": "Seeds that produce .\nNecessary for starting a farm.",
+          "sourceSha256": "5822cfdf2677229f7cf9c604ee734935e8e14569e91c6e9f7dd8ec940627c2da"
+        }
+      }
+    },
+    {
+      "id": "opium",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Suspicious Juice",
+          "sourceSha256": "418a1c52995e286a54b146be0243a40fee889403bf9e789b9f1bdb10315e4f9b"
+        },
+        "description": {
+          "sourceText": "Juice that improves mood when consumed.\nDrinking it increases work speed for a period of time,\nbut lowers SAN.",
+          "sourceSha256": "06529395884d172c09370db6c1617561f167f289e87f4ce09bf4790194796392"
+        }
+      }
+    },
+    {
+      "id": "otomo-atdark-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lord of the Underworld's Baton",
+          "sourceSha256": "d5716046a27e578a1b7dde5df53a2a612f15c59e7aa5d36e6b323ad2268a6ff8"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Dark damage.",
+          "sourceSha256": "0b9b78fc017bce44540c2825e0be18f445bdeccaf800a2db16c44ddd8926190b"
+        }
+      }
+    },
+    {
+      "id": "otomo-atdragon-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Divine Dragon's Baton",
+          "sourceSha256": "a7df0fdeb33bf5f83260de0c18cabfcf8b59da6ffa861bcb2bacf3b5b3d17972"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Dragon damage.",
+          "sourceSha256": "1ddbae65bbf38ed5628282ecbc43d1488d1f757481c6359d0977cac1ffb94f81"
+        }
+      }
+    },
+    {
+      "id": "otomo-atearth-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Earth Emperor's Baton",
+          "sourceSha256": "19bda8821c47e99924d7aa7a373086d2fcd02d012265a38e4d8d0d03a86d32aa"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Ground damage.",
+          "sourceSha256": "c1e869573ae26aa037e2588bdc990f8d9a4e24eb967d6987bd616d6a653342dc"
+        }
+      }
+    },
+    {
+      "id": "otomo-atelectricity-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lord of Lightning's Baton",
+          "sourceSha256": "eab5f9147862c7e2087aeeb28497c9950709dfcdfe761507dfa54ccab0a361fb"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Electric damage.",
+          "sourceSha256": "ae002286e46ef73530950d808fa877c9d7cb2654f0b12509be60825404ae7de7"
+        }
+      }
+    },
+    {
+      "id": "otomo-atfire-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Flame Emperor's Baton",
+          "sourceSha256": "67e26e4d3bbbeb926b834620f99f1c31b17d5cee9a5095ca9e20821009609e5c"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Fire damage.",
+          "sourceSha256": "2f906463f3ba4971599606a4f7269798b101ac3ecc0b04901e06c2452b9f65f9"
+        }
+      }
+    },
+    {
+      "id": "otomo-atice-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Emperor's Baton",
+          "sourceSha256": "b6b0f3f3b0bd4abb8a55868aaa9bb40f185f819f3f8ee666cda94f4e9973612e"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Ice damage.",
+          "sourceSha256": "585cee13831a6b53dc82a4edbf4340c26a6d0377bac81ee772840fadeb031aa8"
+        }
+      }
+    },
+    {
+      "id": "otomo-atleaf-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Spirit Emperor's Baton",
+          "sourceSha256": "6ed62fb6550c7c6d7a98e3d5a2f6bf47a84048056ce242dbe0735fc14be1d37c"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Grass damage.",
+          "sourceSha256": "eab7adbd2feeb866af7cf0c560e7bdf0876d2785c1d81a94ba7ebad4ebf8db28"
+        }
+      }
+    },
+    {
+      "id": "otomo-atnormal-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Celestial Emperor's Baton",
+          "sourceSha256": "680eb54355c7fa21e3922520b34aa7aa55fab1ff2fbe387fbba33561841e374f"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Neutral damage.",
+          "sourceSha256": "cd3592eefbec637c83cd26f3896e81d4ba4ebc70934e994c74921aa43eb42f14"
+        }
+      }
+    },
+    {
+      "id": "otomo-attack-up1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Attack Support Whistle",
+          "sourceSha256": "f0789de7f2388e96a96913420f5015c0e8dc10cb1fd5aa477bb2cd8676e3bb90"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Attack of the Pal fighting alongside you.",
+          "sourceSha256": "db61915987e46e2fb11d3b0c2c6e145ffe5307a65a4d3b931cbde67162de947a"
+        }
+      }
+    },
+    {
+      "id": "otomo-atwater-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lord of the Sea's Baton",
+          "sourceSha256": "aec5aae995a3677cef2eb17a5b585fcfa88188d4ade6a74241ef2b4dab558359"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Attack of the Pal fighting alongside you.\nIt also significantly increases their Water damage.",
+          "sourceSha256": "b937ea43fab9072be9be680b223e375bd4fd37731ad71b4a30f31da699367a93"
+        }
+      }
+    },
+    {
+      "id": "otomo-defense-up1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Defense Support Whistle",
+          "sourceSha256": "a3efc1a51b2450971d3f1dfab5d6b97a8ddfdeba1107dc212193f6f6cb15cb3b"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Defense of the Pal fighting alongside you.",
+          "sourceSha256": "65e545a82815720cb61cd5f9d8f4a55374e648bdd9f9aac73d51d01ce4336e28"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfdark-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen Noct's Talisman",
+          "sourceSha256": "065623d01d85dda76916193d8dc7a9241b602f74a18de9d380194ca94e5cfbdc"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Dark damage.",
+          "sourceSha256": "89107d2e8b89fe860f39d20d29b7a7db716bcdc282d0f77ded5b16f53beeffbb"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfdragon-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jetragon's Talisman",
+          "sourceSha256": "59151e46394af3380719b17ba72878fbe81736e80457e7f945cfc7ac4abba3e3"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Dragon damage.",
+          "sourceSha256": "a2d91013c03b6ed6dec6ca31b4f931d6fa7c170465c53f27e06dcc877790bb9e"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfearth-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Anubis's Talisman",
+          "sourceSha256": "d4e1a268a5de9a4be21ad338d17e3e5fe9a41fb645d26622b464b15a5ebaf31b"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Ground damage.",
+          "sourceSha256": "7e5a737bbe923d1ee3c09583b133e63a6f48672a2e4c2fb0a6d4516e40071cf6"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfelectricity-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Orserk's Talisman",
+          "sourceSha256": "6afe295bf2daa3d0ea5ab79551343bc01d0f16c2efa2863b1224aa1ee56d4183"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Electric damage.",
+          "sourceSha256": "061b3eb500dfab471eb56ae8c9b4f8c47a4cc539903d20be41a61eba1acd870f"
+        }
+      }
+    },
+    {
+      "id": "otomo-dffire-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Blazamut's Talisman",
+          "sourceSha256": "2c14314e5e8e348deba01bad15208596febf0cdcf8ff5eefea9f2545e2920388"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Fire damage.",
+          "sourceSha256": "642593282adb6f7134481d22a10072d962fbe9816fda9223bb1b489d3caf3e0a"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfice-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Frostallion's Talisman",
+          "sourceSha256": "6dca44a478eb4e79f28ee79f3f064354421fbd6b5c02a5804d298412e0ededb0"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Ice damage.",
+          "sourceSha256": "c6fa2fb05153b2d6b1199fd9a99c6d6e0cff56a9430521eb4767523a1ccd735d"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfleaf-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen's Talisman",
+          "sourceSha256": "77cc4ae04acb6d64abb04be9c1d081f74a2a98515c5e93722e641c885a1616fc"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Grass damage.",
+          "sourceSha256": "844422734cb83f666ad7f0d23ac508f37406558daba56fdf3e8a32cb6a3a472f"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfnormal-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hartalis's Talisman",
+          "sourceSha256": "d606a5e495c5473391ef1109049679cc6b0de2b79c49e53e480e6f32350b03aa"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Neutral damage.",
+          "sourceSha256": "cadd58dab0a1c8c34398c2a7e8cf7d35a2d1b609b0baab9ed858f9cfcc1f4eb9"
+        }
+      }
+    },
+    {
+      "id": "otomo-dfwater-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Neptilius's Talisman",
+          "sourceSha256": "fed5e7c052943b456fa4c812070c2e4f110b7727180a996f61e1f59447b7c9f5"
+        },
+        "description": {
+          "sourceText": "An accessory that raises the Defense of the Pal fighting alongside you.\nIt also significantly increases their Water damage.",
+          "sourceSha256": "367a2f97d0ebeba57bfd1cfddc90ae7b5d33f1d2103cac61171fd08aaa686969"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-dark-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Support Whistle",
+          "sourceSha256": "ca3dad5cbbccb476d0d09573fd464d05e15e73519fe83d5bbc78384849011f13"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Dark damage of the Pal fighting alongside you.",
+          "sourceSha256": "9261bda2e51cba7e286594d1001c78fbdf56fcd42351c5cf3cdac8bdbaf3dda0"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-dragon-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Support Whistle",
+          "sourceSha256": "4ab3204c71d2a1cd8c63c267f3560eee09ee1a5dd1cb66d2f0d2792f5f078a35"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Dragon damage of the Pal fighting alongside you.",
+          "sourceSha256": "8ea0967483941cb5b0e94d80aba0212dbe27b55b9ae69018a5a352a56b50881b"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-earth-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Support Whistle",
+          "sourceSha256": "42d7af7cefe0c175c7e5f8c2786e255df52d7e7611b9e35a0698d45397cea8df"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Ground damage of the Pal fighting alongside you.",
+          "sourceSha256": "28f6c698bcf43be3c5ee6854e1919f07e2a92fa8c6017a2b7ff0336e5790f58b"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-electricity-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Support Whistle",
+          "sourceSha256": "7c3699322fd16a3581edfda9a5a6c9b9861c340a10b06e3f65905a9fb56d3e77"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Electric damage of the Pal fighting alongside you.",
+          "sourceSha256": "0091e6a91accc931527bea3faba6b5a8051c55c0957eacdbc660608277b6124e"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-fire-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Support Whistle",
+          "sourceSha256": "ceeb85592e801ba7249b9eea5fffa160beb6ebedbada542ccd42f46da872fa2e"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Fire damage of the Pal fighting alongside you.",
+          "sourceSha256": "5f2eb213857382fe2818ae15ef451ab4f82ac5117e610a06aa8514306903bfc2"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-ice-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Support Whistle",
+          "sourceSha256": "5a1b747e555edd7aa828fef693ff82dac74810eaacc1b23862f32d61cb4bc003"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Ice damage of the Pal fighting alongside you.",
+          "sourceSha256": "1fcbffd9e5c20b3853514900d17bfeac654d36c605052c15c788daf47405480f"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-leaf-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Support Whistle",
+          "sourceSha256": "b41a406517064e732bc3d0f41459448750c5d9e78271929eb4cbd85741176c4b"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Grass damage of the Pal fighting alongside you.",
+          "sourceSha256": "6b3c24dc7204fb306998789c2e207bd8533d6faed679abbe7998e7ec585fb2f3"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-normal-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Neutral Support Whistle",
+          "sourceSha256": "a7ca0a868f7a9151d46c81e2ee3f55ccf869d77a2f10ec5d1a657cf16c3de8e2"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Neutral damage of the Pal fighting alongside you.",
+          "sourceSha256": "13d33920d027d6c1d794b6615ecf509913764e8b1e4df2bb7c4ad545b8f74c6f"
+        }
+      }
+    },
+    {
+      "id": "otomo-element-boost-water-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Support Whistle",
+          "sourceSha256": "375d79220c4fe6d8dc861ac6bc0b72f658929607d40443c6628f3ac1bdace9d9"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises the Water damage of the Pal fighting alongside you.",
+          "sourceSha256": "ed465590849855c487e63003127d8ef7964c7d39c480d05d73613a9da81c218d"
+        }
+      }
+    },
+    {
+      "id": "otomo-pal-confidence-increase-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Trust",
+          "sourceSha256": "99b2c1b338b8fe291f41b7e4b8c70823c6b5e9cef4e073e6cc59f5c080f69360"
+        },
+        "description": {
+          "sourceText": "Equipping this makes it easier to increase your Trust with your Pals.",
+          "sourceSha256": "c2c3a0227ac841e435cd832474440b44459ec82f83d35c36cc7bafe9fe7fa376"
+        }
+      }
+    },
+    {
+      "id": "otomo-pal-exp-increase-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Growth Acceleration Bell",
+          "sourceSha256": "3751ce27f1627739ffe7f02ac2942741afb2739d3caa1bf4d65f2f3bdc8cf5bf"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Pal EXP.",
+          "sourceSha256": "56a453db89b7e0e6532abd9d09b0487cb216a071e588706f6160187684b1a05b"
+        }
+      }
+    },
+    {
+      "id": "overheat-rifle",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Overheat Rifle",
+          "sourceSha256": "b750c6c867b434b91429684465123eadc931eab9dd4df4bf835697fb0bf04930"
+        },
+        "description": {
+          "sourceText": "An assault rifle capable of firing endlessly without reloading.\nProlonged bursts cause overheating, leaving you exposed.\nUse with caution.",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2"
+        }
+      }
+    },
+    {
+      "id": "overheat-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OverheatRifle 2",
+          "sourceSha256": "9bdabf087ecdfdbb4ca98b2f8c1ebb31c9328dceb93b3c3c530f3eee4583a1a6"
+        },
+        "description": {
+          "sourceText": "An assault rifle capable of firing endlessly without reloading.\nProlonged bursts cause overheating, leaving you exposed.\nUse with caution.",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2"
+        }
+      }
+    },
+    {
+      "id": "overheat-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OverheatRifle 3",
+          "sourceSha256": "1e6cb96d63de381473925e58db38436b4e8271393599d8c358a11739a197d3ed"
+        },
+        "description": {
+          "sourceText": "An assault rifle capable of firing endlessly without reloading.\nProlonged bursts cause overheating, leaving you exposed.\nUse with caution.",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2"
+        }
+      }
+    },
+    {
+      "id": "overheat-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OverheatRifle 4",
+          "sourceSha256": "ca0c66247ce1cdf0e61a7a4061824cdec8e777dc5a65ed1e2d38fd227825c942"
+        },
+        "description": {
+          "sourceText": "An assault rifle capable of firing endlessly without reloading.\nProlonged bursts cause overheating, leaving you exposed.\nUse with caution.",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2"
+        }
+      }
+    },
+    {
+      "id": "overheat-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OverheatRifle 5",
+          "sourceSha256": "3211938000ab059fbfe2748b4c584ddcee69445d564b393f37e7e7ed22150c6f"
+        },
+        "description": {
+          "sourceText": "An assault rifle capable of firing endlessly without reloading.\nProlonged bursts cause overheating, leaving you exposed.\nUse with caution.",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2"
+        }
+      }
+    },
+    {
+      "id": "overheat-rifle-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Overheat Rifle Ammo",
+          "sourceSha256": "5ef960d72df21ef0f776b31270b0a8aa9533cfe3bea38a474011241d60bdf49a"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-dark",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Awakening Crystal",
+          "sourceSha256": "9aacdae5cac885a7deef4c6c9c761acbdb941759cadf6c7ea22022127c526c6a"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-dragon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Awakening Crystal",
+          "sourceSha256": "3b4b5994b2717051bb99743628e0b48cb02cf3ef5480f8107e1c3e54894c3693"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-electric",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Awakening Crystal",
+          "sourceSha256": "b4badf2a262c48a5c410673b4ae2462902e9819e64053f8e14a2fcb33f59d1a1"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-fire",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Awakening Crystal",
+          "sourceSha256": "0d5c917c665427a524cf1506291d30b9a5c1e318847c45e96390eb1def2ec0df"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-grass",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Awakening Crystal",
+          "sourceSha256": "751af8d9da9e406b64019e35f580fd7b79132fe3e1b4007146765f61dd377728"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-ground",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Awakening Crystal",
+          "sourceSha256": "3b0f82217cb8c8f437b6a22ed1e5a0bd1bba7033e6280e7558a189cb396ac80e"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-ice",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Awakening Crystal",
+          "sourceSha256": "e20bf4a42bd5075e1b9aa3792c05c5fe94905184e00a3bd3d3b5569726fc9ef9"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-dark",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Radiant Gem",
+          "sourceSha256": "f701ce343ddeb1b2ed0690494a429a65a81739bc4dcb98cca63767b28138bd6e"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-dragon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Radiant Gem",
+          "sourceSha256": "1dfc803b6ebbda7236843d7ef915a13d5c16a100bd367efbe0bfa69888840133"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-electric",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Radiant Gem",
+          "sourceSha256": "c2d0b8e2d9b9079df8283f361fea321d6b9fb9fcf6e98fb0b24e31a2f2d297da"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-fire",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Radiant Gem",
+          "sourceSha256": "2634127ac1badffc3b6e4ca530af1b0812c1c4590e701440b25c9143abf97156"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-grass",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Radiant Gem",
+          "sourceSha256": "f4365cae6750f54bb1264b9c9489caf0bbdb8eba620dccbe968c2676dc9bb882"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-ground",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Radiant Gem",
+          "sourceSha256": "307be462649beacdd08942efbac75197f5849839a74bcefb551e48ee63180af6"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-ice",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Radiant Gem",
+          "sourceSha256": "b3c7e75db714c306f58f3e415a87b727111eaef193201593ad6d0ac13971ca04"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-neutral",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Neutral Radiant Gem",
+          "sourceSha256": "6dbaeee0226bf84f81a8665444e40d2032ae1e4eef301b414029b7c0e20208b5"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-material-water",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Radiant Gem",
+          "sourceSha256": "50c22f30eaf2e8be047fdef95c7f54c1c942431df561bda6c75d375d07135eb9"
+        },
+        "description": {
+          "sourceText": "A gem formed as World Tree energy accumulates within a Pal’s body.\nWhen processed, it becomes an item that releases the hidden power of Pals.",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-neutral",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Neutral Awakening Crystal",
+          "sourceSha256": "c9dd22be631f0fa8b46fe0a9a4fde0555729a0a6a84f906d4c6129bb7c9caebf"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-awakening-water",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Awakening Crystal",
+          "sourceSha256": "aa1f32c6965852a129e57770dbdf764d92893990cef84978e01c13b69c0e8648"
+        },
+        "description": {
+          "sourceText": "A crystal formed from condensed World Tree energy.\nIt awakens Pals, releasing their hidden power.",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a"
+        }
+      }
+    },
+    {
+      "id": "pal-crystal-ex",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Civilization Parts",
+          "sourceSha256": "c229046dd07bea79ef8d1dadb75a9b02b320622c0fc15666b3b3729b7c44f2dd"
+        },
+        "description": {
+          "sourceText": "Debris excavated from ancient ruins.\nContains abundant information on lost technology.\nExtremely valuable, people from all walks of life are now seeking such crystals.",
+          "sourceSha256": "00e141150424b5efd6a718bc1211c49648b6f8699b2cb34e803fa9a39a366471"
+        }
+      }
+    },
+    {
+      "id": "pal-crystal-s",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Paldium Fragment",
+          "sourceSha256": "7834321d9f434cf0db2efb7dda5139a4ea539dc29c4bb5b6574125c44e5cca30"
+        },
+        "description": {
+          "sourceText": "Crystallized energy from the World Tree.\nCapable of creating supernatural items and structures.",
+          "sourceSha256": "028ec6907e54292366b58072af408c6197ed08625b0b04b2dcd8478abb7f3a6e"
+        }
+      }
+    },
+    {
+      "id": "pal-dark-parts",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Fragment",
+          "sourceSha256": "782b762ee53569886bc3c1fa1dbc731b6c22b6c36b8357a20c590fe93bce5e5c"
+        },
+        "description": {
+          "sourceText": "Dropped by some powerful Pals.\nUsed as a material for crafting powerful accessories and other items.",
+          "sourceSha256": "b4a3032fc71a270edb0425013ab570c1593a694237888cb2b0cdbc0ee9e27bdd"
+        }
+      }
+    },
+    {
+      "id": "pal-doping-shot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Boost Gun",
+          "sourceSha256": "0127e6bcf970e56e15fa480e01843c35d00f1c050b34f2ead33c1ae1cd30852f"
+        },
+        "description": {
+          "sourceText": "Firing this at a Pal in your team temporarily boosts that Pal's attack and defense.\nFiring it at an enemy deals damage instead.",
+          "sourceSha256": "cce9620b76e0946c1c2d8c08aedbea13f076d3e7c21a4dcbefd6bd04d48e4385"
+        }
+      }
+    },
+    {
+      "id": "pal-doping-shot-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Megaboost Gun",
+          "sourceSha256": "fc715f29172de9134443ef01f2cb2a0ac822185625214ceea6578def8821f4c6"
+        },
+        "description": {
+          "sourceText": "Firing it at an allied Pal boosts their attack and defense, while hitting an enemy deals damage.\nThanks to improvements, the boost is stronger and lasts longer, and it deals more damage to enemies.",
+          "sourceSha256": "dd19929267f4086dbe271183c3fd22aa0e4d98531c2e0adc5bcbfeef9eb7e2dc"
+        }
+      }
+    },
+    {
+      "id": "pal-doping-shot-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Boost Gun Ammo",
+          "sourceSha256": "78209125c935a0a9180791b5f586ab22aed27877bd970bd17a574b5e5635b152"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dark-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Egg",
+          "sourceSha256": "735636e281bd1c2f8482ea07bcfe3676ed8d64c8079dddef5878e62d3eb85adf"
+        },
+        "description": {
+          "sourceText": "A .\nSomething chaotic stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "b4ea16e85ec100a43d84e60a68baf9d5477f0d9597b94b445ff8b0b39747a033"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dark-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Egg",
+          "sourceSha256": "735636e281bd1c2f8482ea07bcfe3676ed8d64c8079dddef5878e62d3eb85adf"
+        },
+        "description": {
+          "sourceText": "A .\nSomething chaotic stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "b4ea16e85ec100a43d84e60a68baf9d5477f0d9597b94b445ff8b0b39747a033"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dark-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Dark Egg",
+          "sourceSha256": "43e8a66c8092064f74f5a3226e24a60fec6487f12eafee809ca37c8cf685169f"
+        },
+        "description": {
+          "sourceText": "A .\nA vicious wail howls within.\nPlace in a to incubate it.",
+          "sourceSha256": "2c4124770646db850494bcacc57fbae28b01879c5e594d24f7f5c8d69ebca21f"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dark-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Dark Egg",
+          "sourceSha256": "43e8a66c8092064f74f5a3226e24a60fec6487f12eafee809ca37c8cf685169f"
+        },
+        "description": {
+          "sourceText": "A .\nA vicious wail howls within.\nPlace in a to incubate it.",
+          "sourceSha256": "2c4124770646db850494bcacc57fbae28b01879c5e594d24f7f5c8d69ebca21f"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dark-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Dark Egg",
+          "sourceSha256": "849c53955cbabcfe347111c6ec76044539f1d9466632e4f527c8d972ea6bd0af"
+        },
+        "description": {
+          "sourceText": "A .\nA shadowy spirit cries within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "99e99739d745e3d28fa3517015cf852f23b0c322922eea13e0481c0bfb930db8"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dragon-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Egg",
+          "sourceSha256": "6bf255121d987f7b705f2dbfa14cb99ba45bea981dd69cd658e5a8a143f0001c"
+        },
+        "description": {
+          "sourceText": "A .\nSomething mischievous stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "926a38e3ac32e5ff7fad4bf1d8517beb1269d64dcf432773a2adb8c31ae5c198"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dragon-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Egg",
+          "sourceSha256": "6bf255121d987f7b705f2dbfa14cb99ba45bea981dd69cd658e5a8a143f0001c"
+        },
+        "description": {
+          "sourceText": "A .\nSomething mischievous stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "926a38e3ac32e5ff7fad4bf1d8517beb1269d64dcf432773a2adb8c31ae5c198"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dragon-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Dragon Egg",
+          "sourceSha256": "1d946daaeb486e67b403ff46d25104799a0580157a29623d8b8274f9b26546af"
+        },
+        "description": {
+          "sourceText": "A .\nA strange movement pulses within.\nPlace in a to incubate it.",
+          "sourceSha256": "b5cd66cc9b47a2258548859483724e3f2154b75986550aeba381d9479517f929"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dragon-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Dragon Egg",
+          "sourceSha256": "1d946daaeb486e67b403ff46d25104799a0580157a29623d8b8274f9b26546af"
+        },
+        "description": {
+          "sourceText": "A .\nA strange movement pulses within.\nPlace in a to incubate it.",
+          "sourceSha256": "b5cd66cc9b47a2258548859483724e3f2154b75986550aeba381d9479517f929"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-dragon-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Dragon Egg",
+          "sourceSha256": "66ea4f4b3789f62b6b9a6cec9a5a28972aeb5f7067b4db29c37787876f629d70"
+        },
+        "description": {
+          "sourceText": "A .\nA solemn spirit echoes within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "ff72788e7a5f55bfd1e1f46ba5ecafa6dcfda51e6110ca3d871d74da33ddfe9f"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-earth-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocky Egg",
+          "sourceSha256": "6b51251b9183e594cadb19e7ad59b10ae1d698867bea57b1a2b20dc015e494fe"
+        },
+        "description": {
+          "sourceText": "A .\nSomething calm stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "e95261527f9c3ebe6f2758b99ca05789b5af539d353b82cc6f260e219ad19436"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-earth-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocky Egg",
+          "sourceSha256": "6b51251b9183e594cadb19e7ad59b10ae1d698867bea57b1a2b20dc015e494fe"
+        },
+        "description": {
+          "sourceText": "A .\nSomething calm stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "e95261527f9c3ebe6f2758b99ca05789b5af539d353b82cc6f260e219ad19436"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-earth-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Rocky Egg",
+          "sourceSha256": "5913e6c36127cd4f136a6084d68e790b70915430fbf67a6ff7656c81a959cbb4"
+        },
+        "description": {
+          "sourceText": "A .\nA dignified rumble drums within.\nPlace in a to incubate it.",
+          "sourceSha256": "537ddc6dbbf77afdc5826b002ea0f7baeb86a2321f1b16fb4419ec6e4eb92aff"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-earth-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Rocky Egg",
+          "sourceSha256": "5913e6c36127cd4f136a6084d68e790b70915430fbf67a6ff7656c81a959cbb4"
+        },
+        "description": {
+          "sourceText": "A .\nA dignified rumble drums within.\nPlace in a to incubate it.",
+          "sourceSha256": "537ddc6dbbf77afdc5826b002ea0f7baeb86a2321f1b16fb4419ec6e4eb92aff"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-earth-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Rocky Egg",
+          "sourceSha256": "f2ea468f3c3e8ceb4cfaaf4aa504da524b7fe6ae30c5db584e52eddb2ed3fd6d"
+        },
+        "description": {
+          "sourceText": "A .\nAn earthly spirit resounds within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "804f8f4ef484fdf90c93a8bd02212de6ecaa2f91f622f4aa51165891697cc8e0"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-electricity-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Egg",
+          "sourceSha256": "72a42ec3f397590ffcb2612fc8c52d7ad7cc690cbca4d8c3c528d2fdbc205b0e"
+        },
+        "description": {
+          "sourceText": "An .\nSomething energetic moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "813489525748411ac8b5d2ac53a80edde94bb14466e65ddaa8ede8f558c10180"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-electricity-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Egg",
+          "sourceSha256": "72a42ec3f397590ffcb2612fc8c52d7ad7cc690cbca4d8c3c528d2fdbc205b0e"
+        },
+        "description": {
+          "sourceText": "An .\nSomething energetic moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "813489525748411ac8b5d2ac53a80edde94bb14466e65ddaa8ede8f558c10180"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-electricity-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Electric Egg",
+          "sourceSha256": "f13b8ac9d87837721cd7ccfa6e542b67b503945599e9303ff901e98bcab79edb"
+        },
+        "description": {
+          "sourceText": "A .\nA pulsing energy stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "1d925eddd0d152004ad4a4090beb8c1c1e844b980354be4911326b65e312b3af"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-electricity-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Electric Egg",
+          "sourceSha256": "f13b8ac9d87837721cd7ccfa6e542b67b503945599e9303ff901e98bcab79edb"
+        },
+        "description": {
+          "sourceText": "A .\nA pulsing energy stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "1d925eddd0d152004ad4a4090beb8c1c1e844b980354be4911326b65e312b3af"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-electricity-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Electric Egg",
+          "sourceSha256": "e1a6cde55f549b2716cf0e605d699cf89ed65d628f2d06339aa4d0458470970d"
+        },
+        "description": {
+          "sourceText": "A .\nA raging spirit grows within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "b5703b4dcaa59e4476e55c2962a63902a88424c667335b2577cf556bebeaba9b"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-fire-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Scorching Egg",
+          "sourceSha256": "f5cb061e347345c7ff42250a5a366dabbfb37baef308ba9b39cc5218fdd11954"
+        },
+        "description": {
+          "sourceText": "A .\nSomething hot moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "2a340124bf433cbff7467665c485b21c086fad0713d73d6b554afb6103451468"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-fire-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Scorching Egg",
+          "sourceSha256": "f5cb061e347345c7ff42250a5a366dabbfb37baef308ba9b39cc5218fdd11954"
+        },
+        "description": {
+          "sourceText": "A .\nSomething hot moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "2a340124bf433cbff7467665c485b21c086fad0713d73d6b554afb6103451468"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-fire-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Scorching Egg",
+          "sourceSha256": "9771d82fc293514cf813d2688265fc1d4a5d5d09c0a6cea6b6ea4e21c648cfdf"
+        },
+        "description": {
+          "sourceText": "A .\nPassion burns from within.\nPlace in a to incubate it.",
+          "sourceSha256": "1dd53ed3cd5f4fd65d6f44c832274120e37db88dcce3aa77142b7f73de6aceb0"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-fire-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Scorching Egg",
+          "sourceSha256": "9771d82fc293514cf813d2688265fc1d4a5d5d09c0a6cea6b6ea4e21c648cfdf"
+        },
+        "description": {
+          "sourceText": "A .\nPassion burns from within.\nPlace in a to incubate it.",
+          "sourceSha256": "1dd53ed3cd5f4fd65d6f44c832274120e37db88dcce3aa77142b7f73de6aceb0"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-fire-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Scorching Egg",
+          "sourceSha256": "eceed705c7b3a7c5d8e81b7e7a53f227a2d88ff54af8a5435a46c7343f56d7eb"
+        },
+        "description": {
+          "sourceText": "A .\nA blazing spirit burns within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "0f9c2f57cd644a18b23c41417aa10f76ca91f1629f59fbb1e3f72989c3e265f7"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-ice-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Frozen Egg",
+          "sourceSha256": "442b4a01ef6219366f8fc72e4084677991c0836bb3b05d0204c73734878392f2"
+        },
+        "description": {
+          "sourceText": "A .\nSomething cold stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "481f98c6863f8b2af70066018ae77cd970a1b00a1afd10fb589cb4187356ead6"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-ice-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Frozen Egg",
+          "sourceSha256": "442b4a01ef6219366f8fc72e4084677991c0836bb3b05d0204c73734878392f2"
+        },
+        "description": {
+          "sourceText": "A .\nSomething cold stirs within.\nPlace in a to incubate it.",
+          "sourceSha256": "481f98c6863f8b2af70066018ae77cd970a1b00a1afd10fb589cb4187356ead6"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-ice-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Frozen Egg",
+          "sourceSha256": "e109f2d905c39b89daae89dde42c2e82cb74ac20fade7ab4b20c0f79bf47491e"
+        },
+        "description": {
+          "sourceText": "A .\nAn icy pulse pounds within.\nPlace in a to incubate it.",
+          "sourceSha256": "1c65b675e3d9058c1dd5e0d36557ebf618150bb1911a4f12678ad27e5b93805c"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-ice-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Frozen Egg",
+          "sourceSha256": "e109f2d905c39b89daae89dde42c2e82cb74ac20fade7ab4b20c0f79bf47491e"
+        },
+        "description": {
+          "sourceText": "A .\nAn icy pulse pounds within.\nPlace in a to incubate it.",
+          "sourceSha256": "1c65b675e3d9058c1dd5e0d36557ebf618150bb1911a4f12678ad27e5b93805c"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-ice-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Frozen Egg",
+          "sourceSha256": "76cfff6842a6a3ccee3cf2f704ca98a4325f86be23c188fe6c2cd581365dcc2d"
+        },
+        "description": {
+          "sourceText": "A .\nA frigid spirit stirs within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "982775d2add4aad0ebd0e88a68f023f5cec4d045ef5b3f050144410160384a77"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-leaf-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Verdant Egg",
+          "sourceSha256": "4ca4bb32888a91e94de9c33c62bd6c1bd6dc7949e3bd183260a108e1b3a2d086"
+        },
+        "description": {
+          "sourceText": "A .\nSomething lively moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "9cbcb04885cc9a50c9683bd3c3cc1f8843189425814ebcfdcd4adadabf8e6d46"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-leaf-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Verdant Egg",
+          "sourceSha256": "4ca4bb32888a91e94de9c33c62bd6c1bd6dc7949e3bd183260a108e1b3a2d086"
+        },
+        "description": {
+          "sourceText": "A .\nSomething lively moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "9cbcb04885cc9a50c9683bd3c3cc1f8843189425814ebcfdcd4adadabf8e6d46"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-leaf-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Verdant Egg",
+          "sourceSha256": "40ee7a7ca0a92ceeb924dc6cc6620db1bbbf817fc5540e9aa63800e46b24c4c3"
+        },
+        "description": {
+          "sourceText": "A .\nA strong life force dwells within.\nPlace in a to incubate it.",
+          "sourceSha256": "dd761cb0d64f89afb9feb6526d37fbb88c3ef5ebc29958397db647b041523926"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-leaf-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Verdant Egg",
+          "sourceSha256": "40ee7a7ca0a92ceeb924dc6cc6620db1bbbf817fc5540e9aa63800e46b24c4c3"
+        },
+        "description": {
+          "sourceText": "A .\nA strong life force dwells within.\nPlace in a to incubate it.",
+          "sourceSha256": "dd761cb0d64f89afb9feb6526d37fbb88c3ef5ebc29958397db647b041523926"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-leaf-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Verdant Egg",
+          "sourceSha256": "e0ebdc30cc5ad19a5383853fc853493d8a707992acc024f511f4dacb84019060"
+        },
+        "description": {
+          "sourceText": "A .\nA verdant spirit grows within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "a2cbe540506f5287a6106b536877aadb9cdc2df0b16396ad9849c73b43cce56b"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-mutation-pal-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Mutated Egg",
+          "sourceSha256": "5842b39bccc1538e7e9161981391d205d67dde6ad6faec3318520609c7c58726"
+        },
+        "description": {
+          "sourceText": "A .\nAn egg that is extremely rarely obtained, having undergone a special mutation.\nPlace it in a to incubate it.",
+          "sourceSha256": "f398d2bb987187352df8d3414960526713378efd5d9f5da8abbadadf47a78315"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-mutation-pal-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Mutated Egg",
+          "sourceSha256": "5842b39bccc1538e7e9161981391d205d67dde6ad6faec3318520609c7c58726"
+        },
+        "description": {
+          "sourceText": "A .\nAn egg that is extremely rarely obtained, having undergone a special mutation.\nPlace it in a to incubate it.",
+          "sourceSha256": "f398d2bb987187352df8d3414960526713378efd5d9f5da8abbadadf47a78315"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-mutation-pal-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Mutated Egg",
+          "sourceSha256": "68a4a4b82a3d6ce04c738729f150c8b447159cbdce7b2e8ba3c92f930853a160"
+        },
+        "description": {
+          "sourceText": "A .\nAn egg that is extremely rarely obtained, having undergone a special mutation.\nPlace it in a to incubate it.",
+          "sourceSha256": "f398d2bb987187352df8d3414960526713378efd5d9f5da8abbadadf47a78315"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-normal-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Common Egg",
+          "sourceSha256": "083d0da5eb989ce80a518bc7434f85db1c3bc6e8019afde3c873f581371d9ce6"
+        },
+        "description": {
+          "sourceText": "A .\nSomething gentle moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "17a7785defd3945220aaeeea5d85a718ad10114f53bd58aefd311b59bc22e812"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-normal-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Common Egg",
+          "sourceSha256": "083d0da5eb989ce80a518bc7434f85db1c3bc6e8019afde3c873f581371d9ce6"
+        },
+        "description": {
+          "sourceText": "A .\nSomething gentle moves within.\nPlace in a to incubate it.",
+          "sourceSha256": "17a7785defd3945220aaeeea5d85a718ad10114f53bd58aefd311b59bc22e812"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-normal-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Common Egg",
+          "sourceSha256": "cba3e722d37a20d9662a51d614d4d80e200e978cde5b59f102164ee23c57ebab"
+        },
+        "description": {
+          "sourceText": "A .\nA calm rhythm beats within.\nPlace in a to incubate it.",
+          "sourceSha256": "e61b64a29d592f2997dca1476fd6fc8887744e3b91dc5cfe8b62b5be8caa4a76"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-normal-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Common Egg",
+          "sourceSha256": "cba3e722d37a20d9662a51d614d4d80e200e978cde5b59f102164ee23c57ebab"
+        },
+        "description": {
+          "sourceText": "A .\nA calm rhythm beats within.\nPlace in a to incubate it.",
+          "sourceSha256": "e61b64a29d592f2997dca1476fd6fc8887744e3b91dc5cfe8b62b5be8caa4a76"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-normal-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Common Egg",
+          "sourceSha256": "765ac30513e6f6a9998b307a8ec24df541445351283420f6f27a2029db0fbc74"
+        },
+        "description": {
+          "sourceText": "A .\nA gentle spirit throbs within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "c06ce9d455485a2b26bef48896ec27bcf3d2c5281613ce54dcd15dd7ee8fdd4c"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-water-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Damp Egg",
+          "sourceSha256": "cc261829e4b47ab538f9b24a802dabd2aef493439aa4ec01d6c97dffd41b2b9e"
+        },
+        "description": {
+          "sourceText": "A .\nSomething swims within.\nPlace in a to incubate it.",
+          "sourceSha256": "6f2e68676b99a14c556b637e36f9ea5b9f3a3f72884b8d238e9f19b4d2d4ea88"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-water-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Damp Egg",
+          "sourceSha256": "cc261829e4b47ab538f9b24a802dabd2aef493439aa4ec01d6c97dffd41b2b9e"
+        },
+        "description": {
+          "sourceText": "A .\nSomething swims within.\nPlace in a to incubate it.",
+          "sourceSha256": "6f2e68676b99a14c556b637e36f9ea5b9f3a3f72884b8d238e9f19b4d2d4ea88"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-water-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Damp Egg",
+          "sourceSha256": "8cdd88aaa53dbf205438304586ab7730cddb056d46931e57bedd97fcac9f0cb7"
+        },
+        "description": {
+          "sourceText": "A .\nPurity swirls within.\nPlace in a to incubate it.",
+          "sourceSha256": "0c38152c4202a232c109eb7bd9f3433cc935f1e92fb1d21d3c2639516710146b"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-water-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Damp Egg",
+          "sourceSha256": "8cdd88aaa53dbf205438304586ab7730cddb056d46931e57bedd97fcac9f0cb7"
+        },
+        "description": {
+          "sourceText": "A .\nPurity swirls within.\nPlace in a to incubate it.",
+          "sourceSha256": "0c38152c4202a232c109eb7bd9f3433cc935f1e92fb1d21d3c2639516710146b"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-water-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Damp Egg",
+          "sourceSha256": "cfdfea8a0104cc7ade8b682b5cc6071eaca88a886a6bbabe73947bff09971a19"
+        },
+        "description": {
+          "sourceText": "A .\nA tranquil spirit sways within—as if a monster is about to be born.\nPlace in a to incubate it.",
+          "sourceSha256": "f681e38ceabe84481588951becb0ebe84fc021f857ff36e51c28f5028afccb27"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-world-tree-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ominous Egg",
+          "sourceSha256": "96888b39f89b4e8215bcf761f03f8dfa45549fe7680730b6a7caeff47ffc6a58"
+        },
+        "description": {
+          "sourceText": "An .\nA mysterious egg imbued with the energy of the World Tree.\nPlace it in a to incubate it.",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-world-tree-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ominous Egg",
+          "sourceSha256": "96888b39f89b4e8215bcf761f03f8dfa45549fe7680730b6a7caeff47ffc6a58"
+        },
+        "description": {
+          "sourceText": "An .\nA mysterious egg imbued with the energy of the World Tree.\nPlace it in a to incubate it.",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-world-tree-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Ominous Egg",
+          "sourceSha256": "d4266c09931e719a7a83ccc9e98b2490ad56c120261fc61305dd22bae7be8e24"
+        },
+        "description": {
+          "sourceText": "An .\nA mysterious egg imbued with the energy of the World Tree.\nPlace it in a to incubate it.",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-world-tree-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Ominous Egg",
+          "sourceSha256": "d4266c09931e719a7a83ccc9e98b2490ad56c120261fc61305dd22bae7be8e24"
+        },
+        "description": {
+          "sourceText": "An .\nA mysterious egg imbued with the energy of the World Tree.\nPlace it in a to incubate it.",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1"
+        }
+      }
+    },
+    {
+      "id": "pal-egg-world-tree-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Ominous Egg",
+          "sourceSha256": "282b72aa792d5dfbe557207a2fd0e4cb9cd69d61e4692227e4710451578e38aa"
+        },
+        "description": {
+          "sourceText": "An .\nA mysterious egg imbued with the energy of the World Tree.\nPlace it in a to incubate it.",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1"
+        }
+      }
+    },
+    {
+      "id": "pal-fluid",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Aquatic Pal Fluids",
+          "sourceSha256": "325408bb887e6e054ac275a8f190e938b4cf4e4ceac049975fc62613b2e18d45"
+        },
+        "description": {
+          "sourceText": "Bodily fluids taken from a Water Pal.\nTheir high viscosity makes them a handy material.",
+          "sourceSha256": "fd74ab210938af714be7e7f08a8b35faa6696b8b5e51645217efc2031a45be65"
+        }
+      }
+    },
+    {
+      "id": "pal-gender-reverse",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Reverser",
+          "sourceSha256": "b5ce8e372d460e6e5ba4e20e356c850d4f805aec7af648788c32360ac1ffdb2a"
+        },
+        "description": {
+          "sourceText": "A mysterious medicine that can change a Pal's gender.\nCan be used at the .",
+          "sourceSha256": "0619b34f45271858f4aababff0e01b5421a4c01165d7170b1450b0d3fb58ae57"
+        }
+      }
+    },
+    {
+      "id": "pal-healing-grenade",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Recovery Grenade",
+          "sourceSha256": "a9679cbf6a4a6590922a3751830c4da1b00d5a6cb1ebb2fa643f04db75048f56"
+        },
+        "description": {
+          "sourceText": "A with healing effects.\nIt bursts on impact, restoring HP to allied Pals.",
+          "sourceSha256": "05e837985c6526c9fc4657e896b7e9053db98a4a3b3e8e67380974847a568a38"
+        }
+      }
+    },
+    {
+      "id": "pal-item-captain-penguin",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Penking Plume",
+          "sourceSha256": "40a66fe33c2262410332f8099202cd021c619aa90d5a7c41003cbdffbc81d933"
+        },
+        "description": {
+          "sourceText": "Plume dropped from a .\nBright and colorful, it is used to make clothing.",
+          "sourceSha256": "ccb061896e6f3124d9d4b66a461560de04079e038501a839fdf111103a5b8e4d"
+        }
+      }
+    },
+    {
+      "id": "pal-item-cat-mage",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katress Hair",
+          "sourceSha256": "18293aeb19e9cea98ef4ed970e15653e7c41cf97005d1d63bce2ae8a8bcd4b78"
+        },
+        "description": {
+          "sourceText": "Hair dropped from a .\nSoft and supple, it is used to make clothing.",
+          "sourceSha256": "9406c896dedb71f2a285e3b102ab4281697a9e87e4dcc8f7368ae2f69c9fee28"
+        }
+      }
+    },
+    {
+      "id": "pal-item-colorful-bird",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tocotoco Feather",
+          "sourceSha256": "820167784a6cc226106c489f7dd31616432daa42fe888df59463bff9707cf6cd"
+        },
+        "description": {
+          "sourceText": "Feathers dropped from a .\nUsed to make clothing, as the beautifully vivid colors are quite popular.",
+          "sourceSha256": "12b42a1f3b106ed044ef95c6817dd2b22b8f719effea2b027d51bb768afbfaba"
+        }
+      }
+    },
+    {
+      "id": "pal-item-lizard-man",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Leezpunk Crest",
+          "sourceSha256": "763f24fe6c6310906fadae3fa8567475eed62114b91301744aa6ad417353a844"
+        },
+        "description": {
+          "sourceText": "Crest dropped from a .\nSharp and pointy, it is used to make clothing.",
+          "sourceSha256": "5fd67c5cefaa258efbc0ff936a61340e891e0642e24c90632ad17d28bdff0a63"
+        }
+      }
+    },
+    {
+      "id": "pal-item-mop-baby",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Swee Hair",
+          "sourceSha256": "e131b3ad1cb67ac5e829579d22420896d40078e9b265f54520c784ffb88ca8bc"
+        },
+        "description": {
+          "sourceText": "Hair dropped from a .\nFluffy and soft, it is used to make clothing.",
+          "sourceSha256": "da0e4ec2b6086217a8d97fbb46471fc8254ce313c4245d5442ab5b8650c42be1"
+        }
+      }
+    },
+    {
+      "id": "pal-item-negative-octopus",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Killamari Tentacle",
+          "sourceSha256": "8a8d7410889356edaeeb319d12a3e2aacb251dba495fc7d593a46deb304294fa"
+        },
+        "description": {
+          "sourceText": "Tentacle dropped from a .\nStrange in texture, it is used to make clothing.",
+          "sourceSha256": "fe93dc0992afe4499411eaa0011d5b81b2de5985584624e51ffd835f2695fd6f"
+        }
+      }
+    },
+    {
+      "id": "pal-item-pink-rabbit",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ribbuny Ribbon",
+          "sourceSha256": "f2ce671bb5beaaddfb3e14ea5cba4c62026ba1134f646d86da6aa24859e999c0"
+        },
+        "description": {
+          "sourceText": "Ribbon dropped from a .\nCute in color and design, it is used to make clothing.",
+          "sourceSha256": "362968b9572dc4a45c72b6f011d2c3116367b0937f2c0d7036640746a467454a"
+        }
+      }
+    },
+    {
+      "id": "pal-item-plant-slime",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gumoss Leaf",
+          "sourceSha256": "77437355419e797aa6fa0ad1d6c33ff5ba0d10587ed46a7ccb5bb1cff2e09594"
+        },
+        "description": {
+          "sourceText": "Leaf dropped from a .\nFresh and sticky, it is used to make clothing.",
+          "sourceSha256": "b0439ffffa1ef09d88bb53ee920f11db4e1a289a994b64f5c4c9ea0f1ffe1b17"
+        }
+      }
+    },
+    {
+      "id": "pal-item-raijin-daughter",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dazzi Cloud",
+          "sourceSha256": "24d28c120cbacfcf62a2568e298f2fdac28ed8d945fd3c63c754e501fd250bf1"
+        },
+        "description": {
+          "sourceText": "Cloud dropped from a .\nSoft and fluffy, it is used to make clothing.",
+          "sourceSha256": "59a68e31e096102c0f9be575098e84fc3393b78328958c0912b028620e7df35d"
+        }
+      }
+    },
+    {
+      "id": "pal-item-to-sell-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Precious Dragon Stone",
+          "sourceSha256": "acce4dde85da843ea0608011dbec8d5305ed2a6e2cb7bd41333648b2b243d3c8"
+        },
+        "description": {
+          "sourceText": "A gemstone-like ball collected from Pals.\nCan be sold to a merchant for a high price.",
+          "sourceSha256": "76180cf59787fe5eb56bb3ebb709eed091b8fd55fad29b574d465aaf3ba0c1f3"
+        }
+      }
+    },
+    {
+      "id": "pal-item-to-sell-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Precious Plume",
+          "sourceSha256": "52fec7d6755c26fa62b578a480c9223184b0daf488b45c72d3cb0d42100f1a0d"
+        },
+        "description": {
+          "sourceText": "Glittering feathers collected from Pals.\nCan be sold to a merchant for a high price.",
+          "sourceSha256": "c7f1f9a578b9036f1c343125f58940ca430ef773cf8a173d7af06ea5b918c756"
+        }
+      }
+    },
+    {
+      "id": "pal-item-to-sell-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Precious Entrails",
+          "sourceSha256": "25586b92a124ff7bd71ec7d6f731f4decfe789f8cfe3cba605e473fc3a228ecc"
+        },
+        "description": {
+          "sourceText": "A heart that never stops beating collected from Pals.\nCan be sold to a merchant for a high price.",
+          "sourceSha256": "2a03bbed258f90744cea4d54aea66e2c7072ad51e218ea49df140bb2f57cecc6"
+        }
+      }
+    },
+    {
+      "id": "pal-item-to-sell-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Precious Claw",
+          "sourceSha256": "6cde6e47ca399bf7fa1cf33ae192989a42a603f0738bd62efacc45d5951081f0"
+        },
+        "description": {
+          "sourceText": "Extremely sharp claws collected from Pals.\nCan be sold to a merchant for a high price.",
+          "sourceSha256": "e64779025f2e539873c7482a09852de04ad355988460618ba3ef47de0f42547d"
+        }
+      }
+    },
+    {
+      "id": "pal-item-to-sell-05",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Precious Pelt",
+          "sourceSha256": "95a3056364de141901fd61bd93ae6dfe97159d5d3614c805e7b2321cfd4816ac"
+        },
+        "description": {
+          "sourceText": "Fluffy fur collected from Pals.\nCan be sold to a merchant for a high price.",
+          "sourceSha256": "06bb576c8f238604dc5c7cc4abb4cfe857162e2fa963c7b74f428afb281491cb"
+        }
+      }
+    },
+    {
+      "id": "pal-oil",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "High Quality Pal Oil",
+          "sourceSha256": "10824d80c5e48da6ff22459b4c6d01427af24dfb805b9d412e54dde4aa61b427"
+        },
+        "description": {
+          "sourceText": "High-quality oil that can be extracted from Pal.\nNecessary for making .",
+          "sourceSha256": "5f8a683397d99c0a765101fe5d98df2c97afda28c577a6209b02e7476517fe5b"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-auto-hpregene-rate-passive",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Implant: Healing Coach",
+          "sourceSha256": "dca9763ee9317f4df1f3e7265ff3e113fc759514d54e68cc874a65923bdb03e5"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-craft-speed-up3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Remarkable Craftsmanship",
+          "sourceSha256": "8e7047da09d288c6c25690e685ce2de71db0d7c4cd1003315361e8b02934cd80"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-deffence-up3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Diamond Body",
+          "sourceSha256": "b4bc4cddfbd6cbe40497537955704705da347414e0e5e9bf114d22a61a2bd5b2"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-move-speed-up-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Swift",
+          "sourceSha256": "a5d51e3adde841d9444e0d0614cab4ef8701608d405e57725a5f7a3fa1c3d7d4"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-mutation-pal-babysitter",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Babysitter",
+          "sourceSha256": "b893f1e5ff56e537881c708d0ebcf77368aeaeba6465017cdd126520eb8b3a70"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-mutation-pal-explosion-resist",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Heavily Armored",
+          "sourceSha256": "dfa5154063c8669cdca91ae8c0eaec27d2f84f2c72cf0be1e3771b56a4d47531"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-mutation-pal-immortal",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Immortality",
+          "sourceSha256": "0d777ca10366c45af55fcd9dcecfb979f1a94dece16bc028659669fe3b53bf78"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-mutation-pal-mutant",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Idiosyncratic",
+          "sourceSha256": "d7569e0fcf98e4b286e28442de9af3c3ee5ee6eb7c973ef8f51e1cd0d38de11d"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-pal-allattack-up3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Demon God",
+          "sourceSha256": "83175d596ae7750481516669938d45af37181ade0d61179391d0692e924670be"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    },
+    {
+      "id": "pal-passive-skill-change-consumable-pal-full-stomach-down-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Disposable Implant: Mastery of Fasting",
+          "sourceSha256": "d6e9ed5409200d43c525618cad76e8b606a5b78e40144e082d82579a37abaab4"
+        },
+        "description": {
+          "sourceText": "An implant embedded into a Pal's body\nto change its passive skill.\nWhen stored in Key Items, it allows you to\nselect the corresponding passive skill at\na .",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb"
+        }
+      }
+    }
+  ]
+}

@@ -33,6 +33,24 @@ export const PALWORLD_LOCALIZATION_FIELD_STATUSES = [
   "source_language_fallback",
   "unavailable"
 ] as const;
+export const PALWORLD_TRANSLATION_LOCALES = ["ko", "ja"] as const;
+export const PALWORLD_TRANSLATION_RECORD_KINDS = ["pal", "item", "skill"] as const;
+export const PALWORLD_TRANSLATION_FIELDS = ["name", "description", "passiveAbility"] as const;
+export const PALWORLD_TRANSLATION_STATUSES = ["machine_assisted", "human_reviewed"] as const;
+export const PALWORLD_TRANSLATION_DISPLAY_STATUSES = [
+  "machine_assisted",
+  "human_reviewed",
+  "source_language_fallback",
+  "missing_source"
+] as const;
+export const PALWORLD_TRANSLATION_METHODS = ["machine_assisted", "human_reviewed", "mixed"] as const;
+export const PALWORLD_TRANSLATION_SNAPSHOT_STATUSES = ["complete", "incomplete"] as const;
+export const PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE = "source_anomaly_preserved" as const;
+export const PALWORLD_TRANSLATION_MISSING_SOURCE_MARKERS = {
+  ko: "[원문 누락]",
+  ja: "[原文欠落]"
+} as const;
+const PALWORLD_TRANSLATION_PLACEHOLDER_RESIDUE_PATTERN = /XQZ|missing\s+source\s+value|ソース値が不足|원문\s*값\s*누락/iu;
 export const PALWORLD_ITEM_CATEGORIES = [
   "material",
   "consumable",
@@ -49,6 +67,13 @@ export const PALWORLD_ITEM_CATEGORIES = [
 ] as const;
 export const PALWORLD_ACQUISITION_TYPES = ["craft", "drop", "merchant", "chest", "gathering", "quest", "other"] as const;
 export const PALWORLD_GENDERS = ["any", "male", "female"] as const;
+export const PALWORLD_BREEDING_GENDERS = ["male", "female"] as const;
+export const PALWORLD_BREEDING_RESOLUTION_STATES = [
+  "resolved",
+  "requires_gender",
+  "not_found",
+  "data_unavailable"
+] as const;
 export const PALWORLD_DOMAIN_STATUSES = ["ready", "sample", "incomplete"] as const;
 export const PALWORLD_IMAGE_ASSET_STATUSES = [
   "blocked_by_license",
@@ -72,9 +97,18 @@ export type PalworldVariantType = (typeof PALWORLD_VARIANT_TYPES)[number];
 export type PalworldSkillType = (typeof PALWORLD_SKILL_TYPES)[number];
 export type PalworldLocalizationLanguage = (typeof PALWORLD_LOCALIZATION_LANGUAGES)[number];
 export type PalworldLocalizationFieldStatus = (typeof PALWORLD_LOCALIZATION_FIELD_STATUSES)[number];
+export type PalworldTranslationLocale = (typeof PALWORLD_TRANSLATION_LOCALES)[number];
+export type PalworldTranslationRecordKind = (typeof PALWORLD_TRANSLATION_RECORD_KINDS)[number];
+export type PalworldTranslationField = (typeof PALWORLD_TRANSLATION_FIELDS)[number];
+export type PalworldTranslationStatus = (typeof PALWORLD_TRANSLATION_STATUSES)[number];
+export type PalworldTranslationDisplayStatus = (typeof PALWORLD_TRANSLATION_DISPLAY_STATUSES)[number];
+export type PalworldTranslationMethod = (typeof PALWORLD_TRANSLATION_METHODS)[number];
+export type PalworldTranslationSnapshotStatus = (typeof PALWORLD_TRANSLATION_SNAPSHOT_STATUSES)[number];
 export type PalworldItemCategory = (typeof PALWORLD_ITEM_CATEGORIES)[number];
 export type PalworldAcquisitionType = (typeof PALWORLD_ACQUISITION_TYPES)[number];
 export type PalworldGender = (typeof PALWORLD_GENDERS)[number];
+export type PalworldBreedingGender = (typeof PALWORLD_BREEDING_GENDERS)[number];
+export type PalworldBreedingResolutionState = (typeof PALWORLD_BREEDING_RESOLUTION_STATES)[number];
 export type PalworldDomainStatus = (typeof PALWORLD_DOMAIN_STATUSES)[number];
 export type PalworldImageAssetStatus = (typeof PALWORLD_IMAGE_ASSET_STATUSES)[number];
 export type PalworldImagePolicyStatus = (typeof PALWORLD_IMAGE_POLICY_STATUSES)[number];
@@ -136,6 +170,20 @@ export type PalworldLocalizationFallback = {
   ja: PalworldLocalizationFieldStatus;
 };
 
+export type PalworldTranslationLocaleStatus = {
+  ko: PalworldTranslationDisplayStatus;
+  ja: PalworldTranslationDisplayStatus;
+};
+
+/** API 레코드의 필드별 표시 언어 상태입니다. 기존 localization 필드와 additive하게 사용합니다. */
+export type PalworldTranslationDisplayState = {
+  name?: PalworldTranslationLocaleStatus;
+  description?: PalworldTranslationLocaleStatus;
+  passiveAbility?: PalworldTranslationLocaleStatus;
+  label?: PalworldTranslationLocaleStatus;
+  location?: PalworldTranslationLocaleStatus;
+};
+
 export type PalworldSkill = {
   id: string;
   type: PalworldSkillType;
@@ -151,7 +199,10 @@ export type PalworldSkill = {
   unlockLevel?: number;
   passiveTier?: number;
   passiveAbility?: string;
+  passiveAbilityKo?: string;
+  passiveAbilityJa?: string;
   localization?: PalworldLocalizationFallback;
+  translation?: PalworldTranslationDisplayState;
 };
 
 export type PalworldSkillSummary = PalworldSkill & {
@@ -178,6 +229,7 @@ export type PalworldPalReference = {
   imageWidth?: number;
   imageHeight?: number;
   elements: PalworldElement[];
+  translation?: PalworldTranslationDisplayState;
 };
 
 export type PalworldItemReference = {
@@ -189,6 +241,7 @@ export type PalworldItemReference = {
   imageWidth?: number;
   imageHeight?: number;
   localization?: PalworldLocalizationFallback;
+  translation?: PalworldTranslationDisplayState;
 };
 
 export type PalworldPalDrop = {
@@ -225,8 +278,10 @@ export type PalworldPalBreedingInfo = {
   specialParentPairs: Array<{
     parentAId: string;
     parentBId: string;
-    parentAGender?: PalworldGender;
-    parentBGender?: PalworldGender;
+    parentAGender?: PalworldBreedingGender;
+    parentBGender?: PalworldBreedingGender;
+    parentA?: PalworldPalReference;
+    parentB?: PalworldPalReference;
   }>;
 };
 
@@ -269,6 +324,7 @@ export type PalworldAcquisitionMethod = {
   locationJa?: string;
   locationEn?: string;
   localization?: PalworldLocalizationFallback;
+  translation?: PalworldTranslationDisplayState;
 };
 
 export type PalworldItemDetail = PalworldItemSummary & {
@@ -301,6 +357,26 @@ export type PalworldCoverageCount = {
   total: number;
 };
 
+export type PalworldTranslationDomainCoverage = {
+  palNames: PalworldCoverageCount;
+  palDescriptions: PalworldCoverageCount;
+  itemNames: PalworldCoverageCount;
+  itemDescriptions: PalworldCoverageCount;
+  skillNames: PalworldCoverageCount;
+  skillDescriptions: PalworldCoverageCount;
+  skillPassiveAbilities: PalworldCoverageCount;
+  humanReviewed: number;
+  machineAssisted: number;
+  sourceLanguageFallback: number;
+  missingSource: number;
+  staleSourceHash: number;
+};
+
+export type PalworldTranslationCoverage = {
+  ko: PalworldTranslationDomainCoverage;
+  ja: PalworldTranslationDomainCoverage;
+};
+
 export type PalworldDataCoverage = {
   palDetails: PalworldCoverageCount;
   itemDetails: PalworldCoverageCount;
@@ -313,6 +389,101 @@ export type PalworldDataCoverage = {
     ja: PalworldCoverageCount;
     en: PalworldCoverageCount;
   };
+  translations?: PalworldTranslationCoverage;
+};
+
+export type PalworldTranslationFieldValue = {
+  sourceSha256: string;
+  text: string;
+  status: PalworldTranslationStatus;
+  note?: string;
+};
+
+export type PalworldTranslationRecord = {
+  id: string;
+  kind: PalworldTranslationRecordKind;
+  fields: Partial<Record<PalworldTranslationField, PalworldTranslationFieldValue>>;
+};
+
+export type PalworldTranslationMetadata = {
+  schemaVersion: 1;
+  release: string;
+  locale: PalworldTranslationLocale;
+  sourceCatalogSha256: string;
+  sourcePaldexSha256: string;
+  sourceRevision: string;
+  translationRevision: string;
+  translationMethod: PalworldTranslationMethod;
+  translationStatus: PalworldTranslationSnapshotStatus;
+  translatedAt: string;
+  reviewedAt: string | null;
+};
+
+export type PalworldTranslationSnapshot = PalworldTranslationMetadata & {
+  records: PalworldTranslationRecord[];
+};
+
+export type PalworldTranslationSourceField = {
+  text: string;
+  sha256: string;
+};
+
+export type PalworldTranslationSourceRecord = {
+  id: string;
+  kind: PalworldTranslationRecordKind;
+  fields: Partial<Record<PalworldTranslationField, PalworldTranslationSourceField>>;
+};
+
+/**
+ * locale artifact를 canonical 영어 source와 의미 검증할 때 사용하는 고정 context입니다.
+ * englishCopyAllowlist는 `kind:id:field` exact key만 허용합니다.
+ */
+export type PalworldTranslationValidationContext = {
+  release: string;
+  sourceCatalogSha256: string;
+  sourcePaldexSha256: string;
+  sourceRevision: string;
+  records: readonly PalworldTranslationSourceRecord[];
+  englishCopyAllowlist?: readonly string[];
+};
+
+export type PalworldBreedingPalParameters = {
+  palId: string;
+  sourceInternalId: string;
+  tribe: string;
+  combiRank: number;
+  combiDuplicatePriority: number;
+  maleProbability: number;
+  variantType: Extract<PalworldVariantType, "normal" | "variant">;
+};
+
+export type PalworldBreedingSpecialRule = {
+  parentAId: string;
+  parentASourceInternalId: string;
+  parentBId: string;
+  parentBSourceInternalId: string;
+  childId: string;
+  childSourceInternalId: string;
+  parentAGender?: PalworldBreedingGender;
+  parentBGender?: PalworldBreedingGender;
+};
+
+export type PalworldBreedingDataSnapshot = {
+  schemaVersion: 1;
+  release: string;
+  metadata: {
+    gameVersion: string;
+    steamBuildId: string;
+    sourceRevision: string;
+    sourceChecksums: {
+      atlasPals: string;
+      atlasBreeding: string;
+      palCalc: string;
+      catalog: string;
+    };
+  };
+  parameters: PalworldBreedingPalParameters[];
+  specialRules: PalworldBreedingSpecialRule[];
 };
 
 export type PalworldBreedingPair = {
@@ -368,11 +539,14 @@ export type PalworldBreedingResultResponse = {
   parentA: PalworldPalReference;
   parentB: PalworldPalReference;
   result: PalworldBreedingPair | null;
+  state: PalworldBreedingResolutionState;
+  alternatives: PalworldBreedingPair[];
   metadata: PalworldDataMetadata;
 };
 
 export type PalworldBreedingParentsResponse = PalworldPaginatedResponse<PalworldBreedingPair> & {
   child: PalworldPalReference;
+  state: Exclude<PalworldBreedingResolutionState, "requires_gender">;
 };
 
 export type PalworldDataSnapshot = {
@@ -416,7 +590,10 @@ const PALWORLD_SKILL_KEYS = [
   "unlockLevel",
   "passiveTier",
   "passiveAbility",
-  "localization"
+  "passiveAbilityKo",
+  "passiveAbilityJa",
+  "localization",
+  "translation"
 ] as const;
 
 function valid<T>(data: T): PalworldValidationResult<T> {
@@ -649,6 +826,54 @@ function validateLocalizationFallbackAt(
   return valid(record.data as PalworldLocalizationFallback);
 }
 
+function validateTranslationLocaleStatusAt(
+  value: unknown,
+  path: string,
+  availability: { ko: boolean; ja: boolean; en: boolean }
+): PalworldValidationResult<PalworldTranslationLocaleStatus> {
+  const record = recordAt(value, path, ["ko", "ja"]);
+  if (!record.ok) return record;
+  for (const locale of PALWORLD_TRANSLATION_LOCALES) {
+    const status = enumAt(record.data[locale], `${path}.${locale}`, PALWORLD_TRANSLATION_DISPLAY_STATUSES);
+    if (!status.ok) return status;
+    if (
+      (status.data === "human_reviewed" || status.data === "machine_assisted")
+      && (!availability.en || !availability[locale])
+    ) {
+      return invalid(`${path}.${locale}`, "번역 상태에는 영어 원문과 해당 언어 값이 모두 필요합니다.");
+    }
+    if (status.data === "source_language_fallback" && (!availability.en || availability[locale])) {
+      return invalid(`${path}.${locale}`, "영문 원문 fallback에는 영어 값이 있고 해당 언어 값은 없어야 합니다.");
+    }
+    if (status.data === "missing_source" && (availability.en || availability[locale])) {
+      return invalid(`${path}.${locale}`, "원문과 번역이 모두 없을 때만 missing_source를 사용할 수 있습니다.");
+    }
+  }
+  return valid(record.data as PalworldTranslationLocaleStatus);
+}
+
+function validateTranslationDisplayStateAt(
+  value: unknown,
+  path: string,
+  allowedFields: readonly (keyof PalworldTranslationDisplayState)[],
+  requiredField: keyof PalworldTranslationDisplayState,
+  availability: Partial<Record<keyof PalworldTranslationDisplayState, { ko: boolean; ja: boolean; en: boolean }>>
+): PalworldValidationResult<PalworldTranslationDisplayState> {
+  const record = recordAt(value, path, allowedFields);
+  if (!record.ok) return record;
+  if (record.data[requiredField] === undefined) {
+    return invalid(`${path}.${requiredField}`, "필수 번역 표시 상태가 필요합니다.");
+  }
+  for (const field of allowedFields) {
+    if (record.data[field] === undefined) continue;
+    const fieldAvailability = availability[field];
+    if (fieldAvailability === undefined) return invalid(`${path}.${field}`, "허용되지 않은 번역 필드입니다.");
+    const status = validateTranslationLocaleStatusAt(record.data[field], `${path}.${field}`, fieldAvailability);
+    if (!status.ok) return status;
+  }
+  return valid(record.data as PalworldTranslationDisplayState);
+}
+
 function validateDomainCoverageAt(value: unknown, path: string): PalworldValidationResult<PalworldDomainCoverage> {
   const record = recordAt(value, path, ["status", "recordCount", "metadata"]);
   if (!record.ok) return record;
@@ -741,6 +966,12 @@ function validateSkillAt(value: unknown, path: string): PalworldValidationResult
     const passiveAbility = stringAt(candidate.passiveAbility, `${path}.passiveAbility`, MAX_DESCRIPTION_LENGTH);
     if (!passiveAbility.ok) return passiveAbility;
   }
+  for (const field of ["passiveAbilityKo", "passiveAbilityJa"] as const) {
+    if (candidate[field] === undefined) continue;
+    if (type.data !== "passive") return invalid(`${path}.${field}`, "passive 스킬에만 사용할 수 있습니다.");
+    const passiveAbility = stringAt(candidate[field], `${path}.${field}`, MAX_DESCRIPTION_LENGTH);
+    if (!passiveAbility.ok) return passiveAbility;
+  }
   if (candidate.localization !== undefined) {
     const localization = validateLocalizationFallbackAt(candidate.localization, `${path}.localization`);
     if (!localization.ok) return localization;
@@ -758,6 +989,28 @@ function validateSkillAt(value: unknown, path: string): PalworldValidationResult
   ) {
     return invalid(`${path}.localization`, "한국어·일본어 데이터가 없으면 fallback 상태를 명시해야 합니다.");
   }
+  if (candidate.translation !== undefined) {
+    const translation = validateTranslationDisplayStateAt(
+      candidate.translation,
+      `${path}.translation`,
+      ["name", "description", "passiveAbility"],
+      "name",
+      {
+        name: { ko: candidate.nameKo !== undefined, ja: candidate.nameJa !== undefined, en: true },
+        description: {
+          ko: candidate.descriptionKo !== undefined,
+          ja: candidate.descriptionJa !== undefined,
+          en: candidate.descriptionEn !== undefined
+        },
+        passiveAbility: {
+          ko: candidate.passiveAbilityKo !== undefined,
+          ja: candidate.passiveAbilityJa !== undefined,
+          en: candidate.passiveAbility !== undefined
+        }
+      }
+    );
+    if (!translation.ok) return translation;
+  }
   return valid(candidate as PalworldSkill);
 }
 
@@ -771,7 +1024,8 @@ function validatePalReferenceAt(value: unknown, path: string): PalworldValidatio
     "imageUrl",
     "imageWidth",
     "imageHeight",
-    "elements"
+    "elements",
+    "translation"
   ]);
   if (!record.ok) return record;
   const candidate = record.data;
@@ -793,7 +1047,18 @@ function validatePalReferenceAt(value: unknown, path: string): PalworldValidatio
   if (!elements.ok) return elements;
   if (elements.data.length === 0) return invalid(`${path}.elements`, "하나 이상의 속성이 필요합니다.");
   const uniqueElements = uniqueStringsAt(elements.data, `${path}.elements`, "속성");
-  return uniqueElements.ok ? valid(candidate as PalworldPalReference) : uniqueElements;
+  if (!uniqueElements.ok) return uniqueElements;
+  if (candidate.translation !== undefined) {
+    const translation = validateTranslationDisplayStateAt(
+      candidate.translation,
+      `${path}.translation`,
+      ["name"],
+      "name",
+      { name: { ko: true, ja: true, en: true } }
+    );
+    if (!translation.ok) return translation;
+  }
+  return valid(candidate as PalworldPalReference);
 }
 
 function validateElementDefinitionAt(value: unknown, path: string): PalworldValidationResult<PalworldElementDefinition> {
@@ -820,7 +1085,8 @@ function validateItemReferenceAt(value: unknown, path: string): PalworldValidati
     "imageUrl",
     "imageWidth",
     "imageHeight",
-    "localization"
+    "localization",
+    "translation"
   ]);
   if (!record.ok) return record;
   const candidate = record.data;
@@ -847,6 +1113,22 @@ function validateItemReferenceAt(value: unknown, path: string): PalworldValidati
     if (!consistent.ok) return consistent;
   } else if (candidate.nameKo === undefined || candidate.nameJa === undefined) {
     return invalid(`${path}.localization`, "한국어·일본어 이름이 없으면 fallback 상태를 명시해야 합니다.");
+  }
+  if (candidate.translation !== undefined) {
+    const translation = validateTranslationDisplayStateAt(
+      candidate.translation,
+      `${path}.translation`,
+      ["name"],
+      "name",
+      {
+        name: {
+          ko: candidate.nameKo !== undefined,
+          ja: candidate.nameJa !== undefined,
+          en: true
+        }
+      }
+    );
+    if (!translation.ok) return translation;
   }
   return valid(candidate as PalworldItemReference);
 }
@@ -890,7 +1172,8 @@ function validatePalSummaryAt(value: unknown, path: string): PalworldValidationR
     "elements",
     "rarity",
     "variantType",
-    "workSuitabilities"
+    "workSuitabilities",
+    "translation"
   ]);
   if (!record.ok) return record;
   const candidate = record.data;
@@ -904,7 +1187,10 @@ function validatePalSummaryAt(value: unknown, path: string): PalworldValidationR
       ...(candidate.imageUrl === undefined ? {} : { imageUrl: candidate.imageUrl }),
       ...(candidate.imageWidth === undefined ? {} : { imageWidth: candidate.imageWidth }),
       ...(candidate.imageHeight === undefined ? {} : { imageHeight: candidate.imageHeight }),
-      elements: candidate.elements
+      elements: candidate.elements,
+      ...(candidate.translation === undefined ? {} : {
+        translation: { name: (candidate.translation as PalworldTranslationDisplayState).name }
+      })
     },
     path
   );
@@ -937,7 +1223,14 @@ function validateBreedingInfoAt(value: unknown, path: string): PalworldValidatio
     if (!power.ok) return power;
   }
   const pairs = arrayAt(record.data.specialParentPairs, `${path}.specialParentPairs`, MAX_API_COLLECTION_SIZE, (entry, entryPath) => {
-    const pair = recordAt(entry, entryPath, ["parentAId", "parentBId", "parentAGender", "parentBGender"]);
+    const pair = recordAt(entry, entryPath, [
+      "parentAId",
+      "parentBId",
+      "parentAGender",
+      "parentBGender",
+      "parentA",
+      "parentB"
+    ]);
     if (!pair.ok) return pair;
     for (const field of ["parentAId", "parentBId"] as const) {
       const result = idAt(pair.data[field], `${entryPath}.${field}`);
@@ -945,14 +1238,27 @@ function validateBreedingInfoAt(value: unknown, path: string): PalworldValidatio
     }
     for (const field of ["parentAGender", "parentBGender"] as const) {
       if (pair.data[field] === undefined) continue;
-      const result = enumAt(pair.data[field], `${entryPath}.${field}`, PALWORLD_GENDERS);
+      const result = enumAt(pair.data[field], `${entryPath}.${field}`, PALWORLD_BREEDING_GENDERS);
       if (!result.ok) return result;
+    }
+    for (const [referenceField, idField] of [
+      ["parentA", "parentAId"],
+      ["parentB", "parentBId"]
+    ] as const) {
+      if (pair.data[referenceField] === undefined) continue;
+      const reference = validatePalReferenceAt(pair.data[referenceField], `${entryPath}.${referenceField}`);
+      if (!reference.ok) return reference;
+      if (reference.data.id !== pair.data[idField]) {
+        return invalid(`${entryPath}.${referenceField}.id`, `${idField}와 일치해야 합니다.`);
+      }
     }
     return valid(pair.data as {
       parentAId: string;
       parentBId: string;
-      parentAGender?: PalworldGender;
-      parentBGender?: PalworldGender;
+      parentAGender?: PalworldBreedingGender;
+      parentBGender?: PalworldBreedingGender;
+      parentA?: PalworldPalReference;
+      parentB?: PalworldPalReference;
     });
   });
   return pairs.ok ? valid(record.data as PalworldPalBreedingInfo) : pairs;
@@ -995,6 +1301,7 @@ function validatePalDetailAt(value: unknown, path: string): PalworldValidationRe
     "descriptionJa",
     "descriptionEn",
     "localization",
+    "translation",
     "stats",
     "nocturnal",
     "partnerSkill",
@@ -1019,7 +1326,10 @@ function validatePalDetailAt(value: unknown, path: string): PalworldValidationRe
       elements: candidate.elements,
       rarity: candidate.rarity,
       variantType: candidate.variantType,
-      workSuitabilities: candidate.workSuitabilities
+      workSuitabilities: candidate.workSuitabilities,
+      ...(candidate.translation === undefined ? {} : {
+        translation: { name: (candidate.translation as PalworldTranslationDisplayState).name }
+      })
     },
     path
   );
@@ -1040,6 +1350,23 @@ function validatePalDetailAt(value: unknown, path: string): PalworldValidationRe
     if (!consistent.ok) return consistent;
   } else if (hasDescription && (candidate.descriptionKo === undefined || candidate.descriptionJa === undefined)) {
     return invalid(`${path}.localization`, "한국어·일본어 설명이 없으면 fallback 상태를 명시해야 합니다.");
+  }
+  if (candidate.translation !== undefined) {
+    const translation = validateTranslationDisplayStateAt(
+      candidate.translation,
+      `${path}.translation`,
+      ["name", "description"],
+      "name",
+      {
+        name: { ko: true, ja: true, en: true },
+        description: {
+          ko: candidate.descriptionKo !== undefined,
+          ja: candidate.descriptionJa !== undefined,
+          en: candidate.descriptionEn !== undefined
+        }
+      }
+    );
+    if (!translation.ok) return translation;
   }
   const stats = validateStatsAt(candidate.stats, `${path}.stats`);
   if (!stats.ok) return stats;
@@ -1100,7 +1427,8 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
     "descriptionJa",
     "descriptionEn",
     "sellPrice",
-    "technologyLevel"
+    "technologyLevel",
+    "translation"
   ]);
   if (!record.ok) return record;
   const candidate = record.data;
@@ -1113,7 +1441,10 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
       ...(candidate.imageUrl === undefined ? {} : { imageUrl: candidate.imageUrl }),
       ...(candidate.imageWidth === undefined ? {} : { imageWidth: candidate.imageWidth }),
       ...(candidate.imageHeight === undefined ? {} : { imageHeight: candidate.imageHeight }),
-      ...(candidate.localization === undefined ? {} : { localization: candidate.localization })
+      ...(candidate.localization === undefined ? {} : { localization: candidate.localization }),
+      ...(candidate.translation === undefined ? {} : {
+        translation: { name: (candidate.translation as PalworldTranslationDisplayState).name }
+      })
     },
     path
   );
@@ -1148,6 +1479,27 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
   ) {
     return invalid(`${path}.localization`, "한국어·일본어 데이터가 없으면 fallback 상태를 명시해야 합니다.");
   }
+  if (candidate.translation !== undefined) {
+    const translation = validateTranslationDisplayStateAt(
+      candidate.translation,
+      `${path}.translation`,
+      ["name", "description"],
+      "name",
+      {
+        name: {
+          ko: candidate.nameKo !== undefined,
+          ja: candidate.nameJa !== undefined,
+          en: true
+        },
+        description: {
+          ko: candidate.descriptionKo !== undefined,
+          ja: candidate.descriptionJa !== undefined,
+          en: candidate.descriptionEn !== undefined
+        }
+      }
+    );
+    if (!translation.ok) return translation;
+  }
   for (const [field, max] of [
     ["sellPrice", 1_000_000_000],
     ["technologyLevel", 100]
@@ -1178,7 +1530,8 @@ function validateAcquisitionMethodAt(value: unknown, path: string): PalworldVali
     "locationKo",
     "locationJa",
     "locationEn",
-    "localization"
+    "localization",
+    "translation"
   ]);
   if (!record.ok) return record;
   const type = enumAt(record.data.type, `${path}.type`, PALWORLD_ACQUISITION_TYPES);
@@ -1204,6 +1557,27 @@ function validateAcquisitionMethodAt(value: unknown, path: string): PalworldVali
     if (!consistent.ok) return consistent;
   } else if (record.data.labelKo === undefined || record.data.labelJa === undefined) {
     return invalid(`${path}.localization`, "한국어·일본어 안내가 없으면 fallback 상태를 명시해야 합니다.");
+  }
+  if (record.data.translation !== undefined) {
+    const translation = validateTranslationDisplayStateAt(
+      record.data.translation,
+      `${path}.translation`,
+      ["label", "location"],
+      "label",
+      {
+        label: {
+          ko: record.data.labelKo !== undefined,
+          ja: record.data.labelJa !== undefined,
+          en: true
+        },
+        location: {
+          ko: record.data.locationKo !== undefined,
+          ja: record.data.locationJa !== undefined,
+          en: record.data.locationEn !== undefined
+        }
+      }
+    );
+    if (!translation.ok) return translation;
   }
   return valid(record.data as PalworldAcquisitionMethod);
 }
@@ -1234,7 +1608,8 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
     "dropPals",
     "acquisitionMethods",
     "relatedItems",
-    "metadata"
+    "metadata",
+    "translation"
   ]);
   if (!record.ok) return record;
   const candidate = record.data;
@@ -1254,7 +1629,8 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
       descriptionJa: candidate.descriptionJa,
       ...(candidate.descriptionEn === undefined ? {} : { descriptionEn: candidate.descriptionEn }),
       ...(candidate.sellPrice === undefined ? {} : { sellPrice: candidate.sellPrice }),
-      ...(candidate.technologyLevel === undefined ? {} : { technologyLevel: candidate.technologyLevel })
+      ...(candidate.technologyLevel === undefined ? {} : { technologyLevel: candidate.technologyLevel }),
+      ...(candidate.translation === undefined ? {} : { translation: candidate.translation })
     },
     path
   );
@@ -1364,6 +1740,71 @@ function validateCoverageCountAt(value: unknown, path: string): PalworldValidati
   return valid(record.data as PalworldCoverageCount);
 }
 
+function validateTranslationDomainCoverageAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldTranslationDomainCoverage> {
+  const record = recordAt(value, path, [
+    "palNames",
+    "palDescriptions",
+    "itemNames",
+    "itemDescriptions",
+    "skillNames",
+    "skillDescriptions",
+    "skillPassiveAbilities",
+    "humanReviewed",
+    "machineAssisted",
+    "sourceLanguageFallback",
+    "missingSource",
+    "staleSourceHash"
+  ]);
+  if (!record.ok) return record;
+  for (const field of [
+    "palNames",
+    "palDescriptions",
+    "itemNames",
+    "itemDescriptions",
+    "skillNames",
+    "skillDescriptions",
+    "skillPassiveAbilities"
+  ] as const) {
+    const count = validateCoverageCountAt(record.data[field], `${path}.${field}`);
+    if (!count.ok) return count;
+  }
+  for (const field of [
+    "humanReviewed",
+    "machineAssisted",
+    "sourceLanguageFallback",
+    "missingSource",
+    "staleSourceHash"
+  ] as const) {
+    const count = integerAt(record.data[field], `${path}.${field}`, 0, 100_000_000);
+    if (!count.ok) return count;
+  }
+  const fieldCoverages = [
+    "palNames",
+    "palDescriptions",
+    "itemNames",
+    "itemDescriptions",
+    "skillNames",
+    "skillDescriptions",
+    "skillPassiveAbilities"
+  ].map((field) => record.data[field] as PalworldCoverageCount);
+  const fieldTotal = fieldCoverages.reduce((sum, coverage) => sum + coverage.total, 0);
+  const availableTotal = fieldCoverages.reduce((sum, coverage) => sum + coverage.available, 0);
+  const missingTotal = fieldCoverages.reduce((sum, coverage) => sum + coverage.missing, 0);
+  if ((record.data.humanReviewed as number) + (record.data.machineAssisted as number) !== availableTotal) {
+    return invalid(path, "필드 available 합과 humanReviewed·machineAssisted 합이 일치해야 합니다.");
+  }
+  if ((record.data.sourceLanguageFallback as number) !== missingTotal) {
+    return invalid(path, "필드 missing 합과 sourceLanguageFallback이 일치해야 합니다.");
+  }
+  if ((record.data.staleSourceHash as number) !== 0 && (record.data.staleSourceHash as number) !== fieldTotal) {
+    return invalid(`${path}.staleSourceHash`, "stale source hash는 0 또는 전체 번역 필드 수여야 합니다.");
+  }
+  return valid(record.data as PalworldTranslationDomainCoverage);
+}
+
 function validateDataCoverageAt(value: unknown, path: string): PalworldValidationResult<PalworldDataCoverage> {
   const record = recordAt(value, path, [
     "palDetails",
@@ -1372,7 +1813,8 @@ function validateDataCoverageAt(value: unknown, path: string): PalworldValidatio
     "palImages",
     "itemImages",
     "elementImages",
-    "localization"
+    "localization",
+    "translations"
   ]);
   if (!record.ok) return record;
   for (const field of ["palDetails", "itemDetails", "skillDetails", "palImages", "itemImages", "elementImages"] as const) {
@@ -1384,6 +1826,17 @@ function validateDataCoverageAt(value: unknown, path: string): PalworldValidatio
   for (const field of ["ko", "ja", "en"] as const) {
     const count = validateCoverageCountAt(localization.data[field], `${path}.localization.${field}`);
     if (!count.ok) return count;
+  }
+  if (record.data.translations !== undefined) {
+    const translations = recordAt(record.data.translations, `${path}.translations`, ["ko", "ja"]);
+    if (!translations.ok) return translations;
+    for (const locale of PALWORLD_TRANSLATION_LOCALES) {
+      const localeCoverage = validateTranslationDomainCoverageAt(
+        translations.data[locale],
+        `${path}.translations.${locale}`
+      );
+      if (!localeCoverage.ok) return localeCoverage;
+    }
   }
   return valid(record.data as PalworldDataCoverage);
 }
@@ -1497,6 +1950,456 @@ export function validatePalworldDataCoverage(value: unknown): PalworldValidation
   return validateDataCoverageAt(value, "coverage");
 }
 
+function validateTranslationArtifactTextAt(
+  value: unknown,
+  path: string,
+  maxLength: number
+): PalworldValidationResult<string> {
+  const text = stringAt(value, path, maxLength);
+  if (!text.ok) return text;
+  if (text.data.trim() !== text.data) {
+    return invalid(path, "앞뒤 공백을 포함할 수 없습니다.");
+  }
+  if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/u.test(text.data)) {
+    return invalid(path, "제어문자를 포함할 수 없습니다.");
+  }
+  if (/<\s*\/?\s*[a-z][^>]*>|<script\b|javascript:/iu.test(text.data)) {
+    return invalid(path, "HTML markup을 포함할 수 없습니다.");
+  }
+  return text;
+}
+
+function translationSourceMissingSlotCount(value: string): number {
+  return [...value.matchAll(/\(\)/gu)].length
+    + [...value.matchAll(/(?:^|\s)\.(?=\s|$)/gu)].length
+    + [...value.matchAll(/(?:^|\s),(?=\s|$)/gu)].length;
+}
+
+const TRANSLATION_NUMERIC_UNIT_PATTERN = /(?:(?<![A-Za-z])(lv\.?|levels?|레벨|レベル)\s*)?(\d+(?:[.,]\d+)*)(?:\s*-?\s*(milliseconds?|ms|seconds?|secs?|s|minutes?|mins?|hours?|hrs?|days?|years?|kilograms?|kg|grams?|g|kilometers?|km|meters?|m|%|[x×]|lv\.?|levels?|units?|shots?|times?|킬로그램|그램|킬로미터|미터|밀리초|초|분|시간|일|년|레벨|배|단위|발|회|キログラム|グラム|キロメートル|メートル|ミリ秒|秒|分|時間|日|年|レベル|倍|単位|発|回))?(?![A-Za-z0-9])/giu;
+
+function canonicalTranslationUnit(value: string | undefined): string {
+  const unit = value?.normalize("NFKC").toLocaleLowerCase("en-US").replace(/\./gu, "");
+  if (!unit) return "";
+  if (unit === "%") return "%";
+  if (unit === "x" || unit === "×" || unit === "배" || unit === "倍") return "x";
+  if (["kg", "kilogram", "kilograms", "킬로그램", "キログラム"].includes(unit)) return "kg";
+  if (["g", "gram", "grams", "그램", "グラム"].includes(unit)) return "g";
+  if (["km", "kilometer", "kilometers", "킬로미터", "キロメートル"].includes(unit)) return "km";
+  if (["m", "meter", "meters", "미터", "メートル"].includes(unit)) return "m";
+  if (["ms", "millisecond", "milliseconds", "밀리초", "ミリ秒"].includes(unit)) return "ms";
+  if (["s", "sec", "secs", "second", "seconds", "초", "秒"].includes(unit)) return "s";
+  if (["min", "mins", "minute", "minutes", "분", "分"].includes(unit)) return "min";
+  if (["hr", "hrs", "hour", "hours", "시간", "時間"].includes(unit)) return "h";
+  if (["day", "days", "일", "日"].includes(unit)) return "day";
+  if (["year", "years", "년", "年"].includes(unit)) return "year";
+  if (["lv", "level", "levels", "레벨", "レベル"].includes(unit)) return "level";
+  if (["unit", "units", "단위", "単位"].includes(unit)) return "unit";
+  if (["shot", "shots", "발", "発"].includes(unit)) return "shot";
+  if (["time", "times", "회", "回"].includes(unit)) return "times";
+  return unit;
+}
+
+function translationNumericSignature(value: string): { numbers: string[]; boundUnits: string[] } {
+  const numbers: string[] = [];
+  const boundUnits: string[] = [];
+  for (const match of value.normalize("NFKC").matchAll(TRANSLATION_NUMERIC_UNIT_PATTERN)) {
+    const number = match[2]!;
+    const unit = canonicalTranslationUnit(match[1] ?? match[3]);
+    numbers.push(number);
+    boundUnits.push(`${number}|${unit}`);
+  }
+  return { numbers, boundUnits };
+}
+
+const TRANSLATION_KOREAN_SCRIPT_PATTERN = /[\p{Script=Hangul}]/u;
+const TRANSLATION_JAPANESE_SCRIPT_PATTERN = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
+
+function translationVisibleCharacterCount(value: string): number {
+  return Array.from(value.normalize("NFKC").replace(/\s+/gu, " ").trim()).length;
+}
+
+function translationHasLocaleScript(value: string, locale: PalworldTranslationLocale): boolean {
+  return (locale === "ko" ? TRANSLATION_KOREAN_SCRIPT_PATTERN : TRANSLATION_JAPANESE_SCRIPT_PATTERN).test(value);
+}
+
+function translationHasDegenerateRepeatedNgram(value: string): boolean {
+  const characters = Array.from(value.normalize("NFKC").replace(/\s+/gu, " ").trim());
+  for (const gramLength of [3, 4]) {
+    for (let offset = 0; offset + gramLength * 3 <= characters.length; offset += 1) {
+      const gram = characters.slice(offset, offset + gramLength).join("");
+      let repetitions = 1;
+      while (
+        offset + gramLength * (repetitions + 1) <= characters.length
+        && characters.slice(
+          offset + gramLength * repetitions,
+          offset + gramLength * (repetitions + 1)
+        ).join("") === gram
+      ) {
+        repetitions += 1;
+      }
+      if (repetitions >= 3 && gramLength * repetitions >= 12) return true;
+    }
+  }
+  return false;
+}
+
+function translationSourceClauseCount(value: string): number {
+  return value.split(/[.!?;:]+/u).map((part) => part.trim()).filter(Boolean).length;
+}
+
+function validateMachineTranslationQualityAt(
+  sourceText: string,
+  translatedText: string,
+  locale: PalworldTranslationLocale,
+  allowEnglishCopy: boolean,
+  path: string
+): PalworldValidationResult<string> {
+  if (!allowEnglishCopy && !translationHasLocaleScript(translatedText, locale)) {
+    return invalid(path, `${locale === "ko" ? "한국어" : "일본어"} 문자가 없습니다.`);
+  }
+  if (translationHasDegenerateRepeatedNgram(translatedText)) {
+    return invalid(path, "연속 n-gram 반복 퇴행이 있습니다.");
+  }
+  const sourceLength = translationVisibleCharacterCount(sourceText);
+  const targetLength = translationVisibleCharacterCount(translatedText);
+  if (sourceLength >= 20 && targetLength >= 80 && targetLength > sourceLength * 2.5) {
+    return invalid(path, "길이가 영어 원문보다 과도하게 증가했습니다.");
+  }
+  if (
+    sourceLength >= 120
+    && translationSourceClauseCount(sourceText) >= 3
+    && targetLength <= 24
+    && targetLength < sourceLength * 0.2
+  ) {
+    return invalid(path, "지나치게 짧아 영어 원문의 절 대부분이 유실되었습니다.");
+  }
+  return valid(translatedText);
+}
+
+function translationSourceKey(kind: PalworldTranslationRecordKind, id: string): string {
+  return `${kind}:${id}`;
+}
+
+function translationFieldKey(
+  kind: PalworldTranslationRecordKind,
+  id: string,
+  field: PalworldTranslationField
+): string {
+  return `${kind}:${id}:${field}`;
+}
+
+export function validatePalworldTranslationSnapshot(
+  value: unknown,
+  context?: PalworldTranslationValidationContext
+): PalworldValidationResult<PalworldTranslationSnapshot> {
+  const root = recordAt(value, "translation", [
+    "schemaVersion",
+    "release",
+    "locale",
+    "sourceCatalogSha256",
+    "sourcePaldexSha256",
+    "sourceRevision",
+    "translationRevision",
+    "translationMethod",
+    "translationStatus",
+    "translatedAt",
+    "reviewedAt",
+    "records"
+  ]);
+  if (!root.ok) return root;
+  if (root.data.schemaVersion !== 1) return invalid("translation.schemaVersion", "1이어야 합니다.");
+  for (const field of ["release", "sourceRevision", "translationRevision"] as const) {
+    const result = stringAt(root.data[field], `translation.${field}`, 256);
+    if (!result.ok) return result;
+  }
+  const locale = enumAt(root.data.locale, "translation.locale", PALWORLD_TRANSLATION_LOCALES);
+  if (!locale.ok) return locale;
+  for (const field of ["sourceCatalogSha256", "sourcePaldexSha256"] as const) {
+    const hash = stringAt(root.data[field], `translation.${field}`, 64);
+    if (!hash.ok) return hash;
+    if (!SHA256_PATTERN.test(hash.data)) return invalid(`translation.${field}`, "소문자 64자리 SHA-256 hex여야 합니다.");
+  }
+  const method = enumAt(root.data.translationMethod, "translation.translationMethod", PALWORLD_TRANSLATION_METHODS);
+  if (!method.ok) return method;
+  const snapshotStatus = enumAt(
+    root.data.translationStatus,
+    "translation.translationStatus",
+    PALWORLD_TRANSLATION_SNAPSHOT_STATUSES
+  );
+  if (!snapshotStatus.ok) return snapshotStatus;
+  const translatedAt = isoDateAt(root.data.translatedAt, "translation.translatedAt");
+  if (!translatedAt.ok) return translatedAt;
+  if (root.data.reviewedAt !== null) {
+    const reviewedAt = isoDateAt(root.data.reviewedAt, "translation.reviewedAt");
+    if (!reviewedAt.ok) return reviewedAt;
+  }
+
+  const records = arrayAt<PalworldTranslationRecord>(
+    root.data.records,
+    "translation.records",
+    MAX_SNAPSHOT_COLLECTION_SIZE,
+    (entry, entryPath) => {
+    const record = recordAt(entry, entryPath, ["id", "kind", "fields"]);
+    if (!record.ok) return record;
+    const id = idAt(record.data.id, `${entryPath}.id`);
+    if (!id.ok) return id;
+    const kind = enumAt(record.data.kind, `${entryPath}.kind`, PALWORLD_TRANSLATION_RECORD_KINDS);
+    if (!kind.ok) return kind;
+    const allowedFields: readonly PalworldTranslationField[] = kind.data === "skill"
+      ? PALWORLD_TRANSLATION_FIELDS
+      : ["name", "description"];
+    const fields = recordAt(record.data.fields, `${entryPath}.fields`, allowedFields);
+    if (!fields.ok) return fields;
+    const presentFields = allowedFields.filter((field) => fields.data[field] !== undefined);
+    if (presentFields.length === 0) return invalid(`${entryPath}.fields`, "하나 이상의 번역 필드가 필요합니다.");
+    for (const field of presentFields) {
+      const fieldValue = recordAt(
+        fields.data[field],
+        `${entryPath}.fields.${field}`,
+        ["sourceSha256", "text", "status", "note"]
+      );
+      if (!fieldValue.ok) return fieldValue;
+      const sourceSha256 = stringAt(
+        fieldValue.data.sourceSha256,
+        `${entryPath}.fields.${field}.sourceSha256`,
+        64
+      );
+      if (!sourceSha256.ok) return sourceSha256;
+      if (!SHA256_PATTERN.test(sourceSha256.data)) {
+        return invalid(`${entryPath}.fields.${field}.sourceSha256`, "소문자 64자리 SHA-256 hex여야 합니다.");
+      }
+      const text = validateTranslationArtifactTextAt(
+        fieldValue.data.text,
+        `${entryPath}.fields.${field}.text`,
+        field === "name" ? MAX_NAME_LENGTH : MAX_DESCRIPTION_LENGTH
+      );
+      if (!text.ok) return text;
+      const fieldStatus = enumAt(
+        fieldValue.data.status,
+        `${entryPath}.fields.${field}.status`,
+        PALWORLD_TRANSLATION_STATUSES
+      );
+      if (!fieldStatus.ok) return fieldStatus;
+      if (fieldValue.data.note !== undefined) {
+        const note = validateTranslationArtifactTextAt(
+          fieldValue.data.note,
+          `${entryPath}.fields.${field}.note`,
+          1_000
+        );
+        if (!note.ok) return note;
+      }
+    }
+      return valid(record.data as PalworldTranslationRecord);
+    }
+  );
+  if (!records.ok) return records;
+
+  const seenRecords = new Set<string>();
+  let previousKey: string | undefined;
+  let machineAssisted = 0;
+  let humanReviewed = 0;
+  for (const [index, record] of records.data.entries()) {
+    const key = translationSourceKey(record.kind, record.id);
+    if (seenRecords.has(key)) return invalid(`translation.records[${index}]`, `중복 canonical ID입니다: ${key}`);
+    if (previousKey !== undefined && key <= previousKey) {
+      return invalid(`translation.records[${index}]`, "kind:id 오름차순으로 정렬되어야 합니다.");
+    }
+    seenRecords.add(key);
+    previousKey = key;
+    for (const field of Object.values(record.fields)) {
+      if (field?.status === "human_reviewed") humanReviewed += 1;
+      if (field?.status === "machine_assisted") machineAssisted += 1;
+    }
+  }
+  if (method.data === "machine_assisted" && humanReviewed > 0) {
+    return invalid("translation.translationMethod", "human_reviewed 필드가 있으면 machine_assisted일 수 없습니다.");
+  }
+  if (method.data === "human_reviewed" && machineAssisted > 0) {
+    return invalid("translation.translationMethod", "machine_assisted 필드가 있으면 human_reviewed일 수 없습니다.");
+  }
+  if (method.data === "mixed" && (machineAssisted === 0 || humanReviewed === 0)) {
+    return invalid("translation.translationMethod", "mixed에는 두 번역 상태가 모두 필요합니다.");
+  }
+  if (humanReviewed > 0 && root.data.reviewedAt === null) {
+    return invalid("translation.reviewedAt", "human_reviewed 필드가 있으면 검수 시각이 필요합니다.");
+  }
+
+  if (context !== undefined) {
+    const contextRelease = stringAt(context.release, "translationContext.release", 256);
+    if (!contextRelease.ok) return contextRelease;
+    if (root.data.release !== contextRelease.data) {
+      return invalid("translation.release", "현재 canonical release와 일치하지 않습니다.");
+    }
+    if (!SHA256_PATTERN.test(context.sourceCatalogSha256) || !SHA256_PATTERN.test(context.sourcePaldexSha256)) {
+      return invalid("translationContext", "canonical source checksum이 올바른 SHA-256이 아닙니다.");
+    }
+    if (root.data.sourceCatalogSha256 !== context.sourceCatalogSha256) {
+      return invalid("translation.sourceCatalogSha256", "현재 catalog checksum과 일치하지 않습니다.");
+    }
+    if (root.data.sourcePaldexSha256 !== context.sourcePaldexSha256) {
+      return invalid("translation.sourcePaldexSha256", "현재 Paldex checksum과 일치하지 않습니다.");
+    }
+    if (root.data.sourceRevision !== context.sourceRevision) {
+      return invalid("translation.sourceRevision", "현재 source revision과 일치하지 않습니다.");
+    }
+    const sourceByKey = new Map<string, PalworldTranslationSourceRecord>();
+    for (const [index, source] of context.records.entries()) {
+      const sourceId = idAt(source.id, `translationContext.records[${index}].id`);
+      if (!sourceId.ok) return sourceId;
+      const sourceKind = enumAt(
+        source.kind,
+        `translationContext.records[${index}].kind`,
+        PALWORLD_TRANSLATION_RECORD_KINDS
+      );
+      if (!sourceKind.ok) return sourceKind;
+      const key = translationSourceKey(source.kind, source.id);
+      if (sourceByKey.has(key)) return invalid(`translationContext.records[${index}]`, `중복 source ID입니다: ${key}`);
+      sourceByKey.set(key, source);
+      const sourceFields = Object.entries(source.fields) as Array<[
+        PalworldTranslationField,
+        PalworldTranslationSourceField
+      ]>;
+      if (sourceFields.length === 0) {
+        return invalid(`translationContext.records[${index}].fields`, "하나 이상의 영문 원문 필드가 필요합니다.");
+      }
+      for (const [field, sourceField] of sourceFields) {
+        if (!PALWORLD_TRANSLATION_FIELDS.includes(field)) {
+          return invalid(`translationContext.records[${index}].fields.${field}`, "허용되지 않은 source 필드입니다.");
+        }
+        if (source.kind !== "skill" && field === "passiveAbility") {
+          return invalid(
+            `translationContext.records[${index}].fields.${field}`,
+            "passiveAbility 원문은 스킬에만 사용할 수 있습니다."
+          );
+        }
+        const sourceText = stringAt(
+          sourceField.text,
+          `translationContext.records[${index}].fields.${field}.text`,
+          field === "name" ? MAX_NAME_LENGTH : MAX_DESCRIPTION_LENGTH
+        );
+        if (!sourceText.ok) return sourceText;
+        if (!SHA256_PATTERN.test(sourceField.sha256)) {
+          return invalid(`translationContext.records[${index}].fields.${field}.sha256`, "올바른 SHA-256이 아닙니다.");
+        }
+      }
+    }
+    const equalAllowlist = new Set<string>();
+    for (const [index, key] of (context.englishCopyAllowlist ?? []).entries()) {
+      const keyText = stringAt(key, `translationContext.englishCopyAllowlist[${index}]`, 256);
+      if (!keyText.ok) return keyText;
+      if (equalAllowlist.has(keyText.data)) {
+        return invalid(`translationContext.englishCopyAllowlist[${index}]`, "중복 glossary 예외입니다.");
+      }
+      const [kind, id, field, ...extra] = keyText.data.split(":");
+      if (
+        extra.length > 0
+        || !PALWORLD_TRANSLATION_RECORD_KINDS.includes(kind as PalworldTranslationRecordKind)
+        || !PALWORLD_TRANSLATION_FIELDS.includes(field as PalworldTranslationField)
+        || sourceByKey.get(`${kind}:${id}`)?.fields[field as PalworldTranslationField] === undefined
+      ) {
+        return invalid(`translationContext.englishCopyAllowlist[${index}]`, "canonical 영문 원문 필드와 일치해야 합니다.");
+      }
+      equalAllowlist.add(keyText.data);
+    }
+    const translatedFieldKeys = new Set<string>();
+    for (const [index, record] of records.data.entries()) {
+      const source = sourceByKey.get(translationSourceKey(record.kind, record.id));
+      if (!source) return invalid(`translation.records[${index}]`, "canonical source에 없는 orphan ID입니다.");
+      for (const [field, translation] of Object.entries(record.fields) as Array<[
+        PalworldTranslationField,
+        PalworldTranslationFieldValue
+      ]>) {
+        const sourceField = source.fields[field];
+        if (!sourceField) {
+          return invalid(`translation.records[${index}].fields.${field}`, "영문 원문이 없는 필드를 번역할 수 없습니다.");
+        }
+        if (translation.sourceSha256 !== sourceField.sha256) {
+          return invalid(`translation.records[${index}].fields.${field}.sourceSha256`, "현재 영문 원문 hash와 일치하지 않습니다.");
+        }
+        const fieldKey = translationFieldKey(record.kind, record.id, field);
+        const normalizedTranslation = translation.text.normalize("NFKC").trim().toLocaleLowerCase("en-US");
+        const normalizedSource = sourceField.text.normalize("NFKC").trim().toLocaleLowerCase("en-US");
+        if (normalizedTranslation === normalizedSource && !equalAllowlist.has(fieldKey)) {
+          return invalid(`translation.records[${index}].fields.${field}.text`, "영문 원문 복사는 명시적 glossary 예외만 허용됩니다.");
+        }
+        if (translation.status === "machine_assisted") {
+          const quality = validateMachineTranslationQualityAt(
+            sourceField.text,
+            translation.text,
+            locale.data,
+            equalAllowlist.has(fieldKey),
+            `translation.records[${index}].fields.${field}.text`
+          );
+          if (!quality.ok) return quality;
+        }
+        const translatedNumbers = translationNumericSignature(translation.text);
+        const sourceNumbers = translationNumericSignature(sourceField.text);
+        if (translatedNumbers.numbers.join("\u0000") !== sourceNumbers.numbers.join("\u0000")) {
+          return invalid(
+            `translation.records[${index}].fields.${field}.text`,
+            "영문 원문의 숫자 표기를 같은 값·횟수·등장 순서로 보존해야 합니다."
+          );
+        }
+        if (
+          [...translatedNumbers.boundUnits].sort().join("\u0000")
+          !== [...sourceNumbers.boundUnits].sort().join("\u0000")
+        ) {
+          return invalid(
+            `translation.records[${index}].fields.${field}.text`,
+            "영문 원문의 숫자와 인접 단위 결합을 보존해야 합니다."
+          );
+        }
+        const missingSourceSlots = translationSourceMissingSlotCount(sourceField.text);
+        if (PALWORLD_TRANSLATION_PLACEHOLDER_RESIDUE_PATTERN.test(translation.text)) {
+          return invalid(
+            `translation.records[${index}].fields.${field}.text`,
+            "번역 중간 placeholder가 남아 있습니다."
+          );
+        }
+        const marker = PALWORLD_TRANSLATION_MISSING_SOURCE_MARKERS[locale.data];
+        const markerCount = translation.text.split(marker).length - 1;
+        if (markerCount !== missingSourceSlots) {
+          return invalid(
+            `translation.records[${index}].fields.${field}.text`,
+            `locale 누락 marker 수는 영문 원문의 누락 위치 ${missingSourceSlots}개와 정확히 일치해야 합니다.`
+          );
+        }
+        if (missingSourceSlots > 0) {
+          if (
+            !translation.note?.includes(PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE)
+          ) {
+            return invalid(
+              `translation.records[${index}].fields.${field}`,
+              `손상된 영문 원문의 ${missingSourceSlots}개 누락 위치를 locale marker와 note로 보존해야 합니다.`
+            );
+          }
+        }
+        translatedFieldKeys.add(fieldKey);
+      }
+    }
+    if (snapshotStatus.data === "complete") {
+      for (const source of context.records) {
+        for (const field of Object.keys(source.fields) as PalworldTranslationField[]) {
+          const key = translationFieldKey(source.kind, source.id, field);
+          if (!translatedFieldKeys.has(key)) {
+            return invalid("translation.translationStatus", `complete snapshot에 번역이 누락되었습니다: ${key}`);
+          }
+        }
+      }
+    }
+  }
+  return valid(root.data as PalworldTranslationSnapshot);
+}
+
+export function assertPalworldTranslationSnapshot(
+  value: unknown,
+  context?: PalworldTranslationValidationContext
+): PalworldTranslationSnapshot {
+  const result = validatePalworldTranslationSnapshot(value, context);
+  if (!result.ok) throw new TypeError(`Palworld 번역 스냅샷 검증에 실패했습니다. ${result.error}`);
+  return result.data;
+}
+
 export function validatePalworldPalSummary(value: unknown): PalworldValidationResult<PalworldPalSummary> {
   return validatePalSummaryAt(value, "pal");
 }
@@ -1511,6 +2414,181 @@ export function validatePalworldItemSummary(value: unknown): PalworldValidationR
 
 export function validatePalworldItemDetail(value: unknown): PalworldValidationResult<PalworldItemDetail> {
   return validateItemDetailAt(value, "item");
+}
+
+export function validatePalworldBreedingDataSnapshot(
+  value: unknown
+): PalworldValidationResult<PalworldBreedingDataSnapshot> {
+  const root = recordAt(value, "breeding", [
+    "schemaVersion",
+    "release",
+    "metadata",
+    "parameters",
+    "specialRules"
+  ]);
+  if (!root.ok) return root;
+  const schemaVersion = integerAt(root.data.schemaVersion, "breeding.schemaVersion", 1, 1);
+  if (!schemaVersion.ok) return schemaVersion;
+  const release = stringAt(root.data.release, "breeding.release", 64);
+  if (!release.ok) return release;
+  const metadata = recordAt(root.data.metadata, "breeding.metadata", [
+    "gameVersion",
+    "steamBuildId",
+    "sourceRevision",
+    "sourceChecksums"
+  ]);
+  if (!metadata.ok) return metadata;
+  const gameVersion = stringAt(metadata.data.gameVersion, "breeding.metadata.gameVersion", 64);
+  if (!gameVersion.ok) return gameVersion;
+  if (gameVersion.data !== release.data) {
+    return invalid("breeding.metadata.gameVersion", "release와 일치해야 합니다.");
+  }
+  for (const field of ["steamBuildId", "sourceRevision"] as const) {
+    const result = stringAt(metadata.data[field], `breeding.metadata.${field}`, field === "sourceRevision" ? 512 : 64);
+    if (!result.ok) return result;
+  }
+  const checksums = recordAt(metadata.data.sourceChecksums, "breeding.metadata.sourceChecksums", [
+    "atlasPals",
+    "atlasBreeding",
+    "palCalc",
+    "catalog"
+  ]);
+  if (!checksums.ok) return checksums;
+  for (const field of ["atlasPals", "atlasBreeding", "palCalc", "catalog"] as const) {
+    const result = stringAt(checksums.data[field], `breeding.metadata.sourceChecksums.${field}`, 64);
+    if (!result.ok) return result;
+    if (!SHA256_PATTERN.test(result.data)) {
+      return invalid(`breeding.metadata.sourceChecksums.${field}`, "소문자 64자리 SHA-256이어야 합니다.");
+    }
+  }
+
+  const parameters = arrayAt(
+    root.data.parameters,
+    "breeding.parameters",
+    10_000,
+    (entry, path) => {
+      const record = recordAt(entry, path, [
+        "palId",
+        "sourceInternalId",
+        "tribe",
+        "combiRank",
+        "combiDuplicatePriority",
+        "maleProbability",
+        "variantType"
+      ]);
+      if (!record.ok) return record;
+      const palId = idAt(record.data.palId, `${path}.palId`);
+      if (!palId.ok) return palId;
+      const sourceInternalId = sourceInternalIdAt(record.data.sourceInternalId, `${path}.sourceInternalId`);
+      if (!sourceInternalId.ok) return sourceInternalId;
+      const tribe = sourceInternalIdAt(record.data.tribe, `${path}.tribe`);
+      if (!tribe.ok) return tribe;
+      const combiRank = integerAt(record.data.combiRank, `${path}.combiRank`, 1, MAX_STAT_VALUE);
+      if (!combiRank.ok) return combiRank;
+      const priority = integerAt(
+        record.data.combiDuplicatePriority,
+        `${path}.combiDuplicatePriority`,
+        0,
+        1_000_000_000
+      );
+      if (!priority.ok) return priority;
+      const maleProbability = finiteNumberAt(record.data.maleProbability, `${path}.maleProbability`, 0, 1);
+      if (!maleProbability.ok) return maleProbability;
+      const variantType = enumAt(record.data.variantType, `${path}.variantType`, ["normal", "variant"] as const);
+      if (!variantType.ok) return variantType;
+      return valid(record.data as PalworldBreedingPalParameters);
+    }
+  );
+  if (!parameters.ok) return parameters;
+  if (parameters.data.length === 0) return invalid("breeding.parameters", "최소 한 개 Pal이 필요합니다.");
+  const palIds = new Set<string>();
+  const sourceIds = new Set<string>();
+  let previousPalId = "";
+  for (const [index, parameter] of parameters.data.entries()) {
+    if (parameter.palId <= previousPalId) {
+      return invalid(`breeding.parameters[${index}].palId`, "중복 없이 public ID 순서로 정렬되어야 합니다.");
+    }
+    if (palIds.has(parameter.palId) || sourceIds.has(parameter.sourceInternalId)) {
+      return invalid(`breeding.parameters[${index}]`, "Pal ID 또는 source internal ID가 중복됩니다.");
+    }
+    previousPalId = parameter.palId;
+    palIds.add(parameter.palId);
+    sourceIds.add(parameter.sourceInternalId);
+  }
+  const parametersById = new Map(parameters.data.map((entry) => [entry.palId, entry]));
+
+  const specialRules = arrayAt(
+    root.data.specialRules,
+    "breeding.specialRules",
+    10_000,
+    (entry, path) => {
+      const record = recordAt(entry, path, [
+        "parentAId",
+        "parentASourceInternalId",
+        "parentBId",
+        "parentBSourceInternalId",
+        "childId",
+        "childSourceInternalId",
+        "parentAGender",
+        "parentBGender"
+      ]);
+      if (!record.ok) return record;
+      for (const field of ["parentAId", "parentBId", "childId"] as const) {
+        const result = idAt(record.data[field], `${path}.${field}`);
+        if (!result.ok) return result;
+      }
+      for (const field of [
+        "parentASourceInternalId",
+        "parentBSourceInternalId",
+        "childSourceInternalId"
+      ] as const) {
+        const result = sourceInternalIdAt(record.data[field], `${path}.${field}`);
+        if (!result.ok) return result;
+      }
+      for (const field of ["parentAGender", "parentBGender"] as const) {
+        if (record.data[field] === undefined) continue;
+        const result = enumAt(record.data[field], `${path}.${field}`, PALWORLD_BREEDING_GENDERS);
+        if (!result.ok) return result;
+      }
+      return valid(record.data as PalworldBreedingSpecialRule);
+    }
+  );
+  if (!specialRules.ok) return specialRules;
+  const conditionKeys = new Set<string>();
+  let previousRuleKey = "";
+  for (const [index, rule] of specialRules.data.entries()) {
+    for (const [idField, sourceField] of [
+      ["parentAId", "parentASourceInternalId"],
+      ["parentBId", "parentBSourceInternalId"],
+      ["childId", "childSourceInternalId"]
+    ] as const) {
+      const parameter = parametersById.get(rule[idField]);
+      if (!parameter) return invalid(`breeding.specialRules[${index}].${idField}`, "고아 Pal 참조입니다.");
+      if (parameter.sourceInternalId !== rule[sourceField]) {
+        return invalid(`breeding.specialRules[${index}].${sourceField}`, "canonical Pal source internal ID와 일치해야 합니다.");
+      }
+    }
+    const orderKey = [
+      rule.childId,
+      rule.parentAId,
+      rule.parentBId,
+      rule.parentAGender ?? "",
+      rule.parentBGender ?? ""
+    ].join("\0");
+    if (orderKey <= previousRuleKey) {
+      return invalid(`breeding.specialRules[${index}]`, "중복 없이 결정적 순서로 정렬되어야 합니다.");
+    }
+    previousRuleKey = orderKey;
+    const direct = rule.parentAId <= rule.parentBId;
+    const conditionKey = direct
+      ? [rule.parentAId, rule.parentBId, rule.parentAGender ?? "", rule.parentBGender ?? ""].join("\0")
+      : [rule.parentBId, rule.parentAId, rule.parentBGender ?? "", rule.parentAGender ?? ""].join("\0");
+    if (conditionKeys.has(conditionKey)) {
+      return invalid(`breeding.specialRules[${index}]`, "동일한 부모·성별 조건에 결과가 충돌합니다.");
+    }
+    conditionKeys.add(conditionKey);
+  }
+  return valid(root.data as PalworldBreedingDataSnapshot);
 }
 
 export function validatePalworldBreedingPair(value: unknown): PalworldValidationResult<PalworldBreedingPair> {
@@ -1624,6 +2702,32 @@ export function validatePalworldMetaResponse(value: unknown): PalworldValidation
           `response.coverage.localization.${locale}.total`,
           "Pal·아이템·스킬 레코드 수의 합과 일치해야 합니다."
         );
+      }
+    }
+    if (coverage.data.translations !== undefined) {
+      for (const locale of PALWORLD_TRANSLATION_LOCALES) {
+        const translated = coverage.data.translations[locale];
+        if (translated.palNames.total !== counts.data.pals) {
+          return invalid(`response.coverage.translations.${locale}.palNames.total`, "counts.pals와 일치해야 합니다.");
+        }
+        if (translated.itemNames.total !== counts.data.items) {
+          return invalid(`response.coverage.translations.${locale}.itemNames.total`, "counts.items와 일치해야 합니다.");
+        }
+        if (translated.skillNames.total !== ((counts.data.skills as number | undefined) ?? 0)) {
+          return invalid(`response.coverage.translations.${locale}.skillNames.total`, "counts.skills와 일치해야 합니다.");
+        }
+        if (translated.palDescriptions.total > (counts.data.pals as number)) {
+          return invalid(`response.coverage.translations.${locale}.palDescriptions.total`, "Pal 수보다 클 수 없습니다.");
+        }
+        if (translated.itemDescriptions.total > (counts.data.items as number)) {
+          return invalid(`response.coverage.translations.${locale}.itemDescriptions.total`, "아이템 수보다 클 수 없습니다.");
+        }
+        if (translated.skillDescriptions.total > ((counts.data.skills as number | undefined) ?? 0)) {
+          return invalid(`response.coverage.translations.${locale}.skillDescriptions.total`, "스킬 수보다 클 수 없습니다.");
+        }
+        if (translated.skillPassiveAbilities.total > ((counts.data.skills as number | undefined) ?? 0)) {
+          return invalid(`response.coverage.translations.${locale}.skillPassiveAbilities.total`, "스킬 수보다 클 수 없습니다.");
+        }
       }
     }
   }
@@ -1758,26 +2862,69 @@ export function validatePalworldSearchResult(value: unknown): PalworldValidation
 export function validatePalworldBreedingResultResponse(
   value: unknown
 ): PalworldValidationResult<PalworldBreedingResultResponse> {
-  const record = recordAt(value, "response", ["parentA", "parentB", "result", "metadata"]);
+  const record = recordAt(value, "response", [
+    "parentA",
+    "parentB",
+    "result",
+    "state",
+    "alternatives",
+    "metadata"
+  ]);
   if (!record.ok) return record;
   const parentA = validatePalReferenceAt(record.data.parentA, "response.parentA");
   if (!parentA.ok) return parentA;
   const parentB = validatePalReferenceAt(record.data.parentB, "response.parentB");
   if (!parentB.ok) return parentB;
-  if (record.data.result !== null) {
-    const result = validateBreedingPairAt(record.data.result, "response.result");
+  const state = enumAt(
+    record.data.state,
+    "response.state",
+    PALWORLD_BREEDING_RESOLUTION_STATES
+  );
+  if (!state.ok) return state;
+  const alternatives = arrayAt(
+    record.data.alternatives,
+    "response.alternatives",
+    MAX_API_COLLECTION_SIZE,
+    validateBreedingPairAt
+  );
+  if (!alternatives.ok) return alternatives;
+  const validateRequestedParents = (
+    rawPair: unknown,
+    path: string
+  ): PalworldValidationResult<PalworldBreedingPair> => {
+    const result = validateBreedingPairAt(rawPair, path);
     if (!result.ok) return result;
     const directOrder = result.data.parentA.id === parentA.data.id && result.data.parentB.id === parentB.data.id;
     const reverseOrder = result.data.parentA.id === parentB.data.id && result.data.parentB.id === parentA.data.id;
     if (!directOrder && !reverseOrder) {
-      return invalid("response.result", "요청한 부모 Pal 조합과 일치해야 합니다.");
+      return invalid(path, "요청한 부모 Pal 조합과 일치해야 합니다.");
     }
     const expectedParentA = directOrder ? parentA.data : parentB.data;
     const expectedParentB = directOrder ? parentB.data : parentA.data;
-    const parentAReference = validateCanonicalPalReferenceAt(result.data.parentA, expectedParentA, "response.result.parentA");
+    const parentAReference = validateCanonicalPalReferenceAt(result.data.parentA, expectedParentA, `${path}.parentA`);
     if (!parentAReference.ok) return parentAReference;
-    const parentBReference = validateCanonicalPalReferenceAt(result.data.parentB, expectedParentB, "response.result.parentB");
+    const parentBReference = validateCanonicalPalReferenceAt(result.data.parentB, expectedParentB, `${path}.parentB`);
     if (!parentBReference.ok) return parentBReference;
+    return valid(result.data);
+  };
+  if (record.data.result !== null) {
+    const result = validateRequestedParents(record.data.result, "response.result");
+    if (!result.ok) return result;
+  }
+  for (const [index, alternative] of alternatives.data.entries()) {
+    const result = validateRequestedParents(alternative, `response.alternatives[${index}]`);
+    if (!result.ok) return result;
+  }
+  if (state.data === "resolved") {
+    if (record.data.result === null || alternatives.data.length !== 0) {
+      return invalid("response.state", "resolved 상태는 단일 result와 빈 alternatives를 가져야 합니다.");
+    }
+  } else if (state.data === "requires_gender") {
+    if (record.data.result !== null || alternatives.data.length < 2) {
+      return invalid("response.state", "requires_gender 상태는 둘 이상의 alternatives를 가져야 합니다.");
+    }
+  } else if (record.data.result !== null || alternatives.data.length !== 0) {
+    return invalid("response.state", `${state.data} 상태에는 result 또는 alternatives가 없어야 합니다.`);
   }
   const metadata = validateMetadataAt(record.data.metadata, "response.metadata");
   return metadata.ok ? valid(record.data as PalworldBreedingResultResponse) : metadata;
@@ -1786,7 +2933,7 @@ export function validatePalworldBreedingResultResponse(
 export function validatePalworldBreedingParentsResponse(
   value: unknown
 ): PalworldValidationResult<PalworldBreedingParentsResponse> {
-  const record = recordAt(value, "response", ["child", "items", "pagination", "metadata"]);
+  const record = recordAt(value, "response", ["child", "items", "pagination", "state", "metadata"]);
   if (!record.ok) return record;
   const child = validatePalReferenceAt(record.data.child, "response.child");
   if (!child.ok) return child;
@@ -1796,6 +2943,18 @@ export function validatePalworldBreedingParentsResponse(
   if (!pagination.ok) return pagination;
   const itemCount = validatePageItemCountAt(items.data.length, pagination.data, "response.items");
   if (!itemCount.ok) return itemCount;
+  const state = enumAt(record.data.state, "response.state", [
+    "resolved",
+    "not_found",
+    "data_unavailable"
+  ] as const);
+  if (!state.ok) return state;
+  if (state.data === "resolved" && pagination.data.total === 0) {
+    return invalid("response.state", "resolved 상태에는 하나 이상의 부모 조합이 필요합니다.");
+  }
+  if (state.data !== "resolved" && pagination.data.total !== 0) {
+    return invalid("response.state", `${state.data} 상태에는 부모 조합이 없어야 합니다.`);
+  }
   for (const [index, pair] of items.data.entries()) {
     const childReference = validateCanonicalPalReferenceAt(pair.child, child.data, `response.items[${index}].child`);
     if (!childReference.ok) return childReference;
@@ -1844,6 +3003,9 @@ function validateCanonicalPalReferenceAt(
   ) {
     return invalid(`${path}.elements`, "canonical Pal 레코드와 일치해야 합니다.");
   }
+  if (!sameTranslationLocaleStatus(reference.translation?.name, canonical.translation?.name)) {
+    return invalid(`${path}.translation.name`, "canonical Pal 레코드와 일치해야 합니다.");
+  }
   return valid(reference);
 }
 
@@ -1853,6 +3015,14 @@ function sameLocalizationFallback(
 ): boolean {
   if (left === undefined || right === undefined) return left === right;
   return left.sourceLanguage === right.sourceLanguage && left.ko === right.ko && left.ja === right.ja;
+}
+
+function sameTranslationLocaleStatus(
+  left: PalworldTranslationLocaleStatus | undefined,
+  right: PalworldTranslationLocaleStatus | undefined
+): boolean {
+  if (left === undefined || right === undefined) return left === right;
+  return left.ko === right.ko && left.ja === right.ja;
 }
 
 function validateCanonicalItemReferenceAt(
@@ -1867,6 +3037,9 @@ function validateCanonicalItemReferenceAt(
   }
   if (!sameLocalizationFallback(reference.localization, canonical.localization)) {
     return invalid(`${path}.localization`, "canonical 아이템 레코드와 일치해야 합니다.");
+  }
+  if (!sameTranslationLocaleStatus(reference.translation?.name, canonical.translation?.name)) {
+    return invalid(`${path}.translation.name`, "canonical 아이템 레코드와 일치해야 합니다.");
   }
   return valid(reference);
 }
@@ -1889,7 +3062,9 @@ function validateCanonicalSkillAt(
     "power",
     "cooldownSeconds",
     "passiveTier",
-    "passiveAbility"
+    "passiveAbility",
+    "passiveAbilityKo",
+    "passiveAbilityJa"
   ] as const) {
     if (skill[field] !== canonical[field]) {
       return invalid(`${path}.${field}`, "canonical 스킬 레코드와 일치해야 합니다.");
@@ -1897,6 +3072,11 @@ function validateCanonicalSkillAt(
   }
   if (!sameLocalizationFallback(skill.localization, canonical.localization)) {
     return invalid(`${path}.localization`, "canonical 스킬 레코드와 일치해야 합니다.");
+  }
+  for (const field of ["name", "description", "passiveAbility"] as const) {
+    if (!sameTranslationLocaleStatus(skill.translation?.[field], canonical.translation?.[field])) {
+      return invalid(`${path}.translation.${field}`, "canonical 스킬 레코드와 일치해야 합니다.");
+    }
   }
   return valid(skill);
 }

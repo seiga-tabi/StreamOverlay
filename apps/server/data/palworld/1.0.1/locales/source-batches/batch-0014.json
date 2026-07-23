@@ -1,0 +1,2057 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 14,
+  "records": [
+    {
+      "id": "gumoss",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gumoss",
+          "sourceSha256": "a37bb3008b1b48c700546a70f1ea2e6fefb8c02d79cf513b702c4bf7e7783376"
+        },
+        "description": {
+          "sourceText": "A strange Pal with a body resembling tree sap. It gradually loses strength if it has nothing to cover its body with, eventually rotting away.",
+          "sourceSha256": "75783b90ddc9ff3a1644acff863c5dbdb5506dc8c1d2c0ad6f7777fd3202b101"
+        }
+      }
+    },
+    {
+      "id": "hangyu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Hangyu",
+          "sourceSha256": "159f51c73293e1cf8f6bbd6440de5cde7d29e9e5d64568dbdca9a9c6f3534b08"
+        }
+      }
+    },
+    {
+      "id": "hangyu-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Hangyu Cryst",
+          "sourceSha256": "afc5b04ffb87cfb754adaa546110718016a4f3a7324d177b852907c9bfa7acd8"
+        }
+      }
+    },
+    {
+      "id": "hartalis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Hartalis",
+          "sourceSha256": "29db4ec5df29d35fcab2cc5450d0c1964be14143e04b579e1f93f6f50ab12e79"
+        },
+        "description": {
+          "sourceText": "The silence is unsettling, yet strangely soothing. No one else remains. All have been delivered. O King of Salvation, carry me too into eternal stillness. -The ancient text cuts off here.",
+          "sourceSha256": "ad6f823d89a8671c5cd7c69c5f5fc92ac96310280a8ff6075f26a800fa623896"
+        }
+      }
+    },
+    {
+      "id": "helzephyr",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Helzephyr",
+          "sourceSha256": "e793ba2e39995a4083424cf0b38c65535bcfc445c455eae4a1fc8deeb57a8d47"
+        },
+        "description": {
+          "sourceText": "It calls forth lightning from the depths of hell. Those who dies from Helzephyr's lightning are sure to have their soul sent to the underworld.",
+          "sourceSha256": "0c0000349e127a1f13e51702423318a7ea4ecde59d5f4035125aea792660f980"
+        }
+      }
+    },
+    {
+      "id": "helzephyr-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Helzephyr Lux",
+          "sourceSha256": "4ac0273164d0cbb2e343525e3a9455a982dd01e342a807b1d2415e1bf3bfcd89"
+        },
+        "description": {
+          "sourceText": "It calls forth lightning from the depths of hell. While considered a subspecies of Helzephyr, there's a theory that suggests Helzephyr Lux, struck by lightning from hell, will transform into Helzephyr.",
+          "sourceSha256": "75eee0d0987a96fb47e0daf1d68bfc478d28240da7032f50d94dcf82c89d5755"
+        }
+      }
+    },
+    {
+      "id": "herbil",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Herbil",
+          "sourceSha256": "8fdfb19b0ade5966205f9c60cb432ffa8990635a5aff168e06806cb618059604"
+        },
+        "description": {
+          "sourceText": "When in doubt, punch it till it works—that’s Herbil's approach to fixing things. With strength perfectly tuned for humans, sometimes just one punch is enough to restart a stopped heart.",
+          "sourceSha256": "1d79a74d366854fbbb7f587ef7ee05331792aec78ced4e521fa977a214c92570"
+        }
+      }
+    },
+    {
+      "id": "hoocrates",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Hoocrates",
+          "sourceSha256": "9da821e61da87565f79806b13957953825dbbc22d71ecc18a9dfa693610aee86"
+        },
+        "description": {
+          "sourceText": "Often lost in thought, it sometimes finds it difficult to sleep. |I think, therefore I am.|",
+          "sourceSha256": "911dfc360c8a7c80d7ba7266d797d70e83c0c60a6c0cf484a143c155d15c91f6"
+        }
+      }
+    },
+    {
+      "id": "hoodle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Hoodle",
+          "sourceSha256": "736d1c58550135a53d1002bef66d00d27f9f81b148f49e3935f5a8693552a7f6"
+        }
+      }
+    },
+    {
+      "id": "icelyn",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Icelyn",
+          "sourceSha256": "ec52f8c79743d617600c5908003b4adf4ed20fb1eccfec9f6494b24cc1609d31"
+        },
+        "description": {
+          "sourceText": "Though its body melts in the heat, it just can’t resist sunbathing. Though its body melts in the warmth, it likes hot springs too much. If it's going to melt anyway, it hopes it’ll be in a steaming outdoor bath under a clear blue sky.",
+          "sourceSha256": "f0fd8b8ce8394f814824aa92e4d9a4da370f51365a1fafca094ce8f8cf2cb276"
+        }
+      }
+    },
+    {
+      "id": "incineram",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Incineram",
+          "sourceSha256": "ee301dc9a94ce021b7d17431ef053d81a304aa38a41501bf3d4f04d573400807"
+        },
+        "description": {
+          "sourceText": "In the dark of night, this Pal snatches prey to bring back to its territory. What happens to those poor souls afterwards isn't too hard to imagine.",
+          "sourceSha256": "b76b00d35a0c76437bc19c62a59821798d49efaed9bc9c118600d2b9417a094a"
+        }
+      }
+    },
+    {
+      "id": "incineram-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Incineram Noct",
+          "sourceSha256": "97d7be0291ff0af8f1c70b340056cc1ff6e579103ec5e663f675da518b106da4"
+        },
+        "description": {
+          "sourceText": "It specifically targets baby Pals, taking them back to its domain. One can only imagine the profound despair of a parent whose child has been taken away.",
+          "sourceSha256": "19388451dc3299e2a92c8060c5d750df3d4f806050c67bf139b983a5603e42ce"
+        }
+      }
+    },
+    {
+      "id": "jelliette",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Jelliette",
+          "sourceSha256": "d70d834aea3a35872222ed1ba6a3e2f9a7277ef930c289c5c934165420cfe1f6"
+        }
+      }
+    },
+    {
+      "id": "jellroy",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Jellroy",
+          "sourceSha256": "9caf61252359deb42527546fabfda25bfcd077c2f2359b236038065c74f4e6aa"
+        }
+      }
+    },
+    {
+      "id": "jetragon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Jetragon",
+          "sourceSha256": "78c3de6040d0c1678bc0ffac98ca18e3ed912d36c2fbece0d145d3dc0f758626"
+        },
+        "description": {
+          "sourceText": "Watches over Palpagos Island from high above. When calamity returns to the land, the earth will split open, and the skies will burn. It is destined to strike down the calamity in a flash of total destruction.",
+          "sourceSha256": "eda071bd184399bc7d3040140b994e2ebbc36dbd4a3768acfa12ba73a62108c9"
+        }
+      }
+    },
+    {
+      "id": "jolthog",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Jolthog",
+          "sourceSha256": "bf733a12b226d13aa3971d09fec7c9fa88c2a699a55d17f10255a688e69d3623"
+        },
+        "description": {
+          "sourceText": "It releases the electricity stored in its body when under attack. The voltage it generates exceeds 10 million volts, making it more lethal than any conventional heavy firearms when thrown.",
+          "sourceSha256": "c947a6a17933a887d55107c008c2f5212a9c7e5568db6fab4bd4210a1df78e5c"
+        }
+      }
+    },
+    {
+      "id": "jolthog-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Jolthog Cryst",
+          "sourceSha256": "5393a3cc2ef4d1f015cfdc06ac606fba3e0294468e3c9cb2273e8af4bacb9c17"
+        },
+        "description": {
+          "sourceText": "It releases the cold air stored in its body when under attack. The frigid blast it radiates is cold enough to freeze the surrounding air and easily pierces through any attacker's body.",
+          "sourceSha256": "fb56660a73bffc97b9258b012a24960c1e15cdd9f796b97e348c95034eb26956"
+        }
+      }
+    },
+    {
+      "id": "jormuntide",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Jormuntide",
+          "sourceSha256": "bb5697dce91c5432fedf333e102f9657e66fb2a1c42463c1a2ddd6210f281db5"
+        },
+        "description": {
+          "sourceText": "Legend says the Jormuntide was once a wise man who, after being wrongly convicted and cast into a whirlpool, returned as this Pal to annihilate the kingdom.",
+          "sourceSha256": "507b3160effb363d11d7f9016939df08ade06c2b88e0bdccf64b3d5da3c5427d"
+        }
+      }
+    },
+    {
+      "id": "jormuntide-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Jormuntide Ignis",
+          "sourceSha256": "0a701fa16ec650028572d13156c3e81d91cf898489bff9c4c53e093bd4307fe8"
+        },
+        "description": {
+          "sourceText": "Legend says the Jormuntide Ignis was once a warrior who, after being wrongly convicted and cast into a volcano, returned as this Pal to annihilate the kingdom.",
+          "sourceSha256": "cb226eef5f3c994db3ef56ded0b3aa406fe5ea3a923f3f456e73775102f1298e"
+        }
+      }
+    },
+    {
+      "id": "katress",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Katress",
+          "sourceSha256": "df3b04cfc95374d1c205e7734598365b3ed720c1d8884fa9f731cadc8bb97bc3"
+        },
+        "description": {
+          "sourceText": "With the power of shadows, it produces arcane phenomena. It prefers to eat food raw and is particularly hostile towards Wixen.",
+          "sourceSha256": "9bd0810cbbf6e339a6e5d525b1fd73b1e4fc19672a6a9d3cb3c76f39d93ac00e"
+        }
+      }
+    },
+    {
+      "id": "katress-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Katress Ignis",
+          "sourceSha256": "27e37c3651918ec768ccd336df94952cb9db2794ed998936dcff62af8051e3c7"
+        },
+        "description": {
+          "sourceText": "Due to its upbringing, it no longer cares about whether its food is raw enough. This Pal stopped worrying about those details, and just prefers its food to be as spicy as possible. Not on good terms with Wixen Noct.",
+          "sourceSha256": "41526fb58f7ce287df9749b08e3ff00943bc6a1d1459fedc41b4a595a23b1932"
+        }
+      }
+    },
+    {
+      "id": "kelpsea",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Kelpsea",
+          "sourceSha256": "1072cd865d717fd7d6503ae6e9235c8238f41c71873425ae326087e925c0b95c"
+        },
+        "description": {
+          "sourceText": "Its personality changes depending on the quality of the water it was born into. Kelpsea born into polluted waters are generally ill-tempered and quickly become delinquents.",
+          "sourceSha256": "87ea6babb5ce605dbc8ff4627a953685ae724e0820e38c29be4f5201b178ee80"
+        }
+      }
+    },
+    {
+      "id": "kelpsea-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Kelpsea Ignis",
+          "sourceSha256": "e3e2f0c5b319f2807a8c79a6686453bd41802cf7624fd848b0e5066f73d8fa90"
+        },
+        "description": {
+          "sourceText": "Its personality changes depending on the temperature of the water it was born into. Kelpsea born in warm waters generally have a passionate, motivated personality.",
+          "sourceSha256": "dff596eceed5075403e05999f71c44e85098854200748bdfdd4251d398bf8bb2"
+        }
+      }
+    },
+    {
+      "id": "kikit",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Kikit",
+          "sourceSha256": "0aab5e61b7a846aeea8bfa1000e8468f5aa433840eb80afa19046fa2a5834e23"
+        },
+        "description": {
+          "sourceText": "A decade ago, Kikit soccer was popular. However, it quickly fell out of favor due to fierce opposition from the Free Pal Alliance. Nevertheless, the Kikit's themselves didn't mind because it helped shed their old carapace.",
+          "sourceSha256": "bcefdb7b3273aff2c7b8fa6fe861ccd0179419fca3399f1a370eedeeb0b2be40"
+        }
+      }
+    },
+    {
+      "id": "killamari",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Killamari",
+          "sourceSha256": "bf6b53db1f0bbea1dad1ada24d95bb203f4cb4d726dccbecaf2974e0ad1afa07"
+        },
+        "description": {
+          "sourceText": "It wraps itself around an enemy's head, sucking out their insides. Pal mummies are occasionally found, but these are in fact Killamari victims.",
+          "sourceSha256": "8561ae6c07bce6e5cafb4fd19543269bbf102054b7779047262e950a8c0d5401"
+        }
+      }
+    },
+    {
+      "id": "killamari-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Killamari Primo",
+          "sourceSha256": "8c1beb234a8d5e10cf7d8fb88873ef0f0fabd55f0ab24a2d9e88a4c354a77d91"
+        },
+        "description": {
+          "sourceText": "It sinks its fangs into the enemy’s neck, draining every last drop of blood. When two Killamari Primos latch onto each other, they become locked in a relentless struggle—each trying to suck the other dry until one withers away.",
+          "sourceSha256": "07fa7d115761cfe10b86d38bada3310f7f4caa46c8baa908745b7e52694f99e8"
+        }
+      }
+    },
+    {
+      "id": "kingpaca",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Kingpaca",
+          "sourceSha256": "d61135ec171412e1fc686f6a44a5a2add164f6463ef60d9c4f237d31ea1cec55"
+        },
+        "description": {
+          "sourceText": "Melpaca serve this Pal. Contests between Kingpaca offer up their vassals as a wager. Those seen alone are losers of such contests.",
+          "sourceSha256": "2332769475556e63c0094a180da4caa4964f3b066a2abc836877c480ec718c1b"
+        }
+      }
+    },
+    {
+      "id": "kingpaca-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Kingpaca Cryst",
+          "sourceSha256": "88dd0b33d8e8da5026d23f5836eca2d2441e39d7a18c5ac6f9859a7451d8e2f1"
+        },
+        "description": {
+          "sourceText": "With a heart of ice, this Pal is terrible at expressing its emotions. A solitary individual is pitiable, seen as too clumsy in the eyes of a Melpaca.",
+          "sourceSha256": "56381161f7e143d216d0906942ba2a107b80f4e7fd5c79c5de6a74bbabe91f6a"
+        }
+      }
+    },
+    {
+      "id": "kitsun",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Kitsun",
+          "sourceSha256": "78ee32573030118ced1a1580de2afa2f2690718b1b5087aa3726cf2b356be542"
+        },
+        "description": {
+          "sourceText": "Despite its appearance, Kitsun is extremely sensitive and will flee into a cave when spooked. Long ago, it was considered an ill omen if one ran away from you.",
+          "sourceSha256": "34a4180d011e6041344d5fb6932537f066ca8984c13cd09c26b63d25d5d0df3d"
+        }
+      }
+    },
+    {
+      "id": "kitsun-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Kitsun Noct",
+          "sourceSha256": "5b8d931e49aeabfac7caf704683c57d12e9e76bd79bf2e472c9be783873b51dc"
+        },
+        "description": {
+          "sourceText": "Despite its appearance, Kitsun Noct is extremely sensitive and will flee into a cave when spooked. It has become quite gloomy from being a shut-in for too long.",
+          "sourceSha256": "3892925ea00f630376cedb58bef3a753676c98b7653b1cf2b8d571227307b51e"
+        }
+      }
+    },
+    {
+      "id": "knocklem",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Knocklem",
+          "sourceSha256": "6b0cf462f1c545c901cb2fc6e3fd4d6b4f165eadcc5727090b12c71fa17cae9b"
+        },
+        "description": {
+          "sourceText": "Can be disassembled into 215 parts. It is capable of being reassembled and functioning again even if the parts are scattered. Mixing parts from different individuals will trigger a malfunction due to mistaken identity.",
+          "sourceSha256": "aeda16ec4ac4849f0b263a04c3d80773c68c39936b74cf94b37550d3527f56d9"
+        }
+      }
+    },
+    {
+      "id": "knocklem-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Knocklem Ignis",
+          "sourceSha256": "43e73ddd8b635b4827e46c4698af6730d577d39462a09226e006122bf256321f"
+        },
+        "description": {
+          "sourceText": "Upon disassembly, it is capable of being reassembled and functioning again. Mixing parts from different individuals will trigger a fatal cognitive error that causes its systems to overheat.",
+          "sourceSha256": "755c7aa63355ea185ecc53f464ee5235b811e0623718df4e89567ef93e3855c1"
+        }
+      }
+    },
+    {
+      "id": "lamball",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lamball",
+          "sourceSha256": "95d40d479214773ec182beae8b1232f179c652ef94d8059fece061d97851b5a0"
+        },
+        "description": {
+          "sourceText": "A walk up a hill tends to end with this Pal tumbling back down. This causes it to become dizzy and unable to move, making it easy to capture and kill. As a result, this Pal has tumbled down to the very bottom of the food chain itself.",
+          "sourceSha256": "e70a59e250c12575aaba634077bcdc31d86741ef1887cb63f50dfaa7ccdb4f8b"
+        }
+      }
+    },
+    {
+      "id": "lapiron",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lapiron",
+          "sourceSha256": "52e929a61caf0f4d3e1e0b1496324d65c199eebd170fa2e7019e315fc797e6ab"
+        },
+        "description": {
+          "sourceText": "Listens to the earth as it runs, avoiding unstable footing with ease. However, uncooperative terrain will trick it into falling over constantly.",
+          "sourceSha256": "caf5fbfc67d1bca104e31afdebf8a7351f1e2befc5ce4c81e638c9601bb55d34"
+        }
+      }
+    },
+    {
+      "id": "lapure",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lapure",
+          "sourceSha256": "114a6340fbf5ea05492071fd7d7692b47e9e575a9ba2054156a2f3da4a76b9fb"
+        },
+        "description": {
+          "sourceText": "It uses the long, flowing fur on its hands to attract attention, always taking the utmost care to keep them maintained. Highly sensitive to dirt and meticulously clean, kicking up dust nearby will invite a very disgusted glare.",
+          "sourceSha256": "958c9c72e09eeef68131bef8e64e35b5efe82e494344348bc06b49c29d101498"
+        }
+      }
+    },
+    {
+      "id": "leafan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Leafan",
+          "sourceSha256": "eb173ab5db02d2e5275959de506b01cfdfa06905538105b87a77f97734e0ba81"
+        },
+        "description": {
+          "sourceText": "To hone the martial art passed down through a single bloodline: Daily training is the only way! Being distracted by romance? Unthinkable! Daily discipline is the only way! The time has come! Shoot my shot! Instant rejection, that’s all there is! The techniques of love were never passed down... Lingering regret, that’s all there is!",
+          "sourceSha256": "412669e7e8e87279b63c77a1a84fdbff5f6b4fde399d16aa019eec8dbbf71d4b"
+        }
+      }
+    },
+    {
+      "id": "leezpunk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Leezpunk",
+          "sourceSha256": "93b6d972be4339bc36cd02c9a36fc77e948c2ac9c8a6143585e13c8056e469e0"
+        },
+        "description": {
+          "sourceText": "A Pal that always takes great care to maintain a stylish stance. Always on the hunt for the coolest poses, if given a mirror it will spend all day posing in front of it.",
+          "sourceSha256": "83564c73d28e887ac8f2e67e6c02c054517a2562671a1ca52e991d2ecbee674c"
+        }
+      }
+    },
+    {
+      "id": "leezpunk-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Leezpunk Ignis",
+          "sourceSha256": "3ecb39a6e524fb44fa8fd9179935110e2a8c0333fe2c98577a4acf574c7a96d1"
+        },
+        "description": {
+          "sourceText": "A Pal that has an unusual obsession with their standing posture. Always in search of the hottest pose, this Pal's owner is constantly presented with fervent stances.",
+          "sourceSha256": "57ecb3107fa3509e18ebd797ce58af75b9b04573e7a2d9e35b4315412ccfff5f"
+        }
+      }
+    },
+    {
+      "id": "lifmunk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lifmunk",
+          "sourceSha256": "259f288938fdc9075cb3bf05c231d3cdba270769ab05cb67156031aa66fe7e68"
+        },
+        "description": {
+          "sourceText": "Intelligent as a five to seven-year-old human child. It makes a wonderful partner, but there have been more than a few cases where they've killed their master after learning to use weapons.",
+          "sourceSha256": "3cfea257b052cf4467d133ac341f223183bbccf3b4a29493a0b966e41dcfa699"
+        }
+      }
+    },
+    {
+      "id": "loomen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Loomen",
+          "sourceSha256": "e20b100ebc775096c6a222ec6cf138f8175ff92ba789b7a6b9c0b43bf664256f"
+        },
+        "description": {
+          "sourceText": "Its lantern glows with an eerie light that lays bare the truth of the world. If that light strikes you as blinding, then you most likely have something to hide.",
+          "sourceSha256": "ef557f596cb330ada375bed1acecdfe5d5cf1efefa6a054ef0e61d63a5460aa6"
+        }
+      }
+    },
+    {
+      "id": "loupmoon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Loupmoon",
+          "sourceSha256": "357542ffcb6116537c12255249e8f1940b7566c687e39889892eb52d48f042f6"
+        },
+        "description": {
+          "sourceText": "The horns on its head grow under the moonlight. It doesn't hate the sun, but its horns itch when sunlight hits them.",
+          "sourceSha256": "a9e9e06343b5b3541e2837e4f617b727e4f46cc6a7b04f5e846711f995710262"
+        }
+      }
+    },
+    {
+      "id": "loupmoon-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Loupmoon Cryst",
+          "sourceSha256": "2d9e3a514338534c257c68f9c3b2c57f4769e518ff2fee58f16355a79aae4e99"
+        },
+        "description": {
+          "sourceText": "The horns on its head are made of a mysterious ice that never melts. Shaved ice made by breaking off a horn is truly exquisite, but both the one who tries it and Loupmoon Cryst end up with a headache.",
+          "sourceSha256": "6e2f48c9b302d1ed73c2d982e68aad1538c4007b205bfdee1f2742464b256464"
+        }
+      }
+    },
+    {
+      "id": "lovander",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lovander",
+          "sourceSha256": "00c2154f5aab3dbefac15ae054f9579ca7832821de2f2b8bc4ac8c0bb66b2679"
+        },
+        "description": {
+          "sourceText": "Seeking a night of love, it is always chasing someone around. At first it only showed interest in other Pals, but in recent years even humans have become the target of its debauchery.",
+          "sourceSha256": "97f0925f8ccceb05bb961d1f94d45b77f075dfc168c17792fdef0b977e17f63b"
+        }
+      }
+    },
+    {
+      "id": "lullu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lullu",
+          "sourceSha256": "6ce202dba476ef8f32dbf4322f01812bf4cf48b5ff116a9aecf80b465c38149f"
+        },
+        "description": {
+          "sourceText": "In early spring, pollen floats on the wind throughout the island. Flopie's hay fever is Lullu's fault.",
+          "sourceSha256": "beffb623755a58bc73bcaf0bed198af5c491b5457809f50df97973cffb684520"
+        }
+      }
+    },
+    {
+      "id": "lunaris",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lunaris",
+          "sourceSha256": "b61e94917c638be53dbe83b445673695756574f3c470a26b3ff4490669678c06"
+        },
+        "description": {
+          "sourceText": "It can control those who carelessly stare into its eyes. Those seen with a Lunaris are in its mind, simply under its control.",
+          "sourceSha256": "3aacc110e369d711147c3331da32e0e19fc4918743d47a3dbf860b337113e5dd"
+        }
+      }
+    },
+    {
+      "id": "lyleen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen",
+          "sourceSha256": "d7c7494ef36c7377943ebca8a33cc5c3e82f2ee21bd0e935defd1cfdc44d9139"
+        },
+        "description": {
+          "sourceText": "A docile Pal full of love. It watches over small Pals who have lost their parents. It uses a full-power Solar Blast to discipline naughty Pals.",
+          "sourceSha256": "849f10d731c9ce3c45c616ca11caa5dbde2531946d4ff81fbb0dbc73b4ee3945"
+        }
+      }
+    },
+    {
+      "id": "lyleen-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen Noct",
+          "sourceSha256": "ee54f8ea8233fa489bb75c2ecf94f2628646d1f70b93ce21997397cb82d51936"
+        },
+        "description": {
+          "sourceText": "An elegant Pal full of grace. It admonishes any who are disrespectful with a painful slap. Some Pals actively seek out this punishment.",
+          "sourceSha256": "a4b0f0a19cd68c7804d7d1f76d649c532f58dea39da2db0c99adea96840b77d5"
+        }
+      }
+    },
+    {
+      "id": "majex",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Majex",
+          "sourceSha256": "dd03245824a1041955082cb3e172bc3dba769f77be73085e5b20c47af4e1d208"
+        },
+        "description": {
+          "sourceText": "It appears to be striking a heroic pose, but the reality is that it's simply bracing itself against the weight of its tail and hair to avoid toppling over.",
+          "sourceSha256": "2c631f3512203ad722065af14d2b32795e91f4ab17aa34de123dbfad1a9ed6e6"
+        }
+      }
+    },
+    {
+      "id": "mammorest",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mammorest",
+          "sourceSha256": "1ffe86fa700979f2ebe044b3757a96131328bb7ecfaf4b11428e7b63bc2ec34f"
+        },
+        "description": {
+          "sourceText": "The vegetation on its back varies between individuals. There is a long history of appreciating this veritable garden of a Pal, and there are even Mammorest pruning specialists.",
+          "sourceSha256": "88d99987620d920cee7ba9c48aecf8ca9c2e3d35f6aa5d2b7cc1b3631e124d06"
+        }
+      }
+    },
+    {
+      "id": "mammorest-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mammorest Cryst",
+          "sourceSha256": "e51c5a8e24e299f800993ffeb8c06cd3e26115879722ae2cf6439e6c676bd75b"
+        },
+        "description": {
+          "sourceText": "The vegetation on its back varies between individuals. There was a time when seeds of presumed extinct plants were found still frozen on the back of a Mammorest Cryst.",
+          "sourceSha256": "bd73bcb66ebd6fd09e2408dfd4129acd506ed0d7e5878778f1986939d088c693"
+        }
+      }
+    },
+    {
+      "id": "maraith",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Maraith",
+          "sourceSha256": "1bcc33af15f06045659c3f43ab876e7792e175fba5121d063e6018f79a2bc43f"
+        },
+        "description": {
+          "sourceText": "It relishes the peculiar scent living things give off when they are near death. If a Maraith has taken a liking to you, it is safe to assume that is why.",
+          "sourceSha256": "c583f2bc4ca341b2e5981a6fa5baa5f8ebd2b8a34da0efc538006e168bfdd6dc"
+        }
+      }
+    },
+    {
+      "id": "mau",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mau",
+          "sourceSha256": "950d908ffa50b8a36875489fe94d0783d35c9dbf3befe157996c8b6a2d2e3742"
+        },
+        "description": {
+          "sourceText": "Its hard tail does not deteriorate even when cut off. Some believed these severed tails bring good luck, but for the innumerable Mau who were poached as a result, they were anything but.",
+          "sourceSha256": "dc87975e89e141ae7fa1427e85b8defb515381f51e3d7b64fa8c3b39b6e44332"
+        }
+      }
+    },
+    {
+      "id": "mau-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mau Cryst",
+          "sourceSha256": "9f173d566a4449e0a3cacfa12f53799fb9b3dc95b8e6aa8c7f16cf8bf1d0d8f1"
+        },
+        "description": {
+          "sourceText": "Its crystalline tail is beautiful, but shatters when this Pal dies. Some believe it is good luck to raise them, so Mau Cryst in captivity are treated with great care.",
+          "sourceSha256": "116a386b910bfd9f09a14cceb6e5ae866d36a5316192914ef6a84a065c2c1e58"
+        }
+      }
+    },
+    {
+      "id": "melpaca",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Melpaca",
+          "sourceSha256": "058bd4a5ca14824f0be9afefcf473ff0ec837e5f49d2accf1e41dd83bdbf9a0b"
+        },
+        "description": {
+          "sourceText": "Don't be fooled by this Pal's fluffy appearance. A hypersonic kick from one of its long legs may send you flying to the other side of the world.",
+          "sourceSha256": "a8a647301cc05bee47402bcf6a5285755614857374f44d8611e4de82d4e9f99f"
+        }
+      }
+    },
+    {
+      "id": "menasting",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Menasting",
+          "sourceSha256": "4cf1020c86a8e74e0a0b45a2343fabf376b6eda8809344d0165671b1edde1632"
+        },
+        "description": {
+          "sourceText": "Being made of pure energy, its insides are completely hollow. This Pal crams still-living prey into its hollow body, where it absorbs them. Hellish screams of pain can often be heard coming from inside this Pal.",
+          "sourceSha256": "f2c3e22a89cfaa301af7be73c978b8c86dcdf3129f20460e493158fddfbd6953"
+        }
+      }
+    },
+    {
+      "id": "menasting-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Menasting Terra",
+          "sourceSha256": "4286b6b875c02f3e6e03c2e9a83c4e9b0e191c27ab6b98238e70a195869225aa"
+        },
+        "description": {
+          "sourceText": "Being made of pure energy, its insides are completely hollow. It stuffs earth and minerals into its outer shell, achieving overwhelming mass. Those who are struck by it can only let out hellish groans.",
+          "sourceSha256": "23cb5f91498adaca1ef5c972c052365528e32c6691ca5980d816cf90a13e3eeb"
+        }
+      }
+    },
+    {
+      "id": "mimog",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mimog",
+          "sourceSha256": "d82aab28d0e18a12528bdf04fc6cdca9308bbf6a43859acccf26cdc2e034f431"
+        },
+        "description": {
+          "sourceText": "There was once a tradition of handing out an award to the person who met their end in the most foolish way. The first award was given for |being unaware of Mimog, opening the chest, and being bitten to death.|",
+          "sourceSha256": "01b6582aa9b0ed28f91b8f200fd305636625fb75c57ddcae8479c7650de87a17"
+        }
+      }
+    },
+    {
+      "id": "moldron",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Moldron",
+          "sourceSha256": "870825d4282ac54b555ee11877abc0c3129adb28650137d648d84fe73ff4021c"
+        },
+        "description": {
+          "sourceText": "In a healthy individual, the lava on its back flows smoothly. However, a poor lifestyle will gradually worsen its circulation, eventually causing a lava clog that results in a sudden, massive explosion.",
+          "sourceSha256": "0b9d27ecf866950673d455aae342620c0d09958c7d2ef3543cb3f63ba6b69ea9"
+        }
+      }
+    },
+    {
+      "id": "moldron-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Moldron Cryst",
+          "sourceSha256": "d624f0004874778596c6e42a7028d236b58411e150c0c4c75a551fd4c069c984"
+        },
+        "description": {
+          "sourceText": "In a healthy individual, the substance flowing along its back maintains a stable temperature. However, if its heartbeat quickens, the temperature destabilizes, eventually triggering vaporization or crystallization that results in a sudden, abrupt death from shock.",
+          "sourceSha256": "4cd0e59df090053f4cbf542508e8e9de8d21528677ed89d18432d8cd95e38fb8"
+        }
+      }
+    },
+    {
+      "id": "mossanda",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mossanda",
+          "sourceSha256": "c099d45fd3a730f8e9361255e0d7c0881a42f2942f968334155cb3c00f382027"
+        },
+        "description": {
+          "sourceText": "A Pal so powerful it's hard to believe. In one experiment, this Pal tore through 3,000 sheets of paper at once! It's only by some miracle that this Pal isn't a meat-eater.",
+          "sourceSha256": "203179c1181ddad58fd23a150bdd0d73e8e1a1131bad0ea261f134ddd910b0e2"
+        }
+      }
+    },
+    {
+      "id": "mossanda-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mossanda Lux",
+          "sourceSha256": "cd6d8597e91ce520d858c2c7bb2f7ce386ff8e7ffdc5037e12195bf5057ca5d1"
+        },
+        "description": {
+          "sourceText": "A Pal whose power is truly shocking. By altering the electrical currents in its body, this Pal's been able to overload its own strength. When it comes to sheer power, this Pal may be top of the list.",
+          "sourceSha256": "2cdd8dad8097424b68304e5617f0f251bd16c70bf17c66142d2e42be792b8289"
+        }
+      }
+    },
+    {
+      "id": "mozzarina",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mozzarina",
+          "sourceSha256": "7b861de1bba1f1d1b2d131b3c63eb2b53f5b05644a1724331a401a058ac50cb0"
+        },
+        "description": {
+          "sourceText": "Milk pours from this Pal like water from an open faucet, regardless of its gender. It's truly a mystery of life, although this mystery may be better left unsolved.",
+          "sourceSha256": "add500120529db60111ebf1625c21e4dfb678d95d42513672d03ec8cc67967b7"
+        }
+      }
+    },
+    {
+      "id": "muffly",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Muffly",
+          "sourceSha256": "5debe611e7e52449188dcbc37ebbd19b8b9fff356964fd4eafaf7f00c60c0627"
+        },
+        "description": {
+          "sourceText": "Its soft facial fluff softens any hit, but it cannot groom itself well nor scratch its itches, leaving it in a constant state of mild frustration.",
+          "sourceSha256": "75794acd3b862890be95bed40097ac61778728d861108ae63675b7a38825bf5d"
+        }
+      }
+    },
+    {
+      "id": "munchill",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Munchill",
+          "sourceSha256": "5e537f75f7b587b4da2d01f4a0a19769f290cb5d17dafafe20f421983113619e"
+        },
+        "description": {
+          "sourceText": "The inside of its mouth stays pleasantly cold, making it a natural fridge when closed. Its saliva contains enzymes that prevent food from rotting. Thus, it can serve as a food locker for humans— whether it is sanitary or not is another matter entirely.",
+          "sourceSha256": "b10df020b8b12b47f10ac8b88b7a3eb8d3e955391e57b3e29030be4a98c1ac80"
+        }
+      }
+    },
+    {
+      "id": "mycora",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Mycora",
+          "sourceSha256": "4b4c7206f799cb8d51598d689050e4bf74346b7db35a0ad8c65378b9d16e21fd"
+        },
+        "description": {
+          "sourceText": "It views humans as nothing more than convenient parasitic hosts. The reason Mycora has taken this form is to deceive humans into lowering their guard, allowing its spores to spread more efficiently.",
+          "sourceSha256": "e21671baacfdb85cde78d5e7bbefe169a8ef9c0866032fe204469cd915922fb4"
+        }
+      }
+    },
+    {
+      "id": "necromus",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Necromus",
+          "sourceSha256": "bfd44bbf32411250001d09c2f88de740c4089881d1bdbe2deed305a7af5e24af"
+        },
+        "description": {
+          "sourceText": "Once one with Paladius. Its darkened form is the embodiment of negative emotions. However, a glimmer of compassion can still be seen deep within its eyes.",
+          "sourceSha256": "185d6c9bad5ac404cbac078ba58eec70fa7558408b5e5525cccaf7b3c50bf9d8"
+        }
+      }
+    },
+    {
+      "id": "needoll",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Needoll",
+          "sourceSha256": "efdeca1b7bb5e3ed3941ec36e132aff91332a8f31da25127eb24637cfecff2b3"
+        },
+        "description": {
+          "sourceText": "Its spikes react to its emotions. A dearly cherished Needoll is something one may instinctively want to embrace. But more often than not, it ends in a tragic accident.",
+          "sourceSha256": "5402d343464ef30246a003d13daa9a99537686c67e40269ad8c91e80b2c94d65"
+        }
+      }
+    },
+    {
+      "id": "needoll-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Needoll Noct",
+          "sourceSha256": "daab712e92df0f584002b17cf389d857e7251dd9afb6a5307766a3c2f14a67f8"
+        },
+        "description": {
+          "sourceText": "Its spikes react to its emotions. A well-loved Needoll Noct clings to its owner, but accepting that love means accepting the pain too.",
+          "sourceSha256": "87774676fbd28f9e29069598f5453f340051b38f196c12846e725485b88abb8d"
+        }
+      }
+    },
+    {
+      "id": "neptilius",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Neptilius",
+          "sourceSha256": "cee8d8d202d3129e2b4aa2e9fb2a1194aefcf3767450ec5a8af38a793d85bb99"
+        },
+        "description": {
+          "sourceText": "After the sealing of the calamity, a champion from Feybreak emerged. It stares out to sea, awaiting one it deems worthy. For such encounters are no coincidence—they are fate.",
+          "sourceSha256": "a04ef629798e5481896d1b55fba9e7679d986e96f627f37a244b3e89ff41a9fc"
+        }
+      }
+    },
+    {
+      "id": "nitemary",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Nitemary",
+          "sourceSha256": "07cc5f19436fb7c0191f3b55331b06e62688f629e17bb26f80302ab5300a643f"
+        },
+        "description": {
+          "sourceText": "What it carries is its own soul. When it falls for someone, it forcibly extracts their soul and merges it with its own, yearning to become one.",
+          "sourceSha256": "8d792aa2d13aed2d24994a5403e53065664afffba12ca0c2b52cd1b67b023723"
+        }
+      }
+    },
+    {
+      "id": "nitemary-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Nitemary Botan",
+          "sourceSha256": "e9909241c5192c673488d89f2345500a1e4b6e659f3a4ca867ec9bf43878190f"
+        },
+        "description": {
+          "sourceText": "What it carries is its own soul. When it falls for someone, it flings its soul at them to merge it with theirs, yearning to become one.",
+          "sourceSha256": "a9dde28249245ecba919681f4f519fb9a3af1ef4464f6685bfe7d2474b9b24aa"
+        }
+      }
+    },
+    {
+      "id": "nitewing",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Nitewing",
+          "sourceSha256": "4ed4db822f9339bd2d5355a264ad6fd4eb6933193380cfd1d94feb3689cf9f60"
+        },
+        "description": {
+          "sourceText": "It carries newborn Pals to its nest and raises them as a surrogate parent. Once the baby Pal has fattened up, it hunts them.",
+          "sourceSha256": "95f9e67fad1323a2c74c10c983b2ee759d14549dcdd7ce6ee718f1f73c238e8c"
+        }
+      }
+    },
+    {
+      "id": "nox",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Nox",
+          "sourceSha256": "43930f607216cfaecb4f98a875d986ad0dded8c8cb1bfd29db96b29e74277b05"
+        },
+        "description": {
+          "sourceText": "If you find Nox hair in your bedding, you should leave it where it lays and leave immediately. Picking it up is a one-way-ticket to a never ending night.",
+          "sourceSha256": "4bcfbe4bb9b7ff938a024792965735d1b3cc6b5ac04ec4574044388145b94e76"
+        }
+      }
+    },
+    {
+      "id": "nyafia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Nyafia",
+          "sourceSha256": "423622672d8db0d828bbf8a0f558c18b8dc4d5cd55e0734b13fbea2bcd1a6589"
+        },
+        "description": {
+          "sourceText": "Strongly dislikes anyone catching a glimpse of its concealed eye. If you insist on trying, it'll burst into tears and ignore you for two weeks.",
+          "sourceSha256": "f6bec58bfee5db264c7ec3ab9fbe081bef70d20c7a0a942df80619671bae8cba"
+        }
+      }
+    },
+    {
+      "id": "omascul",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Omascul",
+          "sourceSha256": "4cfff3d08244e3949be2e793bfeafad310339aec44bb9b36b3d0bf588a3e6c7f"
+        }
+      }
+    },
+    {
+      "id": "ophydia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Ophydia",
+          "sourceSha256": "ad23febe90cdbfa2b3e1fb9833de0088b3c31186c317217c282f62395b16a2b1"
+        },
+        "description": {
+          "sourceText": "Waters where Ophydias dwell are often filled with flowers that mimic its form. Many attempts have been made to directly propagate these blooms, but they inevitably wither the moment human hands interfere.",
+          "sourceSha256": "a44ee1114fd510ee1d80269d3707d65849e7ba770c7f91d6cae8bb48ca83668d"
+        }
+      }
+    },
+    {
+      "id": "orserk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Orserk",
+          "sourceSha256": "933152883ad16f690ae1e59da319af8ebf540a10db65c722615885cc6b803f89"
+        },
+        "description": {
+          "sourceText": "It sends electricity into its foes' wounds, roasting them from the inside out. Fights between Orserk end in the blink of an eye.",
+          "sourceSha256": "f8fccb52bcc08e9fb80c31fb74acbaf07367bdeab05f56569bc4f4fb5d3d4557"
+        }
+      }
+    },
+    {
+      "id": "paladius",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Paladius",
+          "sourceSha256": "20f8246e984e85b184ccfb788f07838b5a3eeab28f0b1d0588096dfbfc3dd694"
+        },
+        "description": {
+          "sourceText": "Once one with Necromus. Its gleaming form is free of all negative emotions. However, a glimmer of hatred can still be seen deep within its eyes.",
+          "sourceSha256": "f9825d54f974aea952978f2c37e54d81a1cfa85d562b0de0b2e41c971bc27cc9"
+        }
+      }
+    },
+    {
+      "id": "palumba",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Palumba",
+          "sourceSha256": "c375c14e8c2a5638d2618d8c1043b5dc3e49ade9fc237bf39a97c9346979cc20"
+        },
+        "description": {
+          "sourceText": "Disrupts enemies’ rhythm with a signature dance. In turf battles, the first to fall in sync with the other’s rhythm loses. Courtship, boredom, battle—it all comes down to dance! Now then, what could a dance aimed at a human possibly mean?",
+          "sourceSha256": "2455c9a2ebe696cef1d1e70f5df7eda01352bbd3a24a0722eb5bc6bb779c1bd3"
+        }
+      }
+    },
+    {
+      "id": "panthalus",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Panthalus",
+          "sourceSha256": "52f85f41da0619ffa768764cfef94b120008e0c53ac2aeedc697d52961040ca9"
+        }
+      }
+    },
+    {
+      "id": "pengullet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Pengullet",
+          "sourceSha256": "9ca7533753768ce6982213d3dc9f98fe1a31021d29b63cbb7264b237425b6af6"
+        },
+        "description": {
+          "sourceText": "The feathers of this Pal have all but disappeared, but sadly, its desire to fly has remained as strong as ever. Even now, it tries to fly again in any way it can.",
+          "sourceSha256": "9f6ff77db25076171a4f026dc415e13bd55339b6f486ca529a0b5937c9171337"
+        }
+      }
+    },
+    {
+      "id": "pengullet-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Pengullet Lux",
+          "sourceSha256": "25c7897b059e111d0f889593fa1669e7ac8eea7c8099650908d3727d69f4d9ca"
+        },
+        "description": {
+          "sourceText": "The feathers of this Pal have all but disappeared, and it can no longer fly. Yet its longing for the sky has turned to jealousy— so it harnessed electricity to strike down those who still soar.",
+          "sourceSha256": "df182d8a7468cec9b4e36826d8512577be2762dddb3480851bad8a5a26afdcd7"
+        }
+      }
+    },
+    {
+      "id": "penking",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Penking",
+          "sourceSha256": "62e49a827df2e292ea3b3b54bf64d4b1d3ea880ccc02852f82fe13fc4f9a2aaa"
+        },
+        "description": {
+          "sourceText": "Surprisingly, it is unrelated to Pengullet. However, since this Pal gets pampered as it pleases, for now, it's doing its best to strut arrogantly.",
+          "sourceSha256": "d03a2127e12de36a2b0a7162c84597c174a870155baeb682fbc1c8bf92c425c0"
+        }
+      }
+    },
+    {
+      "id": "penking-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Penking Lux",
+          "sourceSha256": "564186df93d1229d0446f5a8f7fac259d31e0b3b849056f0013c3e1e7a5347e4"
+        },
+        "description": {
+          "sourceText": "Its body changed color after gaining electricity to improve underwater hunting. As a result, it lost the affection of Pengullet— but strangely enough, it now has a loyal follower: Pengullet Lux.",
+          "sourceSha256": "29e0b28f21797d7da40aa521cc6813f11a11e5541026cce15b1dcf70c9780890"
+        }
+      }
+    },
+    {
+      "id": "petallia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Petallia",
+          "sourceSha256": "b64bd21e5d9afcd62f85a06fe303a533cae4c9eac5ee6d2f96326bcf7750fe78"
+        },
+        "description": {
+          "sourceText": "A Pal that transforms into a massive plant when at the end of its life. Once every ten years, a beautiful flower blooms and a new Petallia is born.",
+          "sourceSha256": "e277cb2f2842ea7929141efba4476435c93027d97541fcfb5bcbcdd8114a27a1"
+        }
+      }
+    },
+    {
+      "id": "petallia-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Petallia Ignis",
+          "sourceSha256": "b52e77f1f0f7ccdb265b1b89ea09eea9bf7a7aa20f6bd60927d0ff08ffd55a88"
+        },
+        "description": {
+          "sourceText": "A Pal that burns away into a pile of ash upon the end of its life. The surrounding soil becomes incredibly fertile, allowing an abundance of vegetation to thrive for the following decade.",
+          "sourceSha256": "ea99d7fbe2d2c3b064407bee5daf474085b320f879c0dc1932705fc3240b72a0"
+        }
+      }
+    },
+    {
+      "id": "pierdon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Pierdon",
+          "sourceSha256": "541904928e0eae68dbce96c21ebe6067431d0314a20b4aa1c263960af0806558"
+        }
+      }
+    },
+    {
+      "id": "pierdon-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Pierdon Cryst",
+          "sourceSha256": "2cb201aa81c2abaa03a96f4ce2ae0fb0d13f80caaa300d57579f61dcf0733768"
+        },
+        "description": {
+          "sourceText": "It basks in the sun, rotating just enough to melt its ice into its preferred shape. Lopsided ones should be left alone, much like a person who was a little too bold with their sideburns.",
+          "sourceSha256": "dd3f7fbb30a4b2caf576e05aaefc2af8a0407ab5bd34cdfae5a3f6c40fc152dc"
+        }
+      }
+    },
+    {
+      "id": "polapup",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Polapup",
+          "sourceSha256": "74ffe97973666adfb9de9b926b20030ad1037bb5d22af2298891d202d689fc1b"
+        },
+        "description": {
+          "sourceText": "Among Polapups, the fastest slider on the snow earns the highest respect. Sometimes, a too-forceful leap sends one tumbling from the sky— a common sight during territorial season. Forecast: clear skies with a chance of flying Polapups.",
+          "sourceSha256": "67467c52296f4c10185d2e9be81a6f50250b93e3063c153c5df27ce2e671412d"
+        }
+      }
+    },
+    {
+      "id": "polapup-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Polapup Terra",
+          "sourceSha256": "12b8ce5540907598d61b9f6765c0bd306d5dff7ba8c733a08e149bd158676894"
+        },
+        "description": {
+          "sourceText": "Among Polapup Terras, the fastest slider on the snow earns the highest respect. Sometimes, a too-forceful leap leaves one buried in the snow— a common sight during particularly competitive seasons. Traffic forecast: heavy Polapup Terra congestion.",
+          "sourceSha256": "f2a5dc95df812daa474f8db920277cff504c882a613bc27d7fd9cddf2b8c82e4"
+        }
+      }
+    },
+    {
+      "id": "prixter",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Prixter",
+          "sourceSha256": "79dcbc1abf727a2c3353270ffe94e122e8fe7e776c75caac38a7a5eedda5f390"
+        },
+        "description": {
+          "sourceText": "It has about 5,000 types of venom. Some of them are deadly enough to cause instant death, but none are present in a high enough concentration to have any effect.",
+          "sourceSha256": "a1d713fd9616f7bdabe52840887dc5ac7ee534c6fe8b122d430906461906298e"
+        }
+      }
+    },
+    {
+      "id": "prixter-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Prixter Lux",
+          "sourceSha256": "936bf984dcc8572b16cb7ba9a582d296b5b2906381880fb202f4b47615e90ea2"
+        },
+        "description": {
+          "sourceText": "It pierces foes with its tail to deliver an electric jolt directly into their bodies. However, the current it generates is extremely weak, so a simple punch would do far more damage.",
+          "sourceSha256": "6839c22ca303545d23460aeed83dcd858b18cadf0cd8a1ee2e02a4dc8c6520e3"
+        }
+      }
+    },
+    {
+      "id": "prunelia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Prunelia",
+          "sourceSha256": "eeea2278affa162c5a102e4bfe89125b19c09d59bdf9baefd321c8ba4a843d63"
+        },
+        "description": {
+          "sourceText": "Intelligent and graceful in its demeanor, it was frequently employed as an attendant by the island's nobles. However, when encountered at night, its face looked so eerie that it quickly fell out of favor.",
+          "sourceSha256": "51b114555cb46b6325eef5c8c7bb267287c0b1e44224675e6010b0517f53cf66"
+        }
+      }
+    },
+    {
+      "id": "puffolt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Puffolt",
+          "sourceSha256": "5bc1eca9cd0ae099cfc47d52d3ffa1075e129abf7cc197da91dff4e80e31c774"
+        },
+        "description": {
+          "sourceText": "Its fluffy fur absorbs tremendous amounts of water when soaked. Shaking it dry releases a powerful electrical discharge, making bath time together a serious gamble.",
+          "sourceSha256": "c2267a4ec045a8373f91e8eff6dddfd75556e0650151e7add5c8b71516812bf4"
+        }
+      }
+    },
+    {
+      "id": "pupperai",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Pupperai",
+          "sourceSha256": "32bdc0605192c8f1139abfbb8654117e91579180388147447000e728d78d1725"
+        },
+        "description": {
+          "sourceText": "Pupperai territorial disputes begin with a staredown and end in a single, quick strike. Training them to |stay| is risky business, as the |go| command triggers that same attack instinct.",
+          "sourceSha256": "3fcfc8f2c554471d6798c41057ea68353fc9e29473587943cb69056b47033bdb"
+        }
+      }
+    },
+    {
+      "id": "pyrin",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Pyrin",
+          "sourceSha256": "85c68215754bb272bf92313afc5ddad9f59182895cdfd070ad7eb2b598ffa482"
+        },
+        "description": {
+          "sourceText": "Its entire body has evolved into a highly efficient radiator, gifting it with astounding stamina. If someone rides it, this Pal takes caution not to burn them.",
+          "sourceSha256": "09680c39e83b47ac23a4bd596c481eefdc691853db889832179bfc38b13ed9c8"
+        }
+      }
+    },
+    {
+      "id": "pyrin-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Pyrin Noct",
+          "sourceSha256": "ff8e5da9a0e25f55375a962fa309a2d2aa86a7b86f9aea7d4dad1128dba2b290"
+        },
+        "description": {
+          "sourceText": "It burns mysterious dark matter as energy and expels the remaining particles from its body. If someone rides it, they should take care so as not to gallop down the path of darkness.",
+          "sourceSha256": "9693a06d489352399ef4d7085f29669d8a33716ac27e9754c6e8ce60b8699415"
+        }
+      }
+    },
+    {
+      "id": "quivern",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Quivern",
+          "sourceSha256": "35d4a4af4fabc58708b09991cc3ad91c9607f556dc0bd6f47fa6dd5051cb11ec"
+        },
+        "description": {
+          "sourceText": "Sleeping while cuddling a Quivern is said to be a heavenly experience, but there are some who have been crushed and sent to heaven by ones that toss and turn in their sleep.",
+          "sourceSha256": "b71f427597d8ba7a1f8fd198332e3a6016530516180ad9babc457f6c6a765c9d"
+        }
+      }
+    },
+    {
+      "id": "quivern-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Quivern Botan",
+          "sourceSha256": "6e04bf168382090556b964462c891af24162b58163b318dec8c608bd44894f25"
+        },
+        "description": {
+          "sourceText": "When you hug Quivern Botan, if it smells like sunshine and meadows, tomorrow will be sunny. If it smells damp, tomorrow will be wet and miserable.",
+          "sourceSha256": "f063b34bbcd733e91ab3ee3e38a2448aca9ac8517735a64cdfbb420f7a94be44"
+        }
+      }
+    },
+    {
+      "id": "ragnahawk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Ragnahawk",
+          "sourceSha256": "87b3e49239d96ad4f7f2ef3f22e752d2726d81f73758499e532796b95de0fa73"
+        },
+        "description": {
+          "sourceText": "Some think it is a related species to Beakon, but there is in fact no connection. It mainly eats rocks, and after many long years its beak and head have hardened to accommodate this diet.",
+          "sourceSha256": "ab6e6ad6a487f3d416dca924d5246d3d13ff4ccfad97545af39bfc52efe947f0"
+        }
+      }
+    },
+    {
+      "id": "rayhound",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Rayhound",
+          "sourceSha256": "8ec6cec6f187c70dbbbebd98aedd2aae4cad044069bde784ec49a0d20b9de6ef"
+        },
+        "description": {
+          "sourceText": "At full speed, it could be mistaken for a bolt of lightning. When two Rayhounds collide, a thunderous roar echoes through the air.",
+          "sourceSha256": "431048f6cc0bcdcc14269ab8d1844adebf77cb35d8fb2ccd6023e6dcb00695ff"
+        }
+      }
+    },
+    {
+      "id": "rayhound-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Rayhound Cryst",
+          "sourceSha256": "f5a1194c9ffb908b6cf4b887b916a72fbd9a1da862edee8203c7793b658ff745"
+        },
+        "description": {
+          "sourceText": "Sprinting across the tundra at full speed kicks up a blinding blizzard, leading to constant Rayhound Cryst collisions due to zero visibility.",
+          "sourceSha256": "c5b4edea37195b0c23defc958a7eed7e5f28c0e39f82d5f8793be4fbd57e565b"
+        }
+      }
+    },
+    {
+      "id": "reindrix",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Reindrix",
+          "sourceSha256": "2544ad8c0ff15f94c3b7d76cecd1dc25288b7eaadde677dbc3e9a7833b9224fa"
+        },
+        "description": {
+          "sourceText": "Its transparent cerulean antlers glow with the cold of absolute zero. Any who touch them with their bare hands are instantly frozen and smashed to pieces.",
+          "sourceSha256": "71e9d7261d6d44c2fc120abd50778358c4c2eb4af50c5e53a93d67a7e7201a4d"
+        }
+      }
+    },
+    {
+      "id": "relaxaurus",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Relaxaurus",
+          "sourceSha256": "09354ae3925380812b79db3ee9c532ccc3fece2ea4c8e66d2a8288c716ad877c"
+        },
+        "description": {
+          "sourceText": "Contrary to its blasé appearance, it's quite ferocious. It perceives everything in its sight as prey and will stop at nothing to devour it.",
+          "sourceSha256": "dc44130f2e46c5bc81f40af46ae367d4e1ff4eac2e4a39cf821973620db7fc45"
+        }
+      }
+    },
+    {
+      "id": "relaxaurus-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Relaxaurus Lux",
+          "sourceSha256": "23f02f26efb4a3f5291945526c08c8ae1ba1ea3b09613c9d1dd1492bc51cc725"
+        },
+        "description": {
+          "sourceText": "One day, Relaxaurus had an idea. Maybe it was about time for a change. Just then, an electric shock raced through its body!",
+          "sourceSha256": "d5268e26767545900da42f5d233f2f7e3372b3cfcfc918f73c5caae006708d50"
+        }
+      }
+    },
+    {
+      "id": "renjishi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Renjishi",
+          "sourceSha256": "3cc4dabd1d6b0297f9dd21edd085ff373caccf3a3e996691865fe0683c0ed141"
+        },
+        "description": {
+          "sourceText": "At a glance, its movements appear exaggerated and full of openings. Strangely, however, any opponents become overwhelmed, and become unable to look away, as if transfixed.",
+          "sourceSha256": "059f8fc8ffd173a58cef5d4e158c616e4d9ecb284261a1b076993241ddf7487c"
+        }
+      }
+    },
+    {
+      "id": "reptyro",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Reptyro",
+          "sourceSha256": "278cb8f941bc67f036a1167d6aeba1840d67d0bd66957e41eb7d526d5f874d0d"
+        },
+        "description": {
+          "sourceText": "Magma-like blood runs throughout its body. If a large amount of water is thrown on it, the water rapidly heats, causing an immense vapor explosion.",
+          "sourceSha256": "167d9414da51984ba9edfe06b2ca68c33e80d1ef6ad4f3c9fd273a02e656bf53"
+        }
+      }
+    },
+    {
+      "id": "reptyro-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Reptyro Cryst",
+          "sourceSha256": "0325667b9f71f16685d5b23fbb7e824d7b701f81b164f970a349504ff7dd8692"
+        },
+        "description": {
+          "sourceText": "Ice cold blood runs throughout its body. If heated rapidly, its blood evaporates, causing an immense vapor explosion.",
+          "sourceSha256": "f5efa900a739890a833c27a7e10390eecbd457ea98b59ddf0206a7db08779ded"
+        }
+      }
+    },
+    {
+      "id": "ribbuny",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Ribbuny",
+          "sourceSha256": "d269f273f6a7543aba52c9d277ef7c3f7912d061e4ffe7b0d6009c768bf72905"
+        },
+        "description": {
+          "sourceText": "A Pal that's never without a bright smile. Occasionally, its tentacles get tied up in knots by Cattiva's pranks. During those moments, its expression turns demonic.",
+          "sourceSha256": "9c3df55a6dd89f9b5327f5f4dd6302560bf517592da649ae044515bf0df6535a"
+        }
+      }
+    },
+    {
+      "id": "ribbuny-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Ribbuny Botan",
+          "sourceSha256": "75ce7b5d43beff41cbff4f7628dce73161ff0497af1c79defc61f16ac6812e4e"
+        },
+        "description": {
+          "sourceText": "Always wears a cheerful smile. Sometimes, thanks to Cattiva's pranks, they end up tangled in tentacles and have to fight their way out! Even in tough situations, they keep smiling cheerfully.",
+          "sourceSha256": "602a8990c97555d9f84dc284fa7e153502d9a4d2e30d4284eafbe9da2e3d5c24"
+        }
+      }
+    },
+    {
+      "id": "robinquill",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Robinquill",
+          "sourceSha256": "9c2e9bae253341989e1da97f1fd7a2af5323bc00b250fe7fb805c1619c754cb8"
+        },
+        "description": {
+          "sourceText": "A Pal that is very similar to humans who hunt and live in the forests. It may prove to be a key for understanding what Pals are and how they diverged from humans in the distant past.",
+          "sourceSha256": "daa3943cf59535bbcbb6be0449377e7d0229d21d0f3fc08903fe334057897dca"
+        }
+      }
+    },
+    {
+      "id": "robinquill-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Robinquill Terra",
+          "sourceSha256": "6a4d1b4fec0010fef49122f7d74ba8188b5ca0220e82ca608cfebf2624d77e5f"
+        },
+        "description": {
+          "sourceText": "A Pal that is very similar to humans who hunt and live in the rocky areas. When Robinquill Terra bones are found in ruins, there are always human bones found nearby as well.",
+          "sourceSha256": "a79edeaad78d9586d8b929077c7f525a2eb507719b195f2e5a31a224f8e2fca3"
+        }
+      }
+    },
+    {
+      "id": "rooby",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Rooby",
+          "sourceSha256": "f16373504f380c52299fd3e1ddbb4c77a0a1dbd70b85bb5d40da457cd54bc96e"
+        },
+        "description": {
+          "sourceText": "Wild Rooby surprisingly never get sick. Eating one piece of charcoal a day, made by burning a branch, is the secret to its eternal health.",
+          "sourceSha256": "1cfd89d59aa7e0fb7f298026d8a496b2813c5aa2d3541258596c4f62e7c111d2"
+        }
+      }
+    },
+    {
+      "id": "roujay",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Roujay",
+          "sourceSha256": "4df3294e686bd47a3aa72f978de19a51dea0d05c9a8f215606a13d5c43bb53f0"
+        },
+        "description": {
+          "sourceText": "A thief by nature, it snatches items when no one is looking. No reason to be concerned when caught in the act. Once it swiftly steals your eyes, you won’t be seeing anything anyway.",
+          "sourceSha256": "ec39cecb2e26ce581f1788ddf4642da685111720bbce906db34a77e20e9ed50e"
+        }
+      }
+    },
+    {
+      "id": "rushoar",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Rushoar",
+          "sourceSha256": "38a373522eaa1de004c180dfbb95299d8e1022ced85512da2a06ca01d776cf7f"
+        },
+        "description": {
+          "sourceText": "Being an extremely aggressive Pal, it often picks fights before gauging its opponents' strength. Though small, its powerful charge can even send boulders flying.",
+          "sourceSha256": "f609e4835070c37d86f4f62018ac3d33ac6a421457c19a6a438b1eba8402937e"
+        }
+      }
+    },
+    {
+      "id": "sekhmet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Sekhmet",
+          "sourceSha256": "adc9decad9e11d9e16e77131076ae37b2fb4acad1f6e0a85bed2d319d880186f"
+        }
+      }
+    },
+    {
+      "id": "selyne",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Selyne",
+          "sourceSha256": "61e0371fdf4b7cb46fbd0b7921c24a78490a47c93763b540397a826efd949fb5"
+        },
+        "description": {
+          "sourceText": "The object floating behind, resembling the moon, is said to gradually become more circular with each passing generation. No one knows what will happen when the moon is full.",
+          "sourceSha256": "6d0e55794038b47efb3a2f82bbcdd26f2881e5e3c52021b407d5eb52e7d2212c"
+        }
+      }
+    },
+    {
+      "id": "shadowbeak",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Shadowbeak",
+          "sourceSha256": "c10efae4f82f824da05024cf0789536270ff0c0bc1a476a41e2b1b26994be377"
+        },
+        "description": {
+          "sourceText": "Born from the depths of insanity, its very existence defies reason. Having lost all genetic ties to other Pals, one wonders if it could still even be considered a Pal.",
+          "sourceSha256": "dbe37227efff1fa48dbeea9b0a597ec49d85892ff563620f1f76f9c0f244d73f"
+        }
+      }
+    },
+    {
+      "id": "shaolong",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Shaolong",
+          "sourceSha256": "e013af8e6f15240b230139b02f6396877b1a7a4c86504aea92eb22c9515d5752"
+        },
+        "description": {
+          "sourceText": "Its ring is reserved for a special occasion: upon meeting its destined companion, the rings are traded, a symbol of their eternal partnership.",
+          "sourceSha256": "ab6ca7e5b4b7f8db74a76e97b72fbe7c5babb4d9e204d6cc759fbca0943ddf79"
+        }
+      }
+    },
+    {
+      "id": "shroomer",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Shroomer",
+          "sourceSha256": "c66698f29bed267b5cc4e3256fb3f82229fcf462717b77c6c0e388d9b2e1ed8a"
+        },
+        "description": {
+          "sourceText": "Inhaling large amounts of its spores will put you into a trance. Sometimes, if Shroomer appears motionless, it's not because it's mimicking a mushroom, but rather because it's high off its own spores.",
+          "sourceSha256": "c23e2237d8b509ca9213ee8f6373a30ef3f42c24190d324fbea99f02d4dc0d27"
+        }
+      }
+    },
+    {
+      "id": "shroomer-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Shroomer Noct",
+          "sourceSha256": "023b44b69428b6421d567391db44d55d7722c712a582ef3ebec2b43e86f238d2"
+        },
+        "description": {
+          "sourceText": "The abundance of spores released by this Pal blocks out sunlight. Sometimes, if Shroomer Noct appears motionless, it's not because it's mimicking a mushroom, but rather because its own spores don't let it see anything.",
+          "sourceSha256": "2fde9c2407e5224c0005b2926c823285388870601e24ca443e4e0dbb23ec5010"
+        }
+      }
+    },
+    {
+      "id": "sibelyx",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Sibelyx",
+          "sourceSha256": "d986fe2ab3f220076ce9ef959d877e1140e64e7dd07d1efffc16e4cefe912250"
+        },
+        "description": {
+          "sourceText": "A Pal that likes the rain, and will often bask in rain showers until the weather clears up. On rainy days, Foxparks can often be found taking shelter beneath it.",
+          "sourceSha256": "8a59d94b87c12f97d1260162cd23e0d684359ed9bd86bd0492f54150c7f4b054"
+        }
+      }
+    },
+    {
+      "id": "sibelyx-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Sibelyx Primo",
+          "sourceSha256": "ac7900d0cb2764ccf44afa21a1573227b110e3de60f3f39a3edee6bafaf8ceb2"
+        },
+        "description": {
+          "sourceText": "A Pal that loves gazing into the void, and will often remain completely still. It frequently becomes a gathering spot for smaller Pals.",
+          "sourceSha256": "eb79f92a02a92f3764c701b2b01b03f9234840cb9bce398945fbbfff9ffb29f6"
+        }
+      }
+    },
+    {
+      "id": "silvance",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Silvance",
+          "sourceSha256": "498e671e3e884da004f9f1502abe9a9e39137e678a9b365770a941b9d6d7dd4e"
+        },
+        "description": {
+          "sourceText": "Since ancient times, it has remained within the World Tree, continuing its vigil. What it protects, and for what purpose, Silvance does not know. After all, the World Tree will tell it everything. The spores it commands surely know who the enemy is.",
+          "sourceSha256": "fc1e8f957def0b569420b58cd011f69af0c6e777e9b65c72f18e453b0d2274ce"
+        }
+      }
+    },
+    {
+      "id": "silvegis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Silvegis",
+          "sourceSha256": "cc33abac72ea397113a9a6293c21955637b98a8590f7023684ae9c8b38715ab2"
+        }
+      }
+    },
+    {
+      "id": "skutlass",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Skutlass",
+          "sourceSha256": "e7332a248979319d088cbee9c8c981e0cad0519358f973d520c8f5abe1b5f0b6"
+        },
+        "description": {
+          "sourceText": "A bizarre species which temporarily separates its body and uses its bones to slice through enemies, at the risk of perishing itself upon taking too long. While unconfirmed, older individuals are said to deliberately stay separated in order to trigger their survival instincts and prolong their lifespans.",
+          "sourceSha256": "bf15e395bc4360409d6e53cec12f759484b64c8ba5972c799a8559225b63f207"
+        }
+      }
+    },
+    {
+      "id": "skutlass-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Skutlass Ignis",
+          "sourceSha256": "757bf15f0c79e3e91340ea30433c55a7353f96e0685c06059dc201b9741f72e3"
+        },
+        "description": {
+          "sourceText": "A bizarre species which temporarily separates its body and uses its bones to slice through enemies, at the risk of perishing itself upon taking too long. While unconfirmed, older individuals are said to deliberately stay separated in order to trigger their survival instincts and prolong their lifespans.",
+          "sourceSha256": "bf15e395bc4360409d6e53cec12f759484b64c8ba5972c799a8559225b63f207"
+        }
+      }
+    },
+    {
+      "id": "slowatt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Slowatt",
+          "sourceSha256": "3fd9492e972a444c7cf6ee74e87896fdbafd7fc38473b5cccb95eea48132bc03"
+        }
+      }
+    },
+    {
+      "id": "smokie",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Smokie",
+          "sourceSha256": "e39bd070b313b5d3c1e4b3f8e76b94a094696dee6ad4c899cbdda4b0e380cd75"
+        }
+      }
+    },
+    {
+      "id": "smokie-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Smokie Cryst",
+          "sourceSha256": "79f4ef2e9aa72adf6521505de557cacaaae5ab06bffd2a748bfda1f1cdda1547"
+        },
+        "description": {
+          "sourceText": "The blue flames are merely cool to the touch, but anything left in contact with them slowly freezes. Hold a milk bottle over them, and you get a frozen milkshake!",
+          "sourceSha256": "78321fcffb7452db4c182636eaf3efaafc9c683c9f08f323aa861c41e7b87ad0"
+        }
+      }
+    },
+    {
+      "id": "snock",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Snock",
+          "sourceSha256": "633b52597faaf59b7eba0f3f876016b2c6ffa2236f5a03d4aabc92c64c93cf12"
+        },
+        "description": {
+          "sourceText": "Tossing an Snock into the bath for a shock spa is considered a traditional health practice. That is to say, the results may be rather shocking.",
+          "sourceSha256": "d23232bb32b0cbd8b92333a7763091d9f41f17aa82a5f414852115f0b9bb192a"
+        }
+      }
+    },
+    {
+      "id": "snock-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Snock Lux",
+          "sourceSha256": "331599a00bedef1464388fb6ca60d15c71ea7513b21ad20f32767c6bffc2248e"
+        },
+        "description": {
+          "sourceText": "Tossing a heated Snock Lux into the bath for a scorching spa was once a fad of the distant past. Owing to a recent revival, it is now quite literally a hot trend.",
+          "sourceSha256": "ae9f7d8f99ceb6866df9e179c08c788f858791000f4045357d2451adb2ffc94f"
+        }
+      }
+    },
+    {
+      "id": "snugloo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Snugloo",
+          "sourceSha256": "cb2ff7388d91b21b6ed75b01e445331de17af5c8a1fbc004a0f13272ea24a202"
+        },
+        "description": {
+          "sourceText": "“To look at a Snugloo's eyes” is an expression which means to seek the unseen essence of things. Ironically, no researcher has ever confirmed whether Snugloos have eyes in the first place.",
+          "sourceSha256": "a6f2d0e28e15baf3b519a4ec5251c8ec84f88f09fee008f68f863582c36a183e"
+        }
+      }
+    },
+    {
+      "id": "solenne",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Solenne",
+          "sourceSha256": "f768e1f383e5e99c6fe50c413723e91752bfa2f8bc58cece949a058bf73f41f0"
+        },
+        "description": {
+          "sourceText": "Joy and misery come in equal measure for Solenne. Those who choose to take care of one must be prepared for what that entails.",
+          "sourceSha256": "3441a4ba4b34434f732c508821395913055b35061ea84d895fe6ecbc0ae88159"
+        }
+      }
+    },
+    {
+      "id": "solmora",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Solmora",
+          "sourceSha256": "da2725bf82083fda8340292a1c08947bcbda8483c34013c00d35d1160b60f5b4"
+        },
+        "description": {
+          "sourceText": "Its corkscrew tail acts as a propeller. Research claims that if its body could withstand the strain, it could reach speeds beyond 88 mph.",
+          "sourceSha256": "c61f83c6a0672b8d43df3927782581ab69b25b2073637ab6d9e54f419fac081b"
+        }
+      }
+    },
+    {
+      "id": "solmora-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Solmora Lux",
+          "sourceSha256": "3ba675e5d6bf4b273b1570fbf12c93789157124aad0b4d8a99b9652b0d820e7e"
+        },
+        "description": {
+          "sourceText": "Its corkscrew tail acts as a propeller. Research claims that if its body could withstand the strain, it could generate over 1.21 gigawatts of power.",
+          "sourceSha256": "ee791560c67c0cf0063def0eae8d50c2b46f5480daafc5b6d91342e3dc8417ff"
+        }
+      }
+    },
+    {
+      "id": "sootseer",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Sootseer",
+          "sourceSha256": "5217c047c6ad906f8252f100f9278eee52dbfb75bdf99948a50773bed9872fa4"
+        },
+        "description": {
+          "sourceText": "It was once believed that as the world approached its end, the flame would weaken. Doomsayers would repeatedly rejoice when the flame began to weaken, but in the end, it turned out to be a prank by Sootseer. At least, for now.",
+          "sourceSha256": "b5628098a6ce4e2eb78ecf9f4910f08f6fc82e287afb69fae58819432a6f0339"
+        }
+      }
+    },
+    {
+      "id": "souffline",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Souffline",
+          "sourceSha256": "1a38b94123066ef77dca6f739ecf01e5ef0052a6f8976ae5f3a0a511e65131b8"
+        },
+        "description": {
+          "sourceText": "Its fluff can be used to hide away unpleasant memories. Once carried off by the wind, you can bid farewell to the darkness they carried.",
+          "sourceSha256": "e8d64803f0aeaa7722d4984fe4305d24ffacaf96250f3bf04b54c805bec32668"
+        }
+      }
+    },
+    {
+      "id": "sparkit",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Sparkit",
+          "sourceSha256": "ac9471810961d765a0031f9f382335eecc4454235c9bf00b68e971bfa56c8b18"
+        },
+        "description": {
+          "sourceText": "During the dry season, this Pal is always on the verge of blowing a fuse. Sparks can fly with even the slightest provocation, even amongst allies.",
+          "sourceSha256": "24497ef96f5ad0024573e332d26d43a411d3583e1780d7c4fa9dd6884b44946b"
+        }
+      }
+    },
+    {
+      "id": "splatterina",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Splatterina",
+          "sourceSha256": "e384f6613f886f87f84d7fff872fc8ff972217f0f34293b7d8c8fe5ab3439d5d"
+        }
+      }
+    },
+    {
+      "id": "starryon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Starryon",
+          "sourceSha256": "b714147f2c7c17381133ad138b80e5c52db48f3f0bca0edbd0bb0e30490e6e6d"
+        },
+        "description": {
+          "sourceText": "It takes great pride in its flowing, gorgeous mane. If it finds a split end, it becomes so mortified it can't focus on running properly. Because static electricity makes its hair frizzy, it avoids Azurmane at all costs.",
+          "sourceSha256": "ea009036a01034b099d1fc6fa92524cf28626cb24c2d3b82dee7b64c935d952c"
+        }
+      }
+    },
+    {
+      "id": "starryon-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Starryon Primo",
+          "sourceSha256": "6ee7cf68653d18df7c093600bc9c6711084c52f2032f87c8761e3bf47e80912c"
+        },
+        "description": {
+          "sourceText": "It takes great pride in its glowing, gorgeous mane. If it gets even slightly dirty, it becomes so mortified it can't focus on running properly. Because skin oils ruin its coat, it wants to avoid being touched too much, even by its favorite Pal Tamer.",
+          "sourceSha256": "ff0e0ac1ad6c68719761f25bc32043ac95a8ed02ad6c8b497ecf920b3bbf627c"
+        }
+      }
+    },
+    {
+      "id": "surfent",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Surfent",
+          "sourceSha256": "41b4febc60c9d53d2e9f1a2f587b72f126452deed255d751baf7e9838a3f8c0e"
+        },
+        "description": {
+          "sourceText": "Its hydrodynamic form is well suited for activities on water. Poachers often catch them and use them in place of surfboards.",
+          "sourceSha256": "a159fef86d408a7484e5ab1f0f15760cb77d0a7b9d8ede37a90c32a6e4e037ca"
+        }
+      }
+    },
+    {
+      "id": "surfent-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Surfent Terra",
+          "sourceSha256": "87c79df5e4382498b0b35faf3c3b56f268ff1c6af7dd7555c05f15b68d56b7e2"
+        },
+        "description": {
+          "sourceText": "Its aerodynamic form is well suited for activities on sand. Poachers often catch them and use them in place of surfboards.",
+          "sourceSha256": "773f6b68ad5bdc87fdd51b6d96051cd6f2e9eaa890976de953988f7df9fbeec0"
+        }
+      }
+    },
+    {
+      "id": "suzaku",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Suzaku",
+          "sourceSha256": "031cc19b713d0fd42f12b8f0e10e987778d72b5cd118047585fac0577ab0477c"
+        },
+        "description": {
+          "sourceText": "It was once believed to usher in the dry season. Whenever there was a drought the previous year, people would relentlessly seek to cull its numbers, hoping to bring about a plentiful harvest in the next year.",
+          "sourceSha256": "be4838b1b28a76f87a744d5732bff5265c22dc4a48a89504f43b539d8fdee388"
+        }
+      }
+    },
+    {
+      "id": "suzaku-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Suzaku Aqua",
+          "sourceSha256": "23ba52adb5a8d6fb47134848c64c9fc0b76dbab1c830872895cd4bf0d7696c94"
+        },
+        "description": {
+          "sourceText": "It was once believed to usher in the rainy season. Whenever there was a flood the previous year, people would relentlessly seek to cull its numbers, hoping to avert disaster in the coming year.",
+          "sourceSha256": "2037df9c1fd6d21c93193981e711371338331d928f4c502f46a47ce5dfe76de9"
+        }
+      }
+    },
+    {
+      "id": "swee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Swee",
+          "sourceSha256": "0a32714456d3368a2665851e14a7f69ee836deb7e1ccf30fcb4c9a7ffdaaba6d"
+        },
+        "description": {
+          "sourceText": "Crawling along the ground, it eats microscopic organic matter. After a while, it discharges any substances that provide no nutrition. By using it as a mop for cleaning, everyone wins!",
+          "sourceSha256": "8bf0820cf3c9f1e30c2b4be2fb21dc416b42673abe4420b511edcdd7714819d5"
+        }
+      }
+    },
+    {
+      "id": "sweepa",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Sweepa",
+          "sourceSha256": "2485aed1bc2bfba4fa94e9891f7e5949a8f14a7684b39f1d45c5da862b854bbe"
+        },
+        "description": {
+          "sourceText": "While hibernating, a large number of Swee hide within its voluminous body hair. The most ever recorded is 101.",
+          "sourceSha256": "5edba171d9ee525e7238e06dd26df53c3bc2f0545183062fd0b17e043015c888"
+        }
+      }
+    },
+    {
+      "id": "tanzee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tanzee",
+          "sourceSha256": "4d1052abf24bd31c21de574bb49d6a68244f0c10573a875d618099bae12fb0f5"
+        },
+        "description": {
+          "sourceText": "Long ago, this Pal used long objects like tree branches as weapons. After coming into contact with humans, however, it found something slightly more effective: guns.",
+          "sourceSha256": "747b33b7445a32cd5ff6c2f3f19fd7a11401569ea3396bba4a076bb76efc0972"
+        }
+      }
+    },
+    {
+      "id": "tanzee-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tanzee Ignis",
+          "sourceSha256": "9473bf6aa1204960992ab84a9f11e81355c0ab295a0141cdaae460109acf1e86"
+        },
+        "description": {
+          "sourceText": "Its palms have evolved to handle burning objects without getting scorched. When its gun runs out of ammo, it may grab the heated barrel with its bare hands and use it to club its foes.",
+          "sourceSha256": "1ce2cec87e850a2bb2f93cdfde2ef5a26be3bb07a0cb9faaee718b06b957cd2a"
+        }
+      }
+    }
+  ]
+}

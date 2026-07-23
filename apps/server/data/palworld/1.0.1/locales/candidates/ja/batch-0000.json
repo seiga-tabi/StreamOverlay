@@ -1,0 +1,3570 @@
+{
+  "schemaVersion": 1,
+  "locale": "ja",
+  "records": [
+    {
+      "id": "copper-ingot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "af820e185849308fcfb7f7bbbb994991d3e690ddc636310480a783106378f149",
+          "text": "金属インゴット",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "copper-ore",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "b2b092084f4d5b412f918c4a58e4e4eee2b69ec644893b5d98b422b7a5298f8f",
+          "text": "金属鉱石",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "fiber",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "7ed0a5e33e7be0026604a37fe216bb1e04e5f91ea09d89f2ee190d9d0d34d459",
+          "text": "繊維",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "leather",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "e8e775159a57aaaf0f554dad0979a5c41009ee7b19a342c0aa4e4efd10afd03e",
+          "text": "革",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pal-crystal-ex",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "c229046dd07bea79ef8d1dadb75a9b02b320622c0fc15666b3b3729b7c44f2dd",
+          "text": "古代文明の部品",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pal-crystal-s",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "7834321d9f434cf0db2efb7dda5139a4ea539dc29c4bb5b6574125c44e5cca30",
+          "text": "パルジウムの欠片",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pal-sphere",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "9217ff95e4029985a54ca0baa2fc8a1d1d5571d7d6a1c5278795759c1d593099",
+          "text": "パルスフィア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pal-sphere-mega",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "83f9c9683b331bbef951565328b4b77c4bbfbfa7e3afd2a8b4a86505c2279ec4",
+          "text": "メガスフィア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "stone",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "6ffa6b8b1c9fa11cb67a0a54b7e3e175dfb7edcb8e8d322148a3b00affc4a842",
+          "text": "石",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "wood",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceSha256": "731140284eac4aca18aa8cfd15ad56f45d4423067910729caccaf21683e013e1",
+          "text": "木材",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "aegidron",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2e08e38d6d38a11568f794ac577bbc30ea82d3a9dac809c72dc3246a75cc7a78",
+          "text": "シェルガドラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "amione",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9f4d7c6679068d99441690c10fcbb9548f4aa94e97b0503884b90badbe1fef41",
+          "text": "リオリネ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "anubis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4ad4ceb77430e336c9dc5f315cff4813be021551d748b22344fc1ccdae320979",
+          "text": "アヌビス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "arsox",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "62b6c2d616cc954fbf896ef5429e11e78592aec48cc207b559ef1777bfc435a0",
+          "text": "ブルフェルノ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "astegon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2c5a5832cc03051d1a743b0982dab7d565f74bd29501993fe06f4b474c10acca",
+          "text": "ジオラーヴァ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "azurmane",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b77ef4098832938116c63924fd55d05efabcc216c35d016324c7cd35a8bee387",
+          "text": "オーマサンダ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "azurobe",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f60a54a2e60ba26ed9ae2730497c7595c27e1c3ec76cbaf5aa3ec2ab7ab39e55",
+          "text": "アズレーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "azurobe-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c5fd2d6637a4c04d34a6be0a383a8b56ff84e4608e6642fb3742578922119d39",
+          "text": "アズルーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bakemi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "7713eb82254e21715ecc443a2c69c6af0d724e90c34afd7175a23810c51522ac",
+          "text": "ウラミィ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bastigor",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8ae47fa323a41e9847aca5cdf8604381b112bdb63de7ba93316da24fdfd0944b",
+          "text": "ヒョウガオー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "beakon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5b7ecf53406257837a407dc56796f1fc57b1d58b4da5e951a28f4d8c77830a9b",
+          "text": "ライバード",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "beakon-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "84e075bcd55678a3778c1f69d4ffc15ac52177093ba13daa9b6a241356204aa2",
+          "text": "チルバード",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "beegarde",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "99247072a678a5d2577fd64f86d6b30385edeb09279943d9a441f2dd3f022393",
+          "text": "ビーナイト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bellanoir",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d92ea76469c7b0e6c8369254cdaa00948baa3ff70487ac61d605854aefc65246",
+          "text": "ベラノワール",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bellanoir-libero",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "14aadf0d57033af2e2c4bdb9816e9c977480e905e3148e74efa34c7176939eb3",
+          "text": "ベラルージュ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "blazamut",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "34a311533690b909de6ce8a306992e88d9e0746c4f72078c4a18f97af0cd4993",
+          "text": "ボルカイザー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "blazamut-ryu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "7a6c5aac555fc75450993331b7208c1ab116ec0b7df904d08e05ee9dc6b27d04",
+          "text": "ボルドラゴ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "blazehowl",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "bf0c5feb41af92e8c2fa25d5872e19326775e54a8c12de6a6961469869bdce6b",
+          "text": "ゴクエンオ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "blazehowl-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d7edf25264675e8642b454184f6a644862b1239cd91a4aa337f51f764fadb683",
+          "text": "シンエンオ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "braloha",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "6d43b531a0ebb4c7197e4b9424bca494a7ef2610fa90e48d4720faa101338ad8",
+          "text": "トコナッツ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bristla",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "68e9ba26903a3651fd95b1ac3615da964ff350c0dcd8142753576f7c791679b9",
+          "text": "イバラヒメ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "broncherry",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "03cf7cef09939aae82c1f486cb3beb2660e5ed36547421d570e9750d2764fce2",
+          "text": "ラブラドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "broncherry-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0ebec5c9ee00d77d8ed1b102288f9c1ce5ac6001994155be1aae77158e6c24a6",
+          "text": "スプラドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bulldosu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "1aa4da6de497cd256b2902ce70dda39b63c90b37530595c902409b024e6521b1",
+          "text": "ドスコイヌ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bushi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5fe75502c7e8e4e94e20b4db54ddfca99c6400d3000892b77a1eedcc22a5dde8",
+          "text": "ツジギリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "bushi-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e29a7d0d2a02e078c10a90d65a2a128e1c0b45ed273f73af72a37e84416dbd79",
+          "text": "ヤミウチ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "caprity",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b14844898485a9c6b41865385f2d4f734c6d55b2c5bc2fb35802b404599741cb",
+          "text": "ベリゴート",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "caprity-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0c3d4f90d76c65e3352784caf23c12b22cb091e4d1a45a01a912a48674b50125",
+          "text": "ベノゴート",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "carnibora",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3ead6afd116a0f9413efa64a8fecd738a88fa599b171e3be159326ed02806d4c",
+          "text": "カプリリス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "cattiva",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "7893d3df0ea47f7c46fac301ad53af130f361f49a6142be9234e8ef45d62fb8f",
+          "text": "ツッパニャン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "cawgnito",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "901e96ebaada1a1ee7b4a35709886da49ca745c80754870d452a3b40b8970ed0",
+          "text": "マスクロウ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "celaray",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c584f8322e1572ecc17fb53352bb0316c554573153b328f31453618d450fe33a",
+          "text": "ルミカイト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "celaray-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "1bfd8d111c74d09dd4a24495eea136be1634e945090f514a1e7f907ef4e30c7d",
+          "text": "エレカイト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "celesdir",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0bc0d9c710530072f8073063436828540616b1cc0c2a4f0aa08dc191575f268f",
+          "text": "セレスディア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "celesdir-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2c85f288aff5c20f8c8c49465812d9275176b8619b6cb50b3df0694c9cbcf020",
+          "text": "コスモディア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "chikipi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f05154d0813017a6440ba5c3cf6b30f131f8711859da2c4ff66bb8e860ec7278",
+          "text": "タマコッコ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "chillet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3c0fb71d7fedee4a413ab186243a744a4de81ba4bea80be20815b1faf5687b5c",
+          "text": "オコチョ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "chillet-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d6b368a124f6ae54e46e410b868781512fd2626867ca76d3b1a45d101dd0620c",
+          "text": "モモチョ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "cinnamoth",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "477adc809824e8a68565d1e022b3dc3abd42ef47cf32f55cc3db94d902d0ac4a",
+          "text": "パピテフ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "clovee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "36af72148b83891021a7f75b7b43228dc7a3dc44a773aa2fb7131267d8285ca1",
+          "text": "ポワワ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "cremis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "cf9addb56af74ad8dd3e8ea23bf0ad19ace1867455cdfa22c2a961ab9de7dcdb",
+          "text": "ミルフィー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "croajiro",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d2bc23b7347b8fe7d2a919191584892a05defb510959a6ed77a019651549a4f9",
+          "text": "ブシガエル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "croajiro-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "04a4f0854fd21c133f5b02c5390b00e73bf5d847cb25f5c97be23f55b10cff6f",
+          "text": "ドスガエル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "cryolinx",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b3353d2146d09878330846c89bdd5e0c5e729ee21eb185b2e9c2d0a6f3f34e39",
+          "text": "ツンドラー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "cryolinx-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9b9514be126e47198609fd6aa756feddd000b1814a62563c95dacf30ed1bc0dd",
+          "text": "グランドラー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "daedream",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5c2b9fa7fb019f1023252ce3ca5974ae2f4b95d90efe7cdfa14e990b9ac15a2e",
+          "text": "ネムラム",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dandilord",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "db7aa4364c24daf39878f42ddc495284be06bd7a638305e9a35356b5854b3020",
+          "text": "ノクサージュ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dazemu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "357b0097f1dfd8f8f32f19c01d41e86ffc9fa547f5529fd9fdb38c419b0ffb7c",
+          "text": "トリステップ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dazzi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8f97cf1584bd1a679368f5dbe4fb92fb8d79380b62a8a428ba06b49aed68ff05",
+          "text": "カミナラシ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dazzi-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3bcc5819e2e3e4cc2f5254c4d4dba9c5387712b4a28330dc1ef9cee81ad308fa",
+          "text": "ヤミナラシ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "depresso",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d95681abf05fa11a203ccfea3cef8ce8dd4c3baf04b28746595a7825f2c0c970",
+          "text": "ンダコアラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "digtoise",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "256b3514c2fe6584d2507f2c1156e652427c34cfd4f103ad8c55d51920e58cc7",
+          "text": "ドリタス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dinossom",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5544214bcad3a891ec0428e2fffbfa22c3fa989b470fb2bc6ba39e36a44437ea",
+          "text": "アロアリュー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dinossom-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0e7d6050c17420a6e4e0049cb5cc7ac17c8878cc5814b823ebcf297a1fb126fc",
+          "text": "ビリビリュー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "direhowl",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "12311725b01e455488fbcc7b5a6b36a1daf08afd4504d43beef30b10870f9339",
+          "text": "ガウルフ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dogen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "09b33296828dabc6b8a94315113ed6258777bcaa890bfff08ffd1d6b4aaf170e",
+          "text": "ワンフー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dualith",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "659ee2d6b1320f377a229cda6beecbc91196cdf206420cdee8ff5caff0e02e50",
+          "text": "ウゴクゾー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dualith-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "fda387b134deb01f6b8c1c6841418086e7292b4e71fb2873a11e7f84d009cdfa",
+          "text": "ノロウゾー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dumud",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8f144aea148328f9613ad40b5ff5ffc80b58a7c84ec994c80fc91d0607251e70",
+          "text": "トドドドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dumud-gild",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "abcfbbe8f68b000ad20b83e5ed37237007c651cb58a343408696bb5029532583",
+          "text": "ゴルドドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dupin",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8fe87c1e0126be7456a02786b5cfa20e6c513dd567f193a7739503e843334a09",
+          "text": "ラピエール",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "dynamoff",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "1982957ce2f76e25f4b98e374fbf91ac01589fcded77f69694674a2d9ae90930",
+          "text": "ダイナモフ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "eidrolon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4cd5dbc3f740d4a0d25dfdb683a040b997a8b8a1eca561a381c1c75d65bafd79",
+          "text": "レイバーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "eidrolon-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4ad651943f970beedaaf4aba1273dad97bc905dd0b7825fc7444ffc8944f2937",
+          "text": "ヘルバーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "eikthyrdeer",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "bdb36aae24f13d1ff550e0ea2257ae171a6d226abf31c9e21e9497995b002729",
+          "text": "ツノガミ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "eikthyrdeer-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3a621f5487e1059b802cef71f7954d099fa0ac9655543ab8d56aa1130f7dc346",
+          "text": "ヤマガミ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "elgrove",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f5b3a7675b84c54258a63f135ef8b1cec21c90e0424d76a0754442316e6a81d4",
+          "text": "モリタロス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "elgrove-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "165fccd3c1ea05e10f700d604c81d34119ca15c05778647ef10e5bb82eda1dfe",
+          "text": "ユキタロス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "elizabee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f69adad18490faaa059fed42b849a59e296070d3d601d376ce6fe9dfd51f3bab",
+          "text": "クインビーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "elphidran",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3edf0a82371835398f0f6c22abe6df6614dcb9ca145c41c9072ea553568783df",
+          "text": "シルフィア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "elphidran-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e84bb47d7ca32f2f6f02d60128c48a78e493aaf0bf53e14deed62f3af00ebf53",
+          "text": "シルティア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "faleris",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2f378519b85c3d52247bc87e65ddc3b21ce7ce7e6e0d6d5b2c21ad9bd5bb45f6",
+          "text": "ホルス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "faleris-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f9bf11ff56234ce8ab96fe116ee0cdb02ab3a8ff3c3b1a98599bc24245da342f",
+          "text": "イシス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "felbat",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c8e2238c9542e370e18ae2dc054ece88e0202b4f24ff5f726efa897cec2b69ff",
+          "text": "ヤミトバリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "fenglope",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "02dbff02e4ee1b92e05ab25922faeafc097ae55f9f42d47666e86a4a631dee3d",
+          "text": "ムラクモ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "fenglope-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "58bde1c7f29e4bd5a1a0b9642002cd492659a51ebcc9e5d3b33cd27c00d43702",
+          "text": "ムラサメ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "finsider",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5d94dfbb92b8523cb29e6af8342bad15a75f756953fbcfc61c6211f2c7866752",
+          "text": "ガブルミ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "finsider-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "337b255b20ff822892b33ef9d109be143022244b45b94a8ee5bf5b8237dc4517",
+          "text": "ヒグルミ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "flambelle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "cad1c828ceb217a9fc4b2f64fae0d2cc6d981e9fbeede8c69ce6510ab7311927",
+          "text": "ラヴィ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "flaracle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0a0f80fea5311c5736582d5a9e40e8ded60701b1462f02610bd251c02b57eb81",
+          "text": "センコ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "flopie",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "6b171a568d2151562f53979745bc367ee9a869e525ab389f2ab25f4b46ae5736",
+          "text": "ポプリーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "foxcicle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "48e01ce98879ed6437e7c0a8681aff65de04aaade770e27a6298c33ca9471f91",
+          "text": "フブキツネ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "foxparks",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4efd836b8b477fb48c6999a88e604cb917f6ac4ee4721b7c2b838228ae5adc58",
+          "text": "キツネビ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "foxparks-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2c3cbd019aa46d865584c374abdff9cb619d5d88c959a0e0d6d2bad5c0adbabb",
+          "text": "ユキツネ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "frostallion",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "642809a9a3a699e70b072cd41dd513744953873d3f6051d198e1a23b027ffda2",
+          "text": "グレイシャル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "frostallion-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "79d549031da5537e771c0a8f4b1d723958dab44a347d4c4e467675bc30546517",
+          "text": "グレイシャドウ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "frostplume",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "48b028f3faa2e96aaacd2a4fbc12402cd4e08f19bf645d750eb8e71af8d8dd49",
+          "text": "クジャンナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "fuack",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "40d86a0cd65f8abfd222782c73b32a2bbc81701dcd895c379d4044a10883a558",
+          "text": "カモノスケ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "fuack-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3753e5b928fc82b11f4e6aad638a15d1e0072d3fc68f49834bb2b4cb689779e2",
+          "text": "モモノスケ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "fuddler",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "a88763a1a0b5bf8a79a7c6ebbe9ec4366e60b9f3b36c1c62abdc913a7dd0797e",
+          "text": "モグルン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "galeclaw",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3dda8416b8f19e8f3317c6baf8f70f2236d821dc2be2740e3d97cbd5e42c9036",
+          "text": "エアムルグ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "ghangler",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ddb2b141ccffaeaccd30314505242caa6495972a07b9b20fdc6bd9f5e8477919",
+          "text": "アンドーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "ghangler-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "76c1e57278c077984528162a025ada13aff5624834dba84f81a230425ff1591f",
+          "text": "メラドーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gildane",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "476300d76c90d443f9781732a8ef6219bcf27bba139103a438e09ebd5f242331",
+          "text": "キンガゼル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gildra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0b6b50a358445330f73f991793689b54b20bf2ea674fffe82f7f209bd338cd13",
+          "text": "ヨミーラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gloopie",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d2ac406fc824daf1bf3b4d32feb57158fd440051ce4ba5237a97b79c78736317",
+          "text": "ヒメンダコ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gloopie-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "51dccfc90965c0e99de5f1eac351be193a80ff478df4d7a2ba90107479dd485b",
+          "text": "ユメンダコ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gobfin",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8d298769ace356efa3f22ac8f41948dd038b77918bbd05b84c8df00316350ccd",
+          "text": "シャーキッド",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gobfin-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "22935c173f44e4edc4a84188edf457b0503dbd0c308e2df8e226367f19f5c222",
+          "text": "シャーマンダー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gorirat",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ae334e4def565cfd3067cd131b9b2e85dd689f64083c173968a11093abd0a013",
+          "text": "ゴリレイジ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gorirat-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0b181962b557a93bd07d0043f55a894ec6e81a113e4f94baa6c04ba9d3599b3a",
+          "text": "ゴリガイア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "grintale",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "288b12a06e5a4b47360b2944a800723571cc0f5b00dc1191c29d5cbbaee3c15a",
+          "text": "ニャンギマリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "grizzbolt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "46956cf33c2be5c8b504c727bb6aaa4115636e67e7563d8a91881db81303b4fc",
+          "text": "エレパンダ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "gumoss",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "a37bb3008b1b48c700546a70f1ea2e6fefb8c02d79cf513b702c4bf7e7783376",
+          "text": "ナエモチ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "hangyu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "159f51c73293e1cf8f6bbd6440de5cde7d29e9e5d64568dbdca9a9c6f3534b08",
+          "text": "シメナワ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "hangyu-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "afc5b04ffb87cfb754adaa546110718016a4f3a7324d177b852907c9bfa7acd8",
+          "text": "オバケナワ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "hartalis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "29db4ec5df29d35fcab2cc5450d0c1964be14143e04b579e1f93f6f50ab12e79",
+          "text": "レジェンディア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "helzephyr",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e793ba2e39995a4083424cf0b38c65535bcfc445c455eae4a1fc8deeb57a8d47",
+          "text": "ヘルガルダ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "helzephyr-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4ac0273164d0cbb2e343525e3a9455a982dd01e342a807b1d2415e1bf3bfcd89",
+          "text": "ライガルダ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "herbil",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8fdfb19b0ade5966205f9c60cb432ffa8990635a5aff168e06806cb618059604",
+          "text": "モモンパ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "hoocrates",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9da821e61da87565f79806b13957953825dbbc22d71ecc18a9dfa693610aee86",
+          "text": "ホウロック",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "hoodle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "736d1c58550135a53d1002bef66d00d27f9f81b148f49e3935f5a8693552a7f6",
+          "text": "フードール",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "icelyn",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ec52f8c79743d617600c5908003b4adf4ed20fb1eccfec9f6494b24cc1609d31",
+          "text": "チルウィッチ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "incineram",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ee301dc9a94ce021b7d17431ef053d81a304aa38a41501bf3d4f04d573400807",
+          "text": "ヘルゴート",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "incineram-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "97d7be0291ff0af8f1c70b340056cc1ff6e579103ec5e663f675da518b106da4",
+          "text": "アビスゴート",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "jelliette",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d70d834aea3a35872222ed1ba6a3e2f9a7277ef930c289c5c934165420cfe1f6",
+          "text": "クララン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "jellroy",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9caf61252359deb42527546fabfda25bfcd077c2f2359b236038065c74f4e6aa",
+          "text": "ユララン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "jetragon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "78c3de6040d0c1678bc0ffac98ca18e3ed912d36c2fbece0d145d3dc0f758626",
+          "text": "ジェッドラン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "jolthog",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "bf733a12b226d13aa3971d09fec7c9fa88c2a699a55d17f10255a688e69d3623",
+          "text": "パチグリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "jolthog-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5393a3cc2ef4d1f015cfdc06ac606fba3e0294468e3c9cb2273e8af4bacb9c17",
+          "text": "コチグリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "jormuntide",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "bb5697dce91c5432fedf333e102f9657e66fb2a1c42463c1a2ddd6210f281db5",
+          "text": "レヴィドラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "jormuntide-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0a701fa16ec650028572d13156c3e81d91cf898489bff9c4c53e093bd4307fe8",
+          "text": "アグニドラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "katress",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "df3b04cfc95374d1c205e7734598365b3ed720c1d8884fa9f731cadc8bb97bc3",
+          "text": "クレメーオ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "katress-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "27e37c3651918ec768ccd336df94952cb9db2794ed998936dcff62af8051e3c7",
+          "text": "クレメーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "kelpsea",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "1072cd865d717fd7d6503ae6e9235c8238f41c71873425ae326087e925c0b95c",
+          "text": "ケルピス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "kelpsea-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e3e2f0c5b319f2807a8c79a6686453bd41802cf7624fd848b0e5066f73d8fa90",
+          "text": "マグピス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "kikit",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0aab5e61b7a846aeea8bfa1000e8468f5aa433840eb80afa19046fa2a5834e23",
+          "text": "コロマジロ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "killamari",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "bf6b53db1f0bbea1dad1ada24d95bb203f4cb4d726dccbecaf2974e0ad1afa07",
+          "text": "ヤミイカ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "killamari-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8c1beb234a8d5e10cf7d8fb88873ef0f0fabd55f0ab24a2d9e88a4c354a77d91",
+          "text": "ユメイカ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "kingpaca",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d61135ec171412e1fc686f6a44a5a2add164f6463ef60d9c4f237d31ea1cec55",
+          "text": "アルパオー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "kingpaca-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "88dd0b33d8e8da5026d23f5836eca2d2441e39d7a18c5ac6f9859a7451d8e2f1",
+          "text": "アオパオー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "kitsun",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "78ee32573030118ced1a1580de2afa2f2690718b1b5087aa3726cf2b356be542",
+          "text": "シラヌイ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "kitsun-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5b8d931e49aeabfac7caf704683c57d12e9e76bd79bf2e472c9be783873b51dc",
+          "text": "カゲヌイ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "knocklem",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "6b0cf462f1c545c901cb2fc6e3fd4d6b4f165eadcc5727090b12c71fa17cae9b",
+          "text": "テラナイト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "knocklem-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "43e73ddd8b635b4827e46c4698af6730d577d39462a09226e006122bf256321f",
+          "text": "マグナイト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lamball",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "95d40d479214773ec182beae8b1232f179c652ef94d8059fece061d97851b5a0",
+          "text": "モコロン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lapiron",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "52e929a61caf0f4d3e1e0b1496324d65c199eebd170fa2e7019e315fc797e6ab",
+          "text": "バトラビー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lapure",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "114a6340fbf5ea05492071fd7d7692b47e9e575a9ba2054156a2f3da4a76b9fb",
+          "text": "ネモフィ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "leafan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "eb173ab5db02d2e5275959de506b01cfdfa06905538105b87a77f97734e0ba81",
+          "text": "リーファン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "leezpunk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "93b6d972be4339bc36cd02c9a36fc77e948c2ac9c8a6143585e13c8056e469e0",
+          "text": "ダリザード",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "leezpunk-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3ecb39a6e524fb44fa8fd9179935110e2a8c0333fe2c98577a4acf574c7a96d1",
+          "text": "チリザード",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lifmunk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "259f288938fdc9075cb3bf05c231d3cdba270769ab05cb67156031aa66fe7e68",
+          "text": "クルリス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "loomen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e20b100ebc775096c6a222ec6cf138f8175ff92ba789b7a6b9c0b43bf664256f",
+          "text": "ヴィランタン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "loupmoon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "357542ffcb6116537c12255249e8f1940b7566c687e39889892eb52d48f042f6",
+          "text": "ツキカゲ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "loupmoon-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2d9e3a514338534c257c68f9c3b2c57f4769e518ff2fee58f16355a79aae4e99",
+          "text": "ユキカゲ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lovander",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "00c2154f5aab3dbefac15ae054f9579ca7832821de2f2b8bc4ac8c0bb66b2679",
+          "text": "ラブマンダー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lullu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "6ce202dba476ef8f32dbf4322f01812bf4cf48b5ff116a9aecf80b465c38149f",
+          "text": "フワフラワ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lunaris",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b61e94917c638be53dbe83b445673695756574f3c470a26b3ff4490669678c06",
+          "text": "ミステリア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lyleen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d7c7494ef36c7377943ebca8a33cc5c3e82f2ee21bd0e935defd1cfdc44d9139",
+          "text": "リリクイン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "lyleen-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ee54f8ea8233fa489bb75c2ecf94f2628646d1f70b93ce21997397cb82d51936",
+          "text": "ルナクイン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "majex",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "dd03245824a1041955082cb3e172bc3dba769f77be73085e5b20c47af4e1d208",
+          "text": "マジョルナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mammorest",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "1ffe86fa700979f2ebe044b3757a96131328bb7ecfaf4b11428e7b63bc2ec34f",
+          "text": "グランモス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mammorest-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e51c5a8e24e299f800993ffeb8c06cd3e26115879722ae2cf6439e6c676bd75b",
+          "text": "ブリザモス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "maraith",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "1bcc33af15f06045659c3f43ab876e7792e175fba5121d063e6018f79a2bc43f",
+          "text": "ソルレイス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mau",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "950d908ffa50b8a36875489fe94d0783d35c9dbf3befe157996c8b6a2d2e3742",
+          "text": "ニャオテト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mau-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9f173d566a4449e0a3cacfa12f53799fb9b3dc95b8e6aa8c7f16cf8bf1d0d8f1",
+          "text": "チルテト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "melpaca",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "058bd4a5ca14824f0be9afefcf473ff0ec837e5f49d2accf1e41dd83bdbf9a0b",
+          "text": "メルパカ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "menasting",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4cf1020c86a8e74e0a0b45a2343fabf376b6eda8809344d0165671b1edde1632",
+          "text": "デスティング",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "menasting-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4286b6b875c02f3e6e03c2e9a83c4e9b0e191c27ab6b98238e70a195869225aa",
+          "text": "ゴルディング",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mimog",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d82aab28d0e18a12528bdf04fc6cdca9308bbf6a43859acccf26cdc2e034f431",
+          "text": "ミミドッグ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "moldron",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "870825d4282ac54b555ee11877abc0c3129adb28650137d648d84fe73ff4021c",
+          "text": "マグマンダー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "moldron-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d624f0004874778596c6e42a7028d236b58411e150c0c4c75a551fd4c069c984",
+          "text": "ブリザンダー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mossanda",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c099d45fd3a730f8e9361255e0d7c0881a42f2942f968334155cb3c00f382027",
+          "text": "ササゾー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mossanda-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "cd6d8597e91ce520d858c2c7bb2f7ce386ff8e7ffdc5037e12195bf5057ca5d1",
+          "text": "ライゾー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mozzarina",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "7b861de1bba1f1d1b2d131b3c63eb2b53f5b05644a1724331a401a058ac50cb0",
+          "text": "ミルカルビ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "muffly",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5debe611e7e52449188dcbc37ebbd19b8b9fff356964fd4eafaf7f00c60c0627",
+          "text": "モコチッチ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "munchill",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5e537f75f7b587b4da2d01f4a0a19769f290cb5d17dafafe20f421983113619e",
+          "text": "コチワニ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "mycora",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4b4c7206f799cb8d51598d689050e4bf74346b7db35a0ad8c65378b9d16e21fd",
+          "text": "マシュリー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "necromus",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "bfd44bbf32411250001d09c2f88de740c4089881d1bdbe2deed305a7af5e24af",
+          "text": "ベイントール",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "needoll",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "efdeca1b7bb5e3ed3941ec36e132aff91332a8f31da25127eb24637cfecff2b3",
+          "text": "ハグミー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "needoll-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "daab712e92df0f584002b17cf389d857e7251dd9afb6a5307766a3c2f14a67f8",
+          "text": "ハグユー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "neptilius",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "cee8d8d202d3129e2b4aa2e9fb2a1194aefcf3767450ec5a8af38a793d85bb99",
+          "text": "ネプティオス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "nitemary",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "07cc5f19436fb7c0191f3b55331b06e62688f629e17bb26f80302ab5300a643f",
+          "text": "ナイトメアリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "nitemary-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e9909241c5192c673488d89f2345500a1e4b6e659f3a4ca867ec9bf43878190f",
+          "text": "グラスメアリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "nitewing",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4ed4db822f9339bd2d5355a264ad6fd4eb6933193380cfd1d94feb3689cf9f60",
+          "text": "ホークウィン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "nox",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "43930f607216cfaecb4f98a875d986ad0dded8c8cb1bfd29db96b29e74277b05",
+          "text": "ルナティ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "nyafia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "423622672d8db0d828bbf8a0f558c18b8dc4d5cd55e0734b13fbea2bcd1a6589",
+          "text": "ニャニミテ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "omascul",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4cfff3d08244e3949be2e793bfeafad310339aec44bb9b36b3d0bf588a3e6c7f",
+          "text": "オーメン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "ophydia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ad23febe90cdbfa2b3e1fb9833de0088b3c31186c317217c282f62395b16a2b1",
+          "text": "ハナミズチ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "orserk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "933152883ad16f690ae1e59da319af8ebf540a10db65c722615885cc6b803f89",
+          "text": "ボルゼクス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "paladius",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "20f8246e984e85b184ccfb788f07838b5a3eeab28f0b1d0588096dfbfc3dd694",
+          "text": "セイントール",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "palumba",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c375c14e8c2a5638d2618d8c1043b5dc3e49ade9fc237bf39a97c9346979cc20",
+          "text": "ココヤンバ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "panthalus",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "52f85f41da0619ffa768764cfef94b120008e0c53ac2aeedc697d52961040ca9",
+          "text": "グランジーラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pengullet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9ca7533753768ce6982213d3dc9f98fe1a31021d29b63cbb7264b237425b6af6",
+          "text": "ペンタマ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pengullet-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "25c7897b059e111d0f889593fa1669e7ac8eea7c8099650908d3727d69f4d9ca",
+          "text": "デンタマ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "penking",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "62e49a827df2e292ea3b3b54bf64d4b1d3ea880ccc02852f82fe13fc4f9a2aaa",
+          "text": "キャプペン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "penking-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "564186df93d1229d0446f5a8f7fac259d31e0b3b849056f0013c3e1e7a5347e4",
+          "text": "ペンキッド",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "petallia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b64bd21e5d9afcd62f85a06fe303a533cae4c9eac5ee6d2f96326bcf7750fe78",
+          "text": "フラリーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "petallia-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b52e77f1f0f7ccdb265b1b89ea09eea9bf7a7aa20f6bd60927d0ff08ffd55a88",
+          "text": "チェリーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pierdon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "541904928e0eae68dbce96c21ebe6067431d0314a20b4aa1c263960af0806558",
+          "text": "ジオルドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pierdon-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2cb201aa81c2abaa03a96f4ce2ae0fb0d13f80caaa300d57579f61dcf0733768",
+          "text": "フロスドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "polapup",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "74ffe97973666adfb9de9b926b20030ad1037bb5d22af2298891d202d689fc1b",
+          "text": "バニザラシ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "polapup-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "12b8ce5540907598d61b9f6765c0bd306d5dff7ba8c733a08e149bd158676894",
+          "text": "チョコザラシ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "prixter",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "79dcbc1abf727a2c3353270ffe94e122e8fe7e776c75caac38a7a5eedda5f390",
+          "text": "ブッサソリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "prixter-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "936bf984dcc8572b16cb7ba9a582d296b5b2906381880fb202f4b47615e90ea2",
+          "text": "ブッサンダー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "prunelia",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "eeea2278affa162c5a102e4bfe89125b19c09d59bdf9baefd321c8ba4a843d63",
+          "text": "プラムルリム",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "puffolt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5bc1eca9cd0ae099cfc47d52d3ffa1075e129abf7cc197da91dff4e80e31c774",
+          "text": "パチマル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pupperai",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "32bdc0605192c8f1139abfbb8654117e91579180388147447000e728d78d1725",
+          "text": "ポチムネ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pyrin",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "85c68215754bb272bf92313afc5ddad9f59182895cdfd070ad7eb2b598ffa482",
+          "text": "サラブレイズ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "pyrin-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ff8e5da9a0e25f55375a962fa309a2d2aa86a7b86f9aea7d4dad1128dba2b290",
+          "text": "サラブラック",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "quivern",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "35d4a4af4fabc58708b09991cc3ad91c9607f556dc0bd6f47fa6dd5051cb11ec",
+          "text": "フェスキー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "quivern-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "6e04bf168382090556b964462c891af24162b58163b318dec8c608bd44894f25",
+          "text": "フォレスキー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "ragnahawk",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "87b3e49239d96ad4f7f2ef3f22e752d2726d81f73758499e532796b95de0fa73",
+          "text": "イグニクス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "rayhound",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8ec6cec6f187c70dbbbebd98aedd2aae4cad044069bde784ec49a0d20b9de6ef",
+          "text": "イヌズマ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "rayhound-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f5a1194c9ffb908b6cf4b887b916a72fbd9a1da862edee8203c7793b658ff745",
+          "text": "フリーズマ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "reindrix",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2544ad8c0ff15f94c3b7d76cecd1dc25288b7eaadde677dbc3e9a7833b9224fa",
+          "text": "ツララジカ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "relaxaurus",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "09354ae3925380812b79db3ee9c532ccc3fece2ea4c8e66d2a8288c716ad877c",
+          "text": "ペコドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "relaxaurus-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "23f02f26efb4a3f5291945526c08c8ae1ba1ea3b09613c9d1dd1492bc51cc725",
+          "text": "パリピドン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "renjishi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3cc4dabd1d6b0297f9dd21edd085ff373caccf3a3e996691865fe0683c0ed141",
+          "text": "ゴウカブキ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "reptyro",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "278cb8f941bc67f036a1167d6aeba1840d67d0bd66957e41eb7d526d5f874d0d",
+          "text": "ボルカノン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "reptyro-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0325667b9f71f16685d5b23fbb7e824d7b701f81b164f970a349504ff7dd8692",
+          "text": "フロスカノン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "ribbuny",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d269f273f6a7543aba52c9d277ef7c3f7912d061e4ffe7b0d6009c768bf72905",
+          "text": "ヒメウサ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "ribbuny-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "75ce7b5d43beff41cbff4f7628dce73161ff0497af1c79defc61f16ac6812e4e",
+          "text": "ヨモギウサ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "robinquill",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9c2e9bae253341989e1da97f1fd7a2af5323bc00b250fe7fb805c1619c754cb8",
+          "text": "フェザーロ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "robinquill-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "6a4d1b4fec0010fef49122f7d74ba8188b5ca0220e82ca608cfebf2624d77e5f",
+          "text": "サンドロ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "rooby",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f16373504f380c52299fd3e1ddbb4c77a0a1dbd70b85bb5d40da457cd54bc96e",
+          "text": "ヒノコジカ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "roujay",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4df3294e686bd47a3aa72f978de19a51dea0d05c9a8f215606a13d5c43bb53f0",
+          "text": "アルセーヴ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "rushoar",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "38a373522eaa1de004c180dfbb95299d8e1022ced85512da2a06ca01d776cf7f",
+          "text": "イノボウ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "sekhmet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "adc9decad9e11d9e16e77131076ae37b2fb4acad1f6e0a85bed2d319d880186f",
+          "text": "セクメト",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "selyne",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "61e0371fdf4b7cb46fbd0b7921c24a78490a47c93763b540397a826efd949fb5",
+          "text": "セレムーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "shadowbeak",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c10efae4f82f824da05024cf0789536270ff0c0bc1a476a41e2b1b26994be377",
+          "text": "ゼノグリフ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "shaolong",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e013af8e6f15240b230139b02f6396877b1a7a4c86504aea92eb22c9515d5752",
+          "text": "シャオロン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "shroomer",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c66698f29bed267b5cc4e3256fb3f82229fcf462717b77c6c0e388d9b2e1ed8a",
+          "text": "キノッポ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "shroomer-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "023b44b69428b6421d567391db44d55d7722c712a582ef3ebec2b43e86f238d2",
+          "text": "ベノッポ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "sibelyx",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "d986fe2ab3f220076ce9ef959d877e1140e64e7dd07d1efffc16e4cefe912250",
+          "text": "シルキーヌ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "sibelyx-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ac7900d0cb2764ccf44afa21a1573227b110e3de60f3f39a3edee6bafaf8ceb2",
+          "text": "ソワレーヌ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "silvance",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "498e671e3e884da004f9f1502abe9a9e39137e678a9b365770a941b9d6d7dd4e",
+          "text": "モスローン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "silvegis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "cc33abac72ea397113a9a6293c21955637b98a8590f7023684ae9c8b38715ab2",
+          "text": "アイギルガ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "skutlass",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e7332a248979319d088cbee9c8c981e0cad0519358f973d520c8f5abe1b5f0b6",
+          "text": "オオタチウオ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "skutlass-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "757bf15f0c79e3e91340ea30433c55a7353f96e0685c06059dc201b9741f72e3",
+          "text": "ヒノタチウオ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "slowatt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3fd9492e972a444c7cf6ee74e87896fdbafd7fc38473b5cccb95eea48132bc03",
+          "text": "ノンビリリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "smokie",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e39bd070b313b5d3c1e4b3f8e76b94a094696dee6ad4c899cbdda4b0e380cd75",
+          "text": "クロマル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "smokie-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "79f4ef2e9aa72adf6521505de557cacaaae5ab06bffd2a748bfda1f1cdda1547",
+          "text": "フユマル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "snock",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "633b52597faaf59b7eba0f3f876016b2c6ffa2236f5a03d4aabc92c64c93cf12",
+          "text": "デンツム",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "snock-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "331599a00bedef1464388fb6ca60d15c71ea7513b21ad20f32767c6bffc2248e",
+          "text": "ドンツム",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "snugloo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "cb2ff7388d91b21b6ed75b01e445331de17af5c8a1fbc004a0f13272ea24a202",
+          "text": "ユキボウ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "solenne",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f768e1f383e5e99c6fe50c413723e91752bfa2f8bc58cece949a058bf73f41f0",
+          "text": "モノクローナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "solmora",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "da2725bf82083fda8340292a1c08947bcbda8483c34013c00d35d1160b60f5b4",
+          "text": "オーマンボ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "solmora-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "3ba675e5d6bf4b273b1570fbf12c93789157124aad0b4d8a99b9652b0d820e7e",
+          "text": "トノサマンボ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "sootseer",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "5217c047c6ad906f8252f100f9278eee52dbfb75bdf99948a50773bed9872fa4",
+          "text": "オドロクロ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "souffline",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "1a38b94123066ef77dca6f739ecf01e5ef0052a6f8976ae5f3a0a511e65131b8",
+          "text": "ポポフィア",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "sparkit",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ac9471810961d765a0031f9f382335eecc4454235c9bf00b68e971bfa56c8b18",
+          "text": "ボルトラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "splatterina",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e384f6613f886f87f84d7fff872fc8ff972217f0f34293b7d8c8fe5ab3439d5d",
+          "text": "ヤンデリナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "starryon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b714147f2c7c17381133ad138b80e5c52db48f3f0bca0edbd0bb0e30490e6e6d",
+          "text": "ナイトロット",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "starryon-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "6ee7cf68653d18df7c093600bc9c6711084c52f2032f87c8761e3bf47e80912c",
+          "text": "ライトロット",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "surfent",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "41b4febc60c9d53d2e9f1a2f587b72f126452deed255d751baf7e9838a3f8c0e",
+          "text": "シーペント",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "surfent-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "87c79df5e4382498b0b35faf3c3b56f268ff1c6af7dd7555c05f15b68d56b7e2",
+          "text": "スナペント",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "suzaku",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "031cc19b713d0fd42f12b8f0e10e987778d72b5cd118047585fac0577ab0477c",
+          "text": "スザク",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "suzaku-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "23ba52adb5a8d6fb47134848c64c9fc0b76dbab1c830872895cd4bf0d7696c94",
+          "text": "シヴァ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "swee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0a32714456d3368a2665851e14a7f69ee836deb7e1ccf30fcb4c9a7ffdaaba6d",
+          "text": "コモップ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "sweepa",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2485aed1bc2bfba4fa94e9891f7e5949a8f14a7684b39f1d45c5da862b854bbe",
+          "text": "ドンモップ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tanzee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4d1052abf24bd31c21de574bb49d6a68244f0c10573a875d618099bae12fb0f5",
+          "text": "エテッパ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tanzee-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9473bf6aa1204960992ab84a9f11e81355c0ab295a0141cdaae460109acf1e86",
+          "text": "カレッパ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tarantriss",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ccbed91d1088b11ed20d535939b1220d85f44b6aa205366417fe4d3cdd4d7fdb",
+          "text": "モモンチュラ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "teafant",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "8dc8ac5ce45dadb9db5146ba25647d38a7e1c8f53d3d207fbf08bd99c2fe673d",
+          "text": "チョロゾウ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tetroise",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "15a7907f5d73f412643b1d5e98c18582f050a1e6a7235acd64ca89271e4e5aab",
+          "text": "オモシガメ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tetroise-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "74d916fa064e260a435bb1a4e56339a467dfcb08756a1100c6036d56d2dfee9d",
+          "text": "オシロガメ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tocotoco",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "699c2402c75421dc2fd7e555e9f812ddbccc34d1d7e5a28fe6aa3418ab688a52",
+          "text": "クルットリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tombat",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "785510283fdd16c66af27335e794129f9e1c0339c074c5e3de11cbec2dec7f69",
+          "text": "ニャンバット",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "tropicaw",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c437aa38d00d70ed764bd33cd6f62b0c96f2d352414103cf0e2554718068769d",
+          "text": "フラペック",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "turtacle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "b9af4c2cd72f208068329aea1d1028a9e9d573add40308a82f746afc9872455f",
+          "text": "ヘルメッコ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "turtacle-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "76cb0030c105e062d8ce0f926ec86d29d79fe9ffdfdfa0fd105335e6c5bc7061",
+          "text": "ゴルメッコ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "univolt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c3c882eddcdef63e43f12109cee074540bc23e6a9b49609ea66d2f307cb155c2",
+          "text": "ライコーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "univolt-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "24d35e97e0ed6204a4f5955bb2721e31c432c04e5da582e8d5663901dd4ff300",
+          "text": "レイコーン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "vaelet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "874a092511cfd3b19fc354d7678c4ee1a2ea68888d68c6bbc51edbb89577c444",
+          "text": "ヴィオレッタ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "valentail",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "10dc59fe02319653d49ee86a989a600092868a381d1490c30cde89ac5c1869a3",
+          "text": "ニャルル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "vanwyrm",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "55cb30d76a9bc26826bfcd8c09d42051bece51b77c00945be4a9f656a4522895",
+          "text": "カバネドリ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "vanwyrm-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "931d8e9056fed353be8065063cd04d873d642296d6a0b1fb49ca00e1bf9bb4c8",
+          "text": "シロカバネ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "venusa",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "4478fd6be06267b1dca1affe92a3b91b937a048f32dfc7a67a04469c65ab590a",
+          "text": "メドゥーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "verdash",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0ab2c9bb45c03a62693d12770275328ed53932312452d4a9e69cc105b2dfbb6c",
+          "text": "ラベロット",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "vixy",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "0df855c8987aa8bcd0c5c26cb75fd6c4842791fd549173c8456e53a7223eb47c",
+          "text": "タマモ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "warsect",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "e16451bb1b9b1224ff58a7329d4abca02685619fb5eb62701d2f61dd169840ac",
+          "text": "グラクレス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "warsect-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "da950b563cb463f4f3c9150f0e74314207e8f1142cf95acce425fc7e25f5b421",
+          "text": "ゴルクレス",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "whalaska",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "50f93b6bcaee89eaacef31d11a80eb122b7fea707cca129463140b0a115c76ec",
+          "text": "コゴエール",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "whalaska-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "211e4b04fbabb81102bd5b65fc9e4850493544b6ac18944a76c11cd4b746a72a",
+          "text": "モモエール",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "wispaw",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "85708e15da3c9b669b1d6a21f0219bf4d40c2ae5311fe8566d7449952f128e25",
+          "text": "ニャンシー",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "wistella",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "65f3946b7d675bafbc434736fc4fe7149103de9bd0bd883fabe7c6a7974371fb",
+          "text": "ホシノコ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "wixen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "9797987f0863128a3668ab17852c3b21a0e17cb9e79900b88c7dd4c370834957",
+          "text": "フォレーナ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "wixen-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "73068a00665dc37b4cb979f3773c3ad889cc01e7fb8e73dc96a729a45459130d",
+          "text": "フォレーオ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "woolipop",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "ca772c6e90f94e3e0a6e80149c8f1291aee19fa3df76d9cf02562ce573cccd5a",
+          "text": "メリポップ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "woolipop-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "84fddfe7386ea301f93b271efa0f8c87bc4798a661838d7f30659dcffaed3af2",
+          "text": "メリコロネ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "wumpo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "703f47fe1ef5303e93112d46436d4c1e7c039589b349a3d4918042686eec0c74",
+          "text": "ヒエティ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "wumpo-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "2c6ef00a4e91d40ce0b37b09c1f01d7b777009b8fa949e83820f814ffb7238e3",
+          "text": "トロピティ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "xenogard",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "15a26a60d14ecfea08dbabab3d08154246d2eb0eddb33b4b1d1cdd785d2dabdd",
+          "text": "ゼノルーダ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "xenolord",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "f286c4b89a652550b992f110b79c4a13e9887339af23bbddd8849ebf0253efc2",
+          "text": "ゼノドラン",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "xenovader",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c064ee3f28a7e8d3d9c00189eb39bdaf7091a5c7fa8a2d661fb8de69e3060e82",
+          "text": "ゼノベーダ",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    },
+    {
+      "id": "yakumo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceSha256": "c30d24401cfaa7de16efa3af10405a1b7d151dc07751714da5de10c5f1fefa39",
+          "text": "ヤクモマル",
+          "status": "human_reviewed",
+          "note": "既存canonicalデータの確認済み名称"
+        }
+      }
+    }
+  ]
+}

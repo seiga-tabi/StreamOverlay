@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cp, copyFile, mkdir, mkdtemp, readFile, realpath, writeFile } from "node:fs/promises";
+import { cp, copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,7 +22,17 @@ const releaseFiles = [
   "catalog.json",
   "catalog-manifest.json",
   "item-images-manifest.json",
-  "element-images-manifest.json"
+  "element-images-manifest.json",
+  "breeding.json",
+  "breeding-manifest.json",
+  "breeding-import-report.json"
+];
+const translationRuntimeFiles = [
+  "manifest.json",
+  "glossary.json",
+  "ko.json",
+  "ja.json",
+  "reviewed-item-aliases.json"
 ];
 const mappingFiles = [
   "public-id-map.json",
@@ -36,7 +46,8 @@ const mappingFiles = [
 test("Docker runtime은 검증 release·mapping·dashboard dist와 smoke를 포함한다", async () => {
   const dockerfile = await readFile(path.join(repositoryRoot, "apps/server/Dockerfile"), "utf8");
   for (const requiredPath of [
-    "/app/apps/server/data/palworld/1.0.1",
+    ...releaseFiles.map((fileName) => `/app/apps/server/data/palworld/1.0.1/${fileName}`),
+    ...translationRuntimeFiles.map((fileName) => `/app/apps/server/data/palworld/1.0.1/locales/${fileName}`),
     "public-id-map.json",
     "elements.json",
     "work-suitabilities.json",
@@ -48,6 +59,13 @@ test("Docker runtime은 검증 release·mapping·dashboard dist와 smoke를 포�
     assert.equal(dockerfile.includes(requiredPath), true, `${requiredPath} COPY가 필요합니다.`);
   }
   assert.match(dockerfile, /RUN node apps\/server\/dist\/scripts\/smoke-palworld-runtime-artifacts\.js/u);
+  assert.doesNotMatch(
+    dockerfile,
+    /COPY --from=build \/app\/apps\/server\/data\/palworld\/1\.0\.1 \.\/apps\/server\/data\/palworld\/1\.0\.1/u
+  );
+  for (const buildOnlyLocalePath of ["corpus.json", "corpus-report.json", "source-batches", "translation-provenance.json"]) {
+    assert.equal(dockerfile.includes(buildOnlyLocalePath), false, `${buildOnlyLocalePath}는 runtime에 복사하면 안 됩니다.`);
+  }
   assert.equal(dockerfile.includes("image-source-map.example.json"), false);
   assert.equal(dockerfile.includes("streamoverlay-palworld-paldex"), false);
   assert.equal(dockerfile.includes("palworld-assets"), false);
@@ -56,15 +74,21 @@ test("Docker runtime은 검증 release·mapping·dashboard dist와 smoke를 포�
 test("container 형태에서 release JSON·mapping·운영 dist 이미지를 검증한다", async () => {
   const runtimeRoot = await mkdtemp(path.join(await realpath(tmpdir()), "palworld-docker-runtime-"));
   const releaseTarget = path.join(runtimeRoot, "apps/server/data/palworld/1.0.1");
+  const translationTarget = path.join(releaseTarget, "locales");
   const mappingTarget = path.join(runtimeRoot, "apps/server/src/data/palworld-mappings");
   const imageTarget = path.join(runtimeRoot, "apps/dashboard/dist/images/palworld/1.0.1/pals");
   const itemImageTarget = path.join(runtimeRoot, "apps/dashboard/dist/images/palworld/1.0.1/items");
   const elementImageTarget = path.join(runtimeRoot, "apps/dashboard/dist/images/palworld/1.0.1/elements");
   await mkdir(releaseTarget, { recursive: true });
+  await mkdir(translationTarget, { recursive: true });
   await mkdir(mappingTarget, { recursive: true });
   await Promise.all(releaseFiles.map((fileName) => copyFile(
     path.join(repositoryRoot, "apps/server/data/palworld/1.0.1", fileName),
     path.join(releaseTarget, fileName)
+  )));
+  await Promise.all(translationRuntimeFiles.map((fileName) => copyFile(
+    path.join(repositoryRoot, "apps/server/data/palworld/1.0.1/locales", fileName),
+    path.join(translationTarget, fileName)
   )));
   await Promise.all(mappingFiles.map((fileName) => copyFile(
     path.join(repositoryRoot, "apps/server/src/data/palworld-mappings", fileName),
@@ -81,6 +105,14 @@ test("container 형태에서 release JSON·mapping·운영 dist 이미지를 검
   }
 
   await smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot });
+
+  const buildOnlyLocaleFile = path.join(translationTarget, "corpus.json");
+  await writeFile(buildOnlyLocaleFile, "runtime에 포함되면 안 되는 번역 작업 파일");
+  await assert.rejects(
+    smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot }),
+    /Palworld translation runtime에 런타임 불필요 파일/u
+  );
+  await rm(buildOnlyLocaleFile);
 
   await mkdir(itemImageTarget, { recursive: true });
   await writeFile(path.join(itemImageTarget, "operator-source.png"), "runtime에 포함되면 안 되는 source 원본");

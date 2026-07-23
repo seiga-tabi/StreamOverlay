@@ -1,0 +1,2097 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 13,
+  "records": [
+    {
+      "id": "yakushima-blade002-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade002 3",
+          "sourceSha256": "790bda77e12c3ddec4c8b96dd5e9fed7d70f37e3df72afc838abb6d40f88fe5a"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nThis curious sword releases vibrant green shockwaves with each strike, allowing you to hit enemies from afar despite being a melee weapon.",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade002-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade002 4",
+          "sourceSha256": "6f0af9968cb0b6f1335de618326b141a198845c74fd99fb4f412568dff50bc49"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nThis curious sword releases vibrant green shockwaves with each strike, allowing you to hit enemies from afar despite being a melee weapon.",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade002-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade002 5",
+          "sourceSha256": "694748824b6aeb73e9f6bb5a4771e5010fd0845624b7897c153001d7a21d587c"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nThis curious sword releases vibrant green shockwaves with each strike, allowing you to hit enemies from afar despite being a melee weapon.",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade003",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Terraprisma",
+          "sourceSha256": "fdf0b31234ccdad0d2cb03af7f6aa08a393f91ffdb1c68346cf1dc05d11ab1f3"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA mystical sword with a rainbow-colored blade.\nWielding it lets you summon up to nine blessed swords to fight alongside you.",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade003-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade003 2",
+          "sourceSha256": "2eb9c9dae58cb03ba3ce0ba702740688d5c6000fea9064358d90384ee9644e64"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA mystical sword with a rainbow-colored blade.\nWielding it lets you summon up to nine blessed swords to fight alongside you.",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade003-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade003 3",
+          "sourceSha256": "00966adb4a55cf9208a24c4dd73a289a7a0cea81a0ff997cbbfb14d69b86b289"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA mystical sword with a rainbow-colored blade.\nWielding it lets you summon up to nine blessed swords to fight alongside you.",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade003-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade003 4",
+          "sourceSha256": "465b25917dbb3df0b83a278cd06c92b726668612cc4c9d21d31d0950ed0eaaf6"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA mystical sword with a rainbow-colored blade.\nWielding it lets you summon up to nine blessed swords to fight alongside you.",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade003-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade003 5",
+          "sourceSha256": "88d739635c6645f2077744ca11a726c33d08f0eb2f6b852e12034eb5e57c3caf"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA mystical sword with a rainbow-colored blade.\nWielding it lets you summon up to nine blessed swords to fight alongside you.",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade004",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Excalibur",
+          "sourceSha256": "00edbd472e06536f40c949509f9c68ce04a35bf394debbb42c6c0000dab51a23"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA sacred sword that gleams with golden light.\nSwinging it unleashes shockwaves around you.",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade004-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade004 2",
+          "sourceSha256": "734e744c2ee6480884c62ba8aff52a09ac8ddd10b01e92a6afa5ab7775a195a6"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA sacred sword that gleams with golden light.\nSwinging it unleashes shockwaves around you.",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade004-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade004 3",
+          "sourceSha256": "643896fbd8270ee56cbf9aa95fb428c124773658af6691826170e0e14ad4866a"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA sacred sword that gleams with golden light.\nSwinging it unleashes shockwaves around you.",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade004-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade004 4",
+          "sourceSha256": "5a5b492e921de86b6d85d4219ea6a1d8eae1749cef344ae4a4fba1fa5c640840"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA sacred sword that gleams with golden light.\nSwinging it unleashes shockwaves around you.",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade004-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaBlade004 5",
+          "sourceSha256": "92b1212e65917ef4c22b50de806a2b459d2da426ba5f4ee26842e817be7c231a"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA sacred sword that gleams with golden light.\nSwinging it unleashes shockwaves around you.",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112"
+        }
+      }
+    },
+    {
+      "id": "yakushima-blade005",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Legendary Meowmere",
+          "sourceSha256": "79fd1c22adba23f59669b5b720fab269e844f701748ecf3ce71f0094f72ed903"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA legendary forged from .\nSwinging it launches cat projectiles that ricochet and attack foes.",
+          "sourceSha256": "1f67b8f8d082a73a06cb6ff89d930d2dcd624ecda6519d5a14036310d57091ee"
+        }
+      }
+    },
+    {
+      "id": "yakushima-gun001",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Vortex Beater",
+          "sourceSha256": "5e9fb63da121d979c8ac25f575b2e96bd77c2365514246eafcc667b90faa2e7a"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA powerful gun fueled by unknown energy.\nFires homing missiles at regular intervals that track enemies and explode on impact.\nHas a 66% chance to not consume ammo when firing.",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9"
+        }
+      }
+    },
+    {
+      "id": "yakushima-gun001-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaGun001 2",
+          "sourceSha256": "ff96e998ca8ea32ba1a9c68886107a67341035837008a3c1d249d624cb58bad3"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA powerful gun fueled by unknown energy.\nFires homing missiles at regular intervals that track enemies and explode on impact.\nHas a 66% chance to not consume ammo when firing.",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9"
+        }
+      }
+    },
+    {
+      "id": "yakushima-gun001-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaGun001 3",
+          "sourceSha256": "a2e901c945f6d73249ac9c8ea3f2bb0e1f5b0ece0419ed6c346d5a2679cda88e"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA powerful gun fueled by unknown energy.\nFires homing missiles at regular intervals that track enemies and explode on impact.\nHas a 66% chance to not consume ammo when firing.",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9"
+        }
+      }
+    },
+    {
+      "id": "yakushima-gun001-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaGun001 4",
+          "sourceSha256": "8b2c462648c4164b9dd267ea4f3520b9430674102e21abe3830e4667462375fd"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA powerful gun fueled by unknown energy.\nFires homing missiles at regular intervals that track enemies and explode on impact.\nHas a 66% chance to not consume ammo when firing.",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9"
+        }
+      }
+    },
+    {
+      "id": "yakushima-gun001-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaGun001 5",
+          "sourceSha256": "63a56cc22ac1c83e58b0bd566065fb789184c33dfa658780ff390356056900b6"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA powerful gun fueled by unknown energy.\nFires homing missiles at regular intervals that track enemies and explode on impact.\nHas a 66% chance to not consume ammo when firing.",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip001",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hallowed Mask",
+          "sourceSha256": "7f9860c4eeaac9688468e36ed08cd2c02a998944eef137c656ab747e324cad29"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by , , , and .",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip001-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip001 2",
+          "sourceSha256": "1f7eddc21ae2ae0193ec18d77c70cc2ad7d536fcc49472eb8f31eca12fd6ac83"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by , , , and .",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip001-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip001 3",
+          "sourceSha256": "41d926144fbcba819de65f3d5fa5352272c58063fbfa68721674debae0981c84"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by , , , and .",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip001-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip001 4",
+          "sourceSha256": "6e127b1cb494b5a4fab72ee6323edafabbfd23533660b931d0c38d5f2b8775ca"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by , , , and .",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip001-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip001 5",
+          "sourceSha256": "679dc136444a318f7508312ae80da84b375d6a7b7e8f716b9264ba906aa7d8af"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by , , , and .",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip002",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hallowed Headgear",
+          "sourceSha256": "a9abc7240756cd40401ee23ab92cdcc7b9bb3ba978246bba31c7b40ec281bbc6"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip002-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip002 2",
+          "sourceSha256": "bee9c11ca4d925ab61665ba81ca5911bc29cb5fbcfcf8b980e6f717acb8b1c86"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip002-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip002 3",
+          "sourceSha256": "1a1312ef0d7101a80ae5342daf59046c94274a26b729269364bd401f6a8a4ef2"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip002-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip002 4",
+          "sourceSha256": "903f54e5b496145bca9a1569a1a121ab581c91c5451bbc4921505edddfe00199"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip002-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip002 5",
+          "sourceSha256": "1a02e48359fce57aa0a42fa4ce54735c55e094cb36e5fba77964cfdf037afa3d"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip003",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hallowed Helmet",
+          "sourceSha256": "0070db9bf779e7549a75b9ce9580fe128d7fbf8054a6fd0a324eefe136e1c6f2"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip003-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip003 2",
+          "sourceSha256": "2dbc0bda7899e3e84e156547dd8c166e2604585602006965f6be65a1a0910fe8"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip003-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip003 3",
+          "sourceSha256": "3649e6f4adc73d30e50b9f56101f9f6ce7c9dea8881d7a1c6cd8cd003ad3a9e3"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip003-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip003 4",
+          "sourceSha256": "b0e28632e9b16165c1a708f39253d0d7a398efd163f3da04e3b7810b23da8499"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip003-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip003 5",
+          "sourceSha256": "c7da207e79016f396cb8de86d40388910a44ce903bfd159c205f73f070dbeb40"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip004",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hallowed Hood",
+          "sourceSha256": "c5c3662a24cb3cdff8536fe85e917eb26cbcf0062115f68ec4230561a9559b2a"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip004-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip004 2",
+          "sourceSha256": "4a0064d8461d8c5375aca2acc8b2d9d27f0df5f0c0a41fe3cea1ee3b34353ec1"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip004-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip004 3",
+          "sourceSha256": "2e56f2b7daea51837b463e698d2c54697b544840ce7db6ef23bd91cd8950ae30"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip004-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip004 4",
+          "sourceSha256": "0a3640a739532d9876dca4ba3092ac3ab717f849ba0bffc999523ac6b3fdcf83"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip004-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaHeadEquip004 5",
+          "sourceSha256": "e4030f6916becb3e66a336ed1576ed2e04e25298ef4a7f61beeab13098d508c4"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nHelmet forged from .\nEnveloped in divine power, it increases damage dealt by .",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip005",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Moon Lord Mask",
+          "sourceSha256": "b96e353c1798264941a295f5e0de0752019df2d2e5720109d02166622f03cba5"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nPulsing with 's sinister energy.\nA rarity only the most fortunate may obtain.",
+          "sourceSha256": "eabdb9d7cccbe672c23085c956b7690e4c0f6b6b9032ae8b650d25f71bc3b513"
+        }
+      }
+    },
+    {
+      "id": "yakushima-head-equip006",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Eye of Cthulhu Mask",
+          "sourceSha256": "1d13f9c8fd10f4c515defb16fcfff2ee5ece971609d8b6ee82793ac1ae44bbcc"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nPulsing with 's sinister energy.\nA rarity only the most fortunate may obtain.",
+          "sourceSha256": "eabdb9d7cccbe672c23085c956b7690e4c0f6b6b9032ae8b650d25f71bc3b513"
+        }
+      }
+    },
+    {
+      "id": "yakushima-ingot001",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hallowed Bar",
+          "sourceSha256": "0182fa3ce74269084d37ff883535cc29745a698d3e20418b95b059e435b0156b"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA sacred material infused with divine energy.\nCan be used to create a variety of Terraria items.",
+          "sourceSha256": "c0ca5897f30aa0998c37403cfd752c4ac4bdfec56fd4794240372f360c877169"
+        }
+      }
+    },
+    {
+      "id": "yakushima-lantern001",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Nightglow",
+          "sourceSha256": "8ba957a175ad4cc01ff2b8ea348986f162aaa627415dfe82efcb6aede64dc547"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA lantern that radiates a rainbow-hued light.\nHolding it aloft releases homing light projectiles that strike enemies multiple times.",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1"
+        }
+      }
+    },
+    {
+      "id": "yakushima-lantern001-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaLantern001 2",
+          "sourceSha256": "7737b0e61e1a5a3e6acfbf7837261146d36dbeb0a54d17453432a63971a748b7"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA lantern that radiates a rainbow-hued light.\nHolding it aloft releases homing light projectiles that strike enemies multiple times.",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1"
+        }
+      }
+    },
+    {
+      "id": "yakushima-lantern001-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaLantern001 3",
+          "sourceSha256": "7d68a0b049a0e3bf7e5bb66248d24595c1eced1363d9eba7ff1d534056fbc6fb"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA lantern that radiates a rainbow-hued light.\nHolding it aloft releases homing light projectiles that strike enemies multiple times.",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1"
+        }
+      }
+    },
+    {
+      "id": "yakushima-lantern001-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaLantern001 4",
+          "sourceSha256": "bda0e9986b98862c917bc6d79e048828d4f18a7c5447c73223b4865936d4482d"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA lantern that radiates a rainbow-hued light.\nHolding it aloft releases homing light projectiles that strike enemies multiple times.",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1"
+        }
+      }
+    },
+    {
+      "id": "yakushima-lantern001-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "YakushimaLantern001 5",
+          "sourceSha256": "38226e6c1143fefe011ef8b56f81fc6ead66e84b7337ba300784e0b0d36c148b"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nA lantern that radiates a rainbow-hued light.\nHolding it aloft releases homing light projectiles that strike enemies multiple times.",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1"
+        }
+      }
+    },
+    {
+      "id": "aegidron",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Aegidron",
+          "sourceSha256": "2e08e38d6d38a11568f794ac577bbc30ea82d3a9dac809c72dc3246a75cc7a78"
+        },
+        "description": {
+          "sourceText": "In ancient times, when means of communication were limited, the light within Aegidron's wings was used to send simple flash signals.",
+          "sourceSha256": "8835667f9daa8c34541af7dd920160d88339fb44eac5b9c7f078eeecf7f5eb84"
+        }
+      }
+    },
+    {
+      "id": "amione",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Amione",
+          "sourceSha256": "9f4d7c6679068d99441690c10fcbb9548f4aa94e97b0503884b90badbe1fef41"
+        },
+        "description": {
+          "sourceText": "If one disappears, another simply shows up to take its place, and life goes on like nothing happened. For Amione, companionship is everything.",
+          "sourceSha256": "41bec7302e8cffae7dd867c34bee6ea40935ef188757c0f09c0ade9797854509"
+        }
+      }
+    },
+    {
+      "id": "anubis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Anubis",
+          "sourceSha256": "4ad4ceb77430e336c9dc5f315cff4813be021551d748b22344fc1ccdae320979"
+        },
+        "description": {
+          "sourceText": "Once seen as a symbol of nobility, and an idol for those who shunned wealth and power. Yet over time, this Pal became a token of death.",
+          "sourceSha256": "e32c5011e75cd87f567959981712abd0624f47341ba41433976e6ec786e6b373"
+        }
+      }
+    },
+    {
+      "id": "arsox",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Arsox",
+          "sourceSha256": "62b6c2d616cc954fbf896ef5429e11e78592aec48cc207b559ef1777bfc435a0"
+        },
+        "description": {
+          "sourceText": "In ancient times, carnivorous Pals pursued them relentlessly. The absurd fury in the cries of Arsox transformed into a raging inferno, which has been passed on to this day.",
+          "sourceSha256": "66b08860cf9874be464cc198fd8afd12fd069a9d5db88e21f1f805c69e25f83f"
+        }
+      }
+    },
+    {
+      "id": "astegon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Astegon",
+          "sourceSha256": "2c5a5832cc03051d1a743b0982dab7d565f74bd29501993fe06f4b474c10acca"
+        },
+        "description": {
+          "sourceText": "A savage beast born of the abyss. Thou shall not stand before the beast. Thou shall not heed the beast.",
+          "sourceSha256": "110d7cc6c56de99dfe1d15a5ac391e3f2cf62babec101a3f5490cf53a2e3c3e7"
+        }
+      }
+    },
+    {
+      "id": "azurmane",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Azurmane",
+          "sourceSha256": "b77ef4098832938116c63924fd55d05efabcc216c35d016324c7cd35a8bee387"
+        }
+      }
+    },
+    {
+      "id": "azurobe",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Azurobe",
+          "sourceSha256": "f60a54a2e60ba26ed9ae2730497c7595c27e1c3ec76cbaf5aa3ec2ab7ab39e55"
+        },
+        "description": {
+          "sourceText": "This Pal's white ribbon turns black if doused with impure water. Given its usefulness in detecting poison, this Pal was once overhunted. This past has left them bitter towards humanity.",
+          "sourceSha256": "28e25762455d2a34bbabb9846b3e1ad6a5b9de914d86376f8ee3bfd9c58a525f"
+        }
+      }
+    },
+    {
+      "id": "azurobe-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Azurobe Cryst",
+          "sourceSha256": "c5fd2d6637a4c04d34a6be0a383a8b56ff84e4608e6642fb3742578922119d39"
+        },
+        "description": {
+          "sourceText": "This Pal’s white ribbon continuously absorbs heat from its surroundings, yet its temperature remains curiously unchanged. This strange ability once made it a target of relentless hunting, leaving it with a deep mistrust of humans to this day.",
+          "sourceSha256": "320dedf7e9a4a085b6c49daa18298af65d3f8deffd3e093a4dea4d5e1618ecfd"
+        }
+      }
+    },
+    {
+      "id": "bakemi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bakemi",
+          "sourceSha256": "7713eb82254e21715ecc443a2c69c6af0d724e90c34afd7175a23810c51522ac"
+        },
+        "description": {
+          "sourceText": "It lives entirely for the thrill of the scare, but is utterly un-frightening. As most cannot help but indulge it with feigned surprise for its cuteness, Bakemi now leaves a trail of smiles in its wake.",
+          "sourceSha256": "30c7c18693c697f10c6a52e0c631e1d898085124c9298c3715207aa1a155286f"
+        }
+      }
+    },
+    {
+      "id": "bastigor",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bastigor",
+          "sourceSha256": "8ae47fa323a41e9847aca5cdf8604381b112bdb63de7ba93316da24fdfd0944b"
+        },
+        "description": {
+          "sourceText": "The sight of anything round gives it an uncontrollable urge to punch it. For Bastigor the toughest challenge, after simply living, is making a snowman.",
+          "sourceSha256": "f14804a8dfa655cb0b3e89131f5859aa715ce1de6b62476dc92dc4488fcbf9a8"
+        }
+      }
+    },
+    {
+      "id": "beakon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Beakon",
+          "sourceSha256": "5b7ecf53406257837a407dc56796f1fc57b1d58b4da5e951a28f4d8c77830a9b"
+        },
+        "description": {
+          "sourceText": "Some think it is a related species to Ragnahawk, but there is in fact no connection. Using its sharp beak, it descends on its prey in a quick motion that resembles a bolt of lightning.",
+          "sourceSha256": "e1f6ad33bc18e6dc7225de1290321cbdf8b1b90b29d1852965468ac3afaec523"
+        }
+      }
+    },
+    {
+      "id": "beakon-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Beakon Cryst",
+          "sourceSha256": "84e075bcd55678a3778c1f69d4ffc15ac52177093ba13daa9b6a241356204aa2"
+        },
+        "description": {
+          "sourceText": "Perfectly adapted to colder environments, it hardly feels the cold despite its slender form. Its diving plunge carries tremendous force, as if a giant icicle were dropping straight from the sky.",
+          "sourceSha256": "bf195f004c23947c189dbbc00bbf599e889f4bdcb1d51497c4ca585bad164aa3"
+        }
+      }
+    },
+    {
+      "id": "beegarde",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Beegarde",
+          "sourceSha256": "99247072a678a5d2577fd64f86d6b30385edeb09279943d9a441f2dd3f022393"
+        },
+        "description": {
+          "sourceText": "A servant that pledges loyalty to Elizabee. Any that cause harm to the queen are immediately expelled from the hive. It will gladly give its life to protect its queen.",
+          "sourceSha256": "fa80e07d8aee52f56d610d64d6aea91c67b69421390a50685f94207c0b5f014f"
+        }
+      }
+    },
+    {
+      "id": "bellanoir",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bellanoir",
+          "sourceSha256": "d92ea76469c7b0e6c8369254cdaa00948baa3ff70487ac61d605854aefc65246"
+        },
+        "description": {
+          "sourceText": "Without existing, she quietly gazed upon the world. One day, she was seized with a longing to be seen. With unbridled lust for vengeance against reality, thus was born the Eclipsed Siren.",
+          "sourceSha256": "854db251d186325a86241430fce68f124f237bdb62bcaf2a151a8e3a7bb5f0cd"
+        }
+      }
+    },
+    {
+      "id": "bellanoir-libero",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bellanoir Libero",
+          "sourceSha256": "14aadf0d57033af2e2c4bdb9816e9c977480e905e3148e74efa34c7176939eb3"
+        },
+        "description": {
+          "sourceText": "With her desires set loose, she was soon overwhelmed. She longed for a self to gaze upon herself. And the sisters who gazed, resenting reality, were driven into the abyss and, at last, closed their eyes.",
+          "sourceSha256": "430f58db5abcb74115cd5ff0484de764b07f9bf7b45d9d15f1afa68941dcf8b9"
+        }
+      }
+    },
+    {
+      "id": "blazamut",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Blazamut",
+          "sourceSha256": "34a311533690b909de6ce8a306992e88d9e0746c4f72078c4a18f97af0cd4993"
+        },
+        "description": {
+          "sourceText": "Legends say it was born during a volcanic eruption. A strange group even claims that this continent is laid upon the back of a giant Blazamut.",
+          "sourceSha256": "4370843476e15c50978258f4aa85cd67bf50ac6aa097e7f4bc1bc3191ca090df"
+        }
+      }
+    },
+    {
+      "id": "blazamut-ryu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Blazamut Ryu",
+          "sourceSha256": "7a6c5aac555fc75450993331b7208c1ab116ec0b7df904d08e05ee9dc6b27d04"
+        },
+        "description": {
+          "sourceText": "Long ago, it emerged from the depths of the earth. With relentless, raging flames showing no mercy, it burned the entire island until nothing remained. It was known as the Eternal Flame.",
+          "sourceSha256": "5ce6f9ed92c782d23bf651ea83f213c0c531201c2b150a778010d26e9daa810e"
+        }
+      }
+    },
+    {
+      "id": "blazehowl",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Blazehowl",
+          "sourceSha256": "bf0c5feb41af92e8c2fa25d5872e19326775e54a8c12de6a6961469869bdce6b"
+        },
+        "description": {
+          "sourceText": "While it prefers raw meat, it always ends up eating well-done meat. This is due to its blistering claws, which it uses as its weapon—it simply doesn't realize its prey gets burned to a crisp.",
+          "sourceSha256": "4cf2d4a80f8d9d0c8aea27f117f57008f68551501f930f274ed54b89a7c37094"
+        }
+      }
+    },
+    {
+      "id": "blazehowl-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Blazehowl Noct",
+          "sourceSha256": "d7edf25264675e8642b454184f6a644862b1239cd91a4aa337f51f764fadb683"
+        },
+        "description": {
+          "sourceText": "While it prefers raw meat, it always ends up eating tainted meat. This is due to its dark claws, which it uses as its weapon—it simply doesn't realize its prey gets cursed.",
+          "sourceSha256": "086858107af6dfa70539de594bbf6f26655c9ecd0202b4ae9c742dab846fe03d"
+        }
+      }
+    },
+    {
+      "id": "braloha",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Braloha",
+          "sourceSha256": "6d43b531a0ebb4c7197e4b9424bca494a7ef2610fa90e48d4720faa101338ad8"
+        },
+        "description": {
+          "sourceText": "Its breath carries a miraculous, pollen-like substance that pollinates any plant it touches. For plant-based Pals, being near it can be a bit… complicated.",
+          "sourceSha256": "aad5ea69f7ebb7fd284a0a6f660ab9be0e1010cc1fa5e8cd68fc07947be7657e"
+        }
+      }
+    },
+    {
+      "id": "bristla",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bristla",
+          "sourceSha256": "68e9ba26903a3651fd95b1ac3615da964ff350c0dcd8142753576f7c791679b9"
+        },
+        "description": {
+          "sourceText": "This prickly Pal's thorns are highly poisonous. It is friendly with Cinnamoth and only smiles while a Cinnamoth is drinking its nectar.",
+          "sourceSha256": "08e39e20a5327985e16d73e445cc951ea64cb86a35277a9c18e41a39878e11c9"
+        }
+      }
+    },
+    {
+      "id": "broncherry",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Broncherry",
+          "sourceSha256": "03cf7cef09939aae82c1f486cb3beb2660e5ed36547421d570e9750d2764fce2"
+        },
+        "description": {
+          "sourceText": "Its scent drastically changes before and after pairing. It exudes a pleasing aroma after finding a partner, which is called the |Fragrance of First Love.|",
+          "sourceSha256": "876794b692154bac0183d8aa4a6ee5c55a6b72fa23c28ffda6f143443e81f4b2"
+        }
+      }
+    },
+    {
+      "id": "broncherry-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Broncherry Aqua",
+          "sourceSha256": "0ebec5c9ee00d77d8ed1b102288f9c1ce5ac6001994155be1aae77158e6c24a6"
+        },
+        "description": {
+          "sourceText": "Its scent drastically changes before and after pairing. It exudes a pleasing aroma before finding a partner, which is called the |Perfume of Purity.|",
+          "sourceSha256": "1ceb88a893ea021fabfc91a236d59c458a4cf531957764a05995948afcb5da7d"
+        }
+      }
+    },
+    {
+      "id": "bulldosu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bulldosu",
+          "sourceSha256": "1aa4da6de497cd256b2902ce70dda39b63c90b37530595c902409b024e6521b1"
+        },
+        "description": {
+          "sourceText": "In the old islands, Bulldosu sumo was widely enjoyed. At the highest levels, even a charging Rushoar would be sent flying instead.",
+          "sourceSha256": "5132c6e50e030ecfe725731e1f4dac25bec89410238f00f7541153fcd2d11383"
+        }
+      }
+    },
+    {
+      "id": "bushi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bushi",
+          "sourceSha256": "5fe75502c7e8e4e94e20b4db54ddfca99c6400d3000892b77a1eedcc22a5dde8"
+        },
+        "description": {
+          "sourceText": "Its body becomes a blade upon death, to be taken up by the next generation. If someone other than a Bushi wields this blade, the soul within torments them until they are driven mad.",
+          "sourceSha256": "407f3c2e0b110016ce11f25350e93dd7901442f4a37438877989bb6bb6bc2770"
+        }
+      }
+    },
+    {
+      "id": "bushi-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Bushi Noct",
+          "sourceSha256": "e29a7d0d2a02e078c10a90d65a2a128e1c0b45ed273f73af72a37e84416dbd79"
+        },
+        "description": {
+          "sourceText": "Its body becomes a blade upon death, to be taken up by the next generation. If the Bushi who inherits it has a weak heart, the voices of the dead will drive it mad. The madness turns it into Bushi Noct that endlessly wanders.",
+          "sourceSha256": "2751da8d720b0fb14e750da4cb5921cbb0cb143411c62903a8ff060de53fd96f"
+        }
+      }
+    },
+    {
+      "id": "caprity",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Caprity",
+          "sourceSha256": "b14844898485a9c6b41865385f2d4f734c6d55b2c5bc2fb35802b404599741cb"
+        },
+        "description": {
+          "sourceText": "The shrub on this Pal's back produces berries as long as it is properly fed. It offers these berries to potential mates, and if the flavor is to their liking, romance blossoms.",
+          "sourceSha256": "cfed78c52f6e3c38835878c47d33c31a56385c0619dd77bcaf6e849a53cae765"
+        }
+      }
+    },
+    {
+      "id": "caprity-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Caprity Noct",
+          "sourceSha256": "0c3d4f90d76c65e3352784caf23c12b22cb091e4d1a45a01a912a48674b50125"
+        },
+        "description": {
+          "sourceText": "The berries that grow on its back change flavor according to its emotions. The harsher the environment it grows in, the sweeter the berries become. This is why most Caprity Noct raised in captivity have never known love.",
+          "sourceSha256": "35380d786d8c6dbb6d7e137d72747dbf0d3399747f26d4c3a5bb04e6c48972e9"
+        }
+      }
+    },
+    {
+      "id": "carnibora",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Carnibora",
+          "sourceSha256": "3ead6afd116a0f9413efa64a8fecd738a88fa599b171e3be159326ed02806d4c"
+        },
+        "description": {
+          "sourceText": "Prone to eating indiscriminately, the mouth atop its head frequently breaks out in agonizing ulcers, causing it to use the mouth on its face instead. However, its behavior doesn't change, which leads to both mouths suffering the same ulcers.",
+          "sourceSha256": "4bd8f67afdce91166c2a9c9fbea0f5c536ccc35f7c3fea9765bff0e2a7980be6"
+        }
+      }
+    },
+    {
+      "id": "cattiva",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Cattiva",
+          "sourceSha256": "7893d3df0ea47f7c46fac301ad53af130f361f49a6142be9234e8ef45d62fb8f"
+        },
+        "description": {
+          "sourceText": "At a glance it appears full of confidence, but it is in fact weak and cowardly. Being toyed with by a Cattiva is in many ways the greatest of disgraces.",
+          "sourceSha256": "51fb19a1c9d01502370bc4b7470ed74b28ba24b85d62b8efe19675657d5ec472"
+        }
+      }
+    },
+    {
+      "id": "cawgnito",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Cawgnito",
+          "sourceSha256": "901e96ebaada1a1ee7b4a35709886da49ca745c80754870d452a3b40b8970ed0"
+        },
+        "description": {
+          "sourceText": "Long ago it freely soared the skies. After losing a contest with Galeclaw, it abandoned the skies, and now lives a secretive life in the dark of night.",
+          "sourceSha256": "837a35589cd25135cd03a1a45e4e65d51772e99005c938c2106e4467da8a6cd1"
+        }
+      }
+    },
+    {
+      "id": "celaray",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Celaray",
+          "sourceSha256": "c584f8322e1572ecc17fb53352bb0316c554573153b328f31453618d450fe33a"
+        },
+        "description": {
+          "sourceText": "Riding the wind, this Pal travels where it pleases. Should it find a partner along the way, the encounter will mark its journey's end.",
+          "sourceSha256": "50a5b4099da7cda73320cd7206738795feba8400f6af8c7e0cf3ac9e8c65e5cf"
+        }
+      }
+    },
+    {
+      "id": "celaray-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Celaray Lux",
+          "sourceSha256": "1bfd8d111c74d09dd4a24495eea136be1634e945090f514a1e7f907ef4e30c7d"
+        },
+        "description": {
+          "sourceText": "Its flashy patterns help it attract a partner. But after a long history of electrocution incidents involving Celaray Lux, yellow-and-black stripes are now seen across the island as a sign of danger.",
+          "sourceSha256": "e1da75257b38f16488584e4cb8133623403124a4f5cce3a22a9de0d2c64d434e"
+        }
+      }
+    },
+    {
+      "id": "celesdir",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Celesdir",
+          "sourceSha256": "0bc0d9c710530072f8073063436828540616b1cc0c2a4f0aa08dc191575f268f"
+        }
+      }
+    },
+    {
+      "id": "celesdir-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Celesdir Noct",
+          "sourceSha256": "2c85f288aff5c20f8c8c49465812d9275176b8619b6cb50b3df0694c9cbcf020"
+        },
+        "description": {
+          "sourceText": "Where blinding radiance shines, dark shadows are born. It scatters an all-enveloping darkness to reclaim the chaos that ought to be. Balance is what the world requires.",
+          "sourceSha256": "25a92c579d9dafb00f02e1e9abfd1f9525eb0d66af7f4882a814b4172497dc69"
+        }
+      }
+    },
+    {
+      "id": "chikipi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Chikipi",
+          "sourceSha256": "f05154d0813017a6440ba5c3cf6b30f131f8711859da2c4ff66bb8e860ec7278"
+        },
+        "description": {
+          "sourceText": "Extremely weak and far too delicious. It is one of the weakest Pals alongside Lamball. No matter how many are hunted, they just keep appearing.",
+          "sourceSha256": "f04c4c56d9f77e8cfb6ea006f24b556710663f219a882c45bdd62b0c60136065"
+        }
+      }
+    },
+    {
+      "id": "chillet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Chillet",
+          "sourceSha256": "3c0fb71d7fedee4a413ab186243a744a4de81ba4bea80be20815b1faf5687b5c"
+        },
+        "description": {
+          "sourceText": "It can curl up its body and roll around at extremely high speeds. Long ago, people would tie bags of milk to domesticated Chillet as they grazed to produce butter using this spinning force.",
+          "sourceSha256": "f80388177f0a3b10cffbe713bd1f1586d4b3d77a870cb8de1db8965438930bab"
+        }
+      }
+    },
+    {
+      "id": "chillet-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Chillet Ignis",
+          "sourceSha256": "d6b368a124f6ae54e46e410b868781512fd2626867ca76d3b1a45d101dd0620c"
+        },
+        "description": {
+          "sourceText": "It can curl up its body and roll around so fast that sparks fly. Sparks also fly when it feels excited. If you stroke it too much, this pal will get fired up, literally!",
+          "sourceSha256": "10f5e2bc8f50c26998be6a7f88c271a988ee8dd6ea4f27f57d1c527d1fedadd6"
+        }
+      }
+    },
+    {
+      "id": "cinnamoth",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Cinnamoth",
+          "sourceSha256": "477adc809824e8a68565d1e022b3dc3abd42ef47cf32f55cc3db94d902d0ac4a"
+        },
+        "description": {
+          "sourceText": "Sniffing its scales produces a feeling of unparalleled euphoria. There was some effort to further regulate this byproduct, but the Free Pal Alliance have vehemently opposed these measures, putting a stop to them.",
+          "sourceSha256": "7e0a7246823d46849c57d1e877f1b50886adbb3502d166a7206592f66df819e4"
+        }
+      }
+    },
+    {
+      "id": "clovee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Clovee",
+          "sourceSha256": "36af72148b83891021a7f75b7b43228dc7a3dc44a773aa2fb7131267d8285ca1"
+        },
+        "description": {
+          "sourceText": "Some individuals once had three or more leaves on their foreheads. Regarded as symbols of good fortune, those with more leaves were heavily hunted, leading the species to evolve fewer leaves over time.",
+          "sourceSha256": "91101617e1fd4348ce2531ed19e8ba39f4161cf2d14be5d63a855615bb7fdb12"
+        }
+      }
+    },
+    {
+      "id": "cremis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Cremis",
+          "sourceSha256": "cf9addb56af74ad8dd3e8ea23bf0ad19ace1867455cdfa22c2a961ab9de7dcdb"
+        },
+        "description": {
+          "sourceText": "Compared to Lamball, it has finer wool and a temperament more suited for domestication. However, it has historically always been kept as a pet. Cuteness is considered a virtue.",
+          "sourceSha256": "818aad286483e5ed159a42b09ae07221a87b28f0262ba1678af7dcfa7a5c7832"
+        }
+      }
+    },
+    {
+      "id": "croajiro",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Croajiro",
+          "sourceSha256": "d2bc23b7347b8fe7d2a919191584892a05defb510959a6ed77a019651549a4f9"
+        },
+        "description": {
+          "sourceText": "Those who disgrace the honor of the herd are forced to take their own life. By piercing their inflated vocal sac with a tree branch, they are blown away into the atmosphere and return to the afterlife.",
+          "sourceSha256": "562fb9effb4b6ad6dd3d453f4d92521f041cb26f7509ec2c69380b492e3728dc"
+        }
+      }
+    },
+    {
+      "id": "croajiro-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Croajiro Noct",
+          "sourceSha256": "04a4f0854fd21c133f5b02c5390b00e73bf5d847cb25f5c97be23f55b10cff6f"
+        },
+        "description": {
+          "sourceText": "The Croajiro who have forsaken their honor gather and form splinter groups. They will use any underhanded means to take down their chosen prey. If you encounter a pack of Croajiro Noct in the dead of the night, it's your life that's on the line.",
+          "sourceSha256": "d0d1298a24b4b9c9145c9974a66c871b88e16928370ebcdab8a26bc44a4e824b"
+        }
+      }
+    },
+    {
+      "id": "cryolinx",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Cryolinx",
+          "sourceSha256": "b3353d2146d09878330846c89bdd5e0c5e729ee21eb185b2e9c2d0a6f3f34e39"
+        },
+        "description": {
+          "sourceText": "It can easily climb steep mountains with its hard claws. However, its short legs make it difficult to descend, often leaving it stranded in high places.",
+          "sourceSha256": "10a04aa10e375d9e9495e46dfe4223df94427abef5e8d3898bdfc4755266ceb8"
+        }
+      }
+    },
+    {
+      "id": "cryolinx-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Cryolinx Terra",
+          "sourceSha256": "9b9514be126e47198609fd6aa756feddd000b1814a62563c95dacf30ed1bc0dd"
+        },
+        "description": {
+          "sourceText": "It can easily carry many items with its large hands. However, its short legs slow its pace, often leaving it overtaken by nightfall.",
+          "sourceSha256": "f2c929aa7be6fa78a73f90ab7f8878d7e957ab0f5daf3f094c82265f861f5a19"
+        }
+      }
+    },
+    {
+      "id": "daedream",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Daedream",
+          "sourceSha256": "5c2b9fa7fb019f1023252ce3ca5974ae2f4b95d90efe7cdfa14e990b9ac15a2e"
+        },
+        "description": {
+          "sourceText": "It puts those it is interested in to sleep and shows them an endless stream of happy dreams. Those who fall under its spell are never to wake until death takes them.",
+          "sourceSha256": "d48c7f7c29880062590f19af3d9038ce32ded41b344b4f95d09566b1d2c5c334"
+        }
+      }
+    },
+    {
+      "id": "dandilord",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dandilord",
+          "sourceSha256": "db7aa4364c24daf39878f42ddc495284be06bd7a638305e9a35356b5854b3020"
+        },
+        "description": {
+          "sourceText": "Since ancient times, it has remained within the World Tree, continuing its vigil. What it protects, and for what purpose, Dandilord does not care. After all, the World Tree knows everything. Only the mist it wields can reveal the truth.",
+          "sourceSha256": "8dcfbc2ec271b71324a0db6e55c88099b1b6f20e3ea56027f2b8957c6a1c3886"
+        }
+      }
+    },
+    {
+      "id": "dazemu",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dazemu",
+          "sourceSha256": "357b0097f1dfd8f8f32f19c01d41e86ffc9fa547f5529fd9fdb38c419b0ffb7c"
+        },
+        "description": {
+          "sourceText": "Take one step forward and forget your doubts. Take two steps forward and forget your worries. Take three steps forward and forget your fears. Face any enemy.",
+          "sourceSha256": "f4485bd3db000e5dfef458626277e260fd1dc19671dd221df8629875763d98fe"
+        }
+      }
+    },
+    {
+      "id": "dazzi",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dazzi",
+          "sourceSha256": "8f97cf1584bd1a679368f5dbe4fb92fb8d79380b62a8a428ba06b49aed68ff05"
+        },
+        "description": {
+          "sourceText": "Often kind to lonely Pals. However, the moment a Pal mistakes this for actual friendship, it seizes the opportunity to blast them with a thunderbolt.",
+          "sourceSha256": "0afa61944a655c7bf332b1709dd413df3239369a2093b1784ddb2c229c340979"
+        }
+      }
+    },
+    {
+      "id": "dazzi-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dazzi Noct",
+          "sourceSha256": "3bcc5819e2e3e4cc2f5254c4d4dba9c5387712b4a28330dc1ef9cee81ad308fa"
+        },
+        "description": {
+          "sourceText": "Often kind to lonely Pals, it plots to lure them into dropping their guard before striking them down. Yet, unable to find the right moment, it ends up making friends with them instead.",
+          "sourceSha256": "7a0dbc5288804b740392d6c578708d594fea82430afa8005358d01547a9a3086"
+        }
+      }
+    },
+    {
+      "id": "depresso",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Depresso",
+          "sourceSha256": "d95681abf05fa11a203ccfea3cef8ce8dd4c3baf04b28746595a7825f2c0c970"
+        },
+        "description": {
+          "sourceText": "It has few friends because of the perpetually grouchy look on its face, but it is in fact kindhearted. Some have seen it feeding Vixy who have strayed from their pack.",
+          "sourceSha256": "d8d53bac3d8a6428e53d0f52d7dd435c36dac5cd4f2f3c26ff45e270ae922d18"
+        }
+      }
+    },
+    {
+      "id": "digtoise",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Digtoise",
+          "sourceSha256": "256b3514c2fe6584d2507f2c1156e652427c34cfd4f103ad8c55d51920e58cc7"
+        },
+        "description": {
+          "sourceText": "A Digtoise possessing the strongest shell and the only drill capable of piercing it, ponders the contradictions of the world in the popular children's tale, |Digtoise's Fable|.",
+          "sourceSha256": "a6e3356d72b2687e3928d2ea239f7090e1a00ff9e1b5e090330637a62e226d80"
+        }
+      }
+    },
+    {
+      "id": "dinossom",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dinossom",
+          "sourceSha256": "5544214bcad3a891ec0428e2fffbfa22c3fa989b470fb2bc6ba39e36a44437ea"
+        },
+        "description": {
+          "sourceText": "A Pal who once angered cannot be pacified. It rages on and on like an inferno. The phrase |step on a Dinossom's tail| has come to mean enraging someone.",
+          "sourceSha256": "3391f37035c0435037c934f038825119186af1a09fdee14ab8b27cd924127e9a"
+        }
+      }
+    },
+    {
+      "id": "dinossom-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dinossom Lux",
+          "sourceSha256": "0e7d6050c17420a6e4e0049cb5cc7ac17c8878cc5814b823ebcf297a1fb126fc"
+        },
+        "description": {
+          "sourceText": "Though struck by lightning, it lives on. The phrase |struck by a Dinossom Lux's bolt| has come to mean narrowly escaping death.",
+          "sourceSha256": "fbd5711ccd048f9b24d73002c29fb7211378d6ecb8170c4cbede7f7dacd088ef"
+        }
+      }
+    },
+    {
+      "id": "direhowl",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Direhowl",
+          "sourceSha256": "12311725b01e455488fbcc7b5a6b36a1daf08afd4504d43beef30b10870f9339"
+        },
+        "description": {
+          "sourceText": "Long ago Direhowl would hunt alongside humans but over the years this bond faded.",
+          "sourceSha256": "9b279c1e8bdc5c9b74577c0ce8427ee36ea54cc5dfd8857602c920aeb3827603"
+        }
+      }
+    },
+    {
+      "id": "dogen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dogen",
+          "sourceSha256": "09b33296828dabc6b8a94315113ed6258777bcaa890bfff08ffd1d6b4aaf170e"
+        },
+        "description": {
+          "sourceText": "Striving for a state of selflessness, it meditates endlessly. After confronting its worldly desires, it eats a meal and reflects. It ate too much today.",
+          "sourceSha256": "9ad29df90d9974e756a324f1cab9a82c380513a367748867d53d227815edc11b"
+        }
+      }
+    },
+    {
+      "id": "dualith",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dualith",
+          "sourceSha256": "659ee2d6b1320f377a229cda6beecbc91196cdf206420cdee8ff5caff0e02e50"
+        },
+        "description": {
+          "sourceText": "One entity, two minds. When their wills clash, it's impossible to tell where the armor will wander until they reconcile.",
+          "sourceSha256": "b1fc66f176ad6e8be150f2658bf445266ab16d88e4a8a876c97cd51691d6335d"
+        }
+      }
+    },
+    {
+      "id": "dualith-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dualith Noct",
+          "sourceSha256": "fda387b134deb01f6b8c1c6841418086e7292b4e71fb2873a11e7f84d009cdfa"
+        },
+        "description": {
+          "sourceText": "One entity, two minds. They rarely agree and bicker constantly, but once battle begins, mind and body instantly unite as one!",
+          "sourceSha256": "4b514f9bb2c1f8a951cf51894cadec552ec37c15b7c785f52eef5cd44e013a9c"
+        }
+      }
+    },
+    {
+      "id": "dumud",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dumud",
+          "sourceSha256": "8f144aea148328f9613ad40b5ff5ffc80b58a7c84ec994c80fc91d0607251e70"
+        },
+        "description": {
+          "sourceText": "When too relaxed, its reaction time drastically declines. Even if it were sliced from head to tail, it probably wouldn't even realize that it should be dead until the next morning.",
+          "sourceSha256": "fed07388b3976552d51c3ae246183f1b90756fdf8292dec34a5570bf202a6a4a"
+        }
+      }
+    },
+    {
+      "id": "dumud-gild",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dumud Gild",
+          "sourceSha256": "abcfbbe8f68b000ad20b83e5ed37237007c651cb58a343408696bb5029532583"
+        },
+        "description": {
+          "sourceText": "Its body reflects light with astounding clarity. Even more shocking, its reflexes are somehow even slower than Dumud.",
+          "sourceSha256": "ad23a0c27d37f92114f1a336f8dc795fead2c1ee3dce60f2aba6db23b841ac0d"
+        }
+      }
+    },
+    {
+      "id": "dupin",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dupin",
+          "sourceSha256": "8fe87c1e0126be7456a02786b5cfa20e6c513dd567f193a7739503e843334a09"
+        },
+        "description": {
+          "sourceText": "A copy it created might quietly replace it, leaving even the Dupin itself unsure whether it is still the original.",
+          "sourceSha256": "3f0fc3b7c1cc3872b4886c8b52ffe181a5b8c3374361aeabf3d6f27ee361149f"
+        }
+      }
+    },
+    {
+      "id": "dynamoff",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Dynamoff",
+          "sourceSha256": "1982957ce2f76e25f4b98e374fbf91ac01589fcded77f69694674a2d9ae90930"
+        },
+        "description": {
+          "sourceText": "With so little to eat at high altitudes, it will occasionally even feast on its enemies' brains. It is thought that groups seeking a more dependable food source descended to lower skies, ultimately diverging into Beakon.",
+          "sourceSha256": "72463c62e06f3d6b822a1d72ba022dd1628726f3dcf78afe04234f2abfe6d1d2"
+        }
+      }
+    },
+    {
+      "id": "eidrolon",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Eidrolon",
+          "sourceSha256": "4cd5dbc3f740d4a0d25dfdb683a040b997a8b8a1eca561a381c1c75d65bafd79"
+        },
+        "description": {
+          "sourceText": "A new Pal that was only recently discovered. Calm and entirely docile, it spends its time as it pleases. It is no longer bound by anything.",
+          "sourceSha256": "6590a4bdf89339280ef1609d420f15d1e27fe116ca8f680064fa9ca3f11d94e5"
+        }
+      }
+    },
+    {
+      "id": "eidrolon-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Eidrolon Ignis",
+          "sourceSha256": "4ad651943f970beedaaf4aba1273dad97bc905dd0b7825fc7444ffc8944f2937"
+        },
+        "description": {
+          "sourceText": "A new Pal that was only recently discovered. It trusts nothing and no one, and its tempermental nature leads to it constantly venting its rage at the nearest target.",
+          "sourceSha256": "2f12123a7c051a03866d1e02e8360660ab549cf09b21e1b83a84a090087fcc97"
+        }
+      }
+    },
+    {
+      "id": "eikthyrdeer",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Eikthyrdeer",
+          "sourceSha256": "bdb36aae24f13d1ff550e0ea2257ae171a6d226abf31c9e21e9497995b002729"
+        },
+        "description": {
+          "sourceText": "The one who possesses the most impressive antlers becomes the leader of the herd. If their antlers are broken, they become depressed and leave the herd never to be seen again.",
+          "sourceSha256": "6b06a84232e62e21d9adef210ca77b1ecc9533834ceacfe5260417e3c54878a6"
+        }
+      }
+    },
+    {
+      "id": "eikthyrdeer-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Eikthyrdeer Terra",
+          "sourceSha256": "3a621f5487e1059b802cef71f7954d099fa0ac9655543ab8d56aa1130f7dc346"
+        },
+        "description": {
+          "sourceText": "The individual with the hardest horns becomes the leader. Once the horns are lost, so too is its leadership status. It leaves the herd amidst farewell glances and quietly returns to the earth.",
+          "sourceSha256": "16580ccc0f8d4ae7bd6e82a269b92b5e2b40c13be2f2c655b8fbaeb8b2f4c11f"
+        }
+      }
+    },
+    {
+      "id": "elgrove",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Elgrove",
+          "sourceSha256": "f5b3a7675b84c54258a63f135ef8b1cec21c90e0424d76a0754442316e6a81d4"
+        },
+        "description": {
+          "sourceText": "The leaf on its horn cannot be removed, no matter how hard it is pulled. When the leaf falls on its own, Elgrove accepts its time has come.",
+          "sourceSha256": "772a3aa372ec16cec792ec0a9dbb16495e3b6c5b9a81024d3f0aaf58ac22974b"
+        }
+      }
+    },
+    {
+      "id": "elgrove-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Elgrove Cryst",
+          "sourceSha256": "165fccd3c1ea05e10f700d604c81d34119ca15c05778647ef10e5bb82eda1dfe"
+        },
+        "description": {
+          "sourceText": "Its frozen horn stays solid through its life. When water begins to drip from this ice, Elgrove Cryst feels the chill of its own life slipping away.",
+          "sourceSha256": "2a2c24ab1467e5f95171687ace7d3997a35871ca7dab14def3d9d8dc33d8beaf"
+        }
+      }
+    },
+    {
+      "id": "elizabee",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Elizabee",
+          "sourceSha256": "f69adad18490faaa059fed42b849a59e296070d3d601d376ce6fe9dfd51f3bab"
+        },
+        "description": {
+          "sourceText": "A chosen queen to rule over Beegardes. There is a never ending stream of servants willing to work themselves to death for the pleasure of serving their queen.",
+          "sourceSha256": "937a45a78f3c27fb4ced228084f938021ebb22eb55d09cbb3a4e6eea5cf0dc69"
+        }
+      }
+    },
+    {
+      "id": "elphidran",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Elphidran",
+          "sourceSha256": "3edf0a82371835398f0f6c22abe6df6614dcb9ca145c41c9072ea553568783df"
+        },
+        "description": {
+          "sourceText": "It possesses a demeanor as pure as its appearance suggests. Perhaps because of this, it is sometimes unable to discern good from evil, often allowing wrongdoers to take advantage of it.",
+          "sourceSha256": "1a50bc4e39da9f8a93dced2f614a6ece2fe49de713173332237f91bbdc161c93"
+        }
+      }
+    },
+    {
+      "id": "elphidran-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Elphidran Aqua",
+          "sourceSha256": "e84bb47d7ca32f2f6f02d60128c48a78e493aaf0bf53e14deed62f3af00ebf53"
+        },
+        "description": {
+          "sourceText": "It possesses a demeanor as pure as its appearance suggests. Perhaps because of this, it harbors no ill will in any of its actions and is indifferent even after killing someone.",
+          "sourceSha256": "5850c740945ae2e44f511635f9ce675661c829c4eaa536a65939c35223ec825f"
+        }
+      }
+    },
+    {
+      "id": "faleris",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Faleris",
+          "sourceSha256": "2f378519b85c3d52247bc87e65ddc3b21ce7ce7e6e0d6d5b2c21ad9bd5bb45f6"
+        },
+        "description": {
+          "sourceText": "When it finds its prey it unleashes a whirlwind of flames, burning the entire area to ash. Faleris breath is known for its pleasing scent.",
+          "sourceSha256": "0f6550a25b0e016ea07e45e48268fe33be59d30e3410331df0d33b34fefe4417"
+        }
+      }
+    },
+    {
+      "id": "faleris-aqua",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Faleris Aqua",
+          "sourceSha256": "f9bf11ff56234ce8ab96fe116ee0cdb02ab3a8ff3c3b1a98599bc24245da342f"
+        },
+        "description": {
+          "sourceText": "When it finds its prey, it unleashes a mighty torrent, sweeping the entire area. More often than not, the prey gets swept away in the chaos, leaving one to wonder whether this truly counts as hunting.",
+          "sourceSha256": "306100163e670e13d07fea555d62a34d2e2a64409199a0fa42280bc5555682e7"
+        }
+      }
+    },
+    {
+      "id": "felbat",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Felbat",
+          "sourceSha256": "c8e2238c9542e370e18ae2dc054ece88e0202b4f24ff5f726efa897cec2b69ff"
+        },
+        "description": {
+          "sourceText": "Attacking from the shadows, this Pal traps its prey within its cloak-like wings. It's probably best not to know what happens within them, or why the inside of its wings are stained red.",
+          "sourceSha256": "b38f28880023150519a9cc426f284d8bd7c5b9644976a3d98cc149b2bba8ecde"
+        }
+      }
+    },
+    {
+      "id": "fenglope",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Fenglope",
+          "sourceSha256": "02dbff02e4ee1b92e05ab25922faeafc097ae55f9f42d47666e86a4a631dee3d"
+        },
+        "description": {
+          "sourceText": "In ages past, its beautiful visage was a common sight in paintings. As time passed, its beautiful pelt and antlers were often seen in works of art.",
+          "sourceSha256": "e01b983f8eba0eebda828b93b1748ae76ff267b36140450cbdcdaf783ba44af2"
+        }
+      }
+    },
+    {
+      "id": "fenglope-lux",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Fenglope Lux",
+          "sourceSha256": "58bde1c7f29e4bd5a1a0b9642002cd492659a51ebcc9e5d3b33cd27c00d43702"
+        },
+        "description": {
+          "sourceText": "In ages past, it was believed that drawing a picture of Fenglope Lux would result in being struck down by lightning. As time passes, artworks depicting Fenglope Lux became revered as charms to ward off lightning, making them a common presence.",
+          "sourceSha256": "ba574f9ea1a23b42e119e7bc5ac9fdbff93fa3d51a309056b20b7a4c3c0de862"
+        }
+      }
+    },
+    {
+      "id": "finsider",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Finsider",
+          "sourceSha256": "5d94dfbb92b8523cb29e6af8342bad15a75f756953fbcfc61c6211f2c7866752"
+        },
+        "description": {
+          "sourceText": "It looks like something is peeking out from inside a costume, but even if you reach inside, there’s nothing there. In fact, you can keep reaching deeper and deeper. Perhaps the universe itself lies within.",
+          "sourceSha256": "b3575e16465480e48e397b8bbf45ab8351b8aedcb20ad31df3c3731ea6bfc30d"
+        }
+      }
+    },
+    {
+      "id": "finsider-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Finsider Ignis",
+          "sourceSha256": "337b255b20ff822892b33ef9d109be143022244b45b94a8ee5bf5b8237dc4517"
+        },
+        "description": {
+          "sourceText": "Even if you reach into its mouth, there’s nothing inside—it just keeps going. Thinking it might be an interdimensional space, one researcher tried climbing in like a sleeping bag. But when the gag reflex kicked in, they realized... it’s definitely part of the creature’s body.",
+          "sourceSha256": "e0e0679f971c05989f31962dc461816592fb11ec3acba454af2aa8357008cf06"
+        }
+      }
+    },
+    {
+      "id": "flambelle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Flambelle",
+          "sourceSha256": "cad1c828ceb217a9fc4b2f64fae0d2cc6d981e9fbeede8c69ce6510ab7311927"
+        },
+        "description": {
+          "sourceText": "When it starts crying, this Pal produces magma in place of tears. The magma that pours out is absorbed back into its body, causing it to get hotter and hotter. The more it cries, the stronger it becomes.",
+          "sourceSha256": "dc2a6fb8d6a1aa2a1b2215422e89ddadac7406ee1dccf06bb147101be4ba3c8b"
+        }
+      }
+    },
+    {
+      "id": "flaracle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Flaracle",
+          "sourceSha256": "0a0f80fea5311c5736582d5a9e40e8ded60701b1462f02610bd251c02b57eb81"
+        },
+        "description": {
+          "sourceText": "It focuses its mind and reads the future through flames. Should it glimpse an inconvenient destiny, it relentlessly rerolls the prophecy until it gets a favorable result. That is why the future of Flaracle is always exceptionally bright!",
+          "sourceSha256": "ef994d9d00ee7336fbd562775df35f80425a5265ad75e1d4642fe152b16e2901"
+        }
+      }
+    },
+    {
+      "id": "flopie",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Flopie",
+          "sourceSha256": "6b171a568d2151562f53979745bc367ee9a869e525ab389f2ab25f4b46ae5736"
+        },
+        "description": {
+          "sourceText": "It prefers places that have an abundance of vegetation, but hay fever has apparently become a problem for Flopie as of late.",
+          "sourceSha256": "ee1119a6981a792c254abfece26eda66b6f94affdd1c9ae6f9f94dfe352aa153"
+        }
+      }
+    },
+    {
+      "id": "foxcicle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Foxcicle",
+          "sourceSha256": "48e01ce98879ed6437e7c0a8681aff65de04aaade770e27a6298c33ca9471f91"
+        },
+        "description": {
+          "sourceText": "On nights when the aurora is visible, it looks up towards the sky and begins to howl a beautiful song. This does, however, leave it vulnerable to attacks from enemies.",
+          "sourceSha256": "aa6425de4c85a3a0bb3069ec8fca7f4d25594e70630b571f6b0e611acc5f5b1b"
+        }
+      }
+    },
+    {
+      "id": "foxparks",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Foxparks",
+          "sourceSha256": "4efd836b8b477fb48c6999a88e604cb917f6ac4ee4721b7c2b838228ae5adc58"
+        },
+        "description": {
+          "sourceText": "It is unskilled at controlling fire from the moment it is born and tends to choke on the flames it breathes unintentionally. Foxparks sneezes are one of the leading causes of forest fires.",
+          "sourceSha256": "af238e7244c6e1b722fcab2c4db5de56de87ec31b30a84a81c9e70d61c922d50"
+        }
+      }
+    },
+    {
+      "id": "foxparks-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Foxparks Cryst",
+          "sourceSha256": "2c3cbd019aa46d865584c374abdff9cb619d5d88c959a0e0d6d2bad5c0adbabb"
+        },
+        "description": {
+          "sourceText": "It is unskilled at controlling cold air from the moment it is born and tends to choke on the frost it breathes unintentionally. When Foxparks Cryst catches a cold, its nasal discharge freezes, making it difficult to breathe and causing it to panic.",
+          "sourceSha256": "2af15999c821546fdce8d027da3c0a576e9a1a49dc64f0864663a53e95785be6"
+        }
+      }
+    },
+    {
+      "id": "frostallion",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Frostallion",
+          "sourceSha256": "642809a9a3a699e70b072cd41dd513744953873d3f6051d198e1a23b027ffda2"
+        },
+        "description": {
+          "sourceText": "Guardian deity of Palpagos Island, known as the Winter Caller. In the past, when a calamity struck the land, it soared into the sky and sealed away the threat by casting the island into eternal winter.",
+          "sourceSha256": "9a74591a3238d3f8f29f8719d1ef029650500caac648d0602a05326805c3cda7"
+        }
+      }
+    },
+    {
+      "id": "frostallion-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Frostallion Noct",
+          "sourceSha256": "79d549031da5537e771c0a8f4b1d723958dab44a347d4c4e467675bc30546517"
+        },
+        "description": {
+          "sourceText": "Guardian deity of Palpagos Island, known as the Night Caller. In the past, when a calamity struck the land, it soared into the sky and sealed away the threat by casting the island into eternal darkness.",
+          "sourceSha256": "294e53e35b1ceaa77c7deb46ec879a1ac132e368e3904ef99f1897c2073eeb50"
+        }
+      }
+    },
+    {
+      "id": "frostplume",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Frostplume",
+          "sourceSha256": "48b028f3faa2e96aaacd2a4fbc12402cd4e08f19bf645d750eb8e71af8d8dd49"
+        },
+        "description": {
+          "sourceText": "So precise is its sense of time that it awakens at the exact same hour every morning. According to Palpagos lore, a day was divided into 24 parts because when Frostplume spreads its tail feathers wide, it reveals a pattern with 24 distinct spaces.",
+          "sourceSha256": "530dfdbabf68183dc6ef372bfdc935a888d478b51dcdddc140f6518e314ef362"
+        }
+      }
+    },
+    {
+      "id": "fuack",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Fuack",
+          "sourceSha256": "40d86a0cd65f8abfd222782c73b32a2bbc81701dcd895c379d4044a10883a558"
+        },
+        "description": {
+          "sourceText": "Using its own body water, this Pal can create waves anywhere. It body surfs when in a hurry, but the resulting speed often ends in a fatal collision.",
+          "sourceSha256": "310b14f14d557a1266ca9d37a1042abbd986a8a9d5870e31efcea47f9c1e0bbf"
+        }
+      }
+    },
+    {
+      "id": "fuack-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Fuack Ignis",
+          "sourceSha256": "3753e5b928fc82b11f4e6aad638a15d1e0072d3fc68f49834bb2b4cb689779e2"
+        },
+        "description": {
+          "sourceText": "With a belly built for friction, this Pal sparks flames as it body surfs. But when it gets carried away, it often ends up a rolling fireball.",
+          "sourceSha256": "8e5abddea1f760dca39c17f3abbf245ae940c7fc696412203a623f7873d090fc"
+        }
+      }
+    },
+    {
+      "id": "fuddler",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Fuddler",
+          "sourceSha256": "a88763a1a0b5bf8a79a7c6ebbe9ec4366e60b9f3b36c1c62abdc913a7dd0797e"
+        },
+        "description": {
+          "sourceText": "Its large claws boast of diamond-like hardness. However, sharpening these claws consumes most of its energy, leading it to sometimes spending entire days doing nothing else.",
+          "sourceSha256": "df229fc99c9d2cd67ded6dcc664978134797de35d3d0b9c8d9368e254d8d177a"
+        }
+      }
+    },
+    {
+      "id": "galeclaw",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Galeclaw",
+          "sourceSha256": "3dda8416b8f19e8f3317c6baf8f70f2236d821dc2be2740e3d97cbd5e42c9036"
+        },
+        "description": {
+          "sourceText": "A Pal that can easily take flight even while grasping a human. It is, however, prone to letting go when tired, which has led to the sudden demise of more than a few souls.",
+          "sourceSha256": "918d3cad1960f5806267cb2eaa6e0604fea4b474da2f86839d3231fb28250f4b"
+        }
+      }
+    },
+    {
+      "id": "ghangler",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Ghangler",
+          "sourceSha256": "ddb2b141ccffaeaccd30314505242caa6495972a07b9b20fdc6bd9f5e8477919"
+        },
+        "description": {
+          "sourceText": "With its shining lure, it illuminates the darkness. The wandering Pals drawn in by the light stand no chance of escape once spotted by Ghangler. No matter how far, it will keep guiding them until they get home safe and sound.",
+          "sourceSha256": "8a71864a1ef4c1235e33ec860c0ccd73b75965b335a26a0df17d642d2cfb4400"
+        }
+      }
+    },
+    {
+      "id": "ghangler-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Ghangler Ignis",
+          "sourceSha256": "76c1e57278c077984528162a025ada13aff5624834dba84f81a230425ff1591f"
+        },
+        "description": {
+          "sourceText": "Its blazing lure doubles as a grill for roasting prey. Drawn in by the delicious aroma, Pals have no hope of escape once Ghangler Ignis sets its sights on them. In the end, they’re treated to a hearty meal—until everyone’s full.",
+          "sourceSha256": "55f12c8760323263b44cac5ecbdac5431eccd36226f96a200687c808072ab9c0"
+        }
+      }
+    },
+    {
+      "id": "gildane",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gildane",
+          "sourceSha256": "476300d76c90d443f9781732a8ef6219bcf27bba139103a438e09ebd5f242331"
+        },
+        "description": {
+          "sourceText": "During the golden age of alchemy on the island, its ever-glowing golden fur was highly prized as a catalyst for transmuting gold. In time, a remarkable revelation was made: the same golden hue could be achieved simply by processing its mane.",
+          "sourceSha256": "25382ad5a737a7b62a35ab76a3322eb1243e6ab8909f63aa4bcc827d48288ea7"
+        }
+      }
+    },
+    {
+      "id": "gildra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gildra",
+          "sourceSha256": "0b6b50a358445330f73f991793689b54b20bf2ea674fffe82f7f209bd338cd13"
+        },
+        "description": {
+          "sourceText": "The golden, bandage-like organs covering its body are highly elastic. However, they are prone to tearing under extremely dry conditions, so daily moisture checks are absolutely essential.",
+          "sourceSha256": "81995327ffafaa45e1499c2f57bb950463713f7ed9747d1f31a35e029d673345"
+        }
+      }
+    },
+    {
+      "id": "gloopie",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gloopie",
+          "sourceSha256": "d2ac406fc824daf1bf3b4d32feb57158fd440051ce4ba5237a97b79c78736317"
+        }
+      }
+    },
+    {
+      "id": "gloopie-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gloopie Primo",
+          "sourceSha256": "51dccfc90965c0e99de5f1eac351be193a80ff478df4d7a2ba90107479dd485b"
+        },
+        "description": {
+          "sourceText": "Be sure to check your plans for the next day before falling asleep with this Pal. Its suction cups leave marks that look suspiciously like bite marks. One sleepy cuddle session could lead to some truly unnecessary concern.",
+          "sourceSha256": "a5019755f6b5bd2f8047955f6e799072f258a74aeffdd7965001849b1a8e4c2d"
+        }
+      }
+    },
+    {
+      "id": "gobfin",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gobfin",
+          "sourceSha256": "8d298769ace356efa3f22ac8f41948dd038b77918bbd05b84c8df00316350ccd"
+        },
+        "description": {
+          "sourceText": "Long ago, it was a giant and powerful aquatic Pal. However, as food became scarce, it evolved to live on land. Since walking requires much energy, it gradually became smaller and is now a small and puny Pal.",
+          "sourceSha256": "63c3dc78e9f3e9d107c85083a2282b7379ebb9c8f06fdde6b02ca9ae80d948e8"
+        }
+      }
+    },
+    {
+      "id": "gobfin-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gobfin Ignis",
+          "sourceSha256": "22935c173f44e4edc4a84188edf457b0503dbd0c308e2df8e226367f19f5c222"
+        },
+        "description": {
+          "sourceText": "Long ago, it was a giant and powerful aquatic Pal. However, as food became scarce, it evolved to live on land. Since walking burns many calories, it astonishingly awakened its power to control fire!",
+          "sourceSha256": "25b9d0c353bcf42f29d036999f540c00983cad431b64a105ad42398f78480cd4"
+        }
+      }
+    },
+    {
+      "id": "gorirat",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gorirat",
+          "sourceSha256": "ae334e4def565cfd3067cd131b9b2e85dd689f64083c173968a11093abd0a013"
+        },
+        "description": {
+          "sourceText": "It beats the ground rhythmically to communicate with its comrades. The meaning of each rhythm differs by troop, but the distinction between them is still largely unknown.",
+          "sourceSha256": "b521b870bec01057f81db0b8ec9c528f5d546852c9d3ffd94d16b08df23bbc62"
+        }
+      }
+    },
+    {
+      "id": "gorirat-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Gorirat Terra",
+          "sourceSha256": "0b181962b557a93bd07d0043f55a894ec6e81a113e4f94baa6c04ba9d3599b3a"
+        },
+        "description": {
+          "sourceText": "It beats the ground rhythmically to communicate with its comrades. Stronger than Gorirat, if every Gorirat Terra hit the ground at the same time, the island would sink in 1 second.",
+          "sourceSha256": "81fa132b75a9024b0ae706d2b672bbf5f7c1780ced210629f12daecf2cf9b444"
+        }
+      }
+    },
+    {
+      "id": "grintale",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Grintale",
+          "sourceSha256": "288b12a06e5a4b47360b2944a800723571cc0f5b00dc1191c29d5cbbaee3c15a"
+        },
+        "description": {
+          "sourceText": "Grintale's eyes light up the moment anyone enters its territory. This is no figure of speech—its eyes literally light up.",
+          "sourceSha256": "158986e22c82290bf587a5207cead4635e2f9f266c6d2baf4cb0925c56170abf"
+        }
+      }
+    },
+    {
+      "id": "grizzbolt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Grizzbolt",
+          "sourceSha256": "46956cf33c2be5c8b504c727bb6aaa4115636e67e7563d8a91881db81303b4fc"
+        },
+        "description": {
+          "sourceText": "With a friendly smile and a hardy physique, it is docile towards one it recognizes as a partner. For reasons unexplained, its personality undergoes a drastic change when wielding a minigun.",
+          "sourceSha256": "a923f84b869c46efb1ee4d5069ce1345daf34b8004946ff5bc42780472104b3c"
+        }
+      }
+    }
+  ]
+}

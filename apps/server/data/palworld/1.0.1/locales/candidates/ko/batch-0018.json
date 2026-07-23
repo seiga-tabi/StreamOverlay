@@ -1,0 +1,2838 @@
+{
+  "locale": "ko",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "755ea0909e43cb36ce046e2fe622d35fb41a0b9233e8e54b8e92b0f2d29351eb",
+          "status": "machine_assisted",
+          "text": "활성화되었을 때 불검치는 플레이어의 카타나(공격자: 2900/3000/3300/3700/4200)가 된다. 그것이 정상적인 형태로 빨리 되돌아 가지 않는다면. 불검치는 무능력하게 될 것이다. 또한 Iaigiri를 사용하면 무능력 해집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff608c8a8cfc9cacf7445b92cd45a1608b8abf15741f550eec717001f81ada89",
+          "status": "machine_assisted",
+          "text": "Seared 물고기 필렛"
+        }
+      },
+      "id": "partner-skutlass-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c5372594ea99257687ba26adf2d6d1817ef05514a1d7b58d038b382de38e05ae",
+          "status": "machine_assisted",
+          "text": "기지에 있는 동안 다른 모든 기지 Pal의 냉각 작업 적합성 수준을 +1 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c34698d0022edc6131c44187d30fd266f2893ad13ae6203faf8e6403ad7f6ad9",
+          "status": "machine_assisted",
+          "text": "Cryo 본능"
+        }
+      },
+      "id": "partner-smokie-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b522da3339da509126137074eebb6bd8f159d6a32bffba1f1c517fdc68689703",
+          "status": "machine_assisted",
+          "text": "파티에서 플레이어의 공격은 Electrify 2를 공격한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8aca20150cd4be593dd0402cc3f11aca5339ba6481700f7455dd40a8cbf886e3",
+          "status": "machine_assisted",
+          "text": "위탁 포탄"
+        }
+      },
+      "id": "partner-snock",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0168db2c132554475be63fdedc9569890ebd809e9688c98a8c8abd201053d480",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 플레이어와 파티 Pal는 물 피해가 15% 감소하고, 담금질에 면역이 된다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c67bba0f7b692b8466d86384c4ff19986768ae5564bae0fa9d06074a669f361b",
+          "status": "machine_assisted",
+          "text": "지금 연락"
+        }
+      },
+      "id": "partner-snock-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "99bcca614217e3b90182ee04c6d37a4e45ec46442c24185b735777e99d461dec",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 적에게 탐지될 확률을 줄이다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6ba2037c8877dfe357768c4b2c4675bff5c972897efd934d405e171ec55e39dd",
+          "status": "machine_assisted",
+          "text": "보이지 않는 눈"
+        }
+      },
+      "id": "partner-snugloo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a01bab0d7905a46ead3a12d7b4abe734e594fa5b43b3659e8ff7a8570eafdf79",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 파티에 있는 모든 Pal가 다른 종인 경우 플레이어의 공격력이 30% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "698ccd8adf840da0ac4c511fe9a5f1de3d3e854241d99c2e5d43c11ff5101937",
+          "status": "machine_assisted",
+          "text": "Untainted 처녀는"
+        }
+      },
+      "id": "partner-solenne",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7a6d2fcbe8dc49dd1169e4232768023430cb71e1fb36017804a0b1e77b7d9166",
+          "status": "machine_assisted",
+          "text": "물 위에서 여행 할 수 있다. 파티에서 재능있는 Pal를 쉽게 낚을 수 있다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "166c7f2fa3bd0a76e816851fa699c8c85b91431654785ac6fe02f32c607113a5",
+          "status": "machine_assisted",
+          "text": "매력적인 물고기"
+        }
+      },
+      "id": "partner-solmora",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d4edb1695382f05254e27a0cf3cc9157f41b8e73c11a5ce5c281e6e729cecfa9",
+          "status": "machine_assisted",
+          "text": "물 위에서 여행 할 수 있다. 장착 시, 플레이어의 공격 유형을 전기로 변경하고 공격력을 1% 증가시킨다. 파티에서 재능있는 Pal를 쉽게 낚을 수 있다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "63cc19908a6a742242600176ea605af700f62811c9dd191a9d06733fa2a13b1a",
+          "status": "machine_assisted",
+          "text": "충격적인 물고기"
+        }
+      },
+      "id": "partner-solmora-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5a49d2059deda4eceb4605a907a5f224b6ed0b3ea07ba353e53ff613b91ea50e",
+          "status": "machine_assisted",
+          "text": "파티에서 플레이어와 파티 Pal는 중립 피해가 15% 감소한다. (적재하지 않습니다) 때때로 목장에 할당 할 때 뼈를 파고."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e67243c07560e96077d9b8474e7c2d5a22a87bdb7b71891d42329a64c332b2aa",
+          "status": "machine_assisted",
+          "text": "무덤 강도"
+        }
+      },
+      "id": "partner-sootseer",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7cb98c60860efa7121eb4aaadcb7159cd148141c7d915a95e1b806a671ce2faf",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 아이비 커버로 고통받는 Pal의 포획률을 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ad46e81b488adefd2a160d4c8afe39b0678fc990484ef6707ae7e30e3f4a3542",
+          "status": "machine_assisted",
+          "text": "솜털 요정"
+        }
+      },
+      "id": "partner-souffline",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "95976459a35cf7132dc6e9f1d8d21e0a03c0b0f6187e8f31af8eabd56c00581f",
+          "status": "machine_assisted",
+          "text": "파티 중에는 전기 Pal의 공격력이 15% 증가한다. (적재하지 않습니다) 때때로 목장에 할당 할 때 전기 오르간을 떨어 뜨립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2db1d089d884bb152eca44dbe20eb0d694d8f23006c1d53007bf9ede1c52a8ab",
+          "status": "machine_assisted",
+          "text": "정전기"
+        }
+      },
+      "id": "partner-sparkit",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "75f9dafbae94991b096e44553480ea392245567fcadaa9c4470e775e57e034f6",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 점프하는 동안 점프 능력을 향상시킨다. 이 Pal의 이동 속도는 밤에 +50% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a6d088b67d1446d00029559cf0ac6a841ef055b780d734227177450da9fb0e6b",
+          "status": "machine_assisted",
+          "text": "밤 댄서"
+        }
+      },
+      "id": "partner-starryon",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1efa1f5874ad0fc67faf33e7e4aa2567e1fd143cc48e6ee9a01c50c34d92ea29",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 점프 파워를 높이다. 이 Pal의 이동 속도는 파티에서 서로 중립적인 Pal에 대해 5% 증가한다. (라이트롯 제외)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "001587723b1e57ac94bc2c9b16cb4ae2de8ce8d7c025fc2e81100b03e494115e",
+          "status": "machine_assisted",
+          "text": "빛 댄서"
+        }
+      },
+      "id": "partner-starryon-primo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0b124e9561d4ea5b4a8b545098c2f821868edb163c8a5db10239809da3979e64",
+          "status": "machine_assisted",
+          "text": "물 위에서 여행 할 수 있다. 때로는 목장에 할당 할 때 가죽을 떨어 뜨립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9cad28bd6a8eb328dc8bb15caba84fd47f2cbd58297ddf73afc65eb5b65b5ab2",
+          "status": "machine_assisted",
+          "text": "스위프트 수영"
+        }
+      },
+      "id": "partner-surfent",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c26cfbe52f2c38272aca0360992a51f3e02f49649f3d201fdcfc4c818f84e4b5",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에서 플레이어의 공격은 Muddy 2를 공격한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1739ccad0304405d3fc58bd4a24a765def8244c9a4d6b1a52bfb3d0020f4b0ce",
+          "status": "machine_assisted",
+          "text": "모래 수영"
+        }
+      },
+      "id": "partner-surfent-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "73ef414f9fbfc2da8a766a033cd0137051144d89becb3f854d5b169162c1d30a",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 이 Pal의 이동 속도는 파티에서 서로 다른 불 에 대해 5% 증가한다. (주작 제외)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bda1cc1933c10717659b6db702fea91e53a7ba51bc51d0c8fc01c9610bcde646",
+          "status": "machine_assisted",
+          "text": "불꽃의 날개"
+        }
+      },
+      "id": "partner-suzaku",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bd66f205d50d574e61a406b892194f923d1bd288ef216a1b6322d5a0c90ebd65",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 이 Pal의 이동 속도는 파티에서 서로 물 에 대해 5% 증가한다. (시바 제외)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3f536e5deaa42766e62e943a72796565bfdb35c24d161d47b008503510b89766",
+          "status": "machine_assisted",
+          "text": "물의 날개"
+        }
+      },
+      "id": "partner-suzaku-aqua",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "279eb87e218533ce2bfc0b230dd0048cb2243261b92471c64205d084b68d755e",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 모프킹의 공격과 방어가 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "66443efe6ecf5853e9fc80b2250986d9606b07f1d15b1a0a1d5bd1eeeed7a153",
+          "status": "machine_assisted",
+          "text": "플러피"
+        }
+      },
+      "id": "partner-swee",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e34d1404af5e22df4646fe7b1305cb157266a9028f782d3970f51592fd233392",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 이 Pal의 공격과 방어는 각 모프링 당 12% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "05a0c9636ebc01e23f678fcfa348df2c6cbd24c67117672f548ef65bf58ed57d",
+          "status": "machine_assisted",
+          "text": "플러프의 왕"
+        }
+      },
+      "id": "partner-sweepa",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3f7f5595a5795fb759704285e961534250004e0678d58e616870766eb18e902a",
+          "status": "machine_assisted",
+          "text": "몽지가 활성화되면 일정 시간 동안 주변 적에게 무자비하게 돌격소총을 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d6b7d5da98b186b11ebc450b80d362d491cebeff6414177f970f925d47d72a56",
+          "status": "machine_assisted",
+          "text": "쾌활한 소총"
+        }
+      },
+      "id": "partner-tanzee",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b38c16dcba943e134c169a158a2310b39911019f176b2af559d1666aacdefd78",
+          "status": "machine_assisted",
+          "text": "몽화가 활성화되면 일정 시간 동안 주변 적에게 무자비하게 사격을 가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "70affed7ec8f2a28a5e1ea6ea3261ec32a08f0d42a704032e7055a7b63612ac1",
+          "status": "machine_assisted",
+          "text": "치퍼 침팬지 총소리"
+        }
+      },
+      "id": "partner-tanzee-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5652bbaafcf3b081300c6e082a870368224a7590683ab593873d66b5d1063fa2",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 생명력이 20% 이하로 떨어지면 플레이어의 생명력의 30%를 회복한다. (중첩되지 않음) (활성화 후 120초의 재사용 대기시간)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5e936ee908b7088d280d65ee8719205ce58bcfd996e498ea61440f41e33d528b",
+          "status": "machine_assisted",
+          "text": "수딩 샤워"
+        }
+      },
+      "id": "partner-teafant",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d37256b51fc738638e0ea5ef15b1a38b5d5ebc2191231d7397b5d1b7c932c848",
+          "status": "machine_assisted",
+          "text": "기지에 있는 동안, 다른 모든 기지 Pal의 채굴 작업 적합성 수준을 +1 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7012f6bf1d9d53cfa032e19d3aaa3e89343e5bf1605652f9647652fa1cfaaa7d",
+          "status": "machine_assisted",
+          "text": "프리메이슨 Archelon"
+        }
+      },
+      "id": "partner-tetroise",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "316d115a3a93f10783a40df238f67129a9786b126e01b8cba9ed6e0034b3c795",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안 모든 무기와 방어구의 내구성을 80% 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "71bbda18dacebd049098f0189e90951b750886bafd4b1b7bd1486b6aa6afb2d1",
+          "status": "machine_assisted",
+          "text": "돌-체이서 아켈론"
+        }
+      },
+      "id": "partner-tetroise-primo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8c7cf5485af55c64667ac4167ecfd84a5f226503f51d1af85da9ef1a9b2903f7",
+          "status": "machine_assisted",
+          "text": "활성화되면 플레이어에게 장비를 장착하고 달걀 발사기로 변신한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "81675a9c66ceab807eb92d24d2d17d8d574c46dfacd12b12f7496bff26fd09ca",
+          "status": "machine_assisted",
+          "text": "Eggbomb 실행기"
+        }
+      },
+      "id": "partner-tocotoco",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b97eb05d7b2f1f15db9bfd5b2dd6fd8f74e992c93f055ce84d545993d58b75a1",
+          "status": "machine_assisted",
+          "text": "활성화되면 초음파를 사용하여 근처 던전, 보물 상자 및 스크랩을 감지한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2491a482b27b149d2aa176044812eab8429a29cee5ff010cd9e72db1daf30335",
+          "status": "machine_assisted",
+          "text": "초음파 감지기"
+        }
+      },
+      "id": "partner-tombat",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "743432c5e49319ba26e119e7172fb1a96beabdf765e9aa8d5f0e4ef9679401e0",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 닷지 롤과 닷지 단계 동안 무적 기간을 15% 연장한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "919b8f09e524c30f075957998c197f91a4462147a1cf97b2a4488dbe2590d76b",
+          "status": "machine_assisted",
+          "text": "꽃춤"
+        }
+      },
+      "id": "partner-tropicaw",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b8c88cf1eb1b6ef351fdba81bff53589cd619be31fcc4fbea39201c87942cc6c",
+          "status": "machine_assisted",
+          "text": "파티하는 동안, 80%로 광석 무게를 줄일 수 있다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5aae23b038a5b981f34655dcb305464d527440c62d4240df7af78be5c0630920",
+          "status": "machine_assisted",
+          "text": "스파이키 캐리어"
+        }
+      },
+      "id": "partner-turtacle",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "25e0b457002770b910c958e3ae7c01f5e660c8e1c0e7715af597035af9e4b1cb",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 황과 석탄의 무게를 80%까지 감소시킨다. 또한 플레이어와 Pal의 지면 피해가 80% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1426e991e49b44ac4809b4a6e9300c759369a912a6f2bfbebf2289b98383255c",
+          "status": "machine_assisted",
+          "text": "샤이니 홀러"
+        }
+      },
+      "id": "partner-turtacle-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cdfdb0024761b327bed854d3eb96678f5b9f5a64be71990ca1f0ca1513d94733",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안 플레이어의 공격력과 Pal의 전기 공격력이 25% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a4ad9f4c721d4467e56742e7ecd1c8637e06cf9808846021858a4d45bc31adf5",
+          "status": "machine_assisted",
+          "text": "스위프트 신"
+        }
+      },
+      "id": "partner-univolt",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ec123fb069a9dfe8713b277f4f81937ec10070b1e468d2d073ac8d3c15077e9a",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 장착 시, 플레이어의 공격 유형을 얼음으로 변경하고 공격력을 1% 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8434907147ccccf158484cf1d276f22c0eaff4f022fbc4270db417b4d5971ca0",
+          "status": "machine_assisted",
+          "text": "냉혹한 신"
+        }
+      },
+      "id": "partner-univolt-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e2ae9544b83ca9b14853a9d872ee23ba59a49ed003938cdd6bc63cc4c2e85a4d",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 그라운드 Pal는 패배했을 때 40% 더 많은 아이템을 드롭한다. (적재하지 않음) 때때로 목장에 할당 할 때 다양한 씨앗을 떨어 뜨립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9ab4e4e14e1570ec1507cf936840f8b5fa837b32df849496cf91e237fe3f548e",
+          "status": "machine_assisted",
+          "text": "가이아의 정화"
+        }
+      },
+      "id": "partner-vaelet",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "818e0183fd871c5e44b16e8ca66ea94b17e51b9546951f964c31c480bd9970ed",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 플레이어에게 중력의 영향을 줄이면서 점프와 낙하를 하는 동안 플레이어들을 더 부유하게 만듭니다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9bab9aa9d5aa83c1f680640071ef76dcf96e8edd19ad681c3b156dbd08a044f9",
+          "status": "machine_assisted",
+          "text": "큰 스트레치"
+        }
+      },
+      "id": "partner-valentail",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "090eebf82180c0ac6820f540f0fb92de2af1fc53bb7160629cac29dc6555a935",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 파티에 있는 동안 플레이어의 피해량이 20% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3a5ec207bb14c59cdde1295007c38023876c1a6d460c9a1754c8b596a4db5947",
+          "status": "machine_assisted",
+          "text": "공중 Marauder입니다"
+        }
+      },
+      "id": "partner-vanwyrm",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0cd32dc5ce6ef806517e8112a0b78337b88a4f2ad82bf3b78cf132b1f7d47359",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 파티에 있는 동안 플레이어의 피해량이 30% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3a5ec207bb14c59cdde1295007c38023876c1a6d460c9a1754c8b596a4db5947",
+          "status": "machine_assisted",
+          "text": "공중 Marauder입니다"
+        }
+      },
+      "id": "partner-vanwyrm-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c20007a637ee2db67090a7ccc71c0cb6f10fe9e20f89877007ab4549149cbf2e",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 플레이어의 공격은 블라인드 2를 가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "846ca51ece2687e18f96cdece42469cff328d6bf10b51aa48c61c000d2e91dec",
+          "status": "machine_assisted",
+          "text": "스네이크의 Sagacity"
+        }
+      },
+      "id": "partner-venusa",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f6175a3720eb66951bcf39c46eda847fa3c17bafe0acb73557b904e35ffbd98",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 점프 1개와 공중 대시 1개를 추가로 획득할 수 있다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca81964f9ba63df8570d6eb1cdd8722dd91afa4f06bf3031013b0a3172573bb2",
+          "status": "machine_assisted",
+          "text": "Gymnast 잔디"
+        }
+      },
+      "id": "partner-verdash",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8d3976626816d7036602c0988ea8ee5c029beb67fb3ed4c95c234815bcd56bfc",
+          "status": "machine_assisted",
+          "text": "때때로 목장에 할당 할 때 땅에서 항목을 발굴."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "adf90205afba4adcbb7d6d5cdb7a8d858517dbf592f47197b62293eaa4ac53e7",
+          "status": "machine_assisted",
+          "text": "여기 파세요!"
+        }
+      },
+      "id": "partner-vixy",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bfdd0f9a4dd2927164fcbcda304d331a9fbe353e679256edb679909a7c894d65",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 근접 공격이 5히트 적중한 뒤 5초 안에 플레이어 주변에 보호막을 생성한다. 효과는 중첩되지 않는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8001856d639eeb9e156b8cdb451e334c44e7d3bb9b65b1a6ac561d65556ca6ca",
+          "status": "machine_assisted",
+          "text": "캐스트-아이언 쉘"
+        }
+      },
+      "id": "partner-warsect",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "43a32d2ea23ac791c767d2722d09a133f5a34b30b0cd65bd06ca166bd5b30ad0",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안 낚시 미니게임은 평소보다 7% 높은 낚시 게이지로 시작한다. 그리고 막대가 겹치는 동안 캡처 진행률이 9% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "03df2c8e76fa7d50cbe2a72fa1154aed63cc119fccec740dd46a72fd73e835f9",
+          "status": "machine_assisted",
+          "text": "코지 웨일 크루저"
+        }
+      },
+      "id": "partner-whalaska-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c99ea31be131db32df0914efd1577ea13396733a251c2e360e5d72ea2f1268e3",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 다시 보너스를 받을 때 캡처 속도를 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8ae27853748c5552e7682c6e061a1b6850bd8abbe8d7a7d0be098761dec4bda2",
+          "status": "machine_assisted",
+          "text": "치사적 인 고양이"
+        }
+      },
+      "id": "partner-wispaw",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "943c374fed58e2388403601b74a0f98a0eaaf9d62d4f01069c0675afff8267a8",
+          "status": "machine_assisted",
+          "text": "어둠의 Pal 방어력이 15% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76ab6c1fd91d6af15bc7923997061b8df2edf7dd3c3a6c518fc9ca3b50bd89d7",
+          "status": "machine_assisted",
+          "text": "숨겨진 어둠 에너지"
+        }
+      },
+      "id": "partner-wistella",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "50952c6842deb915dd8e353a3f524b26c430dc48f6242dea8c5156760cac86b5",
+          "status": "machine_assisted",
+          "text": "마호가 활성화되면 플레이어의 공격 유형이 불로 바뀌고 공격력이 30% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b0991a1eb0d0233db008efbb095598db592c35c1ebcbbc728a0a83b627559c78",
+          "status": "machine_assisted",
+          "text": "로드 폭스"
+        }
+      },
+      "id": "partner-wixen",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3ee2ddc74d8baf0948a189aa54ffbdfc16f5c09dbdb52f601f878f1f1bd21e25",
+          "status": "machine_assisted",
+          "text": "영마호가 활성화되면 플레이어의 공격 유형이 어둠으로 바뀌고 공격력이 30% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0e982ad93f229a2f05cc36ee0ba01432794ca61488ef8a983dd989ae0ee9ed28",
+          "status": "machine_assisted",
+          "text": "블랙 폭스 로드"
+        }
+      },
+      "id": "partner-wixen-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7ad8dc8138bc15a114bd0607b4f410b3507d1d446e6578ac3f364e53aceadb3c",
+          "status": "machine_assisted",
+          "text": "때로는 목장에 할당 할 때 코튼 캔디를 떨어 뜨립니다. 기지에 있는 동안, 기지 Pal의 기아 감소율을 -10% 감소시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bb406d3e2fe7a2aa4a4856f126542fff8332b0c84aadfbd7a8a022cdd4038ea4",
+          "status": "machine_assisted",
+          "text": "캔디 팝"
+        }
+      },
+      "id": "partner-woolipop",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "50d0ba7f28ab8412509d80d14ddd9550a804d062e71b487b20aabe26ca7a5996",
+          "status": "machine_assisted",
+          "text": "때때로 목장에 할당 할 때 캐러멜 코튼 캔디를 떨어 뜨립니다. 기지에 있는 동안, 기지 Pal의 기아 감소율을 -15% 감소시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fd418056b9154c25ab3d200e8b5ae718e4df980bfa5fb99604704013bfbde3a2",
+          "status": "machine_assisted",
+          "text": "비터 팝"
+        }
+      },
+      "id": "partner-woolipop-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7cd855451bab02bdf9e42f85f5e4f276d5cb664041b53553ca38c5e4a45db8b4",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 기지에 있는 동안, 다른 모든 기지 Pal에 대한 이동 작업 적합성 레벨이 +1 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dd8616216f8f2eabb1f708f9f5b15ea85ce0225005ea61d6e365a4b6c517107c",
+          "status": "machine_assisted",
+          "text": "눈 덮인 산의 수호자"
+        }
+      },
+      "id": "partner-wumpo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8c90ed4df054533f5a7fe4269db29224ff9aed2262a245ee4c225afb46daadd8",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안, 플레이어와 파티 Pal는 15%의 그라운드 데미지를 덜 받고 머디의 상태에 면역이 된다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4f1d38b83079c4c17172dc9c69bb738dd3e8abc5b661a6777ca03e5fef3bbdf0",
+          "status": "machine_assisted",
+          "text": "남부의 수호자"
+        }
+      },
+      "id": "partner-wumpo-botan",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "247c2f08dbc54db00d09827844c45db1ab4c37a17575fe58e32c3d766a42fe83",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안, 플레이어의 에너지 무기 공격력이 10% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3460f0678863abc1d1e48ac90873aecbbde5b01947c271e906b3e1dc2e712215",
+          "status": "machine_assisted",
+          "text": "알 수 없는 침입자"
+        }
+      },
+      "id": "partner-xenogard",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "def207b2f0f1eea714b0b6790646382bd05578ac1fff7b8443fed1b7cba58fb5",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 파티에 있는 동안, 무기 휘두르는 Pal의 파트너 기술에 의한 피해가 20% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "906fcc539f16ac29f7c4824bde6aec0b48dcbba77f4627e0df4c8d007eb38413",
+          "status": "machine_assisted",
+          "text": "유성 날개"
+        }
+      },
+      "id": "partner-xenolord",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "06c7a0487113a7618340dc49503802c57fb047844264c1252021a71e1bbc6829",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 완전 자동 무기에서 발사된 마지막 탄환의 공격력이 100% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca6405ff265dff435782b4b32ffad3b7144750da3b2d3811d7698f5a8a61dc5c",
+          "status": "machine_assisted",
+          "text": "알 수없는 침략자"
+        }
+      },
+      "id": "partner-xenovader",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4280234bf96c5f1b02b1d88dca40953de75da4e375a7d0938cc425ebc9daf451",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 함께 싸우는 동안, 15%는 이 Pal와 같은 패시브 스킬로 Pal를 만날 확률을 높였습니다. (특정 패시브 스킬 제외)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "82c1d82ba51350f067331ab710c791b8b921da1e4b427886c3f41c475ff2efb4",
+          "status": "machine_assisted",
+          "text": "깃털의 새"
+        }
+      },
+      "id": "partner-yakumo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4bdd0ba3d2a3846bbfa258bb823bb03589c639919b7fcc899ebc797f4b29b882",
+          "status": "machine_assisted",
+          "text": "공격력 +10%, 화재 피해 감소 15%, 번개 피해 감소 15%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "629abda941c140e5b9ded3aa6a294761a2ab23bbf968d175be4d60431196ad21",
+          "status": "machine_assisted",
+          "text": "다른 세상 의 세포 들"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7f2e78c14605652dd79c17524385059de04db6e269ce17051166893c0865f2ba",
+          "status": "machine_assisted",
+          "text": "공격, 피해"
+        }
+      },
+      "id": "passive-passive-alien-7fa1e23436",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "45481e2b2500e13fd4bb81085dbeb30084c601b7982be9f72027f788ab55c1c3",
+          "status": "machine_assisted",
+          "text": "액티브 스킬 재사용 대기시간 연장 -15%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "67e2dbcc25dfa289205052490ddd91c8470aec4a6191f901f27e47f746fa0f96",
+          "status": "machine_assisted",
+          "text": "이지고잉"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6df1bb18a59ab97df82e307b93fe4f3bbda34d531bcbb79ec573dda23ba64918",
+          "status": "machine_assisted",
+          "text": "기술"
+        }
+      },
+      "id": "passive-passive-cool-time-reduction-down-1-3cb8042ac5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "80cad6a2f18a7f4077d9dd156459af449d26be639fef3f40b6f2f6c5c428d88a",
+          "status": "machine_assisted",
+          "text": "스킬 재사용 대기시간 감소 30%, 공격력 +10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f1141226d2a19561c55dacdc72d1c947dd550b318ae217931222dbb5def3697",
+          "status": "machine_assisted",
+          "text": "세레니티"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4cd548f3cc29cf9c99a0134a971b1be03c8f6bf80ba8f03e174e030b0d292396",
+          "status": "machine_assisted",
+          "text": "공격"
+        }
+      },
+      "id": "passive-passive-cool-time-reduction-up-1-149b0a9ba1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fc677453c1c88881436d0388ef6731aa50bf4a3e1c9cb8d28ca1775d36d5a19d",
+          "status": "machine_assisted",
+          "text": "스킬 재사용 대기시간 감소 15%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3a64a798b39aaafdf1af8b5cbc7e6106f3e6d660eb2533915f9de547e38c0112",
+          "status": "machine_assisted",
+          "text": "임페션트"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6df1bb18a59ab97df82e307b93fe4f3bbda34d531bcbb79ec573dda23ba64918",
+          "status": "machine_assisted",
+          "text": "기술"
+        }
+      },
+      "id": "passive-passive-cool-time-reduction-up-2-2b0c9bee61",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cb1d026b9bacf4d37d7bdd3048b162f3cfa28c0950b2970907408c6d2c653e47",
+          "status": "machine_assisted",
+          "text": "일 속도 -10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c70f173cfd76693793ac133b3bbb2bc79fce03ee1ff75e0715cfcbb9f275aad1",
+          "status": "machine_assisted",
+          "text": "서투른"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9677c992b417c987985ff7fbb278ccdd96ade3d9c6868ed35201d8a598b667a",
+          "status": "machine_assisted",
+          "text": "일 속도"
+        }
+      },
+      "id": "passive-passive-craft-speed-down1-2a8d997bd0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7c31db040f5459e0431c2487831c25e0983a732d52e71ab2a676a45ee057fa83",
+          "status": "machine_assisted",
+          "text": "일 속도 -30%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "69549ff546d23c73eebd85b2edee0fe2d2b5cde5c21c576b476c463519f07a0d",
+          "status": "machine_assisted",
+          "text": "슬랙커는"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9677c992b417c987985ff7fbb278ccdd96ade3d9c6868ed35201d8a598b667a",
+          "status": "machine_assisted",
+          "text": "일 속도"
+        }
+      },
+      "id": "passive-passive-craft-speed-down2-365dff03b1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e386b6023c6b0642f87657e756822b4a4cb03256ec3717455dd5964e26c631fa",
+          "status": "machine_assisted",
+          "text": "일 속도 +20%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c173da2c2a4d4ca2930d8c094826016bd697cebeed949fe20eadf033f6b16037",
+          "status": "machine_assisted",
+          "text": "심각하다"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9677c992b417c987985ff7fbb278ccdd96ade3d9c6868ed35201d8a598b667a",
+          "status": "machine_assisted",
+          "text": "일 속도"
+        }
+      },
+      "id": "passive-passive-craft-speed-up1-bd91525958",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "454e4bcdc5fa5221cccaaa2d2f2ee8acf87c97e85c6160ede3ad32324ce842cd",
+          "status": "machine_assisted",
+          "text": "일 속도 +50%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "91117818f38f25e793c0889eef6ee5447c10d8945469c8451139df9996551725",
+          "status": "machine_assisted",
+          "text": "아티잔은"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9677c992b417c987985ff7fbb278ccdd96ade3d9c6868ed35201d8a598b667a",
+          "status": "machine_assisted",
+          "text": "일 속도"
+        }
+      },
+      "id": "passive-passive-craft-speed-up2-ecbcdfabde",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8c71cb84369534f48dd040f39118e7b52fe512bae1ab70bc7d9bd9afb0cde354",
+          "status": "machine_assisted",
+          "text": "방어 -10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6501635400ac09c7edf6dceafe3d18e96194f5693bdfe8540466c1143753d4fd",
+          "status": "machine_assisted",
+          "text": "다운트로든은"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb0cd01f69033376ecab889539e64b3ab229872a03df647b0ab37c713a416181",
+          "status": "machine_assisted",
+          "text": "방어 통계"
+        }
+      },
+      "id": "passive-passive-deffence-down1-5e3e3088c5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0e29f3bbd0f0c2fdcb932c54c63ef8e958b8401d90fc06385eb86a4c678284a3",
+          "status": "machine_assisted",
+          "text": "방어 -20%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f96144b2f2bf5281f72aad754bc4a89d92235d12dbe094c8679bad13e55915e2",
+          "status": "machine_assisted",
+          "text": "과민성"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb0cd01f69033376ecab889539e64b3ab229872a03df647b0ab37c713a416181",
+          "status": "machine_assisted",
+          "text": "방어 통계"
+        }
+      },
+      "id": "passive-passive-deffence-down2-69086f3cf0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c507de245655ec567f101bf5873f74cd04517ba160e5f18d67e6f27f617ee51c",
+          "status": "machine_assisted",
+          "text": "방어 10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "956915eeb191c4da6ce2fe6c339963c83f26b87ca122d903303921dc4d2f8c64",
+          "status": "machine_assisted",
+          "text": "지금 연락"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb0cd01f69033376ecab889539e64b3ab229872a03df647b0ab37c713a416181",
+          "status": "machine_assisted",
+          "text": "방어 통계"
+        }
+      },
+      "id": "passive-passive-deffence-up1-b0b7e9a164",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "57d49d6b8bef073c2bbc80f85d9bb33af88d6e1fbd770a66738d973c04d64327",
+          "status": "machine_assisted",
+          "text": "방어 20% 증가"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c3ed7df1a86912deef19c75001ce55d4348d794b726690a912f504ade549e8e3",
+          "status": "machine_assisted",
+          "text": "Burly 바디"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb0cd01f69033376ecab889539e64b3ab229872a03df647b0ab37c713a416181",
+          "status": "machine_assisted",
+          "text": "방어 통계"
+        }
+      },
+      "id": "passive-passive-deffence-up2-90aaea5348",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7e8b0de21006420a58c8b33614416769e13faa7b3657c867cd990589de62d59e",
+          "status": "machine_assisted",
+          "text": "물의 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "593e23198993e91c26711c5c61ed2a962d754e9fc30f84f9431218313bedf50b",
+          "status": "machine_assisted",
+          "text": "히드로마니악"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "21e1e8314419a64a7f9c8d834124111f8540375fa466ec79b6670fbb35283d95",
+          "status": "machine_assisted",
+          "text": "물 손상"
+        }
+      },
+      "id": "passive-passive-element-boost-aqua-1-pal-ef921d34d4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0716d1fbd31f0d3a2f7a0619bf934b85638a075c85376dbb3a02b9b40da5f8b3",
+          "status": "machine_assisted",
+          "text": "물의 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "69781a188415fa0719a3c2bf9485f30bba800e61afd50a998e748e57dd7aff51",
+          "status": "machine_assisted",
+          "text": "바다의 제왕"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "21e1e8314419a64a7f9c8d834124111f8540375fa466ec79b6670fbb35283d95",
+          "status": "machine_assisted",
+          "text": "물 손상"
+        }
+      },
+      "id": "passive-passive-element-boost-aqua-2-pal-3c79819c40",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "98ba0f282db9c4f7a797db8620fcac8fcce960cf3fedab26671f684d9ba80b04",
+          "status": "machine_assisted",
+          "text": "어둠의 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b96a84eae28377a01b44f24bc39225a908ce479f47d8524c14d218bece074270",
+          "status": "machine_assisted",
+          "text": "어둠의 베일"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e2f150862b5683d440fe24d934359a064dd0e6de24f69892a21a54ee59e9e14c",
+          "status": "machine_assisted",
+          "text": "다크 데미지"
+        }
+      },
+      "id": "passive-passive-element-boost-dark-1-pal-cdd58dd4b4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "403d3b8fdc40273c51b6d875424bb27c65f1c8f20ec395a574711d0f8ac6477e",
+          "status": "machine_assisted",
+          "text": "어둠의 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0b5df4811b952651224f6015f961f5a3f5d10baabd08172e999df4f713b7cda9",
+          "status": "machine_assisted",
+          "text": "지하세계의 제왕"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e2f150862b5683d440fe24d934359a064dd0e6de24f69892a21a54ee59e9e14c",
+          "status": "machine_assisted",
+          "text": "다크 데미지"
+        }
+      },
+      "id": "passive-passive-element-boost-dark-2-pal-d576b4c3dc",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8432f7b6c3da07f7501e7057a896fa7730aeb0d7b26ca1dc42a47a237e5b704e",
+          "status": "machine_assisted",
+          "text": "용의 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9e1e48854d66b6eae42fdda55ca8dec16f9dec31582c8995e0bdcad22f9a67c",
+          "status": "machine_assisted",
+          "text": "피의 용"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2ea0518d9a411a374670bbceadb58e40efb175684eb7ba58ceb0e5e1a615156b",
+          "status": "machine_assisted",
+          "text": "드래곤 데미지"
+        }
+      },
+      "id": "passive-passive-element-boost-dragon-1-pal-51575a1218",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "49832e08f106094a124eda274b0252d4e7064811820e8134d5934c55479d0868",
+          "status": "machine_assisted",
+          "text": "용의 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "424deaabfe3fcbb800b0e7efda0e3f9aa30c7c9d254c510c9adcea47c320c89c",
+          "status": "machine_assisted",
+          "text": "신성한 용"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2ea0518d9a411a374670bbceadb58e40efb175684eb7ba58ceb0e5e1a615156b",
+          "status": "machine_assisted",
+          "text": "드래곤 데미지"
+        }
+      },
+      "id": "passive-passive-element-boost-dragon-2-pal-76eb5880f9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4a7b5e8deb5055210c83aec8d7250bf5de0bd1db1bdf195cec757c7050a65c6a",
+          "status": "machine_assisted",
+          "text": "대지의 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e48b97e288c7a8dd22ecbf638c7b228560b66366de1a67cd5136e87b8785d5f5",
+          "status": "machine_assisted",
+          "text": "가이아의 힘"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fc8f75af73c72c4f04b8787796594fa7199ece12e09cbdca9f4ff12ea38626ac",
+          "status": "machine_assisted",
+          "text": "지상 데미지"
+        }
+      },
+      "id": "passive-passive-element-boost-earth-1-pal-8810cf546b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "09207023cc2f6ee604654ea7309b45abba45bbb5668e6f1b9c3f2a0eaabb180a",
+          "status": "machine_assisted",
+          "text": "대지의 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5b880fd017520c6eddf4c876da4822fbd8fdea4ecabae919a9fdb579bec3c328",
+          "status": "machine_assisted",
+          "text": "황제는"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4cd548f3cc29cf9c99a0134a971b1be03c8f6bf80ba8f03e174e030b0d292396",
+          "status": "machine_assisted",
+          "text": "공격"
+        }
+      },
+      "id": "passive-passive-element-boost-earth-2-pal-c4a348146c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d92fd51b601acb67dfa32f8e0c4345e63b98a4cb02e1fa789dff24b8cf9894d3",
+          "status": "machine_assisted",
+          "text": "화염 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "424131ebdcb3d6813e70181eb41a49d41383e760a091203e7c0ef705563f76d3",
+          "status": "machine_assisted",
+          "text": "피코마니악은"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9650f4f3d0b42b77c13e357f77ae081bc555ff1090baaf3c52118d7425c8eb1a",
+          "status": "machine_assisted",
+          "text": "화재 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-fire-1-pal-117b7d811f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5606dc75f9f7801e9ae868613a6784f224ce1ee0828368c7b0152fb0cdeb0f41",
+          "status": "machine_assisted",
+          "text": "화염 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c7fd2f76cd86a90e47313021381469c04b87ee46a6c08802a802c251428b326f",
+          "status": "machine_assisted",
+          "text": "불꽃 황제"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9650f4f3d0b42b77c13e357f77ae081bc555ff1090baaf3c52118d7425c8eb1a",
+          "status": "machine_assisted",
+          "text": "화재 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-fire-2-pal-95f11a54a5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1530b76e4def8690f6f4aec02666f5de4135a387ec07f6e88ed23cc6e938933d",
+          "status": "machine_assisted",
+          "text": "얼음 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3413de0dc6197df006d381c9d08b86dd6a7c500c506923a09945623fd19b4f31",
+          "status": "machine_assisted",
+          "text": "콜드 블러디드"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc7503a1286d692b6b8450acaa50a3c24ce1a41224bdcca58bd9602fa19740a5",
+          "status": "machine_assisted",
+          "text": "얼음 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-ice-1-pal-c015f6d988",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "721232c815ae76c49e449bf097da6aa5fbb4e743861c1c49456e3e750d1a60bd",
+          "status": "machine_assisted",
+          "text": "얼음 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "29efc5e6ae3140df717e57fc4281c8f4dbb5eb92994fe16555d5748a6231c932",
+          "status": "machine_assisted",
+          "text": "얼음 황제는"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc7503a1286d692b6b8450acaa50a3c24ce1a41224bdcca58bd9602fa19740a5",
+          "status": "machine_assisted",
+          "text": "얼음 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-ice-2-pal-164931b250",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "93541e40e9c1d2fb34622d872d1376dcb65bb02401bbed91ce6532b1c242f1fc",
+          "status": "machine_assisted",
+          "text": "풀의 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d246a654d0025a5cea616c5f21aef1488ff7e20bdd34aff1c26bec7c04e13654",
+          "status": "machine_assisted",
+          "text": "향긋한 Foliage"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8c97a2e3af2461bf6c75e4f78d03ca3c36f56a3ae0fe14af031c74c353284644",
+          "status": "machine_assisted",
+          "text": "잔디 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-leaf-1-pal-cc20101254",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eb28768e0401d688fb55d84f9be53ade8df148b02eaaaeaf4aa1bbb8e3f54aa8",
+          "status": "machine_assisted",
+          "text": "풀의 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1c0ac9e4ba115abd632e57b6c5223da415cb7cabbbc5e057a214080f097305ed",
+          "status": "machine_assisted",
+          "text": "스피릿 엠퍼러"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8c97a2e3af2461bf6c75e4f78d03ca3c36f56a3ae0fe14af031c74c353284644",
+          "status": "machine_assisted",
+          "text": "잔디 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-leaf-2-pal-9d88e55564",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "39ede87cb36180c2be3ab0a6534bf0acd9acd917885e2b25cc4c0b3b1357186f",
+          "status": "machine_assisted",
+          "text": "중립 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "65ce19acd6914b29da10e50d515abf5acf678728c741097661a50480e6f38506",
+          "status": "machine_assisted",
+          "text": "젠 마인드"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3b3a2f78e1d1b7d8d42ac4ad63ea9ab1cdc821a1ed158b7252af5fd4fa0ffb34",
+          "status": "machine_assisted",
+          "text": "중립적 인 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-normal-1-pal-52797c409d",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4eee43634172fdd23db8fad80c942eeba06ab7f9574866ff00426e6bae156386",
+          "status": "machine_assisted",
+          "text": "일반 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a91ca506a198c0babf4f8836754eebd89145996ca2ab330597f23a5661ffca62",
+          "status": "machine_assisted",
+          "text": "천황의"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3b3a2f78e1d1b7d8d42ac4ad63ea9ab1cdc821a1ed158b7252af5fd4fa0ffb34",
+          "status": "machine_assisted",
+          "text": "중립적 인 피해"
+        }
+      },
+      "id": "passive-passive-element-boost-normal-2-pal-ead16695ee",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "91d4c447dad03e1eac120daf784c6077bdc8affde896db07c1feb6bb8e2c2f99",
+          "status": "machine_assisted",
+          "text": "번개 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6bf4bbdabe8991257142e8b226947d8502d734c16fc09dc30fd9f72495441206",
+          "status": "machine_assisted",
+          "text": "콘덴서"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "494fbda1a2b2b9b5900d79f3a92ff94ee26867a2533cfdbbc7bd1bc4a1268b98",
+          "status": "machine_assisted",
+          "text": "전기 손상"
+        }
+      },
+      "id": "passive-passive-element-boost-thunder-1-pal-ad7eeb0f6f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "037f51354d8d4c37cb299990ac76cf7509a927377c4b36e99158bd2aea96a12c",
+          "status": "machine_assisted",
+          "text": "번개 공격력이 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2edac33216d88c4cd25f32b32fe6da38dc698729939d2447cd24b70a8d026126",
+          "status": "machine_assisted",
+          "text": "번개의 제왕"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "494fbda1a2b2b9b5900d79f3a92ff94ee26867a2533cfdbbc7bd1bc4a1268b98",
+          "status": "machine_assisted",
+          "text": "전기 손상"
+        }
+      },
+      "id": "passive-passive-element-boost-thunder-2-pal-33f6532de1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c03551d7024bc1a8814b9d58bbc46db12d93fe3ca1fd53357d5c74e325b051ea",
+          "status": "machine_assisted",
+          "text": "들어오는 물의 피해를 10% 감소시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "affaede8ca3ca71c979d3575fe894d2d58062a6297d9a4fb911098f6b18ae16e",
+          "status": "machine_assisted",
+          "text": "방수"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca98170521ae276e3da022965f68a8854465578af7f889dd8d53808e6f9bb05c",
+          "status": "machine_assisted",
+          "text": "물 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-aqua-1-pal-95e604fc20",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f75410d07064bf8cdbdf6b8fde76f1da5c900aea61bd0b1884d2cf2fc99d2f9",
+          "status": "machine_assisted",
+          "text": "어둠의 피해가 10% 감소한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b96f5de907707a744a2b242b7bb12f38a94c13c6cd94d24728f3f92c682dcc95",
+          "status": "machine_assisted",
+          "text": "쾌활한"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "756dfec3e83d653867e499de3737fb165848ffa607095f3fe80489584a1e33ef",
+          "status": "machine_assisted",
+          "text": "다크 디펜스"
+        }
+      },
+      "id": "passive-passive-element-resist-dark-1-pal-102e813b8f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d81532bd9ab7e51abc108f6d5fc0034336638093ae6086ec6904ab0d1005769a",
+          "status": "machine_assisted",
+          "text": "들어오는 용의 피해가 10% 감소한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "068c8a21397f9e14fd309755dae7edebea3efba3f8cd1ac9e48bafb2ed49e5ca",
+          "status": "machine_assisted",
+          "text": "드래곤킬러"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fe93545d749e173ccf70b3833eb01aae432ee63b1d958a01ae15c1a9873fc93b",
+          "status": "machine_assisted",
+          "text": "드래곤 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-dragon-1-pal-688a174630",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d55ef80944240fae741b78c68066e96f0a8ee6f513fcd6e3da0d32b720b70c5d",
+          "status": "machine_assisted",
+          "text": "지구로 들어오는 피해를 10% 감소시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ee78a660dc7588ca8848ed2f795248ab5571ec9b6cdc087c17ab8fe291d95013",
+          "status": "machine_assisted",
+          "text": "지진 방지"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a78c7a89e23a0d6591273b44544167b949bdf11a0000f41d294c6d99cce17fdf",
+          "status": "machine_assisted",
+          "text": "지상 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-earth-1-pal-2e5019ad4d",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "95154fc21a5b0b58ba68b01308306cbad8397bbfa65524ab96f3edea9ff5feb5",
+          "status": "machine_assisted",
+          "text": "들어오는 화염 피해가 10% 감소한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ae61d05f2dd718788ef50db1bf1fbbff4d97c7eb735676e6aefb90b7a71efb20",
+          "status": "machine_assisted",
+          "text": "Suntan 연인"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8ab338feeff4463e68325183b513bf19726e60e8c22ffb851c55f2f087a3d7c0",
+          "status": "machine_assisted",
+          "text": "화재 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-fire-1-pal-ef46091dd0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "67ba0099e0cfa9cf30d19a7d3c6160fbc50e3808aee66b0101e197f72d4eb12d",
+          "status": "machine_assisted",
+          "text": "얼음이 들어오는 피해를 10% 감소시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6b3816209cecbf31a48e75eb6cf79950d38cbcc6b2cf0e7679c687c65c637006",
+          "status": "machine_assisted",
+          "text": "몸 가열"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5eb4f6e938ec0a671dee7141656d53134ea5b2a7a311c0b7fab294d85ae64b28",
+          "status": "machine_assisted",
+          "text": "얼음 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-ice-1-pal-c74477e03c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1ab1a5a2e4ce875ce915f77aac404b768a55922cbabe1da6d7da870487592e9c",
+          "status": "machine_assisted",
+          "text": "들어오는 풀의 피해가 10% 감소한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f10c67a0e0b677074a8f710490b937c39c9a926c2f18ceb73fa4b9dafa0130d1",
+          "status": "machine_assisted",
+          "text": "식물 장벽"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4b5e836a41420cf63fad9093a7aee02a7e2b6e4d4f3bbba766d329152656b615",
+          "status": "machine_assisted",
+          "text": "잔디 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-leaf-1-pal-4b6d7614d7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0d22edfc0658122824efa12753a14e75f73fd061c584ac8ce6e7a1697a793b83",
+          "status": "machine_assisted",
+          "text": "중성 피해를 10% 감소시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fbe27b8e43275fd791ddc25e01198aa223db0178dc534e181392ec09786b94b6",
+          "status": "machine_assisted",
+          "text": "비정상"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e596aaa4b56d2f80dea309fb6a94168e1cdd71e4483ab846ecb55ae62d1de09d",
+          "status": "machine_assisted",
+          "text": "중립 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-normal-1-pal-86334ce7a4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "407737788c7a1a7454e55f89a5f72d937ed322f1695c5afb0e9c90eaaf77eadf",
+          "status": "machine_assisted",
+          "text": "들어오는 번개의 피해를 10% 감소시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8f9fbf9ea35e4fc02ad253a4e202b4f72bcafda351d85977c2c083d994e46bb5",
+          "status": "machine_assisted",
+          "text": "격리된 몸"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eb38679906d39cff53aa69a4e84c30d1960a84049cc63187d88e406ff161896b",
+          "status": "machine_assisted",
+          "text": "전기 방어"
+        }
+      },
+      "id": "passive-passive-element-resist-thunder-1-pal-ea32a45c64",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c73bef344ae500f9383f8b45ebb7c8de9578adef8097f71ae0e3e709ac037951",
+          "status": "machine_assisted",
+          "text": "화염 공격력이 30% 증가한다. 번개 공격력이 30% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "774a650f285c362f82789e40fa8b7b519a63bf69f7dbc411003884c25c236607",
+          "status": "machine_assisted",
+          "text": "영원한 불꽃"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4cd548f3cc29cf9c99a0134a971b1be03c8f6bf80ba8f03e174e030b0d292396",
+          "status": "machine_assisted",
+          "text": "공격"
+        }
+      },
+      "id": "passive-passive-eternal-flame-40c1710409",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "79f353480b88b27c2d873fdd51b7c23f5b16e1cca69fcb3f3cf44801e23f65a1",
+          "status": "machine_assisted",
+          "text": "공격력 20%, 방어력 20%, 이동 속도 15% 증가"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7482e374b5bddc0a48ea3b3430de633b7938e3045e64aebca2574a50a53a5719",
+          "status": "machine_assisted",
+          "text": "전설"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2d45db5162d61a25e320e57134b3766c82a6357d1f69277ec2fbf325b59d5ff9",
+          "status": "machine_assisted",
+          "text": "공격, 방어 및 속도"
+        }
+      },
+      "id": "passive-passive-legend-8ff382798f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b98900d96a4aa6deeff4481eae344210803527e74e5cd75664ddb17bdfefb0ff",
+          "status": "machine_assisted",
+          "text": "이동 속도가 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3db79629f58f9503f804e72906c95cf64af1553ade58a472bb5872db3b6ca989",
+          "status": "machine_assisted",
+          "text": "니블은"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7912f291504c3589b9736bc74776f391e93fdbf517258195ba62ac123abb7d77",
+          "status": "machine_assisted",
+          "text": "이동 속도"
+        }
+      },
+      "id": "passive-passive-move-speed-up-1-7472b18355",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d613f9616d21337ba7ce56b8f66738191ec3e54a5e5a1b0252f1a6d106088253",
+          "status": "machine_assisted",
+          "text": "이동 속도가 20% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2184a4e3f4ce0f213448243fb42d24df4b7763ce99f5fedd2e73b45194774678",
+          "status": "machine_assisted",
+          "text": "러너"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7912f291504c3589b9736bc74776f391e93fdbf517258195ba62ac123abb7d77",
+          "status": "machine_assisted",
+          "text": "이동 속도"
+        }
+      },
+      "id": "passive-passive-move-speed-up-2-dce52a41f8",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "01d20abb40a446ae0eb1c79d8f6fd99bceb95a54fc63dbe4dfa575c0fe7b8517",
+          "status": "machine_assisted",
+          "text": "이동 속도가 30% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ae8ed2743925477eafad0dfdb0d0832702634da4dc6ec1aefa4f3a61953e93f0",
+          "status": "machine_assisted",
+          "text": "스위프트"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7912f291504c3589b9736bc74776f391e93fdbf517258195ba62ac123abb7d77",
+          "status": "machine_assisted",
+          "text": "이동 속도"
+        }
+      },
+      "id": "passive-passive-move-speed-up-3-c669e85b3e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e534ba5e965ddc866d75155c1e95e742006b8ec1fd1f728700f56794ba4cfab7",
+          "status": "machine_assisted",
+          "text": "잠을 자지 않고 밤에도 계속 일한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "196f5deb0ed7c48e9aa3cb818309a87428845aaccba19d7780a318fa1ecfb4e2",
+          "status": "machine_assisted",
+          "text": "야행성"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "196f5deb0ed7c48e9aa3cb818309a87428845aaccba19d7780a318fa1ecfb4e2",
+          "status": "machine_assisted",
+          "text": "야행성"
+        }
+      },
+      "id": "passive-passive-nocturnal-0c9ee8311c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "51bac122a2af9c653ab2bceb0495c1ad9cccb6a0802f082c84e616ce043276e5",
+          "status": "machine_assisted",
+          "text": "공격 대상의 체력은 1보다 작아서는 안 된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "65568b861e2031077bae637633519022db45565df8f75b6c4468cae279abb626",
+          "status": "machine_assisted",
+          "text": "머시 히트"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "072a75e600007ccad230418ee5d049a9ff3cc0f9b6ac083495c2913efd1a2fa3",
+          "status": "machine_assisted",
+          "text": "평화주의자는"
+        }
+      },
+      "id": "passive-passive-non-killing-7f81dcacf4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a5b3f7edf6e5a291964329479b43522ee384b150d4068c29d94f9066b36ae080",
+          "status": "machine_assisted",
+          "text": "공격 +30%의 일 속도 -50%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4c3aba4644b1dc3ca0dddc62ef747d48dfca122dbb5ddf5f70706fed9bf224cd",
+          "status": "machine_assisted",
+          "text": "머슬헤드"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2b615908d71d7f2a20f145f4e22ebdaabfb050d5941232cd7ae2e04aa70aa802",
+          "status": "machine_assisted",
+          "text": "위로 공격 + 아래로 작업"
+        }
+      },
+      "id": "passive-passive-noukin-69a0d11bb6",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dd565656c3711628e1f8d0373cca8f00db40fec9f7947ac60e60893c8bd93cc",
+          "status": "machine_assisted",
+          "text": "공격력 10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6d78af3ecf8e08ac10de51d82264b674f673598511fddcc045383226b8da79eb",
+          "status": "machine_assisted",
+          "text": "비겁한"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fa90ed549fcb80fbd4c78a26dfdf147a0aff3115105fd1841c0684bc8ff90504",
+          "status": "machine_assisted",
+          "text": "공격 통계"
+        }
+      },
+      "id": "passive-passive-pal-allattack-down1-ca85d82fb2",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7898a923cb1ec74a935b25223ea6e650a61eacb335582a1a391a5625efaa7598",
+          "status": "machine_assisted",
+          "text": "공격 -20%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "072a75e600007ccad230418ee5d049a9ff3cc0f9b6ac083495c2913efd1a2fa3",
+          "status": "machine_assisted",
+          "text": "평화주의자는"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fa90ed549fcb80fbd4c78a26dfdf147a0aff3115105fd1841c0684bc8ff90504",
+          "status": "machine_assisted",
+          "text": "공격 통계"
+        }
+      },
+      "id": "passive-passive-pal-allattack-down2-8b5af4c7a8",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9d461db9151a6c450da207e9fd89ddc94ac197b98b69084da032fafd1c5f729b",
+          "status": "machine_assisted",
+          "text": "공격력 10% 증가"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e7d91391c151982552241e802cf3bf1cf34efee5f0e37141a371a5a91e99e2b8",
+          "status": "machine_assisted",
+          "text": "용감한"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fa90ed549fcb80fbd4c78a26dfdf147a0aff3115105fd1841c0684bc8ff90504",
+          "status": "machine_assisted",
+          "text": "공격 통계"
+        }
+      },
+      "id": "passive-passive-pal-allattack-up1-f433e3338b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a2fd7a9f2a5efafd084a47eaa3a89ca32d49f647e5209b222a1db86e42a80ee8",
+          "status": "machine_assisted",
+          "text": "공격력 20% 증가"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c25dbc21886dcf1c27ab6b2d686fd31b11a0c4fb7339c84562e1c61434b54e4d",
+          "status": "machine_assisted",
+          "text": "페로시어스는"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fa90ed549fcb80fbd4c78a26dfdf147a0aff3115105fd1841c0684bc8ff90504",
+          "status": "machine_assisted",
+          "text": "공격 통계"
+        }
+      },
+      "id": "passive-passive-pal-allattack-up2-3b80a6eb56",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9acce153a6b12d93157d9da237a149ff29da30eda024703091c3cd486aabd9df",
+          "status": "machine_assisted",
+          "text": "일 속도 +10% 방어 -10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b9874b3f8d62712b415f965a7897393dac1bca67b93a3d3662a9033b7ca3ce64",
+          "status": "machine_assisted",
+          "text": "감춰진"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7b80072b050c9fee68d428638c5adda36d815404680aa4cdb594111c2bb49045",
+          "status": "machine_assisted",
+          "text": "작업 속도 증가 + 방어력 감소"
+        }
+      },
+      "id": "passive-passive-pal-conceited-86e9327226",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4c3a081839f67c6a697b576311812608a3773fdbd46841b39994180e1e8dbb5e",
+          "status": "machine_assisted",
+          "text": "일 속도 +30% 공격 30%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "112802f921c4c73309ae7422e83d50ddb71ac5c6b6d979179aee1abcbb76bd91",
+          "status": "machine_assisted",
+          "text": "일 노예"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "39f36501e7a49a9b457c7d8996fe2a7a97dc2b8ebb325e7e6f6fc302dc6046fd",
+          "status": "machine_assisted",
+          "text": "작업 속도 증가 + 공격 감소"
+        }
+      },
+      "id": "passive-passive-pal-corporate-slave-6ef0fc31fa",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5392100e6e0b1e6ed17d3519c84a486b628f36bcfb7dde8cdd9f9845538839aa",
+          "status": "machine_assisted",
+          "text": "포만감이 10% 느려집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "00e33efa93e1f0cce4b7a0b367f538e96e09858e97c637c9d58fa4f56e356be1",
+          "status": "machine_assisted",
+          "text": "데인티 이터"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9f73974ef9f849a96435b53e0f5aaed91f0494a363c08503ad81bbf6e94bba38",
+          "status": "machine_assisted",
+          "text": "포만감"
+        }
+      },
+      "id": "passive-passive-pal-full-stomach-down-1-09d023691a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5539585a7d2107e8e9776e3d0712117216f09fa809d31d9eb3ba9ba19eb6ee0f",
+          "status": "machine_assisted",
+          "text": "굶주림 감소는 +15% 감소한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "83f385785662da19df2ab33fd3d50be5cc3c04f4aa5ab1dd476f52f892a9cfb3",
+          "status": "machine_assisted",
+          "text": "다이어트 연인"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9f73974ef9f849a96435b53e0f5aaed91f0494a363c08503ad81bbf6e94bba38",
+          "status": "machine_assisted",
+          "text": "포만감"
+        }
+      },
+      "id": "passive-passive-pal-full-stomach-down-2-e1cbd8faf5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e571944db8c48991b5d8e6c7481040480d7ef864be6a59a241865ba4a71b2a53",
+          "status": "machine_assisted",
+          "text": "포만감은 +10% 더 빨리 떨어집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b6c886e81e520c1d490ae327cf9247fc5bcb35d4f09f6edf4a2453a9e9db4386",
+          "status": "machine_assisted",
+          "text": "글루톤"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9f73974ef9f849a96435b53e0f5aaed91f0494a363c08503ad81bbf6e94bba38",
+          "status": "machine_assisted",
+          "text": "포만감"
+        }
+      },
+      "id": "passive-passive-pal-full-stomach-up-1-e9eb2677b0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f25519e411a8248c6f7206561c160756e00e59bed41f6468a1b6a6a97016bf4e",
+          "status": "machine_assisted",
+          "text": "포만감은 +15% 더 빨리 떨어집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2433d304eecda27eab62e670252eb03d4f5cd99ae6d44d12e4f5a4cd685a92c6",
+          "status": "machine_assisted",
+          "text": "바닥없는 위"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9f73974ef9f849a96435b53e0f5aaed91f0494a363c08503ad81bbf6e94bba38",
+          "status": "machine_assisted",
+          "text": "포만감"
+        }
+      },
+      "id": "passive-passive-pal-full-stomach-up-2-3fc661bea8",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a228b626d98f4bdce3e0d8ba97c31a9ad687c7266fef77200704c7c3e1d0eefa",
+          "status": "machine_assisted",
+          "text": "방어 +15% 공격력 -15%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a8bcaeab158f2a20fb6f52f10eedeb062d3616352d83a2ef6dba03258f8e524f",
+          "status": "machine_assisted",
+          "text": "마조히스트"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5a914fb974ce871a8ab110fbc7457e06207a8b508af0a041f91b48ec1b250d5a",
+          "status": "machine_assisted",
+          "text": "최대 방어 + 아래로 공격"
+        }
+      },
+      "id": "passive-passive-pal-masochist-6e39cf3a41",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e4eb00fddf109f2be534cec7eac70f0d38085e6a235485925db25ef338558082",
+          "status": "machine_assisted",
+          "text": "공격력 +10%, 방어력 -10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4ad0cc8ec0084946ade150954a43f214c3647a20fd4fa57aa8e1b6b2c35fc23c",
+          "status": "machine_assisted",
+          "text": "공격적"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a0911ec3275b5686c0748fc157f59c6ad233af314a967a4cbd5b0c7de538a966",
+          "status": "machine_assisted",
+          "text": "공격력 증가 + 방어력 감소"
+        }
+      },
+      "id": "passive-passive-pal-oraora-2b5cd69aa9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "10e57d5e2773153cd59e17eb21359ff591a94acaee5b16bf2b933726e26ce8bc",
+          "status": "machine_assisted",
+          "text": "공격 +15%, 작업 속도 -10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "97e20a9f6957ebfb5db844c2dc63af810878fb3cb5ce287a442ef1a02922cb53",
+          "status": "machine_assisted",
+          "text": "훌리건은"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2b615908d71d7f2a20f145f4e22ebdaabfb050d5941232cd7ae2e04aa70aa802",
+          "status": "machine_assisted",
+          "text": "위로 공격 + 아래로 작업"
+        }
+      },
+      "id": "passive-passive-pal-rude-733b60f011",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c14742060f517342ebbf91d2253036fc3d3e820bcb0acbc797a4b50888dae4a6",
+          "status": "machine_assisted",
+          "text": "공격 +15%, 방어력 -15%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "967ed11a118f2abd493edbead94a2315f8fbac8cb0b0cf13e3f646f642f51e90",
+          "status": "machine_assisted",
+          "text": "사디스트"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a0911ec3275b5686c0748fc157f59c6ad233af314a967a4cbd5b0c7de538a966",
+          "status": "machine_assisted",
+          "text": "공격력 증가 + 방어력 감소"
+        }
+      },
+      "id": "passive-passive-pal-sadist-e469d81a97",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e9b1de87ef52f57bbfb7c891d9e50af56043a91b9194250d3431ef86526d4811",
+          "status": "machine_assisted",
+          "text": "SAN이 10% 느려집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3cae55a719b17fa96eac04ccf995ac4434c8f8effc06dea897426ad8178bea91",
+          "status": "machine_assisted",
+          "text": "긍정적인 생각"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc5b5f3af3b1145b64bf9ac68736e1e3b64a60a34b67d4671945ac8297d8c6d7",
+          "status": "machine_assisted",
+          "text": "SAN 고갈"
+        }
+      },
+      "id": "passive-passive-pal-sanity-down-1-ac554a1d01",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "82a0b8922a7053daaabd5aaf59f0d207cf7273b1fc54cf0bd8e97899a07c807a",
+          "status": "machine_assisted",
+          "text": "SAN이 +15% 느려집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d42e5e47fc3d324f2f3afbebe86d55e7a1e2ff34b5ee8fe87bcc823ba380617e",
+          "status": "machine_assisted",
+          "text": "워커홀릭은"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc5b5f3af3b1145b64bf9ac68736e1e3b64a60a34b67d4671945ac8297d8c6d7",
+          "status": "machine_assisted",
+          "text": "SAN 고갈"
+        }
+      },
+      "id": "passive-passive-pal-sanity-down-2-2c0876d536",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "611e8a05c7fc03953e64236b01ddb33f129383345227403f01021f2e5655af3d",
+          "status": "machine_assisted",
+          "text": "SAN이 10% 더 빠르게 감소한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6ee605008933bb04acad3adf262bfc06050400c1082eb5cc04975445e7ca288b",
+          "status": "machine_assisted",
+          "text": "불안정"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc5b5f3af3b1145b64bf9ac68736e1e3b64a60a34b67d4671945ac8297d8c6d7",
+          "status": "machine_assisted",
+          "text": "SAN 고갈"
+        }
+      },
+      "id": "passive-passive-pal-sanity-up-1-d16c76d884",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "16f4ad229d87cb9a29445766b2c0b6a1709ccae44e44007312da3d4381562c45",
+          "status": "machine_assisted",
+          "text": "SAN이 +15% 더 빠르게 감소한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c3e58a73609d109404e7ff8f80e7e82d6f8fd347fd1b1945fc469b5c4899697e",
+          "status": "machine_assisted",
+          "text": "파괴적"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc5b5f3af3b1145b64bf9ac68736e1e3b64a60a34b67d4671945ac8297d8c6d7",
+          "status": "machine_assisted",
+          "text": "SAN 고갈"
+        }
+      },
+      "id": "passive-passive-pal-sanity-up-2-86f2b9c7ac",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3ddf33b3618db10ec0919a7af4e2ca4b0481bcd2ad4141091f6e47030c6e52d8",
+          "status": "machine_assisted",
+          "text": "일 속도 +15% 공격력 +15%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "de7cb23632127fe490a6d9344f09f99f537a3a15364a98e32977e2f28322a25a",
+          "status": "machine_assisted",
+          "text": "운이 좋은"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "787f00d9a94e61304fe531a9d29be08be72b7330e75acd546aaeb3788721143a",
+          "status": "machine_assisted",
+          "text": "일과 공격"
+        }
+      },
+      "id": "passive-passive-rare-329966f19e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7fde5a3db2bb66982516c7097ddb8ded137e200e038d91c51e77c8b4678f7cd6",
+          "status": "machine_assisted",
+          "text": "판매 가격 -10%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0de45af68ff96efb20e26b1d302404765ea8c938132c4a95f4ce0655678e19be",
+          "status": "machine_assisted",
+          "text": "초라한"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "08ec35fdeec9513e2faa440690d369e674aeaecf01d06a58b0071c53ac54f59c",
+          "status": "machine_assisted",
+          "text": "판매가격"
+        }
+      },
+      "id": "passive-passive-sale-price-down-1-5a38b58522",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "aed4c8b5fa62c99d80e56d26553cf8493ea21238903f0d66ddd0ab1e2d78da1d",
+          "status": "machine_assisted",
+          "text": "판매 가격 +5%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "190d375ec3483f8f4bbad889ebfe75b071a4a04a13913d68245bf8534069a1c2",
+          "status": "machine_assisted",
+          "text": "귀족"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3f2500b82dabba2d9aa566b18858f989cfc157cc4d0a31f20fd0d9d37d1680ac",
+          "status": "machine_assisted",
+          "text": "판매"
+        }
+      },
+      "id": "passive-passive-sale-price-up-1-4662e36935",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0a4be59940d878872424929e07df89c81218e4d90434ee3befb9294a3fcf96bb",
+          "status": "machine_assisted",
+          "text": "판매 가격 +3%"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c10b904496e07c0885d7ae8f25eff603c24e82dafd7f759c8dcbf4bcff2cde94",
+          "status": "machine_assisted",
+          "text": "좋은 모피"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "08ec35fdeec9513e2faa440690d369e674aeaecf01d06a58b0071c53ac54f59c",
+          "status": "machine_assisted",
+          "text": "판매가격"
+        }
+      },
+      "id": "passive-passive-sale-price-up-2-ea9b88de09",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fd14bb6a1c667eeac7d14bafc89bb9add13e67b0542b2dad3d0ba01ac2feae6c",
+          "status": "machine_assisted",
+          "text": "최대 체력 -25%, *이 효과는 탈 수 있는 Pal에만 유효한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6e69837faae6895689c4effbe4183a12b829e28f66c8e157358e1f5d2190abad",
+          "status": "machine_assisted",
+          "text": "아프다"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cc350ea3393968f7cd7cbf135e8c1ec826c85b881b68dc619c699667805a3e96",
+          "status": "machine_assisted",
+          "text": "체력"
+        }
+      },
+      "id": "passive-passive-stamina-down-1-bf2dd98d1c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "de83ffb38b7eed1597fbdfcb6de14d182d88cdf38dea61fbcb3737e2984437f2",
+          "status": "machine_assisted",
+          "text": "최대 체력 +50, *이 효과는 탈 수 있는 Pal에만 유효한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "062074be2757188919f7390cbd4a5fef317aa30373217f5a390e20b455925920",
+          "status": "machine_assisted",
+          "text": "무한 한 체력"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cc350ea3393968f7cd7cbf135e8c1ec826c85b881b68dc619c699667805a3e96",
+          "status": "machine_assisted",
+          "text": "체력"
+        }
+      },
+      "id": "passive-passive-stamina-up-1-687ad27f7f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5a55435398d8ca6cc860bfc0ec7f93d0e94f4c9bc49efd87f9229278b7f2d465",
+          "status": "machine_assisted",
+          "text": "최대 체력 +25%, *이 효과는 탈 수 있는 Pal에만 유효한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ce718b9686e3d6ade595651f4a43495d1bad3666b9f0d036b113ae0b0495b9f1",
+          "status": "machine_assisted",
+          "text": "fiddle로 적합"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cc350ea3393968f7cd7cbf135e8c1ec826c85b881b68dc619c699667805a3e96",
+          "status": "machine_assisted",
+          "text": "체력"
+        }
+      },
+      "id": "passive-passive-stamina-up-2-801c8a1ef4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2ecebc6f24e80279788f532d19a383194d02a3bee3606660b5febc5dfccc2d74",
+          "status": "machine_assisted",
+          "text": "사육 농장에 할당하면 계란 생산 시간이 100% 단축된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6d604f422a19a0abab7705df02b76c88d98ca1c022289bd255e20960855a503a",
+          "status": "machine_assisted",
+          "text": "필란트로피스트"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "13a7c655a7d4213c0c7e77e83a7be6b267baa3f16937c401bf73371545cc9db8",
+          "status": "machine_assisted",
+          "text": "제작"
+        }
+      },
+      "id": "passive-passive-test-pal-egg-hatching-speed-up-e369a5abcb",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "051007ecfa6a054065b0c6fdb12725c71336da5677c3ade045f437ec42089eac",
+          "status": "machine_assisted",
+          "text": "플레이어의 공격력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ce1edfea6d6b8c2217b9ee006991bddb2e70e11bb4609c4e0970cff7013f9b72",
+          "status": "machine_assisted",
+          "text": "뱅가드"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "685b74d15234dd831b8a46600f3922d63ff0cf01cb44a9888fb6358255768343",
+          "status": "machine_assisted",
+          "text": "플레이어 버프"
+        }
+      },
+      "id": "passive-passive-trainer-atk-up-1-61cc757ea5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "186ffcd5f4112fb226a9855bd9ea93b7b3ec6685f233adf8dae9fe6a5bdee0ae",
+          "status": "machine_assisted",
+          "text": "플레이어 방어력이 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "12621138af8b6bdb6ed7504862888228f1b59c13514e35e311d42ff2d27b3fa9",
+          "status": "machine_assisted",
+          "text": "스트롱홀드 전략가"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "685b74d15234dd831b8a46600f3922d63ff0cf01cb44a9888fb6358255768343",
+          "status": "machine_assisted",
+          "text": "플레이어 버프"
+        }
+      },
+      "id": "passive-passive-trainer-def-up-1-0690f95e65",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2b0a5bdb989a91b34d846cfa3d1dbaa4eda3131c3f11a8b3438cc96487304599",
+          "status": "machine_assisted",
+          "text": "플레이어 로깅 효율성을 25% 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3d9fb2e587fd83c4f7bd65bcc61a0c8ad82d795db300ee9537f6d3e816dcc908",
+          "status": "machine_assisted",
+          "text": "벌목 Foreman"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "685b74d15234dd831b8a46600f3922d63ff0cf01cb44a9888fb6358255768343",
+          "status": "machine_assisted",
+          "text": "플레이어 버프"
+        }
+      },
+      "id": "passive-passive-trainer-logging-up1-536def0d3a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "51b4a1ca54d16f2ffa26bd244b437d586ab7709e086c0868c4d37a1743a7c1fd",
+          "status": "machine_assisted",
+          "text": "플레이어의 마이닝 효율성을 25% 높이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb96202d022dcbabaef0faaea9e71f3df8d3197b8d4b1653831bb975fb328c83",
+          "status": "machine_assisted",
+          "text": "내 포먼"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "685b74d15234dd831b8a46600f3922d63ff0cf01cb44a9888fb6358255768343",
+          "status": "machine_assisted",
+          "text": "플레이어 버프"
+        }
+      },
+      "id": "passive-passive-trainer-mining-up1-e8bb571c3f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c86e54099fcaa4214343409a4fb768b8baf0a108672a2c773b693d6ebb5c64b4",
+          "status": "machine_assisted",
+          "text": "플레이어 작업 속도가 25% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3c21faad3bab4f5d98da5a2e88e3e28f777c61b4c28e420ddb5df2b68c8d4d01",
+          "status": "machine_assisted",
+          "text": "동기부여적 리더"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "685b74d15234dd831b8a46600f3922d63ff0cf01cb44a9888fb6358255768343",
+          "status": "machine_assisted",
+          "text": "플레이어 버프"
+        }
+      },
+      "id": "passive-passive-trainer-work-speed-up-1-457e282f83",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "02d841183717aca2fa3be9825a9b802eabd2818b2edbf5b9c9cb47c3bc0bbf44",
+          "status": "machine_assisted",
+          "text": "어둠의 공격력이 30% 증가한다. 얼음 공격력이 30% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "55cbf5ba29a8dd69d7ecc88b51d746b3c81a4bcf6c3cf4bd16a5e9612c6d7263",
+          "status": "machine_assisted",
+          "text": "공허의 사이렌"
+        },
+        "passiveAbility": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4cd548f3cc29cf9c99a0134a971b1be03c8f6bf80ba8f03e174e030b0d292396",
+          "status": "machine_assisted",
+          "text": "공격"
+        }
+      },
+      "id": "passive-passive-witch-a025ce7175",
+      "kind": "skill"
+    }
+  ],
+  "schemaVersion": 1
+}

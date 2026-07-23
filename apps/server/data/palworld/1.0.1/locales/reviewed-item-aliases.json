@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "aliases": [
+    {
+      "release": "1.0.1",
+      "oldId": "ingot",
+      "canonicalId": "copper-ingot",
+      "sourceInternalId": "CopperIngot",
+      "nameEn": "Ingot",
+      "reason": "기존 검수 아이템 ID가 1.0.1 PAK canonical ID로 변경되어 exact sourceInternalId와 영문 이름으로 연결한다."
+    },
+    {
+      "release": "1.0.1",
+      "oldId": "ore",
+      "canonicalId": "copper-ore",
+      "sourceInternalId": "CopperOre",
+      "nameEn": "Ore",
+      "reason": "기존 검수 아이템 ID가 1.0.1 PAK canonical ID로 변경되어 exact sourceInternalId와 영문 이름으로 연결한다."
+    },
+    {
+      "release": "1.0.1",
+      "oldId": "ancient-technology-parts",
+      "canonicalId": "pal-crystal-ex",
+      "sourceInternalId": "PalCrystal_Ex",
+      "nameEn": "Ancient Civilization Parts",
+      "reason": "기존 검수 아이템 ID가 1.0.1 PAK canonical ID로 변경되어 exact sourceInternalId와 영문 이름으로 연결한다."
+    },
+    {
+      "release": "1.0.1",
+      "oldId": "paldium-fragment",
+      "canonicalId": "pal-crystal-s",
+      "sourceInternalId": "Pal_crystal_S",
+      "nameEn": "Paldium Fragment",
+      "reason": "기존 검수 아이템 ID가 1.0.1 PAK canonical ID로 변경되어 exact sourceInternalId와 영문 이름으로 연결한다."
+    },
+    {
+      "release": "1.0.1",
+      "oldId": "mega-sphere",
+      "canonicalId": "pal-sphere-mega",
+      "sourceInternalId": "PalSphere_Mega",
+      "nameEn": "Mega Sphere",
+      "reason": "기존 검수 아이템 ID가 1.0.1 PAK canonical ID로 변경되어 exact sourceInternalId와 영문 이름으로 연결한다."
+    }
+  ]
+}

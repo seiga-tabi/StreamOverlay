@@ -8,9 +8,27 @@ export function PalworldLoading({ locale, count = 6 }: { locale: PalworldLocale;
   return <div className="palworld-skeleton-grid" role="status" aria-label={text.loading}>{Array.from({ length: count }, (_, index) => <SkeletonCard key={index} loadingLabel={index === 0 ? text.loading : undefined} />)}</div>;
 }
 
-export function PalworldError({ locale, onRetry }: { locale: PalworldLocale; onRetry: () => void }) {
+export function PalworldError({
+  description,
+  descriptionJa,
+  descriptionKo,
+  locale,
+  onRetry,
+  title,
+  titleJa,
+  titleKo,
+}: {
+  description?: string;
+  descriptionJa?: string;
+  descriptionKo?: string;
+  locale: PalworldLocale;
+  onRetry: () => void;
+  title?: string;
+  titleJa?: string;
+  titleKo?: string;
+}) {
   const text = palworldI18n[locale];
-  return <EmptyState variant="error"><EmptyStateIcon>!</EmptyStateIcon><EmptyStateTitle data-ko={palworldI18n.ko.apiError} data-ja={palworldI18n.ja.apiError}>{text.apiError}</EmptyStateTitle><EmptyStateDescription>{text.retry}</EmptyStateDescription><EmptyStateActions><Button variant="secondary" onClick={onRetry}>{text.retry}</Button></EmptyStateActions></EmptyState>;
+  return <EmptyState role="alert" variant="error"><EmptyStateIcon>!</EmptyStateIcon><EmptyStateTitle data-ko={titleKo ?? palworldI18n.ko.apiError} data-ja={titleJa ?? palworldI18n.ja.apiError}>{title ?? text.apiError}</EmptyStateTitle><EmptyStateDescription data-ko={descriptionKo ?? palworldI18n.ko.retry} data-ja={descriptionJa ?? palworldI18n.ja.retry}>{description ?? text.retry}</EmptyStateDescription><EmptyStateActions><Button variant="secondary" onClick={onRetry}>{text.retry}</Button></EmptyStateActions></EmptyState>;
 }
 
 export function PalworldEmpty({ description, locale, title }: { description?: string; locale: PalworldLocale; title: string }) {

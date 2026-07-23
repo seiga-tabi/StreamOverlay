@@ -23,6 +23,10 @@ export function isPalworldPath(pathname: string): boolean {
   return path === "/palworld" || path.startsWith("/palworld/");
 }
 
+export function isKnownPalworldPagePath(pathname: string): boolean {
+  return Object.values(PAGE_PATHS).includes(normalizePath(pathname));
+}
+
 export function palworldPageFromPath(pathname: string): PalworldPage {
   const path = normalizePath(pathname);
   const entry = (Object.entries(PAGE_PATHS) as Array<[PalworldPage, string]>).find(([, value]) => value === path);

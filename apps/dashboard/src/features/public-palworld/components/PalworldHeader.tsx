@@ -39,8 +39,10 @@ export function PalworldHeader({
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
+  const [navScroll, setNavScroll] = useState({ start: false, end: false });
   const headerRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const navScrollRef = useRef<HTMLDivElement>(null);
 
   const closeMenus = useCallback(() => {
     setGameMenuOpen(false);
@@ -59,7 +61,34 @@ export function PalworldHeader({
   useEffect(() => {
     const activeItem = navRef.current?.querySelector<HTMLElement>("[aria-current='page']");
     activeItem?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const frame = window.requestAnimationFrame(() => {
+      const row = navScrollRef.current;
+      if (!row) return;
+      const maxScroll = Math.max(0, row.scrollWidth - row.clientWidth);
+      setNavScroll({ start: row.scrollLeft > 1, end: row.scrollLeft < maxScroll - 1 });
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [page]);
+
+  useEffect(() => {
+    const row = navScrollRef.current;
+    if (!row) return undefined;
+    const sync = () => {
+      const maxScroll = Math.max(0, row.scrollWidth - row.clientWidth);
+      setNavScroll({ start: row.scrollLeft > 1, end: row.scrollLeft < maxScroll - 1 });
+    };
+    sync();
+    row.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    const observer = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(sync);
+    observer?.observe(row);
+    if (navRef.current) observer?.observe(navRef.current);
+    return () => {
+      row.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+      observer?.disconnect();
+    };
+  }, []);
 
   const twitchMenuActions: PublicTwitchAccountMenuAction[] = twitchStatus.streamerRiotRequest?.status === "approved"
     && twitchStatus.streamerRiotRequest.dashboardEnabled === true
@@ -148,7 +177,11 @@ export function PalworldHeader({
       <div className="public-header-bottom-band">
         <div className="public-header-bottom-row palworld-header-bottom-row">
           {searchContent}
-          <div className="public-header-secondary-row palworld-secondary-row">
+          <div
+            className={`public-header-secondary-row palworld-secondary-row${navScroll.start ? " can-scroll-start" : ""}${navScroll.end ? " can-scroll-end" : ""}`}
+            data-scrollable={navScroll.start || navScroll.end ? "true" : undefined}
+            ref={navScrollRef}
+          >
             <nav className="public-header-nav palworld-header-nav" aria-label={palworldI18n[locale].brand} data-testid="palworld-secondary-nav" ref={navRef}>
               {navItems.map((item) => {
                 const active = item.page === page || (page === "search" && item.page === "home");

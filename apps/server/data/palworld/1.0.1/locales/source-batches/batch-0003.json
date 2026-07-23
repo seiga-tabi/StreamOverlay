@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 3,
+  "records": [
+    {
+      "id": "blueprint-fur-helmet-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Feathered Hair Band Schematic 4",
+          "sourceSha256": "12a43b8cc08ed8a1c6ec9a67a87f7b89ab49c76f20b5462e1142a1ad96175fef"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-gatling-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gatling Gun Schematic 1",
+          "sourceSha256": "3d71d7ad4f035e6ffb4913817bbf65859fa9aad188ad58e2544734ff106c1dee"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-gatling-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gatling Gun Schematic 2",
+          "sourceSha256": "517347ae5879dfb2cabdba2e84ab4c12a552a51104da92c60fe2b632257758b5"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-gatling-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gatling Gun Schematic 3",
+          "sourceSha256": "4486578515f2e2d23c84807854f31ad9fee714e1d32de9a643ae5fcef4e1d61c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-gatling-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gatling Gun Schematic 4",
+          "sourceSha256": "591e666029383ab5dd8f2073b4dde6aaed4c735beb3fdd6bc3cd4ac28e34532c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-grenade-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grenade Launcher Schematic 1",
+          "sourceSha256": "1745665447e0c6cd40af560990eab10c5656a639cb60b1780457da337945d5d1"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-grenade-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grenade Launcher Schematic 2",
+          "sourceSha256": "a66cafa760ce8aa219f69734015463758c783c8283ddc0eaf22893a03d89409c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-grenade-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grenade Launcher Schematic 3",
+          "sourceSha256": "da48469f0ccfc79200b614e9bac71f27b028071f3d8792c4531dd082ab995a84"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-grenade-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grenade Launcher Schematic 4",
+          "sourceSha256": "64d2fdfe775d11bb991625adedafeb15d3c137eb98597e69a0114a8182580337"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-guardian-dog-statue",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Yakumo Statue Schematic",
+          "sourceSha256": "ff1a08f0c5813e87d9f392f1f7599224a8f1bf824c6a9952ed69f9c1e9ee8221"
+        },
+        "description": {
+          "sourceText": "When in inventory or stored in a base, allows you to build .",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82"
+        }
+      }
+    },
+    {
+      "id": "blueprint-guided-missile-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Guided Missile Launcher Schematic 1",
+          "sourceSha256": "18a49ec05795c7560dff9749623ceaeda7464b2486955be21817ca358ef1c134"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-guided-missile-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Guided Missile Launcher Schematic 2",
+          "sourceSha256": "efde5035466744b7fe50aa5762aca95e367b779195d34474288fef0e40b6f103"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-guided-missile-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Guided Missile Launcher Schematic 3",
+          "sourceSha256": "5cd2512fb2f76faaa20bf7caa176e4af10909cdc6367be52d802d88a9744fb9a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-guided-missile-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Guided Missile Launcher Schematic 4",
+          "sourceSha256": "0a0a67680234740da3ca3349f8b3c2d591aed3c3db55e75866d400a95a24a7af"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-hand-gun-default-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Handgun Schematic 1",
+          "sourceSha256": "8839af6d501d2b9fd3a4fe4c2485dfc415bfa488fe5ae4899c5cd72db63c6307"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-hand-gun-default-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Handgun Schematic 2",
+          "sourceSha256": "1a0edfa24adaf3459f588b14f1dfed176782ec5b2086e8c08452a6697861184b"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-hand-gun-default-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Handgun Schematic 3",
+          "sourceSha256": "30f381ee8c703007dd36ea9ec4317996756d6b7d108581475b715a8347b4209a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-hand-gun-default-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Handgun Schematic 4",
+          "sourceSha256": "63977f8570ea76d9ae1c48f47c7c61d3323930b146d6229aebfb803640a17235"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head-equip025-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Leezpunk Hood Schematic 1",
+          "sourceSha256": "7d66a504565911b9b429b64f647a88ec4b933c4a51b7ecc25aaf8bd9f21a5563"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head-equip026-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Killamari Cap Schematic 1",
+          "sourceSha256": "9de8a729ada279308de42878e3fb290d70951dd364da010cb374485d6babd819"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head-equip028-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ribbuny Headband Schematic 1",
+          "sourceSha256": "b44ede7be29829f7e6c09145cea8006e1dbdfc4292d2e3bdb99a68b1b795533f"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head-equip031-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Swee Cap Schematic 1",
+          "sourceSha256": "ad028e0359a411c2c23444b52d5d7bfbaced7d1f3f9d38710f4e27edcfbdc8b0"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head-equip032-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dazzi Hat Schematic 1",
+          "sourceSha256": "169dc02f3a7f1f61be2ab8404f14878133b18366094598879a3f680e8ec79b09"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head001-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Monarch's Crown Schematic 1",
+          "sourceSha256": "25b5d442817909eab72bb0b97d7f2887dceb417a8f974ec0a29b286b7b10cf88"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head002-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Golden Crown Schematic 1",
+          "sourceSha256": "70edad0bc0d9e4f485aa3eb5541ff320f70dba9d9c1147b50908494f05c6c5f3"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head003-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Long-Eared Headband Schematic 1",
+          "sourceSha256": "74fbbda042aac0b30b99bf84ff286d39ac201aade52629f6ca544a8231af5fcc"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head004-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Witch Hat Schematic 1",
+          "sourceSha256": "454ad34ce795e03e6f3a3d68e0bb0bd62484212760489c5a12fdb5a03f953bd2"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head005-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Soft Hat Schematic 1",
+          "sourceSha256": "58b2c281bfe0181bacaf501f5d162b787a017649c7eafc88ee585a1746eb423c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head006-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Helmet Schematic 1",
+          "sourceSha256": "8adfa1d7802e9707ba3e390502907aff4caa66cedea1ca19eec0f646849116d6"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head007-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Silk Hat Schematic 1",
+          "sourceSha256": "4af85b94ec444f7a0e6311d95d11b28eabb269354ab70d3fdbe9e0180ed52848"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head008-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tricorne Schematic 1",
+          "sourceSha256": "27643ad5321615278dc46008cdeca00c0ca8d1aa58943d2f3fa07c8251f11369"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head009-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Exploration Cap Schematic 1",
+          "sourceSha256": "4e36008098ba3b1e6312ec0d0a2aa8f4faacb7c7702fce45f3a15077cd9cda88"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head010-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Graduation Cap Schematic 1",
+          "sourceSha256": "0ae3de12694b410f5051167b55455a0459a3f23b956e94bca284e2b4df8d116c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head011-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Farming Hat Schematic 1",
+          "sourceSha256": "cc2fb13c7cdb2a4890602a4ac75fb554b23ffeee40631dfa572ee92ffa1ef370"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head012-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bowler Hat Schematic 1",
+          "sourceSha256": "c2ad24ef693a06e4c960ef2505307164d9eaf165c1ec328219a60ee46023633a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head013-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tocotoco Cap Schematic 1",
+          "sourceSha256": "67fc5f9d5927363a2f25886ca932a7442e22fb5f1a4efccec52149bb85da975f"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head014-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grinning Tocotoco Cap Schematic 1",
+          "sourceSha256": "03b34b879e2ed598a6ffffdaf8fd207812fb26d41b27d5b65a3372155f3eb087"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head015-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gumoss Cap Schematic 1",
+          "sourceSha256": "e58c0541ca147bc9b3901d9539a6ae244c8cc6fc34e2ff0688798baf67e15c29"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head016-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Penking Cap Schematic 1",
+          "sourceSha256": "60a2ec0ece259ca4785cd0c01f0d1e90ce6bc356b4874570a006a656b1cddca6"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-head017-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katress Cap Schematic 1",
+          "sourceSha256": "34b7e59622c2ff1a144f9d41fa9c6a71df486e6ec2515ccd1324fc19d11a8e30"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-hunter-gang-flag",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rayne Syndicate Flag Schematic",
+          "sourceSha256": "eff5831991acc416bb1346b418dadf948f49726471ae600b9d499b762cedc3a1"
+        },
+        "description": {
+          "sourceText": "When in inventory or stored in a base, allows you to build .",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Armor Schematic 1",
+          "sourceSha256": "320f1314f5649e1757b58d7c5f3b937e67495aa6a2c1f026cc5430eb71e4060a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Armor Schematic 2",
+          "sourceSha256": "07e1914f21b257ef714b72d3082ecb35c561115be3e5846674e9277bbb802426"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Armor Schematic 3",
+          "sourceSha256": "8b297e46bf1a7f8196aa4d635819c4be6ea321ba3ce872e4e2f32c8abf00aad6"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Armor Schematic 4",
+          "sourceSha256": "cbfe4bc0c51aef8a2ff77f9442cb4a1f69d87f227098e68b3e9d69296a5a485c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-cold-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Refined Metal Armor Schematic 1",
+          "sourceSha256": "d8f27b33cacea5d8e194dbf59519dc131a2e816c23ba55e1cb4825dfbaa77dd7"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-cold-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Refined Metal Armor Schematic 2",
+          "sourceSha256": "008b75e5188f4a36240583dc1df0fe9668ab08d7e465a83fd6308ec74712ece4"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-cold-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Refined Metal Armor Schematic 3",
+          "sourceSha256": "aff88eedf22ce2cd83606a1f07a046156ce15ab9e190813ee95e4a1a4a7ac9ee"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-cold-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Refined Metal Armor Schematic 4",
+          "sourceSha256": "b526af7d47b565b6445d5e7810d2fdac3c8fb8614c8e57d39c4e890d7d753906"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-heat-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Refined Metal Armor Schematic 1",
+          "sourceSha256": "3fbdaed653baa3df902d5e5959f8c48936c993c07ebd79fd67975d2c4c0fc043"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-heat-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Refined Metal Armor Schematic 2",
+          "sourceSha256": "8de5ebed3de4e4f33096bc5f63211d7c7b1cfb64fa63d6068909d69b64e77e96"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-heat-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Refined Metal Armor Schematic 3",
+          "sourceSha256": "b170c4603019cad5b65b202c91e2a0eef9928325ba5349b7201ee5cd3c7bd3eb"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-armor-heat-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Refined Metal Armor Schematic 4",
+          "sourceSha256": "c75f79e1bd5604b144b7844f5269a5e2cecd64599f81b6af6c6f0b6eaad8d09a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-helmet-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Helm Schematic 1",
+          "sourceSha256": "a00045dd4017c338be00cfd04607e0702d9ae2fbd7612cc509238aff9eae28c5"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-helmet-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Helm Schematic 2",
+          "sourceSha256": "ad651b300945828caeadd56ac349acb3b5950a1ea9fa0f9aeb450bfe35675eef"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-helmet-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Helm Schematic 3",
+          "sourceSha256": "d53796b5c9990a6901e76dfce4c390fc054b3102f5201e30f6f9163730b10a45"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-iron-helmet-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Helm Schematic 4",
+          "sourceSha256": "994b7e7679415c18f5771d1074fd493d31b5a0f1860fdaa77b5f5b83a5a7738a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-katana-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana Schematic 1",
+          "sourceSha256": "038bb2a79c2b40b8fbd550681d534b46901a9e517bbc95b881b04452acd5afe1"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-katana-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana Schematic 2",
+          "sourceSha256": "2ccaf3b3c651ed5f169111e2bc4be9ec5d2190fd67c017dfaee1c8b62041cb13"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-katana-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana Schematic 3",
+          "sourceSha256": "d9d206a61558d01ac34029e6407770cd7553205689a41448597dd8a4f85af700"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-katana-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana Schematic 4",
+          "sourceSha256": "529712bd32735c8c9a68524d68fafddd0563e5ef491b1d497b41e315c38a8dba"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-lantern-top",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Paper Lantern Schematic",
+          "sourceSha256": "5bfd6f7b3a7a9ac0a652d467749fbfa66677983552a6e08dade063409be60ee6"
+        },
+        "description": {
+          "sourceText": "When in inventory or stored in a base, allows you to build .",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-gatling-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Gatling Gun Schematic 1",
+          "sourceSha256": "cdd4ec01e906262406e57832c56adef4953157058abaf1320709324281a38cc9"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-gatling-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Gatling Gun Schematic 2",
+          "sourceSha256": "a072a48ebf90c9e3b63da077c16ee7cafae1b330386e8795029f4ac9b13494ed"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-gatling-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Gatling Gun Schematic 3",
+          "sourceSha256": "b228d8fc0a5cecd80d5cfdf5d0673678fa4b4cb3ee5f5b691a70f008d0ace49d"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-gatling-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Gatling Gun Schematic 4",
+          "sourceSha256": "a0cf092a936f7254bd0aa2dbe8a1754d787f4048739ff5318fe6a4240d987771"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Rifle Schematic 1",
+          "sourceSha256": "e5cc79164ffe497576738f1df18b6f99e6cfae3a073b4cc0fd0ec60864b90c7f"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Rifle Schematic 2",
+          "sourceSha256": "558854ed24d3f7352f4dad6ba9a62203a6d9cee5d31e669f04401c211a92608e"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Rifle Schematic 3",
+          "sourceSha256": "17e3b3a961963efa4ba96d9b66faf518ee8b3e6c01295f9c5dc0a4747918ce41"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-laser-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Rifle Schematic 4",
+          "sourceSha256": "d2a86486a21a790b0781259ca7f5de22fd6d5fa3aa96da46f15c6bacd391883c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-launcher-default-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Launcher Schematic 1",
+          "sourceSha256": "a59e0d17936f2dd5f162b1e11011f8d51fb22aa0179481370003700378d62cb0"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-launcher-default-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Launcher Schematic 2",
+          "sourceSha256": "1077d69ee39d3935146849dc2ea1c285b3b79d42573e95e1790dda4b4ce2c195"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-launcher-default-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Launcher Schematic 3",
+          "sourceSha256": "219d7ddd7a3ee210bdddc6c386067c762f7199908267924f3b3b743d5571e74c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-launcher-default-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Launcher Schematic 4",
+          "sourceSha256": "13519187502615eb9c65cd336bdbe4983b2a4ba1772d2b06e3d4e6ae8da9c433"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-lily-queen-statue",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen Statue Schematic",
+          "sourceSha256": "94e24ac93daa2124a2ec285e32ebc4245aef5cdcd946b3ee572ae2dd184230d9"
+        },
+        "description": {
+          "sourceText": "When in inventory or stored in a base, allows you to build .",
+          "sourceSha256": "857305dc54052b2330560764043e3c7b04a9ca02c7189b9d0c9e7b372444ec82"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-assault-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Assault Rifle Schematic 1",
+          "sourceSha256": "75082727b8299c87ea607f5542d94a95284e89cf3a616d389a8d134d4c15b4e1"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-assault-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Assault Rifle Schematic 2",
+          "sourceSha256": "a53e10975999a5ca66e27513a291dd265a76d0f1058be7ee4e0235e6804506d3"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-assault-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Assault Rifle Schematic 3",
+          "sourceSha256": "e14a6a5824e7cd231c6fc5614a7e6dc6e98a6cc9983472f8fa3af4f1775f5196"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-assault-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Assault Rifle Schematic 4",
+          "sourceSha256": "7f8a5007c039fc187ad1c34a9ffc55f1bcf6391eaf2e4f694feebfb46b309429"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-handgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Handgun Schematic 1",
+          "sourceSha256": "02a4d9baa07ae6985e5ff8b034a69ba231179f7b03821966d4af62ba0832943e"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-handgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Handgun Schematic 2",
+          "sourceSha256": "927f4bdb651c26d4b50333c657312ec681547791189230e9419423e9384969c8"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-handgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Handgun Schematic 3",
+          "sourceSha256": "11fc4615bcd8a42666592bcd2638acff8d0ef5fcf03bbff3d5bb5c73c8bccac0"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-handgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Handgun Schematic 4",
+          "sourceSha256": "2dcc5060642d77dedf60eaf554e86f16d5fa85651a222782af1798cdb169252e"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-shotgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Shotgun Schematic 1",
+          "sourceSha256": "7e15b61546d5a5c071cead440e5e34ac83ced24c22661234f6b03293f46a6220"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-shotgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Shotgun Schematic 2",
+          "sourceSha256": "31efeed474342b19f477cff51b810bf0ab121398b4376ecb79c692392ffb3206"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-shotgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Shotgun Schematic 3",
+          "sourceSha256": "7267978eab2d1a676d924c88a4b46eddb305ca555a7d74d140eb23e560a1d39e"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Shotgun Schematic 4",
+          "sourceSha256": "3beef39313ae5443ac7de6dcd0e27052a682e1641d713a4ac6d0192309ab44a8"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-submachine-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift SMG Schematic 1",
+          "sourceSha256": "960ada2eedcb82a7c0c007aa92e37be30215702f9cd8115fb186b1095355a890"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-submachine-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift SMG Schematic 2",
+          "sourceSha256": "6ec0252917f4691dfbc83c2c4e4844d0ffba4e2df339823b1949befdf5a8742e"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-submachine-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift SMG Schematic 3",
+          "sourceSha256": "3f1c014595093897bed84cd125bdb2c7ba30c5cf8c9162059a9c1f428b58f4f1"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-makeshift-submachine-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift SMG Schematic 4",
+          "sourceSha256": "72328949654e4b1afc82b39daa78f7650e43eb1a35bb6bb05515b63f9d8507b5"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-multi-guided-missile-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Multi Guided Missile Launcher Schematic",
+          "sourceSha256": "6f2badca7a83255530268f267c83dc4ae4251cfcfa9099129870d12bc3e629f6"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-multi-guided-missile-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Multi Guided Missile Launcher Schematic 1",
+          "sourceSha256": "6eae9c47852c2e4767aae0de661cc5820f085582078f7a8b71f04d8cc23436a7"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-multi-guided-missile-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Multi Guided Missile Launcher Schematic 2",
+          "sourceSha256": "12a626db3a36dc63433ff612b11ff2b674f199068b7525d77ae0781502638bb0"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-multi-guided-missile-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Multi Guided Missile Launcher Schematic 3",
+          "sourceSha256": "31d9c2a953226aabdd26ace08856d938492fe4f886db8177f4c4e521400269eb"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-multi-guided-missile-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Multi Guided Missile Launcher Schematic 4",
+          "sourceSha256": "4c09a161fe89245c7880c7835c0e29e69883216a1739b7d91122663585b18c6a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-musket-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket Schematic 1",
+          "sourceSha256": "36cb8d13a5f94d8ec9471c1621ac687bd6589cb96333dee017c939452f500c54"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-musket-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket Schematic 2",
+          "sourceSha256": "2e0d52ed9f1d5c0abbb670a3e35ec54520bd2dad9e8e1c272ca41e5d291ba844"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-musket-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket Schematic 3",
+          "sourceSha256": "1590d2cab00a1573fe51c02c3e28daaf40746b3044396f63f11f55428bfafbe4"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-musket-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket Schematic 4",
+          "sourceSha256": "e10dddb4aeee0f821f2c24c1024c2d0dad49567c043e292d36aa1b85dd1af1c1"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-octavia-revolver-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Marksman Revolver Schematic 4",
+          "sourceSha256": "ecefa247a8f459ae7cebc2c77215c56ec276578d7e6331d49c16c1bcc65b1faf"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nWhen in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "b474f7c2182a4060bd96f5b0b11aad10ae8b8ae5ac3ca64f26d205dfcccec0be"
+        }
+      }
+    },
+    {
+      "id": "blueprint-octavia-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Core Eject Shotgun Schematic 4",
+          "sourceSha256": "47ff4a4bef3e89e161ae442c67417b451abdcd23b4b9c9be0454d723994d4ad5"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nWhen in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "b474f7c2182a4060bd96f5b0b11aad10ae8b8ae5ac3ca64f26d205dfcccec0be"
+        }
+      }
+    },
+    {
+      "id": "blueprint-octavia001-armor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "V1 Armor Schematic 4",
+          "sourceSha256": "829366a1efd5c7a86fc998b7a34317f48cb91bf4515db23b9e00d3c8520de505"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nWhen in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "b474f7c2182a4060bd96f5b0b11aad10ae8b8ae5ac3ca64f26d205dfcccec0be"
+        }
+      }
+    },
+    {
+      "id": "blueprint-octavia002-armor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "V2 Armor Schematic 4",
+          "sourceSha256": "09ac3f803789ac8997a616ce65699c16edbcc2323be29ddcd97c3816fd1bd054"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nWhen in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "b474f7c2182a4060bd96f5b0b11aad10ae8b8ae5ac3ca64f26d205dfcccec0be"
+        }
+      }
+    },
+    {
+      "id": "blueprint-old-revolver-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Old Revolver Schematic 1",
+          "sourceSha256": "c949e89c76fe960957a0856253579c24d58b5ece5f4ba88e83d521c1cd63b5bb"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-old-revolver-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Old Revolver Schematic 2",
+          "sourceSha256": "26b6828606aa1d3317709b2971390120168f3198dd13d1c16952ae034b8e9351"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-old-revolver-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Old Revolver Schematic 3",
+          "sourceSha256": "e96944bcc7d5cb97062902bc486365408fc9bf5923aa29080eeb86e9213b3313"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-old-revolver-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Old Revolver Schematic 4",
+          "sourceSha256": "6b78ac3c3933fa457da444d7eddfd93e51d55fd7d34191d7f3342133ed599ee3"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atdark-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lord of the Underworld's Baton Schematic",
+          "sourceSha256": "0d67b6ac14a857b7d008b0465d470d8709e8dcdc59995dc69618467d8a1aed9b"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atdragon-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Divine Dragon's Baton Schematic",
+          "sourceSha256": "f54cc701084ab71ac3e63fed6dd32986356e93d1fb20c2af0891b2a9ddd39472"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atearth-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Earth Emperor's Baton Schematic",
+          "sourceSha256": "112b0474f308e70e76cd45213c9823fc3f65597dd78cd13ad7a7cb3b50021a9d"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atelectricity-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lord of Lightning's Baton Schematic",
+          "sourceSha256": "a4190a097e6171d1deb63b440ccf4de82f79db24c86425c0c5c18dcf2115a50c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atfire-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Flame Emperor's Baton Schematic",
+          "sourceSha256": "ac871d9cebdde937bf714ca6aaa6662711e7688b632a4ae8b8de4820181cf12a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atice-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Emperor's Baton Schematic",
+          "sourceSha256": "acc648d896169a81b38a428218bb4ef3615af1e2a98b9cbac376f6cf31604c29"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atleaf-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Spirit Emperor's Baton Schematic",
+          "sourceSha256": "0700c2df9f662bc258e101664fae5bf4f95dc761e486bbec09cd3325a1042ac1"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atnormal-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Celestial Emperor's Baton Schematic",
+          "sourceSha256": "b4e6c5a720b2baae80047003e48bd6c9aad98edbf09031a44210454b579bc2ed"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-attack-up1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Attack Support Whistle Schematic",
+          "sourceSha256": "a357018fd415de41c0cb807fcd4a4dc342300a344a262896b0b73042124de164"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-atwater-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lord of the Sea's Baton Schematic",
+          "sourceSha256": "27d6ee84bca9233d1594badfae7e7eb417100cec43757ee66f60f958c2989321"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-defense-up1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Defense Support Whistle Schematic",
+          "sourceSha256": "9ac29569ac0dad4f2885add694e6319d8680d54c60916a40c11402e04bc952fb"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfdark-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen Noct's Talisman Schematic",
+          "sourceSha256": "45cb9ac6d2b17e743441f40f9b3cc4d21961f73c231888550c00859b51a17f17"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfdragon-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jetragon's Talisman Schematic",
+          "sourceSha256": "ccfd96c6c019a57e1349ce3113297cfdb183ed0c016b109d1b8847321ee93111"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfearth-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Anubis's Talisman Schematic",
+          "sourceSha256": "940078d6a161af3849f23dbd10d60a69b8936e2129e9c3f491d439ef85c57b20"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfelectricity-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Orserk's Talisman Schematic",
+          "sourceSha256": "c07182b8ef9354a353f19f4334133d497a68043cd32aa74376c211b74ed37d64"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dffire-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Blazamut's Talisman Schematic",
+          "sourceSha256": "ae33468818285d8643829d31ed2e2ac5de71bc9641fa439263e9bd64f85bedb1"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfice-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Frostallion's Talisman Schematic",
+          "sourceSha256": "8b4ca293b696e223f81ea57b77d1f19ec2e8f82400d7bf68fe8e9936e369b60a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfleaf-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen's Talisman Schematic",
+          "sourceSha256": "9329a9aaef7bc787e1c26691d6b49104308bfa2499f504ff059fb57569bba8c0"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfnormal-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hartalis's Talisman Schematic",
+          "sourceSha256": "e6d59922a50339ba9b3e8b12974b16bb39e2df7863f966f0327f6bd77037a12f"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-dfwater-element-boost-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Neptilius's Talisman Schematic",
+          "sourceSha256": "afd9de4c3a7c0c0f9e6a8c50a7fb45651fb5b76b53f2cb1b02808ca2e6cc45ed"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-dark-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Support Whistle Schematic",
+          "sourceSha256": "a0afc42bfead57b19c8e6555fa864599b915573693fd433ef542139fb8e60ea7"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-dragon-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Support Whistle Schematic",
+          "sourceSha256": "22a5615d90276b5795b4c078a6df3d087cffb9bbb17d6995c8531655fb1687a8"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-earth-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Support Whistle Schematic",
+          "sourceSha256": "ddb8c7f0491c01576a417fe79547c0771d179063c7d672a3732ec0dc87ea9a92"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-electricity-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Support Whistle Schematic",
+          "sourceSha256": "aca20d06cfd4f626f08b19de41507164b18278936835fcb700a0fa5491198251"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-fire-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Support Whistle Schematic",
+          "sourceSha256": "cc58762c349d5f31f99d2d00a3a1bc9e4996f6db9fa66f5e1723244b75d1348d"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-ice-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Support Whistle Schematic",
+          "sourceSha256": "1ea7a10123c37cf4065ea859b171c43d941ff3f5944ce3b6cbe42ce52c858cca"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-leaf-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Support Whistle Schematic",
+          "sourceSha256": "bc50494c0ac8764f9ff8d3cd629266a5531945fd4a11e83299019e2fedf957e6"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-normal-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Neutral Support Whistle Schematic",
+          "sourceSha256": "764a35d22a352e2a0946ab20f8b3312f1a7bd0bafbbbcccd0e73f3fd02fcce77"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-element-boost-water-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Support Whistle Schematic",
+          "sourceSha256": "55e34b74ea6fc50fb5e9c1fbe41097423de72a23d115e2b5c060b7777e12e3cf"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-pal-confidence-increase-1-fix",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Trust Schematic",
+          "sourceSha256": "4502bec225a0bd2809ef1faba76aeb09b5192c28d8a997163461efbb11c0c9ba"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-otomo-pal-exp-increase-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Growth Acceleration Bell Schematic",
+          "sourceSha256": "70d6afe971e38aff6a1afbd221bbee00cd8dce113e378ccf5919f980c79c2e7c"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-overheat-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Overheat Rifle Schematic 1",
+          "sourceSha256": "a4e20d8ed42fc28c6921f5be18d11a842d5c4ebf1d8153d8acf8cf89b01d94c7"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-overheat-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Overheat Rifle Schematic 2",
+          "sourceSha256": "c3730ce392b073c080bf5ff7678075b448ce6576254ea28950d21f88c56de7c6"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-overheat-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Overheat Rifle Schematic 3",
+          "sourceSha256": "a66903a7b0a2ef6aad2cc19ae76dea0e2b86dd9f06fdbe09bc25cff261ed0149"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-overheat-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Overheat Rifle Schematic 4",
+          "sourceSha256": "5361dccd566c57ee2177b23697596c20f983d58f520b7ec755e2a4a31d2a7495"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-pal-summon-yakushima-boss002",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Celestial Sigil Schematic",
+          "sourceSha256": "85668d0926eba43e0c3d2905f1f577221d3de6269b84b86f6dcac6b3798e00ff"
+        },
+        "description": {
+          "sourceText": "[Tides of Terraria]\nWhen in inventory, unlocks recipe for .\nCan be crafted at .",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15"
+        }
+      }
+    },
+    {
+      "id": "blueprint-plastic-armor-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Plasteel Armor Schematic 1",
+          "sourceSha256": "dcc62c1a1ae9decbf959d1b6d548d977039bea947062100aac0c10c6b09bd6ae"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-plastic-armor-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Plasteel Armor Schematic 2",
+          "sourceSha256": "032b0c5e8f187aba1a433433534cc1ccbff9f8c7f72a7e57a866fbd4d8a7b5eb"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-plastic-armor-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Plasteel Armor Schematic 3",
+          "sourceSha256": "128b037b04ddf646b34c88831b18bfafe2327168f9b98d92498350fabb689eb9"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-plastic-armor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Plasteel Armor Schematic 4",
+          "sourceSha256": "81470a63729cf60cf3c211847865b8293e2d8691654e0932fb4d1c6b0480297a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-plastic-armor-cold-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Plasteel Armor Schematic 1",
+          "sourceSha256": "d327892020e21eaf88f7615b31f6aebfa93eb4e779ea645e984a898310ae07f9"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    },
+    {
+      "id": "blueprint-plastic-armor-cold-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Plasteel Armor Schematic 2",
+          "sourceSha256": "132319255b952594d9af5158565faa079f5727a2f7c4005a4971a6da93c6e53a"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for ().\nCan be crafted at .",
+          "sourceSha256": "fe39fc1d1e189f609d0a70c49f4f777e6eea11fb2bea9ca522ab3ae80c1c2fa0"
+        }
+      }
+    }
+  ]
+}

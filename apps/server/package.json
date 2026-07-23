@@ -12,8 +12,13 @@
     "validate:runtime": "tsx src/scripts/validate-runtime-config.ts",
     "fetch:palworld-data": "tsx src/scripts/fetch-palworld-paldex.ts",
     "generate:palworld-data": "tsx src/scripts/generate-palworld-paldex.ts",
+    "generate:palworld-breeding": "tsx src/scripts/generate-palworld-breeding.ts",
     "import:palworld-images": "tsx src/scripts/import-palworld-images.ts",
     "import:palworld-catalog": "tsx src/scripts/import-palworld-catalog.ts",
+    "preflight:palworld-pak": "tsx src/scripts/preflight-palworld-pak.ts",
+    "extract:palworld-translations": "tsx src/scripts/extract-palworld-translations.ts",
+    "import:palworld-translations": "tsx src/scripts/import-palworld-translations.ts",
+    "validate:palworld-translations": "tsx src/scripts/validate-palworld-translations.ts",
     "rollback:palworld-images": "tsx src/scripts/rollback-palworld-images.ts --release 1.0.1",
     "validate:palworld-data": "tsx src/scripts/validate-palworld-paldex.ts",
     "validate:palworld-data:release": "tsx src/scripts/validate-palworld-paldex.ts --release",
@@ -29,8 +34,10 @@
   "devDependencies": {
     "@types/node": "^20.14.10",
     "@types/ws": "^8.5.10",
+    "@types/yauzl": "^3.4.0",
     "sharp": "0.35.3",
     "tsx": "^4.16.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "yauzl": "^3.4.0"
   }
 }

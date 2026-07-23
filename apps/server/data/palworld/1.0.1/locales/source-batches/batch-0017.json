@@ -1,0 +1,2101 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 17,
+  "records": [
+    {
+      "id": "partner-digtoise",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Drill Crusher",
+          "sourceSha256": "a32545d88bc5a7d0f10243b6ab781790aec6ff42c669cad84502fdaf0f3e1106"
+        },
+        "description": {
+          "sourceText": "When activated, enters the Shell Spin state. Follows the player while spinning, increasing ore mining efficiency by 800%.",
+          "sourceSha256": "d8555fccd79cc7c00d06335562dd1d4a1102d4c7ee8dddd26016e4437b0d4ac4"
+        }
+      }
+    },
+    {
+      "id": "partner-dinossom",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fragrant Dragon",
+          "sourceSha256": "985d78378a38ebb4b838a0479a73382102f92ac0f5e1641d50fffaeca3dacf75"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, increase Defense of Dragon Pals by 15%. (Does not stack)",
+          "sourceSha256": "deabc26e958ad06e402b478b38f503def2b02b198e4382d2c768ce6bcb035720"
+        }
+      }
+    },
+    {
+      "id": "partner-dinossom-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunder Dragon",
+          "sourceSha256": "313e3aed9f0007f8bc670fbe09b42728897a8fe7d8dbe2607e6e57f268eab023"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, increases Defense of Electric Pals by 15%. (Does not stack)",
+          "sourceSha256": "f9d589bdfe4b5c66a7914e325e2187a489e4b306d41c0d892c0c61bfae83fe78"
+        }
+      }
+    },
+    {
+      "id": "partner-direhowl",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Direhowl Rider",
+          "sourceSha256": "e2efd45e847c965f562599522891e670c8c002abbfe158eee244bdc3d95b9fd1"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Moves slightly faster than most mounts.",
+          "sourceSha256": "cb367b0bd2740676c941cdeb003433ce620f7e48b2e2e519cc77f39f991198c8"
+        }
+      }
+    },
+    {
+      "id": "partner-dogen",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Homeward Prayer",
+          "sourceSha256": "55b15ac386406ed3684f39d710af43131b7087d72221acb8b4d6f8f01ea95002"
+        },
+        "description": {
+          "sourceText": "When activated, teleports to the nearest base. Cannot be used inside dungeons or similar areas.",
+          "sourceSha256": "acff163ab14be4d8561aa8c424eab81b275e2d8d49bfaa40ab7825b539d322e0"
+        }
+      }
+    },
+    {
+      "id": "partner-dualith",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Forest Laser",
+          "sourceSha256": "c265228f6512450b406d18be17367ce2fa26510f0a305f3a9d04113268b832db"
+        },
+        "description": {
+          "sourceText": "Can be ridden. When activated, Dualith fires a powerful Grass laser from its right hand.",
+          "sourceSha256": "b178dad61d2a32c262c21f0f2b0ac6f57786457a8de6b623afe08ea4455dc0d0"
+        }
+      }
+    },
+    {
+      "id": "partner-dualith-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Corruption Laser",
+          "sourceSha256": "6e8ef777f4ca8ffa400467f88f657c3fdd95fb5df96ea683054e22708f37ffa1"
+        },
+        "description": {
+          "sourceText": "Can be ridden. When activated, Dualith Noct fires a powerful Dark laser from its right hand.",
+          "sourceSha256": "dadb01b88e65fe2617701d1f48a964214eaf40fdbc50fb3164b72ddd77f802ce"
+        }
+      }
+    },
+    {
+      "id": "partner-dumud",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Soil Improver",
+          "sourceSha256": "17248c4de10e2375ed5c84e391ab176ad99e96f746a7985188d31f6ea471a314"
+        },
+        "description": {
+          "sourceText": "While in party, increases Attack of Ground Pals by 15%. (Does not stack) Sometimes drops High Quality Pal Oil when assigned to Ranch.",
+          "sourceSha256": "c66aa54b943670e122a4777b89137bb480a1e11491e4eb320d2f0392e3cad38e"
+        }
+      }
+    },
+    {
+      "id": "partner-dumud-gild",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Golden Harvest",
+          "sourceSha256": "7d1b8e87d99b0b579b5bacbe4bd77359adef97bc63a3960bbff4eaebb1fc3f1b"
+        },
+        "description": {
+          "sourceText": "While in party, increases amount of Gold Coin dropped by enemies by +100%. Sometimes drops High Quality Pal Oil when assigned to Ranch, with a small chance to drop Gold Coin. (Does not stack)",
+          "sourceSha256": "90696adddfc83638db694d4b21d9d53c2295e590815bd0683a96a93ee3861875"
+        }
+      }
+    },
+    {
+      "id": "partner-dupin",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Trick-Loving Fluffle",
+          "sourceSha256": "5073f6b52c004e2e44b68213c8d0703978b8e82e171217ed5b85782a5e8feaec"
+        },
+        "description": {
+          "sourceText": "While in party, when the player's Health falls below 50%, Dupin generates an explosion around the player (Fire / Power: 100 / Burn buildup: 777). Additionally, while the player's Health is below 50%, the player's Attack is increased by 110%. (Does not stack)",
+          "sourceSha256": "2de4f9580486c6062734e7c59ca1515ab75ac8f0bca3e5d2cdaba0dd196e94c6"
+        }
+      }
+    },
+    {
+      "id": "partner-dynamoff",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Electro-Massage Incubation",
+          "sourceSha256": "21e7e2f10eb8954924a84e070b34bc025ebf13ede7196a690bfc2e84035304a1"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While at a base, shortens the time it takes to incubate eggs by 20%. (Does not stack)",
+          "sourceSha256": "fc14297ae416f9a54f2a24fb381e7e75320b583a1c08606c6aea01283350eb0c"
+        }
+      }
+    },
+    {
+      "id": "partner-eidrolon",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Liberated Pterosaur",
+          "sourceSha256": "5d37574339c0d03f4f8c2682e7adfb9f899838158bad3860c723a28f369a3534"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. This Pal's Attack and Movement Speed increase by 2% for each other Dragonor Dark Pal in your party.",
+          "sourceSha256": "3053442ae858a811f2c1fb2356f6f7868f037d16a4b60505244dab216d194f5e"
+        }
+      }
+    },
+    {
+      "id": "partner-eidrolon-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Resentful Pterosaur",
+          "sourceSha256": "5e5fa0ad086481b6d6f01f33dfc7d7f3d4b0ffe4c0213492d8fac78acfdb574b"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. This Pal's Attack and Movement Speed increase by 2% or each other Dragon or Fire Pal in your party. (Excluding Eidrolon Ignis)",
+          "sourceSha256": "e5981c4a2b5b065ed2074a5b52b149c9dc84b5639d68da409632c46d7607c46f"
+        }
+      }
+    },
+    {
+      "id": "partner-eikthyrdeer",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Guardian of the Forest",
+          "sourceSha256": "47646f86981c53a9db8f624412a2d466303fdea2a3d01a6266bf48de06d54619"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can perform a double jump while mounted and increases lumbering efficiency by 220%.",
+          "sourceSha256": "3b2466b4eba278fc7bbb07599b020177f9a821d31e17d6b219fba3522e00f152"
+        }
+      }
+    },
+    {
+      "id": "partner-eikthyrdeer-terra",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Guardian of the Golden Forest",
+          "sourceSha256": "1875304b03dd225626b8fe34b5e5013d02d2fb3fa94773e7c1561b2e6247811d"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can perform a double jump while mounted. While at a base, increases the Lumbering Work Suitability Level for all other Base Pals by +1 (Does not stack)",
+          "sourceSha256": "85be6ecd8923ba44beb7ed0a58091df367c9439c10eae2a36caa3b9559a4a637"
+        }
+      }
+    },
+    {
+      "id": "partner-elgrove",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Mother Nature's Menace",
+          "sourceSha256": "5f060fd684cf9cf3ec9ac227ab370b8e967b7676ae271f603f0b11f6ac403e92"
+        },
+        "description": {
+          "sourceText": "When activated, Elgrove changes the player's attack type to Grass and increases Attack by 30%.",
+          "sourceSha256": "5d07a99cacc34703015b996cbf163bfa6d6fcbf263fee3a38d23566687809b7e"
+        }
+      }
+    },
+    {
+      "id": "partner-elgrove-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Father Winter's Threat",
+          "sourceSha256": "6ce3caa7abbf7b5803155cda2f50647eb531b1ba86ccea99ed0b02e53ab4291f"
+        },
+        "description": {
+          "sourceText": "While in party, grants the player the ability to Freeze enemies afflicted with Soak in one strike.",
+          "sourceSha256": "d3752ba157c2a3e1b30a2205a84558b115ae30feb948b0bc6938f26120008da2"
+        }
+      }
+    },
+    {
+      "id": "partner-elizabee",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Queen Bee Command",
+          "sourceSha256": "9612070f07b3fd4f02d021196b85cd71f130b8915896332c23591c4b819f58ae"
+        },
+        "description": {
+          "sourceText": "This Pal's Attack increases by 12% for each Beegarde in party.",
+          "sourceSha256": "ca19ddf1c04ffbd8fbdf6125a5e44f8895ed178b1b3aef13e8cf11346cd77719"
+        }
+      }
+    },
+    {
+      "id": "partner-elphidran",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Amicable Holy Dragon",
+          "sourceSha256": "49ba5307f2f6eb2d3b724fd9057e6fa4a40a3632e6897cecf5144aee374ba26c"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While flying, Movement Speed is increased. While in party, Dark Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "6180584b95b637fdcf8526cd11ea00af31d4494a7f879e23af0a9c15b9b1db8b"
+        }
+      }
+    },
+    {
+      "id": "partner-elphidran-aqua",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Amicable Water Dragon",
+          "sourceSha256": "11ec90f0124b9f69eae8611ce692bb371e024533bf6a870066d7f57f3db815d9"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While flying, Movement Speed is increased. While in party, player and party Pals take 15% less Fire damage and are immune to Burn. (Does not stack)",
+          "sourceSha256": "14ab39b39fc864143ffc61996884dfe9f397cb7087852d42ee513f9dd384b9db"
+        }
+      }
+    },
+    {
+      "id": "partner-faleris",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Scorching Predator",
+          "sourceSha256": "b0e336b237a0f2e40bb3ff39ed07ddb58c7151bffebca3d6beb3bacc8905f07a"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While in party, Ice Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "f1d94c358d656b080a43baa25b16fc59d7321561ea70f1e0e05c18f5d5e3b949"
+        }
+      }
+    },
+    {
+      "id": "partner-faleris-aqua",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Tidal Predator",
+          "sourceSha256": "35283116be0b6aa6bc8e3eb0714b9ee94b14168899ea3b5e6f36ae94d46a13eb"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While in party, Fire Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "e61f4655668ecbbb1445cbf1b1d748b0e567f811d08fb197c39f9af94b9275e9"
+        }
+      }
+    },
+    {
+      "id": "partner-felbat",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Life Steal",
+          "sourceSha256": "36bf64543f2a504483f3bb77b3e212b6700b54db9c0b790f045248a8d56c3972"
+        },
+        "description": {
+          "sourceText": "While fighting together, grants the player and Felbat a life steal effect that restores 5% of damage dealt as Health.",
+          "sourceSha256": "0ce89c9ad9f5b25127033a799962435bbad8092e3eba8c55b41de67d2c1ae37f"
+        }
+      }
+    },
+    {
+      "id": "partner-fenglope",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wind and Clouds",
+          "sourceSha256": "8ae8d89123918fc7ccfe0c13b1286f20947d3aeaba28d2d571eeebd31b54e7df"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can double jump while mounted.",
+          "sourceSha256": "a6929aa9adbd04010b7f40ba811d79a0a4f1e40e63b9dff92992cdb79a6c5c41"
+        }
+      }
+    },
+    {
+      "id": "partner-fenglope-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Stormcloud",
+          "sourceSha256": "0288fe258b56bbacd5ade2d98c3c99e59573758d37bf52dcaf780dfaacf9ebc5"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can double jump while mounted. While in party, Water Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "2940689f6796de32261324080f041885c9dbdfcf906a91e951e3970be312dfcf"
+        }
+      }
+    },
+    {
+      "id": "partner-finsider",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Water Gun",
+          "sourceSha256": "0247908300b51393ccb3d9b4aa1f836246d345a483d8d9b85c7d887ef25d753b"
+        },
+        "description": {
+          "sourceText": "When activated, Finsider changes the player's attack type to Water and increases Attack by 30%.",
+          "sourceSha256": "d488b4684625fbdcc35a0748f61c196c501e579075c8cceb9bcc382b213fda4e"
+        }
+      }
+    },
+    {
+      "id": "partner-finsider-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ember Chamber",
+          "sourceSha256": "43c74fb3a0b85936f73f837a8b7804f4ac31ce5443bd369f489ab7c3d82b288a"
+        },
+        "description": {
+          "sourceText": "While in party, Finsider Ignis helps carry supplies, reducing the weight of weapons in your inventory by 60%. Also improves player's and Pals' Fire damage to enemy weak points by 70%. (Does not stack)",
+          "sourceSha256": "14fb5262e48d8464989def6127eb1d95b6b304b5d2d047a872331691f29239c9"
+        }
+      }
+    },
+    {
+      "id": "partner-flambelle",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Magma Tears",
+          "sourceSha256": "9008cc50835bab8579dcc9be1c2aa4f1f6f0fa6256645af0764f63ff492b85ac"
+        },
+        "description": {
+          "sourceText": "While in party, recovers Health of the player and Party Pals by 0.1% per second outside of combat. (Does not stack) Sometimes drops Flame Organ when assigned to Ranch.",
+          "sourceSha256": "c840f5190fd606fcad458c55ebacb277da8bf3b04eda3be9fc860b8e1556570d"
+        }
+      }
+    },
+    {
+      "id": "partner-flaracle",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Burning Future",
+          "sourceSha256": "4fd77f9d2aeff5c91a6cf205515ef2eedc79f5384ee4d65ea967dcc1bc1573b1"
+        },
+        "description": {
+          "sourceText": "While in party, when the player attacks an enemy afflicted with Burn, the enemy explodes, dealing damage equal to 40% of the player's attack damage to nearby enemies. (Does not stack.)",
+          "sourceSha256": "49ae074e3dc8e997b37436d8be25702549a37a53242a98914aa437d9cc23ac97"
+        }
+      }
+    },
+    {
+      "id": "partner-flopie",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Helper Bunny",
+          "sourceSha256": "cb41a7d3a5144c815a2a20d148fb2f6edc1e61e24c5a24e7f52dc8c77d51ea79"
+        },
+        "description": {
+          "sourceText": "While in party, appears near the player. Automatically picks up nearby items.",
+          "sourceSha256": "adbdea8c6ce6a3c921747d8f22f41a508ca6ecf19d638684bee845acefe4171e"
+        }
+      }
+    },
+    {
+      "id": "partner-foxcicle",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Aurora Guide",
+          "sourceSha256": "d83ba4e95fb6ed62dbc2b9b2e6ec47e34b46aef1d9ee3e618c1f30b6970e388e"
+        },
+        "description": {
+          "sourceText": "While in party, increases Attack of Ice Pals by 15%. (Does not stack) Sometimes drops Ice Organ when assigned to Ranch.",
+          "sourceSha256": "9e088d8bf07a857865f08c868a0e4e2efb56e35ce7b8889e7c1205f9ec02a52e"
+        }
+      }
+    },
+    {
+      "id": "partner-foxparks",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Huggy Fire",
+          "sourceSha256": "12ae240af4e60b090f07e7c57c4952cefb1100eb40eda922c3a2b17b56e96307"
+        },
+        "description": {
+          "sourceText": "When activated, equips to the player and transforms into a flamethrower.",
+          "sourceSha256": "bf0dcae918c56b34d5b21d50c4c3d49a619a64d3c7dbb31c5565612232acf185"
+        }
+      }
+    },
+    {
+      "id": "partner-foxparks-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Huggy Frost",
+          "sourceSha256": "01ebd13d8a67b098697bc2326c87d5554a2159862f28aff6387867af4dccf725"
+        },
+        "description": {
+          "sourceText": "When activated, equips to the player and attacks using frigid air.",
+          "sourceSha256": "7aa15cdbd581b64e978a39dc63990660ef0fbe24627cb0cdbf894c3f64187994"
+        }
+      }
+    },
+    {
+      "id": "partner-frostallion",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Icy Steed",
+          "sourceSha256": "f338624019d42034bb6029bac29b8d2e295937bed70cced75f3079ffef17ab88"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player's attack type to Ice, inflict Freeze 1, increases Attack by 1%.",
+          "sourceSha256": "cffe5ee1b2fc0edcadf208ce0d9dea9591eb4b03790c52f8d53d2bb588337bd3"
+        }
+      }
+    },
+    {
+      "id": "partner-frostallion-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Black Steed",
+          "sourceSha256": "43877c7147284421e6acb5009c4f58b82c2c52ba922bf15844bf7001a4a07a80"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player's attack type to Dark, inflict Blind 1, increases Attack by 1%.",
+          "sourceSha256": "588d67176aa7a800cb5db5e1c20f9b8197c041f2b589a5107c3c7cfdbcb8e2a5"
+        }
+      }
+    },
+    {
+      "id": "partner-frostplume",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Peacock Pounce",
+          "sourceSha256": "6fcf0ccc18f5a5bccda4d09927dff69b2e6e8857c392f88098ea10428f44095b"
+        },
+        "description": {
+          "sourceText": "While in party, Frostplume's icy aura sharpens focus, increasing the player's reload speeds by 20%. (Does not stack)",
+          "sourceSha256": "11066ea54b0503322284ffe562c27142d6014e1da5638bdfffbee08a2902f5f0"
+        }
+      }
+    },
+    {
+      "id": "partner-fuack",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Surfing Slam",
+          "sourceSha256": "d8d8204a526dd8b533f5ba0ea84d1891abf0c724a77fe2803f05bd61c48da0dc"
+        },
+        "description": {
+          "sourceText": "When activated, Fuack body surfs towards an enemy and slams into them.",
+          "sourceSha256": "df5becdbf3ba254df2c694f2be1f13f49091639be41fd958fe48dfd13ebb7baa"
+        }
+      }
+    },
+    {
+      "id": "partner-fuack-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Tackle",
+          "sourceSha256": "56dc9e1be0b164fb918a11810894e2580fba213fb29695d26d4fe5318d946cc1"
+        },
+        "description": {
+          "sourceText": "When activated, Fuack Ignis fire surfs towards an enemy and slams into them.",
+          "sourceSha256": "215872cc45263e520562d475e75f285a67de4ff346a1f5cf945d4fc72dd5c3ad"
+        }
+      }
+    },
+    {
+      "id": "partner-fuddler",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Mining Assistance",
+          "sourceSha256": "ecde698a611d5abebc64663d32e1e9389bb21c480d660782d63bf5cc8ec27150"
+        },
+        "description": {
+          "sourceText": "While in party, improves player mining efficiency by 30% and reduces Stone weight by 34%. (Does not stack)",
+          "sourceSha256": "0a9c6b17c295e23052cc8ef0bd4b196a499856bd3c83cd20ed7303ab167b3bb5"
+        }
+      }
+    },
+    {
+      "id": "partner-galeclaw",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Galeclaw Glider",
+          "sourceSha256": "3cb08d2439b9dddc21850f8482449d9d7a297ee21c140ab93d10d1a41866a447"
+        },
+        "description": {
+          "sourceText": "While in party, modifies the performance of the equipped glider. Enables high-speed gliding and allows shooting with the right hand.",
+          "sourceSha256": "b873ab47804468db6cbe4b426619bcc3b84ace26cbe7477fb554acefaad82e1b"
+        }
+      }
+    },
+    {
+      "id": "partner-ghangler",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Master of Darkness",
+          "sourceSha256": "61b51e60e7bfbface843e8f930d83b326ecb1baf015a3627e2b7cedaf6eca576"
+        },
+        "description": {
+          "sourceText": "Can be ridden to travel on water. This Pal’s Movement Speed increases by 5% for each other Dark or Water Pal in your party. (Excluding Ghangler)",
+          "sourceSha256": "e1beb9b7c63b72c0517a34cffc0346af1fa0fe7ac820a3253e21f5bbf668df1d"
+        }
+      }
+    },
+    {
+      "id": "partner-ghangler-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Abyssal Celebrity Chef",
+          "sourceSha256": "5e0261b73e9095ba45171e3453ce70e2d42a6414fdea558a8b3cf2f2566b5390"
+        },
+        "description": {
+          "sourceText": "Can be ridden to travel on water. This Pal’s Movement Speed increases by 5% for each other Fire or Water Pal in your party. (Excluding Ghangler Ignis)",
+          "sourceSha256": "478052e4b8507389043cb1bcf53f652d124b3eb5de07daa43d280760740afbd6"
+        }
+      }
+    },
+    {
+      "id": "partner-gildane",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sandstorm's Blessing",
+          "sourceSha256": "1264894d4fff151ed85778790ce0b2fe08b2b705395384b4941f1bd83c6af280"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, changes the player’s attack type to Ground and increases Attack by 1%.",
+          "sourceSha256": "850c8f81e39a0bafb63d02d3df65c91772803629cfd525e07e4f76674c943456"
+        }
+      }
+    },
+    {
+      "id": "partner-gildra",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Resurrection",
+          "sourceSha256": "7f65e66d7b992f00e39bd0933f6ed9732c99bf22e061c0fbf46af3aeb1c52bc0"
+        },
+        "description": {
+          "sourceText": "While fighting together, when Gildra is incapacitated, it revives with its Hunger reduced to 0.",
+          "sourceSha256": "49e30464ae9ba6f8afd405fd88035fcdafa0659e24255947871c095f44c9cea2"
+        }
+      }
+    },
+    {
+      "id": "partner-gloopie-primo",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cephalo-Princess",
+          "sourceSha256": "9b990d0e8a6ae8073f9cd068244fbf7f8e641cc8ea5b9aa1cbf07dcd7e43c4b8"
+        },
+        "description": {
+          "sourceText": "While in party, increases Defense of Water Pals by 15%. (Does not stack)",
+          "sourceSha256": "32cd3453a4212a4b8f9e26221f08766941b1a73abc1663dad81ce6c266264ca5"
+        }
+      }
+    },
+    {
+      "id": "partner-gobfin",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Angry Shark",
+          "sourceSha256": "67d615154abeb29091fa26903c4718dd45ac346df846a80b26d57f57d9dc2555"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Aqua Gun. When this Pal uses Aqua Gun, it has a x1.1/1.3/1.6/2/2.5 damage multiplier. While in party, increases the player's Attack by 10%.",
+          "sourceSha256": "7bed1beb84cf319a91c7c45d6be10c7fe0686b6f9f60755c220cd7adf8e7fc98"
+        }
+      }
+    },
+    {
+      "id": "partner-gobfin-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Angry Shark",
+          "sourceSha256": "67d615154abeb29091fa26903c4718dd45ac346df846a80b26d57f57d9dc2555"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Spirit Fire. When this Pal uses Spirit Fire, it has a x1.1/1.3/1.6/2/2.5 damage multiplier. While in party, increases the player's Attack by 10%.",
+          "sourceSha256": "d41724c76d3681d8bafd8933c83120cc353fa598a9cde99b02a9265f78c222d8"
+        }
+      }
+    },
+    {
+      "id": "partner-gorirat",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Full-Power Gorilla Mode",
+          "sourceSha256": "1897d0aeb255b733c219ac73ea69a682728d0d43fb2239c1eb2423bb13d5437b"
+        },
+        "description": {
+          "sourceText": "When activated, unleashes a primal fury that increases Gorirat's Attack by 75% for a limited time.",
+          "sourceSha256": "13378928b4c14f440c27eaa21add3cecf133ddc80036797808e3d0b37480fa87"
+        }
+      }
+    },
+    {
+      "id": "partner-gorirat-terra",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Full-Power Gorilla Pound",
+          "sourceSha256": "8f952c960da4f63d84b192b4bb7d40cb27510f3bf326d45dbbcd9b93746a9356"
+        },
+        "description": {
+          "sourceText": "While in party, increases the player's climbing speed by 50%. (Does not stack)",
+          "sourceSha256": "3190ca07a792653176d1e0824cfd58490360945523d72ab4976fca58ce865d7c"
+        }
+      }
+    },
+    {
+      "id": "partner-grintale",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Glaring Cat's Eye",
+          "sourceSha256": "6794c20497c01679decbd98683209012812a092ffe54139165789188f367e43b"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, picking up a Pal Egg has a 50% chance of receiving one extra. (Does not stack)",
+          "sourceSha256": "a2ce5b5f1d4a8254b74829b10bf6d7758efcf4d065f12d303b8b284c3370489c"
+        }
+      }
+    },
+    {
+      "id": "partner-grizzbolt",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Yellow Tank",
+          "sourceSha256": "427e178463e040d6e7ec370882aaa44697fceb63d3d4add4c28e40ac2c4261d6"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can rapidly fire a minigun while mounted.",
+          "sourceSha256": "bbaf6f9e1d57d8f4be54f51dbb2a07b7f907e57df85545c3d2e2f81acef3defb"
+        }
+      }
+    },
+    {
+      "id": "partner-gumoss",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Logging Assistance",
+          "sourceSha256": "e281e87f9bdf97def560c7dcd0368ba1811e3c4c383728c34c75ceb171046880"
+        },
+        "description": {
+          "sourceText": "While in party, improves logging efficiency by 30% and reduces weight of all types of wood by 35%. (Does not stack)",
+          "sourceSha256": "2fbaea5297d14732af248ce6d84decd8de960a98e276a7dae1d77a8a57a10308"
+        }
+      }
+    },
+    {
+      "id": "partner-hangyu",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flying Trapeze",
+          "sourceSha256": "e69102d07fc89000555a0baf6dda207befdc5f15675c38da1cf9d3a15da5ff69"
+        }
+      }
+    },
+    {
+      "id": "partner-hangyu-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Winter Trapeze",
+          "sourceSha256": "dc899d7385e1c6f07335d2dca070e358ebe38091bc8181b8d0c990c4e03b13eb"
+        }
+      }
+    },
+    {
+      "id": "partner-hartalis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sacred Barrier",
+          "sourceSha256": "31f5a2a35e417901c03ec08235184f0f5ae7b2e5de97dc9ced19e4abb678f50f"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, it generates a barrier that blocks all attacks. Can triple jump while mounted.",
+          "sourceSha256": "36501f13ff97ad90e644fdd9a389cd3b8229c64a1191bdf90220e84926dca4ea"
+        }
+      }
+    },
+    {
+      "id": "partner-helzephyr",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wings of Death",
+          "sourceSha256": "f0ef86448bb1524ab18b8c8ae1e43e299a3b46a42c2b49841873f20d4e71f4f0"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player’s attack type to Dark and increases Attack by 1%.",
+          "sourceSha256": "92e25b82ada5134ac62bc424426dfa874b2ea12dfc8205ddbed807d7d827fc14"
+        }
+      }
+    },
+    {
+      "id": "partner-helzephyr-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wings of Thunder",
+          "sourceSha256": "58c691f0490a6c27e665ed872a9e25551d02d9b58983826cdcac8643c4776a95"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player’s attack type to Electric and increases Attack by 1%.",
+          "sourceSha256": "38898773c89724da23aaafeb5d2fea79af8f03b0c0013317b32dfb4241643458"
+        }
+      }
+    },
+    {
+      "id": "partner-herbil",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Herbil Pulse",
+          "sourceSha256": "7adb033459468797d8734fbda5d58b09035a65c684cf9f61de1cf039564fd4a9"
+        },
+        "description": {
+          "sourceText": "While in party, Herbil uses its healing powers to restore 30/36/42/48/60% of the player's Max Health when incapacitated.",
+          "sourceSha256": "baff6b991dad2e9bbf0a0fba46d3dc58ddeaa062ccc2be8fc31da4f973e07f4d"
+        }
+      }
+    },
+    {
+      "id": "partner-hoocrates",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Knowledge",
+          "sourceSha256": "55ad4a52efb0c6dfba41a6264c87c15b979195fe929ef617cbf5c187c55bb2af"
+        },
+        "description": {
+          "sourceText": "While in party, increases Attack of Dark Pals by 15%. (Does not stack)",
+          "sourceSha256": "f21590f1535b959a7009a1b546578138a408683f1907acd590ebe7710ff425ea"
+        }
+      }
+    },
+    {
+      "id": "partner-icelyn",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Witch's Icy Veil",
+          "sourceSha256": "b1f4d907f4b9d7032182377d33a087540534f5de1509b4afe0e0a3136fb02958"
+        },
+        "description": {
+          "sourceText": "When activated, Icelyn changes the player's attack type to Ice and increases Attack by 30%.",
+          "sourceSha256": "6afbe27c3e34504363d4dc7e8646ba21af88c77d14897d89f5435f930f6f3450"
+        }
+      }
+    },
+    {
+      "id": "partner-incineram",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flameclaw Hunter",
+          "sourceSha256": "d45c2e7a2599d6a48bba40281c7ef5a5c770d997bf5c2b10654ccf9a45d8e4a9"
+        },
+        "description": {
+          "sourceText": "When activated, attacks the targeted enemy with Hellfire Claw. When this Pal uses Hellfire Claw, it has a x1.1/1.3/1.6/2/2.5 damage multiplier.",
+          "sourceSha256": "640fdf615aabfdb0f74db0b9981c3e5515468a31a48308bca586c259cdf7682f"
+        }
+      }
+    },
+    {
+      "id": "partner-incineram-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Darkclaw Hunter",
+          "sourceSha256": "3a0e6bfc6293300c91703f329684d26d3500107473683be59abde373668dd8f2"
+        },
+        "description": {
+          "sourceText": "When activated, attacks the targeted enemy with Nightmare Claw. When this Pal uses Nightmare Claw, it has a x1.1/1.3/1.6/2/2.5 damage multiplier.",
+          "sourceSha256": "3cbf5a1df8fc8dee494cb5fb2b5d799d397be9f959daefc1364f37bdca7a8d0f"
+        }
+      }
+    },
+    {
+      "id": "partner-jetragon",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Aerial Missile",
+          "sourceSha256": "7eb4fbfa918ca2e1005501b938fd4e648d832ad324a6db59c86e995ddd9c9659"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. Can rapidly fire a missile launcher while mounted.",
+          "sourceSha256": "9a65f4744707b488b5e9fcada7ab39193f8b701a2b9ac53cc038154614b0451c"
+        }
+      }
+    },
+    {
+      "id": "partner-jolthog",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Jolt Bomb",
+          "sourceSha256": "979c8cc33b09d3c2842a8ad0d7d8f172dc899c0527f335760da0c67722bc8ebb"
+        },
+        "description": {
+          "sourceText": "When activated, equips Jolthog to the player to be thrown at an enemy, causing an Electric explosion upon impact.",
+          "sourceSha256": "f0c417eaf70d2f094223a64b757e4972096d74c039214822eb45c31490cbfe92"
+        }
+      }
+    },
+    {
+      "id": "partner-jolthog-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Bomb",
+          "sourceSha256": "0df422ac17153133f05c9a597393bc1aa0c076a5575c6d4bc16846e01c6f3cb0"
+        },
+        "description": {
+          "sourceText": "When activated, equips Jolthog Cryst to the player to be thrown at an enemy, causing an Ice explosion upon impact.",
+          "sourceSha256": "eae00c6bf100be96f94fb5534dabfa6eb4eec3ce5d1d445b2ab1139ace8fd987"
+        }
+      }
+    },
+    {
+      "id": "partner-jormuntide",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Stormbringer Sea Dragon",
+          "sourceSha256": "c4f69e6c07a7a7fc198c267f9d09818e70005896f2808659f9ea232366c992d9"
+        },
+        "description": {
+          "sourceText": "Can be ridden to travel on water. While in party, increases player's and Pals' damage to enemies afflicted with Soak by 50%. (Does not stack)",
+          "sourceSha256": "e2cf7b68729d27a34ac9fc16ddecd8db326314938d38be50d421d7ef4e45c0e4"
+        }
+      }
+    },
+    {
+      "id": "partner-jormuntide-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Stormbringer Lava Dragon",
+          "sourceSha256": "c65cb50e20f99917b6e5a04742deee43ab227c0ea52d6672813e4b26e2c687c7"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, nullifies lava damage and increases player's and Pals' damage to enemies afflicted with Burn by 50%. (Does not stack)",
+          "sourceSha256": "0e1af15bde251715db81aaa808db5a9ccce4cf73f4be671f1bbaf33507b9421b"
+        }
+      }
+    },
+    {
+      "id": "partner-katress",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Mystical Black Magic",
+          "sourceSha256": "21e42de81c82b5cfbe9ecc0f98a6c7ea79dca2e1c059fb6bdeff23aeab1c2ac9"
+        },
+        "description": {
+          "sourceText": "While in party, Neutral Pals drop 40% more items when defeated. Also has a 50% chance to prevent Pal Sphere consumption when thrown. (Does not stack)",
+          "sourceSha256": "bfaec81ecaf9c6418cc94ace7918fdd19377d8951dc773496a0e8dff7777002a"
+        }
+      }
+    },
+    {
+      "id": "partner-katress-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blazing Black Magic",
+          "sourceSha256": "1847bcc5f1c89c0aababbd9e9636c51baa30c145088079b4255542e50a2e03b1"
+        },
+        "description": {
+          "sourceText": "While at a base, increases the Kindling Work Suitability Level for all other Base Pals by +1. (Does not stack)",
+          "sourceSha256": "7e2d252ccc9b0a0cf3086e7a52387cdbc11ecc3e70558ddb19aa5cd21826b2b3"
+        }
+      }
+    },
+    {
+      "id": "partner-kelpsea",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Aqua Spout",
+          "sourceSha256": "8b88d90fed430b4ddec252632030e34ca8f24ff37f351ba111e608ead585d3e3"
+        },
+        "description": {
+          "sourceText": "While in party, increases Attack of Water Pals by 15%. (Does not stack) Sometimes drops Aquatic Pal Fluids when assigned to Ranch.",
+          "sourceSha256": "a39ef2b0417e3ad6f7573764e33d7b4d8768978a6466d0a05cdd98a44ccc4c1e"
+        }
+      }
+    },
+    {
+      "id": "partner-kelpsea-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lava Spout",
+          "sourceSha256": "33e3a41168213b7c6b227bea7ee86953124f248b570a039634dc1212430559e3"
+        },
+        "description": {
+          "sourceText": "While in party, increases Attack of Fire Pals by 15%. (Does not stack) Sometimes drops Flame Organ when assigned to Ranch.",
+          "sourceSha256": "60f68e7088122c4b1a0f87766723c2f5166cde66ac4a921917c4d1faee669c1f"
+        }
+      }
+    },
+    {
+      "id": "partner-kikit",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sandball Soccer",
+          "sourceSha256": "1be482b34591994aff43bc5f33ccf93c6d997e3b9f138585a9b435b3f8f2f315"
+        },
+        "description": {
+          "sourceText": "While in party, increases Defense of Ground Pals by 15%. (Does not stack)",
+          "sourceSha256": "28ed28d1eeaf5f4ff550c663ca9bbca6258d0fe84d97a3a0f05a74aeb059a279"
+        }
+      }
+    },
+    {
+      "id": "partner-killamari",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fried Squid",
+          "sourceSha256": "6132aa063ac70a14bef7ba3484e9270aaec6a7807eabf8db1077e8d9f4b23097"
+        },
+        "description": {
+          "sourceText": "While in party, modifies the performance of the equipped glider. Enables gentle floating while gliding for an extended time.",
+          "sourceSha256": "f0a758f496181fa6eb6592e292fde048e69d86deefd02b4c970d77ef915df7af"
+        }
+      }
+    },
+    {
+      "id": "partner-killamari-primo",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fried Killamari",
+          "sourceSha256": "47f05e77b0b35ff0e61dacd962602eb4c8ae17f37d6907972bff05656d5136ad"
+        },
+        "description": {
+          "sourceText": "While in party, modifies the performance of the equipped glider. Enables gentle floating while gliding for an extended time.",
+          "sourceSha256": "f0a758f496181fa6eb6592e292fde048e69d86deefd02b4c970d77ef915df7af"
+        }
+      }
+    },
+    {
+      "id": "partner-kingpaca",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "King of Muscles",
+          "sourceSha256": "748bd3903bd52923ab355c4aa907201e7ff89a755fc058697e557eed6e2de5fe"
+        },
+        "description": {
+          "sourceText": "Can be ridden. This Pal's Defense and Movement Speed increase by 5% for each Melpaca in party.",
+          "sourceSha256": "230c8bcfa582cd9b22737218c47ebe56424abd5943b0c67560d0f19fc5316dfa"
+        }
+      }
+    },
+    {
+      "id": "partner-kingpaca-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Coldhearted King",
+          "sourceSha256": "d4b44de730f0012d8c2c5f58a7621d5a2901d66dc9275380c4754fc3b729188e"
+        },
+        "description": {
+          "sourceText": "Can be ridden. This Pal's Defense and Movement Speed increase by 5% for each Melpaca in party.",
+          "sourceSha256": "230c8bcfa582cd9b22737218c47ebe56424abd5943b0c67560d0f19fc5316dfa"
+        }
+      }
+    },
+    {
+      "id": "partner-kitsun",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wolf of the Sun",
+          "sourceSha256": "b7905897790376ba059fa1fce5e2b15e815df60dbd07a03d5c7c9d9ef4a60ac4"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, player and party Pals take 15% less Ice damage and are immune to Freeze. (Does not stack)",
+          "sourceSha256": "ed338b36887d56e93a86eb1523a0fb45181b707af64bcfe3c4446c5f988f8a2e"
+        }
+      }
+    },
+    {
+      "id": "partner-kitsun-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Gloomhowl",
+          "sourceSha256": "f67747cd638801e2c1dc7c1b470b6597daa145c1ffd4f8f89cbf7810acb0f6e8"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, player and party Pals take 15% less Dark damage and are immune to Blind. (Does not stack)",
+          "sourceSha256": "b5ace84f3267856abb0ffd215a5919da97e9ae0c93d50b54fb3f55f5051d4d3a"
+        }
+      }
+    },
+    {
+      "id": "partner-knocklem",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Steel Guardian Mode",
+          "sourceSha256": "a8f9bf79e6c449223652f5ae74c97505fc4e30ff744efef0f8f764afe2f2c61a"
+        },
+        "description": {
+          "sourceText": "When activated, a steel resolve increases Knocklem's Attack by 50% and Defense by 75% for a limited time.",
+          "sourceSha256": "efd41b1e61be472e5b90bb8977244d1790bd29ea5520772407ff2b0ddf3af252"
+        }
+      }
+    },
+    {
+      "id": "partner-knocklem-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Iron Guardian Mode",
+          "sourceSha256": "c154bb00776bc948328f63ebfa600641f7adb645d1c0bd6756390e1029a02829"
+        },
+        "description": {
+          "sourceText": "When activated, a steel resolve increases Knocklem Ignis's Attack by 60% and Defense by 85% for a limited time.",
+          "sourceSha256": "5ecc0fb40ee243ab2543611a7eb1ded9af4c7de1a8f0f7a1e25eb4250fee295e"
+        }
+      }
+    },
+    {
+      "id": "partner-lamball",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fluffy Shield",
+          "sourceSha256": "cbb1ea62f4d293b62106dce4436c2c866e1b443d5651d31205d75cc25dbe234f"
+        },
+        "description": {
+          "sourceText": "When activated, equips to the player and becomes a shield. Sometimes drops Wool when assigned to Ranch.",
+          "sourceSha256": "2a2db568fdc6871742f28eb2b123fa7fef3c37a391e1b3edc1c3282a1fc000df"
+        }
+      }
+    },
+    {
+      "id": "partner-lapiron",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Friend of Earth",
+          "sourceSha256": "b2665d573fad6925a81040349e9b7de3a3661e89771c2ccc5b29c0bccf09ecf0"
+        },
+        "description": {
+          "sourceText": "While in party, increases the player's Defense by 50% while sprinting. (Does not stack)",
+          "sourceSha256": "86ea9b0970a00c5c8e5dad45b3284778b95a0e73e7b01731a841b040f62accce"
+        }
+      }
+    },
+    {
+      "id": "partner-lapure",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Long-Sleeved Hurray",
+          "sourceSha256": "9e3b8265afe1a76cfc089a708b150d915b801c00563b7c2a0cc80768fcca38ac"
+        },
+        "description": {
+          "sourceText": "While in party, reduces the Partner Skill cooldowns for other party Pals by 10%. (Does not stack)",
+          "sourceSha256": "b6cebd01fc2b9fd863ad4ad91d132b081e178f4a5be638b8d5ffb34b1af36ccf"
+        }
+      }
+    },
+    {
+      "id": "partner-leafan",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Selfless Discipline",
+          "sourceSha256": "b22906200aaa69eaf62fb1d50eedb60e18b12cdf82c2b0ef003b71293004a97a"
+        },
+        "description": {
+          "sourceText": "This Pal's Attack and Defense increase by 2% for each other Grass Pal in your party.",
+          "sourceSha256": "07f36d75463387d199589e52f540534ecf0a63adcce7cab1e4cc6b2c910d9f35"
+        }
+      }
+    },
+    {
+      "id": "partner-leezpunk",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Too Cool to be Seen",
+          "sourceSha256": "3c1a5dc3f5f377908509caf0b12c1ab2519df2451f8d55f99ab26dc95cdf1e7f"
+        },
+        "description": {
+          "sourceText": "When activated, Leezpunk and the player become invisible, making them undetectable to enemies for 10/12/14/16/20 seconds.",
+          "sourceSha256": "ef580e92b00414e2fde2e38c4fa7f6590c543a4c6788688a976a0450f4eff365"
+        }
+      }
+    },
+    {
+      "id": "partner-leezpunk-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Too Cool to be Seen",
+          "sourceSha256": "3c1a5dc3f5f377908509caf0b12c1ab2519df2451f8d55f99ab26dc95cdf1e7f"
+        },
+        "description": {
+          "sourceText": "When activated, Leezpunk Ignis and the player become invisible, making them undetectable to enemies for 10/12/14/16/20 seconds.",
+          "sourceSha256": "469263c1f1c867009e2ed47f2ed414ec43722b8b141beec25192661dfa34bf50"
+        }
+      }
+    },
+    {
+      "id": "partner-lifmunk",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lifmunk Recoil",
+          "sourceSha256": "3f3c0329672189a56bf59a16b13d8a03e48e721765d9be84d94e99d54ab58c5e"
+        },
+        "description": {
+          "sourceText": "When activated, leaps onto the player's head and uses a submachine gun to follows up player attacks.",
+          "sourceSha256": "587521670cb505471fa89d898d7446da91caf1982eaf1d0605c2d39c87d7b541"
+        }
+      }
+    },
+    {
+      "id": "partner-loomen",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lantern Enchantment",
+          "sourceSha256": "53d4e9b10846c3d8277f3735e3dc77e07cc3d158046d18c12d57a93c15bddf20"
+        },
+        "description": {
+          "sourceText": "While in party, the player's arrows explode on contact, dealing additional damage equal to 15% of the player's attack damage. (Does not stack)",
+          "sourceSha256": "5e95ceece967e475a7ffceceb3dd4b747a4e6f8bb494245a21ec15ab67ef0bbc"
+        }
+      }
+    },
+    {
+      "id": "partner-loupmoon",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Gleam Strike",
+          "sourceSha256": "1efbb2cf872a918d8a57406e4798428ffd66a44ac94a0b431803c408154192d8"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Jumping Claw. When this Pal uses Jumping Claw, it has a x1.1/1.3/1.6/2/2.5 damage multiplier. While in party, increases the player's melee weapon attack speed by 15%. (Does not stack)",
+          "sourceSha256": "a312c6a2c69c1ebfa671b2ae7855e92c4020dab4c9b8e751ca929147b5256650"
+        }
+      }
+    },
+    {
+      "id": "partner-loupmoon-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Frozen Gleam Strike",
+          "sourceSha256": "b0922b64721a933959dd700a0e56ef4f454438dbfaa127c7d0420d3cba4e3697"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Snow Claw. When this Pal uses Snow Claw, it has a x1.1/1.3/1.6/2/2.5 damage multiplier. While in party, increases the player's melee weapon attack speed by 15%. (Does not stack)",
+          "sourceSha256": "b545b92d8332d9e939ed22654a5692bd5e15b0424f05a4500c0bb550d6b55373"
+        }
+      }
+    },
+    {
+      "id": "partner-lovander",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Heart Drain",
+          "sourceSha256": "ab219280ccc0004a1fbc16699b62f38c2e4f12283dfa26a73aed2c0b5384284a"
+        },
+        "description": {
+          "sourceText": "While fighting together, grants the player and Lovander a life steal effect that restores 5% of damage dealt as Health.",
+          "sourceSha256": "c869b9da50984b8638411fecd72615b38c95f56622e52076e238cd251e7c8b70"
+        }
+      }
+    },
+    {
+      "id": "partner-lullu",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Floral Boost",
+          "sourceSha256": "dc216fa7f54356b386f29cc6818f8bd07dc12fb3b1dc210967487501567674a7"
+        },
+        "description": {
+          "sourceText": "While at a base, Lullu fills farms with good spirits, increasing the growth rate of the crops by 50%.",
+          "sourceSha256": "b559964b614a6b3e6b0aa0082519ef4a5de24d7e12c50eded1f4e0abe1ef346a"
+        }
+      }
+    },
+    {
+      "id": "partner-lunaris",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Antigravity",
+          "sourceSha256": "4da276f5f11d050f83c5b576ab967b88eb7bf200f21cdf4830a482529af183d4"
+        },
+        "description": {
+          "sourceText": "While in party, spheres home in on Pals, and carrying capacity increases by 300. (Does not stack)",
+          "sourceSha256": "5237696a459060eee9bec223ae6550f0940dc9c31eee7ed4e7a1bf7a6758d9e9"
+        }
+      }
+    },
+    {
+      "id": "partner-lyleen",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Harvest Goddess",
+          "sourceSha256": "65aa60e1fa0e5cfc66df662dae2ecfb2d501002ef45684f111ab3be686f438a4"
+        },
+        "description": {
+          "sourceText": "When activated, the queen's soothing graces restore the Health of the player and Party Pals by 80/82/84/86/90%.",
+          "sourceSha256": "7d0c3a15ff925722ed217006d41ba96e531781408923eda1b841ef5192d636af"
+        }
+      }
+    },
+    {
+      "id": "partner-lyleen-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Goddess of the Tranquil Light",
+          "sourceSha256": "94e29869d2771a1a731236a89b909e1bc4bffb709308c65bff764f35c98890c2"
+        },
+        "description": {
+          "sourceText": "When activated, the queen's soothing graces restore the Health of the player and Party Pals by 85/87/89/91/95%.",
+          "sourceSha256": "8c0a34129e0c5f5bd6e81a518073745aa002a6fbef43f90de135b31e071e94d9"
+        }
+      }
+    },
+    {
+      "id": "partner-majex",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Phantasmal Arcana",
+          "sourceSha256": "03f639e66678e1e59c406f785ae68aca1cadec1f5f35dd80623d1e623235c8fd"
+        },
+        "description": {
+          "sourceText": "While in party, when the player attacks an enemy afflicted with Burn, the enemy creates flames around itself, dealing continuous damage equal to 15% of the player's attack damage to enemies that come into contact with them. (Does not stack.)",
+          "sourceSha256": "ff34ef7162e969f3650ce8cef2a3ea2fcbd91402cfc462eada6b5385c86f314a"
+        }
+      }
+    },
+    {
+      "id": "partner-mammorest",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Gaia Crusher",
+          "sourceSha256": "26b010b25f5780436141ea72116a7f2ec8d87058f6fe6ee990c4cc52e28a7c74"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, increases logging efficiency by 220% and mining efficiency by 260%.",
+          "sourceSha256": "5d50d189f132813c783360e380acd893f7bd5a0d6102c1e29ee57685effa6602"
+        }
+      }
+    },
+    {
+      "id": "partner-mammorest-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Crusher",
+          "sourceSha256": "b13d668584d182ff3b3fb2a56ff129b1213f536cc0739f3982659596e977801b"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, increases logging efficiency by 220% and mining efficiency by 260%.",
+          "sourceSha256": "5d50d189f132813c783360e380acd893f7bd5a0d6102c1e29ee57685effa6602"
+        }
+      }
+    },
+    {
+      "id": "partner-maraith",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Messenger of Death",
+          "sourceSha256": "31d913da43ad196e2ece06c4ece25ada433a000c04a55fa1ac2f4e70645530a8"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, all Party Pals' Active Skill cooldowns are reduced by 30% whenever you defeat an enemy. (Does not stack)",
+          "sourceSha256": "b1a6a016a2a25028f676808ec199d3704b7d3b44d1fb19d87a8167bf442f29de"
+        }
+      }
+    },
+    {
+      "id": "partner-mau",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Gold Digger",
+          "sourceSha256": "dd4e35e1158573815f6b9a366c202199c3f20d84bca5b9e8a9d6230438541795"
+        },
+        "description": {
+          "sourceText": "Sometimes digs up Gold Coin when assigned to Ranch.",
+          "sourceSha256": "7a005809096a31033135fb1ff58ae3543b2abb51b791f89010ea5e22c27af807"
+        }
+      }
+    },
+    {
+      "id": "partner-mau-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Icy Whispers",
+          "sourceSha256": "9a0c6f2e0ed89ab6e7112ed991ad5b070053014dcd2cd10414e46e8fc34eea82"
+        },
+        "description": {
+          "sourceText": "Sometimes drops Ice Organ when assigned to Ranch.",
+          "sourceSha256": "6f218ac99a104f2a0e13ffb6713776c43f25195fde622b89eea7e2bee3d4b26c"
+        }
+      }
+    },
+    {
+      "id": "partner-melpaca",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Pacapaca Wool",
+          "sourceSha256": "ce8b46270a67fb60fc86da7ce80512f204387b362ab24fbd7b400f88a3ade76d"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, increases Kingpaca's Defense and Movement Speed. Sometimes drops Wool when assigned to Ranch.",
+          "sourceSha256": "d68c7f9d149965ff0d63e11caf48d8c017c27e6027d06e96ec7693fcdc16bac3"
+        }
+      }
+    },
+    {
+      "id": "partner-menasting",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Steel Scorpion",
+          "sourceSha256": "6d9de82b2052ebb2e0fbf128df74f47ecead06f2262749572f61db5d1576b0f4"
+        },
+        "description": {
+          "sourceText": "While in party, player's Defense increases by 50%, and Electric Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "0031a61aa3d122c75b64cf1b4da58ef8f003a5817229c0ab3a9304f4d25c2a03"
+        }
+      }
+    },
+    {
+      "id": "partner-menasting-terra",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Golden Scorpion",
+          "sourceSha256": "a3c3ecc2888716f9f70c76ff9815de183ad6e5c465295cbfd5771f2aaf465d41"
+        },
+        "description": {
+          "sourceText": "While in party, player's Defense increases by 50%, and Electric Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "0031a61aa3d122c75b64cf1b4da58ef8f003a5817229c0ab3a9304f4d25c2a03"
+        }
+      }
+    },
+    {
+      "id": "partner-mimog",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Master of Unlocking",
+          "sourceSha256": "994dcf8c8745efe786d9b8365a68605203f1cb78e876f086ee169e0c0a4fd07a"
+        },
+        "description": {
+          "sourceText": "While fighting together, Mimog can open treasure chests without using a key.",
+          "sourceSha256": "79c2590728db125db327e9b3ab99575c82661a6adce24310b511a4ce584a5d7a"
+        }
+      }
+    },
+    {
+      "id": "partner-moldron",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Magma Overload",
+          "sourceSha256": "8e2d84207dacf31398d337b52c1f9cd95d6f2b884e8cdada22806db99e5e2370"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a mount. This Pal's Attack increases by 4% for each other Fire or Ground Pal in your party.",
+          "sourceSha256": "40358e96f096249f26725478a42b27bd47933527b9a2f553092be73958f4027b"
+        }
+      }
+    },
+    {
+      "id": "partner-moldron-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Overload",
+          "sourceSha256": "d0194555647d3aba4aab710fca611ae955f2f5e7d176ffec9ef69e1d21991bfb"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, improves player's and Pals' Ice damage to enemy weak points by 25%. (Does not stack)",
+          "sourceSha256": "b6f43e639445c0efd35b37dfa85ca7c332d9d32716e90d705b6417db364d648e"
+        }
+      }
+    },
+    {
+      "id": "partner-mossanda",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Grenadier Panda",
+          "sourceSha256": "f04dd063a643d47a67534cfda6ca7c51ca2cbee75b251ffc766c47243268aef7"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can rapidly fire a grenade launcher while mounted.",
+          "sourceSha256": "44448cd86228d2c690f0da3125410223e684b34a1145b2cebde8d4f7a941875c"
+        }
+      }
+    },
+    {
+      "id": "partner-mossanda-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Grenadier Panda",
+          "sourceSha256": "f04dd063a643d47a67534cfda6ca7c51ca2cbee75b251ffc766c47243268aef7"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can rapidly fire a grenade launcher while mounted.",
+          "sourceSha256": "44448cd86228d2c690f0da3125410223e684b34a1145b2cebde8d4f7a941875c"
+        }
+      }
+    },
+    {
+      "id": "partner-mozzarina",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Milk Maker",
+          "sourceSha256": "2633ae44aaefb11c41d49c1e0119d15db8230b983d163c421e0c7929c752ff9d"
+        },
+        "description": {
+          "sourceText": "Sometimes drops Milk when assigned to Ranch.",
+          "sourceSha256": "908b8a2fb7fe95e77615cec627393aed599dcd26036f488ee9e70eeda5df35f8"
+        }
+      }
+    },
+    {
+      "id": "partner-muffly",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fluffy Flutterer",
+          "sourceSha256": "50a6dc9027a809baf8bec9a32b3cd8ebb967fb6bce40edf9a1917fe2c442fa45"
+        },
+        "description": {
+          "sourceText": "While in party, increases the capture rate of Pals afflicted with Freeze. (Does not stack)",
+          "sourceSha256": "e2fb9f6ff6cea902b3f34e7ba11ea9bcee34bd5ee51fd4f0da54e7a696186e55"
+        }
+      }
+    },
+    {
+      "id": "partner-munchill",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Icy Maw",
+          "sourceSha256": "c41fde74f491edd2e7075a7ef20691d7615daaabd3bc4bf11fe41c40f96faf07"
+        },
+        "description": {
+          "sourceText": "While in party, reduces the weight of ingredient and food by 30%. When paired with another Ice Pal, their Rot Speed also reduces by 35%. (Does not stack)",
+          "sourceSha256": "7956a8716258f8eae1208de660bc2c010d5da8f4507a5555674e242c6478bd87"
+        }
+      }
+    },
+    {
+      "id": "partner-mycora",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Charming Spore",
+          "sourceSha256": "81665d5d11b1798602f393e876eb2b098cdff0b3a059b4eabb4fa88e10f5531a"
+        },
+        "description": {
+          "sourceText": "While at a base, increases the Medicine Production Work Suitability Level for all other Base Pals by +1. (Does not stack)",
+          "sourceSha256": "953e0948b9c377dfc9eb4dc129704610ba59b93a1ba77796db828e1ebaf539d4"
+        }
+      }
+    },
+    {
+      "id": "partner-necromus",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Knight of the Abyss",
+          "sourceSha256": "c7cbc0716d22f213e4c5a3fe71068b80226476115f842b75274391d5735e9752"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can double jump while mounted. When Twin Spears skill is activated, a Paladius in your party will appear and attack alongside you.",
+          "sourceSha256": "4f401a80fe5e21cfeefe4726cb7866b038b150527f9f6042037e2e29e9c224a4"
+        }
+      }
+    },
+    {
+      "id": "partner-needoll",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hug Me Please",
+          "sourceSha256": "026af4e97471c9bd2caabe49e1bcdfabb9940f11d06c77eb9caa88ae9083b255"
+        },
+        "description": {
+          "sourceText": "While in party, increases player's and Pals' damage to enemies afflicted with Ivy-Covered by 50%. (Does not stack)",
+          "sourceSha256": "eedaa596c62b610d612c485950f7ac63c238d3eb839f3d1db8f03028c7832f06"
+        }
+      }
+    },
+    {
+      "id": "partner-needoll-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hug You So Much",
+          "sourceSha256": "e80f1bbcb3c9a458ee578efb6357373ae981fcf36714f81e20f3376beaa59362"
+        },
+        "description": {
+          "sourceText": "While in party, the player's attacks inflict Ivy-Covered 2. (Does not stack)",
+          "sourceSha256": "911d0de7e1da3010ca61b5f1861df9960a63ee0c6b0b57d1c994fe1b86fdebcf"
+        }
+      }
+    },
+    {
+      "id": "partner-neptilius",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sentinel of the Great Sea",
+          "sourceSha256": "5cdd1b3fd9fd43cd2f68ef27152174b1130b89faaccd99f1f51d899430ac50d9"
+        },
+        "description": {
+          "sourceText": "While in party, it follows up the player's attacks with Water spear strikes. Can be ridden to travel on water. While mounted, it can leap high into the air over water.",
+          "sourceSha256": "03b034872a0a0c6e1974ad92d92bb181737850b7935cfc30e64bc36979f8db7c"
+        }
+      }
+    },
+    {
+      "id": "partner-nitemary",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Soul Collector",
+          "sourceSha256": "d42902c0a53081a3166f5b5fe16bc5446018d56601d6f3be6a830f33a935cab0"
+        },
+        "description": {
+          "sourceText": "While fighting together, Pals drop +100% more Pal Souls when defeated. (Does not stack)",
+          "sourceSha256": "4f0a762ab67ff09b86c2fa362973bf10fdc068b04016311826b9fd2a1e37998d"
+        }
+      }
+    },
+    {
+      "id": "partner-nitemary-botan",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Soul Binder",
+          "sourceSha256": "591acc41dde5a980b5b420d9da905a20c03766eed4e883c85db8a85a6786a61a"
+        },
+        "description": {
+          "sourceText": "While in party, increases Defense of Grass Pals by 15%. (Does not stack)",
+          "sourceSha256": "68844373a45f82777a5551f22bbd1a900b5729db80dc682ee8facdfd7001c731"
+        }
+      }
+    },
+    {
+      "id": "partner-nitewing",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Travel Companion",
+          "sourceSha256": "507bc530eb6e04bf20c6eee71518763d3f0dc00bf10d468415be5866ca2d01eb"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount.",
+          "sourceSha256": "950a2900628c76574ac02c5fdfcae8a3aae2613e19fbec1d645bfdcfb7172080"
+        }
+      }
+    },
+    {
+      "id": "partner-nox",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Kuudere",
+          "sourceSha256": "31b2a7f7c792a2ff866b26ee2a653f40f65b9a5fffb2869870ece169d3c0fe66"
+        },
+        "description": {
+          "sourceText": "When activated, detects the location of nearby Pal Effigies.",
+          "sourceSha256": "dae099d70bcac6b30e2266331f8232e54858f589b9e5079cb37987a902ea9742"
+        }
+      }
+    },
+    {
+      "id": "partner-nyafia",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Shot-Nyan Mode",
+          "sourceSha256": "0af134a5abe3477c1444a5ff9dbb2a5f5a45ed52800d7448eefa3e68ec60629c"
+        },
+        "description": {
+          "sourceText": "When activated, Nyafia will fire a shotgun at nearby enemies for a limited time. While in party, increases the player's shotgun damage by 10%. (Does not stack)",
+          "sourceSha256": "73437099041758bfe10c8142c593acd40f89c73ae80ff3247ed7e01b7ed4f164"
+        }
+      }
+    },
+    {
+      "id": "partner-ophydia",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Glorious Mist",
+          "sourceSha256": "194bb4377dfc3a0708332ec620f486f8ae9a02f6bb073a30d1f72a662fb7428b"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, the player's attacks inflict Soak 2. (Does not stack)",
+          "sourceSha256": "d355254d885614bda4ab4e4c96ff7b929fbecef3e914d51b59514f2feeec201b"
+        }
+      }
+    },
+    {
+      "id": "partner-orserk",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ferocious Thunder Dragon",
+          "sourceSha256": "51859273f02d7ac1e67d242dac28e1cde8610c1c7e6cc9ee889a506be6728973"
+        },
+        "description": {
+          "sourceText": "While in party, hitting an enemy with a bullet increases the Attack and Defense of the Pal fighting alongside you by 1% for 5 seconds. This effect stacks up to 30 times. (Does not stack.)",
+          "sourceSha256": "d0a82920ca24fcc25a6954289740a170c8e5d741df8de7684bb3cbf877c9c2f0"
+        }
+      }
+    },
+    {
+      "id": "partner-paladius",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Holy Knight of the Firmament",
+          "sourceSha256": "6147e21474b51aad99f3e2cb6b3821eb65eac4e144e520fac2ac7f2d399895f6"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can triple jump while mounted. Activate Spear Thrust to have Necromus stay by your side and attack enemies in tandem.",
+          "sourceSha256": "c6e5c0bfcee6c585f72283233a0a0435de44b1dc2f095f776efa2c3a56e65fbb"
+        }
+      }
+    },
+    {
+      "id": "partner-palumba",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Samba Step",
+          "sourceSha256": "9e5d2e591c28659b268be17989f4fb6bb37b2940c526e9faa842434bbd86419e"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Movement Speed is increased by 155% while mounted on grass.",
+          "sourceSha256": "449e8f1ec79df79a07a9b502682c4c78bc8742d03073ce108342e5344842371f"
+        }
+      }
+    },
+    {
+      "id": "partner-pengullet",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Pengullet Launcher",
+          "sourceSha256": "1af52c82628bd5d11bf6ccaf0a02d7c4503f51e695aa466b10e48b2c59c251fa"
+        },
+        "description": {
+          "sourceText": "When activated, the player equips a Rocket Launcher to fire Pengullet as ammunition. Pengullet explodes on impact and is incapacitated.",
+          "sourceSha256": "02f862652340a572b395f7f8cdc1e9ca86cc705a04fc132ff11c02af31ab3769"
+        }
+      }
+    },
+    {
+      "id": "partner-pengullet-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Pengullet Lux Launcher",
+          "sourceSha256": "7f80dc05080c6d3ebcd6cf76fc4652124fdd3e54c04b56d107666633aaf05b1c"
+        },
+        "description": {
+          "sourceText": "When activated, the player equips Pengullet Lux to fire Rocket Launcher as ammunition. Pengullet Lux explodes on impact and is incapacitated.",
+          "sourceSha256": "98e08e53d69aa6ba1f4c2948d2aace075049a3147a546f1f2ff6d2e832250559"
+        }
+      }
+    },
+    {
+      "id": "partner-penking",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Brave Sailor",
+          "sourceSha256": "a475577b4726a056a3753378bf6ac4b047c43708c3c87ca8853fe7cfd0b3f7ab"
+        },
+        "description": {
+          "sourceText": "While in party, Fire Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "d03ea94706b9ac587f648794de69a42431d32d8ba8bc16d89c81a292b8c7fc3b"
+        }
+      }
+    },
+    {
+      "id": "partner-penking-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Unyielding Storm Commander",
+          "sourceSha256": "887321ebb0285704eb6680b0c3214af1a358a535999a73c1b822adb25afa9194"
+        },
+        "description": {
+          "sourceText": "While in party, improves player's and Pals' Water damage to enemy weak points by 25%. (Does not stack)",
+          "sourceSha256": "05845c32c25bb98b32812923931b0fca86d7b90b6a7797c4335740369be725cc"
+        }
+      }
+    },
+    {
+      "id": "partner-petallia",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blessing of the Flower Spirit",
+          "sourceSha256": "394978c1c00a5014d0991a1e691afac743477a0c3931133f4426e1bb5b702317"
+        },
+        "description": {
+          "sourceText": "When activated, soothing blossoms restore the player's Health by 75/77/79/82/85%. While at a base, increases the Planting Work Suitability Level for all other Base Pals by +1. (Does not stack)",
+          "sourceSha256": "18339122389cfb1d99bac0f9748d3d49516b490513ea3d229eac6c8e7db51b90"
+        }
+      }
+    },
+    {
+      "id": "partner-petallia-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Passion of the Flower Spirit",
+          "sourceSha256": "64453e8e6e6fe1753dd9c96d745d12447f60eac513f10ffed8c146c7d63d4102"
+        },
+        "description": {
+          "sourceText": "When activated, soothing blossoms restore the player's Health by 80/82/84/86/90%. While in party, player and party Pals take 15% less Grass damage, and are immune to Ivy-Covered. (Does not stack)",
+          "sourceSha256": "0c4a5a7c98828587593cf6215d26ff6346b023ec110da0f67f55eee29a655cbe"
+        }
+      }
+    },
+    {
+      "id": "partner-pierdon-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Power Crystal",
+          "sourceSha256": "f5ae1d12b2e912055c51e440f065d35baccf78328a8fceb1f4c0d5ecdc0b0753"
+        },
+        "description": {
+          "sourceText": "While in party, player and party Pals take 15% less Dragon damage. (Does not stack)",
+          "sourceSha256": "10cbc6921e1b7cebd61d7b131a8599c57283ea3812c2109bfbaae88f877ff761"
+        }
+      }
+    },
+    {
+      "id": "partner-polapup",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Rider of the Snowy Mountain",
+          "sourceSha256": "25c203366cd87fd1058e2db9d0d9a71daac588e1cceff9f0d59de94994d72c86"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Movement Speed is increased by 80% while mounted on snow. Can also slide quickly down slopes.",
+          "sourceSha256": "e893fb5d777576f499f1ac504a736ff6917c4a28d812ad67ad895fa97679ce57"
+        }
+      }
+    },
+    {
+      "id": "partner-polapup-terra",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Snowy Mountain Slider",
+          "sourceSha256": "c5d88f7f31878147fdfb65f819ef870b2caa1fe02aed474f8f85387ad7fff519"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Movement Speed is increased by 80% while mounted on snow. Can also slide quickly down slopes. While it starts out slow, the top speed it can hit while sliding is no joke.",
+          "sourceSha256": "c46a7abc266dbfdb46ba0ed06b38fce7a433de71cfed748e7cfa6f2c2703a019"
+        }
+      }
+    },
+    {
+      "id": "partner-prixter",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Phantom Venom",
+          "sourceSha256": "1bb4736a42abe2edcff8031da4f2a2f21c3ef075b0a1307397639b14471bf4d5"
+        },
+        "description": {
+          "sourceText": "While in party, increases player's and Pals' damage to enemies afflicted with Poison by 50%. (Does not stack)",
+          "sourceSha256": "47567d4198cc9105329bd946ebfaf553cc7bf4122c39f02d78c033efb134be97"
+        }
+      }
+    },
+    {
+      "id": "partner-prixter-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Scorpion Longwave",
+          "sourceSha256": "5c84cf34cfa939025e2f5bb10fbf26cb965500c8faedc5da23eb1c414d5d3a1d"
+        },
+        "description": {
+          "sourceText": "When activated, Prixter Lux changes the player's attack type to Electric and increases Attack by 30%.",
+          "sourceSha256": "3d854aab2555a5a0fbc033f5eb7505a875e2bddd2d80f0f4ae7aac2268338c6e"
+        }
+      }
+    },
+    {
+      "id": "partner-prunelia",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Prayer for Abundant Harvest",
+          "sourceSha256": "aa5f979e87bc489fb0214eb031ec134fdc6c508419cbfb3b3727077198a509ea"
+        },
+        "description": {
+          "sourceText": "While at a base, Prunelia's prayers bless the crops, increasing their harvest by 18%.",
+          "sourceSha256": "d8e7c9b675c1c46946b6ef2a1f1799f67558456d796fdef7b762c5bde76d189f"
+        }
+      }
+    },
+    {
+      "id": "partner-puffolt",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Crackle Booster",
+          "sourceSha256": "90523041178a6ae4ee8544da6cf3c0335973d43a091e5aac90cff533f9fe9262"
+        },
+        "description": {
+          "sourceText": "While at a base, increases the Generating Electricity Work Suitability Level for all other Base Pals by +1. (Does not stack)",
+          "sourceSha256": "7915e9cf6e26ac0bf2f8a3c90b477a0c7bc64dae43b3434cad39ba73435fd601"
+        }
+      }
+    },
+    {
+      "id": "partner-pupperai",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Best Boy",
+          "sourceSha256": "d58e862c658debe730eeef990398fb2ad0320df139c22d5c9a41dad4fd035e32"
+        },
+        "description": {
+          "sourceText": "While in party, increases the player's melee weapon damage by 10%. (Does not stack)",
+          "sourceSha256": "6e0458fcfee4cc6f47d9d91efb3e5317fb42fbd470b6e732b50c2e5f4140a8ad"
+        }
+      }
+    },
+    {
+      "id": "partner-pyrin",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Red Hare",
+          "sourceSha256": "5f3fe6d448a0354edbb5b758d5f3a108acd02f723ee52e41e8a0c91a2f0ac142"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, changes the player’s attack type to Fire and increases Attack by 1%.",
+          "sourceSha256": "b3467d18f7f9889f30bacf99f9a4c41dac9843fcb955553494c5298685d63567"
+        }
+      }
+    },
+    {
+      "id": "partner-pyrin-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Black Hare",
+          "sourceSha256": "9bf6df99f269f023ca7ab3e3a24745811a54ed02f060182651c0ad832c052f59"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, changes the player’s attack type toDark and increases Attack by 1%.",
+          "sourceSha256": "916d48750fd4da2cac4ba8533ea6c881b1d3d03399d0fa02a1c4446eb005562d"
+        }
+      }
+    },
+    {
+      "id": "partner-quivern",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sky Dragon Affection",
+          "sourceSha256": "f163aa53fcafc4ed850a9e63580cc82cc434d11abef7178fad3aa806e3e1366c"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While in party, increases Attack of Dragon Pals by 15%. (Does not stack)",
+          "sourceSha256": "93d95fb7695608fa3da03efaf1bb59ad4e47e3b544c1b0f2bb3016ba2cc6556e"
+        }
+      }
+    },
+    {
+      "id": "partner-quivern-botan",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Dragon Affection",
+          "sourceSha256": "8d9c5639968d8e98cae57279ce8a8db0ef5d5d9a473043881465fc6611c2760e"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player’s attack type to Grass and increases Attack by 1%.",
+          "sourceSha256": "9556a4a9ac13e6ad4ebf29336efc9b9daca32664fb3bdfd146d166b342b18aa3"
+        }
+      }
+    },
+    {
+      "id": "partner-ragnahawk",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flame Wing",
+          "sourceSha256": "2b1a42c3b6e5853f218772a70f6e18b9aded6b4a8ada3fea4e07a3dcc7d33d46"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player’s attack type to Fire and increases Attack by 1%.",
+          "sourceSha256": "8e847773149e7ebe89f33b711be098337b6019e2a938cc3a3a49c6e45fa0f066"
+        }
+      }
+    },
+    {
+      "id": "partner-rayhound",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lightning Shepherd",
+          "sourceSha256": "67695b33c073b7020a29096c5d967438440760011804627c6f32cc7577ce583d"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can perform a double jump while mounted. This Pal’s Movement Speed increases by 5% for each other Electric Pal in your party. (Excluding Rayhound)",
+          "sourceSha256": "8e0fe04757defc1d13e022c01533dca0665e8442983f788f6b382cc0d552a3cd"
+        }
+      }
+    },
+    {
+      "id": "partner-rayhound-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Snow Shepherd",
+          "sourceSha256": "5ae0a3928f734a0828d5666dfc3e767999ceccf063184648c00e60b70a88112d"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can perform a double jump while mounted. While in party, increases Defense of Ice Pals by 15%. (Does not stack)",
+          "sourceSha256": "28623cf33c3afa251a80f6e98eb403c84cc0244a126ac9ae4d184c552b8e805c"
+        }
+      }
+    },
+    {
+      "id": "partner-reindrix",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cool Body",
+          "sourceSha256": "cd626b4b8a2de95016341955cbd11f9406c04567e5de4dbc7a3758f3d90ef49f"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, the player gains Heat Resistance +2. (Does not stack)",
+          "sourceSha256": "14e394e7e2b74f0462eb81818412b984dca12bbfefdf6999106275d489ed6dcf"
+        }
+      }
+    },
+    {
+      "id": "partner-relaxaurus",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hungry Missile",
+          "sourceSha256": "1e7c82565c4af1ff2355623f696fbc80a7494b04f1cda4410a6742cc49f5c966"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can rapidly fire a missile launcher while mounted.",
+          "sourceSha256": "40afdfe1744434645635c9dac5f8b12511723284b84ed7ab559b40dbfa9ef42d"
+        }
+      }
+    },
+    {
+      "id": "partner-relaxaurus-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Missile Party",
+          "sourceSha256": "77f07ac0262ec2859f8ab160c98bfc009b28f7ae8a011cb746442f44221676b6"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Can rapidly fire a missile launcher while mounted.",
+          "sourceSha256": "40afdfe1744434645635c9dac5f8b12511723284b84ed7ab559b40dbfa9ef42d"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,4062 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "metadata": {
+    "gameVersion": "1.0.1",
+    "steamBuildId": "24181105",
+    "sourceRevision": "atlas@0385b3fd8bd757240d4a2c79615145122669abd5+palcalc@211dd9fe520cbff9c5e3b9f8ec4f132669869714",
+    "sourceChecksums": {
+      "atlasPals": "57fb4bf837061c1160d5f72755152245fe793e1b0073328714efd63c65ba5b47",
+      "atlasBreeding": "dc39e4c8646eaa7f61573d832dcb854d31184713dfc815e0221dc83d947ae559",
+      "palCalc": "803d891afdb18bd00e24332844a7276bbe5c0855170ef90ef142f2f4d7698ed1",
+      "catalog": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552"
+    }
+  },
+  "parameters": [
+    {
+      "palId": "aegidron",
+      "sourceInternalId": "DomeArmorDragon",
+      "tribe": "DomeArmorDragon",
+      "combiRank": 30,
+      "combiDuplicatePriority": 3000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "amione",
+      "sourceInternalId": "ClioneTwins",
+      "tribe": "ClioneTwins",
+      "combiRank": 2520,
+      "combiDuplicatePriority": 252000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "anubis",
+      "sourceInternalId": "Anubis",
+      "tribe": "Anubis",
+      "combiRank": 480,
+      "combiDuplicatePriority": 48000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "arsox",
+      "sourceInternalId": "FlameBuffalo",
+      "tribe": "FlameBuffalo",
+      "combiRank": 2320,
+      "combiDuplicatePriority": 232000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "astegon",
+      "sourceInternalId": "BlackMetalDragon",
+      "tribe": "BlackMetalDragon",
+      "combiRank": 490,
+      "combiDuplicatePriority": 49000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "azurmane",
+      "sourceInternalId": "BlueThunderHorse",
+      "tribe": "BlueThunderHorse",
+      "combiRank": 420,
+      "combiDuplicatePriority": 42000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "azurobe",
+      "sourceInternalId": "BlueDragon",
+      "tribe": "BlueDragon",
+      "combiRank": 1830,
+      "combiDuplicatePriority": 183000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "azurobe-cryst",
+      "sourceInternalId": "BlueDragon_Ice",
+      "tribe": "BlueDragon_Ice",
+      "combiRank": 1220,
+      "combiDuplicatePriority": 578,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "bakemi",
+      "sourceInternalId": "OniGhostGirl",
+      "tribe": "OniGhostGirl",
+      "combiRank": 1540,
+      "combiDuplicatePriority": 154000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "bastigor",
+      "sourceInternalId": "SnowTigerBeastman",
+      "tribe": "SnowTigerBeastman",
+      "combiRank": 50,
+      "combiDuplicatePriority": 5000,
+      "maleProbability": 0.6,
+      "variantType": "normal"
+    },
+    {
+      "palId": "beakon",
+      "sourceInternalId": "ThunderBird",
+      "tribe": "ThunderBird",
+      "combiRank": 1690,
+      "combiDuplicatePriority": 169000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "beakon-cryst",
+      "sourceInternalId": "ThunderBird_Ice",
+      "tribe": "ThunderBird_Ice",
+      "combiRank": 580,
+      "combiDuplicatePriority": 58000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "beegarde",
+      "sourceInternalId": "SoldierBee",
+      "tribe": "SoldierBee",
+      "combiRank": 2350,
+      "combiDuplicatePriority": 235000,
+      "maleProbability": 0.1,
+      "variantType": "normal"
+    },
+    {
+      "palId": "bellanoir",
+      "sourceInternalId": "NightLady",
+      "tribe": "NightLady",
+      "combiRank": 620,
+      "combiDuplicatePriority": 62000,
+      "maleProbability": 0.1,
+      "variantType": "normal"
+    },
+    {
+      "palId": "bellanoir-libero",
+      "sourceInternalId": "NightLady_Dark",
+      "tribe": "NightLady_Dark",
+      "combiRank": 130,
+      "combiDuplicatePriority": 13000,
+      "maleProbability": 0.1,
+      "variantType": "variant"
+    },
+    {
+      "palId": "blazamut",
+      "sourceInternalId": "KingBahamut",
+      "tribe": "KingBahamut",
+      "combiRank": 410,
+      "combiDuplicatePriority": 41000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "blazamut-ryu",
+      "sourceInternalId": "KingBahamut_Dragon",
+      "tribe": "KingBahamut_Dragon",
+      "combiRank": 100,
+      "combiDuplicatePriority": 10000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "blazehowl",
+      "sourceInternalId": "Manticore",
+      "tribe": "Manticore",
+      "combiRank": 1360,
+      "combiDuplicatePriority": 136000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "blazehowl-noct",
+      "sourceInternalId": "Manticore_Dark",
+      "tribe": "Manticore_Dark",
+      "combiRank": 1270,
+      "combiDuplicatePriority": 127000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "braloha",
+      "sourceInternalId": "Plesiosaur",
+      "tribe": "Plesiosaur",
+      "combiRank": 1030,
+      "combiDuplicatePriority": 103000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "bristla",
+      "sourceInternalId": "LittleBriarRose",
+      "tribe": "LittleBriarRose",
+      "combiRank": 2690,
+      "combiDuplicatePriority": 269000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "broncherry",
+      "sourceInternalId": "SakuraSaurus",
+      "tribe": "SakuraSaurus",
+      "combiRank": 1380,
+      "combiDuplicatePriority": 138000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "broncherry-aqua",
+      "sourceInternalId": "SakuraSaurus_Water",
+      "tribe": "SakuraSaurus_Water",
+      "combiRank": 1080,
+      "combiDuplicatePriority": 108000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "bulldosu",
+      "sourceInternalId": "SumoDog",
+      "tribe": "SumoDog",
+      "combiRank": 1190,
+      "combiDuplicatePriority": 119000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "bushi",
+      "sourceInternalId": "Ronin",
+      "tribe": "Ronin",
+      "combiRank": 1560,
+      "combiDuplicatePriority": 156000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "bushi-noct",
+      "sourceInternalId": "Ronin_Dark",
+      "tribe": "Ronin_Dark",
+      "combiRank": 840,
+      "combiDuplicatePriority": 84000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "caprity",
+      "sourceInternalId": "BerryGoat",
+      "tribe": "BerryGoat",
+      "combiRank": 2610,
+      "combiDuplicatePriority": 261000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "caprity-noct",
+      "sourceInternalId": "BerryGoat_Dark",
+      "tribe": "BerryGoat_Dark",
+      "combiRank": 1940,
+      "combiDuplicatePriority": 194000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "carnibora",
+      "sourceInternalId": "VenusFlytrap",
+      "tribe": "VenusFlytrap",
+      "combiRank": 1700,
+      "combiDuplicatePriority": 170000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "cattiva",
+      "sourceInternalId": "PinkCat",
+      "tribe": "PinkCat",
+      "combiRank": 2760,
+      "combiDuplicatePriority": 276000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "cawgnito",
+      "sourceInternalId": "DarkCrow",
+      "tribe": "DarkCrow",
+      "combiRank": 2370,
+      "combiDuplicatePriority": 237000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "celaray",
+      "sourceInternalId": "FlyingManta",
+      "tribe": "FlyingManta",
+      "combiRank": 2740,
+      "combiDuplicatePriority": 274000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "celaray-lux",
+      "sourceInternalId": "FlyingManta_Thunder",
+      "tribe": "FlyingManta_Thunder",
+      "combiRank": 2380,
+      "combiDuplicatePriority": 574,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "celesdir",
+      "sourceInternalId": "WhiteDeer",
+      "tribe": "WhiteDeer",
+      "combiRank": 570,
+      "combiDuplicatePriority": 57000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "celesdir-noct",
+      "sourceInternalId": "WhiteDeer_Dark",
+      "tribe": "WhiteDeer_Dark",
+      "combiRank": 270,
+      "combiDuplicatePriority": 27000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "chikipi",
+      "sourceInternalId": "ChickenPal",
+      "tribe": "ChickenPal",
+      "combiRank": 3080,
+      "combiDuplicatePriority": 308000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "chillet",
+      "sourceInternalId": "WeaselDragon",
+      "tribe": "WeaselDragon",
+      "combiRank": 2330,
+      "combiDuplicatePriority": 233000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "chillet-ignis",
+      "sourceInternalId": "WeaselDragon_Fire",
+      "tribe": "WeaselDragon_Fire",
+      "combiRank": 1950,
+      "combiDuplicatePriority": 195000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "cinnamoth",
+      "sourceInternalId": "CuteButterfly",
+      "tribe": "CuteButterfly",
+      "combiRank": 2620,
+      "combiDuplicatePriority": 262000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "clovee",
+      "sourceInternalId": "CloverFairy",
+      "tribe": "CloverFairy",
+      "combiRank": 2970,
+      "combiDuplicatePriority": 297000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "cremis",
+      "sourceInternalId": "WoolFox",
+      "tribe": "WoolFox",
+      "combiRank": 2890,
+      "combiDuplicatePriority": 289000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "croajiro",
+      "sourceInternalId": "KendoFrog",
+      "tribe": "KendoFrog",
+      "combiRank": 2600,
+      "combiDuplicatePriority": 260000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "croajiro-noct",
+      "sourceInternalId": "KendoFrog_Dark",
+      "tribe": "KendoFrog_Dark",
+      "combiRank": 1860,
+      "combiDuplicatePriority": 186000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "cryolinx",
+      "sourceInternalId": "WhiteTiger",
+      "tribe": "WhiteTiger",
+      "combiRank": 1040,
+      "combiDuplicatePriority": 104000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "cryolinx-terra",
+      "sourceInternalId": "WhiteTiger_Ground",
+      "tribe": "WhiteTiger_Ground",
+      "combiRank": 470,
+      "combiDuplicatePriority": 47000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "daedream",
+      "sourceInternalId": "DreamDemon",
+      "tribe": "DreamDemon",
+      "combiRank": 2910,
+      "combiDuplicatePriority": 291000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dandilord",
+      "sourceInternalId": "FlowerPrince",
+      "tribe": "FlowerPrince",
+      "combiRank": 60,
+      "combiDuplicatePriority": 6000,
+      "maleProbability": 0.6,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dazemu",
+      "sourceInternalId": "FeatherOstrich",
+      "tribe": "FeatherOstrich",
+      "combiRank": 2210,
+      "combiDuplicatePriority": 221000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dazzi",
+      "sourceInternalId": "RaijinDaughter",
+      "tribe": "RaijinDaughter",
+      "combiRank": 2400,
+      "combiDuplicatePriority": 240000,
+      "maleProbability": 0.2,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dazzi-noct",
+      "sourceInternalId": "RaijinDaughter_Water",
+      "tribe": "RaijinDaughter_Water",
+      "combiRank": 1910,
+      "combiDuplicatePriority": 191000,
+      "maleProbability": 0.2,
+      "variantType": "variant"
+    },
+    {
+      "palId": "depresso",
+      "sourceInternalId": "NegativeKoala",
+      "tribe": "NegativeKoala",
+      "combiRank": 3000,
+      "combiDuplicatePriority": 300000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "digtoise",
+      "sourceInternalId": "DrillGame",
+      "tribe": "DrillGame",
+      "combiRank": 1550,
+      "combiDuplicatePriority": 155000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dinossom",
+      "sourceInternalId": "FlowerDinosaur",
+      "tribe": "FlowerDinosaur",
+      "combiRank": 2100,
+      "combiDuplicatePriority": 210000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dinossom-lux",
+      "sourceInternalId": "FlowerDinosaur_Electric",
+      "tribe": "FlowerDinosaur_Electric",
+      "combiRank": 1890,
+      "combiDuplicatePriority": 189000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "direhowl",
+      "sourceInternalId": "Garm",
+      "tribe": "Garm",
+      "combiRank": 2680,
+      "combiDuplicatePriority": 268000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dogen",
+      "sourceInternalId": "SifuDog",
+      "tribe": "SifuDog",
+      "combiRank": 1460,
+      "combiDuplicatePriority": 146000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dualith",
+      "sourceInternalId": "GrassGolem",
+      "tribe": "GrassGolem",
+      "combiRank": 510,
+      "combiDuplicatePriority": 51000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dualith-noct",
+      "sourceInternalId": "GrassGolem_Dark",
+      "tribe": "GrassGolem_Dark",
+      "combiRank": 250,
+      "combiDuplicatePriority": 25000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "dumud",
+      "sourceInternalId": "LazyCatfish",
+      "tribe": "LazyCatfish",
+      "combiRank": 2290,
+      "combiDuplicatePriority": 229000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dumud-gild",
+      "sourceInternalId": "LazyCatfish_Gold",
+      "tribe": "LazyCatfish_Gold",
+      "combiRank": 1620,
+      "combiDuplicatePriority": 576,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "dupin",
+      "sourceInternalId": "ClownRabbit",
+      "tribe": "ClownRabbit",
+      "combiRank": 520,
+      "combiDuplicatePriority": 52000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "dynamoff",
+      "sourceInternalId": "ThunderFluffyBird",
+      "tribe": "ThunderFluffyBird",
+      "combiRank": 1400,
+      "combiDuplicatePriority": 140000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "eidrolon",
+      "sourceInternalId": "GhostDragon",
+      "tribe": "GhostDragon",
+      "combiRank": 300,
+      "combiDuplicatePriority": 30000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "eidrolon-ignis",
+      "sourceInternalId": "GhostDragon_Fire",
+      "tribe": "GhostDragon_Fire",
+      "combiRank": 140,
+      "combiDuplicatePriority": 14000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "eikthyrdeer",
+      "sourceInternalId": "Deer",
+      "tribe": "Deer",
+      "combiRank": 2710,
+      "combiDuplicatePriority": 271000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "eikthyrdeer-terra",
+      "sourceInternalId": "Deer_Ground",
+      "tribe": "Deer_Ground",
+      "combiRank": 2580,
+      "combiDuplicatePriority": 258000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "elgrove",
+      "sourceInternalId": "GrassMinotaur",
+      "tribe": "GrassMinotaur",
+      "combiRank": 2020,
+      "combiDuplicatePriority": 202000,
+      "maleProbability": 0.6,
+      "variantType": "normal"
+    },
+    {
+      "palId": "elgrove-cryst",
+      "sourceInternalId": "GrassMinotaur_Ice",
+      "tribe": "GrassMinotaur_Ice",
+      "combiRank": 440,
+      "combiDuplicatePriority": 44000,
+      "maleProbability": 0.6,
+      "variantType": "variant"
+    },
+    {
+      "palId": "elizabee",
+      "sourceInternalId": "QueenBee",
+      "tribe": "QueenBee",
+      "combiRank": 1790,
+      "combiDuplicatePriority": 179000,
+      "maleProbability": 0.1,
+      "variantType": "normal"
+    },
+    {
+      "palId": "elphidran",
+      "sourceInternalId": "FairyDragon",
+      "tribe": "FairyDragon",
+      "combiRank": 2280,
+      "combiDuplicatePriority": 228000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "elphidran-aqua",
+      "sourceInternalId": "FairyDragon_Water",
+      "tribe": "FairyDragon_Water",
+      "combiRank": 1640,
+      "combiDuplicatePriority": 164000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "faleris",
+      "sourceInternalId": "Horus",
+      "tribe": "Horus",
+      "combiRank": 500,
+      "combiDuplicatePriority": 50000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "faleris-aqua",
+      "sourceInternalId": "Horus_Water",
+      "tribe": "Horus_Water",
+      "combiRank": 450,
+      "combiDuplicatePriority": 45000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "felbat",
+      "sourceInternalId": "CatVampire",
+      "tribe": "CatVampire",
+      "combiRank": 1570,
+      "combiDuplicatePriority": 157000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "fenglope",
+      "sourceInternalId": "FengyunDeeper",
+      "tribe": "FengyunDeeper",
+      "combiRank": 1960,
+      "combiDuplicatePriority": 196000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "fenglope-lux",
+      "sourceInternalId": "FengyunDeeper_Electric",
+      "tribe": "FengyunDeeper_Electric",
+      "combiRank": 900,
+      "combiDuplicatePriority": 90000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "finsider",
+      "sourceInternalId": "StuffedShark",
+      "tribe": "StuffedShark",
+      "combiRank": 2450,
+      "combiDuplicatePriority": 245000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "finsider-ignis",
+      "sourceInternalId": "StuffedShark_Fire",
+      "tribe": "StuffedShark_Fire",
+      "combiRank": 2240,
+      "combiDuplicatePriority": 581,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "flambelle",
+      "sourceInternalId": "LavaGirl",
+      "tribe": "LavaGirl",
+      "combiRank": 2700,
+      "combiDuplicatePriority": 270000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "flaracle",
+      "sourceInternalId": "FoxExorcist",
+      "tribe": "FoxExorcist",
+      "combiRank": 390,
+      "combiDuplicatePriority": 39000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "flopie",
+      "sourceInternalId": "FlowerRabbit",
+      "tribe": "FlowerRabbit",
+      "combiRank": 2660,
+      "combiDuplicatePriority": 266000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "foxcicle",
+      "sourceInternalId": "IceFox",
+      "tribe": "IceFox",
+      "combiRank": 1970,
+      "combiDuplicatePriority": 197000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "foxparks",
+      "sourceInternalId": "Kitsunebi",
+      "tribe": "Kitsunebi",
+      "combiRank": 2990,
+      "combiDuplicatePriority": 299000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "foxparks-cryst",
+      "sourceInternalId": "Kitsunebi_Ice",
+      "tribe": "Kitsunebi_Ice",
+      "combiRank": 2500,
+      "combiDuplicatePriority": 250000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "frostallion",
+      "sourceInternalId": "IceHorse",
+      "tribe": "IceHorse",
+      "combiRank": 150,
+      "combiDuplicatePriority": 15000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "frostallion-noct",
+      "sourceInternalId": "IceHorse_Dark",
+      "tribe": "IceHorse_Dark",
+      "combiRank": 110,
+      "combiDuplicatePriority": 11000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "frostplume",
+      "sourceInternalId": "SnowPeafowl",
+      "tribe": "SnowPeafowl",
+      "combiRank": 860,
+      "combiDuplicatePriority": 86000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "fuack",
+      "sourceInternalId": "BluePlatypus",
+      "tribe": "Blueplatypus",
+      "combiRank": 2980,
+      "combiDuplicatePriority": 298000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "fuack-ignis",
+      "sourceInternalId": "BluePlatypus_Fire",
+      "tribe": "BluePlatypus_Fire",
+      "combiRank": 2300,
+      "combiDuplicatePriority": 575,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "fuddler",
+      "sourceInternalId": "CuteMole",
+      "tribe": "CuteMole",
+      "combiRank": 2790,
+      "combiDuplicatePriority": 279000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "galeclaw",
+      "sourceInternalId": "Eagle",
+      "tribe": "Eagle",
+      "combiRank": 2570,
+      "combiDuplicatePriority": 257000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "ghangler",
+      "sourceInternalId": "GhostAnglerfish",
+      "tribe": "GhostAnglerfish",
+      "combiRank": 880,
+      "combiDuplicatePriority": 88000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "ghangler-ignis",
+      "sourceInternalId": "GhostAnglerfish_Fire",
+      "tribe": "GhostAnglerfish_Fire",
+      "combiRank": 720,
+      "combiDuplicatePriority": 72000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "gildane",
+      "sourceInternalId": "GoldenHorse",
+      "tribe": "GoldenHorse",
+      "combiRank": 730,
+      "combiDuplicatePriority": 73000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "gildra",
+      "sourceInternalId": "MummyPal",
+      "tribe": "MummyPal",
+      "combiRank": 1170,
+      "combiDuplicatePriority": 117000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "gloopie",
+      "sourceInternalId": "OctopusGirl",
+      "tribe": "OctopusGirl",
+      "combiRank": 2530,
+      "combiDuplicatePriority": 253000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "gloopie-primo",
+      "sourceInternalId": "OctopusGirl_Neutral",
+      "tribe": "OctopusGirl_Neutral",
+      "combiRank": 1630,
+      "combiDuplicatePriority": 163000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "gobfin",
+      "sourceInternalId": "SharkKid",
+      "tribe": "SharkKid",
+      "combiRank": 2550,
+      "combiDuplicatePriority": 255000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "gobfin-ignis",
+      "sourceInternalId": "SharkKid_Fire",
+      "tribe": "SharkKid_Fire",
+      "combiRank": 2430,
+      "combiDuplicatePriority": 243000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "gorirat",
+      "sourceInternalId": "Gorilla",
+      "tribe": "Gorilla",
+      "combiRank": 2140,
+      "combiDuplicatePriority": 214000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "gorirat-terra",
+      "sourceInternalId": "Gorilla_Ground",
+      "tribe": "Gorilla_Ground",
+      "combiRank": 1880,
+      "combiDuplicatePriority": 188000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "grintale",
+      "sourceInternalId": "NaughtyCat",
+      "tribe": "NaughtyCat",
+      "combiRank": 2120,
+      "combiDuplicatePriority": 212000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "grizzbolt",
+      "sourceInternalId": "ElecPanda",
+      "tribe": "ElecPanda",
+      "combiRank": 1020,
+      "combiDuplicatePriority": 102000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "gumoss",
+      "sourceInternalId": "PlantSlime",
+      "tribe": "PlantSlime",
+      "combiRank": 2950,
+      "combiDuplicatePriority": 295000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "hangyu",
+      "sourceInternalId": "WindChimes",
+      "tribe": "WindChimes",
+      "combiRank": 2780,
+      "combiDuplicatePriority": 278000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "hangyu-cryst",
+      "sourceInternalId": "WindChimes_Ice",
+      "tribe": "WindChimes_Ice",
+      "combiRank": 2510,
+      "combiDuplicatePriority": 251000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "hartalis",
+      "sourceInternalId": "LegendDeer",
+      "tribe": "LegendDeer",
+      "combiRank": 90,
+      "combiDuplicatePriority": 9000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "helzephyr",
+      "sourceInternalId": "HadesBird",
+      "tribe": "HadesBird",
+      "combiRank": 1130,
+      "combiDuplicatePriority": 113000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "helzephyr-lux",
+      "sourceInternalId": "HadesBird_Electric",
+      "tribe": "HadesBird_Electric",
+      "combiRank": 960,
+      "combiDuplicatePriority": 96000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "herbil",
+      "sourceInternalId": "LeafMomonga",
+      "tribe": "LeafMomonga",
+      "combiRank": 2630,
+      "combiDuplicatePriority": 263000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "hoocrates",
+      "sourceInternalId": "WizardOwl",
+      "tribe": "WizardOwl",
+      "combiRank": 2940,
+      "combiDuplicatePriority": 294000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "hoodle",
+      "sourceInternalId": "HoodGhost",
+      "tribe": "HoodGhost",
+      "combiRank": 1770,
+      "combiDuplicatePriority": 177000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "icelyn",
+      "sourceInternalId": "IceWitch",
+      "tribe": "IceWitch",
+      "combiRank": 1260,
+      "combiDuplicatePriority": 126000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "incineram",
+      "sourceInternalId": "Baphomet",
+      "tribe": "Baphomet",
+      "combiRank": 1470,
+      "combiDuplicatePriority": 147000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "incineram-noct",
+      "sourceInternalId": "Baphomet_Dark",
+      "tribe": "Baphomet_Dark",
+      "combiRank": 1310,
+      "combiDuplicatePriority": 131000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "jelliette",
+      "sourceInternalId": "JellyfishFairy",
+      "tribe": "JellyfishFairy",
+      "combiRank": 2650,
+      "combiDuplicatePriority": 265000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "jellroy",
+      "sourceInternalId": "JellyfishGhost",
+      "tribe": "JellyfishGhost",
+      "combiRank": 2590,
+      "combiDuplicatePriority": 259000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "jetragon",
+      "sourceInternalId": "JetDragon",
+      "tribe": "JetDragon",
+      "combiRank": 70,
+      "combiDuplicatePriority": 7000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "jolthog",
+      "sourceInternalId": "Hedgehog",
+      "tribe": "Hedgehog",
+      "combiRank": 3030,
+      "combiDuplicatePriority": 303000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "jolthog-cryst",
+      "sourceInternalId": "Hedgehog_Ice",
+      "tribe": "Hedgehog_Ice",
+      "combiRank": 2850,
+      "combiDuplicatePriority": 285000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "jormuntide",
+      "sourceInternalId": "Umihebi",
+      "tribe": "Umihebi",
+      "combiRank": 590,
+      "combiDuplicatePriority": 59000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "jormuntide-ignis",
+      "sourceInternalId": "Umihebi_Fire",
+      "tribe": "Umihebi_Fire",
+      "combiRank": 170,
+      "combiDuplicatePriority": 17000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "katress",
+      "sourceInternalId": "CatMage",
+      "tribe": "CatMage",
+      "combiRank": 2040,
+      "combiDuplicatePriority": 204000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "katress-ignis",
+      "sourceInternalId": "CatMage_Fire",
+      "tribe": "CatMage_Fire",
+      "combiRank": 1800,
+      "combiDuplicatePriority": 180000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "kelpsea",
+      "sourceInternalId": "Kelpie",
+      "tribe": "Kelpie",
+      "combiRank": 2810,
+      "combiDuplicatePriority": 281000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "kelpsea-ignis",
+      "sourceInternalId": "Kelpie_Fire",
+      "tribe": "Kelpie_Fire",
+      "combiRank": 2470,
+      "combiDuplicatePriority": 247000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "kikit",
+      "sourceInternalId": "SmallArmadillo",
+      "tribe": "SmallArmadillo",
+      "combiRank": 2310,
+      "combiDuplicatePriority": 231000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "killamari",
+      "sourceInternalId": "NegativeOctopus",
+      "tribe": "NegativeOctopus",
+      "combiRank": 2770,
+      "combiDuplicatePriority": 277000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "killamari-primo",
+      "sourceInternalId": "NegativeOctopus_Neutral",
+      "tribe": "NegativeOctopus_Neutral",
+      "combiRank": 2540,
+      "combiDuplicatePriority": 571,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "kingpaca",
+      "sourceInternalId": "KingAlpaca",
+      "tribe": "KingAlpaca",
+      "combiRank": 2220,
+      "combiDuplicatePriority": 222000,
+      "maleProbability": 0.9,
+      "variantType": "normal"
+    },
+    {
+      "palId": "kingpaca-cryst",
+      "sourceInternalId": "KingAlpaca_Ice",
+      "tribe": "KingAlpaca_Ice",
+      "combiRank": 1530,
+      "combiDuplicatePriority": 153000,
+      "maleProbability": 0.9,
+      "variantType": "variant"
+    },
+    {
+      "palId": "kitsun",
+      "sourceInternalId": "AmaterasuWolf",
+      "tribe": "AmaterasuWolf",
+      "combiRank": 1670,
+      "combiDuplicatePriority": 167000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "kitsun-noct",
+      "sourceInternalId": "AmaterasuWolf_Dark",
+      "tribe": "AmaterasuWolf_Dark",
+      "combiRank": 800,
+      "combiDuplicatePriority": 80000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "knocklem",
+      "sourceInternalId": "WingGolem",
+      "tribe": "WingGolem",
+      "combiRank": 260,
+      "combiDuplicatePriority": 26000,
+      "maleProbability": 0.7,
+      "variantType": "normal"
+    },
+    {
+      "palId": "knocklem-ignis",
+      "sourceInternalId": "WingGolem_Fire",
+      "tribe": "WingGolem_Fire",
+      "combiRank": 210,
+      "combiDuplicatePriority": 21000,
+      "maleProbability": 0.7,
+      "variantType": "variant"
+    },
+    {
+      "palId": "lamball",
+      "sourceInternalId": "SheepBall",
+      "tribe": "SheepBall",
+      "combiRank": 3050,
+      "combiDuplicatePriority": 305000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "lapiron",
+      "sourceInternalId": "BrownRabbit",
+      "tribe": "BrownRabbit",
+      "combiRank": 1680,
+      "combiDuplicatePriority": 168000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "lapure",
+      "sourceInternalId": "SleeveRabbit",
+      "tribe": "SleeveRabbit",
+      "combiRank": 810,
+      "combiDuplicatePriority": 81000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "leafan",
+      "sourceInternalId": "PandaGirl",
+      "tribe": "PandaGirl",
+      "combiRank": 1410,
+      "combiDuplicatePriority": 141000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "leezpunk",
+      "sourceInternalId": "LizardMan",
+      "tribe": "LizardMan",
+      "combiRank": 2670,
+      "combiDuplicatePriority": 267000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "leezpunk-ignis",
+      "sourceInternalId": "LizardMan_Fire",
+      "tribe": "LizardMan_Fire",
+      "combiRank": 2640,
+      "combiDuplicatePriority": 264000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "lifmunk",
+      "sourceInternalId": "Carbunclo",
+      "tribe": "Carbunclo",
+      "combiRank": 3020,
+      "combiDuplicatePriority": 302000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "loomen",
+      "sourceInternalId": "LanternButler",
+      "tribe": "LanternButler",
+      "combiRank": 890,
+      "combiDuplicatePriority": 89000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "loupmoon",
+      "sourceInternalId": "Werewolf",
+      "tribe": "Werewolf",
+      "combiRank": 2110,
+      "combiDuplicatePriority": 211000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "loupmoon-cryst",
+      "sourceInternalId": "Werewolf_Ice",
+      "tribe": "Werewolf_Ice",
+      "combiRank": 1290,
+      "combiDuplicatePriority": 129000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "lovander",
+      "sourceInternalId": "PinkLizard",
+      "tribe": "PinkLizard",
+      "combiRank": 2090,
+      "combiDuplicatePriority": 209000,
+      "maleProbability": 0.3,
+      "variantType": "normal"
+    },
+    {
+      "palId": "lullu",
+      "sourceInternalId": "LeafPrincess",
+      "tribe": "LeafPrincess",
+      "combiRank": 1990,
+      "combiDuplicatePriority": 199000,
+      "maleProbability": 0.3,
+      "variantType": "normal"
+    },
+    {
+      "palId": "lunaris",
+      "sourceInternalId": "Mutant",
+      "tribe": "Mutant",
+      "combiRank": 2010,
+      "combiDuplicatePriority": 201000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "lyleen",
+      "sourceInternalId": "LilyQueen",
+      "tribe": "LilyQueen",
+      "combiRank": 240,
+      "combiDuplicatePriority": 24000,
+      "maleProbability": 0.3,
+      "variantType": "normal"
+    },
+    {
+      "palId": "lyleen-noct",
+      "sourceInternalId": "LilyQueen_Dark",
+      "tribe": "LilyQueen_Dark",
+      "combiRank": 220,
+      "combiDuplicatePriority": 22000,
+      "maleProbability": 0.3,
+      "variantType": "variant"
+    },
+    {
+      "palId": "majex",
+      "sourceInternalId": "DarkFlameFox",
+      "tribe": "DarkFlameFox",
+      "combiRank": 1010,
+      "combiDuplicatePriority": 101000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "mammorest",
+      "sourceInternalId": "GrassMammoth",
+      "tribe": "GrassMammoth",
+      "combiRank": 1340,
+      "combiDuplicatePriority": 134000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "mammorest-cryst",
+      "sourceInternalId": "GrassMammoth_Ice",
+      "tribe": "GrassMammoth_Ice",
+      "combiRank": 1070,
+      "combiDuplicatePriority": 107000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "maraith",
+      "sourceInternalId": "GhostBeast",
+      "tribe": "GhostBeast",
+      "combiRank": 1710,
+      "combiDuplicatePriority": 171000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "mau",
+      "sourceInternalId": "Bastet",
+      "tribe": "Bastet",
+      "combiRank": 3040,
+      "combiDuplicatePriority": 304000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "mau-cryst",
+      "sourceInternalId": "Bastet_Ice",
+      "tribe": "Bastet_Ice",
+      "combiRank": 2750,
+      "combiDuplicatePriority": 275000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "melpaca",
+      "sourceInternalId": "Alpaca",
+      "tribe": "Alpaca",
+      "combiRank": 2720,
+      "combiDuplicatePriority": 272000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "menasting",
+      "sourceInternalId": "DarkScorpion",
+      "tribe": "DarkScorpion",
+      "combiRank": 1120,
+      "combiDuplicatePriority": 112000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "menasting-terra",
+      "sourceInternalId": "DarkScorpion_Ground",
+      "tribe": "DarkScorpion_Ground",
+      "combiRank": 640,
+      "combiDuplicatePriority": 64000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "mimog",
+      "sourceInternalId": "MimicDog",
+      "tribe": "MimicDog",
+      "combiRank": 1740,
+      "combiDuplicatePriority": 174000,
+      "maleProbability": 0.8,
+      "variantType": "normal"
+    },
+    {
+      "palId": "moldron",
+      "sourceInternalId": "VolcanoDragon",
+      "tribe": "VolcanoDragon",
+      "combiRank": 750,
+      "combiDuplicatePriority": 75000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "moldron-cryst",
+      "sourceInternalId": "VolcanoDragon_Ice",
+      "tribe": "VolcanoDragon_Ice",
+      "combiRank": 380,
+      "combiDuplicatePriority": 38000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "mossanda",
+      "sourceInternalId": "GrassPanda",
+      "tribe": "GrassPanda",
+      "combiRank": 2060,
+      "combiDuplicatePriority": 206000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "mossanda-lux",
+      "sourceInternalId": "GrassPanda_Electric",
+      "tribe": "GrassPanda_Electric",
+      "combiRank": 1440,
+      "combiDuplicatePriority": 144000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "mozzarina",
+      "sourceInternalId": "CowPal",
+      "tribe": "CowPal",
+      "combiRank": 2800,
+      "combiDuplicatePriority": 280000,
+      "maleProbability": 0.2,
+      "variantType": "normal"
+    },
+    {
+      "palId": "muffly",
+      "sourceInternalId": "FluffyBird",
+      "tribe": "FluffyBird",
+      "combiRank": 2480,
+      "combiDuplicatePriority": 248000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "munchill",
+      "sourceInternalId": "IceCrocodile",
+      "tribe": "IceCrocodile",
+      "combiRank": 2130,
+      "combiDuplicatePriority": 213000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "mycora",
+      "sourceInternalId": "MushroomLady",
+      "tribe": "MushroomLady",
+      "combiRank": 760,
+      "combiDuplicatePriority": 76000,
+      "maleProbability": 0.3,
+      "variantType": "normal"
+    },
+    {
+      "palId": "necromus",
+      "sourceInternalId": "BlackCentaur",
+      "tribe": "BlackCentaur",
+      "combiRank": 190,
+      "combiDuplicatePriority": 19000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "needoll",
+      "sourceInternalId": "CactusDoll",
+      "tribe": "CactusDoll",
+      "combiRank": 2420,
+      "combiDuplicatePriority": 242000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "needoll-noct",
+      "sourceInternalId": "CactusDoll_Dark",
+      "tribe": "CactusDoll_Dark",
+      "combiRank": 1580,
+      "combiDuplicatePriority": 158000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "neptilius",
+      "sourceInternalId": "PoseidonOrca",
+      "tribe": "PoseidonOrca",
+      "combiRank": 160,
+      "combiDuplicatePriority": 16000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "nitemary",
+      "sourceInternalId": "GhostRabbit",
+      "tribe": "GhostRabbit",
+      "combiRank": 1230,
+      "combiDuplicatePriority": 123000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "nitemary-botan",
+      "sourceInternalId": "GhostRabbit_Grass",
+      "tribe": "GhostRabbit_Grass",
+      "combiRank": 1320,
+      "combiDuplicatePriority": 132000,
+      "maleProbability": 0.4,
+      "variantType": "variant"
+    },
+    {
+      "palId": "nitewing",
+      "sourceInternalId": "HawkBird",
+      "tribe": "HawkBird",
+      "combiRank": 2560,
+      "combiDuplicatePriority": 256000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "nox",
+      "sourceInternalId": "NightFox",
+      "tribe": "NightFox",
+      "combiRank": 2920,
+      "combiDuplicatePriority": 292000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "nyafia",
+      "sourceInternalId": "BadCatgirl",
+      "tribe": "BadCatgirl",
+      "combiRank": 1250,
+      "combiDuplicatePriority": 125000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "omascul",
+      "sourceInternalId": "MysteryMask",
+      "tribe": "MysteryMask",
+      "combiRank": 1140,
+      "combiDuplicatePriority": 114000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "ophydia",
+      "sourceInternalId": "LotusDragon",
+      "tribe": "LotusDragon",
+      "combiRank": 230,
+      "combiDuplicatePriority": 23000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "orserk",
+      "sourceInternalId": "ThunderDragonMan",
+      "tribe": "ThunderDragonMan",
+      "combiRank": 120,
+      "combiDuplicatePriority": 12000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "paladius",
+      "sourceInternalId": "SaintCentaur",
+      "tribe": "SaintCentaur",
+      "combiRank": 180,
+      "combiDuplicatePriority": 18000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "palumba",
+      "sourceInternalId": "TropicalOstrich",
+      "tribe": "TropicalOstrich",
+      "combiRank": 1240,
+      "combiDuplicatePriority": 124000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "panthalus",
+      "sourceInternalId": "KingWhale",
+      "tribe": "KingWhale",
+      "combiRank": 20,
+      "combiDuplicatePriority": 2000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "pengullet",
+      "sourceInternalId": "Penguin",
+      "tribe": "Penguin",
+      "combiRank": 2960,
+      "combiDuplicatePriority": 296000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "pengullet-lux",
+      "sourceInternalId": "Penguin_Electric",
+      "tribe": "Penguin_Electric",
+      "combiRank": 2490,
+      "combiDuplicatePriority": 572,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "penking",
+      "sourceInternalId": "CaptainPenguin",
+      "tribe": "CaptainPenguin",
+      "combiRank": 2070,
+      "combiDuplicatePriority": 207000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "penking-lux",
+      "sourceInternalId": "CaptainPenguin_Black",
+      "tribe": "CaptainPenguin_Black",
+      "combiRank": 1850,
+      "combiDuplicatePriority": 573,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "petallia",
+      "sourceInternalId": "FlowerDoll",
+      "tribe": "FlowerDoll",
+      "combiRank": 1720,
+      "combiDuplicatePriority": 172000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "petallia-ignis",
+      "sourceInternalId": "FlowerDoll_Fire",
+      "tribe": "FlowerDoll_Fire",
+      "combiRank": 820,
+      "combiDuplicatePriority": 82000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "pierdon",
+      "sourceInternalId": "RockBeast",
+      "tribe": "RockBeast",
+      "combiRank": 1110,
+      "combiDuplicatePriority": 111000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "pierdon-cryst",
+      "sourceInternalId": "RockBeast_Ice",
+      "tribe": "RockBeast_Ice",
+      "combiRank": 460,
+      "combiDuplicatePriority": 46000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "polapup",
+      "sourceInternalId": "IceSeal",
+      "tribe": "IceSeal",
+      "combiRank": 1660,
+      "combiDuplicatePriority": 166000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "polapup-terra",
+      "sourceInternalId": "IceSeal_Ground",
+      "tribe": "IceSeal_Ground",
+      "combiRank": 1100,
+      "combiDuplicatePriority": 110000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "prixter",
+      "sourceInternalId": "ScorpionMan",
+      "tribe": "ScorpionMan",
+      "combiRank": 1510,
+      "combiDuplicatePriority": 151000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "prixter-lux",
+      "sourceInternalId": "ScorpionMan_Electric",
+      "tribe": "ScorpionMan_Electric",
+      "combiRank": 850,
+      "combiDuplicatePriority": 85000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "prunelia",
+      "sourceInternalId": "BlueberryFairy",
+      "tribe": "BlueberryFairy",
+      "combiRank": 1390,
+      "combiDuplicatePriority": 139000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "puffolt",
+      "sourceInternalId": "ElecPomeranian",
+      "tribe": "ElecPomeranian",
+      "combiRank": 2360,
+      "combiDuplicatePriority": 236000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "pupperai",
+      "sourceInternalId": "SamuraiDog",
+      "tribe": "SamuraiDog",
+      "combiRank": 2930,
+      "combiDuplicatePriority": 293000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "pyrin",
+      "sourceInternalId": "FireKirin",
+      "tribe": "FireKirin",
+      "combiRank": 1980,
+      "combiDuplicatePriority": 198000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "pyrin-noct",
+      "sourceInternalId": "FireKirin_Dark",
+      "tribe": "FireKirin_Dark",
+      "combiRank": 1870,
+      "combiDuplicatePriority": 187000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "quivern",
+      "sourceInternalId": "SkyDragon",
+      "tribe": "SkyDragon",
+      "combiRank": 1210,
+      "combiDuplicatePriority": 121000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "quivern-botan",
+      "sourceInternalId": "SkyDragon_Grass",
+      "tribe": "SkyDragon_Grass",
+      "combiRank": 1300,
+      "combiDuplicatePriority": 130000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "ragnahawk",
+      "sourceInternalId": "RedArmorBird",
+      "tribe": "RedArmorBird",
+      "combiRank": 1050,
+      "combiDuplicatePriority": 105000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "rayhound",
+      "sourceInternalId": "ThunderDog",
+      "tribe": "ThunderDog",
+      "combiRank": 1920,
+      "combiDuplicatePriority": 192000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "rayhound-cryst",
+      "sourceInternalId": "ThunderDog_Ice",
+      "tribe": "ThunderDog_Ice",
+      "combiRank": 1600,
+      "combiDuplicatePriority": 160000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "reindrix",
+      "sourceInternalId": "IceDeer",
+      "tribe": "IceDeer",
+      "combiRank": 1930,
+      "combiDuplicatePriority": 193000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "relaxaurus",
+      "sourceInternalId": "LazyDragon",
+      "tribe": "LazyDragon",
+      "combiRank": 1090,
+      "combiDuplicatePriority": 109000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "relaxaurus-lux",
+      "sourceInternalId": "LazyDragon_Electric",
+      "tribe": "LazyDragon_Electric",
+      "combiRank": 770,
+      "combiDuplicatePriority": 77000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "renjishi",
+      "sourceInternalId": "KabukiMan",
+      "tribe": "KabukiMan",
+      "combiRank": 290,
+      "combiDuplicatePriority": 29000,
+      "maleProbability": 0.6,
+      "variantType": "normal"
+    },
+    {
+      "palId": "reptyro",
+      "sourceInternalId": "VolcanicMonster",
+      "tribe": "VolcanicMonster",
+      "combiRank": 1060,
+      "combiDuplicatePriority": 106000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "reptyro-cryst",
+      "sourceInternalId": "VolcanicMonster_Ice",
+      "tribe": "VolcanicMonster_Ice",
+      "combiRank": 600,
+      "combiDuplicatePriority": 60000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "ribbuny",
+      "sourceInternalId": "PinkRabbit",
+      "tribe": "PinkRabbit",
+      "combiRank": 2860,
+      "combiDuplicatePriority": 286000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "ribbuny-botan",
+      "sourceInternalId": "PinkRabbit_Grass",
+      "tribe": "PinkRabbit_Grass",
+      "combiRank": 2460,
+      "combiDuplicatePriority": 246000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "robinquill",
+      "sourceInternalId": "RobinHood",
+      "tribe": "RobinHood",
+      "combiRank": 2260,
+      "combiDuplicatePriority": 226000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "robinquill-terra",
+      "sourceInternalId": "RobinHood_Ground",
+      "tribe": "RobinHood_Ground",
+      "combiRank": 2050,
+      "combiDuplicatePriority": 205000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "rooby",
+      "sourceInternalId": "FlameBambi",
+      "tribe": "FlameBambi",
+      "combiRank": 2870,
+      "combiDuplicatePriority": 287000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "roujay",
+      "sourceInternalId": "ThiefBird",
+      "tribe": "ThiefBird",
+      "combiRank": 530,
+      "combiDuplicatePriority": 53000,
+      "maleProbability": 0.6,
+      "variantType": "normal"
+    },
+    {
+      "palId": "rushoar",
+      "sourceInternalId": "Boar",
+      "tribe": "Boar",
+      "combiRank": 2880,
+      "combiDuplicatePriority": 288000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "sekhmet",
+      "sourceInternalId": "Sekhmet",
+      "tribe": "Sekhmet",
+      "combiRank": 870,
+      "combiDuplicatePriority": 87000,
+      "maleProbability": 0.3,
+      "variantType": "normal"
+    },
+    {
+      "palId": "selyne",
+      "sourceInternalId": "MoonQueen",
+      "tribe": "MoonQueen",
+      "combiRank": 360,
+      "combiDuplicatePriority": 36000,
+      "maleProbability": 0.2,
+      "variantType": "normal"
+    },
+    {
+      "palId": "shadowbeak",
+      "sourceInternalId": "BlackGriffon",
+      "tribe": "BlackGriffon",
+      "combiRank": 550,
+      "combiDuplicatePriority": 55000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "shaolong",
+      "sourceInternalId": "BlueSkyDragon",
+      "tribe": "BlueSkyDragon",
+      "combiRank": 40,
+      "combiDuplicatePriority": 4000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "shroomer",
+      "sourceInternalId": "MushroomDragon",
+      "tribe": "MushroomDragon",
+      "combiRank": 1520,
+      "combiDuplicatePriority": 152000,
+      "maleProbability": 0.55,
+      "variantType": "normal"
+    },
+    {
+      "palId": "shroomer-noct",
+      "sourceInternalId": "MushroomDragon_Dark",
+      "tribe": "MushroomDragon_Dark",
+      "combiRank": 1450,
+      "combiDuplicatePriority": 145000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "sibelyx",
+      "sourceInternalId": "WhiteMoth",
+      "tribe": "WhiteMoth",
+      "combiRank": 1810,
+      "combiDuplicatePriority": 181000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "sibelyx-primo",
+      "sourceInternalId": "WhiteMoth_Neutral",
+      "tribe": "WhiteMoth_Neutral",
+      "combiRank": 650,
+      "combiDuplicatePriority": 65000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "silvance",
+      "sourceInternalId": "Mothman",
+      "tribe": "Mothman",
+      "combiRank": 80,
+      "combiDuplicatePriority": 8000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "silvegis",
+      "sourceInternalId": "WhiteShieldDragon",
+      "tribe": "WhiteShieldDragon",
+      "combiRank": 560,
+      "combiDuplicatePriority": 56000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "skutlass",
+      "sourceInternalId": "SwordCutlassfish",
+      "tribe": "SwordCutlassfish",
+      "combiRank": 1420,
+      "combiDuplicatePriority": 142000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "skutlass-ignis",
+      "sourceInternalId": "SwordCutlassfish_Fire",
+      "tribe": "SwordCutlassfish_Fire",
+      "combiRank": 1590,
+      "combiDuplicatePriority": 159000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "slowatt",
+      "sourceInternalId": "ElecLizard",
+      "tribe": "ElecLizard",
+      "combiRank": 1750,
+      "combiDuplicatePriority": 175000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "smokie",
+      "sourceInternalId": "BlackPuppy",
+      "tribe": "BlackPuppy",
+      "combiRank": 1760,
+      "combiDuplicatePriority": 176000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "smokie-cryst",
+      "sourceInternalId": "BlackPuppy_Ice",
+      "tribe": "BlackPuppy_Ice",
+      "combiRank": 1610,
+      "combiDuplicatePriority": 161000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "snock",
+      "sourceInternalId": "ElecSnail",
+      "tribe": "ElecSnail",
+      "combiRank": 1780,
+      "combiDuplicatePriority": 178000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "snock-lux",
+      "sourceInternalId": "ElecSnail_Ground",
+      "tribe": "ElecSnail_Ground",
+      "combiRank": 1500,
+      "combiDuplicatePriority": 150000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "snugloo",
+      "sourceInternalId": "SmallYeti",
+      "tribe": "SmallYeti",
+      "combiRank": 2390,
+      "combiDuplicatePriority": 239000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "solenne",
+      "sourceInternalId": "MonochromeQueen",
+      "tribe": "MonochromeQueen",
+      "combiRank": 280,
+      "combiDuplicatePriority": 28000,
+      "maleProbability": 0.3,
+      "variantType": "normal"
+    },
+    {
+      "palId": "solmora",
+      "sourceInternalId": "KingSunfish",
+      "tribe": "KingSunfish",
+      "combiRank": 1370,
+      "combiDuplicatePriority": 137000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "solmora-lux",
+      "sourceInternalId": "KingSunfish_Thunder",
+      "tribe": "KingSunfish_Thunder",
+      "combiRank": 1000,
+      "combiDuplicatePriority": 100000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "sootseer",
+      "sourceInternalId": "CandleGhost",
+      "tribe": "CandleGhost",
+      "combiRank": 980,
+      "combiDuplicatePriority": 98000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "souffline",
+      "sourceInternalId": "DandelionGirl",
+      "tribe": "DandelionGirl",
+      "combiRank": 2000,
+      "combiDuplicatePriority": 200000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "sparkit",
+      "sourceInternalId": "ElecCat",
+      "tribe": "ElecCat",
+      "combiRank": 3010,
+      "combiDuplicatePriority": 301000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "splatterina",
+      "sourceInternalId": "GrimGirl",
+      "tribe": "GrimGirl",
+      "combiRank": 780,
+      "combiDuplicatePriority": 78000,
+      "maleProbability": 0.38,
+      "variantType": "normal"
+    },
+    {
+      "palId": "starryon",
+      "sourceInternalId": "NightBlueHorse",
+      "tribe": "NightBlueHorse",
+      "combiRank": 1150,
+      "combiDuplicatePriority": 115000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "starryon-primo",
+      "sourceInternalId": "NightBlueHorse_Neutral",
+      "tribe": "NightBlueHorse_Neutral",
+      "combiRank": 430,
+      "combiDuplicatePriority": 43000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "surfent",
+      "sourceInternalId": "Serpent",
+      "tribe": "Serpent",
+      "combiRank": 2440,
+      "combiDuplicatePriority": 244000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "surfent-terra",
+      "sourceInternalId": "Serpent_Ground",
+      "tribe": "Serpent_Ground",
+      "combiRank": 1840,
+      "combiDuplicatePriority": 184000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "suzaku",
+      "sourceInternalId": "Suzaku",
+      "tribe": "Suzaku",
+      "combiRank": 1200,
+      "combiDuplicatePriority": 120000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "suzaku-aqua",
+      "sourceInternalId": "Suzaku_Water",
+      "tribe": "Suzaku_Water",
+      "combiRank": 740,
+      "combiDuplicatePriority": 74000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "swee",
+      "sourceInternalId": "MopBaby",
+      "tribe": "MopBaby",
+      "combiRank": 2840,
+      "combiDuplicatePriority": 284000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "sweepa",
+      "sourceInternalId": "MopKing",
+      "tribe": "MopKing",
+      "combiRank": 2150,
+      "combiDuplicatePriority": 215000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "tanzee",
+      "sourceInternalId": "Monkey",
+      "tribe": "Monkey",
+      "combiRank": 2900,
+      "combiDuplicatePriority": 290000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "tanzee-ignis",
+      "sourceInternalId": "Monkey_Fire",
+      "tribe": "Monkey_Fire",
+      "combiRank": 2830,
+      "combiDuplicatePriority": 283000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "tarantriss",
+      "sourceInternalId": "PurpleSpider",
+      "tribe": "PurpleSpider",
+      "combiRank": 1730,
+      "combiDuplicatePriority": 173000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "teafant",
+      "sourceInternalId": "Ganesha",
+      "tribe": "Ganesha",
+      "combiRank": 3070,
+      "combiDuplicatePriority": 307000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "tetroise",
+      "sourceInternalId": "CubeTurtle",
+      "tribe": "CubeTurtle",
+      "combiRank": 790,
+      "combiDuplicatePriority": 79000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "tetroise-primo",
+      "sourceInternalId": "CubeTurtle_Neutral",
+      "tribe": "CubeTurtle_Neutral",
+      "combiRank": 200,
+      "combiDuplicatePriority": 20000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "tocotoco",
+      "sourceInternalId": "ColorfulBird",
+      "tribe": "ColorfulBird",
+      "combiRank": 2730,
+      "combiDuplicatePriority": 273000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "tombat",
+      "sourceInternalId": "CatBat",
+      "tribe": "CatBat",
+      "combiRank": 2340,
+      "combiDuplicatePriority": 234000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "tropicaw",
+      "sourceInternalId": "RedFlowerBird",
+      "tribe": "RedFlowerBird",
+      "combiRank": 1350,
+      "combiDuplicatePriority": 135000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "turtacle",
+      "sourceInternalId": "TentacleTurtle",
+      "tribe": "TentacleTurtle",
+      "combiRank": 2410,
+      "combiDuplicatePriority": 241000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "turtacle-terra",
+      "sourceInternalId": "TentacleTurtle_Ground",
+      "tribe": "TentacleTurtle_Ground",
+      "combiRank": 1330,
+      "combiDuplicatePriority": 577,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "univolt",
+      "sourceInternalId": "Kirin",
+      "tribe": "Kirin",
+      "combiRank": 2270,
+      "combiDuplicatePriority": 227000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "univolt-cryst",
+      "sourceInternalId": "Kirin_Ice",
+      "tribe": "Kirin_Ice",
+      "combiRank": 540,
+      "combiDuplicatePriority": 54000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "vaelet",
+      "sourceInternalId": "VioletFairy",
+      "tribe": "VioletFairy",
+      "combiRank": 1480,
+      "combiDuplicatePriority": 148000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "valentail",
+      "sourceInternalId": "LongCat",
+      "tribe": "LongCat",
+      "combiRank": 1900,
+      "combiDuplicatePriority": 190000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "vanwyrm",
+      "sourceInternalId": "BirdDragon",
+      "tribe": "BirdDragon",
+      "combiRank": 1650,
+      "combiDuplicatePriority": 165000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "vanwyrm-cryst",
+      "sourceInternalId": "BirdDragon_Ice",
+      "tribe": "BirdDragon_Ice",
+      "combiRank": 1430,
+      "combiDuplicatePriority": 143000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "venusa",
+      "sourceInternalId": "SnakeGirl",
+      "tribe": "SnakeGirl",
+      "combiRank": 970,
+      "combiDuplicatePriority": 97000,
+      "maleProbability": 0.4,
+      "variantType": "normal"
+    },
+    {
+      "palId": "verdash",
+      "sourceInternalId": "GrassRabbitMan",
+      "tribe": "GrassRabbitMan",
+      "combiRank": 1160,
+      "combiDuplicatePriority": 116000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "vixy",
+      "sourceInternalId": "CuteFox",
+      "tribe": "CuteFox",
+      "combiRank": 3060,
+      "combiDuplicatePriority": 306000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "warsect",
+      "sourceInternalId": "HerculesBeetle",
+      "tribe": "HerculesBeetle",
+      "combiRank": 1280,
+      "combiDuplicatePriority": 128000,
+      "maleProbability": 0.85,
+      "variantType": "normal"
+    },
+    {
+      "palId": "warsect-terra",
+      "sourceInternalId": "HerculesBeetle_Ground",
+      "tribe": "HerculesBeetle_Ground",
+      "combiRank": 630,
+      "combiDuplicatePriority": 63000,
+      "maleProbability": 0.85,
+      "variantType": "variant"
+    },
+    {
+      "palId": "whalaska",
+      "sourceInternalId": "IceNarwhal",
+      "tribe": "IceNarwhal",
+      "combiRank": 710,
+      "combiDuplicatePriority": 71000,
+      "maleProbability": 0.58,
+      "variantType": "normal"
+    },
+    {
+      "palId": "whalaska-ignis",
+      "sourceInternalId": "IceNarwhal_Fire",
+      "tribe": "IceNarwhal_Fire",
+      "combiRank": 370,
+      "combiDuplicatePriority": 37000,
+      "maleProbability": 0.42,
+      "variantType": "variant"
+    },
+    {
+      "palId": "wispaw",
+      "sourceInternalId": "GhostBlackCat",
+      "tribe": "GhostBlackCat",
+      "combiRank": 2250,
+      "combiDuplicatePriority": 225000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "wistella",
+      "sourceInternalId": "MoonChild",
+      "tribe": "MoonChild",
+      "combiRank": 1180,
+      "combiDuplicatePriority": 118000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "wixen",
+      "sourceInternalId": "FoxMage",
+      "tribe": "FoxMage",
+      "combiRank": 2080,
+      "combiDuplicatePriority": 208000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "wixen-noct",
+      "sourceInternalId": "FoxMage_Dark",
+      "tribe": "FoxMage_Dark",
+      "combiRank": 1490,
+      "combiDuplicatePriority": 149000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "woolipop",
+      "sourceInternalId": "SweetsSheep",
+      "tribe": "SweetsSheep",
+      "combiRank": 2820,
+      "combiDuplicatePriority": 282000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "woolipop-terra",
+      "sourceInternalId": "SweetsSheep_Ground",
+      "tribe": "SweetsSheep_Ground",
+      "combiRank": 2030,
+      "combiDuplicatePriority": 203000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "wumpo",
+      "sourceInternalId": "Yeti",
+      "tribe": "Yeti",
+      "combiRank": 830,
+      "combiDuplicatePriority": 83000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "wumpo-botan",
+      "sourceInternalId": "Yeti_Grass",
+      "tribe": "Yeti_Grass",
+      "combiRank": 610,
+      "combiDuplicatePriority": 61000,
+      "maleProbability": 0.5,
+      "variantType": "variant"
+    },
+    {
+      "palId": "xenogard",
+      "sourceInternalId": "WhiteAlienDragon",
+      "tribe": "WhiteAlienDragon",
+      "combiRank": 990,
+      "combiDuplicatePriority": 99000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "xenolord",
+      "sourceInternalId": "DarkMechaDragon",
+      "tribe": "DarkMechaDragon",
+      "combiRank": 400,
+      "combiDuplicatePriority": 40000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "xenovader",
+      "sourceInternalId": "DarkAlien",
+      "tribe": "DarkAlien",
+      "combiRank": 1820,
+      "combiDuplicatePriority": 182000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    },
+    {
+      "palId": "yakumo",
+      "sourceInternalId": "GuardianDog",
+      "tribe": "GuardianDog",
+      "combiRank": 2230,
+      "combiDuplicatePriority": 223000,
+      "maleProbability": 0.5,
+      "variantType": "normal"
+    }
+  ],
+  "specialRules": [
+    {
+      "parentAId": "azurobe",
+      "parentASourceInternalId": "BlueDragon",
+      "parentBId": "frostplume",
+      "parentBSourceInternalId": "SnowPeafowl",
+      "childId": "azurobe-cryst",
+      "childSourceInternalId": "BlueDragon_Ice"
+    },
+    {
+      "parentAId": "azurobe-cryst",
+      "parentASourceInternalId": "BlueDragon_Ice",
+      "parentBId": "azurobe-cryst",
+      "parentBSourceInternalId": "BlueDragon_Ice",
+      "childId": "azurobe-cryst",
+      "childSourceInternalId": "BlueDragon_Ice"
+    },
+    {
+      "parentAId": "bastigor",
+      "parentASourceInternalId": "SnowTigerBeastman",
+      "parentBId": "bastigor",
+      "parentBSourceInternalId": "SnowTigerBeastman",
+      "childId": "bastigor",
+      "childSourceInternalId": "SnowTigerBeastman"
+    },
+    {
+      "parentAId": "beakon",
+      "parentASourceInternalId": "ThunderBird",
+      "parentBId": "frostplume",
+      "parentBSourceInternalId": "SnowPeafowl",
+      "childId": "beakon-cryst",
+      "childSourceInternalId": "ThunderBird_Ice"
+    },
+    {
+      "parentAId": "beakon-cryst",
+      "parentASourceInternalId": "ThunderBird_Ice",
+      "parentBId": "beakon-cryst",
+      "parentBSourceInternalId": "ThunderBird_Ice",
+      "childId": "beakon-cryst",
+      "childSourceInternalId": "ThunderBird_Ice"
+    },
+    {
+      "parentAId": "bellanoir",
+      "parentASourceInternalId": "NightLady",
+      "parentBId": "bellanoir",
+      "parentBSourceInternalId": "NightLady",
+      "childId": "bellanoir",
+      "childSourceInternalId": "NightLady"
+    },
+    {
+      "parentAId": "bellanoir",
+      "parentASourceInternalId": "NightLady",
+      "parentBId": "bellanoir-libero",
+      "parentBSourceInternalId": "NightLady_Dark",
+      "childId": "bellanoir",
+      "childSourceInternalId": "NightLady"
+    },
+    {
+      "parentAId": "bellanoir-libero",
+      "parentASourceInternalId": "NightLady_Dark",
+      "parentBId": "bellanoir-libero",
+      "parentBSourceInternalId": "NightLady_Dark",
+      "childId": "bellanoir-libero",
+      "childSourceInternalId": "NightLady_Dark"
+    },
+    {
+      "parentAId": "blazamut-ryu",
+      "parentASourceInternalId": "KingBahamut_Dragon",
+      "parentBId": "blazamut-ryu",
+      "parentBSourceInternalId": "KingBahamut_Dragon",
+      "childId": "blazamut-ryu",
+      "childSourceInternalId": "KingBahamut_Dragon"
+    },
+    {
+      "parentAId": "blazehowl",
+      "parentASourceInternalId": "Manticore",
+      "parentBId": "felbat",
+      "parentBSourceInternalId": "CatVampire",
+      "childId": "blazehowl-noct",
+      "childSourceInternalId": "Manticore_Dark"
+    },
+    {
+      "parentAId": "blazehowl-noct",
+      "parentASourceInternalId": "Manticore_Dark",
+      "parentBId": "blazehowl-noct",
+      "parentBSourceInternalId": "Manticore_Dark",
+      "childId": "blazehowl-noct",
+      "childSourceInternalId": "Manticore_Dark"
+    },
+    {
+      "parentAId": "broncherry-aqua",
+      "parentASourceInternalId": "SakuraSaurus_Water",
+      "parentBId": "broncherry-aqua",
+      "parentBSourceInternalId": "SakuraSaurus_Water",
+      "childId": "broncherry-aqua",
+      "childSourceInternalId": "SakuraSaurus_Water"
+    },
+    {
+      "parentAId": "bushi",
+      "parentASourceInternalId": "Ronin",
+      "parentBId": "sootseer",
+      "parentBSourceInternalId": "CandleGhost",
+      "childId": "bushi-noct",
+      "childSourceInternalId": "Ronin_Dark"
+    },
+    {
+      "parentAId": "bushi-noct",
+      "parentASourceInternalId": "Ronin_Dark",
+      "parentBId": "bushi-noct",
+      "parentBSourceInternalId": "Ronin_Dark",
+      "childId": "bushi-noct",
+      "childSourceInternalId": "Ronin_Dark"
+    },
+    {
+      "parentAId": "caprity",
+      "parentASourceInternalId": "BerryGoat",
+      "parentBId": "tarantriss",
+      "parentBSourceInternalId": "PurpleSpider",
+      "childId": "caprity-noct",
+      "childSourceInternalId": "BerryGoat_Dark"
+    },
+    {
+      "parentAId": "caprity-noct",
+      "parentASourceInternalId": "BerryGoat_Dark",
+      "parentBId": "caprity-noct",
+      "parentBSourceInternalId": "BerryGoat_Dark",
+      "childId": "caprity-noct",
+      "childSourceInternalId": "BerryGoat_Dark"
+    },
+    {
+      "parentAId": "celaray",
+      "parentASourceInternalId": "FlyingManta",
+      "parentBId": "univolt",
+      "parentBSourceInternalId": "Kirin",
+      "childId": "celaray-lux",
+      "childSourceInternalId": "FlyingManta_Thunder"
+    },
+    {
+      "parentAId": "celaray-lux",
+      "parentASourceInternalId": "FlyingManta_Thunder",
+      "parentBId": "celaray-lux",
+      "parentBSourceInternalId": "FlyingManta_Thunder",
+      "childId": "celaray-lux",
+      "childSourceInternalId": "FlyingManta_Thunder"
+    },
+    {
+      "parentAId": "celesdir",
+      "parentASourceInternalId": "WhiteDeer",
+      "parentBId": "celesdir",
+      "parentBSourceInternalId": "WhiteDeer",
+      "childId": "celesdir",
+      "childSourceInternalId": "WhiteDeer"
+    },
+    {
+      "parentAId": "gildane",
+      "parentASourceInternalId": "GoldenHorse",
+      "parentBId": "eikthyrdeer-terra",
+      "parentBSourceInternalId": "Deer_Ground",
+      "childId": "celesdir",
+      "childSourceInternalId": "WhiteDeer"
+    },
+    {
+      "parentAId": "celesdir",
+      "parentASourceInternalId": "WhiteDeer",
+      "parentBId": "kitsun-noct",
+      "parentBSourceInternalId": "AmaterasuWolf_Dark",
+      "childId": "celesdir-noct",
+      "childSourceInternalId": "WhiteDeer_Dark"
+    },
+    {
+      "parentAId": "celesdir-noct",
+      "parentASourceInternalId": "WhiteDeer_Dark",
+      "parentBId": "celesdir-noct",
+      "parentBSourceInternalId": "WhiteDeer_Dark",
+      "childId": "celesdir-noct",
+      "childSourceInternalId": "WhiteDeer_Dark"
+    },
+    {
+      "parentAId": "chillet",
+      "parentASourceInternalId": "WeaselDragon",
+      "parentBId": "arsox",
+      "parentBSourceInternalId": "FlameBuffalo",
+      "childId": "chillet-ignis",
+      "childSourceInternalId": "WeaselDragon_Fire"
+    },
+    {
+      "parentAId": "chillet-ignis",
+      "parentASourceInternalId": "WeaselDragon_Fire",
+      "parentBId": "chillet-ignis",
+      "parentBSourceInternalId": "WeaselDragon_Fire",
+      "childId": "chillet-ignis",
+      "childSourceInternalId": "WeaselDragon_Fire"
+    },
+    {
+      "parentAId": "croajiro",
+      "parentASourceInternalId": "KendoFrog",
+      "parentBId": "bushi-noct",
+      "parentBSourceInternalId": "Ronin_Dark",
+      "childId": "croajiro-noct",
+      "childSourceInternalId": "KendoFrog_Dark"
+    },
+    {
+      "parentAId": "croajiro-noct",
+      "parentASourceInternalId": "KendoFrog_Dark",
+      "parentBId": "croajiro-noct",
+      "parentBSourceInternalId": "KendoFrog_Dark",
+      "childId": "croajiro-noct",
+      "childSourceInternalId": "KendoFrog_Dark"
+    },
+    {
+      "parentAId": "cryolinx",
+      "parentASourceInternalId": "WhiteTiger",
+      "parentBId": "dazemu",
+      "parentBSourceInternalId": "FeatherOstrich",
+      "childId": "cryolinx-terra",
+      "childSourceInternalId": "WhiteTiger_Ground"
+    },
+    {
+      "parentAId": "cryolinx-terra",
+      "parentASourceInternalId": "WhiteTiger_Ground",
+      "parentBId": "cryolinx-terra",
+      "parentBSourceInternalId": "WhiteTiger_Ground",
+      "childId": "cryolinx-terra",
+      "childSourceInternalId": "WhiteTiger_Ground"
+    },
+    {
+      "parentAId": "dandilord",
+      "parentASourceInternalId": "FlowerPrince",
+      "parentBId": "dandilord",
+      "parentBSourceInternalId": "FlowerPrince",
+      "childId": "dandilord",
+      "childSourceInternalId": "FlowerPrince"
+    },
+    {
+      "parentAId": "dazzi",
+      "parentASourceInternalId": "RaijinDaughter",
+      "parentBId": "omascul",
+      "parentBSourceInternalId": "MysteryMask",
+      "childId": "dazzi-noct",
+      "childSourceInternalId": "RaijinDaughter_Water"
+    },
+    {
+      "parentAId": "dazzi-noct",
+      "parentASourceInternalId": "RaijinDaughter_Water",
+      "parentBId": "dazzi-noct",
+      "parentBSourceInternalId": "RaijinDaughter_Water",
+      "childId": "dazzi-noct",
+      "childSourceInternalId": "RaijinDaughter_Water"
+    },
+    {
+      "parentAId": "dinossom",
+      "parentASourceInternalId": "FlowerDinosaur",
+      "parentBId": "rayhound",
+      "parentBSourceInternalId": "ThunderDog",
+      "childId": "dinossom-lux",
+      "childSourceInternalId": "FlowerDinosaur_Electric"
+    },
+    {
+      "parentAId": "dinossom-lux",
+      "parentASourceInternalId": "FlowerDinosaur_Electric",
+      "parentBId": "dinossom-lux",
+      "parentBSourceInternalId": "FlowerDinosaur_Electric",
+      "childId": "dinossom-lux",
+      "childSourceInternalId": "FlowerDinosaur_Electric"
+    },
+    {
+      "parentAId": "dualith",
+      "parentASourceInternalId": "GrassGolem",
+      "parentBId": "sootseer",
+      "parentBSourceInternalId": "CandleGhost",
+      "childId": "dualith-noct",
+      "childSourceInternalId": "GrassGolem_Dark"
+    },
+    {
+      "parentAId": "dualith-noct",
+      "parentASourceInternalId": "GrassGolem_Dark",
+      "parentBId": "dualith-noct",
+      "parentBSourceInternalId": "GrassGolem_Dark",
+      "childId": "dualith-noct",
+      "childSourceInternalId": "GrassGolem_Dark"
+    },
+    {
+      "parentAId": "dumud",
+      "parentASourceInternalId": "LazyCatfish",
+      "parentBId": "eikthyrdeer-terra",
+      "parentBSourceInternalId": "Deer_Ground",
+      "childId": "dumud-gild",
+      "childSourceInternalId": "LazyCatfish_Gold"
+    },
+    {
+      "parentAId": "dumud-gild",
+      "parentASourceInternalId": "LazyCatfish_Gold",
+      "parentBId": "dumud-gild",
+      "parentBSourceInternalId": "LazyCatfish_Gold",
+      "childId": "dumud-gild",
+      "childSourceInternalId": "LazyCatfish_Gold"
+    },
+    {
+      "parentAId": "eidrolon",
+      "parentASourceInternalId": "GhostDragon",
+      "parentBId": "suzaku",
+      "parentBSourceInternalId": "Suzaku",
+      "childId": "eidrolon-ignis",
+      "childSourceInternalId": "GhostDragon_Fire"
+    },
+    {
+      "parentAId": "eidrolon-ignis",
+      "parentASourceInternalId": "GhostDragon_Fire",
+      "parentBId": "eidrolon-ignis",
+      "parentBSourceInternalId": "GhostDragon_Fire",
+      "childId": "eidrolon-ignis",
+      "childSourceInternalId": "GhostDragon_Fire"
+    },
+    {
+      "parentAId": "eikthyrdeer",
+      "parentASourceInternalId": "Deer",
+      "parentBId": "hangyu",
+      "parentBSourceInternalId": "WindChimes",
+      "childId": "eikthyrdeer-terra",
+      "childSourceInternalId": "Deer_Ground"
+    },
+    {
+      "parentAId": "eikthyrdeer-terra",
+      "parentASourceInternalId": "Deer_Ground",
+      "parentBId": "eikthyrdeer-terra",
+      "parentBSourceInternalId": "Deer_Ground",
+      "childId": "eikthyrdeer-terra",
+      "childSourceInternalId": "Deer_Ground"
+    },
+    {
+      "parentAId": "elgrove",
+      "parentASourceInternalId": "GrassMinotaur",
+      "parentBId": "pierdon-cryst",
+      "parentBSourceInternalId": "RockBeast_Ice",
+      "childId": "elgrove-cryst",
+      "childSourceInternalId": "GrassMinotaur_Ice"
+    },
+    {
+      "parentAId": "elgrove-cryst",
+      "parentASourceInternalId": "GrassMinotaur_Ice",
+      "parentBId": "elgrove-cryst",
+      "parentBSourceInternalId": "GrassMinotaur_Ice",
+      "childId": "elgrove-cryst",
+      "childSourceInternalId": "GrassMinotaur_Ice"
+    },
+    {
+      "parentAId": "elphidran",
+      "parentASourceInternalId": "FairyDragon",
+      "parentBId": "surfent",
+      "parentBSourceInternalId": "Serpent",
+      "childId": "elphidran-aqua",
+      "childSourceInternalId": "FairyDragon_Water"
+    },
+    {
+      "parentAId": "elphidran-aqua",
+      "parentASourceInternalId": "FairyDragon_Water",
+      "parentBId": "elphidran-aqua",
+      "parentBSourceInternalId": "FairyDragon_Water",
+      "childId": "elphidran-aqua",
+      "childSourceInternalId": "FairyDragon_Water"
+    },
+    {
+      "parentAId": "faleris",
+      "parentASourceInternalId": "Horus",
+      "parentBId": "faleris",
+      "parentBSourceInternalId": "Horus",
+      "childId": "faleris",
+      "childSourceInternalId": "Horus"
+    },
+    {
+      "parentAId": "faleris",
+      "parentASourceInternalId": "Horus",
+      "parentBId": "jormuntide",
+      "parentBSourceInternalId": "Umihebi",
+      "childId": "faleris-aqua",
+      "childSourceInternalId": "Horus_Water"
+    },
+    {
+      "parentAId": "faleris-aqua",
+      "parentASourceInternalId": "Horus_Water",
+      "parentBId": "faleris-aqua",
+      "parentBSourceInternalId": "Horus_Water",
+      "childId": "faleris-aqua",
+      "childSourceInternalId": "Horus_Water"
+    },
+    {
+      "parentAId": "fenglope",
+      "parentASourceInternalId": "FengyunDeeper",
+      "parentBId": "azurmane",
+      "parentBSourceInternalId": "BlueThunderHorse",
+      "childId": "fenglope-lux",
+      "childSourceInternalId": "FengyunDeeper_Electric"
+    },
+    {
+      "parentAId": "fenglope-lux",
+      "parentASourceInternalId": "FengyunDeeper_Electric",
+      "parentBId": "fenglope-lux",
+      "parentBSourceInternalId": "FengyunDeeper_Electric",
+      "childId": "fenglope-lux",
+      "childSourceInternalId": "FengyunDeeper_Electric"
+    },
+    {
+      "parentAId": "finsider",
+      "parentASourceInternalId": "StuffedShark",
+      "parentBId": "gobfin-ignis",
+      "parentBSourceInternalId": "SharkKid_Fire",
+      "childId": "finsider-ignis",
+      "childSourceInternalId": "StuffedShark_Fire"
+    },
+    {
+      "parentAId": "finsider-ignis",
+      "parentASourceInternalId": "StuffedShark_Fire",
+      "parentBId": "finsider-ignis",
+      "parentBSourceInternalId": "StuffedShark_Fire",
+      "childId": "finsider-ignis",
+      "childSourceInternalId": "StuffedShark_Fire"
+    },
+    {
+      "parentAId": "foxparks",
+      "parentASourceInternalId": "Kitsunebi",
+      "parentBId": "foxcicle",
+      "parentBSourceInternalId": "IceFox",
+      "childId": "foxparks-cryst",
+      "childSourceInternalId": "Kitsunebi_Ice"
+    },
+    {
+      "parentAId": "foxparks-cryst",
+      "parentASourceInternalId": "Kitsunebi_Ice",
+      "parentBId": "foxparks-cryst",
+      "parentBSourceInternalId": "Kitsunebi_Ice",
+      "childId": "foxparks-cryst",
+      "childSourceInternalId": "Kitsunebi_Ice"
+    },
+    {
+      "parentAId": "frostallion",
+      "parentASourceInternalId": "IceHorse",
+      "parentBId": "frostallion",
+      "parentBSourceInternalId": "IceHorse",
+      "childId": "frostallion",
+      "childSourceInternalId": "IceHorse"
+    },
+    {
+      "parentAId": "frostallion",
+      "parentASourceInternalId": "IceHorse",
+      "parentBId": "helzephyr",
+      "parentBSourceInternalId": "HadesBird",
+      "childId": "frostallion-noct",
+      "childSourceInternalId": "IceHorse_Dark"
+    },
+    {
+      "parentAId": "frostallion-noct",
+      "parentASourceInternalId": "IceHorse_Dark",
+      "parentBId": "frostallion-noct",
+      "parentBSourceInternalId": "IceHorse_Dark",
+      "childId": "frostallion-noct",
+      "childSourceInternalId": "IceHorse_Dark"
+    },
+    {
+      "parentAId": "fuack-ignis",
+      "parentASourceInternalId": "BluePlatypus_Fire",
+      "parentBId": "fuack-ignis",
+      "parentBSourceInternalId": "BluePlatypus_Fire",
+      "childId": "fuack-ignis",
+      "childSourceInternalId": "BluePlatypus_Fire"
+    },
+    {
+      "parentAId": "ghangler",
+      "parentASourceInternalId": "GhostAnglerfish",
+      "parentBId": "sootseer",
+      "parentBSourceInternalId": "CandleGhost",
+      "childId": "ghangler-ignis",
+      "childSourceInternalId": "GhostAnglerfish_Fire"
+    },
+    {
+      "parentAId": "ghangler-ignis",
+      "parentASourceInternalId": "GhostAnglerfish_Fire",
+      "parentBId": "ghangler-ignis",
+      "parentBSourceInternalId": "GhostAnglerfish_Fire",
+      "childId": "ghangler-ignis",
+      "childSourceInternalId": "GhostAnglerfish_Fire"
+    },
+    {
+      "parentAId": "gloopie",
+      "parentASourceInternalId": "OctopusGirl",
+      "parentBId": "valentail",
+      "parentBSourceInternalId": "LongCat",
+      "childId": "gloopie-primo",
+      "childSourceInternalId": "OctopusGirl_Neutral"
+    },
+    {
+      "parentAId": "gloopie-primo",
+      "parentASourceInternalId": "OctopusGirl_Neutral",
+      "parentBId": "gloopie-primo",
+      "parentBSourceInternalId": "OctopusGirl_Neutral",
+      "childId": "gloopie-primo",
+      "childSourceInternalId": "OctopusGirl_Neutral"
+    },
+    {
+      "parentAId": "gobfin",
+      "parentASourceInternalId": "SharkKid",
+      "parentBId": "rooby",
+      "parentBSourceInternalId": "FlameBambi",
+      "childId": "gobfin-ignis",
+      "childSourceInternalId": "SharkKid_Fire"
+    },
+    {
+      "parentAId": "gobfin-ignis",
+      "parentASourceInternalId": "SharkKid_Fire",
+      "parentBId": "gobfin-ignis",
+      "parentBSourceInternalId": "SharkKid_Fire",
+      "childId": "gobfin-ignis",
+      "childSourceInternalId": "SharkKid_Fire"
+    },
+    {
+      "parentAId": "gorirat",
+      "parentASourceInternalId": "Gorilla",
+      "parentBId": "kikit",
+      "parentBSourceInternalId": "SmallArmadillo",
+      "childId": "gorirat-terra",
+      "childSourceInternalId": "Gorilla_Ground"
+    },
+    {
+      "parentAId": "gorirat-terra",
+      "parentASourceInternalId": "Gorilla_Ground",
+      "parentBId": "gorirat-terra",
+      "parentBSourceInternalId": "Gorilla_Ground",
+      "childId": "gorirat-terra",
+      "childSourceInternalId": "Gorilla_Ground"
+    },
+    {
+      "parentAId": "grizzbolt",
+      "parentASourceInternalId": "ElecPanda",
+      "parentBId": "grizzbolt",
+      "parentBSourceInternalId": "ElecPanda",
+      "childId": "grizzbolt",
+      "childSourceInternalId": "ElecPanda"
+    },
+    {
+      "parentAId": "hangyu",
+      "parentASourceInternalId": "WindChimes",
+      "parentBId": "swee",
+      "parentBSourceInternalId": "MopBaby",
+      "childId": "hangyu-cryst",
+      "childSourceInternalId": "WindChimes_Ice"
+    },
+    {
+      "parentAId": "hangyu-cryst",
+      "parentASourceInternalId": "WindChimes_Ice",
+      "parentBId": "hangyu-cryst",
+      "parentBSourceInternalId": "WindChimes_Ice",
+      "childId": "hangyu-cryst",
+      "childSourceInternalId": "WindChimes_Ice"
+    },
+    {
+      "parentAId": "hartalis",
+      "parentASourceInternalId": "LegendDeer",
+      "parentBId": "hartalis",
+      "parentBSourceInternalId": "LegendDeer",
+      "childId": "hartalis",
+      "childSourceInternalId": "LegendDeer"
+    },
+    {
+      "parentAId": "helzephyr",
+      "parentASourceInternalId": "HadesBird",
+      "parentBId": "beakon",
+      "parentBSourceInternalId": "ThunderBird",
+      "childId": "helzephyr-lux",
+      "childSourceInternalId": "HadesBird_Electric"
+    },
+    {
+      "parentAId": "helzephyr-lux",
+      "parentASourceInternalId": "HadesBird_Electric",
+      "parentBId": "helzephyr-lux",
+      "parentBSourceInternalId": "HadesBird_Electric",
+      "childId": "helzephyr-lux",
+      "childSourceInternalId": "HadesBird_Electric"
+    },
+    {
+      "parentAId": "incineram",
+      "parentASourceInternalId": "Baphomet",
+      "parentBId": "maraith",
+      "parentBSourceInternalId": "GhostBeast",
+      "childId": "incineram-noct",
+      "childSourceInternalId": "Baphomet_Dark"
+    },
+    {
+      "parentAId": "incineram-noct",
+      "parentASourceInternalId": "Baphomet_Dark",
+      "parentBId": "incineram-noct",
+      "parentBSourceInternalId": "Baphomet_Dark",
+      "childId": "incineram-noct",
+      "childSourceInternalId": "Baphomet_Dark"
+    },
+    {
+      "parentAId": "jetragon",
+      "parentASourceInternalId": "JetDragon",
+      "parentBId": "jetragon",
+      "parentBSourceInternalId": "JetDragon",
+      "childId": "jetragon",
+      "childSourceInternalId": "JetDragon"
+    },
+    {
+      "parentAId": "jolthog",
+      "parentASourceInternalId": "Hedgehog",
+      "parentBId": "pengullet",
+      "parentBSourceInternalId": "Penguin",
+      "childId": "jolthog-cryst",
+      "childSourceInternalId": "Hedgehog_Ice"
+    },
+    {
+      "parentAId": "jolthog-cryst",
+      "parentASourceInternalId": "Hedgehog_Ice",
+      "parentBId": "jolthog-cryst",
+      "parentBSourceInternalId": "Hedgehog_Ice",
+      "childId": "jolthog-cryst",
+      "childSourceInternalId": "Hedgehog_Ice"
+    },
+    {
+      "parentAId": "jormuntide",
+      "parentASourceInternalId": "Umihebi",
+      "parentBId": "blazehowl",
+      "parentBSourceInternalId": "Manticore",
+      "childId": "jormuntide-ignis",
+      "childSourceInternalId": "Umihebi_Fire"
+    },
+    {
+      "parentAId": "jormuntide-ignis",
+      "parentASourceInternalId": "Umihebi_Fire",
+      "parentBId": "jormuntide-ignis",
+      "parentBSourceInternalId": "Umihebi_Fire",
+      "childId": "jormuntide-ignis",
+      "childSourceInternalId": "Umihebi_Fire"
+    },
+    {
+      "parentAId": "katress",
+      "parentASourceInternalId": "CatMage",
+      "parentBId": "wixen",
+      "parentBSourceInternalId": "FoxMage",
+      "childId": "katress-ignis",
+      "childSourceInternalId": "CatMage_Fire",
+      "parentAGender": "female",
+      "parentBGender": "male"
+    },
+    {
+      "parentAId": "katress-ignis",
+      "parentASourceInternalId": "CatMage_Fire",
+      "parentBId": "katress-ignis",
+      "parentBSourceInternalId": "CatMage_Fire",
+      "childId": "katress-ignis",
+      "childSourceInternalId": "CatMage_Fire"
+    },
+    {
+      "parentAId": "killamari",
+      "parentASourceInternalId": "NegativeOctopus",
+      "parentBId": "ribbuny",
+      "parentBSourceInternalId": "PinkRabbit",
+      "childId": "killamari-primo",
+      "childSourceInternalId": "NegativeOctopus_Neutral"
+    },
+    {
+      "parentAId": "killamari-primo",
+      "parentASourceInternalId": "NegativeOctopus_Neutral",
+      "parentBId": "killamari-primo",
+      "parentBSourceInternalId": "NegativeOctopus_Neutral",
+      "childId": "killamari-primo",
+      "childSourceInternalId": "NegativeOctopus_Neutral"
+    },
+    {
+      "parentAId": "kingpaca",
+      "parentASourceInternalId": "KingAlpaca",
+      "parentBId": "reindrix",
+      "parentBSourceInternalId": "IceDeer",
+      "childId": "kingpaca-cryst",
+      "childSourceInternalId": "KingAlpaca_Ice"
+    },
+    {
+      "parentAId": "kingpaca-cryst",
+      "parentASourceInternalId": "KingAlpaca_Ice",
+      "parentBId": "kingpaca-cryst",
+      "parentBSourceInternalId": "KingAlpaca_Ice",
+      "childId": "kingpaca-cryst",
+      "childSourceInternalId": "KingAlpaca_Ice"
+    },
+    {
+      "parentAId": "kitsun",
+      "parentASourceInternalId": "AmaterasuWolf",
+      "parentBId": "nyafia",
+      "parentBSourceInternalId": "BadCatgirl",
+      "childId": "kitsun-noct",
+      "childSourceInternalId": "AmaterasuWolf_Dark"
+    },
+    {
+      "parentAId": "kitsun-noct",
+      "parentASourceInternalId": "AmaterasuWolf_Dark",
+      "parentBId": "kitsun-noct",
+      "parentBSourceInternalId": "AmaterasuWolf_Dark",
+      "childId": "kitsun-noct",
+      "childSourceInternalId": "AmaterasuWolf_Dark"
+    },
+    {
+      "parentAId": "knocklem",
+      "parentASourceInternalId": "WingGolem",
+      "parentBId": "ragnahawk",
+      "parentBSourceInternalId": "RedArmorBird",
+      "childId": "knocklem-ignis",
+      "childSourceInternalId": "WingGolem_Fire"
+    },
+    {
+      "parentAId": "knocklem-ignis",
+      "parentASourceInternalId": "WingGolem_Fire",
+      "parentBId": "knocklem-ignis",
+      "parentBSourceInternalId": "WingGolem_Fire",
+      "childId": "knocklem-ignis",
+      "childSourceInternalId": "WingGolem_Fire"
+    },
+    {
+      "parentAId": "leezpunk",
+      "parentASourceInternalId": "LizardMan",
+      "parentBId": "flambelle",
+      "parentBSourceInternalId": "LavaGirl",
+      "childId": "leezpunk-ignis",
+      "childSourceInternalId": "LizardMan_Fire"
+    },
+    {
+      "parentAId": "leezpunk-ignis",
+      "parentASourceInternalId": "LizardMan_Fire",
+      "parentBId": "leezpunk-ignis",
+      "parentBSourceInternalId": "LizardMan_Fire",
+      "childId": "leezpunk-ignis",
+      "childSourceInternalId": "LizardMan_Fire"
+    },
+    {
+      "parentAId": "loupmoon",
+      "parentASourceInternalId": "Werewolf",
+      "parentBId": "sweepa",
+      "parentBSourceInternalId": "MopKing",
+      "childId": "loupmoon-cryst",
+      "childSourceInternalId": "Werewolf_Ice"
+    },
+    {
+      "parentAId": "loupmoon-cryst",
+      "parentASourceInternalId": "Werewolf_Ice",
+      "parentBId": "loupmoon-cryst",
+      "parentBSourceInternalId": "Werewolf_Ice",
+      "childId": "loupmoon-cryst",
+      "childSourceInternalId": "Werewolf_Ice"
+    },
+    {
+      "parentAId": "lyleen",
+      "parentASourceInternalId": "LilyQueen",
+      "parentBId": "lyleen",
+      "parentBSourceInternalId": "LilyQueen",
+      "childId": "lyleen",
+      "childSourceInternalId": "LilyQueen"
+    },
+    {
+      "parentAId": "lyleen",
+      "parentASourceInternalId": "LilyQueen",
+      "parentBId": "menasting",
+      "parentBSourceInternalId": "DarkScorpion",
+      "childId": "lyleen-noct",
+      "childSourceInternalId": "LilyQueen_Dark"
+    },
+    {
+      "parentAId": "lyleen-noct",
+      "parentASourceInternalId": "LilyQueen_Dark",
+      "parentBId": "lyleen-noct",
+      "parentBSourceInternalId": "LilyQueen_Dark",
+      "childId": "lyleen-noct",
+      "childSourceInternalId": "LilyQueen_Dark"
+    },
+    {
+      "parentAId": "mammorest",
+      "parentASourceInternalId": "GrassMammoth",
+      "parentBId": "wumpo",
+      "parentBSourceInternalId": "Yeti",
+      "childId": "mammorest-cryst",
+      "childSourceInternalId": "GrassMammoth_Ice"
+    },
+    {
+      "parentAId": "mammorest-cryst",
+      "parentASourceInternalId": "GrassMammoth_Ice",
+      "parentBId": "mammorest-cryst",
+      "parentBSourceInternalId": "GrassMammoth_Ice",
+      "childId": "mammorest-cryst",
+      "childSourceInternalId": "GrassMammoth_Ice"
+    },
+    {
+      "parentAId": "mau",
+      "parentASourceInternalId": "Bastet",
+      "parentBId": "pengullet",
+      "parentBSourceInternalId": "Penguin",
+      "childId": "mau-cryst",
+      "childSourceInternalId": "Bastet_Ice"
+    },
+    {
+      "parentAId": "mau-cryst",
+      "parentASourceInternalId": "Bastet_Ice",
+      "parentBId": "mau-cryst",
+      "parentBSourceInternalId": "Bastet_Ice",
+      "childId": "mau-cryst",
+      "childSourceInternalId": "Bastet_Ice"
+    },
+    {
+      "parentAId": "menasting",
+      "parentASourceInternalId": "DarkScorpion",
+      "parentBId": "knocklem",
+      "parentBSourceInternalId": "WingGolem",
+      "childId": "menasting-terra",
+      "childSourceInternalId": "DarkScorpion_Ground"
+    },
+    {
+      "parentAId": "menasting-terra",
+      "parentASourceInternalId": "DarkScorpion_Ground",
+      "parentBId": "menasting-terra",
+      "parentBSourceInternalId": "DarkScorpion_Ground",
+      "childId": "menasting-terra",
+      "childSourceInternalId": "DarkScorpion_Ground"
+    },
+    {
+      "parentAId": "mimog",
+      "parentASourceInternalId": "MimicDog",
+      "parentBId": "mimog",
+      "parentBSourceInternalId": "MimicDog",
+      "childId": "mimog",
+      "childSourceInternalId": "MimicDog"
+    },
+    {
+      "parentAId": "moldron",
+      "parentASourceInternalId": "VolcanoDragon",
+      "parentBId": "reptyro-cryst",
+      "parentBSourceInternalId": "VolcanicMonster_Ice",
+      "childId": "moldron-cryst",
+      "childSourceInternalId": "VolcanoDragon_Ice"
+    },
+    {
+      "parentAId": "moldron-cryst",
+      "parentASourceInternalId": "VolcanoDragon_Ice",
+      "parentBId": "moldron-cryst",
+      "parentBSourceInternalId": "VolcanoDragon_Ice",
+      "childId": "moldron-cryst",
+      "childSourceInternalId": "VolcanoDragon_Ice"
+    },
+    {
+      "parentAId": "mossanda",
+      "parentASourceInternalId": "GrassPanda",
+      "parentBId": "grizzbolt",
+      "parentBSourceInternalId": "ElecPanda",
+      "childId": "mossanda-lux",
+      "childSourceInternalId": "GrassPanda_Electric"
+    },
+    {
+      "parentAId": "mossanda-lux",
+      "parentASourceInternalId": "GrassPanda_Electric",
+      "parentBId": "mossanda-lux",
+      "parentBSourceInternalId": "GrassPanda_Electric",
+      "childId": "mossanda-lux",
+      "childSourceInternalId": "GrassPanda_Electric"
+    },
+    {
+      "parentAId": "necromus",
+      "parentASourceInternalId": "BlackCentaur",
+      "parentBId": "necromus",
+      "parentBSourceInternalId": "BlackCentaur",
+      "childId": "necromus",
+      "childSourceInternalId": "BlackCentaur"
+    },
+    {
+      "parentAId": "needoll",
+      "parentASourceInternalId": "CactusDoll",
+      "parentBId": "prunelia",
+      "parentBSourceInternalId": "BlueberryFairy",
+      "childId": "needoll-noct",
+      "childSourceInternalId": "CactusDoll_Dark"
+    },
+    {
+      "parentAId": "needoll-noct",
+      "parentASourceInternalId": "CactusDoll_Dark",
+      "parentBId": "needoll-noct",
+      "parentBSourceInternalId": "CactusDoll_Dark",
+      "childId": "needoll-noct",
+      "childSourceInternalId": "CactusDoll_Dark"
+    },
+    {
+      "parentAId": "neptilius",
+      "parentASourceInternalId": "PoseidonOrca",
+      "parentBId": "neptilius",
+      "parentBSourceInternalId": "PoseidonOrca",
+      "childId": "neptilius",
+      "childSourceInternalId": "PoseidonOrca"
+    },
+    {
+      "parentAId": "nitemary",
+      "parentASourceInternalId": "GhostRabbit",
+      "parentBId": "petallia",
+      "parentBSourceInternalId": "FlowerDoll",
+      "childId": "nitemary-botan",
+      "childSourceInternalId": "GhostRabbit_Grass"
+    },
+    {
+      "parentAId": "nitemary-botan",
+      "parentASourceInternalId": "GhostRabbit_Grass",
+      "parentBId": "nitemary-botan",
+      "parentBSourceInternalId": "GhostRabbit_Grass",
+      "childId": "nitemary-botan",
+      "childSourceInternalId": "GhostRabbit_Grass"
+    },
+    {
+      "parentAId": "orserk",
+      "parentASourceInternalId": "ThunderDragonMan",
+      "parentBId": "orserk",
+      "parentBSourceInternalId": "ThunderDragonMan",
+      "childId": "orserk",
+      "childSourceInternalId": "ThunderDragonMan"
+    },
+    {
+      "parentAId": "paladius",
+      "parentASourceInternalId": "SaintCentaur",
+      "parentBId": "paladius",
+      "parentBSourceInternalId": "SaintCentaur",
+      "childId": "paladius",
+      "childSourceInternalId": "SaintCentaur"
+    },
+    {
+      "parentAId": "pengullet",
+      "parentASourceInternalId": "Penguin",
+      "parentBId": "sparkit",
+      "parentBSourceInternalId": "ElecCat",
+      "childId": "pengullet-lux",
+      "childSourceInternalId": "Penguin_Electric"
+    },
+    {
+      "parentAId": "pengullet-lux",
+      "parentASourceInternalId": "Penguin_Electric",
+      "parentBId": "pengullet-lux",
+      "parentBSourceInternalId": "Penguin_Electric",
+      "childId": "pengullet-lux",
+      "childSourceInternalId": "Penguin_Electric"
+    },
+    {
+      "parentAId": "penking",
+      "parentASourceInternalId": "CaptainPenguin",
+      "parentBId": "rayhound",
+      "parentBSourceInternalId": "ThunderDog",
+      "childId": "penking-lux",
+      "childSourceInternalId": "CaptainPenguin_Black"
+    },
+    {
+      "parentAId": "penking-lux",
+      "parentASourceInternalId": "CaptainPenguin_Black",
+      "parentBId": "penking-lux",
+      "parentBSourceInternalId": "CaptainPenguin_Black",
+      "childId": "penking-lux",
+      "childSourceInternalId": "CaptainPenguin_Black"
+    },
+    {
+      "parentAId": "petallia",
+      "parentASourceInternalId": "FlowerDoll",
+      "parentBId": "bushi",
+      "parentBSourceInternalId": "Ronin",
+      "childId": "petallia-ignis",
+      "childSourceInternalId": "FlowerDoll_Fire"
+    },
+    {
+      "parentAId": "petallia-ignis",
+      "parentASourceInternalId": "FlowerDoll_Fire",
+      "parentBId": "petallia-ignis",
+      "parentBSourceInternalId": "FlowerDoll_Fire",
+      "childId": "petallia-ignis",
+      "childSourceInternalId": "FlowerDoll_Fire"
+    },
+    {
+      "parentAId": "pierdon",
+      "parentASourceInternalId": "RockBeast",
+      "parentBId": "wumpo",
+      "parentBSourceInternalId": "Yeti",
+      "childId": "pierdon-cryst",
+      "childSourceInternalId": "RockBeast_Ice"
+    },
+    {
+      "parentAId": "pierdon-cryst",
+      "parentASourceInternalId": "RockBeast_Ice",
+      "parentBId": "pierdon-cryst",
+      "parentBSourceInternalId": "RockBeast_Ice",
+      "childId": "pierdon-cryst",
+      "childSourceInternalId": "RockBeast_Ice"
+    },
+    {
+      "parentAId": "polapup",
+      "parentASourceInternalId": "IceSeal",
+      "parentBId": "surfent-terra",
+      "parentBSourceInternalId": "Serpent_Ground",
+      "childId": "polapup-terra",
+      "childSourceInternalId": "IceSeal_Ground"
+    },
+    {
+      "parentAId": "polapup-terra",
+      "parentASourceInternalId": "IceSeal_Ground",
+      "parentBId": "polapup-terra",
+      "parentBSourceInternalId": "IceSeal_Ground",
+      "childId": "polapup-terra",
+      "childSourceInternalId": "IceSeal_Ground"
+    },
+    {
+      "parentAId": "prixter",
+      "parentASourceInternalId": "ScorpionMan",
+      "parentBId": "helzephyr-lux",
+      "parentBSourceInternalId": "HadesBird_Electric",
+      "childId": "prixter-lux",
+      "childSourceInternalId": "ScorpionMan_Electric"
+    },
+    {
+      "parentAId": "prixter-lux",
+      "parentASourceInternalId": "ScorpionMan_Electric",
+      "parentBId": "prixter-lux",
+      "parentBSourceInternalId": "ScorpionMan_Electric",
+      "childId": "prixter-lux",
+      "childSourceInternalId": "ScorpionMan_Electric"
+    },
+    {
+      "parentAId": "pyrin",
+      "parentASourceInternalId": "FireKirin",
+      "parentBId": "katress",
+      "parentBSourceInternalId": "CatMage",
+      "childId": "pyrin-noct",
+      "childSourceInternalId": "FireKirin_Dark"
+    },
+    {
+      "parentAId": "pyrin-noct",
+      "parentASourceInternalId": "FireKirin_Dark",
+      "parentBId": "pyrin-noct",
+      "parentBSourceInternalId": "FireKirin_Dark",
+      "childId": "pyrin-noct",
+      "childSourceInternalId": "FireKirin_Dark"
+    },
+    {
+      "parentAId": "quivern",
+      "parentASourceInternalId": "SkyDragon",
+      "parentBId": "lullu",
+      "parentBSourceInternalId": "LeafPrincess",
+      "childId": "quivern-botan",
+      "childSourceInternalId": "SkyDragon_Grass"
+    },
+    {
+      "parentAId": "quivern-botan",
+      "parentASourceInternalId": "SkyDragon_Grass",
+      "parentBId": "quivern-botan",
+      "parentBSourceInternalId": "SkyDragon_Grass",
+      "childId": "quivern-botan",
+      "childSourceInternalId": "SkyDragon_Grass"
+    },
+    {
+      "parentAId": "rayhound",
+      "parentASourceInternalId": "ThunderDog",
+      "parentBId": "foxcicle",
+      "parentBSourceInternalId": "IceFox",
+      "childId": "rayhound-cryst",
+      "childSourceInternalId": "ThunderDog_Ice"
+    },
+    {
+      "parentAId": "rayhound-cryst",
+      "parentASourceInternalId": "ThunderDog_Ice",
+      "parentBId": "rayhound-cryst",
+      "parentBSourceInternalId": "ThunderDog_Ice",
+      "childId": "rayhound-cryst",
+      "childSourceInternalId": "ThunderDog_Ice"
+    },
+    {
+      "parentAId": "relaxaurus",
+      "parentASourceInternalId": "LazyDragon",
+      "parentBId": "sparkit",
+      "parentBSourceInternalId": "ElecCat",
+      "childId": "relaxaurus-lux",
+      "childSourceInternalId": "LazyDragon_Electric"
+    },
+    {
+      "parentAId": "relaxaurus-lux",
+      "parentASourceInternalId": "LazyDragon_Electric",
+      "parentBId": "relaxaurus-lux",
+      "parentBSourceInternalId": "LazyDragon_Electric",
+      "childId": "relaxaurus-lux",
+      "childSourceInternalId": "LazyDragon_Electric"
+    },
+    {
+      "parentAId": "reptyro",
+      "parentASourceInternalId": "VolcanicMonster",
+      "parentBId": "foxcicle",
+      "parentBSourceInternalId": "IceFox",
+      "childId": "reptyro-cryst",
+      "childSourceInternalId": "VolcanicMonster_Ice"
+    },
+    {
+      "parentAId": "reptyro-cryst",
+      "parentASourceInternalId": "VolcanicMonster_Ice",
+      "parentBId": "reptyro-cryst",
+      "parentBSourceInternalId": "VolcanicMonster_Ice",
+      "childId": "reptyro-cryst",
+      "childSourceInternalId": "VolcanicMonster_Ice"
+    },
+    {
+      "parentAId": "ribbuny",
+      "parentASourceInternalId": "PinkRabbit",
+      "parentBId": "bristla",
+      "parentBSourceInternalId": "LittleBriarRose",
+      "childId": "ribbuny-botan",
+      "childSourceInternalId": "PinkRabbit_Grass"
+    },
+    {
+      "parentAId": "ribbuny-botan",
+      "parentASourceInternalId": "PinkRabbit_Grass",
+      "parentBId": "ribbuny-botan",
+      "parentBSourceInternalId": "PinkRabbit_Grass",
+      "childId": "ribbuny-botan",
+      "childSourceInternalId": "PinkRabbit_Grass"
+    },
+    {
+      "parentAId": "robinquill",
+      "parentASourceInternalId": "RobinHood",
+      "parentBId": "fuddler",
+      "parentBSourceInternalId": "CuteMole",
+      "childId": "robinquill-terra",
+      "childSourceInternalId": "RobinHood_Ground"
+    },
+    {
+      "parentAId": "robinquill-terra",
+      "parentASourceInternalId": "RobinHood_Ground",
+      "parentBId": "robinquill-terra",
+      "parentBSourceInternalId": "RobinHood_Ground",
+      "childId": "robinquill-terra",
+      "childSourceInternalId": "RobinHood_Ground"
+    },
+    {
+      "parentAId": "selyne",
+      "parentASourceInternalId": "MoonQueen",
+      "parentBId": "selyne",
+      "parentBSourceInternalId": "MoonQueen",
+      "childId": "selyne",
+      "childSourceInternalId": "MoonQueen"
+    },
+    {
+      "parentAId": "shadowbeak",
+      "parentASourceInternalId": "BlackGriffon",
+      "parentBId": "shadowbeak",
+      "parentBSourceInternalId": "BlackGriffon",
+      "childId": "shadowbeak",
+      "childSourceInternalId": "BlackGriffon"
+    },
+    {
+      "parentAId": "shaolong",
+      "parentASourceInternalId": "BlueSkyDragon",
+      "parentBId": "shaolong",
+      "parentBSourceInternalId": "BlueSkyDragon",
+      "childId": "shaolong",
+      "childSourceInternalId": "BlueSkyDragon"
+    },
+    {
+      "parentAId": "sibelyx",
+      "parentASourceInternalId": "WhiteMoth",
+      "parentBId": "lapure",
+      "parentBSourceInternalId": "SleeveRabbit",
+      "childId": "sibelyx-primo",
+      "childSourceInternalId": "WhiteMoth_Neutral"
+    },
+    {
+      "parentAId": "sibelyx-primo",
+      "parentASourceInternalId": "WhiteMoth_Neutral",
+      "parentBId": "sibelyx-primo",
+      "parentBSourceInternalId": "WhiteMoth_Neutral",
+      "childId": "sibelyx-primo",
+      "childSourceInternalId": "WhiteMoth_Neutral"
+    },
+    {
+      "parentAId": "silvance",
+      "parentASourceInternalId": "Mothman",
+      "parentBId": "silvance",
+      "parentBSourceInternalId": "Mothman",
+      "childId": "silvance",
+      "childSourceInternalId": "Mothman"
+    },
+    {
+      "parentAId": "skutlass",
+      "parentASourceInternalId": "SwordCutlassfish",
+      "parentBId": "gobfin-ignis",
+      "parentBSourceInternalId": "SharkKid_Fire",
+      "childId": "skutlass-ignis",
+      "childSourceInternalId": "SwordCutlassfish_Fire"
+    },
+    {
+      "parentAId": "skutlass-ignis",
+      "parentASourceInternalId": "SwordCutlassfish_Fire",
+      "parentBId": "skutlass-ignis",
+      "parentBSourceInternalId": "SwordCutlassfish_Fire",
+      "childId": "skutlass-ignis",
+      "childSourceInternalId": "SwordCutlassfish_Fire"
+    },
+    {
+      "parentAId": "smokie",
+      "parentASourceInternalId": "BlackPuppy",
+      "parentBId": "munchill",
+      "parentBSourceInternalId": "IceCrocodile",
+      "childId": "smokie-cryst",
+      "childSourceInternalId": "BlackPuppy_Ice"
+    },
+    {
+      "parentAId": "smokie-cryst",
+      "parentASourceInternalId": "BlackPuppy_Ice",
+      "parentBId": "smokie-cryst",
+      "parentBSourceInternalId": "BlackPuppy_Ice",
+      "childId": "smokie-cryst",
+      "childSourceInternalId": "BlackPuppy_Ice"
+    },
+    {
+      "parentAId": "snock",
+      "parentASourceInternalId": "ElecSnail",
+      "parentBId": "turtacle-terra",
+      "parentBSourceInternalId": "TentacleTurtle_Ground",
+      "childId": "snock-lux",
+      "childSourceInternalId": "ElecSnail_Ground"
+    },
+    {
+      "parentAId": "snock-lux",
+      "parentASourceInternalId": "ElecSnail_Ground",
+      "parentBId": "snock-lux",
+      "parentBSourceInternalId": "ElecSnail_Ground",
+      "childId": "snock-lux",
+      "childSourceInternalId": "ElecSnail_Ground"
+    },
+    {
+      "parentAId": "solmora",
+      "parentASourceInternalId": "KingSunfish",
+      "parentBId": "slowatt",
+      "parentBSourceInternalId": "ElecLizard",
+      "childId": "solmora-lux",
+      "childSourceInternalId": "KingSunfish_Thunder"
+    },
+    {
+      "parentAId": "solmora-lux",
+      "parentASourceInternalId": "KingSunfish_Thunder",
+      "parentBId": "solmora-lux",
+      "parentBSourceInternalId": "KingSunfish_Thunder",
+      "childId": "solmora-lux",
+      "childSourceInternalId": "KingSunfish_Thunder"
+    },
+    {
+      "parentAId": "starryon",
+      "parentASourceInternalId": "NightBlueHorse",
+      "parentBId": "celesdir",
+      "parentBSourceInternalId": "WhiteDeer",
+      "childId": "starryon-primo",
+      "childSourceInternalId": "NightBlueHorse_Neutral"
+    },
+    {
+      "parentAId": "starryon-primo",
+      "parentASourceInternalId": "NightBlueHorse_Neutral",
+      "parentBId": "starryon-primo",
+      "parentBSourceInternalId": "NightBlueHorse_Neutral",
+      "childId": "starryon-primo",
+      "childSourceInternalId": "NightBlueHorse_Neutral"
+    },
+    {
+      "parentAId": "surfent",
+      "parentASourceInternalId": "Serpent",
+      "parentBId": "dumud",
+      "parentBSourceInternalId": "LazyCatfish",
+      "childId": "surfent-terra",
+      "childSourceInternalId": "Serpent_Ground"
+    },
+    {
+      "parentAId": "surfent-terra",
+      "parentASourceInternalId": "Serpent_Ground",
+      "parentBId": "surfent-terra",
+      "parentBSourceInternalId": "Serpent_Ground",
+      "childId": "surfent-terra",
+      "childSourceInternalId": "Serpent_Ground"
+    },
+    {
+      "parentAId": "suzaku",
+      "parentASourceInternalId": "Suzaku",
+      "parentBId": "jormuntide",
+      "parentBSourceInternalId": "Umihebi",
+      "childId": "suzaku-aqua",
+      "childSourceInternalId": "Suzaku_Water"
+    },
+    {
+      "parentAId": "suzaku-aqua",
+      "parentASourceInternalId": "Suzaku_Water",
+      "parentBId": "suzaku-aqua",
+      "parentBSourceInternalId": "Suzaku_Water",
+      "childId": "suzaku-aqua",
+      "childSourceInternalId": "Suzaku_Water"
+    },
+    {
+      "parentAId": "tanzee",
+      "parentASourceInternalId": "Monkey",
+      "parentBId": "flambelle",
+      "parentBSourceInternalId": "LavaGirl",
+      "childId": "tanzee-ignis",
+      "childSourceInternalId": "Monkey_Fire"
+    },
+    {
+      "parentAId": "tanzee-ignis",
+      "parentASourceInternalId": "Monkey_Fire",
+      "parentBId": "tanzee-ignis",
+      "parentBSourceInternalId": "Monkey_Fire",
+      "childId": "tanzee-ignis",
+      "childSourceInternalId": "Monkey_Fire"
+    },
+    {
+      "parentAId": "tetroise",
+      "parentASourceInternalId": "CubeTurtle",
+      "parentBId": "celesdir",
+      "parentBSourceInternalId": "WhiteDeer",
+      "childId": "tetroise-primo",
+      "childSourceInternalId": "CubeTurtle_Neutral"
+    },
+    {
+      "parentAId": "tetroise-primo",
+      "parentASourceInternalId": "CubeTurtle_Neutral",
+      "parentBId": "tetroise-primo",
+      "parentBSourceInternalId": "CubeTurtle_Neutral",
+      "childId": "tetroise-primo",
+      "childSourceInternalId": "CubeTurtle_Neutral"
+    },
+    {
+      "parentAId": "turtacle",
+      "parentASourceInternalId": "TentacleTurtle",
+      "parentBId": "digtoise",
+      "parentBSourceInternalId": "DrillGame",
+      "childId": "turtacle-terra",
+      "childSourceInternalId": "TentacleTurtle_Ground"
+    },
+    {
+      "parentAId": "turtacle-terra",
+      "parentASourceInternalId": "TentacleTurtle_Ground",
+      "parentBId": "turtacle-terra",
+      "parentBSourceInternalId": "TentacleTurtle_Ground",
+      "childId": "turtacle-terra",
+      "childSourceInternalId": "TentacleTurtle_Ground"
+    },
+    {
+      "parentAId": "univolt",
+      "parentASourceInternalId": "Kirin",
+      "parentBId": "frostplume",
+      "parentBSourceInternalId": "SnowPeafowl",
+      "childId": "univolt-cryst",
+      "childSourceInternalId": "Kirin_Ice"
+    },
+    {
+      "parentAId": "univolt-cryst",
+      "parentASourceInternalId": "Kirin_Ice",
+      "parentBId": "univolt-cryst",
+      "parentBSourceInternalId": "Kirin_Ice",
+      "childId": "univolt-cryst",
+      "childSourceInternalId": "Kirin_Ice"
+    },
+    {
+      "parentAId": "vanwyrm",
+      "parentASourceInternalId": "BirdDragon",
+      "parentBId": "foxcicle",
+      "parentBSourceInternalId": "IceFox",
+      "childId": "vanwyrm-cryst",
+      "childSourceInternalId": "BirdDragon_Ice"
+    },
+    {
+      "parentAId": "vanwyrm-cryst",
+      "parentASourceInternalId": "BirdDragon_Ice",
+      "parentBId": "vanwyrm-cryst",
+      "parentBSourceInternalId": "BirdDragon_Ice",
+      "childId": "vanwyrm-cryst",
+      "childSourceInternalId": "BirdDragon_Ice"
+    },
+    {
+      "parentAId": "warsect",
+      "parentASourceInternalId": "HerculesBeetle",
+      "parentBId": "digtoise",
+      "parentBSourceInternalId": "DrillGame",
+      "childId": "warsect-terra",
+      "childSourceInternalId": "HerculesBeetle_Ground"
+    },
+    {
+      "parentAId": "warsect-terra",
+      "parentASourceInternalId": "HerculesBeetle_Ground",
+      "parentBId": "warsect-terra",
+      "parentBSourceInternalId": "HerculesBeetle_Ground",
+      "childId": "warsect-terra",
+      "childSourceInternalId": "HerculesBeetle_Ground"
+    },
+    {
+      "parentAId": "whalaska",
+      "parentASourceInternalId": "IceNarwhal",
+      "parentBId": "chillet-ignis",
+      "parentBSourceInternalId": "WeaselDragon_Fire",
+      "childId": "whalaska-ignis",
+      "childSourceInternalId": "IceNarwhal_Fire"
+    },
+    {
+      "parentAId": "whalaska-ignis",
+      "parentASourceInternalId": "IceNarwhal_Fire",
+      "parentBId": "whalaska-ignis",
+      "parentBSourceInternalId": "IceNarwhal_Fire",
+      "childId": "whalaska-ignis",
+      "childSourceInternalId": "IceNarwhal_Fire"
+    },
+    {
+      "parentAId": "katress",
+      "parentASourceInternalId": "CatMage",
+      "parentBId": "wixen",
+      "parentBSourceInternalId": "FoxMage",
+      "childId": "wixen-noct",
+      "childSourceInternalId": "FoxMage_Dark",
+      "parentAGender": "male",
+      "parentBGender": "female"
+    },
+    {
+      "parentAId": "wixen-noct",
+      "parentASourceInternalId": "FoxMage_Dark",
+      "parentBId": "wixen-noct",
+      "parentBSourceInternalId": "FoxMage_Dark",
+      "childId": "wixen-noct",
+      "childSourceInternalId": "FoxMage_Dark"
+    },
+    {
+      "parentAId": "woolipop",
+      "parentASourceInternalId": "SweetsSheep",
+      "parentBId": "kikit",
+      "parentBSourceInternalId": "SmallArmadillo",
+      "childId": "woolipop-terra",
+      "childSourceInternalId": "SweetsSheep_Ground"
+    },
+    {
+      "parentAId": "woolipop-terra",
+      "parentASourceInternalId": "SweetsSheep_Ground",
+      "parentBId": "woolipop-terra",
+      "parentBSourceInternalId": "SweetsSheep_Ground",
+      "childId": "woolipop-terra",
+      "childSourceInternalId": "SweetsSheep_Ground"
+    },
+    {
+      "parentAId": "xenogard",
+      "parentASourceInternalId": "WhiteAlienDragon",
+      "parentBId": "xenogard",
+      "parentBSourceInternalId": "WhiteAlienDragon",
+      "childId": "xenogard",
+      "childSourceInternalId": "WhiteAlienDragon"
+    },
+    {
+      "parentAId": "xenolord",
+      "parentASourceInternalId": "DarkMechaDragon",
+      "parentBId": "xenolord",
+      "parentBSourceInternalId": "DarkMechaDragon",
+      "childId": "xenolord",
+      "childSourceInternalId": "DarkMechaDragon"
+    },
+    {
+      "parentAId": "xenovader",
+      "parentASourceInternalId": "DarkAlien",
+      "parentBId": "xenovader",
+      "parentBSourceInternalId": "DarkAlien",
+      "childId": "xenovader",
+      "childSourceInternalId": "DarkAlien"
+    }
+  ]
+}

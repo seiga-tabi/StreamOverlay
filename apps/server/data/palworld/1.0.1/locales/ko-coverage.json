@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "locale": "ko",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "translationRevision": "offline-machine-assisted-v1",
+  "translationStatus": "complete",
+  "coverage": {
+    "byKind": {
+      "pal": {
+        "name": {
+          "translated": 287,
+          "total": 287
+        },
+        "description": {
+          "translated": 268,
+          "total": 268
+        },
+        "passiveAbility": {
+          "translated": 0,
+          "total": 0
+        }
+      },
+      "item": {
+        "name": {
+          "translated": 1847,
+          "total": 1847
+        },
+        "description": {
+          "translated": 1847,
+          "total": 1847
+        },
+        "passiveAbility": {
+          "translated": 0,
+          "total": 0
+        }
+      },
+      "skill": {
+        "name": {
+          "translated": 566,
+          "total": 566
+        },
+        "description": {
+          "translated": 564,
+          "total": 564
+        },
+        "passiveAbility": {
+          "translated": 79,
+          "total": 79
+        }
+      }
+    },
+    "translated": 5458,
+    "total": 5458,
+    "missing": 0,
+    "status": {
+      "human_reviewed": 297,
+      "machine_assisted": 5161
+    }
+  },
+  "contentSha256": "496df208da23524781aa24bbecb54ced5bd1dacf3ef37b87e933768d7896d17a"
+}

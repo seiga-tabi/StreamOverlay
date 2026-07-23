@@ -1,0 +1,797 @@
+import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import path from "node:path";
+import yauzl, { type Entry, type ZipFile } from "yauzl";
+
+const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024 * 1024;
+const MAX_ENTRY_COUNT = 10_000;
+const MAX_UNCOMPRESSED_BYTES = 512 * 1024 * 1024;
+const MAX_MEMBER_BYTES = 64 * 1024 * 1024;
+const MAX_JSON_BYTES = 64 * 1024 * 1024;
+const MAX_COMPRESSION_RATIO = 500;
+const ALLOWED_FILE_EXTENSIONS = new Set([
+  ".json",
+  ".png",
+  ".hdr",
+  ".usmap",
+  ".uasset",
+  ".uexp",
+  ".ubulk",
+  ".uptnl"
+]);
+const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/u;
+const WINDOWS_DRIVE_PATTERN = /^[A-Za-z]:/u;
+const KOREAN_CHARACTER_PATTERN = /[\uac00-\ud7a3]/u;
+const JAPANESE_CHARACTER_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]/u;
+const ENGLISH_CHARACTER_PATTERN = /[A-Za-z]/u;
+
+const REQUIRED_TABLES = [
+  "Pal/DataTable/Character/DT_PalMonsterParameter_Common.json",
+  "Pal/DataTable/Character/DT_PalBPClass_Common.json",
+  "Pal/DataTable/Character/DT_PalCharacterIconDataTable_Common.json",
+  "Pal/DataTable/Character/DT_PalDropItem_Common.json",
+  "Pal/DataTable/Character/DT_PalCombiUnique.json",
+  "Pal/DataTable/Item/DT_ItemDataTable_Common.json",
+  "Pal/DataTable/Item/DT_ItemIconDataTable_Common.json",
+  "Pal/DataTable/Item/DT_ItemRecipeDataTable_Common.json",
+  "Pal/DataTable/Technology/DT_TechnologyRecipeUnlock_Common.json",
+  "Pal/DataTable/Waza/DT_WazaDataTable_Common.json",
+  "Pal/DataTable/Waza/DT_WazaMasterLevel_Common.json",
+  "Pal/DataTable/Waza/DT_WazaMasterTamago.json",
+  "Pal/DataTable/PassiveSkill/DT_PassiveSkill_Main_Common.json",
+  "Pal/DataTable/PartnerSkill/DT_PartnerSkill.json",
+  "Pal/DataTable/Text/DT_PalNameText_Common.json",
+  "Pal/DataTable/Text/DT_PalLongDescriptionText.json",
+  "Pal/DataTable/Text/DT_ItemNameText_Common.json",
+  "Pal/DataTable/Text/DT_ItemDescriptionText_Common.json",
+  "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+  "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+  "L10N/ko/Pal/DataTable/Text/DT_PalNameText_Common.json",
+  "L10N/ko/Pal/DataTable/Text/DT_PalLongDescriptionText.json",
+  "L10N/ko/Pal/DataTable/Text/DT_ItemNameText_Common.json",
+  "L10N/ko/Pal/DataTable/Text/DT_ItemDescriptionText_Common.json",
+  "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+  "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+  "L10N/en/Pal/DataTable/Text/DT_PalNameText_Common.json",
+  "L10N/en/Pal/DataTable/Text/DT_PalLongDescriptionText.json",
+  "L10N/en/Pal/DataTable/Text/DT_ItemNameText_Common.json",
+  "L10N/en/Pal/DataTable/Text/DT_ItemDescriptionText_Common.json",
+  "L10N/en/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+  "L10N/en/Pal/DataTable/Text/DT_SkillDescText_Common.json"
+] as const;
+
+const METADATA_MEMBERS = [
+  "palworld-export-metadata.json",
+  "metadata/palworld-export.json"
+] as const;
+
+type JsonRecord = Record<string, unknown>;
+
+type IndexedZipEntry = {
+  entry: Entry;
+  isDirectory: boolean;
+};
+
+export type PalworldPakExportMetadata = {
+  schemaVersion: 1;
+  gameVersion: string;
+  steamBuildId: string;
+  fmodelVersion: string;
+  exportedAt: string;
+  mappingsSha256: string;
+};
+
+export type PalworldPakPreflightReport = {
+  schemaVersion: 1;
+  archive: {
+    sha256: string;
+    bytes: number;
+    fileCount: number;
+    directoryCount: number;
+    uncompressedBytes: number;
+    extensionCounts: Record<string, number>;
+    rawPackageCounts: {
+      uasset: number;
+      uexp: number;
+      ubulk: number;
+      uptnl: number;
+    };
+    missingRawPackageCompanions: string[];
+  };
+  metadata: {
+    status: "provided" | "not_provided";
+    gameVersion: string;
+    steamBuildId: string;
+    fmodelVersion: string;
+    exportedAt: string;
+    mappingsSha256: string;
+  };
+  mappings: {
+    status: "provided" | "not_provided";
+    actualSha256: string;
+    declaredSha256: string;
+    matchesMetadata: boolean;
+  };
+  data: {
+    rawPalRows: number;
+    canonicalPals: number;
+    normalPals: number;
+    variantPals: number;
+    duplicatePalRowsExcluded: number;
+    legalItems: number;
+    activeSkillRows: number;
+    passiveSkillRows: number;
+    specialBreedingRows: number;
+  };
+  localization: {
+    baseTextLanguage: "ja" | "unknown";
+    koTextLanguage: "ko" | "unknown";
+    enTextLanguage: "en" | "unknown";
+    jaMembers: number;
+    koMembers: number;
+    enMembers: number;
+  };
+  assets: {
+    palIcons: {
+      referenced: number;
+      exactMatches: number;
+      missing: string[];
+    };
+    itemIcons: {
+      referenced: number;
+      exactMatches: number;
+      missingIconRows: number;
+      missingRoots: Record<string, number>;
+    };
+    elementIcons: number;
+    workIcons: number;
+    skillIcons: number;
+    worldMapImages: number;
+  };
+  requiredTables: {
+    present: number;
+    missing: string[];
+  };
+  gates: {
+    archiveStructure: "passed";
+    requiredTables: "passed" | "blocked";
+    metadata: "passed" | "blocked";
+    mappings: "passed" | "blocked";
+    officialKo: "passed" | "blocked";
+    officialJa: "passed" | "blocked";
+    officialEn: "passed" | "blocked";
+    palImages: "passed" | "blocked";
+    itemImages: "passed" | "blocked";
+    inputPrerequisitesSatisfied: boolean;
+    activationValidationRequired: true;
+    blockers: string[];
+  };
+};
+
+export class PalworldPakPreflightError extends Error {
+  readonly code = "PALWORLD_PAK_PREFLIGHT_FAILED";
+
+  constructor(message: string) {
+    super(message);
+    this.name = "PalworldPakPreflightError";
+  }
+}
+
+function fail(message: string): never {
+  throw new PalworldPakPreflightError(message);
+}
+
+function isRecord(value: unknown): value is JsonRecord {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function requiredString(value: unknown, field: string, maxLength = 256): string {
+  if (
+    typeof value !== "string"
+    || value.trim().length === 0
+    || value.length > maxLength
+    || CONTROL_CHARACTER_PATTERN.test(value)
+  ) {
+    fail(`${field}: 비어 있지 않은 ${maxLength}자 이하 문자열이어야 합니다.`);
+  }
+  return value;
+}
+
+function requiredIsoDate(value: unknown, field: string): string {
+  const text = requiredString(value, field, 64);
+  if (Number.isNaN(Date.parse(text))) fail(`${field}: 올바른 ISO 날짜여야 합니다.`);
+  return text;
+}
+
+function requiredSha256(value: unknown, field: string): string {
+  const text = requiredString(value, field, 64);
+  if (!/^[a-f0-9]{64}$/u.test(text)) fail(`${field}: 소문자 64자리 SHA-256이어야 합니다.`);
+  return text;
+}
+
+export function validatePalworldPakMemberName(memberName: string): string {
+  if (
+    memberName.length === 0
+    || memberName.length > 1_024
+    || memberName.startsWith("/")
+    || memberName.startsWith("\\")
+    || memberName.includes("\\")
+    || WINDOWS_DRIVE_PATTERN.test(memberName)
+    || CONTROL_CHARACTER_PATTERN.test(memberName)
+  ) {
+    fail(`ZIP member 경로가 안전하지 않습니다: ${JSON.stringify(memberName)}`);
+  }
+  const normalized = path.posix.normalize(memberName);
+  if (
+    normalized !== memberName
+    || memberName.split("/").some((segment) => segment === "." || segment === "..")
+  ) {
+    fail(`ZIP member path traversal이 감지되었습니다: ${JSON.stringify(memberName)}`);
+  }
+  return memberName;
+}
+
+function zipEntryMode(entry: Entry): number {
+  return (entry.externalFileAttributes >>> 16) & 0xffff;
+}
+
+function zipEntryKind(entry: Entry): number {
+  return zipEntryMode(entry) & 0o170000;
+}
+
+function assertSafeEntry(entry: Entry): boolean {
+  const name = validatePalworldPakMemberName(entry.fileName);
+  const isDirectory = name.endsWith("/");
+  if ((entry.generalPurposeBitFlag & 0x1) !== 0) fail(`암호화 ZIP member는 허용하지 않습니다: ${name}`);
+  if (entry.compressionMethod !== 0 && entry.compressionMethod !== 8) {
+    fail(`허용되지 않은 ZIP 압축 방식입니다: ${name}`);
+  }
+  const kind = zipEntryKind(entry);
+  if (kind === 0o120000) fail(`symlink ZIP member는 허용하지 않습니다: ${name}`);
+  if (kind !== 0 && kind !== 0o100000 && kind !== 0o040000) {
+    fail(`일반 파일·디렉터리가 아닌 ZIP member는 허용하지 않습니다: ${name}`);
+  }
+  if (entry.uncompressedSize > MAX_MEMBER_BYTES) fail(`ZIP member가 너무 큽니다: ${name}`);
+  if (
+    entry.compressedSize > 0
+    && entry.uncompressedSize / entry.compressedSize > MAX_COMPRESSION_RATIO
+  ) {
+    fail(`ZIP member 압축률이 안전 제한을 초과합니다: ${name}`);
+  }
+  if (!isDirectory) {
+    const extension = path.posix.extname(name).toLocaleLowerCase("en-US");
+    if (!ALLOWED_FILE_EXTENSIONS.has(extension)) {
+      fail(`허용되지 않은 ZIP member 확장자입니다: ${name}`);
+    }
+  }
+  return isDirectory;
+}
+
+function openZip(archivePath: string): Promise<ZipFile> {
+  return new Promise((resolve, reject) => {
+    yauzl.open(
+      archivePath,
+      {
+        autoClose: false,
+        decodeStrings: true,
+        lazyEntries: true,
+        strictFileNames: true,
+        validateEntrySizes: true
+      },
+      (error, zipFile) => {
+        if (error || !zipFile) reject(error ?? new Error("ZIP을 열 수 없습니다."));
+        else resolve(zipFile);
+      }
+    );
+  });
+}
+
+async function indexArchive(zipFile: ZipFile): Promise<Map<string, IndexedZipEntry>> {
+  return await new Promise((resolve, reject) => {
+    const indexed = new Map<string, IndexedZipEntry>();
+    const collisionKeys = new Map<string, string>();
+    let uncompressedBytes = 0;
+    let entryCount = 0;
+    const closeWithError = (error: unknown): void => {
+      try {
+        zipFile.close();
+      } catch {
+        // 원본 오류를 유지한다.
+      }
+      reject(error);
+    };
+    zipFile.on("error", closeWithError);
+    zipFile.on("entry", (entry: Entry) => {
+      try {
+        entryCount += 1;
+        if (entryCount > MAX_ENTRY_COUNT) fail("ZIP 파일 수가 안전 제한을 초과합니다.");
+        const isDirectory = assertSafeEntry(entry);
+        uncompressedBytes += entry.uncompressedSize;
+        if (uncompressedBytes > MAX_UNCOMPRESSED_BYTES) {
+          fail("ZIP 전체 압축 해제 크기가 안전 제한을 초과합니다.");
+        }
+        const collisionKey = entry.fileName.normalize("NFC").toLocaleLowerCase("en-US");
+        const collision = collisionKeys.get(collisionKey);
+        if (collision !== undefined) {
+          fail(`ZIP 경로가 중복되거나 대소문자·Unicode 정규화 충돌이 있습니다: ${collision}, ${entry.fileName}`);
+        }
+        collisionKeys.set(collisionKey, entry.fileName);
+        indexed.set(entry.fileName, { entry, isDirectory });
+        zipFile.readEntry();
+      } catch (error) {
+        closeWithError(error);
+      }
+    });
+    zipFile.on("end", () => resolve(indexed));
+    zipFile.readEntry();
+  });
+}
+
+function readEntry(zipFile: ZipFile, indexed: IndexedZipEntry, maxBytes: number): Promise<Buffer> {
+  if (indexed.isDirectory) fail("디렉터리 ZIP member를 파일로 읽을 수 없습니다.");
+  if (indexed.entry.uncompressedSize > maxBytes) fail(`${indexed.entry.fileName}: 읽기 제한을 초과합니다.`);
+  return new Promise((resolve, reject) => {
+    zipFile.openReadStream(indexed.entry, (error, stream) => {
+      if (error || !stream) {
+        reject(error ?? new Error("ZIP member stream을 열 수 없습니다."));
+        return;
+      }
+      const chunks: Buffer[] = [];
+      let total = 0;
+      stream.on("data", (chunk: Buffer) => {
+        total += chunk.length;
+        if (total > maxBytes) {
+          stream.destroy(new PalworldPakPreflightError(`${indexed.entry.fileName}: 읽기 제한을 초과했습니다.`));
+          return;
+        }
+        chunks.push(chunk);
+      });
+      stream.on("error", reject);
+      stream.on("end", () => resolve(Buffer.concat(chunks, total)));
+    });
+  });
+}
+
+function parseJson(buffer: Buffer, memberName: string): unknown {
+  try {
+    return JSON.parse(buffer.toString("utf8")) as unknown;
+  } catch {
+    fail(`${memberName}: JSON을 파싱할 수 없습니다.`);
+  }
+}
+
+function dataTableRows(value: unknown, memberName: string): JsonRecord {
+  if (!Array.isArray(value)) fail(`${memberName}: FModel export 최상위 값은 배열이어야 합니다.`);
+  const table = value.find((entry) => isRecord(entry) && isRecord(entry.Rows));
+  if (!isRecord(table) || !isRecord(table.Rows)) fail(`${memberName}: DataTable Rows를 찾을 수 없습니다.`);
+  return table.Rows;
+}
+
+async function readTable(
+  zipFile: ZipFile,
+  entries: Map<string, IndexedZipEntry>,
+  memberName: string
+): Promise<JsonRecord> {
+  const entry = entries.get(memberName);
+  if (!entry) fail(`${memberName}: 필수 DataTable이 없습니다.`);
+  return dataTableRows(parseJson(await readEntry(zipFile, entry, MAX_JSON_BYTES), memberName), memberName);
+}
+
+function textValue(row: unknown): string | undefined {
+  if (!isRecord(row) || !isRecord(row.TextData)) return undefined;
+  const candidate = typeof row.TextData.LocalizedString === "string"
+    ? row.TextData.LocalizedString
+    : row.TextData.SourceString;
+  if (
+    typeof candidate !== "string"
+    || candidate.trim().length === 0
+    || candidate.trim() === "-"
+    || /^(?:en|ja|ko)_Text$/iu.test(candidate.trim())
+  ) {
+    return undefined;
+  }
+  return candidate.trim();
+}
+
+function dominantLanguage(rows: JsonRecord, pattern: RegExp): boolean {
+  const values = Object.values(rows).flatMap((row) => {
+    const value = textValue(row);
+    return value === undefined ? [] : [value];
+  });
+  if (values.length === 0) return false;
+  return values.filter((value) => pattern.test(value)).length / values.length >= 0.9;
+}
+
+function enumSuffix(value: unknown, field: string): string {
+  const text = requiredString(value, field, 128);
+  const suffix = text.includes("::") ? text.slice(text.lastIndexOf("::") + 2) : text;
+  if (!/^[A-Za-z0-9_]+$/u.test(suffix)) fail(`${field}: 허용되지 않은 enum/internal ID입니다.`);
+  return suffix;
+}
+
+function assetMember(value: unknown): string | undefined {
+  if (!isRecord(value) || typeof value.AssetPathName !== "string") return undefined;
+  const assetPath = value.AssetPathName;
+  if (!assetPath.startsWith("/Game/") || assetPath.includes("\\") || assetPath.includes("..")) return undefined;
+  const packagePath = assetPath.slice("/Game/".length).split(".", 1)[0];
+  if (!packagePath || !/^[A-Za-z0-9_/-]+$/u.test(packagePath)) return undefined;
+  return `${packagePath}.png`;
+}
+
+function canonicalPalRows(rows: JsonRecord): {
+  raw: Array<{ rowName: string; tribe: string; value: JsonRecord }>;
+  canonical: Array<{ rowName: string; tribe: string; value: JsonRecord }>;
+} {
+  const raw = Object.entries(rows).flatMap(([rowName, value]) => {
+    if (!isRecord(value) || value.IsPal !== true || typeof value.ZukanIndex !== "number" || value.ZukanIndex <= 0) {
+      return [];
+    }
+    return [{ rowName, tribe: enumSuffix(value.Tribe, `${rowName}.Tribe`), value }];
+  });
+  const grouped = new Map<string, typeof raw>();
+  for (const row of raw) grouped.set(row.tribe, [...(grouped.get(row.tribe) ?? []), row]);
+  const canonical = [...grouped.entries()].map(([tribe, candidates]) => {
+    const exact = candidates.find((candidate) => candidate.rowName === tribe);
+    const caseOnly = candidates.filter((candidate) =>
+      candidate.rowName.toLocaleLowerCase("en-US") === tribe.toLocaleLowerCase("en-US")
+    );
+    if (exact) return exact;
+    if (caseOnly.length === 1) return caseOnly[0]!;
+    fail(`${tribe}: canonical Pal row를 exact ID로 결정할 수 없습니다.`);
+  });
+  canonical.sort((left, right) => {
+    const numberDelta = Number(left.value.ZukanIndex) - Number(right.value.ZukanIndex);
+    if (numberDelta !== 0) return numberDelta;
+    const leftSuffix = String(left.value.ZukanIndexSuffix ?? "");
+    const rightSuffix = String(right.value.ZukanIndexSuffix ?? "");
+    return leftSuffix.localeCompare(rightSuffix, "en") || left.rowName.localeCompare(right.rowName, "en");
+  });
+  return { raw, canonical };
+}
+
+function countExtensions(entries: Map<string, IndexedZipEntry>): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const { entry, isDirectory } of entries.values()) {
+    if (isDirectory) continue;
+    const extension = path.posix.extname(entry.fileName).toLocaleLowerCase("en-US") || "(none)";
+    counts[extension] = (counts[extension] ?? 0) + 1;
+  }
+  return Object.fromEntries(Object.entries(counts).sort(([left], [right]) => left.localeCompare(right, "en")));
+}
+
+function rawPackageCompanionReport(entries: Map<string, IndexedZipEntry>): {
+  counts: PalworldPakPreflightReport["archive"]["rawPackageCounts"];
+  missing: string[];
+} {
+  const counts = { uasset: 0, uexp: 0, ubulk: 0, uptnl: 0 };
+  const packages = new Map<string, Set<string>>();
+  for (const { entry, isDirectory } of entries.values()) {
+    if (isDirectory) continue;
+    const extension = path.posix.extname(entry.fileName).slice(1).toLocaleLowerCase("en-US");
+    if (!(extension in counts)) continue;
+    counts[extension as keyof typeof counts] += 1;
+    const base = entry.fileName.slice(0, -(`.${extension}`.length));
+    packages.set(base, new Set([...(packages.get(base) ?? []), extension]));
+  }
+  const missing = [...packages.entries()].flatMap(([base, extensions]) =>
+    extensions.has("uasset") && !extensions.has("uexp") ? [`${base}.uexp`] : []
+  ).sort((left, right) => left.localeCompare(right, "en"));
+  return { counts, missing };
+}
+
+async function fileSha256(filePath: string): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const hash = createHash("sha256");
+    const stream = createReadStream(filePath);
+    stream.on("error", reject);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => resolve(hash.digest("hex")));
+  });
+}
+
+function parseExportMetadata(value: unknown): PalworldPakExportMetadata {
+  if (!isRecord(value)) fail("export metadata는 객체여야 합니다.");
+  const allowed = new Set([
+    "schemaVersion",
+    "gameVersion",
+    "steamBuildId",
+    "fmodelVersion",
+    "exportedAt",
+    "mappingsSha256"
+  ]);
+  for (const key of Object.keys(value)) {
+    if (!allowed.has(key)) fail(`export metadata.${key}: 허용되지 않은 필드입니다.`);
+  }
+  if (value.schemaVersion !== 1) fail("export metadata.schemaVersion: 1이어야 합니다.");
+  return {
+    schemaVersion: 1,
+    gameVersion: requiredString(value.gameVersion, "export metadata.gameVersion", 64),
+    steamBuildId: requiredString(value.steamBuildId, "export metadata.steamBuildId", 64),
+    fmodelVersion: requiredString(value.fmodelVersion, "export metadata.fmodelVersion", 128),
+    exportedAt: requiredIsoDate(value.exportedAt, "export metadata.exportedAt"),
+    mappingsSha256: requiredSha256(value.mappingsSha256, "export metadata.mappingsSha256")
+  };
+}
+
+export async function inspectPalworldPakArchive(archivePath: string): Promise<PalworldPakPreflightReport> {
+  const resolvedArchive = path.resolve(archivePath);
+  const archiveInfo = await stat(resolvedArchive);
+  if (!archiveInfo.isFile() || archiveInfo.size <= 0 || archiveInfo.size > MAX_ARCHIVE_BYTES) {
+    fail("PAK export ZIP 크기 또는 파일 형식이 안전 제한에 맞지 않습니다.");
+  }
+  const archiveSha256 = await fileSha256(resolvedArchive);
+  const zipFile = await openZip(resolvedArchive);
+  try {
+    const entries = await indexArchive(zipFile);
+    const files = [...entries.values()].filter((entry) => !entry.isDirectory);
+    const directories = entries.size - files.length;
+    const uncompressedBytes = files.reduce((total, entry) => total + entry.entry.uncompressedSize, 0);
+    const requiredMissing = REQUIRED_TABLES.filter((member) => !entries.has(member));
+    const rawPackages = rawPackageCompanionReport(entries);
+
+    const palRows = await readTable(
+      zipFile,
+      entries,
+      "Pal/DataTable/Character/DT_PalMonsterParameter_Common.json"
+    );
+    const canonicalPals = canonicalPalRows(palRows);
+    const palIconRows = await readTable(
+      zipFile,
+      entries,
+      "Pal/DataTable/Character/DT_PalCharacterIconDataTable_Common.json"
+    );
+    const itemRows = await readTable(zipFile, entries, "Pal/DataTable/Item/DT_ItemDataTable_Common.json");
+    const itemIconRows = await readTable(
+      zipFile,
+      entries,
+      "Pal/DataTable/Item/DT_ItemIconDataTable_Common.json"
+    );
+    const activeSkillRows = await readTable(
+      zipFile,
+      entries,
+      "Pal/DataTable/Waza/DT_WazaDataTable_Common.json"
+    );
+    const passiveSkillRows = await readTable(
+      zipFile,
+      entries,
+      "Pal/DataTable/PassiveSkill/DT_PassiveSkill_Main_Common.json"
+    );
+    const specialBreedingRows = await readTable(
+      zipFile,
+      entries,
+      "Pal/DataTable/Character/DT_PalCombiUnique.json"
+    );
+    const basePalNameRows = await readTable(
+      zipFile,
+      entries,
+      "Pal/DataTable/Text/DT_PalNameText_Common.json"
+    );
+    const koPalNameRows = await readTable(
+      zipFile,
+      entries,
+      "L10N/ko/Pal/DataTable/Text/DT_PalNameText_Common.json"
+    );
+
+    const palMissing: string[] = [];
+    let exactPalIcons = 0;
+    for (const pal of canonicalPals.canonical) {
+      const iconRow = palIconRows[pal.tribe] ?? palIconRows[pal.rowName];
+      const member = isRecord(iconRow) ? assetMember(iconRow.Icon) : undefined;
+      if (member !== undefined && entries.has(member)) exactPalIcons += 1;
+      else palMissing.push(pal.rowName);
+    }
+
+    let legalItems = 0;
+    let referencedItemIcons = 0;
+    let exactItemIcons = 0;
+    let missingItemIconRows = 0;
+    const missingItemRoots = new Map<string, number>();
+    for (const value of Object.values(itemRows)) {
+      if (!isRecord(value) || value.bLegalInGame !== true) continue;
+      legalItems += 1;
+      if (typeof value.IconName !== "string") {
+        missingItemIconRows += 1;
+        continue;
+      }
+      const iconRow = itemIconRows[value.IconName];
+      if (!isRecord(iconRow)) {
+        missingItemIconRows += 1;
+        continue;
+      }
+      const member = assetMember(iconRow.Icon);
+      if (!member) {
+        missingItemIconRows += 1;
+        continue;
+      }
+      referencedItemIcons += 1;
+      if (entries.has(member)) {
+        exactItemIcons += 1;
+      } else {
+        const root = member.split("/").slice(0, 3).join("/");
+        missingItemRoots.set(root, (missingItemRoots.get(root) ?? 0) + 1);
+      }
+    }
+
+    const baseTextLanguage = dominantLanguage(basePalNameRows, JAPANESE_CHARACTER_PATTERN)
+      ? "ja"
+      : "unknown";
+    const koTextLanguage = dominantLanguage(koPalNameRows, KOREAN_CHARACTER_PATTERN)
+      ? "ko"
+      : "unknown";
+    const fileMembers = [...entries.values()]
+      .filter((entry) => !entry.isDirectory)
+      .map((entry) => entry.entry.fileName);
+    const jaMembers = fileMembers.filter((member) => member.startsWith("L10N/ja/")).length;
+    const koMembers = fileMembers.filter((member) => member.startsWith("L10N/ko/")).length;
+    const enMembers = fileMembers.filter((member) => member.startsWith("L10N/en/")).length;
+    const enPalNameMember = "L10N/en/Pal/DataTable/Text/DT_PalNameText_Common.json";
+    const enTextLanguage = entries.has(enPalNameMember)
+      ? dominantLanguage(
+        await readTable(zipFile, entries, enPalNameMember),
+        ENGLISH_CHARACTER_PATTERN
+      )
+        ? "en"
+        : "unknown"
+      : "unknown";
+
+    const metadataEntryName = METADATA_MEMBERS.find((member) => entries.has(member));
+    const exportMetadata = metadataEntryName === undefined
+      ? undefined
+      : parseExportMetadata(parseJson(
+        await readEntry(zipFile, entries.get(metadataEntryName)!, MAX_JSON_BYTES),
+        metadataEntryName
+      ));
+    const mappingsMemberName = "Mappings.usmap";
+    const mappingsEntry = entries.get(mappingsMemberName);
+    const actualMappingsSha256 = mappingsEntry === undefined
+      ? undefined
+      : createHash("sha256")
+        .update(await readEntry(zipFile, mappingsEntry, MAX_MEMBER_BYTES))
+        .digest("hex");
+    const metadata = exportMetadata === undefined
+      ? {
+          status: "not_provided" as const,
+          gameVersion: "not_provided",
+          steamBuildId: "not_provided",
+          fmodelVersion: "not_provided",
+          exportedAt: "not_provided",
+          mappingsSha256: "not_provided"
+        }
+      : {
+          status: "provided" as const,
+          gameVersion: exportMetadata.gameVersion,
+          steamBuildId: exportMetadata.steamBuildId,
+          fmodelVersion: exportMetadata.fmodelVersion,
+          exportedAt: exportMetadata.exportedAt,
+          mappingsSha256: exportMetadata.mappingsSha256
+        };
+    const mappings = {
+      status: actualMappingsSha256 === undefined ? "not_provided" as const : "provided" as const,
+      actualSha256: actualMappingsSha256 ?? "not_provided",
+      declaredSha256: exportMetadata?.mappingsSha256 ?? "not_provided",
+      matchesMetadata: actualMappingsSha256 !== undefined
+        && exportMetadata !== undefined
+        && actualMappingsSha256 === exportMetadata.mappingsSha256
+    };
+
+    const blockers: string[] = [];
+    if (requiredMissing.length > 0) blockers.push("REQUIRED_DATATABLE_MISSING");
+    if (metadata.status !== "provided") blockers.push("EXPORT_METADATA_NOT_PROVIDED");
+    if (mappings.status !== "provided") blockers.push("MAPPINGS_USMAP_NOT_PROVIDED");
+    else if (!mappings.matchesMetadata) blockers.push("MAPPINGS_CHECKSUM_MISMATCH");
+    if (koTextLanguage !== "ko") blockers.push("OFFICIAL_KO_LOCALE_NOT_VERIFIED");
+    if (baseTextLanguage !== "ja") blockers.push("BASE_JA_LOCALE_NOT_VERIFIED");
+    if (enTextLanguage !== "en") blockers.push("OFFICIAL_EN_LOCALE_NOT_PROVIDED");
+    if (exactPalIcons !== canonicalPals.canonical.length) {
+      blockers.push("PAL_ICON_EXPORT_INCOMPLETE");
+    }
+    if (
+      exactItemIcons !== referencedItemIcons
+      || referencedItemIcons === 0
+      || missingItemIconRows > 0
+    ) {
+      blockers.push("ITEM_ICON_EXPORT_INCOMPLETE");
+    }
+    if (rawPackages.missing.length > 0) blockers.push("RAW_PACKAGE_COMPANION_INCOMPLETE");
+
+    const extensionCounts = countExtensions(entries);
+    const normalPals = canonicalPals.canonical.filter((pal) =>
+      String(pal.value.ZukanIndexSuffix ?? "").length === 0
+    ).length;
+    const variantPals = canonicalPals.canonical.length - normalPals;
+    const activeSkills = Object.values(activeSkillRows).filter((value) =>
+      isRecord(value) && value.DisabledData !== true
+    ).length;
+    const elementIcons = [...entries.keys()].filter((member) =>
+      /^Pal\/Texture\/UI\/InGame\/T_Icon_element_s_\d+\.png$/u.test(member)
+    ).length;
+    const workIcons = [...entries.keys()].filter((member) =>
+      /^Pal\/Texture\/UI\/InGame\/T_icon_palwork_\d+\.png$/u.test(member)
+    ).length;
+    const skillIcons = [...entries.keys()].filter((member) =>
+      /\/T_icon_skill_pal_[A-Za-z0-9_]+\.png$/u.test(member)
+    ).length;
+    const worldMapImages = [...entries.keys()].filter((member) =>
+      /^Pal\/Texture\/UI\/Map\/.*WorldMap.*\.png$/iu.test(member)
+    ).length;
+
+    return {
+      schemaVersion: 1,
+      archive: {
+        sha256: archiveSha256,
+        bytes: archiveInfo.size,
+        fileCount: files.length,
+        directoryCount: directories,
+        uncompressedBytes,
+        extensionCounts,
+        rawPackageCounts: rawPackages.counts,
+        missingRawPackageCompanions: rawPackages.missing
+      },
+      metadata,
+      mappings,
+      data: {
+        rawPalRows: canonicalPals.raw.length,
+        canonicalPals: canonicalPals.canonical.length,
+        normalPals,
+        variantPals,
+        duplicatePalRowsExcluded: canonicalPals.raw.length - canonicalPals.canonical.length,
+        legalItems,
+        activeSkillRows: activeSkills,
+        passiveSkillRows: Object.keys(passiveSkillRows).length,
+        specialBreedingRows: Object.keys(specialBreedingRows).length
+      },
+      localization: {
+        baseTextLanguage,
+        koTextLanguage,
+        enTextLanguage,
+        jaMembers,
+        koMembers,
+        enMembers
+      },
+      assets: {
+        palIcons: {
+          referenced: canonicalPals.canonical.length,
+          exactMatches: exactPalIcons,
+          missing: palMissing.sort((left, right) => left.localeCompare(right, "en"))
+        },
+        itemIcons: {
+          referenced: referencedItemIcons,
+          exactMatches: exactItemIcons,
+          missingIconRows: missingItemIconRows,
+          missingRoots: Object.fromEntries(
+            [...missingItemRoots.entries()].sort(([left], [right]) => left.localeCompare(right, "en"))
+          )
+        },
+        elementIcons,
+        workIcons,
+        skillIcons,
+        worldMapImages
+      },
+      requiredTables: {
+        present: REQUIRED_TABLES.length - requiredMissing.length,
+        missing: [...requiredMissing]
+      },
+      gates: {
+        archiveStructure: "passed",
+        requiredTables: requiredMissing.length === 0 ? "passed" : "blocked",
+        metadata: metadata.status === "provided" ? "passed" : "blocked",
+        mappings: mappings.status === "provided" && mappings.matchesMetadata ? "passed" : "blocked",
+        officialKo: koTextLanguage === "ko" ? "passed" : "blocked",
+        officialJa: baseTextLanguage === "ja" ? "passed" : "blocked",
+        officialEn: enTextLanguage === "en" ? "passed" : "blocked",
+        palImages: exactPalIcons === canonicalPals.canonical.length ? "passed" : "blocked",
+        itemImages: exactItemIcons === referencedItemIcons
+          && referencedItemIcons > 0
+          && missingItemIconRows === 0
+          ? "passed"
+          : "blocked",
+        inputPrerequisitesSatisfied: blockers.length === 0,
+        activationValidationRequired: true,
+        blockers
+      }
+    };
+  } finally {
+    zipFile.close();
+  }
+}

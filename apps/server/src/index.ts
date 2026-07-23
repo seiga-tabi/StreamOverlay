@@ -61,7 +61,31 @@ const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
 let palworldDataService: PalworldDataService | undefined;
 try {
   palworldDataService = await loadPalworldDataService({
-    imageRoot: path.join(appConfig.paths.dashboardStatic, "images", "palworld", "1.0.1", "pals")
+    imageRoot: path.join(appConfig.paths.dashboardStatic, "images", "palworld", "1.0.1", "pals"),
+    onTranslationState(locale, state) {
+      const entry = {
+        type: "palworld_translation.runtime_state",
+        locale,
+        status: state.status,
+        ...(state.errorCode === undefined ? {} : { errorCode: state.errorCode }),
+        staleSourceHash: state.staleSourceHash
+      };
+      if (state.status === "loaded") logger.event(entry);
+      else logger.error(entry);
+    },
+    onBreedingState(state) {
+      const entry = {
+        type: "palworld_breeding.runtime_state",
+        release: state.release,
+        status: state.status,
+        ...(state.errorCode === undefined ? {} : { errorCode: state.errorCode }),
+        ...(state.artifactChecksum === undefined ? {} : {
+          artifactChecksum: state.artifactChecksum
+        })
+      };
+      if (state.status === "loaded") logger.event(entry);
+      else logger.error(entry);
+    }
   });
   const meta = palworldDataService.meta();
   logger.event({
@@ -69,6 +93,8 @@ try {
     gameVersion: meta.metadata.gameVersion,
     sourceRevision: meta.metadata.sourceRevision,
     pals: meta.counts.pals,
+    breedingPairs: meta.counts.breedingPairs,
+    breedingDomain: meta.domains.breeding.status,
     dataIntegrityGate: meta.gates.dataIntegrity.status,
     imageAssetGate: meta.gates.imageAssets.status,
     fallbackPals: meta.gates.imageAssets.fallbackPals

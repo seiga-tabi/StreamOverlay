@@ -1,0 +1,2088 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] この奇妙な剣は、各ストライキで活気のある緑の衝撃波を放ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "790bda77e12c3ddec4c8b96dd5e9fed7d70f37e3df72afc838abb6d40f88fe5a",
+          "status": "machine_assisted",
+          "text": "屋久島刃002 3"
+        }
+      },
+      "id": "yakushima-blade002-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] この奇妙な剣は、各ストライキで活気のある緑の衝撃波を放ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6f0af9968cb0b6f1335de618326b141a198845c74fd99fb4f412568dff50bc49",
+          "status": "machine_assisted",
+          "text": "屋久島刃002 4"
+        }
+      },
+      "id": "yakushima-blade002-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] この奇妙な剣は、各ストライキで活気のある緑の衝撃波を放ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "694748824b6aeb73e9f6bb5a4771e5010fd0845624b7897c153001d7a21d587c",
+          "status": "machine_assisted",
+          "text": "屋久島刃002 5"
+        }
+      },
+      "id": "yakushima-blade002-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の刃を持つ神秘的な剣。 剣を振り回すと、最大九本の祝福された刀が一緒に戦えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fdf0b31234ccdad0d2cb03af7f6aa08a393f91ffdb1c68346cf1dc05d11ab1f3",
+          "status": "machine_assisted",
+          "text": "天空"
+        }
+      },
+      "id": "yakushima-blade003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の刃を持つ神秘的な剣。 剣を振り回すと、最大九本の祝福された刀が一緒に戦えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2eb9c9dae58cb03ba3ce0ba702740688d5c6000fea9064358d90384ee9644e64",
+          "status": "machine_assisted",
+          "text": "屋久島刃003 2"
+        }
+      },
+      "id": "yakushima-blade003-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の刃を持つ神秘的な剣。 剣を振り回すと、最大九本の祝福された刀が一緒に戦えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "00966adb4a55cf9208a24c4dd73a289a7a0cea81a0ff997cbbfb14d69b86b289",
+          "status": "machine_assisted",
+          "text": "屋久島刃003 3"
+        }
+      },
+      "id": "yakushima-blade003-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の刃を持つ神秘的な剣。 剣を振り回すと、最大九本の祝福された刀が一緒に戦えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "465b25917dbb3df0b83a278cd06c92b726668612cc4c9d21d31d0950ed0eaaf6",
+          "status": "machine_assisted",
+          "text": "屋久島刃003 4"
+        }
+      },
+      "id": "yakushima-blade003-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の刃を持つ神秘的な剣。 剣を振り回すと、最大九本の祝福された刀が一緒に戦えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "88d739635c6645f2077744ca11a726c33d08f0eb2f6b852e12034eb5e57c3caf",
+          "status": "machine_assisted",
+          "text": "屋久島刃003 5"
+        }
+      },
+      "id": "yakushima-blade003-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 黄金の光で輝く神聖な剣。 スイングすると、周りの衝撃波が解き放たれます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "00edbd472e06536f40c949509f9c68ce04a35bf394debbb42c6c0000dab51a23",
+          "status": "machine_assisted",
+          "text": "解説"
+        }
+      },
+      "id": "yakushima-blade004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 黄金の光で輝く神聖な剣。 スイングすると、周りの衝撃波が解き放たれます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "734e744c2ee6480884c62ba8aff52a09ac8ddd10b01e92a6afa5ab7775a195a6",
+          "status": "machine_assisted",
+          "text": "屋久島刃004 2"
+        }
+      },
+      "id": "yakushima-blade004-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 黄金の光で輝く神聖な剣。 スイングすると、周りの衝撃波が解き放たれます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "643896fbd8270ee56cbf9aa95fb428c124773658af6691826170e0e14ad4866a",
+          "status": "machine_assisted",
+          "text": "屋久島刃004 3"
+        }
+      },
+      "id": "yakushima-blade004-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 黄金の光で輝く神聖な剣。 スイングすると、周りの衝撃波が解き放たれます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5a5b492e921de86b6d85d4219ea6a1d8eae1749cef344ae4a4fba1fa5c640840",
+          "status": "machine_assisted",
+          "text": "屋久島刃004 4"
+        }
+      },
+      "id": "yakushima-blade004-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 黄金の光で輝く神聖な剣。 スイングすると、周りの衝撃波が解き放たれます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "92b1212e65917ef4c22b50de806a2b459d2da426ba5f4ee26842e817be7c231a",
+          "status": "machine_assisted",
+          "text": "屋久島刃004 5"
+        }
+      },
+      "id": "yakushima-blade004-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1f67b8f8d082a73a06cb6ff89d930d2dcd624ecda6519d5a14036310d57091ee",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 伝説の鍛造品。 [原文欠落]。 スイングは猫の発射物を起動し、敵を蹴散らして攻撃する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "79fd1c22adba23f59669b5b720fab269e844f701748ecf3ce71f0094f72ed903",
+          "status": "machine_assisted",
+          "text": "伝説のメウミア"
+        }
+      },
+      "id": "yakushima-blade005",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 未知のエネルギーで燃料を補給する強力な銃。 敵を追跡し、衝撃で爆発する定期的な間隔でのミサイルの発射。 発射時に弾薬を消費しない66%のチャンスがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5e9fb63da121d979c8ac25f575b2e96bd77c2365514246eafcc667b90faa2e7a",
+          "status": "machine_assisted",
+          "text": "渦のビーター"
+        }
+      },
+      "id": "yakushima-gun001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 未知のエネルギーで燃料を補給する強力な銃。 敵を追跡し、衝撃で爆発する定期的な間隔でのミサイルの発射。 発射時に弾薬を消費しない66%のチャンスがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ff96e998ca8ea32ba1a9c68886107a67341035837008a3c1d249d624cb58bad3",
+          "status": "machine_assisted",
+          "text": "屋久島郡001 2"
+        }
+      },
+      "id": "yakushima-gun001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 未知のエネルギーで燃料を補給する強力な銃。 敵を追跡し、衝撃で爆発する定期的な間隔でのミサイルの発射。 発射時に弾薬を消費しない66%のチャンスがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a2e901c945f6d73249ac9c8ea3f2bb0e1f5b0ece0419ed6c346d5a2679cda88e",
+          "status": "machine_assisted",
+          "text": "屋久島郡001 3"
+        }
+      },
+      "id": "yakushima-gun001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 未知のエネルギーで燃料を補給する強力な銃。 敵を追跡し、衝撃で爆発する定期的な間隔でのミサイルの発射。 発射時に弾薬を消費しない66%のチャンスがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8b2c462648c4164b9dd267ea4f3520b9430674102e21abe3830e4667462375fd",
+          "status": "machine_assisted",
+          "text": "屋久島郡001 4"
+        }
+      },
+      "id": "yakushima-gun001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 未知のエネルギーで燃料を補給する強力な銃。 敵を追跡し、衝撃で爆発する定期的な間隔でのミサイルの発射。 発射時に弾薬を消費しない66%のチャンスがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "63a56cc22ac1c83e58b0bd566065fb789184c33dfa658780ff390356056900b6",
+          "status": "machine_assisted",
+          "text": "屋久島郡001 5"
+        }
+      },
+      "id": "yakushima-gun001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落] と、 [原文欠落] と、 [原文欠落] そして [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7f9860c4eeaac9688468e36ed08cd2c02a998944eef137c656ab747e324cad29",
+          "status": "machine_assisted",
+          "text": "聖なる仮面"
+        }
+      },
+      "id": "yakushima-head-equip001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落] と、 [原文欠落] と、 [原文欠落] そして [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1f7eddc21ae2ae0193ec18d77c70cc2ad7d536fcc49472eb8f31eca12fd6ac83",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置001号2号機"
+        }
+      },
+      "id": "yakushima-head-equip001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落] と、 [原文欠落] と、 [原文欠落] そして [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "41d926144fbcba819de65f3d5fa5352272c58063fbfa68721674debae0981c84",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置001号機 3"
+        }
+      },
+      "id": "yakushima-head-equip001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落] と、 [原文欠落] と、 [原文欠落] そして [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6e127b1cb494b5a4fab72ee6323edafabbfd23533660b931d0c38d5f2b8775ca",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置001号機4"
+        }
+      },
+      "id": "yakushima-head-equip001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落] と、 [原文欠落] と、 [原文欠落] そして [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "679dc136444a318f7508312ae80da84b375d6a7b7e8f716b9264ba906aa7d8af",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置001号機5"
+        }
+      },
+      "id": "yakushima-head-equip001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9abc7240756cd40401ee23ab92cdcc7b9bb3ba978246bba31c7b40ec281bbc6",
+          "status": "machine_assisted",
+          "text": "神聖なヘッドギア"
+        }
+      },
+      "id": "yakushima-head-equip002",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bee9c11ca4d925ab61665ba81ca5911bc29cb5fbcfcf8b980e6f717acb8b1c86",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置002号機 2"
+        }
+      },
+      "id": "yakushima-head-equip002-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1a1312ef0d7101a80ae5342daf59046c94274a26b729269364bd401f6a8a4ef2",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置002 3"
+        }
+      },
+      "id": "yakushima-head-equip002-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "903f54e5b496145bca9a1569a1a121ab581c91c5451bbc4921505edddfe00199",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置002 4"
+        }
+      },
+      "id": "yakushima-head-equip002-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1a02e48359fce57aa0a42fa4ce54735c55e094cb36e5fba77964cfdf037afa3d",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置002 5"
+        }
+      },
+      "id": "yakushima-head-equip002-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0070db9bf779e7549a75b9ce9580fe128d7fbf8054a6fd0a324eefe136e1c6f2",
+          "status": "machine_assisted",
+          "text": "聖なるヘルメット"
+        }
+      },
+      "id": "yakushima-head-equip003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2dbc0bda7899e3e84e156547dd8c166e2604585602006965f6be65a1a0910fe8",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置003 2"
+        }
+      },
+      "id": "yakushima-head-equip003-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3649e6f4adc73d30e50b9f56101f9f6ce7c9dea8881d7a1c6cd8cd003ad3a9e3",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置003 3"
+        }
+      },
+      "id": "yakushima-head-equip003-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b0e28632e9b16165c1a708f39253d0d7a398efd163f3da04e3b7810b23da8499",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置003 4"
+        }
+      },
+      "id": "yakushima-head-equip003-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c7da207e79016f396cb8de86d40388910a44ce903bfd159c205f73f070dbeb40",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置003 5"
+        }
+      },
+      "id": "yakushima-head-equip003-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5c3662a24cb3cdff8536fe85e917eb26cbcf0062115f68ec4230561a9559b2a",
+          "status": "machine_assisted",
+          "text": "神聖な食べ物"
+        }
+      },
+      "id": "yakushima-head-equip004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4a0064d8461d8c5375aca2acc8b2d9d27f0df5f0c0a41fe3cea1ee3b34353ec1",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置004号機 2"
+        }
+      },
+      "id": "yakushima-head-equip004-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2e56f2b7daea51837b463e698d2c54697b544840ce7db6ef23bd91cd8950ae30",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置004 3"
+        }
+      },
+      "id": "yakushima-head-equip004-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0a3640a739532d9876dca4ba3092ac3ab717f849ba0bffc999523ac6b3fdcf83",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置004 4"
+        }
+      },
+      "id": "yakushima-head-equip004-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] ヘルメットは [原文欠落]。 神力に包み込まれ、ダメージを増大させます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e4030f6916becb3e66a336ed1576ed2e04e25298ef4a7f61beeab13098d508c4",
+          "status": "machine_assisted",
+          "text": "屋久島ヘッド装置004 5"
+        }
+      },
+      "id": "yakushima-head-equip004-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eabdb9d7cccbe672c23085c956b7690e4c0f6b6b9032ae8b650d25f71bc3b513",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 悪意のあるエネルギーで脈打つ。 まれにしか得られない幸運なこと。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b96e353c1798264941a295f5e0de0752019df2d2e5720109d02166622f03cba5",
+          "status": "machine_assisted",
+          "text": "月面"
+        }
+      },
+      "id": "yakushima-head-equip005",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eabdb9d7cccbe672c23085c956b7690e4c0f6b6b9032ae8b650d25f71bc3b513",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 悪意のあるエネルギーで脈打つ。 まれにしか得られない幸運なこと。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d13f9c8fd10f4c515defb16fcfff2ee5ece971609d8b6ee82793ac1ae44bbcc",
+          "status": "machine_assisted",
+          "text": "クトゥルフマスクの眼"
+        }
+      },
+      "id": "yakushima-head-equip006",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c0ca5897f30aa0998c37403cfd752c4ac4bdfec56fd4794240372f360c877169",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 神聖なエネルギーを注入した神聖材料。 様々なTerrariaアイテムを作成するために使用できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0182fa3ce74269084d37ff883535cc29745a698d3e20418b95b059e435b0156b",
+          "status": "machine_assisted",
+          "text": "聖なるバー"
+        }
+      },
+      "id": "yakushima-ingot001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の光を放つ灯籠。 持ち上げることで、敵を複数回攻撃するホーミングライトの発射物が放出されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8ba957a175ad4cc01ff2b8ea348986f162aaa627415dfe82efcb6aede64dc547",
+          "status": "machine_assisted",
+          "text": "夜光"
+        }
+      },
+      "id": "yakushima-lantern001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の光を放つ灯籠。 持ち上げることで、敵を複数回攻撃するホーミングライトの発射物が放出されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7737b0e61e1a5a3e6acfbf7837261146d36dbeb0a54d17453432a63971a748b7",
+          "status": "machine_assisted",
+          "text": "屋久島灯籠001 2"
+        }
+      },
+      "id": "yakushima-lantern001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の光を放つ灯籠。 持ち上げることで、敵を複数回攻撃するホーミングライトの発射物が放出されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7d68a0b049a0e3bf7e5bb66248d24595c1eced1363d9eba7ff1d534056fbc6fb",
+          "status": "machine_assisted",
+          "text": "屋久島灯籠001 3"
+        }
+      },
+      "id": "yakushima-lantern001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の光を放つ灯籠。 持ち上げることで、敵を複数回攻撃するホーミングライトの発射物が放出されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bda0e9986b98862c917bc6d79e048828d4f18a7c5447c73223b4865936d4482d",
+          "status": "machine_assisted",
+          "text": "屋久島灯籠001 4"
+        }
+      },
+      "id": "yakushima-lantern001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 虹色の光を放つ灯籠。 持ち上げることで、敵を複数回攻撃するホーミングライトの発射物が放出されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "38226e6c1143fefe011ef8b56f81fc6ead66e84b7337ba300784e0b0d36c148b",
+          "status": "machine_assisted",
+          "text": "屋久島灯籠001 5"
+        }
+      },
+      "id": "yakushima-lantern001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8835667f9daa8c34541af7dd920160d88339fb44eac5b9c7f078eeecf7f5eb84",
+          "status": "machine_assisted",
+          "text": "古代には、通信手段が限られていたときのシェルガドラ内の光は簡単なフラッシュ信号を送信するために使用されました。"
+        }
+      },
+      "id": "aegidron",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "41bec7302e8cffae7dd867c34bee6ea40935ef188757c0f09c0ade9797854509",
+          "status": "machine_assisted",
+          "text": "消えれば、別の人がその場所へ来るだけで人生は何も起こらない。 リオリネにとって、会社はすべてです。"
+        }
+      },
+      "id": "amione",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e32c5011e75cd87f567959981712abd0624f47341ba41433976e6ec786e6b373",
+          "status": "machine_assisted",
+          "text": "かつて貴族の象徴と見られ、富や権力を誇示した人々のためのアイドル。 しかし、時間とともにこのパルは死のトークンになりました。"
+        }
+      },
+      "id": "anubis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "66b08860cf9874be464cc198fd8afd12fd069a9d5db88e21f1f805c69e25f83f",
+          "status": "machine_assisted",
+          "text": "古代には肉食のパルは容赦なく彼らを追求した。 ブルフェルノの叫び声は激怒するインフェルノに変わり、今日まで受け継がれています。"
+        }
+      },
+      "id": "arsox",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "110d7cc6c56de99dfe1d15a5ac391e3f2cf62babec101a3f5490cf53a2e3c3e7",
+          "status": "machine_assisted",
+          "text": "深海から生まれた野獣。 獣の前に立たない。 獣はいらない。"
+        }
+      },
+      "id": "astegon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28e25762455d2a34bbabb9846b3e1ad6a5b9de914d86376f8ee3bfd9c58a525f",
+          "status": "machine_assisted",
+          "text": "白リボンが黒く、水に染み込んだら黒くなるパル。 毒の検出に有用であったため、このパルはかつて狩りをしすぎた。 この過去は彼らを人間性に苦しめてきた。"
+        }
+      },
+      "id": "azurobe",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "320dedf7e9a4a085b6c49daa18298af65d3f8deffd3e093a4dea4d5e1618ecfd",
+          "status": "machine_assisted",
+          "text": "このパルの白いリボンは、周囲からの熱を継続的に吸収しますが,その温度には不思議な変化がありません。 この奇妙な能力はかつて、人間の深い不信を今日残し絶え間ない狩猟の標的にしました。"
+        }
+      },
+      "id": "azurobe-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "30c7c18693c697f10c6a52e0c631e1d898085124c9298c3715207aa1a155286f",
+          "status": "machine_assisted",
+          "text": "恐怖のスリルのために生きていますが、まったく怖くありません。 ほとんどがかわいいので、それをでることができないのでウラミィは今やその後部座席に笑顔の跡を残します。"
+        }
+      },
+      "id": "bakemi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f14804a8dfa655cb0b3e89131f5859aa715ce1de6b62476dc92dc4488fcbf9a8",
+          "status": "machine_assisted",
+          "text": "あらゆるラウンドを見ることは、それをパンチする制御不能な衝動を与える。 ヒョウガオーにとって、最も難しい課題は単に生きることの後で雪だるまを作ることです。"
+        }
+      },
+      "id": "bastigor",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1f6ad33bc18e6dc7225de1290321cbdf8b1b90b29d1852965468ac3afaec523",
+          "status": "machine_assisted",
+          "text": "イグニクスと関連している種だと考える人もいますが、実際には関係はありません。 鋭いくちばしを使って、雷のボルトのような速い動きで獲物の上に降ります。"
+        }
+      },
+      "id": "beakon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bf195f004c23947c189dbbc00bbf599e889f4bdcb1d51497c4ca585bad164aa3",
+          "status": "machine_assisted",
+          "text": "寒さに完璧に対応し、細身でも冷えにくい。 まるで巨大な氷が空から真っ直ぐ落ちてくるかのように、ダイビングプランジは大きな力を持ちます。"
+        }
+      },
+      "id": "beakon-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fa80e07d8aee52f56d610d64d6aea91c67b69421390a50685f94207c0b5f014f",
+          "status": "machine_assisted",
+          "text": "クインビーナに忠誠を誓う召使い。 女王に害を与えるものは、すぐに巣箱から追放されます。 女王を守るために喜んで命を与えます。"
+        }
+      },
+      "id": "beegarde",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "854db251d186325a86241430fce68f124f237bdb62bcaf2a151a8e3a7bb5f0cd",
+          "status": "machine_assisted",
+          "text": "存在しなかった彼女は静かに世界を見つめた。 ある日、彼女はれに襲われた。 現実に対する復への欲望が強まったことで、エクリプスのサイレン(英語版)として生まれた。"
+        }
+      },
+      "id": "bellanoir",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "430f58db5abcb74115cd5ff0484de764b07f9bf7b45d9d15f1afa68941dcf8b9",
+          "status": "machine_assisted",
+          "text": "欲望が薄れ、彼女はすぐに圧倒された。 彼女は自分を見つめる自分を欲しがった。 そして、現実をみながら見つめた姉妹たちは、ついにその深海へと追い込まれて目を閉じました。"
+        }
+      },
+      "id": "bellanoir-libero",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4370843476e15c50978258f4aa85cd67bf50ac6aa097e7f4bc1bc3191ca090df",
+          "status": "machine_assisted",
+          "text": "火山噴火の際に生まれたという伝説がある。 奇妙なグループは、この大陸は巨大なボルカイザーの背中に横たわっていると主張しています。"
+        }
+      },
+      "id": "blazamut",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5ce6f9ed92c782d23bf651ea83f213c0c531201c2b150a778010d26e9daa810e",
+          "status": "machine_assisted",
+          "text": "昔、地球の深さから現れました。 容赦なく、激怒する炎がみも無く島全体を焼き尽くし何も残らないまで。 永遠の炎(Eternal Flam)と呼ばれた。"
+        }
+      },
+      "id": "blazamut-ryu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4cf2d4a80f8d9d0c8aea27f117f57008f68551501f930f274ed54b89a7c37094",
+          "status": "machine_assisted",
+          "text": "生肉を好む一方で、よくできたお肉を食べることとなる。 獲物が燃え尽きるなんて、まだわかってないんです。"
+        }
+      },
+      "id": "blazehowl",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "086858107af6dfa70539de594bbf6f26655c9ecd0202b4ae9c742dab846fe03d",
+          "status": "machine_assisted",
+          "text": "生肉を好む一方で、常に汚れたお肉を食べる。 黒い爪が武器として使われているので、獲物は呪われていることに気付かないだけです。"
+        }
+      },
+      "id": "blazehowl-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aad5ea69f7ebb7fd284a0a6f660ab9be0e1010cc1fa5e8cd68fc07947be7657e",
+          "status": "machine_assisted",
+          "text": "息は奇跡的な花粉のような物質を運び、触れた植物に受粉させます。 植物ベースのパルの場合、近くにいると少し...複雑になる可能性があります。"
+        }
+      },
+      "id": "braloha",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "08e39e20a5327985e16d73e445cc951ea64cb86a35277a9c18e41a39878e11c9",
+          "status": "machine_assisted",
+          "text": "このくすんだパルのは非常に有毒です。 パピテフは、XWZTERMax A二が蜜を飲んでいる間だけ笑顔でフレンドリーです。"
+        }
+      },
+      "id": "bristla",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "876794b692154bac0183d8aa4a6ee5c55a6b72fa23c28ffda6f143443e81f4b2",
+          "status": "machine_assisted",
+          "text": "ペアリング前と後の香りは劇的に変わります。 パートナーを見つけた後、心地よい香りが漂います。これは「初恋の香り」と呼ばれています"
+        }
+      },
+      "id": "broncherry",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1ceb88a893ea021fabfc91a236d59c458a4cf531957764a05995948afcb5da7d",
+          "status": "machine_assisted",
+          "text": "ペアリング前と後の香りは劇的に変わります。 パートナーを見つける前に心地よい香りを放ちます。これは「ピュアの香水」と呼ばれています"
+        }
+      },
+      "id": "broncherry-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5132c6e50e030ecfe725731e1f4dac25bec89410238f00f7541153fcd2d11383",
+          "status": "machine_assisted",
+          "text": "旧島では、ドスコイヌ Zsumoが広く楽しまれていました。 最高レベルでは、充電イノボウでさえ代わりに飛行します。"
+        }
+      },
+      "id": "bulldosu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "407f3c2e0b110016ce11f25350e93dd7901442f4a37438877989bb6bb6bc2770",
+          "status": "machine_assisted",
+          "text": "死後、その体は刃物となり次世代に引き継がれる。 ツジギリ二以外の誰かがこのブレードを振るうと、魂は狂ったように駆動されるまでそれらを苦しめます。"
+        }
+      },
+      "id": "bushi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2751da8d720b0fb14e750da4cb5921cbb0cb143411c62903a8ff060de53fd96f",
+          "status": "machine_assisted",
+          "text": "死後、その体は刃物となり次世代に引き継がれる。 それを継承するツジギリが弱い心を持っているならば、死者の声は狂気を駆り立てます。 狂気はそれを無限にさまようヤミウチに変えます。"
+        }
+      },
+      "id": "bushi-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cfed78c52f6e3c38835878c47d33c31a56385c0619dd77bcaf6e849a53cae765",
+          "status": "machine_assisted",
+          "text": "このパルの背中にある低木は、適切に供給されている限りベリーを生成します。 潜在的な仲間にこれらのベリーを提供し、味が彼らの好みであればロマンスの花。"
+        }
+      },
+      "id": "caprity",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "35380d786d8c6dbb6d7e137d72747dbf0d3399747f26d4c3a5bb04e6c48972e9",
+          "status": "machine_assisted",
+          "text": "背中に生える果実は、その感情によって風味が変わります。 環境が厳しくなるほど、果実は甘くなります。 だからこそ、ほとんどのベノゴートは飼育下で育った愛を知らなかったのです。"
+        }
+      },
+      "id": "caprity-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4bd8f67afdce91166c2a9c9fbea0f5c536ccc35f7c3fea9765bff0e2a7980be6",
+          "status": "machine_assisted",
+          "text": "無差別に食べる傾向がある、その頭の上の口はしばしば潰瘍を苦しめるときに発生して代わりに顔面の上に口腔を使用する。 しかし、その行動は変化せず、二つの口は同じ潰瘍に苦しむ。"
+        }
+      },
+      "id": "carnibora",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "51fb19a1c9d01502370bc4b7470ed74b28ba24b85d62b8efe19675657d5ec472",
+          "status": "machine_assisted",
+          "text": "一見自信に満ちているように見えますが、実際には弱く病です。 ツッパニャンにされるのは、多くの点で最大の不名誉です。"
+        }
+      },
+      "id": "cattiva",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "837a35589cd25135cd03a1a45e4e65d51772e99005c938c2106e4467da8a6cd1",
+          "status": "machine_assisted",
+          "text": "昔は空を自由に飛び回っていた。 エアムルグとのコンテストに敗れた後、空を放棄し夜の闇の中で秘密の生活を送っています。"
+        }
+      },
+      "id": "cawgnito",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "50a5b4099da7cda73320cd7206738795feba8400f6af8c7e0cf3ac9e8c65e5cf",
+          "status": "machine_assisted",
+          "text": "風に乗って、このパルはそれが喜ばれる場所を旅行します。 途中でパートナーを見つけた場合、その出会いは旅の終わりを告げます。"
+        }
+      },
+      "id": "celaray",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1da75257b38f16488584e4cb8133623403124a4f5cce3a22a9de0d2c64d434e",
+          "status": "machine_assisted",
+          "text": "その派手なパターンは、パートナーを引き付けるのに役立ちます。 しかし、エレカイトによる感電事故の長い歴史の後は黄色と黒色の縞模様が島中に危険の兆候として見られています。"
+        }
+      },
+      "id": "celaray-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25a92c579d9dafb00f02e1e9abfd1f9525eb0d66af7f4882a814b4172497dc69",
+          "status": "machine_assisted",
+          "text": "暗い輝きが輝くと、影は暗くなります。 闇が真っ暗になり、混とした状態を回復する。 バランスは世界が求めるものです。"
+        }
+      },
+      "id": "celesdir-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f04c4c56d9f77e8cfb6ea006f24b556710663f219a882c45bdd62b0c60136065",
+          "status": "machine_assisted",
+          "text": "極端に弱く、おいしすぎる。 モコロンと並んで最も弱いXAJTERMB。 いくら狩りをしても、彼らはただ現れ続ける。 パル"
+        }
+      },
+      "id": "chikipi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f80388177f0a3b10cffbe713bd1f1586d4b3d77a870cb8de1db8965438930bab",
+          "status": "machine_assisted",
+          "text": "体を丸めて、超高速で転がり回ることができます。 昔、人々はこの紡績力を使ってバターを生産するために放牧したオコチョに牛乳の袋を結びました。"
+        }
+      },
+      "id": "chillet",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10f5e2bc8f50c26998be6a7f88c271a988ee8dd6ea4f27f57d1c527d1fedadd6",
+          "status": "machine_assisted",
+          "text": "体を丸くして、火花が飛ぶほど速く転がり回ることができる。 スパークも興奮すると飛ぶ。 あまりにストロークすると、このパルは文字通り発火します!"
+        }
+      },
+      "id": "chillet-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7e0a7246823d46849c57d1e877f1b50886adbb3502d166a7206592f66df819e4",
+          "status": "machine_assisted",
+          "text": "を嗅ぐと、比類のない高揚感が生まれる。 さらなる規制強化に向けた努力があったが、Free パルアライアンスはこれらの措置に激しく反対し、それを阻止した。"
+        }
+      },
+      "id": "cinnamoth",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "91101617e1fd4348ce2531ed19e8ba39f4161cf2d14be5d63a855615bb7fdb12",
+          "status": "machine_assisted",
+          "text": "かつては三枚以上の葉が額に付いていた。 幸運の象徴として、より多くの葉を持つ人々は強く狩られており,種は時間とともに少ない葉を進化させる。"
+        }
+      },
+      "id": "clovee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "818aad286483e5ed159a42b09ae07221a87b28f0262ba1678af7dcfa7a5c7832",
+          "status": "machine_assisted",
+          "text": "モコロンと比較して、より細かいウールと国内に適した気質を備えています。 しかし、歴史的にはペットとして飼われてきた。 かわいさは美徳だと考えられている。"
+        }
+      },
+      "id": "cremis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "562fb9effb4b6ad6dd3d453f4d92521f041cb26f7509ec2c69380b492e3728dc",
+          "status": "machine_assisted",
+          "text": "群れの名誉をむ者は、自分の命を奪われる。 木の枝で膨らんだ声帯を突き刺すことによって、彼らは大気中に吹き飛ばされ後生に戻ります。"
+        }
+      },
+      "id": "croajiro",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d0d1298a24b4b9c9145c9974a66c871b88e16928370ebcdab8a26bc44a4e824b",
+          "status": "machine_assisted",
+          "text": "名誉を放棄したブシガエルは、スプリンターグループを集めて形成します。 彼らは、選択した獲物を倒すために下手な手段を使用します。 夜中にドスガエルのパックに遭遇した場合、それはあなたの人生が並んでいます。"
+        }
+      },
+      "id": "croajiro-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10a04aa10e375d9e9495e46dfe4223df94427abef5e8d3898bdfc4755266ceb8",
+          "status": "machine_assisted",
+          "text": "硬い爪で急な山に簡単に登れます。 しかし、短い足は下降が難しくなり高所で立ち往生することも多い。"
+        }
+      },
+      "id": "cryolinx",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2c929aa7be6fa78a73f90ab7f8878d7e957ab0f5daf3f094c82265f861f5a19",
+          "status": "machine_assisted",
+          "text": "大きな手で多くのアイテムを簡単に運ぶことができます。 しかし、短い足はペースを遅くし,しばしば夜までに追い越されます。"
+        }
+      },
+      "id": "cryolinx-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d48c7f7c29880062590f19af3d9038ce32ded41b344b4f95d09566b1d2c5c334",
+          "status": "machine_assisted",
+          "text": "睡眠に興味のある人を入れ、幸せな夢の無限の流れを見せてくれます。 呪文に従った者は、死が彼らを連れて行くまで決して目を覚ますことはありません。"
+        }
+      },
+      "id": "daedream",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8dcfbc2ec271b71324a0db6e55c88099b1b6f20e3ea56027f2b8957c6a1c3886",
+          "status": "machine_assisted",
+          "text": "古来より世界樹の中に残っており、その警戒は続いている。 それが何を保護するのか、そしてどのような目的のためにノクサージュは気にしません。 結局のところ、世界の木はすべてを知っています。 真実を明かすことができるのは、それがいものだけ。"
+        }
+      },
+      "id": "dandilord",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f4485bd3db000e5dfef458626277e260fd1dc19671dd221df8629875763d98fe",
+          "status": "machine_assisted",
+          "text": "一歩先へ進み、疑念を忘れなさい。 二歩先へ進み、心配を忘れてください。 三歩先へ進み、恐怖を忘れてください。 どんな敵にも対せよ。"
+        }
+      },
+      "id": "dazemu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0afa61944a655c7bf332b1709dd413df3239369a2093b1784ddb2c229c340979",
+          "status": "machine_assisted",
+          "text": "孤独なパルに親切。 しかし、パルがこれを実際の友情と間違えた瞬間にそれはそれらを雷で爆破する機会をつかみます。"
+        }
+      },
+      "id": "dazzi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7a0dbc5288804b740392d6c578708d594fea82430afa8005358d01547a9a3086",
+          "status": "machine_assisted",
+          "text": "パルは、しばしば孤独なパルに親切で、「倒す前にガードを落とす」ことを企図しています。 しかし、適切な瞬間を見つけることができないため代わりに友達を作ることになる。"
+        }
+      },
+      "id": "dazzi-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d8d53bac3d8a6428e53d0f52d7dd435c36dac5cd4f2f3c26ff45e270ae922d18",
+          "status": "machine_assisted",
+          "text": "顔に不気味な表情が続くため、友達はほとんどいない。 パックから迷子になったタマモを餌にしている人もいます。"
+        }
+      },
+      "id": "depresso",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a6e3356d72b2687e3928d2ea239f7090e1a00ff9e1b5e090330637a62e226d80",
+          "status": "machine_assisted",
+          "text": "最強のシェルと貫通可能な唯一のドリルを持つドリタスは、人気の子供向けの物語『 ドリタス's Fable』で世界の矛盾を考察します。"
+        }
+      },
+      "id": "digtoise",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3391f37035c0435037c934f038825119186af1a09fdee14ab8b27cd924127e9a",
+          "status": "machine_assisted",
+          "text": "一度怒ったパルは和らげられません。 りは、不死鳥のように続く。 アロアリューの尾にステップを踏むというフレーズは、誰か怒らせるという意味になりました。"
+        }
+      },
+      "id": "dinossom",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fbd5711ccd048f9b24d73002c29fb7211378d6ecb8170c4cbede7f7dacd088ef",
+          "status": "machine_assisted",
+          "text": "雷に打たれたが、生き続けている。 ビリビリューのボルトに打たれた|というフレーズは、狭く逃げ出す死を意味するようになった。"
+        }
+      },
+      "id": "dinossom-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9b279c1e8bdc5c9b74577c0ce8427ee36ea54cc5dfd8857602c920aeb3827603",
+          "status": "machine_assisted",
+          "text": "昔、ガウルフは人間と一緒に狩りをしていましたが年月をかけてこのも消えてしまいました。"
+        }
+      },
+      "id": "direhowl",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9ad29df90d9974e756a324f1cab9a82c380513a367748867d53d227815edc11b",
+          "status": "machine_assisted",
+          "text": "無自我状態のために努力し、それは無限に想します。 世間の欲望に向き合って、食事をし反射する。 今日は食べ過ぎだった。"
+        }
+      },
+      "id": "dogen",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1fc66f176ad6e8be150f2658bf445266ab16d88e4a8a876c97cd51691d6335d",
+          "status": "machine_assisted",
+          "text": "一つの実体、二つの心。 意志が衝突すると、は和解するまでどこにさまようのかを知ることは不可能です。"
+        }
+      },
+      "id": "dualith",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b514f9bb2c1f8a951cf51894cadec552ec37c15b7c785f52eef5cd44e013a9c",
+          "status": "machine_assisted",
+          "text": "一つの実体、二つの心。 彼らはめったに同意せず、絶えずビッカーですが、 戦いが始まると心身がすぐに一つとして団結します!"
+        }
+      },
+      "id": "dualith-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fed07388b3976552d51c3ae246183f1b90756fdf8292dec34a5570bf202a6a4a",
+          "status": "machine_assisted",
+          "text": "リラックスすると、反応時間が劇的に減少します。 頭から尾までスライスしても、次の朝になるまで死んでしまうとは気づかないでしょう。"
+        }
+      },
+      "id": "dumud",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ad23a0c27d37f92114f1a336f8dc795fead2c1ee3dce60f2aba6db23b841ac0d",
+          "status": "machine_assisted",
+          "text": "光を反射し、驚くほどの透明度。 さらに衝撃的なのは、反射がトドドドンよりも遅いことです。"
+        }
+      },
+      "id": "dumud-gild",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3f0fc3b7c1cc3872b4886c8b52ffe181a5b8c3374361aeabf3d6f27ee361149f",
+          "status": "machine_assisted",
+          "text": "コピーが作ってあると、ラピエールも元のモデルかどうかわからないままにしちゃうんです。"
+        }
+      },
+      "id": "dupin",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72463c62e06f3d6b822a1d72ba022dd1628726f3dcf78afe04234f2abfe6d1d2",
+          "status": "machine_assisted",
+          "text": "高地では食べられないほど、敵の脳を宴にさえすることがある。 より信頼できる食料源を求めるグループは、最終的にライバードに分岐し低空に降下したと考えられている。"
+        }
+      },
+      "id": "dynamoff",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6590a4bdf89339280ef1609d420f15d1e27fe116ca8f680064fa9ca3f11d94e5",
+          "status": "machine_assisted",
+          "text": "最近発見されたばかりの新しいパル。 落ち着いて完全に落、それはそれが好きなようにその時間を費やします。 もはや何も拘束されない。"
+        }
+      },
+      "id": "eidrolon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2f12123a7c051a03866d1e02e8360660ab549cf09b21e1b83a84a090087fcc97",
+          "status": "machine_assisted",
+          "text": "最近発見されたばかりの新しいパル。 誰も信用せず、その気性は常に最も近いターゲットで怒りを消す。"
+        }
+      },
+      "id": "eidrolon-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6b06a84232e62e21d9adef210ca77b1ecc9533834ceacfe5260417e3c54878a6",
+          "status": "machine_assisted",
+          "text": "最も印象的な角を持っている人は群れのリーダーになります。 角が折れたら、落ち込んで群れを離れる。"
+        }
+      },
+      "id": "eikthyrdeer",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "16580ccc0f8d4ae7bd6e82a269b92b5e2b40c13be2f2c655b8fbaeb8b2f4c11f",
+          "status": "machine_assisted",
+          "text": "最も硬い角を持つ個人がリーダーになります。 角が失われると、そのリーダーシップの地位も失われます。 群れを離れて別れの見張りにし、静かに地球に戻ります。"
+        }
+      },
+      "id": "eikthyrdeer-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "772a3aa372ec16cec792ec0a9dbb16495e3b6c5b9a81024d3f0aaf58ac22974b",
+          "status": "machine_assisted",
+          "text": "角の上の葉は、それがどんなに強く引っ張られても取り除くことができません。 葉が一つに落ちると、モリタロスはその時間を受け入れます。"
+        }
+      },
+      "id": "elgrove",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2a2c24ab1467e5f95171687ace7d3997a35871ca7dab14def3d9d8dc33d8beaf",
+          "status": "machine_assisted",
+          "text": "凍った角は、その寿命を通して固体のままです。 氷から水が滴り始めると、ユキタロスは自分の人生に寒さを感じます。"
+        }
+      },
+      "id": "elgrove-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "937a45a78f3c27fb4ced228084f938021ebb22eb55d09cbb3a4e6eea5cf0dc69",
+          "status": "machine_assisted",
+          "text": "ビーガルデスを支配する女王に選ばれた。 女王に仕える喜びのために自分自身を死に至らせることを喜んでいる召使いの絶え間ない流れがあります。"
+        }
+      },
+      "id": "elizabee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1a50bc4e39da9f8a93dced2f614a6ece2fe49de713173332237f91bbdc161c93",
+          "status": "machine_assisted",
+          "text": "外見が示すように純粋に振舞いを持つ。 このためか悪と区別できないこともあり、悪意ある者が悪を利用できるようにすることもある。"
+        }
+      },
+      "id": "elphidran",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5850c740945ae2e44f511635f9ce675661c829c4eaa536a65939c35223ec825f",
+          "status": "machine_assisted",
+          "text": "外見が示すように純粋に振舞いを持つ。 このためか、その行動に悪意はなく人を殺した後も無関心です。"
+        }
+      },
+      "id": "elphidran-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0f6550a25b0e016ea07e45e48268fe33be59d30e3410331df0d33b34fefe4417",
+          "status": "machine_assisted",
+          "text": "獲物を見つけたら、炎の渦を放ちます。 ホルスの息は、その心地よい香りで知られています。"
+        }
+      },
+      "id": "faleris",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "306100163e670e13d07fea555d62a34d2e2a64409199a0fa42280bc5555682e7",
+          "status": "machine_assisted",
+          "text": "獲物を見つけたら、強大なトレントを放ちます。 多くの場合、獲物は混乱の中で一掃され、「これが本当に狩りだ」と勘違いする。"
+        }
+      },
+      "id": "faleris-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b38f28880023150519a9cc426f284d8bd7c5b9644976a3d98cc149b2bba8ecde",
+          "status": "machine_assisted",
+          "text": "影から攻撃するこのパルは、クロークのような翼の中に獲物を閉じ込めます。 内部で何が起きるか、なぜ翼の内側が赤く染まっているのかはわからない方が良いでしょう。"
+        }
+      },
+      "id": "felbat",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e01b983f8eba0eebda828b93b1748ae76ff267b36140450cbdcdaf783ba44af2",
+          "status": "machine_assisted",
+          "text": "昔は、その美しい景色が絵画で一般的な光景でした。 時間が経つにつれて、その美しい皮と角はしばしば芸術作品で見られました。"
+        }
+      },
+      "id": "fenglope",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ba574f9ea1a23b42e119e7bc5ac9fdbff93fa3d51a309056b20b7a4c3c0de862",
+          "status": "machine_assisted",
+          "text": "昔は、ムラサメの絵を描くと雷に打たれると考えられていました。 時が経つにつれて、ムラサメを描いた作品は雷を避けるための魅力として崇められ、共通の存在となりました。"
+        }
+      },
+      "id": "fenglope-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b3575e16465480e48e397b8bbf45ab8351b8aedcb20ad31df3c3731ea6bfc30d",
+          "status": "machine_assisted",
+          "text": "コスチュームの内側から何かが覗き込んでいるように見えます。 実際には、より深く到達し続けることができます。 宇宙そのものが内側にあるのかもしれません"
+        }
+      },
+      "id": "finsider",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e0e0679f971c05989f31962dc461816592fb11ec3acba454af2aa8357008cf06",
+          "status": "machine_assisted",
+          "text": "口に手を伸ばしても、中には何もありません。 寝袋のように、ある研究者は、この空間を間次元的な空間だと思った。 しかし、ギャグの反射が起動すると彼らは気づいた..。 間違いなく生物の体の一部です"
+        }
+      },
+      "id": "finsider-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dc2a6fb8d6a1aa2a1b2215422e89ddadac7406ee1dccf06bb147101be4ba3c8b",
+          "status": "machine_assisted",
+          "text": "泣き出すと、涙の代わりにマグマが生まれるパル。 噴き出すマグマは体に吸収され、熱くなり熱くなります。 泣くほど強くなる。"
+        }
+      },
+      "id": "flambelle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ef994d9d00ee7336fbd562775df35f80425a5265ad75e1d4642fe152b16e2901",
+          "status": "machine_assisted",
+          "text": "心に焦点をあて、炎を通して未来を読み取る。 不都合な運命を垣間見るならば、それはそれが有利の結果を得るまで、それは容赦なく予言を再ロールします。 センコの将来は、常に非常に明るい理由です!"
+        }
+      },
+      "id": "flaracle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee1119a6981a792c254abfece26eda66b6f94affdd1c9ae6f9f94dfe352aa153",
+          "status": "machine_assisted",
+          "text": "植生が豊富な場所を好むが、最近は干し草熱も問題になっているようだ。"
+        }
+      },
+      "id": "flopie",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aa6425de4c85a3a0bb3069ec8fca7f4d25594e70630b571f6b0e611acc5f5b1b",
+          "status": "machine_assisted",
+          "text": "オーロラが見える夜は空を見上げ、美しい歌をえ始める。 しかし、これは敵からの攻撃に対して脆弱なままです。"
+        }
+      },
+      "id": "foxcicle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af238e7244c6e1b722fcab2c4db5de56de87ec31b30a84a81c9e70d61c922d50",
+          "status": "machine_assisted",
+          "text": "生まれた瞬間から火をコントロールする能力がなく、意図せず呼吸している炎に窒息しがちです。 キツネビくしゃみは森林火災の主な原因の一つです。"
+        }
+      },
+      "id": "foxparks",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2af15999c821546fdce8d027da3c0a576e9a1a49dc64f0864663a53e95785be6",
+          "status": "machine_assisted",
+          "text": "生まれた瞬間から冷たい空気をコントロールする能力がなく、意図せず呼吸をするに窒息しがちです。 ユキツネが風邪をひくと鼻の排出は凍りつき、呼吸しにくくパニックになります。"
+        }
+      },
+      "id": "foxparks-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9a74591a3238d3f8f29f8719d1ef029650500caac648d0602a05326805c3cda7",
+          "status": "machine_assisted",
+          "text": "冬(しんきゅう)として知られる、パルパゴス島の守護神。 過去には、災害が土地を襲ったとき、 それは空に上昇しと永遠の冬島を投げて脅威から封印しました。"
+        }
+      },
+      "id": "frostallion",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "294e53e35b1ceaa77c7deb46ec879a1ac132e368e3904ef99f1897c2073eeb50",
+          "status": "machine_assisted",
+          "text": "夜の呼び出しとして知られているパルパゴス島の守護神。 過去には、災害が土地を襲ったとき,それは空に上昇しと永遠の闇の中に島を投げ込むことによって脅威から封印しました。"
+        }
+      },
+      "id": "frostallion-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "530dfdbabf68183dc6ef372bfdc935a888d478b51dcdddc140f6518e314ef362",
+          "status": "machine_assisted",
+          "text": "時間感覚が非常に正確で、毎朝まったく同じ時刻に目を覚ます。パルパゴスの伝承では、クジャンナが尾羽を広げると24の区画からなる模様が現れるため、一日が24の部分に分けられたとされる。"
+        }
+      },
+      "id": "frostplume",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "310b14f14d557a1266ca9d37a1042abbd986a8a9d5870e31efcea47f9c1e0bbf",
+          "status": "machine_assisted",
+          "text": "独自のボディウォーターで、どこでも波を作り出せるパル。 体は急いでサーフィンをしますが、その結果の速度もしばしば致命的な衝突で終わります。"
+        }
+      },
+      "id": "fuack",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e5abddea1f760dca39c17f3abbf245ae940c7fc696412203a623f7873d090fc",
+          "status": "machine_assisted",
+          "text": "摩擦用に作られた腹で、ボディサーフ時に火花を放ちます。 しかし、持ち去られるとしばしば転がる火の玉になります。"
+        }
+      },
+      "id": "fuack-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "df229fc99c9d2cd67ded6dcc664978134797de35d3d0b9c8d9368e254d8d177a",
+          "status": "machine_assisted",
+          "text": "大きな爪はダイヤモンドのような硬さが自慢です。 しかし、これらの爪を研ぎ澄ますとエネルギーの大部分が消費され、二日間何もしないこともあります。"
+        }
+      },
+      "id": "fuddler",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "918d3cad1960f5806267cb2eaa6e0604fea4b474da2f86839d3231fb28250f4b",
+          "status": "machine_assisted",
+          "text": "人間を掴みながら簡単に飛行できるパル。 しかし、疲れたときに放り出す傾向があり、二、三人以上の魂が突然死に至る。"
+        }
+      },
+      "id": "galeclaw",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a71864a1ef4c1235e33ec860c0ccd73b75965b335a26a0df17d642d2cfb4400",
+          "status": "machine_assisted",
+          "text": "輝きのあるルアーで、闇を照らします。 光に惹かれているいパルは、一度アンドーンが発見した逃げるチャンスがありません。 たとえどんなに遠くまで行っても、安全かつ健全な家に帰るまで、彼らを導くことができる。"
+        }
+      },
+      "id": "ghangler",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "55f12c8760323263b44cac5ecbdac5431eccd36226f96a200687c808072ab9c0",
+          "status": "machine_assisted",
+          "text": "燃えるようなルアーは、獲物を煎するためのグリルとして二重に使われます。 おいしい香りに魅了され、メラドーンはメラドーンが彼らの照準を合わせると逃げる希望がありません。 結局、みんながいっぱいになるまで心からお食事を。"
+        }
+      },
+      "id": "ghangler-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25382ad5a737a7b62a35ab76a3322eb1243e6ab8909f63aa4bcc827d48288ea7",
+          "status": "machine_assisted",
+          "text": "金色の黄金時代、金色の毛皮は金の変質触媒として高く評価された。 やがて、そのたてがみを処理するだけで同じ黄金色が得られるという驚くべき啓示がなされました。"
+        }
+      },
+      "id": "gildane",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "81995327ffafaa45e1499c2f57bb950463713f7ed9747d1f31a35e029d673345",
+          "status": "machine_assisted",
+          "text": "体に巻く黄金の包帯のような器官は、非常に弾力性が高い。 しかし、乾燥状態が極めて強いため毎日の水分チェックは欠かせません。"
+        }
+      },
+      "id": "gildra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a5019755f6b5bd2f8047955f6e799072f258a74aeffdd7965001849b1a8e4c2d",
+          "status": "machine_assisted",
+          "text": "このパルで眠りに落ちる前に、翌日の計画を確認してください。 吸引カップは、噛み跡のように不審に見えるマークを残します。 眠いセッションが、本当に不要な懸念につながる可能性があります。"
+        }
+      },
+      "id": "gloopie-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "63c3dc78e9f3e9d107c85083a2282b7379ebb9c8f06fdde6b02ca9ae80d948e8",
+          "status": "machine_assisted",
+          "text": "昔は巨大で強力な水生パルでした。 しかし、食糧が不足するにつれて土地での生活へと発展していった。 歩くにはエネルギーがかかるので、徐々に小さくなり、今では小さくてパニーなパルになっています。"
+        }
+      },
+      "id": "gobfin",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25b9d0c353bcf42f29d036999f540c00983cad431b64a105ad42398f78480cd4",
+          "status": "machine_assisted",
+          "text": "昔は巨大で強力な水生パルでした。 しかし、食糧が不足するにつれて土地での生活へと発展していった。 歩くとカロリーが燃焼するので、火をコントロールするためにそのパワーに驚異的に目覚めました!"
+        }
+      },
+      "id": "gobfin-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b521b870bec01057f81db0b8ec9c528f5d546852c9d3ffd94d16b08df23bbc62",
+          "status": "machine_assisted",
+          "text": "地面をリズミカルに打ち破り、仲間とコミュニケーションをとる。 それぞれのリズムの意味は部隊によって異なるが、その区別はほとんど不明である。"
+        }
+      },
+      "id": "gorirat",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "81fa132b75a9024b0ae706d2b672bbf5f7c1780ced210629f12daecf2cf9b444",
+          "status": "machine_assisted",
+          "text": "地面をリズミカルに打ち破り、仲間とコミュニケーションをとる。 ゴリレイジよりも強く、すべてのXWERMAXq Aが同時に地面に当たった場合、 島は1 s秒で沈みます。"
+        }
+      },
+      "id": "gorirat-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "158986e22c82290bf587a5207cead4635e2f9f266c6d2baf4cb0925c56170abf",
+          "status": "machine_assisted",
+          "text": "ニャンギマリの目は、誰もがその領土に入った瞬間に点灯します。 言葉の姿ではなく、目は文字通り明るく光っている。"
+        }
+      },
+      "id": "grintale",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a923f84b869c46efb1ee4d5069ce1345daf34b8004946ff5bc42780472104b3c",
+          "status": "machine_assisted",
+          "text": "フレンドリーな笑顔と堅い体格で、パートナーとして認識されるものに向かってもやさしくなっています。 説明がつかない理由から、その性格はミニガンを振るうと劇的に変化します。"
+        }
+      },
+      "id": "grizzbolt",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "75783b90ddc9ff3a1644acff863c5dbdb5506dc8c1d2c0ad6f7777fd3202b101",
+          "status": "machine_assisted",
+          "text": "木の樹液に似たボディを持つ奇妙なパル。 体に何も隠さないと徐々に力を失い、やがて腐り果てます。"
+        }
+      },
+      "id": "gumoss",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ad6f823d89a8671c5cd7c69c5f5fc92ac96310280a8ff6075f26a800fa623896",
+          "status": "machine_assisted",
+          "text": "静寂は落ち着きなく、不思議なほどに落ち着いている。 他には誰も残っていない。 全て納入済みです。 救いの王様よ、私も永遠なる静けさに導いてください。 -古文がここで切れている。"
+        }
+      },
+      "id": "hartalis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0c0000349e127a1f13e51702423318a7ea4ecde59d5f4035125aea792660f980",
+          "status": "machine_assisted",
+          "text": "地獄の奥から雷が鳴り響く。 ヘルガルダの雷で死んだ人は、きっと魂を地下世界に送るでしょう。"
+        }
+      },
+      "id": "helzephyr",
+      "kind": "pal"
+    }
+  ],
+  "schemaVersion": 1
+}

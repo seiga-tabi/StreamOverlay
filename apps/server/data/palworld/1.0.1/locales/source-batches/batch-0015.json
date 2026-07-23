@@ -1,0 +1,2097 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 15,
+  "records": [
+    {
+      "id": "tarantriss",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tarantriss",
+          "sourceSha256": "ccbed91d1088b11ed20d535939b1220d85f44b6aa205366417fe4d3cdd4d7fdb"
+        }
+      }
+    },
+    {
+      "id": "teafant",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Teafant",
+          "sourceSha256": "8dc8ac5ce45dadb9db5146ba25647d38a7e1c8f53d3d207fbf08bd99c2fe673d"
+        },
+        "description": {
+          "sourceText": "Large amounts of water pour from what is thought to be its nose, though some say that it is, in fact, just snot. This has sparked a fierce debate among Pal scholars.",
+          "sourceSha256": "a3c23a2fe7e05c1d999b48076b49ae30ab9f4b1cb01c2cc2c7ad2868f33cc976"
+        }
+      }
+    },
+    {
+      "id": "tetroise",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tetroise",
+          "sourceSha256": "15a7907f5d73f412643b1d5e98c18582f050a1e6a7235acd64ca89271e4e5aab"
+        },
+        "description": {
+          "sourceText": "Those stones on its back are not just cargo. Set them down somewhere distant and they will slowly make their way back home.",
+          "sourceSha256": "9deeed826b34173d4bb83aaeb9417d245a6712a8db62c9300f7141b47d73350f"
+        }
+      }
+    },
+    {
+      "id": "tetroise-primo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tetroise Primo",
+          "sourceSha256": "74d916fa064e260a435bb1a4e56339a467dfcb08756a1100c6036d56d2dfee9d"
+        },
+        "description": {
+          "sourceText": "Even if the stones on its back were to be removed, Tetroise Primo will know where they are. No matter how far apart, it will always track them down.",
+          "sourceSha256": "4af03f2ce40e6784e18af6dceecbe8b09681e1e8a429531d424f6da62e873525"
+        }
+      }
+    },
+    {
+      "id": "tocotoco",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tocotoco",
+          "sourceSha256": "699c2402c75421dc2fd7e555e9f812ddbccc34d1d7e5a28fe6aa3418ab688a52"
+        },
+        "description": {
+          "sourceText": "A frightening Pal that produces exploding eggs. It often fires these eggs from its rear end as a form of defense, but when spent, the Pal itself explodes.",
+          "sourceSha256": "27f53c65550c33257e0c19937c4520381a12ef2745c6d26dcc8c957a62607da8"
+        }
+      }
+    },
+    {
+      "id": "tombat",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tombat",
+          "sourceSha256": "785510283fdd16c66af27335e794129f9e1c0339c074c5e3de11cbec2dec7f69"
+        },
+        "description": {
+          "sourceText": "Often appears out of the blue to flaunt its prized wings in front of other Pals. Although this appears to be an intimidation tactic, the Pal seems to derive some kind of pleasure from the display.",
+          "sourceSha256": "43c264b358503f0f1a2d33951d21aeb39a0af772972cb1d183e299cad4246c42"
+        }
+      }
+    },
+    {
+      "id": "tropicaw",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Tropicaw",
+          "sourceSha256": "c437aa38d00d70ed764bd33cd6f62b0c96f2d352414103cf0e2554718068769d"
+        },
+        "description": {
+          "sourceText": "While some say that it flails around to mimic flowers swaying in the wind and avoid predators, others argue that a crimson flower thrashing violently at high speeds is simply so unsettling that nothing dares approach it.",
+          "sourceSha256": "3ca0a46eb8c071fced024d8f1311bc400143fedfbb46e6a2cac0f4a59a2acb37"
+        }
+      }
+    },
+    {
+      "id": "turtacle",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Turtacle",
+          "sourceSha256": "b9af4c2cd72f208068329aea1d1028a9e9d573add40308a82f746afc9872455f"
+        },
+        "description": {
+          "sourceText": "To protect its fragile body, it developed an incredibly tough shell. Unfortunately, it's utterly defenseless underneath. Even a little tickle could knock it out cold.",
+          "sourceSha256": "5cc028b713dc7aeaba096bb89e38fa7996a9fbcb2d21a464aef6d02c0d4e5326"
+        }
+      }
+    },
+    {
+      "id": "turtacle-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Turtacle Terra",
+          "sourceSha256": "76cb0030c105e062d8ce0f926ec86d29d79fe9ffdfdfa0fd105335e6c5bc7061"
+        },
+        "description": {
+          "sourceText": "To protect its fragile body, it developed an incredibly tough shell. With most of its senses concentrated in its limbs and shell, it can’t even tell if someone quietly touches its core.",
+          "sourceSha256": "743e097303b781310527ff6ff2e91e0ad57017669fd62643f5d620b953467817"
+        }
+      }
+    },
+    {
+      "id": "univolt",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Univolt",
+          "sourceSha256": "c3c882eddcdef63e43f12109cee074540bc23e6a9b49609ea66d2f307cb155c2"
+        },
+        "description": {
+          "sourceText": "It used to be considered an emissary of the Thunder God, and thus was not hunted by people. However, after witnesses observed one die from a lightning strike, its reverence faded, and it quite literally fell into the role of a workhorse.",
+          "sourceSha256": "2ba9f78ed09680a2d5daa7bdc02501a6ff683da07a872950dccd82328a52856e"
+        }
+      }
+    },
+    {
+      "id": "univolt-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Univolt Cryst",
+          "sourceSha256": "24d35e97e0ed6204a4f5955bb2721e31c432c04e5da582e8d5663901dd4ff300"
+        },
+        "description": {
+          "sourceText": "It used to be considered an emissary of the Winter God, and thus was not hunted by people. However, after witnesses observed one lose its footing on the ice, its reverence faded, and it quite literally slid into the role of a workhorse.",
+          "sourceSha256": "579858068b560cab767d565cb258a2d021d6f2eaa50d4e00a9c8b2080b74f540"
+        }
+      }
+    },
+    {
+      "id": "vaelet",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Vaelet",
+          "sourceSha256": "874a092511cfd3b19fc354d7678c4ee1a2ea68888d68c6bbc51edbb89577c444"
+        },
+        "description": {
+          "sourceText": "The castle was filled with the king's favorite flowers. A great battle ensued, and flames approached the castle. Amidst the chaos, the spirit of a flower appeared. - From the fairy tale, |The King's Flower.|",
+          "sourceSha256": "4542e4d2ef21a6655f8f6042d8935be35e47512dbf4f72f681dba3c8c93b541d"
+        }
+      }
+    },
+    {
+      "id": "valentail",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Valentail",
+          "sourceSha256": "10dc59fe02319653d49ee86a989a600092868a381d1490c30cde89ac5c1869a3"
+        },
+        "description": {
+          "sourceText": "In older paintings, it is depicted as much smaller than it is today. For reasons unknown, various parts of its body have begun to elongate rapidly in recent years, and it is predicted to reach nearly ten times its current size within the next century.",
+          "sourceSha256": "88e9a833d873810002c1ba563de71176010ddc9f956d3871db2f1bd3f49a053f"
+        }
+      }
+    },
+    {
+      "id": "vanwyrm",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Vanwyrm",
+          "sourceSha256": "55cb30d76a9bc26826bfcd8c09d42051bece51b77c00945be4a9f656a4522895"
+        },
+        "description": {
+          "sourceText": "The melodies of a flute made from the exoskeleton of a Vanwyrm are said to cross whole mountain ranges. In ages past, such flutes were used to signal an attack.",
+          "sourceSha256": "ff1f1b4ca49d5e52fe8b903039b23ed5de7016e97eb3f1a3bf0857851fc1cb3d"
+        }
+      }
+    },
+    {
+      "id": "vanwyrm-cryst",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Vanwyrm Cryst",
+          "sourceSha256": "931d8e9056fed353be8065063cd04d873d642296d6a0b1fb49ca00e1bf9bb4c8"
+        },
+        "description": {
+          "sourceText": "The melodies of a flute made from the exoskeleton of a Vanwyrm Cryst are said to cross whole mountain ranges. In ages past, such flutes were used to signal victory in battle.",
+          "sourceSha256": "5f37be266a4fa078f70c7f5a3e441d1a33542998da094cf0fee028c4ffd9a32d"
+        }
+      }
+    },
+    {
+      "id": "venusa",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Venusa",
+          "sourceSha256": "4478fd6be06267b1dca1affe92a3b91b937a048f32dfc7a67a04469c65ab590a"
+        },
+        "description": {
+          "sourceText": "Whenever it's confused, it resorts to consulting with the snakes on its head. However, since they're all ultimately the same being, it comes to understand that nothing is understood.",
+          "sourceSha256": "a44149eb62ca8389eabd14876ea01cf87b26f6ff12ca8a4448507430ecbfc08a"
+        }
+      }
+    },
+    {
+      "id": "verdash",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Verdash",
+          "sourceSha256": "0ab2c9bb45c03a62693d12770275328ed53932312452d4a9e69cc105b2dfbb6c"
+        },
+        "description": {
+          "sourceText": "Land that Verdash has run across becomes extremely fertile, with thick vegetation growing soon after. It will not run anywhere that herbicide has been used.",
+          "sourceSha256": "0afcc005c341b737ce697964fa8904552f637575014ab1afb85f7a1809b78153"
+        }
+      }
+    },
+    {
+      "id": "vixy",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Vixy",
+          "sourceSha256": "0df855c8987aa8bcd0c5c26cb75fd6c4842791fd549173c8456e53a7223eb47c"
+        },
+        "description": {
+          "sourceText": "The idol of Palpagos Island. If you bully a Vixy, you best be prepared to become enemies with the whole world.",
+          "sourceSha256": "7513e0fe91f61464813663e7a81d064fca4a11bdd3da35af183b1f784abbb2d1"
+        }
+      }
+    },
+    {
+      "id": "warsect",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Warsect",
+          "sourceSha256": "e16451bb1b9b1224ff58a7329d4abca02685619fb5eb62701d2f61dd169840ac"
+        },
+        "description": {
+          "sourceText": "The ultra-hard armor surrounding its body is extremely strong and heat resistant. Even a napalm blast would hardly leave a scratch.",
+          "sourceSha256": "eed9e5a53c9b69a0afd1edd0fbdf7bd2a568915b47d8c6d79fc0c0d586938fe9"
+        }
+      }
+    },
+    {
+      "id": "warsect-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Warsect Terra",
+          "sourceSha256": "da950b563cb463f4f3c9150f0e74314207e8f1142cf95acce425fc7e25f5b421"
+        }
+      }
+    },
+    {
+      "id": "whalaska",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Whalaska",
+          "sourceSha256": "50f93b6bcaee89eaacef31d11a80eb122b7fea707cca129463140b0a115c76ec"
+        }
+      }
+    },
+    {
+      "id": "whalaska-ignis",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Whalaska Ignis",
+          "sourceSha256": "211e4b04fbabb81102bd5b65fc9e4850493544b6ac18944a76c11cd4b746a72a"
+        },
+        "description": {
+          "sourceText": "Determined never to be mistaken for drift ice again, it turned bright red through sheer will. Unfortunately, some Pals can’t see red. So despite its efforts, its personal space continues to be invaded.",
+          "sourceSha256": "d2c035bd1ab551b88ad62b9a369389aa904ac1513802cd3a5ebe8410274902f1"
+        }
+      }
+    },
+    {
+      "id": "wispaw",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Wispaw",
+          "sourceSha256": "85708e15da3c9b669b1d6a21f0219bf4d40c2ae5311fe8566d7449952f128e25"
+        },
+        "description": {
+          "sourceText": "The ghostly hands behind it embody the souls of all humans who have raised its kind. Lately, they seem to have reached a unanimous consensus to dote on Wispaw.",
+          "sourceSha256": "0495e8e1e2a49ad0f10257920c5cdb89309a9145b425876b4237c0e92512d510"
+        }
+      }
+    },
+    {
+      "id": "wistella",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Wistella",
+          "sourceSha256": "65f3946b7d675bafbc434736fc4fe7149103de9bd0bd883fabe7c6a7974371fb"
+        },
+        "description": {
+          "sourceText": "At the end of its life, a new star appears somewhere in the skies, glowing with the weight of its memories.",
+          "sourceSha256": "35149bc95d8cc22c2073ce1c20cdee174e343f67fa900347c10d33589723267d"
+        }
+      }
+    },
+    {
+      "id": "wixen",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Wixen",
+          "sourceSha256": "9797987f0863128a3668ab17852c3b21a0e17cb9e79900b88c7dd4c370834957"
+        },
+        "description": {
+          "sourceText": "With the power of light, it produces arcane phenomena. It prefers to eat food well-done and is particularly hostile towards Katress.",
+          "sourceSha256": "08162839c70b41c0a0bfa5413923b5cd80c447810aafcc81d68d2a4a344c998b"
+        }
+      }
+    },
+    {
+      "id": "wixen-noct",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Wixen Noct",
+          "sourceSha256": "73068a00665dc37b4cb979f3773c3ad889cc01e7fb8e73dc96a729a45459130d"
+        },
+        "description": {
+          "sourceText": "Due to its upbringing, it no longer cares about whether its food is cooked enough. This Pal stopped worrying about those details, and just prefers its food to be as sweet as possible. Not on good terms with Katress Ignis.",
+          "sourceSha256": "b0d654637770922fb13ebdab81a8d2eff891b8ce3909da201ef252df3b6f47c6"
+        }
+      }
+    },
+    {
+      "id": "woolipop",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Woolipop",
+          "sourceSha256": "ca772c6e90f94e3e0a6e80149c8f1291aee19fa3df76d9cf02562ce573cccd5a"
+        },
+        "description": {
+          "sourceText": "Its entire body is 18,000 times sweeter than sugar. Carnivorous Pals lured by its scent will find themselves overwhelmed by sweetness and even pass out should they take a bite of this Pal.",
+          "sourceSha256": "972d43015d9e8f0d58a3c6bf35efc4ac891168595833b33d72e0de105064277b"
+        }
+      }
+    },
+    {
+      "id": "woolipop-terra",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Woolipop Terra",
+          "sourceSha256": "84fddfe7386ea301f93b271efa0f8c87bc4798a661838d7f30659dcffaed3af2"
+        },
+        "description": {
+          "sourceText": "Its fur emits a sweet smell, but its meat is disgustingly bitter. Carnivorous Pals lured by its scent into taking a bite will find themselves overwhelmed by the foul taste and pass out.",
+          "sourceSha256": "4bef58010bcf0c81d9c9761f28f7e9953264754354cb1ca90694a984c4bcd269"
+        }
+      }
+    },
+    {
+      "id": "wumpo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Wumpo",
+          "sourceSha256": "703f47fe1ef5303e93112d46436d4c1e7c039589b349a3d4918042686eec0c74"
+        },
+        "description": {
+          "sourceText": "Researchers once tried to shave off its hair to reveal its true form. In the end, only hair was left, as if that was all there was to begin with.",
+          "sourceSha256": "e47d18c53cd26ef8962d89595091ab8e7a09e758635ef6bda5136c3970b91ec5"
+        }
+      }
+    },
+    {
+      "id": "wumpo-botan",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Wumpo Botan",
+          "sourceSha256": "2c6ef00a4e91d40ce0b37b09c1f01d7b777009b8fa949e83820f814ffb7238e3"
+        },
+        "description": {
+          "sourceText": "Researchers once tried to cut the grass off its body to reveal its true form. In the end, only grass was left, as if that was all there was to begin with.",
+          "sourceSha256": "befbbc4c54f4f5172f875803c73256fd0ad046148527c5efdb894b6d7f060e9b"
+        }
+      }
+    },
+    {
+      "id": "xenogard",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Xenogard",
+          "sourceSha256": "15a26a60d14ecfea08dbabab3d08154246d2eb0eddb33b4b1d1cdd785d2dabdd"
+        },
+        "description": {
+          "sourceText": "Consumes information and turns it into energy. Regularly seems to be sending information to someone. - Hello? What was the message you just sent? I devoured it before checking.",
+          "sourceSha256": "1bbbd42c9f6e7308b809eb2a377ed77b1202e9944889239b11afd1e152044423"
+        }
+      }
+    },
+    {
+      "id": "xenolord",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Xenolord",
+          "sourceSha256": "f286c4b89a652550b992f110b79c4a13e9887339af23bbddd8849ebf0253efc2"
+        },
+        "description": {
+          "sourceText": "-Destination reached. Priority: Locate entity |Supersonic Dragon| -Note: Conquest deadline exceeded by years. -Update: No conquest traces found. Naturalization confirmed. Commence elimination protocol. -Staff Memo: Refrain from forgetting or consuming critical data!",
+          "sourceSha256": "ca6a975878d38ef11d83b9265638212f2743e5d3b0d462d2947b16725ff9b145"
+        }
+      }
+    },
+    {
+      "id": "xenovader",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Xenovader",
+          "sourceSha256": "c064ee3f28a7e8d3d9c00189eb39bdaf7091a5c7fa8a2d661fb8de69e3060e82"
+        },
+        "description": {
+          "sourceText": "Can send information and convert it into energy by forgetting it. Regularly seems to be sending information to someone. - Respond. Target located. Proceed to immediate destruction.",
+          "sourceSha256": "fa05af0962717afaea6d6e188bce39b22bdc13f619cf2ef76e312657cab1d60e"
+        }
+      }
+    },
+    {
+      "id": "yakumo",
+      "kind": "pal",
+      "fields": {
+        "name": {
+          "sourceText": "Yakumo",
+          "sourceSha256": "c30d24401cfaa7de16efa3af10405a1b7d151dc07751714da5de10c5f1fefa39"
+        },
+        "description": {
+          "sourceText": "It has a strong sense of justice and despises evil. In the past they were faithful and loving companions to the islanders. Nowadays, Yakumos are hostile to humans wherever they spot them.",
+          "sourceSha256": "5059413dff2ade33425cc441b60eb4a608ef178334b54b903333e6fda0abff34"
+        }
+      }
+    },
+    {
+      "id": "active-absolute-frost-8b7feb098a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Absolute Frost",
+          "sourceSha256": "8d0f3dfbe1a1448671b7cf60d9eb43b4bb513414bc328dace74ad9612fd09675"
+        },
+        "description": {
+          "sourceText": "Throws icicles in a wide area from under the enemy's feet.",
+          "sourceSha256": "1f6a759e14bb2196d5b5c36fd9179cb073108ef6c39c05fa711054e4206054c4"
+        }
+      }
+    },
+    {
+      "id": "active-acid-rain-b29ac863a8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Acid Rain",
+          "sourceSha256": "f6e3a857752d0aacf54c77902908a4343b02d2049889fdf40cb4405384fcc1fe"
+        },
+        "description": {
+          "sourceText": "Creates acidic clouds that pour down acid rain on enemies.",
+          "sourceSha256": "c81270d9ef81ad29432d5160233ec6ce28294ee62f5eda3b430fc5c69efc13b4"
+        }
+      }
+    },
+    {
+      "id": "active-air-blade-69ea8df815",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Air Blade",
+          "sourceSha256": "d909ac897e08da27964a5a3655a7196776390ed7b566ee6004f382e2743ba371"
+        },
+        "description": {
+          "sourceText": "Sends out sharp blades of air in a fan shape.",
+          "sourceSha256": "ccabe28f859effdbedc6cedac82122db8e6c913d752f0650230b04c420fa11e5"
+        }
+      }
+    },
+    {
+      "id": "active-air-cannon-ba65ad11ea",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Air Cannon",
+          "sourceSha256": "40e8c51fd7c861cdd8d48f911edb728ee3bf7e0c4f3b83c5390aebfd34681e04"
+        },
+        "description": {
+          "sourceText": "Quickly fires a burst of highly pressurized air.",
+          "sourceSha256": "caf7a8f0efc35fd3baf58bcaad2065f758fb72f28a5b9dfa65c6231d05a3d012"
+        }
+      }
+    },
+    {
+      "id": "active-all-range-thunder-f57fe5d8da",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "All Range Thunder",
+          "sourceSha256": "3a15f7d55f46f9680cdecdbffc596557b840bb9206f59c82a82b16df9afe0523"
+        },
+        "description": {
+          "sourceText": "Generates lightning strikes that travel in a straight line in all directions.",
+          "sourceSha256": "0390745a05acfafff50cc1f2c37474b64c49d910364c1b77e5c88d9b81934b50"
+        }
+      }
+    },
+    {
+      "id": "active-antler-uppercut-c4b694a897",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Antler Uppercut",
+          "sourceSha256": "82c6a54268f5dae00d2f138e0678b9c84c97295a575a82d775c9245e3372d4fe"
+        },
+        "description": {
+          "sourceText": "Eikthyrdeer's exclusive skill. Charges at foes and uses antlers to launch them into the air. When used while riding, the direction of the charge can be controlled.",
+          "sourceSha256": "5863044b1f582809f10565dfa0c678b1c1a59382ef2f9eabd1c93019a035ca77"
+        }
+      }
+    },
+    {
+      "id": "active-apocalypse-c2909dd4d5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Apocalypse",
+          "sourceSha256": "952f6866fcda179f5949780b48f7750ef3b52e55fca04cf4defa183aef89e80b"
+        },
+        "description": {
+          "sourceText": "Generates several dark vortexes around the enemy.",
+          "sourceSha256": "86d215b2e0d5b08756a9b37b2fdd4e1f7bcf3cf5e176fab3a2a887ccee84de23"
+        }
+      }
+    },
+    {
+      "id": "active-aqua-burst-72938e0647",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Aqua Burst",
+          "sourceSha256": "0173e2bd7a0494c5740ae5cbed6cbfa6b56fe9d084109b9a0ce5452244563838"
+        },
+        "description": {
+          "sourceText": "Creates a giant ball of water and hurls it at an enemy.",
+          "sourceSha256": "6c82c94bb754a27121b003a0a73d58501d7bd2bac4a6a4d6a9863eed11420eda"
+        }
+      }
+    },
+    {
+      "id": "active-aqua-gun-97e58f5463",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Aqua Gun",
+          "sourceSha256": "474b3d0ee8de2addb5e230575aec24666c6e56737811ca948d50436bf0a0e27e"
+        },
+        "description": {
+          "sourceText": "Hurls a ball of water straight at an enemy.",
+          "sourceSha256": "5cfcc060320ec3e964656a418424827308b6922f4fa0289b0de2504f964ecf65"
+        }
+      }
+    },
+    {
+      "id": "active-aqua-surge-493d87d7ac",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Aqua Surge",
+          "sourceSha256": "0390ad28617916fc81a5b174baa5576a0ed6617f985333f1dbc736ede33cc66d"
+        },
+        "description": {
+          "sourceText": "Generates waves that surge around the enemy from all sides. They converge and explode at the center, erupting into a column of water.",
+          "sourceSha256": "12a99b63004013c56cc615c66fe0dc0b444498c005d35f6f6804566ce13faa92"
+        }
+      }
+    },
+    {
+      "id": "active-astral-ray-02bd50b8a1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Astral Ray",
+          "sourceSha256": "de79b2567714c35615c10cc6b6cc3eea70c29ce52be15e253282f62feaa3f7f3"
+        },
+        "description": {
+          "sourceText": "Xenolord's exclusive skill. Concentrates energy filled with darkness and releases it all at once in a straight line.",
+          "sourceSha256": "1d1880392737ba29ad03efed0839e68c2658befb99699eb3fa1a3e4b2efe40eb"
+        }
+      }
+    },
+    {
+      "id": "active-azure-dracoflare-90805e9280",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Azure Dracoflare",
+          "sourceSha256": "29c846cbffdc4058f03d653752e0f5be50080afbe1e30edeed69c8ec941bb186"
+        },
+        "description": {
+          "sourceText": "Shaolong's exclusive skill. Breathes Dragon-elemental flames in a sweeping motion, scorching the surrounding area.",
+          "sourceSha256": "dafe9aec954bf217045d0ff2d679be2b9ef14465a7f184ed5703b7d16d809332"
+        }
+      }
+    },
+    {
+      "id": "active-beam-comet-2b15ced317",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Comet",
+          "sourceSha256": "2d3e9183f5bbdcd7ef4ec5e1dfb51605685e0e46d3d13be8d36d59c02d2d8e32"
+        },
+        "description": {
+          "sourceText": "Jetragon's exclusive skill. Illuminates its wings and fires innumerable beams as it flies towards the enemy. The beams explode on impact.",
+          "sourceSha256": "e28e7fb8cec13f028b839eb24cd88fbd892e91c9c3adb30c4dd81fb27211cde2"
+        }
+      }
+    },
+    {
+      "id": "active-beam-slash-50fff54815",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Slash",
+          "sourceSha256": "58f56c6ad31a43e196f239e9147a2b36a89cccad2763132e793b137039b8b359"
+        },
+        "description": {
+          "sourceText": "Xenolord's exclusive skill. Generates a high-output beam sword with the right hand and delivers two powerful slashes while moving at high speed.",
+          "sourceSha256": "d4dd6e8efce9b0e8694fdb14c6f5e65afc6d7defcfe50816d1164c1ac9f24eb9"
+        }
+      }
+    },
+    {
+      "id": "active-beam-slicer-5ff8e56ce9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Slicer",
+          "sourceSha256": "fb11e9439642a2eb61f4223a29097221ba5c7843c5542dc3e9dd51ec95aac7eb"
+        },
+        "description": {
+          "sourceText": "Mows down the area in front with a beam imbued with dragon power. The area struck by the beam will also explode after a short delay.",
+          "sourceSha256": "62516a2de22e01719ff49d93fb82d5a39879dcbfc7c718455190cd0b284f9c09"
+        }
+      }
+    },
+    {
+      "id": "active-bee-quiet-acc073e030",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Bee Quiet",
+          "sourceSha256": "5123f8398317036ba51c57abd4990f76ccf7d98dd8aaf5d910129e94b91da2a5"
+        },
+        "description": {
+          "sourceText": "Risks its life to cause a violent explosion, but receives the honor of falling in battle.",
+          "sourceSha256": "a2e9a09c84b3aa3aacc5a9509477f58516f921f8096fc9def8ebba4e289ce244"
+        }
+      }
+    },
+    {
+      "id": "active-black-quilled-ballet-9d0a2274d2",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Black Quilled Ballet",
+          "sourceSha256": "734b91d639573806226507cc6f0e383ae34eaa44effbe5d5644ef6f07f6d3a6a"
+        },
+        "description": {
+          "sourceText": "Solenne's exclusive skill. Jumps diagonally and throws sharp black feathers at enemies.",
+          "sourceSha256": "1f75f0c7d10ef4c3458e3aed228283131323c52e3903d3fe4659c4a45e0a654d"
+        }
+      }
+    },
+    {
+      "id": "active-blast-cannon-714b67e2e9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blast Cannon",
+          "sourceSha256": "89593f85d8154c012348489411142eb982d1600fd3ce257cc516871349932449"
+        },
+        "description": {
+          "sourceText": "Fires an energy bullet imbued with dragon power at the enemy's location. Upon impact, the bullet shatters and creates a frontal long-range explosion.",
+          "sourceSha256": "535d2b7659f33a2ce1bbf00a39ee0b5e019c92d33e6efd91e1fb26e000870097"
+        }
+      }
+    },
+    {
+      "id": "active-blast-punch-00077c919a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blast Punch",
+          "sourceSha256": "952e11a4f83b3df9ea9dda7f5c2b92f79ec205652d9986ef5339be96a8b2e8fa"
+        },
+        "description": {
+          "sourceText": "Mossanda Lux's exclusive skill. Winds up its right arm before delivering an electrically charged punch.",
+          "sourceSha256": "be7b66667842a62f096771355aea4ff0f1b561da9ef29d90ebffcd2f7ce3f3b2"
+        }
+      }
+    },
+    {
+      "id": "active-blazing-beam-1ee7ce20fc",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blazing Beam",
+          "sourceSha256": "f5314c90745075ab3a73b6120555bb590b474416f8a15a2dd8fa252fe2e8ffc3"
+        },
+        "description": {
+          "sourceText": "Eidrolon's exclusive skill. Emits a superheated light beam for a short time. At the final moment, the targeted area is engulfed in a massive explosion.",
+          "sourceSha256": "89d2be11a2d890ce4e2e303ff6a8b0942f02834d83a2606c5c2e5cbc0e86daea"
+        }
+      }
+    },
+    {
+      "id": "active-blazing-horn-5fc24604e7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blazing Horn",
+          "sourceSha256": "5ab21eb11ac4d05d64772bd72dfd93c729cf169a390ff223cd93f35cff084256"
+        },
+        "description": {
+          "sourceText": "Arsox's exclusive skill. Takes aim and charges with fierce momentum while raising its horn.",
+          "sourceSha256": "d691c206993ab0c086cd41188b5e74ef18942af6c58bba169c0c75abf9f34447"
+        }
+      }
+    },
+    {
+      "id": "active-blizzard-spike-c07fcacb09",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blizzard Spike",
+          "sourceSha256": "92d536192d0e0f0501f0ae135666f16370aa0a2058c113b40a9861d969254790"
+        },
+        "description": {
+          "sourceText": "Creates a giant lump of ice and hurls it at an enemy. It deals damage to those in the surrounding area upon impact.",
+          "sourceSha256": "4f0b1f80e861106690edc37a736fc6f175c26ddf6f1adf805ca13e02ad0b9152"
+        }
+      }
+    },
+    {
+      "id": "active-bog-blast-4dc5411705",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Bog Blast",
+          "sourceSha256": "53ae85c0e0b792f7cce20dec4ee3ee102c48103cf93a4e1eb5867f2d9f4ea7ec"
+        },
+        "description": {
+          "sourceText": "Hurls sticky mud at an enemy.",
+          "sourceSha256": "895d15c8fcf9469c87cc753c534e20fc8e46427e398a9db0b174fcec1d922f7c"
+        }
+      }
+    },
+    {
+      "id": "active-botanical-smash-db5f72660d",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Botanical Smash",
+          "sourceSha256": "9af7a50ffb7af9fa7d28dc53133e64faa3bfc38f245216d5eef49db1afe236b4"
+        },
+        "description": {
+          "sourceText": "Dinossom's exclusive skill. Uses its large tail to strike the ground in front of it, delivering a shockwave in a straight line.",
+          "sourceSha256": "50759caf6d71b219b5c1f678210d73db4421f058646a9faf140b65af6fc92323"
+        }
+      }
+    },
+    {
+      "id": "active-brawn-impact-109c355732",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Brawn Impact",
+          "sourceSha256": "dee6e1ed7a19225f1a39ce53c86c7c0407cf529ae8c6676c973b89ecc3089ae1"
+        },
+        "description": {
+          "sourceText": "Blazamut's exclusive skill. Raises and inflates its arms, then slams them together, causing a massive explosion in the surrounding area.",
+          "sourceSha256": "5c23318e00300b977b3fa9f428233fa2cd851d93db11123b6803e6cb71b9f421"
+        }
+      }
+    },
+    {
+      "id": "active-bubble-blast-eeacb83a1f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Bubble Blast",
+          "sourceSha256": "c5e938b41d205cb1f049f89fd597ac8c1cae4029395e933d0b7688f5be397a7f"
+        },
+        "description": {
+          "sourceText": "Fires numerous bubbles that slowly pursue an enemy.",
+          "sourceSha256": "b1e7df67c93169c22f72145d02ad83c74ae294998ec5ed1cf24c1fd242d70319"
+        }
+      }
+    },
+    {
+      "id": "active-bull-rush-ecf049e507",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Bull Rush",
+          "sourceSha256": "2f88b0c0e5b5d318bfca1c28e8ff4edaf6b83efe1dcdf04c8e89ae38ddfa2fc3"
+        },
+        "description": {
+          "sourceText": "Elgrove's exclusive skill. Enters a wild frenzy and unleashes two consecutive Grass-element charge attacks.",
+          "sourceSha256": "09882fe77cbdd869e8894071544e23f4c7685eb7ed8f1686251986ac44f90c41"
+        }
+      }
+    },
+    {
+      "id": "active-cat-press-eda83cf2ff",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cat Press",
+          "sourceSha256": "35d8c6e0976e5926c77f503147b08d2a584181bb943bbc8fcb3cdd3e774e8ccb"
+        },
+        "description": {
+          "sourceText": "Grintale's exclusive skill. Grins menacingly before leaping into the air and smashing foes with its body.",
+          "sourceSha256": "b8a394fda8cbc6ff942994e086c40719fd315243eff655c1668ce68bf2c35388"
+        }
+      }
+    },
+    {
+      "id": "active-celestial-vortex-bd51cf90bf",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Celestial Vortex",
+          "sourceSha256": "960cc43d81ada03c1a6669793ac16fb7c984dc670bd75097c8d05bb95f87147c"
+        },
+        "description": {
+          "sourceText": "Shaolong's exclusive skill. Summons a massive vortex reaching into the heavens. The vortex draws in and eliminates all surrounding enemies at once.",
+          "sourceSha256": "5c2babca0a5442b4284b417145b3b57c0927b1962edfdddd0e0de590b094302d"
+        }
+      }
+    },
+    {
+      "id": "active-chaotic-spray-78e735e137",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Chaotic Spray",
+          "sourceSha256": "3aa073a0121f6a34290165c79537181f9a8e1940d0c057c2c5b2f4676fbedf84"
+        },
+        "description": {
+          "sourceText": "Munchill's exclusive skill. Coughs up three cold grenades kept undigested inside its body and lobs them at enemies. May occasionally spit out something more dangerous...?",
+          "sourceSha256": "28e062623f45e2fcc909ed72ea003bb802d631e1f3a6aba6205cd645f7c58c99"
+        }
+      }
+    },
+    {
+      "id": "active-charge-cannon-a84c6e2a67",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Charge Cannon",
+          "sourceSha256": "fda5d290dc414389917d9f856bf1544d14ecf1e261a9f1aaebb6b692876e2807"
+        },
+        "description": {
+          "sourceText": "Fires an energy orb infused with draconic power at the enemy. The orb causes a wide-area explosion upon impact.",
+          "sourceSha256": "1d170c1a72b4ae29c54b729440c877e6ce406f6dafa4f7298a4adb6c2e82afc1"
+        }
+      }
+    },
+    {
+      "id": "active-chicken-rush-e9d8490632",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Chicken Rush",
+          "sourceSha256": "dd7720387fe418a1ace17a3e6b4e8eb58476b19bfd752da4e25fbc43d882b953"
+        },
+        "description": {
+          "sourceText": "Chikipi's exclusive skill. Flies at enemies in its sights, attacking them with its sharp beak.",
+          "sourceSha256": "f2f08f617b2ea201289e16f13fce3b331dfd64190901bdad2a6d042f5d63fd2b"
+        }
+      }
+    },
+    {
+      "id": "active-circle-vine-61fedb22d6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Circle Vine",
+          "sourceSha256": "551fd8c1b45ab5ede4120803be58170816a489e2bb143b7a65be477ec95d2622"
+        },
+        "description": {
+          "sourceText": "Sprouts sharp roots in and around the enemy's location.",
+          "sourceSha256": "7fcb3623d86e5265bbb34f9da9b7de23eb5b51ae3b54e08b979b9f4cc160aa28"
+        }
+      }
+    },
+    {
+      "id": "active-cloud-tempest-80729c6441",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cloud Tempest",
+          "sourceSha256": "c06dc8382f765b75c866ccf4685664aba583e62e3496785886f3732218d0eb70"
+        },
+        "description": {
+          "sourceText": "Fenglope's exclusive skill. Charges forward while manipulating the atmosphere to create a pressurized wind tunnel around itself.",
+          "sourceSha256": "ebceca323c94be7780b1dbc5ea1c3f634c73411b3b4ae5e58cfd5f621d586ee6"
+        }
+      }
+    },
+    {
+      "id": "active-comet-barrage-07c6cb53f8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Comet Barrage",
+          "sourceSha256": "d278bcf39396379f70fba61bdf4db567de276e7659cf1899568504513d8ec18c"
+        },
+        "description": {
+          "sourceText": "Drops meteorites one after another, generating shock waves around the impact areas.",
+          "sourceSha256": "4064542b085a0df6ff0c659dd693636b29d90ca68c3c5a674eec413391030dd4"
+        }
+      }
+    },
+    {
+      "id": "active-comet-strike-374bb146ec",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Comet Strike",
+          "sourceSha256": "f0306c6346c9d258024afd561d2306ee7f2c34ec57c5e50a0a3769652c8b1f29"
+        },
+        "description": {
+          "sourceText": "Drops a meteorite straight down, generating a shock wave around the impact area.",
+          "sourceSha256": "ee5578fe34208ee07a7da88a2e74677d6b77b4473451649b5548f6f7027d7d0f"
+        }
+      }
+    },
+    {
+      "id": "active-cosmic-meteor-9949610f26",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cosmic Meteor",
+          "sourceSha256": "2be5094e51c2a45c7ec6261a68ac2047daf03448422cd0a1b310daa903ad82a7"
+        },
+        "description": {
+          "sourceText": "Xenolord's exclusive skill. Soars into the air at the speed of light and releases countless meteor projectiles. Afterwards, transforms into a comet and charges forward, causing a massive explosion upon impact.",
+          "sourceSha256": "6775d23dafdcb313c5da85c759e849b934bfe8d577408a8df5e00c7ee3ec6116"
+        }
+      }
+    },
+    {
+      "id": "active-crash-dash-01f326716a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Crash Dash",
+          "sourceSha256": "bdeecaebeb34e9e4ac9fc3b8f2c3090fa3046279fa8ed260b79a2b92704fdacd"
+        },
+        "description": {
+          "sourceText": "Gildane's exclusive skill. Charges forward, hurling rocks to the left and right with great force.",
+          "sourceSha256": "b261f7068e614fc5bd88ddee3aaca1404f052820ebf225abc4373bf2cc8d3c86"
+        }
+      }
+    },
+    {
+      "id": "active-crosswind-648fe1b2f5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Crosswind",
+          "sourceSha256": "545d3d8573e4f85fd92abd285f8fbb65c4eaa6ff924e7c84d04b23456b9f6be3"
+        },
+        "description": {
+          "sourceText": "Conjures blades of wind in front of the enemy, converging to deliver a cutting cross attack.",
+          "sourceSha256": "1bb7682a3d114030dfae55e65306bd4325a26df82b96268e1ee222f20e8320a6"
+        }
+      }
+    },
+    {
+      "id": "active-crushing-punch-b69370a234",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Crushing Punch",
+          "sourceSha256": "031c9866961f6546abf1f9272c3873b355529520c5b056c4f35c1c50506ac66c"
+        },
+        "description": {
+          "sourceText": "Mossanda's exclusive skill. Winds up its right arm before striking an enemy with a devastating punch.",
+          "sourceSha256": "acbdfc7d28aa6a202a63e403486ad98578f51c2cc23504b823ebb13a338a2bb4"
+        }
+      }
+    },
+    {
+      "id": "active-crystal-breath-a42a4f99ba",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Crystal Breath",
+          "sourceSha256": "9247e4e4333f9ce965f76a07386e1a396fd236f2f2d2409436a0c7cb799f9a97"
+        },
+        "description": {
+          "sourceText": "Enshrouds an enemy in a frigid blast of air, dealing continuous damage.",
+          "sourceSha256": "72fe6cabe4a2c7cd5e8b6afe8df021010ca4f500a2dc23608aeb596fbea7a921"
+        }
+      }
+    },
+    {
+      "id": "active-crystal-wing-79da087cdc",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Crystal Wing",
+          "sourceSha256": "c1d6751ea55945324a368f78168c890240a9d923cee8b8fb0a51a611ce7802f3"
+        },
+        "description": {
+          "sourceText": "Frostallion's exclusive skill. Dashes forward while concentrating frigid air around its wings, using them to slash enemies with icy blade.",
+          "sourceSha256": "ddab52fe99a27b7a693b9dc790442043a071491da05023a0bce0a3fadc4e3f86"
+        }
+      }
+    },
+    {
+      "id": "active-cube-press-d01d1eb08f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cube Press",
+          "sourceSha256": "82a7df52fb7d9c084c04ec16f29c4c5dc9727c109438ae717f332b19976140a1"
+        },
+        "description": {
+          "sourceText": "Tetroise 's exclusive skill. Leaps into the air and crushes enemies with its massive weight.",
+          "sourceSha256": "028de6e17a634e37ef18e38a79b8403662584c3d3482f7ea80ec40aefe085325"
+        }
+      }
+    },
+    {
+      "id": "active-curtain-splash-c6db8d78cd",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Curtain Splash",
+          "sourceSha256": "8bb88b178a3b517e4e72732486f5560c72b4e0965a8254ef1087324332a1fbb2"
+        },
+        "description": {
+          "sourceText": "Continously creates walls made from water columns at the enemy's location.",
+          "sourceSha256": "a5e15c69a112c10f74cebe3d62650c4bb55c6d40a8ec24d5daf254e17317da1a"
+        }
+      }
+    },
+    {
+      "id": "active-daring-flames-6997e96779",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Daring Flames",
+          "sourceSha256": "4208e2168fa89ef17873a9883aba581b1827acfae65c8e15d4a2d17b89c1d7cb"
+        },
+        "description": {
+          "sourceText": "Kitsun's exclusive skill. Charges forward with great speed while enveloped in intense blue flames.",
+          "sourceSha256": "f528d8e3bbf5f41e8a474eb36ab1fd1241bfb27ebd63997685722edb83f36662"
+        }
+      }
+    },
+    {
+      "id": "active-daring-shadowstorm-fd18118d9b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Daring Shadowstorm",
+          "sourceSha256": "0d67154f9d3ab2e3b23e36a73950e8aacef3c704d3a1d98c56eb0b717735438a"
+        },
+        "description": {
+          "sourceText": "Kitsun Noct's exclusive skill. Charges forward with great speed while enveloped in intense purple flames.",
+          "sourceSha256": "63e5a8b85de8f50ee3498d440823cd85b1c859c77d8c721d239e1aa3a7e91721"
+        }
+      }
+    },
+    {
+      "id": "active-dark-arrow-b38e8ed617",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Arrow",
+          "sourceSha256": "dbe74c6bbf6a8890961ca3ac2d4b351f03eb33a87bd8acfdac0233cb616e30ba"
+        },
+        "description": {
+          "sourceText": "Fires off dark energy that homes in on an enemy.",
+          "sourceSha256": "9d054de10988b412bb553f3495393fd8c02ee38d3cd878db169bc8decc48df14"
+        }
+      }
+    },
+    {
+      "id": "active-dark-ball-1122a88ef1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Ball",
+          "sourceSha256": "f0a00da4e4e31ea2852fe26acb4b84d21f6333399c2b3a2f560a1bc3b43c124f"
+        },
+        "description": {
+          "sourceText": "Unleashes a sphere of darkness that slowly tracks down an enemy.",
+          "sourceSha256": "a0414749ad2610d5c401224da851dfc4c2efafea7abfe4bcc39b63ec4fd02169"
+        }
+      }
+    },
+    {
+      "id": "active-dark-cannon-969ecb5927",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Cannon",
+          "sourceSha256": "ca2db3292857754f776e0437b07e83dfa2b5a65d915ee437119265ebaa13454c"
+        },
+        "description": {
+          "sourceText": "Hurls an energy ball imbued with dark energy at an enemy.",
+          "sourceSha256": "3fb8cc51abffa594328eba7807efaf50a903712bb7a1d31d4fd55da3ec376354"
+        }
+      }
+    },
+    {
+      "id": "active-dark-charge-87eb02ac91",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Charge",
+          "sourceSha256": "628d65ea99f98ca8f0ecd80f196bc6780403ff7b73600542127491ddc0d2717f"
+        },
+        "description": {
+          "sourceText": "Pyrin Noct's exclusive skill. Charges forward while engulfed in a veil of dark flames. Flames continue to burn in its path.",
+          "sourceSha256": "eeae7545001e15313ce44812cb67fea9e6360deec95b43a3d72b8e8e793660b8"
+        }
+      }
+    },
+    {
+      "id": "active-dark-laser-55b43e4740",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Laser",
+          "sourceSha256": "38aff38f4d20cc37bb41312be05084e9452ebf3af2dfe3b19d5857e1331cb25a"
+        },
+        "description": {
+          "sourceText": "Charges dark energy before blasting enemies with a powerful beam.",
+          "sourceSha256": "5ef6f0e9779658b2e7619d8d71d8ed18d4000f7f24aaefa39240fdbce2655093"
+        }
+      }
+    },
+    {
+      "id": "active-dark-shot-683871250b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Shot",
+          "sourceSha256": "3bfe1009b52e3a8467c22df69f1fd1e85f6731772c11cc7e198397a2460b19f4"
+        },
+        "description": {
+          "sourceText": "Fires a dark energy projectile that accelerates over time.",
+          "sourceSha256": "fa4a9ad1acd6ad01be23567a119e797902b2def35ae95e1296fea7fd8d6f2326"
+        }
+      }
+    },
+    {
+      "id": "active-dark-whisp-c92448b914",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Whisp",
+          "sourceSha256": "0a77a45ec44151b08447be9f515762987956ae5ec9a1ba4de4a70628ca20b5e3"
+        },
+        "description": {
+          "sourceText": "Fires a menacing ball of dark energy that pursues enemies.",
+          "sourceSha256": "b3484f9ad5ef6ddd114742ac2447e0ea28f9444ba011c7ada551e59034a627c7"
+        }
+      }
+    },
+    {
+      "id": "active-dash-kick-f7ff806be9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dash Kick",
+          "sourceSha256": "e672339d20f7b270d242c7099f554fbaffe22e2b6a9c6b475e8e8255242a02cc"
+        },
+        "description": {
+          "sourceText": "Palumba's exclusive skill. Dashes to build up speed, then launches a devastating airborne kick at its target.",
+          "sourceSha256": "661d1180b1b83723b5d539be4264cbb85a2f8a775a59f8210816351d7c7219e0"
+        }
+      }
+    },
+    {
+      "id": "active-deep-breath-de1195da83",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Deep Breath",
+          "sourceSha256": "8f8d76b7e801d45220934647817151e1cd466b866ffc97611dc4f02830177a6b"
+        },
+        "description": {
+          "sourceText": "Braloha's exclusive skill. From the base of its long neck to the tip of its snout, it gradually spreads the breath of grass element.",
+          "sourceSha256": "faeec974196ce5b544617856e21c6d006c2d1d64255d444656b63b76eac217e1"
+        }
+      }
+    },
+    {
+      "id": "active-diamond-rain-485e2e12ab",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Diamond Rain",
+          "sourceSha256": "91300b2a3fcc3c816ad3cd7caa06e8d59c58545e46af565dd2839d354157349f"
+        },
+        "description": {
+          "sourceText": "Creates numerous lumps of ice that are consecutively dropped on a foe's head.",
+          "sourceSha256": "3eb1cff07ba449ade2d41dfba4b493f65480f95ec59639967df2ddc4014b69d0"
+        }
+      }
+    },
+    {
+      "id": "active-divine-disaster-08bd132196",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Divine Disaster",
+          "sourceSha256": "35c31d8ccfc46eff5a509d9e11b7316439b552887f59c8b2ca5822305103da8b"
+        },
+        "description": {
+          "sourceText": "Charges forward, generating orbs of light that automatically target enemies and unleash a barrage of lasers.",
+          "sourceSha256": "c7386edec8e2ef05d1adc876ad148a67b74a8a84423ef1ebbe95ec7e5e05d104"
+        }
+      }
+    },
+    {
+      "id": "active-divine-wing-d652b5bdc4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Divine Wing",
+          "sourceSha256": "09c41bfe547e1a72f0095093f3bf99d5cbeb6871a33ba2b02f64167a364535ef"
+        },
+        "description": {
+          "sourceText": "Hartalis' exclusive skill. Leaps back and sprouts wings of light, then dives toward the enemy.",
+          "sourceSha256": "eece6c74064f3012ad7297448f4f0a5387096646c5c573ac6bf528cdcbeabc87"
+        }
+      }
+    },
+    {
+      "id": "active-double-fang-51aba4eadf",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Double Fang",
+          "sourceSha256": "2384d321af21aa9f9fc842d2e5a904612acb0a8e7a1d2bee53f59b438fd117ce"
+        },
+        "description": {
+          "sourceText": "Bites rapidly in succession to attack enemies.",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4"
+        }
+      }
+    },
+    {
+      "id": "active-double-fang-b35a322bb6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Double Fang",
+          "sourceSha256": "2384d321af21aa9f9fc842d2e5a904612acb0a8e7a1d2bee53f59b438fd117ce"
+        },
+        "description": {
+          "sourceText": "Launches a rapid succession of bites at the enemy.",
+          "sourceSha256": "894838a68e986855b6cf9307398d2f07c377eba9e990e2863c27f223168de122"
+        }
+      }
+    },
+    {
+      "id": "active-double-fang-dark-de4c931ca9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Double Fang (Dark)",
+          "sourceSha256": "9d95a150311223b0af832e97a4a2fd7dbb4d8db7f457c20e206f4637d15f6e6a"
+        },
+        "description": {
+          "sourceText": "Bites rapidly in succession to attack enemies.",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4"
+        }
+      }
+    },
+    {
+      "id": "active-double-fang-electric-fc11498a3d",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Double Fang (Electric)",
+          "sourceSha256": "2a7e5c7798c1873880726f96bf06b48ec9d84d010149ab670b85424eaeb588a6"
+        },
+        "description": {
+          "sourceText": "Bites rapidly in succession to attack enemies.",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4"
+        }
+      }
+    },
+    {
+      "id": "active-double-fang-fire-3c2776e7d1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Double Fang (Fire)",
+          "sourceSha256": "a758460f7d96aea585355dbc5ee2299865fa6d1ec1c42a17eea46cee13e30f65"
+        },
+        "description": {
+          "sourceText": "Bites rapidly in succession to attack enemies.",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4"
+        }
+      }
+    },
+    {
+      "id": "active-double-fang-ground-652d0a9212",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Double Fang (Ground)",
+          "sourceSha256": "a8380b5babe55fb5359c2255bfbaae92218535ec32a9a16d51f7eaf358bf6600"
+        },
+        "description": {
+          "sourceText": "Bites rapidly in succession to attack enemies.",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4"
+        }
+      }
+    },
+    {
+      "id": "active-double-fang-ice-5afe55c46a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Double Fang (Ice)",
+          "sourceSha256": "677dc137a96243f86fa67fbc54aab680046fe694fa0fb5159c2ddacf8b145315"
+        },
+        "description": {
+          "sourceText": "Bites rapidly in succession to attack enemies.",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4"
+        }
+      }
+    },
+    {
+      "id": "active-dragon-breath-76e9a9c639",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Breath",
+          "sourceSha256": "3b439567997b03617938fd2b0048bb122fcf93edc85c2ea4e96f8a3d2fab9211"
+        },
+        "description": {
+          "sourceText": "Exhales breath imbued with draconic energy, dealing continuous damage to those in front of it.",
+          "sourceSha256": "632fe0f197316407119f75bea69777be9781568e6018345d2940a9e7f7295fce"
+        }
+      }
+    },
+    {
+      "id": "active-dragon-burst-15fdde5ce7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Burst",
+          "sourceSha256": "c3fd2da9b1f744680c039b707cc060f753ad7a3b552886e454cf56617d4d5f74"
+        },
+        "description": {
+          "sourceText": "Quickly discharges draconic energy, damaging those around it.",
+          "sourceSha256": "01be7ffe40d9580274b038fa664b6db90dcbbd52c21cbe27a3a1a22703baafa1"
+        }
+      }
+    },
+    {
+      "id": "active-dragon-cannon-e4a61bd1f5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Cannon",
+          "sourceSha256": "174f74ecdb46a35329df2ec5a1215644347c87e85f14de3e5ed606585457a6c3"
+        },
+        "description": {
+          "sourceText": "Hurls an energy ball imbued with draconic energy at an enemy.",
+          "sourceSha256": "6346ebcf3913d1578e0bdc0e50a28dad000d9686a05463c953d42030a3b83504"
+        }
+      }
+    },
+    {
+      "id": "active-dragon-meteor-436b1479c1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Meteor",
+          "sourceSha256": "b00648a5475c6f8ff3662b5914c96a4e23fa6b776d674f2f0bb358b5195aa938"
+        },
+        "description": {
+          "sourceText": "Summons numerous small meteorites and launches them at an enemy.",
+          "sourceSha256": "a839811462dea1aa8fd88cfa825adaabfe2b779f9558db88f38d81671ed29ed4"
+        }
+      }
+    },
+    {
+      "id": "active-earth-dash-7915143d84",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Earth Dash",
+          "sourceSha256": "f0e6dfd15993cc6e3f3019d56e6a20551d98c599e59857ae2b78bb5fcce6c9ff"
+        },
+        "description": {
+          "sourceText": "Dazemu's exclusive skill. Accelerates all at once and dashes forward at high speed.",
+          "sourceSha256": "54472b1f2d1dad8a4a1ac83c498a4396241e6a4bf8b26793429b51cc4a51f268"
+        }
+      }
+    },
+    {
+      "id": "active-earth-impact-4af9dc4acb",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Earth Impact",
+          "sourceSha256": "af1a887449a0cbaa2b2db801aad3302b6858389eef8b504e2064180004e76ba7"
+        },
+        "description": {
+          "sourceText": "Mammorest's exclusive skill. Uses its massive body to shake the earth, dealing damage over a wide area.",
+          "sourceSha256": "5af1b8f0ded00d7c8a120f7a58587c3bb074eed3f6e0853de8595551b64a2016"
+        }
+      }
+    },
+    {
+      "id": "active-electric-ball-f55d039393",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Ball",
+          "sourceSha256": "855f4604e20f1fb2946d33024bd5f3509bf3ed8be0a0f318b0f399b2fd27bcbd"
+        },
+        "description": {
+          "sourceText": "Fires an electric ball that slowly pursues an enemy.",
+          "sourceSha256": "bbc1eb6220a7041a62bc1b1b9e65e99662c2f19ccd66ba3df5f83d099ccb1b93"
+        }
+      }
+    },
+    {
+      "id": "active-emperor-slide-3c68b535be",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Emperor Slide",
+          "sourceSha256": "b1e8e75226c455a699366394008bab3e7200a6794c030d37f15fc829ebe501b2"
+        },
+        "description": {
+          "sourceText": "Penking's exclusive skill. Lies on its belly while generating frozen air all around it before sliding at enemies at high speed.",
+          "sourceSha256": "28a4239f73f9677968999aaf3269490f9232fb81fe84269d4652581eed93aa68"
+        }
+      }
+    },
+    {
+      "id": "active-evil-slash-5188a788e0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Evil Slash",
+          "sourceSha256": "ffd00ed1ecad4b6326c7e40099c197f6d1e5528bf92acf57b68e3d801659d739"
+        },
+        "description": {
+          "sourceText": "Xenovader's exclusive skill. Swiftly pounces and slashes with its left hand.",
+          "sourceSha256": "39aba85649e57e03b8ec8e74b231da6c83da0030c98dd08a253a3ee948572c06"
+        }
+      }
+    },
+    {
+      "id": "active-fire-ball-04f2ef6fcb",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Ball",
+          "sourceSha256": "7db97dd4017f0d011c7a92f5975816b32b0a6e9a618779c9f4abac26b9b63e3c"
+        },
+        "description": {
+          "sourceText": "Creates a giant ball of flame and hurls it at an enemy. The ball explodes over a wide area upon impact.",
+          "sourceSha256": "06d7d0cbc6571f8f333e31599db60a075ee3dc98908d35073234b640d30a74f0"
+        }
+      }
+    },
+    {
+      "id": "active-flame-funnel-76ade984db",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flame Funnel",
+          "sourceSha256": "725c3e6ca758fc87d2cbd4c993474d24c4535075bf0ce1656e41eeff7030a7d6"
+        },
+        "description": {
+          "sourceText": "Creates multiple spheres of fiery energy, from which countless fireballs shoot towards the enemy.",
+          "sourceSha256": "c7655b88a63e3689bf06ed75eb58f2adbfedef5107d24144be127d531857aee0"
+        }
+      }
+    },
+    {
+      "id": "active-flame-wall-2faee489e7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flame Wall",
+          "sourceSha256": "f4a444ea0b2d3a80c82a7e41510ac20384cec9d60a2b42fe6aa9b2a662bb6db0"
+        },
+        "description": {
+          "sourceText": "Creates a wall of flames at the enemy's location. The wall of flames will remain for a while, and deal damage to the enemies it touches.",
+          "sourceSha256": "6ecd62f5418082a88da7840b25c314a7edba513178a4cf7688e07927e7820832"
+        }
+      }
+    },
+    {
+      "id": "active-flame-waltz-79ed85c425",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flame Waltz",
+          "sourceSha256": "e11d1c5b1c39d5230594ada9b3a278003fc3c00c0578a1851b89a6aa5215f14c"
+        },
+        "description": {
+          "sourceText": "Bellanoir Libero's exclusive skill. With a graceful dance, conjuries expanding rings of fire, then unleashes eerie flames that seek the enemies.",
+          "sourceSha256": "ba816e0055d2e8f54f8403e574dd8a616fb65f63982e451be25f79074a38ca10"
+        }
+      }
+    },
+    {
+      "id": "active-flare-arrow-2e5dcd25bc",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flare Arrow",
+          "sourceSha256": "7d13e623c0f50c0f74ee78589d373b346433025c0b1b6b053d123650b5f75b06"
+        },
+        "description": {
+          "sourceText": "Fires three flaming arrows in succession that home in on an enemy.",
+          "sourceSha256": "9636d2578e68ef60c5806fa52753cdb3a554844ecdba187b51c9057badb1ba68"
+        }
+      }
+    },
+    {
+      "id": "active-flare-storm-e87d805c51",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flare Storm",
+          "sourceSha256": "3ba7b8919e001c92023ab7f31cd7302f987185ac46c5e4439dab67f4467e3d6b"
+        },
+        "description": {
+          "sourceText": "Generates two flaming tornadoes on either side before launching them at an enemy.",
+          "sourceSha256": "45933164761a6a7acd8ad3d62bfbd6bc4ba8cd0af27dde3e3dc3abf5da5c3990"
+        }
+      }
+    },
+    {
+      "id": "active-flower-stomp-98c5071f37",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Flower Stomp",
+          "sourceSha256": "f3e57e0119d509c909b2ebdaf93537abea29190bc9d60ca2b66ddf3878c6c994"
+        },
+        "description": {
+          "sourceText": "Tropicaw's exclusive skill. Leaps lightly into the air, then forcefully slams its sharp claws into the ground.",
+          "sourceSha256": "f1af7f588de2470fc0208451931ffcc994e026c377ad50d2d28d39239a81a82c"
+        }
+      }
+    },
+    {
+      "id": "active-fluffy-tackle-1e7d722911",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fluffy Tackle",
+          "sourceSha256": "897cdb12a238dbedc0808fb6ce47395aa76270dc0e398b4ee78571cad4d3f294"
+        },
+        "description": {
+          "sourceText": "Melpaca's exclusive skill. Charges forward while surrounded by an adorable aura.",
+          "sourceSha256": "ac16958f1a959546bb0d8e0490bb6dc968806519f960c8398f3ad9bc4b3d73ce"
+        }
+      }
+    },
+    {
+      "id": "active-focus-shot-14fd2ba84f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Focus Shot",
+          "sourceSha256": "1264912d83f76cee055faf2e68050e8e7a145d441108bd2ded1e20d41c2f22f1"
+        },
+        "description": {
+          "sourceText": "Robinquill's exclusive skill. Takes aim while drawing its bow before releasing a powerful shot at an enemy.",
+          "sourceSha256": "5761ffc3e559d201c7d7af886c09fccb7d9f1331c9e2f28786b7a7be4fe05c9a"
+        }
+      }
+    },
+    {
+      "id": "active-forceful-charge-91a44b19b1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Forceful Charge",
+          "sourceSha256": "0577fb4c072ab346a5df35a0478340c5c7b9d281bf7f2fda41ee769dc3df9c39"
+        },
+        "description": {
+          "sourceText": "Anubis' exclusive skill. Rapidly pursues its foes while releasing energy and unleashing a powerful punch.",
+          "sourceSha256": "dbbd28921b9f6570a00aa2e96c97ae88891c96150c03392672e46b1c3c649714"
+        }
+      }
+    },
+    {
+      "id": "active-freeze-wall-060f1a2cce",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Freeze Wall",
+          "sourceSha256": "1f783ab5f2e638bda8204754936ac9d7b6e8344156ca2857c5e2e309954ed96e"
+        },
+        "description": {
+          "sourceText": "Creates a wall of ice that rises from the ground. The ice wall remains standing for a while, and breaks after taking enough damage.",
+          "sourceSha256": "174343bbcce67dc85c8f070da4c1cb4d59741e0b884ed2060c0c06526fdd7f06"
+        }
+      }
+    },
+    {
+      "id": "active-freezing-charge-e8b8dbaf5e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Freezing Charge",
+          "sourceSha256": "b14d0df51dd626d645ed0972f94cd6469793e9e49b1eeae800b409c0a8237cbd"
+        },
+        "description": {
+          "sourceText": "Reindrix's exclusive skill. Charges at an enemy with antlers adorned in ice.",
+          "sourceSha256": "695a7dab921b359180fa9607a76faccabdfa45662b5509df6907f564d16d55ed"
+        }
+      }
+    },
+    {
+      "id": "active-frost-burst-7314076278",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Frost Burst",
+          "sourceSha256": "ff22f48b6e51a877b026f1b684600b0af17703eee9458f66a493b1df1a8ae174"
+        },
+        "description": {
+          "sourceText": "Reptyro Cryst's exclusive skill. Raises its front legs and slams them into the ground, causing a frozen blast under its enemies. It simultaneously bombards them with snow balls from above.",
+          "sourceSha256": "0c213f66267a860c822f1284376f4d83fb2d2e6fb7835a39d925cb91ea759087"
+        }
+      }
+    },
+    {
+      "id": "active-frost-talon-29fa7e3263",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Frost Talon",
+          "sourceSha256": "40fdfdf4e51bbe5b71c1823565fd69e8b99443b39187499a1213a0ffb6d6f466"
+        },
+        "description": {
+          "sourceText": "Bastigor's exclusive skill. Stomps the ground, creating a fissure of ice ahead. Then, rapidly closes the distance and slashes with the right hand.",
+          "sourceSha256": "3b40134cf0f3709a8f6e2ddfae7732922a4966a065ef8cf886bb0da4ec2377e3"
+        }
+      }
+    },
+    {
+      "id": "active-frostcall-be29470735",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Frostcall",
+          "sourceSha256": "c10bbf532b8f386187f7b1fdfcca785bdf4e3c4215245848539cd295c35e9c8e"
+        },
+        "description": {
+          "sourceText": "Rayhound Cryst's exclusive skill. Generates ice pillars ahead and charges forward at high speed through the gaps between them.",
+          "sourceSha256": "37833f250f073d9769a5457db44833926ed2c54b182f5c35be75bd9860c0fb70"
+        }
+      }
+    },
+    {
+      "id": "active-gale-claw-948460da17",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Gale Claw",
+          "sourceSha256": "baa210b7ad42ba5f72320ed0b61f07890b849cf843eaee3950c94906c4955b0e"
+        },
+        "description": {
+          "sourceText": "Galeclaw's exclusive skill. With talons outstretched, it glides forward in a ferocious charge.",
+          "sourceSha256": "512c648ca637b0979b9867d8bb1ef9fb18d714a190e4c8993ae208075e1d5ff0"
+        }
+      }
+    },
+    {
+      "id": "active-geyser-gush-ad1cb5496f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Geyser Gush",
+          "sourceSha256": "5b5aa06263f8eafaf31f3d1e21c4a866a74173c7ed010e107618246bc6588e71"
+        },
+        "description": {
+          "sourceText": "Erupts massive pillars of water beneath and around the enemy.",
+          "sourceSha256": "10ddc42a838965921dcb0cc534729db4fb9673af95f23bedfbc93c2034d371cd"
+        }
+      }
+    },
+    {
+      "id": "active-giant-spore-72c70ff036",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Giant Spore",
+          "sourceSha256": "79d21b5740d94f20790b58755b142db1cee1635584385ad4a12f0d80c05ec39c"
+        },
+        "description": {
+          "sourceText": "Silvance's exclusive skill. Fires a massive tracking spore that pursues enemies. It explodes on impact, releasing a wide-area blast.",
+          "sourceSha256": "e2c4e7608cd8e6998248f337a5f9f6b5de7b6044fcb3e332efe69f492f2b40fe"
+        }
+      }
+    },
+    {
+      "id": "active-giga-horn-17e02c2506",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Giga Horn",
+          "sourceSha256": "e050972be1d88552ae1bc21829cbe0107ac94e0475e0f169e15a61af3bc14f42"
+        },
+        "description": {
+          "sourceText": "Warsect's exclusive skill. Skewers enemies with its four sturdy horns.",
+          "sourceSha256": "78703c5a1a1d60309353a8488cf46dd42062eed39b8cbc0d355bbd857db97327"
+        }
+      }
+    },
+    {
+      "id": "active-grass-tornado-5ee2886f0b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Tornado",
+          "sourceSha256": "4ce6fecf50ef098729aac7e9542154e5f0980edf7dbead600e191295c83a267e"
+        },
+        "description": {
+          "sourceText": "Generates two tornadoes on either side before launching them at an enemy.",
+          "sourceSha256": "a119c8b65e58fe9dd7b9af2503013bbfaf6c165dc08777d4b32e82bc91ccc00f"
+        }
+      }
+    },
+    {
+      "id": "active-ground-cutter-cdb473a431",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Cutter",
+          "sourceSha256": "d2784b8e9c9d35ae27a385ceec799ff82f9a8f1fcdcac45696fbe9e85bfede96"
+        },
+        "description": {
+          "sourceText": "Knocklem's exclusive skill. Takes a big swing and throws the ring from its back. The ring flies in a circular trajectory.",
+          "sourceSha256": "d73037f5e69cd4335e8e9d0baaba9d56931670cd818e0a2fc0fc4a698d5a5372"
+        }
+      }
+    },
+    {
+      "id": "active-ground-pound-6ed4b3db51",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Pound",
+          "sourceSha256": "60f1cfcafb4c53c33878b35d88cbc83c2429b7c20a73e24634b59898573aa256"
+        },
+        "description": {
+          "sourceText": "Gorirat's exclusive skill. Pounds the ground twice before leaping into the air and delivers a powerful punch.",
+          "sourceSha256": "a61f43b629c752b467a878ca650b2e2b60eca2f518c844f69d8057e4e26b1dc7"
+        }
+      }
+    },
+    {
+      "id": "active-ground-smash-8f59bb57d4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Smash",
+          "sourceSha256": "dd3133feefd4d07f59ecbe17a4b5516e8e15de99f3e672c34c1f008184f81bc8"
+        },
+        "description": {
+          "sourceText": "Anubis' exclusive skill. Leaps high into the air and strikes a punch to the ground, causing a shockwave that deals damge over a wide area.",
+          "sourceSha256": "5d7dc606bd798d30f406e9837f24e68e23c735d7b8d1dcd83e3f85ab96f1ba97"
+        }
+      }
+    },
+    {
+      "id": "active-hellfire-claw-360dc07915",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hellfire Claw",
+          "sourceSha256": "154227cdf9282028aa35599e7c14e0768242b398172fcc5cbc8ab9a2017fd688"
+        },
+        "description": {
+          "sourceText": "Incineram's exclusive skill. Draws near enemies using its left claw to slash them into the air before cutting them down with its right claw.",
+          "sourceSha256": "84569365a03c956ad173c59109c1dac2b1876efc526170ad5c51eecd8fedc550"
+        }
+      }
+    },
+    {
+      "id": "active-high-breach-daa09bd1e1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "High Breach",
+          "sourceSha256": "0f0848fa2da2e07d3f5d84acd6fc86c4fe7c114bc4b40a5149362cda5fdb4278"
+        },
+        "description": {
+          "sourceText": "Whalaska's exclusive skill. Charges straight ahead and briefly submerges, then bursts high into the air to launch an attack. An ice-element explosion occurs upon emerging.",
+          "sourceSha256": "e3aa199b67f75842aec7db5418cc969409428a183b729a6f150ff6c7e29929c3"
+        }
+      }
+    },
+    {
+      "id": "active-holy-burst-3135fb2407",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Holy Burst",
+          "sourceSha256": "a2984962361b20bdbb401a90a21ff6966e80fec252489a12de8cde6b04617f4f"
+        },
+        "description": {
+          "sourceText": "Creates a wide explosion of light at the enemy's location and around it.",
+          "sourceSha256": "6b835504bea54d2ae4fdcd86d08ea7a2e011d5dd8cd1f520ad0128c59b48b45c"
+        }
+      }
+    },
+    {
+      "id": "active-hydra-charge-8bddd6e544",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hydra Charge",
+          "sourceSha256": "8ab78cefb6b54cc4b1f42b42a9ec85467a8e42783074cdb14e86b1bb8688de98"
+        },
+        "description": {
+          "sourceText": "Shaolong's exclusive skill. Cloaks the body in water and charges straight forward.",
+          "sourceSha256": "5070c533bc9b7a407d4367f4d3dad22d2b403e8d5262fd0ba406362029a20087"
+        }
+      }
+    },
+    {
+      "id": "active-hydro-jet-9381dcef9a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hydro Jet",
+          "sourceSha256": "fbe4e13d2181a073065b2a69f217f59a1a44674374df5c9c40797269405a0cec"
+        },
+        "description": {
+          "sourceText": "Hurls a high speed ball of water at an enemy.",
+          "sourceSha256": "839ad1de28815abda4592c09a8be6b2fcb379e73776d1ce4edc620f0d1cb17ab"
+        }
+      }
+    },
+    {
+      "id": "active-hydro-laser-dc5ef69c8b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hydro Laser",
+          "sourceSha256": "7146b1924e5ce77e143cafe5ffe0ceab33c985af570b91cef5ec5d29d4923421"
+        },
+        "description": {
+          "sourceText": "Shoots pressurized water at extreme velocities, sweeping over a wide area in front of it.",
+          "sourceSha256": "9c73c2dc9fd0effd258c6f608d4645803fa11189ea39b5bf9fc3d404fee82b06"
+        }
+      }
+    },
+    {
+      "id": "active-hydro-slicer-976c2d65a7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hydro Slicer",
+          "sourceSha256": "f90c53117f2ab37d0196523fc70a9ed27ac2957271e51147a63f321c790dca3b"
+        },
+        "description": {
+          "sourceText": "Mows down the frontal area with a blast of compressed water. The area struck by the blast erupts with water after a short delay.",
+          "sourceSha256": "b2670cbc2be383418a4a0864707aa16389301d48e18bfc328ab447038d563c75"
+        }
+      }
+    },
+    {
+      "id": "active-hydro-spin-f8cbb273f6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hydro Spin",
+          "sourceSha256": "b1ee33bf8b4770c8fbfb742ca5bf1942d279fb16b80c177795155383d28b7581"
+        },
+        "description": {
+          "sourceText": "Turtacle's exclusive skill. Uses jet-powered propulsion to spin rapidly and launch itself at the enemy.",
+          "sourceSha256": "ed3244bb95c3f0f81ea253bb44a31fbae641f532af8a799b3a26eb5793dfc0b5"
+        }
+      }
+    },
+    {
+      "id": "active-iaigiri-fb180c52b3",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Iaigiri",
+          "sourceSha256": "39ea155417b6f161345359944cb60b92dfee1fe8d51c462b4e713847b1cb0494"
+        },
+        "description": {
+          "sourceText": "Bushi's exclusive skill. Taking hold of the sword, it appears in front of an enemy in an instant and unleashes an ultra-fast sword draw attack.",
+          "sourceSha256": "0304b3551ad92d69c058b3d8f8da2bdd6f8ce0dfba98e40089afa1097285fce1"
+        }
+      }
+    },
+    {
+      "id": "active-ice-burst-7267c87309",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Burst",
+          "sourceSha256": "51fe13e73cce5880a074a9c852d71c0412454c6380ccac1cd3a331128d7419fa"
+        },
+        "description": {
+          "sourceText": "Pierdon Cryst's exclusive skill. Rakes the ground with its horn, then hurls a snow chunk at enemies.",
+          "sourceSha256": "8c46cad089aa130ce529e3a170e3cd1d8cb672ede5f79551b14d1ed17816e4de"
+        }
+      }
+    },
+    {
+      "id": "active-ice-missile-32d50c646c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Missile",
+          "sourceSha256": "4b2310e268968f3757188a7cac694d1e1bd23382de78635f2683245b094b4676"
+        },
+        "description": {
+          "sourceText": "Creates ice lances in the air that fly towards enemies.",
+          "sourceSha256": "b39b9b4519a295119b987d4f2869b7383d6013d0835b97e61eb3d4815a908ecb"
+        }
+      }
+    },
+    {
+      "id": "active-ice-spit-cc806a52c4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Spit",
+          "sourceSha256": "42bd1c439ca5823f61693f9f42d55a746304e1bb6d7f69bae0d7802f30bce83b"
+        },
+        "description": {
+          "sourceText": "Moldron Cryst's exclusive skill. Spits a chunk of ice from its mouth. The impact creates frost pools that freeze and damage enemies on contact.",
+          "sourceSha256": "15dbdce33f827400aa547517a64826027b55d20a8b6c2337d576390134155d1e"
+        }
+      }
+    },
+    {
+      "id": "active-iceberg-31e1ab24ad",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Iceberg",
+          "sourceSha256": "6a6932a18389ba1de3c266eab35ef6326d352fc1f5b7fc708c2e19a5585908f1"
+        },
+        "description": {
+          "sourceText": "Summons a sharp ice lance under an enemy.",
+          "sourceSha256": "1090e64062647fa112dacb70c880147ce88055a441dbf895a97102d1f06fd5b5"
+        }
+      }
+    },
+    {
+      "id": "active-icicle-bullet-a8b56ad4a7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Icicle Bullet",
+          "sourceSha256": "340179e3f365cbc03d84b6cda772ba3de2023ba28078a14f6ad5b2a57baed634"
+        },
+        "description": {
+          "sourceText": "Generates multiple sharp ice blocks in the sky and fires them at the enemy.",
+          "sourceSha256": "e3fe995c0aea9ab3768daf0d81177788dbd3277d991484e70704f4b23f550254"
+        }
+      }
+    },
+    {
+      "id": "active-icicle-cutter-10e45a0797",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Icicle Cutter",
+          "sourceSha256": "594a976d1c7d988765af8170effa58226aa6ff1c10511553fce61e3c2cf5bcc9"
+        },
+        "description": {
+          "sourceText": "Creates a crescent blade of ice and hurls it forward.",
+          "sourceSha256": "fb132aa24f0dac08d8d3d8a2a59e06cb0bf2046822e77f64fd4da128e67202d5"
+        }
+      }
+    },
+    {
+      "id": "active-icicle-line-00c5a00027",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Icicle Line",
+          "sourceSha256": "b606b8a65e13e6e01dbc4f8966b982d987e0523ffc35546c62c666e6161b791d"
+        },
+        "description": {
+          "sourceText": "Generates pillars of ice that move in a straight line in three directions.",
+          "sourceSha256": "5b655eaae472eaee632c8edb1def8838adea4c014aa791bfcc7105e20b1aa96a"
+        }
+      }
+    },
+    {
+      "id": "active-ignis-blast-fd8c1e9d6c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ignis Blast",
+          "sourceSha256": "3ebd9d6d6edf633a914ac71c8189b23a6c0c0d82b3c5f01aa99e9d49d60fd09f"
+        },
+        "description": {
+          "sourceText": "Hurls a ball of fire straight at an enemy.",
+          "sourceSha256": "86327a21fc19a9951f8a30e17c70a7f9bccfe5e11ae33abb738d4f59e2860dc7"
+        }
+      }
+    },
+    {
+      "id": "active-ignis-breath-522def18c0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ignis Breath",
+          "sourceSha256": "05ef5ebc2240f5fecb7066ee655da09380f05e35e189cd78339666feeeb10ea1"
+        },
+        "description": {
+          "sourceText": "Shoots flames at an enemy, dealing continuous damage.",
+          "sourceSha256": "1d8e03056588b60138115807a8169b7ea486b8543aaa0e0215356c3f1d1d1bd6"
+        }
+      }
+    },
+    {
+      "id": "active-ignis-charge-7edecbc022",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ignis Charge",
+          "sourceSha256": "8e376def39e08b8d1943d6a0f8ee6455b131f95cef33a8bcb4e5c0136e412249"
+        },
+        "description": {
+          "sourceText": "Pyrin's exclusive skill. Charges forward while engulfed in a veil of flames. Flames continue to burn in its path.",
+          "sourceSha256": "8b85a851ef78a94b599882d91386a9dce16f94d5ceea2f5df7c01dbbfce66027"
+        }
+      }
+    }
+  ]
+}

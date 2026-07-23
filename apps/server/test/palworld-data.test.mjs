@@ -31,7 +31,7 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
   assert.equal(meta.metadata.gameVersion, "1.0.1");
   assert.equal(meta.counts.pals, 287);
   assert.equal(meta.counts.items, 1847);
-  assert.equal(meta.counts.breedingPairs, 3);
+  assert.equal(meta.counts.breedingPairs, 41_329);
   assert.equal(meta.counts.skills, 566);
   assert.match(meta.metadata.sourceChecksum, /^[a-f0-9]{64}$/u);
   assert.deepEqual(
@@ -44,7 +44,7 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
     {
       pals: ["ready", 287, "1.0.1"],
       items: ["incomplete", 1847, "1.0.1.100619"],
-      breeding: ["sample", 3, "sample-baseline"],
+      breeding: ["incomplete", 41_329, "1.0.1"],
       skills: ["incomplete", 566, "1.0.1.100619"]
     }
   );
@@ -150,23 +150,40 @@ test("아이템 목록은 종류, 획득 방식, 희귀도와 정렬을 적용�
 });
 
 test("교배 조회는 부모 순서 교환, 동일 부모와 목표 Pal 역검색을 지원한다", () => {
-  assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).result?.child.id, "anubis");
-  assert.equal(service.breeding({ parentA: "bushi", parentB: "penking" }).result?.child.id, "anubis");
+  assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).result?.child.id, "xenovader");
+  assert.equal(service.breeding({ parentA: "bushi", parentB: "penking" }).result?.child.id, "xenovader");
   assert.equal(service.breeding({ parentA: "lamball", parentB: "lamball" }).result?.child.id, "lamball");
   assert.equal(service.breeding({ parentA: "lamball", parentB: "lamball" }).parentA.nameKo, "도로롱");
-  assert.equal(service.breeding({ parentA: "cattiva", parentB: "lamball" }).result, null);
-  assert.equal(service.breeding({ parentA: "panthalus", parentB: "lamball" }).result, null);
+  assert.equal(service.breeding({ parentA: "cattiva", parentB: "lamball" }).result?.child.id, "daedream");
+  assert.equal(service.breeding({ parentA: "panthalus", parentB: "lamball" }).result?.child.id, "bakemi");
 
   const parents = service.breedingParents({ child: "anubis", page: 1, limit: 1 });
   assert.equal(parents.child.id, "anubis");
-  assert.equal(parents.items[0]?.parentA.id, "penking");
-  assert.equal(parents.pagination.total, 1);
-  assert.deepEqual(service.breedingParents({ child: "panthalus", page: 1, limit: 10 }).items, []);
-  assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).metadata.gameVersion, "sample-baseline");
-  assert.equal(parents.metadata.gameVersion, "sample-baseline");
+  assert.deepEqual(
+    [parents.items[0]?.parentA.id, parents.items[0]?.parentB.id],
+    ["aegidron", "fenglope-lux"]
+  );
+  assert.equal(parents.pagination.total, 234);
+  assert.deepEqual(
+    service.breedingParents({ child: "panthalus", page: 1, limit: 10 }).items
+      .map((pair) => [pair.parentA.id, pair.parentB.id, pair.child.id]),
+    [["panthalus", "panthalus", "panthalus"]]
+  );
+  assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).metadata.gameVersion, "1.0.1");
+  assert.equal(parents.metadata.gameVersion, "1.0.1");
+
+  const gendered = service.breeding({ parentA: "katress", parentB: "wixen" });
+  assert.equal(gendered.state, "requires_gender");
+  assert.deepEqual(gendered.alternatives.map((pair) => pair.child.id), ["katress-ignis", "wixen-noct"]);
+  assert.equal(service.breeding({
+    parentA: "katress",
+    parentB: "wixen",
+    parentAGender: "male",
+    parentBGender: "female"
+  }).result?.child.id, "wixen-noct");
 });
 
-test("손상된 catalog artifact는 암묵적으로 ready가 되지 않고 incomplete·sample fallback을 노출한다", async (context) => {
+test("손상된 catalog와 누락된 교배 artifact는 sample 결과로 조용히 fallback하지 않는다", async (context) => {
   const root = await mkdtemp(path.join(tmpdir(), "palworld-malformed-catalog-test-"));
   context.after(() => rm(root, { recursive: true, force: true }));
   for (const fileName of [
@@ -187,12 +204,14 @@ test("손상된 catalog artifact는 암묵적으로 ready가 되지 않고 incom
   assert.equal(meta.domains.pals.recordCount, 287);
   assert.equal(meta.domains.items.status, "sample");
   assert.equal(meta.domains.items.metadata.gameVersion, "sample-baseline");
-  assert.equal(meta.domains.breeding.status, "sample");
-  assert.equal(meta.domains.breeding.metadata.gameVersion, "sample-baseline");
+  assert.equal(meta.domains.breeding.status, "incomplete");
+  assert.equal(meta.domains.breeding.recordCount, 0);
+  assert.equal(meta.domains.breeding.metadata.gameVersion, "1.0.1");
   assert.equal(meta.domains.skills, undefined);
   assert.equal(meta.coverage, undefined);
   assert.equal(fallback.getPal("lamball").descriptionEn.length > 0, true);
   assert.deepEqual(fallback.getPal("lamball").drops, []);
+  assert.equal(fallback.breeding({ parentA: "lamball", parentB: "cattiva" }).state, "data_unavailable");
 });
 
 test("adapter는 source internal ID를 API 상세와 분리된 provenance로 유지한다", () => {

@@ -1,0 +1,1806 @@
+{
+  "locale": "ko",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "75eee0d0987a96fb47e0daf1d68bfc478d28240da7032f50d94dcf82c89d5755",
+          "status": "machine_assisted",
+          "text": "그것은 지옥의 깊은 곳에서 번개를 불러낸다. 헬가루다의 아종으로 간주되는 반면, 지옥에서 번개에 맞은 라이가루다가 헬가루다로 변형 될 것이라는 이론이 있다."
+        }
+      },
+      "id": "helzephyr-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1d79a74d366854fbbb7f587ef7ee05331792aec78ced4e521fa977a214c92570",
+          "status": "machine_assisted",
+          "text": "의심 스러울 때, 그것이 작동 할 때까지 펀치하십시오 - 그것은 물건을 고치는 모몽파의 접근 방식이다. 인간을 위해 완벽하게 조정 된 강도로 때로는 한 번의 펀치로 정지 된 심장을 다시 시작할 수 있다."
+        }
+      },
+      "id": "herbil",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "911dfc360c8a7c80d7ba7266d797d70e83c0c60a6c0cf484a143c155d15c91f6",
+          "status": "machine_assisted",
+          "text": "종종 생각에서 길을 잃으면 때로는 잠들기가 어렵습니다. “나는 생각한다, 그러므로 나는 존재한다.”"
+        }
+      },
+      "id": "hoocrates",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f0fd8b8ce8394f814824aa92e4d9a4da370f51365a1fafca094ce8f8cf2cb276",
+          "status": "machine_assisted",
+          "text": "몸은 더위 속에서 녹지만 일광욕을 거부 할 수는 없다. 몸이 온기에 녹아 있지만, 온천을 너무 좋아한다. 어쨌든 그것이 녹을 것이라면, 그것은 맑은 푸른 하늘 아래 김이 나는 노천탕에 있기를 희망한다."
+        }
+      },
+      "id": "icelyn",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b76b00d35a0c76437bc19c62a59821798d49efaed9bc9c118600d2b9417a094a",
+          "status": "machine_assisted",
+          "text": "어두운 밤에,이 Pal는 영토로 돌아 오기 위해 먹이를 낚아 채게된다. 그 후 그 불쌍한 영혼에게 일어나는 일은 상상하기 어렵지 않습니다."
+        }
+      },
+      "id": "incineram",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "19388451dc3299e2a92c8060c5d750df3d4f806050c67bf139b983a5603e42ce",
+          "status": "machine_assisted",
+          "text": "그것은 특히 아기 Pal를 대상으로하여 도메인으로 되돌려 놓습니다. 아이를 빼앗긴 부모의 깊은 절망을 상상할 수 있을 뿐이다."
+        }
+      },
+      "id": "incineram-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eda071bd184399bc7d3040140b994e2ebbc36dbd4a3768acfa12ba73a62108c9",
+          "status": "machine_assisted",
+          "text": "높은 곳에서 팔파고스 섬을 바라본다. 재앙이 땅에 돌아오면 땅이 갈라지고 하늘이 타오를 것이다. 그것은 완전한 파괴의 섬광에 있는 재앙을 격파하기 위하여 예정된다."
+        }
+      },
+      "id": "jetragon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c947a6a17933a887d55107c008c2f5212a9c7e5568db6fab4bd4210a1df78e5c",
+          "status": "machine_assisted",
+          "text": "공격받으면 몸에 저장된 전기를 방출한다. 발생하는 전압은 10백만 볼트를 넘으며, 던졌을 때 일반적인 중화기보다 치명적이다."
+        }
+      },
+      "id": "jolthog",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb56660a73bffc97b9258b012a24960c1e15cdd9f796b97e348c95034eb26956",
+          "status": "machine_assisted",
+          "text": "그것은 공격을받을 때 몸에 저장된 차가운 공기를 방출한다. 그것이 방출하는 차가운 폭발은 주변 공기를 얼릴만큼 충분히 차갑고 공격자의 몸을 쉽게 관통한다."
+        }
+      },
+      "id": "jolthog-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "507b3160effb363d11d7f9016939df08ade06c2b88e0bdccf64b3d5da3c5427d",
+          "status": "machine_assisted",
+          "text": "전설에 따르면 레비드라는 한때 잘못된 유죄 판결을 받고 소용돌이에 던져진 현명한 사람이었으며,이 Pal로 돌아와 왕국을 전멸 시켰습니다."
+        }
+      },
+      "id": "jormuntide",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cb226eef5f3c994db3ef56ded0b3aa406fe5ea3a923f3f456e73775102f1298e",
+          "status": "machine_assisted",
+          "text": "전설에 따르면 아그니드라는 한때 잘못 유죄 판결을 받고 화산에 던져진 전사 였지만이 Pal로 돌아와 왕국을 전멸 시켰습니다."
+        }
+      },
+      "id": "jormuntide-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9bd0810cbbf6e339a6e5d525b1fd73b1e4fc19672a6a9d3cb3c76f39d93ac00e",
+          "status": "machine_assisted",
+          "text": "그림자의 힘으로 이상한 현상을 일으킵니다. 그것은 원시 음식을 먹는 것을 선호하며 특히 마호에 대해 적대적이다."
+        }
+      },
+      "id": "katress",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "41526fb58f7ce287df9749b08e3ff00943bc6a1d1459fedc41b4a595a23b1932",
+          "status": "machine_assisted",
+          "text": "그것의 육성으로 인해, 그것은 더 이상 그것의 음식이 충분히 원시 여부에 대 한 관심. 이 Pal는 그 세부 사항에 대한 걱정을 멈추고 가능한 한 매운 음식을 선호한다. 영마호와 좋은 조건에 아닙니다."
+        }
+      },
+      "id": "katress-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "87ea6babb5ce605dbc8ff4627a953685ae724e0820e38c29be4f5201b178ee80",
+          "status": "machine_assisted",
+          "text": "그것의 성격은 그것이 태어난 물의 질에 따라 변화한다. 오염 된 물에서 태어난 켈시는 일반적으로 성질이 좋지 않으며 신속하게 비행자가된다."
+        }
+      },
+      "id": "kelpsea",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dff596eceed5075403e05999f71c44e85098854200748bdfdd4251d398bf8bb2",
+          "status": "machine_assisted",
+          "text": "그것의 성격은 그것이 태어난 물의 온도에 따라 변화한다. 따뜻한 물에서 태어난 켈시는 일반적으로 열정적이고 동기 부여 된 성격을 가지고 있다."
+        }
+      },
+      "id": "kelpsea-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bcefdb7b3273aff2c7b8fa6fe861ccd0179419fca3399f1a370eedeeb0b2be40",
+          "status": "machine_assisted",
+          "text": "십 년 전, 꼬마딜로 축구가 인기가있었습니다. 그러나 자유 Pal 동맹의 격렬한 반대로 인해 신속하게 호의를 잃었습니다. 그럼에도 불구하고 꼬마딜로는 오래된 캐러팩을 흘리는 데 도움이 되었기 때문에 신경 쓰지 않았습니다."
+        }
+      },
+      "id": "kikit",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8561ae6c07bce6e5cafb4fd19543269bbf102054b7779047262e950a8c0d5401",
+          "status": "machine_assisted",
+          "text": "그것은 적의 머리 주위를 감싸고, 그들의 내부를 빨아들이다. Pal 미라가 때때로 발견되지만 실제로는 고스문 희생자이다."
+        }
+      },
+      "id": "killamari",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "07fa7d115761cfe10b86d38bada3310f7f4caa46c8baa908745b7e52694f99e8",
+          "status": "machine_assisted",
+          "text": "그것은 그것의 송곳니를 적의 목에 가라 앉히고, 모든 마지막 피 한 방울을 흘립니다. 두 개의 고스문 Primos가 서로 달라 붙을 때, 그들은 끈질긴 투쟁에 갇히게된다."
+        }
+      },
+      "id": "killamari-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2332769475556e63c0094a180da4caa4964f3b066a2abc836877c480ec718c1b",
+          "status": "machine_assisted",
+          "text": "멜파카는이 Pal를 제공한다. 킹파카 사이의 경연 대회는 내기로 자신의 vassals을 제공한다. 그러나 그 모습을 지켜보는 이들은 한결같이 패배자다."
+        }
+      },
+      "id": "kingpaca",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "56381161f7e143d216d0906942ba2a107b80f4e7fd5c79c5de6a74bbabe91f6a",
+          "status": "machine_assisted",
+          "text": "얼음의 마음으로,이 Pal는 감정을 표현하는 데 끔찍한다. 고독한 개인은 멜파카의 눈에 너무 서투른 것으로 보이다."
+        }
+      },
+      "id": "kingpaca-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "34a4180d011e6041344d5fb6932537f066ca8984c13cd09c26b63d25d5d0df3d",
+          "status": "machine_assisted",
+          "text": "외관에도 불구하고 불이리는 매우 민감하며 겁을 먹을 때 동굴로 도망 갈 것이다. 오래 전에, 한 사람이 당신에게서 도망 치면 그것은 나쁜 징조로 여겨졌습니다."
+        }
+      },
+      "id": "kitsun",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3892925ea00f630376cedb58bef3a753676c98b7653b1cf2b8d571227307b51e",
+          "status": "machine_assisted",
+          "text": "외관에도 불구하고 음이리는 매우 민감하며 겁을 먹을 때 동굴로 도망 갈 것이다. 그것은 너무 오랫동안 셧인 인에서 매우 우울 해지고있다."
+        }
+      },
+      "id": "kitsun-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "aeda16ec4ac4849f0b263a04c3d80773c68c39936b74cf94b37550d3527f56d9",
+          "status": "machine_assisted",
+          "text": "215 부분으로 나눌 수 있다. 부품이 흩어져 있더라도 다시 조립하고 다시 작동 할 수 있다. 다른 개인의 부품을 혼합하면 잘못된 정체성으로 인해 오작동이 발생한다."
+        }
+      },
+      "id": "knocklem",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "755c7aa63355ea185ecc53f464ee5235b811e0623718df4e89567ef93e3855c1",
+          "status": "machine_assisted",
+          "text": "분해되면 다시 조립하고 다시 기능 할 수 있다. 다른 개인의 부품을 혼합하면 시스템이 과열되는 치명적인인지 오류가 발생한다."
+        }
+      },
+      "id": "knocklem-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e70a59e250c12575aaba634077bcdc31d86741ef1887cb63f50dfaa7ccdb4f8b",
+          "status": "machine_assisted",
+          "text": "언덕을 걷는 것은이 Pal가 다시 아래로 떨어지는 것으로 끝나는 경향이 있다. 이로 인해 어지럽고 움직일 수 없게되어 쉽게 붙잡고 죽일 수 있다. 결과적으로이 Pal는 먹이 사슬 자체의 맨 아래에 떨어졌습니다."
+        }
+      },
+      "id": "lamball",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "caf5fbfc67d1bca104e31afdebf8a7351f1e2befc5ce4c81e638c9601bb55d34",
+          "status": "machine_assisted",
+          "text": "대지의 소리를 들으며 불안한 발걸음을 쉽게 피할 수 있다. 그러나 비협조적 인 지형은 끊임없이 넘어지도록 속일 것이다."
+        }
+      },
+      "id": "lapiron",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "958c9c72e09eeef68131bef8e64e35b5efe82e494344348bc06b49c29d101498",
+          "status": "machine_assisted",
+          "text": "그것은 관심을 끌기 위해 손에 길고 흐르는 모피를 사용하며, 항상 유지 관리하기 위해 최대한의주의를 기울이다. 먼지에 매우 민감하고 세심하게 깨끗하고 근처에 먼지를 걷어차는 것은 매우 혐오스러운 눈부심을 불러 일으킬 것이다."
+        }
+      },
+      "id": "lapure",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "412669e7e8e87279b63c77a1a84fdbff5f6b4fde399d16aa019eec8dbbf71d4b",
+          "status": "machine_assisted",
+          "text": "하나의 혈통을 통해 전달 된 무술을 연마하기 위해 : 매일 훈련이 유일한 방법입니다! 로맨스에 의해 방해 받고 있습니까? 상상도 할 수 없는! 매일 운동하는 것이 유일한 방법입니다! 때가 왔다! 내 총을 쏴! 즉시 거절, 그게 전부입니다! 사랑의 기술은 결코 전달되지 않았습니다 ... 후회, 그게 전부입니다!"
+        }
+      },
+      "id": "leafan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "83564c73d28e887ac8f2e67e6c02c054517a2562671a1ca52e991d2ecbee674c",
+          "status": "machine_assisted",
+          "text": "스타일리시한 자세를 유지하기 위해 항상 세심한 주의를 기울이는 Pal. 항상 가장 멋진 포즈를 찾기 위해 노력하고, 거울을 주면 하루 종일 그 앞에서 포즈를 취할 것이다."
+        }
+      },
+      "id": "leezpunk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "57ecb3107fa3509e18ebd797ce58af75b9b04573e7a2d9e35b4315412ccfff5f",
+          "status": "machine_assisted",
+          "text": "Pal는 서있는 자세에 특이한 집착을 가지고 있다. 항상 가장 인기있는 포즈를 찾기 위해이 Pal 소유자는 끊임없이 열렬한 자세를 취한다."
+        }
+      },
+      "id": "leezpunk-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3cfea257b052cf4467d133ac341f223183bbccf3b4a29493a0b966e41dcfa699",
+          "status": "machine_assisted",
+          "text": "다섯 살에서 일곱 살 사이의 똑똑한 인간 아이. 그것은 훌륭한 파트너를 만든다, 하지만 그들은 무기를 사용 하 여 학습 후 자신의 주인을 죽인 몇 가지 경우 보다 더 있었다."
+        }
+      },
+      "id": "lifmunk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ef557f596cb330ada375bed1acecdfe5d5cf1efefa6a054ef0e61d63a5460aa6",
+          "status": "machine_assisted",
+          "text": "그 등불은 세상의 진실을 드러내는 섬뜩한 빛으로 빛납니다. 그 빛이 당신을 눈 멀게한다면, 당신은 아마도 숨길 것이있을 것이다."
+        }
+      },
+      "id": "loomen",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a9e9e06343b5b3541e2837e4f617b727e4f46cc6a7b04f5e846711f995710262",
+          "status": "machine_assisted",
+          "text": "머리의 뿔은 달빛 아래에서 자랍니다. 태양을 싫어하지는 않지만 햇빛이 그들을 때릴 때 뿔이 가렵습니다."
+        }
+      },
+      "id": "loupmoon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6e2f48c9b302d1ed73c2d982e68aad1538c4007b205bfdee1f2742464b256464",
+          "status": "machine_assisted",
+          "text": "그 머리의 뿔은 결코 녹지 않는 신비한 얼음으로 만들어져 있다. 경적을 터뜨려 만든 면도 된 얼음은 정말 절묘하지만, 그것을 시도하는 사람과 얼서니 모두 두통으로 끝납니다."
+        }
+      },
+      "id": "loupmoon-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "97f0925f8ccceb05bb961d1f94d45b77f075dfc168c17792fdef0b977e17f63b",
+          "status": "machine_assisted",
+          "text": "사랑의 밤을 찾고, 그것은 항상 누군가를 쫓고 있다. 처음에는 다른 Pal에만 관심을 보였지만 최근 몇 년 동안 인간조차도 방탕의 대상이되었습니다."
+        }
+      },
+      "id": "lovander",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "beffb623755a58bc73bcaf0bed198af5c491b5457809f50df97973cffb684520",
+          "status": "machine_assisted",
+          "text": "이른 봄에 꽃가루가 섬 전체에 바람에 뜬다. 토푸리의 건초열은 뷰티플라워의 잘못이다."
+        }
+      },
+      "id": "lullu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3aacc110e369d711147c3331da32e0e19fc4918743d47a3dbf860b337113e5dd",
+          "status": "machine_assisted",
+          "text": "그것은 눈을 부주의하게 응시하는 사람들을 통제 할 수 있다. 루나리스로 본 사람들은 단순히 자신의 통제하에 있다."
+        }
+      },
+      "id": "lunaris",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "849f10d731c9ce3c45c616ca11caa5dbde2531946d4ff81fbb0dbc73b4ee3945",
+          "status": "machine_assisted",
+          "text": "사랑으로 가득 찬 유순한 Pal 그것은 그들의 부모를 잃은 작은 Pal을 통해 시계. 그것은 장난 꾸 러 기 Pal을 훈련 하는 전체 전력 태양 폭발을 사용 한다."
+        }
+      },
+      "id": "lyleen",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a4b0f0a19cd68c7804d7d1f76d649c532f58dea39da2db0c99adea96840b77d5",
+          "status": "machine_assisted",
+          "text": "우아한 Pal 은혜가 가득한다. [잡담] 님들 님들 ᅮᅮᅮᅮ ᅮᅮ 일부 Pal는 적극적으로이 처벌을 추구한다."
+        }
+      },
+      "id": "lyleen-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2c631f3512203ad722065af14d2b32795e91f4ab17aa34de123dbfad1a9ed6e6",
+          "status": "machine_assisted",
+          "text": "그것은 영웅적인 포즈를 치는 것처럼 보이지만, 현실은 단순히 넘어 뜨리는 것을 피하기 위해 꼬리와 머리카락의 무게에 대항하여 스스로를 보강하고 있다는 것이다."
+        }
+      },
+      "id": "majex",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "88d99987620d920cee7ba9c48aecf8ca9c2e3d35f6aa5d2b7cc1b3631e124d06",
+          "status": "machine_assisted",
+          "text": "등에 있는 식물은 사람마다 다릅니다. Pal의이 진정한 정원을 감상 한 오랜 역사가 있으며 그린모스 가지 치기 전문가도 있다."
+        }
+      },
+      "id": "mammorest",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bd73bcb66ebd6fd09e2408dfd4129acd506ed0d7e5878778f1986939d088c693",
+          "status": "machine_assisted",
+          "text": "등에 있는 식물은 사람마다 다릅니다. 멸종된 것으로 추정되는 식물의 씨앗이 여전히 블리자모스의 뒤쪽에 얼어 있는 것이 발견되었던 때가 있었다."
+        }
+      },
+      "id": "mammorest-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c583f2bc4ca341b2e5981a6fa5baa5f8ebd2b8a34da0efc538006e168bfdd6dc",
+          "status": "machine_assisted",
+          "text": "은 의 을 으로 하여 이 할 때 를 하는 이다. 고스호스가 당신에게 호감을 가지고 있다면, 그것이 그 이유라고 가정하는 것이 안전한다."
+        }
+      },
+      "id": "maraith",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc87975e89e141ae7fa1427e85b8defb515381f51e3d7b64fa8c3b39b6e44332",
+          "status": "machine_assisted",
+          "text": "그것의 단단한 꼬리는 잘릴 때라도 악화하지 않습니다. 어떤 사람들은이 절단 된 꼬리가 행운을 가져다 준다고 믿었지만, 결과적으로 밀렵당한 수많은 냐옹테트에게는 아무 것도 아니 었습니다."
+        }
+      },
+      "id": "mau",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "116a386b910bfd9f09a14cceb6e5ae866d36a5316192914ef6a84a065c2c1e58",
+          "status": "machine_assisted",
+          "text": "그것의 크리스탈 꼬리는 아름답, 그러나 이 Pal가 죽을 때 부서집니다. 어떤 사람들은 그들을 키우는 것이 행운이라고 믿기 때문에 포로로 잡힌 칠테트는 매우 조심스럽게 치료된다."
+        }
+      },
+      "id": "mau-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a8a647301cc05bee47402bcf6a5285755614857374f44d8611e4de82d4e9f99f",
+          "status": "machine_assisted",
+          "text": "이 Pal의 솜털 모양에 속지 마십시오. 그것의 긴 다리의 한에서 hypersonic 걷어차 기는 세계의 다른 쪽에 비행을 보낼 수 있다."
+        }
+      },
+      "id": "melpaca",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f2c3e22a89cfaa301af7be73c978b8c86dcdf3129f20460e493158fddfbd6953",
+          "status": "machine_assisted",
+          "text": "순수한 에너지로 만들어 졌기 때문에 그 내부는 완전히 비어 있다. 이 Pal는 여전히 살아있는 먹이를 속이 빈 몸으로 밀어 넣어 흡수한다. 고통의 지옥의 비명은 종종이 Pal 내부에서 들릴 수 있다."
+        }
+      },
+      "id": "menasting",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "23cb5f91498adaca1ef5c972c052365528e32c6691ca5980d816cf90a13e3eeb",
+          "status": "machine_assisted",
+          "text": "순수한 에너지로 만들어 졌기 때문에 그 내부는 완전히 비어 있다. 그것은 지구와 미네랄을 외부 껍질에 넣고 압도적 인 질량을 달성한다. 이에 반발하는 이들은 오직 악(惡)을 악으로 갚을 뿐이다."
+        }
+      },
+      "id": "menasting-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "01b6582aa9b0ed28f91b8f200fd305636625fb75c57ddcae8479c7650de87a17",
+          "status": "machine_assisted",
+          "text": "한 때 가장 어리석은 방법으로 끝을 만난 사람에게 상을 수여하는 전통이있었습니다. 첫 번째 상은 따라하개에 대해 알지 못하고 가슴을 열고 죽을 때까지 물린 것에 대해 주어졌습니다."
+        }
+      },
+      "id": "mimog",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0b9d27ecf866950673d455aae342620c0d09958c7d2ef3543cb3f63ba6b69ea9",
+          "status": "machine_assisted",
+          "text": "건강한 사람의 경우 등에 용암이 부드럽게 흐릅니다. 그러나 가난한 생활 방식은 점차 순환을 악화시켜 결국 갑자기 엄청난 폭발을 일으키는 용암 막힘을 일으 킵니다."
+        }
+      },
+      "id": "moldron",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4cd0e59df090053f4cbf542508e8e9de8d21528677ed89d18432d8cd95e38fb8",
+          "status": "machine_assisted",
+          "text": "건강한 사람의 경우, 등을 따라 흐르는 물질은 안정적인 온도를 유지한다. 그러나 심장 박동이 빨라지면 온도가 불안정 해지고 결국 기화 또는 결정화가 발생하여 갑작스럽고 갑작스런 충격으로 사망한다."
+        }
+      },
+      "id": "moldron-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "203179c1181ddad58fd23a150bdd0d73e8e1a1131bad0ea261f134ddd910b0e2",
+          "status": "machine_assisted",
+          "text": "Pal는 너무 강력해서 믿기 어렵습니다. 한 실험에서이 Pal는 한 번에 3,000 장의 종이를 찢었습니다! 이 Pal가 고기 먹는 사람이 아니라는 것은 기적이다."
+        }
+      },
+      "id": "mossanda",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2cdd8dad8097424b68304e5617f0f251bd16c70bf17c66142d2e42be792b8289",
+          "status": "machine_assisted",
+          "text": "Pal의 힘은 정말 충격적이다. 이 Pal는 신체의 전류를 변경함으로써 자체 강도를 과부하 할 수있었습니다. 그것은 깎아 지른듯한 힘에 관해서,이 Pal는 목록의 맨 위에있을 수 있다."
+        }
+      },
+      "id": "mossanda-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "add500120529db60111ebf1625c21e4dfb678d95d42513672d03ec8cc67967b7",
+          "status": "machine_assisted",
+          "text": "우유는이 Pal에서 성별에 관계없이 열린 수도꼭지의 물처럼 부어집니다. 그것은 진정으로 삶의 신비, 비록이 신비는 더 나은 미해결 남아 있을 수 있다."
+        }
+      },
+      "id": "mozzarina",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "75794acd3b862890be95bed40097ac61778728d861108ae63675b7a38825bf5d",
+          "status": "machine_assisted",
+          "text": "그것의 부드러운 얼굴 보풀은 어떤 명중든지 연화한다, 그러나 온화한 격파의 일정한 국가에서 그것을 남겨두는 그것의 가려움을 잘 손질하거나 긁을 수 없다."
+        }
+      },
+      "id": "muffly",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b10df020b8b12b47f10ac8b88b7a3eb8d3e955391e57b3e29030be4a98c1ac80",
+          "status": "machine_assisted",
+          "text": "입 안은 쾌적하게 차갑게 유지되어 닫혀있을 때 천연 냉장고가된다. 그것의 타액은 음식이 썩는 것을 막는 효소를 포함한다. 따라서, 그것은 인간을 위한 음식 로커로 봉사할 수 있다-위생 이다 또는 아닙니다 완전히 다른 사정 이다."
+        }
+      },
+      "id": "munchill",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e21671baacfdb85cde78d5e7bbefe169a8ef9c0866032fe204469cd915922fb4",
+          "status": "machine_assisted",
+          "text": "그것은 인간을 편리한 기생 숙주에 불과하다고 본다. 머슐리가이 형태를 취한 이유는 인간을 속여 경비를 낮추고 포자가보다 효율적으로 퍼질 수 있도록하는 것이다."
+        }
+      },
+      "id": "mycora",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "185d6c9bad5ac404cbac078ba58eec70fa7558408b5e5525cccaf7b3c50bf9d8",
+          "status": "machine_assisted",
+          "text": "'팔라디우스'에 해당되는 글 일건 그것의 어두운 형태는 부정적인 감정의 구체화이다. 그러나, 연민의 희미함은 여전히 그 눈 깊숙한 곳에서 볼 수 있다."
+        }
+      },
+      "id": "necromus",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5402d343464ef30246a003d13daa9a99537686c67e40269ad8c91e80b2c94d65",
+          "status": "machine_assisted",
+          "text": "스파이크는 자신의 감정에 반응한다. 매우 소중한 허그미는 본능적으로 받아 들이고 싶을 수도 있다. 그러나 더 자주, 그것은 비극적 인 사고로 끝납니다."
+        }
+      },
+      "id": "needoll",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "87774676fbd28f9e29069598f5453f340051b38f196c12846e725485b88abb8d",
+          "status": "machine_assisted",
+          "text": "스파이크는 자신의 감정에 반응한다. 잘 사랑받는 허그유는 그 소유자에게 집착하지만, 그 사랑을 받아들이는 것은 고통을 받아들이는 것을 의미한다."
+        }
+      },
+      "id": "needoll-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a04ef629798e5481896d1b55fba9e7679d986e96f627f37a244b3e89ff41a9fc",
+          "status": "machine_assisted",
+          "text": "그러나 그 재앙의 후예가 나타났고, 그 후예는 그 재앙의 전조가 되었다. 바다를 바라보며, 가치 있다고 생각하는 한 사람을 바라본다. 그런 만남은 우연이 아니라 운명이기 때문이다."
+        }
+      },
+      "id": "neptilius",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8d792aa2d13aed2d24994a5403e53065664afffba12ca0c2b52cd1b67b023723",
+          "status": "machine_assisted",
+          "text": "그가 가진 것은 자신의 영혼이다. 그것이 누군가에게 떨어지면, 그것은 강제로 자신의 영혼을 추출하고 자신의 것과 합병하여 하나가되기를 갈망한다."
+        }
+      },
+      "id": "nitemary",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a9dde28249245ecba919681f4f519fb9a3af1ef4464f6685bfe7d2474b9b24aa",
+          "status": "machine_assisted",
+          "text": "그가 가진 것은 자신의 영혼이다. 그것이 누군가에게 떨어지면, 그것은 그들의 영혼을 그들의 것과 합병하여 하나가되기를 갈망한다."
+        }
+      },
+      "id": "nitemary-botan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "95f9e67fad1323a2c74c10c983b2ee759d14549dcdd7ce6ee718f1f73c238e8c",
+          "status": "machine_assisted",
+          "text": "그것은 새로 태어난 Pal를 둥지로 운반하고 대리 부모로 올립니다. 일단 아기 Pal가 살찌면, 그들을 사냥한다."
+        }
+      },
+      "id": "nitewing",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4bcfbe4bb9b7ff938a024792965735d1b3cc6b5ac04ec4574044388145b94e76",
+          "status": "machine_assisted",
+          "text": "당신은 당신의 침구에 루나티 머리카락을 발견하면, 당신은 그것을 놓고 즉시 떠나야한다. 그것을 선택하는 것은 결코 끝나지 않는 밤의 편도 티켓이다."
+        }
+      },
+      "id": "nox",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f6bec58bfee5db264c7ec3ab9fbe081bef70d20c7a0a942df80619671bae8cba",
+          "status": "machine_assisted",
+          "text": "그의 눈에 비친 그리움은 누구나 다 공감할 수 있는 풍경이다. 당신이 시도하기를 고집한다면, 그것은 눈물을 터뜨릴 것이고 이 주 동안 당신을 무시할 것이다."
+        }
+      },
+      "id": "nyafia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a44ee1114fd510ee1d80269d3707d65849e7ba770c7f91d6cae8bb48ca83668d",
+          "status": "machine_assisted",
+          "text": "Ophydias가 거주하는 물은 종종 그 형태를 모방 한 꽃으로 가득한다. 이러한 꽃을 직접 전파하려는 많은 시도가 있었지만 필연적으로 인간의 손이 방해를받는 순간 시들게된다."
+        }
+      },
+      "id": "ophydia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f8fccb52bcc08e9fb80c31fb74acbaf07367bdeab05f56569bc4f4fb5d3d4557",
+          "status": "machine_assisted",
+          "text": "그것은 적의 상처에 전기를 보내고, 내부에서 밖으로 구워낸다. 볼젝스 사이의 싸움은 눈 깜짝 할 사이에 끝납니다."
+        }
+      },
+      "id": "orserk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9825d54f974aea952978f2c37e54d81a1cfa85d562b0de0b2e41c971bc27cc9",
+          "status": "machine_assisted",
+          "text": "'켄타나이트'에 해당되는 글 일건 그것의 빛나는 형태는 모든 부정적인 감정에서 자유 롭습니다. 그러나, 증오의 희미한 빛이 여전히 그의 눈 속에 깊숙히 보일 수 있다."
+        }
+      },
+      "id": "paladius",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2455c9a2ebe696cef1d1e70f5df7eda01352bbd3a24a0722eb5bc6bb779c1bd3",
+          "status": "machine_assisted",
+          "text": "서명 춤으로 적의 리듬을 방해한다. 잔디 전투에서, 다른 사람의 리듬과 동기화에 빠진 첫 번째는 잃게된다. 구애, 지루함, 전투 - 모두 춤을 추기 위해 내려옵니다! 그렇다면 인간을 겨냥한 춤은 무엇을 의미 할 수 있습니까?"
+        }
+      },
+      "id": "palumba",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9f6ff77db25076171a4f026dc415e13bd55339b6f486ca529a0b5937c9171337",
+          "status": "machine_assisted",
+          "text": "이 Pal의 깃털은 거의 사라졌지만, 슬프게도 비행에 대한 열망은 그 어느 때보 다 강했습니다. 지금도, 그것은 할 수 있는 어떤 식 으로든 다시 비행 하려고 한다."
+        }
+      },
+      "id": "pengullet",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "df182d8a7468cec9b4e36826d8512577be2762dddb3480851bad8a5a26afdcd7",
+          "status": "machine_assisted",
+          "text": "이 Pal의 깃털은 모두 사라졌으며 더 이상 날 수 없다. 그러나 하늘에 대한 갈망은 질투로 바뀌었고, 여전히 날아 다니는 사람들을 공격하기 위해 전기를 사용했습니다."
+        }
+      },
+      "id": "pengullet-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d03a2127e12de36a2b0a7162c84597c174a870155baeb682fbc1c8bf92c425c0",
+          "status": "machine_assisted",
+          "text": "놀랍게도, 그것은 펭키와 관련이 없다. 그러나이 Pal가 원하는대로 애지중지되기 때문에, 지금은 오만하게 고집하기 위해 최선을 다하고 있다."
+        }
+      },
+      "id": "penking",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "29e0b28f21797d7da40aa521cc6813f11a11e5541026cce15b1dcf70c9780890",
+          "status": "machine_assisted",
+          "text": "그 몸은 수중 사냥을 개선하기 위해 전기를 얻은 후 색상을 변경했습니다. 결과적으로 펭키의 애정을 잃었지만 이상하게도 이제는 충성도 높은 추종자 인 뎅키가 있다."
+        }
+      },
+      "id": "penking-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e277cb2f2842ea7929141efba4476435c93027d97541fcfb5bcbcdd8114a27a1",
+          "status": "machine_assisted",
+          "text": "Pal는 수명이 다할 때 거대한 공장으로 변신한다. 십년에 한 번씩 아름다운 꽃이 피고 새로운 플로리나가 탄생한다."
+        }
+      },
+      "id": "petallia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ea99d7fbe2d2c3b064407bee5daf474085b320f879c0dc1932705fc3240b72a0",
+          "status": "machine_assisted",
+          "text": "Pal는 그것의 생활의 끝에 재의 더미로 멀리 점화한다. 주변의 토양은 믿을 수 없을만큼 비옥하게되어 다음 십 년 동안 풍부한 식물이 번성 할 수있게된다."
+        }
+      },
+      "id": "petallia-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dd3f7fbb30a4b2caf576e05aaefc2af8a0407ab5bd34cdfae5a3f6c40fc152dc",
+          "status": "machine_assisted",
+          "text": "그것은 태양에서 니다, 그것의 선호된 모양으로 그것의 얼음을 녹기 위하여 다만 충분히 자전. 방랑자들은 홀로 남겨져야 한다. 마치 자기 옆구리에 좀 과감한 사람처럼요."
+        }
+      },
+      "id": "pierdon-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "67467c52296f4c10185d2e9be81a6f50250b93e3063c153c5df27ce2e671412d",
+          "status": "machine_assisted",
+          "text": "Polapups 중, 눈에서 가장 빠른 슬라이더는 가장 높은 존경을 벌고있다. 때때로, 너무 강력한 도약은 하늘에서 한 텀블링을 보냅니다 - 영토 시즌 동안 일반적인 광경. 예측: Polapups 비행의 기회와 맑은 하늘."
+        }
+      },
+      "id": "polapup",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f2a5dc95df812daa474f8db920277cff504c882a613bc27d7fd9cddf2b8c82e4",
+          "status": "machine_assisted",
+          "text": "크리범 Terras 중에서 가장 빠른 눈 슬라이더가 가장 높은 존경을 얻습니다. 때때로, 너무 강력한 도약은 눈 속에 묻혀 있습니다 - 특히 경쟁적인 계절 동안의 일반적인 광경이다. 교통 예측 : 무거운 초코범 혼잡."
+        }
+      },
+      "id": "polapup-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a1d713fd9616f7bdabe52840887dc5ac7ee534c6fe8b122d430906461906298e",
+          "status": "machine_assisted",
+          "text": "그것은 약 5,000 종류의 독을 가지고 있다. 그들 중 일부는 즉각적인 죽음을 초래할만큼 치명적이지만, 아무도 어떤 영향을 미칠만큼 높은 농도로 존재하지 않습니다."
+        }
+      },
+      "id": "prixter",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6839c22ca303545d23460aeed83dcd858b18cadf0cd8a1ee2e02a4dc8c6520e3",
+          "status": "machine_assisted",
+          "text": "그것은 그들의 몸에 전기 충격을 직접 전달하기 위해 꼬리와 적을 관통. 그러나, 생성 하는 전류는 매우 약한, 그래서 간단한 펀치는 훨씬 더 많은 피해를 할 것 이다."
+        }
+      },
+      "id": "prixter-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "51b114555cb46b6325eef5c8c7bb267287c0b1e44224675e6010b0517f53cf66",
+          "status": "machine_assisted",
+          "text": "지능적이고 품위있는 태도로, 그것은 종종 섬의 귀족들에 의해 조수로 고용되었습니다. 그러나, 밤에 마주쳤을 때, 그 얼굴은 너무 섬뜩해서 빨리 호의에서 떨어졌습니다."
+        }
+      },
+      "id": "prunelia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c2267a4ec045a8373f91e8eff6dddfd75556e0650151e7add5c8b71516812bf4",
+          "status": "machine_assisted",
+          "text": "그것의 푹신한 모피는 젖을 때 엄청난 양의 물을 흡수한다. Shaking it dry는 강력한 전기 방전을 방출하여 목욕 시간을 함께 심각한 도박으로 만듭니다."
+        }
+      },
+      "id": "puffolt",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3fcfc8f2c554471d6798c41057ea68353fc9e29473587943cb69056b47033bdb",
+          "status": "machine_assisted",
+          "text": "솔바둑 영토 분쟁은 응시 중단으로 시작하여 단 한 번의 빠른 파업으로 끝납니다. go 명령이 동일한 공격 본능을 유발하기 때문에 stay를 훈련시키는 것은 위험한 사업이다."
+        }
+      },
+      "id": "pupperai",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "09680c39e83b47ac23a4bd596c481eefdc691853db889832179bfc38b13ed9c8",
+          "status": "machine_assisted",
+          "text": "몸 전체가 매우 효율적인 라디에이터로 진화하여 놀라운 체력으로 선물한다. 누군가가 그것을 타는 경우,이 Pal는 그들을 태우지 않도록주의한다."
+        }
+      },
+      "id": "pyrin",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9693a06d489352399ef4d7085f29669d8a33716ac27e9754c6e8ce60b8699415",
+          "status": "machine_assisted",
+          "text": "그것은 신비한 암흑 물질을 에너지로 태우고 나머지 입자를 몸에서 배출한다. 누군가가 그것을 타고 있다면, 그들은 어둠의 길을 뛰어 넘지 않도록주의해야한다."
+        }
+      },
+      "id": "pyrin-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b71f427597d8ba7a1f8fd198332e3a6016530516180ad9babc457f6c6a765c9d",
+          "status": "machine_assisted",
+          "text": "페스키를 껴안고있는 동안자는 것은 하늘의 경험이라고하지만, 어떤 사람들은 짓 눌려 잠을 자고 돌아서는 사람들에 의해 하늘로 보내졌습니다."
+        }
+      },
+      "id": "quivern",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f063b34bbcd733e91ab3ee3e38a2448aca9ac8517735a64cdfbb420f7a94be44",
+          "status": "machine_assisted",
+          "text": "포레스키를 껴안을 때, 햇빛과 초원 같은 냄새가 나면 내일은 화창할 것이다. 냄새를 맡으면, 내일은 젖고 비참할 것이다."
+        }
+      },
+      "id": "quivern-botan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ab6e6ad6a487f3d416dca924d5246d3d13ff4ccfad97545af39bfc52efe947f0",
+          "status": "machine_assisted",
+          "text": "일부는 라이버드와 관련된 종이라고 생각하지만 실제로는 관련이 없다. 그것은 주로 바위를 먹고, 오랜 세월이 지나면 부리와 머리가이 식단을 수용하기 위해 경화되었습니다."
+        }
+      },
+      "id": "ragnahawk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "431048f6cc0bcdcc14269ab8d1844adebf77cb35d8fb2ccd6023e6dcb00695ff",
+          "status": "machine_assisted",
+          "text": "최고 속도로, 그것은 번개의 볼트로 착각 될 수 있다. 두 명의 레이하운드가 충돌하면 천둥 같은 포효가 공기를 통해 울려 퍼집니다."
+        }
+      },
+      "id": "rayhound",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c5b4edea37195b0c23defc958a7eed7e5f28c0e39f82d5f8793be4fbd57e565b",
+          "status": "machine_assisted",
+          "text": "전속력으로 툰드라를 질주하는 것은 눈부시게 빛나는 눈보라를 일으키며, 가시성이 없기 때문에 지속적인 프리도그 충돌을 초래한다."
+        }
+      },
+      "id": "rayhound-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "71e9d7261d6d44c2fc120abd50778358c4c2eb4af50c5e53a93d67a7e7201a4d",
+          "status": "machine_assisted",
+          "text": "투명한 청록색 뿔은 절대 영의 추위로 빛납니다. 그들의 손으로 그들을 만지는 사람은 즉시 얼어 붙어서 부서집니다."
+        }
+      },
+      "id": "reindrix",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc44130f2e46c5bc81f40af46ae367d4e1ff4eac2e4a39cf821973620db7fc45",
+          "status": "machine_assisted",
+          "text": "그것의 blasé 외관과는 반대로, 그것은 꽤 사나운 것이다. 그것은 그것의 눈에 보이는 모든 것을 먹이로 인식하고 그것을 삼키려고 아무 것도 멈추지 않을 것이다."
+        }
+      },
+      "id": "relaxaurus",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d5268e26767545900da42f5d233f2f7e3372b3cfcfc918f73c5caae006708d50",
+          "status": "machine_assisted",
+          "text": "어느 날 헤로롱가 아이디어를 냈습니다. 어쩌면 변화를 위한 시간이었을지도 모른다. 바로 그때, 전기 충격이 그의 몸을 뚫고 지나갔습니다!"
+        }
+      },
+      "id": "relaxaurus-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "059f8fc8ffd173a58cef5d4e158c616e4d9ecb284261a1b076993241ddf7487c",
+          "status": "machine_assisted",
+          "text": "한 눈에, 그것의 움직임은 과장되고 개방으로 가득 차 있다. 이상하게도, 그러나, 어떤 상대는 압도되고, transfixed 것처럼 멀리 볼 수 없게된다."
+        }
+      },
+      "id": "renjishi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "167d9414da51984ba9edfe06b2ca68c33e80d1ef6ad4f3c9fd273a02e656bf53",
+          "status": "machine_assisted",
+          "text": "마그마와 같은 혈액은 몸 전체에 흐른다. 많은 양의 물이 던져지면 물이 빠르게 가열되어 엄청난 증기 폭발을 일으 킵니다."
+        }
+      },
+      "id": "reptyro",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f5efa900a739890a833c27a7e10390eecbd457ea98b59ddf0206a7db08779ded",
+          "status": "machine_assisted",
+          "text": "차가운 피가 몸 전체에 흐른다. 급속하게 가열되면 혈액이 증발하여 엄청난 증기 폭발을 일으 킵니다."
+        }
+      },
+      "id": "reptyro-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9c3df55a6dd89f9b5327f5f4dd6302560bf517592da649ae044515bf0df6535a",
+          "status": "machine_assisted",
+          "text": "밝은 미소가 없는 Pal. 때때로, 그것의 촉수는 까부냥의 장난에 의해 매듭에 묶여 있다. 그 순간 그 표현은 악마로 변한다."
+        }
+      },
+      "id": "ribbuny",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "602a8990c97555d9f84dc284fa7e153502d9a4d2e30d4284eafbe9da2e3d5c24",
+          "status": "machine_assisted",
+          "text": "항상 유쾌한 미소를 짓는다. 때때로, 까부냥의 장난 덕분에, 그들은 촉수에 얽힌 결국 그들의 방법을 싸울! 힘든 상황에서도 그들은 계속 쾌활하게 웃는다."
+        }
+      },
+      "id": "ribbuny-botan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "daa3943cf59535bbcbb6be0449377e7d0229d21d0f3fc08903fe334057897dca",
+          "status": "machine_assisted",
+          "text": "Pal는 숲에서 사냥하고 사는 인간과 매우 유사한다. 그것은 Pal가 무엇인지, 그리고 먼 과거에 인간과 어떻게 갈라 졌는지 이해하는 열쇠가 될 수 있다."
+        }
+      },
+      "id": "robinquill",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a79edeaad78d9586d8b929077c7f525a2eb507719b195f2e5a31a224f8e2fca3",
+          "status": "machine_assisted",
+          "text": "Pal는 바위 지역에서 사냥하고 사는 인간과 매우 유사한다. 샌드몽 뼈가 폐허에서 발견되면, 항상 가까운 곳에서도 사람의 뼈가 발견된다."
+        }
+      },
+      "id": "robinquill-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1cfd89d59aa7e0fb7f298026d8a496b2813c5aa2d3541258596c4f62e7c111d2",
+          "status": "machine_assisted",
+          "text": "Wild 불꽃밤비는 놀랍게도 결코 아프지 않습니다. 나뭇가지를 태워 만든 하루에 숯 한 조각을 먹는 것은 그 영원한 건강의 비밀이다."
+        }
+      },
+      "id": "rooby",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ec39cecb2e26ce581f1788ddf4642da685111720bbce906db34a77e20e9ed50e",
+          "status": "machine_assisted",
+          "text": "자연에 의해 도둑은 아무도 보고 있지 않을 때 물건을 빼앗는다. 법에 구속 될 때 걱정할 이유가 없다. 일단 그것이 당신의 눈을 빨리 훔치면, 당신은 어쨌든 아무 것도 보지 못할 것이다."
+        }
+      },
+      "id": "roujay",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f609e4835070c37d86f4f62018ac3d33ac6a421457c19a6a438b1eba8402937e",
+          "status": "machine_assisted",
+          "text": "극단적으로 공격적인 Pal이기 때문에, 그것은 종종 상대방의 힘을 측정하기 전에 싸움을 선택한다. 비록 작지만, 그 강력한 전하가 바위 비행을 보낼 수 있다."
+        }
+      },
+      "id": "rushoar",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6d0e55794038b47efb3a2f82bbcdd26f2881e5e3c52021b407d5eb52e7d2212c",
+          "status": "machine_assisted",
+          "text": "뒤에 떠있는 물체는 달을 닮았으며, 지나가는 세대마다 점차적으로 더 원형이된다고한다. 달이 가득 차면 어떻게 될지 아무도 모릅니다."
+        }
+      },
+      "id": "selyne",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dbe37227efff1fa48dbeea9b0a597ec49d85892ff563620f1f76f9c0f244d73f",
+          "status": "machine_assisted",
+          "text": "광기의 깊이에서 태어난, 그 존재는 이성을 무시한다. 다른 Pal와의 모든 유전 적 유대 관계를 잃어 버렸기 때문에 여전히 Pal로 간주 될 수 있는지 궁금해한다."
+        }
+      },
+      "id": "shadowbeak",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ab6ca7e5b4b7f8db74a76e97b72fbe7c5babb4d9e204d6cc759fbca0943ddf79",
+          "status": "machine_assisted",
+          "text": "반지는 특별한 날을 위해 예약되어 있습니다 : 운명의 동반자를 만날 때, 반지는 영원한 동반자 관계의 상징 인 거래된다."
+        }
+      },
+      "id": "shaolong",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c23e2237d8b509ca9213ee8f6373a30ef3f42c24190d324fbea99f02d4dc0d27",
+          "status": "machine_assisted",
+          "text": "많은 양의 포자를 흡입하면 당신을 트랜스에 넣을 것이다. 때로는 머쉬드래곤가 움직이지 않는 것처럼 보인다면 버섯을 모방하기 때문이 아니라 자신의 포자에서 높기 때문이다."
+        }
+      },
+      "id": "shroomer",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2fde9c2407e5224c0005b2926c823285388870601e24ca443e4e0dbb23ec5010",
+          "status": "machine_assisted",
+          "text": "이 Pal에 의해 방출되는 포자의 풍부는 햇빛을 차단한다. 때로는 머쉬포이즌가 움직이지 않는 것처럼 보인다면 버섯을 모방하기 때문이 아니라 자신의 포자가 아무 것도 보지 못하게하기 때문이다."
+        }
+      },
+      "id": "shroomer-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8a59d94b87c12f97d1260162cd23e0d684359ed9bd86bd0492f54150c7f4b054",
+          "status": "machine_assisted",
+          "text": "비를 좋아하는 Pal는 날씨가 맑아질 때까지 종종 비가 내립니다. 비오는 날에는 파이호가 종종 그 아래에서 피난처를 찾는 것을 발견 할 수 있다."
+        }
+      },
+      "id": "sibelyx",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eb79f92a02a92f3764c701b2b01b03f9234840cb9bce398945fbbfff9ffb29f6",
+          "status": "machine_assisted",
+          "text": "비어있는 곳을 응시하는 것을 좋아하는 Pal는 종종 완전히 정지 상태로 유지된다. 그것은 종종 작은 Pal를위한 모임 장소가된다."
+        }
+      },
+      "id": "sibelyx-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fc1e8f957def0b569420b58cd011f69af0c6e777e9b65c72f18e453b0d2274ce",
+          "status": "machine_assisted",
+          "text": "고대부터, 그것은 세계 나무 안에 남아 있었고, 그 감시를 계속했습니다. 모슬론는 무엇을 보호하고 어떤 목적으로 모슬론를 알지 못한다. 결국, 나무는 모든 것을 말할 것이다. 그러나 그가 알고 있는 것은 적(敵)이라는 것이다."
+        }
+      },
+      "id": "silvance",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bf15e395bc4360409d6e53cec12f759484b64c8ba5972c799a8559225b63f207",
+          "status": "machine_assisted",
+          "text": "기괴한 종은 일시적으로 몸을 분리하고 뼈를 사용하여 적을 슬라이스하여 너무 오래 걸릴 때 죽을 위험이 있다. 확인되지 않은 동안, 나이든 사람들은 생존 본능을 유발하고 수명을 연장하기 위해 의도적으로 분리되어 있다고한다."
+        }
+      },
+      "id": "skutlass",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bf15e395bc4360409d6e53cec12f759484b64c8ba5972c799a8559225b63f207",
+          "status": "machine_assisted",
+          "text": "기괴한 종은 일시적으로 몸을 분리하고 뼈를 사용하여 적을 슬라이스하여 너무 오래 걸릴 때 죽을 위험이 있다. 확인되지 않은 동안, 나이든 사람들은 생존 본능을 유발하고 수명을 연장하기 위해 의도적으로 분리되어 있다고한다."
+        }
+      },
+      "id": "skutlass-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "78321fcffb7452db4c182636eaf3efaafc9c683c9f08f323aa861c41e7b87ad0",
+          "status": "machine_assisted",
+          "text": "파란 불꽃은 단지 터치에 시원하지만, 그들과 접촉하는 것은 천천히 얼어 붙습니다. 그 위에 우유 병을 잡고, 당신은 냉동 밀크 쉐이크를 얻을!"
+        }
+      },
+      "id": "smokie-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d23232bb32b0cbd8b92333a7763091d9f41f17aa82a5f414852115f0b9bb192a",
+          "status": "machine_assisted",
+          "text": "충격 스파를 위해 전팽이를 욕조에 던지는 것은 전통적인 건강 습관으로 간주된다. 즉, 결과는 다소 충격적 일 수 있다."
+        }
+      },
+      "id": "snock",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ae9f7d8f99ceb6866df9e179c08c788f858791000f4045357d2451adb2ffc94f",
+          "status": "machine_assisted",
+          "text": "뜨거운 스파를 위해 뜨거운 돌팽이를 욕조에 던지는 것은 한때 먼 과거의 유행이었습니다. 최근의 부흥으로 인해, 그것은 말 그대로 꽤 뜨거운 추세이다."
+        }
+      },
+      "id": "snock-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a6f2d0e28e15baf3b519a4ec5251c8ec84f88f09fee008f68f863582c36a183e",
+          "status": "machine_assisted",
+          "text": "“설뭉치의 눈을 보는 것”은 사물의 보이지 않는 본질을 추구하는 것을 의미하는 표현이다. 아이러니하게도, Snugloos가 눈을 가지고 있는지 여부를 확인한 연구자는 없다."
+        }
+      },
+      "id": "snugloo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3441a4ba4b34434f732c508821395913055b35061ea84d895fe6ecbc0ae88159",
+          "status": "machine_assisted",
+          "text": "기쁨과 불행은 모노크로나에게도 똑같이 찾아온다. 하나를 돌보는 것을 선택하는 사람들은 그것이 수반하는 것에 대비해야한다."
+        }
+      },
+      "id": "solenne",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c61f83c6a0672b8d43df3927782581ab69b25b2073637ab6d9e54f419fac081b",
+          "status": "machine_assisted",
+          "text": "그것의 코르크 나사 꼬리는 프로펠러 역할을한다. 연구에 따르면 신체가 변형을 견딜 수 있다면 88 mph 이상의 속도에 도달 할 수 있다고한다."
+        }
+      },
+      "id": "solmora",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ee791560c67c0cf0063def0eae8d50c2b46f5480daafc5b6d91342e3dc8417ff",
+          "status": "machine_assisted",
+          "text": "나선형 꼬리는 프로펠러 역할을 한다. 몸이 부담을 견딜 수 있다면 1.21기가와트를 넘는 전력을 생산할 수 있다는 연구 결과가 있다."
+        }
+      },
+      "id": "solmora-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b5628098a6ce4e2eb78ecf9f4910f08f6fc82e287afb69fae58819432a6f0339",
+          "status": "machine_assisted",
+          "text": "한때는 세상이 종말에 가까워질 때 불꽃이 약해질 것이라고 믿었습니다. Doomsayers는 불꽃이 약해지기 시작했을 때 반복적으로 기뻐할 것이지만, 결국 유령초의 장난으로 밝혀졌습니다. 적어도 지금으로서는."
+        }
+      },
+      "id": "sootseer",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e8d64803f0aeaa7722d4984fe4305d24ffacaf96250f3bf04b54c805bec32668",
+          "status": "machine_assisted",
+          "text": "그 보풀은 불쾌한 기억을 숨기는 데 사용될 수 있다. 일단 바람에 휩쓸리면, 그들이 나르는 어둠에 작별을 고할 수 있다."
+        }
+      },
+      "id": "souffline",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "24497ef96f5ad0024573e332d26d43a411d3583e1780d7c4fa9dd6884b44946b",
+          "status": "machine_assisted",
+          "text": "건기 동안이 Pal는 항상 퓨즈를 불기 직전이다. 불꽃은 심지어 동맹국들 사이에서도 조금이라도 도발을 할 수 있다."
+        }
+      },
+      "id": "sparkit",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ea009036a01034b099d1fc6fa92524cf28626cb24c2d3b82dee7b64c935d952c",
+          "status": "machine_assisted",
+          "text": "그것은 흐르는, 아름다운 갈기에 큰 자부심을 가지고 있다. 스플릿 엔드를 발견하면, 그것은 제대로 실행에 초점을 맞출 수 없습니다 너무 mortified된다. 정전기가 머리카락을 곱슬 거리게 만들기 때문에 모든 비용으로 썬더호스를 피할 수 있다."
+        }
+      },
+      "id": "starryon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff0e0ac1ad6c68719761f25bc32043ac95a8ed02ad6c8b497ecf920b3bbf627c",
+          "status": "machine_assisted",
+          "text": "그것은 그것의 빛나는, 화려한 갈기에 큰 자부심을 필요로 한다. 조금 더 더러워지면, 그것은 너무 mortified되어 제대로 실행에 집중할 수 없다. 스킨 오일은 코트를 망가 뜨리기 때문에 좋아하는 Pal Tamer조차도 너무 많이 만지지 않기를 원한다."
+        }
+      },
+      "id": "starryon-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a159fef86d408a7484e5ab1f0f15760cb77d0a7b9d8ede37a90c32a6e4e037ca",
+          "status": "machine_assisted",
+          "text": "그 유체 역학 형태는 물에 활동에 적합한다. 밀렵꾼들은 종종 그들을 잡아서 서핑 보드 대신에 사용한다."
+        }
+      },
+      "id": "surfent",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "773f6b68ad5bdc87fdd51b6d96051cd6f2e9eaa890976de953988f7df9fbeec0",
+          "status": "machine_assisted",
+          "text": "공기 역학적 인 형태는 모래 위에서의 활동에 적합한다. 밀렵꾼들은 종종 그들을 잡아서 서핑 보드 대신에 사용한다."
+        }
+      },
+      "id": "surfent-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "be4838b1b28a76f87a744d5732bff5265c22dc4a48a89504f43b539d8fdee388",
+          "status": "machine_assisted",
+          "text": "한때 건조한 계절에 안내하는 것으로 믿어졌습니다. 작년에 가뭄이 들 때마다 사람들은 내년에 풍부한 수확을 거두기를 희망하면서 그 수를 줄이기 위해 끊임없이 노력할 것이다."
+        }
+      },
+      "id": "suzaku",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2037df9c1fd6d21c93193981e711371338331d928f4c502f46a47ce5dfe76de9",
+          "status": "machine_assisted",
+          "text": "한때 우기에 안내하는 것으로 믿어졌습니다. 전년도에 홍수가 났을 때마다 사람들은 내년에 재난을 피하기를 희망하면서 그 수를 막기 위해 끊임없이 노력할 것이다."
+        }
+      },
+      "id": "suzaku-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8bf0820cf3c9f1e30c2b4be2fb21dc416b42673abe4420b511edcdd7714819d5",
+          "status": "machine_assisted",
+          "text": "땅을 따라 크롤링, 그것은 미세한 유기 물질을 먹는다. 잠시 후, 그것은 영양을 제공하지 않는 모든 물질을 배출한다. 청소를 위한 걸레로 그것을 사용 하 여, 모두가 승리!"
+        }
+      },
+      "id": "swee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5edba171d9ee525e7238e06dd26df53c3bc2f0545183062fd0b17e043015c888",
+          "status": "machine_assisted",
+          "text": "동면하는 동안, 많은 수의 모프링가 볼륨있는 체모에 숨어 있다. 가장 많이 기록 된 것은 101이다."
+        }
+      },
+      "id": "sweepa",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "747b33b7445a32cd5ff6c2f3f19fd7a11401569ea3396bba4a076bb76efc0972",
+          "status": "machine_assisted",
+          "text": "오래 전에이 Pal는 나무 가지와 같은 긴 물체를 무기로 사용했습니다. 그러나 인간과 접촉 한 후, 그것은 약간 더 효과적인 것을 발견했습니다 : 총."
+        }
+      },
+      "id": "tanzee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1ce2cec87e850a2bb2f93cdfde2ef5a26be3bb07a0cb9faaee718b06b957cd2a",
+          "status": "machine_assisted",
+          "text": "그것의 손바닥은 불에 타지 않고 불타는 물체를 처리하도록 진화했습니다. 총에 탄약이 떨어지면 맨손으로 가열 된 배럴을 잡고 적의 클럽에 사용할 수 있다."
+        }
+      },
+      "id": "tanzee-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a3c23a2fe7e05c1d999b48076b49ae30ab9f4b1cb01c2cc2c7ad2868f33cc976",
+          "status": "machine_assisted",
+          "text": "많은 양의 물이 코라고 생각되는 곳에서 쏟아져 나오지만, 일부는 실제로 콧물이라고 말한다. 이것은 Pal 학자들 사이에서 격렬한 논쟁을 불러 일으켰습니다."
+        }
+      },
+      "id": "teafant",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9deeed826b34173d4bb83aaeb9417d245a6712a8db62c9300f7141b47d73350f",
+          "status": "machine_assisted",
+          "text": "등 뒤에 있는 돌들은 단순한 화물이 아니다. 멀리 떨어진 곳에 놓아두면 그들은 천천히 집으로 돌아갈 것이다."
+        }
+      },
+      "id": "tetroise",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4af03f2ce40e6784e18af6dceecbe8b09681e1e8a429531d424f6da62e873525",
+          "status": "machine_assisted",
+          "text": "뒷면의 돌을 제거하더라도 성채북는 그들이 어디에 있는지 알 수 있다. 아무리 멀리 떨어져 있어도 항상 그들을 추적 할 것이다."
+        }
+      },
+      "id": "tetroise-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "27f53c65550c33257e0c19937c4520381a12ef2745c6d26dcc8c957a62607da8",
+          "status": "machine_assisted",
+          "text": "폭발하는 계란을 생산하는 무서운 Pal. 그것은 종종 방어의 한 형태로 뒷쪽에서이 알을 발사하지만, 지출 할 때, Pal 자체는 폭발한다."
+        }
+      },
+      "id": "tocotoco",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "43c264b358503f0f1a2d33951d21aeb39a0af772972cb1d183e299cad4246c42",
+          "status": "machine_assisted",
+          "text": "종종 다른 Pal 앞에서 소중한 날개를 과시하기 위해 파란색으로 나타납니다. 이것이 협박 전술 인 것처럼 보이지만 Pal는 디스플레이에서 일종의 즐거움을 얻는 것 같습니다."
+        }
+      },
+      "id": "tombat",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3ca0a46eb8c071fced024d8f1311bc400143fedfbb46e6a2cac0f4a59a2acb37",
+          "status": "machine_assisted",
+          "text": "어떤 사람들은 바람에 흔들리는 꽃을 모방하고 포식자를 피하기 위해 주위를 날아 다니는 반면, 다른 사람들은 진홍색 꽃이 고속으로 격렬하게 치는 것은 아무 것도 감히 접근 할 수 없을 정도로 불안정하다고 주장한다."
+        }
+      },
+      "id": "tropicaw",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cc028b713dc7aeaba096bb89e38fa7996a9fbcb2d21a464aef6d02c0d4e5326",
+          "status": "machine_assisted",
+          "text": "깨지기 쉬운 몸을 보호하기 위해 엄청나게 단단한 껍질을 개발했습니다. 불행히도, 그것은 아래에 완전히 무방비이다. 심지어 약간의 간지럼조차도 그것을 차갑게 만들 수 있다."
+        }
+      },
+      "id": "turtacle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "743e097303b781310527ff6ff2e91e0ad57017669fd62643f5d620b953467817",
+          "status": "machine_assisted",
+          "text": "깨지기 쉬운 몸을 보호하기 위해 엄청나게 단단한 껍질을 개발했습니다. 대부분의 감각이 팔다리와 껍질에 집중되어 있기 때문에 누군가가 조용히 핵심을 만지는 지조차 알 수 없다."
+        }
+      },
+      "id": "turtacle-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2ba9f78ed09680a2d5daa7bdc02501a6ff683da07a872950dccd82328a52856e",
+          "status": "machine_assisted",
+          "text": "그것은 하나님의 사자로 여겨졌고, 따라서 사람들에 의해 사냥당하지 않았다. 그러나 목격자가 번개로 한 사람이 죽는 것을 목격 한 후, 그 존경은 사라졌고 문자 그대로 말 그대로 노동자의 역할에 빠졌습니다."
+        }
+      },
+      "id": "univolt",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "579858068b560cab767d565cb258a2d021d6f2eaa50d4e00a9c8b2080b74f540",
+          "status": "machine_assisted",
+          "text": "겨울의 신(神)은 인간에 의해 창조된 것이 아니라 인간에 의해 만들어진 것이다. 그러나 목격자가 목격 한 후 얼음에 발을 딛는 것을 잃어 버렸고, 존경은 사라졌고, 말 그대로 노동자의 역할로 미끄러졌습니다."
+        }
+      },
+      "id": "univolt-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4542e4d2ef21a6655f8f6042d8935be35e47512dbf4f72f681dba3c8c93b541d",
+          "status": "machine_assisted",
+          "text": "성은 왕이 가장 좋아하는 꽃으로 가득 차 있었다. 큰 전투가 벌어졌고, 불길이 성에 접근했다. 혼란 속에서 꽃의 정신이 나타났습니다. - 동화에서, \"왕의 꽃.\""
+        }
+      },
+      "id": "vaelet",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "88e9a833d873810002c1ba563de71176010ddc9f956d3871db2f1bd3f49a053f",
+          "status": "machine_assisted",
+          "text": "오래된 그림에서, 그것은 오늘날보다 훨씬 작게 묘사된다. 알 수없는 이유로, 신체의 여러 부분은 최근 몇 년 동안 빠르게 길어지고 있으며, 다음 세기 내에 현재 크기의 거의 십 배에 도달 할 것으로 예상된다."
+        }
+      },
+      "id": "valentail",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff1f1b4ca49d5e52fe8b903039b23ed5de7016e97eb3f1a3bf0857851fc1cb3d",
+          "status": "machine_assisted",
+          "text": "버드래곤의 외골격으로 만든 플루트의 멜로디는 전체 산맥을 가로 지르는 것으로 알려져 있다. 과거에는 이러한 플루트가 공격을 신호하는 데 사용되었습니다."
+        }
+      },
+      "id": "vanwyrm",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5f37be266a4fa078f70c7f5a3e441d1a33542998da094cf0fee028c4ffd9a32d",
+          "status": "machine_assisted",
+          "text": "버드아이스의 외골격으로 만든 플루트의 멜로디는 전체 산맥을 가로 지르는 것으로 알려져 있다. 과거에는 이러한 플루트가 전투에서 승리를 알리는 데 사용되었습니다."
+        }
+      },
+      "id": "vanwyrm-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a44149eb62ca8389eabd14876ea01cf87b26f6ff12ca8a4448507430ecbfc08a",
+          "status": "machine_assisted",
+          "text": "그것이 혼란 스러울 때마다, 그것은 머리에 뱀과 상담하는 것에 의지한다. 그러나, 그들은 모두 궁극적으로 같은 존재이기 때문에, 아무것도 이해되지 않는다는 것을 이해하게된다."
+        }
+      },
+      "id": "venusa",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0afcc005c341b737ce697964fa8904552f637575014ab1afb85f7a1809b78153",
+          "status": "machine_assisted",
+          "text": "초토리가 실행 한 땅은 곧 두꺼운 식물이 자라면서 매우 비옥 해집니다. 그것은 제초제가 이용된 어디에서든지 달리지 않을 것이다."
+        }
+      },
+      "id": "verdash",
+      "kind": "pal"
+    }
+  ],
+  "schemaVersion": 1
+}

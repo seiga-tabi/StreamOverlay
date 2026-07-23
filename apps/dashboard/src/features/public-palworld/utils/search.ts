@@ -1,16 +1,17 @@
 import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared";
 import type { PalworldLocale } from "../i18n/palworld-i18n";
+import { resolvePalworldName } from "./localization";
 
 export function normalizePalworldSearch(value: string): string {
   return value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase();
 }
 
 export function palName(pal: PalworldPalSummary, locale: PalworldLocale): string {
-  return (locale === "ja" ? pal.nameJa : pal.nameKo)?.trim() || pal.nameEn;
+  return resolvePalworldName(pal, locale).text;
 }
 
 export function itemName(item: PalworldItemSummary, locale: PalworldLocale): string {
-  return (locale === "ja" ? item.nameJa : item.nameKo)?.trim() || item.nameEn;
+  return resolvePalworldName(item, locale).text;
 }
 
 export function matchesPalworldPal(pal: PalworldPalSummary, query: string): boolean {

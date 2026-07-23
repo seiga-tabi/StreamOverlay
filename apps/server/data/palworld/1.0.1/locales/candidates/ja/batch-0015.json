@@ -1,0 +1,2616 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7513e0fe91f61464813663e7a81d064fca4a11bdd3da35af183b1f784abbb2d1",
+          "status": "machine_assisted",
+          "text": "パルパゴス島のアイドル。 タマモをいじめるなら、世界全体と敵になる準備が最善です。"
+        }
+      },
+      "id": "vixy",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eed9e5a53c9b69a0afd1edd0fbdf7bd2a568915b47d8c6d79fc0c0d586938fe9",
+          "status": "machine_assisted",
+          "text": "体を取り囲む超硬装甲は、非常に強く耐熱性があります。 ナパームブラストでさえ、傷はほとんど残らないでしょう。"
+        }
+      },
+      "id": "warsect",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d2c035bd1ab551b88ad62b9a369389aa904ac1513802cd3a5ebe8410274902f1",
+          "status": "machine_assisted",
+          "text": "流氷と間違えられることは決してなかったが、その意志によって真っ赤になった。 残念ながら、パルは赤く見えない。 だから努力にもかかわらず、その個人的な空間は侵略され続けています。"
+        }
+      },
+      "id": "whalaska-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0495e8e1e2a49ad0f10257920c5cdb89309a9145b425876b4237c0e92512d510",
+          "status": "machine_assisted",
+          "text": "その背後にある幽霊のような手は、その種類を育てたすべての人間の魂を表しています。 最近、彼らはニャンシーに投票する全会一致の合意に達したようです。"
+        }
+      },
+      "id": "wispaw",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "35149bc95d8cc22c2073ce1c20cdee174e343f67fa900347c10d33589723267d",
+          "status": "machine_assisted",
+          "text": "人生の終わりに、空のどこかで新しい星が現れます。"
+        }
+      },
+      "id": "wistella",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "08162839c70b41c0a0bfa5413923b5cd80c447810aafcc81d68d2a4a344c998b",
+          "status": "machine_assisted",
+          "text": "光の力で、アルカン現象を発生させます。 それはよく食べることを好むとクレメーオに対して特に敵対的です。"
+        }
+      },
+      "id": "wixen",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b0d654637770922fb13ebdab81a8d2eff891b8ce3909da201ef252df3b6f47c6",
+          "status": "machine_assisted",
+          "text": "育てるため、その食べ物が十分に調理されているかどうかはもはや気にしません。 このパルはそれらの詳細を心配しなくなり、できるだけ甘いものを好むだけです。 クレメーナとの良好な条件では。"
+        }
+      },
+      "id": "wixen-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "972d43015d9e8f0d58a3c6bf35efc4ac891168595833b33d72e0de105064277b",
+          "status": "machine_assisted",
+          "text": "全身が砂糖の18,000 times倍も甘い。 香りに誘われた肉食性のパルは、甘さで圧倒されながらこの パルを噛み砕くと消えてしまいます。"
+        }
+      },
+      "id": "woolipop",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4bef58010bcf0c81d9c9761f28f7e9953264754354cb1ca90694a984c4bcd269",
+          "status": "machine_assisted",
+          "text": "毛皮は甘い香りを放ちますが、肉が不快に苦いです。 肉食性のパルは、その香りに誘われて一口を摂取すると汚れた味で圧倒されてしまうでしょう。"
+        }
+      },
+      "id": "woolipop-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e47d18c53cd26ef8962d89595091ab8e7a09e758635ef6bda5136c3970b91ec5",
+          "status": "machine_assisted",
+          "text": "研究者は、その本当の形を明らかにするために髪をろうとしました。 結局、髪の毛だけが残っていた。"
+        }
+      },
+      "id": "wumpo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "befbbc4c54f4f5172f875803c73256fd0ad046148527c5efdb894b6d7f060e9b",
+          "status": "machine_assisted",
+          "text": "研究者はかつて、その真の形を明らかにするために草を体から切り落とそうとしました。 結局、草だけが残っていた。それがすべてだったかのようにね"
+        }
+      },
+      "id": "wumpo-botan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1bbbd42c9f6e7308b809eb2a377ed77b1202e9944889239b11afd1e152044423",
+          "status": "machine_assisted",
+          "text": "情報を消費し、エネルギーに変える。 定期的に誰かに情報を送るようです。 もしもし? 今、送ったメッセージは? チェックする前にそれを食い尽くした。"
+        }
+      },
+      "id": "xenogard",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca6a975878d38ef11d83b9265638212f2743e5d3b0d462d2947b16725ff9b145",
+          "status": "machine_assisted",
+          "text": "-目的地到達。 優先事項: 場所 エンティティ|超音速ドラゴン| -注意してください。 -更新: コンクエストトレースが見つからない。 帰化確認。 開始の廃止プロトコル。 - スタッフメモ:重要なデータの忘れや消費を控えてください!"
+        }
+      },
+      "id": "xenolord",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fa05af0962717afaea6d6e188bce39b22bdc13f619cf2ef76e312657cab1d60e",
+          "status": "machine_assisted",
+          "text": "情報を送り、それを忘れてエネルギーに変換できます。 定期的に誰かに情報を送るようです。 -返答。 ターゲット位置。 即時破壊に進む。"
+        }
+      },
+      "id": "xenovader",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5059413dff2ade33425cc441b60eb4a608ef178334b54b903333e6fda0abff34",
+          "status": "machine_assisted",
+          "text": "正義感が強く、悪を軽蔑する。 かつては島民に忠実で愛情深い仲間でした。 ヤクモスは、今どこにいても人間に敵対的です。"
+        }
+      },
+      "id": "yakumo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1f6a759e14bb2196d5b5c36fd9179cb073108ef6c39c05fa711054e4206054c4",
+          "status": "machine_assisted",
+          "text": "投げる 敵の足の下から広い領域で。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8d0f3dfbe1a1448671b7cf60d9eb43b4bb513414bc328dace74ad9612fd09675",
+          "status": "machine_assisted",
+          "text": "絶対"
+        }
+      },
+      "id": "active-absolute-frost-8b7feb098a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c81270d9ef81ad29432d5160233ec6ce28294ee62f5eda3b430fc5c69efc13b4",
+          "status": "machine_assisted",
+          "text": "酸性雲を作り、敵に雨を降らせる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f6e3a857752d0aacf54c77902908a4343b02d2049889fdf40cb4405384fcc1fe",
+          "status": "machine_assisted",
+          "text": "酸性雨"
+        }
+      },
+      "id": "active-acid-rain-b29ac863a8",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ccabe28f859effdbedc6cedac82122db8e6c913d752f0650230b04c420fa11e5",
+          "status": "machine_assisted",
+          "text": "扇形の鋭利な空気の刃を送り出します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d909ac897e08da27964a5a3655a7196776390ed7b566ee6004f382e2743ba371",
+          "status": "machine_assisted",
+          "text": "エアブレード"
+        }
+      },
+      "id": "active-air-blade-69ea8df815",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "caf7a8f0efc35fd3baf58bcaad2065f758fb72f28a5b9dfa65c6231d05a3d012",
+          "status": "machine_assisted",
+          "text": "加圧空気の破裂を素早く発射します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40e8c51fd7c861cdd8d48f911edb728ee3bf7e0c4f3b83c5390aebfd34681e04",
+          "status": "machine_assisted",
+          "text": "空砲"
+        }
+      },
+      "id": "active-air-cannon-ba65ad11ea",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0390745a05acfafff50cc1f2c37474b64c49d910364c1b77e5c88d9b81934b50",
+          "status": "machine_assisted",
+          "text": "あらゆる方向に直線を進む雷が発生します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a15f7d55f46f9680cdecdbffc596557b840bb9206f59c82a82b16df9afe0523",
+          "status": "machine_assisted",
+          "text": "全射程雷"
+        }
+      },
+      "id": "active-all-range-thunder-f57fe5d8da",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5863044b1f582809f10565dfa0c678b1c1a59382ef2f9eabd1c93019a035ca77",
+          "status": "machine_assisted",
+          "text": "ツノガミの独占的なスキル。 敵の攻撃を撃ち、角を使って空中に発射する。 乗車中に使用した場合、電荷の方向を制御することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "82c6a54268f5dae00d2f138e0678b9c84c97295a575a82d775c9245e3372d4fe",
+          "status": "machine_assisted",
+          "text": "角切り"
+        }
+      },
+      "id": "active-antler-uppercut-c4b694a897",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "86d215b2e0d5b08756a9b37b2fdd4e1f7bcf3cf5e176fab3a2a887ccee84de23",
+          "status": "machine_assisted",
+          "text": "敵の周りのいくつかの暗い渦を生成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "952f6866fcda179f5949780b48f7750ef3b52e55fca04cf4defa183aef89e80b",
+          "status": "machine_assisted",
+          "text": "黙示録"
+        }
+      },
+      "id": "active-apocalypse-c2909dd4d5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6c82c94bb754a27121b003a0a73d58501d7bd2bac4a6a4d6a9863eed11420eda",
+          "status": "machine_assisted",
+          "text": "巨大な水玉を作り敵に投げつける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0173e2bd7a0494c5740ae5cbed6cbfa6b56fe9d084109b9a0ce5452244563838",
+          "status": "machine_assisted",
+          "text": "アクアバースト"
+        }
+      },
+      "id": "active-aqua-burst-72938e0647",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cfcc060320ec3e964656a418424827308b6922f4fa0289b0de2504f964ecf65",
+          "status": "machine_assisted",
+          "text": "敵にまっすぐ水のボールを巻き付ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "474b3d0ee8de2addb5e230575aec24666c6e56737811ca948d50436bf0a0e27e",
+          "status": "machine_assisted",
+          "text": "水鉄砲"
+        }
+      },
+      "id": "active-aqua-gun-97e58f5463",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "12a99b63004013c56cc615c66fe0dc0b444498c005d35f6f6804566ce13faa92",
+          "status": "machine_assisted",
+          "text": "敵の周りをあらゆる側面から波が飛び回る。 中央に集結して爆発し、水柱へと噴出する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0390ad28617916fc81a5b174baa5576a0ed6617f985333f1dbc736ede33cc66d",
+          "status": "machine_assisted",
+          "text": "アクアサージ"
+        }
+      },
+      "id": "active-aqua-surge-493d87d7ac",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d1880392737ba29ad03efed0839e68c2658befb99699eb3fa1a3e4b2efe40eb",
+          "status": "machine_assisted",
+          "text": "ゼノドランの独占的なスキル。 暗闇に満ちたエネルギーを集中させ、一直線で一気に解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "de79b2567714c35615c10cc6b6cc3eea70c29ce52be15e253282f62feaa3f7f3",
+          "status": "machine_assisted",
+          "text": "星条旗"
+        }
+      },
+      "id": "active-astral-ray-02bd50b8a1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dafe9aec954bf217045d0ff2d679be2b9ef14465a7f184ed5703b7d16d809332",
+          "status": "machine_assisted",
+          "text": "シャオロンの独占的なスキル。 ドラゴンの要素が燃える炎を、一掃する動きで、周囲の領域に火傷。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "29c846cbffdc4058f03d653752e0f5be50080afbe1e30edeed69c8ec941bb186",
+          "status": "machine_assisted",
+          "text": "アジュール・ドラコフレア"
+        }
+      },
+      "id": "active-azure-dracoflare-90805e9280",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e28e7fb8cec13f028b839eb24cd88fbd892e91c9c3adb30c4dd81fb27211cde2",
+          "status": "machine_assisted",
+          "text": "ジェッドランの独占的なスキル。 敵に向かって飛ぶとき、翼を照らし、無数のビームを発火します。 衝撃でビームが爆発します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d3e9183f5bbdcd7ef4ec5e1dfb51605685e0e46d3d13be8d36d59c02d2d8e32",
+          "status": "machine_assisted",
+          "text": "ビーム彗星"
+        }
+      },
+      "id": "active-beam-comet-2b15ced317",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4dd6e8efce9b0e8694fdb14c6f5e65afc6d7defcfe50816d1164c1ac9f24eb9",
+          "status": "machine_assisted",
+          "text": "ゼノドランの独占的なスキル。 右手で高出力ビーム剣を生成し、二つの強力なスラッシュを高速で移動しながら提供します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "58f56c6ad31a43e196f239e9147a2b36a89cccad2763132e793b137039b8b359",
+          "status": "machine_assisted",
+          "text": "ビームスラッシュ"
+        }
+      },
+      "id": "active-beam-slash-50fff54815",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "62516a2de22e01719ff49d93fb82d5a39879dcbfc7c718455190cd0b284f9c09",
+          "status": "machine_assisted",
+          "text": "ドラゴンパワーを注入したビームで前方のエリアに芝刈り。 ビームで打たれた領域も、短い遅延後に爆発します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb11e9439642a2eb61f4223a29097221ba5c7843c5542dc3e9dd51ec95aac7eb",
+          "status": "machine_assisted",
+          "text": "ビームスライサー"
+        }
+      },
+      "id": "active-beam-slicer-5ff8e56ce9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a2e9a09c84b3aa3aacc5a9509477f58516f921f8096fc9def8ebba4e289ce244",
+          "status": "machine_assisted",
+          "text": "命を危険にさらして激しい爆発を起こすが、戦闘で倒れる名誉を受ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5123f8398317036ba51c57abd4990f76ccf7d98dd8aaf5d910129e94b91da2a5",
+          "status": "machine_assisted",
+          "text": "蜂の鳴き声"
+        }
+      },
+      "id": "active-bee-quiet-acc073e030",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1f75f0c7d10ef4c3458e3aed228283131323c52e3903d3fe4659c4a45e0a654d",
+          "status": "machine_assisted",
+          "text": "モノクローナの独占的なスキル。 斜めにジャンプし、敵に対して鋭い黒い羽を投げる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "734b91d639573806226507cc6f0e383ae34eaa44effbe5d5644ef6f07f6d3a6a",
+          "status": "machine_assisted",
+          "text": "黒く刻まれたバレエ"
+        }
+      },
+      "id": "active-black-quilled-ballet-9d0a2274d2",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "535d2b7659f33a2ce1bbf00a39ee0b5e019c92d33e6efd91e1fb26e000870097",
+          "status": "machine_assisted",
+          "text": "敵の場所にドラゴンパワーを注入したエネルギー弾丸を発砲する。 弾丸は衝突すると破砕し、正面の長距離爆発を発生させる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "89593f85d8154c012348489411142eb982d1600fd3ce257cc516871349932449",
+          "status": "machine_assisted",
+          "text": "爆破大砲"
+        }
+      },
+      "id": "active-blast-cannon-714b67e2e9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be7b66667842a62f096771355aea4ff0f1b561da9ef29d90ebffcd2f7ce3f3b2",
+          "status": "machine_assisted",
+          "text": "ライゾーの独占的なスキル。 電気的に充電されたパンチを配信する前に右腕に巻く。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "952e11a4f83b3df9ea9dda7f5c2b92f79ec205652d9986ef5339be96a8b2e8fa",
+          "status": "machine_assisted",
+          "text": "ブラストパンチ"
+        }
+      },
+      "id": "active-blast-punch-00077c919a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "89d2be11a2d890ce4e2e303ff6a8b0942f02834d83a2606c5c2e5cbc0e86daea",
+          "status": "machine_assisted",
+          "text": "レイバーンの独占的なスキル。 短時間過熱光を放射する。 最後の瞬間に、ターゲット領域は大規模な爆発で囲まれています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f5314c90745075ab3a73b6120555bb590b474416f8a15a2dd8fa252fe2e8ffc3",
+          "status": "machine_assisted",
+          "text": "焼成ビーム"
+        }
+      },
+      "id": "active-blazing-beam-1ee7ce20fc",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d691c206993ab0c086cd41188b5e74ef18942af6c58bba169c0c75abf9f34447",
+          "status": "machine_assisted",
+          "text": "ブルフェルノの独占的なスキル。 角を上げながら、激しい勢いで狙いと突撃をとっていきます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5ab21eb11ac4d05d64772bd72dfd93c729cf169a390ff223cd93f35cff084256",
+          "status": "machine_assisted",
+          "text": "角を焼く"
+        }
+      },
+      "id": "active-blazing-horn-5fc24604e7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f0b1f80e861106690edc37a736fc6f175c26ddf6f1adf805ca13e02ad0b9152",
+          "status": "machine_assisted",
+          "text": "巨大な氷塊を作り、敵に突き刺す。 被害を受けた際に周辺地域の人々に損害を与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "92d536192d0e0f0501f0ae135666f16370aa0a2058c113b40a9861d969254790",
+          "status": "machine_assisted",
+          "text": "ブリザードスパイク"
+        }
+      },
+      "id": "active-blizzard-spike-c07fcacb09",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "895d15c8fcf9469c87cc753c534e20fc8e46427e398a9db0b174fcec1d922f7c",
+          "status": "machine_assisted",
+          "text": "敵に粘りのある泥を巻き付ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "53ae85c0e0b792f7cce20dec4ee3ee102c48103cf93a4e1eb5867f2d9f4ea7ec",
+          "status": "machine_assisted",
+          "text": "ボッグブラスト"
+        }
+      },
+      "id": "active-bog-blast-4dc5411705",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "50759caf6d71b219b5c1f678210d73db4421f058646a9faf140b65af6fc92323",
+          "status": "machine_assisted",
+          "text": "アロアリューの独占的なスキル。 大きな尾を使って前方の地面にぶつかり、直線に衝撃波を伝えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9af7a50ffb7af9fa7d28dc53133e64faa3bfc38f245216d5eef49db1afe236b4",
+          "status": "machine_assisted",
+          "text": "植物性スマッシュ"
+        }
+      },
+      "id": "active-botanical-smash-db5f72660d",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5c23318e00300b977b3fa9f428233fa2cd851d93db11123b6803e6cb71b9f421",
+          "status": "machine_assisted",
+          "text": "ボルカイザーの独占的なスキル。 腕を上げて膨らませ、それを一緒に叩きつけます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dee6e1ed7a19225f1a39ce53c86c7c0407cf529ae8c6676c973b89ecc3089ae1",
+          "status": "machine_assisted",
+          "text": "ブラウンインパクト"
+        }
+      },
+      "id": "active-brawn-impact-109c355732",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1e7df67c93169c22f72145d02ad83c74ae294998ec5ed1cf24c1fd242d70319",
+          "status": "machine_assisted",
+          "text": "敵をゆっくりと追う多数の泡を発砲する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5e938b41d205cb1f049f89fd597ac8c1cae4029395e933d0b7688f5be397a7f",
+          "status": "machine_assisted",
+          "text": "泡ブラスト"
+        }
+      },
+      "id": "active-bubble-blast-eeacb83a1f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "09882fe77cbdd869e8894071544e23f4c7685eb7ed8f1686251986ac44f90c41",
+          "status": "machine_assisted",
+          "text": "モリタロスの独占的なスキル。 ワイルドな狂気を放ち、二つの連続した草の要素チャージ攻撃を発動。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2f88b0c0e5b5d318bfca1c28e8ff4edaf6b83efe1dcdf04c8e89ae38ddfa2fc3",
+          "status": "machine_assisted",
+          "text": "雄牛のラッシュ"
+        }
+      },
+      "id": "active-bull-rush-ecf049e507",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b8a394fda8cbc6ff942994e086c40719fd315243eff655c1668ce68bf2c35388",
+          "status": "machine_assisted",
+          "text": "ニャンギマリの独占的なスキル。 空中に飛び込んで体で敵を叩く前に、恐ろしくにやにや笑う。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "35d8c6e0976e5926c77f503147b08d2a584181bb943bbc8fcb3cdd3e774e8ccb",
+          "status": "machine_assisted",
+          "text": "猫の報道"
+        }
+      },
+      "id": "active-cat-press-eda83cf2ff",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5c2babca0a5442b4284b417145b3b57c0927b1962edfdddd0e0de590b094302d",
+          "status": "machine_assisted",
+          "text": "シャオロンの独占的なスキル。 天に届く巨大な渦をサモン。 渦は、同時にすべての周囲の敵を引き出して排除します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "960cc43d81ada03c1a6669793ac16fb7c984dc670bd75097c8d05bb95f87147c",
+          "status": "machine_assisted",
+          "text": "天の渦"
+        }
+      },
+      "id": "active-celestial-vortex-bd51cf90bf",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28e062623f45e2fcc909ed72ea003bb802d631e1f3a6aba6205cd645f7c58c99",
+          "status": "machine_assisted",
+          "text": "コチワニの独占的なスキル。 は三つの冷たい手弾を体内に消化されず、敵に向かってロブします。 もっと危険なものを吐き出すこともあるかもしれない。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3aa073a0121f6a34290165c79537181f9a8e1940d0c057c2c5b2f4676fbedf84",
+          "status": "machine_assisted",
+          "text": "混スプレー"
+        }
+      },
+      "id": "active-chaotic-spray-78e735e137",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d170c1a72b4ae29c54b729440c877e6ce406f6dafa4f7298a4adb6c2e82afc1",
+          "status": "machine_assisted",
+          "text": "敵にドラコンパワーを注入したエネルギーオーブを発砲する。 衝突により広範囲の爆発が起きる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fda5d290dc414389917d9f856bf1544d14ecf1e261a9f1aaebb6b692876e2807",
+          "status": "machine_assisted",
+          "text": "チャージキャノン"
+        }
+      },
+      "id": "active-charge-cannon-a84c6e2a67",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2f08f617b2ea201289e16f13fce3b331dfd64190901bdad2a6d042f5d63fd2b",
+          "status": "machine_assisted",
+          "text": "タマコッコの独占的なスキル。 敵をで攻撃し、その目線に立つ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dd7720387fe418a1ace17a3e6b4e8eb58476b19bfd752da4e25fbc43d882b953",
+          "status": "machine_assisted",
+          "text": "鶏のラッシュ"
+        }
+      },
+      "id": "active-chicken-rush-e9d8490632",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7fcb3623d86e5265bbb34f9da9b7de23eb5b51ae3b54e08b979b9f4cc160aa28",
+          "status": "machine_assisted",
+          "text": "敵の場所とその周辺に鋭い根を芽生やします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "551fd8c1b45ab5ede4120803be58170816a489e2bb143b7a65be477ec95d2622",
+          "status": "machine_assisted",
+          "text": "円"
+        }
+      },
+      "id": "active-circle-vine-61fedb22d6",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ebceca323c94be7780b1dbc5ea1c3f634c73411b3b4ae5e58cfd5f621d586ee6",
+          "status": "machine_assisted",
+          "text": "ムラクモの独占的なスキル。 空気を操りながら前方へ突進し、その周囲に加圧風洞を作ります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c06dc8382f765b75c866ccf4685664aba583e62e3496785886f3732218d0eb70",
+          "status": "machine_assisted",
+          "text": "クラウドテンペスト"
+        }
+      },
+      "id": "active-cloud-tempest-80729c6441",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4064542b085a0df6ff0c659dd693636b29d90ca68c3c5a674eec413391030dd4",
+          "status": "machine_assisted",
+          "text": "石を次々と落下させ、衝撃波が発生します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d278bcf39396379f70fba61bdf4db567de276e7659cf1899568504513d8ec18c",
+          "status": "machine_assisted",
+          "text": "彗星衝突"
+        }
+      },
+      "id": "active-comet-barrage-07c6cb53f8",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee5578fe34208ee07a7da88a2e74677d6b77b4473451649b5548f6f7027d7d0f",
+          "status": "machine_assisted",
+          "text": "石をまっすぐに落下させ、衝撃波が発生します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0306c6346c9d258024afd561d2306ee7f2c34ec57c5e50a0a3769652c8b1f29",
+          "status": "machine_assisted",
+          "text": "彗星ストライキ"
+        }
+      },
+      "id": "active-comet-strike-374bb146ec",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6775d23dafdcb313c5da85c759e849b934bfe8d577408a8df5e00c7ee3ec6116",
+          "status": "machine_assisted",
+          "text": "ゼノドランの独占的なスキル。 光速で空中に舞い上がり、無数の流星弾を放出します。 その後、彗星に変化し前方へ突進して衝突時に爆発する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2be5094e51c2a45c7ec6261a68ac2047daf03448422cd0a1b310daa903ad82a7",
+          "status": "machine_assisted",
+          "text": "宇宙流星"
+        }
+      },
+      "id": "active-cosmic-meteor-9949610f26",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b261f7068e614fc5bd88ddee3aaca1404f052820ebf225abc4373bf2cc8d3c86",
+          "status": "machine_assisted",
+          "text": "キンガゼルの独占的なスキル。 大きな力で左右に岩を突き刺す、前方の電荷。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bdeecaebeb34e9e4ac9fc3b8f2c3090fa3046279fa8ed260b79a2b92704fdacd",
+          "status": "machine_assisted",
+          "text": "クラッシュダッシュ"
+        }
+      },
+      "id": "active-crash-dash-01f326716a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1bb7682a3d114030dfae55e65306bd4325a26df82b96268e1ee222f20e8320a6",
+          "status": "machine_assisted",
+          "text": "敵の前に風を吹き込み、切り抜きの十字攻撃を行う。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "545d3d8573e4f85fd92abd285f8fbb65c4eaa6ff924e7c84d04b23456b9f6be3",
+          "status": "machine_assisted",
+          "text": "横風"
+        }
+      },
+      "id": "active-crosswind-648fe1b2f5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "acbdfc7d28aa6a202a63e403486ad98578f51c2cc23504b823ebb13a338a2bb4",
+          "status": "machine_assisted",
+          "text": "ササゾーの独占的なスキル。 破壊的なパンチで敵を攻撃する前に右腕を上げます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "031c9866961f6546abf1f9272c3873b355529520c5b056c4f35c1c50506ac66c",
+          "status": "machine_assisted",
+          "text": "粉砕パンチ"
+        }
+      },
+      "id": "active-crushing-punch-b69370a234",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72fe6cabe4a2c7cd5e8b6afe8df021010ca4f500a2dc23608aeb596fbea7a921",
+          "status": "machine_assisted",
+          "text": "敵を空気の冷たい爆発に閉じ込め、継続的な損傷に対処する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9247e4e4333f9ce965f76a07386e1a396fd236f2f2d2409436a0c7cb799f9a97",
+          "status": "machine_assisted",
+          "text": "結晶性呼吸"
+        }
+      },
+      "id": "active-crystal-breath-a42a4f99ba",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddab52fe99a27b7a693b9dc790442043a071491da05023a0bce0a3fadc4e3f86",
+          "status": "machine_assisted",
+          "text": "グレイシャルの独占的なスキル。 羽根の周りに冷たい空気を集中させながら前進し、氷の刃で敵を切り倒す。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c1d6751ea55945324a368f78168c890240a9d923cee8b8fb0a51a611ce7802f3",
+          "status": "machine_assisted",
+          "text": "クリスタルウィング"
+        }
+      },
+      "id": "active-crystal-wing-79da087cdc",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "028de6e17a634e37ef18e38a79b8403662584c3d3482f7ea80ec40aefe085325",
+          "status": "machine_assisted",
+          "text": "オモシガメの独占的なスキル。 空中に飛び込み、その巨大な重量で敵を粉砕します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "82a7df52fb7d9c084c04ec16f29c4c5dc9727c109438ae717f332b19976140a1",
+          "status": "machine_assisted",
+          "text": "キューブプレス"
+        }
+      },
+      "id": "active-cube-press-d01d1eb08f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a5e15c69a112c10f74cebe3d62650c4bb55c6d40a8ec24d5daf254e17317da1a",
+          "status": "machine_assisted",
+          "text": "敵の位置に水柱から作られた壁を継続的に作成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8bb88b178a3b517e4e72732486f5560c72b4e0965a8254ef1087324332a1fbb2",
+          "status": "machine_assisted",
+          "text": "カーテンスプラッシュ"
+        }
+      },
+      "id": "active-curtain-splash-c6db8d78cd",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f528d8e3bbf5f41e8a474eb36ab1fd1241bfb27ebd63997685722edb83f36662",
+          "status": "machine_assisted",
+          "text": "シラヌイの独占的なスキル。 激しい青い炎に包まれながら、高速で前方に充電。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4208e2168fa89ef17873a9883aba581b1827acfae65c8e15d4a2d17b89c1d7cb",
+          "status": "machine_assisted",
+          "text": "き火炎"
+        }
+      },
+      "id": "active-daring-flames-6997e96779",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "63e5a8b85de8f50ee3498d440823cd85b1c859c77d8c721d239e1aa3a7e91721",
+          "status": "machine_assisted",
+          "text": "カゲヌイの独占的なスキル。 激しい紫色の炎に包まれながら、高速で前方に充電します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0d67154f9d3ab2e3b23e36a73950e8aacef3c704d3a1d98c56eb0b717735438a",
+          "status": "machine_assisted",
+          "text": "暗黒嵐"
+        }
+      },
+      "id": "active-daring-shadowstorm-fd18118d9b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9d054de10988b412bb553f3495393fd8c02ee38d3cd878db169bc8decc48df14",
+          "status": "machine_assisted",
+          "text": "敵に宿るダークエネルギーを発射する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dbe74c6bbf6a8890961ca3ac2d4b351f03eb33a87bd8acfdac0233cb616e30ba",
+          "status": "machine_assisted",
+          "text": "夏期MA 闇"
+        }
+      },
+      "id": "active-dark-arrow-b38e8ed617",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a0414749ad2610d5c401224da851dfc4c2efafea7abfe4bcc39b63ec4fd02169",
+          "status": "machine_assisted",
+          "text": "ゆっくりと敵を追跡する闇の球体を解き放ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0a00da4e4e31ea2852fe26acb4b84d21f6333399c2b3a2f560a1bc3b43c124f",
+          "status": "machine_assisted",
+          "text": "カスターマックスボール 闇"
+        }
+      },
+      "id": "active-dark-ball-1122a88ef1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3fb8cc51abffa594328eba7807efaf50a903712bb7a1d31d4fd55da3ec376354",
+          "status": "machine_assisted",
+          "text": "敵にダークエネルギーを注入したエナジーボールを巻き付ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca2db3292857754f776e0437b07e83dfa2b5a65d915ee437119265ebaa13454c",
+          "status": "machine_assisted",
+          "text": "クワッドカミソリ大砲 闇"
+        }
+      },
+      "id": "active-dark-cannon-969ecb5927",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eeae7545001e15313ce44812cb67fea9e6360deec95b43a3d72b8e8e793660b8",
+          "status": "machine_assisted",
+          "text": "サラブラックの独占的なスキル。 暗い炎のベールに包まれながら前方に充電します。 火炎は燃え続ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "628d65ea99f98ca8f0ecd80f196bc6780403ff7b73600542127491ddc0d2717f",
+          "status": "machine_assisted",
+          "text": "夏期最大チャージ 闇"
+        }
+      },
+      "id": "active-dark-charge-87eb02ac91",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5ef6f0e9779658b2e7619d8d71d8ed18d4000f7f24aaefa39240fdbce2655093",
+          "status": "machine_assisted",
+          "text": "強力なビームで敵をブラストする前にダークエネルギーに課金します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "38aff38f4d20cc37bb41312be05084e9452ebf3af2dfe3b19d5857e1331cb25a",
+          "status": "machine_assisted",
+          "text": "レーザー闇二"
+        }
+      },
+      "id": "active-dark-laser-55b43e4740",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fa4a9ad1acd6ad01be23567a119e797902b2def35ae95e1296fea7fd8d6f2326",
+          "status": "machine_assisted",
+          "text": "時間の経過とともに加速するダークエネルギー発射体を発砲します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3bfe1009b52e3a8467c22df69f1fd1e85f6731772c11cc7e198397a2460b19f4",
+          "status": "machine_assisted",
+          "text": "クアッドコア 闇"
+        }
+      },
+      "id": "active-dark-shot-683871250b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b3484f9ad5ef6ddd114742ac2447e0ea28f9444ba011c7ada551e59034a627c7",
+          "status": "machine_assisted",
+          "text": "敵を追及するダークエネルギーの脅威的なボールを発射。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0a77a45ec44151b08447be9f515762987956ae5ec9a1ba4de4a70628ca20b5e3",
+          "status": "machine_assisted",
+          "text": "クワッド・カズラ 闇"
+        }
+      },
+      "id": "active-dark-whisp-c92448b914",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "661d1180b1b83723b5d539be4264cbb85a2f8a775a59f8210816351d7c7219e0",
+          "status": "machine_assisted",
+          "text": "ココヤンバの独占的なスキル。 速度を上げて、目標に壊滅的な空中キックを発射する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e672339d20f7b270d242c7099f554fbaffe22e2b6a9c6b475e8e8255242a02cc",
+          "status": "machine_assisted",
+          "text": "ダッシュキック"
+        }
+      },
+      "id": "active-dash-kick-f7ff806be9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "faeec974196ce5b544617856e21c6d006c2d1d64255d444656b63b76eac217e1",
+          "status": "machine_assisted",
+          "text": "トコナッツの独占的なスキル。 長い首の基部から鼻先まで、徐々に草原を息づかせます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8f8d76b7e801d45220934647817151e1cd466b866ffc97611dc4f02830177a6b",
+          "status": "machine_assisted",
+          "text": "深呼吸"
+        }
+      },
+      "id": "active-deep-breath-de1195da83",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3eb1cff07ba449ade2d41dfba4b493f65480f95ec59639967df2ddc4014b69d0",
+          "status": "machine_assisted",
+          "text": "敵の頭に連続して落下する多数の氷塊を作成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "91300b2a3fcc3c816ad3cd7caa06e8d59c58545e46af565dd2839d354157349f",
+          "status": "machine_assisted",
+          "text": "ダイヤモンド雨"
+        }
+      },
+      "id": "active-diamond-rain-485e2e12ab",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c7386edec8e2ef05d1adc876ad148a67b74a8a84423ef1ebbe95ec7e5e05d104",
+          "status": "machine_assisted",
+          "text": "前方に充電し、敵を自動的に標的としレーザーの弾丸を解き放つ光のオーブを生成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "35c31d8ccfc46eff5a509d9e11b7316439b552887f59c8b2ca5822305103da8b",
+          "status": "machine_assisted",
+          "text": "神事"
+        }
+      },
+      "id": "active-divine-disaster-08bd132196",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eece6c74064f3012ad7297448f4f0a5387096646c5c573ac6bf528cdcbeabc87",
+          "status": "machine_assisted",
+          "text": "レジェンディアの独占的なスキル。 後ろに飛び、光の翼を芽吹かせてから敵に向かって潜ります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "09c41bfe547e1a72f0095093f3bf99d5cbeb6871a33ba2b02f64167a364535ef",
+          "status": "machine_assisted",
+          "text": "神"
+        }
+      },
+      "id": "active-divine-wing-d652b5bdc4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4",
+          "status": "machine_assisted",
+          "text": "敵を攻撃するために、急速に攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2384d321af21aa9f9fc842d2e5a904612acb0a8e7a1d2bee53f59b438fd117ce",
+          "status": "machine_assisted",
+          "text": "ダブルファング"
+        }
+      },
+      "id": "active-double-fang-51aba4eadf",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "894838a68e986855b6cf9307398d2f07c377eba9e990e2863c27f223168de122",
+          "status": "machine_assisted",
+          "text": "敵に噛みつきの急速な連続を開始します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2384d321af21aa9f9fc842d2e5a904612acb0a8e7a1d2bee53f59b438fd117ce",
+          "status": "machine_assisted",
+          "text": "ダブルファング"
+        }
+      },
+      "id": "active-double-fang-b35a322bb6",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4",
+          "status": "machine_assisted",
+          "text": "敵を攻撃するために、急速に攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9d95a150311223b0af832e97a4a2fd7dbb4d8db7f457c20e206f4637d15f6e6a",
+          "status": "machine_assisted",
+          "text": "ダブルファング(闇)"
+        }
+      },
+      "id": "active-double-fang-dark-de4c931ca9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4",
+          "status": "machine_assisted",
+          "text": "敵を攻撃するために、急速に攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2a7e5c7798c1873880726f96bf06b48ec9d84d010149ab670b85424eaeb588a6",
+          "status": "machine_assisted",
+          "text": "ダブルファング(雷)"
+        }
+      },
+      "id": "active-double-fang-electric-fc11498a3d",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4",
+          "status": "machine_assisted",
+          "text": "敵を攻撃するために、急速に攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a758460f7d96aea585355dbc5ee2299865fa6d1ec1c42a17eea46cee13e30f65",
+          "status": "machine_assisted",
+          "text": "ダブルファング(炎)"
+        }
+      },
+      "id": "active-double-fang-fire-3c2776e7d1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4",
+          "status": "machine_assisted",
+          "text": "敵を攻撃するために、急速に攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a8380b5babe55fb5359c2255bfbaae92218535ec32a9a16d51f7eaf358bf6600",
+          "status": "machine_assisted",
+          "text": "ダブルファング(地)"
+        }
+      },
+      "id": "active-double-fang-ground-652d0a9212",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c2613907df395c08fcdb4bbaf949a83c3bf7ee976e01a678ad0f8951da8f3b4",
+          "status": "machine_assisted",
+          "text": "敵を攻撃するために、急速に攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "677dc137a96243f86fa67fbc54aab680046fe694fa0fb5159c2ddacf8b145315",
+          "status": "machine_assisted",
+          "text": "ダブルファング(氷)"
+        }
+      },
+      "id": "active-double-fang-ice-5afe55c46a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "632fe0f197316407119f75bea69777be9781568e6018345d2940a9e7f7295fce",
+          "status": "machine_assisted",
+          "text": "息を吸い込むと、ドラコンエネルギーが吹き込まれて、目の前の人に継続的なダメージを与えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3b439567997b03617938fd2b0048bb122fcf93edc85c2ea4e96f8a3d2fab9211",
+          "status": "machine_assisted",
+          "text": "クワッドマックの息 竜"
+        }
+      },
+      "id": "active-dragon-breath-76e9a9c639",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "01be7ffe40d9580274b038fa664b6db90dcbbd52c21cbe27a3a1a22703baafa1",
+          "status": "machine_assisted",
+          "text": "すぐにドラコンエネルギーを排出し、周囲の人々を傷つけます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c3fd2da9b1f744680c039b707cc060f753ad7a3b552886e454cf56617d4d5f74",
+          "status": "machine_assisted",
+          "text": "夏期マックスバースト 竜"
+        }
+      },
+      "id": "active-dragon-burst-15fdde5ce7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6346ebcf3913d1578e0bdc0e50a28dad000d9686a05463c953d42030a3b83504",
+          "status": "machine_assisted",
+          "text": "敵にドラコンエネルギーを注入したエナジーボール。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "174f74ecdb46a35329df2ec5a1215644347c87e85f14de3e5ed606585457a6c3",
+          "status": "machine_assisted",
+          "text": "クワッドカミソリ大砲 竜"
+        }
+      },
+      "id": "active-dragon-cannon-e4a61bd1f5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a839811462dea1aa8fd88cfa825adaabfe2b779f9558db88f38d81671ed29ed4",
+          "status": "machine_assisted",
+          "text": "多数の小さな石を召喚し、敵に発射する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b00648a5475c6f8ff3662b5914c96a4e23fa6b776d674f2f0bb358b5195aa938",
+          "status": "machine_assisted",
+          "text": "石座 竜"
+        }
+      },
+      "id": "active-dragon-meteor-436b1479c1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "54472b1f2d1dad8a4a1ac83c498a4396241e6a4bf8b26793429b51cc4a51f268",
+          "status": "machine_assisted",
+          "text": "トリステップの独占的なスキル。 一度に加速し、高速で前進します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0e6dfd15993cc6e3f3019d56e6a20551d98c599e59857ae2b78bb5fcce6c9ff",
+          "status": "machine_assisted",
+          "text": "アースダッシュ"
+        }
+      },
+      "id": "active-earth-dash-7915143d84",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5af1b8f0ded00d7c8a120f7a58587c3bb074eed3f6e0853de8595551b64a2016",
+          "status": "machine_assisted",
+          "text": "グランモスの独占的なスキル。 巨大な体を使って地球を揺さぶり、広い領域にダメージを与えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af1a887449a0cbaa2b2db801aad3302b6858389eef8b504e2064180004e76ba7",
+          "status": "machine_assisted",
+          "text": "地球への影響"
+        }
+      },
+      "id": "active-earth-impact-4af9dc4acb",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bbc1eb6220a7041a62bc1b1b9e65e99662c2f19ccd66ba3df5f83d099ccb1b93",
+          "status": "machine_assisted",
+          "text": "ゆっくりと敵を追いかける電気ボールを発射する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "855f4604e20f1fb2946d33024bd5f3509bf3ed8be0a0f318b0f399b2fd27bcbd",
+          "status": "machine_assisted",
+          "text": "カスターマックスボール 雷"
+        }
+      },
+      "id": "active-electric-ball-f55d039393",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28a4239f73f9677968999aaf3269490f9232fb81fe84269d4652581eed93aa68",
+          "status": "machine_assisted",
+          "text": "キャプペンの独占的なスキル。 敵を高速で滑らせる前に、その周りに凍った空気を生成しながら腹の上に横たわっています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1e8e75226c455a699366394008bab3e7200a6794c030d37f15fc829ebe501b2",
+          "status": "machine_assisted",
+          "text": "天皇"
+        }
+      },
+      "id": "active-emperor-slide-3c68b535be",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "39aba85649e57e03b8ec8e74b231da6c83da0030c98dd08a253a3ee948572c06",
+          "status": "machine_assisted",
+          "text": "ゼノベーダの独占的なスキル。 左手でスウィフトポンジとスラッシュ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ffd00ed1ecad4b6326c7e40099c197f6d1e5528bf92acf57b68e3d801659d739",
+          "status": "machine_assisted",
+          "text": "悪のスラッシュ"
+        }
+      },
+      "id": "active-evil-slash-5188a788e0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "06d7d0cbc6571f8f333e31599db60a075ee3dc98908d35073234b640d30a74f0",
+          "status": "machine_assisted",
+          "text": "巨大な炎のボールを作り、敵に投げつける。 ボールは衝撃により広範囲にわたって爆発します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7db97dd4017f0d011c7a92f5975816b32b0a6e9a618779c9f4abac26b9b63e3c",
+          "status": "machine_assisted",
+          "text": "カスターマックスボール 炎"
+        }
+      },
+      "id": "active-fire-ball-04f2ef6fcb",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c7655b88a63e3689bf06ed75eb58f2adbfedef5107d24144be127d531857aee0",
+          "status": "machine_assisted",
+          "text": "無数の火球が敵に向かって発射される、複数の火気の球体を作成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "725c3e6ca758fc87d2cbd4c993474d24c4535075bf0ce1656e41eeff7030a7d6",
+          "status": "machine_assisted",
+          "text": "火炎漏"
+        }
+      },
+      "id": "active-flame-funnel-76ade984db",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6ecd62f5418082a88da7840b25c314a7edba513178a4cf7688e07927e7820832",
+          "status": "machine_assisted",
+          "text": "敵の場所に炎の壁を作成します。 炎の壁はしばらくの間残り、それが触れる敵にダメージを与えるでしょう。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f4a444ea0b2d3a80c82a7e41510ac20384cec9d60a2b42fe6aa9b2a662bb6db0",
+          "status": "machine_assisted",
+          "text": "炎壁"
+        }
+      },
+      "id": "active-flame-wall-2faee489e7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ba816e0055d2e8f54f8403e574dd8a616fb65f63982e451be25f79074a38ca10",
+          "status": "machine_assisted",
+          "text": "ベラルージュの独占的なスキル。 優雅な踊りで、火の輪を広げて、敵を求める不気味なる炎を放ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e11d1c5b1c39d5230594ada9b3a278003fc3c00c0578a1851b89a6aa5215f14c",
+          "status": "machine_assisted",
+          "text": "火炎ワルツ"
+        }
+      },
+      "id": "active-flame-waltz-79ed85c425",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9636d2578e68ef60c5806fa52753cdb3a554844ecdba187b51c9057badb1ba68",
+          "status": "machine_assisted",
+          "text": "敵に帰着する三つの火炎矢を連続して発射します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7d13e623c0f50c0f74ee78589d373b346433025c0b1b6b053d123650b5f75b06",
+          "status": "machine_assisted",
+          "text": "フレア矢印"
+        }
+      },
+      "id": "active-flare-arrow-2e5dcd25bc",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "45933164761a6a7acd8ad3d62bfbd6bc4ba8cd0af27dde3e3dc3abf5da5c3990",
+          "status": "machine_assisted",
+          "text": "敵に発射する前に、両側の二つの燃えるような竜巻を生成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3ba7b8919e001c92023ab7f31cd7302f987185ac46c5e4439dab67f4467e3d6b",
+          "status": "machine_assisted",
+          "text": "フレアストーム"
+        }
+      },
+      "id": "active-flare-storm-e87d805c51",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f1af7f588de2470fc0208451931ffcc994e026c377ad50d2d28d39239a81a82c",
+          "status": "machine_assisted",
+          "text": "フラペックの独占的なスキル。 軽く空中に飛び、そしてその鋭い爪を地面に強制的に叩きます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f3e57e0119d509c909b2ebdaf93537abea29190bc9d60ca2b66ddf3878c6c994",
+          "status": "machine_assisted",
+          "text": "花の切り株"
+        }
+      },
+      "id": "active-flower-stomp-98c5071f37",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ac16958f1a959546bb0d8e0490bb6dc968806519f960c8398f3ad9bc4b3d73ce",
+          "status": "machine_assisted",
+          "text": "メルパカの独占的なスキル。 愛らしいオーラに囲まれながら前方へ充電。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "897cdb12a238dbedc0808fb6ce47395aa76270dc0e398b4ee78571cad4d3f294",
+          "status": "machine_assisted",
+          "text": "ふわふわタックル"
+        }
+      },
+      "id": "active-fluffy-tackle-1e7d722911",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5761ffc3e559d201c7d7af886c09fccb7d9f1331c9e2f28786b7a7be4fe05c9a",
+          "status": "machine_assisted",
+          "text": "フェザーロの独占的なスキル。 敵に強力なショットを放つ前に弓を引きながら狙います。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1264912d83f76cee055faf2e68050e8e7a145d441108bd2ded1e20d41c2f22f1",
+          "status": "machine_assisted",
+          "text": "フォーカスショット"
+        }
+      },
+      "id": "active-focus-shot-14fd2ba84f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dbbd28921b9f6570a00aa2e96c97ae88891c96150c03392672e46b1c3c649714",
+          "status": "machine_assisted",
+          "text": "アヌビスの独占的なスキル。 エネルギーを解放し、強力なパンチを解き放ちながら敵を追い求める。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0577fb4c072ab346a5df35a0478340c5c7b9d281bf7f2fda41ee769dc3df9c39",
+          "status": "machine_assisted",
+          "text": "強制充電"
+        }
+      },
+      "id": "active-forceful-charge-91a44b19b1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "174343bbcce67dc85c8f070da4c1cb4d59741e0b884ed2060c0c06526fdd7f06",
+          "status": "machine_assisted",
+          "text": "地面から立ち上がる氷の壁を作ります。 氷の壁はしばらくの間立ち残り、十分な損傷を受けた後に壊れます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1f783ab5f2e638bda8204754936ac9d7b6e8344156ca2857c5e2e309954ed96e",
+          "status": "machine_assisted",
+          "text": "凍結壁"
+        }
+      },
+      "id": "active-freeze-wall-060f1a2cce",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "695a7dab921b359180fa9607a76faccabdfa45662b5509df6907f564d16d55ed",
+          "status": "machine_assisted",
+          "text": "ツララジカの独占的なスキル。 敵の角を氷で飾った突撃。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b14d0df51dd626d645ed0972f94cd6469793e9e49b1eeae800b409c0a8237cbd",
+          "status": "machine_assisted",
+          "text": "凍結帯電"
+        }
+      },
+      "id": "active-freezing-charge-e8b8dbaf5e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0c213f66267a860c822f1284376f4d83fb2d2e6fb7835a39d925cb91ea759087",
+          "status": "machine_assisted",
+          "text": "フロスカノンの独占的なスキル。 前に足を上げて地面に叩き込み、敵の下に凍った爆風を引き起こす。 上から雪玉で同時に砲撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ff22f48b6e51a877b026f1b684600b0af17703eee9458f66a493b1df1a8ae174",
+          "status": "machine_assisted",
+          "text": "のバースト"
+        }
+      },
+      "id": "active-frost-burst-7314076278",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3b40134cf0f3709a8f6e2ddfae7732922a4966a065ef8cf886bb0da4ec2377e3",
+          "status": "machine_assisted",
+          "text": "ヒョウガオーの独占的なスキル。 地面に切り込み、前方に氷の亀裂を作成します。 その後、素早く距離を閉じて右手でスラッシュします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40fdfdf4e51bbe5b71c1823565fd69e8b99443b39187499a1213a0ffb6d6f466",
+          "status": "machine_assisted",
+          "text": "フロスト・タロン"
+        }
+      },
+      "id": "active-frost-talon-29fa7e3263",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "37833f250f073d9769a5457db44833926ed2c54b182f5c35be75bd9860c0fb70",
+          "status": "machine_assisted",
+          "text": "フリーズマの独占的なスキル。 前方に氷柱を発生させ、その隙間を通して高速で前進する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c10bbf532b8f386187f7b1fdfcca785bdf4e3c4215245848539cd295c35e9c8e",
+          "status": "machine_assisted",
+          "text": "フロストコール"
+        }
+      },
+      "id": "active-frostcall-be29470735",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "512c648ca637b0979b9867d8bb1ef9fb18d714a190e4c8993ae208075e1d5ff0",
+          "status": "machine_assisted",
+          "text": "エアムルグの独占的なスキル。 タロンが伸びると、それは激しい突撃で前方に滑る。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "baa210b7ad42ba5f72320ed0b61f07890b849cf843eaee3950c94906c4955b0e",
+          "status": "machine_assisted",
+          "text": "ゲール爪"
+        }
+      },
+      "id": "active-gale-claw-948460da17",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10ddc42a838965921dcb0cc534729db4fb9673af95f23bedfbc93c2034d371cd",
+          "status": "machine_assisted",
+          "text": "敵の下や周りの水の巨大な柱を噴火します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5b5aa06263f8eafaf31f3d1e21c4a866a74173c7ed010e107618246bc6588e71",
+          "status": "machine_assisted",
+          "text": "ガイザー・ガッシュ"
+        }
+      },
+      "id": "active-geyser-gush-ad1cb5496f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e2c4e7608cd8e6998248f337a5f9f6b5de7b6044fcb3e332efe69f492f2b40fe",
+          "status": "machine_assisted",
+          "text": "モスローンの独占的なスキル。 敵を追う巨大な追跡胞子を発射する。 衝撃で爆発し、広範囲の爆風を放ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "79d21b5740d94f20790b58755b142db1cee1635584385ad4a12f0d80c05ec39c",
+          "status": "machine_assisted",
+          "text": "巨人胞子"
+        }
+      },
+      "id": "active-giant-spore-72c70ff036",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "78703c5a1a1d60309353a8488cf46dd42062eed39b8cbc0d355bbd857db97327",
+          "status": "machine_assisted",
+          "text": "グラクレスの独占的なスキル。 頑丈な角を持つ敵。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e050972be1d88552ae1bc21829cbe0107ac94e0475e0f169e15a61af3bc14f42",
+          "status": "machine_assisted",
+          "text": "ギガホーン"
+        }
+      },
+      "id": "active-giga-horn-17e02c2506",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a119c8b65e58fe9dd7b9af2503013bbfaf6c165dc08777d4b32e82bc91ccc00f",
+          "status": "machine_assisted",
+          "text": "敵に発射する前に、両側の二つの竜巻を生成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4ce6fecf50ef098729aac7e9542154e5f0980edf7dbead600e191295c83a267e",
+          "status": "machine_assisted",
+          "text": "クアッド・マックス竜巻 草"
+        }
+      },
+      "id": "active-grass-tornado-5ee2886f0b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d73037f5e69cd4335e8e9d0baaba9d56931670cd818e0a2fc0fc4a698d5a5372",
+          "status": "machine_assisted",
+          "text": "テラナイトの独占的なスキル。 大きなスイングを取り、その背中からリングを投げます。 リングは円形の軌道を飛行します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d2784b8e9c9d35ae27a385ceec799ff82f9a8f1fcdcac45696fbe9e85bfede96",
+          "status": "machine_assisted",
+          "text": "カッター「地」"
+        }
+      },
+      "id": "active-ground-cutter-cdb473a431",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a61f43b629c752b467a878ca650b2e2b60eca2f518c844f69d8057e4e26b1dc7",
+          "status": "machine_assisted",
+          "text": "ゴリレイジの独占的なスキル。 空中に飛び込む前に二回地面をパウンドし、強力なパンチを提供します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "60f1cfcafb4c53c33878b35d88cbc83c2429b7c20a73e24634b59898573aa256",
+          "status": "machine_assisted",
+          "text": "西日本大震災 地"
+        }
+      },
+      "id": "active-ground-pound-6ed4b3db51",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5d7dc606bd798d30f406e9837f24e68e23c735d7b8d1dcd83e3f85ab96f1ba97",
+          "status": "machine_assisted",
+          "text": "アヌビスの独占的なスキル。 空中に飛び降りて地面にパンチを打って、広い領域でダメージを与える衝撃波を引き起こします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dd3133feefd4d07f59ecbe17a4b5516e8e15de99f3e672c34c1f008184f81bc8",
+          "status": "machine_assisted",
+          "text": "クワッドマックのスマッシュ 地"
+        }
+      },
+      "id": "active-ground-smash-8f59bb57d4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "84569365a03c956ad173c59109c1dac2b1876efc526170ad5c51eecd8fedc550",
+          "status": "machine_assisted",
+          "text": "ヘルゴートの独占的なスキル。 左爪を使って敵の近くを空中に投げ込み、右爪で切り倒す。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "154227cdf9282028aa35599e7c14e0768242b398172fcc5cbc8ab9a2017fd688",
+          "status": "machine_assisted",
+          "text": "地獄火爪"
+        }
+      },
+      "id": "active-hellfire-claw-360dc07915",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e3aa199b67f75842aec7db5418cc969409428a183b729a6f150ff6c7e29929c3",
+          "status": "machine_assisted",
+          "text": "コゴエールの独占的なスキル。 突撃は直進して短時間沈没し、空中に高射程に飛び込んで攻撃を仕掛ける。 氷の爆発は、出現時に起こる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0f0848fa2da2e07d3f5d84acd6fc86c4fe7c114bc4b40a5149362cda5fdb4278",
+          "status": "machine_assisted",
+          "text": "ハイブリーチ"
+        }
+      },
+      "id": "active-high-breach-daa09bd1e1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6b835504bea54d2ae4fdcd86d08ea7a2e011d5dd8cd1f520ad0128c59b48b45c",
+          "status": "machine_assisted",
+          "text": "敵の位置とその周辺に光の広い爆発を作成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a2984962361b20bdbb401a90a21ff6966e80fec252489a12de8cde6b04617f4f",
+          "status": "machine_assisted",
+          "text": "聖バースト"
+        }
+      },
+      "id": "active-holy-burst-3135fb2407",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5070c533bc9b7a407d4367f4d3dad22d2b403e8d5262fd0ba406362029a20087",
+          "status": "machine_assisted",
+          "text": "シャオロンの独占的なスキル。 体を水に浸し、まっすぐ前方へ充電します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8ab78cefb6b54cc4b1f42b42a9ec85467a8e42783074cdb14e86b1bb8688de98",
+          "status": "machine_assisted",
+          "text": "水素電荷"
+        }
+      },
+      "id": "active-hydra-charge-8bddd6e544",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "839ad1de28815abda4592c09a8be6b2fcb379e73776d1ce4edc620f0d1cb17ab",
+          "status": "machine_assisted",
+          "text": "敵に高速の水のボールを投げます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fbe4e13d2181a073065b2a69f217f59a1a44674374df5c9c40797269405a0cec",
+          "status": "machine_assisted",
+          "text": "ハイドロジェット"
+        }
+      },
+      "id": "active-hydro-jet-9381dcef9a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9c73c2dc9fd0effd258c6f608d4645803fa11189ea39b5bf9fc3d404fee82b06",
+          "status": "machine_assisted",
+          "text": "極速度で加圧水が射出され、その前の広い領域を掃きます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7146b1924e5ce77e143cafe5ffe0ceab33c985af570b91cef5ec5d29d4923421",
+          "status": "machine_assisted",
+          "text": "ハイドロレーザー"
+        }
+      },
+      "id": "active-hydro-laser-dc5ef69c8b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b2670cbc2be383418a4a0864707aa16389301d48e18bfc328ab447038d563c75",
+          "status": "machine_assisted",
+          "text": "圧縮水で前頭部を刈り取る。 爆風で襲われた地域は、短時間に水が噴出する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f90c53117f2ab37d0196523fc70a9ed27ac2957271e51147a63f321c790dca3b",
+          "status": "machine_assisted",
+          "text": "ハイドロスライサー"
+        }
+      },
+      "id": "active-hydro-slicer-976c2d65a7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed3244bb95c3f0f81ea253bb44a31fbae641f532af8a799b3a26eb5793dfc0b5",
+          "status": "machine_assisted",
+          "text": "ヘルメッコの独占的なスキル。 ジェット推進で素早く回転し、敵に発射する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1ee33bf8b4770c8fbfb742ca5bf1942d279fb16b80c177795155383d28b7581",
+          "status": "machine_assisted",
+          "text": "ハイドロスピン"
+        }
+      },
+      "id": "active-hydro-spin-f8cbb273f6",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0304b3551ad92d69c058b3d8f8da2bdd6f8ce0dfba98e40089afa1097285fce1",
+          "status": "machine_assisted",
+          "text": "ツジギリの独占的なスキル。 剣を握ると、瞬時に敵の前に現れ超高速の刀引き攻撃が解ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "39ea155417b6f161345359944cb60b92dfee1fe8d51c462b4e713847b1cb0494",
+          "status": "machine_assisted",
+          "text": "いあいぎり"
+        }
+      },
+      "id": "active-iaigiri-fb180c52b3",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8c46cad089aa130ce529e3a170e3cd1d8cb672ede5f79551b14d1ed17816e4de",
+          "status": "machine_assisted",
+          "text": "フロスドンの独占的なスキル。 角で地面をき、敵に雪の塊を投げつける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "51fe13e73cce5880a074a9c852d71c0412454c6380ccac1cd3a331128d7419fa",
+          "status": "machine_assisted",
+          "text": "夏期マックスバースト 氷"
+        }
+      },
+      "id": "active-ice-burst-7267c87309",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b39b9b4519a295119b987d4f2869b7383d6013d0835b97e61eb3d4815a908ecb",
+          "status": "machine_assisted",
+          "text": "敵に向かって飛ぶ空中に氷のランスを作成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b2310e268968f3757188a7cac694d1e1bd23382de78635f2683245b094b4676",
+          "status": "machine_assisted",
+          "text": "東日本大震災 氷"
+        }
+      },
+      "id": "active-ice-missile-32d50c646c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "15dbdce33f827400aa547517a64826027b55d20a8b6c2337d576390134155d1e",
+          "status": "machine_assisted",
+          "text": "ブリザンダーの独占的なスキル。 口から氷を少し吐き出します。 衝撃は凍りついたプールを作り、接触時に敵を凍結させ損傷させる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "42bd1c439ca5823f61693f9f42d55a746304e1bb6d7f69bae0d7802f30bce83b",
+          "status": "machine_assisted",
+          "text": "夏期マックススピット 氷"
+        }
+      },
+      "id": "active-ice-spit-cc806a52c4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1090e64062647fa112dacb70c880147ce88055a441dbf895a97102d1f06fd5b5",
+          "status": "machine_assisted",
+          "text": "敵の下の鋭い氷のランスを要約します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6a6932a18389ba1de3c266eab35ef6326d352fc1f5b7fc708c2e19a5585908f1",
+          "status": "machine_assisted",
+          "text": "アイスバーグ"
+        }
+      },
+      "id": "active-iceberg-31e1ab24ad",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e3fe995c0aea9ab3768daf0d81177788dbd3277d991484e70704f4b23f550254",
+          "status": "machine_assisted",
+          "text": "空に複数の鋭い氷塊を生成し、敵に向かって発射する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "340179e3f365cbc03d84b6cda772ba3de2023ba28078a14f6ad5b2a57baed634",
+          "status": "machine_assisted",
+          "text": "自転車弾"
+        }
+      },
+      "id": "active-icicle-bullet-a8b56ad4a7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb132aa24f0dac08d8d3d8a2a59e06cb0bf2046822e77f64fd4da128e67202d5",
+          "status": "machine_assisted",
+          "text": "氷の三日月刃を作成し、前方に投げます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "594a976d1c7d988765af8170effa58226aa6ff1c10511553fce61e3c2cf5bcc9",
+          "status": "machine_assisted",
+          "text": "アイクルカッター"
+        }
+      },
+      "id": "active-icicle-cutter-10e45a0797",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5b655eaae472eaee632c8edb1def8838adea4c014aa791bfcc7105e20b1aa96a",
+          "status": "machine_assisted",
+          "text": "直線を三方向に移動する氷の柱を生成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b606b8a65e13e6e01dbc4f8966b982d987e0523ffc35546c62c666e6161b791d",
+          "status": "machine_assisted",
+          "text": "円線"
+        }
+      },
+      "id": "active-icicle-line-00c5a00027",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "86327a21fc19a9951f8a30e17c70a7f9bccfe5e11ae33abb738d4f59e2860dc7",
+          "status": "machine_assisted",
+          "text": "敵に火の玉を直接巻き付ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3ebd9d6d6edf633a914ac71c8189b23a6c0c0d82b3c5f01aa99e9d49d60fd09f",
+          "status": "machine_assisted",
+          "text": "イグニスブラスト"
+        }
+      },
+      "id": "active-ignis-blast-fd8c1e9d6c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d8e03056588b60138115807a8169b7ea486b8543aaa0e0215356c3f1d1d1bd6",
+          "status": "machine_assisted",
+          "text": "敵に火を放ち、連続的なダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "05ef5ebc2240f5fecb7066ee655da09380f05e35e189cd78339666feeeb10ea1",
+          "status": "machine_assisted",
+          "text": "イグニス・ブレス"
+        }
+      },
+      "id": "active-ignis-breath-522def18c0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8b85a851ef78a94b599882d91386a9dce16f94d5ceea2f5df7c01dbbfce66027",
+          "status": "machine_assisted",
+          "text": "サラブレイズの独占的なスキル。 炎のベールに包まれながら前方に充電します。 火炎は燃え続ける。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e376def39e08b8d1943d6a0f8ee6455b131f95cef33a8bcb4e5c0136e412249",
+          "status": "machine_assisted",
+          "text": "イグニスチャージ"
+        }
+      },
+      "id": "active-ignis-charge-7edecbc022",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dce79ddc05133960477d5c733b7a86294b97dba9131b32b89fe0566301f7dee0",
+          "status": "machine_assisted",
+          "text": "周囲の地面をエネルギーで注入し、一定時間後に爆発させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be49bb4cadc58b99068a70f39d6fb82e180f364614d175ae264d4e578730bad1",
+          "status": "machine_assisted",
+          "text": "イグニス・レイジ"
+        }
+      },
+      "id": "active-ignis-rage-f35146b426",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b519cac6672929b1029328226053cbda771a9c056d91dda7f5ac5fcade553ab4",
+          "status": "machine_assisted",
+          "text": "命を危険にさらして爆発を起こす。 その後は無力化される。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "587703884a3b36b2a5074f40b22239ecaab9d692bd2071ef36084304e30affba",
+          "status": "machine_assisted",
+          "text": "解説"
+        }
+      },
+      "id": "active-implode-804e64b073",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c330f492de63d33c78e1aef985516a27d179394cea205f3b1daaa2e5753a056e",
+          "status": "machine_assisted",
+          "text": "ツキカゲの独占的なスキル。 ダークエネルギーを注入した悪質な爪で前進し、二度攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eb491288746ea9eb74c905fa101e8b75664e4076a75aed1c051a1db31cfc3180",
+          "status": "machine_assisted",
+          "text": "ジャンプ爪"
+        }
+      },
+      "id": "active-jumping-claw-ff6d444b8a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b641ef07fd7aa42cb10dea93f9baab47627f8c71542a5efc0ab28781b450f82c",
+          "status": "machine_assisted",
+          "text": "デスティングの独占的なスキル。 高くジャンプし、尾で獲物を強制的に刺します。 尾からの毒は致命的です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "65f78efb0d2578e599824cd1e25148d8b5cfeffea3066063559f7e427b91c3c9",
+          "status": "machine_assisted",
+          "text": "ジャンプするスティンガー"
+        }
+      },
+      "id": "active-jumping-stinger-08791ec447",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "905de7794d7c546c9ee140b1685b2bfce0a2c1a6ddd47d352fca6acc329d8759",
+          "status": "machine_assisted",
+          "text": "ボルゼクスの独占的なスキル。 敵に投げる前に空中に飛びながら稲妻のを召喚します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f28e144eafc03ba46f48e6a6ea9e8d8b983bf266e0e426969061c94165961d68",
+          "status": "machine_assisted",
+          "text": "角野"
+        }
+      },
+      "id": "active-kerauno-20fd04e2bb",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "da51ded47246317c3a7ad1d4a9a6f0106c7a1ce42ca045e96543142ccd7b739b",
+          "status": "machine_assisted",
+          "text": "アルパオーの独占的なスキル。 空中に高く飛び、そのぽっちゃりした巨大な体で敵を破る。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3fd332ef2d4b18bfcf79ec460957cece666b1cd1c8178671893f9b003062db04",
+          "status": "machine_assisted",
+          "text": "王様のスラム"
+        }
+      },
+      "id": "active-kingly-slam-f07d808f15",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "964ebc21aa47fae2340f0225daf1de70170c0fe22ff81a4528136fdb2c3c3253",
+          "status": "machine_assisted",
+          "text": "モモンパの独占的なスキル。 準備の短い瞬間の後、高速で敵に突撃しフリップして終了します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3b5d477f26bdaf32434b6931561400c6a8bd98fc08160704e1d7718806174d8e",
+          "status": "machine_assisted",
+          "text": "コノハフリップ"
+        }
+      },
+      "id": "active-konoha-flip-ace1d2dfed",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b7faa78e84a2b915a1d8323cc324b73bef7cb7fec63dd9a751aa6eaacd25477c",
+          "status": "machine_assisted",
+          "text": "ナイトロットの独占的なスキル。 敵をちらつきのステップで混乱させ、鋭い角を持つスラッシュ攻撃を開始します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "35c77a85db7374b5c0ae934a9a32c21a0fadec368bbf7aa03663a49b5ddcf39a",
+          "status": "machine_assisted",
+          "text": "致命的なステップ"
+        }
+      },
+      "id": "active-lethal-step-8c471c8a1f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "56f760540a3adc09c0adbc84ae657edd192144a6c4821fdeb0aeeb1699024ffb",
+          "status": "machine_assisted",
+          "text": "強力な衝撃で敵を爆破する前に電気エネルギーに充電します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6501d6e4ac16bd7d91b28cd7cd45032d91705b6770f10a4f48ef5e3d61d2d239",
+          "status": "machine_assisted",
+          "text": "稲妻"
+        }
+      },
+      "id": "active-lightning-bolt-8fba614ff7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0ee409e5cc28503c9297ed353c77144853f553b0b6d0e72a063fe3b6068c84b3",
+          "status": "machine_assisted",
+          "text": "エレパンダの独占的なスキル。 敵を跳び、電気で充電された爪を使って二度引き裂いた後地面が攻撃され地域全体に感電する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b817b0987a270d912080926064100398616b9a91c21438ff5fe9c61ef4232b17",
+          "status": "machine_assisted",
+          "text": "雷爪"
+        }
+      },
+      "id": "active-lightning-claw-e4bf550653",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10a00b23e36f5af6451d2bafd3b886a9188c01bf44cecec3008503f67f5517a0",
+          "status": "machine_assisted",
+          "text": "直線状に進む稲妻を発生させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee587bc58b8462b0e34a3bca26935b4a54ddd2dc9896e86ee0d215e9e1c20d34",
+          "status": "machine_assisted",
+          "text": "雷の筋"
+        }
+      },
+      "id": "active-lightning-streak-1d2e8cb8ca",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b867307151cc2947ff9612c4b6a505cbf480808609dc6553c378bd4e6a37c774",
+          "status": "machine_assisted",
+          "text": "雷として機能し、雷を鳴らして周囲のエリアに電気ショックを与えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "13f745dcf1c5c37a52a89d0b5642f0c290dd9262a9c06fb39d67c1b4f1d1afd2",
+          "status": "machine_assisted",
+          "text": "雷撃"
+        }
+      },
+      "id": "active-lightning-strike-bf4cff678a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b83924325cd9410248841d65506ccebe91c474e22b43c05fa8e1e49a648ed21a",
+          "status": "machine_assisted",
+          "text": "超高速レーザーを発射する前に敵を狙う。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b0296e1812519a8257f4803cffdaa0d2a3445a699f3d119da5acd862db5df403",
+          "status": "machine_assisted",
+          "text": "ロックオンレーザー"
+        }
+      },
+      "id": "active-lock-on-laser-ff90626210",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9ecb0314660e8b2c82dfe9dedfc934a3df73013a982cff1aa0a49fd57089027c",
+          "status": "machine_assisted",
+          "text": "ハナミズチの独占的なスキル。 地面に穴があい、消える。 その後、花芽として表面に現れて咲き、広域攻撃を解きます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b180d67d3e083dc7b42a89419da59c7634f709bbdc8f249f9f7ea467faaec8ab",
+          "status": "machine_assisted",
+          "text": "蓮の咲き"
+        }
+      },
+      "id": "active-lotus-bloom-114c7f58f9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2627c29b79b3cc09ae9f24b0ffdcc8b181357e3cd050fea475ad7090a8c04290",
+          "status": "machine_assisted",
+          "text": "マグマンダーの独占的なスキル。 マグマの塊を口から吐き出す。 この衝撃は、接触時に敵を損傷するマグマプールを作成します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "51dbd4f5418b296afcfb2d5200b536fb7aaa05e65270e77d8aef6d124fca7939",
+          "status": "machine_assisted",
+          "text": "マグマスピット"
+        }
+      },
+      "id": "active-magma-spit-a3aaf7795e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d60e6d17e92f418c0812d5cee4502836645c428c5ae2516c496be6e922d600a1",
+          "status": "machine_assisted",
+          "text": "ボルドラゴの独占的なスキル。 大きなジャンプの後、空中で高速に動きます。強力なパンチを解き放つために強さを集めています"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e7dbd230d32fc149e5c3ea90952c7377678b0c505d371f136095ed4ad087cee2",
+          "status": "machine_assisted",
+          "text": "マグナクラッシュ"
+        }
+      },
+      "id": "active-magna-crush-084ab6c546",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6aac521dbabcb87754f2bb31d548d467e9a3e8185aa66072260abc930de92d39",
+          "status": "machine_assisted",
+          "text": "生命が爆発を起こすリスクがあります。 義務を果たせなくなった者は、夜空に輝く星となる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0ba44f0ca6c7bc5c0c961753ad4032e102eb6f0fba2bdd11ce56da28e42e3ad1",
+          "status": "machine_assisted",
+          "text": "メガトン・インプレッション"
+        }
+      },
+      "id": "active-megaton-implode-b7e708985a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1a3f9375ebcf54271981348ed3ea84443b6603c4dea6c80bd8d23842238381e7",
+          "status": "machine_assisted",
+          "text": "セレムーンの独占的なスキル。 月面にエネルギーを蓄え、三日月形のビームが前方に向けて発射される。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "26e6200106b0c64b7752c7482e6c89d0277bff17a5e211a3d0d95a73b7465c4a",
+          "status": "machine_assisted",
+          "text": "月光ビーム"
+        }
+      },
+      "id": "active-moonlight-beam-b28f3b125e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9d34be8f83f7b7909ba6a1e05e3fb9fb6faf42ebb45d479a9c30fbc077c7768a",
+          "status": "machine_assisted",
+          "text": "ユーザーは、敵を直撃する三つの高速風を素早く連続して発射します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "44ae8878a82b3a7d4738ce6691111e77bccd8ee3a46d71a5db2635d967a2b9b8",
+          "status": "machine_assisted",
+          "text": "マルチカッター"
+        }
+      },
+      "id": "active-multicutter-567ff61041",
+      "kind": "skill"
+    }
+  ],
+  "schemaVersion": 1
+}

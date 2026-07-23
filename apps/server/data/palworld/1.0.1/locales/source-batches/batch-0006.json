@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 6,
+  "records": [
+    {
+      "id": "energy-shotgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "EnergyShotgun 2",
+          "sourceSha256": "6000b8d722b8e75488083350851eb045a5df74011dc69d4559245444320f9c21"
+        },
+        "description": {
+          "sourceText": "A shotgun that fires energy rounds.\nExcelling in rapid fire, its close-range firepower is truly otherworldly.",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d"
+        }
+      }
+    },
+    {
+      "id": "energy-shotgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "EnergyShotgun 3",
+          "sourceSha256": "4faac3a1c773a475a8d8254a495048928073019e17027bf00a0598cfdeee1224"
+        },
+        "description": {
+          "sourceText": "A shotgun that fires energy rounds.\nExcelling in rapid fire, its close-range firepower is truly otherworldly.",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d"
+        }
+      }
+    },
+    {
+      "id": "energy-shotgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "EnergyShotgun 4",
+          "sourceSha256": "81e4e328dfc638d9924d1c5e9e0d3054524c588947f76933f631db403d1ae87f"
+        },
+        "description": {
+          "sourceText": "A shotgun that fires energy rounds.\nExcelling in rapid fire, its close-range firepower is truly otherworldly.",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d"
+        }
+      }
+    },
+    {
+      "id": "energy-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "EnergyShotgun 5",
+          "sourceSha256": "fb2957b969d84219312accf995beae106ffe771dfd0dbb5c7e8dcd91558876e9"
+        },
+        "description": {
+          "sourceText": "A shotgun that fires energy rounds.\nExcelling in rapid fire, its close-range firepower is truly otherworldly.",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d"
+        }
+      }
+    },
+    {
+      "id": "energy-shotgun-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Energy Shotgun Ammo",
+          "sourceSha256": "2d37f796e32c9976c782e79e383ebe434c54b8dc9ecb88fe823192d588e0f21c"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "exp-boost-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Training Manual (S)",
+          "sourceSha256": "31be54b5b61dac7c166f45e28293adbada98e89e32db4e188ce58e6f8bdec09d"
+        },
+        "description": {
+          "sourceText": "Training manual that grants a tiny amount\nof EXP when read by a Pal.",
+          "sourceSha256": "7a3222bdc75bb9a73afcf6ba85cbf74f67f76f07a33709bb6af6d96cebbfc593"
+        }
+      }
+    },
+    {
+      "id": "exp-boost-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Training Manual (M)",
+          "sourceSha256": "e27611616d3e70a923c9f0bd77be315813a7267b65f31b2196b8b5bc26226ea0"
+        },
+        "description": {
+          "sourceText": "Training manual that grants a small amount\nof EXP when read by a Pal.",
+          "sourceSha256": "c7af2a34ed3476947214b8d8217987bf829ac0518478eb2e925e60a33b6ef9d9"
+        }
+      }
+    },
+    {
+      "id": "exp-boost-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Training Manual (L)",
+          "sourceSha256": "013d47e686a7c465e38c1c1a8dde88148d3e2f8a6bfc00f20089355d26b5add7"
+        },
+        "description": {
+          "sourceText": "Training manual that grants a large amount\nof EXP when read by a Pal.",
+          "sourceSha256": "622d7274dc9a833fb5c9045ae570ec59852963a2a5f80b0192f999857673b0e6"
+        }
+      }
+    },
+    {
+      "id": "exp-boost-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Training Manual (XL)",
+          "sourceSha256": "7d47af48afa695b11e0a19ca09710a80f332249ac7ad244971770e65b22bf727"
+        },
+        "description": {
+          "sourceText": "Training manual that grants a substantial amount\nof EXP when read by a Pal.",
+          "sourceSha256": "7f29c6df069e395c6679d8f4023e6f5618e462654b67ea5a57be78423131317e"
+        }
+      }
+    },
+    {
+      "id": "explosive-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Ammo",
+          "sourceSha256": "a0af9f4419105e2c1c509827a551973bcaaf65af6f3a5d8a46ba69ccdeb3c5e9"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "fiber",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fiber",
+          "sourceSha256": "7ed0a5e33e7be0026604a37fe216bb1e04e5f91ea09d89f2ee190d9d0d34d459"
+        },
+        "description": {
+          "sourceText": "Fiber collected from trees.\nA material used when creating bows, etc.",
+          "sourceSha256": "437dc50ebe573b8359c76617624a48b057e18d673c0d233e8e8a31ab3c4c2d12"
+        }
+      }
+    },
+    {
+      "id": "fire-organ",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Flame Organ",
+          "sourceSha256": "e3cd7d4bd04558dc12068d1c757308efa87994c236a615f19e67f3f7710efb43"
+        },
+        "description": {
+          "sourceText": "Material obtainable from Pals.\nCan be used to make and more.",
+          "sourceSha256": "2fd7cc6225d81427aec70cd839321b8f8baab64e6dcc298b9b006a427dcd243e"
+        }
+      }
+    },
+    {
+      "id": "fishing-bait-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Simple Bait",
+          "sourceSha256": "a83ec8afbf4d82da0331a8a121a9d30410bd1f61f97ea2ac4cec9b583e89e6a1"
+        },
+        "description": {
+          "sourceText": "Basic fishing bait used to lure in Pals.\nRequired for fishing.",
+          "sourceSha256": "e14349975c3f266fb0079fc0bda390f1ef2887b1e87dcffd772b2f1043af78b4"
+        }
+      }
+    },
+    {
+      "id": "fishing-bait-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "High Quality Bait",
+          "sourceSha256": "f8dab84fc86fc95260040526c0b8721d2d9f8d4610a31f4b8d34ec31c0e84824"
+        },
+        "description": {
+          "sourceText": "Bait that lures in Pals.\nImproved from to increase the chances of Pals biting the bait.",
+          "sourceSha256": "0209c294048f358d47097dcfe4dbdedf6b0ffd9bc951c735b08934e4b3a71276"
+        }
+      }
+    },
+    {
+      "id": "fishing-bait-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Deluxe Bait",
+          "sourceSha256": "8299ef392857e9bc62be8c584ade10dae97c96f38ce9534c31e8c97822c972c4"
+        },
+        "description": {
+          "sourceText": "Bait that lures in Pals.\nImproved to slightly enlarge the size of the bar in the fishing minigame.",
+          "sourceSha256": "ff038ac53cae8053f84a37ae11c593bf395175259bad5057a2fe46d8a6d042d2"
+        }
+      }
+    },
+    {
+      "id": "fishing-bait-3-a",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Alluring Bait",
+          "sourceSha256": "2e7580601f232040b9320ebca53f0f71b7cc7c34fd169cc25484d3f73e990b2b"
+        },
+        "description": {
+          "sourceText": "Bait that lures in Pals.\nImproved to enlarge the size of the bar in the fishing minigame and increase the number of items obtained from fishing.",
+          "sourceSha256": "1f832f49f8da8446e7b7279889aa9b5f5434dd6110bf0ce045c1f3522e322936"
+        }
+      }
+    },
+    {
+      "id": "fishing-rod-01-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Beginner Fishing Rod (Chillet)",
+          "sourceSha256": "b49afcc9864c16d9b9056ab266c93f140381995aba0a5ba65af0c66d09c0d298"
+        },
+        "description": {
+          "sourceText": "A fishing rod designed for catching Pals.\nUse it with bait near water where shadows are visible to start fishing.\nPerfect for beginners and ideal for reeling in low level Pals.",
+          "sourceSha256": "ecf6926ba977776c4566719df20a00e4a1d3236235461e532bc97f250e906ca1"
+        }
+      }
+    },
+    {
+      "id": "fishing-rod-01-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Beginner Fishing Rod (Gumoss)",
+          "sourceSha256": "edd8a82942b3dfe93ec32241dcb73cec6ea3cf1b371b3212c8cac7d5d55823f5"
+        },
+        "description": {
+          "sourceText": "A fishing rod designed for catching Pals.\nIt's sturdier and offers slightly better performance than .\nPerfect for beginners and ideal for reeling in low level Pals.",
+          "sourceSha256": "f9b9cb454d53015f363bdef0c9eb76fc57851a33f4d0a2f48f9b3651a18c6434"
+        }
+      }
+    },
+    {
+      "id": "fishing-rod-02-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Intermediate Fishing Rod (Cattiva)",
+          "sourceSha256": "792f0680eb6216a842360eac279dc50b3bdc9de23e28c3a047e6f29e57a51457"
+        },
+        "description": {
+          "sourceText": "A fishing rod designed for catching Pals.\nUse it with bait near water where shadows are visible to start fishing.\nIt boasts improved performance, making catches a bit easier.",
+          "sourceSha256": "1c8dbd7bfbdd7f9e9001d263a01612ec4467ca8c4819438e1417a2a42d8958ce"
+        }
+      }
+    },
+    {
+      "id": "fishing-rod-02-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Intermediate Fishing Rod (Croajiro)",
+          "sourceSha256": "ce609b4ead2c6d55c6111e57c40e55f3f7254ee996a94279efba58a041e1314e"
+        },
+        "description": {
+          "sourceText": "A fishing rod designed for catching Pals.\nIt's sturdier and offers slightly better performance than .",
+          "sourceSha256": "342dff61477b815f62ff6385105bba5cad98c850c6f1d211c2643d9f42f5b639"
+        }
+      }
+    },
+    {
+      "id": "fishing-rod-03-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Advanced Fishing Rod (Pengullet)",
+          "sourceSha256": "76e88fd518972e6812246d47f73af56c719de602f2aac6958f8a3a9154b9b301"
+        },
+        "description": {
+          "sourceText": "A fishing rod designed for catching Pals.\nUse it with bait near water where shadows are visible to start fishing.\nIt boasts improved performance, making catches vastly easier.",
+          "sourceSha256": "141d8726b48798555cb5a88f5f92076f620ba8009c69ee9dcf2fcb5ca3a2bada"
+        }
+      }
+    },
+    {
+      "id": "fishing-rod-03-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Advanced Fishing Rod (Depresso)",
+          "sourceSha256": "567d3c18b4da9c73f10349ce120d01a4a203013970bc03d3c5db5369b32bd199"
+        },
+        "description": {
+          "sourceText": "A fishing rod designed for catching Pals.\nIt's sturdier and offers slightly better performance than .",
+          "sourceSha256": "342dff61477b815f62ff6385105bba5cad98c850c6f1d211c2643d9f42f5b639"
+        }
+      }
+    },
+    {
+      "id": "flame-thrower",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Flamethrower",
+          "sourceSha256": "3c07f870ddf7e92b119fa7e1c68f7a8a9feef488959ca32b8c9392962665e740"
+        },
+        "description": {
+          "sourceText": "that fires long-range flame.\nCan set the enemy on fire.",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1"
+        }
+      }
+    },
+    {
+      "id": "flame-thrower-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FlameThrower 2",
+          "sourceSha256": "87e04447941b7fbace7b3aa5e9ae653562fe5fdfbd11662bb8ef4d6517c46b66"
+        },
+        "description": {
+          "sourceText": "that fires long-range flame.\nCan set the enemy on fire.",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1"
+        }
+      }
+    },
+    {
+      "id": "flame-thrower-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FlameThrower 3",
+          "sourceSha256": "0511db3fc45e45136bdb469c4387306fb70d863f2f95ecf0068d988f7d3bac59"
+        },
+        "description": {
+          "sourceText": "that fires long-range flame.\nCan set the enemy on fire.",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1"
+        }
+      }
+    },
+    {
+      "id": "flame-thrower-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FlameThrower 4",
+          "sourceSha256": "0b60d6aa6a943a001ff07ca7adf840af67a21411137e70848a4152a76395b51c"
+        },
+        "description": {
+          "sourceText": "that fires long-range flame.\nCan set the enemy on fire.",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1"
+        }
+      }
+    },
+    {
+      "id": "flame-thrower-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FlameThrower 5",
+          "sourceSha256": "99e04f27d87d58e6b4e1d5040ffd3f749de31db69c996bac75763fb56e8ba287"
+        },
+        "description": {
+          "sourceText": "that fires long-range flame.\nCan set the enemy on fire.",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1"
+        }
+      }
+    },
+    {
+      "id": "flamethrower-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Flamethrower Fuel",
+          "sourceSha256": "c3ba1bee19eb15946c4cc791510e7d0b5731b5b0d6cb3ab85549e136f9baadcf"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "flour",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Flour",
+          "sourceSha256": "7c234cbffc5ef6544813625ec10bd5b7d6398f3b3a9e3a7295ac7d9dfbced79c"
+        },
+        "description": {
+          "sourceText": "made from grinding .\nIt can be used as an ingredient in making .",
+          "sourceSha256": "6cb2db80165839b3fe63c2d17be16b49d4ef0f17d4bfef0ce4ed94c52880f54a"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Frag Grenade",
+          "sourceSha256": "5d38df4b2da8b77e9f95bc43f8354b93d562481cf614f4df3144b4a3a0e88116"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, dealing damage to enemies.",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-dark",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Grenade",
+          "sourceSha256": "47a2ec851365652c2208979c664d5576b6481fa07febf2f72ff6229705bf9d3f"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, dealing damage to enemies.",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-dragon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Grenade",
+          "sourceSha256": "ed5b4c58cee12ba3c63381e2b7bd1bdba778c6122953b514ff0059319897d468"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, dealing damage to enemies.",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-elec",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Shock Grenade",
+          "sourceSha256": "de4211d4d0a89829305b122d3cb1ca929c98f7273b008c1fef87b34a1487037e"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, electrocuting everything in the blast radius.",
+          "sourceSha256": "9942934f013e41a2a8251dd60950cd6b1440065b8ab2951eeb1c8ce1aa036e26"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-fire",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Incendiary Grenade",
+          "sourceSha256": "8fabf4f9c724fb33d72366a429cf8240b432595a6ad932e8079f5a3c10562626"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, setting the surrounding area on fire.",
+          "sourceSha256": "501f5a3e785b4cde325dd3697680ceddc3071c2c653246afa91c5f03eb0a88af"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-ground",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Grenade",
+          "sourceSha256": "26d0355daf3c650d54a76a1ad790aed3696d3b53e45ef870bca68db931446805"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, dealing damage to enemies.",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-ice",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Grenade",
+          "sourceSha256": "6a6b2955a6afe605a5d6c6aca75ed5c45ba95f3856bd79890662b87d7862d54c"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, freezing the surrounding area.",
+          "sourceSha256": "67c3feaeafc6d455bcf8753c4c410887c05a836544a0cacdf53a67b0717f4d69"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-leaf",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Grenade",
+          "sourceSha256": "36bcfa43ce9d0ca51633ab4dc12afaeb425cf0ca55e7cc3d2beb1f5b764f8b6f"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, dealing damage to enemies.",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-super",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Frag Grenade Mk2",
+          "sourceSha256": "18cdb513dfa03184de9aa505d57a44cc5577def8487be80f3b3c6756daef8289"
+        },
+        "description": {
+          "sourceText": "An improved frag grenade.\nIt explodes a few seconds after being thrown, dealing massive damage to enemies.",
+          "sourceSha256": "db8cdf76b5682cfcfa3e8d53cd798d86465b02bf20df51892e741aac9f399cb0"
+        }
+      }
+    },
+    {
+      "id": "frag-grenade-water",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Grenade",
+          "sourceSha256": "92814989280f2c41fe7e0b2a8cbbb4bafd37b3b7a60bde3886d20e2f62d53f44"
+        },
+        "description": {
+          "sourceText": "A useful for mid-range combat.\nIt detonates a few seconds after being thrown, dealing damage to enemies.",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35"
+        }
+      }
+    },
+    {
+      "id": "fried-chicken",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fried Chikipi",
+          "sourceSha256": "ce67acd186a27c824a70615c6eab0c290209f6a7a81f14c96413ac6f5812bb63"
+        },
+        "description": {
+          "sourceText": "Magnificently juicy poultry.\nEating it will slightly increase work speed\nand make SAN decrease slower for a period of time.",
+          "sourceSha256": "d3fef0289af13d3f61152ceea9e963ce3b0b2a03f3fec8718b37bdd67a272e63"
+        }
+      }
+    },
+    {
+      "id": "fried-eggs",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fried Egg",
+          "sourceSha256": "46356211ccca7c2540c1a0dc71319b48381a4c6df5691dcac711d20e8928dc19"
+        },
+        "description": {
+          "sourceText": "An now fried and even more delicious.\nGreat for keeping hunger away.",
+          "sourceSha256": "40acae4a9b3a8b306c5715b62c5f88c0d27955529413923515b6e3d0505d6238"
+        }
+      }
+    },
+    {
+      "id": "fried-kelpie",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fried Kelpsea",
+          "sourceSha256": "74bfc9e4839d62bf1e600d9fbd7cb92ac6e917cacc46e99dd4bfcdb96bf64fbd"
+        },
+        "description": {
+          "sourceText": "Crunchy fried batter perfectly accentuates the Kelpsea's plumpness.\nEating it will increase by +10%\nand make SAN decrease slower for a period of time.",
+          "sourceSha256": "af3b815868bd43da6b789639bcf29b766d531d419278c9a6de60090f77075e40"
+        }
+      }
+    },
+    {
+      "id": "fruit-attack-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Power Fruit",
+          "sourceSha256": "62907a0cbe54634731e4baa4be4e6533b4cb27a35b0eddff568b19d2edc9e3aa"
+        },
+        "description": {
+          "sourceText": "Precious fruit that is extremely difficult to obtain.\nSlightly increases a Pal's Attack.",
+          "sourceSha256": "cced832757dc23c8b4d565b14260d8aa3c2488d88459e2a17392c649499533b4"
+        }
+      }
+    },
+    {
+      "id": "fruit-defense-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Stout Fruit",
+          "sourceSha256": "2a716d598596b0d60181e1b10b71799c904195d3a834bae2c459ae04beafd117"
+        },
+        "description": {
+          "sourceText": "Precious fruit that is extremely difficult to obtain.\nSlightly increases a Pal's Defense.",
+          "sourceSha256": "8a817cec50aab5cf6865778a57698c0e64d94205d8075195db8741c75b11515b"
+        }
+      }
+    },
+    {
+      "id": "fruit-hp-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Life Fruit",
+          "sourceSha256": "5cbbb54421d1e7e1ddeb7584a1786e8da665275e99ead3276422f6454dbc6d08"
+        },
+        "description": {
+          "sourceText": "Precious fruit that is extremely difficult to obtain.\nSlightly increases a Pal's Health.",
+          "sourceSha256": "c9fc8d82510a53f0ffd7ce511ce18a2c102c0857436b6a3d582633251e83186a"
+        }
+      }
+    },
+    {
+      "id": "fur-armor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pelt Armor",
+          "sourceSha256": "b489eadabc715879a3689b55e2df55ee8dd09e202303a2fabb9080a15368f64a"
+        },
+        "description": {
+          "sourceText": "Armor made from .\nIts warmth and defense have been improved.",
+          "sourceSha256": "028db8828ba698d2e7d019fdb6b1aed58c249c1d6728f98df049acb71210db5c"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-cold",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Pelt Armor",
+          "sourceSha256": "f11beb53437fdbcf65814b3d7a2437db422924bf178f1001aa475ab0f27e2f8c"
+        },
+        "description": {
+          "sourceText": "A produced in cold regions.\nUseful for surviving in cold climates.",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-cold-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorCold 2",
+          "sourceSha256": "e79bd70abeab5520e5ac325a8ba35275e8e1a859e05e16f97af648a64cf8de3f"
+        },
+        "description": {
+          "sourceText": "A produced in cold regions.\nUseful for surviving in cold climates.",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-cold-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorCold 3",
+          "sourceSha256": "ecb4f4749d082383a54c4162ae388dc979f5f2bc2678e7611899e88ee0dbb3db"
+        },
+        "description": {
+          "sourceText": "A produced in cold regions.\nUseful for surviving in cold climates.",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-cold-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorCold 4",
+          "sourceSha256": "3e0ac93de03035cdcb94badb1a6305702f9d90119f5013e026fdf260939e4dd1"
+        },
+        "description": {
+          "sourceText": "A produced in cold regions.\nUseful for surviving in cold climates.",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-cold-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorCold 5",
+          "sourceSha256": "bed7bdb39af9de4f3703ffae10eaefdf09292d5333cd2998ff5d269a1224497b"
+        },
+        "description": {
+          "sourceText": "A produced in cold regions.\nUseful for surviving in cold climates.",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-heat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Pelt Armor",
+          "sourceSha256": "b8bdd8b379d078f667b7f61aba2c1baf06fcfa645891bf1aa0984ef0fd8d05f8"
+        },
+        "description": {
+          "sourceText": "A produced in hot regions.\nBoasts high heat resistance.",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-heat-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorHeat 2",
+          "sourceSha256": "f65ccd227724a6c01516a3e3c820204a8f1a4c07dc37826bac8bdc19309d1a56"
+        },
+        "description": {
+          "sourceText": "A produced in hot regions.\nBoasts high heat resistance.",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-heat-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorHeat 3",
+          "sourceSha256": "e4027ae0d212e734e8adf3465e74233ca7a2887f02fddeb339bf17db03b065be"
+        },
+        "description": {
+          "sourceText": "A produced in hot regions.\nBoasts high heat resistance.",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-heat-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorHeat 4",
+          "sourceSha256": "ec949f46842308296a470c6484236ded7f1b4e8dc5a34a9a0e1d142f9cd03fee"
+        },
+        "description": {
+          "sourceText": "A produced in hot regions.\nBoasts high heat resistance.",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1"
+        }
+      }
+    },
+    {
+      "id": "fur-armor-heat-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurArmorHeat 5",
+          "sourceSha256": "63a1a55752f8074fb6c3bb59b78da7167501b2da9771080e70be28cec0553d73"
+        },
+        "description": {
+          "sourceText": "A produced in hot regions.\nBoasts high heat resistance.",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1"
+        }
+      }
+    },
+    {
+      "id": "fur-helmet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Feathered Hair Band",
+          "sourceSha256": "60a31d2ca9b8eeada2a6be90c02304ef7314424c675251ade5f9068a9bf2ba46"
+        },
+        "description": {
+          "sourceText": "A beautiful feathered headband.\nThough improbable, it somehow seems to protect its wearer from lethal head injuries.",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7"
+        }
+      }
+    },
+    {
+      "id": "fur-helmet-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurHelmet 2",
+          "sourceSha256": "7921be86ee6e4763574ceb9bf562625b1ec0ae038afd28d28806c392f70c1515"
+        },
+        "description": {
+          "sourceText": "A beautiful feathered headband.\nThough improbable, it somehow seems to protect its wearer from lethal head injuries.",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7"
+        }
+      }
+    },
+    {
+      "id": "fur-helmet-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurHelmet 3",
+          "sourceSha256": "906733c98eab16c6e9378f589c188cab72f4d10338265f7a6d3dab0319acc2df"
+        },
+        "description": {
+          "sourceText": "A beautiful feathered headband.\nThough improbable, it somehow seems to protect its wearer from lethal head injuries.",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7"
+        }
+      }
+    },
+    {
+      "id": "fur-helmet-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurHelmet 4",
+          "sourceSha256": "bfaabe3a6a316e0b2ee2af44d848edd8c80c7ea592cdf669534563ffe5955278"
+        },
+        "description": {
+          "sourceText": "A beautiful feathered headband.\nThough improbable, it somehow seems to protect its wearer from lethal head injuries.",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7"
+        }
+      }
+    },
+    {
+      "id": "fur-helmet-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "FurHelmet 5",
+          "sourceSha256": "76c9e560e5df61e46360bf0dcce0ef7e71c4d5b1efae79da53d71fd6fd67fffc"
+        },
+        "description": {
+          "sourceText": "A beautiful feathered headband.\nThough improbable, it somehow seems to protect its wearer from lethal head injuries.",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7"
+        }
+      }
+    },
+    {
+      "id": "gas-mask",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Corrosive Mist Mask",
+          "sourceSha256": "f970646bfdd3342378e3679678423085af44c27769f6169e6fcd9a08193fc8e3"
+        },
+        "description": {
+          "sourceText": "A mask with a special filtration system.\nNegates damage taken from corrosive mist.",
+          "sourceSha256": "096bae47c8ff1d7aecf0d02da02ca5507663169a19ad3b1c24cd91130650224d"
+        }
+      }
+    },
+    {
+      "id": "gatling-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gatling Gun Ammo",
+          "sourceSha256": "01a7a1a88510b5cf76bc708611f37c05daf40935c29541d579e1caf04a6c19d3"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "gatling-gun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gatling Gun",
+          "sourceSha256": "cb6f2c6f917bd9cb26ba2d12195505d5c8c223b8b7503b9dfb723f2680ec0f82"
+        },
+        "description": {
+          "sourceText": "A Gatling Gun capable of rapid fire.\nMows down enemies with suppressive fire.",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333"
+        }
+      }
+    },
+    {
+      "id": "gatling-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GatlingGun 2",
+          "sourceSha256": "b3caff7839d99be16893a0bbad75bcbec4005451242151e2211b0f327da5f8f4"
+        },
+        "description": {
+          "sourceText": "A Gatling Gun capable of rapid fire.\nMows down enemies with suppressive fire.",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333"
+        }
+      }
+    },
+    {
+      "id": "gatling-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GatlingGun 3",
+          "sourceSha256": "08a3651d154fbcebbe5116dd8b224863f0e6442f1d3aeac80942c38204d002f3"
+        },
+        "description": {
+          "sourceText": "A Gatling Gun capable of rapid fire.\nMows down enemies with suppressive fire.",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333"
+        }
+      }
+    },
+    {
+      "id": "gatling-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GatlingGun 4",
+          "sourceSha256": "651d6f8ee85617647d25a36560d9fe7b81fc623d28e0c98262e5a151cd476d62"
+        },
+        "description": {
+          "sourceText": "A Gatling Gun capable of rapid fire.\nMows down enemies with suppressive fire.",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333"
+        }
+      }
+    },
+    {
+      "id": "gatling-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GatlingGun 5",
+          "sourceSha256": "c429e1d4628b0254e942e66d461ec1cc9afdd7c2a628c6b3daa2297d7ad59d8e"
+        },
+        "description": {
+          "sourceText": "A Gatling Gun capable of rapid fire.\nMows down enemies with suppressive fire.",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333"
+        }
+      }
+    },
+    {
+      "id": "genghis-khan",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grilled Lamball",
+          "sourceSha256": "f66aa50b0439017bbad14df919959ce0238a6b8892dd769b45cabc4e6e6fd62a"
+        },
+        "description": {
+          "sourceText": "Marinated mutton slow-cooked over a grill.\nEating it will slightly increase work speed\nand make SAN decrease slightly slower for a period of time.",
+          "sourceSha256": "82f92ca47c5055d2442c05c2144c52170c14b912f6c2cc4185b2f9100cb88375"
+        }
+      }
+    },
+    {
+      "id": "glider-good",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mega Glider",
+          "sourceSha256": "88d3349b90f8dd6e3c364ea57137eb312a5743af3cefa13d112840f3c937c6c9"
+        },
+        "description": {
+          "sourceText": "A glider for soaring through the air.\nA mass produced commercial model, it’s decently fast.",
+          "sourceSha256": "91568c2d4cafc3e6cc26ac88d1cfd2304d731f9757aeab34c0e5732b54794708"
+        }
+      }
+    },
+    {
+      "id": "glider-old",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Normal Parachute",
+          "sourceSha256": "350140a6555be5f77836d148d0162d586dd42511e6f293c0c6c321d8bf6ca1fb"
+        },
+        "description": {
+          "sourceText": "A glider for soaring through the air.\nCheaply made, it isn't very fast.",
+          "sourceSha256": "fc670df5717d2cffdc9dc91a5e257830af7d8ffc073f2670d951597366e4b0e8"
+        }
+      }
+    },
+    {
+      "id": "glider-super",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Giga Glider",
+          "sourceSha256": "adcf1875783b89ed165b216b6163b75eb8904706af990afd78eba2895a32b723"
+        },
+        "description": {
+          "sourceText": "A glider for soaring through the air.\nWith its capabilities improved, it can soar at high speeds.",
+          "sourceSha256": "95b8973e07d13dcc991bf0cd97e88c5d24ccaac60146a038f4005e4b38988738"
+        }
+      }
+    },
+    {
+      "id": "glider-tera",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Glider Tera",
+          "sourceSha256": "0bbb22801f10df8cbc75c19b3a5b9133bbd497e117a8acbcf3ff8a55e8b5b105"
+        },
+        "description": {
+          "sourceText": "A glider for soaring through the air.\nIts performance has been further improved, with increased speed and lift.",
+          "sourceSha256": "102707c049ad7727b28b8c72c0d8da18bf49188002927cf7046fc53979a234d0"
+        }
+      }
+    },
+    {
+      "id": "grappling-gun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrapplingGun",
+          "sourceSha256": "25a70a27c25fe45db3607dabfee2dac75d1952f6cd777a8f48e7b6a5a4fd3f22"
+        },
+        "description": {
+          "sourceText": "It fires a hook that latches on to distant targets, pulling the user's body towards the target.\nIt allows for easy movement between places with varying elevation.",
+          "sourceSha256": "1f9afd470250fdc7c13ef0424ee3a4ffe5de038e198e799fcb51c34ad00ec3c4"
+        }
+      }
+    },
+    {
+      "id": "grappling-gun2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrapplingGun2",
+          "sourceSha256": "ee6f06a0a035feb69bdcc8924c405729bd446b094986de0b3b0f55acca4641ae"
+        },
+        "description": {
+          "sourceText": "It fires a hook that latches on to distant targets, pulling the user's body towards the target.\nSince it's upgraded, it now has greater range.",
+          "sourceSha256": "186778ce8d10d2cc08985106df6bff6aba9eef6ca940587419bbc198c4750871"
+        }
+      }
+    },
+    {
+      "id": "grappling-gun3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrapplingGun3",
+          "sourceSha256": "48f100c6fd9afdafd4c66b553982869eafce6d66b89228ba634eace1c6e44677"
+        },
+        "description": {
+          "sourceText": "It fires a hook that latches on to distant targets, pulling the user's body towards the target.\nUsing data from prototype versions, its capabilities have been further increased.",
+          "sourceSha256": "e26fba7a7ba53d6e1c533e300918a1d13c35fea9b85722846339f6d53e929ee1"
+        }
+      }
+    },
+    {
+      "id": "grappling-gun4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrapplingGun4",
+          "sourceSha256": "13bb7250e0bd355679f4f3d308349ba1629ba3f536d913947e112958f4a921ba"
+        },
+        "description": {
+          "sourceText": "It fires a hook that latches on to distant targets, pulling the user's body towards the target.\nAs a result of research, it has achieved overwhelming mobility.",
+          "sourceSha256": "759ebefe2b9f3cafa45ff4667dee8cf3e71a29864bff9188a12d55395c51877c"
+        }
+      }
+    },
+    {
+      "id": "grappling-gun5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrapplingGun5",
+          "sourceSha256": "ca90b23b0946c9ad3a559e4c8a96caa48cad5e8e462158b1301a63096d3b7a4d"
+        },
+        "description": {
+          "sourceText": "It fires a hook that latches on to distant targets, pulling the user's body towards the target.\nWith new materials, cooldown time has been significantly reduced.",
+          "sourceSha256": "a9c235467575d5c7e4cca4a70577cd746054dd4a3b929358f4ef124c018214b1"
+        }
+      }
+    },
+    {
+      "id": "gratin",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gratin",
+          "sourceSha256": "6d5a5fbfeb293b57d776b73e10584f6508552e3f23c4c0625d870bb45a71405b"
+        },
+        "description": {
+          "sourceText": "A dish made by coating potatoes with sauce and baking them to perfection.\nBest enjoyed hot and fresh. Eating it will provide lasting fullness and increase your by 10% for a period of time.",
+          "sourceSha256": "c7f3307365bada0cc06573f395691aeef25c311f8c40bc36080149bea2f8ae43"
+        }
+      }
+    },
+    {
+      "id": "grenade-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grenade Ammo",
+          "sourceSha256": "4678cba6499793d937efc9177804a90e228f3f0639ffbf47e16cb704ce4f3114"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "grenade-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grenade Launcher",
+          "sourceSha256": "da6a8268b875d982ebe684ffa0a9f2bd60660133ace22711523baab76fcb763a"
+        },
+        "description": {
+          "sourceText": "Fires grenades that cause wide-ranging explosions.\nUseful when dealing with a large number of enemies.",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2"
+        }
+      }
+    },
+    {
+      "id": "grenade-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrenadeLauncher 2",
+          "sourceSha256": "9aed293ff7483e9046f7972738b90af2a02381a955e2d8c93772b7c74766fe16"
+        },
+        "description": {
+          "sourceText": "Fires grenades that cause wide-ranging explosions.\nUseful when dealing with a large number of enemies.",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2"
+        }
+      }
+    },
+    {
+      "id": "grenade-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrenadeLauncher 3",
+          "sourceSha256": "81cb541404fe98074445cd35eca9a14e5832b0196071c9098052e898b6e55dfb"
+        },
+        "description": {
+          "sourceText": "Fires grenades that cause wide-ranging explosions.\nUseful when dealing with a large number of enemies.",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2"
+        }
+      }
+    },
+    {
+      "id": "grenade-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrenadeLauncher 4",
+          "sourceSha256": "97d66c7212a6e1b51ba9581a4e81280f7ac3c01138f089558e2c7c17f96a53eb"
+        },
+        "description": {
+          "sourceText": "Fires grenades that cause wide-ranging explosions.\nUseful when dealing with a large number of enemies.",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2"
+        }
+      }
+    },
+    {
+      "id": "grenade-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GrenadeLauncher 5",
+          "sourceSha256": "8bfe98dffa295974aa530d2616308bf920ce345431182f2297b284846ef27610"
+        },
+        "description": {
+          "sourceText": "Fires grenades that cause wide-ranging explosions.\nUseful when dealing with a large number of enemies.",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2"
+        }
+      }
+    },
+    {
+      "id": "grilled-sheep-herbs",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Herb Roasted Lamball",
+          "sourceSha256": "6e7958a9cea40af707c3d8f130b508f189bb806fe0d4ff81088941f10c2756a5"
+        },
+        "description": {
+          "sourceText": "Indulging in an abundance of fresh berries\ncreates a tantalizing aroma that accentuates the unique flavor of mutton.\nEating it will increase by +10% for a period of time.",
+          "sourceSha256": "edb40a3945ae8ee15d4ff070b959604beda181badcf8c0773f8c63408a46c06e"
+        }
+      }
+    },
+    {
+      "id": "grilled-sword-cutlass-fish",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Salt-Grilled Skutlass",
+          "sourceSha256": "69e62f9244798c2e2c94b428d059da93bc3196859faecd2088b792aeb744c46f"
+        },
+        "description": {
+          "sourceText": "Fresh fillets of salted and grilled into a simple dish.\nWhen eaten, it nullifies knockback and flinching for a certain period of time.",
+          "sourceSha256": "0e9fdc13f382fdf6e4da3e9def10857a6e03099ba123d99d4c91be12cc95df20"
+        }
+      }
+    },
+    {
+      "id": "guided-missile-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Guided Missile Launcher",
+          "sourceSha256": "2fa76acff31a64bda0234f70efce18cd5e985a143585e87f49c96fb709fe1c5d"
+        },
+        "description": {
+          "sourceText": "Fires missiles that automatically track and pursue enemies.\nMissiles explode upon impact, causing damage over a wide area.",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19"
+        }
+      }
+    },
+    {
+      "id": "guided-missile-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GuidedMissileLauncher 2",
+          "sourceSha256": "6c9be2f2d15bf105692760cfdfa81be7d5a3f8f02dc1950d6f397476d600c5cb"
+        },
+        "description": {
+          "sourceText": "Fires missiles that automatically track and pursue enemies.\nMissiles explode upon impact, causing damage over a wide area.",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19"
+        }
+      }
+    },
+    {
+      "id": "guided-missile-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GuidedMissileLauncher 3",
+          "sourceSha256": "602e39236efbad11eb76402c06beb8eb2cbbaf544ee9c9cc7381cada7831c956"
+        },
+        "description": {
+          "sourceText": "Fires missiles that automatically track and pursue enemies.\nMissiles explode upon impact, causing damage over a wide area.",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19"
+        }
+      }
+    },
+    {
+      "id": "guided-missile-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GuidedMissileLauncher 4",
+          "sourceSha256": "568bd8b2d3743fd4caca850d633627a2dbedf535eef739055ac6cc413d92553d"
+        },
+        "description": {
+          "sourceText": "Fires missiles that automatically track and pursue enemies.\nMissiles explode upon impact, causing damage over a wide area.",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19"
+        }
+      }
+    },
+    {
+      "id": "guided-missile-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "GuidedMissileLauncher 5",
+          "sourceSha256": "557f4309b5f25c847ea82888329c6fd20052f1fe0b4d884e0e138053b5a2c7d8"
+        },
+        "description": {
+          "sourceText": "Fires missiles that automatically track and pursue enemies.\nMissiles explode upon impact, causing damage over a wide area.",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19"
+        }
+      }
+    },
+    {
+      "id": "gunpowder2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gunpowder",
+          "sourceSha256": "ed9485dca097b7107f171beb207b125931b58e86fe121d335e7778bf31d95482"
+        },
+        "description": {
+          "sourceText": "used to fire ammunition.\nRequired to make bullets.",
+          "sourceSha256": "ec7aed9eac88b9a2ba80283877ca3f31d3522800feea0a215275c45891ce2b86"
+        }
+      }
+    },
+    {
+      "id": "gym-head-desert",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Marcus Hat",
+          "sourceSha256": "f4a6abc5dbbd188b60462d09c702e31fdb63b643230b333abf56b2925a8a347e"
+        },
+        "description": {
+          "sourceText": "Dress up like Marcus using this special headpiece!",
+          "sourceSha256": "44ca3dc17c1604604239095411b81f20fe2e11e0073272ac40ff7ec57654a11e"
+        }
+      }
+    },
+    {
+      "id": "gym-head-electric",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Axel Hat",
+          "sourceSha256": "fcdd6575bc6bdc09ef77724f6d4adc53161afd11f0c54596dc6442f936137e84"
+        },
+        "description": {
+          "sourceText": "Dress up like Axel using this special headpiece!",
+          "sourceSha256": "2b3464a94131d5e3f594c656f55e0b900fda8abaa427a0866b40919a929a5a17"
+        }
+      }
+    },
+    {
+      "id": "gym-head-forest",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lily Hat",
+          "sourceSha256": "ddbe2a260ee39186b497d953315d50376269a3b661b8ec89ea4c42a0a8a42167"
+        },
+        "description": {
+          "sourceText": "Dress up like Lily using this special headpiece!",
+          "sourceSha256": "1a7ea235d3fb0bb737c87e47facae076296eab8005e7c3071770730be69bbba9"
+        }
+      }
+    },
+    {
+      "id": "gym-head-grass",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Zoe Hat",
+          "sourceSha256": "57862460ce8ea180a01e8244ace493b25d5cb99bfa0ccdf2dc75879bfc146d35"
+        },
+        "description": {
+          "sourceText": "Dress up like Zoe using this special headpiece!",
+          "sourceSha256": "5d462e190571483a9892f7ac1545af2c95f04da4f029d72eefd003f1e90e535b"
+        }
+      }
+    },
+    {
+      "id": "gym-head-sakurajima",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Saya Hat",
+          "sourceSha256": "071ce19ec9e70e491cbf3e57234ae8604ee847f7c8d36c2c03941ed3d28517d4"
+        },
+        "description": {
+          "sourceText": "Dress up like Saya using this special headpiece!",
+          "sourceSha256": "12201e897d05274593ff157a109da9bae402a9cc7c00d0c789f176b34dcff5a4"
+        }
+      }
+    },
+    {
+      "id": "gym-head-snow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Victor Hat",
+          "sourceSha256": "69f91e087ba579b10c2e5b84369d453df9fb5569355e3d3136c5f2ce0f463c1b"
+        },
+        "description": {
+          "sourceText": "Dress up like Victor using this special headpiece!",
+          "sourceSha256": "b9b4f331021cbc9f8bad46f788626bbcd23bf97e3e09146b47e0c6bd955b8e60"
+        }
+      }
+    },
+    {
+      "id": "gym-head-viking",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bjorn Hat",
+          "sourceSha256": "4b28fbb8544ed608369b011d527361655a07b58dcaceaad9f947894a63f0fc77"
+        },
+        "description": {
+          "sourceText": "Dress up like Bjorn using this special headpiece!",
+          "sourceSha256": "3225df55f6bd6243cbf6619f8f59a556998872a63f936dd4060a0e3297dd811b"
+        }
+      }
+    },
+    {
+      "id": "gyoza",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rushoar Gyoza",
+          "sourceSha256": "9898e4ab1b14cff2e1d9877895310906b17dc46c27231022da3e04a828cf3558"
+        },
+        "description": {
+          "sourceText": "A dish made by wrapping a filling of mushrooms and meat in wheat flour and boiling it. The chewy texture is irresistible.\nEating it improves your by 10% for a period of time.",
+          "sourceSha256": "1103ccf2e694c21fa1dd89936eb5653ef179116b49cc2f6a0d8a63556193549e"
+        }
+      }
+    },
+    {
+      "id": "hamburger-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mozzarina Hamburger",
+          "sourceSha256": "f9c09053591a5274080209beda11b654244c0b6ff865de3cb002bc903a5a88ed"
+        },
+        "description": {
+          "sourceText": "The rich flavor of beef melds with the sweetness of the buns in perfect harmony in this masterpiece.\nEating it will increase work speed\nand make SAN decrease slightly slower for a period of time.",
+          "sourceSha256": "6f1e0ebe655671baa01b8479ae20b340cf0d8bc7c3dba7c644d82edff202d586"
+        }
+      }
+    },
+    {
+      "id": "hand-gun-default",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Handgun",
+          "sourceSha256": "c1fdc3b9f61b9776898a1ecc045acf853d9eba6b64a3e5efe27d09485c7ad90b"
+        },
+        "description": {
+          "sourceText": "A handgun with improved capacity and rapid-fire capabilities.\nHas more immediate firepower than a .",
+          "sourceSha256": "719b89f47c300792da41226de6f69f32e890445547ec0dae9894d3de360c0f83"
+        }
+      }
+    },
+    {
+      "id": "handgun-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Handgun Ammo",
+          "sourceSha256": "31534b3d98dbf1a328d916a0f0ec03d487616a7057ca232152c9976fdc8a7928"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "head-equip001-purple",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Witch's Crown",
+          "sourceSha256": "6cb90bbd720349c8687608ff92a8bcc69aaa2fd68b1c7f08c322763ce994cd95"
+        },
+        "description": {
+          "sourceText": "Imbued with the ominous power of Bellanoir Libero (Ultra).\nA rarity only the most fortunate may obtain.",
+          "sourceSha256": "0015fbd44495253a06661eff9ed07e002e0e1ccb74fff553d43b3f9672ae53c7"
+        }
+      }
+    },
+    {
+      "id": "head-equip023",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lyleen Accessory",
+          "sourceSha256": "bcfbf6f4a69fe82ef6ed86eaa4851747fec89d18ca972705d1ccf32a908b1e29"
+        },
+        "description": {
+          "sourceText": "Floral hair accessory inspired by .",
+          "sourceSha256": "a343f0f120feaef1f5d0ad024fae695dfa97fe36a3f34dea7705b82f5fec2820"
+        }
+      }
+    },
+    {
+      "id": "head-equip024",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Sibelyx Hat",
+          "sourceSha256": "32d553814cd8c9590d3a223b73805f0e44c5b21a1c145983384ba57e8b7f81f3"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip025",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Leezpunk Hood",
+          "sourceSha256": "d87e7c72efb43da72c95df5a18198e83ad7e5e2ff530b6340e81ba38fb1dfe33"
+        },
+        "description": {
+          "sourceText": "Hood shaped like a .",
+          "sourceSha256": "34576bed8b8beb1a89eea9ed86a2f54e30faa25f3e3ef5308cc1e8f12a6c4a19"
+        }
+      }
+    },
+    {
+      "id": "head-equip026",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Killamari Cap",
+          "sourceSha256": "a88d442ae0afb192cb43f32b11a7a1d4619d00bafa3de6036800a256f3d78181"
+        },
+        "description": {
+          "sourceText": "Cap shaped like a .",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842"
+        }
+      }
+    },
+    {
+      "id": "head-equip027",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cawgnito Hat",
+          "sourceSha256": "4699d48b4a346f1dbad56eca992e070b360280f54fc5c0179a531a6b8f5efa93"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip028",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ribbuny Headband",
+          "sourceSha256": "340d22663cad109709b1667436f542a1922bfb65f737fc8ba339310f30af246b"
+        },
+        "description": {
+          "sourceText": "Headband shaped like a .",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf"
+        }
+      }
+    },
+    {
+      "id": "head-equip029",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lamball Helm",
+          "sourceSha256": "b05ec280ac4c40effe1a3c92ac6f8b0aefc56754901e8e311ae7c04e92d0a4ea"
+        },
+        "description": {
+          "sourceText": "Helm shaped like a .",
+          "sourceSha256": "25dd83ed6c59a7ddecbbaa37989d6161ebbc0838f163ab4ee308752a9a9ffb6f"
+        }
+      }
+    },
+    {
+      "id": "head-equip030",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dumud Helm",
+          "sourceSha256": "1fe43df6f10135b9a11b357b26afa8763c006a5aaaaa7901839ee86e2942d9cf"
+        },
+        "description": {
+          "sourceText": "Helm shaped like a .",
+          "sourceSha256": "25dd83ed6c59a7ddecbbaa37989d6161ebbc0838f163ab4ee308752a9a9ffb6f"
+        }
+      }
+    },
+    {
+      "id": "head-equip031",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Swee Cap",
+          "sourceSha256": "7814c306a9096e7886e7eb75981d20712a4c20869dee6487111337acba9808c4"
+        },
+        "description": {
+          "sourceText": "Cap shaped like a .",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842"
+        }
+      }
+    },
+    {
+      "id": "head-equip032",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dazzi Hat",
+          "sourceSha256": "56cbceff5a4dad2ae34401ae7e2037ed674683fc771f077c11562159fd938146"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip033",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cattiva Hat",
+          "sourceSha256": "29d6fa310899f1a041e88cae8bedce852c0aa6e910776fde27a8a587ce22375d"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip041",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Horns of Supremacy",
+          "sourceSha256": "ca8e24ac30745c64098c2274cf01b1cc36387f13bfe444982822b90dc4c3c227"
+        },
+        "description": {
+          "sourceText": "Imbued with the ominous power of Blazamut Ryu (Ultra).\nA rarity only the most fortunate may obtain.",
+          "sourceSha256": "c14d0285cdcb53b3659a608dfd8cdf2fc2f6698356da9752df4f7ed8625dd017"
+        }
+      }
+    },
+    {
+      "id": "head-equip044",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Xenolord's head",
+          "sourceSha256": "a5f5ae092bc79693775f5f69d192e9b7d7841120a4a185a70596e770aaa29d6f"
+        },
+        "description": {
+          "sourceText": "A headgear designed to resemble a .",
+          "sourceSha256": "3fe0e6ad890bb5e1a301fb5ff22e8eecb2d3163e716f119f1408df70a36f91de"
+        }
+      }
+    },
+    {
+      "id": "head-equip045",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Depresso Helmet",
+          "sourceSha256": "a42e16deaa751fe96c18eb8f1cc8d937edb3e6978fb9370abe247d1a2f0c580c"
+        },
+        "description": {
+          "sourceText": "A costume headpiece modeled after Depresso.\nSlightly decreases incoming Dark damage.",
+          "sourceSha256": "019c914d98165f91b4941d7b3d0a96a3a3e67a15778961acfc5dcf3f2d0a6cea"
+        }
+      }
+    },
+    {
+      "id": "head-equip046",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Crown of Salvation",
+          "sourceSha256": "2f5012015094da2d59ae9f628d7c647b9e607a7bae37e28aa38c687a9fcdce92"
+        },
+        "description": {
+          "sourceText": "Imbued with the ominous power of Hartalis (Ultra).\nA rarity only the most fortunate may obtain.",
+          "sourceSha256": "17b7360efea526af7ec5f22c5cce1f39322d35f7e85ed062abbe91b4221f7101"
+        }
+      }
+    },
+    {
+      "id": "head-equip048",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Auri Hat",
+          "sourceSha256": "4e0b026bfad49c4df44c340c46d41401b800d94b6d56eb09aca4983a75326607"
+        },
+        "description": {
+          "sourceText": "Dress up like Auri using this special headpiece!",
+          "sourceSha256": "4639e9d73a33e081792fad94e5f48660447c5266a34fca7783d661bc46627dab"
+        }
+      }
+    },
+    {
+      "id": "head-equip049",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Zenara Hat",
+          "sourceSha256": "a81fa67b39753f029d5c38df729c776bcd58a682eb218389b3d979d04e35eab4"
+        },
+        "description": {
+          "sourceText": "Dress up like Zenara using this special headpiece!\nA rarity only the most fortunate may obtain.",
+          "sourceSha256": "b4e17f64fb2d62ef1d2793e011a9e871ab5c97a5ce89cb74d464e0239b1573c8"
+        }
+      }
+    },
+    {
+      "id": "head-equip050",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Herbil Headband",
+          "sourceSha256": "0d07b7be1c2bc25a272e056a7b31337a03e83db279debb9accb11cab4bdd8d61"
+        },
+        "description": {
+          "sourceText": "Headband shaped like a .",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf"
+        }
+      }
+    },
+    {
+      "id": "head-equip051",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Kingpaca Headband",
+          "sourceSha256": "8cc10d28d8a8c2bd6411d7c48dd2b3bcfa77edcd1ac6a47a24a58973f75c6898"
+        },
+        "description": {
+          "sourceText": "Headband shaped like a .",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf"
+        }
+      }
+    },
+    {
+      "id": "head-equip052",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gloopie Hat",
+          "sourceSha256": "f747ba3f3b69b377f1d9740670f6b17ed9656f4b05cd9359106d2a37acb22aff"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip053",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jelliette Hat",
+          "sourceSha256": "e7b0c310a3c1c7df44c4a62fe5ebb523bf479b1374112b6bbc5d8d846a7f296e"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip054",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Turtacle Cap",
+          "sourceSha256": "2cce66fda377150f11dec034e5c66b8fc5a18f0a7711ddb0d631c843909afd09"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip055",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Croajiro Cap",
+          "sourceSha256": "02cff75159f0f17612fe421044b4f8fc5d9fbe4dd0f8f57ae8faa1f8bd242e63"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip056",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Chikipi Cap",
+          "sourceSha256": "632a3acad658b0338de37f4bcfb47a902678e595054bd36c1a0aac37ff809af1"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip057",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dandilord Hat",
+          "sourceSha256": "37178db5abc0d537efd1e08f07f59552a8d4878703c91ae3a1e9ee12dc35f332"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip058",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Shroomer Hat",
+          "sourceSha256": "ceb73f7720bab92644aeae87003c7bec7755da2a71fe8982326edcf7d1daa9ac"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip059",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ghangler Accessory",
+          "sourceSha256": "003ed2f27de694cdb7181ab03c2f46a5cf7dbc980ec3f5de4b3e50586c384416"
+        },
+        "description": {
+          "sourceText": "Hair accessory modeled after a .",
+          "sourceSha256": "591e4175d688cac374cfbc497bf0d67220caebf4c313dc341577e40a51c40684"
+        }
+      }
+    },
+    {
+      "id": "head-equip060",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Icelyn Hat",
+          "sourceSha256": "21839fa7f480a9a8fffe83f1c6fa031d95f589b717342d4b65663da8d5f51d33"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip061",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Splatterina Hat",
+          "sourceSha256": "1b650d2e3d0a224a8d372b51472369b3aabb0a219543ac299e9b210b207bc8d9"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head-equip062",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tarantriss Hat",
+          "sourceSha256": "cc6a5ac99ca112722670cc098a8f9404e9c092f17ed0e2ab1fb448cbde6efadc"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head001",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Monarch's Crown",
+          "sourceSha256": "8b4bb3ab526bab76aeec76ef3dbbfeb968091a70fc5ef2ee2279fe85493546e2"
+        },
+        "description": {
+          "sourceText": "A crown for those who possess a high ranking.\nBeing quite heavy, it's not suited for practical use.",
+          "sourceSha256": "16738083c32f8d2c26ea70175cd34267d162e4faaf1314c9c7721430ae25fe8b"
+        }
+      }
+    },
+    {
+      "id": "head002",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Golden Crown",
+          "sourceSha256": "bd585f713ad9bcf638f027cb5af78fa7bac2ba11cfcbea8cd0e7599a0cce8aea"
+        },
+        "description": {
+          "sourceText": "A rare golden crown.\nJust wearing it makes you feel like royalty.",
+          "sourceSha256": "51809825a99561b271b135c69509a2a2bdb9d298eac9ecc3d14497987394e361"
+        }
+      }
+    },
+    {
+      "id": "head003",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Long-Eared Headband",
+          "sourceSha256": "8332899c719d51a518e412563852608c737106235295c9043f2ad462b060194e"
+        },
+        "description": {
+          "sourceText": "A cute headband with ears modeled after a .\nIt doesn't provide much head protection.",
+          "sourceSha256": "8acb11f3ff828ce6575712e5697bb9c90f117625a38ec2e1f2b19024ded361f6"
+        }
+      }
+    },
+    {
+      "id": "head004",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Witch Hat",
+          "sourceSha256": "e0d13476ac66870b3a9ed62aca52492e4d7ea3efe6c04f49a7d5cdc523f8e4e5"
+        },
+        "description": {
+          "sourceText": "A hat modeled after a or .\nIt makes you feel like you can use Pal skills.",
+          "sourceSha256": "323123be4e00b7aacd8405a8088dcbad75cbfc0926e9d2e1c853753bfe17012d"
+        }
+      }
+    },
+    {
+      "id": "head005",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Soft Hat",
+          "sourceSha256": "375cae4596ee034d3db28bcb68ebf8034efbfc75ce6fb6926d4ca4f16eba3c81"
+        },
+        "description": {
+          "sourceText": "A light and flexible cap perfect for everyday use.\nFashionable, it was once a\npopular item on the island.",
+          "sourceSha256": "976babd7ef7923a4d7e8965dd50a0fff512232cf675b54f74f11b301a60298a7"
+        }
+      }
+    },
+    {
+      "id": "head006",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Helmet",
+          "sourceSha256": "a47fdf6415fc436ee65ac597251edfa2e58a5ea60b53e65d2886ea6cb17ba374"
+        },
+        "description": {
+          "sourceText": "A tough helmet that protects its wearer's head.\nIt was apparently made after a number of people injured their heads\nafter taking a tumble off a .",
+          "sourceSha256": "89ec0c1ef46d766676a3940c396735048c45e954b4667f6514a04787f0a7c6aa"
+        }
+      }
+    },
+    {
+      "id": "head007",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Silk Hat",
+          "sourceSha256": "63595db7606182f0fd047a949ab8e1351fb4acbf248017df6074b03aef5c1900"
+        },
+        "description": {
+          "sourceText": "A gentleman's hat.\nThose made from materials are considered luxury items,\nbut those made from materials are of poor quality, and more commonly found.",
+          "sourceSha256": "d987241e9bced983db8230364bc55932ae117d8cc863185c07acec3b22c848e1"
+        }
+      }
+    },
+    {
+      "id": "head008",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tricorne",
+          "sourceSha256": "b33f2650640a812fa2b09aa606fd84168a4b8a3ab7558ed9322f6a4388a3cc55"
+        },
+        "description": {
+          "sourceText": "A cap for those who love to fight.\nIts previous owner nearly drove\nto extinction.",
+          "sourceSha256": "d70f7f1b8c37965c7c5537c6652084d16d5470058a9fe60961b574450c116e77"
+        }
+      }
+    },
+    {
+      "id": "head009",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Explorer Cap",
+          "sourceSha256": "d28b9a60af4cffc605bb010696490836d06ea624af2b9be26959fe41d07e8045"
+        },
+        "description": {
+          "sourceText": "A hat for explorers.\nIt protects from the bright rays of the sun.",
+          "sourceSha256": "f734ad99e44810ae22a4756447fce5ae769ec73cc37a48b84632c70370bacb0c"
+        }
+      }
+    },
+    {
+      "id": "head010",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Graduation Cap",
+          "sourceSha256": "4197966c1209bbc719c05a7c20103bd33404703d286dfe4d286932718ccaca4d"
+        },
+        "description": {
+          "sourceText": "A cap that makes its wearer feel smarter.\nWas there once a school on this island?",
+          "sourceSha256": "1dc9311b1a04a580a9014e6f4e5d0cb10f30f2ed2b006bc89309588db272f6ad"
+        }
+      }
+    },
+    {
+      "id": "head011",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Farming Hat",
+          "sourceSha256": "ddf4c02972036d02ec72a2403d04a27ab95ad61536bf51bd87b5be0a58dfd9eb"
+        },
+        "description": {
+          "sourceText": "A hat for working in the fields.\nIt protects from the bright rays of the sun.",
+          "sourceSha256": "9579037754d298e166871be96a6428d7f7e4078d155a7c614be52b6926367c24"
+        }
+      }
+    },
+    {
+      "id": "head012",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bowler Hat",
+          "sourceSha256": "5743bf08237d187256f2c2ed16e4e1bc00b77ea29be094b07214c8ac9d6ac763"
+        },
+        "description": {
+          "sourceText": "A tough, round hat.\nIt was sold with the guarantee that it wouldn't break\neven if a stepped on it.",
+          "sourceSha256": "b59819ea165866eaf323c6e16f1a6049d0b1c363f552748f0d4c194e1626c4ce"
+        }
+      }
+    },
+    {
+      "id": "head013",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Tocotoco Cap",
+          "sourceSha256": "1e01032809ab8b781e551c78d465b2d6339a34ce4b58b2ecf351eb4f811d6f2d"
+        },
+        "description": {
+          "sourceText": "Cap shaped like a .\nIts gaudy design is visible from far away.",
+          "sourceSha256": "9363fb2b6a8ff79f26795e96624a94e44bcb40f47bc5ceebe0dc4321bf56d10e"
+        }
+      }
+    },
+    {
+      "id": "head014",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grinning Tocotoco Cap",
+          "sourceSha256": "6da9de1b9066b78160941560fb5e4c9770405506560f5ba17bf2aa698d36caea"
+        },
+        "description": {
+          "sourceText": "Cap shaped like a .\nIt makes those who wear it smile uncontrollably.",
+          "sourceSha256": "22e2cf66eb81a40b55a61efae03d4ec2d6b6224d86ee35d828a94bf4e47950f6"
+        }
+      }
+    },
+    {
+      "id": "head015",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gumoss Cap",
+          "sourceSha256": "9d7924a450bc6dd2c3b986a34ac522644e4ed4b813074232ba2634fd4187ac35"
+        },
+        "description": {
+          "sourceText": "Cap shaped like a .",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842"
+        }
+      }
+    }
+  ]
+}

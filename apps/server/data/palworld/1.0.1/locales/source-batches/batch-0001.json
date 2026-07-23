@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 1,
+  "records": [
+    {
+      "id": "accessory-air-dash1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Air Dash Boots",
+          "sourceSha256": "40f7caa16d19395afe1a76c98a44b1bf71f621c0bbbdb8faf0c89a71eb531836"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to dash in mid-air when equipped.",
+          "sourceSha256": "ed50bc2bbc19f7febb78d03e2c5d44afb8f8e9ec3e1e165eea1c60ccd1968332"
+        }
+      }
+    },
+    {
+      "id": "accessory-air-dash2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Double Air Dash Boots",
+          "sourceSha256": "0461e38337ce44b046372aaf2ddb9a34f9f14d0200b858f6444659f7f954fca7"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to perform double dashes in mid-air when equipped.",
+          "sourceSha256": "e15469ef95d8f3439a8b778456f1922c40827c9ade36a27ee6cee719a808d866"
+        }
+      }
+    },
+    {
+      "id": "accessory-air-dash3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Triple Air Dash Boots",
+          "sourceSha256": "9c5314e790091c9acb15f645610b0ea46c9fd59a6b838f94e57e90aeb468a044"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to perform triple dashes in mid-air when equipped.",
+          "sourceSha256": "af8e710ba590d29ab5b8166bb1e136a9989333e8064f10d9ace9c2f9a41f658e"
+        }
+      }
+    },
+    {
+      "id": "accessory-aqua-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Water Resistance",
+          "sourceSha256": "42c308bff032013e12923604572a17af211adfdcb729a3a8852492d532568acf"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Water damage.",
+          "sourceSha256": "1b52a15a1df9943df30ab82254814b58cf16e3b70b0a70ea37754abdbf058be9"
+        }
+      }
+    },
+    {
+      "id": "accessory-at-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Attack Pendant",
+          "sourceSha256": "c1930b2bcfb811d9bc185e32982ee8b31ca41a3170d1e2dd001038eff989ba7a"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Attack.",
+          "sourceSha256": "66696fbd425946ae1b9fcacc2fa22a2fe7c1a4085a908dface3831f2c28c7490"
+        }
+      }
+    },
+    {
+      "id": "accessory-avoid-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Phantom Ring",
+          "sourceSha256": "f7bbae117bf91d7d3305ec1f2a5bbe0d6a2dc397a4816b65606ed17a83a332bb"
+        },
+        "description": {
+          "sourceText": "An accessory that extends the invincibility period of rolls and sidesteps.",
+          "sourceSha256": "b59c14f7a065bf93b5cd8aeac7dd233d9cd65a908ed9966b2fb0ed3ab364dae8"
+        }
+      }
+    },
+    {
+      "id": "accessory-cold-ice-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wumpo Charm",
+          "sourceSha256": "59f0c3c4074d006ec075b5d117066fad5b4da243022d35b83a4b483580c6eb24"
+        },
+        "description": {
+          "sourceText": "An accessory with incredible resistance to cold.\nGreatly reduces incoming Ice damage.",
+          "sourceSha256": "246bb12afa03f7c5085d11a4b8b5b835900c40c9383fa6853ed87d69ce7da2a3"
+        }
+      }
+    },
+    {
+      "id": "accessory-cool-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Thermal Undershirt",
+          "sourceSha256": "2e67f849a42b5ed3c476f97a87153af8b90bb5eebe4bb28e63f3880a305033be"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Cold Resistance.",
+          "sourceSha256": "6f914481aa49c4ee239b51264b2b0ca00d4d604f40b4fbbdc01967605e5d3b8b"
+        }
+      }
+    },
+    {
+      "id": "accessory-dark-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Dark Resistance",
+          "sourceSha256": "2135286da9cf095b4ef2d14f6ec389de4ff40b0f6a80740f9575eab58bb61952"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Dark damage.",
+          "sourceSha256": "e4b6ea3a85e346a4a702fa074f361c465258738c5907c66bbad6154f21318112"
+        }
+      }
+    },
+    {
+      "id": "accessory-defense-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Defense Pendant",
+          "sourceSha256": "6bc6c4ea48df41f149a2d5b7bacbd1b8553537b43f8e0628a9529790c1097996"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Defense.",
+          "sourceSha256": "6960f1d43a0d1e79b6fad6db08d52ceff65e29262f685ae65789a76e64f5185c"
+        }
+      }
+    },
+    {
+      "id": "accessory-dfhp-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Warsect Terra's Belt",
+          "sourceSha256": "8734cc7d22493269a2d35f95925ffd7a384dea93fac6eef7a103b664a91353f5"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly raises Defense and Health.",
+          "sourceSha256": "a9f6c0acee7e59fa5912299c86743bde065e0ae5c3755b6e214d1fd3e8969f57"
+        }
+      }
+    },
+    {
+      "id": "accessory-dragon-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Dragon Resistance",
+          "sourceSha256": "373786a7478221d3cd3da7c8d421703773ea70ae817f7807d2aec71f1e06ad27"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Dragon damage.",
+          "sourceSha256": "d0d8303e06a2c3778c2e292c969731d36d6fe01e1694f27fa4c1f138cedc76c0"
+        }
+      }
+    },
+    {
+      "id": "accessory-earth-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Ground Resistance",
+          "sourceSha256": "d10ad9ef5b23b24ea192e6cd9cce7c94e2fc69d5e9dc2ca3ae43f77bc2edb758"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Ground damage.",
+          "sourceSha256": "9914e4b128da33d1ca2b26e5df6a394e4afc980e083cfe7d580a18cec8e28f54"
+        }
+      }
+    },
+    {
+      "id": "accessory-explosion-resist",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Explosion-Resistant Undershirt",
+          "sourceSha256": "4b544473254643e3e110b2beda7c01c44ed3cb6893e3aff53ae2ecd3f7cb86af"
+        },
+        "description": {
+          "sourceText": "A lightweight yet durable undergarment made from special fibers.\nIt nullifies damage from explosions.",
+          "sourceSha256": "ae5cab8d1f64e856ae2d422039cb2c6afe1fafe072c09a54efc2573d15b050c4"
+        }
+      }
+    },
+    {
+      "id": "accessory-fire-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Fire Resistance",
+          "sourceSha256": "7e0970b0a1214253b3d85edd905c0b98c881794601407a35c949c7cffc630acf"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Fire damage.",
+          "sourceSha256": "002faa14b0504ade53e5bd4d12e3008b059fd19b029092402f6699d92489b398"
+        }
+      }
+    },
+    {
+      "id": "accessory-hchp-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Vanguard Charm",
+          "sourceSha256": "4d828b0058d3766ed0289434577f8eccb961f2720e66f0bdde50f6d5a31f1e74"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly raises Heat and Cold Resistance. It also significantly increases Health.",
+          "sourceSha256": "774d818d6ca9da44ac688ee6d758118d1e34e1b6b952c93a7df65b33f0de8ddf"
+        }
+      }
+    },
+    {
+      "id": "accessory-hcmw-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wandering Merchant Charm",
+          "sourceSha256": "3e980bdc5e6b0c88190078fd69f03fc1fbfc42cffc2c6cc5b53b028ed67b3442"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly raises Heat and Cold Resistance. It also significantly increases carrying capacity.",
+          "sourceSha256": "7054e6c5088574b7fc93e7f7e52b8b12feb9a4036f81c0a29edadde5de0a1752"
+        }
+      }
+    },
+    {
+      "id": "accessory-heat-cold-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Multiclimate Undershirt",
+          "sourceSha256": "f885b2fe3ffb6a4db809d66a982f2e3c0a03fd6bfa780e08bb58b6f073eb7bc2"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Heat and Cold Resistance.",
+          "sourceSha256": "fc23e8319742547433cbe629553b417fb1d3f0986331b9d67d1f15f9c9cd6be9"
+        }
+      }
+    },
+    {
+      "id": "accessory-heat-fire-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Reptyro Charm",
+          "sourceSha256": "dded506b0ab7b9c75046a09bd01b6a62c38c1c28ddb622edd2b4814aefeb3009"
+        },
+        "description": {
+          "sourceText": "An accessory with incredible resistance to heat.\nGreatly reduces incoming Fire damage.",
+          "sourceSha256": "4e86d7353bb461af89d2f495c8958d8b98c27ae05df64b3300965e8da88e98fa"
+        }
+      }
+    },
+    {
+      "id": "accessory-heat-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Undershirt",
+          "sourceSha256": "b6795a76b1abf54f6d26b444252719524d12e7281e0a8e50e334cb28e7a26b8e"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Heat Resistance.",
+          "sourceSha256": "36d7ac6f1108953bfab8c7067c7f34a8150509f15cb7ea97b9fde70f825b0f39"
+        }
+      }
+    },
+    {
+      "id": "accessory-hp-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Life Pendant",
+          "sourceSha256": "1e920e6c8648e6e5aa4b96da4dcfedb6b5643ae54eeea0a9e26db6b71702dd78"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Health.",
+          "sourceSha256": "58452ff8e971c9ec4b73df86fe7462e0cc77f2d12cec92fece4d70a286deeb5e"
+        }
+      }
+    },
+    {
+      "id": "accessory-ice-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Ice Resistance",
+          "sourceSha256": "b49477d229d74def0bc121499cbef929b0a64827d11fb5518a59fa73c1366eb0"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Ice damage.",
+          "sourceSha256": "a1a64ac49564c359a580c2e186e3af2c29e374ace3210cb11a58d6a1b7116f62"
+        }
+      }
+    },
+    {
+      "id": "accessory-jump-air-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Air Walker Mk I",
+          "sourceSha256": "e84c669c46df1ef3f4e0ffc86abc7cf8001239e557f124c068abb850afff9436"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to jump in mid-air when equipped.\nAlso grants a mid-air dash.",
+          "sourceSha256": "6f7cdbd69bc6ad4e94104ca71ca90c8e0806a3f7c43de073e0b545af24288b4f"
+        }
+      }
+    },
+    {
+      "id": "accessory-jump-air-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Air Walker Mk II",
+          "sourceSha256": "ac9ce22d6c4f9c9c5348d148a3d365e3296702704358119a2ae0172dc70ff2bb"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to jump in mid-air when equipped.\nAlso grants a double mid-air dash.",
+          "sourceSha256": "4d2ec1e15d98ad78708256cf095c3dbb10e6756de0a3e88c08db6a377a810ce4"
+        }
+      }
+    },
+    {
+      "id": "accessory-jump-count-increase1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Double Jump Boots",
+          "sourceSha256": "efddae886a908c3c5de472fa314af31458c44bcdae54d56d177e0bf8da5d15e4"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to jump in mid-air when equipped.",
+          "sourceSha256": "b0c70441c196e8c9d1ed0d7817d28059bb783c0af990a8ce44f7b5c688d86036"
+        }
+      }
+    },
+    {
+      "id": "accessory-jump-count-increase2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Triple Jump Boots",
+          "sourceSha256": "d8530595ac2641d902bfcaf5daa2589ab84d0159c49442fde512fc026f2057c9"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to perform double jumps in mid-air when equipped.",
+          "sourceSha256": "34340db4f4d84929be93816aea0ce26e506c7d8b67b99780e0bbcee3a81d48dd"
+        }
+      }
+    },
+    {
+      "id": "accessory-jump-power-increase",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Anti-Gravity Belt",
+          "sourceSha256": "66c9b5751405e29c2e55285575c8378aa60dd9155299d9b8e066d6cf8d30d5af"
+        },
+        "description": {
+          "sourceText": "An accessory that increases the player's jump power when equipped.",
+          "sourceSha256": "75e10069d6c874fa35bab31b7d1b6a092d148d1218564eb208902a17a2701115"
+        }
+      }
+    },
+    {
+      "id": "accessory-leaf-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Grass Resistance",
+          "sourceSha256": "1d5b12aa4210f7ba6c7b5ad52dae09135124ef9b4ea237fb13fa6adcbe9c6ba3"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Grass damage.",
+          "sourceSha256": "951041a39eb6c0a16ce7b91972cc8cf42366760c99948c9ba8f2b1ee83e5cc23"
+        }
+      }
+    },
+    {
+      "id": "accessory-max-weight-up-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Freight",
+          "sourceSha256": "c2028327fc86304c8d5c3fae2408f1eebfd548fcbe1b45ca3ef489cce6b67c24"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises carrying capacity.",
+          "sourceSha256": "aaa144d5262c6438bbcc1f5da85d6b4f9951b503192fb415b2c77d3ae482c3d8"
+        }
+      }
+    },
+    {
+      "id": "accessory-nonk-checker-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Tamer's Glasses",
+          "sourceSha256": "433b5697099f14962c8b82b8160715eeea14844ef150209569ef3e46051b2c22"
+        },
+        "description": {
+          "sourceText": "Eyewear for Pal Tamers.\nThe wearer's attacks will not reduce the target's Health below 1.\nReveals hidden Pal potentials.",
+          "sourceSha256": "8e123a623a8d029806569ca3c056448b459a13613cefb9b27e4d175787cdf32c"
+        }
+      }
+    },
+    {
+      "id": "accessory-nonkilling",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Mercy",
+          "sourceSha256": "3afc393a8ee222ab62eaa34e7618a9b6900568badde8ba0d3e7d008d6a50ba7f"
+        },
+        "description": {
+          "sourceText": "Pacifist's ring.\nThe wearer's attacks will not reduce the target's Health below 1.",
+          "sourceSha256": "cfaaaf5fb0826259e214ee52e6edf73ea601bb7265d022ba41991c5f3fe93e5d"
+        }
+      }
+    },
+    {
+      "id": "accessory-normal-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Neutral Resistance",
+          "sourceSha256": "177d2138be9611a5ae3d4684083d65eed9b7be09a3ebb714cfe16cb8ab28fb93"
+        },
+        "description": {
+          "sourceText": "Accessory that slightly lowers Neutral damage.",
+          "sourceSha256": "4ed8470a890b2470e61531110449ddee7b03c60d21af2f41ca1e5fe9daa5de2b"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-dargon-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Elphidran Ring",
+          "sourceSha256": "84fe495a5ec4afad641a564e9d532f0956015b067800f7b1ee9e26ffb0abf108"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Dark damage of the Pal fighting alongside you.\nIt also significantly increases the Dragon damage of the Pal fighting alongside you.",
+          "sourceSha256": "af077af74f4892ff238d3ebd5fd4d9fbdfbf2e114864b2c07b77e50cd8c8611a"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-dark-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katress Ring",
+          "sourceSha256": "ed434bd17647e4e518cc6508b1e48a82fdd5be0a289b1c4e25caf727e4a4fea1"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Neutral damage of the Pal fighting alongside you.\nIt also significantly increases the Dark damage of the Pal fighting alongside you.",
+          "sourceSha256": "0b220c76e349ff1727dec02c9c0820346918648e7855766d06dc0866a2bda344"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-earth-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Menasting Terra Ring",
+          "sourceSha256": "d81c6acc09ff7594c134173fe6e4e8219da17bfb1577ef404142cfb747a01635"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Electric damage of the Pal fighting alongside you.\nIt also significantly increases the Ground damage of the Pal fighting alongside you.",
+          "sourceSha256": "198ef51359c98c9012729ee51a447e0f9ff4ea1638520d6f152f5604e4455c0e"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-electricity-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fenglope Lux Ring",
+          "sourceSha256": "729383fa2bfb73efa9854246fda24cbf1a3c6e3605ddd9b4fab222e6e31e2130"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Water damage of the Pal fighting alongside you.\nIt also significantly increases the Electric damage of the Pal fighting alongside you.",
+          "sourceSha256": "00ff276b4ff342e7df0d4b5639b7d496d3a2a4e3bccfcd7080ab18c755151621"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-fire-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Blazehowl Ring",
+          "sourceSha256": "04d95c6d1d3da299d20f9ed310c8e18569988aacc53ccc6a7b2b1954567888b9"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Grass damage of the Pal fighting alongside you.\nIt also significantly increases the Fire damage of the Pal fighting alongside you.",
+          "sourceSha256": "9a5997c1be42cffec41b66e4674f6443f158f9b6ccabaaa56f7b50a338682e91"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-fire-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Faleris Ring",
+          "sourceSha256": "ea1198f7e0b7182a0f9634ff4fdd4cfe45b98d2ae2f319525c1cf1c64d65c0f2"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Ice damage of the Pal fighting alongside you.\nIt also significantly increases the Fire damage of the Pal fighting alongside you.",
+          "sourceSha256": "953f9a807c574b2f2a9672b31afe4dc19300f928cf9a5b990ed191c30b3f8f76"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-ice-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cryolinx Ring",
+          "sourceSha256": "c8a33322875933e7a47c6bc0fc997c429c52d10c0f66264840413c35a98df034"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Dragon damage of the Pal fighting alongside you.\nIt also significantly increases the Ice damage of the Pal fighting alongside you.",
+          "sourceSha256": "171c82034e4a35a8b7a11739b63385850a3e8aeee3a6fda3ec8a23066faaf1fa"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-leaf-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Vaelet Ring",
+          "sourceSha256": "afc26fe7e317d59b22bc3ca154760ac6a0cb7369056e682e0727ebcf25b71bc3"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Ground damage of the Pal fighting alongside you.\nIt also significantly increases the Grass damage of the Pal fighting alongside you.",
+          "sourceSha256": "d9f8521a69deaa54d5d8b456ba4ecbfa17a432453c01cd7cea5b552a7216c41f"
+        }
+      }
+    },
+    {
+      "id": "accessory-otomo-water-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Faleris Aqua Ring",
+          "sourceSha256": "ee29a24611e3869d0553b2b4481ee599905dfb5882fb7b5f4577cabc790d140c"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly reduces incoming Fire damage of the Pal fighting alongside you.\nIt also significantly increases the Water damage of the Pal fighting alongside you.",
+          "sourceSha256": "a0c72f51aa9643bf5251d7700cc1fb6383f28e81c8f4d8123378487d69516285"
+        }
+      }
+    },
+    {
+      "id": "accessory-ppat-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dogen Emblem",
+          "sourceSha256": "7e1e2a84db93b5c5b67a11d399c47b87f151acf90be8cfc566b2b9ebc7ba5809"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly raises your Attack, and that of the Pal fighting alongside you.",
+          "sourceSha256": "9ce95d4593163d395f928a5dd576a7093d65129ed130f17f41b11541bead874e"
+        }
+      }
+    },
+    {
+      "id": "accessory-ppdf-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Silvegis Emblem",
+          "sourceSha256": "c921f49eb071759a7afd0d3aebc3b3fbe0fef605b6a1aab7a34b63490bab983a"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly raises your Defense, and that of the Pal fighting alongside you.",
+          "sourceSha256": "25a00d3072e83b4ce2bdb91130510053d13d4cd9110a07993e1bdf4c7e96fe9e"
+        }
+      }
+    },
+    {
+      "id": "accessory-super-jump-air-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Air Walker Mk III",
+          "sourceSha256": "c1293f132296dfdf97d1cdfa7209a59cd01e9f842c43f0059f762109f16f170d"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to perform double jumps in mid-air when equipped.\nAlso grants a mid-air dash.",
+          "sourceSha256": "9e3655b95d59696263ca85a2f7b16df6ff36ffa8839ca97435099f411b851c01"
+        }
+      }
+    },
+    {
+      "id": "accessory-super-jump-air-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Air Walker EX",
+          "sourceSha256": "c89dfddf719073e29062f6f747759d93db16150b81eeba9834e54bd1a3a4f40a"
+        },
+        "description": {
+          "sourceText": "An accessory that allows the player to perform double jumps in mid-air when equipped.\nAlso grants a double mid-air dash.",
+          "sourceSha256": "a9ad16f1b62e02c7da53046884e3c3702855728e73622422e66d63a5da985cbb"
+        }
+      }
+    },
+    {
+      "id": "accessory-talent-checker",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ability Glasses",
+          "sourceSha256": "43f9a825e860446954a07cae9d04963a7381ec2f088ffb5a7d8ae54875d43e3b"
+        },
+        "description": {
+          "sourceText": "Glasses used to discern hidden Pal potentials.\nDisplays Health, Attack and Defense stats on a scale of 0 to 100.",
+          "sourceSha256": "e6228254761306c855d0e106588948c7fcfb22a740cae7168fc06d5275dd8368"
+        }
+      }
+    },
+    {
+      "id": "accessory-thunder-resist-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Electric Resistance",
+          "sourceSha256": "843f6584a91e886346e09da383ad222e7b19a60720675dce3ba2c45b2000d3ef"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly reduces incoming Electric damage.",
+          "sourceSha256": "1274728cf13ce2941dfeab5ca6c4cd19d95b6e650b02fd287276141b4f6b68cb"
+        }
+      }
+    },
+    {
+      "id": "accessory-wkmc-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Islander's Tool Belt",
+          "sourceSha256": "665ad608cf353f0bdecc42805eaa55ce3e135a31a6c9ab53a20bb8458c93a417"
+        },
+        "description": {
+          "sourceText": "An accessory that greatly raises carrying capacity. It also significantly increases work speed.",
+          "sourceSha256": "d4a0b407a92a71ac40b2803a62447f134cbd40ce2cd50e0c77998024618ac7f8"
+        }
+      }
+    },
+    {
+      "id": "accessory-work-speed-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pendant of Diligence",
+          "sourceSha256": "fcec4064b46fdcc3809127306571115240f6dcded9e220f9176f1e3874868995"
+        },
+        "description": {
+          "sourceText": "An accessory that slightly raises Work Speed.",
+          "sourceSha256": "3cd44c7b95e0fc8e66c3be9de002f19ba2a812b44d62af882c4e8c01394c5244"
+        }
+      }
+    },
+    {
+      "id": "additional-inventory-001",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Small Pouch",
+          "sourceSha256": "fb585f4ce76b6ffe08c6adcf2f8d6a3c25858f19b29b86282255085ea55994ce"
+        },
+        "description": {
+          "sourceText": "A small pouch that allows you to carry additional items.\nHolding it increases your inventory slots.\nCarrying one is enough.",
+          "sourceSha256": "0a177d9fd1d8c9a22129754b5b9e470f1a2734a9a0db4c54bc1db7ddb93243a3"
+        }
+      }
+    },
+    {
+      "id": "additional-inventory-002",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Medium Pouch",
+          "sourceSha256": "b515df569494a63e2aec9061bade6d7472965ef7b9ba35ecf5efa3d4be11c0a1"
+        },
+        "description": {
+          "sourceText": "A modest pouch that allows you to carry additional items.\nHolding it increases your inventory slots.\nCarrying one is enough.",
+          "sourceSha256": "8d1f008a856b286c14ffac671cbc84bf1faa0e71bea02ad07c452685e14b9e51"
+        }
+      }
+    },
+    {
+      "id": "additional-inventory-003",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Pouch",
+          "sourceSha256": "e62415d38e27c18813fcb577448e62c728839421f548fec217068062e0c6557b"
+        },
+        "description": {
+          "sourceText": "A large pouch that allows you to carry additional items.\nHolding it increases your inventory slots.\nCarrying one is enough.",
+          "sourceSha256": "75c38ebdd873130b8556b3e061b15ca95f7c4b5fa752d886bf71df028c68858c"
+        }
+      }
+    },
+    {
+      "id": "additional-inventory-004",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Giant Pouch",
+          "sourceSha256": "a653a0c5d6be59debeb6a5c99bccaffafbc576ce37a0b04b4109fbd9f44a91e3"
+        },
+        "description": {
+          "sourceText": "A massive pouch that allows you to carry additional items.\nHolding it increases your inventory slots.\nCarrying one is enough.",
+          "sourceSha256": "f6a86e3fb4c5c6b74fc0d4c5526b5cb3aec307f75a7f2b39461d472a2742645b"
+        }
+      }
+    },
+    {
+      "id": "affection-fruit-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Kinship Peach",
+          "sourceSha256": "7a2fca6e77d0fd38e34d454c0090479718b61fcc1b6dbc17378e2c6cad93e987"
+        },
+        "description": {
+          "sourceText": "A rarely seen magical fruit.\nIt is said that a Pal who eats it will open\nits heart to humans.\nChoose carefully which Pal you give it to.",
+          "sourceSha256": "b570f935cfe3a8247fe0d2077e23a7e6ca95b0ca1e51f02cae107e0583cc48cd"
+        }
+      }
+    },
+    {
+      "id": "affection-fruit-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Little Kinship Peach",
+          "sourceSha256": "517b88c2b32adda07ac8278c155f93eb2d7aa2b3f7c832cf93145d7d538a52ae"
+        },
+        "description": {
+          "sourceText": "A small fruit filled with kindness.\nIt is said that a Pal who eats it will open\nits heart to humans.\nChoose carefully which Pal you give it to.",
+          "sourceSha256": "8f76b74925762cf05a11b91007793b3c7363126fad9a93ae7839cdb86840dfe4"
+        }
+      }
+    },
+    {
+      "id": "aicore",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AI Core",
+          "sourceSha256": "7087bda0c04f6702d98302f30f989edb0d04aa86c11b759931e78ea26c01c583"
+        },
+        "description": {
+          "sourceText": "A core component essential to cutting-edge devices, enabling complex decision-making and autonomous control.\nCan be crafted at .",
+          "sourceSha256": "457634ee3fb0706a0ebe463e043f8b07f8840b2fd1130eecf1a5dc156be9b694"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Armor",
+          "sourceSha256": "b5a91478d7556fe5d63b3fb6a7f2922c5da176b11ded3f7149807953c0cb1bd7"
+        },
+        "description": {
+          "sourceText": "Ancient armor forged from .\nCrafted with the essence of a lost civilization, it boasts overwhelming defensive power and is capable of withstanding cataclysmic threats.",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmor 2",
+          "sourceSha256": "abe178c4855a421cdc38ddb1cacd620a7bd41f5f672573d48e02f0507be0dd26"
+        },
+        "description": {
+          "sourceText": "Ancient armor forged from .\nCrafted with the essence of a lost civilization, it boasts overwhelming defensive power and is capable of withstanding cataclysmic threats.",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmor 3",
+          "sourceSha256": "a3ef2970f39641f76a10c8440fc02c2f5da74605976431ef0f3a8738cc99cfde"
+        },
+        "description": {
+          "sourceText": "Ancient armor forged from .\nCrafted with the essence of a lost civilization, it boasts overwhelming defensive power and is capable of withstanding cataclysmic threats.",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmor 4",
+          "sourceSha256": "4faa25db47f739801bee9173787e439de5c40914cc928ac7de45d3e27721280f"
+        },
+        "description": {
+          "sourceText": "Ancient armor forged from .\nCrafted with the essence of a lost civilization, it boasts overwhelming defensive power and is capable of withstanding cataclysmic threats.",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmor 5",
+          "sourceSha256": "ccee91242f9894362fea4fa9117890a54e46ef3986da6e7fca9072ed1e65c3e7"
+        },
+        "description": {
+          "sourceText": "Ancient armor forged from .\nCrafted with the essence of a lost civilization, it boasts overwhelming defensive power and is capable of withstanding cataclysmic threats.",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-cold",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold-Resistant Ancient Armor",
+          "sourceSha256": "ef5d8a69180897f3f68f90036534280819e916e7b1b40890c1897816fc804cd8"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts cold resistance has been further enhanced using ancient technology, allowing the wearer to maintain their strength even in extreme cold regions.",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-cold-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorCold 2",
+          "sourceSha256": "081e026818a4424b4c3d3c5e06bc5f257e7d65b245282d95501beb6c25025383"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts cold resistance has been further enhanced using ancient technology, allowing the wearer to maintain their strength even in extreme cold regions.",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-cold-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorCold 3",
+          "sourceSha256": "f981bfb492bb7cb73caf97af8d5ed47c904608f97644176d7dfdce7b5169cb6e"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts cold resistance has been further enhanced using ancient technology, allowing the wearer to maintain their strength even in extreme cold regions.",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-cold-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorCold 4",
+          "sourceSha256": "e9687876437c25ad7af197e18b74b22fa5947ddd38800cc3caa94fe549a9a0b3"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts cold resistance has been further enhanced using ancient technology, allowing the wearer to maintain their strength even in extreme cold regions.",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-cold-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorCold 5",
+          "sourceSha256": "af7abff56929ff75870d844c293b6ce05fcd7ad05ce280bbe4e6ef2564d24251"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts cold resistance has been further enhanced using ancient technology, allowing the wearer to maintain their strength even in extreme cold regions.",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-heat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat-Resistant Ancient Armor",
+          "sourceSha256": "d9066a00ef6abc6cc399403c468e7b0ddf3fa845dda7d025960d398cfc315025"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts heat resistance has been further enhanced using ancient technology, allowing it to endure scorching environments",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-heat-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorHeat 2",
+          "sourceSha256": "fcc0725c52ff9f281e7d362bb3d458d8f62c233a7e58c6a6fdb4b8c73a227e64"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts heat resistance has been further enhanced using ancient technology, allowing it to endure scorching environments",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-heat-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorHeat 3",
+          "sourceSha256": "d6534ee744bc498f2f90af50f62a24d8024e4d5eb82f203655fee56e0f7c0267"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts heat resistance has been further enhanced using ancient technology, allowing it to endure scorching environments",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-heat-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorHeat 4",
+          "sourceSha256": "43f71d9114a8e5b3232522a1d0148c4e32f83d9460febd36dd769e08ef48c5dd"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts heat resistance has been further enhanced using ancient technology, allowing it to endure scorching environments",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-heat-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorHeat 5",
+          "sourceSha256": "2b9e9b48f4a8bf491b965cec74ed45617922ea98a3e958ce9964366fc4966726"
+        },
+        "description": {
+          "sourceText": "Refined .\nIts heat resistance has been further enhanced using ancient technology, allowing it to endure scorching environments",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-weight",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lightweight Ancient Armor",
+          "sourceSha256": "39f11bf077c02e782a2cdc1bee4aeee88838c488805eead4d16cabfc995517d3"
+        },
+        "description": {
+          "sourceText": "Refined .\nIt is equipped with ancient auxiliary mechanisms, allowing the wearer to carry more supplies.",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-weight-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorWeight 2",
+          "sourceSha256": "f215b6b303ea4cc948707fd6970e870239fa7254fa4583da88738c6afd92adea"
+        },
+        "description": {
+          "sourceText": "Refined .\nIt is equipped with ancient auxiliary mechanisms, allowing the wearer to carry more supplies.",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-weight-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorWeight 3",
+          "sourceSha256": "5561378084c19fccb6f4150c1f486d82847921a8b450ce5a4820701c52ff9d73"
+        },
+        "description": {
+          "sourceText": "Refined .\nIt is equipped with ancient auxiliary mechanisms, allowing the wearer to carry more supplies.",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-weight-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorWeight 4",
+          "sourceSha256": "43cb7bd86398dfb233589a2fd35451316b6c804f31321598a768d186a562025b"
+        },
+        "description": {
+          "sourceText": "Refined .\nIt is equipped with ancient auxiliary mechanisms, allowing the wearer to carry more supplies.",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168"
+        }
+      }
+    },
+    {
+      "id": "ancient-armor-weight-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientArmorWeight 5",
+          "sourceSha256": "ea38025f8eadc1988f39aa25e6d611296904571021ad54275845c82d49f8bd14"
+        },
+        "description": {
+          "sourceText": "Refined .\nIt is equipped with ancient auxiliary mechanisms, allowing the wearer to carry more supplies.",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168"
+        }
+      }
+    },
+    {
+      "id": "ancient-helmet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Helm",
+          "sourceSha256": "d4df539bd9acd7ce0bb13ea00f50261a1659a6f42f080b460f51e587298b6738"
+        },
+        "description": {
+          "sourceText": "An ancient helmet forged from .\nIt is imbued with wisdom passed down through the ages, protecting its wearer with unwavering strength.\nIts defensive capabilities far surpass those of modern equipment.",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e"
+        }
+      }
+    },
+    {
+      "id": "ancient-helmet-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientHelmet 2",
+          "sourceSha256": "2f6415e1e753d0c433733d77c1f702d7ad567a9d793bc3cd2c8c8d6f476c9a6e"
+        },
+        "description": {
+          "sourceText": "An ancient helmet forged from .\nIt is imbued with wisdom passed down through the ages, protecting its wearer with unwavering strength.\nIts defensive capabilities far surpass those of modern equipment.",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e"
+        }
+      }
+    },
+    {
+      "id": "ancient-helmet-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientHelmet 3",
+          "sourceSha256": "99e3501666e5b063aac888a0afbc5d32ac3f0c799d85ce8281c8b9bae78fd530"
+        },
+        "description": {
+          "sourceText": "An ancient helmet forged from .\nIt is imbued with wisdom passed down through the ages, protecting its wearer with unwavering strength.\nIts defensive capabilities far surpass those of modern equipment.",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e"
+        }
+      }
+    },
+    {
+      "id": "ancient-helmet-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientHelmet 4",
+          "sourceSha256": "f6b4e29e8c168906c6f26285a4b3933ca67a7e4fdc4b681d96c5e97f3793c3c6"
+        },
+        "description": {
+          "sourceText": "An ancient helmet forged from .\nIt is imbued with wisdom passed down through the ages, protecting its wearer with unwavering strength.\nIts defensive capabilities far surpass those of modern equipment.",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e"
+        }
+      }
+    },
+    {
+      "id": "ancient-helmet-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "AncientHelmet 5",
+          "sourceSha256": "e4785b3caa4555a497faa56e3772ea4a72fae2a4f55a4272e324b32bc2a14b2d"
+        },
+        "description": {
+          "sourceText": "An ancient helmet forged from .\nIt is imbued with wisdom passed down through the ages, protecting its wearer with unwavering strength.\nIts defensive capabilities far surpass those of modern equipment.",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e"
+        }
+      }
+    },
+    {
+      "id": "ancient-parts2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Civilization Core",
+          "sourceSha256": "74984bfe57665674f83d866e826450442a050c390529ce6f63f58a65626163c1"
+        },
+        "description": {
+          "sourceText": "Core from technology that was lost long ago.\nNearly impossible to find on the Palpagos Islands, it contains a wealth of forgotten knowledge.",
+          "sourceSha256": "9b6fc9be379f6feab3d06768d83e89fdc28a0459b066971d90b7374c3089a27e"
+        }
+      }
+    },
+    {
+      "id": "ancient-parts3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Pal Manuscript",
+          "sourceSha256": "82805f09b514a3b3a01438abae5337e535df621ffaa71d3f81825fe32d37524d"
+        },
+        "description": {
+          "sourceText": "An ancient manuscript written on Pal hide. It may be found by Pals during expeditions.\nRequired for advancing research.",
+          "sourceSha256": "4e4d19742edc9ec6d5696f3fb576b9fe405dbfc62ec4e185d2195653ed176ae1"
+        }
+      }
+    },
+    {
+      "id": "ancient-technology-book-g1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Technical Manual",
+          "sourceSha256": "8d3b3322843fbe853c3588a942174291e04481e2af8d932c25f5f2a687d12d9c"
+        },
+        "description": {
+          "sourceText": "A book that contains long-lost secrets of technology from a forgotten era.\nUse it to obtain Ancient Technology Points.",
+          "sourceSha256": "dacabd76ce6c14d1c56b10f99fec76e966961e4587b3746c1b2e4f7874dd6f17"
+        }
+      }
+    },
+    {
+      "id": "arrow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Arrow",
+          "sourceSha256": "05800e70aa10c86f5ab898d18ad6884245a149f3b945bb0bd8cd05a8e469cd27"
+        },
+        "description": {
+          "sourceText": "s for use with bows.\nCan be crafted at .",
+          "sourceSha256": "93639ea1a3600ae03150558475634f1506d58a4c3220cb8b510bca54bb240519"
+        }
+      }
+    },
+    {
+      "id": "arrow-fire",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Arrow",
+          "sourceSha256": "6ef10e611aae7ccf4cfb00458246456680e0358776d00bd396dd6c80608b79b0"
+        },
+        "description": {
+          "sourceText": "s for use with bows.\nDeals damage on contact.\nCan be crafted at .",
+          "sourceSha256": "4e0454bf0c03c2bcc778500fe0fb3f608aaa8c780be9e5778ba19d88d2c74771"
+        }
+      }
+    },
+    {
+      "id": "arrow-poison",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Poison Arrow",
+          "sourceSha256": "91f9f70df0cdcd9e5be365be692ec2d552c521783600e4862169a99fd84e5f7f"
+        },
+        "description": {
+          "sourceText": "s for use with bows.\nAfflicts target with on contact.\nCan be crafted at .",
+          "sourceSha256": "7fc4b9ae60d914af812ed8096f09b608fe04b657b4b8031a6ca9cfca6f9bf0c3"
+        }
+      }
+    },
+    {
+      "id": "assault-rifle-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Assault Rifle Ammo",
+          "sourceSha256": "da8871770d5fede1b9f7b66a25e0893c6d0b6b07ea80d6cff7c60ae5fdff1567"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "assault-rifle-default1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Assault Rifle",
+          "sourceSha256": "941a63b2b42cf168b71173fbe8dfb0599a493b02014850446e43e27170ce15ea"
+        },
+        "description": {
+          "sourceText": "An that mows down enemies with overwhelming force.\nIt excels at rapid-fire and is well suited to taking down powerful foes.",
+          "sourceSha256": "33589d8a30a87fd8fc7ffb448b4d642b899171e724204f5bc571cbdd5e955eb8"
+        }
+      }
+    },
+    {
+      "id": "auto-meal-pouch-tier1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Small Feed Bag",
+          "sourceSha256": "b89dc823a95f8b3016f26cb90314974b2e952d1264343c3b23fb246f0646fb74"
+        },
+        "description": {
+          "sourceText": "A small pouch for holding food.\nUnlocks a food slot in your inventory.\nPlayers and Pals automatically consume food when hungry.\nCarrying one is enough.",
+          "sourceSha256": "da3c13135fe0135fdc5095c4d92497197f4fa270787f6093c891302050f73a8d"
+        }
+      }
+    },
+    {
+      "id": "auto-meal-pouch-tier2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Average Feed Bag",
+          "sourceSha256": "0cbdc83d5cefea23f88c0aaf9a91b3268d396a10e4975c1c0a2c314a8679db85"
+        },
+        "description": {
+          "sourceText": "A decently sized pouch for holding food.\nUnlocks 2 food slots in your inventory.\nPlayers and Pals automatically consume food when hungry.\nCarrying one is enough.",
+          "sourceSha256": "2a4f3eeb3a41749467d02f5bf140551c654e89caa303d22d6acfb38ced148b3e"
+        }
+      }
+    },
+    {
+      "id": "auto-meal-pouch-tier3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Large Feed Bag",
+          "sourceSha256": "38c82b6987390df9aea50f32a583f5634b910305301c1493d6e5e06e5ceaf25e"
+        },
+        "description": {
+          "sourceText": "A large pouch for holding food.\nUnlocks 3 food slots in your inventory.\nPlayers and Pals automatically consume food when hungry.\nCarrying one is enough.",
+          "sourceSha256": "060cb438feaa055902bf1f7c9ffb9beaee5d0e5b605d6fdf4290a4ba4774a698"
+        }
+      }
+    },
+    {
+      "id": "auto-meal-pouch-tier4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Huge Feed Bag",
+          "sourceSha256": "1446de4ba96561200c65f9267213c347ef6e451b9997d3fe86bd3fb218a04c2b"
+        },
+        "description": {
+          "sourceText": "A extra-large pouch for holding food.\nUnlocks 4 food slots in your inventory.\nPlayers and Pals automatically consume food when hungry.\nCarrying one is enough.",
+          "sourceSha256": "a86c02d84aa927035e104fb35e47f6157c0d6d771164a78cadd5e2292097c5eb"
+        }
+      }
+    },
+    {
+      "id": "auto-meal-pouch-tier5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Giant Feed Bag",
+          "sourceSha256": "009ca4e0fed9017825c9b828667e41b56567a5f4777cf471666c205e536018cb"
+        },
+        "description": {
+          "sourceText": "An enormous pouch for holding food.\nUnlocks 5 food slots in your inventory.\nPlayers and Pals automatically consume food when hungry.\nCarrying one is enough.",
+          "sourceSha256": "a872d258151397cc6d55cc06e53bcea84d0f73fc74e1d34fc580130cddfddae1"
+        }
+      }
+    },
+    {
+      "id": "axe-steal",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Metal Axe",
+          "sourceSha256": "ea85f6f0dbd2bec6a99fd51357190a02a56d0d99ffd6e3de422b2f1bdfb326e3"
+        },
+        "description": {
+          "sourceText": "An axe for chopping wood.\nIt has achieved extraordinary sharpness thanks to Pal Metal.\nIt can slice through high-grade trees from the harshest regions without trouble.",
+          "sourceSha256": "09bec91d1f40e874e112e5e2599989eef7e8e5487fd25e11def068f4dc9a3ee0"
+        }
+      }
+    },
+    {
+      "id": "axe-tier-00",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Stone Axe",
+          "sourceSha256": "6f71b32080395e757b3b209e5a9cef77c6bfcf9f1be1378d9ce5d6299fef116d"
+        },
+        "description": {
+          "sourceText": "An axe for cutting wood.\nMade from stone, it's not very sharp.",
+          "sourceSha256": "0ccdb99ef9b834e954e972ecc7bf89260cc2a068817b5b0a2c09e51f7cd5959f"
+        }
+      }
+    },
+    {
+      "id": "axe-tier-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Metal Axe",
+          "sourceSha256": "1274fb014230cf63aecee14eb33ff00ec7ea3bf42a508e084eba2125893b746b"
+        },
+        "description": {
+          "sourceText": "An axe for cutting wood.\nMade from metal, it chops through Hardwood with ease, making it useful for harvesting sturdy trees that grow deep within the continent.",
+          "sourceSha256": "134ff2f686c9ccd2c69a0db7ad465978873b66b1bd3f2e64404343acb0a7bc27"
+        }
+      }
+    },
+    {
+      "id": "axe-tier-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Axe",
+          "sourceSha256": "350ea0c99aa387182a06e8950f6d5e248f3e3352034efaa6dcd0f96e5cdede47"
+        },
+        "description": {
+          "sourceText": "An axe for cutting wood.\nMade from high quality metal, its sharpness and durability has improved even further.\nIt can harvest Hardwood from sturdy trees that grow in unforgiving lands.",
+          "sourceSha256": "a53638eb7268354abb70c10307329c01ed04bf7362a3e9bbed66e0d71ebb5eb1"
+        }
+      }
+    },
+    {
+      "id": "bacon-eggs",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rushoar Bacon 'n' Eggs",
+          "sourceSha256": "f85a6022a0f0ce236e15f4436d67639432424abce03d4364fa9c5fee5f6a1cfa"
+        },
+        "description": {
+          "sourceText": "The smoky essence of bacon intertwines flawlessly\nwith the gentle texture of eggs, creating a sublime harmony of flavors.\nEating it will increase by +10% for a period of time.",
+          "sourceSha256": "9d027f27348b6125dc11e0220f870909192b4db0382ec214875e5ad4551eb6a7"
+        }
+      }
+    },
+    {
+      "id": "baked-berries",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Baked Berries",
+          "sourceSha256": "9843d594cbe1bc0dc481568680dd5a7fbbce320676b39ee87e192e931b2ae81b"
+        },
+        "description": {
+          "sourceText": "Cooking enhances their nutritional value,\nand surprisingly, they are quite filling.",
+          "sourceSha256": "d5323066089727790a04cf4a6d03655d14ce8ca301c9a929b567bd5a79e58a4a"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-berry-goat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Herb Roasted Caprity",
+          "sourceSha256": "2a18d5bc2ce97787d37a79a64dae8ea7e0da6e6d3b679504b578b8602218df09"
+        },
+        "description": {
+          "sourceText": "Mild roast filled with the natural aromas of\nherbs and berries embedded in the meat.\nGives a pleasant sense of warmth when eaten outdoors.",
+          "sourceSha256": "a9645cf48e606896b5249430863d472d6b223543cccac3f5109d1eb3bbcedc53"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-boar",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Roast Rushoar",
+          "sourceSha256": "a56e415785e696ea3819425d2e080c13aec016848679e6ae37f628796276635e"
+        },
+        "description": {
+          "sourceText": "Boar grilled over a hearty flame.\nCrispy on the outside, juicy on the inside.\nPerfect as an extravagant main dish for a big party.",
+          "sourceSha256": "0823766bd89a2257d2057ab7fdfe090c05ede75aebaa4d1ed0de210626482844"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-chicken-pal",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grilled Chikipi",
+          "sourceSha256": "17265a74d557ad0c32737573715cf6e6af8fd32d511478e7175e6492b0df778e"
+        },
+        "description": {
+          "sourceText": "Chicken skewer slow-grilled over a charcoal fire.\nLight and refreshing on the tongue.",
+          "sourceSha256": "06b5a5d0238becc44a875a1c6b318e7df8f8a204fe730e43a249d2c7a3335262"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-cow-pal",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mozzarina Steak",
+          "sourceSha256": "3ba68adbcf4bce94e7c7d0c1079aaa2e911702bc0e41031ee092677eac0ecd6b"
+        },
+        "description": {
+          "sourceText": "Thick, well-done steak.\nStrong flavors give those who eat it an energy boost.",
+          "sourceSha256": "102b5e78d141c78f66c2471f824ff6f4365d7100c13280021ba07dd175caad48"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-deer",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Roast Eikthyrdeer",
+          "sourceSha256": "6574d033c4398a98f465852c30e9c8b3aba383bf44622f407a51a801a2c10b1d"
+        },
+        "description": {
+          "sourceText": "Carefully roasted venison with delicate flavor notes,\naccented by the aromas of the deep forest.\nElegant taste for an elegant lifestyle.",
+          "sourceSha256": "b4444a5284001161dd688616ca3cbccbaa43dfb78c0639aaa140fb38fd7cd245"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-eagle",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grilled Galeclaw",
+          "sourceSha256": "137e7a1f469d6becd75932ce48c0a020af2d198f8c44d870d1c386daddbde4a9"
+        },
+        "description": {
+          "sourceText": "Grilled meat full of vitality for flying high in the skies.",
+          "sourceSha256": "bf403a16739cee4c3e440ad4b133dcf96ef8d6f9169f73a44cf3691639603251"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-grass-mammoth",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mammorest Steak",
+          "sourceSha256": "4f7b9fa9db1d08abc03e4ef6004a9d69189dd3a7cb338ae00d5e1bdd91b094a1"
+        },
+        "description": {
+          "sourceText": "Boasts a rich and dignified flavor.\nMemories of glaciers and deep forests come rushing back with every bite.",
+          "sourceSha256": "28dccced6649584ee785bf6a5ef97f59631b64395a619ddb79c40c54eb0a0016"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-ice-crocodile",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Munchill Steak",
+          "sourceSha256": "55e832f7a953fe115ef5e512af8202e3ba28d76b368ddb3f62d8ce0b7c41768e"
+        },
+        "description": {
+          "sourceText": "Charcoal-grilled to perfection, this steak offers a crispy exterior and melt-in-your-mouth juiciness.\nUnique compounds seal in flavor and enhance shelf life.",
+          "sourceSha256": "25d94f080142c228327d38e5ebede444853cc6437b8aee7afd7cf9e8893aebd8"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-ice-deer",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Roast Reindrix",
+          "sourceSha256": "3525613410460289afccd9330a8aa87e7fb2736defe2fa0885bfe56c469f1c0c"
+        },
+        "description": {
+          "sourceText": "When taken from a flame, Reindrix meat rapidly drops in temperature.\nThis allows it to retain freshness for long periods of time,\nmaking it a perfect emergency ration.",
+          "sourceSha256": "4bb727271ce15046920d2ec8571c4d44939db33225f0483479b36eb341e62702"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-kelpie",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grilled Kelpsea",
+          "sourceSha256": "950be8d3ed6900c3e4693b854efeb81c34258e95da3f23578af7860587918b5f"
+        },
+        "description": {
+          "sourceText": "Fresh fish grilled over a charcoal fire.\nPlump and juicy.",
+          "sourceSha256": "8a6914b3d3d5cf0b1110f882d1033bfdd2ebd2ae60adeff9089058c7de75823a"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-lazy-catfish",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Broiled Dumud",
+          "sourceSha256": "71a4efd4ae39325b9682f0344780c3302e04b7b731031ea4314771a51978c29b"
+        },
+        "description": {
+          "sourceText": "Grilled fish slathered with a secret sauce.\nSoothes both mind and body.\nPerfect for tired Pal Tamers.",
+          "sourceSha256": "8c2af72860639c0b3c3124fada6b7a812a3ff6e0562e4f8321e6b4290022cd2d"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-sakura-saurus",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Broncherry Rib Roast",
+          "sourceSha256": "f26d538583d373afcca694180e4468ee894195f19f8fb5306619b1aa5cb343fa"
+        },
+        "description": {
+          "sourceText": "Grilled meat brimming with the flavor of the king of the wilds.\nJuices from the compressed meat flow from the bone,\nmaking it surprisingly tender despite the initial toughness.",
+          "sourceSha256": "ca3b4ac2f83a202b382530abcb9f722a4c1c48a17eba6adae522ea55d5037312"
+        }
+      }
+    },
+    {
+      "id": "baked-meat-sheep-ball",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lamball Kebab",
+          "sourceSha256": "f5a7bd524e5b1358a6669ec20700ab4853d1dca6b0e05927c7fbeca2f7bb5e74"
+        },
+        "description": {
+          "sourceText": "Spiced and roasted mutton.\nDeeply complex with unique flavors.",
+          "sourceSha256": "2c1070f5a8bbdc9d79e94764834e289129bd4054255920c5e374f1d5b3894db6"
+        }
+      }
+    },
+    {
+      "id": "baked-mushroom",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Baked Mushroom",
+          "sourceSha256": "0a3c7c603bacc5f820ead8fb0fecb817489cfd88f429e4078fa5465738b57051"
+        },
+        "description": {
+          "sourceText": "Cooking this mushroom enhances its nutritional value.\nCuriously, it's also quite filling.",
+          "sourceSha256": "d0aae10c531a38ab4e3805635c0f2ee412aee565bf5481b17638b5338684de9d"
+        }
+      }
+    },
+    {
+      "id": "bat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wooden Club",
+          "sourceSha256": "cf93336385cd34f41e7373e0a7ebc88cc3618e7392a2c3eca790f4c9edecfdc7"
+        },
+        "description": {
+          "sourceText": "A for close range combat.\nCan beat a small Pal to a pulp if need be.",
+          "sourceSha256": "76a179b32055c714d8f250e6c88f286a44f87797d989678f367ca54a61836778"
+        }
+      }
+    },
+    {
+      "id": "bat2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bat",
+          "sourceSha256": "f2813a523c21f6654fc4185c14aa02280dfd91e3271a4db43929fe61fa7222d1"
+        },
+        "description": {
+          "sourceText": "Baseball bat for close-range combat.\nMight be tough to get a home run with a Pal.",
+          "sourceSha256": "e33c44d80af25c03f9da86c0ddd3e80fb0385eaebdf5de5fb93452eaec2d1082"
+        }
+      }
+    },
+    {
+      "id": "bat3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Metal Bat",
+          "sourceSha256": "0e9e7c8e13ec34c73db8e73090c3b934304e120da1da834dfee206040d9874ce"
+        },
+        "description": {
+          "sourceText": "A that works well in close combat.\nUse it to beat down anyone you don't like.",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093"
+        }
+      }
+    },
+    {
+      "id": "bat3-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bat3 2",
+          "sourceSha256": "039ea5e507c28520d88fe60f10aaf665a047c1e8e5ee518b08e100c9609262c3"
+        },
+        "description": {
+          "sourceText": "A that works well in close combat.\nUse it to beat down anyone you don't like.",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093"
+        }
+      }
+    },
+    {
+      "id": "bat3-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bat3 3",
+          "sourceSha256": "058879cf97ac89b05e0183d8b20568556e429f02a326ab689ea59e2e4d836125"
+        },
+        "description": {
+          "sourceText": "A that works well in close combat.\nUse it to beat down anyone you don't like.",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093"
+        }
+      }
+    },
+    {
+      "id": "bat3-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bat3 4",
+          "sourceSha256": "4b53d1ed9842bb121a865b17b7a7cc35cf59cf044b2cad738fed3c852fc93c18"
+        },
+        "description": {
+          "sourceText": "A that works well in close combat.\nUse it to beat down anyone you don't like.",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093"
+        }
+      }
+    },
+    {
+      "id": "bat3-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bat3 5",
+          "sourceSha256": "d1e7867e40fe11727e83ca602d8f69b89611787a3420ac9e632a0bde7144950c"
+        },
+        "description": {
+          "sourceText": "A that works well in close combat.\nUse it to beat down anyone you don't like.",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093"
+        }
+      }
+    },
+    {
+      "id": "battle-ticket",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Battle Ticket",
+          "sourceSha256": "a6402ca4591357be1ca39541a0d529b7fef0dcfeb4dc9dfb5c92f9d95195982e"
+        },
+        "description": {
+          "sourceText": "Earned by winning solo matches in the arena.\nCollect enough and you can trade them for special rewards.",
+          "sourceSha256": "ba178e8310086c3bd23e7fe6cd4533ce31470093d938094cd19530bfee636850"
+        }
+      }
+    },
+    {
+      "id": "beam-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Launcher",
+          "sourceSha256": "3fb5858eeb6fd8a120117bb93f808a12511d7dd0bb444e19a9eae202856618cc"
+        },
+        "description": {
+          "sourceText": "Fires a high-density beam that causes explosions over a wide area.\nCaution is required to prevent overheating during rapid fire.",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b"
+        }
+      }
+    },
+    {
+      "id": "beam-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamLauncher 2",
+          "sourceSha256": "10f97a7dd22df2c63a1d99474342c1e864e39634fed05e790ed161845a452c41"
+        },
+        "description": {
+          "sourceText": "Fires a high-density beam that causes explosions over a wide area.\nCaution is required to prevent overheating during rapid fire.",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b"
+        }
+      }
+    },
+    {
+      "id": "beam-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamLauncher 3",
+          "sourceSha256": "4f464f4f38a15442e87ef7cd03cd92b908418954271ee3192ede382f87507a28"
+        },
+        "description": {
+          "sourceText": "Fires a high-density beam that causes explosions over a wide area.\nCaution is required to prevent overheating during rapid fire.",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b"
+        }
+      }
+    },
+    {
+      "id": "beam-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamLauncher 4",
+          "sourceSha256": "69e71ec35735d3d1989574f442d37f6594cead673ca82984ce4073416a14c8be"
+        },
+        "description": {
+          "sourceText": "Fires a high-density beam that causes explosions over a wide area.\nCaution is required to prevent overheating during rapid fire.",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b"
+        }
+      }
+    },
+    {
+      "id": "beam-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamLauncher 5",
+          "sourceSha256": "eb8b83b9f097916a5a325c7725e5471e2df0789e68beb578e203fd5dfbc6ee42"
+        },
+        "description": {
+          "sourceText": "Fires a high-density beam that causes explosions over a wide area.\nCaution is required to prevent overheating during rapid fire.",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b"
+        }
+      }
+    },
+    {
+      "id": "beam-launcher-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Launcher Ammo",
+          "sourceSha256": "84cb4d7dedd7147a95de91aa993479751708ec3197b7ed0116aad94f93faa9f5"
+        },
+        "description": {
+          "sourceText": "Ammo for the .\nCan be crafted at .",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec"
+        }
+      }
+    },
+    {
+      "id": "beam-sword",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Beam Sword",
+          "sourceSha256": "dfeac4099c5ad84fa66c306c362bcc7aa6b22a6ed2324253da21d662fc7fcae6"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through opponents, burning them with a high-output laser.",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638"
+        }
+      }
+    },
+    {
+      "id": "beam-sword-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamSword 2",
+          "sourceSha256": "ced282271d62d950f9b4e3a105ea29858662f529d366b7828e59798bb9d87638"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through opponents, burning them with a high-output laser.",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638"
+        }
+      }
+    },
+    {
+      "id": "beam-sword-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamSword 3",
+          "sourceSha256": "3fc6dc24ccf09de5b695cbf46b56c6eba16da5f0e2db2f5628bafec9f900aa43"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through opponents, burning them with a high-output laser.",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638"
+        }
+      }
+    },
+    {
+      "id": "beam-sword-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamSword 4",
+          "sourceSha256": "fc33c0e214faa3b7a9942905faf002a31b70fdc95b5617b24f914dc0357e52bf"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through opponents, burning them with a high-output laser.",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638"
+        }
+      }
+    },
+    {
+      "id": "beam-sword-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "BeamSword 5",
+          "sourceSha256": "7dd7ccb96e4b8cfeb40fdb5a66c08d9fcd24c510588f559495777dbbb61b4619"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through opponents, burning them with a high-output laser.",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638"
+        }
+      }
+    },
+    {
+      "id": "beast-bone-ancient",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Bone",
+          "sourceSha256": "1dafe177757ef9b73bb554fe2a785f3545710ab57ef5e54cf13b4b5c73284233"
+        },
+        "description": {
+          "sourceText": "A beast bone weathered over many years in extreme environments.\nEven after losing its flesh, it still gives off a strong presence.",
+          "sourceSha256": "fb2329449ef0453a736669d8a6e04237a8c96b3806109061e382d2a6580c659f"
+        }
+      }
+    },
+    {
+      "id": "berries",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Red Berries",
+          "sourceSha256": "3d82b35f2e320058193217d7d8b3c3487b9ab6e8c0469fb237ea0e94294f9b09"
+        },
+        "description": {
+          "sourceText": "A versatile ingredient that is delicious raw or cooked.\nThey can be found anywhere on the island.",
+          "sourceSha256": "94f5e17bcd1e184422d8e9da85d4b9328b299ce5894f68f150de7af9a263ce10"
+        }
+      }
+    },
+    {
+      "id": "berry-seeds",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Berry Seeds",
+          "sourceSha256": "3f1be0ec0d512a3a22444fe2e108bb78a4494aecc0bf8ed2e07a4c25a1ead093"
+        },
+        "description": {
+          "sourceText": "Seeds that produce .\nNecessary for starting a farm.\nCan be obtained when picking .",
+          "sourceSha256": "1b58be39a45df1be54351c6e7c952865feb8a26587eda7debf3dfc406c1f74ca"
+        }
+      }
+    },
+    {
+      "id": "bio-battery",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Bio Battery",
+          "sourceSha256": "38ca971fed29fc064937d6de2b72f28addf902bf76f8d3e3e4f36b9b76e40afb"
+        },
+        "description": {
+          "sourceText": "A device that stores bio-energy as electrical power.\nUsed for equipment requiring high energy density.\nCan be crafted at .",
+          "sourceSha256": "23c481beecbe69f8a38f79636672c3f2e8cbae948d973e3992ab307dbde55bc6"
+        }
+      }
+    },
+    {
+      "id": "bio-coolant",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cryogenic Coolant",
+          "sourceSha256": "54dc5cb841a2edf066d60fad89462ade7938f64b531ff4764e2942e1a170af8b"
+        },
+        "description": {
+          "sourceText": "A high-efficiency cooling medium made from special components derived from Pals.\nUsed to regulate temperature in high-output devices.\nCan be crafted at .",
+          "sourceSha256": "6950e858e0986d0cd1484e384dd1111079f04a2e7b12e8a2a1b0d78984a2c64c"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-aqua-resist-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Water Resistance Schematic",
+          "sourceSha256": "7854c98205be43596cae0bea107b37bf7c4088357bd8419b26d351983aaa1744"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-at-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Attack Pendant Schematic",
+          "sourceSha256": "322044b57f4f7ba57bcc98e8384faba4a9ab65b7b6d94e43805467537f4db4fa"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-avoid-1-fix",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Blueprint Accessory Avoid 1 fix",
+          "sourceSha256": "b9fcf940ac1b49079fcbd440e44108efec912810772af2943a41130de33d969f"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-cold-ice-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Wumpo Charm Schematic",
+          "sourceSha256": "423d6b1f494d10e7976b4bc5e6a42697609c44e41bb5c5ea7f94447bcdb961c5"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-cool-resist-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Thermal Undershirt Schematic",
+          "sourceSha256": "9ea423e108d0052d291616eacc4dba12485a455930dab7486ff95bd7d6a71607"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-dark-resist-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Dark Resistance Schematic",
+          "sourceSha256": "23f3ba3a6daa758f753a15aff381111e38e7fa879dbaac62f35f533f4ae68d32"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-defense-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Defense Pendant Schematic",
+          "sourceSha256": "65cbe713bc923812aa901e36d810ad779ea7cdf77c2fbb2ae62d630a021fd61d"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-dfhp-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Warsect Terra's Belt Schematic",
+          "sourceSha256": "cf66a168b6f1d9dda65902773d28767197d2f4cdc242ad8a29987e1f909befbc"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-dragon-resist-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Dragon Resistance Schematic",
+          "sourceSha256": "387ed358b24cde699910e8cc48240ae67b48650903db05e09253375878351d62"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-earth-resist-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Ground Resistance Schematic",
+          "sourceSha256": "f48daba3754c5d4fde4b17ee9e5d47964e51b467e9ad4c35e684e64c19ff4e97"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-fire-resist-1-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ring of Fire Resistance Schematic",
+          "sourceSha256": "d7a289fde151cfe12dc3995d58543fc4b61cd797d9d233c47d94aab4b5a4b0b7"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    },
+    {
+      "id": "blueprint-accessory-hchp-1",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Vanguard Charm Schematic",
+          "sourceSha256": "463d7045a43af11a62440906411251300cec5429c667717e02939dfc92d03138"
+        },
+        "description": {
+          "sourceText": "When in inventory, unlocks recipe for\n().\nCan be crafted at .",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834"
+        }
+      }
+    }
+  ]
+}

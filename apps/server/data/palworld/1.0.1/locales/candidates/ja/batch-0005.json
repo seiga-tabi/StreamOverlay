@@ -1,0 +1,2706 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b4eeda4bd2eaea82203e5eca82aeedde6bae00e7159f959599958cfcd9012b03",
+          "status": "machine_assisted",
+          "text": "聖なるヘッドギア・スキーマ1"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip002-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8af143d6690ff88e8cd64424f04f290e74c8ee25797c5d65e15864cd779ff6c2",
+          "status": "machine_assisted",
+          "text": "ヘッドギアの聖地図2"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip002-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6772878839b93c1c9a9f0478c8ef6ada4dab6ffcf7f9b518a3a5f137cf3f2a3f",
+          "status": "machine_assisted",
+          "text": "ヘッドギアの聖地図3"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip002-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7b5f20bb2b3c76fe06d6284d87f68588a4276a19dbe93681be3f3b1414db5019",
+          "status": "machine_assisted",
+          "text": "ヘッドギアの聖なる図4"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip002-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "87379cbf064814cb5e08187296eecff35163f43c7bd14452ed70dace9918672f",
+          "status": "machine_assisted",
+          "text": "聖なるヘルメットのシュマティック"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4100efaba3b439565951e3c7a823301ef6fc06e58773e0a5c4190718f4a4b578",
+          "status": "machine_assisted",
+          "text": "聖なるヘルメットの図1"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip003-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c669bd7598e1378872494055faf8ddd8824c958d0ca1794f4631aa2069bab791",
+          "status": "machine_assisted",
+          "text": "聖なるヘルメットの図2"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip003-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fe51515038728bef4b4318a61ca275c1cf4521f6db55c755ca13bd2b88adc390",
+          "status": "machine_assisted",
+          "text": "聖なるヘルメットの図3"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip003-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "191bc8b54fc832ee14274acf8fb170bf2bf59577297e92f936118cd1cdaff0cb",
+          "status": "machine_assisted",
+          "text": "ヘロインヘルメット4"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip003-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9e6bbc4daf30e5e58aee7e67a390e2868ff9ae7b318812f4ad5bbe202572b04c",
+          "status": "machine_assisted",
+          "text": "聖なるフッド・シュメマティック"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be13c99047de6fa712919fec185616ec3dc74c11fc0c2dec7cfb09555a08f7c6",
+          "status": "machine_assisted",
+          "text": "聖なるフッド・シュメマティック1"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip004-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "91319c45eb99b6e2b4d2980aaa678a9cc95874f36b8ade30e2fd4855d70bd98c",
+          "status": "machine_assisted",
+          "text": "聖なるフッド・シュメマティック2"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip004-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8cff2148c49f6e718f9b324a664b4211e2567f8584a3f7838d9800884eb13f7b",
+          "status": "machine_assisted",
+          "text": "聖なるフッド・シュメマティック3"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip004-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "80eefd5c46a93a4b20c221e9835b7595a86d12e9c35c2d072fc0ce8756fcc84f",
+          "status": "machine_assisted",
+          "text": "聖なるフッド・シュメマティック4"
+        }
+      },
+      "id": "blueprint-yakushima-head-equip004-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b23b1fb3c27549dcaa62cb0cef2b51a52294d76f789b3dfee6915374c8693b15",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "80ada02f88406516e93e5525a9f3336e0c1b9932b4dfb21bd3a1c93e8b1b1007",
+          "status": "machine_assisted",
+          "text": "ナイトグロー・シェマティック"
+        }
+      },
+      "id": "blueprint-yakushima-lantern001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "63d646e0595b346394985fb38817b5bd47b1c71d5e83db87173c82e8eb6725aa",
+          "status": "machine_assisted",
+          "text": "ナイトグロー・シェマティック1"
+        }
+      },
+      "id": "blueprint-yakushima-lantern001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e086c178a6c70438bf24da2b436829bb91ea2bdc898a71e93a77427f74b5a47e",
+          "status": "machine_assisted",
+          "text": "ナイトグロー・シェマティック2"
+        }
+      },
+      "id": "blueprint-yakushima-lantern001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a0d3081a6b755ce2a1ded5e29c7332ca453d371e8559b78aba1053bb7de81d7b",
+          "status": "machine_assisted",
+          "text": "ナイトグロー・シェマティック3"
+        }
+      },
+      "id": "blueprint-yakushima-lantern001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff051e61a56ef20ef28023934427d29f2455812d5c4e36e96a5bde5f625e882e",
+          "status": "machine_assisted",
+          "text": "[テラリアの潮流] 在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "841a3b0b2e35c68beaabc3dd4117a8427d2c044a4087bbc67c251e2dcaa479ff",
+          "status": "machine_assisted",
+          "text": "ナイトグロー・シマティック4"
+        }
+      },
+      "id": "blueprint-yakushima-lantern001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7eb7ac32d373c7f746eb19fce7d9c258109614198d9f399633471db76e99c97c",
+          "status": "machine_assisted",
+          "text": "パルから収集。 貴重なプレミアムカルシウムの源。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f950109fcbe642a759a2cfc2c90be2b347f5bcd9c05e228218ec0d33f1ea9837",
+          "status": "machine_assisted",
+          "text": "骨"
+        }
+      },
+      "id": "bone",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "01068c331ca01f138ce61b2882d14fe4b4f64e560c3fbb517c97582d7b2a09a4",
+          "status": "machine_assisted",
+          "text": "敗北の証明[ニャニミテ,ナイトシェードハンター]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0c98a1ae93fa22969b11704a67da3bed5c09b4ec22c644550353d8e13b5bf9eb",
+          "status": "machine_assisted",
+          "text": "ニャニミテバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-bad-catgirl",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "612edb7ecd86b7653b6f2460b552c87c02f100a7d146d5f010f2bd47187b1196",
+          "status": "machine_assisted",
+          "text": "破る証拠[ベノゴート の訓練農場]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "563e4074ae1aa185fbaf9cc4b156bcbd4cbb427307b0bc9f8184551e155ac262",
+          "status": "machine_assisted",
+          "text": "ベノゴートバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-berry-goat-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "732969b3c36636f7dc47edddaec3fc8ab0539611e55502e21e7ccbfbacad590f",
+          "status": "machine_assisted",
+          "text": "破る証拠[クロマル,ジェットブラックリトルヒーロー]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0809be9ea944cd8e8b6dcd6bbf5d75da59729e3936278259b12c92e836d04b18",
+          "status": "machine_assisted",
+          "text": "クロマルバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-black-puppy",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ada818c143dfe97b27ad5cc79f4dfe1e242fd1d11a698075f9c267dcbe859a5f",
+          "status": "machine_assisted",
+          "text": "敗北の証明[プラムルリム、 Indigo Handmaiden]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3f652ff1d73b88530606d25b236c1ab6ce8b425837c03881f389c28bead1780c",
+          "status": "machine_assisted",
+          "text": "プラムルリムバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-blueberry-fairy",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "59bc484fa0a1f2e8e8340c6244b0829bed9d2294a640437ad1ec2062c5b53926",
+          "status": "machine_assisted",
+          "text": "敗北の証明[ナイトメアリ、 Soul of the Dark Rabbit]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d49aeed92abbaec633a6dbfca6d37bbe67eb55a06bf69c84800bce22ce27ba46",
+          "status": "machine_assisted",
+          "text": "ナイトメアリバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-ghost-rabbit",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d698dbe99cbda86af8089a63f5bde24a8830294bfd52d32a82ef8543a45733b4",
+          "status": "machine_assisted",
+          "text": "勝利の証[キンガゼル、 Twilightの保護獣]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dd785da1bafd00584b96d66949cfeced563ebfe4db142b74d7983a361ef0be10",
+          "status": "machine_assisted",
+          "text": "キンガゼルバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-golden-horse",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1e483095020fb9c0edbbcbf3dd933616c4f1edf5fc73bed75e68b89ccfe57669",
+          "status": "machine_assisted",
+          "text": "勝利の証[ゴルクレス、 Gold-Armored Warrior]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fe4e3d887f44784610efe8f76c1eda8bcc65daa83d627ad1710f3f4aff1e5eb3",
+          "status": "machine_assisted",
+          "text": "ゴルクレスバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-hercules-beetle-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a4c8e58181c83f5f07794a7fed44fd317a49deb8b93ab7e049432e9625efcda8",
+          "status": "machine_assisted",
+          "text": "破る証拠[グレイシャドウ、 The Legendary Steed ofダークネス]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f828ccc52fdbab55c5998fda0761228eac3bf01a9bc3c4412d32044faf1723a9",
+          "status": "machine_assisted",
+          "text": "グレイシャドウバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-ice-horse-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "22a7aa3c71423544bdc58a2fe23e381fd3673ec9e6a0f8182c9550e44c0e6ece",
+          "status": "machine_assisted",
+          "text": "敗北の証明[ユキツネ、 Icy Blossom Voyager]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af1a4b75704d0aad969ad1a053561c17e20276821f5e982f35b000d7c4ead689",
+          "status": "machine_assisted",
+          "text": "ユキツネバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-kitsunebi-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "863963dd7af2aea20fc4795535a03e6fe6264e25e2cadeb265193e4504f5d188",
+          "status": "machine_assisted",
+          "text": "敗北の証明[オーメン、 百面使徒]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "35c9a2ba3b20969e5bb3937d76efb5f8a5e8e79dc55bb911514a220188ab59c7",
+          "status": "machine_assisted",
+          "text": "オーメンバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-mystery-mask",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ce8f770409f14e83adf1961e2397e72df0f8b8f15861a3e45903fbb1d7cb6d42",
+          "status": "machine_assisted",
+          "text": "勝利の証明[ナイトロット,ミッドナイトブルーマネ]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a14f060a4537489264247c281411d97044a66fb6d138d3bc4b25e4e1df234080",
+          "status": "machine_assisted",
+          "text": "ナイトロットバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-night-blue-horse",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ff52c6990a4cfd9ce6d6a0a49faf088560c3e5e533b73a0190c11271a0a48ad3",
+          "status": "machine_assisted",
+          "text": "敗北の証明[ヨモギウサ,スパークリング笑顔]。 単にそれを永久に所有すると、チーム内のパルの統計が増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "65b584fd932dead1665c6078e0272e4d80f9dab6fd51c523f1489f15a6ef0bec",
+          "status": "machine_assisted",
+          "text": "ヨモギウサバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-pink-rabbit-grass",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0ccbc0046dff7ff2a6c82a5b10d19128f080259421480f0c1c8fcd0b88ef15a9",
+          "status": "machine_assisted",
+          "text": "敗北の証明[モモンチュラ、 Tactician of the Thread Realm]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "876de6f564ceed7c8c27f3bcc3429e01253e31f4432132cdd9585e1df3b9c03a",
+          "status": "machine_assisted",
+          "text": "Tarantris 懸賞トークン"
+        }
+      },
+      "id": "boss-defeat-reward-purple-spider",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6051b8cd01503e5f402502125fc7005a3a1bb2cdfe021beb251a9aa387dbc479",
+          "status": "machine_assisted",
+          "text": "勝利の証[ヤミナラシ、 Thunderclouds生まれ]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "688f46400329b553dd36974b029f47307e8cad3642bc64a6890bcb7e7d424f78",
+          "status": "machine_assisted",
+          "text": "ヤミナラシバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-raijin-daughter-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f78d5c1f580ff6ebc7c2fa7082cb81cac25a94e893e5b1036603a95f17db80df",
+          "status": "machine_assisted",
+          "text": "破る証拠[ユキカゲ、 Enraptured by the Frozen Moonlight]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2c6ee35922b09869721198a2c54f37e6c7fcd34c23718ecadf10adb844b56726",
+          "status": "machine_assisted",
+          "text": "ユキカゲバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-werewolf-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a310951f48798e51be828e0953ea869964c76dddab4312f3d660785f173de455",
+          "status": "machine_assisted",
+          "text": "破る証拠[グランドラー、 Predator of the Earth]。 単にそれを永久に所有すると、あなたのチームにおけるパルの統計量が増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bf6007191a0628e43441279bdadcd3de33772ef75e6368e00c21066d3dfdecdf",
+          "status": "machine_assisted",
+          "text": "グランドラーバウンティトークン"
+        }
+      },
+      "id": "boss-defeat-reward-white-tiger-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "142095e310a041602a5751edfcb80fa5f9f8bc015e6bf6c961d1c3778bf71cee",
+          "status": "machine_assisted",
+          "text": "賞金目標を破ったという証。 村や町の自警団の報奨金係に渡すことで、報酬と交換することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1223107f9d148c7f21a647ba0d0c9d16f3326fec14a70dcdda4c2b5fe2c8f27",
+          "status": "machine_assisted",
+          "text": "成功した賞金トークン"
+        }
+      },
+      "id": "bounty-proof-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "063a2c1e08a4b4a341b0993e5ad5d3c45d726b40c4fcb9ebf7a267f3ffa321eb",
+          "status": "machine_assisted",
+          "text": "たゆまぬ発砲。 ロードには時間がかかりますが、強力なショットを提供します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "44f05d34905904b1f30acedd9cecd321b5b0e88f95dff561c54524716f50ed3c",
+          "status": "machine_assisted",
+          "text": "クロスボウ"
+        }
+      },
+      "id": "bow-gun",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "107481157688a7dc38297ab19e1ee8fd5aa53ee62567f5b9994769aa914f2d73",
+          "status": "machine_assisted",
+          "text": "三本の矢を同時に発射できる強化弓。 奇妙なメカニズムによって、それは発射されたときだけ一つを消費する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dea747dc955c7d67ba6a8c4dc2f61eedc2968810b17e657f9c7079f66843a94b",
+          "status": "machine_assisted",
+          "text": "三発弓"
+        }
+      },
+      "id": "bow-triple",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "14ce637202e8c05c389d9d941fe361f20732ec8b0209f95f6cedee4eede4e5c3",
+          "status": "machine_assisted",
+          "text": "近距離戦闘用の剣。 打たれた剣には悪くない。 身近で個人的な立ち上がりに最適です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f9e54f8de912b9cc905636c725f0a6b7e2aed3ed9dad8bfb70fa7efaf2651ae",
+          "status": "machine_assisted",
+          "text": "原始刀"
+        }
+      },
+      "id": "bronze-sword",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e2ea25c3d99371fd55a16c88cfeefa35a3a1a467e94951213076338837f2d6c4",
+          "status": "machine_assisted",
+          "text": "お祝いに食べる料理。 パルは、特に健康な卵を産むために胸にそれを入れます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2012071b609629ca60310a157e6c956395fade2c87de67b2af08dbc6f995712c",
+          "status": "machine_assisted",
+          "text": "ケーキ"
+        }
+      },
+      "id": "cake",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4ffe676edf0bcdf38181a4ffb64ddf3d1726a48771dcf02a5b58688ebc44869",
+          "status": "machine_assisted",
+          "text": "パルを特に健康的な卵にするために胸の所に置いてください。 結果として得られるパルの才能は少し簡単に成長します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4455732fe6d00483b1346a11ba1dca59c8a6cb7c911298fcbc50e5e6e3eb4793",
+          "status": "machine_assisted",
+          "text": "きのこケーキ"
+        }
+      },
+      "id": "cake02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d691087eba8c3ef31cb94f022c6edc03981fdfcf68290496c6e16f56743edef5",
+          "status": "machine_assisted",
+          "text": "パルを特に健康的な卵にするために胸の所に置いてください。 卵を一度に二回産む。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5f6f308c4b446b2a5ecb54f1a323ad6bcf0bd058df379e310f8333de40520d46",
+          "status": "machine_assisted",
+          "text": "野菜ケーキ"
+        }
+      },
+      "id": "cake03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "45751cfcc11e75a21f4b33efbae5e3cd206982ea9dfac1b3008dd5886c8af3e3",
+          "status": "machine_assisted",
+          "text": "パルを特に健康的な卵にするために胸の所に置いてください。 突然変異が起こりやすくなり、才能がより簡単に成長するでしょう。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee090fa639dd91d2a4898e3adf468fba978cfb39ba53f466d9445033ceb5b80e",
+          "status": "machine_assisted",
+          "text": "贅沢な野菜ケーキ"
+        }
+      },
+      "id": "cake04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d173c33db80f9d6472b0c6d01f1672e9eb3e1762c3a6b6b681f18e1710f2d9f4",
+          "status": "machine_assisted",
+          "text": "パルを特に健康的な卵にするために胸の所に置いてください。 親から複数の受動的なスキルを継承する可能性が高い。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "735b146b80bec379696d66f30d408ad3c07c352be220869422975cd8879f66a2",
+          "status": "machine_assisted",
+          "text": "特別ケーキ"
+        }
+      },
+      "id": "cake05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "2738a20edd18802a6ef52b67fa8f7aa8ffed189bab8010800f89202a1ae6cf99",
+          "status": "machine_assisted",
+          "text": "軽量でありながら丈夫な素材。 装甲などの装備に使用されます。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "45dc1993cb60cec2e09d4bd6cbaa9f15264786b8364eb1e8613a3b9be975caeb",
+          "status": "machine_assisted",
+          "text": "炭素の繊維"
+        }
+      },
+      "id": "carbon-fiber",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fddc7114d5c736d60ad8de8fa66dcedc7abc6df461641d64e55d33fe65fcf29c",
+          "status": "machine_assisted",
+          "text": "パスタとを混ぜた料理。 [原文欠落]。 食べると、一定期間+20%改善します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0099cff4d73d4bac7db0e25ad806aa33a9ae2907b032c41b1dfd14f94e75d2b6",
+          "status": "machine_assisted",
+          "text": "カルボナーラ"
+        }
+      },
+      "id": "carbonara",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f073224da61ed7c78e8d7bf1c86bec06f37ab1bd21bfc9f9160366112c7cf95",
+          "status": "machine_assisted",
+          "text": "栄養豊富な根菜を鮮やかに。 生の消費には適していません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9e87ba4dd07da92b8ecae2ed4d36e503c875d3e19548db7957402f570cefb39e",
+          "status": "machine_assisted",
+          "text": "にんじん"
+        }
+      },
+      "id": "carrot",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "5822cfdf2677229f7cf9c604ee734935e8e14569e91c6e9f7dd8ec940627c2da",
+          "status": "machine_assisted",
+          "text": "種子 [原文欠落]。 農場を始めるのに必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "65b5580cf3b8746238961af7f172f4222ba7ea958d9ceafbbbba2a101ff46169",
+          "status": "machine_assisted",
+          "text": "ニンジン種子"
+        }
+      },
+      "id": "carrot-seeds",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1f0d1e1fbfecd5f4fb811c966110836836ddb7d4159e5d4fc778fa6004be9466",
+          "status": "machine_assisted",
+          "text": "洞窟で多作に成長するキノコ。 癒しの薬にすることができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "909fe386981d4472ba4f269469b794bceaa35d9090dd7ab1c00ab9afa2529d48",
+          "status": "machine_assisted",
+          "text": "キャバーン・マッシュルーム"
+        }
+      },
+      "id": "cave-mushroom",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "534ad8768aa2a273cec2d7ef6857492d44bc71d906b921b95db78c894955cd0c",
+          "status": "machine_assisted",
+          "text": "構造などを作るのに使われます で生産できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "26600a93ebdd733d25018a2ba9f85e55fc7e0f08e14de5d8bd90623fda5d380b",
+          "status": "machine_assisted",
+          "text": "セメント"
+        }
+      },
+      "id": "cement",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "5acb0eb12e00ff515493d1535ac5969e2eefbaa343d7c438b7c94c35de348b2a",
+          "status": "machine_assisted",
+          "text": "燃えているから [原文欠落]。 組み合わせて作成できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2632c885aa43c30faea8600f8c8723da781f4abd512a61d0c65e357caa524200",
+          "status": "machine_assisted",
+          "text": "炭"
+        }
+      },
+      "id": "charcoal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f81d9e60227e0e2ef00e2bf474dcd916135d9ed698fcc3757b5eceec616fdc17",
+          "status": "machine_assisted",
+          "text": "高度な技術で製作されたビームライフル。 エネルギーを帯びて強力なショットが一つ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c74fcbdb4f52118746ed5f069d24f58ebeb793697fecbafd92f71758459e607",
+          "status": "machine_assisted",
+          "text": "チャージライフル"
+        }
+      },
+      "id": "charge-laser-rifle",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f81d9e60227e0e2ef00e2bf474dcd916135d9ed698fcc3757b5eceec616fdc17",
+          "status": "machine_assisted",
+          "text": "高度な技術で製作されたビームライフル。 エネルギーを帯びて強力なショットが一つ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "475abdc4dab2b47aaeac96b4f4d86c12b08aca2b1ad4b51d8341c316f95d1603",
+          "status": "machine_assisted",
+          "text": "チャージレーザーライフル2"
+        }
+      },
+      "id": "charge-laser-rifle-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f81d9e60227e0e2ef00e2bf474dcd916135d9ed698fcc3757b5eceec616fdc17",
+          "status": "machine_assisted",
+          "text": "高度な技術で製作されたビームライフル。 エネルギーを帯びて強力なショットが一つ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10b09dad82ea619f482ea079ae7e89cc7838e2bb8eef3b997a074c030b0c8d07",
+          "status": "machine_assisted",
+          "text": "チャージレーザーライフル3"
+        }
+      },
+      "id": "charge-laser-rifle-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f81d9e60227e0e2ef00e2bf474dcd916135d9ed698fcc3757b5eceec616fdc17",
+          "status": "machine_assisted",
+          "text": "高度な技術で製作されたビームライフル。 エネルギーを帯びて強力なショットが一つ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "da46e817d087b0b5d6d7069ecbcaf457a9daf766481d61b0b51a9df1fbae12a4",
+          "status": "machine_assisted",
+          "text": "チャージレーザー4号機"
+        }
+      },
+      "id": "charge-laser-rifle-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f81d9e60227e0e2ef00e2bf474dcd916135d9ed698fcc3757b5eceec616fdc17",
+          "status": "machine_assisted",
+          "text": "高度な技術で製作されたビームライフル。 エネルギーを帯びて強力なショットが一つ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dbe8c28d54c12e274db2c9851cde2de888ed143bd016f9fce62b210d3ba426e7",
+          "status": "machine_assisted",
+          "text": "チャージレーザー5"
+        }
+      },
+      "id": "charge-laser-rifle-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cf672de8826717f4a3c06a94b5f5efd4fa548caa4507dd6ac36383bf8d652526",
+          "status": "machine_assisted",
+          "text": "チャージライフル弾薬"
+        }
+      },
+      "id": "charge-laser-rifle-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cd2f7a56744ff3fc6a1c13e0f9d09b0785f32b335f179134421359d9d942052c",
+          "status": "machine_assisted",
+          "text": "チーズで、この料理は最高級の高級料理をしました。 食べると20%増えます。 長期間 満腹のままでいられるのです"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "34d435e2fdeda2252da6d63c07abd5c6da556107226fe0ce8b08bb6515c3b07e",
+          "status": "machine_assisted",
+          "text": "カスターマックスチーズバーガー"
+        }
+      },
+      "id": "cheeseburger-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d6b8894bb61473246e78c0064d93b36324205569f2c0053e69d187229c310316",
+          "status": "machine_assisted",
+          "text": "バターでソーテしたふっくらとした家。 新鮮なレモンでアクセント。 食べると、一定期間作業速度がわずかに向上します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d50cc5830861612eeedf31bfebc5840088dc61c032b50264a188393b1a98d6bb",
+          "status": "machine_assisted",
+          "text": "夏期マックスソーテ"
+        }
+      },
+      "id": "chicken-saute",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9edbb3fe4a5734f6c1d3fa029d4c45fb300b29b041374edd24d942e8bf9ce611",
+          "status": "machine_assisted",
+          "text": "クサスターマックスは、濃厚でクリーミーなスープで覆われています。 食べると作業スピードが上がります。 しばらくの間 少し長く 体にとどまります"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0181cd9c38d8eac1290ff62a55f8d2f787051ed719661568766d29e8acbead8e",
+          "status": "machine_assisted",
+          "text": "夏期マックスチャウダー"
+        }
+      },
+      "id": "chowder",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8d71283f10175447b87a07658ffe47506f0e61c14fe9667637fe91b653bf7df8",
+          "status": "machine_assisted",
+          "text": "地下に埋設された金属の一種。 特定の島で検出することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "18bc8897ac89e825862973f3ffc62f3907facb1e71c77d2222f135040e46ae7a",
+          "status": "machine_assisted",
+          "text": "クロマイト"
+        }
+      },
+      "id": "chromium",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7f516f9165a54505ecdf35a58c8ab204d8d500ebc60b045be1e999c9011ea37e",
+          "status": "machine_assisted",
+          "text": "織り上げた [原文欠落]。 を作成するために必要です。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0f086c1c0893f750bca1e4ecd84f1ee127ce239605d6d327425d0e478f4997fb",
+          "status": "machine_assisted",
+          "text": "布"
+        }
+      },
+      "id": "cloth",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c6b38f142aaac6b5b2da878524032b258579bc9d867af4a897668cb55b58448f",
+          "status": "machine_assisted",
+          "text": "衣服 [原文欠落]。 寒い夜から保護します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4443617ec7f1745a81bef6bb1b02a39cd5154a82647b6b4dbe07abcfc9667c1d",
+          "status": "machine_assisted",
+          "text": "布の衣装"
+        }
+      },
+      "id": "cloth-armor",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "279411d7548172e0e8824497096465ecb12abf7eaaa80c49ee69151b68c5bdf5",
+          "status": "machine_assisted",
+          "text": "ツンドラの衣装"
+        }
+      },
+      "id": "cloth-armor-cold",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "346fa3dbccd46fe3059459def297a4b22dd6c6e94295628c805dbae3304528bc",
+          "status": "machine_assisted",
+          "text": "衣服寒2号"
+        }
+      },
+      "id": "cloth-armor-cold-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6717e3a63e8326f0b1d267613db275ce9210080d18c2051782f1dbad585ded85",
+          "status": "machine_assisted",
+          "text": "衣服3号"
+        }
+      },
+      "id": "cloth-armor-cold-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b05a23316a08369568fc937f50ad14ab4e706bc92786e599e2f6421b63210ab3",
+          "status": "machine_assisted",
+          "text": "衣服4号"
+        }
+      },
+      "id": "cloth-armor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "寒冷地で生産。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "53abaaa6c513cc0a64e1e738a038dae1998a42201adfea2c5fd2ef2d48e5693f",
+          "status": "machine_assisted",
+          "text": "衣服寒 5"
+        }
+      },
+      "id": "cloth-armor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c83dc0a9ecc90d6e27a646b3a46751b80f1c412aff53e7ade0d6e3f82cef1d1b",
+          "status": "machine_assisted",
+          "text": "熱帯の衣装"
+        }
+      },
+      "id": "cloth-armor-heat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "08315e2da0fceafd16eb97a15c8cc339cd48e05d3ae01fdf4bd56b8485244c21",
+          "status": "machine_assisted",
+          "text": "衣服の熱 2"
+        }
+      },
+      "id": "cloth-armor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "081af920a0f83f7d93cf9f71627c3894f5b3b2b87afe7981a442102eab6e0b9b",
+          "status": "machine_assisted",
+          "text": "衣服の熱 3"
+        }
+      },
+      "id": "cloth-armor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "38cf45597bf5edd7d554638120acf0d2ec6c89b3ce75efebf3188f26786702b1",
+          "status": "machine_assisted",
+          "text": "衣服の熱4"
+        }
+      },
+      "id": "cloth-armor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "暑い地域で生産。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bee1ce19b20c4c52e1a3e99706c980ee83fc83589e94e5ce88041c24e2294d3a",
+          "status": "machine_assisted",
+          "text": "衣服の熱 5"
+        }
+      },
+      "id": "cloth-armor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fb7407e3cd9e87b17c596e366715877eb72af77924f420fb9a77e2a9b81eee20",
+          "status": "machine_assisted",
+          "text": "大量の布から織られる [原文欠落]。 高品質の装甲を作成するために必要です。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d1778643c4b95e63b4a74a171d018b11fbb5b1f09a9aa6f5390c53842113bce",
+          "status": "machine_assisted",
+          "text": "高品質布"
+        }
+      },
+      "id": "cloth2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76e2b44c07ec2141e8352eb61da5c39377ce21a5278b006ece07671ecd181ecb",
+          "status": "machine_assisted",
+          "text": "洞窟や他の場所でよく見られます 高品質の金属を作成するために必要。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4cc1d6e9f8574bb528cdd79cae8787905a88a115135a173257caa65f51f12104",
+          "status": "machine_assisted",
+          "text": "石炭"
+        }
+      },
+      "id": "coal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be091e3f934af0a9f68853c084602a9b939ae91ded7196f52c875596c0b8449a",
+          "status": "machine_assisted",
+          "text": "近代的な弓。 より強力な矢印を発射することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "687e467d64f8c54ded0c13dc39b07674b7928d7b13a5df76fd4aed3bb802273a",
+          "status": "machine_assisted",
+          "text": "コンパウンドボウ"
+        }
+      },
+      "id": "compound-bow",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be091e3f934af0a9f68853c084602a9b939ae91ded7196f52c875596c0b8449a",
+          "status": "machine_assisted",
+          "text": "近代的な弓。 より強力な矢印を発射することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "90a4d06d531393eb3d7398c3baaffbd22f7744fe6940f5e2d11e77891f7bbe4e",
+          "status": "machine_assisted",
+          "text": "コンパウンドボウ2"
+        }
+      },
+      "id": "compound-bow-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be091e3f934af0a9f68853c084602a9b939ae91ded7196f52c875596c0b8449a",
+          "status": "machine_assisted",
+          "text": "近代的な弓。 より強力な矢印を発射することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ada71aa35700a3c62219404c0d8a012689290194fbc2db20c6d0f9bfc51c01c1",
+          "status": "machine_assisted",
+          "text": "コンパウンド・ボウ3"
+        }
+      },
+      "id": "compound-bow-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be091e3f934af0a9f68853c084602a9b939ae91ded7196f52c875596c0b8449a",
+          "status": "machine_assisted",
+          "text": "近代的な弓。 より強力な矢印を発射することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7a818a6a6a60f1fe18e9c646c472bdb0b9c3ca2251f982b0e2918c9c7765fc7e",
+          "status": "machine_assisted",
+          "text": "コンパウンドボウ4"
+        }
+      },
+      "id": "compound-bow-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be091e3f934af0a9f68853c084602a9b939ae91ded7196f52c875596c0b8449a",
+          "status": "machine_assisted",
+          "text": "近代的な弓。 より強力な矢印を発射することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "535093a99c0ddc94a945f38312c9bbce222ba77ce7f42c817f710ebbaa2f5b76",
+          "status": "machine_assisted",
+          "text": "コンパウンド・ボウ5"
+        }
+      },
+      "id": "compound-bow-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b400c566f81c99dbdb55e7241af30cab78aa5e50ef370fea88db1cb9707bf817",
+          "status": "machine_assisted",
+          "text": "自動装置や精密機械の制御に使用されるコンポーネントです。 現代の技術の基礎を形成する重要な構成要素です で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76ed42d22129dc354362704eb4b54208041b68736f976932aada43bc0035f7c0",
+          "status": "machine_assisted",
+          "text": "コンピュータ"
+        }
+      },
+      "id": "computer",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e56fd5d28600ab82760becc538f20cbba760aa6bec9796b510f52ebdea099b35",
+          "status": "machine_assisted",
+          "text": "金属製の装甲。 いくらか重いが、良い防御を提供します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "02956708d998951a0b542ad870dca957000f2913379e8a7f898a71c87ca62350",
+          "status": "machine_assisted",
+          "text": "金属製カスターマックス 防具"
+        }
+      },
+      "id": "copper-armor",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f1a2315231cef0146dea820e80d52c716925402d4f938f7f610f5524437ed746",
+          "status": "machine_assisted",
+          "text": "耐寒金属防具"
+        }
+      },
+      "id": "copper-armor-cold",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "87fc2031a7828b337fc75fb13a27acdb7de3e38cb5149279e6fca774af3853e7",
+          "status": "machine_assisted",
+          "text": "銅 2号機"
+        }
+      },
+      "id": "copper-armor-cold-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a3668005884577914a8e430ed690cdd95b0d41df7082e5b0c66bb72f895908b9",
+          "status": "machine_assisted",
+          "text": "銅 3"
+        }
+      },
+      "id": "copper-armor-cold-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "42d7dd3ceaac6209b2c52a0b606ad7af4b174bcb1802c0d4de01b6bc200f6257",
+          "status": "machine_assisted",
+          "text": "銅 4号機"
+        }
+      },
+      "id": "copper-armor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 寒冷な気候で生き残るために有用。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ac204f72fa009dc8a61288ddd63791e8fe54796888b073543991d60345d24544",
+          "status": "machine_assisted",
+          "text": "銅 5"
+        }
+      },
+      "id": "copper-armor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74f0b8a92f46a2f0708549811da097439ef04225a7010999b48ba2ef4bdc9bb5",
+          "status": "machine_assisted",
+          "text": "耐熱金属防具"
+        }
+      },
+      "id": "copper-armor-heat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1e8fcd160f3511130dc2c714ee7485a3e71175507086bb6be18e97993985c890",
+          "status": "machine_assisted",
+          "text": "銅2号機甲"
+        }
+      },
+      "id": "copper-armor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8004595f09c7f53457f5262bc3c73fe491e0129a350187fad32d2ff5fee02b13",
+          "status": "machine_assisted",
+          "text": "銅3号機甲"
+        }
+      },
+      "id": "copper-armor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "127921d984eb310903916039fc927791d04e74935e06b20f72ffe96cbfed1108",
+          "status": "machine_assisted",
+          "text": "銅4号機甲"
+        }
+      },
+      "id": "copper-armor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240",
+          "status": "machine_assisted",
+          "text": "改善 [原文欠落]。 耐熱性に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d71484f2fb7ef9de6c50e2b236fbfd9040768d1bfb79b064b382efdd69dc6835",
+          "status": "machine_assisted",
+          "text": "銅5号機甲"
+        }
+      },
+      "id": "copper-armor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6012e99d38903204333d31598a51e92cd357d98cf2f2e0ec9993696ea7138ac1",
+          "status": "machine_assisted",
+          "text": "金属製のヘルメット。 頭と、その中のすべての思考を守る、信頼できる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1a353a214bda715934fe0898313d56bab08f1d02029a37c496ac1ef206760c22",
+          "status": "machine_assisted",
+          "text": "金属の"
+        }
+      },
+      "id": "copper-helmet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6012e99d38903204333d31598a51e92cd357d98cf2f2e0ec9993696ea7138ac1",
+          "status": "machine_assisted",
+          "text": "金属製のヘルメット。 頭と、その中のすべての思考を守る、信頼できる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e7b388fbcacf4bbd70e09b92407db32f9e60a6797572d8c6d9685e7be5d1c2b6",
+          "status": "machine_assisted",
+          "text": "銅ヘルメット2"
+        }
+      },
+      "id": "copper-helmet-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6012e99d38903204333d31598a51e92cd357d98cf2f2e0ec9993696ea7138ac1",
+          "status": "machine_assisted",
+          "text": "金属製のヘルメット。 頭と、その中のすべての思考を守る、信頼できる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d50b3af6464a9ca9e1d6d39224505ad1340f72a705311249f92e2500bf6bbea5",
+          "status": "machine_assisted",
+          "text": "銅のヘルメット 3"
+        }
+      },
+      "id": "copper-helmet-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6012e99d38903204333d31598a51e92cd357d98cf2f2e0ec9993696ea7138ac1",
+          "status": "machine_assisted",
+          "text": "金属製のヘルメット。 頭と、その中のすべての思考を守る、信頼できる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dfeeb2dac6fd80b74120a6aba374c888727a8c6f0403e2c4a5453c8dfc19c223",
+          "status": "machine_assisted",
+          "text": "銅ヘルメット4"
+        }
+      },
+      "id": "copper-helmet-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6012e99d38903204333d31598a51e92cd357d98cf2f2e0ec9993696ea7138ac1",
+          "status": "machine_assisted",
+          "text": "金属製のヘルメット。 頭と、その中のすべての思考を守る、信頼できる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a77158a3dd12240db900f9ef49492009d1b194fb074ac57b5a5246d9ae35e82",
+          "status": "machine_assisted",
+          "text": "銅ヘルメット5"
+        }
+      },
+      "id": "copper-helmet-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c92fc2d2b9d31b4bb1c655b397ad93ec3177c0c6c8be033c07f756ce1fb66d77",
+          "status": "machine_assisted",
+          "text": "金属兵器やを作るのに必要な素材。 炉の使用を改良。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af820e185849308fcfb7f7bbbb994991d3e690ddc636310480a783106378f149",
+          "status": "machine_assisted",
+          "text": "インゴット"
+        }
+      },
+      "id": "copper-ingot",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4da374b0cef5238d88b5fd146c53c2f47ecde688d5bcd3cc2ea5725c1f01f858",
+          "status": "machine_assisted",
+          "text": "炉で精錬するとインゴットになります。 洞窟やその他の場所で見つけることができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b2b092084f4d5b412f918c4a58e4e4eee2b69ec644893b5d98b422b7a5298f8f",
+          "status": "machine_assisted",
+          "text": "オレ"
+        }
+      },
+      "id": "copper-ore",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "34f53f871527547c11e70c8c7df5953ca4bbbbab9e1a1109d385dd0c1cbeefc7",
+          "status": "machine_assisted",
+          "text": "分解性が強い危険な化学溶剤です。 精密加工や特殊処理に使用。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f4ef55a935e06e0c9ce5017e7c76dcfd509adb314deb872ec4b6085cee3cfa49",
+          "status": "machine_assisted",
+          "text": "腐食性溶媒"
+        }
+      },
+      "id": "corrosive-solvent",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a853cf5875135b728443cc25b3945887573c69031303bc146a840023ebb4fff9",
+          "status": "machine_assisted",
+          "text": "様々な製品に加工できる素材。 油田に設置することで取得します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "04826b42f7528e0de17d20adb13030610782494d9ea52be189eb547f1a9f9a0a",
+          "status": "machine_assisted",
+          "text": "原油"
+        }
+      },
+      "id": "crude-oil",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "985adc682ad0107b00505846ad9d3d1b58d23e50829543a63e160292b4961006",
+          "status": "machine_assisted",
+          "text": "野菜や肉をスパイスで煮込んだ料理。 豊かな風味は、柔らかい肉の大きな塊によって強調されます。 食べると、一定期間25%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a8105ad1e37d691f1c13641099de8ea490e49629b2a554a92691ed4039604638",
+          "status": "machine_assisted",
+          "text": "カリーカレー!"
+        }
+      },
+      "id": "curry",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f2d7cc7e219ee23c0728b0a582474bbbbf032e9f004383037da498239e30847",
+          "status": "machine_assisted",
+          "text": "発砲場所の絵を描く奇妙な銃。 楽しみを持って、壁や天井をペイント!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eac38608019081c5728d32189f5b6c0b91a3a79876e22717cd1a413f4c4aed05",
+          "status": "machine_assisted",
+          "text": "デカール銃1"
+        }
+      },
+      "id": "decal-gun-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f2d7cc7e219ee23c0728b0a582474bbbbf032e9f004383037da498239e30847",
+          "status": "machine_assisted",
+          "text": "発砲場所の絵を描く奇妙な銃。 楽しみを持って、壁や天井をペイント!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c1293f829a560589887da7db69c6ef04e26a8bcfc06a1177cac64262e67ec7c0",
+          "status": "machine_assisted",
+          "text": "デカールガン2"
+        }
+      },
+      "id": "decal-gun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f2d7cc7e219ee23c0728b0a582474bbbbf032e9f004383037da498239e30847",
+          "status": "machine_assisted",
+          "text": "発砲場所の絵を描く奇妙な銃。 楽しみを持って、壁や天井をペイント!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dc5e3e201f0db6db9fc1ad31d87e9924e299b2e8fefe5bcf65d7c7ed677872ae",
+          "status": "machine_assisted",
+          "text": "デカール3号機"
+        }
+      },
+      "id": "decal-gun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f2d7cc7e219ee23c0728b0a582474bbbbf032e9f004383037da498239e30847",
+          "status": "machine_assisted",
+          "text": "発砲場所の絵を描く奇妙な銃。 楽しみを持って、壁や天井をペイント!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2d23e4feb6f15fb359a6c76cc123c53558f8c441ef5c526679ad217dee8044dd",
+          "status": "machine_assisted",
+          "text": "デカール4号機"
+        }
+      },
+      "id": "decal-gun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f2d7cc7e219ee23c0728b0a582474bbbbf032e9f004383037da498239e30847",
+          "status": "machine_assisted",
+          "text": "発砲場所の絵を描く奇妙な銃。 楽しみを持って、壁や天井をペイント!"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "793b99dd8909d8efbc3c3746200fb1cc68df441fafe3e1821d2d37440e8af580",
+          "status": "machine_assisted",
+          "text": "デカール銃5"
+        }
+      },
+      "id": "decal-gun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "61ae5722b01e49c31f94bcd2115808eda874ab364d7ab3c7acaaa11f2f184581",
+          "status": "machine_assisted",
+          "text": "クリーミーな揚げ卵でアクセントをつけた濃厚ハンバーガーステーキ。 この崇高な組み合わせは、それを食べる人の口に純粋な喜びをもたらします。 食べると、一定期間+20%増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "435644e45d7a04eb3ce84c32df10b5f62be12c9c49e5a1439d5176d1eb5a38c1",
+          "status": "machine_assisted",
+          "text": "ツノガミ Loco Moコ。"
+        }
+      },
+      "id": "deer-loco-moco",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "406a984e523473c56f650e86022927a7b5bab3c39aa8917b7071ba223ef67d29",
+          "status": "machine_assisted",
+          "text": "愛でつくった優しい口の中で溶けるベニソンシチュー。 野菜と肉の絡み合った風味が、心地よい豊かさを引き出す調和の取れたブレンドを生み出します。 食べると、一定期間+20%増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "208e1da656865d6845cd05271609c42e5e54ce94f5c17a3f6323e2f24f18c55d",
+          "status": "machine_assisted",
+          "text": "クアッドマックスシチュー"
+        }
+      },
+      "id": "deer-stew",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5346f42910a1e1dac0108084de9cc25d6f4304850bdff9d2d9c60a8ab00fd165",
+          "status": "machine_assisted",
+          "text": "輝きを放つ希少な宝石。 高い価格で商人に販売することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b639c243cebdfad98aee950e39ba8b2a00d82c17cd7d8310fffe40c331b32eec",
+          "status": "machine_assisted",
+          "text": "ダイヤモンド"
+        }
+      },
+      "id": "diamond",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "654c447de79a3ad2eb9a1049b3ceb90d243b87e66047cc83928ca6a5520df9d1",
+          "status": "machine_assisted",
+          "text": "謎のコイン。 どうやら、これらを集める人がいます。 普通は持ってるけど 何らかの理由で、殺して入手できません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "358dbd96aeea9a4680af104f19ac8cdba31fc42ae77a144904984c8554378089",
+          "status": "machine_assisted",
+          "text": "犬のコイン"
+        }
+      },
+      "id": "dog-coin",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f77c1eaca79ae505c61aa6d064c6a26d194529bd24f11bbacde469c8145c148",
+          "status": "machine_assisted",
+          "text": "弱い者は近距離で大混乱する。 再読み込み前に二回発火できます。 負荷容量が限られているにもかかわらず、まだパンチをパックします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "39e3d3b9aa30279120e770294d7e25cf60b292886b6f1c9b798cd3e9f64dc623",
+          "status": "machine_assisted",
+          "text": "二重銃"
+        }
+      },
+      "id": "double-barrel-shotgun",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f77c1eaca79ae505c61aa6d064c6a26d194529bd24f11bbacde469c8145c148",
+          "status": "machine_assisted",
+          "text": "弱い者は近距離で大混乱する。 再読み込み前に二回発火できます。 負荷容量が限られているにもかかわらず、まだパンチをパックします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "61295ce7c5177fa035a369b5c7fdfd011527ff87a8b43a609bc16e6b982b3bd2",
+          "status": "machine_assisted",
+          "text": "ダブルバレルショットガン2"
+        }
+      },
+      "id": "double-barrel-shotgun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f77c1eaca79ae505c61aa6d064c6a26d194529bd24f11bbacde469c8145c148",
+          "status": "machine_assisted",
+          "text": "弱い者は近距離で大混乱する。 再読み込み前に二回発火できます。 負荷容量が限られているにもかかわらず、まだパンチをパックします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "850ea670677464ed6b18d21a8d3a9a9d880d7771897ee9dbc5dc94b708789148",
+          "status": "machine_assisted",
+          "text": "ダブルバレルショットガン3"
+        }
+      },
+      "id": "double-barrel-shotgun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f77c1eaca79ae505c61aa6d064c6a26d194529bd24f11bbacde469c8145c148",
+          "status": "machine_assisted",
+          "text": "弱い者は近距離で大混乱する。 再読み込み前に二回発火できます。 負荷容量が限られているにもかかわらず、まだパンチをパックします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7d3dac4702dc1591850e5b6eac740f2ba87aee5b6be2761856831bbbe00bf74c",
+          "status": "machine_assisted",
+          "text": "ダブルバレルショットガン4"
+        }
+      },
+      "id": "double-barrel-shotgun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f77c1eaca79ae505c61aa6d064c6a26d194529bd24f11bbacde469c8145c148",
+          "status": "machine_assisted",
+          "text": "弱い者は近距離で大混乱する。 再読み込み前に二回発火できます。 負荷容量が限られているにもかかわらず、まだパンチをパックします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e4e3cc7d79dc24ab7705a9452a2ddd5316721910a21e91912874c23a22aa2684",
+          "status": "machine_assisted",
+          "text": "ダブルバレルショットガン5"
+        }
+      },
+      "id": "double-barrel-shotgun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d7dd561c310befd12dbfa26838d813e228f4f5e6104c808efdf8f4ad02e4b333",
+          "status": "machine_assisted",
+          "text": "自律攻撃を行うドローンを発射するランチャー。最大9単位まで展開でき、継続的な制圧が可能である。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2402737dc175be5bbd1d5116deb16227e80dd5d4fe01c1d0b49e658d1106dcdb",
+          "status": "machine_assisted",
+          "text": "ドローンランチャー"
+        }
+      },
+      "id": "drone-launcher",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d7dd561c310befd12dbfa26838d813e228f4f5e6104c808efdf8f4ad02e4b333",
+          "status": "machine_assisted",
+          "text": "自律攻撃を行うドローンを発射するランチャー。最大9単位まで展開でき、継続的な制圧が可能である。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bf1049254f91e1cef9c9957c6db7428fe81b354f8587b5ce7395f415207561e4",
+          "status": "machine_assisted",
+          "text": "ドローンランチャー2"
+        }
+      },
+      "id": "drone-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d7dd561c310befd12dbfa26838d813e228f4f5e6104c808efdf8f4ad02e4b333",
+          "status": "machine_assisted",
+          "text": "自律攻撃を行うドローンを発射するランチャー。最大9単位まで展開でき、継続的な制圧が可能である。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3cd0811c2bcf724989ba5d1c537f11ed9313c94f9559760470113dcc2eb596b2",
+          "status": "machine_assisted",
+          "text": "ドローンランチャー3"
+        }
+      },
+      "id": "drone-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d7dd561c310befd12dbfa26838d813e228f4f5e6104c808efdf8f4ad02e4b333",
+          "status": "machine_assisted",
+          "text": "自律攻撃を行うドローンを発射するランチャー。最大9単位まで展開でき、継続的な制圧が可能である。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b13846211ed1b0d0f915d2cae1ab33293221336ca0c18b066091a35c6609379",
+          "status": "machine_assisted",
+          "text": "ドローンランチャー4"
+        }
+      },
+      "id": "drone-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d7dd561c310befd12dbfa26838d813e228f4f5e6104c808efdf8f4ad02e4b333",
+          "status": "machine_assisted",
+          "text": "自律攻撃を行うドローンを発射するランチャー。最大9単位まで展開でき、継続的な制圧が可能である。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1e312045c9dfcb8a7be01c4f9f6131e459e67d4fcfbde74a077cee4a070d23a",
+          "status": "machine_assisted",
+          "text": "ドローンランチャー5"
+        }
+      },
+      "id": "drone-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af9376bb5e6c11c375e7dfbd41459d9fa02d8a75d5dbbc76326bd913d8e3f101",
+          "status": "machine_assisted",
+          "text": "ゆっくりと調理された料理は、豊かな野生の味を放ちます。 食べると、一時期SANが少し遅くなります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ce336a574b03feb658b0c041fd5e8bed376b7d70aa66aae22049a56199b64ac3",
+          "status": "machine_assisted",
+          "text": "煮込みエアムルグ"
+        }
+      },
+      "id": "eaglestew",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb57c02178b27ff97a54901e4f4b249c8cfdb8ecabc3bfadf4e721a74df13a95",
+          "status": "machine_assisted",
+          "text": "緑を輝かせる宝石。 高い価格で商人に販売することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af1ccb31304d74a7940a2f62ec8ffef5eca8e82c211399d2d1b1f6e26db89da2",
+          "status": "machine_assisted",
+          "text": "エメラルド"
+        }
+      },
+      "id": "eemerald",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "824082bcb6b4b65b86349c6c1c368f669af19431aead6e26858021a357dae12a",
+          "status": "machine_assisted",
+          "text": "揚げるとおいしいですが、様々な料理を作るのにも使用できます。 生産するのです"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "37c50c935cd2a9ad065faec4824b7484acfd2b235c52368ccdb05d1f50240af0",
+          "status": "machine_assisted",
+          "text": "卵"
+        }
+      },
+      "id": "egg",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aca2d734cc9a9354b0d1cbdc682ade07742198df7f068d85f4fa6ab9654a74b",
+          "status": "machine_assisted",
+          "text": "接触時に電気的ジョルトを発信する近接距離武器。 パルは、感電で簡単に撮影できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "895573ffa7826a586bd6b65f6036f605be902c62ebf0347a9a23548cd586fbd9",
+          "status": "machine_assisted",
+          "text": "スタン・バトン"
+        }
+      },
+      "id": "elec-baton",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee19792a26c4b51534f48b1e4c0a8d00747afd6fc04b8fbd9d11f7ed5bb86209",
+          "status": "machine_assisted",
+          "text": "複数の敵に連鎖する衝撃点から放電を放つライフル。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e7867be096a97e68480c5c7cc20451bbec2e39f981b5671f8226fc6e469a76d8",
+          "status": "machine_assisted",
+          "text": "プラズマライフル"
+        }
+      },
+      "id": "electric-arc-assault-rifle",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee19792a26c4b51534f48b1e4c0a8d00747afd6fc04b8fbd9d11f7ed5bb86209",
+          "status": "machine_assisted",
+          "text": "複数の敵に連鎖する衝撃点から放電を放つライフル。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fbce37417cb2861fc30a773f6c20d5cf06666432971c3f04f2d486d622b5f71d",
+          "status": "machine_assisted",
+          "text": "電気アーク攻撃ライフル2"
+        }
+      },
+      "id": "electric-arc-assault-rifle-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee19792a26c4b51534f48b1e4c0a8d00747afd6fc04b8fbd9d11f7ed5bb86209",
+          "status": "machine_assisted",
+          "text": "複数の敵に連鎖する衝撃点から放電を放つライフル。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "16a67bb5e97af96d6a11192d66f9b4cc240d9bc25366f0a59dba29e5d3013715",
+          "status": "machine_assisted",
+          "text": "電気アーク攻撃ライフル3"
+        }
+      },
+      "id": "electric-arc-assault-rifle-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee19792a26c4b51534f48b1e4c0a8d00747afd6fc04b8fbd9d11f7ed5bb86209",
+          "status": "machine_assisted",
+          "text": "複数の敵に連鎖する衝撃点から放電を放つライフル。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d40f15a92020a6516a099f2ee64eb14b2ee52a0c8a617f6af61a8ebf483be1bc",
+          "status": "machine_assisted",
+          "text": "電気アーク攻撃ライフル4"
+        }
+      },
+      "id": "electric-arc-assault-rifle-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee19792a26c4b51534f48b1e4c0a8d00747afd6fc04b8fbd9d11f7ed5bb86209",
+          "status": "machine_assisted",
+          "text": "複数の敵に連鎖する衝撃点から放電を放つライフル。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "945120e62bdf84cdf417bd4d1775731262f5df840c15f2a22ba512d2311a4941",
+          "status": "machine_assisted",
+          "text": "電気アーク攻撃ライフル5"
+        }
+      },
+      "id": "electric-arc-assault-rifle-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec",
+          "status": "machine_assisted",
+          "text": "弾薬 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c8abe145db25eddd211d8cf0a93aa824c6f888f3342dcf55a778791ddeaec272",
+          "status": "machine_assisted",
+          "text": "プラズマライフル弾薬"
+        }
+      },
+      "id": "electric-arc-assault-rifle-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9554ee734de638ce1200c6e649f9a7abe35b4d9a0ee8f705e37e1d392a41e7a1",
+          "status": "machine_assisted",
+          "text": "パルから入手できる材料。 電気を蓄えているが、使用時には注意が必要である。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "49c92a3a5635cdae071c12f912ec2c723c1b49e29c218245106bf4f92e745199",
+          "status": "machine_assisted",
+          "text": "カスターマックスのオルガン 雷"
+        }
+      },
+      "id": "electric-organ",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4aa1cc4ae4fc7a7f73e02b62173d29b400554e938650df868bc7553f3fbf0770",
+          "status": "machine_assisted",
+          "text": "消費時に攻撃を少しだけ永久に上げる非常に貴重な薬。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0791b5d693b86829768882d3da8f102ac6514be58817f16c5788975db021ca2e",
+          "status": "machine_assisted",
+          "text": "治療の可能性"
+        }
+      },
+      "id": "elixir-attack-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "674ad0c83cd20433d04d82f8bfbb06d1288ad4a70143a87d0554f977723f8dda",
+          "status": "machine_assisted",
+          "text": "消費時に攻撃を永久に起こす非常に貴重なエリクサー。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2b17b425ec072b035252fa89f7fe2a634c963529e89c252b87e1bf019444eabf",
+          "status": "machine_assisted",
+          "text": "マイトエリクサー"
+        }
+      },
+      "id": "elixir-attack-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b06eece80ec71928e93e49e3025d9c780a0a5f651ebbb48bcc310dcd948de8b5",
+          "status": "machine_assisted",
+          "text": "消費すると健康を少しだけ永久に高める非常に貴重な薬。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1ccaf3fbc77277dea720d0472edbcf777bf5c6b416201dfb48e91ad13d2442e2",
+          "status": "machine_assisted",
+          "text": "生体治療"
+        }
+      },
+      "id": "elixir-hp-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6dbd9fb0549f568ae3b20dc917e0e0101562fe1aae636bf6835784127e34a468",
+          "status": "machine_assisted",
+          "text": "消費すると健康を恒久的に高める非常に貴重なエリクサー。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "06abfb01ebaf350af37d1bd44711417a850a6347f8a3db4a3b2d90a7e2766715",
+          "status": "machine_assisted",
+          "text": "生体エリクサー"
+        }
+      },
+      "id": "elixir-hp-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f03bc0a75f76516065af41fbe6be00799f82438cdf3fbbbf1849194f55d1099c",
+          "status": "machine_assisted",
+          "text": "消費するとスタミナをわずかに上昇させる非常に貴重な薬。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0393aee57032051e1cdfe02b5a0536d4960934630d3d9388a4fd523dcb3fdcd5",
+          "status": "machine_assisted",
+          "text": "スタミナ・リメディ"
+        }
+      },
+      "id": "elixir-stamina-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "58f78fe250ced679acaa10c0a3692810b723321eedadc21662a3b3629a8a7d5b",
+          "status": "machine_assisted",
+          "text": "消費時にスタミナを永久に上昇させる非常に貴重なエリクシアル。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "58295ca8e5099b3f425ce568e4e8dacc913277a74f44f12679b47f358b730934",
+          "status": "machine_assisted",
+          "text": "訳 エリーザル"
+        }
+      },
+      "id": "elixir-stamina-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "60c67282076ca9634200ffd785edc8e50502121161ac48513cff4a01f65d4189",
+          "status": "machine_assisted",
+          "text": "消費時に搬送能力をわずかに向上させる非常に貴重な薬液。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1008a0b2915034729a0923cdf01954203878230098d1fc8b8c1c917ca355371",
+          "status": "machine_assisted",
+          "text": "負担軽減策"
+        }
+      },
+      "id": "elixir-weight-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6b56b0a5a73f9a08414c76e9a21dee35367ed12e090196decab18ce5403d680c",
+          "status": "machine_assisted",
+          "text": "消費時に永久に搬送能力を高める非常に貴重なエリクサー。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7e198177ea0824704a6fc2b8672dc7f4a34fd448bc0022b8ffc14c55d49b21d3",
+          "status": "machine_assisted",
+          "text": "バーデン・エリクシール"
+        }
+      },
+      "id": "elixir-weight-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a246f19de5b2c6ae04006ea47b9b5c6751f3c6977cb293e0a235caee664d29de",
+          "status": "machine_assisted",
+          "text": "消費時に、作業スピードを少しだけ永久に上げる非常に貴重な場所。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "543bc97a71bfd56c9d4c3171a9bc051752bd391970c88911cf7bd86e7935a928",
+          "status": "machine_assisted",
+          "text": "スピードリメディ"
+        }
+      },
+      "id": "elixir-workspeed-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "403630ce81202384fe98f2841d88b16fc8bef6f6f9aa2ca81e1f1c83b38a5679",
+          "status": "machine_assisted",
+          "text": "消費時に作業スピードを永久に上げる非常に貴重なエリクシアル。 パル で使用した場合は効果がありません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ba5c92dc62f693d9d69098b5c75b3b69a264148aee11a7417e918867d8afdd1a",
+          "status": "machine_assisted",
+          "text": "スピードエリクサー"
+        }
+      },
+      "id": "elixir-workspeed-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "498aa9788cc4399294306f8b390c46893da1249638e0770edf1a724eb2900ee9",
+          "status": "machine_assisted",
+          "text": "プラズマカートリッジ"
+        }
+      },
+      "id": "energy-launcher-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "982e35f421bcc0cb6ff92eb966c04066f2562af4cd0b3ba9483ef556d2376f60",
+          "status": "machine_assisted",
+          "text": "高出力のエネルギー発射体。 衝撃でエネルギー爆発を引き起こす。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "526d57d45f0dbbd6d79cc2e98c295b6e3b9b11e23f57248899e687ce6df597be",
+          "status": "machine_assisted",
+          "text": "プラズマキャノン"
+        }
+      },
+      "id": "energy-rocket-launcher",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "982e35f421bcc0cb6ff92eb966c04066f2562af4cd0b3ba9483ef556d2376f60",
+          "status": "machine_assisted",
+          "text": "高出力のエネルギー発射体。 衝撃でエネルギー爆発を引き起こす。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "249635a4879b235dfae8a67edfc1292968e559002fa0f54e22a690934c9f5c7c",
+          "status": "machine_assisted",
+          "text": "ロケット発射装置2"
+        }
+      },
+      "id": "energy-rocket-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "982e35f421bcc0cb6ff92eb966c04066f2562af4cd0b3ba9483ef556d2376f60",
+          "status": "machine_assisted",
+          "text": "高出力のエネルギー発射体。 衝撃でエネルギー爆発を引き起こす。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "67cdd01f490b15bfc348875551f5e81dc5d826c2565c9c7506f32c124d868a33",
+          "status": "machine_assisted",
+          "text": "エネルギーロケットランチャー 3"
+        }
+      },
+      "id": "energy-rocket-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "982e35f421bcc0cb6ff92eb966c04066f2562af4cd0b3ba9483ef556d2376f60",
+          "status": "machine_assisted",
+          "text": "高出力のエネルギー発射体。 衝撃でエネルギー爆発を引き起こす。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fd6c9f2618f61e719c7cdef7865f90dccd13acb37b4e1e61f0ac476a731d27fb",
+          "status": "machine_assisted",
+          "text": "エネルギーロケットランチャー 4"
+        }
+      },
+      "id": "energy-rocket-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "982e35f421bcc0cb6ff92eb966c04066f2562af4cd0b3ba9483ef556d2376f60",
+          "status": "machine_assisted",
+          "text": "高出力のエネルギー発射体。 衝撃でエネルギー爆発を引き起こす。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "996fa37a64fcb5247bccb527bbf848704524ab5c1f76e7cb4de8d532c4c7795a",
+          "status": "machine_assisted",
+          "text": "エネルギーロケットランチャー 5"
+        }
+      },
+      "id": "energy-rocket-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "エネルギーラウンドを発射するショットガン。 急速な火災に優れた、その近距離火力は本当に異世界です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28672ff3606f78b2d5589971c483571f8bd9219922c8e93426858ae04139fb8f",
+          "status": "machine_assisted",
+          "text": "エネルギーショットガン"
+        }
+      },
+      "id": "energy-shotgun",
+      "kind": "item"
+    }
+  ],
+  "schemaVersion": 1
+}

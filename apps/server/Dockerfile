@@ -51,7 +51,28 @@ RUN npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shar
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/apps/server/config ./apps/server/config
-COPY --from=build /app/apps/server/data/palworld/1.0.1 ./apps/server/data/palworld/1.0.1
+COPY --from=build \
+  /app/apps/server/data/palworld/1.0.1/sources.lock.json \
+  /app/apps/server/data/palworld/1.0.1/paldex.json \
+  /app/apps/server/data/palworld/1.0.1/manifest.json \
+  /app/apps/server/data/palworld/1.0.1/images-manifest.json \
+  /app/apps/server/data/palworld/1.0.1/import-report.json \
+  /app/apps/server/data/palworld/1.0.1/image-use-policy.json \
+  /app/apps/server/data/palworld/1.0.1/catalog.json \
+  /app/apps/server/data/palworld/1.0.1/catalog-manifest.json \
+  /app/apps/server/data/palworld/1.0.1/item-images-manifest.json \
+  /app/apps/server/data/palworld/1.0.1/element-images-manifest.json \
+  /app/apps/server/data/palworld/1.0.1/breeding.json \
+  /app/apps/server/data/palworld/1.0.1/breeding-manifest.json \
+  /app/apps/server/data/palworld/1.0.1/breeding-import-report.json \
+  ./apps/server/data/palworld/1.0.1/
+COPY --from=build \
+  /app/apps/server/data/palworld/1.0.1/locales/manifest.json \
+  /app/apps/server/data/palworld/1.0.1/locales/glossary.json \
+  /app/apps/server/data/palworld/1.0.1/locales/ko.json \
+  /app/apps/server/data/palworld/1.0.1/locales/ja.json \
+  /app/apps/server/data/palworld/1.0.1/locales/reviewed-item-aliases.json \
+  ./apps/server/data/palworld/1.0.1/locales/
 COPY --from=build \
   /app/apps/server/src/data/palworld-mappings/public-id-map.json \
   /app/apps/server/src/data/palworld-mappings/elements.json \

@@ -1,0 +1,99 @@
+{
+  "batches": [
+    {
+      "file": "batch-0001.json",
+      "records": 150,
+      "sha256": "2b250be255d3aeb6c6e6e0da97f129392df43d2a8424ffa7fdf0a881696a4ad4"
+    },
+    {
+      "file": "batch-0002.json",
+      "records": 150,
+      "sha256": "fd5e8628073df68b834b6c9a92a1bfd0ac5cf1a9cb805fd1c8f956020c2dfe19"
+    },
+    {
+      "file": "batch-0003.json",
+      "records": 150,
+      "sha256": "c69c21f31cd3674ba4b2e5235669c9f2cb41ccbd5404a020e5e034371c4a31ec"
+    },
+    {
+      "file": "batch-0004.json",
+      "records": 150,
+      "sha256": "c0415e1d9589a6399d6959a854b143d27786447efc0c92ff8129dcad0a6fd999"
+    },
+    {
+      "file": "batch-0005.json",
+      "records": 150,
+      "sha256": "0ba093a16c0d474728b33adcd6891b5b650129226ddad9126d99c74230a2b6f9"
+    },
+    {
+      "file": "batch-0006.json",
+      "records": 150,
+      "sha256": "e3cb97e4c37183db15a5ed8961dfe75d6b18aa2c9f844b0255de8f32f76e5510"
+    },
+    {
+      "file": "batch-0007.json",
+      "records": 150,
+      "sha256": "c1951a203b0859ad1d015b51f3cc2acb4b5b29180a58ec0c2052ff8fb31da074"
+    },
+    {
+      "file": "batch-0008.json",
+      "records": 150,
+      "sha256": "e3f862b02301a9920d19bc009c02b7ff5b0088972ac23a415de3c0035b769b96"
+    },
+    {
+      "file": "batch-0009.json",
+      "records": 150,
+      "sha256": "5f333acd736b8c9b75c3c8bf0fd929199b2452b245785ed8da86014b16cbd473"
+    },
+    {
+      "file": "batch-0010.json",
+      "records": 150,
+      "sha256": "43b6276b2c963ffeeefe640e0c01f0150ee43a5e4a9d04bf2e84ce12d235db49"
+    },
+    {
+      "file": "batch-0011.json",
+      "records": 150,
+      "sha256": "548861b909bd1aca3e8d63273b402e3e25d55d8551d0973ccea5ccbc5afd05e7"
+    },
+    {
+      "file": "batch-0012.json",
+      "records": 150,
+      "sha256": "7d3741d90c607db68d7e08357b6ae8afc8ce3f3c9c9cbfdd497ad927d1b56ba1"
+    },
+    {
+      "file": "batch-0013.json",
+      "records": 150,
+      "sha256": "ca0784b9e997f92fac057ed520124bedd47ad19a2eeda8c1ee2d37536087ca12"
+    },
+    {
+      "file": "batch-0014.json",
+      "records": 150,
+      "sha256": "4a32f4c4a53722579ed059ac345f21b6814be58ad82e7ec53700cc1974eb8220"
+    },
+    {
+      "file": "batch-0015.json",
+      "records": 150,
+      "sha256": "0c7db50fe05ed343b9a7085aaabd79203d7f47c921b4200d29b1925a52d2f48d"
+    },
+    {
+      "file": "batch-0016.json",
+      "records": 150,
+      "sha256": "9aacb2512f27a9f35b4a479f91a82a5f958e41dab720ca03ed4f047360616080"
+    },
+    {
+      "file": "batch-0017.json",
+      "records": 150,
+      "sha256": "cb21026803661f8307c38e8c81ccb56a40065e3a23a5e8d03e6494d414eb93f0"
+    },
+    {
+      "file": "batch-0018.json",
+      "records": 131,
+      "sha256": "8918efe0d59a73fe2f17c2a2b8addcf98f5711c58798cb9e58ff4de122b19df9"
+    }
+  ],
+  "fields": 5166,
+  "identicalEnglish": [],
+  "locale": "ja",
+  "modelNote": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+  "records": 2681
+}

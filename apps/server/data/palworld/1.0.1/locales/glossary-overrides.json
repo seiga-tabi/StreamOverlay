@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "generatedAt": "2026-07-22T00:00:00.000Z",
+  "overrides": [
+    { "kind": "item", "english": "Common Egg", "ids": ["pal-egg-normal-01", "pal-egg-normal-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Damp Egg", "ids": ["pal-egg-water-01", "pal-egg-water-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Dark Egg", "ids": ["pal-egg-dark-01", "pal-egg-dark-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Dragon Egg", "ids": ["pal-egg-dragon-01", "pal-egg-dragon-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Electric Egg", "ids": ["pal-egg-electricity-01", "pal-egg-electricity-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Frozen Egg", "ids": ["pal-egg-ice-01", "pal-egg-ice-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Common Egg", "ids": ["pal-egg-normal-03", "pal-egg-normal-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Damp Egg", "ids": ["pal-egg-water-03", "pal-egg-water-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Dark Egg", "ids": ["pal-egg-dark-03", "pal-egg-dark-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Dragon Egg", "ids": ["pal-egg-dragon-03", "pal-egg-dragon-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Electric Egg", "ids": ["pal-egg-electricity-03", "pal-egg-electricity-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Frozen Egg", "ids": ["pal-egg-ice-03", "pal-egg-ice-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Mutated Egg", "ids": ["pal-egg-mutation-pal-03", "pal-egg-mutation-pal-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Ominous Egg", "ids": ["pal-egg-world-tree-03", "pal-egg-world-tree-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Rocky Egg", "ids": ["pal-egg-earth-03", "pal-egg-earth-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Scorching Egg", "ids": ["pal-egg-fire-03", "pal-egg-fire-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Large Verdant Egg", "ids": ["pal-egg-leaf-03", "pal-egg-leaf-04"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Ominous Egg", "ids": ["pal-egg-world-tree-01", "pal-egg-world-tree-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Rocky Egg", "ids": ["pal-egg-earth-01", "pal-egg-earth-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Scorching Egg", "ids": ["pal-egg-fire-01", "pal-egg-fire-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "item", "english": "Verdant Egg", "ids": ["pal-egg-leaf-01", "pal-egg-leaf-02"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 아이템이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "skill", "english": "Aerial Marauder", "ids": ["partner-vanwyrm", "partner-vanwyrm-cryst"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 스킬이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "skill", "english": "Angry Shark", "ids": ["partner-gobfin", "partner-gobfin-ignis"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 스킬이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "skill", "english": "Double Fang", "ids": ["active-double-fang-51aba4eadf", "active-double-fang-b35a322bb6"], "resolution": "translate_each_canonical_id", "reason": "동일 이름이지만 원문 설명이 서로 달라 ID별 이름과 설명 후보를 독립 검증한다." },
+    { "kind": "skill", "english": "Grenadier Panda", "ids": ["partner-mossanda", "partner-mossanda-lux"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 스킬이므로 ID별 후보만 허용하고 자동 전파하지 않는다." },
+    { "kind": "skill", "english": "Too Cool to be Seen", "ids": ["partner-leezpunk", "partner-leezpunk-ignis"], "resolution": "translate_each_canonical_id", "reason": "동일 영문 이름의 별도 canonical 스킬이므로 ID별 후보만 허용하고 자동 전파하지 않는다." }
+  ]
+}

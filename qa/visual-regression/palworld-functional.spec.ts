@@ -24,16 +24,6 @@ const metadata: PalworldDataMetadata = {
   license: "Test-only Pal text fixture",
 };
 
-const sampleMetadata: PalworldDataMetadata = {
-  gameVersion: "sample-baseline",
-  sourceName: "StreamOverlay curated sample snapshot",
-  sourceUrl: "https://github.com/seiga-tabi/StreamOverlay/blob/main/apps/server/src/data/PALWORLD_DATA.md",
-  sourceRevision: "streamops-palworld-sample-2026-07-21",
-  extractedAt: "2026-07-21T00:00:00.000Z",
-  verifiedAt: "2026-07-21T00:00:00.000Z",
-  license: "저장소 작성 샘플. 교배 구조 참고: tylercamp/palcalc MIT.",
-};
-
 const READY_PAL_IMAGE_URL = `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`;
 const READY_ITEM_IMAGE_URL = `/images/palworld/1.0.1/items/${"b".repeat(64)}.webp`;
 const READY_WORLD_MAP_URL = "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp";
@@ -149,7 +139,103 @@ const pals: PalworldPalDetail[] = [
     ],
     breeding: {
       breedingPower: 570,
-      specialParentPairs: [{ parentAId: "penking", parentBId: "bushi", parentAGender: "male", parentBGender: "female" }],
+      specialParentPairs: [],
+    },
+    metadata,
+  },
+  {
+    id: "sibelyx",
+    number: 116,
+    nameKo: "실키누",
+    nameJa: "シルキーヌ",
+    nameEn: "Sibelyx",
+    elements: ["ice"],
+    rarity: 7,
+    variantType: "normal",
+    workSuitabilities: [
+      { type: "medicine_production", level: 3 },
+      { type: "cooling", level: 3 },
+      { type: "farming", level: 3 },
+    ],
+    stats: { hp: 110, attack: 90, defense: 100, moveSpeed: 400, stamina: 100 },
+    nocturnal: false,
+    activeSkills: [],
+    drops: [],
+    breeding: { breedingPower: 1810, specialParentPairs: [] },
+    metadata,
+  },
+  {
+    id: "katress",
+    number: 79,
+    nameKo: "캐티메이지",
+    nameJa: "クレメーオ",
+    nameEn: "Katress",
+    elements: ["dark"],
+    rarity: 6,
+    variantType: "normal",
+    workSuitabilities: [],
+    stats: { hp: 90, attack: 105, defense: 90, moveSpeed: 440, stamina: 100 },
+    nocturnal: true,
+    activeSkills: [],
+    drops: [],
+    breeding: { breedingPower: 2040, specialParentPairs: [] },
+    metadata,
+  },
+  {
+    id: "wixen",
+    number: 78,
+    nameKo: "마호",
+    nameJa: "フォレーナ",
+    nameEn: "Wixen",
+    elements: ["fire"],
+    rarity: 6,
+    variantType: "normal",
+    workSuitabilities: [],
+    stats: { hp: 90, attack: 110, defense: 80, moveSpeed: 440, stamina: 100 },
+    nocturnal: false,
+    activeSkills: [],
+    drops: [],
+    breeding: { breedingPower: 2080, specialParentPairs: [] },
+    metadata,
+  },
+  {
+    id: "katress-ignis",
+    number: 79,
+    nameKo: "캐티위자드",
+    nameJa: "クレメーナ",
+    nameEn: "Katress Ignis",
+    elements: ["dark", "fire"],
+    rarity: 6,
+    variantType: "variant",
+    workSuitabilities: [],
+    stats: { hp: 95, attack: 105, defense: 90, moveSpeed: 440, stamina: 100 },
+    nocturnal: true,
+    activeSkills: [],
+    drops: [],
+    breeding: {
+      breedingPower: 1800,
+      specialParentPairs: [{
+        parentAId: "katress",
+        parentBId: "wixen",
+        parentAGender: "female",
+        parentBGender: "male",
+        parentA: {
+          id: "katress",
+          number: 79,
+          nameKo: "캐티메이지",
+          nameJa: "クレメーオ",
+          nameEn: "Katress",
+          elements: ["dark"],
+        },
+        parentB: {
+          id: "wixen",
+          number: 78,
+          nameKo: "마호",
+          nameJa: "フォレーナ",
+          nameEn: "Wixen",
+          elements: ["fire"],
+        },
+      }],
     },
     metadata,
   },
@@ -226,11 +312,11 @@ const items: PalworldItemDetail[] = [
 ];
 
 const breedingPair: PalworldBreedingPair = {
-  id: "penking-bushi-anubis",
+  id: "fixture-penking-bushi-sibelyx",
   parentA: palReference("penking"),
   parentB: palReference("bushi"),
-  child: palReference("anubis"),
-  isSpecial: true,
+  child: palReference("sibelyx"),
+  isSpecial: false,
 };
 
 const apiRequestUrls = new WeakMap<Page, string[]>();
@@ -467,11 +553,11 @@ async function installApiFixtures(page: Page): Promise<void> {
     if (url.pathname === "/api/palworld/meta") {
       await json(route, {
         metadata,
-        counts: { pals: 287, items: 1_847, breedingPairs: 3, skills: 566 },
+        counts: { pals: 287, items: 1_847, breedingPairs: 41_329, skills: 566 },
         domains: {
           pals: { status: "ready", recordCount: 287, metadata },
           items: { status: "incomplete", recordCount: 1_847, metadata },
-          breeding: { status: "sample", recordCount: 3, metadata: sampleMetadata },
+          breeding: { status: "ready", recordCount: 41_329, metadata },
           skills: { status: "incomplete", recordCount: 566, metadata },
         },
         coverage: {
@@ -534,10 +620,11 @@ async function installApiFixtures(page: Page): Promise<void> {
       return;
     }
     if (url.pathname === "/api/palworld/breeding/parents") {
-      const child = aliases(url.searchParams.get("child") ?? "").find((id) => id === "anubis");
+      const child = aliases(url.searchParams.get("child") ?? "").find((id) => id === "sibelyx");
       await json(route, {
-        child: palReference(child ?? "anubis"),
-        ...pageResponse(child ? [breedingPair] : [], url, sampleMetadata),
+        child: palReference(child ?? "sibelyx"),
+        ...pageResponse(child ? [breedingPair] : [], url, metadata),
+        state: child ? "resolved" : "not_found",
       });
       return;
     }
@@ -554,7 +641,9 @@ async function installApiFixtures(page: Page): Promise<void> {
         parentA: palReference(parentAId),
         parentB: palReference(parentBId),
         result: isSupported ? breedingPair : null,
-        metadata: sampleMetadata,
+        state: isSupported ? "resolved" : "not_found",
+        alternatives: [],
+        metadata,
       });
       return;
     }
@@ -988,16 +1077,28 @@ test("Pal 필터 query를 유지하고 카드·ESC·직접 URL 상세 Modal을 �
   const directDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" });
   await expect(directDialog).toBeVisible();
   await expect(directDialog).toContainText("アヌビス");
-  await expect(directDialog).toContainText("성별 조건: 수컷 / 암컷");
   const koreanNocturnal = directDialog.locator(".palworld-data-row").filter({ hasText: "야행성" });
   await expect(koreanNocturnal).toContainText("예");
   await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/pals/anubis");
   await page.keyboard.press("Escape");
+  await page.goto("/palworld/pals?pal=katress-ignis");
+  const specialDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "캐티위자드" });
+  await expect(specialDialog).toContainText("캐티메이지");
+  await expect(specialDialog).toContainText("마호");
+  await expect(specialDialog).toContainText("성별 조건: 암컷 / 수컷");
+  await expect(specialDialog).not.toContainText("katress");
+  await expect(specialDialog).not.toContainText("wixen");
+  await page.keyboard.press("Escape");
   await page.locator(".public-locale-button").click();
   await page.getByRole("menuitemradio", { name: /JP/u }).click();
-  await page.getByTestId("pal-card").filter({ hasText: "アヌビス" }).click();
-  const japaneseDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "アヌビス" });
-  await expect(japaneseDialog).toContainText("性別条件: オス / メス");
+  await page.evaluate(() => {
+    window.history.pushState(null, "", "/palworld/pals?pal=katress-ignis");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  });
+  const japaneseDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "クレメーナ" });
+  await expect(japaneseDialog).toContainText("クレメーオ");
+  await expect(japaneseDialog).toContainText("フォレーナ");
+  await expect(japaneseDialog).toContainText("性別条件: メス / オス");
   const japaneseNocturnal = japaneseDialog.locator(".palworld-data-row").filter({ hasText: "夜行性" });
   await expect(japaneseNocturnal).toContainText("はい");
   await assertHealthyDocument(page, errors);
@@ -1092,14 +1193,11 @@ test("스킬 경로는 필터·영문 원문·속성 아이콘·상세·관련 P
   await assertHealthyDocument(page, errors);
 });
 
-test("부모 Pal 자동완성으로 교배 결과를 조회하고 부모 위치를 교환한다", async ({ page }) => {
+test("부모 Pal 자동완성으로 일반 교배 결과를 조회하고 URL과 부모 위치를 교환한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld/breeding");
 
-  const coverage = page.getByTestId("palworld-breeding-coverage");
-  await expect(coverage).toContainText("샘플");
-  await expect(coverage).toContainText("Pal 1.0.1 전체 교배 데이터가 아닙니다");
-  await expect(coverage).toContainText("StreamOverlay curated sample snapshot");
+  await expect(page.getByTestId("palworld-breeding-coverage")).toHaveCount(0);
 
   const parentA = page.getByTestId("breeding-parent-a");
   const parentB = page.getByTestId("breeding-parent-b");
@@ -1113,18 +1211,93 @@ test("부모 Pal 자동완성으로 교배 결과를 조회하고 부모 위치�
   await parentB.getByRole("option", { name: /불무사/u }).click();
 
   const result = page.getByTestId("breeding-result");
-  await expect(result).toContainText("특수 교배");
-  await expect(result).toContainText("아누비스");
+  await expect(result).toContainText("일반 교배");
+  await expect(result).toContainText("실키누");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("penking");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentB")).toBe("bushi");
   await page.getByTestId("breeding-swap").click();
   await expect(parentA).toContainText("불무사");
   await expect(parentB).toContainText("펭킹");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("bushi");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentB")).toBe("penking");
   await expect.poll(() => (apiRequestUrls.get(page) ?? []).some((requestUrl) => {
     const url = new URL(requestUrl, "https://fixture.invalid");
     return url.pathname === "/api/palworld/breeding"
       && url.searchParams.get("parentA") === "bushi"
       && url.searchParams.get("parentB") === "penking";
   })).toBe(true);
+
+  await page.reload();
+  await expect(parentA).toContainText("불무사");
+  await expect(parentB).toContainText("펭킹");
+  await expect(result).toContainText("실키누");
+  await page.goBack();
+  await expect(parentA).toContainText("펭킹");
+  await expect(parentB).toContainText("불무사");
+  await page.goForward();
+  await expect(parentA).toContainText("불무사");
+  await expect(parentB).toContainText("펭킹");
   await assertHealthyDocument(page, errors);
+});
+
+test("목표 Pal 부모 역검색은 직접 URL과 새로고침에서 선택과 결과를 복원한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/palworld/breeding?mode=child&child=sibelyx&page=1");
+
+  await expect(page.getByRole("tab", { name: "원하는 Pal의 부모 찾기" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("breeding-target")).toContainText("실키누");
+  const results = page.getByTestId("breeding-parent-results");
+  await expect(results).toContainText("펭킹");
+  await expect(results).toContainText("불무사");
+  await expect(results).toContainText("실키누");
+
+  await page.reload();
+  await expect(page).toHaveURL(/mode=child.*child=sibelyx.*page=1/u);
+  await expect(page.getByTestId("breeding-target")).toContainText("실키누");
+  await expect(results).toContainText("펭킹");
+  await assertHealthyDocument(page, errors);
+});
+
+test("교배 API 장애와 정상적인 결과 없음을 서로 다른 상태로 표시한다", async ({ page }) => {
+  const directPattern = "**/api/palworld/breeding?*";
+  const unavailableHandler = async (route: Route) => {
+    await json(route, {
+      error: "PALWORLD_DATA_UNAVAILABLE",
+      message: "Palworld 데이터를 사용할 수 없습니다.",
+    }, 503);
+  };
+  await page.route(directPattern, unavailableHandler);
+  await page.goto("/palworld/breeding?mode=parents&parentA=penking&parentB=bushi");
+
+  const result = page.getByTestId("breeding-result");
+  await expect(result.getByRole("alert")).toContainText("교배 데이터를 사용할 수 없습니다.");
+  await expect(result).not.toContainText("지원되는 교배 결과가 없습니다.");
+
+  await page.unroute(directPattern, unavailableHandler);
+  await page.goto("/palworld/breeding?mode=parents&parentA=penking&parentB=anubis");
+  await expect(result).toContainText("지원되는 교배 결과가 없습니다.");
+  await expect(result.getByRole("alert")).toHaveCount(0);
+});
+
+test("교배 Pal 검색 장애는 빈 결과로 숨기지 않고 재시도할 수 있다", async ({ page }) => {
+  const searchPattern = "**/api/palworld/search?*";
+  const unavailableHandler = async (route: Route) => {
+    await json(route, {
+      error: "PALWORLD_DATA_UNAVAILABLE",
+      message: "Palworld 데이터를 사용할 수 없습니다.",
+    }, 503);
+  };
+  await page.route(searchPattern, unavailableHandler);
+  await page.goto("/palworld/breeding");
+
+  const parent = page.getByTestId("breeding-parent-a");
+  await parent.getByRole("searchbox").fill("펭킹");
+  await expect(parent.getByRole("alert")).toContainText("Palworld 데이터를 사용할 수 없어 검색할 수 없습니다.");
+  await expect(parent).not.toContainText("검색 결과가 없습니다.");
+
+  await page.unroute(searchPattern, unavailableHandler);
+  await parent.getByRole("button", { name: "다시 시도" }).click();
+  await expect(parent.getByRole("option", { name: /펭킹/u })).toBeVisible();
 });
 
 test("Pal 이미지 404는 페이지 오류 없이 접근 가능한 fallback으로 전환한다", async ({ page }) => {

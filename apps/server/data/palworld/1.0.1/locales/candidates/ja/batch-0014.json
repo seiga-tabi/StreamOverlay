@@ -1,0 +1,1806 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "75eee0d0987a96fb47e0daf1d68bfc478d28240da7032f50d94dcf82c89d5755",
+          "status": "machine_assisted",
+          "text": "地獄の奥から雷が鳴り響く。 ヘルガルダの亜種と考えられながら、地獄から雷に打たれたXWERMAXq 二が × WZに変換されるという理論があります。 ライガルダ"
+        }
+      },
+      "id": "helzephyr-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d79a74d366854fbbb7f587ef7ee05331792aec78ced4e521fa977a214c92570",
+          "status": "machine_assisted",
+          "text": "問題が発生した場合は、モモンパのアプローチで修正します。 人間にぴったりの強さで、時々一パンチだけで停止した心臓を再起動することができます。"
+        }
+      },
+      "id": "herbil",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "911dfc360c8a7c80d7ba7266d797d70e83c0c60a6c0cf484a143c155d15c91f6",
+          "status": "machine_assisted",
+          "text": "よく考え失くし、眠るのが難しいことが時々あります。 |私は思う、それゆえにわたしは"
+        }
+      },
+      "id": "hoocrates",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0fd8b8ce8394f814824aa92e4d9a4da370f51365a1fafca094ce8f8cf2cb276",
+          "status": "machine_assisted",
+          "text": "体は熱で溶けますが、日光浴に耐えることはできません。 体は温かく溶けますが、温泉が大好きです。 いずれにせよ溶けるなら、澄んだ青空の下で蒸し風呂に入ることを願っている。"
+        }
+      },
+      "id": "icelyn",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b76b00d35a0c76437bc19c62a59821798d49efaed9bc9c118600d2b9417a094a",
+          "status": "machine_assisted",
+          "text": "夜の闇の中で、このパルは獲物を捕らえてその領土に戻ります。 後になってあの貧しい人たちに何が起きるかは想像しにくいことではない。"
+        }
+      },
+      "id": "incineram",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "19388451dc3299e2a92c8060c5d750df3d4f806050c67bf139b983a5603e42ce",
+          "status": "machine_assisted",
+          "text": "対象は、パルでドメインに戻す。 子どもが連れ去られた親の深い絶望を想像するしかありません。"
+        }
+      },
+      "id": "incineram-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eda071bd184399bc7d3040140b994e2ebbc36dbd4a3768acfa12ba73a62108c9",
+          "status": "machine_assisted",
+          "text": "上空からパルパゴス島を見渡せます。 災害が土地に戻ってくると、地球は分裂し空も燃える。 完全な破壊のフラッシュで災害を倒す運命にある。"
+        }
+      },
+      "id": "jetragon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c947a6a17933a887d55107c008c2f5212a9c7e5568db6fab4bd4210a1df78e5c",
+          "status": "machine_assisted",
+          "text": "攻撃を受けると体内に蓄えた電気を放出する。発生する電圧は10百万ボルトを超え、投げつけられた場合は一般的な重火器よりも致命的である。"
+        }
+      },
+      "id": "jolthog",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb56660a73bffc97b9258b012a24960c1e15cdd9f796b97e348c95034eb26956",
+          "status": "machine_assisted",
+          "text": "攻撃を受けると体に蓄えられた冷たい空気を放出します。 放射する冷やしたブラストは、周囲の空気を凍らせて攻撃者の体に簡単に突き刺すのに十分な寒さです。"
+        }
+      },
+      "id": "jolthog-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "507b3160effb363d11d7f9016939df08ade06c2b88e0bdccf64b3d5da3c5427d",
+          "status": "machine_assisted",
+          "text": "伝説によると、レヴィドラはかつて賢い人でした。彼は間違った有罪判決を受けて渦巻きにされた後、「この パル」として王国を滅ぼしました"
+        }
+      },
+      "id": "jormuntide",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cb226eef5f3c994db3ef56ded0b3aa406fe5ea3a923f3f456e73775102f1298e",
+          "status": "machine_assisted",
+          "text": "伝説によると、アグニドラはかつて戦士で、「誤って有罪判決を受け火山に投げ込まれた後」王国を滅ぼすためにこの パルとして戻った。"
+        }
+      },
+      "id": "jormuntide-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9bd0810cbbf6e339a6e5d525b1fd73b1e4fc19672a6a9d3cb3c76f39d93ac00e",
+          "status": "machine_assisted",
+          "text": "影の力によって、それはアルカン現象を生じさせます。 それは生の食べ物を食べることを好む、フォレーナに対して特に敵対的です。"
+        }
+      },
+      "id": "katress",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "41526fb58f7ce287df9749b08e3ff00943bc6a1d1459fedc41b4a595a23b1932",
+          "status": "machine_assisted",
+          "text": "その成長のために、それはもはやその食物が十分に生であるかどうかを気にしません。 このパルはそれらの詳細を心配しなくなり、できるだけ辛いものを好むだけです。 フォレーオとの良好な条件では。"
+        }
+      },
+      "id": "katress-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "87ea6babb5ce605dbc8ff4627a953685ae724e0820e38c29be4f5201b178ee80",
+          "status": "machine_assisted",
+          "text": "生まれた水質によって個性が変わる。 汚染された水に生まれたケルピスは、一般的に気性が悪くすぐに遅れます。"
+        }
+      },
+      "id": "kelpsea",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dff596eceed5075403e05999f71c44e85098854200748bdfdd4251d398bf8bb2",
+          "status": "machine_assisted",
+          "text": "生まれた水の温度によって性格が変わる。 暖かい海で生まれたケルピスは、一般的に情熱的でやる気のある性格を持っています。"
+        }
+      },
+      "id": "kelpsea-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bcefdb7b3273aff2c7b8fa6fe861ccd0179419fca3399f1a370eedeeb0b2be40",
+          "status": "machine_assisted",
+          "text": "十年前、コロマジロ二サッカーが人気でした。 しかし、Free パル Allianceからの激しい反対によりすぐに支持を失いました。 とはいえ、コロマジロ自体は古い空白を失わせるのに役立ったので気にしませんでした。"
+        }
+      },
+      "id": "kikit",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8561ae6c07bce6e5cafb4fd19543269bbf102054b7779047262e950a8c0d5401",
+          "status": "machine_assisted",
+          "text": "敵の頭の周りに巻きついて、内を吸い取る。 パルのミイラは時々見つかるが、実際にはこれらを被害者としている。"
+        }
+      },
+      "id": "killamari",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "07fa7d115761cfe10b86d38bada3310f7f4caa46c8baa908745b7e52694f99e8",
+          "status": "machine_assisted",
+          "text": "首に指を沈め、最後の一滴の血が流れます。 ヤミイカ Primosが互いにぶつかると、彼らは絶え間ない戦いに巻き込まれます。"
+        }
+      },
+      "id": "killamari-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2332769475556e63c0094a180da4caa4964f3b066a2abc836877c480ec718c1b",
+          "status": "machine_assisted",
+          "text": "メルパカは、このXWERMCSのQです。 アルパオー間の競争は、賭けとして彼らの家臣を提供します。 単独で見られるものは、そのようなコンテストの敗者です。"
+        }
+      },
+      "id": "kingpaca",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "56381161f7e143d216d0906942ba2a107b80f4e7fd5c79c5de6a74bbabe91f6a",
+          "status": "machine_assisted",
+          "text": "氷の心で、このパルはその感情を表現するのがひどいです。 孤独な人は、メルパカの目には不器用すぎるように見えるが可哀相である。"
+        }
+      },
+      "id": "kingpaca-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "34a4180d011e6041344d5fb6932537f066ca8984c13cd09c26b63d25d5d0df3d",
+          "status": "machine_assisted",
+          "text": "外観にもかかわらず、シラヌイは極めて敏感でみ込んだときに洞窟に逃げます。 昔は、逃げた方が病気だった。"
+        }
+      },
+      "id": "kitsun",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3892925ea00f630376cedb58bef3a753676c98b7653b1cf2b8d571227307b51e",
+          "status": "machine_assisted",
+          "text": "外観にもかかわらず、カゲヌイは極めて敏感でみ込んだときに洞窟に逃げます。 あまりにも長い間、閉鎖されたことで、かなり暗くなりました。"
+        }
+      },
+      "id": "kitsun-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aeda16ec4ac4849f0b263a04c3d80773c68c39936b74cf94b37550d3527f56d9",
+          "status": "machine_assisted",
+          "text": "215の部品に分解することができます。 部品が散布しても再組み立てや機能する。 異なる個体の部品を混ぜると、誤ったアイデンティティのために誤動作を引き起こす。"
+        }
+      },
+      "id": "knocklem",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "755c7aa63355ea185ecc53f464ee5235b811e0623718df4e89567ef93e3855c1",
+          "status": "machine_assisted",
+          "text": "分解後、再組み立てと機能回復が可能。 異なる個体の部品を混合すると、致命的な認知エラーを引き起こしてシステムが過熱します。"
+        }
+      },
+      "id": "knocklem-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e70a59e250c12575aaba634077bcdc31d86741ef1887cb63f50dfaa7ccdb4f8b",
+          "status": "machine_assisted",
+          "text": "丘を登ると、このパルが後ろに転がり落ちるので終わります。 これにより、めまいや動きがなくなりキャプチャと殺しやすい。 その結果、このパルは食物連鎖の底まで転がり落ちました。"
+        }
+      },
+      "id": "lamball",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "caf5fbfc67d1bca104e31afdebf8a7351f1e2befc5ce4c81e638c9601bb55d34",
+          "status": "machine_assisted",
+          "text": "地を走るのに耳を傾け、不安定な足場を簡単に避けます。 しかし、非協力的な地形はそれを絶えず転倒にします。"
+        }
+      },
+      "id": "lapiron",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "958c9c72e09eeef68131bef8e64e35b5efe82e494344348bc06b49c29d101498",
+          "status": "machine_assisted",
+          "text": "手元に長く流れる毛皮を、常に細心の注意を払って注意を引き付けます。 汚れに敏感で、きめ細かな清潔さが特徴のこの近くにはほこりを蹴り上げるととても嫌な輝きが出てきます。"
+        }
+      },
+      "id": "lapure",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "412669e7e8e87279b63c77a1a84fdbff5f6b4fde399d16aa019eec8dbbf71d4b",
+          "status": "machine_assisted",
+          "text": "一日のトレーニングは唯一の方法です:単一の血統を通過武道に磨きをかけるために! ロマンスに気を取られている? ありえない! 毎日の規律が唯一の方法です! 時が来た! 撃て! 即座に拒絶、それだけです! 愛の技術は決して受け継がれませんでした。 後悔をつむぐこと、それだけ!"
+        }
+      },
+      "id": "leafan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "83564c73d28e887ac8f2e67e6c02c054517a2562671a1ca52e991d2ecbee674c",
+          "status": "machine_assisted",
+          "text": "スタイリッシュな姿勢を維持するために常に細心の注意を払っているパル。 常にクールなポーズをハントし、鏡が与えられた場合それはそれの前で一日中ポーズをとるでしょう。"
+        }
+      },
+      "id": "leezpunk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "57ecb3107fa3509e18ebd797ce58af75b9b04573e7a2d9e35b4315412ccfff5f",
+          "status": "machine_assisted",
+          "text": "立ち姿勢に異常な執着を持つパル。 常に最も熱いポーズを求めて、このパルの所有者は常に熱烈なスタンスで提示されます。"
+        }
+      },
+      "id": "leezpunk-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3cfea257b052cf4467d133ac341f223183bbccf3b4a29493a0b966e41dcfa699",
+          "status": "machine_assisted",
+          "text": "五歳から七歳の人間の子供として知性がある。 素晴らしいパートナーになるが、武器の使用を学んだ後マスターを殺したケースは数件以上ある。"
+        }
+      },
+      "id": "lifmunk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ef557f596cb330ada375bed1acecdfe5d5cf1efefa6a054ef0e61d63a5460aa6",
+          "status": "machine_assisted",
+          "text": "ランタンは、世界の真実を覆う不気味な光で輝きます。 その光が目をつぶっているようにあなたに当たったら、あなたはおそらく隠すものを持っているでしょう。"
+        }
+      },
+      "id": "loomen",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9e9e06343b5b3541e2837e4f617b727e4f46cc6a7b04f5e846711f995710262",
+          "status": "machine_assisted",
+          "text": "頭の角は月明かりの下で成長します。 太陽は嫌いではありませんが、太陽光を浴びると角がかゆくなります。"
+        }
+      },
+      "id": "loupmoon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6e2f48c9b302d1ed73c2d982e68aad1538c4007b205bfdee1f2742464b256464",
+          "status": "machine_assisted",
+          "text": "頭の角は、決して溶けない神秘的な氷でできています。 角を折って作った氷は本当に絶妙ですが、それを試す人とユキカゲの両方が頭痛に終わる。"
+        }
+      },
+      "id": "loupmoon-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "97f0925f8ccceb05bb961d1f94d45b77f075dfc168c17792fdef0b977e17f63b",
+          "status": "machine_assisted",
+          "text": "愛の夜を求めて、それは常に周りに誰かを追いかけています。 最初はパルの他の製品にしか興味を示しませんでしたが、近年では人間でさえその破壊の対象となっています。"
+        }
+      },
+      "id": "lovander",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "beffb623755a58bc73bcaf0bed198af5c491b5457809f50df97973cffb684520",
+          "status": "machine_assisted",
+          "text": "春の初め、花粉が島中の風に浮かぶ。 ポプリーナの花粉症は、CWZTERMBKSが原因です。"
+        }
+      },
+      "id": "lullu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3aacc110e369d711147c3331da32e0e19fc4918743d47a3dbf860b337113e5dd",
+          "status": "machine_assisted",
+          "text": "目を不注意に見つめている人をコントロールできる。 ミステリアで見たものは、その心の中にあります。"
+        }
+      },
+      "id": "lunaris",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "849f10d731c9ce3c45c616ca11caa5dbde2531946d4ff81fbb0dbc73b4ee3945",
+          "status": "machine_assisted",
+          "text": "愛に満ちた、おしゃれなパル。 親を失った小さなパルを監視。 フルパワーのソーラーブラストを使用して、いたずらなパルを訓練します。"
+        }
+      },
+      "id": "lyleen",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a4b0f0a19cd68c7804d7d1f76d649c532f58dea39da2db0c99adea96840b77d5",
+          "status": "machine_assisted",
+          "text": "優雅なパルは優美に満ちています。 痛みを伴う平手打ちで軽蔑する人を警告します。 一部のパルは積極的にこの罰を求めます。"
+        }
+      },
+      "id": "lyleen-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2c631f3512203ad722065af14d2b32795e91f4ab17aa34de123dbfad1a9ed6e6",
+          "status": "machine_assisted",
+          "text": "ヒロイックなポーズをとっているようですが、現実は、転倒を避けるために尾や髪の重さに逆らうだけです。"
+        }
+      },
+      "id": "majex",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "88d99987620d920cee7ba9c48aecf8ca9c2e3d35f6aa5d2b7cc1b3631e124d06",
+          "status": "machine_assisted",
+          "text": "背中の植生は個人によって異なる。 パルのこの本物の庭に感謝する長い歴史があり、そしてXKADERMAXq プルーニングの専門家さえいます。"
+        }
+      },
+      "id": "mammorest",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bd73bcb66ebd6fd09e2408dfd4129acd506ed0d7e5878778f1986939d088c693",
+          "status": "machine_assisted",
+          "text": "背中の植生は個人によって異なる。 絶滅したと推定される植物の種子が、ブリザモスの裏にまだ凍結されていることが発見された時がありました。"
+        }
+      },
+      "id": "mammorest-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c583f2bc4ca341b2e5981a6fa5baa5f8ebd2b8a34da0efc538006e168bfdd6dc",
+          "status": "machine_assisted",
+          "text": "死の近辺で放たれる独特の香りがする生き物を堪能できます。 ソルレイスがあなたに好意をもったならば、それが理由であると仮定することは安全です。"
+        }
+      },
+      "id": "maraith",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dc87975e89e141ae7fa1427e85b8defb515381f51e3d7b64fa8c3b39b6e44332",
+          "status": "machine_assisted",
+          "text": "切断しても硬い尾が劣化しません。 いくつかの人は、これらの切断された尾は幸運をもたらすと信じていましたが、 その結果密猟されている無数のニャオテトにとって彼らは何の役にも立たないものでした。"
+        }
+      },
+      "id": "mau",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "116a386b910bfd9f09a14cceb6e5ae866d36a5316192914ef6a84a065c2c1e58",
+          "status": "machine_assisted",
+          "text": "クリスタルの尾は美しいですが、このパルが死ぬと割れます。 彼らを育てることは幸運であると考える人もいますので、飼育中のチルテトは細心の注意を払って扱われます。"
+        }
+      },
+      "id": "mau-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a8a647301cc05bee47402bcf6a5285755614857374f44d8611e4de82d4e9f99f",
+          "status": "machine_assisted",
+          "text": "パルのふわふわした外観にされるな。 長い足の一つから超音速キックは、世界の反対側に飛んで行くことができます。"
+        }
+      },
+      "id": "melpaca",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2c3e22a89cfaa301af7be73c978b8c86dcdf3129f20460e493158fddfbd6953",
+          "status": "machine_assisted",
+          "text": "純エネルギーでできているので、その内部は完全に空洞です。 このパルは、まだ生きている獲物を中空の体に詰め込みます。 痛みの地獄的な叫びは、このパルの内部からしばしば聞こえます。"
+        }
+      },
+      "id": "menasting",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "23cb5f91498adaca1ef5c972c052365528e32c6691ca5980d816cf90a13e3eeb",
+          "status": "machine_assisted",
+          "text": "純エネルギーでできているので、その内部は完全に空洞です。 土や鉱物を外側の殻に詰め込み、圧倒的な質量を達成します。 それを打たれた者は、落したうめき声を放つしかできない。"
+        }
+      },
+      "id": "menasting-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "01b6582aa9b0ed28f91b8f200fd305636625fb75c57ddcae8479c7650de87a17",
+          "status": "machine_assisted",
+          "text": "かつては、最も愚かな方法で目的を達成した人に賞を渡すという伝統がありました。 初受賞は|ミミドッグを知らず、胸を開き死に噛まれたこと。"
+        }
+      },
+      "id": "mimog",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0b9d27ecf866950673d455aae342620c0d09958c7d2ef3543cb3f63ba6b69ea9",
+          "status": "machine_assisted",
+          "text": "健康な個人では、背中の溶岩がスムーズに流れます。 しかし、生活習慣が悪くなり、徐々に循環を悪化させ、最終的には溶岩塊が発生して突然の大規模な爆発を引き起こします。"
+        }
+      },
+      "id": "moldron",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4cd0e59df090053f4cbf542508e8e9de8d21528677ed89d18432d8cd95e38fb8",
+          "status": "machine_assisted",
+          "text": "健康な個体では、背中に沿って流れる物質は安定した温度を維持します。 しかし、心臓の鼓動が速ければ温度は不安定になり蒸発や結晶化を引き起こして突然ショックで死亡する。"
+        }
+      },
+      "id": "moldron-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "203179c1181ddad58fd23a150bdd0d73e8e1a1131bad0ea261f134ddd910b0e2",
+          "status": "machine_assisted",
+          "text": "パルは信じられないほど強力です。 一度に3,000枚の紙を通す実験が、このパルです! 肉食ではないのは奇跡的なこと。"
+        }
+      },
+      "id": "mossanda",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2cdd8dad8097424b68304e5617f0f251bd16c70bf17c66142d2e42be792b8289",
+          "status": "machine_assisted",
+          "text": "パワーが本当に衝撃的なパル。 体中の電流を変えることで、このパルは自分の強さを過負荷にすることができます。 パワーに関しては、このパルはリストのトップかもしれない。"
+        }
+      },
+      "id": "mossanda-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "add500120529db60111ebf1625c21e4dfb678d95d42513672d03ec8cc67967b7",
+          "status": "machine_assisted",
+          "text": "牛乳は性別に関係なく、このパルからオープン蛇口からの水のように注ぐ。 謎は解けていない方が良いかもしれないが、それは本当に生命のミステリーです。"
+        }
+      },
+      "id": "mozzarina",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "75794acd3b862890be95bed40097ac61778728d861108ae63675b7a38825bf5d",
+          "status": "machine_assisted",
+          "text": "柔らかい顔の毛羽は、どんなヒットも柔らかくなりますが,それは自分自身をよく手入れしたりかゆみに傷をつけたりすることができず。"
+        }
+      },
+      "id": "muffly",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b10df020b8b12b47f10ac8b88b7a3eb8d3e955391e57b3e29030be4a98c1ac80",
+          "status": "machine_assisted",
+          "text": "口の中は冷たく、閉じると自然な冷蔵庫になります。 唾液には、食物の腐敗を防ぐ酵素が含まれています。 衛生的なものであれ、そうでないものであれ。"
+        }
+      },
+      "id": "munchill",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e21671baacfdb85cde78d5e7bbefe169a8ef9c0866032fe204469cd915922fb4",
+          "status": "machine_assisted",
+          "text": "人間は寄生虫の宿主として便利だと考えます。 マシュリーがこのフォームを取った理由は、人間のガードを下げることを欺くためであり、 その胞子をより効率的に拡散させることです。"
+        }
+      },
+      "id": "mycora",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "185d6c9bad5ac404cbac078ba58eec70fa7558408b5e5525cccaf7b3c50bf9d8",
+          "status": "machine_assisted",
+          "text": "セイントールの 一。 その暗くされた形は否定的な感情の具体化です。 しかし、その目の奥深くには思いやりの光がまだ見えます。"
+        }
+      },
+      "id": "necromus",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5402d343464ef30246a003d13daa9a99537686c67e40269ad8c91e80b2c94d65",
+          "status": "machine_assisted",
+          "text": "スパイクは感情に反応します 非常に愛されているハグミーは本能的に受け入れたいものです。 しかし、多くの場合は悲劇的な事故で終わります。"
+        }
+      },
+      "id": "needoll",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "87774676fbd28f9e29069598f5453f340051b38f196c12846e725485b88abb8d",
+          "status": "machine_assisted",
+          "text": "スパイクは感情に反応します 愛されているハグユーは、その所有者にしがみついています。"
+        }
+      },
+      "id": "needoll-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a04ef629798e5481896d1b55fba9e7679d986e96f627f37a244b3e89ff41a9fc",
+          "status": "machine_assisted",
+          "text": "災難の封印後、ファイブレイクからのチャンピオンが出現しました。 海を見つめ、その価値があると思えるものを待っています。 偶然ではない、それは運命だ。"
+        }
+      },
+      "id": "neptilius",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8d792aa2d13aed2d24994a5403e53065664afffba12ca0c2b52cd1b67b023723",
+          "status": "machine_assisted",
+          "text": "魂は、その魂を担っている。 誰かに落ちて、無理やり魂を抜いて自分の魂と融合させ、「一つになる」ことを切望する。"
+        }
+      },
+      "id": "nitemary",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9dde28249245ecba919681f4f519fb9a3af1ef4464f6685bfe7d2474b9b24aa",
+          "status": "machine_assisted",
+          "text": "魂は、その魂を担っている。 誰かに落ちて、魂を振り向ける。"
+        }
+      },
+      "id": "nitemary-botan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "95f9e67fad1323a2c74c10c983b2ee759d14549dcdd7ce6ee718f1f73c238e8c",
+          "status": "machine_assisted",
+          "text": "新生児のパルを巣に運び、代理親として育てます。 赤ちゃんパルは、脂肪が上がれば狩りをします。"
+        }
+      },
+      "id": "nitewing",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4bcfbe4bb9b7ff938a024792965735d1b3cc6b5ac04ec4574044388145b94e76",
+          "status": "machine_assisted",
+          "text": "ルナティの髪があなたの寝具に見つかったら、それを置いてすぐに残してください。 迎えに行くのは、終わりのない夜への片道切符です。"
+        }
+      },
+      "id": "nox",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f6bec58bfee5db264c7ec3ab9fbe081bef70d20c7a0a942df80619671bae8cba",
+          "status": "machine_assisted",
+          "text": "隠された目を垣間見る人は、強く嫌う。 やってみることを主張すると、それは突然泣き出し、二週間もあなたを無視します。"
+        }
+      },
+      "id": "nyafia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a44ee1114fd510ee1d80269d3707d65849e7ba770c7f91d6cae8bb48ca83668d",
+          "status": "machine_assisted",
+          "text": "オフィディアが生息する水は、しばしばその形を模倣した花で満たされています。 花を直接広める試みは数多く行われているが、人間の手によって邪魔される瞬間には必然的に枯渇する。"
+        }
+      },
+      "id": "ophydia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f8fccb52bcc08e9fb80c31fb74acbaf07367bdeab05f56569bc4f4fb5d3d4557",
+          "status": "machine_assisted",
+          "text": "敵の傷に電気を送り、内側から煎します。 ボルゼクス間の戦いは、目の瞬きで終わります。"
+        }
+      },
+      "id": "orserk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f9825d54f974aea952978f2c37e54d81a1cfa85d562b0de0b2e41c971bc27cc9",
+          "status": "machine_assisted",
+          "text": "ベイントールの 一。 その輝く形はすべての否定的な感情を含まない。 しかし、憎しみのきらめく光は今もその目の奥深くに見えます。"
+        }
+      },
+      "id": "paladius",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2455c9a2ebe696cef1d1e70f5df7eda01352bbd3a24a0722eb5bc6bb779c1bd3",
+          "status": "machine_assisted",
+          "text": "シグネチャーダンスで敵のリズムを乱します。 芝の戦闘では、相手がリズムに同期して落ちる最初のものは失われます。 求愛、退屈と戦い...全てがダンスにかかってくる! では、人間をターゲットとしたダンスとはどういう意味でしょうか。"
+        }
+      },
+      "id": "palumba",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f6ff77db25076171a4f026dc415e13bd55339b6f486ca529a0b5937c9171337",
+          "status": "machine_assisted",
+          "text": "このパルの羽は、ほとんど消えましたが悲しいことに飛行する欲求が今まで以上に強く残っています。 今でも、どんな方法でも飛行を試みている。"
+        }
+      },
+      "id": "pengullet",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "df182d8a7468cec9b4e36826d8512577be2762dddb3480851bad8a5a26afdcd7",
+          "status": "machine_assisted",
+          "text": "このパルの羽は消えて、もはや飛ぶことができません。 空へのれはに変わり、電気を利用してまだ震えている人々を倒しました。"
+        }
+      },
+      "id": "pengullet-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d03a2127e12de36a2b0a7162c84597c174a870155baeb682fbc1c8bf92c425c0",
+          "status": "machine_assisted",
+          "text": "意外にも、ペンタマとは無関係です。 しかし、このパルは気の毒なので今のところ慢に仕組むために最善を尽くしています。"
+        }
+      },
+      "id": "penking",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "29e0b28f21797d7da40aa521cc6813f11a11e5541026cce15b1dcf70c9780890",
+          "status": "machine_assisted",
+          "text": "体色は電気をとって水中狩猟を改善した。 結果的にペンタマのファンは失ったが、奇妙なことに今それは忠実なフォロワーがいる。"
+        }
+      },
+      "id": "penking-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e277cb2f2842ea7929141efba4476435c93027d97541fcfb5bcbcdd8114a27a1",
+          "status": "machine_assisted",
+          "text": "パルは、人生の終わりに巨大な植物に変換します。 十年に一度、美しい花が咲き、新しいフラリーナは生まれます。"
+        }
+      },
+      "id": "petallia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ea99d7fbe2d2c3b064407bee5daf474085b320f879c0dc1932705fc3240b72a0",
+          "status": "machine_assisted",
+          "text": "終生灰の山に燃え尽きるパル。 周囲の土壌は信じられないほど肥になり、次の十年間に豊富な植生が繁栄します。"
+        }
+      },
+      "id": "petallia-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dd3f7fbb30a4b2caf576e05aaefc2af8a0407ab5bd34cdfae5a3f6c40fc152dc",
+          "status": "machine_assisted",
+          "text": "太陽の下では、氷を好きな形に溶かすのに必要なだけ回転する。 片側は、少し大胆すぎるサイドバーンを持つ人のように一人で残されるべきです。"
+        }
+      },
+      "id": "pierdon-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "67467c52296f4c10185d2e9be81a6f50250b93e3063c153c5df27ce2e671412d",
+          "status": "machine_assisted",
+          "text": "ポラパップの中では、雪の上の最速スライダーが最も高い尊敬を得ます。 時には、あまりにも力強い跳躍が空から一つ転倒を送ります。 予報:空を晴れ、ポラパップが飛ぶ可能性。"
+        }
+      },
+      "id": "polapup",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2a5dc95df812daa474f8db920277cff504c882a613bc27d7fd9cddf2b8c82e4",
+          "status": "machine_assisted",
+          "text": "バニザラシ Terrasの中で、雪の上の最速スライダーは最高の尊敬を得ています。 雪に埋もれたままの猛烈な跳躍は、競争が激しい季節にはよくある光景です。 交通予測:重いチョコザラシ。"
+        }
+      },
+      "id": "polapup-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a1d713fd9616f7bdabe52840887dc5ac7ee534c6fe8b122d430906461906298e",
+          "status": "machine_assisted",
+          "text": "約5,000種類の毒物がある。 死に至るほど致命的なものもあれば、その影響を及ぼすほどの濃度のものは存在しない。"
+        }
+      },
+      "id": "prixter",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6839c22ca303545d23460aeed83dcd858b18cadf0cd8a1ee2e02a4dc8c6520e3",
+          "status": "machine_assisted",
+          "text": "尾で敵を突き刺し、体に直接電気的ジョルトを送り込む。 しかし、電流が極めて弱いため単純なパンチでははるかに多くのダメージを受けることになります。"
+        }
+      },
+      "id": "prixter-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "51b114555cb46b6325eef5c8c7bb267287c0b1e44224675e6010b0517f53cf66",
+          "status": "machine_assisted",
+          "text": "落した知的で優雅なこの島は、島の貴族の付添人として頻繁に雇われた。 しかし、夜になると顔が不気味に見え、すぐに気に入らない状態になった。"
+        }
+      },
+      "id": "prunelia",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c2267a4ec045a8373f91e8eff6dddfd75556e0650151e7add5c8b71516812bf4",
+          "status": "machine_assisted",
+          "text": "ふわふわした毛皮は、浸すと膨大な量の水を吸収します。 乾いた状態での放電は強力で、入浴時間を深刻なギャンブルにします。"
+        }
+      },
+      "id": "puffolt",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3fcfc8f2c554471d6798c41057ea68353fc9e29473587943cb69056b47033bdb",
+          "status": "machine_assisted",
+          "text": "ポチムネの領土紛争は、一目れで始まり一つの迅速なストライキに終わります。 go|コマンドが同じ攻撃本能をトリガーするため、 |stay_にそれらをトレーニングするのは危険なビジネスです。"
+        }
+      },
+      "id": "pupperai",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "09680c39e83b47ac23a4bd596c481eefdc691853db889832179bfc38b13ed9c8",
+          "status": "machine_assisted",
+          "text": "全身が高効率ラジエーターへと進化し、驚異的なスタミナを付与。 誰かが乗る場合、このパルはそれらを燃やさないように注意します。"
+        }
+      },
+      "id": "pyrin",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9693a06d489352399ef4d7085f29669d8a33716ac27e9754c6e8ce60b8699415",
+          "status": "machine_assisted",
+          "text": "謎の暗黒物質をエネルギーとして燃焼させ、残りの粒子は体から排出します。 誰かが乗るならば、暗闇の道をうろついないように注意する必要があります。"
+        }
+      },
+      "id": "pyrin-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b71f427597d8ba7a1f8fd198332e3a6016530516180ad9babc457f6c6a765c9d",
+          "status": "machine_assisted",
+          "text": "フェスキーを抱きしめながら寝るのは天国体験と言われていますが、眠りにつくと投げ入れて天国に送られた人もいます。"
+        }
+      },
+      "id": "quivern",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f063b34bbcd733e91ab3ee3e38a2448aca9ac8517735a64cdfbb420f7a94be44",
+          "status": "machine_assisted",
+          "text": "フォレスキーを抱きしめると、太陽の光や草原のような匂いがするなら明日は晴れます。 湿った匂いがするなら、明日は濡れて惨めになるでしょう。"
+        }
+      },
+      "id": "quivern-botan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ab6e6ad6a487f3d416dca924d5246d3d13ff4ccfad97545af39bfc52efe947f0",
+          "status": "machine_assisted",
+          "text": "ライバードと関連している種だと考える人もいますが、実際には関係はありません。 それは主に岩を食べ、長年後そのくちばしと頭はこの食事を収容するために固くなった。"
+        }
+      },
+      "id": "ragnahawk",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "431048f6cc0bcdcc14269ab8d1844adebf77cb35d8fb2ccd6023e6dcb00695ff",
+          "status": "machine_assisted",
+          "text": "フルスピードでは、雷のボルトと間違える可能性があります。 ラハウンドが二匹衝突すると、雷鳴は空中を響く。"
+        }
+      },
+      "id": "rayhound",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5b4edea37195b0c23defc958a7eed7e5f28c0e39f82d5f8793be4fbd57e565b",
+          "status": "machine_assisted",
+          "text": "フルスピードでツンドラを駆け抜けると、目隠しブリザードが起動しフリーズマの衝突が発生します。"
+        }
+      },
+      "id": "rayhound-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "71e9d7261d6d44c2fc120abd50778358c4c2eb4af50c5e53a93d67a7e7201a4d",
+          "status": "machine_assisted",
+          "text": "その透明なセルリアンの角は絶対零度の寒さで輝きます。 素手で触った人は、すぐに凍って破砕されます。"
+        }
+      },
+      "id": "reindrix",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dc44130f2e46c5bc81f40af46ae367d4e1ff4eac2e4a39cf821973620db7fc45",
+          "status": "machine_assisted",
+          "text": "見た目は青白だが、かなり強烈だ。 視界にある全てのものを獲物と捉え、何も食べずに立ち止まる。"
+        }
+      },
+      "id": "relaxaurus",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5268e26767545900da42f5d233f2f7e3372b3cfcfc918f73c5caae006708d50",
+          "status": "machine_assisted",
+          "text": "ある日、ペコドンは考えを思いついた。 おそらく、そろそろ変化の時だった。 ちょうどその時、電気ショックが体中を駆け抜けました!"
+        }
+      },
+      "id": "relaxaurus-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "059f8fc8ffd173a58cef5d4e158c616e4d9ecb284261a1b076993241ddf7487c",
+          "status": "machine_assisted",
+          "text": "一見すると、その動きは誇張され開口部でいっぱいに見えます。 しかし、奇妙なことに敵は圧倒され、横目には見えなくなり、まるで横向きに固定されているかのように。"
+        }
+      },
+      "id": "renjishi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "167d9414da51984ba9edfe06b2ca68c33e80d1ef6ad4f3c9fd273a02e656bf53",
+          "status": "machine_assisted",
+          "text": "マグマのような血液が体中を流れます。 大量の水が投げられると、その水は急速に熱し蒸気爆発を引き起こす。"
+        }
+      },
+      "id": "reptyro",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f5efa900a739890a833c27a7e10390eecbd457ea98b59ddf0206a7db08779ded",
+          "status": "machine_assisted",
+          "text": "氷の冷血が体中を流れている。 急速に加熱すると血液が蒸発し、巨大な蒸気爆発を引き起こします。"
+        }
+      },
+      "id": "reptyro-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9c3df55a6dd89f9b5327f5f4dd6302560bf517592da649ae044515bf0df6535a",
+          "status": "machine_assisted",
+          "text": "明るい笑顔がないわけではないパル。 時には、その触手はツッパニャンのいたずらによって結び目で縛られる。 その瞬間にその表情は悪魔的になります。"
+        }
+      },
+      "id": "ribbuny",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "602a8990c97555d9f84dc284fa7e153502d9a4d2e30d4284eafbe9da2e3d5c24",
+          "status": "machine_assisted",
+          "text": "いつも陽気な笑顔を浮かべます。 ツッパニャンのいたずらのおかげで、時には触手で絡み合って、彼らの方法と戦わなければならないことがあります! 厳しい状況でも、彼らは元気に笑顔を保っている。"
+        }
+      },
+      "id": "ribbuny-botan",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "daa3943cf59535bbcbb6be0449377e7d0229d21d0f3fc08903fe334057897dca",
+          "status": "machine_assisted",
+          "text": "パルは、森で狩りをし暮らしている人間に非常に似ています。 パルが何であるか、そして彼らが遠い過去に人間からどのように分岐したかを理解するための鍵であることが証明されるかもしれません。"
+        }
+      },
+      "id": "robinquill",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a79edeaad78d9586d8b929077c7f525a2eb507719b195f2e5a31a224f8e2fca3",
+          "status": "machine_assisted",
+          "text": "パルは岩場に生息する人間と非常に似ています。 サンドロの骨が遺跡で見つかったとき、近くにも必ず人間の骨があります。"
+        }
+      },
+      "id": "robinquill-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1cfd89d59aa7e0fb7f298026d8a496b2813c5aa2d3541258596c4f62e7c111d2",
+          "status": "machine_assisted",
+          "text": "ワイルドヒノコジカは驚くほど病気になることはありません。 枝を燃やして作った一日に一個炭を食べることが、その永遠の健康への秘です。"
+        }
+      },
+      "id": "rooby",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ec39cecb2e26ce581f1788ddf4642da685111720bbce906db34a77e20e9ed50e",
+          "status": "machine_assisted",
+          "text": "泥棒は、誰も見ていないときにアイテムをスナッチします。 行為に巻き込まれたときに心配する理由はありません。 目を奪い取ると、何も見えなくなります。"
+        }
+      },
+      "id": "roujay",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f609e4835070c37d86f4f62018ac3d33ac6a421457c19a6a438b1eba8402937e",
+          "status": "machine_assisted",
+          "text": "パルは非常に攻撃的なため、相手の強さを測る前に戦いを選ぶことがよくあります。 小さいながらも、強力な電荷は岩を飛行させることもできます。"
+        }
+      },
+      "id": "rushoar",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6d0e55794038b47efb3a2f82bbcdd26f2881e5e3c52021b407d5eb52e7d2212c",
+          "status": "machine_assisted",
+          "text": "月に似た後に浮かぶ物体は、世代ごとに徐々に円形になると言われています。 月が満ちているとどうなるか誰も知りません。"
+        }
+      },
+      "id": "selyne",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dbe37227efff1fa48dbeea9b0a597ec49d85892ff563620f1f76f9c0f244d73f",
+          "status": "machine_assisted",
+          "text": "狂気の深さから生まれた、その存在そのものは理由を否定します。 他のパルとすべての遺伝的結びつきを失ったので、それはまだ パルのXWZと考えることができるかどうか疑問に思います。"
+        }
+      },
+      "id": "shadowbeak",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ab6ca7e5b4b7f8db74a76e97b72fbe7c5babb4d9e204d6cc759fbca0943ddf79",
+          "status": "machine_assisted",
+          "text": "そのリングは特別な機会のために予約されています:その運命の仲間に会うと、指輪が取引されます。"
+        }
+      },
+      "id": "shaolong",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c23e2237d8b509ca9213ee8f6373a30ef3f42c24190d324fbea99f02d4dc0d27",
+          "status": "machine_assisted",
+          "text": "大量の胞子を吸入すると、あなたをトランスに導くでしょう。 キノッポが動きのないように見えるのは、キノコを模倣しているからではなくてむしろその胞子に高いからです。"
+        }
+      },
+      "id": "shroomer",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2fde9c2407e5224c0005b2926c823285388870601e24ca443e4e0dbb23ec5010",
+          "status": "machine_assisted",
+          "text": "このパルによって放出される胞子が豊富に存在し、日光を遮る。 ベノッポが動きのないように見えるのは、キノコをまねているからではなくてむしろ胞子に何も見えていないからです。"
+        }
+      },
+      "id": "shroomer-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a59d94b87c12f97d1260162cd23e0d684359ed9bd86bd0492f54150c7f4b054",
+          "status": "machine_assisted",
+          "text": "雨が好きで、晴れるまでしばしばレインシャワーを浴びます。 雨の日には、キツネビはしばしばその下に避難しています。"
+        }
+      },
+      "id": "sibelyx",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eb79f92a02a92f3764c701b2b01b03f9234840cb9bce398945fbbfff9ffb29f6",
+          "status": "machine_assisted",
+          "text": "空を眺めるのが大好きなパルは、しばしば完全に静止しています。 より小さなパルの集いスポットとなることがよくあります。"
+        }
+      },
+      "id": "sibelyx-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fc1e8f957def0b569420b58cd011f69af0c6e777e9b65c72f18e453b0d2274ce",
+          "status": "machine_assisted",
+          "text": "古来より世界樹の中に残っており、その警戒は続いている。 それが何を保護し、そしてどのような目的のためにモスローンは知りません。 結局の世界の木はそれをすべて伝えます。 敵の胞子が誰であるかを必ず知る。"
+        }
+      },
+      "id": "silvance",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bf15e395bc4360409d6e53cec12f759484b64c8ba5972c799a8559225b63f207",
+          "status": "machine_assisted",
+          "text": "体が一時的に分離され、骨を使って敵をスライスする奇妙な種は長すぎると自分自身を破壊する危険性があります。 未確認ではあるものの、高齢者は生存の本能を誘発し寿命を延ばすために意図的に分離していると言われています。"
+        }
+      },
+      "id": "skutlass",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bf15e395bc4360409d6e53cec12f759484b64c8ba5972c799a8559225b63f207",
+          "status": "machine_assisted",
+          "text": "体が一時的に分離され、骨を使って敵をスライスする奇妙な種は長すぎると自分自身を破壊する危険性があります。 未確認ではあるものの、高齢者は生存の本能を誘発し寿命を延ばすために意図的に分離していると言われています。"
+        }
+      },
+      "id": "skutlass-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "78321fcffb7452db4c182636eaf3efaafc9c683c9f08f323aa861c41e7b87ad0",
+          "status": "machine_assisted",
+          "text": "青い炎は単に触ってクールですが、それらに触れたままのものはゆっくりと凍ります。 ミルクボトルを張って、冷凍のミルクセーキを手に入れましょう!"
+        }
+      },
+      "id": "smokie-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d23232bb32b0cbd8b92333a7763091d9f41f17aa82a5f414852115f0b9bb192a",
+          "status": "machine_assisted",
+          "text": "ショックスパのためにデンツムを入浴に投げ込むのは、伝統的な健康習慣と考えられています。 つまり、結果はかなりショック的かもしれません。"
+        }
+      },
+      "id": "snock",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ae9f7d8f99ceb6866df9e179c08c788f858791000f4045357d2451adb2ffc94f",
+          "status": "machine_assisted",
+          "text": "温泉に温められたドンツムを浴場へ投げ込むのは、かつて遠い昔の流行でした。 最近の復興により、それは文字通りホットなトレンドです。"
+        }
+      },
+      "id": "snock-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a6f2d0e28e15baf3b519a4ec5251c8ec84f88f09fee008f68f863582c36a183e",
+          "status": "machine_assisted",
+          "text": "「ユキボウの目を見る」とは、見えないものの本質を探求するという意味で表現されています。 皮肉なことに、スナグルーがそもそも目を持っているかどうかを確認できる研究者はいない。"
+        }
+      },
+      "id": "snugloo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3441a4ba4b34434f732c508821395913055b35061ea84d895fe6ecbc0ae88159",
+          "status": "machine_assisted",
+          "text": "モノクローナの喜びと悲惨さは等しく表れています。 一つを世話することを選んだ人は、それが伴うものに備えなければなりません。"
+        }
+      },
+      "id": "solenne",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c61f83c6a0672b8d43df3927782581ab69b25b2073637ab6d9e54f419fac081b",
+          "status": "machine_assisted",
+          "text": "らせん状の尾がプロペラの役割を果たす。体が負荷に耐えられるなら、速度は88マイル毎時を超える可能性があるという。"
+        }
+      },
+      "id": "solmora",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee791560c67c0cf0063def0eae8d50c2b46f5480daafc5b6d91342e3dc8417ff",
+          "status": "machine_assisted",
+          "text": "らせん状の尾がプロペラの役割を果たす。体が負荷に耐えられるなら、1.21ギガワットを超える電力を生み出せるという。"
+        }
+      },
+      "id": "solmora-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b5628098a6ce4e2eb78ecf9f4910f08f6fc82e287afb69fae58819432a6f0339",
+          "status": "machine_assisted",
+          "text": "かつては、世界が終わりに近づいていくと炎も弱くなると考えられていた。 火が弱くなったとき、ドーンサイアーたちは繰り返し喜ぶだろう。しかし結局それはオドロクロのいたずらであることが判明したのだ(source) 少なくとも今のところは。"
+        }
+      },
+      "id": "sootseer",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e8d64803f0aeaa7722d4984fe4305d24ffacaf96250f3bf04b54c805bec32668",
+          "status": "machine_assisted",
+          "text": "そのふわふわは不快な記憶を隠すために使用することができます。 風にさらわれたら、彼らが運んだ暗闇への別れを告げることができます。"
+        }
+      },
+      "id": "souffline",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "24497ef96f5ad0024573e332d26d43a411d3583e1780d7c4fa9dd6884b44946b",
+          "status": "machine_assisted",
+          "text": "乾季の間、このパルはヒューズを吹くのが常に切望されています。 火花は、たとえ同盟国の間でもわずかな挑発でも飛ぶことができます。"
+        }
+      },
+      "id": "sparkit",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ea009036a01034b099d1fc6fa92524cf28626cb24c2d3b82dee7b64c935d952c",
+          "status": "machine_assisted",
+          "text": "流れるような豪華なたてがみに誇りを持っています。 分割されたエンドを見つけたら、それは正しく実行することに集中できないほど残念になります。 静電気は髪の毛を縮めるので、オーマサンダの費用は一切かかりません。"
+        }
+      },
+      "id": "starryon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ff0e0ac1ad6c68719761f25bc32043ac95a8ed02ad6c8b497ecf920b3bbf627c",
+          "status": "machine_assisted",
+          "text": "輝きと華やかなたてがみに誇りを持っています。 少し汚れても、あまりに悲しくなり、正しく走ることに集中できません。 スキンオイルはコートを台無しにするため、お気に入りのパル Tamerでも触れすぎないようにしたいです。"
+        }
+      },
+      "id": "starryon-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a159fef86d408a7484e5ab1f0f15760cb77d0a7b9d8ede37a90c32a6e4e037ca",
+          "status": "machine_assisted",
+          "text": "その流体力学的形態は水上での活動に適している。 密猟者はしばしばそれらをキャッチし、サーフボードの代わりにそれらを使用します。"
+        }
+      },
+      "id": "surfent",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "773f6b68ad5bdc87fdd51b6d96051cd6f2e9eaa890976de953988f7df9fbeec0",
+          "status": "machine_assisted",
+          "text": "砂の上の活動に適した空気力学的形状です。 密猟者はしばしばそれらをキャッチし、サーフボードの代わりにそれらを使用します。"
+        }
+      },
+      "id": "surfent-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be4838b1b28a76f87a744d5732bff5265c22dc4a48a89504f43b539d8fdee388",
+          "status": "machine_assisted",
+          "text": "かつては乾季に旋すると考えられていた。 前年の干ばつが起きたとき、人々はその数字を容赦なく切り詰めようとし、二年後には豊富な収穫をもたらすことを望んだ。"
+        }
+      },
+      "id": "suzaku",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2037df9c1fd6d21c93193981e711371338331d928f4c502f46a47ce5dfe76de9",
+          "status": "machine_assisted",
+          "text": "かつては雨季に降ると考えられていた。 前年に洪水があったとき、人々はその数字を容赦なく削減しようとし、二年以内に災害を回避することを望んでいます。"
+        }
+      },
+      "id": "suzaku-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8bf0820cf3c9f1e30c2b4be2fb21dc416b42673abe4420b511edcdd7714819d5",
+          "status": "machine_assisted",
+          "text": "地面をクロールして、微細な有機物を食べる。 しばらくすると、栄養を与えない物質を排出します。 掃除のモップとして使うことで、みんなが勝てる!"
+        }
+      },
+      "id": "swee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5edba171d9ee525e7238e06dd26df53c3bc2f0545183062fd0b17e043015c888",
+          "status": "machine_assisted",
+          "text": "冬眠中、コモップの多数のはボリュームのあるボディヘアの中に隠れています。 記録されているのは101枚。"
+        }
+      },
+      "id": "sweepa",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "747b33b7445a32cd5ff6c2f3f19fd7a11401569ea3396bba4a076bb76efc0972",
+          "status": "machine_assisted",
+          "text": "昔、このパルは木枝のような長いオブジェクトを武器として使用しました。 しかし、人間と接触した後に、銃というよりは少し効果的なものを見つけた。"
+        }
+      },
+      "id": "tanzee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1ce2cec87e850a2bb2f93cdfde2ef5a26be3bb07a0cb9faaee718b06b957cd2a",
+          "status": "machine_assisted",
+          "text": "ヤシは燃えている物体を傷めることなく扱うように進化してきた。 銃が弾薬を使い果たすと、熱したを素手でつかみ敵にでる。"
+        }
+      },
+      "id": "tanzee-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a3c23a2fe7e05c1d999b48076b49ae30ab9f4b1cb01c2cc2c7ad2868f33cc976",
+          "status": "machine_assisted",
+          "text": "鼻と思われるところから大量の水が注ぐが、実際にはそうではないと言う人もいる。 これはパルの学者の間で激しい議論を引き起こしました。"
+        }
+      },
+      "id": "teafant",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9deeed826b34173d4bb83aaeb9417d245a6712a8db62c9300f7141b47d73350f",
+          "status": "machine_assisted",
+          "text": "背中の石は貨物だけではない。 どこか遠くに置けば、ゆっくりと家に帰る。"
+        }
+      },
+      "id": "tetroise",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4af03f2ce40e6784e18af6dceecbe8b09681e1e8a429531d424f6da62e873525",
+          "status": "machine_assisted",
+          "text": "背面の石が取り除かれても、オシロガメはどこにいるかを知ることができます。 どんなに離れていても、常に追跡します。"
+        }
+      },
+      "id": "tetroise-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "27f53c65550c33257e0c19937c4520381a12ef2745c6d26dcc8c957a62607da8",
+          "status": "machine_assisted",
+          "text": "爆発する卵を産む恐ろしいパル。 後部から卵を発射することが多いが、パル自体は爆発的に爆発している。"
+        }
+      },
+      "id": "tocotoco",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43c264b358503f0f1a2d33951d21aeb39a0af772972cb1d183e299cad4246c42",
+          "status": "machine_assisted",
+          "text": "青から出て、他のパルの前でその貴重な翼を誇示することが多い。 これは威戦術のようですが、パルはディスプレイから何らかの喜びを導いているようです。"
+        }
+      },
+      "id": "tombat",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3ca0a46eb8c071fced024d8f1311bc400143fedfbb46e6a2cac0f4a59a2acb37",
+          "status": "machine_assisted",
+          "text": "風に揺れる花を模倣して捕食者を避けるために動き回るという説もあるが、赤みがかった草の花は高速で激しく弾けるのは、単に落ち着かないため、何も近づかないようにしているだけだとする意見もある。"
+        }
+      },
+      "id": "tropicaw",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cc028b713dc7aeaba096bb89e38fa7996a9fbcb2d21a464aef6d02c0d4e5326",
+          "status": "machine_assisted",
+          "text": "壊れやすい体を守るために、非常に丈夫な殻を開発しました。 残念ながら、その下は全く無防備です。 少しでもくすぐれば、寒さが抜けるかもしれない。"
+        }
+      },
+      "id": "turtacle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "743e097303b781310527ff6ff2e91e0ad57017669fd62643f5d620b953467817",
+          "status": "machine_assisted",
+          "text": "壊れやすい体を守るために、非常に丈夫な殻を開発しました。 感覚の大部分は手足と殻に集中しているため、誰かが静かにコアに触れているかどうかさえわかりません。"
+        }
+      },
+      "id": "turtacle-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2ba9f78ed09680a2d5daa7bdc02501a6ff683da07a872950dccd82328a52856e",
+          "status": "machine_assisted",
+          "text": "かつては雷神の使者と考えられていたため、人々は狩りをしなかった。 しかし、目撃者が雷で死んだのを観察した後はその敬意が薄れ、文字通り馬に落ちてしまった。"
+        }
+      },
+      "id": "univolt",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "579858068b560cab767d565cb258a2d021d6f2eaa50d4e00a9c8b2080b74f540",
+          "status": "machine_assisted",
+          "text": "かつては冬の神の使者と考えられていたため、人々は狩りをしなかった。 しかし、目撃者が氷の上に足跡が消えたのを観察した後にその敬意は薄れ、文字通り作業馬の役割に滑り込んだ。"
+        }
+      },
+      "id": "univolt-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4542e4d2ef21a6655f8f6042d8935be35e47512dbf4f72f681dba3c8c93b541d",
+          "status": "machine_assisted",
+          "text": "城は王のお気に入りの花でいっぱいでした。 大きな戦いが続き、城に火が近づいた。 混の中で、花の精神が現れた。 -おとぎ話から|王の花。"
+        }
+      },
+      "id": "vaelet",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "88e9a833d873810002c1ba563de71176010ddc9f956d3871db2f1bd3f49a053f",
+          "status": "machine_assisted",
+          "text": "古い絵画では、今日よりもはるかに小さく描かれています。 理由は不明だが、近年では体の様々な部位が急速に伸び始めており次の世紀までには現在の十倍近くに達すると予測されている。"
+        }
+      },
+      "id": "valentail",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ff1f1b4ca49d5e52fe8b903039b23ed5de7016e97eb3f1a3bf0857851fc1cb3d",
+          "status": "machine_assisted",
+          "text": "カバネドリの外骨格から作られたフルートは、山脈全体にまたがると言われています。 昔は、攻撃の合図としてこのようなフルートが使われていた。"
+        }
+      },
+      "id": "vanwyrm",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5f37be266a4fa078f70c7f5a3e441d1a33542998da094cf0fee028c4ffd9a32d",
+          "status": "machine_assisted",
+          "text": "シロカバネの外骨格から作られたフルートは、山脈全体にまたがると言われています。 昔は戦闘で勝利を示すためにそのようなフルートが使われました。"
+        }
+      },
+      "id": "vanwyrm-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a44149eb62ca8389eabd14876ea01cf87b26f6ff12ca8a4448507430ecbfc08a",
+          "status": "machine_assisted",
+          "text": "混乱すると、頭の上のヘビに相談することになります。 しかし、それらはすべて最終的に同じ存在であるため,何も理解されていないことを理解するようになる。"
+        }
+      },
+      "id": "venusa",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0afcc005c341b737ce697964fa8904552f637575014ab1afb85f7a1809b78153",
+          "status": "machine_assisted",
+          "text": "ラベロットが渡った土地は、非常に肥になり厚い植生もすぐに成長します。 除草剤が使用されている場所はどこにも実行されません。"
+        }
+      },
+      "id": "verdash",
+      "kind": "pal"
+    }
+  ],
+  "schemaVersion": 1
+}

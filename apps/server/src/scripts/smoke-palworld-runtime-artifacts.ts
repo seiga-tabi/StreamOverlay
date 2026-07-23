@@ -2,8 +2,16 @@ import { lstat, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadPalworldCatalogRuntimeSource } from "../data/palworld-catalog-artifact.js";
+import { loadPalworldBreedingRuntimeSource } from "../data/palworld-breeding-artifact.js";
+import { loadPalworldPaldexRuntimeRelease } from "../data/palworld-paldex-adapter.js";
 import { PALWORLD_PALDEX_EXPECTED_COUNT } from "../data/palworld-paldex-artifact.js";
 import { loadPalworldPaldexStagedRelease } from "../data/palworld-paldex-loader.js";
+import {
+  createPalworldTranslationValidationContext,
+  loadPalworldTranslationBundle
+} from "../data/palworld-translation-artifact.js";
+import { loadPalworldReviewedItemAliases } from "../data/palworld-reviewed-item-aliases.js";
+import { PalworldBreedingEngine } from "../services/palworld-breeding-engine.js";
 
 const REQUIRED_RELEASE_FILES = [
   "sources.lock.json",
@@ -15,7 +23,23 @@ const REQUIRED_RELEASE_FILES = [
   "catalog.json",
   "catalog-manifest.json",
   "item-images-manifest.json",
-  "element-images-manifest.json"
+  "element-images-manifest.json",
+  "breeding.json",
+  "breeding-manifest.json",
+  "breeding-import-report.json"
+] as const;
+
+const REQUIRED_TRANSLATION_RUNTIME_FILES = [
+  "manifest.json",
+  "glossary.json",
+  "ko.json",
+  "ja.json",
+  "reviewed-item-aliases.json"
+] as const;
+
+const REQUIRED_RELEASE_ENTRIES = [
+  ...REQUIRED_RELEASE_FILES,
+  "locales"
 ] as const;
 
 const EXPECTED_ATLAS_ARCHIVE_SHA256 = "8869d768d80d24e8443e6a82a3be338a092b4a656d77d6938a5265c3e2a164bb";
@@ -37,6 +61,13 @@ async function assertRegularRuntimeFile(filePath: string, label: string): Promis
   const info = await lstat(filePath);
   if (info.isSymbolicLink() || !info.isFile()) {
     throw new Error(`${label}가 regular file이 아닙니다.`);
+  }
+}
+
+async function assertRuntimeDirectory(directory: string, label: string): Promise<void> {
+  const info = await lstat(directory);
+  if (info.isSymbolicLink() || !info.isDirectory()) {
+    throw new Error(`${label}가 directory가 아닙니다.`);
   }
 }
 
@@ -71,21 +102,27 @@ export async function smokePalworldRuntimeArtifacts(options: {
 } = {}): Promise<void> {
   const repositoryRoot = options.repositoryRoot ?? fileURLToPath(new URL("../../../../", import.meta.url));
   const releaseRoot = path.join(repositoryRoot, "apps/server/data/palworld/1.0.1");
+  const translationRoot = path.join(releaseRoot, "locales");
   const mappingRoot = path.join(repositoryRoot, "apps/server/src/data/palworld-mappings");
   const imageRoot = path.join(repositoryRoot, "apps/dashboard/dist/images/palworld/1.0.1/pals");
   const itemImageRoot = path.join(repositoryRoot, "apps/dashboard/dist/images/palworld/1.0.1/items");
   const elementImageRoot = path.join(repositoryRoot, "apps/dashboard/dist/images/palworld/1.0.1/elements");
 
   await Promise.all([
+    assertRuntimeDirectory(translationRoot, "Palworld translation runtime"),
     ...REQUIRED_RELEASE_FILES.map((fileName) =>
       assertRegularRuntimeFile(path.join(releaseRoot, fileName), `Palworld release ${fileName}`)
+    ),
+    ...REQUIRED_TRANSLATION_RUNTIME_FILES.map((fileName) =>
+      assertRegularRuntimeFile(path.join(translationRoot, fileName), `Palworld translation ${fileName}`)
     ),
     ...REQUIRED_MAPPING_FILES.map((fileName) =>
       assertRegularRuntimeFile(path.join(mappingRoot, fileName), `Palworld mapping ${fileName}`)
     )
   ]);
   await Promise.all([
-    assertExactRuntimeFiles(releaseRoot, REQUIRED_RELEASE_FILES, "Palworld release"),
+    assertExactRuntimeFiles(releaseRoot, REQUIRED_RELEASE_ENTRIES, "Palworld release"),
+    assertExactRuntimeFiles(translationRoot, REQUIRED_TRANSLATION_RUNTIME_FILES, "Palworld translation runtime"),
     assertExactRuntimeFiles(mappingRoot, REQUIRED_MAPPING_FILES, "Palworld mapping")
   ]);
 
@@ -101,6 +138,18 @@ export async function smokePalworldRuntimeArtifacts(options: {
     throw new Error("활성 이미지 수가 release manifest와 일치하지 않습니다.");
   }
   await assertRepresentativeRuntimeImages({ imageRoot, activeImages });
+
+  const runtimeRelease = await loadPalworldPaldexRuntimeRelease({ releaseRoot, mappingRoot, imageRoot });
+  const breedingSource = await loadPalworldBreedingRuntimeSource(releaseRoot);
+  const breedingEngine = new PalworldBreedingEngine(breedingSource.artifact);
+  if (
+    breedingSource.artifact.parameters.length !== PALWORLD_PALDEX_EXPECTED_COUNT
+    || breedingSource.manifest.counts.includedNonSelfRules !== 79
+    || breedingSource.manifest.counts.genderedRules !== 2
+    || breedingEngine.pairCount !== 41_329
+  ) {
+    throw new Error("교배 runtime artifact 수량 또는 reverse index가 고정 release와 일치하지 않습니다.");
+  }
 
   const catalog = await loadPalworldCatalogRuntimeSource(releaseRoot, {
     itemImageRoot,
@@ -131,10 +180,31 @@ export async function smokePalworldRuntimeArtifacts(options: {
     throw new Error("고정 Palworld source provenance와 일치하지 않습니다.");
   }
 
+  const translations = await loadPalworldTranslationBundle({
+    releaseRoot,
+    context: createPalworldTranslationValidationContext({
+      catalog: catalog.catalog,
+      catalogSha256: catalog.manifest.catalogSha256,
+      paldex: runtimeRelease,
+      paldexSha256: release.manifest.paldexSha256,
+      reviewedItemAliases: await loadPalworldReviewedItemAliases(releaseRoot, catalog.catalog)
+    })
+  });
+  if (
+    translations.states.ko.status !== "loaded"
+    || translations.states.ja.status !== "loaded"
+    || translations.snapshots.ko === undefined
+    || translations.snapshots.ja === undefined
+  ) {
+    throw new Error("한국어·일본어 번역 runtime artifact 검증에 실패했습니다.");
+  }
+
   console.log(
     `[palworld-data] runtime artifact smoke 완료: ${release.artifact.records.length}종, `
     + `Pal 이미지 ${activeImages.length}개, 아이템 ${catalog.catalog.items.length}개, `
     + `스킬 ${catalog.catalog.skills.length}개, 속성 아이콘 ${catalog.catalog.elements.length}개, `
+    + `교배 결과 ${breedingEngine.pairCount}개·특수 ${breedingSource.manifest.counts.includedNonSelfRules}개, `
+    + `번역 KO ${translations.snapshots.ko.records.length}개·JA ${translations.snapshots.ja.records.length}개, `
     + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`
   );
 }

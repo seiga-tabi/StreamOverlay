@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "translationRevision": "offline-machine-assisted-v1",
+  "generatedAt": "2026-07-22T00:00:00.000Z",
+  "runtimeExternalRequests": false,
+  "locales": {
+    "ko": {
+      "method": "machine_assisted",
+      "model": "Helsinki-NLP/opus-mt-tc-big-en-ko",
+      "sourceUrl": "https://huggingface.co/Helsinki-NLP/opus-mt-tc-big-en-ko",
+      "sourceRevision": "ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+      "license": "CC-BY-4.0",
+      "humanReviewed": false
+    },
+    "ja": {
+      "method": "machine_assisted",
+      "model": "staka/fugumt-en-ja",
+      "sourceUrl": "https://huggingface.co/staka/fugumt-en-ja",
+      "sourceRevision": "fbb91252110cf97d90291eb808629ab0b10f7928",
+      "license": "CC-BY-SA-4.0",
+      "humanReviewed": false
+    }
+  }
+}

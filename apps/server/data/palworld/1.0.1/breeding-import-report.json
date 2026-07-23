@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "incomplete",
+  "counts": {
+    "parameters": 287,
+    "sourceSpecialRows": 257,
+    "includedSpecialRows": 182,
+    "includedSelfRules": 103,
+    "includedNonSelfRules": 79,
+    "genderedRules": 2,
+    "unresolvedSourceRows": 75
+  },
+  "fieldCoverage": {
+    "combiRank": {
+      "available": 287,
+      "missing": 0,
+      "total": 287
+    },
+    "combiDuplicatePriority": {
+      "available": 287,
+      "missing": 0,
+      "total": 287
+    },
+    "tribe": {
+      "available": 287,
+      "missing": 0,
+      "total": 287
+    },
+    "maleProbability": {
+      "available": 287,
+      "missing": 0,
+      "total": 287
+    },
+    "bpClass": {
+      "available": 0,
+      "missing": 287,
+      "total": 287
+    },
+    "ignoreCombi": {
+      "available": 0,
+      "missing": 287,
+      "total": 287
+    },
+    "sourceRowId": {
+      "available": 0,
+      "missing": 287,
+      "total": 287
+    }
+  },
+  "unresolvedSourceInternalIds": [
+    "BeardedDragon",
+    "BlackFurDragon",
+    "Blueplatypus",
+    "DarkMutant",
+    "ElecLion",
+    "GrassDragon",
+    "PinkKangaroo",
+    "WaterLizard",
+    "YakushimaBoss001",
+    "YakushimaBoss001_Small",
+    "YakushimaMonster001",
+    "YakushimaMonster001_Blue",
+    "YakushimaMonster001_Pink",
+    "YakushimaMonster001_Purple",
+    "YakushimaMonster001_Rainbow",
+    "YakushimaMonster001_Red",
+    "YakushimaMonster002",
+    "YakushimaMonster003",
+    "YakushimaMonster003_Purple"
+  ],
+  "limitations": [
+    "BPCLASS_NOT_AVAILABLE_IN_LOCKED_COMPACT_SOURCE",
+    "IGNORE_COMBI_NOT_AVAILABLE_IN_LOCKED_COMPACT_SOURCE",
+    "SOURCE_ROW_ID_NOT_AVAILABLE_IN_LOCKED_COMPACT_SOURCE"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "batches": [
+    {
+      "file": "batch-0001.json",
+      "records": 150,
+      "sha256": "874b85d3b5dff079ca40d1e2b9545c9e0887bf8bbbc838d5a8b0df20a1696433"
+    },
+    {
+      "file": "batch-0002.json",
+      "records": 150,
+      "sha256": "cf94ecd36be67aa16eeb61efb887bc105d4af1d2928bfc1b1e8fff08b8bf0dd4"
+    },
+    {
+      "file": "batch-0003.json",
+      "records": 150,
+      "sha256": "60738ee665bd1af78ec4fd739f6984df82e12f3fdcb1563674062c87598e6620"
+    },
+    {
+      "file": "batch-0004.json",
+      "records": 150,
+      "sha256": "1f11ca101a4a20eb352531e4360776cea40fce823daa10f8b815c81a9c92ac21"
+    },
+    {
+      "file": "batch-0005.json",
+      "records": 150,
+      "sha256": "adc65e29c06fb6999a764450b9fbe2de0bf9f67fecc81724e8e9850daa2d2a2e"
+    },
+    {
+      "file": "batch-0006.json",
+      "records": 150,
+      "sha256": "64cf3045495f2ec343828abbe9280c85fddf9704893de062fa904183fe78b6c0"
+    },
+    {
+      "file": "batch-0007.json",
+      "records": 150,
+      "sha256": "d091d410722ed93f8f0cf06c50ec0de43155d2d68106c32bd074d838748b4e57"
+    },
+    {
+      "file": "batch-0008.json",
+      "records": 150,
+      "sha256": "b1cbf378e84230e5208da430bf47f2a583b3c99822857d8f9d6b74c669bd844b"
+    },
+    {
+      "file": "batch-0009.json",
+      "records": 150,
+      "sha256": "d4260a9f547ba0423ce437ae146b5f4791606ac44ead0e0b8b198fdb315dcc83"
+    },
+    {
+      "file": "batch-0010.json",
+      "records": 150,
+      "sha256": "06abfe65ac4a516f35afd90861293cf82b6135b55955c81436441f19d30115a3"
+    },
+    {
+      "file": "batch-0011.json",
+      "records": 150,
+      "sha256": "22e4bf099f55180509c9d4b999025fa59d57ba77675f9e2b477a9730b4f6e9ea"
+    },
+    {
+      "file": "batch-0012.json",
+      "records": 150,
+      "sha256": "520e1d1fe91b9693903ec087c9546dc03a6cd0ce97ccb38a817d41f6a9440ba7"
+    },
+    {
+      "file": "batch-0013.json",
+      "records": 150,
+      "sha256": "122b651a38d7ef8a15038449444703d340d5877f6b3540b3dbc5b903d8907655"
+    },
+    {
+      "file": "batch-0014.json",
+      "records": 150,
+      "sha256": "77844ef6dae53c717114cdb2e6beb48ba2fbd6c7f90707a6f4171e9d8dd4a63c"
+    },
+    {
+      "file": "batch-0015.json",
+      "records": 150,
+      "sha256": "6bc8fac14893dd3480a237b3b28f92099756748148e206bc455d047a9f87721c"
+    },
+    {
+      "file": "batch-0016.json",
+      "records": 150,
+      "sha256": "a8fa2d8444e3d335cd0d9cbfafb3e90544ce0823a4a7ce44cbcd9ec0a78b70ff"
+    },
+    {
+      "file": "batch-0017.json",
+      "records": 150,
+      "sha256": "6bc3b505e432e72ac22711a9c62624666bd28aaad6a7c177c9a286ad3a0f5a9f"
+    },
+    {
+      "file": "batch-0018.json",
+      "records": 131,
+      "sha256": "b86c53d3aedc56ef4e387d8fe602bced8ec5a3abe681cfdf305ed143a7ce4cdf"
+    }
+  ],
+  "fields": 5166,
+  "identicalEnglish": [],
+  "locale": "ko",
+  "modelNote": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+  "records": 2681
+}

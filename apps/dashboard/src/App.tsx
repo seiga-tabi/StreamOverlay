@@ -28,6 +28,7 @@ import {
   type StreamerDashboardTenant
 } from "./routing/dashboard-routes";
 import { isPalworldPath } from "./features/public-palworld/utils/routes";
+import { PalworldPageErrorBoundary } from "./features/public-palworld/components/PalworldPageErrorBoundary";
 
 const PublicLolPage = lazy(async () => ({ default: (await import("./pages/PublicLolPage")).PublicLolPage }));
 const PublicPalworldPage = lazy(async () => ({ default: (await import("./pages/PublicPalworldPage")).PublicPalworldPage }));
@@ -434,12 +435,19 @@ export default function App() {
   }
 
   if (surface === "public") {
+    const palworldPublic = isPalworldPath(window.location.pathname);
     return (
-      <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
-        {isPalworldPath(window.location.pathname)
-          ? <PublicPalworldPage onOpenStreamerDashboard={openStreamerDashboard} />
-          : <PublicLolPage onOpenAdmin={openAdmin} onOpenStreamerDashboard={openStreamerDashboard} />}
-      </Suspense>
+      palworldPublic ? (
+        <PalworldPageErrorBoundary>
+          <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
+            <PublicPalworldPage onOpenStreamerDashboard={openStreamerDashboard} />
+          </Suspense>
+        </PalworldPageErrorBoundary>
+      ) : (
+        <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
+          <PublicLolPage onOpenAdmin={openAdmin} onOpenStreamerDashboard={openStreamerDashboard} />
+        </Suspense>
+      )
     );
   }
 

@@ -1,0 +1,2706 @@
+{
+  "locale": "ko",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2b88335ef985799f8392fe4e7ee51a1ff404ee99edab048388e9803cda832c2b",
+          "status": "machine_assisted",
+          "text": "요미이라의 독점 기술이다. 일련의 공격을 제공하기 위해 손에서 붕대를 확장한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7b1db25f6550422aa36e65ea7452f535270e523391e7e98e7cd471c9a03f15e2",
+          "status": "machine_assisted",
+          "text": "엄마 러쉬"
+        }
+      },
+      "id": "active-mummy-rush-613fd85907",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5d28ca017a09df60eda22c2b0c8dc28e5a874934cf4cf2da3b5313f0a4aae59c",
+          "status": "machine_assisted",
+          "text": "라브라돈의 독점 기술이다. 그 앞에 적을 공격하기 전에 옆으로 돌려서 공중으로 날아갑니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cf2475b2caf236d7852d3684c2bb4295803b72d5ba8d4e9c0bf741d2f340107b",
+          "status": "machine_assisted",
+          "text": "근육 슬램"
+        }
+      },
+      "id": "active-muscle-slam-fc33dc8eb6",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5b6d54efa4a1959bfe23acd5dbd7e35c1d4c396e8a56339701cee52f9167f98b",
+          "status": "machine_assisted",
+          "text": "실피아의 독점 기술이다. 적을 추격하는 신비한 힘으로 가득 찬 쌍둥이 회오리바람을 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e16aea26fe6d1c8578aff05e65eaeb5d35a941e56aa4d34b883ddb4250124245",
+          "status": "machine_assisted",
+          "text": "미스틱 Whirlwind"
+        }
+      },
+      "id": "active-mystic-whirlwind-efb69e162f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "328bf0bc4312ec553dbd0564224099fd60baed434324ca6719dfe588f889d4a6",
+          "status": "machine_assisted",
+          "text": "어둠의 거대한 공을 만들고 적에게 던져 넣습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6b28b55df9f3f98c9072e45474ceec37b202dbf4e65c1554883da7e13cdc8a0e",
+          "status": "machine_assisted",
+          "text": "악몽 공"
+        }
+      },
+      "id": "active-nightmare-ball-66f40b52a4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e519eb872794df8b90ed0060622e91c8139be19e498f169c213d7d73a29a14be",
+          "status": "machine_assisted",
+          "text": "벨라루주의 독점 기술이다. 갑자기 튀어나오다가 다시 튀어나오면 튕겨져나오는 껍데기들. 들보가 꽃에 피는 아름다운 꽃처럼 퍼져나갔다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9c2a723f99de57c1ecd2fce2b5e0853bdeefc0c8ccc969e5221e22b387032d17",
+          "status": "machine_assisted",
+          "text": "나이트메어 블룸"
+        }
+      },
+      "id": "active-nightmare-bloom-2eebc819f0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e89cd21697019fd85542b9354cbca12eee43ca6f3637f7bb5dceea82d10b9cf1",
+          "status": "machine_assisted",
+          "text": "벨라누아르의 독점 기술이다. 갑자기 튀어나오다가 다시 튀어나오면 튕겨져나오는 껍데기들."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fc8993f0aa64715ad65e60f3d912c20924da0549620653a386d475986c0536ad",
+          "status": "machine_assisted",
+          "text": "악몽 레이"
+        }
+      },
+      "id": "active-nightmare-ray-2279b96a3f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "081593514edab95419625e23ad356e2e4619919a9bc9eb968be6d2bdb40bfea1",
+          "status": "machine_assisted",
+          "text": "제노드란의 독점 기술이다. 서브스페이스에서 파괴의 빛을 소환하여 모든 방향으로 계속 발사하고, 시야에 있는 모든 것을 불태워 재로 만듭니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cb1b84adb8e1b42a71ca2c964c75a75fd4f392d9255340a9ad65870055b0a0f4",
+          "status": "machine_assisted",
+          "text": "오메가 레이저"
+        }
+      },
+      "id": "active-omega-laser-1e7457610c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4bd80744c5ae6991367d9b5f8af4137b56c563851cfb7474d1683cfb12f948ea",
+          "status": "machine_assisted",
+          "text": "넓은 지역에 걸쳐 앞으로 고성능 빔을 발사하기 전에 파괴적인 에너지를 충전한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d070d606bacdb02190342bf96c6fde6efd381955cfc88b4ffcbce9748b646cfd",
+          "status": "machine_assisted",
+          "text": "Pal 폭발은"
+        }
+      },
+      "id": "active-pal-blast-ea8d46d288",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d391950879426089059da3be0ddabeabc657d9e5c103f8b8877e6e7018a0b8f7",
+          "status": "machine_assisted",
+          "text": "솔바둑의 독점 기술이다. 최고 속도로 충전, 입에 개최 나무 막대기와 두 연속 슬래시를 제공."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f861ecd3c95ec49ba4f7b8abb7e564b7509109912fabc5a1cd12ffb8924a5c26",
+          "status": "machine_assisted",
+          "text": "지속 슬래시"
+        }
+      },
+      "id": "active-persistent-slash-8b5feccdb0",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3853076929b0c3759a487dcd405874dbdbe5bddb9d1c37342f4816a0db28bdec",
+          "status": "machine_assisted",
+          "text": "마스크로우의 독점 기술이다. 부리로 공격하기 전에 적 옆에 텔레포트한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4bf9e9909dc77473af33172b6f7080db9924f7b1e6ee2e8e3fc8bbb3e4104b90",
+          "status": "machine_assisted",
+          "text": "팬텀 펙"
+        }
+      },
+      "id": "active-phantom-peck-f08affe601",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "325460b24e56392631f9432320e777e92c82d4c7d17d23b2c347ecac0bcceaa7",
+          "status": "machine_assisted",
+          "text": "호루스 '독점 기술. 그을린 토네이도를 만든 후, 그것은 지옥 불에서 스스로를 은폐하고 앞으로 돌진한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0e5ba9bf673bad8b9731f0acf883e889c541112177a4cd350017c492a7831481",
+          "status": "machine_assisted",
+          "text": "피닉스 플레어"
+        }
+      },
+      "id": "active-phoenix-flare-014541d8dc",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e252306634efbf77e69c3d2648f34a31b11cfe6a05b79ca8bf7e10188de7a91f",
+          "status": "machine_assisted",
+          "text": "이시스의 독점 기술이다. 거대한 토네이도를 소환 한 후, 그것은 물에 몸을 감싸고 앞으로 돌진한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "80c90572ac05ff342add33911e67d87ea85eb033c1401f18ae9aa13ddf42f4e2",
+          "status": "machine_assisted",
+          "text": "피닉스 타이드"
+        }
+      },
+      "id": "active-phoenix-tide-af7aefe940",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e51fb8be240252eb77243e4735b9aafe3687208e771bb17f2638e087430e7b7e",
+          "status": "machine_assisted",
+          "text": "적에게 수많은 번개 orbs를 발사 전기 에너지의 두 볼을 만듭니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d538ba6ec73a12a675c95665081db0210f80d5dbb03ea6089ad4fb7a8f0cfad1",
+          "status": "machine_assisted",
+          "text": "플라스마 깔때기"
+        }
+      },
+      "id": "active-plasma-funnel-fbcb10e79f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2f4242e67a900093957f5478969dfccb531114cffb7cb847ad1421e9492c4683",
+          "status": "machine_assisted",
+          "text": "적에게 독살을 퍼부어라."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d2e3138d9b9dc4479aa55bfb45c8841f0798ca0d42847fb5b30a21f7a6534759",
+          "status": "machine_assisted",
+          "text": "포이즌 블래스트"
+        }
+      },
+      "id": "active-poison-blast-e137b83b4b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c24d615338861ab79347ddc72685ea64fb0919bff6e3b4ad4229ea99f1989d8a",
+          "status": "machine_assisted",
+          "text": "앞에 독의 안개를 생성하여 상대를 독살한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "94cd0e170c1bb1549f2b147c1b5605da3506d6e8fb3c382b1ab6b3e8eb68affd",
+          "status": "machine_assisted",
+          "text": "독 안개"
+        }
+      },
+      "id": "active-poison-fog-74fd7d5d9c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "222e087433c72baa49ce20787394085e4d30724add2adaefb07088f414e73892",
+          "status": "machine_assisted",
+          "text": "녹사주의 독점 기술이다. 땅을 따라 미끄러지고 있는 동안 앞으로 위탁해, 부식성 안개를 살포하. 안개는 제한된 시간 동안 지역에 남아 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "071d5bc702cc76f328b190beecd31ae2562d89116b5158ca983880e3528cf731",
+          "status": "machine_assisted",
+          "text": "포이즌 프로메나드"
+        }
+      },
+      "id": "active-poison-promenade-ed23ca84fd",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "30f516846961fd4299c4eea11a2d4a1b5480ea2d7315b02eb9ceb7a558eccfdf",
+          "status": "machine_assisted",
+          "text": "몸에 에너지를 집중시키고 모든 방향으로 독극물을 뿌리십시오."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f601387684f5ffa4c097a6d8238e1d0ea2b446f74360f159a43c751804af7579",
+          "status": "machine_assisted",
+          "text": "독 샤워"
+        }
+      },
+      "id": "active-poison-shower-65f10fc487",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4e3df3d888611d8536912995e65f6a18ee5945fd862e877c14e0e0029cc25dd6",
+          "status": "machine_assisted",
+          "text": "큰 파괴적인 공을 발사하기 전에 엄청난 양의 에너지를 충전한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0eb23455a6f2191b21889c02272fe9ca495982c08c5f8e3cb31c56b62a585c06",
+          "status": "machine_assisted",
+          "text": "힘 폭탄"
+        }
+      },
+      "id": "active-power-bomb-e4f129f3e4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5b885419d74460ff151109a66f9c39f64c7f9174e7aaf50b5fa0874f2c65a889",
+          "status": "machine_assisted",
+          "text": "집중된 폭발에 에너지를 충전한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "840ca027434dc32b1503b141ddd07ac70d625b094a80c60cc1eea283c2cea149",
+          "status": "machine_assisted",
+          "text": "파워샷"
+        }
+      },
+      "id": "active-power-shot-67586e40cb",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "72a102436ec5aba6c382e7a7204ac61b38a794eb4f860aa4c4cfac0d1789e242",
+          "status": "machine_assisted",
+          "text": "까부냥의 독점 기술이다. 두 팔을 스윙 펀치의 혼란을 제공, 적을 쫓는."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7b3c4d06673a99e469d6a36db137e70920b6968f05b95516aedabcd39dc5f862",
+          "status": "machine_assisted",
+          "text": "펀치 flurry"
+        }
+      },
+      "id": "active-punch-flurry-f3f19d5f0c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6acf1738fb7cad637c0701b5b2ded9694839a1a7c8df32375b257d34545b50af",
+          "status": "machine_assisted",
+          "text": "레젠디얼 '독점 기술. 공중으로 높이 뛰어올라 엄청난 에너지가 하강하는 빛의 구체로 집광된다. 그것이 땅에 떨어지면, 그것은 바닥에있는 모든 것을 정화한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eddd58eabbbad4a406294a258bdff5f364d97fb022b7637eca6556f8e2bd1ea1",
+          "status": "machine_assisted",
+          "text": "순화 빛"
+        }
+      },
+      "id": "active-purifying-light-82107388d3",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3c49eba6bbdb76a0d79b377544964e12110b7059fdcb8ed1343775e4c5f8eb6c",
+          "status": "machine_assisted",
+          "text": "빛의 구체를 풀어 적을 천천히 추적한다. 목표물에 가까워지면서, 그것은 한 번에 모든 것을 공격하는 수많은 가벼운 총알로 나니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2029ce769eb8f8a27b61be80152ae8f6bbcb1184d1697e0b1c4d6448b14c38fe",
+          "status": "machine_assisted",
+          "text": "광란의 난파선"
+        }
+      },
+      "id": "active-radiant-barrage-08edd187f9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d0e756873fe0d1c06978dc3739fa795af6b0a4606b8f53f1b6fcff4d70d97fd0",
+          "status": "machine_assisted",
+          "text": "적을 향해 곧장 날아 수많은 바람의 칼을 쏴."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "15b15236e4f7c03cbf6a2c3660ca4d1a429f1ff531d9b51ae1ad4e71cfafdaa6",
+          "status": "machine_assisted",
+          "text": "레이드 커터"
+        }
+      },
+      "id": "active-raid-cutter-37cd617286",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1685acab0b8d57f4f55c2a902aad55134582c998d6825cf37eef688be694f27f",
+          "status": "machine_assisted",
+          "text": "리팡의 독점 기술이다. 여러 차례의 연속적인 라운드 하우스 킥을 빠르게 전달하며, 강력한 폭발로 마무리된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a33a83421712fbcd09814ff9cb9625c4f2207af9c202d3abf3a080037e27d128",
+          "status": "machine_assisted",
+          "text": "빠른 킥"
+        }
+      },
+      "id": "active-rapid-kick-17acc1357c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "029dc6ff573a0a1ff3985e450910193d97bcf3f70c9519ef6c7a32b3fff6f31d",
+          "status": "machine_assisted",
+          "text": "돌진돼지의 독점 기술이다. 적을 겨냥하고 맹렬한 돌진으로 그들을 돌진한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4528790310b9110c9140881b51809e70f3d674ae3b591935ec3fc1242468fac6",
+          "status": "machine_assisted",
+          "text": "무모한 충전"
+        }
+      },
+      "id": "active-reckless-charge-915be83715",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2ae3ea97ec83b277f62b0421cd7cb3eb7a03fb3fe77fe66cc98a2c8c0170039d",
+          "status": "machine_assisted",
+          "text": "바람의 칼날을 발사하여 적이나 나무를 반복적으로 공격한다. 최대 사번까지 리코셰를 할 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "14f0259170eb2aafadf18c3a8967d8cb1fc897493f1e0cc15987879062c3f0a5",
+          "status": "machine_assisted",
+          "text": "잎을 반영하십시오"
+        }
+      },
+      "id": "active-reflect-leaf-b2804c5a41",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6970bdea6ae925bc240ffa9b31cd1ead31078d20525cc4f61cc878a36a5085d3",
+          "status": "machine_assisted",
+          "text": "적의 밑에 날카로운 바위 창을 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bb54b55a0d9899d8bc7093816500da9bbf27d5136c4aafce7a8b0de43a73fff3",
+          "status": "machine_assisted",
+          "text": "록 랜스"
+        }
+      },
+      "id": "active-rock-lance-3c7499c6b2",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3d552135001c0e912dc544a7b7bfd3557f94c3f91f143e9fd30148d41733fdd6",
+          "status": "machine_assisted",
+          "text": "주변의 거대한 돌 덩어리를 던지기 전에 땅이 흔들리게한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d25d004f3875aa282d28bda274b8f28c36ca66e6ccdd7150ff093844d12f3a27",
+          "status": "machine_assisted",
+          "text": "록버스트는"
+        }
+      },
+      "id": "active-rockburst-2dea7bbd3b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "98ee68e3ae1274652abd6490ae433253b1ae32c9b54944ee8568ea089d27232e",
+          "status": "machine_assisted",
+          "text": "Dualiths 독점 기술. 왼팔을 떼어 적들을 쓸어버리고, 오른팔을 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "51c2251ff30ca1f50a7074f9cd6f8c80f7da91ce910f92c9e547f2694bf39596",
+          "status": "machine_assisted",
+          "text": "로켓 암"
+        }
+      },
+      "id": "active-rocket-arm-a952740f68",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2f4df3ba47ebe1e9b4692db9b919e05a1908fda5a4864f3b925d7189d545192f",
+          "status": "machine_assisted",
+          "text": "베비뇽의 독점 기술이다. 약간의 힘을 모으고 앞으로 나아갑니다. 착륙 할 때 항상 두려움에 눈을 감습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e13085877978077464e1343d3de1b9b9f4d7a8d49a4fd3fec5ba9f6e0ad9c5df",
+          "status": "machine_assisted",
+          "text": "로켓 슬램"
+        }
+      },
+      "id": "active-rocket-slam-4f245f5b9d",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b9ca1cf7309f669712b68bf2b445474e8b53bf76a67cd27145b629c18f8a6f3b",
+          "status": "machine_assisted",
+          "text": "땅을 흔들고 거대한 바위를 공중으로 들어올린다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "503a3c330b55a91a8c535d1602b7001c865adc1f8e697313e3e1899e184b3366",
+          "status": "machine_assisted",
+          "text": "록키 임팩트"
+        }
+      },
+      "id": "active-rocky-impact-b1f59e7567",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "da192a7bff3d705915fdaf594e70f9218e427d162c90d836d0ca7c777df75f70",
+          "status": "machine_assisted",
+          "text": "도로롱의 독점 기술이다. 공으로 컬, 그것의 방법에 있는 어떤 적든지 후에 구르는. 어지러워지고 공격이 끝난 후 움직일 수 없다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bf4069900d0fa16243553f51c87cb5ded2b10f5f26d1ab8a0d8b044d3e22b3b7",
+          "status": "machine_assisted",
+          "text": "롤리 폴리"
+        }
+      },
+      "id": "active-roly-poly-b2908f26e1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "08daead5c4a92c4a53a28a79b518c622942c4b182706eb200686fd0beee109be",
+          "status": "machine_assisted",
+          "text": "레젠디얼 '독점 기술. 그 후, 시야에서 희미하게, 그 위치에 중심을 둔 빛의 기둥의 거대한 공세를 호출한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cbd5f6b6c86b194bfb408c98d90982a9a6e7da5dffc20e1011bad7caede7bf5",
+          "status": "machine_assisted",
+          "text": "신성한 비"
+        }
+      },
+      "id": "active-sacred-rain-3bf6891f54",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4b3dd39dd88ba7805aad747c6e1960d0297098e83cdaf1e219622bd4a30b2d02",
+          "status": "machine_assisted",
+          "text": "적에게 발사하기 전에 양쪽에 모래 토네이도 두 개를 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dcc0453b154b51052e5ebbac216b15d324b36e19547ceb4a83a5d3a8f9e8f73e",
+          "status": "machine_assisted",
+          "text": "모래 토네이도"
+        }
+      },
+      "id": "active-sand-tornado-30df28848a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "043c7d7c55ca7af3d9215d92b5a3b383eba550e16d3fbf9c0c5394933d89a7ed",
+          "status": "machine_assisted",
+          "text": "여러 개의 모래 토네이도를 만듭니다. 토네이도는 계속해서 원을 그리며 돌고 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "927742cfcc07e6e06634c9c79af6a3319a3bf3e04bc179cf401cedefacf449ca",
+          "status": "machine_assisted",
+          "text": "모래 트위스터"
+        }
+      },
+      "id": "active-sand-twister-c64818a0ff",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "06fedcaa0611003509a11202a9326bb1cdb00c4081d249fa94e407d8cc89728f",
+          "status": "machine_assisted",
+          "text": "제노드란의 독점 기술이다. 자동 공격 기능을 갖춘 위성과 같은 날개 사개를 생성한다. 이 날개는 다음 공격이 시작될 때 적을 자동으로 추적하고 공격한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "29f6042e61fa8c6cca5384aa2d8ad591876aceea723bab6725f1f9d102544d2b",
+          "status": "machine_assisted",
+          "text": "위성 비트"
+        }
+      },
+      "id": "active-satellite-bit-683a289878",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a795af476f88b11d11f62d0d23c156bd6fa0b919079be206eb0c552a7cb9e044",
+          "status": "machine_assisted",
+          "text": "그 앞에 적에게 단단한 씨앗의 발리를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "029885965321b93eb91e8ba65de0f8b5180e8630d0f051e0d8d27bdfc4c9f974",
+          "status": "machine_assisted",
+          "text": "종자 기관총"
+        }
+      },
+      "id": "active-seed-machine-gun-9fcf53ac21",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bc811dc55d04680a9948d5d90a7fac9342d5b264d05d4bdd73efb542911f43ad",
+          "status": "machine_assisted",
+          "text": "치명적인 씨앗을 뿌려라. 적을 공격하면 씨앗이 폭발한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b71c1c638d6325eb32da4db60a8d44c7438f39cfe7a1c3e005a5f32fcb9bda26",
+          "status": "machine_assisted",
+          "text": "종자 광산"
+        }
+      },
+      "id": "active-seed-mine-9f59426bde",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "921b40e7254000ce880b168dc14c81964a7a71f26bd88ab31e4ca7c8e4f7f366",
+          "status": "machine_assisted",
+          "text": "셀레문의 독점 기술이다. 달빛의 힘으로 스며든 두 개의 연속 고속 블레이드를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e4879650d95f6d4a33435c75fdf7eccfe7906aefd698d465a698dc92eb33fdcc",
+          "status": "machine_assisted",
+          "text": "세이게츠 블레이드"
+        }
+      },
+      "id": "active-seigetsu-blade-b59af0c995",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "902521efaa06a84a644b034d754933d9db475836fb3597167390ee7335eeb0bd",
+          "status": "machine_assisted",
+          "text": "암흑 에너지를 빠르게 방출하여 주변의 사람들에게 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a80ff06fb1aca2ea598104c25e2d53ef3fcef33aee4d4f990ff92c326c9d4a7c",
+          "status": "machine_assisted",
+          "text": "그림자 버스트"
+        }
+      },
+      "id": "active-shadow-burst-ba9c5d7ae7",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "908f992181491b59ab0580c355473a4b563729d6c708097c4bc02b49c56c60a7",
+          "status": "machine_assisted",
+          "text": "전팽이의 독점 기술이다. 전기 요금을 구축하는 동안 촬영 피해를 줄이기 위해 쉘에 철수. 완전히 충전되면 방전되어 주위 적들에게 피해를 준다. 방전 후, 이 Pal의 전기 기술의 공격은 제한된 시간 동안 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "58a477165ae7580b1be69e7214e6cd245e2a3539927e59b448855c017c8ec4fe",
+          "status": "machine_assisted",
+          "text": "쉘 충전"
+        }
+      },
+      "id": "active-shell-charge-05f45b55a3",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff9c7be053d02d46846896c5995689a1bf7c022a0c590cf64d6a4423672176ed",
+          "status": "machine_assisted",
+          "text": "드릴북이의 독점 기술이다. 몸 전체를 고속으로 회전하면서 움직이다. 적을 훈련시켜 지속적인 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "83cc7551e47dfe066d5dc48924dce8c252dffe430f9612946c16d6870f740d48",
+          "status": "machine_assisted",
+          "text": "쉘 스핀"
+        }
+      },
+      "id": "active-shell-spin-14d0689454",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c0a3f4b2aff0c54274df49cc7273fd73708143f2fb7d59d0672604f7b9387bb7",
+          "status": "machine_assisted",
+          "text": "전기를 빠르게 배출하여 주변 사람들에게 충격을 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6da37aae54832bb17a7b27d274f5d572175761ef0b1a707ef44bcf9a5362bb51",
+          "status": "machine_assisted",
+          "text": "충격파"
+        }
+      },
+      "id": "active-shockwave-16157bc61f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f2d6b3d6cfcec32eecb2d9b4d1b033102a609a79c7adfc73f3717af063a0111c",
+          "status": "machine_assisted",
+          "text": "라이트롯의 독점 기술이다. 화염으로 몸을 덮고 적에게 전하를 돌립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eab4c1e5abec8706dd6b033e1d319099d81fa9c771dd000524cfbb3881fcd67b",
+          "status": "machine_assisted",
+          "text": "실버 스튜드"
+        }
+      },
+      "id": "active-silver-steed-f93bbba4bb",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "23e7de38c3faec4fba1601ba5efb90f8cd6f045bd1c26a16633129d197452681",
+          "status": "machine_assisted",
+          "text": "옥토비아의 독점 기술이다. 연기를 방출하여 자신을 숨기고 그림자에서 놀라운 헤드 부트를 시작한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5737b8674458d8a82b5379921d1ee1f6460b51eb7ce82294caa8ad0ca300bd8c",
+          "status": "machine_assisted",
+          "text": "스모크 제트"
+        }
+      },
+      "id": "active-smoke-jet-d8fe04a774",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0e8fe781e4a5f1f80885971ef952d795b5d50c2edcfc0b7091561c3fc9504287",
+          "status": "machine_assisted",
+          "text": "얼서니의 독점 기술이다. 앞을 향해 도약하고 얼음 성분이 묻은 악랄한 발톱으로 두 번 공격한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b2044e14ba17d1e7bd122a3ab5d207c4047d0c9daecd4dd4b81a14001213120d",
+          "status": "machine_assisted",
+          "text": "스노우 클로"
+        }
+      },
+      "id": "active-snow-claw-0ccaa00dec",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2e44dcf9dc864884f6b7447034eb0932bc2dfc7d4e991035552a694484d8a9ea",
+          "status": "machine_assisted",
+          "text": "블랑타우의 독점 기술이다. 야생의 광란에 빠져 이회 연속으로 얼음 원소를 전하 공격한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9e5306036c9a28f659823e41d280d8b78957d12469f0ff1d5cf26edca1a9086e",
+          "status": "machine_assisted",
+          "text": "스노우 러쉬"
+        }
+      },
+      "id": "active-snow-rush-ba35963fe9",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "da8769336121076d24373beee89cf113fe0630b873ff3d08a9e9cafacc21e11a",
+          "status": "machine_assisted",
+          "text": "강력한 빔으로 적을 폭파하기 전에 태양 에너지를 충전한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1583a2a90d5d8e342dd22f01467c7d8a11edf2ad47ee755173e383b86200308c",
+          "status": "machine_assisted",
+          "text": "태양 폭발"
+        }
+      },
+      "id": "active-solar-blast-84e06b596b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "be71a1dc99620e2a18d7dd8b482cd968c00915439366e7ab7385a9b0751e98ac",
+          "status": "machine_assisted",
+          "text": "번개 구를 팬 모양으로 방출하여 여행 할 때 퍼집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8813b5842e046baba935a99d38c336b8aaa15556cf75cf6aff06d4616f950503",
+          "status": "machine_assisted",
+          "text": "스파크 블라스트"
+        }
+      },
+      "id": "active-spark-blast-c24157a941",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "574495302d339339a5bee2fa3861278b8990a2c2fc05a4935a8d4be60ed67bd0",
+          "status": "machine_assisted",
+          "text": "팔라디우스 '독점 기술. 앞으로 돌진하는 동안 그 창은 앞으로 밀면서 신성한 힘으로 감싸여 있다. 다른 손에 있는 방패는 충전 중에 모든 공격을 차단한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "21bd7751e6080aebbeeb7fcb0e56f5bc269a056545ccf041085cf4bd7e20d23f",
+          "status": "machine_assisted",
+          "text": "창 돌격"
+        }
+      },
+      "id": "active-spear-thrust-11185f4762",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "02980df8707e629f2105078493784ffa311e7d260f77f5858515074bb5ba648c",
+          "status": "machine_assisted",
+          "text": "은 을 하여 의 아래로부터 를 하는 이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "16ecde06508d6eb9a7c431cc3aed76df85130261d3d2d4d0e43e419d7f0c8254",
+          "status": "machine_assisted",
+          "text": "스파인 바인"
+        }
+      },
+      "id": "active-spine-vine-0d7c52eaf8",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b61bbf12ef0564360dfbc00e069ab57a7e0edc38d9412c8dda1b1e307b3b43f5",
+          "status": "machine_assisted",
+          "text": "아누비스 '독점 기술. 강한 다리로 스핀 킥을 수행, 넓은 지역에 걸쳐 적을 휩쓸."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "359bb91512a9917873441d317c9cb6befce9774aad08ea230cda660980f35d08",
+          "status": "machine_assisted",
+          "text": "회전시키는 Roundhouse"
+        }
+      },
+      "id": "active-spinning-roundhouse-844c30ab33",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3ed24da2e32f9775bca8e4e7bf827517eda30898b4df81095f5775eb790448b3",
+          "status": "machine_assisted",
+          "text": "퀸비나의 독점 기술이다. 직원으로 힘을 수로를 열고, 소용돌이에서 그것을 해방한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1031673d9c4b9e74f6dd6f2335b62d883b3fbe68fbd3b7dd22e6807f2da48d62",
+          "status": "machine_assisted",
+          "text": "회전시키는 직원"
+        }
+      },
+      "id": "active-spinning-staff-83ec976170",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8226cf2d39b5d37eb29d1c5ebd394ac30175c65c8a724ccfa192c15ba731c403",
+          "status": "machine_assisted",
+          "text": "적에게 총을 쏜다. 불덩어리는 짧은 거리 후에 폭발하여 앞으로 퍼지는 작은 불덩어리를 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6a85bc4805729d91170c0b53e99fd01669c1f91caa8b724857c208eab14afe6d",
+          "status": "machine_assisted",
+          "text": "스피릿 불"
+        }
+      },
+      "id": "active-spirit-fire-525dbaa4d6",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "18d892d441db515f1947088ab3fe691c0098a33bc4294e92f97c08d176491f6b",
+          "status": "machine_assisted",
+          "text": "끊임없이 적을 추격하는 세 개의 악의 공을 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "761a55536f108e8606744f9f22492777c84a721a671b1203372205a306e20808",
+          "status": "machine_assisted",
+          "text": "성령 불꽃"
+        }
+      },
+      "id": "active-spirit-flame-06ba48d6a5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d0cefb2ed7f19c525f49d508c133e4d1a193b146cc3ac2de4d32770bc9dbac74",
+          "status": "machine_assisted",
+          "text": "직선으로 이동하는 물 기둥을 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c3fa854c3d0cb74555b4004fb23812b3b351ec66dcea638d8a6e8d3382d7b46d",
+          "status": "machine_assisted",
+          "text": "스플래쉬"
+        }
+      },
+      "id": "active-splash-d93296583f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a758fad9f8f6c532ddcacc762c2f5c2405da15678762e8af9001452a9dfd769c",
+          "status": "machine_assisted",
+          "text": "접촉시 폭발하는 적 주위에 별을 생성한다. 별은 또한 잠시 후 폭발한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "928b0c4074f4f77cabfb4acaf8cb7f9c9fc8aaa799d36f338c5c24dad8633f9f",
+          "status": "machine_assisted",
+          "text": "스타 마인"
+        }
+      },
+      "id": "active-star-mine-84da5b7acc",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1b31579b5a76a5bfca77026451c9dad7a9d17933be8e245677c39e770e594ae5",
+          "status": "machine_assisted",
+          "text": "앞으로 돌의 공세를 발사."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0b07c17be537583152f692c23fc6ebd1a8ddb33c2e1b7d420067edc38197ef84",
+          "status": "machine_assisted",
+          "text": "돌 폭발은"
+        }
+      },
+      "id": "active-stone-blast-436054e50a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "38ef3e141cc61c7c73aea9df9a535622d5107cf303551016e4c382c97be80a6b",
+          "status": "machine_assisted",
+          "text": "바위를 파서 적에게 던져 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f4c42e52d26711640a0bdab4a8c896a6a42c342a98352c71d8b10db5f8214f9b",
+          "status": "machine_assisted",
+          "text": "돌 대포"
+        }
+      },
+      "id": "active-stone-cannon-092797a6d2",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "30aae655c75c3d4c19f1dc6713346c160e0c3dcac9682cb394c66ff053fc2ff2",
+          "status": "machine_assisted",
+          "text": "토랑이의 독점 기술이다. 첫째, 발톱으로 치고 두 번째 슬래시로 이어지며 몸 전체를 사용하여 강력한 슬래시를 만듭니다. 발톱을 흔들 때, 바위는 팬 모양에서 앞으로 발사된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8f8efe1dbc752ca408d322ed093cd796c120a8beadef334ea23a58bf6e037ceb",
+          "status": "machine_assisted",
+          "text": "돌 클로는"
+        }
+      },
+      "id": "active-stone-claw-a5470af62e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "efb26dd9b6e45752c91fa6f0cf1aebbef86e908a3b321143244910c1e9afab92",
+          "status": "machine_assisted",
+          "text": "와르차차의 독점 기술이다. 오른쪽 뒷다리를 높이 들어 땅을 쿵쾅거리면서 전방의 팬 모양의 영역의 적을 공격하는 충격파를 만듭니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b9bafa48c135e20781fbe43889278b5ade5de41081e776fb2566347b9deee4f9",
+          "status": "machine_assisted",
+          "text": "스모 스텀프"
+        }
+      },
+      "id": "active-sumo-stomp-bb27d0abd3",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cf229be19c072762ebbd39598f71dc78245fa92ab5ef555981ea6414732bf7c3",
+          "status": "machine_assisted",
+          "text": "레이번의 독점 기술이다. 빠른 속도로 적에게 접근해 꼬리로 찰싹 때리기를 한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "09a6c2c5113b00aad7efc4438298a3dcc8fca3d29cf5e684fcf64e092396659c",
+          "status": "machine_assisted",
+          "text": "꼬리 슬래시"
+        }
+      },
+      "id": "active-tail-slash-b24a9e3a15",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2e21bc7b2bfe5aa93844c2d115ef15a838864b36d3ef4bcf83c9b44effa1eb70",
+          "status": "machine_assisted",
+          "text": "일정 시간이 경과한 후 적을 공격하는 번개를 호출한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "498c87e161087e961cd5e7588efeacbf7b2cfcd1272af3d7bf2dc0478e75fdda",
+          "status": "machine_assisted",
+          "text": "천둥 비"
+        }
+      },
+      "id": "active-thunder-rain-81153ab9b6",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2c76f7672344c860d4b88aaa23447392c5d83282fa1efa09ea4b485084d4dc23",
+          "status": "machine_assisted",
+          "text": "고속 번개 창을 적을 향해 똑바로 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6edb9d72aaa9ff1e5ddd7c32f0011e5a6df0c2792940eb03ee00794ffbb5c86c",
+          "status": "machine_assisted",
+          "text": "천둥 스피어"
+        }
+      },
+      "id": "active-thunder-spear-272f6fd44c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9d5408b91a39e28c0d2934582d130712908bc4bbc1cfe2d6539f24822c49603b",
+          "status": "machine_assisted",
+          "text": "대기를 조작하고 천둥 구름에 자신을 포위하는 동안 앞으로 충전."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "aaddfcfbb9a617fcd832854f497c71d2bfd1b809c19288ca218aa49222794b93",
+          "status": "machine_assisted",
+          "text": "천둥폭풍"
+        }
+      },
+      "id": "active-thunder-tempest-e9d799b29c",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b2c59cb22c5cdd533c3eb1b546068646b73a6710c77fb9f0f116997f17c2e945",
+          "status": "machine_assisted",
+          "text": "썬더피어스의 독점 기술이다. 초전도를 사용하여 적과의 거리를 고속으로 닫은 다음, 핀커를 최대 힘으로 위쪽으로 회전시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "102ae6fdac48fa841f399dce7058f2018730fef331e0fe61b0cfb105159002b1",
+          "status": "machine_assisted",
+          "text": "썬더 어퍼컷"
+        }
+      },
+      "id": "active-thunder-uppercut-1946321b5e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "80f7b3ee22f7d260e3737239e2e943e7e941d664375fcba3aba903072e21b382",
+          "status": "machine_assisted",
+          "text": "뎅킹의 독점 기술이다. 고속으로 적을 슬라이딩하기 전에 모든 주위의 전하를 생성하는 동안 그 배에 거짓말."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "122c531afa0948c835d1db86a75201c00c1fb405da058d55f1e826ec031fd6b7",
+          "status": "machine_assisted",
+          "text": "썬더슬라이드"
+        }
+      },
+      "id": "active-thunderslide-c105a2274a",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b88a761ff1951926a013100a5a6e27915da57c7e53481cf36265f8f9d5c7e613",
+          "status": "machine_assisted",
+          "text": "적을 향해 천천히 움직이는 번개의 거대한 토네이도를 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "31a9beb9609b732e82cfed8e6fbf8170fdf9dd333c2daaca9dcc95572f04001d",
+          "status": "machine_assisted",
+          "text": "폭풍"
+        }
+      },
+      "id": "active-thunderstorm-fcdffa0055",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d51f88910ff5e68587279d10243cca35ab81e7c522052f1b446a451f801ff1c8",
+          "status": "machine_assisted",
+          "text": "나이트윙의 독점 기술이다. 목표물을 향해 치솟기 전에 토네이도를 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d65891dd53786259b0a7f520a966f8008e5ae5d0c2e779216f6115b260ad467d",
+          "status": "machine_assisted",
+          "text": "토네이도 공격"
+        }
+      },
+      "id": "active-tornado-attack-ce889a7ed5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ebada65da0e99a058ebce26f1b1059b70350b9dca312ad9e532b29ac1b10a47d",
+          "status": "machine_assisted",
+          "text": "앞으로 물의 고압적인 시내를 발사한다. 짧은 지연 후, 스트림은 왼쪽과 오른쪽으로 분기한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b4f7cc3bd713dce257a83ffd4aba224c526da73f3a9f671e80d23510271eaccf",
+          "status": "machine_assisted",
+          "text": "토렌티얼 블래스트"
+        }
+      },
+      "id": "active-torrential-blast-c5d7359e2e",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e28a7c0f2d5d6a7766eda7d9129000649f749d49f6583cd6637bcee4b55ea7bb",
+          "status": "machine_assisted",
+          "text": "위에서 세 번 적을 공격 번개를 생성한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2b521201138e2f9281265529d956c294226268da81d254cf16930b8e51d5c9ca",
+          "status": "machine_assisted",
+          "text": "세 배 번개"
+        }
+      },
+      "id": "active-tri-lightning-8930f11853",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "125d0dae07682f9954b28839b3f95e97e5ca17c4d64714c4804633ac2a71fda7",
+          "status": "machine_assisted",
+          "text": "직선으로 날아가는 고속 번개 공. 동시에 적을 추적하는 느린 번개 공을 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ec809eea27217596f16be581062ef8605c0ae5885773993f77ec6ac2eae4b91f",
+          "status": "machine_assisted",
+          "text": "트리스파크"
+        }
+      },
+      "id": "active-tri-spark-30e2c6cd4b",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "734b453ef89696385c86c601bca7c83a0bc12e1c050750e82c0b1f65a97852af",
+          "status": "machine_assisted",
+          "text": "무상이의 독점 기술이다. 입에서 트윈 워터 블래스터를 뽑아 왼쪽과 오른쪽으로 번갈아 육발을 발사한 다음, 두 블래스터가 결합하여 하나의 강력한 샷을 내보낸다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cc2e6cb406fd1e0281469acb1eff27fbfeeac8745eb16f185ada520a84428f8",
+          "status": "machine_assisted",
+          "text": "트리거 해피"
+        }
+      },
+      "id": "active-trigger-happy-7d56ae3367",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8178e4d428d6b8379d1d9d577141c8bf69c52096876ef27a8bdbe2c5b2b4cb90",
+          "status": "machine_assisted",
+          "text": "켄타나이트 '독점 기술. 악순환의 회오리 바람과 전하 앞으로의 쌍둥이 창을 입은, 그들을 차례로 밀어."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f33ba2b2fdfed91d9dfaf809aa9a68a867606358d9ddab07bffb993e53b53b9f",
+          "status": "machine_assisted",
+          "text": "트윈 스피어스"
+        }
+      },
+      "id": "active-twin-spears-9f6b63ca8f",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "49ab7c1407a41557c9cb664bccb93e1df4192f826b3078a0816b9ecfc5a78c4e",
+          "status": "machine_assisted",
+          "text": "빠른 속도의 어두운 구를 팬 형태로 불태우고, 이동 중에 퍼집니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7f49d974dab851bac9fc37b8aea3e459d46cb0d3bd26f10d353917e0d7327406",
+          "status": "machine_assisted",
+          "text": "Umbral 큰 파도"
+        }
+      },
+      "id": "active-umbral-surge-c87fb0b7b1",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c8e6ac4cde7bef6fb4c1b1fd58cc811020a552f6190c596cad12e3767ce1900a",
+          "status": "machine_assisted",
+          "text": "스콜피어스의 독점 기술이다. 고속으로 적과의 거리를 좁히고, 그 다음 핀커를 최대 힘으로 위쪽으로 회전시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "59c478bdfc1e386833c786bd3d7522de06bfeb78f99bdabd64d1efd94e37da14",
+          "status": "machine_assisted",
+          "text": "어퍼 스매쉬"
+        }
+      },
+      "id": "active-upper-smash-881be1f5f4",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0a15c82d14bec67033b39c1bef1d934e8eaf50129b7a26b425f9527cb98feb95",
+          "status": "machine_assisted",
+          "text": "볼카노의 독점 기술이다. 앞다리를 들어 땅속으로 밀어 넣어 적들 밑에서 화산 폭발을 일으킵니다. 그것은 동시에 위에서 화산 폭탄으로 그들을 포격한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "da13278297b0dca00f0a665936aae98793a7b8f8e6a6f71631c130b6f47d3c38",
+          "status": "machine_assisted",
+          "text": "화산 폭발"
+        }
+      },
+      "id": "active-volcanic-burst-dd65716fd5",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "81bf2babe892a2e1a0f6b6837a9f5d12ee8c14e6c4ea4638c7ff1e3843ed07f0",
+          "status": "machine_assisted",
+          "text": "하늘에 수많은 화산 폭탄을 발사한다. 잠시 후, 폭탄은 그들의 창시자 주위에 비가 내린다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8d510ce05a7a239520134145e33057da799f0e200155eabef5b72cff2a30a9e8",
+          "status": "machine_assisted",
+          "text": "화산비"
+        }
+      },
+      "id": "active-volcanic-rain-9d4fd87ad3",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "795ce11a9851bab27f090f9057a3b80a1431a2415bbaf52f505b2d487e7823a4",
+          "status": "machine_assisted",
+          "text": "시푸도그의 독점 기술이다. 아이키 입장을 채택한다. 이 자세를 취하는 동안, 들어오는 모든 공격을 무효화하고, 적에게 즉시 접근하고, 완전히 강제 된 손바닥 공격으로 카운터한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fe3a9b0b16f62b41102d50e8e72a6caa1f8426ecb9731f7699ebbef6c39b7197",
+          "status": "machine_assisted",
+          "text": "전체적 인 입장"
+        }
+      },
+      "id": "active-wholehearted-stance-ca66627f30",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "af4c9c452ad129e8586608c69094494d13b961513c19ee7485492f04eaaccc2a",
+          "status": "machine_assisted",
+          "text": "자신의 주위에 거대한 바람 소용돌이를 소환하고 강력한 공격을 unleasees."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "523b7e6fa9afbdddd1b07fc29409aae0dd1d9365b859ac42f3b6a7edb97a82c2",
+          "status": "machine_assisted",
+          "text": "바람 버스트"
+        }
+      },
+      "id": "active-wind-burst-c24aed4f51",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ceab620846d20ab831b40e4dfdad23375b28da23550ae8540055eedb6310f70e",
+          "status": "machine_assisted",
+          "text": "적에게 곧장 날아다니는 고속의 바람날개를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "acd6e6730e60633c771c42a3b92004d568705cca7fa7e2c0594e3ab27c00f7f9",
+          "status": "machine_assisted",
+          "text": "바람 절단기"
+        }
+      },
+      "id": "active-wind-cutter-dfc20ed055",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "aeef85dde07ac011599d3c399ff4e6cc77be8efa0b0e24d350e1ef311932f450",
+          "status": "machine_assisted",
+          "text": "팬 밖으로 공기의 예리한 잎을 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8a82b832a9b742b5e7eb351e30de6503087ab353ad0e94d40d93ff062ddc0d26",
+          "status": "machine_assisted",
+          "text": "바람 가장자리"
+        }
+      },
+      "id": "active-wind-edge-4eca4c5cfa",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "64229c7cc6a893eaf1d57edb64e04dd241bfc273f813a0b78d4d4ba0499ae8f7",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안, 플레이어와 파티 Pal는 폭발적인 공격의 피해를 60% 덜 받고 기절에 면역이 된다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d5cdfbe4904bcfcb326120757e60c8b84d0e44bf0addb24d7d7f4f86632d8cc6",
+          "status": "machine_assisted",
+          "text": "파괴할 수 없는 요새"
+        }
+      },
+      "id": "partner-aegidron",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7ff3513972dc9dc7952dd0c2a70eba50a41c625080cb66d643d6486ab82c0367",
+          "status": "machine_assisted",
+          "text": "기지에 있는 동안, 다른 모든 기지 Pal에 대한 급수 작업 적합성 수준이 +1 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d6988911f87f8b5c40fcaae967a275dfd2863e99e58a3148391d8b172c292378",
+          "status": "machine_assisted",
+          "text": "마법의 쌍둥이 힘"
+        }
+      },
+      "id": "partner-amione",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6e19969f48390e279f0189e3c9599aa510af77227371263aa265a5a1215d03bf",
+          "status": "machine_assisted",
+          "text": "활성화되면, 아누비스는 플레이어의 공격 유형을 그라운드로 변경하고 공격력을 30% 증가시킨다. 때때로 전투 중에 플래시 회피로 공격을 회피한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4fdd88b09235ebc8951e595da0b52b6739a532f6800f7e7745d03b1b2ef766bb",
+          "status": "machine_assisted",
+          "text": "사막의 수호자"
+        }
+      },
+      "id": "partner-anubis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1c7c4c234de1e9d275e454d8ba76c56dbaf63196f40d4a4815c84852bce61539",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안, 플레이어는 냉기 저항 +2를 얻습니다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1206cd715521a2709101c23b7f5f618b32005dd8f347b3a7934735344d018cb6",
+          "status": "machine_assisted",
+          "text": "온난 한 몸"
+        }
+      },
+      "id": "partner-arsox",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "599d7c24e04faf15d322519becdd6601b83007730075db6c1b14cde05911dc6f",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 광석에 가해지는 피해가 1100% 증가한다. 그리고 마운트하는 동안 1500% 더 많은 광석을 얻을 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "61957ec807abab7d8b9a4b71ecbf1b0af9142e0c69d7ba3cfe71af53cf96ef55",
+          "status": "machine_assisted",
+          "text": "블랙 안킬로사우르스"
+        }
+      },
+      "id": "partner-astegon",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "221aa8d25a8f59a7a0009d485160455ebfb98b32ba9f5f3e3e238263c8fcc7ff",
+          "status": "machine_assisted",
+          "text": "물 위에서 여행 할 수 있다. 장착 시, 플레이어의 공격 유형을 물로 변경하고 공격력을 1% 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3f990bd32660363b6d2f28c656f2ddff30b0e19d6d2fc8d0eb8d9cbadbf06858",
+          "status": "machine_assisted",
+          "text": "물동이 춤"
+        }
+      },
+      "id": "partner-azurobe",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d00ed4ac28e173b09f0a3a61508750120bd200214c9d3506b6233e3172f24562",
+          "status": "machine_assisted",
+          "text": "물 위에서 여행 할 수 있다. 장착 시, 플레이어의 공격 유형을 얼음으로 변경하고 공격력을 1% 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a8ed74940f059ba5a4aa9f490eb41861b3208853ecddb27687cfd5e1cbde2b69",
+          "status": "machine_assisted",
+          "text": "아이스윙 댄스"
+        }
+      },
+      "id": "partner-azurobe-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0f51fff4bcb673621a43539b1e82c43a52801ce7379e4eec35d0e980dc25b159",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 독에 걸린 적들을 공격하면 공격량이 40% 감소한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "06144b72c6f9f592edadae04e6099be22919f6e6320a88e48d3b29aae5c2d85d",
+          "status": "machine_assisted",
+          "text": "죽음 을 뿌리 는 일"
+        }
+      },
+      "id": "partner-bakemi",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5d4d49a3fd50473c64ff5d1371359e24e19aa58f0363ea2e90f0c93c88e53660",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 얼음이 끓어 오르면 얼음을 녹이는 식초가 된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "12137dc7bff297d9e53e04baf992604c44f58df58bd0dd6afdc5b4e463d70981",
+          "status": "machine_assisted",
+          "text": "블리자드 크래시"
+        }
+      },
+      "id": "partner-bastigor",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c70fbea08d67cd001b711dec029acfcf08f5bac0b9651a95852f590c8073e12d",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 마운트할 때 플레이어의 공격 유형을 전기로 변경하고 공격력을 13% 증가시킨다. 이 Pal의 이동 속도는 파티에서 서로 다른 전기 에 대해 5% 증가한다. (라이버드 제외)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1a69439a7caed790d44185c3b42672cfecb5764524deeb752b945a8c1eff97b6",
+          "status": "machine_assisted",
+          "text": "선더러스"
+        }
+      },
+      "id": "partner-beakon",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "484d074ca540e07d4bd9a6df8b304bdc3f98360a20e00d9377263bee49d257d9",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 마운트할 때 플레이어의 공격 유형을 얼음으로 바꾸고 공격력을 13% 증가시킨다. 이 Pal의 이동 속도는 파티에서 서로 얼음 에 대해 5% 증가한다. (칠버드 제외)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f7a30d88e7e42de29b875d998d518f40a0b1004de4a13527b41e0074afffb60f",
+          "status": "machine_assisted",
+          "text": "콜드스냅은"
+        }
+      },
+      "id": "partner-beakon-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "767338df234aa1c482537c3ed10e9e523fced616ab3a33f49ce9c4f7637e6105",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 퀸비나의 공격력을 증가시킨다. 때때로 목장에 배정 될 때 꿀을 떨어 뜨립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a089b7ebcbe0408bce09f0a1031e7a41f9b75b2dd430ac18f1799a6414f407f4",
+          "status": "machine_assisted",
+          "text": "노동자 꿀벌"
+        }
+      },
+      "id": "partner-beegarde",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2902ae7a455287dcba75b5b0d8d08e9fb6ffd74b2250537357bbd0843493ec3e",
+          "status": "machine_assisted",
+          "text": "활성화되었을 때 공격 대상은 악몽의 레이이다. 이 Pal가 악몽의 레이를 사용할 때 x1.1/1.3/1.6/2/2.5 데미지 승수가 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c0a309f72c27b88ec36581d6bf3fc9468c719aeb2936c49dc02493fc9e73a474",
+          "status": "machine_assisted",
+          "text": "악몽 아이리스"
+        }
+      },
+      "id": "partner-bellanoir",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e471b42545c3baf9d57bdf42d9d7796f2b8a36d1851cce8f65d25e30e092e28b",
+          "status": "machine_assisted",
+          "text": "활성화되었을 때 적의 공격 대상을 악몽의 꽃으로 공격한다. 이 Pal가 악몽의 꽃을 사용할 때 x1.1/1.3/1.6/2/2.5 데미지 승수가 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca76527bed63429f825d098e7b2f5ee08f1e041c7f900042e01b20247473ab7c",
+          "status": "machine_assisted",
+          "text": "나이트메어 Stare"
+        }
+      },
+      "id": "partner-bellanoir-libero",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "374d9829648c608635d6d2499581676b999aefa2a290b7371dcd82995064c87c",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안 당신이 적을 물리 칠 때마다 당신과 함께 싸우는 Pal의 공격과 방어가 5% 증가한다. 이 효과는 20 s초 동안 지속되며 최대 오회 중첩된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "73a9423283b03f268073dbba62cf040d4a2b8da95bd30c6e6c914d994377f264",
+          "status": "machine_assisted",
+          "text": "마그마 카이저"
+        }
+      },
+      "id": "partner-blazamut",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5495356cc2b4e84f9f55b7e85b5e62f7c153d458a7c96e893eda84a66b78b66c",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안 플레이어의 공격력과 Pal의 용의 공격력이 25% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d14d863e4ab0d3930526fb9f46dce367d57dd73b0aebf707cb396bdeb2a2475f",
+          "status": "machine_assisted",
+          "text": "용 카이저"
+        }
+      },
+      "id": "partner-blazamut-ryu",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e911b1bdd75c941381814925a0fc9a54136a887aecdbb97448ac17b0ba5e26c8",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안, 잔디 Pal는 패배 했을 때 40% 더 많은 항목을 드롭 한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "60500af7eb16edf37bb9e9ca8cd413a2e0490e1db45117bfef400b90c5041c2a",
+          "status": "machine_assisted",
+          "text": "Hellflame 라이온"
+        }
+      },
+      "id": "partner-blazehowl",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3c411aa3474009ca7a5c66d163d791d5aca11fbc7662bdd2b4a7a88666d5bb98",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에서 중립적 인 Pal는 패배했을 때 40% 더 많은 아이템을 떨어 뜨립니다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c10f9273c5bef83a6f2f68e0479053fc94e2d857eca41d8a8c2c3c5ed3d3cf8f",
+          "status": "machine_assisted",
+          "text": "Darkflame 라이온"
+        }
+      },
+      "id": "partner-blazehowl-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "45b32c5b47387d0e5c7f3eb376bee01a136deea024dfbca6b651d715c87228e0",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 기지에 있는 동안 사육 농장에 할당된 Pal의 난자 생산 속도를 20% 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "da0ed5936a6339688496d0ceba7abc2952400492c278a82cabc92ee61f4fbf00",
+          "status": "machine_assisted",
+          "text": "발미 날씨"
+        }
+      },
+      "id": "partner-braloha",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c375600de8008021672afe0b00642ff86730300afcf6582674ab75a49f917c7c",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 잔디 Pal의 공격력이 15% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a6288f741895a06ccdc7a5c858bb1e03ad1878d2aae8861de8dcf275b0b303f6",
+          "status": "machine_assisted",
+          "text": "공주는"
+        }
+      },
+      "id": "partner-bristla",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1eaed5c9d1ff7961ca1b501f17b873688f8d1448a83b68338bcf59e6e0bbe3de",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안, Pal 달걀은 알파 Pal 계란이 될 확률이 35%이다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ea69f048a8b26aef7ad73c29e660ceb1e203bd1668e9bf99fa71039a8281d5d7",
+          "status": "machine_assisted",
+          "text": "사랑의 첫 꽃"
+        }
+      },
+      "id": "partner-broncherry",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e13cf95d9e7a507b9fd52641efef6bc9e8388bdcf6942a11d3df9aff6a473835",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안, Pal 달걀은 알파 Pal 계란이 될 확률이 45%이다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6620d8823dd8a2e1b61870e36510cd341dde7b0cdc0cd1bf9d8886ed5255426d",
+          "status": "machine_assisted",
+          "text": "순도의 전체 블룸"
+        }
+      },
+      "id": "partner-broncherry-aqua",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3307334e61c9fdb5fda3080fb40e23bc4adf87214eb604e26e6590f7ea292e43",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에서 플레이어와 파티 Pal는 전기 피해를 15% 덜 받고 전기화에 면역이 된다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1e34b425aee494ada8f40022b5b79a2cedc9d8fed957fa1b9cc9446267c7e402",
+          "status": "machine_assisted",
+          "text": "요코즈나의 존재"
+        }
+      },
+      "id": "partner-bulldosu",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7bb3f36e39ed5c18fe12e846d4b4a530c670359dd261c400899f14a5c3de8692",
+          "status": "machine_assisted",
+          "text": "활성화되었을 때 Iaigiri로 적을 공격하십시오. 이 Pal가 Iaigiri를 사용할 때 x1.1/1.3/1.6/2/2.5 데미지 승수가 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0f817abbbe84ebdd58a036971027a56264786ffcbc59a0c55618be8a7d49b2d0",
+          "status": "machine_assisted",
+          "text": "브란디쉬 블레이드"
+        }
+      },
+      "id": "partner-bushi",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "86eae962b8959851d3795e294994d65e5d1717fb174eae8588876ce72c9226df",
+          "status": "machine_assisted",
+          "text": "활성화되었을 때 Iaigiri로 적을 공격하십시오. 이 Pal가 Iaigiri를 사용할 때 x1.1/1.3/1.6/2/2.5 데미지 승수가 있다. 파티에 있는 동안 전투 중이 아닌 경우에만 플레이어의 근접 무기 공격력이 30% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4fb7c7cf4ca3e5b8a5c609ecda0c1c213b34be0c990bf621b8bd7dede5cf23b9",
+          "status": "machine_assisted",
+          "text": "무효 블레이드"
+        }
+      },
+      "id": "partner-bushi-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ab81251b48f9edd1b3e21d0f1de19038b4cb1bd73420618a8ceae573216154c9",
+          "status": "machine_assisted",
+          "text": "목장에 배치하면 등에서 빨간 열매를 떨어뜨리기도 한다. 파티에 있는 동안 배고픔이 가장 낮은 Pal의 배고픔을 100포인트 회복한다. 이 효과는 5분마다 발동하며 중첩되지 않는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "902b1dae140002c9936448fd2374d23900dbffd225bafd96951c535877cbd0f0",
+          "status": "machine_assisted",
+          "text": "베리 피커"
+        }
+      },
+      "id": "partner-caprity",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b81db51f1f77b0c673fb0d00e34d30bc4efa648e7161bbbd47a22bae0a3d1a56",
+          "status": "machine_assisted",
+          "text": "목장에 배치하면 등에서 독샘을 떨어뜨리기도 한다. 파티에 있는 동안 배고픔이 가장 낮은 Pal의 배고픔을 100포인트 회복한다. 이 효과는 5분마다 발동하며 중첩되지 않는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "84f9850826cb667b0c065b0d7932478274fdc5227293fb3362ad79efeda1eccd",
+          "status": "machine_assisted",
+          "text": "베놈 피커"
+        }
+      },
+      "id": "partner-caprity-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "68c2a90cd18e3e90765bf6c162be3e4291801ff26801cf90bd42f90b7b3497d4",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 플레이어가 회피 롤이나 회피 단계를 수행할 때, 카프릴리스는 회오리바람을 일으켜 닿는 적들에게 피해를 줍니다(그라스 / 위력: 40). (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c7ed38f3ec98ce4bf225dea14d2af4690b96007e40660a4e7ee3f927ea0d5239",
+          "status": "machine_assisted",
+          "text": "얽히고 설킨 혀"
+        }
+      },
+      "id": "partner-carnibora",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "afa7b65caf1b380b9563a7c6bf373d5b3dd99567893320f1973b097234b3d16e",
+          "status": "machine_assisted",
+          "text": "파티에서 까부냥는 보급품을 운반하는 데 도움을 주어 플레이어의 최대 운반 능력을 100 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "544ddda263fc02cccaba846c162e9d67358f95c250f55775be3caf977f4691de",
+          "status": "machine_assisted",
+          "text": "고양이 도우미"
+        }
+      },
+      "id": "partner-cattiva",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f86fec40cf5950890d45b7a8980eef2e500c7c16c533e0f35c8eef5a3f57cec",
+          "status": "machine_assisted",
+          "text": "활성화되면 어두운 곳에서 볼 수 있는 야간 시력을 부여한다. 다시 활성화하여 꺼집니다. 때때로 목장에 할당 할 때 뼈를 파고."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a32c65a9cd63db2be390588421e9b5065369ffbd73eb2a81f0a2fc038bb4c2f9",
+          "status": "machine_assisted",
+          "text": "아이리 나이트스트레이커"
+        }
+      },
+      "id": "partner-cawgnito",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b1415121e82e9db29ee36ddf81f2e1c411fe57d3f5c77efb191e264476281131",
+          "status": "machine_assisted",
+          "text": "파티에있는 동안, 장착 된 글라이더의 성능을 수정한다. 낙하 피해를 방지하고 고속 활공의 지속 시간을 연장한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "37b10b4273b456de3bfa17b02e899325ed62a0e98b03ead2d0d8cdab005fb10f",
+          "status": "machine_assisted",
+          "text": "제퍼 글라이더"
+        }
+      },
+      "id": "partner-celaray",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b1415121e82e9db29ee36ddf81f2e1c411fe57d3f5c77efb191e264476281131",
+          "status": "machine_assisted",
+          "text": "파티에있는 동안, 장착 된 글라이더의 성능을 수정한다. 낙하 피해를 방지하고 고속 활공의 지속 시간을 연장한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e463bc48d4514cb0f6c691cfa32e5d54a90ca8b2233bd34d27734032b7121b84",
+          "status": "machine_assisted",
+          "text": "졸트 글라이더"
+        }
+      },
+      "id": "partner-celaray-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "25beedef04810c3c63b5b30839d436ff82a957f1d3bde98552e5baec697c0885",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안 자신과 함께 싸우는 Pal는 공격력이 40% 증가하는 대가로 체력을 점차 잃습니다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0afaf190c5c6e13792c51dd7c296c8858c54d25c0215a73becd77319522416f3",
+          "status": "machine_assisted",
+          "text": "혼돈의 축복"
+        }
+      },
+      "id": "partner-celesdir-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fa299615764afbaa57daa52559272a0d30c1896e1f05bae1bb78dabd6cab7c2a",
+          "status": "machine_assisted",
+          "text": "때때로 목장에 할당 할 때 계란을 낳는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "accfc3682261614132d44de9cd4279536d874a159b92072514548ee6951e1b12",
+          "status": "machine_assisted",
+          "text": "계란 층"
+        }
+      },
+      "id": "partner-chikipi",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "16aade1aa7263c421cbdf3471a4a4ec46d70d4e9819c508d72668f02b8e3d496",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 장착 시, 플레이어의 공격 유형을 드래곤으로 변경하고 공격력을 1% 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b21af1bd21754a0e7c95cf3f8f8c895bf8972c9834f3d7dfdef72da5a3ae3de4",
+          "status": "machine_assisted",
+          "text": "제초제"
+        }
+      },
+      "id": "partner-chillet",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b3467d18f7f9889f30bacf99f9a4c41dac9843fcb955553494c5298685d63567",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 장착 시, 플레이어의 공격 유형을 불로 변경하고 공격력을 1% 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "be3c02bd11ac55a6e82a444f41b9f46c86d30121bec9a36de24679ea43061202",
+          "status": "machine_assisted",
+          "text": "스파클링 족제비"
+        }
+      },
+      "id": "partner-chillet-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "503596a2fd14e197460801eed7c47fee3691260085285bee1dac1b0c2d9856f4",
+          "status": "machine_assisted",
+          "text": "활성화되면, 대상 적에게 독 안개를 발동시킨다. 기지에 있는 동안, 다른 모든 기지 Pal에 대한 농업 작업 적합성 수준이 +1 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4e7d1a937ffedb19af26dd15bf857915a2c7da5d415ac983bfd1c8df449fb1e0",
+          "status": "machine_assisted",
+          "text": "신비 의 저울"
+        }
+      },
+      "id": "partner-cinnamoth",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "47ffac100fc8578a8c765455406f4fb084c63fc42561164c28aea9d991c7ed4c",
+          "status": "machine_assisted",
+          "text": "기지에 있는 동안, 다른 모든 기지 Pal에 대한 개더링 작업 적합성 레벨이 +1 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c1f4d0f5b070b78c4fba1c8c7ddc5a03be7e55b3914fab2b003cec6c63fcc24d",
+          "status": "machine_assisted",
+          "text": "해피 클로버"
+        }
+      },
+      "id": "partner-clovee",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9e2d95249fa7307c80442a158adf43d932c8dd025acb7330b985bf4232c896f8",
+          "status": "machine_assisted",
+          "text": "파티 중에는 중립 Pal의 공격력이 15% 증가한다. (적재하지 않음) 때때로 목장에 할당 할 때 울을 떨어 뜨립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e249bad5fcb9d4f13683aa67b7c60eeed75927ec0f1e2534c66b28cd20f5f9d6",
+          "status": "machine_assisted",
+          "text": "무성한 모직"
+        }
+      },
+      "id": "partner-cremis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ec9aa995ff3fe0649688f71aba26caf86bc93d7ce8439096b9fd4e760bcff4e5",
+          "status": "machine_assisted",
+          "text": "활성화되면 검구리는 충성도를 높이고 복부를 부풀려 에너지를 저장한다. 꼭대기에 오르면 플레이어를 공중으로 높이 올릴 수 있다. 착륙 전에 공중에 떠 있을 때, 플레이어의 공격력이 50% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9b26a487a7e0b27acbb038e2275efc2a73c43ce67aed228604c0b10d4ed4a9ed",
+          "status": "machine_assisted",
+          "text": "립 스탠스"
+        }
+      },
+      "id": "partner-croajiro",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e2106fc25d4cff85c0fbbbfe3ae4a0a3e9578aed6d5696c9abb89b9407b850b9",
+          "status": "machine_assisted",
+          "text": "활성화되면 검구리는 충성도를 높이고 복부를 부풀려 에너지를 저장한다. 꼭대기에 오르면 플레이어를 공중으로 높이 올릴 수 있다. 파티에 있는 동안 플레이어의 어둠과 Pal의 피해량이 25% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6cb77dbda37156d4f2d6bc844dd75b7240f9d094af2c0e00cc0768793f03e211",
+          "status": "machine_assisted",
+          "text": "섀도우"
+        }
+      },
+      "id": "partner-croajiro-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "08477d70b772537c134a2a477229623db08c8dd647123dcfe88457a321bc65a8",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 드래곤 Pal는 패배 했을 때 40% 더 많은 항목을 드롭 한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4d6f687b3c9323004ab15c076dcf20fbe862acdec9dd5bac3112f5c5a55e61be",
+          "status": "machine_assisted",
+          "text": "용 사냥꾼은"
+        }
+      },
+      "id": "partner-cryolinx",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8641319f494f6858893ca5043e8c3e4fe7bf930b9b9bd9d3c1a2b21f1b9fc5a6",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 적의 약점을 공격하면 다음 약점 공격의 공격력이 30% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b414ca03b89063815334300d1566603c4ba0b91dbefdfa08fc5519fea404a97d",
+          "status": "machine_assisted",
+          "text": "폭발성 힘"
+        }
+      },
+      "id": "partner-cryolinx-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0a880fba88c3391cc32e86b2c7d66010091bf29cdf4ea5854186ea324c73ec42",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 플레이어 근처에 나타납니다. 어둠의 마법의 총알로 적들을 공격한다. 이 탄환은 대상의 생명력을 1 이하로 감소시키지 않습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d25e05b63a366b6f7955680e25ca51d077ee94c418dad422f217700225ed4cfc",
+          "status": "machine_assisted",
+          "text": "드림 체이서"
+        }
+      },
+      "id": "partner-daedream",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2a2d0be11fb5eb043c27074a48201c8fa9bbff01b2fa4c3bc5fae0d730e28bc2",
+          "status": "machine_assisted",
+          "text": "활성화되면, 플레이어의 공격은 독 2를 가한다. 파티에 있는 동안, 플레이어와 파티에게 독에 대한 Pal 면역을 부여하고, 세계 나무 지역에서 독성 가스의 효과를 무효화한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f5d1052f80851dd8759da0139400ee8c350716974442a9610da036b4bfc7a05c",
+          "status": "machine_assisted",
+          "text": "미스트 Stalwart"
+        }
+      },
+      "id": "partner-dandilord",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1a7fc1cd4560cc5c43af7de775380460986b3f7d00030803d3b065c47dd1d8dd",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 모래에 장착하는 동안 이동 속도가 50% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b75c8bab4d054af87c62da460cc08ee7fa83a6a527c0882b0d8cd77de2db9863",
+          "status": "machine_assisted",
+          "text": "샌드 스프린트"
+        }
+      },
+      "id": "partner-dazemu",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3a045d5a5ff048484b6d259da143bad6633afb8ae06d32fa1baebf5ec77098f8",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 플레이어 근처에 나타납니다. 전기 볼트로 적들을 공격한다. 이 볼트는 대상의 생명력을 1 이하로 감소시키지 않습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3308857f70d307fe161648ffb8b8bde5354bc828de09f9a63291bdd568e0cc7a",
+          "status": "machine_assisted",
+          "text": "레이디 오브 라이트닝"
+        }
+      },
+      "id": "partner-dazzi",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "07c2e60681d62d8c94badb00abdeb85587f2b82b07cd5a143e019544887b136d",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 플레이어 근처에 나타납니다. 어둠의 볼트로 적들을 공격한다. 이 볼트는 대상의 생명력을 1 이하로 감소시키지 않습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7d95c1ce8ab32e8a7a4cffe185a00298653e428d185295ef22b240629910800a",
+          "status": "machine_assisted",
+          "text": "레이디 오브 어둠 라이트닝"
+        }
+      },
+      "id": "partner-dazzi-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4232f526f2522bb9544513de739ffece4720d7b411ce49ff0262e08a729f0f90",
+          "status": "machine_assisted",
+          "text": "뚱코알라가 활성화되면 전체 에너지 드링크가 튕겨 이동 속도와 작업 속도가 100% 증가한다. 때때로 목장에 할당 할 때 Venom Gland를 떨어 뜨립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6f46648475dc61edf8ea073a0c82941fa1f7ad5515c26119f34333f3d2e00ce4",
+          "status": "machine_assisted",
+          "text": "카페인 접종"
+        }
+      },
+      "id": "partner-depresso",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d8555fccd79cc7c00d06335562dd1d4a1102d4c7ee8dddd26016e4437b0d4ac4",
+          "status": "machine_assisted",
+          "text": "활성화되면 Shell Spin 상태로 들어갑니다. 돌고 있는 동안 플레이어를 따라다니며 광석 채굴 효율을 800% 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a32545d88bc5a7d0f10243b6ab781790aec6ff42c669cad84502fdaf0f3e1106",
+          "status": "machine_assisted",
+          "text": "드릴 크러셔"
+        }
+      },
+      "id": "partner-digtoise",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "deabc26e958ad06e402b478b38f503def2b02b198e4382d2c768ce6bcb035720",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티에 있는 동안 드래곤 Pal의 방어력을 15% 증가시킨다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "985d78378a38ebb4b838a0479a73382102f92ac0f5e1641d50fffaeca3dacf75",
+          "status": "machine_assisted",
+          "text": "향기로운 용"
+        }
+      },
+      "id": "partner-dinossom",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9d589bdfe4b5c66a7914e325e2187a489e4b306d41c0d892c0c61bfae83fe78",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 파티 중에는 전기 Pal 방어력이 15% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "313e3aed9f0007f8bc670fbe09b42728897a8fe7d8dbe2607e6e57f268eab023",
+          "status": "machine_assisted",
+          "text": "썬더 용"
+        }
+      },
+      "id": "partner-dinossom-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cb367b0bd2740676c941cdeb003433ce620f7e48b2e2e519cc77f39f991198c8",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 대부분의 마운트보다 약간 빠르게 이동한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e2efd45e847c965f562599522891e670c8c002abbfe158eee244bdc3d95b9fd1",
+          "status": "machine_assisted",
+          "text": "다크울프 라이더"
+        }
+      },
+      "id": "partner-direhowl",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "acff163ab14be4d8561aa8c424eab81b275e2d8d49bfaa40ab7825b539d322e0",
+          "status": "machine_assisted",
+          "text": "활성화되면 가장 가까운 기지로 텔레포트한다. 던전 또는 이와 유사한 영역에서는 사용할 수 없다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "55b15ac386406ed3684f39d710af43131b7087d72221acb8b4d6f8f01ea95002",
+          "status": "machine_assisted",
+          "text": "Homeward기도는"
+        }
+      },
+      "id": "partner-dogen",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b178dad61d2a32c262c21f0f2b0ac6f57786457a8de6b623afe08ea4455dc0d0",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 활성화되면 스태초는 오른손에서 강력한 잔디 레이저를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c265228f6512450b406d18be17367ce2fa26510f0a305f3a9d04113268b832db",
+          "status": "machine_assisted",
+          "text": "숲 레이저"
+        }
+      },
+      "id": "partner-dualith",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dadb01b88e65fe2617701d1f48a964214eaf40fdbc50fb3164b72ddd77f802ce",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 스태그림가 활성화되면 오른손에서 강력한 다크 레이저가 발사된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6e8ef777f4ca8ffa400467f88f657c3fdd95fb5df96ea683054e22708f37ffa1",
+          "status": "machine_assisted",
+          "text": "부패 레이저"
+        }
+      },
+      "id": "partner-dualith-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c66aa54b943670e122a4777b89137bb480a1e11491e4eb320d2f0392e3cad38e",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 대지의 공격력이 15% 증가한다. (스택하지 않음) 때때로 목장에 할당 할 때 고품질의 Pal 오일을 떨어 뜨립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "17248c4de10e2375ed5c84e391ab176ad99e96f746a7985188d31f6ea471a314",
+          "status": "machine_assisted",
+          "text": "토양 개량"
+        }
+      },
+      "id": "partner-dumud",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "90696adddfc83638db694d4b21d9d53c2295e590815bd0683a96a93ee3861875",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 적들이 떨어뜨린 금화의 양이 +100% 증가한다. 때때로 랜치에 배정되면 고품질 Pal 오일을 떨어 뜨리고 금화를 떨어 뜨릴 수있는 작은 기회가 있다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7d1b8e87d99b0b579b5bacbe4bd77359adef97bc63a3960bbff4eaebb1fc3f1b",
+          "status": "machine_assisted",
+          "text": "황금 수확"
+        }
+      },
+      "id": "partner-dumud-gild",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2de4f9580486c6062734e7c59ca1515ab75ac8f0bca3e5d2cdaba0dd196e94c6",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안 플레이어의 체력이 50% 아래로 떨어진 경우 라피에르는 플레이어 주위에 폭발을 생성합니다 (화재 / 힘: 100 / 구축 굽기: 777). 추가 플레이어의 체력이 50% 미만인 경우 플레이어의 공격력이 110% 증가한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5073f6b52c004e2e44b68213c8d0703978b8e82e171217ed5b85782a5e8feaec",
+          "status": "machine_assisted",
+          "text": "Trick-Loving Fuffle(트릭-러빙 플러플)"
+        }
+      },
+      "id": "partner-dupin",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fc14297ae416f9a54f2a24fb381e7e75320b583a1c08606c6aea01283350eb0c",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 기지에 있는 동안, 알을 배양하는 데 걸리는 시간을 20% 단축한다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "21e7e2f10eb8954924a84e070b34bc025ebf13ede7196a690bfc2e84035304a1",
+          "status": "machine_assisted",
+          "text": "전기 마사지 인큐베이션"
+        }
+      },
+      "id": "partner-dynamoff",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3053442ae858a811f2c1fb2356f6f7868f037d16a4b60505244dab216d194f5e",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 이 Pal의 공격과 이동 속도가 파티에서 각각 Dragonor Dark Pal에 대해 2% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5d37574339c0d03f4f8c2682e7adfb9f899838158bad3860c723a28f369a3534",
+          "status": "machine_assisted",
+          "text": "해방된 Pterosaur"
+        }
+      },
+      "id": "partner-eidrolon",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e5981c4a2b5b065ed2074a5b52b149c9dc84b5639d68da409632c46d7607c46f",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 이 Pal의 공격과 이동 속도가 2% 증가하거나 파티에서 각각 용 또는 불 가 증가한다. (헬번 제외)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5e5fa0ad086481b6d6f01f33dfc7d7f3d4b0ffe4c0213492d8fac78acfdb574b",
+          "status": "machine_assisted",
+          "text": "과민한 Pterosaur"
+        }
+      },
+      "id": "partner-eidrolon-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3b2466b4eba278fc7bbb07599b020177f9a821d31e17d6b219fba3522e00f152",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 거치하고 있는 동안 두 배 점프를 실행할 수 있고 220% 씩 lumbering 효율성을 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "47646f86981c53a9db8f624412a2d466303fdea2a3d01a6266bf48de06d54619",
+          "status": "machine_assisted",
+          "text": "숲의 수호자"
+        }
+      },
+      "id": "partner-eikthyrdeer",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "85be6ecd8923ba44beb7ed0a58091df367c9439c10eae2a36caa3b9559a4a637",
+          "status": "machine_assisted",
+          "text": "탈 수 있다. 두 번 점프하는 동안 마운트 할 수 있다. 기지에 있는 동안 다른 모든 기지 Pal에 대한 Lumbering Work Suitability 레벨이 +1 증가합니다(중첩되지 않음)."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1875304b03dd225626b8fe34b5e5013d02d2fb3fa94773e7c1561b2e6247811d",
+          "status": "machine_assisted",
+          "text": "황금 숲의 수호자"
+        }
+      },
+      "id": "partner-eikthyrdeer-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5d07a99cacc34703015b996cbf163bfa6d6fcbf263fee3a38d23566687809b7e",
+          "status": "machine_assisted",
+          "text": "그루타우가 활성화되면 플레이어의 공격 유형이 잔디로 바뀌고 공격력이 30% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5f060fd684cf9cf3ec9ac227ab370b8e967b7676ae271f603f0b11f6ac403e92",
+          "status": "machine_assisted",
+          "text": "자연의 위협"
+        }
+      },
+      "id": "partner-elgrove",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d3752ba157c2a3e1b30a2205a84558b115ae30feb948b0bc6938f26120008da2",
+          "status": "machine_assisted",
+          "text": "파티에 있는 동안, 플레이어에게 한 번의 공격으로 적들을 적에게 적중시킬 수 있는 능력을 부여한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6ce3caa7abbf7b5803155cda2f50647eb531b1ba86ccea99ed0b02e53ab4291f",
+          "status": "machine_assisted",
+          "text": "윈터의 위협"
+        }
+      },
+      "id": "partner-elgrove-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca19ddf1c04ffbd8fbdf6125a5e44f8895ed178b1b3aef13e8cf11346cd77719",
+          "status": "machine_assisted",
+          "text": "이 Pal의 공격은 파티에 있는 각 비나이트당 12% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9612070f07b3fd4f02d021196b85cd71f130b8915896332c23591c4b819f58ae",
+          "status": "machine_assisted",
+          "text": "여왕벌 사령부"
+        }
+      },
+      "id": "partner-elizabee",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6180584b95b637fdcf8526cd11ea00af31d4494a7f879e23af0a9c15b9b1db8b",
+          "status": "machine_assisted",
+          "text": "비행 마운트로 탈 수 있다. 비행하는 동안 이동 속도가 증가한다. 파티에 있는 동안, 어둠의 Pal는 패배했을 때 40% 더 많은 아이템을 떨어뜨립니다. (스택하지 않음)"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "49ba5307f2f6eb2d3b724fd9057e6fa4a40a3632e6897cecf5144aee374ba26c",
+          "status": "machine_assisted",
+          "text": "호의를 베푸는 신성한 용"
+        }
+      },
+      "id": "partner-elphidran",
+      "kind": "skill"
+    }
+  ],
+  "schemaVersion": 1
+}

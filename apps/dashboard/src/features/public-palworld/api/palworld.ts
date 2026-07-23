@@ -1,6 +1,7 @@
 import type {
   PalworldBreedingParentsResponse,
   PalworldBreedingResultResponse,
+  PalworldBreedingGender,
   PalworldItemDetail,
   PalworldItemSummary,
   PalworldMetaResponse,
@@ -30,6 +31,18 @@ import { runtimeConfig } from "../../../runtime-config";
 export const PALWORLD_VERSION_MISMATCH_EVENT = "palworldversionmismatch";
 let observedGameVersion: string | undefined;
 
+export class PalworldApiError extends Error {
+  readonly status: number;
+  readonly code: string;
+
+  constructor(status: number, code: string, message: string) {
+    super(message);
+    this.name = "PalworldApiError";
+    this.status = status;
+    this.code = code;
+  }
+}
+
 function observeGameVersion(value: unknown): void {
   if (!value || typeof value !== "object") return;
   const metadata = (value as { metadata?: unknown }).metadata;
@@ -43,15 +56,37 @@ function observeGameVersion(value: unknown): void {
   observedGameVersion = version;
 }
 
-async function readError(response: Response): Promise<string> {
+async function readError(response: Response): Promise<{ code: string; message: string }> {
   try {
     const body = await response.json() as { error?: unknown; message?: unknown };
-    if (typeof body.message === "string") return body.message;
-    if (typeof body.error === "string") return body.error;
+    const code = typeof body.error === "string" && /^[A-Z0-9_]{1,128}$/u.test(body.error)
+      ? body.error
+      : `PALWORLD_HTTP_${response.status}`;
+    const message = typeof body.message === "string" && body.message.length <= 512
+      ? body.message
+      : `Palworld API 요청 실패: ${response.status}`;
+    return { code, message };
   } catch {
     // JSON 오류 본문이 아니면 아래의 안정적인 상태 메시지를 사용합니다.
   }
-  return `Palworld API 요청 실패: ${response.status}`;
+  return {
+    code: `PALWORLD_HTTP_${response.status}`,
+    message: `Palworld API 요청 실패: ${response.status}`,
+  };
+}
+
+function observeResponseGameVersion(response: Response, value: unknown): void {
+  const headerVersion = response.headers.get("X-Palworld-Data-Version")?.trim();
+  const metadata = value && typeof value === "object"
+    ? (value as { metadata?: { gameVersion?: unknown } }).metadata
+    : undefined;
+  const bodyVersion = typeof metadata?.gameVersion === "string" ? metadata.gameVersion : undefined;
+  if (headerVersion && bodyVersion && headerVersion !== bodyVersion) {
+    window.dispatchEvent(new CustomEvent(PALWORLD_VERSION_MISMATCH_EVENT, {
+      detail: { expected: headerVersion, received: bodyVersion },
+    }));
+  }
+  observeGameVersion(value);
 }
 
 async function publicGet<T>(
@@ -67,12 +102,17 @@ async function publicGet<T>(
     headers: { Accept: "application/json" },
     signal,
   });
-  if (!response.ok) throw new Error(await readError(response));
+  if (!response.ok) {
+    const error = await readError(response);
+    throw new PalworldApiError(response.status, error.code, error.message);
+  }
   const body: unknown = await response.json();
   const validated = validate(body);
-  if (!validated.ok) throw new Error(`Palworld API 응답 검증 실패: ${validated.error}`);
-  // 아이템·스킬·교배는 Pal 도감과 별도의 고정 출처를 유지하므로 의도적인 버전 차이를 오류로 취급하지 않습니다.
-  if (observeActivePalVersion) observeGameVersion(validated.data);
+  if (!validated.ok) {
+    throw new PalworldApiError(502, "PALWORLD_RESPONSE_INVALID", `Palworld API 응답 검증 실패: ${validated.error}`);
+  }
+  // active Pal release와 분리된 일부 보조 domain만 명시적으로 버전 관찰을 생략합니다.
+  if (observeActivePalVersion) observeResponseGameVersion(response, validated.data);
   return validated.data;
 }
 
@@ -116,12 +156,24 @@ export function getPalworldSkill(id: string, signal?: AbortSignal): Promise<Palw
   return publicGet(`/api/palworld/skills/${encodeURIComponent(id)}`, signal, validatePalworldSkillDetail, false);
 }
 
-export function getPalworldBreeding(parentA: string, parentB: string, signal?: AbortSignal): Promise<PalworldBreedingResultResponse> {
+export type PalworldBreedingRequestOptions = {
+  parentAGender?: PalworldBreedingGender;
+  parentBGender?: PalworldBreedingGender;
+};
+
+export function getPalworldBreeding(
+  parentA: string,
+  parentB: string,
+  options: PalworldBreedingRequestOptions = {},
+  signal?: AbortSignal,
+): Promise<PalworldBreedingResultResponse> {
   const params = new URLSearchParams({ parentA, parentB });
-  return publicGet(queryPath("/api/palworld/breeding", params), signal, validatePalworldBreedingResultResponse, false);
+  if (options.parentAGender) params.set("parentAGender", options.parentAGender);
+  if (options.parentBGender) params.set("parentBGender", options.parentBGender);
+  return publicGet(queryPath("/api/palworld/breeding", params), signal, validatePalworldBreedingResultResponse);
 }
 
 export function getPalworldBreedingParents(child: string, page = 1, pageSize = 12, signal?: AbortSignal): Promise<PalworldBreedingParentsResponse> {
   const params = new URLSearchParams({ child, page: String(page), limit: String(pageSize) });
-  return publicGet(queryPath("/api/palworld/breeding/parents", params), signal, validatePalworldBreedingParentsResponse, false);
+  return publicGet(queryPath("/api/palworld/breeding/parents", params), signal, validatePalworldBreedingParentsResponse);
 }

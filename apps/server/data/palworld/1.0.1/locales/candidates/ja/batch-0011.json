@@ -1,0 +1,2706 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9e8c4ed2120025ac427523a88b4e9811771a5781ae0f283dacdc3e053c7188c5",
+          "status": "machine_assisted",
+          "text": "持ち込むためのショットガン。 パートナースキルを活性化し、近くの敵にショットガンの爆風を発砲します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "233d802c6381c8777ed84747787ca14aaeeb6da0a91f0ccbde01f11169e1ab6e",
+          "status": "machine_assisted",
+          "text": "夏期マックスのショットガン"
+        }
+      },
+      "id": "skill-unlock-bad-catgirl",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43f746d9135b0318964c4458d26f3e5f006cab6a2466d91b0f7cd8fcbffd6870",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-bird-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fa2fe20cdfa0e49aaba1be87efad9289ba88460dd7d81f39560a49e6b08a8de8",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-bird-dragon-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8411a3fc5309db2c50b743af7ef5dc1eada742a37d31d00e1ca4a40141ad3063",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-black-centaur",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4a4eec81261f06017120c4e2ca3b18abb8a3837535025ca1439de7287d6acb8f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-black-griffon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2b8ac825a6db3f8baaf640de55ed2bdd915e50c85739fbf07d879fb0958aec9d",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-black-metal-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "a025438059df0567cd5d57cdc893ca9932d9fa215fe37a3cee4ddd29d229355b",
+          "status": "machine_assisted",
+          "text": "クロマルのハーネス。 パートナースキルを活性化して、近くの場所を検出します。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5df40c384b9d5876016efd237767ceae58fd685875ae0014f8dcffa2ec4b6478",
+          "status": "machine_assisted",
+          "text": "夏期マックスのハーネス"
+        }
+      },
+      "id": "skill-unlock-black-puppy",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0d16a0068e2903c9bc676b0d38f8678b3f142731db512946d19e7fe306217bec",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-blue-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a20f3eb8dadaecc707045ec081f1033f9ed063451355330364b5449bbbfb2fdf",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-blue-dragon-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e3567a40e8b0aef91b5d12465786293826e6064dba4fde56ff3b72c8af69e291",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-blue-sky-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2263f848aff29d8a06a52fec669a02d1418c9b1383d9711bc144f24a4db6524a",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-blue-thunder-horse",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "776bed32aeb9085e8a8a287c0517185d7c3ce83b4ee027fbad52682de2f6d20e",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-boar",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "a9eb2551e6438a19b7bed46cd02627e551841d0df2309fd23f719b7e235ebce6",
+          "status": "machine_assisted",
+          "text": "サブマシンガン専用。 [原文欠落]。 パートナースキルとクルリスを活性化。 頭に乗って敵を撃つ"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c99ef1093ea1ad76c1b8dd35b74dd79b3f4fefaa6d6eac5c13c332f118650a75",
+          "status": "machine_assisted",
+          "text": "スーパーマシーンガン「クルリス」"
+        }
+      },
+      "id": "skill-unlock-carbunclo",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7790139aefa5f15b0d215bf0f9ecb5100309603e164251b08b02e017c381fa50",
+          "status": "machine_assisted",
+          "text": "やさしく握る手袋 [原文欠落]。 パートナースキルを活性化します。 爆発性の卵を発射するのに使います"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fa5e47ceca0cb1268addb240902bf990e1778545df54aa1946f657b3bc3ccf58",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-colorful-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a0b9c98dc8c43698d75165f5e6cd0aec5b30555d61b727be3ec0dd1a1144478a",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-cube-turtle",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7b55a0ac26cd11861ae4df640378771ca6c294f1f109d6ed9f60feca44d68ff9",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-cube-turtle-neutral",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "be58b8cb6570a6d1c103a87ae72a342c88fd8e7e14723d8f215050336c906740",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-dark-mecha-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f811eb09c5b66667d83febb2f789f8e007f7d869facf151f97e4e9d49aff4090",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-deer",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c6df9d9f32c45a23ddcf838f9b13cd9c949888e73195f611d5e11b78c66ad44",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-deer-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "82ad13c80ea66af0f3f78aa5c1df2c002f6aa6316dce8ee3e43abf9606551f54",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-dome-armor-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1c7ae814a82d8c010fa465246cb896a5db69efc3aeaf7b901970dec3405e9b53",
+          "status": "machine_assisted",
+          "text": "色 [原文欠落]。 チームにいるなら 敵を攻撃する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4a516c550c6c560a476e17520e6572c9288298ce32cdc57c90d1d0ed395f5b04",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスのネックレス"
+        }
+      },
+      "id": "skill-unlock-dream-demon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "500a552654e6cca25b0ec6a158788c31f1331fe10c84a41b6b17776d9eab4207",
+          "status": "machine_assisted",
+          "text": "装備グライダーのパフォーマンスを変更するための手袋。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "15a1ddbc66634400db0ab369def38540c9cf0add971be1d2916b1518b1e9b644",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-eagle",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1cc81f34e7a646776dffa78cc159ab04b25891cf2ab7859f51d816275c252fd7",
+          "status": "machine_assisted",
+          "text": "ミニ銃を発射する 乗った時"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5b314e36e69af8387dbb7f097ce112c675869ecf44631c04ade2b0ad103ca484",
+          "status": "machine_assisted",
+          "text": "クアッドマックスのミニガン。"
+        }
+      },
+      "id": "skill-unlock-elec-panda",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a96c42d789743b05d85b05f74c956b643d9c47e99eebea20b5095e304e1be80c",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-fairy-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "12e9165b521b96168b39e74cfbe9c387c2aba907324a9a567999e968454612c4",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-fairy-dragon-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "91bca6f9660018cc5eaadb64122ac1c7096102bca686ed9f7004bd6cc96daf2d",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-feather-ostrich",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d6526faab39df3eb3d9ec965eed1bbe846831be16e2af1eb89d164117306909b",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-fengyun-deeper",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e30038c415ff2f49fe42f673e2b945be4c46cbfd6da7d6c6a728ecd840d4ec7",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-fengyun-deeper-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eff4fe4c6e9a8fe821827ddf1b765daa1428fd8e299417b77d1529882caec6b2",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-fire-kirin",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0cb5140e29df3bf30e019e7ea9b086bf56ebebce4a96c11ee84f61167832def2",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-fire-kirin-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c10ec37e76690e624cae3b324cd3661eb2670caa0777b0ac446d907c0104c23f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-flame-buffalo",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "01a09792398d098d10ea80e5c7f85080023bcec38b7c23faa4cc88e913343eb5",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-flower-dinosaur",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed78c3474e4f7e74a3e4084ac2b95555ddb80b908477a2806f7f874b29d8db1a",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-flower-dinosaur-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "d205f94184cb976cda16339a8771e95e8f90c54ec4c5e06b3d7b1845040e128a",
+          "status": "machine_assisted",
+          "text": "色 [原文欠落]。 チームにいる場合は、傍に留まり自動的に近くのアイテムを収集します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a134c9615a868aa778855ec2a561b2f57c3e21833f1ab49fa060f60c7b8f24fc",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスのネックレス"
+        }
+      },
+      "id": "skill-unlock-flower-rabbit",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "500a552654e6cca25b0ec6a158788c31f1331fe10c84a41b6b17776d9eab4207",
+          "status": "machine_assisted",
+          "text": "装備グライダーのパフォーマンスを変更するための手袋。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "330e440a1d820516457ce769312b5b6c86326a34401e44e88dca7d01c02099a6",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-flying-manta",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "500a552654e6cca25b0ec6a158788c31f1331fe10c84a41b6b17776d9eab4207",
+          "status": "machine_assisted",
+          "text": "装備グライダーのパフォーマンスを変更するための手袋。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "997c370efdc81d3ea95f2503862c013a52f5d851b86c7055816ced968db3300f",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-flying-manta-thunder",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "11791b56672c04bf84f1ca14a4e6462e5b1bf0a4afcaa290ece4ec04423b64e0",
+          "status": "machine_assisted",
+          "text": "サドルハーネスのガウルフ"
+        }
+      },
+      "id": "skill-unlock-garm",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "21e97d390c3f0261a403371761a2d65551e7bddd0be79b8cecc1de0845da0066",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ghost-anglerfish",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "38f6a89b4d2c8b8762601783985ebe3296a787ba646c4a8691c5098b58ee5b29",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ghost-anglerfish-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f13c997e806d713af0808c436859a7c27bc36371b7c7e6d4696f9a153dc7f1e2",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ghost-beast",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d2d9edf399e7fceff76bc4b66b14c9faaed5818274b0c3874b7a7cfb43f7d506",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ghost-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "995bbb5ea9c73026fe006140bc2f7fe029bb8a797aa498469ff948026f119cb3",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ghost-dragon-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d943f863bae937a80a661562522c7307b0e978fa437250278d4356a599b2a3a7",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-golden-horse",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "97d5ba34cbecdd2120e0fb4f4c16031e48d511226b169af2264ea5b1f78f474b",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。 マウント中に強力な草の要素レーザーを発射する能力を保証します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5611acb88c278255d22ec53ea5a1f0a33e33d73be236d466f7e6fe5b0fc187fd",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-grass-golem",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "190108b49fa0afe04809cfaf7d7cb1323f2a27ab97f65c3088c2ed91bc53ff9b",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。 マウント中に強力なダークエレメントレーザーを発射する能力を提供します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3d0b2c1bae7f512e68042385f3db873c168962431c778576da085a0cc24501b8",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-grass-golem-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ad5b2f604b843769a1ee83a1f153d83133c4ac8dc5b2880bf67720f8f4663ed2",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-grass-mammoth",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aceb8f9d1e28c6f26a0af371af8f0eea53bd423467e362e69929123dc1a805f0",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-grass-mammoth-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6dd18a736e4baa0987ccedc8d7978fba93de4e9cf9a7af3cd0195579602a2955",
+          "status": "machine_assisted",
+          "text": "手弾発射機を撃ちます。 乗った時"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b29ce6995791c5e9fc4422731ed68746a46748ffb130b796e164dabed7309a24",
+          "status": "machine_assisted",
+          "text": "ササゾーのグレネードランチャー"
+        }
+      },
+      "id": "skill-unlock-grass-panda",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6dd18a736e4baa0987ccedc8d7978fba93de4e9cf9a7af3cd0195579602a2955",
+          "status": "machine_assisted",
+          "text": "手弾発射機を撃ちます。 乗った時"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "68b40fd4167c5ce7f8c038810ac11f26076868d393b52638f52e2c95df9fe2e7",
+          "status": "machine_assisted",
+          "text": "ライゾーのグレネードランチャー"
+        }
+      },
+      "id": "skill-unlock-grass-panda-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5b42e0efea99b9b9fe0f7996a201f250e120ba4a37360d5e145881cb0750aebb",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-guardian-dog",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6e63ccf8b720c40f121ea961418e0b09cfbe4c2ab9258220feaffd50f735bf4b",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-hades-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "44e80e50922d5c33b499d2fd37188b2c47149de0c80b130a376c90d617e47e23",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-hades-bird-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a6d034dd2f29b57d769b2759d1f606d98effd7f5312d446dda8d5718ae3efff9",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-hawk-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ec8bf0d9420237e1b4dcaa7805a3cabd59ad95d3c6cac5486df3e44b878bbd26",
+          "status": "machine_assisted",
+          "text": "ゴム手袋 [原文欠落]。 パートナースキルを活性化して投げる 衝撃手弾として"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cc6661be6b4fb4cbc2d6f0bcf41d57b6125e7f17a765a71def701c111d25bea",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-hedgehog",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "09aed8ec23f910c2e9cc99b759ede788fdf36819eb2e146f82d8e9d33114cf33",
+          "status": "machine_assisted",
+          "text": "ゴム手袋 [原文欠落]。 パートナースキルを活性化して投げる 氷の手弾として"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f9f91b86f895b4898092284a1f6209b18caf72649e04a4033b82d3d7c040b1e",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-hedgehog-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "49c34d3277704eec1272a7924f45889b4096b71cc9cd5840abb5c1b0133242e4",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-horus",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "abe36e4d65d26d6edfa08daaebbe3c3c12fb1b824c001b45566b380a18a726e4",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-horus-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "30d85afea92e9d53a02991717f69359e1f13e7209afa65c293075a5a8c088988",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ice-deer",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bc32c56b19370ba0656227f188e566a88a02ff6afd7596fe1d239b06b1c36a2f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ice-horse",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "146582de682e47b062e6d2fc151a6ff96b50dc4d1b0143410e0e31d75d89b220",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ice-horse-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "917c66990b26f4e8b3c81625d787da71efd18c66f957b91d0e18812b2e16faeb",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ice-narwhal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7ded9594cfc257a93a397462d918ee7c88ed4f6a2a9b62bce970f6febbc044b7",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ice-narwhal-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10d2de937656882e79bddede6d60c59c2a6093136ce25b9f282145483c1f6b02",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ice-seal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "51c7ddac2bed721c96bd7693f85b559e6e25e946ca592a62a49085246cc8e7d7",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-ice-seal-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e57f1baf19cad58ac16c498d01178a6297d3ac789da17b86c4a640a131eb5074",
+          "status": "machine_assisted",
+          "text": "ミサイルを発射する 乗った時"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f4eab91d30750bd572047dbf250782ca030620db309296a3c928ade8735b0e4b",
+          "status": "machine_assisted",
+          "text": "ロケット発射機「ジェッドラン」"
+        }
+      },
+      "id": "skill-unlock-jet-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "098538498efe38d19b117469e9e918da2be767d4800e1736b6cfe6bf04a3217b",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-king-alpaca",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a3159ed3bd975e6ca757a3aa3a44c666d7e4db8ad1199f2cd236b79eafa9a83",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-king-alpaca-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "937e6f5141be7d4c823f40051bb74506e9138f802f8dc77f03a04fb42570fd9d",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-king-bahamut",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "61006d6ab2318d360b04d8adab2158ceaa6fa54bf4581c6c7554f2be0f3f6ee6",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-king-bahamut-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "00b2da94c840569ef2988358bf3e63e5a7bac21479fb4b81035f14c29fa84952",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-king-sunfish",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "27e9154a5f1b2679e76befa32744dd7e8a279d2c64f7a4f7196810e3be0e40ac",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-king-sunfish-thunder",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "55bd9050b90a32b1d51889b995f6577df5e997ed87aaaa934f9f1156f95b5ff8",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-kirin",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "755c9ff5dcb70d869a22a0184f909aaa6fdbd07d719fea4e23c10fb0fedf7641",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-kirin-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "f0094a90ce6a055bf19a9b7f24c94ed4beefea857c621de8ef955e054490644d",
+          "status": "machine_assisted",
+          "text": "持株用ハーネス [原文欠落]。 パートナースキルを活性化します。 火炎放射器として攻撃します"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "104ed3497ccd4876f1605d2095cf334a119a7f77c27ef9f089226d85b688739f",
+          "status": "machine_assisted",
+          "text": "夏期マックスのハーネス"
+        }
+      },
+      "id": "skill-unlock-kitsunebi",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "5a7d424688b780cb72669bdb341021ec8c167de12dee84c2101d349863443c22",
+          "status": "machine_assisted",
+          "text": "持株用ハーネス [原文欠落]。 パートナースキルを活性化します。 凍った空気を放出して攻撃する"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fc7b41a7c6a58a6753285bbdde989ca37af946c3b51515f4cd79c4028fabe61a",
+          "status": "machine_assisted",
+          "text": "夏期マックスのハーネス"
+        }
+      },
+      "id": "skill-unlock-kitsunebi-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1b83ad18ac83502094ce509462df1b08285ecbf3febd051833accb3170ecb154",
+          "status": "machine_assisted",
+          "text": "ミサイル発射器を発射 乗った時"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "db7b71713971df28c57e63f68fd0b5e71c320410b57a4d759629c6b1b0e87544",
+          "status": "machine_assisted",
+          "text": "ロケット発射機「ペコドン」"
+        }
+      },
+      "id": "skill-unlock-lazy-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1b83ad18ac83502094ce509462df1b08285ecbf3febd051833accb3170ecb154",
+          "status": "machine_assisted",
+          "text": "ミサイル発射器を発射 乗った時"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6cc440462eaae6b31ff3c279c151906bb43489f7a1b99e88113060b3fcb0e591",
+          "status": "machine_assisted",
+          "text": "ロケット発射機「パリピドン」"
+        }
+      },
+      "id": "skill-unlock-lazy-dragon-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "0419a86e8f72ad28d9c20c9c2b61043ad43a4860a0807465a94e47f2f2222fee",
+          "status": "machine_assisted",
+          "text": "ハーネス [原文欠落]。 回復力を利用して無能力なプレイヤーを復活させることができます"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ebf13198358daf4bbec98045f59b20b933450a8255475cb1ddc603101f915158",
+          "status": "machine_assisted",
+          "text": "夏期マックスのハーネス"
+        }
+      },
+      "id": "skill-unlock-leaf-momonga",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "d689aa17d279b39de0b0a1a27fe08d65865c40bde4e06b81e6f248bb0a7a3ead",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。 攻撃をブロックするバリアを生成する機能を提供します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fb29447ef50eede975f34cc32d264b3d9b2a9621fd58ea19b9b7366ce9c7540",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-legend-deer",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b9861711c31157de715028e66e139ad39133cafd094840f8306fb7fe3c1fa6c",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-lotus-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "157eb61e41acd6b1c582415bf9c9ca6769b4977810b977c2be24436432040c81",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-manticore",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "81940f682b61a9a9ab03a3c1a813da8b491d74382e9316ee6840e6489247069f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-manticore-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1fd41e43b4875d3bb1d23e9b4db79f6d2487fb4ac3273ff01407aa28a0dddefd",
+          "status": "machine_assisted",
+          "text": "特殊ライフル銃。 [原文欠落]。 パートナースキルをアクティブにし、ガンナーモードに入ります。 近くの敵を撃ち始める"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f270c3e30cdd20ff9b928c207ae300e8af653023ec099261e972005bd237ea74",
+          "status": "machine_assisted",
+          "text": "クアッドコアの攻撃ライフル"
+        }
+      },
+      "id": "skill-unlock-monkey",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1fd41e43b4875d3bb1d23e9b4db79f6d2487fb4ac3273ff01407aa28a0dddefd",
+          "status": "machine_assisted",
+          "text": "特殊ライフル銃。 [原文欠落]。 パートナースキルをアクティブにし、ガンナーモードに入ります。 近くの敵を撃ち始める"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bc6b07711f7f5b7c5c1939f4c6102ca554289d46971af8e09702a693c92453e2",
+          "status": "machine_assisted",
+          "text": "クアッドコアの攻撃ライフル"
+        }
+      },
+      "id": "skill-unlock-monkey-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed61cd9a93177abf474ef9c3eebcfd70a8c1eb107276c70d46f9ed7046a12ac3",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-moon-queen",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b0d86e787d4a0faee4152eabe91b9d3bee435a61a2a2ecc45e788d60d83b909c",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-mop-king",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b1587149fd2f250b6cad447e04cbff2005c340bfef843275a1dad5808ecf9ac",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-mushroom-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d3faa39c6c48140f6359b6eb3f9207923e1753ebda2bc79aadb6313e6bec1bd3",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-mushroom-dragon-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "55b6732a33ef372dd705b1143a22936e7336d21f5152e5596079bf8a44a11fe3",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-naughty-cat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "500a552654e6cca25b0ec6a158788c31f1331fe10c84a41b6b17776d9eab4207",
+          "status": "machine_assisted",
+          "text": "装備グライダーのパフォーマンスを変更するための手袋。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9864f8b9e899d07d1255273c1ac196c3eb12623bad61515a6d249eb20bd4cb87",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-negative-octopus",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "500a552654e6cca25b0ec6a158788c31f1331fe10c84a41b6b17776d9eab4207",
+          "status": "machine_assisted",
+          "text": "装備グライダーのパフォーマンスを変更するための手袋。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a244986c0b7f7069c9707711938309b95ab5591df7f4f6a09c1ccf4997f5149",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-negative-octopus-neutral",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "707d11546a7f1f21167eeef89708901d7db9b98a2ebb1a03f19dc0f25219ee40",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-night-blue-horse",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0e826c6653626a3043ae04f112fcac5f326ff807d22fc746947ccb146803bb98",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-night-blue-horse-neutral",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "75f130a5e1f58d72dceb161621c10c5f688d84a3b58406691bdb234fd0ced3b3",
+          "status": "machine_assisted",
+          "text": "ロケット発射機 [原文欠落]。 ペンタマを発射し、敵にダメージを与えるパートナースキルを有効にします。 発砲後、無力化します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "75e8c50608e26d5bff556f14d8dae5b598a278a5016434ad6830461ad7c41f2e",
+          "status": "machine_assisted",
+          "text": "ロケット発射装置「ペンタマ二」"
+        }
+      },
+      "id": "skill-unlock-penguin",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "cfcd4e925cd1eb536f80a0f44a6cb3e8b8afb7408a513e47930c1eda46b762b6",
+          "status": "machine_assisted",
+          "text": "ロケット発射機 [原文欠落]。 パートナースキルを活性化して敵に攻撃し、ダメージを与える。 発砲後、無力化します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "398e4c4af14063cba0b5d1e0f53499cafdebe2f975d28fa9ac22c487b3feb331",
+          "status": "machine_assisted",
+          "text": "ロケット発射機「デンタマ」"
+        }
+      },
+      "id": "skill-unlock-penguin-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bfe23f2b06dbb97ea50a76ca2feaf187131da9925cbd11f2962eafbed76b0967",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-plesiosaur",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "41bf94e1b76397c466304a145f6069deae501fac12f313cf77632fd2a524fd6f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-poseidon-orca",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1bcbac741fc643d6cff494bc24735088d2166728708328b5c122096bede19d68",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-purple-spider",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1c7ae814a82d8c010fa465246cb896a5db69efc3aeaf7b901970dec3405e9b53",
+          "status": "machine_assisted",
+          "text": "色 [原文欠落]。 チームにいるなら 敵を攻撃する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9db4b0693e491218905b9b6bdae42a56d29a467c40dd47eec217dfd9a0123678",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスのネックレス"
+        }
+      },
+      "id": "skill-unlock-raijin-daughter",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1c7ae814a82d8c010fa465246cb896a5db69efc3aeaf7b901970dec3405e9b53",
+          "status": "machine_assisted",
+          "text": "色 [原文欠落]。 チームにいるなら 敵を攻撃する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "190e0d4bfaf1ac2f87866546c312d07061961db8c5b3c5e354bc9b3ce4814283",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスのネックレス"
+        }
+      },
+      "id": "skill-unlock-raijin-daughter-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "535647e34709c634ab52b5156f38b06d6c9d0903c0e7c36a1dc1982b97d3fde9",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-red-armor-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fe06311d7dfa38031aaab6a4ae15d6731619a5563917014b3cf12baa470402ef",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-saint-centaur",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "11d505fd68dbe4454ac4c2127e9bb992777f74257ab51615061440497b2baa7c",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-sakura-saurus",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e5683241486a20b5969ce84acb8189d07456e79e0e2875c41b0007def69102ca",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-sakura-saurus-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "09b6a2c8fbdfe064b82f619304c9a7ef635b9440ac3ec619a2841e004963c0bd",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-serpent",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "30c6ab8e669657e8f44182e89c060d014782714d9668614ca5f25814c41e156f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-serpent-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "abd2c282e1122b12acce128692688db8b0105359b08295c0b22c4d6a66b5965a",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-sky-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "03687ab7a9bb989843b3f52a87171cd89a759c37760c53be7ac8b258a43cf004",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-sky-dragon-grass",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9f0f75e4d703c4759d05c1997c96e6afec870385f5a69caf29fd73e0b2e97e08",
+          "status": "machine_assisted",
+          "text": "カスターマックスのハンマー"
+        }
+      },
+      "id": "skill-unlock-snow-tiger-beastman",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dad06d48f4ec8841c8d7ac4e8670cda014f3df956d47fd80ede17b8ae7b469cd",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-sumo-dog",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "faf658a6ce782164bad58063a976de0b0234cb3fa7f9eaf286d2e7e8bf3000a4",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-suzaku",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a89caa2d5cb804be5a4e4868d76ebd60a3e22bc7f8c779b8ef928cbfe3af41f3",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-suzaku-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "30bc9514491e0797c5553f4f3ce2519a739a34a5422639ccb0f021efe6306798",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-thief-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af95508add7d99ef1d0d8e62bab41ff0f2828487c891027974c776f06d64cd53",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-thunder-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5ff1cb880c851b4649e27e7cc74e4678fbde4c140fa3fc5e7d1c757bf9a5714c",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-thunder-bird-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fdc6762a43010753fe9aa48ad679f062e90d941716278289a36377c5220fbf97",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-thunder-dog",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8b7929aa0f964e0fd8e87b6960e7df386c2f4b1ce0b421f0f2c04bdb8b5cb710",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-thunder-fluffy-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6d33b83dc061c33664823b7855aa6b3ed9718bbb46060e91b4a3830a0c2b42ab",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-thunderdog-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "73761650c2c9e14fac3e47f83fe571192b442a18ca9a0d0e0452cb1b71ed4932",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-tropical-ostrich",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a88a5f0ccba6dea61f5decee3e31dfe6effd994dd05fc5f4973dd5c983d088c0",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-umihebi",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eed2f13584c833ee1ab3a9a96bbc8f37a6a57b1c6f69dc64c9ac79bf92a01c7d",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-umihebi-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c6d231723118224aec068a04864873240c0facd562a8c20b748ca8f643b49a39",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-volcanic-monster",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4bf5d4dda03a1747975dbde2a920674bc8e5c16c9ae8acc7548693a0bc908878",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-volcanic-monster-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "93eea5d5c87863ea433673d4478f51ca4637a3e872e95d23ff2751099474ae9a",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-volcano-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7133f2a7a2eaf94c12412f344a7f23dc0fb73ba590c1ac1cb0228b0281fc5ea7",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-volcano-dragon-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9a9e83d554e436a2f408e7a9584240375ff4ecf033bfaca9bbed52cfb1ffc14f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-weasel-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "567f2f53010a2925cd4a6a88d08006cfcad9d028e5a67d53e39f60f7dd33562f",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-weasel-dragon-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9396bff53794125873c7915f90b139ad03f32e01092030fc72fce6d56d680f0c",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-white-alien-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25c9da7cdcd153045b70a7d26024496c3faae5e809b7ff12fff71f7f1ddb9dd0",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-white-deer",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "324de472828ce059332ec16cea1f0929871b46c183d147a589f2ca1bf6a1bc41",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-white-deer-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b6015bc97c32967c6e7f20f2b0fd69340553040a3167ffcae738ce877c06ad53",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-white-shield-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "500a552654e6cca25b0ec6a158788c31f1331fe10c84a41b6b17776d9eab4207",
+          "status": "machine_assisted",
+          "text": "装備グライダーのパフォーマンスを変更するための手袋。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "49b3b3817ab737f8be137ff42388f5b66eec38011aa33d66b18017000a722a7a",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-wind-chimes",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "500a552654e6cca25b0ec6a158788c31f1331fe10c84a41b6b17776d9eab4207",
+          "status": "machine_assisted",
+          "text": "装備グライダーのパフォーマンスを変更するための手袋。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bd754f88633c9d3e306ffd4672eabfc068181feea08080a6137c29d9f3e005ea",
+          "status": "machine_assisted",
+          "text": "クワッド・マックスの手袋"
+        }
+      },
+      "id": "skill-unlock-wind-chimes-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "39b7f68383b0d48ed8d7b08a7ea7507605606e33c7f28f42042241abb223799d",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-yeti",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108",
+          "status": "machine_assisted",
+          "text": "安全に乗れるサドル [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "80013061983a97d132246f29625d41e694e09a5ff161147c40f1f4f26f0c250a",
+          "status": "machine_assisted",
+          "text": "サドル。"
+        }
+      },
+      "id": "skill-unlock-yeti-grass",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5b8ab4b87a6c4e006748ada4fecf65a6142bfc30e14f82029757ed5cc3ac3e6",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製のアサルトライフル。 汎用性を維持しながら強力な弾薬を扱うように強化されています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "df79b869862e8c617b22859adad080db27f755fc024f0af82b31212646cb6599",
+          "status": "machine_assisted",
+          "text": "重攻撃ライフル"
+        }
+      },
+      "id": "sky-assault-rifle",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5b8ab4b87a6c4e006748ada4fecf65a6142bfc30e14f82029757ed5cc3ac3e6",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製のアサルトライフル。 汎用性を維持しながら強力な弾薬を扱うように強化されています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "47288bf6e1b2c7191d62ff53c8b147aafcc5dc0453f83f47a586274715939113",
+          "status": "machine_assisted",
+          "text": "スカイアサルトライフル2"
+        }
+      },
+      "id": "sky-assault-rifle-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5b8ab4b87a6c4e006748ada4fecf65a6142bfc30e14f82029757ed5cc3ac3e6",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製のアサルトライフル。 汎用性を維持しながら強力な弾薬を扱うように強化されています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b141a01dca236f6814d044998071a8490bcc6bdd2ebd67e32052b9f08f54403d",
+          "status": "machine_assisted",
+          "text": "スカイアサルトライフル3"
+        }
+      },
+      "id": "sky-assault-rifle-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5b8ab4b87a6c4e006748ada4fecf65a6142bfc30e14f82029757ed5cc3ac3e6",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製のアサルトライフル。 汎用性を維持しながら強力な弾薬を扱うように強化されています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca5d7102557feead09bf52c397f65244a5e03c520cd6e6fec04a1748cef231e7",
+          "status": "machine_assisted",
+          "text": "スカイアサルトライフル4"
+        }
+      },
+      "id": "sky-assault-rifle-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5b8ab4b87a6c4e006748ada4fecf65a6142bfc30e14f82029757ed5cc3ac3e6",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製のアサルトライフル。 汎用性を維持しながら強力な弾薬を扱うように強化されています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "849ca687c9358b93a044aa5432db05f8660f02448289b3f585435af91e1c5813",
+          "status": "machine_assisted",
+          "text": "スカイアサルトライフル5"
+        }
+      },
+      "id": "sky-assault-rifle-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec",
+          "status": "machine_assisted",
+          "text": "弾薬 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2ca3c94aabeac80f38934d859ab9c4351e2e02b33e0e7d9e1c00e3b1ecfc48e",
+          "status": "machine_assisted",
+          "text": "重攻撃ライフル弾薬"
+        }
+      },
+      "id": "sky-assault-rifle-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72991da11d99c463e893b2de68694d2417bf85776d702a8df310064d9093505f",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製。 高出力のエネルギーブレードで瞬時にターゲットをカットする近距離武器。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43cfd02fff4ded3732e79707978edfa5df0b2cc5d91d1a31b9d815fec320166a",
+          "status": "machine_assisted",
+          "text": "レーザー剣"
+        }
+      },
+      "id": "sky-beam-sword",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72991da11d99c463e893b2de68694d2417bf85776d702a8df310064d9093505f",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製。 高出力のエネルギーブレードで瞬時にターゲットをカットする近距離武器。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3e00888bddf02a746cae456a562670c9509530b95d8ce3a384ab9f3e56ec79c8",
+          "status": "machine_assisted",
+          "text": "スカイビーム剣2"
+        }
+      },
+      "id": "sky-beam-sword-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72991da11d99c463e893b2de68694d2417bf85776d702a8df310064d9093505f",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製。 高出力のエネルギーブレードで瞬時にターゲットをカットする近距離武器。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cae612e703fbb05f1b4e6f28f1e4fd0c7e3123e0aca2f0a399f7e8f4fc6c1ada",
+          "status": "machine_assisted",
+          "text": "スカイビーム剣 3"
+        }
+      },
+      "id": "sky-beam-sword-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72991da11d99c463e893b2de68694d2417bf85776d702a8df310064d9093505f",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製。 高出力のエネルギーブレードで瞬時にターゲットをカットする近距離武器。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b3f93ea812708fa9e9a3351f8a8a5cf1000fefed25e493363ad679f96fa24ac4",
+          "status": "machine_assisted",
+          "text": "スカイビーム剣 4"
+        }
+      },
+      "id": "sky-beam-sword-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72991da11d99c463e893b2de68694d2417bf85776d702a8df310064d9093505f",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツ製。 高出力のエネルギーブレードで瞬時にターゲットをカットする近距離武器。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b636bb204bbc3136b6f2ee5310cbe4ce2ac392997418c540de431066be0f4344",
+          "status": "machine_assisted",
+          "text": "スカイビーム剣 5"
+        }
+      },
+      "id": "sky-beam-sword-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a395db60805bb4716b37b662645c215843fd697e812c504ef61dc7990c4f5e4",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツから作られた弓。 初期速度と貫通力を大幅に向上させた高精度武器で、射程距離での戦闘に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6c1e1f85cbe937626abfe4af39e2a30df5dd8ec5f27e4620eeed41ad5efba022",
+          "status": "machine_assisted",
+          "text": "機械式弓"
+        }
+      },
+      "id": "sky-bow",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a395db60805bb4716b37b662645c215843fd697e812c504ef61dc7990c4f5e4",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツから作られた弓。 初期速度と貫通力を大幅に向上させた高精度武器で、射程距離での戦闘に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "04a3510e6ba717165767e7c62e1f57502e172f08aa054ec64094b0a860b8e82e",
+          "status": "machine_assisted",
+          "text": "スカイボウ2"
+        }
+      },
+      "id": "sky-bow-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a395db60805bb4716b37b662645c215843fd697e812c504ef61dc7990c4f5e4",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツから作られた弓。 初期速度と貫通力を大幅に向上させた高精度武器で、射程距離での戦闘に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "11d00826f3cc490073868bb2ce49ca49103885befee1864399e4241664c34fef",
+          "status": "machine_assisted",
+          "text": "スカイボウ3"
+        }
+      },
+      "id": "sky-bow-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a395db60805bb4716b37b662645c215843fd697e812c504ef61dc7990c4f5e4",
+          "status": "machine_assisted",
+          "text": "ソラライトインゴッツから作られた弓。 初期速度と貫通力を大幅に向上させた高精度武器で、射程距離での戦闘に優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "88f124752cc1fef6bd9b0a213c52dcb61c257bc9613031228e915907537ef843",
+          "status": "machine_assisted",
+          "text": "スカイボウ4"
+        }
+      },
+      "id": "sky-bow-4",
+      "kind": "item"
+    }
+  ],
+  "schemaVersion": 1
+}

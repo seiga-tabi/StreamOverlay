@@ -1,5 +1,6 @@
 import {
   PALWORLD_ACQUISITION_TYPES,
+  PALWORLD_BREEDING_GENDERS,
   PALWORLD_ELEMENTS,
   PALWORLD_ITEM_CATEGORIES,
   PALWORLD_SKILL_TYPES,
@@ -42,7 +43,7 @@ const SKILL_LIST_QUERY_KEYS = new Set([
   "limit"
 ]);
 const SEARCH_QUERY_KEYS = new Set(["q", "limit"]);
-const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB"]);
+const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB", "parentAGender", "parentBGender"]);
 const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "page", "limit"]);
 
 export const PALWORLD_WORK_TYPES = PALWORLD_WORK_SUITABILITY_TYPES;
@@ -100,6 +101,8 @@ export type PalworldSearchQuery = {
 export type PalworldBreedingQuery = {
   parentA: string;
   parentB: string;
+  parentAGender?: (typeof PALWORLD_BREEDING_GENDERS)[number];
+  parentBGender?: (typeof PALWORLD_BREEDING_GENDERS)[number];
 };
 
 export type PalworldBreedingParentsQuery = {
@@ -258,7 +261,9 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
   assertKnownKeys(params, BREEDING_QUERY_KEYS);
   return {
     parentA: requiredId(params, "parentA"),
-    parentB: requiredId(params, "parentB")
+    parentB: requiredId(params, "parentB"),
+    parentAGender: optionalEnum(params, "parentAGender", PALWORLD_BREEDING_GENDERS),
+    parentBGender: optionalEnum(params, "parentBGender", PALWORLD_BREEDING_GENDERS)
   };
 }
 

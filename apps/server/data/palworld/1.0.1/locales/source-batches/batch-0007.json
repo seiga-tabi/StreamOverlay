@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 7,
+  "records": [
+    {
+      "id": "head016",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Penking Cap",
+          "sourceSha256": "e4b78af62646d14075863a81ac9438e695b2394ce062c033c26acb495780effe"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "head017",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katress Cap",
+          "sourceSha256": "041d3c45740c35e1901ec8d56baa8236a2ca9d704d8619b57eb3037c0300c76d"
+        },
+        "description": {
+          "sourceText": "Hat shaped like a .",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968"
+        }
+      }
+    },
+    {
+      "id": "herbs",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Low Grade Medical Supplies",
+          "sourceSha256": "ff7296611dd6f4761c145f968a2f5b076efaf08714ac2419235cf6b5f5734cd9"
+        },
+        "description": {
+          "sourceText": "good for Sick, Sprain, and Overfull.\nThey don't heal Health when eaten, however.",
+          "sourceSha256": "15ecf64582cfeccd4d3b795efdd00fedd30c60d2aaeb0af9aaf4f670283e7436"
+        }
+      }
+    },
+    {
+      "id": "high-grade-processed-wood",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "High Quality Wooden Board",
+          "sourceSha256": "a35fc8ef8b9ca6d1734e57f328e2e2c17158c0f47d09ff1b87f8e76758a5dfa6"
+        },
+        "description": {
+          "sourceText": "Fine planks carefully carved from .\nThey have beautiful wood grain and are used for structures with a luxurious feel.\nCan be crafted at .",
+          "sourceSha256": "d720f33b4726916ebbb338af60f3487e3164ab8b594a24ea7eda64dfb7f921fa"
+        }
+      }
+    },
+    {
+      "id": "homeward",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Homeward Thundercloud",
+          "sourceSha256": "8460b2ebeb5ce9a84be042867bff44cbebf314ba659689f5d106710aa4ca977f"
+        },
+        "description": {
+          "sourceText": "Transports you to the nearest base.\nCannot be used in dungeons and other similar locations.",
+          "sourceSha256": "962ee5ab0a6abf8df8162e8b00542df039088d17a47184aff6a67f420f84ca5f"
+        }
+      }
+    },
+    {
+      "id": "homing-sphere-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Homing Sphere Launcher",
+          "sourceSha256": "e8eacc8d42f51c515e30d44a63030db723b14d2910ce0ed1318060992f7c3bb8"
+        },
+        "description": {
+          "sourceText": "A launcher for firing spheres.\nFired spheres home in on Pals.",
+          "sourceSha256": "2ac6c75f1fea2a4332603081da041aef0a80845d3e46e7dd6a88f39eeda81b42"
+        }
+      }
+    },
+    {
+      "id": "honey",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Honey",
+          "sourceSha256": "ebcf983695346eea63258d8ab772084bb91b6d51b529ae8b00121f2fa323831c"
+        },
+        "description": {
+          "sourceText": "Honey harvested from .\nIt's sweet and tasty.",
+          "sourceSha256": "72f897460fe9eb6e543d18ce61b287b8f31be597dd098e3f9b0df6854e3980ec"
+        }
+      }
+    },
+    {
+      "id": "horn",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Horn",
+          "sourceSha256": "9ebf503462b39881494f5a5c7ffc1e2c93faa3e5b40df0a30c2584227fb01250"
+        },
+        "description": {
+          "sourceText": "collected from Pals.\nUsed to create medicines and more.",
+          "sourceSha256": "390725efad8cc86e6a1187cdcadcb3c3fcdf928a6b838fd5447c7b063a29f345"
+        }
+      }
+    },
+    {
+      "id": "hot-dog-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rushoar Hot Dog",
+          "sourceSha256": "eaf4b9fb9249227516fea75619dd8a05844ad5d8f72a399ca1910f33552eab54"
+        },
+        "description": {
+          "sourceText": "Thick sausage wedged between warm buns.\nThe crisply seared meat and spicy flavors are to die for.\nEating it will increase by +20% for a period of time.",
+          "sourceSha256": "86a996f34875e6740d4729491d4a956496c2ce8855f3ab4e622b08eba626c540"
+        }
+      }
+    },
+    {
+      "id": "hot-milk",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hot Milk",
+          "sourceSha256": "1d91f85e860c8a68bdeeba03e73a912c4eccee5616ad0b7cfe05ca650b6342b2"
+        },
+        "description": {
+          "sourceText": "Even more delicious when warmed up.\nGreat for keeping hunger away.",
+          "sourceSha256": "a562943d2fb8549e55aecdd81d811be33f06a552ae1541dd79573ca07c792c88"
+        }
+      }
+    },
+    {
+      "id": "ice-organ",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Organ",
+          "sourceSha256": "1cf957b9d2ee0fbd8c40e4f70bbf57e0e9c34172c9d251509c49195fb9f1c816"
+        },
+        "description": {
+          "sourceText": "Material obtainable from Pals.\nCan be used to make and more.",
+          "sourceSha256": "2fd7cc6225d81427aec70cd839321b8f8baab64e6dcc298b9b006a427dcd243e"
+        }
+      }
+    },
+    {
+      "id": "ink-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Decal Ink",
+          "sourceSha256": "8ebf79f319fc876b3620667e8e040492b7a5c809a7d2c2ff50a20fd5f242b144"
+        },
+        "description": {
+          "sourceText": "Ammo for Decal Guns.\nUses ink to paint a picture of a Pal.\nCan be crafted at .",
+          "sourceSha256": "1dd1b75e1e9485e95f8e390a7ef2e0187f54614968936afb40ef7853f80f7c25"
+        }
+      }
+    },
+    {
+      "id": "iron-armor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Armor",
+          "sourceSha256": "39d348f60a70232d14c9f8c393c28678c6ff799e569f6cc43d242234f83eb848"
+        },
+        "description": {
+          "sourceText": "Armor made from high quality metal.\nQuite heavy, but provides excellent defense.",
+          "sourceSha256": "44e39e31f08c2cb193f47d21cbdadc3911dae5af455245b19dd1f67b9f0f8426"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-cold",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Refined Metal Armor",
+          "sourceSha256": "0f51846ac840294b911ccedcb6d59a42962905f662349a35d8fdc244f9032ba2"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-cold-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorCold 2",
+          "sourceSha256": "f16ed606732b8c795d3dafec56fab2ac058a4541f7d5051ab03d1d7e0516e797"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-cold-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorCold 3",
+          "sourceSha256": "3512ea1a8e09a22e9c1adb81b94c822c00a0bfadd7c987d4714f6f12afa83686"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-cold-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorCold 4",
+          "sourceSha256": "adb3245c4a88c869220c7d6cc3d120148f3a0798182531179d27621b1bbd9c40"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-cold-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorCold 5",
+          "sourceSha256": "93283f956d81d327f2b0d9f63341a091df92dded22e996628decbc2a0ae7fec1"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-heat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Refined Metal Armor",
+          "sourceSha256": "1f1449ccaf386ab1e38e7c97508daca714bde9430d658d41ce8fa487f8a1fe2e"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-heat-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorHeat 2",
+          "sourceSha256": "c297db8e5305f8576334c5fd5cd0173f494daed376d1eba6eb589624ff4c5d83"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-heat-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorHeat 3",
+          "sourceSha256": "ba855d1fb2c290d90bfeafac9c2b5bd1926af7a400c50c2fff3732054b081b30"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-heat-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorHeat 4",
+          "sourceSha256": "dcdf04145b26747abf3ad8c537e145d4f4693aaef1b871b98aa196829198ac4c"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "iron-armor-heat-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronArmorHeat 5",
+          "sourceSha256": "34f6b527cdc8cbaf12de9a7c1db2afcb31b1c9b8d6e15e155aa3bd8760c18fbc"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "iron-helmet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Metal Helm",
+          "sourceSha256": "311d884d1a8550dfdcb2e9b3f1d642ab8740bf1bee1658e7fa9801746adcf838"
+        },
+        "description": {
+          "sourceText": "A helm made from high quality metal.\nThe luster from the polished metal gives the wearer that added boost of confidence.",
+          "sourceSha256": "ad3a601fa785b6d0401bbaa7f1334b763a4bd5c09cabcec0464521a1c89d4bcc"
+        }
+      }
+    },
+    {
+      "id": "iron-helmet-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronHelmet 2",
+          "sourceSha256": "f494e9c475218116f33f7121977aea532b6e2bf6af208df01a7cefc17bf6c4fc"
+        },
+        "description": {
+          "sourceText": "A helm made from high quality metal.\nThe luster from the polished metal gives the wearer that added boost of confidence.",
+          "sourceSha256": "ad3a601fa785b6d0401bbaa7f1334b763a4bd5c09cabcec0464521a1c89d4bcc"
+        }
+      }
+    },
+    {
+      "id": "iron-helmet-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronHelmet 3",
+          "sourceSha256": "56beb04f35ef70b4c7addfcf1e17bc60785b4423d847e9ffd7872f57891f9ce4"
+        },
+        "description": {
+          "sourceText": "A helm made from high quality metal.\nThe luster from the polished metal gives the wearer that added boost of confidence.",
+          "sourceSha256": "ad3a601fa785b6d0401bbaa7f1334b763a4bd5c09cabcec0464521a1c89d4bcc"
+        }
+      }
+    },
+    {
+      "id": "iron-helmet-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronHelmet 4",
+          "sourceSha256": "b2b1af59c0e8fb9f2dacda735fbfc85e375339baa1a704e7e40719898246142e"
+        },
+        "description": {
+          "sourceText": "A helm made from high quality metal.\nThe luster from the polished metal gives the wearer that added boost of confidence.",
+          "sourceSha256": "ad3a601fa785b6d0401bbaa7f1334b763a4bd5c09cabcec0464521a1c89d4bcc"
+        }
+      }
+    },
+    {
+      "id": "iron-helmet-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "IronHelmet 5",
+          "sourceSha256": "4ba19ec24b6eec93fa9eeeed3877b38f24dd32dd657dc5e980d27fa4f4713f9e"
+        },
+        "description": {
+          "sourceText": "A helm made from high quality metal.\nThe luster from the polished metal gives the wearer that added boost of confidence.",
+          "sourceSha256": "ad3a601fa785b6d0401bbaa7f1334b763a4bd5c09cabcec0464521a1c89d4bcc"
+        }
+      }
+    },
+    {
+      "id": "iron-ingot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Refined Ingot",
+          "sourceSha256": "d4da47811256bdafce74c7b8604d0f081d8ef65b632909ea6abd3a5bda8134bb"
+        },
+        "description": {
+          "sourceText": "A material required to create high quality metal weapons and armor.\nRefined from and using a furnace.",
+          "sourceSha256": "6b390daf31df67ab4214d5f777bd2014caa524842e56dfbddd8df3c39ade2f33"
+        }
+      }
+    },
+    {
+      "id": "jam-bun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jam-Filled Bun",
+          "sourceSha256": "2db78f2c9669909fc7e4a4e3f8cc052bacdd1ae1da83e2fe121b05dbd1563ed3"
+        },
+        "description": {
+          "sourceText": "with jam spread on it.\nThe sweetness of the berries complements it perfectly.",
+          "sourceSha256": "b8b514b997eba2e8c38afe50974bca6668a707682040b0bd14815acc7b2244da"
+        }
+      }
+    },
+    {
+      "id": "jellyfish-fairy-jelly",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jelliette's Jiggly Jelly",
+          "sourceSha256": "97f89deecf3f5dd234ea461f3e165a91b4c30a67d69ae39698ade78404870a14"
+        },
+        "description": {
+          "sourceText": "An unusual treat crafted from and .\nEating it will slightly increase EXP gain and increase by +10% for a period of time.",
+          "sourceSha256": "8f0bdaae82e8cd576cfa400cd4afc4419a12f5427f9860ef90aca1f5df9477fc"
+        }
+      }
+    },
+    {
+      "id": "jellyfish-ghost-jelly",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jellroy's Jolly Jelly",
+          "sourceSha256": "667e70e8d4e70d811661015c97059efa614c7b12658ce0245487de4902ea73c3"
+        },
+        "description": {
+          "sourceText": "An unusual treat crafted from and .\nEating it will slightly increase EXP gain and increase by +10% for a period of time.",
+          "sourceSha256": "8f0bdaae82e8cd576cfa400cd4afc4419a12f5427f9860ef90aca1f5df9477fc"
+        }
+      }
+    },
+    {
+      "id": "katana",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana",
+          "sourceSha256": "2a35ee9463d44929a97b6172c4d05540a7c21deb5f145303f8d284d19bbdd440"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through with razor-sharp precision, cutting cleanly in one strike.",
+          "sourceSha256": "7080be6ae6486dfd16a2406b09fff878cb4d8b8f144169c72aeb7677e29560f2"
+        }
+      }
+    },
+    {
+      "id": "katana-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana 2",
+          "sourceSha256": "1d96be103924e6a2c8d347922e9861462ce1205e94a181b27916521282368a04"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through with razor-sharp precision, cutting cleanly in one strike.",
+          "sourceSha256": "7080be6ae6486dfd16a2406b09fff878cb4d8b8f144169c72aeb7677e29560f2"
+        }
+      }
+    },
+    {
+      "id": "katana-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana 3",
+          "sourceSha256": "a1e63931b106af9928fde57714806fa39b253c5f02930fed4ace6c4322419cf0"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through with razor-sharp precision, cutting cleanly in one strike.",
+          "sourceSha256": "7080be6ae6486dfd16a2406b09fff878cb4d8b8f144169c72aeb7677e29560f2"
+        }
+      }
+    },
+    {
+      "id": "katana-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana 4",
+          "sourceSha256": "fea1a94a7e0af165d91a5b0de32913b719944906b32302b208ef19f1ea00d72a"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through with razor-sharp precision, cutting cleanly in one strike.",
+          "sourceSha256": "7080be6ae6486dfd16a2406b09fff878cb4d8b8f144169c72aeb7677e29560f2"
+        }
+      }
+    },
+    {
+      "id": "katana-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Katana 5",
+          "sourceSha256": "e9990f47ed2a795632f9cebf5aa1ed71d6cde9a0aa05089285ab1622e168c2db"
+        },
+        "description": {
+          "sourceText": "for close-range combat.\nSlices through with razor-sharp precision, cutting cleanly in one strike.",
+          "sourceSha256": "7080be6ae6486dfd16a2406b09fff878cb4d8b8f144169c72aeb7677e29560f2"
+        }
+      }
+    },
+    {
+      "id": "lantern",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hip Lantern",
+          "sourceSha256": "fa7cad470cfc66d28bd5399b853b12b043e5b43a527a122a86a0d7c00b0fa5bd"
+        },
+        "description": {
+          "sourceText": "A lantern that can be attached to the hip.\nIt lights up automatically at night.\nYou can also switch its lighting mode to keep it on at all times.\nJust one is enough to find your way in the dark.",
+          "sourceSha256": "da212563f1b02fb999f6074de1dad3de917fcfb90cf7651818c40d2570c4dfb2"
+        }
+      }
+    },
+    {
+      "id": "lantern-high",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Enhanced Hip Lantern",
+          "sourceSha256": "4564f4b323261ca87c7edcadcbaf4d595c2ba02a12267f50ea06e7fc3597dc3c"
+        },
+        "description": {
+          "sourceText": "A lantern that can be attached to the hip.\nIt lights up automatically at night.\nYou can also switch its lighting mode to keep it on at all times.\nJust one is enough to find your way in the dark.",
+          "sourceSha256": "da212563f1b02fb999f6074de1dad3de917fcfb90cf7651818c40d2570c4dfb2"
+        }
+      }
+    },
+    {
+      "id": "laser-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Energy Cartridge",
+          "sourceSha256": "142570a413654258dcb3a5fc2c7736887d7bf6594adb15d95e328d5b057295c8"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "laser-gatling-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Gatling Cartridge",
+          "sourceSha256": "698c36b88e6dfc3310c58ced23ebc8d9423eda0b262ede6fa8bcd53ef552a595"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "laser-gatling-gun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Gatling Gun",
+          "sourceSha256": "49066a4a02ffad4960a8f1812bd41394bbff0d52207c5ba44779ac589b6fa020"
+        },
+        "description": {
+          "sourceText": "Fires beam-like energy blasts at high speed.\nIts overwhelming firepower can take down multiple enemies at once.",
+          "sourceSha256": "addf6bf57ca34f0acb7523b7b63a15289dc59591bf26e45f86ade6978a04b90d"
+        }
+      }
+    },
+    {
+      "id": "laser-gatling-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserGatlingGun 2",
+          "sourceSha256": "ea4e8679c191f8b0ac168b70f94b2b14b4070b386edb51baef26e6feb6f5ac6f"
+        },
+        "description": {
+          "sourceText": "Fires beam-like energy blasts at high speed.\nIts overwhelming firepower can take down multiple enemies at once.",
+          "sourceSha256": "addf6bf57ca34f0acb7523b7b63a15289dc59591bf26e45f86ade6978a04b90d"
+        }
+      }
+    },
+    {
+      "id": "laser-gatling-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserGatlingGun 3",
+          "sourceSha256": "7c06ed928a1b148fc8fb257d198cf7fc93ba6618f7fad7f2d3849584fbcc33ba"
+        },
+        "description": {
+          "sourceText": "Fires beam-like energy blasts at high speed.\nIts overwhelming firepower can take down multiple enemies at once.",
+          "sourceSha256": "addf6bf57ca34f0acb7523b7b63a15289dc59591bf26e45f86ade6978a04b90d"
+        }
+      }
+    },
+    {
+      "id": "laser-gatling-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserGatlingGun 4",
+          "sourceSha256": "f228600493263ba07e5f31500dd7db5ea4a7974abbaaedb4cb08ee9e8364b548"
+        },
+        "description": {
+          "sourceText": "Fires beam-like energy blasts at high speed.\nIts overwhelming firepower can take down multiple enemies at once.",
+          "sourceSha256": "addf6bf57ca34f0acb7523b7b63a15289dc59591bf26e45f86ade6978a04b90d"
+        }
+      }
+    },
+    {
+      "id": "laser-gatling-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserGatlingGun 5",
+          "sourceSha256": "51302ee2c455983011d26f96289dcd61184f6b3142ce0d3068ea44d2caa9462e"
+        },
+        "description": {
+          "sourceText": "Fires beam-like energy blasts at high speed.\nIts overwhelming firepower can take down multiple enemies at once.",
+          "sourceSha256": "addf6bf57ca34f0acb7523b7b63a15289dc59591bf26e45f86ade6978a04b90d"
+        }
+      }
+    },
+    {
+      "id": "laser-mining-tool",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Plasma Multicutter",
+          "sourceSha256": "cba557cc98725cdbcfc60b18a8e125246b52260380a09e337f3daa96b385db81"
+        },
+        "description": {
+          "sourceText": "A portable plasma cutter that concentrates and emits plasma energy.\nIt supports a wide range of uses, from ore excavation to tree cutting.\nIts high-output energy also allows for the mining of special ores.",
+          "sourceSha256": "ed059d680745f4ddeb821b2643bce8c5aad70fecec818428038acb6cd0ba7564"
+        }
+      }
+    },
+    {
+      "id": "laser-rifle",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Laser Rifle",
+          "sourceSha256": "49f31f69bb37e6ed08bf7edecbdad2632922b75ca02b25f780098f83ff372636"
+        },
+        "description": {
+          "sourceText": "A weapon that fires high-energy lasers.\nIt has impressive firepower and is easy to handle.",
+          "sourceSha256": "bf2af8f0895e25e13153ea8961cf9040c0f4b05ab0e763bf7148455dca9d1f32"
+        }
+      }
+    },
+    {
+      "id": "laser-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserRifle 2",
+          "sourceSha256": "75f7018c5a319cde94bb2528c39333db809aa2cdb6a94ac12f9a6156b572f715"
+        },
+        "description": {
+          "sourceText": "A weapon that fires high-energy lasers.\nIt has impressive firepower and is easy to handle.",
+          "sourceSha256": "bf2af8f0895e25e13153ea8961cf9040c0f4b05ab0e763bf7148455dca9d1f32"
+        }
+      }
+    },
+    {
+      "id": "laser-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserRifle 3",
+          "sourceSha256": "84d5a29d105bbd54f00f43f9a5392e99613dc017e9213b452be3be1a8b0d04e7"
+        },
+        "description": {
+          "sourceText": "A weapon that fires high-energy lasers.\nIt has impressive firepower and is easy to handle.",
+          "sourceSha256": "bf2af8f0895e25e13153ea8961cf9040c0f4b05ab0e763bf7148455dca9d1f32"
+        }
+      }
+    },
+    {
+      "id": "laser-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserRifle 4",
+          "sourceSha256": "8f00ded02f9ba5c4aa8df4e19d2bd137fb080c89c8b3281e31e04bb0198989e8"
+        },
+        "description": {
+          "sourceText": "A weapon that fires high-energy lasers.\nIt has impressive firepower and is easy to handle.",
+          "sourceSha256": "bf2af8f0895e25e13153ea8961cf9040c0f4b05ab0e763bf7148455dca9d1f32"
+        }
+      }
+    },
+    {
+      "id": "laser-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "LaserRifle 5",
+          "sourceSha256": "40cff36c24d54cd9a984d405445e6b4c445636e7c66afa12a8b83dd4e4556925"
+        },
+        "description": {
+          "sourceText": "A weapon that fires high-energy lasers.\nIt has impressive firepower and is easy to handle.",
+          "sourceSha256": "bf2af8f0895e25e13153ea8961cf9040c0f4b05ab0e763bf7148455dca9d1f32"
+        }
+      }
+    },
+    {
+      "id": "launcher-default",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Launcher",
+          "sourceSha256": "dcf4847e1af87fb45b879b1df37d0dca3ea7401e111b2f502e58737495514e4d"
+        },
+        "description": {
+          "sourceText": "A\nthat can fire a powerful round from long distances.",
+          "sourceSha256": "74bb858e69e150cf71bad9210a7fb91dbc5f18c9bd03d0b005b41a856fa7da2a"
+        }
+      }
+    },
+    {
+      "id": "launcher-meteor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Meteor Launcher",
+          "sourceSha256": "4acda7a14b1e8b7422394e01134354a250739ade2e4e85e9df417347c373bd6f"
+        },
+        "description": {
+          "sourceText": "A phenomenal weapon that fires a meteor.\nUpon striking its target, it creates an explosion similar to a meteorite impact.",
+          "sourceSha256": "164874410fe82d0dcb9c2a3f574219e5fe9eca8d41da6d1560e4e9a7e5e1d464"
+        }
+      }
+    },
+    {
+      "id": "launcher-meteor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Launcher Meteor 5",
+          "sourceSha256": "86a6c7c1dd9b24a2676973e774674b4a3a1f3c2cba2f2d28f4f82377d5d68fd2"
+        },
+        "description": {
+          "sourceText": "A phenomenal weapon that fires a meteor.\nUpon striking its target, it creates an explosion similar to a meteorite impact.",
+          "sourceSha256": "164874410fe82d0dcb9c2a3f574219e5fe9eca8d41da6d1560e4e9a7e5e1d464"
+        }
+      }
+    },
+    {
+      "id": "lava-ancient",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Lava",
+          "sourceSha256": "a95ee5c799fc9a741d781f2cc3d199aadd0bd3a6b46918d426fbfc897efc0d8d"
+        },
+        "description": {
+          "sourceText": "A mass of lava formed over long years in extreme environments.\nThe sealed-in blue lava is still emitting heat.",
+          "sourceSha256": "9ec567f3ec9432b2ae2c0b8b9f89c8145f07222971c7d166b6a97360a6354ed9"
+        }
+      }
+    },
+    {
+      "id": "leather",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Leather",
+          "sourceSha256": "e8e775159a57aaaf0f554dad0979a5c41009ee7b19a342c0aa4e4efd10afd03e"
+        },
+        "description": {
+          "sourceText": "taken from a Pal, it serves as a defensive material.\nIt can be obtained from certain Pals.",
+          "sourceSha256": "022d8c6ada10c8722438c734362d41fd4fe8c757262542126c53dc71f1699277"
+        }
+      }
+    },
+    {
+      "id": "lettuce",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lettuce",
+          "sourceSha256": "c0e80db8ac5eaddfa08a56f569281cf71063e65a58e8a3b31d11fb30a715ab84"
+        },
+        "description": {
+          "sourceText": "A leafy green. When it comes to salad, this is a must.\nIt has an exquisitely crunchy texture and refreshing taste.",
+          "sourceSha256": "1575eb11520ebbc7438423cbe89b838dd407e0bb969b7df75626f36954c2f85f"
+        }
+      }
+    },
+    {
+      "id": "lettuce-seeds",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lettuce Seeds",
+          "sourceSha256": "0aa4762dd7c6e7570c7c2746eabf8b05df9e5e3f62fc773fbb287b19b03cd7bc"
+        },
+        "description": {
+          "sourceText": "Seeds that produce .\nNecessary for starting a farm.\nCan be purchased from a merchant.",
+          "sourceSha256": "704936db34335a14d05d8e9e92c7c6a30eff304c7fb88c99b5f0a62ab0b8bab8"
+        }
+      }
+    },
+    {
+      "id": "lotus-attack-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Power Lotus (S)",
+          "sourceSha256": "d50b7ce00e8f2ab781a305ac9ad74bc6530a2cc734f449003328e05177447306"
+        },
+        "description": {
+          "sourceText": "Small red flower that is extremely difficult to obtain.\nNeeded to make Might Remedy.",
+          "sourceSha256": "ac1770cdd86ebb2f23d0dd59046903028a400ea6b56f3af282f94f8e77f40952"
+        }
+      }
+    },
+    {
+      "id": "lotus-attack-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Power Lotus (L)",
+          "sourceSha256": "af16320168534d4f3e6d8225cd16678a3de5432d01c401dcc9abf86e58cca927"
+        },
+        "description": {
+          "sourceText": "Large red flower that is extremely difficult to obtain.\nNeeded to make Might Elixir.",
+          "sourceSha256": "24c64a791e2e7cdbf595e589a5922ba220b5445942b158e95c5235db861b5217"
+        }
+      }
+    },
+    {
+      "id": "lotus-hp-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Life Lotus (S)",
+          "sourceSha256": "c45b5ab0028c04101eec8c68e1594ecbf355d77eca4da4f33bee080cf95ddf99"
+        },
+        "description": {
+          "sourceText": "Small green flower that is extremely difficult to obtain.\nNeeded to make Vital Remedy.",
+          "sourceSha256": "aa57d931f24734c21da8b9e72bea30ffff6d17af3fd450a450ec4e08bee7e582"
+        }
+      }
+    },
+    {
+      "id": "lotus-hp-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Life Lotus (L)",
+          "sourceSha256": "c8929a77c6cb326e13cdc0c388e3aedb3eb6311cf84a937ae4e6e648791bbba2"
+        },
+        "description": {
+          "sourceText": "Large green flower that is extremely difficult to obtain.\nNeeded to make Vital Elixir.",
+          "sourceSha256": "8573136cfc3f70f5f15f6a963b5ff0dcfeec4efc71f621d95e7b5d3c07fae6fc"
+        }
+      }
+    },
+    {
+      "id": "lotus-stamina-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Stamina Lotus (S)",
+          "sourceSha256": "4b7190dda13b909d74916e5b939123cc3e09a4ec3661a66aa1334fb0e8705053"
+        },
+        "description": {
+          "sourceText": "Small yellow flower that is extremely difficult to obtain.\nNeeded to make Stamina Remedy.",
+          "sourceSha256": "5ab7cd576f403bc8eb80a96d3794955f3d1f7bf07570033d265c6888c27df74e"
+        }
+      }
+    },
+    {
+      "id": "lotus-stamina-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Stamina Lotus (L)",
+          "sourceSha256": "39492699f27d467b02396b0716d018981d2b4af5890de7f84a75a096f6461c0d"
+        },
+        "description": {
+          "sourceText": "Large yellow flower that is extremely difficult to obtain.\nNeeded to make Stamina Elixir.",
+          "sourceSha256": "49527b9a3757638474067ccf57f6cb03d91abe9cfc5248adb0344e6b63a329cc"
+        }
+      }
+    },
+    {
+      "id": "lotus-weight-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Carrying Lotus (S)",
+          "sourceSha256": "35d3bdae438f787fe6abd77565480187c2342d6202f403382c7b9c446e5b3822"
+        },
+        "description": {
+          "sourceText": "Small purple flower that is extremely difficult to obtain.\nNeeded to make Burden Remedy.",
+          "sourceSha256": "a0987f206ef3e074b795dec6f80825122444c8d47f5d3b67db3b8704b907e610"
+        }
+      }
+    },
+    {
+      "id": "lotus-weight-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Carrying Lotus (L)",
+          "sourceSha256": "d93d7e8218ac2786adb2e22534123590d63f87fb7375e61b1256963ce2f1097a"
+        },
+        "description": {
+          "sourceText": "Large purple flower that is extremely difficult to obtain.\nNeeded to make Burden Elixir.",
+          "sourceSha256": "9e936bed8c578421f710d6a148473923be10b8541daff657eef8fa0caf5c27af"
+        }
+      }
+    },
+    {
+      "id": "lotus-workspeed-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Speed Lotus (S)",
+          "sourceSha256": "fffed9a045f079a84a778a07b4e821115e0dee8ce7ea225bb5b1c9ed3bca5d8a"
+        },
+        "description": {
+          "sourceText": "Small orange flower that is extremely difficult to obtain.\nNeeded to make Speed Remedy.",
+          "sourceSha256": "3b2bc7a30c1beee3ce400e89b5dcf874ba65be022ac849444745c81496db4c46"
+        }
+      }
+    },
+    {
+      "id": "lotus-workspeed-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Speed Lotus (L)",
+          "sourceSha256": "27929bec8cb723865b9be024d000b639b32a5477b3c0fabb4431107c15a5a611"
+        },
+        "description": {
+          "sourceText": "Large orange flower that is extremely difficult to obtain.\nNeeded to make Speed Elixir.",
+          "sourceSha256": "32ab5f8625ac3cb6d948b5dbe80fd7bddc11f26977ca7dc9707cb8624f17447f"
+        }
+      }
+    },
+    {
+      "id": "luxury-medicines",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "High Grade Medical Supplies",
+          "sourceSha256": "8e4dcb1d5294c0d538d607070df9557c33f097138cda63c15cec301f1b9e3f6e"
+        },
+        "description": {
+          "sourceText": "that are effective at treating and .\nUnfortunately, they have no healing effect.",
+          "sourceSha256": "c0ffd5fd927128856d43ec500a00b058c2967e3493461f5f5b577cb62247b3b3"
+        }
+      }
+    },
+    {
+      "id": "lv-up-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Training Crystal",
+          "sourceSha256": "18d4e2c4a03f69949049685e1bf7fa00f82637b3ffe83d97bf8b05acae05d26a"
+        },
+        "description": {
+          "sourceText": "Strange crystal that when given to a Pal\nraises its level by one.",
+          "sourceSha256": "5332b49fdbafa004f7c8c61f1ea0386c1c2fcca5274dba9ee3d1f2ca18dc0a0e"
+        }
+      }
+    },
+    {
+      "id": "machine-parts",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Nail",
+          "sourceSha256": "20a5f6e0cdf37c628d8a220b4b750eebaa4a1e747cdc449f3940ca9c519076d1"
+        },
+        "description": {
+          "sourceText": "Necessary for building various facilities.\nCan be made with a .",
+          "sourceSha256": "74b524055e0ee0716876eb6dfedbe643921bb90d8bf5fb7c07b1e88606a64475"
+        }
+      }
+    },
+    {
+      "id": "machine-parts2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Circuit Board",
+          "sourceSha256": "afae38ba148d533a3a55695c54afc3c4eab43ae81f879927e5399ed74067f525"
+        },
+        "description": {
+          "sourceText": "Required to create precision equipment.\nCan be made with a .",
+          "sourceSha256": "8c7b37f8d2e975aac53b0308ceb2d229ce5cf6a6561a21ac82bff28f6b4bf0e1"
+        }
+      }
+    },
+    {
+      "id": "makeshift-assault-rifle",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Assault Rifle",
+          "sourceSha256": "cb4fdbba346b83c78e7228b1d3ba1d9046853c1a71cb04418ec7a1392e3ca8a9"
+        },
+        "description": {
+          "sourceText": "An assault rifle handmade from scraps.\nIt excels in rate of fire and long range, but its single-shot power is low.",
+          "sourceSha256": "31af7d5ad54ad641b0b16718455b6cbfec95c296031105a5f744b4dc90eb3c09"
+        }
+      }
+    },
+    {
+      "id": "makeshift-assault-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftAssaultRifle 2",
+          "sourceSha256": "8c619aeff944c07f0e54e2690dde16f4c311dd9bda042b0ff6c642af6b6e5799"
+        },
+        "description": {
+          "sourceText": "An assault rifle handmade from scraps.\nIt excels in rate of fire and long range, but its single-shot power is low.",
+          "sourceSha256": "31af7d5ad54ad641b0b16718455b6cbfec95c296031105a5f744b4dc90eb3c09"
+        }
+      }
+    },
+    {
+      "id": "makeshift-assault-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftAssaultRifle 3",
+          "sourceSha256": "e9bc519e7fde69c1c0bc1bb1222d90b668d4e1c0956e2ef551b49df271ce0e20"
+        },
+        "description": {
+          "sourceText": "An assault rifle handmade from scraps.\nIt excels in rate of fire and long range, but its single-shot power is low.",
+          "sourceSha256": "31af7d5ad54ad641b0b16718455b6cbfec95c296031105a5f744b4dc90eb3c09"
+        }
+      }
+    },
+    {
+      "id": "makeshift-assault-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftAssaultRifle 4",
+          "sourceSha256": "1edd491b9d0ce949ca52bcb1697eaa9d6ce77d1c438b44cf2de548afdd26a336"
+        },
+        "description": {
+          "sourceText": "An assault rifle handmade from scraps.\nIt excels in rate of fire and long range, but its single-shot power is low.",
+          "sourceSha256": "31af7d5ad54ad641b0b16718455b6cbfec95c296031105a5f744b4dc90eb3c09"
+        }
+      }
+    },
+    {
+      "id": "makeshift-assault-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftAssaultRifle 5",
+          "sourceSha256": "4b2b95a8cbee79724a41ad3b75e6e58faf2446e2fe0c172dc75e5ff4a3b57bff"
+        },
+        "description": {
+          "sourceText": "An assault rifle handmade from scraps.\nIt excels in rate of fire and long range, but its single-shot power is low.",
+          "sourceSha256": "31af7d5ad54ad641b0b16718455b6cbfec95c296031105a5f744b4dc90eb3c09"
+        }
+      }
+    },
+    {
+      "id": "makeshift-handgun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Handgun",
+          "sourceSha256": "c803538540d396dc0ed4fe209b00fa6db9b2ce8fbe90f3e040a3ec6f89c1635e"
+        },
+        "description": {
+          "sourceText": "A handgun created from spare parts.\nRelatively well suited for close-quarters combat, but fires only one shot at a time.",
+          "sourceSha256": "1037e2432a9b25abdbd98b2683d811c269b514f0576aa13f693deef298bdc167"
+        }
+      }
+    },
+    {
+      "id": "makeshift-handgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftHandgun 2",
+          "sourceSha256": "8d446e87665d404c66b7b7e91d173f22a36b1a8adead028f381eda2d0d30d81c"
+        },
+        "description": {
+          "sourceText": "A handgun created from spare parts.\nRelatively well suited for close-quarters combat, but fires only one shot at a time.",
+          "sourceSha256": "1037e2432a9b25abdbd98b2683d811c269b514f0576aa13f693deef298bdc167"
+        }
+      }
+    },
+    {
+      "id": "makeshift-handgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftHandgun 3",
+          "sourceSha256": "2a1df45aa780c8c2b1ecfe4205ff130a677340eac3e291c0705f86d2e6870522"
+        },
+        "description": {
+          "sourceText": "A handgun created from spare parts.\nRelatively well suited for close-quarters combat, but fires only one shot at a time.",
+          "sourceSha256": "1037e2432a9b25abdbd98b2683d811c269b514f0576aa13f693deef298bdc167"
+        }
+      }
+    },
+    {
+      "id": "makeshift-handgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftHandgun 4",
+          "sourceSha256": "3e2eec6fecba0b3573dc516e6e57d38fa7a241fba9b52e253fc3be931758a632"
+        },
+        "description": {
+          "sourceText": "A handgun created from spare parts.\nRelatively well suited for close-quarters combat, but fires only one shot at a time.",
+          "sourceSha256": "1037e2432a9b25abdbd98b2683d811c269b514f0576aa13f693deef298bdc167"
+        }
+      }
+    },
+    {
+      "id": "makeshift-handgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftHandgun 5",
+          "sourceSha256": "5b4bb65c50152d88524b126cbcf2d49fc5ba1519fac9f2d36b8701adc0599c19"
+        },
+        "description": {
+          "sourceText": "A handgun created from spare parts.\nRelatively well suited for close-quarters combat, but fires only one shot at a time.",
+          "sourceSha256": "1037e2432a9b25abdbd98b2683d811c269b514f0576aa13f693deef298bdc167"
+        }
+      }
+    },
+    {
+      "id": "makeshift-shotgun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift Shotgun",
+          "sourceSha256": "6178be041df1634aed8d1233bae9aa394b7a617bb12d185ef6d5098e277c9515"
+        },
+        "description": {
+          "sourceText": "A shotgun handmade from scraps.\nIt has a short range but excels in close-range combat",
+          "sourceSha256": "965650ef895c3d455d8851253753ad0b0314581b6860f9f2dd63222ff6cfcbc1"
+        }
+      }
+    },
+    {
+      "id": "makeshift-shotgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftShotgun 2",
+          "sourceSha256": "a9bbc01fbf6107d49521c0815388e2a443c70bfddb3cf0a55c4c77ef5936a306"
+        },
+        "description": {
+          "sourceText": "A shotgun handmade from scraps.\nIt has a short range but excels in close-range combat",
+          "sourceSha256": "965650ef895c3d455d8851253753ad0b0314581b6860f9f2dd63222ff6cfcbc1"
+        }
+      }
+    },
+    {
+      "id": "makeshift-shotgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftShotgun 3",
+          "sourceSha256": "3c4678848616a5a38f86f64dee4f4cf39d6a2a1a9c3fb47d36caa0f6cd428de5"
+        },
+        "description": {
+          "sourceText": "A shotgun handmade from scraps.\nIt has a short range but excels in close-range combat",
+          "sourceSha256": "965650ef895c3d455d8851253753ad0b0314581b6860f9f2dd63222ff6cfcbc1"
+        }
+      }
+    },
+    {
+      "id": "makeshift-shotgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftShotgun 4",
+          "sourceSha256": "dff2e7c909f58fe5b1c88898e9197fc234b9ff949d6866de909a47e35b9982c8"
+        },
+        "description": {
+          "sourceText": "A shotgun handmade from scraps.\nIt has a short range but excels in close-range combat",
+          "sourceSha256": "965650ef895c3d455d8851253753ad0b0314581b6860f9f2dd63222ff6cfcbc1"
+        }
+      }
+    },
+    {
+      "id": "makeshift-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftShotgun 5",
+          "sourceSha256": "98c0e0798c55721c118b9e1fb2d0b7a554ea77bf5ebf1ee53c2ca32d9bb81bb3"
+        },
+        "description": {
+          "sourceText": "A shotgun handmade from scraps.\nIt has a short range but excels in close-range combat",
+          "sourceSha256": "965650ef895c3d455d8851253753ad0b0314581b6860f9f2dd63222ff6cfcbc1"
+        }
+      }
+    },
+    {
+      "id": "makeshift-submachine-gun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Makeshift SMG",
+          "sourceSha256": "4f478dfe5030bfbb774dfcc9f045f8ac37590f0ac7d0826d9831fcf580902e17"
+        },
+        "description": {
+          "sourceText": "A submachine gun handmade from scraps.\nIt excels in rate of fire, but its single-shot power is low.",
+          "sourceSha256": "ed7126f65cb8338dc261bc9cc72d24cde09f66c98459266df0b5ab797df28c68"
+        }
+      }
+    },
+    {
+      "id": "makeshift-submachine-gun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftSubmachineGun 2",
+          "sourceSha256": "994fe8dfe6a80e2bfe8529c09f7959bc25e5bd8329d49c53fbe17193a4994913"
+        },
+        "description": {
+          "sourceText": "A submachine gun handmade from scraps.\nIt excels in rate of fire, but its single-shot power is low.",
+          "sourceSha256": "ed7126f65cb8338dc261bc9cc72d24cde09f66c98459266df0b5ab797df28c68"
+        }
+      }
+    },
+    {
+      "id": "makeshift-submachine-gun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftSubmachineGun 3",
+          "sourceSha256": "c673e90d42e7d66fa56131bc1f6c058ef9a0aa6e401c7b8f0e6be38b53586780"
+        },
+        "description": {
+          "sourceText": "A submachine gun handmade from scraps.\nIt excels in rate of fire, but its single-shot power is low.",
+          "sourceSha256": "ed7126f65cb8338dc261bc9cc72d24cde09f66c98459266df0b5ab797df28c68"
+        }
+      }
+    },
+    {
+      "id": "makeshift-submachine-gun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftSubmachineGun 4",
+          "sourceSha256": "f2b5c9b6a967bc091f3da41316357de6b8ea2a728af6156470e1611f1380b2aa"
+        },
+        "description": {
+          "sourceText": "A submachine gun handmade from scraps.\nIt excels in rate of fire, but its single-shot power is low.",
+          "sourceSha256": "ed7126f65cb8338dc261bc9cc72d24cde09f66c98459266df0b5ab797df28c68"
+        }
+      }
+    },
+    {
+      "id": "makeshift-submachine-gun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MakeshiftSubmachineGun 5",
+          "sourceSha256": "a4d443d592cc3c66c4e1b973d7a1a91284de877113f6b36aecccb4ae642bee9e"
+        },
+        "description": {
+          "sourceText": "A submachine gun handmade from scraps.\nIt excels in rate of fire, but its single-shot power is low.",
+          "sourceSha256": "ed7126f65cb8338dc261bc9cc72d24cde09f66c98459266df0b5ab797df28c68"
+        }
+      }
+    },
+    {
+      "id": "manganese-ingot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Coralum Ingot",
+          "sourceSha256": "f89e1190f0ef1f71bba4c7c0048f971507915d2f3a67bc43606a482e6438c418"
+        },
+        "description": {
+          "sourceText": "An alloy made from found on the ocean floor.\nHighly resistant to energy, making it ideal for crafting weapons.\nCan be refined at .",
+          "sourceSha256": "47ec7667d8ecf342458e79886d4e7c9c979db70a6a65a51c29d541e97a2513cf"
+        }
+      }
+    },
+    {
+      "id": "manganese-ore",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Coralum Ore",
+          "sourceSha256": "8d2cad4db3983c6761ddcc3f4bb64f241a0f57e7a8e93d815186ca94f2c5eead"
+        },
+        "description": {
+          "sourceText": "A rare ore formed over countless years\nin the deep sea.\nCan be retrieved from the depths with\na magnet and fishing rod.",
+          "sourceSha256": "c50729e32f8e8a88c767c87c77ce7b7a5c54a0a1cb9e6bf97ced22777f52ae20"
+        }
+      }
+    },
+    {
+      "id": "marinated-mushrooms",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Marinated Mushrooms",
+          "sourceSha256": "b54ed0829af1813dfeae696e1ae0fa1ad70067a34d31e7f813a4f2d8f740413a"
+        },
+        "description": {
+          "sourceText": "A dish made by marinating s in a marinade.\nEating it improves by +10% for a period of time.",
+          "sourceSha256": "8c034ef2a5b03852370909b020f6c4d1bbbbe5d76f13ed37d1a86322d8b52af3"
+        }
+      }
+    },
+    {
+      "id": "meaningless-item-butchering-import-pal",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Scrapped Tissue Sample",
+          "sourceSha256": "78e3bf0747f442cb775bd2305ff8c78c5e164210a41a94492b8f9207d8ecfd6b"
+        },
+        "description": {
+          "sourceText": "Pulverized remnants of some kind of biological tissue.\nLeftover residue from butchering a genetically reconstructed Pal,\nit serves no purpose and can only be sold or discarded.",
+          "sourceSha256": "ac358c240f83b3c6ae06d9ff2278213354bb4268d4fe3e3d806618bc08624fc6"
+        }
+      }
+    },
+    {
+      "id": "meat-and-potatoes",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Galeclaw Nikujaga",
+          "sourceSha256": "1b039b7069d33fdb53cab74c68e68c384b8723eb06b72e307534dd1811a08712"
+        },
+        "description": {
+          "sourceText": "A dish made by simmering meat and potatoes in a sweet and savory sauce.\nIt has a mysteriously nostalgic taste. Eating it will increase your by 25% for a period of time.",
+          "sourceSha256": "94cf4541e84be1d81e9d09f960710e16c82f052ed792f736c6ad1f4da5f63fbe"
+        }
+      }
+    },
+    {
+      "id": "meat-berry-goat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Caprity Meat",
+          "sourceSha256": "e06f6b41e0e4f8313e2a41ccd61b8ae3c0b28d896903aae674a36e7dc0cf3d00"
+        },
+        "description": {
+          "sourceText": "meat.\nHealthy and full of nutrients.\nHints of berries scenting the meat stimulates the appetite.",
+          "sourceSha256": "8b025d06b975ce37c859b876e497b7f8d3239eda760643e660ef033974bdb2bd"
+        }
+      }
+    },
+    {
+      "id": "meat-boar",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Rushoar Pork",
+          "sourceSha256": "80f8b180bf23a509990a6696386d54cdc805ffa1142d2ab1135a2d0ac0835281"
+        },
+        "description": {
+          "sourceText": "meat.\nFull of the delicious flavors of wild game.\nJuicy and nutritious.",
+          "sourceSha256": "e6e3699055940c41500176c3f110c07c4cb4c772fb260bf1e6fee04dd7423230"
+        }
+      }
+    },
+    {
+      "id": "meat-chicken-pal",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Chikipi Poultry",
+          "sourceSha256": "dfecbb4cca501cf8e55ea369576086f6c63cf2ccf0f50cbb03f248df10295639"
+        },
+        "description": {
+          "sourceText": "meat.\nLight and easy to eat,\nit's a local favorite for residents of Palpagos Island.",
+          "sourceSha256": "e1ba44afde74167f8b6f5b02050e5f9ccde8f9f03c35db39b14c5009634d7cd7"
+        }
+      }
+    },
+    {
+      "id": "meat-cow-pal",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mozzarina Meat",
+          "sourceSha256": "5fd4b47cc0a6a8da31a06e31b86d8606d663be07f0834aa884d2b23ee927b518"
+        },
+        "description": {
+          "sourceText": "meat.\nThick, juicy and marbled.\nResidents of Palpagos Island cherish it above all other meats.",
+          "sourceSha256": "b05141f33e1702f84fc5826e5a01310b462afaa1803cd9efb8953a852e68294c"
+        }
+      }
+    },
+    {
+      "id": "meat-cutter-knife",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Meat Cleaver",
+          "sourceSha256": "21c9f9c46a10cab9e45fb232fb77435148efdfaa032038b9bf0ca230609dd923"
+        },
+        "description": {
+          "sourceText": "Knife for butchering Pals.\nWhen equipped, the Pet command becomes Butcher.\nButchered Pals will be gone for good.",
+          "sourceSha256": "6ab9310dc356ecb644c3f05376515fb7d43deb494a7b34233d6f0dac5746443d"
+        }
+      }
+    },
+    {
+      "id": "meat-deer",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Eikthyrdeer Venison",
+          "sourceSha256": "aafbb1bb48f0d87fb7c7c92db6ce0bc3cf943ad3d9dd2439b2b30d94987d32e8"
+        },
+        "description": {
+          "sourceText": "meat.\nLight and lean, but rich in flavor.",
+          "sourceSha256": "e5bb5419a96a78a2b3d5e1cdafe5ba04588389c40f6878a69545fb2005c682c4"
+        }
+      }
+    },
+    {
+      "id": "meat-eagle",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Galeclaw Poultry",
+          "sourceSha256": "12bb5cd1961ef1c05a2e5b74acb2e42cbcc0a82818c1901119bf9d51f9a7fdae"
+        },
+        "description": {
+          "sourceText": "meat.\nFull of nutrition, its flavor packs a punch.",
+          "sourceSha256": "acc783ad72e01157c54e7fb23e13922aedc5a0020424178fab4348e4e5c5fa3f"
+        }
+      }
+    },
+    {
+      "id": "meat-grass-mammoth",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mammorest Meat",
+          "sourceSha256": "ce491b6802ea07412f22c6e5ae3a3fafebb3a776e3acc2e710bafe2100e70db3"
+        },
+        "description": {
+          "sourceText": "meat.\nWith massive size comes massive flavor.\nIts overwhelming portions are sure to satisfy any glutton.",
+          "sourceSha256": "fbb38225cbd6e3dd9a14d0c2f7890f0ef8b84dea18f5c97f36c7e4c11dd23de6"
+        }
+      }
+    },
+    {
+      "id": "meat-ice-crocodile",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Munchill Meat",
+          "sourceSha256": "7876af1290b03d7e137e102d8c8926df2fdd285e93142cc4a6aa0ec6f6ff60ac"
+        },
+        "description": {
+          "sourceText": "meat.\nHas a satisfying chew that brings out layers of umami as you eat.",
+          "sourceSha256": "d2381f256f19043c380ac2c92fc2b1a797074e073c7eb4e9336d07b6a7893b64"
+        }
+      }
+    },
+    {
+      "id": "meat-ice-deer",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Reindrix Venison",
+          "sourceSha256": "cb67580307c01ac1bfd0b5c277c32639738aedf87533ec9cf3b58a2f4e5e3a7e"
+        },
+        "description": {
+          "sourceText": "meat.\nStrange venison capable of remaining at low temperatures.\nTakes a very long time to spoil.",
+          "sourceSha256": "967dad048321db2f123d43bc9e6106118fab0a01ff02b3818aad510fdd481e59"
+        }
+      }
+    },
+    {
+      "id": "meat-jellyfish-fairy",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jelliette Bell Flesh",
+          "sourceSha256": "a8abb083682b31d47647b715b3174918b0d0fb0a6fbeeb3f5bc2dae63ed121be"
+        },
+        "description": {
+          "sourceText": "'s fleshy bell.\nPacked with ocean flavor and a delightfully chewy bite.",
+          "sourceSha256": "72d986e745ca891d6a0924c46e70503939bec120185614f0061c81807ef8eeac"
+        }
+      }
+    },
+    {
+      "id": "meat-jellyfish-ghost",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Jellroy Bell Flesh",
+          "sourceSha256": "1f7abf5f0f5f14d04ce5a0311ec4bd1cc234a9c187cef12146c4c4510b4ffe94"
+        },
+        "description": {
+          "sourceText": "'s fleshy bell.\nPacked with ocean flavor and a delightfully plump texture.",
+          "sourceSha256": "34c2206c679cb8ef6501991d91c2c7ed629c3227b27dfa900c17c892d07b5539"
+        }
+      }
+    },
+    {
+      "id": "meat-kelpie",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Raw Kelpsea",
+          "sourceSha256": "07117ab05891991cd793f5c4b0efe599ba58ab7d6255e3c654b1e85fc40ea83a"
+        },
+        "description": {
+          "sourceText": "meat.\nTender and slightly sweet.\nFish meat tends to spoil quickly.",
+          "sourceSha256": "6412a7b41e3c0152528f8643c23f9eb5498db9edab035d97afe3622b418d2f67"
+        }
+      }
+    },
+    {
+      "id": "meat-lazy-catfish",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Raw Dumud",
+          "sourceSha256": "1a150ef74ddf5faed5839526ade27f54410038728e01173c54d460fa5830e2e0"
+        },
+        "description": {
+          "sourceText": "meat.\nFatty with a rich taste.\nHas a mouthwatering plump texture.",
+          "sourceSha256": "60bfe3bd0b61a2ed49c55708e3ba7f0d41ec18fa2dc76c2dba2b7866f6ac5ff2"
+        }
+      }
+    },
+    {
+      "id": "meat-octopus-girl",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gloopie Tentacle",
+          "sourceSha256": "305b155d33b57d8e0f0049315f7a9ce78b1c0daa74785de72cac38b797d1d251"
+        },
+        "description": {
+          "sourceText": "tentacle.\nKnown for its springy texture and light, refined flavor.",
+          "sourceSha256": "5916d83c27e47ca9f7ada3ffe32dc3ffccc44bf46cd91ffd895d81422aa3195f"
+        }
+      }
+    },
+    {
+      "id": "meat-sakura-saurus",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Broncherry Meat",
+          "sourceSha256": "360d2de44b6238e638c8471df509181449a3143c612e362b1feab5011a6bb928"
+        },
+        "description": {
+          "sourceText": "meat.\nGiant meat full of massive stores of energy.\nStuffed to the brim with nutrients gathered through photosynthesis.",
+          "sourceSha256": "5fe2be237fb13893db7bedf30a6f6448ea419a785ab447fd34b05f530818b570"
+        }
+      }
+    },
+    {
+      "id": "meat-sheep-ball",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lamball Mutton",
+          "sourceSha256": "d2cf3f3342cd12011de846ef4ebc8d19f93cffe66d2474336cd88ea96b0ad0f7"
+        },
+        "description": {
+          "sourceText": "meat.\nRed meat with a unique flavor.\nDelicious, but takes some getting used to.",
+          "sourceSha256": "612f5fc38f506cb36971a463930bf465f9be05878f516128c35e75525a8ffe2a"
+        }
+      }
+    },
+    {
+      "id": "meat-sword-cutlass-fish",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skutlass Sashimi",
+          "sourceSha256": "649652db796519403bbc082bf3f9e368641d04399101657f498427b32355880b"
+        },
+        "description": {
+          "sourceText": "Raw slices of .\nCharacterized by its supple, plump flesh.\nCaution is required when preparing it due to its sword-like spine.",
+          "sourceSha256": "b080944b088ae680e3beeb0ed063a820f42d09c25ccee380f31e4bcb34798cb0"
+        }
+      }
+    },
+    {
+      "id": "medicines",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Medical Supplies",
+          "sourceSha256": "4b06d84c4c0fa7e9434029d87a00b1196ae5057856acf091770d9be3b0f7f24a"
+        },
+        "description": {
+          "sourceText": "Strange that are effective at treating and .\nUnfortunately, they have no healing effect.",
+          "sourceSha256": "de265f219acfa5317625c35c84517188ea4766293f018d0ba4b07cc7231ecbcf"
+        }
+      }
+    },
+    {
+      "id": "metal-detector",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Metal Detector",
+          "sourceSha256": "41d451e42347d65b387511be8a59d02890104cd7e391ecbff55c57a789b05027"
+        },
+        "description": {
+          "sourceText": "Using this reveals hidden Chromite deposits in dungeons, marking them for easier mining.\nDeposits will become unmarked if you move too far away.",
+          "sourceSha256": "5070331c78bbf47b31cfab28adb930903cf0a36b8a6a1e6e6f90dc2aeacaf626"
+        }
+      }
+    },
+    {
+      "id": "meteor-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Meteorite Ammo",
+          "sourceSha256": "eb0b20dee2138a00f88ee7572e7feb46143a700517bb5da1b5e5bfac20a1d63d"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "meteor-drop",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Meteorite Fragment",
+          "sourceSha256": "8fda34fafa6d8c7405a199066b4ef16a9013e82a282b929bb3f28e2a97b3bb11"
+        },
+        "description": {
+          "sourceText": "Fragment of a rock from outer space.\nContains large amounts of ,\nwhich can be extracted by placing it in a .",
+          "sourceSha256": "855cbe95c5824656cd19b461daf727f19c959f90eb150a41b6ab0ecff248dd33"
+        }
+      }
+    },
+    {
+      "id": "milk",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Milk",
+          "sourceSha256": "8189b8409b18b1ef215ec2f2d8da515cdc7cc21a4b7cd35482b66bede2275d02"
+        },
+        "description": {
+          "sourceText": "Drink it as is, or use it in various meals.\nCan be milked from .",
+          "sourceSha256": "85418f445324729fa4634aadfd174c498a07ca70aeb5dcdfcf85a705c366eb97"
+        }
+      }
+    },
+    {
+      "id": "minestrone",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Minestrone",
+          "sourceSha256": "717dfb59da70bda14b8cba7e7f1ddc2c31d23d86c7254edcfd16e2806a3662ad"
+        },
+        "description": {
+          "sourceText": "A soup simmered with a variety of vegetables.\nDrinking it warms you to the core. Eating it will increase your work speed for a period of time.",
+          "sourceSha256": "a333225149fadc1f156aec08b597359d352913bab3ad36c656182176f7aa8024"
+        }
+      }
+    },
+    {
+      "id": "missile-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Missile Ammo",
+          "sourceSha256": "5da3fd45efa643e1f03fd0833853d912c7bb341c065849e1fb5bf206ad7a2747"
+        },
+        "description": {
+          "sourceText": "Ammo for the and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75"
+        }
+      }
+    },
+    {
+      "id": "money",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Gold Coin",
+          "sourceSha256": "96960859445843e1e25783f66a148648d5e6a8553d5650af31de72eec1fd1adb"
+        },
+        "description": {
+          "sourceText": "Currency traded on Palpagos Island.\nCan be exchanged for items or Pals with merchants.",
+          "sourceSha256": "f8f5a1136b39352098ba5c440d093c84189384fa853f0ae3469d5298c0c8a0d2"
+        }
+      }
+    },
+    {
+      "id": "multi-guided-missile-launcher",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Multi Guided Missile Launcher",
+          "sourceSha256": "e7f0e86d6bf855cc01d21f1d6fcdff8cdd149229a6d4340fdf2d3d1a960d358a"
+        },
+        "description": {
+          "sourceText": "A missile launcher that can hold multiple ammo at once.\nFires a series of missiles that automatically track and follow enemies.",
+          "sourceSha256": "5824286eb87ca3d7d2c4a61cabe41f41a83de047a0e0312baca8b04343550d30"
+        }
+      }
+    },
+    {
+      "id": "multi-guided-missile-launcher-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MultiGuidedMissileLauncher 2",
+          "sourceSha256": "c8c734b10ec7127235cfe887de481972a5b32a6d5d571b634b4553cf3f0c1e2f"
+        },
+        "description": {
+          "sourceText": "A missile launcher that can hold multiple ammo at once.\nFires a series of missiles that automatically track and follow enemies.",
+          "sourceSha256": "5824286eb87ca3d7d2c4a61cabe41f41a83de047a0e0312baca8b04343550d30"
+        }
+      }
+    },
+    {
+      "id": "multi-guided-missile-launcher-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MultiGuidedMissileLauncher 3",
+          "sourceSha256": "52a3e176e924cc3527dc0782a598401de65e605d4e4b98d0a3302082a40471e6"
+        },
+        "description": {
+          "sourceText": "A missile launcher that can hold multiple ammo at once.\nFires a series of missiles that automatically track and follow enemies.",
+          "sourceSha256": "5824286eb87ca3d7d2c4a61cabe41f41a83de047a0e0312baca8b04343550d30"
+        }
+      }
+    },
+    {
+      "id": "multi-guided-missile-launcher-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MultiGuidedMissileLauncher 4",
+          "sourceSha256": "07cf94bed3c65596135cf09c68c52d9f200e37658ddee50dd8d7fdae5cb3aa8a"
+        },
+        "description": {
+          "sourceText": "A missile launcher that can hold multiple ammo at once.\nFires a series of missiles that automatically track and follow enemies.",
+          "sourceSha256": "5824286eb87ca3d7d2c4a61cabe41f41a83de047a0e0312baca8b04343550d30"
+        }
+      }
+    },
+    {
+      "id": "multi-guided-missile-launcher-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "MultiGuidedMissileLauncher 5",
+          "sourceSha256": "331545316b5be9d33f4268e8128a107506c2f66ba1c8c497bd2c0c44aaf6b9a2"
+        },
+        "description": {
+          "sourceText": "A missile launcher that can hold multiple ammo at once.\nFires a series of missiles that automatically track and follow enemies.",
+          "sourceSha256": "5824286eb87ca3d7d2c4a61cabe41f41a83de047a0e0312baca8b04343550d30"
+        }
+      }
+    },
+    {
+      "id": "mushroom",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mushroom",
+          "sourceSha256": "f067a8bafce903cb7e72759e2de3c8e8f0f12968daeff5ef78e01c52b6349e6e"
+        },
+        "description": {
+          "sourceText": "A mushroom that can be eaten raw.\nThey can be found anywhere on the island.",
+          "sourceSha256": "8ba88b439d005b4dac83035b59b6d39933c02b976b17c26aa8f1995cf771f301"
+        }
+      }
+    },
+    {
+      "id": "mushroom-juice",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mysterious Mushroom Juice",
+          "sourceSha256": "c95fb640261419f4598a6b2801e322a09a7f714b6e6a3bbfc0b016c023bd9e33"
+        },
+        "description": {
+          "sourceText": "Mushroom juice known for its incredibly uplifting effect.\nDrinking it greatly boosts work speed for a period of time,\nbut drastically decreases SAN value.",
+          "sourceSha256": "a38e8808d28b824b4b091508d1419769fdf15c9e33b3f8274825059f614fb863"
+        }
+      }
+    },
+    {
+      "id": "mushroom-soup",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mushroom Soup",
+          "sourceSha256": "5a6131eba50e1d0ba281af844690e96f52edca03b89d26713729832e9129fa23"
+        },
+        "description": {
+          "sourceText": "Cream soup made of s.\nEating it allows you to stay fuller for slightly longer for a period of time.",
+          "sourceSha256": "0a41ffa17ec2a388057b5d9e53fe2f3d976586ebb2e1c6c50f015c67adc9ee15"
+        }
+      }
+    },
+    {
+      "id": "musket",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket",
+          "sourceSha256": "7672dad9894ba3d33c1a4a0146e594d068fe79a64b26e8bff3d091aa9e64976e"
+        },
+        "description": {
+          "sourceText": "Simple, old fashioned gun.\nFires a single, powerful shot at the expense of a long reload time.",
+          "sourceSha256": "2364d489670141b703e81669744bd921061f632e4d27e411b9b27d8b5c161e03"
+        }
+      }
+    },
+    {
+      "id": "musket-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket 2",
+          "sourceSha256": "6bee9c8f77a3c2f4023c23580f5d8d731d0f786dcf677b733f7ac9ba28d1340b"
+        },
+        "description": {
+          "sourceText": "Simple, old fashioned gun.\nFires a single, powerful shot at the expense of a long reload time.",
+          "sourceSha256": "2364d489670141b703e81669744bd921061f632e4d27e411b9b27d8b5c161e03"
+        }
+      }
+    },
+    {
+      "id": "musket-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket 3",
+          "sourceSha256": "d61d2dd5bf7e9e1d5c719783c5e8d77b66a74c7de303145d0fd0c826eeda4578"
+        },
+        "description": {
+          "sourceText": "Simple, old fashioned gun.\nFires a single, powerful shot at the expense of a long reload time.",
+          "sourceSha256": "2364d489670141b703e81669744bd921061f632e4d27e411b9b27d8b5c161e03"
+        }
+      }
+    },
+    {
+      "id": "musket-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket 4",
+          "sourceSha256": "4269f3e695db8d0c5cf22f89e54f6562b24bbba0d78489aa84aa40e8684206f5"
+        },
+        "description": {
+          "sourceText": "Simple, old fashioned gun.\nFires a single, powerful shot at the expense of a long reload time.",
+          "sourceSha256": "2364d489670141b703e81669744bd921061f632e4d27e411b9b27d8b5c161e03"
+        }
+      }
+    },
+    {
+      "id": "musket-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Musket 5",
+          "sourceSha256": "00c112a41a5bd66d36a857124a1e8237da921edd938751ea3e78e9990038446b"
+        },
+        "description": {
+          "sourceText": "Simple, old fashioned gun.\nFires a single, powerful shot at the expense of a long reload time.",
+          "sourceSha256": "2364d489670141b703e81669744bd921061f632e4d27e411b9b27d8b5c161e03"
+        }
+      }
+    },
+    {
+      "id": "narcotic",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Strange Juice",
+          "sourceSha256": "a156355b8d52b410d46d505ff0995d11a674bb64bde19c5e29646acb5b3bf8c2"
+        },
+        "description": {
+          "sourceText": "Juice that greatly improves mood when consumed.\nDrinking it significantly increases work speed for a period of time,\nbut significantly lowers SAN.",
+          "sourceSha256": "f54e516f2caf5c14a509d6527c167da0972248e46b933b6b0724e3635734d266"
+        }
+      }
+    },
+    {
+      "id": "night-stone",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Nightstar Sand",
+          "sourceSha256": "83276142f3d5964ef6745bc5d041a35c54540ec32def65af8baff6b38c2fe925"
+        },
+        "description": {
+          "sourceText": "Sand that can be found in the desert at night.\nUsed as a material for crafting certain accessories and other items.",
+          "sourceSha256": "1b113ed9edd81987903899e78d3dcda71330afe10d03b8f1758980f9c6fb968d"
+        }
+      }
+    },
+    {
+      "id": "octavia-revolver",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Marksman Revolver",
+          "sourceSha256": "0f16c6cf1590849704c7e62d3f48561718d300f68b649812a93f391212d03eb2"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nAn electrically powered revolver capable of firing endlessly.\nWhen equipped, Pal Sphere throws are replaced with Coin Toss.\nHitting a coin with the causes the bullet to ricochet toward enemies.",
+          "sourceSha256": "9574813b122a833fc495e84534428b6c8de5644142297b1103c39c4936a622c5"
+        }
+      }
+    },
+    {
+      "id": "octavia-revolver-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OctaviaRevolver 5",
+          "sourceSha256": "096727b9324d30bf21ffef2940c7ed9bfe23d6adefc63a14f2c7bea164c6f05a"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nAn electrically powered revolver capable of firing endlessly.\nWhen equipped, Pal Sphere throws are replaced with Coin Toss.\nHitting a coin with the causes the bullet to ricochet toward enemies.",
+          "sourceSha256": "9574813b122a833fc495e84534428b6c8de5644142297b1103c39c4936a622c5"
+        }
+      }
+    },
+    {
+      "id": "octavia-shotgun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Core Eject Shotgun",
+          "sourceSha256": "fcced22db390fae03142cae33e056931fa3dff6428b41a6d3fa71b849b5678ba"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nA shotgun powered by heat, capable of firing endlessly.\nWhen equipped, throwing a Pal Sphere is replaced with Core Eject.\nHold to charge and extend its range. Cores hit by shots from will explode.",
+          "sourceSha256": "00170a111e55241203f367bd6d1d3424fbeead508e4a2f5401e1c7739c2b12f6"
+        }
+      }
+    },
+    {
+      "id": "octavia-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "OctaviaShotgun 5",
+          "sourceSha256": "f83153d9e9cae090b817219a92fe1865be1ceb8855b7e0aa6e938d586a52fcec"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nA shotgun powered by heat, capable of firing endlessly.\nWhen equipped, throwing a Pal Sphere is replaced with Core Eject.\nHold to charge and extend its range. Cores hit by shots from will explode.",
+          "sourceSha256": "00170a111e55241203f367bd6d1d3424fbeead508e4a2f5401e1c7739c2b12f6"
+        }
+      }
+    },
+    {
+      "id": "octavia001-armor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "V1 Armor",
+          "sourceSha256": "5751e7d9e034b39f32a9f4892f574575353685080e362f71ae667ce852a16752"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nArmor modeled after the Final War machine built in a distant land.\nIt features a self-repair system that activates when dealing damage.",
+          "sourceSha256": "3d936c60c64497b20edd9f08eb56353deaea986b6da452bccc792a141d84482c"
+        }
+      }
+    },
+    {
+      "id": "octavia001-armor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Octavia001 Armor 5",
+          "sourceSha256": "a5be378d2dddb18a0457d5ee9d47521a3970bee99cee5c97a7ae4a59716ac7dc"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nArmor modeled after the Final War machine built in a distant land.\nIt features a self-repair system that activates when dealing damage.",
+          "sourceSha256": "3d936c60c64497b20edd9f08eb56353deaea986b6da452bccc792a141d84482c"
+        }
+      }
+    },
+    {
+      "id": "octavia002-armor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "V2 Armor",
+          "sourceSha256": "dd52865a20bc33dd30a406bf4cd003fde64278203f304e16f0d04cecae4867cd"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nArmor modeled after the New Peace machine built in a distant land.\nIts self-repair system was removed in favor of sturdier plating.",
+          "sourceSha256": "c0467f58225fb18346a16704774b46310e733741515d70925888b24ea170130c"
+        }
+      }
+    },
+    {
+      "id": "octavia002-armor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Octavia002 Armor 5",
+          "sourceSha256": "449cae7d69e75e41b21c1a59e4faffe16a4c1a83486283c8c629b9683559e401"
+        },
+        "description": {
+          "sourceText": "[ULTRAKILL Collab]\nArmor modeled after the New Peace machine built in a distant land.\nIts self-repair system was removed in favor of sturdier plating.",
+          "sourceSha256": "c0467f58225fb18346a16704774b46310e733741515d70925888b24ea170130c"
+        }
+      }
+    },
+    {
+      "id": "octopus-girl-takoyaki",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fried Gloopie Balls",
+          "sourceSha256": "30c0bacff249819ba7934b279bb07b1b804d14fce0e70d68908bc7a27133661b"
+        },
+        "description": {
+          "sourceText": "encased in a dough and grilled into round bites.\nEating it will slightly increase EXP gain for a period of time.",
+          "sourceSha256": "e393ba3d9122c9c4435f4df556e3d1ce3c997e278c8aee305ec22267b696fe39"
+        }
+      }
+    },
+    {
+      "id": "octopus-girl-takoyaki2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Seafood Pasta",
+          "sourceSha256": "32a096994b545e80e23d56410687921e7df7ad9280ba76dbfc60bb990d727d40"
+        },
+        "description": {
+          "sourceText": "Fresh pasta is tossed with fragrant seafood in this exceptional dish, using Gloopie tentacles to elevate it even further.\nWhen eaten, it nullifies damage from explosions for a certain period of time.",
+          "sourceSha256": "2d9a75731be664926bedf08017d5d6e77868872e35e85fae917aff25680fdaf6"
+        }
+      }
+    },
+    {
+      "id": "old-revolver",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Old Revolver",
+          "sourceSha256": "868b7785212f5fe39d54b6fc1653ee1a4602e4cf0225f7a2b1fdf5a7b461c0a2"
+        },
+        "description": {
+          "sourceText": "A slightly outdated revolving handgun.\nCompared to , it excels in single-shot power.",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb"
+        }
+      }
+    }
+  ]
+}

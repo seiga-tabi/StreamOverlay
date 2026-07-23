@@ -1,0 +1,2700 @@
+{
+  "locale": "ko",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "에너지 라운드를 발사하는 샷건. 화재가 발생하여 화재가 발생하였을 경우, 그 피해는 실로 엄청나다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6000b8d722b8e75488083350851eb045a5df74011dc69d4559245444320f9c21",
+          "status": "machine_assisted",
+          "text": "에너지 샷건 2"
+        }
+      },
+      "id": "energy-shotgun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "에너지 라운드를 발사하는 샷건. 화재가 발생하여 화재가 발생하였을 경우, 그 피해는 실로 엄청나다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4faac3a1c773a475a8d8254a495048928073019e17027bf00a0598cfdeee1224",
+          "status": "machine_assisted",
+          "text": "에너지 샷건 3"
+        }
+      },
+      "id": "energy-shotgun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "에너지 라운드를 발사하는 샷건. 화재가 발생하여 화재가 발생하였을 경우, 그 피해는 실로 엄청나다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "81e4e328dfc638d9924d1c5e9e0d3054524c588947f76933f631db403d1ae87f",
+          "status": "machine_assisted",
+          "text": "에너지 샷건 4"
+        }
+      },
+      "id": "energy-shotgun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f0510734763fb781a5cc372f1d4694d13e16d1d3b672ff0fdbed47cc11ffa29d",
+          "status": "machine_assisted",
+          "text": "에너지 라운드를 발사하는 샷건. 화재가 발생하여 화재가 발생하였을 경우, 그 피해는 실로 엄청나다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fb2957b969d84219312accf995beae106ffe771dfd0dbb5c7e8dcd91558876e9",
+          "status": "machine_assisted",
+          "text": "에너지 샷건 5"
+        }
+      },
+      "id": "energy-shotgun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "무기와 비슷한 무기에 대한 탄약. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2d37f796e32c9976c782e79e383ebe434c54b8dc9ecb88fe823192d588e0f21c",
+          "status": "machine_assisted",
+          "text": "에너지 샷건 탄약"
+        }
+      },
+      "id": "energy-shotgun-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7a3222bdc75bb9a73afcf6ba85cbf74f67f76f07a33709bb6af6d96cebbfc593",
+          "status": "machine_assisted",
+          "text": "작은 금액을 부여 하는 교육 매뉴얼 EXP는 Pal에 의해 읽혀질 때의 EXP이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "31be54b5b61dac7c166f45e28293adbada98e89e32db4e188ce58e6f8bdec09d",
+          "status": "machine_assisted",
+          "text": "교육 매뉴얼 (S)"
+        }
+      },
+      "id": "exp-boost-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c7af2a34ed3476947214b8d8217987bf829ac0518478eb2e925e60a33b6ef9d9",
+          "status": "machine_assisted",
+          "text": "작은 금액을 부여 하는 교육 매뉴얼 EXP는 Pal에 의해 읽혀질 때의 EXP이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e27611616d3e70a923c9f0bd77be315813a7267b65f31b2196b8b5bc26226ea0",
+          "status": "machine_assisted",
+          "text": "교육 매뉴얼 (M)"
+        }
+      },
+      "id": "exp-boost-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "622d7274dc9a833fb5c9045ae570ec59852963a2a5f80b0192f999857673b0e6",
+          "status": "machine_assisted",
+          "text": "큰 금액을 부여 하는 교육 매뉴얼 EXP는 Pal에 의해 읽혀질 때의 EXP이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "013d47e686a7c465e38c1c1a8dde88148d3e2f8a6bfc00f20089355d26b5add7",
+          "status": "machine_assisted",
+          "text": "교육 매뉴얼 (L)"
+        }
+      },
+      "id": "exp-boost-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7f29c6df069e395c6679d8f4023e6f5618e462654b67ea5a57be78423131317e",
+          "status": "machine_assisted",
+          "text": "상당한 금액을 부여하는 교육 매뉴얼 EXP는 Pal에 의해 읽혀질 때의 EXP이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7d47af48afa695b11e0a19ca09710a80f332249ac7ad244971770e65b22bf727",
+          "status": "machine_assisted",
+          "text": "교육 매뉴얼 (XL)"
+        }
+      },
+      "id": "exp-boost-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "무기와 비슷한 무기에 대한 탄약. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a0af9f4419105e2c1c509827a551973bcaaf65af6f3a5d8a46ba69ccdeb3c5e9",
+          "status": "machine_assisted",
+          "text": "로켓 탄약"
+        }
+      },
+      "id": "explosive-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "437dc50ebe573b8359c76617624a48b057e18d673c0d233e8e8a31ab3c4c2d12",
+          "status": "machine_assisted",
+          "text": "섬유는 나무에서 수집된다. 활을 만들 때 사용되는 재료, 등등."
+        }
+      },
+      "id": "fiber",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2fd7cc6225d81427aec70cd839321b8f8baab64e6dcc298b9b006a427dcd243e",
+          "status": "machine_assisted",
+          "text": "Pal에서 얻을 수 있는 물자. 만드는 데 사용할 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e3cd7d4bd04558dc12068d1c757308efa87994c236a615f19e67f3f7710efb43",
+          "status": "machine_assisted",
+          "text": "화염 기관"
+        }
+      },
+      "id": "fire-organ",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e14349975c3f266fb0079fc0bda390f1ef2887b1e87dcffd772b2f1043af78b4",
+          "status": "machine_assisted",
+          "text": "Pal에 유혹하는 데 사용되는 기본 낚시 미끼. 낚시에 필요한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a83ec8afbf4d82da0331a8a121a9d30410bd1f61f97ea2ac4cec9b583e89e6a1",
+          "status": "machine_assisted",
+          "text": "간단한 미끼"
+        }
+      },
+      "id": "fishing-bait-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0209c294048f358d47097dcfe4dbdedf6b0ffd9bc951c735b08934e4b3a71276",
+          "status": "machine_assisted",
+          "text": "Pal에 미끼를 미끼. 미끼를 물고 Pal의 기회를 증가에서 개선."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f8dab84fc86fc95260040526c0b8721d2d9f8d4610a31f4b8d34ec31c0e84824",
+          "status": "machine_assisted",
+          "text": "높은 품질 Bait"
+        }
+      },
+      "id": "fishing-bait-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff038ac53cae8053f84a37ae11c593bf395175259bad5057a2fe46d8a6d042d2",
+          "status": "machine_assisted",
+          "text": "Pal에 미끼를 미끼. 약간 낚시 미니 게임에서 바의 크기를 확대하기 위해 개선되었습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8299ef392857e9bc62be8c584ade10dae97c96f38ce9534c31e8c97822c972c4",
+          "status": "machine_assisted",
+          "text": "디럭스 베이트"
+        }
+      },
+      "id": "fishing-bait-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f832f49f8da8446e7b7279889aa9b5f5434dd6110bf0ce045c1f3522e322936",
+          "status": "machine_assisted",
+          "text": "Pal에 미끼를 미끼. 낚시 minigame에서 바의 크기를 확대하고 낚시에서 얻은 항목의 수를 증가하도록 개선되었습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2e7580601f232040b9320ebca53f0f71b7cc7c34fd169cc25484d3f73e990b2b",
+          "status": "machine_assisted",
+          "text": "유혹하는 미끼"
+        }
+      },
+      "id": "fishing-bait-3-a",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ecf6926ba977776c4566719df20a00e4a1d3236235461e532bc97f250e906ca1",
+          "status": "machine_assisted",
+          "text": "Pal를 잡기 위해 설계된 낚싯대. 그림자가 낚시를 시작하는 것을 볼 수있는 물 근처에서 미끼와 함께 사용하십시오. 초보자에게 적합하며 저수준 Pal에서 릴링하는 데 이상적이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b49afcc9864c16d9b9056ab266c93f140381995aba0a5ba65af0c66d09c0d298",
+          "status": "machine_assisted",
+          "text": "초급 낚시대 (베비뇽)"
+        }
+      },
+      "id": "fishing-rod-01-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "f9b9cb454d53015f363bdef0c9eb76fc57851a33f4d0a2f48f9b3651a18c6434",
+          "status": "machine_assisted",
+          "text": "Pal를 잡기 위해 설계된 낚싯대. 그것은 더 튼튼하고 약간 더 나은 성능을 제공한다. [원문 누락] . . 니다. 초보자에게 적합하며 저수준 Pal에서 릴링하는 데 이상적이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "edd8a82942b3dfe93ec32241dcb73cec6ea3cf1b371b3212c8cac7d5d55823f5",
+          "status": "machine_assisted",
+          "text": "초급 낚시대 (초롱이)"
+        }
+      },
+      "id": "fishing-rod-01-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1c8dbd7bfbdd7f9e9001d263a01612ec4467ca8c4819438e1417a2a42d8958ce",
+          "status": "machine_assisted",
+          "text": "Pal를 잡기 위해 설계된 낚싯대. 그림자가 낚시를 시작하는 것을 볼 수있는 물 근처에서 미끼와 함께 사용하십시오. 그것은 조금 더 쉽게 캐치를 만들기, 향상된 성능을 자랑한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "792f0680eb6216a842360eac279dc50b3bdc9de23e28c3a047e6f29e57a51457",
+          "status": "machine_assisted",
+          "text": "중간 낚싯대 (까부냥)"
+        }
+      },
+      "id": "fishing-rod-02-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "342dff61477b815f62ff6385105bba5cad98c850c6f1d211c2643d9f42f5b639",
+          "status": "machine_assisted",
+          "text": "Pal를 잡기 위해 설계된 낚싯대. 그것은 더 튼튼하고 약간 더 나은 성능을 제공한다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ce609b4ead2c6d55c6111e57c40e55f3f7254ee996a94279efba58a041e1314e",
+          "status": "machine_assisted",
+          "text": "중간 낚싯대 (칼구리)"
+        }
+      },
+      "id": "fishing-rod-02-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "141d8726b48798555cb5a88f5f92076f620ba8009c69ee9dcf2fcb5ca3a2bada",
+          "status": "machine_assisted",
+          "text": "Pal를 잡기 위해 설계된 낚싯대. 그림자가 낚시를 시작하는 것을 볼 수있는 물 근처에서 미끼와 함께 사용하십시오. 그것은 더 나은 성능을 자랑, 캐치를 매우 쉽게 만들기."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76e88fd518972e6812246d47f73af56c719de602f2aac6958f8a3a9154b9b301",
+          "status": "machine_assisted",
+          "text": "고급 낚시 막대 (펭키)"
+        }
+      },
+      "id": "fishing-rod-03-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "342dff61477b815f62ff6385105bba5cad98c850c6f1d211c2643d9f42f5b639",
+          "status": "machine_assisted",
+          "text": "Pal를 잡기 위해 설계된 낚싯대. 그것은 더 튼튼하고 약간 더 나은 성능을 제공한다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "567d3c18b4da9c73f10349ce120d01a4a203013970bc03d3c5db5369b32bd199",
+          "status": "machine_assisted",
+          "text": "고급 낚시 막대 (뚱코알라)"
+        }
+      },
+      "id": "fishing-rod-03-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "그것은 긴 불꽃을 뿜어낸다. 적을 불태울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3c07f870ddf7e92b119fa7e1c68f7a8a9feef488959ca32b8c9392962665e740",
+          "status": "machine_assisted",
+          "text": "화염방사기"
+        }
+      },
+      "id": "flame-thrower",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "그것은 긴 불꽃을 뿜어낸다. 적을 불태울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "87e04447941b7fbace7b3aa5e9ae653562fe5fdfbd11662bb8ef4d6517c46b66",
+          "status": "machine_assisted",
+          "text": "화염 방사기 2"
+        }
+      },
+      "id": "flame-thrower-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "그것은 긴 불꽃을 뿜어낸다. 적을 불태울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0511db3fc45e45136bdb469c4387306fb70d863f2f95ecf0068d988f7d3bac59",
+          "status": "machine_assisted",
+          "text": "화염 방사기 3"
+        }
+      },
+      "id": "flame-thrower-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "그것은 긴 불꽃을 뿜어낸다. 적을 불태울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0b60d6aa6a943a001ff07ca7adf840af67a21411137e70848a4152a76395b51c",
+          "status": "machine_assisted",
+          "text": "화염 방사기 4"
+        }
+      },
+      "id": "flame-thrower-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cf1e246e3b90602446a047a10e1157584029e7c63e4190c75b2160ef4c49be1",
+          "status": "machine_assisted",
+          "text": "그것은 긴 불꽃을 뿜어낸다. 적을 불태울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "99e04f27d87d58e6b4e1d5040ffd3f749de31db69c996bac75763fb56e8ba287",
+          "status": "machine_assisted",
+          "text": "화염방사기 5"
+        }
+      },
+      "id": "flame-thrower-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "무기와 비슷한 무기에 대한 탄약. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c3ba1bee19eb15946c4cc791510e7d0b5731b5b0d6cb3ab85549e136f9baadcf",
+          "status": "machine_assisted",
+          "text": "화염 방사기 연료"
+        }
+      },
+      "id": "flamethrower-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6cb2db80165839b3fe63c2d17be16b49d4ef0f17d4bfef0ce4ed94c52880f54a",
+          "status": "machine_assisted",
+          "text": "품질 관리 [원문 누락] . . 니다. 그것은 만들기에 있는 성분으로 사용될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7c234cbffc5ef6544813625ec10bd5b7d6398f3b3a9e3a7295ac7d9dfbced79c",
+          "status": "machine_assisted",
+          "text": "밀가루"
+        }
+      },
+      "id": "flour",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 던져진 후 몇 초 후에 폭발하여 적들에게 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5d38df4b2da8b77e9f95bc43f8354b93d562481cf614f4df3144b4a3a0e88116",
+          "status": "machine_assisted",
+          "text": "수류탄"
+        }
+      },
+      "id": "frag-grenade",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 던져진 후 몇 초 후에 폭발하여 적들에게 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "47a2ec851365652c2208979c664d5576b6481fa07febf2f72ff6229705bf9d3f",
+          "status": "machine_assisted",
+          "text": "어둠 수류탄"
+        }
+      },
+      "id": "frag-grenade-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 던져진 후 몇 초 후에 폭발하여 적들에게 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ed5b4c58cee12ba3c63381e2b7bd1bdba778c6122953b514ff0059319897d468",
+          "status": "machine_assisted",
+          "text": "용 수류탄"
+        }
+      },
+      "id": "frag-grenade-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9942934f013e41a2a8251dd60950cd6b1440065b8ab2951eeb1c8ce1aa036e26",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 그것은 던져진 후 몇 초 후에 폭발하여 폭발 반경의 모든 것을 감전시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "de4211d4d0a89829305b122d3cb1ca929c98f7273b008c1fef87b34a1487037e",
+          "status": "machine_assisted",
+          "text": "충격 수류탄"
+        }
+      },
+      "id": "frag-grenade-elec",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "501f5a3e785b4cde325dd3697680ceddc3071c2c653246afa91c5f03eb0a88af",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 그것은 던져진 후 몇 초 후에 폭발하여 주변 지역을 불로 설정한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8fabf4f9c724fb33d72366a429cf8240b432595a6ad932e8079f5a3c10562626",
+          "status": "machine_assisted",
+          "text": "불타는 수류탄"
+        }
+      },
+      "id": "frag-grenade-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 던져진 후 몇 초 후에 폭발하여 적들에게 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "26d0355daf3c650d54a76a1ad790aed3696d3b53e45ef870bca68db931446805",
+          "status": "machine_assisted",
+          "text": "땅 수류탄"
+        }
+      },
+      "id": "frag-grenade-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "67c3feaeafc6d455bcf8753c4c410887c05a836544a0cacdf53a67b0717f4d69",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 그것은 던져진 후 몇 초 후에 폭발하여 주변 지역을 얼립니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6a6b2955a6afe605a5d6c6aca75ed5c45ba95f3856bd79890662b87d7862d54c",
+          "status": "machine_assisted",
+          "text": "얼음 수류탄"
+        }
+      },
+      "id": "frag-grenade-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 던져진 후 몇 초 후에 폭발하여 적들에게 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "36bcfa43ce9d0ca51633ab4dc12afaeb425cf0ca55e7cc3d2beb1f5b764f8b6f",
+          "status": "machine_assisted",
+          "text": "풀 수류탄"
+        }
+      },
+      "id": "frag-grenade-leaf",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "db8cdf76b5682cfcfa3e8d53cd798d86465b02bf20df51892e741aac9f399cb0",
+          "status": "machine_assisted",
+          "text": "더 나은 수류탄. 던져진 후 몇 초 후에 폭발하여 적들에게 엄청난 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "18cdb513dfa03184de9aa505d57a44cc5577def8487be80f3b3c6756daef8289",
+          "status": "machine_assisted",
+          "text": "수류탄 Mk2"
+        }
+      },
+      "id": "frag-grenade-super",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dc7af26401200b71e66a5d78894623f240e05707f96c7cb1ed34096b0b46c35",
+          "status": "machine_assisted",
+          "text": "중간 전투에 유용한다. 던져진 후 몇 초 후에 폭발하여 적들에게 피해를 준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "92814989280f2c41fe7e0b2a8cbbb4bafd37b3b7a60bde3886d20e2f62d53f44",
+          "status": "machine_assisted",
+          "text": "물 수류탄"
+        }
+      },
+      "id": "frag-grenade-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d3fef0289af13d3f61152ceea9e963ce3b0b2a03f3fec8718b37bdd67a272e63",
+          "status": "machine_assisted",
+          "text": "아주 맛있는 육즙이 가금류. 그것을 먹는 것은 약간 작업 속도를 높일 것이다. (약간)을 (희소)하게 하여 (강박)함을 더한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ce67acd186a27c824a70615c6eab0c290209f6a7a81f14c96413ac6f5812bb63",
+          "status": "machine_assisted",
+          "text": "프라이드 꼬꼬닭"
+        }
+      },
+      "id": "fried-chicken",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "40acae4a9b3a8b306c5715b62c5f88c0d27955529413923515b6e3d0505d6238",
+          "status": "machine_assisted",
+          "text": "지금보다 더 신선하고 더욱 맛있다. 배고픈 것을 멀리하는 것이 좋다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "46356211ccca7c2540c1a0dc71319b48381a4c6df5691dcac711d20e8928dc19",
+          "status": "machine_assisted",
+          "text": "프라이드 에그"
+        }
+      },
+      "id": "fried-eggs",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "af3b815868bd43da6b789639bcf29b766d531d419278c9a6de60090f77075e40",
+          "status": "machine_assisted",
+          "text": "Crunchy 튀김 배터는 켈시의 통통함을 완벽하게 강조한다. 그것을 먹는 것은 + 10% 증가 할 것이다. (약간)을 (희소)하게 하여 (강박)함을 더한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "74bfc9e4839d62bf1e600d9fbd7cb92ac6e917cacc46e99dd4bfcdb96bf64fbd",
+          "status": "machine_assisted",
+          "text": "프라이드 켈시"
+        }
+      },
+      "id": "fried-kelpie",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cced832757dc23c8b4d565b14260d8aa3c2488d88459e2a17392c649499533b4",
+          "status": "machine_assisted",
+          "text": "소중한 과일은 얻기가 매우 어렵습니다. Pal의 공격력이 약간 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "62907a0cbe54634731e4baa4be4e6533b4cb27a35b0eddff568b19d2edc9e3aa",
+          "status": "machine_assisted",
+          "text": "힘 과일"
+        }
+      },
+      "id": "fruit-attack-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8a817cec50aab5cf6865778a57698c0e64d94205d8075195db8741c75b11515b",
+          "status": "machine_assisted",
+          "text": "소중한 과일은 얻기가 매우 어렵습니다. Pal의 방어력을 약간 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2a716d598596b0d60181e1b10b71799c904195d3a834bae2c459ae04beafd117",
+          "status": "machine_assisted",
+          "text": "회사 소개"
+        }
+      },
+      "id": "fruit-defense-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c9fc8d82510a53f0ffd7ce511ce18a2c102c0857436b6a3d582633251e83186a",
+          "status": "machine_assisted",
+          "text": "소중한 과일은 얻기가 매우 어렵습니다. Pal의 체력을 약간 증가시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5cbbb54421d1e7e1ddeb7584a1786e8da665275e99ead3276422f6454dbc6d08",
+          "status": "machine_assisted",
+          "text": "생명 과일"
+        }
+      },
+      "id": "fruit-hp-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "028db8828ba698d2e7d019fdb6b1aed58c249c1d6728f98df049acb71210db5c",
+          "status": "machine_assisted",
+          "text": "만든 사람 Armor [원문 누락] . . 니다. 그들의 따뜻함과 방어력이 향상되었습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b489eadabc715879a3689b55e2df55ee8dd09e202303a2fabb9080a15368f64a",
+          "status": "machine_assisted",
+          "text": "펠트 방어구"
+        }
+      },
+      "id": "fur-armor",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "추운 지역에서 생산된 추운 기후에서 생존하는 데 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f11beb53437fdbcf65814b3d7a2437db422924bf178f1001aa475ab0f27e2f8c",
+          "status": "machine_assisted",
+          "text": "찬 저항하는 펠트 방어구"
+        }
+      },
+      "id": "fur-armor-cold",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "추운 지역에서 생산된 추운 기후에서 생존하는 데 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e79bd70abeab5520e5ac325a8ba35275e8e1a859e05e16f97af648a64cf8de3f",
+          "status": "machine_assisted",
+          "text": "FurArmor콜드 2"
+        }
+      },
+      "id": "fur-armor-cold-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "추운 지역에서 생산된 추운 기후에서 생존하는 데 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ecb4f4749d082383a54c4162ae388dc979f5f2bc2678e7611899e88ee0dbb3db",
+          "status": "machine_assisted",
+          "text": "FurArmor차가운 3"
+        }
+      },
+      "id": "fur-armor-cold-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "추운 지역에서 생산된 추운 기후에서 생존하는 데 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3e0ac93de03035cdcb94badb1a6305702f9d90119f5013e026fdf260939e4dd1",
+          "status": "machine_assisted",
+          "text": "FurArmor차가운 4"
+        }
+      },
+      "id": "fur-armor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d5903bc89fbaf4a2214613390408db1292ed4016e349f1c75bcf59b17ade43fb",
+          "status": "machine_assisted",
+          "text": "추운 지역에서 생산된 추운 기후에서 생존하는 데 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bed7bdb39af9de4f3703ffae10eaefdf09292d5333cd2998ff5d269a1224497b",
+          "status": "machine_assisted",
+          "text": "FurArmor냉각 5"
+        }
+      },
+      "id": "fur-armor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "뜨거운 지역에서 생산된 높은 내열성을 자랑한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b8bdd8b379d078f667b7f61aba2c1baf06fcfa645891bf1aa0984ef0fd8d05f8",
+          "status": "machine_assisted",
+          "text": "방열 펠트 방어구"
+        }
+      },
+      "id": "fur-armor-heat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "뜨거운 지역에서 생산된 높은 내열성을 자랑한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f65ccd227724a6c01516a3e3c820204a8f1a4c07dc37826bac8bdc19309d1a56",
+          "status": "machine_assisted",
+          "text": "FurArmor히트 2"
+        }
+      },
+      "id": "fur-armor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "뜨거운 지역에서 생산된 높은 내열성을 자랑한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e4027ae0d212e734e8adf3465e74233ca7a2887f02fddeb339bf17db03b065be",
+          "status": "machine_assisted",
+          "text": "FurArmor히트 3"
+        }
+      },
+      "id": "fur-armor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "뜨거운 지역에서 생산된 높은 내열성을 자랑한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ec949f46842308296a470c6484236ded7f1b4e8dc5a34a9a0e1d142f9cd03fee",
+          "status": "machine_assisted",
+          "text": "FurArmor열 4"
+        }
+      },
+      "id": "fur-armor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "74328ae98e43c8bd56fad1ce83c3b22f82bf6f155efea78bb68733724552eef1",
+          "status": "machine_assisted",
+          "text": "뜨거운 지역에서 생산된 높은 내열성을 자랑한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "63a1a55752f8074fb6c3bb59b78da7167501b2da9771080e70be28cec0553d73",
+          "status": "machine_assisted",
+          "text": "FurArmor열 5"
+        }
+      },
+      "id": "fur-armor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "아름다운 깃털 머리띠. 불가능하지만, 어떻게 든 치명적인 머리 부상으로부터 착용자를 보호하는 것처럼 보이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "60a31d2ca9b8eeada2a6be90c02304ef7314424c675251ade5f9068a9bf2ba46",
+          "status": "machine_assisted",
+          "text": "Feathered 헤어 밴드"
+        }
+      },
+      "id": "fur-helmet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "아름다운 깃털 머리띠. 불가능하지만, 어떻게 든 치명적인 머리 부상으로부터 착용자를 보호하는 것처럼 보이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7921be86ee6e4763574ceb9bf562625b1ec0ae038afd28d28806c392f70c1515",
+          "status": "machine_assisted",
+          "text": "퍼헬멧 2"
+        }
+      },
+      "id": "fur-helmet-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "아름다운 깃털 머리띠. 불가능하지만, 어떻게 든 치명적인 머리 부상으로부터 착용자를 보호하는 것처럼 보이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "906733c98eab16c6e9378f589c188cab72f4d10338265f7a6d3dab0319acc2df",
+          "status": "machine_assisted",
+          "text": "퍼헬멧 3"
+        }
+      },
+      "id": "fur-helmet-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "아름다운 깃털 머리띠. 불가능하지만, 어떻게 든 치명적인 머리 부상으로부터 착용자를 보호하는 것처럼 보이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bfaabe3a6a316e0b2ee2af44d848edd8c80c7ea592cdf669534563ffe5955278",
+          "status": "machine_assisted",
+          "text": "푸어헬멧 4는"
+        }
+      },
+      "id": "fur-helmet-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "096faa6f68649d50de3061257aefdd0d736f6671b9a0ec7114a288bd57bc1ba7",
+          "status": "machine_assisted",
+          "text": "아름다운 깃털 머리띠. 불가능하지만, 어떻게 든 치명적인 머리 부상으로부터 착용자를 보호하는 것처럼 보이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76c9e560e5df61e46360bf0dcce0ef7e71c4d5b1efae79da53d71fd6fd67fffc",
+          "status": "machine_assisted",
+          "text": "푸어헬멧 5"
+        }
+      },
+      "id": "fur-helmet-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "096bae47c8ff1d7aecf0d02da02ca5507663169a19ad3b1c24cd91130650224d",
+          "status": "machine_assisted",
+          "text": "특수 여과 시스템을 갖춘 마스크. 부식성 안개에서 가져온 손상을 부정한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f970646bfdd3342378e3679678423085af44c27769f6169e6fcd9a08193fc8e3",
+          "status": "machine_assisted",
+          "text": "부식성 안개 가면"
+        }
+      },
+      "id": "gas-mask",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "무기와 비슷한 무기에 대한 탄약. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "01a7a1a88510b5cf76bc708611f37c05daf40935c29541d579e1caf04a6c19d3",
+          "status": "machine_assisted",
+          "text": "개틀링 건 탄약"
+        }
+      },
+      "id": "gatling-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "빠른 발사가 가능한 개틀링 건. 적들을 진압하기 위해 불을 뿜는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cb6f2c6f917bd9cb26ba2d12195505d5c8c223b8b7503b9dfb723f2680ec0f82",
+          "status": "machine_assisted",
+          "text": "개틀링 건"
+        }
+      },
+      "id": "gatling-gun",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "빠른 발사가 가능한 개틀링 건. 적들을 진압하기 위해 불을 뿜는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b3caff7839d99be16893a0bbad75bcbec4005451242151e2211b0f327da5f8f4",
+          "status": "machine_assisted",
+          "text": "개틀링건 2"
+        }
+      },
+      "id": "gatling-gun-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "빠른 발사가 가능한 개틀링 건. 적들을 진압하기 위해 불을 뿜는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "08a3651d154fbcebbe5116dd8b224863f0e6442f1d3aeac80942c38204d002f3",
+          "status": "machine_assisted",
+          "text": "개틀링건 3"
+        }
+      },
+      "id": "gatling-gun-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "빠른 발사가 가능한 개틀링 건. 적들을 진압하기 위해 불을 뿜는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "651d6f8ee85617647d25a36560d9fe7b81fc623d28e0c98262e5a151cd476d62",
+          "status": "machine_assisted",
+          "text": "개틀링건 4"
+        }
+      },
+      "id": "gatling-gun-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2d215f328d0c5533919511f37eb3b4dae67df9025abb1e6e9f850da509b19333",
+          "status": "machine_assisted",
+          "text": "빠른 발사가 가능한 개틀링 건. 적들을 진압하기 위해 불을 뿜는다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c429e1d4628b0254e942e66d461ec1cc9afdd7c2a628c6b3daa2297d7ad59d8e",
+          "status": "machine_assisted",
+          "text": "개틀링건 5"
+        }
+      },
+      "id": "gatling-gun-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "82f92ca47c5055d2442c05c2144c52170c14b912f6c2cc4185b2f9100cb88375",
+          "status": "machine_assisted",
+          "text": "그릴 위에 천천히 요리 된 양고기. 그것을 먹는 것은 약간 작업 속도를 높일 것이다. 시간이 조금 더 짧아질 수 있도록 노력하겠습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f66aa50b0439017bbad14df919959ce0238a6b8892dd769b45cabc4e6e6fd62a",
+          "status": "machine_assisted",
+          "text": "구이 도로롱"
+        }
+      },
+      "id": "genghis-khan",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "91568c2d4cafc3e6cc26ac88d1cfd2304d731f9757aeab34c0e5732b54794708",
+          "status": "machine_assisted",
+          "text": "공중으로 날아오르는 글라이더. 대량 생산 된 상업 모델, 그것은 상당히 빠릅니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "88d3349b90f8dd6e3c364ea57137eb312a5743af3cefa13d112840f3c937c6c9",
+          "status": "machine_assisted",
+          "text": "메가 글라이더"
+        }
+      },
+      "id": "glider-good",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fc670df5717d2cffdc9dc91a5e257830af7d8ffc073f2670d951597366e4b0e8",
+          "status": "machine_assisted",
+          "text": "공중으로 날아오르는 글라이더. 저렴하게 만들어졌지만, 그리 빠르지는 않습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "350140a6555be5f77836d148d0162d586dd42511e6f293c0c6c321d8bf6ca1fb",
+          "status": "machine_assisted",
+          "text": "일반 낙하산"
+        }
+      },
+      "id": "glider-old",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "95b8973e07d13dcc991bf0cd97e88c5d24ccaac60146a038f4005e4b38988738",
+          "status": "machine_assisted",
+          "text": "공중으로 날아오르는 글라이더. 그것의 기능을 향상, 그것은 높은 속도로 활공 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "adcf1875783b89ed165b216b6163b75eb8904706af990afd78eba2895a32b723",
+          "status": "machine_assisted",
+          "text": "Giga 글라이더"
+        }
+      },
+      "id": "glider-super",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "102707c049ad7727b28b8c72c0d8da18bf49188002927cf7046fc53979a234d0",
+          "status": "machine_assisted",
+          "text": "공중으로 날아오르는 글라이더. 성능이 더욱 향상되어 속도와 리프트가 향상되었습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0bbb22801f10df8cbc75c19b3a5b9133bbd497e117a8acbcf3ff8a55e8b5b105",
+          "status": "machine_assisted",
+          "text": "글라이더 테라"
+        }
+      },
+      "id": "glider-tera",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f9afd470250fdc7c13ef0424ee3a4ffe5de038e198e799fcb51c34ad00ec3c4",
+          "status": "machine_assisted",
+          "text": "그것은 먼 목표물에 걸쇠를 걸러 후크를 발사, 대상을 향해 사용자의 시체를 당겨. 그것은 다양한 고도를 가진 장소 사이에서 쉬운 운동을 허용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "25a70a27c25fe45db3607dabfee2dac75d1952f6cd777a8f48e7b6a5a4fd3f22",
+          "status": "machine_assisted",
+          "text": "그라플링건"
+        }
+      },
+      "id": "grappling-gun",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "186778ce8d10d2cc08985106df6bff6aba9eef6ca940587419bbc198c4750871",
+          "status": "machine_assisted",
+          "text": "그것은 먼 목표물에 걸쇠를 걸러 후크를 발사, 대상을 향해 사용자의 시체를 당겨. 그것이 업그레이드 되었기 때문에, 그것은 지금 더 큰 범위를 가지고 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ee6f06a0a035feb69bdcc8924c405729bd446b094986de0b3b0f55acca4641ae",
+          "status": "machine_assisted",
+          "text": "그라플링건2"
+        }
+      },
+      "id": "grappling-gun2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e26fba7a7ba53d6e1c533e300918a1d13c35fea9b85722846339f6d53e929ee1",
+          "status": "machine_assisted",
+          "text": "그것은 먼 목표물에 걸쇠를 걸러 후크를 발사, 대상을 향해 사용자의 시체를 당겨. 프로토 타입 버전의 데이터를 사용하여 기능이 더욱 향상되었습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "48f100c6fd9afdafd4c66b553982869eafce6d66b89228ba634eace1c6e44677",
+          "status": "machine_assisted",
+          "text": "그라플링건3"
+        }
+      },
+      "id": "grappling-gun3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "759ebefe2b9f3cafa45ff4667dee8cf3e71a29864bff9188a12d55395c51877c",
+          "status": "machine_assisted",
+          "text": "그것은 먼 목표물에 걸쇠를 걸러 후크를 발사, 대상을 향해 사용자의 시체를 당겨. 연구의 결과로, 그것은 압도적 인 이동성을 달성했다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "13bb7250e0bd355679f4f3d308349ba1629ba3f536d913947e112958f4a921ba",
+          "status": "machine_assisted",
+          "text": "그라플링건4"
+        }
+      },
+      "id": "grappling-gun4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a9c235467575d5c7e4cca4a70577cd746054dd4a3b929358f4ef124c018214b1",
+          "status": "machine_assisted",
+          "text": "그것은 먼 목표물에 걸쇠를 걸러 후크를 발사, 대상을 향해 사용자의 시체를 당겨. 새로운 소재를 사용하면 쿨다운 시간이 크게 줄어듭니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca90b23b0946c9ad3a559e4c8a96caa48cad5e8e462158b1301a63096d3b7a4d",
+          "status": "machine_assisted",
+          "text": "그라플 링Gun5"
+        }
+      },
+      "id": "grappling-gun5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c7f3307365bada0cc06573f395691aeef25c311f8c40bc36080149bea2f8ae43",
+          "status": "machine_assisted",
+          "text": "감자에 소스를 입히고 완벽하게 구워 만든 요리. 가장 좋은 것은 뜨겁고 신선한 즐길 수 있다. 그것을 먹으면 지속적인 충만감을 제공하고 일정 기간 동안 10%만큼 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6d5a5fbfeb293b57d776b73e10584f6508552e3f23c4c0625d870bb45a71405b",
+          "status": "machine_assisted",
+          "text": "그라틴은"
+        }
+      },
+      "id": "gratin",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "무기와 비슷한 무기에 대한 탄약. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4678cba6499793d937efc9177804a90e228f3f0639ffbf47e16cb704ce4f3114",
+          "status": "machine_assisted",
+          "text": "수류탄 탄약"
+        }
+      },
+      "id": "grenade-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "광범위한 폭발을 일으키는 수류탄을 발사한다. 많은 적을 상대할 때 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "da6a8268b875d982ebe684ffa0a9f2bd60660133ace22711523baab76fcb763a",
+          "status": "machine_assisted",
+          "text": "수류탄 발사기"
+        }
+      },
+      "id": "grenade-launcher",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "광범위한 폭발을 일으키는 수류탄을 발사한다. 많은 적을 상대할 때 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9aed293ff7483e9046f7972738b90af2a02381a955e2d8c93772b7c74766fe16",
+          "status": "machine_assisted",
+          "text": "수류탄Launcher 2"
+        }
+      },
+      "id": "grenade-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "광범위한 폭발을 일으키는 수류탄을 발사한다. 많은 적을 상대할 때 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "81cb541404fe98074445cd35eca9a14e5832b0196071c9098052e898b6e55dfb",
+          "status": "machine_assisted",
+          "text": "수류탄Launcher 3"
+        }
+      },
+      "id": "grenade-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "광범위한 폭발을 일으키는 수류탄을 발사한다. 많은 적을 상대할 때 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "97d66c7212a6e1b51ba9581a4e81280f7ac3c01138f089558e2c7c17f96a53eb",
+          "status": "machine_assisted",
+          "text": "수류탄Launcher 4"
+        }
+      },
+      "id": "grenade-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "76e71cd9049f8c184613e84d595a94e27bbd30d2414103dada02c2023eeda9e2",
+          "status": "machine_assisted",
+          "text": "광범위한 폭발을 일으키는 수류탄을 발사한다. 많은 적을 상대할 때 유용한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8bfe98dffa295974aa530d2616308bf920ce345431182f2297b284846ef27610",
+          "status": "machine_assisted",
+          "text": "수류탄Launcher 5"
+        }
+      },
+      "id": "grenade-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "edb40a3945ae8ee15d4ff070b959604beda181badcf8c0773f8c63408a46c06e",
+          "status": "machine_assisted",
+          "text": "신선한 열매의 풍부에 빠지다 양고기의 독특한 풍미를 강조하는 매혹적인 향기를 만듭니다. 먹는 것은 일정 기간 동안 + 10% 증가한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6e7958a9cea40af707c3d8f130b508f189bb806fe0d4ff81088941f10c2756a5",
+          "status": "machine_assisted",
+          "text": "허브 구이 도로롱"
+        }
+      },
+      "id": "grilled-sheep-herbs",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0e9fdc13f382fdf6e4da3e9def10857a6e03099ba123d99d4c91be12cc95df20",
+          "status": "machine_assisted",
+          "text": "간단한 요리에 소금과 구운 신선한 필레. 밥을 먹을 때, 그것은 일정 기간 동안 녹취를 무효로한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "69e62f9244798c2e2c94b428d059da93bc3196859faecd2088b792aeb744c46f",
+          "status": "machine_assisted",
+          "text": "소금 구이 날검치"
+        }
+      },
+      "id": "grilled-sword-cutlass-fish",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "자동으로 추적하고 적을 추구하는 미사일을 발사한다. 미사일은 충돌시 폭발하여 넓은 지역에 피해를준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2fa76acff31a64bda0234f70efce18cd5e985a143585e87f49c96fb709fe1c5d",
+          "status": "machine_assisted",
+          "text": "미사일 발사기 Missile Launcher"
+        }
+      },
+      "id": "guided-missile-launcher",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "자동으로 추적하고 적을 추구하는 미사일을 발사한다. 미사일은 충돌시 폭발하여 넓은 지역에 피해를준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6c9be2f2d15bf105692760cfdfa81be7d5a3f8f02dc1950d6f397476d600c5cb",
+          "status": "machine_assisted",
+          "text": "MissileLauncher 2을(를) 플레이할 수 있다."
+        }
+      },
+      "id": "guided-missile-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "자동으로 추적하고 적을 추구하는 미사일을 발사한다. 미사일은 충돌시 폭발하여 넓은 지역에 피해를준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "602e39236efbad11eb76402c06beb8eb2cbbaf544ee9c9cc7381cada7831c956",
+          "status": "machine_assisted",
+          "text": "MissileLauncher 3을(를) 플레이할 수 있다."
+        }
+      },
+      "id": "guided-missile-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "자동으로 추적하고 적을 추구하는 미사일을 발사한다. 미사일은 충돌시 폭발하여 넓은 지역에 피해를준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "568bd8b2d3743fd4caca850d633627a2dbedf535eef739055ac6cc413d92553d",
+          "status": "machine_assisted",
+          "text": "MissileLauncher 4을(를) 플레이할 수 있다."
+        }
+      },
+      "id": "guided-missile-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ddf4f0c01072e94fa1e3c9d4bd38507be7434df6e8af6a3e1c24a2c7dfa51b19",
+          "status": "machine_assisted",
+          "text": "자동으로 추적하고 적을 추구하는 미사일을 발사한다. 미사일은 충돌시 폭발하여 넓은 지역에 피해를준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "557f4309b5f25c847ea82888329c6fd20052f1fe0b4d884e0e138053b5a2c7d8",
+          "status": "machine_assisted",
+          "text": "MissileLauncher 5을(를) 플레이할 수 있다."
+        }
+      },
+      "id": "guided-missile-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ec7aed9eac88b9a2ba80283877ca3f31d3522800feea0a215275c45891ce2b86",
+          "status": "machine_assisted",
+          "text": "탄약을 발사하는 데 사용된다. 총알을 만드는 데 필요한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ed9485dca097b7107f171beb207b125931b58e86fe121d335e7778bf31d95482",
+          "status": "machine_assisted",
+          "text": "화약"
+        }
+      },
+      "id": "gunpowder2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "44ca3dc17c1604604239095411b81f20fe2e11e0073272ac40ff7ec57654a11e",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 마커스처럼 옷을 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f4a6abc5dbbd188b60462d09c702e31fdb63b643230b333abf56b2925a8a347e",
+          "status": "machine_assisted",
+          "text": "마커스 모자"
+        }
+      },
+      "id": "gym-head-desert",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2b3464a94131d5e3f594c656f55e0b900fda8abaa427a0866b40919a929a5a17",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 Axel처럼 차려 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fcdd6575bc6bdc09ef77724f6d4adc53161afd11f0c54596dc6442f936137e84",
+          "status": "machine_assisted",
+          "text": "악셀 모자"
+        }
+      },
+      "id": "gym-head-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1a7ea235d3fb0bb737c87e47facae076296eab8005e7c3071770730be69bbba9",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 릴리처럼 옷을 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ddbe2a260ee39186b497d953315d50376269a3b661b8ec89ea4c42a0a8a42167",
+          "status": "machine_assisted",
+          "text": "릴리 모자"
+        }
+      },
+      "id": "gym-head-forest",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5d462e190571483a9892f7ac1545af2c95f04da4f029d72eefd003f1e90e535b",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 Zoe처럼 차려 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "57862460ce8ea180a01e8244ace493b25d5cb99bfa0ccdf2dc75879bfc146d35",
+          "status": "machine_assisted",
+          "text": "Zoe 모자"
+        }
+      },
+      "id": "gym-head-grass",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "12201e897d05274593ff157a109da9bae402a9cc7c00d0c789f176b34dcff5a4",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 Saya처럼 차려 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "071ce19ec9e70e491cbf3e57234ae8604ee847f7c8d36c2c03941ed3d28517d4",
+          "status": "machine_assisted",
+          "text": "Saya 모자"
+        }
+      },
+      "id": "gym-head-sakurajima",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b9b4f331021cbc9f8bad46f788626bbcd23bf97e3e09146b47e0c6bd955b8e60",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 빅터처럼 옷을 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "69f91e087ba579b10c2e5b84369d453df9fb5569355e3d3136c5f2ce0f463c1b",
+          "status": "machine_assisted",
+          "text": "빅터 햇"
+        }
+      },
+      "id": "gym-head-snow",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3225df55f6bd6243cbf6619f8f59a556998872a63f936dd4060a0e3297dd811b",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 Bjorn처럼 차려 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4b28fbb8544ed608369b011d527361655a07b58dcaceaad9f947894a63f0fc77",
+          "status": "machine_assisted",
+          "text": "비욘 모자"
+        }
+      },
+      "id": "gym-head-viking",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1103ccf2e694c21fa1dd89936eb5653ef179116b49cc2f6a0d8a63556193549e",
+          "status": "machine_assisted",
+          "text": "버섯과 고기를 밀가루에 넣고 끓여 만든 요리. 츄이 텍스처는 저항 할 수 없다. 그것을 먹으면 일정 기간 동안 10% 향상된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9898e4ab1b14cff2e1d9877895310906b17dc46c27231022da3e04a828cf3558",
+          "status": "machine_assisted",
+          "text": "돌진돼지 교자(교자)"
+        }
+      },
+      "id": "gyoza",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6f1e0ebe655671baa01b8479ae20b340cf0d8bc7c3dba7c644d82edff202d586",
+          "status": "machine_assisted",
+          "text": "이 걸작에서 완벽한 조화에 있는 롤빵의 단맛을 가진 쇠고기 melds의 부유한 풍미. 그것을 먹는 것은 일 속도를 증가할 것이다 시간이 조금 더 짧아질 수 있도록 노력하겠습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f9c09053591a5274080209beda11b654244c0b6ff865de3cb002bc903a5a88ed",
+          "status": "machine_assisted",
+          "text": "밀카우 햄버거"
+        }
+      },
+      "id": "hamburger-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "719b89f47c300792da41226de6f69f32e890445547ec0dae9894d3de360c0f83",
+          "status": "machine_assisted",
+          "text": "향상된 용량과 빠른 발사 능력을 갖춘 권총. 보다 더 즉각적인 화력을 가지고 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c1fdc3b9f61b9776898a1ecc045acf853d9eba6b64a3e5efe27d09485c7ad90b",
+          "status": "machine_assisted",
+          "text": "권총"
+        }
+      },
+      "id": "hand-gun-default",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "무기와 비슷한 무기에 대한 탄약. 에 제작될 수 있습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "31534b3d98dbf1a328d916a0f0ec03d487616a7057ca232152c9976fdc8a7928",
+          "status": "machine_assisted",
+          "text": "핸드건 탄약"
+        }
+      },
+      "id": "handgun-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0015fbd44495253a06661eff9ed07e002e0e1ccb74fff553d43b3f9672ae53c7",
+          "status": "machine_assisted",
+          "text": "벨라루주 (Ultra)의 불길한 힘을 불러 일으켰습니다. 가장 운 좋은 사람만이 얻을 수 있는 희소성."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6cb90bbd720349c8687608ff92a8bcc69aaa2fd68b1c7f08c322763ce994cd95",
+          "status": "machine_assisted",
+          "text": "마녀의 왕관"
+        }
+      },
+      "id": "head-equip001-purple",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "a343f0f120feaef1f5d0ad024fae695dfa97fe36a3f34dea7705b82f5fec2820",
+          "status": "machine_assisted",
+          "text": "에 의해 영감을 꽃의 머리 액세서리 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bcfbf6f4a69fe82ef6ed86eaa4851747fec89d18ca972705d1ccf32a908b1e29",
+          "status": "machine_assisted",
+          "text": "릴린 액세서리크기변환기"
+        }
+      },
+      "id": "head-equip023",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "32d553814cd8c9590d3a223b73805f0e44c5b21a1c145983384ba57e8b7f81f3",
+          "status": "machine_assisted",
+          "text": "실키누 모자는"
+        }
+      },
+      "id": "head-equip024",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "34576bed8b8beb1a89eea9ed86a2f54e30faa25f3e3ef5308cc1e8f12a6c4a19",
+          "status": "machine_assisted",
+          "text": "두건은 a 같이 형성했습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d87e7c72efb43da72c95df5a18198e83ad7e5e2ff530b6340e81ba38fb1dfe33",
+          "status": "machine_assisted",
+          "text": "도마맨 후드는"
+        }
+      },
+      "id": "head-equip025",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842",
+          "status": "machine_assisted",
+          "text": "모자는 a 같이 형성했습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a88d442ae0afb192cb43f32b11a7a1d4619d00bafa3de6036800a256f3d78181",
+          "status": "machine_assisted",
+          "text": "고스문 모자는"
+        }
+      },
+      "id": "head-equip026",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4699d48b4a346f1dbad56eca992e070b360280f54fc5c0179a531a6b8f5efa93",
+          "status": "machine_assisted",
+          "text": "마스크로우 모자는"
+        }
+      },
+      "id": "head-equip027",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf",
+          "status": "machine_assisted",
+          "text": "머리띠 모양 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "340d22663cad109709b1667436f542a1922bfb65f737fc8ba339310f30af246b",
+          "status": "machine_assisted",
+          "text": "핑토 헤드밴드"
+        }
+      },
+      "id": "head-equip028",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "25dd83ed6c59a7ddecbbaa37989d6161ebbc0838f163ab4ee308752a9a9ffb6f",
+          "status": "machine_assisted",
+          "text": "헬멧은 A처럼 형성 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b05ec280ac4c40effe1a3c92ac6f8b0aefc56754901e8e311ae7c04e92d0a4ea",
+          "status": "machine_assisted",
+          "text": "도로롱 조타 장치"
+        }
+      },
+      "id": "head-equip029",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "25dd83ed6c59a7ddecbbaa37989d6161ebbc0838f163ab4ee308752a9a9ffb6f",
+          "status": "machine_assisted",
+          "text": "헬멧은 A처럼 형성 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1fe43df6f10135b9a11b357b26afa8763c006a5aaaaa7901839ee86e2942d9cf",
+          "status": "machine_assisted",
+          "text": "도도롱 조타 장치"
+        }
+      },
+      "id": "head-equip030",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842",
+          "status": "machine_assisted",
+          "text": "모자는 a 같이 형성했습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7814c306a9096e7886e7eb75981d20712a4c20869dee6487111337acba9808c4",
+          "status": "machine_assisted",
+          "text": "모프링 모자는"
+        }
+      },
+      "id": "head-equip031",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "56cbceff5a4dad2ae34401ae7e2037ed674683fc771f077c11562159fd938146",
+          "status": "machine_assisted",
+          "text": "썬더키드 모자는"
+        }
+      },
+      "id": "head-equip032",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "29d6fa310899f1a041e88cae8bedce852c0aa6e910776fde27a8a587ce22375d",
+          "status": "machine_assisted",
+          "text": "까부냥 모자는"
+        }
+      },
+      "id": "head-equip033",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c14d0285cdcb53b3659a608dfd8cdf2fc2f6698356da9752df4f7ed8625dd017",
+          "status": "machine_assisted",
+          "text": "마그마드라고 (Ultra)의 불길한 힘을 불러 일으켰습니다. 가장 운 좋은 사람만이 얻을 수 있는 희소성."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ca8e24ac30745c64098c2274cf01b1cc36387f13bfe444982822b90dc4c3c227",
+          "status": "machine_assisted",
+          "text": "최극위의 뿔"
+        }
+      },
+      "id": "head-equip041",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3fe0e6ad890bb5e1a301fb5ff22e8eecb2d3163e716f119f1408df70a36f91de",
+          "status": "machine_assisted",
+          "text": "a를 닮도록 설계된 헤드기어 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a5f5ae092bc79693775f5f69d192e9b7d7841120a4a185a70596e770aaa29d6f",
+          "status": "machine_assisted",
+          "text": "제노드란의 머리는 입니다"
+        }
+      },
+      "id": "head-equip044",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "019c914d98165f91b4941d7b3d0a96a3a3e67a15778961acfc5dcf3f2d0a6cea",
+          "status": "machine_assisted",
+          "text": "뚱코알라를 모델로 한 의상 헤드 피스. 들어오는 어둠의 피해를 약간 감소시킨다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a42e16deaa751fe96c18eb8f1cc8d937edb3e6978fb9370abe247d1a2f0c580c",
+          "status": "machine_assisted",
+          "text": "뚱코알라 헬멧은"
+        }
+      },
+      "id": "head-equip045",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "17b7360efea526af7ec5f22c5cce1f39322d35f7e85ed062abbe91b4221f7101",
+          "status": "machine_assisted",
+          "text": "레젠디얼 (Ultra)의 불길한 힘을 불러 일으켰습니다. 가장 운 좋은 사람만이 얻을 수 있는 희소성."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2f5012015094da2d59ae9f628d7c647b9e607a7bae37e28aa38c687a9fcdce92",
+          "status": "machine_assisted",
+          "text": "구원의 왕관"
+        }
+      },
+      "id": "head-equip046",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4639e9d73a33e081792fad94e5f48660447c5266a34fca7783d661bc46627dab",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 Auri처럼 차려 입으십시오!"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4e0b026bfad49c4df44c340c46d41401b800d94b6d56eb09aca4983a75326607",
+          "status": "machine_assisted",
+          "text": "Auri 모자는"
+        }
+      },
+      "id": "head-equip048",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b4e17f64fb2d62ef1d2793e011a9e871ab5c97a5ce89cb74d464e0239b1573c8",
+          "status": "machine_assisted",
+          "text": "이 특별한 헤드 피스를 사용하여 제나라처럼 옷을 입으십시오! 가장 운 좋은 사람만이 얻을 수 있는 희소성."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a81fa67b39753f029d5c38df729c776bcd58a682eb218389b3d979d04e35eab4",
+          "status": "machine_assisted",
+          "text": "제나라 모자"
+        }
+      },
+      "id": "head-equip049",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf",
+          "status": "machine_assisted",
+          "text": "머리띠 모양 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0d07b7be1c2bc25a272e056a7b31337a03e83db279debb9accb11cab4bdd8d61",
+          "status": "machine_assisted",
+          "text": "모몽파 헤드밴드"
+        }
+      },
+      "id": "head-equip050",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "3ca6078382ec6c9cfb0dfe01120043203d22d43a0f78d8ae803f4d9b54eae1bf",
+          "status": "machine_assisted",
+          "text": "머리띠 모양 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8cc10d28d8a8c2bd6411d7c48dd2b3bcfa77edcd1ac6a47a24a58973f75c6898",
+          "status": "machine_assisted",
+          "text": "킹파카 헤드밴드"
+        }
+      },
+      "id": "head-equip051",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f747ba3f3b69b377f1d9740670f6b17ed9656f4b05cd9359106d2a37acb22aff",
+          "status": "machine_assisted",
+          "text": "옥토비아 모자는"
+        }
+      },
+      "id": "head-equip052",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e7b0c310a3c1c7df44c4a62fe5ebb523bf479b1374112b6bbc5d8d846a7f296e",
+          "status": "machine_assisted",
+          "text": "플루미 모자는"
+        }
+      },
+      "id": "head-equip053",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2cce66fda377150f11dec034e5c66b8fc5a18f0a7711ddb0d631c843909afd09",
+          "status": "machine_assisted",
+          "text": "헬터클 모자는"
+        }
+      },
+      "id": "head-equip054",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "02cff75159f0f17612fe421044b4f8fc5d9fbe4dd0f8f57ae8faa1f8bd242e63",
+          "status": "machine_assisted",
+          "text": "칼구리 모자는"
+        }
+      },
+      "id": "head-equip055",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "632a3acad658b0338de37f4bcfb47a902678e595054bd36c1a0aac37ff809af1",
+          "status": "machine_assisted",
+          "text": "꼬꼬닭 모자는"
+        }
+      },
+      "id": "head-equip056",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "37178db5abc0d537efd1e08f07f59552a8d4878703c91ae3a1e9ee12dc35f332",
+          "status": "machine_assisted",
+          "text": "녹사주 모자는"
+        }
+      },
+      "id": "head-equip057",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ceb73f7720bab92644aeae87003c7bec7755da2a71fe8982326edcf7d1daa9ac",
+          "status": "machine_assisted",
+          "text": "머쉬드래곤 모자는"
+        }
+      },
+      "id": "head-equip058",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "591e4175d688cac374cfbc497bf0d67220caebf4c313dc341577e40a51c40684",
+          "status": "machine_assisted",
+          "text": "헤어 액세서리 모델링 후 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "003ed2f27de694cdb7181ab03c2f46a5cf7dbc980ec3f5de4b3e50586c384416",
+          "status": "machine_assisted",
+          "text": "빛초롱 액세서리크기변환기"
+        }
+      },
+      "id": "head-equip059",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "21839fa7f480a9a8fffe83f1c6fa031d95f589b717342d4b65663da8d5f51d33",
+          "status": "machine_assisted",
+          "text": "칠위치 모자는"
+        }
+      },
+      "id": "head-equip060",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1b650d2e3d0a224a8d372b51472369b3aabb0a219543ac299e9b210b207bc8d9",
+          "status": "machine_assisted",
+          "text": "얀데리나 모자는"
+        }
+      },
+      "id": "head-equip061",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e562d34cadb125935bec6fec641ba5849a8938f381cee6a7a5733605584a968",
+          "status": "machine_assisted",
+          "text": "모자 모양 a [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cc6a5ac99ca112722670cc098a8f9404e9c092f17ed0e2ab1fb448cbde6efadc",
+          "status": "machine_assisted",
+          "text": "스틱툴라 모자는"
+        }
+      },
+      "id": "head-equip062",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "16738083c32f8d2c26ea70175cd34267d162e4faaf1314c9c7721430ae25fe8b",
+          "status": "machine_assisted",
+          "text": "높은 지위를 가진 이들을 위한 왕관. 꽤 무거워서 실용적인 용도로는 적합하지 않습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8b4bb3ab526bab76aeec76ef3dbbfeb968091a70fc5ef2ee2279fe85493546e2",
+          "status": "machine_assisted",
+          "text": "모나크의 왕관"
+        }
+      },
+      "id": "head001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "51809825a99561b271b135c69509a2a2bdb9d298eac9ecc3d14497987394e361",
+          "status": "machine_assisted",
+          "text": "희귀 한 황금 왕관 그것을 입는 것은 당신을 로열티처럼 느끼게한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bd585f713ad9bcf638f027cb5af78fa7bac2ba11cfcbea8cd0e7599a0cce8aea",
+          "status": "machine_assisted",
+          "text": "골든 크라운"
+        }
+      },
+      "id": "head002",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "8acb11f3ff828ce6575712e5697bb9c90f117625a38ec2e1f2b19024ded361f6",
+          "status": "machine_assisted",
+          "text": "귀와 귀여운 머리띠는 후 모델링 [원문 누락] . . 니다. 그것은 많은 머리 보호를 제공하지 않습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8332899c719d51a518e412563852608c737106235295c9043f2ad462b060194e",
+          "status": "machine_assisted",
+          "text": "긴 귀가 머리띠"
+        }
+      },
+      "id": "head003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "323123be4e00b7aacd8405a8088dcbad75cbfc0926e9d2e1c853753bfe17012d",
+          "status": "machine_assisted",
+          "text": "A/S 후 입고되는 모자는 [원문 누락] . . 니다. 그것은 당신이 Pal 기술을 사용할 수있는 것처럼 느끼게한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e0d13476ac66870b3a9ed62aca52492e4d7ea3efe6c04f49a7d5cdc523f8e4e5",
+          "status": "machine_assisted",
+          "text": "마녀 모자"
+        }
+      },
+      "id": "head004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "976babd7ef7923a4d7e8965dd50a0fff512232cf675b54f74f11b301a60298a7",
+          "status": "machine_assisted",
+          "text": "매일 사용하기에 완벽한 가볍고 유연한 캡. 유행, 그것은 한 번이었다 섬에서 인기있는 물건."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "375cae4596ee034d3db28bcb68ebf8034efbfc75ce6fb6926d4ca4f16eba3c81",
+          "status": "machine_assisted",
+          "text": "소프트 햇"
+        }
+      },
+      "id": "head005",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "89ec0c1ef46d766676a3940c396735048c45e954b4667f6514a04787f0a7c6aa",
+          "status": "machine_assisted",
+          "text": "착용자의 머리를 보호하는 견고한 헬멧. 그것은 많은 사람들이 머리를 다친 후에 분명히 만들어졌습니다. 텀블 오프를 한 후 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a47fdf6415fc436ee65ac597251edfa2e58a5ea60b53e65d2886ea6cb17ba374",
+          "status": "machine_assisted",
+          "text": "헬멧"
+        }
+      },
+      "id": "head006",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d987241e9bced983db8230364bc55932ae117d8cc863185c07acec3b22c848e1",
+          "status": "machine_assisted",
+          "text": "신사의 모자 재료로 만든 것들은 고급 아이템으로 간주되며, 그러나 재료로 만든 것들은 품질이 좋지 않으며 더 일반적으로 발견된다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "63595db7606182f0fd047a949ab8e1351fb4acbf248017df6074b03aef5c1900",
+          "status": "machine_assisted",
+          "text": "실크 모자"
+        }
+      },
+      "id": "head007",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d70f7f1b8c37965c7c5537c6652084d16d5470058a9fe60961b574450c116e77",
+          "status": "machine_assisted",
+          "text": "싸우는 것을 좋아하는 사람들을위한 모자. 이전 소유자는 거의 운전했습니다. 멸종위기다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b33f2650640a812fa2b09aa606fd84168a4b8a3ab7558ed9322f6a4388a3cc55",
+          "status": "machine_assisted",
+          "text": "트리콘"
+        }
+      },
+      "id": "head008",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f734ad99e44810ae22a4756447fce5ae769ec73cc37a48b84632c70370bacb0c",
+          "status": "machine_assisted",
+          "text": "탐험가를 위한 모자 그것은 태양의 밝은 광선으로부터 보호한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d28b9a60af4cffc605bb010696490836d06ea624af2b9be26959fe41d07e8045",
+          "status": "machine_assisted",
+          "text": "익스플로러 캡"
+        }
+      },
+      "id": "head009",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1dc9311b1a04a580a9014e6f4e5d0cb10f30f2ed2b006bc89309588db272f6ad",
+          "status": "machine_assisted",
+          "text": "착용자를 더 똑똑하게 느끼게 해주는 캡. 이 섬에 학교가 있었나?"
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4197966c1209bbc719c05a7c20103bd33404703d286dfe4d286932718ccaca4d",
+          "status": "machine_assisted",
+          "text": "졸업 모자"
+        }
+      },
+      "id": "head010",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9579037754d298e166871be96a6428d7f7e4078d155a7c614be52b6926367c24",
+          "status": "machine_assisted",
+          "text": "밭에서 일할 때 쓰는 모자. 그것은 태양의 밝은 광선으로부터 보호한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ddf4c02972036d02ec72a2403d04a27ab95ad61536bf51bd87b5be0a58dfd9eb",
+          "status": "machine_assisted",
+          "text": "목장 모자는"
+        }
+      },
+      "id": "head011",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b59819ea165866eaf323c6e16f1a6049d0b1c363f552748f0d4c194e1626c4ce",
+          "status": "machine_assisted",
+          "text": "딱딱한 둥근 모자. 그것은 깨지지 않을 것이라는 보증으로 판매되었습니다. 그 위에 한 발짝 다가선다 해도."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5743bf08237d187256f2c2ed16e4e1bc00b77ea29be094b07214c8ac9d6ac763",
+          "status": "machine_assisted",
+          "text": "보울러 햇"
+        }
+      },
+      "id": "head012",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "9363fb2b6a8ff79f26795e96624a94e44bcb40f47bc5ceebe0dc4321bf56d10e",
+          "status": "machine_assisted",
+          "text": "모자는 a 같이 형성했습니다 [원문 누락] . . 니다. 그것의 화려한 디자인은 멀리에서 볼 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1e01032809ab8b781e551c78d465b2d6339a34ce4b58b2ecf351eb4f811d6f2d",
+          "status": "machine_assisted",
+          "text": "알록새 모자는"
+        }
+      },
+      "id": "head013",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "22e2cf66eb81a40b55a61efae03d4ec2d6b6224d86ee35d828a94bf4e47950f6",
+          "status": "machine_assisted",
+          "text": "모자는 a 같이 형성했습니다 [원문 누락] . . 니다. 그것을 착용하는 사람들은 통제 할 수없이 미소 짓습니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6da9de1b9066b78160941560fb5e4c9770405506560f5ba17bf2aa698d36caea",
+          "status": "machine_assisted",
+          "text": "알록새 모자를 헹구기"
+        }
+      },
+      "id": "head014",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "eea95d4f39de87dac70dc4dece5d6920bd3fc3d7bcc3c9ef60f01a3284b46842",
+          "status": "machine_assisted",
+          "text": "모자는 a 같이 형성했습니다 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9d7924a450bc6dd2c3b986a34ac522644e4ed4b813074232ba2634fd4187ac35",
+          "status": "machine_assisted",
+          "text": "초롱이 모자는"
+        }
+      },
+      "id": "head015",
+      "kind": "item"
+    }
+  ],
+  "schemaVersion": 1
+}

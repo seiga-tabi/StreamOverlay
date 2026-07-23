@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "generatedAt": "2026-07-15T07:03:54.1507828+00:00",
+  "breedingSha256": "9e3f35d9e64b81f6a7c42c6fced2f9c8165c4e3de4112a9790dec19aa833c555",
+  "reportSha256": "b38c5ac6ff009d5ca4c9e9861d7f0d643e594ade3799026a91f5d374ffe3a8b2",
+  "counts": {
+    "parameters": 287,
+    "sourceSpecialRows": 257,
+    "includedSpecialRows": 182,
+    "includedSelfRules": 103,
+    "includedNonSelfRules": 79,
+    "genderedRules": 2,
+    "unresolvedSourceRows": 75
+  },
+  "runtimeActivation": true
+}

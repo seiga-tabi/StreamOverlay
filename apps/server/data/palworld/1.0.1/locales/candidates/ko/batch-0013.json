@@ -1,0 +1,2088 @@
+{
+  "locale": "ko",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 이 호기심 많은 검이 각 스트라이크마다 생동감 넘치는 녹색 충격파를 방출하여 근접 무기임에도 불구하고 멀리서 적을 공격할 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "790bda77e12c3ddec4c8b96dd5e9fed7d70f37e3df72afc838abb6d40f88fe5a",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드002 3"
+        }
+      },
+      "id": "yakushima-blade002-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 이 호기심 많은 검이 각 스트라이크마다 생동감 넘치는 녹색 충격파를 방출하여 근접 무기임에도 불구하고 멀리서 적을 공격할 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6f0af9968cb0b6f1335de618326b141a198845c74fd99fb4f412568dff50bc49",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드002 4"
+        }
+      },
+      "id": "yakushima-blade002-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "78115a99dcf2e8b1da20381431f1e55db4f3f62c2b01a94cc01220037f3d7377",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 이 호기심 많은 검이 각 스트라이크마다 생동감 넘치는 녹색 충격파를 방출하여 근접 무기임에도 불구하고 멀리서 적을 공격할 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "694748824b6aeb73e9f6bb5a4771e5010fd0845624b7897c153001d7a21d587c",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드002 5"
+        }
+      },
+      "id": "yakushima-blade002-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 무지개 색깔의 칼을 가진 신비로운 검. 그것을 사용하면 최대 구 개의 축복받은 검을 소환하여 당신과 함께 싸울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fdf0b31234ccdad0d2cb03af7f6aa08a393f91ffdb1c68346cf1dc05d11ab1f3",
+          "status": "machine_assisted",
+          "text": "테라프리스마는"
+        }
+      },
+      "id": "yakushima-blade003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 무지개 색깔의 칼을 가진 신비로운 검. 그것을 사용하면 최대 구 개의 축복받은 검을 소환하여 당신과 함께 싸울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2eb9c9dae58cb03ba3ce0ba702740688d5c6000fea9064358d90384ee9644e64",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드003 2"
+        }
+      },
+      "id": "yakushima-blade003-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 무지개 색깔의 칼을 가진 신비로운 검. 그것을 사용하면 최대 구 개의 축복받은 검을 소환하여 당신과 함께 싸울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "00966adb4a55cf9208a24c4dd73a289a7a0cea81a0ff997cbbfb14d69b86b289",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드003 3"
+        }
+      },
+      "id": "yakushima-blade003-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 무지개 색깔의 칼을 가진 신비로운 검. 그것을 사용하면 최대 구 개의 축복받은 검을 소환하여 당신과 함께 싸울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "465b25917dbb3df0b83a278cd06c92b726668612cc4c9d21d31d0950ed0eaaf6",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드003 4"
+        }
+      },
+      "id": "yakushima-blade003-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6fd9747c879d5b1e9e15302b075f4185f3f1d1498b63ba3a80dd3de9cd797f3c",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 무지개 색깔의 칼을 가진 신비로운 검. 그것을 사용하면 최대 구 개의 축복받은 검을 소환하여 당신과 함께 싸울 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "88d739635c6645f2077744ca11a726c33d08f0eb2f6b852e12034eb5e57c3caf",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드003 5"
+        }
+      },
+      "id": "yakushima-blade003-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 황금빛 빛으로 빛나는 신성한 검. 흔들리는 것은 당신 주위의 충격파를 풀어준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "00edbd472e06536f40c949509f9c68ce04a35bf394debbb42c6c0000dab51a23",
+          "status": "machine_assisted",
+          "text": "엑스칼리버"
+        }
+      },
+      "id": "yakushima-blade004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 황금빛 빛으로 빛나는 신성한 검. 흔들리는 것은 당신 주위의 충격파를 풀어준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "734e744c2ee6480884c62ba8aff52a09ac8ddd10b01e92a6afa5ab7775a195a6",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드004 2"
+        }
+      },
+      "id": "yakushima-blade004-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 황금빛 빛으로 빛나는 신성한 검. 흔들리는 것은 당신 주위의 충격파를 풀어준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "643896fbd8270ee56cbf9aa95fb428c124773658af6691826170e0e14ad4866a",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드004 3"
+        }
+      },
+      "id": "yakushima-blade004-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 황금빛 빛으로 빛나는 신성한 검. 흔들리는 것은 당신 주위의 충격파를 풀어준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5a5b492e921de86b6d85d4219ea6a1d8eae1749cef344ae4a4fba1fa5c640840",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드004 4"
+        }
+      },
+      "id": "yakushima-blade004-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9aab66bf7e59ace97d211adf0b8e92dcc3e24dcd52b9dd89a08f1faa9cf5a112",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 황금빛 빛으로 빛나는 신성한 검. 흔들리는 것은 당신 주위의 충격파를 풀어준다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "92b1212e65917ef4c22b50de806a2b459d2da426ba5f4ee26842e817be7c231a",
+          "status": "machine_assisted",
+          "text": "야쿠시마블레이드004 5"
+        }
+      },
+      "id": "yakushima-blade004-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1f67b8f8d082a73a06cb6ff89d930d2dcd624ecda6519d5a14036310d57091ee",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 전설의 Forged From [원문 누락] . . 니다. 그네를 휘두르는 것은 고양이 발사체를 발사하여 적을 질식시키고 공격한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "79fd1c22adba23f59669b5b720fab269e844f701748ecf3ce71f0094f72ed903",
+          "status": "machine_assisted",
+          "text": "전설의 Meowmere"
+        }
+      },
+      "id": "yakushima-blade005",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 알 수없는 에너지에 의해 연료 강력한 총. 적을 추적하고 충격에 폭발하는 정기적 인 간격으로 미사일을 발사한다. 발사시 탄약을 소비하지 않을 확률이 66%이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5e9fb63da121d979c8ac25f575b2e96bd77c2365514246eafcc667b90faa2e7a",
+          "status": "machine_assisted",
+          "text": "볼텍스 비터"
+        }
+      },
+      "id": "yakushima-gun001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 알 수없는 에너지에 의해 연료 강력한 총. 적을 추적하고 충격에 폭발하는 정기적 인 간격으로 미사일을 발사한다. 발사시 탄약을 소비하지 않을 확률이 66%이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ff96e998ca8ea32ba1a9c68886107a67341035837008a3c1d249d624cb58bad3",
+          "status": "machine_assisted",
+          "text": "야쿠시마군001 2"
+        }
+      },
+      "id": "yakushima-gun001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 알 수없는 에너지에 의해 연료 강력한 총. 적을 추적하고 충격에 폭발하는 정기적 인 간격으로 미사일을 발사한다. 발사시 탄약을 소비하지 않을 확률이 66%이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a2e901c945f6d73249ac9c8ea3f2bb0e1f5b0ece0419ed6c346d5a2679cda88e",
+          "status": "machine_assisted",
+          "text": "야쿠시마군001 3"
+        }
+      },
+      "id": "yakushima-gun001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 알 수없는 에너지에 의해 연료 강력한 총. 적을 추적하고 충격에 폭발하는 정기적 인 간격으로 미사일을 발사한다. 발사시 탄약을 소비하지 않을 확률이 66%이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8b2c462648c4164b9dd267ea4f3520b9430674102e21abe3830e4667462375fd",
+          "status": "machine_assisted",
+          "text": "야쿠시마군001 4"
+        }
+      },
+      "id": "yakushima-gun001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6bb09088f5822962358ae9bcb47ab9db7ff7dfa3e009033127c7aafd7345b2a9",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 알 수없는 에너지에 의해 연료 강력한 총. 적을 추적하고 충격에 폭발하는 정기적 인 간격으로 미사일을 발사한다. 발사시 탄약을 소비하지 않을 확률이 66%이다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "63a56cc22ac1c83e58b0bd566065fb789184c33dfa658780ff390356056900b6",
+          "status": "machine_assisted",
+          "text": "야쿠시마군001 5"
+        }
+      },
+      "id": "yakushima-gun001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] , [원문 누락] , [원문 누락] , 그리고 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7f9860c4eeaac9688468e36ed08cd2c02a998944eef137c656ab747e324cad29",
+          "status": "machine_assisted",
+          "text": "할로윈 마스크"
+        }
+      },
+      "id": "yakushima-head-equip001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] , [원문 누락] , [원문 누락] , 그리고 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1f7eddc21ae2ae0193ec18d77c70cc2ad7d536fcc49472eb8f31eca12fd6ac83",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip001 2"
+        }
+      },
+      "id": "yakushima-head-equip001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] , [원문 누락] , [원문 누락] , 그리고 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "41d926144fbcba819de65f3d5fa5352272c58063fbfa68721674debae0981c84",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip001 3"
+        }
+      },
+      "id": "yakushima-head-equip001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] , [원문 누락] , [원문 누락] , 그리고 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6e127b1cb494b5a4fab72ee6323edafabbfd23533660b931d0c38d5f2b8775ca",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip001 4"
+        }
+      },
+      "id": "yakushima-head-equip001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6e1265caae968f78a67298be0a5798bd11007811bf81d9e42596ab3c8bb1bedc",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] , [원문 누락] , [원문 누락] , 그리고 [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "679dc136444a318f7508312ae80da84b375d6a7b7e8f716b9264ba906aa7d8af",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip001 5"
+        }
+      },
+      "id": "yakushima-head-equip001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a9abc7240756cd40401ee23ab92cdcc7b9bb3ba978246bba31c7b40ec281bbc6",
+          "status": "machine_assisted",
+          "text": "신성한 헤드 기어"
+        }
+      },
+      "id": "yakushima-head-equip002",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bee9c11ca4d925ab61665ba81ca5911bc29cb5fbcfcf8b980e6f717acb8b1c86",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip002 2"
+        }
+      },
+      "id": "yakushima-head-equip002-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1a1312ef0d7101a80ae5342daf59046c94274a26b729269364bd401f6a8a4ef2",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip002 3"
+        }
+      },
+      "id": "yakushima-head-equip002-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "903f54e5b496145bca9a1569a1a121ab581c91c5451bbc4921505edddfe00199",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip002 4"
+        }
+      },
+      "id": "yakushima-head-equip002-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1a02e48359fce57aa0a42fa4ce54735c55e094cb36e5fba77964cfdf037afa3d",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip002 5"
+        }
+      },
+      "id": "yakushima-head-equip002-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0070db9bf779e7549a75b9ce9580fe128d7fbf8054a6fd0a324eefe136e1c6f2",
+          "status": "machine_assisted",
+          "text": "헬맷 Helmet"
+        }
+      },
+      "id": "yakushima-head-equip003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2dbc0bda7899e3e84e156547dd8c166e2604585602006965f6be65a1a0910fe8",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip003 2"
+        }
+      },
+      "id": "yakushima-head-equip003-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3649e6f4adc73d30e50b9f56101f9f6ce7c9dea8881d7a1c6cd8cd003ad3a9e3",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip003 3"
+        }
+      },
+      "id": "yakushima-head-equip003-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b0e28632e9b16165c1a708f39253d0d7a398efd163f3da04e3b7810b23da8499",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip003 4"
+        }
+      },
+      "id": "yakushima-head-equip003-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c7da207e79016f396cb8de86d40388910a44ce903bfd159c205f73f070dbeb40",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip003 5"
+        }
+      },
+      "id": "yakushima-head-equip003-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c5c3662a24cb3cdff8536fe85e917eb26cbcf0062115f68ec4230561a9559b2a",
+          "status": "machine_assisted",
+          "text": "후드 Hood"
+        }
+      },
+      "id": "yakushima-head-equip004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4a0064d8461d8c5375aca2acc8b2d9d27f0df5f0c0a41fe3cea1ee3b34353ec1",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip004 2"
+        }
+      },
+      "id": "yakushima-head-equip004-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2e56f2b7daea51837b463e698d2c54697b544840ce7db6ef23bd91cd8950ae30",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip004 3"
+        }
+      },
+      "id": "yakushima-head-equip004-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0a3640a739532d9876dca4ba3092ac3ab717f849ba0bffc999523ac6b3fdcf83",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip004 4"
+        }
+      },
+      "id": "yakushima-head-equip004-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "37cd0092b8099f90a8b831724afadbb62b14e7fc4367d31be3f6f952645769b6",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 헬멧 FROM [원문 누락] . . 니다. 신의 힘으로 감싸여, 피해를 증가시킨다. [원문 누락] . . 니다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e4030f6916becb3e66a336ed1576ed2e04e25298ef4a7f61beeab13098d508c4",
+          "status": "machine_assisted",
+          "text": "야쿠시마본점Equip004 5"
+        }
+      },
+      "id": "yakushima-head-equip004-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eabdb9d7cccbe672c23085c956b7690e4c0f6b6b9032ae8b650d25f71bc3b513",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 's 불길한 에너지로 맥박이 뛴다. 가장 운 좋은 사람만이 얻을 수 있는 희소성."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b96e353c1798264941a295f5e0de0752019df2d2e5720109d02166622f03cba5",
+          "status": "machine_assisted",
+          "text": "문로드 마스크"
+        }
+      },
+      "id": "yakushima-head-equip005",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "eabdb9d7cccbe672c23085c956b7690e4c0f6b6b9032ae8b650d25f71bc3b513",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 's 불길한 에너지로 맥박이 뛴다. 가장 운 좋은 사람만이 얻을 수 있는 희소성."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1d13f9c8fd10f4c515defb16fcfff2ee5ece971609d8b6ee82793ac1ae44bbcc",
+          "status": "machine_assisted",
+          "text": "크툴루 마스크 Eye of Cthulhu Mask"
+        }
+      },
+      "id": "yakushima-head-equip006",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "c0ca5897f30aa0998c37403cfd752c4ac4bdfec56fd4794240372f360c877169",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] 신성한 에너지가 주입된 신성한 물질. 다양한 테라리아 아이템을 만드는 데 사용할 수 있다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0182fa3ce74269084d37ff883535cc29745a698d3e20418b95b059e435b0156b",
+          "status": "machine_assisted",
+          "text": "할로웨이드 바"
+        }
+      },
+      "id": "yakushima-ingot001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] rainbow-hued 빛을 발산하는 등불. 적들을 여러 번 공격하는 빛 투사체를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8ba957a175ad4cc01ff2b8ea348986f162aaa627415dfe82efcb6aede64dc547",
+          "status": "machine_assisted",
+          "text": "나이트글로우는"
+        }
+      },
+      "id": "yakushima-lantern001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] rainbow-hued 빛을 발산하는 등불. 적들을 여러 번 공격하는 빛 투사체를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7737b0e61e1a5a3e6acfbf7837261146d36dbeb0a54d17453432a63971a748b7",
+          "status": "machine_assisted",
+          "text": "야쿠시마Lantern001 2"
+        }
+      },
+      "id": "yakushima-lantern001-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] rainbow-hued 빛을 발산하는 등불. 적들을 여러 번 공격하는 빛 투사체를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7d68a0b049a0e3bf7e5bb66248d24595c1eced1363d9eba7ff1d534056fbc6fb",
+          "status": "machine_assisted",
+          "text": "야쿠시마Lantern001 3"
+        }
+      },
+      "id": "yakushima-lantern001-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] rainbow-hued 빛을 발산하는 등불. 적들을 여러 번 공격하는 빛 투사체를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bda0e9986b98862c917bc6d79e048828d4f18a7c5447c73223b4865936d4482d",
+          "status": "machine_assisted",
+          "text": "야쿠시마Lantern001 4"
+        }
+      },
+      "id": "yakushima-lantern001-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "209e6ce18ae5232852b03098716878c0c2eeafea00eac4e77cd6171cc4b1dfe1",
+          "status": "machine_assisted",
+          "text": "[테라리아의 여신들] rainbow-hued 빛을 발산하는 등불. 적들을 여러 번 공격하는 빛 투사체를 발사한다."
+        },
+        "name": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "38226e6c1143fefe011ef8b56f81fc6ead66e84b7337ba300784e0b0d36c148b",
+          "status": "machine_assisted",
+          "text": "야쿠시마Lantern001 5"
+        }
+      },
+      "id": "yakushima-lantern001-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8835667f9daa8c34541af7dd920160d88339fb44eac5b9c7f078eeecf7f5eb84",
+          "status": "machine_assisted",
+          "text": "고대에는 통신 수단이 제한되었을 때 셸가드라의 날개 내의 빛을 사용하여 간단한 플래시 신호를 보냈습니다."
+        }
+      },
+      "id": "aegidron",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "41bec7302e8cffae7dd867c34bee6ea40935ef188757c0f09c0ade9797854509",
+          "status": "machine_assisted",
+          "text": "하나가 사라지면, 다른 하나는 단순히 그 자리를 차지하기 위해 나타나며, 삶은 아무 일도 없었던 것처럼 계속된다. 리오리네에게는 동반자가 모든 것이다."
+        }
+      },
+      "id": "amione",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e32c5011e75cd87f567959981712abd0624f47341ba41433976e6ec786e6b373",
+          "status": "machine_assisted",
+          "text": "한때는 귀족의 상징으로 여겨졌고, 부와 권력을 피하는 사람들을 위한 우상으로 여겨졌다. 그러나 시간이 지남에 따라이 Pal는 죽음의 토큰이되었습니다."
+        }
+      },
+      "id": "anubis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "66b08860cf9874be464cc198fd8afd12fd069a9d5db88e21f1f805c69e25f83f",
+          "status": "machine_assisted",
+          "text": "고대에는 육식성 Pal가 끊임없이 그들을 추구했습니다. 불페르노의 외침에서 터무니없는 분노는 오늘까지 전달 된 격렬한 지옥으로 변형되었습니다."
+        }
+      },
+      "id": "arsox",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "110d7cc6c56de99dfe1d15a5ac391e3f2cf62babec101a3f5490cf53a2e3c3e7",
+          "status": "machine_assisted",
+          "text": "무저갱에서 태어난 야만적인 짐승. 너는 짐승 앞에 서지 못하리라. 너는 짐승의 말에 귀를 기울이지 않을 것이다."
+        }
+      },
+      "id": "astegon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "28e25762455d2a34bbabb9846b3e1ad6a5b9de914d86376f8ee3bfd9c58a525f",
+          "status": "machine_assisted",
+          "text": "이 Pal의 흰색 리본은 불순한 물과 함께 사용하면 검은 색으로 변한다. 독을 탐지하는 데 유용함을 감안할 때,이 Pal는 한 번 오버 헌팅되었습니다. 이 과거는 인류를 향해 쓰라린 것을 남겼습니다."
+        }
+      },
+      "id": "azurobe",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "320dedf7e9a4a085b6c49daa18298af65d3f8deffd3e093a4dea4d5e1618ecfd",
+          "status": "machine_assisted",
+          "text": "이 Pal의 흰색 리본은 주변의 열을 지속적으로 흡수하지만 온도는 이상하게 변하지 않습니다. 이 이상한 능력은 한때 무자비한 사냥의 표적이되어 오늘날까지 인간의 깊은 불신을 남겼습니다."
+        }
+      },
+      "id": "azurobe-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "30c7c18693c697f10c6a52e0c631e1d898085124c9298c3715207aa1a155286f",
+          "status": "machine_assisted",
+          "text": "그것은 공포의 스릴을 위해 완전히 살지만 완전히 무섭지 않습니다. 대부분의 경우 귀여움으로 인해 깜짝 선물을받을 수 없으므로 우라미는 이제 미소의 흔적을 남깁니다."
+        }
+      },
+      "id": "bakemi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f14804a8dfa655cb0b3e89131f5859aa715ce1de6b62476dc92dc4488fcbf9a8",
+          "status": "machine_assisted",
+          "text": "어떤 라운드의 광경은 그것을 펀치 할 수있는 통제 할 수없는 충동을준다. 빙호우거에게 가장 힘든 도전은 단순히 살아온 후 눈사람을 만드는 것이다."
+        }
+      },
+      "id": "bastigor",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e1f6ad33bc18e6dc7225de1290321cbdf8b1b90b29d1852965468ac3afaec523",
+          "status": "machine_assisted",
+          "text": "일부는 적토조와 관련된 종이라고 생각하지만 실제로는 관련이 없다. 그것의 예리한 부리를 사용하여, 그것은 번개의 놀이쇠를 닮는 빠른 동의에 있는 그것의 먹이에 강하한다."
+        }
+      },
+      "id": "beakon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "bf195f004c23947c189dbbc00bbf599e889f4bdcb1d51497c4ca585bad164aa3",
+          "status": "machine_assisted",
+          "text": "추운 환경에 완벽하게 적응되어 가느다란 형태에도 불구하고 추위를 거의 느끼지 못한다. 거대한 고드름이 하늘에서 곧장 떨어지는 것처럼 다이빙의 급락은 엄청난 힘을 가지고 있다."
+        }
+      },
+      "id": "beakon-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fa80e07d8aee52f56d610d64d6aea91c67b69421390a50685f94207c0b5f014f",
+          "status": "machine_assisted",
+          "text": "퀸비나에 충성을 맹세하는 하인. 여왕을 해치는 모든 것은 즉시 벌집에서 추방된다. 여왕을 보호하기 위해 기꺼이 목숨을 바칠 것이다."
+        }
+      },
+      "id": "beegarde",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "854db251d186325a86241430fce68f124f237bdb62bcaf2a151a8e3a7bb5f0cd",
+          "status": "machine_assisted",
+          "text": "그녀는 조용히 세상을 바라보았다. 어느 날, 그녀는 볼 수있는 갈망으로 압수당했습니다. 현실에 대한 복수에 대한 억제되지 않은 욕망으로, 따라서 Eclipsed Siren이 탄생했습니다."
+        }
+      },
+      "id": "bellanoir",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "430f58db5abcb74115cd5ff0484de764b07f9bf7b45d9d15f1afa68941dcf8b9",
+          "status": "machine_assisted",
+          "text": "그녀의 욕망이 느슨해지면서, 그녀는 곧 압도 당했습니다. 그녀는 자신을 응시하는 자신을 갈망. 그리고 현실에 분개하는 자매들은 심연으로 밀려났고, 마침내 그들의 눈을 감았다."
+        }
+      },
+      "id": "bellanoir-libero",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4370843476e15c50978258f4aa85cd67bf50ac6aa097e7f4bc1bc3191ca090df",
+          "status": "machine_assisted",
+          "text": "전설에 따르면 화산 폭발 중에 태어났다고 한다. 이상한 그룹은 심지어이 대륙이 거대한 마그마카이저의 뒷면에 놓여 있다고 주장한다."
+        }
+      },
+      "id": "blazamut",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5ce6f9ed92c782d23bf651ea83f213c0c531201c2b150a778010d26e9daa810e",
+          "status": "machine_assisted",
+          "text": "오래 전에, 그것은 지구의 깊이에서 나타났다. 무자비하고 격렬한 불길이 자비를 베풀지 않고 섬 전체를 태웠지만 아무것도 남지 않았습니다. 그것은 영원한 불꽃으로 알려졌다."
+        }
+      },
+      "id": "blazamut-ryu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4cf2d4a80f8d9d0c8aea27f117f57008f68551501f930f274ed54b89a7c37094",
+          "status": "machine_assisted",
+          "text": "그것은 생고기를 선호하지만, 항상 잘 수행 된 고기를 먹는 것으로 끝납니다. 이것은 그것의 무기로 사용하는 그것의 물집이 많은 발톱 때문에이다 - 그것은 단순히 그것의 먹이가 파삭 파삭 한 화상을 입는다는 것을 깨닫지 못한다."
+        }
+      },
+      "id": "blazehowl",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "086858107af6dfa70539de594bbf6f26655c9ecd0202b4ae9c742dab846fe03d",
+          "status": "machine_assisted",
+          "text": "그것은 생고기를 선호하지만, 항상 오염 된 고기를 먹는 것으로 끝납니다. 이것은 그것의 무기로 사용하는 그것의 어두운 발톱 때문이 - 그것의 먹이가 저주를 얻는다는 것을 단순히 깨닫지 않는다."
+        }
+      },
+      "id": "blazehowl-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "aad5ea69f7ebb7fd284a0a6f660ab9be0e1010cc1fa5e8cd68fc07947be7657e",
+          "status": "machine_assisted",
+          "text": "그것의 호흡은 그것이 닿는 모든 식물을 수분시키는 기적적이고 꽃가루 같은 물질을 운반한다. 식물 기반 Pal의 경우 근처에 있으면 조금... 복잡할 수 있다."
+        }
+      },
+      "id": "braloha",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "08e39e20a5327985e16d73e445cc951ea64cb86a35277a9c18e41a39878e11c9",
+          "status": "machine_assisted",
+          "text": "이 가시 Pal의 가시는 매우 독성이 있다. 귀요비와 친하게 지내며 귀요비가 꿀을 마시는 동안에만 미소를 짓습니다."
+        }
+      },
+      "id": "bristla",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "876794b692154bac0183d8aa4a6ee5c55a6b72fa23c28ffda6f143443e81f4b2",
+          "status": "machine_assisted",
+          "text": "그것의 냄새는 쌍을 이루기 전과 후에 크게 변한다. 그것은 \"첫사랑의 향기\"라고 불리는 파트너를 찾은 후에 즐거운 향기를 풍깁니다."
+        }
+      },
+      "id": "broncherry",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1ceb88a893ea021fabfc91a236d59c458a4cf531957764a05995948afcb5da7d",
+          "status": "machine_assisted",
+          "text": "그것의 냄새는 쌍을 이루기 전과 후에 크게 변한다. 그것은 \"순수함의 향수\"라고 불리는 파트너를 찾기 전에 즐거운 향기를 풍깁니다."
+        }
+      },
+      "id": "broncherry-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5132c6e50e030ecfe725731e1f4dac25bec89410238f00f7541153fcd2d11383",
+          "status": "machine_assisted",
+          "text": "오래된 섬에서는 와르차차 스모가 널리 사용되었습니다. 최고 수준에서는 충전 돌진돼지조차도 대신 비행을 보낼 것이다."
+        }
+      },
+      "id": "bulldosu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "407f3c2e0b110016ce11f25350e93dd7901442f4a37438877989bb6bb6bc2770",
+          "status": "machine_assisted",
+          "text": "그것의 몸은 다음 세대에 의해 채택 될 죽음에 블레이드가된다. 불무사가 아닌 다른 사람이이 블레이드를 휘두른다면, 영혼은 그들이 미쳐 질 때까지 그들을 괴롭힌다."
+        }
+      },
+      "id": "bushi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2751da8d720b0fb14e750da4cb5921cbb0cb143411c62903a8ff060de53fd96f",
+          "status": "machine_assisted",
+          "text": "그것의 몸은 다음 세대에 의해 채택 될 죽음에 블레이드가된다. 만약 불무사를 물려받은 사람이 심장이 약하다면, 죽은 자의 목소리는 그 심장을 미치게 만들 것이다. 광기는 끊임없이 방황하는 어둠무사로 변한다."
+        }
+      },
+      "id": "bushi-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "cfed78c52f6e3c38835878c47d33c31a56385c0619dd77bcaf6e849a53cae765",
+          "status": "machine_assisted",
+          "text": "이 Pal의 뒷면에있는 관목은 제대로 공급되는 한 열매를 생산한다. 그것은 잠재적 인 동료에이 열매를 제공하고, 맛이 자신의 취향에 있다면, 로맨스 꽃."
+        }
+      },
+      "id": "caprity",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "35380d786d8c6dbb6d7e137d72747dbf0d3399747f26d4c3a5bb04e6c48972e9",
+          "status": "machine_assisted",
+          "text": "등 뒤에서 자라는 열매는 감정에 따라 맛이 바뀝니다. 환경이 가혹해질수록 열매는 더 달콤해집니다. 이것이 포로로 길러진 대부분의 베노고트가 사랑을 알지 못하는 이유이다."
+        }
+      },
+      "id": "caprity-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4bd8f67afdce91166c2a9c9fbea0f5c536ccc35f7c3fea9765bff0e2a7980be6",
+          "status": "machine_assisted",
+          "text": "무분별하게 먹는 경향이 있기 때문에, 머리 꼭대기의 입은 고통스러운 궤양에서 자주 튀어 나와 대신 입안을 얼굴에 사용한다. 그러나, 그것의 행동은 변화하지 않습니다, 동일한 궤양을 겪는 두 입 다에 지도하는."
+        }
+      },
+      "id": "carnibora",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "51fb19a1c9d01502370bc4b7470ed74b28ba24b85d62b8efe19675657d5ec472",
+          "status": "machine_assisted",
+          "text": "언뜻 보기에는 자신감으로 가득 차 있지만, 실제로는 약하고 비겁하다. 까부냥로 장난감을 만드는 것은 여러면에서 가장 큰 불명예이다."
+        }
+      },
+      "id": "cattiva",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "837a35589cd25135cd03a1a45e4e65d51772e99005c938c2106e4467da8a6cd1",
+          "status": "machine_assisted",
+          "text": "옛날 옛적에, 그것은 자유롭게 하늘을 날아올랐다. 질풍수리와의 경연 대회를 잃은 후, 그것은 하늘을 포기 하 고, 지금 밤의 어둠 속에서 비밀 생활을 살고 있다."
+        }
+      },
+      "id": "cawgnito",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "50a5b4099da7cda73320cd7206738795feba8400f6af8c7e0cf3ac9e8c65e5cf",
+          "status": "machine_assisted",
+          "text": "바람을 타고,이 Pal는 원하는 곳으로 여행한다. 길을 따라 파트너를 발견하면 만남은 여행의 끝을 표시한다."
+        }
+      },
+      "id": "celaray",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e1da75257b38f16488584e4cb8133623403124a4f5cce3a22a9de0d2c64d434e",
+          "status": "machine_assisted",
+          "text": "그것의 화려한 패턴은 파트너를 유치하는 데 도움이된다. 그러나 일레카이트와 관련된 감전 사고의 오랜 역사가 있은 후, 노란색과 검은 색 줄무늬가 섬 전역에서 위험의 신호로 보이다."
+        }
+      },
+      "id": "celaray-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "25a92c579d9dafb00f02e1e9abfd1f9525eb0d66af7f4882a814b4172497dc69",
+          "status": "machine_assisted",
+          "text": "눈부신 광채가 빛나는 곳에서 어두운 그림자가 태어납니다. 그것은 있어야 할 혼란을 되찾기 위해 모든 것을 감싸는 어둠을 흩어 놓는다. 균형은 세상이 요구하는 것이다."
+        }
+      },
+      "id": "celesdir-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f04c4c56d9f77e8cfb6ea006f24b556710663f219a882c45bdd62b0c60136065",
+          "status": "machine_assisted",
+          "text": "매우 약하고 너무 맛있다. 도로롱와 함께 가장 약한 Pal 중 하나이다. 아무리 많은 사람들이 사냥을 당하더라도, 그들은 계속 나타납니다."
+        }
+      },
+      "id": "chikipi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f80388177f0a3b10cffbe713bd1f1586d4b3d77a870cb8de1db8965438930bab",
+          "status": "machine_assisted",
+          "text": "그것은 그것의 몸을 컬 하 고 매우 높은 속도로 주위를 롤 수 있다. 오래 전, 사람들은이 회전력을 사용하여 버터를 생산하기 위해 갈가리 찢을 때 우유 봉지를 길들인 베비뇽에 묶었습니다."
+        }
+      },
+      "id": "chillet",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "10f5e2bc8f50c26998be6a7f88c271a988ee8dd6ea4f27f57d1c527d1fedadd6",
+          "status": "machine_assisted",
+          "text": "몸을 웅크리고 너무 빨리 굴러서 날아갈 수 있다. 불꽃은 또한 흥분을 느낄 때 날아갑니다. 당신이 그것을 너무 많이 치면,이 Pal는 문자 그대로 해고 될 것입니다!"
+        }
+      },
+      "id": "chillet-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7e0a7246823d46849c57d1e877f1b50886adbb3502d166a7206592f66df819e4",
+          "status": "machine_assisted",
+          "text": "비늘을 스니핑하는 것은 비교할 수없는 행복감의 느낌을준다. 이 부산물을 더욱 규제하려는 노력이 있었지만 Free Pal Alliance는 이러한 조치를 강력히 반대하여 중단했습니다."
+        }
+      },
+      "id": "cinnamoth",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "91101617e1fd4348ce2531ed19e8ba39f4161cf2d14be5d63a855615bb7fdb12",
+          "status": "machine_assisted",
+          "text": "어떤 사람들은 한 때 이마에 삼 개 이상의 잎을 가지고있었습니다. 행운의 상징으로 간주, 더 많은 잎을 가진 사람들은 심하게 사냥했다, 시간이 지남에 따라 적은 잎을 진화하기 위해 종을 선도."
+        }
+      },
+      "id": "clovee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "818aad286483e5ed159a42b09ae07221a87b28f0262ba1678af7dcfa7a5c7832",
+          "status": "machine_assisted",
+          "text": "도로롱와 비교할 때, 그것은 더 미세한 양모와 길들이기에 더 적합한 기질을 가지고 있다. 그러나, 그것은 역사적으로 항상 애완 동물로 유지되었습니다. 귀여움은 미덕으로 간주된다."
+        }
+      },
+      "id": "cremis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "562fb9effb4b6ad6dd3d453f4d92521f041cb26f7509ec2c69380b492e3728dc",
+          "status": "machine_assisted",
+          "text": "소 떼의 명예를 욕되게 하는 자들은 스스로 목숨을 끊어야 한다. 나무 가지로 팽창 된 보컬 주머니를 관통함으로써, 그들은 대기로 날아 가서 사후 세계로 돌아갑니다."
+        }
+      },
+      "id": "croajiro",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d0d1298a24b4b9c9145c9974a66c871b88e16928370ebcdab8a26bc44a4e824b",
+          "status": "machine_assisted",
+          "text": "그들의 명예를 버린 칼구리가 모여 파편 그룹을 형성한다. 그들은 자신이 선택한 먹이감을 제거하기 위해 모든 수단을 사용할 것이다. 당신은 밤의 죽음에서 검구리의 팩을 발생 하는 경우, 그것은 라인에 당신의 인생."
+        }
+      },
+      "id": "croajiro-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "10a04aa10e375d9e9495e46dfe4223df94427abef5e8d3898bdfc4755266ceb8",
+          "status": "machine_assisted",
+          "text": "단단한 발톱으로 가파른 산을 쉽게 오를 수 있다. 그러나 짧은 다리는 내려 가기가 어렵고 종종 높은 곳에서 좌초된다."
+        }
+      },
+      "id": "cryolinx",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f2c929aa7be6fa78a73f90ab7f8878d7e957ab0f5daf3f094c82265f861f5a19",
+          "status": "machine_assisted",
+          "text": "그것은 쉽게 큰 손으로 많은 항목을 수행 할 수 있다. 그러나 짧은 다리는 걸음을 늦추고 종종 해질녘에 따라 따라 잡힙니다."
+        }
+      },
+      "id": "cryolinx-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d48c7f7c29880062590f19af3d9038ce32ded41b344b4f95d09566b1d2c5c334",
+          "status": "machine_assisted",
+          "text": "그것은 잠에 관심이있는 사람들을두고 그들에게 행복한 꿈의 끝없는 흐름을 보여준다. 그 저주 아래 떨어지는 자들은 죽음이 그들을 데려갈 때까지 결코 깨어나지 못할 것이다."
+        }
+      },
+      "id": "daedream",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8dcfbc2ec271b71324a0db6e55c88099b1b6f20e3ea56027f2b8957c6a1c3886",
+          "status": "machine_assisted",
+          "text": "고대부터, 그것은 세계 나무 안에 남아 있었고, 그 감시를 계속했습니다. 녹사주는 무엇을 보호하고 어떤 목적으로 녹사주를 신경 쓰지 않습니다. 나무는 모든 것을 알고 있다. 오직 그들이 휘두르는 안개만이 진실을 드러낼 수 있다."
+        }
+      },
+      "id": "dandilord",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "f4485bd3db000e5dfef458626277e260fd1dc19671dd221df8629875763d98fe",
+          "status": "machine_assisted",
+          "text": "한 발짝 내딛고 의심을 버려라. 두 걸음을 내딛고 걱정을 잊어 버리십시오. 세 걸음을 내딛고 두려움을 잊어 버려라. 모든 적을 상대하십시오."
+        }
+      },
+      "id": "dazemu",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0afa61944a655c7bf332b1709dd413df3239369a2093b1784ddb2c229c340979",
+          "status": "machine_assisted",
+          "text": "종종 외로운 Pal에 친절. 그러나 Pal가 실제 우정을 위해 이것을 실수하는 순간, 그것은 천둥으로 그들을 폭파 할 수있는 기회를 포착한다."
+        }
+      },
+      "id": "dazzi",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "7a0dbc5288804b740392d6c578708d594fea82430afa8005358d01547a9a3086",
+          "status": "machine_assisted",
+          "text": "종종 외로운 Pal에 친절, 그것은 그들을 때리기 전에 그들의 경비를 떨어 뜨리기 위해 그들을 유혹 할 계획이다. 그러나 적절한 순간을 찾을 수 없으면 대신 친구를 사귈 수 있다."
+        }
+      },
+      "id": "dazzi-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "d8d53bac3d8a6428e53d0f52d7dd435c36dac5cd4f2f3c26ff45e270ae922d18",
+          "status": "machine_assisted",
+          "text": "그것에는 그것의 얼굴에 영구히 으한 보기 때문에 몇몇 친구가 있다, 그러나 실제로 친절하다. 일부는 팩에서 벗어난 미호에게 먹이를주는 것을 보았습니다."
+        }
+      },
+      "id": "depresso",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a6e3356d72b2687e3928d2ea239f7090e1a00ff9e1b5e090330637a62e226d80",
+          "status": "machine_assisted",
+          "text": "가장 강한 껍질과 그것을 관통 할 수있는 유일한 드릴을 가진 드릴북이는 인기있는 어린이 이야기에서 세계의 모순을 숙고한다."
+        }
+      },
+      "id": "digtoise",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3391f37035c0435037c934f038825119186af1a09fdee14ab8b27cd924127e9a",
+          "status": "machine_assisted",
+          "text": "한 번 분노한 Pal는 진정될 수 없다. 그것은 마치 지옥과도 같은 것이다. 플로라디노의 꼬리에 \"step\"이라는 문구는 누군가를 화나게하는 것을 의미했습니다."
+        }
+      },
+      "id": "dinossom",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fbd5711ccd048f9b24d73002c29fb7211378d6ecb8170c4cbede7f7dacd088ef",
+          "status": "machine_assisted",
+          "text": "번개에 맞았지만, 그것은에 살고 있다. 찌르르디노의 볼트에 의해 쳤던 문구는 좁게 탈출 죽음을 의미하게되었다."
+        }
+      },
+      "id": "dinossom-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9b279c1e8bdc5c9b74577c0ce8427ee36ea54cc5dfd8857602c920aeb3827603",
+          "status": "machine_assisted",
+          "text": "오래 전 다크울프는 인간과 함께 사냥을했지만 수년 동안이 유대는 사라졌습니다."
+        }
+      },
+      "id": "direhowl",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9ad29df90d9974e756a324f1cab9a82c380513a367748867d53d227815edc11b",
+          "status": "machine_assisted",
+          "text": "사심없는 상태를 위해 노력하면서, 그것은 끝없이 명상한다. 자신의 욕망에 직면 한 후, 그것은 식사를 먹고 반영한다. 오늘 너무 많이 먹었다."
+        }
+      },
+      "id": "dogen",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b1fc66f176ad6e8be150f2658bf445266ab16d88e4a8a876c97cd51691d6335d",
+          "status": "machine_assisted",
+          "text": "하나의 실체, 두 개의 마음. 그들의 의지가 충돌 할 때, 그들이 화해 할 때까지 갑옷이 방황 할 곳을 말하는 것은 불가능한다."
+        }
+      },
+      "id": "dualith",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "4b514f9bb2c1f8a951cf51894cadec552ec37c15b7c785f52eef5cd44e013a9c",
+          "status": "machine_assisted",
+          "text": "하나의 실체, 두 개의 마음. 그들은 거의 동의 하 고 끊임없이 비커, 하지만 일단 전투가 시작 되 면, 마음과 몸은 즉시 하나로 단결!"
+        }
+      },
+      "id": "dualith-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "fed07388b3976552d51c3ae246183f1b90756fdf8292dec34a5570bf202a6a4a",
+          "status": "machine_assisted",
+          "text": "너무 긴장을 풀면 반응 시간이 급격히 줄어 듭니다. 비록 그것이 머리에서 꼬리로 슬라이스 되더라도, 아마 다음날 아침까지 그것이 죽어야한다는 것을 깨닫지 못할 것이다."
+        }
+      },
+      "id": "dumud",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ad23a0c27d37f92114f1a336f8dc795fead2c1ee3dce60f2aba6db23b841ac0d",
+          "status": "machine_assisted",
+          "text": "그 몸은 놀라운 선명도와 빛을 반영한다. 더욱 충격적인 것은, 그 반사작용이 도도롱보다 훨씬 느리다는 것이다."
+        }
+      },
+      "id": "dumud-gild",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "3f0fc3b7c1cc3872b4886c8b52ffe181a5b8c3374361aeabf3d6f27ee361149f",
+          "status": "machine_assisted",
+          "text": "그것이 만든 사본은 조용히 그것을 대체 할 수 있으며, 심지어 라피에르 자체가 여전히 원본인지 확실하지 않습니다."
+        }
+      },
+      "id": "dupin",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "72463c62e06f3d6b822a1d72ba022dd1628726f3dcf78afe04234f2abfe6d1d2",
+          "status": "machine_assisted",
+          "text": "높은 고도에서 먹을 것이 거의 없기 때문에 때로는 적의 두뇌에서 잔치를 벌이기도한다. 보다 신뢰할 수있는 식량 공급원을 찾는 그룹은 궁극적으로 라이버드로 이탈하는 것으로 생각된다."
+        }
+      },
+      "id": "dynamoff",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6590a4bdf89339280ef1609d420f15d1e27fe116ca8f680064fa9ca3f11d94e5",
+          "status": "machine_assisted",
+          "text": "최근에 발견된 새로운 Pal. 평온하고 완전히 유순하게, 그것은 원하는대로 시간을 보낸다. 그것은 더 이상 무엇에 묶여 있지 않습니다."
+        }
+      },
+      "id": "eidrolon",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2f12123a7c051a03866d1e02e8360660ab549cf09b21e1b83a84a090087fcc97",
+          "status": "machine_assisted",
+          "text": "최근에 발견된 새로운 Pal. 그것은 아무것도, 아무도 믿지 않으며, 그 성질은 끊임없이 가장 가까운 목표에 분노를 발산하게한다."
+        }
+      },
+      "id": "eidrolon-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "6b06a84232e62e21d9adef210ca77b1ecc9533834ceacfe5260417e3c54878a6",
+          "status": "machine_assisted",
+          "text": "가장 인상적인 뿔을 가진 사람이 무리의 지도자가된다. 그들의 뿔이 부러지면, 그들은 우울 해지고 무리를 다시는 보지 못하게한다."
+        }
+      },
+      "id": "eikthyrdeer",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "16580ccc0f8d4ae7bd6e82a269b92b5e2b40c13be2f2c655b8fbaeb8b2f4c11f",
+          "status": "machine_assisted",
+          "text": "가장 단단한 뿔을 가진 사람이 리더가 된다. 일단 뿔이 사라지면 리더십 지위도 상실된다. 그것은 작별의 눈 속에서 무리를 떠나 조용히 지구로 돌아갑니다."
+        }
+      },
+      "id": "eikthyrdeer-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "772a3aa372ec16cec792ec0a9dbb16495e3b6c5b9a81024d3f0aaf58ac22974b",
+          "status": "machine_assisted",
+          "text": "뿔의 잎은 아무리 열심히 뽑아도 제거 할 수 없다. 잎이 스스로 떨어지면 그루타우는 그 시간이 왔다는 것을 받아들이다."
+        }
+      },
+      "id": "elgrove",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2a2c24ab1467e5f95171687ace7d3997a35871ca7dab14def3d9d8dc33d8beaf",
+          "status": "machine_assisted",
+          "text": "얼어 붙은 뿔은 삶을 통해 견고하게 유지된다. 이 얼음에서 물이 떨어지기 시작하면 블랑타우는 자신의 삶의 차가움을 느낍니다."
+        }
+      },
+      "id": "elgrove-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "937a45a78f3c27fb4ced228084f938021ebb22eb55d09cbb3a4e6eea5cf0dc69",
+          "status": "machine_assisted",
+          "text": "선택된 여왕은 Beegardes를 지배한다. 여왕을 섬기는 기쁨을 위해 기꺼이 죽기까지 일하려는 하인들의 끝없는 흐름이 있다."
+        }
+      },
+      "id": "elizabee",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "1a50bc4e39da9f8a93dced2f614a6ece2fe49de713173332237f91bbdc161c93",
+          "status": "machine_assisted",
+          "text": "그것은 그것의 외관이 제안하는 것처럼 순수한 태도를 가지고 있다. 아마도 이것 때문에 때로는 선과 악을 분별할 수 없으며, 종종 범죄자가 그것을 이용할 수 있다."
+        }
+      },
+      "id": "elphidran",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "5850c740945ae2e44f511635f9ce675661c829c4eaa536a65939c35223ec825f",
+          "status": "machine_assisted",
+          "text": "그것은 그것의 외관이 제안하는 것처럼 순수한 태도를 가지고 있다. 아마도 이것 때문에, 그것은 자신의 행동에 아무런 악의가 없으며 누군가를 죽인 후에도 무관심한다."
+        }
+      },
+      "id": "elphidran-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0f6550a25b0e016ea07e45e48268fe33be59d30e3410331df0d33b34fefe4417",
+          "status": "machine_assisted",
+          "text": "먹이감을 발견하면 화염의 회오리바람을 일으켜 전체 지역을 잿더미로 만듭니다. 호루스 호흡은 즐거운 향기로 유명한다."
+        }
+      },
+      "id": "faleris",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "306100163e670e13d07fea555d62a34d2e2a64409199a0fa42280bc5555682e7",
+          "status": "machine_assisted",
+          "text": "그것이 먹이를 발견했을 때, 그것은 전체 지역을 휩쓸고있는 강력한 급류를 풀어준다. 종종 먹이가 혼란에 휩쓸려 가면서 이것이 진정으로 사냥으로 간주되는지 궁금해한다."
+        }
+      },
+      "id": "faleris-aqua",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b38f28880023150519a9cc426f284d8bd7c5b9644976a3d98cc149b2bba8ecde",
+          "status": "machine_assisted",
+          "text": "그림자에서 공격,이 Pal는 외투 같은 날개 안에 먹이를 함정. 아마도 그들 안에서 무슨 일이 일어나는지, 또는 날개의 내부가 왜 붉게 스테인드되어 있는지 모르는 것이 가장 좋습니다."
+        }
+      },
+      "id": "felbat",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e01b983f8eba0eebda828b93b1748ae76ff267b36140450cbdcdaf783ba44af2",
+          "status": "machine_assisted",
+          "text": "과거에는 아름다운 얼굴은 그림에서 일반적인 광경이었습니다. 시간이 지남에 따라, 그 아름다운 펠트와 뿔은 종종 예술 작품에서 볼 수있었습니다."
+        }
+      },
+      "id": "fenglope",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ba574f9ea1a23b42e119e7bc5ac9fdbff93fa3d51a309056b20b7a4c3c0de862",
+          "status": "machine_assisted",
+          "text": "과거에는 볼트디어의 그림을 그리는 것이 번개에 의해 격추 될 것이라고 믿었습니다. 시간이 지남에 따라 볼트디어를 묘사 한 작품은 번개를 막아주는 매력으로 숭배되어 일반적인 존재가되었습니다."
+        }
+      },
+      "id": "fenglope-lux",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b3575e16465480e48e397b8bbf45ab8351b8aedcb20ad31df3c3731ea6bfc30d",
+          "status": "machine_assisted",
+          "text": "그것은 뭔가 의상 내부에서 밖으로 엿보는 것 처럼 보이지만, 당신이 내부에 도달 하는 경우에도, 거기에 아무것도 없다. 사실, 당신은 더 깊고 더 깊이 도달 할 수 있다. 우주는 그 안에 있을 수도 있다."
+        }
+      },
+      "id": "finsider",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "e0e0679f971c05989f31962dc461816592fb11ec3acba454af2aa8357008cf06",
+          "status": "machine_assisted",
+          "text": "당신이 입에 닿더라도, 그 안에는 아무 것도 없습니다 - 그것은 계속된다. 그것이 차원 간 공간 일 수 있다고 생각하면서, 한 연구원은 침낭처럼 등반을 시도했습니다. 하지만 개그 반사 신경이 들어갔을 때, 그들은 깨달았어요... 그것은 분명히 생물체의 일부이다."
+        }
+      },
+      "id": "finsider-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "dc2a6fb8d6a1aa2a1b2215422e89ddadac7406ee1dccf06bb147101be4ba3c8b",
+          "status": "machine_assisted",
+          "text": "그것이 울기 시작할 때,이 Pal는 눈물 대신에 마그마를 생산한다. 쏟아지는 마그마는 몸에 다시 흡수되어 더 뜨거워지고 뜨거워집니다. 더 많이 울수록 더 강해진다."
+        }
+      },
+      "id": "flambelle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ef994d9d00ee7336fbd562775df35f80425a5265ad75e1d4642fe152b16e2901",
+          "status": "machine_assisted",
+          "text": "그것은 자신의 마음에 초점을 맞추고 화염을 통해 미래를 읽습니다. 만일 그것이 불편한 운명을 엿볼 수 있다면, 그것은 그것이 호의적인 결과를 얻을 때까지 그 예언을 가차없이 되돌린다. 그래서 센코의 미래는 항상 매우 밝습니다!"
+        }
+      },
+      "id": "flaracle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ee1119a6981a792c254abfece26eda66b6f94affdd1c9ae6f9f94dfe352aa153",
+          "status": "machine_assisted",
+          "text": "식물이 풍부한 곳을 선호하지만, 건초열은 토푸리에 문제가 된 것으로 보인다."
+        }
+      },
+      "id": "flopie",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "aa6425de4c85a3a0bb3069ec8fca7f4d25594e70630b571f6b0e611acc5f5b1b",
+          "status": "machine_assisted",
+          "text": "오로라가 보이는 밤에, 그것은 하늘을 향해 올려다보고 아름다운 노래를 울부 짖기 시작한다. 그러나 이것은 적의 공격에 취약하게 만듭니다."
+        }
+      },
+      "id": "foxcicle",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "af238e7244c6e1b722fcab2c4db5de56de87ec31b30a84a81c9e70d61c922d50",
+          "status": "machine_assisted",
+          "text": "그것은 태어 났을 때부터 불을 조절하는 데 숙련되지 않았으며 의도하지 않은 호흡으로 화염을 질식시키는 경향이 있다. 파이호 재채기는 산불의 주요 원인 중 하나이다."
+        }
+      },
+      "id": "foxparks",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "2af15999c821546fdce8d027da3c0a576e9a1a49dc64f0864663a53e95785be6",
+          "status": "machine_assisted",
+          "text": "그것은 태어나는 순간부터 차가운 공기를 조절하는 데 미숙하며 의도하지 않게 호흡하는 서리에 질식하는 경향이 있다. 아이호가 감기에 걸리면 비강 방전이 멈추고 호흡이 어려워지고 공황 상태가된다."
+        }
+      },
+      "id": "foxparks-cryst",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "9a74591a3238d3f8f29f8719d1ef029650500caac648d0602a05326805c3cda7",
+          "status": "machine_assisted",
+          "text": "겨울 호출자로 알려진 팔파고스 섬의 수호신. 과거에는 재난이 그 땅을 덮쳤을 때, 그것은 하늘로 치솟아 영원한 겨울로 그 섬을 던져서 위협을 차단했다."
+        }
+      },
+      "id": "frostallion",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "294e53e35b1ceaa77c7deb46ec879a1ac132e368e3904ef99f1897c2073eeb50",
+          "status": "machine_assisted",
+          "text": "나이트 콜러(Night Caller)로 알려진 팔파고스 섬의 수호신. 과거에는 재난이 땅을 덮쳤을 때, 그것은 하늘로 치솟아 영원한 어둠에 섬을 던져 위협을 봉인했다."
+        }
+      },
+      "id": "frostallion-noct",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "530dfdbabf68183dc6ef372bfdc935a888d478b51dcdddc140f6518e314ef362",
+          "status": "machine_assisted",
+          "text": "정확한 시간 감각은 매일 아침 정확히 같은 시간에 깨어납니다. 팔파고스의 전설 Palpagos Lore 프리설라가 꼬리 깃털을 넓게 펼칠 때 하루가 24 부분으로 나뉘어 졌기 때문에 그것은 24 개의 별개의 공간을 가진 패턴을 보여준다."
+        }
+      },
+      "id": "frostplume",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "310b14f14d557a1266ca9d37a1042abbd986a8a9d5870e31efcea47f9c1e0bbf",
+          "status": "machine_assisted",
+          "text": "자체 바디 워터를 사용하여이 Pal는 어디서나 파도를 만들 수 있다. 그것은 서둘러 때 몸 서핑, 하지만 결과 속도 종종 치명적인 충돌에서 끝납니다."
+        }
+      },
+      "id": "fuack",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8e5abddea1f760dca39c17f3abbf245ae940c7fc696412203a623f7873d090fc",
+          "status": "machine_assisted",
+          "text": "마찰을 위해 만들어진 배와 함께,이 Pal는 몸 서핑으로 불꽃을 점화한다. 그러나 그것이 멀리 운반 될 때, 그것은 종종 구르는 불덩어리로 끝납니다."
+        }
+      },
+      "id": "fuack-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "df229fc99c9d2cd67ded6dcc664978134797de35d3d0b9c8d9368e254d8d177a",
+          "status": "machine_assisted",
+          "text": "그것의 큰 발톱은 경도 다이아몬드 같이 자랑한다. 그러나 이러한 발톱을 날카롭게하는 것은 대부분의 에너지를 소비하여 때로는 다른 일을하지 않고 하루 종일 보낸다."
+        }
+      },
+      "id": "fuddler",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "918d3cad1960f5806267cb2eaa6e0604fea4b474da2f86839d3231fb28250f4b",
+          "status": "machine_assisted",
+          "text": "Pal는 사람을 잡는 동안에도 쉽게 비행 할 수 있다. 그러나 피곤할 때 놓아주는 경향이 있으며, 이는 몇 명 이상의 영혼을 갑자기 죽게 만들었습니다."
+        }
+      },
+      "id": "galeclaw",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "8a71864a1ef4c1235e33ec860c0ccd73b75965b335a26a0df17d642d2cfb4400",
+          "status": "machine_assisted",
+          "text": "그의 빛나는 유혹과 함께, 그것은 어둠을 밝힙니다. 빛에 의해 그려진 방황하는 Pal는 빛초롱가 발견 한 탈출의 기회가 없다. 아무리 멀리 떨어져 있어도 집에 안전하게 도착할 때까지 계속 안내 할 것이다."
+        }
+      },
+      "id": "ghangler",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "55f12c8760323263b44cac5ecbdac5431eccd36226f96a200687c808072ab9c0",
+          "status": "machine_assisted",
+          "text": "그 타오르는 유혹은 먹이를 구울 수있는 그릴로 두 배가된다. 맛있는 향기에 끌린 Pal는 일단 불초롱가 시선을 돌리면 탈출 할 희망이 없다. 결국, 그들은 모두가 가득 찰 때까지 풍성한 식사를한다."
+        }
+      },
+      "id": "ghangler-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "25382ad5a737a7b62a35ab76a3322eb1243e6ab8909f63aa4bcc827d48288ea7",
+          "status": "machine_assisted",
+          "text": "섬의 연금술의 황금 시대 동안, 그 끊임없이 빛나는 황금 모피는 금을 변형시키는 촉매제로 높이 평가되었습니다. 이윽고, 놀라운 계시가 이루어졌다: 동일한 황금빛 색조는 단순히 갈기를 가공함으로써 달성될 수 있었다."
+        }
+      },
+      "id": "gildane",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "81995327ffafaa45e1499c2f57bb950463713f7ed9747d1f31a35e029d673345",
+          "status": "machine_assisted",
+          "text": "그것의 몸을 덮는 황금, 붕대 같은 기관은 매우 탄력적이다. 그러나, 그들은 극단적으로 건조한 조건 하에서 찢기에 수그린다, 그래서 매일 습기 체크는 절대적으로 근본적이다."
+        }
+      },
+      "id": "gildra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a5019755f6b5bd2f8047955f6e799072f258a74aeffdd7965001849b1a8e4c2d",
+          "status": "machine_assisted",
+          "text": "이 Pal로 잠들기 전에 다음날 계획을 확인하십시오. 그 진공 패드는 물린 자국처럼 의심스럽게 보이는 흔적을 남깁니다. 한 번의 졸린 포옹 세션은 진정으로 불필요한 우려로 이어질 수 있다."
+        }
+      },
+      "id": "gloopie-primo",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "63c3dc78e9f3e9d107c85083a2282b7379ebb9c8f06fdde6b02ca9ae80d948e8",
+          "status": "machine_assisted",
+          "text": "오래 전에, 그것은 거대하고 강력한 수생 Pal였습니다. 그러나 식량이 부족해짐에 따라, 그것은 육지에서 살기 위해 진화했다. 걷는 데는 많은 에너지가 필요하기 때문에 점차적으로 작아졌으며 이제는 작고 보잘것없는 Pal이다."
+        }
+      },
+      "id": "gobfin",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "25b9d0c353bcf42f29d036999f540c00983cad431b64a105ad42398f78480cd4",
+          "status": "machine_assisted",
+          "text": "오래 전에, 그것은 거대하고 강력한 수생 Pal였습니다. 그러나 식량이 부족해짐에 따라, 그것은 육지에서 살기 위해 진화했다. 걷기는 많은 칼로리를 태우기 때문에 놀랍게도 불을 제어하는 힘을 일깨웠습니다!"
+        }
+      },
+      "id": "gobfin-ignis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "b521b870bec01057f81db0b8ec9c528f5d546852c9d3ffd94d16b08df23bbc62",
+          "status": "machine_assisted",
+          "text": "동지들과 소통하기 위해 리드미컬하게 땅을 친다. 각 리듬의 의미는 병력에 따라 다르지만, 그들 사이의 구별은 여전히 크게 알려져 있지 않다."
+        }
+      },
+      "id": "gorirat",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "81fa132b75a9024b0ae706d2b672bbf5f7c1780ced210629f12daecf2cf9b444",
+          "status": "machine_assisted",
+          "text": "동지들과 소통하기 위해 리드미컬하게 땅을 친다. 고릴레이지보다 강하며, 모든 고릴가이아가 동시에 땅에 떨어지면 섬은 1 s초 안에 가라앉습니다."
+        }
+      },
+      "id": "gorirat-terra",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "158986e22c82290bf587a5207cead4635e2f9f266c6d2baf4cb0925c56170abf",
+          "status": "machine_assisted",
+          "text": "소름냥이의 눈은 누군가가 영토에 들어가는 순간 밝아집니다. 이것은 말의 그림이 아닙니다 - 문자 그대로 눈이 밝아집니다."
+        }
+      },
+      "id": "grintale",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "a923f84b869c46efb1ee4d5069ce1345daf34b8004946ff5bc42780472104b3c",
+          "status": "machine_assisted",
+          "text": "친절한 미소와 강건한 체격으로, 그것은 파트너로 인식하는 것에 대해 유순한다. 설명 할 수없는 이유로, 그 성격은 미니건을 휘두를 때 급격한 변화를 겪습니다."
+        }
+      },
+      "id": "grizzbolt",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "75783b90ddc9ff3a1644acff863c5dbdb5506dc8c1d2c0ad6f7777fd3202b101",
+          "status": "machine_assisted",
+          "text": "나무 수액을 닮은 몸을 가진 이상한 Pal. 몸을 덮을 것이 없다면 점차적으로 힘을 잃고 결국 썩습니다."
+        }
+      },
+      "id": "gumoss",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "ad6f823d89a8671c5cd7c69c5f5fc92ac96310280a8ff6075f26a800fa623896",
+          "status": "machine_assisted",
+          "text": "침묵은 불안하지만 이상하게 진정된다. 아무도 안 남았어 모든 것이 배달되었습니다. 오 구원의 왕이시여, 저 또한 영원한 고요로 이끌어 주소서. 고대 문자는 여기서 끊어집니다."
+        }
+      },
+      "id": "hartalis",
+      "kind": "pal"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:Helsinki-NLP/opus-mt-tc-big-en-ko@ae8606b7b29a495f31ce679cee2007f536a3a5ce",
+          "sourceSha256": "0c0000349e127a1f13e51702423318a7ea4ecde59d5f4035125aea792660f980",
+          "status": "machine_assisted",
+          "text": "그것은 지옥의 깊은 곳에서 번개를 불러낸다. 헬가루다의 번개로 죽은 사람들은 자신의 영혼을 지하 세계로 보내야한다."
+        }
+      },
+      "id": "helzephyr",
+      "kind": "pal"
+    }
+  ],
+  "schemaVersion": 1
+}

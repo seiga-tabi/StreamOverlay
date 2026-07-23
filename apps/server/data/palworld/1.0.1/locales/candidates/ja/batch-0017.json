@@ -1,0 +1,2694 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "14ab39b39fc864143ffc61996884dfe9f397cb7087852d42ee513f9dd384b9db",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 飛行中は、移動速度が上昇します。 パーティー中、プレイヤーとパーティパルは火傷を15%減らしバーンに免疫があります。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "11ec90f0124b9f69eae8611ce692bb371e024533bf6a870066d7f57f3db815d9",
+          "status": "machine_assisted",
+          "text": "可鍛性 X 竜 水"
+        }
+      },
+      "id": "partner-elphidran-aqua",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f1d94c358d656b080a43baa25b16fc59d7321561ea70f1e0e05c18f5d5e3b949",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 パーティー中、アイスパルは敗北時に40%以上のアイテムを落としました。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b0e336b237a0f2e40bb3ff39ed07ddb58c7151bffebca3d6beb3bacc8905f07a",
+          "status": "machine_assisted",
+          "text": "き捕食者"
+        }
+      },
+      "id": "partner-faleris",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e61f4655668ecbbb1445cbf1b1d748b0e567f811d08fb197c39f9af94b9275e9",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 パーティー中、Fire パルは敗北時に40%以上のアイテムを落としました。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "35283116be0b6aa6bc8e3eb0714b9ee94b14168899ea3b5e6f36ae94d46a13eb",
+          "status": "machine_assisted",
+          "text": "潮捕食者"
+        }
+      },
+      "id": "partner-faleris-aqua",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0ce89c9ad9f5b25127033a799962435bbad8092e3eba8c55b41de67d2c1ae37f",
+          "status": "machine_assisted",
+          "text": "一緒に戦っている間、プレイヤーとヤミトバリに健康として扱われたダメージの5%を回復するライフスティール効果を与えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "36bf64543f2a504483f3bb77b3e212b6700b54db9c0b790f045248a8d56c3972",
+          "status": "machine_assisted",
+          "text": "ライフスティール"
+        }
+      },
+      "id": "partner-felbat",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a6929aa9adbd04010b7f40ba811d79a0a4f1e40e63b9dff92992cdb79a6c5c41",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中にダブルジャンプできます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8ae8d89123918fc7ccfe0c13b1286f20947d3aeaba28d2d571eeebd31b54e7df",
+          "status": "machine_assisted",
+          "text": "風と雲"
+        }
+      },
+      "id": "partner-fenglope",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2940689f6796de32261324080f041885c9dbdfcf906a91e951e3970be312dfcf",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中にダブルジャンプできます。 パーティー中、ウォーターパルは敗北時に40%以上のアイテムを落としました。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0288fe258b56bbacd5ade2d98c3c99e59573758d37bf52dcaf780dfaacf9ebc5",
+          "status": "machine_assisted",
+          "text": "ストームクラウド"
+        }
+      },
+      "id": "partner-fenglope-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d488b4684625fbdcc35a0748f61c196c501e579075c8cceb9bcc382b213fda4e",
+          "status": "machine_assisted",
+          "text": "アクティベートすると、ガブルミはプレイヤーの攻撃タイプをウォーターに変更しアタック量を30%増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0247908300b51393ccb3d9b4aa1f836246d345a483d8d9b85c7d887ef25d753b",
+          "status": "machine_assisted",
+          "text": "カスターマックス銃 水"
+        }
+      },
+      "id": "partner-finsider",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "14fb5262e48d8464989def6127eb1d95b6b304b5d2d047a872331691f29239c9",
+          "status": "machine_assisted",
+          "text": "パーティー中 ヒグルミは物資の運搬を支援。 在庫の武器重量を60%削減します。 また、プレイヤーとパル'敵の弱点への火傷を70%改善します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43c74fb3a0b85936f73f837a8b7804f4ac31ce5443bd369f489ab7c3d82b288a",
+          "status": "machine_assisted",
+          "text": "室"
+        }
+      },
+      "id": "partner-finsider-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c840f5190fd606fcad458c55ebacb277da8bf3b04eda3be9fc860b8e1556570d",
+          "status": "machine_assisted",
+          "text": "パーティー中は、プレイヤーとパーティパルの健康を戦闘外において0.1%毎秒回復します。 (スタックしない) ランチに割り当てられたときに、Flame臓器がドロップされることがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9008cc50835bab8579dcc9be1c2aa4f1f6f0fa6256645af0764f63ff492b85ac",
+          "status": "machine_assisted",
+          "text": "マグマ涙"
+        }
+      },
+      "id": "partner-flambelle",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "49ae074e3dc8e997b37436d8be25702549a37a53242a98914aa437d9cc23ac97",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーがバーンに苦しむ敵を攻撃すると爆発する。 (積み重なってはいけません) 40%"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4fd77f9d2aeff5c91a6cf205515ef2eedc79f5384ee4d65ea967dcc1bc1573b1",
+          "status": "machine_assisted",
+          "text": "燃える未来"
+        }
+      },
+      "id": "partner-flaracle",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "adbdea8c6ce6a3c921747d8f22f41a508ca6ecf19d638684bee845acefe4171e",
+          "status": "machine_assisted",
+          "text": "パーティー中は、プレイヤーの近くに表示されます。 近くのアイテムを自動的にピックアップします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cb41a7d3a5144c815a2a20d148fb2f6edc1e61e24c5a24e7f52dc8c77d51ea79",
+          "status": "machine_assisted",
+          "text": "ヘルパーバニー"
+        }
+      },
+      "id": "partner-flopie",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9e088d8bf07a857865f08c868a0e4e2efb56e35ce7b8889e7c1205f9ec02a52e",
+          "status": "machine_assisted",
+          "text": "パーティー中は、氷パルの攻撃を15%増加させます。 (スタックしない) ランチに割り当てられたときにアイスオルガンをドロップすることがある。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d83ba4e95fb6ed62dbc2b9b2e6ec47e34b46aef1d9ee3e618c1f30b6970e388e",
+          "status": "machine_assisted",
+          "text": "Auroraガイド"
+        }
+      },
+      "id": "partner-foxcicle",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bf0dcae918c56b34d5b21d50c4c3d49a619a64d3c7dbb31c5565612232acf185",
+          "status": "machine_assisted",
+          "text": "活性化すると、プレイヤーに装備され炎上器に変換されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "12ae240af4e60b090f07e7c57c4952cefb1100eb40eda922c3a2b17b56e96307",
+          "status": "machine_assisted",
+          "text": "ハギーな夏休みの 炎"
+        }
+      },
+      "id": "partner-foxparks",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7aa15cdbd581b64e978a39dc63990660ef0fbe24627cb0cdbf894c3f64187994",
+          "status": "machine_assisted",
+          "text": "アクティブにすると、プレイヤーを装備し冷気を使って攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "01ebd13d8a67b098697bc2326c87d5554a2159862f28aff6387867af4dccf725",
+          "status": "machine_assisted",
+          "text": "ハギーフロスト"
+        }
+      },
+      "id": "partner-foxparks-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cffe5ee1b2fc0edcadf208ce0d9dea9591eb4b03790c52f8d53d2bb588337bd3",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 装着中 プレイヤーの攻撃タイプをアイスに変更する フリーズ1を 攻撃を1%増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f338624019d42034bb6029bac29b8d2e295937bed70cced75f3079ffef17ab88",
+          "status": "machine_assisted",
+          "text": "訳 Icy Sted"
+        }
+      },
+      "id": "partner-frostallion",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "588d67176aa7a800cb5db5e1c20f9b8197c041f2b589a5107c3c7cfdbcb8e2a5",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 装着中 プレイヤーの攻撃タイプをダークに変更します。 失明1を 攻撃を1%増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43877c7147284421e6acb5009c4f58b82c2c52ba922bf15844bf7001a4a07a80",
+          "status": "machine_assisted",
+          "text": "黒糸"
+        }
+      },
+      "id": "partner-frostallion-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "11066ea54b0503322284ffe562c27142d6014e1da5638bdfffbee08a2902f5f0",
+          "status": "machine_assisted",
+          "text": "パーティー中、クジャンナの氷色のオーラが焦点を鋭くし,プレーヤーの再ロード速度は20%向上します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6fcf0ccc18f5a5bccda4d09927dff69b2e6e8857c392f88098ea10428f44095b",
+          "status": "machine_assisted",
+          "text": "孔"
+        }
+      },
+      "id": "partner-frostplume",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "df5becdbf3ba254df2c694f2be1f13f49091639be41fd958fe48dfd13ebb7baa",
+          "status": "machine_assisted",
+          "text": "起動するとカモノスケの体は敵に向かってサーフィンし、それらにスラムします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d8d8204a526dd8b533f5ba0ea84d1891abf0c724a77fe2803f05bd61c48da0dc",
+          "status": "machine_assisted",
+          "text": "サーフィンスラム"
+        }
+      },
+      "id": "partner-fuack",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "215872cc45263e520562d475e75f285a67de4ff346a1f5cf945d4fc72dd5c3ad",
+          "status": "machine_assisted",
+          "text": "起動すると、モモノスケは敵に向かってサーフィンしそれらにスラムします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "56dc9e1be0b164fb918a11810894e2580fba213fb29695d26d4fe5318d946cc1",
+          "status": "machine_assisted",
+          "text": "炎 ZTackle"
+        }
+      },
+      "id": "partner-fuack-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0a9c6b17c295e23052cc8ef0bd4b196a499856bd3c83cd20ed7303ab167b3bb5",
+          "status": "machine_assisted",
+          "text": "パーティー中 プレーヤーのマイニング効率を30%向上させ、ストーン重量が34%削減します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ecde698a611d5abebc64663d32e1e9389bb21c480d660782d63bf5cc8ec27150",
+          "status": "machine_assisted",
+          "text": "東日本大震災支援 採掘"
+        }
+      },
+      "id": "partner-fuddler",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b873ab47804468db6cbe4b426619bcc3b84ace26cbe7477fb554acefaad82e1b",
+          "status": "machine_assisted",
+          "text": "パーティー中は、装備グライダーの性能を変化させます。 高速滑空が可能で、右手での撮影が可能です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3cb08d2439b9dddc21850f8482449d9d7a297ee21c140ab93d10d1a41866a447",
+          "status": "machine_assisted",
+          "text": "クワッドマックスグライダー"
+        }
+      },
+      "id": "partner-galeclaw",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1beb9b7c63b72c0517a34cffc0346af1fa0fe7ac820a3253e21f5bbf668df1d",
+          "status": "machine_assisted",
+          "text": "水上を移動することができます。 このパルの移動速度は、あなたのパーティーでお互いのために5%増加します。 (アンドーンを除けば)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "61b51e60e7bfbface843e8f930d83b326ecb1baf015a3627e2b7cedaf6eca576",
+          "status": "machine_assisted",
+          "text": "暗黒の達人"
+        }
+      },
+      "id": "partner-ghangler",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "478052e4b8507389043cb1bcf53f652d124b3eb5de07daa43d280760740afbd6",
+          "status": "machine_assisted",
+          "text": "水上を移動することができます。 このパルの移動速度は、あなたのパーティーでお互いのために5%増加します。 (メラドーンを除けば)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5e0261b73e9095ba45171e3453ce70e2d42a6414fdea558a8b3cf2f2566b5390",
+          "status": "machine_assisted",
+          "text": "ビサールセレブリティシェフ"
+        }
+      },
+      "id": "partner-ghangler-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "850c8f81e39a0bafb63d02d3df65c91772803629cfd525e07e4f76674c943456",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中に、プレイヤーの攻撃タイプをグランドに変更しアタック率1%アップ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1264894d4fff151ed85778790ce0b2fe08b2b705395384b4941f1bd83c6af280",
+          "status": "machine_assisted",
+          "text": "砂嵐の祝福"
+        }
+      },
+      "id": "partner-gildane",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "49e30464ae9ba6f8afd405fd88035fcdafa0659e24255947871c095f44c9cea2",
+          "status": "machine_assisted",
+          "text": "一緒に戦っている間、ヨミーラが無力化されると空腹で復活します。 0"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7f65e66d7b992f00e39bd0933f6ed9732c99bf22e061c0fbf46af3aeb1c52bc0",
+          "status": "machine_assisted",
+          "text": "復活"
+        }
+      },
+      "id": "partner-gildra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "32cd3453a4212a4b8f9e26221f08766941b1a73abc1663dad81ce6c266264ca5",
+          "status": "machine_assisted",
+          "text": "パーティー中、水パルの防衛を15%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9b990d0e8a6ae8073f9cd068244fbf7f8e641cc8ea5b9aa1cbf07dcd7e43c4b8",
+          "status": "machine_assisted",
+          "text": "太姫"
+        }
+      },
+      "id": "partner-gloopie-primo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7bed1beb84cf319a91c7c45d6be10c7fe0686b6f9f60755c220cd7adf8e7fc98",
+          "status": "machine_assisted",
+          "text": "有効にすると 攻撃対象はアクアガン。 クアッドコアのアクアガンが使える! x1.1/1.3 /1.6、2、2.5 10%のダメージ乗算器がある。 パーティー中 プレイヤーの攻撃を十%増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "67d615154abeb29091fa26903c4718dd45ac346df846a80b26d57f57d9dc2555",
+          "status": "machine_assisted",
+          "text": "怒っているサメ"
+        }
+      },
+      "id": "partner-gobfin",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d41724c76d3681d8bafd8933c83120cc353fa598a9cde99b02a9265f78c222d8",
+          "status": "machine_assisted",
+          "text": "有効にすると スピリット・ファイアで敵を攻撃する。 クアッドコアの「パル」がスピリットファイアーを x1.1/1.3 /1.6、2、2.5 10%のダメージ乗算器がある。 パーティー中 プレイヤーの攻撃を十%増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "67d615154abeb29091fa26903c4718dd45ac346df846a80b26d57f57d9dc2555",
+          "status": "machine_assisted",
+          "text": "怒っているサメ"
+        }
+      },
+      "id": "partner-gobfin-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "13378928b4c14f440c27eaa21add3cecf133ddc80036797808e3d0b37480fa87",
+          "status": "machine_assisted",
+          "text": "有効にすると、ゴリレイジの攻撃を期間限定で75%増加させる主要な怒りが解けます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1897d0aeb255b733c219ac73ea69a682728d0d43fb2239c1eb2423bb13d5437b",
+          "status": "machine_assisted",
+          "text": "フルパワーゴリラモード"
+        }
+      },
+      "id": "partner-gorirat",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3190ca07a792653176d1e0824cfd58490360945523d72ab4976fca58ce865d7c",
+          "status": "machine_assisted",
+          "text": "パーティー中は、選手の登山速度を50%向上させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8f952c960da4f63d84b192b4bb7d40cb27510f3bf326d45dbbcd9b93746a9356",
+          "status": "machine_assisted",
+          "text": "フルパワーゴリラポンド"
+        }
+      },
+      "id": "partner-gorirat-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a2ce5b5f1d4a8254b74829b10bf6d7758efcf4d065f12d303b8b284c3370489c",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中に、パル Eggを拾うと50%つの余分なものを受け取る確率が五十%です。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6794c20497c01679decbd98683209012812a092ffe54139165789188f367e43b",
+          "status": "machine_assisted",
+          "text": "猫の目をる"
+        }
+      },
+      "id": "partner-grintale",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bbaf6f9e1d57d8f4be54f51dbb2a07b7f907e57df85545c3d2e2f81acef3defb",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中にミニガンを素早く発射できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "427e178463e040d6e7ec370882aaa44697fceb63d3d4add4c28e40ac2c4261d6",
+          "status": "machine_assisted",
+          "text": "黄水槽"
+        }
+      },
+      "id": "partner-grizzbolt",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2fbaea5297d14732af248ce6d84decd8de960a98e276a7dae1d77a8a57a10308",
+          "status": "machine_assisted",
+          "text": "パーティー中 木材の伐採効率を30%向上させ、全材重量が35%削減できます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e281e87f9bdf97def560c7dcd0368ba1811e3c4c383728c34c75ceb171046880",
+          "status": "machine_assisted",
+          "text": "ロギングアシスタンス"
+        }
+      },
+      "id": "partner-gumoss",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e69102d07fc89000555a0baf6dda207befdc5f15675c38da1cf9d3a15da5ff69",
+          "status": "machine_assisted",
+          "text": "飛トレープ"
+        }
+      },
+      "id": "partner-hangyu",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dc899d7385e1c6f07335d2dca070e358ebe38091bc8181b8d0c990c4e03b13eb",
+          "status": "machine_assisted",
+          "text": "冬草"
+        }
+      },
+      "id": "partner-hangyu-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "36501f13ff97ad90e644fdd9a389cd3b8229c64a1191bdf90220e84926dca4ea",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中、すべての攻撃をブロックするバリアを生成します。 マウント中に三回ジャンプできます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "31f5a2a35e417901c03ec08235184f0f5ae7b2e5de97dc9ced19e4abb678f50f",
+          "status": "machine_assisted",
+          "text": "聖なる障壁"
+        }
+      },
+      "id": "partner-hartalis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "92e25b82ada5134ac62bc424426dfa874b2ea12dfc8205ddbed807d7d827fc14",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 マウント中に、プレイヤーの攻撃タイプをダークに変更しアタック率1%アップ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0ef86448bb1524ab18b8c8ae1e43e299a3b46a42c2b49841873f20d4e71f4f0",
+          "status": "machine_assisted",
+          "text": "死の翼"
+        }
+      },
+      "id": "partner-helzephyr",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "38898773c89724da23aaafeb5d2fea79af8f03b0c0013317b32dfb4241643458",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 マウント中に、プレイヤーの攻撃タイプをエレクトリックに変更しアタック率1%アップ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "58c691f0490a6c27e665ed872a9e25551d02d9b58983826cdcac8643c4776a95",
+          "status": "machine_assisted",
+          "text": "雷の翼"
+        }
+      },
+      "id": "partner-helzephyr-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "baff6b991dad2e9bbf0a0fba46d3dc58ddeaa062ccc2be8fc31da4f973e07f4d",
+          "status": "machine_assisted",
+          "text": "パーティー中 モモンパは、その治癒力を使用して30/36 / 42または48の60%を回復します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7adb033459468797d8734fbda5d58b09035a65c684cf9f61de1cf039564fd4a9",
+          "status": "machine_assisted",
+          "text": "カスターマックスパルス"
+        }
+      },
+      "id": "partner-herbil",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f21590f1535b959a7009a1b546578138a408683f1907acd590ebe7710ff425ea",
+          "status": "machine_assisted",
+          "text": "パーティー中は、ダークパルの攻撃を15%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "55ad4a52efb0c6dfba41a6264c87c15b979195fe929ef617cbf5c187c55bb2af",
+          "status": "machine_assisted",
+          "text": "東日本大震災の知識 闇"
+        }
+      },
+      "id": "partner-hoocrates",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6afbe27c3e34504363d4dc7e8646ba21af88c77d14897d89f5435f930f6f3450",
+          "status": "machine_assisted",
+          "text": "アクティベートすると、チルウィッチはプレイヤーの攻撃タイプをアイスに変更しアタック量を30%増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1f4d907f4b9d7032182377d33a087540534f5de1509b4afe0e0a3136fb02958",
+          "status": "machine_assisted",
+          "text": "魔女の氷のベール"
+        }
+      },
+      "id": "partner-icelyn",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "640fdf615aabfdb0f74db0b9981c3e5515468a31a48308bca586c259cdf7682f",
+          "status": "machine_assisted",
+          "text": "有効にすると 標的の敵をヘルファイア・クローで攻撃する。 地獄の火をむパル x1.1/1.3 /1.6、2、2.5 二.五のダメージ乗算器がある。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d45c2e7a2599d6a48bba40281c7ef5a5c770d997bf5c2b10654ccf9a45d8e4a9",
+          "status": "machine_assisted",
+          "text": "フラメクローハンター"
+        }
+      },
+      "id": "partner-incineram",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3cbf5a1df8fc8dee494cb5fb2b5d799d397be9f959daefc1364f37bdca7a8d0f",
+          "status": "machine_assisted",
+          "text": "有効にすると 悪夢の爪で標的敵を攻撃する。 悪夢の爪を使ったパル x1.1/1.3 /1.6、2、2.5 二.五のダメージ乗算器がある。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a0e6bfc6293300c91703f329684d26d3500107473683be59abde373668dd8f2",
+          "status": "machine_assisted",
+          "text": "ダーク爪ハンター"
+        }
+      },
+      "id": "partner-incineram-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9a65f4744707b488b5e9fcada7ab39193f8b701a2b9ac53cc038154614b0451c",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 搭載中にミサイル発射器を迅速に発射できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7eb4fbfa918ca2e1005501b938fd4e648d832ad324a6db59c86e995ddd9c9659",
+          "status": "machine_assisted",
+          "text": "航空ミサイル"
+        }
+      },
+      "id": "partner-jetragon",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0c417eaf70d2f094223a64b757e4972096d74c039214822eb45c31490cbfe92",
+          "status": "machine_assisted",
+          "text": "起動すると、パチグリを敵に投げるプレイヤーへ装備し衝撃で電気爆発を起こします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "979c8cc33b09d3c2842a8ad0d7d8f172dc899c0527f335760da0c67722bc8ebb",
+          "status": "machine_assisted",
+          "text": "爆弾"
+        }
+      },
+      "id": "partner-jolthog",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eae00c6bf100be96f94fb5534dabfa6eb4eec3ce5d1d445b2ab1139ace8fd987",
+          "status": "machine_assisted",
+          "text": "起動するとコチグリを敵に投げるプレイヤーへ装備し、衝突時に氷爆発を起こす。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0df422ac17153133f05c9a597393bc1aa0c076a5575c6d4bc16846e01c6f3cb0",
+          "status": "machine_assisted",
+          "text": "冷蔵爆弾"
+        }
+      },
+      "id": "partner-jolthog-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e2cf7b68729d27a34ac9fc16ddecd8db326314938d38be50d421d7ef4e45c0e4",
+          "status": "machine_assisted",
+          "text": "水上を移動することができます。 パーティー中、プレイヤーとパルの敵へのダメージが50%増加します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c4f69e6c07a7a7fc198c267f9d09818e70005896f2808659f9ea232366c992d9",
+          "status": "machine_assisted",
+          "text": "ストームブリーカーシークアスターマックス 竜"
+        }
+      },
+      "id": "partner-jormuntide",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0e1af15bde251715db81aaa808db5a9ccce4cf73f4be671f1bbaf33507b9421b",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中、溶岩ダメージを無効化しプレイヤーとパルの敵へのダメージが50%増加します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c65cb50e20f99917b6e5a04742deee43ab227c0ea52d6672813e4b26e2c687c7",
+          "status": "machine_assisted",
+          "text": "ストームブリーマーLava 竜"
+        }
+      },
+      "id": "partner-jormuntide-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bfaec81ecaf9c6418cc94ace7918fdd19377d8951dc773496a0e8dff7777002a",
+          "status": "machine_assisted",
+          "text": "パーティー中 中性パルは敗北すると40%以上のアイテムをドロップ。 また投げられるときパル球の消費を防ぐ50%チャンスがあります。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "21e42de81c82b5cfbe9ecc0f98a6c7ea79dca2e1c059fb6bdeff23aeab1c2ac9",
+          "status": "machine_assisted",
+          "text": "神秘的なブラックマジック"
+        }
+      },
+      "id": "partner-katress",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7e2d252ccc9b0a0cf3086e7a52387cdbc11ecc3e70558ddb19aa5cd21826b2b3",
+          "status": "machine_assisted",
+          "text": "ベースで、他のすべてのベースのパルのキンドリング作業適性レベルを+1に増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1847bcc5f1c89c0aababbd9e9636c51baa30c145088079b4255542e50a2e03b1",
+          "status": "machine_assisted",
+          "text": "ブラックマジック!"
+        }
+      },
+      "id": "partner-katress-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a39ef2b0417e3ad6f7573764e33d7b4d8768978a6466d0a05cdd98a44ccc4c1e",
+          "status": "machine_assisted",
+          "text": "パーティー中は、水パルの攻撃を15%増加させます。 (積み上げない) ランチに割り当てられたときに、アクアティックパル流体が落ちることがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8b88d90fed430b4ddec252632030e34ca8f24ff37f351ba111e608ead585d3e3",
+          "status": "machine_assisted",
+          "text": "アクア・スパウト"
+        }
+      },
+      "id": "partner-kelpsea",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "60f68e7088122c4b1a0f87766723c2f5166cde66ac4a921917c4d1faee669c1f",
+          "status": "machine_assisted",
+          "text": "パーティー中は、攻撃の火パルを15%増加させます。 (スタックしない) ランチに割り当てられたときに、Flame臓器がドロップされることがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "33e3a41168213b7c6b227bea7ee86953124f248b570a039634dc1212430559e3",
+          "status": "machine_assisted",
+          "text": "溶岩噴出"
+        }
+      },
+      "id": "partner-kelpsea-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28ed28d1eeaf5f4ff550c663ca9bbca6258d0fe84d97a3a0f05a74aeb059a279",
+          "status": "machine_assisted",
+          "text": "パーティー中、グラウンドパルの防衛を15%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1be482b34591994aff43bc5f33ccf93c6d997e3b9f138585a9b435b3f8f2f315",
+          "status": "machine_assisted",
+          "text": "サンドボールサッカー"
+        }
+      },
+      "id": "partner-kikit",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0a758f496181fa6eb6592e292fde048e69d86deefd02b4c970d77ef915df7af",
+          "status": "machine_assisted",
+          "text": "パーティー中は、装備グライダーの性能を変化させます。 長時間滑空しながら、ゆったり浮かび上がれます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6132aa063ac70a14bef7ba3484e9270aaec6a7807eabf8db1077e8d9f4b23097",
+          "status": "machine_assisted",
+          "text": "イカフライ"
+        }
+      },
+      "id": "partner-killamari",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0a758f496181fa6eb6592e292fde048e69d86deefd02b4c970d77ef915df7af",
+          "status": "machine_assisted",
+          "text": "パーティー中は、装備グライダーの性能を変化させます。 長時間滑空しながら、ゆったり浮かび上がれます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "47f05e77b0b35ff0e61dacd962602eb4c8ae17f37d6907972bff05656d5136ad",
+          "status": "machine_assisted",
+          "text": "フライド・クワッドマックス"
+        }
+      },
+      "id": "partner-killamari-primo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "230c8bcfa582cd9b22737218c47ebe56424abd5943b0c67560d0f19fc5316dfa",
+          "status": "machine_assisted",
+          "text": "乗れる。 このパルの防御と移動速度は、パーティーの各々で5%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "748bd3903bd52923ab355c4aa907201e7ff89a755fc058697e557eed6e2de5fe",
+          "status": "machine_assisted",
+          "text": "筋肉の王"
+        }
+      },
+      "id": "partner-kingpaca",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "230c8bcfa582cd9b22737218c47ebe56424abd5943b0c67560d0f19fc5316dfa",
+          "status": "machine_assisted",
+          "text": "乗れる。 このパルの防御と移動速度は、パーティーの各々で5%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4b44de730f0012d8c2c5f58a7621d5a2901d66dc9275380c4754fc3b729188e",
+          "status": "machine_assisted",
+          "text": "冷酷な王様"
+        }
+      },
+      "id": "partner-kingpaca-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed338b36887d56e93a86eb1523a0fb45181b707af64bcfe3c4446c5f988f8a2e",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中、プレイヤーとパーティパルは氷のダメージを15%減らしフリーズに免疫があります。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b7905897790376ba059fa1fce5e2b15e815df60dbd07a03d5c7c9d9ef4a60ac4",
+          "status": "machine_assisted",
+          "text": "太陽の"
+        }
+      },
+      "id": "partner-kitsun",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b5ace84f3267856abb0ffd215a5919da97e9ae0c93d50b54fb3f55f5051d4d3a",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中、プレイヤーとパーティパルは15%パーセントのダークダメージを軽減しブラインドに免疫があります。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f67747cd638801e2c1dc7c1b470b6597daa145c1ffd4f8f89cbf7810acb0f6e8",
+          "status": "machine_assisted",
+          "text": "え声"
+        }
+      },
+      "id": "partner-kitsun-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "efd41b1e61be472e5b90bb8977244d1790bd29ea5520772407ff2b0ddf3af252",
+          "status": "machine_assisted",
+          "text": "有効にすると 鋼製解像度はテラナイトの攻撃を50%増加させ、防衛時間を75%向上させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a8f9bf79e6c449223652f5ae74c97505fc4e30ff744efef0f8f764afe2f2c61a",
+          "status": "machine_assisted",
+          "text": "スチールガーディアンモード"
+        }
+      },
+      "id": "partner-knocklem",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5ecc0fb40ee243ab2543611a7eb1ded9af4c7de1a8f0f7a1e25eb4250fee295e",
+          "status": "machine_assisted",
+          "text": "有効にすると 鋼製解像度はマグナイトの攻撃を60%増加させ、防衛時間を85%向上させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c154bb00776bc948328f63ebfa600641f7adb645d1c0bd6756390e1029a02829",
+          "status": "machine_assisted",
+          "text": "アイアンガーディアンモード"
+        }
+      },
+      "id": "partner-knocklem-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2a2db568fdc6871742f28eb2b123fa7fef3c37a391e1b3edc1c3282a1fc000df",
+          "status": "machine_assisted",
+          "text": "アクティブにすると、プレイヤーが装備してシールドになります。 ランチに割り当てられたときにウールを落とします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cbb1ea62f4d293b62106dce4436c2c866e1b443d5651d31205d75cc25dbe234f",
+          "status": "machine_assisted",
+          "text": "ふわふわシールド"
+        }
+      },
+      "id": "partner-lamball",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "86ea9b0970a00c5c8e5dad45b3284778b95a0e73e7b01731a841b040f62accce",
+          "status": "machine_assisted",
+          "text": "パーティー中は、スプリント中にプレイヤーの防御を50%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b2665d573fad6925a81040349e9b7de3a3661e89771c2ccc5b29c0bccf09ecf0",
+          "status": "machine_assisted",
+          "text": "地球の友"
+        }
+      },
+      "id": "partner-lapiron",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b6cebd01fc2b9fd863ad4ad91d132b081e178f4a5be638b8d5ffb34b1af36ccf",
+          "status": "machine_assisted",
+          "text": "パーティー中、他のパーティパルのパートナースキルクールダウンを10%削減します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9e3b8265afe1a76cfc089a708b150d915b801c00563b7c2a0cc80768fcca38ac",
+          "status": "machine_assisted",
+          "text": "長袖ハリケーン"
+        }
+      },
+      "id": "partner-lapure",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "07f36d75463387d199589e52f540534ecf0a63adcce7cab1e4cc6b2c910d9f35",
+          "status": "machine_assisted",
+          "text": "このパルの攻撃と防御は、あなたのパーティーでお互いのための2%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b22906200aaa69eaf62fb1d50eedb60e18b12cdf82c2b0ef003b71293004a97a",
+          "status": "machine_assisted",
+          "text": "自己無の規律"
+        }
+      },
+      "id": "partner-leafan",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ef580e92b00414e2fde2e38c4fa7f6590c543a4c6788688a976a0450f4eff365",
+          "status": "machine_assisted",
+          "text": "発動するとダリザードとプレイヤーが透明になり、10/12/14/16/20秒間、敵に発見されなくなる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3c1a5dc3f5f377908509caf0b12c1ab2519df2451f8d55f99ab26dc95cdf1e7f",
+          "status": "machine_assisted",
+          "text": "あまりにもクールすぎて見ることができない"
+        }
+      },
+      "id": "partner-leezpunk",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "469263c1f1c867009e2ed47f2ed414ec43722b8b141beec25192661dfa34bf50",
+          "status": "machine_assisted",
+          "text": "発動するとチリザードとプレイヤーが透明になり、10/12/14/16/20秒間、敵に発見されなくなる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3c1a5dc3f5f377908509caf0b12c1ab2519df2451f8d55f99ab26dc95cdf1e7f",
+          "status": "machine_assisted",
+          "text": "あまりにもクールすぎて見ることができない"
+        }
+      },
+      "id": "partner-leezpunk-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "587521670cb505471fa89d898d7446da91caf1982eaf1d0605c2d39c87d7b541",
+          "status": "machine_assisted",
+          "text": "起動すると、プレイヤーの頭に飛び乗ってサブマシンガンを使用してプレーヤー攻撃を追跡します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3f3c0329672189a56bf59a16b13d8a03e48e721765d9be84d94e99d54ab58c5e",
+          "status": "machine_assisted",
+          "text": "カスターマックスリコイル"
+        }
+      },
+      "id": "partner-lifmunk",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5e95ceece967e475a7ffceceb3dd4b747a4e6f8bb494245a21ec15ab67ef0bbc",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーの矢は接触で爆発し,プレイヤーが攻撃したダメージのうち15%に相当する追加の損害を被る。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "53d4e9b10846c3d8277f3735e3dc77e07cc3d158046d18c12d57a93c15bddf20",
+          "status": "machine_assisted",
+          "text": "提灯の"
+        }
+      },
+      "id": "partner-loomen",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a312c6a2c69c1ebfa671b2ae7855e92c4020dab4c9b8e751ca929147b5256650",
+          "status": "machine_assisted",
+          "text": "有効にすると ジャンプ爪で敵を攻撃する。 ジャンプ爪を使ったパル x1.1/1.3 /1.6、2、2.5 15%のダメージ乗算器がある。 パーティー中 プレイヤーのメリー武器攻撃速度を十五%向上させる。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1efbb2cf872a918d8a57406e4798428ffd66a44ac94a0b431803c408154192d8",
+          "status": "machine_assisted",
+          "text": "クアッドコアのクリームストライキ。 闇"
+        }
+      },
+      "id": "partner-loupmoon",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b545b92d8332d9e939ed22654a5692bd5e15b0424f05a4500c0bb550d6b55373",
+          "status": "machine_assisted",
+          "text": "有効にすると 雪爪で敵を攻撃する。 雪の爪を使ったパル x1.1/1.3 /1.6、2、2.5 15%のダメージ乗算器がある。 パーティー中 プレイヤーのメリー武器攻撃速度を十五%向上させる。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b0922b64721a933959dd700a0e56ef4f454438dbfaa127c7d0420d3cba4e3697",
+          "status": "machine_assisted",
+          "text": "冷凍クリームストライク"
+        }
+      },
+      "id": "partner-loupmoon-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c869b9da50984b8638411fecd72615b38c95f56622e52076e238cd251e7c8b70",
+          "status": "machine_assisted",
+          "text": "一緒に戦っている間、プレイヤーとラブマンダーに健康として扱われたダメージの5%を回復するライフスティール効果を与えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ab219280ccc0004a1fbc16699b62f38c2e4f12283dfa26a73aed2c0b5384284a",
+          "status": "machine_assisted",
+          "text": "心臓のドレイン"
+        }
+      },
+      "id": "partner-lovander",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b559964b614a6b3e6b0aa0082519ef4a5de24d7e12c50eded1f4e0abe1ef346a",
+          "status": "machine_assisted",
+          "text": "拠点では、フワフラワは、良い精神で農場を埋める、作物の成長率が50%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dc216fa7f54356b386f29cc6818f8bd07dc12fb3b1dc210967487501567674a7",
+          "status": "machine_assisted",
+          "text": "花のブースト"
+        }
+      },
+      "id": "partner-lullu",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5237696a459060eee9bec223ae6550f0940dc9c31eee7ed4e7a1bf7a6758d9e9",
+          "status": "machine_assisted",
+          "text": "パーティー中、球体はパルに持ち込み可能で、運搬能力が300増加します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4da276f5f11d050f83c5b576ab967b88eb7bf200f21cdf4830a482529af183d4",
+          "status": "machine_assisted",
+          "text": "反重力"
+        }
+      },
+      "id": "partner-lunaris",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7d0c3a15ff925722ed217006d41ba96e531781408923eda1b841ef5192d636af",
+          "status": "machine_assisted",
+          "text": "有効にすると クイーンの優雅さは、プレイヤーとパーティーパル80/82 /84または86=90%で健康を回復します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "65aa60e1fa0e5cfc66df662dae2ecfb2d501002ef45684f111ab3be686f438a4",
+          "status": "machine_assisted",
+          "text": "収穫の女神"
+        }
+      },
+      "id": "partner-lyleen",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8c0a34129e0c5f5bd6e81a518073745aa002a6fbef43f90de135b31e071e94d9",
+          "status": "machine_assisted",
+          "text": "有効にすると クイーンの優雅さは、85/87 /89 +91 =95%でプレイヤーとパーティーパルを健康に回復します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "94e29869d2771a1a731236a89b909e1bc4bffb709308c65bff764f35c98890c2",
+          "status": "machine_assisted",
+          "text": "トランキルの女神"
+        }
+      },
+      "id": "partner-lyleen-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ff34ef7162e969f3650ce8cef2a3ea2fcbd91402cfc462eada6b5385c86f314a",
+          "status": "machine_assisted",
+          "text": "パーティーでは、プレイヤーがバーンに苦しむ敵を攻撃するとその敵は炎を作り出し連続的なダメージと接触した相手への攻撃の15%に相当する。 (積み重なってはいけません)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "03f639e66678e1e59c406f785ae68aca1cadec1f5f35dd80623d1e623235c8fd",
+          "status": "machine_assisted",
+          "text": "ファンタズマル・アルカナ"
+        }
+      },
+      "id": "partner-majex",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5d50d189f132813c783360e380acd893f7bd5a0d6102c1e29ee57685effa6602",
+          "status": "machine_assisted",
+          "text": "乗れる。 装着中 ロギング効率を220%、マイニングの効率性は260%向上します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "26b010b25f5780436141ea72116a7f2ec8d87058f6fe6ee990c4cc52e28a7c74",
+          "status": "machine_assisted",
+          "text": "ガイアクラッシャー"
+        }
+      },
+      "id": "partner-mammorest",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5d50d189f132813c783360e380acd893f7bd5a0d6102c1e29ee57685effa6602",
+          "status": "machine_assisted",
+          "text": "乗れる。 装着中 ロギング効率を220%、マイニングの効率性は260%向上します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b13d668584d182ff3b3fb2a56ff129b1213f536cc0739f3982659596e977801b",
+          "status": "machine_assisted",
+          "text": "クワッドマクスクロージャー 氷"
+        }
+      },
+      "id": "partner-mammorest-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b1a6a016a2a25028f676808ec199d3704b7d3b44d1fb19d87a8167bf442f29de",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中、すべてのパーティパルのアクティブスキルクールダウンは敵を倒すたびに30%削減されます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "31d913da43ad196e2ece06c4ece25ada433a000c04a55fa1ac2f4e70645530a8",
+          "status": "machine_assisted",
+          "text": "死の使者"
+        }
+      },
+      "id": "partner-maraith",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7a005809096a31033135fb1ff58ae3543b2abb51b791f89010ea5e22c27af807",
+          "status": "machine_assisted",
+          "text": "ランチに割り当てられたときにゴールドコインを掘り起こすことがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dd4e35e1158573815f6b9a366c202199c3f20d84bca5b9e8a9d6230438541795",
+          "status": "machine_assisted",
+          "text": "ゴールドディガー"
+        }
+      },
+      "id": "partner-mau",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6f218ac99a104f2a0e13ffb6713776c43f25195fde622b89eea7e2bee3d4b26c",
+          "status": "machine_assisted",
+          "text": "ランチに割り当てられたときにアイスオルガンをドロップすることもあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9a0c6f2e0ed89ab6e7112ed991ad5b070053014dcd2cd10414e46e8fc34eea82",
+          "status": "machine_assisted",
+          "text": "アイシー・ウィスパーズ"
+        }
+      },
+      "id": "partner-mau-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d68c7f9d149965ff0d63e11caf48d8c017c27e6027d06e96ec7693fcdc16bac3",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中は、アルパオーの防衛と移動速度を高めます。 ランチに割り当てられたときにウールを落とします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ce8b46270a67fb60fc86da7ce80512f204387b362ab24fbd7b400f88a3ade76d",
+          "status": "machine_assisted",
+          "text": "ウール"
+        }
+      },
+      "id": "partner-melpaca",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0031a61aa3d122c75b64cf1b4da58ef8f003a5817229c0ab3a9304f4d25c2a03",
+          "status": "machine_assisted",
+          "text": "パーティー中 プレイヤーの防衛力は50%増加します 電気パルは敗北時に40%以上のアイテムを落とします。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6d9de82b2052ebb2e0fbf128df74f47ecead06f2262749572f61db5d1576b0f4",
+          "status": "machine_assisted",
+          "text": "鋼製サソリ"
+        }
+      },
+      "id": "partner-menasting",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0031a61aa3d122c75b64cf1b4da58ef8f003a5817229c0ab3a9304f4d25c2a03",
+          "status": "machine_assisted",
+          "text": "パーティー中 プレイヤーの防衛力は50%増加します 電気パルは敗北時に40%以上のアイテムを落とします。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a3c3ecc2888716f9f70c76ff9815de183ad6e5c465295cbfd5771f2aaf465d41",
+          "status": "machine_assisted",
+          "text": "ゴールデンサソリ"
+        }
+      },
+      "id": "partner-menasting-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "79c2590728db125db327e9b3ab99575c82661a6adce24310b511a4ce584a5d7a",
+          "status": "machine_assisted",
+          "text": "一緒に戦っている間、ミミドッグは鍵を使わずに宝箱を開くことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "994dcf8c8745efe786d9b8365a68605203f1cb78e876f086ee169e0c0a4fd07a",
+          "status": "machine_assisted",
+          "text": "解錠の師匠"
+        }
+      },
+      "id": "partner-mimog",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40358e96f096249f26725478a42b27bd47933527b9a2f553092be73958f4027b",
+          "status": "machine_assisted",
+          "text": "マウントとして乗ることができます。 このパルの攻撃は、あなたのパーティーでお互いのために4%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e2d84207dacf31398d337b52c1f9cd95d6f2b884e8cdada22806db99e5e2370",
+          "status": "machine_assisted",
+          "text": "マグマ過負荷"
+        }
+      },
+      "id": "partner-moldron",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b6f43e639445c0efd35b37dfa85ca7c332d9d32716e90d705b6417db364d648e",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中はプレイヤーとパルの氷ダメージを25%改善します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d0194555647d3aba4aab710fca611ae955f2f5e7d176ffec9ef69e1d21991bfb",
+          "status": "machine_assisted",
+          "text": "夏期MA 氷"
+        }
+      },
+      "id": "partner-moldron-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "44448cd86228d2c690f0da3125410223e684b34a1145b2cebde8d4f7a941875c",
+          "status": "machine_assisted",
+          "text": "乗れる。 搭載中に手弾ランチャーを迅速に発射できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f04dd063a643d47a67534cfda6ca7c51ca2cbee75b251ffc766c47243268aef7",
+          "status": "machine_assisted",
+          "text": "パンダ弾"
+        }
+      },
+      "id": "partner-mossanda",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "44448cd86228d2c690f0da3125410223e684b34a1145b2cebde8d4f7a941875c",
+          "status": "machine_assisted",
+          "text": "乗れる。 搭載中に手弾ランチャーを迅速に発射できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f04dd063a643d47a67534cfda6ca7c51ca2cbee75b251ffc766c47243268aef7",
+          "status": "machine_assisted",
+          "text": "パンダ弾"
+        }
+      },
+      "id": "partner-mossanda-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "908b8a2fb7fe95e77615cec627393aed599dcd26036f488ee9e70eeda5df35f8",
+          "status": "machine_assisted",
+          "text": "ランチに割り当てられたら、時々ミルクを落とします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2633ae44aaefb11c41d49c1e0119d15db8230b983d163c421e0c7929c752ff9d",
+          "status": "machine_assisted",
+          "text": "製乳"
+        }
+      },
+      "id": "partner-mozzarina",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e2fb9f6ff6cea902b3f34e7ba11ea9bcee34bd5ee51fd4f0da54e7a696186e55",
+          "status": "machine_assisted",
+          "text": "パーティー中は、フリーズに苦しむパルのキャプチャ率を高めます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "50a6dc9027a809baf8bec9a32b3cd8ebb967fb6bce40edf9a1917fe2c442fa45",
+          "status": "machine_assisted",
+          "text": "ふわふわフラッター"
+        }
+      },
+      "id": "partner-muffly",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7956a8716258f8eae1208de660bc2c010d5da8f4507a5555674e242c6478bd87",
+          "status": "machine_assisted",
+          "text": "パーティー中 食材や食品の重量を30%減らすことができます。 別の氷パルとペアリングすると 回転速度も35%低下します (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c41fde74f491edd2e7075a7ef20691d7615daaabd3bc4bf11fe41c40f96faf07",
+          "status": "machine_assisted",
+          "text": "アイスモー"
+        }
+      },
+      "id": "partner-munchill",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "953e0948b9c377dfc9eb4dc129704610ba59b93a1ba77796db828e1ebaf539d4",
+          "status": "machine_assisted",
+          "text": "ベースでは、他のすべてのベースのパルの医薬品生産作業適性レベルを+1に増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "81665d5d11b1798602f393e876eb2b098cdff0b3a059b4eabb4fa88e10f5531a",
+          "status": "machine_assisted",
+          "text": "チャーミングな胞子"
+        }
+      },
+      "id": "partner-mycora",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f401a80fe5e21cfeefe4726cb7866b038b150527f9f6042037e2e29e9c224a4",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中にダブルジャンプできます。 ツインスピアーズスキルが有効になると、パーティー内のセイントールが現れてあなたと一緒に攻撃します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c7cbc0716d22f213e4c5a3fe71068b80226476115f842b75274391d5735e9752",
+          "status": "machine_assisted",
+          "text": "東方大王の 闇"
+        }
+      },
+      "id": "partner-necromus",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eedaa596c62b610d612c485950f7ac63c238d3eb839f3d1db8f03028c7832f06",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーとパルの敵へのダメージが50%増加します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "026af4e97471c9bd2caabe49e1bcdfabb9940f11d06c77eb9caa88ae9083b255",
+          "status": "machine_assisted",
+          "text": "抱きしめて"
+        }
+      },
+      "id": "partner-needoll",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "911d0de7e1da3010ca61b5f1861df9960a63ee0c6b0b57d1c994fe1b86fdebcf",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーの攻撃はアイビーカバー2を襲った。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e80f1bbcb3c9a458ee578efb6357373ae981fcf36714f81e20f3376beaa59362",
+          "status": "machine_assisted",
+          "text": "抱きしめて"
+        }
+      },
+      "id": "partner-needoll-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "03b034872a0a0c6e1974ad92d92bb181737850b7935cfc30e64bc36979f8db7c",
+          "status": "machine_assisted",
+          "text": "パーティー中は、水攻撃でプレイヤーのアタックを追跡します。 水上を移動することができます。 水面に上がれば、空中に飛び跳ねる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5cdd1b3fd9fd43cd2f68ef27152174b1130b89faaccd99f1f51d899430ac50d9",
+          "status": "machine_assisted",
+          "text": "大海のセンチネル"
+        }
+      },
+      "id": "partner-neptilius",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f0a762ab67ff09b86c2fa362973bf10fdc068b04016311826b9fd2a1e37998d",
+          "status": "machine_assisted",
+          "text": "一緒に戦う間、パルは+ 100%より多くの XWERMBのXq二魂を倒す。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d42902c0a53081a3166f5b5fe16bc5446018d56601d6f3be6a830f33a935cab0",
+          "status": "machine_assisted",
+          "text": "ソウルコレクター"
+        }
+      },
+      "id": "partner-nitemary",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "68844373a45f82777a5551f22bbd1a900b5729db80dc682ee8facdfd7001c731",
+          "status": "machine_assisted",
+          "text": "パーティー中、グラスパルの防衛を15%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "591acc41dde5a980b5b420d9da905a20c03766eed4e883c85db8a85a6786a61a",
+          "status": "machine_assisted",
+          "text": "魂バインダー"
+        }
+      },
+      "id": "partner-nitemary-botan",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "950a2900628c76574ac02c5fdfcae8a3aae2613e19fbec1d645bfdcfb7172080",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "507bc530eb6e04bf20c6eee71518763d3f0dc00bf10d468415be5866ca2d01eb",
+          "status": "machine_assisted",
+          "text": "旅行会社"
+        }
+      },
+      "id": "partner-nitewing",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dae099d70bcac6b30e2266331f8232e54858f589b9e5079cb37987a902ea9742",
+          "status": "machine_assisted",
+          "text": "有効にすると、近くのパル Effigiesの位置を検出します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "31b2a7f7c792a2ff866b26ee2a653f40f65b9a5fffb2869870ece169d3c0fe66",
+          "status": "machine_assisted",
+          "text": "クウデレ"
+        }
+      },
+      "id": "partner-nox",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "73437099041758bfe10c8142c593acd40f89c73ae80ff3247ed7e01b7ed4f164",
+          "status": "machine_assisted",
+          "text": "起動すると、ニャニミテは限られた時間の間近くの敵にショットガンを発射します。 パーティー中、プレイヤーのショットガンダメージを10%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0af134a5abe3477c1444a5ff9dbb2a5f5a45ed52800d7448eefa3e68ec60629c",
+          "status": "machine_assisted",
+          "text": "Shot-Nyanモード"
+        }
+      },
+      "id": "partner-nyafia",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d355254d885614bda4ab4e4c96ff7b929fbecef3e914d51b59514f2feeec201b",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中、プレイヤーの攻撃はソックス2を襲った。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "194bb4377dfc3a0708332ec620f486f8ae9a02f6bb073a30d1f72a662fb7428b",
+          "status": "machine_assisted",
+          "text": "栄光の霧"
+        }
+      },
+      "id": "partner-ophydia",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d0a82920ca24fcc25a6954289740a170c8e5d741df8de7684bb3cbf877c9c2f0",
+          "status": "machine_assisted",
+          "text": "パーティー中 弾丸で敵を攻撃すると、パルのアタックと防御が1%秒間5 s増加します。 この効果は30 times倍に積み重ねられます。 (積み重なってはいけません)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "51859273f02d7ac1e67d242dac28e1cde8610c1c7e6cc9ee889a506be6728973",
+          "status": "machine_assisted",
+          "text": "猛烈な雷雨 竜"
+        }
+      },
+      "id": "partner-orserk",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c6e5c0bfcee6c585f72283233a0a0435de44b1dc2f095f776efa2c3a56e65fbb",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中に三回ジャンプできます。 ベイントールを横に置き、敵の攻撃を一緒に行うためにSpear Thrustを有効にします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6147e21474b51aad99f3e2cb6b3821eb65eac4e144e520fac2ac7f2d399895f6",
+          "status": "machine_assisted",
+          "text": "の聖騎士"
+        }
+      },
+      "id": "partner-paladius",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "449e8f1ec79df79a07a9b502682c4c78bc8742d03073ce108342e5344842371f",
+          "status": "machine_assisted",
+          "text": "乗れる。 草の上に取り付けながら移動速度は155%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9e5d2e591c28659b268be17989f4fb6bb37b2940c526e9faa842434bbd86419e",
+          "status": "machine_assisted",
+          "text": "三波駅"
+        }
+      },
+      "id": "partner-palumba",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "02f862652340a572b395f7f8cdc1e9ca86cc705a04fc132ff11c02af31ab3769",
+          "status": "machine_assisted",
+          "text": "起動すると、プレイヤーはロケットランチャーを装備してペンタマを弾薬として発射します。 ペンタマは衝撃で爆発し、容量が無くなります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1af52c82628bd5d11bf6ccaf0a02d7c4503f51e695aa466b10e48b2c59c251fa",
+          "status": "machine_assisted",
+          "text": "クアッドコアロケット"
+        }
+      },
+      "id": "partner-pengullet",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "98e08e53d69aa6ba1f4c2948d2aace075049a3147a546f1f2ff6d2e832250559",
+          "status": "machine_assisted",
+          "text": "起動すると、デンタマがロケットランチャーを弾薬として発射する。 デンタマは衝撃で爆発し、容量が無くなります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7f80dc05080c6d3ebcd6cf76fc4652124fdd3e54c04b56d107666633aaf05b1c",
+          "status": "machine_assisted",
+          "text": "クアッドコアロケット"
+        }
+      },
+      "id": "partner-pengullet-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d03ea94706b9ac587f648794de69a42431d32d8ba8bc16d89c81a292b8c7fc3b",
+          "status": "machine_assisted",
+          "text": "パーティー中、Fire パルは敗北時に40%以上のアイテムを落としました。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a475577b4726a056a3753378bf6ac4b047c43708c3c87ca8853fe7cfd0b3f7ab",
+          "status": "machine_assisted",
+          "text": "勇敢な船乗り"
+        }
+      },
+      "id": "partner-penking",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "05845c32c25bb98b32812923931b0fca86d7b90b6a7797c4335740369be725cc",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーとパル'敵の弱点への水ダメージを25%改善します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "887321ebb0285704eb6680b0c3214af1a358a535999a73c1b822adb25afa9194",
+          "status": "machine_assisted",
+          "text": "耐え難いStormコマンド"
+        }
+      },
+      "id": "partner-penking-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "18339122389cfb1d99bac0f9748d3d49516b490513ea3d229eac6c8e7db51b90",
+          "status": "machine_assisted",
+          "text": "有効にすると なだめる花は、75/77 /79 +82 / 85%のプレイヤー健康を回復します。 基地にいる間 その他のすべてのベースパルの植栽作業適性レベルを+1に増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "394978c1c00a5014d0991a1e691afac743477a0c3931133f4426e1bb5b702317",
+          "status": "machine_assisted",
+          "text": "花の精神を祝福する"
+        }
+      },
+      "id": "partner-petallia",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0c4a5a7c98828587593cf6215d26ff6346b023ec110da0f67f55eee29a655cbe",
+          "status": "machine_assisted",
+          "text": "有効にすると なだめる花は80/82 /84 +86 =90%でプレイヤーの健康を回復します。 パーティー中 プレイヤーとパーティーパルは、草のダメージを15%減らします。 アイビーカバーに免疫があるのです (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "64453e8e6e6fe1753dd9c96d745d12447f60eac513f10ffed8c146c7d63d4102",
+          "status": "machine_assisted",
+          "text": "花の精霊への情熱"
+        }
+      },
+      "id": "partner-petallia-ignis",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10cbc6921e1b7cebd61d7b131a8599c57283ea3812c2109bfbaae88f877ff761",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーとパーティパルはドラゴンのダメージを15%減らします。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f5ae1d12b2e912055c51e440f065d35baccf78328a8fceb1f4c0d5ecdc0b0753",
+          "status": "machine_assisted",
+          "text": "パワークリスタル"
+        }
+      },
+      "id": "partner-pierdon-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e893fb5d777576f499f1ac504a736ff6917c4a28d812ad67ad895fa97679ce57",
+          "status": "machine_assisted",
+          "text": "乗れる。 雪に載せながら移動速度を80%アップ。 斜面を素早く滑り降りることもできます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25c203366cd87fd1058e2db9d0d9a71daac588e1cceff9f0d59de94994d72c86",
+          "status": "machine_assisted",
+          "text": "雪山のライダー"
+        }
+      },
+      "id": "partner-polapup",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c46a7abc266dbfdb46ba0ed06b38fce7a433de71cfed748e7cfa6f2c2703a019",
+          "status": "machine_assisted",
+          "text": "乗れる。 雪に載せながら移動速度を80%アップ。 斜面を素早く滑り降りることもできます。 ゆっくりスタートするが、滑空しながら最高速度を叩くことは冗談ではない。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c5d88f7f31878147fdfb65f819ef870b2caa1fe02aed474f8f85387ad7fff519",
+          "status": "machine_assisted",
+          "text": "雪山スライダー"
+        }
+      },
+      "id": "partner-polapup-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "47567d4198cc9105329bd946ebfaf553cc7bf4122c39f02d78c033efb134be97",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーとパルの敵へのダメージがポイズンに50%増加します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1bb4736a42abe2edcff8031da4f2a2f21c3ef075b0a1307397639b14471bf4d5",
+          "status": "machine_assisted",
+          "text": "ファントム毒"
+        }
+      },
+      "id": "partner-prixter",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3d854aab2555a5a0fbc033f5eb7505a875e2bddd2d80f0f4ae7aac2268338c6e",
+          "status": "machine_assisted",
+          "text": "アクティベートすると、ブッサンダーはプレイヤーの攻撃タイプをエレクトリックに変更しアタック量を30%増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5c84cf34cfa939025e2f5bb10fbf26cb965500c8faedc5da23eb1c414d5d3a1d",
+          "status": "machine_assisted",
+          "text": "サソリ長波"
+        }
+      },
+      "id": "partner-prixter-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d8e7c9b675c1c46946b6ef2a1f1799f67558456d796fdef7b762c5bde76d189f",
+          "status": "machine_assisted",
+          "text": "基地で、プラムルリムの祈りは作物を祝福し18%収穫を増やします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aa5f979e87bc489fb0214eb031ec134fdc6c508419cbfb3b3727077198a509ea",
+          "status": "machine_assisted",
+          "text": "豊作祈願者"
+        }
+      },
+      "id": "partner-prunelia",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7915e9cf6e26ac0bf2f8a3c90b477a0c7bc64dae43b3434cad39ba73435fd601",
+          "status": "machine_assisted",
+          "text": "ベースでは、他のすべてのベースパルの発電電力作業適性レベルを+1に増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "90523041178a6ae4ee8544da6cf3c0335973d43a091e5aac90cff533f9fe9262",
+          "status": "machine_assisted",
+          "text": "クラックルブースター"
+        }
+      },
+      "id": "partner-puffolt",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6e0458fcfee4cc6f47d9d91efb3e5317fb42fbd470b6e732b50c2e5f4140a8ad",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーのメリー武器ダメージを10%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d58e862c658debe730eeef990398fb2ad0320df139c22d5c9a41dad4fd035e32",
+          "status": "machine_assisted",
+          "text": "ベストボーイ"
+        }
+      },
+      "id": "partner-pupperai",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b3467d18f7f9889f30bacf99f9a4c41dac9843fcb955553494c5298685d63567",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中、プレイヤーの攻撃タイプをFireに変更しアタック率1%アップ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5f3fe6d448a0354edbb5b758d5f3a108acd02f723ee52e41e8a0c91a2f0ac142",
+          "status": "machine_assisted",
+          "text": "赤うさぎ"
+        }
+      },
+      "id": "partner-pyrin",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "916d48750fd4da2cac4ba8533ea6c881b1d3d03399d0fa02a1c4446eb005562d",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中に、プレイヤーの攻撃タイプをダークに変更しアタック率1%アップ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9bf6df99f269f023ca7ab3e3a24745811a54ed02f060182651c0ad832c052f59",
+          "status": "machine_assisted",
+          "text": "黒うさぎ"
+        }
+      },
+      "id": "partner-pyrin-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "93d95fb7695608fa3da03efaf1bb59ad4e47e3b544c1b0f2bb3016ba2cc6556e",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 パーティー中は、ドラゴンパルの攻撃を15%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f163aa53fcafc4ed850a9e63580cc82cc434d11abef7178fad3aa806e3e1366c",
+          "status": "machine_assisted",
+          "text": "スカイ・サクスターマックスの映像 竜"
+        }
+      },
+      "id": "partner-quivern",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9556a4a9ac13e6ad4ebf29336efc9b9daca32664fb3bdfd146d166b342b18aa3",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 マウント中、プレイヤーの攻撃タイプを草に変更しアタック率1%アップ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8d9c5639968d8e98cae57279ce8a8db0ef5d5d9a473043881465fc6611c2760e",
+          "status": "machine_assisted",
+          "text": "エクスターマックズ効果 草 竜"
+        }
+      },
+      "id": "partner-quivern-botan",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e847773149e7ebe89f33b711be098337b6019e2a938cc3a3a49c6e45fa0f066",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 マウント中、プレイヤーの攻撃タイプをFireに変更しアタック率1%アップ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2b1a42c3b6e5853f218772a70f6e18b9aded6b4a8ada3fea4e07a3dcc7d33d46",
+          "status": "machine_assisted",
+          "text": "炎の翼"
+        }
+      },
+      "id": "partner-ragnahawk",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e0fe04757defc1d13e022c01533dca0665e8442983f788f6b382cc0d552a3cd",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中にダブルジャンプを実行できます。 このパルの移動速度は、あなたのパーティーでお互いのために5%増加します。 (イヌズマを除けば)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "67695b33c073b7020a29096c5d967438440760011804627c6f32cc7577ce583d",
+          "status": "machine_assisted",
+          "text": "稲妻羊飼い"
+        }
+      },
+      "id": "partner-rayhound",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28623cf33c3afa251a80f6e98eb403c84cc0244a126ac9ae4d184c552b8e805c",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中にダブルジャンプを実行できます。 パーティー中、氷の防衛パルを15%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5ae0a3928f734a0828d5666dfc3e767999ceccf063184648c00e60b70a88112d",
+          "status": "machine_assisted",
+          "text": "雪の羊飼い"
+        }
+      },
+      "id": "partner-rayhound-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "14e394e7e2b74f0462eb81818412b984dca12bbfefdf6999106275d489ed6dcf",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中、プレイヤーは耐熱性+2を獲得します。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cd626b4b8a2de95016341955cbd11f9406c04567e5de4dbc7a3758f3d90ef49f",
+          "status": "machine_assisted",
+          "text": "クールボディ"
+        }
+      },
+      "id": "partner-reindrix",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40afdfe1744434645635c9dac5f8b12511723284b84ed7ab559b40dbfa9ef42d",
+          "status": "machine_assisted",
+          "text": "乗れる。 搭載中にミサイル発射器を迅速に発射できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1e7c82565c4af1ff2355623f696fbc80a7494b04f1cda4410a6742cc49f5c966",
+          "status": "machine_assisted",
+          "text": "空腹ミサイル"
+        }
+      },
+      "id": "partner-relaxaurus",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40afdfe1744434645635c9dac5f8b12511723284b84ed7ab559b40dbfa9ef42d",
+          "status": "machine_assisted",
+          "text": "乗れる。 搭載中にミサイル発射器を迅速に発射できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "77f07ac0262ec2859f8ab160c98bfc009b28f7ae8a011cb746442f44221676b6",
+          "status": "machine_assisted",
+          "text": "ミサイル党"
+        }
+      },
+      "id": "partner-relaxaurus-lux",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b31057b30e311e380f59ba13de23fd475809ae116855ce2a5fc55ee40584cf32",
+          "status": "machine_assisted",
+          "text": "パーティー中、プレイヤーの攻撃はバーン2を襲った。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4146f777d21547a2460837ae9b1cb91c4ff7475749b868dfea1be824a6b94d5d",
+          "status": "machine_assisted",
+          "text": "舞台戦闘"
+        }
+      },
+      "id": "partner-renjishi",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8d7f7f7ceee72b23082c21e4b9c7bd7378225d9f60fd211e4e4b70b29ce84990",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中は、すべてのタイプの鉱石の重量を30%減らします。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fbd678e4fe02d3ef7fd330935e9e594790c0c408f8e293e0100635396bea4185",
+          "status": "machine_assisted",
+          "text": "獣"
+        }
+      },
+      "id": "partner-reptyro",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5144c40ac54fc7e07e65990f1dc70839cc23569cea9c17796828c1d35650f060",
+          "status": "machine_assisted",
+          "text": "乗れる。 パーティー中は、すべてのタイプの鉱石の重量を35%減らします。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7e57fbc534a19f4e64735878c814a9cbf54653cf0905683de9a00b7dc79f17c2",
+          "status": "machine_assisted",
+          "text": "東日本大震災の獣 氷"
+        }
+      },
+      "id": "partner-reptyro-cryst",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "64658cc8bb79d77787a059440915c7ec107a2975fe1dfc1bd60c7a79147c5863",
+          "status": "machine_assisted",
+          "text": "パーティー中 中性パルの攻撃を15%増加させます。 (積み上げないでください)基地にいる間 他のすべてのベースパルのハンドワーク作業適性レベルを+17に増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aeeb498c16c7cb3264801fadae47e7d89f92229f29a24c1eb60bd61ce9d10ec4",
+          "status": "machine_assisted",
+          "text": "ハッピーゴーラッキーバニー"
+        }
+      },
+      "id": "partner-ribbuny",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0c6f50b839022a9041a7ae8ed7a44cf3d9e047fb97c2361cdddc0024251d199c",
+          "status": "machine_assisted",
+          "text": "パーティー中 プレイヤーとパルの草ダメージを敵弱点に25%改善。 (スタックしない) ワークベンチで作業する場合の効率が27%向上 武器組立ライン その他関連施設"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "27d0d5233eaa189d7b625d7307ef373bdfe13f5f71096879b53ddf5b1c8974a5",
+          "status": "machine_assisted",
+          "text": "カスターマックスの「」 地"
+        }
+      },
+      "id": "partner-ribbuny-botan",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7df21504aae294e6600f79a226e8b48f640a0e5dea8d16a423f116a238709dbf",
+          "status": "machine_assisted",
+          "text": "パーティー中は、プレイヤーの弓ダメージを10%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "829587c7239b777bd043db1d7be3bf0128fca7d82a8594ef5b3bc1937fadce22",
+          "status": "machine_assisted",
+          "text": "アーチャーの地盤"
+        }
+      },
+      "id": "partner-robinquill",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5441d221a5389ae9168e9d6db177de2a6ff81284d1c129e651f3f7c931ac84c2",
+          "status": "machine_assisted",
+          "text": "パーティー中は、プレイヤーの弓の充電速度を15%向上させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb0a5fe1532bcf637543edc9331d41abd0e03db93c90f876d1314b8bc68d7ada",
+          "status": "machine_assisted",
+          "text": "マスター・アーチャー"
+        }
+      },
+      "id": "partner-robinquill-terra",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76b06cd0ba64e8b43c179e1c5d02569d180cd295034233919baff73b33b21bd9",
+          "status": "machine_assisted",
+          "text": "パーティー中、ファイアパルの防衛を15%増加させます。 (スタックしない) ランチに割り当てられたときに、Flame臓器がドロップされることがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9467bb3fac678de82b77aa191b4fcb70a49cbd003db18c3869dec97f576d4b16",
+          "status": "machine_assisted",
+          "text": "小さな火花"
+        }
+      },
+      "id": "partner-rooby",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "37f5d0698d1129db1fd5a161cda716aa05645f799f0bad2467e15529bdcc0829",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 パーティー中、ブラインドに苦しむ敵へのプレイヤーとパルのダメージを50%増加させます。 (積み重ならない)"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "709f1a68dd7986484f12a85cec8e95c34828caa59cc643a48831884cbd35dcc1",
+          "status": "machine_assisted",
+          "text": "カスターマックス-ネスタ 闇"
+        }
+      },
+      "id": "partner-roujay",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a357f35df417218bb07e515c5af3cc69f4b61c99d5bc5aa8908b10ce881578d4",
+          "status": "machine_assisted",
+          "text": "乗れる。 マウント中は、石を破壊する効率を500%向上させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ba8befc1626d676876749999ecc9213f9786206287947f5af191b86a539347c1",
+          "status": "machine_assisted",
+          "text": "ハードヘッド"
+        }
+      },
+      "id": "partner-rushoar",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "47cf07374c8fdbf876fc6bccf5a890a424c19ca0c274fef2037e069400c36f97",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 マウント中は、ニュートラルとダークの攻撃を15%強化します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e837b54d71137320ad584e3686d51ca60743453cc9149b175b60e2a1f84c7762",
+          "status": "machine_assisted",
+          "text": "天の闇"
+        }
+      },
+      "id": "partner-selyne",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ffebe7eaeebbbdf2ce92b6e44ab9bef0ff8ccf3b3f3dbea8ebc8062bde73fb23",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 飛行中は、移動速度が上昇します。 マウント中にダークアタックを15%強化します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "201e23e0dc5be562ec055f5fa257a912bd6dc559c708bc21e87b3014168cc2c4",
+          "status": "machine_assisted",
+          "text": "DNAの修飾"
+        }
+      },
+      "id": "partner-shadowbeak",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f3a736f88d8a8343e0bea1c08e364992ec0c49de1f94c3ad27860ba64ce60157",
+          "status": "machine_assisted",
+          "text": "フライングマウントとして乗ることができます。 このパルの攻撃は、あなたのパーティーでお互いのために4%増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f9b3c6cf9513ba3ce30763f3f179950f9af8b8ac9f2e1fdc1515cfc6c1d906d8",
+          "status": "machine_assisted",
+          "text": "Azure のガバナンス"
+        }
+      },
+      "id": "partner-shaolong",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "27bcfd48390ff6d3a0ca7a38558664f5cdca4aa49e7c47729b1ba3b1106fe0f8",
+          "status": "machine_assisted",
+          "text": "乗れる。 牧場に割り当てられたときに、時々キノコやカヴァーンマッシュルームを落とします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5a1aeb91ac35072403d2ec9c1e6bf7a056809dd23f078384fd9cfb2a057a3ded",
+          "status": "machine_assisted",
+          "text": "ランパント胞子"
+        }
+      },
+      "id": "partner-shroomer",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b08f561a67537488519dc43886fef7a199f8014bcd5a4c792c630f9ffaabc2aa",
+          "status": "machine_assisted",
+          "text": "乗れる。 基地では、その神秘的な胞子が基地での同盟国のSAN値が10%減少する速度を遅くします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8984cdb69803d2c91a8303b01d75038008f6ae8b0fc51a5ef71b174d7cb21349",
+          "status": "machine_assisted",
+          "text": "の腐り"
+        }
+      },
+      "id": "partner-shroomer-noct",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "342e9e9a3cf8e4d04484792951eed1c20d034fbb9b3d1f5d42223fda9f2eeab9",
+          "status": "machine_assisted",
+          "text": "有効にすると ブリザードスパイクで敵を攻撃する。 このパルはBlizzard Spikeを使います。 x1.1/1.3 /1.6、2、2.5 二.五のダメージ乗算器がある。 牧場に割り当てられると、高品質の布を作ることがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e7ef6ab8d68d1360099015e58c0ae76107d52ddade96534456a4011b1547b65",
+          "status": "machine_assisted",
+          "text": "絹のシュラウド"
+        }
+      },
+      "id": "partner-sibelyx",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "19aacd7769f062c6e5e0bd40455aad6391f6a470fdde592e3a73a76500c0b043",
+          "status": "machine_assisted",
+          "text": "パーティー中、中立パルの防衛を15%増加させます。 (スタックしない) ランチに割り当てられたときに、高品質の布を作ることがあります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ddd0b6253508314f5cbf8e016a1bc5293171906b307bb315c92d199382b8ec98",
+          "status": "machine_assisted",
+          "text": "金色のシュラウド"
+        }
+      },
+      "id": "partner-sibelyx-primo",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1b8226b04e1f25d953b272cc5c772c8eaed1c1bfc5569b1b0ab86e5f0702d04f",
+          "status": "machine_assisted",
+          "text": "パーティーでは、プレイヤーがアイビーカバーを受けた敵を攻撃すると爆発し、「アタックダメージ」の1%に相当する追加の損害を与える。 (スタックしない) また、プレイヤーとパルの両方にワールドツリーの爆発胞子に対する免疫を付与します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "169e61b6872fbab2c894b3e3e9e2c5df61fd515594ab12946cc6ae7b86743561",
+          "status": "machine_assisted",
+          "text": "胞子"
+        }
+      },
+      "id": "partner-silvance",
+      "kind": "skill"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "080f3acf17fb291baa9ecb25372b3364d39fd89ef93bc8d8f52a8c5602dcf6ac",
+          "status": "machine_assisted",
+          "text": "有効にすると オオタチウオはプレイヤーのカタナになります(攻撃:2600/ 2700 / 3000または 3400)。 正常に戻すとすぐには戻らない。 オオタチウオは容量が無くなる。 また、居合ぎりを使えば無力化される。 3900"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "48623d4ab079af22c56e1261547e7807c98f554d1d3e48d2cd59dd9eacc63912",
+          "status": "machine_assisted",
+          "text": "魚のフィレット"
+        }
+      },
+      "id": "partner-skutlass",
+      "kind": "skill"
+    }
+  ],
+  "schemaVersion": 1
+}

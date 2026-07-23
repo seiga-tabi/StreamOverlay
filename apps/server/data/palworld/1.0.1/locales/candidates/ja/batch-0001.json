@@ -1,0 +1,2706 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed50bc2bbc19f7febb78d03e2c5d44afb8f8e9ec3e1e165eea1c60ccd1968332",
+          "status": "machine_assisted",
+          "text": "装備すると空中でダッシュできるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40f7caa16d19395afe1a76c98a44b1bf71f621c0bbbdb8faf0c89a71eb531836",
+          "status": "machine_assisted",
+          "text": "エアダッシュブーツ"
+        }
+      },
+      "id": "accessory-air-dash1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e15469ef95d8f3439a8b778456f1922c40827c9ade36a27ee6cee719a808d866",
+          "status": "machine_assisted",
+          "text": "プレイヤーが装備すると空中でダブルダッシュを行うことができるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0461e38337ce44b046372aaf2ddb9a34f9f14d0200b858f6444659f7f954fca7",
+          "status": "machine_assisted",
+          "text": "ダブルエアダッシュブーツ"
+        }
+      },
+      "id": "accessory-air-dash2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af8e710ba590d29ab5b8166bb1e136a9989333e8064f10d9ace9c2f9a41f658e",
+          "status": "machine_assisted",
+          "text": "装備すると空中で三重ダッシュを演じることができるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9c5314e790091c9acb15f645610b0ea46c9fd59a6b838f94e57e90aeb468a044",
+          "status": "machine_assisted",
+          "text": "トリプルエアダッシュブーツ"
+        }
+      },
+      "id": "accessory-air-dash3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1b52a15a1df9943df30ab82254814b58cf16e3b70b0a70ea37754abdbf058be9",
+          "status": "machine_assisted",
+          "text": "入水ダメージをわずかに軽減するアクセサリーです。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "42c308bff032013e12923604572a17af211adfdcb729a3a8852492d532568acf",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 水"
+        }
+      },
+      "id": "accessory-aqua-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "66696fbd425946ae1b9fcacc2fa22a2fe7c1a4085a908dface3831f2c28c7490",
+          "status": "machine_assisted",
+          "text": "攻撃をわずかに上げるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c1930b2bcfb811d9bc185e32982ee8b31ca41a3170d1e2dd001038eff989ba7a",
+          "status": "machine_assisted",
+          "text": "攻撃ペンダント"
+        }
+      },
+      "id": "accessory-at-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b59c14f7a065bf93b5cd8aeac7dd233d9cd65a908ed9966b2fb0ed3ab364dae8",
+          "status": "machine_assisted",
+          "text": "ロールとサイドステップの無敵期間を延長するアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f7bbae117bf91d7d3305ec1f2a5bbe0d6a2dc397a4816b65606ed17a83a332bb",
+          "status": "machine_assisted",
+          "text": "ファントムリング"
+        }
+      },
+      "id": "accessory-avoid-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "246bb12afa03f7c5085d11a4b8b5b835900c40c9383fa6853ed87d69ce7da2a3",
+          "status": "machine_assisted",
+          "text": "冷えに強いアクセサリー。 氷のダメージを大幅に軽減します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "59f0c3c4074d006ec075b5d117066fad5b4da243022d35b83a4b483580c6eb24",
+          "status": "machine_assisted",
+          "text": "クアッドマックスチャーム"
+        }
+      },
+      "id": "accessory-cold-ice-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6f914481aa49c4ee239b51264b2b0ca00d4d604f40b4fbbdc01967605e5d3b8b",
+          "status": "machine_assisted",
+          "text": "耐寒性をわずかに高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2e67f849a42b5ed3c476f97a87153af8b90bb5eebe4bb28e63f3880a305033be",
+          "status": "machine_assisted",
+          "text": "熱下着"
+        }
+      },
+      "id": "accessory-cool-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e4b6ea3a85e346a4a702fa074f361c465258738c5907c66bbad6154f21318112",
+          "status": "machine_assisted",
+          "text": "入ってくるダークダメージをわずかに軽減するアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2135286da9cf095b4ef2d14f6ec389de4ff40b0f6a80740f9575eab58bb61952",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 闇"
+        }
+      },
+      "id": "accessory-dark-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6960f1d43a0d1e79b6fad6db08d52ceff65e29262f685ae65789a76e64f5185c",
+          "status": "machine_assisted",
+          "text": "少し防衛力を高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bc6c4ea48df41f149a2d5b7bacbd1b8553537b43f8e0628a9529790c1097996",
+          "status": "machine_assisted",
+          "text": "防護"
+        }
+      },
+      "id": "accessory-defense-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9f6c0acee7e59fa5912299c86743bde065e0ae5c3755b6e214d1fd3e8969f57",
+          "status": "machine_assisted",
+          "text": "防衛と健康を大いに高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8734cc7d22493269a2d35f95925ffd7a384dea93fac6eef7a103b664a91353f5",
+          "status": "machine_assisted",
+          "text": "夏期マックスのベルト"
+        }
+      },
+      "id": "accessory-dfhp-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d0d8303e06a2c3778c2e292c969731d36d6fe01e1694f27fa4c1f138cedc76c0",
+          "status": "machine_assisted",
+          "text": "入ってくるドラゴンのダメージをわずかに軽減するアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "373786a7478221d3cd3da7c8d421703773ea70ae817f7807d2aec71f1e06ad27",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 竜"
+        }
+      },
+      "id": "accessory-dragon-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9914e4b128da33d1ca2b26e5df6a394e4afc980e083cfe7d580a18cec8e28f54",
+          "status": "machine_assisted",
+          "text": "着地時のダメージをわずかに軽減するアクセサリーです。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d10ad9ef5b23b24ea192e6cd9cce7c94e2fc69d5e9dc2ca3ae43f77bc2edb758",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 地"
+        }
+      },
+      "id": "accessory-earth-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ae5cab8d1f64e856ae2d422039cb2c6afe1fafe072c09a54efc2573d15b050c4",
+          "status": "machine_assisted",
+          "text": "特殊繊維を使用した軽量かつ耐久性のある下着。 爆発による損傷を排除する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b544473254643e3e110b2beda7c01c44ed3cb6893e3aff53ae2ecd3f7cb86af",
+          "status": "machine_assisted",
+          "text": "耐爆アンダーシャツ"
+        }
+      },
+      "id": "accessory-explosion-resist",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "002faa14b0504ade53e5bd4d12e3008b059fd19b029092402f6699d92489b398",
+          "status": "machine_assisted",
+          "text": "入射する火災のダメージをわずかに軽減できるアクセサリーです。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7e0970b0a1214253b3d85edd905c0b98c881794601407a35c949c7cffc630acf",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 炎"
+        }
+      },
+      "id": "accessory-fire-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "774d818d6ca9da44ac688ee6d758118d1e34e1b6b952c93a7df65b33f0de8ddf",
+          "status": "machine_assisted",
+          "text": "耐熱性と耐寒性を飛躍的に高めるアクセサリー。 健康も大幅に向上します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4d828b0058d3766ed0289434577f8eccb961f2720e66f0bdde50f6d5a31f1e74",
+          "status": "machine_assisted",
+          "text": "ヴァンガードチャーム"
+        }
+      },
+      "id": "accessory-hchp-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7054e6c5088574b7fc93e7f7e52b8b12feb9a4036f81c0a29edadde5de0a1752",
+          "status": "machine_assisted",
+          "text": "耐熱性と耐寒性を飛躍的に高めるアクセサリー。 また、輸送能力も大幅に向上します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3e980bdc5e6b0c88190078fd69f03fc1fbfc42cffc2c6cc5b53b028ed67b3442",
+          "status": "machine_assisted",
+          "text": "ワンダリングマーチャントの魅力"
+        }
+      },
+      "id": "accessory-hcmw-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fc23e8319742547433cbe629553b417fb1d3f0986331b9d67d1f15f9c9cd6be9",
+          "status": "machine_assisted",
+          "text": "熱と耐寒性をわずかに高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f885b2fe3ffb6a4db809d66a982f2e3c0a03fd6bfa780e08bb58b6f073eb7bc2",
+          "status": "machine_assisted",
+          "text": "マルチ気候アンダーシャツ"
+        }
+      },
+      "id": "accessory-heat-cold-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4e86d7353bb461af89d2f495c8958d8b98c27ae05df64b3300965e8da88e98fa",
+          "status": "machine_assisted",
+          "text": "熱に対する信じられないほどの抵抗を持つアクセサリー。 入射火災の被害を大幅に軽減します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dded506b0ab7b9c75046a09bd01b6a62c38c1c28ddb622edd2b4814aefeb3009",
+          "status": "machine_assisted",
+          "text": "クアッドマックスチャーム"
+        }
+      },
+      "id": "accessory-heat-fire-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "36d7ac6f1108953bfab8c7067c7f34a8150509f15cb7ea97b9fde70f825b0f39",
+          "status": "machine_assisted",
+          "text": "耐熱性をわずかに高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b6795a76b1abf54f6d26b444252719524d12e7281e0a8e50e334cb28e7a26b8e",
+          "status": "machine_assisted",
+          "text": "耐熱下着"
+        }
+      },
+      "id": "accessory-heat-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "58452ff8e971c9ec4b73df86fe7462e0cc77f2d12cec92fece4d70a286deeb5e",
+          "status": "machine_assisted",
+          "text": "健康を少し高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1e920e6c8648e6e5aa4b96da4dcfedb6b5643ae54eeea0a9e26db6b71702dd78",
+          "status": "machine_assisted",
+          "text": "保養"
+        }
+      },
+      "id": "accessory-hp-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a1a64ac49564c359a580c2e186e3af2c29e374ace3210cb11a58d6a1b7116f62",
+          "status": "machine_assisted",
+          "text": "入ってくる氷のダメージをわずかに軽減するアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b49477d229d74def0bc121499cbef929b0a64827d11fb5518a59fa73c1366eb0",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 氷"
+        }
+      },
+      "id": "accessory-ice-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6f7cdbd69bc6ad4e94104ca71ca90c8e0806a3f7c43de073e0b545af24288b4f",
+          "status": "machine_assisted",
+          "text": "装備すると空中でジャンプできるアクセサリー。 また、空中ダッシュも付与します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e84c669c46df1ef3f4e0ffc86abc7cf8001239e557f124c068abb850afff9436",
+          "status": "machine_assisted",
+          "text": "エアウォーカーMk.I"
+        }
+      },
+      "id": "accessory-jump-air-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4d2ec1e15d98ad78708256cf095c3dbb10e6756de0a3e88c08db6a377a810ce4",
+          "status": "machine_assisted",
+          "text": "装備すると空中でジャンプできるアクセサリー。 また、ダブルの空中ダッシュも付与します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ac9ce22d6c4f9c9c5348d148a3d365e3296702704358119a2ae0172dc70ff2bb",
+          "status": "machine_assisted",
+          "text": "エアウォーカーMk.II"
+        }
+      },
+      "id": "accessory-jump-air-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b0c70441c196e8c9d1ed0d7817d28059bb783c0af990a8ce44f7b5c688d86036",
+          "status": "machine_assisted",
+          "text": "装備すると空中でジャンプできるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "efddae886a908c3c5de472fa314af31458c44bcdae54d56d177e0bf8da5d15e4",
+          "status": "machine_assisted",
+          "text": "ダブルジャンプブーツ"
+        }
+      },
+      "id": "accessory-jump-count-increase1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "34340db4f4d84929be93816aea0ce26e506c7d8b67b99780e0bbcee3a81d48dd",
+          "status": "machine_assisted",
+          "text": "装備すると空中でダブルジャンプを行えるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d8530595ac2641d902bfcaf5daa2589ab84d0159c49442fde512fc026f2057c9",
+          "status": "machine_assisted",
+          "text": "トリプルジャンプブーツ"
+        }
+      },
+      "id": "accessory-jump-count-increase2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "75e10069d6c874fa35bab31b7d1b6a092d148d1218564eb208902a17a2701115",
+          "status": "machine_assisted",
+          "text": "装備すると、プレーヤーのジャンプ力を増加させるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "66c9b5751405e29c2e55285575c8378aa60dd9155299d9b8e066d6cf8d30d5af",
+          "status": "machine_assisted",
+          "text": "反重力ベルト"
+        }
+      },
+      "id": "accessory-jump-power-increase",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "951041a39eb6c0a16ce7b91972cc8cf42366760c99948c9ba8f2b1ee83e5cc23",
+          "status": "machine_assisted",
+          "text": "入ってくる草のダメージをわずかに軽減するアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d5b12aa4210f7ba6c7b5ad52dae09135124ef9b4ea237fb13fa6adcbe9c6ba3",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 草"
+        }
+      },
+      "id": "accessory-leaf-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aaa144d5262c6438bbcc1f5da85d6b4f9951b503192fb415b2c77d3ae482c3d8",
+          "status": "machine_assisted",
+          "text": "搬送能力がわずかにアップするアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c2028327fc86304c8d5c3fae2408f1eebfd548fcbe1b45ca3ef489cce6b67c24",
+          "status": "machine_assisted",
+          "text": "貨物の輪"
+        }
+      },
+      "id": "accessory-max-weight-up-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e123a623a8d029806569ca3c056448b459a13613cefb9b27e4d175787cdf32c",
+          "status": "machine_assisted",
+          "text": "パルのカメラ用アイウェア。 着用者の攻撃は、ターゲットの健康を1未満にすることはしません。 隠されたパル二の可能性を明らかに。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "433b5697099f14962c8b82b8160715eeea14844ef150209569ef3e46051b2c22",
+          "status": "machine_assisted",
+          "text": "夏期MA パル"
+        }
+      },
+      "id": "accessory-nonk-checker-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cfaaaf5fb0826259e214ee52e6edf73ea601bb7265d022ba41991c5f3fe93e5d",
+          "status": "machine_assisted",
+          "text": "太平洋のリング。 着用者の攻撃は、ターゲットの健康を1未満にすることはしません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3afc393a8ee222ab62eaa34e7618a9b6900568badde8ba0d3e7d008d6a50ba7f",
+          "status": "machine_assisted",
+          "text": "慈悲の輪"
+        }
+      },
+      "id": "accessory-nonkilling",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4ed8470a890b2470e61531110449ddee7b03c60d21af2f41ca1e5fe9daa5de2b",
+          "status": "machine_assisted",
+          "text": "中性ダメージをわずかに下げるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "177d2138be9611a5ae3d4684083d65eed9b7be09a3ebb714cfe16cb8ab28fb93",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 無属性"
+        }
+      },
+      "id": "accessory-normal-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af077af74f4892ff238d3ebd5fd4d9fbdfbf2e114864b2c07b77e50cd8c8611a",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うというダークダメージを大幅に軽減するアクセサリー。 また、パルがあなたと一緒に戦うドラゴンのダメージを大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "84fe495a5ec4afad641a564e9d532f0956015b067800f7b1ee9e26ffb0abf108",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-dargon-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0b220c76e349ff1727dec02c9c0820346918648e7855766d06dc0866a2bda344",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うことで、中性ダメージを大幅に軽減するアクセサリー。 また、パルがあなたと一緒に戦うダークダメージを大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed434bd17647e4e518cc6508b1e48a82fdd5be0a289b1c4e25caf727e4a4fea1",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-dark-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "198ef51359c98c9012729ee51a447e0f9ff4ea1638520d6f152f5604e4455c0e",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うことで、電気的ダメージを大幅に軽減するアクセサリー。 また、パルがあなたと一緒に戦う地上のダメージを大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d81c6acc09ff7594c134173fe6e4e8219da17bfb1577ef404142cfb747a01635",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-earth-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "00ff276b4ff342e7df0d4b5639b7d496d3a2a4e3bccfcd7080ab18c755151621",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦う水のダメージを大幅に軽減するアクセサリー。 また、パルがあなたと一緒に戦う電気的ダメージを大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "729383fa2bfb73efa9854246fda24cbf1a3c6e3605ddd9b4fab222e6e31e2130",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-electricity-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9a5997c1be42cffec41b66e4674f6443f158f9b6ccabaaa56f7b50a338682e91",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うことで、草のダメージを大幅に軽減するアクセサリー。 また、パルがあなたと一緒に戦う火災の被害を大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "04d95c6d1d3da299d20f9ed310c8e18569988aacc53ccc6a7b2b1954567888b9",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-fire-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "953f9a807c574b2f2a9672b31afe4dc19300f928cf9a5b990ed191c30b3f8f76",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うことで、氷のダメージを大幅に減らすアクセサリー。 また、パルがあなたと一緒に戦う火災の被害を大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ea1198f7e0b7182a0f9634ff4fdd4cfe45b98d2ae2f319525c1cf1c64d65c0f2",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-fire-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "171c82034e4a35a8b7a11739b63385850a3e8aeee3a6fda3ec8a23066faaf1fa",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦う際のドラゴンのダメージを大幅に軽減するアクセサリー。 また、パルがあなたと一緒に戦う氷のダメージを大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c8a33322875933e7a47c6bc0fc997c429c52d10c0f66264840413c35a98df034",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-ice-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d9f8521a69deaa54d5d8b456ba4ecbfa17a432453c01cd7cea5b552a7216c41f",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うことで、着地ダメージを大幅に軽減するアクセサリー。 また、パルの草ダメージを大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "afc26fe7e317d59b22bc3ca154760ac6a0cb7369056e682e0727ebcf25b71bc3",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-leaf-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a0c72f51aa9643bf5251d7700cc1fb6383f28e81c8f4d8123378487d69516285",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うことで、着火被害を大幅に軽減するアクセサリー。 また、パルがあなたと一緒に戦う水のダメージを大幅に増加させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ee29a24611e3869d0553b2b4481ee599905dfb5882fb7b5f4577cabc790d140c",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリング"
+        }
+      },
+      "id": "accessory-otomo-water-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9ce95d4593163d395f928a5dd576a7093d65129ed130f17f41b11541bead874e",
+          "status": "machine_assisted",
+          "text": "攻撃を大きく上げるアクセサリーと、パルがあなたと一緒に戦うアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7e1e2a84db93b5c5b67a11d399c47b87f151acf90be8cfc566b2b9ebc7ba5809",
+          "status": "machine_assisted",
+          "text": "西暦二年"
+        }
+      },
+      "id": "accessory-ppat-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25a00d3072e83b4ce2bdb91130510053d13d4cd9110a07993e1bdf4c7e96fe9e",
+          "status": "machine_assisted",
+          "text": "ディフェンスとパルがあなたと一緒に戦うアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c921f49eb071759a7afd0d3aebc3b3fbe0fef605b6a1aab7a34b63490bab983a",
+          "status": "machine_assisted",
+          "text": "西暦二年"
+        }
+      },
+      "id": "accessory-ppdf-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9e3655b95d59696263ca85a2f7b16df6ff36ffa8839ca97435099f411b851c01",
+          "status": "machine_assisted",
+          "text": "装備すると空中でダブルジャンプを行えるアクセサリー。 また、空中ダッシュも付与します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c1293f132296dfdf97d1cdfa7209a59cd01e9f842c43f0059f762109f16f170d",
+          "status": "machine_assisted",
+          "text": "エアウォーカーMk.III"
+        }
+      },
+      "id": "accessory-super-jump-air-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9ad16f1b62e02c7da53046884e3c3702855728e73622422e66d63a5da985cbb",
+          "status": "machine_assisted",
+          "text": "装備すると空中でダブルジャンプを行えるアクセサリー。 また、ダブルの空中ダッシュも付与します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c89dfddf719073e29062f6f747759d93db16150b81eeba9834e54bd1a3a4f40a",
+          "status": "machine_assisted",
+          "text": "エアウォーカーEX"
+        }
+      },
+      "id": "accessory-super-jump-air-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e6228254761306c855d0e106588948c7fcfb22a740cae7168fc06d5275dd8368",
+          "status": "machine_assisted",
+          "text": "ガラスは隠されたパル0電位を識別するために使用されます。 健康状態を表示する 攻撃と防衛の統計は100から百までの規模です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43f9a825e860446954a07cae9d04963a7381ec2f088ffb5a7d8ae54875d43e3b",
+          "status": "machine_assisted",
+          "text": "ガラス"
+        }
+      },
+      "id": "accessory-talent-checker",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1274728cf13ce2941dfeab5ca6c4cd19d95b6e650b02fd287276141b4f6b68cb",
+          "status": "machine_assisted",
+          "text": "入ってくる電気ダメージをわずかに軽減するアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "843f6584a91e886346e09da383ad222e7b19a60720675dce3ba2c45b2000d3ef",
+          "status": "machine_assisted",
+          "text": "サクスターマックス抵抗リング 雷"
+        }
+      },
+      "id": "accessory-thunder-resist-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4a0b407a92a71ac40b2803a62447f134cbd40ce2cd50e0c77998024618ac7f8",
+          "status": "machine_assisted",
+          "text": "搬送能力を大幅にアップさせるアクセサリー。 また、作業速度も大幅に向上します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "665ad608cf353f0bdecc42805eaa55ce3e135a31a6c9ab53a20bb8458c93a417",
+          "status": "machine_assisted",
+          "text": "島民の道具ベルト"
+        }
+      },
+      "id": "accessory-wkmc-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3cd44c7b95e0fc8e66c3be9de002f19ba2a812b44d62af882c4e8c01394c5244",
+          "status": "machine_assisted",
+          "text": "ワークスピードをわずかに上げるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fcec4064b46fdcc3809127306571115240f6dcded9e220f9176f1e3874868995",
+          "status": "machine_assisted",
+          "text": "勤勉のペンダント"
+        }
+      },
+      "id": "accessory-work-speed-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0a177d9fd1d8c9a22129754b5b9e470f1a2734a9a0db4c54bc1db7ddb93243a3",
+          "status": "machine_assisted",
+          "text": "追加アイテムを運ぶことができる小さなポーチ。 保持すると在庫スロットが増加します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb585f4ce76b6ffe08c6adcf2f8d6a3c25858f19b29b86282255085ea55994ce",
+          "status": "machine_assisted",
+          "text": "小型ポーチ"
+        }
+      },
+      "id": "additional-inventory-001",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8d1f008a856b286c14ffac671cbc84bf1faa0e71bea02ad07c452685e14b9e51",
+          "status": "machine_assisted",
+          "text": "追加アイテムを運べる、控えめなポーチ。 保持すると在庫スロットが増加します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b515df569494a63e2aec9061bade6d7472965ef7b9ba35ecf5efa3d4be11c0a1",
+          "status": "machine_assisted",
+          "text": "ミディアムポーチ"
+        }
+      },
+      "id": "additional-inventory-002",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "75c38ebdd873130b8556b3e061b15ca95f7c4b5fa752d886bf71df028c68858c",
+          "status": "machine_assisted",
+          "text": "追加アイテムを運ぶことができる大きなポーチ。 保持すると在庫スロットが増加します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e62415d38e27c18813fcb577448e62c728839421f548fec217068062e0c6557b",
+          "status": "machine_assisted",
+          "text": "大型ポーチ"
+        }
+      },
+      "id": "additional-inventory-003",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f6a86e3fb4c5c6b74fc0d4c5526b5cb3aec307f75a7f2b39461d472a2742645b",
+          "status": "machine_assisted",
+          "text": "追加アイテムを運ぶことができる巨大なポーチ。 保持すると在庫スロットが増加します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a653a0c5d6be59debeb6a5c99bccaffafbc576ce37a0b04b4109fbd9f44a91e3",
+          "status": "machine_assisted",
+          "text": "ジャイアントポーチ"
+        }
+      },
+      "id": "additional-inventory-004",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b570f935cfe3a8247fe0d2077e23a7e6ca95b0ca1e51f02cae107e0583cc48cd",
+          "status": "machine_assisted",
+          "text": "めったに見られない魔法の果物。 食べるパルが開くと言われています 人間への心 どのパルに与えるか慎重に選択してください。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7a2fca6e77d0fd38e34d454c0090479718b61fcc1b6dbc17378e2c6cad93e987",
+          "status": "machine_assisted",
+          "text": "親族桃"
+        }
+      },
+      "id": "affection-fruit-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8f76b74925762cf05a11b91007793b3c7363126fad9a93ae7839cdb86840dfe4",
+          "status": "machine_assisted",
+          "text": "優しい果実がいっぱい。 食べるパルが開くと言われています 人間への心 どのパルに与えるか慎重に選択してください。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "517b88c2b32adda07ac8278c155f93eb2d7aa2b3f7c832cf93145d7d538a52ae",
+          "status": "machine_assisted",
+          "text": "リトル・クリンシップ桃"
+        }
+      },
+      "id": "affection-fruit-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "457634ee3fb0706a0ebe463e043f8b07f8840b2fd1130eecf1a5dc156be9b694",
+          "status": "machine_assisted",
+          "text": "複雑な意思決定と自律制御を可能にする、最先端のデバイスに不可欠なコアコンポーネント。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7087bda0c04f6702d98302f30f989edb0d04aa86c11b759931e78ea26c01c583",
+          "status": "machine_assisted",
+          "text": "AIコア"
+        }
+      },
+      "id": "aicore",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b",
+          "status": "machine_assisted",
+          "text": "古 [原文欠落]。 失われた文明の本質で作られ、圧倒的な防御力を持ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b5a91478d7556fe5d63b3fb6a7f2922c5da176b11ded3f7149807953c0cb1bd7",
+          "status": "machine_assisted",
+          "text": "古代の夏期 防具"
+        }
+      },
+      "id": "ancient-armor",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b",
+          "status": "machine_assisted",
+          "text": "古 [原文欠落]。 失われた文明の本質で作られ、圧倒的な防御力を持ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "abe178c4855a421cdc38ddb1cacd620a7bd41f5f672573d48e02f0507be0dd26",
+          "status": "machine_assisted",
+          "text": "古代の2号"
+        }
+      },
+      "id": "ancient-armor-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b",
+          "status": "machine_assisted",
+          "text": "古 [原文欠落]。 失われた文明の本質で作られ、圧倒的な防御力を持ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a3ef2970f39641f76a10c8440fc02c2f5da74605976431ef0f3a8738cc99cfde",
+          "status": "machine_assisted",
+          "text": "古代3号"
+        }
+      },
+      "id": "ancient-armor-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b",
+          "status": "machine_assisted",
+          "text": "古 [原文欠落]。 失われた文明の本質で作られ、圧倒的な防御力を持ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4faa25db47f739801bee9173787e439de5c40914cc928ac7de45d3e27721280f",
+          "status": "machine_assisted",
+          "text": "古代の4号"
+        }
+      },
+      "id": "ancient-armor-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1aceb5861920e241ab884f1dc6c7065013ed3b18d25843463068ea941beca10b",
+          "status": "machine_assisted",
+          "text": "古 [原文欠落]。 失われた文明の本質で作られ、圧倒的な防御力を持ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ccee91242f9894362fea4fa9117890a54e46ef3986da6e7fca9072ed1e65c3e7",
+          "status": "machine_assisted",
+          "text": "古代の5号"
+        }
+      },
+      "id": "ancient-armor-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐寒性は、古代の技術によりさらに強化され極寒地でも強度を維持しています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ef5d8a69180897f3f68f90036534280819e916e7b1b40890c1897816fc804cd8",
+          "status": "machine_assisted",
+          "text": "耐寒性古代防具"
+        }
+      },
+      "id": "ancient-armor-cold",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐寒性は、古代の技術によりさらに強化され極寒地でも強度を維持しています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "081e026818a4424b4c3d3c5e06bc5f257e7d65b245282d95501beb6c25025383",
+          "status": "machine_assisted",
+          "text": "古代の2号"
+        }
+      },
+      "id": "ancient-armor-cold-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐寒性は、古代の技術によりさらに強化され極寒地でも強度を維持しています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f981bfb492bb7cb73caf97af8d5ed47c904608f97644176d7dfdce7b5169cb6e",
+          "status": "machine_assisted",
+          "text": "古代の3号"
+        }
+      },
+      "id": "ancient-armor-cold-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐寒性は、古代の技術によりさらに強化され極寒地でも強度を維持しています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e9687876437c25ad7af197e18b74b22fa5947ddd38800cc3caa94fe549a9a0b3",
+          "status": "machine_assisted",
+          "text": "古代の4号"
+        }
+      },
+      "id": "ancient-armor-cold-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "62995ea1aae84a7311bf0073aab9dc492a5b0c54ebd6d4ac66df3674984b8773",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐寒性は、古代の技術によりさらに強化され極寒地でも強度を維持しています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "af7abff56929ff75870d844c293b6ce05fcd7ad05ce280bbe4e6ef2564d24251",
+          "status": "machine_assisted",
+          "text": "古代の 5"
+        }
+      },
+      "id": "ancient-armor-cold-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐熱性能は、古代の技術によりさらに向上しき環境にも耐える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d9066a00ef6abc6cc399403c468e7b0ddf3fa845dda7d025960d398cfc315025",
+          "status": "machine_assisted",
+          "text": "耐熱古代防具"
+        }
+      },
+      "id": "ancient-armor-heat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐熱性能は、古代の技術によりさらに向上しき環境にも耐える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fcc0725c52ff9f281e7d362bb3d458d8f62c233a7e58c6a6fdb4b8c73a227e64",
+          "status": "machine_assisted",
+          "text": "古代の火2号"
+        }
+      },
+      "id": "ancient-armor-heat-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐熱性能は、古代の技術によりさらに向上しき環境にも耐える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d6534ee744bc498f2f90af50f62a24d8024e4d5eb82f203655fee56e0f7c0267",
+          "status": "machine_assisted",
+          "text": "古代の熱 3"
+        }
+      },
+      "id": "ancient-armor-heat-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐熱性能は、古代の技術によりさらに向上しき環境にも耐える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43f71d9114a8e5b3232522a1d0148c4e32f83d9460febd36dd769e08ef48c5dd",
+          "status": "machine_assisted",
+          "text": "古代の火4号"
+        }
+      },
+      "id": "ancient-armor-heat-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7ec31b0b44a0f1840d9d883a53480a68db6b5be4d3e8837ebdf6c62022506988",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 耐熱性能は、古代の技術によりさらに向上しき環境にも耐える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2b9e9b48f4a8bf491b965cec74ed45617922ea98a3e958ce9964366fc4966726",
+          "status": "machine_assisted",
+          "text": "古代の火5"
+        }
+      },
+      "id": "ancient-armor-heat-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 古代の補助機構を備えており、着用者はより多くの物資を運ぶことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "39f11bf077c02e782a2cdc1bee4aeee88838c488805eead4d16cabfc995517d3",
+          "status": "machine_assisted",
+          "text": "軽量な古代の防具"
+        }
+      },
+      "id": "ancient-armor-weight",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 古代の補助機構を備えており、着用者はより多くの物資を運ぶことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f215b6b303ea4cc948707fd6970e870239fa7254fa4583da88738c6afd92adea",
+          "status": "machine_assisted",
+          "text": "古代2号"
+        }
+      },
+      "id": "ancient-armor-weight-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 古代の補助機構を備えており、着用者はより多くの物資を運ぶことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5561378084c19fccb6f4150c1f486d82847921a8b450ce5a4820701c52ff9d73",
+          "status": "machine_assisted",
+          "text": "古代3号"
+        }
+      },
+      "id": "ancient-armor-weight-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 古代の補助機構を備えており、着用者はより多くの物資を運ぶことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43cb7bd86398dfb233589a2fd35451316b6c804f31321598a768d186a562025b",
+          "status": "machine_assisted",
+          "text": "古代4号"
+        }
+      },
+      "id": "ancient-armor-weight-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "8cc005f520edb88fceffbe303635722b64e7b09c827e1f4cec9176054622a168",
+          "status": "machine_assisted",
+          "text": "改良 [原文欠落]。 古代の補助機構を備えており、着用者はより多くの物資を運ぶことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ea38025f8eadc1988f39aa25e6d611296904571021ad54275845c82d49f8bd14",
+          "status": "machine_assisted",
+          "text": "古代の装甲重量5"
+        }
+      },
+      "id": "ancient-armor-weight-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e",
+          "status": "machine_assisted",
+          "text": "古代のヘルメットを偽造しました。 [原文欠落]。 時代を経た知恵に溢れ、身に着けている人を揺るぎない力で守ります。 その防御能力は現代の機器のそれよりはるかに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4df539bd9acd7ce0bb13ea00f50261a1659a6f42f080b460f51e587298b6738",
+          "status": "machine_assisted",
+          "text": "古代の地獄"
+        }
+      },
+      "id": "ancient-helmet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e",
+          "status": "machine_assisted",
+          "text": "古代のヘルメットを偽造しました。 [原文欠落]。 時代を経た知恵に溢れ、身に着けている人を揺るぎない力で守ります。 その防御能力は現代の機器のそれよりはるかに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2f6415e1e753d0c433733d77c1f702d7ad567a9d793bc3cd2c8c8d6f476c9a6e",
+          "status": "machine_assisted",
+          "text": "古代ヘルメット2"
+        }
+      },
+      "id": "ancient-helmet-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e",
+          "status": "machine_assisted",
+          "text": "古代のヘルメットを偽造しました。 [原文欠落]。 時代を経た知恵に溢れ、身に着けている人を揺るぎない力で守ります。 その防御能力は現代の機器のそれよりはるかに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "99e3501666e5b063aac888a0afbc5d32ac3f0c799d85ce8281c8b9bae78fd530",
+          "status": "machine_assisted",
+          "text": "古代のヘルメット3"
+        }
+      },
+      "id": "ancient-helmet-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e",
+          "status": "machine_assisted",
+          "text": "古代のヘルメットを偽造しました。 [原文欠落]。 時代を経た知恵に溢れ、身に着けている人を揺るぎない力で守ります。 その防御能力は現代の機器のそれよりはるかに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f6b4e29e8c168906c6f26285a4b3933ca67a7e4fdc4b681d96c5e97f3793c3c6",
+          "status": "machine_assisted",
+          "text": "古代のヘルメット4"
+        }
+      },
+      "id": "ancient-helmet-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1ac46063ee8b6056e1aeb44d4660e87ab7add1d74b84b6593a528f261e25ef8e",
+          "status": "machine_assisted",
+          "text": "古代のヘルメットを偽造しました。 [原文欠落]。 時代を経た知恵に溢れ、身に着けている人を揺るぎない力で守ります。 その防御能力は現代の機器のそれよりはるかに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e4785b3caa4555a497faa56e3772ea4a72fae2a4f55a4272e324b32bc2a14b2d",
+          "status": "machine_assisted",
+          "text": "古代のヘルメット5"
+        }
+      },
+      "id": "ancient-helmet-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9b6fc9be379f6feab3d06768d83e89fdc28a0459b066971d90b7374c3089a27e",
+          "status": "machine_assisted",
+          "text": "昔に失われた技術から生まれたコア。 パルパゴス諸島ではほぼ不可能ですが、忘れられた知識が豊富に含まれています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "74984bfe57665674f83d866e826450442a050c390529ce6f63f58a65626163c1",
+          "status": "machine_assisted",
+          "text": "古代文明の核"
+        }
+      },
+      "id": "ancient-parts2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4e4d19742edc9ec6d5696f3fb576b9fe405dbfc62ec4e185d2195653ed176ae1",
+          "status": "machine_assisted",
+          "text": "パル hideに書かれた古代の原稿。 パルは遠征中に発見されることがあります。 研究を進めるために必要。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "82805f09b514a3b3a01438abae5337e535df621ffaa71d3f81825fe32d37524d",
+          "status": "machine_assisted",
+          "text": "古代夏期マックスの写本"
+        }
+      },
+      "id": "ancient-parts3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dacabd76ce6c14d1c56b10f99fec76e966961e4587b3746c1b2e4f7874dd6f17",
+          "status": "machine_assisted",
+          "text": "忘れ去られた時代の技術秘密を、長く忘れた本。 古代の技術のポイントを取得するためにそれを使用します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8d3b3322843fbe853c3588a942174291e04481e2af8d932c25f5f2a687d12d9c",
+          "status": "machine_assisted",
+          "text": "古代のテクニカルマニュアル"
+        }
+      },
+      "id": "ancient-technology-book-g1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "93639ea1a3600ae03150558475634f1506d58a4c3220cb8b510bca54bb240519",
+          "status": "machine_assisted",
+          "text": "弓に使える で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "05800e70aa10c86f5ab898d18ad6884245a149f3b945bb0bd8cd05a8e469cd27",
+          "status": "machine_assisted",
+          "text": "矢印"
+        }
+      },
+      "id": "arrow",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "4e0454bf0c03c2bcc778500fe0fb3f608aaa8c780be9e5778ba19d88d2c74771",
+          "status": "machine_assisted",
+          "text": "弓に使える 接触によるダメージを処理します。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6ef10e611aae7ccf4cfb00458246456680e0358776d00bd396dd6c80608b79b0",
+          "status": "machine_assisted",
+          "text": "夏期MA 炎"
+        }
+      },
+      "id": "arrow-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "7fc4b9ae60d914af812ed8096f09b608fe04b657b4b8031a6ca9cfca6f9bf0c3",
+          "status": "machine_assisted",
+          "text": "弓に使える 接触でターゲットを攻撃します。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "91f9f70df0cdcd9e5be365be692ec2d552c521783600e4862169a99fd84e5f7f",
+          "status": "machine_assisted",
+          "text": "毒矢"
+        }
+      },
+      "id": "arrow-poison",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "da8871770d5fede1b9f7b66a25e0893c6d0b6b07ea80d6cff7c60ae5fdff1567",
+          "status": "machine_assisted",
+          "text": "攻撃ライフル弾薬"
+        }
+      },
+      "id": "assault-rifle-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "33589d8a30a87fd8fc7ffb448b4d642b899171e724204f5bc571cbdd5e955eb8",
+          "status": "machine_assisted",
+          "text": "圧倒的な力で敵を倒す。 急速発火性に優れ、強力な敵を倒すのに適しています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "941a63b2b42cf168b71173fbe8dfb0599a493b02014850446e43e27170ce15ea",
+          "status": "machine_assisted",
+          "text": "攻撃ライフル"
+        }
+      },
+      "id": "assault-rifle-default1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "da3c13135fe0135fdc5095c4d92497197f4fa270787f6093c891302050f73a8d",
+          "status": "machine_assisted",
+          "text": "食べ物を保持するための小さなポーチ。 在庫のフードスロットをロック解除します。 プレイヤーとパルは空腹時に自動的に食べ物を消費します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b89dc823a95f8b3016f26cb90314974b2e952d1264343c3b23fb246f0646fb74",
+          "status": "machine_assisted",
+          "text": "小型の給餌袋"
+        }
+      },
+      "id": "auto-meal-pouch-tier1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2a4f3eeb3a41749467d02f5bf140551c654e89caa303d22d6acfb38ced148b3e",
+          "status": "machine_assisted",
+          "text": "食べ物を持参するためのまともなサイズのポーチ。 在庫の2つのフードスロットをアンロックします。 プレイヤーとパルは空腹時に自動的に食べ物を消費します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0cbdc83d5cefea23f88c0aaf9a91b3268d396a10e4975c1c0a2c314a8679db85",
+          "status": "machine_assisted",
+          "text": "平均給餌袋"
+        }
+      },
+      "id": "auto-meal-pouch-tier2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "060cb438feaa055902bf1f7c9ffb9beaee5d0e5b605d6fdf4290a4ba4774a698",
+          "status": "machine_assisted",
+          "text": "食べ物を保持するための大きなポーチ。 在庫の3つのフードスロットをアンロックします。 プレイヤーとパルは空腹時に自動的に食べ物を消費します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "38c82b6987390df9aea50f32a583f5634b910305301c1493d6e5e06e5ceaf25e",
+          "status": "machine_assisted",
+          "text": "大型の給餌袋"
+        }
+      },
+      "id": "auto-meal-pouch-tier3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a86c02d84aa927035e104fb35e47f6157c0d6d771164a78cadd5e2292097c5eb",
+          "status": "machine_assisted",
+          "text": "食べ物を持参するための特大ポーチ。 在庫の4つのフードスロットをアンロックします。 プレイヤーとパルは空腹時に自動的に食べ物を消費します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1446de4ba96561200c65f9267213c347ef6e451b9997d3fe86bd3fb218a04c2b",
+          "status": "machine_assisted",
+          "text": "巨大な袋。"
+        }
+      },
+      "id": "auto-meal-pouch-tier4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a872d258151397cc6d55cc06e53bcea84d0f73fc74e1d34fc580130cddfddae1",
+          "status": "machine_assisted",
+          "text": "食べ物を持参するための巨大なポーチ。 在庫内の5つのフードスロットをアンロックします。 プレイヤーとパルは空腹時に自動的に食べ物を消費します。 持ち歩くだけで十分だ。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "009ca4e0fed9017825c9b828667e41b56567a5f4777cf471666c205e536018cb",
+          "status": "machine_assisted",
+          "text": "ジャイアントフィードバッグ"
+        }
+      },
+      "id": "auto-meal-pouch-tier5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "09bec91d1f40e874e112e5e2599989eef7e8e5487fd25e11def068f4dc9a3ee0",
+          "status": "machine_assisted",
+          "text": "木を切り刻むための。 パル Metalのおかげで、並外れたシャープさを実現しました。 過酷な地域から高品位の木を問題なくスライスできます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ea85f6f0dbd2bec6a99fd51357190a02a56d0d99ffd6e3de422b2f1bdfb326e3",
+          "status": "machine_assisted",
+          "text": "クワッドマックス金属軸"
+        }
+      },
+      "id": "axe-steal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0ccdb99ef9b834e954e972ecc7bf89260cc2a068817b5b0a2c09e51f7cd5959f",
+          "status": "machine_assisted",
+          "text": "木を切るための。 石でできていて、あまり鋭くない。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6f71b32080395e757b3b209e5a9cef77c6bfcf9f1be1378d9ce5d6299fef116d",
+          "status": "machine_assisted",
+          "text": "石の斧"
+        }
+      },
+      "id": "axe-tier-00",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "134ff2f686c9ccd2c69a0db7ad465978873b66b1bd3f2e64404343acb0a7bc27",
+          "status": "machine_assisted",
+          "text": "木を切るための。 金属製のこの木は、硬い木材を簡単に切り刻み、大陸の奥深くで育つ丈夫な木の収穫に役立ちます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1274fb014230cf63aecee14eb33ff00ec7ea3bf42a508e084eba2125893b746b",
+          "status": "machine_assisted",
+          "text": "金属軸"
+        }
+      },
+      "id": "axe-tier-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a53638eb7268354abb70c10307329c01ed04bf7362a3e9bbed66e0d71ebb5eb1",
+          "status": "machine_assisted",
+          "text": "木を切るための。 高品質金属で作られ、その切れ味と耐久性は更に向上しています。 容赦ない土地で育つ丈夫な木から、硬い木材を収穫できます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "350ea0c99aa387182a06e8950f6d5e248f3e3352034efaa6dcd0f96e5cdede47",
+          "status": "machine_assisted",
+          "text": "金属の精製軸"
+        }
+      },
+      "id": "axe-tier-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9d027f27348b6125dc11e0220f870909192b4db0382ec214875e5ad4551eb6a7",
+          "status": "machine_assisted",
+          "text": "ベーコンのスモーキーなエッセンスは完璧に絡み合います。 卵の優しい質感で、香りが高貴に調和します。 食べると一定期間+10%増えます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f85a6022a0f0ce236e15f4436d67639432424abce03d4364fa9c5fee5f6a1cfa",
+          "status": "machine_assisted",
+          "text": "カスターマックスのベーコン卵"
+        }
+      },
+      "id": "bacon-eggs",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5323066089727790a04cf4a6d03655d14ce8ca301c9a929b567bd5a79e58a4a",
+          "status": "machine_assisted",
+          "text": "料理は栄養価を高め 驚くべきことに、それらはかなり満ちています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9843d594cbe1bc0dc481568680dd5a7fbbce320676b39ee87e192e931b2ae81b",
+          "status": "machine_assisted",
+          "text": "ベーキングベリー"
+        }
+      },
+      "id": "baked-berries",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9645cf48e606896b5249430863d472d6b223543cccac3f5109d1eb3bbcedc53",
+          "status": "machine_assisted",
+          "text": "自然の香りが漂うマイルドロースト。 肉に埋め込まれたハーブやベリー。 屋外で食べると、心地よい暖かさを感じさせます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2a18d5bc2ce97787d37a79a64dae8ea7e0da6e6d3b679504b578b8602218df09",
+          "status": "machine_assisted",
+          "text": "ハーブローストベリゴート"
+        }
+      },
+      "id": "baked-meat-berry-goat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0823766bd89a2257d2057ab7fdfe090c05ede75aebaa4d1ed0de210626482844",
+          "status": "machine_assisted",
+          "text": "イノシシは心から火をかぶって焼いた。 外側にクリスピー、内側にはジューシー。 大きなパーティーのための贅沢なメインディッシュとして完璧。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a56e415785e696ea3819425d2e080c13aec016848679e6ae37f628796276635e",
+          "status": "machine_assisted",
+          "text": "ロースト・クワッドマックス"
+        }
+      },
+      "id": "baked-meat-boar",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "06b5a5d0238becc44a875a1c6b318e7df8f8a204fe730e43a249d2c7a3335262",
+          "status": "machine_assisted",
+          "text": "鶏は炭火でゆっくりと焼いた。 舌に軽くて爽やか。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "17265a74d557ad0c32737573715cf6e6af8fd32d511478e7175e6492b0df778e",
+          "status": "machine_assisted",
+          "text": "焼き香ばしい夏マックス"
+        }
+      },
+      "id": "baked-meat-chicken-pal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "102b5e78d141c78f66c2471f824ff6f4365d7100c13280021ba07dd175caad48",
+          "status": "machine_assisted",
+          "text": "厚みのある、よくできたステーキ。 強い風味は、それを食べる人にエネルギーを後押しします。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3ba68adbcf4bce94e7c7d0c1079aaa2e911702bc0e41031ee092677eac0ecd6b",
+          "status": "machine_assisted",
+          "text": "クアッドマックスステーキ"
+        }
+      },
+      "id": "baked-meat-cow-pal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b4444a5284001161dd688616ca3cbccbaa43dfb78c0639aaa140fb38fd7cd245",
+          "status": "machine_assisted",
+          "text": "繊細な香りの香りがする、丁寧にローストされたベニソン。 深い森の香りにアクセントを付けました エレガントなライフスタイルのための優雅な味。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6574d033c4398a98f465852c30e9c8b3aba383bf44622f407a51a801a2c10b1d",
+          "status": "machine_assisted",
+          "text": "ロースト・クワッドマックス"
+        }
+      },
+      "id": "baked-meat-deer",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "bf403a16739cee4c3e440ad4b133dcf96ef8d6f9169f73a44cf3691639603251",
+          "status": "machine_assisted",
+          "text": "空高く飛ぶための活力に満ちた焼き肉。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "137e7a1f469d6becd75932ce48c0a020af2d198f8c44d870d1c386daddbde4a9",
+          "status": "machine_assisted",
+          "text": "焼き香ばしい夏マックス"
+        }
+      },
+      "id": "baked-meat-eagle",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28dccced6649584ee785bf6a5ef97f59631b64395a619ddb79c40c54eb0a0016",
+          "status": "machine_assisted",
+          "text": "豊かで威厳のある味わいが自慢です。 氷河や深い森の記憶が、一口一口に駆け返ってくる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f7b9fa9db1d08abc03e4ef6004a9d69189dd3a7cb338ae00d5e1bdd91b094a1",
+          "status": "machine_assisted",
+          "text": "クアッドマックスステーキ"
+        }
+      },
+      "id": "baked-meat-grass-mammoth",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25d94f080142c228327d38e5ebede444853cc6437b8aee7afd7cf9e8893aebd8",
+          "status": "machine_assisted",
+          "text": "炭火焼きで、サクッとした外見と口に溶けるジューシーな味わい。 ユニークな化合物は風味を密封し、貯蔵寿命を高めます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "55e832f7a953fe115ef5e512af8202e3ba28d76b368ddb3f62d8ce0b7c41768e",
+          "status": "machine_assisted",
+          "text": "クアッドマックスステーキ"
+        }
+      },
+      "id": "baked-meat-ice-crocodile",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4bb727271ce15046920d2ec8571c4d44939db33225f0483479b36eb341e62702",
+          "status": "machine_assisted",
+          "text": "炎から取り出すと、ツララジカ肉は急速に温度が下がります。 これにより 長期間の鮮度を保つことができます 完璧な緊急配給にしました"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3525613410460289afccd9330a8aa87e7fb2736defe2fa0885bfe56c469f1c0c",
+          "status": "machine_assisted",
+          "text": "ロースト・クワッドマックス"
+        }
+      },
+      "id": "baked-meat-ice-deer",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a6914b3d3d5cf0b1110f882d1033bfdd2ebd2ae60adeff9089058c7de75823a",
+          "status": "machine_assisted",
+          "text": "炭火で焼き上げた新鮮な魚。 ふっくらとジューシー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "950be8d3ed6900c3e4693b854efeb81c34258e95da3f23578af7860587918b5f",
+          "status": "machine_assisted",
+          "text": "焼き香ばしい夏マックス"
+        }
+      },
+      "id": "baked-meat-kelpie",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8c2af72860639c0b3c3124fada6b7a812a3ff6e0562e4f8321e6b4290022cd2d",
+          "status": "machine_assisted",
+          "text": "秘密のソースで焼いた魚。 心と身体の両方を和らげます。 疲れたパルのカメラに最適です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "71a4efd4ae39325b9682f0344780c3302e04b7b731031ea4314771a51978c29b",
+          "status": "machine_assisted",
+          "text": "焼いたトドドドン"
+        }
+      },
+      "id": "baked-meat-lazy-catfish",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca3b4ac2f83a202b382530abcb9f722a4c1c48a17eba6adae522ea55d5037312",
+          "status": "machine_assisted",
+          "text": "野生の王様のお味がふるいにかけられた焼き肉。 圧縮肉のジュースが骨から流れ 初期の性にもかかわらず驚くほど柔らかくしました"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f26d538583d373afcca694180e4468ee894195f19f8fb5306619b1aa5cb343fa",
+          "status": "machine_assisted",
+          "text": "クワッドマックリブロースト"
+        }
+      },
+      "id": "baked-meat-sakura-saurus",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2c1070f5a8bbdc9d79e94764834e289129bd4054255920c5e374f1d5b3894db6",
+          "status": "machine_assisted",
+          "text": "スパイスとローストマトン。 独特の風味と深く複雑。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f5a7bd524e5b1358a6669ec20700ab4853d1dca6b0e05927c7fbeca2f7bb5e74",
+          "status": "machine_assisted",
+          "text": "クアッドコアケバブ"
+        }
+      },
+      "id": "baked-meat-sheep-ball",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d0aae10c531a38ab4e3805635c0f2ee412aee565bf5481b17638b5338684de9d",
+          "status": "machine_assisted",
+          "text": "このキノコを調理すると、栄養価が高まります。 不思議なことに、それはまたかなり満ちています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0a3c7c603bacc5f820ead8fb0fecb817489cfd88f429e4078fa5465738b57051",
+          "status": "machine_assisted",
+          "text": "焼き"
+        }
+      },
+      "id": "baked-mushroom",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76a179b32055c714d8f250e6c88f286a44f87797d989678f367ca54a61836778",
+          "status": "machine_assisted",
+          "text": "近距離戦闘用。 必要に応じて、小さなパルをパルプに打ち負かすことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cf93336385cd34f41e7373e0a7ebc88cc3618e7392a2c3eca790f4c9edecfdc7",
+          "status": "machine_assisted",
+          "text": "木製クラブ"
+        }
+      },
+      "id": "bat",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e33c44d80af25c03f9da86c0ddd3e80fb0385eaebdf5de5fb93452eaec2d1082",
+          "status": "machine_assisted",
+          "text": "近距離戦闘用の野球バット。 パルでホームランを得るのは難しいかもしれません。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2813a523c21f6654fc4185c14aa02280dfd91e3271a4db43929fe61fa7222d1",
+          "status": "machine_assisted",
+          "text": "バット"
+        }
+      },
+      "id": "bat2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093",
+          "status": "machine_assisted",
+          "text": "近接戦闘でうまく機能するA。 好きじゃない人を倒すために使いなさい。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0e9e7c8e13ec34c73db8e73090c3b934304e120da1da834dfee206040d9874ce",
+          "status": "machine_assisted",
+          "text": "コウモリ"
+        }
+      },
+      "id": "bat3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093",
+          "status": "machine_assisted",
+          "text": "近接戦闘でうまく機能するA。 好きじゃない人を倒すために使いなさい。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "039ea5e507c28520d88fe60f10aaf665a047c1e8e5ee518b08e100c9609262c3",
+          "status": "machine_assisted",
+          "text": "バット3 2"
+        }
+      },
+      "id": "bat3-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093",
+          "status": "machine_assisted",
+          "text": "近接戦闘でうまく機能するA。 好きじゃない人を倒すために使いなさい。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "058879cf97ac89b05e0183d8b20568556e429f02a326ab689ea59e2e4d836125",
+          "status": "machine_assisted",
+          "text": "バット3 3"
+        }
+      },
+      "id": "bat3-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093",
+          "status": "machine_assisted",
+          "text": "近接戦闘でうまく機能するA。 好きじゃない人を倒すために使いなさい。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4b53d1ed9842bb121a865b17b7a7cc35cf59cf044b2cad738fed3c852fc93c18",
+          "status": "machine_assisted",
+          "text": "バット3 4"
+        }
+      },
+      "id": "bat3-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1dc06d54d93b1630d68bd3a0182b42b724007fb5587526b331bb14131b8f093",
+          "status": "machine_assisted",
+          "text": "近接戦闘でうまく機能するA。 好きじゃない人を倒すために使いなさい。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d1e7867e40fe11727e83ca602d8f69b89611787a3420ac9e632a0bde7144950c",
+          "status": "machine_assisted",
+          "text": "バット3 5"
+        }
+      },
+      "id": "bat3-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ba178e8310086c3bd23e7fe6cd4533ce31470093d938094cd19530bfee636850",
+          "status": "machine_assisted",
+          "text": "アリーナでソロの試合に勝つことで獲得。 十分な収集を行い、特別な報酬のために交換することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a6402ca4591357be1ca39541a0d529b7fef0dcfeb4dc9dfb5c92f9d95195982e",
+          "status": "machine_assisted",
+          "text": "合戦券"
+        }
+      },
+      "id": "battle-ticket",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b",
+          "status": "machine_assisted",
+          "text": "広範囲に爆発を起こす高密度ビームを発射する。 急な火災の際の過熱を防ぐには注意が必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3fb5858eeb6fd8a120117bb93f808a12511d7dd0bb444e19a9eae202856618cc",
+          "status": "machine_assisted",
+          "text": "ビームランチャー"
+        }
+      },
+      "id": "beam-launcher",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b",
+          "status": "machine_assisted",
+          "text": "広範囲に爆発を起こす高密度ビームを発射する。 急な火災の際の過熱を防ぐには注意が必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10f97a7dd22df2c63a1d99474342c1e864e39634fed05e790ed161845a452c41",
+          "status": "machine_assisted",
+          "text": "ビームランチャー2"
+        }
+      },
+      "id": "beam-launcher-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b",
+          "status": "machine_assisted",
+          "text": "広範囲に爆発を起こす高密度ビームを発射する。 急な火災の際の過熱を防ぐには注意が必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4f464f4f38a15442e87ef7cd03cd92b908418954271ee3192ede382f87507a28",
+          "status": "machine_assisted",
+          "text": "ビームランチャー3"
+        }
+      },
+      "id": "beam-launcher-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b",
+          "status": "machine_assisted",
+          "text": "広範囲に爆発を起こす高密度ビームを発射する。 急な火災の際の過熱を防ぐには注意が必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "69e71ec35735d3d1989574f442d37f6594cead673ca82984ce4073416a14c8be",
+          "status": "machine_assisted",
+          "text": "ビームランチャー4"
+        }
+      },
+      "id": "beam-launcher-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3a9933c17e155d4f7857f49d702ca539ed3456d434a8ed6566628a42deb6732b",
+          "status": "machine_assisted",
+          "text": "広範囲に爆発を起こす高密度ビームを発射する。 急な火災の際の過熱を防ぐには注意が必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eb8b83b9f097916a5a325c7725e5471e2df0789e68beb578e203fd5dfbc6ee42",
+          "status": "machine_assisted",
+          "text": "ビームランチャー5"
+        }
+      },
+      "id": "beam-launcher-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "61929d29b7ceb8bf5c731180d08b96db87e25b962db77b1fa4aef152b86d9fec",
+          "status": "machine_assisted",
+          "text": "弾薬 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "84cb4d7dedd7147a95de91aa993479751708ec3197b7ed0116aad94f93faa9f5",
+          "status": "machine_assisted",
+          "text": "ビームランチャー弾薬"
+        }
+      },
+      "id": "beam-launcher-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638",
+          "status": "machine_assisted",
+          "text": "近距離戦闘に 相手をスライスし、高出力レーザーで燃焼させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dfeac4099c5ad84fa66c306c362bcc7aa6b22a6ed2324253da21d662fc7fcae6",
+          "status": "machine_assisted",
+          "text": "梁剣"
+        }
+      },
+      "id": "beam-sword",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638",
+          "status": "machine_assisted",
+          "text": "近距離戦闘に 相手をスライスし、高出力レーザーで燃焼させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ced282271d62d950f9b4e3a105ea29858662f529d366b7828e59798bb9d87638",
+          "status": "machine_assisted",
+          "text": "ビームソード2"
+        }
+      },
+      "id": "beam-sword-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638",
+          "status": "machine_assisted",
+          "text": "近距離戦闘に 相手をスライスし、高出力レーザーで燃焼させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3fc6dc24ccf09de5b695cbf46b56c6eba16da5f0e2db2f5628bafec9f900aa43",
+          "status": "machine_assisted",
+          "text": "ビームソード3"
+        }
+      },
+      "id": "beam-sword-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638",
+          "status": "machine_assisted",
+          "text": "近距離戦闘に 相手をスライスし、高出力レーザーで燃焼させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fc33c0e214faa3b7a9942905faf002a31b70fdc95b5617b24f914dc0357e52bf",
+          "status": "machine_assisted",
+          "text": "梁剣4号"
+        }
+      },
+      "id": "beam-sword-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d9b0b035409897a88f65917ff0903979dab7552e4e6ef9abe0e9e0d01751a638",
+          "status": "machine_assisted",
+          "text": "近距離戦闘に 相手をスライスし、高出力レーザーで燃焼させます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7dd7ccb96e4b8cfeb40fdb5a66c08d9fcd24c510588f559495777dbbb61b4619",
+          "status": "machine_assisted",
+          "text": "梁剣5号"
+        }
+      },
+      "id": "beam-sword-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fb2329449ef0453a736669d8a6e04237a8c96b3806109061e382d2a6580c659f",
+          "status": "machine_assisted",
+          "text": "極端な環境で長年にわたって風化していた獣の骨。 肉を失っても、その存在感は強くなります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1dafe177757ef9b73bb554fe2a785f3545710ab57ef5e54cf13b4b5c73284233",
+          "status": "machine_assisted",
+          "text": "古代骨"
+        }
+      },
+      "id": "beast-bone-ancient",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "94f5e17bcd1e184422d8e9da85d4b9328b299ce5894f68f150de7af9a263ce10",
+          "status": "machine_assisted",
+          "text": "生で美味しい、または調理された多用途の食材。 島のどこにでも見つけることができる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3d82b35f2e320058193217d7d8b3c3487b9ab6e8c0469fb237ea0e94294f9b09",
+          "status": "machine_assisted",
+          "text": "赤ベリー"
+        }
+      },
+      "id": "berries",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1b58be39a45df1be54351c6e7c952865feb8a26587eda7debf3dfc406c1f74ca",
+          "status": "machine_assisted",
+          "text": "種子 [原文欠落]。 農場を始めるのに必要です。 ピッキング時に取得できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3f1be0ec0d512a3a22444fe2e108bb78a4494aecc0bf8ed2e07a4c25a1ead093",
+          "status": "machine_assisted",
+          "text": "ベリー種子"
+        }
+      },
+      "id": "berry-seeds",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "23c481beecbe69f8a38f79636672c3f2e8cbae948d973e3992ab307dbde55bc6",
+          "status": "machine_assisted",
+          "text": "バイオエネルギーを電力として蓄える装置。 高エネルギー密度を必要とする機器に使用されます。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "38ca971fed29fc064937d6de2b72f28addf902bf76f8d3e3e4f36b9b76e40afb",
+          "status": "machine_assisted",
+          "text": "バイオバッテリー"
+        }
+      },
+      "id": "bio-battery",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6950e858e0986d0cd1484e384dd1111079f04a2e7b12e8a2a1b0d78984a2c64c",
+          "status": "machine_assisted",
+          "text": "パル由来の特殊部品を使用した高効率冷却媒体です。 高出力デバイスで温度を調整するために使用されます。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "54dc5cb841a2edf066d60fad89462ade7938f64b531ff4764e2942e1a170af8b",
+          "status": "machine_assisted",
+          "text": "極低温冷却剤"
+        }
+      },
+      "id": "bio-coolant",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7854c98205be43596cae0bea107b37bf7c4088357bd8419b26d351983aaa1744",
+          "status": "machine_assisted",
+          "text": "水抵抗計画のリング"
+        }
+      },
+      "id": "blueprint-accessory-aqua-resist-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "322044b57f4f7ba57bcc98e8384faba4a9ab65b7b6d94e43805467537f4db4fa",
+          "status": "machine_assisted",
+          "text": "攻撃ペンダント・スキーマ"
+        }
+      },
+      "id": "blueprint-accessory-at-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b9fcf940ac1b49079fcbd440e44108efec912810772af2943a41130de33d969f",
+          "status": "machine_assisted",
+          "text": "Blueprint アクセサリー 1 修正を避けます。"
+        }
+      },
+      "id": "blueprint-accessory-avoid-1-fix",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "423d6b1f494d10e7976b4bc5e6a42697609c44e41bb5c5ea7f94447bcdb961c5",
+          "status": "machine_assisted",
+          "text": "ヒエティ チャーム・スキーマ"
+        }
+      },
+      "id": "blueprint-accessory-cold-ice-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9ea423e108d0052d291616eacc4dba12485a455930dab7486ff95bd7d6a71607",
+          "status": "machine_assisted",
+          "text": "熱下着の計画"
+        }
+      },
+      "id": "blueprint-accessory-cool-resist-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "23f3ba3a6daa758f753a15aff381111e38e7fa879dbaac62f35f533f4ae68d32",
+          "status": "machine_assisted",
+          "text": "闇抵抗計画のリング"
+        }
+      },
+      "id": "blueprint-accessory-dark-resist-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "65cbe713bc923812aa901e36d810ad779ea7cdf77c2fbb2ae62d630a021fd61d",
+          "status": "machine_assisted",
+          "text": "防御ペンダント・スキーマ"
+        }
+      },
+      "id": "blueprint-accessory-defense-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cf66a168b6f1d9dda65902773d28767197d2f4cdc242ad8a29987e1f909befbc",
+          "status": "machine_assisted",
+          "text": "クアッドコアのベルト・シェマティック"
+        }
+      },
+      "id": "blueprint-accessory-dfhp-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "387ed358b24cde699910e8cc48240ae67b48650903db05e09253375878351d62",
+          "status": "machine_assisted",
+          "text": "竜抵抗計画のリング"
+        }
+      },
+      "id": "blueprint-accessory-dragon-resist-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f48daba3754c5d4fde4b17ee9e5d47964e51b467e9ad4c35e684e64c19ff4e97",
+          "status": "machine_assisted",
+          "text": "地抵抗計画のリング"
+        }
+      },
+      "id": "blueprint-accessory-earth-resist-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d7a289fde151cfe12dc3995d58543fc4b61cd797d9d233c47d94aab4b5a4b0b7",
+          "status": "machine_assisted",
+          "text": "炎抵抗計画のリング"
+        }
+      },
+      "id": "blueprint-accessory-fire-resist-1-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c4b633afaada00734059a7cac02b44890176fd6dd8765b5f9fc3d8074941b834",
+          "status": "machine_assisted",
+          "text": "在庫がある場合は、レシピをロック解除します。 [原文欠落]。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "463d7045a43af11a62440906411251300cec5429c667717e02939dfc92d03138",
+          "status": "machine_assisted",
+          "text": "ファンガードチャーム・シェマティック"
+        }
+      },
+      "id": "blueprint-accessory-hchp-1",
+      "kind": "item"
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared";
-import { getPalworldMeta, getPalworldSkill, getPalworldSkills, PALWORLD_VERSION_MISMATCH_EVENT, searchPalworld } from "../src/features/public-palworld/api/palworld";
+import { getPalworldBreeding, getPalworldMeta, getPalworldSkill, getPalworldSkills, PalworldApiError, PALWORLD_VERSION_MISMATCH_EVENT, searchPalworld } from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
-import { swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
-import { isPalworldPath, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
+import { clearPalworldBreedingParams, palworldBreedingParams, parsePalworldBreedingQuery, swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
+import { isKnownPalworldPagePath, isPalworldPath, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
 import { matchesPalworldItem, matchesPalworldPal, normalizePalworldSearch } from "../src/features/public-palworld/utils/search";
+import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalworldName } from "../src/features/public-palworld/utils/localization";
 import { palworldHomeLiveStreamerCards, sortedFollowedTwitchChannels } from "../src/features/public-palworld/utils/streamers";
 import { getPublicTwitchFollowedChannels, getPublicTwitchStatus, logoutPublicTwitch, publicTwitchLoginUrl } from "../src/features/public-twitch/api";
 
@@ -48,6 +49,9 @@ test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(palworldUrl("search", new URLSearchParams({ q: "아누비스" })), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
   assert.equal(isPalworldPath("/palworld/items"), true);
   assert.equal(isPalworldPath("/lol/summoners/jp/test-JP1"), false);
+  assert.equal(isKnownPalworldPagePath("/palworld/breeding"), true);
+  assert.equal(isKnownPalworldPagePath("/palworld/breeding/"), true);
+  assert.equal(isKnownPalworldPagePath("/palworld/not-a-page"), false);
 });
 
 test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query만 보존한다", () => {
@@ -144,6 +148,48 @@ test("한국어·일본어·영어·ID·도감 번호 통합 검색을 정규화
   assert.equal(matchesPalworldPal(anubis, "100"), true);
   assert.equal(matchesPalworldItem(palSphere, "pal_sphere"), true);
   assert.equal(matchesPalworldItem(palSphere, "パルスフィア"), true);
+});
+
+test("번역 snapshot 상태에 따라 현지어·영어 fallback·원문 없음 상태를 구분한다", () => {
+  const translated = {
+    nameKo: "번역 아이템",
+    nameJa: "翻訳アイテム",
+    nameEn: "Translated Item",
+    descriptionKo: "한국어로 번역된 설명이다.",
+    descriptionJa: "日本語に翻訳された説明です。",
+    descriptionEn: "Source description.",
+    translation: {
+      name: { ko: "machine_assisted" as const, ja: "machine_assisted" as const },
+      description: { ko: "machine_assisted" as const, ja: "machine_assisted" as const },
+    },
+  };
+  assert.deepEqual(resolvePalworldName(translated, "ko"), { text: "번역 아이템", status: "machine_assisted" });
+  assert.deepEqual(resolvePalworldDescription(translated, "ja"), { text: "日本語に翻訳された説明です。", status: "machine_assisted" });
+  assert.deepEqual(resolvePalworldName({ nameEn: "English Only" }, "ko"), { text: "English Only", status: "source_language_fallback" });
+  assert.deepEqual(resolvePalworldName({
+    nameKo: "노출하면 안 되는 오래된 기계번역",
+    nameEn: "Safe English Name",
+    translation: { name: { ko: "source_language_fallback", ja: "missing_source" } },
+  }, "ko"), { text: "Safe English Name", status: "source_language_fallback" });
+  assert.deepEqual(resolvePalworldLocalizedText({}, "description", "ja", undefined, undefined), { text: "", status: "missing_source" });
+});
+
+test("추가된 한국어·일본어 번역 이름은 기존 이름 검색에 포함된다", () => {
+  const translatedItem: PalworldItemSummary = {
+    id: "translated_item",
+    nameKo: "고대의 번역석",
+    nameJa: "古代の翻訳石",
+    nameEn: "Ancient Translation Stone",
+    category: "material",
+    rarity: 1,
+    translation: {
+      name: { ko: "machine_assisted", ja: "machine_assisted" },
+      description: { ko: "missing_source", ja: "missing_source" },
+    },
+  };
+  assert.equal(matchesPalworldItem(translatedItem, "번역석"), true);
+  assert.equal(matchesPalworldItem(translatedItem, "翻訳石"), true);
+  assert.equal(matchesPalworldItem(translatedItem, "translation stone"), true);
 });
 
 test("빈 통합 검색어는 네트워크 요청 전에 거부한다", async () => {
@@ -247,6 +293,83 @@ test("교배 부모 위치 교환은 동일 부모도 안정적으로 처리한�
   assert.deepEqual(swapBreedingParents("a", "b"), ["b", "a"]);
   assert.deepEqual(swapBreedingParents("a", "a"), ["a", "a"]);
   assert.deepEqual(swapBreedingParents(null, "b"), ["b", null]);
+});
+
+test("교배 URL query는 exact ID·성별·mode·page만 상태로 복원한다", () => {
+  const direct = parsePalworldBreedingQuery(new URLSearchParams("mode=parents&parentA=lamball&parentB=cattiva&parentAGender=male&parentBGender=female"));
+  assert.deepEqual(direct, {
+    ok: true,
+    state: {
+      mode: "parents",
+      parentA: "lamball",
+      parentB: "cattiva",
+      parentAGender: "male",
+      parentBGender: "female",
+      page: 1,
+    },
+  });
+  assert.deepEqual(parsePalworldBreedingQuery(new URLSearchParams("mode=child&child=anubis&page=2")), {
+    ok: true,
+    state: { mode: "child", child: "anubis", page: 2 },
+  });
+  for (const invalid of [
+    "mode=unknown",
+    "mode=parents&parentA=Anubis",
+    "mode=parents&parentA=anubis&parentAGender=unknown",
+    "mode=parents&parentA=anubis&parentA=cattiva",
+    "mode=child&child=anubis&page=0",
+    "mode=child&child=anubis&parentA=lamball",
+  ]) {
+    assert.equal(parsePalworldBreedingQuery(new URLSearchParams(invalid)).ok, false, invalid);
+  }
+});
+
+test("교배 URL 직렬화와 초기화는 Modal 등 다른 query를 보존한다", () => {
+  const current = new URLSearchParams("pal=anubis&mode=parents&parentA=lamball&parentB=cattiva");
+  const child = palworldBreedingParams(current, { mode: "child", child: "anubis", page: 3 });
+  assert.equal(child.get("pal"), "anubis");
+  assert.equal(child.get("mode"), "child");
+  assert.equal(child.get("child"), "anubis");
+  assert.equal(child.get("page"), "3");
+  assert.equal(child.has("parentA"), false);
+  assert.equal(clearPalworldBreedingParams(child).toString(), "pal=anubis");
+});
+
+test("교배 API는 optional 성별 query를 전달하고 503 code를 보존한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  let requestedUrl = "";
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: () => true,
+    } as unknown as Window,
+    fetch: async (url: string | URL | Request) => {
+      requestedUrl = String(url);
+      return new Response(JSON.stringify({
+        error: "PALWORLD_DATA_UNAVAILABLE",
+        message: "Palworld 데이터를 사용할 수 없습니다.",
+      }), { status: 503, headers: { "content-type": "application/json" } });
+    },
+  });
+  try {
+    await assert.rejects(
+      () => getPalworldBreeding("lamball", "cattiva", {
+        parentAGender: "male",
+        parentBGender: "female",
+      }),
+      (error: unknown) => error instanceof PalworldApiError
+        && error.status === 503
+        && error.code === "PALWORLD_DATA_UNAVAILABLE",
+    );
+    const url = new URL(requestedUrl);
+    assert.equal(url.searchParams.get("parentA"), "lamball");
+    assert.equal(url.searchParams.get("parentB"), "cattiva");
+    assert.equal(url.searchParams.get("parentAGender"), "male");
+    assert.equal(url.searchParams.get("parentBGender"), "female");
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
 });
 
 test("LoL 게임 메뉴의 펠월드 경로 변경은 App 재평가 이벤트를 보낸다", () => {

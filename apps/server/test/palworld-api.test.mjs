@@ -78,8 +78,9 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(body.domains.items.status, "incomplete");
   assert.equal(body.domains.items.metadata.gameVersion, "1.0.1.100619");
   assert.match(body.domains.items.metadata.sourceChecksum, /^[a-f0-9]{64}$/u);
-  assert.equal(body.domains.breeding.status, "sample");
-  assert.equal(body.domains.breeding.metadata.gameVersion, "sample-baseline");
+  assert.equal(body.counts.breedingPairs, 41_329);
+  assert.equal(body.domains.breeding.status, "incomplete");
+  assert.equal(body.domains.breeding.metadata.gameVersion, "1.0.1");
   assert.equal(body.domains.skills.status, "incomplete");
   assert.equal(body.domains.skills.metadata.gameVersion, "1.0.1.100619");
   assert.equal(body.domains.skills.metadata.sourceRevision, body.domains.items.metadata.sourceRevision);
@@ -179,6 +180,8 @@ test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 S
     ko: "source_language_fallback",
     ja: "source_language_fallback"
   });
+  assert.equal(active.body.items[0].translation.description.ko, "machine_assisted");
+  assert.equal(active.body.items[0].translation.description.ja, "machine_assisted");
   assert.match(active.res.headers["Cache-Control"], /^public,/u);
   assert.equal(
     validatePalworldPaginatedResponse(active.body, validatePalworldSkillSummary).ok,
@@ -255,24 +258,44 @@ test("첫 번째·중간·마지막 Pal 상세는 검증된 로컬 이미지를,
   assert.equal(first.body.breeding.breedingPower, 3050);
 });
 
-test("교배 API는 부모 위치 교환, 결과 없음과 부모 역검색을 지원한다", async () => {
+test("교배 API는 일반·성별 특수 교배, 부모 위치 교환과 역검색 pagination을 지원한다", async () => {
   const handler = createHandler();
   const forward = await request(handler, "/api/palworld/breeding?parentA=bushi&parentB=penking");
-  const empty = await request(handler, "/api/palworld/breeding?parentA=lamball&parentB=cattiva");
-  const outsideSample = await request(handler, "/api/palworld/breeding?parentA=panthalus&parentB=lamball");
+  const general = await request(handler, "/api/palworld/breeding?parentA=lamball&parentB=cattiva");
+  const fullCatalog = await request(handler, "/api/palworld/breeding?parentA=panthalus&parentB=lamball");
+  const requiresGender = await request(handler, "/api/palworld/breeding?parentA=katress&parentB=wixen");
+  const gendered = await request(
+    handler,
+    "/api/palworld/breeding?parentA=katress&parentB=wixen&parentAGender=male&parentBGender=female"
+  );
   const parents = await request(handler, "/api/palworld/breeding/parents?child=anubis&page=1&limit=10");
-  const outsideSampleParents = await request(handler, "/api/palworld/breeding/parents?child=panthalus&page=1&limit=10");
-  assert.equal(forward.body.result.child.id, "anubis");
-  assert.equal(empty.body.result, null);
-  assert.equal(outsideSample.res.statusCode, 200);
-  assert.equal(outsideSample.body.result, null);
+  const parentsPage2 = await request(handler, "/api/palworld/breeding/parents?child=anubis&page=2&limit=10");
+  const selfParents = await request(handler, "/api/palworld/breeding/parents?child=panthalus&page=1&limit=10");
+  assert.equal(forward.body.result.child.id, "xenovader");
+  assert.equal(forward.body.state, "resolved");
+  assert.equal(general.body.result.child.id, "daedream");
+  assert.equal(fullCatalog.res.statusCode, 200);
+  assert.equal(fullCatalog.body.result.child.id, "bakemi");
+  assert.equal(requiresGender.body.state, "requires_gender");
+  assert.deepEqual(
+    requiresGender.body.alternatives.map((pair) => pair.child.id),
+    ["katress-ignis", "wixen-noct"]
+  );
+  assert.equal(gendered.body.state, "resolved");
+  assert.equal(gendered.body.result.child.id, "wixen-noct");
   assert.equal(parents.body.child.id, "anubis");
-  assert.equal(parents.body.items[0].id, "penking-bushi-anubis");
-  assert.equal(outsideSampleParents.res.statusCode, 200);
-  assert.equal(outsideSampleParents.body.child.id, "panthalus");
-  assert.deepEqual(outsideSampleParents.body.items, []);
-  assert.equal(forward.body.metadata.gameVersion, "sample-baseline");
-  assert.equal(parents.body.metadata.gameVersion, "sample-baseline");
+  assert.equal(parents.body.pagination.total, 234);
+  assert.equal(parents.body.pagination.totalPages, 24);
+  assert.equal(parentsPage2.body.pagination.page, 2);
+  assert.notEqual(parentsPage2.body.items[0].id, parents.body.items[0].id);
+  assert.equal(selfParents.res.statusCode, 200);
+  assert.equal(selfParents.body.child.id, "panthalus");
+  assert.deepEqual(
+    selfParents.body.items.map((pair) => [pair.parentA.id, pair.parentB.id, pair.child.id]),
+    [["panthalus", "panthalus", "panthalus"]]
+  );
+  assert.equal(forward.body.metadata.gameVersion, "1.0.1");
+  assert.equal(parents.body.metadata.gameVersion, "1.0.1");
   assert.equal(forward.res.headers["X-Palworld-Data-Version"], "1.0.1");
 });
 

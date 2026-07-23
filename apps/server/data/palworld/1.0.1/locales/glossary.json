@@ -1,0 +1,2850 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "generatedAt": "2026-07-22T00:00:00.000Z",
+  "reviewedNames": [
+    {
+      "kind": "item",
+      "id": "copper-ingot",
+      "en": "Ingot",
+      "ko": "금속 주괴",
+      "ja": "金属インゴット",
+      "sourceSha256": "af820e185849308fcfb7f7bbbb994991d3e690ddc636310480a783106378f149"
+    },
+    {
+      "kind": "item",
+      "id": "copper-ore",
+      "en": "Ore",
+      "ko": "금속 광석",
+      "ja": "金属鉱石",
+      "sourceSha256": "b2b092084f4d5b412f918c4a58e4e4eee2b69ec644893b5d98b422b7a5298f8f"
+    },
+    {
+      "kind": "item",
+      "id": "fiber",
+      "en": "Fiber",
+      "ko": "섬유",
+      "ja": "繊維",
+      "sourceSha256": "7ed0a5e33e7be0026604a37fe216bb1e04e5f91ea09d89f2ee190d9d0d34d459"
+    },
+    {
+      "kind": "item",
+      "id": "leather",
+      "en": "Leather",
+      "ko": "가죽",
+      "ja": "革",
+      "sourceSha256": "e8e775159a57aaaf0f554dad0979a5c41009ee7b19a342c0aa4e4efd10afd03e"
+    },
+    {
+      "kind": "item",
+      "id": "pal-crystal-ex",
+      "en": "Ancient Civilization Parts",
+      "ko": "고대 문명의 부품",
+      "ja": "古代文明の部品",
+      "sourceSha256": "c229046dd07bea79ef8d1dadb75a9b02b320622c0fc15666b3b3729b7c44f2dd"
+    },
+    {
+      "kind": "item",
+      "id": "pal-crystal-s",
+      "en": "Paldium Fragment",
+      "ko": "팰지움 파편",
+      "ja": "パルジウムの欠片",
+      "sourceSha256": "7834321d9f434cf0db2efb7dda5139a4ea539dc29c4bb5b6574125c44e5cca30"
+    },
+    {
+      "kind": "item",
+      "id": "pal-sphere",
+      "en": "Pal Sphere",
+      "ko": "Pal 스피어",
+      "ja": "パルスフィア",
+      "sourceSha256": "9217ff95e4029985a54ca0baa2fc8a1d1d5571d7d6a1c5278795759c1d593099"
+    },
+    {
+      "kind": "item",
+      "id": "pal-sphere-mega",
+      "en": "Mega Sphere",
+      "ko": "메가 스피어",
+      "ja": "メガスフィア",
+      "sourceSha256": "83f9c9683b331bbef951565328b4b77c4bbfbfa7e3afd2a8b4a86505c2279ec4"
+    },
+    {
+      "kind": "item",
+      "id": "stone",
+      "en": "Stone",
+      "ko": "돌",
+      "ja": "石",
+      "sourceSha256": "6ffa6b8b1c9fa11cb67a0a54b7e3e175dfb7edcb8e8d322148a3b00affc4a842"
+    },
+    {
+      "kind": "item",
+      "id": "wood",
+      "en": "Wood",
+      "ko": "목재",
+      "ja": "木材",
+      "sourceSha256": "731140284eac4aca18aa8cfd15ad56f45d4423067910729caccaf21683e013e1"
+    },
+    {
+      "kind": "pal",
+      "id": "aegidron",
+      "en": "Aegidron",
+      "ko": "셸가드라",
+      "ja": "シェルガドラ",
+      "sourceSha256": "2e08e38d6d38a11568f794ac577bbc30ea82d3a9dac809c72dc3246a75cc7a78"
+    },
+    {
+      "kind": "pal",
+      "id": "amione",
+      "en": "Amione",
+      "ko": "리오리네",
+      "ja": "リオリネ",
+      "sourceSha256": "9f4d7c6679068d99441690c10fcbb9548f4aa94e97b0503884b90badbe1fef41"
+    },
+    {
+      "kind": "pal",
+      "id": "anubis",
+      "en": "Anubis",
+      "ko": "아누비스",
+      "ja": "アヌビス",
+      "sourceSha256": "4ad4ceb77430e336c9dc5f315cff4813be021551d748b22344fc1ccdae320979"
+    },
+    {
+      "kind": "pal",
+      "id": "arsox",
+      "en": "Arsox",
+      "ko": "불페르노",
+      "ja": "ブルフェルノ",
+      "sourceSha256": "62b6c2d616cc954fbf896ef5429e11e78592aec48cc207b559ef1777bfc435a0"
+    },
+    {
+      "kind": "pal",
+      "id": "astegon",
+      "en": "Astegon",
+      "ko": "라바드래곤",
+      "ja": "ジオラーヴァ",
+      "sourceSha256": "2c5a5832cc03051d1a743b0982dab7d565f74bd29501993fe06f4b474c10acca"
+    },
+    {
+      "kind": "pal",
+      "id": "azurmane",
+      "en": "Azurmane",
+      "ko": "썬더호스",
+      "ja": "オーマサンダ",
+      "sourceSha256": "b77ef4098832938116c63924fd55d05efabcc216c35d016324c7cd35a8bee387"
+    },
+    {
+      "kind": "pal",
+      "id": "azurobe",
+      "en": "Azurobe",
+      "ko": "아주리비",
+      "ja": "アズレーン",
+      "sourceSha256": "f60a54a2e60ba26ed9ae2730497c7595c27e1c3ec76cbaf5aa3ec2ab7ab39e55"
+    },
+    {
+      "kind": "pal",
+      "id": "azurobe-cryst",
+      "en": "Azurobe Cryst",
+      "ko": "아주리나",
+      "ja": "アズルーナ",
+      "sourceSha256": "c5fd2d6637a4c04d34a6be0a383a8b56ff84e4608e6642fb3742578922119d39"
+    },
+    {
+      "kind": "pal",
+      "id": "bakemi",
+      "en": "Bakemi",
+      "ko": "우라미",
+      "ja": "ウラミィ",
+      "sourceSha256": "7713eb82254e21715ecc443a2c69c6af0d724e90c34afd7175a23810c51522ac"
+    },
+    {
+      "kind": "pal",
+      "id": "bastigor",
+      "en": "Bastigor",
+      "ko": "빙호우거",
+      "ja": "ヒョウガオー",
+      "sourceSha256": "8ae47fa323a41e9847aca5cdf8604381b112bdb63de7ba93316da24fdfd0944b"
+    },
+    {
+      "kind": "pal",
+      "id": "beakon",
+      "en": "Beakon",
+      "ko": "라이버드",
+      "ja": "ライバード",
+      "sourceSha256": "5b7ecf53406257837a407dc56796f1fc57b1d58b4da5e951a28f4d8c77830a9b"
+    },
+    {
+      "kind": "pal",
+      "id": "beakon-cryst",
+      "en": "Beakon Cryst",
+      "ko": "칠버드",
+      "ja": "チルバード",
+      "sourceSha256": "84e075bcd55678a3778c1f69d4ffc15ac52177093ba13daa9b6a241356204aa2"
+    },
+    {
+      "kind": "pal",
+      "id": "beegarde",
+      "en": "Beegarde",
+      "ko": "비나이트",
+      "ja": "ビーナイト",
+      "sourceSha256": "99247072a678a5d2577fd64f86d6b30385edeb09279943d9a441f2dd3f022393"
+    },
+    {
+      "kind": "pal",
+      "id": "bellanoir",
+      "en": "Bellanoir",
+      "ko": "벨라누아르",
+      "ja": "ベラノワール",
+      "sourceSha256": "d92ea76469c7b0e6c8369254cdaa00948baa3ff70487ac61d605854aefc65246"
+    },
+    {
+      "kind": "pal",
+      "id": "bellanoir-libero",
+      "en": "Bellanoir Libero",
+      "ko": "벨라루주",
+      "ja": "ベラルージュ",
+      "sourceSha256": "14aadf0d57033af2e2c4bdb9816e9c977480e905e3148e74efa34c7176939eb3"
+    },
+    {
+      "kind": "pal",
+      "id": "blazamut",
+      "en": "Blazamut",
+      "ko": "마그마카이저",
+      "ja": "ボルカイザー",
+      "sourceSha256": "34a311533690b909de6ce8a306992e88d9e0746c4f72078c4a18f97af0cd4993"
+    },
+    {
+      "kind": "pal",
+      "id": "blazamut-ryu",
+      "en": "Blazamut Ryu",
+      "ko": "마그마드라고",
+      "ja": "ボルドラゴ",
+      "sourceSha256": "7a6c5aac555fc75450993331b7208c1ab116ec0b7df904d08e05ee9dc6b27d04"
+    },
+    {
+      "kind": "pal",
+      "id": "blazehowl",
+      "en": "Blazehowl",
+      "ko": "만티파이어",
+      "ja": "ゴクエンオ",
+      "sourceSha256": "bf0c5feb41af92e8c2fa25d5872e19326775e54a8c12de6a6961469869bdce6b"
+    },
+    {
+      "kind": "pal",
+      "id": "blazehowl-noct",
+      "en": "Blazehowl Noct",
+      "ko": "만티녹턴",
+      "ja": "シンエンオ",
+      "sourceSha256": "d7edf25264675e8642b454184f6a644862b1239cd91a4aa337f51f764fadb683"
+    },
+    {
+      "kind": "pal",
+      "id": "braloha",
+      "en": "Braloha",
+      "ko": "풀레시오",
+      "ja": "トコナッツ",
+      "sourceSha256": "6d43b531a0ebb4c7197e4b9424bca494a7ef2610fa90e48d4720faa101338ad8"
+    },
+    {
+      "kind": "pal",
+      "id": "bristla",
+      "en": "Bristla",
+      "ko": "가시공주",
+      "ja": "イバラヒメ",
+      "sourceSha256": "68e9ba26903a3651fd95b1ac3615da964ff350c0dcd8142753576f7c791679b9"
+    },
+    {
+      "kind": "pal",
+      "id": "broncherry",
+      "en": "Broncherry",
+      "ko": "라브라돈",
+      "ja": "ラブラドン",
+      "sourceSha256": "03cf7cef09939aae82c1f486cb3beb2660e5ed36547421d570e9750d2764fce2"
+    },
+    {
+      "kind": "pal",
+      "id": "broncherry-aqua",
+      "en": "Broncherry Aqua",
+      "ko": "스프라돈",
+      "ja": "スプラドン",
+      "sourceSha256": "0ebec5c9ee00d77d8ed1b102288f9c1ce5ac6001994155be1aae77158e6c24a6"
+    },
+    {
+      "kind": "pal",
+      "id": "bulldosu",
+      "en": "Bulldosu",
+      "ko": "와르차차",
+      "ja": "ドスコイヌ",
+      "sourceSha256": "1aa4da6de497cd256b2902ce70dda39b63c90b37530595c902409b024e6521b1"
+    },
+    {
+      "kind": "pal",
+      "id": "bushi",
+      "en": "Bushi",
+      "ko": "불무사",
+      "ja": "ツジギリ",
+      "sourceSha256": "5fe75502c7e8e4e94e20b4db54ddfca99c6400d3000892b77a1eedcc22a5dde8"
+    },
+    {
+      "kind": "pal",
+      "id": "bushi-noct",
+      "en": "Bushi Noct",
+      "ko": "어둠무사",
+      "ja": "ヤミウチ",
+      "sourceSha256": "e29a7d0d2a02e078c10a90d65a2a128e1c0b45ed273f73af72a37e84416dbd79"
+    },
+    {
+      "kind": "pal",
+      "id": "caprity",
+      "en": "Caprity",
+      "ko": "베리고트",
+      "ja": "ベリゴート",
+      "sourceSha256": "b14844898485a9c6b41865385f2d4f734c6d55b2c5bc2fb35802b404599741cb"
+    },
+    {
+      "kind": "pal",
+      "id": "caprity-noct",
+      "en": "Caprity Noct",
+      "ko": "베노고트",
+      "ja": "ベノゴート",
+      "sourceSha256": "0c3d4f90d76c65e3352784caf23c12b22cb091e4d1a45a01a912a48674b50125"
+    },
+    {
+      "kind": "pal",
+      "id": "carnibora",
+      "en": "Carnibora",
+      "ko": "카프릴리스",
+      "ja": "カプリリス",
+      "sourceSha256": "3ead6afd116a0f9413efa64a8fecd738a88fa599b171e3be159326ed02806d4c"
+    },
+    {
+      "kind": "pal",
+      "id": "cattiva",
+      "en": "Cattiva",
+      "ko": "까부냥",
+      "ja": "ツッパニャン",
+      "sourceSha256": "7893d3df0ea47f7c46fac301ad53af130f361f49a6142be9234e8ef45d62fb8f"
+    },
+    {
+      "kind": "pal",
+      "id": "cawgnito",
+      "en": "Cawgnito",
+      "ko": "마스크로우",
+      "ja": "マスクロウ",
+      "sourceSha256": "901e96ebaada1a1ee7b4a35709886da49ca745c80754870d452a3b40b8970ed0"
+    },
+    {
+      "kind": "pal",
+      "id": "celaray",
+      "en": "Celaray",
+      "ko": "루미카이트",
+      "ja": "ルミカイト",
+      "sourceSha256": "c584f8322e1572ecc17fb53352bb0316c554573153b328f31453618d450fe33a"
+    },
+    {
+      "kind": "pal",
+      "id": "celaray-lux",
+      "en": "Celaray Lux",
+      "ko": "일레카이트",
+      "ja": "エレカイト",
+      "sourceSha256": "1bfd8d111c74d09dd4a24495eea136be1634e945090f514a1e7f907ef4e30c7d"
+    },
+    {
+      "kind": "pal",
+      "id": "celesdir",
+      "en": "Celesdir",
+      "ko": "셀레스디얼",
+      "ja": "セレスディア",
+      "sourceSha256": "0bc0d9c710530072f8073063436828540616b1cc0c2a4f0aa08dc191575f268f"
+    },
+    {
+      "kind": "pal",
+      "id": "celesdir-noct",
+      "en": "Celesdir Noct",
+      "ko": "코스모디얼",
+      "ja": "コスモディア",
+      "sourceSha256": "2c85f288aff5c20f8c8c49465812d9275176b8619b6cb50b3df0694c9cbcf020"
+    },
+    {
+      "kind": "pal",
+      "id": "chikipi",
+      "en": "Chikipi",
+      "ko": "꼬꼬닭",
+      "ja": "タマコッコ",
+      "sourceSha256": "f05154d0813017a6440ba5c3cf6b30f131f8711859da2c4ff66bb8e860ec7278"
+    },
+    {
+      "kind": "pal",
+      "id": "chillet",
+      "en": "Chillet",
+      "ko": "베비뇽",
+      "ja": "オコチョ",
+      "sourceSha256": "3c0fb71d7fedee4a413ab186243a744a4de81ba4bea80be20815b1faf5687b5c"
+    },
+    {
+      "kind": "pal",
+      "id": "chillet-ignis",
+      "en": "Chillet Ignis",
+      "ko": "천도뇽",
+      "ja": "モモチョ",
+      "sourceSha256": "d6b368a124f6ae54e46e410b868781512fd2626867ca76d3b1a45d101dd0620c"
+    },
+    {
+      "kind": "pal",
+      "id": "cinnamoth",
+      "en": "Cinnamoth",
+      "ko": "귀요비",
+      "ja": "パピテフ",
+      "sourceSha256": "477adc809824e8a68565d1e022b3dc3abd42ef47cf32f55cc3db94d902d0ac4a"
+    },
+    {
+      "kind": "pal",
+      "id": "clovee",
+      "en": "Clovee",
+      "ko": "브루밍",
+      "ja": "ポワワ",
+      "sourceSha256": "36af72148b83891021a7f75b7b43228dc7a3dc44a773aa2fb7131267d8285ca1"
+    },
+    {
+      "kind": "pal",
+      "id": "cremis",
+      "en": "Cremis",
+      "ko": "밀피",
+      "ja": "ミルフィー",
+      "sourceSha256": "cf9addb56af74ad8dd3e8ea23bf0ad19ace1867455cdfa22c2a961ab9de7dcdb"
+    },
+    {
+      "kind": "pal",
+      "id": "croajiro",
+      "en": "Croajiro",
+      "ko": "칼구리",
+      "ja": "ブシガエル",
+      "sourceSha256": "d2bc23b7347b8fe7d2a919191584892a05defb510959a6ed77a019651549a4f9"
+    },
+    {
+      "kind": "pal",
+      "id": "croajiro-noct",
+      "en": "Croajiro Noct",
+      "ko": "검구리",
+      "ja": "ドスガエル",
+      "sourceSha256": "04a4f0854fd21c133f5b02c5390b00e73bf5d847cb25f5c97be23f55b10cff6f"
+    },
+    {
+      "kind": "pal",
+      "id": "cryolinx",
+      "en": "Cryolinx",
+      "ko": "백랑이",
+      "ja": "ツンドラー",
+      "sourceSha256": "b3353d2146d09878330846c89bdd5e0c5e729ee21eb185b2e9c2d0a6f3f34e39"
+    },
+    {
+      "kind": "pal",
+      "id": "cryolinx-terra",
+      "en": "Cryolinx Terra",
+      "ko": "토랑이",
+      "ja": "グランドラー",
+      "sourceSha256": "9b9514be126e47198609fd6aa756feddd000b1814a62563c95dacf30ed1bc0dd"
+    },
+    {
+      "kind": "pal",
+      "id": "daedream",
+      "en": "Daedream",
+      "ko": "몽마둥이",
+      "ja": "ネムラム",
+      "sourceSha256": "5c2b9fa7fb019f1023252ce3ca5974ae2f4b95d90efe7cdfa14e990b9ac15a2e"
+    },
+    {
+      "kind": "pal",
+      "id": "dandilord",
+      "en": "Dandilord",
+      "ko": "녹사주",
+      "ja": "ノクサージュ",
+      "sourceSha256": "db7aa4364c24daf39878f42ddc495284be06bd7a638305e9a35356b5854b3020"
+    },
+    {
+      "kind": "pal",
+      "id": "dazemu",
+      "en": "Dazemu",
+      "ko": "페더치프",
+      "ja": "トリステップ",
+      "sourceSha256": "357b0097f1dfd8f8f32f19c01d41e86ffc9fa547f5529fd9fdb38c419b0ffb7c"
+    },
+    {
+      "kind": "pal",
+      "id": "dazzi",
+      "en": "Dazzi",
+      "ko": "썬더키드",
+      "ja": "カミナラシ",
+      "sourceSha256": "8f97cf1584bd1a679368f5dbe4fb92fb8d79380b62a8a428ba06b49aed68ff05"
+    },
+    {
+      "kind": "pal",
+      "id": "dazzi-noct",
+      "en": "Dazzi Noct",
+      "ko": "다크키드",
+      "ja": "ヤミナラシ",
+      "sourceSha256": "3bcc5819e2e3e4cc2f5254c4d4dba9c5387712b4a28330dc1ef9cee81ad308fa"
+    },
+    {
+      "kind": "pal",
+      "id": "depresso",
+      "en": "Depresso",
+      "ko": "뚱코알라",
+      "ja": "ンダコアラ",
+      "sourceSha256": "d95681abf05fa11a203ccfea3cef8ce8dd4c3baf04b28746595a7825f2c0c970"
+    },
+    {
+      "kind": "pal",
+      "id": "digtoise",
+      "en": "Digtoise",
+      "ko": "드릴북이",
+      "ja": "ドリタス",
+      "sourceSha256": "256b3514c2fe6584d2507f2c1156e652427c34cfd4f103ad8c55d51920e58cc7"
+    },
+    {
+      "kind": "pal",
+      "id": "dinossom",
+      "en": "Dinossom",
+      "ko": "플로라디노",
+      "ja": "アロアリュー",
+      "sourceSha256": "5544214bcad3a891ec0428e2fffbfa22c3fa989b470fb2bc6ba39e36a44437ea"
+    },
+    {
+      "kind": "pal",
+      "id": "dinossom-lux",
+      "en": "Dinossom Lux",
+      "ko": "찌르르디노",
+      "ja": "ビリビリュー",
+      "sourceSha256": "0e7d6050c17420a6e4e0049cb5cc7ac17c8878cc5814b823ebcf297a1fb126fc"
+    },
+    {
+      "kind": "pal",
+      "id": "direhowl",
+      "en": "Direhowl",
+      "ko": "다크울프",
+      "ja": "ガウルフ",
+      "sourceSha256": "12311725b01e455488fbcc7b5a6b36a1daf08afd4504d43beef30b10870f9339"
+    },
+    {
+      "kind": "pal",
+      "id": "dogen",
+      "en": "Dogen",
+      "ko": "시푸도그",
+      "ja": "ワンフー",
+      "sourceSha256": "09b33296828dabc6b8a94315113ed6258777bcaa890bfff08ffd1d6b4aaf170e"
+    },
+    {
+      "kind": "pal",
+      "id": "dualith",
+      "en": "Dualith",
+      "ko": "스태초",
+      "ja": "ウゴクゾー",
+      "sourceSha256": "659ee2d6b1320f377a229cda6beecbc91196cdf206420cdee8ff5caff0e02e50"
+    },
+    {
+      "kind": "pal",
+      "id": "dualith-noct",
+      "en": "Dualith Noct",
+      "ko": "스태그림",
+      "ja": "ノロウゾー",
+      "sourceSha256": "fda387b134deb01f6b8c1c6841418086e7292b4e71fb2873a11e7f84d009cdfa"
+    },
+    {
+      "kind": "pal",
+      "id": "dumud",
+      "en": "Dumud",
+      "ko": "도도롱",
+      "ja": "トドドドン",
+      "sourceSha256": "8f144aea148328f9613ad40b5ff5ffc80b58a7c84ec994c80fc91d0607251e70"
+    },
+    {
+      "kind": "pal",
+      "id": "dumud-gild",
+      "en": "Dumud Gild",
+      "ko": "골도롱",
+      "ja": "ゴルドドン",
+      "sourceSha256": "abcfbbe8f68b000ad20b83e5ed37237007c651cb58a343408696bb5029532583"
+    },
+    {
+      "kind": "pal",
+      "id": "dupin",
+      "en": "Dupin",
+      "ko": "라피에르",
+      "ja": "ラピエール",
+      "sourceSha256": "8fe87c1e0126be7456a02786b5cfa20e6c513dd567f193a7739503e843334a09"
+    },
+    {
+      "kind": "pal",
+      "id": "dynamoff",
+      "en": "Dynamoff",
+      "ko": "뇌운조",
+      "ja": "ダイナモフ",
+      "sourceSha256": "1982957ce2f76e25f4b98e374fbf91ac01589fcded77f69694674a2d9ae90930"
+    },
+    {
+      "kind": "pal",
+      "id": "eidrolon",
+      "en": "Eidrolon",
+      "ko": "레이번",
+      "ja": "レイバーン",
+      "sourceSha256": "4cd5dbc3f740d4a0d25dfdb683a040b997a8b8a1eca561a381c1c75d65bafd79"
+    },
+    {
+      "kind": "pal",
+      "id": "eidrolon-ignis",
+      "en": "Eidrolon Ignis",
+      "ko": "헬번",
+      "ja": "ヘルバーン",
+      "sourceSha256": "4ad651943f970beedaaf4aba1273dad97bc905dd0b7825fc7444ffc8944f2937"
+    },
+    {
+      "kind": "pal",
+      "id": "eikthyrdeer",
+      "en": "Eikthyrdeer",
+      "ko": "신령사슴",
+      "ja": "ツノガミ",
+      "sourceSha256": "bdb36aae24f13d1ff550e0ea2257ae171a6d226abf31c9e21e9497995b002729"
+    },
+    {
+      "kind": "pal",
+      "id": "eikthyrdeer-terra",
+      "en": "Eikthyrdeer Terra",
+      "ko": "산령사슴",
+      "ja": "ヤマガミ",
+      "sourceSha256": "3a621f5487e1059b802cef71f7954d099fa0ac9655543ab8d56aa1130f7dc346"
+    },
+    {
+      "kind": "pal",
+      "id": "elgrove",
+      "en": "Elgrove",
+      "ko": "그루타우",
+      "ja": "モリタロス",
+      "sourceSha256": "f5b3a7675b84c54258a63f135ef8b1cec21c90e0424d76a0754442316e6a81d4"
+    },
+    {
+      "kind": "pal",
+      "id": "elgrove-cryst",
+      "en": "Elgrove Cryst",
+      "ko": "블랑타우",
+      "ja": "ユキタロス",
+      "sourceSha256": "165fccd3c1ea05e10f700d604c81d34119ca15c05778647ef10e5bb82eda1dfe"
+    },
+    {
+      "kind": "pal",
+      "id": "elizabee",
+      "en": "Elizabee",
+      "ko": "퀸비나",
+      "ja": "クインビーナ",
+      "sourceSha256": "f69adad18490faaa059fed42b849a59e296070d3d601d376ce6fe9dfd51f3bab"
+    },
+    {
+      "kind": "pal",
+      "id": "elphidran",
+      "en": "Elphidran",
+      "ko": "실피아",
+      "ja": "シルフィア",
+      "sourceSha256": "3edf0a82371835398f0f6c22abe6df6614dcb9ca145c41c9072ea553568783df"
+    },
+    {
+      "kind": "pal",
+      "id": "elphidran-aqua",
+      "en": "Elphidran Aqua",
+      "ko": "실티아",
+      "ja": "シルティア",
+      "sourceSha256": "e84bb47d7ca32f2f6f02d60128c48a78e493aaf0bf53e14deed62f3af00ebf53"
+    },
+    {
+      "kind": "pal",
+      "id": "faleris",
+      "en": "Faleris",
+      "ko": "호루스",
+      "ja": "ホルス",
+      "sourceSha256": "2f378519b85c3d52247bc87e65ddc3b21ce7ce7e6e0d6d5b2c21ad9bd5bb45f6"
+    },
+    {
+      "kind": "pal",
+      "id": "faleris-aqua",
+      "en": "Faleris Aqua",
+      "ko": "이시스",
+      "ja": "イシス",
+      "sourceSha256": "f9bf11ff56234ce8ab96fe116ee0cdb02ab3a8ff3c3b1a98599bc24245da342f"
+    },
+    {
+      "kind": "pal",
+      "id": "felbat",
+      "en": "Felbat",
+      "ko": "블러드캐티",
+      "ja": "ヤミトバリ",
+      "sourceSha256": "c8e2238c9542e370e18ae2dc054ece88e0202b4f24ff5f726efa897cec2b69ff"
+    },
+    {
+      "kind": "pal",
+      "id": "fenglope",
+      "en": "Fenglope",
+      "ko": "윈드디어",
+      "ja": "ムラクモ",
+      "sourceSha256": "02dbff02e4ee1b92e05ab25922faeafc097ae55f9f42d47666e86a4a631dee3d"
+    },
+    {
+      "kind": "pal",
+      "id": "fenglope-lux",
+      "en": "Fenglope Lux",
+      "ko": "볼트디어",
+      "ja": "ムラサメ",
+      "sourceSha256": "58bde1c7f29e4bd5a1a0b9642002cd492659a51ebcc9e5d3b33cd27c00d43702"
+    },
+    {
+      "kind": "pal",
+      "id": "finsider",
+      "en": "Finsider",
+      "ko": "무상이",
+      "ja": "ガブルミ",
+      "sourceSha256": "5d94dfbb92b8523cb29e6af8342bad15a75f756953fbcfc61c6211f2c7866752"
+    },
+    {
+      "kind": "pal",
+      "id": "finsider-ignis",
+      "en": "Finsider Ignis",
+      "ko": "염상이",
+      "ja": "ヒグルミ",
+      "sourceSha256": "337b255b20ff822892b33ef9d109be143022244b45b94a8ee5bf5b8237dc4517"
+    },
+    {
+      "kind": "pal",
+      "id": "flambelle",
+      "en": "Flambelle",
+      "ko": "라비",
+      "ja": "ラヴィ",
+      "sourceSha256": "cad1c828ceb217a9fc4b2f64fae0d2cc6d981e9fbeede8c69ce6510ab7311927"
+    },
+    {
+      "kind": "pal",
+      "id": "flaracle",
+      "en": "Flaracle",
+      "ko": "센코",
+      "ja": "センコ",
+      "sourceSha256": "0a0f80fea5311c5736582d5a9e40e8ded60701b1462f02610bd251c02b57eb81"
+    },
+    {
+      "kind": "pal",
+      "id": "flopie",
+      "en": "Flopie",
+      "ko": "토푸리",
+      "ja": "ポプリーナ",
+      "sourceSha256": "6b171a568d2151562f53979745bc367ee9a869e525ab389f2ab25f4b46ae5736"
+    },
+    {
+      "kind": "pal",
+      "id": "foxcicle",
+      "en": "Foxcicle",
+      "ko": "빙호",
+      "ja": "フブキツネ",
+      "sourceSha256": "48e01ce98879ed6437e7c0a8681aff65de04aaade770e27a6298c33ca9471f91"
+    },
+    {
+      "kind": "pal",
+      "id": "foxparks",
+      "en": "Foxparks",
+      "ko": "파이호",
+      "ja": "キツネビ",
+      "sourceSha256": "4efd836b8b477fb48c6999a88e604cb917f6ac4ee4721b7c2b838228ae5adc58"
+    },
+    {
+      "kind": "pal",
+      "id": "foxparks-cryst",
+      "en": "Foxparks Cryst",
+      "ko": "아이호",
+      "ja": "ユキツネ",
+      "sourceSha256": "2c3cbd019aa46d865584c374abdff9cb619d5d88c959a0e0d6d2bad5c0adbabb"
+    },
+    {
+      "kind": "pal",
+      "id": "frostallion",
+      "en": "Frostallion",
+      "ko": "빙천마",
+      "ja": "グレイシャル",
+      "sourceSha256": "642809a9a3a699e70b072cd41dd513744953873d3f6051d198e1a23b027ffda2"
+    },
+    {
+      "kind": "pal",
+      "id": "frostallion-noct",
+      "en": "Frostallion Noct",
+      "ko": "흑천마",
+      "ja": "グレイシャドウ",
+      "sourceSha256": "79d549031da5537e771c0a8f4b1d723958dab44a347d4c4e467675bc30546517"
+    },
+    {
+      "kind": "pal",
+      "id": "frostplume",
+      "en": "Frostplume",
+      "ko": "프리설라",
+      "ja": "クジャンナ",
+      "sourceSha256": "48b028f3faa2e96aaacd2a4fbc12402cd4e08f19bf645d750eb8e71af8d8dd49"
+    },
+    {
+      "kind": "pal",
+      "id": "fuack",
+      "en": "Fuack",
+      "ko": "청부리",
+      "ja": "カモノスケ",
+      "sourceSha256": "40d86a0cd65f8abfd222782c73b32a2bbc81701dcd895c379d4044a10883a558"
+    },
+    {
+      "kind": "pal",
+      "id": "fuack-ignis",
+      "en": "Fuack Ignis",
+      "ko": "적부리",
+      "ja": "モモノスケ",
+      "sourceSha256": "3753e5b928fc82b11f4e6aad638a15d1e0072d3fc68f49834bb2b4cb689779e2"
+    },
+    {
+      "kind": "pal",
+      "id": "fuddler",
+      "en": "Fuddler",
+      "ko": "두더비",
+      "ja": "モグルン",
+      "sourceSha256": "a88763a1a0b5bf8a79a7c6ebbe9ec4366e60b9f3b36c1c62abdc913a7dd0797e"
+    },
+    {
+      "kind": "pal",
+      "id": "galeclaw",
+      "en": "Galeclaw",
+      "ko": "질풍수리",
+      "ja": "エアムルグ",
+      "sourceSha256": "3dda8416b8f19e8f3317c6baf8f70f2236d821dc2be2740e3d97cbd5e42c9036"
+    },
+    {
+      "kind": "pal",
+      "id": "ghangler",
+      "en": "Ghangler",
+      "ko": "빛초롱",
+      "ja": "アンドーン",
+      "sourceSha256": "ddb2b141ccffaeaccd30314505242caa6495972a07b9b20fdc6bd9f5e8477919"
+    },
+    {
+      "kind": "pal",
+      "id": "ghangler-ignis",
+      "en": "Ghangler Ignis",
+      "ko": "불초롱",
+      "ja": "メラドーン",
+      "sourceSha256": "76c1e57278c077984528162a025ada13aff5624834dba84f81a230425ff1591f"
+    },
+    {
+      "kind": "pal",
+      "id": "gildane",
+      "en": "Gildane",
+      "ko": "러시골드",
+      "ja": "キンガゼル",
+      "sourceSha256": "476300d76c90d443f9781732a8ef6219bcf27bba139103a438e09ebd5f242331"
+    },
+    {
+      "kind": "pal",
+      "id": "gildra",
+      "en": "Gildra",
+      "ko": "요미이라",
+      "ja": "ヨミーラ",
+      "sourceSha256": "0b6b50a358445330f73f991793689b54b20bf2ea674fffe82f7f209bd338cd13"
+    },
+    {
+      "kind": "pal",
+      "id": "gloopie",
+      "en": "Gloopie",
+      "ko": "옥토비아",
+      "ja": "ヒメンダコ",
+      "sourceSha256": "d2ac406fc824daf1bf3b4d32feb57158fd440051ce4ba5237a97b79c78736317"
+    },
+    {
+      "kind": "pal",
+      "id": "gloopie-primo",
+      "en": "Gloopie Primo",
+      "ko": "옥토넬라",
+      "ja": "ユメンダコ",
+      "sourceSha256": "51dccfc90965c0e99de5f1eac351be193a80ff478df4d7a2ba90107479dd485b"
+    },
+    {
+      "kind": "pal",
+      "id": "gobfin",
+      "en": "Gobfin",
+      "ko": "샤키드",
+      "ja": "シャーキッド",
+      "sourceSha256": "8d298769ace356efa3f22ac8f41948dd038b77918bbd05b84c8df00316350ccd"
+    },
+    {
+      "kind": "pal",
+      "id": "gobfin-ignis",
+      "en": "Gobfin Ignis",
+      "ko": "샤맨더",
+      "ja": "シャーマンダー",
+      "sourceSha256": "22935c173f44e4edc4a84188edf457b0503dbd0c308e2df8e226367f19f5c222"
+    },
+    {
+      "kind": "pal",
+      "id": "gorirat",
+      "en": "Gorirat",
+      "ko": "고릴레이지",
+      "ja": "ゴリレイジ",
+      "sourceSha256": "ae334e4def565cfd3067cd131b9b2e85dd689f64083c173968a11093abd0a013"
+    },
+    {
+      "kind": "pal",
+      "id": "gorirat-terra",
+      "en": "Gorirat Terra",
+      "ko": "고릴가이아",
+      "ja": "ゴリガイア",
+      "sourceSha256": "0b181962b557a93bd07d0043f55a894ec6e81a113e4f94baa6c04ba9d3599b3a"
+    },
+    {
+      "kind": "pal",
+      "id": "grintale",
+      "en": "Grintale",
+      "ko": "소름냥이",
+      "ja": "ニャンギマリ",
+      "sourceSha256": "288b12a06e5a4b47360b2944a800723571cc0f5b00dc1191c29d5cbbaee3c15a"
+    },
+    {
+      "kind": "pal",
+      "id": "grizzbolt",
+      "en": "Grizzbolt",
+      "ko": "일렉판다",
+      "ja": "エレパンダ",
+      "sourceSha256": "46956cf33c2be5c8b504c727bb6aaa4115636e67e7563d8a91881db81303b4fc"
+    },
+    {
+      "kind": "pal",
+      "id": "gumoss",
+      "en": "Gumoss",
+      "ko": "초롱이",
+      "ja": "ナエモチ",
+      "sourceSha256": "a37bb3008b1b48c700546a70f1ea2e6fefb8c02d79cf513b702c4bf7e7783376"
+    },
+    {
+      "kind": "pal",
+      "id": "hangyu",
+      "en": "Hangyu",
+      "ko": "건다리",
+      "ja": "シメナワ",
+      "sourceSha256": "159f51c73293e1cf8f6bbd6440de5cde7d29e9e5d64568dbdca9a9c6f3534b08"
+    },
+    {
+      "kind": "pal",
+      "id": "hangyu-cryst",
+      "en": "Hangyu Cryst",
+      "ko": "유령건다리",
+      "ja": "オバケナワ",
+      "sourceSha256": "afc5b04ffb87cfb754adaa546110718016a4f3a7324d177b852907c9bfa7acd8"
+    },
+    {
+      "kind": "pal",
+      "id": "hartalis",
+      "en": "Hartalis",
+      "ko": "레젠디얼",
+      "ja": "レジェンディア",
+      "sourceSha256": "29db4ec5df29d35fcab2cc5450d0c1964be14143e04b579e1f93f6f50ab12e79"
+    },
+    {
+      "kind": "pal",
+      "id": "helzephyr",
+      "en": "Helzephyr",
+      "ko": "헬가루다",
+      "ja": "ヘルガルダ",
+      "sourceSha256": "e793ba2e39995a4083424cf0b38c65535bcfc445c455eae4a1fc8deeb57a8d47"
+    },
+    {
+      "kind": "pal",
+      "id": "helzephyr-lux",
+      "en": "Helzephyr Lux",
+      "ko": "라이가루다",
+      "ja": "ライガルダ",
+      "sourceSha256": "4ac0273164d0cbb2e343525e3a9455a982dd01e342a807b1d2415e1bf3bfcd89"
+    },
+    {
+      "kind": "pal",
+      "id": "herbil",
+      "en": "Herbil",
+      "ko": "모몽파",
+      "ja": "モモンパ",
+      "sourceSha256": "8fdfb19b0ade5966205f9c60cb432ffa8990635a5aff168e06806cb618059604"
+    },
+    {
+      "kind": "pal",
+      "id": "hoocrates",
+      "en": "Hoocrates",
+      "ko": "아테노울",
+      "ja": "ホウロック",
+      "sourceSha256": "9da821e61da87565f79806b13957953825dbbc22d71ecc18a9dfa693610aee86"
+    },
+    {
+      "kind": "pal",
+      "id": "hoodle",
+      "en": "Hoodle",
+      "ko": "후드림",
+      "ja": "フードール",
+      "sourceSha256": "736d1c58550135a53d1002bef66d00d27f9f81b148f49e3935f5a8693552a7f6"
+    },
+    {
+      "kind": "pal",
+      "id": "icelyn",
+      "en": "Icelyn",
+      "ko": "칠위치",
+      "ja": "チルウィッチ",
+      "sourceSha256": "ec52f8c79743d617600c5908003b4adf4ed20fb1eccfec9f6494b24cc1609d31"
+    },
+    {
+      "kind": "pal",
+      "id": "incineram",
+      "en": "Incineram",
+      "ko": "헬고트",
+      "ja": "ヘルゴート",
+      "sourceSha256": "ee301dc9a94ce021b7d17431ef053d81a304aa38a41501bf3d4f04d573400807"
+    },
+    {
+      "kind": "pal",
+      "id": "incineram-noct",
+      "en": "Incineram Noct",
+      "ko": "아비스고트",
+      "ja": "アビスゴート",
+      "sourceSha256": "97d7be0291ff0af8f1c70b340056cc1ff6e579103ec5e663f675da518b106da4"
+    },
+    {
+      "kind": "pal",
+      "id": "jelliette",
+      "en": "Jelliette",
+      "ko": "플루미",
+      "ja": "クララン",
+      "sourceSha256": "d70d834aea3a35872222ed1ba6a3e2f9a7277ef930c289c5c934165420cfe1f6"
+    },
+    {
+      "kind": "pal",
+      "id": "jellroy",
+      "en": "Jellroy",
+      "ko": "흘루미",
+      "ja": "ユララン",
+      "sourceSha256": "9caf61252359deb42527546fabfda25bfcd077c2f2359b236038065c74f4e6aa"
+    },
+    {
+      "kind": "pal",
+      "id": "jetragon",
+      "en": "Jetragon",
+      "ko": "제트래곤",
+      "ja": "ジェッドラン",
+      "sourceSha256": "78c3de6040d0c1678bc0ffac98ca18e3ed912d36c2fbece0d145d3dc0f758626"
+    },
+    {
+      "kind": "pal",
+      "id": "jolthog",
+      "en": "Jolthog",
+      "ko": "찌릿도치",
+      "ja": "パチグリ",
+      "sourceSha256": "bf733a12b226d13aa3971d09fec7c9fa88c2a699a55d17f10255a688e69d3623"
+    },
+    {
+      "kind": "pal",
+      "id": "jolthog-cryst",
+      "en": "Jolthog Cryst",
+      "ko": "코치도치",
+      "ja": "コチグリ",
+      "sourceSha256": "5393a3cc2ef4d1f015cfdc06ac606fba3e0294468e3c9cb2273e8af4bacb9c17"
+    },
+    {
+      "kind": "pal",
+      "id": "jormuntide",
+      "en": "Jormuntide",
+      "ko": "레비드라",
+      "ja": "レヴィドラ",
+      "sourceSha256": "bb5697dce91c5432fedf333e102f9657e66fb2a1c42463c1a2ddd6210f281db5"
+    },
+    {
+      "kind": "pal",
+      "id": "jormuntide-ignis",
+      "en": "Jormuntide Ignis",
+      "ko": "아그니드라",
+      "ja": "アグニドラ",
+      "sourceSha256": "0a701fa16ec650028572d13156c3e81d91cf898489bff9c4c53e093bd4307fe8"
+    },
+    {
+      "kind": "pal",
+      "id": "katress",
+      "en": "Katress",
+      "ko": "캐티메이지",
+      "ja": "クレメーオ",
+      "sourceSha256": "df3b04cfc95374d1c205e7734598365b3ed720c1d8884fa9f731cadc8bb97bc3"
+    },
+    {
+      "kind": "pal",
+      "id": "katress-ignis",
+      "en": "Katress Ignis",
+      "ko": "캐티위자드",
+      "ja": "クレメーナ",
+      "sourceSha256": "27e37c3651918ec768ccd336df94952cb9db2794ed998936dcff62af8051e3c7"
+    },
+    {
+      "kind": "pal",
+      "id": "kelpsea",
+      "en": "Kelpsea",
+      "ko": "켈시",
+      "ja": "ケルピス",
+      "sourceSha256": "1072cd865d717fd7d6503ae6e9235c8238f41c71873425ae326087e925c0b95c"
+    },
+    {
+      "kind": "pal",
+      "id": "kelpsea-ignis",
+      "en": "Kelpsea Ignis",
+      "ko": "마그시",
+      "ja": "マグピス",
+      "sourceSha256": "e3e2f0c5b319f2807a8c79a6686453bd41802cf7624fd848b0e5066f73d8fa90"
+    },
+    {
+      "kind": "pal",
+      "id": "kikit",
+      "en": "Kikit",
+      "ko": "꼬마딜로",
+      "ja": "コロマジロ",
+      "sourceSha256": "0aab5e61b7a846aeea8bfa1000e8468f5aa433840eb80afa19046fa2a5834e23"
+    },
+    {
+      "kind": "pal",
+      "id": "killamari",
+      "en": "Killamari",
+      "ko": "고스문",
+      "ja": "ヤミイカ",
+      "sourceSha256": "bf6b53db1f0bbea1dad1ada24d95bb203f4cb4d726dccbecaf2974e0ad1afa07"
+    },
+    {
+      "kind": "pal",
+      "id": "killamari-primo",
+      "en": "Killamari Primo",
+      "ko": "드리문",
+      "ja": "ユメイカ",
+      "sourceSha256": "8c1beb234a8d5e10cf7d8fb88873ef0f0fabd55f0ab24a2d9e88a4c354a77d91"
+    },
+    {
+      "kind": "pal",
+      "id": "kingpaca",
+      "en": "Kingpaca",
+      "ko": "킹파카",
+      "ja": "アルパオー",
+      "sourceSha256": "d61135ec171412e1fc686f6a44a5a2add164f6463ef60d9c4f237d31ea1cec55"
+    },
+    {
+      "kind": "pal",
+      "id": "kingpaca-cryst",
+      "en": "Kingpaca Cryst",
+      "ko": "블루파카",
+      "ja": "アオパオー",
+      "sourceSha256": "88dd0b33d8e8da5026d23f5836eca2d2441e39d7a18c5ac6f9859a7451d8e2f1"
+    },
+    {
+      "kind": "pal",
+      "id": "kitsun",
+      "en": "Kitsun",
+      "ko": "불이리",
+      "ja": "シラヌイ",
+      "sourceSha256": "78ee32573030118ced1a1580de2afa2f2690718b1b5087aa3726cf2b356be542"
+    },
+    {
+      "kind": "pal",
+      "id": "kitsun-noct",
+      "en": "Kitsun Noct",
+      "ko": "음이리",
+      "ja": "カゲヌイ",
+      "sourceSha256": "5b8d931e49aeabfac7caf704683c57d12e9e76bd79bf2e472c9be783873b51dc"
+    },
+    {
+      "kind": "pal",
+      "id": "knocklem",
+      "en": "Knocklem",
+      "ko": "테라나이트",
+      "ja": "テラナイト",
+      "sourceSha256": "6b0cf462f1c545c901cb2fc6e3fd4d6b4f165eadcc5727090b12c71fa17cae9b"
+    },
+    {
+      "kind": "pal",
+      "id": "knocklem-ignis",
+      "en": "Knocklem Ignis",
+      "ko": "마그나이트",
+      "ja": "マグナイト",
+      "sourceSha256": "43e73ddd8b635b4827e46c4698af6730d577d39462a09226e006122bf256321f"
+    },
+    {
+      "kind": "pal",
+      "id": "lamball",
+      "en": "Lamball",
+      "ko": "도로롱",
+      "ja": "モコロン",
+      "sourceSha256": "95d40d479214773ec182beae8b1232f179c652ef94d8059fece061d97851b5a0"
+    },
+    {
+      "kind": "pal",
+      "id": "lapiron",
+      "en": "Lapiron",
+      "ko": "레패시",
+      "ja": "バトラビー",
+      "sourceSha256": "52e929a61caf0f4d3e1e0b1496324d65c199eebd170fa2e7019e315fc797e6ab"
+    },
+    {
+      "kind": "pal",
+      "id": "lapure",
+      "en": "Lapure",
+      "ko": "슬리비",
+      "ja": "ネモフィ",
+      "sourceSha256": "114a6340fbf5ea05492071fd7d7692b47e9e575a9ba2054156a2f3da4a76b9fb"
+    },
+    {
+      "kind": "pal",
+      "id": "leafan",
+      "en": "Leafan",
+      "ko": "리팡",
+      "ja": "リーファン",
+      "sourceSha256": "eb173ab5db02d2e5275959de506b01cfdfa06905538105b87a77f97734e0ba81"
+    },
+    {
+      "kind": "pal",
+      "id": "leezpunk",
+      "en": "Leezpunk",
+      "ko": "도마맨",
+      "ja": "ダリザード",
+      "sourceSha256": "93b6d972be4339bc36cd02c9a36fc77e948c2ac9c8a6143585e13c8056e469e0"
+    },
+    {
+      "kind": "pal",
+      "id": "leezpunk-ignis",
+      "en": "Leezpunk Ignis",
+      "ko": "도화맨",
+      "ja": "チリザード",
+      "sourceSha256": "3ecb39a6e524fb44fa8fd9179935110e2a8c0333fe2c98577a4acf574c7a96d1"
+    },
+    {
+      "kind": "pal",
+      "id": "lifmunk",
+      "en": "Lifmunk",
+      "ko": "큐룰리스",
+      "ja": "クルリス",
+      "sourceSha256": "259f288938fdc9075cb3bf05c231d3cdba270769ab05cb67156031aa66fe7e68"
+    },
+    {
+      "kind": "pal",
+      "id": "loomen",
+      "en": "Loomen",
+      "ko": "뷔랜턴",
+      "ja": "ヴィランタン",
+      "sourceSha256": "e20b100ebc775096c6a222ec6cf138f8175ff92ba789b7a6b9c0b43bf664256f"
+    },
+    {
+      "kind": "pal",
+      "id": "loupmoon",
+      "en": "Loupmoon",
+      "ko": "달서니",
+      "ja": "ツキカゲ",
+      "sourceSha256": "357542ffcb6116537c12255249e8f1940b7566c687e39889892eb52d48f042f6"
+    },
+    {
+      "kind": "pal",
+      "id": "loupmoon-cryst",
+      "en": "Loupmoon Cryst",
+      "ko": "얼서니",
+      "ja": "ユキカゲ",
+      "sourceSha256": "2d9e3a514338534c257c68f9c3b2c57f4769e518ff2fee58f16355a79aae4e99"
+    },
+    {
+      "kind": "pal",
+      "id": "lovander",
+      "en": "Lovander",
+      "ko": "핑크뇽",
+      "ja": "ラブマンダー",
+      "sourceSha256": "00c2154f5aab3dbefac15ae054f9579ca7832821de2f2b8bc4ac8c0bb66b2679"
+    },
+    {
+      "kind": "pal",
+      "id": "lullu",
+      "en": "Lullu",
+      "ko": "뷰티플라워",
+      "ja": "フワフラワ",
+      "sourceSha256": "6ce202dba476ef8f32dbf4322f01812bf4cf48b5ff116a9aecf80b465c38149f"
+    },
+    {
+      "kind": "pal",
+      "id": "lunaris",
+      "en": "Lunaris",
+      "ko": "루나리스",
+      "ja": "ミステリア",
+      "sourceSha256": "b61e94917c638be53dbe83b445673695756574f3c470a26b3ff4490669678c06"
+    },
+    {
+      "kind": "pal",
+      "id": "lyleen",
+      "en": "Lyleen",
+      "ko": "릴린",
+      "ja": "リリクイン",
+      "sourceSha256": "d7c7494ef36c7377943ebca8a33cc5c3e82f2ee21bd0e935defd1cfdc44d9139"
+    },
+    {
+      "kind": "pal",
+      "id": "lyleen-noct",
+      "en": "Lyleen Noct",
+      "ko": "루나린",
+      "ja": "ルナクイン",
+      "sourceSha256": "ee54f8ea8233fa489bb75c2ecf94f2628646d1f70b93ce21997397cb82d51936"
+    },
+    {
+      "kind": "pal",
+      "id": "majex",
+      "en": "Majex",
+      "ko": "마조리나",
+      "ja": "マジョルナ",
+      "sourceSha256": "dd03245824a1041955082cb3e172bc3dba769f77be73085e5b20c47af4e1d208"
+    },
+    {
+      "kind": "pal",
+      "id": "mammorest",
+      "en": "Mammorest",
+      "ko": "그린모스",
+      "ja": "グランモス",
+      "sourceSha256": "1ffe86fa700979f2ebe044b3757a96131328bb7ecfaf4b11428e7b63bc2ec34f"
+    },
+    {
+      "kind": "pal",
+      "id": "mammorest-cryst",
+      "en": "Mammorest Cryst",
+      "ko": "블리자모스",
+      "ja": "ブリザモス",
+      "sourceSha256": "e51c5a8e24e299f800993ffeb8c06cd3e26115879722ae2cf6439e6c676bd75b"
+    },
+    {
+      "kind": "pal",
+      "id": "maraith",
+      "en": "Maraith",
+      "ko": "고스호스",
+      "ja": "ソルレイス",
+      "sourceSha256": "1bcc33af15f06045659c3f43ab876e7792e175fba5121d063e6018f79a2bc43f"
+    },
+    {
+      "kind": "pal",
+      "id": "mau",
+      "en": "Mau",
+      "ko": "냐옹테트",
+      "ja": "ニャオテト",
+      "sourceSha256": "950d908ffa50b8a36875489fe94d0783d35c9dbf3befe157996c8b6a2d2e3742"
+    },
+    {
+      "kind": "pal",
+      "id": "mau-cryst",
+      "en": "Mau Cryst",
+      "ko": "칠테트",
+      "ja": "チルテト",
+      "sourceSha256": "9f173d566a4449e0a3cacfa12f53799fb9b3dc95b8e6aa8c7f16cf8bf1d0d8f1"
+    },
+    {
+      "kind": "pal",
+      "id": "melpaca",
+      "en": "Melpaca",
+      "ko": "멜파카",
+      "ja": "メルパカ",
+      "sourceSha256": "058bd4a5ca14824f0be9afefcf473ff0ec837e5f49d2accf1e41dd83bdbf9a0b"
+    },
+    {
+      "kind": "pal",
+      "id": "menasting",
+      "en": "Menasting",
+      "ko": "데스스팅",
+      "ja": "デスティング",
+      "sourceSha256": "4cf1020c86a8e74e0a0b45a2343fabf376b6eda8809344d0165671b1edde1632"
+    },
+    {
+      "kind": "pal",
+      "id": "menasting-terra",
+      "en": "Menasting Terra",
+      "ko": "골드스팅",
+      "ja": "ゴルディング",
+      "sourceSha256": "4286b6b875c02f3e6e03c2e9a83c4e9b0e191c27ab6b98238e70a195869225aa"
+    },
+    {
+      "kind": "pal",
+      "id": "mimog",
+      "en": "Mimog",
+      "ko": "따라하개",
+      "ja": "ミミドッグ",
+      "sourceSha256": "d82aab28d0e18a12528bdf04fc6cdca9308bbf6a43859acccf26cdc2e034f431"
+    },
+    {
+      "kind": "pal",
+      "id": "moldron",
+      "en": "Moldron",
+      "ko": "마그맨더",
+      "ja": "マグマンダー",
+      "sourceSha256": "870825d4282ac54b555ee11877abc0c3129adb28650137d648d84fe73ff4021c"
+    },
+    {
+      "kind": "pal",
+      "id": "moldron-cryst",
+      "en": "Moldron Cryst",
+      "ko": "블리잰더",
+      "ja": "ブリザンダー",
+      "sourceSha256": "d624f0004874778596c6e42a7028d236b58411e150c0c4c75a551fd4c069c984"
+    },
+    {
+      "kind": "pal",
+      "id": "mossanda",
+      "en": "Mossanda",
+      "ko": "풀바오",
+      "ja": "ササゾー",
+      "sourceSha256": "c099d45fd3a730f8e9361255e0d7c0881a42f2942f968334155cb3c00f382027"
+    },
+    {
+      "kind": "pal",
+      "id": "mossanda-lux",
+      "en": "Mossanda Lux",
+      "ko": "라이바오",
+      "ja": "ライゾー",
+      "sourceSha256": "cd6d8597e91ce520d858c2c7bb2f7ce386ff8e7ffdc5037e12195bf5057ca5d1"
+    },
+    {
+      "kind": "pal",
+      "id": "mozzarina",
+      "en": "Mozzarina",
+      "ko": "밀카우",
+      "ja": "ミルカルビ",
+      "sourceSha256": "7b861de1bba1f1d1b2d131b3c63eb2b53f5b05644a1724331a401a058ac50cb0"
+    },
+    {
+      "kind": "pal",
+      "id": "muffly",
+      "en": "Muffly",
+      "ko": "솜눈이",
+      "ja": "モコチッチ",
+      "sourceSha256": "5debe611e7e52449188dcbc37ebbd19b8b9fff356964fd4eafaf7f00c60c0627"
+    },
+    {
+      "kind": "pal",
+      "id": "munchill",
+      "en": "Munchill",
+      "ko": "크로꽁",
+      "ja": "コチワニ",
+      "sourceSha256": "5e537f75f7b587b4da2d01f4a0a19769f290cb5d17dafafe20f421983113619e"
+    },
+    {
+      "kind": "pal",
+      "id": "mycora",
+      "en": "Mycora",
+      "ko": "머슐리",
+      "ja": "マシュリー",
+      "sourceSha256": "4b4c7206f799cb8d51598d689050e4bf74346b7db35a0ad8c65378b9d16e21fd"
+    },
+    {
+      "kind": "pal",
+      "id": "necromus",
+      "en": "Necromus",
+      "ko": "켄타나이트",
+      "ja": "ベイントール",
+      "sourceSha256": "bfd44bbf32411250001d09c2f88de740c4089881d1bdbe2deed305a7af5e24af"
+    },
+    {
+      "kind": "pal",
+      "id": "needoll",
+      "en": "Needoll",
+      "ko": "허그미",
+      "ja": "ハグミー",
+      "sourceSha256": "efdeca1b7bb5e3ed3941ec36e132aff91332a8f31da25127eb24637cfecff2b3"
+    },
+    {
+      "kind": "pal",
+      "id": "needoll-noct",
+      "en": "Needoll Noct",
+      "ko": "허그유",
+      "ja": "ハグユー",
+      "sourceSha256": "daab712e92df0f584002b17cf389d857e7251dd9afb6a5307766a3c2f14a67f8"
+    },
+    {
+      "kind": "pal",
+      "id": "neptilius",
+      "en": "Neptilius",
+      "ko": "넵티오스",
+      "ja": "ネプティオス",
+      "sourceSha256": "cee8d8d202d3129e2b4aa2e9fb2a1194aefcf3767450ec5a8af38a793d85bb99"
+    },
+    {
+      "kind": "pal",
+      "id": "nitemary",
+      "en": "Nitemary",
+      "ko": "코쉬마리",
+      "ja": "ナイトメアリ",
+      "sourceSha256": "07cc5f19436fb7c0191f3b55331b06e62688f629e17bb26f80302ab5300a643f"
+    },
+    {
+      "kind": "pal",
+      "id": "nitemary-botan",
+      "en": "Nitemary Botan",
+      "ko": "에브마리",
+      "ja": "グラスメアリ",
+      "sourceSha256": "e9909241c5192c673488d89f2345500a1e4b6e659f3a4ca867ec9bf43878190f"
+    },
+    {
+      "kind": "pal",
+      "id": "nitewing",
+      "en": "Nitewing",
+      "ko": "나이트윙",
+      "ja": "ホークウィン",
+      "sourceSha256": "4ed4db822f9339bd2d5355a264ad6fd4eb6933193380cfd1d94feb3689cf9f60"
+    },
+    {
+      "kind": "pal",
+      "id": "nox",
+      "en": "Nox",
+      "ko": "루나티",
+      "ja": "ルナティ",
+      "sourceSha256": "43930f607216cfaecb4f98a875d986ad0dded8c8cb1bfd29db96b29e74277b05"
+    },
+    {
+      "kind": "pal",
+      "id": "nyafia",
+      "en": "Nyafia",
+      "ko": "멀보냥",
+      "ja": "ニャニミテ",
+      "sourceSha256": "423622672d8db0d828bbf8a0f558c18b8dc4d5cd55e0734b13fbea2bcd1a6589"
+    },
+    {
+      "kind": "pal",
+      "id": "omascul",
+      "en": "Omascul",
+      "ko": "홀로페이스",
+      "ja": "オーメン",
+      "sourceSha256": "4cfff3d08244e3949be2e793bfeafad310339aec44bb9b36b3d0bf588a3e6c7f"
+    },
+    {
+      "kind": "pal",
+      "id": "ophydia",
+      "en": "Ophydia",
+      "ko": "연미르",
+      "ja": "ハナミズチ",
+      "sourceSha256": "ad23febe90cdbfa2b3e1fb9833de0088b3c31186c317217c282f62395b16a2b1"
+    },
+    {
+      "kind": "pal",
+      "id": "orserk",
+      "en": "Orserk",
+      "ko": "볼젝스",
+      "ja": "ボルゼクス",
+      "sourceSha256": "933152883ad16f690ae1e59da319af8ebf540a10db65c722615885cc6b803f89"
+    },
+    {
+      "kind": "pal",
+      "id": "paladius",
+      "en": "Paladius",
+      "ko": "팔라디우스",
+      "ja": "セイントール",
+      "sourceSha256": "20f8246e984e85b184ccfb788f07838b5a3eeab28f0b1d0588096dfbfc3dd694"
+    },
+    {
+      "kind": "pal",
+      "id": "palumba",
+      "en": "Palumba",
+      "ko": "트로조크",
+      "ja": "ココヤンバ",
+      "sourceSha256": "c375c14e8c2a5638d2618d8c1043b5dc3e49ade9fc237bf39a97c9346979cc20"
+    },
+    {
+      "kind": "pal",
+      "id": "panthalus",
+      "en": "Panthalus",
+      "ko": "그랜웰",
+      "ja": "グランジーラ",
+      "sourceSha256": "52f85f41da0619ffa768764cfef94b120008e0c53ac2aeedc697d52961040ca9"
+    },
+    {
+      "kind": "pal",
+      "id": "pengullet",
+      "en": "Pengullet",
+      "ko": "펭키",
+      "ja": "ペンタマ",
+      "sourceSha256": "9ca7533753768ce6982213d3dc9f98fe1a31021d29b63cbb7264b237425b6af6"
+    },
+    {
+      "kind": "pal",
+      "id": "pengullet-lux",
+      "en": "Pengullet Lux",
+      "ko": "뎅키",
+      "ja": "デンタマ",
+      "sourceSha256": "25c7897b059e111d0f889593fa1669e7ac8eea7c8099650908d3727d69f4d9ca"
+    },
+    {
+      "kind": "pal",
+      "id": "penking",
+      "en": "Penking",
+      "ko": "펭킹",
+      "ja": "キャプペン",
+      "sourceSha256": "62e49a827df2e292ea3b3b54bf64d4b1d3ea880ccc02852f82fe13fc4f9a2aaa"
+    },
+    {
+      "kind": "pal",
+      "id": "penking-lux",
+      "en": "Penking Lux",
+      "ko": "뎅킹",
+      "ja": "ペンキッド",
+      "sourceSha256": "564186df93d1229d0446f5a8f7fac259d31e0b3b849056f0013c3e1e7a5347e4"
+    },
+    {
+      "kind": "pal",
+      "id": "petallia",
+      "en": "Petallia",
+      "ko": "플로리나",
+      "ja": "フラリーナ",
+      "sourceSha256": "b64bd21e5d9afcd62f85a06fe303a533cae4c9eac5ee6d2f96326bcf7750fe78"
+    },
+    {
+      "kind": "pal",
+      "id": "petallia-ignis",
+      "en": "Petallia Ignis",
+      "ko": "체를리나",
+      "ja": "チェリーナ",
+      "sourceSha256": "b52e77f1f0f7ccdb265b1b89ea09eea9bf7a7aa20f6bd60927d0ff08ffd55a88"
+    },
+    {
+      "kind": "pal",
+      "id": "pierdon",
+      "en": "Pierdon",
+      "ko": "지오르돈",
+      "ja": "ジオルドン",
+      "sourceSha256": "541904928e0eae68dbce96c21ebe6067431d0314a20b4aa1c263960af0806558"
+    },
+    {
+      "kind": "pal",
+      "id": "pierdon-cryst",
+      "en": "Pierdon Cryst",
+      "ko": "프로스돈",
+      "ja": "フロスドン",
+      "sourceSha256": "2cb201aa81c2abaa03a96f4ce2ae0fb0d13f80caaa300d57579f61dcf0733768"
+    },
+    {
+      "kind": "pal",
+      "id": "polapup",
+      "en": "Polapup",
+      "ko": "크리범",
+      "ja": "バニザラシ",
+      "sourceSha256": "74ffe97973666adfb9de9b926b20030ad1037bb5d22af2298891d202d689fc1b"
+    },
+    {
+      "kind": "pal",
+      "id": "polapup-terra",
+      "en": "Polapup Terra",
+      "ko": "초코범",
+      "ja": "チョコザラシ",
+      "sourceSha256": "12b8ce5540907598d61b9f6765c0bd306d5dff7ba8c733a08e149bd158676894"
+    },
+    {
+      "kind": "pal",
+      "id": "prixter",
+      "en": "Prixter",
+      "ko": "스콜피어스",
+      "ja": "ブッサソリ",
+      "sourceSha256": "79dcbc1abf727a2c3353270ffe94e122e8fe7e776c75caac38a7a5eedda5f390"
+    },
+    {
+      "kind": "pal",
+      "id": "prixter-lux",
+      "en": "Prixter Lux",
+      "ko": "썬더피어스",
+      "ja": "ブッサンダー",
+      "sourceSha256": "936bf984dcc8572b16cb7ba9a582d296b5b2906381880fb202f4b47615e90ea2"
+    },
+    {
+      "kind": "pal",
+      "id": "prunelia",
+      "en": "Prunelia",
+      "ko": "플럼린",
+      "ja": "プラムルリム",
+      "sourceSha256": "eeea2278affa162c5a102e4bfe89125b19c09d59bdf9baefd321c8ba4a843d63"
+    },
+    {
+      "kind": "pal",
+      "id": "puffolt",
+      "en": "Puffolt",
+      "ko": "짜리링",
+      "ja": "パチマル",
+      "sourceSha256": "5bc1eca9cd0ae099cfc47d52d3ffa1075e129abf7cc197da91dff4e80e31c774"
+    },
+    {
+      "kind": "pal",
+      "id": "pupperai",
+      "en": "Pupperai",
+      "ko": "솔바둑",
+      "ja": "ポチムネ",
+      "sourceSha256": "32bdc0605192c8f1139abfbb8654117e91579180388147447000e728d78d1725"
+    },
+    {
+      "kind": "pal",
+      "id": "pyrin",
+      "en": "Pyrin",
+      "ko": "파이린",
+      "ja": "サラブレイズ",
+      "sourceSha256": "85c68215754bb272bf92313afc5ddad9f59182895cdfd070ad7eb2b598ffa482"
+    },
+    {
+      "kind": "pal",
+      "id": "pyrin-noct",
+      "en": "Pyrin Noct",
+      "ko": "베이린",
+      "ja": "サラブラック",
+      "sourceSha256": "ff8e5da9a0e25f55375a962fa309a2d2aa86a7b86f9aea7d4dad1128dba2b290"
+    },
+    {
+      "kind": "pal",
+      "id": "quivern",
+      "en": "Quivern",
+      "ko": "페스키",
+      "ja": "フェスキー",
+      "sourceSha256": "35d4a4af4fabc58708b09991cc3ad91c9607f556dc0bd6f47fa6dd5051cb11ec"
+    },
+    {
+      "kind": "pal",
+      "id": "quivern-botan",
+      "en": "Quivern Botan",
+      "ko": "포레스키",
+      "ja": "フォレスキー",
+      "sourceSha256": "6e04bf168382090556b964462c891af24162b58163b318dec8c608bd44894f25"
+    },
+    {
+      "kind": "pal",
+      "id": "ragnahawk",
+      "en": "Ragnahawk",
+      "ko": "적토조",
+      "ja": "イグニクス",
+      "sourceSha256": "87b3e49239d96ad4f7f2ef3f22e752d2726d81f73758499e532796b95de0fa73"
+    },
+    {
+      "kind": "pal",
+      "id": "rayhound",
+      "en": "Rayhound",
+      "ko": "썬도그",
+      "ja": "イヌズマ",
+      "sourceSha256": "8ec6cec6f187c70dbbbebd98aedd2aae4cad044069bde784ec49a0d20b9de6ef"
+    },
+    {
+      "kind": "pal",
+      "id": "rayhound-cryst",
+      "en": "Rayhound Cryst",
+      "ko": "프리도그",
+      "ja": "フリーズマ",
+      "sourceSha256": "f5a1194c9ffb908b6cf4b887b916a72fbd9a1da862edee8203c7793b658ff745"
+    },
+    {
+      "kind": "pal",
+      "id": "reindrix",
+      "en": "Reindrix",
+      "ko": "얼음사슴",
+      "ja": "ツララジカ",
+      "sourceSha256": "2544ad8c0ff15f94c3b7d76cecd1dc25288b7eaadde677dbc3e9a7833b9224fa"
+    },
+    {
+      "kind": "pal",
+      "id": "relaxaurus",
+      "en": "Relaxaurus",
+      "ko": "헤로롱",
+      "ja": "ペコドン",
+      "sourceSha256": "09354ae3925380812b79db3ee9c532ccc3fece2ea4c8e66d2a8288c716ad877c"
+    },
+    {
+      "kind": "pal",
+      "id": "relaxaurus-lux",
+      "en": "Relaxaurus Lux",
+      "ko": "핑피롱",
+      "ja": "パリピドン",
+      "sourceSha256": "23f02f26efb4a3f5291945526c08c8ae1ba1ea3b09613c9d1dd1492bc51cc725"
+    },
+    {
+      "kind": "pal",
+      "id": "renjishi",
+      "en": "Renjishi",
+      "ko": "업화무",
+      "ja": "ゴウカブキ",
+      "sourceSha256": "3cc4dabd1d6b0297f9dd21edd085ff373caccf3a3e996691865fe0683c0ed141"
+    },
+    {
+      "kind": "pal",
+      "id": "reptyro",
+      "en": "Reptyro",
+      "ko": "볼카노",
+      "ja": "ボルカノン",
+      "sourceSha256": "278cb8f941bc67f036a1167d6aeba1840d67d0bd66957e41eb7d526d5f874d0d"
+    },
+    {
+      "kind": "pal",
+      "id": "reptyro-cryst",
+      "en": "Reptyro Cryst",
+      "ko": "프로스카노",
+      "ja": "フロスカノン",
+      "sourceSha256": "0325667b9f71f16685d5b23fbb7e824d7b701f81b164f970a349504ff7dd8692"
+    },
+    {
+      "kind": "pal",
+      "id": "ribbuny",
+      "en": "Ribbuny",
+      "ko": "핑토",
+      "ja": "ヒメウサ",
+      "sourceSha256": "d269f273f6a7543aba52c9d277ef7c3f7912d061e4ffe7b0d6009c768bf72905"
+    },
+    {
+      "kind": "pal",
+      "id": "ribbuny-botan",
+      "en": "Ribbuny Botan",
+      "ko": "그래토",
+      "ja": "ヨモギウサ",
+      "sourceSha256": "75ce7b5d43beff41cbff4f7628dce73161ff0497af1c79defc61f16ac6812e4e"
+    },
+    {
+      "kind": "pal",
+      "id": "robinquill",
+      "en": "Robinquill",
+      "ko": "로빈몽",
+      "ja": "フェザーロ",
+      "sourceSha256": "9c2e9bae253341989e1da97f1fd7a2af5323bc00b250fe7fb805c1619c754cb8"
+    },
+    {
+      "kind": "pal",
+      "id": "robinquill-terra",
+      "en": "Robinquill Terra",
+      "ko": "샌드몽",
+      "ja": "サンドロ",
+      "sourceSha256": "6a4d1b4fec0010fef49122f7d74ba8188b5ca0220e82ca608cfebf2624d77e5f"
+    },
+    {
+      "kind": "pal",
+      "id": "rooby",
+      "en": "Rooby",
+      "ko": "불꽃밤비",
+      "ja": "ヒノコジカ",
+      "sourceSha256": "f16373504f380c52299fd3e1ddbb4c77a0a1dbd70b85bb5d40da457cd54bc96e"
+    },
+    {
+      "kind": "pal",
+      "id": "roujay",
+      "en": "Roujay",
+      "ko": "아르셉",
+      "ja": "アルセーヴ",
+      "sourceSha256": "4df3294e686bd47a3aa72f978de19a51dea0d05c9a8f215606a13d5c43bb53f0"
+    },
+    {
+      "kind": "pal",
+      "id": "rushoar",
+      "en": "Rushoar",
+      "ko": "돌진돼지",
+      "ja": "イノボウ",
+      "sourceSha256": "38a373522eaa1de004c180dfbb95299d8e1022ced85512da2a06ca01d776cf7f"
+    },
+    {
+      "kind": "pal",
+      "id": "sekhmet",
+      "en": "Sekhmet",
+      "ko": "세크메트",
+      "ja": "セクメト",
+      "sourceSha256": "adc9decad9e11d9e16e77131076ae37b2fb4acad1f6e0a85bed2d319d880186f"
+    },
+    {
+      "kind": "pal",
+      "id": "selyne",
+      "en": "Selyne",
+      "ko": "셀레문",
+      "ja": "セレムーン",
+      "sourceSha256": "61e0371fdf4b7cb46fbd0b7921c24a78490a47c93763b540397a826efd949fb5"
+    },
+    {
+      "kind": "pal",
+      "id": "shadowbeak",
+      "en": "Shadowbeak",
+      "ko": "제노그리프",
+      "ja": "ゼノグリフ",
+      "sourceSha256": "c10efae4f82f824da05024cf0789536270ff0c0bc1a476a41e2b1b26994be377"
+    },
+    {
+      "kind": "pal",
+      "id": "shaolong",
+      "en": "Shaolong",
+      "ko": "샤오롱",
+      "ja": "シャオロン",
+      "sourceSha256": "e013af8e6f15240b230139b02f6396877b1a7a4c86504aea92eb22c9515d5752"
+    },
+    {
+      "kind": "pal",
+      "id": "shroomer",
+      "en": "Shroomer",
+      "ko": "머쉬드래곤",
+      "ja": "キノッポ",
+      "sourceSha256": "c66698f29bed267b5cc4e3256fb3f82229fcf462717b77c6c0e388d9b2e1ed8a"
+    },
+    {
+      "kind": "pal",
+      "id": "shroomer-noct",
+      "en": "Shroomer Noct",
+      "ko": "머쉬포이즌",
+      "ja": "ベノッポ",
+      "sourceSha256": "023b44b69428b6421d567391db44d55d7722c712a582ef3ebec2b43e86f238d2"
+    },
+    {
+      "kind": "pal",
+      "id": "sibelyx",
+      "en": "Sibelyx",
+      "ko": "실키누",
+      "ja": "シルキーヌ",
+      "sourceSha256": "d986fe2ab3f220076ce9ef959d877e1140e64e7dd07d1efffc16e4cefe912250"
+    },
+    {
+      "kind": "pal",
+      "id": "sibelyx-primo",
+      "en": "Sibelyx Primo",
+      "ko": "수아레누",
+      "ja": "ソワレーヌ",
+      "sourceSha256": "ac7900d0cb2764ccf44afa21a1573227b110e3de60f3f39a3edee6bafaf8ceb2"
+    },
+    {
+      "kind": "pal",
+      "id": "silvance",
+      "en": "Silvance",
+      "ko": "모슬론",
+      "ja": "モスローン",
+      "sourceSha256": "498e671e3e884da004f9f1502abe9a9e39137e678a9b365770a941b9d6d7dd4e"
+    },
+    {
+      "kind": "pal",
+      "id": "silvegis",
+      "en": "Silvegis",
+      "ko": "드라이지스",
+      "ja": "アイギルガ",
+      "sourceSha256": "cc33abac72ea397113a9a6293c21955637b98a8590f7023684ae9c8b38715ab2"
+    },
+    {
+      "kind": "pal",
+      "id": "skutlass",
+      "en": "Skutlass",
+      "ko": "날검치",
+      "ja": "オオタチウオ",
+      "sourceSha256": "e7332a248979319d088cbee9c8c981e0cad0519358f973d520c8f5abe1b5f0b6"
+    },
+    {
+      "kind": "pal",
+      "id": "skutlass-ignis",
+      "en": "Skutlass Ignis",
+      "ko": "불검치",
+      "ja": "ヒノタチウオ",
+      "sourceSha256": "757bf15f0c79e3e91340ea30433c55a7353f96e0685c06059dc201b9741f72e3"
+    },
+    {
+      "kind": "pal",
+      "id": "slowatt",
+      "en": "Slowatt",
+      "ko": "밍기저드",
+      "ja": "ノンビリリ",
+      "sourceSha256": "3fd9492e972a444c7cf6ee74e87896fdbafd7fc38473b5cccb95eea48132bc03"
+    },
+    {
+      "kind": "pal",
+      "id": "smokie",
+      "en": "Smokie",
+      "ko": "껌댕이",
+      "ja": "クロマル",
+      "sourceSha256": "e39bd070b313b5d3c1e4b3f8e76b94a094696dee6ad4c899cbdda4b0e380cd75"
+    },
+    {
+      "kind": "pal",
+      "id": "smokie-cryst",
+      "en": "Smokie Cryst",
+      "ko": "눈댕이",
+      "ja": "フユマル",
+      "sourceSha256": "79f4ef2e9aa72adf6521505de557cacaaae5ab06bffd2a748bfda1f1cdda1547"
+    },
+    {
+      "kind": "pal",
+      "id": "snock",
+      "en": "Snock",
+      "ko": "전팽이",
+      "ja": "デンツム",
+      "sourceSha256": "633b52597faaf59b7eba0f3f876016b2c6ffa2236f5a03d4aabc92c64c93cf12"
+    },
+    {
+      "kind": "pal",
+      "id": "snock-lux",
+      "en": "Snock Lux",
+      "ko": "돌팽이",
+      "ja": "ドンツム",
+      "sourceSha256": "331599a00bedef1464388fb6ca60d15c71ea7513b21ad20f32767c6bffc2248e"
+    },
+    {
+      "kind": "pal",
+      "id": "snugloo",
+      "en": "Snugloo",
+      "ko": "설뭉치",
+      "ja": "ユキボウ",
+      "sourceSha256": "cb2ff7388d91b21b6ed75b01e445331de17af5c8a1fbc004a0f13272ea24a202"
+    },
+    {
+      "kind": "pal",
+      "id": "solenne",
+      "en": "Solenne",
+      "ko": "모노크로나",
+      "ja": "モノクローナ",
+      "sourceSha256": "f768e1f383e5e99c6fe50c413723e91752bfa2f8bc58cece949a058bf73f41f0"
+    },
+    {
+      "kind": "pal",
+      "id": "solmora",
+      "en": "Solmora",
+      "ko": "킹복치",
+      "ja": "オーマンボ",
+      "sourceSha256": "da2725bf82083fda8340292a1c08947bcbda8483c34013c00d35d1160b60f5b4"
+    },
+    {
+      "kind": "pal",
+      "id": "solmora-lux",
+      "en": "Solmora Lux",
+      "ko": "쇼군복치",
+      "ja": "トノサマンボ",
+      "sourceSha256": "3ba675e5d6bf4b273b1570fbf12c93789157124aad0b4d8a99b9652b0d820e7e"
+    },
+    {
+      "kind": "pal",
+      "id": "sootseer",
+      "en": "Sootseer",
+      "ko": "유령초",
+      "ja": "オドロクロ",
+      "sourceSha256": "5217c047c6ad906f8252f100f9278eee52dbfb75bdf99948a50773bed9872fa4"
+    },
+    {
+      "kind": "pal",
+      "id": "souffline",
+      "en": "Souffline",
+      "ko": "퍼프피아",
+      "ja": "ポポフィア",
+      "sourceSha256": "1a38b94123066ef77dca6f739ecf01e5ef0052a6f8976ae5f3a0a511e65131b8"
+    },
+    {
+      "kind": "pal",
+      "id": "sparkit",
+      "en": "Sparkit",
+      "ko": "번개냥",
+      "ja": "ボルトラ",
+      "sourceSha256": "ac9471810961d765a0031f9f382335eecc4454235c9bf00b68e971bfa56c8b18"
+    },
+    {
+      "kind": "pal",
+      "id": "splatterina",
+      "en": "Splatterina",
+      "ko": "얀데리나",
+      "ja": "ヤンデリナ",
+      "sourceSha256": "e384f6613f886f87f84d7fff872fc8ff972217f0f34293b7d8c8fe5ab3439d5d"
+    },
+    {
+      "kind": "pal",
+      "id": "starryon",
+      "en": "Starryon",
+      "ko": "나이트롯",
+      "ja": "ナイトロット",
+      "sourceSha256": "b714147f2c7c17381133ad138b80e5c52db48f3f0bca0edbd0bb0e30490e6e6d"
+    },
+    {
+      "kind": "pal",
+      "id": "starryon-primo",
+      "en": "Starryon Primo",
+      "ko": "라이트롯",
+      "ja": "ライトロット",
+      "sourceSha256": "6ee7cf68653d18df7c093600bc9c6711084c52f2032f87c8761e3bf47e80912c"
+    },
+    {
+      "kind": "pal",
+      "id": "surfent",
+      "en": "Surfent",
+      "ko": "씨무기",
+      "ja": "シーペント",
+      "sourceSha256": "41b4febc60c9d53d2e9f1a2f587b72f126452deed255d751baf7e9838a3f8c0e"
+    },
+    {
+      "kind": "pal",
+      "id": "surfent-terra",
+      "en": "Surfent Terra",
+      "ko": "샌무기",
+      "ja": "スナペント",
+      "sourceSha256": "87c79df5e4382498b0b35faf3c3b56f268ff1c6af7dd7555c05f15b68d56b7e2"
+    },
+    {
+      "kind": "pal",
+      "id": "suzaku",
+      "en": "Suzaku",
+      "ko": "주작",
+      "ja": "スザク",
+      "sourceSha256": "031cc19b713d0fd42f12b8f0e10e987778d72b5cd118047585fac0577ab0477c"
+    },
+    {
+      "kind": "pal",
+      "id": "suzaku-aqua",
+      "en": "Suzaku Aqua",
+      "ko": "시바",
+      "ja": "シヴァ",
+      "sourceSha256": "23ba52adb5a8d6fb47134848c64c9fc0b76dbab1c830872895cd4bf0d7696c94"
+    },
+    {
+      "kind": "pal",
+      "id": "swee",
+      "en": "Swee",
+      "ko": "모프링",
+      "ja": "コモップ",
+      "sourceSha256": "0a32714456d3368a2665851e14a7f69ee836deb7e1ccf30fcb4c9a7ffdaaba6d"
+    },
+    {
+      "kind": "pal",
+      "id": "sweepa",
+      "en": "Sweepa",
+      "ko": "모프킹",
+      "ja": "ドンモップ",
+      "sourceSha256": "2485aed1bc2bfba4fa94e9891f7e5949a8f14a7684b39f1d45c5da862b854bbe"
+    },
+    {
+      "kind": "pal",
+      "id": "tanzee",
+      "en": "Tanzee",
+      "ko": "몽지",
+      "ja": "エテッパ",
+      "sourceSha256": "4d1052abf24bd31c21de574bb49d6a68244f0c10573a875d618099bae12fb0f5"
+    },
+    {
+      "kind": "pal",
+      "id": "tanzee-ignis",
+      "en": "Tanzee Ignis",
+      "ko": "몽화",
+      "ja": "カレッパ",
+      "sourceSha256": "9473bf6aa1204960992ab84a9f11e81355c0ab295a0141cdaae460109acf1e86"
+    },
+    {
+      "kind": "pal",
+      "id": "tarantriss",
+      "en": "Tarantriss",
+      "ko": "스틱툴라",
+      "ja": "モモンチュラ",
+      "sourceSha256": "ccbed91d1088b11ed20d535939b1220d85f44b6aa205366417fe4d3cdd4d7fdb"
+    },
+    {
+      "kind": "pal",
+      "id": "teafant",
+      "en": "Teafant",
+      "ko": "차코리",
+      "ja": "チョロゾウ",
+      "sourceSha256": "8dc8ac5ce45dadb9db5146ba25647d38a7e1c8f53d3d207fbf08bd99c2fe673d"
+    },
+    {
+      "kind": "pal",
+      "id": "tetroise",
+      "en": "Tetroise",
+      "ko": "누름북",
+      "ja": "オモシガメ",
+      "sourceSha256": "15a7907f5d73f412643b1d5e98c18582f050a1e6a7235acd64ca89271e4e5aab"
+    },
+    {
+      "kind": "pal",
+      "id": "tetroise-primo",
+      "en": "Tetroise Primo",
+      "ko": "성채북",
+      "ja": "オシロガメ",
+      "sourceSha256": "74d916fa064e260a435bb1a4e56339a467dfcb08756a1100c6036d56d2dfee9d"
+    },
+    {
+      "kind": "pal",
+      "id": "tocotoco",
+      "en": "Tocotoco",
+      "ko": "알록새",
+      "ja": "クルットリ",
+      "sourceSha256": "699c2402c75421dc2fd7e555e9f812ddbccc34d1d7e5a28fe6aa3418ab688a52"
+    },
+    {
+      "kind": "pal",
+      "id": "tombat",
+      "en": "Tombat",
+      "ko": "냥뱃",
+      "ja": "ニャンバット",
+      "sourceSha256": "785510283fdd16c66af27335e794129f9e1c0339c074c5e3de11cbec2dec7f69"
+    },
+    {
+      "kind": "pal",
+      "id": "tropicaw",
+      "en": "Tropicaw",
+      "ko": "플라페크",
+      "ja": "フラペック",
+      "sourceSha256": "c437aa38d00d70ed764bd33cd6f62b0c96f2d352414103cf0e2554718068769d"
+    },
+    {
+      "kind": "pal",
+      "id": "turtacle",
+      "en": "Turtacle",
+      "ko": "헬터클",
+      "ja": "ヘルメッコ",
+      "sourceSha256": "b9af4c2cd72f208068329aea1d1028a9e9d573add40308a82f746afc9872455f"
+    },
+    {
+      "kind": "pal",
+      "id": "turtacle-terra",
+      "en": "Turtacle Terra",
+      "ko": "골터클",
+      "ja": "ゴルメッコ",
+      "sourceSha256": "76cb0030c105e062d8ce0f926ec86d29d79fe9ffdfdfa0fd105335e6c5bc7061"
+    },
+    {
+      "kind": "pal",
+      "id": "univolt",
+      "en": "Univolt",
+      "ko": "썬더콘",
+      "ja": "ライコーン",
+      "sourceSha256": "c3c882eddcdef63e43f12109cee074540bc23e6a9b49609ea66d2f307cb155c2"
+    },
+    {
+      "kind": "pal",
+      "id": "univolt-cryst",
+      "en": "Univolt Cryst",
+      "ko": "레이콘",
+      "ja": "レイコーン",
+      "sourceSha256": "24d35e97e0ed6204a4f5955bb2721e31c432c04e5da582e8d5663901dd4ff300"
+    },
+    {
+      "kind": "pal",
+      "id": "vaelet",
+      "en": "Vaelet",
+      "ko": "비오레타",
+      "ja": "ヴィオレッタ",
+      "sourceSha256": "874a092511cfd3b19fc354d7678c4ee1a2ea68888d68c6bbc51edbb89577c444"
+    },
+    {
+      "kind": "pal",
+      "id": "valentail",
+      "en": "Valentail",
+      "ko": "냐를르",
+      "ja": "ニャルル",
+      "sourceSha256": "10dc59fe02319653d49ee86a989a600092868a381d1490c30cde89ac5c1869a3"
+    },
+    {
+      "kind": "pal",
+      "id": "vanwyrm",
+      "en": "Vanwyrm",
+      "ko": "버드래곤",
+      "ja": "カバネドリ",
+      "sourceSha256": "55cb30d76a9bc26826bfcd8c09d42051bece51b77c00945be4a9f656a4522895"
+    },
+    {
+      "kind": "pal",
+      "id": "vanwyrm-cryst",
+      "en": "Vanwyrm Cryst",
+      "ko": "버드아이스",
+      "ja": "シロカバネ",
+      "sourceSha256": "931d8e9056fed353be8065063cd04d873d642296d6a0b1fb49ca00e1bf9bb4c8"
+    },
+    {
+      "kind": "pal",
+      "id": "venusa",
+      "en": "Venusa",
+      "ko": "메두나",
+      "ja": "メドゥーナ",
+      "sourceSha256": "4478fd6be06267b1dca1affe92a3b91b937a048f32dfc7a67a04469c65ab590a"
+    },
+    {
+      "kind": "pal",
+      "id": "verdash",
+      "en": "Verdash",
+      "ko": "초토리",
+      "ja": "ラベロット",
+      "sourceSha256": "0ab2c9bb45c03a62693d12770275328ed53932312452d4a9e69cc105b2dfbb6c"
+    },
+    {
+      "kind": "pal",
+      "id": "vixy",
+      "en": "Vixy",
+      "ko": "미호",
+      "ja": "タマモ",
+      "sourceSha256": "0df855c8987aa8bcd0c5c26cb75fd6c4842791fd549173c8456e53a7223eb47c"
+    },
+    {
+      "kind": "pal",
+      "id": "warsect",
+      "en": "Warsect",
+      "ko": "장수벌레",
+      "ja": "グラクレス",
+      "sourceSha256": "e16451bb1b9b1224ff58a7329d4abca02685619fb5eb62701d2f61dd169840ac"
+    },
+    {
+      "kind": "pal",
+      "id": "warsect-terra",
+      "en": "Warsect Terra",
+      "ko": "금강벌레",
+      "ja": "ゴルクレス",
+      "sourceSha256": "da950b563cb463f4f3c9150f0e74314207e8f1142cf95acce425fc7e25f5b421"
+    },
+    {
+      "kind": "pal",
+      "id": "whalaska",
+      "en": "Whalaska",
+      "ko": "빙등고래",
+      "ja": "コゴエール",
+      "sourceSha256": "50f93b6bcaee89eaacef31d11a80eb122b7fea707cca129463140b0a115c76ec"
+    },
+    {
+      "kind": "pal",
+      "id": "whalaska-ignis",
+      "en": "Whalaska Ignis",
+      "ko": "홍등고래",
+      "ja": "モモエール",
+      "sourceSha256": "211e4b04fbabb81102bd5b65fc9e4850493544b6ac18944a76c11cd4b746a72a"
+    },
+    {
+      "kind": "pal",
+      "id": "wispaw",
+      "en": "Wispaw",
+      "ko": "냥시",
+      "ja": "ニャンシー",
+      "sourceSha256": "85708e15da3c9b669b1d6a21f0219bf4d40c2ae5311fe8566d7449952f128e25"
+    },
+    {
+      "kind": "pal",
+      "id": "wistella",
+      "en": "Wistella",
+      "ko": "달보미",
+      "ja": "ホシノコ",
+      "sourceSha256": "65f3946b7d675bafbc434736fc4fe7149103de9bd0bd883fabe7c6a7974371fb"
+    },
+    {
+      "kind": "pal",
+      "id": "wixen",
+      "en": "Wixen",
+      "ko": "마호",
+      "ja": "フォレーナ",
+      "sourceSha256": "9797987f0863128a3668ab17852c3b21a0e17cb9e79900b88c7dd4c370834957"
+    },
+    {
+      "kind": "pal",
+      "id": "wixen-noct",
+      "en": "Wixen Noct",
+      "ko": "영마호",
+      "ja": "フォレーオ",
+      "sourceSha256": "73068a00665dc37b4cb979f3773c3ad889cc01e7fb8e73dc96a729a45459130d"
+    },
+    {
+      "kind": "pal",
+      "id": "woolipop",
+      "en": "Woolipop",
+      "ko": "캔디쉽",
+      "ja": "メリポップ",
+      "sourceSha256": "ca772c6e90f94e3e0a6e80149c8f1291aee19fa3df76d9cf02562ce573cccd5a"
+    },
+    {
+      "kind": "pal",
+      "id": "woolipop-terra",
+      "en": "Woolipop Terra",
+      "ko": "비터쉽",
+      "ja": "メリコロネ",
+      "sourceSha256": "84fddfe7386ea301f93b271efa0f8c87bc4798a661838d7f30659dcffaed3af2"
+    },
+    {
+      "kind": "pal",
+      "id": "wumpo",
+      "en": "Wumpo",
+      "ko": "움포",
+      "ja": "ヒエティ",
+      "sourceSha256": "703f47fe1ef5303e93112d46436d4c1e7c039589b349a3d4918042686eec0c74"
+    },
+    {
+      "kind": "pal",
+      "id": "wumpo-botan",
+      "en": "Wumpo Botan",
+      "ko": "움피티",
+      "ja": "トロピティ",
+      "sourceSha256": "2c6ef00a4e91d40ce0b37b09c1f01d7b777009b8fa949e83820f814ffb7238e3"
+    },
+    {
+      "kind": "pal",
+      "id": "xenogard",
+      "en": "Xenogard",
+      "ko": "제노루더",
+      "ja": "ゼノルーダ",
+      "sourceSha256": "15a26a60d14ecfea08dbabab3d08154246d2eb0eddb33b4b1d1cdd785d2dabdd"
+    },
+    {
+      "kind": "pal",
+      "id": "xenolord",
+      "en": "Xenolord",
+      "ko": "제노드란",
+      "ja": "ゼノドラン",
+      "sourceSha256": "f286c4b89a652550b992f110b79c4a13e9887339af23bbddd8849ebf0253efc2"
+    },
+    {
+      "kind": "pal",
+      "id": "xenovader",
+      "en": "Xenovader",
+      "ko": "제노베이더",
+      "ja": "ゼノベーダ",
+      "sourceSha256": "c064ee3f28a7e8d3d9c00189eb39bdaf7091a5c7fa8a2d661fb8de69e3060e82"
+    },
+    {
+      "kind": "pal",
+      "id": "yakumo",
+      "en": "Yakumo",
+      "ko": "둥실해치",
+      "ja": "ヤクモマル",
+      "sourceSha256": "c30d24401cfaa7de16efa3af10405a1b7d151dc07751714da5de10c5f1fefa39"
+    }
+  ],
+  "terms": [
+    {
+      "key": "element.neutral",
+      "en": "Neutral",
+      "ko": "무속성",
+      "ja": "無属性",
+      "domain": "element"
+    },
+    {
+      "key": "element.fire",
+      "en": "Fire",
+      "ko": "불",
+      "ja": "炎",
+      "domain": "element"
+    },
+    {
+      "key": "element.water",
+      "en": "Water",
+      "ko": "물",
+      "ja": "水",
+      "domain": "element"
+    },
+    {
+      "key": "element.electric",
+      "en": "Electric",
+      "ko": "번개",
+      "ja": "雷",
+      "domain": "element"
+    },
+    {
+      "key": "element.grass",
+      "en": "Grass",
+      "ko": "풀",
+      "ja": "草",
+      "domain": "element"
+    },
+    {
+      "key": "element.ice",
+      "en": "Ice",
+      "ko": "얼음",
+      "ja": "氷",
+      "domain": "element"
+    },
+    {
+      "key": "element.ground",
+      "en": "Ground",
+      "ko": "땅",
+      "ja": "地",
+      "domain": "element"
+    },
+    {
+      "key": "element.dark",
+      "en": "Dark",
+      "ko": "어둠",
+      "ja": "闇",
+      "domain": "element"
+    },
+    {
+      "key": "element.dragon",
+      "en": "Dragon",
+      "ko": "용",
+      "ja": "竜",
+      "domain": "element"
+    },
+    {
+      "key": "work.kindling",
+      "en": "Kindling",
+      "ko": "불 피우기",
+      "ja": "火おこし",
+      "domain": "work"
+    },
+    {
+      "key": "work.watering",
+      "en": "Watering",
+      "ko": "관개",
+      "ja": "水やり",
+      "domain": "work"
+    },
+    {
+      "key": "work.planting",
+      "en": "Planting",
+      "ko": "파종",
+      "ja": "種まき",
+      "domain": "work"
+    },
+    {
+      "key": "work.generating_electricity",
+      "en": "Generating Electricity",
+      "ko": "발전",
+      "ja": "発電",
+      "domain": "work"
+    },
+    {
+      "key": "work.handiwork",
+      "en": "Handiwork",
+      "ko": "수작업",
+      "ja": "手作業",
+      "domain": "work"
+    },
+    {
+      "key": "work.gathering",
+      "en": "Gathering",
+      "ko": "채집",
+      "ja": "採集",
+      "domain": "work"
+    },
+    {
+      "key": "work.lumbering",
+      "en": "Lumbering",
+      "ko": "벌목",
+      "ja": "伐採",
+      "domain": "work"
+    },
+    {
+      "key": "work.mining",
+      "en": "Mining",
+      "ko": "채굴",
+      "ja": "採掘",
+      "domain": "work"
+    },
+    {
+      "key": "work.medicine_production",
+      "en": "Medicine Production",
+      "ko": "제약",
+      "ja": "製薬",
+      "domain": "work"
+    },
+    {
+      "key": "work.cooling",
+      "en": "Cooling",
+      "ko": "냉각",
+      "ja": "冷却",
+      "domain": "work"
+    },
+    {
+      "key": "work.transporting",
+      "en": "Transporting",
+      "ko": "운반",
+      "ja": "運搬",
+      "domain": "work"
+    },
+    {
+      "key": "work.farming",
+      "en": "Farming",
+      "ko": "목장",
+      "ja": "牧場",
+      "domain": "work"
+    },
+    {
+      "key": "skill.active",
+      "en": "Active Skill",
+      "ko": "액티브 스킬",
+      "ja": "アクティブスキル",
+      "domain": "skill"
+    },
+    {
+      "key": "skill.partner",
+      "en": "Partner Skill",
+      "ko": "파트너 스킬",
+      "ja": "パートナースキル",
+      "domain": "skill"
+    },
+    {
+      "key": "skill.passive",
+      "en": "Passive Skill",
+      "ko": "패시브 스킬",
+      "ja": "パッシブスキル",
+      "domain": "skill"
+    },
+    {
+      "key": "category.material",
+      "en": "Material",
+      "ko": "재료",
+      "ja": "素材",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.consumable",
+      "en": "Consumable",
+      "ko": "소모품",
+      "ja": "消耗品",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.weapon",
+      "en": "Weapon",
+      "ko": "무기",
+      "ja": "武器",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.armor",
+      "en": "Armor",
+      "ko": "방어구",
+      "ja": "防具",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.accessory",
+      "en": "Accessory",
+      "ko": "액세서리",
+      "ja": "アクセサリー",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.sphere",
+      "en": "Pal Sphere",
+      "ko": "Pal 스피어",
+      "ja": "パルスフィア",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.ammo",
+      "en": "Ammo",
+      "ko": "탄약",
+      "ja": "弾薬",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.food",
+      "en": "Food",
+      "ko": "식량",
+      "ja": "食料",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.medicine",
+      "en": "Medicine",
+      "ko": "약",
+      "ja": "薬",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.key_item",
+      "en": "Key Item",
+      "ko": "중요 아이템",
+      "ja": "大事なもの",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.building",
+      "en": "Building",
+      "ko": "건축",
+      "ja": "建築",
+      "domain": "item-category"
+    },
+    {
+      "key": "category.other",
+      "en": "Other",
+      "ko": "기타",
+      "ja": "その他",
+      "domain": "item-category"
+    }
+  ],
+  "nameCollisions": [
+    {
+      "kind": "item",
+      "english": "Common Egg",
+      "ids": [
+        "pal-egg-normal-01",
+        "pal-egg-normal-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Damp Egg",
+      "ids": [
+        "pal-egg-water-01",
+        "pal-egg-water-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Dark Egg",
+      "ids": [
+        "pal-egg-dark-01",
+        "pal-egg-dark-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Dragon Egg",
+      "ids": [
+        "pal-egg-dragon-01",
+        "pal-egg-dragon-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Electric Egg",
+      "ids": [
+        "pal-egg-electricity-01",
+        "pal-egg-electricity-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Frozen Egg",
+      "ids": [
+        "pal-egg-ice-01",
+        "pal-egg-ice-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Common Egg",
+      "ids": [
+        "pal-egg-normal-03",
+        "pal-egg-normal-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Damp Egg",
+      "ids": [
+        "pal-egg-water-03",
+        "pal-egg-water-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Dark Egg",
+      "ids": [
+        "pal-egg-dark-03",
+        "pal-egg-dark-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Dragon Egg",
+      "ids": [
+        "pal-egg-dragon-03",
+        "pal-egg-dragon-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Electric Egg",
+      "ids": [
+        "pal-egg-electricity-03",
+        "pal-egg-electricity-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Frozen Egg",
+      "ids": [
+        "pal-egg-ice-03",
+        "pal-egg-ice-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Mutated Egg",
+      "ids": [
+        "pal-egg-mutation-pal-03",
+        "pal-egg-mutation-pal-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Ominous Egg",
+      "ids": [
+        "pal-egg-world-tree-03",
+        "pal-egg-world-tree-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Rocky Egg",
+      "ids": [
+        "pal-egg-earth-03",
+        "pal-egg-earth-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Scorching Egg",
+      "ids": [
+        "pal-egg-fire-03",
+        "pal-egg-fire-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Large Verdant Egg",
+      "ids": [
+        "pal-egg-leaf-03",
+        "pal-egg-leaf-04"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Ominous Egg",
+      "ids": [
+        "pal-egg-world-tree-01",
+        "pal-egg-world-tree-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Rocky Egg",
+      "ids": [
+        "pal-egg-earth-01",
+        "pal-egg-earth-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Scorching Egg",
+      "ids": [
+        "pal-egg-fire-01",
+        "pal-egg-fire-02"
+      ]
+    },
+    {
+      "kind": "item",
+      "english": "Verdant Egg",
+      "ids": [
+        "pal-egg-leaf-01",
+        "pal-egg-leaf-02"
+      ]
+    },
+    {
+      "kind": "skill",
+      "english": "Aerial Marauder",
+      "ids": [
+        "partner-vanwyrm",
+        "partner-vanwyrm-cryst"
+      ]
+    },
+    {
+      "kind": "skill",
+      "english": "Angry Shark",
+      "ids": [
+        "partner-gobfin",
+        "partner-gobfin-ignis"
+      ]
+    },
+    {
+      "kind": "skill",
+      "english": "Double Fang",
+      "ids": [
+        "active-double-fang-51aba4eadf",
+        "active-double-fang-b35a322bb6"
+      ]
+    },
+    {
+      "kind": "skill",
+      "english": "Grenadier Panda",
+      "ids": [
+        "partner-mossanda",
+        "partner-mossanda-lux"
+      ]
+    },
+    {
+      "kind": "skill",
+      "english": "Too Cool to be Seen",
+      "ids": [
+        "partner-leezpunk",
+        "partner-leezpunk-ignis"
+      ]
+    }
+  ],
+  "englishCopyAllowlist": []
+}

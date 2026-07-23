@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import {
   assertPalworldDataSnapshot,
+  validatePalworldBreedingDataSnapshot,
   validatePalworldBreedingParentsResponse,
   validatePalworldBreedingResultResponse,
   validatePalworldDataCoverage,
@@ -20,7 +22,8 @@ import {
   validatePalworldSkill,
   validatePalworldSkillAssignment,
   validatePalworldSkillDetail,
-  validatePalworldSkillSummary
+  validatePalworldSkillSummary,
+  validatePalworldTranslationSnapshot
 } from "../dist/index.js";
 
 const metadata = {
@@ -50,6 +53,344 @@ const englishFallback = {
   ko: "source_language_fallback",
   ja: "source_language_fallback"
 };
+
+const sha256 = (value) => createHash("sha256").update(value, "utf8").digest("hex");
+
+const translationSource = {
+  release: "1.0.1",
+  sourceCatalogSha256: "d".repeat(64),
+  sourcePaldexSha256: "e".repeat(64),
+  sourceRevision: "translation-source-revision",
+  records: [
+    {
+      id: "test-item",
+      kind: "item",
+      fields: {
+        name: { text: "Test Item", sha256: sha256("Test Item") },
+        description: { text: "A safe test item.", sha256: sha256("A safe test item.") }
+      }
+    },
+    {
+      id: "test-skill",
+      kind: "skill",
+      fields: {
+        name: { text: "Test Skill", sha256: sha256("Test Skill") },
+        description: { text: "A safe test skill.", sha256: sha256("A safe test skill.") },
+        passiveAbility: { text: "Attack +10%", sha256: sha256("Attack +10%") }
+      }
+    }
+  ]
+};
+
+const translationSnapshot = {
+  schemaVersion: 1,
+  release: translationSource.release,
+  locale: "ko",
+  sourceCatalogSha256: translationSource.sourceCatalogSha256,
+  sourcePaldexSha256: translationSource.sourcePaldexSha256,
+  sourceRevision: translationSource.sourceRevision,
+  translationRevision: "test-translation-v1",
+  translationMethod: "machine_assisted",
+  translationStatus: "complete",
+  translatedAt: "2026-07-22T00:00:00.000Z",
+  reviewedAt: null,
+  records: [
+    {
+      id: "test-item",
+      kind: "item",
+      fields: {
+        name: {
+          sourceSha256: sha256("Test Item"),
+          text: "테스트 아이템",
+          status: "machine_assisted"
+        },
+        description: {
+          sourceSha256: sha256("A safe test item."),
+          text: "안전한 테스트 아이템이다.",
+          status: "machine_assisted"
+        }
+      }
+    },
+    {
+      id: "test-skill",
+      kind: "skill",
+      fields: {
+        name: {
+          sourceSha256: sha256("Test Skill"),
+          text: "테스트 스킬",
+          status: "machine_assisted"
+        },
+        description: {
+          sourceSha256: sha256("A safe test skill."),
+          text: "안전한 테스트 스킬이다.",
+          status: "machine_assisted"
+        },
+        passiveAbility: {
+          sourceSha256: sha256("Attack +10%"),
+          text: "공격력 +10%",
+          status: "machine_assisted"
+        }
+      }
+    }
+  ]
+};
+
+test("KO·JA 번역 snapshot은 canonical source와 필드별 상태를 엄격하게 검증한다", () => {
+  assert.equal(validatePalworldTranslationSnapshot(translationSnapshot, translationSource).ok, true);
+  assert.equal(validatePalworldTranslationSnapshot({
+    ...translationSnapshot,
+    locale: "ja",
+    records: translationSnapshot.records.map((record) => ({
+      ...record,
+      fields: Object.fromEntries(Object.entries(record.fields).map(([field, value]) => [
+        field,
+        { ...value, text: `日本語訳-${record.id}-${field}${field === "passiveAbility" ? "-10%" : ""}` }
+      ]))
+    }))
+  }, translationSource).ok, true);
+  assert.equal(validatePalworldTranslationSnapshot({ ...translationSnapshot, locale: "en" }, translationSource).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot({ ...translationSnapshot, unexpected: true }, translationSource).ok, false);
+});
+
+test("번역 snapshot은 중복·orphan·stale hash·원문 없는 필드·완료 누락을 차단한다", () => {
+  const duplicate = structuredClone(translationSnapshot);
+  duplicate.records.push(structuredClone(duplicate.records[1]));
+  assert.equal(validatePalworldTranslationSnapshot(duplicate, translationSource).ok, false);
+
+  const orphan = structuredClone(translationSnapshot);
+  orphan.records[0].id = "orphan-item";
+  assert.equal(validatePalworldTranslationSnapshot(orphan, translationSource).ok, false);
+
+  const stale = structuredClone(translationSnapshot);
+  stale.records[0].fields.name.sourceSha256 = "f".repeat(64);
+  assert.equal(validatePalworldTranslationSnapshot(stale, translationSource).ok, false);
+
+  const sourceMissing = structuredClone(translationSnapshot);
+  sourceMissing.records[0].fields.passiveAbility = {
+    sourceSha256: sha256("unknown"),
+    text: "추정하지 않은 값",
+    status: "machine_assisted"
+  };
+  assert.equal(validatePalworldTranslationSnapshot(sourceMissing, translationSource).ok, false);
+
+  const incomplete = structuredClone(translationSnapshot);
+  delete incomplete.records[1].fields.description;
+  assert.equal(validatePalworldTranslationSnapshot(incomplete, translationSource).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot({ ...translationSnapshot, release: "9.9.9" }, translationSource).ok, false);
+});
+
+test("번역 snapshot은 영문 복사·HTML·제어문자·잘못된 상태를 차단하고 exact glossary 예외만 허용한다", () => {
+  const copied = structuredClone(translationSnapshot);
+  copied.records[0].fields.name.text = "Test Item";
+  assert.equal(validatePalworldTranslationSnapshot(copied, translationSource).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(copied, {
+    ...translationSource,
+    englishCopyAllowlist: ["item:test-item:name"]
+  }).ok, true);
+  assert.equal(validatePalworldTranslationSnapshot(copied, {
+    ...translationSource,
+    englishCopyAllowlist: ["item:missing:name"]
+  }).ok, false);
+
+  for (const text of ["<script>alert(1)</script>", "javascript:alert(1)", "제어\u0001문자"] ) {
+    const unsafe = structuredClone(translationSnapshot);
+    unsafe.records[0].fields.description.text = text;
+    assert.equal(validatePalworldTranslationSnapshot(unsafe, translationSource).ok, false, text);
+  }
+  const invalidStatus = structuredClone(translationSnapshot);
+  invalidStatus.records[0].fields.name.status = "official";
+  assert.equal(validatePalworldTranslationSnapshot(invalidStatus, translationSource).ok, false);
+
+  const changedNumber = structuredClone(translationSnapshot);
+  changedNumber.records[1].fields.passiveAbility.text = "공격력 +20%";
+  assert.equal(validatePalworldTranslationSnapshot(changedNumber, translationSource).ok, false);
+});
+
+test("번역 snapshot은 숫자 등장 순서와 숫자-단위 결합을 보존한다", () => {
+  const sourceText = "Deals 10% damage for 3 seconds at Lv. 5 and weighs 2 kg at 4x speed.";
+  const source = {
+    release: "1.0.1",
+    sourceCatalogSha256: "a".repeat(64),
+    sourcePaldexSha256: "b".repeat(64),
+    sourceRevision: "numeric-units-v1",
+    records: [{
+      id: "numeric-item",
+      kind: "item",
+      fields: { description: { text: sourceText, sha256: sha256(sourceText) } }
+    }]
+  };
+  const snapshotWith = (text) => ({
+    schemaVersion: 1,
+    release: source.release,
+    locale: "ko",
+    sourceCatalogSha256: source.sourceCatalogSha256,
+    sourcePaldexSha256: source.sourcePaldexSha256,
+    sourceRevision: source.sourceRevision,
+    translationRevision: "numeric-units-translation-v1",
+    translationMethod: "machine_assisted",
+    translationStatus: "complete",
+    translatedAt: "2026-07-22T00:00:00.000Z",
+    reviewedAt: null,
+    records: [{
+      id: "numeric-item",
+      kind: "item",
+      fields: {
+        description: {
+          sourceSha256: sha256(sourceText),
+          text,
+          status: "machine_assisted"
+        }
+      }
+    }]
+  });
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("10% 피해를 3초 동안 주고 5레벨에서 무게는 2kg이며 속도는 4×이다."),
+    source
+  ).ok, true);
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("3초 동안 10% 피해를 주고 5레벨에서 무게는 2kg이며 속도는 4×이다."),
+    source
+  ).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("10% 피해를 3분 동안 주고 5레벨에서 무게는 2kg이며 속도는 4×이다."),
+    source
+  ).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("10% 피해를 3초 동안 주고 5레벨에서 무게는 2이며 속도는 4×이다."),
+    source
+  ).ok, false);
+});
+
+test("Shared 번역 snapshot validator는 runtime locale script와 길이·반복·절 유실 퇴행을 차단한다", () => {
+  const sourceText = "The first clause explains the primary effect of this item in enough detail to be meaningful. The second clause describes an important limitation that must remain visible. The third clause states how the effect ends and why the player should care.";
+  const source = {
+    release: "1.0.1",
+    sourceCatalogSha256: "a".repeat(64),
+    sourcePaldexSha256: "b".repeat(64),
+    sourceRevision: "quality-gate-v1",
+    records: [{
+      id: "quality-item",
+      kind: "item",
+      fields: { description: { text: sourceText, sha256: sha256(sourceText) } }
+    }]
+  };
+  const snapshotWith = (text, { locale = "ko", status = "machine_assisted" } = {}) => ({
+    schemaVersion: 1,
+    release: source.release,
+    locale,
+    sourceCatalogSha256: source.sourceCatalogSha256,
+    sourcePaldexSha256: source.sourcePaldexSha256,
+    sourceRevision: source.sourceRevision,
+    translationRevision: "quality-gate-translation-v1",
+    translationMethod: status,
+    translationStatus: "complete",
+    translatedAt: "2026-07-22T00:00:00.000Z",
+    reviewedAt: status === "human_reviewed" ? "2026-07-22T00:00:00.000Z" : null,
+    records: [{
+      id: "quality-item",
+      kind: "item",
+      fields: {
+        description: { sourceSha256: sha256(sourceText), text, status }
+      }
+    }]
+  });
+
+  assert.equal(validatePalworldTranslationSnapshot(snapshotWith("Translated text without target script."), source).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(snapshotWith("Reviewed English wording.", { status: "human_reviewed" }), source).ok, true);
+  assert.equal(validatePalworldTranslationSnapshot(snapshotWith("일본어 문자가 없는 번역이다.", { locale: "ja" }), source).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(snapshotWith("三つの節を保った自然な日本語の説明であり、元の情報を省略せずに伝える。重要な制限も示し、効果が終了する条件も説明する。", { locale: "ja" }), source).ok, true);
+  assert.equal(validatePalworldTranslationSnapshot(snapshotWith("가나다가나다가나다가나다"), source).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(snapshotWith("설명이 대부분 유실되었다."), source).ok, false);
+
+  const longSourceText = "This source sentence has enough content.";
+  const longSource = {
+    ...source,
+    records: [{
+      id: "quality-item",
+      kind: "item",
+      fields: { description: { text: longSourceText, sha256: sha256(longSourceText) } }
+    }]
+  };
+  const expanded = "이 번역문은 원문의 의미보다 불필요하게 길어졌으며 관련 없는 표현을 계속 추가하여 검증 기준을 넘는다. 또한 전혀 필요하지 않은 문장을 여러 방식으로 이어 붙여 원문보다 지나치게 큰 결과를 의도적으로 만든다. 마지막으로 또 다른 무관한 설명을 덧붙여 품질 저하를 확실히 재현한다.";
+  const expandedSnapshot = snapshotWith(expanded);
+  expandedSnapshot.records[0].fields.description.sourceSha256 = sha256(longSourceText);
+  assert.equal(validatePalworldTranslationSnapshot(expandedSnapshot, longSource).ok, false);
+
+  const exactEnglishSource = {
+    ...source,
+    records: [{
+      id: "quality-item",
+      kind: "item",
+      fields: { description: { text: "Keep As English", sha256: sha256("Keep As English") } }
+    }]
+  };
+  const allowlisted = snapshotWith("Keep As English");
+  allowlisted.records[0].fields.description.sourceSha256 = sha256("Keep As English");
+  assert.equal(validatePalworldTranslationSnapshot(allowlisted, {
+    ...exactEnglishSource,
+    englishCopyAllowlist: ["item:quality-item:description"]
+  }).ok, true);
+});
+
+test("손상된 영어 source의 누락 슬롯은 locale marker와 고정 note로 보존해야 한다", () => {
+  const sourceText = "Increases attack by  . Leaves ().";
+  const source = {
+    release: "1.0.1",
+    sourceCatalogSha256: "a".repeat(64),
+    sourcePaldexSha256: "b".repeat(64),
+    sourceRevision: "source-anomaly-v1",
+    records: [{
+      id: "anomalous-skill",
+      kind: "skill",
+      fields: { description: { text: sourceText, sha256: sha256(sourceText) } }
+    }]
+  };
+  const snapshotWith = (text, note) => ({
+    schemaVersion: 1,
+    release: source.release,
+    locale: "ko",
+    sourceCatalogSha256: source.sourceCatalogSha256,
+    sourcePaldexSha256: source.sourcePaldexSha256,
+    sourceRevision: source.sourceRevision,
+    translationRevision: "source-anomaly-translation-v1",
+    translationMethod: "machine_assisted",
+    translationStatus: "complete",
+    translatedAt: "2026-07-22T00:00:00.000Z",
+    reviewedAt: null,
+    records: [{
+      id: "anomalous-skill",
+      kind: "skill",
+      fields: {
+        description: {
+          sourceSha256: sha256(sourceText),
+          text,
+          status: "machine_assisted",
+          ...(note === undefined ? {} : { note })
+        }
+      }
+    }]
+  });
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("공격력이 [원문 누락] 증가한다. [원문 누락]을 남긴다."),
+    source
+  ).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("공격력이 [원문 누락] 증가한다.", "source_anomaly_preserved"),
+    source
+  ).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("공격력이 [원문 누락] 증가한다. [원문 누락]을 남긴다.", "source_anomaly_preserved"),
+    source
+  ).ok, true);
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("[원문 누락] 공격력이 [원문 누락] 증가한다. [원문 누락]을 남긴다.", "source_anomaly_preserved"),
+    source
+  ).ok, false);
+  assert.equal(validatePalworldTranslationSnapshot(
+    snapshotWith("공격력이 XQZVALUEXQZ 증가한다. [원문 누락] [원문 누락]", "source_anomaly_preserved"),
+    source
+  ).ok, false);
+});
 
 const palReference = {
   id: "anubis",
@@ -347,6 +688,21 @@ test("스킬 summary와 detail은 영어 원문 fallback과 관련 Pal 배정을
   assert.equal(validatePalworldSkill({ ...activeSkill, power: Number.POSITIVE_INFINITY }).ok, false);
   assert.equal(validatePalworldSkill({ ...activeSkill, passiveTier: 2 }).ok, false);
   assert.equal(validatePalworldSkill({ ...activeSkill, unknown: true }).ok, false);
+  assert.equal(validatePalworldSkill({
+    ...activeSkill,
+    nameKo: "모래 돌풍",
+    translation: { name: { ko: "source_language_fallback", ja: "source_language_fallback" } }
+  }).ok, false);
+  assert.equal(validatePalworldSkill({
+    id: "partner-invalid-source",
+    type: "partner",
+    nameEn: "Partner Skill",
+    descriptionKo: "영어 원문 없이 만든 설명이다.",
+    translation: {
+      name: { ko: "source_language_fallback", ja: "source_language_fallback" },
+      description: { ko: "machine_assisted", ja: "missing_source" }
+    }
+  }).ok, false);
   assert.equal(validatePalworldSkillDetail({ ...activeSkillDetail, relatedPalCount: 2 }).ok, false);
   assert.equal(validatePalworldSkillDetail({
     ...activeSkillDetail,
@@ -372,6 +728,56 @@ test("도메인 coverage는 available·missing·total 불변식을 검증한다"
     palDetails: { available: 1, missing: 1, total: 1 }
   }).ok, false);
   assert.equal(validatePalworldDataCoverage({ ...coverage, unknown: true }).ok, false);
+});
+
+test("locale별 번역 coverage는 필드 coverage와 번역 상태 집계를 엄격하게 검증한다", () => {
+  const localeCoverage = {
+    palNames: { available: 1, missing: 0, total: 1 },
+    palDescriptions: { available: 1, missing: 0, total: 1 },
+    itemNames: { available: 1, missing: 0, total: 1 },
+    itemDescriptions: { available: 1, missing: 0, total: 1 },
+    skillNames: { available: 1, missing: 0, total: 1 },
+    skillDescriptions: { available: 1, missing: 0, total: 1 },
+    skillPassiveAbilities: { available: 1, missing: 0, total: 1 },
+    humanReviewed: 2,
+    machineAssisted: 5,
+    sourceLanguageFallback: 0,
+    missingSource: 0,
+    staleSourceHash: 0
+  };
+  const translatedCoverage = {
+    ...coverage,
+    translations: { ko: localeCoverage, ja: localeCoverage }
+  };
+  assert.equal(validatePalworldDataCoverage(translatedCoverage).ok, true);
+  assert.equal(validatePalworldDataCoverage({
+    ...translatedCoverage,
+    translations: {
+      ...translatedCoverage.translations,
+      ko: { ...localeCoverage, machineAssisted: Number.NaN }
+    }
+  }).ok, false);
+  assert.equal(validatePalworldDataCoverage({
+    ...translatedCoverage,
+    translations: {
+      ...translatedCoverage.translations,
+      ko: { ...localeCoverage, machineAssisted: 4 }
+    }
+  }).ok, false);
+  assert.equal(validatePalworldDataCoverage({
+    ...translatedCoverage,
+    translations: {
+      ...translatedCoverage.translations,
+      ko: { ...localeCoverage, staleSourceHash: 1 }
+    }
+  }).ok, false);
+  assert.equal(validatePalworldDataCoverage({
+    ...translatedCoverage,
+    translations: {
+      ...translatedCoverage.translations,
+      ja: { ...localeCoverage, unsafe: true }
+    }
+  }).ok, false);
 });
 
 test("Palworld meta는 optional 스킬 도메인과 상세 coverage를 counts에 맞춰 검증한다", () => {
@@ -898,12 +1304,28 @@ test("교배 결과와 목표 Pal 부모 목록 응답 validator를 제공한다
     parentA: palReference,
     parentB: palReference,
     result: breedingPair,
+    state: "resolved",
+    alternatives: [],
     metadata
   };
   assert.equal(validatePalworldBreedingResultResponse(resultResponse).ok, true);
   assert.equal(validatePalworldBreedingResultResponse({
     ...resultResponse,
     result: { ...breedingPair, parentA: { ...palReference, nameKo: "불일치" } }
+  }).ok, false);
+  assert.equal(validatePalworldBreedingResultResponse({
+    ...resultResponse,
+    result: null,
+    state: "requires_gender",
+    alternatives: [
+      { ...breedingPair, id: "gender-result-a" },
+      { ...breedingPair, id: "gender-result-b" }
+    ]
+  }).ok, true);
+  assert.equal(validatePalworldBreedingResultResponse({
+    ...resultResponse,
+    result: null,
+    state: "resolved"
   }).ok, false);
 
   const parentsResponse = {
@@ -917,11 +1339,73 @@ test("교배 결과와 목표 Pal 부모 목록 응답 validator를 제공한다
       hasNextPage: false,
       hasPreviousPage: false
     },
+    state: "resolved",
     metadata
   };
   assert.equal(validatePalworldBreedingParentsResponse(parentsResponse).ok, true);
   assert.equal(validatePalworldBreedingParentsResponse({
     ...parentsResponse,
     child: { ...palReference, id: "lamball" }
+  }).ok, false);
+});
+
+test("교배 data snapshot은 exact schema·수치·참조·조건 충돌을 검증한다", () => {
+  const parameter = (palId, sourceInternalId, combiRank, priority) => ({
+    palId,
+    sourceInternalId,
+    tribe: sourceInternalId,
+    combiRank,
+    combiDuplicatePriority: priority,
+    maleProbability: 0.5,
+    variantType: "normal"
+  });
+  const breedingSnapshot = {
+    schemaVersion: 1,
+    release: "1.0.1",
+    metadata: {
+      gameVersion: "1.0.1",
+      steamBuildId: "24181105",
+      sourceRevision: "atlas@fixed+palcalc@fixed",
+      sourceChecksums: {
+        atlasPals: "a".repeat(64),
+        atlasBreeding: "b".repeat(64),
+        palCalc: "c".repeat(64),
+        catalog: "d".repeat(64)
+      }
+    },
+    parameters: [
+      parameter("katress", "CatMage", 900, 90_000),
+      parameter("katress-ignis", "CatMage_Fire", 910, 91_000),
+      parameter("wixen", "FoxMage", 880, 88_000)
+    ],
+    specialRules: [{
+      parentAId: "katress",
+      parentASourceInternalId: "CatMage",
+      parentBId: "wixen",
+      parentBSourceInternalId: "FoxMage",
+      childId: "katress-ignis",
+      childSourceInternalId: "CatMage_Fire",
+      parentAGender: "female",
+      parentBGender: "male"
+    }]
+  };
+  assert.equal(validatePalworldBreedingDataSnapshot(breedingSnapshot).ok, true);
+  assert.equal(validatePalworldBreedingDataSnapshot({ ...breedingSnapshot, unexpected: true }).ok, false);
+  assert.equal(validatePalworldBreedingDataSnapshot({
+    ...breedingSnapshot,
+    parameters: breedingSnapshot.parameters.map((entry, index) => index === 0
+      ? { ...entry, combiRank: Number.NaN }
+      : entry)
+  }).ok, false);
+  assert.equal(validatePalworldBreedingDataSnapshot({
+    ...breedingSnapshot,
+    specialRules: [{ ...breedingSnapshot.specialRules[0], childId: "missing-pal" }]
+  }).ok, false);
+  assert.equal(validatePalworldBreedingDataSnapshot({
+    ...breedingSnapshot,
+    specialRules: [
+      breedingSnapshot.specialRules[0],
+      { ...breedingSnapshot.specialRules[0], childId: "wixen", childSourceInternalId: "FoxMage" }
+    ]
   }).ok, false);
 });

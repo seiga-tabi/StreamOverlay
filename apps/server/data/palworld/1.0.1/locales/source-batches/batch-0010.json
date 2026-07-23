@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 10,
+  "records": [
+    {
+      "id": "seafood-salada",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Seafood Salad",
+          "sourceSha256": "be9a96e0f3e4c02e19a0236a0dc602a08a5234aece56923e49dcb92a47417868"
+        },
+        "description": {
+          "sourceText": "A healthy salad made with and .\nEating it will slightly increase EXP gain for a period of time.",
+          "sourceSha256": "3841b43073becd543d6002759e5ec3c4286cc70d5006b391e84c3551af2e954f"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-rifle",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Semi-Auto Rifle",
+          "sourceSha256": "0314b0e496bf74629ab82eceb6233d8b32618ac695391406c5223474614075cb"
+        },
+        "description": {
+          "sourceText": "A rifle that allows for a certain degree of rapid fire.\nIt’s easy to aim and has high firepower, making it effective for mid-range combat.",
+          "sourceSha256": "512e0b03b4232a022e54c6f0504c55baa645953e0bd71bbd5d4d9bb07d97212f"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoRifle 2",
+          "sourceSha256": "5e3b0b4e339a5131133feba0f89c3a2b0dcdbc42b0a3792e2c46d4ac9e028c79"
+        },
+        "description": {
+          "sourceText": "A rifle that allows for a certain degree of rapid fire.\nIt’s easy to aim and has high firepower, making it effective for mid-range combat.",
+          "sourceSha256": "512e0b03b4232a022e54c6f0504c55baa645953e0bd71bbd5d4d9bb07d97212f"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoRifle 3",
+          "sourceSha256": "20cac7f81f4ecb69ba5672c78ef915a26557da8e2689b630275db48fffdfd475"
+        },
+        "description": {
+          "sourceText": "A rifle that allows for a certain degree of rapid fire.\nIt’s easy to aim and has high firepower, making it effective for mid-range combat.",
+          "sourceSha256": "512e0b03b4232a022e54c6f0504c55baa645953e0bd71bbd5d4d9bb07d97212f"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoRifle 4",
+          "sourceSha256": "3597d464c54d663d3f7e0dd816ba5db742501a68493e84d498c9bac9cdd27512"
+        },
+        "description": {
+          "sourceText": "A rifle that allows for a certain degree of rapid fire.\nIt’s easy to aim and has high firepower, making it effective for mid-range combat.",
+          "sourceSha256": "512e0b03b4232a022e54c6f0504c55baa645953e0bd71bbd5d4d9bb07d97212f"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoRifle 5",
+          "sourceSha256": "1613b05143c7288ef66ffc85935291768f601b04ceb65d27cd93a6fa528f2c90"
+        },
+        "description": {
+          "sourceText": "A rifle that allows for a certain degree of rapid fire.\nIt’s easy to aim and has high firepower, making it effective for mid-range combat.",
+          "sourceSha256": "512e0b03b4232a022e54c6f0504c55baa645953e0bd71bbd5d4d9bb07d97212f"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-shotgun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Semi-Auto Shotgun",
+          "sourceSha256": "ac855adbf7107670ee3d742b90f5b2fa746bd2c4f607d126d2de94caee323b94"
+        },
+        "description": {
+          "sourceText": "A rapid-fire shotgun with immense power.\nIts close-range damage output is top-notch.",
+          "sourceSha256": "3169add4f2abf4677b937ec508861ab15394183bceb77e805c66b333d9246535"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-shotgun-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoShotgun 2",
+          "sourceSha256": "fb42ac73370772207370ac4794e13596bfb63817429236db20cf2855a68139fa"
+        },
+        "description": {
+          "sourceText": "A rapid-fire shotgun with immense power.\nIts close-range damage output is top-notch.",
+          "sourceSha256": "3169add4f2abf4677b937ec508861ab15394183bceb77e805c66b333d9246535"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-shotgun-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoShotgun 3",
+          "sourceSha256": "0e425aba169ba86e8ed15638dc083de8821643ff4678bdd337c96afef15e539c"
+        },
+        "description": {
+          "sourceText": "A rapid-fire shotgun with immense power.\nIts close-range damage output is top-notch.",
+          "sourceSha256": "3169add4f2abf4677b937ec508861ab15394183bceb77e805c66b333d9246535"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-shotgun-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoShotgun 4",
+          "sourceSha256": "88734f4dadc271eaa69bab3a74013577c144030660ef6d3ab8e96d4fc69717df"
+        },
+        "description": {
+          "sourceText": "A rapid-fire shotgun with immense power.\nIts close-range damage output is top-notch.",
+          "sourceSha256": "3169add4f2abf4677b937ec508861ab15394183bceb77e805c66b333d9246535"
+        }
+      }
+    },
+    {
+      "id": "semi-auto-shotgun-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SemiAutoShotgun 5",
+          "sourceSha256": "7dc8c5ca0ed9dc823bed8f6bfd1e5db8c965fec4b8d79a64035e73f833f94216"
+        },
+        "description": {
+          "sourceText": "A rapid-fire shotgun with immense power.\nIts close-range damage output is top-notch.",
+          "sourceSha256": "3169add4f2abf4677b937ec508861ab15394183bceb77e805c66b333d9246535"
+        }
+      }
+    },
+    {
+      "id": "sfarmor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hexolite Armor",
+          "sourceSha256": "5d16690196d9bf03b947e77c1875f09d82192db5f602307cb061071245fc5280"
+        },
+        "description": {
+          "sourceText": "Armor made of .\nPossesses overwhelming durability and defense.",
+          "sourceSha256": "663231e44c563f9b737c2931ee61d42c9adf5cfe0fe040d005c7c8d9b552909f"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmor 2",
+          "sourceSha256": "a3e7c246ca2706fbacdf76dbe1a730fbebb6ca2c86707ae3a7fe25e693483aca"
+        },
+        "description": {
+          "sourceText": "Armor made of .\nPossesses overwhelming durability and defense.",
+          "sourceSha256": "663231e44c563f9b737c2931ee61d42c9adf5cfe0fe040d005c7c8d9b552909f"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmor 3",
+          "sourceSha256": "bc5285f51bf40e22202863751952d18e7dd33bb75352ceb577dc0562158dcd27"
+        },
+        "description": {
+          "sourceText": "Armor made of .\nPossesses overwhelming durability and defense.",
+          "sourceSha256": "663231e44c563f9b737c2931ee61d42c9adf5cfe0fe040d005c7c8d9b552909f"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmor 4",
+          "sourceSha256": "3e002c27448e156b717a47875d7a44b14dd8c97edcacf3ec7d1c345f426fc555"
+        },
+        "description": {
+          "sourceText": "Armor made of .\nPossesses overwhelming durability and defense.",
+          "sourceSha256": "663231e44c563f9b737c2931ee61d42c9adf5cfe0fe040d005c7c8d9b552909f"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmor 5",
+          "sourceSha256": "11fe2af6317c719cdb981e42e2a78e1e79035f4b49cbdbc32993d1658d5a3948"
+        },
+        "description": {
+          "sourceText": "Armor made of .\nPossesses overwhelming durability and defense.",
+          "sourceSha256": "663231e44c563f9b737c2931ee61d42c9adf5cfe0fe040d005c7c8d9b552909f"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-cold",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Cold Resistant Hexolite Armor",
+          "sourceSha256": "3edc2e94a7ec8f7fd5ec07dd2027bd89dea4679b13f2ab6454f51cf6a9625751"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-cold-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorCold 2",
+          "sourceSha256": "d812927c623499b55f926d682740d39d4a2c14d1f0bce749cd7515f9eaeec6a2"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-cold-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorCold 3",
+          "sourceSha256": "f4a0a266400f8e7584dbdca4dad358f52e447ae1479d752581b10c4232799130"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-cold-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorCold 4",
+          "sourceSha256": "4c15a22c0d145239849f6a3411a422fe749ee3ded00c1c59eafd647716598b8c"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-cold-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorCold 5",
+          "sourceSha256": "4ef22492b33fc88e3cd61cf040e458d8cc83370c3ccff83bb2966ab057bbf082"
+        },
+        "description": {
+          "sourceText": "Improved .\nUseful for surviving in cold climates.",
+          "sourceSha256": "1bb14e4e38c89911d2c57443916a83684982ba46523b9206380a3277067e3631"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-heat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Heat Resistant Hexolite Armor",
+          "sourceSha256": "9df6c5c502422425a0d3393e01653f8d5b7e19b81fb626718ce910189f721aa2"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-heat-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorHeat 2",
+          "sourceSha256": "3379e133ee1b782d2316fe1919352c0ab365a72eb92b3d48a44cd81422c833fc"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-heat-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorHeat 3",
+          "sourceSha256": "835db436b3c35136047f6d248f886be99222ef4752b6c6828b68fceda36ae0b1"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-heat-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorHeat 4",
+          "sourceSha256": "d0810b49b8c9702f2a55b39acab9b355b69b2643c58e9575ffa52cc02f96fd40"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-heat-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorHeat 5",
+          "sourceSha256": "c0fdd69ebd18f36421eca158e339990daf028be64ab2afc423b8ae76ee21e388"
+        },
+        "description": {
+          "sourceText": "Improved .\nBoasts high heat resistance.",
+          "sourceSha256": "ce1f1c282dc8a85cd0da9b933dab7c81f0f1dd37d81c807364da1b3f6e364240"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-weight",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Lightweight Hexolite Armor",
+          "sourceSha256": "ae4c86dd14e00b521ee391938f992b2d22514865eaa12bf006ec296779c25049"
+        },
+        "description": {
+          "sourceText": "Improved .\nIncreases carrying capacity.",
+          "sourceSha256": "20eca319da6df88ae5de6713095a5429a44c4b2a4781d87e1e47b53a39cf6dcc"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-weight-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorWeight 2",
+          "sourceSha256": "4741ebdab8a822f6bac0f86b31b195de8245caff7100f3b06e3b6244179d52c5"
+        },
+        "description": {
+          "sourceText": "Improved .\nIncreases carrying capacity.",
+          "sourceSha256": "20eca319da6df88ae5de6713095a5429a44c4b2a4781d87e1e47b53a39cf6dcc"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-weight-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorWeight 3",
+          "sourceSha256": "207cf148d76b689d02bd0499103f4b6aa0fb538c7e3fc3ac76cbaca496413d89"
+        },
+        "description": {
+          "sourceText": "Improved .\nIncreases carrying capacity.",
+          "sourceSha256": "20eca319da6df88ae5de6713095a5429a44c4b2a4781d87e1e47b53a39cf6dcc"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-weight-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorWeight 4",
+          "sourceSha256": "044a314e8f134e9c53c891e3c47c1e724888a6bd074e7b5182370b743d492838"
+        },
+        "description": {
+          "sourceText": "Improved .\nIncreases carrying capacity.",
+          "sourceSha256": "20eca319da6df88ae5de6713095a5429a44c4b2a4781d87e1e47b53a39cf6dcc"
+        }
+      }
+    },
+    {
+      "id": "sfarmor-weight-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFArmorWeight 5",
+          "sourceSha256": "21d81af05d4f46f49df4ca3f9e62827f5ccbce88d4384af7208612903d36a6ed"
+        },
+        "description": {
+          "sourceText": "Improved .\nIncreases carrying capacity.",
+          "sourceSha256": "20eca319da6df88ae5de6713095a5429a44c4b2a4781d87e1e47b53a39cf6dcc"
+        }
+      }
+    },
+    {
+      "id": "sfarrow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Advanced Arrow",
+          "sourceSha256": "a1e19a0b22ab08a7bc1332829c39d968cea998c1c667bbbf8a637b8364cf5097"
+        },
+        "description": {
+          "sourceText": "Enhanced arrows for shooting with\n.\nCan be crafted at .",
+          "sourceSha256": "ebd551cca4d006f7490aded097001ec5711ff48f953e8c745e06f2d755c968ad"
+        }
+      }
+    },
+    {
+      "id": "sfbow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Advanced Bow",
+          "sourceSha256": "83d462774f70bc7d2a668bd05dd65d7c65a752b005989095f2ea50a91f145b0f"
+        },
+        "description": {
+          "sourceText": "A bow reconstructed with advanced technology.\nCapable of firing extremely powerful arrows.",
+          "sourceSha256": "3663629d4e4e3ea58c5f0267ae2de80825b4fdbada42e2c17d77143b91cfd528"
+        }
+      }
+    },
+    {
+      "id": "sfbow-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFBow 2",
+          "sourceSha256": "164b597444bcdfcd5c2193f590c10a3439f97c168309cddb98febcfea7efc33b"
+        },
+        "description": {
+          "sourceText": "A bow reconstructed with advanced technology.\nCapable of firing extremely powerful arrows.",
+          "sourceSha256": "3663629d4e4e3ea58c5f0267ae2de80825b4fdbada42e2c17d77143b91cfd528"
+        }
+      }
+    },
+    {
+      "id": "sfbow-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFBow 3",
+          "sourceSha256": "ea0d8e507126dea0eebe35d8ee413ec96512563ec50bf89d1de40e6a5f592bda"
+        },
+        "description": {
+          "sourceText": "A bow reconstructed with advanced technology.\nCapable of firing extremely powerful arrows.",
+          "sourceSha256": "3663629d4e4e3ea58c5f0267ae2de80825b4fdbada42e2c17d77143b91cfd528"
+        }
+      }
+    },
+    {
+      "id": "sfbow-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFBow 4",
+          "sourceSha256": "e661e5f63afd6a535b55cf5cbfcf276235cebd3dae276582c8d34335e7b1fcf9"
+        },
+        "description": {
+          "sourceText": "A bow reconstructed with advanced technology.\nCapable of firing extremely powerful arrows.",
+          "sourceSha256": "3663629d4e4e3ea58c5f0267ae2de80825b4fdbada42e2c17d77143b91cfd528"
+        }
+      }
+    },
+    {
+      "id": "sfbow-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFBow 5",
+          "sourceSha256": "1409874a359a0b07a7c9ef4d168e0806c97ade1dd4a67abe10d94286ad3aa263"
+        },
+        "description": {
+          "sourceText": "A bow reconstructed with advanced technology.\nCapable of firing extremely powerful arrows.",
+          "sourceSha256": "3663629d4e4e3ea58c5f0267ae2de80825b4fdbada42e2c17d77143b91cfd528"
+        }
+      }
+    },
+    {
+      "id": "sfhelmet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hexolite Helmet",
+          "sourceSha256": "3c1a366aced79904e0a638ebe5d86598db91f9e1a48df279099cd9b300462919"
+        },
+        "description": {
+          "sourceText": "Helmet made of .\nCombines incredible strength and lightness.",
+          "sourceSha256": "68bbfb4aa3805a15f3334d79d6dacdb762e2e556d1706d1fda45eb609b979dac"
+        }
+      }
+    },
+    {
+      "id": "sfhelmet-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFHelmet 2",
+          "sourceSha256": "831a76a75d1ec2a71a6f57ca521fd39b943a7499e21da4831008b09d83ce2862"
+        },
+        "description": {
+          "sourceText": "Helmet made of .\nCombines incredible strength and lightness.",
+          "sourceSha256": "68bbfb4aa3805a15f3334d79d6dacdb762e2e556d1706d1fda45eb609b979dac"
+        }
+      }
+    },
+    {
+      "id": "sfhelmet-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFHelmet 3",
+          "sourceSha256": "cbe48fb4529d584c4c71f05c7d81a0df8f12b825535de89c84e20fac79a805e6"
+        },
+        "description": {
+          "sourceText": "Helmet made of .\nCombines incredible strength and lightness.",
+          "sourceSha256": "68bbfb4aa3805a15f3334d79d6dacdb762e2e556d1706d1fda45eb609b979dac"
+        }
+      }
+    },
+    {
+      "id": "sfhelmet-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFHelmet 4",
+          "sourceSha256": "8078b33491084cd9147d14d7380b48ee6a70fbed221f5311a1e79ec097b9ef34"
+        },
+        "description": {
+          "sourceText": "Helmet made of .\nCombines incredible strength and lightness.",
+          "sourceSha256": "68bbfb4aa3805a15f3334d79d6dacdb762e2e556d1706d1fda45eb609b979dac"
+        }
+      }
+    },
+    {
+      "id": "sfhelmet-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SFHelmet 5",
+          "sourceSha256": "ae18c6d05ed803a51258b1fb001ef34a879d4c449f2a8c9eef5f8c422ca90e5b"
+        },
+        "description": {
+          "sourceText": "Helmet made of .\nCombines incredible strength and lightness.",
+          "sourceSha256": "68bbfb4aa3805a15f3334d79d6dacdb762e2e556d1706d1fda45eb609b979dac"
+        }
+      }
+    },
+    {
+      "id": "shield-01",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Common Shield",
+          "sourceSha256": "91994b199680093c359b65cb50dfc0b21e46dc52ac13c9a70a9d3f7243e40d3c"
+        },
+        "description": {
+          "sourceText": "Strange shield made with Paldium technology.\nIt automatically repairs itself after not taking damage for a while.",
+          "sourceSha256": "3ea4b9c7db26e50358ddaf8808bdfd04008bc9928a7a70ec6e365b81eb8593e4"
+        }
+      }
+    },
+    {
+      "id": "shield-02",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Mega Shield",
+          "sourceSha256": "5ecf63f8d755fa2a442176673dab8393b21cad9da2172ba3729541c7558f5c43"
+        },
+        "description": {
+          "sourceText": "Strange shield made with Paldium technology.\nIt automatically repairs itself after not taking damage for a while.\nThe new model has been improved, enhancing its defense.",
+          "sourceSha256": "f2b40bf435dadb121b995449dcb1ceb5d963c60de4749d606158e64c4ed730e9"
+        }
+      }
+    },
+    {
+      "id": "shield-03",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Giga Shield",
+          "sourceSha256": "817d458a46af41a2abb1714e921a685ba53499a3fee25deeb056b7d220f734b6"
+        },
+        "description": {
+          "sourceText": "Strange shield made with Paldium technology.\nIt automatically repairs itself after not taking damage for a while.\nModifications have enhanced its effectiveness even further.",
+          "sourceSha256": "87fb543d6b116bbc523343024f97d24675c7fbfc6ea5707dfc4e4a5a7f686208"
+        }
+      }
+    },
+    {
+      "id": "shield-04",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Hyper Shield",
+          "sourceSha256": "e0d66498831a91d93f293eea5973650f2bafb2beb07a0d9fcc20dcb759397aa1"
+        },
+        "description": {
+          "sourceText": "Strange shield made with Paldium technology.\nIt automatically repairs itself after not taking damage for a while.\nThrough repeated testing, the highest quality has been achieved.",
+          "sourceSha256": "9d81399c1e5f56d214d4ea345d87ec1529f4f67c05dad29f11c973a799215cdd"
+        }
+      }
+    },
+    {
+      "id": "shield-07",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ancient Shield",
+          "sourceSha256": "d3bfeb332c69bf48eac5977f57ef0a87e0c86ef269d7a5150de7ff0a62ed7ea0"
+        },
+        "description": {
+          "sourceText": "A shield created using lost ancient technology.\nIt automatically repairs itself after not taking damage for a while.\nIts performance is said to be impossible to reproduce in the modern era.",
+          "sourceSha256": "48f8e2a5fad61f3d80ed75b8b7a39edafbe8791eb257f716bc35ba443a48321d"
+        }
+      }
+    },
+    {
+      "id": "shield-sf",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Advanced Shield",
+          "sourceSha256": "6887fa04b6587b7f0f709da9b450c820d2ef02fbe3e4572b0045caf55b0697e2"
+        },
+        "description": {
+          "sourceText": "Strange shield made with advanced technology.\nIt automatically repairs itself after not taking damage for a while.",
+          "sourceSha256": "b34cd595809440fa30c22f66312eec9ae3fb599521dbbd4c2dfa2eddff6f0280"
+        }
+      }
+    },
+    {
+      "id": "shield-ultra",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Shield Ultra",
+          "sourceSha256": "c87239742a91972adb68a28ed38839a454213c5cf7db4217f9dcf8648cfc0b60"
+        },
+        "description": {
+          "sourceText": "Strange shield made with Paldium technology.\nIt automatically repairs itself after not taking damage for a while.\nAs a result of further experiments, ultimate quality has been achieved.",
+          "sourceSha256": "0cfbe605bc20e8227b494b0166491d3fa2d4ff6035e9ce3db28174e18fac07d0"
+        }
+      }
+    },
+    {
+      "id": "shotgun-bullet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Shotgun Shell",
+          "sourceSha256": "c96a9656c365718e85f5ba54420f794a94b2cc0c053bc88a13bf248c96592166"
+        },
+        "description": {
+          "sourceText": "Ammo for shotgun and similar weapons.\nCan be crafted at .",
+          "sourceSha256": "b37ffeba7935c8e83b442f91a40f1fec32c9459a2769764259db34a55e2a6b68"
+        }
+      }
+    },
+    {
+      "id": "single-shot-rifle",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Single-Shot Rifle",
+          "sourceSha256": "956af2f1388fc18b2f7abfa6983832d30dfeed8cdf68748b1f9716cbc1758982"
+        },
+        "description": {
+          "sourceText": "A single-shot rifle. Takes time to load.\nWhat it lacks in capacity, it makes up for with sheer power.",
+          "sourceSha256": "94f3a4fc3fa74c0103ff23b8113bd03747d1423172796b9563e3975b3bd9f48c"
+        }
+      }
+    },
+    {
+      "id": "single-shot-rifle-2",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SingleShotRifle 2",
+          "sourceSha256": "27ae331f119dfac6dca03720e4a9c62f4aa1b3347a45cb424ba65862f1413acb"
+        },
+        "description": {
+          "sourceText": "A single-shot rifle. Takes time to load.\nWhat it lacks in capacity, it makes up for with sheer power.",
+          "sourceSha256": "94f3a4fc3fa74c0103ff23b8113bd03747d1423172796b9563e3975b3bd9f48c"
+        }
+      }
+    },
+    {
+      "id": "single-shot-rifle-3",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SingleShotRifle 3",
+          "sourceSha256": "fa2b628cb196282e5223516f2aa61268499c5edfd81a50436e7bd7a98cb278f6"
+        },
+        "description": {
+          "sourceText": "A single-shot rifle. Takes time to load.\nWhat it lacks in capacity, it makes up for with sheer power.",
+          "sourceSha256": "94f3a4fc3fa74c0103ff23b8113bd03747d1423172796b9563e3975b3bd9f48c"
+        }
+      }
+    },
+    {
+      "id": "single-shot-rifle-4",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SingleShotRifle 4",
+          "sourceSha256": "2983d04c361e0fb138bfa92bd0e751ca088fcc8f57b1bc2d78919329f8023092"
+        },
+        "description": {
+          "sourceText": "A single-shot rifle. Takes time to load.\nWhat it lacks in capacity, it makes up for with sheer power.",
+          "sourceSha256": "94f3a4fc3fa74c0103ff23b8113bd03747d1423172796b9563e3975b3bd9f48c"
+        }
+      }
+    },
+    {
+      "id": "single-shot-rifle-5",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "SingleShotRifle 5",
+          "sourceSha256": "813a23137eb342aec15ec81ce35c397764f03570ca52d07d7c957f821a4e5142"
+        },
+        "description": {
+          "sourceText": "A single-shot rifle. Takes time to load.\nWhat it lacks in capacity, it makes up for with sheer power.",
+          "sourceSha256": "94f3a4fc3fa74c0103ff23b8113bd03747d1423172796b9563e3975b3bd9f48c"
+        }
+      }
+    },
+    {
+      "id": "skill-card-acid-rain",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Acid Rain",
+          "sourceSha256": "9a881871d095703c4fd426e6144ec45574c1612f8ac13bcb6d0dad363e73bdf6"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-air-blade",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skill Fruit: Air Blade",
+          "sourceSha256": "a236c7aa289c4498f3d338b9233ac10e0feb60ca9e9e58a3c61b2c8b4ccd4d24"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-air-canon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skill Fruit: Air Cannon",
+          "sourceSha256": "ed194ce760b4ada78c6188e7b7d0d1bea6a0e582447ab52128d8609fae695171"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-apocalypse",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Apocalypse",
+          "sourceSha256": "914d1f1c2a0db3f77a8da998c0c5123fcfbde1f1b4a29a0eb0281d700d7bfc33"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-aqua-jet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Hydro Jet",
+          "sourceSha256": "909bae1dc4b4e8bb7eb13f0d2c108164010294a0285231ce54a38733485679a9"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-beam-slicer",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Beam Slicer",
+          "sourceSha256": "11d7261443c312c776d5bc4f56d2013e6c51a7e151955c8305d98795c7ef1739"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-blast-canon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Blast Cannon",
+          "sourceSha256": "472d16b6610eac00e3dfec7da7c0274636d1b545aaab63a7e584472131b8a6ba"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-blizzard-lance",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Iceberg",
+          "sourceSha256": "8be91b127233168d4f1907d9b8a82dcb7fbf773a4e2534f1573b93f93b6aae4a"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-bubble-shot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Bubble Blast",
+          "sourceSha256": "457751bf8ff54f59d3fc9e4a07e9d7b485ec471c83039578b5646b87e00602de"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-bubble-shower",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Poison Shower",
+          "sourceSha256": "bea60f687ef659af41a30e1ae1dd077af4050a42d3dc5bd7dd7ec559588198ec"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-charge-canon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Charge Cannon",
+          "sourceSha256": "39d95a65d34135f25479f12330c03b3f2f696820f5ce58b97ba5c7fee8cc8cf8"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-commet",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Comet",
+          "sourceSha256": "b9c03292926165c7e5bc87e0b2a73f693173d84bf4fb4616e5fd483ed249bc9f"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-cross-wind",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Crosswind",
+          "sourceSha256": "ea62f90fa7698315e3361a267ebe72e872285abff95bc67db8347d414834c01e"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dark-arrow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Dark Arrow",
+          "sourceSha256": "f217e3794b1307cd4b425543ed3a89733b8092bcc3b7ea8a527edfae1cb38de6"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dark-canon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Dark Cannon",
+          "sourceSha256": "6293724ee12a163adea43f8d10444a6c8a214380b403951934a99f67942c4b8b"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dark-laser",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Dark Laser",
+          "sourceSha256": "e7b81bfd0430d7140a5cdbe67866ff8f310205dd69c2c49353f708bbab50cc27"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dark-legion",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Dark Whisp",
+          "sourceSha256": "b85fd4c0227a4804b73a4c4a8bf15517d2da256c7bf99d145fa59740c1f5f126"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dark-pulse",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Umbral Surge",
+          "sourceSha256": "5fbf3f5a2daca2bb6d222ebd33ef5d37bda979f041cdfe52508e3c95c2e853f2"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dark-wave",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Shadow Burst",
+          "sourceSha256": "44bb4b999e3338fd00a1dd6c2087c85f7570fd232253628a18c3cc939aa83a87"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-diamond-fall",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Diamond Rain",
+          "sourceSha256": "2c259d6340928e02ecba5d044df57ddcae0f3f173eb745cec5bce22024511029"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-diversion-laser",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Torrential Blast",
+          "sourceSha256": "7bd58abc421d2b32d8a4ba72a8d2c95dcb393d64e2f369b8f16be346527442b7"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dragon-breath",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Dragon Breath",
+          "sourceSha256": "dbecd64e5f0fe9fc0a9ca64bc1a047e1080c6f7767ec490a92e9341086e5d56e"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dragon-canon",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Dragon Cannon",
+          "sourceSha256": "58a2c9006a5294923c5671610183f5343df6bc51b15b40572b931fc38ce03ef8"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dragon-meteor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Dragon Meteor",
+          "sourceSha256": "b64a5f331a29cc7aa8324ce64e95b8c4b6602e9e523aa9605173ab1c5ff964c8"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-dragon-wave",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Skill Fruit: Dragon Burst",
+          "sourceSha256": "c0145628ca7fbb408cffd9f29019e28c1266d93fbe3eca13db89344027156e48"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-elec-wave",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Shockwave",
+          "sourceSha256": "63d17d36200c8e064ef3224ae4292439807372aac70b28c78c00090965c39627"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-eruption",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Volcanic Rain",
+          "sourceSha256": "dbcdc2993315a8923ff6842e1fe9b27b1393975d7a85ccf153a2072a7db14bb4"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-fire-ball",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Fire Ball",
+          "sourceSha256": "b3b144d39deb20577e5e5b3186f7173692fd0f4ab7f2e4e8b55b0974202a6813"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-fire-blast",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Ignis Blast",
+          "sourceSha256": "dd93eba751977de5b11bdb6ca945e972d342dfbaeb5f9b7052cbc9711601c47a"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-fire-seed",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Spirit Fire",
+          "sourceSha256": "7932f8da4a523fab7dfb9b5dda0da6d996b3c8cf84398dcc2e392fddb2b857dd"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-flame-funnel",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Flame Funnel",
+          "sourceSha256": "744c4ad7f09bbbc477b461f64e46d13aacd4941098601676a34174df2441bf2d"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-flame-wall",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Flame Wall",
+          "sourceSha256": "645fa17969fdc99af92b42ff91ebcaa85503beefc8e49ae7a1d304ee46dca2c5"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-flamethrower",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Ignis Breath",
+          "sourceSha256": "4818832909dcfca2f8694293ebcbf5c7d4c657aa17c679367a4f350aa7e153ed"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-flare-arrow",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Flare Arrow",
+          "sourceSha256": "217426551a3b6c39911c55b4cf45502084985b67891c80190745622b77a08883"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-flare-tornado",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Flare Storm",
+          "sourceSha256": "6bc6717724f448b3cf2b7f3c9ca69d4d882844c81297c66c1be446c92b54de08"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-frost-breath",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Crystal Breath",
+          "sourceSha256": "650e4310453adc771ae48983c54a38ca65de60ac3beac2310ec1f4248608325d"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-ghost-flame",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Spirit Flame",
+          "sourceSha256": "8d97b63526c35c986a7596decf2c04c60c0e28957ad167923869960b589b8c5a"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-grass-tornado",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Grass Tornado",
+          "sourceSha256": "06601581abbb6c8f624cf04912f78cf462b50e3bf64a6a645edd1596d23a1aef"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-gravity-shot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Dark Shot",
+          "sourceSha256": "c73136b117b2b32c536ed64bc19eaab7d11fcddf416761a91178f28671a1fa68"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-holy-blast",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skill Fruit: Holy Burst",
+          "sourceSha256": "5da57459034e3284b27a8ba36ed642166763b59f72905723db3332950dac5842"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-hydro-pump",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Hydro Laser",
+          "sourceSha256": "f7a6544226d3f69f74e520f148faecc25cc2ec27686624865e36a6944310b241"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-hydro-slicer",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Hydro Slicer",
+          "sourceSha256": "6abd4cc064c1315652149211246412d11986263624d8605aa4bf4bd14084bb66"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-hyper-beam",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skill Fruit: Pal Blast",
+          "sourceSha256": "86f8bad1c44eecf9bdd024c108b323dceab1581bca259e1d4623fbfb0dc476b6"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-ice-age",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Absolute Frost",
+          "sourceSha256": "466207cd9ceae6a8bb724714ae01e93554b85f5ea52caa46cc7ceb2a5cc12f92"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-ice-blade",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Icicle Cutter",
+          "sourceSha256": "0e61e771954e8b32e4934acc78c912b8f840ad51f51774ebcd6c0e3985c086bb"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-ice-missile",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Ice Missile",
+          "sourceSha256": "7bb2f99550470da09f809f186b67137378928afafb1cef58736b6dbb77143c57"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-ice-wall",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Freeze Wall",
+          "sourceSha256": "4ff8befd8c87c4c157d7260e08ddf13db286e0162592049ee8de38c97f5a30db"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-icicle-line",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Icicle Line",
+          "sourceSha256": "1d0502b1ab618986e608521f8adcf7610c703417928ab2daea9f6d584ff51731"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-icicle-pierce",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Icicle Bullet",
+          "sourceSha256": "cd3215c978901e3bbee93771edc6a4d561eb239cf41fab373dfd37203f583847"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-icicle-throw",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ice Skill Fruit: Blizzard Spike",
+          "sourceSha256": "a9e87243152fc4bf607bd09b65328498d682c1d518bef85ac0d11db3605c50e2"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-inferno",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Fire Skill Fruit: Ignis Rage",
+          "sourceSha256": "be3824bc064181d6c7af19160f7a1233506047643dfd21a4197f06a4fccc5df2"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-lightning-strike",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Lightning Strike",
+          "sourceSha256": "65db5c78ec9cd108acc0cce765548d2c35d0c017c54a735d697e723ac2de506f"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-line-geyser",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Splash",
+          "sourceSha256": "6e574c028c0973eebfa4d1345085a53e83660c879718b1023fb1a2aeceab5d7d"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-line-thunder",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Lightning Streak",
+          "sourceSha256": "862a810643f7f1483a8a09302359f069dca1438cd87d27149942c712ddea90e9"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-lockon-laser",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Lock-on Laser",
+          "sourceSha256": "efe976f5cce5879dd07694ea278b609903376fb244e79b248f781e074bdd4c5d"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-mud-shot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Bog Blast",
+          "sourceSha256": "4f7659c10779bf7117829e01e078a5fefd9a67a17e9ac4dca924880da7d53a12"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-poison-shot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Poison Blast",
+          "sourceSha256": "43a95505cf3b9b7c5625dba43d4655446694c17d0e3c079e70fc151d1e323986"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-power-ball",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skill Fruit: Power Bomb",
+          "sourceSha256": "c7f002f6de78888b968c7e4cf097de89d7b32735f41f4e6112a8c05ea1f0d57c"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-power-shot",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skill Fruit: Power Shot",
+          "sourceSha256": "7df9403e8e25909b55eed498c2c5b46a23b3042d8bdeec7d36a07fa61f3a0219"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-range-thunder",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Thunder Skill Fruit: All Range Thunder",
+          "sourceSha256": "fa0d17ab220eb2f9e6e76f4c0b72dd799cfa0dc9eb35ea479110c127341a4918"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-reflective-shuriken",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Reflect Leaf",
+          "sourceSha256": "771c4cd53f0c3f40802c7cfeada874d8437b94f9c825173805e3eafc518b85f2"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-rip-tide",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Aqua Surge",
+          "sourceSha256": "2cc6f346bf36695469c474c8e0b7a4198bff9714caa97225d2d54721a16dae22"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-rock-beat",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Rocky Impact",
+          "sourceSha256": "6d3cbb882379936dc7b269957257e1f861e429428760872205b24c71eba15d43"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-rock-lance",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Rock Lance",
+          "sourceSha256": "5df9592b6ddb8705c93edf58a1ec84b17b56703e3e3bb1680430146777b9b0fe"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-root-attack",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Spine Vine",
+          "sourceSha256": "29d65ff3b141d932ff5f32f3e6a064b457445b747358c15dd1b1bb1c30184bdb"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-root-lance",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Circle Vine",
+          "sourceSha256": "53325afd236ec25b48a6658e74f7f8db386dd0d9fdaecd65202ed541f48594b8"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-sand-tornado",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Sand Tornado",
+          "sourceSha256": "e3a8502d9e7e2c54aaf4ba105ddc875b0de6117bd159681e87952e020d5e7923"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-sand-twister",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Sand Twister",
+          "sourceSha256": "14dcabf41f694556ccff54e1f57b842d0269b92051b78b9bd2fdb662f5352ed2"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-sea-gush",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Geyser Gush",
+          "sourceSha256": "d80b1e5de77c9572f1ec15ad448c9fe901bb5f989bc944c4932628750798cb04"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-seed-machinegun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Seed Machine Gun",
+          "sourceSha256": "d0ad2450a798b7be0556848b023866bfd8f3f405d07c62c3d94afb4c009bb166"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-seed-mine",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Seed Mine",
+          "sourceSha256": "aa73af3ff0a5f828d86382a58c4e4027f10310843783fa6c2c0d0f7a2a1b8ea0"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-self-destruct",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Skill Fruit: Implode",
+          "sourceSha256": "dd8728bd22bca6baa31668186b1835a888c6dce814832b724caf6e687b9bfc2a"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-shadow-ball",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Dark Skill Fruit: Nightmare Ball",
+          "sourceSha256": "49793c48db11c4388300ae459a41fa126cc7112d4b4cefa6d77b3549d6a8b649"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-solar-beam",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Solar Blast",
+          "sourceSha256": "6c69ed73f537c07d9f11dee216471f8aed4f82a38ba5fe430231f8b885b84fd9"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-special-cutter",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Multicutter",
+          "sourceSha256": "e6dd8381b0d85d43f48a0efa6bb65cfbcab32d0dc6f7e85a7c57899da17a8052"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-spread-pulse",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Spark Blast",
+          "sourceSha256": "bc02fb7bfe721dcc8aeefc5748eb9ef493a6eda0369e3538d77871042894cd1f"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-stone-shotgun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Stone Blast",
+          "sourceSha256": "7e6ea0e86f7a4a10cd98c388117f19a34f2ef7029ef6f69fa583f1f5884c7c68"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-three-thunder",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Tri-Lightning",
+          "sourceSha256": "a678ec249f1b348ee8521632528a5a7dfc39945f73fffdabc3fb655e33611763"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-throw-rock",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Stone Cannon",
+          "sourceSha256": "46bc44e9a923ff2928469aeefd776364dac6c05212e841823e54cad311c85fa4"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-thunder-ball",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Electric Ball",
+          "sourceSha256": "a52c9fe86aee87a34faad862cda5c6dd82db53e079ff4e97c680d85ba791eb11"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-thunder-funnel",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Plasma Funnel",
+          "sourceSha256": "8d910fbe35c6606cd84243be7ead0cd61fc01c00f32e1bc7ae502a61bd940f7d"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-thunder-rain",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Thunder Rain",
+          "sourceSha256": "a3f8825e2fa5fc179aff099e7805dc3da30496b2eed32ccb23d5ba8a3a4695fd"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-thunder-spear",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Thunder Spear",
+          "sourceSha256": "cdbd7e075c9b9148494ff208ad2bb2d620287d6e26f39947a9a6f8aa0398fca8"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-thunder-storm",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Thunderstorm",
+          "sourceSha256": "b07e9a69841bfa592e33cf87fc8c1e5826cfc42efaba5935550b252987a97d83"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-thunderbolt",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: Lightning Bolt",
+          "sourceSha256": "9119b21432e29b14ccd814d8fa0ebb58d266d54b91c4a2c1e6b89c7a95091f7a"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-tremor",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Ground Skill Fruit: Rockburst",
+          "sourceSha256": "78f2caff5a0d2229a2904f3aa60e0b4459afaadaf7d89978cca114aea61faa41"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-tri-spark",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Electric Skill Fruit: TriSpark",
+          "sourceSha256": "af9bdf3bac1eabcbb32188809f4501f1b9caf89a4af004ebf78a88a6c7c17314"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-wall-splash",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Curtain Splash",
+          "sourceSha256": "a52f978ed273dc60f7c2fc858eaded5addbeccfba0adef31ba3c52ff89e99423"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-water-ball",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Aqua Burst",
+          "sourceSha256": "0cdaa03785851f1f82e9ba83cd82f33d2b74d84b199ef587675add9ceddcfe33"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-water-gun",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Water Skill Fruit: Aqua Gun",
+          "sourceSha256": "e774b49cfc773798d013b584ed2de50b46b60de88e4439dcfdaf6eda724c8c08"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-wind-burst",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Wind Blast",
+          "sourceSha256": "a3b2f5bec24c21267f39886969a13d72239237845448b87e1c88767700b3200f"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-card-wind-cutter",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Grass Skill Fruit: Wind Cutter",
+          "sourceSha256": "d907f2e20c10d82d99936429f66692b09a0a4df77c3df1dcbca61d91827d5162"
+        },
+        "description": {
+          "sourceText": "Use on a Pal to teach\n.",
+          "sourceSha256": "b991ca48e10c1a111b74fcc372fb368e338c72ce2c5cc1d5ed5fee42efd25623"
+        }
+      }
+    },
+    {
+      "id": "skill-unlock-alpaca",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Melpaca Saddle",
+          "sourceSha256": "ed6b42367470b7d7c038cbe5e8e81d3ca798023110f82c65d2053ad2544d1c10"
+        },
+        "description": {
+          "sourceText": "Saddle for safely riding .",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108"
+        }
+      }
+    },
+    {
+      "id": "skill-unlock-amaterasu-wolf",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Kitsun Saddle",
+          "sourceSha256": "47e77063aaeaa73bfdcf84e0951e7b3ec8f8e8eb4b2300fd84c284b7fad3b833"
+        },
+        "description": {
+          "sourceText": "Saddle for safely riding .",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108"
+        }
+      }
+    },
+    {
+      "id": "skill-unlock-amaterasu-wolf-dark",
+      "kind": "item",
+      "fields": {
+        "name": {
+          "sourceText": "Kitsun Noct Saddle",
+          "sourceSha256": "b9f10782b349908553fcb3b1b78ed1f694c331ba93f4aad7b93053086fc96e36"
+        },
+        "description": {
+          "sourceText": "Saddle for safely riding .",
+          "sourceSha256": "640376d41ac82b7f4ff9afb654ff021b84c6c5fc35b4f6814f468ec2f0c3b108"
+        }
+      }
+    }
+  ]
+}

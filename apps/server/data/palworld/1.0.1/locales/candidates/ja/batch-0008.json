@@ -1,0 +1,2706 @@
+{
+  "locale": "ja",
+  "records": [
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb",
+          "status": "machine_assisted",
+          "text": "少し時代遅れの回転拳銃。 比較 [原文欠落] 単発のパワーに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7b6bf6c643403a07f39d96458553df16e5a0d0917a8092a0b7f2955f2e54b011",
+          "status": "machine_assisted",
+          "text": "旧型リボルバー2号機"
+        }
+      },
+      "id": "old-revolver-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb",
+          "status": "machine_assisted",
+          "text": "少し時代遅れの回転拳銃。 比較 [原文欠落] 単発のパワーに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d32755125279fe1ea05173242c4f87c690213fc7d6f79a6c14098258fcf51a25",
+          "status": "machine_assisted",
+          "text": "旧式回転翼3"
+        }
+      },
+      "id": "old-revolver-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb",
+          "status": "machine_assisted",
+          "text": "少し時代遅れの回転拳銃。 比較 [原文欠落] 単発のパワーに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "36a9b0e9ab0b728fcd09edb37bed0aa9d92d10e0eeeec0c36c9e61ce76d80d6f",
+          "status": "machine_assisted",
+          "text": "旧式回転翼4"
+        }
+      },
+      "id": "old-revolver-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "50cb51e9766c85e0ed81910cde41f043610b0736ec9a5e708e782e96b3ef06eb",
+          "status": "machine_assisted",
+          "text": "少し時代遅れの回転拳銃。 比較 [原文欠落] 単発のパワーに優れています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "483e87232eb67326f4ef809858d628fe0cb598a0686c81445b52f7b4686db918",
+          "status": "machine_assisted",
+          "text": "旧式回転翼5号機"
+        }
+      },
+      "id": "old-revolver-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cde2e5135cf8ff83b9f76bd9b15be3d0271942883bc74fa14d545d1bb6b5c386",
+          "status": "machine_assisted",
+          "text": "め、ケチャップで具をつけて作る料理。 食べると一定期間+10%改善します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cdbebc6e9e8c1be27b1fe57cab80074479aee63cc751c5a38a24b2a2a332dc7b",
+          "status": "machine_assisted",
+          "text": "オムレツ"
+        }
+      },
+      "id": "omelet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "37dc3bfabfe70b5db28c8c190b4ef14a54322e1d16f0b5c280e89d916f6be387",
+          "status": "machine_assisted",
+          "text": "歴史豊かな、大切で育てやすい野菜。 生食には適さない。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cc278ed65b2d4d792808abde8bcf79848ad5c13f4f9f540eb4cfef3d74902029",
+          "status": "machine_assisted",
+          "text": "玉ねぎ"
+        }
+      },
+      "id": "onion",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "5822cfdf2677229f7cf9c604ee734935e8e14569e91c6e9f7dd8ec940627c2da",
+          "status": "machine_assisted",
+          "text": "種子 [原文欠落]。 農場を始めるのに必要です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "199cb1c488fd759af819d83063a49b5a74e6aa7fec1537780de025dc901f765a",
+          "status": "machine_assisted",
+          "text": "タマネギの種"
+        }
+      },
+      "id": "onion-seeds",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "06529395884d172c09370db6c1617561f167f289e87f4ce09bf4790194796392",
+          "status": "machine_assisted",
+          "text": "消費時の気分を改善するジュース。 飲むと一定期間作業速度が上がり サンは下げる"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "418a1c52995e286a54b146be0243a40fee889403bf9e789b9f1bdb10315e4f9b",
+          "status": "machine_assisted",
+          "text": "疑わしいジュース"
+        }
+      },
+      "id": "opium",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0b9b78fc017bce44540c2825e0be18f445bdeccaf800a2db16c44ddd8926190b",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、ダークダメージも大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d5716046a27e578a1b7dde5df53a2a612f15c59e7aa5d36e6b323ad2268a6ff8",
+          "status": "machine_assisted",
+          "text": "地下世界のバトン卿"
+        }
+      },
+      "id": "otomo-atdark-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1ddbae65bbf38ed5628282ecbc43d1488d1f757481c6359d0977cac1ffb94f81",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、ドラゴンのダメージも大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a7df0fdeb33bf5f83260de0c18cabfcf8b59da6ffa861bcb2bacf3b5b3d17972",
+          "status": "machine_assisted",
+          "text": "神聖なる夏マックス座のバトン 竜"
+        }
+      },
+      "id": "otomo-atdragon-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c1e869573ae26aa037e2588bdc990f8d9a4e24eb967d6987bd616d6a653342dc",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、地上の損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "19bda8821c47e99924d7aa7a373086d2fcd02d012265a38e4d8d0d03a86d32aa",
+          "status": "machine_assisted",
+          "text": "地球皇帝の旗"
+        }
+      },
+      "id": "otomo-atearth-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ae002286e46ef73530950d808fa877c9d7cb2654f0b12509be60825404ae7de7",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、電気的損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eab5f9147862c7e2087aeeb28497c9950709dfcdfe761507dfa54ccab0a361fb",
+          "status": "machine_assisted",
+          "text": "ライトニングのバトン卿"
+        }
+      },
+      "id": "otomo-atelectricity-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2f906463f3ba4971599606a4f7269798b101ac3ecc0b04901e06c2452b9f65f9",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、火災による被害も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "67e26e4d3bbbeb926b834620f99f1c31b17d5cee9a5095ca9e20821009609e5c",
+          "status": "machine_assisted",
+          "text": "火炎"
+        }
+      },
+      "id": "otomo-atfire-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "585cee13831a6b53dc82a4edbf4340c26a6d0377bac81ee772840fadeb031aa8",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、氷の損傷も大きく増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b6b0f3f3b0bd4abb8a55868aaa9bb40f185f819f3f8ee666cda94f4e9973612e",
+          "status": "machine_assisted",
+          "text": "西暦二年(千八百二十二)天皇 氷"
+        }
+      },
+      "id": "otomo-atice-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eab7adbd2feeb866af7cf0c560e7bdf0876d2785c1d81a94ba7ebad4ebf8db28",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、草の損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6ed62fb6550c7c6d7a98e3d5a2f6bf47a84048056ce242dbe0735fc14be1d37c",
+          "status": "machine_assisted",
+          "text": "霊帝の"
+        }
+      },
+      "id": "otomo-atleaf-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cd3592eefbec637c83cd26f3896e81d4ba4ebc70934e994c74921aa43eb42f14",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、その中性損傷を大幅に増加させる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "680eb54355c7fa21e3922520b34aa7aa55fab1ff2fbe387fbba33561841e374f",
+          "status": "machine_assisted",
+          "text": "天帝の"
+        }
+      },
+      "id": "otomo-atnormal-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "db61915987e46e2fb11d3b0c2c6e145ffe5307a65a4d3b931cbde67162de947a",
+          "status": "machine_assisted",
+          "text": "パルの攻撃を少し上げて、あなたと一緒に戦うアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f0789de7f2388e96a96913420f5015c0e8dc10cb1fd5aa477bb2cd8676e3bb90",
+          "status": "machine_assisted",
+          "text": "攻撃支援ウィスル"
+        }
+      },
+      "id": "otomo-attack-up1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b937ea43fab9072be9be680b223e375bd4fd37731ad71b4a30f31da699367a93",
+          "status": "machine_assisted",
+          "text": "パルの攻撃をあなたと一緒に戦うアクセサリー。 また、水の損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aec5aae995a3677cef2eb17a5b585fcfa88188d4ade6a74241ef2b4dab558359",
+          "status": "machine_assisted",
+          "text": "海のバトン卿"
+        }
+      },
+      "id": "otomo-atwater-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "65e545a82815720cb61cd5f9d8f4a55374e648bdd9f9aac73d51d01ce4336e28",
+          "status": "machine_assisted",
+          "text": "パルの守備を少し上げて、あなたと一緒に戦うアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a3efc1a51b2450971d3f1dfab5d6b97a8ddfdeba1107dc212193f6f6cb15cb3b",
+          "status": "machine_assisted",
+          "text": "防衛支援の口笛"
+        }
+      },
+      "id": "otomo-defense-up1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "89107d2e8b89fe860f39d20d29b7a7db716bcdc282d0f77ded5b16f53beeffbb",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、ダークダメージも大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "065623d01d85dda76916193d8dc7a9241b602f74a18de9d380194ca94e5cfbdc",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfdark-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a2d91013c03b6ed6dec6ca31b4f931d6fa7c170465c53f27e06dcc877790bb9e",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、ドラゴンのダメージも大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "59151e46394af3380719b17ba72878fbe81736e80457e7f945cfc7ac4abba3e3",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfdragon-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7e5a737bbe923d1ee3c09583b133e63a6f48672a2e4c2fb0a6d4516e40071cf6",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、地上の損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4e1a268a5de9a4be21ad338d17e3e5fe9a41fb645d26622b464b15a5ebaf31b",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfearth-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "061b3eb500dfab471eb56ae8c9b4f8c47a4cc539903d20be41a61eba1acd870f",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、電気的損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6afe295bf2daa3d0ea5ab79551343bc01d0f16c2efa2863b1224aa1ee56d4183",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfelectricity-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "642593282adb6f7134481d22a10072d962fbe9816fda9223bb1b489d3caf3e0a",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、火災による被害も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2c14314e5e8e348deba01bad15208596febf0cdcf8ff5eefea9f2545e2920388",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dffire-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c6fa2fb05153b2d6b1199fd9a99c6d6e0cff56a9430521eb4767523a1ccd735d",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、氷の損傷も大きく増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6dca44a478eb4e79f28ee79f3f064354421fbd6b5c02a5804d298412e0ededb0",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfice-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "844422734cb83f666ad7f0d23ac508f37406558daba56fdf3e8a32cb6a3a472f",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、草の損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "77cc4ae04acb6d64abb04be9c1d081f74a2a98515c5e93722e641c885a1616fc",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfleaf-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cadd58dab0a1c8c34398c2a7e8cf7d35a2d1b609b0baab9ed858f9cfcc1f4eb9",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、その中性損傷を大幅に増加させる。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d606a5e495c5473391ef1109049679cc6b0de2b79c49e53e480e6f32350b03aa",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfnormal-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "367a2f97d0ebeba57bfd1cfddc90ae7b5d33f1d2103cac61171fd08aaa686969",
+          "status": "machine_assisted",
+          "text": "パルの防御をあなたと一緒に戦うアクセサリー。 また、水の損傷も大幅に増加します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fed5e7c052943b456fa4c812070c2e4f110b7727180a996f61e1f59447b7c9f5",
+          "status": "machine_assisted",
+          "text": "夏マカズが語る「おとぎ話」"
+        }
+      },
+      "id": "otomo-dfwater-element-boost-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9261bda2e51cba7e286594d1001c78fbdf56fcd42351c5cf3cdac8bdbaf3dda0",
+          "status": "machine_assisted",
+          "text": "パルのダークダメージを少し上げて、あなたと一緒に戦うアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca3dad5cbbccb476d0d09573fd464d05e15e73519fe83d5bbc78384849011f13",
+          "status": "machine_assisted",
+          "text": "闇二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-dark-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8ea0967483941cb5b0e94d80aba0212dbe27b55b9ae69018a5a352a56b50881b",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦うドラゴンのダメージをわずかに上げるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4ab3204c71d2a1cd8c63c267f3560eee09ee1a5dd1cb66d2f0d2792f5f078a35",
+          "status": "machine_assisted",
+          "text": "竜二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-dragon-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "28f6c698bcf43be3c5ee6854e1919f07e2a92fa8c6017a2b7ff0336e5790f58b",
+          "status": "machine_assisted",
+          "text": "パルの格闘技で、地上ダメージをわずかに高めるアクセサリーです。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "42d7af7cefe0c175c7e5f8c2786e255df52d7e7611b9e35a0698d45397cea8df",
+          "status": "machine_assisted",
+          "text": "地二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-earth-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0091e6a91accc931527bea3faba6b5a8051c55c0957eacdbc660608277b6124e",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦う電気的ダメージをわずかに上げるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c3699322fd16a3581edfda9a5a6c9b9861c340a10b06e3f65905a9fb56d3e77",
+          "status": "machine_assisted",
+          "text": "雷二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-electricity-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5f2eb213857382fe2818ae15ef451ab4f82ac5117e610a06aa8514306903bfc2",
+          "status": "machine_assisted",
+          "text": "パルのファイアダメージを少し上げて、あなたと一緒に戦うアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ceeb85592e801ba7249b9eea5fffa160beb6ebedbada542ccd42f46da872fa2e",
+          "status": "machine_assisted",
+          "text": "炎二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-fire-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fcbffd9e5c20b3853514900d17bfeac654d36c605052c15c788daf47405480f",
+          "status": "machine_assisted",
+          "text": "パルの氷ダメージを少し上げてくれるアクセサリーです。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5a1b747e555edd7aa828fef693ff82dac74810eaacc1b23862f32d61cb4bc003",
+          "status": "machine_assisted",
+          "text": "氷二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-ice-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6b3c24dc7204fb306998789c2e207bd8533d6faed679abbe7998e7ec585fb2f3",
+          "status": "machine_assisted",
+          "text": "パルの格闘技で、草ダメージをわずかに高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b41a406517064e732bc3d0f41459448750c5d9e78271929eb4cbd85741176c4b",
+          "status": "machine_assisted",
+          "text": "草二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-leaf-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "13d33920d027d6c1d794b6615ecf509913764e8b1e4df2bb7c4ad545b8f74c6f",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦う中性ダメージをわずかに高めるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a7ca0a868f7a9151d46c81e2ee3f55ccf869d77a2f10ec5d1a657cf16c3de8e2",
+          "status": "machine_assisted",
+          "text": "無属性二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-normal-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ed465590849855c487e63003127d8ef7964c7d39c480d05d73613a9da81c218d",
+          "status": "machine_assisted",
+          "text": "パルがあなたと一緒に戦う水のダメージをわずかに上げるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "375d79220c4fe6d8dc861ac6bc0b72f658929607d40443c6628f3ac1bdace9d9",
+          "status": "machine_assisted",
+          "text": "水二サポートウィスル"
+        }
+      },
+      "id": "otomo-element-boost-water-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c2c3a0227ac841e435cd832474440b44459ec82f83d35c36cc7bafe9fe7fa376",
+          "status": "machine_assisted",
+          "text": "これを装備すると、パルで信頼を高めることができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "99b2c1b338b8fe291f41b7e4b8c70823c6b5e9cef4e073e6cc59f5c080f69360",
+          "status": "machine_assisted",
+          "text": "信頼の輪"
+        }
+      },
+      "id": "otomo-pal-confidence-increase-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "56a453db89b7e0e6532abd9d09b0487cb216a071e588706f6160187684b1a05b",
+          "status": "machine_assisted",
+          "text": "パルをわずかに上げてくれるアクセサリー。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3751ce27f1627739ffe7f02ac2942741afb2739d3caa1bf4d65f2f3bdc8cf5bf",
+          "status": "machine_assisted",
+          "text": "成長促進ベル"
+        }
+      },
+      "id": "otomo-pal-exp-increase-1",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2",
+          "status": "machine_assisted",
+          "text": "リロードせずに無限に発射できるアサルトライフル。 長時間のバーストは過熱を引き起こし、露出します。 注意して使用してください。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b750c6c867b434b91429684465123eadc931eab9dd4df4bf835697fb0bf04930",
+          "status": "machine_assisted",
+          "text": "過熱ライフル"
+        }
+      },
+      "id": "overheat-rifle",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2",
+          "status": "machine_assisted",
+          "text": "リロードせずに無限に発射できるアサルトライフル。 長時間のバーストは過熱を引き起こし、露出します。 注意して使用してください。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9bdabf087ecdfdbb4ca98b2f8c1ebb31c9328dceb93b3c3c530f3eee4583a1a6",
+          "status": "machine_assisted",
+          "text": "過熱ライフル2"
+        }
+      },
+      "id": "overheat-rifle-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2",
+          "status": "machine_assisted",
+          "text": "リロードせずに無限に発射できるアサルトライフル。 長時間のバーストは過熱を引き起こし、露出します。 注意して使用してください。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1e6cb96d63de381473925e58db38436b4e8271393599d8c358a11739a197d3ed",
+          "status": "machine_assisted",
+          "text": "過熱ライフル3"
+        }
+      },
+      "id": "overheat-rifle-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2",
+          "status": "machine_assisted",
+          "text": "リロードせずに無限に発射できるアサルトライフル。 長時間のバーストは過熱を引き起こし、露出します。 注意して使用してください。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "ca0c66247ce1cdf0e61a7a4061824cdec8e777dc5a65ed1e2d38fd227825c942",
+          "status": "machine_assisted",
+          "text": "過熱ライフル4"
+        }
+      },
+      "id": "overheat-rifle-4",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7edd642f401e5c0106ecd0447c036df4262b0ccce674326514e133dac20d5bf2",
+          "status": "machine_assisted",
+          "text": "リロードせずに無限に発射できるアサルトライフル。 長時間のバーストは過熱を引き起こし、露出します。 注意して使用してください。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3211938000ab059fbfe2748b4c584ddcee69445d564b393f37e7e7ed22150c6f",
+          "status": "machine_assisted",
+          "text": "過熱ライフル5"
+        }
+      },
+      "id": "overheat-rifle-5",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5ef960d72df21ef0f776b31270b0a8aa9533cfe3bea38a474011241d60bdf49a",
+          "status": "machine_assisted",
+          "text": "過熱ライフル弾薬"
+        }
+      },
+      "id": "overheat-rifle-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9aacdae5cac885a7deef4c6c9c761acbdb941759cadf6c7ea22022127c526c6a",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 闇"
+        }
+      },
+      "id": "pal-awakening-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3b4b5994b2717051bb99743628e0b48cb02cf3ef5480f8107e1c3e54894c3693",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 竜"
+        }
+      },
+      "id": "pal-awakening-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b4badf2a262c48a5c410673b4ae2462902e9819e64053f8e14a2fcb33f59d1a1",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 雷"
+        }
+      },
+      "id": "pal-awakening-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0d5c917c665427a524cf1506291d30b9a5c1e318847c45e96390eb1def2ec0df",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 炎"
+        }
+      },
+      "id": "pal-awakening-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "751af8d9da9e406b64019e35f580fd7b79132fe3e1b4007146765f61dd377728",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 草"
+        }
+      },
+      "id": "pal-awakening-grass",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "3b0f82217cb8c8f437b6a22ed1e5a0bd1bba7033e6280e7558a189cb396ac80e",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 地"
+        }
+      },
+      "id": "pal-awakening-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e20bf4a42bd5075e1b9aa3792c05c5fe94905184e00a3bd3d3b5569726fc9ef9",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 氷"
+        }
+      },
+      "id": "pal-awakening-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f701ce343ddeb1b2ed0690494a429a65a81739bc4dcb98cca63767b28138bd6e",
+          "status": "machine_assisted",
+          "text": "闇二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-dark",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1dfc803b6ebbda7236843d7ef915a13d5c16a100bd367efbe0bfa69888840133",
+          "status": "machine_assisted",
+          "text": "竜二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-dragon",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c2d0b8e2d9b9079df8283f361fea321d6b9fb9fcf6e98fb0b24e31a2f2d297da",
+          "status": "machine_assisted",
+          "text": "雷二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-electric",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2634127ac1badffc3b6e4ca530af1b0812c1c4590e701440b25c9143abf97156",
+          "status": "machine_assisted",
+          "text": "炎二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-fire",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f4365cae6750f54bb1264b9c9489caf0bbdb8eba620dccbe968c2676dc9bb882",
+          "status": "machine_assisted",
+          "text": "草二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-grass",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "307be462649beacdd08942efbac75197f5849839a74bcefb551e48ee63180af6",
+          "status": "machine_assisted",
+          "text": "地二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-ground",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b3c7e75db714c306f58f3e415a87b727111eaef193201593ad6d0ac13971ca04",
+          "status": "machine_assisted",
+          "text": "氷二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-ice",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6dbaeee0226bf84f81a8665444e40d2032ae1e4eef301b414029b7c0e20208b5",
+          "status": "machine_assisted",
+          "text": "無属性二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-neutral",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1fbc33cef35eeb89b0e32292cd0dd447fadee71eaeefd6636d31d69eaf5901a6",
+          "status": "machine_assisted",
+          "text": "World Treeのエネルギーとして形成された宝石は、パルに蓄積されます。 処理すると、パルの隠れた力を解放するアイテムになります。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "50c22f30eaf2e8be047fdef95c7f54c1c942431df561bda6c75d375d07135eb9",
+          "status": "machine_assisted",
+          "text": "水二ラジアントジェム"
+        }
+      },
+      "id": "pal-awakening-material-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c9dd22be631f0fa8b46fe0a9a4fde0555729a0a6a84f906d4c6129bb7c9caebf",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 無属性"
+        }
+      },
+      "id": "pal-awakening-neutral",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7c31626169d40598d76d3b48f847948a62ef34cb137963b7f0d425e91d4b3a5a",
+          "status": "machine_assisted",
+          "text": "凝縮ワールドツリーエネルギーから形成された結晶。 パルを目覚めさせ、その隠れた力を解放します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "aa1f32c6965852a129e57770dbdf764d92893990cef84978e01c13b69c0e8648",
+          "status": "machine_assisted",
+          "text": "夏期マックス覚クリスタル 水"
+        }
+      },
+      "id": "pal-awakening-water",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "00e141150424b5efd6a718bc1211c49648b6f8699b2cb34e803fa9a39a366471",
+          "status": "machine_assisted",
+          "text": "古代遺跡から出土した残骸。 失われた技術に関する豊富な情報が含まれています。 非常に貴重な、すべての人生の歩みの人々は今そのような結晶を求めています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c229046dd07bea79ef8d1dadb75a9b02b320622c0fc15666b3b3729b7c44f2dd",
+          "status": "machine_assisted",
+          "text": "古代文明の部分"
+        }
+      },
+      "id": "pal-crystal-ex",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "028ec6907e54292366b58072af408c6197ed08625b0b04b2dcd8478abb7f3a6e",
+          "status": "machine_assisted",
+          "text": "世界樹から結晶エネルギー。 超自然的なアイテムや構造を創り出すことができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "7834321d9f434cf0db2efb7dda5139a4ea539dc29c4bb5b6574125c44e5cca30",
+          "status": "machine_assisted",
+          "text": "パルジウム断片"
+        }
+      },
+      "id": "pal-crystal-s",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b4a3032fc71a270edb0425013ab570c1593a694237888cb2b0cdbc0ee9e27bdd",
+          "status": "machine_assisted",
+          "text": "強力なパルによって落としられました。 強力なアクセサリーなどの素材として使用されています。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "782b762ee53569886bc3c1fa1dbc731b6c22b6c36b8357a20c590fe93bce5e5c",
+          "status": "machine_assisted",
+          "text": "カスターマックスのフラグメント 闇"
+        }
+      },
+      "id": "pal-dark-parts",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cce9620b76e0946c1c2d8c08aedbea13f076d3e7c21a4dcbefd6bd04d48e4385",
+          "status": "machine_assisted",
+          "text": "チーム内のパルでこれを発射すると、一時的にその攻撃と防御が強化されます。 敵に撃たれるとダメージを与える。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0127e6bcf970e56e15fa480e01843c35d00f1c050b34f2ead33c1ae1cd30852f",
+          "status": "machine_assisted",
+          "text": "ブーストガン"
+        }
+      },
+      "id": "pal-doping-shot",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dd19929267f4086dbe271183c3fd22aa0e4d98531c2e0adc5bcbfeef9eb7e2dc",
+          "status": "machine_assisted",
+          "text": "連合国であるパルで発射すると攻撃と防御が強化され、敵にダメージを与える。 改善のおかげで、ブーストは強くなり長く続きます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fc715f29172de9134443ef01f2cb2a0ac822185625214ceea6578def8821f4c6",
+          "status": "machine_assisted",
+          "text": "メガブーストガン"
+        }
+      },
+      "id": "pal-doping-shot-2",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "198f4af5d8c0a0420cd87520449437e1f393781631963f225ed313e929e7fa75",
+          "status": "machine_assisted",
+          "text": "弾薬は、同様の武器のため。 で製作できます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "78209125c935a0a9180791b5f586ab22aed27877bd970bd17a574b5e5635b152",
+          "status": "machine_assisted",
+          "text": "ブーストガン弾薬"
+        }
+      },
+      "id": "pal-doping-shot-bullet",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b4ea16e85ec100a43d84e60a68baf9d5477f0d9597b94b445ff8b0b39747a033",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 混とした何かが内部でかき混ぜられる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "735636e281bd1c2f8482ea07bcfe3676ed8d64c8079dddef5878e62d3eb85adf",
+          "status": "machine_assisted",
+          "text": "カスターマックス卵 闇"
+        }
+      },
+      "id": "pal-egg-dark-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b4ea16e85ec100a43d84e60a68baf9d5477f0d9597b94b445ff8b0b39747a033",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 混とした何かが内部でかき混ぜられる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "735636e281bd1c2f8482ea07bcfe3676ed8d64c8079dddef5878e62d3eb85adf",
+          "status": "machine_assisted",
+          "text": "カスターマックス卵 闇"
+        }
+      },
+      "id": "pal-egg-dark-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "2c4124770646db850494bcacc57fbae28b01879c5e594d24f7f5c8d69ebca21f",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 悪のが内部をうろついている。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43e8a66c8092064f74f5a3226e24a60fec6487f12eafee809ca37c8cf685169f",
+          "status": "machine_assisted",
+          "text": "大型の闇卵。"
+        }
+      },
+      "id": "pal-egg-dark-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "2c4124770646db850494bcacc57fbae28b01879c5e594d24f7f5c8d69ebca21f",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 悪のが内部をうろついている。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "43e8a66c8092064f74f5a3226e24a60fec6487f12eafee809ca37c8cf685169f",
+          "status": "machine_assisted",
+          "text": "大型の闇卵。"
+        }
+      },
+      "id": "pal-egg-dark-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "99e99739d745e3d28fa3517015cf852f23b0c322922eea13e0481c0bfb930db8",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 怪物が生まれようとしているかのように、影の霊は内部で泣きます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "849c53955cbabcfe347111c6ec76044539f1d9466632e4f527c8d972ea6bd0af",
+          "status": "machine_assisted",
+          "text": "巨大な闇の卵"
+        }
+      },
+      "id": "pal-egg-dark-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "926a38e3ac32e5ff7fad4bf1d8517beb1269d64dcf432773a2adb8c31ae5c198",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 何か変なことが内部でかき混ぜる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bf255121d987f7b705f2dbfa14cb99ba45bea981dd69cd658e5a8a143f0001c",
+          "status": "machine_assisted",
+          "text": "カスターマックス卵 竜"
+        }
+      },
+      "id": "pal-egg-dragon-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "926a38e3ac32e5ff7fad4bf1d8517beb1269d64dcf432773a2adb8c31ae5c198",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 何か変なことが内部でかき混ぜる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6bf255121d987f7b705f2dbfa14cb99ba45bea981dd69cd658e5a8a143f0001c",
+          "status": "machine_assisted",
+          "text": "カスターマックス卵 竜"
+        }
+      },
+      "id": "pal-egg-dragon-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b5cd66cc9b47a2258548859483724e3f2154b75986550aeba381d9479517f929",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 奇妙な動きが脈打つ。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d946daaeb486e67b403ff46d25104799a0580157a29623d8b8274f9b26546af",
+          "status": "machine_assisted",
+          "text": "大型の竜卵。"
+        }
+      },
+      "id": "pal-egg-dragon-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b5cd66cc9b47a2258548859483724e3f2154b75986550aeba381d9479517f929",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 奇妙な動きが脈打つ。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "1d946daaeb486e67b403ff46d25104799a0580157a29623d8b8274f9b26546af",
+          "status": "machine_assisted",
+          "text": "大型の竜卵。"
+        }
+      },
+      "id": "pal-egg-dragon-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ff72788e7a5f55bfd1e1f46ba5ecafa6dcfda51e6110ca3d871d74da33ddfe9f",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 怪物が誕生しようとしているかのように、厳な精神は内なる反響を呼ぶ。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "66ea4f4b3789f62b6b9a6cec9a5a28972aeb5f7067b4db29c37787876f629d70",
+          "status": "machine_assisted",
+          "text": "巨大な竜の卵"
+        }
+      },
+      "id": "pal-egg-dragon-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "e95261527f9c3ebe6f2758b99ca05789b5af539d353b82cc6f260e219ad19436",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 落ち着いた何かが内部でかき混ぜる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6b51251b9183e594cadb19e7ad59b10ae1d698867bea57b1a2b20dc015e494fe",
+          "status": "machine_assisted",
+          "text": "ロッキーエッグ"
+        }
+      },
+      "id": "pal-egg-earth-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "e95261527f9c3ebe6f2758b99ca05789b5af539d353b82cc6f260e219ad19436",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 落ち着いた何かが内部でかき混ぜる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6b51251b9183e594cadb19e7ad59b10ae1d698867bea57b1a2b20dc015e494fe",
+          "status": "machine_assisted",
+          "text": "ロッキーエッグ"
+        }
+      },
+      "id": "pal-egg-earth-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "537ddc6dbbf77afdc5826b002ea0f7baeb86a2321f1b16fb4419ec6e4eb92aff",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 堂々としたドラム。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5913e6c36127cd4f136a6084d68e790b70915430fbf67a6ff7656c81a959cbb4",
+          "status": "machine_assisted",
+          "text": "大型岩卵"
+        }
+      },
+      "id": "pal-egg-earth-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "537ddc6dbbf77afdc5826b002ea0f7baeb86a2321f1b16fb4419ec6e4eb92aff",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 堂々としたドラム。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5913e6c36127cd4f136a6084d68e790b70915430fbf67a6ff7656c81a959cbb4",
+          "status": "machine_assisted",
+          "text": "大型岩卵"
+        }
+      },
+      "id": "pal-egg-earth-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "804f8f4ef484fdf90c93a8bd02212de6ecaa2f91f622f4aa51165891697cc8e0",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 怪物が誕生しようとしているかのように、地上の霊は内部に響きます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2ea468f3c3e8ceb4cfaaf4aa504da524b7fe6ae30c5db584e52eddb2ed3fd6d",
+          "status": "machine_assisted",
+          "text": "巨大な岩卵"
+        }
+      },
+      "id": "pal-egg-earth-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "813489525748411ac8b5d2ac53a80edde94bb14466e65ddaa8ede8f558c10180",
+          "status": "machine_assisted",
+          "text": "安 [原文欠落]。 エネルギー的な動きが内なる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72a42ec3f397590ffcb2612fc8c52d7ad7cc690cbca4d8c3c528d2fdbc205b0e",
+          "status": "machine_assisted",
+          "text": "カスターマックス卵 雷"
+        }
+      },
+      "id": "pal-egg-electricity-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "813489525748411ac8b5d2ac53a80edde94bb14466e65ddaa8ede8f558c10180",
+          "status": "machine_assisted",
+          "text": "安 [原文欠落]。 エネルギー的な動きが内なる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "72a42ec3f397590ffcb2612fc8c52d7ad7cc690cbca4d8c3c528d2fdbc205b0e",
+          "status": "machine_assisted",
+          "text": "カスターマックス卵 雷"
+        }
+      },
+      "id": "pal-egg-electricity-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1d925eddd0d152004ad4a4090beb8c1c1e844b980354be4911326b65e312b3af",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 脈動するエネルギーが内部で拌します。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f13b8ac9d87837721cd7ccfa6e542b67b503945599e9303ff901e98bcab79edb",
+          "status": "machine_assisted",
+          "text": "大型の雷卵。"
+        }
+      },
+      "id": "pal-egg-electricity-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1d925eddd0d152004ad4a4090beb8c1c1e844b980354be4911326b65e312b3af",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 脈動するエネルギーが内部で拌します。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f13b8ac9d87837721cd7ccfa6e542b67b503945599e9303ff901e98bcab79edb",
+          "status": "machine_assisted",
+          "text": "大型の雷卵。"
+        }
+      },
+      "id": "pal-egg-electricity-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b5703b4dcaa59e4476e55c2962a63902a88424c667335b2577cf556bebeaba9b",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 怪物が誕生しようとしているかのように、怒りの精神は内部に育つ。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e1a6cde55f549b2716cf0e605d699cf89ed65d628f2d06339aa4d0458470970d",
+          "status": "machine_assisted",
+          "text": "巨大な雷の卵"
+        }
+      },
+      "id": "pal-egg-electricity-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "2a340124bf433cbff7467665c485b21c086fad0713d73d6b554afb6103451468",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 熱いものが内部に動きます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f5cb061e347345c7ff42250a5a366dabbfb37baef308ba9b39cc5218fdd11954",
+          "status": "machine_assisted",
+          "text": "卵を焼く"
+        }
+      },
+      "id": "pal-egg-fire-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "2a340124bf433cbff7467665c485b21c086fad0713d73d6b554afb6103451468",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 熱いものが内部に動きます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f5cb061e347345c7ff42250a5a366dabbfb37baef308ba9b39cc5218fdd11954",
+          "status": "machine_assisted",
+          "text": "卵を焼く"
+        }
+      },
+      "id": "pal-egg-fire-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1dd53ed3cd5f4fd65d6f44c832274120e37db88dcce3aa77142b7f73de6aceb0",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 情熱は内から燃える。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9771d82fc293514cf813d2688265fc1d4a5d5d09c0a6cea6b6ea4e21c648cfdf",
+          "status": "machine_assisted",
+          "text": "大型の化卵"
+        }
+      },
+      "id": "pal-egg-fire-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1dd53ed3cd5f4fd65d6f44c832274120e37db88dcce3aa77142b7f73de6aceb0",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 情熱は内から燃える。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "9771d82fc293514cf813d2688265fc1d4a5d5d09c0a6cea6b6ea4e21c648cfdf",
+          "status": "machine_assisted",
+          "text": "大型の化卵"
+        }
+      },
+      "id": "pal-egg-fire-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "0f9c2f57cd644a18b23c41417aa10f76ca91f1629f59fbb1e3f72989c3e265f7",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 怪物が誕生するかのように、燃えるような霊魂は燃える。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "eceed705c7b3a7c5d8e81b7e7a53f227a2d88ff54af8a5435a46c7343f56d7eb",
+          "status": "machine_assisted",
+          "text": "巨大なき卵"
+        }
+      },
+      "id": "pal-egg-fire-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "481f98c6863f8b2af70066018ae77cd970a1b00a1afd10fb589cb4187356ead6",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 寒さが内部でかき混ぜる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "442b4a01ef6219366f8fc72e4084677991c0836bb3b05d0204c73734878392f2",
+          "status": "machine_assisted",
+          "text": "冷凍卵"
+        }
+      },
+      "id": "pal-egg-ice-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "481f98c6863f8b2af70066018ae77cd970a1b00a1afd10fb589cb4187356ead6",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 寒さが内部でかき混ぜる。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "442b4a01ef6219366f8fc72e4084677991c0836bb3b05d0204c73734878392f2",
+          "status": "machine_assisted",
+          "text": "冷凍卵"
+        }
+      },
+      "id": "pal-egg-ice-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1c65b675e3d9058c1dd5e0d36557ebf618150bb1911a4f12678ad27e5b93805c",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 氷の脈が中をい それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e109f2d905c39b89daae89dde42c2e82cb74ac20fade7ab4b20c0f79bf47491e",
+          "status": "machine_assisted",
+          "text": "大型冷凍卵"
+        }
+      },
+      "id": "pal-egg-ice-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "1c65b675e3d9058c1dd5e0d36557ebf618150bb1911a4f12678ad27e5b93805c",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 氷の脈が中をい それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e109f2d905c39b89daae89dde42c2e82cb74ac20fade7ab4b20c0f79bf47491e",
+          "status": "machine_assisted",
+          "text": "大型冷凍卵"
+        }
+      },
+      "id": "pal-egg-ice-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "982775d2add4aad0ebd0e88a68f023f5cec4d045ef5b3f050144410160384a77",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 怪物が誕生しようとしているかのように、冷酷な精神は内部で拌されます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76cfff6842a6a3ccee3cf2f704ca98a4325f86be23c188fe6c2cd581365dcc2d",
+          "status": "machine_assisted",
+          "text": "巨大な冷凍卵"
+        }
+      },
+      "id": "pal-egg-ice-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "9cbcb04885cc9a50c9683bd3c3cc1f8843189425814ebcfdcd4adadabf8e6d46",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 何かが活気ある動きをしている。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4ca4bb32888a91e94de9c33c62bd6c1bd6dc7949e3bd183260a108e1b3a2d086",
+          "status": "machine_assisted",
+          "text": "卵"
+        }
+      },
+      "id": "pal-egg-leaf-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "9cbcb04885cc9a50c9683bd3c3cc1f8843189425814ebcfdcd4adadabf8e6d46",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 何かが活気ある動きをしている。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "4ca4bb32888a91e94de9c33c62bd6c1bd6dc7949e3bd183260a108e1b3a2d086",
+          "status": "machine_assisted",
+          "text": "卵"
+        }
+      },
+      "id": "pal-egg-leaf-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "dd761cb0d64f89afb9feb6526d37fbb88c3ef5ebc29958397db647b041523926",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 強い生命力が宿る。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40ee7a7ca0a92ceeb924dc6cc6620db1bbbf817fc5540e9aa63800e46b24c4c3",
+          "status": "machine_assisted",
+          "text": "大型の卵"
+        }
+      },
+      "id": "pal-egg-leaf-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "dd761cb0d64f89afb9feb6526d37fbb88c3ef5ebc29958397db647b041523926",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 強い生命力が宿る。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40ee7a7ca0a92ceeb924dc6cc6620db1bbbf817fc5540e9aa63800e46b24c4c3",
+          "status": "machine_assisted",
+          "text": "大型の卵"
+        }
+      },
+      "id": "pal-egg-leaf-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "a2cbe540506f5287a6106b536877aadb9cdc2df0b16396ad9849c73b43cce56b",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 怪物が誕生しようとしているかのように、な霊は内部に育つ。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e0ebdc30cc5ad19a5383853fc853493d8a707992acc024f511f4dacb84019060",
+          "status": "machine_assisted",
+          "text": "巨大な卵"
+        }
+      },
+      "id": "pal-egg-leaf-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "f398d2bb987187352df8d3414960526713378efd5d9f5da8abbadadf47a78315",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 特別な突然変異を経験した卵は、非常にまれに得られます。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5842b39bccc1538e7e9161981391d205d67dde6ad6faec3318520609c7c58726",
+          "status": "machine_assisted",
+          "text": "卵の変異"
+        }
+      },
+      "id": "pal-egg-mutation-pal-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "f398d2bb987187352df8d3414960526713378efd5d9f5da8abbadadf47a78315",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 特別な突然変異を経験した卵は、非常にまれに得られます。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "5842b39bccc1538e7e9161981391d205d67dde6ad6faec3318520609c7c58726",
+          "status": "machine_assisted",
+          "text": "卵の変異"
+        }
+      },
+      "id": "pal-egg-mutation-pal-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "f398d2bb987187352df8d3414960526713378efd5d9f5da8abbadadf47a78315",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 特別な突然変異を経験した卵は、非常にまれに得られます。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "68a4a4b82a3d6ce04c738729f150c8b447159cbdce7b2e8ba3c92f930853a160",
+          "status": "machine_assisted",
+          "text": "卵の変異"
+        }
+      },
+      "id": "pal-egg-mutation-pal-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "17a7785defd3945220aaeeea5d85a718ad10114f53bd58aefd311b59bc22e812",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 中には優しいものがあります。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "083d0da5eb989ce80a518bc7434f85db1c3bc6e8019afde3c873f581371d9ce6",
+          "status": "machine_assisted",
+          "text": "コモンエッグ"
+        }
+      },
+      "id": "pal-egg-normal-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "17a7785defd3945220aaeeea5d85a718ad10114f53bd58aefd311b59bc22e812",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 中には優しいものがあります。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "083d0da5eb989ce80a518bc7434f85db1c3bc6e8019afde3c873f581371d9ce6",
+          "status": "machine_assisted",
+          "text": "コモンエッグ"
+        }
+      },
+      "id": "pal-egg-normal-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "e61b64a29d592f2997dca1476fd6fc8887744e3b91dc5cfe8b62b5be8caa4a76",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 落ち着いたリズムが内部をなでます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cba3e722d37a20d9662a51d614d4d80e200e978cde5b59f102164ee23c57ebab",
+          "status": "machine_assisted",
+          "text": "大型コモンエッグ"
+        }
+      },
+      "id": "pal-egg-normal-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "e61b64a29d592f2997dca1476fd6fc8887744e3b91dc5cfe8b62b5be8caa4a76",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 落ち着いたリズムが内部をなでます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cba3e722d37a20d9662a51d614d4d80e200e978cde5b59f102164ee23c57ebab",
+          "status": "machine_assisted",
+          "text": "大型コモンエッグ"
+        }
+      },
+      "id": "pal-egg-normal-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "c06ce9d455485a2b26bef48896ec27bcf3d2c5281613ce54dcd15dd7ee8fdd4c",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 まるでモンスターが誕生しようとしているかのように、優しい精神は内部を弾きます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "765ac30513e6f6a9998b307a8ec24df541445351283420f6f27a2029db0fbc74",
+          "status": "machine_assisted",
+          "text": "巨大なコモンエッグ"
+        }
+      },
+      "id": "pal-egg-normal-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6f2e68676b99a14c556b637e36f9ea5b9f3a3f72884b8d238e9f19b4d2d4ea88",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 何かが中に泳ぎます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cc261829e4b47ab538f9b24a802dabd2aef493439aa4ec01d6c97dffd41b2b9e",
+          "status": "machine_assisted",
+          "text": "湿った卵"
+        }
+      },
+      "id": "pal-egg-water-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "6f2e68676b99a14c556b637e36f9ea5b9f3a3f72884b8d238e9f19b4d2d4ea88",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 何かが中に泳ぎます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cc261829e4b47ab538f9b24a802dabd2aef493439aa4ec01d6c97dffd41b2b9e",
+          "status": "machine_assisted",
+          "text": "湿った卵"
+        }
+      },
+      "id": "pal-egg-water-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "0c38152c4202a232c109eb7bd9f3433cc935f1e92fb1d21d3c2639516710146b",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 純度は内部で渦巻く。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8cdd88aaa53dbf205438304586ab7730cddb056d46931e57bedd97fcac9f0cb7",
+          "status": "machine_assisted",
+          "text": "大きな湿った卵"
+        }
+      },
+      "id": "pal-egg-water-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "0c38152c4202a232c109eb7bd9f3433cc935f1e92fb1d21d3c2639516710146b",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 純度は内部で渦巻く。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8cdd88aaa53dbf205438304586ab7730cddb056d46931e57bedd97fcac9f0cb7",
+          "status": "machine_assisted",
+          "text": "大きな湿った卵"
+        }
+      },
+      "id": "pal-egg-water-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "f681e38ceabe84481588951becb0ebe84fc021f857ff36e51c28f5028afccb27",
+          "status": "machine_assisted",
+          "text": "A [原文欠落]。 まるでモンスターが誕生しようとしているかのように、静かな精神は内部に揺れます。 それをインキュベーションする場所。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "cfdfea8a0104cc7ade8b682b5cc6071eaca88a886a6bbabe73947bff09971a19",
+          "status": "machine_assisted",
+          "text": "巨大な湿った卵"
+        }
+      },
+      "id": "pal-egg-water-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1",
+          "status": "machine_assisted",
+          "text": "安 [原文欠落]。 世界の木々のエネルギーをふんだんに使った神秘的な卵。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "96888b39f89b4e8215bcf761f03f8dfa45549fe7680730b6a7caeff47ffc6a58",
+          "status": "machine_assisted",
+          "text": "卵"
+        }
+      },
+      "id": "pal-egg-world-tree-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1",
+          "status": "machine_assisted",
+          "text": "安 [原文欠落]。 世界の木々のエネルギーをふんだんに使った神秘的な卵。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "96888b39f89b4e8215bcf761f03f8dfa45549fe7680730b6a7caeff47ffc6a58",
+          "status": "machine_assisted",
+          "text": "卵"
+        }
+      },
+      "id": "pal-egg-world-tree-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1",
+          "status": "machine_assisted",
+          "text": "安 [原文欠落]。 世界の木々のエネルギーをふんだんに使った神秘的な卵。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4266c09931e719a7a83ccc9e98b2490ad56c120261fc61305dd22bae7be8e24",
+          "status": "machine_assisted",
+          "text": "大型卵"
+        }
+      },
+      "id": "pal-egg-world-tree-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1",
+          "status": "machine_assisted",
+          "text": "安 [原文欠落]。 世界の木々のエネルギーをふんだんに使った神秘的な卵。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d4266c09931e719a7a83ccc9e98b2490ad56c120261fc61305dd22bae7be8e24",
+          "status": "machine_assisted",
+          "text": "大型卵"
+        }
+      },
+      "id": "pal-egg-world-tree-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "539af55ec841c832e508f07145d834d2c1784638f4fe5fbb2ac956b0418651c1",
+          "status": "machine_assisted",
+          "text": "安 [原文欠落]。 世界の木々のエネルギーをふんだんに使った神秘的な卵。 それをインキュベーションするために配置します。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "282b72aa792d5dfbe557207a2fd0e4cb9cd69d61e4692227e4710451578e38aa",
+          "status": "machine_assisted",
+          "text": "巨大な卵"
+        }
+      },
+      "id": "pal-egg-world-tree-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "fd74ab210938af714be7e7f08a8b35faa6696b8b5e51645217efc2031a45be65",
+          "status": "machine_assisted",
+          "text": "Water パルから採取した体液。 粘度が高いため、手軽な素材です。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "325408bb887e6e054ac275a8f190e938b4cf4e4ceac049975fc62613b2e18d45",
+          "status": "machine_assisted",
+          "text": "水生水型水力発電装置"
+        }
+      },
+      "id": "pal-fluid",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "0619b34f45271858f4aababff0e01b5421a4c01165d7170b1450b0d3fb58ae57",
+          "status": "machine_assisted",
+          "text": "パルの性別を変えることができる神秘的な薬。 でご利用いただけます。 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b5ce8e372d460e6e5ba4e20e356c850d4f805aec7af648788c32360ac1ffdb2a",
+          "status": "machine_assisted",
+          "text": "カスターマックスリバーサー"
+        }
+      },
+      "id": "pal-gender-reverse",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "05e837985c6526c9fc4657e896b7e9053db98a4a3b3e8e67380974847a568a38",
+          "status": "machine_assisted",
+          "text": "癒しの効果を持つA。 HPをパルに戻すと衝撃で爆発する。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a9679cbf6a4a6590922a3751830c4da1b00d5a6cb1ebb2fa643f04db75048f56",
+          "status": "machine_assisted",
+          "text": "東日本大震災復旧手弾"
+        }
+      },
+      "id": "pal-healing-grenade",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "ccb061896e6f3124d9d4b66a461560de04079e038501a839fdf111103a5b8e4d",
+          "status": "machine_assisted",
+          "text": "プルームは [原文欠落]。 明るくカラフルな、衣服を作るために使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "40a66fe33c2262410332f8099202cd021c619aa90d5a7c41003cbdffbc81d933",
+          "status": "machine_assisted",
+          "text": "クワッドマックスプルーム"
+        }
+      },
+      "id": "pal-item-captain-penguin",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "9406c896dedb71f2a285e3b102ab4281697a9e87e4dcc8f7368ae2f69c9fee28",
+          "status": "machine_assisted",
+          "text": "髪が落ちました [原文欠落]。 柔らかくてしなやかで、衣服を作るのに使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "18293aeb19e9cea98ef4ed970e15653e7c41cf97005d1d63bce2ae8a8bcd4b78",
+          "status": "machine_assisted",
+          "text": "カスターマックスの髪"
+        }
+      },
+      "id": "pal-item-cat-mage",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "12b42a1f3b106ed044ef95c6817dd2b22b8f719effea2b027d51bb768afbfaba",
+          "status": "machine_assisted",
+          "text": "羽毛が落ちました [原文欠落]。 美しい鮮やかな色がとても人気があるので、服を作るのに使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "820167784a6cc226106c489f7dd31616432daa42fe888df59463bff9707cf6cd",
+          "status": "machine_assisted",
+          "text": "クワッドマックス 羽毛"
+        }
+      },
+      "id": "pal-item-colorful-bird",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "5fd67c5cefaa258efbc0ff936a61340e891e0642e24c90632ad17d28bdff0a63",
+          "status": "machine_assisted",
+          "text": "クレストが落ちました [原文欠落]。 鋭く、尖った、それは衣服を作るために使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "763f24fe6c6310906fadae3fa8567475eed62114b91301744aa6ad417353a844",
+          "status": "machine_assisted",
+          "text": "クワッドマックス クレスト"
+        }
+      },
+      "id": "pal-item-lizard-man",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "da0e4ec2b6086217a8d97fbb46471fc8254ce313c4245d5442ab5b8650c42be1",
+          "status": "machine_assisted",
+          "text": "髪が落ちました [原文欠落]。 ふわっとした柔らかさで、洋服を作るのに使われます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e131b3ad1cb67ac5e829579d22420896d40078e9b265f54520c784ffb88ca8bc",
+          "status": "machine_assisted",
+          "text": "カスターマックスの髪"
+        }
+      },
+      "id": "pal-item-mop-baby",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "fe93dc0992afe4499411eaa0011d5b81b2de5985584624e51ffd835f2695fd6f",
+          "status": "machine_assisted",
+          "text": "テンタクルが落ちた [原文欠落]。 風合いが奇妙で、衣服を作るのに使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8a8d7410889356edaeeb319d12a3e2aacb251dba495fc7d593a46deb304294fa",
+          "status": "machine_assisted",
+          "text": "夏期マックステンタクル"
+        }
+      },
+      "id": "pal-item-negative-octopus",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "362968b9572dc4a45c72b6f011d2c3116367b0937f2c0d7036640746a467454a",
+          "status": "machine_assisted",
+          "text": "リボンが落ちました [原文欠落]。 色とデザインがキュートで、服を作るのに使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "f2ce671bb5beaaddfb3e14ea5cba4c62026ba1134f646d86da6aa24859e999c0",
+          "status": "machine_assisted",
+          "text": "クワッドマックスリボン"
+        }
+      },
+      "id": "pal-item-pink-rabbit",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "b0439ffffa1ef09d88bb53ee920f11db4e1a289a994b64f5c4c9ea0f1ffe1b17",
+          "status": "machine_assisted",
+          "text": "葉が落ちて [原文欠落]。 新鮮で粘着性があり、衣服を作るのに使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "77437355419e797aa6fa0ad1d6c33ff5ba0d10587ed46a7ccb5bb1cff2e09594",
+          "status": "machine_assisted",
+          "text": "西日本大震災"
+        }
+      },
+      "id": "pal-item-plant-slime",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "59a68e31e096102c0f9be575098e84fc3393b78328958c0912b028620e7df35d",
+          "status": "machine_assisted",
+          "text": "雲が落ちて [原文欠落]。 柔らかくてふわふわ、それは衣服を作るために使用されます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "24d28c120cbacfcf62a2568e298f2fdac28ed8d945fd3c63c754e501fd250bf1",
+          "status": "machine_assisted",
+          "text": "クラウド カミナラシ"
+        }
+      },
+      "id": "pal-item-raijin-daughter",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "76180cf59787fe5eb56bb3ebb709eed091b8fd55fad29b574d465aaf3ba0c1f3",
+          "status": "machine_assisted",
+          "text": "パルから集めた宝石のようなボール。 高い価格で商人に販売することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "acce4dde85da843ea0608011dbec8d5305ed2a6e2cb7bd41333648b2b243d3c8",
+          "status": "machine_assisted",
+          "text": "高級竜 QAzTERMB XW"
+        }
+      },
+      "id": "pal-item-to-sell-01",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "c7f1f9a578b9036f1c343125f58940ca430ef773cf8a173d7af06ea5b918c756",
+          "status": "machine_assisted",
+          "text": "パルから集めたきらめく羽。 高い価格で商人に販売することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "52fec7d6755c26fa62b578a480c9223184b0daf488b45c72d3cb0d42100f1a0d",
+          "status": "machine_assisted",
+          "text": "貴重プルーム"
+        }
+      },
+      "id": "pal-item-to-sell-02",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "2a03bbed258f90744cea4d54aea66e2c7072ad51e218ea49df140bb2f57cecc6",
+          "status": "machine_assisted",
+          "text": "パルからビートが集まるのを決して止めないハート。 高い価格で商人に販売することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "25586b92a124ff7bd71ec7d6f731f4decfe789f8cfe3cba605e473fc3a228ecc",
+          "status": "machine_assisted",
+          "text": "貴重品"
+        }
+      },
+      "id": "pal-item-to-sell-03",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "e64779025f2e539873c7482a09852de04ad355988460618ba3ef47de0f42547d",
+          "status": "machine_assisted",
+          "text": "パルから収集された非常に鋭い爪。 高い価格で商人に販売することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "6cde6e47ca399bf7fa1cf33ae192989a42a603f0738bd62efacc45d5951081f0",
+          "status": "machine_assisted",
+          "text": "貴爪"
+        }
+      },
+      "id": "pal-item-to-sell-04",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "06bb576c8f238604dc5c7cc4abb4cfe857162e2fa963c7b74f428afb281491cb",
+          "status": "machine_assisted",
+          "text": "パルから集めたふわふわの毛皮。 高い価格で商人に販売することができます。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "95a3056364de141901fd61bd93ae6dfe97159d5d3614c805e7b2321cfd4816ac",
+          "status": "machine_assisted",
+          "text": "貴重品"
+        }
+      },
+      "id": "pal-item-to-sell-05",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "5f8a683397d99c0a765101fe5d98df2c97afda28c577a6209b02e7476517fe5b",
+          "status": "machine_assisted",
+          "text": "パルから抽出できる高品質のオイル。 作り方 [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "10824d80c5e48da6ff22459b4c6d01427af24dfb805b9d412e54dde4aa61b427",
+          "status": "machine_assisted",
+          "text": "高品質パルオイル。"
+        }
+      },
+      "id": "pal-oil",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dca9763ee9317f4df1f3e7265ff3e113fc759514d54e68cc874a65923bdb03e5",
+          "status": "machine_assisted",
+          "text": "インプラント:ヒーリングコーチ"
+        }
+      },
+      "id": "pal-passive-skill-change-auto-hpregene-rate-passive",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "8e7047da09d288c6c25690e685ce2de71db0d7c4cd1003315361e8b02934cd80",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:驚くべき職人技"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-craft-speed-up3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b4bc4cddfbd6cbe40497537955704705da347414e0e5e9bf114d22a61a2bd5b2",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:ダイヤモンドボディ。"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-deffence-up3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "a5d51e3adde841d9444e0d0614cab4ef8701608d405e57725a5f7a3fa1c3d7d4",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:Swift"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-move-speed-up-3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "b893f1e5ff56e537881c708d0ebcf77368aeaeba6465017cdd126520eb8b3a70",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:ベビーシッター。"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-mutation-pal-babysitter",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "dfa5154063c8669cdca91ae8c0eaec27d2f84f2c72cf0be1e3771b56a4d47531",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:重武装"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-mutation-pal-explosion-resist",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "0d777ca10366c45af55fcd9dcecfb979f1a94dece16bc028659669fe3b53bf78",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:不死"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-mutation-pal-immortal",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d7569e0fcf98e4b286e28442de9af3c3ee5ee6eb7c973ef8f51e1cd0d38de11d",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:Idiosyncratic"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-mutation-pal-mutant",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "83175d596ae7750481516669938d45af37181ade0d61179391d0692e924670be",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:悪魔の神"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-pal-allattack-up3",
+      "kind": "item"
+    },
+    {
+      "fields": {
+        "description": {
+          "note": "source_anomaly_preserved",
+          "sourceSha256": "bd99da07a6c92fdb64181a5bc70794bf36a45dc9d3070b9a7f557d2e42677bbb",
+          "status": "machine_assisted",
+          "text": "パルの体内に埋め込まれたインプラント 受動的スキルを変えるために キー項目に格納すると、そのアイテムを保存できます。 対応する受動的スキルを選択する は [原文欠落]。"
+        },
+        "name": {
+          "note": "machine_assisted:staka/fugumt-en-ja@fbb91252110cf97d90291eb808629ab0b10f7928",
+          "sourceSha256": "d6e9ed5409200d43c525618cad76e8b606a5b78e40144e082d82579a37abaab4",
+          "status": "machine_assisted",
+          "text": "使い捨てインプラント:速さの習得"
+        }
+      },
+      "id": "pal-passive-skill-change-consumable-pal-full-stomach-down-3",
+      "kind": "item"
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -1,0 +1,2109 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "batchIndex": 16,
+  "records": [
+    {
+      "id": "active-ignis-rage-f35146b426",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Ignis Rage",
+          "sourceSha256": "be49bb4cadc58b99068a70f39d6fb82e180f364614d175ae264d4e578730bad1"
+        },
+        "description": {
+          "sourceText": "Infuses the surrounding ground with energy, causing it to explode after a set amount of time.",
+          "sourceSha256": "dce79ddc05133960477d5c733b7a86294b97dba9131b32b89fe0566301f7dee0"
+        }
+      }
+    },
+    {
+      "id": "active-implode-804e64b073",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Implode",
+          "sourceSha256": "587703884a3b36b2a5074f40b22239ecaab9d692bd2071ef36084304e30affba"
+        },
+        "description": {
+          "sourceText": "Risks its life to cause a violent explosion. Becomes incapacitated afterwards.",
+          "sourceSha256": "b519cac6672929b1029328226053cbda771a9c056d91dda7f5ac5fcade553ab4"
+        }
+      }
+    },
+    {
+      "id": "active-jumping-claw-ff6d444b8a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Jumping Claw",
+          "sourceSha256": "eb491288746ea9eb74c905fa101e8b75664e4076a75aed1c051a1db31cfc3180"
+        },
+        "description": {
+          "sourceText": "Loupmoon's exclusive skill. Leaps forward and attacks twice with vicious claws imbued with dark energy.",
+          "sourceSha256": "c330f492de63d33c78e1aef985516a27d179394cea205f3b1daaa2e5753a056e"
+        }
+      }
+    },
+    {
+      "id": "active-jumping-stinger-08791ec447",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Jumping Stinger",
+          "sourceSha256": "65f78efb0d2578e599824cd1e25148d8b5cfeffea3066063559f7e427b91c3c9"
+        },
+        "description": {
+          "sourceText": "Menasting's exclusive skill. Jumps high and forcefully stabs its prey with its tail. The poison from the tail is deadly.",
+          "sourceSha256": "b641ef07fd7aa42cb10dea93f9baab47627f8c71542a5efc0ab28781b450f82c"
+        }
+      }
+    },
+    {
+      "id": "active-kerauno-20fd04e2bb",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Kerauno",
+          "sourceSha256": "f28e144eafc03ba46f48e6a6ea9e8d8b983bf266e0e426969061c94165961d68"
+        },
+        "description": {
+          "sourceText": "Orserk's exclusive skill. Summons a spear of lightning while leaping into the air before throwing it at an enemy.",
+          "sourceSha256": "905de7794d7c546c9ee140b1685b2bfce0a2c1a6ddd47d352fca6acc329d8759"
+        }
+      }
+    },
+    {
+      "id": "active-kingly-slam-f07d808f15",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Kingly Slam",
+          "sourceSha256": "3fd332ef2d4b18bfcf79ec460957cece666b1cd1c8178671893f9b003062db04"
+        },
+        "description": {
+          "sourceText": "Kingpaca's exclusive skill. Leaps high into the air before smashing into an enemy with its chubby, massive body.",
+          "sourceSha256": "da51ded47246317c3a7ad1d4a9a6f0106c7a1ce42ca045e96543142ccd7b739b"
+        }
+      }
+    },
+    {
+      "id": "active-konoha-flip-ace1d2dfed",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Konoha Flip",
+          "sourceSha256": "3b5d477f26bdaf32434b6931561400c6a8bd98fc08160704e1d7718806174d8e"
+        },
+        "description": {
+          "sourceText": "Herbil's exclusive skill. After a brief moment of preparation, charges at the enemy at high speed, finishing with a flip.",
+          "sourceSha256": "964ebc21aa47fae2340f0225daf1de70170c0fe22ff81a4528136fdb2c3c3253"
+        }
+      }
+    },
+    {
+      "id": "active-lethal-step-8c471c8a1f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lethal Step",
+          "sourceSha256": "35c77a85db7374b5c0ae934a9a32c21a0fadec368bbf7aa03663a49b5ddcf39a"
+        },
+        "description": {
+          "sourceText": "Starryon's exclusive skill. Confuses enemies with flickering steps and launches slashing attack with its sharp horn.",
+          "sourceSha256": "b7faa78e84a2b915a1d8323cc324b73bef7cb7fec63dd9a751aa6eaacd25477c"
+        }
+      }
+    },
+    {
+      "id": "active-lightning-bolt-8fba614ff7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lightning Bolt",
+          "sourceSha256": "6501d6e4ac16bd7d91b28cd7cd45032d91705b6770f10a4f48ef5e3d61d2d239"
+        },
+        "description": {
+          "sourceText": "Charges electric energy before blasting enemies with a powerful shock.",
+          "sourceSha256": "56f760540a3adc09c0adbc84ae657edd192144a6c4821fdeb0aeeb1699024ffb"
+        }
+      }
+    },
+    {
+      "id": "active-lightning-claw-e4bf550653",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lightning Claw",
+          "sourceSha256": "b817b0987a270d912080926064100398616b9a91c21438ff5fe9c61ef4232b17"
+        },
+        "description": {
+          "sourceText": "Grizzbolt's exclusive skill. After leaping at an enemy and tearing at it twice with its electrically charged claws, it attacks the ground, sending an electric shock throughout the area.",
+          "sourceSha256": "0ee409e5cc28503c9297ed353c77144853f553b0b6d0e72a063fe3b6068c84b3"
+        }
+      }
+    },
+    {
+      "id": "active-lightning-streak-1d2e8cb8ca",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lightning Streak",
+          "sourceSha256": "ee587bc58b8462b0e34a3bca26935b4a54ddd2dc9896e86ee0d215e9e1c20d34"
+        },
+        "description": {
+          "sourceText": "Generates a lightning bolt that moves forward in a line.",
+          "sourceSha256": "10a00b23e36f5af6451d2bafd3b886a9188c01bf44cecec3008503f67f5517a0"
+        }
+      }
+    },
+    {
+      "id": "active-lightning-strike-bf4cff678a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lightning Strike",
+          "sourceSha256": "13f745dcf1c5c37a52a89d0b5642f0c290dd9262a9c06fb39d67c1b4f1d1afd2"
+        },
+        "description": {
+          "sourceText": "Acts as a lightning rod, calling down thunderbolts that electrocute the surrounding area.",
+          "sourceSha256": "b867307151cc2947ff9612c4b6a505cbf480808609dc6553c378bd4e6a37c774"
+        }
+      }
+    },
+    {
+      "id": "active-lock-on-laser-ff90626210",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lock-on Laser",
+          "sourceSha256": "b0296e1812519a8257f4803cffdaa0d2a3445a699f3d119da5acd862db5df403"
+        },
+        "description": {
+          "sourceText": "Takes aim at an enemy before firing a super high speed laser.",
+          "sourceSha256": "b83924325cd9410248841d65506ccebe91c474e22b43c05fa8e1e49a648ed21a"
+        }
+      }
+    },
+    {
+      "id": "active-lotus-bloom-114c7f58f9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lotus Bloom",
+          "sourceSha256": "b180d67d3e083dc7b42a89419da59c7634f709bbdc8f249f9f7ea467faaec8ab"
+        },
+        "description": {
+          "sourceText": "Ophydia's exclusive skill. Burrows into the ground and vanishes. It then emerges at the surface as a flower bud, blooms, and unleashes a wide-area attack.",
+          "sourceSha256": "9ecb0314660e8b2c82dfe9dedfc934a3df73013a982cff1aa0a49fd57089027c"
+        }
+      }
+    },
+    {
+      "id": "active-magma-spit-a3aaf7795e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Magma Spit",
+          "sourceSha256": "51dbd4f5418b296afcfb2d5200b536fb7aaa05e65270e77d8aef6d124fca7939"
+        },
+        "description": {
+          "sourceText": "Moldron's exclusive skill. Spits a mass of magma from its mouth. The impact creates magma pools that damage enemies on contact.",
+          "sourceSha256": "2627c29b79b3cc09ae9f24b0ffdcc8b181357e3cd050fea475ad7090a8c04290"
+        }
+      }
+    },
+    {
+      "id": "active-magna-crush-084ab6c546",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Magna Crush",
+          "sourceSha256": "e7dbd230d32fc149e5c3ea90952c7377678b0c505d371f136095ed4ad087cee2"
+        },
+        "description": {
+          "sourceText": "Blazamut Ryu's exclusive skill. After a big jump, moves at high speed in the air, gathering strength to unleash a powerful punch.",
+          "sourceSha256": "d60e6d17e92f418c0812d5cee4502836645c428c5ae2516c496be6e922d600a1"
+        }
+      }
+    },
+    {
+      "id": "active-megaton-implode-b7e708985a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Megaton Implode",
+          "sourceSha256": "0ba44f0ca6c7bc5c0c961753ad4032e102eb6f0fba2bdd11ce56da28e42e3ad1"
+        },
+        "description": {
+          "sourceText": "Risks life to cause a massive explosion. Those who perish for their duty become glistening stars in the night sky.",
+          "sourceSha256": "6aac521dbabcb87754f2bb31d548d467e9a3e8185aa66072260abc930de92d39"
+        }
+      }
+    },
+    {
+      "id": "active-moonlight-beam-b28f3b125e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Moonlight Beam",
+          "sourceSha256": "26e6200106b0c64b7752c7482e6c89d0277bff17a5e211a3d0d95a73b7465c4a"
+        },
+        "description": {
+          "sourceText": "Selyne's exclusive skill. Stores energy in the moon on its back, then fires a crescent-shaped beam forward.",
+          "sourceSha256": "1a3f9375ebcf54271981348ed3ea84443b6603c4dea6c80bd8d23842238381e7"
+        }
+      }
+    },
+    {
+      "id": "active-multicutter-567ff61041",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Multicutter",
+          "sourceSha256": "44ae8878a82b3a7d4738ce6691111e77bccd8ee3a46d71a5db2635d967a2b9b8"
+        },
+        "description": {
+          "sourceText": "The user fires three high-speed blades of wind in quick succession that fly straight at enemies.",
+          "sourceSha256": "9d34be8f83f7b7909ba6a1e05e3fb9fb6faf42ebb45d479a9c30fbc077c7768a"
+        }
+      }
+    },
+    {
+      "id": "active-mummy-rush-613fd85907",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Mummy Rush",
+          "sourceSha256": "7b1db25f6550422aa36e65ea7452f535270e523391e7e98e7cd471c9a03f15e2"
+        },
+        "description": {
+          "sourceText": "Gildra's exclusive skill. Extends bandages from its hands to deliver a series of attacks.",
+          "sourceSha256": "2b88335ef985799f8392fe4e7ee51a1ff404ee99edab048388e9803cda832c2b"
+        }
+      }
+    },
+    {
+      "id": "active-muscle-slam-fc33dc8eb6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Muscle Slam",
+          "sourceSha256": "cf2475b2caf236d7852d3684c2bb4295803b72d5ba8d4e9c0bf741d2f340107b"
+        },
+        "description": {
+          "sourceText": "Broncherry's exclusive skill. Turns sideways before tackling enemies in front of it, sending them flying into the air.",
+          "sourceSha256": "5d28ca017a09df60eda22c2b0c8dc28e5a874934cf4cf2da3b5313f0a4aae59c"
+        }
+      }
+    },
+    {
+      "id": "active-mystic-whirlwind-efb69e162f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Mystic Whirlwind",
+          "sourceSha256": "e16aea26fe6d1c8578aff05e65eaeb5d35a941e56aa4d34b883ddb4250124245"
+        },
+        "description": {
+          "sourceText": "Elphidran's exclusive skill. Generates twin whirlwinds imbued with a mysterious power that pursues enemies.",
+          "sourceSha256": "5b6d54efa4a1959bfe23acd5dbd7e35c1d4c396e8a56339701cee52f9167f98b"
+        }
+      }
+    },
+    {
+      "id": "active-nightmare-ball-66f40b52a4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Nightmare Ball",
+          "sourceSha256": "6b28b55df9f3f98c9072e45474ceec37b202dbf4e65c1554883da7e13cdc8a0e"
+        },
+        "description": {
+          "sourceText": "Creates a giant ball of darkness and hurls it at an enemy.",
+          "sourceSha256": "328bf0bc4312ec553dbd0564224099fd60baed434324ca6719dfe588f889d4a6"
+        }
+      }
+    },
+    {
+      "id": "active-nightmare-bloom-2eebc819f0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Nightmare Bloom",
+          "sourceSha256": "9c2a723f99de57c1ecd2fce2b5e0853bdeefc0c8ccc969e5221e22b387032d17"
+        },
+        "description": {
+          "sourceText": "Bellanoir Libero's exclusive skill. Disappears suddenly, then reappears while firing a barrage of beams. The beams spread like a beautiful flower in bloom.",
+          "sourceSha256": "e519eb872794df8b90ed0060622e91c8139be19e498f169c213d7d73a29a14be"
+        }
+      }
+    },
+    {
+      "id": "active-nightmare-ray-2279b96a3f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Nightmare Ray",
+          "sourceSha256": "fc8993f0aa64715ad65e60f3d912c20924da0549620653a386d475986c0536ad"
+        },
+        "description": {
+          "sourceText": "Bellanoir's exclusive skill. Disappears suddenly, then reappears while firing a barrage of beams.",
+          "sourceSha256": "e89cd21697019fd85542b9354cbca12eee43ca6f3637f7bb5dceea82d10b9cf1"
+        }
+      }
+    },
+    {
+      "id": "active-omega-laser-1e7457610c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Omega Laser",
+          "sourceSha256": "cb1b84adb8e1b42a71ca2c964c75a75fd4f392d9255340a9ad65870055b0a0f4"
+        },
+        "description": {
+          "sourceText": "Xenolord's exclusive skill. Summons the light of destruction from subspace and continuously fires it in all directions, burning everything in its sight to ashes.",
+          "sourceSha256": "081593514edab95419625e23ad356e2e4619919a9bc9eb968be6d2bdb40bfea1"
+        }
+      }
+    },
+    {
+      "id": "active-pal-blast-ea8d46d288",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Pal Blast",
+          "sourceSha256": "d070d606bacdb02190342bf96c6fde6efd381955cfc88b4ffcbce9748b646cfd"
+        },
+        "description": {
+          "sourceText": "Charges destructive energy before firing a high-powered beam forward across a wide area.",
+          "sourceSha256": "4bd80744c5ae6991367d9b5f8af4137b56c563851cfb7474d1683cfb12f948ea"
+        }
+      }
+    },
+    {
+      "id": "active-persistent-slash-8b5feccdb0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Persistent Slash",
+          "sourceSha256": "f861ecd3c95ec49ba4f7b8abb7e564b7509109912fabc5a1cd12ffb8924a5c26"
+        },
+        "description": {
+          "sourceText": "Pupperai's exclusive skill. Charges at full speed, delivering two consecutive slashes with the wooden stick held in its mouth.",
+          "sourceSha256": "d391950879426089059da3be0ddabeabc657d9e5c103f8b8877e6e7018a0b8f7"
+        }
+      }
+    },
+    {
+      "id": "active-phantom-peck-f08affe601",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Phantom Peck",
+          "sourceSha256": "4bf9e9909dc77473af33172b6f7080db9924f7b1e6ee2e8e3fc8bbb3e4104b90"
+        },
+        "description": {
+          "sourceText": "Cawgnito's exclusive skill. Teleports next to an enemy before attacking with its beak.",
+          "sourceSha256": "3853076929b0c3759a487dcd405874dbdbe5bddb9d1c37342f4816a0db28bdec"
+        }
+      }
+    },
+    {
+      "id": "active-phoenix-flare-014541d8dc",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Phoenix Flare",
+          "sourceSha256": "0e5ba9bf673bad8b9731f0acf883e889c541112177a4cd350017c492a7831481"
+        },
+        "description": {
+          "sourceText": "Faleris' exclusive skill. After creating scorching tornadoes, it cloaks itself in hellfire and charges forward.",
+          "sourceSha256": "325460b24e56392631f9432320e777e92c82d4c7d17d23b2c347ecac0bcceaa7"
+        }
+      }
+    },
+    {
+      "id": "active-phoenix-tide-af7aefe940",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Phoenix Tide",
+          "sourceSha256": "80c90572ac05ff342add33911e67d87ea85eb033c1401f18ae9aa13ddf42f4e2"
+        },
+        "description": {
+          "sourceText": "Faleris Aqua's exclusive skill. After summoning a massive tornado, it envelops its body in water and charges forward.",
+          "sourceSha256": "e252306634efbf77e69c3d2648f34a31b11cfe6a05b79ca8bf7e10188de7a91f"
+        }
+      }
+    },
+    {
+      "id": "active-plasma-funnel-fbcb10e79f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Plasma Funnel",
+          "sourceSha256": "d538ba6ec73a12a675c95665081db0210f80d5dbb03ea6089ad4fb7a8f0cfad1"
+        },
+        "description": {
+          "sourceText": "Creates two balls of electric energy that fire numerous lightning orbs at enemies.",
+          "sourceSha256": "e51fb8be240252eb77243e4735b9aafe3687208e771bb17f2638e087430e7b7e"
+        }
+      }
+    },
+    {
+      "id": "active-poison-blast-e137b83b4b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Poison Blast",
+          "sourceSha256": "d2e3138d9b9dc4479aa55bfb45c8841f0798ca0d42847fb5b30a21f7a6534759"
+        },
+        "description": {
+          "sourceText": "Hurls poison sludge at an enemy.",
+          "sourceSha256": "2f4242e67a900093957f5478969dfccb531114cffb7cb847ad1421e9492c4683"
+        }
+      }
+    },
+    {
+      "id": "active-poison-fog-74fd7d5d9c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Poison Fog",
+          "sourceSha256": "94cd0e170c1bb1549f2b147c1b5605da3506d6e8fb3c382b1ab6b3e8eb68affd"
+        },
+        "description": {
+          "sourceText": "Generates a fog of poison in front, causing the opponent to become poisoned.",
+          "sourceSha256": "c24d615338861ab79347ddc72685ea64fb0919bff6e3b4ad4229ea99f1989d8a"
+        }
+      }
+    },
+    {
+      "id": "active-poison-promenade-ed23ca84fd",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Poison Promenade",
+          "sourceSha256": "071d5bc702cc76f328b190beecd31ae2562d89116b5158ca983880e3528cf731"
+        },
+        "description": {
+          "sourceText": "Dandilord's exclusive skill. Charges forward while sliding along the ground, spraying corrosive mist. The mist remains in the area for a limited time.",
+          "sourceSha256": "222e087433c72baa49ce20787394085e4d30724add2adaefb07088f414e73892"
+        }
+      }
+    },
+    {
+      "id": "active-poison-shower-65f10fc487",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Poison Shower",
+          "sourceSha256": "f601387684f5ffa4c097a6d8238e1d0ea2b446f74360f159a43c751804af7579"
+        },
+        "description": {
+          "sourceText": "Focuses energy into the body and scatters poison orbs in all directions.",
+          "sourceSha256": "30f516846961fd4299c4eea11a2d4a1b5480ea2d7315b02eb9ceb7a558eccfdf"
+        }
+      }
+    },
+    {
+      "id": "active-power-bomb-e4f129f3e4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Power Bomb",
+          "sourceSha256": "0eb23455a6f2191b21889c02272fe9ca495982c08c5f8e3cb31c56b62a585c06"
+        },
+        "description": {
+          "sourceText": "Charges a massive amount of energy before firing a large destructive ball.",
+          "sourceSha256": "4e3df3d888611d8536912995e65f6a18ee5945fd862e877c14e0e0029cc25dd6"
+        }
+      }
+    },
+    {
+      "id": "active-power-shot-67586e40cb",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Power Shot",
+          "sourceSha256": "840ca027434dc32b1503b141ddd07ac70d625b094a80c60cc1eea283c2cea149"
+        },
+        "description": {
+          "sourceText": "Charges energy into a focused blast.",
+          "sourceSha256": "5b885419d74460ff151109a66f9c39f64c7f9174e7aaf50b5fa0874f2c65a889"
+        }
+      }
+    },
+    {
+      "id": "active-punch-flurry-f3f19d5f0c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Punch Flurry",
+          "sourceSha256": "7b3c4d06673a99e469d6a36db137e70920b6968f05b95516aedabcd39dc5f862"
+        },
+        "description": {
+          "sourceText": "Cattiva's exclusive skill. Chases after enemies, swinging both arms and delivering a flurry of punches.",
+          "sourceSha256": "72a102436ec5aba6c382e7a7204ac61b38a794eb4f860aa4c4cfac0d1789e242"
+        }
+      }
+    },
+    {
+      "id": "active-purifying-light-82107388d3",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Purifying Light",
+          "sourceSha256": "eddd58eabbbad4a406294a258bdff5f364d97fb022b7637eca6556f8e2bd1ea1"
+        },
+        "description": {
+          "sourceText": "Hartalis' exclusive skill. Leaps high into the air, condensing immense energy into a descending sphere of light. When it strikes the ground, it purifies all on the ground below.",
+          "sourceSha256": "6acf1738fb7cad637c0701b5b2ded9694839a1a7c8df32375b257d34545b50af"
+        }
+      }
+    },
+    {
+      "id": "active-radiant-barrage-08edd187f9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Radiant Barrage",
+          "sourceSha256": "2029ce769eb8f8a27b61be80152ae8f6bbcb1184d1697e0b1c4d6448b14c38fe"
+        },
+        "description": {
+          "sourceText": "Unleashes a sphere of light that slowly tracks down an enemy. As it nears its target, it splits into countless light bullets that strike all at once.",
+          "sourceSha256": "3c49eba6bbdb76a0d79b377544964e12110b7059fdcb8ed1343775e4c5f8eb6c"
+        }
+      }
+    },
+    {
+      "id": "active-raid-cutter-37cd617286",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Raid Cutter",
+          "sourceSha256": "15b15236e4f7c03cbf6a2c3660ca4d1a429f1ff531d9b51ae1ad4e71cfafdaa6"
+        },
+        "description": {
+          "sourceText": "Shoots countless wind swords that fly straight towards the enemy.",
+          "sourceSha256": "d0e756873fe0d1c06978dc3739fa795af6b0a4606b8f53f1b6fcff4d70d97fd0"
+        }
+      }
+    },
+    {
+      "id": "active-rapid-kick-17acc1357c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Rapid Kick",
+          "sourceSha256": "a33a83421712fbcd09814ff9cb9625c4f2207af9c202d3abf3a080037e27d128"
+        },
+        "description": {
+          "sourceText": "Leafan's exclusive skill. Rapidly delivers a series of consecutive roundhouse kicks, finishing with an engery blast.",
+          "sourceSha256": "1685acab0b8d57f4f55c2a902aad55134582c998d6825cf37eef688be694f27f"
+        }
+      }
+    },
+    {
+      "id": "active-reckless-charge-915be83715",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Reckless Charge",
+          "sourceSha256": "4528790310b9110c9140881b51809e70f3d674ae3b591935ec3fc1242468fac6"
+        },
+        "description": {
+          "sourceText": "Rushoar's exclusive skill. Takes aim at a foe and rushes at them with a fierce charge.",
+          "sourceSha256": "029dc6ff573a0a1ff3985e450910193d97bcf3f70c9519ef6c7a32b3fff6f31d"
+        }
+      }
+    },
+    {
+      "id": "active-reflect-leaf-b2804c5a41",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Reflect Leaf",
+          "sourceSha256": "14f0259170eb2aafadf18c3a8967d8cb1fc897493f1e0cc15987879062c3f0a5"
+        },
+        "description": {
+          "sourceText": "Launches a blade of wind that rebounds off enemies or trees, striking repeatedly. Can ricochet up to four times.",
+          "sourceSha256": "2ae3ea97ec83b277f62b0421cd7cb3eb7a03fb3fe77fe66cc98a2c8c0170039d"
+        }
+      }
+    },
+    {
+      "id": "active-rock-lance-3c7499c6b2",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Rock Lance",
+          "sourceSha256": "bb54b55a0d9899d8bc7093816500da9bbf27d5136c4aafce7a8b0de43a73fff3"
+        },
+        "description": {
+          "sourceText": "Generates a sharp rock spear under an enemy.",
+          "sourceSha256": "6970bdea6ae925bc240ffa9b31cd1ead31078d20525cc4f61cc878a36a5085d3"
+        }
+      }
+    },
+    {
+      "id": "active-rockburst-2dea7bbd3b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Rockburst",
+          "sourceSha256": "d25d004f3875aa282d28bda274b8f28c36ca66e6ccdd7150ff093844d12f3a27"
+        },
+        "description": {
+          "sourceText": "Causes the ground to shake before hurling a massive stone mass at its surroundings.",
+          "sourceSha256": "3d552135001c0e912dc544a7b7bfd3557f94c3f91f143e9fd30148d41733fdd6"
+        }
+      }
+    },
+    {
+      "id": "active-rocket-arm-a952740f68",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Arm",
+          "sourceSha256": "51c2251ff30ca1f50a7074f9cd6f8c80f7da91ce910f92c9e547f2694bf39596"
+        },
+        "description": {
+          "sourceText": "Dualiths exclusive skill. Detaches its left arm to sweep enemies, then launches its right arm.",
+          "sourceSha256": "98ee68e3ae1274652abd6490ae433253b1ae32c9b54944ee8568ea089d27232e"
+        }
+      }
+    },
+    {
+      "id": "active-rocket-slam-4f245f5b9d",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Rocket Slam",
+          "sourceSha256": "e13085877978077464e1343d3de1b9b9f4d7a8d49a4fd3fec5ba9f6e0ad9c5df"
+        },
+        "description": {
+          "sourceText": "Chillet's exclusive skill. Gathers a bit of strength and leaps forward. Always shuts its eyes tight in fear when landing.",
+          "sourceSha256": "2f4df3ba47ebe1e9b4692db9b919e05a1908fda5a4864f3b925d7189d545192f"
+        }
+      }
+    },
+    {
+      "id": "active-rocky-impact-b1f59e7567",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Rocky Impact",
+          "sourceSha256": "503a3c330b55a91a8c535d1602b7001c865adc1f8e697313e3e1899e184b3366"
+        },
+        "description": {
+          "sourceText": "Shakes the ground and lifts a massive boulder into the air.",
+          "sourceSha256": "b9ca1cf7309f669712b68bf2b445474e8b53bf76a67cd27145b629c18f8a6f3b"
+        }
+      }
+    },
+    {
+      "id": "active-roly-poly-b2908f26e1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Roly Poly",
+          "sourceSha256": "bf4069900d0fa16243553f51c87cb5ded2b10f5f26d1ab8a0d8b044d3e22b3b7"
+        },
+        "description": {
+          "sourceText": "Lamball's exclusive skill. Curls into a ball, rolling after any enemies in its way. Becomes dizzy and unable to move after the attack ends.",
+          "sourceSha256": "da192a7bff3d705915fdaf594e70f9218e427d162c90d836d0ca7c777df75f70"
+        }
+      }
+    },
+    {
+      "id": "active-sacred-rain-3bf6891f54",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sacred Rain",
+          "sourceSha256": "5cbd5f6b6c86b194bfb408c98d90982a9a6e7da5dffc20e1011bad7caede7bf5"
+        },
+        "description": {
+          "sourceText": "Hartalis' exclusive skill. Fades from sight, then calls down a massive barrage of light pillars centered on its position.",
+          "sourceSha256": "08daead5c4a92c4a53a28a79b518c622942c4b182706eb200686fd0beee109be"
+        }
+      }
+    },
+    {
+      "id": "active-sand-tornado-30df28848a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sand Tornado",
+          "sourceSha256": "dcc0453b154b51052e5ebbac216b15d324b36e19547ceb4a83a5d3a8f9e8f73e"
+        },
+        "description": {
+          "sourceText": "Generates two sand tornadoes on either side before launching them at an enemy.",
+          "sourceSha256": "4b3dd39dd88ba7805aad747c6e1960d0297098e83cdaf1e219622bd4a30b2d02"
+        }
+      }
+    },
+    {
+      "id": "active-sand-twister-c64818a0ff",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sand Twister",
+          "sourceSha256": "927742cfcc07e6e06634c9c79af6a3319a3bf3e04bc179cf401cedefacf449ca"
+        },
+        "description": {
+          "sourceText": "Creates multiple sand tornadoes. The tornadoes continuously spin in circles.",
+          "sourceSha256": "043c7d7c55ca7af3d9215d92b5a3b383eba550e16d3fbf9c0c5394933d89a7ed"
+        }
+      }
+    },
+    {
+      "id": "active-satellite-bit-683a289878",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Satellite Bit",
+          "sourceSha256": "29f6042e61fa8c6cca5384aa2d8ad591876aceea723bab6725f1f9d102544d2b"
+        },
+        "description": {
+          "sourceText": "Xenolord's exclusive skill. Generates four satellite-like wings with auto-attack functionality. These wings will automatically track and attack the enemy when the next attack is launched.",
+          "sourceSha256": "06fedcaa0611003509a11202a9326bb1cdb00c4081d249fa94e407d8cc89728f"
+        }
+      }
+    },
+    {
+      "id": "active-seed-machine-gun-9fcf53ac21",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Seed Machine Gun",
+          "sourceSha256": "029885965321b93eb91e8ba65de0f8b5180e8630d0f051e0d8d27bdfc4c9f974"
+        },
+        "description": {
+          "sourceText": "Fires a volley of hard seeds at enemies in front of it.",
+          "sourceSha256": "a795af476f88b11d11f62d0d23c156bd6fa0b919079be206eb0c552a7cb9e044"
+        }
+      }
+    },
+    {
+      "id": "active-seed-mine-9f59426bde",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Seed Mine",
+          "sourceSha256": "b71c1c638d6325eb32da4db60a8d44c7438f39cfe7a1c3e005a5f32fcb9bda26"
+        },
+        "description": {
+          "sourceText": "Launches a deadly seed. If it hits an enemy, the seed explodes.",
+          "sourceSha256": "bc811dc55d04680a9948d5d90a7fac9342d5b264d05d4bdd73efb542911f43ad"
+        }
+      }
+    },
+    {
+      "id": "active-seigetsu-blade-b59af0c995",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Seigetsu Blade",
+          "sourceSha256": "e4879650d95f6d4a33435c75fdf7eccfe7906aefd698d465a698dc92eb33fdcc"
+        },
+        "description": {
+          "sourceText": "Selyne's exclusive skill. Fires two consecutive high-speed blades imbued with the power of moonlight.",
+          "sourceSha256": "921b40e7254000ce880b168dc14c81964a7a71f26bd88ab31e4ca7c8e4f7f366"
+        }
+      }
+    },
+    {
+      "id": "active-shadow-burst-ba9c5d7ae7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Shadow Burst",
+          "sourceSha256": "a80ff06fb1aca2ea598104c25e2d53ef3fcef33aee4d4f990ff92c326c9d4a7c"
+        },
+        "description": {
+          "sourceText": "Quickly discharges dark energy, damaging those around it.",
+          "sourceSha256": "902521efaa06a84a644b034d754933d9db475836fb3597167390ee7335eeb0bd"
+        }
+      }
+    },
+    {
+      "id": "active-shell-charge-05f45b55a3",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Shell Charge",
+          "sourceSha256": "58a477165ae7580b1be69e7214e6cd245e2a3539927e59b448855c017c8ec4fe"
+        },
+        "description": {
+          "sourceText": "Snock's exclusive skill. Withdraws into its shell to reduce damage taken while building electric charge. Once fully charged, it discharges, damaging nearby enemies. After discharging, the Attack of this Pal's Electric skills is increased for a limited time.",
+          "sourceSha256": "908f992181491b59ab0580c355473a4b563729d6c708097c4bc02b49c56c60a7"
+        }
+      }
+    },
+    {
+      "id": "active-shell-spin-14d0689454",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Shell Spin",
+          "sourceSha256": "83cc7551e47dfe066d5dc48924dce8c252dffe430f9612946c16d6870f740d48"
+        },
+        "description": {
+          "sourceText": "Digtoise's exclusive skill. Moves while spinning its whole body at high speed. Drills through enemies, dealing continuous damage.",
+          "sourceSha256": "ff9c7be053d02d46846896c5995689a1bf7c022a0c590cf64d6a4423672176ed"
+        }
+      }
+    },
+    {
+      "id": "active-shockwave-16157bc61f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Shockwave",
+          "sourceSha256": "6da37aae54832bb17a7b27d274f5d572175761ef0b1a707ef44bcf9a5362bb51"
+        },
+        "description": {
+          "sourceText": "Quickly discharges electricity, shocking those around it.",
+          "sourceSha256": "c0a3f4b2aff0c54274df49cc7273fd73708143f2fb7d59d0672604f7b9387bb7"
+        }
+      }
+    },
+    {
+      "id": "active-silver-steed-f93bbba4bb",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Silver Steed",
+          "sourceSha256": "eab4c1e5abec8706dd6b033e1d319099d81fa9c771dd000524cfbb3881fcd67b"
+        },
+        "description": {
+          "sourceText": "Starryon Primo's exclusive skill. Cloaks the body in radiant flames and charges toward the enemy.",
+          "sourceSha256": "f2d6b3d6cfcec32eecb2d9b4d1b033102a609a79c7adfc73f3717af063a0111c"
+        }
+      }
+    },
+    {
+      "id": "active-smoke-jet-d8fe04a774",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Smoke Jet",
+          "sourceSha256": "5737b8674458d8a82b5379921d1ee1f6460b51eb7ce82294caa8ad0ca300bd8c"
+        },
+        "description": {
+          "sourceText": "Gloopie's exclusive skill. Releases smoke to conceal itself, then launches a surprise headbutt from the shadows.",
+          "sourceSha256": "23e7de38c3faec4fba1601ba5efb90f8cd6f045bd1c26a16633129d197452681"
+        }
+      }
+    },
+    {
+      "id": "active-snow-claw-0ccaa00dec",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Snow Claw",
+          "sourceSha256": "b2044e14ba17d1e7bd122a3ab5d207c4047d0c9daecd4dd4b81a14001213120d"
+        },
+        "description": {
+          "sourceText": "Loupmoon Cryst's exclusive skill. Leaps forward and attacks twice with vicious claws imbued with ice element.",
+          "sourceSha256": "0e8fe781e4a5f1f80885971ef952d795b5d50c2edcfc0b7091561c3fc9504287"
+        }
+      }
+    },
+    {
+      "id": "active-snow-rush-ba35963fe9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Snow Rush",
+          "sourceSha256": "9e5306036c9a28f659823e41d280d8b78957d12469f0ff1d5cf26edca1a9086e"
+        },
+        "description": {
+          "sourceText": "Elgrove Cryst's exclusive skill. Enters a wild frenzy and unleashes two consecutive Ice-element charge attacks.",
+          "sourceSha256": "2e44dcf9dc864884f6b7447034eb0932bc2dfc7d4e991035552a694484d8a9ea"
+        }
+      }
+    },
+    {
+      "id": "active-solar-blast-84e06b596b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Solar Blast",
+          "sourceSha256": "1583a2a90d5d8e342dd22f01467c7d8a11edf2ad47ee755173e383b86200308c"
+        },
+        "description": {
+          "sourceText": "Charges solar energy before blasting enemies with a powerful beam.",
+          "sourceSha256": "da8769336121076d24373beee89cf113fe0630b873ff3d08a9e9cafacc21e11a"
+        }
+      }
+    },
+    {
+      "id": "active-spark-blast-c24157a941",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Spark Blast",
+          "sourceSha256": "8813b5842e046baba935a99d38c336b8aaa15556cf75cf6aff06d4616f950503"
+        },
+        "description": {
+          "sourceText": "Releases lightning orbs in a fan shape, spreading as they travel.",
+          "sourceSha256": "be71a1dc99620e2a18d7dd8b482cd968c00915439366e7ab7385a9b0751e98ac"
+        }
+      }
+    },
+    {
+      "id": "active-spear-thrust-11185f4762",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Spear Thrust",
+          "sourceSha256": "21bd7751e6080aebbeeb7fcb0e56f5bc269a056545ccf041085cf4bd7e20d23f"
+        },
+        "description": {
+          "sourceText": "Paladius' exclusive skill. Charges forward while enveloped in holy power with its spear thrust ahead. The shield in its other hand blocks all attacks during the charge.",
+          "sourceSha256": "574495302d339339a5bee2fa3861278b8990a2c2fc05a4935a8d4be60ed67bd0"
+        }
+      }
+    },
+    {
+      "id": "active-spine-vine-0d7c52eaf8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Spine Vine",
+          "sourceSha256": "16ecde06508d6eb9a7c431cc3aed76df85130261d3d2d4d0e43e419d7f0c8254"
+        },
+        "description": {
+          "sourceText": "Generates spiny thorns that chase an enemy along the ground, piercing them from below.",
+          "sourceSha256": "02980df8707e629f2105078493784ffa311e7d260f77f5858515074bb5ba648c"
+        }
+      }
+    },
+    {
+      "id": "active-spinning-roundhouse-844c30ab33",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Spinning Roundhouse",
+          "sourceSha256": "359bb91512a9917873441d317c9cb6befce9774aad08ea230cda660980f35d08"
+        },
+        "description": {
+          "sourceText": "Anubis' exclusive skill. Performs a spin kick with its strong legs, sweeping enemies over a wide area.",
+          "sourceSha256": "b61bbf12ef0564360dfbc00e069ab57a7e0edc38d9412c8dda1b1e307b3b43f5"
+        }
+      }
+    },
+    {
+      "id": "active-spinning-staff-83ec976170",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Spinning Staff",
+          "sourceSha256": "1031673d9c4b9e74f6dd6f2335b62d883b3fbe68fbd3b7dd22e6807f2da48d62"
+        },
+        "description": {
+          "sourceText": "Elizabee's exclusive skill. Channels power into its staff, and unleashes it in a whirl.",
+          "sourceSha256": "3ed24da2e32f9775bca8e4e7bf827517eda30898b4df81095f5775eb790448b3"
+        }
+      }
+    },
+    {
+      "id": "active-spirit-fire-525dbaa4d6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Spirit Fire",
+          "sourceSha256": "6a85bc4805729d91170c0b53e99fd01669c1f91caa8b724857c208eab14afe6d"
+        },
+        "description": {
+          "sourceText": "Shoots fireballs towards an enemy. The fireballs explode after a short distance, generating smaller fireballs that spread forward.",
+          "sourceSha256": "8226cf2d39b5d37eb29d1c5ebd394ac30175c65c8a724ccfa192c15ba731c403"
+        }
+      }
+    },
+    {
+      "id": "active-spirit-flame-06ba48d6a5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Spirit Flame",
+          "sourceSha256": "761a55536f108e8606744f9f22492777c84a721a671b1203372205a306e20808"
+        },
+        "description": {
+          "sourceText": "Fires three balls of malice that relentlessly pursue an enemy.",
+          "sourceSha256": "18d892d441db515f1947088ab3fe691c0098a33bc4294e92f97c08d176491f6b"
+        }
+      }
+    },
+    {
+      "id": "active-splash-d93296583f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Splash",
+          "sourceSha256": "c3fa854c3d0cb74555b4004fb23812b3b351ec66dcea638d8a6e8d3382d7b46d"
+        },
+        "description": {
+          "sourceText": "Generates a column of water that travels in a straight line.",
+          "sourceSha256": "d0cefb2ed7f19c525f49d508c133e4d1a193b146cc3ac2de4d32770bc9dbac74"
+        }
+      }
+    },
+    {
+      "id": "active-star-mine-84da5b7acc",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Star Mine",
+          "sourceSha256": "928b0c4074f4f77cabfb4acaf8cb7f9c9fc8aaa799d36f338c5c24dad8633f9f"
+        },
+        "description": {
+          "sourceText": "Generates stars around the enemy that explode on contact. Stars also explode after some time.",
+          "sourceSha256": "a758fad9f8f6c532ddcacc762c2f5c2405da15678762e8af9001452a9dfd769c"
+        }
+      }
+    },
+    {
+      "id": "active-stone-blast-436054e50a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Stone Blast",
+          "sourceSha256": "0b07c17be537583152f692c23fc6ebd1a8ddb33c2e1b7d420067edc38197ef84"
+        },
+        "description": {
+          "sourceText": "Fires a barrage of stones forward.",
+          "sourceSha256": "1b31579b5a76a5bfca77026451c9dad7a9d17933be8e245677c39e770e594ae5"
+        }
+      }
+    },
+    {
+      "id": "active-stone-cannon-092797a6d2",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Stone Cannon",
+          "sourceSha256": "f4c42e52d26711640a0bdab4a8c896a6a42c342a98352c71d8b10db5f8214f9b"
+        },
+        "description": {
+          "sourceText": "Digs up a boulder and hurls it at an enemy.",
+          "sourceSha256": "38ef3e141cc61c7c73aea9df9a535622d5107cf303551016e4c382c97be80a6b"
+        }
+      }
+    },
+    {
+      "id": "active-stone-claw-a5470af62e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Stone Claw",
+          "sourceSha256": "8f8efe1dbc752ca408d322ed093cd796c120a8beadef334ea23a58bf6e037ceb"
+        },
+        "description": {
+          "sourceText": "Cryolinx Terra's exclusive skill. First, it strikes with its claws, followed by a second slash, and culminates with a powerful slash using its entire body. When swinging the claws, rocks are launched forward in a fan shape.",
+          "sourceSha256": "30aae655c75c3d4c19f1dc6713346c160e0c3dcac9682cb394c66ff053fc2ff2"
+        }
+      }
+    },
+    {
+      "id": "active-sumo-stomp-bb27d0abd3",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sumo Stomp",
+          "sourceSha256": "b9bafa48c135e20781fbe43889278b5ade5de41081e776fb2566347b9deee4f9"
+        },
+        "description": {
+          "sourceText": "Bulldosu's exclusive skill. Raises its right hind leg high and stomps the ground, creating a shockwave that strikes enemies in a fan-shaped area ahead.",
+          "sourceSha256": "efb26dd9b6e45752c91fa6f0cf1aebbef86e908a3b321143244910c1e9afab92"
+        }
+      }
+    },
+    {
+      "id": "active-tail-slash-b24a9e3a15",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Tail Slash",
+          "sourceSha256": "09a6c2c5113b00aad7efc4438298a3dcc8fca3d29cf5e684fcf64e092396659c"
+        },
+        "description": {
+          "sourceText": "Eidrolon's exclusive skill. Closes in on the enemy at high speed to deliver a cleaving swipe with its tail.",
+          "sourceSha256": "cf229be19c072762ebbd39598f71dc78245fa92ab5ef555981ea6414732bf7c3"
+        }
+      }
+    },
+    {
+      "id": "active-thunder-rain-81153ab9b6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunder Rain",
+          "sourceSha256": "498c87e161087e961cd5e7588efeacbf7b2cfcd1272af3d7bf2dc0478e75fdda"
+        },
+        "description": {
+          "sourceText": "Calls lightning that strikes an enemy after a set amount of time has passed.",
+          "sourceSha256": "2e21bc7b2bfe5aa93844c2d115ef15a838864b36d3ef4bcf83c9b44effa1eb70"
+        }
+      }
+    },
+    {
+      "id": "active-thunder-spear-272f6fd44c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunder Spear",
+          "sourceSha256": "6edb9d72aaa9ff1e5ddd7c32f0011e5a6df0c2792940eb03ee00794ffbb5c86c"
+        },
+        "description": {
+          "sourceText": "Fires a high-speed lightning spear straight ahead towards the enemy.",
+          "sourceSha256": "2c76f7672344c860d4b88aaa23447392c5d83282fa1efa09ea4b485084d4dc23"
+        }
+      }
+    },
+    {
+      "id": "active-thunder-tempest-e9d799b29c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunder Tempest",
+          "sourceSha256": "aaddfcfbb9a617fcd832854f497c71d2bfd1b809c19288ca218aa49222794b93"
+        },
+        "description": {
+          "sourceText": "Charges forward while manipulating the atmosphere and enveloping itself in thunderclouds.",
+          "sourceSha256": "9d5408b91a39e28c0d2934582d130712908bc4bbc1cfe2d6539f24822c49603b"
+        }
+      }
+    },
+    {
+      "id": "active-thunder-uppercut-1946321b5e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunder Uppercut",
+          "sourceSha256": "102ae6fdac48fa841f399dce7058f2018730fef331e0fe61b0cfb105159002b1"
+        },
+        "description": {
+          "sourceText": "Prixter Lux's exclusive skill. Uses superconductivity to closes the distance to the enemy at high speed, then swings its pincers upward with full force.",
+          "sourceSha256": "b2c59cb22c5cdd533c3eb1b546068646b73a6710c77fb9f0f116997f17c2e945"
+        }
+      }
+    },
+    {
+      "id": "active-thunderslide-c105a2274a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunderslide",
+          "sourceSha256": "122c531afa0948c835d1db86a75201c00c1fb405da058d55f1e826ec031fd6b7"
+        },
+        "description": {
+          "sourceText": "Penking Lux's exclusive skill. Lies on its belly while generating electric charge all around it before sliding at enemies at high speed.",
+          "sourceSha256": "80f7b3ee22f7d260e3737239e2e943e7e941d664375fcba3aba903072e21b382"
+        }
+      }
+    },
+    {
+      "id": "active-thunderstorm-fcdffa0055",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunderstorm",
+          "sourceSha256": "31a9beb9609b732e82cfed8e6fbf8170fdf9dd333c2daaca9dcc95572f04001d"
+        },
+        "description": {
+          "sourceText": "Generates a huge tornado of lightning that moves slowly towards the enemy.",
+          "sourceSha256": "b88a761ff1951926a013100a5a6e27915da57c7e53481cf36265f8f9d5c7e613"
+        }
+      }
+    },
+    {
+      "id": "active-tornado-attack-ce889a7ed5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Tornado Attack",
+          "sourceSha256": "d65891dd53786259b0a7f520a966f8008e5ae5d0c2e779216f6115b260ad467d"
+        },
+        "description": {
+          "sourceText": "Nitewing's exclusive skill. Generates a tornado ahead before soaring towards its target.",
+          "sourceSha256": "d51f88910ff5e68587279d10243cca35ab81e7c522052f1b446a451f801ff1c8"
+        }
+      }
+    },
+    {
+      "id": "active-torrential-blast-c5d7359e2e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Torrential Blast",
+          "sourceSha256": "b4f7cc3bd713dce257a83ffd4aba224c526da73f3a9f671e80d23510271eaccf"
+        },
+        "description": {
+          "sourceText": "Fires a high-pressure stream of water forward. After a short delay, the stream branches off to the left and right.",
+          "sourceSha256": "ebada65da0e99a058ebce26f1b1059b70350b9dca312ad9e532b29ac1b10a47d"
+        }
+      }
+    },
+    {
+      "id": "active-tri-lightning-8930f11853",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Tri-Lightning",
+          "sourceSha256": "2b521201138e2f9281265529d956c294226268da81d254cf16930b8e51d5c9ca"
+        },
+        "description": {
+          "sourceText": "Generates lightning that strikes an enemy three times from above.",
+          "sourceSha256": "e28a7c0f2d5d6a7766eda7d9129000649f749d49f6583cd6637bcee4b55ea7bb"
+        }
+      }
+    },
+    {
+      "id": "active-tri-spark-30e2c6cd4b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "TriSpark",
+          "sourceSha256": "ec809eea27217596f16be581062ef8605c0ae5885773993f77ec6ac2eae4b91f"
+        },
+        "description": {
+          "sourceText": "A high-speed lightning ball that flies in a straight line. Simultaneously fires slow lightning balls that track the enemy.",
+          "sourceSha256": "125d0dae07682f9954b28839b3f95e97e5ca17c4d64714c4804633ac2a71fda7"
+        }
+      }
+    },
+    {
+      "id": "active-trigger-happy-7d56ae3367",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Trigger Happy",
+          "sourceSha256": "5cc2e6cb406fd1e0281469acb1eff27fbfeeac8745eb16f185ada520a84428f8"
+        },
+        "description": {
+          "sourceText": "Finsider's exclusive skill. Draws twin water blasters from its mouth, firing six shots alternately left and right, then finishes by combining both blasters to unleash one powerful shot.",
+          "sourceSha256": "734b453ef89696385c86c601bca7c83a0bc12e1c050750e82c0b1f65a97852af"
+        }
+      }
+    },
+    {
+      "id": "active-twin-spears-9f6b63ca8f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Twin Spears",
+          "sourceSha256": "f33ba2b2fdfed91d9dfaf809aa9a68a867606358d9ddab07bffb993e53b53b9f"
+        },
+        "description": {
+          "sourceText": "Necromus' exclusive skill. Clads its twin spears with vicious whirlwinds and charges forward, thrusting them one after the other.",
+          "sourceSha256": "8178e4d428d6b8379d1d9d577141c8bf69c52096876ef27a8bdbe2c5b2b4cb90"
+        }
+      }
+    },
+    {
+      "id": "active-umbral-surge-c87fb0b7b1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Umbral Surge",
+          "sourceSha256": "7f49d974dab851bac9fc37b8aea3e459d46cb0d3bd26f10d353917e0d7327406"
+        },
+        "description": {
+          "sourceText": "Fires high-speed dark orbs in a fan shape, spreading as they travel.",
+          "sourceSha256": "49ab7c1407a41557c9cb664bccb93e1df4192f826b3078a0816b9ecfc5a78c4e"
+        }
+      }
+    },
+    {
+      "id": "active-upper-smash-881be1f5f4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Upper Smash",
+          "sourceSha256": "59c478bdfc1e386833c786bd3d7522de06bfeb78f99bdabd64d1efd94e37da14"
+        },
+        "description": {
+          "sourceText": "Prixter's exclusive skill. Closes the distance to the enemy at high speed, then swings its pincers upward with full force.",
+          "sourceSha256": "c8e6ac4cde7bef6fb4c1b1fd58cc811020a552f6190c596cad12e3767ce1900a"
+        }
+      }
+    },
+    {
+      "id": "active-volcanic-burst-dd65716fd5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Volcanic Burst",
+          "sourceSha256": "da13278297b0dca00f0a665936aae98793a7b8f8e6a6f71631c130b6f47d3c38"
+        },
+        "description": {
+          "sourceText": "Reptyro's exclusive skill. Raises its front legs and slams them into the ground, causing a volcanic eruptions under its enemies. It simultaneously bombards them with volcanic bombs from above.",
+          "sourceSha256": "0a15c82d14bec67033b39c1bef1d934e8eaf50129b7a26b425f9527cb98feb95"
+        }
+      }
+    },
+    {
+      "id": "active-volcanic-rain-9d4fd87ad3",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Volcanic Rain",
+          "sourceSha256": "8d510ce05a7a239520134145e33057da799f0e200155eabef5b72cff2a30a9e8"
+        },
+        "description": {
+          "sourceText": "Fires countless volcanic bombs into the sky. After a while, the bombs rain down around their originator.",
+          "sourceSha256": "81bf2babe892a2e1a0f6b6837a9f5d12ee8c14e6c4ea4638c7ff1e3843ed07f0"
+        }
+      }
+    },
+    {
+      "id": "active-wholehearted-stance-ca66627f30",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wholehearted Stance",
+          "sourceSha256": "fe3a9b0b16f62b41102d50e8e72a6caa1f8426ecb9731f7699ebbef6c39b7197"
+        },
+        "description": {
+          "sourceText": "Dogen's exclusive skill. Adopts an aiki stance. While in this stance, nulify any incoming attack, instantly close in on the enemy, and counter with a full-forced palm strike.",
+          "sourceSha256": "795ce11a9851bab27f090f9057a3b80a1431a2415bbaf52f505b2d487e7823a4"
+        }
+      }
+    },
+    {
+      "id": "active-wind-burst-c24aed4f51",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wind Burst",
+          "sourceSha256": "523b7e6fa9afbdddd1b07fc29409aae0dd1d9365b859ac42f3b6a7edb97a82c2"
+        },
+        "description": {
+          "sourceText": "Summons a massive wind vortex around itself and unleashes a powerful attack.",
+          "sourceSha256": "af4c9c452ad129e8586608c69094494d13b961513c19ee7485492f04eaaccc2a"
+        }
+      }
+    },
+    {
+      "id": "active-wind-cutter-dfc20ed055",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wind Cutter",
+          "sourceSha256": "acd6e6730e60633c771c42a3b92004d568705cca7fa7e2c0594e3ab27c00f7f9"
+        },
+        "description": {
+          "sourceText": "Fires a high speed blade of wind that flies straight at an enemy.",
+          "sourceSha256": "ceab620846d20ab831b40e4dfdad23375b28da23550ae8540055eedb6310f70e"
+        }
+      }
+    },
+    {
+      "id": "active-wind-edge-4eca4c5cfa",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wind Edge",
+          "sourceSha256": "8a82b832a9b742b5e7eb351e30de6503087ab353ad0e94d40d93ff062ddc0d26"
+        },
+        "description": {
+          "sourceText": "Launches sharp blades of air that fan out.",
+          "sourceSha256": "aeef85dde07ac011599d3c399ff4e6cc77be8efa0b0e24d350e1ef311932f450"
+        }
+      }
+    },
+    {
+      "id": "partner-aegidron",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Indestructible Fortress",
+          "sourceSha256": "d5cdfbe4904bcfcb326120757e60c8b84d0e44bf0addb24d7d7f4f86632d8cc6"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, player and party Pals take 60% less damage from explosive attacks, and are immune to Stun. (Does not stack)",
+          "sourceSha256": "64229c7cc6a893eaf1d57edb64e04dd241bfc273f813a0b78d4d4ba0499ae8f7"
+        }
+      }
+    },
+    {
+      "id": "partner-amione",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Magical Twin Powers",
+          "sourceSha256": "d6988911f87f8b5c40fcaae967a275dfd2863e99e58a3148391d8b172c292378"
+        },
+        "description": {
+          "sourceText": "While at a base, increases the Watering Work Suitability Level for all other Base Pals by +1. (Does not stack)",
+          "sourceSha256": "7ff3513972dc9dc7952dd0c2a70eba50a41c625080cb66d643d6486ab82c0367"
+        }
+      }
+    },
+    {
+      "id": "partner-anubis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Guardian of the Desert",
+          "sourceSha256": "4fdd88b09235ebc8951e595da0b52b6739a532f6800f7e7745d03b1b2ef766bb"
+        },
+        "description": {
+          "sourceText": "When activated, Anubis changes the player's attack type to Ground and increases Attack by 30%. Occasionally evades attacks with a flash sidestep during battle.",
+          "sourceSha256": "6e19969f48390e279f0189e3c9599aa510af77227371263aa265a5a1215d03bf"
+        }
+      }
+    },
+    {
+      "id": "partner-arsox",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Warm Body",
+          "sourceSha256": "1206cd715521a2709101c23b7f5f618b32005dd8f347b3a7934735344d018cb6"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, the player gains Cold Resistance +2. (Does not stack)",
+          "sourceSha256": "1c7c4c234de1e9d275e454d8ba76c56dbaf63196f40d4a4815c84852bce61539"
+        }
+      }
+    },
+    {
+      "id": "partner-astegon",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Black Ankylosaur",
+          "sourceSha256": "61957ec807abab7d8b9a4b71ecbf1b0af9142e0c69d7ba3cfe71af53cf96ef55"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. Increases the damage dealt to ores by 1100%, and you can obtain 1500% more Ore while mounted.",
+          "sourceSha256": "599d7c24e04faf15d322519becdd6601b83007730075db6c1b14cde05911dc6f"
+        }
+      }
+    },
+    {
+      "id": "partner-azurobe",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Waterwing Dance",
+          "sourceSha256": "3f990bd32660363b6d2f28c656f2ddff30b0e19d6d2fc8d0eb8d9cbadbf06858"
+        },
+        "description": {
+          "sourceText": "Can be ridden to travel on water. While mounted, changes the player's attack type to Water and increases Attack by 1%.",
+          "sourceSha256": "221aa8d25a8f59a7a0009d485160455ebfb98b32ba9f5f3e3e238263c8fcc7ff"
+        }
+      }
+    },
+    {
+      "id": "partner-azurobe-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Icewing Dance",
+          "sourceSha256": "a8ed74940f059ba5a4aa9f490eb41861b3208853ecddb27687cfd5e1cbde2b69"
+        },
+        "description": {
+          "sourceText": "Can be ridden to travel on water. While mounted, changes the player’s attack type to Ice and increases Attack by 1%.",
+          "sourceSha256": "d00ed4ac28e173b09f0a3a61508750120bd200214c9d3506b6233e3172f24562"
+        }
+      }
+    },
+    {
+      "id": "partner-bakemi",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Grinning Death",
+          "sourceSha256": "06144b72c6f9f592edadae04e6099be22919f6e6320a88e48d3b29aae5c2d85d"
+        },
+        "description": {
+          "sourceText": "While in party, attacking enemies afflicted with Poison reduces their Attack by 40%. (Does not stack)",
+          "sourceSha256": "0f51fff4bcb673621a43539b1e82c43a52801ce7379e4eec35d0e980dc25b159"
+        }
+      }
+    },
+    {
+      "id": "partner-bastigor",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blizzard Crash",
+          "sourceSha256": "12137dc7bff297d9e53e04baf992604c44f58df58bd0dd6afdc5b4e463d70981"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, delivers crushing blows with a hammer forged from Ice.",
+          "sourceSha256": "5d4d49a3fd50473c64ff5d1371359e24e19aa58f0363ea2e90f0c93c88e53660"
+        }
+      }
+    },
+    {
+      "id": "partner-beakon",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Thunderous",
+          "sourceSha256": "1a69439a7caed790d44185c3b42672cfecb5764524deeb752b945a8c1eff97b6"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player's attack type to Electric and increases Attack by 13%. This Pal’s Movement Speed increases by 5% for each other Electric Pal in your party. (Excluding Beakon)",
+          "sourceSha256": "c70fbea08d67cd001b711dec029acfcf08f5bac0b9651a95852f590c8073e12d"
+        }
+      }
+    },
+    {
+      "id": "partner-beakon-cryst",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Coldsnap",
+          "sourceSha256": "f7a30d88e7e42de29b875d998d518f40a0b1004de4a13527b41e0074afffb60f"
+        },
+        "description": {
+          "sourceText": "Can be ridden as a flying mount. While mounted, changes the player's attack type to Ice and increases Attack by 13%. This Pal’s Movement Speed increases by 5% for each other Ice Pal in your party. (Excluding Beakon Cryst)",
+          "sourceSha256": "484d074ca540e07d4bd9a6df8b304bdc3f98360a20e00d9377263bee49d257d9"
+        }
+      }
+    },
+    {
+      "id": "partner-beegarde",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Worker Bee",
+          "sourceSha256": "a089b7ebcbe0408bce09f0a1031e7a41f9b75b2dd430ac18f1799a6414f407f4"
+        },
+        "description": {
+          "sourceText": "While in party, increases Elizabee's Attack. Sometimes drops Honey when assigned to Ranch.",
+          "sourceSha256": "767338df234aa1c482537c3ed10e9e523fced616ab3a33f49ce9c4f7637e6105"
+        }
+      }
+    },
+    {
+      "id": "partner-bellanoir",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Nightmare Iris",
+          "sourceSha256": "c0a309f72c27b88ec36581d6bf3fc9468c719aeb2936c49dc02493fc9e73a474"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Nightmare Ray. When this Pal uses Nightmare Ray, it has a x1.1/1.3/1.6/2/2.5 damage multiplier.",
+          "sourceSha256": "2902ae7a455287dcba75b5b0d8d08e9fb6ffd74b2250537357bbd0843493ec3e"
+        }
+      }
+    },
+    {
+      "id": "partner-bellanoir-libero",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Nightmare Stare",
+          "sourceSha256": "ca76527bed63429f825d098e7b2f5ee08f1e041c7f900042e01b20247473ab7c"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Nightmare Bloom. When this Pal uses Nightmare Bloom, it has a x1.1/1.3/1.6/2/2.5 damage multiplier.",
+          "sourceSha256": "e471b42545c3baf9d57bdf42d9d7796f2b8a36d1851cce8f65d25e30e092e28b"
+        }
+      }
+    },
+    {
+      "id": "partner-blazamut",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Magma Kaiser",
+          "sourceSha256": "73a9423283b03f268073dbba62cf040d4a2b8da95bd30c6e6c914d994377f264"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, increases the Attack and Defense of the Pal fighting alongside you by 5% whenever you defeat an enemy. This effect lasts 20 seconds and stacks up to five times.",
+          "sourceSha256": "374d9829648c608635d6d2499581676b999aefa2a290b7371dcd82995064c87c"
+        }
+      }
+    },
+    {
+      "id": "partner-blazamut-ryu",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Kaiser",
+          "sourceSha256": "d14d863e4ab0d3930526fb9f46dce367d57dd73b0aebf707cb396bdeb2a2475f"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, improves player's and Pals' Dragon damage to enemy weak points by 25%. (Does not stack)",
+          "sourceSha256": "5495356cc2b4e84f9f55b7e85b5e62f7c153d458a7c96e893eda84a66b78b66c"
+        }
+      }
+    },
+    {
+      "id": "partner-blazehowl",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Hellflame Lion",
+          "sourceSha256": "60500af7eb16edf37bb9e9ca8cd413a2e0490e1db45117bfef400b90c5041c2a"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, Grass Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "e911b1bdd75c941381814925a0fc9a54136a887aecdbb97448ac17b0ba5e26c8"
+        }
+      }
+    },
+    {
+      "id": "partner-blazehowl-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Darkflame Lion",
+          "sourceSha256": "c10f9273c5bef83a6f2f68e0479053fc94e2d857eca41d8a8c2c3c5ed3d3cf8f"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, Neutral Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "3c411aa3474009ca7a5c66d163d791d5aca11fbc7662bdd2b4a7a88666d5bb98"
+        }
+      }
+    },
+    {
+      "id": "partner-braloha",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Balmy Weather",
+          "sourceSha256": "da0ed5936a6339688496d0ceba7abc2952400492c278a82cabc92ee61f4fbf00"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in your base, increases the egg production speed of Pals assigned to Breeding Farm by 20%. (Does not stack)",
+          "sourceSha256": "45b32c5b47387d0e5c7f3eb376bee01a136deea024dfbca6b651d715c87228e0"
+        }
+      }
+    },
+    {
+      "id": "partner-bristla",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Princess Gaze",
+          "sourceSha256": "a6288f741895a06ccdc7a5c858bb1e03ad1878d2aae8861de8dcf275b0b303f6"
+        },
+        "description": {
+          "sourceText": "While in party, increases Attack of Grass Pals by 15%. (Does not stack)",
+          "sourceSha256": "c375600de8008021672afe0b00642ff86730300afcf6582674ab75a49f917c7c"
+        }
+      }
+    },
+    {
+      "id": "partner-broncherry",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Love's First Blossom",
+          "sourceSha256": "ea69f048a8b26aef7ad73c29e660ceb1e203bd1668e9bf99fa71039a8281d5d7"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, Pal Eggs you pick up have a 35% chance of becoming an Alpha Pal Egg. (Does not stack)",
+          "sourceSha256": "1eaed5c9d1ff7961ca1b501f17b873688f8d1448a83b68338bcf59e6e0bbe3de"
+        }
+      }
+    },
+    {
+      "id": "partner-broncherry-aqua",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Purity's Full Bloom",
+          "sourceSha256": "6620d8823dd8a2e1b61870e36510cd341dde7b0cdc0cd1bf9d8886ed5255426d"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, Pal Eggs you pick up have a 45% chance of becoming an Alpha Pal Egg. (Does not stack)",
+          "sourceSha256": "e13cf95d9e7a507b9fd52641efef6bc9e8388bdcf6942a11d3df9aff6a473835"
+        }
+      }
+    },
+    {
+      "id": "partner-bulldosu",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Yokozuna's Presence",
+          "sourceSha256": "1e34b425aee494ada8f40022b5b79a2cedc9d8fed957fa1b9cc9446267c7e402"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, player and party Pals take 15% less Electric damage and are immune to Electrify. (Does not stack)",
+          "sourceSha256": "3307334e61c9fdb5fda3080fb40e23bc4adf87214eb604e26e6590f7ea292e43"
+        }
+      }
+    },
+    {
+      "id": "partner-bushi",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Brandish Blade",
+          "sourceSha256": "0f817abbbe84ebdd58a036971027a56264786ffcbc59a0c55618be8a7d49b2d0"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Iaigiri. When this Pal uses Iaigiri, it has a x1.1/1.3/1.6/2/2.5 damage multiplier.",
+          "sourceSha256": "7bb3f36e39ed5c18fe12e846d4b4a530c670359dd261c400899f14a5c3de8692"
+        }
+      }
+    },
+    {
+      "id": "partner-bushi-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Void Blade",
+          "sourceSha256": "4fb7c7cf4ca3e5b8a5c609ecda0c1c213b34be0c990bf621b8bd7dede5cf23b9"
+        },
+        "description": {
+          "sourceText": "When activated, attacks targeted enemy with Iaigiri. When this Pal uses Iaigiri, it has a x1.1/1.3/1.6/2/2.5 damage multiplier. While in party, increases the player's melee weapon damage by 30% but only when not in combat. (Does not stack)",
+          "sourceSha256": "86eae962b8959851d3795e294994d65e5d1717fb174eae8588876ce72c9226df"
+        }
+      }
+    },
+    {
+      "id": "partner-caprity",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Berry Picker",
+          "sourceSha256": "902b1dae140002c9936448fd2374d23900dbffd225bafd96951c535877cbd0f0"
+        },
+        "description": {
+          "sourceText": "Sometimes drops Red Berries from its back when assigned to Ranch. While in party, restores 100 Pal’s Hunger to the Pal with the lowest Hunger every 5 minutes. (Does not stack)",
+          "sourceSha256": "ab81251b48f9edd1b3e21d0f1de19038b4cb1bd73420618a8ceae573216154c9"
+        }
+      }
+    },
+    {
+      "id": "partner-caprity-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Venom Picker",
+          "sourceSha256": "84f9850826cb667b0c065b0d7932478274fdc5227293fb3362ad79efeda1eccd"
+        },
+        "description": {
+          "sourceText": "Sometimes drops Venom Gland from its back when assigned to Ranch. While in party, restores 100 Pal’s Hunger to the Pal with the lowest Hunger every 5 minutes. (Does not stack)",
+          "sourceSha256": "b81db51f1f77b0c673fb0d00e34d30bc4efa648e7161bbbd47a22bae0a3d1a56"
+        }
+      }
+    },
+    {
+      "id": "partner-carnibora",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Entangling Tongue",
+          "sourceSha256": "c7ed38f3ec98ce4bf225dea14d2af4690b96007e40660a4e7ee3f927ea0d5239"
+        },
+        "description": {
+          "sourceText": "While in party, when the player performs a dodge roll or dodge step, Carnibora creates a whirlwind that deals damage to enemies it touches (Grass / Power: 40). (Does not stack)",
+          "sourceSha256": "68c2a90cd18e3e90765bf6c162be3e4291801ff26801cf90bd42f90b7b3497d4"
+        }
+      }
+    },
+    {
+      "id": "partner-cattiva",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Cat Helper",
+          "sourceSha256": "544ddda263fc02cccaba846c162e9d67358f95c250f55775be3caf977f4691de"
+        },
+        "description": {
+          "sourceText": "While in party, Cattiva helps carry supplies, increasing the player's max carrying capacity by 100. (Does not stack)",
+          "sourceSha256": "afa7b65caf1b380b9563a7c6bf373d5b3dd99567893320f1973b097234b3d16e"
+        }
+      }
+    },
+    {
+      "id": "partner-cawgnito",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Eerie Nightstreaker",
+          "sourceSha256": "a32c65a9cd63db2be390588421e9b5065369ffbd73eb2a81f0a2fc038bb4c2f9"
+        },
+        "description": {
+          "sourceText": "When activated, grants Night Vision to see in dark places. Activate again to turn off. Sometimes digs up Bone when assigned to Ranch.",
+          "sourceSha256": "1f86fec40cf5950890d45b7a8980eef2e500c7c16c533e0f35c8eef5a3f57cec"
+        }
+      }
+    },
+    {
+      "id": "partner-celaray",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Zephyr Glider",
+          "sourceSha256": "37b10b4273b456de3bfa17b02e899325ed62a0e98b03ead2d0d8cdab005fb10f"
+        },
+        "description": {
+          "sourceText": "While in party, modifies the performance of the equipped glider. Prevents fall damage and extends the duration of high-speed gliding.",
+          "sourceSha256": "b1415121e82e9db29ee36ddf81f2e1c411fe57d3f5c77efb191e264476281131"
+        }
+      }
+    },
+    {
+      "id": "partner-celaray-lux",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Jolt Glider",
+          "sourceSha256": "e463bc48d4514cb0f6c691cfa32e5d54a90ca8b2233bd34d27734032b7121b84"
+        },
+        "description": {
+          "sourceText": "While in party, modifies the performance of the equipped glider. Prevents fall damage and extends the duration of high-speed gliding.",
+          "sourceSha256": "b1415121e82e9db29ee36ddf81f2e1c411fe57d3f5c77efb191e264476281131"
+        }
+      }
+    },
+    {
+      "id": "partner-celesdir-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Blessing of Chaos",
+          "sourceSha256": "0afaf190c5c6e13792c51dd7c296c8858c54d25c0215a73becd77319522416f3"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While in party, the Pal fighting alongside you gradually loses Health in exchange for 40% Attack increase. (Does not stack)",
+          "sourceSha256": "25beedef04810c3c63b5b30839d436ff82a957f1d3bde98552e5baec697c0885"
+        }
+      }
+    },
+    {
+      "id": "partner-chikipi",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Egg Layer",
+          "sourceSha256": "accfc3682261614132d44de9cd4279536d874a159b92072514548ee6951e1b12"
+        },
+        "description": {
+          "sourceText": "Sometimes lays an Egg when assigned to Ranch.",
+          "sourceSha256": "fa299615764afbaa57daa52559272a0d30c1896e1f05bae1bb78dabd6cab7c2a"
+        }
+      }
+    },
+    {
+      "id": "partner-chillet",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Wriggling Weasel",
+          "sourceSha256": "b21af1bd21754a0e7c95cf3f8f8c895bf8972c9834f3d7dfdef72da5a3ae3de4"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, changes the player’s attack type to Dragon and increases Attack by 1%.",
+          "sourceSha256": "16aade1aa7263c421cbdf3471a4a4ec46d70d4e9819c508d72668f02b8e3d496"
+        }
+      }
+    },
+    {
+      "id": "partner-chillet-ignis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sparkling Weasel",
+          "sourceSha256": "be3c02bd11ac55a6e82a444f41b9f46c86d30121bec9a36de24679ea43061202"
+        },
+        "description": {
+          "sourceText": "Can be ridden. While mounted, changes the player’s attack type to Fire and increases Attack by 1%.",
+          "sourceSha256": "b3467d18f7f9889f30bacf99f9a4c41dac9843fcb955553494c5298685d63567"
+        }
+      }
+    },
+    {
+      "id": "partner-cinnamoth",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Mysterious Scales",
+          "sourceSha256": "4e7d1a937ffedb19af26dd15bf857915a2c7da5d415ac983bfd1c8df449fb1e0"
+        },
+        "description": {
+          "sourceText": "When activated, attacks the targeted enemy with Poison Fog. While at a base, increases the Farming Work Suitability Level for all other Base Pals by +1. (Does not stack)",
+          "sourceSha256": "503596a2fd14e197460801eed7c47fee3691260085285bee1dac1b0c2d9856f4"
+        }
+      }
+    },
+    {
+      "id": "partner-clovee",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Happy Clover",
+          "sourceSha256": "c1f4d0f5b070b78c4fba1c8c7ddc5a03be7e55b3914fab2b003cec6c63fcc24d"
+        },
+        "description": {
+          "sourceText": "While at a base, increases the Gathering Work Suitability Level for all other Base Pals by +1. (Does not stack)",
+          "sourceSha256": "47ffac100fc8578a8c765455406f4fb084c63fc42561164c28aea9d991c7ed4c"
+        }
+      }
+    },
+    {
+      "id": "partner-cremis",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Fluffy Wool",
+          "sourceSha256": "e249bad5fcb9d4f13683aa67b7c60eeed75927ec0f1e2534c66b28cd20f5f9d6"
+        },
+        "description": {
+          "sourceText": "While in party, increases Attack of Neutral Pals by 15%. (Does not stack) Sometimes drops Wool when assigned to Ranch.",
+          "sourceSha256": "9e2d95249fa7307c80442a158adf43d932c8dd025acb7330b985bf4232c896f8"
+        }
+      }
+    },
+    {
+      "id": "partner-croajiro",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Leap Stance",
+          "sourceSha256": "9b26a487a7e0b27acbb038e2275efc2a73c43ce67aed228604c0b10d4ed4a9ed"
+        },
+        "description": {
+          "sourceText": "When activated, Croajiro Noct channels its loyalty and puffs up its abdomen to store energy. Climbing on top will propel the player high into the air. While airborne before landing, the player's Attack is increased by 50%.",
+          "sourceSha256": "ec9aa995ff3fe0649688f71aba26caf86bc93d7ce8439096b9fd4e760bcff4e5"
+        }
+      }
+    },
+    {
+      "id": "partner-croajiro-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Shadow Stance",
+          "sourceSha256": "6cb77dbda37156d4f2d6bc844dd75b7240f9d094af2c0e00cc0768793f03e211"
+        },
+        "description": {
+          "sourceText": "When activated, Croajiro Noct channels its loyalty and puffs up its abdomen to store energy. Climbing on top will propel the player high into the air. While in party, improves player's and Pals' Dark damage to enemy weak points by 25%. (Does not stack)",
+          "sourceSha256": "e2106fc25d4cff85c0fbbbfe3ae4a0a3e9578aed6d5696c9abb89b9407b850b9"
+        }
+      }
+    },
+    {
+      "id": "partner-cryolinx",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dragon Hunter",
+          "sourceSha256": "4d6f687b3c9323004ab15c076dcf20fbe862acdec9dd5bac3112f5c5a55e61be"
+        },
+        "description": {
+          "sourceText": "While in party, Dragon Pals drop 40% more items when defeated. (Does not stack)",
+          "sourceSha256": "08477d70b772537c134a2a477229623db08c8dd647123dcfe88457a321bc65a8"
+        }
+      }
+    },
+    {
+      "id": "partner-cryolinx-terra",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Explosive Strength",
+          "sourceSha256": "b414ca03b89063815334300d1566603c4ba0b91dbefdfa08fc5519fea404a97d"
+        },
+        "description": {
+          "sourceText": "While in party, when attacking enemy weak point, increases the power of the next weak point attack by 30%. (Does not stack)",
+          "sourceSha256": "8641319f494f6858893ca5043e8c3e4fe7bf930b9b9bd9d3c1a2b21f1b9fc5a6"
+        }
+      }
+    },
+    {
+      "id": "partner-daedream",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Dream Chaser",
+          "sourceSha256": "d25e05b63a366b6f7955680e25ca51d077ee94c418dad422f217700225ed4cfc"
+        },
+        "description": {
+          "sourceText": "While in party, appears near the player. Attacks hostile enemies with Dark magic bullets. These bullets will not reduce the target's Health below 1.",
+          "sourceSha256": "0a880fba88c3391cc32e86b2c7d66010091bf29cdf4ea5854186ea324c73ec42"
+        }
+      }
+    },
+    {
+      "id": "partner-dandilord",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Mist Stalwart",
+          "sourceSha256": "f5d1052f80851dd8759da0139400ee8c350716974442a9610da036b4bfc7a05c"
+        },
+        "description": {
+          "sourceText": "When activated, the player's attacks inflict Poison 2. While in party, grants the player and party Pals immunity to Poison, and nullifies the effects of toxic gas in the World Tree area. (Does not stack)",
+          "sourceSha256": "2a2d0be11fb5eb043c27074a48201c8fa9bbff01b2fa4c3bc5fae0d730e28bc2"
+        }
+      }
+    },
+    {
+      "id": "partner-dazemu",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Sand Sprint",
+          "sourceSha256": "b75c8bab4d054af87c62da460cc08ee7fa83a6a527c0882b0d8cd77de2db9863"
+        },
+        "description": {
+          "sourceText": "Can be ridden. Movement Speed is increased by 50% while mounted on sand.",
+          "sourceSha256": "1a7fc1cd4560cc5c43af7de775380460986b3f7d00030803d3b065c47dd1d8dd"
+        }
+      }
+    },
+    {
+      "id": "partner-dazzi",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lady of Lightning",
+          "sourceSha256": "3308857f70d307fe161648ffb8b8bde5354bc828de09f9a63291bdd568e0cc7a"
+        },
+        "description": {
+          "sourceText": "While in party, appears near the player. Attacks hostile enemies with Electric bolts. These bolts will not reduce the target's Health below 1.",
+          "sourceSha256": "3a045d5a5ff048484b6d259da143bad6633afb8ae06d32fa1baebf5ec77098f8"
+        }
+      }
+    },
+    {
+      "id": "partner-dazzi-noct",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Lady of Dark Lightning",
+          "sourceSha256": "7d95c1ce8ab32e8a7a4cffe185a00298653e428d185295ef22b240629910800a"
+        },
+        "description": {
+          "sourceText": "While in party, appears near the player. Attacks hostile enemies with Dark bolts. These bolts will not reduce the target's Health below 1.",
+          "sourceSha256": "07c2e60681d62d8c94badb00abdeb85587f2b82b07cd5a143e019544887b136d"
+        }
+      }
+    },
+    {
+      "id": "partner-depresso",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceText": "Caffeine Inoculation",
+          "sourceSha256": "6f46648475dc61edf8ea073a0c82941fa1f7ad5515c26119f34333f3d2e00ce4"
+        },
+        "description": {
+          "sourceText": "When activated, Depresso chugs an entire energy drink, increasing its Movement Speed and Work Speed by 100%. Sometimes drops Venom Gland when assigned to Ranch.",
+          "sourceSha256": "4232f526f2522bb9544513de739ffece4720d7b411ce49ff0262e08a729f0f90"
+        }
+      }
+    }
+  ]
+}
