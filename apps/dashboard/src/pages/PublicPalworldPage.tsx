@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PublicTwitchFollowedLolResponse, PublicTwitchViewerStatus } from "../features/public-lol/types/public-lol";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import {
@@ -9,15 +9,14 @@ import {
   ToastTitle,
   ToastViewport,
 } from "../shared/ui/Toast";
+import { SkeletonCard } from "../shared/ui/Skeleton";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { PalworldBreedingPage } from "../features/public-palworld/components/PalworldBreedingPage";
-import { ItemDetailModal, PalDetailModal } from "../features/public-palworld/components/PalworldDetailModals";
 import { PalworldHeader } from "../features/public-palworld/components/PalworldHeader";
 import { PalworldHome } from "../features/public-palworld/components/PalworldHome";
 import { PalworldItemsPage } from "../features/public-palworld/components/PalworldItemsPage";
-import { PalworldMapPage } from "../features/public-palworld/components/PalworldMapPage";
 import { PalworldNotFoundPage } from "../features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldPalsPage } from "../features/public-palworld/components/PalworldPalsPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
@@ -39,6 +38,9 @@ import {
 } from "../features/public-twitch/api";
 
 const noServerLocalePreference = async (): Promise<PalworldLocale | undefined> => undefined;
+const PalworldMapPage = lazy(async () => ({ default: (await import("../features/public-palworld/components/PalworldMapPage")).PalworldMapPage }));
+const PalDetailModal = lazy(async () => ({ default: (await import("../features/public-palworld/components/PalworldDetailModals")).PalDetailModal }));
+const ItemDetailModal = lazy(async () => ({ default: (await import("../features/public-palworld/components/PalworldDetailModals")).ItemDetailModal }));
 
 const EMPTY_TWITCH_STATUS: PublicTwitchViewerStatus = {
   connected: false,
@@ -315,7 +317,15 @@ export function PublicPalworldPage({
       </AppShellHeader>
       <AppShellMain className="palworld-main" id="palworld-main">
         {!knownPage ? <PalworldNotFoundPage locale={locale} /> : null}
-        {knownPage ? <>
+        {knownPage ? <Suspense fallback={(
+          <SkeletonCard
+            className="palworld-page-section"
+            data-ko={palworldI18n.ko.loading}
+            data-ja={palworldI18n.ja.loading}
+            loadingLabel={text.loading}
+            size="lg"
+          />
+        )}>
         {page === "home" ? (
           <PalworldHome
             liveError={twitchError}
@@ -350,11 +360,31 @@ export function PublicPalworldPage({
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
         {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} onOpenPal={openPalPage} /> : null}
         {page === "map" ? <PalworldMapPage locale={locale} /> : null}
-        </> : null}
+        </Suspense> : null}
       </AppShellMain>
       <PalworldSourceFooter locale={locale} />
-      <PalDetailModal palId={selectedPalId} locale={locale} onClose={closeDetail} onOpenItem={openItemPage} />
-      <ItemDetailModal itemId={selectedItemId} locale={locale} onClose={closeDetail} onOpenPal={openPalPage} onOpenItem={openItemPage} />
+      {selectedPalId ? (
+        <Suspense fallback={(
+          <SkeletonCard
+            data-ko={palworldI18n.ko.loading}
+            data-ja={palworldI18n.ja.loading}
+            loadingLabel={text.loading}
+          />
+        )}>
+          <PalDetailModal palId={selectedPalId} locale={locale} onClose={closeDetail} onOpenItem={openItemPage} />
+        </Suspense>
+      ) : null}
+      {selectedItemId ? (
+        <Suspense fallback={(
+          <SkeletonCard
+            data-ko={palworldI18n.ko.loading}
+            data-ja={palworldI18n.ja.loading}
+            loadingLabel={text.loading}
+          />
+        )}>
+          <ItemDetailModal itemId={selectedItemId} locale={locale} onClose={closeDetail} onOpenPal={openPalPage} onOpenItem={openItemPage} />
+        </Suspense>
+      ) : null}
       <ToastProvider position="bottom-right">
         <ToastViewport>
           {versionMismatch ? (

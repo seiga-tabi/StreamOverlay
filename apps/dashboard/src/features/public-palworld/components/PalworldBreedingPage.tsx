@@ -50,7 +50,7 @@ function unavailableError(error: unknown): boolean {
 
 function PairPal({ locale, pal, role }: { locale: PalworldLocale; pal: PalworldPalReference; role: string }) {
   const name = resolvePalworldName(pal, locale);
-  return <div className="palworld-breeding-pal"><span><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span><div><small>{role} · {formatPalNumber(pal.number)}</small><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><div className="palworld-badge-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</div></div></div>;
+  return <div className="palworld-breeding-pal"><span><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span><div><small>{role} · {formatPalNumber(pal.number, locale)}</small><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><div className="palworld-badge-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</div></div></div>;
 }
 
 export function PalworldBreedingPage({
@@ -251,7 +251,7 @@ export function PalworldBreedingPage({
   const reverseLoading = reverse.status === "loading";
 
   return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">BREEDING</span><h1 data-ko={palworldI18n.ko.breeding} data-ja={palworldI18n.ja.breeding}>{text.breeding}</h1><p data-ko={palworldI18n.ko.breedingDescription} data-ja={palworldI18n.ja.breedingDescription}>{text.breedingDescription}</p></div></header>
+    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.breedingKicker}</span><h1 data-ko={palworldI18n.ko.breeding} data-ja={palworldI18n.ja.breeding}>{text.breeding}</h1><p data-ko={palworldI18n.ko.breedingDescription} data-ja={palworldI18n.ja.breedingDescription}>{text.breedingDescription}</p></div></header>
     {!parsedQuery.ok ? (
       <PalworldError
         description={text.invalidBreedingQueryDescription}

@@ -1,0 +1,2135 @@
+{
+  "schemaVersion": 1,
+  "candidateRelease": "candidate-1248184a4b527d94",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "entries": [
+    {
+      "sourceRowId": "NewRow_76",
+      "sourceInternalId": "AcidRain",
+      "nameMessageKey": "ACTION_SKILL_AcidRain",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_152",
+      "sourceInternalId": "AirBlade",
+      "nameMessageKey": "ACTION_SKILL_AirBlade",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_7",
+      "sourceInternalId": "AirCanon",
+      "nameMessageKey": "ACTION_SKILL_AirCanon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_130",
+      "sourceInternalId": "Apocalypse",
+      "nameMessageKey": "ACTION_SKILL_Apocalypse",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_6",
+      "sourceInternalId": "AquaJet",
+      "nameMessageKey": "ACTION_SKILL_AquaJet",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_122",
+      "sourceInternalId": "BeamSlicer",
+      "nameMessageKey": "ACTION_SKILL_BeamSlicer",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_142",
+      "sourceInternalId": "BlastCanon",
+      "nameMessageKey": "ACTION_SKILL_BlastCanon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_50",
+      "sourceInternalId": "BlizzardLance",
+      "nameMessageKey": "ACTION_SKILL_BlizzardLance",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_51",
+      "sourceInternalId": "BubbleShot",
+      "nameMessageKey": "ACTION_SKILL_BubbleShot",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_164",
+      "sourceInternalId": "BubbleShower",
+      "nameMessageKey": "ACTION_SKILL_BubbleShower",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_139",
+      "sourceInternalId": "ChargeCanon",
+      "nameMessageKey": "ACTION_SKILL_ChargeCanon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_125",
+      "sourceInternalId": "Commet",
+      "nameMessageKey": "ACTION_SKILL_Commet",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_144",
+      "sourceInternalId": "CommetRain",
+      "nameMessageKey": "ACTION_SKILL_CommetRain",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_326",
+      "sourceInternalId": "CreepingBubble",
+      "nameMessageKey": "ACTION_SKILL_CreepingBubble",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_175",
+      "sourceInternalId": "CrossWind",
+      "nameMessageKey": "ACTION_SKILL_CrossWind",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_128",
+      "sourceInternalId": "DarkArrow",
+      "nameMessageKey": "ACTION_SKILL_DarkArrow",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_27",
+      "sourceInternalId": "DarkBall",
+      "nameMessageKey": "ACTION_SKILL_DarkBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_127",
+      "sourceInternalId": "DarkCanon",
+      "nameMessageKey": "ACTION_SKILL_DarkCanon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_106",
+      "sourceInternalId": "DarkLaser",
+      "nameMessageKey": "ACTION_SKILL_DarkLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_117",
+      "sourceInternalId": "DarkLegion",
+      "nameMessageKey": "ACTION_SKILL_DarkLegion",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_126",
+      "sourceInternalId": "DarkPulse",
+      "nameMessageKey": "ACTION_SKILL_DarkPulse",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_34",
+      "sourceInternalId": "DarkWave",
+      "nameMessageKey": "ACTION_SKILL_DarkWave",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_121",
+      "sourceInternalId": "DiamondFall",
+      "nameMessageKey": "ACTION_SKILL_DiamondFall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_173",
+      "sourceInternalId": "DiversionLaser",
+      "nameMessageKey": "ACTION_SKILL_DiversionLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_168",
+      "sourceInternalId": "DoubleIcicleThrow",
+      "nameMessageKey": "ACTION_SKILL_DoubleIcicleThrow",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_57",
+      "sourceInternalId": "DragonBreath",
+      "nameMessageKey": "ACTION_SKILL_DragonBreath",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_13",
+      "sourceInternalId": "DragonCanon",
+      "nameMessageKey": "ACTION_SKILL_DragonCanon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_109",
+      "sourceInternalId": "DragonMeteor",
+      "nameMessageKey": "ACTION_SKILL_DragonMeteor",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_36",
+      "sourceInternalId": "DragonWave",
+      "nameMessageKey": "ACTION_SKILL_DragonWave",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_16",
+      "sourceInternalId": "ElecWave",
+      "nameMessageKey": "ACTION_SKILL_ElecWave",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_145",
+      "sourceInternalId": "Eruption",
+      "nameMessageKey": "ACTION_SKILL_Eruption",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_111",
+      "sourceInternalId": "FireBall",
+      "nameMessageKey": "ACTION_SKILL_FireBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_10",
+      "sourceInternalId": "FireBlast",
+      "nameMessageKey": "ACTION_SKILL_FireBlast",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_25",
+      "sourceInternalId": "FireSeed",
+      "nameMessageKey": "ACTION_SKILL_FireSeed",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_159",
+      "sourceInternalId": "FlameFunnel",
+      "nameMessageKey": "ACTION_SKILL_FlameFunnel",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_58",
+      "sourceInternalId": "Flamethrower",
+      "nameMessageKey": "ACTION_SKILL_Flamethrower",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_151",
+      "sourceInternalId": "FlameWall",
+      "nameMessageKey": "ACTION_SKILL_FlameWall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_44",
+      "sourceInternalId": "FlareArrow",
+      "nameMessageKey": "ACTION_SKILL_FlareArrow",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_75",
+      "sourceInternalId": "FlareTornado",
+      "nameMessageKey": "ACTION_SKILL_FlareTornado",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_80",
+      "sourceInternalId": "FrostBreath",
+      "nameMessageKey": "ACTION_SKILL_FrostBreath",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_68",
+      "sourceInternalId": "GhostFlame",
+      "nameMessageKey": "ACTION_SKILL_GhostFlame",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_74",
+      "sourceInternalId": "GrassTornado",
+      "nameMessageKey": "ACTION_SKILL_GrassTornado",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_231",
+      "sourceInternalId": "GravityShot",
+      "nameMessageKey": "ACTION_SKILL_GravityShot",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_148",
+      "sourceInternalId": "HolyBlast",
+      "nameMessageKey": "ACTION_SKILL_HolyBlast",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_105",
+      "sourceInternalId": "HydroPump",
+      "nameMessageKey": "ACTION_SKILL_HydroPump",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_172",
+      "sourceInternalId": "HydroSlicer",
+      "nameMessageKey": "ACTION_SKILL_HydroSlicer",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_107",
+      "sourceInternalId": "HyperBeam",
+      "nameMessageKey": "ACTION_SKILL_HyperBeam",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_169",
+      "sourceInternalId": "IceAge",
+      "nameMessageKey": "ACTION_SKILL_IceAge",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_40",
+      "sourceInternalId": "IceBlade",
+      "nameMessageKey": "ACTION_SKILL_IceBlade",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_11",
+      "sourceInternalId": "IceMissile",
+      "nameMessageKey": "ACTION_SKILL_IceMissile",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_166",
+      "sourceInternalId": "IceWall",
+      "nameMessageKey": "ACTION_SKILL_IceWall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_179",
+      "sourceInternalId": "IcicleLine",
+      "nameMessageKey": "ACTION_SKILL_IcicleLine",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_167",
+      "sourceInternalId": "IciclePierce",
+      "nameMessageKey": "ACTION_SKILL_IciclePierce",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_98",
+      "sourceInternalId": "IcicleThrow",
+      "nameMessageKey": "ACTION_SKILL_IcicleThrow",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_101",
+      "sourceInternalId": "Inferno",
+      "nameMessageKey": "ACTION_SKILL_Inferno",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_102",
+      "sourceInternalId": "LightningStrike",
+      "nameMessageKey": "ACTION_SKILL_LightningStrike",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_138",
+      "sourceInternalId": "LineGeyser",
+      "nameMessageKey": "ACTION_SKILL_LineGeyser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_67",
+      "sourceInternalId": "LineThunder",
+      "nameMessageKey": "ACTION_SKILL_LineThunder",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_52",
+      "sourceInternalId": "LockonLaser",
+      "nameMessageKey": "ACTION_SKILL_LockonLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_12",
+      "sourceInternalId": "MudShot",
+      "nameMessageKey": "ACTION_SKILL_MudShot",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_0",
+      "sourceInternalId": "PoisonFog",
+      "nameMessageKey": "ACTION_SKILL_PoisonFog",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_18",
+      "sourceInternalId": "PoisonShot",
+      "nameMessageKey": "ACTION_SKILL_PoisonShot",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_59",
+      "sourceInternalId": "PowerBall",
+      "nameMessageKey": "ACTION_SKILL_PowerBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_17",
+      "sourceInternalId": "PowerShot",
+      "nameMessageKey": "ACTION_SKILL_PowerShot",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_306",
+      "sourceInternalId": "RadiantBarrage",
+      "nameMessageKey": "ACTION_SKILL_RadiantBarrage",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_170",
+      "sourceInternalId": "RaidCutter",
+      "nameMessageKey": "ACTION_SKILL_RaidCutter",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_162",
+      "sourceInternalId": "Railbolt",
+      "nameMessageKey": "ACTION_SKILL_RailBolt",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_161",
+      "sourceInternalId": "RangeThunder",
+      "nameMessageKey": "ACTION_SKILL_RangeThunder",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_233",
+      "sourceInternalId": "ReflectiveShuriken",
+      "nameMessageKey": "ACTION_SKILL_ReflectiveShuriken",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_129",
+      "sourceInternalId": "RipTide",
+      "nameMessageKey": "ACTION_SKILL_RipTide",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_210",
+      "sourceInternalId": "RockBeat",
+      "nameMessageKey": "ACTION_SKILL_RockBeat",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_108",
+      "sourceInternalId": "RockLance",
+      "nameMessageKey": "ACTION_SKILL_RockLance",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_82",
+      "sourceInternalId": "RootAttack",
+      "nameMessageKey": "ACTION_SKILL_RootAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_135",
+      "sourceInternalId": "RootLance",
+      "nameMessageKey": "ACTION_SKILL_RootLance",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_73",
+      "sourceInternalId": "SandTornado",
+      "nameMessageKey": "ACTION_SKILL_SandTornado",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_160",
+      "sourceInternalId": "SandTwister",
+      "nameMessageKey": "ACTION_SKILL_SandTwister",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_224",
+      "sourceInternalId": "SeaGush",
+      "nameMessageKey": "ACTION_SKILL_SeaGush",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_22",
+      "sourceInternalId": "SeedMachinegun",
+      "nameMessageKey": "ACTION_SKILL_SeedMachinegun",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_31",
+      "sourceInternalId": "SeedMine",
+      "nameMessageKey": "ACTION_SKILL_SeedMine",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_113",
+      "sourceInternalId": "SelfDestruct",
+      "nameMessageKey": "ACTION_SKILL_SelfDestruct",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_114",
+      "sourceInternalId": "SelfDestruct_Bee",
+      "nameMessageKey": "ACTION_SKILL_SelfDestruct_Bee",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_118",
+      "sourceInternalId": "SelfExplosion",
+      "nameMessageKey": "ACTION_SKILL_SelfExplosion",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_84",
+      "sourceInternalId": "ShadowBall",
+      "nameMessageKey": "ACTION_SKILL_ShadowBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_163",
+      "sourceInternalId": "ShokeiLaser",
+      "nameMessageKey": "ACTION_SKILL_ShokeiLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_112",
+      "sourceInternalId": "SolarBeam",
+      "nameMessageKey": "ACTION_SKILL_SolarBeam",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_9",
+      "sourceInternalId": "SpecialCutter",
+      "nameMessageKey": "ACTION_SKILL_SpecialCutter",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_14",
+      "sourceInternalId": "SpreadPulse",
+      "nameMessageKey": "ACTION_SKILL_SpreadPulse",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_133",
+      "sourceInternalId": "StarMine",
+      "nameMessageKey": "ACTION_SKILL_StarMine",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_29",
+      "sourceInternalId": "StoneShotgun",
+      "nameMessageKey": "ACTION_SKILL_StoneShotgun",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_143",
+      "sourceInternalId": "ThreeCommet",
+      "nameMessageKey": "ACTION_SKILL_ThreeCommet",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_79",
+      "sourceInternalId": "ThreeThunder",
+      "nameMessageKey": "ACTION_SKILL_ThreeThunder",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_33",
+      "sourceInternalId": "ThrowRock",
+      "nameMessageKey": "ACTION_SKILL_ThrowRock",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_24",
+      "sourceInternalId": "ThunderBall",
+      "nameMessageKey": "ACTION_SKILL_ThunderBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_110",
+      "sourceInternalId": "Thunderbolt",
+      "nameMessageKey": "ACTION_SKILL_Thunderbolt",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_37",
+      "sourceInternalId": "ThunderFunnel",
+      "nameMessageKey": "ACTION_SKILL_ThunderFunnel",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_97",
+      "sourceInternalId": "ThunderRain",
+      "nameMessageKey": "ACTION_SKILL_ThunderRain",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_232",
+      "sourceInternalId": "ThunderSpear",
+      "nameMessageKey": "ACTION_SKILL_ThunderSpear",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_157",
+      "sourceInternalId": "ThunderStorm",
+      "nameMessageKey": "ACTION_SKILL_ThunderStorm",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_120",
+      "sourceInternalId": "Tremor",
+      "nameMessageKey": "ACTION_SKILL_Tremor",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_156",
+      "sourceInternalId": "TriSpark",
+      "nameMessageKey": "ACTION_SKILL_TriSpark",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_26",
+      "sourceInternalId": "Unique_Alpaca_Tackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_Alpaca_Tackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_288",
+      "sourceInternalId": "Unique_AmaterasuWolf_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_AmaterasuWolf_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_289",
+      "sourceInternalId": "Unique_AmaterasuWolf_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_AmaterasuWolf_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_290",
+      "sourceInternalId": "Unique_AmaterasuWolf_Dark_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_AmaterasuWolf_Dark_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_291",
+      "sourceInternalId": "Unique_AmaterasuWolf_Dark_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_AmaterasuWolf_Dark_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_207",
+      "sourceInternalId": "Unique_AmaterasuWolf_Dark_DarkCharge",
+      "nameMessageKey": "ACTION_SKILL_Unique_AmaterasuWolf_Dark_DarkCharge",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_64",
+      "sourceInternalId": "Unique_AmaterasuWolf_FireCharge",
+      "nameMessageKey": "ACTION_SKILL_Unique_AmaterasuWolf_FireCharge",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_99",
+      "sourceInternalId": "Unique_Anubis_GroundPunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_Anubis_GroundPunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_56",
+      "sourceInternalId": "Unique_Anubis_LowRoundKick",
+      "nameMessageKey": "ACTION_SKILL_Unique_Anubis_LowRoundKick",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_78",
+      "sourceInternalId": "Unique_Anubis_Tackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_Anubis_Tackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_268",
+      "sourceInternalId": "Unique_Baphomet_Dark_DarkKite",
+      "nameMessageKey": "ACTION_SKILL_Unique_Baphomet_Dark_DarkKite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_70",
+      "sourceInternalId": "Unique_Baphomet_SwallowKite",
+      "nameMessageKey": "ACTION_SKILL_Unique_Baphomet_SwallowKite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_191",
+      "sourceInternalId": "Unique_BirdDragon_FireBreath",
+      "nameMessageKey": "ACTION_SKILL_Unique_BirdDragon_FireBreath",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_198",
+      "sourceInternalId": "Unique_BirdDragon_Ice_IceBreath",
+      "nameMessageKey": "ACTION_SKILL_Unique_BirdDragon_Ice_IceBreath",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_115",
+      "sourceInternalId": "Unique_BlackCentaur_TwoSpearRushes",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlackCentaur_TwoSpearRushes",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_103",
+      "sourceInternalId": "Unique_BlackGriffon_TackleLaser",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlackGriffon_TackleLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_177",
+      "sourceInternalId": "Unique_BlackGriffon_TackleLaser2",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlackGriffon_TackleLaser2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_183",
+      "sourceInternalId": "Unique_BlackMetalDragon_FirePunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlackMetalDragon_FirePunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_292",
+      "sourceInternalId": "Unique_BlackPuppy_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlackPuppy_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_293",
+      "sourceInternalId": "Unique_BlackPuppy_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlackPuppy_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_347",
+      "sourceInternalId": "Unique_BlueSkyDragon_DrainStorm",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlueSkyDragon_DrainStorm",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_346",
+      "sourceInternalId": "Unique_BlueSkyDragon_SweepBreath",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlueSkyDragon_SweepBreath",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_345",
+      "sourceInternalId": "Unique_BlueSkyDragon_Tossin",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlueSkyDragon_Tossin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_218",
+      "sourceInternalId": "Unique_BlueThunderHorse_FlashDash",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlueThunderHorse_FlashDash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_299",
+      "sourceInternalId": "Unique_BlueThunderHorse_Tossin",
+      "nameMessageKey": "ACTION_SKILL_Unique_BlueThunderHorse_Tossin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_28",
+      "sourceInternalId": "Unique_Boar_Tackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_Boar_Tackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_243",
+      "sourceInternalId": "Unique_CaptainPenguin_Black_BodySlide_Electric",
+      "nameMessageKey": "ACTION_SKILL_Unique_CaptainPenguin_Black_BodySlide_Electric",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_66",
+      "sourceInternalId": "Unique_CaptainPenguin_BodySlide",
+      "nameMessageKey": "ACTION_SKILL_Unique_CaptainPenguin_BodySlide",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_15",
+      "sourceInternalId": "Unique_ChickenPal_ChickenPeck",
+      "nameMessageKey": "ACTION_SKILL_Unique_ChickenPal_ChickenPeck",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_334",
+      "sourceInternalId": "Unique_ClownRabbit_TrickShow",
+      "nameMessageKey": "ACTION_SKILL_Unique_ClownRabbit_TrickShow",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_336",
+      "sourceInternalId": "Unique_CubeTurtle_CubePress",
+      "nameMessageKey": "ACTION_SKILL_Unique_CubeTurtle_CubePress",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_360",
+      "sourceInternalId": "Unique_CubeTurtle_Neutral_HolyPress",
+      "nameMessageKey": "ACTION_SKILL_Unique_CubeTurtle_Neutral_HolyPress",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_330",
+      "sourceInternalId": "Unique_CuteMole_DiggingAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_CuteMole_DiggingAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_149",
+      "sourceInternalId": "Unique_DarkAlien_JumpScractch",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkAlien_JumpScractch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_39",
+      "sourceInternalId": "Unique_DarkCrow_TelePoke",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkCrow_TelePoke",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_196",
+      "sourceInternalId": "Unique_DarkMechaDragon_BeamSlash",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkMechaDragon_BeamSlash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_195",
+      "sourceInternalId": "Unique_DarkMechaDragon_ConvergentBeam",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkMechaDragon_ConvergentBeam",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_194",
+      "sourceInternalId": "Unique_DarkMechaDragon_FunnelLaser",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkMechaDragon_FunnelLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_193",
+      "sourceInternalId": "Unique_DarkMechaDragon_SetFunnel",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkMechaDragon_SetFunnel",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_197",
+      "sourceInternalId": "Unique_DarkMechaDragon_WarpComet",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkMechaDragon_WarpComet",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_132",
+      "sourceInternalId": "Unique_DarkScorpion_Pierce",
+      "nameMessageKey": "ACTION_SKILL_Unique_DarkScorpion_Pierce",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_270",
+      "sourceInternalId": "Unique_Deer_Ground_DirtyHorn",
+      "nameMessageKey": "ACTION_SKILL_Unique_Deer_Ground_DirtyHorn",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_35",
+      "sourceInternalId": "Unique_Deer_PushupHorn",
+      "nameMessageKey": "ACTION_SKILL_Unique_Deer_PushupHorn",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_387",
+      "sourceInternalId": "Unique_DomeArmorDragon_ExplosiveMissile",
+      "nameMessageKey": "ACTION_SKILL_Unique_DomeArmorDragon_ExplosiveMissile",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_47",
+      "sourceInternalId": "Unique_DrillGame_ShellAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_DrillGame_ShellAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_32",
+      "sourceInternalId": "Unique_Eagle_GlidingNail",
+      "nameMessageKey": "ACTION_SKILL_Unique_Eagle_GlidingNail",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_60",
+      "sourceInternalId": "Unique_ElecPanda_ElecScratch",
+      "nameMessageKey": "ACTION_SKILL_Unique_ElecPanda_ElecScratch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_146",
+      "sourceInternalId": "Unique_ElecPanda_GatlingAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_ElecPanda_GatlingAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_342",
+      "sourceInternalId": "Unique_ElecPomeranian_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_ElecPomeranian_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_343",
+      "sourceInternalId": "Unique_ElecPomeranian_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_ElecPomeranian_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_389",
+      "sourceInternalId": "Unique_ElecSnail_ShellCharge",
+      "nameMessageKey": "ACTION_SKILL_Unique_ElecSnail_ShellCharge",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_61",
+      "sourceInternalId": "Unique_FairyDragon_FairyTornado",
+      "nameMessageKey": "ACTION_SKILL_Unique_FairyDragon_FairyTornado",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_134",
+      "sourceInternalId": "Unique_FeatherOstrich_Tossin",
+      "nameMessageKey": "ACTION_SKILL_Unique_FeatherOstrich_Tossin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_63",
+      "sourceInternalId": "Unique_FengyunDeeper_CloudTempest",
+      "nameMessageKey": "ACTION_SKILL_Unique_FengyunDeeper_CloudTempest",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_204",
+      "sourceInternalId": "Unique_FengyunDeeper_Electric_ThunderTempest",
+      "nameMessageKey": "ACTION_SKILL_Unique_FengyunDeeper_Electric_ThunderTempest",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_71",
+      "sourceInternalId": "Unique_FireKirin_Dark_DarkTossin",
+      "nameMessageKey": "ACTION_SKILL_Unique_FireKirin_Dark_DarkTossin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_69",
+      "sourceInternalId": "Unique_FireKirin_Tackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_FireKirin_Tackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_38",
+      "sourceInternalId": "Unique_FlameBuffalo_FlameHorn",
+      "nameMessageKey": "ACTION_SKILL_Unique_FlameBuffalo_FlameHorn",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_266",
+      "sourceInternalId": "Unique_FlowerDinosaur_Electric_ThunderWhip",
+      "nameMessageKey": "ACTION_SKILL_Unique_FlowerDinosaur_Electric_ThunderWhip",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_45",
+      "sourceInternalId": "Unique_FlowerDinosaur_Whip",
+      "nameMessageKey": "ACTION_SKILL_Unique_FlowerDinosaur_Whip",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_378",
+      "sourceInternalId": "Unique_FlowerPrince_PoisonGasDance",
+      "nameMessageKey": "ACTION_SKILL_Unique_FlowerPrince_PoisonGasDance",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_377",
+      "sourceInternalId": "Unique_FlowerPrince_PoisonGasTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_FlowerPrince_PoisonGasTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_30",
+      "sourceInternalId": "Unique_Garm_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_Garm_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_281",
+      "sourceInternalId": "Unique_Garm_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_Garm_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_242",
+      "sourceInternalId": "Unique_GhostAnglerfish_Fire_SweepBait_Fire",
+      "nameMessageKey": "ACTION_SKILL_Unique_GhostAnglerfish_Fire_SweepBait_Fire",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_229",
+      "sourceInternalId": "Unique_GhostAnglerfish_SweepBait",
+      "nameMessageKey": "ACTION_SKILL_Unique_GhostAnglerfish_SweepBait",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_190",
+      "sourceInternalId": "Unique_GhostBeast_Tossin",
+      "nameMessageKey": "ACTION_SKILL_Unique_GhostBeast_Tossin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_383",
+      "sourceInternalId": "Unique_GhostDragon_PhosphorousBeam",
+      "nameMessageKey": "ACTION_SKILL_Unique_GhostDragon_PhosphorousBeam",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_382",
+      "sourceInternalId": "Unique_GhostDragon_TailSlash",
+      "nameMessageKey": "ACTION_SKILL_Unique_GhostDragon_TailSlash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_286",
+      "sourceInternalId": "Unique_GoldenHorse_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_GoldenHorse_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_287",
+      "sourceInternalId": "Unique_GoldenHorse_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_GoldenHorse_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_221",
+      "sourceInternalId": "Unique_GoldenHorse_StoneDash",
+      "nameMessageKey": "ACTION_SKILL_Unique_GoldenHorse_StoneDash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_271",
+      "sourceInternalId": "Unique_Gorilla_Ground_EarthPunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_Gorilla_Ground_EarthPunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_62",
+      "sourceInternalId": "Unique_Gorilla_GroundPunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_Gorilla_GroundPunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_309",
+      "sourceInternalId": "Unique_GrassGolem_ArmCannon",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassGolem_ArmCannon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_361",
+      "sourceInternalId": "Unique_GrassGolem_Dark_DarkArmCannon",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassGolem_Dark_DarkArmCannon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_310",
+      "sourceInternalId": "Unique_GrassGolem_RocketPunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassGolem_RocketPunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_87",
+      "sourceInternalId": "Unique_Grassmammoth_Earthquake",
+      "nameMessageKey": "ACTION_SKILL_Unique_Grassmammoth_Earthquake",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_379",
+      "sourceInternalId": "Unique_GrassMinotaur_BullRush",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassMinotaur_BullRush",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_384",
+      "sourceInternalId": "Unique_GrassMinotaur_BullRush_Lower",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassMinotaur_BullRush_Lower",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_380",
+      "sourceInternalId": "Unique_GrassMinotaur_Ice_BullRush",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassMinotaur_Ice_BullRush",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_385",
+      "sourceInternalId": "Unique_GrassMinotaur_Ice_BullRush_Lower",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassMinotaur_Ice_BullRush_Lower",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_116",
+      "sourceInternalId": "Unique_GrassPanda_Electric_ElectricPunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassPanda_Electric_ElectricPunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_77",
+      "sourceInternalId": "Unique_GrassPanda_MusclePunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassPanda_MusclePunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_184",
+      "sourceInternalId": "Unique_GrassRabbitMan_GrassRoundKick",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrassRabbitMan_GrassRoundKick",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_216",
+      "sourceInternalId": "Unique_GrimGirl_BrutalMachete",
+      "nameMessageKey": "ACTION_SKILL_Unique_GrimGirl_BrutalMachete",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_284",
+      "sourceInternalId": "Unique_GuardianDog_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_GuardianDog_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_285",
+      "sourceInternalId": "Unique_GuardianDog_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_GuardianDog_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_65",
+      "sourceInternalId": "Unique_HawkBird_Storm",
+      "nameMessageKey": "ACTION_SKILL_Unique_HawkBird_Storm",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_49",
+      "sourceInternalId": "Unique_HerculesBeetle_BeetleTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_HerculesBeetle_BeetleTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_100",
+      "sourceInternalId": "Unique_Horus_FlareBird",
+      "nameMessageKey": "ACTION_SKILL_Unique_Horus_FlareBird",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_176",
+      "sourceInternalId": "Unique_Horus_PerfectStorm",
+      "nameMessageKey": "ACTION_SKILL_Unique_Horus_PerfectStorm",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_206",
+      "sourceInternalId": "Unique_Horus_Water_AquaStorm",
+      "nameMessageKey": "ACTION_SKILL_Unique_Horus_Water_AquaStorm",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_235",
+      "sourceInternalId": "Unique_IceCrocodile_SpitAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_IceCrocodile_SpitAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_48",
+      "sourceInternalId": "Unique_IceDeer_IceHorn",
+      "nameMessageKey": "ACTION_SKILL_Unique_IceDeer_IceHorn",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_272",
+      "sourceInternalId": "Unique_IceHorse_Dark_DarkBladeAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_IceHorse_Dark_DarkBladeAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_95",
+      "sourceInternalId": "Unique_IceHorse_IceBladeAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_IceHorse_IceBladeAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_228",
+      "sourceInternalId": "Unique_IceNarwhal_JumpingHorn",
+      "nameMessageKey": "ACTION_SKILL_Unique_IceNarwhal_JumpingHorn",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_104",
+      "sourceInternalId": "Unique_JetDragon_JumpBeam",
+      "nameMessageKey": "ACTION_SKILL_Unique_JetDragon_JumpBeam",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_89",
+      "sourceInternalId": "Unique_KingAlpaca_BodyPress",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingAlpaca_BodyPress",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_267",
+      "sourceInternalId": "Unique_KingAlpaca_Ice_IcePress",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingAlpaca_Ice_IcePress",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_137",
+      "sourceInternalId": "Unique_KingBahamut_AirCrash",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingBahamut_AirCrash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_140",
+      "sourceInternalId": "Unique_KingBahamut_ArmSmash",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingBahamut_ArmSmash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_318",
+      "sourceInternalId": "Unique_KingWhale_AquaBlade",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingWhale_AquaBlade",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_313",
+      "sourceInternalId": "Unique_KingWhale_AquaTornado",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingWhale_AquaTornado",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_317",
+      "sourceInternalId": "Unique_KingWhale_Breaching",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingWhale_Breaching",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_312",
+      "sourceInternalId": "Unique_KingWhale_HomingBubble",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingWhale_HomingBubble",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_311",
+      "sourceInternalId": "Unique_KingWhale_Maelstrom",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingWhale_Maelstrom",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_316",
+      "sourceInternalId": "Unique_KingWhale_WaveTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_KingWhale_WaveTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_325",
+      "sourceInternalId": "Unique_Kirin_Ice_IceTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_Kirin_Ice_IceTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_90",
+      "sourceInternalId": "Unique_Kirin_LightningTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_Kirin_LightningTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_344",
+      "sourceInternalId": "Unique_LanternButler_LanternFlame",
+      "nameMessageKey": "ACTION_SKILL_Unique_LanternButler_LanternFlame",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_227",
+      "sourceInternalId": "Unique_LeafMomonga_SomerSault",
+      "nameMessageKey": "ACTION_SKILL_Unique_LeafMomonga_SomerSault",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_307",
+      "sourceInternalId": "Unique_LegendDeer_RadiantPurge_Otomo",
+      "nameMessageKey": "ACTION_SKILL_Unique_LegendDeer_RadiantPurge_Otomo",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_301",
+      "sourceInternalId": "Unique_LegendDeer_RadiantWingRush",
+      "nameMessageKey": "ACTION_SKILL_Unique_LegendDeer_RadiantWingRush",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_300",
+      "sourceInternalId": "Unique_LegendDeer_WarpPillarBurst",
+      "nameMessageKey": "ACTION_SKILL_Unique_LegendDeer_WarpPillarBurst",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_147",
+      "sourceInternalId": "Unique_LilyQueen_LilyHealing",
+      "nameMessageKey": "ACTION_SKILL_Unique_LilyQueen_LilyHealing",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_381",
+      "sourceInternalId": "Unique_LotusDragon_LotusBloom",
+      "nameMessageKey": "ACTION_SKILL_Unique_LotusDragon_LotusBloom",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_180",
+      "sourceInternalId": "Unique_Manticore_InfernoStrike",
+      "nameMessageKey": "ACTION_SKILL_Unique_Manticore_InfernoStrike",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_308",
+      "sourceInternalId": "Unique_MonochromeQueen_BalletJump",
+      "nameMessageKey": "ACTION_SKILL_Unique_MonochromeQueen_BalletJump",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_178",
+      "sourceInternalId": "Unique_MoonQueen_IceMoonBlade",
+      "nameMessageKey": "ACTION_SKILL_Unique_MoonQueen_IceMoonBlade",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_150",
+      "sourceInternalId": "Unique_MoonQueen_MoonBeam",
+      "nameMessageKey": "ACTION_SKILL_Unique_MoonQueen_MoonBeam",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_153",
+      "sourceInternalId": "Unique_MoonQueen_MoonBlade",
+      "nameMessageKey": "ACTION_SKILL_Unique_MoonQueen_MoonBlade",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_374",
+      "sourceInternalId": "Unique_Mothman_GiantSpore",
+      "nameMessageKey": "ACTION_SKILL_Unique_Mothman_GiantSpore",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_375",
+      "sourceInternalId": "Unique_Mothman_SporeScatter",
+      "nameMessageKey": "ACTION_SKILL_Unique_Mothman_SporeScatter",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_333",
+      "sourceInternalId": "Unique_MummyPal_MummyAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_MummyPal_MummyAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_215",
+      "sourceInternalId": "Unique_MysteryMask_LifeSteal",
+      "nameMessageKey": "ACTION_SKILL_Unique_MysteryMask_LifeSteal",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_41",
+      "sourceInternalId": "Unique_NaughtyCat_CatPress",
+      "nameMessageKey": "ACTION_SKILL_Unique_NaughtyCat_CatPress",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_220",
+      "sourceInternalId": "Unique_NightBlueHorse_DeathStep",
+      "nameMessageKey": "ACTION_SKILL_Unique_NightBlueHorse_DeathStep",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_320",
+      "sourceInternalId": "Unique_NightBlueHorse_Neutral_AirStep",
+      "nameMessageKey": "ACTION_SKILL_Unique_NightBlueHorse_Neutral_AirStep",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_321",
+      "sourceInternalId": "Unique_NightBlueHorse_Neutral_Tossin",
+      "nameMessageKey": "ACTION_SKILL_Unique_NightBlueHorse_Neutral_Tossin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_298",
+      "sourceInternalId": "Unique_NightBlueHorse_Tossin",
+      "nameMessageKey": "ACTION_SKILL_Unique_NightBlueHorse_Tossin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_124",
+      "sourceInternalId": "Unique_NightLady_FlameNightmare",
+      "nameMessageKey": "ACTION_SKILL_Unique_NightLady_FlameNightmare",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_123",
+      "sourceInternalId": "Unique_NightLady_WarpBeam",
+      "nameMessageKey": "ACTION_SKILL_Unique_NightLady_WarpBeam",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_131",
+      "sourceInternalId": "Unique_NightLady_WarpBeam_Straight",
+      "nameMessageKey": "ACTION_SKILL_Unique_NightLady_WarpBeam_Straight",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_225",
+      "sourceInternalId": "Unique_OctopursGirl_InkJet",
+      "nameMessageKey": "ACTION_SKILL_Unique_OctopursGirl_Inkjet",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_388",
+      "sourceInternalId": "Unique_PandaGirl_RapidKick",
+      "nameMessageKey": "ACTION_SKILL_Unique_PandaGirl_RapidKick",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_23",
+      "sourceInternalId": "Unique_PinkCat_CatPunch",
+      "nameMessageKey": "ACTION_SKILL_Unique_PinkCat_CatPunch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_244",
+      "sourceInternalId": "Unique_Plesiosaur_LongBreath",
+      "nameMessageKey": "ACTION_SKILL_Unique_Plesiosaur_LongBreath",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_251",
+      "sourceInternalId": "Unique_PoseidonOrca_TorrentLaser",
+      "nameMessageKey": "ACTION_SKILL_Unique_PoseidonOrca_TorrentLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_213",
+      "sourceInternalId": "Unique_PurpleSpider_SpiderRaid",
+      "nameMessageKey": "ACTION_SKILL_Unique_PurpleSpider_SpiderRaid",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_54",
+      "sourceInternalId": "Unique_QueenBee_SpinLance",
+      "nameMessageKey": "ACTION_SKILL_Unique_QueenBee_SpinLance",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_188",
+      "sourceInternalId": "Unique_RedArmorBird_TriplePeck",
+      "nameMessageKey": "ACTION_SKILL_Unique_RedArmorBird_TriplePeck",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_356",
+      "sourceInternalId": "Unique_RedFlowerBird_JumpKick",
+      "nameMessageKey": "ACTION_SKILL_Unique_RedFlowerBird_JumpKick",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_53",
+      "sourceInternalId": "Unique_RobinHood_BowSnipe",
+      "nameMessageKey": "ACTION_SKILL_Unique_RobinHood_BowSnipe",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_341",
+      "sourceInternalId": "Unique_RockBeast_Ice_IceHorn",
+      "nameMessageKey": "ACTION_SKILL_Unique_RockBeast_Ice_IceHorn",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_340",
+      "sourceInternalId": "Unique_RockBeast_RockHorn",
+      "nameMessageKey": "ACTION_SKILL_Unique_RockBeast_RockHorn",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_81",
+      "sourceInternalId": "Unique_Ronin_Iai",
+      "nameMessageKey": "ACTION_SKILL_Unique_Ronin_Iai",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_96",
+      "sourceInternalId": "Unique_SaintCentaur_OneSpearRushes",
+      "nameMessageKey": "ACTION_SKILL_Unique_SaintCentaur_OneSpearRushes",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_55",
+      "sourceInternalId": "Unique_SakuraSaurus_SideTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_SakuraSaurus_SideTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_269",
+      "sourceInternalId": "Unique_SakuraSaurus_Water_SplashTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_SakuraSaurus_Water_SplashTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_322",
+      "sourceInternalId": "Unique_SamuraiDog_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_SamuraiDog_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_323",
+      "sourceInternalId": "Unique_SamuraiDog_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_SamuraiDog_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_331",
+      "sourceInternalId": "Unique_SamuraiDog_DashSlash",
+      "nameMessageKey": "ACTION_SKILL_Unique_SamuraiDog_DashSlash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_319",
+      "sourceInternalId": "Unique_ScorpionMan_Erectric_UpperThunder",
+      "nameMessageKey": "ACTION_SKILL_Unique_ScorpionMan_Erectric_UpperThunder",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_158",
+      "sourceInternalId": "Unique_ScorpionMan_Uppercut",
+      "nameMessageKey": "ACTION_SKILL_Unique_ScorpionMan_UpperCut",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_297",
+      "sourceInternalId": "Unique_Sekhmet_RollingScratch",
+      "nameMessageKey": "ACTION_SKILL_Unique_Sekhmet_RollingScratch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_296",
+      "sourceInternalId": "Unique_Sekhmet_SomersaultScratch",
+      "nameMessageKey": "ACTION_SKILL_Unique_Sekhmet_SomersaultScratch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_19",
+      "sourceInternalId": "Unique_SheepBall_Roll",
+      "nameMessageKey": "ACTION_SKILL_Unique_SheepBall_Roll",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_154",
+      "sourceInternalId": "Unique_SifuDog_Counter",
+      "nameMessageKey": "ACTION_SKILL_Unique_SifuDog_Counter",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_332",
+      "sourceInternalId": "Unique_SnakeGirl_SnakeShot",
+      "nameMessageKey": "ACTION_SKILL_Unique_SnakeGirl_SnakeShot",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_212",
+      "sourceInternalId": "Unique_SnowTigerBeastman_SnowImpact",
+      "nameMessageKey": "ACTION_SKILL_Unique_SnowTigerBeastman_SnowImpact",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_214",
+      "sourceInternalId": "Unique_SnowTigerBeastman_TrampleSlash",
+      "nameMessageKey": "ACTION_SKILL_Unique_SnowTigerBeastman_TrampleSlash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_187",
+      "sourceInternalId": "Unique_SoldierBee_NeedleLance",
+      "nameMessageKey": "ACTION_SKILL_Unique_SoldierBee_NeedleLance",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_230",
+      "sourceInternalId": "Unique_StuffedShark_HiddenWeapon",
+      "nameMessageKey": "ACTION_SKILL_Unique_StuffedShark_HiddenWeapon",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_339",
+      "sourceInternalId": "Unique_SumoDog_SumoStomp",
+      "nameMessageKey": "ACTION_SKILL_Unique_SumoDog_SumoStomp",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_226",
+      "sourceInternalId": "Unique_TentacleTurtle_HydroSpin",
+      "nameMessageKey": "ACTION_SKILL_Unique_TentacleTurtle_HydroSpin",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_372",
+      "sourceInternalId": "Unique_ThunderBird_Ice_SnowStrom",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderBird_Ice_SnowStrom",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_181",
+      "sourceInternalId": "Unique_ThunderBird_ThunderStorm",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderBird_ThunderStorm",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_283",
+      "sourceInternalId": "Unique_ThunderDog_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDog_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_282",
+      "sourceInternalId": "Unique_ThunderDog_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDog_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_328",
+      "sourceInternalId": "Unique_ThunderDog_Ice_Bite",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDog_Ice_Bite",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_327",
+      "sourceInternalId": "Unique_ThunderDog_Ice_BiteV2",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDog_Ice_BiteV2",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_324",
+      "sourceInternalId": "Unique_ThunderDog_Ice_KoriShorai",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDog_Ice_KoriShorai",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_189",
+      "sourceInternalId": "Unique_ThunderDog_InazumaShorai",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDog_InazumaShorai",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_136",
+      "sourceInternalId": "Unique_ThunderDragonMan_NumerousSwordAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDragonMan_NumerousSwordAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_92",
+      "sourceInternalId": "Unique_ThunderDragonMan_ThunderSwordAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_ThunderDragonMan_ThunderSwordAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_245",
+      "sourceInternalId": "Unique_TropicalOstrich_DashKick",
+      "nameMessageKey": "ACTION_SKILL_Unique_TropicalOstrich_DashKick",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_199",
+      "sourceInternalId": "Unique_Umihebi_Fire_FireWindingTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_Umihebi_Fire_FireWindingTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_186",
+      "sourceInternalId": "Unique_Umihebi_WindingTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_Umihebi_WindingTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_93",
+      "sourceInternalId": "Unique_VolcanicMonster_Ice_IceAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_VolcanicMonster_Ice_IceAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_91",
+      "sourceInternalId": "Unique_VolcanicMonster_MagmaAttack",
+      "nameMessageKey": "ACTION_SKILL_Unique_VolcanicMonster_MagmaAttack",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_358",
+      "sourceInternalId": "Unique_VolcanoDragon_Ice_IceLaser",
+      "nameMessageKey": "ACTION_SKILL_Unique_VolcanoDragon_Ice_IceLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_359",
+      "sourceInternalId": "Unique_VolcanoDragon_Ice_IcicleSpit",
+      "nameMessageKey": "ACTION_SKILL_Unique_VolcanoDragon_Ice_IcicleSpit",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_295",
+      "sourceInternalId": "Unique_VolcanoDragon_MagmaSpit",
+      "nameMessageKey": "ACTION_SKILL_Unique_VolcanoDragon_MagmaSpit",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_294",
+      "sourceInternalId": "Unique_VolcanoDragon_VolcanicLaser",
+      "nameMessageKey": "ACTION_SKILL_Unique_VolcanoDragon_VolcanicLaser",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_119",
+      "sourceInternalId": "Unique_WeaselDragon_FlyingTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_WeaselDragon_FlyingTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_205",
+      "sourceInternalId": "Unique_Werewolf_Ice_SnowScratch",
+      "nameMessageKey": "ACTION_SKILL_Unique_Werewolf_Ice_SnowScratch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_46",
+      "sourceInternalId": "Unique_Werewolf_Scratch",
+      "nameMessageKey": "ACTION_SKILL_Unique_Werewolf_Scratch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_373",
+      "sourceInternalId": "Unique_WhiteDeer_Dark_DarkPillar",
+      "nameMessageKey": "ACTION_SKILL_Unique_WhiteDeer_Dark_DarkPillar",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_219",
+      "sourceInternalId": "Unique_WhiteDeer_HolyPillar",
+      "nameMessageKey": "ACTION_SKILL_Unique_WhiteDeer_HolyPillar",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_217",
+      "sourceInternalId": "Unique_WhiteShieldDragon_ShieldTackle",
+      "nameMessageKey": "ACTION_SKILL_Unique_WhiteShieldDragon_ShieldTackle",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_203",
+      "sourceInternalId": "Unique_WhiteTiger_Ground_IronScratch",
+      "nameMessageKey": "ACTION_SKILL_Unique_WhiteTiger_Ground_IronScratch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_192",
+      "sourceInternalId": "Unique_WhiteTiger_IceScratch",
+      "nameMessageKey": "ACTION_SKILL_Unique_WhiteTiger_IceScratch",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_357",
+      "sourceInternalId": "Unique_WingGolem_Fire_FlameCutter",
+      "nameMessageKey": "ACTION_SKILL_Unique_WingGolem_Fire_FlameCutter",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_141",
+      "sourceInternalId": "Unique_WingGolem_RoundCutter",
+      "nameMessageKey": "ACTION_SKILL_Unique_WingGolem_RoundCutter",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_211",
+      "sourceInternalId": "Unique_Yeti_Grass_GrassBall",
+      "nameMessageKey": "ACTION_SKILL_Unique_Yeti_Grass_GrassBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_185",
+      "sourceInternalId": "Unique_Yeti_SnowBall",
+      "nameMessageKey": "ACTION_SKILL_Unique_Yeti_SnowBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_155",
+      "sourceInternalId": "WallSplash",
+      "nameMessageKey": "ACTION_SKILL_WallSplash",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_85",
+      "sourceInternalId": "WaterBall",
+      "nameMessageKey": "ACTION_SKILL_WaterBall",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_21",
+      "sourceInternalId": "WaterGun",
+      "nameMessageKey": "ACTION_SKILL_WaterGun",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_329",
+      "sourceInternalId": "WindBurst",
+      "nameMessageKey": "ACTION_SKILL_WindBurst",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_5",
+      "sourceInternalId": "WindCutter",
+      "nameMessageKey": "ACTION_SKILL_WindCutter",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "NewRow_171",
+      "sourceInternalId": "WindEdge",
+      "nameMessageKey": "ACTION_SKILL_WindEdge",
+      "reason": "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+      "reviewStatus": "approved"
+    }
+  ]
+}

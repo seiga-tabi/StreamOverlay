@@ -18,6 +18,8 @@ RUN npm run build:shared
 RUN npm run build:server
 RUN VITE_BASE_PATH=/dashboard/ npm run build:dashboard
 RUN VITE_BASE_PATH=/overlay/ npm run build:overlay
+RUN node apps/server/dist/scripts/smoke-palworld-runtime-artifacts.js \
+  --prepare-runtime-bundle /app/.palworld-runtime-bundle
 
 FROM node:20-bookworm-slim AS runtime
 WORKDIR /app
@@ -51,36 +53,8 @@ RUN npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shar
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/apps/server/config ./apps/server/config
-COPY --from=build \
-  /app/apps/server/data/palworld/1.0.1/sources.lock.json \
-  /app/apps/server/data/palworld/1.0.1/paldex.json \
-  /app/apps/server/data/palworld/1.0.1/manifest.json \
-  /app/apps/server/data/palworld/1.0.1/images-manifest.json \
-  /app/apps/server/data/palworld/1.0.1/import-report.json \
-  /app/apps/server/data/palworld/1.0.1/image-use-policy.json \
-  /app/apps/server/data/palworld/1.0.1/catalog.json \
-  /app/apps/server/data/palworld/1.0.1/catalog-manifest.json \
-  /app/apps/server/data/palworld/1.0.1/item-images-manifest.json \
-  /app/apps/server/data/palworld/1.0.1/element-images-manifest.json \
-  /app/apps/server/data/palworld/1.0.1/breeding.json \
-  /app/apps/server/data/palworld/1.0.1/breeding-manifest.json \
-  /app/apps/server/data/palworld/1.0.1/breeding-import-report.json \
-  ./apps/server/data/palworld/1.0.1/
-COPY --from=build \
-  /app/apps/server/data/palworld/1.0.1/locales/manifest.json \
-  /app/apps/server/data/palworld/1.0.1/locales/glossary.json \
-  /app/apps/server/data/palworld/1.0.1/locales/ko.json \
-  /app/apps/server/data/palworld/1.0.1/locales/ja.json \
-  /app/apps/server/data/palworld/1.0.1/locales/reviewed-item-aliases.json \
-  ./apps/server/data/palworld/1.0.1/locales/
-COPY --from=build \
-  /app/apps/server/src/data/palworld-mappings/public-id-map.json \
-  /app/apps/server/src/data/palworld-mappings/elements.json \
-  /app/apps/server/src/data/palworld-mappings/work-suitabilities.json \
-  /app/apps/server/src/data/palworld-mappings/exclusions.json \
-  /app/apps/server/src/data/palworld-mappings/image-overrides.json \
-  /app/apps/server/src/data/palworld-mappings/image-source-map.json \
-  ./apps/server/src/data/palworld-mappings/
+COPY --from=build /app/.palworld-runtime-bundle/apps/server/data/palworld ./apps/server/data/palworld
+COPY --from=build /app/.palworld-runtime-bundle/apps/server/src/data/palworld-mappings ./apps/server/src/data/palworld-mappings
 COPY --from=build /app/apps/dashboard/dist ./apps/dashboard/dist
 COPY --from=build /app/apps/overlay/dist ./apps/overlay/dist
 RUN node apps/server/dist/scripts/smoke-palworld-runtime-artifacts.js

@@ -1,11 +1,37 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared";
-import { getPalworldBreeding, getPalworldMeta, getPalworldSkill, getPalworldSkills, PalworldApiError, PALWORLD_VERSION_MISMATCH_EVENT, searchPalworld } from "../src/features/public-palworld/api/palworld";
+import type {
+  PalworldAcquisitionType,
+  PalworldElement,
+  PalworldGender,
+  PalworldItemCategory,
+  PalworldItemSummary,
+  PalworldPalSummary,
+  PalworldSkillType,
+  PalworldWorkSuitabilityType,
+} from "@streamops/shared";
+import {
+  getPalworldBreeding,
+  getPalworldItems,
+  getPalworldMeta,
+  getPalworldSkill,
+  getPalworldSkills,
+  PalworldApiError,
+  PALWORLD_VERSION_MISMATCH_EVENT,
+  searchPalworld,
+} from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
 import { clearPalworldBreedingParams, palworldBreedingParams, parsePalworldBreedingQuery, swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
 import { isKnownPalworldPagePath, isPalworldPath, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
-import { matchesPalworldItem, matchesPalworldPal, normalizePalworldSearch } from "../src/features/public-palworld/utils/search";
+import {
+  acquisitionLabel,
+  categoryLabel,
+  elementLabel,
+  genderLabel,
+  skillTypeLabel,
+  workLabel,
+} from "../src/features/public-palworld/utils/labels";
+import { formatPalNumber, matchesPalworldItem, matchesPalworldPal, normalizePalworldSearch } from "../src/features/public-palworld/utils/search";
 import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalworldName } from "../src/features/public-palworld/utils/localization";
 import { palworldSeoMetadata } from "../src/features/public-palworld/utils/seo";
 import { palworldHomeLiveStreamerCards, sortedFollowedTwitchChannels } from "../src/features/public-palworld/utils/streamers";
@@ -151,6 +177,17 @@ test("한국어·일본어·영어·ID·도감 번호 통합 검색을 정규화
   assert.equal(matchesPalworldItem(palSphere, "パルスフィア"), true);
 });
 
+test("도감 번호 표기와 알 수 없는 enum fallback은 locale selector를 사용한다", () => {
+  assert.equal(formatPalNumber(7, "ko"), "No.007");
+  assert.equal(formatPalNumber("7A", "ja"), "No.7A");
+  assert.equal(elementLabel("future_element" as PalworldElement, "ko"), "알 수 없음");
+  assert.equal(workLabel("future_work" as PalworldWorkSuitabilityType, "ja"), "不明");
+  assert.equal(categoryLabel("future_category" as PalworldItemCategory, "ko"), "알 수 없음");
+  assert.equal(acquisitionLabel("future_acquisition" as PalworldAcquisitionType, "ja"), "不明");
+  assert.equal(genderLabel("future_gender" as PalworldGender, "ko"), "알 수 없음");
+  assert.equal(skillTypeLabel("future_skill" as PalworldSkillType, "ja"), "不明");
+});
+
 test("번역 snapshot 상태에 따라 현지어·영어 fallback·원문 없음 상태를 구분한다", () => {
   const translated = {
     nameKo: "번역 아이템",
@@ -286,6 +323,7 @@ test("Palworld SEO metadata는 locale과 route를 반영하고 상세 query 대�
 test("스킬 목록과 상세 API는 shared validator를 통과한 데이터만 반환한다", async () => {
   const originalWindow = globalThis.window;
   const originalFetch = globalThis.fetch;
+  const events: string[] = [];
   const metadata = {
     gameVersion: "1.0.1.100619",
     sourceName: "고정 스킬 데이터",
@@ -308,13 +346,23 @@ test("스킬 목록과 상세 API는 shared validator를 통과한 데이터만 
   };
   const requested: string[] = [];
   Object.assign(globalThis, {
-    window: { __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" }, dispatchEvent: () => true } as unknown as Window,
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: (event: Event) => { events.push(event.type); return true; },
+    } as unknown as Window,
     fetch: async (url: string | URL | Request) => {
       requested.push(String(url));
       const body = String(url).includes("/skills/")
         ? { ...summary, relatedPals: [{ pal: { id: "foxparks", number: 5, nameKo: "파비오", nameJa: "キツネビ", nameEn: "Foxparks", elements: ["fire"] } }], metadata }
         : { items: [summary], pagination: { page: 1, pageSize: 24, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false }, metadata };
-      return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
+      return new Response(JSON.stringify(body), {
+        status: 200,
+        headers: {
+          "content-type": "application/json",
+          "X-Palworld-Data-Version": "9.9.9",
+          "X-Palworld-Data-Revision": "header-revision",
+        },
+      });
     },
   });
   try {
@@ -324,6 +372,54 @@ test("스킬 목록과 상세 API는 shared validator를 통과한 데이터만 
     assert.equal(detail.relatedPals[0]?.pal.id, "foxparks");
     assert.match(requested[0] ?? "", /\/api\/palworld\/skills\?type=active&element=fire&sort=power&order=desc&limit=24$/u);
     assert.match(requested[1] ?? "", /\/api\/palworld\/skills\/active-fire-ball-fire-45-2$/u);
+    assert.ok(events.includes(PALWORLD_VERSION_MISMATCH_EVENT));
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
+});
+
+test("아이템 목록 API도 응답 header와 body의 active release 불일치를 관찰한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  const events: string[] = [];
+  const metadata = {
+    gameVersion: "1.2.3",
+    sourceName: "고정 아이템 데이터",
+    sourceUrl: "https://example.com/palworld-items",
+    sourceRevision: "body-revision",
+    extractedAt: "2026-07-22T00:00:00.000Z",
+    verifiedAt: "2026-07-22T00:00:00.000Z",
+    license: "테스트 전용",
+  };
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: (event: Event) => { events.push(event.type); return true; },
+    } as unknown as Window,
+    fetch: async () => new Response(JSON.stringify({
+      items: [palSphere],
+      pagination: {
+        page: 1,
+        pageSize: 24,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+      metadata,
+    }), {
+      status: 200,
+      headers: {
+        "content-type": "application/json",
+        "X-Palworld-Data-Version": "9.9.9",
+        "X-Palworld-Data-Revision": "header-revision",
+      },
+    }),
+  });
+  try {
+    const result = await getPalworldItems(new URLSearchParams("limit=24"));
+    assert.equal(result.items[0]?.id, "pal_sphere");
+    assert.ok(events.includes(PALWORLD_VERSION_MISMATCH_EVENT));
   } finally {
     Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
   }

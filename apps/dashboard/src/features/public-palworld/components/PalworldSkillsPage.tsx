@@ -87,7 +87,7 @@ export function PalworldSkillDetailView({ detail, locale, onOpenPal }: { detail:
     {detail.type === "passive" ? <section><h4>{text.passiveAbility}</h4><PalworldTranslationBadges locale={locale} statuses={[passiveAbility.status]} /><p className="palworld-localized-copy">{passiveAbility.text || text.originalDataUnavailable}</p></section> : null}
     <section><h4>{text.relatedPals}</h4>{detail.relatedPals.length ? <><div className="palworld-link-list palworld-skill-related-list">{detail.relatedPals.map(({ pal, unlockLevel }) => {
       const displayName = relatedPalName(pal, locale);
-      return <button className="palworld-related-pal-link" type="button" onClick={() => onOpenPal(pal.id)} key={pal.id}><span className="palworld-related-pal-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} intrinsicWidth={pal.imageWidth} intrinsicHeight={pal.imageHeight} alt={displayName} locale={locale} /></span><span>{formatPalNumber(pal.number)} · {displayName}{unlockLevel !== undefined ? ` · ${text.unlockLevel} ${unlockLevel}` : ""}</span></button>;
+      return <button className="palworld-related-pal-link" type="button" onClick={() => onOpenPal(pal.id)} key={pal.id}><span className="palworld-related-pal-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} intrinsicWidth={pal.imageWidth} intrinsicHeight={pal.imageHeight} alt={displayName} locale={locale} /></span><span>{formatPalNumber(pal.number, locale)} · {displayName}{unlockLevel !== undefined ? ` · ${text.unlockLevel} ${unlockLevel}` : ""}</span></button>;
     })}</div><PalworldTranslationBadges locale={locale} statuses={relatedPalStatuses} /></> : <p>{text.originalDataUnavailable}</p>}</section>
   </article>;
 }
@@ -157,7 +157,7 @@ export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: Palw
   }
 
   return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">SKILLS</span><h1 data-ko={palworldI18n.ko.skillsTitle} data-ja={palworldI18n.ja.skillsTitle}>{text.skillsTitle}</h1><p data-ko={palworldI18n.ko.skillsDescription} data-ja={palworldI18n.ja.skillsDescription}>{text.skillsDescription}</p></div></header>
+    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.skillsKicker}</span><h1 data-ko={palworldI18n.ko.skillsTitle} data-ja={palworldI18n.ja.skillsTitle}>{text.skillsTitle}</h1><p data-ko={palworldI18n.ko.skillsDescription} data-ja={palworldI18n.ja.skillsDescription}>{text.skillsDescription}</p></div></header>
     <form className="palworld-filter-bar palworld-skill-filter-bar" onSubmit={submit} aria-label={text.filter}>
       <label><span>{text.nameSearch}</span><Input type="search" value={nameQuery} placeholder={text.skillSearchPlaceholder} onChange={(event) => setNameQuery(event.target.value)} /></label>
       <label><span>{text.skillType}</span><Select value={params.get("type") ?? ""} onChange={(event) => update("type", event.target.value)}><option value="">{text.all}</option>{PALWORLD_SKILL_TYPES.map((value) => <option value={value} key={value}>{skillTypeLabel(value, locale)}</option>)}</Select></label>

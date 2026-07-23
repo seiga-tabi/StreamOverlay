@@ -4,11 +4,15 @@ import { lstat, open, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import {
   PALWORLD_PAK_CANDIDATE_ARTIFACT_FILES,
+  assertPalworldDataSnapshot,
   assertPalworldPakCandidateArtifact,
   assertPalworldSourceProvenance,
   type PalworldPakCandidateArtifactFile,
   type PalworldSourceProvenance
 } from "@streamops/shared";
+import {
+  deterministicPalworldPakSnapshotJson
+} from "./palworld-pak-snapshot-adapter.js";
 
 export const PALWORLD_PAK_RUNTIME_MANIFEST_FILE = "runtime-manifest.json";
 export const PALWORLD_PAK_BLOCKED_CANDIDATE_MANIFEST_FILE =
@@ -38,6 +42,7 @@ export const PALWORLD_PAK_RUNTIME_DOMAINS = [
 ] as const;
 
 export const PALWORLD_PAK_RUNTIME_ARTIFACT_KINDS = [
+  "snapshot",
   "paldex",
   "catalog",
   "items",
@@ -51,7 +56,9 @@ export const PALWORLD_PAK_RUNTIME_ARTIFACT_KINDS = [
   "element-images-manifest",
   "work-images-manifest",
   "skill-images-manifest",
+  "assets-manifest",
   "map-manifest",
+  "source-lock",
   "import-report"
 ] as const;
 
@@ -120,18 +127,18 @@ const SAFE_RELATIVE_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._/-]*\.json$/u;
 const REQUIRED_ARTIFACTS_BY_DOMAIN: Readonly<
   Record<PalworldPakRuntimeDomain, ReadonlyArray<ReadonlyArray<PalworldPakRuntimeArtifactKind>>>
 > = {
-  pals: [["paldex"]],
-  items: [["items", "catalog"]],
-  skills: [["skills", "catalog"]],
-  breeding: [["breeding"]],
+  pals: [["paldex"], ["snapshot"], ["source-lock"]],
+  items: [["items", "catalog"], ["snapshot"], ["source-lock"]],
+  skills: [["skills", "catalog"], ["snapshot"], ["source-lock"]],
+  breeding: [["breeding"], ["snapshot"], ["source-lock"]],
   localizationKo: [["locale-ko"]],
   localizationJa: [["locale-ja"]],
   localizationEn: [["locale-en"]],
-  palImages: [["pal-images-manifest"]],
-  itemImages: [["item-images-manifest"]],
-  elementImages: [["element-images-manifest"]],
-  workImages: [["work-images-manifest"]],
-  skillImages: [["skill-images-manifest"]],
+  palImages: [["pal-images-manifest", "assets-manifest"]],
+  itemImages: [["item-images-manifest", "assets-manifest"]],
+  elementImages: [["element-images-manifest", "assets-manifest"]],
+  workImages: [["work-images-manifest", "assets-manifest"]],
+  skillImages: [["skill-images-manifest", "assets-manifest"]],
   map: [["map-manifest"]]
 };
 
@@ -371,6 +378,14 @@ function assertActivationArtifacts(
     }
     if (state === "blocked") continue;
     for (const alternatives of REQUIRED_ARTIFACTS_BY_DOMAIN[domain]) {
+      if (
+        state !== "ready"
+        && alternatives.every((kind) =>
+          kind === "snapshot" || kind === "source-lock"
+        )
+      ) {
+        continue;
+      }
       if (!alternatives.some((kind) => kinds.has(kind))) {
         fail(
           `manifest.activation.${domain}`,
@@ -582,7 +597,9 @@ const CANDIDATE_ARTIFACT_FILE_BY_RUNTIME_KIND = {
   "locale-ko": "locales/ko.json",
   "locale-ja": "locales/ja.json",
   "locale-en": "locales/en.json",
+  "assets-manifest": "assets-manifest.json",
   "map-manifest": "map-manifest.json",
+  "source-lock": "source-lock.json",
   "import-report": "import-report.json"
 } as const satisfies Partial<
   Record<PalworldPakRuntimeArtifactKind, PalworldPakCandidateArtifactFile>
@@ -593,6 +610,39 @@ function assertArtifactByKind(
   artifact: PalworldPakRuntimeManifest["artifacts"][number],
   manifest: PalworldPakRuntimeManifest
 ): void {
+  if (artifact.kind === "snapshot") {
+    let snapshot;
+    try {
+      snapshot = assertPalworldDataSnapshot(value);
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "Shared snapshot schema 검증에 실패했습니다.";
+      fail("artifact.snapshot", message);
+    }
+    if (
+      snapshot.metadata.gameVersion !== manifest.gameVersion
+      || snapshot.metadata.sourceRevision !== manifest.source.importRevision
+      || snapshot.metadata.sourceChecksum !== manifest.source.archiveSha256
+      || snapshot.metadata.sourceName !== "operator_provided_pak_export"
+      || snapshot.metadata.license !== manifest.source.license
+      || snapshot.metadata.rightsVerified !== manifest.source.rightsVerified
+    ) {
+      fail(
+        "artifact.snapshot.metadata",
+        "runtime manifest의 release·revision·archive checksum·권리 상태와 일치해야 합니다."
+      );
+    }
+    if (
+      snapshot.pals.length !== manifest.counts.pals
+      || snapshot.items.length !== manifest.counts.items
+      || (snapshot.skills?.length ?? 0) !== manifest.counts.skills
+      || snapshot.breedingPairs.length !== manifest.counts.breedingResults
+    ) {
+      fail("artifact.snapshot", "runtime manifest domain count와 일치해야 합니다.");
+    }
+    return;
+  }
   assertArtifactIdentity(value, artifact, manifest);
   const candidateFile = CANDIDATE_ARTIFACT_FILE_BY_RUNTIME_KIND[artifact.kind as
     keyof typeof CANDIDATE_ARTIFACT_FILE_BY_RUNTIME_KIND];
@@ -603,16 +653,282 @@ function assertArtifactByKind(
     );
   }
   try {
-    assertPalworldPakCandidateArtifact(candidateFile, value, {
+    const validated = assertPalworldPakCandidateArtifact(candidateFile, value, {
       candidateId: `candidate-${manifest.source.archiveSha256.slice(0, 16)}`,
       release: manifest.release
     });
+    if (
+      artifact.kind === "import-report"
+      && Object.values(manifest.activation).every((state) => state === "ready")
+      && (
+        validated.status !== "ready_candidate"
+        || validated.activationEligible !== true
+        || !Array.isArray(validated.blockers)
+        || validated.blockers.length !== 0
+      )
+    ) {
+      fail(
+        "artifact.import-report",
+        "전체 ready runtime은 blocker가 없는 ready_candidate import report가 필요합니다."
+      );
+    }
+    if (
+      artifact.kind === "assets-manifest"
+      && [
+        "palImages",
+        "itemImages",
+        "elementImages",
+        "workImages",
+        "skillImages"
+      ].some((domain) =>
+        manifest.activation[domain as PalworldPakRuntimeDomain] === "ready"
+      )
+      && validated.status !== "ready"
+    ) {
+      fail(
+        "artifact.assets-manifest.status",
+        "ready image domain은 ready asset manifest가 필요합니다."
+      );
+    }
+    if (
+      artifact.kind === "map-manifest"
+      && manifest.activation.map === "ready"
+      && validated.status !== "ready"
+    ) {
+      fail("artifact.map-manifest.status", "ready map domain은 ready manifest가 필요합니다.");
+    }
+    const localeDomain = artifact.kind === "locale-ko"
+      ? "localizationKo"
+      : artifact.kind === "locale-ja"
+        ? "localizationJa"
+        : artifact.kind === "locale-en"
+          ? "localizationEn"
+          : undefined;
+    if (
+      localeDomain !== undefined
+      && manifest.activation[localeDomain] === "ready"
+      && (
+        validated.status !== "source_provided"
+        || validated.languageVerified !== true
+      )
+    ) {
+      fail(
+        `artifact.${artifact.kind}`,
+        "ready locale은 source_provided이며 언어 검증을 통과해야 합니다."
+      );
+    }
   } catch (error) {
+    if (error instanceof PalworldPakRuntimeManifestError) throw error;
     const message = error instanceof Error
       ? error.message
       : "artifact schema 검증에 실패했습니다.";
     fail(`artifact.${artifact.kind}`, message);
   }
+}
+
+function recordsAt(value: unknown, pathName: string): Record<string, unknown>[] {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || !Array.isArray((value as Record<string, unknown>).records)
+  ) {
+    fail(pathName, "records 배열이 필요합니다.");
+  }
+  return (value as { records: Record<string, unknown>[] }).records;
+}
+
+function stringSet(
+  records: ReadonlyArray<Record<string, unknown>>,
+  field: string,
+  pathName: string
+): Set<string> {
+  const values = records.map((record, index) => {
+    const value = record[field];
+    if (typeof value !== "string") {
+      fail(`${pathName}.records[${index}].${field}`, "문자열 ID여야 합니다.");
+    }
+    return value;
+  });
+  return new Set(values);
+}
+
+function assertReadyRuntimeReferenceIntegrity(
+  artifacts: ReadonlyMap<PalworldPakRuntimeArtifactKind, unknown>,
+  manifest: PalworldPakRuntimeManifest
+): void {
+  if (
+    manifest.activation.pals !== "ready"
+    || manifest.activation.items !== "ready"
+    || manifest.activation.skills !== "ready"
+    || manifest.activation.breeding !== "ready"
+  ) {
+    return;
+  }
+  const paldex = artifacts.get("paldex");
+  const items = artifacts.get("items");
+  const skills = artifacts.get("skills");
+  const breeding = artifacts.get("breeding");
+  if (
+    paldex === undefined
+    || items === undefined
+    || skills === undefined
+    || breeding === undefined
+  ) {
+    fail("artifacts", "ready data domain의 canonical artifact가 모두 필요합니다.");
+  }
+  const palRecords = recordsAt(paldex, "artifact.paldex");
+  const itemRecords = recordsAt(items, "artifact.items");
+  const skillRecords = recordsAt(skills, "artifact.skills");
+  const breedingRecord = breeding as Record<string, unknown>;
+  if (
+    palRecords.length !== manifest.counts.pals
+    || itemRecords.length !== manifest.counts.items
+    || skillRecords.length !== manifest.counts.skills
+    || breedingRecord.computedResultCount !== manifest.counts.breedingResults
+    || !Array.isArray(breedingRecord.specialRules)
+    || breedingRecord.specialRules.length !== manifest.counts.specialBreedingRules
+  ) {
+    fail(
+      "manifest.counts",
+      "canonical artifact의 Pal·아이템·스킬·일반/특수 교배 실제 수와 일치해야 합니다."
+    );
+  }
+  const palIds = stringSet(palRecords, "id", "artifact.paldex");
+  const itemIds = stringSet(itemRecords, "id", "artifact.items");
+  const skillIds = stringSet(skillRecords, "id", "artifact.skills");
+
+  const assertReference = (
+    value: unknown,
+    ids: ReadonlySet<string>,
+    pathName: string
+  ): void => {
+    if (typeof value !== "string" || !ids.has(value)) {
+      fail(pathName, "ready canonical artifact에 존재하지 않는 참조입니다.");
+    }
+  };
+  for (const [palIndex, pal] of palRecords.entries()) {
+    const palPath = `artifact.paldex.records[${palIndex}]`;
+    if (!Array.isArray(pal.activeSkillAssignmentIds)) {
+      fail(`${palPath}.activeSkillAssignmentIds`, "배열이어야 합니다.");
+    }
+    pal.activeSkillAssignmentIds.forEach((skillId, skillIndex) =>
+      assertReference(
+        skillId,
+        skillIds,
+        `${palPath}.activeSkillAssignmentIds[${skillIndex}]`
+      )
+    );
+    if (!Array.isArray(pal.drops)) fail(`${palPath}.drops`, "배열이어야 합니다.");
+    pal.drops.forEach((drop, dropIndex) => {
+      if (drop === null || typeof drop !== "object" || Array.isArray(drop)) {
+        fail(`${palPath}.drops[${dropIndex}]`, "객체여야 합니다.");
+      }
+      const itemId = (drop as Record<string, unknown>).itemId;
+      if (itemId !== null) {
+        assertReference(itemId, itemIds, `${palPath}.drops[${dropIndex}].itemId`);
+      }
+    });
+  }
+  for (const [itemIndex, item] of itemRecords.entries()) {
+    const itemPath = `artifact.items.records[${itemIndex}]`;
+    if (!Array.isArray(item.dropPalIds)) fail(`${itemPath}.dropPalIds`, "배열이어야 합니다.");
+    item.dropPalIds.forEach((palId, palIndex) =>
+      assertReference(palId, palIds, `${itemPath}.dropPalIds[${palIndex}]`)
+    );
+    if (!Array.isArray(item.recipes)) fail(`${itemPath}.recipes`, "배열이어야 합니다.");
+    item.recipes.forEach((recipe, recipeIndex) => {
+      if (
+        recipe === null
+        || typeof recipe !== "object"
+        || Array.isArray(recipe)
+        || !Array.isArray((recipe as Record<string, unknown>).materials)
+      ) {
+        fail(`${itemPath}.recipes[${recipeIndex}]`, "materials 배열이 필요합니다.");
+      }
+      (recipe as { materials: Record<string, unknown>[] }).materials.forEach(
+        (material, materialIndex) => {
+          if (material.itemId !== null) {
+            assertReference(
+              material.itemId,
+              itemIds,
+              `${itemPath}.recipes[${recipeIndex}].materials[${materialIndex}].itemId`
+            );
+          }
+        }
+      );
+    });
+  }
+  for (const [skillIndex, skill] of skillRecords.entries()) {
+    if (!Array.isArray(skill.relatedPalIds)) continue;
+    skill.relatedPalIds.forEach((palId, palIndex) =>
+      assertReference(
+        palId,
+        palIds,
+        `artifact.skills.records[${skillIndex}].relatedPalIds[${palIndex}]`
+      )
+    );
+  }
+  if (
+    breeding === null
+    || typeof breeding !== "object"
+    || Array.isArray(breeding)
+  ) {
+    fail("artifact.breeding", "객체여야 합니다.");
+  }
+  if (
+    !Array.isArray(breedingRecord.parameters)
+    || !Array.isArray(breedingRecord.specialRules)
+    || !Array.isArray(breedingRecord.sourceMissingSourceRows)
+    || !Array.isArray(breedingRecord.unresolvedSourceRows)
+  ) {
+    fail(
+      "artifact.breeding",
+      "교배 parameters, specialRules, sourceMissingSourceRows, unresolvedSourceRows가 필요합니다."
+    );
+  }
+  if (
+    breedingRecord.sourceMissingSourceRows.length !== 0
+    || breedingRecord.unresolvedSourceRows.length !== 0
+  ) {
+    fail(
+      "artifact.breeding.unresolvedSourceRows",
+      "ready 교배에는 source 누락 또는 미해결 source row가 없어야 합니다."
+    );
+  }
+  const breedingPalIds = new Set(
+    breedingRecord.parameters.map((parameter, index) => {
+      if (
+        parameter === null
+        || typeof parameter !== "object"
+        || Array.isArray(parameter)
+      ) {
+        fail(`artifact.breeding.parameters[${index}]`, "객체여야 합니다.");
+      }
+      const palId = (parameter as Record<string, unknown>).palId;
+      assertReference(palId, palIds, `artifact.breeding.parameters[${index}].palId`);
+      return palId as string;
+    })
+  );
+  if (
+    breedingPalIds.size !== palIds.size
+    || [...palIds].some((palId) => !breedingPalIds.has(palId))
+  ) {
+    fail("artifact.breeding.parameters", "ready Pal set과 정확히 일치해야 합니다.");
+  }
+  breedingRecord.specialRules.forEach((rule, index) => {
+    if (rule === null || typeof rule !== "object" || Array.isArray(rule)) {
+      fail(`artifact.breeding.specialRules[${index}]`, "객체여야 합니다.");
+    }
+    const record = rule as Record<string, unknown>;
+    for (const field of ["parentAId", "parentBId", "childId"] as const) {
+      assertReference(
+        record[field],
+        palIds,
+        `artifact.breeding.specialRules[${index}].${field}`
+      );
+    }
+  });
 }
 
 export async function validatePalworldPakCandidateStagingRoot(input: {
@@ -673,6 +989,7 @@ export async function validatePalworldPakCandidateStagingRoot(input: {
   }
 
   const verifiedArtifacts = [];
+  const artifactValues = new Map<PalworldPakRuntimeArtifactKind, unknown>();
   for (const artifact of manifest.artifacts) {
     const absolute = path.resolve(stagingRoot, ...artifact.file.split("/"));
     if (!absolute.startsWith(`${stagingRoot}${path.sep}`)) {
@@ -697,8 +1014,42 @@ export async function validatePalworldPakCandidateStagingRoot(input: {
       fail(`artifact.${artifact.kind}`, "올바른 JSON이어야 합니다.");
     }
     assertArtifactByKind(artifactJson, artifact, manifest);
+    if (
+      artifact.kind === "snapshot"
+      && bytes.toString("utf8")
+        !== deterministicPalworldPakSnapshotJson(artifactJson)
+    ) {
+      fail(
+        "artifact.snapshot",
+        "Shared validator를 통과한 결정적 snapshot JSON bytes와 일치해야 합니다."
+      );
+    }
+    artifactValues.set(artifact.kind, artifactJson);
     verifiedArtifacts.push({ ...artifact });
   }
+  const snapshotArtifact = artifactValues.get("snapshot");
+  const sourceLockArtifact = artifactValues.get("source-lock");
+  if (
+    snapshotArtifact !== undefined
+    && sourceLockArtifact !== undefined
+  ) {
+    const snapshot = assertPalworldDataSnapshot(snapshotArtifact);
+    const sourceLock = sourceLockArtifact as Record<string, unknown>;
+    const provenance = sourceLock.provenance;
+    if (
+      provenance === null
+      || typeof provenance !== "object"
+      || Array.isArray(provenance)
+      || (provenance as Record<string, unknown>).exportedAt
+        !== snapshot.metadata.extractedAt
+    ) {
+      fail(
+        "artifact.snapshot.metadata.extractedAt",
+        "source-lock provenance.exportedAt과 정확히 일치해야 합니다."
+      );
+    }
+  }
+  assertReadyRuntimeReferenceIntegrity(artifactValues, manifest);
 
   return deepFreeze({
     manifest,
@@ -742,11 +1093,18 @@ const BLOCKED_CANDIDATE_COUNT_FIELDS = [
   "activeAssignments",
   "resolvedActiveAssignments",
   "excludedActiveAssignments",
+  "publicResolvedActiveAssignments",
+  "publicExcludedActiveAssignments",
+  "sourceMissingActiveAssignments",
+  "unresolvedActiveAssignments",
   "eggAssignments",
   "palsWithActiveAssignments",
   "palsWithoutActiveAssignments",
   "sourceSpecialBreedingRows",
   "resolvedSpecialBreedingRules",
+  "publicResolvedSpecialBreedingRows",
+  "publicExcludedSpecialBreedingRows",
+  "sourceMissingSpecialBreedingRows",
   "duplicateSpecialBreedingRows",
   "unresolvedSpecialBreedingRows",
   "computedBreedingResults"
@@ -768,6 +1126,7 @@ const BLOCKED_CANDIDATE_MAPPING_FIELDS = [
   "elementIconMap",
   "workIconMap",
   "skillIconMap",
+  "publicActiveSkillAllowlist",
   "exclusions",
   "legacySkillCatalog"
 ] as const;
@@ -973,7 +1332,9 @@ export function assertPalworldPakBlockedCandidateManifest(
     counts[field] = integerAt(countRecord[field], `candidateManifest.counts.${field}`);
   }
   if (
-    counts.resolvedSpecialBreedingRules
+    counts.publicResolvedSpecialBreedingRows
+      + counts.publicExcludedSpecialBreedingRows
+      + counts.sourceMissingSpecialBreedingRows
       + counts.duplicateSpecialBreedingRows
       + counts.unresolvedSpecialBreedingRows
     !== counts.sourceSpecialBreedingRows
@@ -981,10 +1342,44 @@ export function assertPalworldPakBlockedCandidateManifest(
     fail("candidateManifest.counts", "특수 교배 source 행 분류 합계가 일치해야 합니다.");
   }
   if (
+    counts.resolvedSpecialBreedingRules
+    !== counts.publicResolvedSpecialBreedingRows
+  ) {
+    fail(
+      "candidateManifest.counts",
+      "공개 resolved 특수 교배 수가 artifact rule 수와 일치해야 합니다."
+    );
+  }
+  if (
     counts.resolvedActiveAssignments + counts.excludedActiveAssignments
     !== counts.activeAssignments
   ) {
     fail("candidateManifest.counts", "active assignment 분류 합계가 일치해야 합니다.");
+  }
+  if (
+    counts.publicResolvedActiveAssignments
+      + counts.publicExcludedActiveAssignments
+      + counts.sourceMissingActiveAssignments
+      + counts.unresolvedActiveAssignments
+    !== counts.activeAssignments
+  ) {
+    fail(
+      "candidateManifest.counts",
+      "active assignment 공개/제외/source 누락/unresolved 분류 합계가 일치해야 합니다."
+    );
+  }
+  if (
+    counts.resolvedActiveAssignments
+      !== counts.publicResolvedActiveAssignments
+    || counts.excludedActiveAssignments
+      !== counts.publicExcludedActiveAssignments
+        + counts.sourceMissingActiveAssignments
+        + counts.unresolvedActiveAssignments
+  ) {
+    fail(
+      "candidateManifest.counts",
+      "active assignment 기존/세부 분류 수가 일치해야 합니다."
+    );
   }
   if (
     counts.palsWithActiveAssignments + counts.palsWithoutActiveAssignments

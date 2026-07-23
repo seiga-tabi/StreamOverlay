@@ -1,5 +1,5 @@
 import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared";
-import type { PalworldLocale } from "../i18n/palworld-i18n";
+import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { resolvePalworldName } from "./localization";
 
 export function normalizePalworldSearch(value: string): string {
@@ -30,7 +30,8 @@ export function matchesPalworldItem(item: PalworldItemSummary, query: string): b
     .some((candidate) => normalizePalworldSearch(candidate).includes(normalized));
 }
 
-export function formatPalNumber(number: number | string): string {
+export function formatPalNumber(number: number | string, locale: PalworldLocale): string {
   const numeric = Number(number);
-  return Number.isFinite(numeric) ? `No.${String(numeric).padStart(3, "0")}` : `No.${number}`;
+  const prefix = palworldI18n[locale].numberPrefix;
+  return Number.isFinite(numeric) ? `${prefix}${String(numeric).padStart(3, "0")}` : `${prefix}${number}`;
 }

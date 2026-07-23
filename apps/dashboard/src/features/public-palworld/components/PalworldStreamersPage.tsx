@@ -47,7 +47,7 @@ export function PalworldStreamersPage({
     <section className="palworld-page-section palworld-streamers-page" aria-labelledby="palworld-streamers-title">
       <header className="palworld-page-heading palworld-streamers-heading">
         <div>
-          <span>TWITCH</span>
+          <span data-ko={palworldI18n.ko.streamersKicker} data-ja={palworldI18n.ja.streamersKicker}>{text.streamersKicker}</span>
           <h1 id="palworld-streamers-title" data-ko={palworldI18n.ko.streamersTitle} data-ja={palworldI18n.ja.streamersTitle}>{text.streamersTitle}</h1>
           <p data-ko={palworldI18n.ko.streamersDescription} data-ja={palworldI18n.ja.streamersDescription}>{text.streamersDescription}</p>
         </div>

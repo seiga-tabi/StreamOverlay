@@ -49,7 +49,7 @@ export function PalworldHome({
 
   return <>
     <section className="palworld-hero" aria-labelledby="palworld-home-title">
-      <span className="palworld-hero-mark" aria-hidden="true">PALWORLD</span>
+      <span className="palworld-hero-mark" aria-hidden="true">{text.homeKicker}</span>
       <h1 id="palworld-home-title" data-ko={palworldI18n.ko.brand} data-ja={palworldI18n.ja.brand}>{text.brand}</h1>
       <p data-ko={palworldI18n.ko.description} data-ja={palworldI18n.ja.description}>{text.description}</p>
       <PalworldSearchForm locale={locale} variant="hero" onSearch={onSearch} onPal={(pal) => onOpenPal(pal.id)} onItem={(item) => onOpenItem(item.id)} />

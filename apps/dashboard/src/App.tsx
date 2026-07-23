@@ -14,6 +14,7 @@ import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { applyDashboardLocale, dashboardI18n, detectDashboardLocale, setDashboardLocale as saveDashboardLocale, type DashboardLocale } from "./i18n";
 import { clearDashboardCsrfToken, runtimeConfig } from "./runtime-config";
+import { SkeletonCard } from "./shared/ui/Skeleton";
 import {
   dashboardPageFromPath,
   dashboardPathForPage,
@@ -439,7 +440,15 @@ export default function App() {
     return (
       palworldPublic ? (
         <PalworldPageErrorBoundary>
-          <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
+          <Suspense fallback={(
+            <SkeletonCard
+              className="palworld-page-section"
+              data-ko={dashboardI18n.ko.app.loading}
+              data-ja={dashboardI18n.ja.app.loading}
+              loadingLabel={currentText.app.loading}
+              size="lg"
+            />
+          )}>
             <PublicPalworldPage onOpenStreamerDashboard={openStreamerDashboard} />
           </Suspense>
         </PalworldPageErrorBoundary>

@@ -87,14 +87,19 @@ function fail(pathName: string, message: string): never {
   throw new PalworldBreedingArtifactError(`${pathName}: ${message}`);
 }
 
-function recordAt(value: unknown, pathName: string, keys: readonly string[]): Record<string, unknown> {
+function recordAt(
+  value: unknown,
+  pathName: string,
+  requiredKeys: readonly string[],
+  optionalKeys: readonly string[] = []
+): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) fail(pathName, "객체여야 합니다.");
   const record = value as Record<string, unknown>;
-  const allowed = new Set(keys);
+  const allowed = new Set([...requiredKeys, ...optionalKeys]);
   for (const key of Object.keys(record)) {
     if (!allowed.has(key)) fail(`${pathName}.${key}`, "허용되지 않은 필드입니다.");
   }
-  for (const key of keys) {
+  for (const key of requiredKeys) {
     if (!(key in record)) fail(`${pathName}.${key}`, "필수 필드가 없습니다.");
   }
   return record;
@@ -187,19 +192,28 @@ export function assertPalworldBreedingArtifact(value: unknown): PalworldBreeding
     "steamBuildId",
     "sourceRevision",
     "sourceChecksums"
-  ]);
+  ], ["sourceType"]);
   if (stringAt(metadata.gameVersion, "breeding.metadata.gameVersion", 64) !== release) {
     fail("breeding.metadata.gameVersion", "release와 일치해야 합니다.");
   }
   stringAt(metadata.steamBuildId, "breeding.metadata.steamBuildId", 64);
   stringAt(metadata.sourceRevision, "breeding.metadata.sourceRevision", 512);
-  const checksums = recordAt(metadata.sourceChecksums, "breeding.metadata.sourceChecksums", [
-    "atlasPals",
-    "atlasBreeding",
-    "palCalc",
-    "catalog"
-  ]);
-  for (const field of ["atlasPals", "atlasBreeding", "palCalc", "catalog"] as const) {
+  if (
+    metadata.sourceType !== undefined
+    && metadata.sourceType !== "legacy_catalog"
+    && metadata.sourceType !== "operator_pak_export"
+  ) {
+    fail("breeding.metadata.sourceType", "허용된 교배 원본 종류가 아닙니다.");
+  }
+  const checksumFields = metadata.sourceType === "operator_pak_export"
+    ? ["archive", "breedingArtifact"] as const
+    : ["atlasPals", "atlasBreeding", "palCalc", "catalog"] as const;
+  const checksums = recordAt(
+    metadata.sourceChecksums,
+    "breeding.metadata.sourceChecksums",
+    checksumFields
+  );
+  for (const field of checksumFields) {
     shaAt(checksums[field], `breeding.metadata.sourceChecksums.${field}`);
   }
 
@@ -217,10 +231,16 @@ export function assertPalworldBreedingArtifact(value: unknown): PalworldBreeding
       "combiDuplicatePriority",
       "maleProbability",
       "variantType"
-    ]);
+    ], ["sourceRowId", "bpClass", "ignoreCombi"]);
     const palId = publicIdAt(record.palId, `${pathName}.palId`);
+    const sourceRowId = record.sourceRowId === undefined
+      ? undefined
+      : internalIdAt(record.sourceRowId, `${pathName}.sourceRowId`);
     const sourceInternalId = internalIdAt(record.sourceInternalId, `${pathName}.sourceInternalId`);
     const tribe = internalIdAt(record.tribe, `${pathName}.tribe`);
+    const bpClass = record.bpClass === undefined
+      ? undefined
+      : internalIdAt(record.bpClass, `${pathName}.bpClass`);
     const combiRank = integerAt(record.combiRank, `${pathName}.combiRank`, 1, 1_000_000);
     const combiDuplicatePriority = integerAt(
       record.combiDuplicatePriority,
@@ -228,6 +248,12 @@ export function assertPalworldBreedingArtifact(value: unknown): PalworldBreeding
       0,
       1_000_000_000
     );
+    const ignoreCombi = record.ignoreCombi === undefined
+      ? undefined
+      : record.ignoreCombi;
+    if (ignoreCombi !== undefined && typeof ignoreCombi !== "boolean") {
+      fail(`${pathName}.ignoreCombi`, "boolean이어야 합니다.");
+    }
     const maleProbability = finiteAt(record.maleProbability, `${pathName}.maleProbability`, 0, 1);
     if (!VARIANT_TYPES.has(String(record.variantType))) {
       fail(`${pathName}.variantType`, "normal 또는 variant여야 합니다.");
@@ -239,10 +265,13 @@ export function assertPalworldBreedingArtifact(value: unknown): PalworldBreeding
     internalIds.add(sourceInternalId);
     parameters.push({
       palId,
+      ...(sourceRowId === undefined ? {} : { sourceRowId }),
       sourceInternalId,
       tribe,
+      ...(bpClass === undefined ? {} : { bpClass }),
       combiRank,
       combiDuplicatePriority,
+      ...(ignoreCombi === undefined ? {} : { ignoreCombi }),
       maleProbability,
       variantType: record.variantType as "normal" | "variant"
     });

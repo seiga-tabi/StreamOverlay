@@ -49,7 +49,7 @@ export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: Palwor
   function submit(event: FormEvent) { event.preventDefault(); update("q", nameQuery.trim()); }
 
   return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">PALDEX</span><h1 data-ko={palworldI18n.ko.pals} data-ja={palworldI18n.ja.pals}>{text.pals}</h1><p data-ko={palworldI18n.ko.palsDescription} data-ja={palworldI18n.ja.palsDescription}>{text.palsDescription}</p></div></header>
+    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.palsKicker}</span><h1 data-ko={palworldI18n.ko.pals} data-ja={palworldI18n.ja.pals}>{text.pals}</h1><p data-ko={palworldI18n.ko.palsDescription} data-ja={palworldI18n.ja.palsDescription}>{text.palsDescription}</p></div></header>
     <form className="palworld-filter-bar" onSubmit={submit} aria-label={text.filter}>
       <label><span>{text.nameSearch}</span><Input type="search" value={nameQuery} onChange={(event) => setNameQuery(event.target.value)} /></label>
       <label><span>{text.element}</span><Select value={params.get("element") ?? ""} onChange={(event) => update("element", event.target.value)}><option value="">{text.all}</option>{PALWORLD_ELEMENTS.map((value) => <option value={value} key={value}>{elementLabel(value, locale)}</option>)}</Select></label>

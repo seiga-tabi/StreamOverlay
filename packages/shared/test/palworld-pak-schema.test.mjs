@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
+  assertPalworldPakCandidateArtifact,
   assertPalworldSourceProvenance,
   validatePalworldDataCoverage,
   validatePalworldSkill,
@@ -45,6 +46,43 @@ const completeProvenance = {
   mappingsSha256: "d".repeat(64)
 };
 
+function sourceLockArtifact(metadataOverrides = {}) {
+  return {
+    schemaVersion: 1,
+    candidateId: `candidate-${"a".repeat(16)}`,
+    release: "1.0.1",
+    metadata: {
+      candidateId: `candidate-${"a".repeat(16)}`,
+      sourceType: "operator_pak_export",
+      release: "1.0.1",
+      gameVersion: completeProvenance.gameVersion,
+      steamBuildId: completeProvenance.steamBuildId,
+      fmodelVersion: completeProvenance.fmodelVersion,
+      exportedAt: completeProvenance.exportedAt,
+      mappingsSha256: completeProvenance.mappingsSha256,
+      ...metadataOverrides
+    },
+    provenance: completeProvenance,
+    archive: {
+      sha256: completeProvenance.archiveSha256,
+      bytes: 6912,
+      fileCount: completeProvenance.includedFiles.length
+    },
+    mappings: {
+      publicIdMap: "1".repeat(64),
+      aliases: "2".repeat(64),
+      palIconOverrides: "3".repeat(64),
+      elementIconMap: "4".repeat(64),
+      workIconMap: "5".repeat(64),
+      skillIconMap: "6".repeat(64),
+      publicActiveSkillAllowlist: "7".repeat(64),
+      exclusions: "8".repeat(64),
+      legacySkillCatalog: "9".repeat(64)
+    },
+    includedFiles: completeProvenance.includedFiles
+  };
+}
+
 test("operator PAK provenance는 metadata 미제공 candidate와 완비된 고정 source를 검증한다", () => {
   assert.equal(validatePalworldSourceProvenance(candidateProvenance).ok, true);
   assert.deepEqual(assertPalworldSourceProvenance(candidateProvenance), candidateProvenance);
@@ -53,6 +91,10 @@ test("operator PAK provenance는 metadata 미제공 candidate와 완비된 고�
 
 test("operator PAK provenance는 unknown field, 부분 metadata와 권리 오표시를 거부한다", () => {
   assert.equal(validatePalworldSourceProvenance({ ...candidateProvenance, unknown: true }).ok, false);
+  assert.equal(validatePalworldSourceProvenance({
+    ...candidateProvenance,
+    id: `operator_pak_export:${"b".repeat(16)}`
+  }).ok, false);
   assert.equal(validatePalworldSourceProvenance({
     ...candidateProvenance,
     gameVersion: "1.0.1"
@@ -71,6 +113,28 @@ test("operator PAK provenance는 unknown field, 부분 metadata와 권리 오표
     ...candidateProvenance,
     usageBasis: "rights_verified"
   }).ok, false);
+});
+
+test("candidate artifact metadata는 operator provenance와 exact 일치해야 한다", () => {
+  const context = {
+    candidateId: `candidate-${"a".repeat(16)}`,
+    release: "1.0.1"
+  };
+  assert.doesNotThrow(() =>
+    assertPalworldPakCandidateArtifact(
+      "source-lock.json",
+      sourceLockArtifact(),
+      context
+    )
+  );
+  assert.throws(
+    () => assertPalworldPakCandidateArtifact(
+      "source-lock.json",
+      sourceLockArtifact({ mappingsSha256: "e".repeat(64) }),
+      context
+    ),
+    /operator provenance의 고정 source metadata와 일치/
+  );
 });
 
 test("operator PAK provenance의 includedFiles는 안전하고 결정적인 상대 경로만 허용한다", () => {

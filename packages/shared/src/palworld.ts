@@ -226,6 +226,7 @@ export type PalworldTranslationDisplayState = {
 
 export type PalworldSkill = {
   id: string;
+  sourceInternalId?: string;
   type: PalworldSkillType;
   nameKo?: string;
   nameJa?: string;
@@ -311,6 +312,12 @@ export type PalworldPalStats = {
   defense: number;
   moveSpeed: number;
   stamina: number;
+  meleeAttack?: number;
+  shotAttack?: number;
+  walkSpeed?: number;
+  runSpeed?: number;
+  rideSprintSpeed?: number;
+  food?: number;
 };
 
 export type PalworldPalBreedingInfo = {
@@ -355,6 +362,20 @@ export type PalworldCraftingMaterial = {
   quantity: number;
 };
 
+export type PalworldItemRecipe = {
+  sourceRowId: string;
+  resultCount: number;
+  workAmount?: number;
+  materials: PalworldCraftingMaterial[];
+};
+
+export type PalworldItemTechnologyUnlock = {
+  sourceRowId: string;
+  unlockLevel: number;
+  tier: number;
+  cost: number;
+};
+
 export type PalworldAcquisitionMethod = {
   type: PalworldAcquisitionType;
   labelKo?: string;
@@ -374,6 +395,8 @@ export type PalworldItemDetail = PalworldItemSummary & {
   durability?: number;
   localization?: PalworldLocalizationFallback;
   craftingMaterials: PalworldCraftingMaterial[];
+  recipes?: PalworldItemRecipe[];
+  technologyUnlocks?: PalworldItemTechnologyUnlock[];
   craftingFacility?: PalworldFacilityReference;
   dropPals: PalworldPalReference[];
   acquisitionMethods: PalworldAcquisitionMethod[];
@@ -536,10 +559,13 @@ export type PalworldTranslationValidationContext = {
 
 export type PalworldBreedingPalParameters = {
   palId: string;
+  sourceRowId?: string;
   sourceInternalId: string;
   tribe: string;
+  bpClass?: string;
   combiRank: number;
   combiDuplicatePriority: number;
+  ignoreCombi?: boolean;
   maleProbability: number;
   variantType: Extract<PalworldVariantType, "normal" | "variant">;
 };
@@ -562,13 +588,24 @@ export type PalworldBreedingDataSnapshot = {
     gameVersion: string;
     steamBuildId: string;
     sourceRevision: string;
-    sourceChecksums: {
-      atlasPals: string;
-      atlasBreeding: string;
-      palCalc: string;
-      catalog: string;
-    };
-  };
+  } & (
+    | {
+        sourceType?: "legacy_catalog";
+        sourceChecksums: {
+          atlasPals: string;
+          atlasBreeding: string;
+          palCalc: string;
+          catalog: string;
+        };
+      }
+    | {
+        sourceType: "operator_pak_export";
+        sourceChecksums: {
+          archive: string;
+          breedingArtifact: string;
+        };
+      }
+  );
   parameters: PalworldBreedingPalParameters[];
   specialRules: PalworldBreedingSpecialRule[];
 };
@@ -665,6 +702,7 @@ const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const PALWORLD_TRANSLATION_MESSAGE_KEY_PATTERN = /^[A-Za-z0-9_]+$/u;
 const PALWORLD_SKILL_KEYS = [
   "id",
+  "sourceInternalId",
   "type",
   "nameKo",
   "nameJa",
@@ -977,6 +1015,12 @@ function validateSourceProvenanceAt(
   if (!SHA256_PATTERN.test(archiveSha256.data)) {
     return invalid(`${path}.archiveSha256`, "소문자 64자리 SHA-256 hex여야 합니다.");
   }
+  if (id.data !== `operator_pak_export:${archiveSha256.data.slice(0, 16)}`) {
+    return invalid(
+      `${path}.id`,
+      "archiveSha256 앞 16자리에서 만든 고정 provenance ID여야 합니다."
+    );
+  }
 
   const metadataFields = [
     "gameVersion",
@@ -1183,6 +1227,13 @@ function validateSkillAt(value: unknown, path: string): PalworldValidationResult
   const candidate = record.data;
   const id = idAt(candidate.id, `${path}.id`);
   if (!id.ok) return id;
+  if (candidate.sourceInternalId !== undefined) {
+    const sourceInternalId = sourceInternalIdAt(
+      candidate.sourceInternalId,
+      `${path}.sourceInternalId`
+    );
+    if (!sourceInternalId.ok) return sourceInternalId;
+  }
   const type = enumAt(candidate.type, `${path}.type`, PALWORLD_SKILL_TYPES);
   if (!type.ok) return type;
   const nameEn = stringAt(candidate.nameEn, `${path}.nameEn`);
@@ -1467,9 +1518,33 @@ function validatePalSummaryAt(value: unknown, path: string): PalworldValidationR
 }
 
 function validateStatsAt(value: unknown, path: string): PalworldValidationResult<PalworldPalStats> {
-  const record = recordAt(value, path, ["hp", "attack", "defense", "moveSpeed", "stamina"]);
+  const record = recordAt(value, path, [
+    "hp",
+    "attack",
+    "defense",
+    "moveSpeed",
+    "stamina",
+    "meleeAttack",
+    "shotAttack",
+    "walkSpeed",
+    "runSpeed",
+    "rideSprintSpeed",
+    "food"
+  ]);
   if (!record.ok) return record;
   for (const field of ["hp", "attack", "defense", "moveSpeed", "stamina"] as const) {
+    const result = finiteNumberAt(record.data[field], `${path}.${field}`, 0, MAX_STAT_VALUE);
+    if (!result.ok) return result;
+  }
+  for (const field of [
+    "meleeAttack",
+    "shotAttack",
+    "walkSpeed",
+    "runSpeed",
+    "rideSprintSpeed",
+    "food"
+  ] as const) {
+    if (record.data[field] === undefined) continue;
     const result = finiteNumberAt(record.data[field], `${path}.${field}`, 0, MAX_STAT_VALUE);
     if (!result.ok) return result;
   }
@@ -1782,6 +1857,69 @@ function validateCraftingMaterialAt(value: unknown, path: string): PalworldValid
   return quantity.ok ? valid(record.data as PalworldCraftingMaterial) : quantity;
 }
 
+function validateItemRecipeAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldItemRecipe> {
+  const record = recordAt(value, path, [
+    "sourceRowId",
+    "resultCount",
+    "workAmount",
+    "materials"
+  ]);
+  if (!record.ok) return record;
+  const sourceRowId = sourceInternalIdAt(record.data.sourceRowId, `${path}.sourceRowId`);
+  if (!sourceRowId.ok) return sourceRowId;
+  const resultCount = integerAt(record.data.resultCount, `${path}.resultCount`, 1, 100_000_000);
+  if (!resultCount.ok) return resultCount;
+  if (record.data.workAmount !== undefined) {
+    const workAmount = finiteNumberAt(
+      record.data.workAmount,
+      `${path}.workAmount`,
+      0,
+      1_000_000_000_000
+    );
+    if (!workAmount.ok) return workAmount;
+  }
+  const materials = arrayAt(
+    record.data.materials,
+    `${path}.materials`,
+    MAX_API_COLLECTION_SIZE,
+    validateCraftingMaterialAt
+  );
+  if (!materials.ok) return materials;
+  const uniqueMaterials = uniqueStringsAt(
+    materials.data.map((material) => material.item.id),
+    `${path}.materials`,
+    "제작 재료"
+  );
+  return uniqueMaterials.ok ? valid(record.data as PalworldItemRecipe) : uniqueMaterials;
+}
+
+function validateItemTechnologyUnlockAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldItemTechnologyUnlock> {
+  const record = recordAt(value, path, [
+    "sourceRowId",
+    "unlockLevel",
+    "tier",
+    "cost"
+  ]);
+  if (!record.ok) return record;
+  const sourceRowId = sourceInternalIdAt(record.data.sourceRowId, `${path}.sourceRowId`);
+  if (!sourceRowId.ok) return sourceRowId;
+  for (const [field, maximum] of [
+    ["unlockLevel", 1_000],
+    ["tier", 1_000],
+    ["cost", 1_000_000]
+  ] as const) {
+    const result = integerAt(record.data[field], `${path}.${field}`, 0, maximum);
+    if (!result.ok) return result;
+  }
+  return valid(record.data as PalworldItemTechnologyUnlock);
+}
+
 function validateAcquisitionMethodAt(value: unknown, path: string): PalworldValidationResult<PalworldAcquisitionMethod> {
   const record = recordAt(value, path, [
     "type",
@@ -1865,6 +2003,8 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
     "maxStack",
     "durability",
     "craftingMaterials",
+    "recipes",
+    "technologyUnlocks",
     "craftingFacility",
     "dropPals",
     "acquisitionMethods",
@@ -1917,6 +2057,36 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
   if (!materials.ok) return materials;
   const uniqueMaterials = uniqueStringsAt(materials.data.map((material) => material.item.id), `${path}.craftingMaterials`, "제작 재료");
   if (!uniqueMaterials.ok) return uniqueMaterials;
+  if (candidate.recipes !== undefined) {
+    const recipes = arrayAt(
+      candidate.recipes,
+      `${path}.recipes`,
+      MAX_API_COLLECTION_SIZE,
+      validateItemRecipeAt
+    );
+    if (!recipes.ok) return recipes;
+    const sourceRows = uniqueStringsAt(
+      recipes.data.map((recipe) => recipe.sourceRowId),
+      `${path}.recipes`,
+      "제작법 source row"
+    );
+    if (!sourceRows.ok) return sourceRows;
+  }
+  if (candidate.technologyUnlocks !== undefined) {
+    const technologyUnlocks = arrayAt(
+      candidate.technologyUnlocks,
+      `${path}.technologyUnlocks`,
+      MAX_API_COLLECTION_SIZE,
+      validateItemTechnologyUnlockAt
+    );
+    if (!technologyUnlocks.ok) return technologyUnlocks;
+    const sourceRows = uniqueStringsAt(
+      technologyUnlocks.data.map((unlock) => unlock.sourceRowId),
+      `${path}.technologyUnlocks`,
+      "기술 source row"
+    );
+    if (!sourceRows.ok) return sourceRows;
+  }
   if (candidate.craftingFacility !== undefined) {
     const facility = validateFacilityReferenceAt(candidate.craftingFacility, `${path}.craftingFacility`);
     if (!facility.ok) return facility;
@@ -2928,6 +3098,7 @@ export function validatePalworldBreedingDataSnapshot(
     "gameVersion",
     "steamBuildId",
     "sourceRevision",
+    "sourceType",
     "sourceChecksums"
   ]);
   if (!metadata.ok) return metadata;
@@ -2940,14 +3111,24 @@ export function validatePalworldBreedingDataSnapshot(
     const result = stringAt(metadata.data[field], `breeding.metadata.${field}`, field === "sourceRevision" ? 512 : 64);
     if (!result.ok) return result;
   }
-  const checksums = recordAt(metadata.data.sourceChecksums, "breeding.metadata.sourceChecksums", [
-    "atlasPals",
-    "atlasBreeding",
-    "palCalc",
-    "catalog"
-  ]);
+  const sourceType = metadata.data.sourceType;
+  if (
+    sourceType !== undefined
+    && sourceType !== "legacy_catalog"
+    && sourceType !== "operator_pak_export"
+  ) {
+    return invalid("breeding.metadata.sourceType", "허용된 교배 원본 종류가 아닙니다.");
+  }
+  const checksumFields = sourceType === "operator_pak_export"
+    ? ["archive", "breedingArtifact"] as const
+    : ["atlasPals", "atlasBreeding", "palCalc", "catalog"] as const;
+  const checksums = recordAt(
+    metadata.data.sourceChecksums,
+    "breeding.metadata.sourceChecksums",
+    checksumFields
+  );
   if (!checksums.ok) return checksums;
-  for (const field of ["atlasPals", "atlasBreeding", "palCalc", "catalog"] as const) {
+  for (const field of checksumFields) {
     const result = stringAt(checksums.data[field], `breeding.metadata.sourceChecksums.${field}`, 64);
     if (!result.ok) return result;
     if (!SHA256_PATTERN.test(result.data)) {
@@ -2962,10 +3143,13 @@ export function validatePalworldBreedingDataSnapshot(
     (entry, path) => {
       const record = recordAt(entry, path, [
         "palId",
+        "sourceRowId",
         "sourceInternalId",
         "tribe",
+        "bpClass",
         "combiRank",
         "combiDuplicatePriority",
+        "ignoreCombi",
         "maleProbability",
         "variantType"
       ]);
@@ -2974,8 +3158,16 @@ export function validatePalworldBreedingDataSnapshot(
       if (!palId.ok) return palId;
       const sourceInternalId = sourceInternalIdAt(record.data.sourceInternalId, `${path}.sourceInternalId`);
       if (!sourceInternalId.ok) return sourceInternalId;
+      if (record.data.sourceRowId !== undefined) {
+        const sourceRowId = sourceInternalIdAt(record.data.sourceRowId, `${path}.sourceRowId`);
+        if (!sourceRowId.ok) return sourceRowId;
+      }
       const tribe = sourceInternalIdAt(record.data.tribe, `${path}.tribe`);
       if (!tribe.ok) return tribe;
+      if (record.data.bpClass !== undefined) {
+        const bpClass = sourceInternalIdAt(record.data.bpClass, `${path}.bpClass`);
+        if (!bpClass.ok) return bpClass;
+      }
       const combiRank = integerAt(record.data.combiRank, `${path}.combiRank`, 1, MAX_STAT_VALUE);
       if (!combiRank.ok) return combiRank;
       const priority = integerAt(
@@ -2985,6 +3177,10 @@ export function validatePalworldBreedingDataSnapshot(
         1_000_000_000
       );
       if (!priority.ok) return priority;
+      if (record.data.ignoreCombi !== undefined) {
+        const ignoreCombi = booleanAt(record.data.ignoreCombi, `${path}.ignoreCombi`);
+        if (!ignoreCombi.ok) return ignoreCombi;
+      }
       const maleProbability = finiteNumberAt(record.data.maleProbability, `${path}.maleProbability`, 0, 1);
       if (!maleProbability.ok) return maleProbability;
       const variantType = enumAt(record.data.variantType, `${path}.variantType`, ["normal", "variant"] as const);
@@ -3582,6 +3778,7 @@ function validateCanonicalSkillAt(
 ): PalworldValidationResult<PalworldSkill> {
   for (const field of [
     "id",
+    "sourceInternalId",
     "type",
     "nameKo",
     "nameJa",
@@ -3613,7 +3810,17 @@ function validateCanonicalSkillAt(
 }
 
 function sameSnapshotMetadata(metadata: PalworldDataMetadata, detailMetadata: PalworldDataMetadata): boolean {
-  return metadata.gameVersion === detailMetadata.gameVersion && metadata.sourceRevision === detailMetadata.sourceRevision;
+  return (
+    metadata.gameVersion === detailMetadata.gameVersion
+    && metadata.sourceName === detailMetadata.sourceName
+    && metadata.sourceUrl === detailMetadata.sourceUrl
+    && metadata.sourceRevision === detailMetadata.sourceRevision
+    && metadata.sourceChecksum === detailMetadata.sourceChecksum
+    && metadata.extractedAt === detailMetadata.extractedAt
+    && metadata.verifiedAt === detailMetadata.verifiedAt
+    && metadata.license === detailMetadata.license
+    && metadata.rightsVerified === detailMetadata.rightsVerified
+  );
 }
 
 export function validatePalworldDataSnapshot(value: unknown): PalworldValidationResult<PalworldDataSnapshot> {
@@ -3654,7 +3861,10 @@ export function validatePalworldDataSnapshot(value: unknown): PalworldValidation
   const hasElementCollection = record.data.elements !== undefined;
   for (const [index, pal] of pals.data.entries()) {
     if (!sameSnapshotMetadata(metadata.data, pal.metadata)) {
-      return invalid(`snapshot.pals[${index}].metadata`, "snapshot과 gameVersion/sourceRevision이 같아야 합니다.");
+      return invalid(
+        `snapshot.pals[${index}].metadata`,
+        "snapshot과 metadata가 같아야 합니다."
+      );
     }
     if (pal.imageUrl !== undefined && palImageVersion(pal.imageUrl) !== metadata.data.gameVersion) {
       return invalid(
@@ -3732,7 +3942,10 @@ export function validatePalworldDataSnapshot(value: unknown): PalworldValidation
   }
   for (const [index, item] of items.data.entries()) {
     if (!sameSnapshotMetadata(metadata.data, item.metadata)) {
-      return invalid(`snapshot.items[${index}].metadata`, "snapshot과 gameVersion/sourceRevision이 같아야 합니다.");
+      return invalid(
+        `snapshot.items[${index}].metadata`,
+        "snapshot과 metadata가 같아야 합니다."
+      );
     }
     if (item.imageUrl !== undefined && itemImageVersion(item.imageUrl) !== metadata.data.gameVersion) {
       return invalid(
@@ -3751,6 +3964,23 @@ export function validatePalworldDataSnapshot(value: unknown): PalworldValidation
         `snapshot.items[${index}].craftingMaterials[${materialIndex}].item`
       );
       if (!reference.ok) return reference;
+    }
+    for (const [recipeIndex, recipe] of (item.recipes ?? []).entries()) {
+      for (const [materialIndex, material] of recipe.materials.entries()) {
+        const canonicalItem = itemsById.get(material.item.id);
+        if (!canonicalItem) {
+          return invalid(
+            `snapshot.items[${index}].recipes[${recipeIndex}].materials[${materialIndex}].item`,
+            `존재하지 않는 아이템 참조입니다: ${material.item.id}`
+          );
+        }
+        const reference = validateCanonicalItemReferenceAt(
+          material.item,
+          canonicalItem,
+          `snapshot.items[${index}].recipes[${recipeIndex}].materials[${materialIndex}].item`
+        );
+        if (!reference.ok) return reference;
+      }
     }
     for (const [relatedIndex, related] of item.relatedItems.entries()) {
       const canonicalItem = itemsById.get(related.id);
@@ -3800,7 +4030,10 @@ export function validatePalworldDataSnapshot(value: unknown): PalworldValidation
   }
   for (const [index, skill] of skills.data.entries()) {
     if (!sameSnapshotMetadata(metadata.data, skill.metadata)) {
-      return invalid(`snapshot.skills[${index}].metadata`, "snapshot과 gameVersion/sourceRevision이 같아야 합니다.");
+      return invalid(
+        `snapshot.skills[${index}].metadata`,
+        "snapshot과 metadata가 같아야 합니다."
+      );
     }
     if (hasElementCollection && skill.element !== undefined && !elementsById.has(skill.element)) {
       return invalid(`snapshot.skills[${index}].element`, `정의되지 않은 속성 참조입니다: ${skill.element}`);

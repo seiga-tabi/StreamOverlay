@@ -9,6 +9,7 @@ const {
   PalworldDataService,
   PalworldRecordNotFoundError
 } = await import("../dist/services/palworld-data.js");
+const { PALWORLD_SNAPSHOT } = await import("../dist/data/palworld-snapshot.js");
 const {
   validatePalworldItemSummary,
   validatePalworldPaginatedResponse,
@@ -24,6 +25,28 @@ const releaseRoot = new URL("../data/palworld/1.0.1/", import.meta.url);
 test("서비스는 주입된 스냅샷도 Shared schema로 검증한다", () => {
   assert.throws(() => new PalworldDataService(), TypeError);
   assert.throws(() => new PalworldDataService({ pals: [], items: [], breedingPairs: [] }), TypeError);
+});
+
+test("명시적인 operator/shadow 경로만 snapshot 교배 index를 사용한다", () => {
+  const withoutIndex = new PalworldDataService(PALWORLD_SNAPSHOT);
+  assert.equal(
+    withoutIndex.breeding({ parentA: "penking", parentB: "bushi" }).state,
+    "data_unavailable"
+  );
+
+  const withIndex = new PalworldDataService(PALWORLD_SNAPSHOT, {
+    useSnapshotBreedingPairs: true
+  });
+  assert.equal(withIndex.meta().counts.breedingPairs, 3);
+  assert.equal(
+    withIndex.breeding({ parentA: "penking", parentB: "bushi" }).result?.child.id,
+    "anubis"
+  );
+  assert.deepEqual(
+    withIndex.breedingParents({ child: "anubis", page: 1, limit: 10 }).items
+      .map((pair) => [pair.parentA.id, pair.parentB.id]),
+    [["penking", "bushi"]]
+  );
 });
 
 test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분리된 gate를 반환한다", () => {

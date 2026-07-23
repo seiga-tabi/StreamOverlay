@@ -1,5 +1,4 @@
 import http from "node:http";
-import path from "node:path";
 import type { Socket } from "node:net";
 import type { Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
@@ -28,6 +27,7 @@ import { LocalTtsService } from "./services/local-tts-service.js";
 import { SupportMailboxStore } from "./services/support-mailbox-store.js";
 import { loadPalworldDataService, type PalworldDataService } from "./services/palworld-data.js";
 import { PalworldPaldexValidationError } from "./data/palworld-paldex-artifact.js";
+import { PalworldActiveRuntimeError } from "./data/palworld-active-runtime.js";
 import { PalworldServerClient } from "./services/palworld-server-client.js";
 import {
   PalworldServerConnectionStore,
@@ -61,7 +61,7 @@ const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
 let palworldDataService: PalworldDataService | undefined;
 try {
   palworldDataService = await loadPalworldDataService({
-    imageRoot: path.join(appConfig.paths.dashboardStatic, "images", "palworld", "1.0.1", "pals"),
+    dashboardStaticRoot: appConfig.paths.dashboardStatic,
     onTranslationState(locale, state) {
       const entry = {
         type: "palworld_translation.runtime_state",
@@ -102,6 +102,8 @@ try {
 } catch (error) {
   const errorCode = error instanceof PalworldPaldexValidationError
     ? error.code
+    : error instanceof PalworldActiveRuntimeError
+      ? error.code
     : error instanceof SyntaxError
       ? "PALWORLD_DATA_JSON_INVALID"
       : (error as NodeJS.ErrnoException).code === "ENOENT"

@@ -115,7 +115,7 @@ export function PalworldPalPicker({
       <span className="palworld-picker-label">{label}</span>
       <div className="palworld-selected-pal">
         <span className="palworld-selected-media"><PalworldMedia kind="pal" imageUrl={selected.imageUrl} alt={displayName} locale={locale} /></span>
-        <span><strong>{displayName}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(selected.number)}</small><span className="palworld-badge-row palworld-compact-element-row">{selected.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
+        <span><strong>{displayName}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(selected.number, locale)}</small><span className="palworld-badge-row palworld-compact-element-row">{selected.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
         <Button size="sm" variant="ghost" aria-label={`${displayName} ${text.reset}`} onClick={() => { onChange(null); setQuery(""); }}>×</Button>
       </div>
     </div>;
@@ -151,7 +151,7 @@ export function PalworldPalPicker({
           key={pal.id}
         >
           <span className="palworld-picker-option-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span>
-          <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(pal.number)}</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
+          <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(pal.number, locale)}</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
         </button>;
       })}
       {requestState === "empty" ? <p>{text.noResults}</p> : null}

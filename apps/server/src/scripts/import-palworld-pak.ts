@@ -74,6 +74,10 @@ try {
     elementIconMapPath: path.join(dataRoot, "palworld-pak-mappings/element-icon-map.json"),
     workIconMapPath: path.join(dataRoot, "palworld-pak-mappings/work-icon-map.json"),
     skillIconMapPath: path.join(dataRoot, "palworld-pak-mappings/skill-icon-map.json"),
+    publicActiveSkillAllowlistPath: path.join(
+      dataRoot,
+      "palworld-pak-mappings/public-active-skill-allowlist.json"
+    ),
     exclusionsPath: path.join(dataRoot, "palworld-pak-mappings/exclusions.json"),
     legacySkillCatalogPath: args.legacyCatalog
   });

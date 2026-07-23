@@ -118,7 +118,10 @@ export class PalworldBreedingEngine {
     this.specialRulesByPair = specialRulesByPair;
 
     const specialOnlyChildren = new Set(nonSelfSpecialRules.map((rule) => rule.childId));
-    this.generalCandidates = artifact.parameters.filter((parameter) => !specialOnlyChildren.has(parameter.palId));
+    this.generalCandidates = artifact.parameters.filter((parameter) =>
+      parameter.ignoreCombi !== true
+      && !specialOnlyChildren.has(parameter.palId)
+    );
     this.generalCandidateCount = this.generalCandidates.length;
 
     const reverseIndex = new Map<string, PalworldBreedingEnginePair[]>();

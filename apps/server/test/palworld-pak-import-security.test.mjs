@@ -25,12 +25,15 @@ const {
 } = await import("../dist/data/palworld-pak-assets.js");
 const {
   assertPalworldPakCandidateOutputDirectory,
+  palworldPakSourcePalVisibility,
+  parsePublicActiveSkillAllowlist,
   parseWorkAssetMap
 } = await import("../dist/data/palworld-pak-import.js");
 
 const ARCHIVE_SHA256 = "a".repeat(64);
 const KO_PAL_NAMES = "L10N/ko/Pal/DataTable/Text/DT_PalNameText_Common.json";
 const JA_PAL_NAMES = "Pal/DataTable/Text/DT_PalNameText_Common.json";
+const KO_SKILL_NAMES = "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json";
 
 function dataTableBytes(rows) {
   return Buffer.from(JSON.stringify([{ Type: "DataTable", Rows: rows }]), "utf8");
@@ -214,6 +217,26 @@ test("candidate output은 실행 CWD와 무관하게 실제 active runtime 경�
   }
 });
 
+test("PAK relation 대상은 도감 공개 여부를 exact source 필드로 분류한다", () => {
+  assert.equal(
+    palworldPakSourcePalVisibility({ IsPal: true, ZukanIndex: 1 }),
+    "public"
+  );
+  assert.equal(
+    palworldPakSourcePalVisibility({ IsPal: true, ZukanIndex: -1 }),
+    "nonpublic"
+  );
+  assert.equal(
+    palworldPakSourcePalVisibility({ IsPal: false, ZukanIndex: -1 }),
+    "invalid"
+  );
+  assert.equal(palworldPakSourcePalVisibility(undefined), "missing");
+  assert.equal(
+    palworldPakSourcePalVisibility({ IsPal: true, ZukanIndex: Number.NaN }),
+    "invalid"
+  );
+});
+
 test("work icon mapping은 알려진 semantic ID만 허용하고 중복 의미를 거부한다", () => {
   const candidateId = `candidate-${ARCHIVE_SHA256.slice(0, 16)}`;
   const sourceMember = (suffix) =>
@@ -247,6 +270,61 @@ test("work icon mapping은 알려진 semantic ID만 허용하고 중복 의미�
       { id: "mining", sourceMember: sourceMember("fixture_mining_b") }
     ]), ARCHIVE_SHA256, candidateId),
     /ID 또는 source member가 중복/u
+  );
+});
+
+test("공개 active skill allowlist는 archive에 고정된 exact source 식별자만 허용한다", () => {
+  const candidateId = `candidate-${ARCHIVE_SHA256.slice(0, 16)}`;
+  const entry = {
+    sourceRowId: "NewRow_1",
+    sourceInternalId: "AquaJet",
+    nameMessageKey: "ACTION_SKILL_AquaJet",
+    reason: "canonical_pal_assignment_and_official_ko_ja_locale_verified",
+    reviewStatus: "approved"
+  };
+  const mapping = (entries) => ({
+    schemaVersion: 1,
+    candidateRelease: candidateId,
+    sourceArchiveSha256: ARCHIVE_SHA256,
+    entries
+  });
+
+  assert.deepEqual(
+    [...parsePublicActiveSkillAllowlist(
+      mapping([entry]),
+      ARCHIVE_SHA256,
+      candidateId
+    ).values()],
+    [{
+      sourceRowId: entry.sourceRowId,
+      sourceInternalId: entry.sourceInternalId,
+      nameMessageKey: entry.nameMessageKey,
+      reason: entry.reason
+    }]
+  );
+  assert.throws(
+    () => parsePublicActiveSkillAllowlist(
+      mapping([entry, { ...entry, sourceRowId: "NewRow_2" }]),
+      ARCHIVE_SHA256,
+      candidateId
+    ),
+    /중복/u
+  );
+  assert.throws(
+    () => parsePublicActiveSkillAllowlist(
+      mapping([{ ...entry, reviewStatus: "candidate" }]),
+      ARCHIVE_SHA256,
+      candidateId
+    ),
+    /approved/u
+  );
+  assert.throws(
+    () => parsePublicActiveSkillAllowlist(
+      { ...mapping([entry]), sourceArchiveSha256: "b".repeat(64) },
+      ARCHIVE_SHA256,
+      candidateId
+    ),
+    /checksum/u
   );
 });
 
@@ -302,6 +380,25 @@ test("공식 locale importer는 placeholder를 제외하고 KO·JA source 언어
     assert.equal(isPalworldPakPlaceholder(placeholder), true);
   }
   assert.equal(isPalworldPakPlaceholder("Lamball"), false);
+});
+
+test("partner skill의 '-' 공식 값은 번역이 아니라 missing source로 남긴다", async () => {
+  const candidate = await readPalworldPakOfficialLocale(
+    archiveReader({
+      [KO_SKILL_NAMES]: dataTableBytes({
+        PARTNERSKILL_WorldTreeDragon: localizedRow("-")
+      })
+    }),
+    "ko"
+  );
+  assert.equal(candidate.status, "source_provided");
+  assert.equal(candidate.coverage.inputRows, 1);
+  assert.equal(candidate.coverage.includedRows, 0);
+  assert.equal(candidate.coverage.placeholderRows, 1);
+  assert.equal(
+    officialLocaleLookup(candidate, "skill_name").has("PARTNERSKILL_WorldTreeDragon"),
+    false
+  );
 });
 
 test("공식 locale importer는 경로가 KO여도 실제 문자열이 다른 언어이면 검증 통과시키지 않는다", async () => {

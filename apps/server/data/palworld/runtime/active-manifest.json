@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "format": "legacy_release_v1",
+  "release": "1.0.1",
+  "releaseDirectory": "1.0.1",
+  "manifestFile": "manifest.json",
+  "manifestSha256": "ca39f33365c67f62129d0b36579ee2b29a2670aec2bf50b72d867e8036fc8596"
+}

@@ -1011,6 +1011,22 @@ test("Palworld 스냅샷은 정규화된 상세 데이터와 참조 무결성을
   assert.equal(result.ok, true, result.ok ? "" : result.error);
   assert.equal(assertPalworldDataSnapshot(snapshot).pals[0]?.nameJa, "アヌビス");
 
+  const mismatchedProvenance = validatePalworldDataSnapshot({
+    ...snapshot,
+    pals: [{
+      ...pal,
+      metadata: {
+        ...pal.metadata,
+        sourceChecksum: "f".repeat(64)
+      }
+    }]
+  });
+  assert.equal(mismatchedProvenance.ok, false);
+  assert.match(
+    mismatchedProvenance.ok ? "" : mismatchedProvenance.error,
+    /snapshot과 metadata가 같아야 합니다/
+  );
+
   const missingItem = {
     ...snapshot,
     pals: [{ ...pal, drops: [{ ...itemReference, id: "missing_item" }] }]

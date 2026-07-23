@@ -467,6 +467,7 @@ function commonArtifactAt(
     fail(`${path}.release`, "manifest release와 일치해야 합니다.");
   }
   candidateMetadataAt(record.metadata, `${path}.metadata`, context);
+  const metadata = record.metadata as JsonRecord;
   const provenance = assertPalworldSourceProvenance(record.provenance);
   if (
     provenance.gameVersion !== context.release
@@ -474,6 +475,20 @@ function commonArtifactAt(
       !== `candidate-${provenance.archiveSha256.slice(0, 16)}`
   ) {
     fail(`${path}.provenance`, "candidate release 또는 source checksum과 일치해야 합니다.");
+  }
+  for (const field of [
+    "gameVersion",
+    "steamBuildId",
+    "fmodelVersion",
+    "exportedAt",
+    "mappingsSha256"
+  ] as const) {
+    if (metadata[field] !== provenance[field]) {
+      fail(
+        `${path}.metadata.${field}`,
+        "operator provenance의 고정 source metadata와 일치해야 합니다."
+      );
+    }
   }
   return record;
 }
@@ -942,6 +957,8 @@ function assignmentAt(value: unknown, path: string): void {
   const status = literalAt(record.status, `${path}.status`, [
     "resolved",
     "noncanonical_pal_excluded",
+    "nonpublic_pal_excluded",
+    "source_pal_missing_excluded",
     "pal_reference_unresolved",
     "skill_reference_unresolved"
   ]);
@@ -1064,6 +1081,8 @@ function validateBreeding(
   const root = commonArtifactAt(value, "breeding", context, [
     "parameters",
     "specialRules",
+    "excludedSourceRows",
+    "sourceMissingSourceRows",
     "duplicateSourceRows",
     "unresolvedSourceRows",
     "computedResultCount"
@@ -1144,6 +1163,60 @@ function validateBreeding(
   if (new Set(conditions).size !== conditions.length) {
     fail("breeding.specialRules", "동일한 특수 교배 조건이 중복됩니다.");
   }
+  arrayAt(root.excludedSourceRows, "breeding.excludedSourceRows", 10_000).forEach(
+    (entry, index) => {
+      const path = `breeding.excludedSourceRows[${index}]`;
+      const record = recordAt(entry, path, [
+        "sourceRowId",
+        "parentA",
+        "parentB",
+        "child",
+        "excludedSourceInternalIds",
+        "reason"
+      ]);
+      idAt(record.sourceRowId, `${path}.sourceRowId`);
+      idAt(record.parentA, `${path}.parentA`);
+      idAt(record.parentB, `${path}.parentB`);
+      idAt(record.child, `${path}.child`);
+      uniqueStringsAt(
+        record.excludedSourceInternalIds,
+        `${path}.excludedSourceInternalIds`,
+        (item, itemPath) => idAt(item, itemPath),
+        3
+      );
+      if (record.reason !== "nonpublic_pal_relation") {
+        fail(`${path}.reason`, "명시된 비공개 Pal relation 제외 사유여야 합니다.");
+      }
+    }
+  );
+  arrayAt(
+    root.sourceMissingSourceRows,
+    "breeding.sourceMissingSourceRows",
+    10_000
+  ).forEach((entry, index) => {
+    const path = `breeding.sourceMissingSourceRows[${index}]`;
+    const record = recordAt(entry, path, [
+      "sourceRowId",
+      "parentA",
+      "parentB",
+      "child",
+      "missingSourceInternalIds",
+      "reason"
+    ]);
+    idAt(record.sourceRowId, `${path}.sourceRowId`);
+    idAt(record.parentA, `${path}.parentA`);
+    idAt(record.parentB, `${path}.parentB`);
+    idAt(record.child, `${path}.child`);
+    uniqueStringsAt(
+      record.missingSourceInternalIds,
+      `${path}.missingSourceInternalIds`,
+      (item, itemPath) => idAt(item, itemPath),
+      3
+    );
+    if (record.reason !== "source_pal_row_missing") {
+      fail(`${path}.reason`, "명시된 source Pal 누락 사유여야 합니다.");
+    }
+  });
   arrayAt(root.duplicateSourceRows, "breeding.duplicateSourceRows", 10_000).forEach(
     (entry, index) => {
       const path = `breeding.duplicateSourceRows[${index}]`;
@@ -1309,7 +1382,7 @@ function validateAssets(
     "missing",
     "unmappedSourceImages"
   ]);
-  if (root.status !== "candidate_incomplete") fail("assets.status", "candidate_incomplete여야 합니다.");
+  literalAt(root.status, "assets.status", ["candidate_incomplete", "ready"]);
   literalAt(root.importMode, "assets.importMode", ["validation_only", "converted"]);
   const transform = recordAt(root.transform, "assets.transform", [
     "tool",
@@ -1388,7 +1461,7 @@ function validateMap(
   context: PalworldPakCandidateArtifactContext
 ): JsonRecord {
   const root = commonArtifactAt(value, "map", context, ["status", "variants"]);
-  literalAt(root.status, "map.status", ["candidate", "blocked"]);
+  literalAt(root.status, "map.status", ["candidate", "blocked", "ready"]);
   const variants = arrayAt(root.variants, "map.variants", 4).map((entry, index) =>
     imageAssetAt(entry, `map.variants[${index}]`)
   );
@@ -1430,12 +1503,33 @@ function validateImportReport(
     "imageAssetFailures",
     "limitations"
   ]);
-  if (root.status !== "blocked_candidate" || root.activationEligible !== false) {
-    fail("importReport", "blocked candidate 상태여야 합니다.");
-  }
-  uniqueStringsAt(root.blockers, "importReport.blockers", (entry, entryPath) =>
+  const status = literalAt(root.status, "importReport.status", [
+    "blocked_candidate",
+    "ready_candidate"
+  ]);
+  const activationEligible = booleanAt(
+    root.activationEligible,
+    "importReport.activationEligible"
+  );
+  const blockers = uniqueStringsAt(
+    root.blockers,
+    "importReport.blockers",
+    (entry, entryPath) =>
     idAt(entry, entryPath), 128
   );
+  if (
+    (status === "ready_candidate"
+      && (!activationEligible || blockers.length !== 0))
+    || (
+      status === "blocked_candidate"
+      && (activationEligible || blockers.length === 0)
+    )
+  ) {
+    fail(
+      "importReport",
+      "ready candidate는 blocker가 없어야 하고 blocked candidate는 blocker가 필요합니다."
+    );
+  }
   for (const field of [
     "counts",
     "sourceCounts",
@@ -1489,6 +1583,7 @@ function validateSourceLock(
     "elementIconMap",
     "workIconMap",
     "skillIconMap",
+    "publicActiveSkillAllowlist",
     "exclusions",
     "legacySkillCatalog"
   ]);

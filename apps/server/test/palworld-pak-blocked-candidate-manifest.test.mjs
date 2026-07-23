@@ -12,6 +12,10 @@ const {
   deterministicPalworldPakBlockedCandidateManifestJson,
   validatePalworldPakBlockedCandidateStagingRoot
 } = await import("../dist/data/palworld-pak-runtime-manifest.js");
+const {
+  loadPalworldPakShadowRuntime,
+  PalworldPakShadowRuntimeError
+} = await import("../dist/data/palworld-pak-shadow-runtime.js");
 
 const ARCHIVE_SHA256 = "a".repeat(64);
 const CANDIDATE_ID = `candidate-${ARCHIVE_SHA256.slice(0, 16)}`;
@@ -80,13 +84,20 @@ function baseManifest(artifactBytes, assetBytes) {
       activeAssignments: 5_772,
       resolvedActiveAssignments: 5_700,
       excludedActiveAssignments: 72,
+      publicResolvedActiveAssignments: 5_700,
+      publicExcludedActiveAssignments: 60,
+      sourceMissingActiveAssignments: 12,
+      unresolvedActiveAssignments: 0,
       eggAssignments: 7_111,
       palsWithActiveAssignments: 283,
       palsWithoutActiveAssignments: 5,
       sourceSpecialBreedingRows: 258,
       resolvedSpecialBreedingRules: 184,
+      publicResolvedSpecialBreedingRows: 184,
+      publicExcludedSpecialBreedingRows: 72,
+      sourceMissingSpecialBreedingRows: 0,
       duplicateSpecialBreedingRows: 1,
-      unresolvedSpecialBreedingRows: 73,
+      unresolvedSpecialBreedingRows: 1,
       computedBreedingResults: 41_617
     },
     localeCoverage: {
@@ -111,8 +122,9 @@ function baseManifest(artifactBytes, assetBytes) {
       elementIconMap: "4".repeat(64),
       workIconMap: "5".repeat(64),
       skillIconMap: "6".repeat(64),
-      exclusions: "7".repeat(64),
-      legacySkillCatalog: "8".repeat(64)
+      publicActiveSkillAllowlist: "7".repeat(64),
+      exclusions: "8".repeat(64),
+      legacySkillCatalog: "9".repeat(64)
     },
     artifacts: [
       {
@@ -149,6 +161,22 @@ function fixtureWebp() {
   bytes.write("WEBP", 8, "ascii");
   return bytes;
 }
+
+test("blocked candidate manifest는 snapshot adapter 결과가 있어도 shadow runtime을 열지 않는다", () => {
+  const artifactBytes = fixtureArtifact();
+  const assetBytes = fixtureWebp();
+  const blocked = baseManifest(artifactBytes, assetBytes);
+  assert.throws(
+    () => loadPalworldPakShadowRuntime({
+      manifest: blocked,
+      adapted: {}
+    }),
+    (error) =>
+      error instanceof PalworldPakShadowRuntimeError
+      && error.code === "PALWORLD_PAK_SHADOW_CANDIDATE_BLOCKED"
+      && error.message.includes("EXPORT_METADATA_NOT_PROVIDED")
+  );
+});
 
 async function writeStagingFixture(context, options = {}) {
   const stagingRoot = await mkdtemp(
@@ -241,6 +269,8 @@ async function writeStagingFixture(context, options = {}) {
       ...common,
       parameters: [],
       specialRules: [],
+      excludedSourceRows: [],
+      sourceMissingSourceRows: [],
       duplicateSourceRows: [],
       unresolvedSourceRows: [],
       computedResultCount: 0
@@ -450,6 +480,20 @@ test("blocked candidate manifest는 특수 교배와 active assignment 분류 �
   assert.throws(
     () => assertPalworldPakBlockedCandidateManifest(badAssignments),
     /active assignment 분류 합계/u
+  );
+
+  const badDetailedAssignments = structuredClone(baseManifest(artifact, webp));
+  badDetailedAssignments.counts.sourceMissingActiveAssignments -= 1;
+  assert.throws(
+    () => assertPalworldPakBlockedCandidateManifest(badDetailedAssignments),
+    /공개\/제외\/source 누락\/unresolved 분류 합계/u
+  );
+
+  const badDetailedBreeding = structuredClone(baseManifest(artifact, webp));
+  badDetailedBreeding.counts.publicExcludedSpecialBreedingRows -= 1;
+  assert.throws(
+    () => assertPalworldPakBlockedCandidateManifest(badDetailedBreeding),
+    /특수 교배 source 행 분류 합계/u
   );
 
   const badPalAssignmentCoverage = structuredClone(baseManifest(artifact, webp));

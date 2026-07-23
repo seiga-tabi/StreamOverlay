@@ -17,6 +17,7 @@
     "import:palworld-catalog": "tsx src/scripts/import-palworld-catalog.ts",
     "preflight:palworld-pak": "tsx src/scripts/preflight-palworld-pak.ts",
     "import:palworld-pak": "tsx src/scripts/import-palworld-pak.ts",
+    "promote:palworld-pak": "tsx src/scripts/promote-palworld-pak.ts",
     "extract:palworld-translations": "tsx src/scripts/extract-palworld-translations.ts",
     "import:palworld-translations": "tsx src/scripts/import-palworld-translations.ts",
     "validate:palworld-translations": "tsx src/scripts/validate-palworld-translations.ts",

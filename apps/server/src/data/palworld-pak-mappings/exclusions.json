@@ -2,5 +2,126 @@
   "schemaVersion": 1,
   "candidateRelease": "candidate-1248184a4b527d94",
   "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
-  "entries": []
+  "entries": [
+    {
+      "sourceRowId": "BOSS_GhostAnglerFish",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_GhostAnglerFish_Fire",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_GhostDragon_fire",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_LazyCatFish_Gold",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaBoss001_Small",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster001",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster001_Blue",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster001_Pink",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster001_Purple",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster001_Rainbow",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster001_Red",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster002",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster003",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "BOSS_YakushimaMonster003_Purple",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "Boss_FlameBambi",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "Boss_IceFox",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "Boss_LavaGirl",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "Boss_LazyCatFish",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "Boss_WoolFox",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "GrassBoss",
+      "domain": "active_assignment_source_pal_missing",
+      "reason": "active assignment에는 존재하지만 Pal parameter Common·composite source row와 공개 canonical Pal이 모두 없어 공개 relation에서 제외",
+      "reviewStatus": "approved"
+    }
+  ]
 }

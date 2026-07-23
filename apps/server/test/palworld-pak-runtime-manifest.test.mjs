@@ -310,6 +310,8 @@ function runtimeArtifact(kind) {
       ...common,
       parameters: [],
       specialRules: [],
+      excludedSourceRows: [],
+      sourceMissingSourceRows: [],
       duplicateSourceRows: [],
       unresolvedSourceRows: [],
       computedResultCount: 0

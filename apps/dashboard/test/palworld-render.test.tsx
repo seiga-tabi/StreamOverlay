@@ -22,6 +22,8 @@ import { PalworldElementBadge } from "../src/features/public-palworld/components
 import { PalworldPalPicker } from "../src/features/public-palworld/components/PalworldPalPicker";
 import { PalworldNotFoundPage } from "../src/features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldPageErrorBoundary } from "../src/features/public-palworld/components/PalworldPageErrorBoundary";
+import generatedStaticAssets from "../src/features/public-palworld/data/palworld-static-assets.generated.json";
+import { palworldI18n } from "../src/features/public-palworld/i18n/palworld-i18n";
 import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../src/features/public-palworld/utils/element-images";
 
 const gameAssetUrl = (fileName: string) => new URL(`../public/images/games/${fileName}`, import.meta.url);
@@ -495,14 +497,10 @@ test("첫 화면 Pal 이미지만 eager·high priority로 요청하고 고정 �
 });
 
 test("Palworld 9개 속성 Badge는 검증된 content-hash 이미지와 접근 가능한 텍스트를 함께 표시한다", () => {
-  const manifest = JSON.parse(readFileSync(new URL("../../server/data/palworld/1.0.1/element-images-manifest.json", import.meta.url), "utf8")) as {
-    sourceArchiveSha256: string;
-    entries: Array<{ id: keyof typeof PALWORLD_ELEMENT_IMAGES; imageUrl: string; outputWidth: number; outputHeight: number }>;
-  };
-  assert.equal(manifest.sourceArchiveSha256, "42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115");
-  assert.equal(manifest.entries.length, 9);
-  for (const entry of manifest.entries) {
-    assert.deepEqual(PALWORLD_ELEMENT_IMAGES[entry.id], { imageUrl: entry.imageUrl, width: entry.outputWidth, height: entry.outputHeight });
+  assert.equal(generatedStaticAssets.schemaVersion, 1);
+  assert.equal(generatedStaticAssets.elements.length, 9);
+  for (const entry of generatedStaticAssets.elements) {
+    assert.deepEqual(PALWORLD_ELEMENT_IMAGES[entry.id], { imageUrl: entry.imageUrl, width: entry.width, height: entry.height });
   }
   assert.equal(Object.keys(PALWORLD_ELEMENT_IMAGES).length, 9);
   for (const [element, asset] of Object.entries(PALWORLD_ELEMENT_IMAGES)) {
@@ -510,7 +508,7 @@ test("Palworld 9개 속성 Badge는 검증된 content-hash 이미지와 접근 �
     assert.equal(asset.width, 48);
     assert.equal(asset.height, 48);
     const outputFileName = asset.imageUrl.split("/").at(-1)!;
-    const outputBytes = readFileSync(new URL(`../public/images/palworld/1.0.1/elements/${outputFileName}`, import.meta.url));
+    const outputBytes = readFileSync(new URL(`../public${asset.imageUrl}`, import.meta.url));
     assert.equal(createHash("sha256").update(outputBytes).digest("hex"), outputFileName.replace(".webp", ""));
     assert.equal(outputBytes.subarray(0, 4).toString("ascii"), "RIFF");
     assert.equal(outputBytes.subarray(8, 12).toString("ascii"), "WEBP");
@@ -571,15 +569,17 @@ test("Pal과 아이템 이미지는 종류별 고정 release content-hash WebP �
   assert.match(external, /aria-label="외부 이미지 · 이미지 준비 중"/);
 });
 
-test("월드 지도는 고정 release content-hash WebP와 한국어·일본어 접근성 문구를 사용한다", () => {
-  assert.equal(isLocalPalworldMapUrl(PALWORLD_WORLD_MAP_IMAGE_URL), true);
+test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일본어 접근성 문구를 사용한다", () => {
+  const mapUrl = PALWORLD_WORLD_MAP_IMAGE_URL;
+  assert.ok(mapUrl);
+  assert.equal(isLocalPalworldMapUrl(mapUrl), true);
   assert.equal(isLocalPalworldMapUrl(`/images/palworld/2.3.4/maps/${"a".repeat(64)}.webp`), true);
   assert.equal(isLocalPalworldMapUrl("https://example.com/map.webp"), false);
-  assert.equal(isLocalPalworldMapUrl(`${PALWORLD_WORLD_MAP_IMAGE_URL}?download=1`), false);
-  assert.equal(isLocalPalworldMapUrl(PALWORLD_WORLD_MAP_IMAGE_URL.replace(".webp", ".png")), false);
+  assert.equal(isLocalPalworldMapUrl(`${mapUrl}?download=1`), false);
+  assert.equal(isLocalPalworldMapUrl(mapUrl.replace(".webp", ".png")), false);
 
-  const outputFileName = PALWORLD_WORLD_MAP_IMAGE_URL.split("/").at(-1)!;
-  const outputBytes = readFileSync(new URL(`../public/images/palworld/1.0.1/maps/${outputFileName}`, import.meta.url));
+  const outputFileName = mapUrl.split("/").at(-1)!;
+  const outputBytes = readFileSync(new URL(`../public${mapUrl}`, import.meta.url));
   assert.equal(createHash("sha256").update(outputBytes).digest("hex"), outputFileName.replace(".webp", ""));
   assert.equal(outputBytes.subarray(0, 4).toString("ascii"), "RIFF");
   assert.equal(outputBytes.subarray(8, 12).toString("ascii"), "WEBP");
@@ -588,10 +588,43 @@ test("월드 지도는 고정 release content-hash WebP와 한국어·일본어 
   const japanese = renderToStaticMarkup(<PalworldMapPage locale="ja" />);
   assert.match(korean, /Palworld 월드 지도/u);
   assert.match(korean, /alt="빠른 이동 지점이 표시된 Palworld 월드 지도"/u);
-  assert.match(korean, /지도 이미지 출처: 운영자가 제공한 pyPalworldAPI 0\.2\.0 archive/u);
+  assert.doesNotMatch(korean, /pyPalworldAPI|>1\.0\.1</u);
   assert.match(korean, /aria-label="지도 확대"/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
   assert.match(japanese, /ファストトラベル地点が表示されたPalworldワールドマップ/u);
+});
+
+test("페이지 기술 키커와 Pal·도감 번호·레벨 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
+  assert.equal(palworldI18n.ko.palsKicker, "PAL 도감");
+  assert.equal(palworldI18n.ja.palsKicker, "パル図鑑");
+  assert.equal(palworldI18n.ko.breedingKicker, "교배");
+  assert.equal(palworldI18n.ja.breedingKicker, "配合");
+  assert.equal(palworldI18n.ko.palEntityLabel, "Pal");
+  assert.equal(palworldI18n.ja.palEntityLabel, "パル");
+
+  const sources = [
+    ["PalworldHome.tsx", "homeKicker"],
+    ["PalworldStreamersPage.tsx", "streamersKicker"],
+    ["PalworldPalsPage.tsx", "palsKicker"],
+    ["PalworldBreedingPage.tsx", "breedingKicker"],
+    ["PalworldItemsPage.tsx", "itemsKicker"],
+    ["PalworldSkillsPage.tsx", "skillsKicker"],
+    ["PalworldMapPage.tsx", "mapKicker"],
+  ] as const;
+  for (const [fileName, key] of sources) {
+    const source = readFileSync(new URL(`../src/features/public-palworld/components/${fileName}`, import.meta.url), "utf8");
+    assert.match(source, new RegExp(`text\\.${key}`, "u"), fileName);
+  }
+
+  const searchForm = readFileSync(new URL("../src/features/public-palworld/components/PalworldSearchForm.tsx", import.meta.url), "utf8");
+  const cardAndDetail = [
+    readFileSync(new URL("../src/features/public-palworld/components/PalworldCards.tsx", import.meta.url), "utf8"),
+    readFileSync(new URL("../src/features/public-palworld/components/PalworldDetailModals.tsx", import.meta.url), "utf8"),
+  ].join("\n");
+  assert.match(searchForm, /text\.palEntityLabel/u);
+  assert.doesNotMatch(searchForm, /· Pal/u);
+  assert.match(cardAndDetail, /text\.levelPrefix/u);
+  assert.doesNotMatch(cardAndDetail, /Lv\.\$\{/u);
 });
 
 test("sitemap은 query 없는 Palworld 공개 base 경로를 모두 포함한다", () => {

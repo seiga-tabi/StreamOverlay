@@ -45,15 +45,18 @@ import {
 } from "../data/palworld-paldex-adapter.js";
 import {
   PALWORLD_PALDEX_IMAGE_ROOT,
-  PALWORLD_PALDEX_RELEASE_ROOT
 } from "../data/palworld-paldex-import.js";
+import {
+  loadPalworldActiveRuntime
+} from "../data/palworld-active-runtime.js";
 import {
   createPalworldTranslationValidationContext,
   loadPalworldTranslationBundle
 } from "../data/palworld-translation-artifact.js";
 import {
   PalworldBreedingEngine,
-  type PalworldBreedingEnginePair
+  type PalworldBreedingEnginePair,
+  type PalworldBreedingEngineQuery
 } from "./palworld-breeding-engine.js";
 import {
   loadPalworldReviewedItemAliases,
@@ -246,6 +249,155 @@ function pageItems<T>(items: T[], page: number, pageSize: number): T[] {
   return items.slice(start, start + pageSize);
 }
 
+type PalworldBreedingResolver = Pick<
+  PalworldBreedingEngine,
+  "pairCount" | "resolve" | "parents"
+>;
+
+function snapshotBreedingPairKey(parentAId: string, parentBId: string): string {
+  return parentAId <= parentBId
+    ? `${parentAId}\0${parentBId}`
+    : `${parentBId}\0${parentAId}`;
+}
+
+function snapshotBreedingPairOrder(
+  left: PalworldBreedingEnginePair,
+  right: PalworldBreedingEnginePair
+): number {
+  return left.parentAId.localeCompare(right.parentAId, "en")
+    || left.parentBId.localeCompare(right.parentBId, "en")
+    || (left.parentAGender ?? "").localeCompare(right.parentAGender ?? "", "en")
+    || (left.parentBGender ?? "").localeCompare(right.parentBGender ?? "", "en")
+    || left.childId.localeCompare(right.childId, "en");
+}
+
+function snapshotPairForRequestedOrder(
+  pair: PalworldBreedingPair,
+  query: PalworldBreedingEngineQuery
+): PalworldBreedingEnginePair | undefined {
+  const direct =
+    pair.parentA.id === query.parentAId
+    && pair.parentB.id === query.parentBId;
+  const reversed =
+    pair.parentA.id === query.parentBId
+    && pair.parentB.id === query.parentAId;
+  if (!direct && !reversed) return undefined;
+  const parentAGender = direct
+    ? pair.genderCondition?.parentA
+    : pair.genderCondition?.parentB;
+  const parentBGender = direct
+    ? pair.genderCondition?.parentB
+    : pair.genderCondition?.parentA;
+  return {
+    parentAId: query.parentAId,
+    parentBId: query.parentBId,
+    childId: pair.child.id,
+    isSpecial: pair.isSpecial,
+    ...(parentAGender === undefined || parentAGender === "any"
+      ? {}
+      : { parentAGender }),
+    ...(parentBGender === undefined || parentBGender === "any"
+      ? {}
+      : { parentBGender })
+  };
+}
+
+function snapshotGenderMatches(
+  required: "male" | "female" | undefined,
+  selected: "male" | "female" | undefined
+): boolean {
+  return selected === undefined || required === undefined || required === selected;
+}
+
+class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
+  readonly pairCount: number;
+
+  private readonly pairsByParents: ReadonlyMap<
+    string,
+    readonly PalworldBreedingPair[]
+  >;
+  private readonly pairsByChild: ReadonlyMap<
+    string,
+    readonly PalworldBreedingEnginePair[]
+  >;
+
+  constructor(pairs: readonly PalworldBreedingPair[]) {
+    this.pairCount = pairs.length;
+    const pairsByParents = new Map<string, PalworldBreedingPair[]>();
+    const pairsByChild = new Map<string, PalworldBreedingEnginePair[]>();
+    for (const pair of pairs) {
+      const parentKey = snapshotBreedingPairKey(
+        pair.parentA.id,
+        pair.parentB.id
+      );
+      pairsByParents.set(parentKey, [
+        ...(pairsByParents.get(parentKey) ?? []),
+        pair
+      ]);
+      const indexedPair: PalworldBreedingEnginePair = {
+        parentAId: pair.parentA.id,
+        parentBId: pair.parentB.id,
+        childId: pair.child.id,
+        isSpecial: pair.isSpecial,
+        ...(pair.genderCondition?.parentA === undefined
+          || pair.genderCondition.parentA === "any"
+          ? {}
+          : { parentAGender: pair.genderCondition.parentA }),
+        ...(pair.genderCondition?.parentB === undefined
+          || pair.genderCondition.parentB === "any"
+          ? {}
+          : { parentBGender: pair.genderCondition.parentB })
+      };
+      pairsByChild.set(pair.child.id, [
+        ...(pairsByChild.get(pair.child.id) ?? []),
+        indexedPair
+      ]);
+    }
+    this.pairsByParents = pairsByParents;
+    this.pairsByChild = new Map(
+      [...pairsByChild.entries()].map(([childId, childPairs]) => [
+        childId,
+        [...childPairs].sort(snapshotBreedingPairOrder)
+      ])
+    );
+  }
+
+  resolve(
+    query: PalworldBreedingEngineQuery
+  ): ReturnType<PalworldBreedingEngine["resolve"]> {
+    const candidates = (
+      this.pairsByParents.get(
+        snapshotBreedingPairKey(query.parentAId, query.parentBId)
+      ) ?? []
+    )
+      .map((pair) => snapshotPairForRequestedOrder(pair, query))
+      .filter((pair): pair is PalworldBreedingEnginePair =>
+        pair !== undefined
+        && snapshotGenderMatches(pair.parentAGender, query.parentAGender)
+        && snapshotGenderMatches(pair.parentBGender, query.parentBGender)
+      )
+      .sort(snapshotBreedingPairOrder);
+    if (candidates.length === 1) {
+      return {
+        state: "resolved",
+        result: candidates[0]!,
+        alternatives: []
+      };
+    }
+    if (candidates.length > 1) {
+      return {
+        state: "requires_gender",
+        alternatives: candidates
+      };
+    }
+    return { state: "not_found", alternatives: [] };
+  }
+
+  parents(childId: string): PalworldBreedingEnginePair[] {
+    return [...(this.pairsByChild.get(childId) ?? [])];
+  }
+}
+
 export class PalworldDataService {
   private readonly snapshot: PalworldDataSnapshot;
   private readonly supplementalSnapshot: PalworldDataSnapshot;
@@ -256,7 +408,7 @@ export class PalworldDataService {
   private readonly domains: PalworldDomainCoverageMap;
   private readonly gates: PalworldRuntimeGates;
   private readonly coverage: PalworldDataCoverage | undefined;
-  private readonly breedingEngine: PalworldBreedingEngine | undefined;
+  private readonly breedingEngine: PalworldBreedingResolver | undefined;
 
   constructor(snapshot: unknown, options: {
     supplementalSnapshot?: unknown;
@@ -265,6 +417,7 @@ export class PalworldDataService {
     gates?: PalworldRuntimeGates;
     coverage?: PalworldDataCoverage;
     breedingEngine?: PalworldBreedingEngine;
+    useSnapshotBreedingPairs?: boolean;
   } = {}) {
     this.snapshot = assertPalworldDataSnapshot(snapshot);
     this.supplementalSnapshot = options.supplementalSnapshot === undefined
@@ -275,7 +428,12 @@ export class PalworldDataService {
     this.skillsById = this.indexByIdAliases(this.snapshot.skills ?? []);
     this.sourceInternalIds = options.sourceInternalIds ?? {};
     this.coverage = options.coverage;
-    this.breedingEngine = options.breedingEngine;
+    this.breedingEngine = options.breedingEngine
+      ?? (
+        options.useSnapshotBreedingPairs === true
+          ? new PalworldSnapshotBreedingIndex(this.snapshot.breedingPairs)
+          : undefined
+      );
     const snapshotIsSample = this.snapshot.metadata.gameVersion === "sample-baseline";
     const supplementalIsSample = this.supplementalSnapshot.metadata.gameVersion === "sample-baseline";
     this.domains = options.domains ?? {
@@ -707,6 +865,9 @@ export async function loadPalworldDataService(options: {
   elementImageRoot?: string;
   mappingRoot?: string;
   catalogRoot?: string;
+  dataRoot?: string;
+  activeManifestPath?: string;
+  dashboardStaticRoot?: string;
   onTranslationState?: (
     locale: "ko" | "ja",
     state: Readonly<{
@@ -724,9 +885,48 @@ export async function loadPalworldDataService(options: {
     }>
   ) => void;
 } = {}): Promise<PalworldDataService> {
-  const release = await loadPalworldPaldexRuntimeRelease(options);
-  const palworldImageRoot = path.dirname(options.imageRoot ?? PALWORLD_PALDEX_IMAGE_ROOT);
-  const catalogRoot = options.catalogRoot ?? options.releaseRoot ?? PALWORLD_PALDEX_RELEASE_ROOT;
+  const activeRuntime = options.releaseRoot === undefined
+    ? await loadPalworldActiveRuntime({
+        ...(options.dataRoot === undefined ? {} : { dataRoot: options.dataRoot }),
+        ...(options.activeManifestPath === undefined
+          ? {}
+          : { activeManifestPath: options.activeManifestPath })
+      })
+    : undefined;
+  if (activeRuntime?.manifest.format === "operator_pak_v1") {
+    const {
+      loadPalworldPakShadowRuntimeFromStagingRoot
+    } = await import("../data/palworld-pak-shadow-runtime.js");
+    return (
+      await loadPalworldPakShadowRuntimeFromStagingRoot({
+        stagingRoot: activeRuntime.releaseRoot
+      })
+    ).service;
+  }
+  const releaseRoot = options.releaseRoot ?? activeRuntime?.releaseRoot;
+  const activeRelease = activeRuntime?.manifest.release;
+  const imageRoot = options.imageRoot
+    ?? (
+      options.dashboardStaticRoot === undefined || activeRelease === undefined
+        ? undefined
+        : path.join(
+            options.dashboardStaticRoot,
+            "images",
+            "palworld",
+            activeRelease,
+            "pals"
+          )
+    );
+  const release = await loadPalworldPaldexRuntimeRelease({
+    ...(releaseRoot === undefined ? {} : { releaseRoot }),
+    ...(imageRoot === undefined ? {} : { imageRoot }),
+    ...(options.mappingRoot === undefined ? {} : { mappingRoot: options.mappingRoot })
+  });
+  const palworldImageRoot = path.dirname(imageRoot ?? PALWORLD_PALDEX_IMAGE_ROOT);
+  const catalogRoot = options.catalogRoot ?? releaseRoot;
+  if (catalogRoot === undefined) {
+    throw new TypeError("PALWORLD_ACTIVE_RUNTIME_ROOT_UNAVAILABLE");
+  }
   let breedingEngine: PalworldBreedingEngine | undefined;
   let breedingSource: PalworldBreedingRuntimeSource | undefined;
   try {

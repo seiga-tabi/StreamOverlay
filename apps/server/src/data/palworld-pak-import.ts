@@ -179,6 +179,7 @@ type CandidateMappings = {
   elementIconMap: unknown;
   workIconMap: unknown;
   skillIconMap: unknown;
+  publicActiveSkillAllowlist: unknown;
   exclusions: unknown;
   legacySkillCatalog: unknown;
 };
@@ -217,11 +218,18 @@ export type PalworldPakCandidateImportResult = {
     activeAssignments: number;
     resolvedActiveAssignments: number;
     excludedActiveAssignments: number;
+    publicResolvedActiveAssignments: number;
+    publicExcludedActiveAssignments: number;
+    sourceMissingActiveAssignments: number;
+    unresolvedActiveAssignments: number;
     eggAssignments: number;
     palsWithActiveAssignments: number;
     palsWithoutActiveAssignments: number;
     sourceSpecialBreedingRows: number;
     resolvedSpecialBreedingRules: number;
+    publicResolvedSpecialBreedingRows: number;
+    publicExcludedSpecialBreedingRows: number;
+    sourceMissingSpecialBreedingRows: number;
     duplicateSpecialBreedingRows: number;
     unresolvedSpecialBreedingRows: number;
     computedBreedingResults: number;
@@ -671,6 +679,79 @@ export function parseWorkAssetMap(
   };
 }
 
+type PublicActiveSkillAllowlistEntry = {
+  sourceRowId: string;
+  sourceInternalId: string;
+  nameMessageKey: string;
+  reason: string;
+};
+
+export function parsePublicActiveSkillAllowlist(
+  value: unknown,
+  expectedSha256: string,
+  expectedCandidateId: string
+): Map<string, PublicActiveSkillAllowlistEntry> {
+  const root = exactRecord(value, "publicActiveSkillAllowlist", [
+    "schemaVersion",
+    "candidateRelease",
+    "sourceArchiveSha256",
+    "entries"
+  ]);
+  assertCandidateMappingHeader(
+    root,
+    "publicActiveSkillAllowlist",
+    expectedSha256,
+    expectedCandidateId
+  );
+  if (!Array.isArray(root.entries) || root.entries.length > 10_000) {
+    fail("publicActiveSkillAllowlist.entries: 제한된 배열이어야 합니다.");
+  }
+  const result = new Map<string, PublicActiveSkillAllowlistEntry>();
+  const sourceRowIds = new Set<string>();
+  for (const [index, raw] of root.entries.entries()) {
+    const row = exactRecord(raw, `publicActiveSkillAllowlist.entries[${index}]`, [
+      "sourceRowId",
+      "sourceInternalId",
+      "nameMessageKey",
+      "reason",
+      "reviewStatus"
+    ]);
+    const sourceRowId = internalId(
+      row.sourceRowId,
+      `publicActiveSkillAllowlist.entries[${index}].sourceRowId`
+    );
+    const sourceInternalId = internalId(
+      row.sourceInternalId,
+      `publicActiveSkillAllowlist.entries[${index}].sourceInternalId`
+    );
+    const nameMessageKey = internalId(
+      row.nameMessageKey,
+      `publicActiveSkillAllowlist.entries[${index}].nameMessageKey`
+    );
+    const reason = stringValue(
+      row.reason,
+      `publicActiveSkillAllowlist.entries[${index}].reason`,
+      256
+    );
+    if (row.reviewStatus !== "approved") {
+      fail(`publicActiveSkillAllowlist.entries[${index}].reviewStatus: approved여야 합니다.`);
+    }
+    if (result.has(sourceInternalId) || sourceRowIds.has(sourceRowId)) {
+      fail("publicActiveSkillAllowlist: source row 또는 internal ID가 중복됩니다.");
+    }
+    result.set(sourceInternalId, {
+      sourceRowId,
+      sourceInternalId,
+      nameMessageKey,
+      reason
+    });
+    sourceRowIds.add(sourceRowId);
+  }
+  return new Map(
+    [...result.entries()].sort(([left], [right]) => left.localeCompare(right, "en"))
+  );
+}
+
 function parseSkillAssetMap(
   value: unknown,
   expectedSha256: string,
@@ -820,6 +901,27 @@ function canonicalPalRows(rows: JsonRecord): {
   );
   exclusions.sort((left, right) => left.sourceRowId.localeCompare(right.sourceRowId, "en"));
   return { raw, canonical, exclusions };
+}
+
+export type PalworldPakSourcePalVisibility =
+  | "public"
+  | "nonpublic"
+  | "missing"
+  | "invalid";
+
+export function palworldPakSourcePalVisibility(
+  value: unknown
+): PalworldPakSourcePalVisibility {
+  if (value === undefined) return "missing";
+  if (
+    !isRecord(value)
+    || value.IsPal !== true
+    || typeof value.ZukanIndex !== "number"
+    || !Number.isFinite(value.ZukanIndex)
+  ) {
+    return "invalid";
+  }
+  return value.ZukanIndex > 0 ? "public" : "nonpublic";
 }
 
 function localizedValue(
@@ -1212,11 +1314,26 @@ export async function importPalworldPakCandidate(
     input.expectedArchiveSha256,
     candidateId
   );
+  const publicActiveSkillAllowlist = parsePublicActiveSkillAllowlist(
+    input.mappings.publicActiveSkillAllowlist,
+    input.expectedArchiveSha256,
+    candidateId
+  );
   const reviewedExclusions = parseExclusions(
     input.mappings.exclusions,
     input.expectedArchiveSha256,
     candidateId
   );
+  const reviewedExclusionKeys = new Set(
+    reviewedExclusions.map((entry) => `${entry.domain}\0${entry.sourceRowId}`)
+  );
+  const usedReviewedExclusionKeys = new Set<string>();
+  const hasReviewedExclusion = (domain: string, sourceRowId: string): boolean => {
+    const key = `${domain}\0${sourceRowId}`;
+    if (!reviewedExclusionKeys.has(key)) return false;
+    usedReviewedExclusionKeys.add(key);
+    return true;
+  };
   const mappingChecksums = {
     publicIdMap: sha256(deterministicJson(input.mappings.publicIdMap)),
     aliases: sha256(deterministicJson(input.mappings.aliases)),
@@ -1224,6 +1341,9 @@ export async function importPalworldPakCandidate(
     elementIconMap: sha256(deterministicJson(input.mappings.elementIconMap)),
     workIconMap: sha256(deterministicJson(input.mappings.workIconMap)),
     skillIconMap: sha256(deterministicJson(input.mappings.skillIconMap)),
+    publicActiveSkillAllowlist: sha256(
+      deterministicJson(input.mappings.publicActiveSkillAllowlist)
+    ),
     exclusions: sha256(deterministicJson(input.mappings.exclusions)),
     legacySkillCatalog: sha256(deterministicJson(input.mappings.legacySkillCatalog))
   };
@@ -1408,7 +1528,7 @@ export async function importPalworldPakCandidate(
           );
         }
 
-        const activeRows = Object.entries(activeSkillRows)
+        const sourceActiveRows = Object.entries(activeSkillRows)
           .filter((entry): entry is [string, JsonRecord] => isRecord(entry[1]) && entry[1].DisabledData !== true)
           .sort(([left], [right]) => left.localeCompare(right, "en"));
         const activeSkillIdByInternal = new Map<string, string>();
@@ -1428,7 +1548,9 @@ export async function importPalworldPakCandidate(
           activeSourceIds.add(sourceInternalId);
           activeSkillIdByInternal.set(sourceInternalId, `active:${sourceInternalId}`);
         }
-        if (activeRows.length !== preflight.data.activeSkillRows) fail("active skill count가 preflight와 일치하지 않습니다.");
+        if (sourceActiveRows.length !== preflight.data.activeSkillRows) {
+          fail("active skill source count가 preflight와 일치하지 않습니다.");
+        }
 
         const allPassiveSkillRows = Object.entries(passiveSkillRows)
           .map(([sourceRowId, raw]): [string, JsonRecord] => {
@@ -1690,6 +1812,8 @@ export async function importPalworldPakCandidate(
           status:
             | "resolved"
             | "noncanonical_pal_excluded"
+            | "nonpublic_pal_excluded"
+            | "source_pal_missing_excluded"
             | "pal_reference_unresolved"
             | "skill_reference_unresolved";
         };
@@ -1717,7 +1841,15 @@ export async function importPalworldPakCandidate(
             const status = pal === undefined
               ? sourcePalTribe !== undefined && palIdByInternal.has(sourcePalTribe)
                 ? "noncanonical_pal_excluded" as const
-                : "pal_reference_unresolved" as const
+                : palworldPakSourcePalVisibility(sourcePalRow) === "nonpublic"
+                  ? "nonpublic_pal_excluded" as const
+                  : palworldPakSourcePalVisibility(sourcePalRow) === "missing"
+                    && hasReviewedExclusion(
+                      "active_assignment_source_pal_missing",
+                      rawPalSourceInternalId
+                    )
+                    ? "source_pal_missing_excluded" as const
+                    : "pal_reference_unresolved" as const
               : activeSkillId === null
                 ? "skill_reference_unresolved" as const
                 : "resolved" as const;
@@ -1749,15 +1881,105 @@ export async function importPalworldPakCandidate(
           activeAssignmentRows,
           true
         );
+        const staleActiveAssignmentSourceExclusions = reviewedExclusions
+          .filter((entry) => entry.domain === "active_assignment_source_pal_missing")
+          .filter((entry) =>
+            !usedReviewedExclusionKeys.has(`${entry.domain}\0${entry.sourceRowId}`)
+          );
+        if (staleActiveAssignmentSourceExclusions.length > 0) {
+          fail(
+            "exclusions: active assignment source-missing 검수 항목이 현재 입력에 적용되지 않습니다: "
+              + staleActiveAssignmentSourceExclusions
+                .map((entry) => entry.sourceRowId)
+                .join(", ")
+          );
+        }
         const eggAssignmentRecords = parseAssignmentRows(
           TABLES.activeEggAssignments,
           eggAssignmentRows,
           false
         );
+        const resolvedActiveAssignmentSourceIds = new Set(
+          assignmentRecords
+            .filter((assignment) => assignment.status === "resolved")
+            .map((assignment) => assignment.activeSkillSourceInternalId)
+        );
+        const nonAllowlistedCanonicalAssignments = [...resolvedActiveAssignmentSourceIds]
+          .filter((sourceInternalId) => !publicActiveSkillAllowlist.has(sourceInternalId))
+          .sort((left, right) => left.localeCompare(right, "en"));
+        if (nonAllowlistedCanonicalAssignments.length > 0) {
+          fail(
+            "publicActiveSkillAllowlist: canonical Pal에 배정된 active skill이 allowlist에서 누락되었습니다: "
+              + nonAllowlistedCanonicalAssignments.join(", ")
+          );
+        }
+        const koSkillNames = officialLocaleLookup(koLocale, "skill_name");
+        const jaSkillNames = officialLocaleLookup(jaLocale, "skill_name");
+        const publicActiveRows = sourceActiveRows.filter(([sourceRowId, row]) => {
+          const sourceInternalId = enumSuffix(row.WazaType, `${sourceRowId}.WazaType`);
+          const policy = publicActiveSkillAllowlist.get(sourceInternalId);
+          if (policy === undefined) return false;
+          const nameMessageKey = activeSkillNameKeys.get(sourceInternalId);
+          if (
+            policy.sourceRowId !== sourceRowId
+            || policy.sourceInternalId !== sourceInternalId
+            || policy.nameMessageKey !== nameMessageKey
+          ) {
+            fail(
+              `publicActiveSkillAllowlist.${sourceInternalId}: source row, internal ID 또는 name message key가 일치하지 않습니다.`
+            );
+          }
+          if (!resolvedActiveAssignmentSourceIds.has(sourceInternalId)) {
+            fail(
+              `publicActiveSkillAllowlist.${sourceInternalId}: canonical Pal의 resolved assignment가 없습니다.`
+            );
+          }
+          if (
+            !koSkillNames.has(policy.nameMessageKey)
+            || !jaSkillNames.has(policy.nameMessageKey)
+          ) {
+            fail(
+              `publicActiveSkillAllowlist.${sourceInternalId}: placeholder가 아닌 공식 KO·JA 이름이 모두 필요합니다.`
+            );
+          }
+          return true;
+        });
+        if (publicActiveRows.length !== publicActiveSkillAllowlist.size) {
+          fail("publicActiveSkillAllowlist: source active skill과 exact join되지 않은 entry가 있습니다.");
+        }
+        const publicActiveSkillIds = new Set(
+          publicActiveRows.map(([sourceRowId, row]) =>
+            activeSkillIdByInternal.get(enumSuffix(row.WazaType, `${sourceRowId}.WazaType`))!
+          )
+        );
+        for (const assignment of [...assignmentRecords, ...eggAssignmentRecords]) {
+          if (
+            assignment.activeSkillId !== null
+            && !publicActiveSkillIds.has(assignment.activeSkillId)
+          ) {
+            assignment.activeSkillId = null;
+          }
+        }
         for (const pal of pals) {
           pal.activeSkillAssignmentIds = [...new Set(pal.activeSkillAssignmentIds)]
+            .filter((skillId) => publicActiveSkillIds.has(skillId))
             .sort((left, right) => left.localeCompare(right, "en"));
         }
+        const excludedActiveSkillRows = sourceActiveRows
+          .filter(([sourceRowId, row]) =>
+            !publicActiveSkillAllowlist.has(
+              enumSuffix(row.WazaType, `${sourceRowId}.WazaType`)
+            )
+          )
+          .map(([sourceRowId, row]) => ({
+            sourceRowId,
+            sourceInternalId: enumSuffix(row.WazaType, `${sourceRowId}.WazaType`),
+            reason: "not_in_reviewed_public_allowlist" as const,
+            canonicalAssignment: false
+          }))
+          .sort((left, right) =>
+            left.sourceInternalId.localeCompare(right.sourceInternalId, "en")
+          );
 
         const recipesByProduct = new Map<string, unknown[]>();
         const recipeProductBySourceRowId = new Map<string, string>();
@@ -1961,7 +2183,7 @@ export async function importPalworldPakCandidate(
           };
         }).sort((left, right) => left.id.localeCompare(right.id, "en"));
 
-        const activeSkills = activeRows.map(([sourceRowId, row]) => {
+        const activeSkills = publicActiveRows.map(([sourceRowId, row]) => {
           const sourceInternalId = enumSuffix(row.WazaType, `${sourceRowId}.WazaType`);
           const messageKey = applyAlias(
             aliases,
@@ -2125,6 +2347,22 @@ export async function importPalworldPakCandidate(
           child: string;
           reason: string;
         }> = [];
+        const sourceMissingSpecialRows: Array<{
+          sourceRowId: string;
+          parentA: string;
+          parentB: string;
+          child: string;
+          missingSourceInternalIds: string[];
+          reason: "source_pal_row_missing";
+        }> = [];
+        const excludedSpecialRows: Array<{
+          sourceRowId: string;
+          parentA: string;
+          parentB: string;
+          child: string;
+          excludedSourceInternalIds: string[];
+          reason: "nonpublic_pal_relation";
+        }> = [];
         const specialRules = [];
         const duplicateSpecialRows: Array<{
           sourceRowId: string;
@@ -2158,6 +2396,55 @@ export async function importPalworldPakCandidate(
           const parentBId = palIdByInternal.get(parentBInternal);
           const childId = palIdByInternal.get(childInternal);
           if (!parentAId || !parentBId || !childId) {
+            const unresolvedReferences = [
+              { sourceInternalId: parentAInternal, publicId: parentAId },
+              { sourceInternalId: parentBInternal, publicId: parentBId },
+              { sourceInternalId: childInternal, publicId: childId }
+            ].filter((reference) => reference.publicId === undefined);
+            const nonpublicSourceInternalIds = [...new Set(
+              unresolvedReferences
+                .filter((reference) =>
+                  palworldPakSourcePalVisibility(
+                    palRows[reference.sourceInternalId]
+                  ) === "nonpublic"
+                )
+                .map((reference) => reference.sourceInternalId)
+            )].sort((left, right) => left.localeCompare(right, "en"));
+            if (unresolvedReferences.every((reference) =>
+              palworldPakSourcePalVisibility(
+                palRows[reference.sourceInternalId]
+              ) === "nonpublic"
+            )) {
+              excludedSpecialRows.push({
+                sourceRowId,
+                parentA: rawParentA,
+                parentB: rawParentB,
+                child: rawChild,
+                excludedSourceInternalIds: nonpublicSourceInternalIds,
+                reason: "nonpublic_pal_relation"
+              });
+              continue;
+            }
+            const missingSourceInternalIds = [...new Set(
+              unresolvedReferences
+                .filter((reference) =>
+                  palworldPakSourcePalVisibility(
+                    palRows[reference.sourceInternalId]
+                  ) === "missing"
+                )
+                .map((reference) => reference.sourceInternalId)
+            )].sort((left, right) => left.localeCompare(right, "en"));
+            if (missingSourceInternalIds.length > 0) {
+              sourceMissingSpecialRows.push({
+                sourceRowId,
+                parentA: rawParentA,
+                parentB: rawParentB,
+                child: rawChild,
+                missingSourceInternalIds,
+                reason: "source_pal_row_missing"
+              });
+              continue;
+            }
             unresolvedSpecialRows.push({
               sourceRowId,
               parentA: rawParentA,
@@ -2207,6 +2494,12 @@ export async function importPalworldPakCandidate(
           || (left.parentBGender ?? "").localeCompare(right.parentBGender ?? "", "en")
           || left.childId.localeCompare(right.childId, "en")
           || left.sourceRowId.localeCompare(right.sourceRowId, "en")
+        );
+        excludedSpecialRows.sort((left, right) =>
+          left.sourceRowId.localeCompare(right.sourceRowId, "en")
+        );
+        sourceMissingSpecialRows.sort((left, right) =>
+          left.sourceRowId.localeCompare(right.sourceRowId, "en")
         );
         const breedingParameters = pals.map((pal) => ({
           palId: pal.id,
@@ -2458,6 +2751,8 @@ export async function importPalworldPakCandidate(
           ...common,
           parameters: breedingParameters,
           specialRules,
+          excludedSourceRows: excludedSpecialRows,
+          sourceMissingSourceRows: sourceMissingSpecialRows,
           duplicateSourceRows: duplicateSpecialRows,
           unresolvedSourceRows: unresolvedSpecialRows,
           computedResultCount: computedBreedingResults
@@ -2733,6 +3028,15 @@ export async function importPalworldPakCandidate(
             canonicalIncludedFiles: referencedPalIconMembers.size,
             unreferencedFiles: unreferencedPalIconMembers,
             validationFailures: rawPalIconValidationFailures
+          },
+          itemIcons: {
+            sourceTableReferenced: preflight.assets.itemIcons.referenced,
+            sourceTableExactMatches: preflight.assets.itemIcons.exactMatches,
+            missingIconRows: preflight.assets.itemIcons.missingIconRows,
+            missingRoots: preflight.assets.itemIcons.missingRoots,
+            reason: preflight.assets.itemIcons.exactMatches === 0
+              ? "referenced_source_png_roots_not_exported"
+              : "partial_source_png_export"
           }
         };
         const imageCoverage = {
@@ -2793,7 +3097,10 @@ export async function importPalworldPakCandidate(
           ...(unresolvedSkillIdMigrations > 0
             ? ["SKILL_ID_MIGRATION_INCOMPLETE"]
             : []),
-          ...(unresolvedSpecialRows.length > 0 ? ["SPECIAL_BREEDING_REFERENCE_UNRESOLVED"] : []),
+          ...(sourceMissingSpecialRows.length > 0
+            || unresolvedSpecialRows.length > 0
+            ? ["SPECIAL_BREEDING_REFERENCE_UNRESOLVED"]
+            : []),
           ...(orphanDropItems.size > 0 ? ["DROP_ITEM_REFERENCE_UNRESOLVED"] : []),
           ...(orphanRecipeReferences.size + orphanRecipeProducts.size > 0
             ? ["RECIPE_ITEM_REFERENCE_UNRESOLVED"]
@@ -2852,6 +3159,22 @@ export async function importPalworldPakCandidate(
             .filter((assignment) => assignment.status === "resolved").length,
           excludedActiveAssignments: assignmentRecords
             .filter((assignment) => assignment.status !== "resolved").length,
+          publicResolvedActiveAssignments: assignmentRecords
+            .filter((assignment) => assignment.status === "resolved").length,
+          publicExcludedActiveAssignments: assignmentRecords
+            .filter((assignment) =>
+              assignment.status === "noncanonical_pal_excluded"
+              || assignment.status === "nonpublic_pal_excluded"
+            ).length,
+          sourceMissingActiveAssignments: assignmentRecords
+            .filter((assignment) =>
+              assignment.status === "source_pal_missing_excluded"
+            ).length,
+          unresolvedActiveAssignments: assignmentRecords
+            .filter((assignment) =>
+              assignment.status === "pal_reference_unresolved"
+              || assignment.status === "skill_reference_unresolved"
+            ).length,
           eggAssignments: eggAssignmentRecords.length,
           palsWithActiveAssignments: pals
             .filter((pal) => pal.activeSkillAssignmentIds.length > 0).length,
@@ -2859,6 +3182,9 @@ export async function importPalworldPakCandidate(
             .filter((pal) => pal.activeSkillAssignmentIds.length === 0).length,
           sourceSpecialBreedingRows: Object.keys(specialBreedingRows).length,
           resolvedSpecialBreedingRules: specialRules.length,
+          publicResolvedSpecialBreedingRows: specialRules.length,
+          publicExcludedSpecialBreedingRows: excludedSpecialRows.length,
+          sourceMissingSpecialBreedingRows: sourceMissingSpecialRows.length,
           duplicateSpecialBreedingRows: duplicateSpecialRows.length,
           unresolvedSpecialBreedingRows: unresolvedSpecialRows.length,
           computedBreedingResults
@@ -2891,6 +3217,22 @@ export async function importPalworldPakCandidate(
             passiveSkillRows: allPassiveSkillRows.length,
             visiblePassiveSkillRows: passiveSkills.length,
             excludedPassiveSkillRows: excludedPassiveSkillRows.length,
+            sourceActiveSkillRows: sourceActiveRows.length,
+            publicActiveSkillRows: activeSkills.length,
+            excludedActiveSkillRows: excludedActiveSkillRows.length,
+            passiveDescriptionMissingSourceRows: passiveSkills
+              .filter((skill) =>
+                skill.description.koStatus === "missing_source"
+                || skill.description.jaStatus === "missing_source"
+              ).length,
+            passiveStructuredEffectFallbackRows: passiveSkills
+              .filter((skill) =>
+                (
+                  skill.description.koStatus === "missing_source"
+                  || skill.description.jaStatus === "missing_source"
+                )
+                && skill.effects.length > 0
+              ).length,
             activeAssignmentRows: Object.keys(activeAssignmentRows).length,
             eggAssignmentRows: Object.keys(eggAssignmentRows).length
           },
@@ -2937,6 +3279,7 @@ export async function importPalworldPakCandidate(
           },
           unresolved: {
             specialBreedingRows: unresolvedSpecialRows,
+            sourceMissingSpecialBreedingRows: sourceMissingSpecialRows,
             orphanDropItemInternalIds: [...orphanDropItems].sort((left, right) => left.localeCompare(right, "en")),
             orphanRecipeProductInternalIds: [...orphanRecipeProducts]
               .sort((left, right) => left.localeCompare(right, "en")),
@@ -2954,6 +3297,8 @@ export async function importPalworldPakCandidate(
             duplicatePalRows: canonical.exclusions,
             itemRows: excludedItemRows,
             passiveSkillRows: excludedPassiveSkillRows,
+            activeSkillRows: excludedActiveSkillRows,
+            nonpublicSpecialBreedingRows: excludedSpecialRows,
             duplicateSpecialBreedingRows: duplicateSpecialRows,
             illegalRecipeProducts: excludedIllegalRecipeProducts
               .sort((left, right) => left.sourceRowId.localeCompare(right.sourceRowId, "en")),
@@ -2964,6 +3309,12 @@ export async function importPalworldPakCandidate(
               ),
             noncanonicalActiveSkillAssignments: assignmentRecords
               .filter((assignment) => assignment.status === "noncanonical_pal_excluded"),
+            nonpublicActiveSkillAssignments: assignmentRecords
+              .filter((assignment) => assignment.status === "nonpublic_pal_excluded"),
+            sourceMissingActiveSkillAssignments: assignmentRecords
+              .filter((assignment) =>
+                assignment.status === "source_pal_missing_excluded"
+              ),
             eggAssignments: eggAssignmentRecords
           },
           aliasApplications: aliases.entries.map((entry) => ({
@@ -3030,7 +3381,10 @@ export async function importPalworldPakCandidate(
             pals: "candidate",
             items: "candidate",
             skills: "candidate",
-            breeding: unresolvedSpecialRows.length === 0 ? "candidate" : "blocked",
+            breeding: sourceMissingSpecialRows.length === 0
+              && unresolvedSpecialRows.length === 0
+              ? "candidate"
+              : "blocked",
             localizationKo: koLocale.languageVerified ? "candidate" : "blocked",
             localizationJa: jaLocale.languageVerified ? "candidate" : "blocked",
             localizationEn: enLocale.languageVerified
@@ -3124,6 +3478,7 @@ export type PalworldPakCandidateCliMappings = {
   elementIconMapPath: string;
   workIconMapPath: string;
   skillIconMapPath: string;
+  publicActiveSkillAllowlistPath: string;
   exclusionsPath: string;
   legacySkillCatalogPath: string;
 };
@@ -3138,6 +3493,9 @@ export async function loadPalworldPakCandidateMappings(
     elementIconMap: await readPalworldPakMappingFile(paths.elementIconMapPath),
     workIconMap: await readPalworldPakMappingFile(paths.workIconMapPath),
     skillIconMap: await readPalworldPakMappingFile(paths.skillIconMapPath),
+    publicActiveSkillAllowlist: await readPalworldPakMappingFile(
+      paths.publicActiveSkillAllowlistPath
+    ),
     exclusions: await readPalworldPakMappingFile(paths.exclusionsPath),
     legacySkillCatalog: await readPalworldPakMappingFile(paths.legacySkillCatalogPath)
   };

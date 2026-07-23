@@ -29,14 +29,14 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
     <Card className="palworld-entity-card" variant="interactive" padding="none" onClick={() => onOpen(pal)} aria-label={`${displayName} · ${text.openPal}`} data-testid="pal-card">
       <div className="palworld-entity-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={displayName} locale={locale} priority={priority} {...imageDimensions(pal)} /></div>
       <CardContent>
-        <div className="palworld-card-kicker"><span>{formatPalNumber(pal.number)}</span><Badge size="sm" tone={rarityTone(pal.rarity)}>★ {pal.rarity}</Badge></div>
+        <div className="palworld-card-kicker"><span>{formatPalNumber(pal.number, locale)}</span><Badge size="sm" tone={rarityTone(pal.rarity)}>★ {pal.rarity}</Badge></div>
         <h3 title={displayName}>{displayName}</h3>
         <PalworldTranslationBadges locale={locale} statuses={[name.status]} />
         <div className="palworld-badge-row">
           {pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}
           {pal.variantType !== "normal" ? <Badge size="sm" tone="warning">{pal.variantType === "special" ? text.special : text.variantPal}</Badge> : null}
         </div>
-        {pal.workSuitabilities[0] ? <p className="palworld-card-note">{workLabel(pal.workSuitabilities[0].type, locale)} Lv.{pal.workSuitabilities[0].level}</p> : null}
+        {pal.workSuitabilities[0] ? <p className="palworld-card-note">{workLabel(pal.workSuitabilities[0].type, locale)} {text.levelPrefix}{pal.workSuitabilities[0].level}</p> : null}
       </CardContent>
     </Card>
   );
@@ -55,7 +55,7 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
         <h3 title={displayName}>{displayName}</h3>
         <PalworldTranslationBadges locale={locale} statuses={[name.status, description.status]} />
         <p className="palworld-card-description palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
-        {item.technologyLevel !== undefined ? <p className="palworld-card-note">{text.technologyLevel} · Lv.{item.technologyLevel}</p> : null}
+        {item.technologyLevel !== undefined ? <p className="palworld-card-note">{text.technologyLevel} · {text.levelPrefix}{item.technologyLevel}</p> : null}
       </CardContent>
     </Card>
   );

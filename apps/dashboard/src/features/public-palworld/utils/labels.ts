@@ -6,7 +6,7 @@ import type {
   PalworldSkillType,
   PalworldWorkSuitabilityType,
 } from "@streamops/shared";
-import type { PalworldLocale } from "../i18n/palworld-i18n";
+import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 
 const elementLabels: Record<PalworldElement, [string, string]> = {
   neutral: ["무속성", "無属性"], fire: ["불", "炎"], water: ["물", "水"], electric: ["번개", "雷"],
@@ -40,7 +40,7 @@ const skillTypeLabels: Record<PalworldSkillType, [string, string]> = {
 };
 
 function translated<T extends string>(values: Record<T, [string, string]>, value: T, locale: PalworldLocale): string {
-  return values[value]?.[locale === "ja" ? 1 : 0] ?? value;
+  return values[value]?.[locale === "ja" ? 1 : 0] ?? palworldI18n[locale].unknown;
 }
 
 export const elementLabel = (value: PalworldElement, locale: PalworldLocale) => translated(elementLabels, value, locale);

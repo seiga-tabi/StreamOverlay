@@ -46,7 +46,7 @@ export function PalworldItemsPage({ locale, onOpenItem, params }: { locale: Palw
   function submit(event: FormEvent) { event.preventDefault(); update("q", nameQuery.trim()); }
 
   return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">ITEMS</span><h1 data-ko={palworldI18n.ko.items} data-ja={palworldI18n.ja.items}>{text.items}</h1><p data-ko={palworldI18n.ko.itemsDescription} data-ja={palworldI18n.ja.itemsDescription}>{text.itemsDescription}</p></div></header>
+    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.itemsKicker}</span><h1 data-ko={palworldI18n.ko.items} data-ja={palworldI18n.ja.items}>{text.items}</h1><p data-ko={palworldI18n.ko.itemsDescription} data-ja={palworldI18n.ja.itemsDescription}>{text.itemsDescription}</p></div></header>
     <form className="palworld-filter-bar" onSubmit={submit} aria-label={text.filter}>
       <label><span>{text.nameSearch}</span><Input type="search" value={nameQuery} onChange={(event) => setNameQuery(event.target.value)} /></label>
       <label><span>{text.category}</span><Select value={params.get("category") ?? ""} onChange={(event) => update("category", event.target.value)}><option value="">{text.all}</option>{PALWORLD_ITEM_CATEGORIES.map((value) => <option value={value} key={value}>{categoryLabel(value, locale)}</option>)}</Select></label>
