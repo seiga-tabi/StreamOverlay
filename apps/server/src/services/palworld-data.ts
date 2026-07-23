@@ -26,13 +26,17 @@ import { PALWORLD_SNAPSHOT } from "../data/palworld-snapshot.js";
 import { PalworldCatalogAdapterError, adaptPalworldCatalog } from "../data/palworld-catalog-adapter.js";
 import {
   PalworldBreedingArtifactError,
-  loadPalworldBreedingRuntimeSource
+  loadPalworldBreedingRuntimeSource,
+  type PalworldBreedingRuntimeSource
 } from "../data/palworld-breeding-artifact.js";
 import {
+  collectPalworldCatalogRuntimeAssetCoverage,
   PalworldCatalogValidationError,
-  loadPalworldCatalogDataSource,
-  validatePalworldCatalogAssetFiles
+  loadPalworldCatalogDataSource
 } from "../data/palworld-catalog-artifact.js";
+import {
+  PalworldPaldexValidationError
+} from "../data/palworld-paldex-artifact.js";
 import {
   loadPalworldPaldexRuntimeRelease,
   type PalworldDataIntegrityGate,
@@ -184,6 +188,29 @@ function matchScore(term: string, fields: Array<string | number>): number | unde
 
 function compareText(left: string, right: string): number {
   return left.localeCompare(right, ["ko", "ja", "en"], { numeric: true, sensitivity: "base" });
+}
+
+function localizedName(
+  value: { nameKo?: string; nameJa?: string; nameEn: string },
+  locale: "ko" | "ja" | "en"
+): string {
+  return locale === "ja"
+    ? value.nameJa ?? value.nameEn
+    : locale === "ko"
+      ? value.nameKo ?? value.nameEn
+      : value.nameEn;
+}
+
+function compareLocalizedName(
+  left: { nameKo?: string; nameJa?: string; nameEn: string },
+  right: { nameKo?: string; nameJa?: string; nameEn: string },
+  locale: "ko" | "ja" | "en"
+): number {
+  return localizedName(left, locale).localeCompare(
+    localizedName(right, locale),
+    [locale, locale === "ko" ? "ja" : "ko", "en"],
+    { numeric: true, sensitivity: "base" }
+  );
 }
 
 function direction(value: number, order: PalworldSortOrder): number {
@@ -414,7 +441,7 @@ export class PalworldDataService {
           ? left.number - right.number || compareText(left.id, right.id)
           : query.sort === "rarity"
             ? left.rarity - right.rarity || left.number - right.number
-            : compareText(left.nameKo, right.nameKo) || left.number - right.number;
+            : compareLocalizedName(left, right, query.locale ?? "ko") || left.number - right.number;
         return direction(result, query.order);
       });
     const pageInfo = pagination(query.page, query.limit, filtered.length);
@@ -456,14 +483,16 @@ export class PalworldDataService {
       .filter((item) => query.acquisition === undefined || item.acquisitionMethods.some((method) => method.type === query.acquisition))
       .sort((left, right) => {
         if (query.sort === "price") {
-          return compareOptionalNumber(left.sellPrice, right.sellPrice, query.order) || compareText(left.nameEn, right.nameEn);
+          return compareOptionalNumber(left.sellPrice, right.sellPrice, query.order)
+            || compareLocalizedName(left, right, query.locale ?? "en");
         }
         if (query.sort === "technologyLevel") {
-          return compareOptionalNumber(left.technologyLevel, right.technologyLevel, query.order) || compareText(left.nameEn, right.nameEn);
+          return compareOptionalNumber(left.technologyLevel, right.technologyLevel, query.order)
+            || compareLocalizedName(left, right, query.locale ?? "en");
         }
         const result = query.sort === "rarity"
-          ? left.rarity - right.rarity || compareText(left.nameEn, right.nameEn)
-          : compareText(left.nameKo ?? left.nameEn, right.nameKo ?? right.nameEn);
+          ? left.rarity - right.rarity || compareLocalizedName(left, right, query.locale ?? "en")
+          : compareLocalizedName(left, right, query.locale ?? "en");
         return direction(result, query.order);
       });
     const pageInfo = pagination(query.page, query.limit, filtered.length);
@@ -496,12 +525,14 @@ export class PalworldDataService {
       .filter((skill) => query.element === undefined || skill.element === query.element)
       .sort((left, right) => {
         if (query.sort === "power") {
-          return compareOptionalNumber(left.power, right.power, query.order) || compareText(left.nameEn, right.nameEn);
+          return compareOptionalNumber(left.power, right.power, query.order)
+            || compareLocalizedName(left, right, query.locale ?? "en");
         }
         if (query.sort === "unlockLevel") {
-          return compareOptionalNumber(left.unlockLevel, right.unlockLevel, query.order) || compareText(left.nameEn, right.nameEn);
+          return compareOptionalNumber(left.unlockLevel, right.unlockLevel, query.order)
+            || compareLocalizedName(left, right, query.locale ?? "en");
         }
-        return direction(compareText(left.nameEn, right.nameEn), query.order);
+        return direction(compareLocalizedName(left, right, query.locale ?? "en"), query.order);
       });
     const pageInfo = pagination(query.page, query.limit, filtered.length);
     return {
@@ -697,8 +728,9 @@ export async function loadPalworldDataService(options: {
   const palworldImageRoot = path.dirname(options.imageRoot ?? PALWORLD_PALDEX_IMAGE_ROOT);
   const catalogRoot = options.catalogRoot ?? options.releaseRoot ?? PALWORLD_PALDEX_RELEASE_ROOT;
   let breedingEngine: PalworldBreedingEngine | undefined;
+  let breedingSource: PalworldBreedingRuntimeSource | undefined;
   try {
-    const breedingSource = await loadPalworldBreedingRuntimeSource(catalogRoot);
+    breedingSource = await loadPalworldBreedingRuntimeSource(catalogRoot);
     if (
       breedingSource.artifact.release !== release.metadata.gameVersion
       || breedingSource.artifact.metadata.sourceRevision !== release.metadata.sourceRevision
@@ -757,31 +789,39 @@ export async function loadPalworldDataService(options: {
         // 진단 callback 실패가 공개 Palworld 데이터 runtime을 중단시키지 않도록 격리한다.
       }
     }
-    let itemAssetsAvailable = true;
-    let elementAssetsAvailable = true;
+    let itemAssetsAvailable: boolean | ReadonlySet<string> = new Set<string>();
+    let elementAssetsAvailable: boolean | ReadonlySet<string> = new Set<string>();
     try {
-      await validatePalworldCatalogAssetFiles({
+      itemAssetsAvailable = (await collectPalworldCatalogRuntimeAssetCoverage({
         root: options.itemImageRoot ?? path.join(palworldImageRoot, "items"),
         kind: "items",
         manifest: catalogSource.itemImagesManifest
-      });
+      })).validIds;
     } catch (error) {
-      if (!(error instanceof PalworldCatalogValidationError) && (error as NodeJS.ErrnoException).code !== "ENOENT") {
+      if (
+        !(error instanceof PalworldCatalogValidationError)
+        && !(error instanceof PalworldPaldexValidationError)
+        && (error as NodeJS.ErrnoException).code !== "ENOENT"
+        && (error as NodeJS.ErrnoException).code !== "EACCES"
+      ) {
         throw error;
       }
-      itemAssetsAvailable = false;
     }
     try {
-      await validatePalworldCatalogAssetFiles({
+      elementAssetsAvailable = (await collectPalworldCatalogRuntimeAssetCoverage({
         root: options.elementImageRoot ?? path.join(palworldImageRoot, "elements"),
         kind: "elements",
         manifest: catalogSource.elementImagesManifest
-      });
+      })).validIds;
     } catch (error) {
-      if (!(error instanceof PalworldCatalogValidationError) && (error as NodeJS.ErrnoException).code !== "ENOENT") {
+      if (
+        !(error instanceof PalworldCatalogValidationError)
+        && !(error instanceof PalworldPaldexValidationError)
+        && (error as NodeJS.ErrnoException).code !== "ENOENT"
+        && (error as NodeJS.ErrnoException).code !== "EACCES"
+      ) {
         throw error;
       }
-      elementAssetsAvailable = false;
     }
     const adaptedCatalog = adaptPalworldCatalog({
       basePaldex: release,
@@ -807,6 +847,13 @@ export async function loadPalworldDataService(options: {
         .update(catalogSource.manifest.catalogSha256)
         .digest("hex")
     });
+    const requiredBreedingCoverage = breedingSource !== undefined
+      && Object.values(breedingSource.report.fieldCoverage).every((field) =>
+        field.available === adaptedCatalog.snapshot.pals.length
+        && field.total === adaptedCatalog.snapshot.pals.length
+      )
+      ? adaptedCatalog.snapshot.pals.length
+      : 0;
     return new PalworldDataService(adaptedCatalog.snapshot, {
       sourceInternalIds: release.sourceInternalIds,
       domains: {
@@ -818,7 +865,14 @@ export async function loadPalworldDataService(options: {
         }
       },
       gates: runtimeGates(release),
-      coverage: adaptedCatalog.coverage,
+      coverage: {
+        ...adaptedCatalog.coverage,
+        breedingFields: {
+          available: requiredBreedingCoverage,
+          missing: adaptedCatalog.snapshot.pals.length - requiredBreedingCoverage,
+          total: adaptedCatalog.snapshot.pals.length
+        }
+      },
       breedingEngine
     });
   } catch (error) {

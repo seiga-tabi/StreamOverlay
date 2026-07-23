@@ -14,6 +14,7 @@ const MAX_PAGE = 10_000;
 
 const PAL_LIST_QUERY_KEYS = new Set([
   "q",
+  "locale",
   "element",
   "work",
   "rarity",
@@ -25,6 +26,7 @@ const PAL_LIST_QUERY_KEYS = new Set([
 ]);
 const ITEM_LIST_QUERY_KEYS = new Set([
   "q",
+  "locale",
   "category",
   "rarity",
   "acquisition",
@@ -35,6 +37,7 @@ const ITEM_LIST_QUERY_KEYS = new Set([
 ]);
 const SKILL_LIST_QUERY_KEYS = new Set([
   "q",
+  "locale",
   "type",
   "element",
   "sort",
@@ -62,6 +65,7 @@ export type PalworldSortOrder = "asc" | "desc";
 
 export type PalworldPalListQuery = {
   q?: string;
+  locale?: "ko" | "ja";
   element?: (typeof PALWORLD_ELEMENTS)[number];
   work?: (typeof PALWORLD_WORK_TYPES)[number];
   rarity?: number;
@@ -74,6 +78,7 @@ export type PalworldPalListQuery = {
 
 export type PalworldItemListQuery = {
   q?: string;
+  locale?: "ko" | "ja";
   category?: (typeof PALWORLD_ITEM_CATEGORIES)[number];
   rarity?: number;
   acquisition?: (typeof PALWORLD_ACQUISITION_TYPES)[number];
@@ -85,6 +90,7 @@ export type PalworldItemListQuery = {
 
 export type PalworldSkillListQuery = {
   q?: string;
+  locale?: "ko" | "ja";
   type?: (typeof PALWORLD_SKILL_TYPES)[number];
   element?: (typeof PALWORLD_ELEMENTS)[number];
   sort: (typeof PALWORLD_SKILL_SORTS)[number];
@@ -212,6 +218,7 @@ export function parsePalworldPalListQuery(params: URLSearchParams): PalworldPalL
   assertKnownKeys(params, PAL_LIST_QUERY_KEYS);
   return {
     q: optionalText(params, "q"),
+    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
     element: optionalEnum(params, "element", PALWORLD_ELEMENTS),
     work: optionalEnum(params, "work", PALWORLD_WORK_TYPES),
     rarity: optionalRarity(params, 1),
@@ -226,6 +233,7 @@ export function parsePalworldItemListQuery(params: URLSearchParams): PalworldIte
   assertKnownKeys(params, ITEM_LIST_QUERY_KEYS);
   return {
     q: optionalText(params, "q"),
+    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
     category: optionalEnum(params, "category", PALWORLD_ITEM_CATEGORIES),
     rarity: optionalRarity(params, 0),
     acquisition: optionalEnum(params, "acquisition", PALWORLD_ACQUISITION_TYPES),
@@ -239,6 +247,7 @@ export function parsePalworldSkillListQuery(params: URLSearchParams): PalworldSk
   assertKnownKeys(params, SKILL_LIST_QUERY_KEYS);
   return {
     q: optionalText(params, "q"),
+    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
     type: optionalEnum(params, "type", PALWORLD_SKILL_TYPES),
     element: optionalEnum(params, "element", PALWORLD_ELEMENTS),
     sort: optionalEnum(params, "sort", PALWORLD_SKILL_SORTS) ?? "name",

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "candidateRelease": "candidate-1248184a4b527d94",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "entries": [
+    {
+      "sourceInternalId": "BadCatgirl",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_BadCatgirl_icon_normal.png",
+      "reason": "icon DataTable row 누락을 운영자 제공 export의 exact canonical ID 파일로 보완"
+    },
+    {
+      "sourceInternalId": "CowPal",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_CowPal_icon_normal.png",
+      "reason": "icon DataTable row 누락을 운영자 제공 export의 exact canonical ID 파일로 보완"
+    },
+    {
+      "sourceInternalId": "KingAlpaca_Ice",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_KingAlpaca_Ice_icon_normal.png",
+      "reason": "icon DataTable row 누락을 운영자 제공 export의 exact canonical ID 파일로 보완"
+    },
+    {
+      "sourceInternalId": "Kirin_Ice",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_Kirin_Ice_icon_normal.png",
+      "reason": "icon DataTable row 누락을 운영자 제공 export의 exact canonical ID 파일로 보완"
+    },
+    {
+      "sourceInternalId": "OctopusGirl",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_OctopusGirl_icon_normal.png",
+      "reason": "Neutral 변종과 공유하지 않고 canonical OctopusGirl 파일을 exact 지정"
+    },
+    {
+      "sourceInternalId": "SnowTigerBeastman",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_SnowTigerBeastman_icon_normal.png",
+      "reason": "icon DataTable row 누락을 운영자 제공 export의 exact canonical ID 파일로 보완"
+    },
+    {
+      "sourceInternalId": "SwordCutlassfish",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_SwordCutlassfish_icon_normal.png",
+      "reason": "Fire 변종과 공유하지 않고 canonical 일반종 파일을 exact 지정"
+    },
+    {
+      "sourceInternalId": "SwordCutlassfish_Fire",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_SwordCutlassfish_Fire_icon_normal.png",
+      "reason": "일반종과 공유하지 않고 canonical Fire 변종 파일을 exact 지정"
+    },
+    {
+      "sourceInternalId": "VolcanicMonster",
+      "sourceMember": "Pal/Texture/PalIcon/Normal/T_VolcanicMonster_icon_normal.png",
+      "reason": "Ice 변종과 공유하지 않고 canonical 일반종 파일을 exact 지정"
+    }
+  ]
+}

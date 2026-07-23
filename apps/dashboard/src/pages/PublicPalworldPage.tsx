@@ -30,6 +30,7 @@ import { PALWORLD_VERSION_MISMATCH_EVENT } from "../features/public-palworld/api
 import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldRoute";
 import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
 import { isKnownPalworldPagePath, palworldTwitchReturnTo, palworldUrl, setPalworldUrl, withQueryParam } from "../features/public-palworld/utils/routes";
+import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
 import {
   getPublicTwitchFollowedChannels,
   getPublicTwitchStatus,
@@ -76,6 +77,8 @@ export function PublicPalworldPage({
   const selectedItemId = selectedPalId ? undefined : params.get("item")?.trim() || undefined;
 
   setActivePublicLocale(locale);
+
+  useEffect(() => applyPalworldSeo(knownPage ? page : "home", locale), [knownPage, locale, page]);
 
   const refreshTwitchStatus = useCallback(async (): Promise<void> => {
     if (logoutInFlightRef.current) return;
@@ -294,9 +297,8 @@ export function PublicPalworldPage({
     <AppShell
       className={`public-lol-shell public-dashboard-shell palworld-shell theme-${theme}`}
       mainId="palworld-main"
-      renderRoot={({ children, ...rootProps }) => <main {...rootProps}>{children}</main>}
-      showSkipLink={false}
       sidebarMode="drawer"
+      skipLinkLabel={text.skipToContent}
       variant="public"
     >
       <AppShellHeader as="div" className="palworld-shell-header">

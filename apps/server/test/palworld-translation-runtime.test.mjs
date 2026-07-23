@@ -17,7 +17,10 @@ const {
 const {
   loadPalworldReviewedItemAliases
 } = await import("../dist/data/palworld-reviewed-item-aliases.js");
-const { loadPalworldDataService } = await import("../dist/services/palworld-data.js");
+const {
+  PalworldDataService,
+  loadPalworldDataService
+} = await import("../dist/services/palworld-data.js");
 
 const releaseRoot = fileURLToPath(new URL("../data/palworld/1.0.1/", import.meta.url));
 const temporaryRoots = [];
@@ -309,6 +312,146 @@ test("runtime adapter는 미검수 machine 이름을 영문 fallback으로 격�
   assert.equal(adapted.coverage.translations.ko.itemNames.missing > 0, true);
 });
 
+test("공식 source_provided 이름은 legacy sample보다 우선하고 item 참조·스킬까지 같은 상태를 보존한다", async () => {
+  const { catalogSource, paldex, reviewedItemAliases } = await canonicalContext();
+  const item = catalogSource.catalog.items.find((candidate) => candidate.id === "pal-crystal-s");
+  const skill = catalogSource.catalog.skills.find((candidate) => candidate.type === "active");
+  const pal = paldex.pals[0];
+  assert.ok(item);
+  assert.ok(skill);
+  assert.ok(pal);
+  const field = (text, messageKey, sourceMember) => ({
+    sourceSha256: sha256(text),
+    sourceMessageKey: messageKey,
+    sourceMember,
+    sourceMemberSha256: "c".repeat(64),
+    text,
+    status: "source_provided"
+  });
+  const snapshots = Object.fromEntries(["ko", "ja"].map((locale) => {
+    const isKo = locale === "ko";
+    return [locale, {
+      schemaVersion: 1,
+      release: catalogSource.catalog.release,
+      locale,
+      sourceCatalogSha256: catalogSource.manifest.catalogSha256,
+      sourcePaldexSha256: paldex.manifest.paldexSha256,
+      sourceRevision: catalogSource.catalog.metadata.sourceRevision,
+      translationRevision: `official-${locale}-fixture`,
+      translationMethod: "source_provided",
+      translationStatus: "incomplete",
+      translatedAt: "2026-07-22T00:00:00.000Z",
+      reviewedAt: null,
+      records: [
+        {
+          id: item.id,
+          kind: "item",
+          fields: {
+            name: field(
+              isKo ? "공식 팰지움 파편" : "公式パルジウムの欠片",
+              "ITEM_NAME_Pal_crystal_S",
+              `${isKo ? "L10N/ko/" : ""}Pal/DataTable/Text/DT_ItemNameText_Common.json`
+            )
+          }
+        },
+        {
+          id: pal.id,
+          kind: "pal",
+          fields: {
+            name: field(
+              isKo ? "공식 테스트 Pal" : "公式テストパル",
+              `PAL_NAME_${paldex.sourceInternalIds[pal.id]}`,
+              `${isKo ? "L10N/ko/" : ""}Pal/DataTable/Text/DT_PalNameText_Common.json`
+            )
+          }
+        },
+        {
+          id: skill.id,
+          kind: "skill",
+          fields: {
+            name: field(
+              isKo ? "공식 테스트 스킬" : "公式テストスキル",
+              "ACTION_SKILL_Test",
+              `${isKo ? "L10N/ko/" : ""}Pal/DataTable/Text/DT_SkillNameText_Common.json`
+            )
+          }
+        }
+      ].sort((left, right) => `${left.kind}:${left.id}`.localeCompare(`${right.kind}:${right.id}`, "en"))
+    }];
+  }));
+  const adapted = adaptPalworldCatalog({
+    basePaldex: paldex,
+    catalog: catalogSource.catalog,
+    catalogChecksum: catalogSource.manifest.catalogSha256,
+    localizedSnapshot: PALWORLD_SNAPSHOT,
+    sourceInternalIds: paldex.sourceInternalIds,
+    translations: {
+      snapshots,
+      staleSourceHash: { ko: false, ja: false }
+    },
+    reviewedItemAliases,
+    sourceChecksum: "a".repeat(64)
+  });
+
+  const officialItem = adapted.snapshot.items.find((candidate) => candidate.id === item.id);
+  assert.equal(officialItem.nameKo, "공식 팰지움 파편");
+  assert.equal(officialItem.nameJa, "公式パルジウムの欠片");
+  assert.deepEqual(officialItem.translation.name, {
+    ko: "source_provided",
+    ja: "source_provided"
+  });
+  const itemReferences = [
+    ...adapted.snapshot.pals.flatMap((candidate) => candidate.dropDetails ?? []),
+    ...adapted.snapshot.items.flatMap((candidate) => candidate.craftingMaterials)
+  ]
+    .map((entry) => entry.item)
+    .filter((reference) => reference.id === item.id);
+  assert.equal(itemReferences.length > 0, true);
+  for (const reference of itemReferences) {
+    assert.equal(reference.nameKo, officialItem.nameKo);
+    assert.equal(reference.nameJa, officialItem.nameJa);
+    assert.deepEqual(reference.translation.name, officialItem.translation.name);
+  }
+  const officialSkill = adapted.snapshot.skills.find((candidate) => candidate.id === skill.id);
+  assert.equal(officialSkill.nameKo, "공식 테스트 스킬");
+  assert.equal(officialSkill.nameJa, "公式テストスキル");
+  assert.deepEqual(officialSkill.translation.name, {
+    ko: "source_provided",
+    ja: "source_provided"
+  });
+  const officialPal = adapted.snapshot.pals.find((candidate) => candidate.id === pal.id);
+  assert.equal(officialPal.nameKo, "공식 테스트 Pal");
+  assert.equal(officialPal.nameJa, "公式テストパル");
+  assert.equal(adapted.coverage.translations.ko.sourceProvided > 0, true);
+  assert.equal(adapted.coverage.translations.ja.sourceProvided > 0, true);
+
+  const runtime = new PalworldDataService(adapted.snapshot, {
+    domains: adapted.domains,
+    coverage: adapted.coverage,
+    gates: {
+      dataIntegrity: { passed: true, status: "ready" },
+      imageAssets: {
+        status: "partial",
+        policyStatus: "operator_acknowledged",
+        technicalPassed: true,
+        publicActivationAllowed: true,
+        rightsVerified: false,
+        usageBasis: "operator_reference_use",
+        readyImages: adapted.snapshot.pals.filter((candidate) => candidate.imageUrl !== undefined).length,
+        fallbackPals: adapted.snapshot.pals.filter((candidate) => candidate.imageUrl === undefined).length,
+        publicNoticeRequired: true
+      }
+    }
+  });
+  assert.equal(runtime.getItem(item.id).nameKo, "공식 팰지움 파편");
+  assert.equal(runtime.getSkill(skill.id).nameJa, "公式テストスキル");
+  assert.equal(runtime.getPal(pal.id).translation.name.ko, "source_provided");
+  assert.equal(
+    runtime.search("공식 팰지움 파편", 10).items.some((candidate) => candidate.id === item.id),
+    true
+  );
+});
+
 test("현재 미검수 item·skill machine 이름과 대표 오류 문자열은 runtime 이름으로 노출되지 않는다", async () => {
   const service = await loadPalworldDataService();
   const forbidden = ["회사 소개", "지금 연락", "クアッドマックス", "夏期マックス", "サドル。"];
@@ -375,7 +518,7 @@ test("meta locale coverage는 데이터 수와 번역·fallback·missing-source 
       translated.skillPassiveAbilities
     ];
     assert.equal(
-      translated.humanReviewed + translated.machineAssisted,
+      (translated.sourceProvided ?? 0) + translated.humanReviewed + translated.machineAssisted,
       fieldCoverages.reduce((sum, field) => sum + field.available, 0)
     );
     assert.equal(

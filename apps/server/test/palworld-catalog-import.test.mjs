@@ -8,6 +8,7 @@ import { deflateRawSync } from "node:zlib";
 const {
   assertPalworldCatalogArtifact,
   assertPalworldCatalogAssetManifest,
+  collectPalworldCatalogRuntimeAssetCoverage,
   loadPalworldCatalogRuntimeSource,
   validatePalworldCatalogAssetFiles
 } = await import("../dist/data/palworld-catalog-artifact.js");
@@ -225,6 +226,47 @@ test("asset validator는 manifest 밖 PNG와 symlink를 거부한다", async (co
   const symlinkRoot = path.join(root, "linked-root");
   await symlink(root, symlinkRoot);
   await assert.rejects(() => validatePalworldCatalogAssetFiles({ root: symlinkRoot, kind: "elements", manifest: single }), /symlink/u);
+});
+
+test("runtime asset collector는 손상된 한 파일만 fallback으로 격리한다", async (context) => {
+  const manifest = JSON.parse(await readFile(new URL("element-images-manifest.json", releaseRoot), "utf8"));
+  const [validEntry, missingEntry] = manifest.entries;
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), "palworld-runtime-assets-test-")));
+  context.after(async () => {
+    const { rm } = await import("node:fs/promises");
+    await rm(root, { recursive: true, force: true });
+  });
+  await writeFile(
+    path.join(root, validEntry.outputFileName),
+    await readFile(new URL(validEntry.outputFileName, elementImageRoot))
+  );
+
+  const coverage = await collectPalworldCatalogRuntimeAssetCoverage({
+    root,
+    kind: "elements",
+    manifest: { ...manifest, entries: [validEntry, missingEntry] }
+  });
+  assert.deepEqual([...coverage.validIds], [validEntry.id]);
+  assert.deepEqual(coverage.invalidIds, [missingEntry.id]);
+
+  await writeFile(path.join(root, missingEntry.outputFileName), Buffer.from("damaged-webp"));
+  const damagedCoverage = await collectPalworldCatalogRuntimeAssetCoverage({
+    root,
+    kind: "elements",
+    manifest: { ...manifest, entries: [validEntry, missingEntry] }
+  });
+  assert.deepEqual([...damagedCoverage.validIds], [validEntry.id]);
+  assert.deepEqual(damagedCoverage.invalidIds, [missingEntry.id]);
+
+  await writeFile(path.join(root, "unlisted.webp"), Buffer.from("not-an-image"));
+  await assert.rejects(
+    () => collectPalworldCatalogRuntimeAssetCoverage({
+      root,
+      kind: "elements",
+      manifest: { ...manifest, entries: [validEntry, missingEntry] }
+    }),
+    /manifest에 없는 파일/u
+  );
 });
 
 test("SQL parser는 allowlist table과 column 순서만 처리한다", () => {

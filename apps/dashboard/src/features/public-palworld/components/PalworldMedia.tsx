@@ -3,8 +3,8 @@ import type { PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldI18n } from "../i18n/palworld-i18n";
 
 const LOCAL_PALWORLD_IMAGE_PATTERNS = {
-  pal: /^\/images\/palworld\/1\.0\.1\/pals\/[0-9a-f]{64}\.webp$/u,
-  item: /^\/images\/palworld\/1\.0\.1\/items\/[0-9a-f]{64}\.webp$/u,
+  pal: /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/pals\/[0-9a-f]{64}\.webp$/u,
+  item: /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/items\/[0-9a-f]{64}\.webp$/u,
 } as const;
 
 export function isLocalPalworldImageUrl(

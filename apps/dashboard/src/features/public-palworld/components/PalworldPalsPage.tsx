@@ -14,7 +14,7 @@ const FILTER_KEYS = ["q", "element", "work", "rarity", "variant", "sort", "page"
 
 export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: PalworldLocale; onOpenPal: (id: string) => void; params: URLSearchParams }) {
   const [response, setResponse] = useState<PalworldPaginatedResponse<PalworldPalSummary> | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<unknown>(null);
   const [revision, setRevision] = useState(0);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
   const text = palworldI18n[locale];
@@ -28,15 +28,16 @@ export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: Palwor
       const value = params.get(key);
       if (value) apiParams.set(key, value);
     });
+    apiParams.set("locale", locale);
     apiParams.set("limit", "24");
     setResponse(null);
-    setError(false);
+    setError(null);
     void getPalworldPals(apiParams, controller.signal).then(setResponse).catch((requestError) => {
       if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-      setError(true);
+      setError(requestError);
     });
     return () => controller.abort();
-  }, [routeQuery, revision]);
+  }, [locale, routeQuery, revision]);
 
   function update(key: string, value: string) {
     const next = new URLSearchParams(params);
@@ -59,7 +60,7 @@ export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: Palwor
       <div className="palworld-filter-actions"><Button size="sm" type="submit">{text.searchAction}</Button><Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/pals")}>{text.clearFilters}</Button></div>
     </form>
     {!response && !error ? <PalworldLoading locale={locale} /> : null}
-    {error ? <PalworldError locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
+    {error ? <PalworldError error={error} locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
     {response?.items.length === 0 ? <PalworldEmpty locale={locale} title={text.palListEmpty} /> : null}
     {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-entity-grid">{response.items.map((pal, index) => <PalCard key={pal.id} pal={pal} locale={locale} priority={index < 4} onOpen={(selected) => onOpenPal(selected.id)} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
   </section>;

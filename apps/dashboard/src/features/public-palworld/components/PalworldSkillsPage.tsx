@@ -22,7 +22,6 @@ import { formatPalNumber } from "../utils/search";
 import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalworldName } from "../utils/localization";
 import { setPalworldUrl, withQueryParam } from "../utils/routes";
 import { Pagination } from "./Pagination";
-import { PalworldDomainCoverageNotice, usePalworldDomainCoverage } from "./PalworldCoverageNotice";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldTranslationBadges } from "./PalworldTranslationBadge";
@@ -90,7 +89,6 @@ export function PalworldSkillDetailView({ detail, locale, onOpenPal }: { detail:
       const displayName = relatedPalName(pal, locale);
       return <button className="palworld-related-pal-link" type="button" onClick={() => onOpenPal(pal.id)} key={pal.id}><span className="palworld-related-pal-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} intrinsicWidth={pal.imageWidth} intrinsicHeight={pal.imageHeight} alt={displayName} locale={locale} /></span><span>{formatPalNumber(pal.number)} · {displayName}{unlockLevel !== undefined ? ` · ${text.unlockLevel} ${unlockLevel}` : ""}</span></button>;
     })}</div><PalworldTranslationBadges locale={locale} statuses={relatedPalStatuses} /></> : <p>{text.originalDataUnavailable}</p>}</section>
-    <section className="palworld-source"><h4>{text.source}</h4><p>{detail.metadata.sourceName} · {detail.metadata.sourceRevision}</p><p>{text.gameVersion}: {detail.metadata.gameVersion} · {text.license}: {detail.metadata.license}</p></section>
   </article>;
 }
 
@@ -128,11 +126,10 @@ function SkillDetailModal({ locale, onClose, onOpenPal, skillId }: { locale: Pal
 }
 
 export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: PalworldLocale; onOpenPal: (id: string) => void; params: URLSearchParams }) {
-  const { error, response, retry, routeQuery } = usePalworldSkills(params);
+  const { error, response, retry, routeQuery } = usePalworldSkills(params, locale);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
   const text = palworldI18n[locale];
   const selectedSkillId = params.get("skill")?.trim() || undefined;
-  const coverage = usePalworldDomainCoverage("skills");
 
   useEffect(() => setNameQuery(params.get("q") ?? ""), [routeQuery]);
 
@@ -161,7 +158,6 @@ export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: Palw
 
   return <section className="palworld-page-section">
     <header className="palworld-page-heading"><div><span aria-hidden="true">SKILLS</span><h1 data-ko={palworldI18n.ko.skillsTitle} data-ja={palworldI18n.ja.skillsTitle}>{text.skillsTitle}</h1><p data-ko={palworldI18n.ko.skillsDescription} data-ja={palworldI18n.ja.skillsDescription}>{text.skillsDescription}</p></div></header>
-    <PalworldDomainCoverageNotice coverage={coverage} domain="skills" locale={locale} />
     <form className="palworld-filter-bar palworld-skill-filter-bar" onSubmit={submit} aria-label={text.filter}>
       <label><span>{text.nameSearch}</span><Input type="search" value={nameQuery} placeholder={text.skillSearchPlaceholder} onChange={(event) => setNameQuery(event.target.value)} /></label>
       <label><span>{text.skillType}</span><Select value={params.get("type") ?? ""} onChange={(event) => update("type", event.target.value)}><option value="">{text.all}</option>{PALWORLD_SKILL_TYPES.map((value) => <option value={value} key={value}>{skillTypeLabel(value, locale)}</option>)}</Select></label>
@@ -171,7 +167,7 @@ export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: Palw
       <div className="palworld-filter-actions"><Button size="sm" type="submit">{text.searchAction}</Button><Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/skills")}>{text.clearFilters}</Button></div>
     </form>
     {!response && !error ? <PalworldLoading locale={locale} /> : null}
-    {error ? <PalworldError locale={locale} onRetry={retry} /> : null}
+    {error ? <PalworldError error={error} locale={locale} onRetry={retry} /> : null}
     {response?.items.length === 0 ? <PalworldEmpty locale={locale} title={text.skillListEmpty} /> : null}
     {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-skill-grid">{response.items.map((skill) => <PalworldSkillCard locale={locale} onOpen={openSkill} skill={skill} key={skill.id} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
     <SkillDetailModal locale={locale} onClose={closeSkill} onOpenPal={onOpenPal} skillId={selectedSkillId} />

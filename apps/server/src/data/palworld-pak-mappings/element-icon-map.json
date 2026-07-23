@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "candidateRelease": "candidate-1248184a4b527d94",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "entries": [
+    { "id": "neutral", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_00.png" },
+    { "id": "fire", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_01.png" },
+    { "id": "water", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_02.png" },
+    { "id": "electric", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_03.png" },
+    { "id": "grass", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_04.png" },
+    { "id": "dark", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_05.png" },
+    { "id": "dragon", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_06.png" },
+    { "id": "ground", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_07.png" },
+    { "id": "ice", "sourceMember": "Pal/Texture/UI/InGame/T_Icon_element_s_08.png" }
+  ]
+}

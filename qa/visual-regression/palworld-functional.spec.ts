@@ -564,6 +564,22 @@ async function installApiFixtures(page: Page): Promise<void> {
           palDetails: { available: 270, missing: 17, total: 287 },
           itemDetails: { available: 1_847, missing: 0, total: 1_847 },
           skillDetails: { available: 564, missing: 2, total: 566 },
+          palDescriptions: { available: 268, missing: 19, total: 287 },
+          palStats: { available: 287, missing: 0, total: 287 },
+          partnerSkills: { available: 270, missing: 17, total: 287 },
+          activeSkills: { available: 267, missing: 20, total: 287 },
+          palDrops: { available: 267, missing: 20, total: 287 },
+          breedingFields: { available: 0, missing: 287, total: 287 },
+          itemDescriptions: { available: 1_847, missing: 0, total: 1_847 },
+          craftingRecipes: { available: 889, missing: 958, total: 1_847 },
+          craftingFacilities: { available: 0, missing: 1_847, total: 1_847 },
+          dropPals: { available: 96, missing: 1_751, total: 1_847 },
+          technologyLevels: { available: 372, missing: 1_475, total: 1_847 },
+          prices: { available: 1_705, missing: 142, total: 1_847 },
+          durability: { available: 172, missing: 1_675, total: 1_847 },
+          acquisitionMethods: { available: 965, missing: 882, total: 1_847 },
+          skillDescriptions: { available: 564, missing: 2, total: 566 },
+          relatedPals: { available: 487, missing: 79, total: 566 },
           palImages: { available: 1, missing: 286, total: 287 },
           itemImages: { available: 1, missing: 1_846, total: 1_847 },
           elementImages: { available: 9, missing: 0, total: 9 },
@@ -966,6 +982,65 @@ test("Twitch 팔로우 API 오류가 발생해도 Palworld 홈 검색은 계속 
   await expect(page.getByTestId("hero-search").getByRole("option", { name: /펭킹/u })).toBeVisible();
 });
 
+test("통합 검색 자동완성은 오류를 빈 결과와 구분하고 키보드로 선택할 수 있다", async ({ page }) => {
+  const searchPattern = "**/api/palworld/search?*";
+  const unavailableHandler = async (route: Route) => {
+    await json(route, {
+      error: "PALWORLD_DATA_UNAVAILABLE",
+      message: "Palworld 데이터를 사용할 수 없습니다.",
+    }, 503);
+  };
+  await page.route(searchPattern, unavailableHandler);
+  await page.goto("/palworld");
+
+  const form = page.getByTestId("hero-search");
+  const input = form.getByRole("searchbox");
+  await input.fill("펭킹");
+  await expect(form.getByRole("alert")).toContainText("Palworld 데이터를 사용할 수 없어 검색할 수 없습니다.");
+  await expect(form).not.toContainText("검색 결과가 없습니다.");
+
+  await page.unroute(searchPattern, unavailableHandler);
+  await form.getByRole("button", { name: "다시 시도" }).click();
+  const option = form.getByRole("option", { name: /펭킹/u });
+  await expect(option).toBeVisible();
+  await input.press("ArrowDown");
+  const optionId = await option.getAttribute("id");
+  expect(optionId).toBeTruthy();
+  await expect(input).toHaveAttribute("aria-activedescendant", optionId!);
+  await expect(option).toHaveAttribute("aria-selected", "true");
+  await input.press("Escape");
+  await expect(form.getByRole("listbox")).toHaveCount(0);
+  await expect(input).toHaveAttribute("aria-expanded", "false");
+
+  await input.focus();
+  await input.press("ArrowDown");
+  await input.press("Enter");
+  await expect(page).toHaveURL(/\/palworld\/pals\?pal=penking$/u);
+  await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "펭킹" })).toBeVisible();
+});
+
+test("Palworld route SEO와 skip link는 locale·base canonical을 반영한다", async ({ page }) => {
+  await page.goto("/palworld/breeding?mode=child&child=anubis&page=1");
+  await expect(page).toHaveTitle("교배 조합 | YORO.gg");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://yoro.gg/palworld/breeding");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /부모/u);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", "교배 조합 | YORO.gg");
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", "https://yoro.gg/palworld/breeding");
+  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute("content", "교배 조합 | YORO.gg");
+
+  const skipLink = page.locator(".yoro-app-shell__skip-link");
+  await expect(skipLink).toHaveAttribute("href", "#palworld-main");
+  await expect(skipLink).toHaveText("본문으로 이동");
+  await page.keyboard.press("Tab");
+  await expect(skipLink).toBeFocused();
+
+  await page.locator(".public-locale-button").click();
+  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await expect(page).toHaveTitle("配合組み合わせ | YORO.gg");
+  await expect(skipLink).toHaveText("本文へ移動");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://yoro.gg/palworld/breeding");
+});
+
 test("Palworld pending Twitch 요청은 화면 전환 시 abort되고 늦은 응답이 LoL 화면을 갱신하지 않는다", async ({ page }) => {
   let palworldConnected = true;
   let followedAborted = false;
@@ -1076,7 +1151,7 @@ test("Pal 필터 query를 유지하고 카드·ESC·직접 URL 상세 Modal을 �
   await page.goto("/palworld/pals?pal=anubis");
   const directDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" });
   await expect(directDialog).toBeVisible();
-  await expect(directDialog).toContainText("アヌビス");
+  await expect(directDialog).not.toContainText("アヌビス");
   const koreanNocturnal = directDialog.locator(".palworld-data-row").filter({ hasText: "야행성" });
   await expect(koreanNocturnal).toContainText("예");
   await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/pals/anubis");
@@ -1113,12 +1188,9 @@ test("underscore 아이템 ID의 직접 URL로 아이템 상세 Modal을 연다"
   await expect(page.getByTestId("header-search")).toBeVisible();
   const dialog = page.getByTestId("item-detail-modal").getByRole("dialog", { name: "Pal 스피어" });
   await expect(dialog).toBeVisible();
-  await expect(dialog).toContainText("パルスフィア");
+  await expect(dialog).not.toContainText("パルスフィア");
   await expect(dialog.getByText("pal-sphere", { exact: true })).toBeVisible();
-  const coverage = page.getByTestId("palworld-items-coverage");
-  await expect(coverage).toContainText("준비 중");
-  await expect(coverage).toContainText("고정 출처에서 검증된 아이템만 제공");
-  await expect(coverage).toContainText("Palworld fixed release artifact");
+  await expect(page.getByTestId("palworld-items-coverage")).toHaveCount(0);
   await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/items/pal_sphere");
   const itemImage = dialog.getByRole("img", { name: "Pal 스피어" });
   await expect(itemImage).toHaveAttribute("src", READY_ITEM_IMAGE_URL);
@@ -1152,9 +1224,7 @@ test("스킬 경로는 필터·영문 원문·속성 아이콘·상세·관련 P
   await expect(filters.nth(1)).toHaveValue("ground");
   await expect(filters.nth(2)).toHaveValue("power");
   await expect(filters.nth(3)).toHaveValue("desc");
-  const coverage = page.getByTestId("palworld-skills-coverage");
-  await expect(coverage).toContainText("준비 중");
-  await expect(coverage).toContainText("일부 설명은 영어 원문");
+  await expect(page.getByTestId("palworld-skills-coverage")).toHaveCount(0);
 
   const skillCard = page.locator(".palworld-skill-card").filter({ hasText: "Stone Blast" });
   await expect(skillCard).toBeVisible();
@@ -1201,8 +1271,14 @@ test("부모 Pal 자동완성으로 일반 교배 결과를 조회하고 URL과 
 
   const parentA = page.getByTestId("breeding-parent-a");
   const parentB = page.getByTestId("breeding-parent-b");
-  await parentA.getByRole("searchbox").fill("펭킹");
-  await parentA.getByRole("option", { name: /펭킹/u }).click();
+  const parentASearch = parentA.getByRole("searchbox");
+  await parentASearch.fill("펭킹");
+  const parentAOption = parentA.getByRole("option", { name: /펭킹/u });
+  await expect(parentAOption).toBeVisible();
+  await parentASearch.press("ArrowDown");
+  await expect(parentASearch).toHaveAttribute("aria-activedescendant", await parentAOption.getAttribute("id") ?? "");
+  await expect(parentAOption).toHaveAttribute("aria-selected", "true");
+  await parentASearch.press("Enter");
   const parentImage = parentA.getByRole("img", { name: "펭킹" });
   await expect(parentImage).toBeVisible();
   await expect(parentImage).toHaveAttribute("src", READY_PAL_IMAGE_URL);
@@ -1336,10 +1412,7 @@ test("통합 검색은 한국어와 일본어 이름 결과를 표시한다", as
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("パルスフィア");
   await expect(page.getByRole("heading", { name: "パルスフィア", level: 1 })).toBeVisible();
   await expect(page.getByTestId("item-card").filter({ hasText: "パルスフィア" })).toBeVisible();
-  const itemCoverage = page.getByTestId("palworld-items-coverage");
-  await expect(itemCoverage).toContainText("準備中");
-  await expect(itemCoverage).toContainText("固定出典で検証済みのアイテムのみ提供");
-  await expect(itemCoverage).toContainText("Palworld fixed release artifact");
+  await expect(page.getByTestId("palworld-items-coverage")).toHaveCount(0);
   await expect(page.getByText("応答データのバージョンが一致しません。更新してください。")).toHaveCount(0);
   await assertHealthyDocument(page, errors);
 });

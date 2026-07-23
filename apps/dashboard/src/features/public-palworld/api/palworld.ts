@@ -29,6 +29,7 @@ import {
 import { runtimeConfig } from "../../../runtime-config";
 
 export const PALWORLD_VERSION_MISMATCH_EVENT = "palworldversionmismatch";
+const PALWORLD_REQUEST_TIMEOUT_MS = 10_000;
 let observedGameVersion: string | undefined;
 
 export class PalworldApiError extends Error {
@@ -89,6 +90,30 @@ function observeResponseGameVersion(response: Response, value: unknown): void {
   observeGameVersion(value);
 }
 
+function requestSignal(externalSignal?: AbortSignal): {
+  cleanup: () => void;
+  signal: AbortSignal;
+  timedOut: () => boolean;
+} {
+  const controller = new AbortController();
+  let timeoutReached = false;
+  const handleExternalAbort = () => controller.abort(externalSignal?.reason);
+  if (externalSignal?.aborted) handleExternalAbort();
+  else externalSignal?.addEventListener("abort", handleExternalAbort, { once: true });
+  const timeout = globalThis.setTimeout(() => {
+    timeoutReached = true;
+    controller.abort();
+  }, PALWORLD_REQUEST_TIMEOUT_MS);
+  return {
+    cleanup: () => {
+      globalThis.clearTimeout(timeout);
+      externalSignal?.removeEventListener("abort", handleExternalAbort);
+    },
+    signal: controller.signal,
+    timedOut: () => timeoutReached,
+  };
+}
+
 async function publicGet<T>(
   path: string,
   signal: AbortSignal | undefined,
@@ -97,23 +122,42 @@ async function publicGet<T>(
 ): Promise<T> {
   const configuredBase = typeof window === "undefined" ? undefined : runtimeConfig().apiBase;
   const apiBase = configuredBase ?? import.meta.env?.VITE_API_BASE ?? "http://localhost:3000";
-  const response = await fetch(`${apiBase}${path}`, {
-    credentials: "include",
-    headers: { Accept: "application/json" },
-    signal,
-  });
-  if (!response.ok) {
-    const error = await readError(response);
-    throw new PalworldApiError(response.status, error.code, error.message);
+  const request = requestSignal(signal);
+  try {
+    let response: Response;
+    try {
+      response = await fetch(`${apiBase}${path}`, {
+        credentials: "include",
+        headers: { Accept: "application/json" },
+        signal: request.signal,
+      });
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      if (request.timedOut()) {
+        throw new PalworldApiError(504, "PALWORLD_REQUEST_TIMEOUT", "Palworld API 요청 시간이 초과되었습니다.");
+      }
+      throw new PalworldApiError(0, "PALWORLD_NETWORK_ERROR", "Palworld API에 연결할 수 없습니다.");
+    }
+    if (!response.ok) {
+      const error = await readError(response);
+      throw new PalworldApiError(response.status, error.code, error.message);
+    }
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      throw new PalworldApiError(502, "PALWORLD_RESPONSE_INVALID", "Palworld API 응답을 해석할 수 없습니다.");
+    }
+    const validated = validate(body);
+    if (!validated.ok) {
+      throw new PalworldApiError(502, "PALWORLD_RESPONSE_INVALID", `Palworld API 응답 검증 실패: ${validated.error}`);
+    }
+    // active Pal release와 분리된 일부 보조 domain만 명시적으로 버전 관찰을 생략합니다.
+    if (observeActivePalVersion) observeResponseGameVersion(response, validated.data);
+    return validated.data;
+  } finally {
+    request.cleanup();
   }
-  const body: unknown = await response.json();
-  const validated = validate(body);
-  if (!validated.ok) {
-    throw new PalworldApiError(502, "PALWORLD_RESPONSE_INVALID", `Palworld API 응답 검증 실패: ${validated.error}`);
-  }
-  // active Pal release와 분리된 일부 보조 domain만 명시적으로 버전 관찰을 생략합니다.
-  if (observeActivePalVersion) observeResponseGameVersion(response, validated.data);
-  return validated.data;
 }
 
 function queryPath(path: string, params: URLSearchParams): string {

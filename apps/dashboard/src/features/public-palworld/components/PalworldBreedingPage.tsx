@@ -31,7 +31,6 @@ import { palworldUrl, setPalworldUrl } from "../utils/routes";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldPalPicker } from "./PalworldPalPicker";
-import { PalworldDomainCoverageNotice, usePalworldDomainCoverage } from "./PalworldCoverageNotice";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 import { Pagination } from "./Pagination";
 import { PalworldTranslationBadge } from "./PalworldTranslationBadge";
@@ -76,7 +75,6 @@ export function PalworldBreedingPage({
   const directRequestIdRef = useRef(0);
   const reverseRequestIdRef = useRef(0);
   const referenceRequestIdRef = useRef(0);
-  const coverage = usePalworldDomainCoverage("breeding");
   const text = palworldI18n[locale];
 
   const navigate = useCallback((next: PalworldBreedingQueryState, replace = false) => {
@@ -254,7 +252,6 @@ export function PalworldBreedingPage({
 
   return <section className="palworld-page-section">
     <header className="palworld-page-heading"><div><span aria-hidden="true">BREEDING</span><h1 data-ko={palworldI18n.ko.breeding} data-ja={palworldI18n.ja.breeding}>{text.breeding}</h1><p data-ko={palworldI18n.ko.breedingDescription} data-ja={palworldI18n.ja.breedingDescription}>{text.breedingDescription}</p></div></header>
-    <PalworldDomainCoverageNotice coverage={coverage} domain="breeding" locale={locale} />
     {!parsedQuery.ok ? (
       <PalworldError
         description={text.invalidBreedingQueryDescription}

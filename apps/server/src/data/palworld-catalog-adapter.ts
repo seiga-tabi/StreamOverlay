@@ -58,8 +58,8 @@ export type PalworldCatalogAdapterInput = {
   sourceChecksum: string;
   sourceInternalIds: Readonly<Record<string, string>>;
   assetAvailability?: {
-    items: boolean;
-    elements: boolean;
+    items: boolean | ReadonlySet<string>;
+    elements: boolean | ReadonlySet<string>;
   };
   translations?: {
     snapshots: Partial<Record<PalworldTranslationLocale, PalworldTranslationSnapshot>>;
@@ -157,21 +157,26 @@ function palReference(pal: PalworldPalDetail): PalworldPalReference {
 function catalogItemReference(
   item: PalworldCatalogItem,
   localizedItem: PalworldItemDetail | undefined,
-  imagesAvailable: boolean,
+  imagesAvailable: boolean | ReadonlySet<string>,
   translations: TranslationRecordIndex
 ): PalworldItemReference {
   const translatedNameKo = translatedField(translations, "ko", "item", item.id, "name");
   const translatedNameJa = translatedField(translations, "ja", "item", item.id, "name");
-  const nameKo = localizedItem?.nameKo ?? translatedNameKo?.text;
-  const nameJa = localizedItem?.nameJa ?? translatedNameJa?.text;
+  // 검증된 공식 locale(source_provided)을 기존 sample/legacy 이름보다 우선합니다.
+  // machine-assisted item 이름은 translatedField()에서 계속 차단됩니다.
+  const nameKo = translatedNameKo?.text ?? localizedItem?.nameKo;
+  const nameJa = translatedNameJa?.text ?? localizedItem?.nameJa;
+  const imageAvailable = typeof imagesAvailable === "boolean"
+    ? imagesAvailable
+    : imagesAvailable.has(item.id);
   return {
     id: item.id,
     ...(nameKo === undefined ? {} : { nameKo }),
     ...(nameJa === undefined ? {} : { nameJa }),
     nameEn: item.nameEn,
-    ...(!imagesAvailable || item.imageUrl === undefined ? {} : { imageUrl: item.imageUrl }),
-    ...(!imagesAvailable || item.imageWidth === undefined ? {} : { imageWidth: item.imageWidth }),
-    ...(!imagesAvailable || item.imageHeight === undefined ? {} : { imageHeight: item.imageHeight }),
+    ...(!imageAvailable || item.imageUrl === undefined ? {} : { imageUrl: item.imageUrl }),
+    ...(!imageAvailable || item.imageWidth === undefined ? {} : { imageWidth: item.imageWidth }),
+    ...(!imageAvailable || item.imageHeight === undefined ? {} : { imageHeight: item.imageHeight }),
     localization: {
       sourceLanguage: "en",
       ko: nameKo === undefined ? "source_language_fallback" : "localized",
@@ -180,13 +185,13 @@ function catalogItemReference(
     translation: {
       name: {
         ko: displayStatus(
-          localizedItem?.nameKo === undefined ? translatedNameKo : undefined,
-          localizedItem?.nameKo !== undefined,
+          translatedNameKo,
+          translatedNameKo === undefined && localizedItem?.nameKo !== undefined,
           true
         ),
         ja: displayStatus(
-          localizedItem?.nameJa === undefined ? translatedNameJa : undefined,
-          localizedItem?.nameJa !== undefined,
+          translatedNameJa,
+          translatedNameJa === undefined && localizedItem?.nameJa !== undefined,
           true
         )
       }
@@ -281,7 +286,9 @@ function coverageCount(available: number, total: number): { available: number; m
 }
 
 function isTranslated(status: PalworldTranslationDisplayStatus | undefined): boolean {
-  return status === "human_reviewed" || status === "machine_assisted";
+  return status === "source_provided"
+    || status === "human_reviewed"
+    || status === "machine_assisted";
 }
 
 function translationCoverageForLocale(
@@ -331,6 +338,7 @@ function translationCoverageForLocale(
       skillPassiveAbilitySources.filter((skill) => isTranslated(skill.translation?.passiveAbility?.[locale])).length,
       skillPassiveAbilitySources.length
     ),
+    sourceProvided: displayStatuses.filter((status) => status === "source_provided").length,
     humanReviewed: displayStatuses.filter((status) => status === "human_reviewed").length,
     machineAssisted: displayStatuses.filter((status) => status === "machine_assisted").length,
     sourceLanguageFallback: displayStatuses.filter((status) => status === "source_language_fallback").length,
@@ -604,12 +612,15 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     const id = element.id as PalworldElement;
     const names = ELEMENT_NAMES[id];
     if (!names) throw new TypeError(`Palworld element 정의가 없습니다: ${element.id}`);
+    const imageAvailable = typeof assetAvailability.elements === "boolean"
+      ? assetAvailability.elements
+      : assetAvailability.elements.has(element.id);
     return {
       id,
       nameKo: names.ko,
       nameJa: names.ja,
       nameEn: names.en,
-      ...(assetAvailability.elements ? {
+      ...(imageAvailable ? {
         iconUrl: element.imageUrl,
         imageWidth: element.imageWidth,
         imageHeight: element.imageHeight
@@ -635,6 +646,33 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     palDetails: coverageCount(catalog.coverage.exactPalDetails, pals.length),
     itemDetails: coverageCount(items.length, items.length),
     skillDetails: coverageCount(skills.filter((skill) => skill.descriptionEn).length, skills.length),
+    palDescriptions: coverageCount(
+      pals.filter((pal) => pal.descriptionKo !== undefined || pal.descriptionJa !== undefined || pal.descriptionEn !== undefined).length,
+      pals.length
+    ),
+    palStats: coverageCount(pals.filter((pal) => pal.stats !== undefined).length, pals.length),
+    partnerSkills: coverageCount(pals.filter((pal) => pal.partnerSkill !== undefined).length, pals.length),
+    activeSkills: coverageCount(pals.filter((pal) => pal.activeSkills.length > 0).length, pals.length),
+    palDrops: coverageCount(pals.filter((pal) => (pal.dropDetails?.length ?? pal.drops.length) > 0).length, pals.length),
+    breedingFields: coverageCount(pals.filter((pal) => pal.breeding.breedingPower !== undefined).length, pals.length),
+    itemDescriptions: coverageCount(
+      items.filter((item) => item.descriptionKo !== undefined || item.descriptionJa !== undefined || item.descriptionEn !== undefined).length,
+      items.length
+    ),
+    craftingRecipes: coverageCount(items.filter((item) => item.craftingMaterials.length > 0).length, items.length),
+    craftingFacilities: coverageCount(items.filter((item) => item.craftingFacility !== undefined).length, items.length),
+    dropPals: coverageCount(items.filter((item) => item.dropPals.length > 0).length, items.length),
+    technologyLevels: coverageCount(items.filter((item) => item.technologyLevel !== undefined).length, items.length),
+    prices: coverageCount(items.filter((item) => item.sellPrice !== undefined).length, items.length),
+    durability: coverageCount(items.filter((item) => item.durability !== undefined).length, items.length),
+    acquisitionMethods: coverageCount(items.filter((item) => item.acquisitionMethods.length > 0).length, items.length),
+    skillDescriptions: coverageCount(
+      skills.filter((skill) =>
+        skill.descriptionKo !== undefined || skill.descriptionJa !== undefined || skill.descriptionEn !== undefined
+      ).length,
+      skills.length
+    ),
+    relatedPals: coverageCount(skills.filter((skill) => skill.relatedPals.length > 0).length, skills.length),
     palImages: coverageCount(pals.filter((pal) => pal.imageUrl).length, pals.length),
     itemImages: coverageCount(items.filter((item) => item.imageUrl).length, items.length),
     elementImages: coverageCount(elements.filter((element) => element.iconUrl).length, elements.length),

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
+import { lstat, open, realpath, type FileHandle } from "node:fs/promises";
 import path from "node:path";
 import yauzl, { type Entry, type ZipFile } from "yauzl";
 
@@ -25,6 +25,18 @@ const WINDOWS_DRIVE_PATTERN = /^[A-Za-z]:/u;
 const KOREAN_CHARACTER_PATTERN = /[\uac00-\ud7a3]/u;
 const JAPANESE_CHARACTER_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]/u;
 const ENGLISH_CHARACTER_PATTERN = /[A-Za-z]/u;
+
+const ZIP_CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let index = 0; index < 256; index += 1) {
+    let value = index;
+    for (let bit = 0; bit < 8; bit += 1) {
+      value = (value & 1) === 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
+    }
+    table[index] = value >>> 0;
+  }
+  return table;
+})();
 
 const REQUIRED_TABLES = [
   "Pal/DataTable/Character/DT_PalMonsterParameter_Common.json",
@@ -75,6 +87,7 @@ type IndexedZipEntry = {
 
 export type PalworldPakExportMetadata = {
   schemaVersion: 1;
+  sourceType: "operator_pak_export";
   gameVersion: string;
   steamBuildId: string;
   fmodelVersion: string;
@@ -91,6 +104,8 @@ export type PalworldPakPreflightReport = {
     directoryCount: number;
     uncompressedBytes: number;
     extensionCounts: Record<string, number>;
+    crcVerifiedFiles: number;
+    parsedJsonFiles: number;
     rawPackageCounts: {
       uasset: number;
       uexp: number;
@@ -101,6 +116,7 @@ export type PalworldPakPreflightReport = {
   };
   metadata: {
     status: "provided" | "not_provided";
+    sourceType: "operator_pak_export" | "not_provided";
     gameVersion: string;
     steamBuildId: string;
     fmodelVersion: string;
@@ -119,6 +135,7 @@ export type PalworldPakPreflightReport = {
     normalPals: number;
     variantPals: number;
     duplicatePalRowsExcluded: number;
+    totalItemRows: number;
     legalItems: number;
     activeSkillRows: number;
     passiveSkillRows: number;
@@ -137,6 +154,9 @@ export type PalworldPakPreflightReport = {
       referenced: number;
       exactMatches: number;
       missing: string[];
+      sourceTableReferenced: number;
+      sourceTableExactMatches: number;
+      sourceTableMissing: string[];
     };
     itemIcons: {
       referenced: number;
@@ -178,6 +198,26 @@ export class PalworldPakPreflightError extends Error {
   }
 }
 
+export type PalworldPakArchiveMember = {
+  name: string;
+  compressedBytes: number;
+  uncompressedBytes: number;
+};
+
+export type PalworldPakArchiveReader = {
+  archiveSha256: string;
+  archiveBytes: number;
+  members: readonly PalworldPakArchiveMember[];
+  has(memberName: string): boolean;
+  readBytes(memberName: string, maxBytes?: number): Promise<Buffer>;
+  readJson(memberName: string): Promise<unknown>;
+  readDataTable(memberName: string): Promise<Record<string, unknown>>;
+};
+
+export type PalworldPakArchiveReadOptions = {
+  expectedSha256?: string;
+};
+
 function fail(message: string): never {
   throw new PalworldPakPreflightError(message);
 }
@@ -190,6 +230,7 @@ function requiredString(value: unknown, field: string, maxLength = 256): string 
   if (
     typeof value !== "string"
     || value.trim().length === 0
+    || value.trim() !== value
     || value.length > maxLength
     || CONTROL_CHARACTER_PATTERN.test(value)
   ) {
@@ -268,10 +309,10 @@ function assertSafeEntry(entry: Entry): boolean {
   return isDirectory;
 }
 
-function openZip(archivePath: string): Promise<ZipFile> {
+function openZip(fileDescriptor: number): Promise<ZipFile> {
   return new Promise((resolve, reject) => {
-    yauzl.open(
-      archivePath,
+    yauzl.fromFd(
+      fileDescriptor,
       {
         autoClose: false,
         decodeStrings: true,
@@ -285,6 +326,89 @@ function openZip(archivePath: string): Promise<ZipFile> {
       }
     );
   });
+}
+
+type SecureArchiveHandle = {
+  handle: FileHandle;
+  zipFile: ZipFile;
+  bytes: number;
+  sha256: string;
+};
+
+async function sha256FileHandle(handle: FileHandle, bytes: number): Promise<string> {
+  const hash = createHash("sha256");
+  const chunk = Buffer.allocUnsafe(1024 * 1024);
+  let offset = 0;
+  while (offset < bytes) {
+    const result = await handle.read(
+      chunk,
+      0,
+      Math.min(chunk.length, bytes - offset),
+      offset
+    );
+    if (result.bytesRead <= 0) fail("PAK export ZIP을 checksum 계산 중 끝까지 읽지 못했습니다.");
+    hash.update(chunk.subarray(0, result.bytesRead));
+    offset += result.bytesRead;
+  }
+  return hash.digest("hex");
+}
+
+async function openSecureArchive(archivePath: string): Promise<SecureArchiveHandle> {
+  const resolvedArchive = path.resolve(archivePath);
+  const before = await lstat(resolvedArchive);
+  if (
+    before.isSymbolicLink()
+    || !before.isFile()
+    || before.size <= 0
+    || before.size > MAX_ARCHIVE_BYTES
+    || await realpath(resolvedArchive) !== resolvedArchive
+  ) {
+    fail("PAK export ZIP은 symlink가 아닌 안전한 canonical regular file이어야 합니다.");
+  }
+  const handle = await open(
+    resolvedArchive,
+    fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW
+  );
+  try {
+    const opened = await handle.stat();
+    if (
+      !opened.isFile()
+      || opened.dev !== before.dev
+      || opened.ino !== before.ino
+      || opened.size !== before.size
+    ) {
+      fail("PAK export ZIP이 검증 중 변경되었습니다.");
+    }
+    const archiveSha256 = await sha256FileHandle(handle, opened.size);
+    const afterHash = await handle.stat();
+    if (
+      afterHash.dev !== opened.dev
+      || afterHash.ino !== opened.ino
+      || afterHash.size !== opened.size
+      || afterHash.mtimeMs !== opened.mtimeMs
+    ) {
+      fail("PAK export ZIP이 checksum 검증 중 변경되었습니다.");
+    }
+    const zipFile = await openZip(handle.fd);
+    return {
+      handle,
+      zipFile,
+      bytes: opened.size,
+      sha256: archiveSha256
+    };
+  } catch (error) {
+    await handle.close();
+    throw error;
+  }
+}
+
+async function closeSecureArchive(archive: SecureArchiveHandle): Promise<void> {
+  archive.zipFile.close();
+  try {
+    await archive.handle.close();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EBADF") throw error;
+  }
 }
 
 async function indexArchive(zipFile: ZipFile): Promise<Map<string, IndexedZipEntry>> {
@@ -339,16 +463,27 @@ function readEntry(zipFile: ZipFile, indexed: IndexedZipEntry, maxBytes: number)
       }
       const chunks: Buffer[] = [];
       let total = 0;
+      let runningCrc = 0xffffffff;
       stream.on("data", (chunk: Buffer) => {
         total += chunk.length;
         if (total > maxBytes) {
           stream.destroy(new PalworldPakPreflightError(`${indexed.entry.fileName}: 읽기 제한을 초과했습니다.`));
           return;
         }
+        for (const byte of chunk) {
+          runningCrc = ZIP_CRC_TABLE[(runningCrc ^ byte) & 0xff]! ^ (runningCrc >>> 8);
+        }
         chunks.push(chunk);
       });
       stream.on("error", reject);
-      stream.on("end", () => resolve(Buffer.concat(chunks, total)));
+      stream.on("end", () => {
+        const actualCrc = (runningCrc ^ 0xffffffff) >>> 0;
+        if (actualCrc !== (indexed.entry.crc32 >>> 0)) {
+          reject(new PalworldPakPreflightError(`${indexed.entry.fileName}: ZIP CRC가 일치하지 않습니다.`));
+          return;
+        }
+        resolve(Buffer.concat(chunks, total));
+      });
     });
   });
 }
@@ -433,11 +568,12 @@ function canonicalPalRows(rows: JsonRecord): {
   for (const row of raw) grouped.set(row.tribe, [...(grouped.get(row.tribe) ?? []), row]);
   const canonical = [...grouped.entries()].map(([tribe, candidates]) => {
     const exact = candidates.find((candidate) => candidate.rowName === tribe);
-    const caseOnly = candidates.filter((candidate) =>
-      candidate.rowName.toLocaleLowerCase("en-US") === tribe.toLocaleLowerCase("en-US")
+    const bpClassMatches = candidates.filter((candidate) =>
+      typeof candidate.value.BPClass === "string"
+      && candidate.rowName === candidate.value.BPClass
     );
     if (exact) return exact;
-    if (caseOnly.length === 1) return caseOnly[0]!;
+    if (bpClassMatches.length === 1) return bpClassMatches[0]!;
     fail(`${tribe}: canonical Pal row를 exact ID로 결정할 수 없습니다.`);
   });
   canonical.sort((left, right) => {
@@ -480,20 +616,78 @@ function rawPackageCompanionReport(entries: Map<string, IndexedZipEntry>): {
   return { counts, missing };
 }
 
-async function fileSha256(filePath: string): Promise<string> {
-  return await new Promise((resolve, reject) => {
-    const hash = createHash("sha256");
-    const stream = createReadStream(filePath);
-    stream.on("error", reject);
-    stream.on("data", (chunk) => hash.update(chunk));
-    stream.on("end", () => resolve(hash.digest("hex")));
-  });
+/**
+ * preflight와 candidate importer가 같은 ZIP 경계 검증을 사용하도록 하는 읽기 전용 진입점입니다.
+ * callback이 끝나면 ZIP handle을 항상 닫으며 파일을 압축 해제하거나 실행하지 않습니다.
+ */
+export async function withPalworldPakArchive<T>(
+  archivePath: string,
+  options: PalworldPakArchiveReadOptions,
+  callback: (reader: PalworldPakArchiveReader) => Promise<T>
+): Promise<T> {
+  const archive = await openSecureArchive(archivePath);
+  const archiveSha256 = archive.sha256;
+  if (
+    options.expectedSha256 !== undefined
+    && requiredSha256(options.expectedSha256, "expectedSha256") !== archiveSha256
+  ) {
+    await closeSecureArchive(archive);
+    fail("PAK export ZIP SHA-256이 고정 입력과 일치하지 않습니다.");
+  }
+
+  const zipFile = archive.zipFile;
+  try {
+    const entries = await indexArchive(zipFile);
+    const members = [...entries.values()]
+      .filter((indexed) => !indexed.isDirectory)
+      .map((indexed) => ({
+        name: indexed.entry.fileName,
+        compressedBytes: indexed.entry.compressedSize,
+        uncompressedBytes: indexed.entry.uncompressedSize
+      }))
+      .sort((left, right) => left.name.localeCompare(right.name, "en"));
+    const readJsonMember = async (memberName: string): Promise<unknown> => {
+      if (path.posix.extname(memberName).toLocaleLowerCase("en-US") !== ".json") {
+        fail(`${memberName}: JSON member가 아닙니다.`);
+      }
+      const indexed = entries.get(memberName);
+      if (!indexed || indexed.isDirectory) fail(`${memberName}: JSON member가 없습니다.`);
+      return parseJson(await readEntry(zipFile, indexed, MAX_JSON_BYTES), memberName);
+    };
+    const reader: PalworldPakArchiveReader = {
+      archiveSha256,
+      archiveBytes: archive.bytes,
+      members,
+      has(memberName) {
+        validatePalworldPakMemberName(memberName);
+        return entries.get(memberName)?.isDirectory === false;
+      },
+      async readBytes(memberName, maxBytes = MAX_MEMBER_BYTES) {
+        validatePalworldPakMemberName(memberName);
+        if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > MAX_MEMBER_BYTES) {
+          fail("ZIP member 읽기 제한이 올바르지 않습니다.");
+        }
+        const indexed = entries.get(memberName);
+        if (!indexed || indexed.isDirectory) fail(`${memberName}: ZIP member 파일이 없습니다.`);
+        return await readEntry(zipFile, indexed, maxBytes);
+      },
+      readJson: readJsonMember,
+      async readDataTable(memberName) {
+        const value = await readJsonMember(memberName);
+        return dataTableRows(value, memberName);
+      }
+    };
+    return await callback(reader);
+  } finally {
+    await closeSecureArchive(archive);
+  }
 }
 
 function parseExportMetadata(value: unknown): PalworldPakExportMetadata {
   if (!isRecord(value)) fail("export metadata는 객체여야 합니다.");
   const allowed = new Set([
     "schemaVersion",
+    "sourceType",
     "gameVersion",
     "steamBuildId",
     "fmodelVersion",
@@ -504,29 +698,55 @@ function parseExportMetadata(value: unknown): PalworldPakExportMetadata {
     if (!allowed.has(key)) fail(`export metadata.${key}: 허용되지 않은 필드입니다.`);
   }
   if (value.schemaVersion !== 1) fail("export metadata.schemaVersion: 1이어야 합니다.");
+  if (value.sourceType !== "operator_pak_export") {
+    fail("export metadata.sourceType: operator_pak_export여야 합니다.");
+  }
+  const gameVersion = requiredString(value.gameVersion, "export metadata.gameVersion", 64);
+  const steamBuildId = requiredString(value.steamBuildId, "export metadata.steamBuildId", 20);
+  const fmodelVersion = requiredString(value.fmodelVersion, "export metadata.fmodelVersion", 64);
+  if (!/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:[-+][0-9A-Za-z.-]+)?$/u.test(gameVersion)) {
+    fail("export metadata.gameVersion: 고정 semantic version 형식이 아닙니다.");
+  }
+  if (!/^[1-9][0-9]{0,19}$/u.test(steamBuildId)) {
+    fail("export metadata.steamBuildId: 0으로 시작하지 않는 숫자여야 합니다.");
+  }
+  if (!/^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*)){1,3}(?:[-+][0-9A-Za-z.-]+)?$/u.test(fmodelVersion)) {
+    fail("export metadata.fmodelVersion: 숫자 기반 고정 버전 형식이 아닙니다.");
+  }
   return {
     schemaVersion: 1,
-    gameVersion: requiredString(value.gameVersion, "export metadata.gameVersion", 64),
-    steamBuildId: requiredString(value.steamBuildId, "export metadata.steamBuildId", 64),
-    fmodelVersion: requiredString(value.fmodelVersion, "export metadata.fmodelVersion", 128),
+    sourceType: "operator_pak_export",
+    gameVersion,
+    steamBuildId,
+    fmodelVersion,
     exportedAt: requiredIsoDate(value.exportedAt, "export metadata.exportedAt"),
     mappingsSha256: requiredSha256(value.mappingsSha256, "export metadata.mappingsSha256")
   };
 }
 
+export function assertPalworldPakExportMetadata(value: unknown): PalworldPakExportMetadata {
+  return Object.freeze(parseExportMetadata(value));
+}
+
 export async function inspectPalworldPakArchive(archivePath: string): Promise<PalworldPakPreflightReport> {
-  const resolvedArchive = path.resolve(archivePath);
-  const archiveInfo = await stat(resolvedArchive);
-  if (!archiveInfo.isFile() || archiveInfo.size <= 0 || archiveInfo.size > MAX_ARCHIVE_BYTES) {
-    fail("PAK export ZIP 크기 또는 파일 형식이 안전 제한에 맞지 않습니다.");
-  }
-  const archiveSha256 = await fileSha256(resolvedArchive);
-  const zipFile = await openZip(resolvedArchive);
+  const archive = await openSecureArchive(archivePath);
+  const archiveSha256 = archive.sha256;
+  const zipFile = archive.zipFile;
   try {
     const entries = await indexArchive(zipFile);
     const files = [...entries.values()].filter((entry) => !entry.isDirectory);
     const directories = entries.size - files.length;
     const uncompressedBytes = files.reduce((total, entry) => total + entry.entry.uncompressedSize, 0);
+    let crcVerifiedFiles = 0;
+    let parsedJsonFiles = 0;
+    for (const indexed of files) {
+      const bytes = await readEntry(zipFile, indexed, MAX_MEMBER_BYTES);
+      crcVerifiedFiles += 1;
+      if (path.posix.extname(indexed.entry.fileName).toLocaleLowerCase("en-US") === ".json") {
+        parseJson(bytes, indexed.entry.fileName);
+        parsedJsonFiles += 1;
+      }
+    }
     const requiredMissing = REQUIRED_TABLES.filter((member) => !entries.has(member));
     const rawPackages = rawPackageCompanionReport(entries);
 
@@ -580,6 +800,17 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
       const member = isRecord(iconRow) ? assetMember(iconRow.Icon) : undefined;
       if (member !== undefined && entries.has(member)) exactPalIcons += 1;
       else palMissing.push(pal.rowName);
+    }
+    const palIconSourceTableMissing: string[] = [];
+    let palIconSourceTableReferenced = 0;
+    let palIconSourceTableExactMatches = 0;
+    for (const [sourceRowId, rawIconRow] of Object.entries(palIconRows)) {
+      if (!isRecord(rawIconRow)) continue;
+      const member = assetMember(rawIconRow.Icon);
+      if (member === undefined) continue;
+      palIconSourceTableReferenced += 1;
+      if (entries.has(member)) palIconSourceTableExactMatches += 1;
+      else palIconSourceTableMissing.push(sourceRowId);
     }
 
     let legalItems = 0;
@@ -652,6 +883,7 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
     const metadata = exportMetadata === undefined
       ? {
           status: "not_provided" as const,
+          sourceType: "not_provided" as const,
           gameVersion: "not_provided",
           steamBuildId: "not_provided",
           fmodelVersion: "not_provided",
@@ -660,6 +892,7 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         }
       : {
           status: "provided" as const,
+          sourceType: exportMetadata.sourceType,
           gameVersion: exportMetadata.gameVersion,
           steamBuildId: exportMetadata.steamBuildId,
           fmodelVersion: exportMetadata.fmodelVersion,
@@ -683,7 +916,10 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
     if (koTextLanguage !== "ko") blockers.push("OFFICIAL_KO_LOCALE_NOT_VERIFIED");
     if (baseTextLanguage !== "ja") blockers.push("BASE_JA_LOCALE_NOT_VERIFIED");
     if (enTextLanguage !== "en") blockers.push("OFFICIAL_EN_LOCALE_NOT_PROVIDED");
-    if (exactPalIcons !== canonicalPals.canonical.length) {
+    if (
+      exactPalIcons !== canonicalPals.canonical.length
+      || palIconSourceTableMissing.length > 0
+    ) {
       blockers.push("PAL_ICON_EXPORT_INCOMPLETE");
     }
     if (
@@ -720,11 +956,13 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
       schemaVersion: 1,
       archive: {
         sha256: archiveSha256,
-        bytes: archiveInfo.size,
+        bytes: archive.bytes,
         fileCount: files.length,
         directoryCount: directories,
         uncompressedBytes,
         extensionCounts,
+        crcVerifiedFiles,
+        parsedJsonFiles,
         rawPackageCounts: rawPackages.counts,
         missingRawPackageCompanions: rawPackages.missing
       },
@@ -736,6 +974,7 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         normalPals,
         variantPals,
         duplicatePalRowsExcluded: canonicalPals.raw.length - canonicalPals.canonical.length,
+        totalItemRows: Object.keys(itemRows).length,
         legalItems,
         activeSkillRows: activeSkills,
         passiveSkillRows: Object.keys(passiveSkillRows).length,
@@ -753,7 +992,11 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         palIcons: {
           referenced: canonicalPals.canonical.length,
           exactMatches: exactPalIcons,
-          missing: palMissing.sort((left, right) => left.localeCompare(right, "en"))
+          missing: palMissing.sort((left, right) => left.localeCompare(right, "en")),
+          sourceTableReferenced: palIconSourceTableReferenced,
+          sourceTableExactMatches: palIconSourceTableExactMatches,
+          sourceTableMissing: palIconSourceTableMissing
+            .sort((left, right) => left.localeCompare(right, "en"))
         },
         itemIcons: {
           referenced: referencedItemIcons,
@@ -780,7 +1023,10 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         officialKo: koTextLanguage === "ko" ? "passed" : "blocked",
         officialJa: baseTextLanguage === "ja" ? "passed" : "blocked",
         officialEn: enTextLanguage === "en" ? "passed" : "blocked",
-        palImages: exactPalIcons === canonicalPals.canonical.length ? "passed" : "blocked",
+        palImages: exactPalIcons === canonicalPals.canonical.length
+          && palIconSourceTableMissing.length === 0
+          ? "passed"
+          : "blocked",
         itemImages: exactItemIcons === referencedItemIcons
           && referencedItemIcons > 0
           && missingItemIconRows === 0
@@ -792,6 +1038,6 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
       }
     };
   } finally {
-    zipFile.close();
+    await closeSecureArchive(archive);
   }
 }

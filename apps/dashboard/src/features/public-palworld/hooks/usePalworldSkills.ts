@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import type { PalworldPaginatedResponse, PalworldSkillSummary } from "@streamops/shared";
 import { getPalworldSkills } from "../api/palworld";
+import type { PalworldLocale } from "../i18n/palworld-i18n";
 
 export const PALWORLD_SKILL_FILTER_KEYS = ["q", "type", "element", "sort", "order", "page"] as const;
 
-export function usePalworldSkills(params: URLSearchParams) {
+export function usePalworldSkills(params: URLSearchParams, locale: PalworldLocale) {
   const [response, setResponse] = useState<PalworldPaginatedResponse<PalworldSkillSummary> | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<unknown>(null);
   const [revision, setRevision] = useState(0);
   const routeQuery = PALWORLD_SKILL_FILTER_KEYS.map((key) => `${key}=${params.get(key) ?? ""}`).join("&");
 
@@ -17,15 +18,16 @@ export function usePalworldSkills(params: URLSearchParams) {
       const value = params.get(key);
       if (value) apiParams.set(key, value);
     });
+    apiParams.set("locale", locale);
     apiParams.set("limit", "24");
     setResponse(null);
-    setError(false);
+    setError(null);
     void getPalworldSkills(apiParams, controller.signal).then(setResponse).catch((requestError) => {
       if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-      setError(true);
+      setError(requestError);
     });
     return () => controller.abort();
-  }, [revision, routeQuery]);
+  }, [locale, revision, routeQuery]);
 
   return {
     error,

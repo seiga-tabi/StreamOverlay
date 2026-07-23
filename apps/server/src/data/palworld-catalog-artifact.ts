@@ -3,6 +3,7 @@ import { constants as fsConstants } from "node:fs";
 import { lstat, open, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import { inspectPalworldWebp } from "./palworld-image-import.js";
+import { PalworldPaldexValidationError } from "./palworld-paldex-artifact.js";
 
 export const PALWORLD_CATALOG_RELEASE = "1.0.1";
 export const PALWORLD_CATALOG_FILE = "catalog.json";
@@ -595,28 +596,96 @@ export async function validatePalworldCatalogAssetFiles(input: {
     entriesByFile.set(entry.outputFileName, entries);
   }
   for (const [fileName, entries] of entriesByFile) {
-    const filePath = path.join(resolvedRoot, fileName);
-    if (path.dirname(filePath) !== resolvedRoot) fail(`${input.kind}ImageRoot`, "asset 경로 traversal이 감지되었습니다.");
-    const before = await lstat(filePath);
-    if (before.isSymbolicLink() || !before.isFile() || before.size < 1 || before.size > 512 * 1024) fail(filePath, "안전한 WebP regular file이 아닙니다.");
-    const handle = await open(filePath, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
-    try {
-      const opened = await handle.stat();
-      if (!opened.isFile() || opened.dev !== before.dev || opened.ino !== before.ino || opened.size !== before.size) fail(filePath, "검사 중 asset 파일이 변경되었습니다.");
-      const inspection = inspectPalworldWebp(await handle.readFile());
-      if (fileName !== `${inspection.sha256}.webp`) fail(filePath, "content hash 파일명이 실제 내용과 다릅니다.");
-      for (const entry of entries) {
-        if (
-          entry.outputSha256 !== inspection.sha256
-          || entry.outputWidth !== inspection.width
-          || entry.outputHeight !== inspection.height
-          || entry.outputBytes !== inspection.bytes
-        ) fail(filePath, "asset manifest 크기·hash가 실제 WebP와 다릅니다.");
-      }
-    } finally {
-      await handle.close();
+    await validatePalworldCatalogAssetFile(resolvedRoot, input.kind, fileName, entries);
+  }
+}
+
+async function validatePalworldCatalogAssetFile(
+  resolvedRoot: string,
+  kind: "items" | "elements",
+  fileName: string,
+  entries: PalworldCatalogAssetManifest["entries"]
+): Promise<void> {
+  const filePath = path.join(resolvedRoot, fileName);
+  if (path.dirname(filePath) !== resolvedRoot) fail(`${kind}ImageRoot`, "asset 경로 traversal이 감지되었습니다.");
+  const before = await lstat(filePath);
+  if (before.isSymbolicLink() || !before.isFile() || before.size < 1 || before.size > 512 * 1024) fail(filePath, "안전한 WebP regular file이 아닙니다.");
+  const handle = await open(filePath, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
+  try {
+    const opened = await handle.stat();
+    if (!opened.isFile() || opened.dev !== before.dev || opened.ino !== before.ino || opened.size !== before.size) fail(filePath, "검사 중 asset 파일이 변경되었습니다.");
+    const inspection = inspectPalworldWebp(await handle.readFile());
+    if (fileName !== `${inspection.sha256}.webp`) fail(filePath, "content hash 파일명이 실제 내용과 다릅니다.");
+    for (const entry of entries) {
+      if (
+        entry.outputSha256 !== inspection.sha256
+        || entry.outputWidth !== inspection.width
+        || entry.outputHeight !== inspection.height
+        || entry.outputBytes !== inspection.bytes
+      ) fail(filePath, "asset manifest 크기·hash가 실제 WebP와 다릅니다.");
+    }
+  } finally {
+    await handle.close();
+  }
+}
+
+export type PalworldCatalogRuntimeAssetCoverage = {
+  validIds: ReadonlySet<string>;
+  invalidIds: readonly string[];
+};
+
+/**
+ * 공개 runtime에서는 개별 content-hash asset만 검증합니다.
+ * manifest 자체의 schema와 provenance는 선행 loader에서 fail-closed로 검증하며,
+ * 한 파일의 손상은 그 파일을 참조하는 항목에만 fallback을 적용합니다.
+ */
+export async function collectPalworldCatalogRuntimeAssetCoverage(input: {
+  root: string;
+  kind: "items" | "elements";
+  manifest: PalworldCatalogAssetManifest;
+}): Promise<PalworldCatalogRuntimeAssetCoverage> {
+  const resolvedRoot = path.resolve(input.root);
+  const rootInfo = await lstat(resolvedRoot);
+  if (rootInfo.isSymbolicLink() || !rootInfo.isDirectory() || await realpath(resolvedRoot) !== resolvedRoot) {
+    fail(`${input.kind}ImageRoot`, "symlink가 아닌 canonical directory여야 합니다.");
+  }
+  const entriesByFile = new Map<string, PalworldCatalogAssetManifest["entries"]>();
+  for (const entry of input.manifest.entries) {
+    const entries = entriesByFile.get(entry.outputFileName) ?? [];
+    entries.push(entry);
+    entriesByFile.set(entry.outputFileName, entries);
+  }
+  const directoryEntries = await readdir(resolvedRoot, { withFileTypes: true });
+  for (const entry of directoryEntries) {
+    if (!entry.isFile() || entry.isSymbolicLink() || !entriesByFile.has(entry.name)) {
+      fail(
+        `${input.kind}ImageRoot`,
+        "asset manifest에 없는 파일 또는 안전하지 않은 directory entry가 있습니다."
+      );
     }
   }
+  const validIds = new Set<string>();
+  const invalidIds: string[] = [];
+  for (const [fileName, entries] of entriesByFile) {
+    try {
+      await validatePalworldCatalogAssetFile(resolvedRoot, input.kind, fileName, entries);
+      for (const entry of entries) validIds.add(entry.id);
+    } catch (error) {
+      if (
+        !(error instanceof PalworldCatalogValidationError)
+        && !(error instanceof PalworldPaldexValidationError)
+        && (error as NodeJS.ErrnoException).code !== "ENOENT"
+        && (error as NodeJS.ErrnoException).code !== "EACCES"
+      ) {
+        throw error;
+      }
+      for (const entry of entries) invalidIds.push(entry.id);
+    }
+  }
+  return {
+    validIds,
+    invalidIds: invalidIds.sort((left, right) => left.localeCompare(right, "en"))
+  };
 }
 
 export type PalworldCatalogRuntimeSource = {

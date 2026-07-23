@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "candidateRelease": "candidate-1248184a4b527d94",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "status": "blocked_pending_semantic_mapping",
+  "availableSourceMembers": [
+    "Pal/Texture/UI/InGame/T_icon_palwork_00.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_01.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_02.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_03.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_04.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_05.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_06.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_07.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_08.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_09.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_10.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_11.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_12.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_13.png",
+    "Pal/Texture/UI/InGame/T_icon_palwork_90.png"
+  ],
+  "entries": []
+}

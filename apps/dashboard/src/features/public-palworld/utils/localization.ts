@@ -54,7 +54,11 @@ export function resolvePalworldLocalizedText(
   if (localized) {
     return {
       text: localized,
-      status: explicitStatus === "machine_assisted" ? "machine_assisted" : "human_reviewed",
+      status: explicitStatus === "source_provided"
+        || explicitStatus === "machine_assisted"
+        || explicitStatus === "human_reviewed"
+        ? explicitStatus
+        : "human_reviewed",
     };
   }
 

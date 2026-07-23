@@ -6,7 +6,13 @@ export type PalworldElementImage = {
   height: number;
 };
 
-const ROOT = "/images/palworld/1.0.1/elements";
+/**
+ * 현재 dashboard build에 함께 게시된 정적 보조 asset release입니다.
+ * Pal/item URL은 API가 제공하지만 map/element URL은 아직 public metadata에 없으므로
+ * manifest 없이 다른 release 경로를 추측하지 않습니다.
+ */
+export const PALWORLD_STATIC_ASSET_RELEASE = "1.0.1";
+const ROOT = `/images/palworld/${PALWORLD_STATIC_ASSET_RELEASE}/elements`;
 
 export const PALWORLD_ELEMENT_IMAGES: Readonly<Record<PalworldElement, PalworldElementImage>> = Object.freeze({
   neutral: { imageUrl: `${ROOT}/ab38c4cd2fc1f9ac5683c1401b5f6aee305a73f26e3d59a33f3392d8c85ac842.webp`, width: 48, height: 48 },
@@ -20,7 +26,7 @@ export const PALWORLD_ELEMENT_IMAGES: Readonly<Record<PalworldElement, PalworldE
   dragon: { imageUrl: `${ROOT}/4b267fc44f551e27ed83e90061b2b3bee9421dbf491397cd393cca31b979530f.webp`, width: 48, height: 48 },
 });
 
-const ELEMENT_IMAGE_PATTERN = /^\/images\/palworld\/1\.0\.1\/elements\/[0-9a-f]{64}\.webp$/u;
+const ELEMENT_IMAGE_PATTERN = /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/elements\/[0-9a-f]{64}\.webp$/u;
 
 export function isLocalPalworldElementImageUrl(value: string): boolean {
   return ELEMENT_IMAGE_PATTERN.test(value);

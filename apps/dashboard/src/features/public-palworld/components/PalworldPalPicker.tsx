@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { PalworldPalReference, PalworldPalSummary } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { PalworldApiError, searchPalworld } from "../api/palworld";
@@ -30,6 +30,7 @@ export function PalworldPalPicker({
   const [requestState, setRequestState] = useState<PickerRequestState>("idle");
   const [revision, setRevision] = useState(0);
   const [focused, setFocused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const pickerRef = useRef<HTMLDivElement>(null);
   const requestIdRef = useRef(0);
   const listId = useId();
@@ -39,12 +40,14 @@ export function PalworldPalPicker({
     if (!query.trim() || selected) {
       setSuggestions([]);
       setRequestState("idle");
+      setActiveIndex(-1);
       return undefined;
     }
     const controller = new AbortController();
     const requestId = ++requestIdRef.current;
     setSuggestions([]);
     setRequestState("loading");
+    setActiveIndex(-1);
     const timer = window.setTimeout(() => {
       void searchPalworld(query, controller.signal)
         .then((result) => {
@@ -74,6 +77,37 @@ export function PalworldPalPicker({
     return () => document.removeEventListener("pointerdown", close);
   }, []);
 
+  function selectPal(pal: PalworldPalSummary): void {
+    onChange(pal);
+    setQuery("");
+    setFocused(false);
+    setActiveIndex(-1);
+  }
+
+  function handleInputKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+    if (event.key === "Escape") {
+      if (focused && query.trim()) event.preventDefault();
+      setFocused(false);
+      setActiveIndex(-1);
+      return;
+    }
+    if (event.key === "Enter" && activeIndex >= 0) {
+      const selectedPal = suggestions[activeIndex];
+      if (selectedPal) {
+        event.preventDefault();
+        selectPal(selectedPal);
+      }
+      return;
+    }
+    if (!suggestions.length || (event.key !== "ArrowDown" && event.key !== "ArrowUp")) return;
+    event.preventDefault();
+    setFocused(true);
+    setActiveIndex((current) => {
+      if (event.key === "ArrowDown") return current >= suggestions.length - 1 ? 0 : current + 1;
+      return current <= 0 ? suggestions.length - 1 : current - 1;
+    });
+  }
+
   if (selected) {
     const name = resolvePalworldName(selected, locale);
     const displayName = name.text;
@@ -89,12 +123,33 @@ export function PalworldPalPicker({
 
   return <div className="palworld-picker" ref={pickerRef} data-testid={testId}>
     <label className="palworld-picker-label" htmlFor={`${listId}-input`}>{label}</label>
-    <input id={`${listId}-input`} type="search" value={query} onChange={(event) => setQuery(event.target.value)} onFocus={() => setFocused(true)} placeholder={text.searchPlaceholder} aria-autocomplete="list" aria-expanded={focused && Boolean(query.trim())} aria-controls={listId} />
+    <input
+      id={`${listId}-input`}
+      type="search"
+      value={query}
+      onChange={(event) => setQuery(event.target.value)}
+      onFocus={() => setFocused(true)}
+      onKeyDown={handleInputKeyDown}
+      placeholder={text.searchPlaceholder}
+      aria-autocomplete="list"
+      aria-expanded={focused && Boolean(query.trim())}
+      aria-controls={focused && query.trim() ? listId : undefined}
+      aria-activedescendant={activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
+    />
     {focused && query.trim() ? <div className="palworld-picker-list" id={listId} role="listbox" aria-label={text.autocomplete}>
       {requestState === "loading" ? <p role="status" aria-live="polite">{text.searching}</p> : null}
-      {requestState === "success" && suggestions.map((pal) => {
+      {requestState === "success" && suggestions.map((pal, index) => {
         const name = resolvePalworldName(pal, locale);
-        return <button type="button" role="option" aria-selected="false" onClick={() => { onChange(pal); setQuery(""); setFocused(false); }} key={pal.id}>
+        return <button
+          className={activeIndex === index ? "is-active" : undefined}
+          id={`${listId}-option-${index}`}
+          type="button"
+          role="option"
+          aria-selected={activeIndex === index}
+          onClick={() => selectPal(pal)}
+          onPointerMove={() => setActiveIndex(index)}
+          key={pal.id}
+        >
           <span className="palworld-picker-option-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span>
           <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(pal.number)}</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
         </button>;

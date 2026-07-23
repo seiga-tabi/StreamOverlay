@@ -515,6 +515,22 @@ const coverage = {
   palDetails: { available: 1, missing: 0, total: 1 },
   itemDetails: { available: 1, missing: 0, total: 1 },
   skillDetails: { available: 1, missing: 0, total: 1 },
+  palDescriptions: { available: 0, missing: 1, total: 1 },
+  palStats: { available: 1, missing: 0, total: 1 },
+  partnerSkills: { available: 1, missing: 0, total: 1 },
+  activeSkills: { available: 0, missing: 1, total: 1 },
+  palDrops: { available: 1, missing: 0, total: 1 },
+  breedingFields: { available: 1, missing: 0, total: 1 },
+  itemDescriptions: { available: 1, missing: 0, total: 1 },
+  craftingRecipes: { available: 1, missing: 0, total: 1 },
+  craftingFacilities: { available: 1, missing: 0, total: 1 },
+  dropPals: { available: 1, missing: 0, total: 1 },
+  technologyLevels: { available: 1, missing: 0, total: 1 },
+  prices: { available: 1, missing: 0, total: 1 },
+  durability: { available: 0, missing: 1, total: 1 },
+  acquisitionMethods: { available: 1, missing: 0, total: 1 },
+  skillDescriptions: { available: 1, missing: 0, total: 1 },
+  relatedPals: { available: 1, missing: 0, total: 1 },
   palImages: { available: 1, missing: 0, total: 1 },
   itemImages: { available: 1, missing: 0, total: 1 },
   elementImages: { available: 1, missing: 8, total: 9 },
@@ -727,6 +743,10 @@ test("도메인 coverage는 available·missing·total 불변식을 검증한다"
     ...coverage,
     palDetails: { available: 1, missing: 1, total: 1 }
   }).ok, false);
+  assert.equal(validatePalworldDataCoverage({
+    ...coverage,
+    craftingRecipes: undefined
+  }).ok, false);
   assert.equal(validatePalworldDataCoverage({ ...coverage, unknown: true }).ok, false);
 });
 
@@ -819,6 +839,10 @@ test("Palworld meta는 optional 스킬 도메인과 상세 coverage를 counts에
   assert.equal(validatePalworldMetaResponse({
     ...response,
     coverage: { ...coverage, itemImages: { available: 1, missing: 1, total: 2 } }
+  }).ok, false);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    coverage: { ...coverage, craftingRecipes: { available: 1, missing: 1, total: 2 } }
   }).ok, false);
   assert.equal(validatePalworldMetaResponse({
     ...response,

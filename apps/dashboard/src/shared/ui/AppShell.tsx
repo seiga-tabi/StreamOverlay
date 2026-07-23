@@ -75,6 +75,7 @@ function getSkipLink(label: ReactNode, mainId: string) {
       data-ja="本文へ移動"
       data-ko="본문으로 이동"
       href={`#${mainId}`}
+      tabIndex={0}
     >
       {label}
     </a>

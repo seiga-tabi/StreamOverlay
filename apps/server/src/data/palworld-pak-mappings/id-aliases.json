@@ -1,0 +1,637 @@
+{
+  "schemaVersion": 1,
+  "candidateRelease": "candidate-1248184a4b527d94",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "entries": [
+    {
+      "sourceId": "BluePlatypus",
+      "targetId": "Blueplatypus",
+      "domain": "active_assignment_pal_reference",
+      "reason": "DT_WazaMasterLevel의 이전 대소문자 PalId를 이번 export의 canonical Tribe ID에 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "GhostAnglerFish",
+      "targetId": "GhostAnglerfish",
+      "domain": "active_assignment_pal_reference",
+      "reason": "DT_WazaMasterLevel PalId와 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "GhostAnglerFish_Fire",
+      "targetId": "GhostAnglerfish_Fire",
+      "domain": "active_assignment_pal_reference",
+      "reason": "DT_WazaMasterLevel PalId와 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "LazyCatFish",
+      "targetId": "LazyCatfish",
+      "domain": "active_assignment_pal_reference",
+      "reason": "DT_WazaMasterLevel PalId와 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "LazyCatFish_Gold",
+      "targetId": "LazyCatfish_Gold",
+      "domain": "active_assignment_pal_reference",
+      "reason": "DT_WazaMasterLevel PalId와 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "poppy",
+      "targetId": "Poppy",
+      "domain": "drop_item_reference",
+      "reason": "DT_PalDropItem과 DT_ItemDataTable 사이의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "BluePlatypus",
+      "targetId": "Blueplatypus",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "BlueDragon_ice",
+      "targetId": "BlueDragon_Ice",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Deer_ground",
+      "targetId": "Deer_Ground",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Drillgame",
+      "targetId": "DrillGame",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "FairyDragon_water",
+      "targetId": "FairyDragon_Water",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "FengyunDeeper_electric",
+      "targetId": "FengyunDeeper_Electric",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "FireKirin_dark",
+      "targetId": "FireKirin_Dark",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Gorilla_ground",
+      "targetId": "Gorilla_Ground",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "GrassMammoth_ice",
+      "targetId": "GrassMammoth_Ice",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "GrassPanda_electric",
+      "targetId": "GrassPanda_Electric",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "HadesBird_electric",
+      "targetId": "HadesBird_Electric",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Horus_water",
+      "targetId": "Horus_Water",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "IceNarwhal_fire",
+      "targetId": "IceNarwhal_Fire",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "KingBahamut_dragon",
+      "targetId": "KingBahamut_Dragon",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "LazyDragon_electric",
+      "targetId": "LazyDragon_Electric",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "LilyQueen_dark",
+      "targetId": "LilyQueen_Dark",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Manticore_dark",
+      "targetId": "Manticore_Dark",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "SakuraSaurus_water",
+      "targetId": "SakuraSaurus_Water",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "SkyDragon_grass",
+      "targetId": "SkyDragon_Grass",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Suzaku_water",
+      "targetId": "Suzaku_Water",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Umihebi_fire",
+      "targetId": "Umihebi_Fire",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "WeaselDragon_fire",
+      "targetId": "WeaselDragon_Fire",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Yeti_grass",
+      "targetId": "Yeti_Grass",
+      "domain": "drop_pal_reference",
+      "reason": "drop CharacterID와 canonical Tribe의 suffix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ACTION_SKILL_Unique_OctopursGirl_InkJet",
+      "targetId": "ACTION_SKILL_Unique_OctopursGirl_Inkjet",
+      "domain": "active_skill_name_message_key",
+      "reason": "WazaType 기반 key와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ACTION_SKILL_Railbolt",
+      "targetId": "ACTION_SKILL_RailBolt",
+      "domain": "active_skill_name_message_key",
+      "reason": "WazaType 기반 key와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ACTION_SKILL_Unique_ScorpionMan_Uppercut",
+      "targetId": "ACTION_SKILL_Unique_ScorpionMan_UpperCut",
+      "domain": "active_skill_name_message_key",
+      "reason": "WazaType 기반 key와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ACTION_SKILL_Unique_OctopursGirl_InkJet",
+      "targetId": "ACTION_SKILL_Unique_OctopursGirl_Inkjet",
+      "domain": "active_skill_description_message_key",
+      "reason": "WazaType 기반 설명 key와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ACTION_SKILL_Unique_ScorpionMan_Uppercut",
+      "targetId": "ACTION_SKILL_Unique_ScorpionMan_UpperCut",
+      "domain": "active_skill_description_message_key",
+      "reason": "WazaType 기반 설명 key와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_FlameThrower",
+      "targetId": "ITEM_DESC_Flamethrower",
+      "domain": "item_description_message_key",
+      "reason": "OverrideDescription과 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head001",
+      "targetId": "ITEM_DESC_HEAD001",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head002",
+      "targetId": "ITEM_DESC_HEAD002",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head003",
+      "targetId": "ITEM_DESC_HEAD003",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head004",
+      "targetId": "ITEM_DESC_HEAD004",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head005",
+      "targetId": "ITEM_DESC_HEAD005",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head006",
+      "targetId": "ITEM_DESC_HEAD006",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head007",
+      "targetId": "ITEM_DESC_HEAD007",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head008",
+      "targetId": "ITEM_DESC_HEAD008",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head009",
+      "targetId": "ITEM_DESC_HEAD009",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head010",
+      "targetId": "ITEM_DESC_HEAD010",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head011",
+      "targetId": "ITEM_DESC_HEAD011",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head012",
+      "targetId": "ITEM_DESC_HEAD012",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head013",
+      "targetId": "ITEM_DESC_HEAD013",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head014",
+      "targetId": "ITEM_DESC_HEAD014",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head015",
+      "targetId": "ITEM_DESC_HEAD015",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head016",
+      "targetId": "ITEM_DESC_HEAD016",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_DESC_Head017",
+      "targetId": "ITEM_DESC_HEAD017",
+      "domain": "item_description_message_key",
+      "reason": "아이템 ID와 공식 locale description key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "ITEM_NAME_FlameThrower",
+      "targetId": "ITEM_NAME_Flamethrower",
+      "domain": "item_name_message_key",
+      "reason": "OverrideName과 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PickAxe_Default",
+      "targetId": "Pickaxe_Default",
+      "domain": "item_icon_reference",
+      "reason": "item IconName과 item icon DataTable row key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_FIRST_SPAWN_DESC_Blueplatypus",
+      "targetId": "PAL_FIRST_SPAWN_DESC_BluePlatypus",
+      "domain": "pal_first_activated_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_FIRST_SPAWN_DESC_WindChimes",
+      "targetId": "PAL_FIRST_SPAWN_DESC_Windchimes",
+      "domain": "pal_first_activated_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_FIRST_SPAWN_DESC_WindChimes_Ice",
+      "targetId": "PAL_FIRST_SPAWN_DESC_Windchimes_Ice",
+      "domain": "pal_first_activated_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_LONG_DESC_Blueplatypus",
+      "targetId": "PAL_LONG_DESC_BluePlatypus",
+      "domain": "pal_description_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_LONG_DESC_WindChimes",
+      "targetId": "PAL_LONG_DESC_Windchimes",
+      "domain": "pal_description_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_LONG_DESC_WindChimes_Ice",
+      "targetId": "PAL_LONG_DESC_Windchimes_Ice",
+      "domain": "pal_description_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_NAME_Blueplatypus",
+      "targetId": "PAL_NAME_BluePlatypus",
+      "domain": "pal_name_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_NAME_WindChimes",
+      "targetId": "PAL_NAME_Windchimes",
+      "domain": "pal_name_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PAL_NAME_WindChimes_Ice",
+      "targetId": "PAL_NAME_Windchimes_Ice",
+      "domain": "pal_name_message_key",
+      "reason": "canonical Tribe와 공식 locale message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "PARTNERSKILL_Blueplatypus",
+      "targetId": "PARTNERSKILL_BluePlatypus",
+      "domain": "partner_skill_message_key",
+      "reason": "canonical Tribe와 공식 locale partner skill key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Blueplatypus",
+      "targetId": "BluePlatypus",
+      "domain": "partner_parameter_source",
+      "reason": "새 canonical Tribe를 partner parameter source row casing에 exact 연결",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Blueplatypus",
+      "targetId": "BluePlatypus",
+      "domain": "public_id_source",
+      "reason": "기존 공개 ID를 유지하기 위해 새 canonical Tribe를 versioned legacy mapping key에 exact 연결",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "FIber",
+      "targetId": "Fiber",
+      "domain": "recipe_item_reference",
+      "reason": "recipe material ID와 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Hotmilk",
+      "targetId": "HotMilk",
+      "domain": "recipe_item_reference",
+      "reason": "recipe product ID와 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "cloth",
+      "targetId": "Cloth",
+      "domain": "recipe_item_reference",
+      "reason": "recipe material ID와 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "cloth2",
+      "targetId": "Cloth2",
+      "domain": "recipe_item_reference",
+      "reason": "recipe material ID와 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "stone",
+      "targetId": "Stone",
+      "domain": "recipe_item_reference",
+      "reason": "recipe material ID와 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "wood",
+      "targetId": "Wood",
+      "domain": "recipe_item_reference",
+      "reason": "recipe material ID와 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "BluePlatypus",
+      "targetId": "Blueplatypus",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "GhostAnglerFish",
+      "targetId": "GhostAnglerfish",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Lizardman",
+      "targetId": "LizardMan",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "SnowTigerBeastMan",
+      "targetId": "SnowTigerBeastman",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "SwordCutlassFish",
+      "targetId": "SwordCutlassfish",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Thunderdog_Ice",
+      "targetId": "ThunderDog_Ice",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "WereWolf",
+      "targetId": "Werewolf",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "WereWolf_Ice",
+      "targetId": "Werewolf_Ice",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Whitemoth",
+      "targetId": "WhiteMoth",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Windchimes",
+      "targetId": "WindChimes",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Windchimes_Ice",
+      "targetId": "WindChimes_Ice",
+      "domain": "rich_text_character_reference",
+      "reason": "공식 설명 token과 canonical Tribe의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Iceorgan",
+      "targetId": "IceOrgan",
+      "domain": "rich_text_item_reference",
+      "reason": "공식 설명 token과 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Flamethrower",
+      "targetId": "FlameThrower",
+      "domain": "rich_text_item_reference",
+      "reason": "공식 설명 token과 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Handgun_default",
+      "targetId": "HandGun_Default",
+      "domain": "rich_text_item_reference",
+      "reason": "공식 설명 token과 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Pal_Crystal_S",
+      "targetId": "Pal_crystal_S",
+      "domain": "rich_text_item_reference",
+      "reason": "공식 설명 token과 legal item ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "COMMON_STATUS_RANGE_Attack",
+      "targetId": "COMMON_STATUS_RANGE_ATTACK",
+      "domain": "rich_text_ui_reference",
+      "reason": "공식 설명 token과 UI common message key의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "Bow_triple",
+      "targetId": "Bow_Triple",
+      "domain": "technology_recipe_reference",
+      "reason": "technology unlock recipe ID와 recipe row ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceId": "SkillUnlock_Sakurasaurus_Water",
+      "targetId": "SkillUnlock_SakuraSaurus_Water",
+      "domain": "technology_recipe_reference",
+      "reason": "technology unlock recipe ID와 recipe row ID의 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    }
+  ]
+}

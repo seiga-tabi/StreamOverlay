@@ -11,10 +11,11 @@ import {
 import { Skeleton } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
+import { PALWORLD_STATIC_ASSET_RELEASE } from "../utils/element-images";
 
-export const PALWORLD_WORLD_MAP_IMAGE_URL = "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp";
+export const PALWORLD_WORLD_MAP_IMAGE_URL = `/images/palworld/${PALWORLD_STATIC_ASSET_RELEASE}/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp`;
 
-const PALWORLD_MAP_IMAGE_PATTERN = /^\/images\/palworld\/1\.0\.1\/maps\/[0-9a-f]{64}\.webp$/u;
+const PALWORLD_MAP_IMAGE_PATTERN = /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/maps\/[0-9a-f]{64}\.webp$/u;
 const MAP_ZOOM_LEVELS = [100, 150, 200, 300] as const;
 
 export function isLocalPalworldMapUrl(imageUrl: string): boolean {
@@ -48,7 +49,7 @@ export function PalworldMapPage({ locale }: { locale: PalworldLocale }) {
         <div className="palworld-map-toolbar">
           <div className="palworld-map-toolbar-info">
             <Badge tone="success" data-ko={palworldI18n.ko.mapFastTravel} data-ja={palworldI18n.ja.mapFastTravel}>{text.mapFastTravel}</Badge>
-            <Badge tone="info">1.0.1</Badge>
+            <Badge tone="info">{PALWORLD_STATIC_ASSET_RELEASE}</Badge>
           </div>
           <div className="palworld-map-controls" aria-label={text.mapZoomLevel}>
             <Button

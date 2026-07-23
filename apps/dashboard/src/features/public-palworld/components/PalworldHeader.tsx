@@ -59,11 +59,19 @@ export function PalworldHeader({
   }, [closeMenus]);
 
   useEffect(() => {
-    const activeItem = navRef.current?.querySelector<HTMLElement>("[aria-current='page']");
-    activeItem?.scrollIntoView({ block: "nearest", inline: "nearest" });
     const frame = window.requestAnimationFrame(() => {
       const row = navScrollRef.current;
       if (!row) return;
+      const activeItem = navRef.current?.querySelector<HTMLElement>("[aria-current='page']");
+      if (activeItem) {
+        const rowRect = row.getBoundingClientRect();
+        const activeRect = activeItem.getBoundingClientRect();
+        if (activeRect.left < rowRect.left) {
+          row.scrollTo({ left: Math.max(0, row.scrollLeft + activeRect.left - rowRect.left) });
+        } else if (activeRect.right > rowRect.right) {
+          row.scrollTo({ left: row.scrollLeft + activeRect.right - rowRect.right });
+        }
+      }
       const maxScroll = Math.max(0, row.scrollWidth - row.clientWidth);
       setNavScroll({ start: row.scrollLeft > 1, end: row.scrollLeft < maxScroll - 1 });
     });
