@@ -243,7 +243,7 @@
   display: grid;
   justify-items: center;
   min-inline-size: 0;
-  overflow: hidden;
+  overflow: visible;
   gap: var(--yoro-space-5);
   padding: clamp(var(--yoro-space-10), 9vw, 7rem) clamp(var(--yoro-space-4), 5vw, var(--yoro-space-12));
   border: thin solid color-mix(in srgb, var(--palworld-accent) 25%, var(--yoro-color-border));

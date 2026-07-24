@@ -1184,7 +1184,24 @@ test("Twitch 팔로우 API 오류가 발생해도 Palworld 홈 검색은 계속 
   await expect(page.getByTestId("public-live-streamer-rail").getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
   const search = page.getByTestId("hero-search").getByRole("searchbox");
   await search.fill("펭킹");
-  await expect(page.getByTestId("hero-search").getByRole("option", { name: /펭킹/u })).toBeVisible();
+  const option = page.getByTestId("hero-search").getByRole("option", { name: /펭킹/u });
+  await expect(option).toBeVisible();
+  if ((page.viewportSize()?.width ?? 1440) <= 600) {
+    const optionReceivesPointer = await option.evaluate((element) => {
+      const hero = element.closest(".palworld-hero");
+      if (!hero) return false;
+      const optionRect = element.getBoundingClientRect();
+      const heroRect = hero.getBoundingClientRect();
+      const x = optionRect.left + (optionRect.width / 2);
+      const y = Math.min(
+        optionRect.bottom - 2,
+        Math.max(optionRect.top + 2, heroRect.bottom + 8),
+      );
+      const hit = document.elementFromPoint(x, y);
+      return hit !== null && element.contains(hit);
+    });
+    expect(optionReceivesPointer, "Hero 경계 밖의 모바일 검색 제안을 터치할 수 있어야 합니다.").toBe(true);
+  }
 });
 
 test("통합 검색 자동완성은 오류를 빈 결과와 구분하고 키보드로 선택할 수 있다", async ({ page }) => {

@@ -119,6 +119,21 @@ test("펠월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 
   assert.doesNotMatch(home, /src="\/images\/yorogg-mark\.png"/);
 });
 
+test("펠월드 홈 Hero는 모바일 검색 제안이 경계 밖에서도 잘리지 않게 유지한다", () => {
+  const css = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
+  const heroRule = css.match(/\.palworld-hero\s*\{(?<body>[^}]+)\}/u)?.groups?.body;
+  const shellRule = css.match(/\.palworld-shell\s*\{(?<body>[^}]+)\}/u)?.groups?.body;
+
+  assert.ok(heroRule);
+  assert.match(heroRule, /overflow:\s*visible;/u);
+  assert.doesNotMatch(heroRule, /overflow:\s*hidden;/u);
+  assert.ok(shellRule);
+  assert.match(shellRule, /overflow-x:\s*clip;/u);
+});
+
 test("Palworld 2행 메뉴는 한국어·일본어 7개 순서와 스트리머 활성 상태를 유지한다", () => {
   const korean = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="streamers" searchContent={<div data-testid="header-search">검색</div>} />);
   const japanese = renderToStaticMarkup(<PalworldHeader locale="ja" onLocale={() => undefined} page="home" />);
