@@ -217,7 +217,10 @@ try {
     }: `
     + `Pal ${result.counts.palCount}종, 위치 ${result.counts.placementLinks}개, `
     + `32×32 cluster ${result.counts.clusteredPoints}개, `
-    + `미해결 occurrence ${result.counts.unresolvedPalOccurrences}개\n`
+    + `미해결 occurrence ${result.counts.unresolvedPalOccurrences}개, `
+    + `분포 보조 검증 ${result.distributionAudit.sourceRows}행, `
+    + `spawn Pal exact coverage ${result.distributionAudit.spawnPalsWithDistribution}`
+    + `/${result.counts.palCount}종\n`
   );
 } catch (error) {
   const message = error instanceof Error ? error.message : "알 수 없는 일반 스폰 생성 오류";

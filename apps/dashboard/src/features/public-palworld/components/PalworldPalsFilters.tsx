@@ -3,6 +3,7 @@ import {
   PALWORLD_ELEMENTS,
   PALWORLD_VARIANT_TYPES,
   PALWORLD_WORK_SUITABILITY_TYPES,
+  type PalworldElement,
   type PalworldPagination,
   type PalworldPalListFacets,
   type PalworldWorkSuitabilityType,
@@ -11,10 +12,10 @@ import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import { Select } from "../../../shared/ui/Form";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
+import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../utils/element-images";
 import { elementLabel, workLabel } from "../utils/labels";
 import type { PalworldPalsFilterKey, PalworldPalsRouteKey } from "../utils/pals";
 import { workSuitabilityIconUrl } from "../utils/work-suitability-icons";
-import { PalworldElementBadge } from "./PalworldElementBadge";
 
 type FilterUpdate = (key: PalworldPalsRouteKey, value: string) => void;
 
@@ -27,6 +28,30 @@ function interpolate(template: string, values: Record<string, string | number>):
 
 function includesValue<T extends string>(values: readonly T[], value: string | null): value is T {
   return value !== null && values.includes(value as T);
+}
+
+function ElementFilterIcon({ element }: { element: PalworldElement }) {
+  const asset = PALWORLD_ELEMENT_IMAGES[element];
+  const imageUrl = asset && isLocalPalworldElementImageUrl(asset.imageUrl)
+    ? asset.imageUrl
+    : undefined;
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => setFailed(false), [imageUrl]);
+  if (!asset || !imageUrl || failed) return null;
+
+  return (
+    <img
+      alt=""
+      aria-hidden="true"
+      className="palworld-pal-filter-element-icon"
+      decoding="async"
+      height={asset.height}
+      onError={() => setFailed(true)}
+      src={imageUrl}
+      width={asset.width}
+    />
+  );
 }
 
 function WorkFilterIcon({ type }: { type: PalworldWorkSuitabilityType }) {
@@ -97,7 +122,8 @@ export function PalworldPalsFilterControls({
                 type="button"
               >
                 <FilterCheck selected={selected} />
-                <PalworldElementBadge element={facet.value} locale={locale} />
+                <ElementFilterIcon element={facet.value} />
+                <span>{elementLabel(facet.value, locale)}</span>
                 <small>{interpolate(text.filterOptionCount, { count: facet.count })}</small>
               </button>
             );
@@ -262,12 +288,14 @@ export function PalworldPalsAppliedFilters({
 }
 
 export function PalworldPalsResultToolbar({
+  loadedCount,
   loading,
   locale,
   onUpdate,
   pagination,
   params,
 }: {
+  loadedCount: number;
   loading: boolean;
   locale: PalworldLocale;
   onUpdate: FilterUpdate;
@@ -276,13 +304,11 @@ export function PalworldPalsResultToolbar({
 }) {
   const text = palworldI18n[locale];
   const order = params.get("order") === "desc" ? "desc" : "asc";
-  const currentPage = pagination && pagination.totalPages > 0 ? pagination.page : 0;
   const summary = loading || !pagination
     ? text.matchingPalsLoading
     : interpolate(text.matchingPals, {
       count: pagination.total.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR"),
-      current: currentPage,
-      total: pagination.totalPages,
+      loaded: loadedCount.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR"),
     });
 
   return (

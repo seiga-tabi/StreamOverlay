@@ -257,6 +257,10 @@ function compareLocalizedName(
   );
 }
 
+function compareCanonicalId(left: { id: string }, right: { id: string }): number {
+  return left.id.localeCompare(right.id, "en");
+}
+
 function direction(value: number, order: PalworldSortOrder): number {
   return order === "desc" ? -value : value;
 }
@@ -639,10 +643,12 @@ export class PalworldDataService {
       .filter((pal) => query.variant === undefined || pal.variantType === query.variant)
       .sort((left, right) => {
         const result = query.sort === "number"
-          ? left.number - right.number || compareText(left.id, right.id)
+          ? left.number - right.number || compareCanonicalId(left, right)
           : query.sort === "rarity"
-            ? left.rarity - right.rarity || left.number - right.number
-            : compareLocalizedName(left, right, query.locale ?? "ko") || left.number - right.number;
+            ? left.rarity - right.rarity || left.number - right.number || compareCanonicalId(left, right)
+            : compareLocalizedName(left, right, query.locale ?? "ko")
+              || left.number - right.number
+              || compareCanonicalId(left, right);
         return direction(result, query.order);
       });
     const pageInfo = pagination(query.page, query.limit, filtered.length);
@@ -691,15 +697,20 @@ export class PalworldDataService {
       .sort((left, right) => {
         if (query.sort === "price") {
           return compareOptionalNumber(left.sellPrice, right.sellPrice, query.order)
-            || compareLocalizedName(left, right, query.locale ?? "en");
+            || compareLocalizedName(left, right, query.locale ?? "en")
+            || compareCanonicalId(left, right);
         }
         if (query.sort === "technologyLevel") {
           return compareOptionalNumber(left.technologyLevel, right.technologyLevel, query.order)
-            || compareLocalizedName(left, right, query.locale ?? "en");
+            || compareLocalizedName(left, right, query.locale ?? "en")
+            || compareCanonicalId(left, right);
         }
         const result = query.sort === "rarity"
-          ? left.rarity - right.rarity || compareLocalizedName(left, right, query.locale ?? "en")
-          : compareLocalizedName(left, right, query.locale ?? "en");
+          ? left.rarity - right.rarity
+            || compareLocalizedName(left, right, query.locale ?? "en")
+            || compareCanonicalId(left, right)
+          : compareLocalizedName(left, right, query.locale ?? "en")
+            || compareCanonicalId(left, right);
         return direction(result, query.order);
       });
     const pageInfo = pagination(query.page, query.limit, filtered.length);
@@ -733,13 +744,19 @@ export class PalworldDataService {
       .sort((left, right) => {
         if (query.sort === "power") {
           return compareOptionalNumber(left.power, right.power, query.order)
-            || compareLocalizedName(left, right, query.locale ?? "en");
+            || compareLocalizedName(left, right, query.locale ?? "en")
+            || compareCanonicalId(left, right);
         }
         if (query.sort === "unlockLevel") {
           return compareOptionalNumber(left.unlockLevel, right.unlockLevel, query.order)
-            || compareLocalizedName(left, right, query.locale ?? "en");
+            || compareLocalizedName(left, right, query.locale ?? "en")
+            || compareCanonicalId(left, right);
         }
-        return direction(compareLocalizedName(left, right, query.locale ?? "en"), query.order);
+        return direction(
+          compareLocalizedName(left, right, query.locale ?? "en")
+            || compareCanonicalId(left, right),
+          query.order
+        );
       });
     const pageInfo = pagination(query.page, query.limit, filtered.length);
     return {

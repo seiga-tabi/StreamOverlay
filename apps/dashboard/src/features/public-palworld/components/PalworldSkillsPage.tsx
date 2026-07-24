@@ -21,7 +21,7 @@ import { elementLabel, skillTypeLabel } from "../utils/labels";
 import { formatPalNumber } from "../utils/search";
 import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalworldName } from "../utils/localization";
 import { setPalworldUrl, withQueryParam } from "../utils/routes";
-import { Pagination } from "./Pagination";
+import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldTranslationBadges } from "./PalworldTranslationBadge";
@@ -126,7 +126,17 @@ function SkillDetailModal({ locale, onClose, onOpenPal, skillId }: { locale: Pal
 }
 
 export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: PalworldLocale; onOpenPal: (id: string) => void; params: URLSearchParams }) {
-  const { error, response, retry, routeQuery } = usePalworldSkills(params, locale);
+  const {
+    initialError: error,
+    initialLoading: loading,
+    loadMore,
+    loadMoreError,
+    loadMoreLoading,
+    response,
+    retryInitial,
+    retryLoadMore,
+    routeQuery,
+  } = usePalworldSkills(params, locale);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
   const text = palworldI18n[locale];
   const selectedSkillId = params.get("skill")?.trim() || undefined;
@@ -166,10 +176,10 @@ export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: Palw
       <label><span>{text.sort}</span><Select value={params.get("order") ?? "asc"} onChange={(event) => update("order", event.target.value)}><option value="asc">{text.ascending}</option><option value="desc">{text.descending}</option></Select></label>
       <div className="palworld-filter-actions"><Button size="sm" type="submit">{text.searchAction}</Button><Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/skills")}>{text.clearFilters}</Button></div>
     </form>
-    {!response && !error ? <PalworldLoading locale={locale} /> : null}
-    {error ? <PalworldError error={error} locale={locale} onRetry={retry} /> : null}
+    {loading && !error ? <PalworldLoading locale={locale} /> : null}
+    {error ? <PalworldError error={error} locale={locale} onRetry={retryInitial} /> : null}
     {response?.items.length === 0 ? <PalworldEmpty locale={locale} title={text.skillListEmpty} /> : null}
-    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-skill-grid">{response.items.map((skill) => <PalworldSkillCard locale={locale} onOpen={openSkill} skill={skill} key={skill.id} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
+    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div aria-busy={loadMoreLoading} className="palworld-skill-grid">{response.items.map((skill) => <PalworldSkillCard locale={locale} onOpen={openSkill} skill={skill} key={skill.id} />)}</div><PalworldAutoLoadControl error={loadMoreError} hasMore={response.pagination.hasNextPage} loadedCount={response.items.length} loading={loadMoreLoading} locale={locale} onLoadMore={() => { void loadMore(); }} onRetry={() => { void retryLoadMore(); }} paused={Boolean(selectedSkillId)} total={response.pagination.total} /></> : null}
     <SkillDetailModal locale={locale} onClose={closeSkill} onOpenPal={onOpenPal} skillId={selectedSkillId} />
   </section>;
 }

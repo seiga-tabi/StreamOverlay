@@ -56,10 +56,12 @@ function WorkSuitabilityGlyph({ type }: { type: PalworldWorkSuitabilityType }) {
 }
 
 export function PalworldWorkSuitabilityBadge({
+  compact = false,
   level,
   locale,
   type,
 }: {
+  compact?: boolean;
   level: number;
   locale: PalworldLocale;
   type: PalworldWorkSuitabilityType;
@@ -78,7 +80,10 @@ export function PalworldWorkSuitabilityBadge({
 
   return (
     <span
-      className="palworld-work-suitability-badge"
+      className={[
+        "palworld-work-suitability-badge",
+        compact ? "is-compact" : "",
+      ].filter(Boolean).join(" ")}
       data-ja={labelJa}
       data-ko={labelKo}
       data-work-type={type}
@@ -101,7 +106,10 @@ export function PalworldWorkSuitabilityBadge({
           width="64"
         />
       )}
-      <span className="palworld-work-suitability-label">{label}</span>
+      <span className={[
+        "palworld-work-suitability-label",
+        compact ? "yoro-u-sr-only" : "",
+      ].filter(Boolean).join(" ")}>{label}</span>
       <strong>{levelText}</strong>
     </span>
   );

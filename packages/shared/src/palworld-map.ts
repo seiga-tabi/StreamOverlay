@@ -566,6 +566,27 @@ export function validatePalworldPalSpawnResponse(
         "일반 스폰은 활성 도감 exact join과 검증된 지도 geometry 근거여야 합니다."
       );
     }
+    if (
+      overlay.data.sourceGameVersion === null
+      || overlay.data.sourceSteamBuildId === null
+    ) {
+      return invalid(
+        "response.overlay",
+        "ready 또는 confirmed_empty 일반 스폰에는 검증된 source gameVersion과 Steam build ID가 필요합니다."
+      );
+    }
+    if (overlay.data.sourceGameVersion !== overlay.data.targetGameVersion) {
+      return invalid(
+        "response.overlay.sourceGameVersion",
+        "targetGameVersion과 일치해야 합니다."
+      );
+    }
+    if (!/^[1-9][0-9]{0,19}$/u.test(overlay.data.sourceSteamBuildId)) {
+      return invalid(
+        "response.overlay.sourceSteamBuildId",
+        "0으로 시작하지 않는 20자리 이하 숫자 Steam build ID여야 합니다."
+      );
+    }
     if (overlay.data.targetGameVersion !== metadata.data.gameVersion) {
       return invalid(
         "response.overlay.targetGameVersion",

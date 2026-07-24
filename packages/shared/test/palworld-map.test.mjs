@@ -46,7 +46,9 @@ const overlay = {
 
 const spawnOverlay = {
   ...overlay,
-  compatibilityBasis: "exact_active_paldex_join_and_map_geometry"
+  compatibilityBasis: "exact_active_paldex_join_and_map_geometry",
+  sourceGameVersion: metadata.gameVersion,
+  sourceSteamBuildId: "24181105"
 };
 
 const marker = {
@@ -233,5 +235,30 @@ test("Pal별 일반 스폰 상태는 검증된 overlay 공개 조건을 유지�
     ...base,
     state: "confirmed_empty",
     overlay: { ...spawnOverlay, targetGameVersion: "9.9.9" }
+  }).ok, false);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...base,
+    state: "confirmed_empty",
+    overlay: { ...spawnOverlay, sourceGameVersion: null }
+  }).ok, false);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...base,
+    state: "confirmed_empty",
+    overlay: { ...spawnOverlay, sourceGameVersion: "9.9.9" }
+  }).ok, false);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...base,
+    state: "confirmed_empty",
+    overlay: { ...spawnOverlay, sourceSteamBuildId: "latest" }
+  }).ok, false);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...base,
+    state: "confirmed_empty",
+    overlay: { ...spawnOverlay, sourceSteamBuildId: "012345" }
+  }).ok, false);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...base,
+    state: "confirmed_empty",
+    overlay: { ...spawnOverlay, sourceSteamBuildId: "1".repeat(21) }
   }).ok, false);
 });

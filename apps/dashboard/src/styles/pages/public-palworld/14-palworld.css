@@ -714,7 +714,70 @@
   fill: var(--yoro-color-info);
   stroke: var(--yoro-color-text-on-dark);
   stroke-width: 0.0025;
-  opacity: 0.82;
+}
+
+.palworld-map-layer-legend {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  border-block-end: thin solid var(--yoro-color-border);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-map-layer-legend > ul {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palworld-map-layer-legend li {
+  display: flex;
+  align-items: flex-start;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-map-layer-legend li > span:last-child {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+  overflow-wrap: anywhere;
+}
+
+.palworld-map-layer-legend small {
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-map-legend-spawn,
+.palworld-map-legend-boss {
+  flex: 0 0 auto;
+  inline-size: var(--yoro-space-4);
+  block-size: var(--yoro-space-4);
+  margin-block-start: var(--yoro-space-1);
+  border-radius: var(--yoro-radius-pill);
+}
+
+.palworld-map-legend-spawn {
+  border: thin solid var(--yoro-color-text-on-dark);
+  background: var(--yoro-color-info);
+}
+
+.palworld-map-legend-boss {
+  border: var(--yoro-focus-ring-width) solid var(--yoro-color-danger);
+  background: var(--yoro-color-surface-strong);
+}
+
+.palworld-map-legend-periods {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-1);
 }
 
 .palworld-map-boss-marker {
@@ -1025,15 +1088,12 @@
   white-space: nowrap;
 }
 
-.palworld-pal-filter-option .palworld-element-badge {
-  max-inline-size: 100%;
-}
-
 .palworld-pal-filter-check {
   flex: none;
   font-weight: var(--yoro-font-weight-black);
 }
 
+.palworld-pal-filter-element-icon,
 .palworld-pal-filter-work-icon {
   flex: none;
   inline-size: var(--yoro-space-6);
@@ -1139,6 +1199,10 @@
 }
 
 .palworld-pal-mobile-filter-row {
+  display: none;
+}
+
+.palworld-pals-mobile-filter-trigger {
   display: none;
 }
 
@@ -1274,8 +1338,8 @@
   border-block-start: thin solid var(--yoro-color-border);
 }
 
-.palworld-card-work-list .palworld-work-suitability-badge {
-  grid-template-columns: var(--yoro-space-5) minmax(0, 1fr) auto;
+.palworld-card-work-list .palworld-work-suitability-badge.is-compact {
+  grid-template-columns: var(--yoro-space-5) auto;
   max-inline-size: 100%;
   min-block-size: var(--yoro-space-7);
   padding: 0 var(--yoro-space-2) 0 var(--yoro-space-1);
@@ -1536,14 +1600,47 @@
   margin-block-end: 0;
 }
 
-.palworld-pagination {
-  display: flex;
+.palworld-auto-load {
+  display: grid;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
   min-inline-size: 0;
-  gap: var(--yoro-space-4);
+  inline-size: 100%;
+  gap: var(--yoro-space-2);
   padding-block: var(--yoro-space-4);
+  text-align: center;
+}
+
+.palworld-auto-load-summary,
+.palworld-auto-load-hint,
+.palworld-auto-load-end,
+.palworld-auto-load-error p {
+  margin: 0;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.palworld-auto-load .yoro-button {
+  justify-self: center;
+  min-block-size: var(--yoro-size-touch-target);
+}
+
+.palworld-auto-load-error {
+  display: grid;
+  justify-items: center;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface);
+}
+
+.palworld-auto-load-sentinel {
+  inline-size: 100%;
+  block-size: 1px;
+  pointer-events: none;
 }
 
 .palworld-tabs {
@@ -2080,7 +2177,6 @@
   fill: var(--yoro-color-info);
   stroke: var(--yoro-color-text-on-dark);
   stroke-width: 0.0025;
-  opacity: 0.82;
 }
 
 .palworld-pal-location-marker {
@@ -2137,6 +2233,16 @@
   flex-wrap: wrap;
 }
 
+.palworld-pal-location-spawn-details {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  text-align: end;
+}
+
 .palworld-pal-location-caption li > span:first-child {
   min-inline-size: 0;
   overflow-wrap: anywhere;
@@ -2168,7 +2274,18 @@
 }
 
 .palworld-pal-location-inline-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
   color: var(--yoro-color-danger);
+}
+
+.palworld-pal-location-layer-statuses {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
 }
 
 .palworld-pal-location-actions {
@@ -2192,6 +2309,38 @@
 }
 
 @media (max-width: 32rem) {
+  .palworld-pal-card-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-pal-card-media {
+    padding: var(--yoro-space-2) var(--yoro-space-2) 0;
+  }
+
+  .palworld-pal-card-image-frame {
+    inline-size: min(100%, 7rem);
+  }
+
+  .palworld-pal-card .palworld-pal-card-content {
+    align-content: start;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-2);
+  }
+
+  .palworld-pal-card h3 {
+    font-size: var(--yoro-font-size-base);
+  }
+
+  .palworld-pal-card .palworld-card-kicker,
+  .palworld-pal-card .palworld-badge-row {
+    gap: var(--yoro-space-1);
+  }
+
+  .palworld-card-work-list {
+    margin-inline: var(--yoro-space-2);
+    padding-block: var(--yoro-space-2);
+  }
+
   .palworld-pal-location-caption li {
     align-items: flex-start;
   }
@@ -2199,6 +2348,11 @@
   .palworld-pal-location-actions,
   .palworld-pal-location-actions > .yoro-button {
     inline-size: 100%;
+  }
+
+  .palworld-pal-location-spawn-details {
+    justify-content: flex-start;
+    text-align: start;
   }
 }
 
@@ -2696,6 +2850,10 @@
     gap: var(--yoro-space-3);
   }
 
+  .palworld-entity-grid.palworld-pal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .palworld-filter-bar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2885,7 +3043,7 @@
   }
 
   .palworld-entity-grid.palworld-pal-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .palworld-pal-search-form,
@@ -2898,14 +3056,6 @@
   .palworld-pal-search-form .yoro-button,
   .palworld-pal-filter-modal .yoro-modal__footer .yoro-button {
     inline-size: 100%;
-  }
-
-  .palworld-pal-card-main {
-    grid-template-columns: minmax(5.75rem, 6.5rem) minmax(0, 1fr);
-  }
-
-  .palworld-pal-card-image-frame {
-    inline-size: min(100%, 6.5rem);
   }
 
   .palworld-pal-detail-hero,

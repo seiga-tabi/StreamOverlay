@@ -5600,7 +5600,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
           if (!validation.ok) {
             throw new TypeError(`Palworld 일반 스폰 응답 검증에 실패했습니다. ${validation.error}`);
           }
-          return sendJson(req, res, 200, validation.data, cacheHeaders);
+          return sendJson(
+            req,
+            res,
+            200,
+            validation.data,
+            validation.data.state === "data_unavailable"
+              ? { ...cacheHeaders, "Cache-Control": "no-store" }
+              : cacheHeaders
+          );
         }
         if (url.pathname === "/api/palworld/search") {
           const query = parsePalworldSearchQuery(url.searchParams);

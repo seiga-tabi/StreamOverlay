@@ -132,11 +132,13 @@ export function BreedingGenderAlternativeCard({
 
 export function ReverseBreedingTargetSummary({
   child,
+  loadedCount,
   locale,
   onOpenPal,
   pagination,
 }: {
   child: PalworldPalReference;
+  loadedCount?: number;
   locale: PalworldLocale;
   onOpenPal: (id: string) => void;
   pagination?: PalworldPagination;
@@ -147,8 +149,11 @@ export function ReverseBreedingTargetSummary({
       <BreedingPalButton emphasis="target" locale={locale} onOpen={onOpenPal} pal={child} role={text.targetPalSummary} />
       {pagination ? <div className="palworld-reverse-target-counts">
         <strong>{formatTemplate(text.totalPairCount, { count: pagination.total.toLocaleString() })}</strong>
-        {pagination.totalPages > 0
-          ? <span>{formatTemplate(text.pageCount, { current: pagination.page, total: pagination.totalPages })}</span>
+        {pagination.total > 0 && loadedCount !== undefined
+          ? <span>{formatTemplate(text.loadedPairCount, {
+            loaded: loadedCount.toLocaleString(),
+            total: pagination.total.toLocaleString(),
+          })}</span>
           : null}
       </div> : null}
     </CardContent>

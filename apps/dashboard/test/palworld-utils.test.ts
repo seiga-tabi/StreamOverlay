@@ -8,6 +8,7 @@ import type {
   PalworldItemCategory,
   PalworldItemSummary,
   PalworldPalStats,
+  PalworldPalSpawnPoint,
   PalworldPalSummary,
   PalworldSkillType,
   PalworldWorkSuitabilityType,
@@ -45,6 +46,12 @@ import {
 import { formatPalNumber, matchesPalworldItem, matchesPalworldPal, normalizePalworldSearch } from "../src/features/public-palworld/utils/search";
 import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalworldName } from "../src/features/public-palworld/utils/localization";
 import { palworldSeoMetadata } from "../src/features/public-palworld/utils/seo";
+import {
+  filterPalworldBossMarkers,
+  palworldSpawnPointOpacity,
+  palworldSpawnPointRadius,
+  summarizePalworldSpawnPoints,
+} from "../src/features/public-palworld/utils/spawns";
 import { palworldHomeLiveStreamerCards, sortedFollowedTwitchChannels } from "../src/features/public-palworld/utils/streamers";
 import { getPublicTwitchFollowedChannels, getPublicTwitchStatus, logoutPublicTwitch, publicTwitchLoginUrl } from "../src/features/public-twitch/api";
 import { buildPalworldPalStatRows } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
@@ -71,6 +78,48 @@ const palSphere: PalworldItemSummary = {
   descriptionKo: "Pal을 포획합니다.",
   descriptionJa: "パルを捕獲します。",
 };
+
+test("일반 스폰 요약과 시각 강도는 cluster 수치만 제한된 범위로 반영한다", () => {
+  const points: PalworldPalSpawnPoint[] = [
+    {
+      id: "main-anubis-01-01",
+      cellX: 1,
+      cellY: 1,
+      normalizedX: 0.04,
+      normalizedY: 0.04,
+      placementCount: 2,
+      minimumLevel: 10,
+      maximumLevel: 12,
+      daytime: true,
+      nighttime: false,
+    },
+    {
+      id: "main-anubis-02-02",
+      cellX: 2,
+      cellY: 2,
+      normalizedX: 0.08,
+      normalizedY: 0.08,
+      placementCount: 8,
+      minimumLevel: 20,
+      maximumLevel: 24,
+      daytime: false,
+      nighttime: true,
+    },
+  ];
+  assert.deepEqual(summarizePalworldSpawnPoints(points), {
+    areas: 2,
+    daytime: true,
+    maximumLevel: 24,
+    minimumLevel: 10,
+    nighttime: true,
+    placements: 10,
+  });
+  assert.equal(summarizePalworldSpawnPoints([]), undefined);
+  assert.ok(palworldSpawnPointRadius(8) > palworldSpawnPointRadius(1));
+  assert.ok(palworldSpawnPointRadius(8, 2) < palworldSpawnPointRadius(8, 1));
+  assert.ok(palworldSpawnPointOpacity(8) > palworldSpawnPointOpacity(1));
+  assert.deepEqual(filterPalworldBossMarkers([], "anubis"), []);
+});
 
 test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한다", () => {
   assert.equal(palworldPageFromPath("/palworld"), "home");
@@ -308,8 +357,8 @@ test("Palworld 일반 스폰 API는 canonical Pal ID와 main world를 함께 요
           sourceMember: "Pal/DataTable/Spawner/DT_PalSpawnerPlacement.json",
           sourceMemberSha256: "b".repeat(64),
           targetMapAssetSha256: "c".repeat(64),
-          sourceGameVersion: null,
-          sourceSteamBuildId: null,
+          sourceGameVersion: "1.0.1",
+          sourceSteamBuildId: "24181105",
           targetGameVersion: "1.0.1",
           compatibilityBasis: "exact_active_paldex_join_and_map_geometry",
           transformRevision: "main-map-transform-v1",

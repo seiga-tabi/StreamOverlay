@@ -17,6 +17,7 @@ import {
   type PalworldSpawnArtifact
 } from "./palworld-spawn-artifact.js";
 import {
+  assertPalworldPakExportMetadata,
   withPalworldPakArchive,
   type PalworldPakExportMetadata,
   type PalworldPakArchiveReader
@@ -80,6 +81,21 @@ type SpawnExpectedCounts = {
   clusteredPoints: number;
 };
 
+type SpawnDistributionExpectedCounts = {
+  sourceRows: number;
+  rowsWithDaytime: number;
+  rowsWithNighttime: number;
+  daytimeLocations: number;
+  nighttimeLocations: number;
+  exactPaldexRows: number;
+  paldexRowsWithoutDistribution: number;
+  distributionRowsWithoutPaldex: number;
+  spawnPalsWithDistribution: number;
+  spawnPalsWithoutDistribution: number;
+};
+
+export type PalworldSpawnDistributionAudit = SpawnDistributionExpectedCounts;
+
 export type PalworldSpawnMapping = {
   schemaVersion: 1;
   targetGameVersion: string;
@@ -87,6 +103,7 @@ export type PalworldSpawnMapping = {
   palTable: SourceFileLock;
   placementTable: SourceFileLock;
   wildSpawnerTable: SourceFileLock;
+  distributionTable: SourceFileLock;
   targetMapAsset: {
     imageUrl: string;
     sha256: string;
@@ -106,6 +123,7 @@ export type PalworldSpawnMapping = {
     minimumWeightExclusive: 0;
   };
   expectedCounts: SpawnExpectedCounts;
+  expectedDistributionAudit: SpawnDistributionExpectedCounts;
   world: {
     id: "main";
     horizontalAxis: "world_y";
@@ -120,9 +138,13 @@ export type PalworldSpawnMapping = {
   levelRangeCorrections: SpawnLevelRangeCorrection[];
 };
 
-export type PalworldSpawnGenerationResult = {
+export type PalworldSpawnBuildResult = {
   artifact: PalworldSpawnArtifact;
   counts: SpawnExpectedCounts;
+};
+
+export type PalworldSpawnGenerationResult = PalworldSpawnBuildResult & {
+  distributionAudit: PalworldSpawnDistributionAudit;
 };
 
 type ParsedPlacement = {
@@ -289,10 +311,12 @@ export function assertPalworldSpawnMapping(value: unknown): PalworldSpawnMapping
     "palTable",
     "placementTable",
     "wildSpawnerTable",
+    "distributionTable",
     "targetMapAsset",
     "verification",
     "filters",
     "expectedCounts",
+    "expectedDistributionAudit",
     "world",
     "treeBounds",
     "aliases",
@@ -374,6 +398,43 @@ export function assertPalworldSpawnMapping(value: unknown): PalworldSpawnMapping
     || expectedCounts.clusteredPoints < 1
   ) {
     fail("mapping.expectedCounts", "source와 공개 스폰 기대 수는 1개 이상이어야 합니다.");
+  }
+  const expectedDistribution = exactRecordAt(
+    root.expectedDistributionAudit,
+    "mapping.expectedDistributionAudit",
+    [
+      "sourceRows",
+      "rowsWithDaytime",
+      "rowsWithNighttime",
+      "daytimeLocations",
+      "nighttimeLocations",
+      "exactPaldexRows",
+      "paldexRowsWithoutDistribution",
+      "distributionRowsWithoutPaldex",
+      "spawnPalsWithDistribution",
+      "spawnPalsWithoutDistribution"
+    ]
+  );
+  const expectedDistributionAudit = Object.fromEntries(
+    Object.entries(expectedDistribution).map(([key, count]) => [
+      key,
+      integerAt(
+        count,
+        `mapping.expectedDistributionAudit.${key}`,
+        0,
+        500_000
+      )
+    ])
+  ) as SpawnDistributionExpectedCounts;
+  if (
+    expectedDistributionAudit.sourceRows < 1
+    || expectedDistributionAudit.exactPaldexRows < 1
+    || expectedDistributionAudit.spawnPalsWithDistribution < 1
+  ) {
+    fail(
+      "mapping.expectedDistributionAudit",
+      "보조 분포 source와 exact coverage 기대 수는 1개 이상이어야 합니다."
+    );
   }
   const world = exactRecordAt(root.world, "mapping.world", [
     "id",
@@ -551,6 +612,10 @@ export function assertPalworldSpawnMapping(value: unknown): PalworldSpawnMapping
     palTable: sourceFileAt(root.palTable, "mapping.palTable"),
     placementTable: sourceFileAt(root.placementTable, "mapping.placementTable"),
     wildSpawnerTable: sourceFileAt(root.wildSpawnerTable, "mapping.wildSpawnerTable"),
+    distributionTable: sourceFileAt(
+      root.distributionTable,
+      "mapping.distributionTable"
+    ),
     targetMapAsset: {
       imageUrl,
       sha256: imageSha256,
@@ -570,6 +635,7 @@ export function assertPalworldSpawnMapping(value: unknown): PalworldSpawnMapping
       minimumWeightExclusive: 0
     },
     expectedCounts,
+    expectedDistributionAudit,
     world: {
       id: "main",
       horizontalAxis: "world_y",
@@ -810,6 +876,93 @@ function parseWildSpawnerRows(
     });
 }
 
+function distributionLocationCount(value: unknown, pathName: string): number {
+  const container = exactRecordAt(value, pathName, ["Locations", "Radius"]);
+  finiteAt(container.Radius, `${pathName}.Radius`, 0, 10_000_000);
+  const locations = container.Locations;
+  if (!Array.isArray(locations) || locations.length > 200_000) {
+    fail(`${pathName}.Locations`, "200,000개 이하의 위치 배열이어야 합니다.");
+  }
+  locations.forEach((location, index) => {
+    parsePosition(location, `${pathName}.Locations[${index}]`);
+  });
+  return locations.length;
+}
+
+export function auditPalworldSpawnDistributionRows(input: {
+  rows: JsonRecord;
+  paldex: PalworldPaldexArtifact;
+  spawnSourceInternalIds: readonly string[];
+}): PalworldSpawnDistributionAudit {
+  const paldex = assertPalworldPaldexArtifact(input.paldex);
+  const distributionIds = new Set<string>();
+  let rowsWithDaytime = 0;
+  let rowsWithNighttime = 0;
+  let daytimeLocations = 0;
+  let nighttimeLocations = 0;
+  for (const [sourceInternalId, raw] of Object.entries(input.rows)
+    .sort(([left], [right]) => left.localeCompare(right, "en"))) {
+    sourceIdAt(sourceInternalId, `distribution.Rows.${sourceInternalId}.sourceInternalId`);
+    const row = exactRecordAt(raw, `distribution.Rows.${sourceInternalId}`, [
+      "dayTimeLocations",
+      "nightTimeLocations"
+    ]);
+    const daytimeCount = distributionLocationCount(
+      row.dayTimeLocations,
+      `distribution.Rows.${sourceInternalId}.dayTimeLocations`
+    );
+    const nighttimeCount = distributionLocationCount(
+      row.nightTimeLocations,
+      `distribution.Rows.${sourceInternalId}.nightTimeLocations`
+    );
+    if (daytimeCount > 0) rowsWithDaytime += 1;
+    if (nighttimeCount > 0) rowsWithNighttime += 1;
+    daytimeLocations += daytimeCount;
+    nighttimeLocations += nighttimeCount;
+    distributionIds.add(sourceInternalId);
+  }
+  const paldexIds = new Set(paldex.records.map((pal) => pal.sourceInternalId));
+  const spawnIds = new Set(input.spawnSourceInternalIds);
+  if (spawnIds.size !== input.spawnSourceInternalIds.length) {
+    fail("spawnSourceInternalIds", "중복 sourceInternalId가 있습니다.");
+  }
+  for (const sourceInternalId of spawnIds) {
+    if (!paldexIds.has(sourceInternalId)) {
+      fail(
+        `spawnSourceInternalIds.${sourceInternalId}`,
+        "활성 Paldex에 없는 sourceInternalId입니다."
+      );
+    }
+  }
+  return {
+    sourceRows: distributionIds.size,
+    rowsWithDaytime,
+    rowsWithNighttime,
+    daytimeLocations,
+    nighttimeLocations,
+    exactPaldexRows: [...paldexIds].filter((id) => distributionIds.has(id)).length,
+    paldexRowsWithoutDistribution: [...paldexIds].filter((id) => !distributionIds.has(id)).length,
+    distributionRowsWithoutPaldex: [...distributionIds].filter((id) => !paldexIds.has(id)).length,
+    spawnPalsWithDistribution: [...spawnIds].filter((id) => distributionIds.has(id)).length,
+    spawnPalsWithoutDistribution: [...spawnIds].filter((id) => !distributionIds.has(id)).length
+  };
+}
+
+export function assertPalworldSpawnDistributionAudit(
+  actual: PalworldSpawnDistributionAudit,
+  expected: PalworldSpawnDistributionAudit
+): void {
+  for (const [field, expectedCount] of Object.entries(expected)) {
+    const actualCount = actual[field as keyof PalworldSpawnDistributionAudit];
+    if (actualCount !== expectedCount) {
+      fail(
+        `mapping.expectedDistributionAudit.${field}`,
+        `실제 집계 ${actualCount}와 다릅니다.`
+      );
+    }
+  }
+}
+
 function sourceInternalIdForSpawn(input: {
   sourceCharacterId: string;
   palRows: JsonRecord;
@@ -853,27 +1006,30 @@ export function buildPalworldSpawnArtifact(input: {
   wildSpawnerRows: JsonRecord;
   activation?: "candidate" | "active";
   sourceMetadata?: PalworldPakExportMetadata;
-}): PalworldSpawnGenerationResult {
+}): PalworldSpawnBuildResult {
   const mapping = assertPalworldSpawnMapping(input.mapping);
   const paldex = assertPalworldPaldexArtifact(input.paldex);
+  const sourceMetadata = input.sourceMetadata === undefined
+    ? undefined
+    : assertPalworldPakExportMetadata(input.sourceMetadata);
   if (paldex.release !== mapping.targetGameVersion) {
     fail("mapping.targetGameVersion", "활성 Paldex release와 일치하지 않습니다.");
   }
   const activation = input.activation ?? "candidate";
   if (activation === "active") {
-    if (input.sourceMetadata === undefined) {
+    if (sourceMetadata === undefined) {
       fail(
         "sourceMetadata",
         "active spawn artifact에는 검증된 PAK export metadata가 필요합니다."
       );
     }
-    if (input.sourceMetadata.gameVersion !== mapping.targetGameVersion) {
+    if (sourceMetadata.gameVersion !== mapping.targetGameVersion) {
       fail(
         "sourceMetadata.gameVersion",
         "활성 Paldex release와 정확히 일치해야 합니다."
       );
     }
-    if (input.sourceMetadata.steamBuildId !== paldex.steamBuildId) {
+    if (sourceMetadata.steamBuildId !== paldex.steamBuildId) {
       fail(
         "sourceMetadata.steamBuildId",
         "활성 Paldex Steam build ID와 정확히 일치해야 합니다."
@@ -1138,8 +1294,8 @@ export function buildPalworldSpawnArtifact(input: {
         wildSpawnerTableSha256: mapping.wildSpawnerTable.sha256,
         palTableMember: mapping.palTable.member,
         palTableSha256: mapping.palTable.sha256,
-        sourceGameVersion: input.sourceMetadata?.gameVersion ?? null,
-        sourceSteamBuildId: input.sourceMetadata?.steamBuildId ?? null,
+        sourceGameVersion: sourceMetadata?.gameVersion ?? null,
+        sourceSteamBuildId: sourceMetadata?.steamBuildId ?? null,
         compatibilityBasis: mapping.verification.compatibilityBasis,
         rightsVerified: false,
         usageBasis: "operator_reference_use"
@@ -1200,8 +1356,11 @@ export async function generatePalworldSpawnArtifact(input: {
   mappingsPath?: string;
 }): Promise<PalworldSpawnGenerationResult> {
   const mapping = assertPalworldSpawnMapping(input.mapping);
+  const sourceMetadata = input.sourceMetadata === undefined
+    ? undefined
+    : assertPalworldPakExportMetadata(input.sourceMetadata);
   await assertRegularFileSha256(input.targetMapPath, mapping.targetMapAsset.sha256);
-  if (input.sourceMetadata !== undefined) {
+  if (sourceMetadata !== undefined) {
     if (input.mappingsPath === undefined) {
       fail(
         "sourceMetadata",
@@ -1210,10 +1369,10 @@ export async function generatePalworldSpawnArtifact(input: {
     }
     await assertRegularFileSha256(
       input.mappingsPath,
-      input.sourceMetadata.mappingsSha256
+      sourceMetadata.mappingsSha256
     );
   }
-  if (input.activation === "active" && input.sourceMetadata === undefined) {
+  if (input.activation === "active" && sourceMetadata === undefined) {
       fail(
         "activation",
         "active 게시에는 metadata와 해당 Mappings.usmap이 모두 필요합니다."
@@ -1226,20 +1385,35 @@ export async function generatePalworldSpawnArtifact(input: {
     input.archivePath,
     { expectedSha256: mapping.sourceArchiveSha256 },
     async (reader) => {
-      const [palRows, placementRows, wildSpawnerRows] = await Promise.all([
+      const [palRows, placementRows, wildSpawnerRows, distributionRows] = await Promise.all([
         lockedRows(reader, mapping.palTable),
         lockedRows(reader, mapping.placementTable),
-        lockedRows(reader, mapping.wildSpawnerTable)
+        lockedRows(reader, mapping.wildSpawnerTable),
+        lockedRows(reader, mapping.distributionTable)
       ]);
-      return buildPalworldSpawnArtifact({
+      const result = buildPalworldSpawnArtifact({
         mapping,
         paldex,
         palRows,
         placementRows,
         wildSpawnerRows,
         activation: input.activation,
-        sourceMetadata: input.sourceMetadata
+        sourceMetadata
       });
+      const mainWorld = result.artifact.worlds.find((world) => world.world === "main");
+      if (mainWorld === undefined) {
+        fail("artifact.worlds.main", "일반 스폰 보조 검증 대상 main world가 없습니다.");
+      }
+      const distributionAudit = auditPalworldSpawnDistributionRows({
+        rows: distributionRows,
+        paldex,
+        spawnSourceInternalIds: mainWorld.pals.map((pal) => pal.sourceInternalId)
+      });
+      assertPalworldSpawnDistributionAudit(
+        distributionAudit,
+        mapping.expectedDistributionAudit
+      );
+      return { ...result, distributionAudit };
     }
   );
 }

@@ -14,6 +14,10 @@
     "member": "Pal/DataTable/Spawner/DT_PalWildSpawner.json",
     "sha256": "4bac2dfd1177d5b668677826527636adb1f2cc6dd9861adda7579bd07cb48978"
   },
+  "distributionTable": {
+    "member": "Pal/DataTable/UI/DT_PaldexDistributionData.json",
+    "sha256": "1261f53f885dc470684569999c48eb4581b8aab06a6da22bc98786d8eff7580a"
+  },
   "targetMapAsset": {
     "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
     "sha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
@@ -42,6 +46,18 @@
     "palCount": 224,
     "placementLinks": 53826,
     "clusteredPoints": 3784
+  },
+  "expectedDistributionAudit": {
+    "sourceRows": 365,
+    "rowsWithDaytime": 345,
+    "rowsWithNighttime": 364,
+    "daytimeLocations": 68607,
+    "nighttimeLocations": 83088,
+    "exactPaldexRows": 258,
+    "paldexRowsWithoutDistribution": 29,
+    "distributionRowsWithoutPaldex": 107,
+    "spawnPalsWithDistribution": 224,
+    "spawnPalsWithoutDistribution": 0
   },
   "world": {
     "id": "main",

@@ -3,38 +3,48 @@ import { PALWORLD_ACQUISITION_TYPES, PALWORLD_ITEM_CATEGORIES, type PalworldItem
 import { Button } from "../../../shared/ui/Button";
 import { Input, Select } from "../../../shared/ui/Form";
 import { getPalworldItems } from "../api/palworld";
+import { usePalworldInfiniteList } from "../hooks/usePalworldInfiniteList";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { acquisitionLabel, categoryLabel } from "../utils/labels";
 import { setPalworldUrl } from "../utils/routes";
 import { ItemCard } from "./PalworldCards";
-import { Pagination } from "./Pagination";
+import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 
 const FILTER_KEYS = ["q", "category", "rarity", "acquisition", "sort", "page"] as const;
 
 export function PalworldItemsPage({ locale, onOpenItem, params }: { locale: PalworldLocale; onOpenItem: (id: string) => void; params: URLSearchParams }) {
-  const [response, setResponse] = useState<PalworldPaginatedResponse<PalworldItemSummary> | null>(null);
-  const [error, setError] = useState<unknown>(null);
-  const [revision, setRevision] = useState(0);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
   const text = palworldI18n[locale];
   const routeQuery = FILTER_KEYS.map((key) => `${key}=${params.get(key) ?? ""}`).join("&");
+  const {
+    initialError: error,
+    initialLoading: loading,
+    loadMore,
+    loadMoreError,
+    loadMoreLoading,
+    response,
+    retryInitial,
+    retryLoadMore,
+  } = usePalworldInfiniteList<PalworldItemSummary, PalworldPaginatedResponse<PalworldItemSummary>>({
+    initialPage: params.get("page") ?? "1",
+    itemKey: (item) => item.id,
+    loadPage: (page, signal) => {
+      const apiParams = new URLSearchParams();
+      FILTER_KEYS.forEach((key) => {
+        if (key === "page") return;
+        const value = params.get(key);
+        if (value) apiParams.set(key, value);
+      });
+      apiParams.set("page", String(page));
+      apiParams.set("locale", locale);
+      apiParams.set("limit", "24");
+      return getPalworldItems(apiParams, signal);
+    },
+    queryKey: `${locale}:${routeQuery}`,
+  });
 
   useEffect(() => setNameQuery(params.get("q") ?? ""), [routeQuery]);
-  useEffect(() => {
-    const controller = new AbortController();
-    const apiParams = new URLSearchParams();
-    FILTER_KEYS.forEach((key) => { const value = params.get(key); if (value) apiParams.set(key, value); });
-    apiParams.set("locale", locale);
-    apiParams.set("limit", "24");
-    setResponse(null);
-    setError(null);
-    void getPalworldItems(apiParams, controller.signal).then(setResponse).catch((requestError) => {
-      if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-      setError(requestError);
-    });
-    return () => controller.abort();
-  }, [locale, routeQuery, revision]);
 
   function update(key: string, value: string) {
     const next = new URLSearchParams(params);
@@ -55,9 +65,9 @@ export function PalworldItemsPage({ locale, onOpenItem, params }: { locale: Palw
       <label><span>{text.sort}</span><Select value={params.get("sort") ?? "name"} onChange={(event) => update("sort", event.target.value)}><option value="name">{text.name}</option><option value="rarity">{text.rarity}</option><option value="price">{text.price}</option><option value="technologyLevel">{text.technologyLevel}</option></Select></label>
       <div className="palworld-filter-actions"><Button size="sm" type="submit">{text.searchAction}</Button><Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/items")}>{text.clearFilters}</Button></div>
     </form>
-    {!response && !error ? <PalworldLoading locale={locale} /> : null}
-    {error ? <PalworldError error={error} locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
+    {loading && !error ? <PalworldLoading locale={locale} /> : null}
+    {error ? <PalworldError error={error} locale={locale} onRetry={retryInitial} /> : null}
     {response?.items.length === 0 ? <PalworldEmpty locale={locale} title={text.itemListEmpty} /> : null}
-    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-entity-grid">{response.items.map((item, index) => <ItemCard key={item.id} item={item} locale={locale} priority={index < 4} onOpen={(selected) => onOpenItem(selected.id)} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
+    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div aria-busy={loadMoreLoading} className="palworld-entity-grid">{response.items.map((item, index) => <ItemCard key={item.id} item={item} locale={locale} priority={index < 4} onOpen={(selected) => onOpenItem(selected.id)} />)}</div><PalworldAutoLoadControl error={loadMoreError} hasMore={response.pagination.hasNextPage} loadedCount={response.items.length} loading={loadMoreLoading} locale={locale} onLoadMore={() => { void loadMore(); }} onRetry={() => { void retryLoadMore(); }} paused={Boolean(params.get("item"))} total={response.pagination.total} /></> : null}
   </section>;
 }

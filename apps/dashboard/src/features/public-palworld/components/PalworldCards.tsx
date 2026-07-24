@@ -53,7 +53,7 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
           role="list"
         >
           {pal.workSuitabilities.map((work) => (
-            <PalworldWorkSuitabilityBadge key={work.type} level={work.level} locale={locale} type={work.type} />
+            <PalworldWorkSuitabilityBadge compact key={work.type} level={work.level} locale={locale} type={work.type} />
           ))}
         </div>
       ) : null}

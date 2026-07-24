@@ -14,6 +14,7 @@ import {
 } from "../../../shared/ui/Modal";
 import { getPalworldPals } from "../api/palworld";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+import { usePalworldInfiniteList } from "../hooks/usePalworldInfiniteList";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { setPalworldUrl, palworldUrl } from "../utils/routes";
 import {
@@ -25,8 +26,8 @@ import {
   type PalworldPalsFilterKey,
   type PalworldPalsRouteKey,
 } from "../utils/pals";
-import { Pagination } from "./Pagination";
 import { PalCard } from "./PalworldCards";
+import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import {
   PalworldPalsAppliedFilters,
   PalworldPalsDesktopFilterPanel,
@@ -54,54 +55,47 @@ export function PalworldPalsPage({
   onOpenPal: (id: string) => void;
   params: URLSearchParams;
 }) {
-  const [response, setResponse] = useState<PalworldPalListResponse | null>(null);
   const [facets, setFacets] = useState<PalworldPalListFacets | null>(null);
-  const [error, setError] = useState<unknown>(null);
-  const [loading, setLoading] = useState(true);
-  const [revision, setRevision] = useState(0);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
-  const requestIdRef = useRef(0);
   const text = palworldI18n[locale];
   const routeQuery = routeSignature(params);
   const appliedQuery = params.get("q") ?? "";
   const detailFilterCount = palworldPalsDetailFilterCount(params);
   const hasFilters = hasPalworldPalsFilters(params);
+  const {
+    initialError: error,
+    initialLoading: loading,
+    loadMore,
+    loadMoreError,
+    loadMoreLoading,
+    response,
+    retryInitial,
+    retryLoadMore,
+  } = usePalworldInfiniteList<PalworldPalListResponse["items"][number], PalworldPalListResponse>({
+    initialPage: params.get("page") ?? "1",
+    itemKey: (pal) => pal.id,
+    loadPage: (page, signal): Promise<PalworldPalListResponse> => {
+      const apiParams = new URLSearchParams();
+      for (const key of PALWORLD_PALS_ROUTE_KEYS) {
+        if (key === "page") continue;
+        for (const value of params.getAll(key)) apiParams.append(key, value);
+      }
+      apiParams.set("page", String(page));
+      apiParams.set("locale", locale);
+      apiParams.set("limit", "24");
+      return getPalworldPals(apiParams, signal);
+    },
+    queryKey: `${locale}:${routeQuery}`,
+  });
 
   useBodyScrollLock(filterOpen);
 
   useEffect(() => setNameQuery(appliedQuery), [appliedQuery]);
-
   useEffect(() => {
-    const controller = new AbortController();
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
-    const apiParams = new URLSearchParams();
-    for (const key of PALWORLD_PALS_ROUTE_KEYS) {
-      for (const value of params.getAll(key)) apiParams.append(key, value);
-    }
-    apiParams.set("locale", locale);
-    apiParams.set("limit", "24");
-    setResponse(null);
-    setError(null);
-    setLoading(true);
-
-    void getPalworldPals(apiParams, controller.signal)
-      .then((nextResponse) => {
-        if (controller.signal.aborted || requestIdRef.current !== requestId) return;
-        setFacets(nextResponse.facets);
-        setResponse(nextResponse);
-        setLoading(false);
-      })
-      .catch((requestError) => {
-        if (controller.signal.aborted || requestIdRef.current !== requestId) return;
-        setError(requestError);
-        setLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [locale, routeQuery, revision]);
+    if (response) setFacets(response.facets);
+  }, [response]);
 
   function update(key: PalworldPalsRouteKey, value: string) {
     setPalworldUrl(palworldUrl("pals", updatePalworldPalsParams(params, key, value)));
@@ -197,6 +191,7 @@ export function PalworldPalsPage({
       <PalworldPalsAppliedFilters locale={locale} onRemove={removeFilter} params={params} />
 
       <PalworldPalsResultToolbar
+        loadedCount={response?.items.length ?? 0}
         loading={loading}
         locale={locale}
         onUpdate={update}
@@ -204,9 +199,9 @@ export function PalworldPalsPage({
         params={params}
       />
 
-      <div aria-busy={loading} className="palworld-pals-results" data-testid="palworld-pals-results">
+      <div aria-busy={loading || loadMoreLoading} className="palworld-pals-results" data-testid="palworld-pals-results">
         {loading && !error ? <PalworldLoading locale={locale} /> : null}
-        {error ? <PalworldError error={error} locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
+        {error ? <PalworldError error={error} locale={locale} onRetry={retryInitial} /> : null}
         {!loading && !error && response?.items.length === 0 && response.pagination.total === 0 ? (
           <PalworldEmpty locale={locale} title={text.palListEmpty} />
         ) : null}
@@ -220,7 +215,17 @@ export function PalworldPalsPage({
                 <PalCard key={pal.id} locale={locale} onOpen={(selected) => onOpenPal(selected.id)} pal={pal} priority={index < 4} />
               ))}
             </div>
-            <Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} />
+            <PalworldAutoLoadControl
+              error={loadMoreError}
+              hasMore={response.pagination.hasNextPage}
+              loadedCount={response.items.length}
+              loading={loadMoreLoading}
+              locale={locale}
+              onLoadMore={() => { void loadMore(); }}
+              onRetry={() => { void retryLoadMore(); }}
+              paused={Boolean(params.get("pal"))}
+              total={response.pagination.total}
+            />
           </>
         ) : null}
       </div>

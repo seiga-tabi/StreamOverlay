@@ -84,11 +84,19 @@ export type PalworldSpawnProvider = {
 };
 
 export class PalworldSpawnArtifactError extends Error {
-  readonly code = "PALWORLD_SPAWN_ARTIFACT_INVALID";
+  readonly code:
+    | "PALWORLD_SPAWN_ARTIFACT_INVALID"
+    | "PALWORLD_SPAWN_ARTIFACT_NOT_ACTIVE";
 
-  constructor(message: string) {
+  constructor(
+    message: string,
+    code:
+      | "PALWORLD_SPAWN_ARTIFACT_INVALID"
+      | "PALWORLD_SPAWN_ARTIFACT_NOT_ACTIVE" = "PALWORLD_SPAWN_ARTIFACT_INVALID"
+  ) {
     super(message);
     this.name = "PalworldSpawnArtifactError";
+    this.code = code;
   }
 }
 
@@ -214,10 +222,46 @@ function validateSource(value: unknown): PalworldSpawnArtifactSource {
   ] as const) {
     sha256At(source[field], `artifact.source.${field}`);
   }
-  for (const field of ["sourceGameVersion", "sourceSteamBuildId"] as const) {
-    if (source[field] !== null) {
-      stringAt(source[field], `artifact.source.${field}`, 128);
-    }
+  const sourceGameVersion = source.sourceGameVersion === null
+    ? null
+    : stringAt(
+        source.sourceGameVersion,
+        "artifact.source.sourceGameVersion",
+        128
+      );
+  const sourceSteamBuildId = source.sourceSteamBuildId === null
+    ? null
+    : stringAt(
+        source.sourceSteamBuildId,
+        "artifact.source.sourceSteamBuildId",
+        128
+      );
+  if (
+    (sourceGameVersion === null)
+    !== (sourceSteamBuildId === null)
+  ) {
+    fail(
+      "artifact.source",
+      "source gameVersion과 Steam build ID는 함께 설정하거나 함께 null이어야 합니다."
+    );
+  }
+  if (
+    sourceGameVersion !== null
+    && !RELEASE_PATTERN.test(sourceGameVersion)
+  ) {
+    fail(
+      "artifact.source.sourceGameVersion",
+      "semver 형식이어야 합니다."
+    );
+  }
+  if (
+    sourceSteamBuildId !== null
+    && !/^[1-9][0-9]{0,19}$/u.test(sourceSteamBuildId)
+  ) {
+    fail(
+      "artifact.source.sourceSteamBuildId",
+      "0으로 시작하지 않는 20자리 이하 숫자 Steam build ID여야 합니다."
+    );
   }
   if (source.compatibilityBasis !== "exact_active_paldex_join_and_map_geometry") {
     fail(
@@ -590,7 +634,10 @@ export function createPalworldSpawnProvider(input: {
 }): PalworldSpawnProvider {
   const artifact = assertPalworldSpawnArtifact(input.artifact);
   if (artifact.activation !== "active") {
-    fail("artifact.activation", "명시적으로 active인 artifact만 공개 API에 주입할 수 있습니다.");
+    throw new PalworldSpawnArtifactError(
+      "artifact.activation: 명시적으로 active인 artifact만 공개 API에 주입할 수 있습니다.",
+      "PALWORLD_SPAWN_ARTIFACT_NOT_ACTIVE"
+    );
   }
   const source = artifact.source;
   const worlds = new Map<

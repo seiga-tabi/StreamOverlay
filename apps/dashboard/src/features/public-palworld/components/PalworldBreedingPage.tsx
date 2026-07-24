@@ -26,6 +26,7 @@ import {
   type PalworldBreedingQueryState,
 } from "../utils/breeding";
 import { palworldUrl, setPalworldUrl } from "../utils/routes";
+import { PalworldInfiniteListError } from "../hooks/usePalworldInfiniteList";
 import { BreedingGenderControls, BreedingModeTabs } from "./PalworldBreedingControls";
 import {
   BreedingGenderAlternativeCard,
@@ -35,8 +36,8 @@ import {
   ReverseBreedingTargetSummary,
 } from "./PalworldBreedingResults";
 import { PalworldPalPicker } from "./PalworldPalPicker";
+import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
-import { Pagination } from "./Pagination";
 
 type PickerPal = PalworldPalReference | PalworldPalSummary;
 type RequestStatus = "idle" | "loading" | "success" | "empty" | "error" | "data_unavailable" | "requires_gender";
@@ -77,15 +78,21 @@ export function PalworldBreedingPage({
   const [copyFeedback, setCopyFeedback] = useState<CopyFeedback>(null);
   const [directRevision, setDirectRevision] = useState(0);
   const [reverseRevision, setReverseRevision] = useState(0);
+  const [reverseLoadMoreError, setReverseLoadMoreError] = useState<unknown>(null);
+  const [reverseLoadMoreLoading, setReverseLoadMoreLoading] = useState(false);
+  const paramsKeyRef = useRef(paramsKey);
   const directRequestIdRef = useRef(0);
   const reverseRequestIdRef = useRef(0);
   const referenceRequestIdRef = useRef(0);
+  const reverseLoadMoreControllerRef = useRef<AbortController | null>(null);
+  const reverseLoadMoreInFlightRef = useRef(false);
   const text = palworldI18n[locale];
+  paramsKeyRef.current = paramsKey;
 
   const navigate = useCallback((next: PalworldBreedingQueryState, replace = false) => {
-    const nextParams = palworldBreedingParams(new URLSearchParams(paramsKey), next);
+    const nextParams = palworldBreedingParams(new URLSearchParams(paramsKeyRef.current), next);
     setPalworldUrl(palworldUrl("breeding", nextParams), replace);
-  }, [paramsKey]);
+  }, []);
 
   useEffect(() => {
     if (!parsedQuery.ok) {
@@ -94,6 +101,10 @@ export function PalworldBreedingPage({
       setTarget(null);
       setDirect(IDLE_REQUEST);
       setReverse(IDLE_REQUEST);
+      reverseLoadMoreControllerRef.current?.abort();
+      reverseLoadMoreInFlightRef.current = false;
+      setReverseLoadMoreError(null);
+      setReverseLoadMoreLoading(false);
       setGenderExpanded(false);
       return;
     }
@@ -102,6 +113,10 @@ export function PalworldBreedingPage({
       setParentB((current) => current?.id === query.parentB ? current : null);
       setTarget(null);
       setReverse(IDLE_REQUEST);
+      reverseLoadMoreControllerRef.current?.abort();
+      reverseLoadMoreInFlightRef.current = false;
+      setReverseLoadMoreError(null);
+      setReverseLoadMoreLoading(false);
     } else {
       setTarget((current) => current?.id === query.child ? current : null);
       setParentA(null);
@@ -202,6 +217,11 @@ export function PalworldBreedingPage({
     }
     const controller = new AbortController();
     const requestId = ++reverseRequestIdRef.current;
+    reverseLoadMoreControllerRef.current?.abort();
+    reverseLoadMoreControllerRef.current = null;
+    reverseLoadMoreInFlightRef.current = false;
+    setReverseLoadMoreError(null);
+    setReverseLoadMoreLoading(false);
     setReverse({ status: "loading", data: null, error: null });
     void getPalworldBreedingParents(query.child, query.page, 12, controller.signal, query.type ?? "all")
       .then((response) => {
@@ -232,7 +252,10 @@ export function PalworldBreedingPage({
           error,
         });
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      reverseLoadMoreControllerRef.current?.abort();
+    };
   }, [navigate, parsedQuery.ok, query.child, query.mode, query.page, query.type, reverseRevision]);
 
   useEffect(() => {
@@ -305,6 +328,77 @@ export function PalworldBreedingPage({
       ...genders,
       page: 1,
     });
+  }
+
+  async function loadMoreReversePairs(): Promise<void> {
+    const current = reverse.data;
+    if (
+      reverse.status !== "success"
+      || !current
+      || !current.pagination.hasNextPage
+      || reverseLoadMoreInFlightRef.current
+      || query.mode !== "child"
+      || !query.child
+    ) {
+      return;
+    }
+
+    const requestedPage = current.pagination.page + 1;
+    const requestId = reverseRequestIdRef.current;
+    const controller = new AbortController();
+    reverseLoadMoreControllerRef.current?.abort();
+    reverseLoadMoreControllerRef.current = controller;
+    reverseLoadMoreInFlightRef.current = true;
+    setReverseLoadMoreError(null);
+    setReverseLoadMoreLoading(true);
+
+    try {
+      const nextResponse = await getPalworldBreedingParents(
+        query.child,
+        requestedPage,
+        12,
+        controller.signal,
+        query.type ?? "all",
+      );
+      if (controller.signal.aborted || reverseRequestIdRef.current !== requestId) return;
+      if (
+        nextResponse.state !== current.state
+        || nextResponse.child.id !== current.child.id
+        || nextResponse.pagination.page !== requestedPage
+        || nextResponse.pagination.total !== current.pagination.total
+        || nextResponse.pagination.pageSize !== current.pagination.pageSize
+        || nextResponse.metadata.gameVersion !== current.metadata.gameVersion
+        || nextResponse.metadata.sourceRevision !== current.metadata.sourceRevision
+      ) {
+        throw new PalworldInfiniteListError("교배 조합의 다음 페이지 기준이 기존 결과와 일치하지 않습니다.");
+      }
+      const knownIds = new Set(current.items.map((pair) => pair.id));
+      for (const pair of nextResponse.items) {
+        if (knownIds.has(pair.id)) {
+          throw new PalworldInfiniteListError("페이지 경계에서 중복된 교배 조합이 확인되었습니다.");
+        }
+        knownIds.add(pair.id);
+      }
+      setReverse({
+        status: "success",
+        data: {
+          ...current,
+          ...nextResponse,
+          items: [...current.items, ...nextResponse.items],
+          pagination: nextResponse.pagination,
+        },
+        error: null,
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      if (controller.signal.aborted || reverseRequestIdRef.current !== requestId) return;
+      setReverseLoadMoreError(error);
+    } finally {
+      if (reverseRequestIdRef.current === requestId && !controller.signal.aborted) {
+        reverseLoadMoreInFlightRef.current = false;
+        setReverseLoadMoreLoading(false);
+      }
+    }
   }
 
   async function copyCurrentLink(): Promise<void> {
@@ -441,12 +535,22 @@ export function PalworldBreedingPage({
           <div className="palworld-section-title"><h2>{text.childToParents}</h2></div>
           {!query.child ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.selectTarget} /> : null}
           {reverseLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={1} /></div> : null}
-          {query.child && target ? <ReverseBreedingTargetSummary child={target} locale={locale} onOpenPal={onOpenPal} pagination={reverse.data?.pagination} /> : null}
+          {query.child && target ? <ReverseBreedingTargetSummary child={target} loadedCount={reverse.data?.items.length} locale={locale} onOpenPal={onOpenPal} pagination={reverse.data?.pagination} /> : null}
           {reverse.status === "error" ? <PalworldError error={reverse.error} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} /> : null}
           {reverse.status === "data_unavailable" ? <PalworldError description={text.breedingDataUnavailableDescription} descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription} descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription} error={reverse.error} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} title={text.breedingDataUnavailable} titleJa={palworldI18n.ja.breedingDataUnavailable} titleKo={palworldI18n.ko.breedingDataUnavailable} /> : null}
           {reverse.status === "empty" ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.noParentPairs} /> : null}
           {reverse.status === "success" && reverse.data?.items.length ? <div className="palworld-parent-pair-list">{reverse.data.items.map((pair) => <ReverseBreedingPairCard pair={pair} locale={locale} onOpenPal={onOpenPal} onUsePair={usePairInCalculator} key={pair.id} />)}</div> : null}
-          {reverse.status === "success" && reverse.data ? <Pagination locale={locale} pagination={reverse.data.pagination} onPage={(page) => navigate({ mode: "child", child: query.child, type: query.type, page })} /> : null}
+          {reverse.status === "success" && reverse.data ? <PalworldAutoLoadControl
+            error={reverseLoadMoreError}
+            hasMore={reverse.data.pagination.hasNextPage}
+            loadedCount={reverse.data.items.length}
+            loading={reverseLoadMoreLoading}
+            locale={locale}
+            onLoadMore={() => { void loadMoreReversePairs(); }}
+            onRetry={() => { void loadMoreReversePairs(); }}
+            paused={Boolean(params.get("pal"))}
+            total={reverse.data.pagination.total}
+          /> : null}
         </section>
       </div>}
     </>}

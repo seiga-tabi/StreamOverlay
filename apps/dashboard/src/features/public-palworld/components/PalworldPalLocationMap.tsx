@@ -11,7 +11,15 @@ import { getPalworldMapMarkers, getPalworldPalSpawns } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { PALWORLD_WORLD_MAP_IMAGE } from "../utils/element-images";
 import { resolvePalworldName } from "../utils/localization";
+import {
+  filterPalworldBossMarkers,
+  palworldSpawnPointOpacity,
+  palworldSpawnPointRadius,
+  summarizePalworldSpawnPoints,
+} from "../utils/spawns";
 import { PalworldMedia } from "./PalworldMedia";
+
+export { filterPalworldBossMarkers } from "../utils/spawns";
 
 type LocationLayerState<T> =
   | { kind: "loading" }
@@ -19,13 +27,6 @@ type LocationLayerState<T> =
   | { kind: "confirmed_empty" }
   | { kind: "data_unavailable" }
   | { kind: "error" };
-
-export function filterPalworldBossMarkers(
-  markers: readonly PalworldMapMarker[],
-  palId: string,
-): PalworldMapMarker[] {
-  return markers.filter((marker) => marker.pal.id === palId);
-}
 
 function markerSummary(marker: PalworldMapMarker, locale: PalworldLocale): string {
   const name = resolvePalworldName(marker.pal, locale).text || marker.pal.nameEn;
@@ -46,6 +47,29 @@ function spawnSummary(
     .replace("{areas}", response.points.length.toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP"));
 }
 
+function spawnLevelSummary(
+  response: PalworldPalSpawnResponse,
+  locale: PalworldLocale,
+): string {
+  const summary = summarizePalworldSpawnPoints(response.points);
+  if (!summary) return "";
+  return palworldI18n[locale].palWildSpawnLevelRange
+    .replace("{minimum}", String(summary.minimumLevel))
+    .replace("{maximum}", String(summary.maximumLevel));
+}
+
+function spawnPeriods(
+  response: PalworldPalSpawnResponse,
+  locale: PalworldLocale,
+): string[] {
+  const summary = summarizePalworldSpawnPoints(response.points);
+  if (!summary) return [];
+  return [
+    ...(summary.daytime ? [palworldI18n[locale].palWildSpawnDay] : []),
+    ...(summary.nighttime ? [palworldI18n[locale].palWildSpawnNight] : []),
+  ];
+}
+
 function SpawnAreaLayer({ points }: { points: readonly PalworldPalSpawnPoint[] }) {
   return (
     <svg
@@ -60,10 +84,50 @@ function SpawnAreaLayer({ points }: { points: readonly PalworldPalSpawnPoint[] }
           cx={point.normalizedX}
           cy={point.normalizedY}
           key={point.id}
-          r={0.009}
+          opacity={palworldSpawnPointOpacity(point.placementCount)}
+          r={palworldSpawnPointRadius(point.placementCount)}
         />
       ))}
     </svg>
+  );
+}
+
+function LocationLayerNotice({
+  empty,
+  error,
+  kind,
+  loading,
+  onRetry,
+  retryLabel,
+  unavailable,
+}: {
+  empty: string;
+  error: string;
+  kind: LocationLayerState<unknown>["kind"];
+  loading: string;
+  onRetry: () => void;
+  retryLabel: string;
+  unavailable: string;
+}) {
+  if (kind === "ready") return null;
+  if (kind === "error") {
+    return (
+      <div className="palworld-pal-location-inline-error" role="alert">
+        <span>{error}</span>
+        <Button onClick={onRetry} size="sm" variant="secondary">
+          {retryLabel}
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <p
+      aria-busy={kind === "loading" ? "true" : undefined}
+      className="palworld-pal-location-inline-status"
+      role="status"
+    >
+      {kind === "loading" ? loading : kind === "confirmed_empty" ? empty : unavailable}
+    </p>
   );
 }
 
@@ -77,7 +141,8 @@ export function PalworldPalLocationMap({
   palId: string;
 }) {
   const text = palworldI18n[locale];
-  const [revision, setRevision] = useState(0);
+  const [bossRevision, setBossRevision] = useState(0);
+  const [spawnRevision, setSpawnRevision] = useState(0);
   const [imageRevision, setImageRevision] = useState(0);
   const [imageState, setImageState] = useState<"loading" | "ready" | "error">(
     PALWORLD_WORLD_MAP_IMAGE ? "loading" : "error",
@@ -92,8 +157,6 @@ export function PalworldPalLocationMap({
   useEffect(() => {
     const controller = new AbortController();
     setBossState({ kind: "loading" });
-    setSpawnState({ kind: "loading" });
-
     void getPalworldMapMarkers("main", controller.signal).then((response) => {
       if (controller.signal.aborted) return;
       if (response.state === "data_unavailable") {
@@ -109,6 +172,12 @@ export function PalworldPalLocationMap({
       if (!controller.signal.aborted) setBossState({ kind: "error" });
     });
 
+    return () => controller.abort();
+  }, [bossRevision, palId]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setSpawnState({ kind: "loading" });
     void getPalworldPalSpawns(palId, "main", controller.signal).then((response) => {
       if (controller.signal.aborted) return;
       if (response.state === "ready") setSpawnState({ kind: "ready", data: response });
@@ -119,16 +188,18 @@ export function PalworldPalLocationMap({
     });
 
     return () => controller.abort();
-  }, [palId, revision]);
+  }, [palId, spawnRevision]);
 
   const bossMarkers = bossState.kind === "ready" ? bossState.data : [];
   const spawnResponse = spawnState.kind === "ready" ? spawnState.data : undefined;
   const hasLocations = bossMarkers.length > 0 || spawnResponse !== undefined;
-  const isLoading = bossState.kind === "loading" || spawnState.kind === "loading";
-  const hasError = bossState.kind === "error" || spawnState.kind === "error";
-  const layersSettled = !isLoading;
+  const bothLoading = bossState.kind === "loading" && spawnState.kind === "loading";
   const bothEmpty = bossState.kind === "confirmed_empty"
     && spawnState.kind === "confirmed_empty";
+  const mapAspectRatio = PALWORLD_WORLD_MAP_IMAGE
+    ? `${PALWORLD_WORLD_MAP_IMAGE.width} / ${PALWORLD_WORLD_MAP_IMAGE.height}`
+    : "1 / 1";
+  const periods = spawnResponse ? spawnPeriods(spawnResponse, locale) : [];
 
   return (
     <section
@@ -152,7 +223,7 @@ export function PalworldPalLocationMap({
         </p>
       </div>
 
-      {!hasLocations && isLoading ? (
+      {!hasLocations && bothLoading ? (
         <div
           aria-busy="true"
           aria-label={text.palLocationLoading}
@@ -163,7 +234,7 @@ export function PalworldPalLocationMap({
         </div>
       ) : null}
 
-      {!hasLocations && layersSettled && bothEmpty ? (
+      {!hasLocations && !bothLoading && bothEmpty ? (
         <p
           className="palworld-pal-location-status"
           data-ja={palworldI18n.ja.palLocationEmpty}
@@ -174,40 +245,35 @@ export function PalworldPalLocationMap({
         </p>
       ) : null}
 
-      {!hasLocations && layersSettled && spawnState.kind === "data_unavailable" ? (
-        <p
-          className="palworld-pal-location-status"
-          data-ja={palworldI18n.ja.palLocationUnavailable}
-          data-ko={palworldI18n.ko.palLocationUnavailable}
-          role="status"
-        >
-          {text.palLocationUnavailable}
-        </p>
-      ) : null}
-
-      {!hasLocations && layersSettled && bossState.kind === "data_unavailable" ? (
-        <p
-          className="palworld-pal-location-status"
-          data-ja={palworldI18n.ja.palBossLocationUnavailable}
-          data-ko={palworldI18n.ko.palBossLocationUnavailable}
-          role="status"
-        >
-          {text.palBossLocationUnavailable}
-        </p>
-      ) : null}
-
-      {!hasLocations && layersSettled && hasError ? (
-        <div className="palworld-pal-location-error" role="alert">
-          <p>{spawnState.kind === "error" ? text.palLocationError : text.palBossLocationError}</p>
-          <Button onClick={() => setRevision((value) => value + 1)} size="sm" variant="secondary">
-            {text.retry}
-          </Button>
+      {!hasLocations && !bothLoading && !bothEmpty ? (
+        <div className="palworld-pal-location-layer-statuses">
+          <LocationLayerNotice
+            empty={text.palWildSpawnEmpty}
+            error={text.palLocationError}
+            kind={spawnState.kind}
+            loading={text.palWildSpawnLoading}
+            onRetry={() => setSpawnRevision((value) => value + 1)}
+            retryLabel={text.palWildSpawnRetry}
+            unavailable={text.palLocationUnavailable}
+          />
+          <LocationLayerNotice
+            empty={text.palBossLocationEmpty}
+            error={text.palBossLocationError}
+            kind={bossState.kind}
+            loading={text.mapBossLoading}
+            onRetry={() => setBossRevision((value) => value + 1)}
+            retryLabel={text.mapBossRetry}
+            unavailable={text.palBossLocationUnavailable}
+          />
         </div>
       ) : null}
 
       {hasLocations ? (
         <figure className="palworld-pal-location-figure">
-          <div className="palworld-pal-location-preview">
+          <div
+            className="palworld-pal-location-preview"
+            style={{ aspectRatio: mapAspectRatio }}
+          >
             {imageState === "loading" ? (
               <div
                 aria-busy="true"
@@ -287,7 +353,15 @@ export function PalworldPalLocationMap({
                     <span aria-hidden="true" className="palworld-pal-location-legend-dot" />
                     {text.palWildSpawnAreas}
                   </span>
-                  <span>{spawnSummary(spawnResponse, locale)}</span>
+                  <span className="palworld-pal-location-spawn-details">
+                    <span>{spawnSummary(spawnResponse, locale)}</span>
+                    <Badge size="sm" tone="info">
+                      {spawnLevelSummary(spawnResponse, locale)}
+                    </Badge>
+                    {periods.map((period) => (
+                      <Badge key={period} size="sm" tone="neutral">{period}</Badge>
+                    ))}
+                  </span>
                 </li>
               ) : null}
               {bossMarkers.map((marker) => (
@@ -297,39 +371,32 @@ export function PalworldPalLocationMap({
                 </li>
               ))}
             </ul>
-            {spawnState.kind === "error" ? (
-              <p className="palworld-pal-location-inline-error" role="alert">
-                {text.palLocationError}
-              </p>
-            ) : null}
-            {spawnState.kind === "data_unavailable" ? (
-              <p className="palworld-pal-location-inline-status" role="status">
-                {text.palLocationUnavailable}
-              </p>
-            ) : null}
-            {bossState.kind === "error" ? (
-              <p className="palworld-pal-location-inline-error" role="alert">
-                {text.palBossLocationError}
-              </p>
-            ) : null}
-            {bossState.kind === "data_unavailable" ? (
-              <p className="palworld-pal-location-inline-status" role="status">
-                {text.palBossLocationUnavailable}
-              </p>
-            ) : null}
-            <div className="palworld-pal-location-actions">
-              {hasError ? (
-                <Button onClick={() => setRevision((value) => value + 1)} size="sm" variant="secondary">
-                  {text.retry}
-                </Button>
-              ) : null}
-              <Button onClick={() => onOpenFullMap(palId)} size="sm" variant="secondary">
-                {text.viewOnFullMap}
-              </Button>
-            </div>
+            <LocationLayerNotice
+              empty={text.palWildSpawnEmpty}
+              error={text.palLocationError}
+              kind={spawnState.kind}
+              loading={text.palWildSpawnLoading}
+              onRetry={() => setSpawnRevision((value) => value + 1)}
+              retryLabel={text.palWildSpawnRetry}
+              unavailable={text.palLocationUnavailable}
+            />
+            <LocationLayerNotice
+              empty={text.palBossLocationEmpty}
+              error={text.palBossLocationError}
+              kind={bossState.kind}
+              loading={text.mapBossLoading}
+              onRetry={() => setBossRevision((value) => value + 1)}
+              retryLabel={text.mapBossRetry}
+              unavailable={text.palBossLocationUnavailable}
+            />
           </figcaption>
         </figure>
       ) : null}
+      <div className="palworld-pal-location-actions">
+        <Button onClick={() => onOpenFullMap(palId)} size="sm" variant="secondary">
+          {text.viewOnFullMap}
+        </Button>
+      </div>
     </section>
   );
 }

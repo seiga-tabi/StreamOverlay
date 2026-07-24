@@ -30,6 +30,12 @@ import { getPalworldMapMarkers, getPalworldPalSpawns } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { isLocalPalworldMapUrl, PALWORLD_WORLD_MAP_IMAGE } from "../utils/element-images";
 import { resolvePalworldName } from "../utils/localization";
+import {
+  filterPalworldBossMarkers,
+  palworldSpawnPointOpacity,
+  palworldSpawnPointRadius,
+  summarizePalworldSpawnPoints,
+} from "../utils/spawns";
 import { PalworldMedia } from "./PalworldMedia";
 
 export const PALWORLD_WORLD_MAP_IMAGE_URL = PALWORLD_WORLD_MAP_IMAGE?.imageUrl;
@@ -235,7 +241,8 @@ export function PalworldSpawnAreaLayer({
           cx={point.normalizedX}
           cy={point.normalizedY}
           key={point.id}
-          r={0.009 / zoom}
+          opacity={palworldSpawnPointOpacity(point.placementCount)}
+          r={palworldSpawnPointRadius(point.placementCount, zoom)}
         />
       ))}
     </svg>
@@ -246,7 +253,8 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const text = palworldI18n[locale];
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(PALWORLD_WORLD_MAP_IMAGE ? "loading" : "error");
   const [imageRevision, setImageRevision] = useState(0);
-  const [markerRevision, setMarkerRevision] = useState(0);
+  const [bossRevision, setBossRevision] = useState(0);
+  const [spawnRevision, setSpawnRevision] = useState(0);
   const [markerResponse, setMarkerResponse] = useState<PalworldMapMarkersResponse>();
   const [markerState, setMarkerState] = useState<PalworldMapMarkerRequestState>("loading");
   const [spawnResponse, setSpawnResponse] = useState<PalworldPalSpawnResponse>();
@@ -264,6 +272,28 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     "--palworld-map-translate-y": `${view.y}px`,
     "--palworld-map-zoom": view.zoom,
   } as CSSProperties;
+  const mapAspectRatio = PALWORLD_WORLD_MAP_IMAGE
+    ? `${PALWORLD_WORLD_MAP_IMAGE.width} / ${PALWORLD_WORLD_MAP_IMAGE.height}`
+    : "1 / 1";
+  const visibleBossMarkers = markerState === "ready" && markerResponse
+    ? focusPalId
+      ? filterPalworldBossMarkers(markerResponse.markers, focusPalId)
+      : markerResponse.markers
+    : [];
+  const spawnSummary = spawnState === "ready" && spawnResponse
+    ? summarizePalworldSpawnPoints(spawnResponse.points)
+    : undefined;
+  const localeTag = locale === "ko" ? "ko-KR" : "ja-JP";
+  const spawnMapSummary = spawnSummary
+    ? text.palWildSpawnMapSummary
+      .replace("{areas}", spawnSummary.areas.toLocaleString(localeTag))
+      .replace("{placements}", spawnSummary.placements.toLocaleString(localeTag))
+    : "";
+  const spawnLevelSummary = spawnSummary
+    ? text.palWildSpawnLevelRange
+      .replace("{minimum}", String(spawnSummary.minimumLevel))
+      .replace("{maximum}", String(spawnSummary.maximumLevel))
+    : "";
 
   const commitView = useCallback((nextView: PalworldMapViewState): void => {
     const viewport = viewportRef.current;
@@ -330,7 +360,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       }
     });
     return () => controller.abort();
-  }, [markerRevision]);
+  }, [bossRevision]);
 
   useEffect(() => {
     if (!focusPalId) {
@@ -349,7 +379,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       if (!controller.signal.aborted) setSpawnState("error");
     });
     return () => controller.abort();
-  }, [focusPalId, markerRevision]);
+  }, [focusPalId, spawnRevision]);
 
   useEffect(() => {
     if (!focusPalId) {
@@ -592,7 +622,11 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
 
       <Card as="section" className="palworld-map-card" padding="none" aria-labelledby="palworld-map-title">
         <div className="palworld-map-toolbar">
-          <div className="palworld-map-toolbar-info">
+          <div
+            aria-live="polite"
+            aria-relevant="text"
+            className="palworld-map-toolbar-info"
+          >
             <Badge tone="success" data-ko={palworldI18n.ko.mapFastTravel} data-ja={palworldI18n.ja.mapFastTravel}>{text.mapFastTravel}</Badge>
             {markerState === "loading" ? (
               <Badge
@@ -606,27 +640,25 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             ) : null}
             {markerState === "ready" && markerResponse ? (
               <Badge
-                data-ko={`${palworldI18n.ko.mapBossMarkers} ${markerResponse.markers.length}`}
-                data-ja={`${palworldI18n.ja.mapBossMarkers} ${markerResponse.markers.length}`}
+                data-ko={`${palworldI18n.ko.mapBossMarkers} ${visibleBossMarkers.length}`}
+                data-ja={`${palworldI18n.ja.mapBossMarkers} ${visibleBossMarkers.length}`}
                 tone="danger"
               >
-                {text.mapBossMarkers} {markerResponse.markers.length}
+                {text.mapBossMarkers} {visibleBossMarkers.length}
               </Badge>
             ) : null}
-            {spawnState === "ready" && spawnResponse ? (
+            {spawnState === "ready" && spawnSummary ? (
               <Badge tone="info">
-                {text.palWildSpawnAreas} {spawnResponse.totalPlacements.toLocaleString(
-                  locale === "ko" ? "ko-KR" : "ja-JP",
-                )}
+                {text.palWildSpawnAreas} · {spawnMapSummary}
               </Badge>
             ) : null}
             {spawnState === "loading" ? (
               <Badge role="status" tone="neutral">
-                {text.palLocationLoading}
+                {text.palWildSpawnLoading}
               </Badge>
             ) : null}
             {spawnState === "confirmed_empty" ? (
-              <Badge tone="neutral">{text.palLocationEmpty}</Badge>
+              <Badge tone="neutral">{text.palWildSpawnEmpty}</Badge>
             ) : null}
             {spawnState === "data_unavailable" ? (
               <Badge tone="neutral">{text.palLocationUnavailable}</Badge>
@@ -635,11 +667,11 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
               <span className="palworld-map-marker-error" role="alert">
                 <Badge tone="warning">{text.palLocationError}</Badge>
                 <Button
-                  onClick={() => setMarkerRevision((revision) => revision + 1)}
+                  onClick={() => setSpawnRevision((revision) => revision + 1)}
                   size="sm"
                   variant="ghost"
                 >
-                  {text.retry}
+                  {text.palWildSpawnRetry}
                 </Button>
               </span>
             ) : null}
@@ -664,7 +696,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                 <Button
                   data-ko={palworldI18n.ko.mapBossRetry}
                   data-ja={palworldI18n.ja.mapBossRetry}
-                  onClick={() => setMarkerRevision((revision) => revision + 1)}
+                  onClick={() => setBossRevision((revision) => revision + 1)}
                   size="sm"
                   variant="ghost"
                 >
@@ -705,6 +737,44 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             </Button>
           </div>
         </div>
+        {(focusPalId || visibleBossMarkers.length > 0) ? (
+          <div
+            aria-label={text.mapLayerLegend}
+            className="palworld-map-layer-legend"
+            role="group"
+          >
+            <strong>{text.mapLayerLegend}</strong>
+            <ul>
+              {focusPalId ? (
+                <li>
+                  <span aria-hidden="true" className="palworld-map-legend-spawn" />
+                  <span>
+                    <strong>{text.palWildSpawnAreas}</strong>
+                    {spawnSummary ? (
+                      <>
+                        <small>{spawnMapSummary} · {spawnLevelSummary}</small>
+                        <span className="palworld-map-legend-periods">
+                          {spawnSummary.daytime ? <Badge size="sm" tone="neutral">{text.palWildSpawnDay}</Badge> : null}
+                          {spawnSummary.nighttime ? <Badge size="sm" tone="neutral">{text.palWildSpawnNight}</Badge> : null}
+                        </span>
+                        <small>{text.palWildSpawnDensity}</small>
+                      </>
+                    ) : null}
+                  </span>
+                </li>
+              ) : null}
+              {markerState === "ready" ? (
+                <li>
+                  <span aria-hidden="true" className="palworld-map-legend-boss" />
+                  <span>
+                    <strong>{text.mapBossMarker}</strong>
+                    <small>{visibleBossMarkers.length}</small>
+                  </span>
+                </li>
+              ) : null}
+            </ul>
+          </div>
+        ) : null}
 
         <figure className="palworld-map-figure">
           <div
@@ -724,6 +794,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             onWheel={handleWheel}
             ref={viewportRef}
             role="region"
+            style={{ aspectRatio: mapAspectRatio }}
             tabIndex={0}
           >
             {loadState === "loading" ? (
@@ -765,12 +836,12 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     <PalworldSpawnAreaLayer points={spawnResponse.points} zoom={view.zoom} />
                   </div>
                 ) : null}
-                {loadState === "ready" && markerState === "ready" && markerResponse?.markers.length ? (
+                {loadState === "ready" && visibleBossMarkers.length ? (
                   <div className="palworld-map-marker-layer" data-testid="palworld-map-boss-markers">
                     <PalworldBossMarkerLayer
                       focusedPalId={focusPalId}
                       locale={locale}
-                      markers={markerResponse.markers}
+                      markers={visibleBossMarkers}
                       onOpenPal={onOpenPal}
                       zoom={view.zoom}
                     />

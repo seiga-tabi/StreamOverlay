@@ -39,6 +39,7 @@ import {
 import {
   PALWORLD_SPAWN_ARTIFACT_FILE,
   PALWORLD_SPAWN_MANIFEST_FILE,
+  createPalworldSpawnProvider,
   loadPalworldSpawnArtifact
 } from "../data/palworld-spawn-artifact.js";
 
@@ -345,13 +346,20 @@ async function validateLegacyRuntime(
   if (mainMapSpawns.targetMapAssetSha256 !== mainMapMarkers.targetMapAssetSha256) {
     throw new Error("일반 스폰과 보스 marker의 MainMap asset hash가 일치하지 않습니다.");
   }
+  for (const pal of mainMapSpawns.pals) {
+    if (runtimeRelease.sourceInternalIds[pal.palId] !== pal.sourceInternalId) {
+      throw new Error(
+        "일반 스폰 Pal ID와 sourceInternalId가 active Paldex exact join과 일치하지 않습니다."
+      );
+    }
+  }
 
   console.log(
     `[palworld-data] legacy runtime artifact smoke 완료: release ${layout.release}, `
     + `${release.artifact.records.length}종, Pal 이미지 ${activeImages.length}개, `
     + `아이템 ${catalog.catalog.items.length}개, 스킬 ${catalog.catalog.skills.length}개, `
     + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers.markers.length}개, `
-    + `일반 스폰 Pal ${mainMapSpawns.pals.length}종, `
+    + `일반 스폰 activation=${mapSpawns.activation} Pal ${mainMapSpawns.pals.length}종, `
     + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`
   );
 }
@@ -570,6 +578,11 @@ export async function smokePalworldRuntimeArtifacts(options: {
       layout.manifest.artifacts.some((artifact) => artifact.kind === "map-spawns")
     ) {
       const mapSpawns = await loadPalworldSpawnArtifact(layout.releaseRoot);
+      if (mapSpawns.activation !== "active") {
+        throw new Error(
+          "active manifest의 일반 스폰 artifact는 activation=active여야 합니다."
+        );
+      }
       const mainMapSpawns = mapSpawns.worlds.find((world) => world.world === "main");
       if (
         !mainMapSpawns
@@ -578,6 +591,16 @@ export async function smokePalworldRuntimeArtifacts(options: {
       ) {
         throw new Error("operator PAK MainMap 일반 스폰 runtime artifact가 비어 있습니다.");
       }
+      const { loadPalworldPakShadowRuntimeFromStagingRoot } = await import(
+        "../data/palworld-pak-shadow-runtime.js"
+      );
+      const shadowRuntime = await loadPalworldPakShadowRuntimeFromStagingRoot({
+        stagingRoot: layout.releaseRoot
+      });
+      createPalworldSpawnProvider({
+        artifact: mapSpawns,
+        palworldDataService: shadowRuntime.service
+      });
     }
     console.log(
       `[palworld-data] active manifest runtime smoke 완료: release ${layout.release}, `
