@@ -11,6 +11,7 @@ import {
   PALWORLD_SERVER_AVAILABILITY_ERROR_CODES,
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
+  PALWORLD_PAL_SPAWN_GRID_SIZE,
   formatRiotId,
   normalizeRiotIdKey,
   normalizeLolRole,
@@ -20,6 +21,7 @@ import {
   validatePalworldServerDashboardResponse,
   validatePalworldServerTestResponse,
   validatePalworldMapMarkersResponse,
+  validatePalworldPalSpawnResponse,
   validateBotAction,
   type BotAction,
   type CommunityPost,
@@ -45,6 +47,7 @@ import {
   type PalworldServerDashboardResponse,
   type PalworldServerTestResponse,
   type PalworldMapMarkersResponse,
+  type PalworldPalSpawnResponse,
   type DashboardServerStatus,
   type FollowerManagementResponse,
   type OverlayStatus,
@@ -136,11 +139,13 @@ import {
   parsePalworldId,
   parsePalworldItemListQuery,
   parsePalworldMapMarkersQuery,
+  parsePalworldPalSpawnQuery,
   parsePalworldPalListQuery,
   parsePalworldSkillListQuery,
   parsePalworldSearchQuery
 } from "../services/palworld-query.js";
 import type { PalworldMapMarkerProvider } from "../data/palworld-map-marker-artifact.js";
+import type { PalworldSpawnProvider } from "../data/palworld-spawn-artifact.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
@@ -1799,6 +1804,7 @@ type HttpHandlerInput = {
   overlayStatusForStreamer?: (twitchUserId: string) => OverlayStatus;
   palworldDataService?: PalworldDataService;
   palworldMapMarkerProvider?: PalworldMapMarkerProvider;
+  palworldSpawnProvider?: PalworldSpawnProvider;
   palworldServerMonitor?: PalworldServerMonitor;
   palworldServerUnavailableCode?: PalworldServerAvailabilityErrorCode;
 };
@@ -5571,6 +5577,28 @@ export function createHttpHandler(input: HttpHandlerInput) {
           const validation = validatePalworldMapMarkersResponse(candidate);
           if (!validation.ok) {
             throw new TypeError(`Palworld 지도 marker 응답 검증에 실패했습니다. ${validation.error}`);
+          }
+          return sendJson(req, res, 200, validation.data, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/map/spawns") {
+          const query = parsePalworldPalSpawnQuery(url.searchParams);
+          const canonicalPalId = palworldData.getPal(query.pal).id;
+          const candidate: PalworldPalSpawnResponse = input.palworldSpawnProvider?.response(
+            query.world,
+            canonicalPalId,
+            activeMeta.metadata
+          ) ?? {
+            state: "data_unavailable",
+            world: query.world,
+            palId: canonicalPalId,
+            gridSize: PALWORLD_PAL_SPAWN_GRID_SIZE,
+            totalPlacements: 0,
+            points: [],
+            metadata: activeMeta.metadata
+          };
+          const validation = validatePalworldPalSpawnResponse(candidate);
+          if (!validation.ok) {
+            throw new TypeError(`Palworld 일반 스폰 응답 검증에 실패했습니다. ${validation.error}`);
           }
           return sendJson(req, res, 200, validation.data, cacheHeaders);
         }

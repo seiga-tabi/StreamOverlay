@@ -1,4 +1,5 @@
 export const PALWORLD_ROUTE_EVENT = "palworldroutechange";
+const PALWORLD_PUBLIC_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/u;
 
 export type PalworldPage = "home" | "streamers" | "pals" | "breeding" | "items" | "skills" | "map" | "search";
 
@@ -40,6 +41,12 @@ export function palworldPathForPage(page: PalworldPage): string {
 export function palworldUrl(page: PalworldPage, params?: URLSearchParams): string {
   const query = params?.toString();
   return `${palworldPathForPage(page)}${query ? `?${query}` : ""}`;
+}
+
+export function palworldFocusPalFromParams(params: URLSearchParams): string | undefined {
+  const values = params.getAll("focusPal");
+  const value = values.length === 1 ? values[0] : undefined;
+  return value !== undefined && PALWORLD_PUBLIC_ID_PATTERN.test(value) ? value : undefined;
 }
 
 export function palworldTwitchReturnTo(pathname: string, search = ""): string {

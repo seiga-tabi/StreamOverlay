@@ -8,6 +8,7 @@ import type {
   PalworldMetaResponse,
   PalworldPaginatedResponse,
   PalworldPalDetail,
+  PalworldPalSpawnResponse,
   PalworldPalSummary,
   PalworldSearchResult,
   PalworldSkillDetail,
@@ -23,6 +24,7 @@ import {
   validatePalworldMetaResponse,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
+  validatePalworldPalSpawnResponse,
   validatePalworldPalSummary,
   validatePalworldSearchResult,
   validatePalworldSkillDetail,
@@ -205,6 +207,19 @@ export function getPalworldMapMarkers(
     queryPath("/api/palworld/map/markers", params),
     signal,
     validatePalworldMapMarkersResponse,
+  );
+}
+
+export function getPalworldPalSpawns(
+  palId: string,
+  world: "main" | "tree" = "main",
+  signal?: AbortSignal,
+): Promise<PalworldPalSpawnResponse> {
+  const params = new URLSearchParams({ pal: palId, world });
+  return publicGet(
+    queryPath("/api/palworld/map/spawns", params),
+    signal,
+    validatePalworldPalSpawnResponse,
   );
 }
 

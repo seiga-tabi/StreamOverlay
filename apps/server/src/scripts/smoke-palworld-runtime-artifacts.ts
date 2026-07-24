@@ -36,6 +36,11 @@ import {
   PALWORLD_MAP_MARKER_MANIFEST_FILE,
   loadPalworldMapMarkerArtifact
 } from "../data/palworld-map-marker-artifact.js";
+import {
+  PALWORLD_SPAWN_ARTIFACT_FILE,
+  PALWORLD_SPAWN_MANIFEST_FILE,
+  loadPalworldSpawnArtifact
+} from "../data/palworld-spawn-artifact.js";
 
 const REQUIRED_LEGACY_RELEASE_FILES = [
   "sources.lock.json",
@@ -52,7 +57,9 @@ const REQUIRED_LEGACY_RELEASE_FILES = [
   "breeding-manifest.json",
   "breeding-import-report.json",
   PALWORLD_MAP_MARKER_ARTIFACT_FILE,
-  PALWORLD_MAP_MARKER_MANIFEST_FILE
+  PALWORLD_MAP_MARKER_MANIFEST_FILE,
+  PALWORLD_SPAWN_ARTIFACT_FILE,
+  PALWORLD_SPAWN_MANIFEST_FILE
 ] as const;
 
 const REQUIRED_TRANSLATION_RUNTIME_FILES = [
@@ -326,12 +333,25 @@ async function validateLegacyRuntime(
   ) {
     throw new Error("Palworld MainMap marker가 참조하는 정적 WebP hash가 일치하지 않습니다.");
   }
+  const mapSpawns = await loadPalworldSpawnArtifact(releaseRoot);
+  const mainMapSpawns = mapSpawns.worlds.find((world) => world.world === "main");
+  if (
+    !mainMapSpawns
+    || mainMapSpawns.pals.length < 1
+    || mainMapSpawns.pals.every((pal) => pal.points.length === 0)
+  ) {
+    throw new Error("MainMap 일반 스폰 runtime artifact가 비어 있습니다.");
+  }
+  if (mainMapSpawns.targetMapAssetSha256 !== mainMapMarkers.targetMapAssetSha256) {
+    throw new Error("일반 스폰과 보스 marker의 MainMap asset hash가 일치하지 않습니다.");
+  }
 
   console.log(
     `[palworld-data] legacy runtime artifact smoke 완료: release ${layout.release}, `
     + `${release.artifact.records.length}종, Pal 이미지 ${activeImages.length}개, `
     + `아이템 ${catalog.catalog.items.length}개, 스킬 ${catalog.catalog.skills.length}개, `
     + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers.markers.length}개, `
+    + `일반 스폰 Pal ${mainMapSpawns.pals.length}종, `
     + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`
   );
 }
@@ -546,6 +566,19 @@ export async function smokePalworldRuntimeArtifacts(options: {
     await assertRuntimeDirectory(mappingRoot, "Palworld runtime mapping root");
     await assertExactRuntimeFiles(mappingRoot, [], "Palworld runtime mapping root");
     await assertPakRuntimeStaticAssets(repositoryRoot, "dist", layout);
+    if (
+      layout.manifest.artifacts.some((artifact) => artifact.kind === "map-spawns")
+    ) {
+      const mapSpawns = await loadPalworldSpawnArtifact(layout.releaseRoot);
+      const mainMapSpawns = mapSpawns.worlds.find((world) => world.world === "main");
+      if (
+        !mainMapSpawns
+        || mainMapSpawns.pals.length < 1
+        || mainMapSpawns.pals.every((pal) => pal.points.length === 0)
+      ) {
+        throw new Error("operator PAK MainMap 일반 스폰 runtime artifact가 비어 있습니다.");
+      }
+    }
     console.log(
       `[palworld-data] active manifest runtime smoke 완료: release ${layout.release}, `
       + `artifact ${layout.manifest.artifacts.length}개`

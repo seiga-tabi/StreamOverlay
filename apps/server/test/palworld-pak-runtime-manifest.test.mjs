@@ -13,6 +13,11 @@ const {
   deterministicPalworldPakRuntimeManifestJson,
   validatePalworldPakCandidateStagingRoot
 } = await import("../dist/data/palworld-pak-runtime-manifest.js");
+const {
+  PALWORLD_SPAWN_ARTIFACT_FILE,
+  PALWORLD_SPAWN_MANIFEST_FILE,
+  loadPalworldSpawnArtifact
+} = await import("../dist/data/palworld-spawn-artifact.js");
 
 const SHA_A = "a".repeat(64);
 const SHA_B = "b".repeat(64);
@@ -208,6 +213,18 @@ test("PAK runtime manifest는 coverage·activation·artifact allowlist 불변식
     () => assertPalworldPakRuntimeManifest(duplicateKind),
     /artifact kind가 중복/u
   );
+
+  const missingSpawnManifest = structuredClone(baseManifest());
+  missingSpawnManifest.artifacts.push({
+    kind: "map-spawns",
+    file: PALWORLD_SPAWN_ARTIFACT_FILE,
+    sha256: SHA_C,
+    bytes: 2
+  });
+  assert.throws(
+    () => assertPalworldPakRuntimeManifest(missingSpawnManifest),
+    /map-spawns와 map-spawns-manifest artifact는 항상 함께/u
+  );
 });
 
 test("PAK runtime manifest 직렬화는 입력 key와 artifact 순서와 무관하게 결정적이다", () => {
@@ -339,6 +356,64 @@ function runtimeArtifact(kind) {
       ...common,
       status: "blocked",
       variants: []
+    };
+  }
+  if (kind === "map-spawns") {
+    return {
+      schemaVersion: 1,
+      targetGameVersion: "2.0.0",
+      activation: "candidate",
+      source: {
+        sourceType: "operator_pak_export",
+        archiveSha256: SHA_A,
+        placementTableMember: "Pal/DataTable/Spawner/DT_PalSpawnerPlacement.json",
+        placementTableSha256: SHA_B,
+        wildSpawnerTableMember: "Pal/DataTable/Spawner/DT_PalWildSpawner.json",
+        wildSpawnerTableSha256: SHA_C,
+        palTableMember: "Pal/DataTable/Character/DT_PalMonsterParameter_Common.json",
+        palTableSha256: SHA_B,
+        sourceGameVersion: "2.0.0",
+        sourceSteamBuildId: "30000000",
+        compatibilityBasis: "exact_active_paldex_join_and_map_geometry",
+        rightsVerified: false,
+        usageBasis: "operator_reference_use"
+      },
+      gridSize: 32,
+      worlds: [{
+        world: "main",
+        targetMapAssetSha256: SHA_C,
+        transform: {
+          status: "verified",
+          revision: "main-map-transform-v1",
+          horizontalAxis: "world_y",
+          verticalAxis: "world_x",
+          invertHorizontal: false,
+          invertVertical: true,
+          sourceBounds: {
+            minX: -1,
+            maxX: 1,
+            minY: -1,
+            maxY: 1
+          }
+        },
+        pals: [{
+          palId: "anubis",
+          sourceInternalId: "Anubis",
+          totalPlacements: 1,
+          points: [{
+            id: "main-anubis-16-16",
+            cellX: 16,
+            cellY: 16,
+            normalizedX: 0.515625,
+            normalizedY: 0.515625,
+            placementCount: 1,
+            minimumLevel: 1,
+            maximumLevel: 1,
+            daytime: true,
+            nighttime: true
+          }]
+        }]
+      }]
     };
   }
   if (kind === "import-report") {
@@ -587,6 +662,87 @@ test("candidate staging root는 지원되는 모든 artifact kind를 전용 vali
     } finally {
       await rm(fixture.root, { recursive: true, force: true });
     }
+  }
+});
+
+test("operator PAK 일반 스폰은 artifact와 sidecar manifest를 함께 검증하고 runtime loader로 읽는다", async () => {
+  const fixture = await createValidStagingRoot();
+  try {
+    const spawnBytes = artifactBytes("map-spawns");
+    const spawnManifestBytes = Buffer.from(`${JSON.stringify({
+      schemaVersion: 1,
+      targetGameVersion: "2.0.0",
+      artifactFile: PALWORLD_SPAWN_ARTIFACT_FILE,
+      artifactSha256: createHash("sha256").update(spawnBytes).digest("hex")
+    })}\n`);
+    const files = new Map(fixture.files);
+    files.set(PALWORLD_SPAWN_ARTIFACT_FILE, spawnBytes);
+    files.set(PALWORLD_SPAWN_MANIFEST_FILE, spawnManifestBytes);
+    const manifestInput = baseManifest();
+    manifestInput.artifacts.push(
+      {
+        kind: "map-spawns",
+        file: PALWORLD_SPAWN_ARTIFACT_FILE,
+        sha256: SHA_B,
+        bytes: 2
+      },
+      {
+        kind: "map-spawns-manifest",
+        file: PALWORLD_SPAWN_MANIFEST_FILE,
+        sha256: SHA_C,
+        bytes: 2
+      }
+    );
+    const manifest = withArtifactChecksums(manifestInput, files);
+    await Promise.all([
+      writeFile(path.join(fixture.root, PALWORLD_SPAWN_ARTIFACT_FILE), spawnBytes),
+      writeFile(path.join(fixture.root, PALWORLD_SPAWN_MANIFEST_FILE), spawnManifestBytes)
+    ]);
+    await writeFile(
+      path.join(fixture.root, PALWORLD_PAK_RUNTIME_MANIFEST_FILE),
+      deterministicPalworldPakRuntimeManifestJson(manifest)
+    );
+
+    const result = await validatePalworldPakCandidateStagingRoot({
+      stagingRoot: fixture.root
+    });
+    assert.equal(
+      result.verifiedArtifacts.some((artifact) => artifact.kind === "map-spawns"),
+      true
+    );
+    assert.equal(
+      result.verifiedArtifacts.some(
+        (artifact) => artifact.kind === "map-spawns-manifest"
+      ),
+      true
+    );
+    assert.equal(
+      (await loadPalworldSpawnArtifact(fixture.root)).worlds[0].pals[0].palId,
+      "anubis"
+    );
+
+    const tamperedSidecarBytes = Buffer.from(`${JSON.stringify({
+      schemaVersion: 1,
+      targetGameVersion: "2.0.0",
+      artifactFile: PALWORLD_SPAWN_ARTIFACT_FILE,
+      artifactSha256: SHA_B
+    })}\n`);
+    files.set(PALWORLD_SPAWN_MANIFEST_FILE, tamperedSidecarBytes);
+    const tamperedManifest = withArtifactChecksums(manifestInput, files);
+    await writeFile(
+      path.join(fixture.root, PALWORLD_SPAWN_MANIFEST_FILE),
+      tamperedSidecarBytes
+    );
+    await writeFile(
+      path.join(fixture.root, PALWORLD_PAK_RUNTIME_MANIFEST_FILE),
+      deterministicPalworldPakRuntimeManifestJson(tamperedManifest)
+    );
+    await assert.rejects(
+      validatePalworldPakCandidateStagingRoot({ stagingRoot: fixture.root }),
+      /map-spawns checksum과 일치/u
+    );
+  } finally {
+    await rm(fixture.root, { recursive: true, force: true });
   }
 });
 

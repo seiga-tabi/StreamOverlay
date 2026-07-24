@@ -704,6 +704,19 @@
   pointer-events: auto;
 }
 
+.palworld-map-spawn-layer {
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.palworld-map-spawn-point {
+  fill: var(--yoro-color-info);
+  stroke: var(--yoro-color-text-on-dark);
+  stroke-width: 0.0025;
+  opacity: 0.82;
+}
+
 .palworld-map-boss-marker {
   position: absolute;
   z-index: var(--yoro-z-raised);
@@ -1516,9 +1529,9 @@
 .palworld-pal-location-loading,
 .palworld-pal-location-preview {
   position: relative;
-  inline-size: min(100%, 32rem);
+  inline-size: 100%;
+  min-inline-size: 0;
   aspect-ratio: 1;
-  margin-inline: auto;
   overflow: hidden;
   border: thin solid var(--yoro-color-border);
   border-radius: var(--yoro-radius-xl);
@@ -1559,6 +1572,22 @@
   pointer-events: none;
 }
 
+.palworld-pal-location-spawn-layer {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.palworld-pal-location-spawn-point {
+  fill: var(--yoro-color-info);
+  stroke: var(--yoro-color-text-on-dark);
+  stroke-width: 0.0025;
+  opacity: 0.82;
+}
+
 .palworld-pal-location-marker {
   position: absolute;
   display: grid;
@@ -1586,8 +1615,7 @@
 }
 
 .palworld-pal-location-caption {
-  inline-size: min(100%, 32rem);
-  margin-inline: auto;
+  inline-size: 100%;
 }
 
 .palworld-pal-location-caption ul {
@@ -1610,13 +1638,46 @@
   background: var(--yoro-color-surface-muted);
 }
 
+.palworld-pal-location-spawn-summary {
+  flex-wrap: wrap;
+}
+
 .palworld-pal-location-caption li > span:first-child {
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }
 
-.palworld-pal-location-caption > .yoro-button {
-  justify-self: start;
+.palworld-pal-location-legend,
+.palworld-pal-location-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-pal-location-legend-dot {
+  inline-size: var(--yoro-space-3);
+  block-size: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-text-on-dark);
+  border-radius: 50%;
+  background: var(--yoro-color-info);
+}
+
+.palworld-pal-location-inline-status,
+.palworld-pal-location-inline-error {
+  margin: 0;
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-pal-location-inline-error {
+  color: var(--yoro-color-danger);
+}
+
+.palworld-pal-location-actions {
+  justify-content: flex-start;
 }
 
 .palworld-pal-location-status,
@@ -1633,6 +1694,17 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--yoro-space-3);
+}
+
+@media (max-width: 32rem) {
+  .palworld-pal-location-caption li {
+    align-items: flex-start;
+  }
+
+  .palworld-pal-location-actions,
+  .palworld-pal-location-actions > .yoro-button {
+    inline-size: 100%;
+  }
 }
 
 .palworld-detail h3,

@@ -51,6 +51,7 @@ const SEARCH_QUERY_KEYS = new Set(["q", "limit"]);
 const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB", "parentAGender", "parentBGender"]);
 const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "page", "limit"]);
 const MAP_MARKERS_QUERY_KEYS = new Set(["world"]);
+const PAL_SPAWN_QUERY_KEYS = new Set(["world", "pal"]);
 
 export const PALWORLD_WORK_TYPES = PALWORLD_WORK_SUITABILITY_TYPES;
 export const PALWORLD_PAL_SORTS = ["number", "name", "rarity"] as const;
@@ -122,6 +123,11 @@ export type PalworldBreedingParentsQuery = {
 
 export type PalworldMapMarkersQuery = {
   world: PalworldMapWorld;
+};
+
+export type PalworldPalSpawnQuery = {
+  world: PalworldMapWorld;
+  pal: string;
 };
 
 export class PalworldQueryError extends Error {
@@ -295,5 +301,13 @@ export function parsePalworldMapMarkersQuery(params: URLSearchParams): PalworldM
   assertKnownKeys(params, MAP_MARKERS_QUERY_KEYS);
   return {
     world: optionalEnum(params, "world", PALWORLD_MAP_WORLDS) ?? "main"
+  };
+}
+
+export function parsePalworldPalSpawnQuery(params: URLSearchParams): PalworldPalSpawnQuery {
+  assertKnownKeys(params, PAL_SPAWN_QUERY_KEYS);
+  return {
+    world: optionalEnum(params, "world", PALWORLD_MAP_WORLDS) ?? "main",
+    pal: requiredId(params, "pal")
   };
 }

@@ -16,6 +16,7 @@ import {
   getPalworldItems,
   getPalworldMapMarkers,
   getPalworldMeta,
+  getPalworldPalSpawns,
   getPalworldSkill,
   getPalworldSkills,
   PalworldApiError,
@@ -24,7 +25,7 @@ import {
 } from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
 import { clearPalworldBreedingParams, palworldBreedingParams, parsePalworldBreedingQuery, swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
-import { isKnownPalworldPagePath, isPalworldPath, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
+import { isKnownPalworldPagePath, isPalworldPath, palworldFocusPalFromParams, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
 import {
   acquisitionLabel,
   categoryLabel,
@@ -77,11 +78,21 @@ test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(palworldPathForPage("map"), "/palworld/map");
   assert.equal(palworldPathForPage("skills"), "/palworld/skills");
   assert.equal(palworldUrl("search", new URLSearchParams({ q: "아누비스" })), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
+  assert.equal(palworldUrl("map", new URLSearchParams({ focusPal: "anubis" })), "/palworld/map?focusPal=anubis");
   assert.equal(isPalworldPath("/palworld/items"), true);
   assert.equal(isPalworldPath("/lol/summoners/jp/test-JP1"), false);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding"), true);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding/"), true);
   assert.equal(isKnownPalworldPagePath("/palworld/not-a-page"), false);
+});
+
+test("지도 focusPal query는 단일 canonical Pal ID만 허용한다", () => {
+  assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: "anubis" })), "anubis");
+  assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: "faleris-aqua" })), "faleris-aqua");
+  assert.equal(palworldFocusPalFromParams(new URLSearchParams("focusPal=anubis&focusPal=anubis")), undefined);
+  assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: " Anubis " })), undefined);
+  assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: "../anubis" })), undefined);
+  assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: "a".repeat(81) })), undefined);
 });
 
 test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query만 보존한다", () => {
@@ -161,6 +172,79 @@ test("Palworld 지도 marker API는 main world를 요청하고 Shared validator�
     assert.equal(response.state, "ready");
     assert.equal(response.markers[0]?.pal.nameKo, "아누비스");
     assert.match(requested[0] ?? "", /\/api\/palworld\/map\/markers\?world=main$/u);
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
+});
+
+test("Palworld 일반 스폰 API는 canonical Pal ID와 main world를 함께 요청한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  const requested: string[] = [];
+  const metadata = {
+    gameVersion: "1.0.1",
+    sourceName: "고정 Palworld release",
+    sourceUrl: "https://example.com/palworld-source",
+    sourceRevision: "fixed-revision",
+    extractedAt: "2026-07-20T00:00:00.000Z",
+    verifiedAt: "2026-07-21T00:00:00.000Z",
+    license: "RIGHTS_NOT_INDEPENDENTLY_VERIFIED",
+    rightsVerified: false,
+  };
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: () => true,
+    } as unknown as Window,
+    fetch: async (url: string | URL | Request) => {
+      requested.push(String(url));
+      return new Response(JSON.stringify({
+        state: "ready",
+        world: "main",
+        palId: "anubis",
+        gridSize: 32,
+        totalPlacements: 3,
+        points: [{
+          id: "anubis-08-12",
+          cellX: 8,
+          cellY: 12,
+          normalizedX: 0.265625,
+          normalizedY: 0.390625,
+          placementCount: 3,
+          minimumLevel: 20,
+          maximumLevel: 24,
+          daytime: true,
+          nighttime: true,
+        }],
+        metadata,
+        overlay: {
+          schemaVersion: 1,
+          technicalStatus: "ready",
+          sourceType: "operator_pak_export",
+          archiveSha256: "a".repeat(64),
+          sourceMember: "Pal/DataTable/Spawner/DT_PalSpawnerPlacement.json",
+          sourceMemberSha256: "b".repeat(64),
+          targetMapAssetSha256: "c".repeat(64),
+          sourceGameVersion: null,
+          sourceSteamBuildId: null,
+          targetGameVersion: "1.0.1",
+          compatibilityBasis: "exact_active_paldex_join_and_map_geometry",
+          transformRevision: "main-map-transform-v1",
+          rightsVerified: false,
+          usageBasis: "operator_reference_use",
+        },
+      }), { status: 200 });
+    },
+  });
+
+  try {
+    const response = await getPalworldPalSpawns("anubis", "main");
+    assert.equal(response.state, "ready");
+    assert.equal(response.totalPlacements, 3);
+    assert.match(
+      requested[0] ?? "",
+      /\/api\/palworld\/map\/spawns\?pal=anubis&world=main$/u,
+    );
   } finally {
     Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
   }

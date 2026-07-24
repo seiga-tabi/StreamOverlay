@@ -13,6 +13,13 @@ import {
 import {
   deterministicPalworldPakSnapshotJson
 } from "./palworld-pak-snapshot-adapter.js";
+import {
+  PALWORLD_SPAWN_ARTIFACT_FILE,
+  PALWORLD_SPAWN_MANIFEST_FILE,
+  assertPalworldSpawnArtifact,
+  assertPalworldSpawnArtifactManifest,
+  loadPalworldSpawnArtifact
+} from "./palworld-spawn-artifact.js";
 
 export const PALWORLD_PAK_RUNTIME_MANIFEST_FILE = "runtime-manifest.json";
 export const PALWORLD_PAK_BLOCKED_CANDIDATE_MANIFEST_FILE =
@@ -58,6 +65,8 @@ export const PALWORLD_PAK_RUNTIME_ARTIFACT_KINDS = [
   "skill-images-manifest",
   "assets-manifest",
   "map-manifest",
+  "map-spawns",
+  "map-spawns-manifest",
   "source-lock",
   "import-report"
 ] as const;
@@ -369,6 +378,12 @@ function assertActivationArtifacts(
   artifacts: PalworldPakRuntimeManifest["artifacts"]
 ): void {
   const kinds = new Set(artifacts.map((artifact) => artifact.kind));
+  if (kinds.has("map-spawns") !== kinds.has("map-spawns-manifest")) {
+    fail(
+      "manifest.artifacts",
+      "map-spawns와 map-spawns-manifest artifact는 항상 함께 포함되어야 합니다."
+    );
+  }
   for (const domain of PALWORLD_PAK_RUNTIME_DOMAINS) {
     const state = activation[domain];
     if (state === "ready") {
@@ -640,6 +655,68 @@ function assertArtifactByKind(
       || snapshot.breedingPairs.length !== manifest.counts.breedingResults
     ) {
       fail("artifact.snapshot", "runtime manifest domain count와 일치해야 합니다.");
+    }
+    return;
+  }
+  if (artifact.kind === "map-spawns") {
+    try {
+      if (artifact.file !== PALWORLD_SPAWN_ARTIFACT_FILE) {
+        fail(
+          "artifact.map-spawns.file",
+          `${PALWORLD_SPAWN_ARTIFACT_FILE}이어야 합니다.`
+        );
+      }
+      const spawnArtifact = assertPalworldSpawnArtifact(value);
+      if (
+        spawnArtifact.targetGameVersion !== manifest.gameVersion
+        || spawnArtifact.source.archiveSha256 !== manifest.source.archiveSha256
+        || spawnArtifact.source.sourceGameVersion !== manifest.gameVersion
+        || spawnArtifact.source.sourceSteamBuildId !== manifest.steamBuildId
+      ) {
+        fail(
+          "artifact.map-spawns",
+          "runtime manifest의 gameVersion·Steam build ID·archive checksum과 일치해야 합니다."
+        );
+      }
+      if (
+        manifest.activation.map === "ready"
+        && spawnArtifact.activation !== "active"
+      ) {
+        fail(
+          "artifact.map-spawns.activation",
+          "ready map runtime에서는 active여야 합니다."
+        );
+      }
+    } catch (error) {
+      if (error instanceof PalworldPakRuntimeManifestError) throw error;
+      const message = error instanceof Error
+        ? error.message
+        : "일반 스폰 artifact schema 검증에 실패했습니다.";
+      fail("artifact.map-spawns", message);
+    }
+    return;
+  }
+  if (artifact.kind === "map-spawns-manifest") {
+    try {
+      if (artifact.file !== PALWORLD_SPAWN_MANIFEST_FILE) {
+        fail(
+          "artifact.map-spawns-manifest.file",
+          `${PALWORLD_SPAWN_MANIFEST_FILE}이어야 합니다.`
+        );
+      }
+      const spawnManifest = assertPalworldSpawnArtifactManifest(value);
+      if (spawnManifest.targetGameVersion !== manifest.gameVersion) {
+        fail(
+          "artifact.map-spawns-manifest.targetGameVersion",
+          "runtime manifest gameVersion과 일치해야 합니다."
+        );
+      }
+    } catch (error) {
+      if (error instanceof PalworldPakRuntimeManifestError) throw error;
+      const message = error instanceof Error
+        ? error.message
+        : "일반 스폰 manifest schema 검증에 실패했습니다.";
+      fail("artifact.map-spawns-manifest", message);
     }
     return;
   }
@@ -1026,6 +1103,27 @@ export async function validatePalworldPakCandidateStagingRoot(input: {
     }
     artifactValues.set(artifact.kind, artifactJson);
     verifiedArtifacts.push({ ...artifact });
+  }
+  const spawnArtifact = manifest.artifacts.find(
+    (artifact) => artifact.kind === "map-spawns"
+  );
+  const spawnManifestValue = artifactValues.get("map-spawns-manifest");
+  if (spawnArtifact !== undefined && spawnManifestValue !== undefined) {
+    const spawnManifest = assertPalworldSpawnArtifactManifest(spawnManifestValue);
+    if (spawnManifest.artifactSha256 !== spawnArtifact.sha256) {
+      fail(
+        "artifact.map-spawns-manifest.artifactSha256",
+        "runtime manifest의 map-spawns checksum과 일치해야 합니다."
+      );
+    }
+    try {
+      await loadPalworldSpawnArtifact(stagingRoot);
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "일반 스폰 runtime loader 검증에 실패했습니다.";
+      fail("artifact.map-spawns", message);
+    }
   }
   const snapshotArtifact = artifactValues.get("snapshot");
   const sourceLockArtifact = artifactValues.get("source-lock");

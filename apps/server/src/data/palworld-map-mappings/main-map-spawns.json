@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "1.0.1",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "palTable": {
+    "member": "Pal/DataTable/Character/DT_PalMonsterParameter_Common.json",
+    "sha256": "cc1c3b63078489a8570b6eea435aec7a1cdbe6428cac1330080d10727460433c"
+  },
+  "placementTable": {
+    "member": "Pal/DataTable/Spawner/DT_PalSpawnerPlacement.json",
+    "sha256": "73b9e111491c9ee060e539594e162032a2585f8594ad47b9dd2169db49d38be4"
+  },
+  "wildSpawnerTable": {
+    "member": "Pal/DataTable/Spawner/DT_PalWildSpawner.json",
+    "sha256": "4bac2dfd1177d5b668677826527636adb1f2cc6dd9861adda7579bd07cb48978"
+  },
+  "targetMapAsset": {
+    "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
+    "sha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+    "width": 4096,
+    "height": 4096
+  },
+  "verification": {
+    "status": "exact_spawner_join_and_grid_reviewed",
+    "revision": "main-map-fmodel-spawns-v1",
+    "gridSize": 32,
+    "compatibilityBasis": "exact_active_paldex_join_and_map_geometry"
+  },
+  "filters": {
+    "worldName": "PL_MainWorld5",
+    "placementType": "EPalSpawnerPlacementType::Field",
+    "spawnerType": "EPalSpawnedCharacterType::Common",
+    "minimumWeightExclusive": 0
+  },
+  "expectedCounts": {
+    "placementRows": 8253,
+    "wildSpawnerRows": 1691,
+    "matchedPlacementRows": 8182,
+    "unmatchedPlacementRows": 71,
+    "unresolvedPalOccurrences": 12,
+    "eligibleOccurrences": 55066,
+    "palCount": 224,
+    "placementLinks": 53826,
+    "clusteredPoints": 3784
+  },
+  "world": {
+    "id": "main",
+    "horizontalAxis": "world_y",
+    "verticalAxis": "world_x",
+    "invertHorizontal": false,
+    "invertVertical": true,
+    "sourceBounds": {
+      "minX": -1099400,
+      "maxX": 349400,
+      "minY": -724400,
+      "maxY": 724400
+    }
+  },
+  "treeBounds": {
+    "minX": 347351.5,
+    "maxX": 689148.5,
+    "minY": -818197,
+    "maxY": -476400
+  },
+  "aliases": [
+    {
+      "stage": "canonical_tribe",
+      "sourceId": "Blueplatypus",
+      "targetSourceInternalId": "BluePlatypus",
+      "reason": "이번 PAK Tribe casing과 활성 1.0.1 sourceInternalId의 차이를 exact 교정",
+      "reviewStatus": "approved"
+    }
+  ],
+  "exclusions": [
+    {
+      "sourceCharacterId": "Male_NinjaElite01",
+      "reason": "Pal spawn slot에 포함된 인간 NPC이며 활성 canonical Pal 도감 대상이 아님",
+      "reviewStatus": "approved"
+    }
+  ],
+  "levelRangeCorrections": [
+    {
+      "sourceRowId": "snow_orange_B_040",
+      "slot": 2,
+      "sourceCharacterId": "Penguin",
+      "sourceMinimum": 35,
+      "sourceMaximum": 34,
+      "correctedMinimum": 34,
+      "correctedMaximum": 35,
+      "reason": "PAK source의 LvMin/LvMax 역전 1건을 versioned exact correction으로 교정",
+      "reviewStatus": "approved"
+    },
+    {
+      "sourceRowId": "snow_orange_D_040",
+      "slot": 2,
+      "sourceCharacterId": "Penguin",
+      "sourceMinimum": 35,
+      "sourceMaximum": 34,
+      "correctedMinimum": 34,
+      "correctedMaximum": 35,
+      "reason": "PAK source의 LvMin/LvMax 역전 1건을 versioned exact correction으로 교정",
+      "reviewStatus": "approved"
+    }
+  ]
+}

@@ -28,7 +28,7 @@ import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i
 import { PALWORLD_VERSION_MISMATCH_EVENT } from "../features/public-palworld/api/palworld";
 import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldRoute";
 import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
-import { isKnownPalworldPagePath, palworldTwitchReturnTo, palworldUrl, setPalworldUrl, withQueryParam } from "../features/public-palworld/utils/routes";
+import { isKnownPalworldPagePath, palworldFocusPalFromParams, palworldTwitchReturnTo, palworldUrl, setPalworldUrl, withQueryParam } from "../features/public-palworld/utils/routes";
 import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
 import {
   getPublicTwitchFollowedChannels,
@@ -74,6 +74,7 @@ export function PublicPalworldPage({
   const logoutInFlightRef = useRef(false);
   const mountedRef = useRef(true);
   const needsFollowedChannels = page === "home" || page === "streamers";
+  const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
   const selectedPalId = params.get("pal")?.trim() || undefined;
   // 조작된 URL에 두 상세 ID가 함께 있어도 Modal은 하나만 표시합니다.
   const selectedItemId = selectedPalId ? undefined : params.get("item")?.trim() || undefined;
@@ -270,6 +271,10 @@ export function PublicPalworldPage({
     setPalworldUrl(palworldUrl("items", new URLSearchParams({ item: id })));
   }, []);
 
+  const openPalMap = useCallback((id: string) => {
+    setPalworldUrl(palworldUrl("map", new URLSearchParams({ focusPal: id })));
+  }, []);
+
   const openPalHere = useCallback((id: string) => {
     const current = `${window.location.pathname}${window.location.search}`;
     setPalworldUrl(withQueryParam(withQueryParam(current, "item"), "pal", id));
@@ -359,7 +364,7 @@ export function PublicPalworldPage({
         {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} params={params} /> : null}
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
         {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} onOpenPal={openPalPage} /> : null}
-        {page === "map" ? <PalworldMapPage locale={locale} onOpenPal={openPalHere} /> : null}
+        {page === "map" ? <PalworldMapPage focusPalId={focusPalId} locale={locale} onOpenPal={openPalHere} /> : null}
         </Suspense> : null}
       </AppShellMain>
       <PalworldSourceFooter locale={locale} />
@@ -371,7 +376,13 @@ export function PublicPalworldPage({
             loadingLabel={text.loading}
           />
         )}>
-          <PalDetailModal palId={selectedPalId} locale={locale} onClose={closeDetail} onOpenItem={openItemPage} />
+          <PalDetailModal
+            palId={selectedPalId}
+            locale={locale}
+            onClose={closeDetail}
+            onOpenItem={openItemPage}
+            onOpenMap={openPalMap}
+          />
         </Suspense>
       ) : null}
       {selectedItemId ? (

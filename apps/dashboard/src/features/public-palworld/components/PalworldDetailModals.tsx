@@ -32,6 +32,7 @@ import { PalworldItemReferenceButton } from "./PalworldItemReferenceButton";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldPalStatsGraph } from "./PalworldPalStatsGraph";
+import { PalworldPalLocationMap } from "./PalworldPalLocationMap";
 import { PalworldTranslationBadge, PalworldTranslationBadges } from "./PalworldTranslationBadge";
 import { PalworldWorkSuitabilityBadge } from "./PalworldWorkSuitabilityBadge";
 
@@ -133,11 +134,13 @@ function ErrorPanel({ locale, onRetry }: { locale: PalworldLocale; onRetry: () =
 export function PalDetailModal({
   locale,
   onClose,
+  onOpenMap,
   onOpenItem,
   palId,
 }: {
   locale: PalworldLocale;
   onClose: () => void;
+  onOpenMap: (id: string) => void;
   onOpenItem: (id: string) => void;
   palId?: string;
 }) {
@@ -192,6 +195,11 @@ export function PalDetailModal({
             <section><h4 data-ko={palworldI18n.ko.activeSkills} data-ja={palworldI18n.ja.activeSkills}>{text.activeSkills}</h4>{detail.activeSkills.length ? <ul className="palworld-skill-detail-list">{detail.activeSkills.map((skill) => <li key={skill.id}><strong>{referenceName(skill, locale)}</strong><SkillDescription locale={locale} skill={skill} /></li>)}</ul> : <p>{text.originalDataUnavailable}</p>}</section>
             <section><h4 data-ko={palworldI18n.ko.drops} data-ja={palworldI18n.ja.drops}>{text.drops}</h4>{dropDetails?.length ? <><div className="palworld-item-reference-list">{dropDetails.map((drop) => <PalworldItemReferenceButton item={drop.item} locale={locale} minQuantity={drop.minQuantity} maxQuantity={drop.maxQuantity} dropRatePercent={drop.dropRatePercent} onOpen={onOpenItem} key={drop.item.id} />)}</div><PalworldTranslationBadges locale={locale} statuses={referenceTranslationStatuses(dropDetails.map((drop) => drop.item), locale)} /></> : detail.drops.length ? <><div className="palworld-item-reference-list">{detail.drops.map((drop) => <PalworldItemReferenceButton item={drop} locale={locale} onOpen={onOpenItem} key={drop.id} />)}</div><PalworldTranslationBadges locale={locale} statuses={referenceTranslationStatuses(detail.drops, locale)} /></> : <p>{text.originalDataUnavailable}</p>}</section>
             {detail.breeding.specialParentPairs.length ? <section><h4 data-ko={palworldI18n.ko.breedingInfo} data-ja={palworldI18n.ja.breedingInfo}>{text.breedingInfo}</h4><div><strong>{text.specialParentPairs}</strong><ul>{detail.breeding.specialParentPairs.map((pair) => <SpecialParentPair locale={locale} pair={pair} key={`${pair.parentAId}-${pair.parentBId}-${pair.parentAGender ?? "any"}-${pair.parentBGender ?? "any"}`} />)}</ul></div></section> : null}
+            <PalworldPalLocationMap
+              locale={locale}
+              onOpenFullMap={onOpenMap}
+              palId={detail.id}
+            />
           </article>
         ) : null}
       </ModalContent>

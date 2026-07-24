@@ -9,7 +9,12 @@ import {
   type ReactNode,
   type WheelEvent,
 } from "react";
-import type { PalworldMapMarker, PalworldMapMarkersResponse } from "@streamops/shared";
+import type {
+  PalworldMapMarker,
+  PalworldMapMarkersResponse,
+  PalworldPalSpawnPoint,
+  PalworldPalSpawnResponse,
+} from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import {
@@ -21,7 +26,7 @@ import {
 } from "../../../shared/ui/EmptyState";
 import { Skeleton } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
-import { getPalworldMapMarkers } from "../api/palworld";
+import { getPalworldMapMarkers, getPalworldPalSpawns } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { isLocalPalworldMapUrl, PALWORLD_WORLD_MAP_IMAGE } from "../utils/element-images";
 import { resolvePalworldName } from "../utils/localization";
@@ -44,6 +49,7 @@ export type PalworldMapViewState = MapPoint & {
 };
 
 type PalworldMapPageProps = {
+  focusPalId?: string;
   locale: PalworldLocale;
   markerLayer?: ReactNode | ((view: Readonly<PalworldMapViewState>) => ReactNode);
   onOpenPal?: (id: string) => void;
@@ -100,6 +106,19 @@ export function zoomPalworldMapViewAt(
   }, viewportWidth, viewportHeight);
 }
 
+export function focusPalworldMapViewAt(
+  marker: Pick<PalworldMapMarker, "normalizedX" | "normalizedY">,
+  viewportWidth: number,
+  viewportHeight: number,
+  zoom = 2,
+): PalworldMapViewState {
+  return clampPalworldMapView({
+    x: (viewportWidth / 2) - (marker.normalizedX * viewportWidth * zoom),
+    y: (viewportHeight / 2) - (marker.normalizedY * viewportHeight * zoom),
+    zoom,
+  }, viewportWidth, viewportHeight);
+}
+
 function distanceBetween(first: MapPoint, second: MapPoint): number {
   return Math.hypot(second.x - first.x, second.y - first.y);
 }
@@ -117,6 +136,13 @@ function isMapControlTarget(target: EventTarget | null): boolean {
 }
 
 type PalworldMapMarkerRequestState = "loading" | "ready" | "data_unavailable" | "error";
+type PalworldMapSpawnRequestState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "confirmed_empty"
+  | "data_unavailable"
+  | "error";
 
 function markerLabel(marker: PalworldMapMarker, locale: PalworldLocale): string {
   const text = palworldI18n[locale];
@@ -125,11 +151,13 @@ function markerLabel(marker: PalworldMapMarker, locale: PalworldLocale): string 
 }
 
 export function PalworldBossMarkerLayer({
+  focusedPalId,
   locale,
   markers,
   onOpenPal,
   zoom,
 }: {
+  focusedPalId?: string;
   locale: PalworldLocale;
   markers: readonly PalworldMapMarker[];
   onOpenPal?: (id: string) => void;
@@ -140,15 +168,22 @@ export function PalworldBossMarkerLayer({
       {markers.map((marker) => {
         const displayName = resolvePalworldName(marker.pal, locale).text || marker.pal.nameEn;
         const label = markerLabel(marker, locale);
+        const focused = marker.pal.id === focusedPalId;
         const markerStyle = {
           "--palworld-map-marker-inverse-scale": 1 / zoom,
           left: `${marker.normalizedX * 100}%`,
+          ...(focused ? {
+            outline: "var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring)",
+            outlineOffset: "var(--yoro-space-1)",
+          } : {}),
           top: `${marker.normalizedY * 100}%`,
         } as CSSProperties;
         return (
           <button
+            aria-current={focused ? "location" : undefined}
             aria-label={label}
             className="palworld-map-boss-marker"
+            data-focused={focused ? "true" : undefined}
             data-map-interactive="true"
             key={marker.id}
             onClick={(event) => {
@@ -180,17 +215,47 @@ export function PalworldBossMarkerLayer({
   );
 }
 
-export function PalworldMapPage({ locale, markerLayer, onOpenPal }: PalworldMapPageProps) {
+export function PalworldSpawnAreaLayer({
+  points,
+  zoom,
+}: {
+  points: readonly PalworldPalSpawnPoint[];
+  zoom: number;
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="palworld-map-spawn-layer"
+      preserveAspectRatio="none"
+      viewBox="0 0 1 1"
+    >
+      {points.map((point) => (
+        <circle
+          className="palworld-map-spawn-point"
+          cx={point.normalizedX}
+          cy={point.normalizedY}
+          key={point.id}
+          r={0.009 / zoom}
+        />
+      ))}
+    </svg>
+  );
+}
+
+export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: PalworldMapPageProps) {
   const text = palworldI18n[locale];
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(PALWORLD_WORLD_MAP_IMAGE ? "loading" : "error");
   const [imageRevision, setImageRevision] = useState(0);
   const [markerRevision, setMarkerRevision] = useState(0);
   const [markerResponse, setMarkerResponse] = useState<PalworldMapMarkersResponse>();
   const [markerState, setMarkerState] = useState<PalworldMapMarkerRequestState>("loading");
+  const [spawnResponse, setSpawnResponse] = useState<PalworldPalSpawnResponse>();
+  const [spawnState, setSpawnState] = useState<PalworldMapSpawnRequestState>("idle");
   const [view, setView] = useState<PalworldMapViewState>({ x: 0, y: 0, zoom: MAP_MIN_ZOOM });
   const [isPanning, setIsPanning] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef(view);
+  const appliedFocusMarkerRef = useRef<string>();
   const pointersRef = useRef(new Map<number, MapPoint>());
   const gestureRef = useRef<MapGesture>();
   const zoomPercent = Math.round(view.zoom * 100);
@@ -266,6 +331,87 @@ export function PalworldMapPage({ locale, markerLayer, onOpenPal }: PalworldMapP
     });
     return () => controller.abort();
   }, [markerRevision]);
+
+  useEffect(() => {
+    if (!focusPalId) {
+      setSpawnResponse(undefined);
+      setSpawnState("idle");
+      return;
+    }
+    const controller = new AbortController();
+    setSpawnResponse(undefined);
+    setSpawnState("loading");
+    void getPalworldPalSpawns(focusPalId, "main", controller.signal).then((response) => {
+      if (controller.signal.aborted) return;
+      setSpawnResponse(response);
+      setSpawnState(response.state);
+    }).catch(() => {
+      if (!controller.signal.aborted) setSpawnState("error");
+    });
+    return () => controller.abort();
+  }, [focusPalId, markerRevision]);
+
+  useEffect(() => {
+    if (!focusPalId) {
+      appliedFocusMarkerRef.current = undefined;
+      return;
+    }
+    if (loadState !== "ready") {
+      return;
+    }
+    const marker = markerState === "ready"
+      ? markerResponse?.markers.find((entry) => entry.pal.id === focusPalId)
+      : undefined;
+    const spawnFocus = spawnState === "ready" && spawnResponse
+      ? (() => {
+          const weight = spawnResponse.points.reduce(
+            (sum, point) => sum + point.placementCount,
+            0,
+          );
+          if (weight <= 0) return undefined;
+          return {
+            normalizedX: spawnResponse.points.reduce(
+              (sum, point) => sum + (point.normalizedX * point.placementCount),
+              0,
+            ) / weight,
+            normalizedY: spawnResponse.points.reduce(
+              (sum, point) => sum + (point.normalizedY * point.placementCount),
+              0,
+            ) / weight,
+          };
+        })()
+      : undefined;
+    const target = marker ?? spawnFocus;
+    const viewport = viewportRef.current;
+    if (!target) {
+      appliedFocusMarkerRef.current = undefined;
+      return;
+    }
+    const focusKey = marker?.id
+      ?? `spawn-${focusPalId}-${spawnResponse?.totalPlacements ?? 0}`;
+    if (
+      !viewport
+      || viewport.clientWidth <= 0
+      || viewport.clientHeight <= 0
+      || appliedFocusMarkerRef.current === focusKey
+    ) {
+      return;
+    }
+    appliedFocusMarkerRef.current = focusKey;
+    commitView(focusPalworldMapViewAt(
+      target,
+      viewport.clientWidth,
+      viewport.clientHeight,
+    ));
+  }, [
+    commitView,
+    focusPalId,
+    loadState,
+    markerResponse,
+    markerState,
+    spawnResponse,
+    spawnState,
+  ]);
 
   function retry(): void {
     setLoadState("loading");
@@ -467,6 +613,36 @@ export function PalworldMapPage({ locale, markerLayer, onOpenPal }: PalworldMapP
                 {text.mapBossMarkers} {markerResponse.markers.length}
               </Badge>
             ) : null}
+            {spawnState === "ready" && spawnResponse ? (
+              <Badge tone="info">
+                {text.palWildSpawnAreas} {spawnResponse.totalPlacements.toLocaleString(
+                  locale === "ko" ? "ko-KR" : "ja-JP",
+                )}
+              </Badge>
+            ) : null}
+            {spawnState === "loading" ? (
+              <Badge role="status" tone="neutral">
+                {text.palLocationLoading}
+              </Badge>
+            ) : null}
+            {spawnState === "confirmed_empty" ? (
+              <Badge tone="neutral">{text.palLocationEmpty}</Badge>
+            ) : null}
+            {spawnState === "data_unavailable" ? (
+              <Badge tone="neutral">{text.palLocationUnavailable}</Badge>
+            ) : null}
+            {spawnState === "error" ? (
+              <span className="palworld-map-marker-error" role="alert">
+                <Badge tone="warning">{text.palLocationError}</Badge>
+                <Button
+                  onClick={() => setMarkerRevision((revision) => revision + 1)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  {text.retry}
+                </Button>
+              </span>
+            ) : null}
             {markerState === "data_unavailable" ? (
               <Badge
                 data-ko={palworldI18n.ko.mapBossUnavailable}
@@ -584,9 +760,15 @@ export function PalworldMapPage({ locale, markerLayer, onOpenPal }: PalworldMapP
                     {typeof markerLayer === "function" ? markerLayer(view) : markerLayer}
                   </div>
                 ) : null}
+                {loadState === "ready" && spawnState === "ready" && spawnResponse ? (
+                  <div className="palworld-map-marker-layer" data-testid="palworld-map-spawn-areas">
+                    <PalworldSpawnAreaLayer points={spawnResponse.points} zoom={view.zoom} />
+                  </div>
+                ) : null}
                 {loadState === "ready" && markerState === "ready" && markerResponse?.markers.length ? (
                   <div className="palworld-map-marker-layer" data-testid="palworld-map-boss-markers">
                     <PalworldBossMarkerLayer
+                      focusedPalId={focusPalId}
                       locale={locale}
                       markers={markerResponse.markers}
                       onOpenPal={onOpenPal}

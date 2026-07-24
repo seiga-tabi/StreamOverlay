@@ -36,6 +36,11 @@ import {
   PalworldMapMarkerArtifactError,
   type PalworldMapMarkerProvider
 } from "./data/palworld-map-marker-artifact.js";
+import {
+  loadPalworldSpawnProvider,
+  PalworldSpawnArtifactError,
+  type PalworldSpawnProvider
+} from "./data/palworld-spawn-artifact.js";
 import { PalworldServerClient } from "./services/palworld-server-client.js";
 import {
   PalworldServerConnectionStore,
@@ -68,6 +73,7 @@ assertRuntimeConfig();
 const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
 let palworldDataService: PalworldDataService | undefined;
 let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
+let palworldSpawnProvider: PalworldSpawnProvider | undefined;
 try {
   palworldDataService = await loadPalworldDataService({
     dashboardStaticRoot: appConfig.paths.dashboardStatic,
@@ -136,6 +142,40 @@ try {
         : "PALWORLD_MAP_MARKER_INITIALIZATION_FAILED";
     logger.event({
       type: "palworld_map_markers.runtime_state",
+      status: "data_unavailable",
+      errorCode
+    });
+  }
+  try {
+    const activeRuntime = await loadPalworldActiveRuntime();
+    const candidateSpawnProvider = await loadPalworldSpawnProvider({
+      releaseRoot: activeRuntime.releaseRoot,
+      dashboardStaticRoot: appConfig.paths.dashboardStatic,
+      palworldDataService
+    });
+    const mainMap = candidateSpawnProvider.response("main", "anubis", meta.metadata);
+    palworldSpawnProvider = candidateSpawnProvider;
+    logger.event({
+      type: "palworld_map_spawns.runtime_state",
+      status: mainMap.state,
+      world: "main",
+      points: mainMap.points.length,
+      placements: mainMap.totalPlacements,
+      ...(mainMap.overlay === undefined
+        ? {}
+        : {
+            archiveSha256: mainMap.overlay.archiveSha256,
+            transformRevision: mainMap.overlay.transformRevision
+          })
+    });
+  } catch (error) {
+    const errorCode = (error as NodeJS.ErrnoException).code === "ENOENT"
+      ? "PALWORLD_SPAWN_ARTIFACT_MISSING"
+      : error instanceof PalworldSpawnArtifactError
+        ? error.code
+        : "PALWORLD_SPAWN_INITIALIZATION_FAILED";
+    logger.event({
+      type: "palworld_map_spawns.runtime_state",
       status: "data_unavailable",
       errorCode
     });
@@ -321,6 +361,7 @@ const server = http.createServer(createHttpHandler({
   supportMailbox,
   palworldDataService,
   palworldMapMarkerProvider,
+  palworldSpawnProvider,
   palworldServerMonitor,
   palworldServerUnavailableCode,
   readiness: () => store.getReadiness(),

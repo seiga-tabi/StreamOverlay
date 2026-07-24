@@ -6,6 +6,7 @@ const {
   normalizePalworldSearchTerm,
   parsePalworldBreedingQuery,
   parsePalworldItemListQuery,
+  parsePalworldPalSpawnQuery,
   parsePalworldPalListQuery,
   parsePalworldSkillListQuery,
   parsePalworldSearchQuery
@@ -113,4 +114,23 @@ test("검색과 교배 query는 빈 값, 중복 값, 알 수 없는 필드와 �
     )),
     PalworldQueryError
   );
+});
+
+test("Pal 일반 스폰 query는 world와 canonical Pal ID만 허용한다", () => {
+  assert.deepEqual(
+    parsePalworldPalSpawnQuery(new URLSearchParams("world=main&pal=anubis")),
+    { world: "main", pal: "anubis" }
+  );
+  assert.deepEqual(
+    parsePalworldPalSpawnQuery(new URLSearchParams("pal=ANUBIS")),
+    { world: "main", pal: "anubis" }
+  );
+  for (const params of [
+    new URLSearchParams("world=unknown&pal=anubis"),
+    new URLSearchParams("world=main"),
+    new URLSearchParams("world=main&pal=..%2Fsecret"),
+    new URLSearchParams("world=main&pal=anubis&url=https%3A%2F%2Fexample.com")
+  ]) {
+    assert.throws(() => parsePalworldPalSpawnQuery(params), PalworldQueryError);
+  }
 });
