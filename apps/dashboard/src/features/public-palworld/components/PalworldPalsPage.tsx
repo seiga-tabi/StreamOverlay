@@ -1,68 +1,229 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { PALWORLD_ELEMENTS, PALWORLD_WORK_SUITABILITY_TYPES, type PalworldPaginatedResponse, type PalworldPalSummary } from "@streamops/shared";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import type { PalworldPalListFacets, PalworldPalListResponse } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
-import { Input, Select } from "../../../shared/ui/Form";
+import { Card, CardContent } from "../../../shared/ui/Card";
+import { Input } from "../../../shared/ui/Form";
+import {
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../../../shared/ui/Modal";
 import { getPalworldPals } from "../api/palworld";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
-import { elementLabel, workLabel } from "../utils/labels";
-import { setPalworldUrl } from "../utils/routes";
+import { setPalworldUrl, palworldUrl } from "../utils/routes";
+import {
+  clearPalworldPalsFilterParams,
+  PALWORLD_PALS_FILTER_KEYS,
+  PALWORLD_PALS_ROUTE_KEYS,
+  palworldPalsDetailFilterCount,
+  updatePalworldPalsParams,
+  type PalworldPalsFilterKey,
+  type PalworldPalsRouteKey,
+} from "../utils/pals";
 import { Pagination } from "./Pagination";
 import { PalCard } from "./PalworldCards";
+import {
+  PalworldPalsAppliedFilters,
+  PalworldPalsDesktopFilterPanel,
+  PalworldPalsFilterControls,
+  PalworldPalsResultToolbar,
+} from "./PalworldPalsFilters";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 
-const FILTER_KEYS = ["q", "element", "work", "rarity", "variant", "sort", "order", "page"] as const;
+function routeSignature(params: URLSearchParams): string {
+  return PALWORLD_PALS_ROUTE_KEYS
+    .flatMap((key) => params.getAll(key).map((value) => `${key}=${value}`))
+    .join("&");
+}
 
-export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: PalworldLocale; onOpenPal: (id: string) => void; params: URLSearchParams }) {
-  const [response, setResponse] = useState<PalworldPaginatedResponse<PalworldPalSummary> | null>(null);
+function hasPalworldPalsFilters(params: URLSearchParams): boolean {
+  return PALWORLD_PALS_FILTER_KEYS.some((key) => Boolean(params.get(key)?.trim()));
+}
+
+export function PalworldPalsPage({
+  locale,
+  onOpenPal,
+  params,
+}: {
+  locale: PalworldLocale;
+  onOpenPal: (id: string) => void;
+  params: URLSearchParams;
+}) {
+  const [response, setResponse] = useState<PalworldPalListResponse | null>(null);
+  const [facets, setFacets] = useState<PalworldPalListFacets | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const [loading, setLoading] = useState(true);
   const [revision, setRevision] = useState(0);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterTriggerRef = useRef<HTMLButtonElement>(null);
+  const requestIdRef = useRef(0);
   const text = palworldI18n[locale];
-  const routeQuery = FILTER_KEYS.map((key) => `${key}=${params.get(key) ?? ""}`).join("&");
+  const routeQuery = routeSignature(params);
+  const appliedQuery = params.get("q") ?? "";
+  const detailFilterCount = palworldPalsDetailFilterCount(params);
+  const hasFilters = hasPalworldPalsFilters(params);
 
-  useEffect(() => setNameQuery(params.get("q") ?? ""), [routeQuery]);
+  useBodyScrollLock(filterOpen);
+
+  useEffect(() => setNameQuery(appliedQuery), [appliedQuery]);
+
   useEffect(() => {
     const controller = new AbortController();
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
     const apiParams = new URLSearchParams();
-    FILTER_KEYS.forEach((key) => {
-      const value = params.get(key);
-      if (value) apiParams.set(key, value);
-    });
+    for (const key of PALWORLD_PALS_ROUTE_KEYS) {
+      for (const value of params.getAll(key)) apiParams.append(key, value);
+    }
     apiParams.set("locale", locale);
     apiParams.set("limit", "24");
     setResponse(null);
     setError(null);
-    void getPalworldPals(apiParams, controller.signal).then(setResponse).catch((requestError) => {
-      if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-      setError(requestError);
-    });
+    setLoading(true);
+
+    void getPalworldPals(apiParams, controller.signal)
+      .then((nextResponse) => {
+        if (controller.signal.aborted || requestIdRef.current !== requestId) return;
+        setFacets(nextResponse.facets);
+        setResponse(nextResponse);
+        setLoading(false);
+      })
+      .catch((requestError) => {
+        if (controller.signal.aborted || requestIdRef.current !== requestId) return;
+        setError(requestError);
+        setLoading(false);
+      });
+
     return () => controller.abort();
   }, [locale, routeQuery, revision]);
 
-  function update(key: string, value: string) {
-    const next = new URLSearchParams(params);
-    next.delete("pal");
-    if (value) next.set(key, value); else next.delete(key);
-    if (key !== "page") next.delete("page");
-    setPalworldUrl(`/palworld/pals${next.toString() ? `?${next}` : ""}`);
+  function update(key: PalworldPalsRouteKey, value: string) {
+    setPalworldUrl(palworldUrl("pals", updatePalworldPalsParams(params, key, value)));
   }
-  function submit(event: FormEvent) { event.preventDefault(); update("q", nameQuery.trim()); }
 
-  return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.palsKicker}</span><h1 data-ko={palworldI18n.ko.pals} data-ja={palworldI18n.ja.pals}>{text.pals}</h1><p data-ko={palworldI18n.ko.palsDescription} data-ja={palworldI18n.ja.palsDescription}>{text.palsDescription}</p></div></header>
-    <form className="palworld-filter-bar" onSubmit={submit} aria-label={text.filter}>
-      <label><span>{text.nameSearch}</span><Input type="search" value={nameQuery} onChange={(event) => setNameQuery(event.target.value)} /></label>
-      <label><span>{text.element}</span><Select value={params.get("element") ?? ""} onChange={(event) => update("element", event.target.value)}><option value="">{text.all}</option>{PALWORLD_ELEMENTS.map((value) => <option value={value} key={value}>{elementLabel(value, locale)}</option>)}</Select></label>
-      <label><span>{text.work}</span><Select value={params.get("work") ?? ""} onChange={(event) => update("work", event.target.value)}><option value="">{text.all}</option>{PALWORLD_WORK_SUITABILITY_TYPES.map((value) => <option value={value} key={value}>{workLabel(value, locale)}</option>)}</Select></label>
-      <label><span>{text.rarity}</span><Select value={params.get("rarity") ?? ""} onChange={(event) => update("rarity", event.target.value)}><option value="">{text.all}</option>{Array.from({ length: 20 }, (_, index) => index + 1).map((value) => <option value={value} key={value}>★ {value}</option>)}</Select></label>
-      <label><span>{text.variant}</span><Select value={params.get("variant") ?? ""} onChange={(event) => update("variant", event.target.value)}><option value="">{text.all}</option><option value="normal">{text.normal}</option><option value="variant">{text.variantPal}</option><option value="special">{text.special}</option></Select></label>
-      <label><span>{text.sort}</span><Select value={params.get("sort") ?? "number"} onChange={(event) => update("sort", event.target.value)}><option value="number">{text.number}</option><option value="name">{text.name}</option><option value="rarity">{text.rarity}</option></Select></label>
-      <label><span>{text.sortOrder}</span><Select value={params.get("order") ?? "asc"} onChange={(event) => update("order", event.target.value)}><option value="asc">{text.ascending}</option><option value="desc">{text.descending}</option></Select></label>
-      <div className="palworld-filter-actions"><Button size="sm" type="submit">{text.searchAction}</Button><Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/pals")}>{text.clearFilters}</Button></div>
-    </form>
-    {!response && !error ? <PalworldLoading locale={locale} /> : null}
-    {error ? <PalworldError error={error} locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
-    {response?.items.length === 0 ? <PalworldEmpty locale={locale} title={text.palListEmpty} /> : null}
-    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-entity-grid palworld-pal-grid">{response.items.map((pal, index) => <PalCard key={pal.id} pal={pal} locale={locale} priority={index < 4} onOpen={(selected) => onOpenPal(selected.id)} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
-  </section>;
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    update("q", nameQuery.trim());
+  }
+
+  function clearFilters() {
+    setNameQuery("");
+    setPalworldUrl(palworldUrl("pals", clearPalworldPalsFilterParams(params)));
+  }
+
+  function removeFilter(key: PalworldPalsFilterKey) {
+    update(key, "");
+  }
+
+  return (
+    <section className="palworld-page-section palworld-pals-page">
+      <header className="palworld-page-heading">
+        <div>
+          <span aria-hidden="true">{text.palsKicker}</span>
+          <h1 data-ja={palworldI18n.ja.pals} data-ko={palworldI18n.ko.pals}>{text.pals}</h1>
+          <p data-ja={palworldI18n.ja.palsDescription} data-ko={palworldI18n.ko.palsDescription}>{text.palsDescription}</p>
+        </div>
+      </header>
+
+      <Card as="section" className="palworld-pals-search-card" padding="md">
+        <form aria-label={text.nameSearch} className="palworld-pals-search palworld-pal-search-form" onSubmit={submit} role="search">
+          <label>
+            <span>{text.nameSearch}</span>
+            <Input
+              aria-label={text.nameSearch}
+              placeholder={text.palSearchPlaceholder}
+              type="search"
+              value={nameQuery}
+              onChange={(event) => setNameQuery(event.target.value)}
+            />
+          </label>
+          <Button type="submit">{text.searchAction}</Button>
+        </form>
+      </Card>
+
+      <div className="palworld-pals-desktop-filter">
+        <PalworldPalsDesktopFilterPanel
+          clearDisabled={!hasFilters}
+          facets={facets}
+          locale={locale}
+          onClear={clearFilters}
+          onUpdate={update}
+          params={params}
+        />
+      </div>
+
+      <Button
+        aria-expanded={filterOpen}
+        aria-haspopup="dialog"
+        className="palworld-pal-mobile-filter-trigger palworld-pals-mobile-filter-trigger"
+        data-testid="pal-filter-trigger"
+        onClick={() => setFilterOpen(true)}
+        ref={filterTriggerRef}
+        type="button"
+        variant="secondary"
+      >
+        {text.filterCount.replace("{count}", String(detailFilterCount))}
+      </Button>
+
+      <Modal
+        className="palworld-pals-filter-modal"
+        onClose={() => setFilterOpen(false)}
+        open={filterOpen}
+        returnFocusRef={filterTriggerRef}
+        size="lg"
+      >
+        <ModalHeader>
+          <div>
+            <ModalTitle>{text.detailedFilters}</ModalTitle>
+            <ModalDescription>{text.detailedFiltersDescription}</ModalDescription>
+          </div>
+          <ModalCloseButton aria-label={text.closeFilters}>×</ModalCloseButton>
+        </ModalHeader>
+        <ModalContent>
+          <PalworldPalsFilterControls facets={facets} locale={locale} onUpdate={update} params={params} />
+        </ModalContent>
+        <ModalFooter>
+          <Button disabled={!hasFilters} onClick={clearFilters} type="button" variant="ghost">{text.clearFilters}</Button>
+          <Button onClick={() => setFilterOpen(false)} type="button">{text.close}</Button>
+        </ModalFooter>
+      </Modal>
+
+      <PalworldPalsAppliedFilters locale={locale} onRemove={removeFilter} params={params} />
+
+      <PalworldPalsResultToolbar
+        loading={loading}
+        locale={locale}
+        onUpdate={update}
+        pagination={response?.pagination}
+        params={params}
+      />
+
+      <div aria-busy={loading} className="palworld-pals-results" data-testid="palworld-pals-results">
+        {loading && !error ? <PalworldLoading locale={locale} /> : null}
+        {error ? <PalworldError error={error} locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
+        {!loading && !error && response?.items.length === 0 && response.pagination.total === 0 ? (
+          <PalworldEmpty locale={locale} title={text.palListEmpty} />
+        ) : null}
+        {!loading && !error && response?.items.length === 0 && response.pagination.total > 0 ? (
+          <PalworldEmpty description={text.currentPageEmptyDescription} locale={locale} title={text.currentPageEmpty} />
+        ) : null}
+        {!loading && !error && response?.items.length ? (
+          <>
+            <div className="palworld-entity-grid palworld-pal-grid">
+              {response.items.map((pal, index) => (
+                <PalCard key={pal.id} locale={locale} onOpen={(selected) => onOpenPal(selected.id)} pal={pal} priority={index < 4} />
+              ))}
+            </div>
+            <Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} />
+          </>
+        ) : null}
+      </div>
+    </section>
+  );
 }

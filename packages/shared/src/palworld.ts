@@ -648,6 +648,22 @@ export type PalworldPaginatedResponse<T> = {
   metadata: PalworldDataMetadata;
 };
 
+export type PalworldFacetEntry<T extends string | number> = {
+  value: T;
+  count: number;
+};
+
+export type PalworldPalListFacets = {
+  elements: PalworldFacetEntry<PalworldElement>[];
+  workSuitabilities: PalworldFacetEntry<PalworldWorkSuitabilityType>[];
+  rarities: PalworldFacetEntry<number>[];
+  variants: PalworldFacetEntry<PalworldVariantType>[];
+};
+
+export type PalworldPalListResponse = PalworldPaginatedResponse<PalworldPalSummary> & {
+  facets: PalworldPalListFacets;
+};
+
 export type PalworldMetaResponse = {
   metadata: PalworldDataMetadata;
   counts: {
@@ -3313,6 +3329,98 @@ export function validatePalworldPaginatedResponse<T>(
   if (!itemCount.ok) return itemCount;
   const metadata = validateMetadataAt(record.data.metadata, "response.metadata");
   return metadata.ok ? valid(record.data as PalworldPaginatedResponse<T>) : metadata;
+}
+
+function validatePalworldFacetEntriesAt<T extends string | number>(
+  value: unknown,
+  path: string,
+  maxLength: number,
+  valueValidator: (value: unknown, path: string) => PalworldValidationResult<T>
+): PalworldValidationResult<PalworldFacetEntry<T>[]> {
+  const entries = arrayAt(value, path, maxLength, (entry, entryPath) => {
+    const record = recordAt(entry, entryPath, ["value", "count"]);
+    if (!record.ok) return record;
+    const facetValue = valueValidator(record.data.value, `${entryPath}.value`);
+    if (!facetValue.ok) return facetValue;
+    const count = integerAt(record.data.count, `${entryPath}.count`, 0, 100_000_000);
+    return count.ok ? valid(record.data as PalworldFacetEntry<T>) : count;
+  });
+  if (!entries.ok) return entries;
+  const unique = uniqueStringsAt(
+    entries.data.map((entry) => String(entry.value)),
+    path,
+    "facet value"
+  );
+  return unique.ok ? entries : unique;
+}
+
+function validatePalworldPalListFacetsAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldPalListFacets> {
+  const record = recordAt(value, path, [
+    "elements",
+    "workSuitabilities",
+    "rarities",
+    "variants"
+  ]);
+  if (!record.ok) return record;
+  const elements = validatePalworldFacetEntriesAt(
+    record.data.elements,
+    `${path}.elements`,
+    PALWORLD_ELEMENTS.length,
+    (entry, entryPath) => enumAt(entry, entryPath, PALWORLD_ELEMENTS)
+  );
+  if (!elements.ok) return elements;
+  const workSuitabilities = validatePalworldFacetEntriesAt(
+    record.data.workSuitabilities,
+    `${path}.workSuitabilities`,
+    PALWORLD_WORK_SUITABILITY_TYPES.length,
+    (entry, entryPath) => enumAt(entry, entryPath, PALWORLD_WORK_SUITABILITY_TYPES)
+  );
+  if (!workSuitabilities.ok) return workSuitabilities;
+  const rarities = validatePalworldFacetEntriesAt(
+    record.data.rarities,
+    `${path}.rarities`,
+    MAX_RARITY,
+    (entry, entryPath) => integerAt(entry, entryPath, 1, MAX_RARITY)
+  );
+  if (!rarities.ok) return rarities;
+  const variants = validatePalworldFacetEntriesAt(
+    record.data.variants,
+    `${path}.variants`,
+    PALWORLD_VARIANT_TYPES.length,
+    (entry, entryPath) => enumAt(entry, entryPath, PALWORLD_VARIANT_TYPES)
+  );
+  return variants.ok ? valid(record.data as PalworldPalListFacets) : variants;
+}
+
+export function validatePalworldPalListFacets(
+  value: unknown
+): PalworldValidationResult<PalworldPalListFacets> {
+  return validatePalworldPalListFacetsAt(value, "facets");
+}
+
+export function validatePalworldPalListResponse(
+  value: unknown
+): PalworldValidationResult<PalworldPalListResponse> {
+  const record = recordAt(value, "response", ["items", "pagination", "metadata", "facets"]);
+  if (!record.ok) return record;
+  const items = arrayAt(
+    record.data.items,
+    "response.items",
+    MAX_API_COLLECTION_SIZE,
+    validatePalSummaryAt
+  );
+  if (!items.ok) return items;
+  const pagination = validatePaginationAt(record.data.pagination, "response.pagination");
+  if (!pagination.ok) return pagination;
+  const itemCount = validatePageItemCountAt(items.data.length, pagination.data, "response.items");
+  if (!itemCount.ok) return itemCount;
+  const metadata = validateMetadataAt(record.data.metadata, "response.metadata");
+  if (!metadata.ok) return metadata;
+  const facets = validatePalworldPalListFacetsAt(record.data.facets, "response.facets");
+  return facets.ok ? valid(record.data as PalworldPalListResponse) : facets;
 }
 
 export function validatePalworldMetaResponse(value: unknown): PalworldValidationResult<PalworldMetaResponse> {

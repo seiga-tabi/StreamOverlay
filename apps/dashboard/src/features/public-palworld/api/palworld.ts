@@ -9,8 +9,8 @@ import type {
   PalworldMetaResponse,
   PalworldPaginatedResponse,
   PalworldPalDetail,
+  PalworldPalListResponse,
   PalworldPalSpawnResponse,
-  PalworldPalSummary,
   PalworldSearchResult,
   PalworldSkillDetail,
   PalworldSkillSummary,
@@ -25,8 +25,8 @@ import {
   validatePalworldMetaResponse,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
+  validatePalworldPalListResponse,
   validatePalworldPalSpawnResponse,
-  validatePalworldPalSummary,
   validatePalworldSearchResult,
   validatePalworldSkillDetail,
   validatePalworldSkillSummary,
@@ -231,8 +231,8 @@ export function searchPalworld(query: string, signal?: AbortSignal): Promise<Pal
   return publicGet(queryPath("/api/palworld/search", params), signal, validatePalworldSearchResult);
 }
 
-export function getPalworldPals(params: URLSearchParams, signal?: AbortSignal): Promise<PalworldPaginatedResponse<PalworldPalSummary>> {
-  return publicGet(queryPath("/api/palworld/pals", params), signal, (value) => validatePalworldPaginatedResponse(value, validatePalworldPalSummary));
+export function getPalworldPals(params: URLSearchParams, signal?: AbortSignal): Promise<PalworldPalListResponse> {
+  return publicGet(queryPath("/api/palworld/pals", params), signal, validatePalworldPalListResponse);
 }
 
 export function getPalworldPal(id: string, signal?: AbortSignal): Promise<PalworldPalDetail> {

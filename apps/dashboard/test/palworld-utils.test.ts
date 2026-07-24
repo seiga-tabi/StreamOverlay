@@ -18,6 +18,7 @@ import {
   getPalworldItems,
   getPalworldMapMarkers,
   getPalworldMeta,
+  getPalworldPals,
   getPalworldPalSpawns,
   getPalworldSkill,
   getPalworldSkills,
@@ -27,6 +28,11 @@ import {
 } from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
 import { breedingPairGendersForParents, clearPalworldBreedingParams, palworldBreedingParams, parsePalworldBreedingQuery, swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
+import {
+  clearPalworldPalsFilterParams,
+  palworldPalsDetailFilterCount,
+  updatePalworldPalsParams,
+} from "../src/features/public-palworld/utils/pals";
 import { isKnownPalworldPagePath, isPalworldPath, palworldFocusPalFromParams, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
 import {
   acquisitionLabel,
@@ -95,6 +101,81 @@ test("지도 focusPal query는 단일 canonical Pal ID만 허용한다", () => {
   assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: " Anubis " })), undefined);
   assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: "../anubis" })), undefined);
   assert.equal(palworldFocusPalFromParams(new URLSearchParams({ focusPal: "a".repeat(81) })), undefined);
+});
+
+test("Pal 도감 query 갱신과 초기화는 page만 재설정하고 정렬 및 다른 안전한 query를 보존한다", () => {
+  const current = new URLSearchParams(
+    "q=아누비스&element=ground&work=mining&rarity=10&variant=normal&sort=name&order=desc&page=3&pal=anubis",
+  );
+  const changed = updatePalworldPalsParams(current, "element", "fire");
+  assert.equal(changed.get("element"), "fire");
+  assert.equal(changed.has("page"), false);
+  assert.equal(changed.get("sort"), "name");
+  assert.equal(changed.get("order"), "desc");
+  assert.equal(changed.get("pal"), "anubis");
+
+  const pageOnly = updatePalworldPalsParams(current, "page", "2");
+  assert.equal(pageOnly.get("page"), "2");
+  const cleared = clearPalworldPalsFilterParams(current);
+  for (const key of ["q", "element", "work", "rarity", "variant", "page"]) {
+    assert.equal(cleared.has(key), false, key);
+  }
+  assert.equal(cleared.get("sort"), "name");
+  assert.equal(cleared.get("order"), "desc");
+  assert.equal(cleared.get("pal"), "anubis");
+  assert.equal(palworldPalsDetailFilterCount(current), 4);
+  assert.equal(palworldPalsDetailFilterCount(new URLSearchParams("q=아누비스")), 0);
+});
+
+test("Pal 도감 목록 API는 전체 facet 응답만 허용하고 잘못된 facet을 invalid response로 거부한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  const metadata = {
+    gameVersion: "1.0.1",
+    sourceName: "고정 Pal 데이터",
+    sourceUrl: "https://example.com/palworld-pals",
+    sourceRevision: "pals-facet-test",
+    extractedAt: "2026-07-24T00:00:00.000Z",
+    verifiedAt: "2026-07-24T00:00:00.000Z",
+    license: "테스트 전용",
+  };
+  let invalid = false;
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: () => true,
+    } as unknown as Window,
+    fetch: async () => new Response(JSON.stringify({
+      items: [anubis],
+      pagination: {
+        page: 1,
+        pageSize: 24,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+      metadata,
+      facets: {
+        elements: [{ value: "ground", count: 1 }],
+        workSuitabilities: [{ value: "mining", count: 1 }],
+        rarities: [{ value: 10, count: 1 }],
+        variants: [{ value: "normal", count: 1 }],
+        ...(invalid ? { unknown: [] } : {}),
+      },
+    }), { status: 200, headers: { "content-type": "application/json" } }),
+  });
+  try {
+    const result = await getPalworldPals(new URLSearchParams("element=ground"));
+    assert.equal(result.facets.elements[0]?.count, 1);
+    invalid = true;
+    await assert.rejects(
+      () => getPalworldPals(new URLSearchParams("element=ground")),
+      (error: unknown) => error instanceof PalworldApiError && error.code === "PALWORLD_RESPONSE_INVALID",
+    );
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
 });
 
 test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query만 보존한다", () => {

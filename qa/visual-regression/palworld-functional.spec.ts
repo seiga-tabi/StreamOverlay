@@ -1,6 +1,12 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { resolve } from "node:path";
-import { PALWORLD_PUBLIC_NOTICE_JA, PALWORLD_PUBLIC_NOTICE_KO } from "@streamops/shared";
+import {
+  PALWORLD_ELEMENTS,
+  PALWORLD_PUBLIC_NOTICE_JA,
+  PALWORLD_PUBLIC_NOTICE_KO,
+  PALWORLD_VARIANT_TYPES,
+  PALWORLD_WORK_SUITABILITY_TYPES,
+} from "@streamops/shared";
 import type {
   PalworldBreedingPair,
   PalworldDataMetadata,
@@ -9,6 +15,8 @@ import type {
   PalworldMapMarkersResponse,
   PalworldPaginatedResponse,
   PalworldPalDetail,
+  PalworldPalListFacets,
+  PalworldPalListResponse,
   PalworldPalReference,
   PalworldPalSpawnResponse,
   PalworldPalSummary,
@@ -602,6 +610,36 @@ function filteredPals(url: URL): PalworldPalSummary[] {
     .map(palSummary);
 }
 
+function palListFacets(): PalworldPalListFacets {
+  const count = <T extends string | number>(values: T[], value: T) =>
+    values.filter((candidate) => candidate === value).length;
+  const elements = pals.flatMap((pal) => pal.elements);
+  const workSuitabilities = pals.flatMap((pal) => pal.workSuitabilities.map((work) => work.type));
+  const rarities = pals.map((pal) => pal.rarity);
+  const variants = pals.map((pal) => pal.variantType);
+  return {
+    elements: PALWORLD_ELEMENTS
+      .map((value) => ({ value, count: count(elements, value) }))
+      .filter((facet) => facet.count > 0),
+    workSuitabilities: PALWORLD_WORK_SUITABILITY_TYPES
+      .map((value) => ({ value, count: count(workSuitabilities, value) }))
+      .filter((facet) => facet.count > 0),
+    rarities: [...new Set(rarities)]
+      .sort((left, right) => left - right)
+      .map((value) => ({ value, count: count(rarities, value) })),
+    variants: PALWORLD_VARIANT_TYPES
+      .map((value) => ({ value, count: count(variants, value) }))
+      .filter((facet) => facet.count > 0),
+  };
+}
+
+function palListResponse(url: URL): PalworldPalListResponse {
+  return {
+    ...pageResponse(filteredPals(url), url),
+    facets: palListFacets(),
+  };
+}
+
 function filteredItems(url: URL): PalworldItemSummary[] {
   const query = url.searchParams.get("q");
   const category = url.searchParams.get("category");
@@ -752,7 +790,7 @@ async function installApiFixtures(page: Page): Promise<void> {
       return;
     }
     if (url.pathname === "/api/palworld/pals") {
-      await json(route, pageResponse(filteredPals(url), url));
+      await json(route, palListResponse(url));
       return;
     }
     if (url.pathname === "/api/palworld/items") {
@@ -1305,11 +1343,17 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
 
   await expect(page.getByTestId("header-search")).toBeVisible();
   await expect(page.getByTestId("hero-search")).toHaveCount(0);
-  const filters = page.locator(".palworld-filter-bar");
-  await expect(filters.getByLabel("속성")).toHaveValue("ground");
-  await expect(filters.getByLabel("작업 적성")).toHaveValue("mining");
-  await expect(filters.locator("label").filter({ has: page.getByText("정렬", { exact: true }) }).locator("select")).toHaveValue("number");
-  await expect(filters.locator("label").filter({ has: page.getByText("정렬 방향", { exact: true }) }).locator("select")).toHaveValue("desc");
+  const mobileFilterTrigger = page.getByTestId("pal-filter-trigger");
+  const mobileFilters = await mobileFilterTrigger.isVisible();
+  if (mobileFilters) await mobileFilterTrigger.click();
+  const filterSurface = mobileFilters ? page.getByRole("dialog", { name: "상세 필터" }) : page;
+  const elementFilters = filterSurface.getByRole("group", { name: "속성" });
+  const workFilters = filterSurface.getByRole("group", { name: "작업 적성" });
+  await expect(elementFilters.getByRole("button", { name: /땅/u })).toHaveAttribute("aria-pressed", "true");
+  await expect(workFilters.getByRole("button", { name: /채굴/u })).toHaveAttribute("aria-pressed", "true");
+  if (mobileFilters) await page.keyboard.press("Escape");
+  await expect(page.getByRole("combobox", { name: "정렬", exact: true })).toHaveValue("number");
+  await expect(page.locator(".palworld-pal-sort-order")).toContainText("내림차순");
   await expect(page.locator(".palworld-pal-grid")).toBeVisible();
   const anubisCard = page.getByTestId("pal-card").filter({ hasText: "아누비스" });
   await expect(anubisCard).toBeVisible();
@@ -1395,6 +1439,144 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(japaneseDialog).toContainText("フォレーナ");
   await expect(japaneseDialog).toContainText("性別条件: メス / オス");
   await expect(japaneseDialog.getByText("夜行性: はい", { exact: true })).toBeVisible();
+  await assertHealthyDocument(page, errors);
+});
+
+test("Pal 도감 검색·facet·chip·초기화·정렬은 URL을 단일 적용 상태로 유지한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/palworld/pals?element=ground&work=mining&rarity=10&variant=special&sort=name&order=desc&page=2");
+
+  const search = page.locator(".palworld-pal-search-form").getByRole("searchbox", { name: "이름 검색" });
+  await expect(search).toBeVisible();
+  const mobileFilterTrigger = page.getByTestId("pal-filter-trigger");
+  const mobileFilters = await mobileFilterTrigger.isVisible();
+  if (mobileFilters) await mobileFilterTrigger.click();
+  let filterSurface = mobileFilters ? page.getByRole("dialog", { name: "상세 필터" }) : page;
+  const elementGroup = filterSurface.getByRole("group", { name: "속성" });
+  const workGroup = filterSurface.getByRole("group", { name: "작업 적성" });
+  await expect(elementGroup.getByRole("button", { name: /땅/u })).toHaveAttribute("aria-pressed", "true");
+  await expect(workGroup.getByRole("button", { name: /채굴/u })).toHaveAttribute("aria-pressed", "true");
+  await expect(elementGroup.getByRole("button", { name: /물/u })).toBeVisible();
+  await expect(filterSurface.getByRole("combobox", { name: "희귀도", exact: true })).toHaveValue("10");
+  await expect(filterSurface.getByRole("option", { name: /★ 20/u })).toHaveCount(0);
+  await expect(filterSurface.getByRole("combobox", { name: "종류", exact: true })).toHaveValue("special");
+  if (mobileFilters) await page.keyboard.press("Escape");
+  await expect(page.getByText("조건에 맞는 Pal 1종 · 1/1 페이지", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "땅 속성 필터 제거" })).toBeVisible();
+
+  await search.fill("  펭킹  ");
+  await page.getByRole("combobox", { name: "정렬", exact: true }).selectOption("rarity");
+  await expect(search).toHaveValue("  펭킹  ");
+  await search.press("Enter");
+  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("펭킹");
+  await expect.poll(() => new URL(page.url()).searchParams.has("page")).toBe(false);
+  expect(new URL(page.url()).searchParams.get("order")).toBe("desc");
+
+  await page.getByRole("button", { name: "땅 속성 필터 제거" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.has("element")).toBe(false);
+  expect(new URL(page.url()).searchParams.get("work")).toBe("mining");
+  expect(new URL(page.url()).searchParams.get("sort")).toBe("rarity");
+  expect(new URL(page.url()).searchParams.get("order")).toBe("desc");
+
+  if (mobileFilters) {
+    await mobileFilterTrigger.click();
+    filterSurface = page.getByRole("dialog", { name: "상세 필터" });
+    await filterSurface.getByRole("button", { name: "필터 초기화" }).click();
+    await page.keyboard.press("Escape");
+  } else {
+    await page.getByRole("button", { name: "필터 초기화" }).click();
+  }
+  await expect.poll(() => {
+    const current = new URL(page.url()).searchParams;
+    return ["q", "element", "work", "rarity", "variant", "page"].every((key) => !current.has(key));
+  }).toBe(true);
+  expect(new URL(page.url()).searchParams.get("sort")).toBe("rarity");
+  expect(new URL(page.url()).searchParams.get("order")).toBe("desc");
+  await expect(search).toHaveValue("");
+
+  await page.goBack();
+  await expect.poll(() => new URL(page.url()).searchParams.has("element")).toBe(false);
+  await expect(search).toHaveValue("펭킹");
+  await page.goForward();
+  await expect(search).toHaveValue("");
+
+  await page.goto("/palworld/pals?q=존재하지않는Pal");
+  await expect(page.getByText("조건에 맞는 Pal 0종 · 0/0 페이지", { exact: true })).toBeVisible();
+  await expect(page.getByText("조건에 맞는 Pal이 없습니다.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.locator(".public-locale-button").click();
+  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("존재하지않는Pal");
+  await expect(page.getByText("条件に一致するパル 0体 · 0/0ページ", { exact: true })).toBeVisible();
+  if (mobileFilters) await page.getByTestId("pal-filter-trigger").click();
+  await expect(page.getByRole("group", { name: "属性" })).toBeVisible();
+  if (mobileFilters) await page.keyboard.press("Escape");
+  await assertHealthyDocument(page, errors);
+});
+
+test("Pal 도감 모바일 필터 Modal은 즉시 적용·focus 복귀·scroll lock과 모든 화면 폭을 지원한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  const mobileViewports = [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+    { width: 768, height: 1024 },
+  ];
+
+  for (const viewport of mobileViewports) {
+    await page.setViewportSize(viewport);
+    await page.goto("/palworld/pals?q=아누비스&element=ground&work=mining&rarity=10&variant=special");
+    const search = page.locator(".palworld-pal-search-form").getByRole("searchbox", { name: "이름 검색" });
+    const trigger = page.getByTestId("pal-filter-trigger");
+    await expect(search).toBeVisible();
+    await expect(trigger).toHaveText("필터 4개");
+    await expect(page.locator(".palworld-pal-filter-panel")).toBeHidden();
+
+    await trigger.focus();
+    await trigger.click();
+    const dialog = page.getByRole("dialog", { name: "상세 필터" });
+    await expect(dialog).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+    await expect.poll(() => dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+    await dialog.getByRole("group", { name: "속성" }).getByRole("button", { name: /불/u }).click();
+    await expect.poll(() => new URL(page.url()).searchParams.get("element")).toBe("fire");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /물/u })).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("");
+    await assertHealthyDocument(page, errors);
+  }
+
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/palworld/pals?element=ground");
+  await expect(page.locator(".palworld-pal-filter-panel")).toBeVisible();
+  await expect(page.getByTestId("pal-filter-trigger")).toBeHidden();
+  await assertHealthyDocument(page, errors);
+});
+
+test("Pal 도감 API 오류는 결과 없음과 구분하고 동일 query로 재시도한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  let fail = true;
+  await page.route("**/api/palworld/pals*", async (route) => {
+    if (!fail) {
+      await route.fallback();
+      return;
+    }
+    await json(route, { error: "PALWORLD_TEMPORARY_FAILURE", message: "일시적인 오류" }, 503);
+  });
+  await page.goto("/palworld/pals?element=ground&sort=name");
+  await expect(page.getByRole("alert")).toContainText("데이터를 불러오지 못했습니다.");
+  await expect(page.getByText("조건에 맞는 Pal이 없습니다.", { exact: true })).toHaveCount(0);
+  fail = false;
+  await page.getByRole("button", { name: "다시 시도" }).click();
+  await expect(page.getByTestId("pal-card").filter({ hasText: "아누비스" })).toBeVisible();
+  expect(new URL(page.url()).searchParams.get("element")).toBe("ground");
+  expect(new URL(page.url()).searchParams.get("sort")).toBe("name");
+  expect(errors.some((message) => message.includes("503 (Service Unavailable)"))).toBe(true);
+  errors.length = 0;
   await assertHealthyDocument(page, errors);
 });
 

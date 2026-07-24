@@ -1,4 +1,7 @@
 import {
+  PALWORLD_ELEMENTS,
+  PALWORLD_VARIANT_TYPES,
+  PALWORLD_WORK_SUITABILITY_TYPES,
   assertPalworldDataSnapshot,
   validatePalworldMetaResponse,
   type PalworldBreedingPair,
@@ -13,6 +16,8 @@ import {
   type PalworldPaginatedResponse,
   type PalworldPagination,
   type PalworldPalDetail,
+  type PalworldPalListFacets,
+  type PalworldPalListResponse,
   type PalworldPalReference,
   type PalworldPalSummary,
   type PalworldRuntimeGates,
@@ -119,6 +124,42 @@ function palReference(pal: PalworldPalDetail): PalworldPalReference {
     elements: pal.elements,
     ...(pal.translation?.name === undefined ? {} : {
       translation: { name: { ...pal.translation.name } }
+    })
+  };
+}
+
+function collectPalListFacets(pals: readonly PalworldPalDetail[]): PalworldPalListFacets {
+  const elementCounts = new Map(PALWORLD_ELEMENTS.map((value) => [value, 0]));
+  const workCounts = new Map(PALWORLD_WORK_SUITABILITY_TYPES.map((value) => [value, 0]));
+  const variantCounts = new Map(PALWORLD_VARIANT_TYPES.map((value) => [value, 0]));
+  const rarityCounts = new Map<number, number>();
+
+  for (const pal of pals) {
+    for (const element of pal.elements) {
+      elementCounts.set(element, (elementCounts.get(element) ?? 0) + 1);
+    }
+    for (const work of pal.workSuitabilities) {
+      workCounts.set(work.type, (workCounts.get(work.type) ?? 0) + 1);
+    }
+    variantCounts.set(pal.variantType, (variantCounts.get(pal.variantType) ?? 0) + 1);
+    rarityCounts.set(pal.rarity, (rarityCounts.get(pal.rarity) ?? 0) + 1);
+  }
+
+  return {
+    elements: PALWORLD_ELEMENTS.flatMap((value) => {
+      const count = elementCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
+    }),
+    workSuitabilities: PALWORLD_WORK_SUITABILITY_TYPES.flatMap((value) => {
+      const count = workCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
+    }),
+    rarities: [...rarityCounts.entries()]
+      .sort(([left], [right]) => left - right)
+      .map(([value, count]) => ({ value, count })),
+    variants: PALWORLD_VARIANT_TYPES.flatMap((value) => {
+      const count = variantCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
     })
   };
 }
@@ -405,6 +446,7 @@ export class PalworldDataService {
   private readonly itemsById: ReadonlyMap<string, PalworldItemDetail>;
   private readonly skillsById: ReadonlyMap<string, PalworldSkillDetail>;
   private readonly sourceInternalIds: Readonly<Record<string, string>>;
+  private readonly palListFacets: PalworldPalListFacets;
   private readonly domains: PalworldDomainCoverageMap;
   private readonly gates: PalworldRuntimeGates;
   private readonly coverage: PalworldDataCoverage | undefined;
@@ -427,6 +469,7 @@ export class PalworldDataService {
     this.itemsById = this.indexByIdAliases(this.supplementalSnapshot.items);
     this.skillsById = this.indexByIdAliases(this.snapshot.skills ?? []);
     this.sourceInternalIds = options.sourceInternalIds ?? {};
+    this.palListFacets = collectPalListFacets(this.snapshot.pals);
     this.coverage = options.coverage;
     this.breedingEngine = options.breedingEngine
       ?? (
@@ -578,7 +621,7 @@ export class PalworldDataService {
     };
   }
 
-  listPals(query: PalworldPalListQuery): PalworldPaginatedResponse<PalworldPalSummary> {
+  listPals(query: PalworldPalListQuery): PalworldPalListResponse {
     const term = query.q ? normalizePalworldSearchTerm(query.q) : undefined;
     const filtered = this.snapshot.pals
       .filter((pal) => term === undefined || matchScore(term, [
@@ -606,7 +649,13 @@ export class PalworldDataService {
     return {
       items: pageItems(filtered, pageInfo.page, query.limit).map(palSummary),
       pagination: pageInfo,
-      metadata: this.snapshot.metadata
+      metadata: this.snapshot.metadata,
+      facets: {
+        elements: this.palListFacets.elements.map((facet) => ({ ...facet })),
+        workSuitabilities: this.palListFacets.workSuitabilities.map((facet) => ({ ...facet })),
+        rarities: this.palListFacets.rarities.map((facet) => ({ ...facet })),
+        variants: this.palListFacets.variants.map((facet) => ({ ...facet }))
+      }
     };
   }
 

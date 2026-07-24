@@ -13,7 +13,7 @@ const { PALWORLD_SNAPSHOT } = await import("../dist/data/palworld-snapshot.js");
 const {
   validatePalworldItemSummary,
   validatePalworldPaginatedResponse,
-  validatePalworldPalSummary,
+  validatePalworldPalListResponse,
   validatePalworldSearchResult,
   validatePalworldSkillDetail,
   validatePalworldSkillSummary
@@ -208,6 +208,59 @@ test("Pal 목록은 allowlist 필터, 정렬과 pagination을 적용한다", () 
   assert.deepEqual(sourceInternalId.items.map((pal) => pal.id), ["lamball"]);
 });
 
+test("Pal 목록 facet은 현재 페이지가 아닌 전체 active catalog에서 계산한다", () => {
+  const total = service.meta().counts.pals;
+  const allPals = service.listPals({
+    sort: "number",
+    order: "asc",
+    page: 1,
+    limit: total
+  }).items;
+  const firstPage = service.listPals({
+    element: "ground",
+    work: "mining",
+    rarity: 10,
+    variant: "normal",
+    sort: "number",
+    order: "asc",
+    page: 1,
+    limit: 1
+  });
+  const unfiltered = service.listPals({
+    sort: "number",
+    order: "asc",
+    page: 1,
+    limit: 1
+  });
+
+  assert.equal(firstPage.items.length <= 1, true);
+  assert.deepEqual(firstPage.facets, unfiltered.facets);
+  assert.equal(unfiltered.pagination.pageSize, 1);
+  assert.equal(unfiltered.facets.variants.reduce((sum, facet) => sum + facet.count, 0), total);
+  assert.equal(unfiltered.facets.rarities.reduce((sum, facet) => sum + facet.count, 0), total);
+
+  for (const facet of unfiltered.facets.elements) {
+    assert.equal(
+      facet.count,
+      allPals.filter((pal) => pal.elements.includes(facet.value)).length
+    );
+  }
+  for (const facet of unfiltered.facets.workSuitabilities) {
+    assert.equal(
+      facet.count,
+      allPals.filter((pal) =>
+        pal.workSuitabilities.some((work) => work.type === facet.value)
+      ).length
+    );
+  }
+  for (const facet of unfiltered.facets.rarities) {
+    assert.equal(facet.count, allPals.filter((pal) => pal.rarity === facet.value).length);
+  }
+  for (const facet of unfiltered.facets.variants) {
+    assert.equal(facet.count, allPals.filter((pal) => pal.variantType === facet.value).length);
+  }
+});
+
 test("아이템 목록은 종류, 획득 방식, 희귀도와 정렬을 적용한다", () => {
   const response = service.listItems({
     category: "sphere",
@@ -324,7 +377,7 @@ test("검색과 목록 응답은 Shared schema 계약을 충족한다", () => {
   const items = service.listItems({ sort: "name", order: "asc", page: 1, limit: 5 });
   const skills = service.listSkills({ sort: "name", order: "asc", page: 1, limit: 5 });
   assert.equal(validatePalworldSearchResult(service.search("Pal", 20)).ok, true);
-  assert.equal(validatePalworldPaginatedResponse(pals, validatePalworldPalSummary).ok, true);
+  assert.equal(validatePalworldPalListResponse(pals).ok, true);
   assert.equal(validatePalworldPaginatedResponse(items, validatePalworldItemSummary).ok, true);
   assert.equal(validatePalworldPaginatedResponse(skills, validatePalworldSkillSummary).ok, true);
   assert.equal(validatePalworldSkillDetail(service.getSkill(skills.items[0].id)).ok, true);

@@ -17,6 +17,8 @@ import {
   validatePalworldPalDrop,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
+  validatePalworldPalListFacets,
+  validatePalworldPalListResponse,
   validatePalworldPalSummary,
   validatePalworldSearchResult,
   validatePalworldSkill,
@@ -1337,6 +1339,69 @@ test("페이지 응답은 item schema와 페이지 크기를 함께 검증한다
     metadata
   }, validatePalworldPalSummary);
   assert.equal(impossibleEmptyPage.ok, false);
+});
+
+test("Pal 목록 facet 응답은 exact enum·중복·안전한 count를 검증한다", () => {
+  const palSummary = {
+    id: pal.id,
+    number: pal.number,
+    nameKo: pal.nameKo,
+    nameJa: pal.nameJa,
+    nameEn: pal.nameEn,
+    imageUrl: pal.imageUrl,
+    elements: pal.elements,
+    rarity: pal.rarity,
+    variantType: pal.variantType,
+    workSuitabilities: pal.workSuitabilities
+  };
+  const facets = {
+    elements: [{ value: "ground", count: 42 }],
+    workSuitabilities: [{ value: "mining", count: 31 }],
+    rarities: [{ value: 10, count: 18 }],
+    variants: [{ value: "normal", count: 203 }]
+  };
+  const response = {
+    items: [palSummary],
+    pagination: {
+      page: 1,
+      pageSize: 20,
+      total: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false
+    },
+    metadata,
+    facets
+  };
+
+  assert.equal(validatePalworldPalListFacets(facets).ok, true);
+  assert.equal(validatePalworldPalListResponse(response).ok, true);
+  assert.equal(validatePalworldPalListResponse({ ...response, unexpected: true }).ok, false);
+  assert.equal(validatePalworldPalListFacets({ ...facets, unexpected: [] }).ok, false);
+  assert.equal(validatePalworldPalListFacets({
+    ...facets,
+    elements: [{ ...facets.elements[0], unexpected: true }]
+  }).ok, false);
+  assert.equal(validatePalworldPalListFacets({
+    ...facets,
+    elements: [...facets.elements, { value: "ground", count: 1 }]
+  }).ok, false);
+
+  for (const count of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+    assert.equal(validatePalworldPalListFacets({
+      ...facets,
+      elements: [{ value: "ground", count }]
+    }).ok, false);
+  }
+
+  for (const invalidFacets of [
+    { ...facets, elements: [{ value: "wind", count: 1 }] },
+    { ...facets, workSuitabilities: [{ value: "fishing", count: 1 }] },
+    { ...facets, rarities: [{ value: 0, count: 1 }] },
+    { ...facets, variants: [{ value: "boss", count: 1 }] }
+  ]) {
+    assert.equal(validatePalworldPalListFacets(invalidFacets).ok, false);
+  }
 });
 
 test("교배 결과와 목표 Pal 부모 목록 응답 validator를 제공한다", () => {
