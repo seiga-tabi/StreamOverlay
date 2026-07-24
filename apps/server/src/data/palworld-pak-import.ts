@@ -624,7 +624,7 @@ export function parseWorkAssetMap(
   const availableSourceMembers = root.availableSourceMembers.map((value, index) => {
     const member = stringValue(value, `workIconMap.availableSourceMembers[${index}]`, 512);
     if (
-      !/^Pal\/Texture\/UI\/InGame\/T_icon_palwork_[A-Za-z0-9_]+\.png$/u.test(member)
+      !/^Pal\/Texture\/UI\/InGame\/SkillIcon\/T_icon_skill_pal_WorkRank_[A-Za-z0-9_]+\.png$/u.test(member)
     ) {
       fail(`workIconMap.availableSourceMembers[${index}]: 허용된 work icon 경로가 아닙니다.`);
     }
@@ -2550,7 +2550,7 @@ export async function importPalworldPakCandidate(
         const availableWorkIconMembers = reader.members
           .map((entry) => entry.name)
           .filter((name) =>
-            /^Pal\/Texture\/UI\/InGame\/T_icon_palwork_[A-Za-z0-9_]+\.png$/u.test(name)
+            /^Pal\/Texture\/UI\/InGame\/SkillIcon\/T_icon_skill_pal_WorkRank_[A-Za-z0-9_]+\.png$/u.test(name)
           )
           .sort((left, right) => left.localeCompare(right, "en"));
         if (

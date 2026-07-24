@@ -3,11 +3,12 @@ import { Card, CardContent } from "../../../shared/ui/Card";
 import { Badge } from "../../../shared/ui/Status";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { formatPalNumber } from "../utils/search";
-import { categoryLabel, workLabel } from "../utils/labels";
+import { categoryLabel } from "../utils/labels";
 import { resolvePalworldDescription, resolvePalworldName } from "../utils/localization";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldTranslationBadges } from "./PalworldTranslationBadge";
+import { PalworldWorkSuitabilityBadge } from "./PalworldWorkSuitabilityBadge";
 
 function rarityTone(rarity: number): "neutral" | "info" | "warning" {
   if (rarity >= 4) return "warning";
@@ -26,18 +27,36 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
   const name = resolvePalworldName(pal, locale);
   const displayName = name.text;
   return (
-    <Card className="palworld-entity-card" variant="interactive" padding="none" onClick={() => onOpen(pal)} aria-label={`${displayName} · ${text.openPal}`} data-testid="pal-card">
-      <div className="palworld-entity-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={displayName} locale={locale} priority={priority} {...imageDimensions(pal)} /></div>
-      <CardContent>
-        <div className="palworld-card-kicker"><span>{formatPalNumber(pal.number, locale)}</span><Badge size="sm" tone={rarityTone(pal.rarity)}>★ {pal.rarity}</Badge></div>
-        <h3 title={displayName}>{displayName}</h3>
-        <PalworldTranslationBadges locale={locale} statuses={[name.status]} />
-        <div className="palworld-badge-row">
-          {pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}
-          {pal.variantType !== "normal" ? <Badge size="sm" tone="warning">{pal.variantType === "special" ? text.special : text.variantPal}</Badge> : null}
+    <Card className="palworld-entity-card palworld-pal-card" variant="interactive" padding="none" onClick={() => onOpen(pal)} aria-label={`${displayName} · ${text.openPal}`} data-testid="pal-card">
+      <div className="palworld-pal-card-main">
+        <div className="palworld-pal-card-media">
+          <div className="palworld-pal-card-image-frame">
+            <PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={displayName} locale={locale} priority={priority} {...imageDimensions(pal)} />
+          </div>
         </div>
-        {pal.workSuitabilities[0] ? <p className="palworld-card-note">{workLabel(pal.workSuitabilities[0].type, locale)} {text.levelPrefix}{pal.workSuitabilities[0].level}</p> : null}
-      </CardContent>
+        <CardContent className="palworld-pal-card-content">
+          <div className="palworld-card-kicker"><span>{formatPalNumber(pal.number, locale)}</span><Badge size="sm" tone={rarityTone(pal.rarity)}>★ {pal.rarity}</Badge></div>
+          <h3 title={displayName}>{displayName}</h3>
+          <PalworldTranslationBadges locale={locale} statuses={[name.status]} />
+          <div className="palworld-badge-row">
+            {pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}
+            {pal.variantType !== "normal" ? <Badge size="sm" tone="warning">{pal.variantType === "special" ? text.special : text.variantPal}</Badge> : null}
+          </div>
+        </CardContent>
+      </div>
+      {pal.workSuitabilities.length ? (
+        <div
+          aria-label={text.workSuitabilities}
+          className="palworld-card-work-list"
+          data-ja={palworldI18n.ja.workSuitabilities}
+          data-ko={palworldI18n.ko.workSuitabilities}
+          role="list"
+        >
+          {pal.workSuitabilities.map((work) => (
+            <PalworldWorkSuitabilityBadge key={work.type} level={work.level} locale={locale} type={work.type} />
+          ))}
+        </div>
+      ) : null}
     </Card>
   );
 }

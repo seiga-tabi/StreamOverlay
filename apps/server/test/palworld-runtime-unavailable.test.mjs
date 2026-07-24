@@ -162,6 +162,7 @@ test("Palworld 데이터가 없으면 Palworld GET API만 고정 503이고 healt
     "/api/palworld/pals/lamball",
     "/api/palworld/items",
     "/api/palworld/items/pal-sphere",
+    "/api/palworld/map/markers?world=main",
     "/api/palworld/breeding?parentA=penking&parentB=bushi",
     "/api/palworld/breeding/parents?child=anubis"
   ];

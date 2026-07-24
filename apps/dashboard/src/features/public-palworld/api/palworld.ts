@@ -4,6 +4,7 @@ import type {
   PalworldBreedingGender,
   PalworldItemDetail,
   PalworldItemSummary,
+  PalworldMapMarkersResponse,
   PalworldMetaResponse,
   PalworldPaginatedResponse,
   PalworldPalDetail,
@@ -18,6 +19,7 @@ import {
   validatePalworldBreedingResultResponse,
   validatePalworldItemDetail,
   validatePalworldItemSummary,
+  validatePalworldMapMarkersResponse,
   validatePalworldMetaResponse,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
@@ -192,6 +194,18 @@ function queryPath(path: string, params: URLSearchParams): string {
 
 export function getPalworldMeta(signal?: AbortSignal): Promise<PalworldMetaResponse> {
   return publicGet("/api/palworld/meta", signal, validatePalworldMetaResponse);
+}
+
+export function getPalworldMapMarkers(
+  world: "main" | "tree" = "main",
+  signal?: AbortSignal,
+): Promise<PalworldMapMarkersResponse> {
+  const params = new URLSearchParams({ world });
+  return publicGet(
+    queryPath("/api/palworld/map/markers", params),
+    signal,
+    validatePalworldMapMarkersResponse,
+  );
 }
 
 export function searchPalworld(query: string, signal?: AbortSignal): Promise<PalworldSearchResult> {

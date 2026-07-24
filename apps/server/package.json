@@ -13,6 +13,7 @@
     "fetch:palworld-data": "tsx src/scripts/fetch-palworld-paldex.ts",
     "generate:palworld-data": "tsx src/scripts/generate-palworld-paldex.ts",
     "generate:palworld-breeding": "tsx src/scripts/generate-palworld-breeding.ts",
+    "generate:palworld-map-markers": "tsx src/scripts/generate-palworld-map-markers.ts",
     "import:palworld-images": "tsx src/scripts/import-palworld-images.ts",
     "import:palworld-catalog": "tsx src/scripts/import-palworld-catalog.ts",
     "preflight:palworld-pak": "tsx src/scripts/preflight-palworld-pak.ts",

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   copyFile,
   lstat,
@@ -30,6 +31,11 @@ import {
 } from "../data/palworld-translation-artifact.js";
 import { loadPalworldReviewedItemAliases } from "../data/palworld-reviewed-item-aliases.js";
 import { PalworldBreedingEngine } from "../services/palworld-breeding-engine.js";
+import {
+  PALWORLD_MAP_MARKER_ARTIFACT_FILE,
+  PALWORLD_MAP_MARKER_MANIFEST_FILE,
+  loadPalworldMapMarkerArtifact
+} from "../data/palworld-map-marker-artifact.js";
 
 const REQUIRED_LEGACY_RELEASE_FILES = [
   "sources.lock.json",
@@ -44,7 +50,9 @@ const REQUIRED_LEGACY_RELEASE_FILES = [
   "element-images-manifest.json",
   "breeding.json",
   "breeding-manifest.json",
-  "breeding-import-report.json"
+  "breeding-import-report.json",
+  PALWORLD_MAP_MARKER_ARTIFACT_FILE,
+  PALWORLD_MAP_MARKER_MANIFEST_FILE
 ] as const;
 
 const REQUIRED_TRANSLATION_RUNTIME_FILES = [
@@ -300,12 +308,31 @@ async function validateLegacyRuntime(
   ) {
     throw new Error("한국어·일본어 번역 runtime artifact 검증에 실패했습니다.");
   }
+  const mapMarkers = await loadPalworldMapMarkerArtifact(releaseRoot);
+  const mainMapMarkers = mapMarkers.worlds.find((world) => world.world === "main");
+  if (!mainMapMarkers || mainMapMarkers.markers.length < 1) {
+    throw new Error("MainMap 보스 marker runtime artifact가 비어 있습니다.");
+  }
+  const mapAssetPath = path.join(
+    staticRoot,
+    "maps",
+    `${mainMapMarkers.targetMapAssetSha256}.webp`
+  );
+  await assertRegularRuntimeFile(mapAssetPath, "Palworld MainMap 정적 WebP");
+  const mapAssetBytes = await readFile(mapAssetPath);
+  if (
+    createHash("sha256").update(mapAssetBytes).digest("hex")
+      !== mainMapMarkers.targetMapAssetSha256
+  ) {
+    throw new Error("Palworld MainMap marker가 참조하는 정적 WebP hash가 일치하지 않습니다.");
+  }
 
   console.log(
     `[palworld-data] legacy runtime artifact smoke 완료: release ${layout.release}, `
     + `${release.artifact.records.length}종, Pal 이미지 ${activeImages.length}개, `
     + `아이템 ${catalog.catalog.items.length}개, 스킬 ${catalog.catalog.skills.length}개, `
-    + `교배 결과 ${breedingEngine.pairCount}개, fallback ${release.manifest.imageAssetGate.fallbackPals}개`
+    + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers.markers.length}개, `
+    + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`
   );
 }
 

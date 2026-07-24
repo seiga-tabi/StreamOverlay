@@ -6,6 +6,7 @@ import type {
   PalworldDataMetadata,
   PalworldItemDetail,
   PalworldItemSummary,
+  PalworldMapMarkersResponse,
   PalworldPaginatedResponse,
   PalworldPalDetail,
   PalworldPalReference,
@@ -28,6 +29,47 @@ const READY_PAL_IMAGE_URL = `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`
 const READY_ITEM_IMAGE_URL = `/images/palworld/1.0.1/items/${"b".repeat(64)}.webp`;
 const READY_WORLD_MAP_URL = "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp";
 const LOCAL_WEBP_FIXTURE = resolve("apps/dashboard/public/images/yorogg-logo.webp");
+
+const mapMarkers: PalworldMapMarkersResponse = {
+  state: "ready",
+  world: "main",
+  markers: [{
+    id: "anubis-field-boss",
+    sourceRowId: "Anubis_FieldBoss",
+    sourceInternalId: "Anubis",
+    pal: {
+      id: "anubis",
+      number: 100,
+      nameKo: "아누비스",
+      nameJa: "アヌビス",
+      nameEn: "Anubis",
+      imageUrl: READY_PAL_IMAGE_URL,
+      imageWidth: 128,
+      imageHeight: 128,
+      elements: ["ground"],
+    },
+    level: 55,
+    normalizedX: 0.566558531,
+    normalizedY: 0.356591662,
+  }],
+  metadata,
+  overlay: {
+    schemaVersion: 1,
+    technicalStatus: "ready",
+    sourceType: "operator_pak_export",
+    archiveSha256: "1".repeat(64),
+    sourceMember: "Pal/DataTable/UI/DT_BossSpawnerLoactionData.json",
+    sourceMemberSha256: "2".repeat(64),
+    targetMapAssetSha256: "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+    sourceGameVersion: null,
+    sourceSteamBuildId: null,
+    targetGameVersion: "1.0.1",
+    compatibilityBasis: "exact_map_geometry_and_coordinate_transform",
+    transformRevision: "main-map-v1",
+    rightsVerified: false,
+    usageBasis: "operator_reference_use",
+  },
+};
 
 const pals: PalworldPalDetail[] = [
   {
@@ -468,6 +510,8 @@ function filteredPals(url: URL): PalworldPalSummary[] {
   const rarity = url.searchParams.get("rarity");
   const variant = url.searchParams.get("variant");
   const sort = url.searchParams.get("sort") ?? "number";
+  const locale = url.searchParams.get("locale") === "ja" ? "ja" : "ko";
+  const order = url.searchParams.get("order") === "desc" ? -1 : 1;
   return pals
     .filter((pal) => !query || matches(query, [...aliases(pal.id), pal.number, `#${pal.number}`, pal.nameKo, pal.nameJa, pal.nameEn]))
     .filter((pal) => !element || pal.elements.includes(element as never))
@@ -475,9 +519,12 @@ function filteredPals(url: URL): PalworldPalSummary[] {
     .filter((pal) => !rarity || pal.rarity === Number(rarity))
     .filter((pal) => !variant || pal.variantType === variant)
     .sort((left, right) => {
-      if (sort === "rarity") return left.rarity - right.rarity || left.number - right.number;
-      if (sort === "name") return left.nameKo.localeCompare(right.nameKo);
-      return left.number - right.number;
+      const result = sort === "rarity"
+        ? left.rarity - right.rarity || left.number - right.number
+        : sort === "name"
+          ? (locale === "ja" ? left.nameJa : left.nameKo).localeCompare(locale === "ja" ? right.nameJa : right.nameKo)
+          : left.number - right.number;
+      return order * result;
     })
     .map(palSummary);
 }
@@ -604,6 +651,10 @@ async function installApiFixtures(page: Page): Promise<void> {
           },
         },
       });
+      return;
+    }
+    if (url.pathname === "/api/palworld/map/markers") {
+      await json(route, mapMarkers);
       return;
     }
     if (url.pathname === "/api/palworld/search") {
@@ -1129,17 +1180,41 @@ test("Palworld 로그아웃은 공유 session을 제거해 LoL에서도 미로�
   await expect(page.getByRole("button", { name: /Twitch/u }).first()).toBeVisible();
 });
 
-test("Pal 필터 query를 유지하고 카드·ESC·직접 URL 상세 Modal을 지원한다", async ({ page }) => {
+test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL 상세 Modal을 지원한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
-  await page.goto("/palworld/pals?element=ground&work=mining&sort=number");
+  await page.goto("/palworld/pals?element=ground&work=mining&sort=number&order=desc");
 
   await expect(page.getByTestId("header-search")).toBeVisible();
   await expect(page.getByTestId("hero-search")).toHaveCount(0);
-  await expect(page.getByLabel("속성")).toHaveValue("ground");
-  await expect(page.getByLabel("작업 적성")).toHaveValue("mining");
-  await expect(page.getByLabel("정렬")).toHaveValue("number");
+  const filters = page.locator(".palworld-filter-bar");
+  await expect(filters.getByLabel("속성")).toHaveValue("ground");
+  await expect(filters.getByLabel("작업 적성")).toHaveValue("mining");
+  await expect(filters.locator("label").filter({ has: page.getByText("정렬", { exact: true }) }).locator("select")).toHaveValue("number");
+  await expect(filters.locator("label").filter({ has: page.getByText("정렬 방향", { exact: true }) }).locator("select")).toHaveValue("desc");
+  await expect(page.locator(".palworld-pal-grid")).toBeVisible();
   const anubisCard = page.getByTestId("pal-card").filter({ hasText: "아누비스" });
   await expect(anubisCard).toBeVisible();
+  await expect(anubisCard.locator(".palworld-pal-card-image-frame")).toBeVisible();
+  await expect(anubisCard.locator(".palworld-card-work-list [role='listitem']")).toHaveCount(2);
+  await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
+  await expect(anubisCard.locator('[data-work-type="mining"]')).toContainText("Lv.3");
+  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(2);
+  const cardBox = await anubisCard.boundingBox();
+  const cardMainBox = await anubisCard.locator(".palworld-pal-card-main").boundingBox();
+  const cardImageFrameBox = await anubisCard.locator(".palworld-pal-card-image-frame").boundingBox();
+  const cardContentBox = await anubisCard.locator(".palworld-pal-card-content").boundingBox();
+  const cardWorkBox = await anubisCard.locator(".palworld-card-work-list").boundingBox();
+  expect(cardBox).not.toBeNull();
+  expect(cardMainBox).not.toBeNull();
+  expect(cardImageFrameBox).not.toBeNull();
+  expect(cardContentBox).not.toBeNull();
+  expect(cardWorkBox).not.toBeNull();
+  if (cardBox && cardMainBox && cardImageFrameBox && cardContentBox && cardWorkBox) {
+    expect(cardImageFrameBox.x + cardImageFrameBox.width).toBeLessThanOrEqual(cardContentBox.x + 1);
+    expect(cardWorkBox.y).toBeGreaterThanOrEqual(cardMainBox.y + cardMainBox.height - 1);
+    expect(cardImageFrameBox.width).toBeLessThanOrEqual(120);
+    expect(cardBox.width / cardBox.height).toBeGreaterThan(1.2);
+  }
 
   await anubisCard.click();
   await expect(page).toHaveURL(/pal=anubis/u);
@@ -1152,12 +1227,31 @@ test("Pal 필터 query를 유지하고 카드·ESC·직접 URL 상세 Modal을 �
   const directDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" });
   await expect(directDialog).toBeVisible();
   await expect(directDialog).not.toContainText("アヌビス");
-  const koreanNocturnal = directDialog.locator(".palworld-data-row").filter({ hasText: "야행성" });
-  await expect(koreanNocturnal).toContainText("예");
+  await expect(directDialog).not.toContainText("교배 파워");
+  await expect(directDialog).not.toContainText("교배 정보");
+  await expect(directDialog.getByText("야행성: 예", { exact: true })).toBeVisible();
+  const workList = directDialog.getByRole("list", { name: "작업 적성" });
+  await expect(workList.locator(".palworld-work-suitability-badge")).toHaveCount(2);
+  await expect(workList.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
+  await expect(workList.locator('[data-work-type="mining"]')).toContainText("Lv.3");
+  const statChart = directDialog.getByTestId("palworld-stat-chart");
+  await expect(statChart.locator(".palworld-stat-chart-row")).toHaveCount(5);
+  await expect(statChart.locator('[data-stat="hp"]')).toContainText("120");
+  await expect(statChart.locator('[data-stat="moveSpeed"]')).toContainText("800");
+  const palMediaBox = await directDialog.locator(".palworld-pal-detail-media").boundingBox();
+  const palImageBox = await directDialog.getByRole("img", { name: "아누비스" }).boundingBox();
+  expect(palMediaBox).not.toBeNull();
+  expect(palImageBox).not.toBeNull();
+  if (palMediaBox && palImageBox) {
+    expect(palMediaBox.width).toBeLessThanOrEqual(160);
+    expect(palMediaBox.width - palImageBox.width).toBeLessThanOrEqual(32);
+  }
   await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/pals/anubis");
   await page.keyboard.press("Escape");
   await page.goto("/palworld/pals?pal=katress-ignis");
   const specialDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "캐티위자드" });
+  await expect(specialDialog).toContainText("교배 정보");
+  await expect(specialDialog).not.toContainText("교배 파워");
   await expect(specialDialog).toContainText("캐티메이지");
   await expect(specialDialog).toContainText("마호");
   await expect(specialDialog).toContainText("성별 조건: 암컷 / 수컷");
@@ -1171,11 +1265,12 @@ test("Pal 필터 query를 유지하고 카드·ESC·직접 URL 상세 Modal을 �
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
   const japaneseDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "クレメーナ" });
+  await expect(japaneseDialog).toContainText("配合情報");
+  await expect(japaneseDialog).not.toContainText("配合パワー");
   await expect(japaneseDialog).toContainText("クレメーオ");
   await expect(japaneseDialog).toContainText("フォレーナ");
   await expect(japaneseDialog).toContainText("性別条件: メス / オス");
-  const japaneseNocturnal = japaneseDialog.locator(".palworld-data-row").filter({ hasText: "夜行性" });
-  await expect(japaneseNocturnal).toContainText("はい");
+  await expect(japaneseDialog.getByText("夜行性: はい", { exact: true })).toBeVisible();
   await assertHealthyDocument(page, errors);
 });
 
@@ -1493,6 +1588,27 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.getByRole("button", { name: "지도 확대" }).click();
   await expect(page.getByText("150%", { exact: true })).toBeVisible();
   await expect.poll(() => viewport.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+  const mapStage = page.getByTestId("palworld-map-stage");
+  const transformBeforeDrag = await mapStage.evaluate((element) => window.getComputedStyle(element).transform);
+  await viewport.scrollIntoViewIfNeeded();
+  const viewportBounds = await viewport.boundingBox();
+  expect(viewportBounds).not.toBeNull();
+  if (viewportBounds) {
+    await page.mouse.move(
+      viewportBounds.x + (viewportBounds.width * 0.2),
+      viewportBounds.y + (viewportBounds.height * 0.2),
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      viewportBounds.x + (viewportBounds.width * 0.35),
+      viewportBounds.y + (viewportBounds.height * 0.35),
+      { steps: 4 },
+    );
+    await page.mouse.up();
+  }
+  await expect.poll(
+    () => mapStage.evaluate((element) => window.getComputedStyle(element).transform),
+  ).not.toBe(transformBeforeDrag);
   await page.getByRole("button", { name: "배율 초기화" }).click();
   await expect(page.getByText("100%", { exact: true })).toBeVisible();
 
@@ -1501,11 +1617,19 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.goForward();
   await expect(page).toHaveURL(/\/palworld\/map$/u);
   await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+  const bossMarker = page.getByRole("button", { name: "필드 보스: 아누비스, Lv.55" });
+  await expect(bossMarker).toBeVisible();
+  await bossMarker.click();
+  await expect(page).toHaveURL(/\/palworld\/map\?pal=anubis$/u);
+  await expect(page.getByRole("dialog", { name: "아누비스" })).toBeVisible();
+  await page.getByRole("button", { name: "닫기" }).click();
+  await expect(page).toHaveURL(/\/palworld\/map$/u);
 
   await page.locator(".public-locale-button").click();
   await page.getByRole("menuitemradio", { name: /JP/u }).click();
   await expect(page.getByRole("heading", { name: "Palworld ワールドマップ", level: 1 })).toBeVisible();
   await expect(page.getByRole("button", { name: "マップを拡大" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "フィールドボス: アヌビス, Lv.55" })).toBeVisible();
   await assertHealthyDocument(page, errors);
 });
 

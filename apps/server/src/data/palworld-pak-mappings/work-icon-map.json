@@ -2,23 +2,69 @@
   "schemaVersion": 1,
   "candidateRelease": "candidate-1248184a4b527d94",
   "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
-  "status": "blocked_pending_semantic_mapping",
+  "status": "verified",
   "availableSourceMembers": [
-    "Pal/Texture/UI/InGame/T_icon_palwork_00.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_01.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_02.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_03.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_04.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_05.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_06.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_07.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_08.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_09.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_10.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_11.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_12.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_13.png",
-    "Pal/Texture/UI/InGame/T_icon_palwork_90.png"
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Collection.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Cool.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Deforest.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_EmitFlame.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_GenerateElectricity.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Handcraft.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Mining.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_MonsterFarm.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_ProductMedicine.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Seeding.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Transport.png",
+    "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Watering.png"
   ],
-  "entries": []
+  "entries": [
+    {
+      "id": "cooling",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Cool.png"
+    },
+    {
+      "id": "farming",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_MonsterFarm.png"
+    },
+    {
+      "id": "gathering",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Collection.png"
+    },
+    {
+      "id": "generating_electricity",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_GenerateElectricity.png"
+    },
+    {
+      "id": "handiwork",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Handcraft.png"
+    },
+    {
+      "id": "kindling",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_EmitFlame.png"
+    },
+    {
+      "id": "lumbering",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Deforest.png"
+    },
+    {
+      "id": "medicine_production",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_ProductMedicine.png"
+    },
+    {
+      "id": "mining",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Mining.png"
+    },
+    {
+      "id": "planting",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Seeding.png"
+    },
+    {
+      "id": "transporting",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Transport.png"
+    },
+    {
+      "id": "watering",
+      "sourceMember": "Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_Watering.png"
+    }
+  ]
 }

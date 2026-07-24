@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "1.0.1",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "bossTable": {
+    "member": "Pal/DataTable/UI/DT_BossSpawnerLoactionData.json",
+    "sha256": "34a715be8f095967ead086ab71a3eeee5c0374298c5dae074894f8d908aae720"
+  },
+  "worldMapTable": {
+    "member": "Pal/DataTable/WorldMapUIData/DT_WorldMapUIData.json",
+    "sha256": "ef42c5e63e6683ec010d37b587263390a49caae3449e99f859cc9eac626e5846"
+  },
+  "sourceMapAsset": {
+    "member": "Pal/Texture/UI/Map/T_WorldMap.png",
+    "sha256": "f02560929cf0f30ee16ba2d2693f9ca65ca5400db14e13bca862268092499b62"
+  },
+  "targetMapAsset": {
+    "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
+    "sha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+    "width": 4096,
+    "height": 4096
+  },
+  "verification": {
+    "status": "source_bounds_and_biome_anchors_reviewed",
+    "revision": "main-map-fmodel-bounds-v1",
+    "coordinateCrossCheckRows": 700,
+    "maximumPixelError": 0.5
+  },
+  "expectedCounts": {
+    "sourceRows": 159,
+    "nonPalRows": 69,
+    "mainMarkers": 83,
+    "treeMarkers": 7
+  },
+  "world": {
+    "id": "main",
+    "sourceRowId": "MainMap",
+    "horizontalAxis": "world_y",
+    "verticalAxis": "world_x",
+    "invertHorizontal": false,
+    "invertVertical": true,
+    "sourceBounds": {
+      "minX": -1099400,
+      "maxX": 349400,
+      "minY": -724400,
+      "maxY": 724400
+    }
+  },
+  "treeBounds": {
+    "minX": 347351.5,
+    "maxX": 689148.5,
+    "minY": -818197,
+    "maxY": -476400
+  },
+  "aliases": [
+    {
+      "sourceCharacterId": "Boss_Anubis",
+      "sourceInternalId": "Anubis",
+      "reason": "source row 46의 구조적 prefix 대소문자 차이를 exact 교정",
+      "reviewStatus": "approved"
+    }
+  ]
+}

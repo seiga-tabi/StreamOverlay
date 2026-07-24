@@ -629,6 +629,13 @@
   gap: var(--yoro-space-2);
 }
 
+.palworld-map-marker-error {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-1);
+}
+
 .palworld-map-controls output {
   min-inline-size: calc(var(--yoro-size-touch-target) + var(--yoro-space-4));
   color: var(--yoro-color-text-strong);
@@ -645,29 +652,147 @@
 .palworld-map-viewport {
   position: relative;
   min-inline-size: 0;
-  overflow: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
   background: var(--yoro-color-surface-strong);
-  scroll-behavior: smooth;
-  touch-action: pan-x pan-y;
+  cursor: grab;
+  touch-action: none;
 }
 
-.palworld-map-viewport[data-zoomed="true"] {
-  max-block-size: 75vh;
+.palworld-map-viewport:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: calc(var(--yoro-focus-ring-width) * -1);
+}
+
+.palworld-map-viewport[data-panning="true"] {
+  cursor: grabbing;
+}
+
+.palworld-map-stage {
+  position: relative;
+  inline-size: 100%;
+  transform:
+    translate3d(
+      var(--palworld-map-translate-x, 0),
+      var(--palworld-map-translate-y, 0),
+      0
+    )
+    scale(var(--palworld-map-zoom, 1));
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
 .palworld-map-image {
   display: block;
-  inline-size: var(--palworld-map-scale, 100%);
-  max-inline-size: none;
+  inline-size: 100%;
+  max-inline-size: 100%;
   block-size: auto;
-  margin-inline: auto;
-  transition: inline-size var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
   user-select: none;
 }
 
 .palworld-map-image.is-loading {
   visibility: hidden;
+}
+
+.palworld-map-marker-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.palworld-map-marker-layer [data-map-interactive="true"] {
+  pointer-events: auto;
+}
+
+.palworld-map-boss-marker {
+  position: absolute;
+  z-index: var(--yoro-z-raised);
+  display: grid;
+  place-items: center;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-1);
+  border: 0;
+  background: transparent;
+  color: var(--yoro-color-text-strong);
+  cursor: pointer;
+  transform:
+    translate(-50%, -50%)
+    scale(var(--palworld-map-marker-inverse-scale, 1));
+  transform-origin: center;
+}
+
+.palworld-map-boss-marker:hover,
+.palworld-map-boss-marker:focus-visible {
+  z-index: var(--yoro-z-sticky);
+}
+
+.palworld-map-boss-marker:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: calc(var(--yoro-focus-ring-width) * -1);
+  border-radius: var(--yoro-radius-pill);
+}
+
+.palworld-map-boss-marker-media {
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--yoro-size-touch-target) - (var(--yoro-space-1) * 2));
+  block-size: calc(var(--yoro-size-touch-target) - (var(--yoro-space-1) * 2));
+  overflow: hidden;
+  border: thin solid var(--yoro-color-danger);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.palworld-map-boss-marker-media .palworld-media-image,
+.palworld-map-boss-marker-media .palworld-media-fallback {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+}
+
+.palworld-map-boss-marker-media .palworld-media-image {
+  object-fit: contain;
+}
+
+.palworld-map-boss-marker-media .palworld-media-fallback small {
+  display: none;
+}
+
+.palworld-map-boss-marker-tooltip {
+  position: absolute;
+  inset-block-end: calc(100% + var(--yoro-space-1));
+  inset-inline-start: 50%;
+  display: none;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  max-inline-size: min(15rem, 70vw);
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-panel);
+  font-size: var(--yoro-font-size-xs);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.palworld-map-boss-marker:hover .palworld-map-boss-marker-tooltip,
+.palworld-map-boss-marker:focus-visible .palworld-map-boss-marker-tooltip {
+  display: grid;
+}
+
+.palworld-map-boss-marker-tooltip > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palworld-map-boss-marker-tooltip small {
+  color: var(--yoro-color-text-muted);
+  font-size: inherit;
+  font-weight: var(--yoro-font-weight-bold);
 }
 
 .palworld-map-loading {
@@ -765,6 +890,48 @@
   overflow: hidden;
 }
 
+.palworld-entity-grid.palworld-pal-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  grid-auto-rows: 1fr;
+  align-items: stretch;
+}
+
+.palworld-pal-card {
+  display: grid;
+  block-size: 100%;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.palworld-pal-card-main {
+  display: grid;
+  min-inline-size: 0;
+  grid-template-columns: minmax(6.75rem, 7.5rem) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.palworld-pal-card-media {
+  display: grid;
+  place-items: center;
+  padding: var(--yoro-space-3) 0 var(--yoro-space-3) var(--yoro-space-3);
+}
+
+.palworld-pal-card-image-frame {
+  display: grid;
+  inline-size: min(100%, 7.5rem);
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: thin solid color-mix(in srgb, var(--palworld-accent) 24%, var(--yoro-color-border));
+  border-radius: var(--yoro-radius-xl);
+  background: color-mix(in srgb, var(--palworld-accent-soft) 58%, var(--yoro-color-surface-muted));
+}
+
+.palworld-pal-card-image-frame > .palworld-media-image,
+.palworld-pal-card-image-frame > .palworld-media-fallback {
+  max-inline-size: 100%;
+  max-block-size: 100%;
+}
+
 .palworld-entity-media {
   display: grid;
   place-items: center;
@@ -817,6 +984,36 @@
   min-inline-size: 0;
   gap: var(--yoro-space-3);
   padding: var(--yoro-space-4);
+}
+
+.palworld-pal-card .palworld-pal-card-content {
+  align-content: center;
+  padding: var(--yoro-space-3);
+}
+
+.palworld-card-work-list {
+  display: flex;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-1);
+  margin: 0 var(--yoro-space-3);
+  padding: var(--yoro-space-2) 0 var(--yoro-space-3);
+  border-block-start: thin solid var(--yoro-color-border);
+}
+
+.palworld-card-work-list .palworld-work-suitability-badge {
+  grid-template-columns: var(--yoro-space-5) auto;
+  min-block-size: var(--yoro-space-7);
+  padding: 0 var(--yoro-space-1);
+}
+
+.palworld-card-work-list .palworld-work-suitability-icon {
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-5);
+}
+
+.palworld-card-work-list .palworld-work-suitability-badge strong {
+  font-size: var(--yoro-font-size-xs);
 }
 
 .palworld-entity-card h3,
@@ -1304,6 +1501,12 @@
   gap: var(--yoro-space-6);
 }
 
+.palworld-pal-detail-hero {
+  grid-template-columns: clamp(8.5rem, 14vw, 10rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--yoro-space-5);
+}
+
 .palworld-detail-media {
   display: grid;
   place-items: center;
@@ -1313,9 +1516,165 @@
   background: var(--palworld-accent-soft);
 }
 
+.palworld-pal-detail-media {
+  inline-size: 100%;
+  max-inline-size: 10rem;
+  padding: var(--yoro-space-1);
+  border: thin solid color-mix(in srgb, var(--palworld-accent) 24%, var(--yoro-color-border));
+  background: color-mix(in srgb, var(--palworld-accent-soft) 58%, var(--yoro-color-surface-muted));
+}
+
+.palworld-pal-detail-summary {
+  display: grid;
+  min-inline-size: 0;
+  align-content: start;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-pal-detail-summary h3 {
+  margin: 0;
+}
+
 .palworld-detail-number {
   color: var(--palworld-accent);
   font-weight: var(--yoro-font-weight-black);
+}
+
+.palworld-work-suitability-list {
+  display: flex;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+  margin-block-start: var(--yoro-space-1);
+}
+
+.palworld-work-suitability-badge {
+  display: inline-grid;
+  grid-template-columns: var(--yoro-space-6) auto;
+  align-items: center;
+  min-block-size: var(--yoro-space-8);
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-1) var(--yoro-space-2);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-work-suitability-badge strong {
+  font-size: var(--yoro-font-size-sm);
+  line-height: var(--yoro-line-height-tight);
+  white-space: nowrap;
+}
+
+.palworld-work-suitability-icon {
+  display: block;
+  inline-size: var(--yoro-space-6);
+  block-size: var(--yoro-space-6);
+}
+
+.palworld-work-suitability-icon.is-source-image {
+  border-radius: var(--yoro-radius-sm);
+  background: currentColor;
+  object-fit: contain;
+}
+
+.palworld-work-suitability-badge:is(
+  [data-work-type="kindling"],
+  [data-work-type="medicine_production"]
+) {
+  color: var(--yoro-color-danger);
+}
+
+.palworld-work-suitability-badge:is(
+  [data-work-type="watering"],
+  [data-work-type="cooling"]
+) {
+  color: var(--palworld-sky);
+}
+
+.palworld-work-suitability-badge:is(
+  [data-work-type="planting"],
+  [data-work-type="gathering"],
+  [data-work-type="farming"]
+) {
+  color: var(--palworld-accent);
+}
+
+.palworld-work-suitability-badge:is(
+  [data-work-type="generating_electricity"],
+  [data-work-type="handiwork"],
+  [data-work-type="lumbering"]
+) {
+  color: var(--palworld-gold);
+}
+
+.palworld-work-suitability-badge[data-work-type="transporting"] {
+  color: var(--yoro-color-primary-strong);
+}
+
+.palworld-stat-chart {
+  display: grid;
+  min-inline-size: 0;
+  margin: 0;
+  border-block-start: thin solid var(--yoro-color-border);
+}
+
+.palworld-stat-chart-row {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, .34fr) minmax(0, 1fr);
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--yoro-space-4);
+  padding-block: var(--yoro-space-3);
+  border-block-end: thin solid var(--yoro-color-border);
+}
+
+.palworld-stat-chart-row dt {
+  min-inline-size: 0;
+  color: var(--yoro-color-text-muted);
+  font-weight: var(--yoro-font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.palworld-stat-chart-row dd {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(3.5rem, auto);
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--yoro-space-3);
+  margin: 0;
+}
+
+.palworld-stat-chart-row strong {
+  color: var(--yoro-color-text-strong);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.palworld-stat-chart-track {
+  display: block;
+  min-inline-size: 0;
+  block-size: var(--yoro-space-2);
+  overflow: hidden;
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-stat-chart-fill {
+  display: block;
+  max-inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--palworld-accent);
+}
+
+.palworld-stat-chart-row[data-stat-group="movement"] .palworld-stat-chart-fill {
+  background: var(--palworld-sky);
+}
+
+.palworld-stat-chart-row[data-stat-group="resource"] .palworld-stat-chart-fill {
+  background: var(--palworld-gold);
 }
 
 .palworld-stat-grid,
@@ -1672,6 +2031,17 @@
     margin-inline: auto;
   }
 
+  .palworld-pal-detail-hero {
+    grid-template-columns: minmax(7.5rem, 8.5rem) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--yoro-space-4);
+  }
+
+  .palworld-pal-detail-media {
+    inline-size: 100%;
+    margin-inline: 0;
+  }
+
   .palworld-stat-grid,
   .palworld-detail-list {
     grid-template-columns: minmax(0, 1fr);
@@ -1697,6 +2067,27 @@
   .palworld-skeleton-grid,
   .palworld-filter-bar {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-entity-grid.palworld-pal-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-pal-card-main {
+    grid-template-columns: minmax(5.75rem, 6.5rem) minmax(0, 1fr);
+  }
+
+  .palworld-pal-card-image-frame {
+    inline-size: min(100%, 6.5rem);
+  }
+
+  .palworld-pal-detail-hero,
+  .palworld-stat-chart-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-pal-detail-media {
+    justify-self: center;
   }
 
   .palworld-search-submit {

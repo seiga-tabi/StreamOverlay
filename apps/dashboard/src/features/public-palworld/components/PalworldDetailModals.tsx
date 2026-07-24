@@ -20,7 +20,7 @@ import { Badge } from "../../../shared/ui/Status";
 import { getPalworldItem, getPalworldPal } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { formatPalNumber } from "../utils/search";
-import { acquisitionLabel, categoryLabel, genderLabel, workLabel } from "../utils/labels";
+import { acquisitionLabel, categoryLabel, genderLabel } from "../utils/labels";
 import {
   resolvePalworldDescription,
   resolvePalworldLocalizedText,
@@ -31,7 +31,9 @@ import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { PalworldItemReferenceButton } from "./PalworldItemReferenceButton";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
+import { PalworldPalStatsGraph } from "./PalworldPalStatsGraph";
 import { PalworldTranslationBadge, PalworldTranslationBadges } from "./PalworldTranslationBadge";
+import { PalworldWorkSuitabilityBadge } from "./PalworldWorkSuitabilityBadge";
 
 type NameReference = PalworldTranslationCarrier & { id: string; nameKo?: string; nameJa?: string; nameEn: string };
 type ImageDimensionCompatibility = { imageWidth?: number; imageHeight?: number };
@@ -165,31 +167,31 @@ export function PalDetailModal({
   const description = detail ? resolvePalworldDescription(detail, locale) : null;
   const dropDetails = detail?.dropDetails;
   return (
-    <Modal open={Boolean(palId)} onClose={onClose} size="lg" className="palworld-detail-modal" data-testid="pal-detail-modal">
+    <Modal open={Boolean(palId)} onClose={onClose} size="lg" className="palworld-detail-modal palworld-pal-detail-modal" data-testid="pal-detail-modal">
       <ModalHeader><ModalTitle>{displayName}</ModalTitle><ModalCloseButton aria-label={text.close}>×</ModalCloseButton></ModalHeader>
       <ModalContent>
         {!detail && !error ? <SkeletonCard loadingLabel={text.loading} /> : null}
         {error ? <ErrorPanel locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
         {detail ? (
-          <article className="palworld-detail">
-            <div className="palworld-detail-hero">
-              <div className="palworld-detail-media"><PalworldMedia kind="pal" imageUrl={detail.imageUrl} alt={displayName} locale={locale} priority {...imageDimensions(detail)} /></div>
-              <div><span className="palworld-detail-number">{formatPalNumber(detail.number, locale)}</span><h3>{displayName}</h3>{name ? <PalworldTranslationBadges locale={locale} statuses={[name.status]} /> : null}<div className="palworld-badge-row">{detail.elements.map((element) => <PalworldElementBadge element={element} locale={locale} size="md" key={element} />)}<Badge tone="warning">★ {detail.rarity}</Badge><Badge>{detail.variantType === "normal" ? text.normal : detail.variantType === "special" ? text.special : text.variantPal}</Badge></div></div>
+          <article className="palworld-detail palworld-pal-detail">
+            <div className="palworld-detail-hero palworld-pal-detail-hero">
+              <div className="palworld-detail-media palworld-pal-detail-media"><PalworldMedia kind="pal" imageUrl={detail.imageUrl} alt={displayName} locale={locale} priority {...imageDimensions(detail)} /></div>
+              <div className="palworld-pal-detail-summary">
+                <span className="palworld-detail-number">{formatPalNumber(detail.number, locale)}</span>
+                <h3>{displayName}</h3>
+                {name ? <PalworldTranslationBadges locale={locale} statuses={[name.status]} /> : null}
+                <div className="palworld-badge-row">{detail.elements.map((element) => <PalworldElementBadge element={element} locale={locale} size="md" key={element} />)}<Badge tone="warning">★ {detail.rarity}</Badge><Badge>{detail.variantType === "normal" ? text.normal : detail.variantType === "special" ? text.special : text.variantPal}</Badge><Badge data-ko={`${palworldI18n.ko.nocturnal}: ${detail.nocturnal ? palworldI18n.ko.yes : palworldI18n.ko.no}`} data-ja={`${palworldI18n.ja.nocturnal}: ${detail.nocturnal ? palworldI18n.ja.yes : palworldI18n.ja.no}`}>{text.nocturnal}: {detail.nocturnal ? text.yes : text.no}</Badge></div>
+                {detail.workSuitabilities.length ? <div aria-label={text.workSuitabilities} className="palworld-work-suitability-list" data-ja={palworldI18n.ja.workSuitabilities} data-ko={palworldI18n.ko.workSuitabilities} role="list">
+                  {detail.workSuitabilities.map((work) => <PalworldWorkSuitabilityBadge level={work.level} locale={locale} type={work.type} key={work.type} />)}
+                </div> : null}
+              </div>
             </div>
             <section><h4 data-ko={palworldI18n.ko.descriptionLabel} data-ja={palworldI18n.ja.descriptionLabel}>{text.descriptionLabel}</h4>{description ? <PalworldTranslationBadges locale={locale} statuses={[description.status]} /> : null}<p className="palworld-localized-copy">{description?.text || text.originalDataUnavailable}</p></section>
-            <section><h4 data-ko={palworldI18n.ko.stats} data-ja={palworldI18n.ja.stats}>{text.stats}</h4><dl className="palworld-stat-grid">
-              <DataRow locale={locale} labelKo={palworldI18n.ko.hp} labelJa={palworldI18n.ja.hp}>{detail.stats.hp}</DataRow>
-              <DataRow locale={locale} labelKo={palworldI18n.ko.attack} labelJa={palworldI18n.ja.attack}>{detail.stats.attack}</DataRow>
-              <DataRow locale={locale} labelKo={palworldI18n.ko.defense} labelJa={palworldI18n.ja.defense}>{detail.stats.defense}</DataRow>
-              <DataRow locale={locale} labelKo={palworldI18n.ko.moveSpeed} labelJa={palworldI18n.ja.moveSpeed}>{detail.stats.moveSpeed}</DataRow>
-              <DataRow locale={locale} labelKo={palworldI18n.ko.stamina} labelJa={palworldI18n.ja.stamina}>{detail.stats.stamina}</DataRow>
-              <DataRow locale={locale} labelKo={palworldI18n.ko.nocturnal} labelJa={palworldI18n.ja.nocturnal}><span data-ko={detail.nocturnal ? palworldI18n.ko.yes : palworldI18n.ko.no} data-ja={detail.nocturnal ? palworldI18n.ja.yes : palworldI18n.ja.no}>{detail.nocturnal ? text.yes : text.no}</span></DataRow>
-            </dl></section>
-            <section><h4 data-ko={palworldI18n.ko.workSuitabilities} data-ja={palworldI18n.ja.workSuitabilities}>{text.workSuitabilities}</h4><div className="palworld-badge-row">{detail.workSuitabilities.map((work) => <Badge tone="success" key={work.type}>{workLabel(work.type, locale)} {text.levelPrefix}{work.level}</Badge>)}</div></section>
+            <section><h4 data-ko={palworldI18n.ko.stats} data-ja={palworldI18n.ja.stats}>{text.stats}</h4><PalworldPalStatsGraph locale={locale} stats={detail.stats} /></section>
             <section><h4 data-ko={palworldI18n.ko.partnerSkill} data-ja={palworldI18n.ja.partnerSkill}>{text.partnerSkill}</h4>{detail.partnerSkill ? <div className="palworld-skill-detail-list"><strong>{referenceName(detail.partnerSkill, locale)}</strong><SkillDescription locale={locale} skill={detail.partnerSkill} /></div> : <p>{text.originalDataUnavailable}</p>}</section>
             <section><h4 data-ko={palworldI18n.ko.activeSkills} data-ja={palworldI18n.ja.activeSkills}>{text.activeSkills}</h4>{detail.activeSkills.length ? <ul className="palworld-skill-detail-list">{detail.activeSkills.map((skill) => <li key={skill.id}><strong>{referenceName(skill, locale)}</strong><SkillDescription locale={locale} skill={skill} /></li>)}</ul> : <p>{text.originalDataUnavailable}</p>}</section>
             <section><h4 data-ko={palworldI18n.ko.drops} data-ja={palworldI18n.ja.drops}>{text.drops}</h4>{dropDetails?.length ? <><div className="palworld-item-reference-list">{dropDetails.map((drop) => <PalworldItemReferenceButton item={drop.item} locale={locale} minQuantity={drop.minQuantity} maxQuantity={drop.maxQuantity} dropRatePercent={drop.dropRatePercent} onOpen={onOpenItem} key={drop.item.id} />)}</div><PalworldTranslationBadges locale={locale} statuses={referenceTranslationStatuses(dropDetails.map((drop) => drop.item), locale)} /></> : detail.drops.length ? <><div className="palworld-item-reference-list">{detail.drops.map((drop) => <PalworldItemReferenceButton item={drop} locale={locale} onOpen={onOpenItem} key={drop.id} />)}</div><PalworldTranslationBadges locale={locale} statuses={referenceTranslationStatuses(detail.drops, locale)} /></> : <p>{text.originalDataUnavailable}</p>}</section>
-            <section><h4 data-ko={palworldI18n.ko.breedingInfo} data-ja={palworldI18n.ja.breedingInfo}>{text.breedingInfo}</h4><p>{text.breedingPower}: {detail.breeding.breedingPower ?? text.unknown}</p>{detail.breeding.specialParentPairs.length ? <div><strong>{text.specialParentPairs}</strong><ul>{detail.breeding.specialParentPairs.map((pair) => <SpecialParentPair locale={locale} pair={pair} key={`${pair.parentAId}-${pair.parentBId}-${pair.parentAGender ?? "any"}-${pair.parentBGender ?? "any"}`} />)}</ul></div> : null}</section>
+            {detail.breeding.specialParentPairs.length ? <section><h4 data-ko={palworldI18n.ko.breedingInfo} data-ja={palworldI18n.ja.breedingInfo}>{text.breedingInfo}</h4><div><strong>{text.specialParentPairs}</strong><ul>{detail.breeding.specialParentPairs.map((pair) => <SpecialParentPair locale={locale} pair={pair} key={`${pair.parentAId}-${pair.parentBId}-${pair.parentAGender ?? "any"}-${pair.parentBGender ?? "any"}`} />)}</ul></div></section> : null}
           </article>
         ) : null}
       </ModalContent>

@@ -4,7 +4,13 @@ import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { PalworldItemReference, PalworldSkillDetail, PalworldSkillSummary } from "@streamops/shared";
+import type {
+  PalworldItemReference,
+  PalworldMapMarker,
+  PalworldSkillDetail,
+  PalworldSkillSummary,
+} from "@streamops/shared";
+import { PALWORLD_WORK_SUITABILITY_TYPES } from "@streamops/shared";
 import { PublicGameSelector } from "../src/features/public-lol/components/PublicGameSelector";
 import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
 import { PalworldHeader } from "../src/features/public-palworld/components/PalworldHeader";
@@ -12,19 +18,29 @@ import { PalworldHome } from "../src/features/public-palworld/components/Palworl
 import { ItemCard, PalCard } from "../src/features/public-palworld/components/PalworldCards";
 import { PalworldItemReferenceButton } from "../src/features/public-palworld/components/PalworldItemReferenceButton";
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
-import { isLocalPalworldMapUrl, PALWORLD_WORLD_MAP_IMAGE_URL, PalworldMapPage } from "../src/features/public-palworld/components/PalworldMapPage";
+import {
+  clampPalworldMapView,
+  isLocalPalworldMapUrl,
+  PALWORLD_WORLD_MAP_IMAGE_URL,
+  PalworldBossMarkerLayer,
+  PalworldMapPage,
+  zoomPalworldMapViewAt,
+} from "../src/features/public-palworld/components/PalworldMapPage";
 import { PalworldPalsPage } from "../src/features/public-palworld/components/PalworldPalsPage";
 import { PalworldItemsPage } from "../src/features/public-palworld/components/PalworldItemsPage";
 import { PalworldSourceFooter } from "../src/features/public-palworld/components/PalworldSourceFooter";
 import { PalworldStreamersPage } from "../src/features/public-palworld/components/PalworldStreamersPage";
 import { PalworldSkillCard, PalworldSkillDetailView, PalworldSkillsPage } from "../src/features/public-palworld/components/PalworldSkillsPage";
 import { PalworldElementBadge } from "../src/features/public-palworld/components/PalworldElementBadge";
+import { PalworldPalStatsGraph } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
 import { PalworldPalPicker } from "../src/features/public-palworld/components/PalworldPalPicker";
 import { PalworldNotFoundPage } from "../src/features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldPageErrorBoundary } from "../src/features/public-palworld/components/PalworldPageErrorBoundary";
+import { PalworldWorkSuitabilityBadge } from "../src/features/public-palworld/components/PalworldWorkSuitabilityBadge";
 import generatedStaticAssets from "../src/features/public-palworld/data/palworld-static-assets.generated.json";
 import { palworldI18n } from "../src/features/public-palworld/i18n/palworld-i18n";
 import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../src/features/public-palworld/utils/element-images";
+import { workSuitabilityIconUrl } from "../src/features/public-palworld/utils/work-suitability-icons";
 
 const gameAssetUrl = (fileName: string) => new URL(`../public/images/games/${fileName}`, import.meta.url);
 
@@ -353,11 +369,12 @@ test("Palworld 스트리머 화면은 미설정·미로그인·오프라인 전�
   assert.match(offlineOnly, /Offline User/u);
 });
 
-test("Pal 필터는 URL query 값을 선택 상태로 렌더하고 전체 희귀도를 제공한다", () => {
-  const html = renderToStaticMarkup(<PalworldPalsPage locale="ja" params={new URLSearchParams("element=fire&work=mining&sort=number&rarity=10")} onOpenPal={() => undefined} />);
+test("Pal 필터는 URL query 값을 선택 상태로 렌더하고 정렬 방향과 전체 희귀도를 제공한다", () => {
+  const html = renderToStaticMarkup(<PalworldPalsPage locale="ja" params={new URLSearchParams("element=fire&work=mining&sort=number&order=desc&rarity=10")} onOpenPal={() => undefined} />);
   assert.match(html, /value="fire" selected=""/);
   assert.match(html, /value="mining" selected=""/);
   assert.match(html, /value="10" selected=""/);
+  assert.match(html, /value="desc" selected=""/);
   assert.match(html, /value="20"/);
   assert.match(html, /パル図鑑/);
 });
@@ -463,7 +480,7 @@ test("이미지 없는 Pal은 카드 높이를 유지하는 한국어·일본어
   assert.match(japanese, /aria-label="モコロン · 画像準備中"/);
 });
 
-test("Pal 카드 이미지 alt는 현재 locale 이름을 사용하고 동일 출처 경로를 유지한다", () => {
+test("Pal 카드는 왼쪽 이미지·오른쪽 정보·하단 작업 적성 구조로 표시한다", () => {
   const imageUrl = `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`;
   const pal = {
     id: "lamball",
@@ -475,12 +492,25 @@ test("Pal 카드 이미지 alt는 현재 locale 이름을 사용하고 동일 �
     elements: ["neutral" as const],
     rarity: 1,
     variantType: "normal" as const,
-    workSuitabilities: [{ type: "handiwork" as const, level: 1 }]
+    workSuitabilities: [
+      { type: "handiwork" as const, level: 1 },
+      { type: "transporting" as const, level: 2 },
+      { type: "farming" as const, level: 1 },
+    ]
   };
   const korean = renderToStaticMarkup(<PalCard locale="ko" pal={pal} onOpen={() => undefined} />);
   const japanese = renderToStaticMarkup(<PalCard locale="ja" pal={pal} onOpen={() => undefined} />);
+  assert.match(korean, /class="yoro-card palworld-entity-card palworld-pal-card"/u);
+  assert.match(korean, /class="palworld-pal-card-main"[\s\S]*class="palworld-pal-card-media"[\s\S]*class="palworld-pal-card-image-frame"[\s\S]*class="yoro-card__content palworld-pal-card-content"/u);
   assert.match(korean, new RegExp(`src="${imageUrl.replaceAll("/", "\\/")}" alt="도로롱"`));
+  assert.match(korean, /class="palworld-card-work-list"[\s\S]*role="list"/u);
+  assert.ok(korean.indexOf("palworld-pal-card-main") < korean.indexOf("palworld-card-work-list"));
+  assert.equal((korean.match(/role="listitem"/gu) ?? []).length, 3);
+  assert.match(korean, /data-work-type="handiwork"[\s\S]*Lv\.1/u);
+  assert.match(korean, /data-work-type="transporting"[\s\S]*Lv\.2/u);
+  assert.match(korean, /data-work-type="farming"[\s\S]*Lv\.1/u);
   assert.match(japanese, /alt="モコロン"/);
+  assert.match(japanese, /title="手作業: Lv\.1"/u);
 });
 
 test("첫 화면 Pal 이미지만 eager·high priority로 요청하고 고정 크기로 layout shift를 방지한다", () => {
@@ -587,11 +617,99 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   const korean = renderToStaticMarkup(<PalworldMapPage locale="ko" />);
   const japanese = renderToStaticMarkup(<PalworldMapPage locale="ja" />);
   assert.match(korean, /Palworld 월드 지도/u);
-  assert.match(korean, /alt="빠른 이동 지점이 표시된 Palworld 월드 지도"/u);
+  assert.match(korean, /alt="빠른 이동 지점과 필드 보스 위치가 표시된 Palworld 월드 지도"/u);
   assert.doesNotMatch(korean, /pyPalworldAPI|>1\.0\.1</u);
   assert.match(korean, /aria-label="지도 확대"/u);
+  assert.match(korean, /aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight \+ - Home"/u);
+  assert.match(korean, /data-testid="palworld-map-stage"/u);
+  assert.match(korean, /휠·핀치/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
-  assert.match(japanese, /ファストトラベル地点が表示されたPalworldワールドマップ/u);
+  assert.match(japanese, /ファストトラベル地点とフィールドボスの位置が表示されたPalworldワールドマップ/u);
+  assert.match(japanese, /ホイール・ピンチ/u);
+});
+
+test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 않는다", () => {
+  assert.deepEqual(
+    clampPalworldMapView({ x: 120, y: -1_000, zoom: 2 }, 1_000, 800),
+    { x: 0, y: -800, zoom: 2 },
+  );
+  assert.deepEqual(
+    clampPalworldMapView({ x: -400, y: -300, zoom: 1 }, 1_000, 800),
+    { x: 0, y: 0, zoom: 1 },
+  );
+
+  const zoomed = zoomPalworldMapViewAt(
+    { x: 0, y: 0, zoom: 1 },
+    2,
+    { x: 500, y: 400 },
+    1_000,
+    800,
+  );
+  assert.deepEqual(zoomed, { x: -500, y: -400, zoom: 2 });
+  assert.equal((500 - zoomed.x) / zoomed.zoom, 500);
+  assert.equal((400 - zoomed.y) / zoomed.zoom, 400);
+
+  assert.deepEqual(
+    zoomPalworldMapViewAt(zoomed, 1, { x: 500, y: 400 }, 1_000, 800),
+    { x: 0, y: 0, zoom: 1 },
+  );
+});
+
+test("월드 지도 marker layer는 지도 변환 평면 안에서 별도 상호작용 요소를 받을 수 있다", () => {
+  const markup = renderToStaticMarkup(
+    <PalworldMapPage
+      locale="ko"
+      markerLayer={({ zoom }) => (
+        <button data-map-interactive="true" type="button">
+          보스 · {zoom * 100}%
+        </button>
+      )}
+    />,
+  );
+  assert.match(markup, /class="palworld-map-marker-layer"/u);
+  assert.match(markup, /data-map-interactive="true"/u);
+  assert.match(markup, /보스 · 100%/u);
+});
+
+test("월드 지도 보스 marker는 정규화 좌표와 현지화 이름·레벨로 상세 열기 동작을 제공한다", () => {
+  const marker: PalworldMapMarker = {
+    id: "main-anubis-001",
+    sourceRowId: "Boss_Anubis",
+    sourceInternalId: "Anubis",
+    pal: {
+      id: "anubis",
+      number: 100,
+      nameKo: "아누비스",
+      nameJa: "アヌビス",
+      nameEn: "Anubis",
+      elements: ["ground"],
+      imageUrl: `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`,
+      imageWidth: 128,
+      imageHeight: 128,
+    },
+    level: 47,
+    normalizedX: 0.25,
+    normalizedY: 0.75,
+  };
+  const korean = renderToStaticMarkup(
+    <PalworldBossMarkerLayer locale="ko" markers={[marker]} onOpenPal={() => undefined} zoom={2} />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldBossMarkerLayer locale="ja" markers={[marker]} onOpenPal={() => undefined} zoom={2} />,
+  );
+
+  assert.match(korean, /data-map-interactive="true"/u);
+  assert.match(korean, /aria-label="필드 보스: 아누비스, Lv\.47"/u);
+  assert.match(korean, /left:25%;top:75%/u);
+  assert.match(korean, /--palworld-map-marker-inverse-scale:0\.5/u);
+  assert.match(japanese, /aria-label="フィールドボス: アヌビス, Lv\.47"/u);
+  assert.doesNotMatch(japanese, /フィールドボス: Anubis/u);
+
+  const pageSource = readFileSync(
+    new URL("../src/pages/PublicPalworldPage.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(pageSource, /<PalworldMapPage locale=\{locale\} onOpenPal=\{openPalHere\}/u);
 });
 
 test("페이지 기술 키커와 Pal·도감 번호·레벨 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
@@ -689,6 +807,50 @@ test("Pal 드롭과 제작 재료는 이미지·현지화 이름·수량을 공�
   assert.match(fallback, /role="img"[\s\S]*팰 스피어[\s\S]*이미지 준비 중[\s\S]*× 1/u);
 });
 
+test("Pal 작업 적성은 공식 로컬 이미지와 Lv. 숫자를 사용하고 능력치는 접근 가능한 그래프로 표시한다", () => {
+  assert.deepEqual(generatedStaticAssets.workSource, {
+    candidateRelease: "candidate-1248184a4b527d94",
+    sourceArchiveSha256: "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+    mappingStatus: "verified_semantic_source_member",
+    status: "operator_acknowledged",
+    usageBasis: "operator_reference_use",
+    rightsVerified: false,
+  });
+  const koreanWork = renderToStaticMarkup(<PalworldWorkSuitabilityBadge level={3} locale="ko" type="mining" />);
+  const japaneseWork = renderToStaticMarkup(<PalworldWorkSuitabilityBadge level={4} locale="ja" type="handiwork" />);
+  assert.match(koreanWork, /data-work-type="mining"/u);
+  assert.match(koreanWork, /title="채굴: Lv\.3"/u);
+  assert.match(koreanWork, /<img[^>]+alt=""[^>]+aria-hidden="true"[^>]+class="palworld-work-suitability-icon is-source-image"/u);
+  assert.match(koreanWork, /src="\/images\/palworld\/work\/[a-f0-9]{64}\.webp"/u);
+  assert.match(koreanWork, /Lv\.3/u);
+  assert.doesNotMatch(koreanWork, /https?:\/\//u);
+  assert.match(japaneseWork, /title="手作業: Lv\.4"/u);
+
+  for (const type of PALWORLD_WORK_SUITABILITY_TYPES) {
+    const imageUrl = workSuitabilityIconUrl(type);
+    assert.ok(imageUrl);
+    assert.match(imageUrl, /^\/images\/palworld\/work\/[a-f0-9]{64}\.webp$/u);
+    const outputBytes = readFileSync(new URL(`../public${imageUrl}`, import.meta.url));
+    assert.equal(createHash("sha256").update(outputBytes).digest("hex"), imageUrl.split("/").at(-1)?.replace(".webp", ""));
+  }
+  const badgeSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldWorkSuitabilityBadge.tsx", import.meta.url),
+    "utf8"
+  );
+  assert.match(badgeSource, /onError=\{\(\) => setImageFailed\(true\)\}/u);
+  assert.match(badgeSource, /imageFailed \|\| iconUrl === undefined \? \(/u);
+
+  const graph = renderToStaticMarkup(<PalworldPalStatsGraph
+    locale="ko"
+    stats={{ hp: 100, attack: 80, shotAttack: 120, meleeAttack: 90, defense: 100, stamina: 250, food: 5, moveSpeed: 800, walkSpeed: 1_500, runSpeed: 1_500, rideSprintSpeed: 1_750 }}
+  />);
+  assert.equal((graph.match(/class="palworld-stat-chart-row"/gu) ?? []).length, 9);
+  assert.match(graph, /data-stat="shotAttack"[\s\S]*원거리 공격력/u);
+  assert.match(graph, /data-stat="rideSprintSpeed"[\s\S]*탑승 질주 속도/u);
+  assert.doesNotMatch(graph, /data-stat="attack"|data-stat="moveSpeed"|야행성/u);
+  assert.equal((graph.match(/aria-hidden="true"/gu) ?? []).length, 9);
+});
+
 test("공개 페이지의 데이터 범위 블록과 상세 기술 출처는 제거하고 하단 권리 고지는 유지한다", () => {
   const componentRoot = new URL("../src/features/public-palworld/components/", import.meta.url);
   for (const file of [
@@ -705,5 +867,9 @@ test("공개 페이지의 데이터 범위 블록과 상세 기술 출처는 제
   }
   const detailSource = readFileSync(new URL("PalworldDetailModals.tsx", componentRoot), "utf8");
   assert.doesNotMatch(detailSource, /multilingualNames/u);
+  assert.doesNotMatch(detailSource, /breedingPower/u);
+  assert.match(detailSource, /detail\.breeding\.specialParentPairs\.length \?/u);
+  assert.match(detailSource, /palworld-pal-detail-summary[\s\S]*palworld-work-suitability-list/u);
+  assert.doesNotMatch(detailSource, /<section><h4[^>]+workSuitabilities/u);
   assert.match(readFileSync(new URL("PalworldSourceFooter.tsx", componentRoot), "utf8"), /palworldI18n\.(?:ko|ja)\.sourceNotice/u);
 });

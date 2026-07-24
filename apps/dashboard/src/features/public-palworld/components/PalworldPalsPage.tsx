@@ -10,7 +10,7 @@ import { Pagination } from "./Pagination";
 import { PalCard } from "./PalworldCards";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 
-const FILTER_KEYS = ["q", "element", "work", "rarity", "variant", "sort", "page"] as const;
+const FILTER_KEYS = ["q", "element", "work", "rarity", "variant", "sort", "order", "page"] as const;
 
 export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: PalworldLocale; onOpenPal: (id: string) => void; params: URLSearchParams }) {
   const [response, setResponse] = useState<PalworldPaginatedResponse<PalworldPalSummary> | null>(null);
@@ -57,11 +57,12 @@ export function PalworldPalsPage({ locale, onOpenPal, params }: { locale: Palwor
       <label><span>{text.rarity}</span><Select value={params.get("rarity") ?? ""} onChange={(event) => update("rarity", event.target.value)}><option value="">{text.all}</option>{Array.from({ length: 20 }, (_, index) => index + 1).map((value) => <option value={value} key={value}>★ {value}</option>)}</Select></label>
       <label><span>{text.variant}</span><Select value={params.get("variant") ?? ""} onChange={(event) => update("variant", event.target.value)}><option value="">{text.all}</option><option value="normal">{text.normal}</option><option value="variant">{text.variantPal}</option><option value="special">{text.special}</option></Select></label>
       <label><span>{text.sort}</span><Select value={params.get("sort") ?? "number"} onChange={(event) => update("sort", event.target.value)}><option value="number">{text.number}</option><option value="name">{text.name}</option><option value="rarity">{text.rarity}</option></Select></label>
+      <label><span>{text.sortOrder}</span><Select value={params.get("order") ?? "asc"} onChange={(event) => update("order", event.target.value)}><option value="asc">{text.ascending}</option><option value="desc">{text.descending}</option></Select></label>
       <div className="palworld-filter-actions"><Button size="sm" type="submit">{text.searchAction}</Button><Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/pals")}>{text.clearFilters}</Button></div>
     </form>
     {!response && !error ? <PalworldLoading locale={locale} /> : null}
     {error ? <PalworldError error={error} locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
     {response?.items.length === 0 ? <PalworldEmpty locale={locale} title={text.palListEmpty} /> : null}
-    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-entity-grid">{response.items.map((pal, index) => <PalCard key={pal.id} pal={pal} locale={locale} priority={index < 4} onOpen={(selected) => onOpenPal(selected.id)} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
+    {response?.items.length ? <><div className="palworld-result-count">{text.results}: {response.pagination.total.toLocaleString()}</div><div className="palworld-entity-grid palworld-pal-grid">{response.items.map((pal, index) => <PalCard key={pal.id} pal={pal} locale={locale} priority={index < 4} onOpen={(selected) => onOpenPal(selected.id)} />)}</div><Pagination locale={locale} pagination={response.pagination} onPage={(page) => update("page", String(page))} /></> : null}
   </section>;
 }

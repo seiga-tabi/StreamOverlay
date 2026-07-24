@@ -2410,6 +2410,12 @@ export function validatePalworldDataMetadata(value: unknown): PalworldValidation
   return validateMetadataAt(value, "metadata");
 }
 
+export function validatePalworldPalReference(
+  value: unknown
+): PalworldValidationResult<PalworldPalReference> {
+  return validatePalReferenceAt(value, "pal");
+}
+
 export function validatePalworldSourceProvenance(
   value: unknown
 ): PalworldValidationResult<PalworldSourceProvenance> {

@@ -1,0 +1,784 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "1.0.1",
+  "activation": "active",
+  "source": {
+    "sourceType": "operator_pak_export",
+    "archiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+    "sourceMember": "Pal/DataTable/UI/DT_BossSpawnerLoactionData.json",
+    "sourceMemberSha256": "34a715be8f095967ead086ab71a3eeee5c0374298c5dae074894f8d908aae720",
+    "sourceGameVersion": null,
+    "sourceSteamBuildId": null,
+    "rightsVerified": false,
+    "usageBasis": "operator_reference_use"
+  },
+  "worlds": [
+    {
+      "world": "main",
+      "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+      "transform": {
+        "status": "verified",
+        "revision": "main-map-fmodel-bounds-v1",
+        "horizontalAxis": "world_y",
+        "verticalAxis": "world_x",
+        "invertHorizontal": false,
+        "invertVertical": true,
+        "sourceBounds": {
+          "minX": -1099400,
+          "maxX": 349400,
+          "minY": -724400,
+          "maxY": 724400
+        }
+      },
+      "markers": [
+        {
+          "id": "main-000-faleris-aqua",
+          "sourceRowId": "0",
+          "sourceInternalId": "Horus_Water",
+          "palId": "faleris-aqua",
+          "level": 66,
+          "normalizedX": 0.195376712,
+          "normalizedY": 0.839978534
+        },
+        {
+          "id": "main-001-splatterina",
+          "sourceRowId": "1",
+          "sourceInternalId": "GrimGirl",
+          "palId": "splatterina",
+          "level": 65,
+          "normalizedX": 0.267272267,
+          "normalizedY": 0.787733435
+        },
+        {
+          "id": "main-002-warsect-terra",
+          "sourceRowId": "2",
+          "sourceInternalId": "HerculesBeetle_Ground",
+          "palId": "warsect-terra",
+          "level": 64,
+          "normalizedX": 0.286250456,
+          "normalizedY": 0.718283131
+        },
+        {
+          "id": "main-003-gildane",
+          "sourceRowId": "3",
+          "sourceInternalId": "GoldenHorse",
+          "palId": "gildane",
+          "level": 63,
+          "normalizedX": 0.311179273,
+          "normalizedY": 0.774167035
+        },
+        {
+          "id": "main-004-omascul",
+          "sourceRowId": "4",
+          "sourceInternalId": "MysteryMask",
+          "palId": "omascul",
+          "level": 60,
+          "normalizedX": 0.384810664,
+          "normalizedY": 0.621170665
+        },
+        {
+          "id": "main-005-cryolinx-terra",
+          "sourceRowId": "5",
+          "sourceInternalId": "WhiteTiger_Ground",
+          "palId": "cryolinx-terra",
+          "level": 62,
+          "normalizedX": 0.201811844,
+          "normalizedY": 0.739259387
+        },
+        {
+          "id": "main-006-starryon",
+          "sourceRowId": "6",
+          "sourceInternalId": "NightBlueHorse",
+          "palId": "starryon",
+          "level": 63,
+          "normalizedX": 0.326209739,
+          "normalizedY": 0.736448054
+        },
+        {
+          "id": "main-007-dazzi-noct",
+          "sourceRowId": "7",
+          "sourceInternalId": "RaijinDaughter_Water",
+          "palId": "dazzi-noct",
+          "level": 60,
+          "normalizedX": 0.22863672,
+          "normalizedY": 0.597430287
+        },
+        {
+          "id": "main-008-kitsun-noct",
+          "sourceRowId": "8",
+          "sourceInternalId": "AmaterasuWolf_Dark",
+          "palId": "kitsun-noct",
+          "level": 65,
+          "normalizedX": 0.340560008,
+          "normalizedY": 0.740739025
+        },
+        {
+          "id": "main-009-azurmane",
+          "sourceRowId": "9",
+          "sourceInternalId": "BlueThunderHorse",
+          "palId": "azurmane",
+          "level": 66,
+          "normalizedX": 0.250625138,
+          "normalizedY": 0.855080964
+        },
+        {
+          "id": "main-010-celesdir",
+          "sourceRowId": "10",
+          "sourceInternalId": "WhiteDeer",
+          "palId": "celesdir",
+          "level": 65,
+          "normalizedX": 0.30329111,
+          "normalizedY": 0.698006557
+        },
+        {
+          "id": "main-011-nyafia",
+          "sourceRowId": "11",
+          "sourceInternalId": "BadCatgirl",
+          "palId": "nyafia",
+          "level": 60,
+          "normalizedX": 0.317703009,
+          "normalizedY": 0.617299351
+        },
+        {
+          "id": "main-012-silvegis",
+          "sourceRowId": "12",
+          "sourceInternalId": "WhiteShieldDragon",
+          "palId": "silvegis",
+          "level": 62,
+          "normalizedX": 0.297049586,
+          "normalizedY": 0.65064405
+        },
+        {
+          "id": "main-013-fenglope-lux",
+          "sourceRowId": "13",
+          "sourceInternalId": "FengyunDeeper_Electric",
+          "palId": "fenglope-lux",
+          "level": 60,
+          "normalizedX": 0.337371162,
+          "normalizedY": 0.689699793
+        },
+        {
+          "id": "main-014-loupmoon-cryst",
+          "sourceRowId": "14",
+          "sourceInternalId": "Werewolf_Ice",
+          "palId": "loupmoon-cryst",
+          "level": 66,
+          "normalizedX": 0.24581317,
+          "normalizedY": 0.774729017
+        },
+        {
+          "id": "main-022-dinossom-lux",
+          "sourceRowId": "22",
+          "sourceInternalId": "FlowerDinosaur_Electric",
+          "palId": "dinossom-lux",
+          "level": 47,
+          "normalizedX": 0.708826477,
+          "normalizedY": 0.272990333
+        },
+        {
+          "id": "main-023-suzaku",
+          "sourceRowId": "23",
+          "sourceInternalId": "Suzaku",
+          "palId": "suzaku",
+          "level": 45,
+          "normalizedX": 0.712244409,
+          "normalizedY": 0.173718726
+        },
+        {
+          "id": "main-024-menasting",
+          "sourceRowId": "24",
+          "sourceInternalId": "DarkScorpion",
+          "palId": "menasting",
+          "level": 44,
+          "normalizedX": 0.719982054,
+          "normalizedY": 0.15643291
+        },
+        {
+          "id": "main-025-tetroise",
+          "sourceRowId": "25",
+          "sourceInternalId": "CubeTurtle",
+          "palId": "tetroise",
+          "level": 55,
+          "normalizedX": 0.746933649,
+          "normalizedY": 0.206263956
+        },
+        {
+          "id": "main-026-paladius",
+          "sourceRowId": "26",
+          "sourceInternalId": "SaintCentaur",
+          "palId": "paladius",
+          "level": 60,
+          "normalizedX": 0.748410581,
+          "normalizedY": 0.111588073
+        },
+        {
+          "id": "main-027-moldron",
+          "sourceRowId": "27",
+          "sourceInternalId": "VolcanoDragon",
+          "palId": "moldron",
+          "level": 70,
+          "normalizedX": 0.252380729,
+          "normalizedY": 0.954409125
+        },
+        {
+          "id": "main-028-pierdon",
+          "sourceRowId": "28",
+          "sourceInternalId": "RockBeast",
+          "palId": "pierdon",
+          "level": 50,
+          "normalizedX": 0.868586278,
+          "normalizedY": 0.178806288
+        },
+        {
+          "id": "main-029-needoll",
+          "sourceRowId": "29",
+          "sourceInternalId": "CactusDoll",
+          "palId": "needoll",
+          "level": 40,
+          "normalizedX": 0.746332289,
+          "normalizedY": 0.552015137
+        },
+        {
+          "id": "main-030-prixter-lux",
+          "sourceRowId": "30",
+          "sourceInternalId": "ScorpionMan_Electric",
+          "palId": "prixter-lux",
+          "level": 70,
+          "normalizedX": 0.192910857,
+          "normalizedY": 0.520546797
+        },
+        {
+          "id": "main-031-dualith-noct",
+          "sourceRowId": "31",
+          "sourceInternalId": "GrassGolem_Dark",
+          "palId": "dualith-noct",
+          "level": 70,
+          "normalizedX": 0.072418036,
+          "normalizedY": 0.626911886
+        },
+        {
+          "id": "main-032-dualith",
+          "sourceRowId": "32",
+          "sourceInternalId": "GrassGolem",
+          "palId": "dualith",
+          "level": 55,
+          "normalizedX": 0.89735167,
+          "normalizedY": 0.357908787
+        },
+        {
+          "id": "main-033-kingpaca-cryst",
+          "sourceRowId": "33",
+          "sourceInternalId": "KingAlpaca_Ice",
+          "palId": "kingpaca-cryst",
+          "level": 46,
+          "normalizedX": 0.48704259,
+          "normalizedY": 0.21402203
+        },
+        {
+          "id": "main-034-whalaska",
+          "sourceRowId": "34",
+          "sourceInternalId": "IceNarwhal",
+          "palId": "whalaska",
+          "level": 55,
+          "normalizedX": 0.552277747,
+          "normalizedY": 0.059821922
+        },
+        {
+          "id": "main-035-frostallion",
+          "sourceRowId": "35",
+          "sourceInternalId": "IceHorse",
+          "palId": "frostallion",
+          "level": 60,
+          "normalizedX": 0.495941469,
+          "normalizedY": 0.165385146
+        },
+        {
+          "id": "main-036-lyleen",
+          "sourceRowId": "36",
+          "sourceInternalId": "LilyQueen",
+          "palId": "lyleen",
+          "level": 58,
+          "normalizedX": 0.408843484,
+          "normalizedY": 0.231031853
+        },
+        {
+          "id": "main-037-menasting-terra",
+          "sourceRowId": "37",
+          "sourceInternalId": "DarkScorpion_Ground",
+          "palId": "menasting-terra",
+          "level": 55,
+          "normalizedX": 0.424764191,
+          "normalizedY": 0.226155753
+        },
+        {
+          "id": "main-038-lyleen-noct",
+          "sourceRowId": "38",
+          "sourceInternalId": "LilyQueen_Dark",
+          "palId": "lyleen-noct",
+          "level": 58,
+          "normalizedX": 0.410006281,
+          "normalizedY": 0.230229489
+        },
+        {
+          "id": "main-039-flaracle",
+          "sourceRowId": "39",
+          "sourceInternalId": "FoxExorcist",
+          "palId": "flaracle",
+          "level": 68,
+          "normalizedX": 0.531841565,
+          "normalizedY": 0.808222046
+        },
+        {
+          "id": "main-040-eidrolon",
+          "sourceRowId": "40",
+          "sourceInternalId": "GhostDragon",
+          "palId": "eidrolon",
+          "level": 69,
+          "normalizedX": 0.454167587,
+          "normalizedY": 0.80853603
+        },
+        {
+          "id": "main-041-jetragon",
+          "sourceRowId": "41",
+          "sourceInternalId": "JetDragon",
+          "palId": "jetragon",
+          "level": 70,
+          "normalizedX": 0.43378456,
+          "normalizedY": 0.748784097
+        },
+        {
+          "id": "main-042-dynamoff",
+          "sourceRowId": "42",
+          "sourceInternalId": "ThunderFluffyBird",
+          "palId": "dynamoff",
+          "level": 67,
+          "normalizedX": 0.511559221,
+          "normalizedY": 0.809099945
+        },
+        {
+          "id": "main-043-slowatt",
+          "sourceRowId": "43",
+          "sourceInternalId": "ElecLizard",
+          "palId": "slowatt",
+          "level": 66,
+          "normalizedX": 0.492629758,
+          "normalizedY": 0.756658655
+        },
+        {
+          "id": "main-044-ophydia",
+          "sourceRowId": "44",
+          "sourceInternalId": "LotusDragon",
+          "palId": "ophydia",
+          "level": 69,
+          "normalizedX": 0.422273606,
+          "normalizedY": 0.795016565
+        },
+        {
+          "id": "main-045-snock",
+          "sourceRowId": "45",
+          "sourceInternalId": "ElecSnail",
+          "palId": "snock",
+          "level": 65,
+          "normalizedX": 0.4922881,
+          "normalizedY": 0.77460243
+        },
+        {
+          "id": "main-046-anubis",
+          "sourceRowId": "46",
+          "sourceInternalId": "Anubis",
+          "palId": "anubis",
+          "level": 55,
+          "normalizedX": 0.566558531,
+          "normalizedY": 0.356591662
+        },
+        {
+          "id": "main-047-mammorest",
+          "sourceRowId": "47",
+          "sourceInternalId": "GrassMammoth",
+          "palId": "mammorest",
+          "level": 38,
+          "normalizedX": 0.668819023,
+          "normalizedY": 0.47801974
+        },
+        {
+          "id": "main-048-chillet",
+          "sourceRowId": "48",
+          "sourceInternalId": "WeaselDragon",
+          "palId": "chillet",
+          "level": 11,
+          "normalizedX": 0.663664391,
+          "normalizedY": 0.458989184
+        },
+        {
+          "id": "main-049-fenglope",
+          "sourceRowId": "49",
+          "sourceInternalId": "FengyunDeeper",
+          "palId": "fenglope",
+          "level": 25,
+          "normalizedX": 0.527339867,
+          "normalizedY": 0.471659304
+        },
+        {
+          "id": "main-050-univolt",
+          "sourceRowId": "50",
+          "sourceInternalId": "Kirin",
+          "palId": "univolt",
+          "level": 31,
+          "normalizedX": 0.572059636,
+          "normalizedY": 0.498585036
+        },
+        {
+          "id": "main-051-beakon",
+          "sourceRowId": "51",
+          "sourceInternalId": "ThunderBird",
+          "palId": "beakon",
+          "level": 37,
+          "normalizedX": 0.639074041,
+          "normalizedY": 0.319297122
+        },
+        {
+          "id": "main-052-azurobe",
+          "sourceRowId": "52",
+          "sourceInternalId": "BlueDragon",
+          "palId": "azurobe",
+          "level": 40,
+          "normalizedX": 0.553285478,
+          "normalizedY": 0.411029818
+        },
+        {
+          "id": "main-053-grintale",
+          "sourceRowId": "53",
+          "sourceInternalId": "NaughtyCat",
+          "palId": "grintale",
+          "level": 17,
+          "normalizedX": 0.721776726,
+          "normalizedY": 0.404560395
+        },
+        {
+          "id": "main-054-kingpaca",
+          "sourceRowId": "54",
+          "sourceInternalId": "KingAlpaca",
+          "palId": "kingpaca",
+          "level": 23,
+          "normalizedX": 0.624748067,
+          "normalizedY": 0.472546245
+        },
+        {
+          "id": "main-055-broncherry",
+          "sourceRowId": "55",
+          "sourceInternalId": "SakuraSaurus",
+          "palId": "broncherry",
+          "level": 23,
+          "normalizedX": 0.538749714,
+          "normalizedY": 0.538687493
+        },
+        {
+          "id": "main-056-jormuntide",
+          "sourceRowId": "56",
+          "sourceInternalId": "Umihebi",
+          "palId": "jormuntide",
+          "level": 55,
+          "normalizedX": 0.719988956,
+          "normalizedY": 0.353609884
+        },
+        {
+          "id": "main-057-elphidran",
+          "sourceRowId": "57",
+          "sourceInternalId": "FairyDragon",
+          "palId": "elphidran",
+          "level": 30,
+          "normalizedX": 0.622894809,
+          "normalizedY": 0.41652402
+        },
+        {
+          "id": "main-058-dumud",
+          "sourceRowId": "58",
+          "sourceInternalId": "LazyCatfish",
+          "palId": "dumud",
+          "level": 14,
+          "normalizedX": 0.510912479,
+          "normalizedY": 0.325414136
+        },
+        {
+          "id": "main-059-nitewing",
+          "sourceRowId": "59",
+          "sourceInternalId": "HawkBird",
+          "palId": "nitewing",
+          "level": 18,
+          "normalizedX": 0.521576477,
+          "normalizedY": 0.348805908
+        },
+        {
+          "id": "main-060-tarantriss",
+          "sourceRowId": "60",
+          "sourceInternalId": "PurpleSpider",
+          "palId": "tarantriss",
+          "level": 35,
+          "normalizedX": 0.500238644,
+          "normalizedY": 0.406430549
+        },
+        {
+          "id": "main-061-gumoss",
+          "sourceRowId": "61",
+          "sourceInternalId": "PlantSlime",
+          "palId": "gumoss",
+          "level": 11,
+          "normalizedX": 0.573328044,
+          "normalizedY": 0.525717338
+        },
+        {
+          "id": "main-062-sweepa",
+          "sourceRowId": "62",
+          "sourceInternalId": "MopKing",
+          "palId": "sweepa",
+          "level": 11,
+          "normalizedX": 0.537114964,
+          "normalizedY": 0.514496908
+        },
+        {
+          "id": "main-063-mossanda-lux",
+          "sourceRowId": "63",
+          "sourceInternalId": "GrassPanda_Electric",
+          "palId": "mossanda-lux",
+          "level": 31,
+          "normalizedX": 0.751111264,
+          "normalizedY": 0.384021259
+        },
+        {
+          "id": "main-064-wumpo-botan",
+          "sourceRowId": "64",
+          "sourceInternalId": "Yeti_Grass",
+          "palId": "wumpo-botan",
+          "level": 38,
+          "normalizedX": 0.75124931,
+          "normalizedY": 0.342883766
+        },
+        {
+          "id": "main-065-elizabee",
+          "sourceRowId": "65",
+          "sourceInternalId": "QueenBee",
+          "palId": "elizabee",
+          "level": 39,
+          "normalizedX": 0.660902285,
+          "normalizedY": 0.353314012
+        },
+        {
+          "id": "main-066-knocklem",
+          "sourceRowId": "66",
+          "sourceInternalId": "WingGolem",
+          "palId": "knocklem",
+          "level": 55,
+          "normalizedX": 0.423738522,
+          "normalizedY": 0.405998723
+        },
+        {
+          "id": "main-067-reptyro",
+          "sourceRowId": "67",
+          "sourceInternalId": "VolcanicMonster",
+          "palId": "reptyro",
+          "level": 50,
+          "normalizedX": 0.435512258,
+          "normalizedY": 0.463983966
+        },
+        {
+          "id": "main-068-blazamut",
+          "sourceRowId": "68",
+          "sourceInternalId": "KingBahamut",
+          "palId": "blazamut",
+          "level": 52,
+          "normalizedX": 0.375695079,
+          "normalizedY": 0.431715537
+        },
+        {
+          "id": "main-069-astegon",
+          "sourceRowId": "69",
+          "sourceInternalId": "BlackMetalDragon",
+          "palId": "astegon",
+          "level": 55,
+          "normalizedX": 0.390796694,
+          "normalizedY": 0.361664101
+        },
+        {
+          "id": "main-070-grizzbolt",
+          "sourceRowId": "70",
+          "sourceInternalId": "ElecPanda",
+          "palId": "grizzbolt",
+          "level": 30,
+          "normalizedX": 0.626787286,
+          "normalizedY": 0.547529542
+        },
+        {
+          "id": "main-071-frostallion-noct",
+          "sourceRowId": "71",
+          "sourceInternalId": "IceHorse_Dark",
+          "palId": "frostallion-noct",
+          "level": 65,
+          "normalizedX": 0.827371231,
+          "normalizedY": 0.121377485
+        },
+        {
+          "id": "main-105-neptilius",
+          "sourceRowId": "105",
+          "sourceInternalId": "PoseidonOrca",
+          "palId": "neptilius",
+          "level": 60,
+          "normalizedX": 0.652944851,
+          "normalizedY": 0.12027694
+        },
+        {
+          "id": "main-106-verdash",
+          "sourceRowId": "106",
+          "sourceInternalId": "GrassRabbitMan",
+          "palId": "verdash",
+          "level": 35,
+          "normalizedX": 0.699446715,
+          "normalizedY": 0.32351913
+        },
+        {
+          "id": "main-107-penking",
+          "sourceRowId": "107",
+          "sourceInternalId": "CaptainPenguin",
+          "palId": "penking",
+          "level": 15,
+          "normalizedX": 0.645059836,
+          "normalizedY": 0.438108297
+        },
+        {
+          "id": "main-108-caprity-noct",
+          "sourceRowId": "108",
+          "sourceInternalId": "BerryGoat_Dark",
+          "palId": "caprity-noct",
+          "level": 23,
+          "normalizedX": 0.562582827,
+          "normalizedY": 0.53560878
+        },
+        {
+          "id": "main-109-nitemary",
+          "sourceRowId": "109",
+          "sourceInternalId": "GhostRabbit",
+          "palId": "nitemary",
+          "level": 60,
+          "normalizedX": 0.316486472,
+          "normalizedY": 0.647885975
+        },
+        {
+          "id": "main-110-smokie",
+          "sourceRowId": "110",
+          "sourceInternalId": "BlackPuppy",
+          "palId": "smokie",
+          "level": 60,
+          "normalizedX": 0.330627499,
+          "normalizedY": 0.791526919
+        },
+        {
+          "id": "main-111-wixen",
+          "sourceRowId": "111",
+          "sourceInternalId": "FoxMage",
+          "palId": "wixen",
+          "level": 28,
+          "normalizedX": 0.66012792,
+          "normalizedY": 0.397406288
+        },
+        {
+          "id": "main-112-foxcicle",
+          "sourceRowId": "112",
+          "sourceInternalId": "IceFox",
+          "palId": "foxcicle",
+          "level": 15,
+          "normalizedX": 0.685663998,
+          "normalizedY": 0.431833241
+        },
+        {
+          "id": "main-113-lunaris",
+          "sourceRowId": "113",
+          "sourceInternalId": "Mutant",
+          "palId": "lunaris",
+          "level": 35,
+          "normalizedX": 0.650040841,
+          "normalizedY": 0.342646004
+        },
+        {
+          "id": "main-114-sibelyx",
+          "sourceRowId": "114",
+          "sourceInternalId": "WhiteMoth",
+          "palId": "sibelyx",
+          "level": 40,
+          "normalizedX": 0.688943885,
+          "normalizedY": 0.304707185
+        },
+        {
+          "id": "main-115-vaelet",
+          "sourceRowId": "115",
+          "sourceInternalId": "VioletFairy",
+          "palId": "vaelet",
+          "level": 27,
+          "normalizedX": 0.60292794,
+          "normalizedY": 0.410587314
+        },
+        {
+          "id": "main-116-wistella",
+          "sourceRowId": "116",
+          "sourceInternalId": "MoonChild",
+          "palId": "wistella",
+          "level": 66,
+          "normalizedX": 0.535543804,
+          "normalizedY": 0.775071715
+        },
+        {
+          "id": "main-117-bushi",
+          "sourceRowId": "117",
+          "sourceInternalId": "Ronin",
+          "palId": "bushi",
+          "level": 25,
+          "normalizedX": 0.544831723,
+          "normalizedY": 0.436398205
+        },
+        {
+          "id": "main-118-tetroise-primo",
+          "sourceRowId": "118",
+          "sourceInternalId": "CubeTurtle_Neutral",
+          "palId": "tetroise-primo",
+          "level": 60,
+          "normalizedX": 0.266333863,
+          "normalizedY": 0.744888225
+        },
+        {
+          "id": "main-119-blazehowl",
+          "sourceRowId": "119",
+          "sourceInternalId": "Manticore",
+          "palId": "blazehowl",
+          "level": 30,
+          "normalizedX": 0.528056212,
+          "normalizedY": 0.368041759
+        },
+        {
+          "id": "main-120-arsox",
+          "sourceRowId": "120",
+          "sourceInternalId": "FlameBuffalo",
+          "palId": "arsox",
+          "level": 15,
+          "normalizedX": 0.572152805,
+          "normalizedY": 0.482104417
+        },
+        {
+          "id": "main-121-prunelia",
+          "sourceRowId": "121",
+          "sourceInternalId": "BlueberryFairy",
+          "palId": "prunelia",
+          "level": 63,
+          "normalizedX": 0.179636168,
+          "normalizedY": 0.633233849
+        },
+        {
+          "id": "main-122-foxparks-cryst",
+          "sourceRowId": "122",
+          "sourceInternalId": "Kitsunebi_Ice",
+          "palId": "foxparks-cryst",
+          "level": 15,
+          "normalizedX": 0.478913584,
+          "normalizedY": 0.344043346
+        }
+      ]
+    }
+  ]
+}

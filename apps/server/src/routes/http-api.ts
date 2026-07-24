@@ -19,6 +19,7 @@ import {
   validatePalworldServerConnectionInput,
   validatePalworldServerDashboardResponse,
   validatePalworldServerTestResponse,
+  validatePalworldMapMarkersResponse,
   validateBotAction,
   type BotAction,
   type CommunityPost,
@@ -43,6 +44,7 @@ import {
   type PalworldServerConnectionInput,
   type PalworldServerDashboardResponse,
   type PalworldServerTestResponse,
+  type PalworldMapMarkersResponse,
   type DashboardServerStatus,
   type FollowerManagementResponse,
   type OverlayStatus,
@@ -133,10 +135,12 @@ import {
   parsePalworldBreedingQuery,
   parsePalworldId,
   parsePalworldItemListQuery,
+  parsePalworldMapMarkersQuery,
   parsePalworldPalListQuery,
   parsePalworldSkillListQuery,
   parsePalworldSearchQuery
 } from "../services/palworld-query.js";
+import type { PalworldMapMarkerProvider } from "../data/palworld-map-marker-artifact.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
@@ -1794,6 +1798,7 @@ type HttpHandlerInput = {
   disconnectStreamerDashboard?: (twitchUserId: string) => void;
   overlayStatusForStreamer?: (twitchUserId: string) => OverlayStatus;
   palworldDataService?: PalworldDataService;
+  palworldMapMarkerProvider?: PalworldMapMarkerProvider;
   palworldServerMonitor?: PalworldServerMonitor;
   palworldServerUnavailableCode?: PalworldServerAvailabilityErrorCode;
 };
@@ -5551,6 +5556,23 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const cacheHeaders = palworldCacheHeaders(activeMeta.metadata);
         if (url.pathname === "/api/palworld/meta") {
           return sendJson(req, res, 200, activeMeta, cacheHeaders);
+        }
+        if (url.pathname === "/api/palworld/map/markers") {
+          const query = parsePalworldMapMarkersQuery(url.searchParams);
+          const candidate: PalworldMapMarkersResponse = input.palworldMapMarkerProvider?.response(
+            query.world,
+            activeMeta.metadata
+          ) ?? {
+            state: "data_unavailable",
+            world: query.world,
+            markers: [],
+            metadata: activeMeta.metadata
+          };
+          const validation = validatePalworldMapMarkersResponse(candidate);
+          if (!validation.ok) {
+            throw new TypeError(`Palworld 지도 marker 응답 검증에 실패했습니다. ${validation.error}`);
+          }
+          return sendJson(req, res, 200, validation.data, cacheHeaders);
         }
         if (url.pathname === "/api/palworld/search") {
           const query = parsePalworldSearchQuery(url.searchParams);

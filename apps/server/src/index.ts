@@ -27,7 +27,15 @@ import { LocalTtsService } from "./services/local-tts-service.js";
 import { SupportMailboxStore } from "./services/support-mailbox-store.js";
 import { loadPalworldDataService, type PalworldDataService } from "./services/palworld-data.js";
 import { PalworldPaldexValidationError } from "./data/palworld-paldex-artifact.js";
-import { PalworldActiveRuntimeError } from "./data/palworld-active-runtime.js";
+import {
+  loadPalworldActiveRuntime,
+  PalworldActiveRuntimeError
+} from "./data/palworld-active-runtime.js";
+import {
+  loadPalworldMapMarkerProvider,
+  PalworldMapMarkerArtifactError,
+  type PalworldMapMarkerProvider
+} from "./data/palworld-map-marker-artifact.js";
 import { PalworldServerClient } from "./services/palworld-server-client.js";
 import {
   PalworldServerConnectionStore,
@@ -59,6 +67,7 @@ assertRuntimeConfig();
 
 const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
 let palworldDataService: PalworldDataService | undefined;
+let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
 try {
   palworldDataService = await loadPalworldDataService({
     dashboardStaticRoot: appConfig.paths.dashboardStatic,
@@ -99,6 +108,38 @@ try {
     imageAssetGate: meta.gates.imageAssets.status,
     fallbackPals: meta.gates.imageAssets.fallbackPals
   });
+  try {
+    const activeRuntime = await loadPalworldActiveRuntime();
+    palworldMapMarkerProvider = await loadPalworldMapMarkerProvider({
+      releaseRoot: activeRuntime.releaseRoot,
+      dashboardStaticRoot: appConfig.paths.dashboardStatic,
+      palworldDataService
+    });
+    const mainMap = palworldMapMarkerProvider.response("main", meta.metadata);
+    logger.event({
+      type: "palworld_map_markers.runtime_state",
+      status: mainMap.state,
+      world: "main",
+      markers: mainMap.markers.length,
+      ...(mainMap.overlay === undefined
+        ? {}
+        : {
+            archiveSha256: mainMap.overlay.archiveSha256,
+            transformRevision: mainMap.overlay.transformRevision
+          })
+    });
+  } catch (error) {
+    const errorCode = (error as NodeJS.ErrnoException).code === "ENOENT"
+      ? "PALWORLD_MAP_MARKER_ARTIFACT_MISSING"
+      : error instanceof PalworldMapMarkerArtifactError
+        ? error.code
+        : "PALWORLD_MAP_MARKER_INITIALIZATION_FAILED";
+    logger.event({
+      type: "palworld_map_markers.runtime_state",
+      status: "data_unavailable",
+      errorCode
+    });
+  }
 } catch (error) {
   const errorCode = error instanceof PalworldPaldexValidationError
     ? error.code
@@ -279,6 +320,7 @@ const server = http.createServer(createHttpHandler({
   overlayStatusForStreamer: (twitchUserId) => overlay.statusForStreamer(twitchUserId),
   supportMailbox,
   palworldDataService,
+  palworldMapMarkerProvider,
   palworldServerMonitor,
   palworldServerUnavailableCode,
   readiness: () => store.getReadiness(),

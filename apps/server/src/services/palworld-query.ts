@@ -3,9 +3,11 @@ import {
   PALWORLD_BREEDING_GENDERS,
   PALWORLD_ELEMENTS,
   PALWORLD_ITEM_CATEGORIES,
+  PALWORLD_MAP_WORLDS,
   PALWORLD_SKILL_TYPES,
   PALWORLD_VARIANT_TYPES,
-  PALWORLD_WORK_SUITABILITY_TYPES
+  PALWORLD_WORK_SUITABILITY_TYPES,
+  type PalworldMapWorld
 } from "@streamops/shared";
 
 const MAX_SEARCH_LENGTH = 80;
@@ -48,6 +50,7 @@ const SKILL_LIST_QUERY_KEYS = new Set([
 const SEARCH_QUERY_KEYS = new Set(["q", "limit"]);
 const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB", "parentAGender", "parentBGender"]);
 const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "page", "limit"]);
+const MAP_MARKERS_QUERY_KEYS = new Set(["world"]);
 
 export const PALWORLD_WORK_TYPES = PALWORLD_WORK_SUITABILITY_TYPES;
 export const PALWORLD_PAL_SORTS = ["number", "name", "rarity"] as const;
@@ -115,6 +118,10 @@ export type PalworldBreedingParentsQuery = {
   child: string;
   page: number;
   limit: number;
+};
+
+export type PalworldMapMarkersQuery = {
+  world: PalworldMapWorld;
 };
 
 export class PalworldQueryError extends Error {
@@ -281,5 +288,12 @@ export function parsePalworldBreedingParentsQuery(params: URLSearchParams): Palw
   return {
     child: requiredId(params, "child"),
     ...pagination(params, 20)
+  };
+}
+
+export function parsePalworldMapMarkersQuery(params: URLSearchParams): PalworldMapMarkersQuery {
+  assertKnownKeys(params, MAP_MARKERS_QUERY_KEYS);
+  return {
+    world: optionalEnum(params, "world", PALWORLD_MAP_WORLDS) ?? "main"
   };
 }

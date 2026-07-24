@@ -6,6 +6,7 @@ import type {
   PalworldGender,
   PalworldItemCategory,
   PalworldItemSummary,
+  PalworldPalStats,
   PalworldPalSummary,
   PalworldSkillType,
   PalworldWorkSuitabilityType,
@@ -13,6 +14,7 @@ import type {
 import {
   getPalworldBreeding,
   getPalworldItems,
+  getPalworldMapMarkers,
   getPalworldMeta,
   getPalworldSkill,
   getPalworldSkills,
@@ -36,6 +38,7 @@ import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalwor
 import { palworldSeoMetadata } from "../src/features/public-palworld/utils/seo";
 import { palworldHomeLiveStreamerCards, sortedFollowedTwitchChannels } from "../src/features/public-palworld/utils/streamers";
 import { getPublicTwitchFollowedChannels, getPublicTwitchStatus, logoutPublicTwitch, publicTwitchLoginUrl } from "../src/features/public-twitch/api";
+import { buildPalworldPalStatRows } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
 
 const anubis: PalworldPalSummary = {
   id: "anubis",
@@ -90,6 +93,77 @@ test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query�
   assert.equal(palworldTwitchReturnTo("//evil.example", "?q=x"), "/palworld");
   assert.equal(palworldTwitchReturnTo("/palworld\\streamers", ""), "/palworld");
   assert.match(publicTwitchLoginUrl("/palworld/search?q=Pal"), /\/api\/public\/twitch\/auth\/start\?return_to=%2Fpalworld%2Fsearch%3Fq%3DPal$/u);
+});
+
+test("Palworld 지도 marker API는 main world를 요청하고 Shared validator를 통과한 응답만 반환한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  const requested: string[] = [];
+  const metadata = {
+    gameVersion: "1.0.1",
+    sourceName: "고정 Palworld release",
+    sourceUrl: "https://example.com/palworld-source",
+    sourceRevision: "fixed-revision",
+    extractedAt: "2026-07-20T00:00:00.000Z",
+    verifiedAt: "2026-07-21T00:00:00.000Z",
+    license: "RIGHTS_NOT_INDEPENDENTLY_VERIFIED",
+    rightsVerified: false,
+  };
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: () => true,
+    } as unknown as Window,
+    fetch: async (url: string | URL | Request) => {
+      requested.push(String(url));
+      return new Response(JSON.stringify({
+        state: "ready",
+        world: "main",
+        markers: [{
+          id: "main-anubis-001",
+          sourceRowId: "Boss_Anubis",
+          sourceInternalId: "Anubis",
+          pal: {
+            id: "anubis",
+            number: 100,
+            nameKo: "아누비스",
+            nameJa: "アヌビス",
+            nameEn: "Anubis",
+            elements: ["ground"],
+          },
+          level: 47,
+          normalizedX: 0.25,
+          normalizedY: 0.75,
+        }],
+        metadata,
+        overlay: {
+          schemaVersion: 1,
+          technicalStatus: "ready",
+          sourceType: "operator_pak_export",
+          archiveSha256: "a".repeat(64),
+          sourceMember: "Pal/DataTable/UI/DT_BossSpawnerLoactionData.json",
+          sourceMemberSha256: "b".repeat(64),
+          targetMapAssetSha256: "c".repeat(64),
+          sourceGameVersion: null,
+          sourceSteamBuildId: null,
+          targetGameVersion: "1.0.1",
+          compatibilityBasis: "exact_map_geometry_and_coordinate_transform",
+          transformRevision: "main-map-transform-v1",
+          rightsVerified: false,
+          usageBasis: "operator_reference_use",
+        },
+      }), { status: 200 });
+    },
+  });
+
+  try {
+    const response = await getPalworldMapMarkers("main");
+    assert.equal(response.state, "ready");
+    assert.equal(response.markers[0]?.pal.nameKo, "아누비스");
+    assert.match(requested[0] ?? "", /\/api\/palworld\/map\/markers\?world=main$/u);
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
 });
 
 test("Palworld LIVE 목록은 Twitch user ID로 중복 제거하고 LIVE만 최대 12개 표시한다", () => {
@@ -186,6 +260,45 @@ test("도감 번호 표기와 알 수 없는 enum fallback은 locale selector를
   assert.equal(acquisitionLabel("future_acquisition" as PalworldAcquisitionType, "ja"), "不明");
   assert.equal(genderLabel("future_gender" as PalworldGender, "ko"), "알 수 없음");
   assert.equal(skillTypeLabel("future_skill" as PalworldSkillType, "ja"), "不明");
+});
+
+test("Pal 상세 능력치 그래프는 호환 alias를 중복하지 않고 실제 필드만 정규화한다", () => {
+  const legacy: PalworldPalStats = {
+    hp: 120,
+    attack: 130,
+    defense: 100,
+    moveSpeed: 800,
+    stamina: 100,
+  };
+  assert.deepEqual(
+    buildPalworldPalStatRows(legacy).map(({ id }) => id),
+    ["hp", "attack", "defense", "stamina", "moveSpeed"],
+  );
+
+  const rich: PalworldPalStats = {
+    ...legacy,
+    hp: 100,
+    shotAttack: 150,
+    meleeAttack: 100,
+    defense: 200,
+    stamina: 250,
+    food: 5,
+    walkSpeed: 1_500,
+    runSpeed: 1_500,
+    rideSprintSpeed: 1_750,
+  };
+  const rows = buildPalworldPalStatRows(rich);
+  assert.deepEqual(
+    rows.map(({ id }) => id),
+    ["hp", "shotAttack", "meleeAttack", "defense", "stamina", "food", "walkSpeed", "runSpeed", "rideSprintSpeed"],
+  );
+  assert.equal(rows.some(({ id }) => id === "attack" || id === "moveSpeed"), false);
+  assert.equal(rows.every(({ percent }) => percent >= 0 && percent <= 100), true);
+  assert.equal(rows.find(({ id }) => id === "rideSprintSpeed")?.percent, 50);
+
+  const sourceSentinel = buildPalworldPalStatRows({ ...rich, runSpeed: -1, rideSprintSpeed: -1 });
+  assert.equal(sourceSentinel.some(({ id }) => id === "runSpeed" || id === "rideSprintSpeed"), false);
+  assert.equal(sourceSentinel.some(({ id }) => id === "moveSpeed"), true);
 });
 
 test("번역 snapshot 상태에 따라 현지어·영어 fallback·원문 없음 상태를 구분한다", () => {
