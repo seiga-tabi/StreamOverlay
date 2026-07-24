@@ -10,18 +10,38 @@ import { PalworldMedia } from "./PalworldMedia";
 import { PalworldTranslationBadge } from "./PalworldTranslationBadge";
 
 type PickerPal = PalworldPalReference | PalworldPalSummary;
-type PickerRequestState = "idle" | "loading" | "success" | "empty" | "error" | "data_unavailable";
+type PickerRequestState =
+  | "idle"
+  | "loading"
+  | "success"
+  | "empty"
+  | "error"
+  | "data_unavailable"
+  | "network_error"
+  | "timeout"
+  | "invalid_response";
+
+function pickerErrorState(error: unknown): PickerRequestState {
+  if (!(error instanceof PalworldApiError)) return "error";
+  if (error.status === 503 || error.code === "PALWORLD_DATA_UNAVAILABLE") return "data_unavailable";
+  if (error.code === "PALWORLD_NETWORK_ERROR") return "network_error";
+  if (error.code === "PALWORLD_REQUEST_TIMEOUT") return "timeout";
+  if (error.code === "PALWORLD_RESPONSE_INVALID") return "invalid_response";
+  return "error";
+}
 
 export function PalworldPalPicker({
   label,
   locale,
   onChange,
+  onOpenPal,
   selected,
   testId,
 }: {
   label: string;
   locale: PalworldLocale;
   onChange: (pal: PalworldPalSummary | null) => void;
+  onOpenPal?: (id: string) => void;
   selected: PickerPal | null;
   testId: string;
 }) {
@@ -34,6 +54,7 @@ export function PalworldPalPicker({
   const pickerRef = useRef<HTMLDivElement>(null);
   const requestIdRef = useRef(0);
   const listId = useId();
+  const statusId = `${listId}-status`;
   const text = palworldI18n[locale];
 
   useEffect(() => {
@@ -60,7 +81,7 @@ export function PalworldPalPicker({
           if (error instanceof DOMException && error.name === "AbortError") return;
           if (controller.signal.aborted || requestIdRef.current !== requestId) return;
           setSuggestions([]);
-          setRequestState(error instanceof PalworldApiError && error.status === 503 ? "data_unavailable" : "error");
+          setRequestState(pickerErrorState(error));
         });
     }, 180);
     return () => {
@@ -71,7 +92,10 @@ export function PalworldPalPicker({
 
   useEffect(() => {
     const close = (event: PointerEvent) => {
-      if (!pickerRef.current?.contains(event.target as Node)) setFocused(false);
+      if (!pickerRef.current?.contains(event.target as Node)) {
+        setFocused(false);
+        setActiveIndex(-1);
+      }
     };
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
@@ -111,17 +135,36 @@ export function PalworldPalPicker({
   if (selected) {
     const name = resolvePalworldName(selected, locale);
     const displayName = name.text;
+    const selectedContent = <>
+      <span className="palworld-selected-media"><PalworldMedia kind="pal" imageUrl={selected.imageUrl} alt={displayName} locale={locale} /></span>
+      <span><strong>{displayName}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(selected.number, locale)}</small><span className="palworld-badge-row palworld-compact-element-row">{selected.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
+    </>;
     return <div className="palworld-picker" ref={pickerRef} data-testid={testId}>
       <span className="palworld-picker-label">{label}</span>
       <div className="palworld-selected-pal">
-        <span className="palworld-selected-media"><PalworldMedia kind="pal" imageUrl={selected.imageUrl} alt={displayName} locale={locale} /></span>
-        <span><strong>{displayName}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(selected.number, locale)}</small><span className="palworld-badge-row palworld-compact-element-row">{selected.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
-        <Button size="sm" variant="ghost" aria-label={`${displayName} ${text.reset}`} onClick={() => { onChange(null); setQuery(""); }}>×</Button>
+        {onOpenPal ? <button className="palworld-selected-pal-button" type="button" aria-label={`${text.openParentPalDetails}: ${displayName}`} onClick={() => onOpenPal(selected.id)}>{selectedContent}</button> : selectedContent}
+        <Button size="sm" variant="ghost" aria-label={`${displayName} ${text.removePalSelection}`} onClick={() => { onChange(null); setQuery(""); }}>×</Button>
       </div>
     </div>;
   }
 
-  return <div className="palworld-picker" ref={pickerRef} data-testid={testId}>
+  const describedBy = requestState !== "idle" && requestState !== "success"
+    ? statusId
+    : undefined;
+  const popupOpen = focused && Boolean(query.trim());
+  const suggestionsOpen = popupOpen && requestState === "success";
+  const errorKey: "searchError" | "palDataUnavailable" | "apiNetworkError" | "apiTimeout" | "apiInvalidResponse" =
+    requestState === "data_unavailable"
+      ? "palDataUnavailable"
+      : requestState === "network_error"
+        ? "apiNetworkError"
+        : requestState === "timeout"
+          ? "apiTimeout"
+          : requestState === "invalid_response"
+            ? "apiInvalidResponse"
+            : "searchError";
+
+  return <div className="palworld-picker" ref={pickerRef} data-testid={testId} aria-busy={requestState === "loading"}>
     <label className="palworld-picker-label" htmlFor={`${listId}-input`}>{label}</label>
     <input
       id={`${listId}-input`}
@@ -130,15 +173,17 @@ export function PalworldPalPicker({
       onChange={(event) => setQuery(event.target.value)}
       onFocus={() => setFocused(true)}
       onKeyDown={handleInputKeyDown}
-      placeholder={text.searchPlaceholder}
+      placeholder={text.palPickerPlaceholder}
       aria-autocomplete="list"
-      aria-expanded={focused && Boolean(query.trim())}
-      aria-controls={focused && query.trim() ? listId : undefined}
-      aria-activedescendant={activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
+      aria-busy={requestState === "loading"}
+      aria-haspopup="listbox"
+      aria-expanded={suggestionsOpen}
+      aria-controls={suggestionsOpen ? listId : undefined}
+      aria-activedescendant={suggestionsOpen && activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
+      aria-describedby={describedBy}
     />
-    {focused && query.trim() ? <div className="palworld-picker-list" id={listId} role="listbox" aria-label={text.autocomplete}>
-      {requestState === "loading" ? <p role="status" aria-live="polite">{text.searching}</p> : null}
-      {requestState === "success" && suggestions.map((pal, index) => {
+    {suggestionsOpen ? <div className="palworld-picker-list" id={listId} role="listbox" aria-label={text.autocomplete}>
+      {suggestions.map((pal, index) => {
         const name = resolvePalworldName(pal, locale);
         return <button
           className={activeIndex === index ? "is-active" : undefined}
@@ -154,18 +199,18 @@ export function PalworldPalPicker({
           <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(pal.number, locale)}</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
         </button>;
       })}
-      {requestState === "empty" ? <p>{text.noResults}</p> : null}
-      {requestState === "error" || requestState === "data_unavailable" ? (
-        <div className="palworld-picker-error" role="alert">
-          <p
-            data-ko={requestState === "data_unavailable" ? palworldI18n.ko.palDataUnavailable : palworldI18n.ko.searchError}
-            data-ja={requestState === "data_unavailable" ? palworldI18n.ja.palDataUnavailable : palworldI18n.ja.searchError}
-          >
-            {requestState === "data_unavailable" ? text.palDataUnavailable : text.searchError}
-          </p>
-          <Button size="sm" variant="secondary" onClick={() => setRevision((value) => value + 1)}>{text.retry}</Button>
-        </div>
-      ) : null}
     </div> : null}
+    {popupOpen && requestState === "loading"
+      ? <div className="palworld-picker-list" id={statusId} role="status" aria-live="polite"><p>{text.searching}</p></div>
+      : null}
+    {popupOpen && requestState === "empty"
+      ? <div className="palworld-picker-list" id={statusId}><p>{text.noResults}</p></div>
+      : null}
+    {popupOpen && ["error", "data_unavailable", "network_error", "timeout", "invalid_response"].includes(requestState) ? (
+      <div className="palworld-picker-list palworld-picker-error" id={statusId} role="alert">
+        <p data-ko={palworldI18n.ko[errorKey]} data-ja={palworldI18n.ja[errorKey]}>{text[errorKey]}</p>
+        <Button size="sm" variant="secondary" onClick={() => setRevision((value) => value + 1)}>{text.retry}</Button>
+      </div>
+    ) : null}
   </div>;
 }

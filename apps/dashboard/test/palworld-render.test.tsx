@@ -5,6 +5,7 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type {
+  PalworldBreedingPair,
   PalworldItemReference,
   PalworldMapMarker,
   PalworldSkillDetail,
@@ -36,6 +37,14 @@ import { PalworldSkillCard, PalworldSkillDetailView, PalworldSkillsPage } from "
 import { PalworldElementBadge } from "../src/features/public-palworld/components/PalworldElementBadge";
 import { PalworldPalStatsGraph } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
 import { PalworldPalPicker } from "../src/features/public-palworld/components/PalworldPalPicker";
+import { BreedingModeTabs } from "../src/features/public-palworld/components/PalworldBreedingControls";
+import {
+  BreedingGenderAlternativeCard,
+  BreedingRequestStatus,
+  DirectBreedingResult,
+  ReverseBreedingPairCard,
+  ReverseBreedingTargetSummary,
+} from "../src/features/public-palworld/components/PalworldBreedingResults";
 import { PalworldNotFoundPage } from "../src/features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldPageErrorBoundary } from "../src/features/public-palworld/components/PalworldPageErrorBoundary";
 import {
@@ -455,6 +464,71 @@ test("교배 Pal 자동완성의 선택 상태도 공통 번역 이름과 locale
   assert.doesNotMatch(korean, /Translated Pal/u);
   assert.match(japanese, /翻訳されたパル/u);
   assert.match(japanese, /data-ja="翻訳確認中"/u);
+});
+
+test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 반복을 제거한다", () => {
+  const pair: PalworldBreedingPair = {
+    id: "penking-bushi-sibelyx",
+    parentA: {
+      id: "penking",
+      number: 11,
+      nameKo: "펭킹",
+      nameJa: "キャプペン",
+      nameEn: "Penking",
+      elements: ["water", "ice"],
+    },
+    parentB: {
+      id: "bushi",
+      number: 72,
+      nameKo: "불무사",
+      nameJa: "ツジギリ",
+      nameEn: "Bushi",
+      elements: ["fire"],
+    },
+    child: {
+      id: "sibelyx",
+      number: 79,
+      nameKo: "실키누",
+      nameJa: "シルキーヌ",
+      nameEn: "Sibelyx",
+      elements: ["ice"],
+    },
+    isSpecial: true,
+    genderCondition: { parentA: "male", parentB: "female" },
+  };
+  const tabs = renderToStaticMarkup(<BreedingModeTabs locale="ja" mode="child" onMode={() => undefined} />);
+  const direct = renderToStaticMarkup(<DirectBreedingResult locale="ko" onCopy={() => undefined} onOpenPal={() => undefined} onViewParents={() => undefined} pair={pair} />);
+  const reverse = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} />);
+  const target = renderToStaticMarkup(<ReverseBreedingTargetSummary
+    child={pair.child}
+    locale="ko"
+    onOpenPal={() => undefined}
+    pagination={{ page: 2, pageSize: 12, total: 25, totalPages: 3, hasNextPage: true, hasPreviousPage: true }}
+  />);
+  const alternative = renderToStaticMarkup(<BreedingGenderAlternativeCard locale="ja" onApply={() => undefined} onOpenPal={() => undefined} pair={pair} />);
+  const status = renderToStaticMarkup(<BreedingRequestStatus message="결과 1개" />);
+
+  assert.equal((tabs.match(/role="tab"/gu) ?? []).length, 2);
+  assert.match(tabs, /親から結果を探す[\s\S]*結果パルの親を探す/u);
+  assert.match(tabs, /aria-selected="true"[^>]*>結果パルの親を探す/u);
+  assert.match(direct, /data-testid="breeding-direct-card"/u);
+  assert.match(direct, /class="palworld-direct-result-hero"/u);
+  assert.match(direct, /결과 Pal 상세 보기/u);
+  assert.match(direct, /이 Pal의 부모 조합 보기/u);
+  assert.match(direct, /링크 복사/u);
+  assert.match(reverse, /data-testid="breeding-reverse-pair"/u);
+  assert.match(reverse, /펭킹/u);
+  assert.match(reverse, /불무사/u);
+  assert.doesNotMatch(reverse, /실키누/u);
+  assert.match(reverse, /계산기에 넣기/u);
+  assert.match(target, /data-testid="breeding-target-summary"/u);
+  assert.match(target, /실키누/u);
+  assert.match(target, /aria-label="목표 Pal 상세 보기: 실키누"/u);
+  assert.match(target, /총 25개 조합/u);
+  assert.match(target, /2\/3 페이지/u);
+  assert.match(alternative, /この条件を適用/u);
+  assert.match(alternative, /aria-label="この条件を適用: シルキーヌ, オス \/ メス"/u);
+  assert.match(status, /role="status"[^>]*aria-live="polite"[^>]*aria-atomic="true"/u);
 });
 
 test("원문 설명이 없는 아이템 카드는 정보를 추정하지 않고 locale별 원본 없음 문구를 표시한다", () => {

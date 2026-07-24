@@ -1281,32 +1281,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  min-inline-size: 0;
   gap: var(--yoro-space-4);
   padding-block: var(--yoro-space-4);
 }
 
 .palworld-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   min-inline-size: 0;
-  overflow-x: auto;
-  border-block-end: thin solid var(--yoro-color-border);
-  scrollbar-width: thin;
+  overflow: hidden;
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface);
 }
 
 .palworld-tabs button {
-  flex: none;
+  min-inline-size: 0;
   min-block-size: var(--yoro-size-touch-target);
-  padding-inline: var(--yoro-space-5);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
   border: 0;
   border-block-end: var(--yoro-focus-ring-width) solid transparent;
   background: transparent;
   color: var(--yoro-color-text-muted);
   cursor: pointer;
   font-weight: var(--yoro-font-weight-bold);
+  line-height: var(--yoro-line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.palworld-tabs button + button {
+  border-inline-start: thin solid var(--yoro-color-border);
+}
+
+.palworld-tabs button:focus-visible {
+  position: relative;
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
 }
 
 .palworld-tabs button.active {
   border-block-end-color: var(--palworld-accent);
+  background: var(--palworld-accent-soft);
   color: var(--palworld-accent);
 }
 
@@ -1318,7 +1335,7 @@
 .palworld-breeding-pickers {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: end;
+  align-items: center;
   gap: var(--yoro-space-4);
 }
 
@@ -1355,6 +1372,12 @@
   font: inherit;
 }
 
+.palworld-breeding-input-hint {
+  margin-block: var(--yoro-space-0) var(--yoro-space-4);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
 .palworld-picker-error {
   display: grid;
   justify-items: start;
@@ -1379,11 +1402,31 @@
   background: var(--palworld-accent-soft);
 }
 
+.palworld-selected-pal-button {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-0);
+  border: 0;
+  border-radius: var(--yoro-radius-md);
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.palworld-selected-pal-button:focus-visible {
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
+}
+
 .palworld-gender-field {
   display: grid;
   min-inline-size: 0;
   gap: var(--yoro-space-2);
-  margin-block-start: var(--yoro-space-3);
+  margin-block-start: var(--yoro-space-0);
   color: var(--yoro-color-text-muted);
   font-size: var(--yoro-font-size-sm);
   font-weight: var(--yoro-font-weight-bold);
@@ -1400,8 +1443,72 @@
   font: inherit;
 }
 
-.palworld-selected-pal > span:nth-child(2) {
+.palworld-selected-pal > span:nth-child(2),
+.palworld-selected-pal-button > span:nth-child(2) {
   flex: 1;
+  min-inline-size: 0;
+}
+
+.palworld-breeding-gender-disclosure {
+  display: grid;
+  gap: var(--yoro-space-3);
+  margin-block-start: var(--yoro-space-4);
+  padding-block-start: var(--yoro-space-4);
+  border-block-start: thin solid var(--yoro-color-border);
+}
+
+.palworld-breeding-gender-disclosure-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-breeding-gender-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--yoro-space-4);
+}
+
+.palworld-breeding-gender-controls[hidden] {
+  display: none;
+}
+
+.palworld-breeding-reverse-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, .4fr);
+  align-items: end;
+  gap: var(--yoro-space-4);
+}
+
+.palworld-breeding-target-change {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-breeding-target-change .yoro-button {
+  justify-self: start;
+}
+
+.palworld-breeding-type-filter {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-breeding-type-filter select {
+  min-inline-size: 0;
+  min-block-size: var(--yoro-size-touch-target);
+  padding-inline: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-strong);
+  color: var(--yoro-color-text);
+  font: inherit;
 }
 
 .palworld-breeding-actions,
@@ -1412,10 +1519,16 @@
 }
 
 .palworld-breeding-result,
-.palworld-parent-pair-list {
+.palworld-parent-pair-list,
+.palworld-gender-alternative-list {
   display: grid;
   min-inline-size: 0;
   gap: var(--yoro-space-4);
+}
+
+.palworld-parent-pair-list,
+.palworld-gender-alternative-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .palworld-breeding-gender-notice {
@@ -1430,60 +1543,183 @@
   margin-block-end: var(--yoro-space-0);
 }
 
-.palworld-pair-flow {
+.palworld-breeding-pair-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-direct-result-card {
+  inline-size: min(100%, 68rem);
+  margin-inline: auto;
+  border-color: var(--palworld-accent);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.palworld-direct-result-card .yoro-card__content,
+.palworld-gender-alternative-card .yoro-card__content,
+.palworld-reverse-pair-card .yoro-card__content,
+.palworld-reverse-target-summary .yoro-card__content {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+}
+
+.palworld-direct-parent-summary,
+.palworld-reverse-parents {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   min-inline-size: 0;
   gap: var(--yoro-space-3);
 }
 
-.palworld-pair-flow > span {
+.palworld-direct-parent-summary > span,
+.palworld-reverse-parents > span,
+.palworld-direct-result-connector {
   color: var(--palworld-accent);
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
+  text-align: center;
 }
 
-.palworld-breeding-pal {
-  display: flex;
+.palworld-breeding-pal-button {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
   align-items: center;
   min-inline-size: 0;
   gap: var(--yoro-space-3);
-}
-
-.palworld-breeding-pal > span {
-  flex: none;
-  inline-size: 5rem;
-  block-size: 5rem;
-  overflow: hidden;
+  padding: var(--yoro-space-2);
+  border: thin solid var(--yoro-color-border);
   border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-strong);
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
 }
 
-.palworld-breeding-pal > div {
+.palworld-breeding-pal-button:hover {
+  border-color: var(--palworld-accent);
+}
+
+.palworld-breeding-pal-button:focus-visible {
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
+}
+
+.palworld-breeding-pal-media {
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  overflow: hidden;
+  border-radius: var(--yoro-radius-md);
+}
+
+.palworld-breeding-pal-copy {
   display: grid;
   min-inline-size: 0;
   gap: var(--yoro-space-1);
 }
 
-.palworld-breeding-pal strong {
+.palworld-breeding-pal-copy strong {
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.palworld-breeding-pal small {
+.palworld-breeding-pal-copy small {
   color: var(--yoro-color-text-muted);
 }
 
-.palworld-result-pal-button {
-  min-inline-size: 0;
-  padding: var(--yoro-space-2);
+.palworld-direct-result-hero {
+  inline-size: min(100%, 38rem);
+  margin-inline: auto;
+}
+
+.palworld-breeding-pal-button.is-hero {
+  grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
+  inline-size: 100%;
+  padding: var(--yoro-space-4);
   border: thin solid var(--palworld-accent);
-  border-radius: var(--yoro-radius-lg);
+  border-radius: var(--yoro-radius-xl);
   background: var(--palworld-accent-soft);
-  color: inherit;
-  text-align: start;
-  cursor: pointer;
+}
+
+.palworld-breeding-pal-button.is-hero .palworld-breeding-pal-media {
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 1;
+  border-radius: var(--yoro-radius-lg);
+}
+
+.palworld-breeding-pal-button.is-hero strong {
+  font-size: var(--yoro-font-size-2xl);
+  line-height: var(--yoro-line-height-tight);
+}
+
+.palworld-breeding-pal-button.is-target {
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+}
+
+.palworld-breeding-pal-button.is-target .palworld-breeding-pal-media {
+  inline-size: 4.5rem;
+  block-size: 4.5rem;
+}
+
+.palworld-direct-result-actions,
+.palworld-reverse-pair-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-gender-alternative-card .yoro-card__header,
+.palworld-reverse-pair-card .yoro-card__header {
+  align-items: center;
+}
+
+.palworld-gender-alternative-card .yoro-button,
+.palworld-reverse-pair-actions .yoro-button {
+  inline-size: 100%;
+}
+
+.palworld-reverse-target-summary {
+  background: var(--palworld-accent-soft);
+}
+
+.palworld-reverse-target-summary .yoro-card__content {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.palworld-reverse-target-counts {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+  color: var(--yoro-color-text-muted);
+  text-align: end;
+}
+
+.palworld-reverse-target-counts strong {
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-copy-feedback {
+  margin: var(--yoro-space-0);
+  color: var(--yoro-color-text-muted);
+  text-align: center;
+}
+
+.palworld-copy-feedback[role="alert"] {
+  color: var(--yoro-color-danger);
+}
+
+.palworld-breeding-result-skeleton {
+  min-inline-size: 0;
 }
 
 .palworld-detail-modal .yoro-modal__dialog {
@@ -2121,13 +2357,9 @@
     mask-image: linear-gradient(to right, transparent, var(--yoro-color-text) var(--yoro-space-8), var(--yoro-color-text) calc(100% - var(--yoro-space-8)), transparent);
   }
 
-  .palworld-pair-flow {
+  .palworld-parent-pair-list,
+  .palworld-gender-alternative-list {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .palworld-pair-flow > span {
-    transform: rotate(90deg);
-    text-align: center;
   }
 
   .palworld-streamer-grid {
@@ -2218,6 +2450,11 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .palworld-breeding-gender-controls,
+  .palworld-breeding-reverse-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .palworld-picker .palworld-picker-list {
     position: static;
     max-block-size: min(20rem, 45dvh);
@@ -2234,6 +2471,27 @@
   .palworld-swap-button {
     justify-self: center;
     transform: rotate(90deg);
+  }
+
+  .palworld-breeding-pal-button.is-hero {
+    grid-template-columns: minmax(6.5rem, 8rem) minmax(0, 1fr);
+  }
+
+  .palworld-breeding-pal-button.is-hero strong {
+    font-size: var(--yoro-font-size-lg);
+  }
+
+  .palworld-direct-result-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-reverse-target-summary .yoro-card__content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-reverse-target-counts {
+    text-align: start;
   }
 
   .palworld-detail-modal.yoro-modal {
@@ -2316,6 +2574,25 @@
   .palworld-pal-detail-hero,
   .palworld-stat-chart-row {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-direct-parent-summary,
+  .palworld-reverse-parents {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-direct-parent-summary > span,
+  .palworld-reverse-parents > span {
+    text-align: center;
+  }
+
+  .palworld-breeding-pal-button.is-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-breeding-pal-button.is-hero .palworld-breeding-pal-media {
+    inline-size: min(100%, 8rem);
+    justify-self: center;
   }
 
   .palworld-pal-detail-media {

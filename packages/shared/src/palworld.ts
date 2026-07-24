@@ -78,6 +78,7 @@ export const PALWORLD_ITEM_CATEGORIES = [
 export const PALWORLD_ACQUISITION_TYPES = ["craft", "drop", "merchant", "chest", "gathering", "quest", "other"] as const;
 export const PALWORLD_GENDERS = ["any", "male", "female"] as const;
 export const PALWORLD_BREEDING_GENDERS = ["male", "female"] as const;
+export const PALWORLD_BREEDING_PAIR_TYPES = ["all", "normal", "special"] as const;
 export const PALWORLD_BREEDING_RESOLUTION_STATES = [
   "resolved",
   "requires_gender",
@@ -119,6 +120,7 @@ export type PalworldItemCategory = (typeof PALWORLD_ITEM_CATEGORIES)[number];
 export type PalworldAcquisitionType = (typeof PALWORLD_ACQUISITION_TYPES)[number];
 export type PalworldGender = (typeof PALWORLD_GENDERS)[number];
 export type PalworldBreedingGender = (typeof PALWORLD_BREEDING_GENDERS)[number];
+export type PalworldBreedingPairType = (typeof PALWORLD_BREEDING_PAIR_TYPES)[number];
 export type PalworldBreedingResolutionState = (typeof PALWORLD_BREEDING_RESOLUTION_STATES)[number];
 export type PalworldDomainStatus = (typeof PALWORLD_DOMAIN_STATUSES)[number];
 export type PalworldImageAssetStatus = (typeof PALWORLD_IMAGE_ASSET_STATUSES)[number];

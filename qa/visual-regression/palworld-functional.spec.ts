@@ -414,6 +414,26 @@ const breedingPair: PalworldBreedingPair = {
   isSpecial: false,
 };
 
+function genderBreedingPair(
+  parentAId: string,
+  parentBId: string,
+  katressGender: "female" | "male",
+): PalworldBreedingPair {
+  const parentAIsKatress = parentAId === "katress";
+  const wixenGender = katressGender === "female" ? "male" : "female";
+  return {
+    id: `fixture-${parentAId}-${parentBId}-katress-ignis-${katressGender}`,
+    parentA: palReference(parentAId),
+    parentB: palReference(parentBId),
+    child: palReference("katress-ignis"),
+    isSpecial: true,
+    genderCondition: {
+      parentA: parentAIsKatress ? katressGender : wixenGender,
+      parentB: parentAIsKatress ? wixenGender : katressGender,
+    },
+  };
+}
+
 const apiRequestUrls = new WeakMap<Page, string[]>();
 
 function palReference(id: string): PalworldPalReference {
@@ -744,11 +764,23 @@ async function installApiFixtures(page: Page): Promise<void> {
       return;
     }
     if (url.pathname === "/api/palworld/breeding/parents") {
-      const child = aliases(url.searchParams.get("child") ?? "").find((id) => id === "sibelyx");
+      const child = aliases(url.searchParams.get("child") ?? "")
+        .find((id) => id === "sibelyx" || id === "katress-ignis");
+      const type = url.searchParams.get("type") ?? "all";
+      const childPairs = child === "sibelyx"
+        ? [breedingPair]
+        : child === "katress-ignis"
+          ? Array.from({ length: 13 }, (_, index) => ({
+            ...genderBreedingPair("katress", "wixen", index % 2 === 0 ? "female" : "male"),
+            id: `fixture-katress-wixen-katress-ignis-reverse-${index + 1}`,
+          }))
+          : [];
+      const pairs = childPairs
+        .filter((pair) => type === "all" || (type === "special" ? pair.isSpecial : !pair.isSpecial));
       await json(route, {
         child: palReference(child ?? "sibelyx"),
-        ...pageResponse(child ? [breedingPair] : [], url, metadata),
-        state: child ? "resolved" : "not_found",
+        ...pageResponse(pairs, url, metadata),
+        state: pairs.length ? "resolved" : "not_found",
       });
       return;
     }
@@ -761,12 +793,39 @@ async function installApiFixtures(page: Page): Promise<void> {
       }
       const isSupported = new Set([parentAId, parentBId]).size === 2
         && [parentAId, parentBId].every((id) => id === "penking" || id === "bushi");
+      const isGendered = new Set([parentAId, parentBId]).size === 2
+        && [parentAId, parentBId].every((id) => id === "katress" || id === "wixen");
+      const selfPair = parentAId === parentBId
+        ? {
+          id: `fixture-${parentAId}-self`,
+          parentA: palReference(parentAId),
+          parentB: palReference(parentBId),
+          child: palReference(parentAId),
+          isSpecial: false,
+        } satisfies PalworldBreedingPair
+        : null;
+      const genderPairs = isGendered
+        ? [
+          genderBreedingPair(parentAId, parentBId, "female"),
+          genderBreedingPair(parentAId, parentBId, "male"),
+        ]
+        : [];
+      const parentAGender = url.searchParams.get("parentAGender");
+      const parentBGender = url.searchParams.get("parentBGender");
+      const genderPair = genderPairs.find((pair) => pair.genderCondition
+        && parentAGender === pair.genderCondition.parentA
+        && parentBGender === pair.genderCondition.parentB) ?? null;
+      const genderResolved = genderPair !== null;
       await json(route, {
         parentA: palReference(parentAId),
         parentB: palReference(parentBId),
-        result: isSupported ? breedingPair : null,
-        state: isSupported ? "resolved" : "not_found",
-        alternatives: [],
+        result: isSupported ? breedingPair : selfPair ?? (genderResolved ? genderPair : null),
+        state: isSupported || selfPair ? "resolved" : isGendered && (!parentAGender || !parentBGender)
+          ? "requires_gender"
+          : genderResolved
+            ? "resolved"
+            : "not_found",
+        alternatives: isGendered && (!parentAGender || !parentBGender) ? genderPairs : [],
         metadata,
       });
       return;
@@ -1204,7 +1263,10 @@ test("Palworld OAuth marker는 기존 검색 query를 보존해 제거하고 현
   await expect.poll(() => new URL(page.url()).searchParams.has("viewer_twitch")).toBe(false);
   expect(new URL(page.url()).searchParams.get("q")).toBe("아누비스");
   expect(new URL(page.url()).searchParams.get("pal")).toBe("anubis");
+  const palModal = page.getByTestId("pal-detail-modal");
+  await expect(palModal).toBeVisible();
   await page.keyboard.press("Escape");
+  await expect(palModal).toHaveCount(0);
 
   const authRequestPromise = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/public/twitch/auth/start");
   await page.getByRole("button", { name: "Twitch 로그인" }).first().click();
@@ -1470,6 +1532,16 @@ test("스킬 경로는 필터·영문 원문·속성 아이콘·상세·관련 P
 });
 
 test("부모 Pal 자동완성으로 일반 교배 결과를 조회하고 URL과 부모 위치를 교환한다", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          window.sessionStorage.setItem("copiedBreedingUrl", value);
+        },
+      },
+    });
+  });
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld/breeding");
 
@@ -1495,8 +1567,35 @@ test("부모 Pal 자동완성으로 일반 교배 결과를 조회하고 URL과 
   const result = page.getByTestId("breeding-result");
   await expect(result).toContainText("일반 교배");
   await expect(result).toContainText("실키누");
+  await expect(result.getByTestId("breeding-direct-card").locator(".palworld-direct-result-hero")).toBeVisible();
+  await expect(page.getByRole("button", { name: "성별 조건 설정" })).toBeVisible();
+  await expect(page.getByLabel("부모 1 성별")).toBeHidden();
   await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("penking");
   await expect.poll(() => new URL(page.url()).searchParams.get("parentB")).toBe("bushi");
+
+  await parentA.getByRole("button", { name: "부모 Pal 상세 보기: 펭킹" }).click();
+  await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "펭킹" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await result.getByRole("button", { name: "결과 Pal 상세 보기: 실키누" }).click();
+  await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "실키누" })).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  await result.getByRole("button", { name: "링크 복사" }).click();
+  await expect(result.locator(".palworld-copy-feedback")).toHaveText("링크가 복사되었습니다.");
+  await expect.poll(() => page.evaluate(() => window.sessionStorage.getItem("copiedBreedingUrl"))).toContain("parentA=penking");
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async () => {
+          throw new Error("clipboard blocked");
+        },
+      },
+    });
+  });
+  await result.getByRole("button", { name: "링크 복사" }).click();
+  await expect(result.locator(".palworld-copy-feedback")).toHaveText("링크를 복사하지 못했습니다.");
+
   await page.getByTestId("breeding-swap").click();
   await expect(parentA).toContainText("불무사");
   await expect(parentB).toContainText("펭킹");
@@ -1519,6 +1618,69 @@ test("부모 Pal 자동완성으로 일반 교배 결과를 조회하고 URL과 
   await page.goForward();
   await expect(parentA).toContainText("불무사");
   await expect(parentB).toContainText("펭킹");
+
+  await result.getByRole("button", { name: "이 Pal의 부모 조합 보기" }).click();
+  await expect(page).toHaveURL(/mode=child.*child=sibelyx/u);
+  await expect(page.getByTestId("breeding-target-summary")).toContainText("실키누");
+  await page.getByTestId("breeding-reverse-pair").getByRole("button", { name: "계산기에 넣기" }).click();
+  await expect(page).toHaveURL(/mode=parents.*parentA=penking.*parentB=bushi/u);
+  await assertHealthyDocument(page, errors);
+});
+
+test("교배 모드 탭은 키보드 이동과 query 정리를 지원한다", async ({ page }) => {
+  await page.goto("/palworld/breeding?mode=parents&parentA=penking&parentB=bushi");
+  const directTab = page.getByRole("tab", { name: "부모로 결과 찾기" });
+  const reverseTab = page.getByRole("tab", { name: "목표 Pal의 부모 찾기" });
+
+  await directTab.focus();
+  await directTab.press("Home");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("penking");
+  await directTab.press("ArrowRight");
+  await expect(reverseTab).toBeFocused();
+  await expect(reverseTab).toHaveAttribute("aria-selected", "true");
+  await expect.poll(() => new URL(page.url()).searchParams.get("mode")).toBe("child");
+  await expect.poll(() => new URL(page.url()).searchParams.has("parentA")).toBe(false);
+
+  await reverseTab.press("Home");
+  await expect(directTab).toBeFocused();
+  await expect(directTab).toHaveAttribute("aria-selected", "true");
+  await expect.poll(() => new URL(page.url()).searchParams.get("mode")).toBe("parents");
+});
+
+test("성별 조건이 필요한 교배는 대안을 한 번에 적용하고 부모 교환 시 조건도 교환한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/palworld/breeding?mode=parents&parentA=katress&parentB=wixen");
+
+  const result = page.getByTestId("breeding-result");
+  await expect(result).toContainText("성별 조건을 선택해야 결과를 확정할 수 있습니다.");
+  await expect(page.getByRole("button", { name: "성별 조건 접기" })).toBeVisible();
+  const applyConditionButtons = result.getByRole("button", { name: /^이 조건 적용:/u });
+  await expect(applyConditionButtons).toHaveCount(2);
+  await expect(result).toContainText("캐티위자드");
+
+  await applyConditionButtons.first().click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentAGender")).toBe("female");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentBGender")).toBe("male");
+  await expect(result.getByTestId("breeding-direct-card")).toContainText("캐티위자드");
+
+  await page.getByTestId("breeding-swap").click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("wixen");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentB")).toBe("katress");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentAGender")).toBe("male");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentBGender")).toBe("female");
+  await expect(result.getByTestId("breeding-direct-card")).toContainText("캐티위자드");
+  await assertHealthyDocument(page, errors);
+});
+
+test("동일한 부모 Pal 두 마리도 자동 계산 결과를 표시한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/palworld/breeding?mode=parents&parentA=penking&parentB=penking");
+
+  const directCard = page.getByTestId("breeding-direct-card");
+  await expect(directCard).toContainText("일반 교배");
+  await expect(directCard.locator(".palworld-direct-result-hero")).toContainText("펭킹");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("penking");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentB")).toBe("penking");
   await assertHealthyDocument(page, errors);
 });
 
@@ -1526,18 +1688,91 @@ test("목표 Pal 부모 역검색은 직접 URL과 새로고침에서 선택과 
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld/breeding?mode=child&child=sibelyx&page=1");
 
-  await expect(page.getByRole("tab", { name: "원하는 Pal의 부모 찾기" })).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByTestId("breeding-target")).toContainText("실키누");
+  await expect(page.getByRole("tab", { name: "목표 Pal의 부모 찾기" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("breeding-target").getByRole("button", { name: "다른 목표 Pal 선택" })).toBeVisible();
   const results = page.getByTestId("breeding-parent-results");
+  const pair = page.getByTestId("breeding-reverse-pair");
+  await expect(page.getByTestId("breeding-target-summary")).toContainText("실키누");
+  await expect(results.getByText("실키누", { exact: true })).toHaveCount(1);
+  await expect(page.getByTestId("breeding-target-summary")).toContainText("총 1개 조합");
+  await expect(page.getByTestId("breeding-target-summary")).toContainText("1/1 페이지");
   await expect(results).toContainText("펭킹");
   await expect(results).toContainText("불무사");
   await expect(results).toContainText("실키누");
+  await expect(pair).not.toContainText("실키누");
 
   await page.reload();
   await expect(page).toHaveURL(/mode=child.*child=sibelyx.*page=1/u);
-  await expect(page.getByTestId("breeding-target")).toContainText("실키누");
+  await expect(page.getByTestId("breeding-target-summary")).toContainText("실키누");
   await expect(results).toContainText("펭킹");
+
+  await page.getByLabel("교배 종류").selectOption("special");
+  await expect.poll(() => new URL(page.url()).searchParams.get("type")).toBe("special");
+  await expect(results).toContainText("등록된 부모 조합이 없습니다.");
+  await expect(page.getByTestId("breeding-target-summary")).toContainText("총 0개 조합");
+  await expect(page.getByTestId("breeding-target-summary")).not.toContainText("1/0 페이지");
+  await page.getByLabel("교배 종류").selectOption("normal");
+  await expect.poll(() => new URL(page.url()).searchParams.get("type")).toBe("normal");
+  await expect(pair).toContainText("펭킹");
+
+  await page.goto("/palworld/breeding?mode=child&child=sibelyx&page=999");
+  await expect.poll(() => new URL(page.url()).searchParams.has("page")).toBe(false);
+  await expect(page.getByTestId("breeding-target-summary")).toContainText("1/1 페이지");
   await assertHealthyDocument(page, errors);
+});
+
+test("목표 Pal 역검색 pagination은 URL·요약·목록 개수를 함께 갱신한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/palworld/breeding?mode=child&child=katress-ignis");
+
+  const summary = page.getByTestId("breeding-target-summary");
+  await expect(summary).toContainText("총 13개 조합");
+  await expect(summary).toContainText("1/2 페이지");
+  await expect(page.getByTestId("breeding-reverse-pair")).toHaveCount(12);
+
+  await page.getByRole("button", { name: "다음" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("page")).toBe("2");
+  await expect(summary).toContainText("2/2 페이지");
+  await expect(page.getByTestId("breeding-reverse-pair")).toHaveCount(1);
+
+  await page.goBack();
+  await expect.poll(() => new URL(page.url()).searchParams.has("page")).toBe(false);
+  await expect(summary).toContainText("1/2 페이지");
+  await assertHealthyDocument(page, errors);
+});
+
+test("교배 직접 결과와 역검색 카드는 요구 화면 크기에서 수평 overflow 없이 표시된다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  const viewports = [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+    { width: 768, height: 1024 },
+    { width: 1024, height: 768 },
+    { width: 1440, height: 1000 },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    await page.goto("/palworld/breeding?mode=parents&parentA=penking&parentB=bushi");
+    const tabs = page.getByRole("tab");
+    await expect(tabs).toHaveCount(2);
+    const [directTabBounds, reverseTabBounds] = await Promise.all([
+      tabs.nth(0).boundingBox(),
+      tabs.nth(1).boundingBox(),
+    ]);
+    expect(directTabBounds).not.toBeNull();
+    expect(reverseTabBounds).not.toBeNull();
+    expect(Math.abs(directTabBounds!.y - reverseTabBounds!.y)).toBeLessThanOrEqual(1);
+    expect(reverseTabBounds!.x + reverseTabBounds!.width).toBeLessThanOrEqual(viewport.width + 1);
+    await expect(page.getByTestId("breeding-direct-card").locator(".palworld-direct-result-hero")).toBeVisible();
+    await assertHealthyDocument(page, errors);
+
+    await page.goto("/palworld/breeding?mode=child&child=sibelyx");
+    await expect(page.getByTestId("breeding-target-summary")).toBeVisible();
+    await expect(page.getByTestId("breeding-reverse-pair")).toBeVisible();
+    await assertHealthyDocument(page, errors);
+  }
 });
 
 test("교배 API 장애와 정상적인 결과 없음을 서로 다른 상태로 표시한다", async ({ page }) => {

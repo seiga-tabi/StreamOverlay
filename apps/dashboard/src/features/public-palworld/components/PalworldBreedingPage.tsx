@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   PalworldBreedingPair,
   PalworldBreedingParentsResponse,
   PalworldBreedingResultResponse,
   PalworldBreedingGender,
+  PalworldBreedingPairType,
   PalworldPalReference,
   PalworldPalSummary,
 } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../shared/ui/Card";
-import { Badge } from "../../../shared/ui/Status";
+import { Card, CardContent } from "../../../shared/ui/Card";
 import {
   getPalworldBreeding,
   getPalworldBreedingParents,
@@ -17,10 +17,8 @@ import {
   PalworldApiError,
 } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
-import { genderLabel } from "../utils/labels";
-import { resolvePalworldName } from "../utils/localization";
-import { formatPalNumber } from "../utils/search";
 import {
+  breedingPairGendersForParents,
   clearPalworldBreedingParams,
   palworldBreedingParams,
   parsePalworldBreedingQuery,
@@ -28,29 +26,34 @@ import {
   type PalworldBreedingQueryState,
 } from "../utils/breeding";
 import { palworldUrl, setPalworldUrl } from "../utils/routes";
-import { PalworldMedia } from "./PalworldMedia";
-import { PalworldElementBadge } from "./PalworldElementBadge";
+import { BreedingGenderControls, BreedingModeTabs } from "./PalworldBreedingControls";
+import {
+  BreedingGenderAlternativeCard,
+  BreedingRequestStatus,
+  DirectBreedingResult,
+  ReverseBreedingPairCard,
+  ReverseBreedingTargetSummary,
+} from "./PalworldBreedingResults";
 import { PalworldPalPicker } from "./PalworldPalPicker";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 import { Pagination } from "./Pagination";
-import { PalworldTranslationBadge } from "./PalworldTranslationBadge";
 
 type PickerPal = PalworldPalReference | PalworldPalSummary;
 type RequestStatus = "idle" | "loading" | "success" | "empty" | "error" | "data_unavailable" | "requires_gender";
-type RequestState<T> = { status: RequestStatus; data: T | null };
+type RequestState<T> = { status: RequestStatus; data: T | null; error: unknown | null };
 type DirectResponse = PalworldBreedingResultResponse;
 type ReverseResponse = PalworldBreedingParentsResponse;
+type CopyFeedback = "success" | "error" | null;
 
-const IDLE_REQUEST = { status: "idle", data: null } as const;
+const IDLE_REQUEST = { status: "idle", data: null, error: null } as const;
 
 function unavailableError(error: unknown): boolean {
   return error instanceof PalworldApiError
     && (error.status === 503 || error.code === "PALWORLD_DATA_UNAVAILABLE");
 }
 
-function PairPal({ locale, pal, role }: { locale: PalworldLocale; pal: PalworldPalReference; role: string }) {
-  const name = resolvePalworldName(pal, locale);
-  return <div className="palworld-breeding-pal"><span><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span><div><small>{role} · {formatPalNumber(pal.number, locale)}</small><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><div className="palworld-badge-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</div></div></div>;
+function formatCountMessage(template: string, count: number): string {
+  return template.replace("{count}", count.toLocaleString());
 }
 
 export function PalworldBreedingPage({
@@ -70,6 +73,8 @@ export function PalworldBreedingPage({
   const [target, setTarget] = useState<PickerPal | null>(null);
   const [direct, setDirect] = useState<RequestState<DirectResponse>>(IDLE_REQUEST);
   const [reverse, setReverse] = useState<RequestState<ReverseResponse>>(IDLE_REQUEST);
+  const [genderExpanded, setGenderExpanded] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState<CopyFeedback>(null);
   const [directRevision, setDirectRevision] = useState(0);
   const [reverseRevision, setReverseRevision] = useState(0);
   const directRequestIdRef = useRef(0);
@@ -89,6 +94,7 @@ export function PalworldBreedingPage({
       setTarget(null);
       setDirect(IDLE_REQUEST);
       setReverse(IDLE_REQUEST);
+      setGenderExpanded(false);
       return;
     }
     if (query.mode === "parents") {
@@ -101,35 +107,47 @@ export function PalworldBreedingPage({
       setParentA(null);
       setParentB(null);
       setDirect(IDLE_REQUEST);
+      setGenderExpanded(false);
     }
+    setCopyFeedback(null);
   }, [paramsKey, parsedQuery.ok, query.child, query.mode, query.parentA, query.parentB]);
 
   useEffect(() => {
-    if (
-      !parsedQuery.ok
-      || query.mode !== "parents"
-      || (query.parentA && query.parentB)
-      || (!query.parentA && !query.parentB)
-    ) {
-      return undefined;
-    }
-    const missingId = query.parentA ?? query.parentB;
-    if (!missingId || (query.parentA ? parentA?.id === missingId : parentB?.id === missingId)) return undefined;
+    if (!parsedQuery.ok) return undefined;
     const controller = new AbortController();
     const requestId = ++referenceRequestIdRef.current;
-    void getPalworldPal(missingId, controller.signal)
-      .then((pal) => {
-        if (controller.signal.aborted || referenceRequestIdRef.current !== requestId) return;
-        if (query.parentA) setParentA(pal);
-        else setParentB(pal);
-      })
-      .catch((error) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        if (controller.signal.aborted || referenceRequestIdRef.current !== requestId) return;
-        setDirect({ status: unavailableError(error) ? "data_unavailable" : "error", data: null });
-      });
+    const hydrate = (
+      id: string | undefined,
+      currentId: string | undefined,
+      setter: (pal: PalworldPalReference) => void,
+    ): void => {
+      if (!id || id === currentId) return;
+      void getPalworldPal(id, controller.signal)
+        .then((pal) => {
+          if (controller.signal.aborted || referenceRequestIdRef.current !== requestId) return;
+          setter(pal);
+        })
+        .catch((error) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+        });
+    };
+    if (query.mode === "parents") {
+      hydrate(query.parentA, parentA?.id, setParentA);
+      hydrate(query.parentB, parentB?.id, setParentB);
+    } else {
+      hydrate(query.child, target?.id, setTarget);
+    }
     return () => controller.abort();
-  }, [parentA?.id, parentB?.id, parsedQuery.ok, query.mode, query.parentA, query.parentB]);
+  }, [
+    parentA?.id,
+    parentB?.id,
+    parsedQuery.ok,
+    query.child,
+    query.mode,
+    query.parentA,
+    query.parentB,
+    target?.id,
+  ]);
 
   useEffect(() => {
     if (!parsedQuery.ok || query.mode !== "parents" || !query.parentA || !query.parentB) {
@@ -138,30 +156,33 @@ export function PalworldBreedingPage({
     }
     const controller = new AbortController();
     const requestId = ++directRequestIdRef.current;
-    setDirect({ status: "loading", data: null });
+    setDirect({ status: "loading", data: null, error: null });
     void getPalworldBreeding(query.parentA, query.parentB, {
       parentAGender: query.parentAGender,
       parentBGender: query.parentBGender,
     }, controller.signal)
-      .then((responseValue) => {
+      .then((response) => {
         if (controller.signal.aborted || directRequestIdRef.current !== requestId) return;
-        const response = responseValue;
         setParentA(response.parentA);
         setParentB(response.parentB);
         if (response.state === "data_unavailable") {
-          setDirect({ status: "data_unavailable", data: response });
+          setDirect({ status: "data_unavailable", data: response, error: null });
         } else if (response.state === "requires_gender") {
-          setDirect({ status: "requires_gender", data: response });
+          setDirect({ status: "requires_gender", data: response, error: null });
         } else if (response.state === "not_found" || !response.result) {
-          setDirect({ status: "empty", data: response });
+          setDirect({ status: "empty", data: response, error: null });
         } else {
-          setDirect({ status: "success", data: response });
+          setDirect({ status: "success", data: response, error: null });
         }
       })
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         if (controller.signal.aborted || directRequestIdRef.current !== requestId) return;
-        setDirect({ status: unavailableError(error) ? "data_unavailable" : "error", data: null });
+        setDirect({
+          status: unavailableError(error) ? "data_unavailable" : "error",
+          data: null,
+          error,
+        });
       });
     return () => controller.abort();
   }, [
@@ -181,39 +202,69 @@ export function PalworldBreedingPage({
     }
     const controller = new AbortController();
     const requestId = ++reverseRequestIdRef.current;
-    setReverse({ status: "loading", data: null });
-    void getPalworldBreedingParents(query.child, query.page, 12, controller.signal)
-      .then((responseValue) => {
+    setReverse({ status: "loading", data: null, error: null });
+    void getPalworldBreedingParents(query.child, query.page, 12, controller.signal, query.type ?? "all")
+      .then((response) => {
         if (controller.signal.aborted || reverseRequestIdRef.current !== requestId) return;
-        const response = responseValue;
         setTarget(response.child);
+        if (response.pagination.page !== query.page) {
+          navigate({
+            mode: "child",
+            child: query.child,
+            type: query.type,
+            page: response.pagination.page,
+          }, true);
+        }
         if (response.state === "data_unavailable") {
-          setReverse({ status: "data_unavailable", data: response });
+          setReverse({ status: "data_unavailable", data: response, error: null });
         } else if (response.state === "not_found" || response.items.length === 0) {
-          setReverse({ status: "empty", data: response });
+          setReverse({ status: "empty", data: response, error: null });
         } else {
-          setReverse({ status: "success", data: response });
+          setReverse({ status: "success", data: response, error: null });
         }
       })
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         if (controller.signal.aborted || reverseRequestIdRef.current !== requestId) return;
-        setReverse({ status: unavailableError(error) ? "data_unavailable" : "error", data: null });
+        setReverse({
+          status: unavailableError(error) ? "data_unavailable" : "error",
+          data: null,
+          error,
+        });
       });
     return () => controller.abort();
-  }, [parsedQuery.ok, query.child, query.mode, query.page, reverseRevision]);
+  }, [navigate, parsedQuery.ok, query.child, query.mode, query.page, query.type, reverseRevision]);
 
-  function resetAll() {
+  useEffect(() => {
+    if (
+      query.mode === "parents"
+      && (query.parentAGender !== undefined
+        || query.parentBGender !== undefined
+        || direct.status === "requires_gender")
+    ) {
+      setGenderExpanded(true);
+    }
+  }, [direct.status, query.mode, query.parentAGender, query.parentBGender]);
+
+  useEffect(() => {
+    if (!copyFeedback) return undefined;
+    const timeout = window.setTimeout(() => setCopyFeedback(null), 4_000);
+    return () => window.clearTimeout(timeout);
+  }, [copyFeedback]);
+
+  function resetAll(): void {
     setParentA(null);
     setParentB(null);
     setTarget(null);
     setDirect(IDLE_REQUEST);
     setReverse(IDLE_REQUEST);
+    setGenderExpanded(false);
+    setCopyFeedback(null);
     const nextParams = clearPalworldBreedingParams(new URLSearchParams(paramsKey));
     setPalworldUrl(palworldUrl("breeding", nextParams));
   }
 
-  function changeParent(position: "parentA" | "parentB", pal: PalworldPalSummary | null) {
+  function changeParent(position: "parentA" | "parentB", pal: PalworldPalSummary | null): void {
     const current = query.mode === "parents" ? query : { mode: "parents" as const, page: 1 };
     if (position === "parentA") setParentA(pal);
     else setParentB(pal);
@@ -225,7 +276,7 @@ export function PalworldBreedingPage({
     });
   }
 
-  function changeGender(position: "parentAGender" | "parentBGender", value: string) {
+  function changeGender(position: "parentAGender" | "parentBGender", value: string): void {
     if (query.mode !== "parents") return;
     navigate({
       ...query,
@@ -233,20 +284,57 @@ export function PalworldBreedingPage({
     });
   }
 
-  function moveTab(event: KeyboardEvent<HTMLButtonElement>, mode: "parents" | "child") {
-    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-    event.preventDefault();
-    const nextMode = event.key === "ArrowLeft" || event.key === "Home"
-      ? "parents"
-      : event.key === "ArrowRight" || event.key === "End"
-        ? "child"
-        : mode;
-    navigate({ mode: nextMode, page: 1 });
-    window.requestAnimationFrame(() => {
-      document.getElementById(`palworld-breeding-${nextMode}-tab`)?.focus();
+  function applyGenderCondition(pair: PalworldBreedingPair): void {
+    if (query.mode !== "parents" || !query.parentA || !query.parentB) return;
+    const genders = breedingPairGendersForParents(pair, query.parentA, query.parentB);
+    if (!genders) return;
+    setGenderExpanded(true);
+    navigate({ ...query, ...genders });
+  }
+
+  function usePairInCalculator(pair: PalworldBreedingPair): void {
+    const genders = breedingPairGendersForParents(pair, pair.parentA.id, pair.parentB.id);
+    setParentA(pair.parentA);
+    setParentB(pair.parentB);
+    setTarget(null);
+    setGenderExpanded(Boolean(genders));
+    navigate({
+      mode: "parents",
+      parentA: pair.parentA.id,
+      parentB: pair.parentB.id,
+      ...genders,
+      page: 1,
     });
   }
 
+  async function copyCurrentLink(): Promise<void> {
+    try {
+      if (!navigator.clipboard?.writeText) throw new TypeError("clipboard unavailable");
+      const canonicalParams = palworldBreedingParams(new URLSearchParams(), query);
+      const url = new URL(palworldUrl("breeding", canonicalParams), window.location.origin);
+      await navigator.clipboard.writeText(url.toString());
+      setCopyFeedback("success");
+    } catch {
+      setCopyFeedback("error");
+    }
+  }
+
+  const directAnnouncement = direct.status === "loading"
+    ? text.calculatingStatus
+    : direct.status === "success"
+      ? text.directResultStatus
+      : direct.status === "requires_gender"
+        ? text.genderSelectionStatus
+        : direct.status === "empty"
+          ? text.noDirectResultStatus
+        : "";
+  const reverseAnnouncement = reverse.status === "loading"
+    ? text.calculatingStatus
+    : reverse.status === "success" && reverse.data
+      ? formatCountMessage(text.parentPairsStatus, reverse.data.pagination.total)
+      : reverse.status === "empty"
+        ? text.noParentPairsStatus
+      : "";
   const directLoading = direct.status === "loading";
   const reverseLoading = reverse.status === "loading";
 
@@ -264,17 +352,15 @@ export function PalworldBreedingPage({
         titleKo={palworldI18n.ko.invalidBreedingQuery}
       />
     ) : <>
-      <div className="palworld-tabs" role="tablist">
-        <button id="palworld-breeding-parents-tab" className={query.mode === "parents" ? "active" : ""} role="tab" aria-controls="palworld-breeding-parents-panel" aria-selected={query.mode === "parents"} tabIndex={query.mode === "parents" ? 0 : -1} onKeyDown={(event) => moveTab(event, "parents")} onClick={() => navigate({ mode: "parents", page: 1 })}>{text.parentsToChild}</button>
-        <button id="palworld-breeding-child-tab" className={query.mode === "child" ? "active" : ""} role="tab" aria-controls="palworld-breeding-child-panel" aria-selected={query.mode === "child"} tabIndex={query.mode === "child" ? 0 : -1} onKeyDown={(event) => moveTab(event, "child")} onClick={() => navigate({ mode: "child", page: 1 })}>{text.childToParents}</button>
-      </div>
+      <BreedingModeTabs locale={locale} mode={query.mode} onMode={(mode) => navigate({ mode, page: 1 })} />
+      {query.mode === "parents"
+        ? <div id="palworld-breeding-child-panel" role="tabpanel" aria-labelledby="palworld-breeding-child-tab" hidden />
+        : <div id="palworld-breeding-parents-panel" role="tabpanel" aria-labelledby="palworld-breeding-parents-tab" hidden />}
       {query.mode === "parents" ? <div id="palworld-breeding-parents-panel" role="tabpanel" aria-labelledby="palworld-breeding-parents-tab">
         <Card className="palworld-breeding-input-card"><CardContent>
+          <p className="palworld-breeding-input-hint">{text.autoCalculateHint}</p>
           <div className="palworld-breeding-pickers">
-            <div>
-              <PalworldPalPicker label={text.parentA} locale={locale} selected={parentA} onChange={(pal) => changeParent("parentA", pal)} testId="breeding-parent-a" />
-              {query.parentA ? <label className="palworld-gender-field"><span>{text.parentAGender}</span><select value={query.parentAGender ?? "any"} onChange={(event) => changeGender("parentAGender", event.target.value)}><option value="any">{genderLabel("any", locale)}</option><option value="male">{genderLabel("male", locale)}</option><option value="female">{genderLabel("female", locale)}</option></select></label> : null}
-            </div>
+            <PalworldPalPicker label={text.parentA} locale={locale} selected={parentA} onChange={(pal) => changeParent("parentA", pal)} onOpenPal={onOpenPal} testId="breeding-parent-a" />
             <Button className="palworld-swap-button" variant="secondary" aria-label={text.swapParents} data-testid="breeding-swap" disabled={!query.parentA && !query.parentB} onClick={() => {
               const [nextA, nextB] = swapBreedingParents(parentA, parentB);
               setParentA(nextA);
@@ -287,48 +373,82 @@ export function PalworldBreedingPage({
                 parentBGender: query.parentAGender,
                 page: 1,
               });
-            }}>⇄</Button>
-            <div>
-              <PalworldPalPicker label={text.parentB} locale={locale} selected={parentB} onChange={(pal) => changeParent("parentB", pal)} testId="breeding-parent-b" />
-              {query.parentB ? <label className="palworld-gender-field"><span>{text.parentBGender}</span><select value={query.parentBGender ?? "any"} onChange={(event) => changeGender("parentBGender", event.target.value)}><option value="any">{genderLabel("any", locale)}</option><option value="male">{genderLabel("male", locale)}</option><option value="female">{genderLabel("female", locale)}</option></select></label> : null}
-            </div>
+            }}><span aria-hidden="true">⇄</span></Button>
+            <PalworldPalPicker label={text.parentB} locale={locale} selected={parentB} onChange={(pal) => changeParent("parentB", pal)} onOpenPal={onOpenPal} testId="breeding-parent-b" />
+          </div>
+          {query.parentA && query.parentB ? <BreedingGenderControls
+            expanded={genderExpanded}
+            locale={locale}
+            onGender={changeGender}
+            onToggle={() => setGenderExpanded((value) => !value)}
+            parentAGender={query.parentAGender}
+            parentBGender={query.parentBGender}
+          /> : null}
+          <div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div>
+        </CardContent></Card>
+        <section className="palworld-breeding-result" data-testid="breeding-result" aria-busy={directLoading}>
+          <BreedingRequestStatus message={directAnnouncement} />
+          <div className="palworld-section-title"><h2>{text.breedingResult}</h2></div>
+          {!query.parentA || !query.parentB ? <PalworldEmpty description={text.autoCalculateHint} includeDefaultDescription={false} locale={locale} title={text.selectBothParents} /> : null}
+          {directLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={1} /></div> : null}
+          {direct.status === "error" ? <PalworldError error={direct.error} locale={locale} onRetry={() => setDirectRevision((value) => value + 1)} /> : null}
+          {direct.status === "data_unavailable" ? <PalworldError description={text.breedingDataUnavailableDescription} descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription} descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription} error={direct.error} locale={locale} onRetry={() => setDirectRevision((value) => value + 1)} title={text.breedingDataUnavailable} titleJa={palworldI18n.ja.breedingDataUnavailable} titleKo={palworldI18n.ko.breedingDataUnavailable} /> : null}
+          {direct.status === "empty" ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.noBreedingResult} /> : null}
+          {direct.status === "requires_gender" ? <>
+            <div className="palworld-breeding-gender-notice"><strong>{text.genderRequired}</strong><p>{text.genderRequiredDescription}</p></div>
+            {direct.data?.alternatives.length ? <div className="palworld-gender-alternative-list">{direct.data.alternatives.map((pair) => <BreedingGenderAlternativeCard pair={pair} locale={locale} onApply={applyGenderCondition} onOpenPal={onOpenPal} key={pair.id} />)}</div> : null}
+          </> : null}
+          {direct.status === "success" && direct.data?.result ? <DirectBreedingResult
+            locale={locale}
+            onCopy={() => { void copyCurrentLink(); }}
+            onOpenPal={onOpenPal}
+            onViewParents={(child) => navigate({ mode: "child", child, page: 1 })}
+            pair={direct.data.result}
+          /> : null}
+          {copyFeedback ? <p className="palworld-copy-feedback" role={copyFeedback === "error" ? "alert" : "status"}>{copyFeedback === "success" ? text.linkCopied : text.linkCopyFailed}</p> : null}
+        </section>
+      </div> : <div id="palworld-breeding-child-panel" role="tabpanel" aria-labelledby="palworld-breeding-child-tab">
+        <Card className="palworld-breeding-input-card"><CardContent>
+          <div className="palworld-breeding-reverse-controls">
+            {query.child ? <div className="palworld-breeding-target-change" data-testid="breeding-target">
+              <span className="palworld-picker-label">{text.targetPalSummary}</span>
+              <Button variant="secondary" onClick={() => {
+                setTarget(null);
+                navigate({ mode: "child", page: 1 });
+              }}>{text.changeTargetPal}</Button>
+            </div> : <PalworldPalPicker label={text.targetPal} locale={locale} selected={null} onChange={(pal) => {
+              setTarget(pal);
+              navigate({ mode: "child", child: pal?.id, page: 1 });
+            }} onOpenPal={onOpenPal} testId="breeding-target" />}
+            <label className="palworld-breeding-type-filter">
+              <span>{text.breedingTypeFilter}</span>
+              <select value={query.type ?? "all"} onChange={(event) => navigate({
+                mode: "child",
+                child: query.child,
+                type: event.target.value as PalworldBreedingPairType,
+                page: 1,
+              })}>
+                <option value="all">{text.allBreedingTypes}</option>
+                <option value="normal">{text.normalBreedingOnly}</option>
+                <option value="special">{text.specialBreedingOnly}</option>
+              </select>
+            </label>
           </div>
           <div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div>
         </CardContent></Card>
-        <section className="palworld-breeding-result" data-testid="breeding-result" aria-busy={directLoading} aria-live="polite">
-          <div className="palworld-section-title"><h2>{text.breedingResult}</h2></div>
-          {!query.parentA || !query.parentB ? <PalworldEmpty locale={locale} title={text.selectBothParents} /> : null}
-          {directLoading ? <PalworldLoading locale={locale} count={1} /> : null}
-          {direct.status === "error" ? <PalworldError locale={locale} onRetry={() => setDirectRevision((value) => value + 1)} /> : null}
-          {direct.status === "data_unavailable" ? <PalworldError description={text.breedingDataUnavailableDescription} descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription} descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription} locale={locale} onRetry={() => setDirectRevision((value) => value + 1)} title={text.breedingDataUnavailable} titleJa={palworldI18n.ja.breedingDataUnavailable} titleKo={palworldI18n.ko.breedingDataUnavailable} /> : null}
-          {direct.status === "empty" ? <PalworldEmpty locale={locale} title={text.noBreedingResult} /> : null}
-          {direct.status === "requires_gender" ? <>
-            <div className="palworld-breeding-gender-notice" role="status"><strong>{text.genderRequired}</strong><p>{text.genderRequiredDescription}</p></div>
-            {direct.data?.alternatives.length ? <div className="palworld-parent-pair-list">{direct.data.alternatives.map((pair) => <BreedingResultCard pair={pair} locale={locale} onOpenPal={onOpenPal} compact key={pair.id} />)}</div> : null}
-          </> : null}
-          {direct.status === "success" && direct.data?.result ? <BreedingResultCard pair={direct.data.result} locale={locale} onOpenPal={onOpenPal} /> : null}
-        </section>
-      </div> : <div id="palworld-breeding-child-panel" role="tabpanel" aria-labelledby="palworld-breeding-child-tab">
-        <Card className="palworld-breeding-input-card"><CardContent><PalworldPalPicker label={text.targetPal} locale={locale} selected={target} onChange={(pal) => {
-          setTarget(pal);
-          navigate({ mode: "child", child: pal?.id, page: 1 });
-        }} testId="breeding-target" /><div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div></CardContent></Card>
-        <section className="palworld-breeding-result" data-testid="breeding-parent-results" aria-busy={reverseLoading} aria-live="polite">
+        <section className="palworld-breeding-result" data-testid="breeding-parent-results" aria-busy={reverseLoading}>
+          <BreedingRequestStatus message={reverseAnnouncement} />
           <div className="palworld-section-title"><h2>{text.childToParents}</h2></div>
-          {!query.child ? <PalworldEmpty locale={locale} title={text.selectTarget} /> : null}
-          {reverseLoading ? <PalworldLoading locale={locale} count={1} /> : null}
-          {reverse.status === "error" ? <PalworldError locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} /> : null}
-          {reverse.status === "data_unavailable" ? <PalworldError description={text.breedingDataUnavailableDescription} descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription} descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} title={text.breedingDataUnavailable} titleJa={palworldI18n.ja.breedingDataUnavailable} titleKo={palworldI18n.ko.breedingDataUnavailable} /> : null}
-          {reverse.status === "empty" ? <PalworldEmpty locale={locale} title={text.noParentPairs} /> : null}
-          {reverse.status === "success" && reverse.data?.items.length ? <div className="palworld-parent-pair-list">{reverse.data.items.map((pair) => <BreedingResultCard pair={pair} locale={locale} onOpenPal={onOpenPal} compact key={pair.id} />)}</div> : null}
-          {reverse.status === "success" && reverse.data ? <Pagination locale={locale} pagination={reverse.data.pagination} onPage={(page) => navigate({ mode: "child", child: query.child, page })} /> : null}
+          {!query.child ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.selectTarget} /> : null}
+          {reverseLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={1} /></div> : null}
+          {query.child && target ? <ReverseBreedingTargetSummary child={target} locale={locale} onOpenPal={onOpenPal} pagination={reverse.data?.pagination} /> : null}
+          {reverse.status === "error" ? <PalworldError error={reverse.error} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} /> : null}
+          {reverse.status === "data_unavailable" ? <PalworldError description={text.breedingDataUnavailableDescription} descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription} descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription} error={reverse.error} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} title={text.breedingDataUnavailable} titleJa={palworldI18n.ja.breedingDataUnavailable} titleKo={palworldI18n.ko.breedingDataUnavailable} /> : null}
+          {reverse.status === "empty" ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.noParentPairs} /> : null}
+          {reverse.status === "success" && reverse.data?.items.length ? <div className="palworld-parent-pair-list">{reverse.data.items.map((pair) => <ReverseBreedingPairCard pair={pair} locale={locale} onOpenPal={onOpenPal} onUsePair={usePairInCalculator} key={pair.id} />)}</div> : null}
+          {reverse.status === "success" && reverse.data ? <Pagination locale={locale} pagination={reverse.data.pagination} onPage={(page) => navigate({ mode: "child", child: query.child, type: query.type, page })} /> : null}
         </section>
       </div>}
     </>}
   </section>;
-}
-
-function BreedingResultCard({ compact = false, locale, onOpenPal, pair }: { compact?: boolean; locale: PalworldLocale; onOpenPal: (id: string) => void; pair: PalworldBreedingPair }) {
-  const text = palworldI18n[locale];
-  return <Card className={`palworld-pair-card${compact ? " is-compact" : ""}`}><CardHeader><CardTitle>{pair.isSpecial ? text.specialBreeding : text.normalBreeding}</CardTitle>{pair.genderCondition ? <Badge tone="warning">{text.genderCondition}: {genderLabel(pair.genderCondition.parentA, locale)} / {genderLabel(pair.genderCondition.parentB, locale)}</Badge> : null}</CardHeader><CardContent><div className="palworld-pair-flow"><PairPal pal={pair.parentA} role={text.parentRoleA} locale={locale} /><span aria-hidden="true">＋</span><PairPal pal={pair.parentB} role={text.parentRoleB} locale={locale} /><span aria-hidden="true">＝</span><button className="palworld-result-pal-button" type="button" onClick={() => onOpenPal(pair.child.id)}><PairPal pal={pair.child} role={text.resultPal} locale={locale} /></button></div></CardContent></Card>;
 }

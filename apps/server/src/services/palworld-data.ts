@@ -743,7 +743,10 @@ export class PalworldDataService {
 
   breedingParents(query: PalworldBreedingParentsQuery): PalworldBreedingParentsResponse {
     const child = this.getPal(query.child);
-    const pairs = this.breedingEngine?.parents(child.id).map((pair) => this.enginePair(pair)) ?? [];
+    const pairs = (this.breedingEngine?.parents(child.id).map((pair) => this.enginePair(pair)) ?? [])
+      .filter((pair) => query.type === undefined
+        || query.type === "all"
+        || (query.type === "special" ? pair.isSpecial : !pair.isSpecial));
     const pageInfo = pagination(query.page, query.limit, pairs.length);
     return {
       child: palReference(child),

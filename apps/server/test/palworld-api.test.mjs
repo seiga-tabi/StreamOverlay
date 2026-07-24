@@ -270,6 +270,9 @@ test("교배 API는 일반·성별 특수 교배, 부모 위치 교환과 역검
   );
   const parents = await request(handler, "/api/palworld/breeding/parents?child=anubis&page=1&limit=10");
   const parentsPage2 = await request(handler, "/api/palworld/breeding/parents?child=anubis&page=2&limit=10");
+  const mixedParents = await request(handler, "/api/palworld/breeding/parents?child=relaxaurus-lux&type=all&page=1&limit=1");
+  const normalParents = await request(handler, "/api/palworld/breeding/parents?child=relaxaurus-lux&type=normal&page=1&limit=1");
+  const specialParents = await request(handler, "/api/palworld/breeding/parents?child=relaxaurus-lux&type=special&page=1&limit=1");
   const selfParents = await request(handler, "/api/palworld/breeding/parents?child=panthalus&page=1&limit=10");
   assert.equal(forward.body.result.child.id, "xenovader");
   assert.equal(forward.body.state, "resolved");
@@ -288,6 +291,16 @@ test("교배 API는 일반·성별 특수 교배, 부모 위치 교환과 역검
   assert.equal(parents.body.pagination.totalPages, 24);
   assert.equal(parentsPage2.body.pagination.page, 2);
   assert.notEqual(parentsPage2.body.items[0].id, parents.body.items[0].id);
+  assert.equal(normalParents.body.pagination.total > 0, true);
+  assert.equal(specialParents.body.pagination.total > 0, true);
+  assert.equal(normalParents.body.items.every((pair) => !pair.isSpecial), true);
+  assert.equal(specialParents.body.items.every((pair) => pair.isSpecial), true);
+  assert.equal(
+    normalParents.body.pagination.total + specialParents.body.pagination.total,
+    mixedParents.body.pagination.total
+  );
+  assert.equal(normalParents.body.pagination.totalPages, normalParents.body.pagination.total);
+  assert.equal(specialParents.body.pagination.totalPages, specialParents.body.pagination.total);
   assert.equal(selfParents.res.statusCode, 200);
   assert.equal(selfParents.body.child.id, "panthalus");
   assert.deepEqual(
@@ -304,6 +317,7 @@ test("잘못된 query와 존재하지 않는 ID는 안정적인 오류 code를 �
   const invalid = await request(handler, "/api/palworld/search?q=&redirect=https%3A%2F%2Fexample.com");
   const traversal = await request(handler, "/api/palworld/items/%2E%2E%2Fsecret");
   const missing = await request(handler, "/api/palworld/pals/not-found");
+  const invalidBreedingType = await request(handler, "/api/palworld/breeding/parents?child=anubis&type=unknown");
   assert.equal(invalid.res.statusCode, 400);
   assert.equal(invalid.body.code, "PALWORLD_INVALID_QUERY");
   assert.equal(invalid.res.headers["Cache-Control"], "no-store");
@@ -312,6 +326,8 @@ test("잘못된 query와 존재하지 않는 ID는 안정적인 오류 code를 �
   assert.equal(missing.res.statusCode, 404);
   assert.equal(missing.body.code, "PALWORLD_NOT_FOUND");
   assert.equal(missing.res.headers["Cache-Control"], "no-store");
+  assert.equal(invalidBreedingType.res.statusCode, 400);
+  assert.equal(invalidBreedingType.body.code, "PALWORLD_INVALID_QUERY");
 });
 
 test("펠월드 API rate limit은 상세 ID를 바꿔도 하나의 공개 bucket으로 제한한다", async () => {

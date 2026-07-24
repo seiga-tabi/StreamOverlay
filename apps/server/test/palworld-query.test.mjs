@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 const {
   PalworldQueryError,
   normalizePalworldSearchTerm,
+  parsePalworldBreedingParentsQuery,
   parsePalworldBreedingQuery,
   parsePalworldItemListQuery,
   parsePalworldPalSpawnQuery,
@@ -114,6 +115,25 @@ test("검색과 교배 query는 빈 값, 중복 값, 알 수 없는 필드와 �
     )),
     PalworldQueryError
   );
+
+  assert.deepEqual(
+    parsePalworldBreedingParentsQuery(new URLSearchParams("child=anubis&page=2&limit=12")),
+    { child: "anubis", type: "all", page: 2, limit: 12 }
+  );
+  assert.deepEqual(
+    parsePalworldBreedingParentsQuery(new URLSearchParams("child=anubis&type=special")),
+    { child: "anubis", type: "special", page: 1, limit: 20 }
+  );
+  for (const invalid of [
+    "child=anubis&type=unknown",
+    "child=anubis&type=all&type=normal",
+    "child=anubis&filter=special"
+  ]) {
+    assert.throws(
+      () => parsePalworldBreedingParentsQuery(new URLSearchParams(invalid)),
+      PalworldQueryError
+    );
+  }
 });
 
 test("Pal 일반 스폰 query는 world와 canonical Pal ID만 허용한다", () => {

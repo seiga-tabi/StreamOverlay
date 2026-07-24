@@ -48,7 +48,17 @@ export function PalworldError({
   return <EmptyState role="alert" variant="error"><EmptyStateIcon>!</EmptyStateIcon><EmptyStateTitle data-ko={titleKo ?? palworldI18n.ko.apiError} data-ja={titleJa ?? palworldI18n.ja.apiError}>{title ?? text.apiError}</EmptyStateTitle><EmptyStateDescription data-ko={safeDescriptionKo} data-ja={safeDescriptionJa}>{safeDescription}</EmptyStateDescription><EmptyStateActions><Button variant="secondary" onClick={onRetry}>{text.retry}</Button></EmptyStateActions></EmptyState>;
 }
 
-export function PalworldEmpty({ description, locale, title }: { description?: string; locale: PalworldLocale; title: string }) {
+export function PalworldEmpty({
+  description,
+  includeDefaultDescription = true,
+  locale,
+  title,
+}: {
+  description?: string;
+  includeDefaultDescription?: boolean;
+  locale: PalworldLocale;
+  title: string;
+}) {
   const text = palworldI18n[locale];
-  return <EmptyState variant="search"><EmptyStateIcon>⌕</EmptyStateIcon><EmptyStateTitle>{title}</EmptyStateTitle>{description ? <EmptyStateDescription>{description}</EmptyStateDescription> : null}<EmptyStateDescription>{text.noResultsDescription}</EmptyStateDescription></EmptyState>;
+  return <EmptyState variant="search"><EmptyStateIcon>⌕</EmptyStateIcon><EmptyStateTitle>{title}</EmptyStateTitle>{description ? <EmptyStateDescription>{description}</EmptyStateDescription> : null}{includeDefaultDescription ? <EmptyStateDescription>{text.noResultsDescription}</EmptyStateDescription> : null}</EmptyState>;
 }

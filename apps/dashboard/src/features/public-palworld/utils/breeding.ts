@@ -1,4 +1,9 @@
-import type { PalworldBreedingGender } from "@streamops/shared";
+import {
+  PALWORLD_BREEDING_PAIR_TYPES,
+  type PalworldBreedingGender,
+  type PalworldBreedingPair,
+  type PalworldBreedingPairType,
+} from "@streamops/shared";
 
 export type PalworldBreedingMode = "parents" | "child";
 
@@ -9,6 +14,7 @@ export type PalworldBreedingQueryState = {
   parentAGender?: PalworldBreedingGender;
   parentBGender?: PalworldBreedingGender;
   child?: string;
+  type?: PalworldBreedingPairType;
   page: number;
 };
 
@@ -23,6 +29,7 @@ const BREEDING_QUERY_KEYS = [
   "parentAGender",
   "parentBGender",
   "child",
+  "type",
   "page",
 ] as const;
 const PALWORLD_PUBLIC_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/u;
@@ -55,6 +62,7 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
   const parentA = singleValue(params, "parentA");
   const parentB = singleValue(params, "parentB");
   const child = singleValue(params, "child");
+  const type = singleValue(params, "type");
   const parentAGender = explicitGender(singleValue(params, "parentAGender"));
   const parentBGender = explicitGender(singleValue(params, "parentBGender"));
   const pageValue = singleValue(params, "page");
@@ -64,15 +72,17 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
     parentA === null
     || parentB === null
     || child === null
+    || type === null
     || parentAGender === null
     || parentBGender === null
     || pageValue === null
     || !Number.isSafeInteger(page)
     || page < 1
-    || page > 1_000_000
+    || page > 10_000
     || (parentA !== undefined && !validId(parentA))
     || (parentB !== undefined && !validId(parentB))
     || (child !== undefined && !validId(child))
+    || (type !== undefined && !PALWORLD_BREEDING_PAIR_TYPES.includes(type as PalworldBreedingPairType))
     || (parentAGender !== undefined && parentA === undefined)
     || (parentBGender !== undefined && parentB === undefined)
   ) {
@@ -80,7 +90,7 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
   }
 
   if (mode === "parents") {
-    if (child !== undefined || pageValue !== undefined) return { ok: false, state: fallback };
+    if (child !== undefined || type !== undefined || pageValue !== undefined) return { ok: false, state: fallback };
     return {
       ok: true,
       state: {
@@ -107,6 +117,7 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
     state: {
       mode,
       ...(child ? { child } : {}),
+      ...(type && type !== "all" ? { type: type as PalworldBreedingPairType } : {}),
       page,
     },
   };
@@ -127,6 +138,7 @@ export function palworldBreedingParams(
     return params;
   }
   if (state.child) params.set("child", state.child);
+  if (state.type && state.type !== "all") params.set("type", state.type);
   if (state.page > 1) params.set("page", String(state.page));
   return params;
 }
@@ -139,4 +151,26 @@ export function clearPalworldBreedingParams(current: URLSearchParams): URLSearch
 
 export function swapBreedingParents<T>(parentA: T | null, parentB: T | null): [T | null, T | null] {
   return [parentB, parentA];
+}
+
+export function breedingPairGendersForParents(
+  pair: PalworldBreedingPair,
+  parentAId: string,
+  parentBId: string,
+): { parentAGender: PalworldBreedingGender; parentBGender: PalworldBreedingGender } | undefined {
+  const condition = pair.genderCondition;
+  if (!condition || condition.parentA === "any" || condition.parentB === "any") return undefined;
+  if (pair.parentA.id === parentAId && pair.parentB.id === parentBId) {
+    return {
+      parentAGender: condition.parentA,
+      parentBGender: condition.parentB,
+    };
+  }
+  if (pair.parentA.id === parentBId && pair.parentB.id === parentAId) {
+    return {
+      parentAGender: condition.parentB,
+      parentBGender: condition.parentA,
+    };
+  }
+  return undefined;
 }

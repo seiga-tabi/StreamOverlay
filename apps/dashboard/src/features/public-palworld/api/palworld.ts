@@ -1,4 +1,5 @@
 import type {
+  PalworldBreedingPairType,
   PalworldBreedingParentsResponse,
   PalworldBreedingResultResponse,
   PalworldBreedingGender,
@@ -271,7 +272,14 @@ export function getPalworldBreeding(
   return publicGet(queryPath("/api/palworld/breeding", params), signal, validatePalworldBreedingResultResponse);
 }
 
-export function getPalworldBreedingParents(child: string, page = 1, pageSize = 12, signal?: AbortSignal): Promise<PalworldBreedingParentsResponse> {
+export function getPalworldBreedingParents(
+  child: string,
+  page = 1,
+  pageSize = 12,
+  signal?: AbortSignal,
+  type: PalworldBreedingPairType = "all",
+): Promise<PalworldBreedingParentsResponse> {
   const params = new URLSearchParams({ child, page: String(page), limit: String(pageSize) });
+  if (type !== "all") params.set("type", type);
   return publicGet(queryPath("/api/palworld/breeding/parents", params), signal, validatePalworldBreedingParentsResponse);
 }
