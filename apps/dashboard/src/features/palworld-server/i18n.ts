@@ -30,7 +30,10 @@ export const palworldServerI18n = {
       config_missing: "전용 서버 연동에 필요한 운영 설정이 없습니다.",
       config_invalid: "전용 서버 연동 운영 설정이 올바르지 않습니다.",
       key_missing: "StreamOverlay의 자격 증명 저장소가 준비되지 않았습니다.",
-      key_invalid: "StreamOverlay의 자격 증명 저장소를 사용할 수 없습니다.",
+      key_invalid: "StreamOverlay의 공통 암호화 key 형식 또는 길이가 올바르지 않습니다.",
+      key_permission_denied: "StreamOverlay가 자격 증명 저장소를 읽을 권한이 없습니다.",
+      key_mismatch: "StreamOverlay 자격 증명 저장소의 암호화 인증에 실패했습니다.",
+      state_damaged: "StreamOverlay 자격 증명 저장소 상태 파일이 손상되었습니다.",
       policy_missing: "전용 서버 접속 허용 정책이 설정되지 않았습니다.",
       not_configured: "연결 정보가 설정되지 않았습니다.",
       invalid_request: "요청 입력값이 올바르지 않습니다.",
@@ -75,8 +78,23 @@ export const palworldServerI18n = {
       },
       key_invalid: {
         label: "자격 증명 저장소 오류",
-        title: "StreamOverlay의 자격 증명 저장소를 확인해야 합니다.",
-        description: "입력한 Palworld 관리자 비밀번호의 문제가 아닙니다. 서비스 운영자가 공통 암호화 저장소를 복구한 뒤 기존 연결을 확인하거나 본인 Dashboard에서 직접 관리할 수 있습니다."
+        title: "StreamOverlay의 공통 암호화 key 형식을 확인해야 합니다.",
+        description: "입력한 Palworld 관리자 비밀번호의 문제가 아닙니다. 서비스 운영자가 공통 암호화 key의 형식과 길이를 확인한 뒤 다시 이용할 수 있습니다."
+      },
+      key_permission_denied: {
+        label: "자격 증명 저장소 권한 오류",
+        title: "StreamOverlay가 자격 증명 저장소를 읽을 수 없습니다.",
+        description: "입력한 Palworld 관리자 비밀번호의 문제가 아닙니다. 서비스 운영자가 암호화 key와 상태 저장소의 접근 권한을 복구해야 합니다."
+      },
+      key_mismatch: {
+        label: "자격 증명 저장소 인증 오류",
+        title: "기존 자격 증명 저장소를 현재 암호화 key로 열 수 없습니다.",
+        description: "입력한 Palworld 관리자 비밀번호의 문제가 아닙니다. 기존 암호문과 일치하는 원래 공통 암호화 key를 서비스 운영자가 복구해야 합니다."
+      },
+      state_damaged: {
+        label: "자격 증명 저장소 손상",
+        title: "StreamOverlay의 자격 증명 저장소 상태를 복구해야 합니다.",
+        description: "입력한 Palworld 관리자 비밀번호의 문제가 아닙니다. 서비스 운영자가 손상된 암호화 상태 파일을 안전한 백업에서 복구해야 합니다."
       },
       policy_missing: {
         label: "접속 정책 필요",
@@ -211,7 +229,10 @@ export const palworldServerI18n = {
       config_missing: "専用サーバー連携に必要な運用設定がありません。",
       config_invalid: "専用サーバー連携の運用設定が正しくありません。",
       key_missing: "StreamOverlay の認証情報ストレージが準備されていません。",
-      key_invalid: "StreamOverlay の認証情報ストレージを使用できません。",
+      key_invalid: "StreamOverlay の共通暗号化 key の形式または長さが正しくありません。",
+      key_permission_denied: "StreamOverlay に認証情報ストレージを読み取る権限がありません。",
+      key_mismatch: "StreamOverlay の認証情報ストレージの暗号化認証に失敗しました。",
+      state_damaged: "StreamOverlay の認証情報ストレージの状態ファイルが破損しています。",
       policy_missing: "専用サーバー接続の許可ポリシーが設定されていません。",
       not_configured: "接続情報が設定されていません。",
       invalid_request: "リクエストの入力内容が正しくありません。",
@@ -256,8 +277,23 @@ export const palworldServerI18n = {
       },
       key_invalid: {
         label: "認証情報ストレージエラー",
-        title: "StreamOverlay の認証情報ストレージを確認してください。",
-        description: "入力した Palworld 管理者パスワードの問題ではありません。サービス運営者が共通の暗号化ストレージを復旧した後、既存の接続を確認するか、ご自身の Dashboard で直接管理できます。"
+        title: "StreamOverlay の共通暗号化 key の形式を確認してください。",
+        description: "入力した Palworld 管理者パスワードの問題ではありません。サービス運営者が共通暗号化 key の形式と長さを確認した後に利用できます。"
+      },
+      key_permission_denied: {
+        label: "認証情報ストレージの権限エラー",
+        title: "StreamOverlay が認証情報ストレージを読み取れません。",
+        description: "入力した Palworld 管理者パスワードの問題ではありません。サービス運営者が暗号化 key と状態ストレージのアクセス権限を復旧する必要があります。"
+      },
+      key_mismatch: {
+        label: "認証情報ストレージの認証エラー",
+        title: "現在の暗号化 key では既存の認証情報ストレージを開けません。",
+        description: "入力した Palworld 管理者パスワードの問題ではありません。既存の暗号文と一致する元の共通暗号化 key をサービス運営者が復旧する必要があります。"
+      },
+      state_damaged: {
+        label: "認証情報ストレージの破損",
+        title: "StreamOverlay の認証情報ストレージ状態を復旧してください。",
+        description: "入力した Palworld 管理者パスワードの問題ではありません。サービス運営者が破損した暗号化状態ファイルを安全なバックアップから復旧する必要があります。"
       },
       policy_missing: {
         label: "接続ポリシーが必要",

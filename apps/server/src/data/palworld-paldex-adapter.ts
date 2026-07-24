@@ -136,7 +136,11 @@ export function adaptPalworldPaldexArtifact(
 ): PalworldPaldexAdapterResult {
   const validatedArtifact = assertPalworldPaldexArtifact(artifact);
   assertAliasIntegrity(validatedArtifact);
-  const metadata = { ...validatedArtifact.metadata };
+  const metadata: PalworldDataMetadata = {
+    ...validatedArtifact.metadata,
+    release: validatedArtifact.release,
+    steamBuildId: validatedArtifact.steamBuildId
+  };
   const sourceInternalIds: Record<string, string> = {};
   const pals = validatedArtifact.records.map((record) => {
     sourceInternalIds[record.id] = record.sourceInternalId;

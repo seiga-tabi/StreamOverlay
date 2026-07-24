@@ -8,11 +8,17 @@ import {
   validatePalworldPakCandidateStagingRoot,
   type PalworldPakRuntimeManifest
 } from "./palworld-pak-runtime-manifest.js";
+import {
+  assertPalworldLegacyCompositeRuntimeManifest,
+  verifyPalworldLegacyCompositeRuntimeManifest,
+  type PalworldLegacyCompositeRuntimeManifest
+} from "./palworld-legacy-composite-runtime.js";
 
-export const PALWORLD_ACTIVE_RUNTIME_SCHEMA_VERSION = 1 as const;
+export const PALWORLD_ACTIVE_RUNTIME_SCHEMA_VERSION = 2 as const;
 export const PALWORLD_ACTIVE_RUNTIME_FILE = "active-manifest.json";
 export const PALWORLD_RUNTIME_FORMATS = [
   "legacy_release_v1",
+  "legacy_composite_v2",
   "operator_pak_v1"
 ] as const;
 export const PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS = [
@@ -33,14 +39,29 @@ export const PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS = [
 
 export type PalworldRuntimeFormat = (typeof PALWORLD_RUNTIME_FORMATS)[number];
 
-export type PalworldActiveRuntimeManifest = {
-  schemaVersion: 1;
-  format: PalworldRuntimeFormat;
+type PalworldActiveRuntimeManifestBase = {
   release: string;
   releaseDirectory: string;
   manifestFile: "manifest.json" | "runtime-manifest.json";
   manifestSha256: string;
 };
+
+export type PalworldActiveRuntimeManifestV1 =
+  PalworldActiveRuntimeManifestBase & {
+  schemaVersion: 1;
+  format: "legacy_release_v1" | "operator_pak_v1";
+};
+
+export type PalworldActiveRuntimeManifestV2 =
+  PalworldActiveRuntimeManifestBase & {
+  schemaVersion: 2;
+  format: "legacy_composite_v2";
+  composite: PalworldLegacyCompositeRuntimeManifest;
+};
+
+export type PalworldActiveRuntimeManifest =
+  | PalworldActiveRuntimeManifestV1
+  | PalworldActiveRuntimeManifestV2;
 
 export type PalworldActiveRuntime = {
   manifest: PalworldActiveRuntimeManifest;
@@ -179,7 +200,21 @@ function safeReleaseDirectoryAt(value: unknown): string {
 export function assertPalworldActiveRuntimeManifest(
   value: unknown
 ): PalworldActiveRuntimeManifest {
-  const record = recordAt(value, "activeManifest", [
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    fail("activeManifest", "객체여야 합니다.");
+  }
+  const schemaVersion = (value as Record<string, unknown>).schemaVersion;
+  const record = recordAt(value, "activeManifest", schemaVersion === 2
+    ? [
+      "schemaVersion",
+      "format",
+      "release",
+      "releaseDirectory",
+      "manifestFile",
+      "manifestSha256",
+      "composite"
+    ]
+    : [
     "schemaVersion",
     "format",
     "release",
@@ -187,24 +222,36 @@ export function assertPalworldActiveRuntimeManifest(
     "manifestFile",
     "manifestSha256"
   ]);
-  if (record.schemaVersion !== PALWORLD_ACTIVE_RUNTIME_SCHEMA_VERSION) {
-    fail("activeManifest.schemaVersion", "1이어야 합니다.");
+  if (record.schemaVersion !== 1 && record.schemaVersion !== 2) {
+    fail("activeManifest.schemaVersion", "1 또는 2여야 합니다.");
   }
   if (!(PALWORLD_RUNTIME_FORMATS as readonly unknown[]).includes(record.format)) {
     fail(
       "activeManifest.format",
-      "legacy_release_v1 또는 operator_pak_v1이어야 합니다."
+      "legacy_release_v1, legacy_composite_v2 또는 operator_pak_v1이어야 합니다."
     );
   }
   const format = record.format as PalworldRuntimeFormat;
+  if (
+    (record.schemaVersion === 1 && format === "legacy_composite_v2")
+    || (
+      record.schemaVersion === 2
+      && format !== "legacy_composite_v2"
+    )
+  ) {
+    fail(
+      "activeManifest.format",
+      "schemaVersion 2는 legacy_composite_v2에만 사용해야 합니다."
+    );
+  }
   const release = stringAt(record.release, "activeManifest.release", 64);
   if (!RELEASE_PATTERN.test(release)) {
     fail("activeManifest.release", "major.minor.patch 형식이어야 합니다.");
   }
   const releaseDirectory = safeReleaseDirectoryAt(record.releaseDirectory);
-  const expectedManifestFile = format === "legacy_release_v1"
-    ? "manifest.json"
-    : "runtime-manifest.json";
+  const expectedManifestFile = format === "operator_pak_v1"
+    ? "runtime-manifest.json"
+    : "manifest.json";
   if (record.manifestFile !== expectedManifestFile) {
     fail(
       "activeManifest.manifestFile",
@@ -219,13 +266,35 @@ export function assertPalworldActiveRuntimeManifest(
   if (!SHA256_PATTERN.test(manifestSha256)) {
     fail("activeManifest.manifestSha256", "소문자 64자리 SHA-256이어야 합니다.");
   }
-  return Object.freeze({
-    schemaVersion: PALWORLD_ACTIVE_RUNTIME_SCHEMA_VERSION,
+  const base = {
+    schemaVersion: record.schemaVersion,
     format,
     release,
     releaseDirectory,
     manifestFile: expectedManifestFile,
     manifestSha256
+  } as const;
+  if (record.schemaVersion === 2) {
+    const composite = assertPalworldLegacyCompositeRuntimeManifest(
+      record.composite
+    );
+    if (composite.release !== release) {
+      fail(
+        "activeManifest.composite.release",
+        "active selector release와 일치해야 합니다."
+      );
+    }
+    return Object.freeze({
+      ...base,
+      schemaVersion: 2,
+      format: "legacy_composite_v2",
+      composite
+    });
+  }
+  return Object.freeze({
+    ...base,
+    schemaVersion: 1,
+    format: format as "legacy_release_v1" | "operator_pak_v1"
   });
 }
 
@@ -342,7 +411,10 @@ export async function loadPalworldActiveRuntime(options: {
     fail("activeManifest.manifestSha256", "실제 release manifest checksum과 일치하지 않습니다.");
   }
 
-  if (manifest.format === "legacy_release_v1") {
+  if (
+    manifest.format === "legacy_release_v1"
+    || manifest.format === "legacy_composite_v2"
+  ) {
     const releaseManifest = assertPalworldPaldexReleaseManifest(
       parseJson(releaseManifestBytes, "releaseManifest")
     );
@@ -354,6 +426,13 @@ export async function loadPalworldActiveRuntime(options: {
         "releaseManifest",
         "active release와 버전이 같고 runtimeActivation=true여야 합니다."
       );
+    }
+    if (manifest.format === "legacy_composite_v2") {
+      await verifyPalworldLegacyCompositeRuntimeManifest({
+        releaseRoot,
+        expectedRelease: manifest.release,
+        manifest: manifest.composite
+      });
     }
   } else {
     const validated = await validatePalworldPakCandidateStagingRoot({

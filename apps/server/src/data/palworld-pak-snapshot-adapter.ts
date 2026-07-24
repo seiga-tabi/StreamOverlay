@@ -954,6 +954,8 @@ export function adaptPalworldPakCandidateToSnapshot(
   const archiveSha256 = provenance.archiveSha256;
   const metadata: PalworldDataMetadata = {
     gameVersion: input.identity.gameVersion,
+    release: input.identity.release,
+    steamBuildId: input.identity.steamBuildId,
     sourceName: "operator_provided_pak_export",
     sourceUrl: input.identity.publicSourceUrl,
     sourceRevision: input.identity.importRevision,

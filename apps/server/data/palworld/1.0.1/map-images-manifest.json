@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "kind": "maps",
+  "status": "operator_acknowledged",
+  "sourceType": "operator_pak_export",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "usageBasis": "operator_reference_use",
+  "rightsVerified": false,
+  "entries": [
+    {
+      "id": "main",
+      "sourceMember": "Pal/Texture/UI/Map/T_WorldMap.png",
+      "sourceSha256": "f02560929cf0f30ee16ba2d2693f9ca65ca5400db14e13bca862268092499b62",
+      "outputSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+      "outputFileName": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
+      "outputWidth": 4096,
+      "outputHeight": 4096,
+      "outputBytes": 956292,
+      "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp"
+    }
+  ]
+}

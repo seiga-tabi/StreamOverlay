@@ -1,4 +1,5 @@
 import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared";
+import { Button } from "../../../shared/ui/Button";
 import { Card, CardContent } from "../../../shared/ui/Card";
 import { Badge } from "../../../shared/ui/Status";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
@@ -27,7 +28,7 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
   const name = resolvePalworldName(pal, locale);
   const displayName = name.text;
   return (
-    <Card className="palworld-entity-card palworld-pal-card" variant="interactive" padding="none" onClick={() => onOpen(pal)} aria-label={`${displayName} · ${text.openPal}`} data-testid="pal-card">
+    <Card className="palworld-entity-card palworld-pal-card" variant="interactive" padding="none" data-testid="pal-card">
       <div className="palworld-pal-card-main">
         <div className="palworld-pal-card-media">
           <div className="palworld-pal-card-image-frame">
@@ -57,6 +58,16 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
           ))}
         </div>
       ) : null}
+      <Button
+        aria-haspopup="dialog"
+        className="palworld-card-open-action"
+        onClick={() => onOpen(pal)}
+        size="sm"
+        type="button"
+        variant="secondary"
+      >
+        {text.openPal}
+      </Button>
     </Card>
   );
 }
@@ -67,7 +78,7 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
   const description = resolvePalworldDescription(item, locale);
   const displayName = name.text;
   return (
-    <Card className="palworld-entity-card palworld-item-card" variant="interactive" padding="none" onClick={() => onOpen(item)} aria-label={`${displayName} · ${text.openItem}`} data-testid="item-card">
+    <Card className="palworld-entity-card palworld-item-card" variant="interactive" padding="none" data-testid="item-card">
       <div className="palworld-entity-media"><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={displayName} locale={locale} priority={priority} {...imageDimensions(item)} /></div>
       <CardContent>
         <div className="palworld-card-kicker"><Badge size="sm" tone="info">{categoryLabel(item.category, locale)}</Badge><Badge size="sm" tone={rarityTone(item.rarity)}>★ {item.rarity}</Badge></div>
@@ -76,6 +87,16 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
         <p className="palworld-card-description palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
         {item.technologyLevel !== undefined ? <p className="palworld-card-note">{text.technologyLevel} · {text.levelPrefix}{item.technologyLevel}</p> : null}
       </CardContent>
+      <Button
+        aria-haspopup="dialog"
+        className="palworld-card-open-action"
+        onClick={() => onOpen(item)}
+        size="sm"
+        type="button"
+        variant="secondary"
+      >
+        {text.openItem}
+      </Button>
     </Card>
   );
 }

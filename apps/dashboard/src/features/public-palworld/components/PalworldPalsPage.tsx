@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { PalworldPalListFacets, PalworldPalListResponse } from "@streamops/shared";
+import {
+  PALWORLD_SEARCH_MAX_LENGTH,
+  type PalworldPalListFacets,
+  type PalworldPalListResponse
+} from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { Card, CardContent } from "../../../shared/ui/Card";
 import { Input } from "../../../shared/ui/Form";
@@ -28,6 +32,7 @@ import {
 } from "../utils/pals";
 import { PalCard } from "./PalworldCards";
 import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
+import { PalworldPreviousLoadControl } from "./PalworldPreviousLoadControl";
 import {
   PalworldPalsAppliedFilters,
   PalworldPalsDesktopFilterPanel,
@@ -67,12 +72,19 @@ export function PalworldPalsPage({
   const {
     initialError: error,
     initialLoading: loading,
+    hasPreviousPage,
     loadMore,
     loadMoreError,
     loadMoreLoading,
+    loadMoreRetryBlocked,
+    loadPrevious,
+    loadPreviousError,
+    loadPreviousLoading,
+    loadPreviousRetryBlocked,
     response,
     retryInitial,
     retryLoadMore,
+    retryLoadPrevious,
   } = usePalworldInfiniteList<PalworldPalListResponse["items"][number], PalworldPalListResponse>({
     initialPage: params.get("page") ?? "1",
     itemKey: (pal) => pal.id,
@@ -87,6 +99,7 @@ export function PalworldPalsPage({
       apiParams.set("limit", "24");
       return getPalworldPals(apiParams, signal);
     },
+    paused: Boolean(params.get("pal") || params.get("item") || params.get("skill")),
     queryKey: `${locale}:${routeQuery}`,
   });
 
@@ -131,6 +144,7 @@ export function PalworldPalsPage({
             <span>{text.nameSearch}</span>
             <Input
               aria-label={text.nameSearch}
+              maxLength={PALWORLD_SEARCH_MAX_LENGTH}
               placeholder={text.palSearchPlaceholder}
               type="search"
               value={nameQuery}
@@ -210,6 +224,16 @@ export function PalworldPalsPage({
         ) : null}
         {!loading && !error && response?.items.length ? (
           <>
+            <PalworldPreviousLoadControl
+              error={loadPreviousError}
+              hasPrevious={hasPreviousPage}
+              loading={loadPreviousLoading}
+              locale={locale}
+              onLoadPrevious={() => { void loadPrevious(); }}
+              onRetry={() => { void retryLoadPrevious(); }}
+              paused={Boolean(params.get("pal"))}
+              retryBlocked={loadPreviousRetryBlocked}
+            />
             <div className="palworld-entity-grid palworld-pal-grid">
               {response.items.map((pal, index) => (
                 <PalCard key={pal.id} locale={locale} onOpen={(selected) => onOpenPal(selected.id)} pal={pal} priority={index < 4} />
@@ -224,6 +248,7 @@ export function PalworldPalsPage({
               onLoadMore={() => { void loadMore(); }}
               onRetry={() => { void retryLoadMore(); }}
               paused={Boolean(params.get("pal"))}
+              retryBlocked={loadMoreRetryBlocked}
               total={response.pagination.total}
             />
           </>

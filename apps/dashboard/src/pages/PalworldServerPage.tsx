@@ -92,6 +92,9 @@ export function palworldServerOperationFailureDescription(
   if (error.code === "password_required") return text.errorCodes.password_required;
   if (error.code === "key_missing") return text.errorCodes.key_missing;
   if (error.code === "key_invalid") return text.errorCodes.key_invalid;
+  if (error.code === "key_permission_denied") return text.errorCodes.key_permission_denied;
+  if (error.code === "key_mismatch") return text.errorCodes.key_mismatch;
+  if (error.code === "state_damaged") return text.errorCodes.state_damaged;
   return text.operationFailedDescription;
 }
 

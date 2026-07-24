@@ -565,7 +565,8 @@ export function buildPalworldMapMarkerArtifact(input: {
   const artifact = createPalworldMapMarkerArtifact({
     schemaVersion: 1,
     targetGameVersion: mapping.targetGameVersion,
-    activation: "active",
+    // ZIP에 gameVersion과 Steam build ID metadata가 없으므로 검증 전 candidate로만 생성합니다.
+    activation: "candidate",
     source: {
       sourceType: "operator_pak_export",
       archiveSha256: mapping.sourceArchiveSha256,

@@ -290,6 +290,23 @@ export function assertPalworldMapMarkerArtifact(value: unknown): PalworldMapMark
     fail("artifact.activation", "candidate 또는 active여야 합니다.");
   }
   const source = validateSource(artifact.source);
+  if (artifact.activation === "active") {
+    if (
+      source.sourceGameVersion === null
+      || source.sourceSteamBuildId === null
+    ) {
+      fail(
+        "artifact.source",
+        "active artifact에는 sourceGameVersion과 sourceSteamBuildId가 모두 필요합니다."
+      );
+    }
+    if (source.sourceGameVersion !== targetGameVersion) {
+      fail(
+        "artifact.source.sourceGameVersion",
+        "targetGameVersion과 일치해야 합니다."
+      );
+    }
+  }
   if (!Array.isArray(artifact.worlds) || artifact.worlds.length === 0 || artifact.worlds.length > 2) {
     fail("artifact.worlds", "1개 이상 2개 이하의 배열이어야 합니다.");
   }

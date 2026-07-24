@@ -17,6 +17,9 @@ export const PALWORLD_SERVER_ERROR_CODES = [
   "config_invalid",
   "key_missing",
   "key_invalid",
+  "key_permission_denied",
+  "key_mismatch",
+  "state_damaged",
   "policy_missing",
   "not_configured",
   "invalid_request",
@@ -45,6 +48,9 @@ export const PALWORLD_SERVER_AVAILABILITY_ERROR_CODES = [
   "config_invalid",
   "key_missing",
   "key_invalid",
+  "key_permission_denied",
+  "key_mismatch",
+  "state_damaged",
   "policy_missing"
 ] as const satisfies readonly (typeof PALWORLD_SERVER_ERROR_CODES)[number][];
 

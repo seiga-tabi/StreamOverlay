@@ -34,7 +34,7 @@ import {
   palworldPalsDetailFilterCount,
   updatePalworldPalsParams,
 } from "../src/features/public-palworld/utils/pals";
-import { isKnownPalworldPagePath, isPalworldPath, palworldFocusPalFromParams, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
+import { isKnownPalworldPagePath, isPalworldPath, palworldDetailSelectionFromParams, palworldFocusPalFromParams, palworldPageFromPath, palworldPathForPage, palworldTwitchReturnTo, palworldUrl } from "../src/features/public-palworld/utils/routes";
 import {
   acquisitionLabel,
   categoryLabel,
@@ -569,6 +569,56 @@ test("빈 통합 검색어는 네트워크 요청 전에 거부한다", async ()
   await assert.rejects(searchPalworld("   "), /검색어/);
 });
 
+test("80자를 초과한 검색어는 API를 호출하지 않고 typed 400으로 거부한다", async () => {
+  const originalFetch = globalThis.fetch;
+  let called = false;
+  Object.assign(globalThis, {
+    fetch: async () => {
+      called = true;
+      throw new Error("호출되면 안 됩니다.");
+    },
+  });
+  try {
+    await assert.rejects(
+      () => searchPalworld("가".repeat(81)),
+      (error: unknown) => error instanceof PalworldApiError
+        && error.status === 400
+        && error.code === "PALWORLD_INVALID_QUERY",
+    );
+    assert.equal(called, false);
+  } finally {
+    Object.assign(globalThis, { fetch: originalFetch });
+  }
+});
+
+test("429 응답은 bounded backoff에 사용할 Retry-After를 보존한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: () => true,
+    } as unknown as Window,
+    fetch: async () => new Response(JSON.stringify({ error: "rate limit exceeded" }), {
+      status: 429,
+      headers: {
+        "content-type": "application/json",
+        "Retry-After": "17",
+      },
+    }),
+  });
+  try {
+    await assert.rejects(
+      () => searchPalworld("아누비스"),
+      (error: unknown) => error instanceof PalworldApiError
+        && error.status === 429
+        && error.retryAfterSeconds === 17,
+    );
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
+});
+
 test("Palworld API client는 network·timeout·손상 응답을 결과 없음과 구분한다", async () => {
   const originalWindow = globalThis.window;
   const originalFetch = globalThis.fetch;
@@ -754,7 +804,7 @@ test("아이템 목록 API도 응답 header와 body의 active release 불일치�
   }
 });
 
-test("통합 검색 응답은 Pal과 샘플 아이템의 상태·출처를 분리해 검증한다", async () => {
+test("통합 검색 응답은 활성 release identity와 샘플 domain 출처를 분리해 검증한다", async () => {
   const originalWindow = globalThis.window;
   const originalFetch = globalThis.fetch;
   const metadata = {
@@ -785,7 +835,7 @@ test("통합 검색 응답은 Pal과 샘플 아이템의 상태·출처를 분�
       metadata,
       domains: {
         pals: { status: "ready", recordCount: 287, metadata },
-        items: { status: "sample", recordCount: 10, metadata: sampleMetadata },
+        items: { status: "sample", recordCount: 10, metadata, domainMetadata: sampleMetadata },
       },
     }), { status: 200, headers: { "content-type": "application/json" } }),
   });
@@ -794,8 +844,9 @@ test("통합 검색 응답은 Pal과 샘플 아이템의 상태·출처를 분�
     assert.equal(result.domains.pals.status, "ready");
     assert.equal(result.domains.pals.metadata.gameVersion, "1.0.1");
     assert.equal(result.domains.items.status, "sample");
-    assert.equal(result.domains.items.metadata.gameVersion, "sample-baseline");
-    assert.equal(result.domains.items.metadata.sourceRevision, "sample-revision");
+    assert.equal(result.domains.items.metadata.gameVersion, "1.0.1");
+    assert.equal(result.domains.items.domainMetadata?.gameVersion, "sample-baseline");
+    assert.equal(result.domains.items.domainMetadata?.sourceRevision, "sample-revision");
   } finally {
     Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
   }
@@ -878,6 +929,32 @@ test("교배 URL query는 exact ID·성별·mode·page만 상태로 복원한다
   ]) {
     assert.equal(parsePalworldBreedingQuery(new URLSearchParams(invalid)).ok, false, invalid);
   }
+});
+
+test("Pal·Item·Skill 상세 query는 하나의 union state로 canonicalize한다", () => {
+  const item = palworldDetailSelectionFromParams(new URLSearchParams("item=pal-sphere"));
+  assert.deepEqual(item.selection, { type: "item", id: "pal-sphere" });
+  assert.equal(item.canonicalParams.toString(), "item=pal-sphere");
+  assert.equal(item.changed, false);
+  const conflicted = palworldDetailSelectionFromParams(
+    new URLSearchParams("item=pal-sphere&pal=anubis&skill=active-air-cannon"),
+  );
+  assert.deepEqual(conflicted.selection, { type: "pal", id: "anubis" });
+  assert.equal(conflicted.changed, true);
+  assert.equal(conflicted.canonicalParams.toString(), "pal=anubis");
+
+  const duplicated = palworldDetailSelectionFromParams(
+    new URLSearchParams("pal=anubis&pal=lamball&q=pal"),
+  );
+  assert.equal(duplicated.selection, null);
+  assert.equal(duplicated.changed, true);
+  assert.equal(duplicated.canonicalParams.toString(), "q=pal");
+
+  const invalid = palworldDetailSelectionFromParams(
+    new URLSearchParams("skill=..%2Fsecret&q=ice"),
+  );
+  assert.equal(invalid.selection, null);
+  assert.equal(invalid.canonicalParams.toString(), "q=ice");
 });
 
 test("교배 URL 직렬화와 초기화는 Modal 등 다른 query를 보존한다", () => {

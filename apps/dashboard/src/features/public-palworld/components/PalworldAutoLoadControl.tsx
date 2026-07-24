@@ -18,6 +18,7 @@ export function PalworldAutoLoadControl({
   onLoadMore,
   onRetry,
   paused = false,
+  retryBlocked = false,
   total,
 }: {
   error: unknown;
@@ -28,6 +29,7 @@ export function PalworldAutoLoadControl({
   onLoadMore: () => void;
   onRetry: () => void;
   paused?: boolean;
+  retryBlocked?: boolean;
   total: number;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -66,14 +68,16 @@ export function PalworldAutoLoadControl({
       <p aria-live="polite" className="palworld-auto-load-summary">{loadedSummary}</p>
       {error ? (
         <div className="palworld-auto-load-error" role="alert">
-          <p>{text.loadMoreError}</p>
-          <Button onClick={onRetry} size="sm" type="button" variant="secondary">
+          <p>{retryBlocked ? text.rateLimitWait : text.loadMoreError}</p>
+          <Button disabled={retryBlocked} onClick={onRetry} size="sm" type="button" variant="secondary">
             {text.retryLoadMore}
           </Button>
         </div>
       ) : hasMore ? (
         <>
-          <p className="palworld-auto-load-hint">{text.autoLoadHint}</p>
+          <p className="palworld-auto-load-hint" role={paused ? "status" : undefined}>
+            {paused ? text.autoLoadPaused : text.autoLoadHint}
+          </p>
           <Button
             loading={loading}
             loadingLabel={text.loadingMore}

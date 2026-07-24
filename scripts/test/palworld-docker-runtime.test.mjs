@@ -45,11 +45,32 @@ test("server runtime image는 active manifest allowlist bundle만 포함하고 s
     /(?:runtime-manifest\.candidate\.json|Content\.zip|source-cache|streamoverlay-palworld-paldex)/u
   );
 
-  assert.equal(activeManifest.schemaVersion, 1);
+  assert.equal([1, 2].includes(activeManifest.schemaVersion), true);
   assert.equal(
-    ["legacy_release_v1", "operator_pak_v1"].includes(activeManifest.format),
+    [
+      "legacy_release_v1",
+      "legacy_composite_v2",
+      "operator_pak_v1"
+    ].includes(activeManifest.format),
     true
   );
+  if (activeManifest.format === "legacy_composite_v2") {
+    assert.equal(activeManifest.schemaVersion, 2);
+    assert.equal(activeManifest.composite.schemaVersion, 3);
+    assert.equal(
+      activeManifest.composite.artifacts.some((artifact) =>
+        artifact.kind === "map-images-manifest"
+        && artifact.file === "map-images-manifest.json"
+      ),
+      true
+    );
+    assert.equal(
+      activeManifest.composite.artifacts.some((artifact) =>
+        /(?:^|\/)(?:breeding-)?import-report\.json$/u.test(artifact.file)
+      ),
+      false
+    );
+  }
   await access(path.join(
     repositoryRoot,
     "apps/server/data/palworld",

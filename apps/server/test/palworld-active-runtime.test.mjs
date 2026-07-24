@@ -23,6 +23,15 @@ import {
   loadPalworldActiveRuntime
 } from "../dist/data/palworld-active-runtime.js";
 import {
+  assertPalworldLegacyCompositeRuntimeManifest,
+  createPalworldLegacyCompositeRuntimeManifest,
+  verifyPalworldLegacyCompositeRuntimeManifest
+} from "../dist/data/palworld-legacy-composite-runtime.js";
+import {
+  assertPalworldMapImageManifest,
+  loadPalworldMapImageManifest
+} from "../dist/data/palworld-map-image-manifest.js";
+import {
   activatePalworldRuntimeManifest,
   promotePalworldPakRuntime,
   rollbackPalworldRuntime
@@ -126,6 +135,114 @@ test("active manifest exact schema와 결정적 JSON을 검증한다", () => {
       releaseDirectory: "runtime/release"
     }),
     /runtime selector와 분리/
+  );
+});
+
+test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 candidate domain을 제외한다", async () => {
+  const releaseRoot = path.dirname(legacyManifestPath);
+  const composite = await createPalworldLegacyCompositeRuntimeManifest({
+    releaseRoot,
+    release: "1.0.1",
+    workImages: "candidate"
+  });
+  assert.equal(composite.schemaVersion, 3);
+  assert.equal(composite.artifacts.length, 17);
+  assert.equal(
+    composite.artifacts.some((artifact) =>
+      artifact.kind === "map-images-manifest"
+      && artifact.file === "map-images-manifest.json"
+    ),
+    true
+  );
+  assert.equal(
+    composite.artifacts.some((artifact) => artifact.file.includes("import-report")),
+    false
+  );
+  assert.deepEqual(composite.availability, {
+    mapMarkers: "candidate",
+    mapSpawns: "candidate",
+    workImages: "candidate",
+    skillImages: "unavailable"
+  });
+  assert.equal(
+    composite.artifacts.some(({ kind }) =>
+      kind === "map-markers" || kind === "map-spawns"
+    ),
+    false
+  );
+  await verifyPalworldLegacyCompositeRuntimeManifest({
+    releaseRoot,
+    expectedRelease: "1.0.1",
+    manifest: composite
+  });
+  const active = assertPalworldActiveRuntimeManifest({
+    schemaVersion: 2,
+    format: "legacy_composite_v2",
+    release: "1.0.1",
+    releaseDirectory: "1.0.1",
+    manifestFile: "manifest.json",
+    manifestSha256: "a".repeat(64),
+    composite
+  });
+  assert.equal(active.schemaVersion, 2);
+  assert.equal(active.format, "legacy_composite_v2");
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest({
+      ...composite,
+      schemaVersion: 2,
+      artifacts: composite.artifacts.filter(
+        (artifact) => artifact.kind !== "map-images-manifest"
+      )
+    }).schemaVersion,
+    2,
+    "기존 composite schema v2 selector를 계속 읽어야 합니다."
+  );
+  assert.throws(
+    () => assertPalworldLegacyCompositeRuntimeManifest({
+      ...composite,
+      artifacts: composite.artifacts.map((artifact, index) =>
+        index === 1
+          ? { ...artifact, sha256: composite.artifacts[0].sha256 }
+          : artifact
+      )
+    }),
+    /중복/u
+  );
+  await assert.rejects(
+    verifyPalworldLegacyCompositeRuntimeManifest({
+      releaseRoot,
+      expectedRelease: "1.0.1",
+      manifest: {
+        ...composite,
+        artifacts: composite.artifacts.map((artifact, index) =>
+          index === 0 ? { ...artifact, sha256: "0".repeat(64) } : artifact
+        )
+      }
+    }),
+    /checksum/u
+  );
+});
+
+test("map image manifest는 active release·content hash·권리 상태를 exact 검증한다", async () => {
+  const releaseRoot = path.dirname(legacyManifestPath);
+  const manifest = await loadPalworldMapImageManifest(releaseRoot, "1.0.1");
+  assert.equal(manifest.entries.length, 1);
+  assert.equal(manifest.entries[0].id, "main");
+  assert.equal(manifest.rightsVerified, false);
+  assert.equal(manifest.status, "operator_acknowledged");
+  assert.throws(
+    () => assertPalworldMapImageManifest(
+      { ...manifest, rightsVerified: true },
+      "1.0.1"
+    ),
+    /rightsVerified=false/u
+  );
+  assert.throws(
+    () => assertPalworldMapImageManifest(
+      { ...manifest, unknown: true },
+      "1.0.1"
+    ),
+    /허용되지 않은 필드/u
   );
 });
 

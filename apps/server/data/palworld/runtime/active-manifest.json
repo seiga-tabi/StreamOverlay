@@ -1,8 +1,105 @@
 {
-  "schemaVersion": 1,
-  "format": "legacy_release_v1",
+  "schemaVersion": 2,
+  "format": "legacy_composite_v2",
   "release": "1.0.1",
   "releaseDirectory": "1.0.1",
   "manifestFile": "manifest.json",
-  "manifestSha256": "ca39f33365c67f62129d0b36579ee2b29a2670aec2bf50b72d867e8036fc8596"
+  "manifestSha256": "ca39f33365c67f62129d0b36579ee2b29a2670aec2bf50b72d867e8036fc8596",
+  "composite": {
+    "schemaVersion": 3,
+    "release": "1.0.1",
+    "artifacts": [
+      {
+        "kind": "source-lock",
+        "file": "sources.lock.json",
+        "sha256": "690a38bfd2e02f79c17cfc842c230adf385f69141c4e6660f18f7bf25bcb36be"
+      },
+      {
+        "kind": "paldex",
+        "file": "paldex.json",
+        "sha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20"
+      },
+      {
+        "kind": "paldex-manifest",
+        "file": "manifest.json",
+        "sha256": "ca39f33365c67f62129d0b36579ee2b29a2670aec2bf50b72d867e8036fc8596"
+      },
+      {
+        "kind": "pal-images-manifest",
+        "file": "images-manifest.json",
+        "sha256": "016647f3c257b40814e10012857224ffae5e8531b5a8b5d97ee2f0c691d0c473"
+      },
+      {
+        "kind": "image-use-policy",
+        "file": "image-use-policy.json",
+        "sha256": "e886812f4ea3fda26ed6daed08d9a0dcf676f6947a09cf2c00bd26e7fc260d1e"
+      },
+      {
+        "kind": "catalog",
+        "file": "catalog.json",
+        "sha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552"
+      },
+      {
+        "kind": "catalog-manifest",
+        "file": "catalog-manifest.json",
+        "sha256": "8f71eeb87f8e6c9405dff9d779cece4c0aa3882295184e1848308ccaa1102300"
+      },
+      {
+        "kind": "item-images-manifest",
+        "file": "item-images-manifest.json",
+        "sha256": "13a7f479b69a618fbddc3e89ec68de3437708e468da8de3af756d7ea52e8543a"
+      },
+      {
+        "kind": "element-images-manifest",
+        "file": "element-images-manifest.json",
+        "sha256": "2ba8fcf8600bc275a5808d6b6bdc5a13e7527c67b08559605140a681e172eedb"
+      },
+      {
+        "kind": "map-images-manifest",
+        "file": "map-images-manifest.json",
+        "sha256": "11db2051f08c4c04be2bff870739792aff13b7679e4fb16dc852929d39a2aa98"
+      },
+      {
+        "kind": "breeding",
+        "file": "breeding.json",
+        "sha256": "9e3f35d9e64b81f6a7c42c6fced2f9c8165c4e3de4112a9790dec19aa833c555"
+      },
+      {
+        "kind": "breeding-manifest",
+        "file": "breeding-manifest.json",
+        "sha256": "ddef1b6f2b2fa8d7e28eaaf2950f5fba4bcf08b392d58a009a775744a9541106"
+      },
+      {
+        "kind": "locale-manifest",
+        "file": "locales/manifest.json",
+        "sha256": "5c927a2f864b613457cc501531c853c28c81c6ac4dc81a57fe7fa6a2773e0816"
+      },
+      {
+        "kind": "locale-glossary",
+        "file": "locales/glossary.json",
+        "sha256": "e2fffc918a7f85b2c16ef027800aede61383b6e8c97930f6b9c70e92e23029a1"
+      },
+      {
+        "kind": "locale-ko",
+        "file": "locales/ko.json",
+        "sha256": "887df97d51ba3007ab3ecb1b8239273c8cb5fe3d1ebc362115619d374a6e4c53"
+      },
+      {
+        "kind": "locale-ja",
+        "file": "locales/ja.json",
+        "sha256": "a1b374ff54fc853c61b60ee263c0cf400f8a729b0181008e9a7cb65eb1785302"
+      },
+      {
+        "kind": "reviewed-item-aliases",
+        "file": "locales/reviewed-item-aliases.json",
+        "sha256": "8f9b8588799cc06e753dc2978f986dcfa09f79ed2f46725b32f3e0539ae1b9c3"
+      }
+    ],
+    "availability": {
+      "mapMarkers": "candidate",
+      "mapSpawns": "candidate",
+      "workImages": "candidate",
+      "skillImages": "unavailable"
+    }
+  }
 }

@@ -48,6 +48,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate Palworld public translations
+        run: npm run validate:palworld-translations
+
       - name: Check bundle budgets
         run: npm run check:budgets
 

@@ -48,6 +48,47 @@ export function PalworldError({
   return <EmptyState role="alert" variant="error"><EmptyStateIcon>!</EmptyStateIcon><EmptyStateTitle data-ko={titleKo ?? palworldI18n.ko.apiError} data-ja={titleJa ?? palworldI18n.ja.apiError}>{title ?? text.apiError}</EmptyStateTitle><EmptyStateDescription data-ko={safeDescriptionKo} data-ja={safeDescriptionJa}>{safeDescription}</EmptyStateDescription><EmptyStateActions><Button variant="secondary" onClick={onRetry}>{text.retry}</Button></EmptyStateActions></EmptyState>;
 }
 
+export function PalworldDetailError({
+  error,
+  locale,
+  onClose,
+  onRetry,
+}: {
+  error: unknown;
+  locale: PalworldLocale;
+  onClose: () => void;
+  onRetry: () => void;
+}) {
+  const text = palworldI18n[locale];
+  const permanent = error instanceof PalworldApiError && (error.status === 400 || error.status === 404);
+  const description = error instanceof PalworldApiError
+    ? error.status === 400
+      ? text.detailInvalid
+      : error.status === 404
+        ? text.detailNotFound
+        : error.status === 503
+          ? text.palDataUnavailable
+          : error.code === "PALWORLD_REQUEST_TIMEOUT"
+            ? text.apiTimeout
+            : error.code === "PALWORLD_NETWORK_ERROR"
+              ? text.apiNetworkError
+              : error.code === "PALWORLD_RESPONSE_INVALID"
+                ? text.apiInvalidResponse
+                : text.apiHttpError
+    : text.apiError;
+  return (
+    <EmptyState role="alert" variant="error">
+      <EmptyStateIcon>!</EmptyStateIcon>
+      <EmptyStateTitle>{text.apiError}</EmptyStateTitle>
+      <EmptyStateDescription>{description}</EmptyStateDescription>
+      <EmptyStateActions>
+        <Button variant="ghost" onClick={onClose}>{text.closeDetail}</Button>
+        {!permanent ? <Button variant="secondary" onClick={onRetry}>{text.retry}</Button> : null}
+      </EmptyStateActions>
+    </EmptyState>
+  );
+}
+
 export function PalworldEmpty({
   description,
   includeDefaultDescription = true,

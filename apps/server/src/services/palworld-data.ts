@@ -52,7 +52,8 @@ import {
   PALWORLD_PALDEX_IMAGE_ROOT,
 } from "../data/palworld-paldex-import.js";
 import {
-  loadPalworldActiveRuntime
+  loadPalworldActiveRuntime,
+  type PalworldActiveRuntime
 } from "../data/palworld-active-runtime.js";
 import {
   createPalworldTranslationValidationContext,
@@ -77,7 +78,9 @@ import {
   type PalworldSortOrder
 } from "./palworld-query.js";
 
-export const PALWORLD_PUBLIC_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=86400";
+// release 전환 중 서로 다른 endpoint의 하루짜리 stale 응답이 섞이지 않도록
+// 브라우저·CDN이 매 요청에서 release별 ETag를 재검증하게 합니다.
+export const PALWORLD_PUBLIC_CACHE_CONTROL = "public, max-age=0, must-revalidate";
 
 export class PalworldRecordNotFoundError extends Error {
   readonly code = "PALWORLD_NOT_FOUND";
@@ -88,6 +91,15 @@ export class PalworldRecordNotFoundError extends Error {
   ) {
     super(`${recordType === "pal" ? "Pal" : recordType === "item" ? "아이템" : "스킬"}을 찾을 수 없습니다: ${recordId}`);
     this.name = "PalworldRecordNotFoundError";
+  }
+}
+
+export class PalworldDomainUnavailableError extends Error {
+  readonly code = "PALWORLD_DATA_UNAVAILABLE";
+
+  constructor(readonly domain: "items" | "skills") {
+    super(`Palworld ${domain} 데이터를 사용할 수 없습니다.`);
+    this.name = "PalworldDomainUnavailableError";
   }
 }
 
@@ -224,14 +236,29 @@ function identifierAliases(id: string): string[] {
 
 function matchScore(term: string, fields: Array<string | number>): number | undefined {
   const normalizedFields = searchFields(fields);
+  return matchNormalizedSearchFields(term, normalizedFields);
+}
+
+function matchNormalizedSearchFields(term: string, normalizedFields: readonly string[]): number | undefined {
   if (normalizedFields.some((field) => field === term)) return 0;
   if (normalizedFields.some((field) => field.startsWith(term))) return 1;
   if (normalizedFields.some((field) => field.includes(term))) return 2;
   return undefined;
 }
 
+const PALWORLD_COLLATOR = new Intl.Collator(["ko", "ja", "en"], {
+  numeric: true,
+  sensitivity: "base"
+});
+const PALWORLD_LOCALE_COLLATORS = {
+  ko: new Intl.Collator(["ko", "ja", "en"], { numeric: true, sensitivity: "base" }),
+  ja: new Intl.Collator(["ja", "ko", "en"], { numeric: true, sensitivity: "base" }),
+  en: new Intl.Collator(["en", "ko", "ja"], { numeric: true, sensitivity: "base" })
+} as const;
+const PALWORLD_ID_COLLATOR = new Intl.Collator("en");
+
 function compareText(left: string, right: string): number {
-  return left.localeCompare(right, ["ko", "ja", "en"], { numeric: true, sensitivity: "base" });
+  return PALWORLD_COLLATOR.compare(left, right);
 }
 
 function localizedName(
@@ -250,15 +277,14 @@ function compareLocalizedName(
   right: { nameKo?: string; nameJa?: string; nameEn: string },
   locale: "ko" | "ja" | "en"
 ): number {
-  return localizedName(left, locale).localeCompare(
-    localizedName(right, locale),
-    [locale, locale === "ko" ? "ja" : "ko", "en"],
-    { numeric: true, sensitivity: "base" }
+  return PALWORLD_LOCALE_COLLATORS[locale].compare(
+    localizedName(left, locale),
+    localizedName(right, locale)
   );
 }
 
 function compareCanonicalId(left: { id: string }, right: { id: string }): number {
-  return left.id.localeCompare(right.id, "en");
+  return PALWORLD_ID_COLLATOR.compare(left.id, right.id);
 }
 
 function direction(value: number, order: PalworldSortOrder): number {
@@ -289,7 +315,7 @@ function pagination(page: number, pageSize: number, total: number): PalworldPagi
   };
 }
 
-function pageItems<T>(items: T[], page: number, pageSize: number): T[] {
+function pageItems<T>(items: readonly T[], page: number, pageSize: number): T[] {
   const start = (page - 1) * pageSize;
   return items.slice(start, start + pageSize);
 }
@@ -455,6 +481,13 @@ export class PalworldDataService {
   private readonly gates: PalworldRuntimeGates;
   private readonly coverage: PalworldDataCoverage | undefined;
   private readonly breedingEngine: PalworldBreedingResolver | undefined;
+  private readonly unavailableDomains: ReadonlySet<"items" | "skills">;
+  private readonly palSearchFields: ReadonlyMap<string, readonly string[]>;
+  private readonly itemSearchFields: ReadonlyMap<string, readonly string[]>;
+  private readonly skillSearchFields: ReadonlyMap<string, readonly string[]>;
+  private readonly itemListCache = new Map<string, readonly PalworldItemDetail[]>();
+  private readonly skillListCache = new Map<string, readonly PalworldSkillDetail[]>();
+  private readonly searchCache = new Map<string, PalworldSearchResult>();
 
   constructor(snapshot: unknown, options: {
     supplementalSnapshot?: unknown;
@@ -464,6 +497,7 @@ export class PalworldDataService {
     coverage?: PalworldDataCoverage;
     breedingEngine?: PalworldBreedingEngine;
     useSnapshotBreedingPairs?: boolean;
+    unavailableDomains?: readonly ("items" | "skills")[];
   } = {}) {
     this.snapshot = assertPalworldDataSnapshot(snapshot);
     this.supplementalSnapshot = options.supplementalSnapshot === undefined
@@ -473,6 +507,40 @@ export class PalworldDataService {
     this.itemsById = this.indexByIdAliases(this.supplementalSnapshot.items);
     this.skillsById = this.indexByIdAliases(this.snapshot.skills ?? []);
     this.sourceInternalIds = options.sourceInternalIds ?? {};
+    this.palSearchFields = new Map(this.snapshot.pals.map((pal) => [
+      pal.id,
+      searchFields([
+        ...identifierAliases(pal.id),
+        this.sourceInternalIds[pal.id] ?? "",
+        pal.number,
+        `#${pal.number}`,
+        pal.nameKo,
+        pal.nameJa,
+        pal.nameEn
+      ])
+    ]));
+    this.itemSearchFields = new Map(this.supplementalSnapshot.items.map((item) => [
+      item.id,
+      searchFields([
+        ...identifierAliases(item.id),
+        item.sourceInternalId ?? "",
+        item.nameKo ?? "",
+        item.nameJa ?? "",
+        item.nameEn
+      ])
+    ]));
+    this.skillSearchFields = new Map((this.snapshot.skills ?? []).map((skill) => [
+      skill.id,
+      searchFields([
+        ...identifierAliases(skill.id),
+        skill.nameKo ?? "",
+        skill.nameJa ?? "",
+        skill.nameEn,
+        skill.descriptionKo ?? "",
+        skill.descriptionJa ?? "",
+        skill.descriptionEn ?? ""
+      ])
+    ]));
     this.palListFacets = collectPalListFacets(this.snapshot.pals);
     this.coverage = options.coverage;
     this.breedingEngine = options.breedingEngine
@@ -481,6 +549,7 @@ export class PalworldDataService {
           ? new PalworldSnapshotBreedingIndex(this.snapshot.breedingPairs)
           : undefined
       );
+    this.unavailableDomains = new Set(options.unavailableDomains ?? []);
     const snapshotIsSample = this.snapshot.metadata.gameVersion === "sample-baseline";
     const supplementalIsSample = this.supplementalSnapshot.metadata.gameVersion === "sample-baseline";
     this.domains = options.domains ?? {
@@ -555,7 +624,7 @@ export class PalworldDataService {
         pals: this.snapshot.pals.length,
         items: this.supplementalSnapshot.items.length,
         breedingPairs: this.breedingEngine?.pairCount ?? 0,
-        ...(this.snapshot.skills === undefined ? {} : { skills: this.snapshot.skills.length })
+        ...(this.domains.skills === undefined ? {} : { skills: this.snapshot.skills?.length ?? 0 })
       },
       domains: {
         pals: { ...this.domains.pals, metadata: { ...this.domains.pals.metadata } },
@@ -581,48 +650,62 @@ export class PalworldDataService {
   search(rawQuery: string, limit: number): PalworldSearchResult {
     const query = rawQuery.trim().replace(/\s+/gu, " ");
     const term = normalizePalworldSearchTerm(query);
+    const cacheKey = JSON.stringify([term, limit]);
+    const cached = this.searchCache.get(cacheKey);
+    if (cached !== undefined) {
+      this.searchCache.delete(cacheKey);
+      this.searchCache.set(cacheKey, cached);
+      return structuredClone(cached);
+    }
     const matchedPals = this.snapshot.pals
       .map((pal) => ({
         pal,
-        score: matchScore(term, [
-          ...identifierAliases(pal.id),
-          this.sourceInternalIds[pal.id] ?? "",
-          pal.number,
-          `#${pal.number}`,
-          pal.nameKo,
-          pal.nameJa,
-          pal.nameEn
-        ])
+        score: matchNormalizedSearchFields(term, this.palSearchFields.get(pal.id) ?? [])
       }))
       .filter((entry): entry is { pal: PalworldPalDetail; score: number } => entry.score !== undefined)
       .sort((left, right) => left.score - right.score || left.pal.number - right.pal.number);
     const pals = matchedPals
       .slice(0, limit)
       .map(({ pal }) => palSummary(pal));
-    const matchedItems = this.supplementalSnapshot.items
-      .map((item) => ({ item, score: matchScore(term, [
-        ...identifierAliases(item.id),
-        item.sourceInternalId ?? "",
-        item.nameKo ?? "",
-        item.nameJa ?? "",
-        item.nameEn
-      ]) }))
+    const matchedItems = (this.unavailableDomains.has("items") ? [] : this.supplementalSnapshot.items)
+      .map((item) => ({
+        item,
+        score: matchNormalizedSearchFields(term, this.itemSearchFields.get(item.id) ?? [])
+      }))
       .filter((entry): entry is { item: PalworldItemDetail; score: number } => entry.score !== undefined)
       .sort((left, right) => left.score - right.score || compareText(left.item.nameEn, right.item.nameEn));
     const items = matchedItems
       .slice(0, limit)
       .map(({ item }) => itemSummary(item));
-    return {
+    const response: PalworldSearchResult = {
       query,
       total: matchedPals.length + matchedItems.length,
       pals,
       items,
+      domainResults: {
+        pals: {
+          total: matchedPals.length,
+          returned: pals.length,
+          hasMore: pals.length < matchedPals.length
+        },
+        items: {
+          total: matchedItems.length,
+          returned: items.length,
+          hasMore: items.length < matchedItems.length
+        }
+      },
       metadata: this.snapshot.metadata,
       domains: {
         pals: { ...this.domains.pals, metadata: { ...this.domains.pals.metadata } },
         items: { ...this.domains.items, metadata: { ...this.domains.items.metadata } }
       }
     };
+    this.searchCache.set(cacheKey, response);
+    if (this.searchCache.size > 64) {
+      const oldest = this.searchCache.keys().next().value;
+      if (oldest !== undefined) this.searchCache.delete(oldest);
+    }
+    return structuredClone(response);
   }
 
   listPals(query: PalworldPalListQuery): PalworldPalListResponse {
@@ -682,15 +765,22 @@ export class PalworldDataService {
   }
 
   listItems(query: PalworldItemListQuery): PalworldPaginatedResponse<PalworldItemSummary> {
+    this.ensureDomainAvailable("items");
     const term = query.q ? normalizePalworldSearchTerm(query.q) : undefined;
-    const filtered = this.supplementalSnapshot.items
-      .filter((item) => term === undefined || matchScore(term, [
-        ...identifierAliases(item.id),
-        item.sourceInternalId ?? "",
-        item.nameKo ?? "",
-        item.nameJa ?? "",
-        item.nameEn
-      ]) !== undefined)
+    const cacheKey = JSON.stringify([
+      term ?? "",
+      query.category ?? "",
+      query.rarity ?? "",
+      query.acquisition ?? "",
+      query.sort,
+      query.order,
+      query.locale ?? "en"
+    ]);
+    const filtered = this.cachedList(this.itemListCache, cacheKey, () => this.supplementalSnapshot.items
+      .filter((item) =>
+        term === undefined
+        || matchNormalizedSearchFields(term, this.itemSearchFields.get(item.id) ?? []) !== undefined
+      )
       .filter((item) => query.category === undefined || item.category === query.category)
       .filter((item) => query.rarity === undefined || item.rarity === query.rarity)
       .filter((item) => query.acquisition === undefined || item.acquisitionMethods.some((method) => method.type === query.acquisition))
@@ -712,33 +802,41 @@ export class PalworldDataService {
           : compareLocalizedName(left, right, query.locale ?? "en")
             || compareCanonicalId(left, right);
         return direction(result, query.order);
-      });
+      }));
     const pageInfo = pagination(query.page, query.limit, filtered.length);
     return {
       items: pageItems(filtered, pageInfo.page, query.limit).map(itemSummary),
       pagination: pageInfo,
-      metadata: this.domains.items.metadata
+      metadata: this.snapshot.metadata,
+      domainMetadata: this.domains.items.domainMetadata
+        ?? this.supplementalSnapshot.items[0]?.domainMetadata
+        ?? this.domains.items.metadata
     };
   }
 
   getItem(id: string): PalworldItemDetail {
+    this.ensureDomainAvailable("items");
     const item = identifierAliases(id).map((alias) => this.itemsById.get(alias)).find(Boolean);
     if (!item) throw new PalworldRecordNotFoundError("item", id);
     return item;
   }
 
   listSkills(query: PalworldSkillListQuery): PalworldPaginatedResponse<PalworldSkillSummary> {
+    this.ensureDomainAvailable("skills");
     const term = query.q ? normalizePalworldSearchTerm(query.q) : undefined;
-    const filtered = [...(this.snapshot.skills ?? [])]
-      .filter((skill) => term === undefined || matchScore(term, [
-        ...identifierAliases(skill.id),
-        skill.nameKo ?? "",
-        skill.nameJa ?? "",
-        skill.nameEn,
-        skill.descriptionKo ?? "",
-        skill.descriptionJa ?? "",
-        skill.descriptionEn ?? ""
-      ]) !== undefined)
+    const cacheKey = JSON.stringify([
+      term ?? "",
+      query.type ?? "",
+      query.element ?? "",
+      query.sort,
+      query.order,
+      query.locale ?? "en"
+    ]);
+    const filtered = this.cachedList(this.skillListCache, cacheKey, () => [...(this.snapshot.skills ?? [])]
+      .filter((skill) =>
+        term === undefined
+        || matchNormalizedSearchFields(term, this.skillSearchFields.get(skill.id) ?? []) !== undefined
+      )
       .filter((skill) => query.type === undefined || skill.type === query.type)
       .filter((skill) => query.element === undefined || skill.element === query.element)
       .sort((left, right) => {
@@ -757,19 +855,50 @@ export class PalworldDataService {
             || compareCanonicalId(left, right),
           query.order
         );
-      });
+      }));
     const pageInfo = pagination(query.page, query.limit, filtered.length);
     return {
       items: pageItems(filtered, pageInfo.page, query.limit).map(skillSummary),
       pagination: pageInfo,
-      metadata: this.domains.skills?.metadata ?? this.snapshot.metadata
+      metadata: this.snapshot.metadata,
+      domainMetadata: this.domains.skills?.domainMetadata
+        ?? this.snapshot.skills?.[0]?.domainMetadata
+        ?? this.domains.skills?.metadata
+        ?? this.snapshot.metadata
     };
   }
 
   getSkill(id: string): PalworldSkillDetail {
+    this.ensureDomainAvailable("skills");
     const skill = identifierAliases(id).map((alias) => this.skillsById.get(alias)).find(Boolean);
     if (!skill) throw new PalworldRecordNotFoundError("skill", id);
     return skill;
+  }
+
+  private ensureDomainAvailable(domain: "items" | "skills"): void {
+    if (this.unavailableDomains.has(domain)) {
+      throw new PalworldDomainUnavailableError(domain);
+    }
+  }
+
+  private cachedList<T>(
+    cache: Map<string, readonly T[]>,
+    key: string,
+    create: () => readonly T[]
+  ): readonly T[] {
+    const existing = cache.get(key);
+    if (existing !== undefined) {
+      cache.delete(key);
+      cache.set(key, existing);
+      return existing;
+    }
+    const created = create();
+    cache.set(key, created);
+    if (cache.size > 64) {
+      const oldest = cache.keys().next().value;
+      if (oldest !== undefined) cache.delete(oldest);
+    }
+    return created;
   }
 
   breeding(query: PalworldBreedingQuery): PalworldBreedingResultResponse {
@@ -928,6 +1057,7 @@ function runtimeGates(input: {
 }
 
 export async function loadPalworldDataService(options: {
+  activeRuntime?: PalworldActiveRuntime;
   releaseRoot?: string;
   imageRoot?: string;
   itemImageRoot?: string;
@@ -953,15 +1083,24 @@ export async function loadPalworldDataService(options: {
       artifactChecksum?: string;
     }>
   ) => void;
+  onCatalogState?: (
+    state: Readonly<{
+      status: "loaded" | "missing" | "invalid" | "checksum_mismatch";
+      release: string;
+      errorCode?: string;
+      items: number;
+      skills: number;
+    }>
+  ) => void;
 } = {}): Promise<PalworldDataService> {
-  const activeRuntime = options.releaseRoot === undefined
+  const activeRuntime = options.activeRuntime ?? (options.releaseRoot === undefined
     ? await loadPalworldActiveRuntime({
         ...(options.dataRoot === undefined ? {} : { dataRoot: options.dataRoot }),
         ...(options.activeManifestPath === undefined
           ? {}
           : { activeManifestPath: options.activeManifestPath })
       })
-    : undefined;
+    : undefined);
   if (activeRuntime?.manifest.format === "operator_pak_v1") {
     const {
       loadPalworldPakShadowRuntimeFromStagingRoot
@@ -999,7 +1138,9 @@ export async function loadPalworldDataService(options: {
   let breedingEngine: PalworldBreedingEngine | undefined;
   let breedingSource: PalworldBreedingRuntimeSource | undefined;
   try {
-    breedingSource = await loadPalworldBreedingRuntimeSource(catalogRoot);
+    breedingSource = await loadPalworldBreedingRuntimeSource(catalogRoot, {
+      requireImportReport: false
+    });
     if (
       breedingSource.artifact.release !== release.metadata.gameVersion
       || breedingSource.artifact.metadata.sourceRevision !== release.metadata.sourceRevision
@@ -1117,12 +1258,22 @@ export async function loadPalworldDataService(options: {
         .digest("hex")
     });
     const requiredBreedingCoverage = breedingSource !== undefined
-      && Object.values(breedingSource.report.fieldCoverage).every((field) =>
+      && Object.values(breedingSource.fieldCoverage).every((field) =>
         field.available === adaptedCatalog.snapshot.pals.length
         && field.total === adaptedCatalog.snapshot.pals.length
       )
       ? adaptedCatalog.snapshot.pals.length
       : 0;
+    try {
+      options.onCatalogState?.({
+        status: "loaded",
+        release: release.metadata.gameVersion,
+        items: adaptedCatalog.snapshot.items.length,
+        skills: adaptedCatalog.snapshot.skills?.length ?? 0
+      });
+    } catch {
+      // 진단 callback 실패는 공개 데이터 runtime과 분리합니다.
+    }
     return new PalworldDataService(adaptedCatalog.snapshot, {
       sourceInternalIds: release.sourceInternalIds,
       domains: {
@@ -1152,13 +1303,29 @@ export async function loadPalworldDataService(options: {
     ) {
       throw error;
     }
+    const missing = (error as NodeJS.ErrnoException).code === "ENOENT";
+    const checksumMismatch = error instanceof PalworldCatalogValidationError
+      && /checksum|sha-?256/i.test(error.message);
+    try {
+      options.onCatalogState?.({
+        status: missing ? "missing" : checksumMismatch ? "checksum_mismatch" : "invalid",
+        release: release.metadata.gameVersion,
+        errorCode: missing
+          ? "PALWORLD_CATALOG_MISSING"
+          : checksumMismatch
+            ? "PALWORLD_CATALOG_CHECKSUM_MISMATCH"
+            : error instanceof PalworldCatalogValidationError
+              ? error.code
+              : "PALWORLD_CATALOG_INVALID",
+        items: 0,
+        skills: 0
+      });
+    } catch {
+      // 진단 callback 실패는 공개 데이터 runtime과 분리합니다.
+    }
   }
   const fallbackSnapshot = incompletePaldexSnapshot(release);
   return new PalworldDataService(fallbackSnapshot, {
-    supplementalSnapshot: {
-      ...PALWORLD_SNAPSHOT,
-      breedingPairs: []
-    },
     sourceInternalIds: release.sourceInternalIds,
     domains: {
       pals: {
@@ -1167,17 +1334,23 @@ export async function loadPalworldDataService(options: {
         metadata: fallbackSnapshot.metadata
       },
       items: {
-        status: "sample",
-        recordCount: PALWORLD_SNAPSHOT.items.length,
-        metadata: PALWORLD_SNAPSHOT.metadata
+        status: "unavailable",
+        recordCount: 0,
+        metadata: fallbackSnapshot.metadata
       },
       breeding: {
         status: "incomplete",
         recordCount: breedingEngine?.pairCount ?? 0,
         metadata: fallbackSnapshot.metadata
+      },
+      skills: {
+        status: "unavailable",
+        recordCount: 0,
+        metadata: fallbackSnapshot.metadata
       }
     },
     gates: runtimeGates(release),
-    breedingEngine
+    breedingEngine,
+    unavailableDomains: ["items", "skills"]
   });
 }

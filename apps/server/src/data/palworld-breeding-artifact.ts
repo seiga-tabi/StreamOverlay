@@ -40,6 +40,16 @@ export type PalworldBreedingCounts = {
   unresolvedSourceRows: number;
 };
 
+export type PalworldBreedingFieldCoverage = {
+  combiRank: { available: number; missing: number; total: number };
+  combiDuplicatePriority: { available: number; missing: number; total: number };
+  tribe: { available: number; missing: number; total: number };
+  maleProbability: { available: number; missing: number; total: number };
+  bpClass: { available: number; missing: number; total: number };
+  ignoreCombi: { available: number; missing: number; total: number };
+  sourceRowId: { available: number; missing: number; total: number };
+};
+
 export type PalworldBreedingManifest = {
   schemaVersion: 1;
   release: string;
@@ -55,15 +65,7 @@ export type PalworldBreedingImportReport = {
   release: string;
   status: "incomplete";
   counts: PalworldBreedingCounts;
-  fieldCoverage: {
-    combiRank: { available: number; missing: number; total: number };
-    combiDuplicatePriority: { available: number; missing: number; total: number };
-    tribe: { available: number; missing: number; total: number };
-    maleProbability: { available: number; missing: number; total: number };
-    bpClass: { available: 0; missing: number; total: number };
-    ignoreCombi: { available: 0; missing: number; total: number };
-    sourceRowId: { available: 0; missing: number; total: number };
-  };
+  fieldCoverage: PalworldBreedingFieldCoverage;
   unresolvedSourceInternalIds: string[];
   limitations: string[];
 };
@@ -71,7 +73,8 @@ export type PalworldBreedingImportReport = {
 export type PalworldBreedingRuntimeSource = {
   artifact: PalworldBreedingArtifact;
   manifest: PalworldBreedingManifest;
-  report: PalworldBreedingImportReport;
+  report?: PalworldBreedingImportReport;
+  fieldCoverage: PalworldBreedingFieldCoverage;
 };
 
 export class PalworldBreedingArtifactError extends Error {
@@ -507,6 +510,18 @@ async function readRegularBytes(root: string, fileName: string): Promise<Buffer>
   return readFile(filePath);
 }
 
+async function readOptionalRegularBytes(
+  root: string,
+  fileName: string
+): Promise<Buffer | undefined> {
+  try {
+    return await readRegularBytes(root, fileName);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
 function parseJson(bytes: Buffer, pathName: string): unknown {
   try {
     return JSON.parse(bytes.toString("utf8")) as unknown;
@@ -520,22 +535,62 @@ function sha256(bytes: Buffer): string {
 }
 
 export async function loadPalworldBreedingRuntimeSource(
-  releaseRoot: string
+  releaseRoot: string,
+  options: { requireImportReport?: boolean } = {}
 ): Promise<PalworldBreedingRuntimeSource> {
   const resolvedRoot = await realpath(path.resolve(releaseRoot));
   const [artifactBytes, manifestBytes, reportBytes] = await Promise.all([
     readRegularBytes(resolvedRoot, PALWORLD_BREEDING_FILE),
     readRegularBytes(resolvedRoot, PALWORLD_BREEDING_MANIFEST_FILE),
-    readRegularBytes(resolvedRoot, PALWORLD_BREEDING_REPORT_FILE)
+    readOptionalRegularBytes(resolvedRoot, PALWORLD_BREEDING_REPORT_FILE)
   ]);
+  if (options.requireImportReport !== false && reportBytes === undefined) {
+    fail(PALWORLD_BREEDING_REPORT_FILE, "source 감사용 report가 없습니다.");
+  }
   const manifest = assertPalworldBreedingManifest(parseJson(manifestBytes, PALWORLD_BREEDING_MANIFEST_FILE));
   if (manifest.breedingSha256 !== sha256(artifactBytes)) fail("breedingManifest.breedingSha256", "실제 artifact checksum과 다릅니다.");
-  if (manifest.reportSha256 !== sha256(reportBytes)) fail("breedingManifest.reportSha256", "실제 report checksum과 다릅니다.");
   const artifact = assertPalworldBreedingArtifact(parseJson(artifactBytes, PALWORLD_BREEDING_FILE));
-  const report = assertPalworldBreedingImportReport(parseJson(reportBytes, PALWORLD_BREEDING_REPORT_FILE), artifact);
-  if (manifest.release !== artifact.release || manifest.release !== report.release) {
+  const report = reportBytes === undefined
+    ? undefined
+    : assertPalworldBreedingImportReport(
+        parseJson(reportBytes, PALWORLD_BREEDING_REPORT_FILE),
+        artifact
+      );
+  if (reportBytes !== undefined && manifest.reportSha256 !== sha256(reportBytes)) {
+    fail("breedingManifest.reportSha256", "실제 report checksum과 다릅니다.");
+  }
+  if (
+    manifest.release !== artifact.release
+    || (report !== undefined && manifest.release !== report.release)
+  ) {
     fail("breedingManifest.release", "artifact와 report release가 일치해야 합니다.");
   }
-  if (!sameCounts(manifest.counts, report.counts)) fail("breedingManifest.counts", "report counts와 일치해야 합니다.");
-  return { artifact, manifest, report };
+  if (report !== undefined && !sameCounts(manifest.counts, report.counts)) {
+    fail("breedingManifest.counts", "report counts와 일치해야 합니다.");
+  }
+  const total = artifact.parameters.length;
+  const coverageFor = (
+    field: "combiRank" | "combiDuplicatePriority" | "tribe"
+      | "maleProbability" | "bpClass" | "ignoreCombi" | "sourceRowId"
+  ) => {
+    const available = artifact.parameters.filter((parameter) =>
+      Object.hasOwn(parameter, field)
+    ).length;
+    return { available, missing: total - available, total };
+  };
+  const fieldCoverage = report?.fieldCoverage ?? {
+    combiRank: coverageFor("combiRank"),
+    combiDuplicatePriority: coverageFor("combiDuplicatePriority"),
+    tribe: coverageFor("tribe"),
+    maleProbability: coverageFor("maleProbability"),
+    bpClass: coverageFor("bpClass"),
+    ignoreCombi: coverageFor("ignoreCombi"),
+    sourceRowId: coverageFor("sourceRowId")
+  };
+  return {
+    artifact,
+    manifest,
+    ...(report === undefined ? {} : { report }),
+    fieldCoverage
+  };
 }

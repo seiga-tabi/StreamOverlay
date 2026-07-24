@@ -82,6 +82,11 @@ test("active selector가 가리키는 release만 bundle에 포함하고 raw sour
   const files = await collectRelativeFiles(dataRoot);
   assert.equal(files.includes("runtime/active-manifest.json"), true);
   assert.equal(
+    files.some((file) => /(?:^|\/)(?:breeding-)?import-report\.json$/u.test(file)),
+    false,
+    "감사용 import report는 production runtime bundle에 포함하지 않습니다."
+  );
+  assert.equal(
     files.some((file) =>
       file.includes("_imports/")
       || file.includes("candidate")
@@ -103,6 +108,52 @@ test("active selector가 가리키는 release만 bundle에 포함하고 raw sour
   await mkdir(path.dirname(runtimeImages), { recursive: true });
   await cp(sourceImages, runtimeImages, { recursive: true });
   await smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot });
+
+  const mapManifest = JSON.parse(await readFile(
+    path.join(
+      dataRoot,
+      ...sourceLayout.releaseDirectory.split("/"),
+      "map-images-manifest.json"
+    ),
+    "utf8"
+  ));
+  const mainMap = mapManifest.entries.find((entry) => entry.id === "main");
+  assert.ok(mainMap);
+  const mapFile = path.join(runtimeImages, "maps", mainMap.outputFileName);
+  const originalMapBytes = await readFile(mapFile);
+  await writeFile(mapFile, Buffer.concat([originalMapBytes, Buffer.from([0])]));
+  await assert.rejects(
+    smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot }),
+    /content hash WebP|bytes/u
+  );
+  await writeFile(mapFile, originalMapBytes);
+
+  const extraSkillDirectory = path.join(runtimeImages, "skills");
+  await mkdir(extraSkillDirectory);
+  await writeFile(
+    path.join(extraSkillDirectory, mainMap.outputFileName),
+    originalMapBytes
+  );
+  await assert.rejects(
+    smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot }),
+    /manifest allowlist/u
+  );
+  await rm(extraSkillDirectory, { recursive: true });
+
+  const nonVersionedWorkDirectory = path.join(
+    path.dirname(runtimeImages),
+    "work"
+  );
+  await mkdir(nonVersionedWorkDirectory);
+  await writeFile(
+    path.join(nonVersionedWorkDirectory, mainMap.outputFileName),
+    originalMapBytes
+  );
+  await assert.rejects(
+    smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot }),
+    /manifest allowlist/u
+  );
+  await rm(nonVersionedWorkDirectory, { recursive: true });
 
   const rawArchive = path.join(
     dataRoot,

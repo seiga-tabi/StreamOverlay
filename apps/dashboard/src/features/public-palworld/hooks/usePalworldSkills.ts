@@ -22,6 +22,7 @@ export function usePalworldSkills(params: URLSearchParams, locale: PalworldLocal
       apiParams.set("limit", "24");
       return getPalworldSkills(apiParams, signal);
     },
+    paused: Boolean(params.get("pal") || params.get("item") || params.get("skill")),
     queryKey: `${locale}:${routeQuery}`,
   });
 

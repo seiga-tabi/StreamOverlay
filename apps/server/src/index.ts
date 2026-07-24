@@ -29,7 +29,8 @@ import { loadPalworldDataService, type PalworldDataService } from "./services/pa
 import { PalworldPaldexValidationError } from "./data/palworld-paldex-artifact.js";
 import {
   loadPalworldActiveRuntime,
-  PalworldActiveRuntimeError
+  PalworldActiveRuntimeError,
+  type PalworldActiveRuntime
 } from "./data/palworld-active-runtime.js";
 import {
   loadPalworldMapMarkerProvider,
@@ -44,7 +45,8 @@ import {
 import { PalworldServerClient } from "./services/palworld-server-client.js";
 import {
   PalworldServerConnectionStore,
-  PalworldServerConnectionStoreError
+  PalworldServerConnectionStoreError,
+  palworldServerConnectionStoreAvailabilityCode
 } from "./services/palworld-server-connection-store.js";
 import { PalworldServerMonitor } from "./services/palworld-server-monitor.js";
 import {
@@ -74,8 +76,11 @@ const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
 let palworldDataService: PalworldDataService | undefined;
 let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
 let palworldSpawnProvider: PalworldSpawnProvider | undefined;
+let palworldActiveRuntime: PalworldActiveRuntime | undefined;
 try {
+  palworldActiveRuntime = await loadPalworldActiveRuntime();
   palworldDataService = await loadPalworldDataService({
+    activeRuntime: palworldActiveRuntime,
     dashboardStaticRoot: appConfig.paths.dashboardStatic,
     onTranslationState(locale, state) {
       const entry = {
@@ -100,6 +105,18 @@ try {
       };
       if (state.status === "loaded") logger.event(entry);
       else logger.error(entry);
+    },
+    onCatalogState(state) {
+      const entry = {
+        type: "palworld_catalog.runtime_state",
+        release: state.release,
+        status: state.status,
+        ...(state.errorCode === undefined ? {} : { errorCode: state.errorCode }),
+        items: state.items,
+        skills: state.skills
+      };
+      if (state.status === "loaded") logger.event(entry);
+      else logger.error(entry);
     }
   });
   const meta = palworldDataService.meta();
@@ -115,9 +132,8 @@ try {
     fallbackPals: meta.gates.imageAssets.fallbackPals
   });
   try {
-    const activeRuntime = await loadPalworldActiveRuntime();
     palworldMapMarkerProvider = await loadPalworldMapMarkerProvider({
-      releaseRoot: activeRuntime.releaseRoot,
+      releaseRoot: palworldActiveRuntime.releaseRoot,
       dashboardStaticRoot: appConfig.paths.dashboardStatic,
       palworldDataService
     });
@@ -147,9 +163,8 @@ try {
     });
   }
   try {
-    const activeRuntime = await loadPalworldActiveRuntime();
     const candidateSpawnProvider = await loadPalworldSpawnProvider({
-      releaseRoot: activeRuntime.releaseRoot,
+      releaseRoot: palworldActiveRuntime.releaseRoot,
       dashboardStaticRoot: appConfig.paths.dashboardStatic,
       palworldDataService
     });
@@ -261,7 +276,7 @@ try {
       ? error.code
       : "initialization_failed";
   palworldServerUnavailableCode = error instanceof PalworldServerConnectionStoreError
-    ? "key_invalid"
+    ? palworldServerConnectionStoreAvailabilityCode(error)
     : palworldServerStatusAvailabilityCode(error);
   logger.error({
     type: "palworld_server.subsystem_unavailable",

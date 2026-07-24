@@ -110,7 +110,7 @@ export function PalworldStreamersPage({
             {visibleChannels.map((channel) => {
               const channelUrl = twitchChannelUrl(channel);
               return (
-                <Card as="article" className="palworld-streamer-card" key={channel.twitchUserId} padding="md" tabIndex={0}>
+                <Card as="article" className="palworld-streamer-card" key={channel.twitchUserId} padding="md">
                   <CardHeader>
                     <div className="palworld-streamer-identity">
                       <span className="palworld-streamer-avatar">

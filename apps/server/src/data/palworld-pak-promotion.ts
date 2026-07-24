@@ -9,8 +9,10 @@ import {
   readFile,
   realpath,
   rename,
-  rm
+  rm,
+  unlink
 } from "node:fs/promises";
+import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
 import {
   PALWORLD_ACTIVE_RUNTIME_FILE,
@@ -111,31 +113,57 @@ export async function activatePalworldRuntimeManifest(input: {
   manifest: unknown;
 }): Promise<PalworldActiveRuntimeManifest> {
   const dataRoot = await assertCanonicalDirectory(input.dataRoot, "dataRoot");
-  const manifest = assertPalworldActiveRuntimeManifest(input.manifest);
-  if (manifest.format === "operator_pak_v1") {
-    const releaseRoot = path.resolve(
-      dataRoot,
-      ...manifest.releaseDirectory.split("/")
+  const runtimeRoot = path.join(dataRoot, "runtime");
+  await mkdir(runtimeRoot, { recursive: true });
+  const lockPath = path.join(runtimeRoot, ".activation.lock");
+  let lockHandle: FileHandle;
+  try {
+    lockHandle = await open(
+      lockPath,
+      fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_WRONLY,
+      0o600
     );
-    if (!releaseRoot.startsWith(`${dataRoot}${path.sep}`)) {
-      fail("operator PAK release root가 data root 밖으로 벗어났습니다.");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      fail("다른 Palworld release 활성화 작업이 진행 중입니다.");
     }
-    const shadow = await loadPalworldPakShadowRuntimeFromStagingRoot({
-      stagingRoot: releaseRoot
-    });
-    finalizePalworldPakRuntimeForPublicActivation(shadow.manifest);
+    throw error;
   }
-  await validatePointerWithoutActivation({ dataRoot, manifest });
-  const activePath = path.join(dataRoot, "runtime", PALWORLD_ACTIVE_RUNTIME_FILE);
-  await writeAtomicFile(
-    activePath,
-    deterministicPalworldActiveRuntimeManifestJson(manifest)
-  );
-  const loaded = await loadPalworldActiveRuntime({
-    dataRoot,
-    activeManifestPath: activePath
-  });
-  return loaded.manifest;
+  try {
+    await lockHandle.writeFile(`${process.pid}\n`);
+    await lockHandle.sync();
+    const manifest = assertPalworldActiveRuntimeManifest(input.manifest);
+    if (manifest.format === "operator_pak_v1") {
+      const releaseRoot = path.resolve(
+        dataRoot,
+        ...manifest.releaseDirectory.split("/")
+      );
+      if (!releaseRoot.startsWith(`${dataRoot}${path.sep}`)) {
+        fail("operator PAK release root가 data root 밖으로 벗어났습니다.");
+      }
+      const shadow = await loadPalworldPakShadowRuntimeFromStagingRoot({
+        stagingRoot: releaseRoot
+      });
+      finalizePalworldPakRuntimeForPublicActivation(shadow.manifest);
+    }
+    await validatePointerWithoutActivation({ dataRoot, manifest });
+    const activePath = path.join(
+      runtimeRoot,
+      PALWORLD_ACTIVE_RUNTIME_FILE
+    );
+    await writeAtomicFile(
+      activePath,
+      deterministicPalworldActiveRuntimeManifestJson(manifest)
+    );
+    const loaded = await loadPalworldActiveRuntime({
+      dataRoot,
+      activeManifestPath: activePath
+    });
+    return loaded.manifest;
+  } finally {
+    await lockHandle.close();
+    await unlink(lockPath).catch(() => undefined);
+  }
 }
 
 export async function promotePalworldPakRuntime(input: {

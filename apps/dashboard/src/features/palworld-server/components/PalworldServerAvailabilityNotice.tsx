@@ -31,7 +31,13 @@ export function palworldServerAvailabilityCode(
 
 export function palworldServerAvailabilityTone(code: PalworldServerAvailabilityCode): StatusTone {
   if (code === "disabled") return "neutral";
-  if (code === "config_invalid" || code === "key_invalid") return "danger";
+  if (code === "config_invalid"
+    || code === "key_invalid"
+    || code === "key_permission_denied"
+    || code === "key_mismatch"
+    || code === "state_damaged") {
+    return "danger";
+  }
   return "warning";
 }
 
@@ -43,7 +49,11 @@ export function PalworldServerAvailabilityNotice({
   text: PalworldServerText;
 }) {
   const copy = text.availability[code];
-  const icon = code === "disabled" ? "Ⅱ" : code.endsWith("_invalid") ? "!" : "⚙";
+  const icon = code === "disabled"
+    ? "Ⅱ"
+    : palworldServerAvailabilityTone(code) === "danger"
+      ? "!"
+      : "⚙";
   return (
     <EmptyState
       className="palworld-server-availability-notice"

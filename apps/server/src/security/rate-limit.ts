@@ -16,6 +16,10 @@ export class MemoryRateLimiter {
     private readonly windowMs: number
   ) {}
 
+  get requestLimit(): number {
+    return this.limit;
+  }
+
   check(key: string, now = Date.now()): RateLimitResult {
     this.prune(now);
     const current = this.buckets.get(key);
@@ -45,6 +49,8 @@ export class MemoryRateLimiter {
 export const dashboardLoginLimiter = new MemoryRateLimiter(8, 60_000);
 export const dashboardApiLimiter = new MemoryRateLimiter(240, 60_000);
 export const publicLolApiLimiter = new MemoryRateLimiter(60, 60_000);
+export const publicPalworldApiLimiter = new MemoryRateLimiter(60, 60_000);
+export const publicPalworldListApiLimiter = new MemoryRateLimiter(180, 60_000);
 export const oauthLimiter = new MemoryRateLimiter(20, 60_000);
 export const inboundEmailLimiter = new MemoryRateLimiter(120, 60_000);
 export const websocketLimiter = new MemoryRateLimiter(60, 60_000);
@@ -54,6 +60,8 @@ export function resetSecurityRateLimiters(): void {
   dashboardLoginLimiter.reset();
   dashboardApiLimiter.reset();
   publicLolApiLimiter.reset();
+  publicPalworldApiLimiter.reset();
+  publicPalworldListApiLimiter.reset();
   oauthLimiter.reset();
   inboundEmailLimiter.reset();
   websocketLimiter.reset();

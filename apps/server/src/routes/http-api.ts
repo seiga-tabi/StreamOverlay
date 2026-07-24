@@ -118,7 +118,15 @@ import {
   type AuthPrincipal,
   type DashboardRole
 } from "../security/auth.js";
-import { dashboardApiLimiter, dashboardLoginLimiter, inboundEmailLimiter, oauthLimiter, publicLolApiLimiter } from "../security/rate-limit.js";
+import {
+  dashboardApiLimiter,
+  dashboardLoginLimiter,
+  inboundEmailLimiter,
+  oauthLimiter,
+  publicLolApiLimiter,
+  publicPalworldApiLimiter,
+  publicPalworldListApiLimiter
+} from "../security/rate-limit.js";
 import { isPublicDashboardAppRoute } from "../routing/public-dashboard-routes.js";
 import {
   buildLivenessResponse,
@@ -129,6 +137,7 @@ import {
 import { CommunityModerationService, CommunityModerationServiceError } from "../services/community-moderation-service.js";
 import {
   PALWORLD_PUBLIC_CACHE_CONTROL,
+  PalworldDomainUnavailableError,
   PalworldRecordNotFoundError,
   type PalworldDataService
 } from "../services/palworld-data.js";
@@ -214,12 +223,50 @@ const PALWORLD_DATA_UNAVAILABLE_RESPONSE = {
   message: "Palworld 데이터를 사용할 수 없습니다."
 } as const;
 
-function palworldCacheHeaders(metadata: { gameVersion: string; sourceRevision: string }): Record<string, string> {
+function palworldCacheHeaders(
+  metadata: { gameVersion: string; sourceRevision: string },
+  requestTarget: string
+): Record<string, string> {
+  const releaseTag = crypto
+    .createHash("sha256")
+    .update(metadata.gameVersion)
+    .update("\0")
+    .update(metadata.sourceRevision)
+    .update("\0")
+    .update(requestTarget)
+    .digest("hex")
+    .slice(0, 24);
   return {
     "Cache-Control": PALWORLD_PUBLIC_CACHE_CONTROL,
     "X-Palworld-Data-Version": metadata.gameVersion,
-    "X-Palworld-Data-Revision": metadata.sourceRevision
+    "X-Palworld-Data-Revision": metadata.sourceRevision,
+    ETag: `"palworld-${releaseTag}"`
   };
+}
+
+function palworldNoStoreHeaders(
+  headers: Record<string, string>
+): Record<string, string> {
+  const { ETag: _etag, ...rest } = headers;
+  return { ...rest, "Cache-Control": "no-store" };
+}
+
+function palworldRateLimitGroup(pathname: string): {
+  group: string;
+  list: boolean;
+} {
+  if (
+    pathname === "/api/palworld/meta"
+    || pathname === "/api/palworld/pals"
+    || pathname === "/api/palworld/items"
+    || pathname === "/api/palworld/skills"
+  ) {
+    return { group: "list", list: true };
+  }
+  if (pathname === "/api/palworld/search") return { group: "search", list: false };
+  if (pathname.startsWith("/api/palworld/breeding")) return { group: "breeding", list: false };
+  if (pathname.startsWith("/api/palworld/map/")) return { group: "map", list: false };
+  return { group: "detail", list: false };
 }
 
 type SkinOptionsResponse = {
@@ -743,6 +790,23 @@ function noStoreHeaders(): Record<string, string> {
 }
 
 function sendJson(req: IncomingMessage, res: ServerResponse, status: number, payload: unknown, headers: Record<string, string | string[]> = {}): void {
+  const etag = headers.ETag;
+  const ifNoneMatch = req.headers["if-none-match"];
+  if (
+    req.method === "GET"
+    && status === 200
+    && typeof etag === "string"
+    && typeof ifNoneMatch === "string"
+    && (ifNoneMatch === "*" || ifNoneMatch.split(",").map((value) => value.trim()).includes(etag))
+  ) {
+    res.writeHead(304, {
+      ...securityHeadersForRequest(req),
+      ...corsHeaders(req),
+      ...headers
+    });
+    res.end();
+    return;
+  }
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     ...securityHeadersForRequest(req),
@@ -1861,7 +1925,11 @@ function palworldServerInputErrorMessage(code: string): string {
     return "Palworld 서버 상태 운영 설정을 확인해야 합니다.";
   }
   if (code === "policy_missing") return "Palworld 서버 접속 허용 정책을 확인해야 합니다.";
-  if (code === "key_missing" || code === "key_invalid") {
+  if (code === "key_missing"
+    || code === "key_invalid"
+    || code === "key_permission_denied"
+    || code === "key_mismatch"
+    || code === "state_damaged") {
     return "Palworld 서버 자격 증명 보호 설정을 확인해야 합니다.";
   }
   if (code === "password_required") return "Palworld 서버 관리자 비밀번호가 필요합니다.";
@@ -5493,7 +5561,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/overlay", appConfig.paths.overlayStatic)) return;
 
       if (url.pathname.startsWith("/api/")) {
-        const rateLimitPath = url.pathname.startsWith("/api/palworld/") ? "/api/palworld" : url.pathname;
+        const palworldLimitGroup = url.pathname.startsWith("/api/palworld/")
+          ? palworldRateLimitGroup(url.pathname)
+          : undefined;
+        const rateLimitPath = palworldLimitGroup === undefined
+          ? url.pathname
+          : `/api/palworld/${palworldLimitGroup.group}`;
         const limitKey = `${ip}:${rateLimitPath}`;
         const limiter = url.pathname === "/api/inbound-email/cloudflare"
           ? inboundEmailLimiter
@@ -5501,11 +5574,24 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
             ? oauthLimiter
-            : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/palworld/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
+          : palworldLimitGroup?.list
+            ? publicPalworldListApiLimiter
+            : palworldLimitGroup
+              ? publicPalworldApiLimiter
+          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
-        if (!limited.ok) return sendJson(req, res, 429, { error: "rate limit exceeded" }, { "Retry-After": String(limited.retryAfterSeconds) });
+        if (!limited.ok) {
+          return sendJson(req, res, 429, { error: "rate limit exceeded" }, {
+            "Cache-Control": "no-store",
+            "Retry-After": String(limited.retryAfterSeconds),
+            "X-RateLimit-Limit": String(limiter.requestLimit),
+            "X-RateLimit-Reset": String(
+              Math.ceil(Date.now() / 1_000) + limited.retryAfterSeconds
+            )
+          });
+        }
       }
 
       const auth = authorizeHttpRequest(req, url.pathname, sessions);
@@ -5559,7 +5645,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return sendJson(req, res, 503, PALWORLD_DATA_UNAVAILABLE_RESPONSE, { "Cache-Control": "no-store" });
         }
         const activeMeta = palworldData.meta();
-        const cacheHeaders = palworldCacheHeaders(activeMeta.metadata);
+        const cacheHeaders = palworldCacheHeaders(
+          activeMeta.metadata,
+          `${url.pathname}${url.search}`
+        );
         if (url.pathname === "/api/palworld/meta") {
           return sendJson(req, res, 200, activeMeta, cacheHeaders);
         }
@@ -5578,7 +5667,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
           if (!validation.ok) {
             throw new TypeError(`Palworld 지도 marker 응답 검증에 실패했습니다. ${validation.error}`);
           }
-          return sendJson(req, res, 200, validation.data, cacheHeaders);
+          return sendJson(
+            req,
+            res,
+            200,
+            validation.data,
+            validation.data.state === "data_unavailable"
+              ? palworldNoStoreHeaders(cacheHeaders)
+              : cacheHeaders
+          );
         }
         if (url.pathname === "/api/palworld/map/spawns") {
           const query = parsePalworldPalSpawnQuery(url.searchParams);
@@ -5606,7 +5703,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             200,
             validation.data,
             validation.data.state === "data_unavailable"
-              ? { ...cacheHeaders, "Cache-Control": "no-store" }
+              ? palworldNoStoreHeaders(cacheHeaders)
               : cacheHeaders
           );
         }
@@ -5654,12 +5751,28 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (url.pathname === "/api/palworld/breeding/parents") {
           const query = parsePalworldBreedingParentsQuery(url.searchParams);
           const response = palworldData.breedingParents(query);
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(
+            req,
+            res,
+            200,
+            response,
+            response.state === "data_unavailable"
+              ? palworldNoStoreHeaders(cacheHeaders)
+              : cacheHeaders
+          );
         }
         if (url.pathname === "/api/palworld/breeding") {
           const query = parsePalworldBreedingQuery(url.searchParams);
           const response = palworldData.breeding(query);
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(
+            req,
+            res,
+            200,
+            response,
+            response.state === "data_unavailable"
+              ? palworldNoStoreHeaders(cacheHeaders)
+              : cacheHeaders
+          );
         }
       }
       if (req.method === "GET" && url.pathname === "/api/dashboard/auth/status") {
@@ -6749,6 +6862,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (error instanceof PalworldRecordNotFoundError) {
         return sendJson(req, res, 404, { error: error.message, code: error.code });
+      }
+      if (error instanceof PalworldDomainUnavailableError) {
+        return sendJson(req, res, 503, {
+          ...PALWORLD_DATA_UNAVAILABLE_RESPONSE,
+          domain: error.domain
+        }, { "Cache-Control": "no-store" });
       }
       if (error instanceof CommunityModerationServiceError) {
         return sendJson(req, res, error.status, { error: error.publicMessage });

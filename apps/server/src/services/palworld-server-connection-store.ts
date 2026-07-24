@@ -16,6 +16,10 @@ const MAX_CONNECTION_RECORDS = 10_000;
 const PALWORLD_CONNECTION_FILE_NAME = "palworld-server-connections.json.enc";
 
 export type PalworldServerConnectionStoreErrorCode =
+  | "key_invalid"
+  | "key_mismatch"
+  | "storage_permission_denied"
+  | "state_damaged"
   | "storage_invalid"
   | "storage_write_failed";
 
@@ -23,10 +27,31 @@ export class PalworldServerConnectionStoreError extends Error {
   readonly name = "PalworldServerConnectionStoreError";
 
   constructor(public readonly code: PalworldServerConnectionStoreErrorCode) {
-    super(code === "storage_invalid"
-      ? "Palworld 서버 연결 저장소를 복호화하거나 검증할 수 없습니다. (storage_invalid)"
-      : "Palworld 서버 연결 저장소를 저장할 수 없습니다. (storage_write_failed)");
+    const messages: Record<PalworldServerConnectionStoreErrorCode, string> = {
+      key_invalid: "Palworld 서버 연결 암호화 키 형식이 올바르지 않습니다. (key_invalid)",
+      key_mismatch: "Palworld 서버 연결 저장소 인증에 실패했습니다. (key_mismatch)",
+      storage_permission_denied: "Palworld 서버 연결 저장소 권한을 확인해야 합니다. (storage_permission_denied)",
+      state_damaged: "Palworld 서버 연결 저장소가 손상되었습니다. (state_damaged)",
+      storage_invalid: "Palworld 서버 연결 저장소 위치를 검증할 수 없습니다. (storage_invalid)",
+      storage_write_failed: "Palworld 서버 연결 저장소를 저장할 수 없습니다. (storage_write_failed)"
+    };
+    super(messages[code]);
   }
+}
+
+export type PalworldServerConnectionStoreAvailabilityCode =
+  | "key_invalid"
+  | "key_permission_denied"
+  | "key_mismatch"
+  | "state_damaged";
+
+export function palworldServerConnectionStoreAvailabilityCode(
+  error: PalworldServerConnectionStoreError
+): PalworldServerConnectionStoreAvailabilityCode {
+  if (error.code === "key_invalid") return "key_invalid";
+  if (error.code === "storage_permission_denied") return "key_permission_denied";
+  if (error.code === "key_mismatch") return "key_mismatch";
+  return "state_damaged";
 }
 
 type EncryptedConnectionFile = {
@@ -69,7 +94,7 @@ function decodeEncryptionKey(value: string): Buffer {
       : undefined;
   if (!key || key.byteLength !== 32 || (!/^[a-f0-9]{64}$/iu.test(value) && key.toString("base64") !== value)) {
     key?.fill(0);
-    throw new Error("Palworld 서버 연결 암호화 키 형식이 올바르지 않습니다.");
+    throw new PalworldServerConnectionStoreError("key_invalid");
   }
   return key;
 }
@@ -125,6 +150,11 @@ function errnoCode(error: unknown): string | undefined {
   return (error as NodeJS.ErrnoException | undefined)?.code;
 }
 
+function isPermissionError(error: unknown): boolean {
+  const code = errnoCode(error);
+  return code === "EACCES" || code === "EPERM";
+}
+
 function assertSafeStateDirectoryPath(directory: string): void {
   const resolved = path.resolve(directory);
   const root = path.parse(resolved).root;
@@ -141,6 +171,9 @@ function assertSafeStateDirectoryPath(directory: string): void {
       stat = fs.lstatSync(current);
     } catch (error) {
       if (errnoCode(error) === "ENOENT") return;
+      if (isPermissionError(error)) {
+        throw new PalworldServerConnectionStoreError("storage_permission_denied");
+      }
       throw new PalworldServerConnectionStoreError("storage_invalid");
     }
     if (stat.isSymbolicLink() || !stat.isDirectory()) {
@@ -212,7 +245,10 @@ export class PalworldServerConnectionStore {
     if (create) {
       try {
         fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
-      } catch {
+      } catch (error) {
+        if (isPermissionError(error)) {
+          throw new PalworldServerConnectionStoreError("storage_permission_denied");
+        }
         throw new PalworldServerConnectionStoreError("storage_invalid");
       }
       assertSafeStateDirectoryPath(directory);
@@ -226,6 +262,9 @@ export class PalworldServerConnectionStore {
       );
     } catch (error) {
       if (!create && errnoCode(error) === "ENOENT") return false;
+      if (isPermissionError(error)) {
+        throw new PalworldServerConnectionStoreError("storage_permission_denied");
+      }
       throw new PalworldServerConnectionStoreError("storage_invalid");
     }
     try {
@@ -235,7 +274,14 @@ export class PalworldServerConnectionStore {
       if (currentUid !== undefined && currentUid !== 0 && stat.uid !== currentUid) {
         throw new PalworldServerConnectionStoreError("storage_invalid");
       }
-      fs.fchmodSync(descriptor, 0o700);
+      try {
+        fs.fchmodSync(descriptor, 0o700);
+      } catch (error) {
+        if (isPermissionError(error)) {
+          throw new PalworldServerConnectionStoreError("storage_permission_denied");
+        }
+        throw new PalworldServerConnectionStoreError("storage_invalid");
+      }
       return true;
     } finally {
       fs.closeSync(descriptor);
@@ -249,6 +295,9 @@ export class PalworldServerConnectionStore {
       descriptor = fs.openSync(this.filePath, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
     } catch (error) {
       if (errnoCode(error) === "ENOENT") return;
+      if (isPermissionError(error)) {
+        throw new PalworldServerConnectionStoreError("storage_permission_denied");
+      }
       throw new PalworldServerConnectionStoreError("storage_invalid");
     }
     try {
@@ -256,8 +305,23 @@ export class PalworldServerConnectionStore {
       if (!fileStat.isFile() || fileStat.size > MAX_ENCRYPTED_FILE_BYTES) {
         throw new PalworldServerConnectionStoreError("storage_invalid");
       }
-      fs.fchmodSync(descriptor, 0o600);
-      const serialized = fs.readFileSync(descriptor, "utf8");
+      try {
+        fs.fchmodSync(descriptor, 0o600);
+      } catch (error) {
+        if (isPermissionError(error)) {
+          throw new PalworldServerConnectionStoreError("storage_permission_denied");
+        }
+        throw new PalworldServerConnectionStoreError("state_damaged");
+      }
+      let serialized: string;
+      try {
+        serialized = fs.readFileSync(descriptor, "utf8");
+      } catch (error) {
+        if (isPermissionError(error)) {
+          throw new PalworldServerConnectionStoreError("storage_permission_denied");
+        }
+        throw new PalworldServerConnectionStoreError("state_damaged");
+      }
       if (Buffer.byteLength(serialized, "utf8") > MAX_ENCRYPTED_FILE_BYTES) {
         throw new PalworldServerConnectionStoreError("storage_invalid");
       }
@@ -273,10 +337,13 @@ export class PalworldServerConnectionStore {
         const decipher = crypto.createDecipheriv(PALWORLD_CONNECTION_ALGORITHM, this.encryptionKey, iv);
         decipher.setAAD(PALWORLD_CONNECTION_AAD);
         decipher.setAuthTag(authTag);
-        plaintext = Buffer.concat([
-          decipher.update(ciphertext),
-          decipher.final()
-        ]);
+        let decrypted: Buffer;
+        try {
+          decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+        } catch {
+          throw new PalworldServerConnectionStoreError("key_mismatch");
+        }
+        plaintext = decrypted;
         if (plaintext.byteLength > MAX_PLAINTEXT_BYTES) throw new Error("payload too large");
         const payload = JSON.parse(plaintext.toString("utf8")) as unknown;
         if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("payload invalid");
@@ -303,7 +370,7 @@ export class PalworldServerConnectionStore {
       }
     } catch (error) {
       if (error instanceof PalworldServerConnectionStoreError) throw error;
-      throw new PalworldServerConnectionStoreError("storage_invalid");
+      throw new PalworldServerConnectionStoreError("state_damaged");
     } finally {
       fs.closeSync(descriptor);
     }

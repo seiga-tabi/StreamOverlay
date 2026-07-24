@@ -80,13 +80,17 @@ export function PalworldBreedingPage({
   const [reverseRevision, setReverseRevision] = useState(0);
   const [reverseLoadMoreError, setReverseLoadMoreError] = useState<unknown>(null);
   const [reverseLoadMoreLoading, setReverseLoadMoreLoading] = useState(false);
+  const [reverseRetryBlocked, setReverseRetryBlocked] = useState(false);
   const paramsKeyRef = useRef(paramsKey);
   const directRequestIdRef = useRef(0);
   const reverseRequestIdRef = useRef(0);
   const referenceRequestIdRef = useRef(0);
   const reverseLoadMoreControllerRef = useRef<AbortController | null>(null);
   const reverseLoadMoreInFlightRef = useRef(false);
+  const reverseRetryBlockedRef = useRef(false);
+  const reverseRetryTimerRef = useRef<number | null>(null);
   const text = palworldI18n[locale];
+  const detailModalOpen = Boolean(params.get("pal") || params.get("item") || params.get("skill"));
   paramsKeyRef.current = paramsKey;
 
   const navigate = useCallback((next: PalworldBreedingQueryState, replace = false) => {
@@ -105,6 +109,8 @@ export function PalworldBreedingPage({
       reverseLoadMoreInFlightRef.current = false;
       setReverseLoadMoreError(null);
       setReverseLoadMoreLoading(false);
+      reverseRetryBlockedRef.current = false;
+      setReverseRetryBlocked(false);
       setGenderExpanded(false);
       return;
     }
@@ -117,6 +123,8 @@ export function PalworldBreedingPage({
       reverseLoadMoreInFlightRef.current = false;
       setReverseLoadMoreError(null);
       setReverseLoadMoreLoading(false);
+      reverseRetryBlockedRef.current = false;
+      setReverseRetryBlocked(false);
     } else {
       setTarget((current) => current?.id === query.child ? current : null);
       setParentA(null);
@@ -222,6 +230,8 @@ export function PalworldBreedingPage({
     reverseLoadMoreInFlightRef.current = false;
     setReverseLoadMoreError(null);
     setReverseLoadMoreLoading(false);
+    reverseRetryBlockedRef.current = false;
+    setReverseRetryBlocked(false);
     setReverse({ status: "loading", data: null, error: null });
     void getPalworldBreedingParents(query.child, query.page, 12, controller.signal, query.type ?? "all")
       .then((response) => {
@@ -257,6 +267,18 @@ export function PalworldBreedingPage({
       reverseLoadMoreControllerRef.current?.abort();
     };
   }, [navigate, parsedQuery.ok, query.child, query.mode, query.page, query.type, reverseRevision]);
+
+  useEffect(() => {
+    if (!detailModalOpen) return;
+    reverseLoadMoreControllerRef.current?.abort();
+    reverseLoadMoreControllerRef.current = null;
+    reverseLoadMoreInFlightRef.current = false;
+    setReverseLoadMoreLoading(false);
+  }, [detailModalOpen]);
+
+  useEffect(() => () => {
+    if (reverseRetryTimerRef.current !== null) window.clearTimeout(reverseRetryTimerRef.current);
+  }, []);
 
   useEffect(() => {
     if (
@@ -337,6 +359,8 @@ export function PalworldBreedingPage({
       || !current
       || !current.pagination.hasNextPage
       || reverseLoadMoreInFlightRef.current
+      || reverseRetryBlockedRef.current
+      || detailModalOpen
       || query.mode !== "child"
       || !query.child
     ) {
@@ -393,6 +417,17 @@ export function PalworldBreedingPage({
       if (error instanceof DOMException && error.name === "AbortError") return;
       if (controller.signal.aborted || reverseRequestIdRef.current !== requestId) return;
       setReverseLoadMoreError(error);
+      if (error instanceof PalworldApiError && error.status === 429) {
+        const delay = Math.min(60_000, Math.max(1_000, (error.retryAfterSeconds ?? 5) * 1_000));
+        reverseRetryBlockedRef.current = true;
+        setReverseRetryBlocked(true);
+        if (reverseRetryTimerRef.current !== null) window.clearTimeout(reverseRetryTimerRef.current);
+        reverseRetryTimerRef.current = window.setTimeout(() => {
+          reverseRetryBlockedRef.current = false;
+          setReverseRetryBlocked(false);
+          reverseRetryTimerRef.current = null;
+        }, delay);
+      }
     } finally {
       if (reverseRequestIdRef.current === requestId && !controller.signal.aborted) {
         reverseLoadMoreInFlightRef.current = false;
@@ -548,7 +583,8 @@ export function PalworldBreedingPage({
             locale={locale}
             onLoadMore={() => { void loadMoreReversePairs(); }}
             onRetry={() => { void loadMoreReversePairs(); }}
-            paused={Boolean(params.get("pal"))}
+            paused={detailModalOpen}
+            retryBlocked={reverseRetryBlocked}
             total={reverse.data.pagination.total}
           /> : null}
         </section>

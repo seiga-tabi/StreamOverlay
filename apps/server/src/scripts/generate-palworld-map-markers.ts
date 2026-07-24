@@ -131,6 +131,11 @@ try {
   }
 
   if (args.activate) {
+    if (result.artifact.activation !== "active") {
+      throw new Error(
+        "source gameVersion과 Steam build ID가 검증되지 않은 marker candidate는 활성화할 수 없습니다."
+      );
+    }
     await writeFileAtomic(
       path.join(args.releaseRoot, PALWORLD_MAP_MARKER_ARTIFACT_FILE),
       firstArtifactText

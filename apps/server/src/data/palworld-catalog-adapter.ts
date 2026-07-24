@@ -296,7 +296,8 @@ function translationCoverageForLocale(
   pals: PalworldPalDetail[],
   items: PalworldItemDetail[],
   skills: PalworldSkillDetail[],
-  staleSourceHash: boolean
+  staleSourceHash: boolean,
+  artifactTranslated: number
 ): PalworldTranslationDomainCoverage {
   const palDescriptionSources = pals.filter((pal) => pal.descriptionEn !== undefined);
   const itemDescriptionSources = items.filter((item) => item.descriptionEn !== undefined);
@@ -338,6 +339,8 @@ function translationCoverageForLocale(
       skillPassiveAbilitySources.filter((skill) => isTranslated(skill.translation?.passiveAbility?.[locale])).length,
       skillPassiveAbilitySources.length
     ),
+    artifactTranslated,
+    publicUsable: displayStatuses.filter((status) => isTranslated(status)).length,
     sourceProvided: displayStatuses.filter((status) => status === "source_provided").length,
     humanReviewed: displayStatuses.filter((status) => status === "human_reviewed").length,
     machineAssisted: displayStatuses.filter((status) => status === "machine_assisted").length,
@@ -355,6 +358,13 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
   const translationIndex = createTranslationRecordIndex(input.translations?.snapshots ?? {});
   const metadata = {
     gameVersion: basePaldex.metadata.gameVersion,
+    ...(basePaldex.metadata.release === undefined
+      || basePaldex.metadata.steamBuildId === undefined
+      ? {}
+      : {
+          release: basePaldex.metadata.release,
+          steamBuildId: basePaldex.metadata.steamBuildId
+        }),
     sourceName: `${basePaldex.metadata.sourceName} + ${catalog.metadata.sourceName}`,
     sourceUrl: basePaldex.metadata.sourceUrl,
     sourceRevision: `${basePaldex.metadata.sourceRevision}+catalog@${catalog.metadata.sourceRevision}`,
@@ -583,7 +593,8 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
           item.descriptionEn !== undefined
         )
       },
-      metadata: { ...metadata }
+      metadata: { ...metadata },
+      domainMetadata: { ...catalogMetadata }
     };
   });
 
@@ -604,7 +615,8 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       ...catalogSkill(skill, translationIndex, unlockLevels.length === 0 ? undefined : Math.min(...unlockLevels)),
       relatedPalCount: relatedPals.length,
       relatedPals,
-      metadata: { ...metadata }
+      metadata: { ...metadata },
+      domainMetadata: { ...catalogMetadata }
     };
   });
 
@@ -687,14 +699,22 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
         pals,
         items,
         skills,
-        input.translations?.staleSourceHash.ko ?? false
+        input.translations?.staleSourceHash.ko ?? false,
+        input.translations?.snapshots.ko?.records.reduce(
+          (sum, record) => sum + Object.keys(record.fields).length,
+          0
+        ) ?? 0
       ),
       ja: translationCoverageForLocale(
         "ja",
         pals,
         items,
         skills,
-        input.translations?.staleSourceHash.ja ?? false
+        input.translations?.staleSourceHash.ja ?? false,
+        input.translations?.snapshots.ja?.records.reduce(
+          (sum, record) => sum + Object.keys(record.fields).length,
+          0
+        ) ?? 0
       )
     }
   };
@@ -707,7 +727,8 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     items: {
       status: localizedItemCount === items.length ? "ready" : "incomplete",
       recordCount: items.length,
-      metadata: { ...catalogMetadata }
+      metadata: { ...metadata },
+      domainMetadata: { ...catalogMetadata }
     },
     breeding: {
       status: "incomplete",
@@ -717,7 +738,8 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     skills: {
       status: "incomplete",
       recordCount: skills.length,
-      metadata: { ...catalogMetadata }
+      metadata: { ...metadata },
+      domainMetadata: { ...catalogMetadata }
     }
   };
   return deepFreeze({ snapshot, domains, coverage });

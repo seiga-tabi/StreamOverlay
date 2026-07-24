@@ -15,11 +15,11 @@ const {
 } = await import("@streamops/shared");
 const palworldDataService = await loadPalworldDataService();
 
-function createRequest(method, url) {
+function createRequest(method, url, headers = {}) {
   return {
     method,
     url,
-    headers: {},
+    headers,
     socket: { remoteAddress: "127.0.0.1" },
     async *[Symbol.asyncIterator]() {}
   };
@@ -40,18 +40,18 @@ function createResponse() {
   };
 }
 
-function createHandler() {
+function createHandler(service = palworldDataService) {
   return createHttpHandler({
     store: {},
     twitchAuth: {},
     actions: { async dispatchOne() {} },
-    palworldDataService
+    palworldDataService: service
   });
 }
 
-async function request(handler, url, method = "GET") {
+async function request(handler, url, method = "GET", headers = {}) {
   const res = createResponse();
-  await handler(createRequest(method, url), res);
+  await handler(createRequest(method, url, headers), res);
   return { res, body: res.body ? JSON.parse(res.body) : undefined };
 }
 
@@ -72,25 +72,121 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.match(res.headers["Cache-Control"], /^public,/);
   assert.equal(res.headers["X-Palworld-Data-Version"], "1.0.1");
   assert.equal(res.headers["X-Palworld-Data-Revision"], body.metadata.sourceRevision);
+  assert.equal(body.metadata.release, "1.0.1");
+  assert.equal(body.metadata.steamBuildId, "24181105");
   assert.equal(body.counts.pals, 287);
   assert.equal(body.counts.items, 1_847);
   assert.equal(body.counts.skills, 566);
   assert.equal(body.domains.pals.status, "ready");
   assert.equal(body.domains.items.status, "incomplete");
-  assert.equal(body.domains.items.metadata.gameVersion, "1.0.1.100619");
-  assert.match(body.domains.items.metadata.sourceChecksum, /^[a-f0-9]{64}$/u);
+  assert.equal(body.domains.items.metadata.gameVersion, "1.0.1");
+  assert.equal(body.domains.items.metadata.sourceRevision, body.metadata.sourceRevision);
+  assert.equal(body.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
+  assert.match(body.domains.items.domainMetadata.sourceChecksum, /^[a-f0-9]{64}$/u);
   assert.equal(body.counts.breedingPairs, 41_329);
   assert.equal(body.domains.breeding.status, "incomplete");
   assert.equal(body.domains.breeding.metadata.gameVersion, "1.0.1");
   assert.equal(body.domains.skills.status, "incomplete");
-  assert.equal(body.domains.skills.metadata.gameVersion, "1.0.1.100619");
-  assert.equal(body.domains.skills.metadata.sourceRevision, body.domains.items.metadata.sourceRevision);
+  assert.equal(body.domains.skills.metadata.gameVersion, "1.0.1");
+  assert.equal(body.domains.skills.metadata.sourceRevision, body.metadata.sourceRevision);
+  assert.equal(body.domains.skills.domainMetadata.gameVersion, "1.0.1.100619");
+  assert.equal(body.domains.skills.domainMetadata.sourceRevision, body.domains.items.domainMetadata.sourceRevision);
   assert.deepEqual(body.coverage.palDetails, { available: 270, missing: 17, total: 287 });
   assert.deepEqual(body.coverage.itemImages, { available: 1_762, missing: 85, total: 1_847 });
   assert.deepEqual(body.coverage.skillDetails, { available: 564, missing: 2, total: 566 });
   assert.deepEqual(body.coverage.elementImages, { available: 9, missing: 0, total: 9 });
   assert.equal(body.gates.imageAssets.readyImages, 272);
   assert.equal(body.gates.imageAssets.fallbackPals, 15);
+});
+
+test("모든 Palworld 공개 endpoint의 header와 최상위 release identity가 일치한다", async () => {
+  const handler = createHandler();
+  const paths = [
+    "/api/palworld/meta",
+    "/api/palworld/search?q=anubis",
+    "/api/palworld/pals?limit=1",
+    "/api/palworld/pals/anubis",
+    "/api/palworld/items?limit=1",
+    "/api/palworld/items/pal-sphere",
+    "/api/palworld/skills?limit=1",
+    "/api/palworld/skills/active-absolute-frost-8b7feb098a",
+    "/api/palworld/breeding?parentA=lamball&parentB=cattiva",
+    "/api/palworld/breeding/parents?child=anubis&limit=1",
+    "/api/palworld/map/markers?world=main",
+    "/api/palworld/map/spawns?world=main&pal=anubis"
+  ];
+  for (const pathname of paths) {
+    const response = await request(handler, pathname);
+    assert.equal(response.res.statusCode, 200, pathname);
+    assert.equal(
+      response.res.headers["X-Palworld-Data-Version"],
+      response.body.metadata.gameVersion,
+      pathname
+    );
+    assert.equal(
+      response.res.headers["X-Palworld-Data-Revision"],
+      response.body.metadata.sourceRevision,
+      pathname
+    );
+    assert.equal(response.body.metadata.release, "1.0.1", pathname);
+    assert.equal(response.body.metadata.steamBuildId, "24181105", pathname);
+  }
+});
+
+test("Palworld JSON ETag는 같은 active release의 조건부 요청을 304로 처리한다", async () => {
+  const handler = createHandler();
+  const first = await request(handler, "/api/palworld/meta");
+  assert.equal(first.res.statusCode, 200);
+  assert.match(first.res.headers.ETag, /^"palworld-[a-f0-9]{24}"$/u);
+  const second = await request(
+    handler,
+    "/api/palworld/meta",
+    "GET",
+    { "if-none-match": first.res.headers.ETag }
+  );
+  assert.equal(second.res.statusCode, 304);
+  assert.equal(second.res.body, "");
+  assert.equal(second.body, undefined);
+
+  const differentResource = await request(
+    handler,
+    "/api/palworld/pals?limit=1",
+    "GET",
+    { "if-none-match": first.res.headers.ETag }
+  );
+  assert.equal(differentResource.res.statusCode, 200);
+  assert.notEqual(differentResource.res.headers.ETag, first.res.headers.ETag);
+});
+
+test("catalog 손상은 Pal을 유지하고 Item·Skill만 no-store 503으로 격리한다", async () => {
+  const service = await loadPalworldDataService({
+    catalogRoot: `${process.cwd()}/__missing-palworld-catalog-fixture__`
+  });
+  const handler = createHandler(service);
+  const meta = await request(handler, "/api/palworld/meta");
+  const pal = await request(handler, "/api/palworld/pals/anubis");
+  const search = await request(handler, "/api/palworld/search?q=anubis");
+  assert.equal(meta.res.statusCode, 200);
+  assert.equal(meta.body.domains.items.status, "unavailable");
+  assert.equal(meta.body.domains.skills.status, "unavailable");
+  assert.equal(meta.body.counts.items, 0);
+  assert.equal(meta.body.counts.skills, 0);
+  assert.equal(pal.res.statusCode, 200);
+  assert.equal(search.res.statusCode, 200);
+  assert.equal(search.body.pals[0].id, "anubis");
+  assert.deepEqual(search.body.items, []);
+  for (const pathname of [
+    "/api/palworld/items",
+    "/api/palworld/items/pal-sphere",
+    "/api/palworld/skills",
+    "/api/palworld/skills/active-absolute-frost-8b7feb098a"
+  ]) {
+    const unavailable = await request(handler, pathname);
+    assert.equal(unavailable.res.statusCode, 503, pathname);
+    assert.equal(unavailable.res.headers["Cache-Control"], "no-store", pathname);
+    assert.equal(unavailable.body.error, "PALWORLD_DATA_UNAVAILABLE", pathname);
+    assert.equal(JSON.stringify(unavailable.body).includes("sample-baseline"), false, pathname);
+  }
 });
 
 test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 반환한다", async () => {
@@ -112,12 +208,25 @@ test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 �
   assert.equal(japanese.body.domains.pals.status, "ready");
   assert.equal(japanese.body.domains.pals.metadata.gameVersion, "1.0.1");
   assert.equal(japanese.body.domains.items.status, "incomplete");
-  assert.equal(japanese.body.domains.items.metadata.gameVersion, "1.0.1.100619");
+  assert.equal(japanese.body.domains.items.metadata.gameVersion, "1.0.1");
+  assert.equal(japanese.body.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
 
   const limited = await request(handler, "/api/palworld/search?q=a&limit=1");
   assert.equal(limited.body.pals.length <= 1, true);
   assert.equal(limited.body.items.length <= 1, true);
   assert.equal(limited.body.total > limited.body.pals.length + limited.body.items.length, true);
+  assert.deepEqual(limited.body.domainResults, {
+    pals: {
+      total: limited.body.domainResults.pals.total,
+      returned: limited.body.pals.length,
+      hasMore: limited.body.pals.length < limited.body.domainResults.pals.total
+    },
+    items: {
+      total: limited.body.domainResults.items.total,
+      returned: limited.body.items.length,
+      hasMore: limited.body.items.length < limited.body.domainResults.items.total
+    }
+  });
 });
 
 test("Pal과 아이템 목록 API는 filter와 pagination을 적용한다", async () => {
@@ -155,8 +264,10 @@ test("Pal과 아이템 목록 API는 filter와 pagination을 적용한다", asyn
   assert.equal(zeroRarityItems.body.items.every((item) => item.rarity === 0), true);
   assert.deepEqual(palInternalId.body.items.map((pal) => pal.id), ["lamball"]);
   assert.equal(itemInternalId.body.items.some((item) => item.id === "pal-sphere"), true);
-  assert.equal(items.body.metadata.gameVersion, "1.0.1.100619");
-  assert.equal(items.res.headers["X-Palworld-Data-Version"], "1.0.1");
+  assert.equal(items.body.metadata.gameVersion, "1.0.1");
+  assert.equal(items.body.domainMetadata.gameVersion, "1.0.1.100619");
+  assert.equal(items.res.headers["X-Palworld-Data-Version"], items.body.metadata.gameVersion);
+  assert.equal(items.res.headers["X-Palworld-Data-Revision"], items.body.metadata.sourceRevision);
 });
 
 test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드로 조회한다", async () => {
@@ -350,4 +461,19 @@ test("펠월드 API rate limit은 상세 ID를 바꿔도 하나의 공개 bucket
   assert.equal(last.res.statusCode, 429);
   assert.equal(last.body.error, "rate limit exceeded");
   assert.equal(last.res.headers["Retry-After"], "60");
+  assert.equal(last.res.headers["Cache-Control"], "no-store");
+  assert.equal(last.res.headers["X-RateLimit-Limit"], "60");
+  assert.match(last.res.headers["X-RateLimit-Reset"], /^[1-9][0-9]+$/u);
+});
+
+test("무한 목록 bucket은 상세·검색 bucket과 경쟁하지 않는다", async () => {
+  const handler = createHandler();
+  for (let index = 0; index < 60; index += 1) {
+    const list = await request(handler, `/api/palworld/items?page=${(index % 10) + 1}&limit=1`);
+    assert.equal(list.res.statusCode, 200);
+  }
+  const detail = await request(handler, "/api/palworld/items/pal-sphere");
+  const search = await request(handler, "/api/palworld/search?q=anubis");
+  assert.equal(detail.res.statusCode, 200);
+  assert.equal(search.res.statusCode, 200);
 });

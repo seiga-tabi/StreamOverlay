@@ -13,6 +13,8 @@ const artifact = JSON.parse(readFileSync(new URL("paldex.json", releaseRoot), "u
 test("기본 Pal artifact adapter는 287종의 canonical 수치와 internal ID를 분리한다", () => {
   const adapted = adaptPalworldPaldexArtifact(artifact);
   assert.equal(adapted.metadata.gameVersion, "1.0.1");
+  assert.equal(adapted.metadata.release, artifact.release);
+  assert.equal(adapted.metadata.steamBuildId, artifact.steamBuildId);
   assert.equal(adapted.pals.length, 287);
   assert.equal(adapted.sourceInternalIds.lamball, "SheepBall");
 

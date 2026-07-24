@@ -1356,16 +1356,11 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   const elementIcon = groundFilter.locator(".palworld-pal-filter-element-icon");
   const workIcon = miningFilter.locator(".palworld-pal-filter-work-icon");
   await expect(elementIcon).toBeVisible();
-  await expect(workIcon).toBeVisible();
-  const [elementIconBox, workIconBox] = await Promise.all([
-    elementIcon.boundingBox(),
-    workIcon.boundingBox(),
-  ]);
+  // release manifest에 결합되지 않은 candidate 작업 아이콘은 공개하지 않습니다.
+  await expect(workIcon).toHaveCount(0);
+  const elementIconBox = await elementIcon.boundingBox();
   expect(elementIconBox).not.toBeNull();
-  expect(workIconBox).not.toBeNull();
-  if (elementIconBox && workIconBox) {
-    expect(elementIconBox.width).toBe(workIconBox.width);
-    expect(elementIconBox.height).toBe(workIconBox.height);
+  if (elementIconBox) {
     expect(elementIconBox.width).toBeGreaterThanOrEqual(24);
   }
   if (mobileFilters) await page.keyboard.press("Escape");
@@ -1378,12 +1373,16 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(anubisCard.locator(".palworld-card-work-list [role='listitem']")).toHaveCount(2);
   await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
   await expect(anubisCard.locator('[data-work-type="mining"]')).toContainText("Lv.3");
-  await expect(anubisCard.locator('[data-work-type="handiwork"]')).toHaveAttribute("title", "수작업: Lv.4");
-  await expect(anubisCard.locator('[data-work-type="mining"]')).toHaveAttribute("title", "채굴: Lv.3");
+  await expect(anubisCard.locator('[data-work-type="handiwork"]')).not.toHaveAttribute("title");
+  await expect(anubisCard.locator('[data-work-type="mining"]')).not.toHaveAttribute("title");
+  await expect(anubisCard.locator('[data-work-type="handiwork"]')).toHaveAttribute("aria-describedby", /.+/u);
+  await expect(anubisCard.locator('[data-work-type="mining"]')).toHaveAttribute("aria-describedby", /.+/u);
+  await expect(anubisCard.locator('[data-work-type="handiwork"] .palworld-work-suitability-tooltip')).toHaveText("수작업: Lv.4");
+  await expect(anubisCard.locator('[data-work-type="mining"] .palworld-work-suitability-tooltip')).toHaveText("채굴: Lv.3");
   await expect(anubisCard.locator('[data-work-type="handiwork"] .palworld-work-suitability-label')).toHaveClass(/yoro-u-sr-only/u);
   await expect(anubisCard.locator('[data-work-type="mining"] .palworld-work-suitability-label')).toHaveClass(/yoro-u-sr-only/u);
-  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(2);
-  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image").first()).toHaveAttribute("width", "64");
+  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(0);
+  await expect(anubisCard.locator(".palworld-work-suitability-icon:not(.is-source-image)")).toHaveCount(2);
   const cardBox = await anubisCard.boundingBox();
   const cardMainBox = await anubisCard.locator(".palworld-pal-card-main").boundingBox();
   const cardImageFrameBox = await anubisCard.locator(".palworld-pal-card-image-frame").boundingBox();
@@ -1405,7 +1404,7 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
     expect(cardImageFrameBox.width).toBeLessThanOrEqual(120);
   }
 
-  await anubisCard.click();
+  await anubisCard.getByRole("button", { name: "Pal 상세 보기" }).click();
   await expect(page).toHaveURL(/pal=anubis/u);
   await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -1731,6 +1730,50 @@ test("Pal·아이템·스킬 목록은 스크롤 시 다음 페이지를 누적�
   await expect(page.getByTestId("palworld-auto-load")).toContainText("모든 결과를 불러왔습니다.");
   expect(new URL(page.url()).searchParams.has("page")).toBe(false);
   await assertHealthyDocument(page, errors);
+});
+
+test("Pal 무한 목록은 page deep-link의 이전·다음 페이지를 복원하고 상세 Modal 동안 자동 로드를 멈춘다", async ({ page }) => {
+  const manyPals = Array.from({ length: 50 }, (_, index): PalworldPalSummary => ({
+    ...palSummary(pals[index % pals.length]!),
+    id: `deep-link-pal-${index + 1}`,
+    number: index + 1,
+    nameKo: `딥 링크 Pal ${index + 1}`,
+    nameJa: `ディープリンクパル ${index + 1}`,
+    nameEn: `Deep Link Pal ${index + 1}`,
+  }));
+  const requestedPages: string[] = [];
+  await page.route("**/api/palworld/pals?*", async (route) => {
+    const url = new URL(route.request().url());
+    requestedPages.push(url.searchParams.get("page") ?? "1");
+    await json(route, {
+      ...pageResponse(manyPals, url),
+      facets: palListFacets(),
+    });
+  });
+
+  await page.goto("/palworld/pals?page=2");
+  await expect(page.getByTestId("pal-card")).toHaveCount(48);
+  expect(requestedPages.slice(0, 2)).toEqual(["2", "1"]);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  expect(new URL(page.url()).searchParams.get("page")).toBe("2");
+
+  await page.getByTestId("palworld-auto-load").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("pal-card")).toHaveCount(50);
+  expect(requestedPages).toContain("3");
+  expect(new URL(page.url()).searchParams.get("page")).toBe("2");
+
+  requestedPages.length = 0;
+  await page.goto("/palworld/pals?page=1&pal=anubis");
+  await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" })).toBeVisible();
+  await page.getByTestId("palworld-auto-load").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(250);
+  expect(requestedPages).toEqual(["1"]);
+  await expect(page.getByTestId("palworld-auto-load")).toContainText("상세 정보를 닫으면 목록 자동 불러오기를 계속합니다.");
+
+  await page.keyboard.press("Escape");
+  await page.getByTestId("palworld-auto-load").scrollIntoViewIfNeeded();
+  await expect.poll(() => page.getByTestId("pal-card").count()).toBeGreaterThanOrEqual(48);
+  expect(requestedPages).toContain("2");
 });
 
 test("Pal 상세 mini-map은 일반 스폰과 필드 보스를 함께 표시하고 confirmed empty를 구분한다", async ({ page }) => {
@@ -2320,7 +2363,7 @@ test("Pal 이미지 404는 페이지 오류 없이 접근 가능한 fallback으�
   await expect(card).toBeVisible();
   await expect(card.locator(".palworld-media-image")).toHaveCount(0);
   await expect(card.getByRole("img", { name: "펭킹 · 이미지 준비 중" })).toBeVisible();
-  await card.click();
+  await card.getByRole("button", { name: "Pal 상세 보기" }).click();
   const dialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "펭킹" });
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".palworld-media-image")).toHaveCount(0);
@@ -2512,7 +2555,11 @@ test("Palworld 화면은 외부 origin 이미지 요청 없이 카드·자동완
   await expect(cardImage).toHaveAttribute("loading", "eager");
   await expect(cardImage).toHaveAttribute("fetchpriority", "high");
   await expect(cardImage).toHaveClass(/is-low-resolution/u);
-  await cardImage.click();
+  await page
+    .getByTestId("pal-card")
+    .filter({ hasText: "펭킹" })
+    .getByRole("button", { name: "Pal 상세 보기" })
+    .click();
   await expect(page.getByTestId("pal-detail-modal").getByRole("img", { name: "펭킹" })).toBeVisible();
   await page.keyboard.press("Escape");
 
@@ -2568,10 +2615,8 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
     await page.getByRole("button", { name: "전체 보기" }).click();
     const streamerCards = page.getByTestId("palworld-streamer-list").locator(".palworld-streamer-card");
     await expect(streamerCards).toHaveCount(2);
-    await streamerCards.first().focus();
-    await expect(streamerCards.first()).toBeFocused();
-    await streamerCards.last().focus();
-    await expect(streamerCards.last()).toBeFocused();
+    await expect(streamerCards.first()).not.toHaveAttribute("tabindex");
+    await expect(streamerCards.last()).not.toHaveAttribute("tabindex");
     const watchLinks = page.getByTestId("palworld-streamer-list").getByRole("link", { name: "방송 보기" });
     await watchLinks.first().focus();
     await expect(watchLinks.first()).toBeFocused();

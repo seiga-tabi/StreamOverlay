@@ -85,7 +85,7 @@ export const PALWORLD_BREEDING_RESOLUTION_STATES = [
   "not_found",
   "data_unavailable"
 ] as const;
-export const PALWORLD_DOMAIN_STATUSES = ["ready", "sample", "incomplete"] as const;
+export const PALWORLD_DOMAIN_STATUSES = ["ready", "sample", "incomplete", "unavailable"] as const;
 export const PALWORLD_IMAGE_ASSET_STATUSES = [
   "blocked_by_license",
   "operator_acknowledged",
@@ -102,6 +102,7 @@ export const PALWORLD_IMAGE_USAGE_BASES = ["none", "operator_reference_use", "ri
 export const PALWORLD_SOURCE_TYPES = ["operator_pak_export"] as const;
 export const PALWORLD_PUBLIC_NOTICE_KO = "비공식 팰월드 데이터베이스 · 데이터/이미지 출처 Palworld · Pocketpair";
 export const PALWORLD_PUBLIC_NOTICE_JA = "非公式パルワールドデータベース・データ／画像出典 Palworld・Pocketpair";
+export const PALWORLD_SEARCH_MAX_LENGTH = 80;
 
 export type PalworldElement = (typeof PALWORLD_ELEMENTS)[number];
 export type PalworldWorkSuitabilityType = (typeof PALWORLD_WORK_SUITABILITY_TYPES)[number];
@@ -156,11 +157,48 @@ export type PalworldOperatorPakExportProvenance = {
 
 export type PalworldSourceProvenance = PalworldOperatorPakExportProvenance;
 
-export type PalworldDataMetadata = {
+/**
+ * 공개 API 응답 전체가 공유하는 활성 Palworld release 식별자입니다.
+ *
+ * legacy snapshot은 release 또는 Steam Build ID를 보존하지 않을 수 있으므로
+ * 두 필드는 additive optional 필드로 유지합니다. 새 runtime은 검증 가능한 값을
+ * 제공하고, 도메인 고유 원본은 PalworldDomainCoverage.domainMetadata에 분리합니다.
+ */
+export type PalworldReleaseIdentity = {
   gameVersion: string;
+  release?: string;
+  steamBuildId?: string;
+  sourceRevision: string;
+};
+
+export const PALWORLD_COMPOSITE_DOMAIN_STATES = [
+  "active",
+  "candidate",
+  "unavailable"
+] as const;
+
+export type PalworldCompositeDomainState =
+  (typeof PALWORLD_COMPOSITE_DOMAIN_STATES)[number];
+
+export type PalworldCompositeRuntimeManifest = {
+  schemaVersion: number;
+  release: string;
+  artifacts: Array<{
+    kind: string;
+    file: string;
+    sha256: string;
+  }>;
+  availability: {
+    mapMarkers: PalworldCompositeDomainState;
+    mapSpawns: PalworldCompositeDomainState;
+    workImages: PalworldCompositeDomainState;
+    skillImages: PalworldCompositeDomainState;
+  };
+};
+
+export type PalworldDataMetadata = PalworldReleaseIdentity & {
   sourceName: string;
   sourceUrl: string;
-  sourceRevision: string;
   sourceChecksum?: string;
   extractedAt: string;
   verifiedAt: string;
@@ -172,6 +210,7 @@ export type PalworldDomainCoverage = {
   status: PalworldDomainStatus;
   recordCount: number;
   metadata: PalworldDataMetadata;
+  domainMetadata?: PalworldDataMetadata;
 };
 
 export type PalworldDomainCoverageMap = {
@@ -404,6 +443,7 @@ export type PalworldItemDetail = PalworldItemSummary & {
   acquisitionMethods: PalworldAcquisitionMethod[];
   relatedItems: PalworldItemReference[];
   metadata: PalworldDataMetadata;
+  domainMetadata?: PalworldDataMetadata;
 };
 
 export type PalworldSkillAssignment = {
@@ -414,6 +454,7 @@ export type PalworldSkillAssignment = {
 export type PalworldSkillDetail = PalworldSkillSummary & {
   relatedPals: PalworldSkillAssignment[];
   metadata: PalworldDataMetadata;
+  domainMetadata?: PalworldDataMetadata;
 };
 
 export type PalworldCoverageCount = {
@@ -430,6 +471,8 @@ export type PalworldTranslationDomainCoverage = {
   skillNames: PalworldCoverageCount;
   skillDescriptions: PalworldCoverageCount;
   skillPassiveAbilities: PalworldCoverageCount;
+  artifactTranslated?: number;
+  publicUsable?: number;
   sourceProvided?: number;
   humanReviewed: number;
   machineAssisted: number;
@@ -629,8 +672,18 @@ export type PalworldSearchResult = {
   total: number;
   pals: PalworldPalSummary[];
   items: PalworldItemSummary[];
+  domainResults?: {
+    pals: PalworldSearchDomainResultCount;
+    items: PalworldSearchDomainResultCount;
+  };
   metadata: PalworldDataMetadata;
   domains: PalworldSearchDomainCoverageMap;
+};
+
+export type PalworldSearchDomainResultCount = {
+  total: number;
+  returned: number;
+  hasMore: boolean;
 };
 
 export type PalworldPagination = {
@@ -646,6 +699,7 @@ export type PalworldPaginatedResponse<T> = {
   items: T[];
   pagination: PalworldPagination;
   metadata: PalworldDataMetadata;
+  domainMetadata?: PalworldDataMetadata;
 };
 
 export type PalworldFacetEntry<T extends string | number> = {
@@ -717,7 +771,11 @@ const MAX_WORK_LEVEL = 8;
 const MAX_STAT_VALUE = 1_000_000;
 const MAX_RELATED_PALS = 10_000;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const PALWORLD_RELEASE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/u;
+const PALWORLD_STEAM_BUILD_ID_PATTERN = /^[1-9][0-9]{0,19}$/u;
 const PALWORLD_TRANSLATION_MESSAGE_KEY_PATTERN = /^[A-Za-z0-9_]+$/u;
+const RFC3339_PATTERN =
+  /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/u;
 const PALWORLD_SKILL_KEYS = [
   "id",
   "sourceInternalId",
@@ -847,7 +905,12 @@ function enumAt<T extends readonly string[]>(value: unknown, path: string, value
 function isoDateAt(value: unknown, path: string): PalworldValidationResult<string> {
   const stringResult = stringAt(value, path, 64);
   if (!stringResult.ok) return stringResult;
-  return Number.isNaN(Date.parse(stringResult.data)) ? invalid(path, "올바른 날짜 문자열이어야 합니다.") : stringResult;
+  return (
+    !RFC3339_PATTERN.test(stringResult.data)
+    || Number.isNaN(Date.parse(stringResult.data))
+  )
+    ? invalid(path, "strict RFC3339 날짜 문자열이어야 합니다.")
+    : stringResult;
 }
 
 function httpsUrlAt(value: unknown, path: string): PalworldValidationResult<string> {
@@ -948,9 +1011,178 @@ function uniqueStringsAt(values: readonly string[], path: string, label: string)
   return valid(true);
 }
 
+function validateReleaseIdentityFieldsAt(
+  candidate: Record<string, unknown>,
+  path: string
+): PalworldValidationResult<PalworldReleaseIdentity> {
+  for (const field of ["gameVersion", "sourceRevision"] as const) {
+    const result = stringAt(candidate[field], `${path}.${field}`);
+    if (!result.ok) return result;
+  }
+  if (candidate.release !== undefined) {
+    const release = stringAt(candidate.release, `${path}.release`, 64);
+    if (!release.ok) return release;
+    if (!PALWORLD_RELEASE_PATTERN.test(release.data)) {
+      return invalid(
+        `${path}.release`,
+        "공백과 제어문자 없이 영문·숫자로 시작하는 고정 release 식별자여야 합니다."
+      );
+    }
+  }
+  if (candidate.steamBuildId !== undefined) {
+    const steamBuildId = stringAt(candidate.steamBuildId, `${path}.steamBuildId`, 20);
+    if (!steamBuildId.ok) return steamBuildId;
+    if (!PALWORLD_STEAM_BUILD_ID_PATTERN.test(steamBuildId.data)) {
+      return invalid(
+        `${path}.steamBuildId`,
+        "0으로 시작하지 않는 숫자 Steam Build ID여야 합니다."
+      );
+    }
+  }
+  if ((candidate.release === undefined) !== (candidate.steamBuildId === undefined)) {
+    return invalid(
+      path,
+      "release와 steamBuildId는 legacy에서는 함께 생략하고, 고정 runtime에서는 함께 제공해야 합니다."
+    );
+  }
+  return valid(candidate as PalworldReleaseIdentity);
+}
+
+function validateReleaseIdentityAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldReleaseIdentity> {
+  const record = recordAt(value, path, [
+    "gameVersion",
+    "release",
+    "steamBuildId",
+    "sourceRevision"
+  ]);
+  return record.ok ? validateReleaseIdentityFieldsAt(record.data, path) : record;
+}
+
+function sameReleaseIdentity(
+  left: PalworldReleaseIdentity,
+  right: PalworldReleaseIdentity
+): boolean {
+  return (
+    left.gameVersion === right.gameVersion
+    && left.release === right.release
+    && left.steamBuildId === right.steamBuildId
+    && left.sourceRevision === right.sourceRevision
+  );
+}
+
+function validateCompositeRuntimeManifestAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldCompositeRuntimeManifest> {
+  const root = recordAt(value, path, [
+    "schemaVersion",
+    "release",
+    "artifacts",
+    "availability"
+  ]);
+  if (!root.ok) return root;
+  const schemaVersion = integerAt(
+    root.data.schemaVersion,
+    `${path}.schemaVersion`,
+    1,
+    100
+  );
+  if (!schemaVersion.ok) return schemaVersion;
+  const release = stringAt(root.data.release, `${path}.release`, 64);
+  if (!release.ok) return release;
+  if (!PALWORLD_RELEASE_PATTERN.test(release.data)) {
+    return invalid(`${path}.release`, "안전한 고정 release 식별자여야 합니다.");
+  }
+  const artifacts = arrayAt<PalworldCompositeRuntimeManifest["artifacts"][number]>(
+    root.data.artifacts,
+    `${path}.artifacts`,
+    64,
+    (value, artifactPath) => {
+      const artifact = recordAt(value, artifactPath, ["kind", "file", "sha256"]);
+      if (!artifact.ok) return artifact;
+      const kind = idAt(artifact.data.kind, `${artifactPath}.kind`);
+      if (!kind.ok) return kind;
+      const file = stringAt(artifact.data.file, `${artifactPath}.file`, 512);
+      if (!file.ok) return file;
+      if (
+        file.data.startsWith("/")
+        || /[\\%\u0000-\u001f\u007f]/u.test(file.data)
+        || file.data.includes("//")
+        || file.data.split("/").some((segment) =>
+          segment.length === 0 || segment === "." || segment === ".."
+        )
+      ) {
+        return invalid(
+          `${artifactPath}.file`,
+          "release root 내부의 안전한 정규 상대 경로여야 합니다."
+        );
+      }
+      const sha256 = stringAt(artifact.data.sha256, `${artifactPath}.sha256`, 64);
+      if (!sha256.ok) return sha256;
+      if (!SHA256_PATTERN.test(sha256.data)) {
+        return invalid(`${artifactPath}.sha256`, "소문자 64자리 SHA-256이어야 합니다.");
+      }
+      return valid({
+        kind: kind.data,
+        file: file.data,
+        sha256: sha256.data
+      });
+    }
+  );
+  if (!artifacts.ok) return artifacts;
+  if (artifacts.data.length < 1) {
+    return invalid(`${path}.artifacts`, "최소 1개의 고정 artifact가 필요합니다.");
+  }
+  for (const [field, label] of [
+    ["kind", "kind"],
+    ["file", "file"],
+    ["sha256", "checksum"]
+  ] as const) {
+    const duplicate = uniqueStringsAt(
+      artifacts.data.map((artifact) => artifact[field]),
+      `${path}.artifacts`,
+      label
+    );
+    if (!duplicate.ok) return duplicate;
+  }
+  const availability = recordAt(root.data.availability, `${path}.availability`, [
+    "mapMarkers",
+    "mapSpawns",
+    "workImages",
+    "skillImages"
+  ]);
+  if (!availability.ok) return availability;
+  const states: Record<string, PalworldCompositeDomainState> = {};
+  for (const field of [
+    "mapMarkers",
+    "mapSpawns",
+    "workImages",
+    "skillImages"
+  ] as const) {
+    const state = enumAt(
+      availability.data[field],
+      `${path}.availability.${field}`,
+      PALWORLD_COMPOSITE_DOMAIN_STATES
+    );
+    if (!state.ok) return state;
+    states[field] = state.data;
+  }
+  return valid({
+    schemaVersion: schemaVersion.data,
+    release: release.data,
+    artifacts: artifacts.data,
+    availability: states as PalworldCompositeRuntimeManifest["availability"]
+  });
+}
+
 function validateMetadataAt(value: unknown, path: string): PalworldValidationResult<PalworldDataMetadata> {
   const record = recordAt(value, path, [
     "gameVersion",
+    "release",
+    "steamBuildId",
     "sourceName",
     "sourceUrl",
     "sourceRevision",
@@ -962,7 +1194,9 @@ function validateMetadataAt(value: unknown, path: string): PalworldValidationRes
   ]);
   if (!record.ok) return record;
   const candidate = record.data;
-  for (const field of ["gameVersion", "sourceName", "sourceRevision", "license"] as const) {
+  const releaseIdentity = validateReleaseIdentityFieldsAt(candidate, path);
+  if (!releaseIdentity.ok) return releaseIdentity;
+  for (const field of ["sourceName", "license"] as const) {
     const result = stringAt(candidate[field], `${path}.${field}`);
     if (!result.ok) return result;
   }
@@ -975,9 +1209,15 @@ function validateMetadataAt(value: unknown, path: string): PalworldValidationRes
       return invalid(`${path}.sourceChecksum`, "소문자 64자리 SHA-256 hex여야 합니다.");
     }
   }
-  for (const field of ["extractedAt", "verifiedAt"] as const) {
-    const result = isoDateAt(candidate[field], `${path}.${field}`);
-    if (!result.ok) return result;
+  const extractedAt = isoDateAt(candidate.extractedAt, `${path}.extractedAt`);
+  if (!extractedAt.ok) return extractedAt;
+  const verifiedAt = isoDateAt(candidate.verifiedAt, `${path}.verifiedAt`);
+  if (!verifiedAt.ok) return verifiedAt;
+  if (Date.parse(verifiedAt.data) < Date.parse(extractedAt.data)) {
+    return invalid(
+      `${path}.verifiedAt`,
+      "verifiedAt은 extractedAt과 같거나 이후여야 합니다."
+    );
   }
   if (candidate.rightsVerified !== undefined) {
     const rightsVerified = booleanAt(candidate.rightsVerified, `${path}.rightsVerified`);
@@ -1198,14 +1438,22 @@ function validateTranslationDisplayStateAt(
 }
 
 function validateDomainCoverageAt(value: unknown, path: string): PalworldValidationResult<PalworldDomainCoverage> {
-  const record = recordAt(value, path, ["status", "recordCount", "metadata"]);
+  const record = recordAt(value, path, ["status", "recordCount", "metadata", "domainMetadata"]);
   if (!record.ok) return record;
   const status = enumAt(record.data.status, `${path}.status`, PALWORLD_DOMAIN_STATUSES);
   if (!status.ok) return status;
   const recordCount = integerAt(record.data.recordCount, `${path}.recordCount`, 0, 100_000_000);
   if (!recordCount.ok) return recordCount;
+  if (status.data === "unavailable" && recordCount.data !== 0) {
+    return invalid(`${path}.recordCount`, "unavailable 도메인의 공개 레코드 수는 0이어야 합니다.");
+  }
   const metadata = validateMetadataAt(record.data.metadata, `${path}.metadata`);
-  return metadata.ok ? valid(record.data as PalworldDomainCoverage) : metadata;
+  if (!metadata.ok) return metadata;
+  if (record.data.domainMetadata !== undefined) {
+    const domainMetadata = validateMetadataAt(record.data.domainMetadata, `${path}.domainMetadata`);
+    if (!domainMetadata.ok) return domainMetadata;
+  }
+  return valid(record.data as PalworldDomainCoverage);
 }
 
 function validateWorkSuitabilityAt(value: unknown, path: string): PalworldValidationResult<PalworldWorkSuitability> {
@@ -2028,6 +2276,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
     "acquisitionMethods",
     "relatedItems",
     "metadata",
+    "domainMetadata",
     "translation"
   ]);
   if (!record.ok) return record;
@@ -2120,7 +2369,12 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
   const uniqueRelatedItems = uniqueStringsAt(relatedItems.data.map((item) => item.id), `${path}.relatedItems`, "관련 아이템");
   if (!uniqueRelatedItems.ok) return uniqueRelatedItems;
   const metadata = validateMetadataAt(candidate.metadata, `${path}.metadata`);
-  return metadata.ok ? valid(candidate as PalworldItemDetail) : metadata;
+  if (!metadata.ok) return metadata;
+  if (candidate.domainMetadata !== undefined) {
+    const domainMetadata = validateMetadataAt(candidate.domainMetadata, `${path}.domainMetadata`);
+    if (!domainMetadata.ok) return domainMetadata;
+  }
+  return valid(candidate as PalworldItemDetail);
 }
 
 function skillValueFromRecord(record: Record<string, unknown>): Record<string, unknown> {
@@ -2153,7 +2407,13 @@ function validateSkillAssignmentAt(value: unknown, path: string): PalworldValida
 }
 
 function validateSkillDetailAt(value: unknown, path: string): PalworldValidationResult<PalworldSkillDetail> {
-  const record = recordAt(value, path, [...PALWORLD_SKILL_KEYS, "relatedPalCount", "relatedPals", "metadata"]);
+  const record = recordAt(value, path, [
+    ...PALWORLD_SKILL_KEYS,
+    "relatedPalCount",
+    "relatedPals",
+    "metadata",
+    "domainMetadata"
+  ]);
   if (!record.ok) return record;
   const summary = validateSkillSummaryAt(
     { ...skillValueFromRecord(record.data), relatedPalCount: record.data.relatedPalCount },
@@ -2173,7 +2433,12 @@ function validateSkillDetailAt(value: unknown, path: string): PalworldValidation
     seenPalIds.add(assignment.pal.id);
   }
   const metadata = validateMetadataAt(record.data.metadata, `${path}.metadata`);
-  return metadata.ok ? valid(record.data as PalworldSkillDetail) : metadata;
+  if (!metadata.ok) return metadata;
+  if (record.data.domainMetadata !== undefined) {
+    const domainMetadata = validateMetadataAt(record.data.domainMetadata, `${path}.domainMetadata`);
+    if (!domainMetadata.ok) return domainMetadata;
+  }
+  return valid(record.data as PalworldSkillDetail);
 }
 
 function validateCoverageCountAt(value: unknown, path: string): PalworldValidationResult<PalworldCoverageCount> {
@@ -2201,6 +2466,8 @@ function validateTranslationDomainCoverageAt(
     "skillNames",
     "skillDescriptions",
     "skillPassiveAbilities",
+    "artifactTranslated",
+    "publicUsable",
     "sourceProvided",
     "humanReviewed",
     "machineAssisted",
@@ -2224,6 +2491,8 @@ function validateTranslationDomainCoverageAt(
     if (!count.ok) return count;
   }
   for (const field of [
+    "artifactTranslated",
+    "publicUsable",
     "sourceProvided",
     "humanReviewed",
     "machineAssisted",
@@ -2234,7 +2503,9 @@ function validateTranslationDomainCoverageAt(
     "staleSourceHash"
   ] as const) {
     if (record.data[field] === undefined && (
-      field === "sourceProvided"
+      field === "artifactTranslated"
+      || field === "publicUsable"
+      || field === "sourceProvided"
       || field === "placeholderExcluded"
       || field === "unresolvedRichText"
     )) {
@@ -2255,6 +2526,18 @@ function validateTranslationDomainCoverageAt(
   const fieldTotal = fieldCoverages.reduce((sum, coverage) => sum + coverage.total, 0);
   const availableTotal = fieldCoverages.reduce((sum, coverage) => sum + coverage.available, 0);
   const missingTotal = fieldCoverages.reduce((sum, coverage) => sum + coverage.missing, 0);
+  if (
+    record.data.publicUsable !== undefined
+    && (record.data.publicUsable as number) !== availableTotal
+  ) {
+    return invalid(`${path}.publicUsable`, "실제 공개 가능한 필드 available 합과 일치해야 합니다.");
+  }
+  if (
+    record.data.artifactTranslated !== undefined
+    && (record.data.artifactTranslated as number) > fieldTotal
+  ) {
+    return invalid(`${path}.artifactTranslated`, "전체 locale 필드 수보다 클 수 없습니다.");
+  }
   if (
     ((record.data.sourceProvided as number | undefined) ?? 0)
     + (record.data.humanReviewed as number)
@@ -2426,6 +2709,18 @@ function validatePageItemCountAt(
 
 export function validatePalworldDataMetadata(value: unknown): PalworldValidationResult<PalworldDataMetadata> {
   return validateMetadataAt(value, "metadata");
+}
+
+export function validatePalworldReleaseIdentity(
+  value: unknown
+): PalworldValidationResult<PalworldReleaseIdentity> {
+  return validateReleaseIdentityAt(value, "releaseIdentity");
+}
+
+export function validatePalworldCompositeRuntimeManifest(
+  value: unknown
+): PalworldValidationResult<PalworldCompositeRuntimeManifest> {
+  return validateCompositeRuntimeManifestAt(value, "compositeRuntime");
 }
 
 export function validatePalworldPalReference(
@@ -3316,7 +3611,7 @@ export function validatePalworldPaginatedResponse<T>(
   value: unknown,
   itemValidator: PalworldValidator<T>
 ): PalworldValidationResult<PalworldPaginatedResponse<T>> {
-  const record = recordAt(value, "response", ["items", "pagination", "metadata"]);
+  const record = recordAt(value, "response", ["items", "pagination", "metadata", "domainMetadata"]);
   if (!record.ok) return record;
   const items = arrayAt(record.data.items, "response.items", MAX_API_COLLECTION_SIZE, (entry, path) => {
     const result = itemValidator(entry);
@@ -3328,7 +3623,12 @@ export function validatePalworldPaginatedResponse<T>(
   const itemCount = validatePageItemCountAt(items.data.length, pagination.data, "response.items");
   if (!itemCount.ok) return itemCount;
   const metadata = validateMetadataAt(record.data.metadata, "response.metadata");
-  return metadata.ok ? valid(record.data as PalworldPaginatedResponse<T>) : metadata;
+  if (!metadata.ok) return metadata;
+  if (record.data.domainMetadata !== undefined) {
+    const domainMetadata = validateMetadataAt(record.data.domainMetadata, "response.domainMetadata");
+    if (!domainMetadata.ok) return domainMetadata;
+  }
+  return valid(record.data as PalworldPaginatedResponse<T>);
 }
 
 function validatePalworldFacetEntriesAt<T extends string | number>(
@@ -3451,12 +3751,15 @@ export function validatePalworldMetaResponse(value: unknown): PalworldValidation
     const skills = validateDomainCoverageAt(domains.data.skills, "response.domains.skills");
     if (!skills.ok) return skills;
   }
-  const palDomain = domains.data.pals as PalworldDomainCoverage;
-  if (
-    palDomain.metadata.gameVersion !== metadata.data.gameVersion ||
-    palDomain.metadata.sourceRevision !== metadata.data.sourceRevision
-  ) {
-    return invalid("response.domains.pals.metadata", "최상위 metadata와 활성 Pal 데이터 출처가 일치해야 합니다.");
+  for (const field of ["pals", "items", "breeding", "skills"] as const) {
+    if (domains.data[field] === undefined) continue;
+    const domain = domains.data[field] as PalworldDomainCoverage;
+    if (!sameReleaseIdentity(domain.metadata, metadata.data)) {
+      return invalid(
+        `response.domains.${field}.metadata`,
+        "최상위 metadata와 활성 release identity가 일치해야 합니다."
+      );
+    }
   }
   const expectedCounts = {
     pals: counts.data.pals,
@@ -3475,7 +3778,12 @@ export function validatePalworldMetaResponse(value: unknown): PalworldValidation
   ) {
     return invalid("response.domains.skills.recordCount", "counts.skills와 일치해야 합니다.");
   }
-  if (counts.data.skills !== undefined && record.data.coverage === undefined) {
+  const skillDomain = domains.data.skills as PalworldDomainCoverage | undefined;
+  if (
+    counts.data.skills !== undefined
+    && skillDomain?.status !== "unavailable"
+    && record.data.coverage === undefined
+  ) {
     return invalid("response.coverage", "스킬 도메인을 제공할 때는 상세·이미지·현지화 coverage가 필요합니다.");
   }
   let validatedCoverage: PalworldDataCoverage | undefined;
@@ -3667,9 +3975,17 @@ export function validatePalworldMetaResponse(value: unknown): PalworldValidation
 }
 
 export function validatePalworldSearchResult(value: unknown): PalworldValidationResult<PalworldSearchResult> {
-  const record = recordAt(value, "searchResult", ["query", "total", "pals", "items", "metadata", "domains"]);
+  const record = recordAt(value, "searchResult", [
+    "query",
+    "total",
+    "pals",
+    "items",
+    "domainResults",
+    "metadata",
+    "domains"
+  ]);
   if (!record.ok) return record;
-  const query = stringAt(record.data.query, "searchResult.query", MAX_NAME_LENGTH, true);
+  const query = stringAt(record.data.query, "searchResult.query", PALWORLD_SEARCH_MAX_LENGTH, true);
   if (!query.ok) return query;
   const total = integerAt(record.data.total, "searchResult.total", 0, 100_000_000);
   if (!total.ok) return total;
@@ -3679,6 +3995,52 @@ export function validatePalworldSearchResult(value: unknown): PalworldValidation
   if (!items.ok) return items;
   if (total.data < pals.data.length + items.data.length) {
     return invalid("searchResult.total", "반환된 Pal과 아이템 결과 수의 합 이상이어야 합니다.");
+  }
+  if (record.data.domainResults !== undefined) {
+    const domainResults = recordAt(record.data.domainResults, "searchResult.domainResults", ["pals", "items"]);
+    if (!domainResults.ok) return domainResults;
+    let domainTotal = 0;
+    for (const field of ["pals", "items"] as const) {
+      const result = recordAt(
+        domainResults.data[field],
+        `searchResult.domainResults.${field}`,
+        ["total", "returned", "hasMore"]
+      );
+      if (!result.ok) return result;
+      const domainResultTotal = integerAt(
+        result.data.total,
+        `searchResult.domainResults.${field}.total`,
+        0,
+        100_000_000
+      );
+      if (!domainResultTotal.ok) return domainResultTotal;
+      const returned = integerAt(
+        result.data.returned,
+        `searchResult.domainResults.${field}.returned`,
+        0,
+        MAX_API_COLLECTION_SIZE
+      );
+      if (!returned.ok) return returned;
+      const expectedReturned = field === "pals" ? pals.data.length : items.data.length;
+      if (returned.data !== expectedReturned || returned.data > domainResultTotal.data) {
+        return invalid(
+          `searchResult.domainResults.${field}.returned`,
+          "실제 반환 수 및 domain 전체 수와 일치해야 합니다."
+        );
+      }
+      const hasMore = booleanAt(result.data.hasMore, `searchResult.domainResults.${field}.hasMore`);
+      if (!hasMore.ok) return hasMore;
+      if (hasMore.data !== (returned.data < domainResultTotal.data)) {
+        return invalid(
+          `searchResult.domainResults.${field}.hasMore`,
+          "전체 수와 반환 수로 계산한 값과 일치해야 합니다."
+        );
+      }
+      domainTotal += domainResultTotal.data;
+    }
+    if (domainTotal !== total.data) {
+      return invalid("searchResult.total", "domain별 검색 결과 전체 수의 합과 일치해야 합니다.");
+    }
   }
   const metadata = validateMetadataAt(record.data.metadata, "searchResult.metadata");
   if (!metadata.ok) return metadata;
@@ -3692,12 +4054,14 @@ export function validatePalworldSearchResult(value: unknown): PalworldValidation
       return invalid(`searchResult.domains.${field}.recordCount`, "반환된 검색 결과 수 이상이어야 합니다.");
     }
   }
-  const palDomain = domains.data.pals as PalworldDomainCoverage;
-  if (
-    palDomain.metadata.gameVersion !== metadata.data.gameVersion ||
-    palDomain.metadata.sourceRevision !== metadata.data.sourceRevision
-  ) {
-    return invalid("searchResult.domains.pals.metadata", "최상위 metadata와 활성 Pal 데이터 출처가 일치해야 합니다.");
+  for (const field of ["pals", "items"] as const) {
+    const domain = domains.data[field] as PalworldDomainCoverage;
+    if (!sameReleaseIdentity(domain.metadata, metadata.data)) {
+      return invalid(
+        `searchResult.domains.${field}.metadata`,
+        "최상위 metadata와 활성 release identity가 일치해야 합니다."
+      );
+    }
   }
   return valid(record.data as PalworldSearchResult);
 }
@@ -3927,10 +4291,9 @@ function validateCanonicalSkillAt(
 
 function sameSnapshotMetadata(metadata: PalworldDataMetadata, detailMetadata: PalworldDataMetadata): boolean {
   return (
-    metadata.gameVersion === detailMetadata.gameVersion
+    sameReleaseIdentity(metadata, detailMetadata)
     && metadata.sourceName === detailMetadata.sourceName
     && metadata.sourceUrl === detailMetadata.sourceUrl
-    && metadata.sourceRevision === detailMetadata.sourceRevision
     && metadata.sourceChecksum === detailMetadata.sourceChecksum
     && metadata.extractedAt === detailMetadata.extractedAt
     && metadata.verifiedAt === detailMetadata.verifiedAt

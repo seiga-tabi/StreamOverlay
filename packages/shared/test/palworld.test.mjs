@@ -6,6 +6,7 @@ import {
   validatePalworldBreedingDataSnapshot,
   validatePalworldBreedingParentsResponse,
   validatePalworldBreedingResultResponse,
+  validatePalworldCompositeRuntimeManifest,
   validatePalworldDataCoverage,
   validatePalworldDataMetadata,
   validatePalworldDataSnapshot,
@@ -14,6 +15,7 @@ import {
   validatePalworldMetaResponse,
   validatePalworldItemSummary,
   validatePalworldLocalizationFallback,
+  validatePalworldReleaseIdentity,
   validatePalworldPalDrop,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
@@ -30,6 +32,8 @@ import {
 
 const metadata = {
   gameVersion: "0.6.2",
+  release: "0.6.2",
+  steamBuildId: "12345678",
   sourceName: "StreamOps Palworld 정규화 스냅샷",
   sourceUrl: "https://github.com/tylercamp/palcalc",
   sourceRevision: "test-revision",
@@ -552,6 +556,12 @@ const snapshot = {
 
 test("Palworld 메타데이터는 출처와 버전 검증 정보를 요구한다", () => {
   assert.equal(validatePalworldDataMetadata(metadata).ok, true);
+  assert.equal(validatePalworldReleaseIdentity({
+    gameVersion: metadata.gameVersion,
+    release: metadata.release,
+    steamBuildId: metadata.steamBuildId,
+    sourceRevision: metadata.sourceRevision
+  }).ok, true);
   assert.equal(validatePalworldDataMetadata({
     ...metadata,
     sourceChecksum: "d".repeat(64),
@@ -561,7 +571,68 @@ test("Palworld 메타데이터는 출처와 버전 검증 정보를 요구한다
   assert.equal(validatePalworldDataMetadata({ ...metadata, rightsVerified: "false" }).ok, false);
   assert.equal(validatePalworldDataMetadata({ ...metadata, sourceUrl: "http://example.com/data" }).ok, false);
   assert.equal(validatePalworldDataMetadata({ ...metadata, verifiedAt: "잘못된 날짜" }).ok, false);
+  assert.equal(validatePalworldDataMetadata({ ...metadata, verifiedAt: "2026-07-21 00:00:00Z" }).ok, false);
+  assert.equal(validatePalworldDataMetadata({
+    ...metadata,
+    verifiedAt: "2026-07-19T23:59:59.000Z"
+  }).ok, false);
+  assert.equal(validatePalworldDataMetadata({ ...metadata, release: "잘못된 release" }).ok, false);
+  assert.equal(validatePalworldDataMetadata({ ...metadata, steamBuildId: "012345678" }).ok, false);
+  assert.equal(validatePalworldDataMetadata({ ...metadata, steamBuildId: undefined }).ok, false);
+  assert.equal(validatePalworldDataMetadata({ ...metadata, release: undefined }).ok, false);
+  assert.equal(validatePalworldReleaseIdentity({
+    gameVersion: metadata.gameVersion,
+    release: metadata.release,
+    steamBuildId: metadata.steamBuildId,
+    sourceRevision: metadata.sourceRevision,
+    sourceName: metadata.sourceName
+  }).ok, false);
   assert.equal(validatePalworldDataMetadata({ ...metadata, unknown: true }).ok, false);
+});
+
+test("composite runtime manifest는 exact artifact·checksum·candidate 상태를 검증한다", () => {
+  const composite = {
+    schemaVersion: 3,
+    release: "1.0.1",
+    artifacts: [
+      {
+        kind: "catalog",
+        file: "catalog.json",
+        sha256: "a".repeat(64)
+      },
+      {
+        kind: "map-images-manifest",
+        file: "map-images-manifest.json",
+        sha256: "b".repeat(64)
+      }
+    ],
+    availability: {
+      mapMarkers: "candidate",
+      mapSpawns: "candidate",
+      workImages: "candidate",
+      skillImages: "unavailable"
+    }
+  };
+  assert.equal(validatePalworldCompositeRuntimeManifest(composite).ok, true);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    artifacts: [
+      composite.artifacts[0],
+      { ...composite.artifacts[1], sha256: composite.artifacts[0].sha256 }
+    ]
+  }).ok, false);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    artifacts: [{ ...composite.artifacts[0], file: "../catalog.json" }]
+  }).ok, false);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    availability: { ...composite.availability, mapSpawns: "ready" }
+  }).ok, false);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    unknown: true
+  }).ok, false);
 });
 
 test("현지화 fallback은 원문 언어와 KO·JA 표시 상태를 엄격하게 검증한다", () => {
@@ -572,14 +643,23 @@ test("현지화 fallback은 원문 언어와 KO·JA 표시 상태를 엄격하�
 });
 
 test("Palworld meta는 도메인별 coverage와 provenance를 검증한다", () => {
-  const sampleMetadata = { ...metadata, gameVersion: "sample-baseline", sourceRevision: "sample-revision" };
+  const {
+    release: _activeRelease,
+    steamBuildId: _activeSteamBuildId,
+    ...legacyMetadata
+  } = metadata;
+  const sampleMetadata = {
+    ...legacyMetadata,
+    gameVersion: "sample-baseline",
+    sourceRevision: "sample-revision"
+  };
   const response = {
     metadata,
     counts: { pals: 287, items: 10, breedingPairs: 3 },
     domains: {
       pals: { status: "ready", recordCount: 287, metadata },
-      items: { status: "sample", recordCount: 10, metadata: sampleMetadata },
-      breeding: { status: "sample", recordCount: 3, metadata: sampleMetadata }
+      items: { status: "sample", recordCount: 10, metadata, domainMetadata: sampleMetadata },
+      breeding: { status: "sample", recordCount: 3, metadata, domainMetadata: sampleMetadata }
     },
     gates: {
       dataIntegrity: { passed: true, status: "ready" },
@@ -604,6 +684,26 @@ test("Palworld meta는 도메인별 coverage와 provenance를 검증한다", () 
   assert.equal(validatePalworldMetaResponse({
     ...response,
     domains: { ...response.domains, pals: { ...response.domains.pals, metadata: sampleMetadata } }
+  }).ok, false);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    domains: {
+      ...response.domains,
+      pals: {
+        ...response.domains.pals,
+        metadata: { ...metadata, release: "0.6.3" }
+      }
+    }
+  }).ok, false);
+  assert.equal(validatePalworldMetaResponse({
+    ...response,
+    domains: {
+      ...response.domains,
+      pals: {
+        ...response.domains.pals,
+        metadata: { ...metadata, steamBuildId: "12345679" }
+      }
+    }
   }).ok, false);
   assert.equal(validatePalworldMetaResponse({
     ...response,

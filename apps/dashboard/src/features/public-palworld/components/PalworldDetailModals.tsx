@@ -35,6 +35,7 @@ import { PalworldPalStatsGraph } from "./PalworldPalStatsGraph";
 import { PalworldPalLocationMap } from "./PalworldPalLocationMap";
 import { PalworldTranslationBadge, PalworldTranslationBadges } from "./PalworldTranslationBadge";
 import { PalworldWorkSuitabilityBadge } from "./PalworldWorkSuitabilityBadge";
+import { PalworldDetailError } from "./PalworldStates";
 
 type NameReference = PalworldTranslationCarrier & { id: string; nameKo?: string; nameJa?: string; nameEn: string };
 type ImageDimensionCompatibility = { imageWidth?: number; imageHeight?: number };
@@ -126,11 +127,6 @@ function SpecialParentReference({ locale, pal, role }: { locale: PalworldLocale;
   </div>;
 }
 
-function ErrorPanel({ locale, onRetry }: { locale: PalworldLocale; onRetry: () => void }) {
-  const text = palworldI18n[locale];
-  return <div className="palworld-modal-error" role="alert"><p data-ko={palworldI18n.ko.apiError} data-ja={palworldI18n.ja.apiError}>{text.apiError}</p><Button variant="secondary" onClick={onRetry}>{text.retry}</Button></div>;
-}
-
 export function PalDetailModal({
   locale,
   onClose,
@@ -145,7 +141,7 @@ export function PalDetailModal({
   palId?: string;
 }) {
   const [detail, setDetail] = useState<PalworldPalDetail | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<unknown>(null);
   const [revision, setRevision] = useState(0);
   const text = palworldI18n[locale];
   useBodyScrollLock(Boolean(palId));
@@ -157,10 +153,10 @@ export function PalDetailModal({
     }
     const controller = new AbortController();
     setDetail(null);
-    setError(false);
+    setError(null);
     void getPalworldPal(palId, controller.signal).then(setDetail).catch((requestError) => {
       if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-      setError(true);
+      setError(requestError);
     });
     return () => controller.abort();
   }, [palId, revision]);
@@ -174,7 +170,7 @@ export function PalDetailModal({
       <ModalHeader><ModalTitle>{displayName}</ModalTitle><ModalCloseButton aria-label={text.close}>×</ModalCloseButton></ModalHeader>
       <ModalContent>
         {!detail && !error ? <SkeletonCard loadingLabel={text.loading} /> : null}
-        {error ? <ErrorPanel locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
+        {error ? <PalworldDetailError error={error} locale={locale} onClose={onClose} onRetry={() => setRevision((value) => value + 1)} /> : null}
         {detail ? (
           <article className="palworld-detail palworld-pal-detail">
             <div className="palworld-detail-hero palworld-pal-detail-hero">
@@ -221,7 +217,7 @@ export function ItemDetailModal({
   onOpenPal: (id: string) => void;
 }) {
   const [detail, setDetail] = useState<PalworldItemDetail | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<unknown>(null);
   const [revision, setRevision] = useState(0);
   const text = palworldI18n[locale];
   useBodyScrollLock(Boolean(itemId));
@@ -233,10 +229,10 @@ export function ItemDetailModal({
     }
     const controller = new AbortController();
     setDetail(null);
-    setError(false);
+    setError(null);
     void getPalworldItem(itemId, controller.signal).then(setDetail).catch((requestError) => {
       if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-      setError(true);
+      setError(requestError);
     });
     return () => controller.abort();
   }, [itemId, revision]);
@@ -249,7 +245,7 @@ export function ItemDetailModal({
       <ModalHeader><ModalTitle>{displayName}</ModalTitle><ModalCloseButton aria-label={text.close}>×</ModalCloseButton></ModalHeader>
       <ModalContent>
         {!detail && !error ? <SkeletonCard loadingLabel={text.loading} /> : null}
-        {error ? <ErrorPanel locale={locale} onRetry={() => setRevision((value) => value + 1)} /> : null}
+        {error ? <PalworldDetailError error={error} locale={locale} onClose={onClose} onRetry={() => setRevision((value) => value + 1)} /> : null}
         {detail ? (
           <article className="palworld-detail">
             <div className="palworld-detail-hero">

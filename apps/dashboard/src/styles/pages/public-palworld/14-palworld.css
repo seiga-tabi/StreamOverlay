@@ -1363,6 +1363,11 @@
   text-overflow: ellipsis;
 }
 
+.palworld-card-open-action {
+  margin: 0 var(--space-3) var(--space-3);
+  width: calc(100% - (var(--space-3) * 2));
+}
+
 .palworld-element-icon {
   inline-size: 1.15em;
   block-size: 1.15em;
@@ -2418,6 +2423,7 @@
 }
 
 .palworld-work-suitability-badge {
+  position: relative;
   display: inline-grid;
   grid-template-columns: var(--yoro-space-6) minmax(0, 1fr) auto;
   max-inline-size: 100%;
@@ -2430,6 +2436,35 @@
   border-radius: var(--yoro-radius-pill);
   background: var(--yoro-color-surface-muted);
   color: var(--yoro-color-text-strong);
+}
+
+.palworld-work-suitability-tooltip {
+  position: absolute;
+  z-index: 4;
+  inset-block-end: calc(100% + var(--yoro-space-1));
+  inset-inline-start: 50%;
+  max-inline-size: min(14rem, 80vw);
+  padding: var(--yoro-space-1) var(--yoro-space-2);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--yoro-color-surface);
+  box-shadow: var(--yoro-shadow-panel);
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-xs);
+  line-height: var(--yoro-line-height-tight);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, var(--yoro-space-1));
+  transition: opacity var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.palworld-work-suitability-badge.is-compact:is(:hover, :focus-visible) .palworld-work-suitability-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  visibility: visible;
 }
 
 .palworld-work-suitability-badge strong {

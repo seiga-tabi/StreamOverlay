@@ -16,7 +16,11 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-const { PalworldServerConnectionStore } = await import("../dist/services/palworld-server-connection-store.js");
+const {
+  PalworldServerConnectionStore,
+  PalworldServerConnectionStoreError,
+  palworldServerConnectionStoreAvailabilityCode
+} = await import("../dist/services/palworld-server-connection-store.js");
 const secureTemporaryRoot = realpathSync(tmpdir());
 
 function temporaryStore(prefix, keyByte = 17) {
@@ -91,7 +95,12 @@ test("Palworld 연결 저장소는 다른 key와 손상된 ciphertext를 fail-cl
     assert.throws(() => new PalworldServerConnectionStore({
       filePath: fixture.filePath,
       encryptionKey: Buffer.alloc(32, 32).toString("base64")
-    }), /복호화하거나 검증/);
+    }), (error) => {
+      assert.ok(error instanceof PalworldServerConnectionStoreError);
+      assert.equal(error.code, "key_mismatch");
+      assert.equal(palworldServerConnectionStoreAvailabilityCode(error), "key_mismatch");
+      return true;
+    });
     assert.deepEqual(readFileSync(fixture.filePath), originalCiphertext);
 
     const encrypted = JSON.parse(readFileSync(fixture.filePath, "utf8"));
@@ -100,7 +109,41 @@ test("Palworld 연결 저장소는 다른 key와 손상된 ciphertext를 fail-cl
     assert.throws(() => new PalworldServerConnectionStore({
       filePath: fixture.filePath,
       encryptionKey: fixture.encryptionKey
-    }), /복호화하거나 검증/);
+    }), (error) => {
+      assert.ok(error instanceof PalworldServerConnectionStoreError);
+      assert.equal(error.code, "key_mismatch");
+      assert.equal(palworldServerConnectionStoreAvailabilityCode(error), "key_mismatch");
+      return true;
+    });
+  } finally {
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("Palworld 연결 저장소는 key 형식 오류와 state 손상을 안전한 공개 상태로 구분한다", () => {
+  const fixture = temporaryStore("streamops-palworld-store-safe-errors-", 37);
+  try {
+    assert.throws(() => new PalworldServerConnectionStore({
+      filePath: fixture.filePath,
+      encryptionKey: "invalid-key-material"
+    }), (error) => {
+      assert.ok(error instanceof PalworldServerConnectionStoreError);
+      assert.equal(error.code, "key_invalid");
+      assert.equal(palworldServerConnectionStoreAvailabilityCode(error), "key_invalid");
+      return true;
+    });
+
+    writeFileSync(fixture.filePath, "{\"version\":1,\"ciphertext\":\"broken\"}\n", { mode: 0o600 });
+    assert.throws(() => new PalworldServerConnectionStore({
+      filePath: fixture.filePath,
+      encryptionKey: fixture.encryptionKey
+    }), (error) => {
+      assert.ok(error instanceof PalworldServerConnectionStoreError);
+      assert.equal(error.code, "state_damaged");
+      assert.equal(palworldServerConnectionStoreAvailabilityCode(error), "state_damaged");
+      assert.doesNotMatch(error.message, /ciphertext|adminPassword|\/run\/secrets/u);
+      return true;
+    });
   } finally {
     rmSync(fixture.directory, { recursive: true, force: true });
   }

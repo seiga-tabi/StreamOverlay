@@ -576,7 +576,16 @@ test("Palworld subsystem 준비 실패는 안전한 운영 상태별 응답으�
   const { store, tenantA, sessions, sessionA } = setupTenants();
   const headers = streamerHeaders(sessionA, tenantA);
 
-  for (const errorCode of ["config_missing", "config_invalid", "policy_missing", "key_missing", "key_invalid"]) {
+  for (const errorCode of [
+    "config_missing",
+    "config_invalid",
+    "policy_missing",
+    "key_missing",
+    "key_invalid",
+    "key_permission_denied",
+    "key_mismatch",
+    "state_damaged"
+  ]) {
     const handler = createHttpHandler(handlerInput(store, sessions, undefined, undefined, {
       palworldServerUnavailableCode: errorCode
     }));

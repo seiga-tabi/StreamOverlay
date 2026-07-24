@@ -60,6 +60,15 @@ async function readOptionalJsonWithBytes(filePath: string): Promise<{ bytes: Buf
   }
 }
 
+async function readOptionalBytes(filePath: string): Promise<Buffer | undefined> {
+  try {
+    return await readFile(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
 export function assertPalworldImageRightsGate(input: {
   sourceLock: PalworldPaldexSourceLock;
   imagesManifest: PalworldImagesManifest;
@@ -231,6 +240,7 @@ export async function loadPalworldPaldexStagedRelease(options: {
   mappingRoot?: string;
   requireReleaseReady?: boolean;
   imageFailureMode?: "throw" | "fallback";
+  requireImportReport?: boolean;
 } = {}): Promise<PalworldPaldexStagedRelease> {
   const releaseRoot = options.releaseRoot ?? PALWORLD_PALDEX_RELEASE_ROOT;
   const imageRoot = options.imageRoot ?? PALWORLD_PALDEX_IMAGE_ROOT;
@@ -252,7 +262,7 @@ export async function loadPalworldPaldexStagedRelease(options: {
     readJsonWithBytes(path.join(releaseRoot, "sources.lock.json")),
     readJsonWithBytes(path.join(releaseRoot, "paldex.json")),
     readJsonWithBytes(path.join(releaseRoot, "images-manifest.json")),
-    readFile(path.join(releaseRoot, "import-report.json")),
+    readOptionalBytes(path.join(releaseRoot, "import-report.json")),
     readJsonWithBytes(path.join(releaseRoot, "manifest.json")),
     readJsonWithBytes(path.join(mappingRoot, "public-id-map.json")),
     readJsonWithBytes(path.join(mappingRoot, "elements.json")),
@@ -263,6 +273,9 @@ export async function loadPalworldPaldexStagedRelease(options: {
     readOptionalJsonWithBytes(path.join(mappingRoot, PALWORLD_IMAGE_SOURCE_MAP_FILE_NAME))
   ]);
   const sourceLock = assertPalworldPaldexSourceLock(sourceLockFile.value);
+  if (options.requireImportReport !== false && reportFile === undefined) {
+    throw new PalworldPaldexValidationError("import-report.json: source 감사용 report가 없습니다.");
+  }
   const artifact = assertPalworldPaldexArtifact(paldexFile.value);
   const imagesManifest = assertPalworldImagesManifest(imagesFile.value, artifact);
   const manifest = assertPalworldPaldexReleaseManifest(manifestFile.value);
@@ -332,7 +345,9 @@ export async function loadPalworldPaldexStagedRelease(options: {
     sourceLockSha256: sha256Bytes(sourceLockFile.bytes),
     paldexSha256: sha256Bytes(paldexFile.bytes),
     imagesManifestSha256: sha256Bytes(imagesFile.bytes),
-    importReportSha256: sha256Bytes(reportFile)
+    ...(reportFile === undefined ? {} : {
+      importReportSha256: sha256Bytes(reportFile)
+    })
   };
   for (const [field, hash] of Object.entries(actualHashes)) {
     if (manifest[field as keyof typeof actualHashes] !== hash) {
@@ -449,7 +464,7 @@ async function loadPalworldPaldexDataOnlyRuntimeFallback(options: {
   ] = await Promise.all([
     readJsonWithBytes(path.join(releaseRoot, "sources.lock.json")),
     readJsonWithBytes(path.join(releaseRoot, "paldex.json")),
-    readFile(path.join(releaseRoot, "import-report.json")),
+    readOptionalBytes(path.join(releaseRoot, "import-report.json")),
     readJsonWithBytes(path.join(releaseRoot, "manifest.json")),
     readJsonWithBytes(path.join(mappingRoot, "public-id-map.json")),
     readJsonWithBytes(path.join(mappingRoot, "elements.json")),
@@ -473,7 +488,9 @@ async function loadPalworldPaldexDataOnlyRuntimeFallback(options: {
   const dataHashes = {
     sourceLockSha256: sha256Bytes(sourceLockFile.bytes),
     paldexSha256: sha256Bytes(paldexFile.bytes),
-    importReportSha256: sha256Bytes(reportFile)
+    ...(reportFile === undefined ? {} : {
+      importReportSha256: sha256Bytes(reportFile)
+    })
   };
   for (const [field, hash] of Object.entries(dataHashes)) {
     if (manifest[field as keyof typeof dataHashes] !== hash) {
@@ -534,7 +551,11 @@ export async function loadPalworldPaldexRuntimeSource(options: {
   mappingRoot?: string;
 } = {}): Promise<PalworldPaldexRuntimeSource> {
   try {
-    return await loadPalworldPaldexStagedRelease({ ...options, imageFailureMode: "fallback" });
+    return await loadPalworldPaldexStagedRelease({
+      ...options,
+      imageFailureMode: "fallback",
+      requireImportReport: false
+    });
   } catch {
     return loadPalworldPaldexDataOnlyRuntimeFallback(options);
   }

@@ -5,13 +5,13 @@ import {
   PALWORLD_ELEMENTS,
   PALWORLD_ITEM_CATEGORIES,
   PALWORLD_MAP_WORLDS,
+  PALWORLD_SEARCH_MAX_LENGTH,
   PALWORLD_SKILL_TYPES,
   PALWORLD_VARIANT_TYPES,
   PALWORLD_WORK_SUITABILITY_TYPES,
   type PalworldMapWorld
 } from "@streamops/shared";
 
-const MAX_SEARCH_LENGTH = 80;
 const MAX_ID_LENGTH = 80;
 const MAX_PAGE = 10_000;
 
@@ -161,7 +161,7 @@ function optionalText(params: URLSearchParams, key: string): string | undefined 
   if (raw === null) return undefined;
   const value = raw.trim().replace(/\s+/gu, " ");
   if (!value) return undefined;
-  if (value.length > MAX_SEARCH_LENGTH || /[\u0000-\u001f\u007f]/u.test(value)) {
+  if (value.length > PALWORLD_SEARCH_MAX_LENGTH || /[\u0000-\u001f\u007f]/u.test(value)) {
     throw new PalworldQueryError(`${key} 값이 너무 길거나 허용되지 않는 문자를 포함합니다.`);
   }
   return value;

@@ -11,12 +11,14 @@ import type {
   PalworldPalDetail,
   PalworldPalListResponse,
   PalworldPalSpawnResponse,
+  PalworldReleaseIdentity,
   PalworldSearchResult,
   PalworldSkillDetail,
   PalworldSkillSummary,
   PalworldValidator,
 } from "@streamops/shared";
 import {
+  PALWORLD_SEARCH_MAX_LENGTH,
   validatePalworldBreedingParentsResponse,
   validatePalworldBreedingResultResponse,
   validatePalworldItemDetail,
@@ -37,16 +39,20 @@ export const PALWORLD_VERSION_MISMATCH_EVENT = "palworldversionmismatch";
 const PALWORLD_REQUEST_TIMEOUT_MS = 10_000;
 let observedGameVersion: string | undefined;
 let observedSourceRevision: string | undefined;
+let observedRelease: string | undefined;
+let observedSteamBuildId: string | undefined;
 
 export class PalworldApiError extends Error {
   readonly status: number;
   readonly code: string;
+  readonly retryAfterSeconds?: number;
 
-  constructor(status: number, code: string, message: string) {
+  constructor(status: number, code: string, message: string, retryAfterSeconds?: number) {
     super(message);
     this.name = "PalworldApiError";
     this.status = status;
     this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -70,30 +76,44 @@ function observeActiveRelease(value: unknown): void {
   if (!value || typeof value !== "object") return;
   const metadata = (value as { metadata?: unknown }).metadata;
   if (!metadata || typeof metadata !== "object") return;
-  const version = (metadata as { gameVersion?: unknown }).gameVersion;
-  const revision = (metadata as { sourceRevision?: unknown }).sourceRevision;
+  const releaseIdentity = metadata as Partial<PalworldReleaseIdentity>;
+  const version = releaseIdentity.gameVersion;
+  const revision = releaseIdentity.sourceRevision;
+  const release = releaseIdentity.release;
+  const steamBuildId = releaseIdentity.steamBuildId;
   if (typeof version !== "string" || !version || typeof revision !== "string" || !revision) return;
   if (
     observedGameVersion
     && observedSourceRevision
-    && (observedGameVersion !== version || observedSourceRevision !== revision)
+    && (
+      observedGameVersion !== version
+      || observedSourceRevision !== revision
+      || observedRelease !== release
+      || observedSteamBuildId !== steamBuildId
+    )
   ) {
     dispatchReleaseMismatch(observedGameVersion, version, observedSourceRevision, revision);
     return;
   }
   observedGameVersion = version;
   observedSourceRevision = revision;
+  observedRelease = release;
+  observedSteamBuildId = steamBuildId;
 }
 
 async function readError(response: Response): Promise<{ code: string; message: string }> {
   try {
-    const body = await response.json() as { error?: unknown; message?: unknown };
-    const code = typeof body.error === "string" && /^[A-Z0-9_]{1,128}$/u.test(body.error)
-      ? body.error
+    const body = await response.json() as { code?: unknown; error?: unknown; message?: unknown };
+    const code = typeof body.code === "string" && /^[A-Z0-9_]{1,128}$/u.test(body.code)
+      ? body.code
+      : typeof body.error === "string" && /^[A-Z0-9_]{1,128}$/u.test(body.error)
+        ? body.error
       : `PALWORLD_HTTP_${response.status}`;
     const message = typeof body.message === "string" && body.message.length <= 512
       ? body.message
-      : `Palworld API 요청 실패: ${response.status}`;
+      : typeof body.error === "string" && body.error.length <= 512 && body.error !== code
+        ? body.error
+        : `Palworld API 요청 실패: ${response.status}`;
     return { code, message };
   } catch {
     // JSON 오류 본문이 아니면 아래의 안정적인 상태 메시지를 사용합니다.
@@ -171,7 +191,11 @@ async function publicGet<T>(
     }
     if (!response.ok) {
       const error = await readError(response);
-      throw new PalworldApiError(response.status, error.code, error.message);
+      const retryAfter = response.headers.get("Retry-After");
+      const retryAfterSeconds = retryAfter !== null && /^\d{1,6}$/u.test(retryAfter)
+        ? Number.parseInt(retryAfter, 10)
+        : undefined;
+      throw new PalworldApiError(response.status, error.code, error.message, retryAfterSeconds);
     }
     let body: unknown;
     try {
@@ -227,6 +251,13 @@ export function getPalworldPalSpawns(
 export function searchPalworld(query: string, signal?: AbortSignal): Promise<PalworldSearchResult> {
   const normalized = query.trim();
   if (!normalized) return Promise.reject(new Error("검색어를 입력해 주세요."));
+  if (normalized.length > PALWORLD_SEARCH_MAX_LENGTH) {
+    return Promise.reject(new PalworldApiError(
+      400,
+      "PALWORLD_INVALID_QUERY",
+      `검색어는 ${PALWORLD_SEARCH_MAX_LENGTH}자 이하여야 합니다.`,
+    ));
+  }
   const params = new URLSearchParams({ q: normalized });
   return publicGet(queryPath("/api/palworld/search", params), signal, validatePalworldSearchResult);
 }

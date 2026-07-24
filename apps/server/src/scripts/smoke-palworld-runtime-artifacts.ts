@@ -37,6 +37,10 @@ import {
   loadPalworldMapMarkerArtifact
 } from "../data/palworld-map-marker-artifact.js";
 import {
+  PALWORLD_MAP_IMAGE_MANIFEST_FILE,
+  loadPalworldMapImageManifest
+} from "../data/palworld-map-image-manifest.js";
+import {
   PALWORLD_SPAWN_ARTIFACT_FILE,
   PALWORLD_SPAWN_MANIFEST_FILE,
   createPalworldSpawnProvider,
@@ -48,17 +52,22 @@ const REQUIRED_LEGACY_RELEASE_FILES = [
   "paldex.json",
   "manifest.json",
   "images-manifest.json",
-  "import-report.json",
   "image-use-policy.json",
   "catalog.json",
   "catalog-manifest.json",
   "item-images-manifest.json",
   "element-images-manifest.json",
+  PALWORLD_MAP_IMAGE_MANIFEST_FILE,
   "breeding.json",
   "breeding-manifest.json",
-  "breeding-import-report.json",
+] as const;
+
+const LEGACY_MAP_MARKER_FILES = [
   PALWORLD_MAP_MARKER_ARTIFACT_FILE,
-  PALWORLD_MAP_MARKER_MANIFEST_FILE,
+  PALWORLD_MAP_MARKER_MANIFEST_FILE
+] as const;
+
+const LEGACY_SPAWN_FILES = [
   PALWORLD_SPAWN_ARTIFACT_FILE,
   PALWORLD_SPAWN_MANIFEST_FILE
 ] as const;
@@ -69,11 +78,6 @@ const REQUIRED_TRANSLATION_RUNTIME_FILES = [
   "ko.json",
   "ja.json",
   "reviewed-item-aliases.json"
-] as const;
-
-const REQUIRED_LEGACY_RELEASE_ENTRIES = [
-  ...REQUIRED_LEGACY_RELEASE_FILES,
-  "locales"
 ] as const;
 
 const REQUIRED_LEGACY_MAPPING_FILES = [
@@ -102,6 +106,7 @@ export type PalworldRuntimeLayout =
       release: string;
       releaseDirectory: string;
       releaseRoot: string;
+      compositeArtifactFiles?: readonly string[];
     };
 
 async function pathExists(filePath: string): Promise<boolean> {
@@ -166,7 +171,14 @@ export async function resolvePalworldRuntimeLayout(
     kind: "legacy",
     release: active.manifest.release,
     releaseDirectory: active.manifest.releaseDirectory,
-    releaseRoot: active.releaseRoot
+    releaseRoot: active.releaseRoot,
+    ...(active.manifest.format === "legacy_composite_v2"
+      ? {
+          compositeArtifactFiles: active.manifest.composite.artifacts.map(
+            (artifact) => artifact.file
+          )
+        }
+      : {})
   };
 }
 
@@ -186,6 +198,62 @@ export async function assertRepresentativeRuntimeImages(input: {
       `Palworld runtime image ${index + 1}`
     );
   }));
+}
+
+async function assertExactStaticAssetUrls(input: {
+  releaseStaticRoot: string;
+  release: string;
+  expectedUrls: ReadonlySet<string>;
+}): Promise<void> {
+  const expectedPrefix = `/images/palworld/${input.release}/`;
+  const expectedByDirectory = new Map<string, Set<string>>();
+  for (const imageUrl of input.expectedUrls) {
+    if (!imageUrl.startsWith(expectedPrefix)) {
+      throw new Error("Palworld static asset URL의 release가 active release와 일치하지 않습니다.");
+    }
+    const relative = imageUrl.slice(expectedPrefix.length);
+    const segments = relative.split("/");
+    if (
+      segments.length !== 2
+      || !["pals", "items", "elements", "work", "skills", "maps"].includes(segments[0]!)
+      || !CONTENT_HASH_WEBP_PATTERN.test(segments[1]!)
+    ) {
+      throw new Error("Palworld static asset URL이 허용된 content-hash 경로가 아닙니다.");
+    }
+    const names = expectedByDirectory.get(segments[0]!) ?? new Set<string>();
+    names.add(segments[1]!);
+    expectedByDirectory.set(segments[0]!, names);
+  }
+  await assertRuntimeDirectory(input.releaseStaticRoot, "Palworld release static asset");
+  await assertExactRuntimeFiles(
+    input.releaseStaticRoot,
+    [...expectedByDirectory.keys()],
+    "Palworld release static asset"
+  );
+  for (const [directoryName, expectedNames] of expectedByDirectory) {
+    const directory = path.join(input.releaseStaticRoot, directoryName);
+    await assertRuntimeDirectory(directory, `Palworld ${directoryName} static asset`);
+    await assertExactRuntimeFiles(
+      directory,
+      [...expectedNames],
+      `Palworld ${directoryName} static asset`
+    );
+    for (const fileName of expectedNames) {
+      const filePath = path.join(directory, fileName);
+      await assertRegularRuntimeFile(filePath, `Palworld ${directoryName}/${fileName}`);
+      const bytes = await readFile(filePath);
+      if (
+        bytes.length < 20
+        || bytes.subarray(0, 4).toString("ascii") !== "RIFF"
+        || bytes.subarray(8, 12).toString("ascii") !== "WEBP"
+        || createHash("sha256").update(bytes).digest("hex") !== fileName.slice(0, 64)
+      ) {
+        throw new Error(
+          `Palworld ${directoryName}/${fileName} bytes가 content hash WebP와 일치하지 않습니다.`
+        );
+      }
+    }
+  }
 }
 
 async function assertNoRawRuntimeFiles(root: string): Promise<void> {
@@ -231,13 +299,40 @@ async function validateLegacyRuntime(
   const imageRoot = path.join(staticRoot, "pals");
   const itemImageRoot = path.join(staticRoot, "items");
   const elementImageRoot = path.join(staticRoot, "elements");
+  const markerFilePresence = await Promise.all(
+    LEGACY_MAP_MARKER_FILES.map((file) => pathExists(path.join(releaseRoot, file)))
+  );
+  const spawnFilePresence = await Promise.all(
+    LEGACY_SPAWN_FILES.map((file) => pathExists(path.join(releaseRoot, file)))
+  );
+  if (markerFilePresence.some(Boolean) && !markerFilePresence.every(Boolean)) {
+    throw new Error("Palworld marker artifact와 manifest는 함께 존재해야 합니다.");
+  }
+  if (spawnFilePresence.some(Boolean) && !spawnFilePresence.every(Boolean)) {
+    throw new Error("Palworld spawn artifact와 manifest는 함께 존재해야 합니다.");
+  }
+  const hasMapMarkers = markerFilePresence.every(Boolean);
+  const hasMapSpawns = spawnFilePresence.every(Boolean);
+  const compositeFiles = layout.compositeArtifactFiles;
+  const runtimeReleaseFiles = compositeFiles === undefined
+    ? [
+        ...REQUIRED_LEGACY_RELEASE_FILES,
+        ...(hasMapMarkers ? LEGACY_MAP_MARKER_FILES : []),
+        ...(hasMapSpawns ? LEGACY_SPAWN_FILES : [])
+      ]
+    : compositeFiles.filter((file) => !file.startsWith("locales/"));
+  const runtimeTranslationFiles = compositeFiles === undefined
+    ? [...REQUIRED_TRANSLATION_RUNTIME_FILES]
+    : compositeFiles
+        .filter((file) => file.startsWith("locales/"))
+        .map((file) => file.slice("locales/".length));
 
   await Promise.all([
     assertRuntimeDirectory(translationRoot, "Palworld translation runtime"),
-    ...REQUIRED_LEGACY_RELEASE_FILES.map((fileName) =>
+    ...runtimeReleaseFiles.map((fileName) =>
       assertRegularRuntimeFile(path.join(releaseRoot, fileName), `Palworld release ${fileName}`)
     ),
-    ...REQUIRED_TRANSLATION_RUNTIME_FILES.map((fileName) =>
+    ...runtimeTranslationFiles.map((fileName) =>
       assertRegularRuntimeFile(path.join(translationRoot, fileName), `Palworld translation ${fileName}`)
     ),
     ...REQUIRED_LEGACY_MAPPING_FILES.map((fileName) =>
@@ -246,13 +341,27 @@ async function validateLegacyRuntime(
   ]);
   if (requireExactRuntimeDirectories) {
     await Promise.all([
-      assertExactRuntimeFiles(releaseRoot, REQUIRED_LEGACY_RELEASE_ENTRIES, "Palworld release"),
-      assertExactRuntimeFiles(translationRoot, REQUIRED_TRANSLATION_RUNTIME_FILES, "Palworld translation runtime"),
-      assertExactRuntimeFiles(mappingRoot, REQUIRED_LEGACY_MAPPING_FILES, "Palworld mapping")
+      assertExactRuntimeFiles(
+        releaseRoot,
+        [...runtimeReleaseFiles, "locales"],
+        "Palworld release"
+      ),
+      assertExactRuntimeFiles(translationRoot, runtimeTranslationFiles, "Palworld translation runtime"),
+      assertExactRuntimeFiles(mappingRoot, REQUIRED_LEGACY_MAPPING_FILES, "Palworld mapping"),
+      assertExactRuntimeFiles(
+        path.join(repositoryRoot, `apps/dashboard/${staticDirectory}/images/palworld`),
+        [layout.release],
+        "Palworld static asset root"
+      )
     ]);
   }
 
-  const release = await loadPalworldPaldexStagedRelease({ releaseRoot, mappingRoot, imageRoot });
+  const release = await loadPalworldPaldexStagedRelease({
+    releaseRoot,
+    mappingRoot,
+    imageRoot,
+    requireImportReport: !requireExactRuntimeDirectories
+  });
   if (release.artifact.records.length !== release.manifest.counts.pals) {
     throw new Error("Pal artifact 수가 release manifest와 일치하지 않습니다.");
   }
@@ -266,7 +375,9 @@ async function validateLegacyRuntime(
   await assertRepresentativeRuntimeImages({ imageRoot, activeImages });
 
   const runtimeRelease = await loadPalworldPaldexRuntimeRelease({ releaseRoot, mappingRoot, imageRoot });
-  const breedingSource = await loadPalworldBreedingRuntimeSource(releaseRoot);
+  const breedingSource = await loadPalworldBreedingRuntimeSource(releaseRoot, {
+    requireImportReport: !requireExactRuntimeDirectories
+  });
   const breedingEngine = new PalworldBreedingEngine(breedingSource.artifact);
   if (
     breedingSource.artifact.parameters.length !== breedingSource.manifest.counts.parameters
@@ -316,41 +427,93 @@ async function validateLegacyRuntime(
   ) {
     throw new Error("한국어·일본어 번역 runtime artifact 검증에 실패했습니다.");
   }
-  const mapMarkers = await loadPalworldMapMarkerArtifact(releaseRoot);
-  const mainMapMarkers = mapMarkers.worlds.find((world) => world.world === "main");
-  if (!mainMapMarkers || mainMapMarkers.markers.length < 1) {
-    throw new Error("MainMap 보스 marker runtime artifact가 비어 있습니다.");
-  }
-  const mapAssetPath = path.join(
-    staticRoot,
-    "maps",
-    `${mainMapMarkers.targetMapAssetSha256}.webp`
+  const mapImagesManifest = await loadPalworldMapImageManifest(
+    releaseRoot,
+    layout.release
   );
-  await assertRegularRuntimeFile(mapAssetPath, "Palworld MainMap 정적 WebP");
-  const mapAssetBytes = await readFile(mapAssetPath);
-  if (
-    createHash("sha256").update(mapAssetBytes).digest("hex")
-      !== mainMapMarkers.targetMapAssetSha256
-  ) {
-    throw new Error("Palworld MainMap marker가 참조하는 정적 WebP hash가 일치하지 않습니다.");
+  const expectedStaticUrls = new Set<string>([
+    ...activeImages.flatMap((entry) => entry.imageUrl === null ? [] : [entry.imageUrl]),
+    ...catalog.itemImagesManifest.entries.map((entry) => entry.imageUrl),
+    ...catalog.elementImagesManifest.entries.map((entry) => entry.imageUrl),
+    ...mapImagesManifest.entries.map((entry) => entry.imageUrl)
+  ]);
+  await assertExactStaticAssetUrls({
+    releaseStaticRoot: staticRoot,
+    release: layout.release,
+    expectedUrls: expectedStaticUrls
+  });
+  for (const entry of mapImagesManifest.entries) {
+    const bytes = await readFile(
+      path.join(staticRoot, "maps", entry.outputFileName)
+    );
+    if (bytes.length !== entry.outputBytes) {
+      throw new Error("Palworld map image manifest bytes와 실제 WebP 크기가 일치하지 않습니다.");
+    }
   }
-  const mapSpawns = await loadPalworldSpawnArtifact(releaseRoot);
-  const mainMapSpawns = mapSpawns.worlds.find((world) => world.world === "main");
-  if (
-    !mainMapSpawns
-    || mainMapSpawns.pals.length < 1
-    || mainMapSpawns.pals.every((pal) => pal.points.length === 0)
-  ) {
-    throw new Error("MainMap 일반 스폰 runtime artifact가 비어 있습니다.");
-  }
-  if (mainMapSpawns.targetMapAssetSha256 !== mainMapMarkers.targetMapAssetSha256) {
-    throw new Error("일반 스폰과 보스 marker의 MainMap asset hash가 일치하지 않습니다.");
-  }
-  for (const pal of mainMapSpawns.pals) {
-    if (runtimeRelease.sourceInternalIds[pal.palId] !== pal.sourceInternalId) {
-      throw new Error(
-        "일반 스폰 Pal ID와 sourceInternalId가 active Paldex exact join과 일치하지 않습니다."
+  let mainMapMarkers: Awaited<ReturnType<typeof loadPalworldMapMarkerArtifact>>["worlds"][number] | undefined;
+  if (hasMapMarkers) {
+    try {
+      const mapMarkers = await loadPalworldMapMarkerArtifact(releaseRoot);
+      mainMapMarkers = mapMarkers.worlds.find((world) => world.world === "main");
+      if (!mainMapMarkers || mainMapMarkers.markers.length < 1) {
+        throw new Error("MainMap 보스 marker runtime artifact가 비어 있습니다.");
+      }
+      const mapAssetPath = path.join(
+        staticRoot,
+        "maps",
+        `${mainMapMarkers.targetMapAssetSha256}.webp`
       );
+      if (
+        !mapImagesManifest.entries.some((entry) =>
+          entry.outputSha256 === mainMapMarkers?.targetMapAssetSha256
+        )
+      ) {
+        throw new Error("Palworld marker가 composite map image manifest 밖의 지도를 참조합니다.");
+      }
+      await assertRegularRuntimeFile(mapAssetPath, "Palworld MainMap 정적 WebP");
+      const mapAssetBytes = await readFile(mapAssetPath);
+      if (
+        createHash("sha256").update(mapAssetBytes).digest("hex")
+          !== mainMapMarkers.targetMapAssetSha256
+      ) {
+        throw new Error("Palworld MainMap marker가 참조하는 정적 WebP hash가 일치하지 않습니다.");
+      }
+    } catch (error) {
+      if (requireExactRuntimeDirectories) throw error;
+      mainMapMarkers = undefined;
+    }
+  }
+  let mainMapSpawns: Awaited<ReturnType<typeof loadPalworldSpawnArtifact>>["worlds"][number] | undefined;
+  if (hasMapSpawns) {
+    try {
+      const mapSpawns = await loadPalworldSpawnArtifact(releaseRoot);
+      if (mapSpawns.activation !== "active") {
+        throw new Error("runtime bundle의 일반 스폰 artifact는 activation=active여야 합니다.");
+      }
+      mainMapSpawns = mapSpawns.worlds.find((world) => world.world === "main");
+      if (
+        !mainMapSpawns
+        || mainMapSpawns.pals.length < 1
+        || mainMapSpawns.pals.every((pal) => pal.points.length === 0)
+      ) {
+        throw new Error("MainMap 일반 스폰 runtime artifact가 비어 있습니다.");
+      }
+      if (
+        mainMapMarkers
+        && mainMapSpawns.targetMapAssetSha256 !== mainMapMarkers.targetMapAssetSha256
+      ) {
+        throw new Error("일반 스폰과 보스 marker의 MainMap asset hash가 일치하지 않습니다.");
+      }
+      for (const pal of mainMapSpawns.pals) {
+        if (runtimeRelease.sourceInternalIds[pal.palId] !== pal.sourceInternalId) {
+          throw new Error(
+            "일반 스폰 Pal ID와 sourceInternalId가 active Paldex exact join과 일치하지 않습니다."
+          );
+        }
+      }
+    } catch (error) {
+      if (requireExactRuntimeDirectories) throw error;
+      mainMapSpawns = undefined;
     }
   }
 
@@ -358,8 +521,8 @@ async function validateLegacyRuntime(
     `[palworld-data] legacy runtime artifact smoke 완료: release ${layout.release}, `
     + `${release.artifact.records.length}종, Pal 이미지 ${activeImages.length}개, `
     + `아이템 ${catalog.catalog.items.length}개, 스킬 ${catalog.catalog.skills.length}개, `
-    + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers.markers.length}개, `
-    + `일반 스폰 activation=${mapSpawns.activation} Pal ${mainMapSpawns.pals.length}종, `
+    + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers?.markers.length ?? 0}개, `
+    + `일반 스폰 Pal ${mainMapSpawns?.pals.length ?? 0}종, `
     + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`
   );
 }
@@ -419,32 +582,11 @@ async function assertPakRuntimeStaticAssets(
     return;
   }
   await assertExactRuntimeFiles(palworldRoot, [layout.release], "Palworld static asset root");
-  const releaseStaticRoot = path.join(palworldRoot, layout.release);
-  const actualUrls = new Set<string>();
-  async function visit(directory: string): Promise<void> {
-    for (const entry of await readdir(directory, { withFileTypes: true })) {
-      const absolute = path.join(directory, entry.name);
-      const info = await lstat(absolute);
-      if (info.isSymbolicLink()) {
-        throw new Error("Palworld static asset에 symlink가 포함되어 있습니다.");
-      }
-      if (info.isDirectory()) {
-        await visit(absolute);
-      } else if (!info.isFile() || !CONTENT_HASH_WEBP_PATTERN.test(entry.name)) {
-        throw new Error("Palworld static asset에는 content-hash WebP만 허용됩니다.");
-      } else {
-        const relative = path.relative(releaseStaticRoot, absolute).split(path.sep).join("/");
-        actualUrls.add(`/images/palworld/${layout.release}/${relative}`);
-      }
-    }
-  }
-  await visit(releaseStaticRoot);
-  if (
-    JSON.stringify([...actualUrls].sort())
-    !== JSON.stringify([...expectedUrls].sort())
-  ) {
-    throw new Error("active manifest image URL allowlist와 static asset 집합이 일치하지 않습니다.");
-  }
+  await assertExactStaticAssetUrls({
+    releaseStaticRoot: path.join(palworldRoot, layout.release),
+    release: layout.release,
+    expectedUrls
+  });
 }
 
 export async function preparePalworldRuntimeBundle(input: {
@@ -510,11 +652,34 @@ export async function preparePalworldRuntimeBundle(input: {
       );
       const translationTarget = path.join(releaseTarget, "locales");
       await mkdir(translationTarget, { recursive: true });
+      const optionalRuntimeFiles: string[] = [];
+      if (layout.compositeArtifactFiles === undefined) {
+        try {
+          await loadPalworldMapMarkerArtifact(layout.releaseRoot);
+          optionalRuntimeFiles.push(...LEGACY_MAP_MARKER_FILES);
+        } catch {
+          // source provenance gate를 통과하지 못한 marker는 runtime bundle에서 제외합니다.
+        }
+        try {
+          const spawns = await loadPalworldSpawnArtifact(layout.releaseRoot);
+          if (spawns.activation === "active") optionalRuntimeFiles.push(...LEGACY_SPAWN_FILES);
+        } catch {
+          // candidate 또는 손상된 spawn은 runtime bundle에서 제외합니다.
+        }
+      }
+      const releaseFiles = layout.compositeArtifactFiles === undefined
+        ? [...REQUIRED_LEGACY_RELEASE_FILES, ...optionalRuntimeFiles]
+        : layout.compositeArtifactFiles.filter((file) => !file.startsWith("locales/"));
+      const translationFiles = layout.compositeArtifactFiles === undefined
+        ? [...REQUIRED_TRANSLATION_RUNTIME_FILES]
+        : layout.compositeArtifactFiles
+            .filter((file) => file.startsWith("locales/"))
+            .map((file) => file.slice("locales/".length));
       await Promise.all([
-        ...REQUIRED_LEGACY_RELEASE_FILES.map((file) =>
+        ...releaseFiles.map((file) =>
           copyFile(path.join(layout.releaseRoot, file), path.join(releaseTarget, file))
         ),
-        ...REQUIRED_TRANSLATION_RUNTIME_FILES.map((file) =>
+        ...translationFiles.map((file) =>
           copyFile(path.join(layout.releaseRoot, "locales", file), path.join(translationTarget, file))
         ),
         ...REQUIRED_LEGACY_MAPPING_FILES.map((file) =>

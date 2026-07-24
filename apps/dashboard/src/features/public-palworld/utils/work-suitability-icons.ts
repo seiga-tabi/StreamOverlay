@@ -1,12 +1,14 @@
 import { PALWORLD_WORK_SUITABILITY_TYPES, type PalworldWorkSuitabilityType } from "@streamops/shared";
 import generatedAssets from "../data/palworld-static-assets.generated.json";
 
-const WORK_ICON_PATTERN = /^\/images\/palworld\/work\/[a-f0-9]{64}\.webp$/u;
+const WORK_ICON_PATTERN =
+  /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/work\/[a-f0-9]{64}\.webp$/u;
 
 function verifiedWorkIconUrls(): Readonly<Partial<Record<PalworldWorkSuitabilityType, string>>> {
   const source = generatedAssets.workSource;
   if (
     generatedAssets.schemaVersion !== 1
+    || source.candidateRelease.startsWith("candidate-")
     || source.mappingStatus !== "verified_colored_source_member"
     || source.status !== "operator_acknowledged"
     || source.usageBasis !== "operator_reference_use"

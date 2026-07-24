@@ -21,14 +21,22 @@ import { PalworldNotFoundPage } from "../features/public-palworld/components/Pal
 import { PalworldPalsPage } from "../features/public-palworld/components/PalworldPalsPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
 import { PalworldSearchResults } from "../features/public-palworld/components/PalworldSearchResults";
-import { PalworldSkillsPage } from "../features/public-palworld/components/PalworldSkillsPage";
+import { PalworldSkillsPage, SkillDetailModal } from "../features/public-palworld/components/PalworldSkillsPage";
 import { PalworldSourceFooter } from "../features/public-palworld/components/PalworldSourceFooter";
 import { PalworldStreamersPage } from "../features/public-palworld/components/PalworldStreamersPage";
 import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i18n/palworld-i18n";
 import { PALWORLD_VERSION_MISMATCH_EVENT } from "../features/public-palworld/api/palworld";
 import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldRoute";
 import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
-import { isKnownPalworldPagePath, palworldFocusPalFromParams, palworldTwitchReturnTo, palworldUrl, setPalworldUrl, withQueryParam } from "../features/public-palworld/utils/routes";
+import {
+  isKnownPalworldPagePath,
+  palworldDetailSelectionFromParams,
+  palworldFocusPalFromParams,
+  palworldTwitchReturnTo,
+  palworldUrl,
+  setPalworldUrl,
+  withQueryParam
+} from "../features/public-palworld/utils/routes";
 import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
 import {
   getPublicTwitchFollowedChannels,
@@ -75,13 +83,23 @@ export function PublicPalworldPage({
   const mountedRef = useRef(true);
   const needsFollowedChannels = page === "home" || page === "streamers";
   const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
-  const selectedPalId = params.get("pal")?.trim() || undefined;
-  // 조작된 URL에 두 상세 ID가 함께 있어도 Modal은 하나만 표시합니다.
-  const selectedItemId = selectedPalId ? undefined : params.get("item")?.trim() || undefined;
+  const routeQuery = params.toString();
+  const detailRoute = useMemo(
+    () => palworldDetailSelectionFromParams(params),
+    [routeQuery]
+  );
+  const selectedPalId = detailRoute.selection?.type === "pal" ? detailRoute.selection.id : undefined;
+  const selectedItemId = detailRoute.selection?.type === "item" ? detailRoute.selection.id : undefined;
+  const selectedSkillId = detailRoute.selection?.type === "skill" ? detailRoute.selection.id : undefined;
 
   setActivePublicLocale(locale);
 
   useEffect(() => applyPalworldSeo(knownPage ? page : "home", locale), [knownPage, locale, page]);
+  useEffect(() => {
+    const canonicalQuery = detailRoute.canonicalParams.toString();
+    if (canonicalQuery === routeQuery) return;
+    setPalworldUrl(`${window.location.pathname}${canonicalQuery ? `?${canonicalQuery}` : ""}`, true);
+  }, [detailRoute, routeQuery]);
 
   const refreshTwitchStatus = useCallback(async (): Promise<void> => {
     if (logoutInFlightRef.current) return;
@@ -277,18 +295,19 @@ export function PublicPalworldPage({
 
   const openPalHere = useCallback((id: string) => {
     const current = `${window.location.pathname}${window.location.search}`;
-    setPalworldUrl(withQueryParam(withQueryParam(current, "item"), "pal", id));
+    setPalworldUrl(withQueryParam(withQueryParam(withQueryParam(current, "item"), "skill"), "pal", id));
   }, []);
 
   const openItemHere = useCallback((id: string) => {
     const current = `${window.location.pathname}${window.location.search}`;
-    setPalworldUrl(withQueryParam(withQueryParam(current, "pal"), "item", id));
+    setPalworldUrl(withQueryParam(withQueryParam(withQueryParam(current, "pal"), "skill"), "item", id));
   }, []);
 
   const closeDetail = useCallback(() => {
+    if (!detailRoute.selection) return;
     const current = `${window.location.pathname}${window.location.search}`;
-    setPalworldUrl(withQueryParam(withQueryParam(current, "pal"), "item"), true);
-  }, []);
+    setPalworldUrl(withQueryParam(current, detailRoute.selection.type), true);
+  }, [detailRoute.selection]);
 
   const headerSearch = page === "home" ? undefined : (
     <PalworldSearchForm
@@ -396,6 +415,14 @@ export function PublicPalworldPage({
           <ItemDetailModal itemId={selectedItemId} locale={locale} onClose={closeDetail} onOpenPal={openPalPage} onOpenItem={openItemPage} />
         </Suspense>
       ) : null}
+      {selectedSkillId ? (
+        <SkillDetailModal
+          locale={locale}
+          onClose={closeDetail}
+          onOpenPal={openPalPage}
+          skillId={selectedSkillId}
+        />
+      ) : null}
       <ToastProvider position="bottom-right">
         <ToastViewport>
           {versionMismatch ? (
@@ -407,7 +434,9 @@ export function PublicPalworldPage({
           ) : null}
         </ToastViewport>
       </ToastProvider>
-      <span className="palworld-sr-version" aria-live="polite">{text.dataVersion}</span>
+      <span className="palworld-sr-version" aria-live="polite">
+        {versionMismatch ? text.versionMismatch : ""}
+      </span>
     </AppShell>
   );
 }

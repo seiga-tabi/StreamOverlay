@@ -145,6 +145,7 @@ test("내부 config와 secret 오류는 브라우저용 안전 상태 코드로 
     ["policy_invalid", "policy_missing"],
     ["key_missing", "key_missing"],
     ["key_invalid_file", "key_invalid"],
+    ["key_permission_denied", "key_permission_denied"],
     ["key_invalid_encoding", "key_invalid"],
     ["key_weak", "key_invalid"],
     ["key_reused", "key_invalid"],
@@ -464,7 +465,7 @@ test("secret 파일은 owner 전용 0400 또는 0600 권한만 허용한다", ()
     assert.equal(loadFixture(context).encryptionKey, strongBase64A);
     for (const mode of [0o444, 0o644, 0o700]) {
       chmodSync(context.secretPath, mode);
-      assertConfigError(() => loadFixture(context), "key_invalid_file");
+      assertConfigError(() => loadFixture(context), "key_permission_denied");
     }
   } finally {
     context.dispose();

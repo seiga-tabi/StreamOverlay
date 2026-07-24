@@ -1,5 +1,10 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import type { PalworldItemSummary, PalworldPalSummary, PalworldSearchResult } from "@streamops/shared";
+import {
+  PALWORLD_SEARCH_MAX_LENGTH,
+  type PalworldItemSummary,
+  type PalworldPalSummary,
+  type PalworldSearchResult
+} from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { PalworldApiError, searchPalworld } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
@@ -56,7 +61,13 @@ export function PalworldSearchForm({
   const formRef = useRef<HTMLFormElement>(null);
   const requestIdRef = useRef(0);
   const text = palworldI18n[locale];
-  const showPanel = focused && query.trim().length > 0 && (loading || result !== null || requestError !== null);
+  const normalizedQuery = query.trim();
+  const queryTooLong = normalizedQuery.length > PALWORLD_SEARCH_MAX_LENGTH;
+  const inputErrorId = `${listId}-input-error`;
+  const showPanel = focused
+    && normalizedQuery.length > 0
+    && !queryTooLong
+    && (loading || result !== null || requestError !== null);
 
   useEffect(() => setQuery(initialQuery), [initialQuery]);
 
@@ -66,7 +77,7 @@ export function PalworldSearchForm({
     setResult(null);
     setRequestError(null);
     setActiveIndex(-1);
-    if (!normalized) {
+    if (!normalized || normalized.length > PALWORLD_SEARCH_MAX_LENGTH) {
       setLoading(false);
       return undefined;
     }
@@ -106,7 +117,7 @@ export function PalworldSearchForm({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = query.trim();
-    if (!normalized) return;
+    if (!normalized || normalized.length > PALWORLD_SEARCH_MAX_LENGTH) return;
     setFocused(false);
     onSearch(normalized);
   }
@@ -159,6 +170,7 @@ export function PalworldSearchForm({
         <span className="palworld-search-icon" aria-hidden="true">⌕</span>
         <input
           type="search"
+          maxLength={PALWORLD_SEARCH_MAX_LENGTH}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onFocus={() => setFocused(true)}
@@ -171,6 +183,8 @@ export function PalworldSearchForm({
           aria-controls={showPanel ? listId : undefined}
           aria-expanded={showPanel}
           aria-activedescendant={activeOptionId}
+          aria-invalid={queryTooLong}
+          aria-describedby={queryTooLong ? inputErrorId : undefined}
         />
         {query ? (
           <button className="palworld-search-clear" type="button" aria-label={text.searchReset} onClick={() => {
@@ -180,10 +194,21 @@ export function PalworldSearchForm({
             setActiveIndex(-1);
           }}>×</button>
         ) : null}
-        <button className="palworld-search-submit" type="submit" disabled={!query.trim()} data-ko={palworldI18n.ko.searchAction} data-ja={palworldI18n.ja.searchAction}>
+        <button className="palworld-search-submit" type="submit" disabled={!normalizedQuery || queryTooLong} data-ko={palworldI18n.ko.searchAction} data-ja={palworldI18n.ja.searchAction}>
           {text.searchAction}
         </button>
       </div>
+      {queryTooLong ? (
+        <p
+          className="yoro-form-error"
+          id={inputErrorId}
+          role="alert"
+          data-ko={palworldI18n.ko.searchTooLong}
+          data-ja={palworldI18n.ja.searchTooLong}
+        >
+          {text.searchTooLong}
+        </p>
+      ) : null}
       {showPanel ? (
         <div className="palworld-autocomplete" id={listId} role="listbox" aria-label={text.autocomplete}>
           {loading ? <p role="status" data-ko={palworldI18n.ko.searching} data-ja={palworldI18n.ja.searching}>{text.searching}</p> : null}

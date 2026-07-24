@@ -6,6 +6,7 @@ import path from "node:path";
 
 const {
   loadPalworldDataService,
+  PalworldDomainUnavailableError,
   PalworldDataService,
   PalworldRecordNotFoundError
 } = await import("../dist/services/palworld-data.js");
@@ -76,11 +77,13 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
     },
     {
       pals: ["ready", 287, "1.0.1"],
-      items: ["incomplete", 1847, "1.0.1.100619"],
+      items: ["incomplete", 1847, "1.0.1"],
       breeding: ["incomplete", 41_329, "1.0.1"],
-      skills: ["incomplete", 566, "1.0.1.100619"]
+      skills: ["incomplete", 566, "1.0.1"]
     }
   );
+  assert.equal(meta.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
+  assert.equal(meta.domains.skills.domainMetadata.gameVersion, "1.0.1.100619");
   assert.deepEqual(meta.coverage?.palDetails, { available: 270, missing: 17, total: 287 });
   assert.deepEqual(meta.coverage?.itemImages, { available: 1762, missing: 85, total: 1847 });
   assert.deepEqual(meta.coverage?.skillDetails, { available: 564, missing: 2, total: 566 });
@@ -173,7 +176,8 @@ test("통합 검색은 한국어, 일본어, 영어, 도감 번호와 ID를 지�
   assert.equal(mixed.domains.pals.status, "ready");
   assert.equal(mixed.domains.pals.metadata.gameVersion, "1.0.1");
   assert.equal(mixed.domains.items.status, "incomplete");
-  assert.equal(mixed.domains.items.metadata.gameVersion, "1.0.1.100619");
+  assert.equal(mixed.domains.items.metadata.gameVersion, "1.0.1");
+  assert.equal(mixed.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
 
   const limited = service.search("a", 1);
   assert.equal(limited.pals.length <= 1, true);
@@ -348,15 +352,19 @@ test("손상된 catalog와 누락된 교배 artifact는 sample 결과로 조용�
   const meta = fallback.meta();
   assert.equal(meta.domains.pals.status, "incomplete");
   assert.equal(meta.domains.pals.recordCount, 287);
-  assert.equal(meta.domains.items.status, "sample");
-  assert.equal(meta.domains.items.metadata.gameVersion, "sample-baseline");
+  assert.equal(meta.domains.items.status, "unavailable");
+  assert.equal(meta.domains.items.recordCount, 0);
+  assert.equal(meta.domains.items.metadata.gameVersion, "1.0.1");
   assert.equal(meta.domains.breeding.status, "incomplete");
   assert.equal(meta.domains.breeding.recordCount, 0);
   assert.equal(meta.domains.breeding.metadata.gameVersion, "1.0.1");
-  assert.equal(meta.domains.skills, undefined);
+  assert.equal(meta.domains.skills.status, "unavailable");
+  assert.equal(meta.domains.skills.recordCount, 0);
   assert.equal(meta.coverage, undefined);
   assert.equal(fallback.getPal("lamball").descriptionEn.length > 0, true);
   assert.deepEqual(fallback.getPal("lamball").drops, []);
+  assert.throws(() => fallback.listItems({ sort: "name", order: "asc", page: 1, limit: 10 }), PalworldDomainUnavailableError);
+  assert.throws(() => fallback.listSkills({ sort: "name", order: "asc", page: 1, limit: 10 }), PalworldDomainUnavailableError);
   assert.equal(fallback.breeding({ parentA: "lamball", parentB: "cattiva" }).state, "data_unavailable");
 });
 

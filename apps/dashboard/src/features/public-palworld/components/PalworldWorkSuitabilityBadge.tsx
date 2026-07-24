@@ -1,5 +1,5 @@
 import type { PalworldWorkSuitabilityType } from "@streamops/shared";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { workLabel } from "../utils/labels";
 import { workSuitabilityIconUrl } from "../utils/work-suitability-icons";
@@ -73,6 +73,7 @@ export function PalworldWorkSuitabilityBadge({
   const labelJa = `${workLabel(type, "ja")}: ${palworldI18n.ja.levelPrefix}${level}`;
   const iconUrl = workSuitabilityIconUrl(type);
   const [imageFailed, setImageFailed] = useState(false);
+  const descriptionId = useId();
 
   useEffect(() => {
     setImageFailed(false);
@@ -88,7 +89,10 @@ export function PalworldWorkSuitabilityBadge({
       data-ko={labelKo}
       data-work-type={type}
       role="listitem"
-      title={accessibleLabel}
+      {...(compact ? {
+        "aria-describedby": descriptionId,
+        tabIndex: 0
+      } : {})}
     >
       {imageFailed || iconUrl === undefined ? (
         <WorkSuitabilityGlyph type={type} />
@@ -111,6 +115,12 @@ export function PalworldWorkSuitabilityBadge({
         compact ? "yoro-u-sr-only" : "",
       ].filter(Boolean).join(" ")}>{label}</span>
       <strong>{levelText}</strong>
+      {compact ? (
+        <>
+          <span className="yoro-u-sr-only" id={descriptionId}>{accessibleLabel}</span>
+          <span aria-hidden="true" className="palworld-work-suitability-tooltip">{accessibleLabel}</span>
+        </>
+      ) : null}
     </span>
   );
 }

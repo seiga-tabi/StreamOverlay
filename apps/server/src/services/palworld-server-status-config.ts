@@ -35,6 +35,7 @@ export type PalworldServerStatusConfigErrorCode =
   | "policy_invalid"
   | "key_missing"
   | "key_invalid_file"
+  | "key_permission_denied"
   | "key_invalid_encoding"
   | "key_weak"
   | "key_reused"
@@ -53,13 +54,15 @@ export type PalworldServerStatusAvailabilityCode =
   | "config_invalid"
   | "policy_missing"
   | "key_missing"
-  | "key_invalid";
+  | "key_invalid"
+  | "key_permission_denied";
 
 export function palworldServerStatusAvailabilityCode(error: unknown): PalworldServerStatusAvailabilityCode {
   if (!(error instanceof PalworldServerStatusConfigError)) return "config_invalid";
   if (error.code === "config_missing") return "config_missing";
   if (error.code === "policy_missing" || error.code === "policy_invalid") return "policy_missing";
   if (error.code === "key_missing") return "key_missing";
+  if (error.code === "key_permission_denied") return "key_permission_denied";
   if (error.code.startsWith("key_")) return "key_invalid";
   return "config_invalid";
 }
@@ -143,6 +146,9 @@ function readRegularFile(
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === "ENOENT") return configError(kind === "config" ? "config_missing" : "key_missing");
+    if (kind === "key" && (code === "EACCES" || code === "EPERM")) {
+      return configError("key_permission_denied");
+    }
     return configError(kind === "config" ? "config_invalid_file" : "key_invalid_file");
   }
   try {
@@ -151,7 +157,7 @@ function readRegularFile(
       return configError(kind === "config" ? "config_invalid_file" : "key_invalid_file");
     }
     const mode = stat.mode & 0o777;
-    if (kind === "key" && ![0o400, 0o600].includes(mode)) configError("key_invalid_file");
+    if (kind === "key" && ![0o400, 0o600].includes(mode)) configError("key_permission_denied");
     if (kind === "config" && (mode & 0o022) !== 0) configError("config_invalid_file");
     const raw = fs.readFileSync(descriptor, "utf8");
     if (Buffer.byteLength(raw, "utf8") > maxBytes) {
@@ -160,6 +166,10 @@ function readRegularFile(
     return raw;
   } catch (error) {
     if (error instanceof PalworldServerStatusConfigError) throw error;
+    const code = (error as NodeJS.ErrnoException).code;
+    if (kind === "key" && (code === "EACCES" || code === "EPERM")) {
+      return configError("key_permission_denied");
+    }
     return configError(kind === "config" ? "config_invalid_file" : "key_invalid_file");
   } finally {
     fs.closeSync(descriptor);

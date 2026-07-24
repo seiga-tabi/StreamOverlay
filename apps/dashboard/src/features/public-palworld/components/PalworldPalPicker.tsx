@@ -1,5 +1,9 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import type { PalworldPalReference, PalworldPalSummary } from "@streamops/shared";
+import {
+  PALWORLD_SEARCH_MAX_LENGTH,
+  type PalworldPalReference,
+  type PalworldPalSummary
+} from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { PalworldApiError, searchPalworld } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
@@ -56,9 +60,11 @@ export function PalworldPalPicker({
   const listId = useId();
   const statusId = `${listId}-status`;
   const text = palworldI18n[locale];
+  const normalizedQuery = query.trim();
+  const queryTooLong = normalizedQuery.length > PALWORLD_SEARCH_MAX_LENGTH;
 
   useEffect(() => {
-    if (!query.trim() || selected) {
+    if (!query.trim() || query.trim().length > PALWORLD_SEARCH_MAX_LENGTH || selected) {
       setSuggestions([]);
       setRequestState("idle");
       setActiveIndex(-1);
@@ -148,10 +154,12 @@ export function PalworldPalPicker({
     </div>;
   }
 
-  const describedBy = requestState !== "idle" && requestState !== "success"
+  const describedBy = queryTooLong
+    ? statusId
+    : requestState !== "idle" && requestState !== "success"
     ? statusId
     : undefined;
-  const popupOpen = focused && Boolean(query.trim());
+  const popupOpen = focused && Boolean(normalizedQuery) && !queryTooLong;
   const suggestionsOpen = popupOpen && requestState === "success";
   const errorKey: "searchError" | "palDataUnavailable" | "apiNetworkError" | "apiTimeout" | "apiInvalidResponse" =
     requestState === "data_unavailable"
@@ -169,6 +177,7 @@ export function PalworldPalPicker({
     <input
       id={`${listId}-input`}
       type="search"
+      maxLength={PALWORLD_SEARCH_MAX_LENGTH}
       value={query}
       onChange={(event) => setQuery(event.target.value)}
       onFocus={() => setFocused(true)}
@@ -181,7 +190,13 @@ export function PalworldPalPicker({
       aria-controls={suggestionsOpen ? listId : undefined}
       aria-activedescendant={suggestionsOpen && activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
       aria-describedby={describedBy}
+      aria-invalid={queryTooLong}
     />
+    {queryTooLong ? (
+      <div className="palworld-picker-list palworld-picker-error" id={statusId} role="alert">
+        <p data-ko={palworldI18n.ko.searchTooLong} data-ja={palworldI18n.ja.searchTooLong}>{text.searchTooLong}</p>
+      </div>
+    ) : null}
     {suggestionsOpen ? <div className="palworld-picker-list" id={listId} role="listbox" aria-label={text.autocomplete}>
       {suggestions.map((pal, index) => {
         const name = resolvePalworldName(pal, locale);

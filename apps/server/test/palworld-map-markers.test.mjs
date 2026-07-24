@@ -60,8 +60,8 @@ function artifact(activation = "active") {
       archiveSha256: "a".repeat(64),
       sourceMember: "Pal/DataTable/UI/DT_BossSpawnerLoactionData.json",
       sourceMemberSha256: "b".repeat(64),
-      sourceGameVersion: null,
-      sourceSteamBuildId: null,
+      sourceGameVersion: activation === "active" ? metadata.gameVersion : null,
+      sourceSteamBuildId: activation === "active" ? "fixture-build-001" : null,
       rightsVerified: false,
       usageBasis: "operator_reference_use"
     },
@@ -147,8 +147,8 @@ test("active overlay만 Pal 참조를 exact join하여 ready marker로 반환한
   assert.equal(main.res.statusCode, 200);
   assert.equal(main.body.state, "ready");
   assert.equal(main.body.markers[0].pal.nameKo, "아누비스");
-  assert.equal(main.body.overlay.sourceGameVersion, null);
-  assert.equal(main.body.overlay.sourceSteamBuildId, null);
+  assert.equal(main.body.overlay.sourceGameVersion, metadata.gameVersion);
+  assert.equal(main.body.overlay.sourceSteamBuildId, "fixture-build-001");
   assert.equal(
     main.body.overlay.compatibilityBasis,
     "exact_map_geometry_and_coordinate_transform"
@@ -165,6 +165,17 @@ test("active overlay만 Pal 참조를 exact join하여 ready marker로 반환한
       palworldDataService: service
     }),
     /active/u
+  );
+  assert.throws(
+    () => createPalworldMapMarkerArtifact({
+      ...artifact(),
+      source: {
+        ...artifact().source,
+        sourceGameVersion: null,
+        sourceSteamBuildId: null
+      }
+    }),
+    /sourceGameVersion과 sourceSteamBuildId/u
   );
   assert.throws(
     () => createPalworldMapMarkerProvider({
