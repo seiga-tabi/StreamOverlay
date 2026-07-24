@@ -237,39 +237,86 @@ test("PAK relation 대상은 도감 공개 여부를 exact source 필드로 분�
   );
 });
 
-test("work icon mapping은 알려진 semantic ID만 허용하고 중복 의미를 거부한다", () => {
+test("work icon mapping은 공개 작업 적성 전체와 제외 source를 exact 분류한다", () => {
   const candidateId = `candidate-${ARCHIVE_SHA256.slice(0, 16)}`;
-  const sourceMember = (suffix) =>
-    `Pal/Texture/UI/InGame/SkillIcon/T_icon_skill_pal_WorkRank_${suffix}.png`;
-  const mapping = (entries) => ({
+  const sourceMember = (suffix) => `Pal/Texture/UI/InGame/T_icon_palwork_${suffix}.png`;
+  const publicEntries = [
+    ["kindling", "00"],
+    ["watering", "01"],
+    ["planting", "02"],
+    ["generating_electricity", "03"],
+    ["handiwork", "04"],
+    ["gathering", "05"],
+    ["lumbering", "06"],
+    ["mining", "07"],
+    ["medicine_production", "08"],
+    ["cooling", "10"],
+    ["transporting", "11"],
+    ["farming", "12"]
+  ].map(([id, suffix]) => ({ id, sourceMember: sourceMember(suffix) }));
+  const exclusions = [
+    {
+      sourceMember: sourceMember("09"),
+      reason: "source_only_oil_extraction_not_in_public_work_enum"
+    },
+    {
+      sourceMember: sourceMember("13"),
+      reason: "semantic_meaning_not_verified"
+    },
+    {
+      sourceMember: sourceMember("90"),
+      reason: "not_a_public_work_suitability_icon"
+    }
+  ];
+  const mapping = (entries, excludedSourceMembers = [], status = "verified") => ({
     schemaVersion: 1,
     candidateRelease: candidateId,
     sourceArchiveSha256: ARCHIVE_SHA256,
-    status: "verified",
-    availableSourceMembers: entries.map((entry) => entry.sourceMember),
-    entries
+    status,
+    availableSourceMembers: [
+      ...entries.map((entry) => entry.sourceMember),
+      ...excludedSourceMembers.map((entry) => entry.sourceMember)
+    ].sort(),
+    entries,
+    excludedSourceMembers
   });
 
-  assert.deepEqual(
-    parseWorkAssetMap(mapping([
-      { id: "oil_extraction", sourceMember: sourceMember("OilExtraction") }
-    ]), ARCHIVE_SHA256, candidateId).entries,
-    [{ id: "oil_extraction", sourceMember: sourceMember("OilExtraction") }]
+  const parsed = parseWorkAssetMap(
+    mapping(publicEntries, exclusions),
+    ARCHIVE_SHA256,
+    candidateId
   );
+  assert.equal(parsed.entries.length, 12);
+  assert.deepEqual(parsed.excludedSourceMembers, exclusions);
 
   assert.throws(
     () => parseWorkAssetMap(mapping([
-      { id: "unknown_work", sourceMember: sourceMember("Unknown") }
-    ]), ARCHIVE_SHA256, candidateId),
+      { id: "unknown_work", sourceMember: sourceMember("00") }
+    ], [], "blocked_pending_semantic_mapping"), ARCHIVE_SHA256, candidateId),
     /허용된 work semantic ID/u
   );
 
   assert.throws(
     () => parseWorkAssetMap(mapping([
-      { id: "mining", sourceMember: sourceMember("MiningA") },
-      { id: "mining", sourceMember: sourceMember("MiningB") }
-    ]), ARCHIVE_SHA256, candidateId),
+      { id: "mining", sourceMember: sourceMember("07") },
+      { id: "mining", sourceMember: sourceMember("13") }
+    ], [], "blocked_pending_semantic_mapping"), ARCHIVE_SHA256, candidateId),
     /ID 또는 source member가 중복/u
+  );
+
+  assert.throws(
+    () => parseWorkAssetMap(
+      {
+        ...mapping(publicEntries, exclusions.slice(0, 2)),
+        availableSourceMembers: [
+          ...mapping(publicEntries, exclusions.slice(0, 2)).availableSourceMembers,
+          sourceMember("90")
+        ].sort()
+      },
+      ARCHIVE_SHA256,
+      candidateId
+    ),
+    /공개 작업 적성 전체 mapping과 source 분류/u
   );
 });
 

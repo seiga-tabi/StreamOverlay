@@ -59,7 +59,7 @@
   "workSource": {
     "candidateRelease": "candidate-1248184a4b527d94",
     "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
-    "mappingStatus": "verified_semantic_source_member",
+    "mappingStatus": "verified_colored_source_member",
     "status": "operator_acknowledged",
     "usageBasis": "operator_reference_use",
     "rightsVerified": false
@@ -67,75 +67,75 @@
   "work": [
     {
       "id": "cooling",
-      "imageUrl": "/images/palworld/work/46bca476500a504466151f8511c9dc6819736defce27920ce104f2fe793acdf4.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/c92ed65193de060c52bb31808f63f02d829ed58ec79b2cf4c4f006290f3936ea.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "farming",
-      "imageUrl": "/images/palworld/work/676d4dcda05f916c4e371658c01f3aacc27c42be9c99a6d12c9462ea234f05e3.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/c5524f86524833beb7f3a1e1e7e1062fe5dd1076ce72424b1ec85737a952712c.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "gathering",
-      "imageUrl": "/images/palworld/work/98b87c79f6c820516cc4369f20dfa8a7b9a8f0ca6aab3fcc77eafdd7f10d129f.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/511697f6b45600a63245aa69359aeb8a8e9d38a4c517254ba8d98572bf652c43.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "generating_electricity",
-      "imageUrl": "/images/palworld/work/6876b398c5e12376264bae50a81a8c0099abbf2bce0ad5fb8d2c4024daed384d.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/330c83c9024fedf4ed01331be29fb46d90f0aa623fbdb44955dd2fad6f216b43.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "handiwork",
-      "imageUrl": "/images/palworld/work/d36bb5d9bdd4ae26f25866b9a898ea1f36e9dcdb37618ac6d0b1cc106ececbdb.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/4a84b2f67d078b8d154f731c38ef4b8959500aded1101771d53382f35ef58e4f.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "kindling",
-      "imageUrl": "/images/palworld/work/b3cc1e2c639518aa301e3c09b00f7311e5e370c1625479b7be567f975205f5d7.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/cb62212b59bb8775234a4a62a821406d2e27aa539e94fdb392b973bc4b1153a6.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "lumbering",
-      "imageUrl": "/images/palworld/work/8d3a881b4c88c89d961934705415b48b73bfc081dfc9c7b9b26e114c4c64c805.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/964f1f2ed06bb2d37c0e0cfb8653f4b250e39f424670070e75a36fdabe9d9d3b.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "medicine_production",
-      "imageUrl": "/images/palworld/work/80369104637dcbee733be8c5fbac51cfaf8ef5ab2437b83ccd67ec124b0c3e21.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/0a8dadd2a324c3026aa24616d20e6d2a902768f7a955a635328337d28c6839cb.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "mining",
-      "imageUrl": "/images/palworld/work/bb1168693e53ab786f71f6f1219682b3767d241deab37d96add1b3e0e02931b0.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/23463dad245f9a71d1a048e0bb25a31ddf70eab0ea9b5fb85996d5df121ae968.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "planting",
-      "imageUrl": "/images/palworld/work/642132c5fdfd8092b13eee504b61a644523ea1951782898d2a434d5569433433.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/8b9217d8248508c9492b6816cf3fd45070b0a25c8c5ca976c2838275d3270a84.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "transporting",
-      "imageUrl": "/images/palworld/work/8ef549ee6a465bceddb45b0c2e39a98a59a7e0915d2dc5e19cd60789293c70fc.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/49b764764b1d064a704e84f5a1d1915917086a38d4346b9db64430444eff0b94.webp",
+      "width": 64,
+      "height": 64
     },
     {
       "id": "watering",
-      "imageUrl": "/images/palworld/work/8efad84b5747b558c0883fa7b094803e8da0e02862da67458a068ef9ad83aa0b.webp",
-      "width": 128,
-      "height": 128
+      "imageUrl": "/images/palworld/work/da8dedab7a60d51cd0762b876d31de53404f25814f55d9e302b91930a993b5a1.webp",
+      "width": 64,
+      "height": 64
     }
   ],
   "map": {

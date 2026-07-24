@@ -7,7 +7,7 @@ function verifiedWorkIconUrls(): Readonly<Partial<Record<PalworldWorkSuitability
   const source = generatedAssets.workSource;
   if (
     generatedAssets.schemaVersion !== 1
-    || source.mappingStatus !== "verified_semantic_source_member"
+    || source.mappingStatus !== "verified_colored_source_member"
     || source.status !== "operator_acknowledged"
     || source.usageBasis !== "operator_reference_use"
     || source.rightsVerified
@@ -18,8 +18,8 @@ function verifiedWorkIconUrls(): Readonly<Partial<Record<PalworldWorkSuitability
     if (
       !PALWORLD_WORK_SUITABILITY_TYPES.includes(entry.id as PalworldWorkSuitabilityType)
       || !WORK_ICON_PATTERN.test(entry.imageUrl)
-      || entry.width !== 128
-      || entry.height !== 128
+      || entry.width !== 64
+      || entry.height !== 64
     ) continue;
     const id = entry.id as PalworldWorkSuitabilityType;
     if (entries.has(id)) {

@@ -20,6 +20,7 @@ import { PalworldItemReferenceButton } from "../src/features/public-palworld/com
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
 import {
   clampPalworldMapView,
+  focusPalworldMapViewAt,
   isLocalPalworldMapUrl,
   PALWORLD_WORLD_MAP_IMAGE_URL,
   PalworldBossMarkerLayer,
@@ -36,6 +37,10 @@ import { PalworldPalStatsGraph } from "../src/features/public-palworld/component
 import { PalworldPalPicker } from "../src/features/public-palworld/components/PalworldPalPicker";
 import { PalworldNotFoundPage } from "../src/features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldPageErrorBoundary } from "../src/features/public-palworld/components/PalworldPageErrorBoundary";
+import {
+  filterPalworldBossMarkers,
+  PalworldPalLocationMap,
+} from "../src/features/public-palworld/components/PalworldPalLocationMap";
 import { PalworldWorkSuitabilityBadge } from "../src/features/public-palworld/components/PalworldWorkSuitabilityBadge";
 import generatedStaticAssets from "../src/features/public-palworld/data/palworld-static-assets.generated.json";
 import { palworldI18n } from "../src/features/public-palworld/i18n/palworld-i18n";
@@ -653,6 +658,15 @@ test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 
     zoomPalworldMapViewAt(zoomed, 1, { x: 500, y: 400 }, 1_000, 800),
     { x: 0, y: 0, zoom: 1 },
   );
+
+  assert.deepEqual(
+    focusPalworldMapViewAt({ normalizedX: 0.25, normalizedY: 0.75 }, 1_000, 800),
+    { x: 0, y: -800, zoom: 2 },
+  );
+  assert.deepEqual(
+    focusPalworldMapViewAt({ normalizedX: 0.5, normalizedY: 0.5 }, 1_000, 800),
+    { x: -500, y: -400, zoom: 2 },
+  );
 });
 
 test("월드 지도 marker layer는 지도 변환 평면 안에서 별도 상호작용 요소를 받을 수 있다", () => {
@@ -692,24 +706,114 @@ test("월드 지도 보스 marker는 정규화 좌표와 현지화 이름·레�
     normalizedY: 0.75,
   };
   const korean = renderToStaticMarkup(
-    <PalworldBossMarkerLayer locale="ko" markers={[marker]} onOpenPal={() => undefined} zoom={2} />,
+    <PalworldBossMarkerLayer focusedPalId="anubis" locale="ko" markers={[marker]} onOpenPal={() => undefined} zoom={2} />,
   );
   const japanese = renderToStaticMarkup(
     <PalworldBossMarkerLayer locale="ja" markers={[marker]} onOpenPal={() => undefined} zoom={2} />,
   );
+  const unmatched = renderToStaticMarkup(
+    <PalworldBossMarkerLayer focusedPalId="Anubis" locale="ko" markers={[marker]} onOpenPal={() => undefined} zoom={2} />,
+  );
 
   assert.match(korean, /data-map-interactive="true"/u);
+  assert.match(korean, /aria-current="location"/u);
+  assert.match(korean, /data-focused="true"/u);
   assert.match(korean, /aria-label="필드 보스: 아누비스, Lv\.47"/u);
-  assert.match(korean, /left:25%;top:75%/u);
+  assert.match(korean, /left:25%/u);
+  assert.match(korean, /top:75%/u);
   assert.match(korean, /--palworld-map-marker-inverse-scale:0\.5/u);
   assert.match(japanese, /aria-label="フィールドボス: アヌビス, Lv\.47"/u);
   assert.doesNotMatch(japanese, /フィールドボス: Anubis/u);
+  assert.doesNotMatch(unmatched, /aria-current|data-focused/u);
 
   const pageSource = readFileSync(
     new URL("../src/pages/PublicPalworldPage.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(pageSource, /<PalworldMapPage locale=\{locale\} onOpenPal=\{openPalHere\}/u);
+  assert.match(pageSource, /<PalworldMapPage focusPalId=\{focusPalId\} locale=\{locale\} onOpenPal=\{openPalHere\}/u);
+  assert.match(pageSource, /onOpenMap=\{openPalMap\}/u);
+});
+
+test("Pal 상세 위치는 canonical ID로 필드 보스를 exact filter하고 한국어·일본어 i18n을 연결한다", () => {
+  const anubisMarker: PalworldMapMarker = {
+    id: "main-anubis-001",
+    sourceRowId: "Boss_Anubis",
+    sourceInternalId: "Anubis",
+    pal: {
+      id: "anubis",
+      number: 100,
+      nameKo: "아누비스",
+      nameJa: "アヌビス",
+      nameEn: "Anubis",
+      elements: ["ground"],
+    },
+    level: 47,
+    normalizedX: 0.25,
+    normalizedY: 0.75,
+  };
+  const penkingMarker: PalworldMapMarker = {
+    ...anubisMarker,
+    id: "main-penking-001",
+    sourceRowId: "Boss_Penking",
+    sourceInternalId: "Penking",
+    pal: {
+      id: "penking",
+      number: 11,
+      nameKo: "펭킹",
+      nameJa: "キャプペン",
+      nameEn: "Penking",
+      elements: ["water", "ice"],
+    },
+  };
+  const secondAnubisMarker: PalworldMapMarker = {
+    ...anubisMarker,
+    id: "main-anubis-002",
+    sourceRowId: "Boss_Anubis_02",
+    normalizedX: 0.6,
+    normalizedY: 0.4,
+  };
+  const markers = [anubisMarker, penkingMarker, secondAnubisMarker];
+
+  assert.deepEqual(
+    filterPalworldBossMarkers(markers, "anubis").map((marker) => marker.id),
+    ["main-anubis-001", "main-anubis-002"],
+  );
+  assert.deepEqual(filterPalworldBossMarkers(markers, "Anubis"), []);
+  assert.deepEqual(filterPalworldBossMarkers(markers, "anubi"), []);
+
+  const korean = renderToStaticMarkup(
+    <PalworldPalLocationMap
+      locale="ko"
+      onOpenFullMap={() => undefined}
+      palId="anubis"
+    />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldPalLocationMap
+      locale="ja"
+      onOpenFullMap={() => undefined}
+      palId="anubis"
+    />,
+  );
+  assert.match(korean, /data-testid="pal-detail-location"/u);
+  assert.match(korean, />필드 보스 출현 위치</u);
+  assert.match(korean, /aria-label="이 Pal의 필드 보스 위치를 불러오는 중입니다."/u);
+  assert.match(japanese, />フィールドボス出現位置</u);
+  assert.match(japanese, /aria-label="このパルのフィールドボス位置を読み込んでいます。"/u);
+  assert.equal(palworldI18n.ko.palBossLocationEmpty, "현재 지도 데이터에서 확인된 이 Pal의 필드 보스 위치가 없습니다.");
+  assert.equal(palworldI18n.ja.palBossLocationEmpty, "現在のマップデータでは、このパルのフィールドボス位置を確認できません。");
+
+  const componentSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldPalLocationMap.tsx", import.meta.url),
+    "utf8",
+  );
+  const detailSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldDetailModals.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(componentSource, /getPalworldMapMarkers\("main", controller\.signal\)/u);
+  assert.match(componentSource, /filterPalworldBossMarkers\(response\.markers, palId\)/u);
+  assert.match(detailSource, /<PalworldPalLocationMap[\s\S]*onOpenFullMap=\{onOpenMap\}[\s\S]*palId=\{detail\.id\}/u);
 });
 
 test("페이지 기술 키커와 Pal·도감 번호·레벨 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
@@ -811,7 +915,7 @@ test("Pal 작업 적성은 공식 로컬 이미지와 Lv. 숫자를 사용하고
   assert.deepEqual(generatedStaticAssets.workSource, {
     candidateRelease: "candidate-1248184a4b527d94",
     sourceArchiveSha256: "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
-    mappingStatus: "verified_semantic_source_member",
+    mappingStatus: "verified_colored_source_member",
     status: "operator_acknowledged",
     usageBasis: "operator_reference_use",
     rightsVerified: false,
@@ -822,9 +926,11 @@ test("Pal 작업 적성은 공식 로컬 이미지와 Lv. 숫자를 사용하고
   assert.match(koreanWork, /title="채굴: Lv\.3"/u);
   assert.match(koreanWork, /<img[^>]+alt=""[^>]+aria-hidden="true"[^>]+class="palworld-work-suitability-icon is-source-image"/u);
   assert.match(koreanWork, /src="\/images\/palworld\/work\/[a-f0-9]{64}\.webp"/u);
+  assert.match(koreanWork, /class="palworld-work-suitability-label">채굴<\/span>/u);
   assert.match(koreanWork, /Lv\.3/u);
   assert.doesNotMatch(koreanWork, /https?:\/\//u);
   assert.match(japaneseWork, /title="手作業: Lv\.4"/u);
+  assert.match(japaneseWork, /class="palworld-work-suitability-label">手作業<\/span>/u);
 
   for (const type of PALWORLD_WORK_SUITABILITY_TYPES) {
     const imageUrl = workSuitabilityIconUrl(type);

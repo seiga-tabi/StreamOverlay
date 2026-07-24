@@ -1198,7 +1198,10 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(anubisCard.locator(".palworld-card-work-list [role='listitem']")).toHaveCount(2);
   await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
   await expect(anubisCard.locator('[data-work-type="mining"]')).toContainText("Lv.3");
+  await expect(anubisCard.locator('[data-work-type="handiwork"] .palworld-work-suitability-label')).toHaveText("수작업");
+  await expect(anubisCard.locator('[data-work-type="mining"] .palworld-work-suitability-label')).toHaveText("채굴");
   await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(2);
+  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image").first()).toHaveAttribute("width", "64");
   const cardBox = await anubisCard.boundingBox();
   const cardMainBox = await anubisCard.locator(".palworld-pal-card-main").boundingBox();
   const cardImageFrameBox = await anubisCard.locator(".palworld-pal-card-image-frame").boundingBox();
@@ -1234,6 +1237,8 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(workList.locator(".palworld-work-suitability-badge")).toHaveCount(2);
   await expect(workList.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
   await expect(workList.locator('[data-work-type="mining"]')).toContainText("Lv.3");
+  await expect(workList.locator('[data-work-type="handiwork"] .palworld-work-suitability-label')).toHaveText("수작업");
+  await expect(workList.locator('[data-work-type="mining"] .palworld-work-suitability-label')).toHaveText("채굴");
   const statChart = directDialog.getByTestId("palworld-stat-chart");
   await expect(statChart.locator(".palworld-stat-chart-row")).toHaveCount(5);
   await expect(statChart.locator('[data-stat="hp"]')).toContainText("120");
@@ -1272,6 +1277,47 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(japaneseDialog).toContainText("性別条件: メス / オス");
   await expect(japaneseDialog.getByText("夜行性: はい", { exact: true })).toBeVisible();
   await assertHealthyDocument(page, errors);
+});
+
+test("Pal 상세 mini-map은 필드 보스 위치와 confirmed empty를 구분하고 전체 지도의 Pal 위치로 이동한다", async ({ page }) => {
+  await page.goto("/palworld/pals?pal=anubis");
+  const anubisDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" });
+  await expect(anubisDialog).toBeVisible();
+
+  const location = anubisDialog.getByTestId("pal-detail-location");
+  await location.scrollIntoViewIfNeeded();
+  await expect(location.getByRole("heading", { name: "필드 보스 출현 위치", level: 4 })).toBeVisible();
+  const miniMapImage = location.getByRole("img", { name: "필드 보스 출현 위치가 표시된 Palworld 월드 지도" });
+  await expect(miniMapImage).toHaveAttribute("src", READY_WORLD_MAP_URL);
+  await expect.poll(() => miniMapImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(4096);
+  await expect(location.getByRole("listitem", { name: "필드 보스: 아누비스, Lv.55" })).toBeVisible();
+  await expect.poll(() => location.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
+  await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/map/markers?world=main");
+
+  await location.getByRole("button", { name: "전체 지도에서 보기" }).click();
+  await expect(page).toHaveURL(/\/palworld\/map\?focusPal=anubis$/u);
+  await expect(page.getByTestId("pal-detail-modal")).toHaveCount(0);
+  await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+  const focusedMarker = page.getByRole("button", { name: "필드 보스: 아누비스, Lv.55" });
+  await expect(focusedMarker).toHaveAttribute("aria-current", "location");
+  await expect(focusedMarker).toHaveAttribute("data-focused", "true");
+  await expect(page.getByTestId("palworld-map-viewport")).toHaveAttribute("data-zoomed", "true");
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/palworld\/pals\?pal=anubis$/u);
+  const restoredDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" });
+  await expect(restoredDialog).toBeVisible();
+  await expect(restoredDialog.getByTestId("pal-detail-location")).toContainText("필드 보스 출현 위치");
+
+  await page.goto("/palworld/pals?pal=penking");
+  const penkingDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "펭킹" });
+  await expect(penkingDialog).toBeVisible();
+  const emptyLocation = penkingDialog.getByTestId("pal-detail-location");
+  await expect(emptyLocation.getByRole("status")).toHaveText("현재 지도 데이터에서 확인된 이 Pal의 필드 보스 위치가 없습니다.");
+  await expect(emptyLocation.locator(".palworld-pal-location-map-image")).toHaveCount(0);
+  await expect(emptyLocation.getByRole("button", { name: "전체 지도에서 보기" })).toHaveCount(0);
+  await expect(emptyLocation).not.toContainText("아누비스");
 });
 
 test("underscore 아이템 ID의 직접 URL로 아이템 상세 Modal을 연다", async ({ page }) => {
@@ -1489,6 +1535,22 @@ test("Pal 이미지 404는 페이지 오류 없이 접근 가능한 fallback으�
   await expect(dialog.locator(".palworld-media-image")).toHaveCount(0);
   await expect(dialog.getByRole("img", { name: "펭킹 · 이미지 준비 중" })).toBeVisible();
   await expect(pageErrors).toEqual([]);
+});
+
+test("작업 적성 이미지 404는 해당 아이콘만 SVG fallback으로 바꾸고 이름과 레벨을 유지한다", async ({ page }) => {
+  await page.route("**/images/palworld/work/*.webp", async (route) => {
+    await route.fulfill({ status: 404, contentType: "text/plain", body: "not found" });
+  });
+  await page.goto("/palworld/pals?element=ground&work=mining");
+
+  const anubisCard = page.getByTestId("pal-card").filter({ hasText: "아누비스" });
+  await expect(anubisCard).toBeVisible();
+  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(0);
+  await expect(anubisCard.locator(".palworld-work-suitability-icon:not(.is-source-image)")).toHaveCount(2);
+  await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("수작업");
+  await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
+  await expect(anubisCard.locator('[data-work-type="mining"]')).toContainText("채굴");
+  await expect(anubisCard.locator('[data-work-type="mining"]')).toContainText("Lv.3");
 });
 
 test("통합 검색은 한국어와 일본어 이름 결과를 표시한다", async ({ page }) => {

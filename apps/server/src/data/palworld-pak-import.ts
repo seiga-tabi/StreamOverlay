@@ -605,6 +605,7 @@ export function parseWorkAssetMap(
   status: string;
   availableSourceMembers: string[];
   entries: Array<{ id: string; sourceMember: string }>;
+  excludedSourceMembers: Array<{ sourceMember: string; reason: string }>;
 } {
   const root = exactRecord(value, "workIconMap", [
     "schemaVersion",
@@ -612,19 +613,21 @@ export function parseWorkAssetMap(
     "sourceArchiveSha256",
     "status",
     "availableSourceMembers",
-    "entries"
+    "entries",
+    "excludedSourceMembers"
   ]);
   if (
     !Array.isArray(root.availableSourceMembers)
     || !Array.isArray(root.entries)
+    || !Array.isArray(root.excludedSourceMembers)
   ) {
-    fail("workIconMap: availableSourceMembers와 entries는 배열이어야 합니다.");
+    fail("workIconMap: availableSourceMembers, entries, excludedSourceMembers는 배열이어야 합니다.");
   }
   assertCandidateMappingHeader(root, "workIconMap", expectedSha256, expectedCandidateId);
   const availableSourceMembers = root.availableSourceMembers.map((value, index) => {
     const member = stringValue(value, `workIconMap.availableSourceMembers[${index}]`, 512);
     if (
-      !/^Pal\/Texture\/UI\/InGame\/SkillIcon\/T_icon_skill_pal_WorkRank_[A-Za-z0-9_]+\.png$/u.test(member)
+      !/^Pal\/Texture\/UI\/InGame\/T_icon_palwork_\d{2}\.png$/u.test(member)
     ) {
       fail(`workIconMap.availableSourceMembers[${index}]: 허용된 work icon 경로가 아닙니다.`);
     }
@@ -660,6 +663,44 @@ export function parseWorkAssetMap(
     entryIds.add(entry.id);
     entryMembers.add(entry.sourceMember);
   }
+  const excludedSourceMembers = root.excludedSourceMembers.map((raw, index) => {
+    const row = exactRecord(
+      raw,
+      `workIconMap.excludedSourceMembers[${index}]`,
+      ["sourceMember", "reason"]
+    );
+    const sourceMember = stringValue(
+      row.sourceMember,
+      `workIconMap.excludedSourceMembers[${index}].sourceMember`,
+      512
+    );
+    const reason = stringValue(
+      row.reason,
+      `workIconMap.excludedSourceMembers[${index}].reason`,
+      128
+    );
+    if (
+      reason !== "source_only_oil_extraction_not_in_public_work_enum"
+      && reason !== "semantic_meaning_not_verified"
+      && reason !== "not_a_public_work_suitability_icon"
+    ) {
+      fail(`workIconMap.excludedSourceMembers[${index}].reason: 허용된 제외 사유가 아닙니다.`);
+    }
+    return { sourceMember, reason };
+  });
+  const excludedMembers = new Set<string>();
+  for (const [index, exclusion] of excludedSourceMembers.entries()) {
+    if (
+      excludedMembers.has(exclusion.sourceMember)
+      || entryMembers.has(exclusion.sourceMember)
+    ) {
+      fail(`workIconMap.excludedSourceMembers[${index}]: source member가 중복 분류되었습니다.`);
+    }
+    if (!availableSourceMembers.includes(exclusion.sourceMember)) {
+      fail(`workIconMap.excludedSourceMembers[${index}].sourceMember: source 목록에 없는 경로입니다.`);
+    }
+    excludedMembers.add(exclusion.sourceMember);
+  }
   const status = stringValue(root.status, "workIconMap.status", 64);
   if (
     status !== "blocked_pending_semantic_mapping"
@@ -667,15 +708,22 @@ export function parseWorkAssetMap(
   ) {
     fail("workIconMap.status: 허용된 mapping 상태가 아닙니다.");
   }
-  if (
-    (status === "verified") !== (entries.length === availableSourceMembers.length)
-  ) {
-    fail("workIconMap: verified 상태와 전체 source mapping 수가 일치해야 합니다.");
+  const publicWorkIds = new Set(WORK_FIELDS.map(([type]) => type));
+  const allPublicWorkIdsMapped = entryIds.size === publicWorkIds.size
+    && [...publicWorkIds].every((id) => entryIds.has(id));
+  const everySourceClassified = availableSourceMembers.every((member) =>
+    entryMembers.has(member) || excludedMembers.has(member)
+  );
+  if (status === "verified" && (!allPublicWorkIdsMapped || !everySourceClassified)) {
+    fail("workIconMap: verified 상태는 공개 작업 적성 전체 mapping과 source 분류가 필요합니다.");
   }
   return {
     status,
     availableSourceMembers,
-    entries: entries.sort((left, right) => left.id.localeCompare(right.id, "en"))
+    entries: entries.sort((left, right) => left.id.localeCompare(right.id, "en")),
+    excludedSourceMembers: excludedSourceMembers.sort((left, right) =>
+      left.sourceMember.localeCompare(right.sourceMember, "en")
+    )
   };
 }
 
@@ -2550,7 +2598,7 @@ export async function importPalworldPakCandidate(
         const availableWorkIconMembers = reader.members
           .map((entry) => entry.name)
           .filter((name) =>
-            /^Pal\/Texture\/UI\/InGame\/SkillIcon\/T_icon_skill_pal_WorkRank_[A-Za-z0-9_]+\.png$/u.test(name)
+            /^Pal\/Texture\/UI\/InGame\/T_icon_palwork_\d{2}\.png$/u.test(name)
           )
           .sort((left, right) => left.localeCompare(right, "en"));
         if (
@@ -3057,8 +3105,8 @@ export async function importPalworldPakCandidate(
           },
           work: {
             available: workImageAssets.length,
-            missing: workIconMap.availableSourceMembers.length - workImageAssets.length,
-            total: workIconMap.availableSourceMembers.length
+            missing: workIconMap.entries.length - workImageAssets.length,
+            total: workIconMap.entries.length
           },
           skills: {
             available: skillImageAssets.length,
@@ -3129,7 +3177,7 @@ export async function importPalworldPakCandidate(
             ? ["PAL_IMAGE_IMPORT_INCOMPLETE"]
             : []),
           ...(workIconMap.status !== "verified"
-            || workImageAssets.length !== workIconMap.availableSourceMembers.length
+            || workImageAssets.length !== workIconMap.entries.length
             ? ["WORK_ICON_SEMANTIC_MAPPING_NOT_VERIFIED"]
             : []),
           ...(skillIconMap.status !== "verified"
@@ -3354,7 +3402,7 @@ export async function importPalworldPakCandidate(
               ? ["게임 버전·Steam Build ID·FModel version·Mappings checksum을 추정하지 않습니다."]
               : []),
             ...(workIconMap.status !== "verified"
-              ? ["work icon 번호와 의미의 검증된 mapping이 없어 source PNG를 자동 연결하지 않습니다."]
+              ? ["컬러 work icon 번호와 의미의 검증된 mapping이 없어 source PNG를 자동 연결하지 않습니다."]
               : [])
           ]
         };
@@ -3405,7 +3453,7 @@ export async function importPalworldPakCandidate(
               : "blocked",
             workImages: input.includeAssets !== false
               && workIconMap.status === "verified"
-              && workImageAssets.length === workIconMap.availableSourceMembers.length
+              && workImageAssets.length === workIconMap.entries.length
               ? "candidate"
               : "blocked",
             skillImages: input.includeAssets !== false

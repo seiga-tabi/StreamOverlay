@@ -85,7 +85,6 @@ export function PalworldWorkSuitabilityBadge({
       role="listitem"
       title={accessibleLabel}
     >
-      <span className="yoro-u-sr-only">{label}: </span>
       {imageFailed || iconUrl === undefined ? (
         <WorkSuitabilityGlyph type={type} />
       ) : (
@@ -95,13 +94,14 @@ export function PalworldWorkSuitabilityBadge({
           className="palworld-work-suitability-icon is-source-image"
           decoding="async"
           draggable="false"
-          height="128"
+          height="64"
           loading="lazy"
           onError={() => setImageFailed(true)}
           src={iconUrl}
-          width="128"
+          width="64"
         />
       )}
+      <span className="palworld-work-suitability-label">{label}</span>
       <strong>{levelText}</strong>
     </span>
   );

@@ -723,7 +723,8 @@
 }
 
 .palworld-map-boss-marker:hover,
-.palworld-map-boss-marker:focus-visible {
+.palworld-map-boss-marker:focus-visible,
+.palworld-map-boss-marker[data-focused="true"] {
   z-index: var(--yoro-z-sticky);
 }
 
@@ -1002,9 +1003,10 @@
 }
 
 .palworld-card-work-list .palworld-work-suitability-badge {
-  grid-template-columns: var(--yoro-space-5) auto;
+  grid-template-columns: var(--yoro-space-5) minmax(0, 1fr) auto;
+  max-inline-size: 100%;
   min-block-size: var(--yoro-space-7);
-  padding: 0 var(--yoro-space-1);
+  padding: 0 var(--yoro-space-2) 0 var(--yoro-space-1);
 }
 
 .palworld-card-work-list .palworld-work-suitability-icon {
@@ -1487,6 +1489,152 @@
   border-block-start: thin solid var(--yoro-color-border);
 }
 
+.palworld-pal-location-section,
+.palworld-pal-location-heading,
+.palworld-pal-location-figure,
+.palworld-pal-location-caption {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-pal-location-figure {
+  margin: 0;
+}
+
+.palworld-pal-location-heading {
+  gap: var(--yoro-space-1);
+}
+
+.palworld-pal-location-heading p,
+.palworld-pal-location-status,
+.palworld-pal-location-error p,
+.palworld-pal-location-image-error p {
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-pal-location-loading,
+.palworld-pal-location-preview {
+  position: relative;
+  inline-size: min(100%, 32rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  overflow: hidden;
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-surface-strong);
+}
+
+.palworld-pal-location-loading > .yoro-skeleton,
+.palworld-pal-location-image-loading,
+.palworld-pal-location-image-loading > .yoro-skeleton {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-pal-location-image-loading,
+.palworld-pal-location-image-error {
+  position: absolute;
+  inset: 0;
+}
+
+.palworld-pal-location-image-loading {
+  z-index: var(--yoro-z-base);
+}
+
+.palworld-pal-location-map-image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.palworld-pal-location-map-image.is-loading {
+  visibility: hidden;
+}
+
+.palworld-pal-location-marker-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.palworld-pal-location-marker {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-1);
+  transform: translate(-50%, -50%);
+}
+
+.palworld-pal-location-marker .palworld-map-boss-marker-media {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-pal-location-image-error {
+  z-index: var(--yoro-z-raised);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-4);
+  background: var(--yoro-color-surface-strong);
+  text-align: center;
+}
+
+.palworld-pal-location-caption {
+  inline-size: min(100%, 32rem);
+  margin-inline: auto;
+}
+
+.palworld-pal-location-caption ul {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palworld-pal-location-caption li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-pal-location-caption li > span:first-child {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.palworld-pal-location-caption > .yoro-button {
+  justify-self: start;
+}
+
+.palworld-pal-location-status,
+.palworld-pal-location-error {
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-pal-location-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-3);
+}
+
 .palworld-detail h3,
 .palworld-detail h4,
 .palworld-detail p {
@@ -1550,7 +1698,9 @@
 
 .palworld-work-suitability-badge {
   display: inline-grid;
-  grid-template-columns: var(--yoro-space-6) auto;
+  grid-template-columns: var(--yoro-space-6) minmax(0, 1fr) auto;
+  max-inline-size: 100%;
+  min-inline-size: 0;
   align-items: center;
   min-block-size: var(--yoro-space-8);
   gap: var(--yoro-space-1);
@@ -1562,8 +1712,19 @@
 }
 
 .palworld-work-suitability-badge strong {
+  color: var(--yoro-color-text-strong);
   font-size: var(--yoro-font-size-sm);
   line-height: var(--yoro-line-height-tight);
+  white-space: nowrap;
+}
+
+.palworld-work-suitability-label {
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--yoro-color-text);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -1571,11 +1732,10 @@
   display: block;
   inline-size: var(--yoro-space-6);
   block-size: var(--yoro-space-6);
+  color: var(--palworld-work-accent, var(--yoro-color-text-muted));
 }
 
 .palworld-work-suitability-icon.is-source-image {
-  border-radius: var(--yoro-radius-sm);
-  background: currentColor;
   object-fit: contain;
 }
 
@@ -1583,14 +1743,14 @@
   [data-work-type="kindling"],
   [data-work-type="medicine_production"]
 ) {
-  color: var(--yoro-color-danger);
+  --palworld-work-accent: var(--yoro-color-danger);
 }
 
 .palworld-work-suitability-badge:is(
   [data-work-type="watering"],
   [data-work-type="cooling"]
 ) {
-  color: var(--palworld-sky);
+  --palworld-work-accent: var(--palworld-sky);
 }
 
 .palworld-work-suitability-badge:is(
@@ -1598,7 +1758,7 @@
   [data-work-type="gathering"],
   [data-work-type="farming"]
 ) {
-  color: var(--palworld-accent);
+  --palworld-work-accent: var(--palworld-accent);
 }
 
 .palworld-work-suitability-badge:is(
@@ -1606,11 +1766,11 @@
   [data-work-type="handiwork"],
   [data-work-type="lumbering"]
 ) {
-  color: var(--palworld-gold);
+  --palworld-work-accent: var(--palworld-gold);
 }
 
 .palworld-work-suitability-badge[data-work-type="transporting"] {
-  color: var(--yoro-color-primary-strong);
+  --palworld-work-accent: var(--yoro-color-primary-strong);
 }
 
 .palworld-stat-chart {
