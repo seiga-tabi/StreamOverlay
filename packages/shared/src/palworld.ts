@@ -55,6 +55,11 @@ export const PALWORLD_TRANSLATION_METHODS = [
   "mixed"
 ] as const;
 export const PALWORLD_TRANSLATION_SNAPSHOT_STATUSES = ["complete", "incomplete"] as const;
+export const PALWORLD_TRANSLATION_SOURCE_INTEGRITY_STATUSES = [
+  "intact",
+  "source_anomaly",
+  "missing_source"
+] as const;
 export const PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE = "source_anomaly_preserved" as const;
 export const PALWORLD_TRANSLATION_MISSING_SOURCE_MARKERS = {
   ko: "[원문 누락]",
@@ -84,6 +89,27 @@ export const PALWORLD_BREEDING_RESOLUTION_STATES = [
   "requires_gender",
   "not_found",
   "data_unavailable"
+] as const;
+export const PALWORLD_CONDENSATION_AVAILABILITIES = [
+  "available",
+  "missing_source",
+  "unresolved_rule",
+  "data_unavailable"
+] as const;
+export const PALWORLD_CONDENSATION_STARS = [0, 1, 2, 3, 4] as const;
+export const PALWORLD_CHARACTER_RANKS = [1, 2, 3, 4, 5] as const;
+export const PALWORLD_CONDENSED_STAT_IDS = [
+  "hp",
+  "attack",
+  "defense",
+  "moveSpeed",
+  "stamina",
+  "meleeAttack",
+  "shotAttack",
+  "walkSpeed",
+  "runSpeed",
+  "rideSprintSpeed",
+  "food"
 ] as const;
 export const PALWORLD_DOMAIN_STATUSES = ["ready", "sample", "incomplete", "unavailable"] as const;
 export const PALWORLD_IMAGE_ASSET_STATUSES = [
@@ -117,12 +143,18 @@ export type PalworldTranslationStatus = (typeof PALWORLD_TRANSLATION_STATUSES)[n
 export type PalworldTranslationDisplayStatus = (typeof PALWORLD_TRANSLATION_DISPLAY_STATUSES)[number];
 export type PalworldTranslationMethod = (typeof PALWORLD_TRANSLATION_METHODS)[number];
 export type PalworldTranslationSnapshotStatus = (typeof PALWORLD_TRANSLATION_SNAPSHOT_STATUSES)[number];
+export type PalworldTranslationSourceIntegrityStatus =
+  (typeof PALWORLD_TRANSLATION_SOURCE_INTEGRITY_STATUSES)[number];
 export type PalworldItemCategory = (typeof PALWORLD_ITEM_CATEGORIES)[number];
 export type PalworldAcquisitionType = (typeof PALWORLD_ACQUISITION_TYPES)[number];
 export type PalworldGender = (typeof PALWORLD_GENDERS)[number];
 export type PalworldBreedingGender = (typeof PALWORLD_BREEDING_GENDERS)[number];
 export type PalworldBreedingPairType = (typeof PALWORLD_BREEDING_PAIR_TYPES)[number];
 export type PalworldBreedingResolutionState = (typeof PALWORLD_BREEDING_RESOLUTION_STATES)[number];
+export type PalworldCondensationAvailability = (typeof PALWORLD_CONDENSATION_AVAILABILITIES)[number];
+export type PalworldCondensationStars = (typeof PALWORLD_CONDENSATION_STARS)[number];
+export type PalworldCharacterRank = (typeof PALWORLD_CHARACTER_RANKS)[number];
+export type PalworldCondensedStatId = (typeof PALWORLD_CONDENSED_STAT_IDS)[number];
 export type PalworldDomainStatus = (typeof PALWORLD_DOMAIN_STATUSES)[number];
 export type PalworldImageAssetStatus = (typeof PALWORLD_IMAGE_ASSET_STATUSES)[number];
 export type PalworldImagePolicyStatus = (typeof PALWORLD_IMAGE_POLICY_STATUSES)[number];
@@ -254,6 +286,10 @@ export type PalworldLocalizationFallback = {
 export type PalworldTranslationLocaleStatus = {
   ko: PalworldTranslationDisplayStatus;
   ja: PalworldTranslationDisplayStatus;
+  sourceIntegrity?: {
+    ko: PalworldTranslationSourceIntegrityStatus;
+    ja: PalworldTranslationSourceIntegrityStatus;
+  };
 };
 
 /** API 레코드의 필드별 표시 언어 상태입니다. 기존 localization 필드와 additive하게 사용합니다. */
@@ -271,7 +307,7 @@ export type PalworldSkill = {
   type: PalworldSkillType;
   nameKo?: string;
   nameJa?: string;
-  nameEn: string;
+  nameEn?: string;
   descriptionKo?: string;
   descriptionJa?: string;
   descriptionEn?: string;
@@ -306,7 +342,7 @@ export type PalworldPalReference = {
   number: number;
   nameKo: string;
   nameJa: string;
-  nameEn: string;
+  nameEn?: string;
   imageUrl?: string;
   imageWidth?: number;
   imageHeight?: number;
@@ -318,7 +354,7 @@ export type PalworldItemReference = {
   id: string;
   nameKo?: string;
   nameJa?: string;
-  nameEn: string;
+  nameEn?: string;
   imageUrl?: string;
   imageWidth?: number;
   imageHeight?: number;
@@ -361,6 +397,32 @@ export type PalworldPalStats = {
   food?: number;
 };
 
+export type PalworldCondensedStat = {
+  stat: PalworldCondensedStatId;
+  baseValue: number;
+  value: number;
+};
+
+export type PalworldCondensedWorkSuitability = {
+  type: PalworldWorkSuitabilityType;
+  baseLevel: number;
+  level: number;
+};
+
+export type PalworldPalCondensationStage = {
+  stars: PalworldCondensationStars;
+  characterRank: PalworldCharacterRank;
+  partnerSkillRank: PalworldCharacterRank;
+  stats: PalworldCondensedStat[];
+  workSuitabilities: PalworldCondensedWorkSuitability[];
+};
+
+export type PalworldPalCondensationProfile = {
+  availability: PalworldCondensationAvailability;
+  sourceRuleSha256?: string;
+  stages?: PalworldPalCondensationStage[];
+};
+
 export type PalworldPalBreedingInfo = {
   breedingPower?: number;
   specialParentPairs: Array<{
@@ -385,6 +447,7 @@ export type PalworldPalDetail = PalworldPalSummary & {
   drops: PalworldItemReference[];
   dropDetails?: PalworldPalDrop[];
   breeding: PalworldPalBreedingInfo;
+  condensation?: PalworldPalCondensationProfile;
   metadata: PalworldDataMetadata;
 };
 
@@ -481,6 +544,35 @@ export type PalworldTranslationDomainCoverage = {
   placeholderExcluded?: number;
   unresolvedRichText?: number;
   staleSourceHash: number;
+  /** 기존 flat 소비자를 위한 호환 집계입니다. */
+  sourceAnomalousFields?: number;
+  /** 손상된 원문에서 빠진 전체 값 자리 수입니다. */
+  missingSourceSlots?: number;
+  availability?: PalworldTranslationAvailabilityCoverage;
+  review?: PalworldTranslationReviewCoverage;
+  sourceIntegrity?: PalworldSourceIntegrityCoverage;
+};
+
+export type PalworldTranslationAvailabilityCoverage = {
+  translated: number;
+  sourceLanguageFallback: number;
+  missingSource: number;
+  total: number;
+};
+
+export type PalworldTranslationReviewCoverage = {
+  sourceProvided: number;
+  humanReviewed: number;
+  machineAssisted: number;
+  total: number;
+};
+
+export type PalworldSourceIntegrityCoverage = {
+  intact: number;
+  sourceAnomalousFields: number;
+  missingSourceFields: number;
+  missingSourceSlots: number;
+  total: number;
 };
 
 export type PalworldTranslationCoverage = {
@@ -1391,7 +1483,7 @@ function validateTranslationLocaleStatusAt(
   path: string,
   availability: { ko: boolean; ja: boolean; en: boolean }
 ): PalworldValidationResult<PalworldTranslationLocaleStatus> {
-  const record = recordAt(value, path, ["ko", "ja"]);
+  const record = recordAt(value, path, ["ko", "ja", "sourceIntegrity"]);
   if (!record.ok) return record;
   for (const locale of PALWORLD_TRANSLATION_LOCALES) {
     const status = enumAt(record.data[locale], `${path}.${locale}`, PALWORLD_TRANSLATION_DISPLAY_STATUSES);
@@ -1405,11 +1497,70 @@ function validateTranslationLocaleStatusAt(
     if (status.data === "source_provided" && !availability[locale]) {
       return invalid(`${path}.${locale}`, "공식 source locale 상태에는 해당 언어 값이 필요합니다.");
     }
-    if (status.data === "source_language_fallback" && (!availability.en || availability[locale])) {
-      return invalid(`${path}.${locale}`, "영문 원문 fallback에는 영어 값이 있고 해당 언어 값은 없어야 합니다.");
+    const hasOtherSource = locale === "ko"
+      ? availability.ja || availability.en
+      : availability.ko || availability.en;
+    if (
+      status.data === "source_language_fallback"
+      && (!hasOtherSource || availability[locale])
+    ) {
+      return invalid(
+        `${path}.${locale}`,
+        "다른 source 언어 fallback에는 해당 source 값이 있고 현재 언어 값은 없어야 합니다."
+      );
     }
-    if (status.data === "missing_source" && (availability.en || availability[locale])) {
-      return invalid(`${path}.${locale}`, "원문과 번역이 모두 없을 때만 missing_source를 사용할 수 있습니다.");
+    if (
+      status.data === "missing_source"
+      && (availability.ko || availability.ja || availability.en)
+    ) {
+      return invalid(
+        `${path}.${locale}`,
+        "사용 가능한 source 언어 값이 전혀 없을 때만 missing_source를 사용할 수 있습니다."
+      );
+    }
+  }
+  if (record.data.sourceIntegrity !== undefined) {
+    const sourceIntegrity = recordAt(
+      record.data.sourceIntegrity,
+      `${path}.sourceIntegrity`,
+      PALWORLD_TRANSLATION_LOCALES
+    );
+    if (!sourceIntegrity.ok) return sourceIntegrity;
+    for (const locale of PALWORLD_TRANSLATION_LOCALES) {
+      const integrity = enumAt(
+        sourceIntegrity.data[locale],
+        `${path}.sourceIntegrity.${locale}`,
+        PALWORLD_TRANSLATION_SOURCE_INTEGRITY_STATUSES
+      );
+      if (!integrity.ok) return integrity;
+      const displayStatus = record.data[locale] as PalworldTranslationDisplayStatus;
+      if (
+        integrity.data === "missing_source"
+        && displayStatus !== "missing_source"
+      ) {
+        return invalid(
+          `${path}.sourceIntegrity.${locale}`,
+          "원문 전체 누락은 번역 표시 상태 missing_source와 함께 사용해야 합니다."
+        );
+      }
+      if (
+        displayStatus === "missing_source"
+        && integrity.data !== "missing_source"
+      ) {
+        return invalid(
+          `${path}.sourceIntegrity.${locale}`,
+          "번역 표시 상태 missing_source에는 원문 전체 누락 상태가 필요합니다."
+        );
+      }
+      if (
+        integrity.data === "source_anomaly"
+        && !availability[locale]
+      ) {
+        return invalid(
+          `${path}.sourceIntegrity.${locale}`,
+          "일부 원문 누락 상태에는 해당 locale의 누락 marker가 포함된 공개 값이 필요합니다."
+        );
+      }
     }
   }
   return valid(record.data as PalworldTranslationLocaleStatus);
@@ -1502,11 +1653,18 @@ function validateSkillAt(value: unknown, path: string): PalworldValidationResult
   }
   const type = enumAt(candidate.type, `${path}.type`, PALWORLD_SKILL_TYPES);
   if (!type.ok) return type;
-  const nameEn = stringAt(candidate.nameEn, `${path}.nameEn`);
+  const nameEn = optionalStringAt(candidate.nameEn, `${path}.nameEn`);
   if (!nameEn.ok) return nameEn;
   for (const field of ["nameKo", "nameJa"] as const) {
     const result = optionalStringAt(candidate[field], `${path}.${field}`);
     if (!result.ok) return result;
+  }
+  if (
+    candidate.nameKo === undefined
+    && candidate.nameJa === undefined
+    && candidate.nameEn === undefined
+  ) {
+    return invalid(path, "하나 이상의 언어로 된 스킬 이름이 필요합니다.");
   }
   for (const field of ["descriptionKo", "descriptionJa"] as const) {
     const result = optionalStringAt(candidate[field], `${path}.${field}`, MAX_DESCRIPTION_LENGTH);
@@ -1574,7 +1732,11 @@ function validateSkillAt(value: unknown, path: string): PalworldValidationResult
       ["name", "description", "passiveAbility"],
       "name",
       {
-        name: { ko: candidate.nameKo !== undefined, ja: candidate.nameJa !== undefined, en: true },
+        name: {
+          ko: candidate.nameKo !== undefined,
+          ja: candidate.nameJa !== undefined,
+          en: candidate.nameEn !== undefined
+        },
         description: {
           ko: candidate.descriptionKo !== undefined,
           ja: candidate.descriptionJa !== undefined,
@@ -1611,10 +1773,12 @@ function validatePalReferenceAt(value: unknown, path: string): PalworldValidatio
   if (!id.ok) return id;
   const number = integerAt(candidate.number, `${path}.number`, 1, 10_000);
   if (!number.ok) return number;
-  for (const field of ["nameKo", "nameJa", "nameEn"] as const) {
+  for (const field of ["nameKo", "nameJa"] as const) {
     const result = stringAt(candidate[field], `${path}.${field}`);
     if (!result.ok) return result;
   }
+  const nameEn = optionalStringAt(candidate.nameEn, `${path}.nameEn`);
+  if (!nameEn.ok) return nameEn;
   const imageUrl = optionalPalImagePathAt(candidate.imageUrl, `${path}.imageUrl`);
   if (!imageUrl.ok) return imageUrl;
   const dimensions = validateOptionalImageDimensionsAt(candidate, path, "imageUrl");
@@ -1632,7 +1796,7 @@ function validatePalReferenceAt(value: unknown, path: string): PalworldValidatio
       `${path}.translation`,
       ["name"],
       "name",
-      { name: { ko: true, ja: true, en: true } }
+      { name: { ko: true, ja: true, en: candidate.nameEn !== undefined } }
     );
     if (!translation.ok) return translation;
   }
@@ -1670,11 +1834,18 @@ function validateItemReferenceAt(value: unknown, path: string): PalworldValidati
   const candidate = record.data;
   const id = idAt(candidate.id, `${path}.id`);
   if (!id.ok) return id;
-  const nameEn = stringAt(candidate.nameEn, `${path}.nameEn`);
+  const nameEn = optionalStringAt(candidate.nameEn, `${path}.nameEn`);
   if (!nameEn.ok) return nameEn;
   for (const field of ["nameKo", "nameJa"] as const) {
     const result = optionalStringAt(candidate[field], `${path}.${field}`);
     if (!result.ok) return result;
+  }
+  if (
+    candidate.nameKo === undefined
+    && candidate.nameJa === undefined
+    && candidate.nameEn === undefined
+  ) {
+    return invalid(path, "하나 이상의 언어로 된 아이템 이름이 필요합니다.");
   }
   const imageUrl = optionalItemImagePathAt(candidate.imageUrl, `${path}.imageUrl`);
   if (!imageUrl.ok) return imageUrl;
@@ -1686,7 +1857,7 @@ function validateItemReferenceAt(value: unknown, path: string): PalworldValidati
     const consistent = validateLocalizationConsistencyAt(localization.data, `${path}.localization`, {
       ko: candidate.nameKo !== undefined,
       ja: candidate.nameJa !== undefined,
-      en: true
+      en: candidate.nameEn !== undefined
     });
     if (!consistent.ok) return consistent;
   } else if (candidate.nameKo === undefined || candidate.nameJa === undefined) {
@@ -1702,7 +1873,7 @@ function validateItemReferenceAt(value: unknown, path: string): PalworldValidati
         name: {
           ko: candidate.nameKo !== undefined,
           ja: candidate.nameJa !== undefined,
-          en: true
+          en: candidate.nameEn !== undefined
         }
       }
     );
@@ -1885,6 +2056,184 @@ function validatePalDropAt(value: unknown, path: string): PalworldValidationResu
   return valid(record.data as PalworldPalDrop);
 }
 
+function validateCondensedStatAt(
+  value: unknown,
+  path: string,
+  baseStats?: PalworldPalStats
+): PalworldValidationResult<PalworldCondensedStat> {
+  const record = recordAt(value, path, ["stat", "baseValue", "value"]);
+  if (!record.ok) return record;
+  const stat = enumAt(record.data.stat, `${path}.stat`, PALWORLD_CONDENSED_STAT_IDS);
+  if (!stat.ok) return stat;
+  const baseValue = finiteNumberAt(record.data.baseValue, `${path}.baseValue`, 0, MAX_STAT_VALUE);
+  if (!baseValue.ok) return baseValue;
+  const condensedValue = finiteNumberAt(record.data.value, `${path}.value`, 0, MAX_STAT_VALUE);
+  if (!condensedValue.ok) return condensedValue;
+  if (baseStats !== undefined) {
+    const expectedBase = baseStats[stat.data];
+    if (expectedBase === undefined) {
+      return invalid(`${path}.stat`, "Pal 기본 능력치에 존재하는 필드여야 합니다.");
+    }
+    if (baseValue.data !== expectedBase) {
+      return invalid(`${path}.baseValue`, "Pal 기본 능력치와 일치해야 합니다.");
+    }
+  }
+  return valid(record.data as PalworldCondensedStat);
+}
+
+function validateCondensedWorkSuitabilityAt(
+  value: unknown,
+  path: string,
+  baseWorkSuitabilities?: readonly PalworldWorkSuitability[]
+): PalworldValidationResult<PalworldCondensedWorkSuitability> {
+  const record = recordAt(value, path, ["type", "baseLevel", "level"]);
+  if (!record.ok) return record;
+  const type = enumAt(record.data.type, `${path}.type`, PALWORLD_WORK_SUITABILITY_TYPES);
+  if (!type.ok) return type;
+  const baseLevel = integerAt(record.data.baseLevel, `${path}.baseLevel`, 1, MAX_STAT_VALUE);
+  if (!baseLevel.ok) return baseLevel;
+  const level = integerAt(record.data.level, `${path}.level`, 1, MAX_STAT_VALUE);
+  if (!level.ok) return level;
+  if (baseWorkSuitabilities !== undefined) {
+    const expectedBase = baseWorkSuitabilities.find((entry) => entry.type === type.data)?.level;
+    if (expectedBase === undefined) {
+      return invalid(`${path}.type`, "Pal 기본 작업 적성에 존재하는 종류여야 합니다.");
+    }
+    if (baseLevel.data !== expectedBase) {
+      return invalid(`${path}.baseLevel`, "Pal 기본 작업 적성 레벨과 일치해야 합니다.");
+    }
+  }
+  return valid(record.data as PalworldCondensedWorkSuitability);
+}
+
+function validatePalCondensationStageAt(
+  value: unknown,
+  path: string,
+  baseStats?: PalworldPalStats,
+  baseWorkSuitabilities?: readonly PalworldWorkSuitability[]
+): PalworldValidationResult<PalworldPalCondensationStage> {
+  const record = recordAt(value, path, [
+    "stars",
+    "characterRank",
+    "partnerSkillRank",
+    "stats",
+    "workSuitabilities"
+  ]);
+  if (!record.ok) return record;
+  const stars = integerAt(record.data.stars, `${path}.stars`, 0, 4);
+  if (!stars.ok) return stars;
+  if (!(PALWORLD_CONDENSATION_STARS as readonly number[]).includes(stars.data)) {
+    return invalid(`${path}.stars`, "0★부터 4★ 사이의 단계여야 합니다.");
+  }
+  const characterRank = integerAt(record.data.characterRank, `${path}.characterRank`, 1, 5);
+  if (!characterRank.ok) return characterRank;
+  const partnerSkillRank = integerAt(record.data.partnerSkillRank, `${path}.partnerSkillRank`, 1, 5);
+  if (!partnerSkillRank.ok) return partnerSkillRank;
+  const stats = arrayAt(
+    record.data.stats,
+    `${path}.stats`,
+    PALWORLD_CONDENSED_STAT_IDS.length,
+    (entry, entryPath) => validateCondensedStatAt(entry, entryPath, baseStats)
+  );
+  if (!stats.ok) return stats;
+  const uniqueStats = uniqueStringsAt(
+    stats.data.map((entry) => entry.stat),
+    `${path}.stats`,
+    "농축 능력치"
+  );
+  if (!uniqueStats.ok) return uniqueStats;
+  const workSuitabilities = arrayAt(
+    record.data.workSuitabilities,
+    `${path}.workSuitabilities`,
+    PALWORLD_WORK_SUITABILITY_TYPES.length,
+    (entry, entryPath) =>
+      validateCondensedWorkSuitabilityAt(entry, entryPath, baseWorkSuitabilities)
+  );
+  if (!workSuitabilities.ok) return workSuitabilities;
+  const uniqueWork = uniqueStringsAt(
+    workSuitabilities.data.map((entry) => entry.type),
+    `${path}.workSuitabilities`,
+    "농축 작업 적성"
+  );
+  if (!uniqueWork.ok) return uniqueWork;
+  if (stars.data === 0) {
+    if (stats.data.some((entry) => entry.value !== entry.baseValue)) {
+      return invalid(`${path}.stats`, "0★ 단계는 Pal 기본 능력치와 같아야 합니다.");
+    }
+    if (workSuitabilities.data.some((entry) => entry.level !== entry.baseLevel)) {
+      return invalid(`${path}.workSuitabilities`, "0★ 단계는 Pal 기본 작업 적성과 같아야 합니다.");
+    }
+  }
+  return valid(record.data as PalworldPalCondensationStage);
+}
+
+function validatePalCondensationProfileAt(
+  value: unknown,
+  path: string,
+  baseStats?: PalworldPalStats,
+  baseWorkSuitabilities?: readonly PalworldWorkSuitability[]
+): PalworldValidationResult<PalworldPalCondensationProfile> {
+  const record = recordAt(value, path, ["availability", "sourceRuleSha256", "stages"]);
+  if (!record.ok) return record;
+  const availability = enumAt(
+    record.data.availability,
+    `${path}.availability`,
+    PALWORLD_CONDENSATION_AVAILABILITIES
+  );
+  if (!availability.ok) return availability;
+  if (record.data.sourceRuleSha256 !== undefined) {
+    const sourceRuleSha256 = stringAt(
+      record.data.sourceRuleSha256,
+      `${path}.sourceRuleSha256`,
+      64
+    );
+    if (!sourceRuleSha256.ok) return sourceRuleSha256;
+    if (!SHA256_PATTERN.test(sourceRuleSha256.data)) {
+      return invalid(`${path}.sourceRuleSha256`, "소문자 64자리 SHA-256이어야 합니다.");
+    }
+  }
+  if (record.data.stages !== undefined) {
+    const stages = arrayAt(
+      record.data.stages,
+      `${path}.stages`,
+      PALWORLD_CONDENSATION_STARS.length,
+      (entry, entryPath) =>
+        validatePalCondensationStageAt(
+          entry,
+          entryPath,
+          baseStats,
+          baseWorkSuitabilities
+        )
+    );
+    if (!stages.ok) return stages;
+    const uniqueStars = uniqueStringsAt(
+      stages.data.map((stage) => String(stage.stars)),
+      `${path}.stages`,
+      "농축 단계"
+    );
+    if (!uniqueStars.ok) return uniqueStars;
+    if (
+      stages.data.some((stage, index) => stage.stars !== PALWORLD_CONDENSATION_STARS[index])
+    ) {
+      return invalid(`${path}.stages`, "0★부터 4★까지 결정적 순서로 정렬해야 합니다.");
+    }
+  }
+  if (availability.data === "available") {
+    if (record.data.sourceRuleSha256 === undefined) {
+      return invalid(`${path}.sourceRuleSha256`, "활성 농축 데이터에는 규칙 checksum이 필요합니다.");
+    }
+    if (
+      !Array.isArray(record.data.stages)
+      || record.data.stages.length !== PALWORLD_CONDENSATION_STARS.length
+    ) {
+      return invalid(`${path}.stages`, "활성 농축 데이터에는 0★~4★ 전체 단계가 필요합니다.");
+    }
+  } else if (record.data.stages !== undefined) {
+    return invalid(`${path}.stages`, "비활성 농축 상태에는 계산된 단계를 포함할 수 없습니다.");
+  }
+  return valid(record.data as PalworldPalCondensationProfile);
+}
+
 function validatePalDetailAt(value: unknown, path: string): PalworldValidationResult<PalworldPalDetail> {
   const record = recordAt(value, path, [
     "id",
@@ -1911,6 +2260,7 @@ function validatePalDetailAt(value: unknown, path: string): PalworldValidationRe
     "drops",
     "dropDetails",
     "breeding",
+    "condensation",
     "metadata"
   ]);
   if (!record.ok) return record;
@@ -1960,7 +2310,7 @@ function validatePalDetailAt(value: unknown, path: string): PalworldValidationRe
       ["name", "description"],
       "name",
       {
-        name: { ko: true, ja: true, en: true },
+        name: { ko: true, ja: true, en: candidate.nameEn !== undefined },
         description: {
           ko: candidate.descriptionKo !== undefined,
           ja: candidate.descriptionJa !== undefined,
@@ -2009,6 +2359,15 @@ function validatePalDetailAt(value: unknown, path: string): PalworldValidationRe
   }
   const breeding = validateBreedingInfoAt(candidate.breeding, `${path}.breeding`);
   if (!breeding.ok) return breeding;
+  if (candidate.condensation !== undefined) {
+    const condensation = validatePalCondensationProfileAt(
+      candidate.condensation,
+      `${path}.condensation`,
+      stats.data,
+      summary.data.workSuitabilities
+    );
+    if (!condensation.ok) return condensation;
+  }
   const metadata = validateMetadataAt(candidate.metadata, `${path}.metadata`);
   return metadata.ok ? valid(candidate as PalworldPalDetail) : metadata;
 }
@@ -2061,23 +2420,31 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
   }
   const descriptionEn = optionalStringAt(candidate.descriptionEn, `${path}.descriptionEn`, MAX_DESCRIPTION_LENGTH);
   if (!descriptionEn.ok) return descriptionEn;
-  if (candidate.descriptionKo === undefined && candidate.descriptionJa === undefined && candidate.descriptionEn === undefined) {
-    return invalid(path, "하나 이상의 언어로 된 아이템 설명이 필요합니다.");
-  }
+  const hasAnyDescription = candidate.descriptionKo !== undefined
+    || candidate.descriptionJa !== undefined
+    || candidate.descriptionEn !== undefined;
   if (candidate.localization !== undefined) {
     const localization = validateLocalizationFallbackAt(candidate.localization, `${path}.localization`);
     if (!localization.ok) return localization;
     const consistent = validateLocalizationConsistencyAt(localization.data, `${path}.localization`, {
-      ko: candidate.nameKo !== undefined && candidate.descriptionKo !== undefined,
-      ja: candidate.nameJa !== undefined && candidate.descriptionJa !== undefined,
-      en: candidate.nameEn !== undefined && candidate.descriptionEn !== undefined
+      ko: candidate.nameKo !== undefined
+        && (!hasAnyDescription || candidate.descriptionKo !== undefined),
+      ja: candidate.nameJa !== undefined
+        && (!hasAnyDescription || candidate.descriptionJa !== undefined),
+      en: candidate.nameEn !== undefined
+        && (!hasAnyDescription || candidate.descriptionEn !== undefined)
     });
     if (!consistent.ok) return consistent;
   } else if (
     candidate.nameKo === undefined ||
     candidate.nameJa === undefined ||
-    candidate.descriptionKo === undefined ||
-    candidate.descriptionJa === undefined
+    (
+      hasAnyDescription
+      && (
+        candidate.descriptionKo === undefined
+        || candidate.descriptionJa === undefined
+      )
+    )
   ) {
     return invalid(`${path}.localization`, "한국어·일본어 데이터가 없으면 fallback 상태를 명시해야 합니다.");
   }
@@ -2091,7 +2458,7 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
         name: {
           ko: candidate.nameKo !== undefined,
           ja: candidate.nameJa !== undefined,
-          en: true
+          en: candidate.nameEn !== undefined
         },
         description: {
           ko: candidate.descriptionKo !== undefined,
@@ -2475,7 +2842,12 @@ function validateTranslationDomainCoverageAt(
     "missingSource",
     "placeholderExcluded",
     "unresolvedRichText",
-    "staleSourceHash"
+    "staleSourceHash",
+    "sourceAnomalousFields",
+    "missingSourceSlots",
+    "availability",
+    "review",
+    "sourceIntegrity"
   ]);
   if (!record.ok) return record;
   for (const field of [
@@ -2500,7 +2872,9 @@ function validateTranslationDomainCoverageAt(
     "missingSource",
     "placeholderExcluded",
     "unresolvedRichText",
-    "staleSourceHash"
+    "staleSourceHash",
+    "sourceAnomalousFields",
+    "missingSourceSlots"
   ] as const) {
     if (record.data[field] === undefined && (
       field === "artifactTranslated"
@@ -2508,6 +2882,8 @@ function validateTranslationDomainCoverageAt(
       || field === "sourceProvided"
       || field === "placeholderExcluded"
       || field === "unresolvedRichText"
+      || field === "sourceAnomalousFields"
+      || field === "missingSourceSlots"
     )) {
       continue;
     }
@@ -2557,6 +2933,158 @@ function validateTranslationDomainCoverageAt(
   }
   if ((record.data.staleSourceHash as number) !== 0 && (record.data.staleSourceHash as number) !== fieldTotal) {
     return invalid(`${path}.staleSourceHash`, "stale source hash는 0 또는 전체 번역 필드 수여야 합니다.");
+  }
+  const translated = (record.data.publicUsable as number | undefined) ?? availableTotal;
+  const sourceProvided = (record.data.sourceProvided as number | undefined) ?? 0;
+  const humanReviewed = record.data.humanReviewed as number;
+  const machineAssisted = record.data.machineAssisted as number;
+  const sourceLanguageFallback = record.data.sourceLanguageFallback as number;
+  const missingSource = record.data.missingSource as number;
+  const publicFieldTotal = translated + sourceLanguageFallback + missingSource;
+  const separatedCoverageFields = [
+    "sourceAnomalousFields",
+    "missingSourceSlots",
+    "availability",
+    "review",
+    "sourceIntegrity"
+  ] as const;
+  const separatedCoverageCount = separatedCoverageFields.filter(
+    (field) => record.data[field] !== undefined
+  ).length;
+  if (
+    separatedCoverageCount !== 0
+    && separatedCoverageCount !== separatedCoverageFields.length
+  ) {
+    return invalid(
+      path,
+      "availability·review·source integrity 집계는 호환 flat 집계와 함께 모두 제공해야 합니다."
+    );
+  }
+
+  if (record.data.availability !== undefined) {
+    const availability = recordAt(record.data.availability, `${path}.availability`, [
+      "translated",
+      "sourceLanguageFallback",
+      "missingSource",
+      "total"
+    ]);
+    if (!availability.ok) return availability;
+    for (const field of ["translated", "sourceLanguageFallback", "missingSource", "total"] as const) {
+      const count = integerAt(
+        availability.data[field],
+        `${path}.availability.${field}`,
+        0,
+        100_000_000
+      );
+      if (!count.ok) return count;
+    }
+    if (
+      availability.data.translated !== translated
+      || availability.data.sourceLanguageFallback !== sourceLanguageFallback
+      || availability.data.missingSource !== missingSource
+      || availability.data.total !== publicFieldTotal
+    ) {
+      return invalid(`${path}.availability`, "기존 공개 번역 availability 집계와 일치해야 합니다.");
+    }
+  }
+
+  if (record.data.review !== undefined) {
+    const review = recordAt(record.data.review, `${path}.review`, [
+      "sourceProvided",
+      "humanReviewed",
+      "machineAssisted",
+      "total"
+    ]);
+    if (!review.ok) return review;
+    for (const field of ["sourceProvided", "humanReviewed", "machineAssisted", "total"] as const) {
+      const count = integerAt(review.data[field], `${path}.review.${field}`, 0, 100_000_000);
+      if (!count.ok) return count;
+    }
+    if (
+      review.data.sourceProvided !== sourceProvided
+      || review.data.humanReviewed !== humanReviewed
+      || review.data.machineAssisted !== machineAssisted
+      || review.data.total !== translated
+    ) {
+      return invalid(`${path}.review`, "기존 번역 review 집계와 일치해야 합니다.");
+    }
+  }
+
+  if (record.data.sourceIntegrity !== undefined) {
+    const sourceIntegrity = recordAt(record.data.sourceIntegrity, `${path}.sourceIntegrity`, [
+      "intact",
+      "sourceAnomalousFields",
+      "missingSourceFields",
+      "missingSourceSlots",
+      "total"
+    ]);
+    if (!sourceIntegrity.ok) return sourceIntegrity;
+    for (const field of [
+      "intact",
+      "sourceAnomalousFields",
+      "missingSourceFields",
+      "missingSourceSlots",
+      "total"
+    ] as const) {
+      const count = integerAt(
+        sourceIntegrity.data[field],
+        `${path}.sourceIntegrity.${field}`,
+        0,
+        100_000_000
+      );
+      if (!count.ok) return count;
+    }
+    if (
+      (sourceIntegrity.data.intact as number)
+      + (sourceIntegrity.data.sourceAnomalousFields as number)
+      + (sourceIntegrity.data.missingSourceFields as number)
+      !== sourceIntegrity.data.total
+    ) {
+      return invalid(
+        `${path}.sourceIntegrity`,
+        "정상·일부 누락·원문 전체 누락 필드 합이 source integrity total과 같아야 합니다."
+      );
+    }
+    if (
+      sourceIntegrity.data.total !== publicFieldTotal
+      || sourceIntegrity.data.missingSourceFields !== missingSource
+    ) {
+      return invalid(
+        `${path}.sourceIntegrity`,
+        "공개 필드 total과 원문 전체 누락 집계가 availability와 일치해야 합니다."
+      );
+    }
+    if (
+      (sourceIntegrity.data.sourceAnomalousFields as number) > translated
+      || (
+        (sourceIntegrity.data.sourceAnomalousFields as number) > 0
+        && (sourceIntegrity.data.missingSourceSlots as number)
+          < (sourceIntegrity.data.sourceAnomalousFields as number)
+      )
+    ) {
+      return invalid(
+        `${path}.sourceIntegrity`,
+        "일부 누락 필드와 누락 slot 집계가 공개 번역 범위를 벗어났습니다."
+      );
+    }
+    if (
+      record.data.sourceAnomalousFields !== undefined
+      && record.data.sourceAnomalousFields !== sourceIntegrity.data.sourceAnomalousFields
+    ) {
+      return invalid(
+        `${path}.sourceAnomalousFields`,
+        "source integrity의 일부 누락 필드 수와 일치해야 합니다."
+      );
+    }
+    if (
+      record.data.missingSourceSlots !== undefined
+      && record.data.missingSourceSlots !== sourceIntegrity.data.missingSourceSlots
+    ) {
+      return invalid(
+        `${path}.missingSourceSlots`,
+        "source integrity의 누락 slot 수와 일치해야 합니다."
+      );
+    }
   }
   return valid(record.data as PalworldTranslationDomainCoverage);
 }
@@ -3388,6 +3916,12 @@ export function validatePalworldPalSummary(value: unknown): PalworldValidationRe
 
 export function validatePalworldPalDetail(value: unknown): PalworldValidationResult<PalworldPalDetail> {
   return validatePalDetailAt(value, "pal");
+}
+
+export function validatePalworldPalCondensationProfile(
+  value: unknown
+): PalworldValidationResult<PalworldPalCondensationProfile> {
+  return validatePalCondensationProfileAt(value, "condensation");
 }
 
 export function validatePalworldItemSummary(value: unknown): PalworldValidationResult<PalworldItemSummary> {

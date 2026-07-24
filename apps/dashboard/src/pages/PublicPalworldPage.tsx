@@ -30,8 +30,10 @@ import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldR
 import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
 import {
   isKnownPalworldPagePath,
+  palworldCondensationStarsFromParams,
   palworldDetailSelectionFromParams,
   palworldFocusPalFromParams,
+  palworldSpawnPeriodFromParams,
   palworldTwitchReturnTo,
   palworldUrl,
   setPalworldUrl,
@@ -91,6 +93,8 @@ export function PublicPalworldPage({
   const selectedPalId = detailRoute.selection?.type === "pal" ? detailRoute.selection.id : undefined;
   const selectedItemId = detailRoute.selection?.type === "item" ? detailRoute.selection.id : undefined;
   const selectedSkillId = detailRoute.selection?.type === "skill" ? detailRoute.selection.id : undefined;
+  const selectedCondensationStars = palworldCondensationStarsFromParams(params);
+  const selectedSpawnPeriod = palworldSpawnPeriodFromParams(params);
 
   setActivePublicLocale(locale);
 
@@ -295,19 +299,49 @@ export function PublicPalworldPage({
 
   const openPalHere = useCallback((id: string) => {
     const current = `${window.location.pathname}${window.location.search}`;
-    setPalworldUrl(withQueryParam(withQueryParam(withQueryParam(current, "item"), "skill"), "pal", id));
+    const withoutDetailState = withQueryParam(
+      withQueryParam(
+        withQueryParam(
+          withQueryParam(current, "stars"),
+          "spawnPeriod"
+        ),
+        "item"
+      ),
+      "skill"
+    );
+    setPalworldUrl(withQueryParam(withoutDetailState, "pal", id));
   }, []);
 
   const openItemHere = useCallback((id: string) => {
     const current = `${window.location.pathname}${window.location.search}`;
-    setPalworldUrl(withQueryParam(withQueryParam(withQueryParam(current, "pal"), "skill"), "item", id));
+    const withoutPalState = withQueryParam(
+      withQueryParam(
+        withQueryParam(current, "stars"),
+        "spawnPeriod"
+      ),
+      "pal"
+    );
+    setPalworldUrl(withQueryParam(withQueryParam(withoutPalState, "skill"), "item", id));
   }, []);
 
   const closeDetail = useCallback(() => {
     if (!detailRoute.selection) return;
     const current = `${window.location.pathname}${window.location.search}`;
-    setPalworldUrl(withQueryParam(current, detailRoute.selection.type), true);
+    const withoutSelection = withQueryParam(current, detailRoute.selection.type);
+    const withoutPalState = detailRoute.selection.type === "pal"
+      ? withQueryParam(withQueryParam(withoutSelection, "stars"), "spawnPeriod")
+      : withoutSelection;
+    setPalworldUrl(withoutPalState, true);
   }, [detailRoute.selection]);
+
+  const updatePalDetailPreference = useCallback((
+    key: "stars" | "spawnPeriod",
+    value?: string,
+  ) => {
+    if (!selectedPalId) return;
+    const current = `${window.location.pathname}${window.location.search}`;
+    setPalworldUrl(withQueryParam(current, key, value));
+  }, [selectedPalId]);
 
   const headerSearch = page === "home" ? undefined : (
     <PalworldSearchForm
@@ -396,11 +430,22 @@ export function PublicPalworldPage({
           />
         )}>
           <PalDetailModal
+            condensationStars={selectedCondensationStars}
             palId={selectedPalId}
             locale={locale}
             onClose={closeDetail}
+            onCondensationStarsChange={(stars) =>
+              updatePalDetailPreference("stars", stars === 0 ? undefined : String(stars))
+            }
             onOpenItem={openItemPage}
             onOpenMap={openPalMap}
+            onSpawnPeriodChange={(period) =>
+              updatePalDetailPreference(
+                "spawnPeriod",
+                period === "all" ? undefined : period,
+              )
+            }
+            spawnPeriod={selectedSpawnPeriod}
           />
         </Suspense>
       ) : null}

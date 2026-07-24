@@ -60,26 +60,28 @@ test("월드 지도는 고정 원본에서 변환한 content-hash WebP 한 장�
   assert.equal(mapImport.runtimeActivated, true);
 });
 
-test("Pal 이미지는 canonical exact mapping 272개만 활성화하고 누락 15개는 fallback으로 유지한다", async () => {
+test("Pal 이미지는 기존 272개를 보존하고 보완 archive의 15개를 exact mapping으로 활성화한다", async () => {
   const provenance = await json("import-provenance.json", importRoot);
   const mapping = await json("image-source-map.json", mappingRoot);
   const paldex = await json("paldex.json", releaseRoot);
   const manifest = await json("manifest.json", releaseRoot);
   const policy = await json("image-use-policy.json", releaseRoot);
   const mappedIds = new Set(mapping.entries.map((entry) => entry.palId));
-  const fallbackIds = paldex.records.filter((pal) => !mappedIds.has(pal.id)).map((pal) => pal.id);
+  const supplementalMappings = mapping.entries.filter((entry) => entry.sourceRevision.startsWith("delta-zip-"));
 
   assert.equal(policy.sourceType, "operator_provided_archive");
   assert.equal(policy.rightsVerified, false);
-  assert.equal(mapping.entries.length, 272);
-  assert.equal(new Set(mapping.entries.map((entry) => entry.sourceInternalId)).size, 272);
+  assert.equal(mapping.entries.length, 287);
+  assert.equal(new Set(mapping.entries.map((entry) => entry.sourceInternalId)).size, 287);
   assert.equal(mapping.entries.every((entry) => entry.sourceKind === policy.sourceType), true);
-  assert.equal(mapping.entries.every((entry) => entry.sourceRevision.endsWith(provenance.source.archiveSha256)), true);
-  assert.deepEqual(fallbackIds, provenance.palImageImport.missingPalIds);
-  assert.equal(paldex.records.filter((pal) => pal.imageUrl).length, 272);
-  assert.equal(manifest.imageAssetGate.status, "partial");
-  assert.equal(manifest.imageAssetGate.readyImages, 272);
-  assert.equal(manifest.imageAssetGate.fallbackPals, 15);
+  assert.equal(mapping.entries.filter((entry) => entry.sourceRevision.endsWith(provenance.source.archiveSha256)).length, 272);
+  assert.equal(supplementalMappings.length, 15);
+  assert.deepEqual(supplementalMappings.map((entry) => entry.palId).sort(), [...provenance.palImageImport.missingPalIds].sort());
+  assert.equal(mappedIds.size, 287);
+  assert.equal(paldex.records.filter((pal) => pal.imageUrl).length, 287);
+  assert.equal(manifest.imageAssetGate.status, "operator_acknowledged");
+  assert.equal(manifest.imageAssetGate.readyImages, 287);
+  assert.equal(manifest.imageAssetGate.fallbackPals, 0);
 });
 
 test("quarantine에는 전체 archive·SQL·원본 PNG를 복사하지 않는다", async () => {

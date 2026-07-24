@@ -3,11 +3,11 @@
   "release": "1.0.1",
   "generatedAt": "2026-07-15T07:03:54.1507828+00:00",
   "sourceLockSha256": "690a38bfd2e02f79c17cfc842c230adf385f69141c4e6660f18f7bf25bcb36be",
-  "paldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
-  "imagesManifestSha256": "016647f3c257b40814e10012857224ffae5e8531b5a8b5d97ee2f0c691d0c473",
-  "importReportSha256": "06cd896cbed3d46921c0b14f671e1e8cb7db55f4943131cbe5bfc7eafd8f9cb1",
-  "imageUsePolicySha256": "e886812f4ea3fda26ed6daed08d9a0dcf676f6947a09cf2c00bd26e7fc260d1e",
-  "imageSourceMapSha256": "a2f2734571b0c0a5f6f43427c0d4ac3b0bf2d3c8eba3ac5b4bf63044ddfb81ef",
+  "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+  "imagesManifestSha256": "671a3c00c4e5d0842b42c30b5610d541682e52302d161755ccc75fdac4d2031e",
+  "importReportSha256": "110a4afc0016937d23a5f3f6a5d6af07dec297e6fc387c5ed903321589327fe9",
+  "imageUsePolicySha256": "565a199f730c05c3f20e61448e1ec0e4f0d1c3aefd36b00b8e10eab78b35eaa1",
+  "imageSourceMapSha256": "6f0210f1c8ca2873d32703654f38ac93d4134556f8e62f806ec832fcb8a31be2",
   "mappingSha256": {
     "publicIdMap": "174d68027ae7f7c54ecd3158f0d98a03eb644c4f70cfe2aba70aeddbe7a67acd",
     "elements": "2ad974b1579429f89cdbd6b9551bddecbf000d7da459922cd98aa325f0faa00a",
@@ -20,8 +20,8 @@
     "normal": 203,
     "variant": 84,
     "imageMappings": 287,
-    "readyImages": 272,
-    "uniqueImageFiles": 272
+    "readyImages": 287,
+    "uniqueImageFiles": 287
   },
   "dataIntegrityGate": {
     "passed": true,
@@ -46,17 +46,15 @@
   },
   "imageAssetGate": {
     "passed": true,
-    "status": "partial",
+    "status": "operator_acknowledged",
     "policyStatus": "operator_acknowledged",
-    "failures": [
-      "PAL_IMAGE_COVERAGE_PARTIAL"
-    ],
+    "failures": [],
     "technicalPassed": true,
     "publicActivationAllowed": true,
     "rightsVerified": false,
     "usageBasis": "operator_reference_use",
-    "readyImages": 272,
-    "fallbackPals": 15,
+    "readyImages": 287,
+    "fallbackPals": 0,
     "publicNoticeRequired": true
   },
   "runtimeActivation": true

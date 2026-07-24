@@ -7,7 +7,8 @@ import test from "node:test";
 
 const {
   PalworldPakPreflightError,
-  withPalworldPakArchive
+  withPalworldPakArchive,
+  withPalworldPakArchiveOverlay
 } = await import("../dist/data/palworld-pak-preflight.js");
 
 const CRC_TABLE = (() => {
@@ -216,6 +217,92 @@ test("고정 checksum 불일치는 typed error로 종료하고 archive handle을
   // Windows에서도 열린 handle이 남으면 삭제가 실패하므로 cleanup 회귀를 함께 검증합니다.
   await rm(fixture.archivePath);
   await assert.rejects(access(fixture.archivePath));
+});
+
+test("고정 asset overlay는 신규 member와 byte-identical 중복만 결합한다", async (context) => {
+  const primary = await writeArchiveFixture(context, [
+    { name: "Pal/Data/base.json", data: "{\"source\":\"same\"}" },
+    { name: "Pal/Data/shared.json", data: "{\"value\":1}" }
+  ]);
+  const overlay = await writeArchiveFixture(context, [
+    { name: "Pal/Data/shared.json", data: "{\"value\":1}" },
+    { name: "Pal/Texture/new.png", data: "png-fixture" }
+  ], "streamops-pak-overlay-");
+
+  await withPalworldPakArchiveOverlay(
+    {
+      archivePath: primary.archivePath,
+      expectedSha256: primary.sha256
+    },
+    [{
+      archivePath: overlay.archivePath,
+      expectedSha256: overlay.sha256
+    }],
+    async (reader) => {
+      assert.equal(reader.archiveSha256, primary.sha256);
+      assert.deepEqual(
+        reader.sourceArchives.map(({ role, sha256 }) => ({ role, sha256 })),
+        [
+          { role: "primary", sha256: primary.sha256 },
+          { role: "asset_overlay", sha256: overlay.sha256 }
+        ]
+      );
+      assert.deepEqual(
+        reader.members.map((member) => member.name),
+        [
+          "Pal/Data/base.json",
+          "Pal/Data/shared.json",
+          "Pal/Texture/new.png"
+        ]
+      );
+      assert.equal(
+        (await reader.readBytes("Pal/Texture/new.png")).toString("utf8"),
+        "png-fixture"
+      );
+    }
+  );
+});
+
+test("asset overlay가 기존 DataTable을 다른 bytes로 덮어쓰는 것을 차단한다", async (context) => {
+  const primary = await writeArchiveFixture(context, [
+    { name: "Pal/Data/shared.json", data: "{\"value\":1}" }
+  ]);
+  const overlay = await writeArchiveFixture(context, [
+    { name: "Pal/Data/shared.json", data: "{\"value\":2}" }
+  ], "streamops-pak-overlay-conflict-");
+  let callbackCalled = false;
+
+  await assert.rejects(
+    withPalworldPakArchiveOverlay(
+      {
+        archivePath: primary.archivePath,
+        expectedSha256: primary.sha256
+      },
+      [{
+        archivePath: overlay.archivePath,
+        expectedSha256: overlay.sha256
+      }],
+      async () => {
+        callbackCalled = true;
+      }
+    ),
+    (error) => isTypedPreflightError(error, /다른 내용으로 충돌/u)
+  );
+  assert.equal(callbackCalled, false);
+});
+
+test("대용량 asset profile은 고정 SHA-256 없이 사용할 수 없다", async (context) => {
+  const fixture = await writeArchiveFixture(context, [
+    { name: "Pal/Texture/icon.png", data: "png-fixture" }
+  ]);
+  await assert.rejects(
+    withPalworldPakArchive(
+      fixture.archivePath,
+      { profile: "fixed_asset_overlay" },
+      async () => assert.fail("고정 checksum 없이 callback을 실행하면 안 됩니다.")
+    ),
+    (error) => isTypedPreflightError(error, /고정 expectedSha256/u)
+  );
 });
 
 test("개별 member의 비압축 크기 상한을 작은 central-directory fixture로 차단한다", async (context) => {

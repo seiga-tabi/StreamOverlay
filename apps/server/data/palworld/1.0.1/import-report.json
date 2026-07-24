@@ -44,13 +44,13 @@
     "aliasCollisions": 0
   },
   "images": {
-    "status": "partial",
+    "status": "operator_acknowledged",
     "policyStatus": "operator_acknowledged",
-    "sourceMappings": 272,
+    "sourceMappings": 287,
     "mappedPals": 287,
-    "readyImages": 272,
-    "uniqueImageFiles": 272,
-    "fallbackPals": 15,
+    "readyImages": 287,
+    "uniqueImageFiles": 287,
+    "fallbackPals": 0,
     "rightsVerified": false,
     "usageBasis": "operator_reference_use",
     "converter": {
@@ -92,17 +92,15 @@
   },
   "imageAssetGate": {
     "passed": true,
-    "status": "partial",
+    "status": "operator_acknowledged",
     "policyStatus": "operator_acknowledged",
-    "failures": [
-      "PAL_IMAGE_COVERAGE_PARTIAL"
-    ],
+    "failures": [],
     "technicalPassed": true,
     "publicActivationAllowed": true,
     "rightsVerified": false,
     "usageBasis": "operator_reference_use",
-    "readyImages": 272,
-    "fallbackPals": 15,
+    "readyImages": 287,
+    "fallbackPals": 0,
     "publicNoticeRequired": true
   },
   "runtimeActivation": true

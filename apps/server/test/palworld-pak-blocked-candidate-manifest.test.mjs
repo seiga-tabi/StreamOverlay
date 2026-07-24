@@ -117,6 +117,7 @@ function baseManifest(artifactBytes, assetBytes) {
     },
     mappingChecksums: {
       publicIdMap: "1".repeat(64),
+      publicIdExtensions: "a".repeat(64),
       aliases: "2".repeat(64),
       palIconOverrides: "3".repeat(64),
       elementIconMap: "4".repeat(64),
@@ -320,7 +321,18 @@ async function writeStagingFixture(context, options = {}) {
       ...common,
       status: "blocked_candidate",
       activationEligible: false,
+      sourceArchives: [{
+        role: "primary",
+        sha256: ARCHIVE_SHA256,
+        bytes: 1
+      }],
+      localePolicy: {
+        officialKo: "required",
+        officialJa: "required",
+        officialEn: "required"
+      },
       blockers: ["EXPORT_METADATA_NOT_PROVIDED"],
+      coverageLimitations: [],
       counts: zeroCounts,
       sourceCounts: {},
       localeCoverage: zeroLocaleCoverage,
@@ -351,6 +363,11 @@ async function writeStagingFixture(context, options = {}) {
         bytes: 1,
         fileCount: 1
       },
+      sourceArchives: [{
+        role: "primary",
+        sha256: ARCHIVE_SHA256,
+        bytes: 1
+      }],
       mappings: mappingChecksums,
       includedFiles: options.localeRecord === undefined
         ? []

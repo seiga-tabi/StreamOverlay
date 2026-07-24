@@ -15,7 +15,7 @@ import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../utils/element-images";
 import { elementLabel, workLabel } from "../utils/labels";
 import type { PalworldPalsFilterKey, PalworldPalsRouteKey } from "../utils/pals";
-import { workSuitabilityIconUrl } from "../utils/work-suitability-icons";
+import { workSuitabilityFilterIconUrl } from "../utils/work-suitability-icons";
 
 type FilterUpdate = (key: PalworldPalsRouteKey, value: string) => void;
 
@@ -55,7 +55,7 @@ function ElementFilterIcon({ element }: { element: PalworldElement }) {
 }
 
 function WorkFilterIcon({ type }: { type: PalworldWorkSuitabilityType }) {
-  const imageUrl = workSuitabilityIconUrl(type);
+  const imageUrl = workSuitabilityFilterIconUrl(type);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => setFailed(false), [imageUrl]);

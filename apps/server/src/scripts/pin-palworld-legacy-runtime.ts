@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import {
+  PALWORLD_ACTIVE_RUNTIME_FILE,
   PALWORLD_DATA_ROOT,
-  assertPalworldActiveRuntimeManifest,
-  loadPalworldActiveRuntime
+  assertPalworldActiveRuntimeManifest
 } from "../data/palworld-active-runtime.js";
 import {
   createPalworldLegacyCompositeRuntimeManifest
@@ -61,27 +61,55 @@ function parseArgs(args: string[]): Options {
 export async function pinPalworldLegacyRuntime(
   options: Options
 ): Promise<void> {
-  const active = await loadPalworldActiveRuntime({
-    dataRoot: options.dataRoot
-  });
-  if (active.manifest.format === "operator_pak_v1") {
+  const dataRoot = path.resolve(options.dataRoot);
+  const activeManifestPath = path.join(
+    dataRoot,
+    "runtime",
+    PALWORLD_ACTIVE_RUNTIME_FILE
+  );
+  const current = assertPalworldActiveRuntimeManifest(
+    JSON.parse(await readFile(activeManifestPath, "utf8")) as unknown
+  );
+  if (current.format === "operator_pak_v1") {
     throw new Error(
       "operator PAK runtime은 자체 runtime-manifest를 사용하므로 legacy composite로 변환할 수 없습니다."
     );
   }
+  const releaseRoot = path.resolve(
+    dataRoot,
+    ...current.releaseDirectory.split("/")
+  );
+  if (!releaseRoot.startsWith(`${dataRoot}${path.sep}`)) {
+    throw new Error("legacy release root가 Palworld data root 밖으로 벗어났습니다.");
+  }
+  const releaseRootInfo = await lstat(releaseRoot);
+  if (
+    releaseRootInfo.isSymbolicLink()
+    || !releaseRootInfo.isDirectory()
+    || await realpath(releaseRoot) !== releaseRoot
+  ) {
+    throw new Error("legacy release root는 symlink가 아닌 canonical directory여야 합니다.");
+  }
   const composite = await createPalworldLegacyCompositeRuntimeManifest({
-    releaseRoot: active.releaseRoot,
-    release: active.manifest.release,
+    releaseRoot,
+    release: current.release,
     workImages: options.workImages,
     skillImages: options.skillImages
   });
-  const releaseManifestBytes = await readFile(active.releaseManifestPath);
+  const releaseManifestPath = path.resolve(
+    releaseRoot,
+    ...current.manifestFile.split("/")
+  );
+  if (!releaseManifestPath.startsWith(`${releaseRoot}${path.sep}`)) {
+    throw new Error("legacy release manifest가 release root 밖으로 벗어났습니다.");
+  }
+  const releaseManifestBytes = await readFile(releaseManifestPath);
   const next = assertPalworldActiveRuntimeManifest({
     schemaVersion: 2,
     format: "legacy_composite_v2",
-    release: active.manifest.release,
-    releaseDirectory: active.manifest.releaseDirectory,
-    manifestFile: "manifest.json",
+    release: current.release,
+    releaseDirectory: current.releaseDirectory,
+    manifestFile: current.manifestFile,
     manifestSha256: createHash("sha256")
       .update(releaseManifestBytes)
       .digest("hex"),

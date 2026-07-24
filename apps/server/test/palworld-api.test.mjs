@@ -78,7 +78,7 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(body.counts.items, 1_847);
   assert.equal(body.counts.skills, 566);
   assert.equal(body.domains.pals.status, "ready");
-  assert.equal(body.domains.items.status, "incomplete");
+  assert.equal(body.domains.items.status, "ready");
   assert.equal(body.domains.items.metadata.gameVersion, "1.0.1");
   assert.equal(body.domains.items.metadata.sourceRevision, body.metadata.sourceRevision);
   assert.equal(body.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
@@ -95,8 +95,35 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.deepEqual(body.coverage.itemImages, { available: 1_762, missing: 85, total: 1_847 });
   assert.deepEqual(body.coverage.skillDetails, { available: 564, missing: 2, total: 566 });
   assert.deepEqual(body.coverage.elementImages, { available: 9, missing: 0, total: 9 });
-  assert.equal(body.gates.imageAssets.readyImages, 272);
-  assert.equal(body.gates.imageAssets.fallbackPals, 15);
+  for (const locale of ["ko", "ja"]) {
+    const translationCoverage = body.coverage.translations[locale];
+    assert.equal(translationCoverage.publicUsable, 5_458);
+    assert.equal(translationCoverage.sourceLanguageFallback, 0);
+    assert.equal(translationCoverage.missingSource, 21);
+    assert.equal(translationCoverage.sourceAnomalousFields, 1_120);
+    assert.equal(translationCoverage.missingSourceSlots, 1_649);
+    assert.deepEqual(translationCoverage.availability, {
+      translated: 5_458,
+      sourceLanguageFallback: 0,
+      missingSource: 21,
+      total: 5_479
+    });
+    assert.deepEqual(translationCoverage.review, {
+      sourceProvided: 0,
+      humanReviewed: 297,
+      machineAssisted: 5_161,
+      total: 5_458
+    });
+    assert.deepEqual(translationCoverage.sourceIntegrity, {
+      intact: 4_338,
+      sourceAnomalousFields: 1_120,
+      missingSourceFields: 21,
+      missingSourceSlots: 1_649,
+      total: 5_479
+    });
+  }
+  assert.equal(body.gates.imageAssets.readyImages, 287);
+  assert.equal(body.gates.imageAssets.fallbackPals, 0);
 });
 
 test("모든 Palworld 공개 endpoint의 header와 최상위 release identity가 일치한다", async () => {
@@ -158,6 +185,75 @@ test("Palworld JSON ETag는 같은 active release의 조건부 요청을 304로 
   assert.notEqual(differentResource.res.headers.ETag, first.res.headers.ETag);
 });
 
+test("같은 release에서도 공개 번역 표현이 바뀌면 Item·Skill 목록과 Pal 상세 ETag를 갱신한다", async () => {
+  const cases = [
+    {
+      method: "listItems",
+      path: "/api/palworld/items?limit=1",
+      localizedTarget(response) {
+        return response.items[0];
+      }
+    },
+    {
+      method: "listSkills",
+      path: "/api/palworld/skills?limit=1",
+      localizedTarget(response) {
+        return response.items[0];
+      }
+    },
+    {
+      method: "getPal",
+      path: "/api/palworld/pals/anubis",
+      localizedTarget(response) {
+        return response.partnerSkill ?? response;
+      }
+    }
+  ];
+
+  for (const fixture of cases) {
+    const staleService = {
+      meta: () => palworldDataService.meta(),
+      [fixture.method]: (...args) => {
+        const response = structuredClone(
+          palworldDataService[fixture.method](...args)
+        );
+        const target = fixture.localizedTarget(response);
+        delete target.nameKo;
+        if (target.translation?.name) {
+          target.translation.name.ko = "source_language_fallback";
+        }
+        return response;
+      }
+    };
+    const stale = await request(createHandler(staleService), fixture.path);
+    assert.equal(stale.res.statusCode, 200, fixture.path);
+
+    const refreshed = await request(
+      createHandler(),
+      fixture.path,
+      "GET",
+      { "if-none-match": stale.res.headers.ETag }
+    );
+    assert.equal(refreshed.res.statusCode, 200, fixture.path);
+    assert.notEqual(refreshed.res.headers.ETag, stale.res.headers.ETag, fixture.path);
+    const localizedTarget = fixture.localizedTarget(refreshed.body);
+    assert.equal(typeof localizedTarget.nameKo, "string", fixture.path);
+    assert.notEqual(
+      localizedTarget.translation?.name?.ko,
+      "source_language_fallback",
+      fixture.path
+    );
+
+    const unchanged = await request(
+      createHandler(),
+      fixture.path,
+      "GET",
+      { "if-none-match": refreshed.res.headers.ETag }
+    );
+    assert.equal(unchanged.res.statusCode, 304, fixture.path);
+  }
+});
+
 test("catalog 손상은 Pal을 유지하고 Item·Skill만 no-store 503으로 격리한다", async () => {
   const service = await loadPalworldDataService({
     catalogRoot: `${process.cwd()}/__missing-palworld-catalog-fixture__`
@@ -198,6 +294,8 @@ test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 �
   const number = await request(handler, "/api/palworld/search?q=%23139");
   const palInternalId = await request(handler, "/api/palworld/search?q=SheepBall");
   const itemInternalId = await request(handler, "/api/palworld/search?q=PalSphere");
+  const machineItemKo = await request(handler, "/api/palworld/search?q=%EB%BC%88");
+  const machineItemJa = await request(handler, "/api/palworld/search?q=%E9%AA%A8");
   assert.equal(korean.body.pals[0].id, "anubis");
   assert.equal(japanese.body.items[0].id, "pal-sphere");
   assert.equal(english.body.pals[0].id, "anubis");
@@ -205,9 +303,11 @@ test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 �
   assert.equal(number.body.pals[0].id, "anubis");
   assert.equal(palInternalId.body.pals[0].id, "lamball");
   assert.equal(itemInternalId.body.items.some((item) => item.id === "pal-sphere"), true);
+  assert.equal(machineItemKo.body.items.some((item) => item.id === "bone"), true);
+  assert.equal(machineItemJa.body.items.some((item) => item.id === "bone"), true);
   assert.equal(japanese.body.domains.pals.status, "ready");
   assert.equal(japanese.body.domains.pals.metadata.gameVersion, "1.0.1");
-  assert.equal(japanese.body.domains.items.status, "incomplete");
+  assert.equal(japanese.body.domains.items.status, "ready");
   assert.equal(japanese.body.domains.items.metadata.gameVersion, "1.0.1");
   assert.equal(japanese.body.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
 
@@ -274,8 +374,21 @@ test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드�
   const handler = createHandler();
   const pal = await request(handler, "/api/palworld/pals/anubis");
   const item = await request(handler, "/api/palworld/items/pal_sphere");
+  const machineItem = await request(handler, "/api/palworld/items/bone");
   assert.equal(pal.res.statusCode, 200);
   assert.equal(pal.body.nameJa, "アヌビス");
+  assert.equal(pal.body.partnerSkill.nameKo, "사막의 수호자");
+  assert.equal(pal.body.partnerSkill.nameJa, "砂漠の守護者");
+  assert.equal(pal.body.partnerSkill.translation.name.ko, "machine_assisted");
+  assert.equal(pal.body.activeSkills.every((skill) => skill.nameKo && skill.nameJa), true);
+  assert.equal(
+    pal.body.activeSkills.every((skill) =>
+      skill.translation.name.ko === "machine_assisted"
+      && skill.translation.name.ja === "machine_assisted"
+    ),
+    true
+  );
+  assert.equal(pal.body.drops.every((drop) => drop.nameKo && drop.nameJa), true);
   assert.equal(item.res.statusCode, 200);
   assert.equal(item.body.id, "pal-sphere");
   assert.equal(item.body.sourceInternalId, "PalSphere");
@@ -285,7 +398,31 @@ test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드�
   assert.equal(item.body.descriptionEn.length > 0, true);
   assert.equal(item.body.maxStack > 0, true);
   assert.equal(item.body.craftingMaterials.length > 0, true);
+  assert.equal(
+    item.body.craftingMaterials.every(({ item: material }) => material.nameKo && material.nameJa),
+    true
+  );
   assert.equal(validatePalworldItemDetail(item.body).ok, true);
+  assert.equal(machineItem.res.statusCode, 200);
+  assert.equal(machineItem.body.nameKo, "뼈");
+  assert.equal(machineItem.body.nameJa, "骨");
+  assert.equal(machineItem.body.translation.name.ko, "machine_assisted");
+  assert.equal(machineItem.body.translation.name.ja, "machine_assisted");
+  assert.deepEqual(machineItem.body.translation.name.sourceIntegrity, {
+    ko: "intact",
+    ja: "intact"
+  });
+
+  const anomalousItem = await request(handler, "/api/palworld/items/aicore");
+  assert.equal(anomalousItem.res.statusCode, 200);
+  assert.equal(anomalousItem.body.translation.description.ko, "machine_assisted");
+  assert.equal(anomalousItem.body.translation.description.ja, "machine_assisted");
+  assert.deepEqual(anomalousItem.body.translation.description.sourceIntegrity, {
+    ko: "source_anomaly",
+    ja: "source_anomaly"
+  });
+  assert.equal(anomalousItem.body.descriptionKo.includes("[원문 누락]"), true);
+  assert.equal(anomalousItem.body.descriptionJa.includes("[原文欠落]"), true);
 });
 
 test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 Shared schema를 적용한다", async () => {
@@ -299,9 +436,15 @@ test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 S
   assert.equal(active.body.items[0].descriptionEn.includes("icicles"), true);
   assert.deepEqual(active.body.items[0].localization, {
     sourceLanguage: "en",
-    ko: "source_language_fallback",
-    ja: "source_language_fallback"
+    ko: "localized",
+    ja: "localized"
   });
+  assert.equal(active.body.items[0].nameKo.length > 0, true);
+  assert.equal(active.body.items[0].nameJa.length > 0, true);
+  assert.notEqual(active.body.items[0].nameKo, active.body.items[0].nameEn);
+  assert.notEqual(active.body.items[0].nameJa, active.body.items[0].nameEn);
+  assert.equal(active.body.items[0].translation.name.ko, "machine_assisted");
+  assert.equal(active.body.items[0].translation.name.ja, "machine_assisted");
   assert.equal(active.body.items[0].translation.description.ko, "machine_assisted");
   assert.equal(active.body.items[0].translation.description.ja, "machine_assisted");
   assert.match(active.res.headers["Cache-Control"], /^public,/u);
@@ -312,6 +455,22 @@ test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 S
 
   const description = await request(handler, "/api/palworld/skills?q=acidic%20clouds&page=1&limit=10");
   assert.equal(description.body.items.some((skill) => skill.id === "active-acid-rain-b29ac863a8"), true);
+  const koreanName = await request(
+    handler,
+    "/api/palworld/skills?q=%EC%82%AC%EB%A7%89%EC%9D%98%20%EC%88%98%ED%98%B8%EC%9E%90&page=1&limit=10"
+  );
+  const japaneseName = await request(
+    handler,
+    "/api/palworld/skills?q=%E7%A0%82%E6%BC%A0%E3%81%AE%E5%AE%88%E8%AD%B7%E8%80%85&page=1&limit=10"
+  );
+  assert.equal(
+    koreanName.body.items.some((skill) => skill.id === "partner-anubis"),
+    true
+  );
+  assert.equal(
+    japaneseName.body.items.some((skill) => skill.id === "partner-anubis"),
+    true
+  );
 
   const passive = await request(handler, "/api/palworld/skills?type=passive&sort=name&order=asc&page=1&limit=3");
   assert.equal(passive.body.pagination.total, 79);
@@ -349,12 +508,12 @@ test("스킬 API는 unknown query와 허용되지 않은 filter를 안정적인 
   }
 });
 
-test("첫 번째·중간·마지막 Pal 상세는 검증된 로컬 이미지를, 누락 Pal은 fallback 상태를 반환한다", async () => {
+test("첫 번째·중간·마지막 Pal과 기존 누락 Pal 상세는 모두 검증된 로컬 이미지를 반환한다", async () => {
   const handler = createHandler();
   const first = await request(handler, "/api/palworld/pals/lamball");
   const middle = await request(handler, "/api/palworld/pals/rayhound");
   const last = await request(handler, "/api/palworld/pals/panthalus");
-  const missingImage = await request(handler, "/api/palworld/pals/smokie");
+  const supplementedImage = await request(handler, "/api/palworld/pals/smokie");
   const nocturnal = await request(handler, "/api/palworld/pals/depresso");
   assert.deepEqual(
     [first.body.number, middle.body.number, last.body.number],
@@ -365,7 +524,7 @@ test("첫 번째·중간·마지막 Pal 상세는 검증된 로컬 이미지를,
     ["도로롱", "イヌズマ", "Panthalus"]
   );
   assert.equal([first.body, middle.body, last.body].every((pal) => /^\/images\/palworld\/1\.0\.1\/pals\/[a-f0-9]{64}\.webp$/u.test(pal.imageUrl)), true);
-  assert.equal(missingImage.body.imageUrl, undefined);
+  assert.match(supplementedImage.body.imageUrl, /^\/images\/palworld\/1\.0\.1\/pals\/[a-f0-9]{64}\.webp$/u);
   assert.equal(typeof first.body.nocturnal, "boolean");
   assert.equal(nocturnal.body.nocturnal, true);
   assert.equal(first.body.descriptionEn.includes("food chain"), true);

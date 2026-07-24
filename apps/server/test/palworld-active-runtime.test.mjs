@@ -16,11 +16,13 @@ import { fileURLToPath } from "node:url";
 import {
   PalworldActiveRuntimeError,
   PalworldPakPublicActivationError,
+  PALWORLD_OPERATOR_ACTIVE_OPTIONAL_DOMAINS,
   PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS,
   assertPalworldActiveRuntimeManifest,
   deterministicPalworldActiveRuntimeManifestJson,
   finalizePalworldPakRuntimeForPublicActivation,
-  loadPalworldActiveRuntime
+  loadPalworldActiveRuntime,
+  palworldRuntimeAllowsLegacyOverlay
 } from "../dist/data/palworld-active-runtime.js";
 import {
   assertPalworldLegacyCompositeRuntimeManifest,
@@ -43,14 +45,16 @@ const legacyManifestPath = path.join(
   "apps/server/data/palworld/1.0.1/manifest.json"
 );
 
-test("operator active gate는 promotion과 동일한 전체 공개 domain을 요구한다", () => {
+test("operator active gate는 KO/JA core data와 선택 domain을 분리한다", () => {
   assert.deepEqual(PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS, [
     "pals",
     "items",
     "skills",
     "breeding",
     "localizationKo",
-    "localizationJa",
+    "localizationJa"
+  ]);
+  assert.deepEqual(PALWORLD_OPERATOR_ACTIVE_OPTIONAL_DOMAINS, [
     "localizationEn",
     "palImages",
     "itemImages",
@@ -61,27 +65,49 @@ test("operator active gate는 promotion과 동일한 전체 공개 domain을 요
   ]);
 });
 
-test("operator PAK public finalizer는 기술 gate와 권리 gate를 분리해 fail-closed 처리한다", () => {
+test("operator PAK public finalizer는 KO/JA data와 공개 asset 권리 gate를 분리한다", () => {
   const manifest = {
-    activation: Object.fromEntries(
-      PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS.map((domain) => [domain, "ready"])
-    )
+    activation: {
+      ...Object.fromEntries(
+        PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS.map((domain) => [domain, "ready"])
+      ),
+      ...Object.fromEntries(
+        PALWORLD_OPERATOR_ACTIVE_OPTIONAL_DOMAINS.map((domain) => [domain, "blocked"])
+      )
+    }
   };
-  assert.throws(
-    () => finalizePalworldPakRuntimeForPublicActivation(manifest),
-    (error) =>
-      error instanceof PalworldPakPublicActivationError
-      && error.code === "PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE"
-      && /PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE/u.test(error.message)
+  assert.equal(
+    finalizePalworldPakRuntimeForPublicActivation(manifest),
+    manifest
   );
 
-  manifest.activation.itemImages = "blocked";
+  manifest.activation.localizationEn = "candidate";
   assert.throws(
     () => finalizePalworldPakRuntimeForPublicActivation(manifest),
     (error) =>
       error instanceof PalworldPakPublicActivationError
       && error.code === "PALWORLD_PAK_RUNTIME_NOT_READY"
+      && /localizationEn/u.test(error.message)
+  );
+
+  manifest.activation.localizationEn = "blocked";
+  manifest.activation.itemImages = "ready";
+  assert.throws(
+    () => finalizePalworldPakRuntimeForPublicActivation(manifest),
+    (error) =>
+      error instanceof PalworldPakPublicActivationError
+      && error.code === "PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE"
       && /itemImages/u.test(error.message)
+  );
+
+  manifest.activation.itemImages = "blocked";
+  manifest.activation.items = "blocked";
+  assert.throws(
+    () => finalizePalworldPakRuntimeForPublicActivation(manifest),
+    (error) =>
+      error instanceof PalworldPakPublicActivationError
+      && error.code === "PALWORLD_PAK_RUNTIME_NOT_READY"
+      && /items/u.test(error.message)
   );
 });
 
@@ -138,6 +164,55 @@ test("active manifest exact schema와 결정적 JSON을 검증한다", () => {
   );
 });
 
+test("legacy 지도 overlay는 composite selector가 active로 고정한 domain만 로드한다", () => {
+  const base = {
+    schemaVersion: 2,
+    format: "legacy_composite_v2",
+    composite: {
+      availability: {
+        mapMarkers: "candidate",
+        mapSpawns: "unavailable"
+      }
+    }
+  };
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay(base, "mapMarkers"),
+    false
+  );
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay(base, "mapSpawns"),
+    false
+  );
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay({
+      ...base,
+      composite: {
+        availability: {
+          mapMarkers: "active",
+          mapSpawns: "active"
+        }
+      }
+    }, "mapMarkers"),
+    true
+  );
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay({
+      schemaVersion: 1,
+      format: "legacy_release_v1"
+    }, "mapSpawns"),
+    true,
+    "기존 schema v1 legacy pointer는 기존 loader 동작을 유지해야 합니다."
+  );
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay({
+      schemaVersion: 1,
+      format: "operator_pak_v1"
+    }, "mapMarkers"),
+    false,
+    "operator PAK runtime에 legacy overlay 파일을 주입하면 안 됩니다."
+  );
+});
+
 test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 candidate domain을 제외한다", async () => {
   const releaseRoot = path.dirname(legacyManifestPath);
   const composite = await createPalworldLegacyCompositeRuntimeManifest({
@@ -186,6 +261,16 @@ test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 c
   });
   assert.equal(active.schemaVersion, 2);
   assert.equal(active.format, "legacy_composite_v2");
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay(active, "mapMarkers"),
+    false,
+    "candidate marker 파일이 release에 남아 있어도 provider 로드를 허용하면 안 됩니다."
+  );
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay(active, "mapSpawns"),
+    false,
+    "candidate spawn 파일이 release에 남아 있어도 provider 로드를 허용하면 안 됩니다."
+  );
   assert.equal(
     assertPalworldLegacyCompositeRuntimeManifest({
       ...composite,

@@ -32,7 +32,10 @@ import {
   assertPalworldPakExportMetadata,
   inspectPalworldPakArchive,
   withPalworldPakArchive,
+  withPalworldPakArchiveOverlay,
+  validatePalworldPakMemberName,
   type PalworldPakArchiveReader,
+  type PalworldPakArchiveOverlaySource,
   type PalworldPakExportMetadata,
   type PalworldPakPreflightReport
 } from "./palworld-pak-preflight.js";
@@ -174,6 +177,7 @@ type CandidateAliases = {
 
 type CandidateMappings = {
   publicIdMap: unknown;
+  publicIdExtensions: unknown;
   aliases: unknown;
   palIconOverrides: unknown;
   elementIconMap: unknown;
@@ -187,6 +191,9 @@ type CandidateMappings = {
 export type PalworldPakCandidateImportInput = {
   archivePath: string;
   expectedArchiveSha256: string;
+  assetOverlayArchives?: readonly PalworldPakArchiveOverlaySource[];
+  mappingsUsmapMember?: string;
+  officialEnLocale?: "required" | "optional";
   outputDirectory: string;
   metadata?: unknown;
   mappings: CandidateMappings;
@@ -198,6 +205,7 @@ export type PalworldPakCandidateImportResult = {
   candidateId: string;
   activationEligible: false;
   blockers: string[];
+  coverageLimitations: string[];
   counts: {
     rawPalRows: number;
     canonicalPals: number;
@@ -418,7 +426,12 @@ export async function readPalworldPakMappingFile(filePath: string): Promise<unkn
   return await readSmallJsonFile(filePath, MAX_MAPPING_BYTES, "mapping");
 }
 
-function parsePublicIdMap(value: unknown): {
+export function parsePalworldPakPublicIdMap(
+  value: unknown,
+  extensionValue: unknown,
+  expectedSha256: string,
+  expectedCandidateId: string
+): {
   release: string;
   entries: Map<string, string>;
 } {
@@ -438,6 +451,50 @@ function parsePublicIdMap(value: unknown): {
     const publicId = stringValue(row.publicId, `publicIdMap.entries[${index}].publicId`, 128);
     if (!PUBLIC_ID_PATTERN.test(publicId)) fail(`publicIdMap.entries[${index}].publicId: kebab-case여야 합니다.`);
     if (result.has(sourceInternalId) || publicIds.has(publicId)) fail("publicIdMap: ID가 중복됩니다.");
+    result.set(sourceInternalId, publicId);
+    publicIds.add(publicId);
+  }
+  const extensionRoot = exactRecord(extensionValue, "publicIdExtensions", [
+    "schemaVersion",
+    "candidateRelease",
+    "sourceArchiveSha256",
+    "entries"
+  ]);
+  assertCandidateMappingHeader(
+    extensionRoot,
+    "publicIdExtensions",
+    expectedSha256,
+    expectedCandidateId
+  );
+  if (!Array.isArray(extensionRoot.entries) || extensionRoot.entries.length > 10_000) {
+    fail("publicIdExtensions.entries: 최대 10,000개의 배열이어야 합니다.");
+  }
+  for (const [index, raw] of extensionRoot.entries.entries()) {
+    const row = exactRecord(raw, `publicIdExtensions.entries[${index}]`, [
+      "sourceInternalId",
+      "publicId",
+      "reason",
+      "reviewStatus"
+    ]);
+    if (row.reviewStatus !== "approved") {
+      fail(`publicIdExtensions.entries[${index}].reviewStatus: approved여야 합니다.`);
+    }
+    const sourceInternalId = internalId(
+      row.sourceInternalId,
+      `publicIdExtensions.entries[${index}].sourceInternalId`
+    );
+    const publicId = stringValue(
+      row.publicId,
+      `publicIdExtensions.entries[${index}].publicId`,
+      128
+    );
+    if (!PUBLIC_ID_PATTERN.test(publicId)) {
+      fail(`publicIdExtensions.entries[${index}].publicId: kebab-case여야 합니다.`);
+    }
+    stringValue(row.reason, `publicIdExtensions.entries[${index}].reason`, 512);
+    if (result.has(sourceInternalId) || publicIds.has(publicId)) {
+      fail("publicIdExtensions: legacy 또는 extension ID가 중복됩니다.");
+    }
     result.set(sourceInternalId, publicId);
     publicIds.add(publicId);
   }
@@ -1328,13 +1385,21 @@ export async function importPalworldPakCandidate(
     fail("candidate output parent는 symlink가 아닌 canonical directory여야 합니다.");
   }
   const staging = await mkdtemp(path.join(outputParent, ".palworld-pak-candidate-"));
-  const preflight = await inspectPalworldPakArchive(input.archivePath);
+  const officialEnLocale = input.officialEnLocale ?? "required";
+  const preflight = await inspectPalworldPakArchive(input.archivePath, {
+    officialEnLocale
+  });
   if (preflight.archive.sha256 !== input.expectedArchiveSha256) {
     await rm(staging, { recursive: true, force: true });
     fail("preflight archive SHA-256이 고정 입력과 일치하지 않습니다.");
   }
   const candidateId = `candidate-${input.expectedArchiveSha256.slice(0, 16)}`;
-  const publicIdMap = parsePublicIdMap(input.mappings.publicIdMap);
+  const publicIdMap = parsePalworldPakPublicIdMap(
+    input.mappings.publicIdMap,
+    input.mappings.publicIdExtensions,
+    input.expectedArchiveSha256,
+    candidateId
+  );
   const publicIds = publicIdMap.entries;
   const aliases = parseAliases(
     input.mappings.aliases,
@@ -1384,6 +1449,9 @@ export async function importPalworldPakCandidate(
   };
   const mappingChecksums = {
     publicIdMap: sha256(deterministicJson(input.mappings.publicIdMap)),
+    publicIdExtensions: sha256(
+      deterministicJson(input.mappings.publicIdExtensions)
+    ),
     aliases: sha256(deterministicJson(input.mappings.aliases)),
     palIconOverrides: sha256(deterministicJson(input.mappings.palIconOverrides)),
     elementIconMap: sha256(deterministicJson(input.mappings.elementIconMap)),
@@ -1403,11 +1471,42 @@ export async function importPalworldPakCandidate(
     : assertPalworldPakExportMetadata(input.metadata);
 
   try {
-    const result = await withPalworldPakArchive(
-      input.archivePath,
-      { expectedSha256: input.expectedArchiveSha256 },
+    const importWithReader = async (
+      callback: (reader: PalworldPakArchiveReader) => Promise<PalworldPakCandidateImportResult>
+    ): Promise<PalworldPakCandidateImportResult> => {
+      if ((input.assetOverlayArchives?.length ?? 0) === 0) {
+        return await withPalworldPakArchive(
+          input.archivePath,
+          { expectedSha256: input.expectedArchiveSha256 },
+          callback
+        );
+      }
+      return await withPalworldPakArchiveOverlay(
+        {
+          archivePath: input.archivePath,
+          expectedSha256: input.expectedArchiveSha256
+        },
+        input.assetOverlayArchives ?? [],
+        callback
+      );
+    };
+    const result = await importWithReader(
       async (reader) => {
         const sourceFiles = new Map<string, CandidateSourceFile>();
+        const mappingsUsmapMember = validatePalworldPakMemberName(
+          input.mappingsUsmapMember ?? "Mappings.usmap"
+        );
+        const mappingsUsmapSha256 = reader.has(mappingsUsmapMember)
+          ? sha256(await reader.readBytes(mappingsUsmapMember))
+          : undefined;
+        if (mappingsUsmapSha256 !== undefined) {
+          const member = reader.members.find((entry) => entry.name === mappingsUsmapMember);
+          sourceFiles.set(mappingsUsmapMember, {
+            member: mappingsUsmapMember,
+            sha256: mappingsUsmapSha256,
+            bytes: member?.uncompressedBytes ?? 0
+          });
+        }
         const tableCache = new Map<string, JsonRecord>();
         const readTable = async (member: string): Promise<JsonRecord> => {
           const cached = tableCache.get(member);
@@ -2608,6 +2707,23 @@ export async function importPalworldPakCandidate(
           fail("workIconMap.availableSourceMembers: archive의 실제 source 목록과 일치하지 않습니다.");
         }
         const palIconMemberByInternal = new Map<string, string>();
+        const sourceTablePalIconMissing = Object.entries(palIconRows)
+          .flatMap(([sourceRowId, rawIconRow]) => {
+            const member = isRecord(rawIconRow)
+              ? assetMember(rawIconRow.Icon)
+              : undefined;
+            return member !== undefined && !reader.has(member)
+              ? [sourceRowId]
+              : [];
+          })
+          .sort((left, right) => left.localeCompare(right, "en"));
+        const canonicalPalInternalIds = new Set(
+          canonical.canonical.flatMap((pal) => [pal.tribe, pal.rowName])
+        );
+        const publicSourceTablePalIconMissing = sourceTablePalIconMissing
+          .filter((sourceRowId) => canonicalPalInternalIds.has(sourceRowId));
+        const nonPublicSourceTablePalIconMissing = sourceTablePalIconMissing
+          .filter((sourceRowId) => !canonicalPalInternalIds.has(sourceRowId));
         for (const pal of canonical.canonical) {
           const iconRow = palIconRows[pal.tribe] ?? palIconRows[pal.rowName];
           const fromTable = isRecord(iconRow) ? assetMember(iconRow.Icon) : undefined;
@@ -3070,8 +3186,10 @@ export async function importPalworldPakCandidate(
         const sourceReferenceGaps = {
           palIcons: {
             sourceTableReferenced: preflight.assets.palIcons.sourceTableReferenced,
-            sourceTableExactMatches: preflight.assets.palIcons.sourceTableExactMatches,
-            missing: preflight.assets.palIcons.sourceTableMissing,
+            sourceTableExactMatches:
+              preflight.assets.palIcons.sourceTableReferenced - sourceTablePalIconMissing.length,
+            missing: publicSourceTablePalIconMissing,
+            nonPublicMissing: nonPublicSourceTablePalIconMissing,
             rawInputFiles: availablePalIconMembers.length,
             canonicalIncludedFiles: referencedPalIconMembers.size,
             unreferencedFiles: unreferencedPalIconMembers,
@@ -3122,28 +3240,66 @@ export async function importPalworldPakCandidate(
         const adjustedPreflightBlockers = preflight.gates.blockers.filter((blocker) => {
           if (blocker === "EXPORT_METADATA_NOT_PROVIDED" && metadata !== undefined) return false;
           if (
+            blocker === "MAPPINGS_USMAP_NOT_PROVIDED"
+            && mappingsUsmapSha256 !== undefined
+          ) return false;
+          if (blocker === "MAPPINGS_CHECKSUM_MISMATCH") {
+            if (mappingsUsmapSha256 === undefined) return true;
+            if (metadata === undefined) return false;
+            return mappingsUsmapSha256 !== metadata.mappingsSha256;
+          }
+          if (
             blocker === "PAL_ICON_EXPORT_INCOMPLETE"
-            && missingPalImages.length === 0
-            && preflight.assets.palIcons.sourceTableMissing.length === 0
+            || blocker === "ITEM_ICON_EXPORT_INCOMPLETE"
           ) return false;
           return true;
         });
+        const coverageLimitations = [...new Set([
+          ...(unresolvedSkillIdMigrations > 0
+            ? ["SKILL_ID_MIGRATION_INCOMPLETE"]
+            : []),
+          ...(pals.some((pal) => pal.activeSkillAssignmentIds.length === 0)
+            ? ["ACTIVE_SKILL_ASSIGNMENT_COVERAGE_INCOMPLETE"]
+            : []),
+          ...(pals.some((pal) => pal.partnerSkill.parameterSourceRowId === null)
+            ? ["PARTNER_SKILL_PARAMETER_INCOMPLETE"]
+            : []),
+          ...(unresolvedRichText.ko.value
+            + unresolvedRichText.ja.value
+            + unresolvedRichText.en.value > 0
+            ? ["RICH_TEXT_TOKEN_UNRESOLVED"]
+            : []),
+          ...(input.includeAssets === false ? ["ASSET_IMPORT_SKIPPED"] : []),
+          ...(imageAssetFailures.length > 0 ? ["IMAGE_ASSET_VALIDATION_FAILED"] : []),
+          ...(missingPalImages.length > 0 || palImageAssets.length !== pals.length
+            ? ["PAL_IMAGE_IMPORT_INCOMPLETE"]
+            : []),
+          ...(itemImageAssets.length !== items.length
+            ? ["ITEM_IMAGE_IMPORT_INCOMPLETE"]
+            : []),
+          ...(workIconMap.status !== "verified"
+            || workImageAssets.length !== workIconMap.entries.length
+            ? ["WORK_ICON_SEMANTIC_MAPPING_NOT_VERIFIED"]
+            : []),
+          ...(skillIconMap.status !== "verified"
+            || skillImageAssets.length !== skills.length
+            ? ["SKILL_ICON_SEMANTIC_MAPPING_NOT_VERIFIED"]
+            : [])
+        ])].sort((left, right) => left.localeCompare(right, "en"));
         const blockers = [...new Set([
           ...adjustedPreflightBlockers,
           ...(metadata === undefined ? ["EXPORT_METADATA_NOT_PROVIDED"] : []),
-          ...(metadata !== undefined
-            && preflight.mappings.status === "provided"
-            && metadata.mappingsSha256 !== preflight.mappings.actualSha256
-            ? ["MAPPINGS_CHECKSUM_MISMATCH"]
-            : []),
+          ...(mappingsUsmapSha256 === undefined
+            ? ["MAPPINGS_USMAP_NOT_PROVIDED"]
+            : metadata !== undefined
+              && metadata.mappingsSha256 !== mappingsUsmapSha256
+              ? ["MAPPINGS_CHECKSUM_MISMATCH"]
+              : []),
           ...(metadata === undefined || publicIdMap.release !== metadata.gameVersion
             ? ["PUBLIC_ID_MAPPING_RELEASE_UNVERIFIED"]
             : []),
           ...(generatedPublicIdCount > 0
             ? ["PUBLIC_ID_MAPPING_INCOMPLETE"]
-            : []),
-          ...(unresolvedSkillIdMigrations > 0
-            ? ["SKILL_ID_MIGRATION_INCOMPLETE"]
             : []),
           ...(sourceMissingSpecialRows.length > 0
             || unresolvedSpecialRows.length > 0
@@ -3160,30 +3316,6 @@ export async function importPalworldPakCandidate(
             assignment.status === "skill_reference_unresolved"
             || assignment.status === "pal_reference_unresolved"
           ) ? ["ACTIVE_SKILL_ASSIGNMENT_REFERENCE_UNRESOLVED"] : []),
-          ...(pals.some((pal) => pal.activeSkillAssignmentIds.length === 0)
-            ? ["ACTIVE_SKILL_ASSIGNMENT_COVERAGE_INCOMPLETE"]
-            : []),
-          ...(pals.some((pal) => pal.partnerSkill.parameterSourceRowId === null)
-            ? ["PARTNER_SKILL_PARAMETER_INCOMPLETE"]
-            : []),
-          ...(unresolvedRichText.ko.value
-            + unresolvedRichText.ja.value
-            + unresolvedRichText.en.value > 0
-            ? ["RICH_TEXT_TOKEN_UNRESOLVED"]
-            : []),
-          ...(input.includeAssets === false ? ["ASSET_IMPORT_SKIPPED"] : []),
-          ...(imageAssetFailures.length > 0 ? ["IMAGE_ASSET_VALIDATION_FAILED"] : []),
-          ...(input.includeAssets !== false && palImageAssets.length !== pals.length
-            ? ["PAL_IMAGE_IMPORT_INCOMPLETE"]
-            : []),
-          ...(workIconMap.status !== "verified"
-            || workImageAssets.length !== workIconMap.entries.length
-            ? ["WORK_ICON_SEMANTIC_MAPPING_NOT_VERIFIED"]
-            : []),
-          ...(skillIconMap.status !== "verified"
-            || skillImageAssets.length !== skills.length
-            ? ["SKILL_ICON_SEMANTIC_MAPPING_NOT_VERIFIED"]
-            : [])
         ])].sort((left, right) => left.localeCompare(right, "en"));
         const counts = {
           rawPalRows: canonical.raw.length,
@@ -3241,7 +3373,14 @@ export async function importPalworldPakCandidate(
           ...common,
           status: "blocked_candidate",
           activationEligible: false,
+          sourceArchives: reader.sourceArchives,
+          localePolicy: {
+            officialKo: "required",
+            officialJa: "required",
+            officialEn: officialEnLocale
+          },
           blockers,
+          coverageLimitations,
           counts,
           sourceCounts: preflight.data,
           localeCoverage,
@@ -3387,8 +3526,10 @@ export async function importPalworldPakCandidate(
           })),
           sourceTablePalIconReferences: {
             referenced: preflight.assets.palIcons.sourceTableReferenced,
-            exactMatches: preflight.assets.palIcons.sourceTableExactMatches,
-            missing: preflight.assets.palIcons.sourceTableMissing
+            exactMatches:
+              preflight.assets.palIcons.sourceTableReferenced - sourceTablePalIconMissing.length,
+            missing: publicSourceTablePalIconMissing,
+            nonPublicMissing: nonPublicSourceTablePalIconMissing
           },
           imageAssetFailures,
           limitations: [
@@ -3414,6 +3555,7 @@ export async function importPalworldPakCandidate(
             bytes: reader.archiveBytes,
             fileCount: reader.members.length
           },
+          sourceArchives: reader.sourceArchives,
           mappings: mappingChecksums,
           includedFiles: sourceIncludedFiles
         }));
@@ -3435,6 +3577,8 @@ export async function importPalworldPakCandidate(
               : "blocked",
             localizationKo: koLocale.languageVerified ? "candidate" : "blocked",
             localizationJa: jaLocale.languageVerified ? "candidate" : "blocked",
+            // optional은 전체 data activation blocker에서만 제외합니다. 실제 EN
+            // artifact가 없는데 candidate라고 표시하지는 않습니다.
             localizationEn: enLocale.languageVerified
               && unresolvedRichText.en.value === 0
               ? "candidate"
@@ -3497,6 +3641,7 @@ export async function importPalworldPakCandidate(
           candidateId,
           activationEligible: false as const,
           blockers,
+          coverageLimitations,
           counts,
           localeCoverage,
           imageCoverage
@@ -3521,6 +3666,7 @@ export async function importPalworldPakCandidate(
 
 export type PalworldPakCandidateCliMappings = {
   publicIdMapPath: string;
+  publicIdExtensionsPath: string;
   aliasesPath: string;
   palIconOverridesPath: string;
   elementIconMapPath: string;
@@ -3536,6 +3682,9 @@ export async function loadPalworldPakCandidateMappings(
 ): Promise<CandidateMappings> {
   return {
     publicIdMap: await readPalworldPakMappingFile(paths.publicIdMapPath),
+    publicIdExtensions: await readPalworldPakMappingFile(
+      paths.publicIdExtensionsPath
+    ),
     aliases: await readPalworldPakMappingFile(paths.aliasesPath),
     palIconOverrides: await readPalworldPakMappingFile(paths.palIconOverridesPath),
     elementIconMap: await readPalworldPakMappingFile(paths.elementIconMapPath),

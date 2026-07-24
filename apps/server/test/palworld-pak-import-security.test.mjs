@@ -26,11 +26,13 @@ const {
 const {
   assertPalworldPakCandidateOutputDirectory,
   palworldPakSourcePalVisibility,
+  parsePalworldPakPublicIdMap,
   parsePublicActiveSkillAllowlist,
   parseWorkAssetMap
 } = await import("../dist/data/palworld-pak-import.js");
 
 const ARCHIVE_SHA256 = "a".repeat(64);
+const CANDIDATE_ID = `candidate-${ARCHIVE_SHA256.slice(0, 16)}`;
 const KO_PAL_NAMES = "L10N/ko/Pal/DataTable/Text/DT_PalNameText_Common.json";
 const JA_PAL_NAMES = "Pal/DataTable/Text/DT_PalNameText_Common.json";
 const KO_SKILL_NAMES = "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json";
@@ -191,6 +193,50 @@ test("PAK export metadata는 exact schema와 고정 source 필드를 검증한�
   assert.throws(
     () => assertPalworldPakExportMetadata({ ...metadata, fmodelVersion: "main" }),
     /숫자 기반 고정 버전/u
+  );
+});
+
+test("PAK public ID extension은 legacy map을 수정하지 않고 exact sourceInternalId를 추가한다", () => {
+  const legacy = {
+    version: 1,
+    release: "1.0.1",
+    entries: [{ sourceInternalId: "Anubis", publicId: "anubis" }]
+  };
+  const extension = {
+    schemaVersion: 1,
+    candidateRelease: CANDIDATE_ID,
+    sourceArchiveSha256: ARCHIVE_SHA256,
+    entries: [{
+      sourceInternalId: "WorldTreeDragon",
+      publicId: "world-tree-dragon",
+      reason: "PAK 신규 canonical Pal exact ID",
+      reviewStatus: "approved"
+    }]
+  };
+  const parsed = parsePalworldPakPublicIdMap(
+    legacy,
+    extension,
+    ARCHIVE_SHA256,
+    CANDIDATE_ID
+  );
+  assert.equal(parsed.entries.get("Anubis"), "anubis");
+  assert.equal(parsed.entries.get("WorldTreeDragon"), "world-tree-dragon");
+  assert.equal(legacy.entries.length, 1);
+
+  assert.throws(
+    () => parsePalworldPakPublicIdMap(
+      legacy,
+      {
+        ...extension,
+        entries: [{
+          ...extension.entries[0],
+          publicId: "anubis"
+        }]
+      },
+      ARCHIVE_SHA256,
+      CANDIDATE_ID
+    ),
+    /중복/u
   );
 });
 

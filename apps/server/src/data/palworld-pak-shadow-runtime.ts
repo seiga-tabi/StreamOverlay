@@ -14,6 +14,7 @@ import { constants as fsConstants } from "node:fs";
 import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
 import {
+  PALWORLD_PAK_CORE_DATA_DOMAINS,
   assertPalworldPakBlockedCandidateManifest,
   assertPalworldPakRuntimeManifest,
   validatePalworldPakCandidateStagingRoot,
@@ -26,15 +27,8 @@ import type {
 } from "./palworld-pak-snapshot-adapter.js";
 import { PalworldDataService } from "../services/palworld-data.js";
 
-const REQUIRED_SHADOW_DOMAINS = [
-  "pals",
-  "items",
-  "skills",
-  "breeding",
-  "localizationKo",
-  "localizationJa",
-  "localizationEn"
-] as const satisfies readonly PalworldPakRuntimeDomain[];
+const REQUIRED_SHADOW_DOMAINS =
+  PALWORLD_PAK_CORE_DATA_DOMAINS satisfies readonly PalworldPakRuntimeDomain[];
 
 const SOURCE_INTERNAL_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,191}$/u;
 const SHADOW_ARTIFACT_MAX_BYTES = 256 * 1024 * 1024;
@@ -290,6 +284,8 @@ function assertMetadataIdentity(
 ): void {
   if (
     metadata.gameVersion !== manifest.gameVersion
+    || metadata.release !== manifest.release
+    || metadata.steamBuildId !== manifest.steamBuildId
     || metadata.sourceRevision !== manifest.source.importRevision
     || metadata.sourceChecksum !== manifest.source.archiveSha256
     || metadata.sourceName !== "operator_provided_pak_export"
@@ -651,6 +647,21 @@ export function loadPalworldPakShadowRuntime(input: {
     fail(
       "PALWORLD_PAK_SHADOW_IDENTITY_MISMATCH",
       "image rights gate와 source manifest의 권리 상태가 일치하지 않습니다."
+    );
+  }
+  if (
+    runtime.gates.imageAssets.status !== "blocked_by_license"
+    || runtime.gates.imageAssets.technicalPassed
+    || runtime.gates.imageAssets.publicActivationAllowed
+    || runtime.gates.imageAssets.readyImages !== 0
+    || runtime.gates.imageAssets.fallbackPals !== snapshot.pals.length
+    || snapshot.pals.some((pal) => pal.imageUrl !== undefined)
+    || snapshot.items.some((item) => item.imageUrl !== undefined)
+    || (snapshot.elements ?? []).some((element) => element.iconUrl !== undefined)
+  ) {
+    fail(
+      "PALWORLD_PAK_SHADOW_DATA_NOT_READY",
+      "operator PAK schema v1 공개 runtime은 모든 asset을 권리 차단 상태와 UI fallback으로 유지해야 합니다."
     );
   }
   if (

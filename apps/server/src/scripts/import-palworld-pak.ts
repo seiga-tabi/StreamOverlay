@@ -9,6 +9,10 @@ import {
 type CliArguments = {
   archive: string;
   expectedSha256: string;
+  assetOverlay?: string;
+  assetOverlaySha256?: string;
+  mappingsUsmapMember?: string;
+  officialEnLocale: "required" | "optional";
   output: string;
   legacyCatalog: string;
   metadata?: string;
@@ -20,6 +24,9 @@ function usage(): never {
     "사용법: npm run import:palworld-pak -- "
       + "--archive <Content.zip> --expected-sha256 <sha256> --output <candidate-dir> "
       + "--legacy-catalog <검증된 기존 catalog.json> "
+      + "[--asset-overlay <delta.zip> --asset-overlay-sha256 <sha256>] "
+      + "[--mappings-usmap-member <Mappings.usmap>] "
+      + "[--official-en required|optional] "
       + "[--metadata <palworld-export-metadata.json>] [--skip-assets]"
   );
 }
@@ -42,6 +49,10 @@ function parseArguments(argv: string[]): CliArguments {
   const allowed = new Set([
     "--archive",
     "--expected-sha256",
+    "--asset-overlay",
+    "--asset-overlay-sha256",
+    "--mappings-usmap-member",
+    "--official-en",
     "--output",
     "--legacy-catalog",
     "--metadata"
@@ -52,9 +63,24 @@ function parseArguments(argv: string[]): CliArguments {
   const output = values.get("--output");
   const legacyCatalog = values.get("--legacy-catalog");
   if (!archive || !expectedSha256 || !output || !legacyCatalog) usage();
+  const assetOverlay = values.get("--asset-overlay");
+  const assetOverlaySha256 = values.get("--asset-overlay-sha256");
+  if ((assetOverlay === undefined) !== (assetOverlaySha256 === undefined)) usage();
+  const officialEnLocale = values.get("--official-en") ?? "required";
+  if (officialEnLocale !== "required" && officialEnLocale !== "optional") usage();
   return {
     archive: path.resolve(archive),
     expectedSha256,
+    ...(assetOverlay === undefined
+      ? {}
+      : {
+          assetOverlay: path.resolve(assetOverlay),
+          assetOverlaySha256
+        }),
+    ...(values.get("--mappings-usmap-member") === undefined
+      ? {}
+      : { mappingsUsmapMember: values.get("--mappings-usmap-member")! }),
+    officialEnLocale,
     output: path.resolve(output),
     legacyCatalog: path.resolve(legacyCatalog),
     ...(values.get("--metadata") === undefined
@@ -69,6 +95,10 @@ const dataRoot = fileURLToPath(new URL("../../src/data/", import.meta.url));
 try {
   const mappings = await loadPalworldPakCandidateMappings({
     publicIdMapPath: path.join(dataRoot, "palworld-mappings/public-id-map.json"),
+    publicIdExtensionsPath: path.join(
+      dataRoot,
+      "palworld-pak-mappings/public-id-extensions.json"
+    ),
     aliasesPath: path.join(dataRoot, "palworld-pak-mappings/id-aliases.json"),
     palIconOverridesPath: path.join(dataRoot, "palworld-pak-mappings/pal-icon-overrides.json"),
     elementIconMapPath: path.join(dataRoot, "palworld-pak-mappings/element-icon-map.json"),
@@ -87,6 +117,18 @@ try {
   const result = await importPalworldPakCandidate({
     archivePath: args.archive,
     expectedArchiveSha256: args.expectedSha256,
+    ...(args.assetOverlay === undefined
+      ? {}
+      : {
+          assetOverlayArchives: [{
+            archivePath: args.assetOverlay,
+            expectedSha256: args.assetOverlaySha256!
+          }]
+        }),
+    ...(args.mappingsUsmapMember === undefined
+      ? {}
+      : { mappingsUsmapMember: args.mappingsUsmapMember }),
+    officialEnLocale: args.officialEnLocale,
     outputDirectory: args.output,
     ...(metadata === undefined ? {} : { metadata }),
     mappings,
@@ -97,6 +139,7 @@ try {
     outputDirectoryName: path.basename(result.outputDirectory),
     activationEligible: result.activationEligible,
     blockers: result.blockers,
+    coverageLimitations: result.coverageLimitations,
     counts: result.counts,
     localeCoverage: result.localeCoverage,
     imageCoverage: result.imageCoverage

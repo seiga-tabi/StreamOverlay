@@ -17,9 +17,12 @@ import {
   type PalworldTranslationField,
   type PalworldTranslationFieldValue,
   type PalworldTranslationLocale,
+  type PalworldTranslationLocaleStatus,
   type PalworldTranslationRecordKind,
   type PalworldTranslationSnapshot,
-  type PalworldTranslationDomainCoverage
+  type PalworldTranslationDomainCoverage,
+  PALWORLD_TRANSLATION_MISSING_SOURCE_MARKERS,
+  PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE
 } from "@streamops/shared";
 import type {
   PalworldCatalogArtifact,
@@ -106,17 +109,10 @@ function translatedField(
   id: string,
   field: PalworldTranslationField
 ): PalworldTranslationFieldValue | undefined {
-  const translated = index[locale].get(translationRecordKey(kind, id))?.fields[field];
-  // 이름은 의미 품질 검증이 설명보다 엄격해야 한다. 현재 machine-assisted
-  // 아이템·스킬 이름은 검수 완료 전까지 공개하지 않고 영문 원문으로 되돌린다.
-  if (
-    field === "name"
-    && kind !== "pal"
-    && translated?.status === "machine_assisted"
-  ) {
-    return undefined;
-  }
-  return translated;
+  // source hash·canonical ID·영문 원문 복사·HTML·제어문자 검증을 통과한
+  // versioned snapshot만 이 index에 들어옵니다. machine-assisted 값은
+  // UI에서 검수 중 Badge를 함께 표시하므로 이름과 설명에 동일하게 적용합니다.
+  return index[locale].get(translationRecordKey(kind, id))?.fields[field];
 }
 
 function displayStatus(
@@ -127,6 +123,33 @@ function displayStatus(
   if (translation !== undefined) return translation.status;
   if (hasExistingLocale) return "human_reviewed";
   return hasSource ? "source_language_fallback" : "missing_source";
+}
+
+function sourceIntegrityStatus(
+  translation: PalworldTranslationFieldValue | undefined,
+  hasSource: boolean
+): "intact" | "source_anomaly" | "missing_source" {
+  if (!hasSource) return "missing_source";
+  return translation?.note?.includes(PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE)
+    ? "source_anomaly"
+    : "intact";
+}
+
+function displayFieldState(input: {
+  ko: PalworldTranslationFieldValue | undefined;
+  ja: PalworldTranslationFieldValue | undefined;
+  koHasExistingLocale: boolean;
+  jaHasExistingLocale: boolean;
+  hasSource: boolean;
+}): PalworldTranslationLocaleStatus {
+  return {
+    ko: displayStatus(input.ko, input.koHasExistingLocale, input.hasSource),
+    ja: displayStatus(input.ja, input.jaHasExistingLocale, input.hasSource),
+    sourceIntegrity: {
+      ko: sourceIntegrityStatus(input.ko, input.hasSource),
+      ja: sourceIntegrityStatus(input.ja, input.hasSource)
+    }
+  };
 }
 
 function legacyLocalizationStatus(
@@ -162,8 +185,8 @@ function catalogItemReference(
 ): PalworldItemReference {
   const translatedNameKo = translatedField(translations, "ko", "item", item.id, "name");
   const translatedNameJa = translatedField(translations, "ja", "item", item.id, "name");
-  // 검증된 공식 locale(source_provided)을 기존 sample/legacy 이름보다 우선합니다.
-  // machine-assisted item 이름은 translatedField()에서 계속 차단됩니다.
+  // 검증된 locale snapshot을 기존 sample/legacy 이름보다 우선합니다.
+  // machine-assisted 이름은 상태를 보존하여 UI가 검수 중임을 함께 알립니다.
   const nameKo = translatedNameKo?.text ?? localizedItem?.nameKo;
   const nameJa = translatedNameJa?.text ?? localizedItem?.nameJa;
   const imageAvailable = typeof imagesAvailable === "boolean"
@@ -183,18 +206,13 @@ function catalogItemReference(
       ja: nameJa === undefined ? "source_language_fallback" : "localized"
     },
     translation: {
-      name: {
-        ko: displayStatus(
-          translatedNameKo,
-          translatedNameKo === undefined && localizedItem?.nameKo !== undefined,
-          true
-        ),
-        ja: displayStatus(
-          translatedNameJa,
-          translatedNameJa === undefined && localizedItem?.nameJa !== undefined,
-          true
-        )
-      }
+      name: displayFieldState({
+        ko: translatedNameKo,
+        ja: translatedNameJa,
+        koHasExistingLocale: translatedNameKo === undefined && localizedItem?.nameKo !== undefined,
+        jaHasExistingLocale: translatedNameJa === undefined && localizedItem?.nameJa !== undefined,
+        hasSource: true
+      })
     }
   };
 }
@@ -233,19 +251,28 @@ function catalogSkill(
       ja: legacyLocalizationStatus(nameJa !== undefined, descriptionJa !== undefined, skill.descriptionEn !== undefined)
     },
     translation: {
-      name: {
-        ko: displayStatus(nameKo, false, true),
-        ja: displayStatus(nameJa, false, true)
-      },
-      description: {
-        ko: displayStatus(descriptionKo, false, skill.descriptionEn !== undefined),
-        ja: displayStatus(descriptionJa, false, skill.descriptionEn !== undefined)
-      },
+      name: displayFieldState({
+        ko: nameKo,
+        ja: nameJa,
+        koHasExistingLocale: false,
+        jaHasExistingLocale: false,
+        hasSource: true
+      }),
+      description: displayFieldState({
+        ko: descriptionKo,
+        ja: descriptionJa,
+        koHasExistingLocale: false,
+        jaHasExistingLocale: false,
+        hasSource: skill.descriptionEn !== undefined
+      }),
       ...(skill.type !== "passive" ? {} : {
-        passiveAbility: {
-          ko: displayStatus(passiveAbilityKo, false, skill.passiveAbility !== undefined),
-          ja: displayStatus(passiveAbilityJa, false, skill.passiveAbility !== undefined)
-        }
+        passiveAbility: displayFieldState({
+          ko: passiveAbilityKo,
+          ja: passiveAbilityJa,
+          koHasExistingLocale: false,
+          jaHasExistingLocale: false,
+          hasSource: skill.passiveAbility !== undefined
+        })
       })
     }
   };
@@ -297,7 +324,7 @@ function translationCoverageForLocale(
   items: PalworldItemDetail[],
   skills: PalworldSkillDetail[],
   staleSourceHash: boolean,
-  artifactTranslated: number
+  translationSnapshot: PalworldTranslationSnapshot | undefined
 ): PalworldTranslationDomainCoverage {
   const palDescriptionSources = pals.filter((pal) => pal.descriptionEn !== undefined);
   const itemDescriptionSources = items.filter((item) => item.descriptionEn !== undefined);
@@ -319,6 +346,26 @@ function translationCoverageForLocale(
     + skills.length
     + skillDescriptionSources.length
     + skillPassiveAbilitySources.length;
+  const artifactFields = (translationSnapshot?.records ?? [])
+    .flatMap((record) => Object.values(record.fields))
+    .filter((field): field is PalworldTranslationFieldValue => field !== undefined);
+  const sourceAnomalousFields = artifactFields.filter((field) =>
+    field.note?.includes(PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE)
+  );
+  const missingSourceMarker = PALWORLD_TRANSLATION_MISSING_SOURCE_MARKERS[locale];
+  const missingSourceSlots = sourceAnomalousFields.reduce(
+    (sum, field) => sum + field.text.split(missingSourceMarker).length - 1,
+    0
+  );
+  const translated = displayStatuses.filter((status) => isTranslated(status)).length;
+  const sourceProvided = displayStatuses.filter((status) => status === "source_provided").length;
+  const humanReviewed = displayStatuses.filter((status) => status === "human_reviewed").length;
+  const machineAssisted = displayStatuses.filter((status) => status === "machine_assisted").length;
+  const sourceLanguageFallback = displayStatuses.filter(
+    (status) => status === "source_language_fallback"
+  ).length;
+  const missingSource = displayStatuses.filter((status) => status === "missing_source").length;
+  const publicFieldTotal = translated + sourceLanguageFallback + missingSource;
   return {
     palNames: coverageCount(pals.filter((pal) => isTranslated(pal.translation?.name?.[locale])).length, pals.length),
     palDescriptions: coverageCount(
@@ -339,14 +386,35 @@ function translationCoverageForLocale(
       skillPassiveAbilitySources.filter((skill) => isTranslated(skill.translation?.passiveAbility?.[locale])).length,
       skillPassiveAbilitySources.length
     ),
-    artifactTranslated,
-    publicUsable: displayStatuses.filter((status) => isTranslated(status)).length,
-    sourceProvided: displayStatuses.filter((status) => status === "source_provided").length,
-    humanReviewed: displayStatuses.filter((status) => status === "human_reviewed").length,
-    machineAssisted: displayStatuses.filter((status) => status === "machine_assisted").length,
-    sourceLanguageFallback: displayStatuses.filter((status) => status === "source_language_fallback").length,
-    missingSource: displayStatuses.filter((status) => status === "missing_source").length,
-    staleSourceHash: staleSourceHash ? sourceFieldTotal : 0
+    artifactTranslated: artifactFields.length,
+    publicUsable: translated,
+    sourceProvided,
+    humanReviewed,
+    machineAssisted,
+    sourceLanguageFallback,
+    missingSource,
+    staleSourceHash: staleSourceHash ? sourceFieldTotal : 0,
+    sourceAnomalousFields: sourceAnomalousFields.length,
+    missingSourceSlots,
+    availability: {
+      translated,
+      sourceLanguageFallback,
+      missingSource,
+      total: publicFieldTotal
+    },
+    review: {
+      sourceProvided,
+      humanReviewed,
+      machineAssisted,
+      total: translated
+    },
+    sourceIntegrity: {
+      intact: publicFieldTotal - sourceAnomalousFields.length - missingSource,
+      sourceAnomalousFields: sourceAnomalousFields.length,
+      missingSourceFields: missingSource,
+      missingSourceSlots,
+      total: publicFieldTotal
+    }
   };
 }
 
@@ -511,14 +579,20 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
         }
       }),
       translation: {
-        name: {
-          ko: displayStatus(nameKoTranslation, true, true),
-          ja: displayStatus(nameJaTranslation, true, true)
-        },
-        description: {
-          ko: displayStatus(descriptionKoTranslation, false, detail?.descriptionEn !== undefined),
-          ja: displayStatus(descriptionJaTranslation, false, detail?.descriptionEn !== undefined)
-        }
+        name: displayFieldState({
+          ko: nameKoTranslation,
+          ja: nameJaTranslation,
+          koHasExistingLocale: true,
+          jaHasExistingLocale: true,
+          hasSource: true
+        }),
+        description: displayFieldState({
+          ko: descriptionKoTranslation,
+          ja: descriptionJaTranslation,
+          koHasExistingLocale: false,
+          jaHasExistingLocale: false,
+          hasSource: detail?.descriptionEn !== undefined
+        })
       },
       ...(partnerSource === undefined ? {} : {
         partnerSkill: catalogSkill(partnerSource, translationIndex, partnerAssignment?.unlockLevel)
@@ -575,10 +649,13 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       relatedItems: [],
       translation: {
         name: { ...reference.translation!.name! },
-        description: {
-          ko: displayStatus(descriptionKoTranslation, localized?.descriptionKo !== undefined, item.descriptionEn !== undefined),
-          ja: displayStatus(descriptionJaTranslation, localized?.descriptionJa !== undefined, item.descriptionEn !== undefined)
-        }
+        description: displayFieldState({
+          ko: descriptionKoTranslation,
+          ja: descriptionJaTranslation,
+          koHasExistingLocale: localized?.descriptionKo !== undefined,
+          jaHasExistingLocale: localized?.descriptionJa !== undefined,
+          hasSource: item.descriptionEn !== undefined
+        })
       },
       localization: {
         sourceLanguage: "en",
@@ -700,10 +777,7 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
         items,
         skills,
         input.translations?.staleSourceHash.ko ?? false,
-        input.translations?.snapshots.ko?.records.reduce(
-          (sum, record) => sum + Object.keys(record.fields).length,
-          0
-        ) ?? 0
+        input.translations?.snapshots.ko
       ),
       ja: translationCoverageForLocale(
         "ja",
@@ -711,10 +785,7 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
         items,
         skills,
         input.translations?.staleSourceHash.ja ?? false,
-        input.translations?.snapshots.ja?.records.reduce(
-          (sum, record) => sum + Object.keys(record.fields).length,
-          0
-        ) ?? 0
+        input.translations?.snapshots.ja
       )
     }
   };

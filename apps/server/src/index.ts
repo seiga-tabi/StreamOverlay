@@ -29,6 +29,7 @@ import { loadPalworldDataService, type PalworldDataService } from "./services/pa
 import { PalworldPaldexValidationError } from "./data/palworld-paldex-artifact.js";
 import {
   loadPalworldActiveRuntime,
+  palworldRuntimeAllowsLegacyOverlay,
   PalworldActiveRuntimeError,
   type PalworldActiveRuntime
 } from "./data/palworld-active-runtime.js";
@@ -131,68 +132,94 @@ try {
     imageAssetGate: meta.gates.imageAssets.status,
     fallbackPals: meta.gates.imageAssets.fallbackPals
   });
-  try {
-    palworldMapMarkerProvider = await loadPalworldMapMarkerProvider({
-      releaseRoot: palworldActiveRuntime.releaseRoot,
-      dashboardStaticRoot: appConfig.paths.dashboardStatic,
-      palworldDataService
-    });
-    const mainMap = palworldMapMarkerProvider.response("main", meta.metadata);
-    logger.event({
-      type: "palworld_map_markers.runtime_state",
-      status: mainMap.state,
-      world: "main",
-      markers: mainMap.markers.length,
-      ...(mainMap.overlay === undefined
-        ? {}
-        : {
-            archiveSha256: mainMap.overlay.archiveSha256,
-            transformRevision: mainMap.overlay.transformRevision
-          })
-    });
-  } catch (error) {
-    const errorCode = (error as NodeJS.ErrnoException).code === "ENOENT"
-      ? "PALWORLD_MAP_MARKER_ARTIFACT_MISSING"
-      : error instanceof PalworldMapMarkerArtifactError
-        ? error.code
-        : "PALWORLD_MAP_MARKER_INITIALIZATION_FAILED";
+  if (
+    palworldRuntimeAllowsLegacyOverlay(
+      palworldActiveRuntime.manifest,
+      "mapMarkers"
+    )
+  ) {
+    try {
+      palworldMapMarkerProvider = await loadPalworldMapMarkerProvider({
+        releaseRoot: palworldActiveRuntime.releaseRoot,
+        dashboardStaticRoot: appConfig.paths.dashboardStatic,
+        palworldDataService
+      });
+      const mainMap = palworldMapMarkerProvider.response("main", meta.metadata);
+      logger.event({
+        type: "palworld_map_markers.runtime_state",
+        status: mainMap.state,
+        world: "main",
+        markers: mainMap.markers.length,
+        ...(mainMap.overlay === undefined
+          ? {}
+          : {
+              archiveSha256: mainMap.overlay.archiveSha256,
+              transformRevision: mainMap.overlay.transformRevision
+            })
+      });
+    } catch (error) {
+      const errorCode = (error as NodeJS.ErrnoException).code === "ENOENT"
+        ? "PALWORLD_MAP_MARKER_ARTIFACT_MISSING"
+        : error instanceof PalworldMapMarkerArtifactError
+          ? error.code
+          : "PALWORLD_MAP_MARKER_INITIALIZATION_FAILED";
+      logger.event({
+        type: "palworld_map_markers.runtime_state",
+        status: "data_unavailable",
+        errorCode
+      });
+    }
+  } else {
     logger.event({
       type: "palworld_map_markers.runtime_state",
       status: "data_unavailable",
-      errorCode
+      errorCode: "PALWORLD_MAP_MARKER_RUNTIME_NOT_ACTIVE"
     });
   }
-  try {
-    const candidateSpawnProvider = await loadPalworldSpawnProvider({
-      releaseRoot: palworldActiveRuntime.releaseRoot,
-      dashboardStaticRoot: appConfig.paths.dashboardStatic,
-      palworldDataService
-    });
-    const mainMap = candidateSpawnProvider.response("main", "anubis", meta.metadata);
-    palworldSpawnProvider = candidateSpawnProvider;
-    logger.event({
-      type: "palworld_map_spawns.runtime_state",
-      status: mainMap.state,
-      world: "main",
-      points: mainMap.points.length,
-      placements: mainMap.totalPlacements,
-      ...(mainMap.overlay === undefined
-        ? {}
-        : {
-            archiveSha256: mainMap.overlay.archiveSha256,
-            transformRevision: mainMap.overlay.transformRevision
-          })
-    });
-  } catch (error) {
-    const errorCode = (error as NodeJS.ErrnoException).code === "ENOENT"
-      ? "PALWORLD_SPAWN_ARTIFACT_MISSING"
-      : error instanceof PalworldSpawnArtifactError
-        ? error.code
-        : "PALWORLD_SPAWN_INITIALIZATION_FAILED";
+  if (
+    palworldRuntimeAllowsLegacyOverlay(
+      palworldActiveRuntime.manifest,
+      "mapSpawns"
+    )
+  ) {
+    try {
+      const candidateSpawnProvider = await loadPalworldSpawnProvider({
+        releaseRoot: palworldActiveRuntime.releaseRoot,
+        dashboardStaticRoot: appConfig.paths.dashboardStatic,
+        palworldDataService
+      });
+      const mainMap = candidateSpawnProvider.response("main", "anubis", meta.metadata);
+      palworldSpawnProvider = candidateSpawnProvider;
+      logger.event({
+        type: "palworld_map_spawns.runtime_state",
+        status: mainMap.state,
+        world: "main",
+        points: mainMap.points.length,
+        placements: mainMap.totalPlacements,
+        ...(mainMap.overlay === undefined
+          ? {}
+          : {
+              archiveSha256: mainMap.overlay.archiveSha256,
+              transformRevision: mainMap.overlay.transformRevision
+            })
+      });
+    } catch (error) {
+      const errorCode = (error as NodeJS.ErrnoException).code === "ENOENT"
+        ? "PALWORLD_SPAWN_ARTIFACT_MISSING"
+        : error instanceof PalworldSpawnArtifactError
+          ? error.code
+          : "PALWORLD_SPAWN_INITIALIZATION_FAILED";
+      logger.event({
+        type: "palworld_map_spawns.runtime_state",
+        status: "data_unavailable",
+        errorCode
+      });
+    }
+  } else {
     logger.event({
       type: "palworld_map_spawns.runtime_state",
       status: "data_unavailable",
-      errorCode
+      errorCode: "PALWORLD_SPAWN_RUNTIME_NOT_ACTIVE"
     });
   }
 } catch (error) {

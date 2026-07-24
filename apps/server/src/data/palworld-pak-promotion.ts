@@ -186,7 +186,10 @@ export async function promotePalworldPakRuntime(input: {
 
   const runtimeRoot = path.join(dataRoot, "runtime");
   const releasesRoot = path.join(dataRoot, "releases");
-  await mkdir(releasesRoot, { recursive: true });
+  await Promise.all([
+    mkdir(runtimeRoot, { recursive: true }),
+    mkdir(releasesRoot, { recursive: true })
+  ]);
   await assertCanonicalDirectory(runtimeRoot, "runtimeRoot");
   await assertCanonicalDirectory(releasesRoot, "releasesRoot");
 

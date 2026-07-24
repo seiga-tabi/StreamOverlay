@@ -18,10 +18,12 @@ import {
   assertPalworldImageUsePolicy
 } from "../data/palworld-image-policy.js";
 import {
+  assertPalworldImagesManifest,
   PALWORLD_PAL_IMAGE_MAX_BYTES,
   PALWORLD_PALDEX_RELEASE,
   assertPalworldPaldexArtifact,
-  assertPalworldPaldexReleaseManifest
+  assertPalworldPaldexReleaseManifest,
+  type PalworldImageManifestEntry
 } from "../data/palworld-paldex-artifact.js";
 import {
   PALWORLD_PALDEX_PUBLIC_IMAGE_ROOT,
@@ -125,10 +127,50 @@ async function publishContentHashFiles(stagingRoot: string): Promise<void> {
   }
 }
 
+function retainedImportedImage(
+  entry: PalworldImageManifestEntry | undefined,
+  mapping: {
+    palId: string;
+    sourceInternalId: string;
+    sourceFileName: string;
+    sourceRevision: string;
+  }
+): ImportedPalworldImage | undefined {
+  if (
+    !entry
+    || (entry.status !== "operator_acknowledged" && entry.status !== "ready")
+    || entry.palId !== mapping.palId
+    || entry.sourceInternalId !== mapping.sourceInternalId
+    || entry.originalFileName !== mapping.sourceFileName
+    || entry.sourceRevision !== mapping.sourceRevision
+    || entry.originalSha256 === null
+    || entry.generatedSha256 === null
+    || entry.outputFileName === null
+    || entry.outputWidth === null
+    || entry.outputHeight === null
+    || entry.outputBytes === null
+    || entry.imageUrl === null
+  ) {
+    return undefined;
+  }
+  return {
+    palId: mapping.palId,
+    sourceFileName: mapping.sourceFileName,
+    originalSha256: entry.originalSha256,
+    generatedSha256: entry.generatedSha256,
+    outputFileName: entry.outputFileName,
+    outputWidth: entry.outputWidth,
+    outputHeight: entry.outputHeight,
+    outputBytes: entry.outputBytes,
+    imageUrl: entry.imageUrl
+  };
+}
+
 async function main(): Promise<void> {
 const args = parseArguments(process.argv.slice(2));
-const [paldexFile, reportFile, manifestFile, policyFile, mappingFile, overridesFile] = await Promise.all([
+const [paldexFile, imagesManifestFile, reportFile, manifestFile, policyFile, mappingFile, overridesFile] = await Promise.all([
   readJson(path.join(PALWORLD_PALDEX_RELEASE_ROOT, "paldex.json"), "paldex"),
+  readJson(path.join(PALWORLD_PALDEX_RELEASE_ROOT, "images-manifest.json"), "images manifest"),
   readJson(path.join(PALWORLD_PALDEX_RELEASE_ROOT, "import-report.json"), "import report"),
   readJson(path.join(PALWORLD_PALDEX_RELEASE_ROOT, "manifest.json"), "release manifest"),
   readJson(args.policy, "image-use-policy"),
@@ -137,6 +179,7 @@ const [paldexFile, reportFile, manifestFile, policyFile, mappingFile, overridesF
 ]);
 const artifact = assertPalworldPaldexArtifact(paldexFile.value);
 const manifest = assertPalworldPaldexReleaseManifest(manifestFile.value);
+const existingImagesManifest = assertPalworldImagesManifest(imagesManifestFile.value, artifact);
 const policy = assertPalworldImageUsePolicy(policyFile.value);
 if (policy.status !== "operator_acknowledged" && policy.status !== "ready") {
   fail("image-use-policy가 공개 반입을 허용하지 않습니다.");
@@ -151,26 +194,50 @@ const stagingImageRoot = await mkdtemp(path.join(imageParent, ".palworld-image-i
 const releaseParent = path.dirname(PALWORLD_PALDEX_RELEASE_ROOT);
 const stagingReleaseRoot = await mkdtemp(path.join(releaseParent, ".palworld-release-import-"));
 try {
+  await validatePalworldImageFiles({
+    manifest: existingImagesManifest,
+    imageRoot: PALWORLD_PALDEX_PUBLIC_IMAGE_ROOT,
+    overrides: overridesFile.value
+  });
+  const existingEntriesByPalId = new Map(existingImagesManifest.entries.map((entry) => [entry.palId, entry]));
   const importedImages = new Map<string, ImportedPalworldImage>();
+  const stagedOutputFileNames = new Set<string>();
+  let newlyImportedImages = 0;
+  let retainedImages = 0;
   for (const mapping of sourceMap.entries) {
-    if (!(await palworldSourceImageExists(args.sourceDir, mapping.sourceFileName))) continue;
-    const imported = await importOperatorAcknowledgedPalworldImage({
-      sourceRoot: args.sourceDir,
-      sourceFileName: mapping.sourceFileName,
-      imageRoot: stagingImageRoot,
-      policy
-    });
-    importedImages.set(mapping.palId, {
-      palId: mapping.palId,
-      sourceFileName: mapping.sourceFileName,
-      originalSha256: imported.originalSha256,
-      generatedSha256: imported.sha256,
-      outputFileName: imported.outputFileName,
-      outputWidth: imported.width,
-      outputHeight: imported.height,
-      outputBytes: imported.bytes,
-      imageUrl: imported.imageUrl
-    });
+    if (await palworldSourceImageExists(args.sourceDir, mapping.sourceFileName)) {
+      const imported = await importOperatorAcknowledgedPalworldImage({
+        sourceRoot: args.sourceDir,
+        sourceFileName: mapping.sourceFileName,
+        imageRoot: stagingImageRoot,
+        policy
+      });
+      importedImages.set(mapping.palId, {
+        palId: mapping.palId,
+        sourceFileName: mapping.sourceFileName,
+        originalSha256: imported.originalSha256,
+        generatedSha256: imported.sha256,
+        outputFileName: imported.outputFileName,
+        outputWidth: imported.width,
+        outputHeight: imported.height,
+        outputBytes: imported.bytes,
+        imageUrl: imported.imageUrl
+      });
+      stagedOutputFileNames.add(imported.outputFileName);
+      newlyImportedImages += 1;
+      continue;
+    }
+    const retained = retainedImportedImage(existingEntriesByPalId.get(mapping.palId), mapping);
+    if (!retained) continue;
+    if (!stagedOutputFileNames.has(retained.outputFileName)) {
+      await link(
+        path.join(PALWORLD_PALDEX_PUBLIC_IMAGE_ROOT, retained.outputFileName),
+        path.join(stagingImageRoot, retained.outputFileName)
+      );
+      stagedOutputFileNames.add(retained.outputFileName);
+    }
+    importedImages.set(mapping.palId, retained);
+    retainedImages += 1;
   }
   if (importedImages.size === 0) fail("PALWORLD_IMAGE_SOURCE_FILES_NOT_FOUND");
   const release = buildPalworldImageRelease({
@@ -226,7 +293,10 @@ try {
   ]);
   await writeFileAtomic(path.join(PALWORLD_PALDEX_RELEASE_ROOT, "manifest.json"), release.manifestText);
   await loadPalworldPaldexStagedRelease({ imageRoot: PALWORLD_PALDEX_PUBLIC_IMAGE_ROOT, imageFailureMode: "throw" });
-  console.log(`[palworld-images] 기술 검증 이미지 ${importedImages.size}개를 반입했습니다. fallback ${artifact.records.length - importedImages.size}개`);
+  console.log(
+    `[palworld-images] 신규 ${newlyImportedImages}개, 기존 검증 자산 ${retainedImages}개를 반영했습니다. `
+    + `기술 검증 이미지 ${importedImages.size}개, fallback ${artifact.records.length - importedImages.size}개`
+  );
 } finally {
   await Promise.all([
     rm(stagingImageRoot, { recursive: true, force: true }),

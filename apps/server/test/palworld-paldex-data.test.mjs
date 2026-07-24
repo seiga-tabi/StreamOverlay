@@ -58,8 +58,8 @@ test("고정 v1.0.1 artifact는 287종·일반 203종·변종 84종을 포함한
   assert.equal(release.artifact.records.every((pal) => Object.values(pal.stats).every(Number.isFinite)), true);
   assert.equal(Math.max(...release.artifact.records.flatMap((pal) => pal.workSuitabilities.map((work) => work.level))), 8);
   assert.equal(release.dataIntegrityReady, true);
-  assert.equal(release.imageAssetsReady, false);
-  assert.equal(release.releaseReady, false);
+  assert.equal(release.imageAssetsReady, true);
+  assert.equal(release.releaseReady, true);
   assert.equal(release.manifest.dataIntegrityGate.passed, true);
   assert.equal(release.manifest.dataIntegrityGate.status, "ready");
   assert.deepEqual(release.manifest.dataIntegrityGate.failures, []);
@@ -81,15 +81,15 @@ test("고정 v1.0.1 artifact는 287종·일반 203종·변종 84종을 포함한
   });
   assert.deepEqual(release.manifest.imageAssetGate, {
     passed: true,
-    status: "partial",
+    status: "operator_acknowledged",
     policyStatus: "operator_acknowledged",
-    failures: ["PAL_IMAGE_COVERAGE_PARTIAL"],
+    failures: [],
     technicalPassed: true,
     publicActivationAllowed: true,
     rightsVerified: false,
     usageBasis: "operator_reference_use",
-    readyImages: 272,
-    fallbackPals: 15,
+    readyImages: 287,
+    fallbackPals: 0,
     publicNoticeRequired: true
   });
   assert.equal(release.manifest.runtimeActivation, true);
@@ -151,19 +151,19 @@ test("data integrity와 image asset gate는 서로 독립된 coverage를 보고�
     mappingChecksumsVerified: true,
     artifactChecksumsVerified: true
   });
-  assert.equal(report.images.status, "partial");
+  assert.equal(report.images.status, "operator_acknowledged");
   assert.equal(report.images.policyStatus, "operator_acknowledged");
-  assert.equal(report.images.sourceMappings, 272);
+  assert.equal(report.images.sourceMappings, 287);
   assert.equal(report.images.mappedPals, 287);
-  assert.equal(report.images.readyImages, 272);
-  assert.equal(report.images.uniqueImageFiles, 272);
-  assert.equal(report.images.fallbackPals, 15);
+  assert.equal(report.images.readyImages, 287);
+  assert.equal(report.images.uniqueImageFiles, 287);
+  assert.equal(report.images.fallbackPals, 0);
   assert.equal(report.images.rightsVerified, false);
   assert.equal(report.images.usageBasis, "operator_reference_use");
   assert.equal(report.imageAssetGate.passed, true);
-  assert.equal(report.imageAssetGate.status, "partial");
-  assert.equal(report.imageAssetGate.readyImages, 272);
-  assert.equal(report.imageAssetGate.fallbackPals, 15);
+  assert.equal(report.imageAssetGate.status, "operator_acknowledged");
+  assert.equal(report.imageAssetGate.readyImages, 287);
+  assert.equal(report.imageAssetGate.fallbackPals, 0);
   assert.equal(report.runtimeActivation, true);
 });
 
@@ -286,20 +286,22 @@ test("exclusions에는 중복·미확인·이벤트 레코드 13개의 사유가
   assert.throws(() => assertPalworldPaldexExclusions(replacedPal), /고정된 제외/);
 });
 
-test("이미지 manifest는 archive source reference와 272개 이미지·15개 fallback을 명시한다", async () => {
+test("이미지 manifest는 두 고정 archive provenance와 287개 검증 이미지를 명시한다", async () => {
   const artifact = assertPalworldPaldexArtifact(await json("paldex.json"));
   const images = assertPalworldImagesManifest(await json("images-manifest.json"), artifact);
   assert.equal(images.entries.length, 287);
-  assert.equal(images.entries.filter((entry) => entry.status === "operator_acknowledged").length, 272);
-  assert.equal(images.entries.filter((entry) => entry.status === "blocked_by_license").length, 15);
+  assert.equal(images.entries.filter((entry) => entry.status === "operator_acknowledged").length, 287);
+  assert.equal(images.entries.filter((entry) => entry.status === "blocked_by_license").length, 0);
   assert.equal(images.entries.every((entry) => entry.license === "RIGHTS_NOT_INDEPENDENTLY_VERIFIED"), true);
   assert.equal(images.entries.filter((entry) => entry.status === "operator_acknowledged").every((entry) => entry.imageUrl && entry.generatedSha256), true);
   assert.equal(images.entries.filter((entry) => entry.status === "blocked_by_license").every((entry) => entry.imageUrl === null && entry.generatedSha256 === null), true);
-  assert.equal(artifact.records.filter((pal) => pal.imageUrl !== undefined).length, 272);
+  assert.equal(artifact.records.filter((pal) => pal.imageUrl !== undefined).length, 287);
   assert.equal(images.entries.every((entry) => entry.sourceUrl === undefined), true);
   assert.equal(images.entries.every((entry) => entry.sourceReference === `operator-archive-${entry.sourceInternalId}`), true);
   const sourceMap = await json("image-source-map.json", mappingRoot);
-  assert.equal(sourceMap.entries.length, 272);
+  assert.equal(sourceMap.entries.length, 287);
+  assert.equal(sourceMap.entries.filter((entry) => entry.sourceRevision.startsWith("pypalworldapi-")).length, 272);
+  assert.equal(sourceMap.entries.filter((entry) => entry.sourceRevision.startsWith("delta-zip-")).length, 15);
   assert.equal(sourceMap.entries.every((entry) => entry.sourceKind === "operator_provided_archive"), true);
 });
 
@@ -351,6 +353,9 @@ test("생성 JSON은 동일 입력을 두 번 직렬화해도 byte-for-byte 동�
   }
 });
 
-test("권리 gate를 release 모드에서 우회할 수 없다", async () => {
-  await assert.rejects(loadPalworldPaldexStagedRelease({ requireReleaseReady: true }), /PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE/);
+test("release 모드는 운영자 공개 확인을 허용하되 권리 검증 완료로 오표시하지 않는다", async () => {
+  const release = await loadPalworldPaldexStagedRelease({ requireReleaseReady: true });
+  assert.equal(release.releaseReady, true);
+  assert.equal(release.manifest.imageAssetGate.status, "operator_acknowledged");
+  assert.equal(release.manifest.imageAssetGate.rightsVerified, false);
 });

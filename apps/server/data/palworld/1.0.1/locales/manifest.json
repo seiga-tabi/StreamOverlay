@@ -2,20 +2,20 @@
   "schemaVersion": 1,
   "release": "1.0.1",
   "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
-  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
-  "glossarySha256": "e2fffc918a7f85b2c16ef027800aede61383b6e8c97930f6b9c70e92e23029a1",
+  "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+  "glossarySha256": "19a8d9fab0d3e924b41772dea00adacc05fdc92785baa55f271d589f5941bbaf",
   "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
   "translationRevision": "offline-machine-assisted-v1",
   "generatedAt": "2026-07-22T00:00:00.000Z",
   "locales": {
     "ko": {
       "file": "ko.json",
-      "sha256": "887df97d51ba3007ab3ecb1b8239273c8cb5fe3d1ebc362115619d374a6e4c53",
+      "sha256": "0605cbfcd39dcbd05d7eec43e5b179bc7373a879de7ac7052f7b1cec122ad3d7",
       "recordCount": 2700
     },
     "ja": {
       "file": "ja.json",
-      "sha256": "a1b374ff54fc853c61b60ee263c0cf400f8a729b0181008e9a7cb65eb1785302",
+      "sha256": "6e9d7204fba8521f61579b680de8c71942fcff68d64fae1f78e5fa6f669e8284",
       "recordCount": 2700
     }
   }

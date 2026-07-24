@@ -8534,7 +8534,8 @@
       "nocturnal": false,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/dc6f41a0f346f9fc67be5a944d705520b862f3178ab274df9a2da073b53e505c.webp"
     },
     {
       "id": "jellroy",
@@ -8578,7 +8579,8 @@
       "nocturnal": true,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/e2a6375bb8295b62a7d025eecdaf62392b0d4938ccc9ea66264d7da718b83fab.webp"
     },
     {
       "id": "amione",
@@ -8745,7 +8747,8 @@
       "nocturnal": true,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/e4f9b01912e018877a67525b31bc198df8cb4575c2cbadbdc1a94b7b252cc0ec.webp"
     },
     {
       "id": "gloopie-primo",
@@ -12550,7 +12553,8 @@
       "nocturnal": true,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/e58dee612f2aae3becec2caca67de7a4e96d7c9fd49edf45e5fefd83057a2ec2.webp"
     },
     {
       "id": "polapup",
@@ -25798,7 +25802,8 @@
       "nocturnal": false,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/cde2c8cb0b11b61d9efc555f649afaceac2db9b7ab58deeaa7d66e21204d936d.webp"
     },
     {
       "id": "pierdon-cryst",
@@ -27663,7 +27668,8 @@
       "nocturnal": false,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/4da45d0d04f813f15b67d6795331397ec0c2aaaaaccfc2cdfd75bc855db66f6c.webp"
     },
     {
       "id": "prixter",
@@ -29145,7 +29151,8 @@
       "nocturnal": true,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/7b5c475b50ae3fd42b7425c6797528620c1592c41a5cddba762f8006bc38dc22.webp"
     },
     {
       "id": "smokie-cryst",
@@ -29313,7 +29320,8 @@
       "nocturnal": true,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/3e7c88c39ad4c7070daed7aec40625e1d948e27b13309ff0812b6744476303f6.webp"
     },
     {
       "id": "whalaska",
@@ -29349,7 +29357,8 @@
       "nocturnal": false,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/8a321760ad1e32e8cbea4ea8c91575d63ea67c45c1f675be5eb1aa3ab135f98d.webp"
     },
     {
       "id": "whalaska-ignis",
@@ -29688,7 +29697,8 @@
       "nocturnal": true,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/217f3424f3c8869755b76ae3948206bfcce5f8f4b3ae38910034735966190169.webp"
     },
     {
       "id": "gildane",
@@ -30113,7 +30123,8 @@
           "parentAId": "gildane",
           "parentBId": "eikthyrdeer-terra"
         }
-      ]
+      ],
+      "imageUrl": "/images/palworld/1.0.1/pals/6dd1f4217e6f2a520265977f7b3b832be183da65ef0c019ae380db9d01428e6f.webp"
     },
     {
       "id": "celesdir-noct",
@@ -30687,7 +30698,8 @@
       "nocturnal": false,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/0b12be2010e52aabf8e89a999195a287bd05f83d95fa76a3e3b6d3ae609583dc.webp"
     },
     {
       "id": "azurmane",
@@ -30718,7 +30730,8 @@
       "nocturnal": false,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/94f45bb0d2cb85ee926a47473c23118f1f8aab7c6209f0d66844eeb7b4fd4e71.webp"
     },
     {
       "id": "valentail",
@@ -31386,7 +31399,8 @@
       "nocturnal": true,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/e2f36c0dabcde3444ed1bc94ab29ef8a7e166c1546bc2d8332994a16da4460cd.webp"
     },
     {
       "id": "slowatt",
@@ -31417,7 +31431,8 @@
       "nocturnal": false,
       "activeSkills": [],
       "drops": [],
-      "specialParentPairs": []
+      "specialParentPairs": [],
+      "imageUrl": "/images/palworld/1.0.1/pals/81b36f6ab89c98912e7522ee6fcec0dfb4151915ced387d3613bd83c5ba54aa0.webp"
     },
     {
       "id": "bakemi",

@@ -14,6 +14,7 @@ const { PALWORLD_SNAPSHOT } = await import("../dist/data/palworld-snapshot.js");
 const {
   validatePalworldItemSummary,
   validatePalworldPaginatedResponse,
+  validatePalworldPalDetail,
   validatePalworldPalListResponse,
   validatePalworldSearchResult,
   validatePalworldSkillDetail,
@@ -77,7 +78,7 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
     },
     {
       pals: ["ready", 287, "1.0.1"],
-      items: ["incomplete", 1847, "1.0.1"],
+      items: ["ready", 1847, "1.0.1"],
       breeding: ["incomplete", 41_329, "1.0.1"],
       skills: ["incomplete", 566, "1.0.1"]
     }
@@ -89,14 +90,14 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
   assert.deepEqual(meta.coverage?.skillDetails, { available: 564, missing: 2, total: 566 });
   assert.deepEqual(meta.gates.dataIntegrity, { passed: true, status: "ready" });
   assert.deepEqual(meta.gates.imageAssets, {
-    status: "partial",
+    status: "operator_acknowledged",
     policyStatus: "operator_acknowledged",
     technicalPassed: true,
     publicActivationAllowed: true,
     rightsVerified: false,
     usageBasis: "operator_reference_use",
-    readyImages: 272,
-    fallbackPals: 15,
+    readyImages: 287,
+    fallbackPals: 0,
     publicNoticeRequired: true
   });
 });
@@ -161,6 +162,35 @@ test("runtime meta는 레코드 존재 여부가 아니라 실제 상세 필드�
   assert.equal(meta.coverage.craftingRecipes.available < meta.coverage.itemDetails.available, true);
 });
 
+test("Pal 상세는 검증되지 않은 농축 수치를 만들지 않고 missing_source 상태를 반환한다", () => {
+  const detail = service.getPal("anubis");
+  assert.deepEqual(detail.condensation, { availability: "missing_source" });
+  assert.equal(validatePalworldPalDetail(detail).ok, true);
+});
+
+test("Pal snapshot에 직접 주입된 available 농축 단계는 별도 artifact gate 없이 공개하지 않는다", () => {
+  const snapshot = structuredClone(PALWORLD_SNAPSHOT);
+  const pal = snapshot.pals[0];
+  assert.ok(pal);
+  pal.condensation = {
+    availability: "available",
+    sourceRuleSha256: "a".repeat(64),
+    stages: [0, 1, 2, 3, 4].map((stars) => ({
+      stars,
+      characterRank: stars + 1,
+      partnerSkillRank: stars + 1,
+      stats: [],
+      workSuitabilities: []
+    }))
+  };
+
+  const injectedService = new PalworldDataService(snapshot);
+  assert.deepEqual(
+    injectedService.getPal(pal.id).condensation,
+    { availability: "missing_source" }
+  );
+});
+
 test("통합 검색은 한국어, 일본어, 영어, 도감 번호와 ID를 지원한다", () => {
   assert.equal(service.search("아누비스", 10).pals[0]?.id, "anubis");
   assert.equal(service.search("アヌビス", 10).pals[0]?.id, "anubis");
@@ -175,7 +205,7 @@ test("통합 검색은 한국어, 일본어, 영어, 도감 번호와 ID를 지�
   assert.equal(mixed.metadata.gameVersion, "1.0.1");
   assert.equal(mixed.domains.pals.status, "ready");
   assert.equal(mixed.domains.pals.metadata.gameVersion, "1.0.1");
-  assert.equal(mixed.domains.items.status, "incomplete");
+  assert.equal(mixed.domains.items.status, "ready");
   assert.equal(mixed.domains.items.metadata.gameVersion, "1.0.1");
   assert.equal(mixed.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
 

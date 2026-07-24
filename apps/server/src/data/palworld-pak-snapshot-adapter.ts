@@ -306,23 +306,33 @@ function coverageCount(available: number, total: number): {
 
 function localizationState(
   hasKo: boolean,
-  hasJa: boolean
+  hasJa: boolean,
+  hasEn: boolean
 ): {
-  sourceLanguage: "en";
+  sourceLanguage: "ko" | "ja" | "en";
   ko: "localized" | "source_language_fallback";
   ja: "localized" | "source_language_fallback";
 } {
+  if (!hasKo && !hasJa && !hasEn) {
+    fail("localization: fallback에 사용할 source 언어가 없습니다.");
+  }
+  const sourceLanguage = hasEn ? "en" : hasJa ? "ja" : "ko";
   return {
-    sourceLanguage: "en",
+    sourceLanguage,
     ko: hasKo ? "localized" : "source_language_fallback",
     ja: hasJa ? "localized" : "source_language_fallback"
   };
 }
 
 function translationStatus(
-  available: boolean
+  available: boolean,
+  hasFallbackSource: boolean
 ): PalworldTranslationDisplayStatus {
-  return available ? "source_provided" : "source_language_fallback";
+  return available
+    ? "source_provided"
+    : hasFallbackSource
+      ? "source_language_fallback"
+      : "missing_source";
 }
 
 function palReference(pal: Pick<
@@ -340,7 +350,7 @@ function palReference(pal: Pick<
     number: pal.number,
     nameKo: pal.nameKo,
     nameJa: pal.nameJa,
-    nameEn: pal.nameEn,
+    ...(pal.nameEn === undefined ? {} : { nameEn: pal.nameEn }),
     elements: [...pal.elements],
     ...(pal.translation?.name === undefined
       ? {}
@@ -354,7 +364,7 @@ function itemReference(item: Pick<
 >): PalworldItemReference {
   return {
     id: item.id,
-    nameEn: item.nameEn,
+    ...(item.nameEn === undefined ? {} : { nameEn: item.nameEn }),
     ...(item.nameKo === undefined ? {} : { nameKo: item.nameKo }),
     ...(item.nameJa === undefined ? {} : { nameJa: item.nameJa }),
     ...(item.localization === undefined
@@ -373,7 +383,7 @@ function skillValue(skill: PalworldSkillDetail, unlockLevel?: number): PalworldS
       ? {}
       : { sourceInternalId: skill.sourceInternalId }),
     type: skill.type,
-    nameEn: skill.nameEn,
+    ...(skill.nameEn === undefined ? {} : { nameEn: skill.nameEn }),
     ...(skill.nameKo === undefined ? {} : { nameKo: skill.nameKo }),
     ...(skill.nameJa === undefined ? {} : { nameJa: skill.nameJa }),
     ...(skill.descriptionKo === undefined
@@ -522,12 +532,25 @@ export function adaptPalworldPakCandidateToSnapshot(
   for (const locale of ["ko", "ja", "en"] as const) {
     const localeArtifact = artifacts.get(`locales/${locale}.json`)!;
     if (
+      locale === "en"
+      && localeArtifact.status === "missing"
+      && localeArtifact.languageVerified === false
+    ) {
+      if (
+        asRecords(localeArtifact.records, "locales/en.json.records").length !== 0
+      ) {
+        fail("locales/en.json.records: missing locale에는 record가 없어야 합니다.");
+      }
+      localeMaps.set(locale, new Map());
+      continue;
+    }
+    if (
       localeArtifact.status !== "source_provided"
       || localeArtifact.languageVerified !== true
     ) {
       fail(
         locale === "en"
-          ? "공식 EN locale이 없어 필수 nameEn을 PAK 원본으로 검증할 수 없습니다."
+          ? "공식 EN locale artifact 상태가 올바르지 않습니다."
           : `공식 ${locale.toUpperCase()} locale이 준비되지 않았습니다.`,
         locale === "en"
           ? "OFFICIAL_EN_LOCALE_NOT_PROVIDED"
@@ -612,7 +635,9 @@ export function adaptPalworldPakCandidateToSnapshot(
           || !Array.isArray(rich.unresolved)
           || rich.unresolved.length !== 0
         ) {
-          fail(`${pathName}.${locale}: rich text가 완전히 해결되지 않았습니다.`);
+          // 미해결 source rich text는 이전 번역이나 추정값으로 대체하지 않고
+          // 해당 locale 필드만 공개 snapshot에서 격리합니다.
+          continue;
         }
       }
       result[locale] = text;
@@ -668,7 +693,7 @@ export function adaptPalworldPakCandidateToSnapshot(
 
   const palBase = new Map<string, {
     record: JsonRecord;
-    name: { ko: string; ja: string; en: string };
+    name: { ko: string; ja: string; en?: string };
     description: { ko?: string; ja?: string; en?: string };
     translation: PalworldTranslationDisplayState;
   }>();
@@ -676,8 +701,8 @@ export function adaptPalworldPakCandidateToSnapshot(
     const name = localized(
       record.name as CandidateLocalizedValue,
       `paldex.records[${index}].name`,
-      { requireKo: true, requireJa: true, requireEn: true }
-    ) as { ko: string; ja: string; en: string };
+      { requireKo: true, requireJa: true }
+    ) as { ko: string; ja: string; en?: string };
     const description = localized(
       record.description as CandidateLocalizedValue,
       `paldex.records[${index}].description`,
@@ -695,8 +720,14 @@ export function adaptPalworldPakCandidateToSnapshot(
           ? {}
           : {
               description: {
-                ko: translationStatus(description.ko !== undefined),
-                ja: translationStatus(description.ja !== undefined)
+                ko: translationStatus(
+                  description.ko !== undefined,
+                  description.ja !== undefined || description.en !== undefined
+                ),
+                ja: translationStatus(
+                  description.ja !== undefined,
+                  description.ko !== undefined || description.en !== undefined
+                )
               }
             })
       }
@@ -710,28 +741,35 @@ export function adaptPalworldPakCandidateToSnapshot(
   for (const [index, record] of itemRecords.entries()) {
     const name = localized(
       record.name as CandidateLocalizedValue,
-      `items.records[${index}].name`,
-      { requireEn: true }
+      `items.records[${index}].name`
     );
     const description = localized(
       record.description as CandidateLocalizedValue,
       `items.records[${index}].description`,
       { richText: true }
     );
-    if (
-      description.ko === undefined
-      && description.ja === undefined
-      && description.en === undefined
-    ) {
-      fail(`items.records[${index}].description: 하나 이상의 공식 설명이 필요합니다.`);
-    }
+    const hasAnyDescription = description.ko !== undefined
+      || description.ja !== undefined
+      || description.en !== undefined;
     const nameTranslation = {
-      ko: translationStatus(name.ko !== undefined),
-      ja: translationStatus(name.ja !== undefined)
+      ko: translationStatus(
+        name.ko !== undefined,
+        name.ja !== undefined || name.en !== undefined
+      ),
+      ja: translationStatus(
+        name.ja !== undefined,
+        name.ko !== undefined || name.en !== undefined
+      )
     } as const;
     const descriptionTranslation = {
-      ko: translationStatus(description.ko !== undefined),
-      ja: translationStatus(description.ja !== undefined)
+      ko: translationStatus(
+        description.ko !== undefined,
+        description.ja !== undefined || description.en !== undefined
+      ),
+      ja: translationStatus(
+        description.ja !== undefined,
+        description.ko !== undefined || description.en !== undefined
+      )
     } as const;
     const technology = asRecords(
       record.technology,
@@ -743,9 +781,9 @@ export function adaptPalworldPakCandidateToSnapshot(
         record.sourceInternalId,
         `items.records[${index}].sourceInternalId`
       ),
-      nameEn: name.en!,
       ...(name.ko === undefined ? {} : { nameKo: name.ko }),
       ...(name.ja === undefined ? {} : { nameJa: name.ja }),
+      ...(name.en === undefined ? {} : { nameEn: name.en }),
       category: itemCategory(String(record.typeA), String(record.typeB)),
       rarity: asNumber(record.rarity, `items.records[${index}].rarity`),
       ...(description.ko === undefined ? {} : { descriptionKo: description.ko }),
@@ -765,8 +803,12 @@ export function adaptPalworldPakCandidateToSnapshot(
       maxStack: asNumber(record.maxStack, `items.records[${index}].maxStack`),
       durability: asNumber(record.durability, `items.records[${index}].durability`),
       localization: localizationState(
-        name.ko !== undefined && description.ko !== undefined,
-        name.ja !== undefined && description.ja !== undefined
+        name.ko !== undefined
+          && (!hasAnyDescription || description.ko !== undefined),
+        name.ja !== undefined
+          && (!hasAnyDescription || description.ja !== undefined),
+        name.en !== undefined
+          && (!hasAnyDescription || description.en !== undefined)
       ),
       craftingMaterials: [],
       recipes: [],
@@ -795,7 +837,7 @@ export function adaptPalworldPakCandidateToSnapshot(
       number: asNumber(base.record.number, `paldex.${id}.number`),
       nameKo: base.name.ko,
       nameJa: base.name.ja,
-      nameEn: base.name.en,
+      ...(base.name.en === undefined ? {} : { nameEn: base.name.en }),
       elements: [...(base.record.elements as PalworldPalReference["elements"])],
       translation: { name: { ko: "source_provided", ja: "source_provided" } }
     });
@@ -846,16 +888,6 @@ export function adaptPalworldPakCandidateToSnapshot(
   for (const [index, record] of skillRecords.entries()) {
     const candidateId = asString(record.id, `skills.records[${index}].id`);
     const id = skillIdMap.get(candidateId)!;
-    const name = localized(
-      record.name as CandidateLocalizedValue,
-      `skills.records[${index}].name`,
-      { requireEn: true }
-    );
-    const description = localized(
-      record.description as CandidateLocalizedValue,
-      `skills.records[${index}].description`,
-      { richText: true }
-    );
     const type = asString(record.type, `skills.records[${index}].type`) as
       "active" | "passive" | "partner";
     const relatedIds = type === "active"
@@ -873,6 +905,27 @@ export function adaptPalworldPakCandidateToSnapshot(
     ) {
       fail(`skills.records[${index}].relatedPalIds: resolved assignment와 일치하지 않습니다.`);
     }
+    const name = localized(
+      record.name as CandidateLocalizedValue,
+      `skills.records[${index}].name`
+    );
+    if (
+      name.ko === undefined
+      && name.ja === undefined
+      && name.en === undefined
+    ) {
+      if (type === "active" && relatedIds.length > 0) {
+        fail(`skills.records[${index}].name: 공개 active skill 이름이 없습니다.`);
+      }
+      // 원본 locale에 이름이 없는 partner/passive skill은 이름을 추정하지 않고
+      // 공개 snapshot에서 제외합니다. Pal 관계 coverage에는 누락으로 남습니다.
+      continue;
+    }
+    const description = localized(
+      record.description as CandidateLocalizedValue,
+      `skills.records[${index}].description`,
+      { richText: true }
+    );
     const relatedPals = [...new Set(relatedIds)]
       .sort(codePointCompare)
       .map((palId) => {
@@ -890,7 +943,10 @@ export function adaptPalworldPakCandidateToSnapshot(
       name.ko !== undefined
         && (description.en === undefined || description.ko !== undefined),
       name.ja !== undefined
-        && (description.en === undefined || description.ja !== undefined)
+        && (description.en === undefined || description.ja !== undefined),
+      name.en !== undefined
+        && (description.ko === undefined || description.en !== undefined)
+        && (description.ja === undefined || description.en !== undefined)
     );
     const detail = {
       id,
@@ -899,9 +955,9 @@ export function adaptPalworldPakCandidateToSnapshot(
         `skills.records[${index}].sourceInternalId`
       ),
       type,
-      nameEn: name.en!,
       ...(name.ko === undefined ? {} : { nameKo: name.ko }),
       ...(name.ja === undefined ? {} : { nameJa: name.ja }),
+      ...(name.en === undefined ? {} : { nameEn: name.en }),
       ...(description.ko === undefined ? {} : { descriptionKo: description.ko }),
       ...(description.ja === undefined ? {} : { descriptionJa: description.ja }),
       ...(description.en === undefined ? {} : { descriptionEn: description.en }),
@@ -930,8 +986,14 @@ export function adaptPalworldPakCandidateToSnapshot(
       localization,
       translation: {
         name: {
-          ko: translationStatus(name.ko !== undefined),
-          ja: translationStatus(name.ja !== undefined)
+          ko: translationStatus(
+            name.ko !== undefined,
+            name.ja !== undefined || name.en !== undefined
+          ),
+          ja: translationStatus(
+            name.ja !== undefined,
+            name.ko !== undefined || name.en !== undefined
+          )
         },
         ...(description.ko === undefined
           && description.ja === undefined
@@ -939,8 +1001,14 @@ export function adaptPalworldPakCandidateToSnapshot(
           ? {}
           : {
               description: {
-                ko: translationStatus(description.ko !== undefined),
-                ja: translationStatus(description.ja !== undefined)
+                ko: translationStatus(
+                  description.ko !== undefined,
+                  description.ja !== undefined || description.en !== undefined
+                ),
+                ja: translationStatus(
+                  description.ja !== undefined,
+                  description.ko !== undefined || description.en !== undefined
+                )
               }
             })
       },
@@ -1174,7 +1242,7 @@ export function adaptPalworldPakCandidateToSnapshot(
       number: asNumber(base.record.number, `paldex.${id}.number`),
       nameKo: base.name.ko,
       nameJa: base.name.ja,
-      nameEn: base.name.en,
+      ...(base.name.en === undefined ? {} : { nameEn: base.name.en }),
       elements: [...(base.record.elements as PalworldPalDetail["elements"])],
       rarity: asNumber(base.record.rarity, `paldex.${id}.rarity`),
       variantType: base.record.variantType as "normal" | "variant",
@@ -1197,7 +1265,8 @@ export function adaptPalworldPakCandidateToSnapshot(
         : {
             localization: localizationState(
               base.description.ko !== undefined,
-              base.description.ja !== undefined
+              base.description.ja !== undefined,
+              base.description.en !== undefined
             )
           }),
       translation: structuredClone(base.translation),
@@ -1218,7 +1287,9 @@ export function adaptPalworldPakCandidateToSnapshot(
         food: asNumber(stats.food, `paldex.${id}.stats.food`)
       },
       nocturnal: base.record.nocturnal === true,
-      partnerSkill: skillValue(partnerSkill),
+      ...(partnerSkill === undefined
+        ? {}
+        : { partnerSkill: skillValue(partnerSkill) }),
       activeSkills,
       drops,
       dropDetails,

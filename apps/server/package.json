@@ -23,6 +23,7 @@
     "pin:palworld-legacy-runtime": "tsx src/scripts/pin-palworld-legacy-runtime.ts",
     "extract:palworld-translations": "tsx src/scripts/extract-palworld-translations.ts",
     "import:palworld-translations": "tsx src/scripts/import-palworld-translations.ts",
+    "generate:palworld-translation-review": "tsx src/scripts/generate-palworld-translation-review.ts",
     "validate:palworld-translations": "tsx src/scripts/validate-palworld-translations.ts",
     "rollback:palworld-images": "tsx src/scripts/rollback-palworld-images.ts --release 1.0.1",
     "validate:palworld-data": "tsx src/scripts/validate-palworld-paldex.ts",

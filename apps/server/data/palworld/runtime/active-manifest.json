@@ -4,7 +4,7 @@
   "release": "1.0.1",
   "releaseDirectory": "1.0.1",
   "manifestFile": "manifest.json",
-  "manifestSha256": "ca39f33365c67f62129d0b36579ee2b29a2670aec2bf50b72d867e8036fc8596",
+  "manifestSha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198",
   "composite": {
     "schemaVersion": 3,
     "release": "1.0.1",
@@ -17,22 +17,22 @@
       {
         "kind": "paldex",
         "file": "paldex.json",
-        "sha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20"
+        "sha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53"
       },
       {
         "kind": "paldex-manifest",
         "file": "manifest.json",
-        "sha256": "ca39f33365c67f62129d0b36579ee2b29a2670aec2bf50b72d867e8036fc8596"
+        "sha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198"
       },
       {
         "kind": "pal-images-manifest",
         "file": "images-manifest.json",
-        "sha256": "016647f3c257b40814e10012857224ffae5e8531b5a8b5d97ee2f0c691d0c473"
+        "sha256": "671a3c00c4e5d0842b42c30b5610d541682e52302d161755ccc75fdac4d2031e"
       },
       {
         "kind": "image-use-policy",
         "file": "image-use-policy.json",
-        "sha256": "e886812f4ea3fda26ed6daed08d9a0dcf676f6947a09cf2c00bd26e7fc260d1e"
+        "sha256": "565a199f730c05c3f20e61448e1ec0e4f0d1c3aefd36b00b8e10eab78b35eaa1"
       },
       {
         "kind": "catalog",
@@ -72,22 +72,22 @@
       {
         "kind": "locale-manifest",
         "file": "locales/manifest.json",
-        "sha256": "5c927a2f864b613457cc501531c853c28c81c6ac4dc81a57fe7fa6a2773e0816"
+        "sha256": "9faadecbf52b197ee5344445f1316d3447b8e1f72c2b29ffa760bab5de4b7c56"
       },
       {
         "kind": "locale-glossary",
         "file": "locales/glossary.json",
-        "sha256": "e2fffc918a7f85b2c16ef027800aede61383b6e8c97930f6b9c70e92e23029a1"
+        "sha256": "19a8d9fab0d3e924b41772dea00adacc05fdc92785baa55f271d589f5941bbaf"
       },
       {
         "kind": "locale-ko",
         "file": "locales/ko.json",
-        "sha256": "887df97d51ba3007ab3ecb1b8239273c8cb5fe3d1ebc362115619d374a6e4c53"
+        "sha256": "0605cbfcd39dcbd05d7eec43e5b179bc7373a879de7ac7052f7b1cec122ad3d7"
       },
       {
         "kind": "locale-ja",
         "file": "locales/ja.json",
-        "sha256": "a1b374ff54fc853c61b60ee263c0cf400f8a729b0181008e9a7cb65eb1785302"
+        "sha256": "6e9d7204fba8521f61579b680de8c71942fcff68d64fae1f78e5fa6f669e8284"
       },
       {
         "kind": "reviewed-item-aliases",

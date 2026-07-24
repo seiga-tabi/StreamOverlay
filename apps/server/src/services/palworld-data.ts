@@ -109,7 +109,7 @@ function palSummary(pal: PalworldPalDetail): PalworldPalSummary {
     number: pal.number,
     nameKo: pal.nameKo,
     nameJa: pal.nameJa,
-    nameEn: pal.nameEn,
+    ...(pal.nameEn === undefined ? {} : { nameEn: pal.nameEn }),
     ...(pal.imageUrl ? { imageUrl: pal.imageUrl } : {}),
     ...(pal.imageWidth === undefined ? {} : { imageWidth: pal.imageWidth }),
     ...(pal.imageHeight === undefined ? {} : { imageHeight: pal.imageHeight }),
@@ -123,13 +123,26 @@ function palSummary(pal: PalworldPalDetail): PalworldPalSummary {
   };
 }
 
+function publicCondensationProfile(
+  pal: PalworldPalDetail
+): NonNullable<PalworldPalDetail["condensation"]> {
+  const profile = pal.condensation;
+  if (!profile || profile.availability === "available") {
+    // Pal snapshot 자체는 농축 규칙의 신뢰 경계가 아닙니다.
+    // release·Steam Build·Mappings에 고정된 별도 artifact loader가 추가되기 전에는
+    // 계산된 단계를 공개하지 않고 안전한 미제공 상태로 유지합니다.
+    return { availability: "missing_source" };
+  }
+  return { ...profile };
+}
+
 function palReference(pal: PalworldPalDetail): PalworldPalReference {
   return {
     id: pal.id,
     number: pal.number,
     nameKo: pal.nameKo,
     nameJa: pal.nameJa,
-    nameEn: pal.nameEn,
+    ...(pal.nameEn === undefined ? {} : { nameEn: pal.nameEn }),
     ...(pal.imageUrl ? { imageUrl: pal.imageUrl } : {}),
     ...(pal.imageWidth === undefined ? {} : { imageWidth: pal.imageWidth }),
     ...(pal.imageHeight === undefined ? {} : { imageHeight: pal.imageHeight }),
@@ -181,7 +194,7 @@ function itemSummary(item: PalworldItemDetail): PalworldItemSummary {
     id: item.id,
     ...(item.nameKo === undefined ? {} : { nameKo: item.nameKo }),
     ...(item.nameJa === undefined ? {} : { nameJa: item.nameJa }),
-    nameEn: item.nameEn,
+    ...(item.nameEn === undefined ? {} : { nameEn: item.nameEn }),
     ...(item.imageUrl ? { imageUrl: item.imageUrl } : {}),
     ...(item.imageWidth === undefined ? {} : { imageWidth: item.imageWidth }),
     ...(item.imageHeight === undefined ? {} : { imageHeight: item.imageHeight }),
@@ -203,7 +216,7 @@ function skillSummary(skill: PalworldSkillDetail): PalworldSkillSummary {
     type: skill.type,
     ...(skill.nameKo === undefined ? {} : { nameKo: skill.nameKo }),
     ...(skill.nameJa === undefined ? {} : { nameJa: skill.nameJa }),
-    nameEn: skill.nameEn,
+    ...(skill.nameEn === undefined ? {} : { nameEn: skill.nameEn }),
     ...(skill.descriptionKo === undefined ? {} : { descriptionKo: skill.descriptionKo }),
     ...(skill.descriptionJa === undefined ? {} : { descriptionJa: skill.descriptionJa }),
     ...(skill.descriptionEn === undefined ? {} : { descriptionEn: skill.descriptionEn }),
@@ -262,19 +275,19 @@ function compareText(left: string, right: string): number {
 }
 
 function localizedName(
-  value: { nameKo?: string; nameJa?: string; nameEn: string },
+  value: { id: string; nameKo?: string; nameJa?: string; nameEn?: string },
   locale: "ko" | "ja" | "en"
 ): string {
   return locale === "ja"
-    ? value.nameJa ?? value.nameEn
+    ? value.nameJa ?? value.nameKo ?? value.nameEn ?? value.id
     : locale === "ko"
-      ? value.nameKo ?? value.nameEn
-      : value.nameEn;
+      ? value.nameKo ?? value.nameJa ?? value.nameEn ?? value.id
+      : value.nameEn ?? value.nameKo ?? value.nameJa ?? value.id;
 }
 
 function compareLocalizedName(
-  left: { nameKo?: string; nameJa?: string; nameEn: string },
-  right: { nameKo?: string; nameJa?: string; nameEn: string },
+  left: { id: string; nameKo?: string; nameJa?: string; nameEn?: string },
+  right: { id: string; nameKo?: string; nameJa?: string; nameEn?: string },
   locale: "ko" | "ja" | "en"
 ): number {
   return PALWORLD_LOCALE_COLLATORS[locale].compare(
@@ -516,7 +529,7 @@ export class PalworldDataService {
         `#${pal.number}`,
         pal.nameKo,
         pal.nameJa,
-        pal.nameEn
+        pal.nameEn ?? ""
       ])
     ]));
     this.itemSearchFields = new Map(this.supplementalSnapshot.items.map((item) => [
@@ -526,7 +539,7 @@ export class PalworldDataService {
         item.sourceInternalId ?? "",
         item.nameKo ?? "",
         item.nameJa ?? "",
-        item.nameEn
+        item.nameEn ?? ""
       ])
     ]));
     this.skillSearchFields = new Map((this.snapshot.skills ?? []).map((skill) => [
@@ -535,7 +548,7 @@ export class PalworldDataService {
         ...identifierAliases(skill.id),
         skill.nameKo ?? "",
         skill.nameJa ?? "",
-        skill.nameEn,
+        skill.nameEn ?? "",
         skill.descriptionKo ?? "",
         skill.descriptionJa ?? "",
         skill.descriptionEn ?? ""
@@ -673,7 +686,10 @@ export class PalworldDataService {
         score: matchNormalizedSearchFields(term, this.itemSearchFields.get(item.id) ?? [])
       }))
       .filter((entry): entry is { item: PalworldItemDetail; score: number } => entry.score !== undefined)
-      .sort((left, right) => left.score - right.score || compareText(left.item.nameEn, right.item.nameEn));
+      .sort((left, right) =>
+        left.score - right.score
+        || compareText(left.item.nameEn ?? left.item.id, right.item.nameEn ?? right.item.id)
+      );
     const items = matchedItems
       .slice(0, limit)
       .map(({ item }) => itemSummary(item));
@@ -718,7 +734,7 @@ export class PalworldDataService {
         `#${pal.number}`,
         pal.nameKo,
         pal.nameJa,
-        pal.nameEn
+        pal.nameEn ?? ""
       ]) !== undefined)
       .filter((pal) => query.element === undefined || pal.elements.includes(query.element))
       .filter((pal) => query.work === undefined || pal.workSuitabilities.some((work) => work.type === query.work))
@@ -753,6 +769,7 @@ export class PalworldDataService {
     if (!pal) throw new PalworldRecordNotFoundError("pal", id);
     return {
       ...pal,
+      condensation: publicCondensationProfile(pal),
       breeding: {
         ...pal.breeding,
         specialParentPairs: pal.breeding.specialParentPairs.map((pair) => ({

@@ -1,17 +1,38 @@
 import path from "node:path";
 import { inspectPalworldPakArchive, PalworldPakPreflightError } from "../data/palworld-pak-preflight.js";
 
-function archiveArgument(argv: string[]): string {
-  if (argv.length !== 2 || argv[0] !== "--archive" || !argv[1]) {
+function argumentsFrom(argv: string[]): {
+  archive: string;
+  officialEnLocale: "required" | "optional";
+} {
+  if (
+    (argv.length !== 2 && argv.length !== 4)
+    || argv[0] !== "--archive"
+    || !argv[1]
+    || (
+      argv.length === 4
+      && (
+        argv[2] !== "--official-en"
+        || (argv[3] !== "required" && argv[3] !== "optional")
+      )
+    )
+  ) {
     throw new PalworldPakPreflightError(
-      "사용법: npm run preflight:palworld-pak -- --archive <Content.zip>"
+      "사용법: npm run preflight:palworld-pak -- --archive <Content.zip> "
+        + "[--official-en required|optional]"
     );
   }
-  return path.resolve(argv[1]);
+  return {
+    archive: path.resolve(argv[1]),
+    officialEnLocale: argv[3] === "optional" ? "optional" : "required"
+  };
 }
 
 try {
-  const report = await inspectPalworldPakArchive(archiveArgument(process.argv.slice(2)));
+  const args = argumentsFrom(process.argv.slice(2));
+  const report = await inspectPalworldPakArchive(args.archive, {
+    officialEnLocale: args.officialEnLocale
+  });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   if (!report.gates.inputPrerequisitesSatisfied) {
     process.exitCode = 2;

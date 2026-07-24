@@ -1479,7 +1479,10 @@ function validateImportReport(
   const root = commonArtifactAt(value, "importReport", context, [
     "status",
     "activationEligible",
+    "sourceArchives",
+    "localePolicy",
     "blockers",
+    "coverageLimitations",
     "counts",
     "sourceCounts",
     "localeCoverage",
@@ -1517,6 +1520,24 @@ function validateImportReport(
     (entry, entryPath) =>
     idAt(entry, entryPath), 128
   );
+  uniqueStringsAt(
+    root.coverageLimitations,
+    "importReport.coverageLimitations",
+    (entry, entryPath) => idAt(entry, entryPath),
+    128
+  );
+  const localePolicy = recordAt(root.localePolicy, "importReport.localePolicy", [
+    "officialKo",
+    "officialJa",
+    "officialEn"
+  ]);
+  literalAt(localePolicy.officialKo, "importReport.localePolicy.officialKo", ["required"]);
+  literalAt(localePolicy.officialJa, "importReport.localePolicy.officialJa", ["required"]);
+  literalAt(
+    localePolicy.officialEn,
+    "importReport.localePolicy.officialEn",
+    ["required", "optional"]
+  );
   if (
     (status === "ready_candidate"
       && (!activationEligible || blockers.length !== 0))
@@ -1531,6 +1552,7 @@ function validateImportReport(
     );
   }
   for (const field of [
+    "sourceArchives",
     "counts",
     "sourceCounts",
     "localeCoverage",
@@ -1565,6 +1587,7 @@ function validateSourceLock(
 ): JsonRecord {
   const root = commonArtifactAt(value, "sourceLock", context, [
     "archive",
+    "sourceArchives",
     "mappings",
     "includedFiles"
   ]);
@@ -1576,8 +1599,53 @@ function validateSourceLock(
   sha256At(archive.sha256, "sourceLock.archive.sha256");
   integerAt(archive.bytes, "sourceLock.archive.bytes", 1, Number.MAX_SAFE_INTEGER);
   integerAt(archive.fileCount, "sourceLock.archive.fileCount", 1, 100_000);
+  if (root.sourceArchives !== undefined) {
+    const seenArchiveHashes = new Set<string>();
+    const sourceArchives = arrayAt(
+      root.sourceArchives,
+      "sourceLock.sourceArchives",
+      9
+    ).map((entry, index) => {
+      const archivePath = `sourceLock.sourceArchives[${index}]`;
+      const record = recordAt(entry, archivePath, ["role", "sha256", "bytes"]);
+      const role = literalAt(
+        record.role,
+        `${archivePath}.role`,
+        ["primary", "asset_overlay"]
+      );
+      if ((index === 0) !== (role === "primary")) {
+        fail(
+          `${archivePath}.role`,
+          "첫 archive만 primary이고 나머지는 asset_overlay여야 합니다."
+        );
+      }
+      const sourceSha256 = sha256At(record.sha256, `${archivePath}.sha256`);
+      if (seenArchiveHashes.has(sourceSha256)) {
+        fail("sourceLock.sourceArchives", "archive SHA-256이 중복됩니다.");
+      }
+      seenArchiveHashes.add(sourceSha256);
+      const bytes = integerAt(
+        record.bytes,
+        `${archivePath}.bytes`,
+        1,
+        Number.MAX_SAFE_INTEGER
+      );
+      return { role, sha256: sourceSha256, bytes };
+    });
+    if (
+      sourceArchives.length === 0
+      || sourceArchives[0]!.sha256 !== archive.sha256
+      || sourceArchives[0]!.bytes !== archive.bytes
+    ) {
+      fail(
+        "sourceLock.sourceArchives",
+        "첫 primary archive는 기존 archive identity와 일치해야 합니다."
+      );
+    }
+  }
   const mappings = recordAt(root.mappings, "sourceLock.mappings", [
     "publicIdMap",
+    "publicIdExtensions",
     "aliases",
     "palIconOverrides",
     "elementIconMap",

@@ -98,26 +98,56 @@ export function buildPalworldPalStatRows(stats: PalworldPalStats): PalworldPalSt
 }
 
 export function PalworldPalStatsGraph({
+  baselineStats,
   locale,
   stats,
 }: {
+  baselineStats?: PalworldPalStats;
   locale: PalworldLocale;
   stats: PalworldPalStats;
 }) {
   const text = palworldI18n[locale];
+  const baselineRows = new Map(
+    (baselineStats ? buildPalworldPalStatRows(baselineStats) : []).map((row) => [row.id, row]),
+  );
   return (
     <dl className="palworld-stat-chart" data-testid="palworld-stat-chart">
-      {buildPalworldPalStatRows(stats).map((row) => (
-        <div className="palworld-stat-chart-row" data-stat={row.id} data-stat-group={row.group} key={row.id}>
+      {buildPalworldPalStatRows(stats).map((row) => {
+        const baseline = baselineRows.get(row.id);
+        const changed = baseline !== undefined && baseline.value !== row.value;
+        return (
+          <div
+            className="palworld-stat-chart-row"
+            data-changed={changed ? "true" : undefined}
+            data-stat={row.id}
+            data-stat-group={row.group}
+            key={row.id}
+          >
           <dt data-ja={palworldI18n.ja[row.label]} data-ko={palworldI18n.ko[row.label]}>{text[row.label]}</dt>
           <dd>
             <span aria-hidden="true" className="palworld-stat-chart-track">
               <span className="palworld-stat-chart-fill" style={{ inlineSize: `${row.percent}%` }} />
             </span>
-            <strong>{row.value.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR")}</strong>
+            <span
+              aria-label={changed
+                ? `${text.condensationBaseValue} ${baseline!.value}, ${text.condensationAppliedValue} ${row.value}`
+                : undefined}
+              className="palworld-stat-chart-value"
+            >
+              {changed ? (
+                <>
+                  <span className="palworld-stat-chart-baseline">
+                    {baseline!.value.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR")}
+                  </span>
+                  <span aria-hidden="true">→</span>
+                </>
+              ) : null}
+              <strong>{row.value.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR")}</strong>
+            </span>
           </dd>
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </dl>
   );
 }

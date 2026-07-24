@@ -19,6 +19,7 @@ import {
   validatePalworldPalDrop,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
+  validatePalworldPalCondensationProfile,
   validatePalworldPalListFacets,
   validatePalworldPalListResponse,
   validatePalworldPalSummary,
@@ -156,6 +157,22 @@ test("KO·JA 번역 snapshot은 canonical source와 필드별 상태를 엄격�
   }, translationSource).ok, true);
   assert.equal(validatePalworldTranslationSnapshot({ ...translationSnapshot, locale: "en" }, translationSource).ok, false);
   assert.equal(validatePalworldTranslationSnapshot({ ...translationSnapshot, unexpected: true }, translationSource).ok, false);
+});
+
+test("translationStatus complete는 필드 가용성만 뜻하며 사람 검수 완료를 요구하지 않는다", () => {
+  const validation = validatePalworldTranslationSnapshot(
+    translationSnapshot,
+    translationSource
+  );
+  assert.equal(validation.ok, true);
+  assert.equal(translationSnapshot.translationStatus, "complete");
+  assert.equal(translationSnapshot.reviewedAt, null);
+  assert.equal(
+    translationSnapshot.records.every((record) =>
+      Object.values(record.fields).every((field) => field.status === "machine_assisted")
+    ),
+    true
+  );
 });
 
 test("번역 snapshot은 중복·orphan·stale hash·원문 없는 필드·완료 누락을 차단한다", () => {
@@ -442,6 +459,32 @@ const pal = {
   metadata
 };
 
+const availableCondensation = {
+  availability: "available",
+  sourceRuleSha256: "f".repeat(64),
+  stages: [
+    { stars: 0, characterRank: 1, partnerSkillRank: 1 },
+    { stars: 1, characterRank: 2, partnerSkillRank: 2 },
+    { stars: 2, characterRank: 3, partnerSkillRank: 3 },
+    { stars: 3, characterRank: 4, partnerSkillRank: 4 },
+    { stars: 4, characterRank: 5, partnerSkillRank: 5 }
+  ].map(({ stars, characterRank, partnerSkillRank }) => ({
+    stars,
+    characterRank,
+    partnerSkillRank,
+    stats: Object.entries(pal.stats).map(([stat, baseValue]) => ({
+      stat,
+      baseValue,
+      value: baseValue
+    })),
+    workSuitabilities: pal.workSuitabilities.map(({ type, level }) => ({
+      type,
+      baseLevel: level,
+      level
+    }))
+  }))
+};
+
 const item = {
   ...itemReference,
   category: "sphere",
@@ -505,6 +548,49 @@ test("원본에 설명이 없는 스킬은 이름 fallback 상태를 유지한 �
     localization: englishFallback
   });
   assert.equal(result.ok, true, result.ok ? "" : result.error);
+});
+
+test("공식 KO·JA source가 있으면 EN locale 없이도 공개 이름을 검증한다", () => {
+  const koJaOnlySkill = {
+    id: "active-aqua-jet",
+    sourceInternalId: "AquaJet",
+    type: "active",
+    nameKo: "워터 제트",
+    nameJa: "ウォータージェット",
+    descriptionKo: "고속 물줄기를 발사한다.",
+    descriptionJa: "高速の水流を放つ。",
+    translation: {
+      name: { ko: "source_provided", ja: "source_provided" },
+      description: { ko: "source_provided", ja: "source_provided" }
+    }
+  };
+  assert.equal(validatePalworldSkill(koJaOnlySkill).ok, true);
+
+  const koJaOnlyPal = structuredClone(pal);
+  delete koJaOnlyPal.nameEn;
+  assert.equal(validatePalworldPalDetail(koJaOnlyPal).ok, true);
+
+  const koJaOnlyItem = structuredClone(item);
+  delete koJaOnlyItem.nameEn;
+  koJaOnlyItem.translation = {
+    name: { ko: "source_provided", ja: "source_provided" },
+    description: { ko: "source_provided", ja: "source_provided" }
+  };
+  assert.equal(validatePalworldItemDetail(koJaOnlyItem).ok, true);
+
+  assert.equal(validatePalworldSkill({
+    id: "active-name-missing",
+    type: "active"
+  }).ok, false);
+});
+
+test("공식 설명의 참조를 공개할 수 없으면 아이템 이름·수치는 유지하고 설명을 생략한다", () => {
+  const withoutDescription = structuredClone(item);
+  delete withoutDescription.descriptionKo;
+  delete withoutDescription.descriptionJa;
+  delete withoutDescription.descriptionEn;
+
+  assert.equal(validatePalworldItemDetail(withoutDescription).ok, true);
 });
 
 const elementDefinition = {
@@ -861,11 +947,34 @@ test("locale별 번역 coverage는 필드 coverage와 번역 상태 집계를 �
     skillNames: { available: 1, missing: 0, total: 1 },
     skillDescriptions: { available: 1, missing: 0, total: 1 },
     skillPassiveAbilities: { available: 1, missing: 0, total: 1 },
+    publicUsable: 7,
+    sourceProvided: 0,
     humanReviewed: 2,
     machineAssisted: 5,
     sourceLanguageFallback: 0,
     missingSource: 0,
-    staleSourceHash: 0
+    staleSourceHash: 0,
+    sourceAnomalousFields: 1,
+    missingSourceSlots: 2,
+    availability: {
+      translated: 7,
+      sourceLanguageFallback: 0,
+      missingSource: 0,
+      total: 7
+    },
+    review: {
+      sourceProvided: 0,
+      humanReviewed: 2,
+      machineAssisted: 5,
+      total: 7
+    },
+    sourceIntegrity: {
+      intact: 6,
+      sourceAnomalousFields: 1,
+      missingSourceFields: 0,
+      missingSourceSlots: 2,
+      total: 7
+    }
   };
   const translatedCoverage = {
     ...coverage,
@@ -897,9 +1006,59 @@ test("locale별 번역 coverage는 필드 coverage와 번역 상태 집계를 �
     ...translatedCoverage,
     translations: {
       ...translatedCoverage.translations,
+      ko: {
+        ...localeCoverage,
+        sourceIntegrity: { ...localeCoverage.sourceIntegrity, missingSourceSlots: 0 }
+      }
+    }
+  }).ok, false);
+  assert.equal(validatePalworldDataCoverage({
+    ...translatedCoverage,
+    translations: {
+      ...translatedCoverage.translations,
+      ko: {
+        ...localeCoverage,
+        review: { ...localeCoverage.review, machineAssisted: 4 }
+      }
+    }
+  }).ok, false);
+  assert.equal(validatePalworldDataCoverage({
+    ...translatedCoverage,
+    translations: {
+      ...translatedCoverage.translations,
       ja: { ...localeCoverage, unsafe: true }
     }
   }).ok, false);
+});
+
+test("공개 번역 상태는 review provenance와 원문 무결성을 독립적으로 검증한다", () => {
+  const anomalous = structuredClone(item);
+  anomalous.translation = {
+    name: { ko: "human_reviewed", ja: "human_reviewed" },
+    description: { ko: "machine_assisted", ja: "machine_assisted" }
+  };
+  anomalous.translation.description.sourceIntegrity = {
+    ko: "source_anomaly",
+    ja: "intact"
+  };
+  assert.equal(validatePalworldItemDetail(anomalous).ok, true);
+
+  anomalous.translation.description.sourceIntegrity.ko = "missing_source";
+  assert.equal(validatePalworldItemDetail(anomalous).ok, false);
+
+  const missing = structuredClone(item);
+  delete missing.descriptionKo;
+  delete missing.descriptionJa;
+  delete missing.descriptionEn;
+  missing.translation = {
+    name: { ko: "human_reviewed", ja: "human_reviewed" }
+  };
+  missing.translation.description = {
+    ko: "missing_source",
+    ja: "missing_source",
+    sourceIntegrity: { ko: "missing_source", ja: "missing_source" }
+  };
+  assert.equal(validatePalworldItemDetail(missing).ok, true);
 });
 
 test("Palworld meta는 optional 스킬 도메인과 상세 coverage를 counts에 맞춰 검증한다", () => {
@@ -1024,6 +1183,68 @@ test("Pal 상세는 nocturnal boolean을 필수로 검증한다", () => {
       ...pal.breeding,
       specialParentPairs: [{ parentAId: "anubis", parentBId: "anubis", parentAGender: "unknown" }]
     }
+  }).ok, false);
+});
+
+test("Pal 농축 profile은 검증된 0★~4★ 전체 단계와 안전한 미제공 상태를 허용한다", () => {
+  assert.equal(validatePalworldPalCondensationProfile(availableCondensation).ok, true);
+  assert.equal(validatePalworldPalDetail({
+    ...pal,
+    condensation: availableCondensation
+  }).ok, true);
+
+  for (const availability of ["missing_source", "unresolved_rule", "data_unavailable"]) {
+    assert.equal(validatePalworldPalCondensationProfile({ availability }).ok, true);
+    assert.equal(validatePalworldPalDetail({
+      ...pal,
+      condensation: { availability }
+    }).ok, true);
+  }
+});
+
+test("Pal 농축 profile은 unknown 필드·NaN·중복·잘못된 단계와 기본값 불일치를 차단한다", () => {
+  assert.equal(validatePalworldPalCondensationProfile({
+    ...availableCondensation,
+    unexpected: true
+  }).ok, false);
+
+  const nanValue = structuredClone(availableCondensation);
+  nanValue.stages[1].stats[0].value = Number.NaN;
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: nanValue }).ok, false);
+
+  const duplicateStat = structuredClone(availableCondensation);
+  duplicateStat.stages[2].stats.push(structuredClone(duplicateStat.stages[2].stats[0]));
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: duplicateStat }).ok, false);
+
+  const duplicateWork = structuredClone(availableCondensation);
+  duplicateWork.stages[2].workSuitabilities.push(
+    structuredClone(duplicateWork.stages[2].workSuitabilities[0])
+  );
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: duplicateWork }).ok, false);
+
+  const duplicateStage = structuredClone(availableCondensation);
+  duplicateStage.stages[3].stars = 2;
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: duplicateStage }).ok, false);
+
+  const outOfRangeStage = structuredClone(availableCondensation);
+  outOfRangeStage.stages[4].stars = 5;
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: outOfRangeStage }).ok, false);
+
+  const incompleteStages = structuredClone(availableCondensation);
+  incompleteStages.stages.pop();
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: incompleteStages }).ok, false);
+
+  const changedBaseStage = structuredClone(availableCondensation);
+  changedBaseStage.stages[0].stats[0].value += 1;
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: changedBaseStage }).ok, false);
+
+  const mismatchedBaseValue = structuredClone(availableCondensation);
+  mismatchedBaseValue.stages[1].stats[0].baseValue += 1;
+  assert.equal(validatePalworldPalDetail({ ...pal, condensation: mismatchedBaseValue }).ok, false);
+
+  assert.equal(validatePalworldPalCondensationProfile({
+    availability: "missing_source",
+    stages: availableCondensation.stages
   }).ok, false);
 });
 

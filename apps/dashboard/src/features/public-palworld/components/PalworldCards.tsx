@@ -38,7 +38,11 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
         <CardContent className="palworld-pal-card-content">
           <div className="palworld-card-kicker"><span>{formatPalNumber(pal.number, locale)}</span><Badge size="sm" tone={rarityTone(pal.rarity)}>★ {pal.rarity}</Badge></div>
           <h3 title={displayName}>{displayName}</h3>
-          <PalworldTranslationBadges locale={locale} statuses={[name.status]} />
+          <PalworldTranslationBadges
+            locale={locale}
+            sourceIntegrities={[name.sourceIntegrity]}
+            statuses={[name.status]}
+          />
           <div className="palworld-badge-row">
             {pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}
             {pal.variantType !== "normal" ? <Badge size="sm" tone="warning">{pal.variantType === "special" ? text.special : text.variantPal}</Badge> : null}
@@ -83,7 +87,12 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
       <CardContent>
         <div className="palworld-card-kicker"><Badge size="sm" tone="info">{categoryLabel(item.category, locale)}</Badge><Badge size="sm" tone={rarityTone(item.rarity)}>★ {item.rarity}</Badge></div>
         <h3 title={displayName}>{displayName}</h3>
-        <PalworldTranslationBadges locale={locale} statuses={[name.status, description.status]} />
+        <PalworldTranslationBadges
+          locale={locale}
+          showMachineAssisted={false}
+          sourceIntegrities={[name.sourceIntegrity, description.sourceIntegrity]}
+          statuses={[name.status, description.status]}
+        />
         <p className="palworld-card-description palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
         {item.technologyLevel !== undefined ? <p className="palworld-card-note">{text.technologyLevel} · {text.levelPrefix}{item.technologyLevel}</p> : null}
       </CardContent>

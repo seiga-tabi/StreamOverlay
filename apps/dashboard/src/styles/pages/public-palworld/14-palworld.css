@@ -656,6 +656,11 @@
   overscroll-behavior: contain;
   background: var(--yoro-color-surface-strong);
   cursor: grab;
+  /* 1배율에서는 상세 Modal의 세로 스크롤을 허용하고, 확대 후에만 지도 제스처를 독점합니다. */
+  touch-action: pan-y;
+}
+
+.palworld-map-viewport[data-zoomed="true"] {
   touch-action: none;
 }
 
@@ -1428,6 +1433,28 @@
   min-inline-size: 0;
 }
 
+.palworld-translation-review-notice {
+  display: flex;
+  align-items: flex-start;
+  max-inline-size: 100%;
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-translation-review-notice .yoro-badge {
+  flex: 0 0 auto;
+}
+
+.palworld-translation-review-notice p {
+  min-inline-size: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .palworld-skill-metrics {
   display: flex;
   flex-wrap: wrap;
@@ -2099,6 +2126,178 @@
   border-block-start: thin solid var(--yoro-color-border);
 }
 
+.palworld-condensation {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-surface);
+}
+
+.palworld-condensation-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-condensation-heading > div {
+  min-inline-size: 0;
+  flex: 1 1 20rem;
+}
+
+.palworld-condensation-heading p,
+.palworld-condensation-status,
+.palworld-condensation-work > p {
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-condensation-heading .yoro-badge {
+  max-inline-size: 100%;
+  white-space: normal;
+}
+
+.palworld-condensation-stars {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-condensation-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-2);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--yoro-font-weight-bold);
+  transition:
+    border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    background-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.palworld-condensation-star:hover {
+  border-color: var(--palworld-accent);
+  background: var(--palworld-accent-soft);
+}
+
+.palworld-condensation-star[data-selected="true"] {
+  border-color: var(--palworld-accent);
+  background: var(--palworld-accent-soft);
+  box-shadow: inset 0 0 0 var(--yoro-focus-ring-width) var(--palworld-accent);
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-condensation-star[data-selected="true"]::after {
+  content: "✓";
+  font-size: var(--yoro-font-size-xs);
+}
+
+.palworld-condensation-star:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-width);
+}
+
+.palworld-condensation-status {
+  margin: 0;
+  padding: var(--yoro-space-3);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+  overflow-wrap: anywhere;
+}
+
+.palworld-condensation-ranks {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-condensation-ranks:empty {
+  display: none;
+}
+
+.palworld-condensation-stats,
+.palworld-condensation-work {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-condensation-stats h5,
+.palworld-condensation-work h5 {
+  margin: 0;
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-condensation-work ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palworld-condensation-work li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-3);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-condensation-work li strong {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.palworld-condensation-work li > span {
+  flex: 0 0 auto;
+  color: var(--palworld-accent);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--yoro-font-weight-bold);
+  white-space: nowrap;
+}
+
+.palworld-stat-chart-row[data-changed="true"] {
+  padding-inline: var(--yoro-space-2);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--palworld-accent-soft);
+}
+
+.palworld-stat-chart-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.palworld-stat-chart-baseline {
+  color: var(--yoro-color-text-muted);
+  text-decoration: line-through;
+}
+
 .palworld-pal-location-section,
 .palworld-pal-location-heading,
 .palworld-pal-location-figure,
@@ -2114,6 +2313,45 @@
 
 .palworld-pal-location-heading {
   gap: var(--yoro-space-1);
+}
+
+.palworld-pal-location-toolbar,
+.palworld-pal-location-periods,
+.palworld-pal-location-controls {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-pal-location-toolbar {
+  justify-content: space-between;
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-pal-location-periods {
+  flex: 1 1 auto;
+}
+
+.palworld-pal-location-periods .yoro-button,
+.palworld-pal-location-controls .yoro-button {
+  min-block-size: var(--yoro-size-touch-target);
+}
+
+.palworld-pal-location-controls {
+  justify-content: flex-end;
+}
+
+.palworld-pal-location-controls output {
+  min-inline-size: calc(var(--yoro-size-touch-target) + var(--yoro-space-3));
+  color: var(--yoro-color-text-strong);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--yoro-font-weight-bold);
+  text-align: center;
 }
 
 .palworld-pal-location-heading p,
@@ -2157,10 +2395,17 @@
   inline-size: 100%;
   block-size: 100%;
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
 .palworld-pal-location-map-image.is-loading {
   visibility: hidden;
+}
+
+.palworld-pal-location-preview > .palworld-map-stage {
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 .palworld-pal-location-marker-layer {
@@ -2191,7 +2436,10 @@
   inline-size: var(--yoro-size-touch-target);
   block-size: var(--yoro-size-touch-target);
   padding: var(--yoro-space-1);
-  transform: translate(-50%, -50%);
+  transform:
+    translate(-50%, -50%)
+    scale(var(--palworld-map-marker-scale, 1));
+  transform-origin: center;
 }
 
 .palworld-pal-location-marker .palworld-map-boss-marker-media {
@@ -2314,6 +2562,29 @@
 }
 
 @media (max-width: 32rem) {
+  .palworld-condensation {
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-3);
+  }
+
+  .palworld-condensation-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-condensation-stars {
+    gap: var(--yoro-space-1);
+  }
+
+  .palworld-condensation-star {
+    padding-inline: var(--yoro-space-1);
+    font-size: var(--yoro-font-size-sm);
+  }
+
+  .palworld-condensation-work ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .palworld-pal-card-main {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2344,6 +2615,36 @@
   .palworld-card-work-list {
     margin-inline: var(--yoro-space-2);
     padding-block: var(--yoro-space-2);
+  }
+
+  .palworld-pal-location-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .palworld-pal-location-periods,
+  .palworld-pal-location-controls {
+    display: grid;
+    inline-size: 100%;
+  }
+
+  .palworld-pal-location-periods {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .palworld-pal-location-controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .palworld-pal-location-periods .yoro-button,
+  .palworld-pal-location-controls .yoro-button {
+    min-inline-size: 0;
+    inline-size: 100%;
+    white-space: normal;
+  }
+
+  .palworld-pal-location-controls > :last-child {
+    grid-column: 1 / -1;
   }
 
   .palworld-pal-location-caption li {

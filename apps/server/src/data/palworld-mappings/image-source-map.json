@@ -444,10 +444,31 @@
       "sourceKind": "operator_provided_archive"
     },
     {
+      "palId": "jelliette",
+      "sourceInternalId": "JellyfishFairy",
+      "sourceFileName": "T_JellyfishFairy_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "jellroy",
+      "sourceInternalId": "JellyfishGhost",
+      "sourceFileName": "T_JellyfishGhost_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
       "palId": "amione",
       "sourceInternalId": "ClioneTwins",
       "sourceFileName": "T_ClioneTwins_icon_normal.png",
       "sourceRevision": "pypalworldapi-0.2.0-sha256-42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "gloopie",
+      "sourceInternalId": "OctopusGirl",
+      "sourceFileName": "T_OctopusGirl_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
       "sourceKind": "operator_provided_archive"
     },
     {
@@ -644,6 +665,13 @@
       "sourceInternalId": "NaughtyCat",
       "sourceFileName": "T_NaughtyCat_icon_normal.png",
       "sourceRevision": "pypalworldapi-0.2.0-sha256-42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "tarantriss",
+      "sourceInternalId": "PurpleSpider",
+      "sourceFileName": "T_PurpleSpider_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
       "sourceKind": "operator_provided_archive"
     },
     {
@@ -1340,6 +1368,13 @@
       "sourceKind": "operator_provided_archive"
     },
     {
+      "palId": "pierdon",
+      "sourceInternalId": "RockBeast",
+      "sourceFileName": "T_RockBeast_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
       "palId": "pierdon-cryst",
       "sourceInternalId": "RockBeast_Ice",
       "sourceFileName": "T_RockBeast_Ice_icon_normal.png",
@@ -1431,6 +1466,13 @@
       "sourceKind": "operator_provided_archive"
     },
     {
+      "palId": "sekhmet",
+      "sourceInternalId": "Sekhmet",
+      "sourceFileName": "T_Sekhmet_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
       "palId": "prixter",
       "sourceInternalId": "ScorpionMan",
       "sourceFileName": "T_ScorpionMan_icon_normal.png",
@@ -1508,10 +1550,31 @@
       "sourceKind": "operator_provided_archive"
     },
     {
+      "palId": "smokie",
+      "sourceInternalId": "BlackPuppy",
+      "sourceFileName": "T_BlackPuppy_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
       "palId": "smokie-cryst",
       "sourceInternalId": "BlackPuppy_Ice",
       "sourceFileName": "T_BlackPuppy_Ice_icon_normal.png",
       "sourceRevision": "pypalworldapi-0.2.0-sha256-42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "omascul",
+      "sourceInternalId": "MysteryMask",
+      "sourceFileName": "T_MysteryMask_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "whalaska",
+      "sourceInternalId": "IceNarwhal",
+      "sourceFileName": "T_IceNarwhal_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
       "sourceKind": "operator_provided_archive"
     },
     {
@@ -1526,6 +1589,13 @@
       "sourceInternalId": "GrassRabbitMan",
       "sourceFileName": "T_GrassRabbitMan_icon_normal.png",
       "sourceRevision": "pypalworldapi-0.2.0-sha256-42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "splatterina",
+      "sourceInternalId": "GrimGirl",
+      "sourceFileName": "T_GrimGirl_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
       "sourceKind": "operator_provided_archive"
     },
     {
@@ -1547,6 +1617,13 @@
       "sourceInternalId": "SumoDog",
       "sourceFileName": "T_SumoDog_icon_normal.png",
       "sourceRevision": "pypalworldapi-0.2.0-sha256-42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "celesdir",
+      "sourceInternalId": "WhiteDeer",
+      "sourceFileName": "T_WhiteDeer_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
       "sourceKind": "operator_provided_archive"
     },
     {
@@ -1575,6 +1652,20 @@
       "sourceInternalId": "WingGolem_Fire",
       "sourceFileName": "T_WingGolem_Fire_icon_normal.png",
       "sourceRevision": "pypalworldapi-0.2.0-sha256-42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "silvegis",
+      "sourceInternalId": "WhiteShieldDragon",
+      "sourceFileName": "T_WhiteShieldDragon_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "azurmane",
+      "sourceInternalId": "BlueThunderHorse",
+      "sourceFileName": "T_BlueThunderHorse_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
       "sourceKind": "operator_provided_archive"
     },
     {
@@ -1610,6 +1701,20 @@
       "sourceInternalId": "BrownRabbit",
       "sourceFileName": "T_BrownRabbit_icon_normal.png",
       "sourceRevision": "pypalworldapi-0.2.0-sha256-42676bdc3ecb6820e31fe8f18c875ba7ac226de5de78ddf966a92808709d5115",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "hoodle",
+      "sourceInternalId": "HoodGhost",
+      "sourceFileName": "T_HoodGhost_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+      "sourceKind": "operator_provided_archive"
+    },
+    {
+      "palId": "slowatt",
+      "sourceInternalId": "ElecLizard",
+      "sourceFileName": "T_ElecLizard_icon_normal.png",
+      "sourceRevision": "delta-zip-sha256-2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
       "sourceKind": "operator_provided_archive"
     },
     {

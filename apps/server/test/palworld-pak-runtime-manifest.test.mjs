@@ -421,7 +421,18 @@ function runtimeArtifact(kind) {
       ...common,
       status: "blocked_candidate",
       activationEligible: false,
+      sourceArchives: [{
+        role: "primary",
+        sha256: SHA_A,
+        bytes: 1
+      }],
+      localePolicy: {
+        officialKo: "required",
+        officialJa: "required",
+        officialEn: "required"
+      },
       blockers: ["ITEM_ICON_EXPORT_INCOMPLETE"],
+      coverageLimitations: [],
       counts: {},
       sourceCounts: {},
       localeCoverage: {},

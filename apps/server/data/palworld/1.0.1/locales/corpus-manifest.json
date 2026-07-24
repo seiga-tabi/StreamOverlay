@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "1.0.1",
   "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
-  "sourcePaldexSha256": "2c98813fa87a88b170cbcae4250c7fc175bed249271dd1f194933657718a4f20",
+  "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
   "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
   "generatedAt": "2026-07-22T00:00:00.000Z",
   "batchSize": 150,
@@ -12,130 +12,130 @@
       "first": "item:accessory-air-dash1",
       "last": "item:blueprint-accessory-hchp-1",
       "records": 150,
-      "sha256": "e884f16570a7dfe9c4ca5551b5fcb3d4302aaba9878fd7d228639919f4e68311"
+      "sha256": "c721d0d1af44a6adc1d07884097f076ce0dc5fb8ef22bc92762224b113b007f9"
     },
     {
       "name": "batch-0002.json",
       "first": "item:blueprint-accessory-hcmw-1",
       "last": "item:blueprint-fur-helmet-4",
       "records": 150,
-      "sha256": "592ca0e02d22f9a6b4b8c4145468ab1338729dab821b9f3af197b6e06e54ea63"
+      "sha256": "202eb2223ad958c4f459654e4b0dea96f1430a0304f95846837d68d2d7c29ea0"
     },
     {
       "name": "batch-0003.json",
       "first": "item:blueprint-fur-helmet-5",
       "last": "item:blueprint-plastic-armor-cold-3",
       "records": 150,
-      "sha256": "2826f59887f264494c486e9f4fb63198dc22b2684bcea614477929dba4cabf75"
+      "sha256": "0df2af7aacf88b47eb46c2adc7d3a54d0cfa085e419a0d725e8fd73109feac22"
     },
     {
       "name": "batch-0004.json",
       "first": "item:blueprint-plastic-armor-cold-4",
       "last": "item:blueprint-yakushima-head-equip002",
       "records": 150,
-      "sha256": "1e5bbf6f0f33116507790c5a8daadbc98599f7e085ef4cfcf85b3f6c5b17e66d"
+      "sha256": "1e51f811faa6d8a087bab9fa2b6c5298ef9f9f3af0c8fc6c57efa99158acba91"
     },
     {
       "name": "batch-0005.json",
       "first": "item:blueprint-yakushima-head-equip002-2",
       "last": "item:energy-shotgun",
       "records": 150,
-      "sha256": "c26429105d63dfb4a8bc8a7dcc9671ee9116021bfe181f3172d79865b0929fa8"
+      "sha256": "58c8924a0e43b86bcab4028ff9a8efa1d70e5d68a78af94a5f112e7a8f3b3c67"
     },
     {
       "name": "batch-0006.json",
       "first": "item:energy-shotgun-2",
       "last": "item:head015",
       "records": 150,
-      "sha256": "092a0d1555cb756239b22d1cc11d04f396365ae5fabb47ee0d33ba5a369842d3"
+      "sha256": "875d75eca2e95bac142e2a2c56d668daa83b70768f85a48313de11704cd587b2"
     },
     {
       "name": "batch-0007.json",
       "first": "item:head016",
       "last": "item:old-revolver",
       "records": 150,
-      "sha256": "3c2f16a3af8dac7d05c8dde43207df6f608c3bb15ebd76ca4044b8aa16f626e3"
+      "sha256": "25159182e31bba0e565a1c53cddbb0b097e41c7841f5dd740b9c897dc4a24b63"
     },
     {
       "name": "batch-0008.json",
       "first": "item:old-revolver-2",
       "last": "item:pal-passive-skill-change-consumable-pal-full-stomach-down-3",
       "records": 150,
-      "sha256": "79e185e53af806ef0fc04fd893af3f93a832f370edd1576bf01fbfc5c8c56e3b"
+      "sha256": "f7b6314040e89baf266a1f516458c04b48af59c328188ce5c62a006ad927913d"
     },
     {
       "name": "batch-0009.json",
       "first": "item:pal-passive-skill-change-consumable-pal-sanity-down-3",
       "last": "item:sapphire",
       "records": 150,
-      "sha256": "b3caafd64d42948b85f4eefbd1ea8c1250f6562438ad82b625c4b10bb5db3545"
+      "sha256": "8119e1604f3e556ea57dfc9b470c6f4780a1283c3ddf63cde31c77458f5156d7"
     },
     {
       "name": "batch-0010.json",
       "first": "item:seafood-salada",
       "last": "item:skill-unlock-amaterasu-wolf-dark",
       "records": 150,
-      "sha256": "93a6c7d67b2099a77c579503d3e09bbb05fdededf047a26fb04d71b53c264ed7"
+      "sha256": "8af17b60e0ec2e8038b2b019bbc99fd1a12f0ca9ca69c386bdf9d8163bab6899"
     },
     {
       "name": "batch-0011.json",
       "first": "item:skill-unlock-bad-catgirl",
       "last": "item:sky-bow-4",
       "records": 150,
-      "sha256": "4d144b266d387ffb25278f66915c6f788be52ce3670d9ffa89ac331d702e6fd4"
+      "sha256": "217b9e89928c43239dd7c1c20728597719ef924381798464d964d25803f0ece9"
     },
     {
       "name": "batch-0012.json",
       "first": "item:sky-bow-5",
       "last": "item:yakushima-blade002-2",
       "records": 150,
-      "sha256": "e6900cdee12b7dab9b221ffb7e3fdc01e0a224c60b726b881f553aa455ac30c5"
+      "sha256": "80b2fda8a9050df04e2d9d9e2a6d533694710c5a3c876aae206e32ae75f31ec6"
     },
     {
       "name": "batch-0013.json",
       "first": "item:yakushima-blade002-3",
       "last": "pal:grizzbolt",
       "records": 150,
-      "sha256": "a7fb7a0c6e480627b9c8eb77a68bb5c1b1b1233a1ed1543fac5ddf1056e18b37"
+      "sha256": "5a9c1f73eb6d458f971e538d9201a2bf829c20de963898c38bef7f1dfe4c29b5"
     },
     {
       "name": "batch-0014.json",
       "first": "pal:gumoss",
       "last": "pal:tanzee-ignis",
       "records": 150,
-      "sha256": "ccb49f036e92b4612469971b78d9162f9cab570f4f83328370379d99b6e0aba7"
+      "sha256": "4949377bb0ce267c1f45894863e87251ea5a9a1788e67f19a9c1e31a151be11f"
     },
     {
       "name": "batch-0015.json",
       "first": "pal:tarantriss",
       "last": "skill:active-ignis-charge-7edecbc022",
       "records": 150,
-      "sha256": "9d8992d2d6512a2deb820e301e1c4daf431cc873a38e16aa8e6f0d6828b81894"
+      "sha256": "a6b8c4fef5fd752b1470ecb41e3d6ca056c611d98296abbddca96399d0a995d6"
     },
     {
       "name": "batch-0016.json",
       "first": "skill:active-ignis-rage-f35146b426",
       "last": "skill:partner-depresso",
       "records": 150,
-      "sha256": "7fd38c3b42f8ebdd887445801f98cdb34cb44e768f33dcab610c7d763b018c77"
+      "sha256": "0a4286d599eb63d96d77aa4ac528f91e594a266617ecd1c35f89996ce803e0f7"
     },
     {
       "name": "batch-0017.json",
       "first": "skill:partner-digtoise",
       "last": "skill:partner-relaxaurus-lux",
       "records": 150,
-      "sha256": "6c67ff59c5dbd49af3c151da95ca339bd24562d5cc0bf2905e0eea0bc62dc50b"
+      "sha256": "70b64c8accaee68666d93192f4c516f1df293d070971bc996fde54f168235f83"
     },
     {
       "name": "batch-0018.json",
       "first": "skill:partner-renjishi",
       "last": "skill:passive-passive-witch-a025ce7175",
       "records": 150,
-      "sha256": "ec70a71a0b2abb0efa08b397cf01386d0b625f78014abdfadb9662f479e6af92"
+      "sha256": "eef6ece3c3f835a864adb29ecaa319cc7bdf1921c05074f6b4973ba53fb9dbc0"
     }
   ],
-  "corpusSha256": "fae0107b2894c87e7e045ff2e194fe8053fe6180bafbdab7902a45bee1a3fdaa",
-  "glossarySha256": "e2fffc918a7f85b2c16ef027800aede61383b6e8c97930f6b9c70e92e23029a1",
+  "corpusSha256": "ff12da84952783a30fa138c890184d3008b3ec3407a75eaa2ecfab16f7e6fbbc",
+  "glossarySha256": "19a8d9fab0d3e924b41772dea00adacc05fdc92785baa55f271d589f5941bbaf",
   "glossaryOverridesSha256": "c163246e9344e2892ccb1ce43bc0ec527511d403eb02bcee5c67c4292c660602",
-  "reportSha256": "88b15820fe2f2d02e6fd7a7be0086a42c2d7a884445183b0ecd818812fc5a552"
+  "reportSha256": "44241bf3c1e532d65aedbdb5eef9414fff040cf2f23bd5671ef0cd0e4f55e36d"
 }

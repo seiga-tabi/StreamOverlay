@@ -145,6 +145,7 @@ export type PalworldPakPreflightReport = {
     baseTextLanguage: "ja" | "unknown";
     koTextLanguage: "ko" | "unknown";
     enTextLanguage: "en" | "unknown";
+    enRequirement: "required" | "optional";
     jaMembers: number;
     koMembers: number;
     enMembers: number;
@@ -180,13 +181,21 @@ export type PalworldPakPreflightReport = {
     mappings: "passed" | "blocked";
     officialKo: "passed" | "blocked";
     officialJa: "passed" | "blocked";
-    officialEn: "passed" | "blocked";
+    officialEn: "passed" | "blocked" | "not_required";
     palImages: "passed" | "blocked";
     itemImages: "passed" | "blocked";
     inputPrerequisitesSatisfied: boolean;
     activationValidationRequired: true;
     blockers: string[];
   };
+};
+
+export type PalworldPakPreflightPolicy = {
+  /**
+   * 공개 UI가 KO/JA만 제공하는 release에서 EN 원문을 필수 activation 조건에서 제외합니다.
+   * 기본값은 기존 동작과 동일한 required입니다.
+   */
+  officialEnLocale?: "required" | "optional";
 };
 
 export class PalworldPakPreflightError extends Error {
@@ -207,6 +216,11 @@ export type PalworldPakArchiveMember = {
 export type PalworldPakArchiveReader = {
   archiveSha256: string;
   archiveBytes: number;
+  sourceArchives: readonly {
+    role: "primary" | "asset_overlay";
+    sha256: string;
+    bytes: number;
+  }[];
   members: readonly PalworldPakArchiveMember[];
   has(memberName: string): boolean;
   readBytes(memberName: string, maxBytes?: number): Promise<Buffer>;
@@ -216,7 +230,38 @@ export type PalworldPakArchiveReader = {
 
 export type PalworldPakArchiveReadOptions = {
   expectedSha256?: string;
+  /**
+   * 기본 archive 제한은 그대로 유지합니다. 512 MiB를 넘는 운영자 asset overlay는
+   * 고정 SHA-256이 제공된 경우에만 별도 profile로 열 수 있습니다.
+   */
+  profile?: "standard" | "fixed_asset_overlay";
 };
+
+export type PalworldPakArchiveOverlaySource = {
+  archivePath: string;
+  expectedSha256: string;
+};
+
+type ArchiveLimits = {
+  maximumArchiveBytes: number;
+  maximumEntryCount: number;
+  maximumUncompressedBytes: number;
+  maximumMemberBytes: number;
+};
+
+const STANDARD_ARCHIVE_LIMITS: ArchiveLimits = Object.freeze({
+  maximumArchiveBytes: MAX_ARCHIVE_BYTES,
+  maximumEntryCount: MAX_ENTRY_COUNT,
+  maximumUncompressedBytes: MAX_UNCOMPRESSED_BYTES,
+  maximumMemberBytes: MAX_MEMBER_BYTES
+});
+
+const FIXED_ASSET_OVERLAY_LIMITS: ArchiveLimits = Object.freeze({
+  maximumArchiveBytes: 3 * 1024 * 1024 * 1024,
+  maximumEntryCount: MAX_ENTRY_COUNT,
+  maximumUncompressedBytes: 3 * 1024 * 1024 * 1024,
+  maximumMemberBytes: MAX_MEMBER_BYTES
+});
 
 function fail(message: string): never {
   throw new PalworldPakPreflightError(message);
@@ -281,7 +326,7 @@ function zipEntryKind(entry: Entry): number {
   return zipEntryMode(entry) & 0o170000;
 }
 
-function assertSafeEntry(entry: Entry): boolean {
+function assertSafeEntry(entry: Entry, limits: ArchiveLimits): boolean {
   const name = validatePalworldPakMemberName(entry.fileName);
   const isDirectory = name.endsWith("/");
   if ((entry.generalPurposeBitFlag & 0x1) !== 0) fail(`암호화 ZIP member는 허용하지 않습니다: ${name}`);
@@ -293,7 +338,9 @@ function assertSafeEntry(entry: Entry): boolean {
   if (kind !== 0 && kind !== 0o100000 && kind !== 0o040000) {
     fail(`일반 파일·디렉터리가 아닌 ZIP member는 허용하지 않습니다: ${name}`);
   }
-  if (entry.uncompressedSize > MAX_MEMBER_BYTES) fail(`ZIP member가 너무 큽니다: ${name}`);
+  if (entry.uncompressedSize > limits.maximumMemberBytes) {
+    fail(`ZIP member가 너무 큽니다: ${name}`);
+  }
   if (
     entry.compressedSize > 0
     && entry.uncompressedSize / entry.compressedSize > MAX_COMPRESSION_RATIO
@@ -353,14 +400,17 @@ async function sha256FileHandle(handle: FileHandle, bytes: number): Promise<stri
   return hash.digest("hex");
 }
 
-async function openSecureArchive(archivePath: string): Promise<SecureArchiveHandle> {
+async function openSecureArchive(
+  archivePath: string,
+  limits: ArchiveLimits
+): Promise<SecureArchiveHandle> {
   const resolvedArchive = path.resolve(archivePath);
   const before = await lstat(resolvedArchive);
   if (
     before.isSymbolicLink()
     || !before.isFile()
     || before.size <= 0
-    || before.size > MAX_ARCHIVE_BYTES
+    || before.size > limits.maximumArchiveBytes
     || await realpath(resolvedArchive) !== resolvedArchive
   ) {
     fail("PAK export ZIP은 symlink가 아닌 안전한 canonical regular file이어야 합니다.");
@@ -411,7 +461,10 @@ async function closeSecureArchive(archive: SecureArchiveHandle): Promise<void> {
   }
 }
 
-async function indexArchive(zipFile: ZipFile): Promise<Map<string, IndexedZipEntry>> {
+async function indexArchive(
+  zipFile: ZipFile,
+  limits: ArchiveLimits
+): Promise<Map<string, IndexedZipEntry>> {
   return await new Promise((resolve, reject) => {
     const indexed = new Map<string, IndexedZipEntry>();
     const collisionKeys = new Map<string, string>();
@@ -429,10 +482,12 @@ async function indexArchive(zipFile: ZipFile): Promise<Map<string, IndexedZipEnt
     zipFile.on("entry", (entry: Entry) => {
       try {
         entryCount += 1;
-        if (entryCount > MAX_ENTRY_COUNT) fail("ZIP 파일 수가 안전 제한을 초과합니다.");
-        const isDirectory = assertSafeEntry(entry);
+        if (entryCount > limits.maximumEntryCount) {
+          fail("ZIP 파일 수가 안전 제한을 초과합니다.");
+        }
+        const isDirectory = assertSafeEntry(entry, limits);
         uncompressedBytes += entry.uncompressedSize;
-        if (uncompressedBytes > MAX_UNCOMPRESSED_BYTES) {
+        if (uncompressedBytes > limits.maximumUncompressedBytes) {
           fail("ZIP 전체 압축 해제 크기가 안전 제한을 초과합니다.");
         }
         const collisionKey = entry.fileName.normalize("NFC").toLocaleLowerCase("en-US");
@@ -616,6 +671,18 @@ function rawPackageCompanionReport(entries: Map<string, IndexedZipEntry>): {
   return { counts, missing };
 }
 
+function archiveLimitsFor(options: PalworldPakArchiveReadOptions): ArchiveLimits {
+  const profile = options.profile ?? "standard";
+  if (profile === "fixed_asset_overlay") {
+    if (options.expectedSha256 === undefined) {
+      fail("대용량 asset overlay는 고정 expectedSha256이 반드시 필요합니다.");
+    }
+    requiredSha256(options.expectedSha256, "expectedSha256");
+    return FIXED_ASSET_OVERLAY_LIMITS;
+  }
+  return STANDARD_ARCHIVE_LIMITS;
+}
+
 /**
  * preflight와 candidate importer가 같은 ZIP 경계 검증을 사용하도록 하는 읽기 전용 진입점입니다.
  * callback이 끝나면 ZIP handle을 항상 닫으며 파일을 압축 해제하거나 실행하지 않습니다.
@@ -625,7 +692,8 @@ export async function withPalworldPakArchive<T>(
   options: PalworldPakArchiveReadOptions,
   callback: (reader: PalworldPakArchiveReader) => Promise<T>
 ): Promise<T> {
-  const archive = await openSecureArchive(archivePath);
+  const limits = archiveLimitsFor(options);
+  const archive = await openSecureArchive(archivePath, limits);
   const archiveSha256 = archive.sha256;
   if (
     options.expectedSha256 !== undefined
@@ -637,7 +705,7 @@ export async function withPalworldPakArchive<T>(
 
   const zipFile = archive.zipFile;
   try {
-    const entries = await indexArchive(zipFile);
+    const entries = await indexArchive(zipFile, limits);
     const members = [...entries.values()]
       .filter((indexed) => !indexed.isDirectory)
       .map((indexed) => ({
@@ -657,6 +725,11 @@ export async function withPalworldPakArchive<T>(
     const reader: PalworldPakArchiveReader = {
       archiveSha256,
       archiveBytes: archive.bytes,
+      sourceArchives: Object.freeze([{
+        role: "primary" as const,
+        sha256: archiveSha256,
+        bytes: archive.bytes
+      }]),
       members,
       has(memberName) {
         validatePalworldPakMemberName(memberName);
@@ -681,6 +754,108 @@ export async function withPalworldPakArchive<T>(
   } finally {
     await closeSecureArchive(archive);
   }
+}
+
+/**
+ * 데이터 archive와 별도의 대용량 asset archive를 하나의 read-only view로 결합합니다.
+ *
+ * 각 overlay는 고정 SHA-256을 필수로 요구합니다. 같은 경로가 여러 archive에 있으면
+ * 두 파일의 실제 bytes가 완전히 동일할 때만 허용하므로, delta가 DataTable이나 locale을
+ * 조용히 덮어쓸 수 없습니다. 신규 경로만 overlay에서 공급할 수 있습니다.
+ */
+export async function withPalworldPakArchiveOverlay<T>(
+  primary: PalworldPakArchiveOverlaySource,
+  overlays: readonly PalworldPakArchiveOverlaySource[],
+  callback: (reader: PalworldPakArchiveReader) => Promise<T>
+): Promise<T> {
+  requiredSha256(primary.expectedSha256, "primary.expectedSha256");
+  if (overlays.length > 8) fail("asset overlay archive는 최대 8개까지 허용합니다.");
+  const sourceHashes = new Set([primary.expectedSha256]);
+  for (const [index, overlay] of overlays.entries()) {
+    const hash = requiredSha256(
+      overlay.expectedSha256,
+      `overlays[${index}].expectedSha256`
+    );
+    if (sourceHashes.has(hash)) fail("같은 SHA-256 archive를 중복 지정할 수 없습니다.");
+    sourceHashes.add(hash);
+  }
+
+  const openOverlay = async (
+    index: number,
+    readers: readonly PalworldPakArchiveReader[]
+  ): Promise<T> => {
+    if (index >= overlays.length) {
+      const providers = new Map<string, PalworldPakArchiveReader>();
+      const memberMetadata = new Map<string, PalworldPakArchiveMember>();
+      for (const reader of readers) {
+        for (const member of reader.members) {
+          const previous = providers.get(member.name);
+          if (previous !== undefined) {
+            const previousMember = memberMetadata.get(member.name)!;
+            if (previousMember.uncompressedBytes !== member.uncompressedBytes) {
+              fail(`${member.name}: overlay가 기존 member와 다른 크기로 충돌합니다.`);
+            }
+            const [previousBytes, overlayBytes] = await Promise.all([
+              previous.readBytes(member.name),
+              reader.readBytes(member.name)
+            ]);
+            if (!previousBytes.equals(overlayBytes)) {
+              fail(`${member.name}: overlay가 기존 member와 다른 내용으로 충돌합니다.`);
+            }
+          }
+          providers.set(member.name, reader);
+          memberMetadata.set(member.name, member);
+        }
+      }
+      const members = [...memberMetadata.values()]
+        .sort((left, right) => left.name.localeCompare(right.name, "en"));
+      const primaryReader = readers[0]!;
+      const sourceArchives = readers.map((reader, readerIndex) => ({
+        role: readerIndex === 0 ? "primary" as const : "asset_overlay" as const,
+        sha256: reader.archiveSha256,
+        bytes: reader.archiveBytes
+      }));
+      const compositeReader: PalworldPakArchiveReader = {
+        archiveSha256: primaryReader.archiveSha256,
+        archiveBytes: primaryReader.archiveBytes,
+        sourceArchives: Object.freeze(sourceArchives),
+        members,
+        has(memberName) {
+          validatePalworldPakMemberName(memberName);
+          return providers.has(memberName);
+        },
+        async readBytes(memberName, maxBytes = MAX_MEMBER_BYTES) {
+          validatePalworldPakMemberName(memberName);
+          const provider = providers.get(memberName);
+          if (provider === undefined) fail(`${memberName}: ZIP member 파일이 없습니다.`);
+          return await provider.readBytes(memberName, maxBytes);
+        },
+        async readJson(memberName) {
+          const bytes = await this.readBytes(memberName, MAX_JSON_BYTES);
+          return parseJson(bytes, memberName);
+        },
+        async readDataTable(memberName) {
+          return dataTableRows(await this.readJson(memberName), memberName);
+        }
+      };
+      return await callback(compositeReader);
+    }
+    const overlay = overlays[index]!;
+    return await withPalworldPakArchive(
+      overlay.archivePath,
+      {
+        expectedSha256: overlay.expectedSha256,
+        profile: "fixed_asset_overlay"
+      },
+      async (reader) => await openOverlay(index + 1, [...readers, reader])
+    );
+  };
+
+  return await withPalworldPakArchive(
+    primary.archivePath,
+    { expectedSha256: primary.expectedSha256 },
+    async (reader) => await openOverlay(0, [reader])
+  );
 }
 
 function parseExportMetadata(value: unknown): PalworldPakExportMetadata {
@@ -728,12 +903,16 @@ export function assertPalworldPakExportMetadata(value: unknown): PalworldPakExpo
   return Object.freeze(parseExportMetadata(value));
 }
 
-export async function inspectPalworldPakArchive(archivePath: string): Promise<PalworldPakPreflightReport> {
-  const archive = await openSecureArchive(archivePath);
+export async function inspectPalworldPakArchive(
+  archivePath: string,
+  policy: PalworldPakPreflightPolicy = {}
+): Promise<PalworldPakPreflightReport> {
+  const officialEnRequired = (policy.officialEnLocale ?? "required") === "required";
+  const archive = await openSecureArchive(archivePath, STANDARD_ARCHIVE_LIMITS);
   const archiveSha256 = archive.sha256;
   const zipFile = archive.zipFile;
   try {
-    const entries = await indexArchive(zipFile);
+    const entries = await indexArchive(zipFile, STANDARD_ARCHIVE_LIMITS);
     const files = [...entries.values()].filter((entry) => !entry.isDirectory);
     const directories = entries.size - files.length;
     const uncompressedBytes = files.reduce((total, entry) => total + entry.entry.uncompressedSize, 0);
@@ -747,7 +926,10 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         parsedJsonFiles += 1;
       }
     }
-    const requiredMissing = REQUIRED_TABLES.filter((member) => !entries.has(member));
+    const requiredTables = officialEnRequired
+      ? REQUIRED_TABLES
+      : REQUIRED_TABLES.filter((member) => !member.startsWith("L10N/en/"));
+    const requiredMissing = requiredTables.filter((member) => !entries.has(member));
     const rawPackages = rawPackageCompanionReport(entries);
 
     const palRows = await readTable(
@@ -915,7 +1097,9 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
     else if (!mappings.matchesMetadata) blockers.push("MAPPINGS_CHECKSUM_MISMATCH");
     if (koTextLanguage !== "ko") blockers.push("OFFICIAL_KO_LOCALE_NOT_VERIFIED");
     if (baseTextLanguage !== "ja") blockers.push("BASE_JA_LOCALE_NOT_VERIFIED");
-    if (enTextLanguage !== "en") blockers.push("OFFICIAL_EN_LOCALE_NOT_PROVIDED");
+    if (officialEnRequired && enTextLanguage !== "en") {
+      blockers.push("OFFICIAL_EN_LOCALE_NOT_PROVIDED");
+    }
     if (
       exactPalIcons !== canonicalPals.canonical.length
       || palIconSourceTableMissing.length > 0
@@ -984,6 +1168,7 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         baseTextLanguage,
         koTextLanguage,
         enTextLanguage,
+        enRequirement: officialEnRequired ? "required" : "optional",
         jaMembers,
         koMembers,
         enMembers
@@ -1012,7 +1197,7 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         worldMapImages
       },
       requiredTables: {
-        present: REQUIRED_TABLES.length - requiredMissing.length,
+        present: requiredTables.length - requiredMissing.length,
         missing: [...requiredMissing]
       },
       gates: {
@@ -1022,7 +1207,11 @@ export async function inspectPalworldPakArchive(archivePath: string): Promise<Pa
         mappings: mappings.status === "provided" && mappings.matchesMetadata ? "passed" : "blocked",
         officialKo: koTextLanguage === "ko" ? "passed" : "blocked",
         officialJa: baseTextLanguage === "ja" ? "passed" : "blocked",
-        officialEn: enTextLanguage === "en" ? "passed" : "blocked",
+        officialEn: !officialEnRequired && enTextLanguage !== "en"
+          ? "not_required"
+          : enTextLanguage === "en"
+            ? "passed"
+            : "blocked",
         palImages: exactPalIcons === canonicalPals.canonical.length
           && palIconSourceTableMissing.length === 0
           ? "passed"

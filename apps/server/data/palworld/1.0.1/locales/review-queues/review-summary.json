@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "pending_operator_review",
+  "preparedAt": "2026-07-25T00:00:00.000Z",
+  "source": {
+    "active": {
+      "release": "1.0.1",
+      "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
+      "catalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+      "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+      "translationRevision": "offline-machine-assisted-v1",
+      "localeSha256": {
+        "ko": "0605cbfcd39dcbd05d7eec43e5b179bc7373a879de7ac7052f7b1cec122ad3d7",
+        "ja": "6e9d7204fba8521f61579b680de8c71942fcff68d64fae1f78e5fa6f669e8284"
+      }
+    },
+    "candidate": {
+      "candidateId": "candidate-1248184a4b527d94",
+      "release": null,
+      "archiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+      "mappingsSha256": null,
+      "activationEligible": false,
+      "activationBlockers": [
+        "EXPORT_METADATA_NOT_PROVIDED",
+        "PUBLIC_ID_MAPPING_RELEASE_UNVERIFIED"
+      ]
+    }
+  },
+  "counts": {
+    "machineAssisted": {
+      "ko": 5161,
+      "ja": 5161
+    },
+    "humanReviewed": {
+      "ko": 297,
+      "ja": 297
+    },
+    "sourceAnomalies": {
+      "fields": 1120,
+      "missingSlots": 1649,
+      "uniqueSourceSha256": 177
+    },
+    "officialExact": {
+      "ko": {
+        "joined": 4490,
+        "resolved": 4488,
+        "unresolved": 2,
+        "unjoined": 671
+      },
+      "ja": {
+        "joined": 4490,
+        "resolved": 4488,
+        "unresolved": 2,
+        "unjoined": 671
+      }
+    }
+  },
+  "limitations": {
+    "officialCandidateActivationBlocked": true,
+    "humanReviewStatusChanged": false,
+    "fuzzyMatchingUsed": false,
+    "unjoinedReason": "legacy active/passive skill에는 검증된 sourceInternalId·messageKey migration이 없어 공식 locale과 연결하지 않았습니다."
+  }
+}

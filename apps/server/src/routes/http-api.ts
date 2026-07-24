@@ -225,8 +225,13 @@ const PALWORLD_DATA_UNAVAILABLE_RESPONSE = {
 
 function palworldCacheHeaders(
   metadata: { gameVersion: string; sourceRevision: string },
-  requestTarget: string
+  requestTarget: string,
+  payload: unknown
 ): Record<string, string> {
+  // source revision이 같아도 번역 병합·표시 정책처럼 공개 JSON 표현은 바뀔 수 있습니다.
+  // 실제 응답 본문을 ETag에 포함해 브라우저·CDN이 이전 영문 응답을 304로 재사용하지
+  // 않도록 하며, 동일한 본문은 계속 조건부 요청으로 재검증할 수 있게 합니다.
+  const serializedPayload = JSON.stringify(payload);
   const releaseTag = crypto
     .createHash("sha256")
     .update(metadata.gameVersion)
@@ -234,6 +239,8 @@ function palworldCacheHeaders(
     .update(metadata.sourceRevision)
     .update("\0")
     .update(requestTarget)
+    .update("\0")
+    .update(serializedPayload)
     .digest("hex")
     .slice(0, 24);
   return {
@@ -5645,12 +5652,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return sendJson(req, res, 503, PALWORLD_DATA_UNAVAILABLE_RESPONSE, { "Cache-Control": "no-store" });
         }
         const activeMeta = palworldData.meta();
-        const cacheHeaders = palworldCacheHeaders(
+        const requestTarget = `${url.pathname}${url.search}`;
+        const cacheHeadersFor = (payload: unknown) => palworldCacheHeaders(
           activeMeta.metadata,
-          `${url.pathname}${url.search}`
+          requestTarget,
+          payload
         );
         if (url.pathname === "/api/palworld/meta") {
-          return sendJson(req, res, 200, activeMeta, cacheHeaders);
+          return sendJson(req, res, 200, activeMeta, cacheHeadersFor(activeMeta));
         }
         if (url.pathname === "/api/palworld/map/markers") {
           const query = parsePalworldMapMarkersQuery(url.searchParams);
@@ -5673,8 +5682,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
             200,
             validation.data,
             validation.data.state === "data_unavailable"
-              ? palworldNoStoreHeaders(cacheHeaders)
-              : cacheHeaders
+              ? palworldNoStoreHeaders(cacheHeadersFor(validation.data))
+              : cacheHeadersFor(validation.data)
           );
         }
         if (url.pathname === "/api/palworld/map/spawns") {
@@ -5703,50 +5712,50 @@ export function createHttpHandler(input: HttpHandlerInput) {
             200,
             validation.data,
             validation.data.state === "data_unavailable"
-              ? palworldNoStoreHeaders(cacheHeaders)
-              : cacheHeaders
+              ? palworldNoStoreHeaders(cacheHeadersFor(validation.data))
+              : cacheHeadersFor(validation.data)
           );
         }
         if (url.pathname === "/api/palworld/search") {
           const query = parsePalworldSearchQuery(url.searchParams);
           const response = palworldData.search(query.q, query.limit);
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         if (url.pathname === "/api/palworld/pals") {
           const query = parsePalworldPalListQuery(url.searchParams);
           const response = palworldData.listPals(query);
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         const palworldPalDetailMatch = url.pathname.match(/^\/api\/palworld\/pals\/([^/]+)$/);
         if (palworldPalDetailMatch?.[1]) {
           const decodedId = decodeUrlPathSegment(palworldPalDetailMatch[1]);
           if (decodedId === undefined) throw new PalworldQueryError("Pal ID 인코딩이 올바르지 않습니다.");
           const response = palworldData.getPal(parsePalworldId(decodedId, "Pal ID"));
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         if (url.pathname === "/api/palworld/items") {
           const query = parsePalworldItemListQuery(url.searchParams);
           const response = palworldData.listItems(query);
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         const palworldItemDetailMatch = url.pathname.match(/^\/api\/palworld\/items\/([^/]+)$/);
         if (palworldItemDetailMatch?.[1]) {
           const decodedId = decodeUrlPathSegment(palworldItemDetailMatch[1]);
           if (decodedId === undefined) throw new PalworldQueryError("아이템 ID 인코딩이 올바르지 않습니다.");
           const response = palworldData.getItem(parsePalworldId(decodedId, "아이템 ID"));
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         if (url.pathname === "/api/palworld/skills") {
           const query = parsePalworldSkillListQuery(url.searchParams);
           const response = palworldData.listSkills(query);
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         const palworldSkillDetailMatch = url.pathname.match(/^\/api\/palworld\/skills\/([^/]+)$/);
         if (palworldSkillDetailMatch?.[1]) {
           const decodedId = decodeUrlPathSegment(palworldSkillDetailMatch[1]);
           if (decodedId === undefined) throw new PalworldQueryError("스킬 ID 인코딩이 올바르지 않습니다.");
           const response = palworldData.getSkill(parsePalworldId(decodedId, "스킬 ID"));
-          return sendJson(req, res, 200, response, cacheHeaders);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         if (url.pathname === "/api/palworld/breeding/parents") {
           const query = parsePalworldBreedingParentsQuery(url.searchParams);
@@ -5757,8 +5766,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
             200,
             response,
             response.state === "data_unavailable"
-              ? palworldNoStoreHeaders(cacheHeaders)
-              : cacheHeaders
+              ? palworldNoStoreHeaders(cacheHeadersFor(response))
+              : cacheHeadersFor(response)
           );
         }
         if (url.pathname === "/api/palworld/breeding") {
@@ -5770,8 +5779,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
             200,
             response,
             response.state === "data_unavailable"
-              ? palworldNoStoreHeaders(cacheHeaders)
-              : cacheHeaders
+              ? palworldNoStoreHeaders(cacheHeadersFor(response))
+              : cacheHeadersFor(response)
           );
         }
       }

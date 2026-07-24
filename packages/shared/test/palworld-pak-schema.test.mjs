@@ -68,8 +68,14 @@ function sourceLockArtifact(metadataOverrides = {}) {
       bytes: 6912,
       fileCount: completeProvenance.includedFiles.length
     },
+    sourceArchives: [{
+      role: "primary",
+      sha256: completeProvenance.archiveSha256,
+      bytes: 6912
+    }],
     mappings: {
       publicIdMap: "1".repeat(64),
+      publicIdExtensions: "a".repeat(64),
       aliases: "2".repeat(64),
       palIconOverrides: "3".repeat(64),
       elementIconMap: "4".repeat(64),

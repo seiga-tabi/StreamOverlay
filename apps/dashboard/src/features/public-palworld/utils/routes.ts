@@ -1,7 +1,12 @@
+import type { PalworldCondensationStars } from "@streamops/shared";
+
 export const PALWORLD_ROUTE_EVENT = "palworldroutechange";
 const PALWORLD_PUBLIC_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/u;
+const PALWORLD_CONDENSATION_STAR_VALUES = new Set(["0", "1", "2", "3", "4"]);
+const PALWORLD_SPAWN_PERIOD_VALUES = new Set(["all", "day", "night"]);
 
 export type PalworldPage = "home" | "streamers" | "pals" | "breeding" | "items" | "skills" | "map" | "search";
+export type PalworldSpawnPeriod = "all" | "day" | "night";
 export type PalworldDetailSelection =
   | { type: "pal"; id: string }
   | { type: "item"; id: string }
@@ -53,6 +58,26 @@ export function palworldFocusPalFromParams(params: URLSearchParams): string | un
   return value !== undefined && PALWORLD_PUBLIC_ID_PATTERN.test(value) ? value : undefined;
 }
 
+export function palworldCondensationStarsFromParams(
+  params: URLSearchParams
+): PalworldCondensationStars {
+  const values = params.getAll("stars");
+  const value = values.length === 1 ? values[0] : undefined;
+  return value !== undefined && PALWORLD_CONDENSATION_STAR_VALUES.has(value)
+    ? Number(value) as PalworldCondensationStars
+    : 0;
+}
+
+export function palworldSpawnPeriodFromParams(
+  params: URLSearchParams
+): PalworldSpawnPeriod {
+  const values = params.getAll("spawnPeriod");
+  const value = values.length === 1 ? values[0] : undefined;
+  return value !== undefined && PALWORLD_SPAWN_PERIOD_VALUES.has(value)
+    ? value as PalworldSpawnPeriod
+    : "all";
+}
+
 /**
  * 조작된 URL에 상세 query가 여러 개 있으면 Pal → Item → Skill 순으로 하나만 남깁니다.
  * 우선순위를 코드에 고정하고 canonical query를 함께 반환해 Modal 중첩을 방지합니다.
@@ -75,6 +100,14 @@ export function palworldDetailSelectionFromParams(params: URLSearchParams): {
   for (const key of ["pal", "item", "skill"]) canonicalParams.delete(key);
   const selection = (candidates[0] as PalworldDetailSelection | undefined) ?? null;
   if (selection) canonicalParams.set(selection.type, selection.id);
+  const stars = palworldCondensationStarsFromParams(params);
+  const spawnPeriod = palworldSpawnPeriodFromParams(params);
+  canonicalParams.delete("stars");
+  canonicalParams.delete("spawnPeriod");
+  if (selection?.type === "pal") {
+    if (stars > 0) canonicalParams.set("stars", String(stars));
+    if (spawnPeriod !== "all") canonicalParams.set("spawnPeriod", spawnPeriod);
+  }
   return {
     canonicalParams,
     changed: canonicalParams.toString() !== params.toString(),

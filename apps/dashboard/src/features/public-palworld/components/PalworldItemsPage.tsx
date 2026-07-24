@@ -12,11 +12,17 @@ import { getPalworldItems } from "../api/palworld";
 import { usePalworldInfiniteList } from "../hooks/usePalworldInfiniteList";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { acquisitionLabel, categoryLabel } from "../utils/labels";
+import {
+  hasMachineAssistedTranslation,
+  resolvePalworldDescription,
+  resolvePalworldName,
+} from "../utils/localization";
 import { setPalworldUrl } from "../utils/routes";
 import { ItemCard } from "./PalworldCards";
 import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import { PalworldPreviousLoadControl } from "./PalworldPreviousLoadControl";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
+import { PalworldTranslationReviewNotice } from "./PalworldTranslationBadge";
 
 const FILTER_KEYS = ["q", "category", "rarity", "acquisition", "sort", "order", "page"] as const;
 
@@ -69,9 +75,16 @@ export function PalworldItemsPage({ locale, onOpenItem, params }: { locale: Palw
     setPalworldUrl(`/palworld/items${next.toString() ? `?${next}` : ""}`);
   }
   function submit(event: FormEvent) { event.preventDefault(); update("q", nameQuery.trim()); }
+  const hasReviewPending = response?.items.some((item) => (
+    hasMachineAssistedTranslation([
+      resolvePalworldName(item, locale).status,
+      resolvePalworldDescription(item, locale).status,
+    ])
+  )) ?? false;
 
   return <section className="palworld-page-section">
     <header className="palworld-page-heading"><div><span aria-hidden="true">{text.itemsKicker}</span><h1 data-ko={palworldI18n.ko.items} data-ja={palworldI18n.ja.items}>{text.items}</h1><p data-ko={palworldI18n.ko.itemsDescription} data-ja={palworldI18n.ja.itemsDescription}>{text.itemsDescription}</p></div></header>
+    {hasReviewPending ? <PalworldTranslationReviewNotice locale={locale} /> : null}
     <form className="palworld-filter-bar" onSubmit={submit} aria-label={text.filter}>
       <label><span>{text.nameSearch}</span><Input maxLength={PALWORLD_SEARCH_MAX_LENGTH} type="search" value={nameQuery} onChange={(event) => setNameQuery(event.target.value)} /></label>
       <label><span>{text.category}</span><Select value={params.get("category") ?? ""} onChange={(event) => update("category", event.target.value)}><option value="">{text.all}</option>{PALWORLD_ITEM_CATEGORIES.map((value) => <option value={value} key={value}>{categoryLabel(value, locale)}</option>)}</Select></label>

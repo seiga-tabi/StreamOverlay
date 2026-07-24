@@ -48,6 +48,34 @@ export const PALWORLD_PAK_RUNTIME_DOMAINS = [
   "map"
 ] as const;
 
+export const PALWORLD_PAK_CORE_DATA_DOMAINS = [
+  "pals",
+  "items",
+  "skills",
+  "breeding",
+  "localizationKo",
+  "localizationJa"
+] as const;
+
+export const PALWORLD_PAK_OPTIONAL_DOMAINS = [
+  "localizationEn",
+  "palImages",
+  "itemImages",
+  "elementImages",
+  "workImages",
+  "skillImages",
+  "map"
+] as const;
+
+export const PALWORLD_PAK_PUBLIC_ASSET_DOMAINS = [
+  "palImages",
+  "itemImages",
+  "elementImages",
+  "workImages",
+  "skillImages",
+  "map"
+] as const;
+
 export const PALWORLD_PAK_RUNTIME_ARTIFACT_KINDS = [
   "snapshot",
   "paldex",
@@ -132,6 +160,9 @@ const RELEASE_PATTERN = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/u;
 const STEAM_BUILD_ID_PATTERN = /^[1-9]\d{0,19}$/u;
 const IMPORT_REVISION_PATTERN = /^[a-z0-9][a-z0-9._-]{0,127}$/u;
 const SAFE_RELATIVE_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._/-]*\.json$/u;
+const CORE_READY_OPTIONAL_IMPORT_BLOCKERS = new Set([
+  "OFFICIAL_EN_LOCALE_NOT_PROVIDED"
+]);
 
 const REQUIRED_ARTIFACTS_BY_DOMAIN: Readonly<
   Record<PalworldPakRuntimeDomain, ReadonlyArray<ReadonlyArray<PalworldPakRuntimeArtifactKind>>>
@@ -637,6 +668,8 @@ function assertArtifactByKind(
     }
     if (
       snapshot.metadata.gameVersion !== manifest.gameVersion
+      || snapshot.metadata.release !== manifest.release
+      || snapshot.metadata.steamBuildId !== manifest.steamBuildId
       || snapshot.metadata.sourceRevision !== manifest.source.importRevision
       || snapshot.metadata.sourceChecksum !== manifest.source.archiveSha256
       || snapshot.metadata.sourceName !== "operator_provided_pak_export"
@@ -734,20 +767,37 @@ function assertArtifactByKind(
       candidateId: `candidate-${manifest.source.archiveSha256.slice(0, 16)}`,
       release: manifest.release
     });
+    const coreDataReady = PALWORLD_PAK_CORE_DATA_DOMAINS.every(
+      (domain) => manifest.activation[domain] === "ready"
+    );
     if (
       artifact.kind === "import-report"
-      && Object.values(manifest.activation).every((state) => state === "ready")
-      && (
-        validated.status !== "ready_candidate"
-        || validated.activationEligible !== true
-        || !Array.isArray(validated.blockers)
-        || validated.blockers.length !== 0
-      )
+      && coreDataReady
     ) {
-      fail(
-        "artifact.import-report",
-        "전체 ready runtime은 blocker가 없는 ready_candidate import report가 필요합니다."
+      const blockers = Array.isArray(validated.blockers)
+        ? validated.blockers as string[]
+        : [];
+      const fullyReadyReport = (
+        validated.status === "ready_candidate"
+        && validated.activationEligible === true
+        && blockers.length === 0
+        && manifest.activation.localizationEn === "ready"
       );
+      const koJaOnlyReport = (
+        validated.status === "blocked_candidate"
+        && validated.activationEligible === false
+        && blockers.length > 0
+        && blockers.every((blocker) =>
+          CORE_READY_OPTIONAL_IMPORT_BLOCKERS.has(blocker)
+        )
+        && manifest.activation.localizationEn === "blocked"
+      );
+      if (!fullyReadyReport && !koJaOnlyReport) {
+        fail(
+          "artifact.import-report",
+          "core data ready runtime은 blocker가 없거나 공식 EN locale 누락만 명시한 report여야 합니다."
+        );
+      }
     }
     if (
       artifact.kind === "assets-manifest"
@@ -1219,6 +1269,7 @@ const BLOCKED_CANDIDATE_IMAGE_DOMAINS = [
 
 const BLOCKED_CANDIDATE_MAPPING_FIELDS = [
   "publicIdMap",
+  "publicIdExtensions",
   "aliases",
   "palIconOverrides",
   "elementIconMap",

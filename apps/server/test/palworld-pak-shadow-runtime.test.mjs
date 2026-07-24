@@ -17,6 +17,8 @@ const SOURCE_TIMESTAMP = "2026-07-23T00:00:00.000Z";
 function metadata() {
   return {
     gameVersion: RELEASE,
+    release: RELEASE,
+    steamBuildId: "12345678",
     sourceName: "operator_provided_pak_export",
     sourceUrl: "https://github.com/seiga-tabi/StreamOverlay",
     sourceRevision: SOURCE_REVISION,
@@ -301,7 +303,7 @@ function manifest() {
     breeding: "ready",
     localizationKo: "ready",
     localizationJa: "ready",
-    localizationEn: "ready",
+    localizationEn: "blocked",
     palImages: "blocked",
     itemImages: "blocked",
     elementImages: "blocked",
@@ -317,7 +319,6 @@ function manifest() {
     ["breeding", "breeding.json"],
     ["locale-ko", "locales/ko.json"],
     ["locale-ja", "locales/ja.json"],
-    ["locale-en", "locales/en.json"],
     ["source-lock", "source-lock.json"],
     ["import-report", "import-report.json"]
   ].map(([kind, file]) => ({
@@ -354,7 +355,7 @@ function manifest() {
       breeding: count(1, 1),
       localizationKo: count(5, 5),
       localizationJa: count(5, 5),
-      localizationEn: count(5, 5),
+      localizationEn: count(0, 5),
       palImages: count(0, 2),
       itemImages: count(0, 2),
       elementImages: count(0, 9),
@@ -573,5 +574,23 @@ test("ready manifest라도 identity·count·unresolved gate 불일치는 fail-cl
     (error) =>
       error instanceof PalworldPakShadowRuntimeError
       && error.code === "PALWORLD_PAK_SHADOW_DATA_NOT_READY"
+  );
+});
+
+test("KO/JA shadow runtime은 공개 asset을 모두 fallback으로 강제한다", () => {
+  const publicImageGate = adapted();
+  publicImageGate.gates.imageAssets.technicalPassed = true;
+  publicImageGate.gates.imageAssets.publicActivationAllowed = true;
+  publicImageGate.gates.imageAssets.readyImages = 1;
+  publicImageGate.gates.imageAssets.fallbackPals = 1;
+  assert.throws(
+    () => loadPalworldPakShadowRuntime({
+      manifest: manifest(),
+      adapted: publicImageGate
+    }),
+    (error) =>
+      error instanceof PalworldPakShadowRuntimeError
+      && error.code === "PALWORLD_PAK_SHADOW_DATA_NOT_READY"
+      && /fallback/u.test(error.message)
   );
 });

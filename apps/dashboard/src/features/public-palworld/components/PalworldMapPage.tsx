@@ -1,13 +1,9 @@
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
   type CSSProperties,
-  type KeyboardEvent,
-  type PointerEvent,
   type ReactNode,
-  type WheelEvent,
 } from "react";
 import type {
   PalworldMapMarker,
@@ -27,6 +23,17 @@ import {
 import { Skeleton } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
 import { getPalworldMapMarkers, getPalworldPalSpawns } from "../api/palworld";
+import {
+  clampPalworldMapView,
+  focusPalworldMapViewAt,
+  PALWORLD_MAP_MAX_ZOOM,
+  PALWORLD_MAP_MIN_ZOOM,
+  PALWORLD_MAP_ZOOM_EPSILON,
+  PALWORLD_MAP_ZOOM_STEP,
+  usePalworldMapViewport,
+  zoomPalworldMapViewAt,
+  type PalworldMapViewState,
+} from "../hooks/usePalworldMapViewport";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { isLocalPalworldMapUrl, PALWORLD_WORLD_MAP_IMAGE } from "../utils/element-images";
 import { resolvePalworldName } from "../utils/localization";
@@ -39,20 +46,6 @@ import {
 import { PalworldMedia } from "./PalworldMedia";
 
 export const PALWORLD_WORLD_MAP_IMAGE_URL = PALWORLD_WORLD_MAP_IMAGE?.imageUrl;
-const MAP_MIN_ZOOM = 1;
-const MAP_MAX_ZOOM = 3;
-const MAP_ZOOM_STEP = 0.5;
-const MAP_KEYBOARD_PAN_STEP = 48;
-const MAP_ZOOM_EPSILON = 0.001;
-
-type MapPoint = {
-  x: number;
-  y: number;
-};
-
-export type PalworldMapViewState = MapPoint & {
-  zoom: number;
-};
 
 type PalworldMapPageProps = {
   focusPalId?: string;
@@ -61,85 +54,13 @@ type PalworldMapPageProps = {
   onOpenPal?: (id: string) => void;
 };
 
-type MapGesture =
-  | {
-      kind: "drag";
-      lastPoint: MapPoint;
-    }
-  | {
-      anchorContent: MapPoint;
-      kind: "pinch";
-      startDistance: number;
-      startZoom: number;
-    };
-
 export { isLocalPalworldMapUrl };
-
-function clamp(value: number, minimum: number, maximum: number): number {
-  return Math.min(maximum, Math.max(minimum, value));
-}
-
-export function clampPalworldMapView(
-  view: Readonly<PalworldMapViewState>,
-  viewportWidth: number,
-  viewportHeight: number,
-): PalworldMapViewState {
-  const zoom = clamp(Number.isFinite(view.zoom) ? view.zoom : MAP_MIN_ZOOM, MAP_MIN_ZOOM, MAP_MAX_ZOOM);
-  if (viewportWidth <= 0 || viewportHeight <= 0) {
-    return { x: 0, y: 0, zoom };
-  }
-
-  return {
-    x: clamp(Number.isFinite(view.x) ? view.x : 0, viewportWidth - (viewportWidth * zoom), 0),
-    y: clamp(Number.isFinite(view.y) ? view.y : 0, viewportHeight - (viewportHeight * zoom), 0),
-    zoom,
-  };
-}
-
-export function zoomPalworldMapViewAt(
-  view: Readonly<PalworldMapViewState>,
-  nextZoom: number,
-  anchor: Readonly<MapPoint>,
-  viewportWidth: number,
-  viewportHeight: number,
-): PalworldMapViewState {
-  const zoom = clamp(nextZoom, MAP_MIN_ZOOM, MAP_MAX_ZOOM);
-  const currentZoom = clamp(view.zoom, MAP_MIN_ZOOM, MAP_MAX_ZOOM);
-  return clampPalworldMapView({
-    x: anchor.x - (((anchor.x - view.x) / currentZoom) * zoom),
-    y: anchor.y - (((anchor.y - view.y) / currentZoom) * zoom),
-    zoom,
-  }, viewportWidth, viewportHeight);
-}
-
-export function focusPalworldMapViewAt(
-  marker: Pick<PalworldMapMarker, "normalizedX" | "normalizedY">,
-  viewportWidth: number,
-  viewportHeight: number,
-  zoom = 2,
-): PalworldMapViewState {
-  return clampPalworldMapView({
-    x: (viewportWidth / 2) - (marker.normalizedX * viewportWidth * zoom),
-    y: (viewportHeight / 2) - (marker.normalizedY * viewportHeight * zoom),
-    zoom,
-  }, viewportWidth, viewportHeight);
-}
-
-function distanceBetween(first: MapPoint, second: MapPoint): number {
-  return Math.hypot(second.x - first.x, second.y - first.y);
-}
-
-function midpoint(first: MapPoint, second: MapPoint): MapPoint {
-  return {
-    x: (first.x + second.x) / 2,
-    y: (first.y + second.y) / 2,
-  };
-}
-
-function isMapControlTarget(target: EventTarget | null): boolean {
-  return target instanceof Element
-    && Boolean(target.closest("button, a, input, select, textarea, [data-map-interactive='true']"));
-}
+export {
+  clampPalworldMapView,
+  focusPalworldMapViewAt,
+  zoomPalworldMapViewAt,
+};
+export type { PalworldMapViewState };
 
 type PalworldMapMarkerRequestState = "loading" | "ready" | "data_unavailable" | "error";
 type PalworldMapSpawnRequestState =
@@ -259,13 +180,21 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const [markerState, setMarkerState] = useState<PalworldMapMarkerRequestState>("loading");
   const [spawnResponse, setSpawnResponse] = useState<PalworldPalSpawnResponse>();
   const [spawnState, setSpawnState] = useState<PalworldMapSpawnRequestState>("idle");
-  const [view, setView] = useState<PalworldMapViewState>({ x: 0, y: 0, zoom: MAP_MIN_ZOOM });
-  const [isPanning, setIsPanning] = useState(false);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef(view);
+  const {
+    commitView,
+    endPointer,
+    handleKeyDown,
+    handlePointerDown,
+    handlePointerMove,
+    handleWheel,
+    isPanning,
+    resetView,
+    view,
+    viewRef,
+    viewportRef,
+    zoomAt,
+  } = usePalworldMapViewport(loadState === "ready");
   const appliedFocusMarkerRef = useRef<string>();
-  const pointersRef = useRef(new Map<number, MapPoint>());
-  const gestureRef = useRef<MapGesture>();
   const zoomPercent = Math.round(view.zoom * 100);
   const mapStyle = {
     "--palworld-map-translate-x": `${view.x}px`,
@@ -294,55 +223,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       .replace("{minimum}", String(spawnSummary.minimumLevel))
       .replace("{maximum}", String(spawnSummary.maximumLevel))
     : "";
-
-  const commitView = useCallback((nextView: PalworldMapViewState): void => {
-    const viewport = viewportRef.current;
-    const clampedView = clampPalworldMapView(
-      nextView,
-      viewport?.clientWidth ?? 0,
-      viewport?.clientHeight ?? 0,
-    );
-    viewRef.current = clampedView;
-    setView(clampedView);
-  }, []);
-
-  const zoomAt = useCallback((nextZoom: number, anchor?: MapPoint): void => {
-    const viewport = viewportRef.current;
-    if (!viewport) {
-      return;
-    }
-    commitView(zoomPalworldMapViewAt(
-      viewRef.current,
-      nextZoom,
-      anchor ?? { x: viewport.clientWidth / 2, y: viewport.clientHeight / 2 },
-      viewport.clientWidth,
-      viewport.clientHeight,
-    ));
-  }, [commitView]);
-
-  const resetView = useCallback((): void => {
-    pointersRef.current.clear();
-    gestureRef.current = undefined;
-    setIsPanning(false);
-    commitView({ x: 0, y: 0, zoom: MAP_MIN_ZOOM });
-  }, [commitView]);
-
-  useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) {
-      return;
-    }
-
-    const clampCurrentView = (): void => commitView(viewRef.current);
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", clampCurrentView);
-      return () => window.removeEventListener("resize", clampCurrentView);
-    }
-
-    const observer = new ResizeObserver(clampCurrentView);
-    observer.observe(viewport);
-    return () => observer.disconnect();
-  }, [commitView]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -448,168 +328,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     setImageRevision((revision) => revision + 1);
   }
 
-  function pointFromPointer(event: PointerEvent<HTMLDivElement>): MapPoint {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    return {
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-    };
-  }
-
-  function beginPinch(): void {
-    const points = [...pointersRef.current.values()];
-    if (points.length < 2) {
-      return;
-    }
-    const [first, second] = points;
-    if (!first || !second) {
-      return;
-    }
-    const center = midpoint(first, second);
-    gestureRef.current = {
-      anchorContent: {
-        x: (center.x - viewRef.current.x) / viewRef.current.zoom,
-        y: (center.y - viewRef.current.y) / viewRef.current.zoom,
-      },
-      kind: "pinch",
-      startDistance: Math.max(1, distanceBetween(first, second)),
-      startZoom: viewRef.current.zoom,
-    };
-  }
-
-  function handlePointerDown(event: PointerEvent<HTMLDivElement>): void {
-    if (
-      loadState !== "ready"
-      || (event.pointerType === "mouse" && event.button !== 0)
-      || isMapControlTarget(event.target)
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-    event.currentTarget.focus({ preventScroll: true });
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const point = pointFromPointer(event);
-    pointersRef.current.set(event.pointerId, point);
-    setIsPanning(true);
-    if (pointersRef.current.size >= 2) {
-      beginPinch();
-    } else {
-      gestureRef.current = { kind: "drag", lastPoint: point };
-    }
-  }
-
-  function handlePointerMove(event: PointerEvent<HTMLDivElement>): void {
-    if (!pointersRef.current.has(event.pointerId)) {
-      return;
-    }
-
-    event.preventDefault();
-    const point = pointFromPointer(event);
-    pointersRef.current.set(event.pointerId, point);
-    const gesture = gestureRef.current;
-
-    if (pointersRef.current.size >= 2) {
-      if (!gesture || gesture.kind !== "pinch") {
-        beginPinch();
-        return;
-      }
-      const points = [...pointersRef.current.values()];
-      const [first, second] = points;
-      if (!first || !second) {
-        return;
-      }
-      const center = midpoint(first, second);
-      const zoom = clamp(
-        gesture.startZoom * (distanceBetween(first, second) / gesture.startDistance),
-        MAP_MIN_ZOOM,
-        MAP_MAX_ZOOM,
-      );
-      commitView({
-        x: center.x - (gesture.anchorContent.x * zoom),
-        y: center.y - (gesture.anchorContent.y * zoom),
-        zoom,
-      });
-      return;
-    }
-
-    if (!gesture || gesture.kind !== "drag") {
-      gestureRef.current = { kind: "drag", lastPoint: point };
-      return;
-    }
-    commitView({
-      ...viewRef.current,
-      x: viewRef.current.x + (point.x - gesture.lastPoint.x),
-      y: viewRef.current.y + (point.y - gesture.lastPoint.y),
-    });
-    gestureRef.current = { kind: "drag", lastPoint: point };
-  }
-
-  function endPointer(event: PointerEvent<HTMLDivElement>): void {
-    if (!pointersRef.current.delete(event.pointerId)) {
-      return;
-    }
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-
-    const remainingPoint = pointersRef.current.values().next().value as MapPoint | undefined;
-    if (remainingPoint) {
-      gestureRef.current = { kind: "drag", lastPoint: remainingPoint };
-      return;
-    }
-    gestureRef.current = undefined;
-    setIsPanning(false);
-  }
-
-  function handleWheel(event: WheelEvent<HTMLDivElement>): void {
-    if (loadState !== "ready") {
-      return;
-    }
-    event.preventDefault();
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const wheelDelta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
-    zoomAt(viewRef.current.zoom * Math.exp(-wheelDelta * 0.0015), {
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-    });
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
-    if (event.target !== event.currentTarget || loadState !== "ready") {
-      return;
-    }
-
-    switch (event.key) {
-      case "ArrowLeft":
-        commitView({ ...viewRef.current, x: viewRef.current.x + MAP_KEYBOARD_PAN_STEP });
-        break;
-      case "ArrowRight":
-        commitView({ ...viewRef.current, x: viewRef.current.x - MAP_KEYBOARD_PAN_STEP });
-        break;
-      case "ArrowUp":
-        commitView({ ...viewRef.current, y: viewRef.current.y + MAP_KEYBOARD_PAN_STEP });
-        break;
-      case "ArrowDown":
-        commitView({ ...viewRef.current, y: viewRef.current.y - MAP_KEYBOARD_PAN_STEP });
-        break;
-      case "+":
-      case "=":
-        zoomAt(viewRef.current.zoom + MAP_ZOOM_STEP);
-        break;
-      case "-":
-      case "_":
-        zoomAt(viewRef.current.zoom - MAP_ZOOM_STEP);
-        break;
-      case "Home":
-        resetView();
-        break;
-      default:
-        return;
-    }
-    event.preventDefault();
-  }
-
   return (
     <section className="palworld-page-section palworld-map-page" aria-labelledby="palworld-map-title">
       <header className="palworld-page-heading">
@@ -708,8 +426,8 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
           <div className="palworld-map-controls" aria-label={text.mapZoomLevel}>
             <Button
               aria-label={text.mapZoomOut}
-              disabled={view.zoom <= MAP_MIN_ZOOM + MAP_ZOOM_EPSILON}
-              onClick={() => zoomAt(viewRef.current.zoom - MAP_ZOOM_STEP)}
+              disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON}
+              onClick={() => zoomAt(viewRef.current.zoom - PALWORLD_MAP_ZOOM_STEP)}
               size="sm"
               variant="secondary"
             >
@@ -718,8 +436,8 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             <output aria-live="polite" aria-label={`${text.mapZoomLevel} ${zoomPercent}%`}>{zoomPercent}%</output>
             <Button
               aria-label={text.mapZoomIn}
-              disabled={view.zoom >= MAP_MAX_ZOOM - MAP_ZOOM_EPSILON}
-              onClick={() => zoomAt(viewRef.current.zoom + MAP_ZOOM_STEP)}
+              disabled={view.zoom >= PALWORLD_MAP_MAX_ZOOM - PALWORLD_MAP_ZOOM_EPSILON}
+              onClick={() => zoomAt(viewRef.current.zoom + PALWORLD_MAP_ZOOM_STEP)}
               size="sm"
               variant="secondary"
             >
@@ -728,7 +446,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             <Button
               data-ko={palworldI18n.ko.mapZoomReset}
               data-ja={palworldI18n.ja.mapZoomReset}
-              disabled={view.zoom <= MAP_MIN_ZOOM + MAP_ZOOM_EPSILON && view.x === 0 && view.y === 0}
+              disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON && view.x === 0 && view.y === 0}
               onClick={resetView}
               size="sm"
               variant="ghost"
@@ -784,7 +502,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             className="palworld-map-viewport"
             data-testid="palworld-map-viewport"
             data-panning={isPanning ? "true" : undefined}
-            data-zoomed={view.zoom > MAP_MIN_ZOOM + MAP_ZOOM_EPSILON ? "true" : undefined}
+            data-zoomed={view.zoom > PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON ? "true" : undefined}
             onKeyDown={handleKeyDown}
             onLostPointerCapture={endPointer}
             onPointerCancel={endPointer}

@@ -5,6 +5,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertPalworldPaldexReleaseManifest } from "./palworld-paldex-artifact.js";
 import {
+  PALWORLD_PAK_CORE_DATA_DOMAINS,
+  PALWORLD_PAK_OPTIONAL_DOMAINS,
+  PALWORLD_PAK_PUBLIC_ASSET_DOMAINS,
   validatePalworldPakCandidateStagingRoot,
   type PalworldPakRuntimeManifest
 } from "./palworld-pak-runtime-manifest.js";
@@ -21,21 +24,10 @@ export const PALWORLD_RUNTIME_FORMATS = [
   "legacy_composite_v2",
   "operator_pak_v1"
 ] as const;
-export const PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS = [
-  "pals",
-  "items",
-  "skills",
-  "breeding",
-  "localizationKo",
-  "localizationJa",
-  "localizationEn",
-  "palImages",
-  "itemImages",
-  "elementImages",
-  "workImages",
-  "skillImages",
-  "map"
-] as const;
+export const PALWORLD_OPERATOR_ACTIVE_REQUIRED_DOMAINS =
+  PALWORLD_PAK_CORE_DATA_DOMAINS;
+export const PALWORLD_OPERATOR_ACTIVE_OPTIONAL_DOMAINS =
+  PALWORLD_PAK_OPTIONAL_DOMAINS;
 
 export type PalworldRuntimeFormat = (typeof PALWORLD_RUNTIME_FORMATS)[number];
 
@@ -62,6 +54,8 @@ export type PalworldActiveRuntimeManifestV2 =
 export type PalworldActiveRuntimeManifest =
   | PalworldActiveRuntimeManifestV1
   | PalworldActiveRuntimeManifestV2;
+
+export type PalworldLegacyOverlayDomain = "mapMarkers" | "mapSpawns";
 
 export type PalworldActiveRuntime = {
   manifest: PalworldActiveRuntimeManifest;
@@ -116,12 +110,30 @@ function fail(pathName: string, message: string): never {
 }
 
 /**
+ * legacy 지도 overlay는 composite selector에 checksum으로 고정된 경우에만
+ * 공개 provider로 로드합니다. schema v1 legacy pointer는 기존 동작을 유지하고,
+ * operator PAK runtime은 별도 runtime manifest loader가 준비되기 전까지 차단합니다.
+ */
+export function palworldRuntimeAllowsLegacyOverlay(
+  manifest: PalworldActiveRuntimeManifest,
+  domain: PalworldLegacyOverlayDomain
+): boolean {
+  if (manifest.schemaVersion === 2) {
+    return manifest.composite.availability[domain] === "active";
+  }
+  return manifest.format === "legacy_release_v1";
+}
+
+/**
  * operator PAK schema v1의 public activation finalizer입니다.
  *
+ * 공식 KO/JA가 준비된 core data release는 공식 EN locale 및 공개 asset이
+ * blocked 상태여도 기존 UI fallback과 함께 활성화할 수 있습니다.
+ *
  * schema v1은 `RIGHTS_NOT_INDEPENDENTLY_VERIFIED` provenance만 허용하고
- * versioned image-use-policy 증빙을 포함하지 않습니다. 따라서 기술 gate가 모두
- * ready여도 공개 이미지·지도 활성화는 fail-closed 처리합니다. 향후 release별
- * 권리 policy artifact가 exact schema에 추가되기 전에는 이 검증을 완화하지 않습니다.
+ * versioned image-use-policy 증빙을 포함하지 않습니다. 따라서 이미지·지도 domain이
+ * ready이면 공개 활성화를 fail-closed 처리합니다. 향후 release별 권리 policy
+ * artifact가 exact schema에 추가되기 전에는 이 검증을 완화하지 않습니다.
  */
 export function finalizePalworldPakRuntimeForPublicActivation(
   manifest: PalworldPakRuntimeManifest
@@ -134,10 +146,24 @@ export function finalizePalworldPakRuntimeForPublicActivation(
       );
     }
   }
-  throw new PalworldPakPublicActivationError(
-    "PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE",
-    "PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE: operator PAK runtime schema v1에는 release별 이미지 권리 policy 증빙이 없습니다."
+  for (const domain of PALWORLD_OPERATOR_ACTIVE_OPTIONAL_DOMAINS) {
+    if (manifest.activation[domain] === "candidate") {
+      throw new PalworldPakPublicActivationError(
+        "PALWORLD_PAK_RUNTIME_NOT_READY",
+        `runtime-manifest.activation.${domain}: 선택 domain이 candidate 상태입니다. blocked 또는 ready로 확정해야 합니다.`
+      );
+    }
+  }
+  const publicAssetDomain = PALWORLD_PAK_PUBLIC_ASSET_DOMAINS.find(
+    (domain) => manifest.activation[domain] === "ready"
   );
+  if (publicAssetDomain !== undefined) {
+    throw new PalworldPakPublicActivationError(
+      "PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE",
+      `PALWORLD_IMAGE_RELEASE_BLOCKED_BY_LICENSE: runtime-manifest.activation.${publicAssetDomain}은 release별 이미지 권리 policy 증빙 없이 공개할 수 없습니다.`
+    );
+  }
+  return manifest;
 }
 
 function recordAt(
