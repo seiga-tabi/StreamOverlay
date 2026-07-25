@@ -2368,8 +2368,9 @@
 .palworld-pal-location-loading,
 .palworld-pal-location-preview {
   position: relative;
-  inline-size: 100%;
+  inline-size: min(100%, clamp(20rem, 50vw, 40rem));
   min-inline-size: 0;
+  justify-self: center;
   aspect-ratio: 1;
   overflow: hidden;
   border: thin solid var(--yoro-color-border);
@@ -2428,9 +2429,9 @@
 }
 
 .palworld-pal-location-spawn-point {
-  fill: var(--yoro-color-info);
+  fill: var(--palworld-sky);
   stroke: var(--yoro-color-text-on-dark);
-  stroke-width: 0.0025;
+  stroke-width: 0.0035;
 }
 
 .palworld-pal-location-marker {

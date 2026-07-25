@@ -17,6 +17,10 @@ export const PALWORLD_MAP_OVERLAY_COMPATIBILITY_BASES = [
   "exact_map_geometry_and_coordinate_transform",
   "exact_active_paldex_join_and_map_geometry"
 ] as const;
+export const PALWORLD_MAP_OVERLAY_ACTIVATION_BASES = [
+  "source_metadata",
+  "versioned_compatibility_approval"
+] as const;
 export const PALWORLD_PAL_SPAWN_GRID_SIZE = 32;
 
 export type PalworldMapWorld = (typeof PALWORLD_MAP_WORLDS)[number];
@@ -24,6 +28,8 @@ export type PalworldMapMarkerState = (typeof PALWORLD_MAP_MARKER_STATES)[number]
 export type PalworldPalSpawnState = (typeof PALWORLD_PAL_SPAWN_STATES)[number];
 export type PalworldMapOverlayCompatibilityBasis =
   (typeof PALWORLD_MAP_OVERLAY_COMPATIBILITY_BASES)[number];
+export type PalworldMapOverlayActivationBasis =
+  (typeof PALWORLD_MAP_OVERLAY_ACTIVATION_BASES)[number];
 
 export type PalworldMapMarker = {
   id: string;
@@ -50,6 +56,8 @@ export type PalworldMapOverlayProvenance = {
   transformRevision: string;
   rightsVerified: false;
   usageBasis: "operator_reference_use";
+  activationBasis?: PalworldMapOverlayActivationBasis;
+  compatibilityApprovalSha256?: string;
 };
 
 export type PalworldMapMarkersResponse = {
@@ -178,6 +186,9 @@ function validateOverlayAt(
     "transformRevision",
     "rightsVerified",
     "usageBasis"
+  ], [
+    "activationBasis",
+    "compatibilityApprovalSha256"
   ]);
   if (!record.ok) return record;
   if (record.data.schemaVersion !== 1) {
@@ -226,6 +237,42 @@ function validateOverlayAt(
     return invalid(
       `${path}.compatibilityBasis`,
       "검증된 지도 geometry/coordinate transform 또는 활성 도감 exact join 호환성 근거여야 합니다."
+    );
+  }
+  if (
+    record.data.activationBasis !== undefined
+    && !PALWORLD_MAP_OVERLAY_ACTIVATION_BASES.includes(
+      record.data.activationBasis as PalworldMapOverlayActivationBasis
+    )
+  ) {
+    return invalid(
+      `${path}.activationBasis`,
+      "source_metadata 또는 versioned_compatibility_approval이어야 합니다."
+    );
+  }
+  if (record.data.compatibilityApprovalSha256 !== undefined) {
+    const approvalChecksum = sha256At(
+      record.data.compatibilityApprovalSha256,
+      `${path}.compatibilityApprovalSha256`
+    );
+    if (!approvalChecksum.ok) return approvalChecksum;
+  }
+  if (
+    record.data.activationBasis === "versioned_compatibility_approval"
+    && record.data.compatibilityApprovalSha256 === undefined
+  ) {
+    return invalid(
+      `${path}.compatibilityApprovalSha256`,
+      "versioned compatibility approval checksum이 필요합니다."
+    );
+  }
+  if (
+    record.data.activationBasis !== "versioned_compatibility_approval"
+    && record.data.compatibilityApprovalSha256 !== undefined
+  ) {
+    return invalid(
+      `${path}.compatibilityApprovalSha256`,
+      "versioned compatibility approval 상태에서만 사용할 수 있습니다."
     );
   }
   if (record.data.rightsVerified !== false) {
@@ -566,25 +613,45 @@ export function validatePalworldPalSpawnResponse(
         "일반 스폰은 활성 도감 exact join과 검증된 지도 geometry 근거여야 합니다."
       );
     }
-    if (
-      overlay.data.sourceGameVersion === null
-      || overlay.data.sourceSteamBuildId === null
+    const sourceGameVersion = overlay.data.sourceGameVersion;
+    const sourceSteamBuildId = overlay.data.sourceSteamBuildId;
+    const hasSourceMetadata = sourceGameVersion !== null
+      && sourceSteamBuildId !== null;
+    const usesCompatibilityApproval =
+      overlay.data.activationBasis === "versioned_compatibility_approval"
+      && overlay.data.compatibilityApprovalSha256 !== undefined;
+    if (!hasSourceMetadata && !usesCompatibilityApproval) {
+      return invalid(
+        "response.overlay",
+        "검증된 source metadata 또는 checksum으로 고정된 versioned compatibility approval이 필요합니다."
+      );
+    }
+    if (hasSourceMetadata) {
+      if (overlay.data.activationBasis === "versioned_compatibility_approval") {
+        return invalid(
+          "response.overlay.activationBasis",
+          "source metadata가 있으면 compatibility approval 대체 경로를 사용할 수 없습니다."
+        );
+      }
+      if (sourceGameVersion !== overlay.data.targetGameVersion) {
+        return invalid(
+          "response.overlay.sourceGameVersion",
+          "targetGameVersion과 일치해야 합니다."
+        );
+      }
+      if (!/^[1-9][0-9]{0,19}$/u.test(sourceSteamBuildId)) {
+        return invalid(
+          "response.overlay.sourceSteamBuildId",
+          "0으로 시작하지 않는 20자리 이하 숫자 Steam build ID여야 합니다."
+        );
+      }
+    } else if (
+      sourceGameVersion !== null
+      || sourceSteamBuildId !== null
     ) {
       return invalid(
         "response.overlay",
-        "ready 또는 confirmed_empty 일반 스폰에는 검증된 source gameVersion과 Steam build ID가 필요합니다."
-      );
-    }
-    if (overlay.data.sourceGameVersion !== overlay.data.targetGameVersion) {
-      return invalid(
-        "response.overlay.sourceGameVersion",
-        "targetGameVersion과 일치해야 합니다."
-      );
-    }
-    if (!/^[1-9][0-9]{0,19}$/u.test(overlay.data.sourceSteamBuildId)) {
-      return invalid(
-        "response.overlay.sourceSteamBuildId",
-        "0으로 시작하지 않는 20자리 이하 숫자 Steam build ID여야 합니다."
+        "source gameVersion과 Steam build ID는 함께 설정하거나 함께 null이어야 합니다."
       );
     }
     if (overlay.data.targetGameVersion !== metadata.data.gameVersion) {

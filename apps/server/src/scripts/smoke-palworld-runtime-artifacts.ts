@@ -49,6 +49,12 @@ import {
   createPalworldSpawnProvider,
   loadPalworldSpawnArtifact
 } from "../data/palworld-spawn-artifact.js";
+import {
+  loadPalworldSpawnCompatibilityAuthorization
+} from "../data/palworld-spawn-compatibility.js";
+import {
+  loadPalworldCondensationRules
+} from "../data/palworld-condensation-artifact.js";
 
 const REQUIRED_LEGACY_RELEASE_FILES = [
   "sources.lock.json",
@@ -110,7 +116,9 @@ export type PalworldRuntimeLayout =
       releaseDirectory: string;
       releaseRoot: string;
       compositeArtifactFiles?: readonly string[];
-      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5;
+      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+      spawnCompatibilityApprovalSha256?: string;
+      condensationRulesSha256?: string;
     };
 
 async function pathExists(filePath: string): Promise<boolean> {
@@ -181,7 +189,28 @@ export async function resolvePalworldRuntimeLayout(
           compositeArtifactFiles: active.manifest.composite.artifacts.map(
             (artifact) => artifact.file
           ),
-          compositeSchemaVersion: active.manifest.composite.schemaVersion
+          compositeSchemaVersion: active.manifest.composite.schemaVersion,
+          ...(active.manifest.composite.artifacts.find(
+            (artifact) => artifact.kind === "map-spawns-compatibility"
+          )?.sha256 === undefined
+            ? {}
+            : {
+                spawnCompatibilityApprovalSha256:
+                  active.manifest.composite.artifacts.find(
+                    (artifact) =>
+                      artifact.kind === "map-spawns-compatibility"
+                  )!.sha256
+              }),
+          ...(active.manifest.composite.artifacts.find(
+            (artifact) => artifact.kind === "condensation-rules"
+          )?.sha256 === undefined
+            ? {}
+            : {
+                condensationRulesSha256:
+                  active.manifest.composite.artifacts.find(
+                    (artifact) => artifact.kind === "condensation-rules"
+                  )!.sha256
+              })
         }
       : {})
   };
@@ -380,6 +409,22 @@ async function validateLegacyRuntime(
   await assertRepresentativeRuntimeImages({ imageRoot, activeImages });
 
   const runtimeRelease = await loadPalworldPaldexRuntimeRelease({ releaseRoot, mappingRoot, imageRoot });
+  if ((layout.compositeSchemaVersion ?? 0) >= 7) {
+    if (
+      layout.condensationRulesSha256 === undefined
+      || runtimeRelease.metadata.steamBuildId === undefined
+    ) {
+      throw new Error("농축 규칙 checksum 또는 active Steam Build ID가 없습니다.");
+    }
+    await loadPalworldCondensationRules({
+      releaseRoot,
+      expectedRelease: runtimeRelease.metadata.gameVersion,
+      expectedSteamBuildId: runtimeRelease.metadata.steamBuildId,
+      expectedSourceRevision: runtimeRelease.metadata.sourceRevision,
+      expectedPaldexSha256: release.manifest.paldexSha256,
+      expectedArtifactSha256: layout.condensationRulesSha256
+    });
+  }
   const breedingSource = await loadPalworldBreedingRuntimeSource(releaseRoot, {
     requireImportReport: !requireExactRuntimeDirectories
   });
@@ -507,8 +552,22 @@ async function validateLegacyRuntime(
   if (hasMapSpawns) {
     try {
       const mapSpawns = await loadPalworldSpawnArtifact(releaseRoot);
-      if (mapSpawns.activation !== "active") {
-        throw new Error("runtime bundle의 일반 스폰 artifact는 activation=active여야 합니다.");
+      if (mapSpawns.activation === "candidate") {
+        if (layout.spawnCompatibilityApprovalSha256 === undefined) {
+          throw new Error(
+            "candidate 일반 스폰은 active composite가 고정한 compatibility approval 없이는 runtime에 포함할 수 없습니다."
+          );
+        }
+        await loadPalworldSpawnCompatibilityAuthorization({
+          releaseRoot,
+          artifact: mapSpawns,
+          expectedApprovalSha256:
+            layout.spawnCompatibilityApprovalSha256
+        });
+      } else if (mapSpawns.activation !== "active") {
+        throw new Error(
+          "runtime bundle의 일반 스폰 artifact에는 active 상태 또는 검증된 compatibility approval이 필요합니다."
+        );
       }
       mainMapSpawns = mapSpawns.worlds.find((world) => world.world === "main");
       if (
@@ -682,9 +741,11 @@ export async function preparePalworldRuntimeBundle(input: {
         }
         try {
           const spawns = await loadPalworldSpawnArtifact(layout.releaseRoot);
-          if (spawns.activation === "active") optionalRuntimeFiles.push(...LEGACY_SPAWN_FILES);
+          if (spawns.activation === "active") {
+            optionalRuntimeFiles.push(...LEGACY_SPAWN_FILES);
+          }
         } catch {
-          // candidate 또는 손상된 spawn은 runtime bundle에서 제외합니다.
+          // candidate 또는 손상된 spawn은 selector가 없는 legacy bundle에서 제외합니다.
         }
       }
       const releaseFiles = layout.compositeArtifactFiles === undefined

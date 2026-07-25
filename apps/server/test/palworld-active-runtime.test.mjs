@@ -213,15 +213,15 @@ test("legacy 지도 overlay는 composite selector가 active로 고정한 domain�
   );
 });
 
-test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 candidate domain을 제외한다", async () => {
+test("legacy composite는 승인된 spawn companion까지 checksum으로 고정한다", async () => {
   const releaseRoot = path.dirname(legacyManifestPath);
   const composite = await createPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
     release: "1.0.1",
     workImages: "candidate"
   });
-  assert.equal(composite.schemaVersion, 5);
-  assert.equal(composite.artifacts.length, 20);
+  assert.equal(composite.schemaVersion, 7);
+  assert.equal(composite.artifacts.length, 24);
   assert.equal(
     composite.artifacts.some((artifact) =>
       artifact.kind === "map-images-manifest"
@@ -254,15 +254,45 @@ test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 c
   );
   assert.deepEqual(composite.availability, {
     mapMarkers: "candidate",
-    mapSpawns: "candidate",
+    mapSpawns: "active",
     workImages: "candidate",
     skillImages: "unavailable"
   });
-  assert.equal(
-    composite.artifacts.some(({ kind }) =>
-      kind === "map-markers" || kind === "map-spawns"
-    ),
-    false
+  assert.deepEqual(
+    composite.artifacts
+      .filter(({ kind }) => kind.startsWith("map-spawns"))
+      .map(({ kind, file }) => [kind, file]),
+    [
+      ["map-spawns", "map-spawns.json"],
+      ["map-spawns-manifest", "map-spawns-manifest.json"],
+      ["map-spawns-compatibility", "map-spawns-compatibility.json"]
+    ]
+  );
+  const metadataBackedActiveShape =
+    assertPalworldLegacyCompositeRuntimeManifest({
+      ...composite,
+      artifacts: composite.artifacts.filter(
+        (artifact) => artifact.kind !== "map-spawns-compatibility"
+      )
+    });
+  assert.deepEqual(
+    metadataBackedActiveShape.artifacts
+      .filter(({ kind }) => kind.startsWith("map-spawns"))
+      .map(({ kind, file }) => [kind, file]),
+    [
+      ["map-spawns", "map-spawns.json"],
+      ["map-spawns-manifest", "map-spawns-manifest.json"]
+    ],
+    "source metadata가 검증된 active spawn은 compatibility companion 없이 pin할 수 있어야 합니다."
+  );
+  await assert.rejects(
+    verifyPalworldLegacyCompositeRuntimeManifest({
+      releaseRoot,
+      expectedRelease: "1.0.1",
+      manifest: metadataBackedActiveShape
+    }),
+    /compatibility approval/u,
+    "실제 candidate를 metadata-backed active 형태로 가장할 수 없어야 합니다."
   );
   await verifyPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
@@ -287,13 +317,41 @@ test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 c
   );
   assert.equal(
     palworldRuntimeAllowsLegacyOverlay(active, "mapSpawns"),
-    false,
-    "candidate spawn 파일이 release에 남아 있어도 provider 로드를 허용하면 안 됩니다."
+    true,
+    "candidate 단독이 아니라 checksum approval까지 고정한 spawn만 로드해야 합니다."
+  );
+  const legacyV6 = {
+    ...composite,
+    schemaVersion: 6,
+    artifacts: composite.artifacts.filter(
+      (artifact) => artifact.kind !== "condensation-rules"
+    )
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV6).schemaVersion,
+    6,
+    "기존 composite schema v6 selector를 계속 읽어야 합니다."
+  );
+  const legacyV5 = {
+    ...legacyV6,
+    schemaVersion: 5,
+    artifacts: legacyV6.artifacts.filter(
+      (artifact) => !artifact.kind.startsWith("map-spawns")
+    ),
+    availability: {
+      ...composite.availability,
+      mapSpawns: "candidate"
+    }
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV5).schemaVersion,
+    5,
+    "기존 composite schema v5 selector를 계속 읽어야 합니다."
   );
   const legacyV4 = {
-    ...composite,
+    ...legacyV5,
     schemaVersion: 4,
-    artifacts: composite.artifacts.filter(
+    artifacts: legacyV5.artifacts.filter(
       (artifact) => artifact.kind !== "locale-official-active-skill-evidence"
     )
   };

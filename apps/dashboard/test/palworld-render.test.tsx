@@ -58,6 +58,8 @@ import { PalworldNotFoundPage } from "../src/features/public-palworld/components
 import { PalworldPageErrorBoundary } from "../src/features/public-palworld/components/PalworldPageErrorBoundary";
 import {
   filterPalworldBossMarkers,
+  PALWORLD_PAL_DETAIL_INITIAL_ZOOM,
+  PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY,
   PalworldPalLocationMap,
 } from "../src/features/public-palworld/components/PalworldPalLocationMap";
 import { PalworldActiveSkillDetail } from "../src/features/public-palworld/components/PalworldDetailModals";
@@ -1154,6 +1156,8 @@ test("월드 지도 일반 스폰 layer는 cluster 좌표를 확대 배율에 �
 });
 
 test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고 한국어·일본어 i18n을 연결한다", () => {
+  assert.equal(PALWORLD_PAL_DETAIL_INITIAL_ZOOM, 1.5);
+  assert.equal(PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY, 0.84);
   const anubisMarker: PalworldMapMarker = {
     id: "main-anubis-001",
     sourceRowId: "Boss_Anubis",
@@ -1234,6 +1238,10 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
     new URL("../src/features/public-palworld/components/PalworldDetailModals.tsx", import.meta.url),
     "utf8",
   );
+  const css = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
   assert.match(componentSource, /getPalworldMapMarkers\("main", controller\.signal\)/u);
   assert.match(componentSource, /getPalworldPalSpawns\(palId, "main", controller\.signal\)/u);
   assert.match(componentSource, /filterPalworldBossMarkers\(response\.markers, palId\)/u);
@@ -1248,6 +1256,14 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   assert.match(componentSource, /aria-pressed=\{period === value\}/u);
   assert.match(componentSource, /onClick=\{\(\) => onPeriodChange\(value\)\}/u);
   assert.match(componentSource, /<SpawnAreaLayer points=\{visibleSpawnPoints\} zoom=\{view\.zoom\}/u);
+  assert.match(
+    componentSource,
+    /Math\.max\([\s\S]*PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY[\s\S]*palworldSpawnPointOpacity/u,
+  );
+  assert.match(
+    componentSource,
+    /imageState !== "ready" \|\| !hasLocations[\s\S]*resetView\(\);[\s\S]*zoomAt\(PALWORLD_PAL_DETAIL_INITIAL_ZOOM\)/u,
+  );
   assert.match(componentSource, /spawnSummary\(visibleSpawnPoints, locale\)/u);
   assert.match(componentSource, /data-testid="pal-detail-map-viewport"[\s\S]*role="region"/u);
   assert.match(
@@ -1261,6 +1277,14 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   assert.match(detailSource, /<PalworldPalLocationMap[\s\S]*onOpenFullMap=\{onOpenMap\}[\s\S]*palId=\{detail\.id\}/u);
   assert.match(detailSource, /onPeriodChange=\{onSpawnPeriodChange\}/u);
   assert.match(detailSource, /period=\{spawnPeriod\}/u);
+  assert.match(
+    css,
+    /\.palworld-pal-location-loading,[\s\S]*?\.palworld-pal-location-preview\s*\{[\s\S]*?inline-size:\s*min\(100%, clamp\(20rem, 50vw, 40rem\)\);[\s\S]*?justify-self:\s*center;/u,
+  );
+  assert.match(
+    css,
+    /\.palworld-pal-location-spawn-point\s*\{[\s\S]*?fill:\s*var\(--palworld-sky\);[\s\S]*?stroke-width:\s*0\.0035;/u,
+  );
 });
 
 test("페이지 기술 키커와 Pal·도감 번호·레벨 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
@@ -1525,6 +1549,7 @@ test("검증된 농축 단계는 서버가 제공한 수치·작업 적성·Rank
   );
 
   assert.match(korean, /검증된 농축 규칙/u);
+  assert.match(korean, /4★ · \+17%/u);
   assert.match(korean, /농축 적용 능력치/u);
   assert.match(korean, /캐릭터 랭크[\s\S]*5/u);
   assert.match(korean, /파트너 스킬 랭크[\s\S]*5/u);
@@ -1535,6 +1560,7 @@ test("검증된 농축 단계는 서버가 제공한 수치·작업 적성·Rank
   assert.doesNotMatch(korean, /103|107|111/u);
 
   assert.match(japanese, /検証済みの濃縮ルール/u);
+  assert.match(japanese, /4★ · \+17%/u);
   assert.match(japanese, /濃縮適用ステータス/u);
   assert.match(japanese, /キャラクターランク[\s\S]*5/u);
   assert.match(japanese, /パートナースキルランク[\s\S]*5/u);

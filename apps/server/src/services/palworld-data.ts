@@ -15,6 +15,7 @@ import {
   type PalworldMetaResponse,
   type PalworldPaginatedResponse,
   type PalworldPagination,
+  type PalworldPalCondensationProfile,
   type PalworldPalDetail,
   type PalworldPalListFacets,
   type PalworldPalListResponse,
@@ -73,6 +74,11 @@ import {
   type PalworldReviewedItemAlias
 } from "../data/palworld-reviewed-item-aliases.js";
 import {
+  createPalworldPalCondensationProfile,
+  loadPalworldCondensationRules,
+  type PalworldLoadedCondensationRules
+} from "../data/palworld-condensation-artifact.js";
+import {
   normalizePalworldSearchTerm,
   type PalworldBreedingParentsQuery,
   type PalworldBreedingQuery,
@@ -128,14 +134,22 @@ function palSummary(pal: PalworldPalDetail): PalworldPalSummary {
 }
 
 function publicCondensationProfile(
-  pal: PalworldPalDetail
+  pal: PalworldPalDetail,
+  trustedProfile: PalworldPalCondensationProfile | undefined,
+  unavailableState: Exclude<
+    PalworldPalCondensationProfile["availability"],
+    "available"
+  >
 ): NonNullable<PalworldPalDetail["condensation"]> {
+  if (trustedProfile !== undefined) {
+    return structuredClone(trustedProfile);
+  }
   const profile = pal.condensation;
   if (!profile || profile.availability === "available") {
     // Pal snapshot 자체는 농축 규칙의 신뢰 경계가 아닙니다.
-    // release·Steam Build·Mappings에 고정된 별도 artifact loader가 추가되기 전에는
-    // 계산된 단계를 공개하지 않고 안전한 미제공 상태로 유지합니다.
-    return { availability: "missing_source" };
+    // release·Steam Build·Paldex checksum에 고정된 별도 artifact loader 결과만
+    // 계산된 단계로 공개하고, 그 외 직접 주입값은 계속 차단합니다.
+    return { availability: unavailableState };
   }
   return { ...profile };
 }
@@ -505,6 +519,14 @@ export class PalworldDataService {
   private readonly itemListCache = new Map<string, readonly PalworldItemDetail[]>();
   private readonly skillListCache = new Map<string, readonly PalworldSkillDetail[]>();
   private readonly searchCache = new Map<string, PalworldSearchResult>();
+  private readonly condensationProfiles: ReadonlyMap<
+    string,
+    PalworldPalCondensationProfile
+  >;
+  private readonly condensationUnavailableState: Exclude<
+    PalworldPalCondensationProfile["availability"],
+    "available"
+  >;
 
   constructor(snapshot: unknown, options: {
     supplementalSnapshot?: unknown;
@@ -513,6 +535,11 @@ export class PalworldDataService {
     gates?: PalworldRuntimeGates;
     coverage?: PalworldDataCoverage;
     breedingEngine?: PalworldBreedingEngine;
+    condensationRules?: PalworldLoadedCondensationRules;
+    condensationUnavailableState?: Exclude<
+      PalworldPalCondensationProfile["availability"],
+      "available"
+    >;
     useSnapshotBreedingPairs?: boolean;
     unavailableDomains?: readonly ("items" | "skills")[];
   } = {}) {
@@ -567,6 +594,14 @@ export class PalworldDataService {
           : undefined
       );
     this.unavailableDomains = new Set(options.unavailableDomains ?? []);
+    this.condensationUnavailableState =
+      options.condensationUnavailableState ?? "missing_source";
+    this.condensationProfiles = options.condensationRules === undefined
+      ? new Map()
+      : new Map(this.snapshot.pals.map((pal) => [
+          pal.id,
+          createPalworldPalCondensationProfile(pal, options.condensationRules!)
+        ]));
     const snapshotIsSample = this.snapshot.metadata.gameVersion === "sample-baseline";
     const supplementalIsSample = this.supplementalSnapshot.metadata.gameVersion === "sample-baseline";
     this.domains = options.domains ?? {
@@ -773,7 +808,11 @@ export class PalworldDataService {
     if (!pal) throw new PalworldRecordNotFoundError("pal", id);
     return {
       ...pal,
-      condensation: publicCondensationProfile(pal),
+      condensation: publicCondensationProfile(
+        pal,
+        this.condensationProfiles.get(pal.id),
+        this.condensationUnavailableState
+      ),
       breeding: {
         ...pal.breeding,
         specialParentPairs: pal.breeding.specialParentPairs.map((pair) => ({
@@ -1151,6 +1190,37 @@ export async function loadPalworldDataService(options: {
     ...(imageRoot === undefined ? {} : { imageRoot }),
     ...(options.mappingRoot === undefined ? {} : { mappingRoot: options.mappingRoot })
   });
+  let condensationRules: PalworldLoadedCondensationRules | undefined;
+  let condensationUnavailableState: Exclude<
+    PalworldPalCondensationProfile["availability"],
+    "available"
+  > = "missing_source";
+  const condensationArtifact = activeRuntime?.manifest.format === "legacy_composite_v2"
+    && activeRuntime.manifest.composite.schemaVersion >= 7
+    ? activeRuntime.manifest.composite.artifacts.find(
+        (artifact) => artifact.kind === "condensation-rules"
+      )
+    : undefined;
+  if (condensationArtifact !== undefined) {
+    if (releaseRoot === undefined || release.metadata.steamBuildId === undefined) {
+      condensationUnavailableState = "data_unavailable";
+    } else {
+      try {
+        condensationRules = await loadPalworldCondensationRules({
+          releaseRoot,
+          expectedRelease: release.metadata.gameVersion,
+          expectedSteamBuildId: release.metadata.steamBuildId,
+          expectedSourceRevision: release.metadata.sourceRevision,
+          expectedPaldexSha256: release.manifest.paldexSha256,
+          expectedArtifactSha256: condensationArtifact.sha256
+        });
+      } catch {
+        // 농축 artifact 손상은 Pal 텍스트·기본 능력치 API와 분리하고
+        // 해당 부가 기능만 fail-closed 상태로 전달합니다.
+        condensationUnavailableState = "data_unavailable";
+      }
+    }
+  }
   const palworldImageRoot = path.dirname(imageRoot ?? PALWORLD_PALDEX_IMAGE_ROOT);
   const catalogRoot = options.catalogRoot ?? releaseRoot;
   if (catalogRoot === undefined) {
@@ -1357,7 +1427,9 @@ export async function loadPalworldDataService(options: {
           total: adaptedCatalog.snapshot.pals.length
         }
       },
-      breedingEngine
+      breedingEngine,
+      condensationRules,
+      condensationUnavailableState
     });
   } catch (error) {
     if (
@@ -1415,6 +1487,8 @@ export async function loadPalworldDataService(options: {
     },
     gates: runtimeGates(release),
     breedingEngine,
+    condensationRules,
+    condensationUnavailableState,
     unavailableDomains: ["items", "skills"]
   });
 }

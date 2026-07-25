@@ -162,9 +162,32 @@ test("runtime meta는 레코드 존재 여부가 아니라 실제 상세 필드�
   assert.equal(meta.coverage.craftingRecipes.available < meta.coverage.itemDetails.available, true);
 });
 
-test("Pal 상세는 검증되지 않은 농축 수치를 만들지 않고 missing_source 상태를 반환한다", () => {
+test("Pal 상세는 active composite에 고정된 농축 규칙으로 단계별 능력치를 반환한다", () => {
   const detail = service.getPal("anubis");
-  assert.deepEqual(detail.condensation, { availability: "missing_source" });
+  assert.equal(detail.condensation.availability, "available");
+  assert.match(detail.condensation.sourceRuleSha256, /^[a-f0-9]{64}$/u);
+  assert.deepEqual(
+    detail.condensation.stages.map((stage) => ({
+      stars: stage.stars,
+      hp: stage.stats.find((entry) => entry.stat === "hp")?.value,
+      attack: stage.stats.find((entry) => entry.stat === "attack")?.value,
+      defense: stage.stats.find((entry) => entry.stat === "defense")?.value
+    })),
+    [
+      { stars: 0, hp: 120, attack: 130, defense: 100 },
+      { stars: 1, hp: 126, attack: 136.5, defense: 105 },
+      { stars: 2, hp: 132, attack: 143, defense: 110 },
+      { stars: 3, hp: 138, attack: 149.5, defense: 115 },
+      { stars: 4, hp: 144, attack: 156, defense: 120 }
+    ]
+  );
+  assert.equal(
+    detail.condensation.stages.every(
+      (stage) => stage.workSuitabilities.length === 0
+    ),
+    true,
+    "미검증 1.0 작업 적성 선택 규칙은 추정하지 않습니다."
+  );
   assert.equal(validatePalworldPalDetail(detail).ok, true);
 });
 

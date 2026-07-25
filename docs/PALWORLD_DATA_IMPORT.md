@@ -59,6 +59,20 @@ npm run import:palworld-pak --workspace @streamops/server -- \
 
 PAK 이미지 사용 정책은 신규 source archive와 생성된 asset manifest checksum에 별도로 고정한다. 운영자 사용 결정 상태에서도 `usageBasis`는 `operator_reference_use`, `rightsVerified`는 `false`로 유지하며 라이선스 승인 완료로 표시하지 않는다. import 결과는 항상 candidate이며, metadata·참조·이미지·권리·Docker smoke gate가 모두 통과하기 전에는 active selector를 변경하지 않는다. 실패한 candidate는 기존 active release에 영향을 주지 않으며 activation 문자열을 수동 편집하지 않는다.
 
+일반 필드 스폰처럼 기존 활성 도감과의 exact join 및 지도 좌표 변환은
+검증됐지만 export 자체의 게임 버전 metadata가 없는 경우에는
+`map-spawns-compatibility.json`을 별도 gate로 사용한다. 이 파일은 source
+archive·DataTable·USMAP·생성 mapping에 대한 운영자 검수 evidence와 활성
+Paldex·지도·spawn artifact 및 집계 checksum을 고정하고
+`sourceVersionVerified:false`, `rightsVerified:false`를 유지한다. Docker
+runtime에서는 raw archive·USMAP·생성 입력을 다시 읽지 않으므로 전자는 감사용
+고정 evidence이며, 후자는 실제 release 파일과 다시 대조한다. Candidate artifact
+단독으로는 계속 공개할 수 없으며, composite selector schema v6가
+artifact·manifest·compatibility approval 세 파일을 함께 pin한 경우에만 해당
+exact 데이터의 표시를 허용한다. Source metadata가 검증된 `active` artifact는
+compatibility approval 없이 artifact·manifest만 pin한다. 이 절차는 원본 게임
+버전 확인이나 이미지 권리 승인을 대신하지 않는다.
+
 ## 포함 기준과 격리 레코드
 
 고정 원본에 대한 기대 수량은 다음과 같다.
@@ -135,6 +149,16 @@ diff-palworld-paldex
 일반 빌드와 서버 시작 과정은 `fetch`를 실행하지 않는다. CI와 운영 배포는 커밋된 정규화 artifact를 네트워크 없이 검증할 수 있어야 한다.
 
 `npm run validate:palworld-data`는 Pal artifact의 source·mapping·artifact checksum과 `dataIntegrityGate`를 검증한다. `npm run validate:palworld-data:release`는 이미지가 포함된 287종 전체 release 준비 상태까지 검증하며, 현재처럼 15개가 fallback인 `partial` 상태에서는 전체 이미지 release가 준비되지 않았다는 오류로 실패한다. 이 예상 실패는 검증된 Pal 텍스트·수치 데이터와 272개 이미지의 runtime 활성화를 막지 않는다.
+
+## 농축 능력치 규칙
+
+`condensation-rules.json`은 Pal snapshot과 분리된 운영 compatibility artifact다. active composite manifest가 release, Steam Build ID, source revision, Paldex와 artifact SHA-256을 모두 고정한 경우에만 공개 Pal 상세에 적용한다.
+
+- 현재 검증 범위는 0★~4★의 기본 HP·공격·방어 `0/5/10/15/20%` 변화다.
+- 이동 속도, 스태미나, 식사량은 농축 능력치로 계산하지 않는다.
+- Pal snapshot에 직접 넣은 `condensation` 값은 신뢰하지 않는다.
+- 1.0에서 추가된 단계별 작업 적성 선택 규칙은 제공된 DataTable JSON에 계산 근거가 없으므로 `unresolved_rule`로 유지하고 추정하지 않는다.
+- artifact가 누락되면 `missing_source`, checksum 또는 schema가 손상되면 농축 기능만 `data_unavailable`로 격리한다. Pal 기본 정보와 다른 공개 API는 계속 제공한다.
 
 ## 결정적 생성
 

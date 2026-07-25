@@ -13,6 +13,11 @@ import {
 } from "@streamops/shared";
 import type { PalworldDataService } from "../services/palworld-data.js";
 import type { PalworldMapCoordinateTransform } from "./palworld-map-marker-artifact.js";
+import {
+  assertPalworldSpawnCompatibilityAuthorization,
+  loadPalworldSpawnCompatibilityAuthorization,
+  type PalworldSpawnCompatibilityAuthorization
+} from "./palworld-spawn-compatibility.js";
 
 export const PALWORLD_SPAWN_ARTIFACT_FILE = "map-spawns.json";
 export const PALWORLD_SPAWN_MANIFEST_FILE = "map-spawns-manifest.json";
@@ -631,11 +636,30 @@ export async function loadPalworldSpawnArtifact(
 export function createPalworldSpawnProvider(input: {
   artifact: PalworldSpawnArtifact;
   palworldDataService: Pick<PalworldDataService, "getPal" | "sourceInternalIdForPal">;
+  compatibilityAuthorization?: PalworldSpawnCompatibilityAuthorization;
 }): PalworldSpawnProvider {
   const artifact = assertPalworldSpawnArtifact(input.artifact);
-  if (artifact.activation !== "active") {
+  if (
+    artifact.activation === "candidate"
+    && input.compatibilityAuthorization === undefined
+  ) {
     throw new PalworldSpawnArtifactError(
-      "artifact.activation: 명시적으로 active인 artifact만 공개 API에 주입할 수 있습니다.",
+      "artifact.activation: candidate 단독으로는 공개 API에 주입할 수 없습니다.",
+      "PALWORLD_SPAWN_ARTIFACT_NOT_ACTIVE"
+    );
+  }
+  const compatibilityAuthorization = artifact.activation === "candidate"
+    ? assertPalworldSpawnCompatibilityAuthorization(
+        input.compatibilityAuthorization,
+        artifact
+      )
+    : undefined;
+  if (
+    artifact.activation !== "active"
+    && compatibilityAuthorization === undefined
+  ) {
+    throw new PalworldSpawnArtifactError(
+      "artifact.activation: active artifact 또는 검증된 compatibility authorization이 필요합니다.",
       "PALWORLD_SPAWN_ARTIFACT_NOT_ACTIVE"
     );
   }
@@ -682,7 +706,16 @@ export function createPalworldSpawnProvider(input: {
         compatibilityBasis: source.compatibilityBasis,
         transformRevision: world.transform.revision,
         rightsVerified: source.rightsVerified,
-        usageBasis: source.usageBasis
+        usageBasis: source.usageBasis,
+        ...(compatibilityAuthorization === undefined
+          ? {
+              activationBasis: "source_metadata" as const
+            }
+          : {
+              activationBasis: "versioned_compatibility_approval" as const,
+              compatibilityApprovalSha256:
+                compatibilityAuthorization.approvalSha256
+            })
       }
     });
   }
@@ -733,8 +766,27 @@ export async function loadPalworldSpawnProvider(input: {
   releaseRoot: string;
   dashboardStaticRoot?: string;
   palworldDataService: Pick<PalworldDataService, "getPal" | "sourceInternalIdForPal">;
+  compatibilityApprovalSha256?: string;
 }): Promise<PalworldSpawnProvider> {
   const artifact = await loadPalworldSpawnArtifact(input.releaseRoot);
+  const compatibilityAuthorization = artifact.activation === "candidate"
+    ? input.compatibilityApprovalSha256 === undefined
+      ? undefined
+      : await loadPalworldSpawnCompatibilityAuthorization({
+          releaseRoot: input.releaseRoot,
+          artifact,
+          expectedApprovalSha256: input.compatibilityApprovalSha256
+        })
+    : undefined;
+  if (
+    artifact.activation === "active"
+    && input.compatibilityApprovalSha256 !== undefined
+  ) {
+    throw new PalworldSpawnArtifactError(
+      "source metadata가 검증된 active artifact에는 compatibility approval을 사용할 수 없습니다.",
+      "PALWORLD_SPAWN_ARTIFACT_INVALID"
+    );
+  }
   if (input.dashboardStaticRoot !== undefined) {
     for (const world of artifact.worlds) {
       const assetPath = path.join(
@@ -762,6 +814,9 @@ export async function loadPalworldSpawnProvider(input: {
   }
   return createPalworldSpawnProvider({
     artifact,
-    palworldDataService: input.palworldDataService
+    palworldDataService: input.palworldDataService,
+    ...(compatibilityAuthorization === undefined
+      ? {}
+      : { compatibilityAuthorization })
   });
 }

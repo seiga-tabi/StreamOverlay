@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "steamBuildId": "24181105",
+  "sourceRevision": "atlas@0385b3fd8bd757240d4a2c79615145122669abd5+palcalc@211dd9fe520cbff9c5e3b9f8ec4f132669869714",
+  "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+  "status": "operator_reviewed_compatibility",
+  "evidence": {
+    "kind": "operator_provided_reference",
+    "evidenceSha256": "f790fad44bf16c3b2f67e0ea8c7f002a8bdd73802c1d9e904ba9e3f99b962fca",
+    "reviewedAt": "2026-07-24T00:12:16Z",
+    "reviewer": "operator"
+  },
+  "statRule": {
+    "affectedStats": [
+      "hp",
+      "attack",
+      "defense",
+      "meleeAttack",
+      "shotAttack"
+    ],
+    "stages": [
+      {
+        "stars": 0,
+        "bonusPercent": 0
+      },
+      {
+        "stars": 1,
+        "bonusPercent": 5
+      },
+      {
+        "stars": 2,
+        "bonusPercent": 10
+      },
+      {
+        "stars": 3,
+        "bonusPercent": 15
+      },
+      {
+        "stars": 4,
+        "bonusPercent": 20
+      }
+    ]
+  },
+  "workSuitabilityRule": {
+    "status": "unresolved_rule"
+  }
+}

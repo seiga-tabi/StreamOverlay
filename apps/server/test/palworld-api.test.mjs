@@ -376,6 +376,13 @@ test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드�
   const officialItem = await request(handler, "/api/palworld/items/bone");
   assert.equal(pal.res.statusCode, 200);
   assert.equal(pal.body.nameJa, "アヌビス");
+  assert.equal(pal.body.condensation.availability, "available");
+  assert.equal(
+    pal.body.condensation.stages[4].stats.find(
+      (entry) => entry.stat === "hp"
+    )?.value,
+    144
+  );
   assert.equal(pal.body.partnerSkill.translation.name.ko, "source_provided");
   assert.equal(pal.body.partnerSkill.translation.name.ja, "source_provided");
   assert.equal(

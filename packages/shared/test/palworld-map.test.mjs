@@ -50,6 +50,12 @@ const spawnOverlay = {
   sourceGameVersion: metadata.gameVersion,
   sourceSteamBuildId: "24181105"
 };
+const compatibilitySpawnOverlay = {
+  ...overlay,
+  compatibilityBasis: "exact_active_paldex_join_and_map_geometry",
+  activationBasis: "versioned_compatibility_approval",
+  compatibilityApprovalSha256: "d".repeat(64)
+};
 
 const marker = {
   id: "main-anubis-001",
@@ -158,6 +164,10 @@ test("Pal별 일반 스폰 응답은 ready, confirmed_empty, data_unavailable을
     points: [],
     overlay: undefined
   }).ok, true);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...ready,
+    overlay: compatibilitySpawnOverlay
+  }).ok, true);
 });
 
 test("Pal별 일반 스폰 응답은 grid, count, level과 결정적 정렬을 검증한다", () => {
@@ -240,6 +250,23 @@ test("Pal별 일반 스폰 상태는 검증된 overlay 공개 조건을 유지�
     ...base,
     state: "confirmed_empty",
     overlay: { ...spawnOverlay, sourceGameVersion: null }
+  }).ok, false);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...base,
+    state: "confirmed_empty",
+    overlay: {
+      ...compatibilitySpawnOverlay,
+      compatibilityApprovalSha256: undefined
+    }
+  }).ok, false);
+  assert.equal(validatePalworldPalSpawnResponse({
+    ...base,
+    state: "confirmed_empty",
+    overlay: {
+      ...compatibilitySpawnOverlay,
+      sourceGameVersion: metadata.gameVersion,
+      sourceSteamBuildId: "24181105"
+    }
   }).ok, false);
   assert.equal(validatePalworldPalSpawnResponse({
     ...base,

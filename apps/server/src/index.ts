@@ -188,10 +188,19 @@ try {
     )
   ) {
     try {
+      const compatibilityApprovalSha256 =
+        palworldActiveRuntime.manifest.format === "legacy_composite_v2"
+          ? palworldActiveRuntime.manifest.composite.artifacts.find(
+              (artifact) => artifact.kind === "map-spawns-compatibility"
+            )?.sha256
+          : undefined;
       const candidateSpawnProvider = await loadPalworldSpawnProvider({
         releaseRoot: palworldActiveRuntime.releaseRoot,
         dashboardStaticRoot: appConfig.paths.dashboardStatic,
-        palworldDataService
+        palworldDataService,
+        ...(compatibilityApprovalSha256 === undefined
+          ? {}
+          : { compatibilityApprovalSha256 })
       });
       const mainMap = candidateSpawnProvider.response("main", "anubis", meta.metadata);
       palworldSpawnProvider = candidateSpawnProvider;

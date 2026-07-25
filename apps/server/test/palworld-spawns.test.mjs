@@ -1,9 +1,10 @@
 import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { loadPalworldDataService } = await import("../dist/services/palworld-data.js");
@@ -11,7 +12,8 @@ const {
   PalworldSpawnArtifactError,
   createPalworldSpawnArtifact,
   createPalworldSpawnProvider,
-  loadPalworldSpawnArtifact
+  loadPalworldSpawnArtifact,
+  loadPalworldSpawnProvider
 } = await import("../dist/data/palworld-spawn-artifact.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 
@@ -19,6 +21,25 @@ const service = await loadPalworldDataService();
 const metadata = service.meta().metadata;
 const sourceInternalId = service.sourceInternalIdForPal("anubis");
 const temporaryRoots = [];
+const activeReleaseRoot = fileURLToPath(
+  new URL("../data/palworld/1.0.1/", import.meta.url)
+);
+const activeRuntimeManifest = JSON.parse(
+  await readFile(
+    fileURLToPath(
+      new URL("../data/palworld/runtime/active-manifest.json", import.meta.url)
+    ),
+    "utf8"
+  )
+);
+const compatibilityApprovalSha256 =
+  activeRuntimeManifest.composite.artifacts.find(
+    (artifact) => artifact.kind === "map-spawns-compatibility"
+  )?.sha256;
+assert.match(compatibilityApprovalSha256, /^[a-f0-9]{64}$/u);
+const dashboardStaticRoot = fileURLToPath(
+  new URL("../../dashboard/public/", import.meta.url)
+);
 
 function createRequest(url) {
   return {
@@ -254,6 +275,113 @@ test("active spawn provider는 Pal을 exact join하고 빈 위치 상태를 구�
       palworldDataService: service
     }),
     /sourceInternalId/u
+  );
+});
+
+test("checksum compatibility approval이 있는 고정 candidate는 실제 스폰을 공개한다", async () => {
+  const provider = await loadPalworldSpawnProvider({
+    releaseRoot: activeReleaseRoot,
+    dashboardStaticRoot,
+    palworldDataService: service,
+    compatibilityApprovalSha256
+  });
+  const lamball = await request(
+    handler(provider),
+    "/api/palworld/map/spawns?world=main&pal=lamball"
+  );
+  assert.equal(lamball.res.statusCode, 200);
+  assert.equal(lamball.body.state, "ready");
+  assert.equal(lamball.body.points.length, 23);
+  assert.equal(lamball.body.totalPlacements, 350);
+  assert.equal(
+    lamball.body.overlay.activationBasis,
+    "versioned_compatibility_approval"
+  );
+  assert.equal(lamball.body.overlay.sourceGameVersion, null);
+  assert.match(
+    lamball.body.overlay.compatibilityApprovalSha256,
+    /^[a-f0-9]{64}$/u
+  );
+
+  const anubis = await request(
+    handler(provider),
+    "/api/palworld/map/spawns?world=main&pal=anubis"
+  );
+  assert.equal(anubis.body.state, "ready");
+  assert.equal(anubis.body.points.length, 2);
+  assert.equal(anubis.body.totalPlacements, 35);
+
+  const noFieldSpawn = await request(
+    handler(provider),
+    "/api/palworld/map/spawns?world=main&pal=jetragon"
+  );
+  assert.equal(noFieldSpawn.body.state, "confirmed_empty");
+  assert.equal(noFieldSpawn.body.points.length, 0);
+});
+
+test("compatibility approval 누락과 변조는 candidate 공개를 fail-closed 처리한다", async () => {
+  await assert.rejects(
+    loadPalworldSpawnProvider({
+      releaseRoot: activeReleaseRoot,
+      palworldDataService: service
+    }),
+    (error) => error?.code === "PALWORLD_SPAWN_ARTIFACT_NOT_ACTIVE"
+  );
+  const files = [
+    "map-spawns.json",
+    "map-spawns-manifest.json",
+    "paldex.json",
+    "map-images-manifest.json"
+  ];
+  const missingRoot = await mkdtemp(
+    path.join(tmpdir(), "streamops-palworld-spawn-approval-missing-")
+  );
+  temporaryRoots.push(missingRoot);
+  await Promise.all(files.map((file) =>
+    copyFile(path.join(activeReleaseRoot, file), path.join(missingRoot, file))
+  ));
+  await assert.rejects(
+    loadPalworldSpawnProvider({
+      releaseRoot: missingRoot,
+      palworldDataService: service,
+      compatibilityApprovalSha256
+    }),
+    (error) => error?.code === "ENOENT"
+  );
+
+  const tamperedRoot = await mkdtemp(
+    path.join(tmpdir(), "streamops-palworld-spawn-approval-tampered-")
+  );
+  temporaryRoots.push(tamperedRoot);
+  await Promise.all(files.map((file) =>
+    copyFile(path.join(activeReleaseRoot, file), path.join(tamperedRoot, file))
+  ));
+  const approval = JSON.parse(
+    await readFile(
+      path.join(activeReleaseRoot, "map-spawns-compatibility.json"),
+      "utf8"
+    )
+  );
+  approval.counts.clusteredPoints += 1;
+  await writeFile(
+    path.join(tamperedRoot, "map-spawns-compatibility.json"),
+    `${JSON.stringify(approval, null, 2)}\n`,
+    "utf8"
+  );
+  const tamperedApprovalSha256 = createHash("sha256")
+    .update(
+      await readFile(
+        path.join(tamperedRoot, "map-spawns-compatibility.json")
+      )
+    )
+    .digest("hex");
+  await assert.rejects(
+    loadPalworldSpawnProvider({
+      releaseRoot: tamperedRoot,
+      palworldDataService: service,
+      compatibilityApprovalSha256: tamperedApprovalSha256
+    }),
+    /evidenceChecksum/u
   );
 });
 

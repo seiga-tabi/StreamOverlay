@@ -6,7 +6,7 @@
   "manifestFile": "manifest.json",
   "manifestSha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198",
   "composite": {
-    "schemaVersion": 5,
+    "schemaVersion": 7,
     "release": "1.0.1",
     "artifacts": [
       {
@@ -108,11 +108,31 @@
         "kind": "reviewed-item-aliases",
         "file": "locales/reviewed-item-aliases.json",
         "sha256": "8f9b8588799cc06e753dc2978f986dcfa09f79ed2f46725b32f3e0539ae1b9c3"
+      },
+      {
+        "kind": "condensation-rules",
+        "file": "condensation-rules.json",
+        "sha256": "183404a72983c45c7e1609bb29b735d6b1959dee12701efb9b34c7b4bba3a127"
+      },
+      {
+        "kind": "map-spawns",
+        "file": "map-spawns.json",
+        "sha256": "86ec04ed0a7003bc0dce3000987fcf0f2ef04a452f22d4f70a08d36ca2f4efe6"
+      },
+      {
+        "kind": "map-spawns-manifest",
+        "file": "map-spawns-manifest.json",
+        "sha256": "19e1920f1bb03679ed2839a8bfe1d6cf04ae66190ce6989373fa6edfe4eb48ee"
+      },
+      {
+        "kind": "map-spawns-compatibility",
+        "file": "map-spawns-compatibility.json",
+        "sha256": "d45d6749ada3b8ecf589c93c86233871c57da449e898a28fcca1b3aca56e4442"
       }
     ],
     "availability": {
       "mapMarkers": "candidate",
-      "mapSpawns": "candidate",
+      "mapSpawns": "active",
       "workImages": "candidate",
       "skillImages": "unavailable"
     }

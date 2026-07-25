@@ -33,6 +33,25 @@ function availabilityText(
   return text.condensationMissingSource;
 }
 
+function uniformStatBonusPercent(
+  stage: PalworldPalCondensationStage | undefined,
+): number | undefined {
+  if (!stage) return undefined;
+  if (stage.stars === 0) return 0;
+  const percentages = stage.stats
+    .filter((entry) => entry.baseValue > 0 && entry.value !== entry.baseValue)
+    .map((entry) =>
+      Number((((entry.value / entry.baseValue) - 1) * 100).toFixed(4)),
+    );
+  if (
+    percentages.length === 0
+    || percentages.some((value) => value !== percentages[0])
+  ) {
+    return undefined;
+  }
+  return percentages[0]!;
+}
+
 export function PalworldPalCondensation({
   baseStats,
   hasPartnerSkill,
@@ -57,6 +76,7 @@ export function PalworldPalCondensation({
   const workChanges = stage?.workSuitabilities.filter(
     (entry) => entry.level !== entry.baseLevel,
   ) ?? [];
+  const statBonusPercent = uniformStatBonusPercent(stage);
   const stageLabel = (value: PalworldCondensationStars) =>
     text.condensationStageLabel.replace("{stars}", String(value));
   const moveSelection = (
@@ -132,6 +152,13 @@ export function PalworldPalCondensation({
       <div className="palworld-condensation-ranks" aria-live="polite">
         {stage ? (
           <>
+            {statBonusPercent !== undefined && stars > 0 ? (
+              <Badge tone="success">
+                {text.condensationStatBonus
+                  .replace("{stars}", String(stars))
+                  .replace("{percent}", String(statBonusPercent))}
+              </Badge>
+            ) : null}
             <Badge tone="info">
               {text.condensationCharacterRank} {stage.characterRank}
             </Badge>
@@ -162,7 +189,7 @@ export function PalworldPalCondensation({
         />
       </div>
 
-      {stage && stars > 0 ? (
+      {stage && stars > 0 && stage.workSuitabilities.length > 0 ? (
         <div className="palworld-condensation-work">
           <h5>{text.condensationWorkChanges}</h5>
           {workChanges.length ? (

@@ -29,6 +29,9 @@ import { PalworldMedia } from "./PalworldMedia";
 
 export { filterPalworldBossMarkers } from "../utils/spawns";
 
+export const PALWORLD_PAL_DETAIL_INITIAL_ZOOM = 1.5;
+export const PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY = 0.84;
+
 type LocationLayerState<T> =
   | { kind: "loading" }
   | { kind: "ready"; data: T }
@@ -100,7 +103,10 @@ function SpawnAreaLayer({
           cx={point.normalizedX}
           cy={point.normalizedY}
           key={point.id}
-          opacity={palworldSpawnPointOpacity(point.placementCount)}
+          opacity={Math.max(
+            PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY,
+            palworldSpawnPointOpacity(point.placementCount),
+          )}
           r={palworldSpawnPointRadius(point.placementCount, zoom)}
         />
       ))}
@@ -250,8 +256,10 @@ export function PalworldPalLocationMap({
   } as CSSProperties;
 
   useEffect(() => {
+    if (imageState !== "ready" || !hasLocations) return;
     resetView();
-  }, [palId, resetView]);
+    zoomAt(PALWORLD_PAL_DETAIL_INITIAL_ZOOM);
+  }, [hasLocations, imageState, palId, resetView, zoomAt]);
 
   return (
     <section

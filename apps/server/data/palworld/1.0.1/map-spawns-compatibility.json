@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "operator_acknowledged",
+  "decision": "allow_exact_checksum_compatibility_display",
+  "sourceVersionVerified": false,
+  "compatibilityBasis": "exact_active_paldex_join_and_map_geometry",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "sourceTables": {
+    "placementTable": {
+      "member": "Pal/DataTable/Spawner/DT_PalSpawnerPlacement.json",
+      "sha256": "73b9e111491c9ee060e539594e162032a2585f8594ad47b9dd2169db49d38be4"
+    },
+    "wildSpawnerTable": {
+      "member": "Pal/DataTable/Spawner/DT_PalWildSpawner.json",
+      "sha256": "4bac2dfd1177d5b668677826527636adb1f2cc6dd9861adda7579bd07cb48978"
+    },
+    "palTable": {
+      "member": "Pal/DataTable/Character/DT_PalMonsterParameter_Common.json",
+      "sha256": "cc1c3b63078489a8570b6eea435aec7a1cdbe6428cac1330080d10727460433c"
+    },
+    "distributionTable": {
+      "member": "Pal/DataTable/UI/DT_PaldexDistributionData.json",
+      "sha256": "1261f53f885dc470684569999c48eb4581b8aab06a6da22bc98786d8eff7580a"
+    }
+  },
+  "mappingsEvidence": {
+    "archiveSha256": "2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+    "member": "Mappings101.usmap",
+    "sha256": "b9b1ef0a5b2fba657d421f43c31dda7d3818aadb50e52c1c3215dfe45db9fb44"
+  },
+  "generationMappingSha256": "8c6df559d176c5ab3dabb57856611aecaf00825e6d39766a0537ab09ecec0240",
+  "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+  "targetPaldexSteamBuildId": "24181105",
+  "spawnArtifactSha256": "86ec04ed0a7003bc0dce3000987fcf0f2ef04a452f22d4f70a08d36ca2f4efe6",
+  "spawnManifestSha256": "19e1920f1bb03679ed2839a8bfe1d6cf04ae66190ce6989373fa6edfe4eb48ee",
+  "mapImagesManifestSha256": "11db2051f08c4c04be2bff870739792aff13b7679e4fb16dc852929d39a2aa98",
+  "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+  "transformRevision": "main-map-fmodel-spawns-v1",
+  "counts": {
+    "palCount": 224,
+    "placementLinks": 53826,
+    "clusteredPoints": 3784,
+    "unresolvedPalOccurrences": 12,
+    "exactJoinMismatches": 0
+  },
+  "reviewedAt": "2026-07-25T00:00:00.000Z",
+  "reviewer": "streamoverlay-data-maintenance",
+  "evidenceChecksum": "440ca737f3505cb3f69530b036c4542cda0a0ebd99d148233660d64da19f1204",
+  "rightsVerified": false,
+  "usageBasis": "operator_reference_use"
+}
