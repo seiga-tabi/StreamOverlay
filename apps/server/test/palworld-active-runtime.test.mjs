@@ -220,8 +220,8 @@ test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 c
     release: "1.0.1",
     workImages: "candidate"
   });
-  assert.equal(composite.schemaVersion, 3);
-  assert.equal(composite.artifacts.length, 17);
+  assert.equal(composite.schemaVersion, 5);
+  assert.equal(composite.artifacts.length, 20);
   assert.equal(
     composite.artifacts.some((artifact) =>
       artifact.kind === "map-images-manifest"
@@ -232,6 +232,25 @@ test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 c
   assert.equal(
     composite.artifacts.some((artifact) => artifact.file.includes("import-report")),
     false
+  );
+  assert.deepEqual(
+    composite.artifacts
+      .filter((artifact) => artifact.kind.startsWith("locale-official-"))
+      .map((artifact) => [artifact.kind, artifact.file]),
+    [
+      [
+        "locale-official-source-fields",
+        "locales/official-source-fields.json"
+      ],
+      [
+        "locale-official-active-skill-evidence",
+        "locales/official-active-skill-evidence.json"
+      ],
+      [
+        "locale-official-compatibility",
+        "locales/official-locale-compatibility.json"
+      ]
+    ]
   );
   assert.deepEqual(composite.availability, {
     mapMarkers: "candidate",
@@ -271,11 +290,35 @@ test("legacy composite는 runtime 파일 전체를 checksum으로 고정하고 c
     false,
     "candidate spawn 파일이 release에 남아 있어도 provider 로드를 허용하면 안 됩니다."
   );
+  const legacyV4 = {
+    ...composite,
+    schemaVersion: 4,
+    artifacts: composite.artifacts.filter(
+      (artifact) => artifact.kind !== "locale-official-active-skill-evidence"
+    )
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV4).schemaVersion,
+    4,
+    "기존 composite schema v4 selector를 계속 읽어야 합니다."
+  );
+  const legacyV3 = {
+    ...legacyV4,
+    schemaVersion: 3,
+    artifacts: legacyV4.artifacts.filter(
+      (artifact) => !artifact.kind.startsWith("locale-official-")
+    )
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV3).schemaVersion,
+    3,
+    "기존 composite schema v3 selector를 계속 읽어야 합니다."
+  );
   assert.equal(
     assertPalworldLegacyCompositeRuntimeManifest({
-      ...composite,
+      ...legacyV3,
       schemaVersion: 2,
-      artifacts: composite.artifacts.filter(
+      artifacts: legacyV3.artifacts.filter(
         (artifact) => artifact.kind !== "map-images-manifest"
       )
     }).schemaVersion,

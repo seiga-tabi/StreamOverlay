@@ -25,7 +25,10 @@ import { PalworldSkillsPage, SkillDetailModal } from "../features/public-palworl
 import { PalworldSourceFooter } from "../features/public-palworld/components/PalworldSourceFooter";
 import { PalworldStreamersPage } from "../features/public-palworld/components/PalworldStreamersPage";
 import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i18n/palworld-i18n";
-import { PALWORLD_VERSION_MISMATCH_EVENT } from "../features/public-palworld/api/palworld";
+import {
+  PALWORLD_VERSION_MISMATCH_EVENT,
+  resetPalworldReleaseObservation,
+} from "../features/public-palworld/api/palworld";
 import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldRoute";
 import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
 import {
@@ -219,6 +222,9 @@ export function PublicPalworldPage({
   }, [followedChannels, followedError, needsFollowedChannels, refreshFollowedChannels, twitchStatus.connected]);
 
   useEffect(() => {
+    // 이전 Palworld 화면이나 개발 중 교체된 release의 관찰값을 새 화면 세션으로
+    // 가져오지 않습니다. 현재 화면 안에서 섞이는 실제 mismatch 감시는 유지됩니다.
+    resetPalworldReleaseObservation();
     const handleMismatch = () => setVersionMismatch(true);
     window.addEventListener(PALWORLD_VERSION_MISMATCH_EVENT, handleMismatch);
     return () => window.removeEventListener(PALWORLD_VERSION_MISMATCH_EVENT, handleMismatch);

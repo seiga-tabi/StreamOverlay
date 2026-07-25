@@ -7,6 +7,8 @@ import {
   PALWORLD_TRANSLATION_RELEASE,
   PALWORLD_TRANSLATION_SCHEMA_VERSION,
   atomicWriteJson,
+  independentOfficialSourceFieldsForRecords,
+  loadIndependentOfficialSourceFields,
   loadTranslationSources,
   mergeTranslationRecords,
   readCandidateRecords,
@@ -20,6 +22,7 @@ import {
   stableJson,
   translationNameCollisions,
   translationCoverage,
+  translationMethodForStatusCounts,
   validateTranslationRecord,
   type TranslationLocale,
   type TranslationSnapshot,
@@ -82,6 +85,12 @@ async function main(): Promise<void> {
   const locale = localeArgument();
   const translationRevision = revisionArgument();
   const sources = await loadTranslationSources();
+  const independentOfficialSourceFields =
+    await loadIndependentOfficialSourceFields({
+      release: PALWORLD_TRANSLATION_RELEASE,
+      sourceCatalogSha256: sources.catalogSha256,
+      sourcePaldexSha256: sources.paldexSha256,
+    });
   const sourceByIdentity = new Map(sources.corpus.map((record) => [`${record.kind}:${record.id}`, record]));
   const identicalAllowlist = await readIdenticalAllowlist();
   const reviewedNames = await readReviewedNames();
@@ -119,9 +128,7 @@ async function main(): Promise<void> {
   assertStrictMachineNameQualityForImport(records, locale, sources.corpus, reviewedNames);
   const coverage = translationCoverage(records, sources.corpus);
   const statuses = coverage.status;
-  const translationMethod = statuses.human_reviewed > 0 && statuses.machine_assisted > 0
-    ? "mixed"
-    : statuses.human_reviewed > 0 ? "human_reviewed" : "machine_assisted";
+  const translationMethod = translationMethodForStatusCounts(statuses);
   const contentHash = sha256(stableJson(records));
   const snapshot: TranslationSnapshot = {
     schemaVersion: PALWORLD_TRANSLATION_SCHEMA_VERSION,
@@ -150,6 +157,11 @@ async function main(): Promise<void> {
         sha256: value?.sourceSha256,
       }])) as never,
     })),
+    officialSourceFields: independentOfficialSourceFieldsForRecords(
+      locale,
+      records,
+      independentOfficialSourceFields,
+    ),
     englishCopyAllowlist: [...identicalAllowlist]
       .filter((key) => key.startsWith(`${locale}:`))
       .map((key) => key.slice(locale.length + 1)),

@@ -21,6 +21,9 @@ const {
   PalworldDataService,
   loadPalworldDataService
 } = await import("../dist/services/palworld-data.js");
+const {
+  loadIndependentOfficialSourceFields
+} = await import("../dist/scripts/palworld-translation-artifacts.js");
 
 const releaseRoot = fileURLToPath(new URL("../data/palworld/1.0.1/", import.meta.url));
 const temporaryRoots = [];
@@ -40,6 +43,12 @@ async function canonicalContext(root = releaseRoot) {
     loadPalworldPaldexRuntimeRelease({ releaseRoot: root })
   ]);
   const reviewedItemAliases = await loadPalworldReviewedItemAliases(root, catalogSource.catalog);
+  const officialSourceFields = await loadIndependentOfficialSourceFields({
+    release: catalogSource.catalog.release,
+    sourceCatalogSha256: catalogSource.manifest.catalogSha256,
+    sourcePaldexSha256: paldex.manifest.paldexSha256,
+    localeRoot: path.join(root, "locales")
+  });
   return {
     catalogSource,
     paldex,
@@ -49,7 +58,8 @@ async function canonicalContext(root = releaseRoot) {
       catalogSha256: catalogSource.manifest.catalogSha256,
       paldex,
       paldexSha256: paldex.manifest.paldexSha256,
-      reviewedItemAliases
+      reviewedItemAliases,
+      officialSourceFields
     })
   };
 }
@@ -71,7 +81,41 @@ test("고정 KO·JA locale artifact는 canonical hash 검증 후 독립적으로
   assert.equal(bundle.snapshots.ja.records.length > 0, true);
 });
 
-test("한 locale 파일이 손상되어도 다른 locale과 Palworld catalog runtime은 유지된다", async () => {
+test("checksum을 갱신한 machine 번역도 공개 runtime loader가 fail-closed로 차단한다", async () => {
+  const root = fixture();
+  const localePath = path.join(root, "locales", "ko.json");
+  const manifestPath = path.join(root, "locales", "manifest.json");
+  const corpus = JSON.parse(readFileSync(path.join(root, "locales", "corpus.json"), "utf8"));
+  const snapshot = JSON.parse(readFileSync(localePath, "utf8"));
+  const source = corpus.records.find((record) =>
+    record.kind === "item" && record.id === "pal-crystal-s"
+  )?.fields.description;
+  const record = snapshot.records.find((entry) =>
+    entry.kind === "item" && entry.id === "pal-crystal-s"
+  );
+  assert.ok(source);
+  assert.ok(record);
+  record.fields.description = {
+    sourceSha256: source.sourceSha256,
+    text: "세계수에서 결정화된 에너지로, 신비한 아이템과 구조물을 만드는 재료입니다.",
+    status: "machine_assisted"
+  };
+  snapshot.translationMethod = "mixed";
+  const localeBytes = Buffer.from(`${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+  writeFileSync(localePath, localeBytes);
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  manifest.locales.ko.sha256 = sha256(localeBytes);
+  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+
+  const { context } = await canonicalContext(root);
+  const bundle = await loadPalworldTranslationBundle({ releaseRoot: root, context });
+  assert.equal(bundle.states.ko.status, "invalid");
+  assert.equal(bundle.states.ko.errorCode, "PALWORLD_TRANSLATION_LOCALE_INVALID");
+  assert.equal(bundle.snapshots.ko, undefined);
+  assert.equal(bundle.states.ja.status, "loaded");
+});
+
+test("직접 locale loader는 손상을 격리하고 composite runtime은 공식 evidence 전체를 fail-closed 처리한다", async () => {
   const root = fixture();
   writeFileSync(path.join(root, "locales", "ko.json"), "{손상된 locale", "utf8");
   const { context } = await canonicalContext(root);
@@ -94,7 +138,7 @@ test("한 locale 파일이 손상되어도 다른 locale과 Palworld catalog run
   assert.equal(service.meta().counts.pals, 287);
   assert.deepEqual(reported.map(({ locale, status, errorCode }) => ({ locale, status, errorCode })), [
     { locale: "ko", status: "invalid", errorCode: "PALWORLD_TRANSLATION_LOCALE_INVALID" },
-    { locale: "ja", status: "loaded", errorCode: undefined }
+    { locale: "ja", status: "invalid", errorCode: "PALWORLD_TRANSLATION_LOCALE_INVALID" }
   ]);
   assert.equal(JSON.stringify(reported).includes("손상된 locale"), false);
 });
@@ -149,12 +193,14 @@ test("glossary source catalog checksum 변조는 manifest hash를 함께 바꿔�
   assert.equal(bundle.states.ja.staleSourceHash, true);
 });
 
-test("human-reviewed Pal 이름은 locale checksum을 갱신해도 glossary 이름과 다르면 차단한다", async () => {
+test("source_provided Pal 이름은 locale checksum만 갱신해도 공식 source와 다르면 차단한다", async () => {
   const root = fixture();
   const localePath = path.join(root, "locales", "ko.json");
   const manifestPath = path.join(root, "locales", "manifest.json");
   const snapshot = JSON.parse(readFileSync(localePath, "utf8"));
-  const record = snapshot.records.find((entry) => entry.kind === "pal" && entry.fields.name?.status === "human_reviewed");
+  const record = snapshot.records.find((entry) =>
+    entry.kind === "pal" && entry.fields.name?.status === "source_provided"
+  );
   assert.ok(record);
   record.fields.name.text = `${record.fields.name.text} 변조`;
   const localeBytes = Buffer.from(`${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
@@ -255,7 +301,7 @@ test("canonical source hash가 오래된 manifest는 두 locale을 차단하고 
   ]);
 });
 
-test("runtime adapter는 구조 검증을 통과한 machine 이름과 설명을 검수 중 상태로 함께 제공한다", async () => {
+test("runtime adapter는 machine 이름과 설명을 공개하지 않고 영어 원문 fallback으로 격리한다", async () => {
   const { catalogSource, paldex, context, reviewedItemAliases } = await canonicalContext();
   const localizedIds = new Set(PALWORLD_SNAPSHOT.items.map((item) => item.id));
   const item = catalogSource.catalog.items.find((candidate) => !localizedIds.has(candidate.id));
@@ -303,13 +349,13 @@ test("runtime adapter는 구조 검증을 통과한 machine 이름과 설명을 
     sourceChecksum: "a".repeat(64)
   });
   const merged = adapted.snapshot.items.find((candidate) => candidate.id === item.id);
-  assert.equal(merged.nameKo, "검증용 번역 이름");
-  assert.equal(merged.descriptionKo, "검증용 번역 설명");
+  assert.equal(merged.nameKo, undefined);
+  assert.equal(merged.descriptionKo, undefined);
   assert.equal(merged.nameEn, item.nameEn);
-  assert.equal(merged.translation.name.ko, "machine_assisted");
-  assert.equal(merged.translation.description.ko, "machine_assisted");
+  assert.equal(merged.translation.name.ko, "source_language_fallback");
+  assert.equal(merged.translation.description.ko, "source_language_fallback");
   assert.equal(merged.translation.name.ja, "source_language_fallback");
-  assert.equal(adapted.coverage.translations.ko.itemNames.available > 0, true);
+  assert.equal(adapted.coverage.translations.ko.machineAssisted, 0);
 });
 
 test("공식 source_provided 이름은 legacy sample보다 우선하고 item 참조·스킬까지 같은 상태를 보존한다", async () => {
@@ -456,29 +502,22 @@ test("공식 source_provided 이름은 legacy sample보다 우선하고 item 참
   );
 });
 
-test("현재 item·skill machine 이름은 locale runtime에 표시하고 검수 중 상태를 유지한다", async () => {
+test("active locale artifact와 공개 runtime에는 machine 번역이 남지 않는다", async () => {
   const service = await loadPalworldDataService();
   for (const locale of ["ko", "ja"]) {
     const snapshot = JSON.parse(readFileSync(path.join(releaseRoot, "locales", `${locale}.json`), "utf8"));
-    const machineNames = snapshot.records.filter((record) =>
-      (record.kind === "item" || record.kind === "skill")
-      && record.fields.name?.status === "machine_assisted"
+    assert.equal(
+      snapshot.records.some((record) =>
+        Object.values(record.fields).some((field) => field?.status === "machine_assisted")
+      ),
+      false
     );
-    assert.equal(machineNames.length, 2_403);
-    for (const record of machineNames) {
-      const runtime = record.kind === "item" ? service.getItem(record.id) : service.getSkill(record.id);
-      assert.equal(
-        locale === "ko" ? runtime.nameKo : runtime.nameJa,
-        record.fields.name.text,
-        `${locale}:${record.kind}:${record.id}`
-      );
-      assert.equal(runtime.translation.name[locale], "machine_assisted");
-      assert.equal(runtime.nameEn.length > 0, true);
-    }
   }
+  assert.equal(service.meta().coverage.translations.ko.machineAssisted, 0);
+  assert.equal(service.meta().coverage.translations.ja.machineAssisted, 0);
 });
 
-test("Pal 상세와 아이템 상세의 중첩 참조도 한국어·일본어 이름 상태를 유지한다", async () => {
+test("Pal 상세와 아이템 상세의 중첩 참조도 machine 이름을 공개하지 않는다", async () => {
   const service = await loadPalworldDataService();
   const koreanSnapshot = JSON.parse(readFileSync(path.join(releaseRoot, "locales", "ko.json"), "utf8"));
   const palIds = koreanSnapshot.records
@@ -487,31 +526,30 @@ test("Pal 상세와 아이템 상세의 중첩 참조도 한국어·일본어 �
   const itemIds = koreanSnapshot.records
     .filter((record) => record.kind === "item")
     .map((record) => record.id);
-  const assertLocalizedReference = (reference, context) => {
-    assert.equal(typeof reference.nameKo, "string", `${context}:ko`);
-    assert.equal(typeof reference.nameJa, "string", `${context}:ja`);
-    assert.notEqual(reference.translation?.name?.ko, "source_language_fallback", `${context}:ko-status`);
-    assert.notEqual(reference.translation?.name?.ja, "source_language_fallback", `${context}:ja-status`);
+  const assertSafeReference = (reference, context) => {
+    assert.equal(typeof reference.nameEn, "string", `${context}:en`);
+    assert.notEqual(reference.translation?.name?.ko, "machine_assisted", `${context}:ko-status`);
+    assert.notEqual(reference.translation?.name?.ja, "machine_assisted", `${context}:ja-status`);
   };
 
   for (const palId of palIds) {
     const pal = service.getPal(palId);
-    if (pal.partnerSkill) assertLocalizedReference(pal.partnerSkill, `${palId}:partner`);
-    for (const skill of pal.activeSkills) assertLocalizedReference(skill, `${palId}:active:${skill.id}`);
-    for (const drop of pal.drops) assertLocalizedReference(drop, `${palId}:drop:${drop.id}`);
+    if (pal.partnerSkill) assertSafeReference(pal.partnerSkill, `${palId}:partner`);
+    for (const skill of pal.activeSkills) assertSafeReference(skill, `${palId}:active:${skill.id}`);
+    for (const drop of pal.drops) assertSafeReference(drop, `${palId}:drop:${drop.id}`);
   }
   for (const itemId of itemIds) {
     const item = service.getItem(itemId);
     for (const material of item.craftingMaterials) {
-      assertLocalizedReference(material.item, `${itemId}:material:${material.item.id}`);
+      assertSafeReference(material.item, `${itemId}:material:${material.item.id}`);
     }
     for (const related of item.relatedItems) {
-      assertLocalizedReference(related, `${itemId}:related:${related.id}`);
+      assertSafeReference(related, `${itemId}:related:${related.id}`);
     }
   }
 });
 
-test("versioned exact alias는 기존 검수 아이템 10개의 locale 이름을 human_reviewed로 유지한다", async () => {
+test("versioned exact alias 아이템도 공식 locale이 있으면 source_provided를 우선한다", async () => {
   const service = await loadPalworldDataService();
   const expected = new Map([
     ["copper-ingot", ["금속 주괴", "金属インゴット"]],
@@ -525,8 +563,8 @@ test("versioned exact alias는 기존 검수 아이템 10개의 locale 이름을
     assert.equal(item.nameKo, ko);
     assert.equal(item.nameJa, ja);
     assert.deepEqual(item.translation.name, {
-      ko: "human_reviewed",
-      ja: "human_reviewed",
+      ko: "source_provided",
+      ja: "source_provided",
       sourceIntegrity: { ko: "intact", ja: "intact" }
     });
   }
@@ -542,10 +580,10 @@ test("meta locale coverage는 데이터 수와 번역·fallback·missing-source 
     assert.equal(translated.skillNames.total, meta.counts.skills);
     assert.equal(translated.palNames.available, meta.counts.pals);
     assert.equal(translated.itemNames.available, meta.counts.items);
-    assert.equal(translated.skillNames.available, meta.counts.skills);
+    assert.equal(translated.skillNames.available, 487);
     assert.equal(translated.palNames.missing, 0);
     assert.equal(translated.itemNames.missing, 0);
-    assert.equal(translated.skillNames.missing, 0);
+    assert.equal(translated.skillNames.missing, 79);
     assert.equal(translated.palDescriptions.total <= meta.counts.pals, true);
     assert.equal(translated.itemDescriptions.total <= meta.counts.items, true);
     assert.equal(translated.skillDescriptions.total <= meta.counts.skills, true);
@@ -568,11 +606,16 @@ test("meta locale coverage는 데이터 수와 번역·fallback·missing-source 
       translated.sourceLanguageFallback,
       fieldCoverages.reduce((sum, field) => sum + field.missing, 0)
     );
-    assert.equal(translated.sourceAnomalousFields, 1_120);
-    assert.equal(translated.missingSourceSlots, 1_649);
-    assert.equal(translated.sourceIntegrity.sourceAnomalousFields, 1_120);
-    assert.equal(translated.sourceIntegrity.missingSourceSlots, 1_649);
+    assert.equal(translated.sourceAnomalousFields, 0);
+    assert.equal(translated.missingSourceSlots, 0);
+    assert.equal(translated.sourceIntegrity.sourceAnomalousFields, 0);
+    assert.equal(translated.sourceIntegrity.missingSourceSlots, 0);
     assert.equal(translated.sourceIntegrity.missingSourceFields, 21);
     assert.equal(translated.availability.translated, translated.review.total);
+    assert.equal(translated.machineAssisted, 0);
+    assert.equal(translated.sourceProvided, 5_219);
+    assert.equal(translated.humanReviewed, 0);
+    assert.equal(translated.artifactTranslated, 5_219);
+    assert.equal(translated.publicUsable, 5_219);
   }
 });

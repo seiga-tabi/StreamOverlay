@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "translation_compatibility_only",
+  "scope": "official_locale_exact_join",
+  "reviewedAt": "2026-07-25T00:00:00.000Z",
+  "reviewer": "streamoverlay-locale-review",
+  "evidenceChecksum": "eb408d81a4db9f25cc873b6cda0b80d47307d5b40db2d042ab99005fb979a93e",
+  "usageBasis": "operator_reference_use",
+  "rightsVerified": false,
+  "candidateRuntimeActivationGranted": false,
+  "fuzzyMatchingUsed": false,
+  "inputs": {
+    "active": {
+      "catalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+      "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+      "corpusSha256": "ff12da84952783a30fa138c890184d3008b3ec3407a75eaa2ecfab16f7e6fbbc",
+      "localeSha256": {
+        "ko": "9f0cc7e65c8607c505ffc8d51fd74b46da9358379d74b4997d5fdb3659eac00c",
+        "ja": "f1b756018821e5631da1ffe68fa1ef0485ffb7441d5052db6c92974c6e1d1f09"
+      },
+      "glossarySha256": "19a8d9fab0d3e924b41772dea00adacc05fdc92785baa55f271d589f5941bbaf",
+      "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
+      "translationRevision": "official-locale-overlay-18b8d60fdb9e7acb-eb408d81"
+    },
+    "candidate": {
+      "candidateId": "candidate-1248184a4b527d94",
+      "activationEligible": false,
+      "activationBlockers": [
+        "EXPORT_METADATA_NOT_PROVIDED",
+        "PUBLIC_ID_MAPPING_RELEASE_UNVERIFIED"
+      ],
+      "artifactSha256": {
+        "runtimeManifest": "265e60d64d93c3050b0da65481b2d109e71afe83cf4a845fb2371ded4b41303c",
+        "importReport": "eb408d81a4db9f25cc873b6cda0b80d47307d5b40db2d042ab99005fb979a93e",
+        "sourceLock": "160a2fc6a5b0b45b37479b2c88eae6aed012ec26dc290b3dc45f1b50406f8a4d",
+        "paldex": "748aba2b093b40b115f570f704c902003e3ca2f4c4c0b29d273b4a329571ce58",
+        "items": "472b9419e0e1d7437e8ac436ab99c1dc0d0ca5eef43d0665bbbe30b34d69568b",
+        "skills": "4f03cc98c5cf5aeac245b2f11ca82ac09bef7c0ffca0fed2512c4a8c4258ceb7",
+        "localeKo": "fd3aa5261b9d4e8051fb72905eaeaff1ae78f6c29dac3e18d4a466d143b17726",
+        "localeJa": "92d9a9102281aa68f66f4d841b10b28f544cab47b6b8d4500694bfb8506a46a5"
+      },
+      "sourceArchives": [
+        {
+          "role": "asset_overlay",
+          "sha256": "2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+          "bytes": 2277355281
+        },
+        {
+          "role": "primary",
+          "sha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+          "bytes": 137652397
+        }
+      ],
+      "archive": {
+        "sha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+        "bytes": 137652397,
+        "fileCount": 3289
+      },
+      "mappings": {
+        "aliases": "5c4caf90ef2b8d2aaaaac4b4a1548a4b316391b915ef3abf1cb93317ec45d4d3",
+        "elementIconMap": "98fd64ad7aebd65d93340f569ed647341f4f8923d937ea9a633fa8d93e61a5f9",
+        "exclusions": "62d0acc981237cc3557c88b0c836047ba1838290922a5dd7de5980c2ccb6916a",
+        "legacySkillCatalog": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+        "palIconOverrides": "3d7966596ddca21209d4119f9268e20c4855027706a02a735351c22453a8bfcb",
+        "publicActiveSkillAllowlist": "7146b2643c4432f718f40567dde55c04b0f7eb49b54f9c359b03c33cb38e5293",
+        "publicIdExtensions": "05432c254af1186bf3446d4427ae583f9babfb5bbdf172ac754f2fadc74bd808",
+        "publicIdMap": "174d68027ae7f7c54ecd3158f0d98a03eb644c4f70cfe2aba70aeddbe7a67acd",
+        "skillIconMap": "1dc086d3181d9a0584ed4b780347e35f86ae0725a7a5cb9f956304515f4d0e6d",
+        "workIconMap": "1867e2a6caf0efa9f852c6227cf80fa04fa1ab8d09b8281f415bc08c6e50db58"
+      },
+      "activeSkillLocaleMapSha256": "0549911b57790c55b77c364fe6e7d6539eb19324305369bae254b7da2d59fb8d"
+    }
+  },
+  "outputs": {
+    "officialSourceFieldsSha256": "9499ec38e96ef9caa4258f9f119326b302970267f7b23355020c9a4e223c6ff9",
+    "activeSkillEvidenceSha256": "19c49222cc8e30b4151fb6aca3d6ada259f391bd4f1ea710d88bdc5d6afb52e2",
+    "localeSha256": {
+      "ko": "5ac95abeed9ba072fe7cf0818b9b80bcd45b5224ba5ff821f7809de19196cb4e",
+      "ja": "c29f8299234960623455fa0c970744550f89a1cd2353f555a1966887124aa25b"
+    },
+    "manifestSha256": "f6c95472303eb0dfa873597d1fcf94b2795ff5b5e3e909843ba6d71e1d0f3c62",
+    "translationRevision": "official-locale-overlay-9499ec38e96ef9ca-eb408d81"
+  },
+  "counts": {
+    "officialExactResolved": {
+      "ko": 5219,
+      "ja": 5219
+    },
+    "officialUnresolved": {
+      "ko": 2,
+      "ja": 2
+    },
+    "officialUnjoined": {
+      "ko": 237,
+      "ja": 237
+    },
+    "humanReviewedPreserved": {
+      "ko": 0,
+      "ja": 0
+    },
+    "humanReviewedSuperseded": {
+      "ko": 0,
+      "ja": 0
+    },
+    "machineAssistedExcluded": {
+      "ko": 0,
+      "ja": 0
+    },
+    "sourceProvidedExcluded": {
+      "ko": 4785,
+      "ja": 4785
+    },
+    "outputRecords": {
+      "ko": 2621,
+      "ja": 2621
+    }
+  }
+}

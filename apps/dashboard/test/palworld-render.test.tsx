@@ -60,6 +60,7 @@ import {
   filterPalworldBossMarkers,
   PalworldPalLocationMap,
 } from "../src/features/public-palworld/components/PalworldPalLocationMap";
+import { PalworldActiveSkillDetail } from "../src/features/public-palworld/components/PalworldDetailModals";
 import {
   clampPalworldMapView as clampSharedPalworldMapView,
   focusPalworldMapViewAt as focusSharedPalworldMapViewAt,
@@ -772,6 +773,85 @@ test("원문 설명이 없는 아이템 카드는 정보를 추정하지 않고 
   assert.match(japanese, /元データに情報がありません/u);
   assert.match(japanese, /data-ja="原文なし"/u);
   assert.doesNotMatch(korean, /영문 원문|번역 검수 중/u);
+});
+
+test("Pal 상세 액티브 스킬은 영문 fallback을 숨기고 현지어 안내와 전투 수치를 유지한다", () => {
+  const fallbackSkill = {
+    id: "active-absolute-frost",
+    type: "active" as const,
+    nameEn: "Absolute Frost",
+    descriptionEn: "Throws icicles in a wide area from under the enemy's feet.",
+    element: "ice" as const,
+    power: 700,
+    cooldownSeconds: 30,
+    unlockLevel: 50,
+    localization: {
+      sourceLanguage: "en" as const,
+      ko: "source_language_fallback" as const,
+      ja: "source_language_fallback" as const,
+    },
+    translation: {
+      name: {
+        ko: "source_language_fallback" as const,
+        ja: "source_language_fallback" as const,
+      },
+      description: {
+        ko: "source_language_fallback" as const,
+        ja: "source_language_fallback" as const,
+      },
+    },
+  };
+  const korean = renderToStaticMarkup(
+    <PalworldActiveSkillDetail index={0} locale="ko" skill={fallbackSkill} />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldActiveSkillDetail index={0} locale="ja" skill={fallbackSkill} />,
+  );
+
+  assert.doesNotMatch(korean, /Absolute Frost|Throws icicles|영문 원문/u);
+  assert.doesNotMatch(japanese, /Absolute Frost|Throws icicles|英語原文/u);
+  assert.match(korean, /액티브 스킬 1/u);
+  assert.match(korean, /공식 한국어 스킬 설명을 확인할 수 없습니다/u);
+  assert.match(japanese, /アクティブスキル 1/u);
+  assert.match(japanese, /公式の日本語スキル説明を確認できません/u);
+  assert.match(korean, /위력 700/u);
+  assert.match(korean, /재사용 시간 30초/u);
+  assert.match(korean, /해금 레벨 50/u);
+  assert.match(korean, />얼음</u);
+  assert.match(japanese, />氷</u);
+});
+
+test("Pal 상세 액티브 스킬은 공식 source_provided 이름과 설명을 그대로 표시한다", () => {
+  const officialSkill = {
+    id: "active-aqua-jet",
+    type: "active" as const,
+    nameKo: "워터 제트",
+    nameJa: "ウォータージェット",
+    nameEn: "Aqua Jet",
+    descriptionKo: "고속 물줄기를 발사한다.",
+    descriptionJa: "高速の水流を放つ。",
+    descriptionEn: "Hurls a high speed ball of water at an enemy.",
+    element: "water" as const,
+    power: 40,
+    cooldownSeconds: 2,
+    translation: {
+      name: { ko: "source_provided" as const, ja: "source_provided" as const },
+      description: { ko: "source_provided" as const, ja: "source_provided" as const },
+    },
+  };
+  const korean = renderToStaticMarkup(
+    <PalworldActiveSkillDetail index={0} locale="ko" skill={officialSkill} />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldActiveSkillDetail index={0} locale="ja" skill={officialSkill} />,
+  );
+
+  assert.match(korean, /워터 제트/u);
+  assert.match(korean, /고속 물줄기를 발사한다/u);
+  assert.match(japanese, /ウォータージェット/u);
+  assert.match(japanese, /高速の水流を放つ/u);
+  assert.doesNotMatch(korean, /Aqua Jet|Hurls a high speed ball/u);
+  assert.doesNotMatch(japanese, /Aqua Jet|Hurls a high speed ball/u);
 });
 
 test("이미지 없는 Pal은 카드 높이를 유지하는 한국어·일본어 대체 표시를 렌더한다", () => {

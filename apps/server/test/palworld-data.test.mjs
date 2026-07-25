@@ -78,7 +78,7 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
     },
     {
       pals: ["ready", 287, "1.0.1"],
-      items: ["ready", 1847, "1.0.1"],
+      items: ["incomplete", 1847, "1.0.1"],
       breeding: ["incomplete", 41_329, "1.0.1"],
       skills: ["incomplete", 566, "1.0.1"]
     }
@@ -205,7 +205,7 @@ test("통합 검색은 한국어, 일본어, 영어, 도감 번호와 ID를 지�
   assert.equal(mixed.metadata.gameVersion, "1.0.1");
   assert.equal(mixed.domains.pals.status, "ready");
   assert.equal(mixed.domains.pals.metadata.gameVersion, "1.0.1");
-  assert.equal(mixed.domains.items.status, "ready");
+  assert.equal(mixed.domains.items.status, "incomplete");
   assert.equal(mixed.domains.items.metadata.gameVersion, "1.0.1");
   assert.equal(mixed.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
 

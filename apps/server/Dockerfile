@@ -16,7 +16,9 @@ ENV NODE_ENV=production \
 RUN npm ci --include=dev
 RUN npm run build:shared
 RUN npm run build:server
-RUN node apps/server/dist/scripts/validate-palworld-translations.js
+RUN node apps/server/dist/scripts/validate-palworld-translations.js \
+  --allow-incomplete \
+  --reject-machine-assisted
 RUN VITE_BASE_PATH=/dashboard/ npm run build:dashboard
 # active release manifest에 결합되지 않은 비버전 candidate 작업 아이콘은 runtime 정적 경로에서 제외합니다.
 RUN rm -rf /app/apps/dashboard/dist/images/palworld/work

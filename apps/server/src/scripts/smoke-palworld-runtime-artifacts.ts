@@ -29,6 +29,9 @@ import {
   createPalworldTranslationValidationContext,
   loadPalworldTranslationBundle
 } from "../data/palworld-translation-artifact.js";
+import {
+  loadPalworldOfficialLocaleRuntimeOverlay
+} from "../data/palworld-official-locale-runtime.js";
 import { loadPalworldReviewedItemAliases } from "../data/palworld-reviewed-item-aliases.js";
 import { PalworldBreedingEngine } from "../services/palworld-breeding-engine.js";
 import {
@@ -107,6 +110,7 @@ export type PalworldRuntimeLayout =
       releaseDirectory: string;
       releaseRoot: string;
       compositeArtifactFiles?: readonly string[];
+      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5;
     };
 
 async function pathExists(filePath: string): Promise<boolean> {
@@ -176,7 +180,8 @@ export async function resolvePalworldRuntimeLayout(
       ? {
           compositeArtifactFiles: active.manifest.composite.artifacts.map(
             (artifact) => artifact.file
-          )
+          ),
+          compositeSchemaVersion: active.manifest.composite.schemaVersion
         }
       : {})
   };
@@ -409,6 +414,15 @@ async function validateLegacyRuntime(
     throw new Error("아이템 이미지 수가 catalog coverage와 일치하지 않습니다.");
   }
 
+  const officialLocaleOverlay = (layout.compositeSchemaVersion ?? 0) >= 4
+    ? await loadPalworldOfficialLocaleRuntimeOverlay({
+        releaseRoot,
+        expectedRelease: runtimeRelease.metadata.gameVersion,
+        expectedCatalogSha256: catalog.manifest.catalogSha256,
+        expectedPaldexSha256: release.manifest.paldexSha256,
+        expectedSourceRevision: catalog.catalog.metadata.sourceRevision
+      })
+    : undefined;
   const translations = await loadPalworldTranslationBundle({
     releaseRoot,
     context: createPalworldTranslationValidationContext({
@@ -416,7 +430,13 @@ async function validateLegacyRuntime(
       catalogSha256: catalog.manifest.catalogSha256,
       paldex: runtimeRelease,
       paldexSha256: release.manifest.paldexSha256,
-      reviewedItemAliases: await loadPalworldReviewedItemAliases(releaseRoot, catalog.catalog)
+      reviewedItemAliases: await loadPalworldReviewedItemAliases(releaseRoot, catalog.catalog),
+      ...(officialLocaleOverlay === undefined
+        ? {}
+        : {
+            officialSourceFields:
+              officialLocaleOverlay.officialSourceFields
+          })
     })
   });
   if (

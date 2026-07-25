@@ -7,6 +7,7 @@ import {
   type PalworldTranslationField,
   type PalworldTranslationFieldValue,
   type PalworldTranslationLocale,
+  type PalworldTranslationOfficialSourceField,
   type PalworldTranslationRecordKind,
   type PalworldTranslationSnapshot,
   type PalworldTranslationSourceField,
@@ -373,6 +374,7 @@ export function createPalworldTranslationValidationContext(input: {
   paldex: PalworldPaldexRuntimeRelease;
   paldexSha256: string;
   reviewedItemAliases?: readonly PalworldReviewedItemAlias[];
+  officialSourceFields?: readonly PalworldTranslationOfficialSourceField[];
   englishCopyAllowlist?: readonly string[];
 }): PalworldTranslationRuntimeContext {
   const palDetailsById = new Map(input.catalog.palDetails.map((detail) => [detail.palId, detail]));
@@ -462,6 +464,9 @@ export function createPalworldTranslationValidationContext(input: {
     sourceRevision: input.catalog.metadata.sourceRevision,
     records,
     reviewedNames,
+    ...(input.officialSourceFields === undefined
+      ? {}
+      : { officialSourceFields: [...input.officialSourceFields] }),
     ...(input.englishCopyAllowlist === undefined ? {} : { englishCopyAllowlist: [...input.englishCopyAllowlist] })
   };
 }
@@ -522,8 +527,28 @@ function assertHumanReviewedNames(
   }
   for (const [identity, glossary] of glossaryNames) {
     const name = snapshotNames.get(identity);
+    if (name?.status === "source_provided") {
+      continue;
+    }
     if (name?.status !== "human_reviewed" || name.text !== glossary[locale]) {
       fail("PALWORLD_TRANSLATION_LOCALE_INVALID", `${locale}.records.${identity}.fields.name`, "검수 이름이 locale snapshot에서 human_reviewed로 고정되지 않았습니다.");
+    }
+  }
+}
+
+function assertPublicTranslationPolicy(
+  snapshot: PalworldTranslationSnapshot,
+  locale: PalworldTranslationLocale
+): void {
+  for (const record of snapshot.records) {
+    for (const [field, value] of Object.entries(record.fields)) {
+      if (value?.status === "machine_assisted") {
+        fail(
+          "PALWORLD_TRANSLATION_LOCALE_INVALID",
+          `${locale}.records.${record.kind}:${record.id}.fields.${field}`,
+          "공개 runtime에는 machine_assisted 번역을 사용할 수 없습니다."
+        );
+      }
     }
   }
 }
@@ -635,6 +660,7 @@ export async function loadPalworldTranslationBundle(input: {
         ) {
           fail("PALWORLD_TRANSLATION_LOCALE_INVALID", locale, "manifest metadata와 일치하지 않습니다.");
         }
+        assertPublicTranslationPolicy(result.data, locale);
         assertHumanReviewedNames(result.data, locale, glossary.reviewedNames);
         snapshots[locale] = result.data;
         states[locale] = { status: "loaded", staleSourceHash: false };

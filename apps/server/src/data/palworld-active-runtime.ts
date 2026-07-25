@@ -374,6 +374,11 @@ function parseJson(bytes: Buffer, pathName: string): unknown {
 export async function loadPalworldActiveRuntime(options: {
   dataRoot?: string;
   activeManifestPath?: string;
+  /**
+   * 실제 서버 startup에서 번역 domain만 service fallback으로 격리할 때 사용합니다.
+   * 기본 verifier와 Docker smoke는 이 값을 설정하지 않아 strict fail-closed입니다.
+   */
+  deferTranslationArtifactIntegrity?: boolean;
 } = {}): Promise<PalworldActiveRuntime> {
   const dataRoot = path.resolve(options.dataRoot ?? PALWORLD_DATA_ROOT);
   const dataRootInfo = await lstat(dataRoot);
@@ -457,7 +462,9 @@ export async function loadPalworldActiveRuntime(options: {
       await verifyPalworldLegacyCompositeRuntimeManifest({
         releaseRoot,
         expectedRelease: manifest.release,
-        manifest: manifest.composite
+        manifest: manifest.composite,
+        deferTranslationArtifactIntegrity:
+          options.deferTranslationArtifactIntegrity === true
       });
     }
   } else {

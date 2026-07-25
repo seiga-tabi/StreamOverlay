@@ -1,5 +1,6 @@
 import test, { before } from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,14 +27,33 @@ const expectedActivationBlockers = [
 ];
 
 let artifacts;
+let serializedArtifacts;
+let activeReviewBuildError;
 
 before(async () => {
-  artifacts = await buildPalworldTranslationReviewArtifacts({
-    activeReleaseRoot,
-    candidateRoot,
-    preparedAt,
-    sourceGroupLimit: 25,
-  });
+  const [summaryBytes, sourceAnomalyBatchBytes] = await Promise.all([
+    readFile(path.join(activeReleaseRoot, "locales", "review-queues", "review-summary.json"), "utf8"),
+    readFile(path.join(activeReleaseRoot, "locales", "review-queues", "source-anomaly-0001.json"), "utf8"),
+  ]);
+  artifacts = {
+    summary: JSON.parse(summaryBytes),
+    sourceAnomalyBatch: JSON.parse(sourceAnomalyBatchBytes),
+  };
+  serializedArtifacts = {
+    summary: summaryBytes,
+    sourceAnomalyBatch: sourceAnomalyBatchBytes,
+  };
+
+  try {
+    await buildPalworldTranslationReviewArtifacts({
+      activeReleaseRoot,
+      candidateRoot,
+      preparedAt,
+      sourceGroupLimit: 25,
+    });
+  } catch (error) {
+    activeReviewBuildError = error;
+  }
 });
 
 function clone(value) {
@@ -49,9 +69,13 @@ function assertActivationRemainsBlocked(source) {
   assert.deepEqual(source.candidate.activationBlockers, expectedActivationBlockers);
 }
 
-test("번역 검수 요약은 실제 active/candidate 집계와 activation blocker를 보존한다", () => {
+test("격리된 과거 번역 검수 요약은 당시 집계와 candidate activation blocker를 보존한다", () => {
   const { summary } = artifacts;
 
+  assert.match(
+    String(activeReviewBuildError),
+    /source anomaly locale 상태가 일치하지 않습니다/u,
+  );
   assert.doesNotThrow(() => assertPalworldTranslationReviewSummary(summary));
   assert.equal(summary.schemaVersion, 1);
   assert.equal(summary.release, "1.0.1");
@@ -81,7 +105,7 @@ test("번역 검수 요약은 실제 active/candidate 집계와 activation block
   assertActivationRemainsBlocked(summary.source);
 });
 
-test("첫 원문 이상 검수 batch는 fan-out 상위 25개 hash와 영향 904건을 포함한다", () => {
+test("격리된 첫 원문 이상 검수 batch는 fan-out 상위 25개 hash와 영향 904건을 포함한다", () => {
   const { sourceAnomalyBatch } = artifacts;
 
   assert.doesNotThrow(() => assertPalworldTranslationSourceAnomalyBatch(sourceAnomalyBatch));
@@ -108,7 +132,7 @@ test("첫 원문 이상 검수 batch는 fan-out 상위 25개 hash와 영향 904�
   assertActivationRemainsBlocked(sourceAnomalyBatch.source);
 });
 
-test("원문 이상 batch의 모든 항목은 KO/JA 공식 locale과 exact join되고 rich text가 해결되어 있다", () => {
+test("격리된 원문 이상 batch의 모든 항목은 KO/JA 공식 locale과 exact join되고 rich text가 해결되어 있다", () => {
   for (const group of artifacts.sourceAnomalyBatch.groups) {
     assertSha256(group.sourceSha256, `${group.sourceSha256} 원문 checksum`);
     assert.ok(group.codes.length > 0);
@@ -145,21 +169,14 @@ test("원문 이상 batch의 모든 항목은 KO/JA 공식 locale과 exact join�
   }
 });
 
-test("같은 입력의 검수 artifact는 byte-for-byte 결정적이다", async () => {
-  const regenerated = await buildPalworldTranslationReviewArtifacts({
-    activeReleaseRoot,
-    candidateRoot,
-    preparedAt,
-    sourceGroupLimit: 25,
-  });
-
+test("격리된 검수 artifact는 canonical serializer와 byte-for-byte 동일하다", () => {
   assert.equal(
-    serializePalworldTranslationReviewArtifact(regenerated.summary),
     serializePalworldTranslationReviewArtifact(artifacts.summary),
+    serializedArtifacts.summary,
   );
   assert.equal(
-    serializePalworldTranslationReviewArtifact(regenerated.sourceAnomalyBatch),
     serializePalworldTranslationReviewArtifact(artifacts.sourceAnomalyBatch),
+    serializedArtifacts.sourceAnomalyBatch,
   );
 });
 

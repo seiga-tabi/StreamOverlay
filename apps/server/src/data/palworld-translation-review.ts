@@ -17,13 +17,23 @@ const MAX_JSON_BYTES = 64 * 1024 * 1024;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const SAFE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const SAFE_MESSAGE_KEY_PATTERN = /^[A-Za-z0-9_]+$/u;
+const DECORATIVE_ELEMENT_PAIR_PATTERN =
+  /<img id=\|ElemIcon_[A-Za-z0-9_]+\|\/><uiCommon id=\|([A-Za-z0-9_.:-]+)\|(?: style=\|[A-Za-z0-9_.:-]+\|)?\/>/gu;
 const STRICT_RFC3339_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/u;
 
-type JsonRecord = Record<string, unknown>;
-type ReviewLocale = "ko" | "ja";
-type ReviewKind = "pal" | "item" | "skill";
-type ReviewField = "name" | "description" | "passiveAbility";
+export type PalworldTranslationReviewJsonRecord = Record<string, unknown>;
+export type PalworldTranslationReviewLocale = "ko" | "ja";
+export type PalworldTranslationReviewKind = "pal" | "item" | "skill";
+export type PalworldTranslationReviewField =
+  | "name"
+  | "description"
+  | "passiveAbility";
+
+type JsonRecord = PalworldTranslationReviewJsonRecord;
+type ReviewLocale = PalworldTranslationReviewLocale;
+type ReviewKind = PalworldTranslationReviewKind;
+type ReviewField = PalworldTranslationReviewField;
 
 type ReviewSourceIdentity = {
   active: {
@@ -86,7 +96,7 @@ type CurrentLocaleValue = {
   note: string | null;
 };
 
-type OfficialLocaleValue = {
+export type PalworldTranslationOfficialLocaleValue = {
   text: string;
   valueSha256: string;
   sourceValueSha256: string;
@@ -108,8 +118,8 @@ type SourceAnomalyAffectedEntry = {
   official: {
     joinRule: typeof REVIEW_JOIN_RULE;
     messageKey: string;
-    ko: OfficialLocaleValue;
-    ja: OfficialLocaleValue;
+    ko: PalworldTranslationOfficialLocaleValue;
+    ja: PalworldTranslationOfficialLocaleValue;
   };
   decision: typeof REVIEW_STATUS;
 };
@@ -160,7 +170,7 @@ export type BuildPalworldTranslationReviewArtifactsOptions = {
 type ActiveField = {
   sourceSha256: string;
   text: string;
-  status: "machine_assisted" | "human_reviewed";
+  status: "source_provided" | "machine_assisted" | "human_reviewed";
   note?: string;
 };
 
@@ -181,7 +191,7 @@ type CorpusRecord = {
   fields: Partial<Record<ReviewField, CorpusField>>;
 };
 
-type LocalizedCandidateValue = {
+export type PalworldTranslationLocalizedCandidateValue = {
   messageKey: string;
   sourceField: string;
   ko: string | null;
@@ -192,22 +202,22 @@ type LocalizedCandidateValue = {
   jaRichTextStatus?: "resolved" | "unresolved" | "placeholder";
 };
 
-type CandidateEntity = {
+export type PalworldTranslationCandidateEntity = {
   id: string;
   sourceInternalId: string;
   type?: string;
   relatedPalIds?: string[];
-  name?: LocalizedCandidateValue;
-  description?: LocalizedCandidateValue;
+  name?: PalworldTranslationLocalizedCandidateValue;
+  description?: PalworldTranslationLocalizedCandidateValue;
 };
 
-type ActiveEntity = {
+export type PalworldTranslationActiveEntity = {
   id: string;
   sourceInternalId?: string;
   type?: string;
 };
 
-type CandidateLocaleRecord = {
+export type PalworldTranslationCandidateLocaleRecord = {
   messageKey: string;
   field: string;
   text: string;
@@ -364,13 +374,45 @@ function activeRecordsAt(value: unknown, pathName: string): ActiveRecord[] {
       const valueRecord = recordAt(
         rawField,
         `${entryPath}.fields.${field}`,
-        ["sourceSha256", "text", "status", "note"],
+        [
+          "sourceSha256",
+          "sourceMessageKey",
+          "sourceMember",
+          "sourceMemberSha256",
+          "text",
+          "status",
+          "note",
+        ],
       );
       if (
+        valueRecord.status !== "source_provided"
+        &&
         valueRecord.status !== "machine_assisted"
         && valueRecord.status !== "human_reviewed"
       ) {
         fail(`${entryPath}.fields.${field}.status가 올바르지 않습니다.`);
+      }
+      if (valueRecord.status === "source_provided") {
+        stringAt(
+          valueRecord.sourceMessageKey,
+          `${entryPath}.fields.${field}.sourceMessageKey`,
+          192,
+        );
+        stringAt(
+          valueRecord.sourceMember,
+          `${entryPath}.fields.${field}.sourceMember`,
+          1_024,
+        );
+        sha256At(
+          valueRecord.sourceMemberSha256,
+          `${entryPath}.fields.${field}.sourceMemberSha256`,
+        );
+      } else if (
+        valueRecord.sourceMessageKey !== undefined
+        || valueRecord.sourceMember !== undefined
+        || valueRecord.sourceMemberSha256 !== undefined
+      ) {
+        fail(`${entryPath}.fields.${field} 공식 source 필드는 source_provided에만 허용됩니다.`);
       }
       fields[field] = {
         sourceSha256: sha256At(
@@ -432,7 +474,10 @@ function corpusRecordsAt(value: unknown, pathName: string): CorpusRecord[] {
   });
 }
 
-function activeEntitiesAt(value: unknown, pathName: string): ActiveEntity[] {
+function activeEntitiesAt(
+  value: unknown,
+  pathName: string,
+): PalworldTranslationActiveEntity[] {
   return arrayAt(value, pathName).map((input, index) => {
     if (!isRecord(input)) fail(`${pathName}[${index}]는 객체여야 합니다.`);
     return {
@@ -453,13 +498,16 @@ function activeEntitiesAt(value: unknown, pathName: string): ActiveEntity[] {
   });
 }
 
-function candidateEntitiesAt(value: unknown, pathName: string): CandidateEntity[] {
+function candidateEntitiesAt(
+  value: unknown,
+  pathName: string,
+): PalworldTranslationCandidateEntity[] {
   return arrayAt(value, pathName).map((input, index) => {
     if (!isRecord(input)) fail(`${pathName}[${index}]는 객체여야 합니다.`);
     const parseLocalized = (
       raw: unknown,
       fieldPath: string,
-    ): LocalizedCandidateValue | undefined => {
+    ): PalworldTranslationLocalizedCandidateValue | undefined => {
       if (raw === undefined) return undefined;
       if (!isRecord(raw)) fail(`${fieldPath}는 객체여야 합니다.`);
       const status = (locale: ReviewLocale): "source_provided" | "missing_source" => {
@@ -528,7 +576,7 @@ function candidateEntitiesAt(value: unknown, pathName: string): CandidateEntity[
 function candidateLocaleRecordsAt(
   value: unknown,
   pathName: string,
-): CandidateLocaleRecord[] {
+): PalworldTranslationCandidateLocaleRecord[] {
   return arrayAt(value, pathName).map((input, index) => {
     const entryPath = `${pathName}[${index}]`;
     const record = recordAt(input, entryPath, [
@@ -575,13 +623,19 @@ function uniqueMap<T>(
   return result;
 }
 
-function sourceIdentityMatches(
+export type PalworldTranslationSourceIdentityJoinRule =
+  | "source_internal_id_exact"
+  | "versioned_alias_exact";
+
+export function palworldTranslationSourceIdentityJoinRule(
   activeSourceInternalId: string | undefined,
   candidateSourceInternalId: string,
-  aliasApplications: readonly JsonRecord[],
-): boolean {
-  if (activeSourceInternalId === candidateSourceInternalId) return true;
-  if (activeSourceInternalId === undefined) return false;
+  aliasApplications: readonly PalworldTranslationReviewJsonRecord[],
+): PalworldTranslationSourceIdentityJoinRule | undefined {
+  if (activeSourceInternalId === candidateSourceInternalId) {
+    return "source_internal_id_exact";
+  }
+  if (activeSourceInternalId === undefined) return undefined;
   return aliasApplications.some((entry) =>
     entry.sourceId === activeSourceInternalId
     && entry.targetId === candidateSourceInternalId
@@ -590,23 +644,37 @@ function sourceIdentityMatches(
     && (
       entry.domain === "active_assignment_pal_reference"
       || entry.domain === "public_id_source"
-    ));
+    ))
+    ? "versioned_alias_exact"
+    : undefined;
 }
 
-function localizedValueFor(
+export function palworldTranslationSourceIdentityMatches(
+  activeSourceInternalId: string | undefined,
+  candidateSourceInternalId: string,
+  aliasApplications: readonly PalworldTranslationReviewJsonRecord[],
+): boolean {
+  return palworldTranslationSourceIdentityJoinRule(
+    activeSourceInternalId,
+    candidateSourceInternalId,
+    aliasApplications,
+  ) !== undefined;
+}
+
+export function palworldTranslationLocalizedValueFor(
   kind: ReviewKind,
   id: string,
   field: ReviewField,
   sources: {
-    activePalById: ReadonlyMap<string, ActiveEntity>;
-    activeItemById: ReadonlyMap<string, ActiveEntity>;
-    activeSkillById: ReadonlyMap<string, ActiveEntity>;
-    candidatePalById: ReadonlyMap<string, CandidateEntity>;
-    candidateItemById: ReadonlyMap<string, CandidateEntity>;
-    candidateSkillById: ReadonlyMap<string, CandidateEntity>;
-    aliasApplications: readonly JsonRecord[];
+    activePalById: ReadonlyMap<string, PalworldTranslationActiveEntity>;
+    activeItemById: ReadonlyMap<string, PalworldTranslationActiveEntity>;
+    activeSkillById: ReadonlyMap<string, PalworldTranslationActiveEntity>;
+    candidatePalById: ReadonlyMap<string, PalworldTranslationCandidateEntity>;
+    candidateItemById: ReadonlyMap<string, PalworldTranslationCandidateEntity>;
+    candidateSkillById: ReadonlyMap<string, PalworldTranslationCandidateEntity>;
+    aliasApplications: readonly PalworldTranslationReviewJsonRecord[];
   },
-): LocalizedCandidateValue | undefined {
+): PalworldTranslationLocalizedCandidateValue | undefined {
   if (field === "passiveAbility") return undefined;
   if (kind === "item") {
     const active = sources.activeItemById.get(id);
@@ -614,7 +682,7 @@ function localizedValueFor(
     if (
       active === undefined
       || candidate === undefined
-      || !sourceIdentityMatches(
+      || !palworldTranslationSourceIdentityMatches(
         active.sourceInternalId,
         candidate.sourceInternalId,
         sources.aliasApplications,
@@ -630,7 +698,7 @@ function localizedValueFor(
     if (
       active === undefined
       || candidate === undefined
-      || !sourceIdentityMatches(
+      || !palworldTranslationSourceIdentityMatches(
         active.sourceInternalId,
         candidate.sourceInternalId,
         sources.aliasApplications,
@@ -656,7 +724,7 @@ function localizedValueFor(
     || candidate?.type !== "partner"
     || candidate.relatedPalIds?.length !== 1
     || candidate.relatedPalIds[0] !== palId
-    || !sourceIdentityMatches(
+    || !palworldTranslationSourceIdentityMatches(
       activePal.sourceInternalId,
       candidate.sourceInternalId,
       sources.aliasApplications,
@@ -667,12 +735,12 @@ function localizedValueFor(
   return candidate[field];
 }
 
-function officialLocaleValue(
-  localized: LocalizedCandidateValue,
+export function palworldTranslationOfficialLocaleValue(
+  localized: PalworldTranslationLocalizedCandidateValue,
   locale: ReviewLocale,
-  localeByKey: ReadonlyMap<string, CandidateLocaleRecord>,
+  localeByKey: ReadonlyMap<string, PalworldTranslationCandidateLocaleRecord>,
   requireResolved: boolean,
-): OfficialLocaleValue | undefined {
+): PalworldTranslationOfficialLocaleValue | undefined {
   const text = localized[locale];
   const status = localized[`${locale}Status`];
   const localeRecord = localeByKey.get(`${localized.sourceField}:${localized.messageKey}`);
@@ -688,9 +756,31 @@ function officialLocaleValue(
   const richTextStatus = localized[`${locale}RichTextStatus`] ?? "resolved";
   if (requireResolved && richTextStatus !== "resolved") return undefined;
   if (richTextStatus !== "resolved") return undefined;
+  let normalizedText = text;
+  DECORATIVE_ELEMENT_PAIR_PATTERN.lastIndex = 0;
+  for (const match of localeRecord.text.matchAll(DECORATIVE_ELEMENT_PAIR_PATTERN)) {
+    const messageKey = match[1];
+    if (messageKey === undefined) return undefined;
+    const label = localeByKey.get(`ui_common:${messageKey}`);
+    if (
+      label === undefined
+      || label.status !== "source_provided"
+      || label.text.length === 0
+      || /[<>{}\u0000-\u001f\u007f]/u.test(label.text)
+    ) {
+      return undefined;
+    }
+    const duplicatedLabel = `${label.text}${label.text}`;
+    const duplicateOffset = normalizedText.indexOf(duplicatedLabel);
+    if (duplicateOffset < 0) continue;
+    normalizedText =
+      normalizedText.slice(0, duplicateOffset)
+      + label.text
+      + normalizedText.slice(duplicateOffset + duplicatedLabel.length);
+  }
   return {
-    text,
-    valueSha256: sha256(text),
+    text: normalizedText,
+    valueSha256: sha256(normalizedText),
     sourceValueSha256: localeRecord.valueSha256,
     status: "source_provided",
     richTextStatus: "resolved",
@@ -700,9 +790,9 @@ function officialLocaleValue(
 }
 
 function isOfficialJoined(
-  localized: LocalizedCandidateValue,
+  localized: PalworldTranslationLocalizedCandidateValue,
   locale: ReviewLocale,
-  localeByKey: ReadonlyMap<string, CandidateLocaleRecord>,
+  localeByKey: ReadonlyMap<string, PalworldTranslationCandidateLocaleRecord>,
 ): { joined: boolean; resolved: boolean } {
   const text = localized[locale];
   const status = localized[`${locale}Status`];
@@ -904,7 +994,7 @@ function assertCurrentLocaleValue(
 function assertOfficialLocaleValue(
   value: unknown,
   pathName: string,
-): OfficialLocaleValue {
+): PalworldTranslationOfficialLocaleValue {
   const field = recordAt(value, pathName, [
     "text",
     "valueSha256",
@@ -1438,7 +1528,13 @@ export async function buildPalworldTranslationReviewArtifacts(
       if (source === undefined) fail(`active ${locale} locale에 orphan record가 있습니다.`);
       for (const [fieldName, field] of Object.entries(record.fields)) {
         const sourceField = source.fields[fieldName as ReviewField];
-        if (sourceField === undefined || sourceField.sourceSha256 !== field.sourceSha256) {
+        if (
+          sourceField === undefined
+          || (
+            field.status !== "source_provided"
+            && sourceField.sourceSha256 !== field.sourceSha256
+          )
+        ) {
           fail(`active ${locale}:${record.kind}:${record.id}:${fieldName} source hash가 일치하지 않습니다.`);
         }
       }
@@ -1553,12 +1649,13 @@ export async function buildPalworldTranslationReviewArtifacts(
   for (const locale of ["ko", "ja"] as const) {
     for (const record of activeLocales[locale]) {
       for (const [fieldName, field] of Object.entries(record.fields)) {
+        if (field.status === "source_provided") continue;
         if (field.status === "human_reviewed") {
           humanReviewed[locale] += 1;
           continue;
         }
         machineAssisted[locale] += 1;
-        const localized = localizedValueFor(
+        const localized = palworldTranslationLocalizedValueFor(
           record.kind,
           record.id,
           fieldName as ReviewField,
@@ -1601,7 +1698,7 @@ export async function buildPalworldTranslationReviewArtifacts(
       if (
         activeItem?.sourceInternalId === undefined
         || candidateItem === undefined
-        || !sourceIdentityMatches(
+        || !palworldTranslationSourceIdentityMatches(
           activeItem.sourceInternalId,
           candidateItem.sourceInternalId,
           aliasApplications,
@@ -1622,13 +1719,13 @@ export async function buildPalworldTranslationReviewArtifacts(
       ) {
         fail(`source anomaly locale 상태가 일치하지 않습니다: ${corpusRecord.id}`);
       }
-      const koOfficial = officialLocaleValue(
+      const koOfficial = palworldTranslationOfficialLocaleValue(
         candidateItem.description,
         "ko",
         candidateLocaleByKey.ko,
         true,
       );
-      const jaOfficial = officialLocaleValue(
+      const jaOfficial = palworldTranslationOfficialLocaleValue(
         candidateItem.description,
         "ja",
         candidateLocaleByKey.ja,

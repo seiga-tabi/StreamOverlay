@@ -5,7 +5,9 @@ import {
   LOCALES_ROOT,
   PALWORLD_TRANSLATION_RELEASE,
   PALWORLD_TRANSLATION_SCHEMA_VERSION,
+  independentOfficialSourceFieldsForRecords,
   loadTranslationSources,
+  loadIndependentOfficialSourceFields,
   readIdenticalAllowlist,
   readNameCollisionOverrides,
   readReviewedGlossaryTerms,
@@ -14,6 +16,7 @@ import {
   assertUniqueSortedTranslationRecords,
   translationNameCollisions,
   translationCoverage,
+  translationMethodForStatusCounts,
   validateTranslationRecord,
   sha256,
   stableJson,
@@ -30,15 +33,30 @@ function expectSnapshotHeader(value: unknown, locale: TranslationLocale): Transl
     throw new TypeError(`${locale}.json header가 올바르지 않습니다.`);
   }
   if (!Array.isArray(snapshot.records)) throw new TypeError(`${locale}.json.records가 배열이 아닙니다.`);
-  if (snapshot.translationMethod !== "machine_assisted" && snapshot.translationMethod !== "human_reviewed" && snapshot.translationMethod !== "mixed") {
+  if (
+    snapshot.translationMethod !== "source_provided"
+    && snapshot.translationMethod !== "machine_assisted"
+    && snapshot.translationMethod !== "human_reviewed"
+    && snapshot.translationMethod !== "mixed"
+  ) {
     throw new TypeError(`${locale}.json.translationMethod가 올바르지 않습니다.`);
   }
   if (snapshot.translationStatus !== "complete" && snapshot.translationStatus !== "incomplete") throw new TypeError(`${locale}.json.translationStatus가 올바르지 않습니다.`);
   return snapshot as TranslationSnapshot;
 }
 
-async function validateLocale(locale: TranslationLocale, allowIncomplete: boolean) {
+async function validateLocale(
+  locale: TranslationLocale,
+  allowIncomplete: boolean,
+  rejectMachineAssisted: boolean
+) {
   const sources = await loadTranslationSources();
+  const independentOfficialSourceFields =
+    await loadIndependentOfficialSourceFields({
+      release: PALWORLD_TRANSLATION_RELEASE,
+      sourceCatalogSha256: sources.catalogSha256,
+      sourcePaldexSha256: sources.paldexSha256,
+    });
   const identicalAllowlist = await readIdenticalAllowlist();
   const reviewedNames = await readReviewedNames();
   const reviewedTerms = await readReviewedGlossaryTerms();
@@ -59,14 +77,18 @@ async function validateLocale(locale: TranslationLocale, allowIncomplete: boolea
   assertUniqueSortedTranslationRecords(records, `${locale}.records`);
   assertReviewedNameRecords(records, locale, reviewedNames);
   const coverage = translationCoverage(records, sources.corpus);
+  if (rejectMachineAssisted && coverage.status.machine_assisted !== 0) {
+    throw new TypeError(
+      `${locale}.json에는 공개 정책상 허용되지 않는 machine_assisted 필드가 `
+      + `${coverage.status.machine_assisted}개 있습니다.`
+    );
+  }
   if (!allowIncomplete && coverage.missing !== 0) {
     throw new TypeError(`${locale}.json은 기본 검증에서 complete snapshot이어야 하지만 ${coverage.missing}개 필드가 누락되었습니다.`);
   }
   if (snapshot.translationStatus === "complete" && coverage.missing !== 0) throw new TypeError(`${locale}.json이 complete이지만 ${coverage.missing}개 필드가 누락되었습니다.`);
   if (snapshot.translationStatus === "incomplete" && coverage.missing === 0) throw new TypeError(`${locale}.json은 모든 필드가 있지만 incomplete로 표시되었습니다.`);
-  const expectedMethod = coverage.status.human_reviewed > 0 && coverage.status.machine_assisted > 0
-    ? "mixed"
-    : coverage.status.human_reviewed > 0 ? "human_reviewed" : "machine_assisted";
+  const expectedMethod = translationMethodForStatusCounts(coverage.status);
   if (snapshot.translationMethod !== expectedMethod) throw new TypeError(`${locale}.json.translationMethod가 실제 field status와 일치하지 않습니다.`);
   assertPalworldTranslationSnapshot(snapshot, {
     release: PALWORLD_TRANSLATION_RELEASE,
@@ -81,6 +103,11 @@ async function validateLocale(locale: TranslationLocale, allowIncomplete: boolea
         sha256: value?.sourceSha256,
       }])) as never,
     })),
+    officialSourceFields: independentOfficialSourceFieldsForRecords(
+      locale,
+      records,
+      independentOfficialSourceFields,
+    ),
     englishCopyAllowlist: [...identicalAllowlist]
       .filter((key) => key.startsWith(`${locale}:`))
       .map((key) => key.slice(locale.length + 1)),
@@ -151,9 +178,13 @@ async function validateGeneratedArtifactSet(results: Awaited<ReturnType<typeof v
 }
 
 const allowIncomplete = process.argv.includes("--allow-incomplete");
-const unknownArguments = process.argv.slice(2).filter((argument) => argument !== "--allow-incomplete");
+const rejectMachineAssisted = process.argv.includes("--reject-machine-assisted");
+const unknownArguments = process.argv.slice(2).filter((argument) =>
+  argument !== "--allow-incomplete" && argument !== "--reject-machine-assisted");
 if (unknownArguments.length > 0) throw new TypeError(`허용되지 않은 인자입니다: ${unknownArguments.join(", ")}`);
 const results = [];
-for (const locale of ["ko", "ja"] as const) results.push(await validateLocale(locale, allowIncomplete));
+for (const locale of ["ko", "ja"] as const) {
+  results.push(await validateLocale(locale, allowIncomplete, rejectMachineAssisted));
+}
 await validateGeneratedArtifactSet(results);
 process.stdout.write(`${JSON.stringify(results, null, 2)}\n`);

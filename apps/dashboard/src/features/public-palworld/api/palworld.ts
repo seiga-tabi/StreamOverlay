@@ -42,6 +42,13 @@ let observedSourceRevision: string | undefined;
 let observedRelease: string | undefined;
 let observedSteamBuildId: string | undefined;
 
+export function resetPalworldReleaseObservation(): void {
+  observedGameVersion = undefined;
+  observedSourceRevision = undefined;
+  observedRelease = undefined;
+  observedSteamBuildId = undefined;
+}
+
 export class PalworldApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -93,8 +100,9 @@ function observeActiveRelease(value: unknown): void {
     )
   ) {
     dispatchReleaseMismatch(observedGameVersion, version, observedSourceRevision, revision);
-    return;
   }
+  // 실제 release 전환은 한 번 알리되, 이후 같은 새 release 응답까지 계속
+  // 불일치로 판단하지 않도록 관찰 기준을 최신 검증 응답으로 이동합니다.
   observedGameVersion = version;
   observedSourceRevision = revision;
   observedRelease = release;
@@ -138,6 +146,9 @@ function observeResponseGameVersion(response: Response, value: unknown): void {
     && (headerVersion !== bodyVersion || (headerRevision && bodyRevision && headerRevision !== bodyRevision))
   ) {
     dispatchReleaseMismatch(headerVersion, bodyVersion, headerRevision, bodyRevision);
+    // 헤더와 본문이 다른 응답은 active release 기준으로 사용할 수 없습니다.
+    // 이 값을 저장하면 다음 정상 응답도 반복 경고로 이어질 수 있습니다.
+    return;
   }
   observeActiveRelease(value);
 }

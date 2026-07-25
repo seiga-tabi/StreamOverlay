@@ -11,10 +11,13 @@ const {
   assertStrictMachineNameQualityForImport,
   assertReviewedNameRecords,
   assertUniqueSortedTranslationRecords,
+  independentOfficialSourceFieldsForRecords,
   mergeTranslationRecords,
   sha256,
   stableJson,
   translationNameCollisions,
+  translationCoverage,
+  translationMethodForStatusCounts,
   validateNameCollisionOverrides,
   validateTranslationRecord,
 } = await import("../dist/scripts/palworld-translation-artifacts.js");
@@ -438,6 +441,178 @@ test("candidate 병합은 batch 순서와 무관하고 human-reviewed를 우선�
   assert.throws(
     () => mergeTranslationRecords([machineA, translationRecord(sourceA, { name: "서로 다른 A", description: "기계 설명 A" })]),
     /같은 우선순위/u,
+  );
+});
+
+test("공식 source_provided 필드는 exact 출처 metadata를 보존하고 최우선 병합한다", () => {
+  const source = sourceRecord({ description: undefined });
+  const sourceByIdentity = new Map([["item:test-item", source]]);
+  const officialText = "공식 테스트 아이템";
+  const official = {
+    id: source.id,
+    kind: source.kind,
+    fields: {
+      name: {
+        sourceSha256: sha256(officialText),
+        sourceMessageKey: "ITEM_NAME_TestItem",
+        sourceMember: "L10N/ko/Pal/DataTable/Text/DT_ItemNameText_Common.json",
+        sourceMemberSha256: "b".repeat(64),
+        text: officialText,
+        status: "source_provided",
+      },
+    },
+  };
+  const validated = validateTranslationRecord(
+    official,
+    "ko",
+    sourceByIdentity,
+    new Set(),
+    "candidate",
+  );
+  assert.deepEqual(validated, official);
+  assert.throws(
+    () => validateTranslationRecord(
+      {
+        ...official,
+        fields: {
+          name: {
+            ...official.fields.name,
+            sourceMemberSha256: undefined,
+          },
+        },
+      },
+      "ko",
+      sourceByIdentity,
+      new Set(),
+      "candidate",
+    ),
+    /sourceMemberSha256/u,
+  );
+  assert.throws(
+    () => validateTranslationRecord(
+      {
+        ...official,
+        fields: {
+          name: {
+            ...official.fields.name,
+            status: "human_reviewed",
+          },
+        },
+      },
+      "ko",
+      sourceByIdentity,
+      new Set(),
+      "candidate",
+    ),
+    /source_provided에만/u,
+  );
+
+  const human = translationRecord(source, {
+    name: "검수 테스트 아이템",
+    status: "human_reviewed",
+  });
+  assert.deepEqual(
+    mergeTranslationRecords([human, validated])[0].fields.name,
+    validated.fields.name,
+  );
+  const independentOfficialSource = {
+    locale: "ko",
+    kind: "item",
+    id: "test-item",
+    field: "name",
+    messageKey: "ITEM_NAME_TestItem",
+    text: officialText,
+    textSha256: sha256(officialText),
+    sourceMember: "L10N/ko/Pal/DataTable/Text/DT_ItemNameText_Common.json",
+    sourceMemberSha256: "b".repeat(64),
+  };
+  assert.deepEqual(
+    independentOfficialSourceFieldsForRecords(
+      "ko",
+      [validated],
+      [independentOfficialSource],
+    ),
+    [independentOfficialSource],
+  );
+  assert.throws(
+    () => independentOfficialSourceFieldsForRecords("ko", [validated], []),
+    /독립 검증된 official-source-fields\.json/u,
+  );
+  assert.throws(
+    () => independentOfficialSourceFieldsForRecords(
+      "ko",
+      [validated],
+      [{
+        ...independentOfficialSource,
+        sourceMemberSha256: "d".repeat(64),
+      }],
+    ),
+    /독립 검증된 official-source-fields\.json/u,
+  );
+});
+
+test("번역 coverage와 method는 source_provided·human_reviewed·machine_assisted를 분리 집계한다", () => {
+  const officialSource = sourceRecord({ id: "a-item", description: undefined });
+  const humanSource = sourceRecord({ id: "b-item", description: undefined });
+  const machineSource = sourceRecord({ id: "c-item", description: undefined });
+  const officialText = "공식 아이템";
+  const records = [
+    {
+      id: officialSource.id,
+      kind: officialSource.kind,
+      fields: {
+        name: {
+          sourceSha256: sha256(officialText),
+          sourceMessageKey: "ITEM_NAME_Official",
+          sourceMember: "L10N/ko/Pal/DataTable/Text/DT_ItemNameText_Common.json",
+          sourceMemberSha256: "c".repeat(64),
+          text: officialText,
+          status: "source_provided",
+        },
+      },
+    },
+    translationRecord(humanSource, {
+      name: "검수 아이템",
+      status: "human_reviewed",
+    }),
+    translationRecord(machineSource, {
+      name: "기계 아이템",
+      status: "machine_assisted",
+    }),
+  ];
+  const coverage = translationCoverage(
+    records,
+    [officialSource, humanSource, machineSource],
+  );
+  assert.deepEqual(coverage.status, {
+    source_provided: 1,
+    human_reviewed: 1,
+    machine_assisted: 1,
+  });
+  assert.equal(translationMethodForStatusCounts(coverage.status), "mixed");
+  assert.equal(
+    translationMethodForStatusCounts({
+      source_provided: 1,
+      human_reviewed: 0,
+      machine_assisted: 0,
+    }),
+    "source_provided",
+  );
+  assert.equal(
+    translationMethodForStatusCounts({
+      source_provided: 0,
+      human_reviewed: 1,
+      machine_assisted: 0,
+    }),
+    "human_reviewed",
+  );
+  assert.equal(
+    translationMethodForStatusCounts({
+      source_provided: 0,
+      human_reviewed: 0,
+      machine_assisted: 1,
+    }),
+    "machine_assisted",
   );
 });
 

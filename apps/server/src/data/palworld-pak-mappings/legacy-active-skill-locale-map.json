@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "activeRelease": "1.0.1",
+  "candidateId": "candidate-1248184a4b527d94",
+  "joinRule": "pal_id_unlock_level_exact",
+  "activeCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "candidateSkillsSha256": "4f03cc98c5cf5aeac245b2f11ca82ac09bef7c0ffca0fed2512c4a8c4258ceb7",
+  "candidateImportReportSha256": "eb408d81a4db9f25cc873b6cda0b80d47307d5b40db2d042ab99005fb979a93e",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "reviewedExceptions": [
+    {
+      "legacySkillId": "active-purifying-light-82107388d3",
+      "candidateSkillId": "active:Unique_LegendDeer_RadiantPurge_Otomo",
+      "field": "power",
+      "activeValue": 250,
+      "candidateValue": 1250,
+      "reason": "고정된 palId+unlockLevel assignment identity와 공식 locale key는 일치하지만 고정 candidate에서 power가 변경되어 locale 호환만 명시적으로 승인합니다.",
+      "reviewStatus": "approved"
+    }
+  ]
+}

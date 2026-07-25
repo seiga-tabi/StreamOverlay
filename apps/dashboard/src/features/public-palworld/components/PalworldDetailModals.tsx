@@ -132,11 +132,22 @@ function itemDetailTranslationStatuses(
   ];
 }
 
-function SkillDescription({ locale, skill }: { locale: PalworldLocale; skill: PalworldSkill }) {
+function SkillDescription({
+  hideSourceLanguageFallback = false,
+  locale,
+  skill,
+}: {
+  hideSourceLanguageFallback?: boolean;
+  locale: PalworldLocale;
+  skill: PalworldSkill;
+}) {
   const text = palworldI18n[locale];
   const name = resolvePalworldName(skill, locale);
   const description = resolvePalworldDescription(skill, locale);
-  const statuses: PalworldTranslationDisplayStatus[] = [name.status, description.status];
+  const descriptionUsesSourceLanguageFallback = hideSourceLanguageFallback
+    && description.status === "source_language_fallback";
+  const statuses: PalworldTranslationDisplayStatus[] = [name.status, description.status]
+    .filter((status) => !hideSourceLanguageFallback || status !== "source_language_fallback");
   return <div className="palworld-skill-detail-copy">
     <PalworldTranslationBadges
       locale={locale}
@@ -150,8 +161,46 @@ function SkillDescription({ locale, skill }: { locale: PalworldLocale; skill: Pa
       {skill.cooldownSeconds !== undefined ? <Badge size="sm">{text.cooldown} {skill.cooldownSeconds}{text.seconds}</Badge> : null}
       {skill.unlockLevel !== undefined ? <Badge size="sm">{text.unlockLevel} {skill.unlockLevel}</Badge> : null}
     </div>
-    <p className="palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
+    <p
+      className="palworld-localized-copy"
+      {...(descriptionUsesSourceLanguageFallback ? {
+        "data-ko": palworldI18n.ko.activeSkillFallbackDescription,
+        "data-ja": palworldI18n.ja.activeSkillFallbackDescription,
+      } : {})}
+    >
+      {descriptionUsesSourceLanguageFallback
+        ? text.activeSkillFallbackDescription
+        : description.text || text.originalDataUnavailable}
+    </p>
   </div>;
+}
+
+export function PalworldActiveSkillDetail({
+  index,
+  locale,
+  skill,
+}: {
+  index: number;
+  locale: PalworldLocale;
+  skill: PalworldSkill;
+}) {
+  const name = resolvePalworldName(skill, locale);
+  const nameUsesSourceLanguageFallback = name.status === "source_language_fallback";
+  const fallbackNameKo = palworldI18n.ko.activeSkillFallbackName.replace("{index}", String(index + 1));
+  const fallbackNameJa = palworldI18n.ja.activeSkillFallbackName.replace("{index}", String(index + 1));
+  return <li>
+    <strong
+      {...(nameUsesSourceLanguageFallback ? {
+        "data-ko": fallbackNameKo,
+        "data-ja": fallbackNameJa,
+      } : {})}
+    >
+      {nameUsesSourceLanguageFallback
+        ? locale === "ja" ? fallbackNameJa : fallbackNameKo
+        : name.text || palworldI18n[locale].originalDataUnavailable}
+    </strong>
+    <SkillDescription hideSourceLanguageFallback locale={locale} skill={skill} />
+  </li>;
 }
 
 function DataRow({ labelJa, labelKo, locale, children }: { labelJa: string; labelKo: string; locale: PalworldLocale; children: React.ReactNode }) {
@@ -278,7 +327,7 @@ export function PalDetailModal({
               stars={condensationStars}
             />
             <section><h4 data-ko={palworldI18n.ko.partnerSkill} data-ja={palworldI18n.ja.partnerSkill}>{text.partnerSkill}</h4>{detail.partnerSkill ? <div className="palworld-skill-detail-list"><strong>{referenceName(detail.partnerSkill, locale)}</strong><SkillDescription locale={locale} skill={detail.partnerSkill} /></div> : <p>{text.sourceNotProvided}</p>}</section>
-            <section><h4 data-ko={palworldI18n.ko.activeSkills} data-ja={palworldI18n.ja.activeSkills}>{text.activeSkills}</h4>{detail.activeSkills.length ? <ul className="palworld-skill-detail-list">{detail.activeSkills.map((skill) => <li key={skill.id}><strong>{referenceName(skill, locale)}</strong><SkillDescription locale={locale} skill={skill} /></li>)}</ul> : <p>{text.sourceNotProvided}</p>}</section>
+            <section><h4 data-ko={palworldI18n.ko.activeSkills} data-ja={palworldI18n.ja.activeSkills}>{text.activeSkills}</h4>{detail.activeSkills.length ? <ul className="palworld-skill-detail-list">{detail.activeSkills.map((skill, index) => <PalworldActiveSkillDetail index={index} locale={locale} skill={skill} key={skill.id} />)}</ul> : <p>{text.sourceNotProvided}</p>}</section>
             <section><h4 data-ko={palworldI18n.ko.drops} data-ja={palworldI18n.ja.drops}>{text.drops}</h4>{dropDetails?.length ? <><div className="palworld-item-reference-list">{dropDetails.map((drop) => <PalworldItemReferenceButton item={drop.item} locale={locale} minQuantity={drop.minQuantity} maxQuantity={drop.maxQuantity} dropRatePercent={drop.dropRatePercent} onOpen={onOpenItem} key={drop.item.id} />)}</div><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={referenceTranslationSourceIntegrities(dropDetails.map((drop) => drop.item), locale)} statuses={referenceTranslationStatuses(dropDetails.map((drop) => drop.item), locale)} /></> : detail.drops.length ? <><div className="palworld-item-reference-list">{detail.drops.map((drop) => <PalworldItemReferenceButton item={drop} locale={locale} onOpen={onOpenItem} key={drop.id} />)}</div><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={referenceTranslationSourceIntegrities(detail.drops, locale)} statuses={referenceTranslationStatuses(detail.drops, locale)} /></> : <p>{text.sourceNotProvided}</p>}</section>
             {detail.breeding.specialParentPairs.length ? <section><h4 data-ko={palworldI18n.ko.breedingInfo} data-ja={palworldI18n.ja.breedingInfo}>{text.breedingInfo}</h4><div><strong>{text.specialParentPairs}</strong><ul>{detail.breeding.specialParentPairs.map((pair) => <SpecialParentPair locale={locale} pair={pair} key={`${pair.parentAId}-${pair.parentBId}-${pair.parentAGender ?? "any"}-${pair.parentBGender ?? "any"}`} />)}</ul></div></section> : null}
             <PalworldPalLocationMap

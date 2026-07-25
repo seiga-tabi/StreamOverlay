@@ -2,6 +2,11 @@ import { createHash } from "node:crypto";
 import { lstat, mkdir, readFile, readdir, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import type { PalworldTranslationOfficialSourceField } from "@streamops/shared";
+import {
+  assertPalworldOfficialLocaleSourceFieldsArtifact,
+  serializePalworldOfficialLocaleOverlayArtifact,
+} from "../data/palworld-official-locale-overlay.js";
 import { PALWORLD_SNAPSHOT } from "../data/palworld-snapshot.js";
 import type { PalworldCatalogArtifact } from "../data/palworld-catalog-artifact.js";
 import {
@@ -22,7 +27,15 @@ export const PALWORLD_TRANSLATION_MISSING_SOURCE_MARKER = {
 export type TranslationLocale = "ko" | "ja";
 export type TranslationKind = "pal" | "item" | "skill";
 export type TranslationFieldName = "name" | "description" | "passiveAbility";
-export type TranslationReviewStatus = "human_reviewed" | "machine_assisted";
+export type TranslationReviewStatus =
+  | "source_provided"
+  | "human_reviewed"
+  | "machine_assisted";
+export type TranslationMethod =
+  | "source_provided"
+  | "human_reviewed"
+  | "machine_assisted"
+  | "mixed";
 
 export interface TranslationSourceField {
   sourceText: string;
@@ -47,6 +60,9 @@ export interface TranslationCorpusRecord {
 
 export interface TranslationField {
   sourceSha256: string;
+  sourceMessageKey?: string;
+  sourceMember?: string;
+  sourceMemberSha256?: string;
   text: string;
   status: TranslationReviewStatus;
   note?: string;
@@ -66,7 +82,7 @@ export interface TranslationSnapshot {
   sourcePaldexSha256: string;
   sourceRevision: string;
   translationRevision: string;
-  translationMethod: "machine_assisted" | "human_reviewed" | "mixed";
+  translationMethod: TranslationMethod;
   translationStatus: "complete" | "incomplete";
   translatedAt: string;
   reviewedAt: string | null;
@@ -137,8 +153,10 @@ export const GLOSSARY_OVERRIDE_FILE = path.join(LOCALES_ROOT, "glossary-override
 
 const ID_PATTERN = /^[a-z0-9][a-z0-9-]{0,127}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const MESSAGE_KEY_PATTERN = /^[A-Za-z0-9_]{1,192}$/u;
 const FIELD_ORDER: readonly TranslationFieldName[] = ["name", "description", "passiveAbility"];
 const MAX_SOURCE_BYTES = 20 * 1024 * 1024;
+const MAX_OFFICIAL_SOURCE_BYTES = 64 * 1024 * 1024;
 const MAX_TRANSLATION_LENGTH = 4_000;
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u;
 const HTML_PATTERN = /<\/?[a-z][^>]*>|<script\b|javascript:/iu;
@@ -330,10 +348,13 @@ function assertOnlyKeys(value: Record<string, unknown>, keys: readonly string[],
   }
 }
 
-async function readBoundedJson<T>(filePath: string): Promise<{ value: T; bytes: Buffer }> {
+async function readBoundedJson<T>(
+  filePath: string,
+  maximumBytes = MAX_SOURCE_BYTES,
+): Promise<{ value: T; bytes: Buffer }> {
   const linkStat = await lstat(filePath);
   const fileStat = await stat(filePath);
-  if (linkStat.isSymbolicLink() || !fileStat.isFile() || fileStat.size <= 0 || fileStat.size > MAX_SOURCE_BYTES) {
+  if (linkStat.isSymbolicLink() || !fileStat.isFile() || fileStat.size <= 0 || fileStat.size > maximumBytes) {
     fail(`${path.basename(filePath)} 크기 또는 파일 형식이 올바르지 않습니다.`);
   }
   const bytes = await readFile(filePath);
@@ -516,26 +537,90 @@ export function validateTranslationRecord(
     const sourceField = source.fields[fieldName];
     if (!sourceField) fail(`${pathName}.fields.${fieldName}은 원문에 없는 필드입니다.`);
     const field = assertPlainObject(inputField, `${pathName}.fields.${fieldName}`);
-    assertOnlyKeys(field, ["sourceSha256", "text", "status", "note"], `${pathName}.fields.${fieldName}`);
+    assertOnlyKeys(
+      field,
+      [
+        "sourceSha256",
+        "sourceMessageKey",
+        "sourceMember",
+        "sourceMemberSha256",
+        "text",
+        "status",
+        "note",
+      ],
+      `${pathName}.fields.${fieldName}`,
+    );
     const sourceSha256 = requiredString(field.sourceSha256, `${pathName}.fields.${fieldName}.sourceSha256`, 64);
-    if (!SHA256_PATTERN.test(sourceSha256) || sourceSha256 !== sourceField.sourceSha256) {
-      fail(`${pathName}.fields.${fieldName} 원문 hash가 현재 source와 일치하지 않습니다.`);
-    }
+    if (!SHA256_PATTERN.test(sourceSha256)) fail(`${pathName}.fields.${fieldName}.sourceSha256가 올바르지 않습니다.`);
     const text = requiredString(field.text, `${pathName}.fields.${fieldName}.text`);
     if (HTML_PATTERN.test(text)) fail(`${pathName}.fields.${fieldName}.text에 HTML 또는 script를 허용하지 않습니다.`);
-    if (text === sourceField.sourceText && !identicalAllowlist.has(`${locale}:${kind}:${id}:${fieldName}`)) {
-      fail(`${pathName}.fields.${fieldName}.text가 영어 원문과 동일합니다.`);
-    }
-    const translatedNumbers = numericSignature(text);
-    const sourceNumbers = numericSignature(sourceField.sourceText);
-    if (translatedNumbers.numbers.join("\u0000") !== sourceNumbers.numbers.join("\u0000")) {
-      fail(`${pathName}.fields.${fieldName}.text가 원문의 숫자 값·횟수·등장 순서를 보존하지 않았습니다.`);
-    }
-    if ([...translatedNumbers.boundUnits].sort().join("\u0000") !== [...sourceNumbers.boundUnits].sort().join("\u0000")) {
-      fail(`${pathName}.fields.${fieldName}.text가 원문의 숫자와 인접 단위 결합을 보존하지 않았습니다.`);
-    }
-    if (field.status !== "human_reviewed" && field.status !== "machine_assisted") {
+    if (
+      field.status !== "source_provided"
+      && field.status !== "human_reviewed"
+      && field.status !== "machine_assisted"
+    ) {
       fail(`${pathName}.fields.${fieldName}.status가 올바르지 않습니다.`);
+    }
+    const officialMetadataFields = [
+      "sourceMessageKey",
+      "sourceMember",
+      "sourceMemberSha256",
+    ] as const;
+    let sourceMessageKey: string | undefined;
+    let sourceMember: string | undefined;
+    let sourceMemberSha256: string | undefined;
+    if (field.status === "source_provided") {
+      sourceMessageKey = requiredString(
+        field.sourceMessageKey,
+        `${pathName}.fields.${fieldName}.sourceMessageKey`,
+        192,
+      );
+      if (!MESSAGE_KEY_PATTERN.test(sourceMessageKey)) {
+        fail(`${pathName}.fields.${fieldName}.sourceMessageKey가 exact locale message key 형식이 아닙니다.`);
+      }
+      sourceMember = requiredString(
+        field.sourceMember,
+        `${pathName}.fields.${fieldName}.sourceMember`,
+        512,
+      );
+      if (
+        sourceMember.startsWith("/")
+        || /[\u0000-\u001F\u007F\\%]/u.test(sourceMember)
+        || sourceMember.includes("//")
+        || sourceMember.split("/").some((segment) =>
+          segment.length === 0 || segment === "." || segment === "..")
+      ) {
+        fail(`${pathName}.fields.${fieldName}.sourceMember가 안전한 archive 상대 경로가 아닙니다.`);
+      }
+      sourceMemberSha256 = requiredString(
+        field.sourceMemberSha256,
+        `${pathName}.fields.${fieldName}.sourceMemberSha256`,
+        64,
+      );
+      if (!SHA256_PATTERN.test(sourceMemberSha256)) {
+        fail(`${pathName}.fields.${fieldName}.sourceMemberSha256가 올바르지 않습니다.`);
+      }
+      if (sourceSha256 !== sha256(text)) {
+        fail(`${pathName}.fields.${fieldName}.sourceSha256가 공식 locale 값 hash와 일치하지 않습니다.`);
+      }
+    } else {
+      if (officialMetadataFields.some((metadataField) => field[metadataField] !== undefined)) {
+        fail(`${pathName}.fields.${fieldName}의 공식 source 출처 정보는 source_provided에만 허용됩니다.`);
+      }
+      if (sourceSha256 !== sourceField.sourceSha256) {
+        fail(`${pathName}.fields.${fieldName} 원문 hash가 현재 source와 일치하지 않습니다.`);
+      }
+      if (text === sourceField.sourceText && !identicalAllowlist.has(`${locale}:${kind}:${id}:${fieldName}`)) {
+        fail(`${pathName}.fields.${fieldName}.text가 영어 원문과 동일합니다.`);
+      }
+      const translatedNumbers = numericSignature(text);
+      const sourceNumbers = numericSignature(sourceField.sourceText);
+      if (translatedNumbers.numbers.join("\u0000") !== sourceNumbers.numbers.join("\u0000")) {
+        fail(`${pathName}.fields.${fieldName}.text가 원문의 숫자 값·횟수·등장 순서를 보존하지 않았습니다.`);
+      }
+      if ([...translatedNumbers.boundUnits].sort().join("\u0000") !== [...sourceNumbers.boundUnits].sort().join("\u0000")) {
+        fail(`${pathName}.fields.${fieldName}.text가 원문의 숫자와 인접 단위 결합을 보존하지 않았습니다.`);
+      }
     }
     if (field.status === "machine_assisted") {
       validateMachineTranslationQuality(
@@ -551,7 +636,7 @@ export function validateTranslationRecord(
     if (reviewedName !== undefined && field.status === "human_reviewed" && text !== reviewedName) {
       fail(`${pathName}.fields.name.text가 검수된 glossary 이름과 일치하지 않습니다.`);
     }
-    if (fieldName === "name") {
+    if (fieldName === "name" && field.status !== "source_provided") {
       for (const [termKey, reviewedTerm] of reviewedTerms) {
         const prefix = `${locale}:`;
         if (!termKey.startsWith(prefix)) continue;
@@ -561,21 +646,31 @@ export function validateTranslationRecord(
         }
       }
     }
-    const anomaly = analyzeTranslationSource(sourceField.sourceText);
     if (PLACEHOLDER_RESIDUE_PATTERN.test(text)) {
       fail(`${pathName}.fields.${fieldName}.text에 번역 중간 placeholder가 남아 있습니다.`);
     }
-    const marker = PALWORLD_TRANSLATION_MISSING_SOURCE_MARKER[locale];
-    const markerCount = text.split(marker).length - 1;
-    if (markerCount !== anomaly.missingSlotCount) {
-      fail(`${pathName}.fields.${fieldName}의 locale marker 수는 손상 원문의 ${anomaly.missingSlotCount}개 누락 위치와 정확히 일치해야 합니다.`);
-    }
-    if (anomaly.missingSlotCount > 0) {
-      if (!note?.includes(PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE)) {
-        fail(`${pathName}.fields.${fieldName}은 손상 원문의 ${anomaly.missingSlotCount}개 누락 위치를 ${marker}와 ${PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE} note로 보존해야 합니다.`);
+    if (field.status !== "source_provided") {
+      const anomaly = analyzeTranslationSource(sourceField.sourceText);
+      const marker = PALWORLD_TRANSLATION_MISSING_SOURCE_MARKER[locale];
+      const markerCount = text.split(marker).length - 1;
+      if (markerCount !== anomaly.missingSlotCount) {
+        fail(`${pathName}.fields.${fieldName}의 locale marker 수는 손상 원문의 ${anomaly.missingSlotCount}개 누락 위치와 정확히 일치해야 합니다.`);
+      }
+      if (anomaly.missingSlotCount > 0) {
+        if (!note?.includes(PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE)) {
+          fail(`${pathName}.fields.${fieldName}은 손상 원문의 ${anomaly.missingSlotCount}개 누락 위치를 ${marker}와 ${PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE} note로 보존해야 합니다.`);
+        }
       }
     }
-    fields[fieldName] = { sourceSha256, text, status: field.status, ...(note ? { note } : {}) };
+    fields[fieldName] = {
+      sourceSha256,
+      ...(sourceMessageKey === undefined ? {} : { sourceMessageKey }),
+      ...(sourceMember === undefined ? {} : { sourceMember }),
+      ...(sourceMemberSha256 === undefined ? {} : { sourceMemberSha256 }),
+      text,
+      status: field.status,
+      ...(note ? { note } : {}),
+    };
   }
   if (Object.keys(fields).length === 0) fail(`${pathName}.fields가 비어 있습니다.`);
   return { id, kind, fields: sortedFields(fields) };
@@ -649,6 +744,11 @@ export function assertStrictMachineNameQualityForImport(
 }
 
 export function mergeTranslationRecords(records: readonly TranslationRecord[]): TranslationRecord[] {
+  const priority: Readonly<Record<TranslationReviewStatus, number>> = {
+    source_provided: 3,
+    human_reviewed: 2,
+    machine_assisted: 1,
+  };
   const merged = new Map<string, TranslationRecord>();
   for (const record of records) {
     const identity = `${record.kind}:${record.id}`;
@@ -661,13 +761,19 @@ export function mergeTranslationRecords(records: readonly TranslationRecord[]): 
         current.fields[fieldName] = incoming;
         continue;
       }
-      if (existing.sourceSha256 !== incoming.sourceSha256) fail(`${identity}:${fieldName}의 원문 hash가 candidate 사이에서 충돌합니다.`);
-      if (existing.status === "human_reviewed" && incoming.status === "machine_assisted") continue;
-      if (existing.status === "machine_assisted" && incoming.status === "human_reviewed") {
+      if (priority[existing.status] > priority[incoming.status]) continue;
+      if (priority[existing.status] < priority[incoming.status]) {
         current.fields[fieldName] = incoming;
         continue;
       }
-      if (existing.text !== incoming.text || existing.note !== incoming.note) {
+      if (
+        existing.sourceSha256 !== incoming.sourceSha256
+        || existing.sourceMessageKey !== incoming.sourceMessageKey
+        || existing.sourceMember !== incoming.sourceMember
+        || existing.sourceMemberSha256 !== incoming.sourceMemberSha256
+        || existing.text !== incoming.text
+        || existing.note !== incoming.note
+      ) {
         fail(`${identity}:${fieldName}에 같은 우선순위의 서로 다른 번역이 있습니다.`);
       }
     }
@@ -714,8 +820,101 @@ export function translationCoverage(records: readonly TranslationRecord[], corpu
   const status = [...translated.values()].reduce((result, field) => {
     result[field.status] += 1;
     return result;
-  }, { human_reviewed: 0, machine_assisted: 0 });
+  }, { source_provided: 0, human_reviewed: 0, machine_assisted: 0 });
   return { byKind, translated: translated.size, total, missing: total - translated.size, status };
+}
+
+export function translationMethodForStatusCounts(
+  status: Readonly<Record<TranslationReviewStatus, number>>,
+): TranslationMethod {
+  const present = ([
+    "source_provided",
+    "human_reviewed",
+    "machine_assisted",
+  ] as const).filter((entry) => status[entry] > 0);
+  if (present.length === 0) fail("번역 field status가 없어 translationMethod를 계산할 수 없습니다.");
+  return present.length === 1 ? present[0]! : "mixed";
+}
+
+export async function loadIndependentOfficialSourceFields(input: {
+  release: string;
+  sourceCatalogSha256: string;
+  sourcePaldexSha256: string;
+  localeRoot?: string;
+}): Promise<readonly PalworldTranslationOfficialSourceField[]> {
+  const localeRoot = path.resolve(input.localeRoot ?? LOCALES_ROOT);
+  const filePath = path.join(localeRoot, "official-source-fields.json");
+  let result: Awaited<ReturnType<typeof readBoundedJson<unknown>>>;
+  try {
+    result = await readBoundedJson<unknown>(filePath, MAX_OFFICIAL_SOURCE_BYTES);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
+  const artifact = assertPalworldOfficialLocaleSourceFieldsArtifact(result.value);
+  if (
+    artifact.release !== input.release
+    || artifact.sourceCatalogSha256 !== input.sourceCatalogSha256
+    || artifact.sourcePaldexSha256 !== input.sourcePaldexSha256
+  ) {
+    fail("official-source-fields.json이 현재 release 또는 catalog/Paldex checksum과 일치하지 않습니다.");
+  }
+  if (
+    result.bytes.toString("utf8")
+    !== serializePalworldOfficialLocaleOverlayArtifact(artifact)
+  ) {
+    fail("official-source-fields.json이 결정적 canonical JSON bytes와 일치하지 않습니다.");
+  }
+  return artifact.records.map((record) => ({
+    locale: record.locale,
+    kind: record.kind,
+    id: record.id,
+    field: record.field,
+    messageKey: record.messageKey,
+    text: record.text,
+    textSha256: record.textSha256,
+    sourceMember: record.sourceMember,
+    sourceMemberSha256: record.sourceMemberSha256,
+  }));
+}
+
+export function independentOfficialSourceFieldsForRecords(
+  locale: TranslationLocale,
+  records: readonly TranslationRecord[],
+  independentFields: readonly PalworldTranslationOfficialSourceField[],
+): readonly PalworldTranslationOfficialSourceField[] {
+  const sourceByIdentity = new Map(
+    independentFields.map((field) => [
+      `${field.locale}:${field.kind}:${field.id}:${field.field}`,
+      field,
+    ]),
+  );
+  return records.flatMap((record) =>
+    FIELD_ORDER.flatMap((fieldName) => {
+      const field = record.fields[fieldName];
+      if (field?.status !== "source_provided") return [];
+      if (
+        field.sourceMessageKey === undefined
+        || field.sourceMember === undefined
+        || field.sourceMemberSha256 === undefined
+      ) {
+        fail(`${record.kind}:${record.id}:${fieldName}의 공식 source 출처 정보가 누락되었습니다.`);
+      }
+      const identity = `${locale}:${record.kind}:${record.id}:${fieldName}`;
+      const independent = sourceByIdentity.get(identity);
+      if (
+        independent === undefined
+        || independent.messageKey !== field.sourceMessageKey
+        || independent.text !== field.text
+        || independent.textSha256 !== field.sourceSha256
+        || independent.sourceMember !== field.sourceMember
+        || independent.sourceMemberSha256 !== field.sourceMemberSha256
+      ) {
+        fail(`${identity}가 독립 검증된 official-source-fields.json과 일치하지 않습니다.`);
+      }
+      return [independent];
+    })
+  );
 }
 
 export async function readIdenticalAllowlist(): Promise<Set<string>> {
@@ -776,8 +975,9 @@ export function assertReviewedNameRecords(
     if (!identity.startsWith(`${locale}:`)) continue;
     const canonicalIdentity = identity.slice(locale.length + 1);
     const name = recordsByIdentity.get(canonicalIdentity)?.fields.name;
+    if (name?.status === "source_provided") continue;
     if (name?.status !== "human_reviewed" || name.text !== expected) {
-      fail(`${canonicalIdentity}의 검수 이름이 human_reviewed glossary 값으로 고정되지 않았습니다.`);
+      fail(`${canonicalIdentity}의 이름이 공식 source 또는 human_reviewed glossary 값으로 고정되지 않았습니다.`);
     }
   }
 }

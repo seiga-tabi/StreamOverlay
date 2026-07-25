@@ -57,8 +57,12 @@ import {
 } from "../data/palworld-active-runtime.js";
 import {
   createPalworldTranslationValidationContext,
-  loadPalworldTranslationBundle
+  loadPalworldTranslationBundle,
+  type PalworldTranslationBundle
 } from "../data/palworld-translation-artifact.js";
+import {
+  loadPalworldOfficialLocaleRuntimeOverlay
+} from "../data/palworld-official-locale-runtime.js";
 import {
   PalworldBreedingEngine,
   type PalworldBreedingEnginePair,
@@ -1199,16 +1203,59 @@ export async function loadPalworldDataService(options: {
       // 검수 이름 alias 손상은 번역 bundle만 stale/invalid로 차단하고,
       // Palworld 영문 catalog와 기존 공개 API는 계속 제공한다.
     }
-    const translationBundle = await loadPalworldTranslationBundle({
-      releaseRoot: catalogRoot,
-      context: createPalworldTranslationValidationContext({
-        catalog: catalogSource.catalog,
-        catalogSha256: catalogSource.manifest.catalogSha256,
-        paldex: release,
-        paldexSha256: release.manifest.paldexSha256,
-        reviewedItemAliases
-      })
-    });
+    let officialLocaleOverlay:
+      Awaited<ReturnType<typeof loadPalworldOfficialLocaleRuntimeOverlay>>
+      | undefined;
+    let translationBundle: PalworldTranslationBundle | undefined;
+    if (
+      activeRuntime?.manifest.format === "legacy_composite_v2"
+      && activeRuntime.manifest.composite.schemaVersion >= 4
+    ) {
+      try {
+        officialLocaleOverlay = await loadPalworldOfficialLocaleRuntimeOverlay({
+          releaseRoot: catalogRoot,
+          expectedRelease: release.metadata.gameVersion,
+          expectedCatalogSha256: catalogSource.manifest.catalogSha256,
+          expectedPaldexSha256: release.manifest.paldexSha256,
+          expectedSourceRevision: catalogSource.catalog.metadata.sourceRevision
+        });
+      } catch {
+        // 공식 locale overlay의 checksum/evidence가 손상되어도 catalog 자체를
+        // sample 또는 비가용 상태로 바꾸지 않습니다. 두 번역만 fail-closed하고
+        // Pal·Item·Skill의 검증된 영문 원문 runtime은 계속 제공합니다.
+        translationBundle = {
+          snapshots: {},
+          states: {
+            ko: {
+              status: "invalid",
+              errorCode: "PALWORLD_TRANSLATION_MANIFEST_INVALID",
+              staleSourceHash: true
+            },
+            ja: {
+              status: "invalid",
+              errorCode: "PALWORLD_TRANSLATION_MANIFEST_INVALID",
+              staleSourceHash: true
+            }
+          }
+        };
+      }
+    }
+    translationBundle ??= await loadPalworldTranslationBundle({
+        releaseRoot: catalogRoot,
+        context: createPalworldTranslationValidationContext({
+          catalog: catalogSource.catalog,
+          catalogSha256: catalogSource.manifest.catalogSha256,
+          paldex: release,
+          paldexSha256: release.manifest.paldexSha256,
+          reviewedItemAliases,
+          ...(officialLocaleOverlay === undefined
+            ? {}
+            : {
+                officialSourceFields:
+                  officialLocaleOverlay.officialSourceFields
+              })
+        })
+      });
     for (const locale of ["ko", "ja"] as const) {
       try {
         options.onTranslationState?.(locale, { ...translationBundle.states[locale] });

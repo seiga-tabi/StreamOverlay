@@ -78,7 +78,7 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(body.counts.items, 1_847);
   assert.equal(body.counts.skills, 566);
   assert.equal(body.domains.pals.status, "ready");
-  assert.equal(body.domains.items.status, "ready");
+  assert.equal(body.domains.items.status, "incomplete");
   assert.equal(body.domains.items.metadata.gameVersion, "1.0.1");
   assert.equal(body.domains.items.metadata.sourceRevision, body.metadata.sourceRevision);
   assert.equal(body.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
@@ -97,28 +97,31 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.deepEqual(body.coverage.elementImages, { available: 9, missing: 0, total: 9 });
   for (const locale of ["ko", "ja"]) {
     const translationCoverage = body.coverage.translations[locale];
-    assert.equal(translationCoverage.publicUsable, 5_458);
-    assert.equal(translationCoverage.sourceLanguageFallback, 0);
+    assert.equal(translationCoverage.artifactTranslated, 5_219);
+    assert.equal(translationCoverage.publicUsable, 5_219);
+    assert.equal(translationCoverage.sourceProvided, 5_219);
+    assert.equal(translationCoverage.humanReviewed, 0);
+    assert.equal(translationCoverage.sourceLanguageFallback, 239);
     assert.equal(translationCoverage.missingSource, 21);
-    assert.equal(translationCoverage.sourceAnomalousFields, 1_120);
-    assert.equal(translationCoverage.missingSourceSlots, 1_649);
+    assert.equal(translationCoverage.sourceAnomalousFields, 0);
+    assert.equal(translationCoverage.missingSourceSlots, 0);
     assert.deepEqual(translationCoverage.availability, {
-      translated: 5_458,
-      sourceLanguageFallback: 0,
+      translated: 5_219,
+      sourceLanguageFallback: 239,
       missingSource: 21,
       total: 5_479
     });
     assert.deepEqual(translationCoverage.review, {
-      sourceProvided: 0,
-      humanReviewed: 297,
-      machineAssisted: 5_161,
-      total: 5_458
+      sourceProvided: 5_219,
+      humanReviewed: 0,
+      machineAssisted: 0,
+      total: 5_219
     });
     assert.deepEqual(translationCoverage.sourceIntegrity, {
-      intact: 4_338,
-      sourceAnomalousFields: 1_120,
+      intact: 5_458,
+      sourceAnomalousFields: 0,
       missingSourceFields: 21,
-      missingSourceSlots: 1_649,
+      missingSourceSlots: 0,
       total: 5_479
     });
   }
@@ -211,41 +214,37 @@ test("같은 release에서도 공개 번역 표현이 바뀌면 Item·Skill 목�
   ];
 
   for (const fixture of cases) {
-    const staleService = {
+    const baseline = await request(createHandler(), fixture.path);
+    assert.equal(baseline.res.statusCode, 200, fixture.path);
+
+    const translatedService = {
       meta: () => palworldDataService.meta(),
       [fixture.method]: (...args) => {
         const response = structuredClone(
           palworldDataService[fixture.method](...args)
         );
         const target = fixture.localizedTarget(response);
-        delete target.nameKo;
+        target.nameKo = "공식 번역 검증값";
         if (target.translation?.name) {
-          target.translation.name.ko = "source_language_fallback";
+          target.translation.name.ko = "source_provided";
         }
         return response;
       }
     };
-    const stale = await request(createHandler(staleService), fixture.path);
-    assert.equal(stale.res.statusCode, 200, fixture.path);
-
     const refreshed = await request(
-      createHandler(),
+      createHandler(translatedService),
       fixture.path,
       "GET",
-      { "if-none-match": stale.res.headers.ETag }
+      { "if-none-match": baseline.res.headers.ETag }
     );
     assert.equal(refreshed.res.statusCode, 200, fixture.path);
-    assert.notEqual(refreshed.res.headers.ETag, stale.res.headers.ETag, fixture.path);
+    assert.notEqual(refreshed.res.headers.ETag, baseline.res.headers.ETag, fixture.path);
     const localizedTarget = fixture.localizedTarget(refreshed.body);
-    assert.equal(typeof localizedTarget.nameKo, "string", fixture.path);
-    assert.notEqual(
-      localizedTarget.translation?.name?.ko,
-      "source_language_fallback",
-      fixture.path
-    );
+    assert.equal(localizedTarget.nameKo, "공식 번역 검증값", fixture.path);
+    assert.equal(localizedTarget.translation?.name?.ko, "source_provided", fixture.path);
 
     const unchanged = await request(
-      createHandler(),
+      createHandler(translatedService),
       fixture.path,
       "GET",
       { "if-none-match": refreshed.res.headers.ETag }
@@ -294,8 +293,8 @@ test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 �
   const number = await request(handler, "/api/palworld/search?q=%23139");
   const palInternalId = await request(handler, "/api/palworld/search?q=SheepBall");
   const itemInternalId = await request(handler, "/api/palworld/search?q=PalSphere");
-  const machineItemKo = await request(handler, "/api/palworld/search?q=%EB%BC%88");
-  const machineItemJa = await request(handler, "/api/palworld/search?q=%E9%AA%A8");
+  const officialItemKo = await request(handler, "/api/palworld/search?q=%EB%BC%88");
+  const officialItemJa = await request(handler, "/api/palworld/search?q=%E9%AA%A8");
   assert.equal(korean.body.pals[0].id, "anubis");
   assert.equal(japanese.body.items[0].id, "pal-sphere");
   assert.equal(english.body.pals[0].id, "anubis");
@@ -303,11 +302,11 @@ test("통합 검색 API는 한국어와 일본어 Pal 및 아이템 결과를 �
   assert.equal(number.body.pals[0].id, "anubis");
   assert.equal(palInternalId.body.pals[0].id, "lamball");
   assert.equal(itemInternalId.body.items.some((item) => item.id === "pal-sphere"), true);
-  assert.equal(machineItemKo.body.items.some((item) => item.id === "bone"), true);
-  assert.equal(machineItemJa.body.items.some((item) => item.id === "bone"), true);
+  assert.equal(officialItemKo.body.items.some((item) => item.id === "bone"), true);
+  assert.equal(officialItemJa.body.items.some((item) => item.id === "bone"), true);
   assert.equal(japanese.body.domains.pals.status, "ready");
   assert.equal(japanese.body.domains.pals.metadata.gameVersion, "1.0.1");
-  assert.equal(japanese.body.domains.items.status, "ready");
+  assert.equal(japanese.body.domains.items.status, "incomplete");
   assert.equal(japanese.body.domains.items.metadata.gameVersion, "1.0.1");
   assert.equal(japanese.body.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
 
@@ -374,21 +373,27 @@ test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드�
   const handler = createHandler();
   const pal = await request(handler, "/api/palworld/pals/anubis");
   const item = await request(handler, "/api/palworld/items/pal_sphere");
-  const machineItem = await request(handler, "/api/palworld/items/bone");
+  const officialItem = await request(handler, "/api/palworld/items/bone");
   assert.equal(pal.res.statusCode, 200);
   assert.equal(pal.body.nameJa, "アヌビス");
-  assert.equal(pal.body.partnerSkill.nameKo, "사막의 수호자");
-  assert.equal(pal.body.partnerSkill.nameJa, "砂漠の守護者");
-  assert.equal(pal.body.partnerSkill.translation.name.ko, "machine_assisted");
-  assert.equal(pal.body.activeSkills.every((skill) => skill.nameKo && skill.nameJa), true);
+  assert.equal(pal.body.partnerSkill.translation.name.ko, "source_provided");
+  assert.equal(pal.body.partnerSkill.translation.name.ja, "source_provided");
   assert.equal(
     pal.body.activeSkills.every((skill) =>
-      skill.translation.name.ko === "machine_assisted"
-      && skill.translation.name.ja === "machine_assisted"
+      skill.translation.name.ko === "source_provided"
+      && skill.translation.name.ja === "source_provided"
+      && skill.translation.description.ko === "source_provided"
+      && skill.translation.description.ja === "source_provided"
     ),
     true
   );
-  assert.equal(pal.body.drops.every((drop) => drop.nameKo && drop.nameJa), true);
+  assert.equal(
+    pal.body.drops.every((drop) =>
+      drop.translation.name.ko !== "machine_assisted"
+      && drop.translation.name.ja !== "machine_assisted"
+    ),
+    true
+  );
   assert.equal(item.res.statusCode, 200);
   assert.equal(item.body.id, "pal-sphere");
   assert.equal(item.body.sourceInternalId, "PalSphere");
@@ -403,26 +408,24 @@ test("상세 API는 canonical ID와 underscore alias를 같은 로컬 레코드�
     true
   );
   assert.equal(validatePalworldItemDetail(item.body).ok, true);
-  assert.equal(machineItem.res.statusCode, 200);
-  assert.equal(machineItem.body.nameKo, "뼈");
-  assert.equal(machineItem.body.nameJa, "骨");
-  assert.equal(machineItem.body.translation.name.ko, "machine_assisted");
-  assert.equal(machineItem.body.translation.name.ja, "machine_assisted");
-  assert.deepEqual(machineItem.body.translation.name.sourceIntegrity, {
+  assert.equal(officialItem.res.statusCode, 200);
+  assert.equal(officialItem.body.translation.name.ko, "source_provided");
+  assert.equal(officialItem.body.translation.name.ja, "source_provided");
+  assert.deepEqual(officialItem.body.translation.name.sourceIntegrity, {
     ko: "intact",
     ja: "intact"
   });
 
   const anomalousItem = await request(handler, "/api/palworld/items/aicore");
   assert.equal(anomalousItem.res.statusCode, 200);
-  assert.equal(anomalousItem.body.translation.description.ko, "machine_assisted");
-  assert.equal(anomalousItem.body.translation.description.ja, "machine_assisted");
+  assert.equal(anomalousItem.body.translation.description.ko, "source_provided");
+  assert.equal(anomalousItem.body.translation.description.ja, "source_provided");
   assert.deepEqual(anomalousItem.body.translation.description.sourceIntegrity, {
-    ko: "source_anomaly",
-    ja: "source_anomaly"
+    ko: "intact",
+    ja: "intact"
   });
-  assert.equal(anomalousItem.body.descriptionKo.includes("[원문 누락]"), true);
-  assert.equal(anomalousItem.body.descriptionJa.includes("[原文欠落]"), true);
+  assert.equal(anomalousItem.body.descriptionKo.length > 0, true);
+  assert.equal(anomalousItem.body.descriptionJa.length > 0, true);
 });
 
 test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 Shared schema를 적용한다", async () => {
@@ -439,14 +442,12 @@ test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 S
     ko: "localized",
     ja: "localized"
   });
-  assert.equal(active.body.items[0].nameKo.length > 0, true);
-  assert.equal(active.body.items[0].nameJa.length > 0, true);
-  assert.notEqual(active.body.items[0].nameKo, active.body.items[0].nameEn);
-  assert.notEqual(active.body.items[0].nameJa, active.body.items[0].nameEn);
-  assert.equal(active.body.items[0].translation.name.ko, "machine_assisted");
-  assert.equal(active.body.items[0].translation.name.ja, "machine_assisted");
-  assert.equal(active.body.items[0].translation.description.ko, "machine_assisted");
-  assert.equal(active.body.items[0].translation.description.ja, "machine_assisted");
+  assert.equal(active.body.items[0].nameKo, "프로스트 아웃");
+  assert.equal(active.body.items[0].nameJa, "フロストアウト");
+  assert.equal(active.body.items[0].translation.name.ko, "source_provided");
+  assert.equal(active.body.items[0].translation.name.ja, "source_provided");
+  assert.equal(active.body.items[0].translation.description.ko, "source_provided");
+  assert.equal(active.body.items[0].translation.description.ja, "source_provided");
   assert.match(active.res.headers["Cache-Control"], /^public,/u);
   assert.equal(
     validatePalworldPaginatedResponse(active.body, validatePalworldSkillSummary).ok,
@@ -463,12 +464,20 @@ test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 S
     handler,
     "/api/palworld/skills?q=%E7%A0%82%E6%BC%A0%E3%81%AE%E5%AE%88%E8%AD%B7%E8%80%85&page=1&limit=10"
   );
+  const englishName = await request(
+    handler,
+    "/api/palworld/skills?q=guardian%20of%20the%20desert&page=1&limit=10"
+  );
   assert.equal(
     koreanName.body.items.some((skill) => skill.id === "partner-anubis"),
-    true
+    false
   );
   assert.equal(
     japaneseName.body.items.some((skill) => skill.id === "partner-anubis"),
+    false
+  );
+  assert.equal(
+    englishName.body.items.some((skill) => skill.id === "partner-anubis"),
     true
   );
 
@@ -531,6 +540,13 @@ test("첫 번째·중간·마지막 Pal과 기존 누락 Pal 상세는 모두 �
   assert.equal(first.body.partnerSkill.nameEn, "Fluffy Shield");
   assert.equal(first.body.activeSkills.length, 7);
   assert.equal(first.body.activeSkills.every((skill) => skill.descriptionEn && skill.localization.sourceLanguage === "en"), true);
+  assert.equal(
+    first.body.activeSkills.every((skill) =>
+      skill.translation.name.ko === "source_provided"
+      && skill.translation.name.ja === "source_provided"
+    ),
+    true
+  );
   assert.deepEqual(first.body.drops.map((drop) => drop.id), ["wool", "meat-sheep-ball"]);
   assert.deepEqual(first.body.dropDetails.map((drop) => [drop.item.id, drop.minQuantity, drop.maxQuantity, drop.dropRatePercent]), [
     ["wool", 1, 3, 100],

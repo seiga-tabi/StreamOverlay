@@ -79,7 +79,12 @@ let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
 let palworldSpawnProvider: PalworldSpawnProvider | undefined;
 let palworldActiveRuntime: PalworldActiveRuntime | undefined;
 try {
-  palworldActiveRuntime = await loadPalworldActiveRuntime();
+  palworldActiveRuntime = await loadPalworldActiveRuntime({
+    // 번역 artifact만 손상된 경우 Palworld 전체를 중단하지 않고
+    // service의 KO/JA invalid + 영문 fallback 경계에서 격리합니다.
+    // core catalog·Paldex·breeding·asset 검증은 계속 strict합니다.
+    deferTranslationArtifactIntegrity: true
+  });
   palworldDataService = await loadPalworldDataService({
     activeRuntime: palworldActiveRuntime,
     dashboardStaticRoot: appConfig.paths.dashboardStatic,

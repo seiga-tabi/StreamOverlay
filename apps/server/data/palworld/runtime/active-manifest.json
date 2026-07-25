@@ -6,7 +6,7 @@
   "manifestFile": "manifest.json",
   "manifestSha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198",
   "composite": {
-    "schemaVersion": 3,
+    "schemaVersion": 5,
     "release": "1.0.1",
     "artifacts": [
       {
@@ -72,7 +72,7 @@
       {
         "kind": "locale-manifest",
         "file": "locales/manifest.json",
-        "sha256": "9faadecbf52b197ee5344445f1316d3447b8e1f72c2b29ffa760bab5de4b7c56"
+        "sha256": "f6c95472303eb0dfa873597d1fcf94b2795ff5b5e3e909843ba6d71e1d0f3c62"
       },
       {
         "kind": "locale-glossary",
@@ -82,12 +82,27 @@
       {
         "kind": "locale-ko",
         "file": "locales/ko.json",
-        "sha256": "0605cbfcd39dcbd05d7eec43e5b179bc7373a879de7ac7052f7b1cec122ad3d7"
+        "sha256": "5ac95abeed9ba072fe7cf0818b9b80bcd45b5224ba5ff821f7809de19196cb4e"
       },
       {
         "kind": "locale-ja",
         "file": "locales/ja.json",
-        "sha256": "6e9d7204fba8521f61579b680de8c71942fcff68d64fae1f78e5fa6f669e8284"
+        "sha256": "c29f8299234960623455fa0c970744550f89a1cd2353f555a1966887124aa25b"
+      },
+      {
+        "kind": "locale-official-source-fields",
+        "file": "locales/official-source-fields.json",
+        "sha256": "9499ec38e96ef9caa4258f9f119326b302970267f7b23355020c9a4e223c6ff9"
+      },
+      {
+        "kind": "locale-official-active-skill-evidence",
+        "file": "locales/official-active-skill-evidence.json",
+        "sha256": "19c49222cc8e30b4151fb6aca3d6ada259f391bd4f1ea710d88bdc5d6afb52e2"
+      },
+      {
+        "kind": "locale-official-compatibility",
+        "file": "locales/official-locale-compatibility.json",
+        "sha256": "32e95e20bbce6c58482ea13c779a92a46bdb60a1e6f97b8810fa2f32864d3427"
       },
       {
         "kind": "reviewed-item-aliases",

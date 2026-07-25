@@ -109,10 +109,13 @@ function translatedField(
   id: string,
   field: PalworldTranslationField
 ): PalworldTranslationFieldValue | undefined {
-  // source hash·canonical ID·영문 원문 복사·HTML·제어문자 검증을 통과한
-  // versioned snapshot만 이 index에 들어옵니다. machine-assisted 값은
-  // UI에서 검수 중 Badge를 함께 표시하므로 이름과 설명에 동일하게 적용합니다.
-  return index[locale].get(translationRecordKey(kind, id))?.fields[field];
+  const value = index[locale].get(translationRecordKey(kind, id))?.fields[field];
+  // 기계 보조 번역은 artifact 감사·coverage에는 보존하지만 공개 이름과 설명으로
+  // 승격하지 않습니다. 공식 PAK locale(source_provided) 또는 실제 검수된 값만
+  // runtime에 전달하며, 나머지는 기존 locale이나 영어 원문 fallback을 사용합니다.
+  return value?.status === "source_provided" || value?.status === "human_reviewed"
+    ? value
+    : undefined;
 }
 
 function displayStatus(
@@ -314,8 +317,7 @@ function coverageCount(available: number, total: number): { available: number; m
 
 function isTranslated(status: PalworldTranslationDisplayStatus | undefined): boolean {
   return status === "source_provided"
-    || status === "human_reviewed"
-    || status === "machine_assisted";
+    || status === "human_reviewed";
 }
 
 function translationCoverageForLocale(
@@ -349,7 +351,10 @@ function translationCoverageForLocale(
   const artifactFields = (translationSnapshot?.records ?? [])
     .flatMap((record) => Object.values(record.fields))
     .filter((field): field is PalworldTranslationFieldValue => field !== undefined);
-  const sourceAnomalousFields = artifactFields.filter((field) =>
+  const publicArtifactFields = artifactFields.filter((field) =>
+    field.status === "source_provided" || field.status === "human_reviewed"
+  );
+  const sourceAnomalousFields = publicArtifactFields.filter((field) =>
     field.note?.includes(PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE)
   );
   const missingSourceMarker = PALWORLD_TRANSLATION_MISSING_SOURCE_MARKERS[locale];
@@ -796,7 +801,13 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       metadata: { ...metadata }
     },
     items: {
-      status: localizedItemCount === items.length ? "ready" : "incomplete",
+      status:
+        localizedItemCount === items.length
+        && catalog.coverage.unresolvedDropReferences === 0
+        && catalog.coverage.unresolvedCraftingReferences === 0
+        && catalog.coverage.unresolvedTechnologyReferences === 0
+          ? "ready"
+          : "incomplete",
       recordCount: items.length,
       metadata: { ...metadata },
       domainMetadata: { ...catalogMetadata }

@@ -71,6 +71,22 @@ test("uiCommon, mapObjectName의 명시적 대소문자 alias와 img를 exact lo
   );
 });
 
+test("장식 element 이미지는 뒤따르는 공식 uiCommon 이름을 중복 출력하지 않는다", () => {
+  const result = normalizePalworldPakRichText(
+    "<img id=|ElemIcon_Fire|/>"
+      + "<uiCommon id=|COMMON_ELEMENT_NAME_Fire| style=|Elem_Fire|/> 공격",
+    {
+      uiCommon: (id) =>
+        id === "COMMON_ELEMENT_NAME_Fire" ? "불 속성" : undefined,
+      image: (id) => id === "ElemIcon_Fire" ? {} : undefined
+    }
+  );
+
+  assert.equal(result.status, "resolved");
+  assert.equal(result.text, "불 속성 공격");
+  assert.equal(result.tokens.filter((token) => token.type === "image").length, 1);
+});
+
 test("reference message를 재귀 정규화하고 rank별 값을 임의로 하나만 고르지 않는다", () => {
   const result = normalizePalworldPakRichText(
     "{ReferenceMsgId_DamageUp}: <Status_Up>{Passive1_EffectValue1}%</>",

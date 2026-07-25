@@ -1248,18 +1248,9 @@ function referenceResolvers(input: {
       ?? mapObjects.get(`MAPOBJECT_NAME_${id}`)?.text,
     image: (id) => {
       const element = /^ElemIcon_([A-Za-z0-9_]+)$/u.exec(id)?.[1];
-      const sourceElement = element === "Electric"
-        ? "Electricity"
-        : element === "Grass"
-          ? "Leaf"
-          : element === "Ground"
-            ? "Earth"
-            : element === "Neutral"
-              ? "Normal"
-              : element;
       return element === undefined
         ? undefined
-        : uiCommon.get(`COMMON_ELEMENT_NAME_${sourceElement}`)?.text;
+        : {};
     },
     referenceMessage: (id) => {
       const direct = partnerAppend.get(id)?.text;

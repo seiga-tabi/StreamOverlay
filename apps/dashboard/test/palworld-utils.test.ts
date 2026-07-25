@@ -25,6 +25,7 @@ import {
   getPalworldSkills,
   PalworldApiError,
   PALWORLD_VERSION_MISMATCH_EVENT,
+  resetPalworldReleaseObservation,
   searchPalworld,
 } from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
@@ -1222,10 +1223,83 @@ test("서로 다른 API 데이터 버전을 받으면 불일치 UI 이벤트를 
     },
   });
   try {
+    resetPalworldReleaseObservation();
     await getPalworldMeta();
     await getPalworldMeta();
-    assert.ok(events.includes(PALWORLD_VERSION_MISMATCH_EVENT));
+    await getPalworldMeta();
+    assert.deepEqual(events, [PALWORLD_VERSION_MISMATCH_EVENT]);
   } finally {
+    resetPalworldReleaseObservation();
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
+});
+
+test("헤더와 본문이 다른 응답은 active release 관찰 기준을 오염시키지 않는다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  const events: string[] = [];
+  const responses = [
+    { headerVersion: "9.9.9", headerRevision: "bad-header", gameVersion: "1.0.1", sourceRevision: "bad-body" },
+    { headerVersion: "1.0.1", headerRevision: "active-revision", gameVersion: "1.0.1", sourceRevision: "active-revision" },
+    { headerVersion: "1.0.1", headerRevision: "active-revision", gameVersion: "1.0.1", sourceRevision: "active-revision" },
+  ];
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: (event: Event) => { events.push(event.type); return true; },
+    } as unknown as Window,
+    fetch: async () => {
+      const current = responses.shift();
+      assert.ok(current);
+      const metadata = {
+        gameVersion: current.gameVersion,
+        sourceName: "고정 테스트 snapshot",
+        sourceUrl: "https://example.com/source",
+        sourceRevision: current.sourceRevision,
+        extractedAt: "2026-07-01T00:00:00.000Z",
+        verifiedAt: "2026-07-02T00:00:00.000Z",
+        license: "테스트 전용",
+      };
+      return new Response(JSON.stringify({
+        metadata,
+        counts: { pals: 1, items: 1, breedingPairs: 1 },
+        domains: {
+          pals: { status: "ready", recordCount: 1, metadata },
+          items: { status: "sample", recordCount: 1, metadata },
+          breeding: { status: "sample", recordCount: 1, metadata },
+        },
+        gates: {
+          dataIntegrity: { passed: true, status: "ready" },
+          imageAssets: {
+            status: "blocked_by_license",
+            policyStatus: "operator_acknowledged",
+            technicalPassed: false,
+            publicActivationAllowed: false,
+            rightsVerified: false,
+            usageBasis: "operator_reference_use",
+            readyImages: 0,
+            fallbackPals: 1,
+            publicNoticeRequired: true,
+          },
+        },
+      }), {
+        status: 200,
+        headers: {
+          "content-type": "application/json",
+          "X-Palworld-Data-Version": current.headerVersion,
+          "X-Palworld-Data-Revision": current.headerRevision,
+        },
+      });
+    },
+  });
+  try {
+    resetPalworldReleaseObservation();
+    await getPalworldMeta();
+    await getPalworldMeta();
+    await getPalworldMeta();
+    assert.deepEqual(events, [PALWORLD_VERSION_MISMATCH_EVENT]);
+  } finally {
+    resetPalworldReleaseObservation();
     Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
   }
 });

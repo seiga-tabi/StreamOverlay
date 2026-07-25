@@ -5,18 +5,18 @@
   "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
   "glossarySha256": "19a8d9fab0d3e924b41772dea00adacc05fdc92785baa55f271d589f5941bbaf",
   "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
-  "translationRevision": "offline-machine-assisted-v1",
-  "generatedAt": "2026-07-22T00:00:00.000Z",
+  "translationRevision": "official-locale-overlay-9499ec38e96ef9ca-eb408d81",
+  "generatedAt": "2026-07-25T00:00:00.000Z",
   "locales": {
     "ko": {
       "file": "ko.json",
-      "sha256": "0605cbfcd39dcbd05d7eec43e5b179bc7373a879de7ac7052f7b1cec122ad3d7",
-      "recordCount": 2700
+      "sha256": "5ac95abeed9ba072fe7cf0818b9b80bcd45b5224ba5ff821f7809de19196cb4e",
+      "recordCount": 2621
     },
     "ja": {
       "file": "ja.json",
-      "sha256": "6e9d7204fba8521f61579b680de8c71942fcff68d64fae1f78e5fa6f669e8284",
-      "recordCount": 2700
+      "sha256": "c29f8299234960623455fa0c970744550f89a1cd2353f555a1966887124aa25b",
+      "recordCount": 2621
     }
   }
 }

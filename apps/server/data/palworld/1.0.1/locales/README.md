@@ -2,12 +2,17 @@
 
 이 디렉터리는 고정된 `catalog.json`과 `paldex.json`의 영어 원문을 한국어·일본어 번역과 분리해 관리한다. Runtime 또는 production build에서는 외부 번역 API를 호출하지 않는다.
 
-현재 `machine_assisted` 후보는 고정 revision의 오프라인 모델로 생성한다. 모델과
-라이선스·commit은 `translation-provenance.json`에 기록하며, 기계 보조 결과를 공식 번역이나
-인간 검수 완료 번역으로 표시하지 않는다. 한국어는
-`Helsinki-NLP/opus-mt-tc-big-en-ko`(CC-BY-4.0), 일본어는
-`staka/fugumt-en-ja`(CC-BY-SA-4.0)를 사용한다. 배포 전 운영자는 모델 라이선스 고지와
-게임 원문 기반 번역문의 권리를 별도로 확인해야 한다.
+공개 runtime에는 공식 게임 locale인 `source_provided` 또는 명시적으로 검수된
+`human_reviewed` 값만 사용할 수 있다. `machine_assisted` 후보는 활성 KO/JA snapshot과
+공개 이름·설명에 포함하지 않는다.
+
+현재 operator PAK candidate 전체는 게임 버전·Steam Build ID·public ID mapping
+release 증빙이 완료되지 않아 활성화하지 않는다. 다만 기존 `1.0.1` canonical
+ID·`sourceInternalId`와 exact join되는 공식 KO/JA locale만 별도의
+`translation_compatibility_only` overlay로 검증해 사용할 수 있다. 이 overlay는
+candidate의 Pal·Item·Skill 데이터를 활성화하지 않으며, exact join되지 않거나
+rich text가 해결되지 않은 필드는 기계 번역으로 채우지 않고 원문 fallback으로
+표시한다.
 
 ## 1. 원문 추출
 
@@ -25,9 +30,12 @@ npm --workspace apps/server run extract:palworld-translations
 - `corpus-manifest.json`: 각 source batch와 corpus의 checksum
 - `candidates/{ko,ja}/batch-0000.json`: 기존 검수 Pal 이름 287개와 핵심 아이템 5종 이름 seed
 
-## 2. 오프라인 번역 후보 입력 형식
+## 2. 격리된 과거 기계 번역 후보
 
-전용 오프라인 번역 모델의 결과는 locale별 `candidates/<locale>/batch-NNNN.json`에 저장한다. `batch-0000.json`은 기존 검수 이름 seed이므로 덮어쓰지 않는다.
+`candidates/<locale>/batch-NNNN.json`은 과거 결과의 감사와 회귀 검증을 위한
+격리 자료다. 이 파일은 active manifest와 Docker runtime bundle에 포함하지 않으며,
+locale snapshot 생성 입력으로 다시 사용하지 않는다. `batch-0000.json`의 검수 이름
+seed도 활성 snapshot의 `glossary.json`을 통해서만 사용한다.
 
 ```json
 {
@@ -69,13 +77,12 @@ npm --workspace apps/server run extract:palworld-translations
 
 후보 batch 파일의 순서는 결과에 영향을 주지 않는다. Import는 모든 field를 위 규칙으로 병합한 다음 `kind:canonical ID` 순으로 정렬한다. 같은 우선순위의 충돌은 batch 순서와 관계없이 실패한다.
 
-## 3. Locale snapshot 생성
+## 3. 공개 Locale snapshot 생성
 
-두 locale에 같은 고정 revision을 사용한다.
+활성 snapshot에서 기계 번역을 제거하고 검수된 값만 남긴다.
 
 ```bash
-npm --workspace apps/server run import:palworld-translations -- --locale ko --revision offline-machine-assisted-v1
-npm --workspace apps/server run import:palworld-translations -- --locale ja --revision offline-machine-assisted-v1
+npm --workspace apps/server run purge:palworld-machine-translations
 ```
 
 결과:
@@ -84,7 +91,36 @@ npm --workspace apps/server run import:palworld-translations -- --locale ja --re
 - `ko-coverage.json`, `ja-coverage.json`: 번역·누락·검수 상태 집계
 - `manifest.json`: 두 locale의 checksum과 공통 revision
 
-번역이 일부만 있으면 `translationStatus`는 자동으로 `incomplete`가 된다. 모든 영어 source field가 번역된 경우에만 `complete`가 된다.
+공식 PAK locale compatibility overlay를 생성할 때는 고정 candidate와 검수 증거를
+명시한다.
+
+```bash
+npm --workspace apps/server run generate:palworld-official-locale-overlay -- \
+  --active-root apps/server/data/palworld/1.0.1 \
+  --candidate-root apps/server/data/palworld/candidates/<candidate-id> \
+  --output <새 staging-directory> \
+  --reviewed-at <고정 RFC3339 UTC 시각> \
+  --reviewer <검수자 ID> \
+  --evidence-checksum <검수 증거 SHA-256> \
+  --active-skill-mapping \
+    apps/server/src/data/palworld-pak-mappings/legacy-active-skill-locale-map.json
+```
+
+생성물:
+
+- `official-source-fields.json`: locale member와 message key까지 고정한 exact source
+- `official-active-skill-evidence.json`: Pal ID·해금 레벨·전투 수치로 검증한
+  legacy 액티브 스킬 217개의 공식 locale 연결 근거
+- `official-locale-compatibility.json`: ZIP·candidate·mapping·출력 checksum과 blocker
+- `ko.json`, `ja.json`: 공개 runtime snapshot
+- `ko-coverage.json`, `ja-coverage.json`: 공식·검수·fallback 상태 집계
+- `manifest.json`: locale checksum과 공통 revision
+
+공식 locale이 없거나 exact join되지 않은 필드는 원문 fallback으로 남으므로
+`translationStatus`는 `incomplete`다. 생성기는 candidate activation blocker와
+`rightsVerified: false`를 그대로 보존하며 동일 입력에서 byte-for-byte 같은 결과를
+만든다. 게시할 때는 모든 파일을 검증한 뒤 `manifest.json`과 active runtime selector를
+마지막에 원자적으로 갱신한다.
 
 ## 4. 검증
 
@@ -92,6 +128,9 @@ npm --workspace apps/server run import:palworld-translations -- --locale ja --re
 npm --workspace apps/server run validate:palworld-translations
 ```
 
-검증기는 현재 catalog/Paldex checksum, revision, canonical ID, 필드별 영어 원문 hash, 중복, 정렬, status, HTML·제어문자 및 영어 복사를 확인한다. `machine_assisted` 결과는 공식 번역으로 취급하지 않으며 화면에서는 검수 중 상태를 유지해야 한다.
+검증기는 현재 catalog/Paldex checksum, revision, canonical ID, 필드별 영어 원문 hash,
+공식 message key·본문·member checksum, 중복, 정렬, status, HTML·제어문자 및 영어
+복사를 확인한다. 활성 snapshot에 `machine_assisted` 필드가 하나라도 있으면 검증을
+실패시킨다.
 
 추출 시각과 번역 시각은 artifact에 고정된 값만 사용한다. Source batch, 최종 record, manifest는 canonical 순서와 고정 JSON 직렬화를 사용하므로 같은 입력과 revision에서는 byte-for-byte 같은 결과가 생성된다. Runtime 및 production build는 외부 번역 API를 호출하지 않는다.

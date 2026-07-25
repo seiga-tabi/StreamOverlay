@@ -6,15 +6,28 @@ import { validatePalworldCompositeRuntimeManifest } from "@streamops/shared";
 import { loadPalworldMapMarkerArtifact } from "./palworld-map-marker-artifact.js";
 import { loadPalworldSpawnArtifact } from "./palworld-spawn-artifact.js";
 
-export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 3 as const;
-export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS = [1, 2, 3] as const;
+export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 5 as const;
+export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS = [1, 2, 3, 4, 5] as const;
 export const PALWORLD_LEGACY_COMPOSITE_DOMAIN_STATES = [
   "active",
   "candidate",
   "unavailable"
 ] as const;
 
-const REQUIRED_ARTIFACTS = [
+const DEFERRED_TRANSLATION_ARTIFACT_KINDS = new Set<
+  PalworldLegacyCompositeArtifactKind
+>([
+  "locale-manifest",
+  "locale-glossary",
+  "locale-ko",
+  "locale-ja",
+  "locale-official-source-fields",
+  "locale-official-active-skill-evidence",
+  "locale-official-compatibility",
+  "reviewed-item-aliases"
+]);
+
+const LEGACY_V3_REQUIRED_ARTIFACTS = [
   ["source-lock", "sources.lock.json"],
   ["paldex", "paldex.json"],
   ["paldex-manifest", "manifest.json"],
@@ -34,7 +47,29 @@ const REQUIRED_ARTIFACTS = [
   ["reviewed-item-aliases", "locales/reviewed-item-aliases.json"]
 ] as const;
 
-const LEGACY_V2_REQUIRED_ARTIFACTS = REQUIRED_ARTIFACTS.filter(
+const LEGACY_V4_REQUIRED_ARTIFACTS = [
+  ...LEGACY_V3_REQUIRED_ARTIFACTS.slice(0, -1),
+  [
+    "locale-official-source-fields",
+    "locales/official-source-fields.json"
+  ],
+  [
+    "locale-official-compatibility",
+    "locales/official-locale-compatibility.json"
+  ],
+  LEGACY_V3_REQUIRED_ARTIFACTS.at(-1)!
+] as const;
+
+const REQUIRED_ARTIFACTS = [
+  ...LEGACY_V4_REQUIRED_ARTIFACTS.slice(0, -2),
+  [
+    "locale-official-active-skill-evidence",
+    "locales/official-active-skill-evidence.json"
+  ],
+  ...LEGACY_V4_REQUIRED_ARTIFACTS.slice(-2)
+] as const;
+
+const LEGACY_V2_REQUIRED_ARTIFACTS = LEGACY_V3_REQUIRED_ARTIFACTS.filter(
   ([kind]) => kind !== "map-images-manifest"
 );
 
@@ -85,7 +120,7 @@ export type PalworldLegacyCompositeArtifactKind =
   (typeof PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS)[number];
 
 export type PalworldLegacyCompositeRuntimeManifest = {
-  schemaVersion: 1 | 2 | 3;
+  schemaVersion: 1 | 2 | 3 | 4 | 5;
   release: string;
   artifacts: Array<{
     kind: PalworldLegacyCompositeArtifactKind;
@@ -149,7 +184,11 @@ function expectedArtifactsForAvailability(
       ? LEGACY_V1_REQUIRED_ARTIFACTS
       : schemaVersion === 2
         ? LEGACY_V2_REQUIRED_ARTIFACTS
-        : REQUIRED_ARTIFACTS),
+        : schemaVersion === 3
+          ? LEGACY_V3_REQUIRED_ARTIFACTS
+          : schemaVersion === 4
+            ? LEGACY_V4_REQUIRED_ARTIFACTS
+            : REQUIRED_ARTIFACTS),
     ...(availability.mapMarkers === "active"
       ? OPTIONAL_ACTIVE_ARTIFACTS.mapMarkers
       : []),
@@ -176,9 +215,9 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     !(PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS as readonly unknown[])
       .includes(record.schemaVersion)
   ) {
-    fail("legacyComposite.schemaVersion", "1, 2 또는 3이어야 합니다.");
+    fail("legacyComposite.schemaVersion", "1, 2, 3, 4 또는 5여야 합니다.");
   }
-  const schemaVersion = record.schemaVersion as 1 | 2 | 3;
+  const schemaVersion = record.schemaVersion as 1 | 2 | 3 | 4 | 5;
   if (
     typeof record.release !== "string"
     || !RELEASE_PATTERN.test(record.release)
@@ -430,6 +469,11 @@ export async function verifyPalworldLegacyCompositeRuntimeManifest(input: {
   releaseRoot: string;
   expectedRelease: string;
   manifest: unknown;
+  /**
+   * 서버 startup에서만 번역 domain 손상을 service fallback으로 넘깁니다.
+   * 기본값은 false이며 Docker smoke와 일반 verifier는 계속 strict합니다.
+   */
+  deferTranslationArtifactIntegrity?: boolean;
 }): Promise<PalworldLegacyCompositeRuntimeManifest> {
   const manifest = assertPalworldLegacyCompositeRuntimeManifest(input.manifest);
   if (manifest.release !== input.expectedRelease) {
@@ -439,6 +483,12 @@ export async function verifyPalworldLegacyCompositeRuntimeManifest(input: {
     );
   }
   for (const artifact of manifest.artifacts) {
+    if (
+      input.deferTranslationArtifactIntegrity === true
+      && DEFERRED_TRANSLATION_ARTIFACT_KINDS.has(artifact.kind)
+    ) {
+      continue;
+    }
     const actual = createHash("sha256")
       .update(await readCanonicalArtifact(path.resolve(input.releaseRoot), artifact.file))
       .digest("hex");
