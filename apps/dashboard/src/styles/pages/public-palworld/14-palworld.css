@@ -1344,15 +1344,19 @@
 }
 
 .palworld-card-work-list .palworld-work-suitability-badge.is-compact {
-  grid-template-columns: var(--yoro-space-5) auto;
+  grid-template-columns: var(--yoro-space-6) auto;
   max-inline-size: 100%;
   min-block-size: var(--yoro-space-7);
   padding: 0 var(--yoro-space-2) 0 var(--yoro-space-1);
 }
 
 .palworld-card-work-list .palworld-work-suitability-icon {
-  inline-size: var(--yoro-space-5);
-  block-size: var(--yoro-space-5);
+  inline-size: var(--yoro-space-6);
+  block-size: var(--yoro-space-6);
+}
+
+.palworld-card-work-list .palworld-work-suitability-badge.is-compact.has-no-icon {
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .palworld-card-work-list .palworld-work-suitability-badge strong {
@@ -2739,6 +2743,10 @@
   color: var(--yoro-color-text-strong);
 }
 
+.palworld-work-suitability-badge.has-no-icon {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .palworld-work-suitability-tooltip {
   position: absolute;
   z-index: 4;
@@ -2789,45 +2797,10 @@
   display: block;
   inline-size: var(--yoro-space-6);
   block-size: var(--yoro-space-6);
-  color: var(--palworld-work-accent, var(--yoro-color-text-muted));
 }
 
 .palworld-work-suitability-icon.is-source-image {
   object-fit: contain;
-}
-
-.palworld-work-suitability-badge:is(
-  [data-work-type="kindling"],
-  [data-work-type="medicine_production"]
-) {
-  --palworld-work-accent: var(--yoro-color-danger);
-}
-
-.palworld-work-suitability-badge:is(
-  [data-work-type="watering"],
-  [data-work-type="cooling"]
-) {
-  --palworld-work-accent: var(--palworld-sky);
-}
-
-.palworld-work-suitability-badge:is(
-  [data-work-type="planting"],
-  [data-work-type="gathering"],
-  [data-work-type="farming"]
-) {
-  --palworld-work-accent: var(--palworld-accent);
-}
-
-.palworld-work-suitability-badge:is(
-  [data-work-type="generating_electricity"],
-  [data-work-type="handiwork"],
-  [data-work-type="lumbering"]
-) {
-  --palworld-work-accent: var(--palworld-gold);
-}
-
-.palworld-work-suitability-badge[data-work-type="transporting"] {
-  --palworld-work-accent: var(--yoro-color-primary-strong);
 }
 
 .palworld-stat-chart {

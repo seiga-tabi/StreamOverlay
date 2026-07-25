@@ -71,10 +71,7 @@ import { PalworldTranslationReviewNotice } from "../src/features/public-palworld
 import generatedStaticAssets from "../src/features/public-palworld/data/palworld-static-assets.generated.json";
 import { palworldI18n } from "../src/features/public-palworld/i18n/palworld-i18n";
 import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../src/features/public-palworld/utils/element-images";
-import {
-  workSuitabilityFilterIconUrl,
-  workSuitabilityIconUrl,
-} from "../src/features/public-palworld/utils/work-suitability-icons";
+import { workSuitabilityIconUrl } from "../src/features/public-palworld/utils/work-suitability-icons";
 
 const gameAssetUrl = (fileName: string) => new URL(`../public/images/games/${fileName}`, import.meta.url);
 
@@ -890,7 +887,12 @@ test("Pal 카드는 왼쪽 이미지·오른쪽 정보·하단 작업 적성 구
   assert.ok(korean.indexOf("palworld-pal-card-main") < korean.indexOf("palworld-card-work-list"));
   assert.equal((korean.match(/role="listitem"/gu) ?? []).length, 3);
   assert.equal((korean.match(/palworld-work-suitability-badge is-compact/gu) ?? []).length, 3);
+  assert.equal((korean.match(/palworld-work-suitability-icon is-source-image/gu) ?? []).length, 3);
   assert.equal((korean.match(/palworld-work-suitability-label yoro-u-sr-only/gu) ?? []).length, 3);
+  assert.match(korean, new RegExp(`src="${workSuitabilityIconUrl("handiwork")?.replaceAll("/", "\\/")}"`));
+  assert.match(korean, new RegExp(`src="${workSuitabilityIconUrl("transporting")?.replaceAll("/", "\\/")}"`));
+  assert.match(korean, new RegExp(`src="${workSuitabilityIconUrl("farming")?.replaceAll("/", "\\/")}"`));
+  assert.doesNotMatch(korean, /<svg/u);
   assert.match(korean, /data-work-type="handiwork"[\s\S]*aria-describedby="[^"]+"[\s\S]*Lv\.1/u);
   assert.match(korean, /class="palworld-work-suitability-tooltip">수작업: Lv\.1/u);
   assert.match(korean, /data-work-type="transporting"[\s\S]*Lv\.2/u);
@@ -1356,7 +1358,7 @@ test("Pal 드롭과 제작 재료는 이미지·현지화 이름·수량을 공�
   assert.match(fallback, /role="img"[\s\S]*팰 스피어[\s\S]*이미지 준비 중[\s\S]*× 1/u);
 });
 
-test("Pal 카드·상세는 작업 적성 glyph를 유지하고 도감 필터만 검증된 로컬 아이콘을 사용한다", () => {
+test("Pal 카드·상세·도감 필터는 동일한 검증된 작업 적성 아이콘을 사용한다", () => {
   assert.deepEqual(generatedStaticAssets.workSource, {
     candidateRelease: "candidate-1248184a4b527d94",
     sourceArchiveSha256: "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
@@ -1368,9 +1370,9 @@ test("Pal 카드·상세는 작업 적성 glyph를 유지하고 도감 필터만
   const koreanWork = renderToStaticMarkup(<PalworldWorkSuitabilityBadge level={3} locale="ko" type="mining" />);
   const japaneseWork = renderToStaticMarkup(<PalworldWorkSuitabilityBadge level={4} locale="ja" type="handiwork" />);
   assert.match(koreanWork, /data-work-type="mining"/u);
-  assert.match(koreanWork, /<svg[^>]+aria-hidden="true"[^>]+class="palworld-work-suitability-icon"/u);
-  assert.doesNotMatch(koreanWork, /<img/u);
-  assert.doesNotMatch(koreanWork, /\/images\/palworld\/work\//u);
+  assert.match(koreanWork, /<img[^>]+alt=""[^>]+aria-hidden="true"[^>]+class="palworld-work-suitability-icon is-source-image"/u);
+  assert.match(koreanWork, /\/images\/palworld\/work\/[a-f0-9]{64}\.webp/u);
+  assert.doesNotMatch(koreanWork, /<svg/u);
   assert.match(koreanWork, /class="palworld-work-suitability-label">채굴<\/span>/u);
   assert.match(koreanWork, /Lv\.3/u);
   assert.doesNotMatch(koreanWork, /https?:\/\//u);
@@ -1378,19 +1380,20 @@ test("Pal 카드·상세는 작업 적성 glyph를 유지하고 도감 필터만
   assert.match(japaneseWork, /class="palworld-work-suitability-label">手作業<\/span>/u);
 
   for (const type of PALWORLD_WORK_SUITABILITY_TYPES) {
-    const imageUrl = workSuitabilityIconUrl(type);
-    assert.equal(imageUrl, undefined);
-    assert.match(
-      workSuitabilityFilterIconUrl(type) ?? "",
-      /^\/images\/palworld\/work\/[a-f0-9]{64}\.webp$/u,
+    const imageUrl = workSuitabilityIconUrl(type) ?? "";
+    assert.match(imageUrl, /^\/images\/palworld\/work\/[a-f0-9]{64}\.webp$/u);
+    const asset = readFileSync(
+      new URL(`../public${imageUrl}`, import.meta.url),
     );
+    assert.equal(createHash("sha256").update(asset).digest("hex"), imageUrl.slice(-69, -5));
   }
   const badgeSource = readFileSync(
     new URL("../src/features/public-palworld/components/PalworldWorkSuitabilityBadge.tsx", import.meta.url),
     "utf8"
   );
   assert.match(badgeSource, /onError=\{\(\) => setImageFailed\(true\)\}/u);
-  assert.match(badgeSource, /imageFailed \|\| iconUrl === undefined \? \(/u);
+  assert.match(badgeSource, /const hasImage = iconUrl !== undefined && !imageFailed/u);
+  assert.doesNotMatch(badgeSource, /WorkSuitabilityGlyph|<svg/u);
 
   const graph = renderToStaticMarkup(<PalworldPalStatsGraph
     locale="ko"
