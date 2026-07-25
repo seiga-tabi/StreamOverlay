@@ -6,7 +6,7 @@
   "manifestFile": "manifest.json",
   "manifestSha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198",
   "composite": {
-    "schemaVersion": 8,
+    "schemaVersion": 9,
     "release": "1.0.1",
     "artifacts": [
       {
@@ -143,12 +143,17 @@
         "kind": "map-spawns-compatibility",
         "file": "map-spawns-compatibility.json",
         "sha256": "d45d6749ada3b8ecf589c93c86233871c57da449e898a28fcca1b3aca56e4442"
+      },
+      {
+        "kind": "work-images-manifest",
+        "file": "work-images-manifest.json",
+        "sha256": "9baebc6a49687a7635a60838489026f24d4c69e317869461afca956a2fca3357"
       }
     ],
     "availability": {
       "mapMarkers": "active",
       "mapSpawns": "active",
-      "workImages": "candidate",
+      "workImages": "active",
       "skillImages": "unavailable"
     }
   }

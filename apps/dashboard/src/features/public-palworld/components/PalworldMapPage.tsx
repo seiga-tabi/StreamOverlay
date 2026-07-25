@@ -331,6 +331,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const mapStyle = {
     "--palworld-map-translate-x": `${view.x}px`,
     "--palworld-map-translate-y": `${view.y}px`,
+    "--palworld-map-layout-width": `${view.zoom * 100}%`,
     "--palworld-map-zoom": view.zoom,
   } as CSSProperties;
   const mapAspectRatio = PALWORLD_WORLD_MAP_IMAGE
@@ -1359,7 +1360,11 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     </EmptyStateActions>
                   </EmptyState>
                 ) : (
-                  <div className="palworld-map-stage" data-testid="palworld-map-stage" style={mapStyle}>
+                  <div
+                    className="palworld-map-stage palworld-map-stage-layout-zoom"
+                    data-testid="palworld-map-stage"
+                    style={mapStyle}
+                  >
                     <img
                       alt={text.mapImageAlt}
                       className={`palworld-map-image${loadState === "loading" ? " is-loading" : ""}`}

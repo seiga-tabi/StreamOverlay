@@ -448,7 +448,7 @@ test("Pal 도감 상세 필터는 서버 facet만 아이콘·텍스트 단일 �
   assert.match(html, /aria-pressed="true"[^>]*>[\s\S]*採掘/u);
   assert.match(html, /palworld-pal-filter-element-icon/u);
   assert.match(html, /palworld-pal-filter-work-icon/u);
-  assert.match(html, /src="\/images\/palworld\/work\/[a-f0-9]{64}\.webp"/u);
+  assert.match(html, /src="\/images\/palworld\/1\.0\.1\/work\/[a-f0-9]{64}\.webp"/u);
   assert.match(html, /alt="" aria-hidden="true" class="palworld-pal-filter-work-icon"/u);
   assert.doesNotMatch(html, /palworld-pal-filter-option[^>]*>[\s\S]*palworld-element-badge/u);
   assert.match(html, /value="10" selected=""/u);
@@ -1018,7 +1018,10 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.doesNotMatch(korean, /pyPalworldAPI|>1\.0\.1</u);
   assert.match(korean, /aria-label="지도 확대"/u);
   assert.match(korean, /aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight \+ - Home"/u);
-  assert.match(korean, /data-testid="palworld-map-stage"/u);
+  assert.match(
+    korean,
+    /class="palworld-map-stage palworld-map-stage-layout-zoom"[^>]*data-testid="palworld-map-stage"/u,
+  );
   assert.match(korean, /class="[^"]*palworld-map-filter-panel/u);
   assert.match(korean, /data-testid="palworld-map-pal-picker"/u);
   assert.match(korean, /class="[^"]*palworld-map-mobile-filter-trigger/u);
@@ -1042,6 +1045,19 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
     /検証済みのフィールドボスと選択したパルの通常の野生スポーン位置が表示されたPalworldワールドマップ/u
   );
   assert.match(japanese, /ホイール・ピンチ/u);
+
+  const css = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
+  const layoutZoomRule = css.match(
+    /\.palworld-map-stage-layout-zoom\s*\{[\s\S]*?\n\}/u,
+  )?.[0] ?? "";
+  assert.match(
+    layoutZoomRule,
+    /inline-size:\s*var\(--palworld-map-layout-width,\s*100%\)/u,
+  );
+  assert.doesNotMatch(layoutZoomRule, /\bscale\(/u);
 });
 
 test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하고 키보드 닫기를 제공한다", () => {
@@ -1458,8 +1474,11 @@ test("Pal 드롭과 제작 재료는 이미지·현지화 이름·수량을 공�
 
 test("Pal 카드·상세·도감 필터는 동일한 검증된 작업 적성 아이콘을 사용한다", () => {
   assert.deepEqual(generatedStaticAssets.workSource, {
+    release: "1.0.1",
     candidateRelease: "candidate-1248184a4b527d94",
+    sourceType: "operator_pak_export",
     sourceArchiveSha256: "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+    mappingSha256: "1867e2a6caf0efa9f852c6227cf80fa04fa1ab8d09b8281f415bc08c6e50db58",
     mappingStatus: "verified_colored_source_member",
     status: "operator_acknowledged",
     usageBasis: "operator_reference_use",
@@ -1469,7 +1488,7 @@ test("Pal 카드·상세·도감 필터는 동일한 검증된 작업 적성 아
   const japaneseWork = renderToStaticMarkup(<PalworldWorkSuitabilityBadge level={4} locale="ja" type="handiwork" />);
   assert.match(koreanWork, /data-work-type="mining"/u);
   assert.match(koreanWork, /<img[^>]+alt=""[^>]+aria-hidden="true"[^>]+class="palworld-work-suitability-icon is-source-image"/u);
-  assert.match(koreanWork, /\/images\/palworld\/work\/[a-f0-9]{64}\.webp/u);
+  assert.match(koreanWork, /\/images\/palworld\/1\.0\.1\/work\/[a-f0-9]{64}\.webp/u);
   assert.doesNotMatch(koreanWork, /<svg/u);
   assert.match(koreanWork, /class="palworld-work-suitability-label">채굴<\/span>/u);
   assert.match(koreanWork, /Lv\.3/u);
@@ -1479,7 +1498,7 @@ test("Pal 카드·상세·도감 필터는 동일한 검증된 작업 적성 아
 
   for (const type of PALWORLD_WORK_SUITABILITY_TYPES) {
     const imageUrl = workSuitabilityIconUrl(type) ?? "";
-    assert.match(imageUrl, /^\/images\/palworld\/work\/[a-f0-9]{64}\.webp$/u);
+    assert.match(imageUrl, /^\/images\/palworld\/1\.0\.1\/work\/[a-f0-9]{64}\.webp$/u);
     const asset = readFileSync(
       new URL(`../public${imageUrl}`, import.meta.url),
     );
@@ -1492,6 +1511,18 @@ test("Pal 카드·상세·도감 필터는 동일한 검증된 작업 적성 아
   assert.match(badgeSource, /onError=\{\(\) => setImageFailed\(true\)\}/u);
   assert.match(badgeSource, /const hasImage = iconUrl !== undefined && !imageFailed/u);
   assert.doesNotMatch(badgeSource, /WorkSuitabilityGlyph|<svg/u);
+  const viteSource = readFileSync(
+    new URL("../vite.config.ts", import.meta.url),
+    "utf8"
+  );
+  assert.match(viteSource, /active-manifest\.json/u);
+  assert.match(viteSource, /work-images-manifest\.json/u);
+  assert.match(viteSource, /availability\?\.workImages !== "active"/u);
+  assert.match(viteSource, /workManifestArtifacts\[0\]\?\.sha256 !== workManifestSha256/u);
+  assert.match(viteSource, /workManifest\.mappingSha256 !== workMappingSha256/u);
+  assert.match(viteSource, /activeWorkAssets[\s\S]*outputBytes[\s\S]*outputSha256/u);
+  assert.match(viteSource, /images\/palworld\/work/u);
+  assert.match(viteSource, /activeWorkRelease[\s\S]*"work"/u);
 
   const graph = renderToStaticMarkup(<PalworldPalStatsGraph
     locale="ko"

@@ -13,10 +13,14 @@ import {
   PALWORLD_SPAWN_COMPATIBILITY_FILE,
   loadPalworldSpawnCompatibilityAuthorization
 } from "./palworld-spawn-compatibility.js";
+import {
+  PALWORLD_WORK_IMAGE_MANIFEST_FILE,
+  loadPalworldWorkImageManifest
+} from "./palworld-work-image-manifest.js";
 
-export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 8 as const;
+export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 9 as const;
 export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS =
-  [1, 2, 3, 4, 5, 6, 7, 8] as const;
+  [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 export const PALWORLD_LEGACY_COMPOSITE_DOMAIN_STATES = [
   "active",
   "candidate",
@@ -121,6 +125,9 @@ const OPTIONAL_ACTIVE_ARTIFACTS = {
     ["map-spawns", "map-spawns.json"],
     ["map-spawns-manifest", "map-spawns-manifest.json"],
     ["map-spawns-compatibility", PALWORLD_SPAWN_COMPATIBILITY_FILE]
+  ],
+  workImages: [
+    ["work-images-manifest", PALWORLD_WORK_IMAGE_MANIFEST_FILE]
   ]
 } as const;
 
@@ -129,7 +136,8 @@ export const PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS = [
   ...LEGACY_V2_REQUIRED_ARTIFACTS.map(([kind]) => kind),
   ...LEGACY_V1_REQUIRED_ARTIFACTS.map(([kind]) => kind),
   ...OPTIONAL_ACTIVE_ARTIFACTS.mapMarkers.map(([kind]) => kind),
-  ...OPTIONAL_ACTIVE_ARTIFACTS.mapSpawns.map(([kind]) => kind)
+  ...OPTIONAL_ACTIVE_ARTIFACTS.mapSpawns.map(([kind]) => kind),
+  ...OPTIONAL_ACTIVE_ARTIFACTS.workImages.map(([kind]) => kind)
 ] as const;
 
 export type PalworldLegacyCompositeDomainState =
@@ -139,7 +147,7 @@ export type PalworldLegacyCompositeArtifactKind =
   (typeof PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS)[number];
 
 export type PalworldLegacyCompositeRuntimeManifest = {
-  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   release: string;
   artifacts: Array<{
     kind: PalworldLegacyCompositeArtifactKind;
@@ -149,7 +157,7 @@ export type PalworldLegacyCompositeRuntimeManifest = {
   availability: {
     mapMarkers: PalworldLegacyCompositeDomainState;
     mapSpawns: PalworldLegacyCompositeDomainState;
-    workImages: "candidate" | "unavailable";
+    workImages: PalworldLegacyCompositeDomainState;
     skillImages: "candidate" | "unavailable";
   };
 };
@@ -221,6 +229,9 @@ function expectedArtifactsForAvailability(
       ? schemaVersion >= 6 && includeSpawnCompatibility
         ? OPTIONAL_ACTIVE_ARTIFACTS.mapSpawns
         : OPTIONAL_ACTIVE_ARTIFACTS.mapSpawns.slice(0, 2)
+      : []),
+    ...(availability.workImages === "active" && schemaVersion >= 9
+      ? OPTIONAL_ACTIVE_ARTIFACTS.workImages
       : [])
   ];
 }
@@ -242,10 +253,10 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     !(PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS as readonly unknown[])
       .includes(record.schemaVersion)
   ) {
-    fail("legacyComposite.schemaVersion", "1부터 8 사이여야 합니다.");
+    fail("legacyComposite.schemaVersion", "1부터 9 사이여야 합니다.");
   }
   const schemaVersion =
-    record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+    record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   if (
     typeof record.release !== "string"
     || !RELEASE_PATTERN.test(record.release)
@@ -273,10 +284,16 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     availabilityRecord.skillImages,
     "legacyComposite.availability.skillImages"
   );
-  if (workImages === "active" || skillImages === "active") {
+  if (workImages === "active" && schemaVersion < 9) {
     fail(
-      "legacyComposite.availability",
-      "legacy composite v1은 release별 manifest가 없는 work/skill image를 활성화할 수 없습니다."
+      "legacyComposite.availability.workImages",
+      "작업 적성 이미지는 release별 manifest를 고정하는 legacy composite v9부터 활성화할 수 있습니다."
+    );
+  }
+  if (skillImages === "active") {
+    fail(
+      "legacyComposite.availability.skillImages",
+      "release별 manifest가 없는 skill image는 활성화할 수 없습니다."
     );
   }
   const availability = {
@@ -528,7 +545,7 @@ async function inferredAvailability(
 export async function createPalworldLegacyCompositeRuntimeManifest(input: {
   releaseRoot: string;
   release: string;
-  workImages?: "candidate" | "unavailable";
+  workImages?: PalworldLegacyCompositeDomainState;
   skillImages?: "candidate" | "unavailable";
 }): Promise<PalworldLegacyCompositeRuntimeManifest> {
   const releaseRoot = path.resolve(input.releaseRoot);
@@ -550,6 +567,9 @@ export async function createPalworldLegacyCompositeRuntimeManifest(input: {
     workImages: input.workImages ?? "unavailable",
     skillImages: input.skillImages ?? "unavailable"
   } satisfies PalworldLegacyCompositeRuntimeManifest["availability"];
+  if (availability.workImages === "active") {
+    await loadPalworldWorkImageManifest(releaseRoot, input.release);
+  }
   const artifacts = await Promise.all(
     expectedArtifactsForAvailability(
       availability,
@@ -665,6 +685,21 @@ export async function verifyPalworldLegacyCompositeRuntimeManifest(input: {
         "source metadata가 검증된 active spawn에는 compatibility approval을 함께 고정할 수 없습니다."
       );
     }
+  }
+  if (manifest.availability.workImages === "active") {
+    const workManifestArtifact = manifest.artifacts.find(
+      (artifact) => artifact.kind === "work-images-manifest"
+    );
+    if (manifest.schemaVersion < 9 || workManifestArtifact === undefined) {
+      fail(
+        "legacyComposite.availability.workImages",
+        "active 상태는 v9 composite에 고정된 work image manifest를 요구합니다."
+      );
+    }
+    await loadPalworldWorkImageManifest(
+      path.resolve(input.releaseRoot),
+      input.expectedRelease
+    );
   }
   return manifest;
 }

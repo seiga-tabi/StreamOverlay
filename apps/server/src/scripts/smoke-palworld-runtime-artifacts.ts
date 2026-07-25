@@ -58,6 +58,9 @@ import {
 import {
   loadPalworldCondensationRules
 } from "../data/palworld-condensation-artifact.js";
+import {
+  loadPalworldWorkImageManifest
+} from "../data/palworld-work-image-manifest.js";
 
 const REQUIRED_LEGACY_RELEASE_FILES = [
   "sources.lock.json",
@@ -119,10 +122,11 @@ export type PalworldRuntimeLayout =
       releaseDirectory: string;
       releaseRoot: string;
       compositeArtifactFiles?: readonly string[];
-      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
       markerCompatibilityApprovalSha256?: string;
       spawnCompatibilityApprovalSha256?: string;
       condensationRulesSha256?: string;
+      workImagesManifestSha256?: string;
     };
 
 async function pathExists(filePath: string): Promise<boolean> {
@@ -224,6 +228,16 @@ export async function resolvePalworldRuntimeLayout(
                 condensationRulesSha256:
                   active.manifest.composite.artifacts.find(
                     (artifact) => artifact.kind === "condensation-rules"
+                  )!.sha256
+              }),
+          ...(active.manifest.composite.artifacts.find(
+            (artifact) => artifact.kind === "work-images-manifest"
+          )?.sha256 === undefined
+            ? {}
+            : {
+                workImagesManifestSha256:
+                  active.manifest.composite.artifacts.find(
+                    (artifact) => artifact.kind === "work-images-manifest"
                   )!.sha256
               })
         }
@@ -511,11 +525,31 @@ async function validateLegacyRuntime(
     releaseRoot,
     layout.release
   );
+  const workImagesManifest = layout.workImagesManifestSha256 === undefined
+    ? undefined
+    : await loadPalworldWorkImageManifest(releaseRoot, layout.release);
+  if (workImagesManifest !== undefined && staticDirectory === "public") {
+    const mappingBytes = await readFile(
+      path.join(
+        repositoryRoot,
+        "apps/server/src/data/palworld-pak-mappings/work-icon-map.json"
+      )
+    );
+    if (
+      createHash("sha256").update(mappingBytes).digest("hex")
+      !== workImagesManifest.mappingSha256
+    ) {
+      throw new Error(
+        "Palworld work image manifest의 mapping checksum이 검수 mapping과 일치하지 않습니다."
+      );
+    }
+  }
   const expectedStaticUrls = new Set<string>([
     ...activeImages.flatMap((entry) => entry.imageUrl === null ? [] : [entry.imageUrl]),
     ...catalog.itemImagesManifest.entries.map((entry) => entry.imageUrl),
     ...catalog.elementImagesManifest.entries.map((entry) => entry.imageUrl),
-    ...mapImagesManifest.entries.map((entry) => entry.imageUrl)
+    ...mapImagesManifest.entries.map((entry) => entry.imageUrl),
+    ...(workImagesManifest?.entries.map((entry) => entry.imageUrl) ?? [])
   ]);
   await assertExactStaticAssetUrls({
     releaseStaticRoot: staticRoot,
@@ -528,6 +562,16 @@ async function validateLegacyRuntime(
     );
     if (bytes.length !== entry.outputBytes) {
       throw new Error("Palworld map image manifest bytes와 실제 WebP 크기가 일치하지 않습니다.");
+    }
+  }
+  for (const entry of workImagesManifest?.entries ?? []) {
+    const bytes = await readFile(
+      path.join(staticRoot, "work", entry.outputFileName)
+    );
+    if (bytes.length !== entry.outputBytes) {
+      throw new Error(
+        "Palworld work image manifest bytes와 실제 WebP 크기가 일치하지 않습니다."
+      );
     }
   }
   let mainMapMarkers: Awaited<ReturnType<typeof loadPalworldMapMarkerArtifact>>["worlds"][number] | undefined;
@@ -632,6 +676,7 @@ async function validateLegacyRuntime(
     `[palworld-data] legacy runtime artifact smoke 완료: release ${layout.release}, `
     + `${release.artifact.records.length}종, Pal 이미지 ${activeImages.length}개, `
     + `아이템 ${catalog.catalog.items.length}개, 스킬 ${catalog.catalog.skills.length}개, `
+    + `작업 적성 아이콘 ${workImagesManifest?.entries.length ?? 0}개, `
     + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers?.markers.length ?? 0}개, `
     + `일반 스폰 Pal ${mainMapSpawns?.pals.length ?? 0}종, `
     + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`

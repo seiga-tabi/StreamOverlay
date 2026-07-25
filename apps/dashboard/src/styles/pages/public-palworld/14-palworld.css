@@ -963,6 +963,24 @@
   will-change: transform;
 }
 
+.palworld-map-stage-layout-zoom {
+  /*
+   * 화면 크기로 래스터화한 이미지를 GPU scale로 확대하면 고해상도 원본도 흐려집니다.
+   * 지도 페이지는 실제 layout 크기를 확대해 브라우저가 4096px 원본에서 다시 샘플링하게 합니다.
+   */
+  inline-size: var(--palworld-map-layout-width, 100%);
+  transform:
+    translate3d(
+      var(--palworld-map-translate-x, 0),
+      var(--palworld-map-translate-y, 0),
+      0
+    );
+}
+
+.palworld-map-stage-layout-zoom .palworld-map-boss-marker {
+  transform: translate(-50%, -50%);
+}
+
 .palworld-map-image {
   display: block;
   inline-size: 100%;

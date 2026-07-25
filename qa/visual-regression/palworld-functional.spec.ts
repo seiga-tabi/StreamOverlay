@@ -1384,7 +1384,7 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(workIcon).toBeVisible();
   await expect(workIcon).toHaveAttribute(
     "src",
-    /^\/images\/palworld\/work\/[a-f0-9]{64}\.webp$/u,
+    /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/work\/[a-f0-9]{64}\.webp$/u,
   );
   const elementIconBox = await elementIcon.boundingBox();
   const workIconBox = await workIcon.boundingBox();
@@ -1414,8 +1414,8 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(anubisCard.locator('[data-work-type="mining"] .palworld-work-suitability-tooltip')).toHaveText("채굴: Lv.3");
   await expect(anubisCard.locator('[data-work-type="handiwork"] .palworld-work-suitability-label')).toHaveClass(/yoro-u-sr-only/u);
   await expect(anubisCard.locator('[data-work-type="mining"] .palworld-work-suitability-label')).toHaveClass(/yoro-u-sr-only/u);
-  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(0);
-  await expect(anubisCard.locator(".palworld-work-suitability-icon:not(.is-source-image)")).toHaveCount(2);
+  await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(2);
+  await expect(anubisCard.locator(".palworld-work-suitability-badge.has-no-icon")).toHaveCount(0);
   const cardBox = await anubisCard.boundingBox();
   const cardMainBox = await anubisCard.locator(".palworld-pal-card-main").boundingBox();
   const cardImageFrameBox = await anubisCard.locator(".palworld-pal-card-image-frame").boundingBox();
@@ -2553,7 +2553,7 @@ test("Pal 이미지 404는 페이지 오류 없이 접근 가능한 fallback으�
 });
 
 test("작업 적성 이미지 404는 해당 아이콘만 SVG fallback으로 바꾸고 이름과 레벨을 유지한다", async ({ page }) => {
-  await page.route("**/images/palworld/work/*.webp", async (route) => {
+  await page.route("**/images/palworld/*/work/*.webp", async (route) => {
     await route.fulfill({ status: 404, contentType: "text/plain", body: "not found" });
   });
   await page.goto("/palworld/pals?element=ground&work=mining");
@@ -2573,7 +2573,8 @@ test("작업 적성 이미지 404는 해당 아이콘만 SVG fallback으로 바�
   if (mobileFilters) await page.keyboard.press("Escape");
 
   await expect(anubisCard.locator(".palworld-work-suitability-icon.is-source-image")).toHaveCount(0);
-  await expect(anubisCard.locator(".palworld-work-suitability-icon:not(.is-source-image)")).toHaveCount(2);
+  await expect(anubisCard.locator(".palworld-work-suitability-badge.has-no-icon")).toHaveCount(2);
+  await expect(anubisCard.locator(".palworld-work-suitability-label.yoro-u-sr-only")).toHaveCount(0);
   await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("수작업");
   await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
   await expect(anubisCard.locator('[data-work-type="mining"]')).toContainText("채굴");

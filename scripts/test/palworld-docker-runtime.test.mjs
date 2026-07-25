@@ -56,11 +56,19 @@ test("server runtime image는 active manifest allowlist bundle만 포함하고 s
   );
   if (activeManifest.format === "legacy_composite_v2") {
     assert.equal(activeManifest.schemaVersion, 2);
-    assert.equal(activeManifest.composite.schemaVersion, 7);
+    assert.equal(activeManifest.composite.schemaVersion, 9);
     assert.equal(
       activeManifest.composite.artifacts.some((artifact) =>
         artifact.kind === "map-images-manifest"
         && artifact.file === "map-images-manifest.json"
+      ),
+      true
+    );
+    assert.equal(
+      activeManifest.composite.artifacts.some((artifact) =>
+        artifact.kind === "work-images-manifest"
+        && artifact.file === "work-images-manifest.json"
+        && /^[a-f0-9]{64}$/u.test(artifact.sha256)
       ),
       true
     );

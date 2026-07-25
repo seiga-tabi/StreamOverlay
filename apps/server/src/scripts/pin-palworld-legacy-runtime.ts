@@ -16,7 +16,7 @@ import {
 
 type Options = {
   dataRoot: string;
-  workImages: "candidate" | "unavailable";
+  workImages: "active" | "candidate" | "unavailable";
   skillImages: "candidate" | "unavailable";
 };
 
@@ -34,7 +34,11 @@ function parseArgs(args: string[]): Options {
     }
     if (
       argument === "--work-images"
-      && (value === "candidate" || value === "unavailable")
+      && (
+        value === "active"
+        || value === "candidate"
+        || value === "unavailable"
+      )
     ) {
       workImages = value;
       index += 1;
@@ -51,7 +55,7 @@ function parseArgs(args: string[]): Options {
     throw new Error(
       "사용법: pin-palworld-legacy-runtime "
       + "[--data-root <path>] "
-      + "[--work-images candidate|unavailable] "
+      + "[--work-images active|candidate|unavailable] "
       + "[--skill-images candidate|unavailable]"
     );
   }

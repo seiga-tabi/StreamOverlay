@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "kind": "work",
+  "status": "operator_acknowledged",
+  "sourceType": "operator_pak_export",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "mappingSha256": "1867e2a6caf0efa9f852c6227cf80fa04fa1ab8d09b8281f415bc08c6e50db58",
+  "usageBasis": "operator_reference_use",
+  "rightsVerified": false,
+  "entries": [
+    {
+      "id": "cooling",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_10.png",
+      "sourceSha256": "b166bfa7a132503bf91b88bf467948d0f346d4790f997a666a463827fbddf054",
+      "outputSha256": "c92ed65193de060c52bb31808f63f02d829ed58ec79b2cf4c4f006290f3936ea",
+      "outputFileName": "c92ed65193de060c52bb31808f63f02d829ed58ec79b2cf4c4f006290f3936ea.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 2142,
+      "imageUrl": "/images/palworld/1.0.1/work/c92ed65193de060c52bb31808f63f02d829ed58ec79b2cf4c4f006290f3936ea.webp"
+    },
+    {
+      "id": "farming",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_12.png",
+      "sourceSha256": "2fcc2e93480ff5bb0b61a085152b2e73eb9fd0637f0aef162d74a9a105db8345",
+      "outputSha256": "c5524f86524833beb7f3a1e1e7e1062fe5dd1076ce72424b1ec85737a952712c",
+      "outputFileName": "c5524f86524833beb7f3a1e1e7e1062fe5dd1076ce72424b1ec85737a952712c.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 2096,
+      "imageUrl": "/images/palworld/1.0.1/work/c5524f86524833beb7f3a1e1e7e1062fe5dd1076ce72424b1ec85737a952712c.webp"
+    },
+    {
+      "id": "gathering",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_05.png",
+      "sourceSha256": "7ea71dc48391266377ff3034b840cf9c91b2486c710a926a5d9f78ff5737d710",
+      "outputSha256": "511697f6b45600a63245aa69359aeb8a8e9d38a4c517254ba8d98572bf652c43",
+      "outputFileName": "511697f6b45600a63245aa69359aeb8a8e9d38a4c517254ba8d98572bf652c43.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1726,
+      "imageUrl": "/images/palworld/1.0.1/work/511697f6b45600a63245aa69359aeb8a8e9d38a4c517254ba8d98572bf652c43.webp"
+    },
+    {
+      "id": "generating_electricity",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_03.png",
+      "sourceSha256": "89f9d8f72d6750c93240122668bebbf6d966c47751e6d71b6290da0303c95cce",
+      "outputSha256": "330c83c9024fedf4ed01331be29fb46d90f0aa623fbdb44955dd2fad6f216b43",
+      "outputFileName": "330c83c9024fedf4ed01331be29fb46d90f0aa623fbdb44955dd2fad6f216b43.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1496,
+      "imageUrl": "/images/palworld/1.0.1/work/330c83c9024fedf4ed01331be29fb46d90f0aa623fbdb44955dd2fad6f216b43.webp"
+    },
+    {
+      "id": "handiwork",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_04.png",
+      "sourceSha256": "773668d8d375cd8e28fc66eca8ff33d4dde869f2221b7a1004e1ac6863f2845b",
+      "outputSha256": "4a84b2f67d078b8d154f731c38ef4b8959500aded1101771d53382f35ef58e4f",
+      "outputFileName": "4a84b2f67d078b8d154f731c38ef4b8959500aded1101771d53382f35ef58e4f.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1614,
+      "imageUrl": "/images/palworld/1.0.1/work/4a84b2f67d078b8d154f731c38ef4b8959500aded1101771d53382f35ef58e4f.webp"
+    },
+    {
+      "id": "kindling",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_00.png",
+      "sourceSha256": "f31611686cc573cd147b7a4ef02c2338485cee9af6ee9605eb09200c70e5623c",
+      "outputSha256": "cb62212b59bb8775234a4a62a821406d2e27aa539e94fdb392b973bc4b1153a6",
+      "outputFileName": "cb62212b59bb8775234a4a62a821406d2e27aa539e94fdb392b973bc4b1153a6.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1918,
+      "imageUrl": "/images/palworld/1.0.1/work/cb62212b59bb8775234a4a62a821406d2e27aa539e94fdb392b973bc4b1153a6.webp"
+    },
+    {
+      "id": "lumbering",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_06.png",
+      "sourceSha256": "ec2e52bf974f8942dd4f6e83290616ddfc1a5c226bd8bb32721d4593f931f46d",
+      "outputSha256": "964f1f2ed06bb2d37c0e0cfb8653f4b250e39f424670070e75a36fdabe9d9d3b",
+      "outputFileName": "964f1f2ed06bb2d37c0e0cfb8653f4b250e39f424670070e75a36fdabe9d9d3b.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1692,
+      "imageUrl": "/images/palworld/1.0.1/work/964f1f2ed06bb2d37c0e0cfb8653f4b250e39f424670070e75a36fdabe9d9d3b.webp"
+    },
+    {
+      "id": "medicine_production",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_08.png",
+      "sourceSha256": "92538df1178a8d39f87a3d206fa04d10d45db0b8a238ff3fb7d8728fc461c8d4",
+      "outputSha256": "0a8dadd2a324c3026aa24616d20e6d2a902768f7a955a635328337d28c6839cb",
+      "outputFileName": "0a8dadd2a324c3026aa24616d20e6d2a902768f7a955a635328337d28c6839cb.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1898,
+      "imageUrl": "/images/palworld/1.0.1/work/0a8dadd2a324c3026aa24616d20e6d2a902768f7a955a635328337d28c6839cb.webp"
+    },
+    {
+      "id": "mining",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_07.png",
+      "sourceSha256": "ce0bfc881f9e4db2342d48f6b557eeae50ea541b92aaf16973445edda958dfcd",
+      "outputSha256": "23463dad245f9a71d1a048e0bb25a31ddf70eab0ea9b5fb85996d5df121ae968",
+      "outputFileName": "23463dad245f9a71d1a048e0bb25a31ddf70eab0ea9b5fb85996d5df121ae968.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1698,
+      "imageUrl": "/images/palworld/1.0.1/work/23463dad245f9a71d1a048e0bb25a31ddf70eab0ea9b5fb85996d5df121ae968.webp"
+    },
+    {
+      "id": "planting",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_02.png",
+      "sourceSha256": "003ff5dfc46bff538a56e734f4744378114a1e0293023aa16f8b1570dcfc2a6f",
+      "outputSha256": "8b9217d8248508c9492b6816cf3fd45070b0a25c8c5ca976c2838275d3270a84",
+      "outputFileName": "8b9217d8248508c9492b6816cf3fd45070b0a25c8c5ca976c2838275d3270a84.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1680,
+      "imageUrl": "/images/palworld/1.0.1/work/8b9217d8248508c9492b6816cf3fd45070b0a25c8c5ca976c2838275d3270a84.webp"
+    },
+    {
+      "id": "transporting",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_11.png",
+      "sourceSha256": "ed9265735609df9076ec51ce25e4cd9122d1897eadd5efc05b21f7352e02763a",
+      "outputSha256": "49b764764b1d064a704e84f5a1d1915917086a38d4346b9db64430444eff0b94",
+      "outputFileName": "49b764764b1d064a704e84f5a1d1915917086a38d4346b9db64430444eff0b94.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1950,
+      "imageUrl": "/images/palworld/1.0.1/work/49b764764b1d064a704e84f5a1d1915917086a38d4346b9db64430444eff0b94.webp"
+    },
+    {
+      "id": "watering",
+      "sourceMember": "Pal/Texture/UI/InGame/T_icon_palwork_01.png",
+      "sourceSha256": "e8658b903065aa78875adaa755ec19691793487710905390e93a62270de9c810",
+      "outputSha256": "da8dedab7a60d51cd0762b876d31de53404f25814f55d9e302b91930a993b5a1",
+      "outputFileName": "da8dedab7a60d51cd0762b876d31de53404f25814f55d9e302b91930a993b5a1.webp",
+      "outputWidth": 64,
+      "outputHeight": 64,
+      "outputBytes": 1480,
+      "imageUrl": "/images/palworld/1.0.1/work/da8dedab7a60d51cd0762b876d31de53404f25814f55d9e302b91930a993b5a1.webp"
+    }
+  ]
+}

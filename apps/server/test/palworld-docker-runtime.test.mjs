@@ -128,6 +128,41 @@ test("active selector가 가리키는 release만 bundle에 포함하고 raw sour
   );
   await writeFile(mapFile, originalMapBytes);
 
+  const workManifest = JSON.parse(await readFile(
+    path.join(
+      dataRoot,
+      ...sourceLayout.releaseDirectory.split("/"),
+      "work-images-manifest.json"
+    ),
+    "utf8"
+  ));
+  assert.equal(workManifest.entries.length, 12);
+  const representativeWorkEntries = [
+    workManifest.entries[0],
+    workManifest.entries[Math.floor(workManifest.entries.length / 2)],
+    workManifest.entries.at(-1)
+  ];
+  for (const entry of representativeWorkEntries) {
+    assert.ok(entry);
+    await readFile(path.join(runtimeImages, "work", entry.outputFileName));
+  }
+  const middleWorkEntry = representativeWorkEntries[1];
+  const middleWorkFile = path.join(
+    runtimeImages,
+    "work",
+    middleWorkEntry.outputFileName
+  );
+  const originalWorkBytes = await readFile(middleWorkFile);
+  await writeFile(
+    middleWorkFile,
+    Buffer.concat([originalWorkBytes, Buffer.from([0])])
+  );
+  await assert.rejects(
+    smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot }),
+    /content hash WebP|bytes/u
+  );
+  await writeFile(middleWorkFile, originalWorkBytes);
+
   const extraSkillDirectory = path.join(runtimeImages, "skills");
   await mkdir(extraSkillDirectory);
   await writeFile(
