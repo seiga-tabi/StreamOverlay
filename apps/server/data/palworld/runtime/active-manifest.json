@@ -6,7 +6,7 @@
   "manifestFile": "manifest.json",
   "manifestSha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198",
   "composite": {
-    "schemaVersion": 7,
+    "schemaVersion": 8,
     "release": "1.0.1",
     "artifacts": [
       {
@@ -115,6 +115,21 @@
         "sha256": "183404a72983c45c7e1609bb29b735d6b1959dee12701efb9b34c7b4bba3a127"
       },
       {
+        "kind": "map-markers",
+        "file": "map-markers.json",
+        "sha256": "32fc4af43e28fc8b0a530fe7874d821f0de71a3f12d4288b5e6e33940767f0d2"
+      },
+      {
+        "kind": "map-markers-manifest",
+        "file": "map-markers-manifest.json",
+        "sha256": "d49e1efb1fd4223aafd301fd0a0cc63efdebaa77005fc28e0dd9c2df838d9eda"
+      },
+      {
+        "kind": "map-markers-compatibility",
+        "file": "map-markers-compatibility.json",
+        "sha256": "327eda2982ed331e44dabda82e9a733ffc6e387d30deb1de8ff4b8a91536ff83"
+      },
+      {
         "kind": "map-spawns",
         "file": "map-spawns.json",
         "sha256": "86ec04ed0a7003bc0dce3000987fcf0f2ef04a452f22d4f70a08d36ca2f4efe6"
@@ -131,7 +146,7 @@
       }
     ],
     "availability": {
-      "mapMarkers": "candidate",
+      "mapMarkers": "active",
       "mapSpawns": "active",
       "workImages": "candidate",
       "skillImages": "unavailable"

@@ -144,10 +144,19 @@ try {
     )
   ) {
     try {
+      const compatibilityApprovalSha256 =
+        palworldActiveRuntime.manifest.format === "legacy_composite_v2"
+          ? palworldActiveRuntime.manifest.composite.artifacts.find(
+              (artifact) => artifact.kind === "map-markers-compatibility"
+            )?.sha256
+          : undefined;
       palworldMapMarkerProvider = await loadPalworldMapMarkerProvider({
         releaseRoot: palworldActiveRuntime.releaseRoot,
         dashboardStaticRoot: appConfig.paths.dashboardStatic,
-        palworldDataService
+        palworldDataService,
+        ...(compatibilityApprovalSha256 === undefined
+          ? {}
+          : { compatibilityApprovalSha256 })
       });
       const mainMap = palworldMapMarkerProvider.response("main", meta.metadata);
       logger.event({
@@ -159,6 +168,7 @@ try {
           ? {}
           : {
               archiveSha256: mainMap.overlay.archiveSha256,
+              activationBasis: mainMap.overlay.activationBasis,
               transformRevision: mainMap.overlay.transformRevision
             })
       });

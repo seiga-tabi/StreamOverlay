@@ -213,15 +213,15 @@ test("legacy 지도 overlay는 composite selector가 active로 고정한 domain�
   );
 });
 
-test("legacy composite는 승인된 spawn companion까지 checksum으로 고정한다", async () => {
+test("legacy composite v8은 승인된 marker·spawn companion까지 checksum으로 고정한다", async () => {
   const releaseRoot = path.dirname(legacyManifestPath);
   const composite = await createPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
     release: "1.0.1",
     workImages: "candidate"
   });
-  assert.equal(composite.schemaVersion, 7);
-  assert.equal(composite.artifacts.length, 24);
+  assert.equal(composite.schemaVersion, 8);
+  assert.equal(composite.artifacts.length, 27);
   assert.equal(
     composite.artifacts.some((artifact) =>
       artifact.kind === "map-images-manifest"
@@ -253,11 +253,21 @@ test("legacy composite는 승인된 spawn companion까지 checksum으로 고정�
     ]
   );
   assert.deepEqual(composite.availability, {
-    mapMarkers: "candidate",
+    mapMarkers: "active",
     mapSpawns: "active",
     workImages: "candidate",
     skillImages: "unavailable"
   });
+  assert.deepEqual(
+    composite.artifacts
+      .filter(({ kind }) => kind.startsWith("map-markers"))
+      .map(({ kind, file }) => [kind, file]),
+    [
+      ["map-markers", "map-markers.json"],
+      ["map-markers-manifest", "map-markers-manifest.json"],
+      ["map-markers-compatibility", "map-markers-compatibility.json"]
+    ]
+  );
   assert.deepEqual(
     composite.artifacts
       .filter(({ kind }) => kind.startsWith("map-spawns"))
@@ -294,6 +304,32 @@ test("legacy composite는 승인된 spawn companion까지 checksum으로 고정�
     /compatibility approval/u,
     "실제 candidate를 metadata-backed active 형태로 가장할 수 없어야 합니다."
   );
+  const markerMetadataBackedActiveShape =
+    assertPalworldLegacyCompositeRuntimeManifest({
+      ...composite,
+      artifacts: composite.artifacts.filter(
+        (artifact) => artifact.kind !== "map-markers-compatibility"
+      )
+    });
+  assert.deepEqual(
+    markerMetadataBackedActiveShape.artifacts
+      .filter(({ kind }) => kind.startsWith("map-markers"))
+      .map(({ kind, file }) => [kind, file]),
+    [
+      ["map-markers", "map-markers.json"],
+      ["map-markers-manifest", "map-markers-manifest.json"]
+    ],
+    "source metadata가 검증된 active marker는 compatibility companion 없이 pin할 수 있어야 합니다."
+  );
+  await assert.rejects(
+    verifyPalworldLegacyCompositeRuntimeManifest({
+      releaseRoot,
+      expectedRelease: "1.0.1",
+      manifest: markerMetadataBackedActiveShape
+    }),
+    /compatibility approval/u,
+    "실제 candidate marker를 metadata-backed active 형태로 가장할 수 없어야 합니다."
+  );
   await verifyPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
     expectedRelease: "1.0.1",
@@ -312,18 +348,34 @@ test("legacy composite는 승인된 spawn companion까지 checksum으로 고정�
   assert.equal(active.format, "legacy_composite_v2");
   assert.equal(
     palworldRuntimeAllowsLegacyOverlay(active, "mapMarkers"),
-    false,
-    "candidate marker 파일이 release에 남아 있어도 provider 로드를 허용하면 안 됩니다."
+    true,
+    "v8 selector가 checksum approval까지 고정한 candidate marker만 로드해야 합니다."
   );
   assert.equal(
     palworldRuntimeAllowsLegacyOverlay(active, "mapSpawns"),
     true,
     "candidate 단독이 아니라 checksum approval까지 고정한 spawn만 로드해야 합니다."
   );
-  const legacyV6 = {
+  const legacyV7 = {
     ...composite,
-    schemaVersion: 6,
+    schemaVersion: 7,
     artifacts: composite.artifacts.filter(
+      (artifact) => !artifact.kind.startsWith("map-markers")
+    ),
+    availability: {
+      ...composite.availability,
+      mapMarkers: "candidate"
+    }
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV7).schemaVersion,
+    7,
+    "기존 composite schema v7 selector를 계속 읽어야 합니다."
+  );
+  const legacyV6 = {
+    ...legacyV7,
+    schemaVersion: 6,
+    artifacts: legacyV7.artifacts.filter(
       (artifact) => artifact.kind !== "condensation-rules"
     )
   };
@@ -339,7 +391,7 @@ test("legacy composite는 승인된 spawn companion까지 checksum으로 고정�
       (artifact) => !artifact.kind.startsWith("map-spawns")
     ),
     availability: {
-      ...composite.availability,
+      ...legacyV6.availability,
       mapSpawns: "candidate"
     }
   };

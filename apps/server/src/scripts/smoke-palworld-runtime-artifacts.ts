@@ -40,6 +40,9 @@ import {
   loadPalworldMapMarkerArtifact
 } from "../data/palworld-map-marker-artifact.js";
 import {
+  loadPalworldMapMarkerCompatibilityAuthorization
+} from "../data/palworld-map-marker-compatibility.js";
+import {
   PALWORLD_MAP_IMAGE_MANIFEST_FILE,
   loadPalworldMapImageManifest
 } from "../data/palworld-map-image-manifest.js";
@@ -116,7 +119,8 @@ export type PalworldRuntimeLayout =
       releaseDirectory: string;
       releaseRoot: string;
       compositeArtifactFiles?: readonly string[];
-      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+      markerCompatibilityApprovalSha256?: string;
       spawnCompatibilityApprovalSha256?: string;
       condensationRulesSha256?: string;
     };
@@ -190,6 +194,17 @@ export async function resolvePalworldRuntimeLayout(
             (artifact) => artifact.file
           ),
           compositeSchemaVersion: active.manifest.composite.schemaVersion,
+          ...(active.manifest.composite.artifacts.find(
+            (artifact) => artifact.kind === "map-markers-compatibility"
+          )?.sha256 === undefined
+            ? {}
+            : {
+                markerCompatibilityApprovalSha256:
+                  active.manifest.composite.artifacts.find(
+                    (artifact) =>
+                      artifact.kind === "map-markers-compatibility"
+                  )!.sha256
+              }),
           ...(active.manifest.composite.artifacts.find(
             (artifact) => artifact.kind === "map-spawns-compatibility"
           )?.sha256 === undefined
@@ -519,6 +534,23 @@ async function validateLegacyRuntime(
   if (hasMapMarkers) {
     try {
       const mapMarkers = await loadPalworldMapMarkerArtifact(releaseRoot);
+      if (mapMarkers.activation === "candidate") {
+        if (layout.markerCompatibilityApprovalSha256 === undefined) {
+          throw new Error(
+            "candidate 보스 marker는 active composite가 고정한 compatibility approval 없이는 runtime에 포함할 수 없습니다."
+          );
+        }
+        await loadPalworldMapMarkerCompatibilityAuthorization({
+          releaseRoot,
+          artifact: mapMarkers,
+          expectedApprovalSha256:
+            layout.markerCompatibilityApprovalSha256
+        });
+      } else if (mapMarkers.activation !== "active") {
+        throw new Error(
+          "runtime bundle의 보스 marker artifact에는 active 상태 또는 검증된 compatibility approval이 필요합니다."
+        );
+      }
       mainMapMarkers = mapMarkers.worlds.find((world) => world.world === "main");
       if (!mainMapMarkers || mainMapMarkers.markers.length < 1) {
         throw new Error("MainMap 보스 marker runtime artifact가 비어 있습니다.");

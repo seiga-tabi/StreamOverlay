@@ -4,15 +4,19 @@ import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
 import { validatePalworldCompositeRuntimeManifest } from "@streamops/shared";
 import { loadPalworldMapMarkerArtifact } from "./palworld-map-marker-artifact.js";
+import {
+  PALWORLD_MAP_MARKER_COMPATIBILITY_FILE,
+  loadPalworldMapMarkerCompatibilityAuthorization
+} from "./palworld-map-marker-compatibility.js";
 import { loadPalworldSpawnArtifact } from "./palworld-spawn-artifact.js";
 import {
   PALWORLD_SPAWN_COMPATIBILITY_FILE,
   loadPalworldSpawnCompatibilityAuthorization
 } from "./palworld-spawn-compatibility.js";
 
-export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 7 as const;
+export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 8 as const;
 export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS =
-  [1, 2, 3, 4, 5, 6, 7] as const;
+  [1, 2, 3, 4, 5, 6, 7, 8] as const;
 export const PALWORLD_LEGACY_COMPOSITE_DOMAIN_STATES = [
   "active",
   "candidate",
@@ -107,7 +111,11 @@ const LEGACY_V1_REQUIRED_ARTIFACTS = [
 const OPTIONAL_ACTIVE_ARTIFACTS = {
   mapMarkers: [
     ["map-markers", "map-markers.json"],
-    ["map-markers-manifest", "map-markers-manifest.json"]
+    ["map-markers-manifest", "map-markers-manifest.json"],
+    [
+      "map-markers-compatibility",
+      PALWORLD_MAP_MARKER_COMPATIBILITY_FILE
+    ]
   ],
   mapSpawns: [
     ["map-spawns", "map-spawns.json"],
@@ -131,7 +139,7 @@ export type PalworldLegacyCompositeArtifactKind =
   (typeof PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS)[number];
 
 export type PalworldLegacyCompositeRuntimeManifest = {
-  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   release: string;
   artifacts: Array<{
     kind: PalworldLegacyCompositeArtifactKind;
@@ -189,6 +197,7 @@ function stateAt(
 function expectedArtifactsForAvailability(
   availability: PalworldLegacyCompositeRuntimeManifest["availability"],
   schemaVersion: PalworldLegacyCompositeRuntimeManifest["schemaVersion"],
+  includeMarkerCompatibility = false,
   includeSpawnCompatibility = false
 ): ReadonlyArray<readonly [PalworldLegacyCompositeArtifactKind, string]> {
   return [
@@ -204,7 +213,9 @@ function expectedArtifactsForAvailability(
               ? LEGACY_V6_REQUIRED_ARTIFACTS
               : REQUIRED_ARTIFACTS),
     ...(availability.mapMarkers === "active"
-      ? OPTIONAL_ACTIVE_ARTIFACTS.mapMarkers
+      ? schemaVersion >= 8 && includeMarkerCompatibility
+        ? OPTIONAL_ACTIVE_ARTIFACTS.mapMarkers
+        : OPTIONAL_ACTIVE_ARTIFACTS.mapMarkers.slice(0, 2)
       : []),
     ...(availability.mapSpawns === "active"
       ? schemaVersion >= 6 && includeSpawnCompatibility
@@ -231,9 +242,10 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     !(PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS as readonly unknown[])
       .includes(record.schemaVersion)
   ) {
-    fail("legacyComposite.schemaVersion", "1부터 7 사이여야 합니다.");
+    fail("legacyComposite.schemaVersion", "1부터 8 사이여야 합니다.");
   }
-  const schemaVersion = record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  const schemaVersion =
+    record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   if (
     typeof record.release !== "string"
     || !RELEASE_PATTERN.test(record.release)
@@ -328,9 +340,16 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     && artifacts.some(
       (artifact) => artifact.kind === "map-spawns-compatibility"
     );
+  const includeMarkerCompatibility =
+    schemaVersion >= 8
+    && availability.mapMarkers === "active"
+    && artifacts.some(
+      (artifact) => artifact.kind === "map-markers-compatibility"
+    );
   const expected = expectedArtifactsForAvailability(
     availability,
     schemaVersion,
+    includeMarkerCompatibility,
     includeSpawnCompatibility
   );
   if (artifacts.length !== expected.length) {
@@ -430,17 +449,40 @@ async function inferredAvailability(
     PalworldLegacyCompositeRuntimeManifest["availability"],
     "mapMarkers" | "mapSpawns"
   > & {
+    mapMarkersCompatibility: boolean;
     mapSpawnsCompatibility: boolean;
   }
 > {
   let mapMarkers: PalworldLegacyCompositeDomainState = "unavailable";
+  let mapMarkersCompatibility = false;
   try {
-    await loadPalworldMapMarkerArtifact(releaseRoot);
-    mapMarkers = "active";
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      mapMarkers = "candidate";
+    const artifact = await loadPalworldMapMarkerArtifact(releaseRoot);
+    if (artifact.activation === "active") {
+      mapMarkers = "active";
+    } else {
+      try {
+        const approvalSha256 = createHash("sha256")
+          .update(
+            await readCanonicalArtifact(
+              releaseRoot,
+              PALWORLD_MAP_MARKER_COMPATIBILITY_FILE
+            )
+          )
+          .digest("hex");
+        await loadPalworldMapMarkerCompatibilityAuthorization({
+          releaseRoot,
+          artifact,
+          expectedApprovalSha256: approvalSha256
+        });
+        mapMarkers = "active";
+        mapMarkersCompatibility = true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+        mapMarkers = "candidate";
+      }
     }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
   let mapSpawns: PalworldLegacyCompositeDomainState = "unavailable";
   let mapSpawnsCompatibility = false;
@@ -475,7 +517,12 @@ async function inferredAvailability(
       throw error;
     }
   }
-  return { mapMarkers, mapSpawns, mapSpawnsCompatibility };
+  return {
+    mapMarkers,
+    mapMarkersCompatibility,
+    mapSpawns,
+    mapSpawnsCompatibility
+  };
 }
 
 export async function createPalworldLegacyCompositeRuntimeManifest(input: {
@@ -494,6 +541,7 @@ export async function createPalworldLegacyCompositeRuntimeManifest(input: {
     fail("releaseRoot", "symlink가 아닌 canonical directory여야 합니다.");
   }
   const {
+    mapMarkersCompatibility,
     mapSpawnsCompatibility,
     ...inferred
   } = await inferredAvailability(releaseRoot);
@@ -506,6 +554,7 @@ export async function createPalworldLegacyCompositeRuntimeManifest(input: {
     expectedArtifactsForAvailability(
       availability,
       PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION,
+      mapMarkersCompatibility,
       mapSpawnsCompatibility
     ).map(async ([kind, file]) => ({
       kind,
@@ -558,7 +607,35 @@ export async function verifyPalworldLegacyCompositeRuntimeManifest(input: {
     }
   }
   if (manifest.availability.mapMarkers === "active") {
-    await loadPalworldMapMarkerArtifact(path.resolve(input.releaseRoot));
+    const markers = await loadPalworldMapMarkerArtifact(
+      path.resolve(input.releaseRoot)
+    );
+    const compatibilityArtifact = manifest.artifacts.find(
+      (artifact) => artifact.kind === "map-markers-compatibility"
+    );
+    if (markers.activation === "candidate" && manifest.schemaVersion >= 8) {
+      if (compatibilityArtifact === undefined) {
+        fail(
+          "legacyComposite.availability.mapMarkers",
+          "candidate marker 활성화에는 composite에 고정된 compatibility approval이 필요합니다."
+        );
+      }
+      await loadPalworldMapMarkerCompatibilityAuthorization({
+        releaseRoot: path.resolve(input.releaseRoot),
+        artifact: markers,
+        expectedApprovalSha256: compatibilityArtifact.sha256
+      });
+    } else if (markers.activation !== "active") {
+      fail(
+        "legacyComposite.availability.mapMarkers",
+        "active 상태는 active artifact 또는 v8 compatibility approval을 요구합니다."
+      );
+    } else if (compatibilityArtifact !== undefined) {
+      fail(
+        "legacyComposite.artifacts.map-markers-compatibility",
+        "source metadata가 검증된 active marker에는 compatibility approval을 함께 고정할 수 없습니다."
+      );
+    }
   }
   if (manifest.availability.mapSpawns === "active") {
     const spawns = await loadPalworldSpawnArtifact(path.resolve(input.releaseRoot));

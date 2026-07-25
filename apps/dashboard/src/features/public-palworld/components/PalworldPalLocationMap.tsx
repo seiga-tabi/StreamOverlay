@@ -30,7 +30,7 @@ import { PalworldMedia } from "./PalworldMedia";
 export { filterPalworldBossMarkers } from "../utils/spawns";
 
 export const PALWORLD_PAL_DETAIL_INITIAL_ZOOM = 1.5;
-export const PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY = 0.84;
+export const PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY = 0.96;
 
 type LocationLayerState<T> =
   | { kind: "loading" }

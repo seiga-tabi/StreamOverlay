@@ -11,6 +11,11 @@ import {
   type PalworldPalDetail
 } from "@streamops/shared";
 import type { PalworldDataService } from "../services/palworld-data.js";
+import {
+  assertPalworldMapMarkerCompatibilityAuthorization,
+  loadPalworldMapMarkerCompatibilityAuthorization,
+  type PalworldMapMarkerCompatibilityAuthorization
+} from "./palworld-map-marker-compatibility.js";
 
 export const PALWORLD_MAP_MARKER_ARTIFACT_FILE = "map-markers.json";
 export const PALWORLD_MAP_MARKER_MANIFEST_FILE = "map-markers-manifest.json";
@@ -460,10 +465,32 @@ function palReference(pal: PalworldPalDetail) {
 export function createPalworldMapMarkerProvider(input: {
   artifact: PalworldMapMarkerArtifact;
   palworldDataService: Pick<PalworldDataService, "getPal" | "sourceInternalIdForPal">;
+  compatibilityAuthorization?: PalworldMapMarkerCompatibilityAuthorization;
 }): PalworldMapMarkerProvider {
   const artifact = assertPalworldMapMarkerArtifact(input.artifact);
-  if (artifact.activation !== "active") {
-    fail("artifact.activation", "명시적으로 active인 artifact만 공개 API에 주입할 수 있습니다.");
+  if (
+    artifact.activation === "candidate"
+    && input.compatibilityAuthorization === undefined
+  ) {
+    fail(
+      "artifact.activation",
+      "candidate 단독으로는 공개 API에 주입할 수 없습니다."
+    );
+  }
+  const compatibilityAuthorization = artifact.activation === "candidate"
+    ? assertPalworldMapMarkerCompatibilityAuthorization(
+        input.compatibilityAuthorization,
+        artifact
+      )
+    : undefined;
+  if (
+    artifact.activation !== "active"
+    && compatibilityAuthorization === undefined
+  ) {
+    fail(
+      "artifact.activation",
+      "active artifact 또는 검증된 compatibility authorization이 필요합니다."
+    );
   }
   const responses = new Map<PalworldMapWorld, Omit<PalworldMapMarkersResponse, "metadata">>();
   for (const world of artifact.worlds) {
@@ -497,7 +524,16 @@ export function createPalworldMapMarkerProvider(input: {
         targetMapAssetSha256: world.targetMapAssetSha256,
         targetGameVersion: artifact.targetGameVersion,
         compatibilityBasis: "exact_map_geometry_and_coordinate_transform",
-        transformRevision: world.transform.revision
+        transformRevision: world.transform.revision,
+        ...(compatibilityAuthorization === undefined
+          ? {
+              activationBasis: "source_metadata" as const
+            }
+          : {
+              activationBasis: "versioned_compatibility_approval" as const,
+              compatibilityApprovalSha256:
+                compatibilityAuthorization.approvalSha256
+            })
       }
     });
   }
@@ -524,8 +560,27 @@ export async function loadPalworldMapMarkerProvider(input: {
   releaseRoot: string;
   dashboardStaticRoot?: string;
   palworldDataService: Pick<PalworldDataService, "getPal" | "sourceInternalIdForPal">;
+  compatibilityApprovalSha256?: string;
 }): Promise<PalworldMapMarkerProvider> {
   const artifact = await loadPalworldMapMarkerArtifact(input.releaseRoot);
+  const compatibilityAuthorization = artifact.activation === "candidate"
+    ? input.compatibilityApprovalSha256 === undefined
+      ? undefined
+      : await loadPalworldMapMarkerCompatibilityAuthorization({
+          releaseRoot: input.releaseRoot,
+          artifact,
+          expectedApprovalSha256: input.compatibilityApprovalSha256
+        })
+    : undefined;
+  if (
+    artifact.activation === "active"
+    && input.compatibilityApprovalSha256 !== undefined
+  ) {
+    fail(
+      "compatibilityApprovalSha256",
+      "source metadata가 검증된 active artifact에는 compatibility approval을 사용할 수 없습니다."
+    );
+  }
   if (input.dashboardStaticRoot !== undefined) {
     for (const world of artifact.worlds) {
       const assetPath = path.join(
@@ -553,6 +608,9 @@ export async function loadPalworldMapMarkerProvider(input: {
   }
   return createPalworldMapMarkerProvider({
     artifact,
-    palworldDataService: input.palworldDataService
+    palworldDataService: input.palworldDataService,
+    ...(compatibilityAuthorization === undefined
+      ? {}
+      : { compatibilityAuthorization })
   });
 }

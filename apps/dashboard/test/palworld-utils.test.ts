@@ -60,6 +60,7 @@ import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalwor
 import { palworldSeoMetadata } from "../src/features/public-palworld/utils/seo";
 import {
   filterPalworldBossMarkers,
+  filterPalworldSpawnPointsByPeriod,
   palworldSpawnPointOpacity,
   palworldSpawnPointRadius,
   summarizePalworldSpawnPoints,
@@ -131,6 +132,15 @@ test("일반 스폰 요약과 시각 강도는 cluster 수치만 제한된 범�
   assert.ok(palworldSpawnPointRadius(8) > palworldSpawnPointRadius(1));
   assert.ok(palworldSpawnPointRadius(8, 2) < palworldSpawnPointRadius(8, 1));
   assert.ok(palworldSpawnPointOpacity(8) > palworldSpawnPointOpacity(1));
+  assert.deepEqual(
+    filterPalworldSpawnPointsByPeriod(points, "day").map((point) => point.id),
+    ["main-anubis-01-01"],
+  );
+  assert.deepEqual(
+    filterPalworldSpawnPointsByPeriod(points, "night").map((point) => point.id),
+    ["main-anubis-02-02"],
+  );
+  assert.equal(filterPalworldSpawnPointsByPeriod(points, "all").length, 2);
   assert.deepEqual(filterPalworldBossMarkers([], "anubis"), []);
 });
 

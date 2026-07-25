@@ -12,6 +12,18 @@ export type PalworldSpawnPointSummary = {
   placements: number;
 };
 
+export type PalworldSpawnPeriod = "all" | "day" | "night";
+
+export function filterPalworldSpawnPointsByPeriod(
+  points: readonly PalworldPalSpawnPoint[],
+  period: PalworldSpawnPeriod,
+): PalworldPalSpawnPoint[] {
+  if (period === "all") return [...points];
+  return points.filter((point) =>
+    period === "day" ? point.daytime : point.nighttime
+  );
+}
+
 export function summarizePalworldSpawnPoints(
   points: readonly PalworldPalSpawnPoint[],
 ): PalworldSpawnPointSummary | undefined {

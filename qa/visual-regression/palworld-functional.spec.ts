@@ -1897,6 +1897,21 @@ test("Pal 상세 농축 단계와 인터랙티브 스폰 지도는 URL·history�
   const viewport = location.getByTestId("pal-detail-map-viewport");
   const stage = location.getByTestId("pal-detail-map-stage");
   await expect(location.locator(".palworld-pal-location-spawn-point")).toHaveCount(2);
+  const spawnPointStyle = await location
+    .locator(".palworld-pal-location-spawn-point")
+    .first()
+    .evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        fill: style.fill,
+        opacity: Number(style.opacity),
+        stroke: style.stroke,
+        strokeWidth: Number.parseFloat(style.strokeWidth),
+      };
+    });
+  expect(spawnPointStyle.fill).not.toBe(spawnPointStyle.stroke);
+  expect(spawnPointStyle.opacity).toBeGreaterThanOrEqual(0.96);
+  expect(spawnPointStyle.strokeWidth).toBeGreaterThan(0.0035);
   await location.getByRole("button", { name: "야간", exact: true }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("spawnPeriod")).toBe("night");
   await expect(location.locator(".palworld-pal-location-spawn-point")).toHaveCount(1);
@@ -1911,7 +1926,7 @@ test("Pal 상세 농축 단계와 인터랙티브 스폰 지도는 URL·history�
 
   await expect.poll(() => viewport.evaluate((element) =>
     getComputedStyle(element).touchAction
-  )).toBe("pan-y");
+  )).toBe("none");
   await location.getByRole("button", { name: "지도 확대" }).click();
   await expect(viewport).toHaveAttribute("data-zoomed", "true");
   await expect.poll(() => viewport.evaluate((element) =>
@@ -2691,13 +2706,63 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.goForward();
   await expect(page).toHaveURL(/\/palworld\/map$/u);
   await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+  const mobileViewport = (page.viewportSize()?.width ?? 1440) <= 768;
+  const mobileFilterTrigger = page.getByRole("button", { name: "필터 1개" });
+  const filterScope = mobileViewport
+    ? page.getByTestId("palworld-map-mobile-filters")
+    : page.locator(".palworld-map-desktop-filter");
+  if (mobileViewport) {
+    await expect(mobileFilterTrigger).toBeVisible();
+    await mobileFilterTrigger.click();
+    await expect(filterScope).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  } else {
+    await expect(mobileFilterTrigger).toBeHidden();
+  }
+  const bossLayerCheckbox = filterScope.locator('[data-layer="boss"] input[type="checkbox"]');
+  await expect(bossLayerCheckbox).toBeChecked();
+  await bossLayerCheckbox.uncheck();
+  await expect.poll(() => new URL(page.url()).searchParams.get("layers")).toBe("spawn");
+  await expect(page.getByTestId("palworld-map-boss-markers")).toBeHidden();
+  await bossLayerCheckbox.check();
+  await expect.poll(() => new URL(page.url()).searchParams.has("layers")).toBe(false);
+  await expect(page.getByTestId("palworld-map-boss-markers")).toBeVisible();
+  await page.goBack();
+  await expect.poll(() => new URL(page.url()).searchParams.get("layers")).toBe("spawn");
+  await expect(page.getByTestId("palworld-map-boss-markers")).toBeHidden();
+  await page.goForward();
+  await expect.poll(() => new URL(page.url()).searchParams.has("layers")).toBe(false);
+  await expect(page.getByTestId("palworld-map-boss-markers")).toBeVisible();
+  if (mobileViewport) {
+    await filterScope.getByRole("button", { name: "필터 숨기기" }).click();
+    await expect(filterScope).toBeHidden();
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("");
+    await expect(mobileFilterTrigger).toBeFocused();
+  }
   const bossMarker = page.getByRole("button", { name: "필드 보스: 아누비스, Lv.55" });
   await expect(bossMarker).toBeVisible();
   await bossMarker.click();
-  await expect(page).toHaveURL(/\/palworld\/map\?pal=anubis$/u);
+  await expect.poll(() => new URL(page.url()).searchParams.get("marker")).toBe("anubis-field-boss");
+  const markerPopover = page.getByRole("dialog", { name: "아누비스" });
+  await expect(markerPopover).toHaveAttribute("id", "palworld-map-marker-popover");
+  await expect(bossMarker).toHaveAttribute("aria-controls", "palworld-map-marker-popover");
+  await markerPopover.getByRole("button", { name: "지도 중앙에 맞추기" }).click();
+  await page.keyboard.press("Escape");
+  await expect.poll(() => new URL(page.url()).searchParams.has("marker")).toBe(false);
+  await expect(bossMarker).toBeFocused();
+  await bossMarker.click();
   await expect(page.getByRole("dialog", { name: "아누비스" })).toBeVisible();
-  await page.getByRole("button", { name: "닫기" }).click();
-  await expect(page).toHaveURL(/\/palworld\/map$/u);
+  await page.getByRole("heading", { name: "Palworld 월드 지도", level: 1 }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.has("marker")).toBe(false);
+  await bossMarker.click();
+  await expect(page.getByRole("dialog", { name: "아누비스" })).toBeVisible();
+  await page.getByRole("dialog", { name: "아누비스" }).getByRole("button", { name: "Pal 상세 보기" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("pal")).toBe("anubis");
+  await expect(page.getByTestId("pal-detail-modal")).toBeVisible();
+  await page.getByTestId("pal-detail-modal").getByRole("button", { name: "닫기" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.has("pal")).toBe(false);
+  await page.getByRole("dialog", { name: "아누비스" }).getByRole("button", { name: "위치 정보 닫기" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.has("marker")).toBe(false);
 
   await page.locator(".public-locale-button").click();
   await page.getByRole("menuitemradio", { name: /JP/u }).click();

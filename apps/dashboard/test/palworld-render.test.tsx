@@ -21,6 +21,8 @@ import { PalworldHeader } from "../src/features/public-palworld/components/Palwo
 import { PalworldHome } from "../src/features/public-palworld/components/PalworldHome";
 import { ItemCard, PalCard } from "../src/features/public-palworld/components/PalworldCards";
 import { PalworldItemReferenceButton } from "../src/features/public-palworld/components/PalworldItemReferenceButton";
+import { PalworldMapFilterPanel } from "../src/features/public-palworld/components/PalworldMapFilterPanel";
+import { PalworldMapMarkerPopover } from "../src/features/public-palworld/components/PalworldMapMarkerPopover";
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
 import {
   clampPalworldMapView,
@@ -1011,19 +1013,87 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /Palworld 월드 지도/u);
   assert.match(
     korean,
-    /alt="빠른 이동 지점, 필드 보스와 선택한 Pal의 일반 야생 스폰 위치가 표시된 Palworld 월드 지도"/u
+    /alt="검증된 필드 보스와 선택한 Pal의 일반 야생 스폰 위치가 표시된 Palworld 월드 지도"/u
   );
   assert.doesNotMatch(korean, /pyPalworldAPI|>1\.0\.1</u);
   assert.match(korean, /aria-label="지도 확대"/u);
   assert.match(korean, /aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight \+ - Home"/u);
   assert.match(korean, /data-testid="palworld-map-stage"/u);
+  assert.match(korean, /class="[^"]*palworld-map-filter-panel/u);
+  assert.match(korean, /data-testid="palworld-map-pal-picker"/u);
+  assert.match(korean, /class="[^"]*palworld-map-mobile-filter-trigger/u);
+  assert.match(korean, />필터 1개</u);
+  assert.match(korean, /role="tablist"/u);
+  assert.match(korean, /팰파고스섬/u);
+  assert.match(korean, /세계수/u);
+  assert.match(korean, /이동·장소/u);
+  assert.match(korean, /빠른 이동 지점/u);
+  assert.match(korean, /수집품/u);
+  assert.match(korean, /쿠룰리스상/u);
+  assert.match(korean, /data-layer="fast-travel"[\s\S]*<input disabled=""/u);
+  assert.match(korean, /현재 화면의 위치/u);
   assert.match(korean, /휠·핀치/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
+  assert.match(japanese, />フィルター 1件</u);
+  assert.match(japanese, /移動・場所/u);
+  assert.match(japanese, /収集品/u);
   assert.match(
     japanese,
-    /ファストトラベル地点、フィールドボスと選択したパルの通常の野生スポーン位置が表示されたPalworldワールドマップ/u
+    /検証済みのフィールドボスと選択したパルの通常の野生スポーン位置が表示されたPalworldワールドマップ/u
   );
   assert.match(japanese, /ホイール・ピンチ/u);
+});
+
+test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하고 키보드 닫기를 제공한다", () => {
+  const filter = renderToStaticMarkup(
+    <PalworldMapFilterPanel
+      collapsed={false}
+      copy={{
+        all: { ko: "전체", ja: "すべて" },
+        hide: { ko: "필터 숨기기", ja: "フィルターを隠す" },
+        reset: { ko: "초기화", ja: "リセット" },
+        show: { ko: "필터 열기", ja: "フィルターを開く" },
+        title: { ko: "지도 필터", ja: "マップフィルター" },
+      }}
+      groups={[{
+        id: "pal",
+        label: { ko: "Pal 위치", ja: "パルの位置" },
+        layers: [{
+          id: "boss",
+          label: { ko: "필드 보스", ja: "フィールドボス" },
+          selected: true,
+          state: "ready",
+        }, {
+          id: "spawn",
+          label: { ko: "일반 야생 스폰", ja: "通常の野生スポーン" },
+          selected: false,
+          state: "data_unavailable",
+          statusLabel: { ko: "준비되지 않음", ja: "準備中" },
+        }],
+      }]}
+      locale="ko"
+      onCollapsedChange={() => undefined}
+      onGroupLayerChange={() => undefined}
+      onLayerChange={() => undefined}
+      onReset={() => undefined}
+    />,
+  );
+  const popover = renderToStaticMarkup(
+    <PalworldMapMarkerPopover
+      closeLabel={{ ko: "위치 정보 닫기", ja: "位置情報を閉じる" }}
+      kindLabel={{ ko: "필드 보스", ja: "フィールドボス" }}
+      locale="ko"
+      onClose={() => undefined}
+      title={{ ko: "아누비스", ja: "アヌビス" }}
+    />,
+  );
+
+  assert.match(filter, /data-layer="boss"[\s\S]*type="checkbox" checked=""/u);
+  assert.match(filter, /data-layer="spawn"[\s\S]*<input disabled=""[^>]*type="checkbox"/u);
+  assert.match(popover, /role="dialog"/u);
+  assert.match(popover, /aria-modal="false"/u);
+  assert.match(popover, /aria-label="위치 정보 닫기"/u);
+  assert.match(popover, />아누비스</u);
 });
 
 test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 않는다", () => {
@@ -1157,7 +1227,7 @@ test("월드 지도 일반 스폰 layer는 cluster 좌표를 확대 배율에 �
 
 test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고 한국어·일본어 i18n을 연결한다", () => {
   assert.equal(PALWORLD_PAL_DETAIL_INITIAL_ZOOM, 1.5);
-  assert.equal(PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY, 0.84);
+  assert.equal(PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY, 0.96);
   const anubisMarker: PalworldMapMarker = {
     id: "main-anubis-001",
     sourceRowId: "Boss_Anubis",
@@ -1283,7 +1353,11 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   );
   assert.match(
     css,
-    /\.palworld-pal-location-spawn-point\s*\{[\s\S]*?fill:\s*var\(--palworld-sky\);[\s\S]*?stroke-width:\s*0\.0035;/u,
+    /\.palworld-pal-location-spawn-point\s*\{[\s\S]*?fill:\s*color-mix\(in srgb, var\(--palworld-sky\) 52%, var\(--yoro-color-text-on-dark\)\);[\s\S]*?stroke:\s*var\(--yoro-color-text-strong\);[\s\S]*?stroke-width:\s*0\.006;[\s\S]*?paint-order:\s*stroke fill;/u,
+  );
+  assert.match(
+    css,
+    /\.palworld-pal-location-legend-dot\s*\{[\s\S]*?border:\s*medium solid var\(--yoro-color-text-strong\);[\s\S]*?background:\s*color-mix\(in srgb, var\(--palworld-sky\) 52%, var\(--yoro-color-text-on-dark\)\);/u,
   );
 });
 

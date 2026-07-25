@@ -607,6 +607,258 @@
   overflow: hidden;
 }
 
+.palworld-map-workspace {
+  display: grid;
+  grid-template-columns: minmax(17.5rem, 20rem) minmax(0, 1fr);
+  align-items: start;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+}
+
+.palworld-map-workspace[data-filter-collapsed="true"] {
+  grid-template-columns: minmax(10rem, max-content) minmax(0, 1fr);
+}
+
+.palworld-map-explorer-main {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+}
+
+.palworld-map-mobile-filter-trigger {
+  display: none;
+}
+
+.palworld-map-filter-panel {
+  position: sticky;
+  inset-block-start: var(--yoro-space-4);
+  min-inline-size: 0;
+  max-block-size: calc(100svh - (var(--yoro-space-8) * 2));
+  overflow: hidden;
+}
+
+.palworld-map-filter-header,
+.palworld-map-filter-header-actions,
+.palworld-map-filter-group-heading,
+.palworld-map-filter-layer > label,
+.palworld-map-filter-all {
+  display: flex;
+  align-items: center;
+}
+
+.palworld-map-filter-header {
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-3);
+  border-block-end: thin solid var(--yoro-color-border);
+  background: var(--yoro-color-surface-strong);
+}
+
+.palworld-map-filter-header > strong {
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--yoro-color-text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palworld-map-filter-header-actions {
+  flex: 0 0 auto;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-map-filter-content {
+  max-block-size: calc(100svh - (var(--yoro-space-8) * 4));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.palworld-map-filter-search {
+  position: relative;
+  z-index: var(--yoro-z-raised);
+  padding: var(--yoro-space-3);
+  border-block-end: thin solid var(--yoro-color-border);
+}
+
+.palworld-map-filter-search .palworld-picker {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.palworld-map-filter-group {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-block-end: thin solid var(--yoro-color-border);
+}
+
+.palworld-map-filter-group-heading {
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-map-filter-group-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2);
+  border: 0;
+  background: transparent;
+  color: var(--yoro-color-text-strong);
+  font: inherit;
+  font-weight: var(--yoro-font-weight-bold);
+  text-align: start;
+  cursor: pointer;
+}
+
+.palworld-map-filter-group-toggle:focus-visible,
+.palworld-map-filter-layer input:focus-visible,
+.palworld-map-filter-all input:focus-visible,
+.palworld-map-period-filter button:focus-visible,
+.palworld-map-world-switcher button:focus-visible,
+.palworld-map-visible-location:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-width);
+}
+
+.palworld-map-filter-all {
+  flex: 0 0 auto;
+  gap: var(--yoro-space-1);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.palworld-map-filter-group > ul {
+  display: grid;
+  min-inline-size: 0;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palworld-map-filter-layer > label {
+  min-inline-size: 0;
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  cursor: pointer;
+}
+
+.palworld-map-filter-layer > label:hover {
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-map-filter-layer > label:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: .72;
+}
+
+.palworld-map-filter-layer-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-5);
+}
+
+.palworld-map-filter-symbol.is-boss {
+  color: var(--yoro-color-danger);
+}
+
+.palworld-map-filter-symbol.is-spawn {
+  color: var(--yoro-color-info);
+}
+
+.palworld-map-filter-layer-copy {
+  display: grid;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  gap: var(--yoro-space-0);
+}
+
+.palworld-map-filter-layer-copy strong,
+.palworld-map-filter-layer-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palworld-map-filter-layer-copy small {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  white-space: normal;
+}
+
+.palworld-map-filter-layer-count {
+  flex: 0 0 auto;
+  color: var(--yoro-color-text-strong);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-map-period-filter {
+  min-inline-size: 0;
+  margin: var(--yoro-space-3) 0 0;
+  padding: var(--yoro-space-3) 0 0;
+  border: 0;
+  border-block-start: thin solid var(--yoro-color-border);
+}
+
+.palworld-map-period-filter legend {
+  margin-block-end: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-map-period-filter > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--yoro-space-1);
+}
+
+.palworld-map-period-filter button,
+.palworld-map-world-switcher button {
+  min-block-size: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-text);
+  font: inherit;
+  font-size: var(--yoro-font-size-sm);
+  cursor: pointer;
+}
+
+.palworld-map-period-filter button[aria-pressed="true"],
+.palworld-map-world-switcher button[aria-selected="true"] {
+  border-color: var(--palworld-accent);
+  background: var(--palworld-accent-soft);
+  color: var(--yoro-color-text-strong);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-map-world-switcher {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-map-world-switcher button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
 .palworld-map-toolbar,
 .palworld-map-toolbar-info,
 .palworld-map-controls {
@@ -629,6 +881,25 @@
   gap: var(--yoro-space-2);
 }
 
+.palworld-map-viewport > .palworld-map-controls {
+  position: absolute;
+  inset-inline-end: var(--yoro-space-3);
+  inset-block-end: var(--yoro-space-3);
+  z-index: var(--yoro-z-sticky);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(var(--yoro-size-touch-target), auto));
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-1);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.palworld-map-viewport > .palworld-map-controls > :last-child {
+  grid-column: 1 / -1;
+}
+
 .palworld-map-marker-error {
   display: inline-flex;
   align-items: center;
@@ -647,6 +918,11 @@
 .palworld-map-figure {
   min-inline-size: 0;
   margin: 0;
+}
+
+.palworld-map-canvas-shell {
+  position: relative;
+  min-inline-size: 0;
 }
 
 .palworld-map-viewport {
@@ -805,7 +1081,8 @@
 
 .palworld-map-boss-marker:hover,
 .palworld-map-boss-marker:focus-visible,
-.palworld-map-boss-marker[data-focused="true"] {
+.palworld-map-boss-marker[data-focused="true"],
+.palworld-map-boss-marker[data-selected="true"] {
   z-index: var(--yoro-z-sticky);
 }
 
@@ -875,6 +1152,211 @@
   color: var(--yoro-color-text-muted);
   font-size: inherit;
   font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-map-marker-popover {
+  position: absolute;
+  inset-block-start: var(--yoro-space-3);
+  inset-inline-end: var(--yoro-space-3);
+  z-index: var(--yoro-z-modal);
+  display: grid;
+  inline-size: min(22rem, calc(100% - (var(--yoro-space-6) * 2)));
+  max-block-size: calc(100% - (var(--yoro-space-6) * 2));
+  gap: var(--yoro-space-3);
+  overflow-y: auto;
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.palworld-map-marker-popover-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-map-marker-popover-media {
+  display: grid;
+  place-items: center;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  overflow: hidden;
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-map-marker-popover-media .palworld-media-image,
+.palworld-map-marker-popover-media .palworld-media-fallback {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-map-marker-popover-heading {
+  display: grid;
+  min-inline-size: 0;
+  justify-items: start;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-map-marker-popover-heading strong {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palworld-map-marker-popover > p {
+  margin: 0;
+  color: var(--yoro-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.palworld-map-marker-popover-details {
+  display: grid;
+  gap: var(--yoro-space-1);
+  margin: 0;
+}
+
+.palworld-map-marker-popover-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-map-marker-popover-details dt {
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-map-marker-popover-details dd {
+  margin: 0;
+  color: var(--yoro-color-text-strong);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-map-marker-popover-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-map-visible-locations {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-map-visible-locations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-map-visible-locations-header h2 {
+  margin: 0;
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-lg);
+}
+
+.palworld-map-visible-location-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  min-inline-size: 0;
+  max-block-size: 24rem;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.palworld-map-visible-location {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  inline-size: 100%;
+  min-block-size: var(--yoro-size-touch-target);
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.palworld-map-visible-location:hover,
+.palworld-map-visible-location[aria-current="location"] {
+  border-color: var(--palworld-accent);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-map-visible-location-media {
+  display: grid;
+  place-items: center;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  overflow: hidden;
+  border-radius: var(--yoro-radius-md);
+}
+
+.palworld-map-visible-location-media .palworld-media-image,
+.palworld-map-visible-location-media .palworld-media-fallback {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-map-visible-location-copy,
+.palworld-map-visible-location-heading {
+  min-inline-size: 0;
+}
+
+.palworld-map-visible-location-copy {
+  display: grid;
+  align-content: center;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-map-visible-location-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-map-visible-location-heading strong {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palworld-map-visible-location-copy small {
+  color: var(--yoro-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.palworld-map-visible-location-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.palworld-map-visible-location-skeletons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--yoro-space-2);
+}
+
+.palworld-map-visible-location-skeleton {
+  display: grid;
+  grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr);
+  gap: var(--yoro-space-2);
 }
 
 .palworld-map-loading {
@@ -2429,9 +2911,10 @@
 }
 
 .palworld-pal-location-spawn-point {
-  fill: var(--palworld-sky);
-  stroke: var(--yoro-color-text-on-dark);
-  stroke-width: 0.0035;
+  fill: color-mix(in srgb, var(--palworld-sky) 52%, var(--yoro-color-text-on-dark));
+  stroke: var(--yoro-color-text-strong);
+  stroke-width: 0.006;
+  paint-order: stroke fill;
 }
 
 .palworld-pal-location-marker {
@@ -2518,9 +3001,9 @@
 .palworld-pal-location-legend-dot {
   inline-size: var(--yoro-space-3);
   block-size: var(--yoro-space-3);
-  border: thin solid var(--yoro-color-text-on-dark);
+  border: medium solid var(--yoro-color-text-strong);
   border-radius: 50%;
-  background: var(--yoro-color-info);
+  background: color-mix(in srgb, var(--palworld-sky) 52%, var(--yoro-color-text-on-dark));
 }
 
 .palworld-pal-location-inline-status,
@@ -3049,6 +3532,20 @@
 }
 
 @media (max-width: 60rem) {
+  .palworld-map-workspace,
+  .palworld-map-workspace[data-filter-collapsed="true"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-map-filter-panel {
+    position: static;
+    max-block-size: none;
+  }
+
+  .palworld-map-filter-content {
+    max-block-size: min(34rem, 62svh);
+  }
+
   .palworld-header-bottom-row {
     flex-wrap: wrap;
   }
@@ -3140,6 +3637,55 @@
     flex-direction: column;
   }
 
+  .palworld-map-desktop-filter {
+    display: none;
+  }
+
+  .palworld-map-mobile-filter-trigger {
+    display: inline-flex;
+    justify-self: start;
+  }
+
+  .palworld-map-mobile-filters {
+    place-items: end center;
+    padding: var(--yoro-space-0);
+  }
+
+  .palworld-map-mobile-filters .yoro-modal__dialog {
+    inline-size: 100%;
+    max-block-size: min(82dvh, 44rem);
+    border-inline: none;
+    border-block-end: none;
+    border-radius:
+      var(--yoro-radius-lg)
+      var(--yoro-radius-lg)
+      var(--yoro-space-0)
+      var(--yoro-space-0);
+  }
+
+  .palworld-map-mobile-filters__content {
+    display: flex;
+    overflow: hidden;
+    padding: var(--yoro-space-0);
+  }
+
+  .palworld-map-mobile-filters__panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-block-size: 0;
+    inline-size: 100%;
+    max-block-size: none;
+    border: none;
+    border-radius: var(--yoro-space-0);
+    box-shadow: var(--yoro-shadow-none);
+  }
+
+  .palworld-map-mobile-filters__panel .palworld-map-filter-content {
+    flex: 1;
+    max-block-size: none;
+  }
+
   .palworld-map-controls {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3148,6 +3694,25 @@
 
   .palworld-map-controls > :last-child {
     grid-column: 1 / -1;
+  }
+
+  .palworld-map-viewport > .palworld-map-controls {
+    grid-template-columns: repeat(3, minmax(var(--yoro-size-touch-target), auto));
+    inline-size: auto;
+    max-inline-size: calc(100% - (var(--yoro-space-6) * 2));
+  }
+
+  .palworld-map-marker-popover {
+    position: static;
+    inline-size: auto;
+    max-block-size: none;
+    margin: var(--yoro-space-3);
+    overflow: visible;
+  }
+
+  .palworld-map-visible-location-list,
+  .palworld-map-visible-location-skeletons {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .palworld-search-submit {

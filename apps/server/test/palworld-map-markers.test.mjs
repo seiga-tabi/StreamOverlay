@@ -1,16 +1,24 @@
 import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { loadPalworldDataService } = await import("../dist/services/palworld-data.js");
 const {
   createPalworldMapMarkerArtifact,
   createPalworldMapMarkerProvider,
-  loadPalworldMapMarkerArtifact
+  loadPalworldMapMarkerArtifact,
+  loadPalworldMapMarkerProvider
 } = await import("../dist/data/palworld-map-marker-artifact.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 
@@ -18,6 +26,25 @@ const service = await loadPalworldDataService();
 const metadata = service.meta().metadata;
 const sourceInternalId = service.sourceInternalIdForPal("anubis");
 const temporaryRoots = [];
+const activeReleaseRoot = fileURLToPath(
+  new URL("../data/palworld/1.0.1/", import.meta.url)
+);
+const activeRuntimeManifest = JSON.parse(
+  await readFile(
+    fileURLToPath(
+      new URL("../data/palworld/runtime/active-manifest.json", import.meta.url)
+    ),
+    "utf8"
+  )
+);
+const compatibilityApprovalSha256 =
+  activeRuntimeManifest.composite.artifacts.find(
+    (entry) => entry.kind === "map-markers-compatibility"
+  )?.sha256;
+assert.match(compatibilityApprovalSha256, /^[a-f0-9]{64}$/u);
+const dashboardStaticRoot = fileURLToPath(
+  new URL("../../dashboard/public/", import.meta.url)
+);
 
 function createRequest(url) {
   return {
@@ -164,7 +191,7 @@ test("active overlay만 Pal 참조를 exact join하여 ready marker로 반환한
       artifact: createPalworldMapMarkerArtifact(artifact("candidate")),
       palworldDataService: service
     }),
-    /active/u
+    /candidate 단독/u
   );
   assert.throws(
     () => createPalworldMapMarkerArtifact({
@@ -216,6 +243,84 @@ test("active overlay만 Pal 참조를 exact join하여 ready marker로 반환한
       }
     }]
   }).activation, "candidate");
+});
+
+test("checksum compatibility approval이 있는 고정 candidate는 실제 보스 marker를 공개한다", async () => {
+  const provider = await loadPalworldMapMarkerProvider({
+    releaseRoot: activeReleaseRoot,
+    dashboardStaticRoot,
+    palworldDataService: service,
+    compatibilityApprovalSha256
+  });
+  const main = await request(
+    handler(provider),
+    "/api/palworld/map/markers?world=main"
+  );
+  assert.equal(main.res.statusCode, 200);
+  assert.equal(main.body.state, "ready");
+  assert.equal(main.body.markers.length, 83);
+  assert.equal(
+    main.body.overlay.activationBasis,
+    "versioned_compatibility_approval"
+  );
+  assert.equal(main.body.overlay.sourceGameVersion, null);
+  assert.equal(main.body.overlay.sourceSteamBuildId, null);
+  assert.equal(
+    main.body.overlay.compatibilityApprovalSha256,
+    compatibilityApprovalSha256
+  );
+  assert.equal(main.body.overlay.rightsVerified, false);
+});
+
+test("compatibility approval 누락과 변조는 candidate marker 공개를 fail-closed 처리한다", async () => {
+  await assert.rejects(
+    loadPalworldMapMarkerProvider({
+      releaseRoot: activeReleaseRoot,
+      palworldDataService: service
+    }),
+    /candidate 단독/u
+  );
+
+  const files = [
+    "map-markers.json",
+    "map-markers-manifest.json",
+    "paldex.json",
+    "map-images-manifest.json"
+  ];
+  const tamperedRoot = await mkdtemp(
+    path.join(tmpdir(), "streamops-palworld-marker-approval-tampered-")
+  );
+  temporaryRoots.push(tamperedRoot);
+  await Promise.all(files.map((file) =>
+    copyFile(path.join(activeReleaseRoot, file), path.join(tamperedRoot, file))
+  ));
+  const approval = JSON.parse(
+    await readFile(
+      path.join(activeReleaseRoot, "map-markers-compatibility.json"),
+      "utf8"
+    )
+  );
+  approval.reviewer = "streamoverlay-data-maintenance-tampered";
+  await writeFile(
+    path.join(tamperedRoot, "map-markers-compatibility.json"),
+    `${JSON.stringify(approval, null, 2)}\n`,
+    "utf8"
+  );
+  const tamperedApprovalSha256 = createHash("sha256")
+    .update(
+      await readFile(
+        path.join(tamperedRoot, "map-markers-compatibility.json")
+      )
+    )
+    .digest("hex");
+  await assert.rejects(
+    loadPalworldMapMarkerProvider({
+      releaseRoot: tamperedRoot,
+      palworldDataService: service,
+      compatibilityApprovalSha256: tamperedApprovalSha256
+    }),
+    /evidenceChecksum/u
+  );
 });
 
 test("manifest SHA-256 변조는 overlay artifact 로드를 fail-closed 처리한다", async () => {

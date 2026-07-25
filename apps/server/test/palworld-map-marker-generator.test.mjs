@@ -41,7 +41,7 @@ test("검수된 FModel MainMap 좌표 변환은 사막 보스 anchor와 일치�
   );
 });
 
-test("legacy MainMap marker artifact는 checksum과 exact Pal join을 보존하지만 provenance 누락 시 공개하지 않는다", async () => {
+test("legacy MainMap marker artifact는 checksum과 exact Pal join을 보존하고 provenance 누락을 candidate로 유지한다", async () => {
   const artifactBytes = await readFile(path.join(releaseRoot, "map-markers.json"));
   const manifest = JSON.parse(
     await readFile(path.join(releaseRoot, "map-markers-manifest.json"), "utf8")
@@ -71,9 +71,11 @@ test("legacy MainMap marker artifact는 checksum과 exact Pal join을 보존하�
   assert.equal(artifact.source.sourceGameVersion, null);
   assert.equal(artifact.source.sourceSteamBuildId, null);
   assert.equal(artifact.source.rightsVerified, false);
-  await assert.rejects(
-    loadPalworldMapMarkerArtifact(releaseRoot),
-    /sourceGameVersion과 sourceSteamBuildId/u
+  const loaded = await loadPalworldMapMarkerArtifact(releaseRoot);
+  assert.equal(
+    loaded.activation,
+    "candidate",
+    "source metadata가 없는 artifact는 loader에서 active로 승격되면 안 됩니다."
   );
 });
 

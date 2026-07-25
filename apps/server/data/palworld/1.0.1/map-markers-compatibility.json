@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "operator_acknowledged",
+  "decision": "allow_exact_checksum_compatibility_display",
+  "sourceVersionVerified": false,
+  "compatibilityBasis": "exact_map_geometry_and_coordinate_transform",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "sourceTables": {
+    "bossTable": {
+      "member": "Pal/DataTable/UI/DT_BossSpawnerLoactionData.json",
+      "sha256": "34a715be8f095967ead086ab71a3eeee5c0374298c5dae074894f8d908aae720"
+    },
+    "worldMapTable": {
+      "member": "Pal/DataTable/WorldMapUIData/DT_WorldMapUIData.json",
+      "sha256": "ef42c5e63e6683ec010d37b587263390a49caae3449e99f859cc9eac626e5846"
+    }
+  },
+  "sourceMapAsset": {
+    "member": "Pal/Texture/UI/Map/T_WorldMap.png",
+    "sha256": "f02560929cf0f30ee16ba2d2693f9ca65ca5400db14e13bca862268092499b62"
+  },
+  "mappingsEvidence": {
+    "archiveSha256": "2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
+    "member": "Mappings101.usmap",
+    "sha256": "b9b1ef0a5b2fba657d421f43c31dda7d3818aadb50e52c1c3215dfe45db9fb44"
+  },
+  "generationMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4",
+  "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+  "targetPaldexSteamBuildId": "24181105",
+  "markerArtifactSha256": "32fc4af43e28fc8b0a530fe7874d821f0de71a3f12d4288b5e6e33940767f0d2",
+  "markerManifestSha256": "d49e1efb1fd4223aafd301fd0a0cc63efdebaa77005fc28e0dd9c2df838d9eda",
+  "mapImagesManifestSha256": "11db2051f08c4c04be2bff870739792aff13b7679e4fb16dc852929d39a2aa98",
+  "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+  "transformRevision": "main-map-fmodel-bounds-v1",
+  "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
+  "counts": {
+    "sourceRows": 159,
+    "nonPalRows": 69,
+    "mainMarkers": 83,
+    "treeMarkers": 7,
+    "exactJoinMismatches": 0
+  },
+  "reviewedAt": "2026-07-25T00:00:00.000Z",
+  "reviewer": "streamoverlay-data-maintenance",
+  "evidenceChecksum": "2581069c91feacb160f0ab7fab4dfa70fcc4e1566f51dd07a0f5dcaaf9bca204",
+  "rightsVerified": false,
+  "usageBasis": "operator_reference_use"
+}
