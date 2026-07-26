@@ -206,6 +206,14 @@ test("legacy 지도 overlay는 composite selector가 active로 고정한 domain�
   assert.equal(
     palworldRuntimeAllowsLegacyOverlay({
       schemaVersion: 1,
+      format: "legacy_release_v1"
+    }, "mapLocations"),
+    false,
+    "지도 위치는 checksum을 고정하는 composite v10 이전 pointer에 주입할 수 없어야 합니다."
+  );
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay({
+      schemaVersion: 1,
       format: "operator_pak_v1"
     }, "mapMarkers"),
     false,
@@ -213,15 +221,15 @@ test("legacy 지도 overlay는 composite selector가 active로 고정한 domain�
   );
 });
 
-test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이콘 manifest를 고정한다", async () => {
+test("legacy composite v11은 지도 위치·필터 아이콘과 기존 companion manifest를 함께 고정하고 v10을 계속 읽는다", async () => {
   const releaseRoot = path.dirname(legacyManifestPath);
   const composite = await createPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
     release: "1.0.1",
     workImages: "candidate"
   });
-  assert.equal(composite.schemaVersion, 9);
-  assert.equal(composite.artifacts.length, 27);
+  assert.equal(composite.schemaVersion, 11);
+  assert.equal(composite.artifacts.length, 30);
   assert.equal(
     composite.artifacts.some((artifact) =>
       artifact.kind === "map-images-manifest"
@@ -255,6 +263,8 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
   assert.deepEqual(composite.availability, {
     mapMarkers: "active",
     mapSpawns: "active",
+    mapLocations: "active",
+    mapLayerIcons: "unavailable",
     workImages: "candidate",
     skillImages: "unavailable"
   });
@@ -276,12 +286,21 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
   assert.equal(
     workActiveShape.artifacts.at(-1)?.kind,
     "work-images-manifest",
-    "active 작업 적성 이미지는 v9 composite가 release manifest checksum을 고정해야 합니다."
+    "active 작업 적성 이미지는 v10 composite가 release manifest checksum을 고정해야 합니다."
   );
+  const {
+    mapLocations: _workMapLocations,
+    mapLayerIcons: _workMapLayerIcons,
+    ...workActiveV8Availability
+  } = workActiveShape.availability;
   assert.throws(
     () => assertPalworldLegacyCompositeRuntimeManifest({
       ...workActiveShape,
-      schemaVersion: 8
+      schemaVersion: 8,
+      artifacts: workActiveShape.artifacts.filter(
+        (artifact) => !artifact.kind.startsWith("map-locations")
+      ),
+      availability: workActiveV8Availability
     }),
     /v9/u,
     "v8 selector에서 작업 적성 이미지를 active로 가장할 수 없어야 합니다."
@@ -292,7 +311,7 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
       release: "1.0.1",
       workImages: "active"
     });
-  assert.equal(workActiveComposite.artifacts.length, 28);
+  assert.equal(workActiveComposite.artifacts.length, 31);
   assert.equal(workActiveComposite.availability.workImages, "active");
   assert.equal(
     workActiveComposite.artifacts.at(-1)?.file,
@@ -302,6 +321,26 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
     releaseRoot,
     expectedRelease: "1.0.1",
     manifest: workActiveComposite
+  });
+  const mapLayerIconsActiveComposite =
+    await createPalworldLegacyCompositeRuntimeManifest({
+      releaseRoot,
+      release: "1.0.1",
+      mapLayerIcons: "active",
+      workImages: "candidate"
+    });
+  assert.equal(
+    mapLayerIconsActiveComposite.availability.mapLayerIcons,
+    "active"
+  );
+  assert.equal(
+    mapLayerIconsActiveComposite.artifacts.at(-1)?.file,
+    "map-layer-icons-manifest.json"
+  );
+  await verifyPalworldLegacyCompositeRuntimeManifest({
+    releaseRoot,
+    expectedRelease: "1.0.1",
+    manifest: mapLayerIconsActiveComposite
   });
   assert.deepEqual(
     composite.artifacts
@@ -321,6 +360,19 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
       ["map-spawns", "map-spawns.json"],
       ["map-spawns-manifest", "map-spawns-manifest.json"],
       ["map-spawns-compatibility", "map-spawns-compatibility.json"]
+    ]
+  );
+  assert.deepEqual(
+    composite.artifacts
+      .filter(({ kind }) => kind.startsWith("map-locations"))
+      .map(({ kind, file }) => [kind, file]),
+    [
+      ["map-locations", "map-locations.json"],
+      ["map-locations-manifest", "map-locations-manifest.json"],
+      [
+        "map-locations-compatibility",
+        "map-locations-compatibility.json"
+      ]
     ]
   );
   const metadataBackedActiveShape =
@@ -375,6 +427,22 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
     /compatibility approval/u,
     "실제 candidate marker를 metadata-backed active 형태로 가장할 수 없어야 합니다."
   );
+  const locationMetadataBackedActiveShape =
+    assertPalworldLegacyCompositeRuntimeManifest({
+      ...composite,
+      artifacts: composite.artifacts.filter(
+        (artifact) => artifact.kind !== "map-locations-compatibility"
+      )
+    });
+  await assert.rejects(
+    verifyPalworldLegacyCompositeRuntimeManifest({
+      releaseRoot,
+      expectedRelease: "1.0.1",
+      manifest: locationMetadataBackedActiveShape
+    }),
+    /compatibility|candidate/u,
+    "실제 candidate 위치를 metadata-backed active 형태로 가장할 수 없어야 합니다."
+  );
   await verifyPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
     expectedRelease: "1.0.1",
@@ -394,15 +462,51 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
   assert.equal(
     palworldRuntimeAllowsLegacyOverlay(active, "mapMarkers"),
     true,
-    "v8 selector가 checksum approval까지 고정한 candidate marker만 로드해야 합니다."
+    "v10 selector가 checksum approval까지 고정한 candidate marker만 로드해야 합니다."
   );
   assert.equal(
     palworldRuntimeAllowsLegacyOverlay(active, "mapSpawns"),
     true,
     "candidate 단독이 아니라 checksum approval까지 고정한 spawn만 로드해야 합니다."
   );
-  const legacyV8 = {
+  assert.equal(
+    palworldRuntimeAllowsLegacyOverlay(active, "mapLocations"),
+    true,
+    "v10 selector가 exact-checksum approval까지 고정한 지도 위치만 로드해야 합니다."
+  );
+  const {
+    mapLayerIcons: _mapLayerIcons,
+    ...legacyV10Availability
+  } = composite.availability;
+  const legacyV10 = {
     ...composite,
+    schemaVersion: 10,
+    availability: legacyV10Availability
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV10).schemaVersion,
+    10,
+    "기존 composite schema v10 selector를 계속 읽어야 합니다."
+  );
+  const {
+    mapLocations: _mapLocations,
+    ...legacyV9Availability
+  } = legacyV10.availability;
+  const legacyV9 = {
+    ...legacyV10,
+    schemaVersion: 9,
+    artifacts: composite.artifacts.filter(
+      (artifact) => !artifact.kind.startsWith("map-locations")
+    ),
+    availability: legacyV9Availability
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV9).schemaVersion,
+    9,
+    "기존 composite schema v9 selector를 계속 읽어야 합니다."
+  );
+  const legacyV8 = {
+    ...legacyV9,
     schemaVersion: 8
   };
   assert.equal(
@@ -413,11 +517,11 @@ test("legacy composite v9은 승인된 marker·spawn companion와 작업 아이�
   const legacyV7 = {
     ...legacyV8,
     schemaVersion: 7,
-    artifacts: composite.artifacts.filter(
+    artifacts: legacyV8.artifacts.filter(
       (artifact) => !artifact.kind.startsWith("map-markers")
     ),
     availability: {
-      ...composite.availability,
+      ...legacyV8.availability,
       mapMarkers: "candidate"
     }
   };

@@ -55,7 +55,10 @@ export type PalworldActiveRuntimeManifest =
   | PalworldActiveRuntimeManifestV1
   | PalworldActiveRuntimeManifestV2;
 
-export type PalworldLegacyOverlayDomain = "mapMarkers" | "mapSpawns";
+export type PalworldLegacyOverlayDomain =
+  | "mapMarkers"
+  | "mapSpawns"
+  | "mapLocations";
 
 export type PalworldActiveRuntime = {
   manifest: PalworldActiveRuntimeManifest;
@@ -121,7 +124,8 @@ export function palworldRuntimeAllowsLegacyOverlay(
   if (manifest.schemaVersion === 2) {
     return manifest.composite.availability[domain] === "active";
   }
-  return manifest.format === "legacy_release_v1";
+  return manifest.format === "legacy_release_v1"
+    && domain !== "mapLocations";
 }
 
 /**

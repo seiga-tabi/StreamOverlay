@@ -11,6 +11,9 @@ const {
   resolvePalworldRuntimeLayout,
   smokePalworldRuntimeArtifacts
 } = await import("../dist/scripts/smoke-palworld-runtime-artifacts.js");
+const {
+  PALWORLD_MAP_LAYER_ICON_IDS
+} = await import("../dist/data/palworld-map-layer-icon-manifest.js");
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -162,6 +165,39 @@ test("active selector가 가리키는 release만 bundle에 포함하고 raw sour
     /content hash WebP|bytes/u
   );
   await writeFile(middleWorkFile, originalWorkBytes);
+
+  const mapLayerIconsManifest = JSON.parse(await readFile(
+    path.join(
+      dataRoot,
+      ...sourceLayout.releaseDirectory.split("/"),
+      "map-layer-icons-manifest.json"
+    ),
+    "utf8"
+  ));
+  assert.equal(
+    mapLayerIconsManifest.entries.length,
+    PALWORLD_MAP_LAYER_ICON_IDS.length
+  );
+  const representativeMapIcon =
+    mapLayerIconsManifest.entries[
+      Math.floor(mapLayerIconsManifest.entries.length / 2)
+    ];
+  assert.ok(representativeMapIcon);
+  const representativeMapIconFile = path.join(
+    runtimeImages,
+    "map-icons",
+    representativeMapIcon.outputFileName
+  );
+  const originalMapIconBytes = await readFile(representativeMapIconFile);
+  await writeFile(
+    representativeMapIconFile,
+    Buffer.concat([originalMapIconBytes, Buffer.from([0])])
+  );
+  await assert.rejects(
+    smokePalworldRuntimeArtifacts({ repositoryRoot: runtimeRoot }),
+    /content hash WebP|지도 필터 아이콘/u
+  );
+  await writeFile(representativeMapIconFile, originalMapIconBytes);
 
   const extraSkillDirectory = path.join(runtimeImages, "skills");
   await mkdir(extraSkillDirectory);

@@ -702,6 +702,42 @@ test("composite runtime manifest는 exact artifact·checksum·candidate 상태�
   assert.equal(validatePalworldCompositeRuntimeManifest(composite).ok, true);
   assert.equal(validatePalworldCompositeRuntimeManifest({
     ...composite,
+    schemaVersion: 10,
+    availability: {
+      ...composite.availability,
+      mapLocations: "candidate"
+    }
+  }).ok, true);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    schemaVersion: 11,
+    availability: {
+      ...composite.availability,
+      mapLocations: "candidate",
+      mapLayerIcons: "active"
+    }
+  }).ok, true);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    schemaVersion: 11,
+    availability: {
+      ...composite.availability,
+      mapLocations: "candidate"
+    }
+  }).ok, false);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    schemaVersion: 10
+  }).ok, false);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
+    availability: {
+      ...composite.availability,
+      mapLocations: "candidate"
+    }
+  }).ok, false);
+  assert.equal(validatePalworldCompositeRuntimeManifest({
+    ...composite,
     artifacts: [
       composite.artifacts[0],
       { ...composite.artifacts[1], sha256: composite.artifacts[0].sha256 }

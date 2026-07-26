@@ -1,20 +1,25 @@
 import type { ReactNode } from "react";
 import type { PalworldLocale } from "../i18n/palworld-i18n";
+import { PALWORLD_MAP_COLLECTIBLE_TYPE_IDS } from "../utils/map-collectible-types";
 
 /**
  * 현재 공개 runtime에서 검증된 지도 레이어만 허용합니다.
  * 신규 레이어는 Shared schema와 artifact activation gate가 준비된 뒤 명시적으로 추가합니다.
  */
-export const PALWORLD_MAP_READY_LAYER_IDS = ["boss", "spawn"] as const;
-export const PALWORLD_MAP_PENDING_LAYER_IDS = [
+export const PALWORLD_MAP_READY_LAYER_IDS = [
+  "boss",
+  "spawn",
   "fast-travel",
   "dungeon",
-  "npc",
   "egg",
   "lifmunk",
   "skill-fruit",
-  "treasure",
   "journal",
+  ...PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
+] as const;
+export const PALWORLD_MAP_PENDING_LAYER_IDS = [
+  "npc",
+  "treasure",
   "ancient-ruin",
 ] as const;
 export const PALWORLD_MAP_EXPLORER_LAYER_IDS = [
@@ -40,13 +45,20 @@ export type PalworldMapLayerDisplayState =
   | "data_unavailable"
   | "error";
 
+export type PalworldMapLayerIconAsset = {
+  imageUrl: string;
+  width: number;
+  height: number;
+};
+
 export type PalworldMapLayerOption = {
   id: PalworldMapExplorerLayerId;
   label: PalworldMapLocalizedLabel;
   description?: PalworldMapLocalizedLabel;
   statusLabel?: PalworldMapLocalizedLabel;
   count?: number;
-  icon?: ReactNode;
+  iconAsset?: PalworldMapLayerIconAsset;
+  iconFallback: string;
   selected: boolean;
   state: PalworldMapLayerDisplayState;
 };

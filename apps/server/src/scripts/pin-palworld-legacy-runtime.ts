@@ -16,12 +16,14 @@ import {
 
 type Options = {
   dataRoot: string;
+  mapLayerIcons: "active" | "candidate" | "unavailable";
   workImages: "active" | "candidate" | "unavailable";
   skillImages: "candidate" | "unavailable";
 };
 
 function parseArgs(args: string[]): Options {
   let dataRoot = PALWORLD_DATA_ROOT;
+  let mapLayerIcons: Options["mapLayerIcons"] = "unavailable";
   let workImages: Options["workImages"] = "unavailable";
   let skillImages: Options["skillImages"] = "unavailable";
   for (let index = 0; index < args.length; index += 1) {
@@ -29,6 +31,18 @@ function parseArgs(args: string[]): Options {
     const value = args[index + 1];
     if (argument === "--data-root" && value !== undefined) {
       dataRoot = path.resolve(value);
+      index += 1;
+      continue;
+    }
+    if (
+      argument === "--map-layer-icons"
+      && (
+        value === "active"
+        || value === "candidate"
+        || value === "unavailable"
+      )
+    ) {
+      mapLayerIcons = value;
       index += 1;
       continue;
     }
@@ -55,11 +69,12 @@ function parseArgs(args: string[]): Options {
     throw new Error(
       "사용법: pin-palworld-legacy-runtime "
       + "[--data-root <path>] "
+      + "[--map-layer-icons active|candidate|unavailable] "
       + "[--work-images active|candidate|unavailable] "
       + "[--skill-images candidate|unavailable]"
     );
   }
-  return { dataRoot, workImages, skillImages };
+  return { dataRoot, mapLayerIcons, workImages, skillImages };
 }
 
 export async function pinPalworldLegacyRuntime(
@@ -97,6 +112,7 @@ export async function pinPalworldLegacyRuntime(
   const composite = await createPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
     release: current.release,
+    mapLayerIcons: options.mapLayerIcons,
     workImages: options.workImages,
     skillImages: options.skillImages
   });
@@ -128,6 +144,7 @@ export async function pinPalworldLegacyRuntime(
     + `release ${activated.release}, artifact ${composite.artifacts.length}개, `
     + `marker ${composite.availability.mapMarkers}, `
     + `spawn ${composite.availability.mapSpawns}, `
+    + `map layer icon ${composite.availability.mapLayerIcons}, `
     + `work image ${composite.availability.workImages}`
   );
 }

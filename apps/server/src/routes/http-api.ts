@@ -20,6 +20,7 @@ import {
   validatePalworldServerConnectionInput,
   validatePalworldServerDashboardResponse,
   validatePalworldServerTestResponse,
+  validatePalworldMapLocationsResponse,
   validatePalworldMapMarkersResponse,
   validatePalworldPalSpawnResponse,
   validateBotAction,
@@ -46,6 +47,7 @@ import {
   type PalworldServerConnectionInput,
   type PalworldServerDashboardResponse,
   type PalworldServerTestResponse,
+  type PalworldMapLocationsResponse,
   type PalworldMapMarkersResponse,
   type PalworldPalSpawnResponse,
   type DashboardServerStatus,
@@ -147,6 +149,7 @@ import {
   parsePalworldBreedingQuery,
   parsePalworldId,
   parsePalworldItemListQuery,
+  parsePalworldMapLocationsQuery,
   parsePalworldMapMarkersQuery,
   parsePalworldPalSpawnQuery,
   parsePalworldPalListQuery,
@@ -155,6 +158,7 @@ import {
 } from "../services/palworld-query.js";
 import type { PalworldMapMarkerProvider } from "../data/palworld-map-marker-artifact.js";
 import type { PalworldSpawnProvider } from "../data/palworld-spawn-artifact.js";
+import type { PalworldMapLocationsProvider } from "../data/palworld-map-locations-artifact.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
@@ -1876,6 +1880,7 @@ type HttpHandlerInput = {
   palworldDataService?: PalworldDataService;
   palworldMapMarkerProvider?: PalworldMapMarkerProvider;
   palworldSpawnProvider?: PalworldSpawnProvider;
+  palworldMapLocationsProvider?: PalworldMapLocationsProvider;
   palworldServerMonitor?: PalworldServerMonitor;
   palworldServerUnavailableCode?: PalworldServerAvailabilityErrorCode;
 };
@@ -5675,6 +5680,43 @@ export function createHttpHandler(input: HttpHandlerInput) {
           const validation = validatePalworldMapMarkersResponse(candidate);
           if (!validation.ok) {
             throw new TypeError(`Palworld 지도 marker 응답 검증에 실패했습니다. ${validation.error}`);
+          }
+          return sendJson(
+            req,
+            res,
+            200,
+            validation.data,
+            validation.data.state === "data_unavailable"
+              ? palworldNoStoreHeaders(cacheHeadersFor(validation.data))
+              : cacheHeadersFor(validation.data)
+          );
+        }
+        if (url.pathname === "/api/palworld/map/locations") {
+          const query = parsePalworldMapLocationsQuery(url.searchParams);
+          const candidate: PalworldMapLocationsResponse =
+            input.palworldMapLocationsProvider?.response(
+              query.world,
+              query.layers,
+              query.offset,
+              query.limit,
+              activeMeta.metadata
+            ) ?? {
+              state: "data_unavailable",
+              world: query.world,
+              layers: query.layers,
+              offset: query.offset,
+              limit: query.limit,
+              total: 0,
+              returned: 0,
+              hasMore: false,
+              locations: [],
+              metadata: activeMeta.metadata
+            };
+          const validation = validatePalworldMapLocationsResponse(candidate);
+          if (!validation.ok) {
+            throw new TypeError(
+              `Palworld 지도 위치 응답 검증에 실패했습니다. ${validation.error}`
+            );
           }
           return sendJson(
             req,

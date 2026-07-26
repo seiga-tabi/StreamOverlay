@@ -56,13 +56,25 @@ test("server runtime image는 active manifest allowlist bundle만 포함하고 s
   );
   if (activeManifest.format === "legacy_composite_v2") {
     assert.equal(activeManifest.schemaVersion, 2);
-    assert.equal(activeManifest.composite.schemaVersion, 9);
+    assert.equal(activeManifest.composite.schemaVersion, 11);
     assert.equal(
       activeManifest.composite.artifacts.some((artifact) =>
         artifact.kind === "map-images-manifest"
         && artifact.file === "map-images-manifest.json"
       ),
       true
+    );
+    assert.equal(
+      activeManifest.composite.artifacts.some((artifact) =>
+        artifact.kind === "map-layer-icons-manifest"
+        && artifact.file === "map-layer-icons-manifest.json"
+        && /^[a-f0-9]{64}$/u.test(artifact.sha256)
+      ),
+      true
+    );
+    assert.equal(
+      activeManifest.composite.availability.mapLayerIcons,
+      "active"
     );
     assert.equal(
       activeManifest.composite.artifacts.some((artifact) =>
@@ -80,9 +92,25 @@ test("server runtime image는 active manifest allowlist bundle만 포함하고 s
       ),
       true
     );
+    for (const [kind, file] of [
+      ["map-locations", "map-locations.json"],
+      ["map-locations-manifest", "map-locations-manifest.json"],
+      ["map-locations-compatibility", "map-locations-compatibility.json"]
+    ]) {
+      assert.equal(
+        activeManifest.composite.artifacts.some((artifact) =>
+          artifact.kind === kind
+          && artifact.file === file
+          && /^[a-f0-9]{64}$/u.test(artifact.sha256)
+        ),
+        true
+      );
+    }
     assert.equal(
       activeManifest.composite.artifacts.some((artifact) =>
-        /(?:^|\/)(?:breeding-)?import-report\.json$/u.test(artifact.file)
+        /(?:^|\/)(?:breeding-|map-locations-)?import-report\.json$/u.test(
+          artifact.file
+        )
       ),
       false
     );

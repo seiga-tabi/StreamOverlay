@@ -17,10 +17,21 @@ import {
   PALWORLD_WORK_IMAGE_MANIFEST_FILE,
   loadPalworldWorkImageManifest
 } from "./palworld-work-image-manifest.js";
+import {
+  PALWORLD_MAP_LOCATIONS_ARTIFACT_FILE,
+  PALWORLD_MAP_LOCATIONS_COMPATIBILITY_FILE,
+  PALWORLD_MAP_LOCATIONS_MANIFEST_FILE,
+  loadPalworldMapLocationsArtifact,
+  loadPalworldMapLocationsCompatibilityAuthorization
+} from "./palworld-map-locations-artifact.js";
+import {
+  PALWORLD_MAP_LAYER_ICON_MANIFEST_FILE,
+  loadPalworldMapLayerIconManifest
+} from "./palworld-map-layer-icon-manifest.js";
 
-export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 9 as const;
+export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 11 as const;
 export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS =
-  [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
 export const PALWORLD_LEGACY_COMPOSITE_DOMAIN_STATES = [
   "active",
   "candidate",
@@ -126,6 +137,17 @@ const OPTIONAL_ACTIVE_ARTIFACTS = {
     ["map-spawns-manifest", "map-spawns-manifest.json"],
     ["map-spawns-compatibility", PALWORLD_SPAWN_COMPATIBILITY_FILE]
   ],
+  mapLocations: [
+    ["map-locations", PALWORLD_MAP_LOCATIONS_ARTIFACT_FILE],
+    ["map-locations-manifest", PALWORLD_MAP_LOCATIONS_MANIFEST_FILE],
+    [
+      "map-locations-compatibility",
+      PALWORLD_MAP_LOCATIONS_COMPATIBILITY_FILE
+    ]
+  ],
+  mapLayerIcons: [
+    ["map-layer-icons-manifest", PALWORLD_MAP_LAYER_ICON_MANIFEST_FILE]
+  ],
   workImages: [
     ["work-images-manifest", PALWORLD_WORK_IMAGE_MANIFEST_FILE]
   ]
@@ -137,6 +159,8 @@ export const PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS = [
   ...LEGACY_V1_REQUIRED_ARTIFACTS.map(([kind]) => kind),
   ...OPTIONAL_ACTIVE_ARTIFACTS.mapMarkers.map(([kind]) => kind),
   ...OPTIONAL_ACTIVE_ARTIFACTS.mapSpawns.map(([kind]) => kind),
+  ...OPTIONAL_ACTIVE_ARTIFACTS.mapLocations.map(([kind]) => kind),
+  ...OPTIONAL_ACTIVE_ARTIFACTS.mapLayerIcons.map(([kind]) => kind),
   ...OPTIONAL_ACTIVE_ARTIFACTS.workImages.map(([kind]) => kind)
 ] as const;
 
@@ -147,7 +171,7 @@ export type PalworldLegacyCompositeArtifactKind =
   (typeof PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS)[number];
 
 export type PalworldLegacyCompositeRuntimeManifest = {
-  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
   release: string;
   artifacts: Array<{
     kind: PalworldLegacyCompositeArtifactKind;
@@ -157,6 +181,8 @@ export type PalworldLegacyCompositeRuntimeManifest = {
   availability: {
     mapMarkers: PalworldLegacyCompositeDomainState;
     mapSpawns: PalworldLegacyCompositeDomainState;
+    mapLocations?: PalworldLegacyCompositeDomainState;
+    mapLayerIcons?: PalworldLegacyCompositeDomainState;
     workImages: PalworldLegacyCompositeDomainState;
     skillImages: "candidate" | "unavailable";
   };
@@ -206,7 +232,8 @@ function expectedArtifactsForAvailability(
   availability: PalworldLegacyCompositeRuntimeManifest["availability"],
   schemaVersion: PalworldLegacyCompositeRuntimeManifest["schemaVersion"],
   includeMarkerCompatibility = false,
-  includeSpawnCompatibility = false
+  includeSpawnCompatibility = false,
+  includeLocationsCompatibility = false
 ): ReadonlyArray<readonly [PalworldLegacyCompositeArtifactKind, string]> {
   return [
     ...(schemaVersion === 1
@@ -229,6 +256,14 @@ function expectedArtifactsForAvailability(
       ? schemaVersion >= 6 && includeSpawnCompatibility
         ? OPTIONAL_ACTIVE_ARTIFACTS.mapSpawns
         : OPTIONAL_ACTIVE_ARTIFACTS.mapSpawns.slice(0, 2)
+      : []),
+    ...(schemaVersion >= 10 && availability.mapLocations === "active"
+      ? includeLocationsCompatibility
+        ? OPTIONAL_ACTIVE_ARTIFACTS.mapLocations
+        : OPTIONAL_ACTIVE_ARTIFACTS.mapLocations.slice(0, 2)
+      : []),
+    ...(schemaVersion >= 11 && availability.mapLayerIcons === "active"
+      ? OPTIONAL_ACTIVE_ARTIFACTS.mapLayerIcons
       : []),
     ...(availability.workImages === "active" && schemaVersion >= 9
       ? OPTIONAL_ACTIVE_ARTIFACTS.workImages
@@ -253,10 +288,10 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     !(PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS as readonly unknown[])
       .includes(record.schemaVersion)
   ) {
-    fail("legacyComposite.schemaVersion", "1부터 9 사이여야 합니다.");
+    fail("legacyComposite.schemaVersion", "1부터 11 사이여야 합니다.");
   }
   const schemaVersion =
-    record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+    record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
   if (
     typeof record.release !== "string"
     || !RELEASE_PATTERN.test(record.release)
@@ -266,7 +301,24 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
   const availabilityRecord = exactRecord(
     record.availability,
     "legacyComposite.availability",
-    ["mapMarkers", "mapSpawns", "workImages", "skillImages"]
+    schemaVersion >= 11
+      ? [
+          "mapMarkers",
+          "mapSpawns",
+          "mapLocations",
+          "mapLayerIcons",
+          "workImages",
+          "skillImages"
+        ]
+      : schemaVersion >= 10
+      ? [
+          "mapMarkers",
+          "mapSpawns",
+          "mapLocations",
+          "workImages",
+          "skillImages"
+        ]
+      : ["mapMarkers", "mapSpawns", "workImages", "skillImages"]
   );
   const mapMarkers = stateAt(
     availabilityRecord.mapMarkers,
@@ -276,6 +328,18 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     availabilityRecord.mapSpawns,
     "legacyComposite.availability.mapSpawns"
   );
+  const mapLocations = schemaVersion >= 10
+    ? stateAt(
+        availabilityRecord.mapLocations,
+        "legacyComposite.availability.mapLocations"
+      )
+    : undefined;
+  const mapLayerIcons = schemaVersion >= 11
+    ? stateAt(
+        availabilityRecord.mapLayerIcons,
+        "legacyComposite.availability.mapLayerIcons"
+      )
+    : undefined;
   const workImages = stateAt(
     availabilityRecord.workImages,
     "legacyComposite.availability.workImages"
@@ -299,6 +363,8 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
   const availability = {
     mapMarkers,
     mapSpawns,
+    ...(mapLocations === undefined ? {} : { mapLocations }),
+    ...(mapLayerIcons === undefined ? {} : { mapLayerIcons }),
     workImages,
     skillImages
   } satisfies PalworldLegacyCompositeRuntimeManifest["availability"];
@@ -363,11 +429,18 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     && artifacts.some(
       (artifact) => artifact.kind === "map-markers-compatibility"
     );
+  const includeLocationsCompatibility =
+    schemaVersion >= 10
+    && availability.mapLocations === "active"
+    && artifacts.some(
+      (artifact) => artifact.kind === "map-locations-compatibility"
+    );
   const expected = expectedArtifactsForAvailability(
     availability,
     schemaVersion,
     includeMarkerCompatibility,
-    includeSpawnCompatibility
+    includeSpawnCompatibility,
+    includeLocationsCompatibility
   );
   if (artifacts.length !== expected.length) {
     fail(
@@ -466,8 +539,10 @@ async function inferredAvailability(
     PalworldLegacyCompositeRuntimeManifest["availability"],
     "mapMarkers" | "mapSpawns"
   > & {
+    mapLocations: PalworldLegacyCompositeDomainState;
     mapMarkersCompatibility: boolean;
     mapSpawnsCompatibility: boolean;
+    mapLocationsCompatibility: boolean;
   }
 > {
   let mapMarkers: PalworldLegacyCompositeDomainState = "unavailable";
@@ -534,17 +609,51 @@ async function inferredAvailability(
       throw error;
     }
   }
+  let mapLocations: PalworldLegacyCompositeDomainState = "unavailable";
+  let mapLocationsCompatibility = false;
+  try {
+    const artifact = await loadPalworldMapLocationsArtifact(releaseRoot);
+    if (artifact.activation === "active") {
+      mapLocations = "active";
+    } else {
+      try {
+        const approvalSha256 = createHash("sha256")
+          .update(
+            await readCanonicalArtifact(
+              releaseRoot,
+              PALWORLD_MAP_LOCATIONS_COMPATIBILITY_FILE
+            )
+          )
+          .digest("hex");
+        await loadPalworldMapLocationsCompatibilityAuthorization({
+          releaseRoot,
+          artifact,
+          expectedApprovalSha256: approvalSha256
+        });
+        mapLocations = "active";
+        mapLocationsCompatibility = true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+        mapLocations = "candidate";
+      }
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
   return {
     mapMarkers,
     mapMarkersCompatibility,
     mapSpawns,
-    mapSpawnsCompatibility
+    mapSpawnsCompatibility,
+    mapLocations,
+    mapLocationsCompatibility
   };
 }
 
 export async function createPalworldLegacyCompositeRuntimeManifest(input: {
   releaseRoot: string;
   release: string;
+  mapLayerIcons?: PalworldLegacyCompositeDomainState;
   workImages?: PalworldLegacyCompositeDomainState;
   skillImages?: "candidate" | "unavailable";
 }): Promise<PalworldLegacyCompositeRuntimeManifest> {
@@ -560,22 +669,28 @@ export async function createPalworldLegacyCompositeRuntimeManifest(input: {
   const {
     mapMarkersCompatibility,
     mapSpawnsCompatibility,
+    mapLocationsCompatibility,
     ...inferred
   } = await inferredAvailability(releaseRoot);
   const availability = {
     ...inferred,
+    mapLayerIcons: input.mapLayerIcons ?? "unavailable",
     workImages: input.workImages ?? "unavailable",
     skillImages: input.skillImages ?? "unavailable"
   } satisfies PalworldLegacyCompositeRuntimeManifest["availability"];
   if (availability.workImages === "active") {
     await loadPalworldWorkImageManifest(releaseRoot, input.release);
   }
+  if (availability.mapLayerIcons === "active") {
+    await loadPalworldMapLayerIconManifest(releaseRoot, input.release);
+  }
   const artifacts = await Promise.all(
     expectedArtifactsForAvailability(
       availability,
       PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION,
       mapMarkersCompatibility,
-      mapSpawnsCompatibility
+      mapSpawnsCompatibility,
+      mapLocationsCompatibility
     ).map(async ([kind, file]) => ({
       kind,
       file,
@@ -686,6 +801,40 @@ export async function verifyPalworldLegacyCompositeRuntimeManifest(input: {
       );
     }
   }
+  if (
+    manifest.schemaVersion >= 10
+    && manifest.availability.mapLocations === "active"
+  ) {
+    const locations = await loadPalworldMapLocationsArtifact(
+      path.resolve(input.releaseRoot)
+    );
+    const compatibilityArtifact = manifest.artifacts.find(
+      (artifact) => artifact.kind === "map-locations-compatibility"
+    );
+    if (locations.activation === "candidate") {
+      if (compatibilityArtifact === undefined) {
+        fail(
+          "legacyComposite.availability.mapLocations",
+          "candidate 지도 위치 활성화에는 composite에 고정된 compatibility approval이 필요합니다."
+        );
+      }
+      await loadPalworldMapLocationsCompatibilityAuthorization({
+        releaseRoot: path.resolve(input.releaseRoot),
+        artifact: locations,
+        expectedApprovalSha256: compatibilityArtifact.sha256
+      });
+    } else if (locations.activation !== "active") {
+      fail(
+        "legacyComposite.availability.mapLocations",
+        "active 상태는 active artifact 또는 v10 compatibility approval을 요구합니다."
+      );
+    } else if (compatibilityArtifact !== undefined) {
+      fail(
+        "legacyComposite.artifacts.map-locations-compatibility",
+        "source metadata가 검증된 active 지도 위치에는 compatibility approval을 함께 고정할 수 없습니다."
+      );
+    }
+  }
   if (manifest.availability.workImages === "active") {
     const workManifestArtifact = manifest.artifacts.find(
       (artifact) => artifact.kind === "work-images-manifest"
@@ -697,6 +846,24 @@ export async function verifyPalworldLegacyCompositeRuntimeManifest(input: {
       );
     }
     await loadPalworldWorkImageManifest(
+      path.resolve(input.releaseRoot),
+      input.expectedRelease
+    );
+  }
+  if (
+    manifest.schemaVersion >= 11
+    && manifest.availability.mapLayerIcons === "active"
+  ) {
+    const mapLayerIconsManifestArtifact = manifest.artifacts.find(
+      (artifact) => artifact.kind === "map-layer-icons-manifest"
+    );
+    if (mapLayerIconsManifestArtifact === undefined) {
+      fail(
+        "legacyComposite.availability.mapLayerIcons",
+        "active 상태는 v11 composite에 고정된 지도 필터 아이콘 manifest를 요구합니다."
+      );
+    }
+    await loadPalworldMapLayerIconManifest(
       path.resolve(input.releaseRoot),
       input.expectedRelease
     );

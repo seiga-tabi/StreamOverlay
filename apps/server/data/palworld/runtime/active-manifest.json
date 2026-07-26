@@ -6,7 +6,7 @@
   "manifestFile": "manifest.json",
   "manifestSha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198",
   "composite": {
-    "schemaVersion": 9,
+    "schemaVersion": 11,
     "release": "1.0.1",
     "artifacts": [
       {
@@ -145,6 +145,26 @@
         "sha256": "d45d6749ada3b8ecf589c93c86233871c57da449e898a28fcca1b3aca56e4442"
       },
       {
+        "kind": "map-locations",
+        "file": "map-locations.json",
+        "sha256": "3449e9cbebf930cf33e69f51917fe958aa0c31b566d12a589e2c3a8be2bee47c"
+      },
+      {
+        "kind": "map-locations-manifest",
+        "file": "map-locations-manifest.json",
+        "sha256": "5c9689a5278ca85dc0ed68e301b11671b9468226eeaec7d1143466754be09d1b"
+      },
+      {
+        "kind": "map-locations-compatibility",
+        "file": "map-locations-compatibility.json",
+        "sha256": "39767fa5ac6bd41f132e833841a836be752772248b3cc521f0f9e97769497adf"
+      },
+      {
+        "kind": "map-layer-icons-manifest",
+        "file": "map-layer-icons-manifest.json",
+        "sha256": "8373d58c13b61a6cc2555809e659b2db42fc7af36c3100c4fd1d9898ee285de3"
+      },
+      {
         "kind": "work-images-manifest",
         "file": "work-images-manifest.json",
         "sha256": "9baebc6a49687a7635a60838489026f24d4c69e317869461afca956a2fca3357"
@@ -153,6 +173,8 @@
     "availability": {
       "mapMarkers": "active",
       "mapSpawns": "active",
+      "mapLocations": "active",
+      "mapLayerIcons": "active",
       "workImages": "active",
       "skillImages": "unavailable"
     }

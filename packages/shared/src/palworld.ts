@@ -223,6 +223,8 @@ export type PalworldCompositeRuntimeManifest = {
   availability: {
     mapMarkers: PalworldCompositeDomainState;
     mapSpawns: PalworldCompositeDomainState;
+    mapLocations?: PalworldCompositeDomainState;
+    mapLayerIcons?: PalworldCompositeDomainState;
     workImages: PalworldCompositeDomainState;
     skillImages: PalworldCompositeDomainState;
   };
@@ -1240,20 +1242,32 @@ function validateCompositeRuntimeManifestAt(
     );
     if (!duplicate.ok) return duplicate;
   }
-  const availability = recordAt(root.data.availability, `${path}.availability`, [
-    "mapMarkers",
-    "mapSpawns",
-    "workImages",
-    "skillImages"
-  ]);
+  const availabilityFields = schemaVersion.data >= 11
+    ? [
+        "mapMarkers",
+        "mapSpawns",
+        "mapLocations",
+        "mapLayerIcons",
+        "workImages",
+        "skillImages"
+      ] as const
+    : schemaVersion.data >= 10
+      ? [
+        "mapMarkers",
+        "mapSpawns",
+        "mapLocations",
+        "workImages",
+        "skillImages"
+      ] as const
+      : ["mapMarkers", "mapSpawns", "workImages", "skillImages"] as const;
+  const availability = recordAt(
+    root.data.availability,
+    `${path}.availability`,
+    availabilityFields
+  );
   if (!availability.ok) return availability;
   const states: Record<string, PalworldCompositeDomainState> = {};
-  for (const field of [
-    "mapMarkers",
-    "mapSpawns",
-    "workImages",
-    "skillImages"
-  ] as const) {
+  for (const field of availabilityFields) {
     const state = enumAt(
       availability.data[field],
       `${path}.availability.${field}`,

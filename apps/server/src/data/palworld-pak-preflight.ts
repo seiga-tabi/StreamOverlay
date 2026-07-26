@@ -234,7 +234,7 @@ export type PalworldPakArchiveReadOptions = {
    * 기본 archive 제한은 그대로 유지합니다. 512 MiB를 넘는 운영자 asset overlay는
    * 고정 SHA-256이 제공된 경우에만 별도 profile로 열 수 있습니다.
    */
-  profile?: "standard" | "fixed_asset_overlay";
+  profile?: "standard" | "fixed_asset_overlay" | "fixed_map_world_export";
 };
 
 export type PalworldPakArchiveOverlaySource = {
@@ -261,6 +261,18 @@ const FIXED_ASSET_OVERLAY_LIMITS: ArchiveLimits = Object.freeze({
   maximumEntryCount: MAX_ENTRY_COUNT,
   maximumUncompressedBytes: 3 * 1024 * 1024 * 1024,
   maximumMemberBytes: MAX_MEMBER_BYTES
+});
+
+/**
+ * FModel World Partition export는 수천 개 cell JSON과 매우 큰 root index를 포함합니다.
+ * 이 profile은 고정 SHA-256 입력을 선택적으로 읽는 지도 유지보수 작업에서만 사용하며,
+ * 일반 PAK preflight의 제한은 변경하지 않습니다.
+ */
+const FIXED_MAP_WORLD_EXPORT_LIMITS: ArchiveLimits = Object.freeze({
+  maximumArchiveBytes: 3 * 1024 * 1024 * 1024,
+  maximumEntryCount: 11_000,
+  maximumUncompressedBytes: 30 * 1024 * 1024 * 1024,
+  maximumMemberBytes: 400 * 1024 * 1024
 });
 
 function fail(message: string): never {
@@ -673,12 +685,18 @@ function rawPackageCompanionReport(entries: Map<string, IndexedZipEntry>): {
 
 function archiveLimitsFor(options: PalworldPakArchiveReadOptions): ArchiveLimits {
   const profile = options.profile ?? "standard";
-  if (profile === "fixed_asset_overlay") {
+  if (profile === "fixed_asset_overlay" || profile === "fixed_map_world_export") {
     if (options.expectedSha256 === undefined) {
-      fail("대용량 asset overlay는 고정 expectedSha256이 반드시 필요합니다.");
+      fail(
+        profile === "fixed_asset_overlay"
+          ? "대용량 asset overlay는 고정 expectedSha256이 반드시 필요합니다."
+          : "World Partition 지도 profile은 고정 expectedSha256이 반드시 필요합니다."
+      );
     }
     requiredSha256(options.expectedSha256, "expectedSha256");
-    return FIXED_ASSET_OVERLAY_LIMITS;
+    return profile === "fixed_asset_overlay"
+      ? FIXED_ASSET_OVERLAY_LIMITS
+      : FIXED_MAP_WORLD_EXPORT_LIMITS;
   }
   return STANDARD_ARCHIVE_LIMITS;
 }
@@ -720,7 +738,14 @@ export async function withPalworldPakArchive<T>(
       }
       const indexed = entries.get(memberName);
       if (!indexed || indexed.isDirectory) fail(`${memberName}: JSON member가 없습니다.`);
-      return parseJson(await readEntry(zipFile, indexed, MAX_JSON_BYTES), memberName);
+      return parseJson(
+        await readEntry(
+          zipFile,
+          indexed,
+          Math.max(MAX_JSON_BYTES, limits.maximumMemberBytes)
+        ),
+        memberName
+      );
     };
     const reader: PalworldPakArchiveReader = {
       archiveSha256,
@@ -737,7 +762,11 @@ export async function withPalworldPakArchive<T>(
       },
       async readBytes(memberName, maxBytes = MAX_MEMBER_BYTES) {
         validatePalworldPakMemberName(memberName);
-        if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > MAX_MEMBER_BYTES) {
+        if (
+          !Number.isSafeInteger(maxBytes)
+          || maxBytes <= 0
+          || maxBytes > limits.maximumMemberBytes
+        ) {
           fail("ZIP member 읽기 제한이 올바르지 않습니다.");
         }
         const indexed = entries.get(memberName);

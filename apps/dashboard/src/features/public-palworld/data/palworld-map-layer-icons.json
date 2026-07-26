@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "entries": [
+    {
+      "id": "ancient-ruin",
+      "kind": "item",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "AncientTechnologyBook_G1",
+      "imageUrl": "/images/palworld/1.0.1/items/09ab0135998945fd2211f784c32ad995236eb2e3a34c5dacb4e757812ec06283.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "boss",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "Pal/Texture/UI/InGame/T_icon_compass_boss.png",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/f7e71b74a0c58f42e49e24655517b46a8bf02ec621a62f5e9e161567b1328fdf.webp",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "id": "dungeon",
+      "kind": "map",
+      "mappingStatus": "exact_datatable_reference",
+      "sourceReference": "DT_LocationUIData.PointDungeonPortal",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/7f796dc3c9a9ed8457588a91147f3423a73cbd0c2dc05d0afb35d672c01b56db.webp",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "id": "egg-desert",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-desert",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "egg-glacier",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-glacier",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "egg-grass",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-grass",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "egg-sakurajima",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-sakurajima",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "egg-sky-island",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-sky-island",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "egg-tenraku",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-tenraku",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "egg-volcanic",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-volcanic",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "egg-world-tree",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "collectible-icon-map.egg-world-tree",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6a5c4dd6712d6bf686d38ab429714742ac2c619db178715a8f154253cfc5d275.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "fast-travel",
+      "kind": "map",
+      "mappingStatus": "exact_datatable_reference",
+      "sourceReference": "DT_LocationUIData.PointFastTravel",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/4d65cf6d45e95b962b477be18a0527fedf962314e57fddc9200eecd48e99e707.webp",
+      "width": 100,
+      "height": 100
+    },
+    {
+      "id": "journal",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "TechnologyBook_G1",
+      "imageUrl": "/images/palworld/1.0.1/items/ae66612de37817abd80734690baf0df873938ff27d52a866855da6c1f0433801.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "npc",
+      "kind": "map",
+      "mappingStatus": "representative_game_asset",
+      "sourceReference": "Pal/Texture/PalIcon/NPC/T_BOSS_NPC_Male_Trader01.png",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/180a6f668aa25009255b67a8531fd4b5bd163008306b207c03aba9d9acca7abe.webp",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "id": "skill-fruit",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "SkillCard_AirBlade",
+      "imageUrl": "/images/palworld/1.0.1/items/e477656d0f18d556dd1c7c7125d0d33c38dac88f2d93d923881a7d130d169fda.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "spawn",
+      "kind": "pal",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "SheepBall",
+      "imageUrl": "/images/palworld/1.0.1/pals/bc3c8509e97b670998d26d66e0143cb5661a5ea731c2273808a8c93ddc9e446b.webp",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "id": "statue-cattiva",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-cattiva",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/396d887fd4b346ae472bd47527a434bf4c70a172cbd8c6bc4392b8fa4a7c926b.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-depresso",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-depresso",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/f7f521f53b1809fadbe7310cfcdae9bedc6fa88b9dfe9205025d01d3aa119c56.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-herbil",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-herbil",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/1b4f141f44788975f04f5e1d82de6057a17589ce61c04b94dfa5c2cd866c1c37.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-lamball",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-lamball",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/49617511c1ba768f7eac6a9f7f08865c5b1417fdc967609dff3db59f554961ba.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-lifmunk",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-lifmunk",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/09a5aa5fd8a049fa905086742208bb1a03956427c1303696d0233a7d3d16a150.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-lunaris",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-lunaris",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/d6ba53dedbba826e37f9e99bcbebf5d5df6beb445d0656f503e7aa698aa97427.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-munchill",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-munchill",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/fc2e6f2e0e4e7bcd65e1ed01a9b647dc1398146d10aa1a354eb40ed533f1031e.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-pengullet",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-pengullet",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/3e07fc8f460c28eb025b5e2eb1eb6723bf96d7abf7d6ca98b9e218c34fa98468.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-relaxaurus",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-relaxaurus",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/6b8319ad5401750d4e618d38d62e18ee53e04444d13ba01bdcd5b73b8ab555b0.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-rooby",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-rooby",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/eaefddb80a956e74eb028e53013e01fd0a7dc11289d32e27fefba8714653b719.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-tanzee",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-tanzee",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/3c9d228e7729ff956bf27b72e63861533a26b929e09a83a50af7e3ddb6d61dd1.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "statue-yakumo",
+      "kind": "map",
+      "mappingStatus": "verified_game_ui",
+      "sourceReference": "collectible-icon-map.statue-yakumo",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/4481f2cedd8fac1bf6001606ee4c0e4caac228610ff2839d4b67778704638a75.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "treasure",
+      "kind": "map",
+      "mappingStatus": "exact_datatable_reference",
+      "sourceReference": "DT_LocationUIData.mapObjectIconMap.TreasureBox",
+      "imageUrl": "/images/palworld/1.0.1/map-icons/2ccd4a7ed68e407e8e0c187d2123d45ad0913c6c857a9a8249d28bd2c3ec5363.webp",
+      "width": 80,
+      "height": 80
+    }
+  ]
+}

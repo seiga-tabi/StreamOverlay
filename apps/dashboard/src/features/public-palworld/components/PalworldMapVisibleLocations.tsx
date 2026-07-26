@@ -32,7 +32,11 @@ type PalworldMapVisibleLocationsProps = {
   locale: PalworldLocale;
   locations: readonly PalworldMapVisibleLocation[];
   onRetry?: () => void;
-  onSelect: (location: PalworldMapVisibleLocation) => void;
+  onSelect: (
+    location: PalworldMapVisibleLocation,
+    trigger: HTMLButtonElement,
+  ) => void;
+  popoverId?: string;
   state: PalworldMapLayerDisplayState;
 };
 
@@ -126,6 +130,7 @@ export function PalworldMapVisibleLocations({
   locations,
   onRetry,
   onSelect,
+  popoverId,
   state,
 }: PalworldMapVisibleLocationsProps) {
   const panelClassName = ["palworld-map-visible-locations", className]
@@ -153,10 +158,14 @@ export function PalworldMapVisibleLocations({
           {locations.map((location) => (
             <li key={location.id}>
               <button
+                aria-controls={location.selected && popoverId ? popoverId : undefined}
                 aria-current={location.selected ? "location" : undefined}
+                aria-expanded={location.layerId !== "spawn" && popoverId
+                  ? Boolean(location.selected)
+                  : undefined}
                 className="palworld-map-visible-location"
                 data-layer={location.layerId}
-                onClick={() => onSelect(location)}
+                onClick={(event) => onSelect(location, event.currentTarget)}
                 type="button"
               >
                 {location.media ? (

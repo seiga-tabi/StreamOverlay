@@ -8,6 +8,9 @@ import {
   type ReactNode,
 } from "react";
 import type {
+  PalworldMapLocation,
+  PalworldMapLocationCategory,
+  PalworldMapLocationsResponse,
   PalworldMapMarker,
   PalworldMapMarkersResponse,
   PalworldPalReference,
@@ -15,6 +18,7 @@ import type {
   PalworldPalSpawnResponse,
   PalworldPalSummary,
 } from "@streamops/shared";
+import { PALWORLD_MAP_LOCATION_CATEGORIES } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import {
@@ -27,6 +31,7 @@ import {
 import { Skeleton } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
 import {
+  getPalworldMapLocations,
   getPalworldMapMarkers,
   getPalworldPal,
   getPalworldPalSpawns,
@@ -52,6 +57,17 @@ import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { isLocalPalworldMapUrl, PALWORLD_WORLD_MAP_IMAGE } from "../utils/element-images";
 import { resolvePalworldName } from "../utils/localization";
 import {
+  PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
+  PALWORLD_MAP_EGG_TYPE_IDS,
+  PALWORLD_MAP_STATUE_TYPE_IDS,
+  isPalworldMapCollectibleTypeId,
+  palworldMapCollectibleCategory,
+  palworldMapCollectibleTypeForLocation,
+  palworldMapCollectibleTypesForCategory,
+  type PalworldMapCollectibleTypeId,
+} from "../utils/map-collectible-types";
+import { PALWORLD_MAP_LAYER_ICONS } from "../utils/map-layer-icons";
+import {
   filterPalworldBossMarkers,
   filterPalworldSpawnPointsByPeriod,
   palworldSpawnPointOpacity,
@@ -66,10 +82,14 @@ import {
   type PalworldMapVisibleLocation,
 } from "./PalworldMapExplorerTypes";
 import { PalworldMapFilterPanel } from "./PalworldMapFilterPanel";
+import {
+  PalworldMapLocationIcon,
+  PalworldMapLocationLayer,
+} from "./PalworldMapLocationLayer";
 import { PalworldMapMarkerPopover } from "./PalworldMapMarkerPopover";
 import { PalworldMapMobileFilters } from "./PalworldMapMobileFilters";
 import { PalworldMapVisibleLocations } from "./PalworldMapVisibleLocations";
-import { PalworldMedia } from "./PalworldMedia";
+import { isLocalPalworldImageUrl, PalworldMedia } from "./PalworldMedia";
 import { PalworldPalPicker } from "./PalworldPalPicker";
 
 export const PALWORLD_WORLD_MAP_IMAGE_URL = PALWORLD_WORLD_MAP_IMAGE?.imageUrl;
@@ -97,12 +117,122 @@ type PalworldMapSpawnRequestState =
   | "confirmed_empty"
   | "data_unavailable"
   | "error";
+type PalworldMapLocationRequestState =
+  | "loading"
+  | "ready"
+  | "confirmed_empty"
+  | "data_unavailable"
+  | "error";
 
 const mapLabel = (ko: string, ja: string): PalworldMapLocalizedLabel => ({
   ja,
   ko,
 });
 const PALWORLD_MAP_MARKER_POPOVER_ID = "palworld-map-marker-popover";
+const PALWORLD_MAP_LOCATION_LABELS: Readonly<
+  Record<PalworldMapLocationCategory, PalworldMapLocalizedLabel>
+> = {
+  "fast-travel": mapLabel(palworldI18n.ko.mapFastTravel, palworldI18n.ja.mapFastTravel),
+  dungeon: mapLabel(palworldI18n.ko.mapDungeon, palworldI18n.ja.mapDungeon),
+  egg: mapLabel(palworldI18n.ko.mapEggs, palworldI18n.ja.mapEggs),
+  lifmunk: mapLabel(
+    palworldI18n.ko.mapLifmunkEffigies,
+    palworldI18n.ja.mapLifmunkEffigies,
+  ),
+  "skill-fruit": mapLabel(
+    palworldI18n.ko.mapSkillFruits,
+    palworldI18n.ja.mapSkillFruits,
+  ),
+  journal: mapLabel(palworldI18n.ko.mapJournals, palworldI18n.ja.mapJournals),
+};
+const PALWORLD_MAP_LOCATION_FALLBACKS: Readonly<
+  Record<PalworldMapLocationCategory, string>
+> = {
+  "fast-travel": "◇",
+  dungeon: "▣",
+  egg: "●",
+  lifmunk: "✦",
+  "skill-fruit": "◆",
+  journal: "▤",
+};
+const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
+  Record<PalworldMapCollectibleTypeId, PalworldMapLocalizedLabel>
+> = {
+  "statue-lifmunk": mapLabel(
+    palworldI18n.ko.mapStatueLifmunk,
+    palworldI18n.ja.mapStatueLifmunk,
+  ),
+  "statue-lamball": mapLabel(
+    palworldI18n.ko.mapStatueLamball,
+    palworldI18n.ja.mapStatueLamball,
+  ),
+  "statue-pengullet": mapLabel(
+    palworldI18n.ko.mapStatuePengullet,
+    palworldI18n.ja.mapStatuePengullet,
+  ),
+  "statue-munchill": mapLabel(
+    palworldI18n.ko.mapStatueMunchill,
+    palworldI18n.ja.mapStatueMunchill,
+  ),
+  "statue-rooby": mapLabel(
+    palworldI18n.ko.mapStatueRooby,
+    palworldI18n.ja.mapStatueRooby,
+  ),
+  "statue-herbil": mapLabel(
+    palworldI18n.ko.mapStatueHerbil,
+    palworldI18n.ja.mapStatueHerbil,
+  ),
+  "statue-tanzee": mapLabel(
+    palworldI18n.ko.mapStatueTanzee,
+    palworldI18n.ja.mapStatueTanzee,
+  ),
+  "statue-depresso": mapLabel(
+    palworldI18n.ko.mapStatueDepresso,
+    palworldI18n.ja.mapStatueDepresso,
+  ),
+  "statue-cattiva": mapLabel(
+    palworldI18n.ko.mapStatueCattiva,
+    palworldI18n.ja.mapStatueCattiva,
+  ),
+  "statue-lunaris": mapLabel(
+    palworldI18n.ko.mapStatueLunaris,
+    palworldI18n.ja.mapStatueLunaris,
+  ),
+  "statue-relaxaurus": mapLabel(
+    palworldI18n.ko.mapStatueRelaxaurus,
+    palworldI18n.ja.mapStatueRelaxaurus,
+  ),
+  "statue-yakumo": mapLabel(
+    palworldI18n.ko.mapStatueYakumo,
+    palworldI18n.ja.mapStatueYakumo,
+  ),
+  "egg-grass": mapLabel(palworldI18n.ko.mapEggGrass, palworldI18n.ja.mapEggGrass),
+  "egg-desert": mapLabel(palworldI18n.ko.mapEggDesert, palworldI18n.ja.mapEggDesert),
+  "egg-glacier": mapLabel(
+    palworldI18n.ko.mapEggGlacier,
+    palworldI18n.ja.mapEggGlacier,
+  ),
+  "egg-volcanic": mapLabel(
+    palworldI18n.ko.mapEggVolcanic,
+    palworldI18n.ja.mapEggVolcanic,
+  ),
+  "egg-sakurajima": mapLabel(
+    palworldI18n.ko.mapEggSakurajima,
+    palworldI18n.ja.mapEggSakurajima,
+  ),
+  "egg-sky-island": mapLabel(
+    palworldI18n.ko.mapEggSkyIsland,
+    palworldI18n.ja.mapEggSkyIsland,
+  ),
+  "egg-tenraku": mapLabel(
+    palworldI18n.ko.mapEggTenraku,
+    palworldI18n.ja.mapEggTenraku,
+  ),
+  "egg-world-tree": mapLabel(
+    palworldI18n.ko.mapEggWorldTree,
+    palworldI18n.ja.mapEggWorldTree,
+  ),
+};
 
 function layerDisplayState(
   state: PalworldMapMarkerRequestState | PalworldMapSpawnRequestState,
@@ -271,10 +401,14 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const [imageRevision, setImageRevision] = useState(0);
   const [bossRevision, setBossRevision] = useState(0);
   const [spawnRevision, setSpawnRevision] = useState(0);
+  const [locationRevision, setLocationRevision] = useState(0);
   const [markerResponse, setMarkerResponse] = useState<PalworldMapMarkersResponse>();
   const [markerState, setMarkerState] = useState<PalworldMapMarkerRequestState>("loading");
   const [spawnResponse, setSpawnResponse] = useState<PalworldPalSpawnResponse>();
   const [spawnState, setSpawnState] = useState<PalworldMapSpawnRequestState>("idle");
+  const [locationResponse, setLocationResponse] = useState<PalworldMapLocationsResponse>();
+  const [locationState, setLocationState] =
+    useState<PalworldMapLocationRequestState>("loading");
   const [focusedPal, setFocusedPal] = useState<PalworldPalReference | PalworldPalSummary | null>(null);
   const [filtersCollapsed, setFiltersCollapsed] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -302,21 +436,110 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   } = usePalworldMapViewport(loadState === "ready");
   const bossLayerSelected = mapQuery.layers.includes("boss");
   const spawnLayerSelected = mapQuery.layers.includes("spawn") && Boolean(activeFocusPalId);
-  const visibleSpawnPoints = spawnState === "ready" && spawnResponse
-    ? filterPalworldSpawnPointsByPeriod(spawnResponse.points, mapQuery.period)
-    : [];
-  const visibleBossMarkers = markerState === "ready" && markerResponse && bossLayerSelected
-    ? activeFocusPalId
-      ? filterPalworldBossMarkers(markerResponse.markers, activeFocusPalId)
-      : markerResponse.markers
-    : [];
-  const selectedMarker = mapQuery.marker
-    ? visibleBossMarkers.find((marker) => marker.id === mapQuery.marker)
-    : undefined;
-  const spawnSummary = spawnLayerSelected
-    ? summarizePalworldSpawnPoints(visibleSpawnPoints)
-    : undefined;
+  const selectedLocationLayers = useMemo(
+    () => PALWORLD_MAP_LOCATION_CATEGORIES.filter(
+      (category) => mapQuery.layers.includes(category),
+    ),
+    [mapQuery.layers],
+  );
+  const selectedCollectibleTypes = mapQuery.types;
+  const visibleSpawnPoints = useMemo(
+    () => spawnState === "ready" && spawnResponse
+      ? filterPalworldSpawnPointsByPeriod(spawnResponse.points, mapQuery.period)
+      : [],
+    [mapQuery.period, spawnResponse, spawnState],
+  );
+  const visibleBossMarkers = useMemo(
+    () => markerState === "ready" && markerResponse && bossLayerSelected
+      ? activeFocusPalId
+        ? filterPalworldBossMarkers(markerResponse.markers, activeFocusPalId)
+        : markerResponse.markers
+      : [],
+    [activeFocusPalId, bossLayerSelected, markerResponse, markerState],
+  );
+  const selectedMarker = useMemo(
+    () => mapQuery.marker
+      ? visibleBossMarkers.find((marker) => marker.id === mapQuery.marker)
+      : undefined,
+    [mapQuery.marker, visibleBossMarkers],
+  );
+  const locationCounts = useMemo<ReadonlyMap<PalworldMapLocationCategory, number>>(() => {
+    const counts = new Map<PalworldMapLocationCategory, number>();
+    for (const category of PALWORLD_MAP_LOCATION_CATEGORIES) {
+      counts.set(category, 0);
+    }
+    if (locationState === "ready" && locationResponse) {
+      for (const location of locationResponse.locations) {
+        counts.set(location.category, (counts.get(location.category) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [locationResponse, locationState]);
+  const collectibleTypeCounts = useMemo<
+    ReadonlyMap<PalworldMapCollectibleTypeId, number>
+  >(() => {
+    const counts = new Map<PalworldMapCollectibleTypeId, number>(
+      PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.map((typeId) => [typeId, 0]),
+    );
+    if (locationState === "ready" && locationResponse) {
+      for (const location of locationResponse.locations) {
+        const typeId = palworldMapCollectibleTypeForLocation(location);
+        if (typeId) counts.set(typeId, (counts.get(typeId) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [locationResponse, locationState]);
+  const visibleMapLocations = useMemo(
+    () => locationState === "ready" && locationResponse
+      ? locationResponse.locations.filter((location) => {
+          if (!selectedLocationLayers.includes(location.category)) return false;
+          const typeId = palworldMapCollectibleTypeForLocation(location);
+          if (typeId) return selectedCollectibleTypes.includes(typeId);
+          const categoryTypes = palworldMapCollectibleTypesForCategory(
+            location.category,
+          );
+          return categoryTypes.length === 0
+            || categoryTypes.every((candidate) =>
+              selectedCollectibleTypes.includes(candidate)
+            );
+        })
+      : [],
+    [
+      locationResponse,
+      locationState,
+      selectedCollectibleTypes,
+      selectedLocationLayers,
+    ],
+  );
+  const selectedMapLocation = useMemo(
+    () => mapQuery.marker
+      ? visibleMapLocations.find((location) => location.id === mapQuery.marker)
+      : undefined,
+    [mapQuery.marker, visibleMapLocations],
+  );
+  const mapLocationLabel = useCallback(
+    (location: Pick<PalworldMapLocation, "category" | "subtype">) => {
+      const typeId = palworldMapCollectibleTypeForLocation(location);
+      return typeId
+        ? PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[typeId]
+        : PALWORLD_MAP_LOCATION_LABELS[location.category];
+    },
+    [],
+  );
+  const spawnSummary = useMemo(
+    () => spawnLayerSelected
+      ? summarizePalworldSpawnPoints(visibleSpawnPoints)
+      : undefined,
+    [spawnLayerSelected, visibleSpawnPoints],
+  );
   const localeTag = locale === "ko" ? "ko-KR" : "ja-JP";
+  const locationClusterLabel = useCallback(
+    (count: number) => text.mapLocationCluster.replace(
+      "{count}",
+      count.toLocaleString(localeTag),
+    ),
+    [localeTag, text.mapLocationCluster],
+  );
   const spawnMapSummary = spawnSummary
     ? text.palWildSpawnMapSummary
       .replace("{areas}", spawnSummary.areas.toLocaleString(localeTag))
@@ -357,6 +580,24 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     });
     return () => controller.abort();
   }, [bossRevision]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setLocationResponse(undefined);
+    setLocationState("loading");
+    void getPalworldMapLocations(
+      PALWORLD_MAP_LOCATION_CATEGORIES,
+      "main",
+      controller.signal,
+    ).then((response) => {
+      if (controller.signal.aborted) return;
+      setLocationResponse(response);
+      setLocationState(response.state);
+    }).catch(() => {
+      if (!controller.signal.aborted) setLocationState("error");
+    });
+    return () => controller.abort();
+  }, [locationRevision]);
 
   useEffect(() => {
     if (!activeFocusPalId) {
@@ -526,13 +767,52 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   ]);
 
   useEffect(() => {
+    if (
+      loadState !== "ready"
+      || !selectedMapLocation
+      || mapQuery.center
+    ) {
+      return;
+    }
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const nextView = focusPalworldMapViewAt(
+      selectedMapLocation,
+      viewport.clientWidth,
+      viewport.clientHeight,
+      Math.max(2, mapQuery.zoom),
+    );
+    commitView(nextView);
+    replaceQuery({
+      center: {
+        x: selectedMapLocation.normalizedX,
+        y: selectedMapLocation.normalizedY,
+      },
+      zoom: nextView.zoom,
+    });
+  }, [
+    commitView,
+    loadState,
+    mapQuery.center,
+    mapQuery.zoom,
+    replaceQuery,
+    selectedMapLocation,
+    viewportRef,
+  ]);
+
+  useEffect(() => {
     if (loadState !== "ready") return;
     const timer = window.setTimeout(() => {
       const viewport = viewportRef.current;
       if (!viewport) return;
       if (
         (!mapQuery.center && activeFocusPalId && !appliedFocusMarkerRef.current)
-        || (!mapQuery.center && mapQuery.marker && !selectedMarker)
+        || (
+          !mapQuery.center
+          && mapQuery.marker
+          && !selectedMarker
+          && !selectedMapLocation
+        )
       ) {
         return;
       }
@@ -575,6 +855,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     mapQuery.zoom,
     replaceQuery,
     selectedMarker,
+    selectedMapLocation,
     view.x,
     view.y,
     view.zoom,
@@ -586,11 +867,20 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     if (
       mapQuery.marker
       && markerState === "ready"
+      && (locationState === "ready" || locationState === "confirmed_empty")
       && !visibleBossMarkers.some((marker) => marker.id === mapQuery.marker)
+      && !visibleMapLocations.some((location) => location.id === mapQuery.marker)
     ) {
       replaceQuery({ marker: null });
     }
-  }, [mapQuery.marker, markerState, replaceQuery, visibleBossMarkers]);
+  }, [
+    locationState,
+    mapQuery.marker,
+    markerState,
+    replaceQuery,
+    visibleBossMarkers,
+    visibleMapLocations,
+  ]);
 
   useEffect(() => {
     if (copyState === "idle") return;
@@ -637,8 +927,56 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     });
   }, [commitView, mapQuery.marker, pushQuery, viewRef, viewportRef]);
 
+  const selectMapLocation = useCallback((
+    location: PalworldMapLocation,
+    trigger?: HTMLElement,
+  ): void => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    if (trigger) {
+      selectedMarkerTriggerRef.current = trigger;
+    } else if (mapQuery.marker !== location.id) {
+      selectedMarkerTriggerRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    const nextView = focusPalworldMapViewAt(
+      location,
+      viewport.clientWidth,
+      viewport.clientHeight,
+      Math.max(2, viewRef.current.zoom),
+    );
+    commitView(nextView);
+    pushQuery({
+      center: { x: location.normalizedX, y: location.normalizedY },
+      marker: location.id,
+      zoom: nextView.zoom,
+    });
+  }, [commitView, mapQuery.marker, pushQuery, viewRef, viewportRef]);
+
+  const focusMapLocationCluster = useCallback((
+    cluster: Pick<PalworldMapLocation, "normalizedX" | "normalizedY">,
+  ): void => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const nextView = focusPalworldMapViewAt(
+      cluster,
+      viewport.clientWidth,
+      viewport.clientHeight,
+      Math.min(PALWORLD_MAP_MAX_ZOOM, Math.max(2, viewRef.current.zoom + 0.75)),
+    );
+    commitView(nextView);
+    pushQuery({
+      center: { x: cluster.normalizedX, y: cluster.normalizedY },
+      marker: null,
+      zoom: nextView.zoom,
+    });
+    window.requestAnimationFrame(() => {
+      viewport.focus({ preventScroll: true });
+    });
+  }, [commitView, pushQuery, viewRef, viewportRef]);
+
   useEffect(() => {
-    if (!selectedMarker) return undefined;
+    if (!selectedMarker && !selectedMapLocation) return undefined;
 
     const handleOutsidePointerDown = (event: PointerEvent): void => {
       const target = event.target;
@@ -646,6 +984,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       if (
         target.closest(`#${PALWORLD_MAP_MARKER_POPOVER_ID}`)
         || target.closest(".palworld-map-boss-marker")
+        || target.closest(".palworld-map-location-marker")
         || target.closest(".yoro-modal")
       ) {
         return;
@@ -656,7 +995,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
 
     document.addEventListener("pointerdown", handleOutsidePointerDown);
     return () => document.removeEventListener("pointerdown", handleOutsidePointerDown);
-  }, [replaceQuery, selectedMarker]);
+  }, [replaceQuery, selectedMapLocation, selectedMarker]);
 
   const focusSpawnAreas = useCallback((): void => {
     const viewport = viewportRef.current;
@@ -701,26 +1040,104 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     layer: PalworldMapExplorerLayerId,
     selected: boolean,
   ): void => {
+    if (isPalworldMapCollectibleTypeId(layer)) {
+      const category = palworldMapCollectibleCategory(layer);
+      const categoryTypes = palworldMapCollectibleTypesForCategory(category);
+      const nextTypes = new Set(mapQuery.types);
+      if (!mapQuery.layers.includes(category)) {
+        for (const typeId of categoryTypes) nextTypes.delete(typeId);
+      }
+      if (selected) nextTypes.add(layer);
+      else nextTypes.delete(layer);
+      const hasSelectedType = categoryTypes.some((typeId) =>
+        nextTypes.has(typeId)
+      );
+      const nextLayers = new Set(mapQuery.layers);
+      if (hasSelectedType) nextLayers.add(category);
+      else nextLayers.delete(category);
+      pushQuery({
+        layers: PALWORLD_MAP_LAYERS.filter((entry) => nextLayers.has(entry)),
+        types: PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.filter((typeId) =>
+          nextTypes.has(typeId)
+        ),
+        ...(!selected && selectedMapLocation ? { marker: null } : {}),
+      });
+      return;
+    }
     if (!isRuntimeMapLayer(layer)) return;
     const next = selected
       ? [...mapQuery.layers, layer]
       : mapQuery.layers.filter((entry) => entry !== layer);
+    const selectedLayer = selectedMarker
+      ? "boss"
+      : selectedMapLocation?.category;
     pushQuery({
       layers: next,
-      ...(layer === "boss" && !selected ? { marker: null } : {}),
+      ...(!selected && selectedLayer === layer ? { marker: null } : {}),
     });
-  }, [mapQuery.layers, pushQuery]);
+  }, [
+    mapQuery.layers,
+    mapQuery.types,
+    pushQuery,
+    selectedMapLocation,
+    selectedMarker,
+  ]);
 
   const changeGroupLayers = useCallback((
     layerIds: readonly PalworldMapExplorerLayerId[],
     selected: boolean,
   ): void => {
     const runtimeLayerIds = layerIds.filter(isRuntimeMapLayer);
+    const collectibleTypeIds = layerIds.filter(isPalworldMapCollectibleTypeId);
+    const nextTypes = new Set(mapQuery.types);
+    const nextLayers = new Set(
+      updatePalworldMapLayerSelection(mapQuery.layers, runtimeLayerIds, selected),
+    );
+    for (const typeId of collectibleTypeIds) {
+      if (selected) nextTypes.add(typeId);
+      else nextTypes.delete(typeId);
+    }
+    for (const category of ["egg", "lifmunk"] as const) {
+      const categoryTypes = palworldMapCollectibleTypesForCategory(category);
+      if (!collectibleTypeIds.some((typeId) =>
+        palworldMapCollectibleCategory(typeId) === category
+      )) {
+        continue;
+      }
+      if (categoryTypes.some((typeId) => nextTypes.has(typeId))) {
+        nextLayers.add(category);
+      } else {
+        nextLayers.delete(category);
+      }
+    }
+    const selectedLayer = selectedMarker
+      ? "boss"
+      : selectedMapLocation?.category;
     pushQuery({
-      layers: updatePalworldMapLayerSelection(mapQuery.layers, runtimeLayerIds, selected),
-      ...(!selected && runtimeLayerIds.includes("boss") ? { marker: null } : {}),
+      layers: PALWORLD_MAP_LAYERS.filter((layerId) => nextLayers.has(layerId)),
+      types: PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.filter((typeId) =>
+        nextTypes.has(typeId)
+      ),
+      ...(
+        !selected
+        && selectedLayer
+        && (
+          runtimeLayerIds.includes(selectedLayer)
+          || collectibleTypeIds.some((typeId) =>
+            palworldMapCollectibleCategory(typeId) === selectedLayer
+          )
+        )
+          ? { marker: null }
+          : {}
+      ),
     });
-  }, [mapQuery.layers, pushQuery]);
+  }, [
+    mapQuery.layers,
+    mapQuery.types,
+    pushQuery,
+    selectedMapLocation,
+    selectedMarker,
+  ]);
 
   const changeGroupCollapsed = useCallback((groupId: string, collapsed: boolean): void => {
     setCollapsedFilterGroups((current) => {
@@ -768,6 +1185,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       layers: ["boss", "spawn"],
       marker: null,
       period: "all",
+      types: PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
       world: "main",
       zoom: PALWORLD_MAP_MIN_ZOOM,
     });
@@ -810,6 +1228,56 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     const spawnDisplayState: PalworldMapLayerDisplayState = activeFocusPalId
       ? layerDisplayState(spawnState)
       : "idle";
+    const focusedSpawnIcon =
+      focusedPal?.imageUrl
+      && isLocalPalworldImageUrl(focusedPal.imageUrl, "pal")
+      && Number.isInteger(focusedPal.imageWidth)
+      && Number(focusedPal.imageWidth) > 0
+      && Number.isInteger(focusedPal.imageHeight)
+      && Number(focusedPal.imageHeight) > 0
+        ? {
+            imageUrl: focusedPal.imageUrl,
+            width: Number(focusedPal.imageWidth),
+            height: Number(focusedPal.imageHeight),
+          }
+        : PALWORLD_MAP_LAYER_ICONS.spawn;
+    const importedLocationState = layerDisplayState(locationState);
+    const importedLocationDescription = mapLabel(
+      palworldI18n.ko.mapImportedLocationDescription,
+      palworldI18n.ja.mapImportedLocationDescription,
+    );
+    const locationLayer = (
+      id: PalworldMapLocationCategory,
+    ): PalworldMapLayerGroup["layers"][number] => ({
+      id,
+      label: PALWORLD_MAP_LOCATION_LABELS[id],
+      description: importedLocationDescription,
+      statusLabel: layerStatusLabel(importedLocationState),
+      count: importedLocationState === "ready" ? locationCounts.get(id) : undefined,
+      iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
+      iconFallback: PALWORLD_MAP_LOCATION_FALLBACKS[id],
+      selected: mapQuery.layers.includes(id),
+      state: importedLocationState,
+    });
+    const collectibleTypeLayer = (
+      id: PalworldMapCollectibleTypeId,
+    ): PalworldMapLayerGroup["layers"][number] => {
+      const category = palworldMapCollectibleCategory(id);
+      return {
+        id,
+        label: PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[id],
+        description: importedLocationDescription,
+        statusLabel: layerStatusLabel(importedLocationState),
+        count: importedLocationState === "ready"
+          ? collectibleTypeCounts.get(id)
+          : undefined,
+        iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
+        iconFallback: category === "egg" ? "●" : "✦",
+        selected: mapQuery.layers.includes(category)
+          && mapQuery.types.includes(id),
+        state: importedLocationState,
+      };
+    };
     const unavailableStatus = layerStatusLabel("data_unavailable");
     const unavailableDescription = mapLabel(
       palworldI18n.ko.mapCoordinateExportRequired,
@@ -828,7 +1296,8 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         ),
         statusLabel: layerStatusLabel(markerState),
         count: markerResponse?.markers.length,
-        icon: <span className="palworld-map-filter-symbol is-boss">◆</span>,
+        iconAsset: PALWORLD_MAP_LAYER_ICONS.boss,
+        iconFallback: "◆",
         selected: bossLayerSelected,
         state: layerDisplayState(markerState),
       }, {
@@ -844,7 +1313,8 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         ),
         statusLabel: layerStatusLabel(spawnDisplayState),
         count: spawnResponse?.points.length,
-        icon: <span className="palworld-map-filter-symbol is-spawn">●</span>,
+        iconAsset: focusedSpawnIcon,
+        iconFallback: "●",
         selected: spawnLayerSelected,
         state: spawnDisplayState,
       }],
@@ -852,81 +1322,62 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       id: "places",
       label: mapLabel(palworldI18n.ko.mapPlaceLayers, palworldI18n.ja.mapPlaceLayers),
       collapsed: collapsedFilterGroups.has("places"),
-      layers: [{
-        id: "fast-travel",
-        label: mapLabel(palworldI18n.ko.mapFastTravel, palworldI18n.ja.mapFastTravel),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        icon: <span className="palworld-map-filter-symbol">◇</span>,
-        selected: false,
-        state: "data_unavailable",
-      }, {
-        id: "dungeon",
-        label: mapLabel(palworldI18n.ko.mapDungeon, palworldI18n.ja.mapDungeon),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        icon: <span className="palworld-map-filter-symbol">▣</span>,
-        selected: false,
-        state: "data_unavailable",
-      }, {
+      layers: [
+        locationLayer("fast-travel"),
+        locationLayer("dungeon"),
+        {
         id: "npc",
         label: mapLabel(palworldI18n.ko.mapMerchantsNpcs, palworldI18n.ja.mapMerchantsNpcs),
         description: unavailableDescription,
         statusLabel: unavailableStatus,
-        icon: <span className="palworld-map-filter-symbol">♙</span>,
+        iconAsset: PALWORLD_MAP_LAYER_ICONS.npc,
+        iconFallback: "♙",
         selected: false,
         state: "data_unavailable",
       }],
     }, {
+      id: "statues",
+      label: mapLabel(
+        palworldI18n.ko.mapStatueLayers,
+        palworldI18n.ja.mapStatueLayers,
+      ),
+      collapsed: collapsedFilterGroups.has("statues"),
+      layers: PALWORLD_MAP_STATUE_TYPE_IDS.map(collectibleTypeLayer),
+    }, {
+      id: "eggs",
+      label: mapLabel(
+        palworldI18n.ko.mapEggLayers,
+        palworldI18n.ja.mapEggLayers,
+      ),
+      collapsed: collapsedFilterGroups.has("eggs"),
+      layers: PALWORLD_MAP_EGG_TYPE_IDS.map(collectibleTypeLayer),
+    }, {
       id: "collectibles",
       label: mapLabel(
-        palworldI18n.ko.mapCollectibleLayers,
-        palworldI18n.ja.mapCollectibleLayers,
+        palworldI18n.ko.mapOtherCollectibleLayers,
+        palworldI18n.ja.mapOtherCollectibleLayers,
       ),
       collapsed: collapsedFilterGroups.has("collectibles"),
-      layers: [{
-        id: "egg",
-        label: mapLabel(palworldI18n.ko.mapEggs, palworldI18n.ja.mapEggs),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        selected: false,
-        state: "data_unavailable",
-      }, {
-        id: "lifmunk",
-        label: mapLabel(
-          palworldI18n.ko.mapLifmunkEffigies,
-          palworldI18n.ja.mapLifmunkEffigies,
-        ),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        selected: false,
-        state: "data_unavailable",
-      }, {
-        id: "skill-fruit",
-        label: mapLabel(palworldI18n.ko.mapSkillFruits, palworldI18n.ja.mapSkillFruits),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        selected: false,
-        state: "data_unavailable",
-      }, {
+      layers: [
+        locationLayer("skill-fruit"),
+        {
         id: "treasure",
         label: mapLabel(palworldI18n.ko.mapTreasures, palworldI18n.ja.mapTreasures),
         description: unavailableDescription,
         statusLabel: unavailableStatus,
+        iconAsset: PALWORLD_MAP_LAYER_ICONS.treasure,
+        iconFallback: "◇",
         selected: false,
         state: "data_unavailable",
-      }, {
-        id: "journal",
-        label: mapLabel(palworldI18n.ko.mapJournals, palworldI18n.ja.mapJournals),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        selected: false,
-        state: "data_unavailable",
-      }, {
+      },
+        locationLayer("journal"),
+        {
         id: "ancient-ruin",
         label: mapLabel(palworldI18n.ko.mapAncientRuins, palworldI18n.ja.mapAncientRuins),
         description: unavailableDescription,
         statusLabel: unavailableStatus,
+        iconAsset: PALWORLD_MAP_LAYER_ICONS["ancient-ruin"],
+        iconFallback: "⌂",
         selected: false,
         state: "data_unavailable",
       }],
@@ -935,7 +1386,13 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     activeFocusPalId,
     bossLayerSelected,
     collapsedFilterGroups,
+    collectibleTypeCounts,
+    focusedPal,
     layerStatusLabel,
+    locationCounts,
+    locationState,
+    mapQuery.layers,
+    mapQuery.types,
     markerResponse,
     markerState,
     spawnLayerSelected,
@@ -980,8 +1437,38 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
           selected: marker.id === selectedMarker?.id,
         };
       });
+    const importedLocations = visibleMapLocations
+      .filter((location) => markerIsInsideViewport(location, view, width, height))
+      .slice(0, Math.max(0, 60 - bossLocations.length))
+      .map((location) => {
+        const typeId = palworldMapCollectibleTypeForLocation(location);
+        return {
+          id: location.id,
+          layerId: location.category,
+          title: mapLocationLabel(location),
+          layerLabel: mapLabel(
+            palworldI18n.ko.mapLocationPoint,
+            palworldI18n.ja.mapLocationPoint,
+          ),
+          media: (
+            <PalworldMapLocationIcon
+              asset={PALWORLD_MAP_LAYER_ICONS[typeId ?? location.category]}
+              className="palworld-map-visible-location-icon"
+              fallbackSymbol={PALWORLD_MAP_LOCATION_FALLBACKS[location.category]}
+            />
+          ),
+          metadata: [{
+            label: mapLabel(
+              palworldI18n.ko.mapNormalizedPosition,
+              palworldI18n.ja.mapNormalizedPosition,
+            ),
+            value: `${(location.normalizedX * 100).toFixed(1)}% · ${(location.normalizedY * 100).toFixed(1)}%`,
+          }],
+          selected: location.id === selectedMapLocation?.id,
+        };
+      });
     if (!spawnLayerSelected || !spawnSummary || !activeFocusPalId) {
-      return bossLocations;
+      return [...bossLocations, ...importedLocations];
     }
     const fallbackName = focusedPal
       ? resolvePalworldName(focusedPal, locale).text
@@ -1018,13 +1505,15 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         label: mapLabel(palworldI18n.ko.mapMarkerLevel, palworldI18n.ja.mapMarkerLevel),
         value: spawnLevelSummary,
       }],
-    }, ...bossLocations];
+    }, ...bossLocations, ...importedLocations];
   }, [
     activeFocusPalId,
     focusedPal,
     locale,
     localeTag,
+    mapLocationLabel,
     selectedMarker,
+    selectedMapLocation,
     spawnLayerSelected,
     spawnLevelSummary,
     spawnSummary,
@@ -1032,18 +1521,23 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     view,
     viewportRef,
     visibleBossMarkers,
+    visibleMapLocations,
   ]);
 
+  const importedLayerSelected = selectedLocationLayers.length > 0;
   const locationsState: PalworldMapLayerDisplayState = locations.length > 0
     ? "ready"
     : (bossLayerSelected && markerState === "loading")
       || (spawnLayerSelected && spawnState === "loading")
+      || (importedLayerSelected && locationState === "loading")
       ? "loading"
       : (bossLayerSelected && markerState === "error")
         || (spawnLayerSelected && spawnState === "error")
+        || (importedLayerSelected && locationState === "error")
         ? "error"
         : (bossLayerSelected && markerState === "data_unavailable")
           || (spawnLayerSelected && spawnState === "data_unavailable")
+          || (importedLayerSelected && locationState === "data_unavailable")
           ? "data_unavailable"
           : "confirmed_empty";
   const filterCopy = {
@@ -1053,7 +1547,14 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     show: mapLabel(palworldI18n.ko.mapFilterShow, palworldI18n.ja.mapFilterShow),
     title: mapLabel(palworldI18n.ko.mapFilters, palworldI18n.ja.mapFilters),
   };
-  const activeLayerCount = Number(bossLayerSelected) + Number(spawnLayerSelected);
+  const activeLayerCount = Number(bossLayerSelected)
+    + Number(spawnLayerSelected)
+    + selectedLocationLayers.filter((category) =>
+      category !== "egg" && category !== "lifmunk"
+    ).length
+    + selectedCollectibleTypes.filter((typeId) =>
+      mapQuery.layers.includes(palworldMapCollectibleCategory(typeId))
+    ).length;
   const mobileFilterButtonCopy = mapLabel(
     palworldI18n.ko.mapMobileFilterButton.replace(
       "{count}",
@@ -1147,6 +1648,34 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       }}
     />
   ) : null;
+  const locationPopover = selectedMapLocation ? (
+    <PalworldMapMarkerPopover
+      actions={[{
+        id: "center",
+        label: mapLabel(palworldI18n.ko.mapCenterMarker, palworldI18n.ja.mapCenterMarker),
+        onClick: () => selectMapLocation(selectedMapLocation),
+      }, {
+        id: "copy",
+        label: mapLabel(palworldI18n.ko.mapCopyLink, palworldI18n.ja.mapCopyLink),
+        onClick: () => void copyMapLink(),
+        variant: "primary",
+      }]}
+      closeLabel={mapLabel(palworldI18n.ko.mapCloseMarker, palworldI18n.ja.mapCloseMarker)}
+      description={mapLabel(
+        palworldI18n.ko.mapImportedLocationDescription,
+        palworldI18n.ja.mapImportedLocationDescription,
+      )}
+      details={[{
+        label: mapLabel(palworldI18n.ko.mapNormalizedPosition, palworldI18n.ja.mapNormalizedPosition),
+        value: `${(selectedMapLocation.normalizedX * 100).toFixed(1)}% · ${(selectedMapLocation.normalizedY * 100).toFixed(1)}%`,
+      }]}
+      id={PALWORLD_MAP_MARKER_POPOVER_ID}
+      kindLabel={mapLabel(palworldI18n.ko.mapLocationPoint, palworldI18n.ja.mapLocationPoint)}
+      locale={locale}
+      onClose={closeMarkerPopover}
+      title={mapLocationLabel(selectedMapLocation)}
+    />
+  ) : null;
 
   return (
     <section className="palworld-page-section palworld-map-page" aria-labelledby="palworld-map-title">
@@ -1223,6 +1752,29 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     {text.mapBossMarkers} {visibleBossMarkers.length}
                   </Badge>
                 ) : null}
+                {importedLayerSelected && locationState === "loading" ? (
+                  <Badge role="status" tone="neutral">{text.mapImportedLocationsLoading}</Badge>
+                ) : null}
+                {importedLayerSelected && locationState === "ready" ? (
+                  <Badge tone="info">
+                    {text.mapLocationPoint} {visibleMapLocations.length.toLocaleString(localeTag)}
+                  </Badge>
+                ) : null}
+                {importedLayerSelected && locationState === "data_unavailable" ? (
+                  <Badge tone="neutral">{text.mapImportedLocationsUnavailable}</Badge>
+                ) : null}
+                {importedLayerSelected && locationState === "error" ? (
+                  <span className="palworld-map-marker-error" role="alert">
+                    <Badge tone="warning">{text.mapImportedLocationsError}</Badge>
+                    <Button
+                      onClick={() => setLocationRevision((revision) => revision + 1)}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      {text.mapImportedLocationsRetry}
+                    </Button>
+                  </span>
+                ) : null}
                 {spawnLayerSelected && spawnState === "ready" && spawnSummary ? (
                   <Badge tone="info">{text.palWildSpawnAreas} · {spawnMapSummary}</Badge>
                 ) : null}
@@ -1278,7 +1830,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
               </div>
             </div>
 
-            {(spawnLayerSelected || visibleBossMarkers.length > 0) ? (
+            {(spawnLayerSelected || visibleBossMarkers.length > 0 || visibleMapLocations.length > 0) ? (
               <div aria-label={text.mapLayerLegend} className="palworld-map-layer-legend" role="group">
                 <strong>{text.mapLayerLegend}</strong>
                 <ul>
@@ -1309,6 +1861,46 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                       </span>
                     </li>
                   ) : null}
+                  {selectedLocationLayers
+                    .filter((category) => category !== "egg" && category !== "lifmunk")
+                    .map((category) => {
+                    const count = locationCounts.get(category) ?? 0;
+                    if (count === 0) return null;
+                    return (
+                      <li key={category}>
+                        <PalworldMapLocationIcon
+                          asset={PALWORLD_MAP_LAYER_ICONS[category]}
+                          className="palworld-map-legend-location-icon"
+                          fallbackSymbol={PALWORLD_MAP_LOCATION_FALLBACKS[category]}
+                        />
+                        <span>
+                          <strong>{PALWORLD_MAP_LOCATION_LABELS[category][locale]}</strong>
+                          <small>{count.toLocaleString(localeTag)}</small>
+                        </span>
+                      </li>
+                    );
+                  })}
+                  {selectedCollectibleTypes.map((typeId) => {
+                    const category = palworldMapCollectibleCategory(typeId);
+                    if (!mapQuery.layers.includes(category)) return null;
+                    const count = collectibleTypeCounts.get(typeId) ?? 0;
+                    if (count === 0) return null;
+                    return (
+                      <li key={typeId}>
+                        <PalworldMapLocationIcon
+                          asset={PALWORLD_MAP_LAYER_ICONS[typeId]}
+                          className="palworld-map-legend-location-icon"
+                          fallbackSymbol={category === "egg" ? "●" : "✦"}
+                        />
+                        <span>
+                          <strong>
+                            {PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[typeId][locale]}
+                          </strong>
+                          <small>{count.toLocaleString(localeTag)}</small>
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ) : null}
@@ -1330,7 +1922,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     || !(target instanceof Element)
                     || !target.closest("[data-map-interactive='true']")
                   ) {
-                    if (selectedMarker) closeMarkerPopover();
+                    if (selectedMarker || selectedMapLocation) closeMarkerPopover();
                   }
                 }}
                 onKeyDown={handleKeyDown}
@@ -1386,6 +1978,26 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     {loadState === "ready" && spawnLayerSelected && spawnState === "ready" ? (
                       <div className="palworld-map-marker-layer" data-testid="palworld-map-spawn-areas">
                         <PalworldSpawnAreaLayer points={visibleSpawnPoints} zoom={view.zoom} />
+                      </div>
+                    ) : null}
+                    {loadState === "ready" && visibleMapLocations.length ? (
+                      <div
+                        className="palworld-map-marker-layer"
+                        data-testid="palworld-map-imported-locations"
+                      >
+                        <PalworldMapLocationLayer
+                          clusterLabel={locationClusterLabel}
+                          iconAssets={PALWORLD_MAP_LAYER_ICONS}
+                          labels={PALWORLD_MAP_LOCATION_LABELS}
+                          locale={locale}
+                          locations={visibleMapLocations}
+                          subtypeLabels={PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS}
+                          onSelectCluster={focusMapLocationCluster}
+                          onSelectLocation={selectMapLocation}
+                          popoverId={PALWORLD_MAP_MARKER_POPOVER_ID}
+                          selectedLocationId={selectedMapLocation?.id}
+                          zoom={view.zoom}
+                        />
                       </div>
                     ) : null}
                     {loadState === "ready" && visibleBossMarkers.length ? (
@@ -1448,7 +2060,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                   <p data-ko={palworldI18n.ko.mapCaption} data-ja={palworldI18n.ja.mapCaption}>{text.mapCaption}</p>
                 </figcaption>
               </figure>
-              {markerPopover}
+              {markerPopover ?? locationPopover}
             </div>
             <p className="palworld-map-hint" id="palworld-map-hint" data-ko={palworldI18n.ko.mapUsageHint} data-ja={palworldI18n.ja.mapUsageHint}>{text.mapUsageHint}</p>
           </Card>
@@ -1467,15 +2079,26 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             onRetry={() => {
               if (bossLayerSelected) setBossRevision((revision) => revision + 1);
               if (spawnLayerSelected) setSpawnRevision((revision) => revision + 1);
+              if (importedLayerSelected) {
+                setLocationRevision((revision) => revision + 1);
+              }
             }}
-            onSelect={(location) => {
+            onSelect={(location, trigger) => {
               if (location.layerId === "spawn") {
                 focusSpawnAreas();
                 return;
               }
               const marker = visibleBossMarkers.find((entry) => entry.id === location.id);
-              if (marker) selectBossMarker(marker);
+              if (marker) {
+                selectBossMarker(marker, trigger);
+                return;
+              }
+              const importedLocation = visibleMapLocations.find(
+                (entry) => entry.id === location.id,
+              );
+              if (importedLocation) selectMapLocation(importedLocation, trigger);
             }}
+            popoverId={PALWORLD_MAP_MARKER_POPOVER_ID}
             state={locationsState}
           />
         </div>

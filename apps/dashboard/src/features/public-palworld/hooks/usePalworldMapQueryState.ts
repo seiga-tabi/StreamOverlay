@@ -8,8 +8,22 @@ import {
   palworldPathForPage,
   setPalworldUrl,
 } from "../utils/routes";
+import {
+  PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
+  isPalworldMapCollectibleTypeId,
+  type PalworldMapCollectibleTypeId,
+} from "../utils/map-collectible-types";
 
-export const PALWORLD_MAP_LAYERS = ["boss", "spawn"] as const;
+export const PALWORLD_MAP_LAYERS = [
+  "boss",
+  "spawn",
+  "fast-travel",
+  "dungeon",
+  "egg",
+  "lifmunk",
+  "skill-fruit",
+  "journal",
+] as const;
 export const PALWORLD_MAP_WORLDS = ["main", "tree"] as const;
 export const PALWORLD_MAP_PERIODS = ["all", "day", "night"] as const;
 
@@ -26,6 +40,7 @@ export type PalworldMapQueryState = {
   layers: readonly PalworldMapLayer[];
   marker?: string;
   period: PalworldMapPeriod;
+  types: readonly PalworldMapCollectibleTypeId[];
   world: PalworldMapWorld;
   zoom: number;
 };
@@ -36,6 +51,7 @@ export type PalworldMapQueryPatch = {
   layers?: readonly PalworldMapLayer[];
   marker?: string | null;
   period?: PalworldMapPeriod;
+  types?: readonly PalworldMapCollectibleTypeId[];
   world?: PalworldMapWorld;
   zoom?: number;
 };
@@ -103,12 +119,37 @@ function parseLayers(value: string | undefined): readonly PalworldMapLayer[] {
   return PALWORLD_MAP_LAYERS.filter((layer) => values.includes(layer));
 }
 
+function parseCollectibleTypes(
+  value: string | undefined,
+): readonly PalworldMapCollectibleTypeId[] {
+  if (value === undefined) return PALWORLD_MAP_COLLECTIBLE_TYPE_IDS;
+  if (value === "") return [];
+  const values = value.split(",");
+  if (
+    values.some((typeId) => !isPalworldMapCollectibleTypeId(typeId))
+    || new Set(values).size !== values.length
+  ) {
+    return PALWORLD_MAP_COLLECTIBLE_TYPE_IDS;
+  }
+  return PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.filter((typeId) =>
+    values.includes(typeId)
+  );
+}
+
 function sameLayers(
   first: readonly PalworldMapLayer[],
   second: readonly PalworldMapLayer[],
 ): boolean {
   return first.length === second.length
     && first.every((layer, index) => layer === second[index]);
+}
+
+function sameCollectibleTypes(
+  first: readonly PalworldMapCollectibleTypeId[],
+  second: readonly PalworldMapCollectibleTypeId[],
+): boolean {
+  return first.length === second.length
+    && first.every((typeId, index) => typeId === second[index]);
 }
 
 export function updatePalworldMapLayerSelection(
@@ -170,6 +211,7 @@ export function parsePalworldMapQuery(
       && PALWORLD_MAP_PERIODS.includes(periodValue as PalworldMapPeriod)
       ? periodValue as PalworldMapPeriod
       : "all",
+    types: parseCollectibleTypes(singleQueryValue(params, "types")),
     world: worldValue !== undefined
       && PALWORLD_MAP_WORLDS.includes(worldValue as PalworldMapWorld)
       ? worldValue as PalworldMapWorld
@@ -206,6 +248,23 @@ export function updatePalworldMapQueryParams(
     const orderedLayers = PALWORLD_MAP_LAYERS.filter((layer) => patch.layers?.includes(layer));
     if (sameLayers(orderedLayers, PALWORLD_MAP_DEFAULT_LAYERS)) next.delete("layers");
     else next.set("layers", orderedLayers.join(","));
+  }
+
+  if (patch.types !== undefined) {
+    if (
+      patch.types.some((typeId) => !isPalworldMapCollectibleTypeId(typeId))
+      || new Set(patch.types).size !== patch.types.length
+    ) {
+      throw new TypeError("types 값에 지원되지 않거나 중복된 수집품 종류가 있습니다.");
+    }
+    const orderedTypes = PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.filter((typeId) =>
+      patch.types?.includes(typeId)
+    );
+    if (sameCollectibleTypes(orderedTypes, PALWORLD_MAP_COLLECTIBLE_TYPE_IDS)) {
+      next.delete("types");
+    } else {
+      next.set("types", orderedTypes.join(","));
+    }
   }
 
   if (patch.focusPal !== undefined) {

@@ -22,6 +22,7 @@ import { PalworldHome } from "../src/features/public-palworld/components/Palworl
 import { ItemCard, PalCard } from "../src/features/public-palworld/components/PalworldCards";
 import { PalworldItemReferenceButton } from "../src/features/public-palworld/components/PalworldItemReferenceButton";
 import { PalworldMapFilterPanel } from "../src/features/public-palworld/components/PalworldMapFilterPanel";
+import { PalworldMapLocationLayer } from "../src/features/public-palworld/components/PalworldMapLocationLayer";
 import { PalworldMapMarkerPopover } from "../src/features/public-palworld/components/PalworldMapMarkerPopover";
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
 import {
@@ -75,6 +76,11 @@ import { PalworldTranslationReviewNotice } from "../src/features/public-palworld
 import generatedStaticAssets from "../src/features/public-palworld/data/palworld-static-assets.generated.json";
 import { palworldI18n } from "../src/features/public-palworld/i18n/palworld-i18n";
 import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../src/features/public-palworld/utils/element-images";
+import { PALWORLD_MAP_COLLECTIBLE_TYPE_IDS } from "../src/features/public-palworld/utils/map-collectible-types";
+import {
+  isLocalPalworldMapLayerIconUrl,
+  PALWORLD_MAP_LAYER_ICONS,
+} from "../src/features/public-palworld/utils/map-layer-icons";
 import { workSuitabilityIconUrl } from "../src/features/public-palworld/utils/work-suitability-icons";
 
 const gameAssetUrl = (fileName: string) => new URL(`../public/images/games/${fileName}`, import.meta.url);
@@ -1013,7 +1019,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /Palworld 월드 지도/u);
   assert.match(
     korean,
-    /alt="검증된 필드 보스와 선택한 Pal의 일반 야생 스폰 위치가 표시된 Palworld 월드 지도"/u
+    /alt="검증된 필드 보스, 야생 스폰, 이동 및 수집 위치가 표시된 Palworld 월드 지도"/u
   );
   assert.doesNotMatch(korean, /pyPalworldAPI|>1\.0\.1</u);
   assert.match(korean, /aria-label="지도 확대"/u);
@@ -1032,17 +1038,44 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /이동·장소/u);
   assert.match(korean, /빠른 이동 지점/u);
   assert.match(korean, /수집품/u);
-  assert.match(korean, /쿠룰리스상/u);
+  assert.match(korean, /쿠룰리스 상/u);
+  assert.match(korean, /도로롱 상/u);
+  assert.match(korean, /펭키 상/u);
+  assert.match(korean, /크로꽁 상/u);
+  assert.match(korean, /초원 알/u);
+  assert.match(korean, /천락 알/u);
   assert.match(korean, /data-layer="fast-travel"[\s\S]*<input disabled=""/u);
+  assert.equal(
+    (korean.match(/class="palworld-map-filter-layer-icon"/gu) ?? []).length,
+    29,
+  );
+  assert.match(
+    korean,
+    /data-layer="fast-travel"[\s\S]*src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
+  );
+  assert.match(
+    korean,
+    /data-layer="egg-grass"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
+  );
+  assert.match(
+    korean,
+    /data-layer="statue-lifmunk"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
+  );
+  assert.doesNotMatch(
+    korean,
+    /data-layer="statue-lifmunk"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/pals\//u,
+  );
   assert.match(korean, /현재 화면의 위치/u);
   assert.match(korean, /휠·핀치/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
   assert.match(japanese, />フィルター 1件</u);
   assert.match(japanese, /移動・場所/u);
   assert.match(japanese, /収集品/u);
+  assert.match(japanese, /クルリス像/u);
+  assert.match(japanese, /モコロン像/u);
   assert.match(
     japanese,
-    /検証済みのフィールドボスと選択したパルの通常の野生スポーン位置が表示されたPalworldワールドマップ/u
+    /検証済みのフィールドボス、野生スポーン、移動・収集地点が表示されたPalworldワールドマップ/u
   );
   assert.match(japanese, /ホイール・ピンチ/u);
 
@@ -1076,11 +1109,13 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
         label: { ko: "Pal 위치", ja: "パルの位置" },
         layers: [{
           id: "boss",
+          iconFallback: "◆",
           label: { ko: "필드 보스", ja: "フィールドボス" },
           selected: true,
           state: "ready",
         }, {
           id: "spawn",
+          iconFallback: "●",
           label: { ko: "일반 야생 스폰", ja: "通常の野生スポーン" },
           selected: false,
           state: "data_unavailable",
@@ -1105,11 +1140,52 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
   );
 
   assert.match(filter, /data-layer="boss"[\s\S]*type="checkbox" checked=""/u);
+  assert.match(filter, /palworld-map-filter-layer-icon-fallback[^>]*>◆</u);
   assert.match(filter, /data-layer="spawn"[\s\S]*<input disabled=""[^>]*type="checkbox"/u);
   assert.match(popover, /role="dialog"/u);
   assert.match(popover, /aria-modal="false"/u);
   assert.match(popover, /aria-label="위치 정보 닫기"/u);
   assert.match(popover, />아누비스</u);
+});
+
+test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 알 subtype을 완전하게 제공한다", () => {
+  const ids = [
+    "ancient-ruin",
+    "boss",
+    "dungeon",
+    "fast-travel",
+    "journal",
+    "npc",
+    "skill-fruit",
+    "spawn",
+    "treasure",
+    ...PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
+  ] as const;
+  assert.deepEqual(
+    Object.keys(PALWORLD_MAP_LAYER_ICONS).sort(),
+    [...ids].sort(),
+  );
+
+  for (const id of ids) {
+    const asset = PALWORLD_MAP_LAYER_ICONS[id];
+    assert.ok(asset);
+    assert.equal(isLocalPalworldMapLayerIconUrl(asset.imageUrl), true);
+    const bytes = readFileSync(new URL(`../public${asset.imageUrl}`, import.meta.url));
+    assert.equal(bytes.subarray(0, 4).toString("ascii"), "RIFF");
+    assert.equal(bytes.subarray(8, 12).toString("ascii"), "WEBP");
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      asset.imageUrl.split("/").at(-1)?.replace(".webp", ""),
+    );
+  }
+
+  assert.equal(isLocalPalworldMapLayerIconUrl("https://example.com/icon.webp"), false);
+  assert.equal(
+    isLocalPalworldMapLayerIconUrl(
+      `/images/palworld/1.0.1/map-icons/${"a".repeat(64)}.png`,
+    ),
+    false,
+  );
 });
 
 test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 않는다", () => {
@@ -1239,6 +1315,120 @@ test("월드 지도 일반 스폰 layer는 cluster 좌표를 확대 배율에 �
   assert.match(markup, /cy="0\.390625"/u);
   assert.match(markup, /opacity="0\.64"/u);
   assert.match(markup, /r="0\.004"/u);
+});
+
+test("월드 지도 추가 위치 마커는 상세 연결 상태와 최소 터치 영역을 제공한다", () => {
+  const labels = {
+    "fast-travel": { ko: "빠른 이동", ja: "ファストトラベル" },
+    dungeon: { ko: "던전", ja: "ダンジョン" },
+    egg: { ko: "알", ja: "タマゴ" },
+    lifmunk: { ko: "쿠룰리스 석상", ja: "クルリス像" },
+    "skill-fruit": { ko: "스킬 열매", ja: "スキルフルーツ" },
+    journal: { ko: "수기", ja: "手記" },
+  } as const;
+  const html = renderToStaticMarkup(
+    <PalworldMapLocationLayer
+      clusterLabel={(count) => `${count}개 위치`}
+      iconAssets={{
+        "egg-grass": {
+          imageUrl: `/images/palworld/1.0.1/map-icons/${"a".repeat(64)}.webp`,
+          width: 256,
+          height: 256,
+        },
+      }}
+      labels={labels}
+      locale="ko"
+      locations={[{
+        id: "egg-001",
+        category: "egg",
+        subtype: "grass-main",
+        normalizedX: 0.25,
+        normalizedY: 0.75,
+      }]}
+      onSelectCluster={() => undefined}
+      onSelectLocation={() => undefined}
+      popoverId="map-location-popover"
+      selectedLocationId="egg-001"
+      zoom={2}
+    />,
+  );
+  const css = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
+  const markerRule = css.match(
+    /\.palworld-map-location-marker\s*\{(?<body>[^}]+)\}/u,
+  )?.groups?.body;
+
+  assert.match(html, /aria-controls="map-location-popover"/u);
+  assert.match(html, /aria-expanded="true"/u);
+  assert.match(html, /aria-label="알"/u);
+  assert.match(
+    html,
+    /src="\/images\/palworld\/1\.0\.1\/map-icons\/a{64}\.webp"/u,
+  );
+  assert.match(html, /--palworld-map-marker-inverse-scale:0\.5/u);
+  assert.match(html, /alt=""[^>]*aria-hidden="true"/u);
+  assert.ok(markerRule);
+  assert.match(
+    markerRule,
+    /min-inline-size:\s*var\(--yoro-size-touch-target\);/u,
+  );
+  assert.match(
+    markerRule,
+    /min-block-size:\s*var\(--yoro-size-touch-target\);/u,
+  );
+});
+
+test("월드 지도 subtype cluster는 검증된 실제 아이콘과 위치 수를 함께 표시한다", () => {
+  const labels = {
+    "fast-travel": { ko: "빠른 이동", ja: "ファストトラベル" },
+    dungeon: { ko: "던전", ja: "ダンジョン" },
+    egg: { ko: "알", ja: "タマゴ" },
+    lifmunk: { ko: "석상", ja: "像" },
+    "skill-fruit": { ko: "스킬 열매", ja: "スキルフルーツ" },
+    journal: { ko: "수기", ja: "手記" },
+  } as const;
+  const subtypeLabels = {
+    "statue-lifmunk": { ko: "쿠룰리스 상", ja: "クルリス像" },
+  } as const;
+  const imageUrl = `/images/palworld/1.0.1/map-icons/${"b".repeat(64)}.webp`;
+  const html = renderToStaticMarkup(
+    <PalworldMapLocationLayer
+      clusterLabel={(count) => `${count}개 위치`}
+      iconAssets={{
+        "statue-lifmunk": {
+          imageUrl,
+          width: 256,
+          height: 256,
+        },
+      }}
+      labels={labels}
+      locale="ko"
+      locations={[{
+        id: "statue-001",
+        category: "lifmunk",
+        subtype: "statue-lifmunk",
+        normalizedX: 0.25,
+        normalizedY: 0.75,
+      }, {
+        id: "statue-002",
+        category: "lifmunk",
+        subtype: "statue-lifmunk",
+        normalizedX: 0.251,
+        normalizedY: 0.751,
+      }]}
+      onSelectCluster={() => undefined}
+      onSelectLocation={() => undefined}
+      subtypeLabels={subtypeLabels}
+      zoom={1}
+    />,
+  );
+
+  assert.match(html, /aria-label="쿠룰리스 상, 2개 위치"/u);
+  assert.match(html, new RegExp(`src="${imageUrl}"`, "u"));
+  assert.match(html, /<strong aria-hidden="true">2<\/strong>/u);
+  assert.equal((html.match(/palworld-map-location-marker/gu) ?? []).length, 1);
 });
 
 test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고 한국어·일본어 i18n을 연결한다", () => {

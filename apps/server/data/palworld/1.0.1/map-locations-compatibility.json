@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "operator_acknowledged",
+  "decision": "allow_exact_checksum_compatibility_display",
+  "sourceVersionVerified": false,
+  "compatibilityBasis": "exact_world_actor_join_and_map_geometry",
+  "sourceArchiveSha256": "344628b020ffc8ee4642188e356013fc3e955f2ec8addf5ae384786c494f6186",
+  "indexMemberSha256": "0f3b811f079e1fbb24b745a55d7e0d77dc4ac3b0574f6d9d4df7b7ae4a39a661",
+  "memberInventorySha256": "6b6a85b984df3f933a452ec9a420e541ba7d1eb9ea199a7670cbfc6d0be0b406",
+  "mapLocationsArtifactSha256": "3449e9cbebf930cf33e69f51917fe958aa0c31b566d12a589e2c3a8be2bee47c",
+  "mapLocationsManifestSha256": "5c9689a5278ca85dc0ed68e301b11671b9468226eeaec7d1143466754be09d1b",
+  "selectedMemberCount": 7487,
+  "totalLocations": 2543,
+  "categoryCounts": {
+    "fast-travel": 137,
+    "dungeon": 170,
+    "egg": 1786,
+    "skill-fruit": 35,
+    "lifmunk": 360,
+    "journal": 55
+  },
+  "worlds": [
+    {
+      "world": "main",
+      "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+      "transformRevision": "main-map-fmodel-bounds-v1"
+    }
+  ],
+  "importAudit": {
+    "sourceRawExact": 2656,
+    "mainIncluded": 2543,
+    "treeExcluded": 113,
+    "outOfBoundsExcluded": 0,
+    "exactDuplicates": 0,
+    "taxonomyMappingSha256": "9192ef813fcb6b80e27ae44d06fece3b40dcbb0c20826c60edd319d4078fff4f",
+    "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4"
+  },
+  "reviewedAt": "2026-07-26T00:00:00.000Z",
+  "reviewer": "streamoverlay-data-maintenance",
+  "rightsVerified": false,
+  "usageBasis": "operator_reference_use",
+  "evidenceChecksum": "ef156c8b0c7a864255a8d35b54d5a9e55e5a05a48d24ac67064113b055463da5"
+}

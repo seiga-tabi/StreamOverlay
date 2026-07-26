@@ -61,6 +61,17 @@ import {
 import {
   loadPalworldWorkImageManifest
 } from "../data/palworld-work-image-manifest.js";
+import {
+  PALWORLD_MAP_LOCATIONS_ARTIFACT_FILE,
+  PALWORLD_MAP_LOCATIONS_MANIFEST_FILE,
+  createPalworldMapLocationsProvider,
+  loadPalworldMapLocationsArtifact,
+  loadPalworldMapLocationsCompatibilityAuthorization
+} from "../data/palworld-map-locations-artifact.js";
+import {
+  loadPalworldMapLayerIconManifest
+} from "../data/palworld-map-layer-icon-manifest.js";
+import { inspectPalworldWebp } from "../data/palworld-image-import.js";
 
 const REQUIRED_LEGACY_RELEASE_FILES = [
   "sources.lock.json",
@@ -85,6 +96,11 @@ const LEGACY_MAP_MARKER_FILES = [
 const LEGACY_SPAWN_FILES = [
   PALWORLD_SPAWN_ARTIFACT_FILE,
   PALWORLD_SPAWN_MANIFEST_FILE
+] as const;
+
+const LEGACY_MAP_LOCATION_FILES = [
+  PALWORLD_MAP_LOCATIONS_ARTIFACT_FILE,
+  PALWORLD_MAP_LOCATIONS_MANIFEST_FILE
 ] as const;
 
 const REQUIRED_TRANSLATION_RUNTIME_FILES = [
@@ -122,10 +138,12 @@ export type PalworldRuntimeLayout =
       releaseDirectory: string;
       releaseRoot: string;
       compositeArtifactFiles?: readonly string[];
-      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
       markerCompatibilityApprovalSha256?: string;
       spawnCompatibilityApprovalSha256?: string;
+      mapLocationsCompatibilityApprovalSha256?: string;
       condensationRulesSha256?: string;
+      mapLayerIconsManifestSha256?: string;
       workImagesManifestSha256?: string;
     };
 
@@ -221,6 +239,17 @@ export async function resolvePalworldRuntimeLayout(
                   )!.sha256
               }),
           ...(active.manifest.composite.artifacts.find(
+            (artifact) => artifact.kind === "map-locations-compatibility"
+          )?.sha256 === undefined
+            ? {}
+            : {
+                mapLocationsCompatibilityApprovalSha256:
+                  active.manifest.composite.artifacts.find(
+                    (artifact) =>
+                      artifact.kind === "map-locations-compatibility"
+                  )!.sha256
+              }),
+          ...(active.manifest.composite.artifacts.find(
             (artifact) => artifact.kind === "condensation-rules"
           )?.sha256 === undefined
             ? {}
@@ -228,6 +257,17 @@ export async function resolvePalworldRuntimeLayout(
                 condensationRulesSha256:
                   active.manifest.composite.artifacts.find(
                     (artifact) => artifact.kind === "condensation-rules"
+                  )!.sha256
+              }),
+          ...(active.manifest.composite.artifacts.find(
+            (artifact) => artifact.kind === "map-layer-icons-manifest"
+          )?.sha256 === undefined
+            ? {}
+            : {
+                mapLayerIconsManifestSha256:
+                  active.manifest.composite.artifacts.find(
+                    (artifact) =>
+                      artifact.kind === "map-layer-icons-manifest"
                   )!.sha256
               }),
           ...(active.manifest.composite.artifacts.find(
@@ -278,7 +318,15 @@ async function assertExactStaticAssetUrls(input: {
     const segments = relative.split("/");
     if (
       segments.length !== 2
-      || !["pals", "items", "elements", "work", "skills", "maps"].includes(segments[0]!)
+      || ![
+        "pals",
+        "items",
+        "elements",
+        "work",
+        "skills",
+        "maps",
+        "map-icons"
+      ].includes(segments[0]!)
       || !CONTENT_HASH_WEBP_PATTERN.test(segments[1]!)
     ) {
       throw new Error("Palworld static asset URL이 허용된 content-hash 경로가 아닙니다.");
@@ -368,20 +416,33 @@ async function validateLegacyRuntime(
   const spawnFilePresence = await Promise.all(
     LEGACY_SPAWN_FILES.map((file) => pathExists(path.join(releaseRoot, file)))
   );
+  const locationFilePresence = await Promise.all(
+    LEGACY_MAP_LOCATION_FILES.map((file) =>
+      pathExists(path.join(releaseRoot, file))
+    )
+  );
   if (markerFilePresence.some(Boolean) && !markerFilePresence.every(Boolean)) {
     throw new Error("Palworld marker artifact와 manifest는 함께 존재해야 합니다.");
   }
   if (spawnFilePresence.some(Boolean) && !spawnFilePresence.every(Boolean)) {
     throw new Error("Palworld spawn artifact와 manifest는 함께 존재해야 합니다.");
   }
+  if (
+    locationFilePresence.some(Boolean)
+    && !locationFilePresence.every(Boolean)
+  ) {
+    throw new Error("Palworld 위치 artifact와 manifest는 함께 존재해야 합니다.");
+  }
   const hasMapMarkers = markerFilePresence.every(Boolean);
   const hasMapSpawns = spawnFilePresence.every(Boolean);
+  const hasMapLocations = locationFilePresence.every(Boolean);
   const compositeFiles = layout.compositeArtifactFiles;
   const runtimeReleaseFiles = compositeFiles === undefined
     ? [
         ...REQUIRED_LEGACY_RELEASE_FILES,
         ...(hasMapMarkers ? LEGACY_MAP_MARKER_FILES : []),
-        ...(hasMapSpawns ? LEGACY_SPAWN_FILES : [])
+        ...(hasMapSpawns ? LEGACY_SPAWN_FILES : []),
+        ...(hasMapLocations ? LEGACY_MAP_LOCATION_FILES : [])
       ]
     : compositeFiles.filter((file) => !file.startsWith("locales/"));
   const runtimeTranslationFiles = compositeFiles === undefined
@@ -528,6 +589,10 @@ async function validateLegacyRuntime(
   const workImagesManifest = layout.workImagesManifestSha256 === undefined
     ? undefined
     : await loadPalworldWorkImageManifest(releaseRoot, layout.release);
+  const mapLayerIconsManifest =
+    layout.mapLayerIconsManifestSha256 === undefined
+      ? undefined
+      : await loadPalworldMapLayerIconManifest(releaseRoot, layout.release);
   if (workImagesManifest !== undefined && staticDirectory === "public") {
     const mappingBytes = await readFile(
       path.join(
@@ -549,6 +614,7 @@ async function validateLegacyRuntime(
     ...catalog.itemImagesManifest.entries.map((entry) => entry.imageUrl),
     ...catalog.elementImagesManifest.entries.map((entry) => entry.imageUrl),
     ...mapImagesManifest.entries.map((entry) => entry.imageUrl),
+    ...(mapLayerIconsManifest?.entries.map((entry) => entry.imageUrl) ?? []),
     ...(workImagesManifest?.entries.map((entry) => entry.imageUrl) ?? [])
   ]);
   await assertExactStaticAssetUrls({
@@ -571,6 +637,22 @@ async function validateLegacyRuntime(
     if (bytes.length !== entry.outputBytes) {
       throw new Error(
         "Palworld work image manifest bytes와 실제 WebP 크기가 일치하지 않습니다."
+      );
+    }
+  }
+  for (const entry of mapLayerIconsManifest?.entries ?? []) {
+    const bytes = await readFile(
+      path.join(staticRoot, "map-icons", entry.outputFileName)
+    );
+    const inspection = inspectPalworldWebp(bytes);
+    if (
+      inspection.bytes !== entry.outputBytes
+      || inspection.sha256 !== entry.outputSha256
+      || inspection.width !== entry.outputWidth
+      || inspection.height !== entry.outputHeight
+    ) {
+      throw new Error(
+        "Palworld 지도 필터 아이콘 manifest bytes와 실제 WebP가 일치하지 않습니다."
       );
     }
   }
@@ -671,14 +753,110 @@ async function validateLegacyRuntime(
       mainMapSpawns = undefined;
     }
   }
+  let mainMapLocations:
+    Awaited<ReturnType<typeof loadPalworldMapLocationsArtifact>>["worlds"][number]
+    | undefined;
+  if (hasMapLocations) {
+    try {
+      const mapLocations = await loadPalworldMapLocationsArtifact(releaseRoot);
+      const compatibilityAuthorization =
+        mapLocations.activation === "candidate"
+          ? layout.mapLocationsCompatibilityApprovalSha256 === undefined
+            ? undefined
+            : await loadPalworldMapLocationsCompatibilityAuthorization({
+                releaseRoot,
+                artifact: mapLocations,
+                expectedApprovalSha256:
+                  layout.mapLocationsCompatibilityApprovalSha256
+              })
+          : undefined;
+      if (
+        mapLocations.activation === "candidate"
+        && compatibilityAuthorization === undefined
+      ) {
+        throw new Error(
+          "candidate 지도 위치는 active composite가 고정한 compatibility approval 없이는 runtime에 포함할 수 없습니다."
+        );
+      }
+      const provider = createPalworldMapLocationsProvider({
+        artifact: mapLocations,
+        ...(compatibilityAuthorization === undefined
+          ? {}
+          : { compatibilityAuthorization })
+      });
+      mainMapLocations = mapLocations.worlds.find(
+        (world) => world.world === "main"
+      );
+      if (
+        !mainMapLocations
+        || mainMapLocations.locations.length < 1
+        || provider.diagnostics().total !== mapLocations.totalLocations
+      ) {
+        throw new Error(
+          "MainMap 지도 위치 runtime artifact가 비었거나 diagnostics count가 다릅니다."
+        );
+      }
+      if (
+        mainMapMarkers
+        && mainMapLocations.targetMapAssetSha256
+          !== mainMapMarkers.targetMapAssetSha256
+      ) {
+        throw new Error(
+          "지도 위치와 보스 marker의 MainMap asset hash가 일치하지 않습니다."
+        );
+      }
+      if (
+        mainMapSpawns
+        && mainMapLocations.targetMapAssetSha256
+          !== mainMapSpawns.targetMapAssetSha256
+      ) {
+        throw new Error(
+          "지도 위치와 일반 스폰의 MainMap asset hash가 일치하지 않습니다."
+        );
+      }
+      if (
+        !mapImagesManifest.entries.some((entry) =>
+          entry.outputSha256 === mainMapLocations?.targetMapAssetSha256
+        )
+      ) {
+        throw new Error(
+          "지도 위치가 composite map image manifest 밖의 지도를 참조합니다."
+        );
+      }
+      const representativeIndexes = new Set([
+        0,
+        Math.floor(mainMapLocations.locations.length / 2),
+        mainMapLocations.locations.length - 1
+      ]);
+      for (const index of representativeIndexes) {
+        const location = mainMapLocations.locations[index];
+        if (
+          location === undefined
+          || location.normalizedX < 0
+          || location.normalizedX > 1
+          || location.normalizedY < 0
+          || location.normalizedY > 1
+        ) {
+          throw new Error(
+            "지도 위치 대표 좌표가 정규화 범위를 벗어났습니다."
+          );
+        }
+      }
+    } catch (error) {
+      if (requireExactRuntimeDirectories) throw error;
+      mainMapLocations = undefined;
+    }
+  }
 
   console.log(
     `[palworld-data] legacy runtime artifact smoke 완료: release ${layout.release}, `
     + `${release.artifact.records.length}종, Pal 이미지 ${activeImages.length}개, `
     + `아이템 ${catalog.catalog.items.length}개, 스킬 ${catalog.catalog.skills.length}개, `
+    + `지도 필터 아이콘 ${mapLayerIconsManifest?.entries.length ?? 0}개, `
     + `작업 적성 아이콘 ${workImagesManifest?.entries.length ?? 0}개, `
     + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers?.markers.length ?? 0}개, `
     + `일반 스폰 Pal ${mainMapSpawns?.pals.length ?? 0}종, `
+    + `지도 위치 ${mainMapLocations?.locations.length ?? 0}개, `
     + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`
   );
 }
@@ -691,7 +869,7 @@ async function collectManifestImageUrls(
   const expectedPrefix = `/images/palworld/${manifest.release}/`;
   const imagePattern = new RegExp(
     `^/images/palworld/${manifest.release.replaceAll(".", "\\.")}/`
-    + "(?:pals|items|elements|work|skills|maps)/[a-f0-9]{64}\\.webp$",
+    + "(?:pals|items|elements|work|skills|maps|map-icons)/[a-f0-9]{64}\\.webp$",
     "u"
   );
   const visit = (value: unknown): void => {
@@ -823,6 +1001,16 @@ export async function preparePalworldRuntimeBundle(input: {
           }
         } catch {
           // candidate 또는 손상된 spawn은 selector가 없는 legacy bundle에서 제외합니다.
+        }
+        try {
+          const locations = await loadPalworldMapLocationsArtifact(
+            layout.releaseRoot
+          );
+          if (locations.activation === "active") {
+            optionalRuntimeFiles.push(...LEGACY_MAP_LOCATION_FILES);
+          }
+        } catch {
+          // candidate 또는 손상된 위치 artifact는 legacy bundle에서 제외합니다.
         }
       }
       const releaseFiles = layout.compositeArtifactFiles === undefined

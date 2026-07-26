@@ -7,6 +7,7 @@ const {
   parsePalworldBreedingParentsQuery,
   parsePalworldBreedingQuery,
   parsePalworldItemListQuery,
+  parsePalworldMapLocationsQuery,
   parsePalworldPalSpawnQuery,
   parsePalworldPalListQuery,
   parsePalworldSkillListQuery,
@@ -152,5 +153,51 @@ test("Pal 일반 스폰 query는 world와 canonical Pal ID만 허용한다", () 
     new URLSearchParams("world=main&pal=anubis&url=https%3A%2F%2Fexample.com")
   ]) {
     assert.throws(() => parsePalworldPalSpawnQuery(params), PalworldQueryError);
+  }
+});
+
+test("지도 위치 query는 world·레이어·offset·limit allowlist만 허용한다", () => {
+  assert.deepEqual(
+    parsePalworldMapLocationsQuery(
+      new URLSearchParams(
+        "world=main&layers=journal,fast-travel&offset=20&limit=100"
+      )
+    ),
+    {
+      world: "main",
+      layers: ["fast-travel", "journal"],
+      offset: 20,
+      limit: 100
+    }
+  );
+  assert.deepEqual(
+    parsePalworldMapLocationsQuery(new URLSearchParams()),
+    {
+      world: "main",
+      layers: [
+        "fast-travel",
+        "dungeon",
+        "egg",
+        "skill-fruit",
+        "lifmunk",
+        "journal"
+      ],
+      offset: 0,
+      limit: 5000
+    }
+  );
+  for (const params of [
+    new URLSearchParams("layers="),
+    new URLSearchParams("layers=egg,egg"),
+    new URLSearchParams("layers=unknown"),
+    new URLSearchParams("world=unknown"),
+    new URLSearchParams("offset=-1"),
+    new URLSearchParams("limit=5001"),
+    new URLSearchParams("target=https%3A%2F%2Fexample.com")
+  ]) {
+    assert.throws(
+      () => parsePalworldMapLocationsQuery(params),
+      PalworldQueryError
+    );
   }
 });

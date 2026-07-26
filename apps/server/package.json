@@ -15,6 +15,8 @@
     "generate:palworld-breeding": "tsx src/scripts/generate-palworld-breeding.ts",
     "generate:palworld-map-markers": "tsx src/scripts/generate-palworld-map-markers.ts",
     "publish:palworld-map-markers-compatibility": "tsx src/scripts/publish-palworld-map-markers-compatibility.ts",
+    "import:palworld-map-locations": "tsx src/scripts/import-palworld-map-locations.ts",
+    "import:palworld-map-collectible-icons": "tsx src/scripts/import-palworld-map-collectible-icons.ts",
     "generate:palworld-spawns": "tsx src/scripts/generate-palworld-spawns.ts",
     "import:palworld-images": "tsx src/scripts/import-palworld-images.ts",
     "import:palworld-catalog": "tsx src/scripts/import-palworld-catalog.ts",

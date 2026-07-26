@@ -17,6 +17,7 @@ import {
   getPalworldBreeding,
   getPalworldBreedingParents,
   getPalworldItems,
+  getPalworldMapLocations,
   getPalworldMapMarkers,
   getPalworldMeta,
   getPalworldPals,
@@ -327,6 +328,85 @@ test("Palworld 지도 marker API는 main world를 요청하고 Shared validator�
     assert.equal(response.state, "ready");
     assert.equal(response.markers[0]?.pal.nameKo, "아누비스");
     assert.match(requested[0] ?? "", /\/api\/palworld\/map\/markers\?world=main$/u);
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
+});
+
+test("Palworld 추가 지도 위치 API는 선택 레이어와 bounded limit을 전달한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  let requested = "";
+  const metadata = {
+    gameVersion: "1.0.1",
+    sourceName: "고정 Palworld release",
+    sourceUrl: "https://example.com/palworld-source",
+    sourceRevision: "fixed-revision",
+    extractedAt: "2026-07-20T00:00:00.000Z",
+    verifiedAt: "2026-07-21T00:00:00.000Z",
+    license: "RIGHTS_NOT_INDEPENDENTLY_VERIFIED",
+    rightsVerified: false,
+  };
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" },
+      dispatchEvent: () => true,
+    } as unknown as Window,
+    fetch: async (url: string | URL | Request) => {
+      requested = String(url);
+      return new Response(JSON.stringify({
+        state: "ready",
+        world: "main",
+        layers: ["fast-travel", "egg"],
+        offset: 0,
+        limit: 5000,
+        total: 2,
+        returned: 2,
+        hasMore: false,
+        locations: [{
+          id: "map-location-001",
+          category: "fast-travel",
+          subtype: "tower",
+          normalizedX: 0.25,
+          normalizedY: 0.75,
+        }, {
+          id: "map-location-002",
+          category: "egg",
+          subtype: "grass-grade-01",
+          normalizedX: 0.5,
+          normalizedY: 0.5,
+        }],
+        metadata,
+        overlay: {
+          schemaVersion: 1,
+          technicalStatus: "ready",
+          sourceType: "operator_pak_export",
+          archiveSha256: "a".repeat(64),
+          sourceMember: "MainWorld_5/PL_MainWorld5.json",
+          sourceMemberSha256: "b".repeat(64),
+          targetMapAssetSha256: "c".repeat(64),
+          sourceGameVersion: null,
+          sourceSteamBuildId: null,
+          targetGameVersion: "1.0.1",
+          compatibilityBasis: "exact_world_actor_join_and_map_geometry",
+          transformRevision: "main-map-transform-v1",
+          rightsVerified: false,
+          usageBasis: "operator_reference_use",
+          activationBasis: "versioned_compatibility_approval",
+          compatibilityApprovalSha256: "d".repeat(64),
+        },
+      }), { status: 200 });
+    },
+  });
+
+  try {
+    const response = await getPalworldMapLocations(["fast-travel", "egg"], "main");
+    assert.equal(response.returned, 2);
+    const url = new URL(requested);
+    assert.equal(url.pathname, "/api/palworld/map/locations");
+    assert.equal(url.searchParams.get("layers"), "fast-travel,egg");
+    assert.equal(url.searchParams.get("limit"), "5000");
+    assert.equal(url.searchParams.get("offset"), "0");
   } finally {
     Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
   }

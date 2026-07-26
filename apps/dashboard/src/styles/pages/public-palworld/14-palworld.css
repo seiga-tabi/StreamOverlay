@@ -647,6 +647,7 @@
 }
 
 .palworld-map-filter-header {
+  flex-wrap: wrap;
   justify-content: space-between;
   min-inline-size: 0;
   gap: var(--yoro-space-2);
@@ -656,15 +657,15 @@
 }
 
 .palworld-map-filter-header > strong {
+  flex: 1 1 100%;
   min-inline-size: 0;
-  overflow: hidden;
   color: var(--yoro-color-text-strong);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .palworld-map-filter-header-actions {
-  flex: 0 0 auto;
+  flex: 1 1 100%;
+  justify-content: space-between;
   gap: var(--yoro-space-1);
 }
 
@@ -767,16 +768,25 @@
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  inline-size: var(--yoro-space-5);
-  block-size: var(--yoro-space-5);
+  overflow: hidden;
+  inline-size: var(--yoro-space-6);
+  block-size: var(--yoro-space-6);
+  border: thin solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--yoro-color-product-gray-surface-strong);
 }
 
-.palworld-map-filter-symbol.is-boss {
-  color: var(--yoro-color-danger);
+.palworld-map-filter-layer-icon img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
 }
 
-.palworld-map-filter-symbol.is-spawn {
-  color: var(--yoro-color-info);
+.palworld-map-filter-layer-icon-fallback {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  line-height: 1;
 }
 
 .palworld-map-filter-layer-copy {
@@ -1054,7 +1064,8 @@
 }
 
 .palworld-map-legend-spawn,
-.palworld-map-legend-boss {
+.palworld-map-legend-boss,
+.palworld-map-legend-location {
   flex: 0 0 auto;
   inline-size: var(--yoro-space-4);
   block-size: var(--yoro-space-4);
@@ -1070,6 +1081,65 @@
 .palworld-map-legend-boss {
   border: var(--yoro-focus-ring-width) solid var(--yoro-color-danger);
   background: var(--yoro-color-surface-strong);
+}
+
+.palworld-map-legend-location {
+  border: var(--yoro-focus-ring-width) solid currentColor;
+  background: var(--yoro-color-surface-strong);
+  color: var(--palworld-accent);
+}
+
+.palworld-map-location-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+}
+
+.palworld-map-location-icon img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.palworld-map-location-icon-fallback {
+  color: currentColor;
+  line-height: 1;
+}
+
+.palworld-map-legend-location-icon {
+  inline-size: var(--yoro-space-6);
+  block-size: var(--yoro-space-6);
+  margin-block-start: var(--yoro-space-1);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--yoro-color-surface-strong);
+}
+
+.palworld-map-legend-location[data-category="fast-travel"],
+.palworld-map-location-marker[data-category="fast-travel"] {
+  color: var(--yoro-color-info);
+}
+
+.palworld-map-legend-location[data-category="dungeon"],
+.palworld-map-location-marker[data-category="dungeon"] {
+  color: var(--yoro-color-danger);
+}
+
+.palworld-map-legend-location[data-category="egg"],
+.palworld-map-location-marker[data-category="egg"] {
+  color: var(--yoro-color-warning);
+}
+
+.palworld-map-legend-location[data-category="skill-fruit"],
+.palworld-map-location-marker[data-category="skill-fruit"] {
+  color: var(--yoro-color-success);
+}
+
+.palworld-map-legend-location[data-category="journal"],
+.palworld-map-location-marker[data-category="journal"] {
+  color: var(--yoro-color-text-muted);
 }
 
 .palworld-map-legend-periods {
@@ -1095,6 +1165,72 @@
     translate(-50%, -50%)
     scale(var(--palworld-map-marker-inverse-scale, 1));
   transform-origin: center;
+}
+
+.palworld-map-location-marker {
+  position: absolute;
+  z-index: var(--yoro-z-raised);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--yoro-size-touch-target);
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-1);
+  border: var(--yoro-focus-ring-width) solid currentColor;
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-soft);
+  font: inherit;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  cursor: pointer;
+  transform:
+    translate(-50%, -50%)
+    scale(var(--palworld-map-marker-inverse-scale, 1));
+  transform-origin: center;
+}
+
+.palworld-map-stage-layout-zoom .palworld-map-location-marker {
+  transform: translate(-50%, -50%);
+}
+
+.palworld-map-location-marker .palworld-map-location-icon {
+  inline-size: var(--yoro-space-8);
+  block-size: var(--yoro-space-8);
+  border-radius: var(--yoro-radius-sm);
+}
+
+.palworld-map-location-marker .palworld-map-location-icon-fallback {
+  font-size: var(--yoro-font-size-md);
+}
+
+.palworld-map-location-marker:hover,
+.palworld-map-location-marker:focus-visible,
+.palworld-map-location-marker[data-selected="true"] {
+  z-index: var(--yoro-z-sticky);
+  background: var(--palworld-accent-soft);
+}
+
+.palworld-map-location-marker:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-width);
+}
+
+.palworld-map-location-marker > strong {
+  position: absolute;
+  inset-block-start: calc(var(--yoro-space-1) * -1);
+  inset-inline-end: calc(var(--yoro-space-1) * -1);
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--yoro-space-5);
+  min-block-size: var(--yoro-space-5);
+  padding-inline: var(--yoro-space-1);
+  border: thin solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface-strong);
+  color: var(--yoro-color-text-strong);
+  font-variant-numeric: tabular-nums;
 }
 
 .palworld-map-boss-marker:hover,
@@ -1325,6 +1461,15 @@
 .palworld-map-visible-location-media .palworld-media-fallback {
   inline-size: 100%;
   block-size: 100%;
+}
+
+.palworld-map-visible-location-icon {
+  inline-size: 100%;
+  block-size: 100%;
+  padding: var(--yoro-space-1);
+  border: thin solid var(--yoro-color-border);
+  border-radius: inherit;
+  background: var(--yoro-color-surface-strong);
 }
 
 .palworld-map-visible-location-copy,

@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "1.0.1",
+  "sourceArchiveSha256": "344628b020ffc8ee4642188e356013fc3e955f2ec8addf5ae384786c494f6186",
+  "indexMember": {
+    "member": "MainWorld_5/PL_MainWorld5.json",
+    "sha256": "0f3b811f079e1fbb24b745a55d7e0d77dc4ac3b0574f6d9d4df7b7ae4a39a661"
+  },
+  "transformEvidence": {
+    "member": "apps/server/src/data/palworld-map-mappings/main-map-transform.json",
+    "sha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4",
+    "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
+    "revision": "main-map-fmodel-bounds-v1",
+    "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003"
+  },
+  "classes": [
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Desert_C",
+      "category": "dungeon",
+      "subtype": "desert"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Forest_C",
+      "category": "dungeon",
+      "subtype": "forest"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Grass1_C",
+      "category": "dungeon",
+      "subtype": "grass"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Sakura_C",
+      "category": "dungeon",
+      "subtype": "sakura"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Skyland_C",
+      "category": "dungeon",
+      "subtype": "skyland"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Snow_C",
+      "category": "dungeon",
+      "subtype": "snow"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Viking_B_C",
+      "category": "dungeon",
+      "subtype": "viking-b"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Viking_C",
+      "category": "dungeon",
+      "subtype": "viking"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Viking_C_C",
+      "category": "dungeon",
+      "subtype": "viking-c"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Volcano_C",
+      "category": "dungeon",
+      "subtype": "volcano"
+    },
+    {
+      "sourceClass": "BP_DungeonPortalMarker_Yakushima_C",
+      "category": "dungeon",
+      "subtype": "yakushima"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Note_C",
+      "category": "journal",
+      "subtype": "note"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_C",
+      "category": "lifmunk",
+      "subtype": "statue-lifmunk"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_FlameBambi_C",
+      "category": "lifmunk",
+      "subtype": "statue-rooby"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_GuardianDog_C",
+      "category": "lifmunk",
+      "subtype": "statue-yakumo"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_IceCrocodile_C",
+      "category": "lifmunk",
+      "subtype": "statue-munchill"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_LazyDragon_C",
+      "category": "lifmunk",
+      "subtype": "statue-relaxaurus"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_LeafMomonga_C",
+      "category": "lifmunk",
+      "subtype": "statue-herbil"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_Monkey_C",
+      "category": "lifmunk",
+      "subtype": "statue-tanzee"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_Mutant_C",
+      "category": "lifmunk",
+      "subtype": "statue-lunaris"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_NegativeKoala_C",
+      "category": "lifmunk",
+      "subtype": "statue-depresso"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_Penguin_C",
+      "category": "lifmunk",
+      "subtype": "statue-pengullet"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
+      "category": "lifmunk",
+      "subtype": "statue-cattiva"
+    },
+    {
+      "sourceClass": "BP_LevelObject_Relic_SheepBall_C",
+      "category": "lifmunk",
+      "subtype": "statue-lamball"
+    },
+    {
+      "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
+      "category": "fast-travel",
+      "subtype": "tower"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_DarkIsland_C",
+      "category": "skill-fruit",
+      "subtype": "dark-island"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_Desert_C",
+      "category": "skill-fruit",
+      "subtype": "desert"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_Grass_C",
+      "category": "skill-fruit",
+      "subtype": "grass"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_Sakura_C",
+      "category": "skill-fruit",
+      "subtype": "sakura"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_SkyIsland_C",
+      "category": "skill-fruit",
+      "subtype": "sky-island"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_Snow_C",
+      "category": "skill-fruit",
+      "subtype": "snow"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_Volcano_C",
+      "category": "skill-fruit",
+      "subtype": "volcano"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
+      "category": "skill-fruit",
+      "subtype": "world-tree"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_Sakurajima_grade_01_C",
+      "category": "egg",
+      "subtype": "sakurajima-1"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_desert_grade_01_C",
+      "category": "egg",
+      "subtype": "desert-1"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_glacier_grade_01_C",
+      "category": "egg",
+      "subtype": "glacier-1"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_glacier_grade_02_C",
+      "category": "egg",
+      "subtype": "glacier-2"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_grass_grade_01_C",
+      "category": "egg",
+      "subtype": "grass-1"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_grass_grade_02_C",
+      "category": "egg",
+      "subtype": "grass-2"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_grass_grade_03_C",
+      "category": "egg",
+      "subtype": "grass-3"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_grass_grade_04_C",
+      "category": "egg",
+      "subtype": "grass-4"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_skyisland_grade_01_C",
+      "category": "egg",
+      "subtype": "sky-island-1"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_tenraku_grade_01_C",
+      "category": "egg",
+      "subtype": "tenraku-1"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_tenraku_grade_02_C",
+      "category": "egg",
+      "subtype": "tenraku-2"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_volcanic_grade_01_C",
+      "category": "egg",
+      "subtype": "volcanic-1"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_volcanic_grade_02_C",
+      "category": "egg",
+      "subtype": "volcanic-2"
+    },
+    {
+      "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
+      "category": "egg",
+      "subtype": "world-tree-1"
+    }
+  ],
+  "expectedSourceCounts": {
+    "fast-travel": 152,
+    "dungeon": 170,
+    "egg": 1816,
+    "skill-fruit": 47,
+    "lifmunk": 407,
+    "journal": 64
+  },
+  "candidateFamilies": [
+    {
+      "id": "additional-warp",
+      "sourceClassTokens": [
+        "BP_DimensionWarpPoint_C",
+        "BP_LevelObject_WarpPointDestination_C",
+        "BP_LevelObject_WarpPointDestination_WorldTreeEntrance_C"
+      ]
+    },
+    {
+      "id": "fishing",
+      "sourceClassTokens": [
+        "Fishing"
+      ]
+    },
+    {
+      "id": "npc",
+      "sourceClassTokens": [
+        "MonoNPCSpawner",
+        "NPCCampSpawner"
+      ]
+    },
+    {
+      "id": "resource",
+      "sourceClassTokens": [
+        "PalMapObjectSpawner_Rock",
+        "PalMapObjectSpawner_PalCrystal",
+        "PalMapObjectSpawner_Sulfur",
+        "PalMapObjectSpawner_NightStone",
+        "PalMapObjectSpawner_SkyIslandOre",
+        "PalMapObjectSpawner_WorldTreeOre"
+      ]
+    },
+    {
+      "id": "treasure",
+      "sourceClassTokens": [
+        "Treasure"
+      ]
+    }
+  ],
+  "compatibilityApproval": {
+    "reviewedAt": "2026-07-26T00:00:00.000Z",
+    "reviewer": "streamoverlay-data-maintenance"
+  }
+}

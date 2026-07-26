@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "inventoryArchiveSha256": "6b06519e21dd00937e54d7ffcd9cba7948917bd4e76d34bffd65a53848fd7dc1",
+  "blueprintArchiveSha256": "633316b83bec9d8d2a07fae7e76ba877cb794fcbe9ca2ea407f109b3e7ca066d",
+  "entries": [
+    {
+      "id": "statue-lifmunk",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic.json",
+          "sha256": "7dfb9824426dfe52d7a5da7c4bec1102877d1e609f294305e4493e3cee7379f7"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic.png",
+      "imageSha256": "757df8fa76ab711acfb4d607b47d815afc8a93306ecb04e773904509b1d50d32",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-lamball",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_SheepBall_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_SheepBall.json",
+          "sha256": "bb1bf4760797c8d59c5bd49207e91ef7f78f1e01bf590c9057b9cabcafaf3ab5"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_01.png",
+      "imageSha256": "41087d47c1ad9a375935ef8010e8e89d8bab2a0099d8122c5d658f7f06f176df",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-pengullet",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_Penguin_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_Penguin.json",
+          "sha256": "75f6dcfc5878e03d777b51469b6f238eda471f4da6a73794c014e5804828c1d8"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_02.png",
+      "imageSha256": "2414ea82ccf5fdab535c5366ea248a434416b2a9af96022aa85b9e396b0e8038",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-munchill",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_IceCrocodile_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_IceCrocodile.json",
+          "sha256": "77ed2a4ae84611db21e2c3fdc8bdf88441b95f320886961f1dfba886f6e98391"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_03.png",
+      "imageSha256": "bc723134999067fb753b3f7d95a2e6bb94df026c4ec74dd3939a60170718748a",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-rooby",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_FlameBambi_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_FlameBambi.json",
+          "sha256": "60c0a2eea1766ee4255285d2638ba8bea1fb290b4f1d51df31933ca781d4c754"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_04.png",
+      "imageSha256": "c9351b7f1b917fec667d265b25d31a9e7ec73c4fcc49f7cc91f5cc5d1bc7d5ff",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-herbil",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_LeafMomonga_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_LeafMomonga.json",
+          "sha256": "87001c61b94f69563414f1ec36d7ad4e7b26cf67a8818f63a4223a2c393e862d"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_05.png",
+      "imageSha256": "e9791262fa4a94bf08484efa044ead7d1cd2bd1b49f5e4da4d9b1003fded99dd",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-tanzee",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_Monkey_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_Monkey.json",
+          "sha256": "9cf523be1bc68bbd717ed9e23d455c98b64aafa838ac27e7a4755242caa82b11"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_06.png",
+      "imageSha256": "7d448189ff539ff4954c63798ebe5b5c4804de28622abb4f42e577dd926459f7",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-depresso",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_NegativeKoala_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_NegativeKoala.json",
+          "sha256": "ae647687e12ac2d548bc0c9db8c527a76f41e660d202a0e1a08d31d00eb745d2"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_07.png",
+      "imageSha256": "9437a09ad3b7ef11586a6a16fb81de632849c5ef362f92346efe42436003533a",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-cattiva",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_PinkCat_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_PinkCat.json",
+          "sha256": "952f071c1dc9856bd7f09b1014bd9ecfd54a26fb6d51a5394fc02816b88bd1a6"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_08.png",
+      "imageSha256": "c548c3e33042644857bc2c8c64132b55bbb0a154b61c2b1e963794c3b8cd77e4",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-lunaris",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_Mutant_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_Mutant.json",
+          "sha256": "4948703dc9134f8bcb6d371fcabcd8bfb7acfbaa185c27a8fdbba2d89adaa85a"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_09.png",
+      "imageSha256": "fbeee4825111487a33ebc506faa7bcd02ecf82c4ef6b8f91aa734f377b470878",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-relaxaurus",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_LazyDragon_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_LazyDragon.json",
+          "sha256": "efb974a9cb53da61f41bcc4fc47f0346d1ee24f63fb19a0eca6f7c82bb882ecc"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_10.png",
+      "imageSha256": "f3468bafba7070fa942b28bbee4321d97ff5e21cd51f6f739076427c8f2f5b55",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "statue-yakumo",
+      "category": "statue",
+      "mappingStatus": "verified_game_ui",
+      "sourceClasses": [
+        "BP_LevelObject_Relic_GuardianDog_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Object/LevelObject/BP_LevelObject_Relic_GuardianDog.json",
+          "sha256": "8916be19578f1a8bea14f99bf5b793e3bb58e2b3afd2beff8cb2ec6fd7b09404"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Relic_11.png",
+      "imageSha256": "c49cfcb565b465092cf0803df604d554df428ecb727818aeb4675f43d2714b12",
+      "sharedAssetReason": null,
+      "reviewStatus": "source_verified_exact"
+    },
+    {
+      "id": "egg-grass",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_grass_grade_01_C",
+        "bp_palmapobjectspawner_palegg_grass_grade_02_C",
+        "bp_palmapobjectspawner_palegg_grass_grade_03_C",
+        "bp_palmapobjectspawner_palegg_grass_grade_04_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_grass_grade_01.json",
+          "sha256": "37ed0878701df7759cf80907942b87b3a2d90de349aaa70cb05a19034fc7ad90"
+        },
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_grass_grade_02.json",
+          "sha256": "e3d24d16e86f1b8335b83a817909390f65f2b2751e62e86923c726be8c32aac2"
+        },
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_grass_grade_03.json",
+          "sha256": "059507abf2af442586baaf60f61b494b2580d6a38f9632e37ed50f66134b9100"
+        },
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_grass_grade_04.json",
+          "sha256": "3f8128fb90ce828e6e9dcf9af417a73f240078467bbb5d5a534912980b7c60d2"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    },
+    {
+      "id": "egg-desert",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_desert_grade_01_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_desert_grade_01.json",
+          "sha256": "5f80eafc9f11f6e8769b1b39dc6c15f6bbeda0a7e03c9bc98a88cd9eed5e883f"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    },
+    {
+      "id": "egg-glacier",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_glacier_grade_01_C",
+        "bp_palmapobjectspawner_palegg_glacier_grade_02_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_glacier_grade_01.json",
+          "sha256": "5450ce9794aad278d559f9e7edc6362aa5381ae06cd674cef57a3b5d024d6993"
+        },
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_glacier_grade_02.json",
+          "sha256": "29d73dc7abb8e9430de98a13c36a6fa551f3bd00273e505eb1fa443728faaca6"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    },
+    {
+      "id": "egg-volcanic",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_volcanic_grade_01_C",
+        "bp_palmapobjectspawner_palegg_volcanic_grade_02_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_volcanic_grade_01.json",
+          "sha256": "ff100e86e72cdaf476d84f1a7441ec3a7bc9f552709d7cf8a2865a1eaa5a7346"
+        },
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_volcanic_grade_02.json",
+          "sha256": "70066c0a2bb307a7df522b51fe5b29b2fe20c8f5fe9f36be6ccecafebcfaf729"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    },
+    {
+      "id": "egg-sakurajima",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_Sakurajima_grade_01_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_Sakurajima_grade_01.json",
+          "sha256": "70c29545d10e98c215ee579223c6b0d9bbcf1073c8fbe01c2d1dcebc5a15caa3"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    },
+    {
+      "id": "egg-sky-island",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_skyisland_grade_01_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_skyisland_grade_01.json",
+          "sha256": "c0208fc6fdf49f256a77de57c68a47274ace8b146c87080dbebcb20032792cd7"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    },
+    {
+      "id": "egg-tenraku",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_tenraku_grade_01_C",
+        "bp_palmapobjectspawner_palegg_tenraku_grade_02_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_tenraku_grade_01.json",
+          "sha256": "87e240b7f08bcb65c295733cdfaeb817839a6e5fd7b83ced2cdcb22294fc9f7e"
+        },
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_tenraku_grade_02.json",
+          "sha256": "f5efa1f6ae9e108f0394e5dc0aa361ea97bb9241b4c4a313be4b539fd4602bbd"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    },
+    {
+      "id": "egg-world-tree",
+      "category": "egg",
+      "mappingStatus": "representative_game_asset",
+      "sourceClasses": [
+        "bp_palmapobjectspawner_palegg_worldtree_grade_01_C"
+      ],
+      "evidence": [
+        {
+          "member": "MapObject/Spawner/bp_palmapobjectspawner_palegg_worldtree_grade_01.json",
+          "sha256": "d1da606163c21d6cfb7203a35d625c6bd26333272e01bed38a348721bb3d91bf"
+        }
+      ],
+      "imageMember": "Texture/T_itemicon_Material_PalEgg_Unknown.png",
+      "imageSha256": "f5bd5ca4b9fe95346b7d46443165e803a8e3135b08513fbe12dd4875baf89e43",
+      "sharedAssetReason": "regional_random_egg_unknown_icon",
+      "reviewStatus": "source_verified_representative"
+    }
+  ]
+}

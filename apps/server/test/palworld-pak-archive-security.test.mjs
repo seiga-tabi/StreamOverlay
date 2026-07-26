@@ -305,6 +305,20 @@ test("대용량 asset profile은 고정 SHA-256 없이 사용할 수 없다", as
   );
 });
 
+test("World Partition 지도 profile도 고정 SHA-256 없이 사용할 수 없다", async (context) => {
+  const fixture = await writeArchiveFixture(context, [
+    { name: "MainWorld_5/PL_MainWorld5.json", data: "[]" }
+  ]);
+  await assert.rejects(
+    withPalworldPakArchive(
+      fixture.archivePath,
+      { profile: "fixed_map_world_export" },
+      async () => assert.fail("고정 checksum 없이 callback을 실행하면 안 됩니다.")
+    ),
+    (error) => isTypedPreflightError(error, /expectedSha256/u)
+  );
+});
+
 test("개별 member의 비압축 크기 상한을 작은 central-directory fixture로 차단한다", async (context) => {
   const fixture = await writeArchiveFixture(context, [
     {

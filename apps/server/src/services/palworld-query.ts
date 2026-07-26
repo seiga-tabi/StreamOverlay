@@ -4,11 +4,15 @@ import {
   PALWORLD_BREEDING_GENDERS,
   PALWORLD_ELEMENTS,
   PALWORLD_ITEM_CATEGORIES,
+  PALWORLD_MAP_LOCATION_CATEGORIES,
+  PALWORLD_MAP_LOCATION_MAX_ARTIFACT_ENTRIES,
+  PALWORLD_MAP_LOCATION_MAX_RESPONSE,
   PALWORLD_MAP_WORLDS,
   PALWORLD_SEARCH_MAX_LENGTH,
   PALWORLD_SKILL_TYPES,
   PALWORLD_VARIANT_TYPES,
   PALWORLD_WORK_SUITABILITY_TYPES,
+  type PalworldMapLocationCategory,
   type PalworldMapWorld
 } from "@streamops/shared";
 
@@ -53,6 +57,12 @@ const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB", "parentAGender", "par
 const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "type", "page", "limit"]);
 const MAP_MARKERS_QUERY_KEYS = new Set(["world"]);
 const PAL_SPAWN_QUERY_KEYS = new Set(["world", "pal"]);
+const MAP_LOCATIONS_QUERY_KEYS = new Set([
+  "world",
+  "layers",
+  "offset",
+  "limit"
+]);
 
 export const PALWORLD_WORK_TYPES = PALWORLD_WORK_SUITABILITY_TYPES;
 export const PALWORLD_PAL_SORTS = ["number", "name", "rarity"] as const;
@@ -130,6 +140,13 @@ export type PalworldMapMarkersQuery = {
 export type PalworldPalSpawnQuery = {
   world: PalworldMapWorld;
   pal: string;
+};
+
+export type PalworldMapLocationsQuery = {
+  world: PalworldMapWorld;
+  layers: PalworldMapLocationCategory[];
+  offset: number;
+  limit: number;
 };
 
 export class PalworldQueryError extends Error {
@@ -312,5 +329,48 @@ export function parsePalworldPalSpawnQuery(params: URLSearchParams): PalworldPal
   return {
     world: optionalEnum(params, "world", PALWORLD_MAP_WORLDS) ?? "main",
     pal: requiredId(params, "pal")
+  };
+}
+
+export function parsePalworldMapLocationsQuery(
+  params: URLSearchParams
+): PalworldMapLocationsQuery {
+  assertKnownKeys(params, MAP_LOCATIONS_QUERY_KEYS);
+  const rawLayers = params.get("layers");
+  const requestedLayers = rawLayers === null
+    ? [...PALWORLD_MAP_LOCATION_CATEGORIES]
+    : rawLayers.split(",");
+  if (
+    requestedLayers.length < 1
+    || requestedLayers.some((layer) =>
+      !PALWORLD_MAP_LOCATION_CATEGORIES.includes(
+        layer as PalworldMapLocationCategory
+      )
+    )
+    || new Set(requestedLayers).size !== requestedLayers.length
+  ) {
+    throw new PalworldQueryError(
+      "layers 값은 중복 없는 허용된 지도 위치 레이어 목록이어야 합니다."
+    );
+  }
+  return {
+    world: optionalEnum(params, "world", PALWORLD_MAP_WORLDS) ?? "main",
+    layers: PALWORLD_MAP_LOCATION_CATEGORIES.filter((layer) =>
+      requestedLayers.includes(layer)
+    ),
+    offset: integerParam(
+      params,
+      "offset",
+      0,
+      0,
+      PALWORLD_MAP_LOCATION_MAX_ARTIFACT_ENTRIES
+    ),
+    limit: integerParam(
+      params,
+      "limit",
+      PALWORLD_MAP_LOCATION_MAX_RESPONSE,
+      1,
+      PALWORLD_MAP_LOCATION_MAX_RESPONSE
+    )
   };
 }

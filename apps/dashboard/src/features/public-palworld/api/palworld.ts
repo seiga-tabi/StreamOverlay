@@ -5,6 +5,8 @@ import type {
   PalworldBreedingGender,
   PalworldItemDetail,
   PalworldItemSummary,
+  PalworldMapLocationCategory,
+  PalworldMapLocationsResponse,
   PalworldMapMarkersResponse,
   PalworldMetaResponse,
   PalworldPaginatedResponse,
@@ -23,6 +25,7 @@ import {
   validatePalworldBreedingResultResponse,
   validatePalworldItemDetail,
   validatePalworldItemSummary,
+  validatePalworldMapLocationsResponse,
   validatePalworldMapMarkersResponse,
   validatePalworldMetaResponse,
   validatePalworldPaginatedResponse,
@@ -243,6 +246,24 @@ export function getPalworldMapMarkers(
     queryPath("/api/palworld/map/markers", params),
     signal,
     validatePalworldMapMarkersResponse,
+  );
+}
+
+export function getPalworldMapLocations(
+  layers: readonly PalworldMapLocationCategory[],
+  world: "main" | "tree" = "main",
+  signal?: AbortSignal,
+): Promise<PalworldMapLocationsResponse> {
+  const params = new URLSearchParams({
+    layers: layers.join(","),
+    limit: "5000",
+    offset: "0",
+    world,
+  });
+  return publicGet(
+    queryPath("/api/palworld/map/locations", params),
+    signal,
+    validatePalworldMapLocationsResponse,
   );
 }
 

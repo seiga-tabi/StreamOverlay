@@ -7,6 +7,11 @@ import {
   updatePalworldMapLayerSelection,
   updatePalworldMapQueryParams,
 } from "../src/features/public-palworld/hooks/usePalworldMapQueryState";
+import {
+  clusterPalworldMapLocations,
+  palworldMapLocationClusterZoomBand,
+} from "../src/features/public-palworld/utils/map-location-clusters";
+import { PALWORLD_MAP_COLLECTIBLE_TYPE_IDS } from "../src/features/public-palworld/utils/map-collectible-types";
 import { PALWORLD_ROUTE_EVENT } from "../src/features/public-palworld/utils/routes";
 
 test("지도 query는 허용된 값만 exact match로 복원한다", () => {
@@ -20,6 +25,7 @@ test("지도 query는 허용된 값만 exact match로 복원한다", () => {
       layers: ["boss", "spawn"],
       marker: "main-001-anubis",
       period: "night",
+      types: PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
       world: "tree",
       zoom: 2.5,
     },
@@ -32,6 +38,7 @@ test("지도 query는 허용된 값만 exact match로 복원한다", () => {
     {
       layers: ["boss", "spawn"],
       period: "all",
+      types: PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
       world: "main",
       zoom: 1,
     },
@@ -45,9 +52,34 @@ test("지도 query의 중복 key와 불완전한 좌표 쌍은 기본값으로 �
   assert.deepEqual(parsed, {
     layers: [],
     period: "all",
+    types: PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
     world: "main",
     zoom: 1,
   });
+});
+
+test("지도 수집품 종류 query는 기존 layer와 독립적으로 exact 복원된다", () => {
+  const parsed = parsePalworldMapQuery(new URLSearchParams(
+    "layers=egg,lifmunk&types=statue-lamball,egg-grass",
+  ));
+  assert.deepEqual(parsed.layers, ["egg", "lifmunk"]);
+  assert.deepEqual(parsed.types, ["statue-lamball", "egg-grass"]);
+
+  const invalid = parsePalworldMapQuery(new URLSearchParams(
+    "types=statue-lamball,../egg",
+  ));
+  assert.deepEqual(invalid.types, PALWORLD_MAP_COLLECTIBLE_TYPE_IDS);
+
+  const next = updatePalworldMapQueryParams(new URLSearchParams(), {
+    types: ["egg-grass", "statue-lamball"],
+  });
+  assert.equal(next.get("types"), "statue-lamball,egg-grass");
+  assert.equal(
+    updatePalworldMapQueryParams(next, {
+      types: PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
+    }).has("types"),
+    false,
+  );
 });
 
 test("지도 query 변경은 다른 검색·상세 query를 보존하고 기본값을 URL에서 정리한다", () => {
@@ -124,6 +156,14 @@ test("레이어 그룹 선택은 여러 레이어를 한 번에 결정적인 순
     updatePalworldMapLayerSelection(["boss", "spawn"], ["boss"], false),
     ["spawn"],
   );
+  assert.deepEqual(
+    updatePalworldMapLayerSelection(
+      ["boss"],
+      ["journal", "fast-travel", "egg"],
+      true,
+    ),
+    ["boss", "fast-travel", "egg", "journal"],
+  );
   assert.throws(
     () => updatePalworldMapLayerSelection(["boss", "boss"], ["spawn"], true),
     TypeError,
@@ -158,4 +198,71 @@ test("지도 query 구독은 popstate와 내부 route 이벤트를 모두 복원
   unsubscribe();
   target.dispatchEvent(new Event("popstate"));
   assert.equal(calls, 2);
+});
+
+test("지도 위치 클러스터는 레이어와 수집품 종류별로 분리되고 결정적이다", () => {
+  const locations = [{
+    id: "egg-b",
+    category: "egg",
+    subtype: "grass-2",
+    normalizedX: 0.101,
+    normalizedY: 0.2,
+  }, {
+    id: "fast-travel-a",
+    category: "fast-travel",
+    normalizedX: 0.1,
+    normalizedY: 0.2,
+  }, {
+    id: "egg-a",
+    category: "egg",
+    subtype: "grass-2",
+    normalizedX: 0.1,
+    normalizedY: 0.201,
+  }, {
+    id: "egg-desert",
+    category: "egg",
+    subtype: "desert-1",
+    normalizedX: 0.1,
+    normalizedY: 0.201,
+  }];
+
+  const forward = clusterPalworldMapLocations(locations, 1);
+  const reverse = clusterPalworldMapLocations([...locations].reverse(), 1);
+
+  assert.deepEqual(reverse, forward);
+  assert.equal(forward.length, 3);
+  const eggCluster = forward.find((cluster) =>
+    cluster.locations[0]?.subtype === "grass-2"
+  );
+  assert.equal(eggCluster?.count, 2);
+  assert.deepEqual(eggCluster?.locations.map((location) => location.id), [
+    "egg-a",
+    "egg-b",
+  ]);
+});
+
+test("지도 위치 클러스터는 잘못된 좌표를 렌더링 대상에서 제외한다", () => {
+  const clusters = clusterPalworldMapLocations([{
+    id: "valid",
+    category: "journal",
+    normalizedX: 0.5,
+    normalizedY: 0.5,
+  }, {
+    id: "invalid",
+    category: "journal",
+    normalizedX: Number.NaN,
+    normalizedY: 0.5,
+  }], 3);
+
+  assert.equal(clusters.length, 1);
+  assert.equal(clusters[0]?.locations[0]?.id, "valid");
+});
+
+test("지도 이동 중 같은 확대 구간은 동일한 클러스터 격자를 재사용한다", () => {
+  assert.equal(palworldMapLocationClusterZoomBand(1), 1);
+  assert.equal(palworldMapLocationClusterZoomBand(1.74), 1);
+  assert.equal(palworldMapLocationClusterZoomBand(1.75), 1.75);
+  assert.equal(palworldMapLocationClusterZoomBand(2.49), 1.75);
+  assert.equal(palworldMapLocationClusterZoomBand(2.5), 2.5);
+  assert.equal(palworldMapLocationClusterZoomBand(3), 2.5);
 });

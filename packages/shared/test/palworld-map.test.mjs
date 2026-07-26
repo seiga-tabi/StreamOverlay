@@ -2,6 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   PALWORLD_PAL_SPAWN_GRID_SIZE,
+  assertPalworldMapLocationsArtifact,
+  validatePalworldMapLocationsArtifact,
+  validatePalworldMapLocationsArtifactManifest,
+  validatePalworldMapLocationsResponse,
   assertPalworldPalSpawnResponse,
   validatePalworldPalSpawnResponse,
   validatePalworldMapMarkersResponse
@@ -55,6 +59,12 @@ const compatibilitySpawnOverlay = {
   compatibilityBasis: "exact_active_paldex_join_and_map_geometry",
   activationBasis: "versioned_compatibility_approval",
   compatibilityApprovalSha256: "d".repeat(64)
+};
+const locationOverlay = {
+  ...overlay,
+  compatibilityBasis: "exact_world_actor_join_and_map_geometry",
+  activationBasis: "versioned_compatibility_approval",
+  compatibilityApprovalSha256: "e".repeat(64)
 };
 
 const marker = {
@@ -288,4 +298,204 @@ test("Pal별 일반 스폰 상태는 검증된 overlay 공개 조건을 유지�
     state: "confirmed_empty",
     overlay: { ...spawnOverlay, sourceSteamBuildId: "1".repeat(21) }
   }).ok, false);
+});
+
+const emptyLocationCounts = {
+  "fast-travel": 0,
+  dungeon: 0,
+  egg: 0,
+  "skill-fruit": 0,
+  lifmunk: 0,
+  journal: 0
+};
+
+const locationArtifact = {
+  schemaVersion: 1,
+  targetGameVersion: "1.0.1",
+  activation: "candidate",
+  source: {
+    sourceType: "operator_pak_export",
+    archiveSha256: "1".repeat(64),
+    indexMember: "MainWorld_5/PL_MainWorld5.json",
+    indexMemberSha256: "2".repeat(64),
+    memberInventorySha256: "3".repeat(64),
+    selectedMemberCount: 2,
+    sourceGameVersion: null,
+    sourceSteamBuildId: null,
+    rightsVerified: false,
+    usageBasis: "operator_reference_use"
+  },
+  totalLocations: 2,
+  worlds: [{
+    world: "main",
+    targetMapAssetSha256: "4".repeat(64),
+    transform: {
+      status: "verified",
+      revision: "main-map-fmodel-bounds-v1",
+      horizontalAxis: "world_y",
+      verticalAxis: "world_x",
+      invertHorizontal: false,
+      invertVertical: true,
+      sourceBounds: {
+        minX: -1_099_400,
+        maxX: 349_400,
+        minY: -724_400,
+        maxY: 724_400
+      }
+    },
+    locationCount: 2,
+    categoryCounts: {
+      ...emptyLocationCounts,
+      egg: 1,
+      "skill-fruit": 1
+    },
+    locations: [{
+      id: "main-egg-001",
+      sourceActorId: "bp_palmapobjectspawner_palegg_grass_grade_01_C_UAID_1",
+      sourceClass: "bp_palmapobjectspawner_palegg_grass_grade_01_C",
+      sourceMemberPath:
+        "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-1_Y1_DL0.json",
+      sourceActorExportIndex: 0,
+      sourceInstanceId: "7CB385AA-4E03D3EA-CEB917AE-81323B8F",
+      category: "egg",
+      subtype: "grass-grade-01",
+      normalizedX: 0.25,
+      normalizedY: 0.75
+    }, {
+      id: "main-skill-fruit-001",
+      sourceActorId: "BP_SkillFruitsSpawner_Grass_C_UAID_2",
+      sourceClass: "BP_SkillFruitsSpawner_Grass_C",
+      sourceMemberPath:
+        "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X1_Y1_DL0.json",
+      sourceActorExportIndex: 7,
+      sourceInstanceId: "7CB385AA-4E03D3EA-CEB917AE-81323B8F",
+      category: "skill-fruit",
+      subtype: "grass",
+      normalizedX: 0.5,
+      normalizedY: 0.5
+    }]
+  }]
+};
+
+test("Palworld 지도 위치 artifact는 exact source actor와 count를 검증한다", () => {
+  assert.deepEqual(
+    assertPalworldMapLocationsArtifact(locationArtifact),
+    locationArtifact
+  );
+  assert.equal(validatePalworldMapLocationsArtifact({
+    ...locationArtifact,
+    unknown: true
+  }).ok, false);
+  assert.equal(validatePalworldMapLocationsArtifact({
+    ...locationArtifact,
+    totalLocations: 1
+  }).ok, false);
+  assert.equal(validatePalworldMapLocationsArtifact({
+    ...locationArtifact,
+    worlds: [{
+      ...locationArtifact.worlds[0],
+      locations: [
+        locationArtifact.worlds[0].locations[0],
+        {
+          ...locationArtifact.worlds[0].locations[1],
+          sourceMemberPath:
+            locationArtifact.worlds[0].locations[0].sourceMemberPath,
+          sourceActorExportIndex:
+            locationArtifact.worlds[0].locations[0].sourceActorExportIndex
+        }
+      ]
+    }]
+  }).ok, false);
+  assert.equal(validatePalworldMapLocationsArtifact({
+    ...locationArtifact,
+    worlds: [{
+      ...locationArtifact.worlds[0],
+      locations: [
+        locationArtifact.worlds[0].locations[0],
+        {
+          ...locationArtifact.worlds[0].locations[1],
+          normalizedX: Number.NaN
+        }
+      ]
+    }]
+  }).ok, false);
+});
+
+test("Palworld 지도 위치 manifest와 public response는 checksum·pagination을 검증한다", () => {
+  assert.equal(validatePalworldMapLocationsArtifactManifest({
+    schemaVersion: 1,
+    targetGameVersion: "1.0.1",
+    artifactFile: "map-locations.json",
+    artifactSha256: "a".repeat(64)
+  }).ok, true);
+  assert.equal(validatePalworldMapLocationsArtifactManifest({
+    schemaVersion: 1,
+    targetGameVersion: "1.0.1",
+    artifactFile: "map-locations.json",
+    artifactSha256: "invalid"
+  }).ok, false);
+  const ready = {
+    state: "ready",
+    world: "main",
+    layers: ["egg", "skill-fruit"],
+    offset: 0,
+    limit: 100,
+    total: 2,
+    returned: 2,
+    hasMore: false,
+    locations: locationArtifact.worlds[0].locations.map((entry) => ({
+      id: entry.id,
+      category: entry.category,
+      subtype: entry.subtype,
+      normalizedX: entry.normalizedX,
+      normalizedY: entry.normalizedY
+    })),
+    metadata,
+    overlay: locationOverlay
+  };
+  assert.equal(validatePalworldMapLocationsResponse(ready).ok, true);
+  assert.equal(validatePalworldMapLocationsResponse({
+    ...ready,
+    layers: ["skill-fruit", "egg"]
+  }).ok, false);
+  assert.equal(validatePalworldMapLocationsResponse({
+    ...ready,
+    returned: 1
+  }).ok, false);
+  assert.equal(validatePalworldMapLocationsResponse({
+    ...ready,
+    overlay: {
+      ...locationOverlay,
+      sourceGameVersion: metadata.gameVersion,
+      sourceSteamBuildId: "24181105",
+      activationBasis: "source_metadata",
+      compatibilityApprovalSha256: undefined
+    }
+  }).ok, true);
+  assert.equal(validatePalworldMapLocationsResponse({
+    ...ready,
+    overlay: {
+      ...locationOverlay,
+      sourceGameVersion: "9.9.9",
+      sourceSteamBuildId: "24181105",
+      activationBasis: "source_metadata",
+      compatibilityApprovalSha256: undefined
+    }
+  }).ok, false);
+  assert.equal(validatePalworldMapLocationsResponse({
+    ...ready,
+    overlay: {
+      ...locationOverlay,
+      sourceGameVersion: metadata.gameVersion,
+      sourceSteamBuildId: "24181105"
+    }
+  }).ok, false);
+  assert.equal(validatePalworldMapLocationsResponse({
+    ...ready,
+    state: "data_unavailable",
+    total: 0,
+    returned: 0,
+    locations: [],
+    overlay: undefined
+  }).ok, true);
 });

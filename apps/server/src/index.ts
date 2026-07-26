@@ -43,6 +43,11 @@ import {
   PalworldSpawnArtifactError,
   type PalworldSpawnProvider
 } from "./data/palworld-spawn-artifact.js";
+import {
+  loadPalworldMapLocationsProvider,
+  PalworldMapLocationsArtifactError,
+  type PalworldMapLocationsProvider
+} from "./data/palworld-map-locations-artifact.js";
 import { PalworldServerClient } from "./services/palworld-server-client.js";
 import {
   PalworldServerConnectionStore,
@@ -77,6 +82,7 @@ const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
 let palworldDataService: PalworldDataService | undefined;
 let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
 let palworldSpawnProvider: PalworldSpawnProvider | undefined;
+let palworldMapLocationsProvider: PalworldMapLocationsProvider | undefined;
 let palworldActiveRuntime: PalworldActiveRuntime | undefined;
 try {
   palworldActiveRuntime = await loadPalworldActiveRuntime({
@@ -244,6 +250,52 @@ try {
       type: "palworld_map_spawns.runtime_state",
       status: "data_unavailable",
       errorCode: "PALWORLD_SPAWN_RUNTIME_NOT_ACTIVE"
+    });
+  }
+  if (
+    palworldRuntimeAllowsLegacyOverlay(
+      palworldActiveRuntime.manifest,
+      "mapLocations"
+    )
+  ) {
+    try {
+      const compatibilityApprovalSha256 =
+        palworldActiveRuntime.manifest.format === "legacy_composite_v2"
+          ? palworldActiveRuntime.manifest.composite.artifacts.find(
+              (artifact) => artifact.kind === "map-locations-compatibility"
+            )?.sha256
+          : undefined;
+      palworldMapLocationsProvider = await loadPalworldMapLocationsProvider({
+        releaseRoot: palworldActiveRuntime.releaseRoot,
+        dashboardStaticRoot: appConfig.paths.dashboardStatic,
+        ...(compatibilityApprovalSha256 === undefined
+          ? {}
+          : { compatibilityApprovalSha256 })
+      });
+      const diagnostics = palworldMapLocationsProvider.diagnostics();
+      logger.event({
+        type: "palworld_map_locations.runtime_state",
+        status: diagnostics.state,
+        locations: diagnostics.total,
+        categoryCounts: diagnostics.categoryCounts
+      });
+    } catch (error) {
+      const errorCode = (error as NodeJS.ErrnoException).code === "ENOENT"
+        ? "PALWORLD_MAP_LOCATIONS_ARTIFACT_MISSING"
+        : error instanceof PalworldMapLocationsArtifactError
+          ? error.code
+          : "PALWORLD_MAP_LOCATIONS_INITIALIZATION_FAILED";
+      logger.event({
+        type: "palworld_map_locations.runtime_state",
+        status: "data_unavailable",
+        errorCode
+      });
+    }
+  } else {
+    logger.event({
+      type: "palworld_map_locations.runtime_state",
+      status: "data_unavailable",
+      errorCode: "PALWORLD_MAP_LOCATIONS_RUNTIME_NOT_ACTIVE"
     });
   }
 } catch (error) {
@@ -428,6 +480,7 @@ const server = http.createServer(createHttpHandler({
   palworldDataService,
   palworldMapMarkerProvider,
   palworldSpawnProvider,
+  palworldMapLocationsProvider,
   palworldServerMonitor,
   palworldServerUnavailableCode,
   readiness: () => store.getReadiness(),

@@ -16,6 +16,7 @@ import {
   type PalworldMapLayerOption,
   type PalworldMapLocalizedLabel,
 } from "./PalworldMapExplorerTypes";
+import { PalworldMapLayerIcon } from "./PalworldMapLayerIcon";
 
 export type PalworldMapFilterPanelCopy = {
   title: PalworldMapLocalizedLabel;
@@ -138,11 +139,10 @@ function LayerRow({
           onChange={onChange}
           type="checkbox"
         />
-        {layer.icon ? (
-          <span aria-hidden="true" className="palworld-map-filter-layer-icon">
-            {layer.icon}
-          </span>
-        ) : null}
+        <PalworldMapLayerIcon
+          asset={layer.iconAsset}
+          fallbackSymbol={layer.iconFallback}
+        />
         <span className="palworld-map-filter-layer-copy">
           <strong data-ja={layer.label.ja} data-ko={layer.label.ko}>
             {resolvePalworldMapLabel(layer.label, locale)}
