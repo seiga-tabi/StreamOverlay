@@ -3236,7 +3236,7 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   border-bottom: 1px solid rgba(248, 249, 250, .14) !important;
 }
 
-.public-dashboard-shell .public-site-footer-nav button {
+.public-dashboard-shell .public-site-footer-nav a {
   min-height: 42px !important;
   padding: 0 18px !important;
   border: 1px solid rgba(248, 249, 250, .18) !important;
@@ -3247,8 +3247,8 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   text-shadow: none !important;
 }
 
-.public-dashboard-shell .public-site-footer-nav button:hover,
-.public-dashboard-shell .public-site-footer-nav button:focus-visible {
+.public-dashboard-shell .public-site-footer-nav a:hover,
+.public-dashboard-shell .public-site-footer-nav a:focus-visible {
   transform: none !important;
   border-color: rgba(123, 92, 255, .54) !important;
   background: rgba(123, 92, 255, .16) !important;
@@ -3292,7 +3292,7 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
     border-radius: 22px 22px 0 0 !important;
   }
 
-  .public-dashboard-shell .public-site-footer-nav button {
+  .public-dashboard-shell .public-site-footer-nav a {
     min-height: 40px !important;
   }
 }

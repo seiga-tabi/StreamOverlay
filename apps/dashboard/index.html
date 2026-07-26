@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="YORO.gg에서 League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 확인하세요." />
+    <meta name="google-adsense-account" content="ca-pub-7880271953912430" />
     <link rel="canonical" href="https://yoro.gg/" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta property="og:type" content="website" />
@@ -27,7 +28,12 @@
       (() => {
         const consentKey = "yoro.ads.consent";
         const scriptSelector = "script[data-yoro-adsense]";
+        const isAdEligiblePath = () => {
+          const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+          return pathname === "/" || pathname === "/lol" || pathname.startsWith("/lol/");
+        };
         const loadAdsense = () => {
+          if (!isAdEligiblePath()) return;
           if (document.querySelector(scriptSelector)) return;
           const script = document.createElement("script");
           script.async = true;

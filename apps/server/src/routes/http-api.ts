@@ -1611,12 +1611,136 @@ function isNotModified(req: IncomingMessage, etag: string, mtime: Date): boolean
   return Number.isFinite(since) && mtime.getTime() <= since;
 }
 
+type PublicSeoMetadata = {
+  canonicalUrl: string;
+  description: string;
+  title: string;
+};
+
+function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
+  const normalizedPath = pathname !== "/" && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const defaultMetadata: Omit<PublicSeoMetadata, "canonicalUrl"> = {
+    title: "YORO.gg",
+    description: "YORO.gg에서 League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 확인하세요."
+  };
+  const palworldMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl">> = {
+    "/palworld": {
+      title: "펠월드 데이터베이스 | YORO.gg",
+      description: "Pal, 아이템, 스킬과 교배 정보를 한곳에서 확인하세요."
+    },
+    "/palworld/streamers": {
+      title: "팔로우 중인 스트리머 | YORO.gg",
+      description: "Twitch에서 팔로우 중인 채널의 현재 방송 상태를 확인하세요."
+    },
+    "/palworld/pals": {
+      title: "Pal 도감 | YORO.gg",
+      description: "Palworld Pal의 속성, 능력치, 작업 적성과 상세 정보를 확인하세요."
+    },
+    "/palworld/breeding": {
+      title: "교배 조합 | YORO.gg",
+      description: "Palworld 일반·특수 교배 결과와 부모 조합을 확인하세요."
+    },
+    "/palworld/items": {
+      title: "아이템 | YORO.gg",
+      description: "Palworld 아이템의 분류, 제작 재료와 상세 정보를 확인하세요."
+    },
+    "/palworld/skills": {
+      title: "Palworld 스킬 | YORO.gg",
+      description: "액티브·파트너·패시브 스킬의 효과와 관련 Pal을 확인하세요."
+    },
+    "/palworld/map": {
+      title: "Palworld 월드 지도 | YORO.gg",
+      description: "필드 보스·야생 스폰과 이동·수집 위치를 레이어별로 탐색하세요."
+    },
+    "/palworld/search": {
+      title: "Palworld 통합 검색 | YORO.gg",
+      description: "Palworld Pal과 아이템을 한국어·일본어 이름으로 검색하세요."
+    }
+  };
+  const exactMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl">> = {
+    "/": defaultMetadata,
+    "/lol": {
+      title: "LoL 전적 검색 | YORO.gg",
+      description: "League of Legends 전적과 최근 게임 정보를 검색하세요."
+    },
+    "/lol/tournaments": {
+      title: "LoL 대회 정보 | YORO.gg",
+      description: "League of Legends 대회 일정과 참가 정보를 확인하세요."
+    },
+    "/follow": {
+      title: "팔로우 중인 스트리머 | YORO.gg",
+      description: "Twitch에서 팔로우 중인 스트리머의 방송 상태를 확인하세요."
+    },
+    "/participation": {
+      title: "시청자 참여 | YORO.gg",
+      description: "YORO.gg 스트리머 방송의 시청자 참여 기능을 이용하세요."
+    },
+    "/privacy": {
+      title: "개인정보 처리방침 | YORO.gg",
+      description: "YORO.gg의 개인정보 처리방침을 확인하세요."
+    },
+    "/terms": {
+      title: "이용약관 | YORO.gg",
+      description: "YORO.gg 서비스 이용약관을 확인하세요."
+    },
+    "/contact": {
+      title: "문의 | YORO.gg",
+      description: "YORO.gg 서비스 운영자에게 문의하세요."
+    }
+  };
+  const selected = palworldMetadata[normalizedPath]
+    ?? exactMetadata[normalizedPath]
+    ?? (normalizedPath.startsWith("/lol/summoners/")
+      ? {
+          title: "LoL 소환사 전적 | YORO.gg",
+          description: "League of Legends 소환사의 전적과 최근 게임 정보를 확인하세요."
+        }
+      : normalizedPath.startsWith("/lol/tournaments/")
+        ? {
+            title: "LoL 대회 정보 | YORO.gg",
+            description: "League of Legends 대회 일정과 참가 정보를 확인하세요."
+          }
+        : normalizedPath.startsWith("/community/")
+          ? {
+              title: "LoL 커뮤니티 | YORO.gg",
+              description: "YORO.gg League of Legends 커뮤니티 게시물을 확인하세요."
+            }
+          : defaultMetadata);
+  return {
+    ...selected,
+    canonicalUrl: new URL(normalizedPath || "/", "https://yoro.gg").href
+  };
+}
+
+function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata): string {
+  const replacements: Array<[RegExp, string]> = [
+    [/(<meta\s+name="description"\s+content=")[^"]*("\s*\/?>)/u, metadata.description],
+    [/(<link\s+rel="canonical"\s+href=")[^"]*("\s*\/?>)/u, metadata.canonicalUrl],
+    [/(<meta\s+property="og:title"\s+content=")[^"]*("\s*\/?>)/u, metadata.title],
+    [/(<meta\s+property="og:description"\s+content=")[^"]*("\s*\/?>)/u, metadata.description],
+    [/(<meta\s+property="og:url"\s+content=")[^"]*("\s*\/?>)/u, metadata.canonicalUrl],
+    [/(<meta\s+name="twitter:title"\s+content=")[^"]*("\s*\/?>)/u, metadata.title],
+    [/(<meta\s+name="twitter:description"\s+content=")[^"]*("\s*\/?>)/u, metadata.description]
+  ];
+  let nextHtml = html.replace(
+    /<title>[^<]*<\/title>/u,
+    `<title>${escapeHtml(metadata.title)}</title>`
+  );
+  for (const [pattern, value] of replacements) {
+    nextHtml = nextHtml.replace(pattern, (_match, prefix: string, suffix: string) => (
+      `${prefix}${escapeHtml(value)}${suffix}`
+    ));
+  }
+  return nextHtml;
+}
+
 async function sendStaticFile(
   req: IncomingMessage,
   res: ServerResponse,
   filePath: string,
   extraHeaders: Record<string, string> = {},
-  mountPath?: "/admin" | "/dashboard" | "/overlay"
+  mountPath?: "/admin" | "/dashboard" | "/overlay",
+  transformHtml?: (html: string) => string
 ): Promise<void> {
   try {
     const stat = await fs.stat(filePath);
@@ -1626,7 +1750,7 @@ async function sendStaticFile(
     const cspNonce = isDashboardHtml ? crypto.randomBytes(18).toString("base64url") : undefined;
     const etag = staticEtag(stat.size, stat.mtimeMs);
     const lastModified = stat.mtime.toUTCString();
-    const publicMetadata = ["robots.txt", "sitemap.xml", "favicon.png", "favicon.svg"].includes(path.basename(filePath));
+    const publicMetadata = ["ads.txt", "robots.txt", "sitemap.xml", "favicon.png", "favicon.svg"].includes(path.basename(filePath));
     const cacheControl = cspNonce
       ? "no-store"
       : filePath.endsWith("index.html")
@@ -1648,7 +1772,11 @@ async function sendStaticFile(
     }
     const fileBody = await fs.readFile(filePath);
     const body = cspNonce
-      ? Buffer.from(fileBody.toString("utf8").replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce), "utf8")
+      ? Buffer.from(
+          (transformHtml ? transformHtml(fileBody.toString("utf8")) : fileBody.toString("utf8"))
+            .replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce),
+          "utf8"
+        )
       : fileBody;
     res.writeHead(200, baseHeaders);
     if (req.method === "HEAD") {
@@ -1747,6 +1875,7 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
 }
 
 const PUBLIC_DASHBOARD_ASSETS = new Map([
+  ["/ads.txt", "ads.txt"],
   ["/favicon.png", "favicon.png"],
   ["/favicon.svg", "favicon.svg"],
   ["/robots.txt", "robots.txt"],
@@ -5552,7 +5681,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
           const legalDraftHeaders = url.pathname === "/privacy" || url.pathname === "/terms"
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
-          await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, "index.html"), legalDraftHeaders, "/dashboard");
+          await sendStaticFile(
+            req,
+            res,
+            path.resolve(appConfig.paths.dashboardStatic, "index.html"),
+            legalDraftHeaders,
+            "/dashboard",
+            (html) => applyPublicSeoMetadata(html, publicSeoMetadataForPath(url.pathname))
+          );
           return;
         }
       }

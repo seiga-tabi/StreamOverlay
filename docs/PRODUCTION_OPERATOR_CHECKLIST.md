@@ -40,6 +40,10 @@
 - [ ] 외부 메일 발송부터 관리자 문의함 표시와 답변까지 확인했다.
 - [ ] 개인정보 처리방침과 이용약관을 관할 법률 전문가 또는 책임자가 검토했다.
 - [ ] 운영자 정보, 보관 기간, 국외 이전, 처리 위탁, 시행일을 실제 값으로 확정했다.
+- [ ] `https://yoro.gg/ads.txt`의 publisher ID와 판매자 관계가 AdSense 콘솔의 제공 행과 정확히 일치한다.
+- [ ] Search Console의 `yoro.gg` 도메인 속성 소유권을 확인하고 `https://yoro.gg/sitemap.xml`을 제출했다.
+- [ ] sitemap URL의 title, canonical과 실제 최종 URL이 일치한다.
+- [ ] `www.yoro.gg`와 HTTP 변형이 `https://yoro.gg`로 영구 redirect된다.
 - [ ] AdSense는 동의 전 요청이 없고 동의 후에만 로드된다.
 - [ ] 필요한 지역에서는 Google 인증 CMP를 연결하고 동의 철회를 제공한다.
 

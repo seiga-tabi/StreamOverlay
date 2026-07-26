@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { ChampionFilterSelect } from "../src/features/public-lol/components/ChampionFilterSelect";
 import { PublicAppHeader } from "../src/features/public-lol/components/PublicAppHeader";
 import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
+import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
 import { Button } from "../src/shared/ui/Button";
@@ -25,6 +26,28 @@ test("Shared Status가 tone과 size 계약을 마크업에 유지한다", () => 
   assert.match(html, /data-tone="live"/);
   assert.match(html, /data-size="sm"/);
   assert.match(html, />LIVE</);
+});
+
+test("공개 footer의 법적 고지와 문의는 crawler와 키보드가 접근 가능한 링크다", () => {
+  const localized = (label: string, ja: string) => ({ label, ko: label, ja });
+  const html = renderToStaticMarkup(
+    <PublicSiteFooter
+      onPage={() => undefined}
+      text={{
+        privacy: localized("개인정보 처리 방침", "プライバシーポリシー"),
+        terms: localized("이용약관", "利用規約"),
+        contact: localized("문의", "お問い合わせ"),
+        riotDisclaimer: localized("Riot Games 비공식 서비스", "Riot Games 非公式サービス"),
+        copyright: localized("© YORO.gg", "© YORO.gg"),
+      }}
+    />
+  );
+
+  assert.match(html, /<a[^>]+href="\/privacy"[^>]*>개인정보 처리 방침<\/a>/u);
+  assert.match(html, /<a[^>]+href="\/terms"[^>]*>이용약관<\/a>/u);
+  assert.match(html, /<a[^>]+href="\/contact"[^>]*>문의<\/a>/u);
+  assert.match(html, /data-ja="プライバシーポリシー"/u);
+  assert.doesNotMatch(html, /<button/u);
 });
 
 test("공통 Twitch account chip이 프로필과 접근 가능한 메뉴 action을 렌더링한다", () => {

@@ -46,6 +46,8 @@ git tag -a "rollback/v${VERSION}" "${PREVIOUS_GOOD_GIT_SHA}" -m "Rollback point 
 - [ ] OBS Browser Source, token, test event를 staging에서 확인했다.
 - [ ] `support@yoro.gg` 송수신과 관리자 문의함 수신을 확인했다.
 - [ ] 개인정보 처리방침과 이용약관의 운영자 정보, 보관 기간, 시행일을 사람이 검토했다.
+- [ ] `ads.txt`, `robots.txt`, `sitemap.xml`의 루트 응답과 MIME을 운영 도메인에서 확인했다.
+- [ ] Search Console 도메인 소유권과 sitemap 제출 상태를 운영 콘솔에서 확인했다.
 - [ ] AdSense를 사용할 경우 Google 동의 관리 요건과 CMP 연동을 확인했다.
 
 세부 수동 검증은 [운영자 체크리스트](PRODUCTION_OPERATOR_CHECKLIST.md)에 기록합니다.

@@ -616,7 +616,7 @@
 
 .public-dashboard-shell .public-app-header button,
 .public-dashboard-shell .public-app-header [role="button"],
-.public-dashboard-shell .public-site-footer button {
+.public-dashboard-shell .public-site-footer a {
   min-height: var(--yoro-size-touch-target) !important;
 }
 

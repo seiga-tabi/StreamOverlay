@@ -30,8 +30,8 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
   }
 });
 
-test("API와 Dashboard 내부 URL은 공개 SPA 경로로 오인하지 않는다", () => {
-  for (const pathname of ["/api/public/community/posts", "/palworldish", "/dashboard", "/admin", "/overlay"]) {
+test("API와 Dashboard 내부 URL 및 존재하지 않는 Palworld URL은 공개 SPA 경로로 오인하지 않는다", () => {
+  for (const pathname of ["/api/public/community/posts", "/palworldish", "/palworld/not-a-real-page", "/dashboard", "/admin", "/overlay"]) {
     assert.equal(isPublicDashboardAppRoute(pathname), false, pathname);
   }
 });

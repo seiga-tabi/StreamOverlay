@@ -235,7 +235,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
   try {
     writeFileSync(
       path.join(dir, "index.html"),
-      "<!doctype html><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title><div id=\"root\"></div>"
+      "<!doctype html><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><div id=\"root\"></div>"
     );
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
@@ -255,16 +255,33 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.match(res.body, /YORO\.gg/);
     assert.equal(res.headers["Cache-Control"], "no-store");
     assert.equal(res.headers.ETag, undefined);
+    assert.match(res.body, /<title>LoL 소환사 전적 \| YORO\.gg<\/title>/);
+    assert.match(res.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/lol\/summoners\/jp\/%E3%81%9B%E3%81%84%E3%81%8C-sei">/);
     const nonce = /script-src 'nonce-([^']+)'/.exec(res.headers["Content-Security-Policy"])?.[1];
     assert.ok(nonce);
     assert.match(res.headers["Content-Security-Policy"], /'strict-dynamic'/);
     assert.match(res.body, new RegExp(`nonce=\"${nonce}\"`));
     assert.doesNotMatch(res.body, /__STREAMOPS_CSP_NONCE__/);
 
+    const tournamentRes = createResponse();
+    await handler(createRequest("GET", "/lol/tournaments"), tournamentRes);
+    assert.equal(tournamentRes.statusCode, 200);
+    assert.match(tournamentRes.body, /<title>LoL 대회 정보 \| YORO\.gg<\/title>/);
+    assert.match(tournamentRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/lol\/tournaments">/);
+    assert.match(tournamentRes.body, /<meta property="og:url" content="https:\/\/yoro\.gg\/lol\/tournaments">/);
+
     const legalRes = createResponse();
     await handler(createRequest("GET", "/privacy"), legalRes);
     assert.equal(legalRes.statusCode, 200);
     assert.equal(legalRes.headers["X-Robots-Tag"], "noindex, nofollow");
+    assert.match(legalRes.body, /<title>개인정보 처리방침 \| YORO\.gg<\/title>/);
+    assert.match(legalRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/privacy">/);
+
+    const unknownPalworldRes = createResponse();
+    await handler(createRequest("GET", "/palworld/not-a-real-page"), unknownPalworldRes);
+    assert.equal(unknownPalworldRes.statusCode, 404);
+    assert.match(unknownPalworldRes.headers["Content-Type"], /application\/json/);
+    assert.doesNotMatch(unknownPalworldRes.body, /<!doctype html>/i);
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });
@@ -336,12 +353,13 @@ test("Palworld content-hash WebP는 immutable로 서빙하고 누락·directory 
   }
 });
 
-test("favicon과 sitemap은 dashboard public asset으로 서빙된다", async () => {
+test("favicon, sitemap과 ads.txt는 dashboard public asset으로 서빙된다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-dashboard-public-"));
   try {
     writeFileSync(path.join(dir, "favicon.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     writeFileSync(path.join(dir, "sitemap.xml"), "<?xml version=\"1.0\"?><urlset></urlset>");
+    writeFileSync(path.join(dir, "ads.txt"), "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0\n");
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
       store: {},
@@ -360,6 +378,13 @@ test("favicon과 sitemap은 dashboard public asset으로 서빙된다", async ()
     await handler(createRequest("GET", "/sitemap.xml"), sitemapResponse);
     assert.equal(sitemapResponse.statusCode, 200);
     assert.equal(sitemapResponse.headers["Content-Type"], "application/xml; charset=utf-8");
+
+    const adsResponse = createResponse();
+    await handler(createRequest("GET", "/ads.txt"), adsResponse);
+    assert.equal(adsResponse.statusCode, 200);
+    assert.equal(adsResponse.headers["Content-Type"], "text/plain; charset=utf-8");
+    assert.equal(adsResponse.headers["Cache-Control"], "public, max-age=3600");
+    assert.equal(adsResponse.body, "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0\n");
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });

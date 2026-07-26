@@ -7,17 +7,21 @@ import { fileURLToPath } from "node:url";
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("공개 SEO 메타데이터는 운영 도메인 yoro.gg를 사용한다", async () => {
-  const [html, robots, sitemap] = await Promise.all([
+  const [html, robots, sitemap, ads] = await Promise.all([
     readFile(path.join(projectRoot, "apps/dashboard/index.html"), "utf8"),
     readFile(path.join(projectRoot, "apps/dashboard/public/robots.txt"), "utf8"),
-    readFile(path.join(projectRoot, "apps/dashboard/public/sitemap.xml"), "utf8")
+    readFile(path.join(projectRoot, "apps/dashboard/public/sitemap.xml"), "utf8"),
+    readFile(path.join(projectRoot, "apps/dashboard/public/ads.txt"), "utf8")
   ]);
 
   assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/"/);
   assert.match(html, /<meta property="og:url" content="https:\/\/yoro\.gg\/"/);
+  assert.match(html, /<meta name="google-adsense-account" content="ca-pub-7880271953912430"/);
   assert.match(robots, /Sitemap: https:\/\/yoro\.gg\/sitemap\.xml/);
+  assert.doesNotMatch(robots, /Disallow:\s*\/(?:privacy|terms)/);
   assert.match(sitemap, /<loc>https:\/\/yoro\.gg\//);
-  assert.doesNotMatch(`${html}\n${robots}\n${sitemap}`, /gg\.seigatabi\.com/);
+  assert.equal(ads.trim(), "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0");
+  assert.doesNotMatch(`${html}\n${robots}\n${sitemap}\n${ads}`, /gg\.seigatabi\.com/);
 });
 
 test("AdSense는 명시적 광고 동의 전에는 직접 로드되지 않는다", async () => {
@@ -27,4 +31,6 @@ test("AdSense는 명시적 광고 동의 전에는 직접 로드되지 않는다
   assert.match(html, /yoro\.ads\.consent/);
   assert.match(html, /yoro:ads-consent/);
   assert.match(html, /event\.detail\?\.granted === true/);
+  assert.match(html, /pathname === "\/" \|\| pathname === "\/lol" \|\| pathname\.startsWith\("\/lol\/"\)/);
+  assert.doesNotMatch(html, /pathname\.startsWith\("\/(?:admin|dashboard|palworld)/);
 });

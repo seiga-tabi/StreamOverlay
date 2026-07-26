@@ -12,6 +12,20 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/contact",
   "/palworld",
   "/palworld/",
+  "/palworld/streamers",
+  "/palworld/streamers/",
+  "/palworld/pals",
+  "/palworld/pals/",
+  "/palworld/breeding",
+  "/palworld/breeding/",
+  "/palworld/items",
+  "/palworld/items/",
+  "/palworld/skills",
+  "/palworld/skills/",
+  "/palworld/map",
+  "/palworld/map/",
+  "/palworld/search",
+  "/palworld/search/",
   "/lol/tournaments"
 ]);
 
@@ -20,8 +34,7 @@ const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/lol/tournaments/",
   "/community/server",
   "/community/party",
-  "/community/posts/",
-  "/palworld/"
+  "/community/posts/"
 ];
 
 export function isPublicDashboardAppRoute(pathname: string): boolean {

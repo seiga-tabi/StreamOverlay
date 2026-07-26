@@ -65,6 +65,22 @@ async function checkStatic(origin, pathname) {
   }
 }
 
+async function checkAdsTxt(origin) {
+  try {
+    const response = await request(new URL("/ads.txt", origin));
+    const body = await response.text();
+    const contentType = response.headers.get("content-type") || "";
+    const expected = "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0";
+    record(
+      "/ads.txt",
+      response.ok && contentType.toLowerCase().startsWith("text/plain") && body.trim() === expected,
+      `HTTP ${response.status}, Content-Type=${contentType || "없음"}`
+    );
+  } catch (error) {
+    record("/ads.txt", false, error instanceof Error ? error.message : "요청 실패");
+  }
+}
+
 async function checkBackupFreshness() {
   if (!backupDir) return;
   try {
@@ -265,6 +281,7 @@ try {
 for (const pathname of ["/privacy", "/terms", "/favicon.png", "/robots.txt", "/sitemap.xml"]) {
   await checkStatic(origin, pathname);
 }
+await checkAdsTxt(origin);
 await checkBackupFreshness();
 await checkDiskUsage();
 
