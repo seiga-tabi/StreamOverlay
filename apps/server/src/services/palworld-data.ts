@@ -1,5 +1,8 @@
 import {
   PALWORLD_ELEMENTS,
+  PALWORLD_PASSIVE_EFFECT_FILTERS,
+  PALWORLD_PASSIVE_TIERS,
+  PALWORLD_SKILL_TYPES,
   PALWORLD_VARIANT_TYPES,
   PALWORLD_WORK_SUITABILITY_TYPES,
   assertPalworldDataSnapshot,
@@ -21,9 +24,12 @@ import {
   type PalworldPalListResponse,
   type PalworldPalReference,
   type PalworldPalSummary,
+  type PalworldPassiveEffectFilter,
   type PalworldRuntimeGates,
   type PalworldSearchResult,
   type PalworldSkillDetail,
+  type PalworldSkillListFacets,
+  type PalworldSkillListResponse,
   type PalworldSkillSummary
 } from "@streamops/shared";
 import { createHash } from "node:crypto";
@@ -207,6 +213,129 @@ function collectPalListFacets(pals: readonly PalworldPalDetail[]): PalworldPalLi
   };
 }
 
+const LEGACY_1_0_1_PASSIVE_ABILITY_EFFECTS = {
+  "Movement Speed": ["movement_speed"],
+  "Attack": ["attack"],
+  "Attack Stat": ["attack"],
+  "Attack Up + Defense Down": ["attack", "defense"],
+  "Attack Up + Work Down": ["attack", "work_speed"],
+  "Attack, Damage": ["attack"],
+  "Attack, Defense and Speed": ["attack", "defense", "movement_speed"],
+  "Defense Stat": ["defense"],
+  "Defense Up + Attack Down": ["defense", "attack"],
+  "Stamina": ["stamina"],
+  "Work Speed": ["work_speed"],
+  "Work Speed Up + Attack Down": ["work_speed", "attack"],
+  "Work Speed Up + Defense Down": ["work_speed", "defense"],
+  "Work and Attack": ["work_speed", "attack"],
+  "SAN Depletion": ["san"],
+  "Dark Damage": ["element_attack"],
+  "Dragon Damage": ["element_attack"],
+  "Electric Damage": ["element_attack"],
+  "Fire Damage": ["element_attack"],
+  "Grass Damage": ["element_attack"],
+  "Ground Damage": ["element_attack"],
+  "Ice Damage": ["element_attack"],
+  "Neutral Damage": ["element_attack"],
+  "Water Damage": ["element_attack"],
+  "Dark Defense": ["element_defense"],
+  "Dragon Defense": ["element_defense"],
+  "Electric Defense": ["element_defense"],
+  "Fire Defense": ["element_defense"],
+  "Grass Defense": ["element_defense"],
+  "Ground Defense": ["element_defense"],
+  "Ice Defense": ["element_defense"],
+  "Neutral Defense": ["element_defense"],
+  "Water Defense": ["element_defense"],
+  "Sale": ["trade"],
+  "SalePrice": ["trade"],
+  "Production": ["production"],
+  "Nocturnal": ["other"],
+  "Pacifist": ["other"],
+  "Player Buff": ["other"],
+  "Satiety": ["other"],
+  "Skill": ["other"]
+} as const satisfies Readonly<Record<string, readonly PalworldPassiveEffectFilter[]>>;
+
+/**
+ * legacy 1.0.1 catalog의 passiveAbility만 versioned exact mapping으로 분류합니다.
+ * 알려지지 않은 문구는 의미를 추측하지 않고 other로 격리합니다.
+ */
+export function classifyLegacyPalworldPassiveEffects(
+  passiveAbility: string | undefined
+): readonly PalworldPassiveEffectFilter[] {
+  if (passiveAbility === undefined) return ["other"];
+  return LEGACY_1_0_1_PASSIVE_ABILITY_EFFECTS[passiveAbility as keyof typeof LEGACY_1_0_1_PASSIVE_ABILITY_EFFECTS]
+    ?? ["other"];
+}
+
+function collectSkillListFacets(
+  skills: readonly PalworldSkillDetail[],
+  partnerElementsBySkillId: ReadonlyMap<string, readonly (typeof PALWORLD_ELEMENTS)[number][]>,
+  passiveEffectsBySkillId: ReadonlyMap<string, readonly PalworldPassiveEffectFilter[]>
+): PalworldSkillListFacets {
+  const typeCounts = new Map(PALWORLD_SKILL_TYPES.map((value) => [value, 0]));
+  const activeElementCounts = new Map(PALWORLD_ELEMENTS.map((value) => [value, 0]));
+  const partnerElementCounts = new Map(PALWORLD_ELEMENTS.map((value) => [value, 0]));
+  const passiveEffectCounts = new Map(PALWORLD_PASSIVE_EFFECT_FILTERS.map((value) => [value, 0]));
+  const passiveTierCounts = new Map(PALWORLD_PASSIVE_TIERS.map((value) => [value, 0]));
+
+  for (const skill of skills) {
+    typeCounts.set(skill.type, (typeCounts.get(skill.type) ?? 0) + 1);
+    if (skill.type === "active" && skill.element !== undefined) {
+      activeElementCounts.set(
+        skill.element,
+        (activeElementCounts.get(skill.element) ?? 0) + 1
+      );
+    }
+    if (skill.type === "partner") {
+      for (const element of partnerElementsBySkillId.get(skill.id) ?? []) {
+        partnerElementCounts.set(
+          element,
+          (partnerElementCounts.get(element) ?? 0) + 1
+        );
+      }
+    }
+    if (skill.type === "passive") {
+      for (const effect of passiveEffectsBySkillId.get(skill.id) ?? ["other"]) {
+        passiveEffectCounts.set(effect, (passiveEffectCounts.get(effect) ?? 0) + 1);
+      }
+      if (
+        skill.passiveTier !== undefined
+        && PALWORLD_PASSIVE_TIERS.includes(
+          skill.passiveTier as (typeof PALWORLD_PASSIVE_TIERS)[number]
+        )
+      ) {
+        const tier = skill.passiveTier as (typeof PALWORLD_PASSIVE_TIERS)[number];
+        passiveTierCounts.set(tier, (passiveTierCounts.get(tier) ?? 0) + 1);
+      }
+    }
+  }
+
+  return {
+    types: PALWORLD_SKILL_TYPES.flatMap((value) => {
+      const count = typeCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
+    }),
+    activeElements: PALWORLD_ELEMENTS.flatMap((value) => {
+      const count = activeElementCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
+    }),
+    partnerElements: PALWORLD_ELEMENTS.flatMap((value) => {
+      const count = partnerElementCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
+    }),
+    passiveEffects: PALWORLD_PASSIVE_EFFECT_FILTERS.flatMap((value) => {
+      const count = passiveEffectCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
+    }),
+    passiveTiers: PALWORLD_PASSIVE_TIERS.flatMap((value) => {
+      const count = passiveTierCounts.get(value) ?? 0;
+      return count > 0 ? [{ value, count }] : [];
+    })
+  };
+}
+
 function itemSummary(item: PalworldItemDetail): PalworldItemSummary {
   return {
     id: item.id,
@@ -219,6 +348,7 @@ function itemSummary(item: PalworldItemDetail): PalworldItemSummary {
     ...(item.localization === undefined ? {} : { localization: { ...item.localization } }),
     ...(item.translation === undefined ? {} : { translation: structuredClone(item.translation) }),
     category: item.category,
+    ...(item.itemType === undefined ? {} : { itemType: item.itemType }),
     rarity: item.rarity,
     ...(item.descriptionKo === undefined ? {} : { descriptionKo: item.descriptionKo }),
     ...(item.descriptionJa === undefined ? {} : { descriptionJa: item.descriptionJa }),
@@ -248,7 +378,10 @@ function skillSummary(skill: PalworldSkillDetail): PalworldSkillSummary {
     ...(skill.passiveAbilityJa === undefined ? {} : { passiveAbilityJa: skill.passiveAbilityJa }),
     ...(skill.localization === undefined ? {} : { localization: { ...skill.localization } }),
     ...(skill.translation === undefined ? {} : { translation: structuredClone(skill.translation) }),
-    relatedPalCount: skill.relatedPalCount
+    relatedPalCount: skill.relatedPalCount,
+    relatedPalPreviews: skill.relatedPals
+      .slice(0, 3)
+      .map(({ pal }) => structuredClone(pal))
   };
 }
 
@@ -508,6 +641,15 @@ export class PalworldDataService {
   private readonly skillsById: ReadonlyMap<string, PalworldSkillDetail>;
   private readonly sourceInternalIds: Readonly<Record<string, string>>;
   private readonly palListFacets: PalworldPalListFacets;
+  private readonly skillListFacets: PalworldSkillListFacets;
+  private readonly partnerElementsBySkillId: ReadonlyMap<
+    string,
+    readonly (typeof PALWORLD_ELEMENTS)[number][]
+  >;
+  private readonly passiveEffectsBySkillId: ReadonlyMap<
+    string,
+    readonly PalworldPassiveEffectFilter[]
+  >;
   private readonly domains: PalworldDomainCoverageMap;
   private readonly gates: PalworldRuntimeGates;
   private readonly coverage: PalworldDataCoverage | undefined;
@@ -586,6 +728,32 @@ export class PalworldDataService {
       ])
     ]));
     this.palListFacets = collectPalListFacets(this.snapshot.pals);
+    this.partnerElementsBySkillId = new Map(
+      (this.snapshot.skills ?? [])
+        .filter((skill) => skill.type === "partner")
+        .map((skill) => {
+          const relatedElements = new Set(
+            skill.relatedPals.flatMap((assignment) => assignment.pal.elements)
+          );
+          return [
+            skill.id,
+            PALWORLD_ELEMENTS.filter((element) => relatedElements.has(element))
+          ] as const;
+        })
+    );
+    this.passiveEffectsBySkillId = new Map(
+      (this.snapshot.skills ?? [])
+        .filter((skill) => skill.type === "passive")
+        .map((skill) => [
+          skill.id,
+          classifyLegacyPalworldPassiveEffects(skill.passiveAbility)
+        ] as const)
+    );
+    this.skillListFacets = collectSkillListFacets(
+      this.snapshot.skills ?? [],
+      this.partnerElementsBySkillId,
+      this.passiveEffectsBySkillId
+    );
     this.coverage = options.coverage;
     this.breedingEngine = options.breedingEngine
       ?? (
@@ -830,7 +998,9 @@ export class PalworldDataService {
     const cacheKey = JSON.stringify([
       term ?? "",
       query.category ?? "",
+      query.itemType ?? "",
       query.rarity ?? "",
+      query.rarityTier ?? "",
       query.acquisition ?? "",
       query.sort,
       query.order,
@@ -842,7 +1012,16 @@ export class PalworldDataService {
         || matchNormalizedSearchFields(term, this.itemSearchFields.get(item.id) ?? []) !== undefined
       )
       .filter((item) => query.category === undefined || item.category === query.category)
+      .filter((item) => query.itemType === undefined || item.itemType === query.itemType)
       .filter((item) => query.rarity === undefined || item.rarity === query.rarity)
+      .filter((item) => {
+        if (query.rarityTier === undefined) return true;
+        if (query.rarityTier === "common") return item.rarity === 0;
+        if (query.rarityTier === "uncommon") return item.rarity === 1;
+        if (query.rarityTier === "rare") return item.rarity === 2;
+        if (query.rarityTier === "epic") return item.rarity === 3;
+        return item.rarity === 4;
+      })
       .filter((item) => query.acquisition === undefined || item.acquisitionMethods.some((method) => method.type === query.acquisition))
       .sort((left, right) => {
         if (query.sort === "price") {
@@ -881,13 +1060,16 @@ export class PalworldDataService {
     return item;
   }
 
-  listSkills(query: PalworldSkillListQuery): PalworldPaginatedResponse<PalworldSkillSummary> {
+  listSkills(query: PalworldSkillListQuery): PalworldSkillListResponse {
     this.ensureDomainAvailable("skills");
     const term = query.q ? normalizePalworldSearchTerm(query.q) : undefined;
     const cacheKey = JSON.stringify([
       term ?? "",
       query.type ?? "",
       query.element ?? "",
+      query.partnerElement ?? "",
+      query.passiveEffect ?? "",
+      query.passiveTier ?? "",
       query.sort,
       query.order,
       query.locale ?? "en"
@@ -898,7 +1080,28 @@ export class PalworldDataService {
         || matchNormalizedSearchFields(term, this.skillSearchFields.get(skill.id) ?? []) !== undefined
       )
       .filter((skill) => query.type === undefined || skill.type === query.type)
-      .filter((skill) => query.element === undefined || skill.element === query.element)
+      .filter((skill) =>
+        query.element === undefined
+        || (skill.type === "active" && skill.element === query.element)
+      )
+      .filter((skill) =>
+        query.partnerElement === undefined
+        || (
+          skill.type === "partner"
+          && (this.partnerElementsBySkillId.get(skill.id) ?? []).includes(query.partnerElement)
+        )
+      )
+      .filter((skill) =>
+        query.passiveEffect === undefined
+        || (
+          skill.type === "passive"
+          && (this.passiveEffectsBySkillId.get(skill.id) ?? ["other"]).includes(query.passiveEffect)
+        )
+      )
+      .filter((skill) =>
+        query.passiveTier === undefined
+        || (skill.type === "passive" && skill.passiveTier === query.passiveTier)
+      )
       .sort((left, right) => {
         if (query.sort === "power") {
           return compareOptionalNumber(left.power, right.power, query.order)
@@ -924,7 +1127,14 @@ export class PalworldDataService {
       domainMetadata: this.domains.skills?.domainMetadata
         ?? this.snapshot.skills?.[0]?.domainMetadata
         ?? this.domains.skills?.metadata
-        ?? this.snapshot.metadata
+        ?? this.snapshot.metadata,
+      facets: {
+        types: this.skillListFacets.types.map((facet) => ({ ...facet })),
+        activeElements: this.skillListFacets.activeElements.map((facet) => ({ ...facet })),
+        partnerElements: this.skillListFacets.partnerElements.map((facet) => ({ ...facet })),
+        passiveEffects: this.skillListFacets.passiveEffects.map((facet) => ({ ...facet })),
+        passiveTiers: this.skillListFacets.passiveTiers.map((facet) => ({ ...facet }))
+      }
     };
   }
 

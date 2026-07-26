@@ -11,7 +11,7 @@ const {
   validatePalworldPaginatedResponse,
   validatePalworldPalListResponse,
   validatePalworldSkillDetail,
-  validatePalworldSkillSummary
+  validatePalworldSkillListResponse
 } = await import("@streamops/shared");
 const palworldDataService = await loadPalworldDataService();
 
@@ -97,25 +97,25 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.deepEqual(body.coverage.elementImages, { available: 9, missing: 0, total: 9 });
   for (const locale of ["ko", "ja"]) {
     const translationCoverage = body.coverage.translations[locale];
-    assert.equal(translationCoverage.artifactTranslated, 5_219);
-    assert.equal(translationCoverage.publicUsable, 5_219);
-    assert.equal(translationCoverage.sourceProvided, 5_219);
+    assert.equal(translationCoverage.artifactTranslated, 5_348);
+    assert.equal(translationCoverage.publicUsable, 5_348);
+    assert.equal(translationCoverage.sourceProvided, 5_348);
     assert.equal(translationCoverage.humanReviewed, 0);
-    assert.equal(translationCoverage.sourceLanguageFallback, 239);
+    assert.equal(translationCoverage.sourceLanguageFallback, 110);
     assert.equal(translationCoverage.missingSource, 21);
     assert.equal(translationCoverage.sourceAnomalousFields, 0);
     assert.equal(translationCoverage.missingSourceSlots, 0);
     assert.deepEqual(translationCoverage.availability, {
-      translated: 5_219,
-      sourceLanguageFallback: 239,
+      translated: 5_348,
+      sourceLanguageFallback: 110,
       missingSource: 21,
       total: 5_479
     });
     assert.deepEqual(translationCoverage.review, {
-      sourceProvided: 5_219,
+      sourceProvided: 5_348,
       humanReviewed: 0,
       machineAssisted: 0,
-      total: 5_219
+      total: 5_348
     });
     assert.deepEqual(translationCoverage.sourceIntegrity, {
       intact: 5_458,
@@ -335,6 +335,10 @@ test("Pal과 아이템 목록 API는 filter와 pagination을 적용한다", asyn
   const rarityVariants = await request(handler, "/api/palworld/pals?rarity=10&variant=variant&sort=number&page=1&limit=100");
   const items = await request(handler, "/api/palworld/items?category=sphere&acquisition=craft&sort=technologyLevel&order=desc&page=1&limit=5");
   const zeroRarityItems = await request(handler, "/api/palworld/items?rarity=0&page=1&limit=5");
+  const legendarySphereModules = await request(
+    handler,
+    "/api/palworld/items?itemType=sphere_module&rarityTier=legendary&page=1&limit=100"
+  );
   const palInternalId = await request(handler, "/api/palworld/pals?q=SheepBall&sort=number&page=1&limit=10");
   const itemInternalId = await request(handler, "/api/palworld/items?q=PalSphere&sort=name&page=1&limit=10");
   assert.equal(pals.body.items.length, 5);
@@ -361,6 +365,14 @@ test("Pal과 아이템 목록 API는 filter와 pagination을 적용한다", asyn
   assert.equal(zeroRarityItems.res.statusCode, 200);
   assert.equal(zeroRarityItems.body.items.length, 5);
   assert.equal(zeroRarityItems.body.items.every((item) => item.rarity === 0), true);
+  assert.equal(legendarySphereModules.res.statusCode, 200);
+  assert.equal(legendarySphereModules.body.items.length > 0, true);
+  assert.equal(
+    legendarySphereModules.body.items.every(
+      (item) => item.itemType === "sphere_module" && item.rarity === 4
+    ),
+    true
+  );
   assert.deepEqual(palInternalId.body.items.map((pal) => pal.id), ["lamball"]);
   assert.equal(itemInternalId.body.items.some((item) => item.id === "pal-sphere"), true);
   assert.equal(items.body.metadata.gameVersion, "1.0.1");
@@ -456,10 +468,14 @@ test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 S
   assert.equal(active.body.items[0].translation.description.ko, "source_provided");
   assert.equal(active.body.items[0].translation.description.ja, "source_provided");
   assert.match(active.res.headers["Cache-Control"], /^public,/u);
-  assert.equal(
-    validatePalworldPaginatedResponse(active.body, validatePalworldSkillSummary).ok,
-    true
-  );
+  assert.equal(validatePalworldSkillListResponse(active.body).ok, true);
+  assert.equal(active.body.items.every((skill) => skill.type === "active" && skill.element === "ice"), true);
+  assert.equal(active.body.items.every((skill) =>
+    skill.relatedPalPreviews.length === Math.min(3, skill.relatedPalCount)
+  ), true);
+  assert.equal(active.body.items.every((skill) =>
+    skill.relatedPalPreviews.every((pal) => Array.isArray(pal.elements) && pal.elements.length > 0)
+  ), true);
 
   const description = await request(handler, "/api/palworld/skills?q=acidic%20clouds&page=1&limit=10");
   assert.equal(description.body.items.some((skill) => skill.id === "active-acid-rain-b29ac863a8"), true);
@@ -492,6 +508,36 @@ test("스킬 목록 API는 설명 검색·type·element·정렬·pagination과 S
   assert.equal(passive.body.pagination.total, 79);
   assert.equal(passive.body.items.length, 3);
   assert.equal(passive.body.items.every((skill) => skill.type === "passive"), true);
+
+  const partnerElement = active.body.facets.partnerElements[0];
+  assert.ok(partnerElement);
+  const partner = await request(
+    handler,
+    `/api/palworld/skills?type=partner&partnerElement=${partnerElement.value}&page=1&limit=100`
+  );
+  assert.equal(partner.res.statusCode, 200);
+  assert.equal(partner.body.pagination.total, partnerElement.count);
+  assert.equal(partner.body.items.every((skill) => skill.type === "partner"), true);
+
+  const attackFacet = active.body.facets.passiveEffects.find((facet) => facet.value === "attack");
+  assert.ok(attackFacet);
+  const attackPassive = await request(
+    handler,
+    "/api/palworld/skills?type=passive&passiveEffect=attack&page=1&limit=100"
+  );
+  assert.equal(attackPassive.res.statusCode, 200);
+  assert.equal(attackPassive.body.pagination.total, attackFacet.count);
+  assert.equal(attackPassive.body.items.every((skill) => skill.type === "passive"), true);
+
+  const tierFacet = active.body.facets.passiveTiers[0];
+  assert.ok(tierFacet);
+  const tiered = await request(
+    handler,
+    `/api/palworld/skills?type=passive&passiveTier=${tierFacet.value}&page=1&limit=100`
+  );
+  assert.equal(tiered.res.statusCode, 200);
+  assert.equal(tiered.body.pagination.total, tierFacet.count);
+  assert.equal(tiered.body.items.every((skill) => skill.passiveTier === tierFacet.value), true);
 });
 
 test("스킬 상세 API는 canonical ID와 underscore alias, 관련 Pal과 없는 ID를 처리한다", async () => {
@@ -514,6 +560,9 @@ test("스킬 API는 unknown query와 허용되지 않은 filter를 안정적인 
   const handler = createHandler();
   for (const url of [
     "/api/palworld/skills?type=ultimate",
+    "/api/palworld/skills?partnerElement=wind",
+    "/api/palworld/skills?passiveEffect=critical",
+    "/api/palworld/skills?passiveTier=0",
     "/api/palworld/skills?sort=rarity",
     "/api/palworld/skills?redirect=https%3A%2F%2Fexample.com",
     "/api/palworld/skills?limit=201"

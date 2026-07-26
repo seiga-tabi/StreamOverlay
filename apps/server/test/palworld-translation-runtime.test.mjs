@@ -580,10 +580,10 @@ test("meta locale coverage는 데이터 수와 번역·fallback·missing-source 
     assert.equal(translated.skillNames.total, meta.counts.skills);
     assert.equal(translated.palNames.available, meta.counts.pals);
     assert.equal(translated.itemNames.available, meta.counts.items);
-    assert.equal(translated.skillNames.available, 487);
+    assert.equal(translated.skillNames.available, 566);
     assert.equal(translated.palNames.missing, 0);
     assert.equal(translated.itemNames.missing, 0);
-    assert.equal(translated.skillNames.missing, 79);
+    assert.equal(translated.skillNames.missing, 0);
     assert.equal(translated.palDescriptions.total <= meta.counts.pals, true);
     assert.equal(translated.itemDescriptions.total <= meta.counts.items, true);
     assert.equal(translated.skillDescriptions.total <= meta.counts.skills, true);
@@ -613,9 +613,9 @@ test("meta locale coverage는 데이터 수와 번역·fallback·missing-source 
     assert.equal(translated.sourceIntegrity.missingSourceFields, 21);
     assert.equal(translated.availability.translated, translated.review.total);
     assert.equal(translated.machineAssisted, 0);
-    assert.equal(translated.sourceProvided, 5_219);
+    assert.equal(translated.sourceProvided, 5_348);
     assert.equal(translated.humanReviewed, 0);
-    assert.equal(translated.artifactTranslated, 5_219);
-    assert.equal(translated.publicUsable, 5_219);
+    assert.equal(translated.artifactTranslated, 5_348);
+    assert.equal(translated.publicUsable, 5_348);
   }
 });

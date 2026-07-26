@@ -32,6 +32,7 @@ const CATEGORY_SYMBOLS: Record<PalworldMapLocationCategory, string> = {
   "skill-fruit": "◆",
   lifmunk: "✦",
   journal: "▤",
+  resource: "◆",
 };
 
 type PalworldMapLocationIconId =

@@ -23,6 +23,7 @@ export const PALWORLD_MAP_LAYERS = [
   "lifmunk",
   "skill-fruit",
   "journal",
+  "resource",
 ] as const;
 export const PALWORLD_MAP_WORLDS = ["main", "tree"] as const;
 export const PALWORLD_MAP_PERIODS = ["all", "day", "night"] as const;

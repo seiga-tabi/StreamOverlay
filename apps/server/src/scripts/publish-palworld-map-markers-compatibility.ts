@@ -23,7 +23,7 @@ import {
   type PalworldMapMarkerCompatibilityApproval
 } from "../data/palworld-map-marker-compatibility.js";
 import {
-  assertPalworldMapMarkerMapping,
+  assertPalworldMapMarkerWorldsMapping,
   generatePalworldMapMarkerArtifact
 } from "../data/palworld-map-marker-generator.js";
 import { assertPalworldPaldexArtifact } from "../data/palworld-paldex-artifact.js";
@@ -41,7 +41,7 @@ const DEFAULT_RELEASE_ROOT = path.join(
 );
 const DEFAULT_MAPPING_PATH = path.join(
   REPOSITORY_ROOT,
-  "apps/server/src/data/palworld-map-mappings/main-map-transform.json"
+  "apps/server/src/data/palworld-map-mappings/map-marker-worlds.json"
 );
 const DEFAULT_DASHBOARD_STATIC_ROOT = path.join(
   REPOSITORY_ROOT,
@@ -155,15 +155,22 @@ function checksum(bytes: Uint8Array | string): string {
 try {
   const args = parseArguments(process.argv.slice(2));
   const mappingBytes = await readFile(args.mappingPath);
-  const mapping = assertPalworldMapMarkerMapping(
+  const mapping = assertPalworldMapMarkerWorldsMapping(
     JSON.parse(mappingBytes.toString("utf8")) as unknown
   );
   const targetMapPath = path.resolve(
     args.dashboardStaticRoot,
     `.${mapping.targetMapAsset.imageUrl}`
   );
+  const targetTreeMapPath = path.resolve(
+    args.dashboardStaticRoot,
+    `.${mapping.targetTreeMapAsset.imageUrl}`
+  );
   if (
     !targetMapPath.startsWith(
+      `${path.resolve(args.dashboardStaticRoot)}${path.sep}`
+    )
+    || !targetTreeMapPath.startsWith(
       `${path.resolve(args.dashboardStaticRoot)}${path.sep}`
     )
   ) {
@@ -173,7 +180,8 @@ try {
     archivePath: args.archivePath,
     mapping,
     paldexPath: path.join(args.releaseRoot, "paldex.json"),
-    targetMapPath
+    targetMapPath,
+    targetTreeMapPath
   });
   if (result.artifact.activation !== "candidate") {
     throw new TypeError(
@@ -229,11 +237,16 @@ try {
   const mainWorld = result.artifact.worlds.find(
     (world) => world.world === "main"
   );
-  if (!mainWorld) {
-    throw new TypeError("compatibility approval 대상 MainMap marker가 없습니다.");
+  const treeWorld = result.artifact.worlds.find(
+    (world) => world.world === "tree"
+  );
+  if (!mainWorld || !treeWorld) {
+    throw new TypeError(
+      "compatibility approval 대상 MainMap·Tree marker가 모두 필요합니다."
+    );
   }
   const withoutEvidenceChecksum = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     release: mapping.targetGameVersion,
     status: "operator_acknowledged",
     decision: "allow_exact_checksum_compatibility_display",
@@ -245,6 +258,7 @@ try {
       worldMapTable: { ...mapping.worldMapTable }
     },
     sourceMapAsset: { ...mapping.sourceMapAsset },
+    sourceTreeMapAsset: { ...mapping.sourceTreeMapAsset },
     mappingsEvidence,
     generationMappingSha256: checksum(mappingBytes),
     paldexSha256: checksum(paldexBytes),
@@ -253,9 +267,14 @@ try {
     markerManifestSha256: checksum(manifestText),
     mapImagesManifestSha256: checksum(mapImagesManifestBytes),
     targetMapAssetSha256: mainWorld.targetMapAssetSha256,
+    targetTreeMapAssetSha256: treeWorld.targetMapAssetSha256,
     transformRevision: mainWorld.transform.revision,
     transformSha256: palworldMapMarkerTransformChecksum(
       mainWorld.transform
+    ),
+    treeTransformRevision: treeWorld.transform.revision,
+    treeTransformSha256: palworldMapMarkerTransformChecksum(
+      treeWorld.transform
     ),
     counts: {
       ...result.counts,

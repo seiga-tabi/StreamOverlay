@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "targetGameVersion": "1.0.1",
   "activation": "candidate",
   "source": {
@@ -11,61 +11,85 @@
     "selectedMemberCount": 7487
   },
   "checksums": {
-    "mappingSha256": "9192ef813fcb6b80e27ae44d06fece3b40dcbb0c20826c60edd319d4078fff4f",
+    "mappingSha256": "28bb81538efb8f27fa0398ab8ba029263c1bae8e997d9f22092dd46550ec215a",
     "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4",
     "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
-    "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003"
+    "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+    "treeTargetMapAssetSha256": "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf"
   },
   "counts": {
     "selectedMembers": 7487,
     "actorsScanned": 791613,
-    "sourceActors": 2656,
-    "included": 2543,
-    "treeExcluded": 113,
+    "sourceActors": 18318,
+    "included": 18102,
+    "treeIncluded": 193,
+    "treeExcluded": 0,
+    "coordinateUnresolved": 0,
     "outOfBoundsExcluded": 0,
-    "exactDuplicates": 0,
+    "exactDuplicates": 23,
     "byCategory": {
       "fast-travel": {
         "sourceActors": 152,
         "included": 137,
-        "treeExcluded": 15,
+        "treeIncluded": 15,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 0
       },
       "dungeon": {
         "sourceActors": 170,
         "included": 170,
+        "treeIncluded": 0,
         "treeExcluded": 0,
+        "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 0
       },
       "egg": {
         "sourceActors": 1816,
         "included": 1786,
-        "treeExcluded": 30,
+        "treeIncluded": 30,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 0
       },
       "skill-fruit": {
         "sourceActors": 47,
         "included": 35,
-        "treeExcluded": 12,
+        "treeIncluded": 12,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 0
       },
       "lifmunk": {
         "sourceActors": 407,
         "included": 360,
-        "treeExcluded": 47,
+        "treeIncluded": 47,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 0
       },
       "journal": {
         "sourceActors": 64,
         "included": 55,
-        "treeExcluded": 9,
+        "treeIncluded": 9,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 0
+      },
+      "resource": {
+        "sourceActors": 15662,
+        "included": 15559,
+        "treeIncluded": 80,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
+        "outOfBoundsExcluded": 0,
+        "exactDuplicates": 23
       }
     }
   },
@@ -836,85 +860,6 @@
       "reason": "semantic_mapping_not_verified"
     },
     {
-      "family": "resource",
-      "actors": 15662,
-      "sourceClasses": [
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_NightStone_C",
-          "actors": 271
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_PalCrystal_C",
-          "actors": 713
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_PalCrystal_Small_C",
-          "actors": 1349
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockCoal_C",
-          "actors": 1021
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockCopper_C",
-          "actors": 2027
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockIron_C",
-          "actors": 8
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockQuartz_C",
-          "actors": 675
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone_C",
-          "actors": 1649
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone18_C",
-          "actors": 415
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone2_C",
-          "actors": 74
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone3_C",
-          "actors": 293
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone4_C",
-          "actors": 1402
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone5_C",
-          "actors": 1628
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone6_C",
-          "actors": 1566
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_RockStone7_C",
-          "actors": 1547
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_SkyIslandOre_C",
-          "actors": 226
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Sulfur_C",
-          "actors": 718
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_WorldTreeOre_C",
-          "actors": 80
-        }
-      ],
-      "reason": "semantic_mapping_not_verified"
-    },
-    {
       "family": "treasure",
       "actors": 10008,
       "sourceClasses": [
@@ -1047,582 +992,18 @@
     }
   ],
   "exclusions": {
-    "treeWorld": [
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572BFD602_1222068729",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572BFD602_1395877730",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572BFD602_1794538731",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572BFD602_2089535732",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572C0D602_1173883909",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572C0D602_1331086911",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572C0D602_1528412912",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572C0D602_1727253913",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Note_C_UAID_C87F5459F572C0D602_1876671914",
-        "sourceClass": "BP_LevelObject_Note_C",
-        "category": "journal"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC0739627BC202_1570686402",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC0739627CC202_1903392746",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396283C202_1408658374",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396283C202_1980098770",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396283C202_2029542771",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_1150976948",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_1282015949",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_1366958950",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_1435049951",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_1824349952",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_1898611953",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_1990510954",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396284C202_2103595955",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396285C202_1390863384",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_C_UAID_A036BC07396285C202_1435652385",
-        "sourceClass": "BP_LevelObject_Relic_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_GuardianDog_C_UAID_A036BC07396287C202_1973509766",
-        "sourceClass": "BP_LevelObject_Relic_GuardianDog_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_GuardianDog_C_UAID_A036BC0739628BC202_2123885656",
-        "sourceClass": "BP_LevelObject_Relic_GuardianDog_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396272C202_1879184817",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396273C202_1223495020",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396273C202_1415057049",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396273C202_1692173078",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396273C202_1959629105",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396274C202_1132091308",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396274C202_1374324466",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396274C202_1883748697",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396274C202_2110551952",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396275C202_1216951381",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396275C202_1460500636",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396277C202_1299293146",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396278C202_1410294575",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739627AC202_2018950225",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739628CC102_1570783337",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739628DC102_1277148848",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739628DC102_2004114905",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739628EC102_2100249362",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739628FC102_1533937106",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396292C102_1729452713",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396293C102_1280147247",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396294C102_1220304489",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396294C102_1648329538",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC07396294C102_2027171567",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739629AC102_1610991134",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739629AC102_2088435191",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739629BC102_1196033396",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739629BC102_1445874425",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739629BC102_1814079456",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_Relic_PinkCat_C_UAID_A036BC0739629BC102_2046396485",
-        "sourceClass": "BP_LevelObject_Relic_PinkCat_C",
-        "category": "lifmunk"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4E72E302_2144750690",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4E73E302_2059132867",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4E73E302_2129612868",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1300234842",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1533421919",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1696976923",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1744355924",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1810330925",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1839468926",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1877316927",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1909416928",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1945041929",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EA9AB02_1985047930",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EBFC502_1803344502",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "BP_LevelObject_TowerFastTravelPoint_C_UAID_345A605CEA4EBFC502_2122046503",
-        "sourceClass": "BP_LevelObject_TowerFastTravelPoint_C",
-        "category": "fast-travel"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E22C502_1632806471",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E54E302_1655037855",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E55E302_1130853113",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E55E302_1898903289",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E56E302_1171087697",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E75C502_1435936727",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E75C502_1843871863",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4E76C502_1151797088",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1156436738",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1214999774",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1270745776",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1321598801",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1375954835",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1646589941",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1871955973",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EACAB02_1919713974",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB4C502_2038626684",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB5C502_1611235267",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB5C502_1786740339",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB6C502_1579731153",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB6C502_1745657250",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB6C502_1897820374",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB6C502_1999609490",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB7C502_1373899843",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB8C502_1472447561",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB8C502_1658160640",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB8C502_1780529910",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB8C502_2061267125",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB8C502_2094883127",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C_UAID_345A605CEA4EB9C502_1558209306",
-        "sourceClass": "bp_palmapobjectspawner_palegg_worldtree_grade_01_C",
-        "category": "egg"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4E54E302_1495633854",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4E55E302_1219839114",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4E55E302_2098039428",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4E76C502_1076678069",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB4C502_1952948683",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB5C502_1538497266",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB7C502_1279069832",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB7C502_2135947184",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB8C502_1399965559",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB8C502_1675713641",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB8C502_1940036040",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      },
-      {
-        "sourceActorId": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C_UAID_345A605CEA4EB9C502_2125040408",
-        "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
-        "category": "skill-fruit"
-      }
-    ],
-    "outsideKnownWorlds": []
+    "treeWorld": [],
+    "outsideKnownWorlds": [],
+    "coordinateUnresolved": []
   },
   "excludedByReason": {
-    "tree_world_without_active_map": 113,
-    "outside_verified_main_and_tree_bounds": 0
+    "tree_world_without_active_map": 0,
+    "outside_verified_main_and_tree_bounds": 0,
+    "attached_parent_coordinate_unresolved": 0
   },
   "integrityAudit": {
-    "exactCoordinateCollisions": 0,
-    "reusedLevelObjectInstanceIds": 3,
+    "exactCoordinateCollisions": 23,
+    "reusedLevelObjectInstanceIds": 2126,
     "fastTravelPointIds": 152,
     "noteRowNames": 64
   },
@@ -1633,6 +1014,7 @@
     "rootComponentResolution": "passed",
     "sourceCounts": "passed",
     "mainMapTransform": "passed",
+    "treeMapTransform": "passed",
     "sourceMetadata": "blocked",
     "activation": "candidate"
   }

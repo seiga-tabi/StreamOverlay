@@ -22,6 +22,9 @@ import {
 import {
   assertPalworldMapMarkerMapping
 } from "../data/palworld-map-marker-generator.js";
+import {
+  loadPalworldMapImageManifest
+} from "../data/palworld-map-image-manifest.js";
 
 const REPOSITORY_ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
 const DEFAULT_RELEASE_ROOT = path.join(
@@ -130,12 +133,17 @@ try {
   const transformMapping = assertPalworldMapMarkerMapping(
     JSON.parse(transformMappingBytes.toString("utf8")) as unknown
   );
+  const mapImagesManifest = await loadPalworldMapImageManifest(
+    args.releaseRoot,
+    mapping.targetGameVersion
+  );
   const generate = async () => await generatePalworldMapLocationCandidate({
     archivePath: args.archivePath,
     mapping,
     mappingBytes,
     transformMapping,
-    transformMappingBytes
+    transformMappingBytes,
+    mapImagesManifest
   });
   const first = await generate();
   const firstArtifactText = deterministicMapLocationJson(first.artifact);
@@ -190,7 +198,8 @@ try {
   process.stdout.write(
     `[palworld-map-locations] ${args.publish ? "candidate 게시 완료" : "검증 완료"}: `
     + `source ${counts.sourceActors}개, MainMap ${counts.included}개, `
-    + `Tree 제외 ${counts.treeExcluded}개, bounds 밖 ${counts.outOfBoundsExcluded}개, `
+    + `Tree ${counts.treeIncluded}개, 좌표 미해결 ${counts.coordinateUnresolved}개, `
+    + `bounds 밖 ${counts.outOfBoundsExcluded}개, `
     + `selected member ${counts.selectedMembers}개\n`
   );
 } catch (error) {

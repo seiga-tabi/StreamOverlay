@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 const {
+  classifyLegacyPalworldPassiveEffects,
   loadPalworldDataService,
   PalworldDomainUnavailableError,
   PalworldDataService,
@@ -12,13 +13,14 @@ const {
 } = await import("../dist/services/palworld-data.js");
 const { PALWORLD_SNAPSHOT } = await import("../dist/data/palworld-snapshot.js");
 const {
+  PALWORLD_ITEM_FILTER_CATEGORIES,
   validatePalworldItemSummary,
   validatePalworldPaginatedResponse,
   validatePalworldPalDetail,
   validatePalworldPalListResponse,
   validatePalworldSearchResult,
   validatePalworldSkillDetail,
-  validatePalworldSkillSummary
+  validatePalworldSkillListResponse
 } = await import("@streamops/shared");
 
 const service = await loadPalworldDataService();
@@ -352,6 +354,59 @@ test("아이템 목록은 종류, 획득 방식, 희귀도와 정렬을 적용�
   assert.equal(sourceInternalId.items.some((item) => item.id === "pal-sphere"), true);
 });
 
+test("아이템 공개 분류는 sourceCategory 기준 12종으로 모든 runtime 아이템을 빠짐없이 분류한다", () => {
+  const totals = PALWORLD_ITEM_FILTER_CATEGORIES.map((itemType) => ({
+    itemType,
+    total: service.listItems({
+      itemType,
+      sort: "name",
+      order: "asc",
+      page: 1,
+      limit: 1
+    }).pagination.total
+  }));
+  assert.equal(totals.length, 12);
+  assert.deepEqual(Object.fromEntries(
+    totals.map(({ itemType, total }) => [itemType, total])
+  ), {
+    material: 177,
+    sphere: 10,
+    ammo: 32,
+    consumable: 205,
+    weapon: 286,
+    armor: 244,
+    accessory: 81,
+    glider: 5,
+    food: 94,
+    valuable: 217,
+    blueprint: 490,
+    sphere_module: 6
+  });
+  assert.equal(
+    totals.reduce((sum, { total }) => sum + total, 0),
+    service.meta().counts.items
+  );
+
+  const legendary = service.listItems({
+    rarityTier: "legendary",
+    sort: "rarity",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(legendary.items.every((item) => item.rarity === 4), true);
+  assert.equal(legendary.pagination.total, 313);
+  const sourceOnlyRarity = service.listItems({
+    rarity: 5,
+    sort: "rarity",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(sourceOnlyRarity.pagination.total, 2);
+  assert.equal(sourceOnlyRarity.items.every((item) => item.rarity === 5), true);
+});
+
 test("교배 조회는 부모 순서 교환, 동일 부모와 목표 Pal 역검색을 지원한다", () => {
   assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).result?.child.id, "xenovader");
   assert.equal(service.breeding({ parentA: "bushi", parentB: "penking" }).result?.child.id, "xenovader");
@@ -440,8 +495,101 @@ test("검색과 목록 응답은 Shared schema 계약을 충족한다", () => {
   assert.equal(validatePalworldSearchResult(service.search("Pal", 20)).ok, true);
   assert.equal(validatePalworldPalListResponse(pals).ok, true);
   assert.equal(validatePalworldPaginatedResponse(items, validatePalworldItemSummary).ok, true);
-  assert.equal(validatePalworldPaginatedResponse(skills, validatePalworldSkillSummary).ok, true);
+  assert.equal(validatePalworldSkillListResponse(skills).ok, true);
   assert.equal(validatePalworldSkillDetail(service.getSkill(skills.items[0].id)).ok, true);
+  assert.equal(skills.items.every((skill) =>
+    skill.relatedPalPreviews.length === Math.min(3, skill.relatedPalCount)
+  ), true);
+  const previewedSkill = skills.items.find((skill) => skill.relatedPalCount > 0);
+  assert.ok(previewedSkill);
+  assert.deepEqual(
+    previewedSkill.relatedPalPreviews,
+    service.getSkill(previewedSkill.id).relatedPals.slice(0, 3).map(({ pal }) => pal)
+  );
+});
+
+test("스킬 facet과 필터는 액티브·파트너 속성과 패시브 exact mapping을 분리한다", () => {
+  const all = service.listSkills({
+    sort: "name",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(validatePalworldSkillListResponse(all).ok, true);
+  assert.equal(
+    all.facets.types.reduce((total, facet) => total + facet.count, 0),
+    all.pagination.total
+  );
+
+  const activeElement = all.facets.activeElements[0];
+  assert.ok(activeElement);
+  const active = service.listSkills({
+    type: "active",
+    element: activeElement.value,
+    sort: "name",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(active.pagination.total, activeElement.count);
+  assert.equal(
+    active.items.every((skill) => skill.type === "active" && skill.element === activeElement.value),
+    true
+  );
+
+  const partnerElement = all.facets.partnerElements[0];
+  assert.ok(partnerElement);
+  const partner = service.listSkills({
+    type: "partner",
+    partnerElement: partnerElement.value,
+    sort: "name",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(partner.pagination.total, partnerElement.count);
+  assert.equal(partner.items.every((skill) =>
+    service.getSkill(skill.id).relatedPals.some((assignment) =>
+      assignment.pal.elements.includes(partnerElement.value)
+    )
+  ), true);
+
+  const passiveEffect = all.facets.passiveEffects.find((facet) => facet.value === "attack");
+  assert.ok(passiveEffect);
+  const passive = service.listSkills({
+    type: "passive",
+    passiveEffect: "attack",
+    sort: "name",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(passive.pagination.total, passiveEffect.count);
+  assert.equal(passive.items.every((skill) =>
+    classifyLegacyPalworldPassiveEffects(skill.passiveAbility).includes("attack")
+  ), true);
+
+  const passiveTier = all.facets.passiveTiers[0];
+  assert.ok(passiveTier);
+  const tiered = service.listSkills({
+    type: "passive",
+    passiveTier: passiveTier.value,
+    sort: "name",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(tiered.pagination.total, passiveTier.count);
+  assert.equal(tiered.items.every((skill) => skill.passiveTier === passiveTier.value), true);
+
+  assert.deepEqual(
+    classifyLegacyPalworldPassiveEffects("Attack Up + Defense Down"),
+    ["attack", "defense"]
+  );
+  assert.deepEqual(
+    classifyLegacyPalworldPassiveEffects("Attack Up + Unknown"),
+    ["other"]
+  );
 });
 
 test("이름 정렬은 요청 locale을 우선하고 누락된 이름은 영문으로 fallback한다", () => {

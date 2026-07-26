@@ -70,6 +70,12 @@ import { palworldHomeLiveStreamerCards, sortedFollowedTwitchChannels } from "../
 import { getPublicTwitchFollowedChannels, getPublicTwitchStatus, logoutPublicTwitch, publicTwitchLoginUrl } from "../src/features/public-twitch/api";
 import { applyPalworldCondensationStage } from "../src/features/public-palworld/components/PalworldPalCondensation";
 import { buildPalworldPalStatRows } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
+import {
+  PALWORLD_MAP_RESOURCE_TYPE_IDS,
+  palworldMapCollectibleCategory,
+  palworldMapCollectibleTypeForLocation,
+  palworldMapCollectibleTypesForCategory,
+} from "../src/features/public-palworld/utils/map-collectible-types";
 
 const anubis: PalworldPalSummary = {
   id: "anubis",
@@ -143,6 +149,49 @@ test("일반 스폰 요약과 시각 강도는 cluster 수치만 제한된 범�
   );
   assert.equal(filterPalworldSpawnPointsByPeriod(points, "all").length, 2);
   assert.deepEqual(filterPalworldBossMarkers([], "anubis"), []);
+});
+
+test("지도 광물 source subtype은 이름 추측 없이 10개 공개 필터로 exact 정규화한다", () => {
+  assert.equal(PALWORLD_MAP_RESOURCE_TYPE_IDS.length, 10);
+  assert.deepEqual(
+    palworldMapCollectibleTypesForCategory("resource"),
+    PALWORLD_MAP_RESOURCE_TYPE_IDS,
+  );
+  assert.equal(palworldMapCollectibleCategory("resource-stone"), "resource");
+
+  const expected = new Map([
+    ["night-stone", "resource-night-stone"],
+    ["pal-crystal", "resource-pal-crystal"],
+    ["pal-crystal-small", "resource-pal-crystal"],
+    ["coal", "resource-coal"],
+    ["copper-ore", "resource-copper-ore"],
+    ["iron-ore", "resource-iron-ore"],
+    ["quartz", "resource-quartz"],
+    ["stone", "resource-stone"],
+    ["stone-18", "resource-stone"],
+    ["stone-2", "resource-stone"],
+    ["stone-3", "resource-stone"],
+    ["stone-4", "resource-stone"],
+    ["stone-5", "resource-stone"],
+    ["stone-6", "resource-stone"],
+    ["stone-7", "resource-stone"],
+    ["sky-island-ore", "resource-sky-island-ore"],
+    ["sulfur", "resource-sulfur"],
+    ["world-tree-ore", "resource-world-tree-ore"],
+  ] as const);
+  for (const [subtype, typeId] of expected) {
+    assert.equal(
+      palworldMapCollectibleTypeForLocation({ category: "resource", subtype }),
+      typeId,
+    );
+  }
+  assert.equal(
+    palworldMapCollectibleTypeForLocation({
+      category: "resource",
+      subtype: "unknown-resource",
+    }),
+    undefined,
+  );
 });
 
 test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한다", () => {
@@ -407,6 +456,15 @@ test("Palworld 추가 지도 위치 API는 선택 레이어와 bounded limit을 
     assert.equal(url.searchParams.get("layers"), "fast-travel,egg");
     assert.equal(url.searchParams.get("limit"), "5000");
     assert.equal(url.searchParams.get("offset"), "0");
+    await assert.rejects(
+      () => getPalworldMapLocations(
+        ["resource"],
+        "main",
+        undefined,
+        { limit: 5_001, offset: 0 },
+      ),
+      RangeError,
+    );
   } finally {
     Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
   }
@@ -840,6 +898,14 @@ test("스킬 목록과 상세 API는 shared validator를 통과한 데이터만 
     power: 45,
     cooldownSeconds: 2,
     relatedPalCount: 1,
+    relatedPalPreviews: [{
+      id: "foxparks",
+      number: 5,
+      nameKo: "파비오",
+      nameJa: "キツネビ",
+      nameEn: "Foxparks",
+      elements: ["fire"],
+    }],
     localization: { sourceLanguage: "en", ko: "source_language_fallback", ja: "source_language_fallback" },
   };
   const requested: string[] = [];
@@ -852,7 +918,18 @@ test("스킬 목록과 상세 API는 shared validator를 통과한 데이터만 
       requested.push(String(url));
       const body = String(url).includes("/skills/")
         ? { ...summary, relatedPals: [{ pal: { id: "foxparks", number: 5, nameKo: "파비오", nameJa: "キツネビ", nameEn: "Foxparks", elements: ["fire"] } }], metadata }
-        : { items: [summary], pagination: { page: 1, pageSize: 24, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false }, metadata };
+        : {
+          items: [summary],
+          pagination: { page: 1, pageSize: 24, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+          facets: {
+            types: [{ value: "active", count: 1 }],
+            activeElements: [{ value: "fire", count: 1 }],
+            partnerElements: [],
+            passiveEffects: [],
+            passiveTiers: [],
+          },
+          metadata,
+        };
       return new Response(JSON.stringify(body), {
         status: 200,
         headers: {

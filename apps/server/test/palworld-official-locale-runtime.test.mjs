@@ -61,6 +61,13 @@ const activeSkillMappingFile = path.join(
   "palworld-pak-mappings",
   "legacy-active-skill-locale-map.json",
 );
+const passiveSkillMappingFile = path.join(
+  serverRoot,
+  "src",
+  "data",
+  "palworld-pak-mappings",
+  "legacy-passive-skill-locale-map.json",
+);
 const temporaryRoots = [];
 let built;
 let expected;
@@ -81,6 +88,11 @@ async function writeOverlayFiles(root) {
     writeFile(
       path.join(root, "locales", "official-active-skill-evidence.json"),
       serializePalworldOfficialLocaleOverlayArtifact(built.activeSkillEvidence),
+      "utf8",
+    ),
+    writeFile(
+      path.join(root, "locales", "official-passive-skill-evidence.json"),
+      serializePalworldOfficialLocaleOverlayArtifact(built.passiveSkillEvidence),
       "utf8",
     ),
     writeFile(
@@ -170,6 +182,7 @@ before(async () => {
     reviewer: "operator-locale-review",
     evidenceChecksum: "1".repeat(64),
     activeSkillMappingFile,
+    passiveSkillMappingFile,
   });
   expected = {
     expectedRelease: built.manifest.release,
@@ -185,16 +198,18 @@ after(async () => {
   );
 });
 
-test("legacy v4 공식 locale runtime은 독립 evidence와 output checksum을 검증해 Shared context에 전달한다", async () => {
+test("legacy 공식 locale runtime은 독립 active/passive evidence와 output checksum을 검증한다", async () => {
   const root = await writeOverlayFixture();
   const overlay = await loadPalworldOfficialLocaleRuntimeOverlay({
     releaseRoot: root,
     ...expected,
   });
-  assert.equal(overlay.officialSourceFields.length, 10_438);
-  assert.equal(overlay.sourceArtifact.counts.byLocale.ko, 5_219);
-  assert.equal(overlay.sourceArtifact.counts.byLocale.ja, 5_219);
+  assert.equal(overlay.officialSourceFields.length, 10_696);
+  assert.equal(overlay.sourceArtifact.counts.byLocale.ko, 5_348);
+  assert.equal(overlay.sourceArtifact.counts.byLocale.ja, 5_348);
   assert.equal(overlay.activeSkillEvidence?.counts.activeSkills, 217);
+  assert.equal(overlay.passiveSkillEvidence?.counts.activePassiveSkills, 79);
+  assert.equal(overlay.passiveSkillEvidence?.counts.compatibleDescriptions, 50);
   assert.equal(overlay.compatibility.candidateRuntimeActivationGranted, false);
   assert.equal(overlay.compatibility.rightsVerified, false);
 
@@ -291,6 +306,20 @@ test("legacy composite v5 service는 공식 KO/JA 이름을 source_provided 상�
   assert.equal(activeSkill.nameJa, "フロストアウト");
   assert.equal(activeSkill.translation.name.ko, "source_provided");
   assert.equal(activeSkill.translation.description.ja, "source_provided");
+  const passiveSkill = service.getSkill("passive-passive-alien-7fa1e23436");
+  assert.equal(passiveSkill.nameKo, "미지의 생체세포");
+  assert.equal(passiveSkill.nameJa, "未知の生体細胞");
+  assert.equal(passiveSkill.translation.name.ko, "source_provided");
+  assert.equal(passiveSkill.translation.description.ja, "source_provided");
+  const versionMismatchPassive = service.getSkill(
+    "passive-passive-legend-8ff382798f",
+  );
+  assert.equal(versionMismatchPassive.nameKo, "전설");
+  assert.equal(versionMismatchPassive.nameJa, "伝説");
+  assert.notEqual(
+    versionMismatchPassive.translation.description.ko,
+    "source_provided",
+  );
 });
 
 test("공식 locale evidence 손상은 번역만 invalid로 격리하고 Pal·Item·Skill catalog는 유지한다", async () => {

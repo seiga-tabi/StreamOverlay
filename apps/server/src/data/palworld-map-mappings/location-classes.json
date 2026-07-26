@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "targetGameVersion": "1.0.1",
   "sourceArchiveSha256": "344628b020ffc8ee4642188e356013fc3e955f2ec8addf5ae384786c494f6186",
   "indexMember": {
@@ -12,6 +12,12 @@
     "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
     "revision": "main-map-fmodel-bounds-v1",
     "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003"
+  },
+  "treeTransformEvidence": {
+    "sourceMapAssetMember": "Pal/Texture/UI/Map/T_TreeMap.png",
+    "sourceMapAssetSha256": "6f79de30a1d0fbbd4306dcc10ee9b5b098d84defcb8612cf962bb8baffcf941e",
+    "targetMapAssetSha256": "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf",
+    "revision": "tree-map-fmodel-bounds-v1"
   },
   "classes": [
     {
@@ -180,6 +186,96 @@
       "subtype": "world-tree"
     },
     {
+      "sourceClass": "BP_PalMapObjectSpawner_NightStone_C",
+      "category": "resource",
+      "subtype": "night-stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_PalCrystal_C",
+      "category": "resource",
+      "subtype": "pal-crystal"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_PalCrystal_Small_C",
+      "category": "resource",
+      "subtype": "pal-crystal"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockCoal_C",
+      "category": "resource",
+      "subtype": "coal"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockCopper_C",
+      "category": "resource",
+      "subtype": "copper-ore"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockIron_C",
+      "category": "resource",
+      "subtype": "iron-ore"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockQuartz_C",
+      "category": "resource",
+      "subtype": "quartz"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone18_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone2_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone3_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone4_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone5_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone6_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_RockStone7_C",
+      "category": "resource",
+      "subtype": "stone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_SkyIslandOre_C",
+      "category": "resource",
+      "subtype": "sky-island-ore"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Sulfur_C",
+      "category": "resource",
+      "subtype": "sulfur"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_WorldTreeOre_C",
+      "category": "resource",
+      "subtype": "world-tree-ore"
+    },
+    {
       "sourceClass": "bp_palmapobjectspawner_palegg_Sakurajima_grade_01_C",
       "category": "egg",
       "subtype": "sakurajima-1"
@@ -256,7 +352,8 @@
     "egg": 1816,
     "skill-fruit": 47,
     "lifmunk": 407,
-    "journal": 64
+    "journal": 64,
+    "resource": 15662
   },
   "candidateFamilies": [
     {
@@ -278,17 +375,6 @@
       "sourceClassTokens": [
         "MonoNPCSpawner",
         "NPCCampSpawner"
-      ]
-    },
-    {
-      "id": "resource",
-      "sourceClassTokens": [
-        "PalMapObjectSpawner_Rock",
-        "PalMapObjectSpawner_PalCrystal",
-        "PalMapObjectSpawner_Sulfur",
-        "PalMapObjectSpawner_NightStone",
-        "PalMapObjectSpawner_SkyIslandOre",
-        "PalMapObjectSpawner_WorldTreeOre"
       ]
     },
     {

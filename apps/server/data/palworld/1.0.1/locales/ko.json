@@ -5,7 +5,7 @@
   "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
   "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
   "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
-  "translationRevision": "official-locale-overlay-9499ec38e96ef9ca-eb408d81",
+  "translationRevision": "official-locale-overlay-23341e7d79a57bac-eb408d81",
   "translationMethod": "source_provided",
   "translationStatus": "incomplete",
   "translatedAt": "2026-07-25T00:00:00.000Z",
@@ -57485,6 +57485,1512 @@
           "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
           "sourceMemberSha256": "91ebda4f75e54fb40f89fc430fc5ff8eb6dd3f6086a07f3649551cce9e56b93e",
           "text": "등에 타고 이동할 수 있다.\n함께 싸우는 동안, 이 팰과 같은 패시브 스킬을 가진 팰과 조우할 확률이 Lv.1 15 · Lv.2 18 · Lv.3 21 · Lv.4 24 · Lv.5 30% 증가한다.\n※일부 패시브 스킬 제외",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-alien-7fa1e23436",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "a9b833429707104d6ade4d02e486dab8d32fc27dca32d0349c13b386a3568031",
+          "sourceMessageKey": "PASSIVE_Alien",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "미지의 생체세포",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "fb9a3f624ded4a3f8b55a1ca8191e6a3cdd9cde5c9b6965d7a68d5a7498cba06",
+          "sourceMessageKey": "PASSIVE_Alien_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "공격 +10%\n화염 속성 피해 경감 15%\n번개 속성 피해 경감 15%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-cool-time-reduction-down-1-3cb8042ac5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f8e291aa3259483a83e365181479f1045d26bc629c8c6db92d718381bf53fa6d",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Down_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "느긋함",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "5e44f00b91be7ae27a0a20ca7a67e53a491958f613736e0d13ea13f989b85550",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Down_1_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "액티브 스킬 쿨타임 연장 -15%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-cool-time-reduction-up-1-149b0a9ba1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c18b1bc2e32d3d4389bea2adaf91001830382738509f6f2cdb04674db422e3b0",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "냉철함",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "c8011578909c931f4afa31b0aa2758c4a2daf317e3293e0142028f49d1adb682",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_1_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "액티브 스킬 쿨타임 단축 30%\n공격 +10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-cool-time-reduction-up-2-2b0c9bee61",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "72ce5058ac342eb2e4182d52c14d1cbbbc7db71b01ebd0da046b840a79e2a196",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "성급함",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "bec8dfc4de47efad9c4d93036e28db1bba9c59fa61b7053ff53a3462f38f99cc",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_2_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "액티브 스킬 쿨타임 단축 15%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-down1-2a8d997bd0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "421a2e2f2fcbfa70a9a0ca4aa2c2410db72ab5d49ff5c958419bcdc153df1fec",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_down1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "서투름",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-down2-365dff03b1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "650d1332a6edcdf86295bc19cb8875442b783381be326e26ae5a0ac128fe7953",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_down2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "농땡이치는 버릇",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-up1-bd91525958",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "b6f613dfd9ca01e1154f25135d7547ee5f266ba3bc063f4eee1c52f680e123de",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_up1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "성실함",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-up2-ecbcdfabde",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "3ab39a32274878edc1a2e5d2e1a5287c69f0a0d1cf7e6751752e2c2bc892d97e",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_up2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "장인 기질",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-down1-5e3e3088c5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "1748c08c642cf574f83c0bbe5c9fc6cab69850cfcea19e9603c30241817ce749",
+          "sourceMessageKey": "PASSIVE_Deffence_down1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "약한 맷집",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-down2-69086f3cf0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "e2253fd3d6f0bf185c5a51334e8931ad8088e9490bc5250246d00cb11f7683ed",
+          "sourceMessageKey": "PASSIVE_Deffence_down2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "부실한 뼈",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-up1-b0b7e9a164",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "88a8cff02db9cfcaaf04de44257c2b677dbe2a084dcca87d8d56041956b73c26",
+          "sourceMessageKey": "PASSIVE_Deffence_up1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "단단한 피부",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-up2-90aaea5348",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "e73e5149caa3fd323758ec8ee05aac809e529732cfb4d097ce57466e68898a3e",
+          "sourceMessageKey": "PASSIVE_Deffence_up2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "억센 육체",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "4180ed4fe64bf8886c7a48a2e6061fc40184453bd87dab6a28f7d43ec4eb392d",
+          "sourceMessageKey": "PASSIVE_Deffence_up2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "방어 +20%\n피격 경직 무효",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-aqua-1-pal-ef921d34d4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "0bb4674d19a44d7dc191a60344c975b32636fe78634e38403485f4038067c584",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Aqua_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "물놀이 선호",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "60abfbb051f9cfac47ab2ac2b98333ed0949bb48b9079ca7d2ce6756bc727dca",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Aqua_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "물 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-aqua-2-pal-3c79819c40",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "754579f9a542ba4d5e10775992ce7c40176ec404add82c12d0cf9b1bd8de3077",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Aqua_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "해황",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dark-1-pal-cdd58dd4b4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "7c0003d7a3c873513013c3c0536d2689208685c12b24ac9ebe176e653a33786c",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "밤의 장막",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "32574b7285a52623fe97d2b1c8a123dc192e16b46bd33925077f3325825e02a8",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "어둠 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dark-2-pal-d576b4c3dc",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "1452e30454ce993eab29970f420ef06a88961ce9dcbd5096b70945dd5f999e9b",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "명왕",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dragon-1-pal-51575a1218",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "e9cd777b05815f2cdc8f846f45969a0f06c67a3e5bf5e6cfa2f0ff64e25b5a9a",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dragon_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "용의 혈족",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "1e5e20b0a72e71ababf61fa92fe905c884264fd7b71de4f4268a580a7762b12c",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dragon_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "용 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dragon-2-pal-76eb5880f9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "11cd5223cdb99d2f560dffa121540ac9174900cd7fea9b840ffe2e12adab309e",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dragon_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "신룡",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-earth-1-pal-8810cf546b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "65cb7d7cc58eeb1e41cf32e3e40cce31c18ab8f829505f424dbce18a024e21cc",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Earth_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "대지의 힘",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "6c5ef81b25af3dfef297bfca585543111a762e126dd5252bd8d606bf464b0c80",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Earth_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "땅 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-earth-2-pal-c4a348146c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "a3dbc0179e7970d74ba13d9079a3e573c87015a7f65def6d10b63dd8dd07b56d",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Earth_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "지제",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-fire-1-pal-117b7d811f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "a8180b45e1019ad7dc904bec345e7d7b6224e51725efc33508067f1028c2541e",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "불놀이 선호",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "dfc4819f83a38f0d934c879d56a2b05e8c2ff10dc09c2e0df78ed8d388dfdc3a",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "화염 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-fire-2-pal-95f11a54a5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "ea196d2702bc9b6749032b60e5156c33b7a5ef60281c3f2a74616c298bf909ea",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "염제",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-ice-1-pal-c015f6d988",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "474530196746c6a3199890c86c62581432017d2717779ffc106c8e42aa94b813",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Ice_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "냉혈",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "822e27329bc8f5c0b18e0c0d1addaf595e2bf4ef2664cdfd7113c4dea2d4e4fc",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Ice_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "얼음 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-ice-2-pal-164931b250",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "22d020e1c8b127c8edd25d5d4d501971a0478f8935f27b7a87a752b2748f282d",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Ice_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "빙제",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-leaf-1-pal-cc20101254",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "659b2d9217288f859c7bec976eda22c578942e7c058faf5a6e222d39b060c9e0",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Leaf_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "초목의 향기",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "2f6b9a8de0a780789563c8b2a8a252a935cef782231285ec811e1d41b3bf3eee",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Leaf_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "풀 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-leaf-2-pal-9d88e55564",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "8e9d540e18987ef7fb018fd01273921a00ac5ea730b38ad0c88d3d9d7e71fb58",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Leaf_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "정령왕",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-normal-1-pal-52797c409d",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9a51ac578dddb59694df34d6a1033e25f6549ad273f2fde2fe6b4207e0e44d14",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Normal_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "무의 경지",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "21bf09dcf420c2c889e9b33cf9cb30fdffde3dcab54030670242cb9955a1cef7",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Normal_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "무속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-normal-2-pal-ead16695ee",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "81b0255c5be74b99dbd1afca48d5d11fe80a17cc29e49b5e1d4bb1a9dac4851f",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Normal_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "성천",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-thunder-1-pal-ad7eeb0f6f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "361bb1bd32f4b9bfe23ac7bca8258698d623b2b3a06de25221de8fae2a7d509f",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Thunder_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "콘덴서",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "dd0373280fc5aa3d99ed3d24fde926baf07c3b4faf5f623646618b88de6da03a",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Thunder_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "번개 속성 공격 피해 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-thunder-2-pal-33f6532de1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "d21a23cf1e01bd2d1d397603380f75523227f2e0a2123c3285999b2ceb6e9589",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Thunder_2_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "뇌제",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-aqua-1-pal-95e604fc20",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "6710c91eb42dc9a172f42ebcee7b0a7e6fba38d0bc4ff2c21963bedd15ab3793",
+          "sourceMessageKey": "PASSIVE_ElementResist_Aqua_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "방수 가공",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "bcfb3ae6ce4f1d43f6f7e444988def0c884eaa676fbce63a15f3d05530a173d7",
+          "sourceMessageKey": "PASSIVE_ElementResist_Aqua_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "물 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-dark-1-pal-102e813b8f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "5ca353637daa1f3b3c0b5ae71ee9f71ddd7328befdc991ef9a5e3043862cdbed",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dark_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "밝은 성격",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "1bde6854025880a030bc5f90febe56c38fbcfb864febab4096657fd47f72869a",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dark_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "어둠 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-dragon-1-pal-688a174630",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "de429c72b4b27f8fb3325f549051bcf117e8002e0151e8e10920b3f46301c05e",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dragon_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "용 학살자",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "f99579a581013b007aed13dda05fd8671846e6d11488a56664893607f2230eea",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dragon_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "용 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-earth-1-pal-2e5019ad4d",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "ac46f94bc2481a7eca22930bb4760e98619a34adf89dc71a0cf144396fdc6ecb",
+          "sourceMessageKey": "PASSIVE_ElementResist_Earth_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "내진 구조",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "5222385549e2ea549d25dc270b5cfc9f4f95dbd15625b546ca071c9c850cb569",
+          "sourceMessageKey": "PASSIVE_ElementResist_Earth_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "땅 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-fire-1-pal-ef46091dd0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "a8cdbede3c4e6022e63cc28cec85ea8b19f3297dbd9bf36f64d19c3c093899d6",
+          "sourceMessageKey": "PASSIVE_ElementResist_Fire_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "일광욕 선호",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "3cc5cf3c3640d6ad59df7ba327335dd30867d03b498ce2dc32774c040875d040",
+          "sourceMessageKey": "PASSIVE_ElementResist_Fire_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "화염 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-ice-1-pal-c74477e03c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "384ce8d997e7030b2dc93adfa28e36002c1edbb8e7f3cf58d7ae3f1b7cf9a1c3",
+          "sourceMessageKey": "PASSIVE_ElementResist_Ice_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "고온 체질",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "896ad1f353b5fd592b84f37c60810cc10121d949e69973ba82a4e192a9b037ab",
+          "sourceMessageKey": "PASSIVE_ElementResist_Ice_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "얼음 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-leaf-1-pal-4b6d7614d7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "6490cd43320cb138eab8116502be681cc0d20f42b3690a6b9451d0b74faf01d7",
+          "sourceMessageKey": "PASSIVE_ElementResist_Leaf_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "방초 효과",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "949c6a60c3e2b7c934de42e11e598cd716c873198db2cfb16b1db16e4b89aeee",
+          "sourceMessageKey": "PASSIVE_ElementResist_Leaf_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "풀 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-normal-1-pal-86334ce7a4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "89205a7d3f962644af0a10f866c86235c5cde4637451a08a27abe334f911d8d9",
+          "sourceMessageKey": "PASSIVE_ElementResist_Normal_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "어브노멀",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "7a6b559b5ebfaea8e84e8b2e955ea627611a32a1048002c200f3ff803be596a2",
+          "sourceMessageKey": "PASSIVE_ElementResist_Normal_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "무속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-thunder-1-pal-ea32a45c64",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "29526d9944f8b784d469d96fcc4d64242b4c4621e4a3407f918eb9780f35337d",
+          "sourceMessageKey": "PASSIVE_ElementResist_Thunder_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "절연체",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "e383bafc47f5e1884fb4cd9559cb1092097e8222612112a84ea82c87cbabe42e",
+          "sourceMessageKey": "PASSIVE_ElementResist_Thunder_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "번개 속성 피해 경감 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-eternal-flame-40c1710409",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "17afcbaceddfc3f9a58c21f0d438293fb6693ed62afd3e9edb298640d65df9db",
+          "sourceMessageKey": "PASSIVE_EternalFlame",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "영원한 불꽃",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "162c901d3cffc80cf799f8d63da5f1e670ee0edaedbe204c4ff9941b9b87e0ee",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_Electric_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "화염 속성 공격 피해 증가 30%\n번개 속성 공격 피해 증가 30%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-legend-8ff382798f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "d7a38fd8b5b8fe4baf5d2000054a6ef483fb3912434d91a6e291f78d5436a61d",
+          "sourceMessageKey": "PASSIVE_Legend",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "전설",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-move-speed-up-1-7472b18355",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c77798d2523ca435f801310c9aeb5290f329f7a5815d38eedfb93ad48d153d0e",
+          "sourceMessageKey": "PASSIVE_MoveSpeed_up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "재빠름",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "89bcbba648aa181e39d4619c246e23aed81e510b0231a00af0aad6eb04ccb891",
+          "sourceMessageKey": "PASSIVE_PAL_MoveSpeed_up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "이동 속도 상승 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-move-speed-up-2-dce52a41f8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "b27aede46a3189f86803f1944aa74be732c46631d95c89031b1b0010ad97ad45",
+          "sourceMessageKey": "PASSIVE_MoveSpeed_up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "달리기 왕",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "8be3c16dcf432773bc5e7ffcd90fb2af0fbd3ea6bde544ddd0bde977d5d1ba82",
+          "sourceMessageKey": "PASSIVE_PAL_MoveSpeed_up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "이동 속도 상승 20%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-move-speed-up-3-c669e85b3e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "31f02f124ad510e23c82aa40fe450c9d19b3e15f0c45f980f20b223a73ed8cb4",
+          "sourceMessageKey": "PASSIVE_MoveSpeed_up_3",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "신속",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "586df03747a7e2f2e51c2c9dcce7ec268bda92ddcac91c258ec7a918c4ed5a11",
+          "sourceMessageKey": "PASSIVE_PAL_MoveSpeed_up_3",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "이동 속도 상승 30%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-nocturnal-0c9ee8311c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "4ae62d8d05d250027633356a24f81cf6d1a42e02321b64fd6fac762939e40b45",
+          "sourceMessageKey": "PASSIVE_Nocturnal",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "불면",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "ccbc6e322b423280fb5bb28cbad1e47156ba1c3a81dec8a1dd4e1b6fe2776893",
+          "sourceMessageKey": "PASSIVE_Nocturnal_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "밤이 되어도 잠들지 않고 계속 일한다.",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-non-killing-7f81dcacf4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "bda37c792248e5c0a9adf72555724b624ea699a0f462a95cebf444bad29f8017",
+          "sourceMessageKey": "PASSIVE_NonKilling",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "힘 조절",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "d7a3e5db717311d66b13cc4fdba5bad6f508492a9c4f4366724798b1079186c0",
+          "sourceMessageKey": "PASSIVE_NonKilling_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "평화주의자.\n공격 대상의 HP를 1 미만으로 깎을 수 없게 된다.",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-noukin-69a0d11bb6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "3e6106d97175988a72f4a925f4860199956615cafdf669dcd41b13e55f9e712c",
+          "sourceMessageKey": "PASSIVE_Noukin",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "운동 바보",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-down1-ca85d82fb2",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f38b509a6ff45804847eb3f7501ac6183d3d8adf9f335c995b3e7d392d70d927",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_down1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "겁쟁이",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-down2-8b5af4c7a8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "129a23797109da18f5957e8a42dd55af12b9ff460ee69d6d481b29726bb06752",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_down2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "무사주의자",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-up1-f433e3338b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "a373035f008ae2943711fc9ea122c8b11dadbc3c82ecdbcb8ebab99652890bb1",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_up1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "용감",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-up2-3b80a6eb56",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "5c71d8cf5a993b44c84938a3346c856ad2b9e8312d105196321ec0efa5781b58",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_up2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "사나움",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-conceited-86e9327226",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "3c8bc1073b7b096e6ee84831f3639b9c5a235b6dc2a7f6ccd67f9dfb76fc1e43",
+          "sourceMessageKey": "PASSIVE_PAL_conceited",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "자만심",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-corporate-slave-6ef0fc31fa",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "de78a51b8b70529ae8d395836ba0b9eb0bb190268ca30641361f610f6574866b",
+          "sourceMessageKey": "PASSIVE_PAL_CorporateSlave",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "일 노예",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-down-1-09d023691a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "648fb8dfcf63ca8c8cb61de5f473571ad84c2c88d92067bb22c14bd6564429ec",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "소식",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "24cb48e1d0faeba8bb24e696dc98b1e78892194e63f34362892515d2ea8238c9",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "포만도 쉽게 내려가지 않음 +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-down-2-e1cbd8faf5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "14a6c996d704d073e5ddc9f60c6df5aac4c04ca25b9e2af3cec398390d86eeb0",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "식습관의 달인",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "8be21e6138512b13b091b5ae8b69c35f3d5a75d800e8e5346ebcd05b069c1366",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "포만도 쉽게 내려가지 않음 +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-up-1-e9eb2677b0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9a30f00e244fa53304155529f25151d20d3e3a7427821d8be2a3dae460748cab",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "먹보",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "db0abe26d8f8d75c39cb34aebd53f5a89fa98ce26a1ddc154a42616c6374757d",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "포만도 쉽게 내려감 +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-up-2-3fc661bea8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c7767dde62dd6ae850e0b1174b64cb76f0ff43975449da6cfbb22d4d8c072285",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "블랙홀 위장",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "a56f0169eabd55591c57ab73753ac9e9821849a3689529fa0feda9c662e4c978",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "포만도 쉽게 내려감 +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-masochist-6e39cf3a41",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "8ea8a270ecd7f3bdc188d8252dd9d98a1644ac009baf1b05eb0f25d821e6a54c",
+          "sourceMessageKey": "PASSIVE_PAL_masochist",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "마조히스트",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-oraora-2b5cd69aa9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "587ae8621cc948ecd14da38b8dd1bd8e7c4f928968e9d24629a21f176627bed5",
+          "sourceMessageKey": "PASSIVE_PAL_oraora",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "불량배",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-rude-733b60f011",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9bc553d17232764f09d7028802ebf0efab318bfb034b8be92400416731fed724",
+          "sourceMessageKey": "PASSIVE_PAL_rude",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "난폭함",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sadist-e469d81a97",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c0232d3b893f49d21b203baf558bccc48afc3c6cfa860ca5526bcc1fb953a4ef",
+          "sourceMessageKey": "PASSIVE_PAL_sadist",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "사디스트",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-down-1-ac554a1d01",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "2ad84ee4002495429cd29f1e05bd607abcaa7c0d9940f073edbcdcd7aef6eca1",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "긍정적인 사고",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "425e73351491dfa468777beefbb5271c4f2a09ca568ee77b7d64cfadcffb67b9",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "SAN 수치 쉽게 내려가지 않음 +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-down-2-2c0876d536",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "6d83ca4926a0371d91296e4ba4861794aef4afb30be563f5316f0b7d1a4bce0c",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "일 중독",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "eae8970bb569bd02c84afb02f2f8eaa2cacc02971ef02f1757345d2f3eac8d73",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "SAN 수치 쉽게 내려가지 않음 +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-up-1-d16c76d884",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c8421d3aeb52c898c285b898dc3a5096d8650da7cab2b2691bf04c2bd89791ed",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "정신 불안정",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "c4fe98b56c1e00dcf7b03a3a778ebfb51ab088e64314b47b862d920a4979a853",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "SAN 수치 쉽게 내려감 +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-up-2-86f2b9c7ac",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "ad5788d4be11238f272ef0535d1be5915953d31bf679929d2a257790fb8dfdf9",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "파멸 기원",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "8a03b582cba3b23ace2c48617ea83bd927119ff8f20145373f3b132eb596338f",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "SAN 수치 쉽게 내려감 +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-rare-329966f19e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f706e984d0a4aae2c7134d3bf017306d429682aa91896f3c4d098f4b3ad3420b",
+          "sourceMessageKey": "PASSIVE_Rare",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "희귀",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-sale-price-down-1-5a38b58522",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "fbdbd693b8235d2d895dc6663eeb328fcc876792e46b1d8c164be741139a4202",
+          "sourceMessageKey": "PASSIVE_SalePrice_Down_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "초라함",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "6a2f8d202d3febbc2fed1c9ed205de29b3ce9fba023f5e8bc905697061689fcb",
+          "sourceMessageKey": "PASSIVE_SalePrice_Down_1_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "거래 가격 악화 -10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-sale-price-up-1-4662e36935",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "7475fbcd2d4d69870eed415689a4d968a7c3c71a5b8bda2c722c6c99731029e3",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "고귀",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "3b4d94f7546ed034f193996db5eac8474f8a53c566cfc76a848ca4f623ffc857",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_1_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "거래 가격 향상 +5%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-sale-price-up-2-ea9b88de09",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "8b7325e220de4f7ce2f1dae1097e318880662027ebd877bd58e7be1733b114a4",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "좋은 혈통",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "d08bb669cbe0ad107ea2d59cf8e138b9cb45c6bea2b1455c8d86ea52e331b14c",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_2_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "거래 가격 향상 +3%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-stamina-down-1-bf2dd98d1c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "0d67051ba8fe9140e0ea35925a392ed88bf0f8b6361a973d62cdbb8771418559",
+          "sourceMessageKey": "PASSIVE_Stamina_Down_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "은둔형 외톨이",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "c2a1d31ec0481c5a944837eca01ff08a17f58296bca0a4f2b033e4553191f1f3",
+          "sourceMessageKey": "PASSIVE_Stamina_Down_1_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "최대 기력 -25%\n※탑승 가능한 팰에게만 적용",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-stamina-up-1-687ad27f7f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "d07389b94f351b93e45c97c8621195fa5bd661b71fefad2f788b76cb761d3b7c",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "넘쳐나는 기력",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "833a662d4c4aa6f7bb01cedabcd49a2e8083bdf9a37beade0ea95f29e1de95e3",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_1_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "최대 기력 +50%\n※탑승 가능한 팰에게만 적용",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-stamina-up-2-801c8a1ef4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "7aca3f1e194cb491f0a2e6e77f59d08a6dd2138a77f5d99c9982cd34ce3ef9d5",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_2",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "건강한 우량아",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "377e829779e244ca4923ecff16c07b322e240b78462036a2db5c3f870d25b55f",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_2_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "최대 기력 +25%\n※탑승 가능한 팰에게만 적용",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-test-pal-egg-hatching-speed-up-e369a5abcb",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f876e8e56283494495a08dcfca23ad1dd408cb874e2f1816f7880081389bffd6",
+          "sourceMessageKey": "PASSIVE_Test_PalEgg_HatchingSpeed_Up",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "박애주의자",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "c23f702485ad32791d191421a582a26ca55eb6120f5bdc22ab3fb0f11d35366e",
+          "sourceMessageKey": "PASSIVE_Test_PalEgg_HatchingSpeed_Up_DESC",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "배합 목장에 배치된 동안 알 생산 속도가 100% 증가한다",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-atk-up-1-61cc757ea5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "b47a2722343c3294f995165558e11d4f6740c658f411d3476c139491dc5b0840",
+          "sourceMessageKey": "PASSIVE_TrainerATK_UP_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "돌격 지휘자",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "8d24fdca4ecc22885df33533eb55bc94e298a1945a676776e59551a73a34c97c",
+          "sourceMessageKey": "PASSIVE_TrainerATK_UP_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "플레이어의 공격 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-def-up-1-0690f95e65",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "a3a5d1bd6145c7b10783b9c3371753a931499012f986025a80d74369fbd846d1",
+          "sourceMessageKey": "PASSIVE_TrainerDEF_UP_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "철옹성의 책사",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "279b64f183a6361cee3c915f233075d162730d43c6bcbdcf274c1557256d4c51",
+          "sourceMessageKey": "PASSIVE_TrainerDEF_UP_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "플레이어의 방어 증가 10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-logging-up1-536def0d3a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "95610c381a5368beeee6788b5f67a96a69fc61887406739654e2ea1e02505ae6",
+          "sourceMessageKey": "PASSIVE_TrainerLogging_up1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "벌목 관리자",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "65998a9083f3990626cc5f76a197415b2dcf2be5db09b354af959a1c95dd0b6f",
+          "sourceMessageKey": "PASSIVE_TrainerLogging_up1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "플레이어의 벌목 효율 증가 25%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-mining-up1-e8bb571c3f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "04d6e81a15529629e872c5a734b634f05e3c567a0c87d2662a33cd5e31ca7bdd",
+          "sourceMessageKey": "PASSIVE_TrainerMining_up1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "광산 관리자",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "29920ede6b615b6f1e0abbb7293e82260c8ea035750d07122744a330c380362c",
+          "sourceMessageKey": "PASSIVE_TrainerMining_up1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "플레이어의 채굴 효율 증가 25%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-work-speed-up-1-457e282f83",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f2935b65ce43ed1762a8a86c8cd6f01e4941a7a153168e5b80589459ebd528a1",
+          "sourceMessageKey": "PASSIVE_TrainerWorkSpeed_UP_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "동기 부여",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "feabe0241e3d3b1d4b06b5bf1bfcbd5b762290b383964d15590c08876e891ff1",
+          "sourceMessageKey": "PASSIVE_TrainerWorkSpeed_UP_1",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "플레이어의 작업 속도 증가 25%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-witch-a025ce7175",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "60ffcd1f2f4ab4498b98307f130f3eb5dfe6219c6d2e7d1da308baf53938328a",
+          "sourceMessageKey": "PASSIVE_Witch",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
+          "text": "마녀",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "46b460ca74cb48c05b29a3ef1687975ee2426890588af784cbf6219c171cdd6d",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_Ice_1_PAL",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "5e1048c28fdcdf77915c35aa02d3ade64328a6f35e6a904d4ca376b7957c60c5",
+          "text": "어둠 속성 공격 피해 증가 30%\n얼음 속성 공격 피해 증가 30%",
           "status": "source_provided"
         }
       }

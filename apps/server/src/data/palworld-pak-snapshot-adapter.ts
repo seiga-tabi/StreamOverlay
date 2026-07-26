@@ -257,7 +257,92 @@ function candidateSkillId(type: string, sourceInternalId: string): string {
   return id;
 }
 
+const PALWORLD_PAK_ITEM_SUBTYPES_BY_TYPE = new Map<string, ReadonlySet<string>>([
+  ["Accessory", new Set(["Accessory"])],
+  ["Ammo", new Set(["ConsumeBullet"])],
+  ["Armor", new Set(["ArmorBody", "ArmorHead", "Shield"])],
+  ["Blueprint", new Set(["Blueprint"])],
+  ["CaptureItemModifier", new Set(["CaptureItemModifier"])],
+  ["Consume", new Set([
+    "ConsumeAncientTechnologyBook",
+    "ConsumeFishingBait",
+    "ConsumeGainStatusPoints",
+    "ConsumeOther",
+    "ConsumePalAwakening",
+    "ConsumePalGainExp",
+    "ConsumePalGainFriendshipPoint",
+    "ConsumePalLevelUp",
+    "ConsumePalRankUp",
+    "ConsumePalRevive",
+    "ConsumePalTalentUp",
+    "ConsumePalWorkSuitabilityUp",
+    "ConsumePassiveSkillChange",
+    "ConsumeTechnologyBook",
+    "ConsumeTreasureMap",
+    "ConsumeWazaMachine",
+    "ConsumeWorldTreeHolyWater",
+    "Drug",
+    "Medicine",
+    "ReturnToBaseCamp"
+  ])],
+  ["Essential", new Set([
+    "Essential",
+    "Essential_AdditionalInventory",
+    "Essential_BossReward",
+    "Essential_Lamp",
+    "Essential_PalGear",
+    "Essential_PassiveSkillChange",
+    "Essential_UnlockPlayerFuture"
+  ])],
+  ["Food", new Set([
+    "FoodDishFish",
+    "FoodDishMeat",
+    "FoodDishVegetable",
+    "FoodFish",
+    "FoodMeat",
+    "FoodVegetable"
+  ])],
+  ["Glider", new Set(["Glider"])],
+  ["Material", new Set([
+    "Drug",
+    "MaterialIngot",
+    "MaterialJewelry",
+    "MaterialMonster",
+    "MaterialOre",
+    "MaterialPalEgg",
+    "MaterialProccessing",
+    "MaterialStone",
+    "MaterialWood",
+    "Money"
+  ])],
+  ["SpecialWeapon", new Set(["SPWeaponCaptureBall"])],
+  ["Weapon", new Set([
+    "WeaponAssaultRifle",
+    "WeaponBow",
+    "WeaponCrossbow",
+    "WeaponFishingRod",
+    "WeaponFlameThrower",
+    "WeaponGatlingGun",
+    "WeaponGrapplingGun",
+    "WeaponHandgun",
+    "WeaponMelee",
+    "WeaponMetalDetector",
+    "WeaponRocketLauncher",
+    "WeaponShotgun",
+    "WeaponThrowObject"
+  ])]
+]);
+
+function assertSupportedItemSourcePair(typeA: string, typeB: string): void {
+  if (!PALWORLD_PAK_ITEM_SUBTYPES_BY_TYPE.get(typeA)?.has(typeB)) {
+    throw new TypeError(
+      `허용되지 않은 Palworld item TypeA/TypeB 조합입니다: ${typeA}/${typeB}`
+    );
+  }
+}
+
 function itemCategory(typeA: string, typeB: string): PalworldItemCategory {
+  assertSupportedItemSourcePair(typeA, typeB);
   if (typeB === "SPWeaponCaptureBall") return "sphere";
   if (typeA === "Material") return "material";
   if (typeA === "Weapon" || typeA === "SpecialWeapon") return "weapon";
@@ -269,6 +354,29 @@ function itemCategory(typeA: string, typeB: string): PalworldItemCategory {
   if (typeB === "Drug" || typeB === "Medicine") return "medicine";
   if (typeA === "Consume") return "consumable";
   return "other";
+}
+
+function itemType(
+  typeA: string,
+  typeB: string
+): import("@streamops/shared").PalworldItemFilterCategory {
+  assertSupportedItemSourcePair(typeA, typeB);
+  if (typeB === "SPWeaponCaptureBall") return "sphere";
+  if (typeA === "CaptureItemModifier") return "sphere_module";
+  if (typeA === "Glider") return "glider";
+  if (typeA === "Blueprint") return "blueprint";
+  if (typeA === "Essential") return "valuable";
+  if (typeA === "Material") return "material";
+  if (typeA === "Ammo" || typeB === "ConsumeBullet") return "ammo";
+  if (typeA === "Consume") return "consumable";
+  if (typeA === "Weapon") return "weapon";
+  if (typeA === "SpecialWeapon") {
+    throw new TypeError(`지원하지 않는 Palworld SpecialWeapon TypeB입니다: ${typeB}`);
+  }
+  if (typeA === "Armor") return "armor";
+  if (typeA === "Accessory") return "accessory";
+  if (typeA === "Food") return "food";
+  throw new TypeError(`지원하지 않는 Palworld item TypeA/TypeB 조합입니다: ${typeA}/${typeB}`);
 }
 
 function canonicalJsonValue(value: unknown): unknown {
@@ -785,6 +893,7 @@ export function adaptPalworldPakCandidateToSnapshot(
       ...(name.ja === undefined ? {} : { nameJa: name.ja }),
       ...(name.en === undefined ? {} : { nameEn: name.en }),
       category: itemCategory(String(record.typeA), String(record.typeB)),
+      itemType: itemType(String(record.typeA), String(record.typeB)),
       rarity: asNumber(record.rarity, `items.records[${index}].rarity`),
       ...(description.ko === undefined ? {} : { descriptionKo: description.ko }),
       ...(description.ja === undefined ? {} : { descriptionJa: description.ja }),

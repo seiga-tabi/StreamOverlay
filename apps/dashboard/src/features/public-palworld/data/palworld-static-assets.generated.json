@@ -145,5 +145,17 @@
     "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
     "width": 4096,
     "height": 4096
+  },
+  "maps": {
+    "main": {
+      "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
+      "width": 4096,
+      "height": 4096
+    },
+    "tree": {
+      "imageUrl": "/images/palworld/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf.webp",
+      "width": 4096,
+      "height": 4096
+    }
   }
 }

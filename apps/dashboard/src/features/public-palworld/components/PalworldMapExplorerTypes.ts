@@ -15,6 +15,7 @@ export const PALWORLD_MAP_READY_LAYER_IDS = [
   "lifmunk",
   "skill-fruit",
   "journal",
+  "resource",
   ...PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
 ] as const;
 export const PALWORLD_MAP_PENDING_LAYER_IDS = [

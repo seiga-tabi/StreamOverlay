@@ -18,7 +18,11 @@ import type {
   PalworldPalSpawnResponse,
   PalworldPalSummary,
 } from "@streamops/shared";
-import { PALWORLD_MAP_LOCATION_CATEGORIES } from "@streamops/shared";
+import {
+  PALWORLD_MAP_LOCATION_CATEGORIES,
+  PALWORLD_MAP_LOCATION_MAX_ARTIFACT_ENTRIES,
+  PALWORLD_MAP_LOCATION_MAX_RESPONSE,
+} from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import {
@@ -54,11 +58,16 @@ import {
   type PalworldMapViewState,
 } from "../hooks/usePalworldMapViewport";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
-import { isLocalPalworldMapUrl, PALWORLD_WORLD_MAP_IMAGE } from "../utils/element-images";
+import {
+  isLocalPalworldMapUrl,
+  PALWORLD_MAP_IMAGES,
+  PALWORLD_WORLD_MAP_IMAGE,
+} from "../utils/element-images";
 import { resolvePalworldName } from "../utils/localization";
 import {
   PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
   PALWORLD_MAP_EGG_TYPE_IDS,
+  PALWORLD_MAP_RESOURCE_TYPE_IDS,
   PALWORLD_MAP_STATUE_TYPE_IDS,
   isPalworldMapCollectibleTypeId,
   palworldMapCollectibleCategory,
@@ -129,6 +138,36 @@ const mapLabel = (ko: string, ja: string): PalworldMapLocalizedLabel => ({
   ko,
 });
 const PALWORLD_MAP_MARKER_POPOVER_ID = "palworld-map-marker-popover";
+const PALWORLD_MAP_LOCATION_PAGE_LIMIT = PALWORLD_MAP_LOCATION_MAX_RESPONSE;
+const PALWORLD_MAP_LOCATION_MAX_PAGES = Math.ceil(
+  PALWORLD_MAP_LOCATION_MAX_ARTIFACT_ENTRIES / PALWORLD_MAP_LOCATION_PAGE_LIMIT,
+);
+
+function mapLocationPageIdentity(response: PalworldMapLocationsResponse): string {
+  return JSON.stringify({
+    world: response.world,
+    layers: response.layers,
+    release: {
+      gameVersion: response.metadata.gameVersion,
+      release: response.metadata.release ?? null,
+      steamBuildId: response.metadata.steamBuildId ?? null,
+      sourceRevision: response.metadata.sourceRevision,
+    },
+    overlay: response.overlay ? {
+      archiveSha256: response.overlay.archiveSha256,
+      sourceMember: response.overlay.sourceMember,
+      sourceMemberSha256: response.overlay.sourceMemberSha256,
+      targetMapAssetSha256: response.overlay.targetMapAssetSha256,
+      targetGameVersion: response.overlay.targetGameVersion,
+      compatibilityBasis: response.overlay.compatibilityBasis,
+      transformRevision: response.overlay.transformRevision,
+      activationBasis: response.overlay.activationBasis ?? null,
+      compatibilityApprovalSha256:
+        response.overlay.compatibilityApprovalSha256 ?? null,
+    } : null,
+  });
+}
+
 const PALWORLD_MAP_LOCATION_LABELS: Readonly<
   Record<PalworldMapLocationCategory, PalworldMapLocalizedLabel>
 > = {
@@ -144,6 +183,7 @@ const PALWORLD_MAP_LOCATION_LABELS: Readonly<
     palworldI18n.ja.mapSkillFruits,
   ),
   journal: mapLabel(palworldI18n.ko.mapJournals, palworldI18n.ja.mapJournals),
+  resource: mapLabel(palworldI18n.ko.mapResources, palworldI18n.ja.mapResources),
 };
 const PALWORLD_MAP_LOCATION_FALLBACKS: Readonly<
   Record<PalworldMapLocationCategory, string>
@@ -154,6 +194,7 @@ const PALWORLD_MAP_LOCATION_FALLBACKS: Readonly<
   lifmunk: "✦",
   "skill-fruit": "◆",
   journal: "▤",
+  resource: "◆",
 };
 const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
   Record<PalworldMapCollectibleTypeId, PalworldMapLocalizedLabel>
@@ -231,6 +272,46 @@ const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
   "egg-world-tree": mapLabel(
     palworldI18n.ko.mapEggWorldTree,
     palworldI18n.ja.mapEggWorldTree,
+  ),
+  "resource-night-stone": mapLabel(
+    palworldI18n.ko.mapResourceNightStone,
+    palworldI18n.ja.mapResourceNightStone,
+  ),
+  "resource-pal-crystal": mapLabel(
+    palworldI18n.ko.mapResourcePalCrystal,
+    palworldI18n.ja.mapResourcePalCrystal,
+  ),
+  "resource-coal": mapLabel(
+    palworldI18n.ko.mapResourceCoal,
+    palworldI18n.ja.mapResourceCoal,
+  ),
+  "resource-copper-ore": mapLabel(
+    palworldI18n.ko.mapResourceCopperOre,
+    palworldI18n.ja.mapResourceCopperOre,
+  ),
+  "resource-iron-ore": mapLabel(
+    palworldI18n.ko.mapResourceIronOre,
+    palworldI18n.ja.mapResourceIronOre,
+  ),
+  "resource-quartz": mapLabel(
+    palworldI18n.ko.mapResourceQuartz,
+    palworldI18n.ja.mapResourceQuartz,
+  ),
+  "resource-stone": mapLabel(
+    palworldI18n.ko.mapResourceStone,
+    palworldI18n.ja.mapResourceStone,
+  ),
+  "resource-sky-island-ore": mapLabel(
+    palworldI18n.ko.mapResourceSkyIslandOre,
+    palworldI18n.ja.mapResourceSkyIslandOre,
+  ),
+  "resource-sulfur": mapLabel(
+    palworldI18n.ko.mapResourceSulfur,
+    palworldI18n.ja.mapResourceSulfur,
+  ),
+  "resource-world-tree-ore": mapLabel(
+    palworldI18n.ko.mapResourceWorldTreeOre,
+    palworldI18n.ja.mapResourceWorldTreeOre,
   ),
 };
 
@@ -394,9 +475,10 @@ export function PalworldSpawnAreaLayer({
 export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: PalworldMapPageProps) {
   const text = palworldI18n[locale];
   const { pushQuery, replaceQuery, state: mapQuery } = usePalworldMapQueryState();
+  const activeMapImage = PALWORLD_MAP_IMAGES[mapQuery.world];
   const activeFocusPalId = mapQuery.focusPal ?? focusPalId;
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
-    PALWORLD_WORLD_MAP_IMAGE ? "loading" : "error",
+    activeMapImage ? "loading" : "error",
   );
   const [imageRevision, setImageRevision] = useState(0);
   const [bossRevision, setBossRevision] = useState(0);
@@ -406,7 +488,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const [markerState, setMarkerState] = useState<PalworldMapMarkerRequestState>("loading");
   const [spawnResponse, setSpawnResponse] = useState<PalworldPalSpawnResponse>();
   const [spawnState, setSpawnState] = useState<PalworldMapSpawnRequestState>("idle");
-  const [locationResponse, setLocationResponse] = useState<PalworldMapLocationsResponse>();
+  const [mapLocations, setMapLocations] = useState<readonly PalworldMapLocation[]>([]);
   const [locationState, setLocationState] =
     useState<PalworldMapLocationRequestState>("loading");
   const [focusedPal, setFocusedPal] = useState<PalworldPalReference | PalworldPalSummary | null>(null);
@@ -468,30 +550,30 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     for (const category of PALWORLD_MAP_LOCATION_CATEGORIES) {
       counts.set(category, 0);
     }
-    if (locationState === "ready" && locationResponse) {
-      for (const location of locationResponse.locations) {
+    if (locationState === "ready") {
+      for (const location of mapLocations) {
         counts.set(location.category, (counts.get(location.category) ?? 0) + 1);
       }
     }
     return counts;
-  }, [locationResponse, locationState]);
+  }, [locationState, mapLocations]);
   const collectibleTypeCounts = useMemo<
     ReadonlyMap<PalworldMapCollectibleTypeId, number>
   >(() => {
     const counts = new Map<PalworldMapCollectibleTypeId, number>(
       PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.map((typeId) => [typeId, 0]),
     );
-    if (locationState === "ready" && locationResponse) {
-      for (const location of locationResponse.locations) {
+    if (locationState === "ready") {
+      for (const location of mapLocations) {
         const typeId = palworldMapCollectibleTypeForLocation(location);
         if (typeId) counts.set(typeId, (counts.get(typeId) ?? 0) + 1);
       }
     }
     return counts;
-  }, [locationResponse, locationState]);
+  }, [locationState, mapLocations]);
   const visibleMapLocations = useMemo(
-    () => locationState === "ready" && locationResponse
-      ? locationResponse.locations.filter((location) => {
+    () => locationState === "ready"
+      ? mapLocations.filter((location) => {
           if (!selectedLocationLayers.includes(location.category)) return false;
           const typeId = palworldMapCollectibleTypeForLocation(location);
           if (typeId) return selectedCollectibleTypes.includes(typeId);
@@ -505,8 +587,8 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         })
       : [],
     [
-      locationResponse,
       locationState,
+      mapLocations,
       selectedCollectibleTypes,
       selectedLocationLayers,
     ],
@@ -557,21 +639,21 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     "--palworld-map-layout-width": `${view.zoom * 100}%`,
     "--palworld-map-zoom": view.zoom,
   } as CSSProperties;
-  const mapAspectRatio = PALWORLD_WORLD_MAP_IMAGE
-    ? `${PALWORLD_WORLD_MAP_IMAGE.width} / ${PALWORLD_WORLD_MAP_IMAGE.height}`
+  const mapAspectRatio = activeMapImage
+    ? `${activeMapImage.width} / ${activeMapImage.height}`
     : "1 / 1";
 
   useEffect(() => {
-    if (mapQuery.world !== "main") {
-      replaceQuery({ marker: null, world: "main" });
-    }
-  }, [mapQuery.world, replaceQuery]);
+    setLoadState(activeMapImage ? "loading" : "error");
+    setImageRevision((revision) => revision + 1);
+    resetView();
+  }, [activeMapImage, mapQuery.world, resetView]);
 
   useEffect(() => {
     const controller = new AbortController();
     setMarkerState("loading");
     setMarkerResponse(undefined);
-    void getPalworldMapMarkers("main", controller.signal).then((response) => {
+    void getPalworldMapMarkers(mapQuery.world, controller.signal).then((response) => {
       if (controller.signal.aborted) return;
       setMarkerResponse(response);
       setMarkerState(response.state);
@@ -579,25 +661,88 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       if (!controller.signal.aborted) setMarkerState("error");
     });
     return () => controller.abort();
-  }, [bossRevision]);
+  }, [bossRevision, mapQuery.world]);
 
   useEffect(() => {
     const controller = new AbortController();
-    setLocationResponse(undefined);
+    setMapLocations([]);
     setLocationState("loading");
-    void getPalworldMapLocations(
-      PALWORLD_MAP_LOCATION_CATEGORIES,
-      "main",
-      controller.signal,
-    ).then((response) => {
+    void (async () => {
+      const locations: PalworldMapLocation[] = [];
+      const ids = new Set<string>();
+      let expectedTotal: number | undefined;
+      let expectedPageIdentity: string | undefined;
+      let offset = 0;
+      let pageCount = 0;
+      while (true) {
+        if (pageCount >= PALWORLD_MAP_LOCATION_MAX_PAGES) {
+          throw new Error("지도 위치 pagination이 안전한 최대 페이지 수를 초과했습니다.");
+        }
+        pageCount += 1;
+        const response = await getPalworldMapLocations(
+          PALWORLD_MAP_LOCATION_CATEGORIES,
+          mapQuery.world,
+          controller.signal,
+          {
+            limit: PALWORLD_MAP_LOCATION_PAGE_LIMIT,
+            offset,
+          },
+        );
+        if (controller.signal.aborted) return;
+        if (offset === 0 && response.state !== "ready") {
+          setLocationState(response.state);
+          return;
+        }
+        const pageIdentity = mapLocationPageIdentity(response);
+        const pageTotal = expectedTotal ?? response.total;
+        const expectedReturned = Math.min(
+          PALWORLD_MAP_LOCATION_PAGE_LIMIT,
+          pageTotal - offset,
+        );
+        if (
+          response.state !== "ready"
+          || response.world !== mapQuery.world
+          || response.layers.length !== PALWORLD_MAP_LOCATION_CATEGORIES.length
+          || response.layers.some(
+            (layer, index) => layer !== PALWORLD_MAP_LOCATION_CATEGORIES[index],
+          )
+          || response.offset !== offset
+          || response.limit !== PALWORLD_MAP_LOCATION_PAGE_LIMIT
+          || response.returned !== expectedReturned
+          || (expectedTotal !== undefined && response.total !== expectedTotal)
+          || (
+            expectedPageIdentity !== undefined
+            && pageIdentity !== expectedPageIdentity
+          )
+        ) {
+          throw new Error("지도 위치 pagination 응답이 서로 일치하지 않습니다.");
+        }
+        expectedTotal ??= response.total;
+        expectedPageIdentity ??= pageIdentity;
+        for (const location of response.locations) {
+          if (ids.has(location.id)) {
+            throw new Error("지도 위치 pagination 응답에 중복 ID가 있습니다.");
+          }
+          ids.add(location.id);
+          locations.push(location);
+        }
+        if (!response.hasMore) break;
+        if (response.returned === 0) {
+          throw new Error("지도 위치 pagination이 진행되지 않았습니다.");
+        }
+        offset += response.returned;
+      }
       if (controller.signal.aborted) return;
-      setLocationResponse(response);
-      setLocationState(response.state);
-    }).catch(() => {
+      if (locations.length !== expectedTotal) {
+        throw new Error("지도 위치 pagination 전체 수가 일치하지 않습니다.");
+      }
+      setMapLocations(locations);
+      setLocationState(locations.length > 0 ? "ready" : "confirmed_empty");
+    })().catch(() => {
       if (!controller.signal.aborted) setLocationState("error");
     });
     return () => controller.abort();
-  }, [locationRevision]);
+  }, [locationRevision, mapQuery.world]);
 
   useEffect(() => {
     if (!activeFocusPalId) {
@@ -608,7 +753,11 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     const controller = new AbortController();
     setSpawnResponse(undefined);
     setSpawnState("loading");
-    void getPalworldPalSpawns(activeFocusPalId, "main", controller.signal).then((response) => {
+    void getPalworldPalSpawns(
+      activeFocusPalId,
+      mapQuery.world,
+      controller.signal,
+    ).then((response) => {
       if (controller.signal.aborted) return;
       setSpawnResponse(response);
       setSpawnState(response.state);
@@ -616,7 +765,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       if (!controller.signal.aborted) setSpawnState("error");
     });
     return () => controller.abort();
-  }, [activeFocusPalId, spawnRevision]);
+  }, [activeFocusPalId, mapQuery.world, spawnRevision]);
 
   useEffect(() => {
     if (!activeFocusPalId) {
@@ -1097,7 +1246,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       if (selected) nextTypes.add(typeId);
       else nextTypes.delete(typeId);
     }
-    for (const category of ["egg", "lifmunk"] as const) {
+    for (const category of ["egg", "lifmunk", "resource"] as const) {
       const categoryTypes = palworldMapCollectibleTypesForCategory(category);
       if (!collectibleTypeIds.some((typeId) =>
         palworldMapCollectibleCategory(typeId) === category
@@ -1272,7 +1421,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
           ? collectibleTypeCounts.get(id)
           : undefined,
         iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
-        iconFallback: category === "egg" ? "●" : "✦",
+        iconFallback: category === "egg" ? "●" : category === "resource" ? "◆" : "✦",
         selected: mapQuery.layers.includes(category)
           && mapQuery.types.includes(id),
         state: importedLocationState,
@@ -1351,6 +1500,14 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       ),
       collapsed: collapsedFilterGroups.has("eggs"),
       layers: PALWORLD_MAP_EGG_TYPE_IDS.map(collectibleTypeLayer),
+    }, {
+      id: "resources",
+      label: mapLabel(
+        palworldI18n.ko.mapResourceLayers,
+        palworldI18n.ja.mapResourceLayers,
+      ),
+      collapsed: collapsedFilterGroups.has("resources"),
+      layers: PALWORLD_MAP_RESOURCE_TYPE_IDS.map(collectibleTypeLayer),
     }, {
       id: "collectibles",
       label: mapLabel(
@@ -1550,7 +1707,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const activeLayerCount = Number(bossLayerSelected)
     + Number(spawnLayerSelected)
     + selectedLocationLayers.filter((category) =>
-      category !== "egg" && category !== "lifmunk"
+      category !== "egg" && category !== "lifmunk" && category !== "resource"
     ).length
     + selectedCollectibleTypes.filter((typeId) =>
       mapQuery.layers.includes(palworldMapCollectibleCategory(typeId))
@@ -1812,21 +1969,38 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                 className="palworld-map-world-switcher"
                 role="tablist"
               >
-                <button aria-selected="true" role="tab" type="button">
+                <button
+                  aria-selected={mapQuery.world === "main"}
+                  onClick={() => {
+                    if (mapQuery.world === "main") return;
+                    pushQuery({
+                      center: null,
+                      marker: null,
+                      world: "main",
+                      zoom: PALWORLD_MAP_MIN_ZOOM,
+                    });
+                  }}
+                  role="tab"
+                  type="button"
+                >
                   {text.mapMainWorld}
                 </button>
                 <button
-                  aria-describedby="palworld-map-tree-status"
-                  aria-selected="false"
-                  disabled
+                  aria-selected={mapQuery.world === "tree"}
+                  onClick={() => {
+                    if (mapQuery.world === "tree" || !PALWORLD_MAP_IMAGES.tree) return;
+                    pushQuery({
+                      center: null,
+                      marker: null,
+                      world: "tree",
+                      zoom: PALWORLD_MAP_MIN_ZOOM,
+                    });
+                  }}
                   role="tab"
                   type="button"
                 >
                   {text.mapTreeWorld}
                 </button>
-                <span className="yoro-u-sr-only" id="palworld-map-tree-status">
-                  {text.mapWorldUnavailable}
-                </span>
               </div>
             </div>
 
@@ -1862,7 +2036,11 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     </li>
                   ) : null}
                   {selectedLocationLayers
-                    .filter((category) => category !== "egg" && category !== "lifmunk")
+                    .filter((category) =>
+                      category !== "egg"
+                      && category !== "lifmunk"
+                      && category !== "resource"
+                    )
                     .map((category) => {
                     const count = locationCounts.get(category) ?? 0;
                     if (count === 0) return null;
@@ -1890,7 +2068,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                         <PalworldMapLocationIcon
                           asset={PALWORLD_MAP_LAYER_ICONS[typeId]}
                           className="palworld-map-legend-location-icon"
-                          fallbackSymbol={category === "egg" ? "●" : "✦"}
+                          fallbackSymbol={category === "egg" ? "●" : category === "resource" ? "◆" : "✦"}
                         />
                         <span>
                           <strong>
@@ -1942,7 +2120,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     <Skeleton className="palworld-map-skeleton" rounded />
                   </div>
                 ) : null}
-                {loadState === "error" || !PALWORLD_WORLD_MAP_IMAGE ? (
+                {loadState === "error" || !activeMapImage ? (
                   <EmptyState className="palworld-map-error" variant="error" role="alert">
                     <EmptyStateIcon>!</EmptyStateIcon>
                     <EmptyStateTitle>{text.mapLoadError}</EmptyStateTitle>
@@ -1963,12 +2141,12 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                       data-testid="palworld-map-image"
                       decoding="async"
                       draggable={false}
-                      height={PALWORLD_WORLD_MAP_IMAGE.height}
-                      key={imageRevision}
+                      height={activeMapImage.height}
+                      key={`${mapQuery.world}-${imageRevision}`}
                       onError={() => setLoadState("error")}
                       onLoad={() => setLoadState("ready")}
-                      src={PALWORLD_WORLD_MAP_IMAGE.imageUrl}
-                      width={PALWORLD_WORLD_MAP_IMAGE.width}
+                      src={activeMapImage.imageUrl}
+                      width={activeMapImage.width}
                     />
                     {markerLayer ? (
                       <div className="palworld-map-marker-layer">

@@ -12,6 +12,7 @@ import {
 import path from "node:path";
 import {
   assertPalworldActiveSkillLocaleEvidenceArtifact,
+  assertPalworldPassiveSkillLocaleEvidenceArtifact,
   assertPalworldOfficialLocaleCompatibilityArtifact,
   assertPalworldOfficialLocaleCoverageArtifact,
   assertPalworldOfficialLocaleManifest,
@@ -28,11 +29,13 @@ type Arguments = {
   reviewer: string;
   evidenceChecksum: string;
   activeSkillMappingFile: string;
+  passiveSkillMappingFile: string;
 };
 
 const OUTPUT_FILES = [
   "locales/official-source-fields.json",
   "locales/official-active-skill-evidence.json",
+  "locales/official-passive-skill-evidence.json",
   "locales/official-locale-compatibility.json",
   "locales/ko.json",
   "locales/ja.json",
@@ -50,7 +53,8 @@ function usage(): never {
       + "--reviewed-at <고정 RFC3339 UTC 시각> "
       + "--reviewer <번역 호환성 검수자 ID> "
       + "--evidence-checksum <번역 호환성 검수 증거 SHA-256> "
-      + "--active-skill-mapping <versioned active skill locale mapping JSON>",
+      + "--active-skill-mapping <versioned active skill locale mapping JSON> "
+      + "--passive-skill-mapping <versioned passive skill locale mapping JSON>",
   );
 }
 
@@ -79,6 +83,7 @@ function parseArguments(argv: string[]): Arguments {
     "--reviewer",
     "--evidence-checksum",
     "--active-skill-mapping",
+    "--passive-skill-mapping",
   ]);
   if ([...values.keys()].some((key) => !allowed.has(key))) usage();
   const activeReleaseRoot = values.get("--active-root");
@@ -88,6 +93,7 @@ function parseArguments(argv: string[]): Arguments {
   const reviewer = values.get("--reviewer");
   const evidenceChecksum = values.get("--evidence-checksum");
   const activeSkillMappingFile = values.get("--active-skill-mapping");
+  const passiveSkillMappingFile = values.get("--passive-skill-mapping");
   if (
     activeReleaseRoot === undefined
     || candidateRoot === undefined
@@ -96,6 +102,7 @@ function parseArguments(argv: string[]): Arguments {
     || reviewer === undefined
     || evidenceChecksum === undefined
     || activeSkillMappingFile === undefined
+    || passiveSkillMappingFile === undefined
   ) {
     usage();
   }
@@ -107,6 +114,7 @@ function parseArguments(argv: string[]): Arguments {
     reviewer,
     evidenceChecksum,
     activeSkillMappingFile: path.resolve(activeSkillMappingFile),
+    passiveSkillMappingFile: path.resolve(passiveSkillMappingFile),
   };
 }
 
@@ -184,6 +192,7 @@ try {
     reviewer: args.reviewer,
     evidenceChecksum: args.evidenceChecksum,
     activeSkillMappingFile: args.activeSkillMappingFile,
+    passiveSkillMappingFile: args.passiveSkillMappingFile,
   });
   const texts = new Map<string, string>([
     [
@@ -193,6 +202,10 @@ try {
     [
       "locales/official-active-skill-evidence.json",
       serializePalworldOfficialLocaleOverlayArtifact(artifacts.activeSkillEvidence),
+    ],
+    [
+      "locales/official-passive-skill-evidence.json",
+      serializePalworldOfficialLocaleOverlayArtifact(artifacts.passiveSkillEvidence),
     ],
     [
       "locales/official-locale-compatibility.json",
@@ -236,10 +249,20 @@ try {
   for (const fileName of OUTPUT_FILES) {
     await writeExclusive(path.join(temporaryRoot, fileName), texts.get(fileName)!);
   }
-  const [sourceFieldsRaw, activeSkillEvidenceRaw, compatibilityRaw, manifestRaw] = await Promise.all([
+  const [
+    sourceFieldsRaw,
+    activeSkillEvidenceRaw,
+    passiveSkillEvidenceRaw,
+    compatibilityRaw,
+    manifestRaw,
+  ] = await Promise.all([
     readFile(path.join(temporaryRoot, "locales", "official-source-fields.json"), "utf8"),
     readFile(
       path.join(temporaryRoot, "locales", "official-active-skill-evidence.json"),
+      "utf8",
+    ),
+    readFile(
+      path.join(temporaryRoot, "locales", "official-passive-skill-evidence.json"),
       "utf8",
     ),
     readFile(path.join(temporaryRoot, "locales", "official-locale-compatibility.json"), "utf8"),
@@ -248,6 +271,9 @@ try {
   assertPalworldOfficialLocaleSourceFieldsArtifact(JSON.parse(sourceFieldsRaw));
   assertPalworldActiveSkillLocaleEvidenceArtifact(
     JSON.parse(activeSkillEvidenceRaw),
+  );
+  assertPalworldPassiveSkillLocaleEvidenceArtifact(
+    JSON.parse(passiveSkillEvidenceRaw),
   );
   assertPalworldOfficialLocaleManifest(JSON.parse(manifestRaw));
   assertPalworldOfficialLocaleCoverageArtifact(
@@ -261,6 +287,7 @@ try {
     {
       officialSourceFields: sourceFieldsRaw,
       activeSkillEvidence: activeSkillEvidenceRaw,
+      passiveSkillEvidence: passiveSkillEvidenceRaw,
       ko: texts.get("locales/ko.json")!,
       ja: texts.get("locales/ja.json")!,
       manifest: manifestRaw,

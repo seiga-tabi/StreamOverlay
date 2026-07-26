@@ -306,7 +306,8 @@ const emptyLocationCounts = {
   egg: 0,
   "skill-fruit": 0,
   lifmunk: 0,
-  journal: 0
+  journal: 0,
+  resource: 0
 };
 
 const locationArtifact = {
@@ -454,6 +455,19 @@ test("Palworld 지도 위치 manifest와 public response는 checksum·pagination
     overlay: locationOverlay
   };
   assert.equal(validatePalworldMapLocationsResponse(ready).ok, true);
+  assert.equal(validatePalworldMapLocationsResponse({
+    ...ready,
+    layers: ["resource"],
+    total: 1,
+    returned: 1,
+    locations: [{
+      id: "resource-copper-ore-001",
+      category: "resource",
+      subtype: "copper-ore",
+      normalizedX: 0.4,
+      normalizedY: 0.6
+    }]
+  }).ok, true);
   assert.equal(validatePalworldMapLocationsResponse({
     ...ready,
     layers: ["skill-fruit", "egg"]

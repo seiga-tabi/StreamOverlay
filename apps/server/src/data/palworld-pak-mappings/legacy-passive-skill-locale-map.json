@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "activeRelease": "1.0.1",
+  "candidateId": "candidate-1248184a4b527d94",
+  "joinRule": "passive_source_row_public_id_prefix_exact",
+  "activeCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+  "candidateSkillsSha256": "4f03cc98c5cf5aeac245b2f11ca82ac09bef7c0ffca0fed2512c4a8c4258ceb7",
+  "candidateImportReportSha256": "eb408d81a4db9f25cc873b6cda0b80d47307d5b40db2d042ab99005fb979a93e",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "entries": [
+    {
+      "legacySkillId": "passive-passive-alien-7fa1e23436",
+      "candidateSkillId": "passive:Alien",
+      "candidateSourceRowId": "Alien",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-cool-time-reduction-down-1-3cb8042ac5",
+      "candidateSkillId": "passive:CoolTimeReduction_Down_1",
+      "candidateSourceRowId": "CoolTimeReduction_Down_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-cool-time-reduction-up-1-149b0a9ba1",
+      "candidateSkillId": "passive:CoolTimeReduction_Up_1",
+      "candidateSourceRowId": "CoolTimeReduction_Up_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-cool-time-reduction-up-2-2b0c9bee61",
+      "candidateSkillId": "passive:CoolTimeReduction_Up_2",
+      "candidateSourceRowId": "CoolTimeReduction_Up_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-down1-2a8d997bd0",
+      "candidateSkillId": "passive:CraftSpeed_down1",
+      "candidateSourceRowId": "CraftSpeed_down1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-down2-365dff03b1",
+      "candidateSkillId": "passive:CraftSpeed_down2",
+      "candidateSourceRowId": "CraftSpeed_down2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-up1-bd91525958",
+      "candidateSkillId": "passive:CraftSpeed_up1",
+      "candidateSourceRowId": "CraftSpeed_up1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-up2-ecbcdfabde",
+      "candidateSkillId": "passive:CraftSpeed_up2",
+      "candidateSourceRowId": "CraftSpeed_up2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-down1-5e3e3088c5",
+      "candidateSkillId": "passive:Deffence_down1",
+      "candidateSourceRowId": "Deffence_down1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-down2-69086f3cf0",
+      "candidateSkillId": "passive:Deffence_down2",
+      "candidateSourceRowId": "Deffence_down2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-up1-b0b7e9a164",
+      "candidateSkillId": "passive:Deffence_up1",
+      "candidateSourceRowId": "Deffence_up1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-up2-90aaea5348",
+      "candidateSkillId": "passive:Deffence_up2",
+      "candidateSourceRowId": "Deffence_up2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-aqua-1-pal-ef921d34d4",
+      "candidateSkillId": "passive:ElementBoost_Aqua_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Aqua_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-aqua-2-pal-3c79819c40",
+      "candidateSkillId": "passive:ElementBoost_Aqua_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Aqua_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dark-1-pal-cdd58dd4b4",
+      "candidateSkillId": "passive:ElementBoost_Dark_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Dark_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dark-2-pal-d576b4c3dc",
+      "candidateSkillId": "passive:ElementBoost_Dark_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Dark_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dragon-1-pal-51575a1218",
+      "candidateSkillId": "passive:ElementBoost_Dragon_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Dragon_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dragon-2-pal-76eb5880f9",
+      "candidateSkillId": "passive:ElementBoost_Dragon_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Dragon_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-earth-1-pal-8810cf546b",
+      "candidateSkillId": "passive:ElementBoost_Earth_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Earth_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-earth-2-pal-c4a348146c",
+      "candidateSkillId": "passive:ElementBoost_Earth_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Earth_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-fire-1-pal-117b7d811f",
+      "candidateSkillId": "passive:ElementBoost_Fire_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Fire_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-fire-2-pal-95f11a54a5",
+      "candidateSkillId": "passive:ElementBoost_Fire_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Fire_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-ice-1-pal-c015f6d988",
+      "candidateSkillId": "passive:ElementBoost_Ice_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Ice_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-ice-2-pal-164931b250",
+      "candidateSkillId": "passive:ElementBoost_Ice_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Ice_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-leaf-1-pal-cc20101254",
+      "candidateSkillId": "passive:ElementBoost_Leaf_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Leaf_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-leaf-2-pal-9d88e55564",
+      "candidateSkillId": "passive:ElementBoost_Leaf_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Leaf_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-normal-1-pal-52797c409d",
+      "candidateSkillId": "passive:ElementBoost_Normal_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Normal_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-normal-2-pal-ead16695ee",
+      "candidateSkillId": "passive:ElementBoost_Normal_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Normal_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-thunder-1-pal-ad7eeb0f6f",
+      "candidateSkillId": "passive:ElementBoost_Thunder_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Thunder_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-thunder-2-pal-33f6532de1",
+      "candidateSkillId": "passive:ElementBoost_Thunder_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Thunder_2_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-aqua-1-pal-95e604fc20",
+      "candidateSkillId": "passive:ElementResist_Aqua_1_PAL",
+      "candidateSourceRowId": "ElementResist_Aqua_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-dark-1-pal-102e813b8f",
+      "candidateSkillId": "passive:ElementResist_Dark_1_PAL",
+      "candidateSourceRowId": "ElementResist_Dark_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-dragon-1-pal-688a174630",
+      "candidateSkillId": "passive:ElementResist_Dragon_1_PAL",
+      "candidateSourceRowId": "ElementResist_Dragon_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-earth-1-pal-2e5019ad4d",
+      "candidateSkillId": "passive:ElementResist_Earth_1_PAL",
+      "candidateSourceRowId": "ElementResist_Earth_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-fire-1-pal-ef46091dd0",
+      "candidateSkillId": "passive:ElementResist_Fire_1_PAL",
+      "candidateSourceRowId": "ElementResist_Fire_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-ice-1-pal-c74477e03c",
+      "candidateSkillId": "passive:ElementResist_Ice_1_PAL",
+      "candidateSourceRowId": "ElementResist_Ice_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-leaf-1-pal-4b6d7614d7",
+      "candidateSkillId": "passive:ElementResist_Leaf_1_PAL",
+      "candidateSourceRowId": "ElementResist_Leaf_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-normal-1-pal-86334ce7a4",
+      "candidateSkillId": "passive:ElementResist_Normal_1_PAL",
+      "candidateSourceRowId": "ElementResist_Normal_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-thunder-1-pal-ea32a45c64",
+      "candidateSkillId": "passive:ElementResist_Thunder_1_PAL",
+      "candidateSourceRowId": "ElementResist_Thunder_1_PAL",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-eternal-flame-40c1710409",
+      "candidateSkillId": "passive:EternalFlame",
+      "candidateSourceRowId": "EternalFlame",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-legend-8ff382798f",
+      "candidateSkillId": "passive:Legend",
+      "candidateSourceRowId": "Legend",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-move-speed-up-1-7472b18355",
+      "candidateSkillId": "passive:MoveSpeed_up_1",
+      "candidateSourceRowId": "MoveSpeed_up_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-move-speed-up-2-dce52a41f8",
+      "candidateSkillId": "passive:MoveSpeed_up_2",
+      "candidateSourceRowId": "MoveSpeed_up_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-move-speed-up-3-c669e85b3e",
+      "candidateSkillId": "passive:MoveSpeed_up_3",
+      "candidateSourceRowId": "MoveSpeed_up_3",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-nocturnal-0c9ee8311c",
+      "candidateSkillId": "passive:Nocturnal",
+      "candidateSourceRowId": "Nocturnal",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-non-killing-7f81dcacf4",
+      "candidateSkillId": "passive:NonKilling",
+      "candidateSourceRowId": "NonKilling",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-noukin-69a0d11bb6",
+      "candidateSkillId": "passive:Noukin",
+      "candidateSourceRowId": "Noukin",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-down1-ca85d82fb2",
+      "candidateSkillId": "passive:PAL_ALLAttack_down1",
+      "candidateSourceRowId": "PAL_ALLAttack_down1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-down2-8b5af4c7a8",
+      "candidateSkillId": "passive:PAL_ALLAttack_down2",
+      "candidateSourceRowId": "PAL_ALLAttack_down2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-up1-f433e3338b",
+      "candidateSkillId": "passive:PAL_ALLAttack_up1",
+      "candidateSourceRowId": "PAL_ALLAttack_up1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-up2-3b80a6eb56",
+      "candidateSkillId": "passive:PAL_ALLAttack_up2",
+      "candidateSourceRowId": "PAL_ALLAttack_up2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-conceited-86e9327226",
+      "candidateSkillId": "passive:PAL_conceited",
+      "candidateSourceRowId": "PAL_conceited",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-corporate-slave-6ef0fc31fa",
+      "candidateSkillId": "passive:PAL_CorporateSlave",
+      "candidateSourceRowId": "PAL_CorporateSlave",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-down-1-09d023691a",
+      "candidateSkillId": "passive:PAL_FullStomach_Down_1",
+      "candidateSourceRowId": "PAL_FullStomach_Down_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-down-2-e1cbd8faf5",
+      "candidateSkillId": "passive:PAL_FullStomach_Down_2",
+      "candidateSourceRowId": "PAL_FullStomach_Down_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-up-1-e9eb2677b0",
+      "candidateSkillId": "passive:PAL_FullStomach_Up_1",
+      "candidateSourceRowId": "PAL_FullStomach_Up_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-up-2-3fc661bea8",
+      "candidateSkillId": "passive:PAL_FullStomach_Up_2",
+      "candidateSourceRowId": "PAL_FullStomach_Up_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-masochist-6e39cf3a41",
+      "candidateSkillId": "passive:PAL_masochist",
+      "candidateSourceRowId": "PAL_masochist",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-oraora-2b5cd69aa9",
+      "candidateSkillId": "passive:PAL_oraora",
+      "candidateSourceRowId": "PAL_oraora",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-rude-733b60f011",
+      "candidateSkillId": "passive:PAL_rude",
+      "candidateSourceRowId": "PAL_rude",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sadist-e469d81a97",
+      "candidateSkillId": "passive:PAL_sadist",
+      "candidateSourceRowId": "PAL_sadist",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-down-1-ac554a1d01",
+      "candidateSkillId": "passive:PAL_Sanity_Down_1",
+      "candidateSourceRowId": "PAL_Sanity_Down_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-down-2-2c0876d536",
+      "candidateSkillId": "passive:PAL_Sanity_Down_2",
+      "candidateSourceRowId": "PAL_Sanity_Down_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-up-1-d16c76d884",
+      "candidateSkillId": "passive:PAL_Sanity_Up_1",
+      "candidateSourceRowId": "PAL_Sanity_Up_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-up-2-86f2b9c7ac",
+      "candidateSkillId": "passive:PAL_Sanity_Up_2",
+      "candidateSourceRowId": "PAL_Sanity_Up_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-rare-329966f19e",
+      "candidateSkillId": "passive:Rare",
+      "candidateSourceRowId": "Rare",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-sale-price-down-1-5a38b58522",
+      "candidateSkillId": "passive:SalePrice_Down_1",
+      "candidateSourceRowId": "SalePrice_Down_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-sale-price-up-1-4662e36935",
+      "candidateSkillId": "passive:SalePrice_Up_1",
+      "candidateSourceRowId": "SalePrice_Up_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-sale-price-up-2-ea9b88de09",
+      "candidateSkillId": "passive:SalePrice_Up_2",
+      "candidateSourceRowId": "SalePrice_Up_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-stamina-down-1-bf2dd98d1c",
+      "candidateSkillId": "passive:Stamina_Down_1",
+      "candidateSourceRowId": "Stamina_Down_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-stamina-up-1-687ad27f7f",
+      "candidateSkillId": "passive:Stamina_Up_1",
+      "candidateSourceRowId": "Stamina_Up_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-stamina-up-2-801c8a1ef4",
+      "candidateSkillId": "passive:Stamina_Up_2",
+      "candidateSourceRowId": "Stamina_Up_2",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-test-pal-egg-hatching-speed-up-e369a5abcb",
+      "candidateSkillId": "passive:Test_PalEgg_HatchingSpeed_Up",
+      "candidateSourceRowId": "Test_PalEgg_HatchingSpeed_Up",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-atk-up-1-61cc757ea5",
+      "candidateSkillId": "passive:TrainerATK_UP_1",
+      "candidateSourceRowId": "TrainerATK_UP_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-def-up-1-0690f95e65",
+      "candidateSkillId": "passive:TrainerDEF_UP_1",
+      "candidateSourceRowId": "TrainerDEF_UP_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-logging-up1-536def0d3a",
+      "candidateSkillId": "passive:TrainerLogging_up1",
+      "candidateSourceRowId": "TrainerLogging_up1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-mining-up1-e8bb571c3f",
+      "candidateSkillId": "passive:TrainerMining_up1",
+      "candidateSourceRowId": "TrainerMining_up1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-work-speed-up-1-457e282f83",
+      "candidateSkillId": "passive:TrainerWorkSpeed_UP_1",
+      "candidateSourceRowId": "TrainerWorkSpeed_UP_1",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    },
+    {
+      "legacySkillId": "passive-passive-witch-a025ce7175",
+      "candidateSkillId": "passive:Witch",
+      "candidateSourceRowId": "Witch",
+      "reason": "legacy public ID prefix와 candidate passive source row의 exact 검수 매핑",
+      "reviewStatus": "approved"
+    }
+  ]
+}

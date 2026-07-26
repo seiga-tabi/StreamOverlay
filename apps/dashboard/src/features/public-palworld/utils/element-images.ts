@@ -1,4 +1,9 @@
-import { PALWORLD_ELEMENTS, type PalworldElement } from "@streamops/shared";
+import {
+  PALWORLD_ELEMENTS,
+  PALWORLD_MAP_WORLDS,
+  type PalworldElement,
+  type PalworldMapWorld,
+} from "@streamops/shared";
 import generatedAssets from "../data/palworld-static-assets.generated.json";
 
 export type PalworldElementImage = {
@@ -30,15 +35,46 @@ function assetRelease(imageUrl: string): string | undefined {
 function staticAssets(): {
   elements: Readonly<Partial<Record<PalworldElement, PalworldElementImage>>>;
   map?: PalworldElementImage;
+  maps: Readonly<Partial<Record<PalworldMapWorld, PalworldElementImage>>>;
 } {
   if (generatedAssets.schemaVersion !== 1) {
-    return { elements: Object.freeze({}) };
+    return { elements: Object.freeze({}), maps: Object.freeze({}) };
   }
   const map = generatedAssets.map;
   const safeMap = isLocalPalworldMapUrl(map.imageUrl) && safeDimensions(map.width) && safeDimensions(map.height)
     ? { imageUrl: map.imageUrl, width: map.width, height: map.height }
     : undefined;
   const expectedRelease = safeMap ? assetRelease(safeMap.imageUrl) : undefined;
+  const maps = new Map<PalworldMapWorld, PalworldElementImage>();
+  const generatedMaps = generatedAssets.maps as Partial<
+    Record<PalworldMapWorld, PalworldElementImage>
+  >;
+  for (const world of PALWORLD_MAP_WORLDS) {
+    const candidate = generatedMaps[world];
+    if (
+      candidate
+      && isLocalPalworldMapUrl(candidate.imageUrl)
+      && safeDimensions(candidate.width)
+      && safeDimensions(candidate.height)
+      && assetRelease(candidate.imageUrl) === expectedRelease
+    ) {
+      maps.set(world, {
+        imageUrl: candidate.imageUrl,
+        width: candidate.width,
+        height: candidate.height,
+      });
+    }
+  }
+  if (
+    safeMap
+    && (
+      maps.get("main")?.imageUrl !== safeMap.imageUrl
+      || maps.get("main")?.width !== safeMap.width
+      || maps.get("main")?.height !== safeMap.height
+    )
+  ) {
+    maps.delete("main");
+  }
   const entries = new Map<PalworldElement, PalworldElementImage>();
   const duplicates = new Set<PalworldElement>();
 
@@ -65,6 +101,9 @@ function staticAssets(): {
 
   return {
     elements: Object.freeze(Object.fromEntries(entries)) as Readonly<Partial<Record<PalworldElement, PalworldElementImage>>>,
+    maps: Object.freeze(Object.fromEntries(maps)) as Readonly<
+      Partial<Record<PalworldMapWorld, PalworldElementImage>>
+    >,
     ...(safeMap ? { map: Object.freeze(safeMap) } : {}),
   };
 }
@@ -73,3 +112,4 @@ const STATIC_ASSETS = staticAssets();
 
 export const PALWORLD_ELEMENT_IMAGES = STATIC_ASSETS.elements;
 export const PALWORLD_WORLD_MAP_IMAGE = STATIC_ASSETS.map;
+export const PALWORLD_MAP_IMAGES = STATIC_ASSETS.maps;

@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   generatePalworldMapMarkerArtifact,
-  assertPalworldMapMarkerMapping
+  assertPalworldMapMarkerWorldsMapping
 } from "../data/palworld-map-marker-generator.js";
 import {
   PALWORLD_MAP_MARKER_ARTIFACT_FILE,
@@ -25,7 +25,7 @@ const DEFAULT_RELEASE_ROOT = path.join(
 );
 const DEFAULT_MAPPING_PATH = path.join(
   REPOSITORY_ROOT,
-  "apps/server/src/data/palworld-map-mappings/main-map-transform.json"
+  "apps/server/src/data/palworld-map-mappings/map-marker-worlds.json"
 );
 const DEFAULT_DASHBOARD_STATIC_ROOT = path.join(
   REPOSITORY_ROOT,
@@ -79,21 +79,33 @@ function parseArguments(argv: string[]): Arguments {
 
 try {
   const args = parseArguments(process.argv.slice(2));
-  const mapping = assertPalworldMapMarkerMapping(
+  const mapping = assertPalworldMapMarkerWorldsMapping(
     JSON.parse(await readFile(args.mappingPath, "utf8")) as unknown
   );
   const targetMapPath = path.resolve(
     args.dashboardStaticRoot,
     `.${mapping.targetMapAsset.imageUrl}`
   );
-  if (!targetMapPath.startsWith(`${path.resolve(args.dashboardStaticRoot)}${path.sep}`)) {
+  const targetTreeMapPath = path.resolve(
+    args.dashboardStaticRoot,
+    `.${mapping.targetTreeMapAsset.imageUrl}`
+  );
+  if (
+    !targetMapPath.startsWith(
+      `${path.resolve(args.dashboardStaticRoot)}${path.sep}`
+    )
+    || !targetTreeMapPath.startsWith(
+      `${path.resolve(args.dashboardStaticRoot)}${path.sep}`
+    )
+  ) {
     throw new TypeError("target map asset이 Dashboard static root 밖을 가리킵니다.");
   }
   const result = await generatePalworldMapMarkerArtifact({
     archivePath: args.archivePath,
     mapping,
     paldexPath: path.join(args.releaseRoot, "paldex.json"),
-    targetMapPath
+    targetMapPath,
+    targetTreeMapPath
   });
   const firstArtifactText = deterministicJson(result.artifact);
   const secondArtifactText = deterministicJson(

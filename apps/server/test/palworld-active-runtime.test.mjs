@@ -221,15 +221,15 @@ test("legacy 지도 overlay는 composite selector가 active로 고정한 domain�
   );
 });
 
-test("legacy composite v11은 지도 위치·필터 아이콘과 기존 companion manifest를 함께 고정하고 v10을 계속 읽는다", async () => {
+test("legacy composite v12는 패시브 locale evidence와 지도 artifact를 고정하고 v1~v11을 계속 읽는다", async () => {
   const releaseRoot = path.dirname(legacyManifestPath);
   const composite = await createPalworldLegacyCompositeRuntimeManifest({
     releaseRoot,
     release: "1.0.1",
     workImages: "candidate"
   });
-  assert.equal(composite.schemaVersion, 11);
-  assert.equal(composite.artifacts.length, 30);
+  assert.equal(composite.schemaVersion, 12);
+  assert.equal(composite.artifacts.length, 31);
   assert.equal(
     composite.artifacts.some((artifact) =>
       artifact.kind === "map-images-manifest"
@@ -253,6 +253,10 @@ test("legacy composite v11은 지도 위치·필터 아이콘과 기존 companio
       [
         "locale-official-active-skill-evidence",
         "locales/official-active-skill-evidence.json"
+      ],
+      [
+        "locale-official-passive-skill-evidence",
+        "locales/official-passive-skill-evidence.json"
       ],
       [
         "locale-official-compatibility",
@@ -311,7 +315,7 @@ test("legacy composite v11은 지도 위치·필터 아이콘과 기존 companio
       release: "1.0.1",
       workImages: "active"
     });
-  assert.equal(workActiveComposite.artifacts.length, 31);
+  assert.equal(workActiveComposite.artifacts.length, 32);
   assert.equal(workActiveComposite.availability.workImages, "active");
   assert.equal(
     workActiveComposite.artifacts.at(-1)?.file,
@@ -474,12 +478,25 @@ test("legacy composite v11은 지도 위치·필터 아이콘과 기존 companio
     true,
     "v10 selector가 exact-checksum approval까지 고정한 지도 위치만 로드해야 합니다."
   );
+  const legacyV11 = {
+    ...composite,
+    schemaVersion: 11,
+    artifacts: composite.artifacts.filter(
+      (artifact) =>
+        artifact.kind !== "locale-official-passive-skill-evidence"
+    )
+  };
+  assert.equal(
+    assertPalworldLegacyCompositeRuntimeManifest(legacyV11).schemaVersion,
+    11,
+    "기존 composite schema v11 selector는 passive evidence 없이 계속 읽어야 합니다."
+  );
   const {
     mapLayerIcons: _mapLayerIcons,
     ...legacyV10Availability
-  } = composite.availability;
+  } = legacyV11.availability;
   const legacyV10 = {
-    ...composite,
+    ...legacyV11,
     schemaVersion: 10,
     availability: legacyV10Availability
   };
@@ -495,7 +512,7 @@ test("legacy composite v11은 지도 위치·필터 아이콘과 기존 companio
   const legacyV9 = {
     ...legacyV10,
     schemaVersion: 9,
-    artifacts: composite.artifacts.filter(
+    artifacts: legacyV10.artifacts.filter(
       (artifact) => !artifact.kind.startsWith("map-locations")
     ),
     availability: legacyV9Availability
@@ -622,8 +639,11 @@ test("legacy composite v11은 지도 위치·필터 아이콘과 기존 companio
 test("map image manifest는 active release·content hash·권리 상태를 exact 검증한다", async () => {
   const releaseRoot = path.dirname(legacyManifestPath);
   const manifest = await loadPalworldMapImageManifest(releaseRoot, "1.0.1");
-  assert.equal(manifest.entries.length, 1);
+  assert.equal(manifest.entries.length, 2);
   assert.equal(manifest.entries[0].id, "main");
+  assert.equal(manifest.entries[1].id, "tree");
+  assert.equal(manifest.entries[1].outputWidth, 4096);
+  assert.equal(manifest.entries[1].outputHeight, 4096);
   assert.equal(manifest.rightsVerified, false);
   assert.equal(manifest.status, "operator_acknowledged");
   assert.throws(

@@ -54,6 +54,16 @@ const MAP_LAYER_DIRECT_ICON_IDS = [
 const MAP_LAYER_REPRESENTATIVE_ICON_IDS = [
   "ancient-ruin",
   "journal",
+  "resource",
+  "resource-coal",
+  "resource-copper-ore",
+  "resource-night-stone",
+  "resource-pal-crystal",
+  "resource-quartz",
+  "resource-sky-island-ore",
+  "resource-stone",
+  "resource-sulfur",
+  "resource-world-tree-ore",
   "skill-fruit",
   "spawn"
 ] as const;
@@ -159,6 +169,10 @@ function palworldStaticAssetPolicy(): Plugin {
       const generated = JSON.parse(generatedText) as {
         schemaVersion?: unknown;
         map?: { imageUrl?: unknown; width?: unknown; height?: unknown };
+        maps?: Record<
+          string,
+          { imageUrl?: unknown; width?: unknown; height?: unknown }
+        >;
         workSource?: {
           release?: unknown;
           sourceType?: unknown;
@@ -452,11 +466,23 @@ function palworldStaticAssetPolicy(): Plugin {
         };
       });
       const mainMap = mapManifest.entries?.find((entry) => entry.id === "main");
+      const generatedMapIds = Object.keys(generated.maps ?? {}).sort();
+      const manifestMapIds = (mapManifest.entries ?? [])
+        .flatMap((entry) => typeof entry.id === "string" ? [entry.id] : [])
+        .sort();
       if (
         mainMap === undefined
         || generated.map?.imageUrl !== mainMap.imageUrl
         || generated.map.width !== mainMap.outputWidth
         || generated.map.height !== mainMap.outputHeight
+        || JSON.stringify(generatedMapIds) !== JSON.stringify(manifestMapIds)
+        || (mapManifest.entries ?? []).some((entry) => {
+          const generatedEntry =
+            typeof entry.id === "string" ? generated.maps?.[entry.id] : undefined;
+          return generatedEntry?.imageUrl !== entry.imageUrl
+            || generatedEntry.width !== entry.outputWidth
+            || generatedEntry.height !== entry.outputHeight;
+        })
       ) {
         throw new Error(
           "Dashboard 지도 asset과 active Palworld map image manifest가 일치하지 않습니다."

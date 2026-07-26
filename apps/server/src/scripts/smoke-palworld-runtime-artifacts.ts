@@ -138,7 +138,7 @@ export type PalworldRuntimeLayout =
       releaseDirectory: string;
       releaseRoot: string;
       compositeArtifactFiles?: readonly string[];
-      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+      compositeSchemaVersion?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
       markerCompatibilityApprovalSha256?: string;
       spawnCompatibilityApprovalSha256?: string;
       mapLocationsCompatibilityApprovalSha256?: string;
@@ -626,8 +626,18 @@ async function validateLegacyRuntime(
     const bytes = await readFile(
       path.join(staticRoot, "maps", entry.outputFileName)
     );
-    if (bytes.length !== entry.outputBytes) {
-      throw new Error("Palworld map image manifest bytes와 실제 WebP 크기가 일치하지 않습니다.");
+    if (
+      bytes.length !== entry.outputBytes
+      || bytes.length < 20
+      || bytes.toString("ascii", 0, 4) !== "RIFF"
+      || bytes.toString("ascii", 8, 12) !== "WEBP"
+      || bytes.readUInt32LE(4) + 8 !== bytes.length
+      || createHash("sha256").update(bytes).digest("hex")
+        !== entry.outputSha256
+    ) {
+      throw new Error(
+        "Palworld map image manifest와 실제 WebP hash·크기가 일치하지 않습니다."
+      );
     }
   }
   for (const entry of workImagesManifest?.entries ?? []) {
@@ -657,6 +667,7 @@ async function validateLegacyRuntime(
     }
   }
   let mainMapMarkers: Awaited<ReturnType<typeof loadPalworldMapMarkerArtifact>>["worlds"][number] | undefined;
+  let treeMapMarkers: Awaited<ReturnType<typeof loadPalworldMapMarkerArtifact>>["worlds"][number] | undefined;
   if (hasMapMarkers) {
     try {
       const mapMarkers = await loadPalworldMapMarkerArtifact(releaseRoot);
@@ -681,6 +692,10 @@ async function validateLegacyRuntime(
       if (!mainMapMarkers || mainMapMarkers.markers.length < 1) {
         throw new Error("MainMap 보스 marker runtime artifact가 비어 있습니다.");
       }
+      treeMapMarkers = mapMarkers.worlds.find((world) => world.world === "tree");
+      if (!treeMapMarkers || treeMapMarkers.markers.length < 1) {
+        throw new Error("세계수 보스 marker runtime artifact가 비어 있습니다.");
+      }
       const mapAssetPath = path.join(
         staticRoot,
         "maps",
@@ -701,9 +716,23 @@ async function validateLegacyRuntime(
       ) {
         throw new Error("Palworld MainMap marker가 참조하는 정적 WebP hash가 일치하지 않습니다.");
       }
+      if (treeMapMarkers !== undefined) {
+        const treeMapAsset = mapImagesManifest.entries.find(
+          (entry) => entry.id === "tree"
+        );
+        if (
+          treeMapAsset === undefined
+          || treeMapAsset.outputSha256 !== treeMapMarkers.targetMapAssetSha256
+        ) {
+          throw new Error(
+            "Palworld 세계수 marker와 composite map image manifest가 일치하지 않습니다."
+          );
+        }
+      }
     } catch (error) {
       if (requireExactRuntimeDirectories) throw error;
       mainMapMarkers = undefined;
+      treeMapMarkers = undefined;
     }
   }
   let mainMapSpawns: Awaited<ReturnType<typeof loadPalworldSpawnArtifact>>["worlds"][number] | undefined;
@@ -756,6 +785,7 @@ async function validateLegacyRuntime(
   let mainMapLocations:
     Awaited<ReturnType<typeof loadPalworldMapLocationsArtifact>>["worlds"][number]
     | undefined;
+  let treeMapLocationCount = 0;
   if (hasMapLocations) {
     try {
       const mapLocations = await loadPalworldMapLocationsArtifact(releaseRoot);
@@ -787,15 +817,21 @@ async function validateLegacyRuntime(
       mainMapLocations = mapLocations.worlds.find(
         (world) => world.world === "main"
       );
+      const treeMapLocations = mapLocations.worlds.find(
+        (world) => world.world === "tree"
+      );
       if (
         !mainMapLocations
         || mainMapLocations.locations.length < 1
+        || !treeMapLocations
+        || treeMapLocations.locations.length < 1
         || provider.diagnostics().total !== mapLocations.totalLocations
       ) {
         throw new Error(
-          "MainMap 지도 위치 runtime artifact가 비었거나 diagnostics count가 다릅니다."
+          "MainMap·세계수 지도 위치 runtime artifact가 비었거나 diagnostics count가 다릅니다."
         );
       }
+      treeMapLocationCount = treeMapLocations.locations.length;
       if (
         mainMapMarkers
         && mainMapLocations.targetMapAssetSha256
@@ -815,12 +851,60 @@ async function validateLegacyRuntime(
         );
       }
       if (
+        treeMapMarkers
+        && treeMapLocations.targetMapAssetSha256
+          !== treeMapMarkers.targetMapAssetSha256
+      ) {
+        throw new Error(
+          "지도 위치와 보스 marker의 세계수 map asset hash가 일치하지 않습니다."
+        );
+      }
+      if (
         !mapImagesManifest.entries.some((entry) =>
           entry.outputSha256 === mainMapLocations?.targetMapAssetSha256
         )
       ) {
         throw new Error(
           "지도 위치가 composite map image manifest 밖의 지도를 참조합니다."
+        );
+      }
+      const treeMapAsset = mapImagesManifest.entries.find(
+        (entry) => entry.id === "tree"
+      );
+      if (
+        treeMapAsset === undefined
+        || treeMapAsset.outputSha256
+          !== treeMapLocations.targetMapAssetSha256
+      ) {
+        throw new Error(
+          "세계수 지도 위치와 composite map image manifest의 tree asset이 일치하지 않습니다."
+        );
+      }
+      const treeMapAssetPath = path.join(
+        staticRoot,
+        "maps",
+        treeMapAsset.outputFileName
+      );
+      await assertRegularRuntimeFile(
+        treeMapAssetPath,
+        "Palworld 세계수 정적 WebP"
+      );
+      const treeMapAssetBytes = await readFile(treeMapAssetPath);
+      const treeMapAssetSha256 = createHash("sha256")
+        .update(treeMapAssetBytes)
+        .digest("hex");
+      if (
+        treeMapAssetSha256 !== treeMapLocations.targetMapAssetSha256
+        || treeMapAssetSha256 !== treeMapAsset.outputSha256
+        || treeMapAssetBytes.length !== treeMapAsset.outputBytes
+        || treeMapAssetBytes.length < 20
+        || treeMapAssetBytes.toString("ascii", 0, 4) !== "RIFF"
+        || treeMapAssetBytes.toString("ascii", 8, 12) !== "WEBP"
+        || treeMapAssetBytes.readUInt32LE(4) + 8
+          !== treeMapAssetBytes.length
+      ) {
+        throw new Error(
+          "세계수 지도 위치가 참조하는 실제 WebP hash·크기가 일치하지 않습니다."
         );
       }
       const representativeIndexes = new Set([
@@ -854,9 +938,12 @@ async function validateLegacyRuntime(
     + `아이템 ${catalog.catalog.items.length}개, 스킬 ${catalog.catalog.skills.length}개, `
     + `지도 필터 아이콘 ${mapLayerIconsManifest?.entries.length ?? 0}개, `
     + `작업 적성 아이콘 ${workImagesManifest?.entries.length ?? 0}개, `
-    + `교배 결과 ${breedingEngine.pairCount}개, MainMap 보스 ${mainMapMarkers?.markers.length ?? 0}개, `
+    + `교배 결과 ${breedingEngine.pairCount}개, `
+    + `MainMap 보스 ${mainMapMarkers?.markers.length ?? 0}개, `
+    + `Tree 보스 ${treeMapMarkers?.markers.length ?? 0}개, `
     + `일반 스폰 Pal ${mainMapSpawns?.pals.length ?? 0}종, `
-    + `지도 위치 ${mainMapLocations?.locations.length ?? 0}개, `
+    + `지도 위치 Main ${mainMapLocations?.locations.length ?? 0}개·`
+    + `Tree ${treeMapLocationCount}개, `
     + `fallback ${release.manifest.imageAssetGate.fallbackPals}개`
   );
 }

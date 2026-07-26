@@ -40,13 +40,20 @@ type MapMarkerAlias = {
 };
 
 export type PalworldMapMarkerMapping = {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   targetGameVersion: string;
   sourceArchiveSha256: string;
   bossTable: SourceFileLock;
   worldMapTable: SourceFileLock;
   sourceMapAsset: SourceFileLock;
+  sourceTreeMapAsset?: SourceFileLock;
   targetMapAsset: {
+    imageUrl: string;
+    sha256: string;
+    width: number;
+    height: number;
+  };
+  targetTreeMapAsset?: {
     imageUrl: string;
     sha256: string;
     width: number;
@@ -57,6 +64,11 @@ export type PalworldMapMarkerMapping = {
     revision: string;
     coordinateCrossCheckRows: number;
     maximumPixelError: number;
+  };
+  treeVerification?: {
+    status: "source_bounds_and_boss_rows_reviewed";
+    revision: string;
+    coordinateCrossCheckRows: number;
   };
   expectedCounts: {
     sourceRows: number;
@@ -75,6 +87,17 @@ export type PalworldMapMarkerMapping = {
   };
   treeBounds: SourceBounds;
   aliases: MapMarkerAlias[];
+};
+
+export type PalworldMapMarkerWorldsMapping = PalworldMapMarkerMapping & {
+  schemaVersion: 2;
+  sourceTreeMapAsset: SourceFileLock;
+  targetTreeMapAsset: NonNullable<
+    PalworldMapMarkerMapping["targetTreeMapAsset"]
+  >;
+  treeVerification: NonNullable<
+    PalworldMapMarkerMapping["treeVerification"]
+  >;
 };
 
 export type PalworldMapMarkerGenerationResult = {
@@ -183,7 +206,14 @@ function boundsAt(value: unknown, pathName: string): SourceBounds {
 }
 
 export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarkerMapping {
-  const root = objectAt(value, "mapping", [
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    fail("mapping", "객체여야 합니다.");
+  }
+  const schemaVersion = (value as JsonRecord).schemaVersion;
+  if (schemaVersion !== 1 && schemaVersion !== 2) {
+    fail("mapping.schemaVersion", "1 또는 2여야 합니다.");
+  }
+  const commonKeys = [
     "schemaVersion",
     "targetGameVersion",
     "sourceArchiveSha256",
@@ -196,8 +226,19 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
     "world",
     "treeBounds",
     "aliases"
-  ]);
-  if (root.schemaVersion !== 1) fail("mapping.schemaVersion", "1이어야 합니다.");
+  ] as const;
+  const root = objectAt(
+    value,
+    "mapping",
+    schemaVersion === 2
+      ? [
+          ...commonKeys,
+          "sourceTreeMapAsset",
+          "targetTreeMapAsset",
+          "treeVerification"
+        ]
+      : commonKeys
+  );
   const targetGameVersion = textAt(root.targetGameVersion, "mapping.targetGameVersion", 64);
   if (!/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/u.test(targetGameVersion)) {
     fail("mapping.targetGameVersion", "semver 형식이어야 합니다.");
@@ -208,6 +249,13 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
     "width",
     "height"
   ]);
+  const targetTreeMapAsset = schemaVersion === 2
+    ? objectAt(
+        root.targetTreeMapAsset,
+        "mapping.targetTreeMapAsset",
+        ["imageUrl", "sha256", "width", "height"]
+      )
+    : undefined;
   const imageUrl = textAt(targetMapAsset.imageUrl, "mapping.targetMapAsset.imageUrl");
   const imageMatch = imageUrl.match(SAFE_PUBLIC_ASSET_PATTERN);
   const targetMapSha256 = sha256At(targetMapAsset.sha256, "mapping.targetMapAsset.sha256");
@@ -216,6 +264,31 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
       "mapping.targetMapAsset.imageUrl",
       "target release와 content hash가 일치하는 로컬 Palworld map URL이어야 합니다."
     );
+  }
+  const treeImageUrl = targetTreeMapAsset === undefined
+    ? undefined
+    : textAt(
+        targetTreeMapAsset.imageUrl,
+        "mapping.targetTreeMapAsset.imageUrl"
+      );
+  const targetTreeMapSha256 = targetTreeMapAsset === undefined
+    ? undefined
+    : sha256At(
+        targetTreeMapAsset.sha256,
+        "mapping.targetTreeMapAsset.sha256"
+      );
+  if (treeImageUrl !== undefined && targetTreeMapSha256 !== undefined) {
+    const treeImageMatch = treeImageUrl.match(SAFE_PUBLIC_ASSET_PATTERN);
+    if (
+      !treeImageMatch
+      || treeImageMatch[1] !== targetGameVersion
+      || treeImageMatch[2] !== targetTreeMapSha256
+    ) {
+      fail(
+        "mapping.targetTreeMapAsset.imageUrl",
+        "target release와 content hash가 일치하는 로컬 Palworld tree map URL이어야 합니다."
+      );
+    }
   }
   const verification = objectAt(root.verification, "mapping.verification", [
     "status",
@@ -229,12 +302,51 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
       "source_bounds_and_biome_anchors_reviewed여야 합니다."
     );
   }
+  const treeVerification = schemaVersion === 2
+    ? objectAt(
+        root.treeVerification,
+        "mapping.treeVerification",
+        ["status", "revision", "coordinateCrossCheckRows"]
+      )
+    : undefined;
+  if (
+    treeVerification !== undefined
+    && treeVerification.status !== "source_bounds_and_boss_rows_reviewed"
+  ) {
+    fail(
+      "mapping.treeVerification.status",
+      "source_bounds_and_boss_rows_reviewed여야 합니다."
+    );
+  }
   const expectedCounts = objectAt(root.expectedCounts, "mapping.expectedCounts", [
     "sourceRows",
     "nonPalRows",
     "mainMarkers",
     "treeMarkers"
   ]);
+  const expectedTreeMarkers = integerAt(
+    expectedCounts.treeMarkers,
+    "mapping.expectedCounts.treeMarkers",
+    0,
+    500
+  );
+  const treeCoordinateCrossCheckRows = treeVerification === undefined
+    ? undefined
+    : integerAt(
+        treeVerification.coordinateCrossCheckRows,
+        "mapping.treeVerification.coordinateCrossCheckRows",
+        1,
+        500
+      );
+  if (
+    treeCoordinateCrossCheckRows !== undefined
+    && treeCoordinateCrossCheckRows !== expectedTreeMarkers
+  ) {
+    fail(
+      "mapping.treeVerification.coordinateCrossCheckRows",
+      "고정 Tree marker 전체 수와 일치해야 합니다."
+    );
+  }
   const world = objectAt(root.world, "mapping.world", [
     "id",
     "sourceRowId",
@@ -294,7 +406,7 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
     fail("mapping.aliases", "sourceCharacterId가 중복됐습니다.");
   }
   return {
-    schemaVersion: 1,
+    schemaVersion,
     targetGameVersion,
     sourceArchiveSha256: sha256At(
       root.sourceArchiveSha256,
@@ -303,12 +415,42 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
     bossTable: sourceFileAt(root.bossTable, "mapping.bossTable"),
     worldMapTable: sourceFileAt(root.worldMapTable, "mapping.worldMapTable"),
     sourceMapAsset: sourceFileAt(root.sourceMapAsset, "mapping.sourceMapAsset"),
+    ...(schemaVersion === 2
+      ? {
+          sourceTreeMapAsset: sourceFileAt(
+            root.sourceTreeMapAsset,
+            "mapping.sourceTreeMapAsset"
+          )
+        }
+      : {}),
     targetMapAsset: {
       imageUrl,
       sha256: targetMapSha256,
       width: integerAt(targetMapAsset.width, "mapping.targetMapAsset.width", 1, 16_384),
       height: integerAt(targetMapAsset.height, "mapping.targetMapAsset.height", 1, 16_384)
     },
+    ...(targetTreeMapAsset === undefined
+      || treeImageUrl === undefined
+      || targetTreeMapSha256 === undefined
+      ? {}
+      : {
+          targetTreeMapAsset: {
+            imageUrl: treeImageUrl,
+            sha256: targetTreeMapSha256,
+            width: integerAt(
+              targetTreeMapAsset.width,
+              "mapping.targetTreeMapAsset.width",
+              1,
+              16_384
+            ),
+            height: integerAt(
+              targetTreeMapAsset.height,
+              "mapping.targetTreeMapAsset.height",
+              1,
+              16_384
+            )
+          }
+        }),
     verification: {
       status: "source_bounds_and_biome_anchors_reviewed",
       revision: textAt(verification.revision, "mapping.verification.revision", 128),
@@ -325,11 +467,25 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
         1
       )
     },
+    ...(treeVerification === undefined
+      || treeCoordinateCrossCheckRows === undefined
+      ? {}
+      : {
+          treeVerification: {
+            status: "source_bounds_and_boss_rows_reviewed" as const,
+            revision: textAt(
+              treeVerification.revision,
+              "mapping.treeVerification.revision",
+              128
+            ),
+            coordinateCrossCheckRows: treeCoordinateCrossCheckRows
+          }
+        }),
     expectedCounts: {
       sourceRows: integerAt(expectedCounts.sourceRows, "mapping.expectedCounts.sourceRows", 1, 10_000),
       nonPalRows: integerAt(expectedCounts.nonPalRows, "mapping.expectedCounts.nonPalRows", 0, 10_000),
       mainMarkers: integerAt(expectedCounts.mainMarkers, "mapping.expectedCounts.mainMarkers", 1, 500),
-      treeMarkers: integerAt(expectedCounts.treeMarkers, "mapping.expectedCounts.treeMarkers", 0, 500)
+      treeMarkers: expectedTreeMarkers
     },
     world: {
       id: "main",
@@ -343,6 +499,24 @@ export function assertPalworldMapMarkerMapping(value: unknown): PalworldMapMarke
     treeBounds: boundsAt(root.treeBounds, "mapping.treeBounds"),
     aliases
   };
+}
+
+export function assertPalworldMapMarkerWorldsMapping(
+  value: unknown
+): PalworldMapMarkerWorldsMapping {
+  const mapping = assertPalworldMapMarkerMapping(value);
+  if (
+    mapping.schemaVersion !== 2
+    || mapping.sourceTreeMapAsset === undefined
+    || mapping.targetTreeMapAsset === undefined
+    || mapping.treeVerification === undefined
+  ) {
+    fail(
+      "mapping.schemaVersion",
+      "MainMap·Tree marker 생성에는 versioned schema 2 mapping이 필요합니다."
+    );
+  }
+  return mapping as PalworldMapMarkerWorldsMapping;
 }
 
 function sha256Bytes(bytes: Uint8Array): string {
@@ -470,12 +644,12 @@ function internalIdForBoss(
 }
 
 export function buildPalworldMapMarkerArtifact(input: {
-  mapping: PalworldMapMarkerMapping;
+  mapping: PalworldMapMarkerWorldsMapping;
   paldex: PalworldPaldexArtifact;
   bossRows: JsonRecord;
   worldMapRows: JsonRecord;
 }): PalworldMapMarkerGenerationResult {
-  const mapping = assertPalworldMapMarkerMapping(input.mapping);
+  const mapping = assertPalworldMapMarkerWorldsMapping(input.mapping);
   const paldex = assertPalworldPaldexArtifact(input.paldex);
   if (paldex.release !== mapping.targetGameVersion) {
     fail("mapping.targetGameVersion", "활성 Paldex release와 일치하지 않습니다.");
@@ -489,8 +663,9 @@ export function buildPalworldMapMarkerArtifact(input: {
   );
   const usedAliases = new Set<string>();
   const markers: PalworldMapMarkerArtifact["worlds"][number]["markers"] = [];
+  const treeMarkerEntries:
+    PalworldMapMarkerArtifact["worlds"][number]["markers"] = [];
   let nonPalRows = 0;
-  let treeMarkers = 0;
   for (const [sourceRowId, value] of Object.entries(input.bossRows)) {
     const row = objectAt(value, `boss.Rows.${sourceRowId}`, [
       "SpawnerID",
@@ -520,7 +695,18 @@ export function buildPalworldMapMarkerArtifact(input: {
       );
     }
     if (inside(position, mapping.treeBounds)) {
-      treeMarkers += 1;
+      const coordinate = normalizedPalworldMainMapCoordinate(
+        position,
+        mapping.treeBounds
+      );
+      treeMarkerEntries.push({
+        id: `tree-${sourceRowId.padStart(3, "0")}-${pal.id}`,
+        sourceRowId,
+        sourceInternalId,
+        palId: pal.id,
+        level,
+        ...coordinate
+      });
       continue;
     }
     const coordinate = normalizedPalworldMainMapCoordinate(
@@ -540,7 +726,7 @@ export function buildPalworldMapMarkerArtifact(input: {
     sourceRows: Object.keys(input.bossRows).length,
     nonPalRows,
     mainMarkers: markers.length,
-    treeMarkers
+    treeMarkers: treeMarkerEntries.length
   };
   for (const [field, expected] of Object.entries(mapping.expectedCounts)) {
     if (counts[field as keyof typeof counts] !== expected) {
@@ -562,6 +748,15 @@ export function buildPalworldMapMarkerArtifact(input: {
     invertVertical: mapping.world.invertVertical,
     sourceBounds: { ...mapping.world.sourceBounds }
   };
+  const treeTransform: PalworldMapCoordinateTransform = {
+    status: "verified",
+    revision: mapping.treeVerification.revision,
+    horizontalAxis: mapping.world.horizontalAxis,
+    verticalAxis: mapping.world.verticalAxis,
+    invertHorizontal: mapping.world.invertHorizontal,
+    invertVertical: mapping.world.invertVertical,
+    sourceBounds: { ...mapping.treeBounds }
+  };
   const artifact = createPalworldMapMarkerArtifact({
     schemaVersion: 1,
     targetGameVersion: mapping.targetGameVersion,
@@ -577,12 +772,20 @@ export function buildPalworldMapMarkerArtifact(input: {
       rightsVerified: false,
       usageBasis: "operator_reference_use"
     },
-    worlds: [{
-      world: "main",
-      targetMapAssetSha256: mapping.targetMapAsset.sha256,
-      transform,
-      markers
-    }]
+    worlds: [
+      {
+        world: "main",
+        targetMapAssetSha256: mapping.targetMapAsset.sha256,
+        transform,
+        markers
+      },
+      {
+        world: "tree",
+        targetMapAssetSha256: mapping.targetTreeMapAsset.sha256,
+        transform: treeTransform,
+        markers: treeMarkerEntries
+      }
+    ]
   });
   return { artifact, counts };
 }
@@ -604,12 +807,22 @@ async function assertRegularFileSha256(
 
 export async function generatePalworldMapMarkerArtifact(input: {
   archivePath: string;
-  mapping: PalworldMapMarkerMapping;
+  mapping: PalworldMapMarkerWorldsMapping;
   paldexPath: string;
   targetMapPath: string;
+  targetTreeMapPath: string;
 }): Promise<PalworldMapMarkerGenerationResult> {
-  const mapping = assertPalworldMapMarkerMapping(input.mapping);
-  await assertRegularFileSha256(input.targetMapPath, mapping.targetMapAsset.sha256);
+  const mapping = assertPalworldMapMarkerWorldsMapping(input.mapping);
+  await Promise.all([
+    assertRegularFileSha256(
+      input.targetMapPath,
+      mapping.targetMapAsset.sha256
+    ),
+    assertRegularFileSha256(
+      input.targetTreeMapPath,
+      mapping.targetTreeMapAsset.sha256
+    )
+  ]);
   const paldex = assertPalworldPaldexArtifact(
     JSON.parse(await readFile(input.paldexPath, "utf8")) as unknown
   );
@@ -617,11 +830,27 @@ export async function generatePalworldMapMarkerArtifact(input: {
     input.archivePath,
     { expectedSha256: mapping.sourceArchiveSha256 },
     async (reader) => {
-      const [bossBytes, worldMapBytes] = await Promise.all([
+      const [
+        bossBytes,
+        worldMapBytes,
+        sourceMapAssetBytes,
+        sourceTreeMapAssetBytes
+      ] = await Promise.all([
         lockedMemberBytes(reader, mapping.bossTable),
         lockedMemberBytes(reader, mapping.worldMapTable),
-        lockedMemberBytes(reader, mapping.sourceMapAsset)
+        lockedMemberBytes(reader, mapping.sourceMapAsset),
+        lockedMemberBytes(reader, mapping.sourceTreeMapAsset)
       ]);
+      if (
+        sha256Bytes(sourceMapAssetBytes) !== mapping.sourceMapAsset.sha256
+        || sha256Bytes(sourceTreeMapAssetBytes)
+          !== mapping.sourceTreeMapAsset.sha256
+      ) {
+        fail(
+          "mapping.sourceMapAsset",
+          "검증된 MainMap·Tree source asset checksum과 일치하지 않습니다."
+        );
+      }
       const parseRows = async (source: SourceFileLock, bytes: Buffer): Promise<JsonRecord> => {
         const tableRows = await reader.readDataTable(source.member);
         if (sha256Bytes(bytes) !== source.sha256) {

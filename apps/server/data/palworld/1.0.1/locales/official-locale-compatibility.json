@@ -16,12 +16,12 @@
       "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
       "corpusSha256": "ff12da84952783a30fa138c890184d3008b3ec3407a75eaa2ecfab16f7e6fbbc",
       "localeSha256": {
-        "ko": "9f0cc7e65c8607c505ffc8d51fd74b46da9358379d74b4997d5fdb3659eac00c",
-        "ja": "f1b756018821e5631da1ffe68fa1ef0485ffb7441d5052db6c92974c6e1d1f09"
+        "ko": "5ac95abeed9ba072fe7cf0818b9b80bcd45b5224ba5ff821f7809de19196cb4e",
+        "ja": "c29f8299234960623455fa0c970744550f89a1cd2353f555a1966887124aa25b"
       },
       "glossarySha256": "19a8d9fab0d3e924b41772dea00adacc05fdc92785baa55f271d589f5941bbaf",
       "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
-      "translationRevision": "official-locale-overlay-18b8d60fdb9e7acb-eb408d81"
+      "translationRevision": "official-locale-overlay-9499ec38e96ef9ca-eb408d81"
     },
     "candidate": {
       "candidateId": "candidate-1248184a4b527d94",
@@ -69,31 +69,33 @@
         "skillIconMap": "1dc086d3181d9a0584ed4b780347e35f86ae0725a7a5cb9f956304515f4d0e6d",
         "workIconMap": "1867e2a6caf0efa9f852c6227cf80fa04fa1ab8d09b8281f415bc08c6e50db58"
       },
-      "activeSkillLocaleMapSha256": "0549911b57790c55b77c364fe6e7d6539eb19324305369bae254b7da2d59fb8d"
+      "activeSkillLocaleMapSha256": "0549911b57790c55b77c364fe6e7d6539eb19324305369bae254b7da2d59fb8d",
+      "passiveSkillLocaleMapSha256": "5d14831d1065f48717904b0405291e165dcaa962d4f04acca65c7e0effcc0e2c"
     }
   },
   "outputs": {
-    "officialSourceFieldsSha256": "9499ec38e96ef9caa4258f9f119326b302970267f7b23355020c9a4e223c6ff9",
+    "officialSourceFieldsSha256": "23341e7d79a57bacd66a69ece32f86ebb32bf08420d439e35ab3433126014bcf",
     "activeSkillEvidenceSha256": "19c49222cc8e30b4151fb6aca3d6ada259f391bd4f1ea710d88bdc5d6afb52e2",
+    "passiveSkillEvidenceSha256": "7eb59347beb80c43522a1dc6649e97b60ebf6b7cb8d932f270732828f2933f99",
     "localeSha256": {
-      "ko": "5ac95abeed9ba072fe7cf0818b9b80bcd45b5224ba5ff821f7809de19196cb4e",
-      "ja": "c29f8299234960623455fa0c970744550f89a1cd2353f555a1966887124aa25b"
+      "ko": "b732714087184c797afe404d4979862e92020dbc8f65736e01a12148e3978a77",
+      "ja": "3c99d88aaf26ebeba711efca0ab1588c95090aed50d516191fdb4bc5e67f2ea3"
     },
-    "manifestSha256": "f6c95472303eb0dfa873597d1fcf94b2795ff5b5e3e909843ba6d71e1d0f3c62",
-    "translationRevision": "official-locale-overlay-9499ec38e96ef9ca-eb408d81"
+    "manifestSha256": "4ca4361feaa54a318ba173de49df02dcb36fe2c3f9377bfecdd56fea256164f2",
+    "translationRevision": "official-locale-overlay-23341e7d79a57bac-eb408d81"
   },
   "counts": {
     "officialExactResolved": {
-      "ko": 5219,
-      "ja": 5219
+      "ko": 5348,
+      "ja": 5348
     },
     "officialUnresolved": {
       "ko": 2,
       "ja": 2
     },
     "officialUnjoined": {
-      "ko": 237,
-      "ja": 237
+      "ko": 108,
+      "ja": 108
     },
     "humanReviewedPreserved": {
       "ko": 0,
@@ -108,12 +110,12 @@
       "ja": 0
     },
     "sourceProvidedExcluded": {
-      "ko": 4785,
-      "ja": 4785
+      "ko": 5219,
+      "ja": 5219
     },
     "outputRecords": {
-      "ko": 2621,
-      "ja": 2621
+      "ko": 2700,
+      "ja": 2700
     }
   }
 }

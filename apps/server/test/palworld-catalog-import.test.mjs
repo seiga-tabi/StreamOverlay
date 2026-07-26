@@ -176,6 +176,43 @@ test("catalog adapter는 Pal sourceInternalId가 canonical mapping과 다르면 
   }), /canonical mapping과 일치하지 않습니다/u);
 });
 
+test("catalog adapter는 sourceCategory를 12종에 exact 분류하고 알 수 없는 조합은 거부한다", async () => {
+  const [catalogSource, paldexRelease] = await Promise.all([
+    loadPalworldCatalogRuntimeSource(releaseRoot.pathname, {
+      itemImageRoot: itemImageRoot.pathname,
+      elementImageRoot: elementImageRoot.pathname
+    }),
+    loadPalworldPaldexRuntimeRelease()
+  ]);
+  const input = {
+    basePaldex: paldexRelease,
+    catalog: catalogSource.catalog,
+    catalogChecksum: catalogSource.manifest.catalogSha256,
+    localizedSnapshot: PALWORLD_SNAPSHOT,
+    sourceChecksum: "a".repeat(64),
+    sourceInternalIds: paldexRelease.sourceInternalIds
+  };
+  const adapted = adaptPalworldCatalog(input);
+  assert.equal(adapted.snapshot.items.every((item) => item.itemType !== undefined), true);
+
+  const unknown = structuredClone(catalogSource.catalog);
+  unknown.items[0].sourceCategory = "Unknown/Unknown";
+  assert.throws(
+    () => adaptPalworldCatalog({ ...input, catalog: unknown }),
+    /지원하지 않는 Palworld catalog sourceCategory/u
+  );
+
+  const unknownSpecialWeapon = structuredClone(catalogSource.catalog);
+  const sphere = unknownSpecialWeapon.items.find(
+    (item) => item.sourceCategory === "SpecialWeapon/SPWeaponCaptureBall"
+  );
+  sphere.sourceCategory = "SpecialWeapon/Unknown";
+  assert.throws(
+    () => adaptPalworldCatalog({ ...input, catalog: unknownSpecialWeapon }),
+    /지원하지 않는 Palworld SpecialWeapon sourceCategory/u
+  );
+});
+
 test("asset manifest는 output hash와 다른 URL을 거부한다", async () => {
   const source = JSON.parse(await readFile(new URL("element-images-manifest.json", releaseRoot), "utf8"));
   source.entries[0].imageUrl = `/images/palworld/1.0.1/elements/${"f".repeat(64)}.webp`;

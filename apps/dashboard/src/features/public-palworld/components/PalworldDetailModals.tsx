@@ -22,7 +22,14 @@ import { getPalworldItem, getPalworldPal } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import type { PalworldSpawnPeriod } from "../utils/routes";
 import { formatPalNumber } from "../utils/search";
-import { acquisitionLabel, categoryLabel, genderLabel } from "../utils/labels";
+import {
+  acquisitionLabel,
+  categoryLabel,
+  genderLabel,
+  itemRarityBand,
+  itemRarityLabel,
+  itemTypeLabel,
+} from "../utils/labels";
 import {
   hasMachineAssistedTranslation,
   resolvePalworldDescription,
@@ -381,6 +388,7 @@ export function ItemDetailModal({
   const name = detail ? resolvePalworldName(detail, locale) : null;
   const displayName = name?.text ?? text.details;
   const description = detail ? resolvePalworldDescription(detail, locale) : null;
+  const rarityLabel = detail ? itemRarityLabel(detail.rarity, locale) : "";
   const hasReviewPending = detail
     ? hasMachineAssistedTranslation(itemDetailTranslationStatuses(detail, locale))
     : false;
@@ -400,8 +408,8 @@ export function ItemDetailModal({
               ? <PalworldTranslationReviewNotice id={reviewNoticeId} locale={locale} />
               : null}
             <div className="palworld-detail-hero">
-              <div className="palworld-detail-media"><PalworldMedia kind="item" imageUrl={detail.imageUrl} alt={displayName} locale={locale} priority {...imageDimensions(detail)} /></div>
-              <div><h3>{displayName}</h3>{name ? <PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[name.sourceIntegrity]} statuses={[name.status]} /> : null}<div className="palworld-badge-row"><Badge tone="info">{categoryLabel(detail.category, locale)}</Badge><Badge tone="warning">★ {detail.rarity}</Badge></div></div>
+              <div className="palworld-detail-media palworld-item-detail-media" data-rarity-band={itemRarityBand(detail.rarity)}><PalworldMedia kind="item" imageUrl={detail.imageUrl} alt={displayName} locale={locale} priority {...imageDimensions(detail)} /></div>
+              <div><h3>{displayName}</h3>{name ? <PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[name.sourceIntegrity]} statuses={[name.status]} /> : null}<div className="palworld-badge-row"><Badge tone="info">{detail.itemType ? itemTypeLabel(detail.itemType, locale) : categoryLabel(detail.category, locale)}</Badge><Badge data-ja={itemRarityLabel(detail.rarity, "ja")} data-ko={itemRarityLabel(detail.rarity, "ko")} tone={detail.rarity > 4 ? "neutral" : "warning"}>{rarityLabel}</Badge></div></div>
             </div>
             <dl className="palworld-detail-list">
               <DataRow locale={locale} labelKo={palworldI18n.ko.internalId} labelJa={palworldI18n.ja.internalId}><code>{detail.sourceInternalId ?? detail.id}</code></DataRow>

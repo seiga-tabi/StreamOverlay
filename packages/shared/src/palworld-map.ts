@@ -19,7 +19,8 @@ export const PALWORLD_MAP_LOCATION_CATEGORIES = [
   "egg",
   "skill-fruit",
   "lifmunk",
-  "journal"
+  "journal",
+  "resource"
 ] as const;
 export const PALWORLD_MAP_LOCATION_STATES = [
   "ready",

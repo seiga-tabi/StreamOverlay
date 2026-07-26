@@ -10,8 +10,10 @@ import type {
   PalworldMapMarker,
   PalworldPalCondensationProfile,
   PalworldPalListFacets,
+  PalworldPalReference,
   PalworldPalStats,
   PalworldSkillDetail,
+  PalworldSkillListFacets,
   PalworldSkillSummary,
 } from "@streamops/shared";
 import { PALWORLD_WORK_SUITABILITY_TYPES } from "@streamops/shared";
@@ -45,6 +47,7 @@ import { PalworldItemsPage } from "../src/features/public-palworld/components/Pa
 import { PalworldSourceFooter } from "../src/features/public-palworld/components/PalworldSourceFooter";
 import { PalworldStreamersPage } from "../src/features/public-palworld/components/PalworldStreamersPage";
 import { PalworldSkillCard, PalworldSkillDetailView, PalworldSkillsPage } from "../src/features/public-palworld/components/PalworldSkillsPage";
+import { PalworldSkillsFilters } from "../src/features/public-palworld/components/PalworldSkillsFilters";
 import { PalworldElementBadge } from "../src/features/public-palworld/components/PalworldElementBadge";
 import { PalworldPalCondensation } from "../src/features/public-palworld/components/PalworldPalCondensation";
 import { PalworldPalStatsGraph } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
@@ -73,9 +76,14 @@ import {
 } from "../src/features/public-palworld/hooks/usePalworldMapViewport";
 import { PalworldWorkSuitabilityBadge } from "../src/features/public-palworld/components/PalworldWorkSuitabilityBadge";
 import { PalworldTranslationReviewNotice } from "../src/features/public-palworld/components/PalworldTranslationBadge";
+import generatedMapLayerIcons from "../src/features/public-palworld/data/palworld-map-layer-icons.json";
 import generatedStaticAssets from "../src/features/public-palworld/data/palworld-static-assets.generated.json";
 import { palworldI18n } from "../src/features/public-palworld/i18n/palworld-i18n";
-import { isLocalPalworldElementImageUrl, PALWORLD_ELEMENT_IMAGES } from "../src/features/public-palworld/utils/element-images";
+import {
+  isLocalPalworldElementImageUrl,
+  PALWORLD_ELEMENT_IMAGES,
+  PALWORLD_MAP_IMAGES,
+} from "../src/features/public-palworld/utils/element-images";
 import { PALWORLD_MAP_COLLECTIBLE_TYPE_IDS } from "../src/features/public-palworld/utils/map-collectible-types";
 import {
   isLocalPalworldMapLayerIconUrl,
@@ -208,6 +216,64 @@ test("스킬 카드와 상세는 설명·수치·관련 Pal과 영어 원문 fal
   assert.doesNotMatch(japanese, /palworld-source|pyPalworldAPI|db70ea654aea70c4b1a4b0045bccfe58164cf01a/u);
 });
 
+test("스킬 카드는 관련 Pal 이미지를 최대 3개 표시하고 나머지는 접근 가능한 생략 표시로 알린다", () => {
+  const palImageUrl = `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`;
+  const relatedPalPreviews: PalworldPalReference[] = [
+    { id: "lamball", number: 1, nameKo: "도로롱", nameJa: "モコロン", imageUrl: palImageUrl, imageWidth: 128, imageHeight: 128, elements: ["neutral"] },
+    { id: "cattiva", number: 2, nameKo: "까부냥", nameJa: "ツッパニャン", imageUrl: palImageUrl, imageWidth: 128, imageHeight: 128, elements: ["neutral"] },
+    { id: "chikipi", number: 3, nameKo: "꼬꼬닭", nameJa: "タマコッコ", imageUrl: palImageUrl, imageWidth: 128, imageHeight: 128, elements: ["neutral"] },
+  ];
+  const skill: PalworldSkillSummary = {
+    id: "active-related-preview",
+    type: "active",
+    nameKo: "공기 대포",
+    nameJa: "エアーキャノン",
+    nameEn: "Air Cannon",
+    descriptionKo: "고속 공기 덩어리를 발사한다.",
+    descriptionJa: "高速の空気の塊を発射する。",
+    element: "neutral",
+    power: 25,
+    cooldownSeconds: 2,
+    relatedPalCount: 5,
+    relatedPalPreviews,
+    translation: {
+      name: { ko: "source_provided", ja: "source_provided" },
+      description: { ko: "source_provided", ja: "source_provided" },
+    },
+  };
+
+  const korean = renderToStaticMarkup(<PalworldSkillCard locale="ko" onOpen={() => undefined} skill={skill} />);
+  const japanese = renderToStaticMarkup(<PalworldSkillCard locale="ja" onOpen={() => undefined} skill={skill} />);
+  const exactlyThree = renderToStaticMarkup(
+    <PalworldSkillCard
+      locale="ko"
+      onOpen={() => undefined}
+      skill={{ ...skill, relatedPalCount: 3 }}
+    />,
+  );
+  const four = renderToStaticMarkup(
+    <PalworldSkillCard
+      locale="ko"
+      onOpen={() => undefined}
+      skill={{ ...skill, relatedPalCount: 4 }}
+    />,
+  );
+
+  assert.equal((korean.match(/class="palworld-skill-related-preview-media"/gu) ?? []).length, 3);
+  assert.equal((korean.match(/\/images\/palworld\/1\.0\.1\/pals\//gu) ?? []).length, 3);
+  assert.match(korean, /aria-label="관련 Pal"/u);
+  assert.match(korean, /title="도로롱"/u);
+  assert.match(korean, /title="까부냥"/u);
+  assert.match(korean, /title="꼬꼬닭"/u);
+  assert.match(korean, /aria-label="외 2종"[^>]*class="palworld-skill-related-preview-more"/u);
+  assert.match(korean, /palworld-skill-related-preview-more[\s\S]*?>[\s\S]*?…/u);
+  assert.match(japanese, /aria-label="関連パル"/u);
+  assert.match(japanese, /title="モコロン"/u);
+  assert.match(japanese, /aria-label="ほか2体"[^>]*class="palworld-skill-related-preview-more"/u);
+  assert.doesNotMatch(exactlyThree, /palworld-skill-related-preview-more/u);
+  assert.match(four, /aria-label="외 1종"[^>]*class="palworld-skill-related-preview-more"/u);
+});
+
 test("스킬 카드와 열린 상세는 locale 전환 시 번역문·검수 상태·패시브 효과를 즉시 바꾼다", () => {
   const metadata = {
     gameVersion: "1.0.1.100619",
@@ -316,13 +382,146 @@ test("패시브 스킬 상세는 효과 원문이 없을 때 정보 없음 상�
   assert.match(japanese, /パッシブ効果[\s\S]*元データに情報がありません/u);
 });
 
+test("패시브 스킬은 현지어 본문이 source language fallback이면 영어 대신 원본 없음 안내를 표시한다", () => {
+  const detail: PalworldSkillDetail = {
+    id: "passive-source-language-fallback",
+    type: "passive",
+    nameKo: "단단한 피부",
+    nameJa: "硬い皮膚",
+    nameEn: "Hard Skin",
+    descriptionEn: "Defense increases.",
+    passiveAbility: "Defense +10%",
+    passiveTier: 1,
+    relatedPalCount: 0,
+    relatedPals: [],
+    translation: {
+      name: { ko: "source_provided", ja: "source_provided" },
+      description: { ko: "source_language_fallback", ja: "source_language_fallback" },
+      passiveAbility: { ko: "source_language_fallback", ja: "source_language_fallback" },
+    },
+    metadata: {
+      gameVersion: "1.0.1.100619",
+      sourceName: "고정 스킬 데이터",
+      sourceUrl: "https://example.com/palworld-skills",
+      sourceRevision: "translation-r1",
+      extractedAt: "2026-07-22T00:00:00.000Z",
+      verifiedAt: "2026-07-22T00:00:00.000Z",
+      license: "operator_reference_use",
+    },
+  };
+  const koreanCard = renderToStaticMarkup(<PalworldSkillCard locale="ko" onOpen={() => undefined} skill={detail} />);
+  const koreanDetail = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ko" onOpenPal={() => undefined} />);
+  const japaneseDetail = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ja" onOpenPal={() => undefined} />);
+
+  assert.doesNotMatch(koreanCard, /Defense increases/u);
+  assert.match(koreanCard, /원본 데이터에 정보가 없습니다/u);
+  assert.match(koreanCard, /data-translation-status="source_language_fallback"/u);
+  assert.doesNotMatch(koreanDetail, /Defense increases|Defense \+10%/u);
+  assert.equal((koreanDetail.match(/원본 데이터에 정보가 없습니다/gu) ?? []).length, 2);
+  assert.equal((koreanDetail.match(/data-translation-status="source_language_fallback"/gu) ?? []).length, 2);
+  assert.doesNotMatch(japaneseDetail, /Defense increases|Defense \+10%/u);
+  assert.equal((japaneseDetail.match(/元データに情報がありません/gu) ?? []).length, 2);
+  assert.equal((japaneseDetail.match(/data-translation-status="source_language_fallback"/gu) ?? []).length, 2);
+});
+
+test("패시브 스킬은 공식 source_provided 설명과 효과를 locale별로 그대로 표시한다", () => {
+  const detail: PalworldSkillDetail = {
+    id: "passive-source-provided",
+    type: "passive",
+    nameKo: "장인의 손",
+    nameJa: "職人の手",
+    nameEn: "Artisan",
+    descriptionKo: "작업 속도가 증가한다.",
+    descriptionJa: "作業速度が上昇する。",
+    descriptionEn: "Work speed increases.",
+    passiveAbilityKo: "작업 속도 +50%",
+    passiveAbilityJa: "作業速度 +50%",
+    passiveAbility: "Work Speed +50%",
+    passiveTier: 3,
+    relatedPalCount: 0,
+    relatedPals: [],
+    translation: {
+      name: { ko: "source_provided", ja: "source_provided" },
+      description: { ko: "source_provided", ja: "source_provided" },
+      passiveAbility: { ko: "source_provided", ja: "source_provided" },
+    },
+    metadata: {
+      gameVersion: "1.0.1.100619",
+      sourceName: "공식 게임 locale",
+      sourceUrl: "https://example.com/palworld-skills",
+      sourceRevision: "translation-r1",
+      extractedAt: "2026-07-22T00:00:00.000Z",
+      verifiedAt: "2026-07-22T00:00:00.000Z",
+      license: "operator_reference_use",
+    },
+  };
+  const korean = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ko" onOpenPal={() => undefined} />);
+  const japanese = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ja" onOpenPal={() => undefined} />);
+
+  assert.match(korean, /장인의 손/u);
+  assert.match(korean, /작업 속도가 증가한다/u);
+  assert.match(korean, /작업 속도 \+50%/u);
+  assert.doesNotMatch(korean, /Work speed increases|Work Speed \+50%|원본 데이터에 정보가 없습니다/u);
+  assert.match(japanese, /職人の手/u);
+  assert.match(japanese, /作業速度が上昇する/u);
+  assert.match(japanese, /作業速度 \+50%/u);
+  assert.doesNotMatch(japanese, /Work speed increases|Work Speed \+50%|元データに情報がありません/u);
+});
+
 test("스킬 페이지는 URL query 필터를 선택 상태로 복원한다", () => {
-  const html = renderToStaticMarkup(<PalworldSkillsPage locale="ja" onOpenPal={() => undefined} params={new URLSearchParams("type=passive&element=dark&sort=power&order=desc")} />);
+  const facets: PalworldSkillListFacets = {
+    types: [
+      { value: "active", count: 304 },
+      { value: "passive", count: 115 },
+      { value: "partner", count: 288 },
+    ],
+    activeElements: [{ value: "fire", count: 30 }],
+    partnerElements: [{ value: "dark", count: 40 }],
+    passiveEffects: [
+      { value: "attack", count: 20 },
+      { value: "work_speed", count: 13 },
+    ],
+    passiveTiers: [
+      { value: 5, count: 7 },
+      { value: -1, count: 10 },
+    ],
+  };
+  const html = renderToStaticMarkup(<PalworldSkillsPage locale="ja" onOpenPal={() => undefined} params={new URLSearchParams("type=passive&passiveEffect=attack&passiveTier=5&sort=power&order=desc")} />);
+  const passiveFilters = renderToStaticMarkup(<PalworldSkillsFilters
+    facets={facets}
+    locale="ja"
+    onUpdate={() => undefined}
+    params={new URLSearchParams("type=passive&passiveEffect=attack&passiveTier=5")}
+    selectedType="passive"
+  />);
+  const partnerFilters = renderToStaticMarkup(<PalworldSkillsFilters
+    facets={facets}
+    locale="ko"
+    onUpdate={() => undefined}
+    params={new URLSearchParams("type=partner&partnerElement=dark")}
+    selectedType="partner"
+  />);
   assert.match(html, /Palworld スキル/u);
-  assert.match(html, /value="passive" selected=""/u);
-  assert.match(html, /value="dark" selected=""/u);
+  assert.match(html, /aria-pressed="true"[^>]*data-selected="true"[^>]*>パッシブスキル/u);
+  assert.match(html, /攻撃/u);
   assert.match(html, /value="power" selected=""/u);
   assert.match(html, /value="desc" selected=""/u);
+  assert.match(passiveFilters, /アクティブスキル[\s\S]*パッシブスキル[\s\S]*パートナースキル/u);
+  assert.match(passiveFilters, /aria-pressed="true"[^>]*aria-label="攻撃効果で絞り込む"/u);
+  assert.match(passiveFilters, /aria-pressed="true"[^>]*aria-label="パッシブ等級\+5で絞り込む"/u);
+  assert.match(passiveFilters, /作業速度/u);
+  assert.match(partnerFilters, /aria-pressed="true"[^>]*aria-label="어둠 속성 스킬로 필터"/u);
+  assert.match(partnerFilters, /palworld-element-icon/u);
+});
+
+test("스킬 페이지의 기본 탭은 액티브이며 game data 속성 아이콘과 다국어 탭을 표시한다", () => {
+  const korean = renderToStaticMarkup(<PalworldSkillsPage locale="ko" onOpenPal={() => undefined} params={new URLSearchParams()} />);
+  const japanese = renderToStaticMarkup(<PalworldSkillsPage locale="ja" onOpenPal={() => undefined} params={new URLSearchParams()} />);
+
+  assert.match(korean, /aria-pressed="true"[^>]*data-selected="true"[^>]*>액티브 스킬/u);
+  assert.match(korean, /액티브 스킬[\s\S]*패시브 스킬[\s\S]*파트너 스킬/u);
+  assert.match(korean, /palworld-element-icon/u);
+  assert.match(japanese, /アクティブスキル[\s\S]*パッシブスキル[\s\S]*パートナースキル/u);
 });
 
 test("Palworld 헤더는 공유 Twitch 프로필과 Dashboard·로그아웃 메뉴를 렌더한다", () => {
@@ -490,11 +689,23 @@ test("Pal 도감 적용 chip과 결과 toolbar는 제거 label·0개 결과·정
   assert.match(toolbar, /내림차순/u);
 });
 
-test("아이템 필터는 실제 데이터의 희귀도 0을 선택 상태로 복원한다", () => {
-  const html = renderToStaticMarkup(<PalworldItemsPage locale="ko" params={new URLSearchParams("rarity=0&sort=rarity")} onOpenItem={() => undefined} />);
-  assert.match(html, /value="0" selected=""/u);
-  assert.match(html, /value="20"/u);
-  assert.match(html, /아이템/u);
+test("아이템 종류와 레어도 필터는 신규 query와 legacy 숫자 rarity를 chip 선택 상태로 복원한다", () => {
+  const korean = renderToStaticMarkup(<PalworldItemsPage locale="ko" params={new URLSearchParams("itemType=material&rarityTier=common&sort=rarity&order=desc&acquisition=drop")} onOpenItem={() => undefined} />);
+  const legacy = renderToStaticMarkup(<PalworldItemsPage locale="ko" params={new URLSearchParams("category=material&rarity=4")} onOpenItem={() => undefined} />);
+  const japanese = renderToStaticMarkup(<PalworldItemsPage locale="ja" params={new URLSearchParams("itemType=sphere_module&rarityTier=legendary")} onOpenItem={() => undefined} />);
+  assert.match(korean, /<legend>아이템 종류<\/legend>/u);
+  assert.match(korean, /aria-pressed="true" aria-label="소재 종류로 필터"/u);
+  assert.match(korean, /<legend>레어도<\/legend>/u);
+  assert.match(korean, /<button(?=[^>]*aria-pressed="true")(?=[^>]*aria-label="레어도 일반 선택")(?=[^>]*data-rarity-band="common")[^>]*>/u);
+  assert.match(korean, /<button(?=[^>]*aria-label="레어도 전설 선택")(?=[^>]*data-rarity-band="legendary")[^>]*>/u);
+  assert.match(korean, /value="drop" selected=""/u);
+  assert.match(korean, /value="desc" selected=""/u);
+  assert.doesNotMatch(korean, /희귀도/u);
+  assert.match(legacy, /aria-pressed="true" aria-label="소재 종류로 필터"/u);
+  assert.match(legacy, /<button(?=[^>]*aria-pressed="true")(?=[^>]*aria-label="레어도 전설 선택")(?=[^>]*data-rarity-band="legendary")[^>]*>/u);
+  assert.match(japanese, /<legend>レア度<\/legend>/u);
+  assert.match(japanese, /aria-pressed="true" aria-label="スフィアモジュールの種類で絞り込む"/u);
+  assert.match(japanese, /<button(?=[^>]*aria-pressed="true")(?=[^>]*aria-label="レア度レジェンダリーで絞り込む")(?=[^>]*data-rarity-band="legendary")[^>]*>/u);
 });
 
 test("현지화가 없는 아이템 카드는 영문 원문 Badge와 영어 이름·설명을 표시한다", () => {
@@ -512,6 +723,55 @@ test("현지화가 없는 아이템 카드는 영문 원문 Badge와 영어 이�
   assert.match(html, /English Only Item/u);
   assert.match(html, /Source English description/u);
   assert.match(html, /data-ko="영문 원문"/u);
+  assert.match(html, /data-rarity-band="common"/u);
+});
+
+test("아이템 카드 이미지 영역은 레어도 단계별 디자인 상태를 제공한다", () => {
+  const rarities = [
+    [0, "common", "일반"],
+    [1, "uncommon", "비범"],
+    [2, "rare", "희귀"],
+    [3, "epic", "영웅"],
+    [4, "legendary", "전설"],
+    [5, "unclassified", "레어도 5"],
+    [20, "unclassified", "레어도 20"],
+  ] as const;
+  for (const [rarity, band, label] of rarities) {
+    const html = renderToStaticMarkup(<ItemCard
+      item={{
+        id: `rarity-${rarity}`,
+        nameEn: `Rarity ${rarity}`,
+        category: "material",
+        rarity,
+      }}
+      locale="ko"
+      onOpen={() => undefined}
+    />);
+    assert.match(html, new RegExp(`data-rarity-band="${band}"`, "u"));
+    assert.match(html, new RegExp(`data-ko="${label}"`, "u"));
+    assert.match(html, new RegExp(`>${label}<`, "u"));
+  }
+  const css = readFileSync(new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url), "utf8");
+  assert.match(css, /data-rarity-band="epic"[\s\S]*--palworld-item-rarity-accent: var\(--yoro-color-secondary\)/u);
+  assert.match(css, /data-rarity-band="legendary"[\s\S]*--palworld-item-rarity-accent: var\(--palworld-gold\)/u);
+});
+
+test("아이템 카드의 12분류는 legacy category보다 itemType을 우선해 locale별로 표시한다", () => {
+  const item = {
+    id: "glider-item",
+    nameKo: "시험용 글라이더",
+    nameJa: "テスト用グライダー",
+    nameEn: "Test Glider",
+    category: "other" as const,
+    itemType: "glider" as const,
+    rarity: 5,
+  };
+  const korean = renderToStaticMarkup(<ItemCard item={item} locale="ko" onOpen={() => undefined} />);
+  const japanese = renderToStaticMarkup(<ItemCard item={item} locale="ja" onOpen={() => undefined} />);
+  assert.match(korean, />글라이더</u);
+  assert.doesNotMatch(korean, />기타</u);
+  assert.match(japanese, />グライダー</u);
+  assert.match(japanese, /data-ja="レア度 5"/u);
 });
 
 test("번역된 아이템 카드는 locale별 이름·설명을 유지하고 반복 검수 Badge를 숨긴다", () => {
@@ -534,10 +794,12 @@ test("번역된 아이템 카드는 locale별 이름·설명을 유지하고 반
   const japanese = renderToStaticMarkup(<ItemCard item={item} locale="ja" onOpen={() => undefined} />);
   assert.match(korean, /번역된 부품/u);
   assert.match(korean, /제작에 사용하는 부품이다/u);
+  assert.match(korean, /data-ko="비범"/u);
   assert.doesNotMatch(korean, /data-ko="번역 검수 중"/u);
   assert.doesNotMatch(korean, /data-ko="영문 원문"/u);
   assert.match(japanese, /翻訳された部品/u);
   assert.match(japanese, /クラフトに使用する部品です/u);
+  assert.match(japanese, /data-ja="アンコモン"/u);
   assert.doesNotMatch(japanese, /data-ja="翻訳確認中"/u);
 });
 
@@ -1001,7 +1263,12 @@ test("Pal과 아이템 이미지는 종류별 고정 release content-hash WebP �
 
 test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일본어 접근성 문구를 사용한다", () => {
   const mapUrl = PALWORLD_WORLD_MAP_IMAGE_URL;
+  const mainMapImage = PALWORLD_MAP_IMAGES.main;
+  const treeMapImage = PALWORLD_MAP_IMAGES.tree;
   assert.ok(mapUrl);
+  assert.ok(mainMapImage);
+  assert.ok(treeMapImage);
+  assert.equal(mainMapImage.imageUrl, mapUrl);
   assert.equal(isLocalPalworldMapUrl(mapUrl), true);
   assert.equal(isLocalPalworldMapUrl(`/images/palworld/2.3.4/maps/${"a".repeat(64)}.webp`), true);
   assert.equal(isLocalPalworldMapUrl("https://example.com/map.webp"), false);
@@ -1013,6 +1280,15 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.equal(createHash("sha256").update(outputBytes).digest("hex"), outputFileName.replace(".webp", ""));
   assert.equal(outputBytes.subarray(0, 4).toString("ascii"), "RIFF");
   assert.equal(outputBytes.subarray(8, 12).toString("ascii"), "WEBP");
+  const treeOutputBytes = readFileSync(
+    new URL(`../public${treeMapImage.imageUrl}`, import.meta.url),
+  );
+  assert.equal(
+    createHash("sha256").update(treeOutputBytes).digest("hex"),
+    treeMapImage.imageUrl.split("/").at(-1)?.replace(".webp", ""),
+  );
+  assert.equal(treeMapImage.width, 4096);
+  assert.equal(treeMapImage.height, 4096);
 
   const korean = renderToStaticMarkup(<PalworldMapPage locale="ko" />);
   const japanese = renderToStaticMarkup(<PalworldMapPage locale="ja" />);
@@ -1044,10 +1320,15 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /크로꽁 상/u);
   assert.match(korean, /초원 알/u);
   assert.match(korean, /천락 알/u);
+  assert.match(korean, /광물·광석/u);
+  assert.match(korean, /밤별 모래/u);
+  assert.match(korean, /팰지움 파편/u);
+  assert.match(korean, /금속 광석/u);
+  assert.match(korean, /팰키사이트/u);
   assert.match(korean, /data-layer="fast-travel"[\s\S]*<input disabled=""/u);
   assert.equal(
     (korean.match(/class="palworld-map-filter-layer-icon"/gu) ?? []).length,
-    29,
+    39,
   );
   assert.match(
     korean,
@@ -1059,7 +1340,23 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   );
   assert.match(
     korean,
+    /data-layer="egg-grass"[\s\S]*?<img[^>]*loading="eager"[^>]*src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
+  );
+  assert.match(
+    korean,
     /data-layer="statue-lifmunk"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
+  );
+  assert.match(
+    korean,
+    /data-layer="resource-copper-ore"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/items\/[a-f0-9]{64}\.webp"/u,
+  );
+  assert.match(
+    korean,
+    /data-layer="resource-stone"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/items\/[a-f0-9]{64}\.webp"/u,
+  );
+  assert.match(
+    korean,
+    /data-layer="resource-iron-ore"[\s\S]*?palworld-map-filter-layer-icon-fallback[^>]*>◆</u,
   );
   assert.doesNotMatch(
     korean,
@@ -1071,6 +1368,9 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(japanese, />フィルター 1件</u);
   assert.match(japanese, /移動・場所/u);
   assert.match(japanese, /収集品/u);
+  assert.match(japanese, /鉱物・鉱石/u);
+  assert.match(japanese, /金属鉱石/u);
+  assert.match(japanese, /パルキサイト/u);
   assert.match(japanese, /クルリス像/u);
   assert.match(japanese, /モコロン像/u);
   assert.match(
@@ -1082,6 +1382,10 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   const css = readFileSync(
     new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
     "utf8",
+  );
+  assert.match(
+    css,
+    /\.palworld-map-filter-content\[hidden\],\s*\.palworld-map-filter-group > ul\[hidden\]\s*\{[\s\S]*?display:\s*none/u,
   );
   const layoutZoomRule = css.match(
     /\.palworld-map-stage-layout-zoom\s*\{[\s\S]*?\n\}/u,
@@ -1149,6 +1453,17 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
 });
 
 test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 알 subtype을 완전하게 제공한다", () => {
+  const resourceIconIds = [
+    "resource-coal",
+    "resource-copper-ore",
+    "resource-night-stone",
+    "resource-pal-crystal",
+    "resource-quartz",
+    "resource-sky-island-ore",
+    "resource-stone",
+    "resource-sulfur",
+    "resource-world-tree-ore",
+  ] as const;
   const ids = [
     "ancient-ruin",
     "boss",
@@ -1156,14 +1471,40 @@ test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 �
     "fast-travel",
     "journal",
     "npc",
+    "resource",
+    ...resourceIconIds,
     "skill-fruit",
     "spawn",
     "treasure",
-    ...PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
+    ...PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.filter((id) =>
+      !id.startsWith("resource-")
+    ),
   ] as const;
   assert.deepEqual(
     Object.keys(PALWORLD_MAP_LAYER_ICONS).sort(),
     [...ids].sort(),
+  );
+  assert.equal(PALWORLD_MAP_LAYER_ICONS["resource-iron-ore"], undefined);
+
+  const resourceSources = new Map(
+    generatedMapLayerIcons.entries.map((entry) => [
+      entry.id,
+      entry.sourceReference,
+    ]),
+  );
+  assert.deepEqual(
+    Object.fromEntries(resourceIconIds.map((id) => [id, resourceSources.get(id)])),
+    {
+      "resource-coal": "Coal",
+      "resource-copper-ore": "CopperOre",
+      "resource-night-stone": "NightStone",
+      "resource-pal-crystal": "Pal_crystal_S",
+      "resource-quartz": "Quartz",
+      "resource-sky-island-ore": "SkyIslandOre",
+      "resource-stone": "Stone",
+      "resource-sulfur": "Sulfur",
+      "resource-world-tree-ore": "WorldTreeOre",
+    },
   );
 
   for (const id of ids) {
@@ -1882,6 +2223,9 @@ test("공개 페이지의 데이터 범위 블록과 상세 기술 출처는 제
   assert.doesNotMatch(detailSource, /breedingPower/u);
   assert.match(detailSource, /detail\.breeding\.specialParentPairs\.length \?/u);
   assert.match(detailSource, /palworld-pal-detail-summary[\s\S]*palworld-work-suitability-list/u);
+  assert.match(detailSource, /palworld-item-detail-media/u);
+  assert.match(detailSource, /data-rarity-band=\{itemRarityBand\(detail\.rarity\)\}/u);
+  assert.match(detailSource, /itemRarityLabel\(detail\.rarity, locale\)/u);
   assert.doesNotMatch(detailSource, /<section><h4[^>]+workSuitabilities/u);
   assert.match(readFileSync(new URL("PalworldSourceFooter.tsx", componentRoot), "utf8"), /palworldI18n\.(?:ko|ja)\.sourceNotice/u);
 });

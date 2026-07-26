@@ -18,6 +18,17 @@
       "outputHeight": 4096,
       "outputBytes": 956292,
       "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp"
+    },
+    {
+      "id": "tree",
+      "sourceMember": "Pal/Texture/UI/Map/T_TreeMap.png",
+      "sourceSha256": "6f79de30a1d0fbbd4306dcc10ee9b5b098d84defcb8612cf962bb8baffcf941e",
+      "outputSha256": "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf",
+      "outputFileName": "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf.webp",
+      "outputWidth": 4096,
+      "outputHeight": 4096,
+      "outputBytes": 1455652,
+      "imageUrl": "/images/palworld/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf.webp"
     }
   ]
 }

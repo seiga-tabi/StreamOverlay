@@ -4,10 +4,14 @@ import {
   PALWORLD_BREEDING_GENDERS,
   PALWORLD_ELEMENTS,
   PALWORLD_ITEM_CATEGORIES,
+  PALWORLD_ITEM_FILTER_CATEGORIES,
+  PALWORLD_ITEM_RARITY_TIERS,
   PALWORLD_MAP_LOCATION_CATEGORIES,
   PALWORLD_MAP_LOCATION_MAX_ARTIFACT_ENTRIES,
   PALWORLD_MAP_LOCATION_MAX_RESPONSE,
   PALWORLD_MAP_WORLDS,
+  PALWORLD_PASSIVE_EFFECT_FILTERS,
+  PALWORLD_PASSIVE_TIERS,
   PALWORLD_SEARCH_MAX_LENGTH,
   PALWORLD_SKILL_TYPES,
   PALWORLD_VARIANT_TYPES,
@@ -35,7 +39,9 @@ const ITEM_LIST_QUERY_KEYS = new Set([
   "q",
   "locale",
   "category",
+  "itemType",
   "rarity",
+  "rarityTier",
   "acquisition",
   "sort",
   "order",
@@ -47,6 +53,9 @@ const SKILL_LIST_QUERY_KEYS = new Set([
   "locale",
   "type",
   "element",
+  "partnerElement",
+  "passiveEffect",
+  "passiveTier",
   "sort",
   "order",
   "page",
@@ -73,6 +82,8 @@ export {
   PALWORLD_ACQUISITION_TYPES,
   PALWORLD_ELEMENTS,
   PALWORLD_ITEM_CATEGORIES,
+  PALWORLD_ITEM_FILTER_CATEGORIES,
+  PALWORLD_ITEM_RARITY_TIERS,
   PALWORLD_VARIANT_TYPES
 };
 
@@ -95,7 +106,9 @@ export type PalworldItemListQuery = {
   q?: string;
   locale?: "ko" | "ja";
   category?: (typeof PALWORLD_ITEM_CATEGORIES)[number];
+  itemType?: (typeof PALWORLD_ITEM_FILTER_CATEGORIES)[number];
   rarity?: number;
+  rarityTier?: (typeof PALWORLD_ITEM_RARITY_TIERS)[number];
   acquisition?: (typeof PALWORLD_ACQUISITION_TYPES)[number];
   sort: (typeof PALWORLD_ITEM_SORTS)[number];
   order: PalworldSortOrder;
@@ -108,6 +121,9 @@ export type PalworldSkillListQuery = {
   locale?: "ko" | "ja";
   type?: (typeof PALWORLD_SKILL_TYPES)[number];
   element?: (typeof PALWORLD_ELEMENTS)[number];
+  partnerElement?: (typeof PALWORLD_ELEMENTS)[number];
+  passiveEffect?: (typeof PALWORLD_PASSIVE_EFFECT_FILTERS)[number];
+  passiveTier?: (typeof PALWORLD_PASSIVE_TIERS)[number];
   sort: (typeof PALWORLD_SKILL_SORTS)[number];
   order: PalworldSortOrder;
   page: number;
@@ -231,6 +247,23 @@ function optionalRarity(params: URLSearchParams, min: 0 | 1): number | undefined
   return value;
 }
 
+function optionalIntegerEnum<const T extends readonly number[]>(
+  params: URLSearchParams,
+  key: string,
+  allowed: T
+): T[number] | undefined {
+  const raw = params.get(key);
+  if (raw === null || raw === "") return undefined;
+  if (!/^-?\d+$/u.test(raw)) {
+    throw new PalworldQueryError(`${key} 값은 정수여야 합니다.`);
+  }
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value) || !allowed.includes(value as T[number])) {
+    throw new PalworldQueryError(`${key} 값이 허용 목록에 없습니다.`);
+  }
+  return value as T[number];
+}
+
 function pagination(params: URLSearchParams, defaultLimit: number): { page: number; limit: number } {
   return {
     page: integerParam(params, "page", 1, 1, MAX_PAGE),
@@ -263,11 +296,18 @@ export function parsePalworldPalListQuery(params: URLSearchParams): PalworldPalL
 
 export function parsePalworldItemListQuery(params: URLSearchParams): PalworldItemListQuery {
   assertKnownKeys(params, ITEM_LIST_QUERY_KEYS);
+  const rarity = optionalRarity(params, 0);
+  const rarityTier = optionalEnum(params, "rarityTier", PALWORLD_ITEM_RARITY_TIERS);
+  if (rarity !== undefined && rarityTier !== undefined) {
+    throw new PalworldQueryError("rarity와 rarityTier는 동시에 사용할 수 없습니다.");
+  }
   return {
     q: optionalText(params, "q"),
     locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
     category: optionalEnum(params, "category", PALWORLD_ITEM_CATEGORIES),
-    rarity: optionalRarity(params, 0),
+    itemType: optionalEnum(params, "itemType", PALWORLD_ITEM_FILTER_CATEGORIES),
+    rarity,
+    rarityTier,
     acquisition: optionalEnum(params, "acquisition", PALWORLD_ACQUISITION_TYPES),
     sort: optionalEnum(params, "sort", PALWORLD_ITEM_SORTS) ?? "name",
     order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
@@ -282,6 +322,9 @@ export function parsePalworldSkillListQuery(params: URLSearchParams): PalworldSk
     locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
     type: optionalEnum(params, "type", PALWORLD_SKILL_TYPES),
     element: optionalEnum(params, "element", PALWORLD_ELEMENTS),
+    partnerElement: optionalEnum(params, "partnerElement", PALWORLD_ELEMENTS),
+    passiveEffect: optionalEnum(params, "passiveEffect", PALWORLD_PASSIVE_EFFECT_FILTERS),
+    passiveTier: optionalIntegerEnum(params, "passiveTier", PALWORLD_PASSIVE_TIERS),
     sort: optionalEnum(params, "sort", PALWORLD_SKILL_SORTS) ?? "name",
     order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
     ...pagination(params, 24)

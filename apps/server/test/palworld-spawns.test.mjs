@@ -15,6 +15,10 @@ const {
   loadPalworldSpawnArtifact,
   loadPalworldSpawnProvider
 } = await import("../dist/data/palworld-spawn-artifact.js");
+const {
+  assertPalworldSpawnCompatibilityApproval,
+  createPalworldSpawnCompatibilityApproval
+} = await import("../dist/data/palworld-spawn-compatibility.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 
 const service = await loadPalworldDataService();
@@ -40,6 +44,32 @@ assert.match(compatibilityApprovalSha256, /^[a-f0-9]{64}$/u);
 const dashboardStaticRoot = fileURLToPath(
   new URL("../../dashboard/public/", import.meta.url)
 );
+
+test("spawn compatibility 갱신은 검증된 기존 evidence에서 map manifest checksum만 결정적으로 교체한다", async () => {
+  const previous = assertPalworldSpawnCompatibilityApproval(
+    JSON.parse(
+      await readFile(
+        path.join(activeReleaseRoot, "map-spawns-compatibility.json"),
+        "utf8"
+      )
+    )
+  );
+  const refreshed = createPalworldSpawnCompatibilityApproval({
+    previousApproval: previous,
+    mapImagesManifestSha256: "f".repeat(64)
+  });
+  assert.equal(refreshed.mapImagesManifestSha256, "f".repeat(64));
+  assert.equal(refreshed.spawnArtifactSha256, previous.spawnArtifactSha256);
+  assert.equal(refreshed.sourceArchiveSha256, previous.sourceArchiveSha256);
+  assert.notEqual(refreshed.evidenceChecksum, previous.evidenceChecksum);
+  assert.deepEqual(
+    refreshed,
+    createPalworldSpawnCompatibilityApproval({
+      previousApproval: previous,
+      mapImagesManifestSha256: "f".repeat(64)
+    })
+  );
+});
 
 function createRequest(url) {
   return {

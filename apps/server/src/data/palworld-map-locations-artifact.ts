@@ -42,7 +42,9 @@ type CompatibilityWorld = {
 type CompatibilityImportAudit = {
   sourceRawExact: number;
   mainIncluded: number;
+  treeIncluded?: number;
   treeExcluded: number;
+  coordinateUnresolved?: number;
   outOfBoundsExcluded: number;
   exactDuplicates: number;
   taxonomyMappingSha256: string;
@@ -50,7 +52,7 @@ type CompatibilityImportAudit = {
 };
 
 export type PalworldMapLocationsCompatibilityApproval = {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   release: string;
   status: "operator_acknowledged";
   decision: "allow_exact_checksum_compatibility_display";
@@ -245,8 +247,8 @@ export function assertPalworldMapLocationsCompatibilityApproval(
     "rightsVerified",
     "usageBasis"
   ]);
-  if (root.schemaVersion !== 1) {
-    fail("mapLocationsCompatibility.schemaVersion", "1이어야 합니다.");
+  if (root.schemaVersion !== 1 && root.schemaVersion !== 2) {
+    fail("mapLocationsCompatibility.schemaVersion", "1 또는 2여야 합니다.");
   }
   const release = textAt(root.release, "mapLocationsCompatibility.release", 64);
   if (!RELEASE_PATTERN.test(release)) {
@@ -339,7 +341,17 @@ export function assertPalworldMapLocationsCompatibilityApproval(
   const importAuditRecord = exactRecord(
     root.importAudit,
     "mapLocationsCompatibility.importAudit",
-    [
+    root.schemaVersion === 2 ? [
+      "sourceRawExact",
+      "mainIncluded",
+      "treeIncluded",
+      "treeExcluded",
+      "coordinateUnresolved",
+      "outOfBoundsExcluded",
+      "exactDuplicates",
+      "taxonomyMappingSha256",
+      "transformMappingSha256"
+    ] : [
       "sourceRawExact",
       "mainIncluded",
       "treeExcluded",
@@ -349,7 +361,7 @@ export function assertPalworldMapLocationsCompatibilityApproval(
       "transformMappingSha256"
     ]
   );
-  const importAudit: CompatibilityImportAudit = {
+  const commonImportAudit = {
     sourceRawExact: integerAt(
       importAuditRecord.sourceRawExact,
       "mapLocationsCompatibility.importAudit.sourceRawExact",
@@ -389,13 +401,39 @@ export function assertPalworldMapLocationsCompatibilityApproval(
       "mapLocationsCompatibility.importAudit.transformMappingSha256"
     )
   };
+  const importAudit: CompatibilityImportAudit = root.schemaVersion === 2
+    ? {
+        sourceRawExact: commonImportAudit.sourceRawExact,
+        mainIncluded: commonImportAudit.mainIncluded,
+        treeIncluded: integerAt(
+          importAuditRecord.treeIncluded,
+          "mapLocationsCompatibility.importAudit.treeIncluded",
+          0,
+          50_000
+        ),
+        treeExcluded: commonImportAudit.treeExcluded,
+        coordinateUnresolved: integerAt(
+          importAuditRecord.coordinateUnresolved,
+          "mapLocationsCompatibility.importAudit.coordinateUnresolved",
+          0,
+          50_000
+        ),
+        outOfBoundsExcluded: commonImportAudit.outOfBoundsExcluded,
+        exactDuplicates: commonImportAudit.exactDuplicates,
+        taxonomyMappingSha256: commonImportAudit.taxonomyMappingSha256,
+        transformMappingSha256: commonImportAudit.transformMappingSha256
+      }
+    : commonImportAudit;
+  const includedTotal = importAudit.mainIncluded
+    + (importAudit.treeIncluded ?? 0);
+  const accountedSourceTotal = includedTotal
+    + importAudit.treeExcluded
+    + (importAudit.coordinateUnresolved ?? 0)
+    + importAudit.outOfBoundsExcluded
+    + importAudit.exactDuplicates;
   if (
-    importAudit.mainIncluded !== totalLocations
-    || importAudit.sourceRawExact
-      !== importAudit.mainIncluded
-        + importAudit.treeExcluded
-        + importAudit.outOfBoundsExcluded
-        + importAudit.exactDuplicates
+    includedTotal !== totalLocations
+    || importAudit.sourceRawExact !== accountedSourceTotal
   ) {
     fail(
       "mapLocationsCompatibility.importAudit",
@@ -435,7 +473,7 @@ export function assertPalworldMapLocationsCompatibilityApproval(
   }
   const approval = {
     ...root,
-    schemaVersion: 1,
+    schemaVersion: root.schemaVersion,
     release,
     status: "operator_acknowledged",
     decision: "allow_exact_checksum_compatibility_display",
@@ -590,6 +628,8 @@ export async function loadPalworldMapLocationsCompatibilityAuthorization(input: 
   const approval = assertPalworldMapLocationsCompatibilityApproval(
     parseJson(approvalBytes, "mapLocationsCompatibility")
   );
+  const mainWorld = input.artifact.worlds.find((world) => world.world === "main");
+  const treeWorld = input.artifact.worlds.find((world) => world.world === "tree");
   const artifactSha256 = sha256Bytes(artifactBytes);
   const manifestSha256 = sha256Bytes(manifestBytes);
   if (
@@ -601,9 +641,14 @@ export async function loadPalworldMapLocationsCompatibilityAuthorization(input: 
     || approval.selectedMemberCount
       !== input.artifact.source.selectedMemberCount
     || approval.totalLocations !== input.artifact.totalLocations
-    || input.artifact.worlds.length !== 1
-    || input.artifact.worlds[0]?.world !== "main"
-    || approval.importAudit.mainIncluded !== input.artifact.totalLocations
+    || mainWorld === undefined
+    || approval.importAudit.mainIncluded !== mainWorld.locationCount
+    || (
+      approval.schemaVersion === 1
+        ? input.artifact.worlds.length !== 1
+        : treeWorld === undefined
+          || approval.importAudit.treeIncluded !== treeWorld.locationCount
+    )
     || approval.mapLocationsArtifactSha256 !== artifactSha256
     || approval.mapLocationsManifestSha256 !== manifestSha256
   ) {

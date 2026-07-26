@@ -38,7 +38,8 @@ function categoryCounts() {
     egg: 1,
     "skill-fruit": 0,
     lifmunk: 0,
-    journal: 0
+    journal: 0,
+    resource: 0
   };
 }
 

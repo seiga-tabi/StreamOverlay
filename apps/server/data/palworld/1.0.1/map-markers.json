@@ -779,6 +779,89 @@
           "normalizedY": 0.344043346
         }
       ]
+    },
+    {
+      "world": "tree",
+      "targetMapAssetSha256": "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf",
+      "transform": {
+        "status": "verified",
+        "revision": "tree-map-fmodel-bounds-v1",
+        "horizontalAxis": "world_y",
+        "verticalAxis": "world_x",
+        "invertHorizontal": false,
+        "invertVertical": true,
+        "sourceBounds": {
+          "minX": 347351.5,
+          "maxX": 689148.5,
+          "minY": -818197,
+          "maxY": -476400
+        }
+      },
+      "markers": [
+        {
+          "id": "tree-015-dualith",
+          "sourceRowId": "15",
+          "sourceInternalId": "GrassGolem",
+          "palId": "dualith",
+          "level": 75,
+          "normalizedX": 0.559563133,
+          "normalizedY": 0.502340571
+        },
+        {
+          "id": "tree-016-celesdir-noct",
+          "sourceRowId": "16",
+          "sourceInternalId": "WhiteDeer_Dark",
+          "palId": "celesdir-noct",
+          "level": 79,
+          "normalizedX": 0.266304268,
+          "normalizedY": 0.493592688
+        },
+        {
+          "id": "tree-017-whalaska-ignis",
+          "sourceRowId": "17",
+          "sourceInternalId": "IceNarwhal_Fire",
+          "palId": "whalaska-ignis",
+          "level": 74,
+          "normalizedX": 0.691841649,
+          "normalizedY": 0.474662738
+        },
+        {
+          "id": "tree-018-mycora",
+          "sourceRowId": "18",
+          "sourceInternalId": "MushroomLady",
+          "palId": "mycora",
+          "level": 78,
+          "normalizedX": 0.361726405,
+          "normalizedY": 0.675996278
+        },
+        {
+          "id": "tree-019-moldron-cryst",
+          "sourceRowId": "19",
+          "sourceInternalId": "VolcanoDragon_Ice",
+          "palId": "moldron-cryst",
+          "level": 78,
+          "normalizedX": 0.248033189,
+          "normalizedY": 0.343123257
+        },
+        {
+          "id": "tree-020-renjishi",
+          "sourceRowId": "20",
+          "sourceInternalId": "KabukiMan",
+          "palId": "renjishi",
+          "level": 78,
+          "normalizedX": 0.720117321,
+          "normalizedY": 0.257614169
+        },
+        {
+          "id": "tree-021-aegidron",
+          "sourceRowId": "21",
+          "sourceInternalId": "DomeArmorDragon",
+          "palId": "aegidron",
+          "level": 79,
+          "normalizedX": 0.270628297,
+          "normalizedY": 0.578026489
+        }
+      ]
     }
   ]
 }

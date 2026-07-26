@@ -1,8 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import {
-  PALWORLD_ELEMENTS,
   PALWORLD_SEARCH_MAX_LENGTH,
-  PALWORLD_SKILL_TYPES,
   type PalworldSkill,
   type PalworldSkillDetail,
   type PalworldSkillSummary,
@@ -18,7 +16,7 @@ import { getPalworldSkill } from "../api/palworld";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { usePalworldSkills } from "../hooks/usePalworldSkills";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
-import { elementLabel, skillTypeLabel } from "../utils/labels";
+import { skillTypeLabel } from "../utils/labels";
 import { formatPalNumber } from "../utils/search";
 import {
   hasMachineAssistedTranslation,
@@ -31,6 +29,10 @@ import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import { PalworldPreviousLoadControl } from "./PalworldPreviousLoadControl";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
+import {
+  PalworldSkillsFilters,
+  type PalworldSkillFilterKey,
+} from "./PalworldSkillsFilters";
 import {
   PalworldTranslationBadges,
   PalworldTranslationReviewNotice,
@@ -63,6 +65,17 @@ function skillVisibleTranslationStatuses(skill: PalworldSkill, locale: PalworldL
   return [resolvePalworldName(skill, locale).status, skillDescription(skill, locale).status];
 }
 
+function visibleSkillBody(
+  skill: PalworldSkill,
+  localized: ReturnType<typeof resolvePalworldLocalizedText>,
+  unavailableText: string,
+): string {
+  if (skill.type === "passive" && localized.status === "source_language_fallback") {
+    return unavailableText;
+  }
+  return localized.text || unavailableText;
+}
+
 function SkillBadges({ locale, skill }: { locale: PalworldLocale; skill: PalworldSkill }) {
   const text = palworldI18n[locale];
   return <div className="palworld-badge-row">
@@ -72,6 +85,58 @@ function SkillBadges({ locale, skill }: { locale: PalworldLocale; skill: Palworl
     {skill.cooldownSeconds !== undefined ? <Badge size="sm">{text.cooldown} {skill.cooldownSeconds}{text.seconds}</Badge> : null}
     {skill.unlockLevel !== undefined ? <Badge size="sm">{text.unlockLevel} {skill.unlockLevel}</Badge> : null}
   </div>;
+}
+
+function SkillRelatedPalPreviews({
+  locale,
+  skill,
+}: {
+  locale: PalworldLocale;
+  skill: PalworldSkillSummary;
+}) {
+  const previews = skill.relatedPalPreviews ?? [];
+  if (previews.length === 0) return null;
+  const text = palworldI18n[locale];
+  const names = previews.map((pal) => relatedPalName(pal, locale));
+  const hiddenCount = Math.max(0, skill.relatedPalCount - previews.length);
+  const hiddenLabel = hiddenCount > 0
+    ? text.relatedPalPreviewMore.replace("{count}", hiddenCount.toLocaleString(locale))
+    : "";
+
+  return (
+    <div
+      aria-label={text.relatedPals}
+      className="palworld-skill-related-preview"
+      role="group"
+    >
+      {previews.map((pal, index) => (
+        <span
+          className="palworld-skill-related-preview-media"
+          key={pal.id}
+          title={names[index] ?? ""}
+        >
+          <PalworldMedia
+            alt={names[index] ?? ""}
+            imageUrl={pal.imageUrl}
+            intrinsicWidth={pal.imageWidth}
+            intrinsicHeight={pal.imageHeight}
+            kind="pal"
+            locale={locale}
+          />
+        </span>
+      ))}
+      {hiddenCount > 0 ? (
+        <span
+          aria-label={hiddenLabel}
+          className="palworld-skill-related-preview-more"
+          role="img"
+          title={hiddenLabel}
+        >
+          <span aria-hidden="true">…</span>
+        </span>
+      ) : null}
+    </div>
+  );
 }
 
 export function PalworldSkillCard({ locale, onOpen, skill }: { locale: PalworldLocale; onOpen: (id: string) => void; skill: PalworldSkillSummary }) {
@@ -87,7 +152,8 @@ export function PalworldSkillCard({ locale, onOpen, skill }: { locale: PalworldL
       sourceIntegrities={[name.sourceIntegrity, description.sourceIntegrity]}
       statuses={skillVisibleTranslationStatuses(skill, locale)}
     />
-    <p className="palworld-skill-description palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
+    <p className="palworld-skill-description palworld-localized-copy">{visibleSkillBody(skill, description, text.originalDataUnavailable)}</p>
+    <SkillRelatedPalPreviews locale={locale} skill={skill} />
     <div className="palworld-skill-metrics"><span>{text.relatedPalCount} <strong>{skill.relatedPalCount.toLocaleString()}</strong></span>{skill.passiveTier !== undefined ? <span>{text.passiveTier} <strong>{skill.passiveTier}</strong></span> : null}</div>
     <Button size="sm" variant="secondary" onClick={() => onOpen(skill.id)}>{text.viewSkill}</Button>
   </CardContent></Card>;
@@ -109,8 +175,8 @@ export function PalworldSkillDetailView({ detail, locale, onOpenPal }: { detail:
   const hasReviewPending = hasMachineAssistedTranslation(recordStatuses);
   return <article className="palworld-detail" aria-describedby={hasReviewPending ? reviewNoticeId : undefined}>
     {hasReviewPending ? <PalworldTranslationReviewNotice id={reviewNoticeId} locale={locale} /> : null}
-    <div><SkillBadges locale={locale} skill={detail} /><h3>{skillName(detail, locale)}</h3><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[name.sourceIntegrity, description.sourceIntegrity]} statuses={skillVisibleTranslationStatuses(detail, locale)} /><p className="palworld-localized-copy">{description.text || text.originalDataUnavailable}</p></div>
-    {detail.type === "passive" ? <section><h4>{text.passiveAbility}</h4><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[passiveAbility.sourceIntegrity]} statuses={[passiveAbility.status]} /><p className="palworld-localized-copy">{passiveAbility.text || text.originalDataUnavailable}</p></section> : null}
+    <div><SkillBadges locale={locale} skill={detail} /><h3>{skillName(detail, locale)}</h3><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[name.sourceIntegrity, description.sourceIntegrity]} statuses={skillVisibleTranslationStatuses(detail, locale)} /><p className="palworld-localized-copy">{visibleSkillBody(detail, description, text.originalDataUnavailable)}</p></div>
+    {detail.type === "passive" ? <section><h4>{text.passiveAbility}</h4><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[passiveAbility.sourceIntegrity]} statuses={[passiveAbility.status]} /><p className="palworld-localized-copy">{visibleSkillBody(detail, passiveAbility, text.originalDataUnavailable)}</p></section> : null}
     <section><h4>{text.relatedPals}</h4>{detail.relatedPals.length ? <><div className="palworld-link-list palworld-skill-related-list">{detail.relatedPals.map(({ pal, unlockLevel }) => {
       const displayName = relatedPalName(pal, locale);
       return <button className="palworld-related-pal-link" type="button" onClick={() => onOpenPal(pal.id)} key={pal.id}><span className="palworld-related-pal-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} intrinsicWidth={pal.imageWidth} intrinsicHeight={pal.imageHeight} alt={displayName} locale={locale} /></span><span>{formatPalNumber(pal.number, locale)} · {displayName}{unlockLevel !== undefined ? ` · ${text.unlockLevel} ${unlockLevel}` : ""}</span></button>;
@@ -169,6 +235,7 @@ export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: Palw
     retryLoadMore,
     retryLoadPrevious,
     routeQuery,
+    selectedType,
   } = usePalworldSkills(params, locale);
   const [nameQuery, setNameQuery] = useState(params.get("q") ?? "");
   const text = palworldI18n[locale];
@@ -179,9 +246,18 @@ export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: Palw
 
   useEffect(() => setNameQuery(params.get("q") ?? ""), [routeQuery]);
 
-  function update(key: string, value: string) {
+  function update(
+    key: PalworldSkillFilterKey | "q" | "sort" | "order" | "page",
+    value: string,
+  ) {
     const next = new URLSearchParams(params);
     next.delete("skill");
+    if (key === "type") {
+      next.delete("element");
+      next.delete("partnerElement");
+      next.delete("passiveEffect");
+      next.delete("passiveTier");
+    }
     if (value) next.set(key, value); else next.delete(key);
     if (key !== "page") next.delete("page");
     setPalworldUrl(`/palworld/skills${next.toString() ? `?${next}` : ""}`);
@@ -203,13 +279,26 @@ export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: Palw
   return <section className="palworld-page-section">
     <header className="palworld-page-heading"><div><span aria-hidden="true">{text.skillsKicker}</span><h1 data-ko={palworldI18n.ko.skillsTitle} data-ja={palworldI18n.ja.skillsTitle}>{text.skillsTitle}</h1><p data-ko={palworldI18n.ko.skillsDescription} data-ja={palworldI18n.ja.skillsDescription}>{text.skillsDescription}</p></div></header>
     {hasReviewPending ? <PalworldTranslationReviewNotice locale={locale} /> : null}
-    <form className="palworld-filter-bar palworld-skill-filter-bar" onSubmit={submit} aria-label={text.filter}>
-      <label><span>{text.nameSearch}</span><Input maxLength={PALWORLD_SEARCH_MAX_LENGTH} type="search" value={nameQuery} placeholder={text.skillSearchPlaceholder} onChange={(event) => setNameQuery(event.target.value)} /></label>
-      <label><span>{text.skillType}</span><Select value={params.get("type") ?? ""} onChange={(event) => update("type", event.target.value)}><option value="">{text.all}</option>{PALWORLD_SKILL_TYPES.map((value) => <option value={value} key={value}>{skillTypeLabel(value, locale)}</option>)}</Select></label>
-      <label><span>{text.element}</span><Select value={params.get("element") ?? ""} onChange={(event) => update("element", event.target.value)}><option value="">{text.all}</option>{PALWORLD_ELEMENTS.map((value) => <option value={value} key={value}>{elementLabel(value, locale)}</option>)}</Select></label>
-      <label><span>{text.sort}</span><Select value={params.get("sort") ?? "name"} onChange={(event) => update("sort", event.target.value)}><option value="name">{text.name}</option><option value="power">{text.power}</option><option value="unlockLevel">{text.unlockLevel}</option></Select></label>
-      <label><span>{text.sortOrder}</span><Select aria-label={text.sortOrder} value={params.get("order") ?? "asc"} onChange={(event) => update("order", event.target.value)}><option value="asc">{text.ascending}</option><option value="desc">{text.descending}</option></Select></label>
-      <div className="palworld-filter-actions"><Button size="sm" type="submit">{text.searchAction}</Button><Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/skills")}>{text.clearFilters}</Button></div>
+    <form className="palworld-skill-filter-panel" onSubmit={submit} aria-label={text.filter}>
+      <PalworldSkillsFilters
+        facets={response?.facets}
+        locale={locale}
+        onUpdate={update}
+        params={params}
+        selectedType={selectedType}
+      />
+      <div className="palworld-skill-search-row">
+        <label><span>{text.nameSearch}</span><Input maxLength={PALWORLD_SEARCH_MAX_LENGTH} type="search" value={nameQuery} placeholder={text.skillSearchPlaceholder} onChange={(event) => setNameQuery(event.target.value)} /></label>
+        <Button size="sm" type="submit">{text.searchAction}</Button>
+        <Button size="sm" type="button" variant="ghost" onClick={() => setPalworldUrl("/palworld/skills")}>{text.clearFilters}</Button>
+      </div>
+      <details className="palworld-skill-advanced-filters">
+        <summary>{text.skillAdvancedFilters}</summary>
+        <div className="palworld-skill-filter-secondary">
+          <label><span>{text.sort}</span><Select value={params.get("sort") ?? "name"} onChange={(event) => update("sort", event.target.value)}><option value="name">{text.name}</option><option value="power">{text.power}</option><option value="unlockLevel">{text.unlockLevel}</option></Select></label>
+          <label><span>{text.sortOrder}</span><Select aria-label={text.sortOrder} value={params.get("order") ?? "asc"} onChange={(event) => update("order", event.target.value)}><option value="asc">{text.ascending}</option><option value="desc">{text.descending}</option></Select></label>
+        </div>
+      </details>
     </form>
     {loading && !error ? <PalworldLoading locale={locale} /> : null}
     {error ? <PalworldError error={error} locale={locale} onRetry={retryInitial} /> : null}

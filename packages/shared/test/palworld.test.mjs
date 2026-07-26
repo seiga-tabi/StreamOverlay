@@ -27,6 +27,8 @@ import {
   validatePalworldSkill,
   validatePalworldSkillAssignment,
   validatePalworldSkillDetail,
+  validatePalworldSkillListFacets,
+  validatePalworldSkillListResponse,
   validatePalworldSkillSummary,
   validatePalworldTranslationSnapshot
 } from "../dist/index.js";
@@ -916,7 +918,11 @@ test("Palworld meta는 도메인별 coverage와 provenance를 검증한다", () 
 });
 
 test("스킬 summary와 detail은 영어 원문 fallback과 관련 Pal 배정을 검증한다", () => {
-  const summary = { ...activeSkill, relatedPalCount: 1 };
+  const summary = {
+    ...activeSkill,
+    relatedPalCount: 1,
+    relatedPalPreviews: [palReference]
+  };
   assert.equal(validatePalworldSkill(activeSkill).ok, true);
   assert.equal(validatePalworldSkillSummary(summary).ok, true);
   assert.equal(validatePalworldSkillAssignment(activeSkillDetail.relatedPals[0]).ok, true);
@@ -948,6 +954,26 @@ test("스킬 summary와 detail은 영어 원문 fallback과 관련 Pal 배정을
     ...activeSkillDetail,
     relatedPalCount: 2,
     relatedPals: [...activeSkillDetail.relatedPals, activeSkillDetail.relatedPals[0]]
+  }).ok, false);
+  assert.equal(validatePalworldSkillSummary({
+    ...activeSkill,
+    relatedPalCount: 4,
+    relatedPalPreviews: [
+      palReference,
+      { ...palReference, id: "preview-pal-2" },
+      { ...palReference, id: "preview-pal-3" },
+      { ...palReference, id: "preview-pal-4" }
+    ]
+  }).ok, false);
+  assert.equal(validatePalworldSkillSummary({
+    ...activeSkill,
+    relatedPalCount: 2,
+    relatedPalPreviews: [palReference, palReference]
+  }).ok, false);
+  assert.equal(validatePalworldSkillSummary({
+    ...activeSkill,
+    relatedPalCount: 2,
+    relatedPalPreviews: [palReference]
   }).ok, false);
   assert.equal(validatePalworldSkillAssignment({ ...activeSkillDetail.relatedPals[0], unlockLevel: 101 }).ok, false);
 });
@@ -1302,6 +1328,7 @@ test("아이템 summary는 rarity 0과 고정 버전 item content-hash WebP만 �
     nameEn: item.nameEn,
     imageUrl: itemImageUrl,
     category: item.category,
+    itemType: "sphere",
     rarity: 0,
     descriptionKo: item.descriptionKo,
     descriptionJa: item.descriptionJa,
@@ -1319,6 +1346,7 @@ test("아이템 summary는 rarity 0과 고정 버전 item content-hash WebP만 �
   ]) {
     assert.equal(validatePalworldItemSummary({ ...summary, imageUrl }).ok, false, imageUrl);
   }
+  assert.equal(validatePalworldItemSummary({ ...summary, itemType: "unknown" }).ok, false);
   assert.equal(validatePalworldItemSummary({ ...summary, rarity: -1 }).ok, false);
 });
 
@@ -1758,6 +1786,60 @@ test("Pal 목록 facet 응답은 exact enum·중복·안전한 count를 검증�
     { ...facets, variants: [{ value: "boss", count: 1 }] }
   ]) {
     assert.equal(validatePalworldPalListFacets(invalidFacets).ok, false);
+  }
+});
+
+test("스킬 목록 facet 응답은 종류·속성·패시브 효과와 등급을 exact schema로 검증한다", () => {
+  const facets = {
+    types: [{ value: "active", count: 217 }],
+    activeElements: [{ value: "fire", count: 20 }],
+    partnerElements: [{ value: "water", count: 31 }],
+    passiveEffects: [
+      { value: "movement_speed", count: 4 },
+      { value: "attack", count: 12 }
+    ],
+    passiveTiers: [
+      { value: -3, count: 3 },
+      { value: 4, count: 24 }
+    ]
+  };
+  const response = {
+    items: [{ ...activeSkill, relatedPalCount: 1, relatedPalPreviews: [palReference] }],
+    pagination: {
+      page: 1,
+      pageSize: 24,
+      total: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false
+    },
+    metadata,
+    domainMetadata: metadata,
+    facets
+  };
+
+  assert.equal(validatePalworldSkillListFacets(facets).ok, true);
+  assert.equal(validatePalworldSkillListResponse(response).ok, true);
+  assert.equal(validatePalworldSkillListResponse({
+    ...response,
+    items: [{ ...activeSkill, relatedPalCount: 1 }]
+  }).ok, false);
+  assert.equal(validatePalworldSkillListResponse({ ...response, unexpected: true }).ok, false);
+  assert.equal(validatePalworldSkillListFacets({ ...facets, unexpected: [] }).ok, false);
+  assert.equal(validatePalworldSkillListFacets({
+    ...facets,
+    passiveEffects: [...facets.passiveEffects, { value: "attack", count: 1 }]
+  }).ok, false);
+
+  for (const invalidFacets of [
+    { ...facets, types: [{ value: "ultimate", count: 1 }] },
+    { ...facets, activeElements: [{ value: "wind", count: 1 }] },
+    { ...facets, passiveEffects: [{ value: "critical", count: 1 }] },
+    { ...facets, passiveTiers: [{ value: 0, count: 1 }] },
+    { ...facets, passiveTiers: [{ value: 6, count: 1 }] },
+    { ...facets, passiveTiers: [{ value: 4, count: -1 }] }
+  ]) {
+    assert.equal(validatePalworldSkillListFacets(invalidFacets).ok, false);
   }
 });
 

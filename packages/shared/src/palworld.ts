@@ -27,6 +27,21 @@ export const PALWORLD_WORK_SUITABILITY_TYPES = [
 
 export const PALWORLD_VARIANT_TYPES = ["normal", "variant", "special"] as const;
 export const PALWORLD_SKILL_TYPES = ["partner", "active", "passive"] as const;
+export const PALWORLD_PASSIVE_EFFECT_FILTERS = [
+  "movement_speed",
+  "attack",
+  "defense",
+  "health",
+  "stamina",
+  "work_speed",
+  "san",
+  "element_attack",
+  "element_defense",
+  "trade",
+  "production",
+  "other"
+] as const;
+export const PALWORLD_PASSIVE_TIERS = [-3, -2, -1, 1, 2, 3, 4, 5] as const;
 export const PALWORLD_LOCALIZATION_LANGUAGES = ["ko", "ja", "en"] as const;
 export const PALWORLD_LOCALIZATION_FIELD_STATUSES = [
   "localized",
@@ -79,6 +94,27 @@ export const PALWORLD_ITEM_CATEGORIES = [
   "key_item",
   "building",
   "other"
+] as const;
+export const PALWORLD_ITEM_FILTER_CATEGORIES = [
+  "material",
+  "sphere",
+  "ammo",
+  "consumable",
+  "weapon",
+  "armor",
+  "accessory",
+  "glider",
+  "food",
+  "valuable",
+  "blueprint",
+  "sphere_module"
+] as const;
+export const PALWORLD_ITEM_RARITY_TIERS = [
+  "common",
+  "uncommon",
+  "rare",
+  "epic",
+  "legendary"
 ] as const;
 export const PALWORLD_ACQUISITION_TYPES = ["craft", "drop", "merchant", "chest", "gathering", "quest", "other"] as const;
 export const PALWORLD_GENDERS = ["any", "male", "female"] as const;
@@ -134,6 +170,8 @@ export type PalworldElement = (typeof PALWORLD_ELEMENTS)[number];
 export type PalworldWorkSuitabilityType = (typeof PALWORLD_WORK_SUITABILITY_TYPES)[number];
 export type PalworldVariantType = (typeof PALWORLD_VARIANT_TYPES)[number];
 export type PalworldSkillType = (typeof PALWORLD_SKILL_TYPES)[number];
+export type PalworldPassiveEffectFilter = (typeof PALWORLD_PASSIVE_EFFECT_FILTERS)[number];
+export type PalworldPassiveTier = (typeof PALWORLD_PASSIVE_TIERS)[number];
 export type PalworldLocalizationLanguage = (typeof PALWORLD_LOCALIZATION_LANGUAGES)[number];
 export type PalworldLocalizationFieldStatus = (typeof PALWORLD_LOCALIZATION_FIELD_STATUSES)[number];
 export type PalworldTranslationLocale = (typeof PALWORLD_TRANSLATION_LOCALES)[number];
@@ -146,6 +184,8 @@ export type PalworldTranslationSnapshotStatus = (typeof PALWORLD_TRANSLATION_SNA
 export type PalworldTranslationSourceIntegrityStatus =
   (typeof PALWORLD_TRANSLATION_SOURCE_INTEGRITY_STATUSES)[number];
 export type PalworldItemCategory = (typeof PALWORLD_ITEM_CATEGORIES)[number];
+export type PalworldItemFilterCategory = (typeof PALWORLD_ITEM_FILTER_CATEGORIES)[number];
+export type PalworldItemRarityTier = (typeof PALWORLD_ITEM_RARITY_TIERS)[number];
 export type PalworldAcquisitionType = (typeof PALWORLD_ACQUISITION_TYPES)[number];
 export type PalworldGender = (typeof PALWORLD_GENDERS)[number];
 export type PalworldBreedingGender = (typeof PALWORLD_BREEDING_GENDERS)[number];
@@ -327,6 +367,8 @@ export type PalworldSkill = {
 
 export type PalworldSkillSummary = PalworldSkill & {
   relatedPalCount: number;
+  /** 목록 카드에서 사용하는 검증된 관련 Pal 미리보기입니다. 최대 3개만 포함합니다. */
+  relatedPalPreviews?: PalworldPalReference[];
 };
 
 export type PalworldElementDefinition = {
@@ -455,6 +497,7 @@ export type PalworldPalDetail = PalworldPalSummary & {
 
 export type PalworldItemSummary = PalworldItemReference & {
   category: PalworldItemCategory;
+  itemType?: PalworldItemFilterCategory;
   rarity: number;
   descriptionKo?: string;
   descriptionJa?: string;
@@ -810,6 +853,18 @@ export type PalworldPalListFacets = {
 
 export type PalworldPalListResponse = PalworldPaginatedResponse<PalworldPalSummary> & {
   facets: PalworldPalListFacets;
+};
+
+export type PalworldSkillListFacets = {
+  types: PalworldFacetEntry<PalworldSkillType>[];
+  activeElements: PalworldFacetEntry<PalworldElement>[];
+  partnerElements: PalworldFacetEntry<PalworldElement>[];
+  passiveEffects: PalworldFacetEntry<PalworldPassiveEffectFilter>[];
+  passiveTiers: PalworldFacetEntry<PalworldPassiveTier>[];
+};
+
+export type PalworldSkillListResponse = PalworldPaginatedResponse<PalworldSkillSummary> & {
+  facets: PalworldSkillListFacets;
 };
 
 export type PalworldMetaResponse = {
@@ -2397,6 +2452,7 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
     "imageHeight",
     "localization",
     "category",
+    "itemType",
     "rarity",
     "descriptionKo",
     "descriptionJa",
@@ -2426,6 +2482,14 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
   if (!reference.ok) return reference;
   const category = enumAt(candidate.category, `${path}.category`, PALWORLD_ITEM_CATEGORIES);
   if (!category.ok) return category;
+  if (candidate.itemType !== undefined) {
+    const itemType = enumAt(
+      candidate.itemType,
+      `${path}.itemType`,
+      PALWORLD_ITEM_FILTER_CATEGORIES
+    );
+    if (!itemType.ok) return itemType;
+  }
   const rarity = integerAt(candidate.rarity, `${path}.rarity`, 0, MAX_RARITY);
   if (!rarity.ok) return rarity;
   for (const field of ["descriptionKo", "descriptionJa"] as const) {
@@ -2639,6 +2703,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
     "imageHeight",
     "localization",
     "category",
+    "itemType",
     "rarity",
     "descriptionKo",
     "descriptionJa",
@@ -2673,6 +2738,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
       ...(candidate.imageHeight === undefined ? {} : { imageHeight: candidate.imageHeight }),
       ...(candidate.localization === undefined ? {} : { localization: candidate.localization }),
       category: candidate.category,
+      ...(candidate.itemType === undefined ? {} : { itemType: candidate.itemType }),
       rarity: candidate.rarity,
       descriptionKo: candidate.descriptionKo,
       descriptionJa: candidate.descriptionJa,
@@ -2767,12 +2833,34 @@ function skillValueFromRecord(record: Record<string, unknown>): Record<string, u
 }
 
 function validateSkillSummaryAt(value: unknown, path: string): PalworldValidationResult<PalworldSkillSummary> {
-  const record = recordAt(value, path, [...PALWORLD_SKILL_KEYS, "relatedPalCount"]);
+  const record = recordAt(value, path, [...PALWORLD_SKILL_KEYS, "relatedPalCount", "relatedPalPreviews"]);
   if (!record.ok) return record;
   const skill = validateSkillAt(skillValueFromRecord(record.data), path);
   if (!skill.ok) return skill;
   const relatedPalCount = integerAt(record.data.relatedPalCount, `${path}.relatedPalCount`, 0, MAX_RELATED_PALS);
-  return relatedPalCount.ok ? valid(record.data as PalworldSkillSummary) : relatedPalCount;
+  if (!relatedPalCount.ok) return relatedPalCount;
+  if (record.data.relatedPalPreviews !== undefined) {
+    const previews = arrayAt(
+      record.data.relatedPalPreviews,
+      `${path}.relatedPalPreviews`,
+      3,
+      validatePalReferenceAt
+    );
+    if (!previews.ok) return previews;
+    const uniquePreviews = uniqueStringsAt(
+      previews.data.map((preview) => preview.id),
+      `${path}.relatedPalPreviews`,
+      "관련 Pal 미리보기"
+    );
+    if (!uniquePreviews.ok) return uniquePreviews;
+    if (previews.data.length !== Math.min(3, relatedPalCount.data)) {
+      return invalid(
+        `${path}.relatedPalPreviews`,
+        "relatedPalCount 기준 최대 3개의 관련 Pal이 필요합니다."
+      );
+    }
+  }
+  return valid(record.data as PalworldSkillSummary);
 }
 
 function validateSkillAssignmentAt(value: unknown, path: string): PalworldValidationResult<PalworldSkillAssignment> {
@@ -2791,13 +2879,18 @@ function validateSkillDetailAt(value: unknown, path: string): PalworldValidation
   const record = recordAt(value, path, [
     ...PALWORLD_SKILL_KEYS,
     "relatedPalCount",
+    "relatedPalPreviews",
     "relatedPals",
     "metadata",
     "domainMetadata"
   ]);
   if (!record.ok) return record;
   const summary = validateSkillSummaryAt(
-    { ...skillValueFromRecord(record.data), relatedPalCount: record.data.relatedPalCount },
+    {
+      ...skillValueFromRecord(record.data),
+      relatedPalCount: record.data.relatedPalCount,
+      relatedPalPreviews: record.data.relatedPalPreviews
+    },
     path
   );
   if (!summary.ok) return summary;
@@ -4269,6 +4362,112 @@ export function validatePalworldPalListResponse(
   if (!metadata.ok) return metadata;
   const facets = validatePalworldPalListFacetsAt(record.data.facets, "response.facets");
   return facets.ok ? valid(record.data as PalworldPalListResponse) : facets;
+}
+
+function validatePalworldSkillListFacetsAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldSkillListFacets> {
+  const record = recordAt(value, path, [
+    "types",
+    "activeElements",
+    "partnerElements",
+    "passiveEffects",
+    "passiveTiers"
+  ]);
+  if (!record.ok) return record;
+  const types = validatePalworldFacetEntriesAt(
+    record.data.types,
+    `${path}.types`,
+    PALWORLD_SKILL_TYPES.length,
+    (entry, entryPath) => enumAt(entry, entryPath, PALWORLD_SKILL_TYPES)
+  );
+  if (!types.ok) return types;
+  const activeElements = validatePalworldFacetEntriesAt(
+    record.data.activeElements,
+    `${path}.activeElements`,
+    PALWORLD_ELEMENTS.length,
+    (entry, entryPath) => enumAt(entry, entryPath, PALWORLD_ELEMENTS)
+  );
+  if (!activeElements.ok) return activeElements;
+  const partnerElements = validatePalworldFacetEntriesAt(
+    record.data.partnerElements,
+    `${path}.partnerElements`,
+    PALWORLD_ELEMENTS.length,
+    (entry, entryPath) => enumAt(entry, entryPath, PALWORLD_ELEMENTS)
+  );
+  if (!partnerElements.ok) return partnerElements;
+  const passiveEffects = validatePalworldFacetEntriesAt(
+    record.data.passiveEffects,
+    `${path}.passiveEffects`,
+    PALWORLD_PASSIVE_EFFECT_FILTERS.length,
+    (entry, entryPath) => enumAt(entry, entryPath, PALWORLD_PASSIVE_EFFECT_FILTERS)
+  );
+  if (!passiveEffects.ok) return passiveEffects;
+  const passiveTiers = validatePalworldFacetEntriesAt<PalworldPassiveTier>(
+    record.data.passiveTiers,
+    `${path}.passiveTiers`,
+    PALWORLD_PASSIVE_TIERS.length,
+    (entry, entryPath) => {
+      const tier = integerAt(entry, entryPath, -3, 5);
+      if (!tier.ok) return tier;
+      return PALWORLD_PASSIVE_TIERS.includes(tier.data as PalworldPassiveTier)
+        ? valid(tier.data as PalworldPassiveTier)
+        : invalid(entryPath, "허용된 패시브 등급이 아닙니다.");
+    }
+  );
+  return passiveTiers.ok
+    ? valid(record.data as PalworldSkillListFacets)
+    : passiveTiers;
+}
+
+export function validatePalworldSkillListFacets(
+  value: unknown
+): PalworldValidationResult<PalworldSkillListFacets> {
+  return validatePalworldSkillListFacetsAt(value, "facets");
+}
+
+export function validatePalworldSkillListResponse(
+  value: unknown
+): PalworldValidationResult<PalworldSkillListResponse> {
+  const record = recordAt(value, "response", [
+    "items",
+    "pagination",
+    "metadata",
+    "domainMetadata",
+    "facets"
+  ]);
+  if (!record.ok) return record;
+  const items = arrayAt(
+    record.data.items,
+    "response.items",
+    MAX_API_COLLECTION_SIZE,
+    validateSkillSummaryAt
+  );
+  if (!items.ok) return items;
+  for (const [index, item] of items.data.entries()) {
+    if (
+      !Object.prototype.hasOwnProperty.call(item, "relatedPalPreviews")
+      || item.relatedPalPreviews === undefined
+    ) {
+      return invalid(
+        `response.items[${index}].relatedPalPreviews`,
+        "스킬 목록 응답에는 관련 Pal 미리보기가 필요합니다."
+      );
+    }
+  }
+  const pagination = validatePaginationAt(record.data.pagination, "response.pagination");
+  if (!pagination.ok) return pagination;
+  const itemCount = validatePageItemCountAt(items.data.length, pagination.data, "response.items");
+  if (!itemCount.ok) return itemCount;
+  const metadata = validateMetadataAt(record.data.metadata, "response.metadata");
+  if (!metadata.ok) return metadata;
+  if (record.data.domainMetadata !== undefined) {
+    const domainMetadata = validateMetadataAt(record.data.domainMetadata, "response.domainMetadata");
+    if (!domainMetadata.ok) return domainMetadata;
+  }
+  const facets = validatePalworldSkillListFacetsAt(record.data.facets, "response.facets");
+  return facets.ok ? valid(record.data as PalworldSkillListResponse) : facets;
 }
 
 export function validatePalworldMetaResponse(value: unknown): PalworldValidationResult<PalworldMetaResponse> {

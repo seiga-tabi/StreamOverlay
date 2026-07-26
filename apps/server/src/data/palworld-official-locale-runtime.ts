@@ -5,11 +5,13 @@ import path from "node:path";
 import type { PalworldTranslationOfficialSourceField } from "@streamops/shared";
 import {
   assertPalworldActiveSkillLocaleEvidenceArtifact,
+  assertPalworldPassiveSkillLocaleEvidenceArtifact,
   assertPalworldOfficialLocaleCompatibilityArtifact,
   assertPalworldOfficialLocaleManifest,
   assertPalworldOfficialLocaleSourceFieldsArtifact,
   serializePalworldOfficialLocaleOverlayArtifact,
   type PalworldActiveSkillLocaleEvidence,
+  type PalworldPassiveSkillLocaleEvidence,
   type PalworldOfficialLocaleCompatibilityArtifact,
   type PalworldOfficialLocaleSourceFieldsArtifact,
 } from "./palworld-official-locale-overlay.js";
@@ -20,6 +22,8 @@ export const PALWORLD_OFFICIAL_LOCALE_COMPATIBILITY_FILE =
   "locales/official-locale-compatibility.json";
 export const PALWORLD_ACTIVE_SKILL_LOCALE_EVIDENCE_FILE =
   "locales/official-active-skill-evidence.json";
+export const PALWORLD_PASSIVE_SKILL_LOCALE_EVIDENCE_FILE =
+  "locales/official-passive-skill-evidence.json";
 
 const OFFICIAL_LOCALE_FILES = {
   ko: "locales/ko.json",
@@ -30,6 +34,7 @@ const OFFICIAL_LOCALE_FILES = {
 const MAX_OFFICIAL_SOURCE_FIELDS_BYTES = 64 * 1024 * 1024;
 const MAX_COMPATIBILITY_BYTES = 512 * 1024;
 const MAX_ACTIVE_SKILL_EVIDENCE_BYTES = 16 * 1024 * 1024;
+const MAX_PASSIVE_SKILL_EVIDENCE_BYTES = 8 * 1024 * 1024;
 const MAX_LOCALE_BYTES = 32 * 1024 * 1024;
 const MAX_MANIFEST_BYTES = 128 * 1024;
 
@@ -37,6 +42,7 @@ export type PalworldOfficialLocaleRuntimeOverlay = {
   officialSourceFields: readonly PalworldTranslationOfficialSourceField[];
   sourceArtifact: PalworldOfficialLocaleSourceFieldsArtifact;
   activeSkillEvidence?: PalworldActiveSkillLocaleEvidence;
+  passiveSkillEvidence?: PalworldPassiveSkillLocaleEvidence;
   compatibility: PalworldOfficialLocaleCompatibilityArtifact;
 };
 
@@ -224,6 +230,30 @@ export async function loadPalworldOfficialLocaleRuntimeOverlay(input: {
       PALWORLD_ACTIVE_SKILL_LOCALE_EVIDENCE_FILE,
     );
   }
+  let passiveSkillEvidence:
+    | PalworldPassiveSkillLocaleEvidence
+    | undefined;
+  let passiveSkillEvidenceBytes: Buffer | undefined;
+  if (
+    compatibilityIdentity.outputs.passiveSkillEvidenceSha256 !== undefined
+  ) {
+    passiveSkillEvidenceBytes = await readCanonicalFile(
+      releaseRoot,
+      PALWORLD_PASSIVE_SKILL_LOCALE_EVIDENCE_FILE,
+      MAX_PASSIVE_SKILL_EVIDENCE_BYTES,
+    );
+    passiveSkillEvidence = assertPalworldPassiveSkillLocaleEvidenceArtifact(
+      parseJson(
+        passiveSkillEvidenceBytes,
+        PALWORLD_PASSIVE_SKILL_LOCALE_EVIDENCE_FILE,
+      ),
+    );
+    assertCanonicalJsonBytes(
+      passiveSkillEvidenceBytes,
+      serializePalworldOfficialLocaleOverlayArtifact(passiveSkillEvidence),
+      PALWORLD_PASSIVE_SKILL_LOCALE_EVIDENCE_FILE,
+    );
+  }
   const compatibility =
     assertPalworldOfficialLocaleCompatibilityArtifact(
       compatibilityValue,
@@ -232,6 +262,9 @@ export async function loadPalworldOfficialLocaleRuntimeOverlay(input: {
         ...(activeSkillEvidenceBytes === undefined
           ? {}
           : { activeSkillEvidence: activeSkillEvidenceBytes }),
+        ...(passiveSkillEvidenceBytes === undefined
+          ? {}
+          : { passiveSkillEvidence: passiveSkillEvidenceBytes }),
         ko: koBytes,
         ja: jaBytes,
         manifest: manifestBytes,
@@ -326,6 +359,40 @@ export async function loadPalworldOfficialLocaleRuntimeOverlay(input: {
       );
     }
   }
+  if (passiveSkillEvidence !== undefined) {
+    const evidenceSkillIds = passiveSkillEvidence.entries.map(
+      (entry) => entry.legacySkillId,
+    );
+    const sourceSkillIds = [...new Set(
+      sourceArtifact.records
+        .filter((record) =>
+          record.kind === "skill"
+          && record.id.startsWith("passive-")
+          && record.field === "name")
+        .map((record) => record.id),
+    )].sort((left, right) => left.localeCompare(right, "en"));
+    if (
+      passiveSkillEvidence.release !== input.expectedRelease
+      || passiveSkillEvidence.candidateId
+        !== compatibility.inputs.candidate.candidateId
+      || passiveSkillEvidence.inputs.activeCatalogSha256
+        !== input.expectedCatalogSha256
+      || passiveSkillEvidence.inputs.candidateSkillsSha256
+        !== compatibility.inputs.candidate.artifactSha256.skills
+      || passiveSkillEvidence.inputs.candidateImportReportSha256
+        !== compatibility.inputs.candidate.artifactSha256.importReport
+      || passiveSkillEvidence.inputs.sourceArchiveSha256
+        !== compatibility.inputs.candidate.archive.sha256
+      || passiveSkillEvidence.inputs.mappingSha256
+        !== compatibility.inputs.candidate.passiveSkillLocaleMapSha256
+      || JSON.stringify(evidenceSkillIds) !== JSON.stringify(sourceSkillIds)
+    ) {
+      fail(
+        "passiveSkillEvidence",
+        "공식 패시브 스킬 evidence와 active/candidate 입력이 일치해야 합니다.",
+      );
+    }
+  }
   if (
     manifest.translationRevision
       !== compatibility.outputs.translationRevision
@@ -373,6 +440,7 @@ export async function loadPalworldOfficialLocaleRuntimeOverlay(input: {
     officialSourceFields: Object.freeze(officialSourceFields),
     sourceArtifact,
     ...(activeSkillEvidence === undefined ? {} : { activeSkillEvidence }),
+    ...(passiveSkillEvidence === undefined ? {} : { passiveSkillEvidence }),
     compatibility,
   });
 }

@@ -4,7 +4,7 @@
   "locale": "ko",
   "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
   "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
-  "translationRevision": "official-locale-overlay-9499ec38e96ef9ca-eb408d81",
+  "translationRevision": "official-locale-overlay-23341e7d79a57bac-eb408d81",
   "translationStatus": "incomplete",
   "coverage": {
     "byKind": {
@@ -38,11 +38,11 @@
       },
       "skill": {
         "name": {
-          "translated": 487,
+          "translated": 566,
           "total": 566
         },
         "description": {
-          "translated": 485,
+          "translated": 535,
           "total": 564
         },
         "passiveAbility": {
@@ -51,14 +51,14 @@
         }
       }
     },
-    "translated": 5219,
+    "translated": 5348,
     "total": 5458,
-    "missing": 239,
+    "missing": 110,
     "status": {
-      "source_provided": 5219,
+      "source_provided": 5348,
       "human_reviewed": 0,
       "machine_assisted": 0
     }
   },
-  "contentSha256": "c1f4ddb8929a66f5c925a6c2504d292c740249082f00c31c7cabf725d17145c0"
+  "contentSha256": "ce3592e0225e97e1317349ab91a5ec730a74e95aef4c96bfacd74810d71d0c73"
 }

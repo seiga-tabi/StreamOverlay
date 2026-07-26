@@ -9,7 +9,7 @@ import { Button } from "../../../shared/ui/Button";
 import { PalworldApiError, searchPalworld } from "../api/palworld";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { formatPalNumber } from "../utils/search";
-import { categoryLabel } from "../utils/labels";
+import { categoryLabel, itemTypeLabel } from "../utils/labels";
 import { resolvePalworldName } from "../utils/localization";
 import { PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
@@ -246,7 +246,7 @@ export function PalworldSearchForm({
                 key={`item-${item.id}`}
               >
                 <span className="palworld-autocomplete-media"><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={name.text} locale={locale} /></span>
-                <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{categoryLabel(item.category, locale)} · {text.items}</small></span>
+                <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{item.itemType ? itemTypeLabel(item.itemType, locale) : categoryLabel(item.category, locale)} · {text.items}</small></span>
               </button>
             );
           })}

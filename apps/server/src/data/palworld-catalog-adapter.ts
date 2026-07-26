@@ -71,6 +71,41 @@ export type PalworldCatalogAdapterInput = {
   reviewedItemAliases?: readonly PalworldReviewedItemAlias[];
 };
 
+function publicItemType(
+  item: PalworldCatalogItem
+): import("@streamops/shared").PalworldItemFilterCategory {
+  const separator = item.sourceCategory.indexOf("/");
+  if (separator <= 0 || separator === item.sourceCategory.length - 1) {
+    throw new TypeError(
+      `Palworld catalog sourceCategory 형식이 올바르지 않습니다: ${item.sourceCategory}`
+    );
+  }
+  const sourceType = item.sourceCategory.slice(0, separator);
+  const sourceSubType = item.sourceCategory.slice(separator + 1);
+  if (sourceType === "Material") return "material";
+  if (sourceType === "SpecialWeapon" && sourceSubType === "SPWeaponCaptureBall") {
+    return "sphere";
+  }
+  if (sourceType === "SpecialWeapon") {
+    throw new TypeError(
+      `지원하지 않는 Palworld SpecialWeapon sourceCategory입니다: ${item.sourceCategory}`
+    );
+  }
+  if (sourceType === "Ammo") return "ammo";
+  if (sourceType === "Consume") return "consumable";
+  if (sourceType === "Weapon") return "weapon";
+  if (sourceType === "Armor") return "armor";
+  if (sourceType === "Accessory") return "accessory";
+  if (sourceType === "Glider") return "glider";
+  if (sourceType === "Food") return "food";
+  if (sourceType === "Essential") return "valuable";
+  if (sourceType === "Blueprint") return "blueprint";
+  if (sourceType === "CaptureItemModifier") return "sphere_module";
+  throw new TypeError(
+    `지원하지 않는 Palworld catalog sourceCategory입니다: ${item.sourceCategory}`
+  );
+}
+
 export class PalworldCatalogAdapterError extends Error {
   readonly code = "PALWORLD_CATALOG_ADAPTER_INVALID";
 
@@ -635,6 +670,7 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       ...reference,
       sourceInternalId: item.sourceInternalId,
       category: item.category as PalworldItemCategory,
+      itemType: publicItemType(item),
       rarity: item.rarity,
       ...(descriptionKoTranslation?.text === undefined && localized?.descriptionKo === undefined ? {} : {
         descriptionKo: descriptionKoTranslation?.text ?? localized!.descriptionKo!

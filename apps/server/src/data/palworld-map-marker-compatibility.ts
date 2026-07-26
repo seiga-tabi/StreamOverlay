@@ -32,7 +32,7 @@ type SourceFileEvidence = {
 };
 
 export type PalworldMapMarkerCompatibilityApproval = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   release: string;
   status: "operator_acknowledged";
   decision: "allow_exact_checksum_compatibility_display";
@@ -44,6 +44,7 @@ export type PalworldMapMarkerCompatibilityApproval = {
     worldMapTable: SourceFileEvidence;
   };
   sourceMapAsset: SourceFileEvidence;
+  sourceTreeMapAsset: SourceFileEvidence;
   mappingsEvidence: {
     archiveSha256: string;
     member: string;
@@ -56,8 +57,11 @@ export type PalworldMapMarkerCompatibilityApproval = {
   markerManifestSha256: string;
   mapImagesManifestSha256: string;
   targetMapAssetSha256: string;
+  targetTreeMapAssetSha256: string;
   transformRevision: string;
   transformSha256: string;
+  treeTransformRevision: string;
+  treeTransformSha256: string;
   counts: {
     sourceRows: number;
     nonPalRows: number;
@@ -206,6 +210,7 @@ export function assertPalworldMapMarkerCompatibilityApproval(
     "sourceArchiveSha256",
     "sourceTables",
     "sourceMapAsset",
+    "sourceTreeMapAsset",
     "mappingsEvidence",
     "generationMappingSha256",
     "paldexSha256",
@@ -214,8 +219,11 @@ export function assertPalworldMapMarkerCompatibilityApproval(
     "markerManifestSha256",
     "mapImagesManifestSha256",
     "targetMapAssetSha256",
+    "targetTreeMapAssetSha256",
     "transformRevision",
     "transformSha256",
+    "treeTransformRevision",
+    "treeTransformSha256",
     "counts",
     "reviewedAt",
     "reviewer",
@@ -223,8 +231,8 @@ export function assertPalworldMapMarkerCompatibilityApproval(
     "rightsVerified",
     "usageBasis"
   ]);
-  if (root.schemaVersion !== 1) {
-    fail("mapMarkerCompatibility.schemaVersion", "1이어야 합니다.");
+  if (root.schemaVersion !== 2) {
+    fail("mapMarkerCompatibility.schemaVersion", "2여야 합니다.");
   }
   const release = textAt(root.release, "mapMarkerCompatibility.release", 64);
   if (!RELEASE_PATTERN.test(release)) {
@@ -262,6 +270,10 @@ export function assertPalworldMapMarkerCompatibilityApproval(
     root.sourceMapAsset,
     "mapMarkerCompatibility.sourceMapAsset"
   );
+  const sourceTreeMapAsset = sourceFileEvidenceAt(
+    root.sourceTreeMapAsset,
+    "mapMarkerCompatibility.sourceTreeMapAsset"
+  );
   const mappingsRecord = recordAt(
     root.mappingsEvidence,
     "mapMarkerCompatibility.mappingsEvidence",
@@ -295,6 +307,11 @@ export function assertPalworldMapMarkerCompatibilityApproval(
   const transformRevision = textAt(
     root.transformRevision,
     "mapMarkerCompatibility.transformRevision",
+    128
+  );
+  const treeTransformRevision = textAt(
+    root.treeTransformRevision,
+    "mapMarkerCompatibility.treeTransformRevision",
     128
   );
   const countsRecord = recordAt(
@@ -376,7 +393,7 @@ export function assertPalworldMapMarkerCompatibilityApproval(
     );
   }
   const approval = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     release,
     status: "operator_acknowledged",
     decision: "allow_exact_checksum_compatibility_display",
@@ -388,6 +405,7 @@ export function assertPalworldMapMarkerCompatibilityApproval(
     ),
     sourceTables,
     sourceMapAsset,
+    sourceTreeMapAsset,
     mappingsEvidence,
     generationMappingSha256: sha256At(
       root.generationMappingSha256,
@@ -414,10 +432,19 @@ export function assertPalworldMapMarkerCompatibilityApproval(
       root.targetMapAssetSha256,
       "mapMarkerCompatibility.targetMapAssetSha256"
     ),
+    targetTreeMapAssetSha256: sha256At(
+      root.targetTreeMapAssetSha256,
+      "mapMarkerCompatibility.targetTreeMapAssetSha256"
+    ),
     transformRevision,
     transformSha256: sha256At(
       root.transformSha256,
       "mapMarkerCompatibility.transformSha256"
+    ),
+    treeTransformRevision,
+    treeTransformSha256: sha256At(
+      root.treeTransformSha256,
+      "mapMarkerCompatibility.treeTransformSha256"
     ),
     counts,
     reviewedAt,
@@ -514,23 +541,33 @@ function assertArtifactRelation(
     );
   }
   const mainWorlds = artifact.worlds.filter((world) => world.world === "main");
+  const treeWorlds = artifact.worlds.filter((world) => world.world === "tree");
   if (
-    artifact.worlds.length !== 1
+    artifact.worlds.length !== 2
     || mainWorlds.length !== 1
+    || treeWorlds.length !== 1
     || mainWorlds[0]!.targetMapAssetSha256
       !== approval.targetMapAssetSha256
+    || treeWorlds[0]!.targetMapAssetSha256
+      !== approval.targetTreeMapAssetSha256
     || mainWorlds[0]!.transform.status !== "verified"
+    || treeWorlds[0]!.transform.status !== "verified"
     || mainWorlds[0]!.transform.revision !== approval.transformRevision
+    || treeWorlds[0]!.transform.revision
+      !== approval.treeTransformRevision
     || palworldMapMarkerTransformChecksum(mainWorlds[0]!.transform)
       !== approval.transformSha256
+    || palworldMapMarkerTransformChecksum(treeWorlds[0]!.transform)
+      !== approval.treeTransformSha256
   ) {
     fail(
       "mapMarkerCompatibility.targetMapAssetSha256",
-      "승인된 MainMap asset과 exact verified transform이 필요합니다."
+      "승인된 MainMap·Tree asset과 exact verified transform이 필요합니다."
     );
   }
   if (
     mainWorlds[0]!.markers.length !== approval.counts.mainMarkers
+    || treeWorlds[0]!.markers.length !== approval.counts.treeMarkers
     || approval.counts.exactJoinMismatches !== 0
   ) {
     fail(
@@ -653,10 +690,16 @@ export async function loadPalworldMapMarkerCompatibilityAuthorization(input: {
       && entry.sourceSha256 === approval.sourceMapAsset.sha256
       && entry.outputSha256 === approval.targetMapAssetSha256
     )
+    || !mapImages.entries.some((entry) =>
+      entry.id === "tree"
+      && entry.sourceMember === approval.sourceTreeMapAsset.member
+      && entry.sourceSha256 === approval.sourceTreeMapAsset.sha256
+      && entry.outputSha256 === approval.targetTreeMapAssetSha256
+    )
   ) {
     fail(
       "mapMarkerCompatibility.targetMapAssetSha256",
-      "승인된 source와 output MainMap asset이 지도 이미지 manifest에 없습니다."
+      "승인된 source와 output MainMap·Tree asset이 지도 이미지 manifest에 없습니다."
     );
   }
   assertArtifactRelation(approval, input.artifact);

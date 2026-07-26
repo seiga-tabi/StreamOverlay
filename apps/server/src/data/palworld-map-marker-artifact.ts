@@ -316,6 +316,7 @@ export function assertPalworldMapMarkerArtifact(value: unknown): PalworldMapMark
     fail("artifact.worlds", "1개 이상 2개 이하의 배열이어야 합니다.");
   }
   const seenWorlds = new Set<string>();
+  const allSourceRows = new Set<string>();
   let previousWorld = "";
   for (const [worldIndex, valueAtIndex] of artifact.worlds.entries()) {
     const pathName = `artifact.worlds[${worldIndex}]`;
@@ -352,11 +353,18 @@ export function assertPalworldMapMarkerArtifact(value: unknown): PalworldMapMark
       if (sourceRows.has(marker.sourceRowId)) {
         fail(`${pathName}.markers[${markerIndex}].sourceRowId`, "중복 source row ID입니다.");
       }
+      if (allSourceRows.has(marker.sourceRowId)) {
+        fail(
+          `${pathName}.markers[${markerIndex}].sourceRowId`,
+          "다른 world와 중복된 source row ID입니다."
+        );
+      }
       if (marker.id <= previousId) {
         fail(`${pathName}.markers[${markerIndex}].id`, "marker ID 오름차순이어야 합니다.");
       }
       ids.add(marker.id);
       sourceRows.add(marker.sourceRowId);
+      allSourceRows.add(marker.sourceRowId);
       previousId = marker.id;
     }
   }

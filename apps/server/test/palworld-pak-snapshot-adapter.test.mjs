@@ -938,6 +938,23 @@ test("candidate의 orphan·duplicate·NaN 값을 Shared exact validator 전에 �
   }
 });
 
+test("candidate item은 각각 허용된 TypeA·TypeB라도 검증되지 않은 교차 조합을 거부한다", () => {
+  for (const [typeA, typeB] of [
+    ["Weapon", "SPWeaponCaptureBall"],
+    ["SpecialWeapon", "ConsumeBullet"]
+  ]) {
+    const invalidPair = canonicalFixture();
+    replaceArtifact(invalidPair, "items.json", (value) => {
+      value.records[0].typeA = typeA;
+      value.records[0].typeB = typeB;
+    });
+    assert.throws(
+      () => adaptPalworldPakCandidateToSnapshot(invalidPair.input),
+      new RegExp(`허용되지 않은 Palworld item TypeA/TypeB 조합입니다: ${typeA}/${typeB}`, "u")
+    );
+  }
+});
+
 test("stale locale·placeholder를 차단하고 공식 EN 누락을 명시적으로 격리한다", () => {
   const stale = canonicalFixture();
   replaceArtifact(stale, "locales/ko.json", (value) => {

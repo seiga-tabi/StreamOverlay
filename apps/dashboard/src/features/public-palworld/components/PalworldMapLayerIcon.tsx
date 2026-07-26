@@ -25,7 +25,7 @@ export function PalworldMapLayerIcon({
           decoding="async"
           draggable={false}
           height={asset.height}
-          loading="lazy"
+          loading="eager"
           onError={() => setFailed(true)}
           src={asset.imageUrl}
           width={asset.width}

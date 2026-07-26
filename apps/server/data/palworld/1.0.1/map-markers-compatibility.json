@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "release": "1.0.1",
   "status": "operator_acknowledged",
   "decision": "allow_exact_checksum_compatibility_display",
@@ -20,20 +20,27 @@
     "member": "Pal/Texture/UI/Map/T_WorldMap.png",
     "sha256": "f02560929cf0f30ee16ba2d2693f9ca65ca5400db14e13bca862268092499b62"
   },
+  "sourceTreeMapAsset": {
+    "member": "Pal/Texture/UI/Map/T_TreeMap.png",
+    "sha256": "6f79de30a1d0fbbd4306dcc10ee9b5b098d84defcb8612cf962bb8baffcf941e"
+  },
   "mappingsEvidence": {
     "archiveSha256": "2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443",
     "member": "Mappings101.usmap",
     "sha256": "b9b1ef0a5b2fba657d421f43c31dda7d3818aadb50e52c1c3215dfe45db9fb44"
   },
-  "generationMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4",
+  "generationMappingSha256": "6d06db576d8509b0ce5bd24586afa06cbef282f4950018c9f27187218cd0d7c0",
   "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
   "targetPaldexSteamBuildId": "24181105",
-  "markerArtifactSha256": "32fc4af43e28fc8b0a530fe7874d821f0de71a3f12d4288b5e6e33940767f0d2",
-  "markerManifestSha256": "d49e1efb1fd4223aafd301fd0a0cc63efdebaa77005fc28e0dd9c2df838d9eda",
-  "mapImagesManifestSha256": "11db2051f08c4c04be2bff870739792aff13b7679e4fb16dc852929d39a2aa98",
+  "markerArtifactSha256": "11f54e4ddc48b2374e755ec04d1139a687fad0b7702f36221c349029e2afb1e8",
+  "markerManifestSha256": "c4ecbb6dd844b4480aaf2bf3a3ee73e23b5a3144be516b579b2c904d0f7b0586",
+  "mapImagesManifestSha256": "d32f3282f7e6458e531277f875396475f2770cb6667a4d13e65d7259a079d547",
   "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+  "targetTreeMapAssetSha256": "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf",
   "transformRevision": "main-map-fmodel-bounds-v1",
   "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
+  "treeTransformRevision": "tree-map-fmodel-bounds-v1",
+  "treeTransformSha256": "3022c59c90112d9c8fe952384d0bbc3394f0600028190b564a48476a331b5cd8",
   "counts": {
     "sourceRows": 159,
     "nonPalRows": 69,
@@ -43,7 +50,7 @@
   },
   "reviewedAt": "2026-07-25T00:00:00.000Z",
   "reviewer": "streamoverlay-data-maintenance",
-  "evidenceChecksum": "2581069c91feacb160f0ab7fab4dfa70fcc4e1566f51dd07a0f5dcaaf9bca204",
+  "evidenceChecksum": "1bf88547a53df087e70356e847c0ee3ede921f45800b3b0cb50a240e041eea3a",
   "rightsVerified": false,
   "usageBasis": "operator_reference_use"
 }

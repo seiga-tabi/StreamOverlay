@@ -223,6 +223,24 @@ test("active overlay만 Pal 참조를 exact join하여 ready marker로 반환한
   assert.throws(
     () => createPalworldMapMarkerArtifact({
       ...artifact(),
+      worlds: [
+        artifact().worlds[0],
+        {
+          ...artifact().worlds[0],
+          world: "tree",
+          targetMapAssetSha256: "d".repeat(64),
+          markers: [{
+            ...artifact().worlds[0].markers[0],
+            id: "tree-anubis-001"
+          }]
+        }
+      ]
+    }),
+    /다른 world와 중복된 source row ID/u
+  );
+  assert.throws(
+    () => createPalworldMapMarkerArtifact({
+      ...artifact(),
       worlds: [{
         ...artifact().worlds[0],
         transform: {
@@ -270,6 +288,33 @@ test("checksum compatibility approval이 있는 고정 candidate는 실제 보�
     compatibilityApprovalSha256
   );
   assert.equal(main.body.overlay.rightsVerified, false);
+  const tree = await request(
+    handler(provider),
+    "/api/palworld/map/markers?world=tree"
+  );
+  assert.equal(tree.res.statusCode, 200);
+  assert.equal(tree.body.state, "ready");
+  assert.equal(tree.body.markers.length, 7);
+  assert.deepEqual(
+    tree.body.markers.map((marker) => marker.pal.id),
+    [
+      "dualith",
+      "celesdir-noct",
+      "whalaska-ignis",
+      "mycora",
+      "moldron-cryst",
+      "renjishi",
+      "aegidron"
+    ]
+  );
+  assert.equal(
+    tree.body.overlay.targetMapAssetSha256,
+    "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf"
+  );
+  assert.equal(
+    tree.body.overlay.transformRevision,
+    "tree-map-fmodel-bounds-v1"
+  );
 });
 
 test("compatibility approval 누락과 변조는 candidate marker 공개를 fail-closed 처리한다", async () => {

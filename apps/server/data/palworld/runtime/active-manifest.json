@@ -6,7 +6,7 @@
   "manifestFile": "manifest.json",
   "manifestSha256": "25c1b64784933c323e2206ff4c55421852501b45ec9bc5ed9d84934da788e198",
   "composite": {
-    "schemaVersion": 11,
+    "schemaVersion": 12,
     "release": "1.0.1",
     "artifacts": [
       {
@@ -57,7 +57,7 @@
       {
         "kind": "map-images-manifest",
         "file": "map-images-manifest.json",
-        "sha256": "11db2051f08c4c04be2bff870739792aff13b7679e4fb16dc852929d39a2aa98"
+        "sha256": "d32f3282f7e6458e531277f875396475f2770cb6667a4d13e65d7259a079d547"
       },
       {
         "kind": "breeding",
@@ -72,7 +72,7 @@
       {
         "kind": "locale-manifest",
         "file": "locales/manifest.json",
-        "sha256": "f6c95472303eb0dfa873597d1fcf94b2795ff5b5e3e909843ba6d71e1d0f3c62"
+        "sha256": "4ca4361feaa54a318ba173de49df02dcb36fe2c3f9377bfecdd56fea256164f2"
       },
       {
         "kind": "locale-glossary",
@@ -82,17 +82,17 @@
       {
         "kind": "locale-ko",
         "file": "locales/ko.json",
-        "sha256": "5ac95abeed9ba072fe7cf0818b9b80bcd45b5224ba5ff821f7809de19196cb4e"
+        "sha256": "b732714087184c797afe404d4979862e92020dbc8f65736e01a12148e3978a77"
       },
       {
         "kind": "locale-ja",
         "file": "locales/ja.json",
-        "sha256": "c29f8299234960623455fa0c970744550f89a1cd2353f555a1966887124aa25b"
+        "sha256": "3c99d88aaf26ebeba711efca0ab1588c95090aed50d516191fdb4bc5e67f2ea3"
       },
       {
         "kind": "locale-official-source-fields",
         "file": "locales/official-source-fields.json",
-        "sha256": "9499ec38e96ef9caa4258f9f119326b302970267f7b23355020c9a4e223c6ff9"
+        "sha256": "23341e7d79a57bacd66a69ece32f86ebb32bf08420d439e35ab3433126014bcf"
       },
       {
         "kind": "locale-official-active-skill-evidence",
@@ -100,9 +100,14 @@
         "sha256": "19c49222cc8e30b4151fb6aca3d6ada259f391bd4f1ea710d88bdc5d6afb52e2"
       },
       {
+        "kind": "locale-official-passive-skill-evidence",
+        "file": "locales/official-passive-skill-evidence.json",
+        "sha256": "7eb59347beb80c43522a1dc6649e97b60ebf6b7cb8d932f270732828f2933f99"
+      },
+      {
         "kind": "locale-official-compatibility",
         "file": "locales/official-locale-compatibility.json",
-        "sha256": "32e95e20bbce6c58482ea13c779a92a46bdb60a1e6f97b8810fa2f32864d3427"
+        "sha256": "5da4eb7ddfc5f2a84d4bdbb3efeecacda2d29a6585460b6fb34007a3a0a7988c"
       },
       {
         "kind": "reviewed-item-aliases",
@@ -117,17 +122,17 @@
       {
         "kind": "map-markers",
         "file": "map-markers.json",
-        "sha256": "32fc4af43e28fc8b0a530fe7874d821f0de71a3f12d4288b5e6e33940767f0d2"
+        "sha256": "11f54e4ddc48b2374e755ec04d1139a687fad0b7702f36221c349029e2afb1e8"
       },
       {
         "kind": "map-markers-manifest",
         "file": "map-markers-manifest.json",
-        "sha256": "d49e1efb1fd4223aafd301fd0a0cc63efdebaa77005fc28e0dd9c2df838d9eda"
+        "sha256": "c4ecbb6dd844b4480aaf2bf3a3ee73e23b5a3144be516b579b2c904d0f7b0586"
       },
       {
         "kind": "map-markers-compatibility",
         "file": "map-markers-compatibility.json",
-        "sha256": "327eda2982ed331e44dabda82e9a733ffc6e387d30deb1de8ff4b8a91536ff83"
+        "sha256": "78b99dde4b248f95de1602992c29d9af99e1bbe9f9101fee07f00baf07667e64"
       },
       {
         "kind": "map-spawns",
@@ -142,22 +147,22 @@
       {
         "kind": "map-spawns-compatibility",
         "file": "map-spawns-compatibility.json",
-        "sha256": "d45d6749ada3b8ecf589c93c86233871c57da449e898a28fcca1b3aca56e4442"
+        "sha256": "0137b144f41e16347c4fe7ff6835c48b3db4df6ea6e529bfddea3712d2a890cd"
       },
       {
         "kind": "map-locations",
         "file": "map-locations.json",
-        "sha256": "3449e9cbebf930cf33e69f51917fe958aa0c31b566d12a589e2c3a8be2bee47c"
+        "sha256": "76250fa3571e63abacc5a40f1f59675e5ffc47e65d4a7ee293773ff35e6faf2f"
       },
       {
         "kind": "map-locations-manifest",
         "file": "map-locations-manifest.json",
-        "sha256": "5c9689a5278ca85dc0ed68e301b11671b9468226eeaec7d1143466754be09d1b"
+        "sha256": "9fac2ba54e1488e43b3965b4975e66a4749b9543756e138cd63310f8841bbf1b"
       },
       {
         "kind": "map-locations-compatibility",
         "file": "map-locations-compatibility.json",
-        "sha256": "39767fa5ac6bd41f132e833841a836be752772248b3cc521f0f9e97769497adf"
+        "sha256": "8e3b1933f14ecd4f3df3ac2cb528bf8242a02aec21d72e36a5bf58e2425a3ae6"
       },
       {
         "kind": "map-layer-icons-manifest",

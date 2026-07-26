@@ -42,8 +42,13 @@ const PARTNER_JOIN_RULE =
   "partner_pal_id_source_internal_id_message_key_exact" as const;
 const ACTIVE_SKILL_JOIN_RULE =
   "legacy_active_pal_level_assignment_exact" as const;
+const PASSIVE_SKILL_JOIN_RULE =
+  "legacy_passive_public_id_prefix_exact" as const;
 const ACTIVE_SKILL_MAPPING_JOIN_RULE = "pal_id_unlock_level_exact" as const;
 const ACTIVE_SKILL_EVIDENCE_STATUS = "translation_compatibility_only" as const;
+const PASSIVE_SKILL_EVIDENCE_STATUS = "translation_compatibility_only" as const;
+const PASSIVE_SKILL_MAPPING_JOIN_RULE =
+  "passive_source_row_public_id_prefix_exact" as const;
 const MAX_JSON_BYTES = 64 * 1024 * 1024;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const SAFE_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,191}$/u;
@@ -59,10 +64,12 @@ type JsonRecord = Record<string, unknown>;
 type OfficialJoinRule =
   | typeof JOIN_RULE
   | typeof PARTNER_JOIN_RULE
-  | typeof ACTIVE_SKILL_JOIN_RULE;
+  | typeof ACTIVE_SKILL_JOIN_RULE
+  | typeof PASSIVE_SKILL_JOIN_RULE;
 type OfficialSourceIdentityJoinRule =
   | PalworldTranslationSourceIdentityJoinRule
-  | "assignment_identity_exact";
+  | "assignment_identity_exact"
+  | "legacy_public_id_prefix_exact";
 
 export type PalworldOfficialLocaleSourceField = {
   locale: PalworldTranslationLocale;
@@ -149,11 +156,13 @@ export type PalworldOfficialLocaleCompatibilityArtifact = {
       };
       mappings: Record<string, string>;
       activeSkillLocaleMapSha256?: string;
+      passiveSkillLocaleMapSha256?: string;
     };
   };
   outputs: {
     officialSourceFieldsSha256: string;
     activeSkillEvidenceSha256?: string;
+    passiveSkillEvidenceSha256?: string;
     localeSha256: Record<PalworldTranslationLocale, string>;
     manifestSha256: string;
     translationRevision: string;
@@ -185,6 +194,24 @@ export type PalworldLegacyActiveSkillLocaleMap = {
     field: "power";
     activeValue: number;
     candidateValue: number;
+    reason: string;
+    reviewStatus: "approved";
+  }>;
+};
+
+export type PalworldLegacyPassiveSkillLocaleMap = {
+  schemaVersion: 1;
+  activeRelease: string;
+  candidateId: string;
+  joinRule: typeof PASSIVE_SKILL_MAPPING_JOIN_RULE;
+  activeCatalogSha256: string;
+  candidateSkillsSha256: string;
+  candidateImportReportSha256: string;
+  sourceArchiveSha256: string;
+  entries: Array<{
+    legacySkillId: string;
+    candidateSkillId: string;
+    candidateSourceRowId: string;
     reason: string;
     reviewStatus: "approved";
   }>;
@@ -236,6 +263,44 @@ export type PalworldActiveSkillLocaleEvidence = {
   }>;
 };
 
+export type PalworldPassiveSkillLocaleEvidence = {
+  schemaVersion: 1;
+  release: string;
+  status: typeof PASSIVE_SKILL_EVIDENCE_STATUS;
+  candidateId: string;
+  joinRule: typeof PASSIVE_SKILL_MAPPING_JOIN_RULE;
+  inputs: {
+    activeCatalogSha256: string;
+    candidateSkillsSha256: string;
+    candidateImportReportSha256: string;
+    sourceArchiveSha256: string;
+    mappingSha256: string;
+  };
+  counts: {
+    activePassiveSkills: number;
+    exactMatches: number;
+    officialNames: number;
+    compatibleDescriptions: number;
+    missingSourceDescriptions: number;
+    numericMismatchDescriptions: number;
+  };
+  entries: Array<{
+    legacySkillId: string;
+    candidateSkillId: string;
+    candidateSourceRowId: string;
+    candidateSourceInternalId: string;
+    expectedLegacyIdPrefix: string;
+    joinGuard: "legacy_public_id_prefix_exact";
+    nameLocalePayloadSha256: Record<PalworldTranslationLocale, string>;
+    description: {
+      status: "compatible" | "missing_source" | "numeric_mismatch";
+      legacyNumbers: number[];
+      candidateNumbers: Record<PalworldTranslationLocale, number[]>;
+      localePayloadSha256?: Record<PalworldTranslationLocale, string>;
+    };
+  }>;
+};
+
 export type PalworldOfficialLocaleManifest = {
   schemaVersion: 1;
   release: string;
@@ -280,6 +345,7 @@ export type PalworldOfficialLocaleCoverageArtifact = {
 export type PalworldOfficialLocaleOverlayArtifacts = {
   officialSourceFields: PalworldOfficialLocaleSourceFieldsArtifact;
   activeSkillEvidence: PalworldActiveSkillLocaleEvidence;
+  passiveSkillEvidence: PalworldPassiveSkillLocaleEvidence;
   compatibility: PalworldOfficialLocaleCompatibilityArtifact;
   snapshots: Record<PalworldTranslationLocale, PalworldTranslationSnapshot>;
   coverage: Record<PalworldTranslationLocale, PalworldOfficialLocaleCoverageArtifact>;
@@ -293,6 +359,7 @@ export type BuildPalworldOfficialLocaleOverlayOptions = {
   reviewer: string;
   evidenceChecksum: string;
   activeSkillMappingFile: string;
+  passiveSkillMappingFile: string;
 };
 
 type FileInput = {
@@ -361,6 +428,22 @@ type ActiveSkillLocaleResolution = {
   }>;
 };
 
+type CandidatePassiveSkill = {
+  id: string;
+  sourceRowId: string;
+  sourceInternalId: string;
+  name: PalworldTranslationLocalizedCandidateValue;
+  description: PalworldTranslationLocalizedCandidateValue;
+};
+
+type PassiveSkillLocaleResolution = {
+  evidence: PalworldPassiveSkillLocaleEvidence;
+  byLegacySkillId: ReadonlyMap<string, {
+    candidate: CandidatePassiveSkill;
+    descriptionCompatible: boolean;
+  }>;
+};
+
 function fail(message: string): never {
   throw new TypeError(`Palworld 공식 locale overlay 오류: ${message}`);
 }
@@ -423,6 +506,24 @@ function integerAt(
     || value > maximum
   ) {
     fail(`${pathName}는 ${minimum}~${maximum} 범위 정수여야 합니다.`);
+  }
+  return value;
+}
+
+function finiteNumberAt(
+  value: unknown,
+  pathName: string,
+  minimum = -1_000_000,
+  maximum = 1_000_000,
+): number {
+  if (
+    typeof value !== "number"
+    || !Number.isFinite(value)
+    || value < minimum
+    || value > maximum
+    || Object.is(value, -0)
+  ) {
+    fail(`${pathName}는 ${minimum}~${maximum} 범위 유한 숫자여야 합니다.`);
   }
   return value;
 }
@@ -499,6 +600,27 @@ async function readJsonFile(filePath: string): Promise<FileInput> {
 
 function canonicalJson(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
+}
+
+function legacyPublicId(sourceInternalId: string): string {
+  const result = sourceInternalId
+    .replace(/([a-z0-9])([A-Z])/gu, "$1-$2")
+    .replace(/[^A-Za-z0-9]+/gu, "-")
+    .replace(/^-+|-+$/gu, "")
+    .toLocaleLowerCase("en-US");
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(result)) {
+    fail(`legacy public ID를 만들 수 없습니다: ${sourceInternalId}`);
+  }
+  return result;
+}
+
+function numericMeaningSequence(value: string | undefined): number[] {
+  if (value === undefined) return [];
+  return [...value.matchAll(/-?\d+(?:\.\d+)?/gu)].map((match) => {
+    const number = Number(match[0]);
+    if (!Number.isFinite(number)) fail("패시브 설명 숫자는 유한해야 합니다.");
+    return number;
+  });
 }
 
 function activeManifestAt(value: unknown): ActiveManifest {
@@ -859,6 +981,53 @@ function candidateActiveSkillsAt(
   };
 }
 
+function candidatePassiveSkillsAt(
+  candidateSkills: JsonRecord,
+): CandidatePassiveSkill[] {
+  const localizedById = sortedUniqueMap(
+    candidateEntitiesAt(candidateSkills.records, "candidate.skills.records")
+      .filter((record) => record.type === "passive"),
+    (record) => record.id,
+    "candidate.skills.passiveRecords",
+  );
+  const skills = arrayAt(
+    candidateSkills.records,
+    "candidate.skills.records",
+  ).flatMap((input, index): CandidatePassiveSkill[] => {
+    if (!isRecord(input) || input.type !== "passive") return [];
+    const entryPath = `candidate.skills.records[${index}]`;
+    const id = candidateCanonicalIdAt(input.id, `${entryPath}.id`);
+    const sourceRowId = stringAt(
+      input.sourceRowId,
+      `${entryPath}.sourceRowId`,
+      192,
+    );
+    const sourceInternalId = stringAt(
+      input.sourceInternalId,
+      `${entryPath}.sourceInternalId`,
+      192,
+    );
+    const localized = localizedById.get(id);
+    if (
+      id !== `passive:${sourceRowId}`
+      || sourceRowId !== sourceInternalId
+      || localized?.type !== "passive"
+      || localized.name === undefined
+      || localized.description === undefined
+    ) {
+      fail(`${entryPath} passive skill source identity 또는 locale이 올바르지 않습니다.`);
+    }
+    return [{
+      id,
+      sourceRowId,
+      sourceInternalId,
+      name: localized.name,
+      description: localized.description,
+    }];
+  });
+  return [...skills].sort((left, right) => left.id.localeCompare(right.id, "en"));
+}
+
 function officialActiveSkillPayload(input: {
   skill: CandidateActiveSkill;
   locale: PalworldTranslationLocale;
@@ -1099,6 +1268,189 @@ function buildActiveSkillLocaleResolution(input: {
   return { evidence, byLegacySkillId };
 }
 
+function buildPassiveSkillLocaleResolution(input: {
+  catalog: PalworldCatalogArtifact;
+  candidateSkills: JsonRecord;
+  candidateId: string;
+  sourceArchiveSha256: string;
+  activeCatalogSha256: string;
+  candidateSkillsSha256: string;
+  candidateImportReportSha256: string;
+  mapping: PalworldLegacyPassiveSkillLocaleMap;
+  mappingSha256: string;
+  localeByKey: Record<
+    PalworldTranslationLocale,
+    ReadonlyMap<string, PalworldTranslationCandidateLocaleRecord>
+  >;
+}): PassiveSkillLocaleResolution {
+  if (
+    input.mapping.activeRelease !== input.catalog.release
+    || input.mapping.candidateId !== input.candidateId
+    || input.mapping.activeCatalogSha256 !== input.activeCatalogSha256
+    || input.mapping.candidateSkillsSha256 !== input.candidateSkillsSha256
+    || input.mapping.candidateImportReportSha256
+      !== input.candidateImportReportSha256
+    || input.mapping.sourceArchiveSha256 !== input.sourceArchiveSha256
+  ) {
+    fail("passive skill locale map의 release/candidate/checksum pin이 실제 입력과 다릅니다.");
+  }
+  const candidates = candidatePassiveSkillsAt(input.candidateSkills);
+  const candidateById = sortedUniqueMap(
+    candidates,
+    (candidate) => candidate.id,
+    "candidate.passiveSkills",
+  );
+  const legacySkills = input.catalog.skills
+    .filter((skill) => skill.type === "passive")
+    .sort((left, right) => left.id.localeCompare(right.id, "en"));
+  const legacyById = sortedUniqueMap(
+    legacySkills,
+    (skill) => skill.id,
+    "active.passiveSkills",
+  );
+  if (
+    input.mapping.entries.length !== legacySkills.length
+    || input.mapping.entries.some((entry) => !legacyById.has(entry.legacySkillId))
+    || legacySkills.some((skill) =>
+      !input.mapping.entries.some((entry) => entry.legacySkillId === skill.id))
+  ) {
+    fail("passive skill locale map은 active passive skill 전체를 정확히 포함해야 합니다.");
+  }
+  const byLegacySkillId = new Map<string, {
+    candidate: CandidatePassiveSkill;
+    descriptionCompatible: boolean;
+  }>();
+  const usedCandidateIds = new Set<string>();
+  const entries: PalworldPassiveSkillLocaleEvidence["entries"] = [];
+
+  for (const mappingEntry of input.mapping.entries) {
+    const legacySkill = legacyById.get(mappingEntry.legacySkillId)
+      ?? fail(`${mappingEntry.legacySkillId} active passive skill이 없습니다.`);
+    const candidate = candidateById.get(mappingEntry.candidateSkillId)
+      ?? fail(`${mappingEntry.candidateSkillId} candidate passive skill이 없습니다.`);
+    if (candidate.sourceRowId !== mappingEntry.candidateSourceRowId) {
+      fail(`${legacySkill.id} mapping source row가 candidate와 일치하지 않습니다.`);
+    }
+    if (usedCandidateIds.has(candidate.id)) {
+      fail(`${candidate.id} candidate passive skill이 중복 연결되었습니다.`);
+    }
+    usedCandidateIds.add(candidate.id);
+    const expectedLegacyIdPrefix =
+      `passive-${legacyPublicId(`Passive_${candidate.sourceRowId}`).slice(0, 84)}-`;
+    const escapedPrefix = expectedLegacyIdPrefix.replace(
+      /[.*+?^${}()|[\]\\]/gu,
+      "\\$&",
+    );
+    if (
+      !new RegExp(`^${escapedPrefix}[a-f0-9]{10}$`, "u")
+        .test(legacySkill.id)
+    ) {
+      fail(`${legacySkill.id} legacy passive ID 형식이 exact prefix와 일치하지 않습니다.`);
+    }
+
+    const nameLocalePayloadSha256 =
+      {} as Record<PalworldTranslationLocale, string>;
+    const officialDescriptions = {} as Record<
+      PalworldTranslationLocale,
+      ReturnType<typeof palworldTranslationOfficialLocaleValue>
+    >;
+    for (const locale of LOCALES) {
+      const name = palworldTranslationOfficialLocaleValue(
+        candidate.name,
+        locale,
+        input.localeByKey[locale],
+        true,
+      );
+      if (
+        name === undefined
+        || candidate.name[`${locale}Status`] !== "source_provided"
+      ) {
+        fail(`${candidate.id} ${locale} 공식 passive 이름이 source_provided가 아닙니다.`);
+      }
+      nameLocalePayloadSha256[locale] = sha256(name.text);
+      officialDescriptions[locale] = palworldTranslationOfficialLocaleValue(
+        candidate.description,
+        locale,
+        input.localeByKey[locale],
+        true,
+      );
+    }
+
+    const legacyNumbers = numericMeaningSequence(legacySkill.descriptionEn);
+    const candidateNumbers = {
+      ko: numericMeaningSequence(officialDescriptions.ko?.text),
+      ja: numericMeaningSequence(officialDescriptions.ja?.text),
+    };
+    const descriptionHasSource = LOCALES.every((locale) =>
+      officialDescriptions[locale] !== undefined
+      && candidate.description[`${locale}Status`] === "source_provided"
+      && candidate.description[`${locale}RichTextStatus`] === "resolved");
+    const descriptionCompatible = descriptionHasSource
+      && canonicalJson(candidateNumbers.ko) === canonicalJson(legacyNumbers)
+      && canonicalJson(candidateNumbers.ja) === canonicalJson(legacyNumbers);
+    const descriptionStatus = !descriptionHasSource
+      ? "missing_source" as const
+      : descriptionCompatible
+        ? "compatible" as const
+        : "numeric_mismatch" as const;
+
+    byLegacySkillId.set(legacySkill.id, {
+      candidate,
+      descriptionCompatible,
+    });
+    entries.push({
+      legacySkillId: legacySkill.id,
+      candidateSkillId: candidate.id,
+      candidateSourceRowId: candidate.sourceRowId,
+      candidateSourceInternalId: candidate.sourceInternalId,
+      expectedLegacyIdPrefix,
+      joinGuard: "legacy_public_id_prefix_exact",
+      nameLocalePayloadSha256,
+      description: {
+        status: descriptionStatus,
+        legacyNumbers,
+        candidateNumbers,
+        ...(descriptionCompatible
+          ? {
+              localePayloadSha256: {
+                ko: sha256(officialDescriptions.ko!.text),
+                ja: sha256(officialDescriptions.ja!.text),
+              },
+            }
+          : {}),
+      },
+    });
+  }
+
+  const evidence = assertPalworldPassiveSkillLocaleEvidenceArtifact({
+    schemaVersion: 1,
+    release: input.catalog.release,
+    status: PASSIVE_SKILL_EVIDENCE_STATUS,
+    candidateId: input.candidateId,
+    joinRule: PASSIVE_SKILL_MAPPING_JOIN_RULE,
+    inputs: {
+      activeCatalogSha256: input.activeCatalogSha256,
+      candidateSkillsSha256: input.candidateSkillsSha256,
+      candidateImportReportSha256: input.candidateImportReportSha256,
+      sourceArchiveSha256: input.sourceArchiveSha256,
+      mappingSha256: input.mappingSha256,
+    },
+    counts: {
+      activePassiveSkills: legacySkills.length,
+      exactMatches: entries.length,
+      officialNames: entries.length,
+      compatibleDescriptions: entries.filter((entry) =>
+        entry.description.status === "compatible").length,
+      missingSourceDescriptions: entries.filter((entry) =>
+        entry.description.status === "missing_source").length,
+      numericMismatchDescriptions: entries.filter((entry) =>
+        entry.description.status === "numeric_mismatch").length,
+    },
+    entries,
+  });
+  return { evidence, byLegacySkillId };
+}
+
 function sourceLockAt(value: unknown): CandidateSourceLock {
   const root = value as JsonRecord;
   const candidateId = stringAt(root.candidateId, "sourceLock.candidateId", 64);
@@ -1307,6 +1659,118 @@ export function assertPalworldLegacyActiveSkillLocaleMap(
       "legacyActiveSkillLocaleMap.sourceArchiveSha256",
     ),
     reviewedExceptions,
+  };
+}
+
+export function assertPalworldLegacyPassiveSkillLocaleMap(
+  value: unknown,
+): PalworldLegacyPassiveSkillLocaleMap {
+  const root = recordAt(value, "legacyPassiveSkillLocaleMap", [
+    "schemaVersion",
+    "activeRelease",
+    "candidateId",
+    "joinRule",
+    "activeCatalogSha256",
+    "candidateSkillsSha256",
+    "candidateImportReportSha256",
+    "sourceArchiveSha256",
+    "entries",
+  ]);
+  if (
+    root.schemaVersion !== 1
+    || root.joinRule !== PASSIVE_SKILL_MAPPING_JOIN_RULE
+  ) {
+    fail("legacyPassiveSkillLocaleMap identity가 올바르지 않습니다.");
+  }
+  let previousIdentity = "";
+  const seenCandidates = new Set<string>();
+  const entries = arrayAt(
+    root.entries,
+    "legacyPassiveSkillLocaleMap.entries",
+    1_000,
+  ).map((input, index) => {
+    const entryPath = `legacyPassiveSkillLocaleMap.entries[${index}]`;
+    const entry = recordAt(input, entryPath, [
+      "legacySkillId",
+      "candidateSkillId",
+      "candidateSourceRowId",
+      "reason",
+      "reviewStatus",
+    ]);
+    const legacySkillId = safeIdAt(entry.legacySkillId, `${entryPath}.legacySkillId`);
+    const candidateSkillId = candidateCanonicalIdAt(
+      entry.candidateSkillId,
+      `${entryPath}.candidateSkillId`,
+    );
+    const candidateSourceRowId = stringAt(
+      entry.candidateSourceRowId,
+      `${entryPath}.candidateSourceRowId`,
+      192,
+    );
+    const expectedLegacyIdPrefix =
+      `passive-${legacyPublicId(`Passive_${candidateSourceRowId}`).slice(0, 84)}-`;
+    const escapedPrefix = expectedLegacyIdPrefix.replace(
+      /[.*+?^${}()|[\]\\]/gu,
+      "\\$&",
+    );
+    const identity = `${legacySkillId}\0${candidateSkillId}`;
+    if (
+      previousIdentity !== ""
+      && previousIdentity.localeCompare(identity, "en") >= 0
+    ) {
+      fail(`${entryPath}가 중복되었거나 정렬되지 않았습니다.`);
+    }
+    previousIdentity = identity;
+    if (
+      !new RegExp(`^${escapedPrefix}[a-f0-9]{10}$`, "u").test(legacySkillId)
+      || candidateSkillId !== `passive:${candidateSourceRowId}`
+      || seenCandidates.has(candidateSkillId)
+      || entry.reviewStatus !== "approved"
+    ) {
+      fail(`${entryPath}의 passive exact mapping이 올바르지 않습니다.`);
+    }
+    seenCandidates.add(candidateSkillId);
+    return {
+      legacySkillId,
+      candidateSkillId,
+      candidateSourceRowId,
+      reason: stringAt(entry.reason, `${entryPath}.reason`, 1_000),
+      reviewStatus: "approved" as const,
+    };
+  });
+  if (entries.length === 0) {
+    fail("legacyPassiveSkillLocaleMap.entries가 비었습니다.");
+  }
+  return {
+    schemaVersion: 1,
+    activeRelease: stringAt(
+      root.activeRelease,
+      "legacyPassiveSkillLocaleMap.activeRelease",
+      64,
+    ),
+    candidateId: stringAt(
+      root.candidateId,
+      "legacyPassiveSkillLocaleMap.candidateId",
+      64,
+    ),
+    joinRule: PASSIVE_SKILL_MAPPING_JOIN_RULE,
+    activeCatalogSha256: sha256At(
+      root.activeCatalogSha256,
+      "legacyPassiveSkillLocaleMap.activeCatalogSha256",
+    ),
+    candidateSkillsSha256: sha256At(
+      root.candidateSkillsSha256,
+      "legacyPassiveSkillLocaleMap.candidateSkillsSha256",
+    ),
+    candidateImportReportSha256: sha256At(
+      root.candidateImportReportSha256,
+      "legacyPassiveSkillLocaleMap.candidateImportReportSha256",
+    ),
+    sourceArchiveSha256: sha256At(
+      root.sourceArchiveSha256,
+      "legacyPassiveSkillLocaleMap.sourceArchiveSha256",
+    ),
+    entries,
   };
 }
 
@@ -1613,6 +2077,269 @@ export function assertPalworldActiveSkillLocaleEvidenceArtifact(
   };
 }
 
+export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
+  value: unknown,
+): PalworldPassiveSkillLocaleEvidence {
+  const root = recordAt(value, "passiveSkillLocaleEvidence", [
+    "schemaVersion",
+    "release",
+    "status",
+    "candidateId",
+    "joinRule",
+    "inputs",
+    "counts",
+    "entries",
+  ]);
+  if (
+    root.schemaVersion !== 1
+    || root.status !== PASSIVE_SKILL_EVIDENCE_STATUS
+    || root.joinRule !== PASSIVE_SKILL_MAPPING_JOIN_RULE
+  ) {
+    fail("passiveSkillLocaleEvidence identity가 올바르지 않습니다.");
+  }
+  const inputRoot = recordAt(root.inputs, "passiveSkillLocaleEvidence.inputs", [
+    "activeCatalogSha256",
+    "candidateSkillsSha256",
+    "candidateImportReportSha256",
+    "sourceArchiveSha256",
+    "mappingSha256",
+  ]);
+  const inputs = {
+    activeCatalogSha256: sha256At(
+      inputRoot.activeCatalogSha256,
+      "passiveSkillLocaleEvidence.inputs.activeCatalogSha256",
+    ),
+    candidateSkillsSha256: sha256At(
+      inputRoot.candidateSkillsSha256,
+      "passiveSkillLocaleEvidence.inputs.candidateSkillsSha256",
+    ),
+    candidateImportReportSha256: sha256At(
+      inputRoot.candidateImportReportSha256,
+      "passiveSkillLocaleEvidence.inputs.candidateImportReportSha256",
+    ),
+    sourceArchiveSha256: sha256At(
+      inputRoot.sourceArchiveSha256,
+      "passiveSkillLocaleEvidence.inputs.sourceArchiveSha256",
+    ),
+    mappingSha256: sha256At(
+      inputRoot.mappingSha256,
+      "passiveSkillLocaleEvidence.inputs.mappingSha256",
+    ),
+  };
+  let previousLegacySkillId = "";
+  const seenCandidateSkillIds = new Set<string>();
+  const entries = arrayAt(
+    root.entries,
+    "passiveSkillLocaleEvidence.entries",
+    1_000,
+  ).map((input, index) => {
+    const entryPath = `passiveSkillLocaleEvidence.entries[${index}]`;
+    const entry = recordAt(input, entryPath, [
+      "legacySkillId",
+      "candidateSkillId",
+      "candidateSourceRowId",
+      "candidateSourceInternalId",
+      "expectedLegacyIdPrefix",
+      "joinGuard",
+      "nameLocalePayloadSha256",
+      "description",
+    ]);
+    const legacySkillId = safeIdAt(entry.legacySkillId, `${entryPath}.legacySkillId`);
+    const candidateSkillId = candidateCanonicalIdAt(
+      entry.candidateSkillId,
+      `${entryPath}.candidateSkillId`,
+    );
+    const candidateSourceRowId = stringAt(
+      entry.candidateSourceRowId,
+      `${entryPath}.candidateSourceRowId`,
+      192,
+    );
+    const candidateSourceInternalId = stringAt(
+      entry.candidateSourceInternalId,
+      `${entryPath}.candidateSourceInternalId`,
+      192,
+    );
+    const expectedLegacyIdPrefix = stringAt(
+      entry.expectedLegacyIdPrefix,
+      `${entryPath}.expectedLegacyIdPrefix`,
+      192,
+    );
+    const calculatedPrefix =
+      `passive-${legacyPublicId(`Passive_${candidateSourceRowId}`).slice(0, 84)}-`;
+    const escapedPrefix = calculatedPrefix.replace(
+      /[.*+?^${}()|[\]\\]/gu,
+      "\\$&",
+    );
+    if (
+      (previousLegacySkillId !== ""
+        && previousLegacySkillId.localeCompare(legacySkillId, "en") >= 0)
+      || seenCandidateSkillIds.has(candidateSkillId)
+      || candidateSkillId !== `passive:${candidateSourceRowId}`
+      || candidateSourceInternalId !== candidateSourceRowId
+      || expectedLegacyIdPrefix !== calculatedPrefix
+      || !new RegExp(`^${escapedPrefix}[a-f0-9]{10}$`, "u").test(legacySkillId)
+      || entry.joinGuard !== "legacy_public_id_prefix_exact"
+    ) {
+      fail(`${entryPath}의 passive exact join evidence가 올바르지 않습니다.`);
+    }
+    previousLegacySkillId = legacySkillId;
+    seenCandidateSkillIds.add(candidateSkillId);
+    const nameHashes = recordAt(
+      entry.nameLocalePayloadSha256,
+      `${entryPath}.nameLocalePayloadSha256`,
+      LOCALES,
+    );
+    const nameLocalePayloadSha256 = {
+      ko: sha256At(nameHashes.ko, `${entryPath}.nameLocalePayloadSha256.ko`),
+      ja: sha256At(nameHashes.ja, `${entryPath}.nameLocalePayloadSha256.ja`),
+    };
+    const descriptionRoot = recordAt(entry.description, `${entryPath}.description`, [
+      "status",
+      "legacyNumbers",
+      "candidateNumbers",
+      "localePayloadSha256",
+    ]);
+    if (
+      descriptionRoot.status !== "compatible"
+      && descriptionRoot.status !== "missing_source"
+      && descriptionRoot.status !== "numeric_mismatch"
+    ) {
+      fail(`${entryPath}.description.status가 올바르지 않습니다.`);
+    }
+    const descriptionStatus = descriptionRoot.status as
+      | "compatible"
+      | "missing_source"
+      | "numeric_mismatch";
+    const numberArray = (value: unknown, pathName: string): number[] =>
+      arrayAt(value, pathName, 64).map((number, numberIndex) =>
+        finiteNumberAt(number, `${pathName}[${numberIndex}]`));
+    const legacyNumbers = numberArray(
+      descriptionRoot.legacyNumbers,
+      `${entryPath}.description.legacyNumbers`,
+    );
+    const candidateNumbersRoot = recordAt(
+      descriptionRoot.candidateNumbers,
+      `${entryPath}.description.candidateNumbers`,
+      LOCALES,
+    );
+    const candidateNumbers = {
+      ko: numberArray(
+        candidateNumbersRoot.ko,
+        `${entryPath}.description.candidateNumbers.ko`,
+      ),
+      ja: numberArray(
+        candidateNumbersRoot.ja,
+        `${entryPath}.description.candidateNumbers.ja`,
+      ),
+    };
+    const numbersMatch = LOCALES.every((locale) =>
+      canonicalJson(candidateNumbers[locale]) === canonicalJson(legacyNumbers));
+    let localePayloadSha256:
+      | Record<PalworldTranslationLocale, string>
+      | undefined;
+    if (descriptionRoot.localePayloadSha256 !== undefined) {
+      const hashes = recordAt(
+        descriptionRoot.localePayloadSha256,
+        `${entryPath}.description.localePayloadSha256`,
+        LOCALES,
+      );
+      localePayloadSha256 = {
+        ko: sha256At(hashes.ko, `${entryPath}.description.localePayloadSha256.ko`),
+        ja: sha256At(hashes.ja, `${entryPath}.description.localePayloadSha256.ja`),
+      };
+    }
+    if (
+      (descriptionStatus === "compatible"
+        && (!numbersMatch || localePayloadSha256 === undefined))
+      || (descriptionStatus === "numeric_mismatch"
+        && (numbersMatch || localePayloadSha256 !== undefined))
+      || (descriptionStatus === "missing_source"
+        && localePayloadSha256 !== undefined)
+    ) {
+      fail(`${entryPath}.description 상태와 수치/hash evidence가 일치하지 않습니다.`);
+    }
+    return {
+      legacySkillId,
+      candidateSkillId,
+      candidateSourceRowId,
+      candidateSourceInternalId,
+      expectedLegacyIdPrefix,
+      joinGuard: "legacy_public_id_prefix_exact" as const,
+      nameLocalePayloadSha256,
+      description: {
+        status: descriptionStatus,
+        legacyNumbers,
+        candidateNumbers,
+        ...(localePayloadSha256 === undefined ? {} : { localePayloadSha256 }),
+      },
+    };
+  });
+  const countsRoot = recordAt(root.counts, "passiveSkillLocaleEvidence.counts", [
+    "activePassiveSkills",
+    "exactMatches",
+    "officialNames",
+    "compatibleDescriptions",
+    "missingSourceDescriptions",
+    "numericMismatchDescriptions",
+  ]);
+  const counts = {
+    activePassiveSkills: integerAt(
+      countsRoot.activePassiveSkills,
+      "passiveSkillLocaleEvidence.counts.activePassiveSkills",
+    ),
+    exactMatches: integerAt(
+      countsRoot.exactMatches,
+      "passiveSkillLocaleEvidence.counts.exactMatches",
+    ),
+    officialNames: integerAt(
+      countsRoot.officialNames,
+      "passiveSkillLocaleEvidence.counts.officialNames",
+    ),
+    compatibleDescriptions: integerAt(
+      countsRoot.compatibleDescriptions,
+      "passiveSkillLocaleEvidence.counts.compatibleDescriptions",
+    ),
+    missingSourceDescriptions: integerAt(
+      countsRoot.missingSourceDescriptions,
+      "passiveSkillLocaleEvidence.counts.missingSourceDescriptions",
+    ),
+    numericMismatchDescriptions: integerAt(
+      countsRoot.numericMismatchDescriptions,
+      "passiveSkillLocaleEvidence.counts.numericMismatchDescriptions",
+    ),
+  };
+  if (
+    counts.activePassiveSkills !== entries.length
+    || counts.exactMatches !== entries.length
+    || counts.officialNames !== entries.length
+    || counts.compatibleDescriptions
+      !== entries.filter((entry) => entry.description.status === "compatible").length
+    || counts.missingSourceDescriptions
+      !== entries.filter((entry) => entry.description.status === "missing_source").length
+    || counts.numericMismatchDescriptions
+      !== entries.filter((entry) => entry.description.status === "numeric_mismatch").length
+    || counts.compatibleDescriptions
+      + counts.missingSourceDescriptions
+      + counts.numericMismatchDescriptions !== entries.length
+  ) {
+    fail("passiveSkillLocaleEvidence counts가 실제 entries와 일치하지 않습니다.");
+  }
+  return {
+    schemaVersion: 1,
+    release: stringAt(root.release, "passiveSkillLocaleEvidence.release", 64),
+    status: PASSIVE_SKILL_EVIDENCE_STATUS,
+    candidateId: stringAt(
+      root.candidateId,
+      "passiveSkillLocaleEvidence.candidateId",
+      64,
+    ),
+    joinRule: PASSIVE_SKILL_MAPPING_JOIN_RULE,
+    inputs,
+    counts,
+    entries,
+  };
+}
+
 export function assertPalworldOfficialLocaleSourceFieldsArtifact(
   value: unknown,
 ): PalworldOfficialLocaleSourceFieldsArtifact {
@@ -1682,6 +2409,7 @@ export function assertPalworldOfficialLocaleSourceFieldsArtifact(
       sourceIdentityJoinRule !== "source_internal_id_exact"
       && sourceIdentityJoinRule !== "versioned_alias_exact"
       && sourceIdentityJoinRule !== "assignment_identity_exact"
+      && sourceIdentityJoinRule !== "legacy_public_id_prefix_exact"
     ) {
       fail(`${entryPath}.sourceIdentityJoinRule이 올바르지 않습니다.`);
     }
@@ -1689,6 +2417,7 @@ export function assertPalworldOfficialLocaleSourceFieldsArtifact(
       record.joinRule !== JOIN_RULE
       && record.joinRule !== PARTNER_JOIN_RULE
       && record.joinRule !== ACTIVE_SKILL_JOIN_RULE
+      && record.joinRule !== PASSIVE_SKILL_JOIN_RULE
     ) {
       fail(`${entryPath}.joinRule이 올바르지 않습니다.`);
     }
@@ -1718,6 +2447,17 @@ export function assertPalworldOfficialLocaleSourceFieldsArtifact(
       )
     ) {
       fail(`${entryPath}.joinRule과 legacy active assignment identity가 일치하지 않습니다.`);
+    }
+    if (
+      record.joinRule === PASSIVE_SKILL_JOIN_RULE
+      && (
+        kind !== "skill"
+        || !id.startsWith("passive-")
+        || !candidateCanonicalId.startsWith("passive:")
+        || sourceIdentityJoinRule !== "legacy_public_id_prefix_exact"
+      )
+    ) {
+      fail(`${entryPath}.joinRule과 legacy passive exact mapping이 일치하지 않습니다.`);
     }
     const messageKey = stringAt(record.messageKey, `${entryPath}.messageKey`, 192);
     if (!SAFE_MESSAGE_KEY_PATTERN.test(messageKey)) {
@@ -2047,6 +2787,7 @@ export function assertPalworldOfficialLocaleCoverageArtifact(
 export type PalworldOfficialLocaleCompatibilityExpectedOutputs = {
   officialSourceFields: string | Uint8Array;
   activeSkillEvidence?: string | Uint8Array;
+  passiveSkillEvidence?: string | Uint8Array;
   ko: string | Uint8Array;
   ja: string | Uint8Array;
   manifest: string | Uint8Array;
@@ -2117,6 +2858,7 @@ export function assertPalworldOfficialLocaleCompatibilityArtifact(
       "archive",
       "mappings",
       "activeSkillLocaleMapSha256",
+      "passiveSkillLocaleMapSha256",
     ],
   );
   if (candidate.activationEligible !== false) {
@@ -2235,6 +2977,7 @@ export function assertPalworldOfficialLocaleCompatibilityArtifact(
   const outputs = recordAt(root.outputs, "officialLocaleCompatibility.outputs", [
     "officialSourceFieldsSha256",
     "activeSkillEvidenceSha256",
+    "passiveSkillEvidenceSha256",
     "localeSha256",
     "manifestSha256",
     "translationRevision",
@@ -2257,6 +3000,14 @@ export function assertPalworldOfficialLocaleCompatibilityArtifact(
             "outputs.activeSkillEvidenceSha256",
           ),
         }),
+    ...(outputs.passiveSkillEvidenceSha256 === undefined
+      ? {}
+      : {
+          passiveSkillEvidenceSha256: sha256At(
+            outputs.passiveSkillEvidenceSha256,
+            "outputs.passiveSkillEvidenceSha256",
+          ),
+        }),
     localeSha256: {
       ko: sha256At(outputLocale.ko, "outputs.localeSha256.ko"),
       ja: sha256At(outputLocale.ja, "outputs.localeSha256.ja"),
@@ -2274,6 +3025,12 @@ export function assertPalworldOfficialLocaleCompatibilityArtifact(
   ) {
     fail("active skill locale map과 evidence checksum은 함께 있어야 합니다.");
   }
+  if (
+    (candidate.passiveSkillLocaleMapSha256 === undefined)
+      !== (parsedOutputs.passiveSkillEvidenceSha256 === undefined)
+  ) {
+    fail("passive skill locale map과 evidence checksum은 함께 있어야 합니다.");
+  }
   if (expectedOutputs !== undefined) {
     if (
       (expectedOutputs.activeSkillEvidence === undefined)
@@ -2281,11 +3038,20 @@ export function assertPalworldOfficialLocaleCompatibilityArtifact(
     ) {
       fail("검증 대상 active skill evidence bytes가 compatibility와 일치하지 않습니다.");
     }
+    if (
+      (expectedOutputs.passiveSkillEvidence === undefined)
+        !== (parsedOutputs.passiveSkillEvidenceSha256 === undefined)
+    ) {
+      fail("검증 대상 passive skill evidence bytes가 compatibility와 일치하지 않습니다.");
+    }
     const expectedHashes = {
       officialSourceFieldsSha256: sha256(expectedOutputs.officialSourceFields),
       ...(expectedOutputs.activeSkillEvidence === undefined
         ? {}
         : { activeSkillEvidenceSha256: sha256(expectedOutputs.activeSkillEvidence) }),
+      ...(expectedOutputs.passiveSkillEvidence === undefined
+        ? {}
+        : { passiveSkillEvidenceSha256: sha256(expectedOutputs.passiveSkillEvidence) }),
       localeSha256: {
         ko: sha256(expectedOutputs.ko),
         ja: sha256(expectedOutputs.ja),
@@ -2297,6 +3063,8 @@ export function assertPalworldOfficialLocaleCompatibilityArtifact(
         !== expectedHashes.officialSourceFieldsSha256
       || parsedOutputs.activeSkillEvidenceSha256
         !== expectedHashes.activeSkillEvidenceSha256
+      || parsedOutputs.passiveSkillEvidenceSha256
+        !== expectedHashes.passiveSkillEvidenceSha256
       || parsedOutputs.localeSha256.ko !== expectedHashes.localeSha256.ko
       || parsedOutputs.localeSha256.ja !== expectedHashes.localeSha256.ja
       || parsedOutputs.manifestSha256 !== expectedHashes.manifestSha256
@@ -2382,6 +3150,14 @@ export function assertPalworldOfficialLocaleCompatibilityArtifact(
                 "candidate.activeSkillLocaleMapSha256",
               ),
             }),
+        ...(candidate.passiveSkillLocaleMapSha256 === undefined
+          ? {}
+          : {
+              passiveSkillLocaleMapSha256: sha256At(
+                candidate.passiveSkillLocaleMapSha256,
+                "candidate.passiveSkillLocaleMapSha256",
+              ),
+            }),
       },
     },
     outputs: parsedOutputs,
@@ -2393,6 +3169,7 @@ export function serializePalworldOfficialLocaleOverlayArtifact(
   value:
     | PalworldOfficialLocaleSourceFieldsArtifact
     | PalworldActiveSkillLocaleEvidence
+    | PalworldPassiveSkillLocaleEvidence
     | PalworldOfficialLocaleCompatibilityArtifact
     | PalworldOfficialLocaleCoverageArtifact
     | PalworldOfficialLocaleManifest
@@ -2406,6 +3183,14 @@ export function serializePalworldOfficialLocaleOverlayArtifact(
     && valueRecord.joinRule === ACTIVE_SKILL_MAPPING_JOIN_RULE
   ) {
     return canonicalJson(assertPalworldActiveSkillLocaleEvidenceArtifact(value));
+  }
+  if (
+    isRecord(valueRecord)
+    && valueRecord.status === PASSIVE_SKILL_EVIDENCE_STATUS
+    && Object.hasOwn(valueRecord, "entries")
+    && valueRecord.joinRule === PASSIVE_SKILL_MAPPING_JOIN_RULE
+  ) {
+    return canonicalJson(assertPalworldPassiveSkillLocaleEvidenceArtifact(value));
   }
   if (
     isRecord(valueRecord)
@@ -2527,6 +3312,10 @@ function candidateEntityInfo(input: {
   activeSkillCompatibilityByLegacyId: ReadonlyMap<string, {
     candidates: readonly CandidateActiveSkill[];
   }>;
+  passiveSkillCompatibilityByLegacyId: ReadonlyMap<string, {
+    candidate: CandidatePassiveSkill;
+    descriptionCompatible: boolean;
+  }>;
   aliasApplications: readonly PalworldTranslationReviewJsonRecord[];
 }): {
   activeSourceInternalId: string;
@@ -2567,6 +3356,17 @@ function candidateEntityInfo(input: {
       candidateSourceInternalId: candidate.sourceInternalId,
       sourceIdentityJoinRule: "assignment_identity_exact",
       joinRule: ACTIVE_SKILL_JOIN_RULE,
+    };
+  }
+  if (input.id.startsWith("passive-")) {
+    const resolution = input.passiveSkillCompatibilityByLegacyId.get(input.id);
+    if (resolution === undefined) return undefined;
+    return {
+      activeSourceInternalId: input.id,
+      candidateCanonicalId: resolution.candidate.id,
+      candidateSourceInternalId: resolution.candidate.sourceInternalId,
+      sourceIdentityJoinRule: "legacy_public_id_prefix_exact",
+      joinRule: PASSIVE_SKILL_JOIN_RULE,
     };
   }
   if (!input.id.startsWith("partner-")) return undefined;
@@ -2628,6 +3428,7 @@ export async function buildPalworldOfficialLocaleOverlay(
     candidateSourceLockFile,
     candidateRuntimeManifestFile,
     activeSkillMappingFile,
+    passiveSkillMappingFile,
   ] = await Promise.all([
     readJsonFile(path.join(activeReleaseRoot, "catalog.json")),
     readJsonFile(path.join(activeReleaseRoot, "paldex.json")),
@@ -2645,6 +3446,7 @@ export async function buildPalworldOfficialLocaleOverlay(
     readJsonFile(path.join(candidateRoot, "source-lock.json")),
     readJsonFile(path.join(candidateRoot, "runtime-manifest.candidate.json")),
     readJsonFile(path.resolve(options.activeSkillMappingFile)),
+    readJsonFile(path.resolve(options.passiveSkillMappingFile)),
   ]);
 
   const catalog = assertPalworldCatalogArtifact(activeCatalogFile.raw);
@@ -2772,6 +3574,9 @@ export async function buildPalworldOfficialLocaleOverlay(
   const activeSkillMapping = assertPalworldLegacyActiveSkillLocaleMap(
     activeSkillMappingFile.raw,
   );
+  const passiveSkillMapping = assertPalworldLegacyPassiveSkillLocaleMap(
+    passiveSkillMappingFile.raw,
+  );
   const runtimeArtifactHashes = candidateArtifactHashesAt(candidateRuntimeManifest);
   const candidateFiles: Record<string, FileInput> = {
     "import-report.json": candidateReportFile,
@@ -2895,11 +3700,25 @@ export async function buildPalworldOfficialLocaleOverlay(
     mappingSha256: activeSkillMappingFile.sha256,
     localeByKey,
   });
+  const passiveSkillResolution = buildPassiveSkillLocaleResolution({
+    catalog,
+    candidateSkills,
+    candidateId,
+    sourceArchiveSha256: sourceLock.archive.sha256,
+    activeCatalogSha256: activeCatalogFile.sha256,
+    candidateSkillsSha256: candidateSkillsFile.sha256,
+    candidateImportReportSha256: candidateReportFile.sha256,
+    mapping: passiveSkillMapping,
+    mappingSha256: passiveSkillMappingFile.sha256,
+    localeByKey,
+  });
   const lookupSources = {
     ...activeMaps,
     ...candidateMaps,
     activeSkillCompatibilityByLegacyId:
       activeSkillResolution.byLegacySkillId,
+    passiveSkillCompatibilityByLegacyId:
+      passiveSkillResolution.byLegacySkillId,
     aliasApplications,
   };
   const officialRecords: PalworldOfficialLocaleSourceField[] = [];
@@ -2912,18 +3731,29 @@ export async function buildPalworldOfficialLocaleOverlay(
         ? activeSkillResolution.byLegacySkillId
             .get(sourceRecord.id)?.candidates[0]
         : undefined;
-      const localized = activeSkillCandidate === undefined
-        ? palworldTranslationLocalizedValueFor(
-            sourceRecord.kind,
-            sourceRecord.id,
-            field,
-            lookupSources,
-          )
-        : field === "name"
+      const passiveSkillResolutionEntry = sourceRecord.kind === "skill"
+        && sourceRecord.id.startsWith("passive-")
+        ? passiveSkillResolution.byLegacySkillId.get(sourceRecord.id)
+        : undefined;
+      const localized = activeSkillCandidate !== undefined
+        ? field === "name"
           ? activeSkillCandidate.name
           : field === "description"
             ? activeSkillCandidate.description
-            : undefined;
+            : undefined
+        : passiveSkillResolutionEntry !== undefined
+          ? field === "name"
+            ? passiveSkillResolutionEntry.candidate.name
+            : field === "description"
+              && passiveSkillResolutionEntry.descriptionCompatible
+              ? passiveSkillResolutionEntry.candidate.description
+              : undefined
+          : palworldTranslationLocalizedValueFor(
+              sourceRecord.kind,
+              sourceRecord.id,
+              field,
+              lookupSources,
+            );
       const entityInfo = candidateEntityInfo({
         kind: sourceRecord.kind,
         id: sourceRecord.id,
@@ -2931,6 +3761,8 @@ export async function buildPalworldOfficialLocaleOverlay(
         ...candidateMaps,
         activeSkillCompatibilityByLegacyId:
           activeSkillResolution.byLegacySkillId,
+        passiveSkillCompatibilityByLegacyId:
+          passiveSkillResolution.byLegacySkillId,
         aliasApplications,
       });
       if (localized === undefined || entityInfo === undefined) {
@@ -3024,6 +3856,8 @@ export async function buildPalworldOfficialLocaleOverlay(
   const officialSourceFieldsSha256 = sha256(officialSourceFieldsText);
   const activeSkillEvidenceText = canonicalJson(activeSkillResolution.evidence);
   const activeSkillEvidenceSha256 = sha256(activeSkillEvidenceText);
+  const passiveSkillEvidenceText = canonicalJson(passiveSkillResolution.evidence);
+  const passiveSkillEvidenceSha256 = sha256(passiveSkillEvidenceText);
   const translationRevision =
     `official-locale-overlay-${officialSourceFieldsSha256.slice(0, 16)}`
     + `-${evidenceChecksum.slice(0, 8)}`;
@@ -3232,11 +4066,13 @@ export async function buildPalworldOfficialLocaleOverlay(
         archive: sourceLock.archive,
         mappings: sourceLock.mappings,
         activeSkillLocaleMapSha256: activeSkillMappingFile.sha256,
+        passiveSkillLocaleMapSha256: passiveSkillMappingFile.sha256,
       },
     },
     outputs: {
       officialSourceFieldsSha256,
       activeSkillEvidenceSha256,
+      passiveSkillEvidenceSha256,
       localeSha256: {
         ko: sha256(snapshotTexts.ko),
         ja: sha256(snapshotTexts.ja),
@@ -3265,6 +4101,7 @@ export async function buildPalworldOfficialLocaleOverlay(
     assertPalworldOfficialLocaleCompatibilityArtifact(compatibility, {
       officialSourceFields: officialSourceFieldsText,
       activeSkillEvidence: activeSkillEvidenceText,
+      passiveSkillEvidence: passiveSkillEvidenceText,
       ko: snapshotTexts.ko,
       ja: snapshotTexts.ja,
       manifest: manifestText,
@@ -3272,6 +4109,7 @@ export async function buildPalworldOfficialLocaleOverlay(
   return {
     officialSourceFields: validatedOfficialSourceFields,
     activeSkillEvidence: activeSkillResolution.evidence,
+    passiveSkillEvidence: passiveSkillResolution.evidence,
     compatibility: validatedCompatibility,
     snapshots,
     coverage,

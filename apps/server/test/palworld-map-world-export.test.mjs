@@ -6,10 +6,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const {
+  assertPalworldMapLocationMapImageEvidence,
   assertPalworldMapLocationClassMapping,
   deterministicMapLocationJson,
   PALWORLD_MAP_WORLD_EXPORT_SHA256
 } = await import("../dist/data/palworld-map-world-export.js");
+const {
+  assertPalworldMapImageManifest
+} = await import("../dist/data/palworld-map-image-manifest.js");
 const {
   createPalworldMapLocationsProvider,
   loadPalworldMapLocationsArtifact,
@@ -40,8 +44,18 @@ test("Maps.zip 위치 taxonomy는 exact actor class와 고정 원본 수량을 �
     egg: 1816,
     "skill-fruit": 47,
     lifmunk: 407,
-    journal: 64
+    journal: 64,
+    resource: 15662
   });
+  assert.equal(mapping.classes.length, 65);
+  assert.equal(
+    mapping.classes.filter((entry) => entry.category === "resource").length,
+    18
+  );
+  assert.equal(
+    mapping.candidateFamilies.some((entry) => entry.id === "resource"),
+    false
+  );
   assert.equal(
     new Set(mapping.classes.map((entry) => entry.sourceClass)).size,
     mapping.classes.length
@@ -59,7 +73,53 @@ test("Maps.zip 위치 taxonomy는 exact actor class와 고정 원본 수량을 �
   );
 });
 
-test("생성된 MainMap 위치 artifact는 raw 2656건 중 2543건을 포함하고 Tree 113건을 분리한다", async () => {
+test("세계수 transform evidence는 map image manifest의 source·output hash와 exact join한다", async () => {
+  const [mappingRaw, manifestRaw] = await Promise.all([
+    readFile(mappingPath, "utf8").then(JSON.parse),
+    readFile(
+      path.join(releaseRoot, "map-images-manifest.json"),
+      "utf8"
+    ).then(JSON.parse)
+  ]);
+  const mapping = assertPalworldMapLocationClassMapping(mappingRaw);
+  const manifest = assertPalworldMapImageManifest(manifestRaw, "1.0.1");
+  assert.doesNotThrow(() =>
+    assertPalworldMapLocationMapImageEvidence({
+      mapping,
+      mapImagesManifest: manifest
+    })
+  );
+  assert.throws(
+    () => assertPalworldMapLocationMapImageEvidence({
+      mapping,
+      mapImagesManifest: {
+        ...manifest,
+        entries: manifest.entries.map((entry) =>
+          entry.id === "tree"
+            ? { ...entry, sourceSha256: "0".repeat(64) }
+            : entry
+        )
+      }
+    }),
+    /세계수 source member·source SHA-256·output SHA-256 evidence/u
+  );
+  assert.throws(
+    () => assertPalworldMapLocationMapImageEvidence({
+      mapping,
+      mapImagesManifest: {
+        ...manifest,
+        entries: manifest.entries.map((entry) =>
+          entry.id === "tree"
+            ? { ...entry, outputSha256: "0".repeat(64) }
+            : entry
+        )
+      }
+    }),
+    /세계수 source member·source SHA-256·output SHA-256 evidence/u
+  );
+});
+
+test("생성된 위치 artifact는 raw 18,318건을 MainMap과 세계수 지도에 정확히 분리한다", async () => {
   const [artifactBytes, manifest, report] = await Promise.all([
     readFile(path.join(releaseRoot, "map-locations.json")),
     readFile(path.join(releaseRoot, "map-locations-manifest.json"), "utf8")
@@ -68,36 +128,58 @@ test("생성된 MainMap 위치 artifact는 raw 2656건 중 2543건을 포함하�
       .then(JSON.parse)
   ]);
   const artifact = await loadPalworldMapLocationsArtifact(releaseRoot);
-  assert.equal(artifact.totalLocations, 2543);
-  assert.equal(artifact.worlds.length, 1);
+  assert.equal(artifact.totalLocations, 18295);
+  assert.equal(artifact.worlds.length, 2);
   assert.equal(artifact.worlds[0].world, "main");
-  assert.equal(artifact.worlds[0].locationCount, 2543);
+  assert.equal(artifact.worlds[0].locationCount, 18102);
   assert.deepEqual(artifact.worlds[0].categoryCounts, {
     "fast-travel": 137,
     dungeon: 170,
     egg: 1786,
     "skill-fruit": 35,
     lifmunk: 360,
-    journal: 55
+    journal: 55,
+    resource: 15559
   });
-  assert.equal(report.counts.sourceActors, 2656);
-  assert.equal(report.excludedByReason.tree_world_without_active_map, 113);
+  assert.equal(artifact.worlds[1].world, "tree");
+  assert.equal(artifact.worlds[1].locationCount, 193);
+  assert.deepEqual(artifact.worlds[1].categoryCounts, {
+    "fast-travel": 15,
+    dungeon: 0,
+    egg: 30,
+    "skill-fruit": 12,
+    lifmunk: 47,
+    journal: 9,
+    resource: 80
+  });
+  assert.equal(report.counts.sourceActors, 18318);
+  assert.equal(report.excludedByReason.tree_world_without_active_map, 0);
+  assert.equal(report.excludedByReason.attached_parent_coordinate_unresolved, 0);
+  assert.equal(report.counts.exactDuplicates, 23);
   assert.equal(
     report.excludedByReason.outside_verified_main_and_tree_bounds,
     0
   );
-  assert.equal(report.integrityAudit.exactCoordinateCollisions, 0);
-  assert.equal(report.integrityAudit.reusedLevelObjectInstanceIds, 3);
+  assert.equal(report.integrityAudit.exactCoordinateCollisions, 23);
+  assert.equal(report.integrityAudit.reusedLevelObjectInstanceIds, 2126);
+  assert.equal(
+    report.counts.byCategory.resource.included
+      + report.counts.byCategory.resource.treeIncluded
+      + report.counts.byCategory.resource.coordinateUnresolved
+      + report.counts.byCategory.resource.outOfBoundsExcluded
+      + report.counts.byCategory.resource.exactDuplicates,
+    15662
+  );
   assert.equal(sha256(artifactBytes), manifest.artifactSha256);
   assert.equal(
     deterministicMapLocationJson(JSON.parse(artifactBytes.toString("utf8"))),
     artifactBytes.toString("utf8")
   );
   const subtypeCounts = new Map();
-  for (const entry of artifact.worlds[0].locations) {
+  for (const entry of artifact.worlds.flatMap((world) => world.locations)) {
     subtypeCounts.set(entry.subtype, (subtypeCounts.get(entry.subtype) ?? 0) + 1);
   }
-  assert.equal(subtypeCounts.get("statue-lifmunk"), 140);
+  assert.equal(subtypeCounts.get("statue-lifmunk"), 155);
   assert.equal(subtypeCounts.get("statue-lamball"), 30);
   assert.equal(subtypeCounts.get("statue-pengullet"), 30);
   assert.equal(subtypeCounts.get("statue-munchill"), 30);
@@ -107,12 +189,32 @@ test("생성된 MainMap 위치 artifact는 raw 2656건 중 2543건을 포함하�
   assert.equal(subtypeCounts.get("statue-depresso"), 30);
   assert.equal(subtypeCounts.get("statue-lunaris"), 4);
   assert.equal(subtypeCounts.get("statue-relaxaurus"), 4);
-  assert.equal(subtypeCounts.get("statue-yakumo"), 2);
+  assert.equal(subtypeCounts.get("statue-yakumo"), 4);
+  assert.deepEqual(
+    new Set(
+      artifact.worlds
+        .flatMap((world) => world.locations)
+        .filter((entry) => entry.category === "resource")
+        .map((entry) => entry.subtype)
+    ),
+    new Set([
+      "night-stone",
+      "pal-crystal",
+      "coal",
+      "copper-ore",
+      "iron-ore",
+      "quartz",
+      "stone",
+      "sky-island-ore",
+      "sulfur",
+      "world-tree-ore"
+    ])
+  );
 });
 
-test("stable ID는 archive·member·export index를 사용하고 재사용 instance ID를 dedupe하지 않는다", async () => {
+test("stable ID는 archive·member·export index를 사용하고 서로 다른 위치의 재사용 instance ID를 보존한다", async () => {
   const artifact = await loadPalworldMapLocationsArtifact(releaseRoot);
-  const locations = artifact.worlds[0].locations;
+  const locations = artifact.worlds.flatMap((world) => world.locations);
   for (const location of locations.slice(0, 50)) {
     const digest = sha256(
       `${PALWORLD_MAP_WORLD_EXPORT_SHA256}\0`
@@ -160,7 +262,7 @@ test("additional warp 33건은 candidate report에 남기고 runtime 위치에�
   );
   assert.equal(additionalWarp?.actors, 33);
   assert.equal(
-    artifact.worlds[0].locations.some((entry) =>
+    artifact.worlds.flatMap((world) => world.locations).some((entry) =>
       entry.sourceClass === "BP_DimensionWarpPoint_C"
       || entry.sourceClass === "BP_LevelObject_WarpPointDestination_C"
       || entry.sourceClass
@@ -189,9 +291,32 @@ test("candidate는 exact-checksum compatibility authorization으로만 provider�
     artifact,
     compatibilityAuthorization: authorization
   });
-  assert.equal(provider.diagnostics().total, 2543);
-  assert.equal(authorization.approval.importAudit.sourceRawExact, 2656);
-  assert.equal(authorization.approval.importAudit.treeExcluded, 113);
+  assert.equal(provider.diagnostics().total, 18295);
+  assert.equal(authorization.approval.importAudit.sourceRawExact, 18318);
+  assert.equal(authorization.approval.importAudit.mainIncluded, 18102);
+  assert.equal(authorization.approval.importAudit.treeIncluded, 193);
+  assert.equal(authorization.approval.importAudit.treeExcluded, 0);
+  assert.equal(authorization.approval.importAudit.coordinateUnresolved, 0);
+  assert.equal(authorization.approval.importAudit.exactDuplicates, 23);
+  assert.equal(
+    provider.response(
+      "tree",
+      ["resource"],
+      0,
+      100,
+      {
+        gameVersion: "1.0.1",
+        sourceRevision: "fixture-revision",
+        sourceName: "fixture",
+        sourceUrl: "https://example.invalid/palworld-map-fixture",
+        extractedAt: "2026-07-25T00:00:00.000Z",
+        verifiedAt: "2026-07-25T00:00:00.000Z",
+        license: "fixture",
+        rightsVerified: false
+      }
+    ).total,
+    80
+  );
   assert.equal(authorization.approval.rightsVerified, false);
   assert.equal(authorization.approval.sourceVersionVerified, false);
 });

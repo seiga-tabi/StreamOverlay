@@ -129,6 +129,96 @@
       "height": 128
     },
     {
+      "id": "resource",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "CopperOre",
+      "imageUrl": "/images/palworld/1.0.1/items/1380acde21a21533ea2568c01d57c9637dad154850bdcf4db36a44c11cbe0289.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-coal",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "Coal",
+      "imageUrl": "/images/palworld/1.0.1/items/fdbd02c8df5162560dc1ce5bdc56d8a2758d515b6c7701c873b5ca5742f300b3.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-copper-ore",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "CopperOre",
+      "imageUrl": "/images/palworld/1.0.1/items/1380acde21a21533ea2568c01d57c9637dad154850bdcf4db36a44c11cbe0289.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-night-stone",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "NightStone",
+      "imageUrl": "/images/palworld/1.0.1/items/984d2df24e74b469e1483d49d8ddc90d273d66fdfe461394d5cfad226f666650.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-pal-crystal",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "Pal_crystal_S",
+      "imageUrl": "/images/palworld/1.0.1/items/ee7acb0826bdb462c233ec460e45ddf7ff76032a3b4f2c12e2223db1460b26a1.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-quartz",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "Quartz",
+      "imageUrl": "/images/palworld/1.0.1/items/d6c1ecda1ded128f09934964e3c17f14f5a5356fd0bd31d481356998efbbd61e.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-sky-island-ore",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "SkyIslandOre",
+      "imageUrl": "/images/palworld/1.0.1/items/c20e7b7e2e878262494306b409a8f746defa2bd5251b3803be074b621bf8f049.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-stone",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "Stone",
+      "imageUrl": "/images/palworld/1.0.1/items/d76ac5b623059db3126d51c8dd27e60c33e9cfe87f7573a162b54221e9159455.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-sulfur",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "Sulfur",
+      "imageUrl": "/images/palworld/1.0.1/items/db475ba0f20dab070bbb1188b07cd27064800eb7abd0b91c2ec5e292701e8188.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-world-tree-ore",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "WorldTreeOre",
+      "imageUrl": "/images/palworld/1.0.1/items/17b9aa0d5ea41771ad39182c9577dde2c73d2b16a71c16d21298827baee3b007.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
       "id": "skill-fruit",
       "kind": "item",
       "mappingStatus": "representative_runtime_asset",

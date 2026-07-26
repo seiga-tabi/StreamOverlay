@@ -54,11 +54,24 @@ test("아이템 목록 query는 허용된 필터와 정렬을 해석한다", () 
     () => parsePalworldPalListQuery(new URLSearchParams("rarity=0")),
     PalworldQueryError
   );
+  const classified = parsePalworldItemListQuery(new URLSearchParams(
+    "itemType=sphere_module&rarityTier=legendary"
+  ));
+  assert.equal(classified.itemType, "sphere_module");
+  assert.equal(classified.rarityTier, "legendary");
+  assert.throws(
+    () => parsePalworldItemListQuery(new URLSearchParams("rarity=4&rarityTier=legendary")),
+    PalworldQueryError
+  );
+  assert.throws(
+    () => parsePalworldItemListQuery(new URLSearchParams("rarityTier=unknown")),
+    PalworldQueryError
+  );
 });
 
 test("스킬 목록 query는 종류·속성·정렬과 pagination만 허용한다", () => {
   const query = parsePalworldSkillListQuery(new URLSearchParams(
-    "q=Flame&locale=ja&type=active&element=fire&sort=power&order=desc&page=2&limit=12"
+    "q=Flame&locale=ja&type=active&element=fire&partnerElement=water&passiveEffect=work_speed&passiveTier=-3&sort=power&order=desc&page=2&limit=12"
   ));
 
   assert.deepEqual(query, {
@@ -66,6 +79,9 @@ test("스킬 목록 query는 종류·속성·정렬과 pagination만 허용한�
     locale: "ja",
     type: "active",
     element: "fire",
+    partnerElement: "water",
+    passiveEffect: "work_speed",
+    passiveTier: -3,
     sort: "power",
     order: "desc",
     page: 2,
@@ -83,6 +99,18 @@ test("스킬 목록 query는 종류·속성·정렬과 pagination만 허용한�
     () => parsePalworldSkillListQuery(new URLSearchParams("locale=en")),
     PalworldQueryError
   );
+  for (const invalidQuery of [
+    "partnerElement=wind",
+    "passiveEffect=critical",
+    "passiveTier=0",
+    "passiveTier=6",
+    "passiveTier=1.5"
+  ]) {
+    assert.throws(
+      () => parsePalworldSkillListQuery(new URLSearchParams(invalidQuery)),
+      PalworldQueryError
+    );
+  }
 });
 
 test("검색과 교배 query는 빈 값, 중복 값, 알 수 없는 필드와 비정상 ID를 거부한다", () => {
@@ -180,9 +208,21 @@ test("지도 위치 query는 world·레이어·offset·limit allowlist만 허용
         "egg",
         "skill-fruit",
         "lifmunk",
-        "journal"
+        "journal",
+        "resource"
       ],
       offset: 0,
+      limit: 5000
+    }
+  );
+  assert.deepEqual(
+    parsePalworldMapLocationsQuery(
+      new URLSearchParams("layers=resource&offset=5000&limit=5000")
+    ),
+    {
+      world: "main",
+      layers: ["resource"],
+      offset: 5000,
       limit: 5000
     }
   );

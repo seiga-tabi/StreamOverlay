@@ -1,10 +1,13 @@
 import test, { before } from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const {
   assertPalworldActiveSkillLocaleEvidenceArtifact,
+  assertPalworldLegacyPassiveSkillLocaleMap,
+  assertPalworldPassiveSkillLocaleEvidenceArtifact,
   assertPalworldOfficialLocaleCompatibilityArtifact,
   assertPalworldOfficialLocaleCoverageArtifact,
   assertPalworldOfficialLocaleSourceFieldsArtifact,
@@ -34,7 +37,15 @@ const options = {
     "palworld-pak-mappings",
     "legacy-active-skill-locale-map.json",
   ),
+  passiveSkillMappingFile: path.join(
+    serverRoot,
+    "src",
+    "data",
+    "palworld-pak-mappings",
+    "legacy-passive-skill-locale-map.json",
+  ),
 };
+const passiveSkillMappingFile = options.passiveSkillMappingFile;
 
 let artifacts;
 
@@ -51,8 +62,8 @@ function textOf(locale, kind, id, field) {
 test("공식 KO/JA overlay는 blocked candidate를 활성화하지 않고 exact source만 생성한다", () => {
   assert.doesNotThrow(() =>
     assertPalworldOfficialLocaleSourceFieldsArtifact(artifacts.officialSourceFields));
-  assert.equal(artifacts.officialSourceFields.counts.byLocale.ko, 5_219);
-  assert.equal(artifacts.officialSourceFields.counts.byLocale.ja, 5_219);
+  assert.equal(artifacts.officialSourceFields.counts.byLocale.ko, 5_348);
+  assert.equal(artifacts.officialSourceFields.counts.byLocale.ja, 5_348);
   assert.deepEqual(
     artifacts.compatibility.inputs.candidate.activationBlockers,
     ["EXPORT_METADATA_NOT_PROVIDED", "PUBLIC_ID_MAPPING_RELEASE_UNVERIFIED"],
@@ -61,7 +72,64 @@ test("공식 KO/JA overlay는 blocked candidate를 활성화하지 않고 exact 
   assert.equal(artifacts.compatibility.rightsVerified, false);
   assert.equal(artifacts.compatibility.fuzzyMatchingUsed, false);
   assert.deepEqual(artifacts.compatibility.counts.officialUnresolved, { ko: 2, ja: 2 });
-  assert.deepEqual(artifacts.compatibility.counts.officialUnjoined, { ko: 237, ja: 237 });
+  assert.deepEqual(artifacts.compatibility.counts.officialUnjoined, { ko: 108, ja: 108 });
+});
+
+test("legacy passive skill 79개는 explicit exact mapping으로 이름을 연결하고 설명 수치 차이는 차단한다", () => {
+  assert.doesNotThrow(() =>
+    assertPalworldPassiveSkillLocaleEvidenceArtifact(
+      artifacts.passiveSkillEvidence,
+    ));
+  assert.deepEqual(artifacts.passiveSkillEvidence.counts, {
+    activePassiveSkills: 79,
+    exactMatches: 79,
+    officialNames: 79,
+    compatibleDescriptions: 50,
+    missingSourceDescriptions: 19,
+    numericMismatchDescriptions: 10,
+  });
+  assert.deepEqual(
+    {
+      ko: textOf("ko", "skill", "passive-passive-alien-7fa1e23436", "name")?.text,
+      ja: textOf("ja", "skill", "passive-passive-alien-7fa1e23436", "name")?.text,
+    },
+    { ko: "미지의 생체세포", ja: "未知の生体細胞" },
+  );
+  assert.equal(
+    textOf("ko", "skill", "passive-passive-alien-7fa1e23436", "description")?.status,
+    "source_provided",
+  );
+  assert.equal(
+    textOf("ko", "skill", "passive-passive-legend-8ff382798f", "description"),
+    undefined,
+    "legacy와 candidate 수치가 다른 설명은 공식 번역으로 승격하면 안 됩니다.",
+  );
+  assert.equal(
+    artifacts.passiveSkillEvidence.entries.filter(
+      (entry) => entry.description.status === "numeric_mismatch",
+    ).length,
+    10,
+  );
+});
+
+test("패시브 explicit mapping과 evidence 변조는 fail-closed 처리한다", async () => {
+  const mapping = JSON.parse(await readFile(passiveSkillMappingFile, "utf8"));
+  assert.equal(assertPalworldLegacyPassiveSkillLocaleMap(mapping).entries.length, 79);
+  const tamperedMapping = structuredClone(mapping);
+  tamperedMapping.entries[0].candidateSourceRowId = "Tampered";
+  assert.throws(
+    () => assertPalworldLegacyPassiveSkillLocaleMap(tamperedMapping),
+    /exact mapping|올바르지/u,
+  );
+  const tamperedEvidence = structuredClone(artifacts.passiveSkillEvidence);
+  const compatible = tamperedEvidence.entries.find(
+    (entry) => entry.description.status === "compatible",
+  );
+  delete compatible.description.localePayloadSha256;
+  assert.throws(
+    () => assertPalworldPassiveSkillLocaleEvidenceArtifact(tamperedEvidence),
+    /상태와 수치|evidence/u,
+  );
 });
 
 test("legacy active skill 217개는 palId+unlockLevel exact evidence로 공식 locale에 연결된다", () => {
@@ -213,6 +281,10 @@ test("공식 overlay 생성은 동일 입력에서 byte-for-byte 결정적이다
     serializePalworldOfficialLocaleOverlayArtifact(artifacts.activeSkillEvidence),
   );
   assert.equal(
+    serializePalworldOfficialLocaleOverlayArtifact(repeated.passiveSkillEvidence),
+    serializePalworldOfficialLocaleOverlayArtifact(artifacts.passiveSkillEvidence),
+  );
+  assert.equal(
     serializePalworldOfficialLocaleOverlayArtifact(repeated.compatibility),
     serializePalworldOfficialLocaleOverlayArtifact(artifacts.compatibility),
   );
@@ -226,13 +298,13 @@ test("KO/JA coverage 보고서는 snapshot과 corpus 기준의 실제 공개 집
     assert.equal(coverage.translationRevision, artifacts.snapshots[locale].translationRevision);
     assert.equal(coverage.translationStatus, artifacts.snapshots[locale].translationStatus);
     assert.deepEqual(coverage.coverage.status, {
-      source_provided: 5_219,
+      source_provided: 5_348,
       human_reviewed: 0,
       machine_assisted: 0,
     });
-    assert.equal(coverage.coverage.translated, 5_219);
+    assert.equal(coverage.coverage.translated, 5_348);
     assert.equal(coverage.coverage.total, 5_458);
-    assert.equal(coverage.coverage.missing, 239);
+    assert.equal(coverage.coverage.missing, 110);
     assert.match(coverage.contentSha256, /^[a-f0-9]{64}$/u);
   }
 });
@@ -243,6 +315,8 @@ test("compatibility validator는 출력 checksum과 unknown field 변조를 거�
       serializePalworldOfficialLocaleOverlayArtifact(artifacts.officialSourceFields),
     activeSkillEvidence:
       serializePalworldOfficialLocaleOverlayArtifact(artifacts.activeSkillEvidence),
+    passiveSkillEvidence:
+      serializePalworldOfficialLocaleOverlayArtifact(artifacts.passiveSkillEvidence),
     ko: serializePalworldOfficialLocaleOverlayArtifact(artifacts.snapshots.ko),
     ja: serializePalworldOfficialLocaleOverlayArtifact(artifacts.snapshots.ja),
     manifest: serializePalworldOfficialLocaleOverlayArtifact(artifacts.manifest),

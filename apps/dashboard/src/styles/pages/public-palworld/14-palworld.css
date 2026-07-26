@@ -677,6 +677,11 @@
   scrollbar-gutter: stable;
 }
 
+.palworld-map-filter-content[hidden],
+.palworld-map-filter-group > ul[hidden] {
+  display: none;
+}
+
 .palworld-map-filter-search {
   position: relative;
   z-index: var(--yoro-z-raised);
@@ -1598,6 +1603,236 @@
   gap: var(--yoro-space-2);
 }
 
+.palworld-item-filter-panel {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface);
+  box-shadow: var(--yoro-shadow-sm);
+}
+
+.palworld-item-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: end;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-item-search-row label,
+.palworld-item-filter-secondary label {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-item-search-row .yoro-input,
+.palworld-item-filter-secondary .yoro-select {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.palworld-item-filter-group {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.palworld-item-filter-group legend {
+  margin-block-end: var(--yoro-space-2);
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-item-filter-chip-list {
+  display: flex;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-item-filter-chip {
+  flex: none;
+  min-block-size: var(--yoro-size-touch-target);
+  border-radius: var(--yoro-radius-pill);
+  white-space: nowrap;
+}
+
+.palworld-item-rarity-chip {
+  --palworld-item-rarity-accent: var(--yoro-color-border-strong);
+  --palworld-item-rarity-surface: var(--yoro-color-surface-muted);
+}
+
+.palworld-item-rarity-chip[data-variant="tertiary"] {
+  border-color: color-mix(in srgb, var(--palworld-item-rarity-accent) 55%, var(--yoro-color-border));
+  background: color-mix(in srgb, var(--palworld-item-rarity-accent) 10%, var(--palworld-item-rarity-surface));
+}
+
+.palworld-item-rarity-chip[data-variant="primary"] {
+  border-color: var(--palworld-item-rarity-accent);
+  background: color-mix(in srgb, var(--palworld-item-rarity-accent) 42%, var(--yoro-color-surface-strong));
+}
+
+.palworld-item-filter-secondary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  padding-block-start: var(--yoro-space-3);
+  border-block-start: thin solid var(--yoro-color-border);
+}
+
+.palworld-skill-filter-panel {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface);
+  box-shadow: var(--yoro-shadow-sm);
+}
+
+.palworld-skill-type-tabs {
+  display: flex;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-block-end: thin solid var(--yoro-color-border);
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.palworld-skill-type-tab {
+  flex: none;
+  min-block-size: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-2) var(--yoro-space-1);
+  border: 0;
+  border-block-end: 0.125rem solid transparent;
+  background: transparent;
+  color: var(--yoro-color-text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  white-space: nowrap;
+}
+
+.palworld-skill-type-tab:is(:hover, [data-selected="true"]) {
+  border-block-end-color: var(--palworld-sky);
+  color: var(--palworld-sky);
+}
+
+.palworld-skill-type-tab:focus-visible {
+  border-radius: var(--yoro-radius-sm);
+  outline: 0.125rem solid var(--yoro-color-focus-ring);
+  outline-offset: -0.125rem;
+}
+
+.palworld-skill-filter-group {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.palworld-skill-filter-group legend {
+  margin-block-end: var(--yoro-space-2);
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-skill-filter-chip-list {
+  display: flex;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-skill-filter-chip {
+  flex: none;
+  min-block-size: var(--yoro-size-touch-target);
+  border-radius: var(--yoro-radius-pill);
+  white-space: nowrap;
+}
+
+.palworld-skill-element-chip .yoro-badge {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.palworld-passive-tier-chip[data-tier^="-"] {
+  border-color: color-mix(in srgb, var(--yoro-color-danger) 55%, var(--yoro-color-border));
+}
+
+.palworld-passive-tier-chip:not([data-tier^="-"]) {
+  border-color: color-mix(in srgb, var(--yoro-color-success) 55%, var(--yoro-color-border));
+}
+
+.palworld-skill-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: end;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-skill-search-row label,
+.palworld-skill-filter-secondary label {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-skill-search-row .yoro-input,
+.palworld-skill-filter-secondary .yoro-select {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.palworld-skill-advanced-filters {
+  min-inline-size: 0;
+  padding-block-start: var(--yoro-space-3);
+  border-block-start: thin solid var(--yoro-color-border);
+}
+
+.palworld-skill-advanced-filters summary {
+  min-block-size: var(--yoro-size-touch-target);
+  color: var(--yoro-color-text-strong);
+  cursor: pointer;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-skill-advanced-filters summary:focus-visible {
+  border-radius: var(--yoro-radius-sm);
+  outline: 0.125rem solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-space-1);
+}
+
+.palworld-skill-filter-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  padding-block-start: var(--yoro-space-3);
+}
+
 .palworld-result-count {
   color: var(--yoro-color-text-muted);
   font-size: var(--yoro-font-size-sm);
@@ -1927,6 +2162,52 @@
   background: color-mix(in srgb, var(--palworld-accent-soft) 54%, var(--yoro-color-surface-muted));
 }
 
+.palworld-item-card .palworld-entity-media,
+.palworld-item-detail-media {
+  --palworld-item-rarity-accent: var(--yoro-color-border-strong);
+  --palworld-item-rarity-surface: var(--yoro-color-surface-muted);
+
+  background:
+    radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--palworld-item-rarity-accent) 22%, transparent), transparent 58%),
+    var(--palworld-item-rarity-surface);
+}
+
+.palworld-item-card .palworld-entity-media {
+  border-block-end: thin solid color-mix(in srgb, var(--palworld-item-rarity-accent) 38%, var(--yoro-color-border));
+}
+
+.palworld-item-detail-media {
+  border: thin solid color-mix(in srgb, var(--palworld-item-rarity-accent) 38%, var(--yoro-color-border));
+}
+
+.palworld-item-card .palworld-entity-media[data-rarity-band="uncommon"],
+.palworld-item-detail-media[data-rarity-band="uncommon"],
+.palworld-item-rarity-chip[data-rarity-band="uncommon"] {
+  --palworld-item-rarity-accent: var(--yoro-color-success);
+  --palworld-item-rarity-surface: var(--yoro-color-success-bg);
+}
+
+.palworld-item-card .palworld-entity-media[data-rarity-band="rare"],
+.palworld-item-detail-media[data-rarity-band="rare"],
+.palworld-item-rarity-chip[data-rarity-band="rare"] {
+  --palworld-item-rarity-accent: var(--yoro-color-info);
+  --palworld-item-rarity-surface: var(--yoro-color-info-bg);
+}
+
+.palworld-item-card .palworld-entity-media[data-rarity-band="epic"],
+.palworld-item-detail-media[data-rarity-band="epic"],
+.palworld-item-rarity-chip[data-rarity-band="epic"] {
+  --palworld-item-rarity-accent: var(--yoro-color-secondary);
+  --palworld-item-rarity-surface: color-mix(in srgb, var(--yoro-color-secondary) 14%, var(--yoro-color-surface-muted));
+}
+
+.palworld-item-card .palworld-entity-media[data-rarity-band="legendary"],
+.palworld-item-detail-media[data-rarity-band="legendary"],
+.palworld-item-rarity-chip[data-rarity-band="legendary"] {
+  --palworld-item-rarity-accent: var(--palworld-gold);
+  --palworld-item-rarity-surface: color-mix(in srgb, var(--palworld-gold) 14%, var(--yoro-color-surface-muted));
+}
+
 .palworld-media-image {
   display: block;
   inline-size: 100%;
@@ -2114,6 +2395,54 @@
 
 .palworld-skill-metrics strong {
   color: var(--yoro-color-text-strong);
+}
+
+.palworld-skill-related-preview {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-2);
+}
+
+.palworld-skill-related-preview-media {
+  display: grid;
+  flex: 0 0 auto;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  place-items: center;
+  overflow: hidden;
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-skill-related-preview-media .palworld-media-image,
+.palworld-skill-related-preview-media .palworld-media-fallback {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-skill-related-preview-media .palworld-media-image {
+  object-fit: contain;
+}
+
+.palworld-skill-related-preview-media .palworld-media-fallback small {
+  display: none;
+}
+
+.palworld-skill-related-preview-more {
+  display: grid;
+  flex: 0 0 auto;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  place-items: center;
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-lg);
+  font-weight: var(--yoro-font-weight-bold);
 }
 
 .palworld-skill-card .yoro-button {
@@ -3896,6 +4225,32 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .palworld-item-filter-chip-list,
+  .palworld-skill-filter-chip-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block-end: var(--yoro-space-2);
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: var(--yoro-space-2);
+  }
+
+  .palworld-skill-search-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .palworld-skill-search-row label {
+    grid-column: 1 / -1;
+  }
+
+  .palworld-skill-search-row .yoro-button {
+    inline-size: 100%;
+  }
+
+  .palworld-skill-filter-secondary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .palworld-page-heading {
     align-items: stretch;
     flex-direction: column;
@@ -4082,6 +4437,15 @@
 
   .palworld-entity-grid.palworld-pal-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .palworld-item-search-row,
+  .palworld-item-filter-secondary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-item-search-row .yoro-button {
+    inline-size: 100%;
   }
 
   .palworld-pal-search-form,

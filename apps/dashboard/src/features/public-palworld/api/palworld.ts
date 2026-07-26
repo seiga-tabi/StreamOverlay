@@ -16,7 +16,7 @@ import type {
   PalworldReleaseIdentity,
   PalworldSearchResult,
   PalworldSkillDetail,
-  PalworldSkillSummary,
+  PalworldSkillListResponse,
   PalworldValidator,
 } from "@streamops/shared";
 import {
@@ -34,7 +34,7 @@ import {
   validatePalworldPalSpawnResponse,
   validatePalworldSearchResult,
   validatePalworldSkillDetail,
-  validatePalworldSkillSummary,
+  validatePalworldSkillListResponse,
 } from "@streamops/shared";
 import { runtimeConfig } from "../../../runtime-config";
 
@@ -253,11 +253,26 @@ export function getPalworldMapLocations(
   layers: readonly PalworldMapLocationCategory[],
   world: "main" | "tree" = "main",
   signal?: AbortSignal,
+  page: {
+    limit?: number;
+    offset?: number;
+  } = {},
 ): Promise<PalworldMapLocationsResponse> {
+  const limit = page.limit ?? 5_000;
+  const offset = page.offset ?? 0;
+  if (
+    !Number.isInteger(limit)
+    || limit < 1
+    || limit > 5_000
+    || !Number.isInteger(offset)
+    || offset < 0
+  ) {
+    return Promise.reject(new RangeError("지도 위치 pagination 값이 올바르지 않습니다."));
+  }
   const params = new URLSearchParams({
     layers: layers.join(","),
-    limit: "5000",
-    offset: "0",
+    limit: String(limit),
+    offset: String(offset),
     world,
   });
   return publicGet(
@@ -310,8 +325,8 @@ export function getPalworldItem(id: string, signal?: AbortSignal): Promise<Palwo
   return publicGet(`/api/palworld/items/${encodeURIComponent(id)}`, signal, validatePalworldItemDetail);
 }
 
-export function getPalworldSkills(params: URLSearchParams, signal?: AbortSignal): Promise<PalworldPaginatedResponse<PalworldSkillSummary>> {
-  return publicGet(queryPath("/api/palworld/skills", params), signal, (value) => validatePalworldPaginatedResponse(value, validatePalworldSkillSummary));
+export function getPalworldSkills(params: URLSearchParams, signal?: AbortSignal): Promise<PalworldSkillListResponse> {
+  return publicGet(queryPath("/api/palworld/skills", params), signal, validatePalworldSkillListResponse);
 }
 
 export function getPalworldSkill(id: string, signal?: AbortSignal): Promise<PalworldSkillDetail> {

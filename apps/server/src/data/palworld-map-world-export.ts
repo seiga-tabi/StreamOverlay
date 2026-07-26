@@ -26,6 +26,9 @@ import {
   palworldMapLocationsCompatibilityEvidenceChecksum,
   type PalworldMapLocationsCompatibilityApproval
 } from "./palworld-map-locations-artifact.js";
+import type {
+  PalworldMapImageManifest
+} from "./palworld-map-image-manifest.js";
 
 export const PALWORLD_MAP_WORLD_EXPORT_SHA256 =
   "344628b020ffc8ee4642188e356013fc3e955f2ec8addf5ae384786c494f6186";
@@ -69,7 +72,7 @@ type CandidateFamily = {
 };
 
 export type PalworldMapLocationClassMapping = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   targetGameVersion: string;
   sourceArchiveSha256: typeof PALWORLD_MAP_WORLD_EXPORT_SHA256;
   indexMember: SourceMemberLock;
@@ -79,6 +82,12 @@ export type PalworldMapLocationClassMapping = {
     transformSha256: string;
     revision: string;
     targetMapAssetSha256: string;
+  };
+  treeTransformEvidence: {
+    sourceMapAssetMember: string;
+    sourceMapAssetSha256: string;
+    targetMapAssetSha256: string;
+    revision: string;
   };
   classes: SourceClassMapping[];
   expectedSourceCounts: Record<PalworldMapLocationCategory, number>;
@@ -94,20 +103,24 @@ export type PalworldMapLocationCounts = {
   actorsScanned: number;
   sourceActors: number;
   included: number;
+  treeIncluded: number;
   treeExcluded: number;
+  coordinateUnresolved: number;
   outOfBoundsExcluded: number;
   exactDuplicates: number;
   byCategory: Record<PalworldMapLocationCategory, {
     sourceActors: number;
     included: number;
+    treeIncluded: number;
     treeExcluded: number;
+    coordinateUnresolved: number;
     outOfBoundsExcluded: number;
     exactDuplicates: number;
   }>;
 };
 
 export type PalworldMapLocationImportReport = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   targetGameVersion: string;
   activation: "candidate";
   source: {
@@ -123,6 +136,7 @@ export type PalworldMapLocationImportReport = {
     transformMappingSha256: string;
     transformSha256: string;
     targetMapAssetSha256: string;
+    treeTargetMapAssetSha256: string;
   };
   counts: PalworldMapLocationCounts;
   candidatesExcluded: Array<{
@@ -145,10 +159,21 @@ export type PalworldMapLocationImportReport = {
       sourceClass: string;
       category: PalworldMapLocationCategory;
     }>;
+    coordinateUnresolved: Array<{
+      sourceActorId: string;
+      sourceClass: string;
+      category: PalworldMapLocationCategory;
+      reason: "attached_parent_coordinate_unresolved";
+      detailCode:
+        | "parent_pitch_roll_unsupported"
+        | "parent_transform_cycle"
+        | "parent_transform_depth_exceeded";
+    }>;
   };
   excludedByReason: {
     tree_world_without_active_map: number;
     outside_verified_main_and_tree_bounds: number;
+    attached_parent_coordinate_unresolved: number;
   };
   integrityAudit: {
     exactCoordinateCollisions: number;
@@ -163,6 +188,7 @@ export type PalworldMapLocationImportReport = {
     rootComponentResolution: "passed";
     sourceCounts: "passed";
     mainMapTransform: "passed";
+    treeMapTransform: "passed";
     sourceMetadata: "blocked";
     activation: "candidate";
   };
@@ -179,6 +205,46 @@ type MutableCategoryCounts =
 
 function fail(pathName: string, message: string): never {
   throw new TypeError(`${pathName}: ${message}`);
+}
+
+export function assertPalworldMapLocationMapImageEvidence(input: {
+  mapping: PalworldMapLocationClassMapping;
+  mapImagesManifest: PalworldMapImageManifest;
+}): void {
+  const mapping = assertPalworldMapLocationClassMapping(input.mapping);
+  const manifest = input.mapImagesManifest;
+  if (manifest.release !== mapping.targetGameVersion) {
+    fail(
+      "mapImagesManifest.release",
+      "지도 위치 taxonomy의 target release와 일치하지 않습니다."
+    );
+  }
+  const mainEntry = manifest.entries.find((entry) => entry.id === "main");
+  if (
+    mainEntry === undefined
+    || mainEntry.outputSha256
+      !== mapping.transformEvidence.targetMapAssetSha256
+  ) {
+    fail(
+      "mapImagesManifest.entries.main",
+      "MainMap transform evidence와 output asset이 일치하지 않습니다."
+    );
+  }
+  const treeEntry = manifest.entries.find((entry) => entry.id === "tree");
+  if (
+    treeEntry === undefined
+    || treeEntry.sourceMember
+      !== mapping.treeTransformEvidence.sourceMapAssetMember
+    || treeEntry.sourceSha256
+      !== mapping.treeTransformEvidence.sourceMapAssetSha256
+    || treeEntry.outputSha256
+      !== mapping.treeTransformEvidence.targetMapAssetSha256
+  ) {
+    fail(
+      "mapImagesManifest.entries.tree",
+      "세계수 source member·source SHA-256·output SHA-256 evidence가 일치하지 않습니다."
+    );
+  }
 }
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -274,7 +340,9 @@ function emptyCategoryCounts(): Record<
       {
         sourceActors: 0,
         included: 0,
+        treeIncluded: 0,
         treeExcluded: 0,
+        coordinateUnresolved: 0,
         outOfBoundsExcluded: 0,
         exactDuplicates: 0
       }
@@ -301,12 +369,13 @@ export function assertPalworldMapLocationClassMapping(
     "sourceArchiveSha256",
     "indexMember",
     "transformEvidence",
+    "treeTransformEvidence",
     "classes",
     "expectedSourceCounts",
     "candidateFamilies",
     "compatibilityApproval"
   ]);
-  if (root.schemaVersion !== 1) fail("locationMapping.schemaVersion", "1이어야 합니다.");
+  if (root.schemaVersion !== 2) fail("locationMapping.schemaVersion", "2여야 합니다.");
   const targetGameVersion = textAt(
     root.targetGameVersion,
     "locationMapping.targetGameVersion",
@@ -338,6 +407,16 @@ export function assertPalworldMapLocationClassMapping(
       "transformSha256",
       "revision",
       "targetMapAssetSha256"
+    ]
+  );
+  const treeTransform = exactRecordAt(
+    root.treeTransformEvidence,
+    "locationMapping.treeTransformEvidence",
+    [
+      "sourceMapAssetMember",
+      "sourceMapAssetSha256",
+      "targetMapAssetSha256",
+      "revision"
     ]
   );
   if (!Array.isArray(root.classes) || root.classes.length === 0 || root.classes.length > 100) {
@@ -478,7 +557,7 @@ export function assertPalworldMapLocationClassMapping(
     );
   }
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     targetGameVersion,
     sourceArchiveSha256: PALWORLD_MAP_WORLD_EXPORT_SHA256,
     indexMember,
@@ -503,6 +582,25 @@ export function assertPalworldMapLocationClassMapping(
       targetMapAssetSha256: sha256At(
         transform.targetMapAssetSha256,
         "locationMapping.transformEvidence.targetMapAssetSha256"
+      )
+    },
+    treeTransformEvidence: {
+      sourceMapAssetMember: sourceMemberAt(
+        treeTransform.sourceMapAssetMember,
+        "locationMapping.treeTransformEvidence.sourceMapAssetMember"
+      ),
+      sourceMapAssetSha256: sha256At(
+        treeTransform.sourceMapAssetSha256,
+        "locationMapping.treeTransformEvidence.sourceMapAssetSha256"
+      ),
+      targetMapAssetSha256: sha256At(
+        treeTransform.targetMapAssetSha256,
+        "locationMapping.treeTransformEvidence.targetMapAssetSha256"
+      ),
+      revision: textAt(
+        treeTransform.revision,
+        "locationMapping.treeTransformEvidence.revision",
+        128
       )
     },
     classes,
@@ -550,26 +648,252 @@ function finiteCoordinate(
   return { x: value.X as number, y: value.Y as number };
 }
 
+type Transform2d = {
+  x: number;
+  y: number;
+  xx: number;
+  xy: number;
+  yx: number;
+  yy: number;
+};
+
+type AttachedParentCoordinateErrorCode =
+  | "parent_pitch_roll_unsupported"
+  | "parent_transform_cycle"
+  | "parent_transform_depth_exceeded";
+
+class AttachedParentCoordinateError extends Error {
+  readonly code: AttachedParentCoordinateErrorCode;
+
+  constructor(code: AttachedParentCoordinateErrorCode, message: string) {
+    super(message);
+    this.name = "AttachedParentCoordinateError";
+    this.code = code;
+  }
+}
+
+function componentAtReference(
+  exports: unknown[],
+  value: unknown,
+  pathName: string
+): { component: JsonRecord; index: number } {
+  const reference = exactRecordAt(value, pathName, [
+    "ObjectName",
+    "ObjectPath"
+  ]);
+  const objectName = textAt(
+    reference.ObjectName,
+    `${pathName}.ObjectName`,
+    512
+  );
+  const index = objectPathIndex(reference, pathName, exports.length);
+  const component = isRecord(exports[index])
+    ? exports[index]
+    : fail(pathName, "참조한 export가 객체가 아닙니다.");
+  const componentType = textAt(
+    component.Type,
+    `${pathName}.Referenced.Type`,
+    160
+  );
+  const componentName = textAt(
+    component.Name,
+    `${pathName}.Referenced.Name`,
+    160
+  );
+  if (
+    !/Component$/u.test(componentType)
+    || !objectName.startsWith(`${componentType}'`)
+    || !objectName.endsWith(`.${componentName}'`)
+  ) {
+    fail(pathName, "참조가 exact component type·name과 일치하지 않습니다.");
+  }
+  return { component, index };
+}
+
+function relativeCoordinate(
+  value: unknown,
+  pathName: string,
+  allowDefault: boolean
+): { x: number; y: number } {
+  if (value === undefined && allowDefault) return { x: 0, y: 0 };
+  return finiteCoordinate(value, pathName);
+}
+
+function finiteNumberAt(
+  value: unknown,
+  pathName: string,
+  maximumAbsolute: number
+): number {
+  if (
+    typeof value !== "number"
+    || !Number.isFinite(value)
+    || Math.abs(value) > maximumAbsolute
+  ) {
+    fail(pathName, `절댓값 ${maximumAbsolute} 이하의 유한한 수여야 합니다.`);
+  }
+  return value;
+}
+
+function componentLocalLinear(
+  properties: JsonRecord,
+  pathName: string
+): Pick<Transform2d, "xx" | "xy" | "yx" | "yy"> {
+  let yaw = 0;
+  if (properties.RelativeRotation !== undefined) {
+    if (!isRecord(properties.RelativeRotation)) {
+      fail(`${pathName}.RelativeRotation`, "회전 객체여야 합니다.");
+    }
+    const pitch = finiteNumberAt(
+      properties.RelativeRotation.Pitch,
+      `${pathName}.RelativeRotation.Pitch`,
+      360_000
+    );
+    yaw = finiteNumberAt(
+      properties.RelativeRotation.Yaw,
+      `${pathName}.RelativeRotation.Yaw`,
+      360_000
+    );
+    const roll = finiteNumberAt(
+      properties.RelativeRotation.Roll,
+      `${pathName}.RelativeRotation.Roll`,
+      360_000
+    );
+    if (Math.abs(pitch) > 0.000001 || Math.abs(roll) > 0.000001) {
+      throw new AttachedParentCoordinateError(
+        "parent_pitch_roll_unsupported",
+        "부모 component의 pitch 또는 roll이 0이 아니어서 2D 지도 좌표를 확정할 수 없습니다."
+      );
+    }
+  }
+  let scaleX = 1;
+  let scaleY = 1;
+  if (properties.RelativeScale3D !== undefined) {
+    if (!isRecord(properties.RelativeScale3D)) {
+      fail(`${pathName}.RelativeScale3D`, "scale 객체여야 합니다.");
+    }
+    scaleX = finiteNumberAt(
+      properties.RelativeScale3D.X,
+      `${pathName}.RelativeScale3D.X`,
+      10_000
+    );
+    scaleY = finiteNumberAt(
+      properties.RelativeScale3D.Y,
+      `${pathName}.RelativeScale3D.Y`,
+      10_000
+    );
+    finiteNumberAt(
+      properties.RelativeScale3D.Z,
+      `${pathName}.RelativeScale3D.Z`,
+      10_000
+    );
+  }
+  const radians = yaw * (Math.PI / 180);
+  const cosine = Math.cos(radians);
+  const sine = Math.sin(radians);
+  return {
+    xx: cosine * scaleX,
+    xy: -sine * scaleY,
+    yx: sine * scaleX,
+    yy: cosine * scaleY
+  };
+}
+
+function resolveComponentTransform(
+  exports: unknown[],
+  component: JsonRecord,
+  componentIndex: number,
+  pathName: string,
+  cache: Map<number, Transform2d>,
+  active: Set<number>,
+  depth: number
+): Transform2d {
+  const cached = cache.get(componentIndex);
+  if (cached) return cached;
+  if (depth > 64) {
+    throw new AttachedParentCoordinateError(
+      "parent_transform_depth_exceeded",
+      "부모 component 체인이 안전한 최대 깊이를 초과했습니다."
+    );
+  }
+  if (active.has(componentIndex)) {
+    throw new AttachedParentCoordinateError(
+      "parent_transform_cycle",
+      "부모 component 체인에 순환 참조가 있습니다."
+    );
+  }
+  active.add(componentIndex);
+  try {
+    const properties = isRecord(component.Properties)
+      ? component.Properties
+      : fail(`${pathName}.Properties`, "객체여야 합니다.");
+    const localPosition = relativeCoordinate(
+      properties.RelativeLocation,
+      `${pathName}.Properties.RelativeLocation`,
+      true
+    );
+    const localLinear = componentLocalLinear(
+      properties,
+      `${pathName}.Properties`
+    );
+    let result: Transform2d;
+    if (properties.AttachParent === undefined) {
+      result = {
+        x: localPosition.x,
+        y: localPosition.y,
+        ...localLinear
+      };
+    } else {
+      const parentReference = componentAtReference(
+        exports,
+        properties.AttachParent,
+        `${pathName}.Properties.AttachParent`
+      );
+      const parent = resolveComponentTransform(
+        exports,
+        parentReference.component,
+        parentReference.index,
+        `${pathName}.Parent[${parentReference.index}]`,
+        cache,
+        active,
+        depth + 1
+      );
+      result = {
+        x: parent.x
+          + (parent.xx * localPosition.x)
+          + (parent.xy * localPosition.y),
+        y: parent.y
+          + (parent.yx * localPosition.x)
+          + (parent.yy * localPosition.y),
+        xx: (parent.xx * localLinear.xx) + (parent.xy * localLinear.yx),
+        xy: (parent.xx * localLinear.xy) + (parent.xy * localLinear.yy),
+        yx: (parent.yx * localLinear.xx) + (parent.yy * localLinear.yx),
+        yy: (parent.yx * localLinear.xy) + (parent.yy * localLinear.yy)
+      };
+    }
+    cache.set(componentIndex, result);
+    return result;
+  } finally {
+    active.delete(componentIndex);
+  }
+}
+
 function resolveActorPosition(
   exports: unknown[],
   actor: JsonRecord,
   actorIndex: number,
-  pathName: string
+  pathName: string,
+  componentTransformCache: Map<number, Transform2d>
 ): { x: number; y: number } {
   const properties = isRecord(actor.Properties)
     ? actor.Properties
     : fail(`${pathName}.Properties`, "객체여야 합니다.");
-  const rootIndex = objectPathIndex(
+  const rootReference = componentAtReference(
+    exports,
     properties.RootComponent,
-    `${pathName}.Properties.RootComponent`,
-    exports.length
+    `${pathName}.Properties.RootComponent`
   );
-  const root = isRecord(exports[rootIndex])
-    ? exports[rootIndex]
-    : fail(`${pathName}.RootComponent`, "export 객체가 아닙니다.");
-  if (!/Component$/u.test(textAt(root.Type, `${pathName}.RootComponent.Type`, 160))) {
-    fail(`${pathName}.RootComponent.Type`, "component export여야 합니다.");
-  }
+  const rootIndex = rootReference.index;
+  const root = rootReference.component;
   const actorName = textAt(actor.Name, `${pathName}.Name`, 160);
   const outer = exactRecordAt(root.Outer, `${pathName}.RootComponent.Outer`, [
     "ObjectName",
@@ -600,16 +924,34 @@ function resolveActorPosition(
   const rootProperties = isRecord(root.Properties)
     ? root.Properties
     : fail(`${pathName}.RootComponent.Properties`, "객체여야 합니다.");
-  if (rootProperties.AttachParent !== undefined) {
-    fail(
-      `${pathName}.RootComponent.Properties.AttachParent`,
-      "root component에 parent가 있어 좌표를 안전하게 확정할 수 없습니다."
-    );
-  }
-  return finiteCoordinate(
+  const localPosition = relativeCoordinate(
     rootProperties.RelativeLocation,
-    `${pathName}.RootComponent.Properties.RelativeLocation`
+    `${pathName}.RootComponent.Properties.RelativeLocation`,
+    false
   );
+  if (rootProperties.AttachParent === undefined) return localPosition;
+  const parentReference = componentAtReference(
+    exports,
+    rootProperties.AttachParent,
+    `${pathName}.RootComponent.Properties.AttachParent`
+  );
+  const parent = resolveComponentTransform(
+    exports,
+    parentReference.component,
+    parentReference.index,
+    `${pathName}.RootComponent.Parent[${parentReference.index}]`,
+    componentTransformCache,
+    new Set([rootIndex]),
+    1
+  );
+  return {
+    x: parent.x
+      + (parent.xx * localPosition.x)
+      + (parent.xy * localPosition.y),
+    y: parent.y
+      + (parent.yx * localPosition.x)
+      + (parent.yy * localPosition.y)
+  };
 }
 
 function actorSourceId(actor: JsonRecord, pathName: string): string {
@@ -735,8 +1077,13 @@ export async function generatePalworldMapLocationCandidate(input: {
   mappingBytes: Uint8Array;
   transformMapping: PalworldMapMarkerMapping;
   transformMappingBytes: Uint8Array;
+  mapImagesManifest: PalworldMapImageManifest;
 }): Promise<PalworldMapLocationGenerationResult> {
   const mapping = assertPalworldMapLocationClassMapping(input.mapping);
+  assertPalworldMapLocationMapImageEvidence({
+    mapping,
+    mapImagesManifest: input.mapImagesManifest
+  });
   const mappingSha256 = palworldMapLocationSha256(input.mappingBytes);
   const transformMappingSha256 = palworldMapLocationSha256(
     input.transformMappingBytes
@@ -776,6 +1123,15 @@ export async function generatePalworldMapLocationCandidate(input: {
   ) {
     fail("locationMapping.transformEvidence", "검증된 MainMap 축 계약이 아닙니다.");
   }
+  const treeTransform = {
+    status: "verified" as const,
+    revision: mapping.treeTransformEvidence.revision,
+    horizontalAxis: transform.horizontalAxis,
+    verticalAxis: transform.verticalAxis,
+    invertHorizontal: transform.invertHorizontal,
+    invertVertical: transform.invertVertical,
+    sourceBounds: { ...input.transformMapping.treeBounds }
+  };
   if (
     palworldMapMarkerTransformChecksum(transform)
     !== mapping.transformEvidence.transformSha256
@@ -797,7 +1153,7 @@ export async function generatePalworldMapLocationCandidate(input: {
       mappingSha256,
       transformMappingSha256,
       transform,
-      treeBounds: { ...input.transformMapping.treeBounds }
+      treeTransform
     })
   );
 }
@@ -808,12 +1164,7 @@ async function buildFromWorldExport(input: {
   mappingSha256: string;
   transformMappingSha256: string;
   transform: PalworldMapLocationsArtifact["worlds"][number]["transform"];
-  treeBounds: {
-    minX: number;
-    maxX: number;
-    minY: number;
-    maxY: number;
-  };
+  treeTransform: PalworldMapLocationsArtifact["worlds"][number]["transform"];
 }): Promise<PalworldMapLocationGenerationResult> {
   const {
     reader,
@@ -821,8 +1172,9 @@ async function buildFromWorldExport(input: {
     mappingSha256,
     transformMappingSha256,
     transform,
-    treeBounds
+    treeTransform
   } = input;
+  const treeBounds = treeTransform.sourceBounds;
   if (reader.archiveSha256 !== PALWORLD_MAP_WORLD_EXPORT_SHA256) {
     fail("archive", "검수된 Maps.zip 고정 SHA-256과 일치하지 않습니다.");
   }
@@ -870,11 +1222,15 @@ async function buildFromWorldExport(input: {
     mapping.candidateFamilies.map((family) => [family.id, new Map()])
   );
   const locations: PalworldMapLocationArtifactEntry[] = [];
+  const treeLocations: PalworldMapLocationArtifactEntry[] = [];
   const treeWorld: PalworldMapLocationImportReport["exclusions"]["treeWorld"] = [];
   const outsideKnownWorlds:
     PalworldMapLocationImportReport["exclusions"]["outsideKnownWorlds"] = [];
+  const coordinateUnresolved:
+    PalworldMapLocationImportReport["exclusions"]["coordinateUnresolved"] = [];
   const seenActors = new Set<string>();
   const coordinateKeys = new Set<string>();
+  const exactPlacementKeys = new Set<string>();
   const instanceIds = new Map<string, number>();
   const fastTravelPointIds = new Set<string>();
   const noteRowNames = new Set<string>();
@@ -883,6 +1239,7 @@ async function buildFromWorldExport(input: {
   let actorsScanned = 0;
 
   const visitExports = (exports: unknown[], memberName: string): void => {
+    const componentTransformCache = new Map<number, Transform2d>();
     for (const [index, value] of exports.entries()) {
       if (!isRecord(value) || !isActorExport(value)) continue;
       actorsScanned += 1;
@@ -914,12 +1271,6 @@ async function buildFromWorldExport(input: {
         value,
         `${memberName}[${index}]`
       );
-      const position = resolveActorPosition(
-        exports,
-        value,
-        index,
-        `${memberName}[${index}]`
-      );
       const category = classMapping.category;
       const counts = categoryCounts[category];
       counts.sourceActors += 1;
@@ -929,6 +1280,29 @@ async function buildFromWorldExport(input: {
         continue;
       }
       seenActors.add(sourceIdentity);
+      let position: { x: number; y: number };
+      try {
+        position = resolveActorPosition(
+          exports,
+          value,
+          index,
+          `${memberName}[${index}]`,
+          componentTransformCache
+        );
+      } catch (error) {
+        if (error instanceof AttachedParentCoordinateError) {
+          counts.coordinateUnresolved += 1;
+          coordinateUnresolved.push({
+            sourceActorId,
+            sourceClass,
+            category,
+            reason: "attached_parent_coordinate_unresolved",
+            detailCode: error.code
+          });
+          continue;
+        }
+        throw error;
+      }
       const coordinateKey = `${sourceClass}\u0000${position.x}\u0000${position.y}`;
       if (coordinateKeys.has(coordinateKey)) {
         exactCoordinateCollisions += 1;
@@ -936,6 +1310,23 @@ async function buildFromWorldExport(input: {
         coordinateKeys.add(coordinateKey);
       }
       const properties = isRecord(value.Properties) ? value.Properties : {};
+      const sourceInstanceId =
+        typeof properties.LevelObjectInstanceId === "string"
+          ? textAt(
+            properties.LevelObjectInstanceId,
+            `${memberName}[${index}].Properties.LevelObjectInstanceId`,
+            160
+          )
+          : null;
+      if (sourceInstanceId !== null) {
+        const exactPlacementKey =
+          `${coordinateKey}\u0000${sourceInstanceId}`;
+        if (exactPlacementKeys.has(exactPlacementKey)) {
+          counts.exactDuplicates += 1;
+          continue;
+        }
+        exactPlacementKeys.add(exactPlacementKey);
+      }
       if (typeof properties.LevelObjectInstanceId === "string") {
         const prior = instanceIds.get(properties.LevelObjectInstanceId) ?? 0;
         if (prior > 0) reusedLevelObjectInstanceIds += 1;
@@ -975,39 +1366,38 @@ async function buildFromWorldExport(input: {
         }
         noteRowNames.add(noteRowName);
       }
-      if (inside(position, treeBounds)) {
-        counts.treeExcluded += 1;
-        treeWorld.push({ sourceActorId, sourceClass, category });
-        continue;
-      }
-      if (!inside(position, transform.sourceBounds)) {
+      const targetWorld = inside(position, treeBounds)
+        ? "tree"
+        : inside(position, transform.sourceBounds)
+          ? "main"
+          : undefined;
+      if (targetWorld === undefined) {
         counts.outOfBoundsExcluded += 1;
         outsideKnownWorlds.push({ sourceActorId, sourceClass, category });
         continue;
       }
       const coordinate = normalizedPalworldMainMapCoordinate(
         position,
-        transform.sourceBounds
+        targetWorld === "tree" ? treeTransform.sourceBounds : transform.sourceBounds
       );
-      locations.push({
+      const entry = {
         id: artifactLocationId(category, memberName, index),
         sourceActorId,
         sourceClass,
         sourceMemberPath: memberName,
         sourceActorExportIndex: index,
-        sourceInstanceId:
-          typeof properties.LevelObjectInstanceId === "string"
-            ? textAt(
-              properties.LevelObjectInstanceId,
-              `${memberName}[${index}].Properties.LevelObjectInstanceId`,
-              160
-            )
-            : null,
+        sourceInstanceId,
         category,
         subtype: classMapping.subtype,
         ...coordinate
-      });
-      counts.included += 1;
+      };
+      if (targetWorld === "tree") {
+        treeLocations.push(entry);
+        counts.treeIncluded += 1;
+      } else {
+        locations.push(entry);
+        counts.included += 1;
+      }
     }
   };
 
@@ -1033,13 +1423,20 @@ async function buildFromWorldExport(input: {
     }
   }
   locations.sort((left, right) => left.id.localeCompare(right.id, "en"));
-  if (new Set(locations.map((entry) => entry.id)).size !== locations.length) {
-    fail("artifact.worlds[0].locations", "생성 ID가 충돌했습니다.");
+  treeLocations.sort((left, right) => left.id.localeCompare(right.id, "en"));
+  const allLocations = [...locations, ...treeLocations];
+  if (
+    new Set(allLocations.map((entry) => entry.id)).size !== allLocations.length
+  ) {
+    fail("artifact.worlds.locations", "생성 ID가 충돌했습니다.");
   }
   treeWorld.sort((left, right) =>
     left.sourceActorId.localeCompare(right.sourceActorId, "en")
   );
   outsideKnownWorlds.sort((left, right) =>
+    left.sourceActorId.localeCompare(right.sourceActorId, "en")
+  );
+  coordinateUnresolved.sort((left, right) =>
     left.sourceActorId.localeCompare(right.sourceActorId, "en")
   );
   const counts: PalworldMapLocationCounts = {
@@ -1050,7 +1447,9 @@ async function buildFromWorldExport(input: {
       0
     ),
     included: locations.length,
+    treeIncluded: treeLocations.length,
     treeExcluded: treeWorld.length,
+    coordinateUnresolved: coordinateUnresolved.length,
     outOfBoundsExcluded: outsideKnownWorlds.length,
     exactDuplicates: SOURCE_CATEGORIES.reduce(
       (sum, category) => sum + categoryCounts[category].exactDuplicates,
@@ -1061,7 +1460,9 @@ async function buildFromWorldExport(input: {
   if (
     counts.sourceActors
     !== counts.included
+      + counts.treeIncluded
       + counts.treeExcluded
+      + counts.coordinateUnresolved
       + counts.outOfBoundsExcluded
       + counts.exactDuplicates
   ) {
@@ -1079,10 +1480,16 @@ async function buildFromWorldExport(input: {
       reason: "semantic_mapping_not_verified" as const
     };
   });
-  const artifactCategoryCounts = Object.fromEntries(
+  const mainCategoryCounts = Object.fromEntries(
     SOURCE_CATEGORIES.map((category) => [
       category,
       categoryCounts[category].included
+    ])
+  ) as PalworldMapLocationCategoryCounts;
+  const treeCategoryCounts = Object.fromEntries(
+    SOURCE_CATEGORIES.map((category) => [
+      category,
+      categoryCounts[category].treeIncluded
     ])
   ) as PalworldMapLocationCategoryCounts;
   const artifact: PalworldMapLocationsArtifact = {
@@ -1101,18 +1508,29 @@ async function buildFromWorldExport(input: {
       rightsVerified: false,
       usageBasis: "operator_reference_use"
     },
-    totalLocations: locations.length,
-    worlds: [{
-      world: "main",
-      targetMapAssetSha256: mapping.transformEvidence.targetMapAssetSha256,
-      transform,
-      locationCount: locations.length,
-      categoryCounts: artifactCategoryCounts,
-      locations
-    }]
+    totalLocations: allLocations.length,
+    worlds: [
+      {
+        world: "main",
+        targetMapAssetSha256: mapping.transformEvidence.targetMapAssetSha256,
+        transform,
+        locationCount: locations.length,
+        categoryCounts: mainCategoryCounts,
+        locations
+      },
+      {
+        world: "tree",
+        targetMapAssetSha256:
+          mapping.treeTransformEvidence.targetMapAssetSha256,
+        transform: treeTransform,
+        locationCount: treeLocations.length,
+        categoryCounts: treeCategoryCounts,
+        locations: treeLocations
+      }
+    ]
   };
   const report: PalworldMapLocationImportReport = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     targetGameVersion: mapping.targetGameVersion,
     activation: "candidate",
     source: {
@@ -1127,17 +1545,21 @@ async function buildFromWorldExport(input: {
       mappingSha256,
       transformMappingSha256,
       transformSha256: mapping.transformEvidence.transformSha256,
-      targetMapAssetSha256: mapping.transformEvidence.targetMapAssetSha256
+      targetMapAssetSha256: mapping.transformEvidence.targetMapAssetSha256,
+      treeTargetMapAssetSha256:
+        mapping.treeTransformEvidence.targetMapAssetSha256
     },
     counts,
     candidatesExcluded,
     exclusions: {
       treeWorld,
-      outsideKnownWorlds
+      outsideKnownWorlds,
+      coordinateUnresolved
     },
     excludedByReason: {
       tree_world_without_active_map: treeWorld.length,
-      outside_verified_main_and_tree_bounds: outsideKnownWorlds.length
+      outside_verified_main_and_tree_bounds: outsideKnownWorlds.length,
+      attached_parent_coordinate_unresolved: coordinateUnresolved.length
     },
     integrityAudit: {
       exactCoordinateCollisions,
@@ -1152,6 +1574,7 @@ async function buildFromWorldExport(input: {
       rootComponentResolution: "passed",
       sourceCounts: "passed",
       mainMapTransform: "passed",
+      treeMapTransform: "passed",
       sourceMetadata: "blocked",
       activation: "candidate"
     }
@@ -1183,12 +1606,19 @@ export function createPalworldMapLocationCompatibilityApproval(input: {
   report: PalworldMapLocationImportReport;
 }): PalworldMapLocationsCompatibilityApproval {
   const mapping = assertPalworldMapLocationClassMapping(input.mapping);
-  const world = input.artifact.worlds[0];
-  if (!world || world.world !== "main") {
-    fail("artifact.worlds", "main world artifact가 필요합니다.");
+  const mainWorld = input.artifact.worlds.find((world) => world.world === "main");
+  const treeWorld = input.artifact.worlds.find((world) => world.world === "tree");
+  if (!mainWorld || !treeWorld) {
+    fail("artifact.worlds", "main과 tree world artifact가 모두 필요합니다.");
   }
+  const aggregateCategoryCounts = Object.fromEntries(
+    SOURCE_CATEGORIES.map((category) => [
+      category,
+      mainWorld.categoryCounts[category] + treeWorld.categoryCounts[category]
+    ])
+  ) as PalworldMapLocationCategoryCounts;
   const payload = {
-    schemaVersion: 1 as const,
+    schemaVersion: 2 as const,
     release: mapping.targetGameVersion,
     status: "operator_acknowledged" as const,
     decision: "allow_exact_checksum_compatibility_display" as const,
@@ -1202,16 +1632,18 @@ export function createPalworldMapLocationCompatibilityApproval(input: {
       palworldMapLocationSha256(input.manifestText),
     selectedMemberCount: input.artifact.source.selectedMemberCount,
     totalLocations: input.artifact.totalLocations,
-    categoryCounts: world.categoryCounts,
-    worlds: [{
-      world: "main" as const,
+    categoryCounts: aggregateCategoryCounts,
+    worlds: input.artifact.worlds.map((world) => ({
+      world: world.world,
       targetMapAssetSha256: world.targetMapAssetSha256,
       transformRevision: world.transform.revision
-    }],
+    })),
     importAudit: {
       sourceRawExact: input.report.counts.sourceActors,
       mainIncluded: input.report.counts.included,
+      treeIncluded: input.report.counts.treeIncluded,
       treeExcluded: input.report.counts.treeExcluded,
+      coordinateUnresolved: input.report.counts.coordinateUnresolved,
       outOfBoundsExcluded: input.report.counts.outOfBoundsExcluded,
       exactDuplicates: input.report.counts.exactDuplicates,
       taxonomyMappingSha256: input.report.checksums.mappingSha256,

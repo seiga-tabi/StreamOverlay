@@ -29,9 +29,9 @@ import {
   loadPalworldMapLayerIconManifest
 } from "./palworld-map-layer-icon-manifest.js";
 
-export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 11 as const;
+export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSION = 12 as const;
 export const PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS =
-  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 export const PALWORLD_LEGACY_COMPOSITE_DOMAIN_STATES = [
   "active",
   "candidate",
@@ -47,6 +47,7 @@ const DEFERRED_TRANSLATION_ARTIFACT_KINDS = new Set<
   "locale-ja",
   "locale-official-source-fields",
   "locale-official-active-skill-evidence",
+  "locale-official-passive-skill-evidence",
   "locale-official-compatibility",
   "reviewed-item-aliases"
 ]);
@@ -95,6 +96,16 @@ const LEGACY_V6_REQUIRED_ARTIFACTS = [
 
 const REQUIRED_ARTIFACTS = [
   ...LEGACY_V6_REQUIRED_ARTIFACTS,
+  ["condensation-rules", "condensation-rules.json"]
+] as const;
+
+const LEGACY_V12_REQUIRED_ARTIFACTS = [
+  ...LEGACY_V6_REQUIRED_ARTIFACTS.slice(0, -2),
+  [
+    "locale-official-passive-skill-evidence",
+    "locales/official-passive-skill-evidence.json"
+  ],
+  ...LEGACY_V6_REQUIRED_ARTIFACTS.slice(-2),
   ["condensation-rules", "condensation-rules.json"]
 ] as const;
 
@@ -154,6 +165,7 @@ const OPTIONAL_ACTIVE_ARTIFACTS = {
 } as const;
 
 export const PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS = [
+  ...LEGACY_V12_REQUIRED_ARTIFACTS.map(([kind]) => kind),
   ...REQUIRED_ARTIFACTS.map(([kind]) => kind),
   ...LEGACY_V2_REQUIRED_ARTIFACTS.map(([kind]) => kind),
   ...LEGACY_V1_REQUIRED_ARTIFACTS.map(([kind]) => kind),
@@ -171,7 +183,7 @@ export type PalworldLegacyCompositeArtifactKind =
   (typeof PALWORLD_LEGACY_COMPOSITE_ARTIFACT_KINDS)[number];
 
 export type PalworldLegacyCompositeRuntimeManifest = {
-  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+  schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   release: string;
   artifacts: Array<{
     kind: PalworldLegacyCompositeArtifactKind;
@@ -246,7 +258,9 @@ function expectedArtifactsForAvailability(
             ? LEGACY_V4_REQUIRED_ARTIFACTS
             : schemaVersion <= 6
               ? LEGACY_V6_REQUIRED_ARTIFACTS
-              : REQUIRED_ARTIFACTS),
+              : schemaVersion >= 12
+                ? LEGACY_V12_REQUIRED_ARTIFACTS
+                : REQUIRED_ARTIFACTS),
     ...(availability.mapMarkers === "active"
       ? schemaVersion >= 8 && includeMarkerCompatibility
         ? OPTIONAL_ACTIVE_ARTIFACTS.mapMarkers
@@ -288,10 +302,10 @@ export function assertPalworldLegacyCompositeRuntimeManifest(
     !(PALWORLD_LEGACY_COMPOSITE_SCHEMA_VERSIONS as readonly unknown[])
       .includes(record.schemaVersion)
   ) {
-    fail("legacyComposite.schemaVersion", "1부터 11 사이여야 합니다.");
+    fail("legacyComposite.schemaVersion", "1부터 12 사이여야 합니다.");
   }
   const schemaVersion =
-    record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+    record.schemaVersion as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   if (
     typeof record.release !== "string"
     || !RELEASE_PATTERN.test(record.release)

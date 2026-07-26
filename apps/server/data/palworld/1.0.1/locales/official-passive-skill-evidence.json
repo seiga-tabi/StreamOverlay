@@ -1,0 +1,2225 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "translation_compatibility_only",
+  "candidateId": "candidate-1248184a4b527d94",
+  "joinRule": "passive_source_row_public_id_prefix_exact",
+  "inputs": {
+    "activeCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+    "candidateSkillsSha256": "4f03cc98c5cf5aeac245b2f11ca82ac09bef7c0ffca0fed2512c4a8c4258ceb7",
+    "candidateImportReportSha256": "eb408d81a4db9f25cc873b6cda0b80d47307d5b40db2d042ab99005fb979a93e",
+    "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+    "mappingSha256": "5d14831d1065f48717904b0405291e165dcaa962d4f04acca65c7e0effcc0e2c"
+  },
+  "counts": {
+    "activePassiveSkills": 79,
+    "exactMatches": 79,
+    "officialNames": 79,
+    "compatibleDescriptions": 50,
+    "missingSourceDescriptions": 19,
+    "numericMismatchDescriptions": 10
+  },
+  "entries": [
+    {
+      "legacySkillId": "passive-passive-alien-7fa1e23436",
+      "candidateSkillId": "passive:Alien",
+      "candidateSourceRowId": "Alien",
+      "candidateSourceInternalId": "Alien",
+      "expectedLegacyIdPrefix": "passive-passive-alien-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "a9b833429707104d6ade4d02e486dab8d32fc27dca32d0349c13b386a3568031",
+        "ja": "1dab7782bb15ec4f59a3a315ab805125e162ef26ec907f15acc5720bb0c2af01"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10,
+          15,
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10,
+            15,
+            15
+          ],
+          "ja": [
+            10,
+            15,
+            15
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "fb9a3f624ded4a3f8b55a1ca8191e6a3cdd9cde5c9b6965d7a68d5a7498cba06",
+          "ja": "d8744de4e58f7c67e2eaca4255f5fff631d9869ea237c8db6883ab5118d38ba4"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-cool-time-reduction-down-1-3cb8042ac5",
+      "candidateSkillId": "passive:CoolTimeReduction_Down_1",
+      "candidateSourceRowId": "CoolTimeReduction_Down_1",
+      "candidateSourceInternalId": "CoolTimeReduction_Down_1",
+      "expectedLegacyIdPrefix": "passive-passive-cool-time-reduction-down-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "f8e291aa3259483a83e365181479f1045d26bc629c8c6db92d718381bf53fa6d",
+        "ja": "34ddf05479af440ee713b1f005eaea99e998026c2e294f4efbd604529ff898d3"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          -15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            -15
+          ],
+          "ja": [
+            -15
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "5e44f00b91be7ae27a0a20ca7a67e53a491958f613736e0d13ea13f989b85550",
+          "ja": "53e3d28b235649c8ba17163f51457e55fe2d17293f8a10f946485214fed3f7e9"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-cool-time-reduction-up-1-149b0a9ba1",
+      "candidateSkillId": "passive:CoolTimeReduction_Up_1",
+      "candidateSourceRowId": "CoolTimeReduction_Up_1",
+      "candidateSourceInternalId": "CoolTimeReduction_Up_1",
+      "expectedLegacyIdPrefix": "passive-passive-cool-time-reduction-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "c18b1bc2e32d3d4389bea2adaf91001830382738509f6f2cdb04674db422e3b0",
+        "ja": "fc480c72ae03b86310362df009e216108404db48e153dee3737f019eee0532b1"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          30,
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30,
+            10
+          ],
+          "ja": [
+            30,
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "c8011578909c931f4afa31b0aa2758c4a2daf317e3293e0142028f49d1adb682",
+          "ja": "da3a7fa872632e1c109ae6df300c91d04c47edb76911a9bc2c7723ce4629b43c"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-cool-time-reduction-up-2-2b0c9bee61",
+      "candidateSkillId": "passive:CoolTimeReduction_Up_2",
+      "candidateSourceRowId": "CoolTimeReduction_Up_2",
+      "candidateSourceInternalId": "CoolTimeReduction_Up_2",
+      "expectedLegacyIdPrefix": "passive-passive-cool-time-reduction-up-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "72ce5058ac342eb2e4182d52c14d1cbbbc7db71b01ebd0da046b840a79e2a196",
+        "ja": "eb3297c8a4f041bc546a547a99688bbd1abd08efd64b07e44d7925e369c3e8b2"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            15
+          ],
+          "ja": [
+            15
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "bec8dfc4de47efad9c4d93036e28db1bba9c59fa61b7053ff53a3462f38f99cc",
+          "ja": "5e78ac651f3dda8a203587eb5d1783a9ea3c3d7ee2a7a4e293a8092ac0c22c59"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-down1-2a8d997bd0",
+      "candidateSkillId": "passive:CraftSpeed_down1",
+      "candidateSourceRowId": "CraftSpeed_down1",
+      "candidateSourceInternalId": "CraftSpeed_down1",
+      "expectedLegacyIdPrefix": "passive-passive-craft-speed-down1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "421a2e2f2fcbfa70a9a0ca4aa2c2410db72ab5d49ff5c958419bcdc153df1fec",
+        "ja": "132acb74d485e7f2c7b3f84ac6affe6cd8d9af82701846d6a6e22b452c67c7c2"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          -10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-down2-365dff03b1",
+      "candidateSkillId": "passive:CraftSpeed_down2",
+      "candidateSourceRowId": "CraftSpeed_down2",
+      "candidateSourceInternalId": "CraftSpeed_down2",
+      "expectedLegacyIdPrefix": "passive-passive-craft-speed-down2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "650d1332a6edcdf86295bc19cb8875442b783381be326e26ae5a0ac128fe7953",
+        "ja": "7165a47840367e25ac2afd01955358c386006127bb8d64ffcad08bc2c08cb4ba"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          -30
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-up1-bd91525958",
+      "candidateSkillId": "passive:CraftSpeed_up1",
+      "candidateSourceRowId": "CraftSpeed_up1",
+      "candidateSourceInternalId": "CraftSpeed_up1",
+      "expectedLegacyIdPrefix": "passive-passive-craft-speed-up1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "b6f613dfd9ca01e1154f25135d7547ee5f266ba3bc063f4eee1c52f680e123de",
+        "ja": "787fb6df637613b3526223248821a43f4310cb2a256aee313cc8f89492453e26"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-craft-speed-up2-ecbcdfabde",
+      "candidateSkillId": "passive:CraftSpeed_up2",
+      "candidateSourceRowId": "CraftSpeed_up2",
+      "candidateSourceInternalId": "CraftSpeed_up2",
+      "expectedLegacyIdPrefix": "passive-passive-craft-speed-up2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "3ab39a32274878edc1a2e5d2e1a5287c69f0a0d1cf7e6751752e2c2bc892d97e",
+        "ja": "7e9c4fa0c3b7f1ecb4be34de5ea1fb3003571ffa99927cd2086f2633bf0cb49f"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          50
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-down1-5e3e3088c5",
+      "candidateSkillId": "passive:Deffence_down1",
+      "candidateSourceRowId": "Deffence_down1",
+      "candidateSourceInternalId": "Deffence_down1",
+      "expectedLegacyIdPrefix": "passive-passive-deffence-down1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "1748c08c642cf574f83c0bbe5c9fc6cab69850cfcea19e9603c30241817ce749",
+        "ja": "9ccb18ec2bb1b9cbf0435362b226b1321ff8f11ce1eb43d10b251a3eb5e07c11"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          -10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-down2-69086f3cf0",
+      "candidateSkillId": "passive:Deffence_down2",
+      "candidateSourceRowId": "Deffence_down2",
+      "candidateSourceInternalId": "Deffence_down2",
+      "expectedLegacyIdPrefix": "passive-passive-deffence-down2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "e2253fd3d6f0bf185c5a51334e8931ad8088e9490bc5250246d00cb11f7683ed",
+        "ja": "59fd8248e66f934b23e9841775b2c828031fc1c3edd5ae96e5c229b8b6059727"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          -20
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-up1-b0b7e9a164",
+      "candidateSkillId": "passive:Deffence_up1",
+      "candidateSourceRowId": "Deffence_up1",
+      "candidateSourceInternalId": "Deffence_up1",
+      "expectedLegacyIdPrefix": "passive-passive-deffence-up1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "88a8cff02db9cfcaaf04de44257c2b677dbe2a084dcca87d8d56041956b73c26",
+        "ja": "2c7baa84d4d3bb46e882001e89c53f45eb6478af4065372d2e8d2ffb7a4ea3ff"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-deffence-up2-90aaea5348",
+      "candidateSkillId": "passive:Deffence_up2",
+      "candidateSourceRowId": "Deffence_up2",
+      "candidateSourceInternalId": "Deffence_up2",
+      "expectedLegacyIdPrefix": "passive-passive-deffence-up2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "e73e5149caa3fd323758ec8ee05aac809e529732cfb4d097ce57466e68898a3e",
+        "ja": "5123506540649a3dca9307414be980df4e6f40ecc5e09b03b51dcd806d57b88a"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            20
+          ],
+          "ja": [
+            20
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "4180ed4fe64bf8886c7a48a2e6061fc40184453bd87dab6a28f7d43ec4eb392d",
+          "ja": "0d5dea3f3bd9b992c2b5d55394cb333bcbfb1eeaf498ab075956ee7c9b23dc35"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-aqua-1-pal-ef921d34d4",
+      "candidateSkillId": "passive:ElementBoost_Aqua_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Aqua_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Aqua_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-aqua-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "0bb4674d19a44d7dc191a60344c975b32636fe78634e38403485f4038067c584",
+        "ja": "2969ae4c91953ec27269f430a85f830904a47c71d1352daf33960c30c16c0919"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "60abfbb051f9cfac47ab2ac2b98333ed0949bb48b9079ca7d2ce6756bc727dca",
+          "ja": "e255564f3cb688680184bb3b88d3a6fd6140a915a9e6885069c52a4e3fc7a745"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-aqua-2-pal-3c79819c40",
+      "candidateSkillId": "passive:ElementBoost_Aqua_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Aqua_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Aqua_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-aqua-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "754579f9a542ba4d5e10775992ce7c40176ec404add82c12d0cf9b1bd8de3077",
+        "ja": "9168e34e2c0ed049a18abf2b1c7c920bef3dea67e68c0d51ccfd8a7a383e6af3"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dark-1-pal-cdd58dd4b4",
+      "candidateSkillId": "passive:ElementBoost_Dark_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Dark_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Dark_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-dark-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "7c0003d7a3c873513013c3c0536d2689208685c12b24ac9ebe176e653a33786c",
+        "ja": "320823b129986f1d5c50e356956c0b8bd4a5a788b7cc6764d5020bfa80012107"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "32574b7285a52623fe97d2b1c8a123dc192e16b46bd33925077f3325825e02a8",
+          "ja": "c8c0ffd6f207940cb01b7f583354ae573bb7e7b7ad080e4c149bb7d913191b38"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dark-2-pal-d576b4c3dc",
+      "candidateSkillId": "passive:ElementBoost_Dark_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Dark_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Dark_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-dark-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "1452e30454ce993eab29970f420ef06a88961ce9dcbd5096b70945dd5f999e9b",
+        "ja": "b34b2733308a40f83ccf00ee2a2eec36c5de1fe03b7e7e317abc43f33a6bb2bb"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dragon-1-pal-51575a1218",
+      "candidateSkillId": "passive:ElementBoost_Dragon_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Dragon_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Dragon_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-dragon-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "e9cd777b05815f2cdc8f846f45969a0f06c67a3e5bf5e6cfa2f0ff64e25b5a9a",
+        "ja": "754ce33cd74c3049618d501640f1f0195b083782c499b173e0c9526ef3221c2a"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "1e5e20b0a72e71ababf61fa92fe905c884264fd7b71de4f4268a580a7762b12c",
+          "ja": "ce5d7694f60b26144adaec839fa32207a20c8f587a92da390f5177625ea95b76"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-dragon-2-pal-76eb5880f9",
+      "candidateSkillId": "passive:ElementBoost_Dragon_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Dragon_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Dragon_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-dragon-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "11cd5223cdb99d2f560dffa121540ac9174900cd7fea9b840ffe2e12adab309e",
+        "ja": "3d633d05f09ac2ce403b65c2ce8d2abd4304259ae954daf4e7407857dcffe4dc"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-earth-1-pal-8810cf546b",
+      "candidateSkillId": "passive:ElementBoost_Earth_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Earth_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Earth_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-earth-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "65cb7d7cc58eeb1e41cf32e3e40cce31c18ab8f829505f424dbce18a024e21cc",
+        "ja": "240fa8fb6b6fd4f86f11104afaff9be56812f75a5dff93943c7c16aa23f1b67a"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "6c5ef81b25af3dfef297bfca585543111a762e126dd5252bd8d606bf464b0c80",
+          "ja": "7922e9b714a41a3b939b176545727f0cb976dc37884245bff1cc4d714ddaa9e5"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-earth-2-pal-c4a348146c",
+      "candidateSkillId": "passive:ElementBoost_Earth_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Earth_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Earth_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-earth-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "a3dbc0179e7970d74ba13d9079a3e573c87015a7f65def6d10b63dd8dd07b56d",
+        "ja": "5df0859f3d977f30968c2f1e188c00330247a7ccad642df56d27099123344b4d"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-fire-1-pal-117b7d811f",
+      "candidateSkillId": "passive:ElementBoost_Fire_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Fire_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Fire_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-fire-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "a8180b45e1019ad7dc904bec345e7d7b6224e51725efc33508067f1028c2541e",
+        "ja": "b827b7b4db505ebd6687efece036d75d16b5dccf494fc43eda34d2a63bb28ac8"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "dfc4819f83a38f0d934c879d56a2b05e8c2ff10dc09c2e0df78ed8d388dfdc3a",
+          "ja": "0fdfdd4f0a5025512dd59cbe035432e45f8c004253715b3182f0878dd2fd8d25"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-fire-2-pal-95f11a54a5",
+      "candidateSkillId": "passive:ElementBoost_Fire_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Fire_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Fire_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-fire-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "ea196d2702bc9b6749032b60e5156c33b7a5ef60281c3f2a74616c298bf909ea",
+        "ja": "838748c481ec62625ebfafdcc722a76ce2b618c28fb5a3f8be408c97deaca060"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-ice-1-pal-c015f6d988",
+      "candidateSkillId": "passive:ElementBoost_Ice_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Ice_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Ice_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-ice-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "474530196746c6a3199890c86c62581432017d2717779ffc106c8e42aa94b813",
+        "ja": "4864378ea7d24032a2c516ef5c188dc12f3793ffcdcdca3abafd063f7f8ea931"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "822e27329bc8f5c0b18e0c0d1addaf595e2bf4ef2664cdfd7113c4dea2d4e4fc",
+          "ja": "355f6afd4d7ddfb618986f893242e97bb3fcc500573eb1f1130fd882dec800fa"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-ice-2-pal-164931b250",
+      "candidateSkillId": "passive:ElementBoost_Ice_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Ice_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Ice_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-ice-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "22d020e1c8b127c8edd25d5d4d501971a0478f8935f27b7a87a752b2748f282d",
+        "ja": "07fb4e9e5c77002b6c71547676dd0af0ff1116ffa7524fa8b358aba424767d87"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-leaf-1-pal-cc20101254",
+      "candidateSkillId": "passive:ElementBoost_Leaf_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Leaf_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Leaf_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-leaf-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "659b2d9217288f859c7bec976eda22c578942e7c058faf5a6e222d39b060c9e0",
+        "ja": "9694f35d0820bf5bf7d148d58fb9170c57e515e86ed017865b5868b89b955633"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "2f6b9a8de0a780789563c8b2a8a252a935cef782231285ec811e1d41b3bf3eee",
+          "ja": "9cedd2b43590ca836cea1f058e961e76ac899f35fbdc747eec6ed4a5d9385ee3"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-leaf-2-pal-9d88e55564",
+      "candidateSkillId": "passive:ElementBoost_Leaf_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Leaf_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Leaf_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-leaf-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "8e9d540e18987ef7fb018fd01273921a00ac5ea730b38ad0c88d3d9d7e71fb58",
+        "ja": "5cc60228025dce52adb523b68da6bd9b15c7dbac9932c1a8a95878f6e1199f07"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-normal-1-pal-52797c409d",
+      "candidateSkillId": "passive:ElementBoost_Normal_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Normal_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Normal_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-normal-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "9a51ac578dddb59694df34d6a1033e25f6549ad273f2fde2fe6b4207e0e44d14",
+        "ja": "822ae66860ee052c23f6a141f02c592494685332dc875f0678516c290ab423c0"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "21bf09dcf420c2c889e9b33cf9cb30fdffde3dcab54030670242cb9955a1cef7",
+          "ja": "d6e2589d932b95ffb9330caeb5fe5cd9e27a173fe5f940a5123503098fc38e2e"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-normal-2-pal-ead16695ee",
+      "candidateSkillId": "passive:ElementBoost_Normal_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Normal_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Normal_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-normal-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "81b0255c5be74b99dbd1afca48d5d11fe80a17cc29e49b5e1d4bb1a9dac4851f",
+        "ja": "d0c2e183085884bd35d8d6115712588935823951f60898d9e6a38d07bb0d3d75"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-thunder-1-pal-ad7eeb0f6f",
+      "candidateSkillId": "passive:ElementBoost_Thunder_1_PAL",
+      "candidateSourceRowId": "ElementBoost_Thunder_1_PAL",
+      "candidateSourceInternalId": "ElementBoost_Thunder_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-thunder-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "361bb1bd32f4b9bfe23ac7bca8258698d623b2b3a06de25221de8fae2a7d509f",
+        "ja": "f5bec0037fadad28a66caaf37ffa148a46dcfd343f277f0b8915071e2ab75ed2"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "dd0373280fc5aa3d99ed3d24fde926baf07c3b4faf5f623646618b88de6da03a",
+          "ja": "f9dc2c06173c3bbe7f5b57182ad3e5f590d9b4343231e667ee15ae38d4d85aec"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-boost-thunder-2-pal-33f6532de1",
+      "candidateSkillId": "passive:ElementBoost_Thunder_2_PAL",
+      "candidateSourceRowId": "ElementBoost_Thunder_2_PAL",
+      "candidateSourceInternalId": "ElementBoost_Thunder_2_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-boost-thunder-2-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "d21a23cf1e01bd2d1d397603380f75523227f2e0a2123c3285999b2ceb6e9589",
+        "ja": "cefdc0fa95956f79d27f9bd7de66b435b7d11de4c5c997feb4989faf48d07389"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-aqua-1-pal-95e604fc20",
+      "candidateSkillId": "passive:ElementResist_Aqua_1_PAL",
+      "candidateSourceRowId": "ElementResist_Aqua_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Aqua_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-aqua-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "6710c91eb42dc9a172f42ebcee7b0a7e6fba38d0bc4ff2c21963bedd15ab3793",
+        "ja": "c811b27de6447d0f564b03c727fd133fabdd943656fe3f76fccad91eac947b17"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "bcfb3ae6ce4f1d43f6f7e444988def0c884eaa676fbce63a15f3d05530a173d7",
+          "ja": "10ebccddc12846c4f1e8f172e2f0d59f5a6407a7a557109ed8193951f20e59d6"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-dark-1-pal-102e813b8f",
+      "candidateSkillId": "passive:ElementResist_Dark_1_PAL",
+      "candidateSourceRowId": "ElementResist_Dark_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Dark_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-dark-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "5ca353637daa1f3b3c0b5ae71ee9f71ddd7328befdc991ef9a5e3043862cdbed",
+        "ja": "29fc2db5f3a04b9f5d2fe900f96742bd2825e6d79e3ce11765e439757067017b"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "1bde6854025880a030bc5f90febe56c38fbcfb864febab4096657fd47f72869a",
+          "ja": "b5d6e78363a3fda37126d61e644e05f706ee1656ce360942c179d2a4f766548f"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-dragon-1-pal-688a174630",
+      "candidateSkillId": "passive:ElementResist_Dragon_1_PAL",
+      "candidateSourceRowId": "ElementResist_Dragon_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Dragon_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-dragon-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "de429c72b4b27f8fb3325f549051bcf117e8002e0151e8e10920b3f46301c05e",
+        "ja": "f20cc9022a5cac4f7896d51c6c1f191025cb9d5cae9a293b39c2622df495912a"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "f99579a581013b007aed13dda05fd8671846e6d11488a56664893607f2230eea",
+          "ja": "dda6765bbe48d6827b6ad168df29f4c8afd188736ac73f0c4541e5df9caf282e"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-earth-1-pal-2e5019ad4d",
+      "candidateSkillId": "passive:ElementResist_Earth_1_PAL",
+      "candidateSourceRowId": "ElementResist_Earth_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Earth_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-earth-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "ac46f94bc2481a7eca22930bb4760e98619a34adf89dc71a0cf144396fdc6ecb",
+        "ja": "ab9d1078d8d954fa5bc821306738fc7427350b228c0d12dfe66b362e28853355"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "5222385549e2ea549d25dc270b5cfc9f4f95dbd15625b546ca071c9c850cb569",
+          "ja": "c3284d3e942c43279cf4b85ee93da35cc4fcf07f826cb35d677596f3e75975e6"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-fire-1-pal-ef46091dd0",
+      "candidateSkillId": "passive:ElementResist_Fire_1_PAL",
+      "candidateSourceRowId": "ElementResist_Fire_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Fire_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-fire-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "a8cdbede3c4e6022e63cc28cec85ea8b19f3297dbd9bf36f64d19c3c093899d6",
+        "ja": "1d3abccb2fd2a25fe320eb1842cac1d55068528d812215315b6108d5acaaefba"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "3cc5cf3c3640d6ad59df7ba327335dd30867d03b498ce2dc32774c040875d040",
+          "ja": "1771d9126840bc7d5c37d02feaf565d918029f95991d79711da22c9f33c3dbae"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-ice-1-pal-c74477e03c",
+      "candidateSkillId": "passive:ElementResist_Ice_1_PAL",
+      "candidateSourceRowId": "ElementResist_Ice_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Ice_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-ice-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "384ce8d997e7030b2dc93adfa28e36002c1edbb8e7f3cf58d7ae3f1b7cf9a1c3",
+        "ja": "cdd99527af3824c9cd074afe8780373441232e1c80e7e55c8472aa1bdcae7390"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "896ad1f353b5fd592b84f37c60810cc10121d949e69973ba82a4e192a9b037ab",
+          "ja": "ddc377d21a74b4df0572cd09e502b2ab8082787b87a733abee01c100f5cf5867"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-leaf-1-pal-4b6d7614d7",
+      "candidateSkillId": "passive:ElementResist_Leaf_1_PAL",
+      "candidateSourceRowId": "ElementResist_Leaf_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Leaf_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-leaf-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "6490cd43320cb138eab8116502be681cc0d20f42b3690a6b9451d0b74faf01d7",
+        "ja": "c08f105f75078745741d64b08055ab494818c5bd9e1e215a7cf980b4a9fc35f8"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "949c6a60c3e2b7c934de42e11e598cd716c873198db2cfb16b1db16e4b89aeee",
+          "ja": "3f8e46f4f4d9ed8045890423372c5b9b79dbaaa8877b986df8174488bb459a1b"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-normal-1-pal-86334ce7a4",
+      "candidateSkillId": "passive:ElementResist_Normal_1_PAL",
+      "candidateSourceRowId": "ElementResist_Normal_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Normal_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-normal-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "89205a7d3f962644af0a10f866c86235c5cde4637451a08a27abe334f911d8d9",
+        "ja": "723e54b5c4e4ef56ffb6ac19e7a381e04b87b0f8ab8132b647478620577a0f6c"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "7a6b559b5ebfaea8e84e8b2e955ea627611a32a1048002c200f3ff803be596a2",
+          "ja": "8559e4d128de4369518e20fa2fc24d5c70a4203426c9d6275742cc692eb9a473"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-element-resist-thunder-1-pal-ea32a45c64",
+      "candidateSkillId": "passive:ElementResist_Thunder_1_PAL",
+      "candidateSourceRowId": "ElementResist_Thunder_1_PAL",
+      "candidateSourceInternalId": "ElementResist_Thunder_1_PAL",
+      "expectedLegacyIdPrefix": "passive-passive-element-resist-thunder-1-pal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "29526d9944f8b784d469d96fcc4d64242b4c4621e4a3407f918eb9780f35337d",
+        "ja": "cbefe0f5a6feea1a30cedd74b92651845e725e881e0ac48da7581e78c5f2fc79"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "e383bafc47f5e1884fb4cd9559cb1092097e8222612112a84ea82c87cbabe42e",
+          "ja": "061d1faffb09e51cbcf8f8e7cdd78281833a747b851fba6baa1c5ed12cdc5420"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-eternal-flame-40c1710409",
+      "candidateSkillId": "passive:EternalFlame",
+      "candidateSourceRowId": "EternalFlame",
+      "candidateSourceInternalId": "EternalFlame",
+      "expectedLegacyIdPrefix": "passive-passive-eternal-flame-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "17afcbaceddfc3f9a58c21f0d438293fb6693ed62afd3e9edb298640d65df9db",
+        "ja": "cb36f8d734bb983f4cb3f63151a820f864dd51164366a237c29d6bc409889b59"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          30,
+          30
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30,
+            30
+          ],
+          "ja": [
+            30,
+            30
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "162c901d3cffc80cf799f8d63da5f1e670ee0edaedbe204c4ff9941b9b87e0ee",
+          "ja": "7177b90c95ea445d80dbfd8a607b559b48260b53a196d2a5b4cc273fe9ace0be"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-legend-8ff382798f",
+      "candidateSkillId": "passive:Legend",
+      "candidateSourceRowId": "Legend",
+      "candidateSourceInternalId": "Legend",
+      "expectedLegacyIdPrefix": "passive-passive-legend-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "d7a38fd8b5b8fe4baf5d2000054a6ef483fb3912434d91a6e291f78d5436a61d",
+        "ja": "c488a012d8296f7357e846f6cad3d7af37ac5592002f3d77f6725b7fc70b1831"
+      },
+      "description": {
+        "status": "numeric_mismatch",
+        "legacyNumbers": [
+          20,
+          20,
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            20,
+            20,
+            20
+          ],
+          "ja": [
+            20,
+            20,
+            20
+          ]
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-move-speed-up-1-7472b18355",
+      "candidateSkillId": "passive:MoveSpeed_up_1",
+      "candidateSourceRowId": "MoveSpeed_up_1",
+      "candidateSourceInternalId": "MoveSpeed_up_1",
+      "expectedLegacyIdPrefix": "passive-passive-move-speed-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "c77798d2523ca435f801310c9aeb5290f329f7a5815d38eedfb93ad48d153d0e",
+        "ja": "59f15b66193be4c948fba27296f201f8cf1036bf0a408c66325efdbcea8d9d82"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "89bcbba648aa181e39d4619c246e23aed81e510b0231a00af0aad6eb04ccb891",
+          "ja": "33659bbfa2724484bba72b6b302b62f4d86f064bbb9bce6b06436fc1a899b3ae"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-move-speed-up-2-dce52a41f8",
+      "candidateSkillId": "passive:MoveSpeed_up_2",
+      "candidateSourceRowId": "MoveSpeed_up_2",
+      "candidateSourceInternalId": "MoveSpeed_up_2",
+      "expectedLegacyIdPrefix": "passive-passive-move-speed-up-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "b27aede46a3189f86803f1944aa74be732c46631d95c89031b1b0010ad97ad45",
+        "ja": "f55e82680f4fb3c965524cdd046d159343c45bc1aa8dc42323124c6e60d87557"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [
+            20
+          ],
+          "ja": [
+            20
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "8be3c16dcf432773bc5e7ffcd90fb2af0fbd3ea6bde544ddd0bde977d5d1ba82",
+          "ja": "262310fa9eb01e78f19684efb1e39042c395f5e23c577bb1b81f10026b403895"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-move-speed-up-3-c669e85b3e",
+      "candidateSkillId": "passive:MoveSpeed_up_3",
+      "candidateSourceRowId": "MoveSpeed_up_3",
+      "candidateSourceInternalId": "MoveSpeed_up_3",
+      "expectedLegacyIdPrefix": "passive-passive-move-speed-up-3-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "31f02f124ad510e23c82aa40fe450c9d19b3e15f0c45f980f20b223a73ed8cb4",
+        "ja": "5813433a9071724998850b936fa1be038f52b3ed1c6ff6d3ce1e5d5f094e5bc3"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          30
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30
+          ],
+          "ja": [
+            30
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "586df03747a7e2f2e51c2c9dcce7ec268bda92ddcac91c258ec7a918c4ed5a11",
+          "ja": "8066a0388df1a0b9fb338ef83aed006adff715bf0638a1ccae3c7bdb06c38eb1"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-nocturnal-0c9ee8311c",
+      "candidateSkillId": "passive:Nocturnal",
+      "candidateSourceRowId": "Nocturnal",
+      "candidateSourceInternalId": "Nocturnal",
+      "expectedLegacyIdPrefix": "passive-passive-nocturnal-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "4ae62d8d05d250027633356a24f81cf6d1a42e02321b64fd6fac762939e40b45",
+        "ja": "24dea0c88559d3e01d5799f7b1bf0522d11a588cff9be5996febad07158fbe3b"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        },
+        "localePayloadSha256": {
+          "ko": "ccbc6e322b423280fb5bb28cbad1e47156ba1c3a81dec8a1dd4e1b6fe2776893",
+          "ja": "155473e1bc79383de0bf8b8abd427d3b685c12a5408e1354f30e696f46438322"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-non-killing-7f81dcacf4",
+      "candidateSkillId": "passive:NonKilling",
+      "candidateSourceRowId": "NonKilling",
+      "candidateSourceInternalId": "NonKilling",
+      "expectedLegacyIdPrefix": "passive-passive-non-killing-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "bda37c792248e5c0a9adf72555724b624ea699a0f462a95cebf444bad29f8017",
+        "ja": "8fd9995c63fa574b50f920e4f926f63f89d20ad2d9e092d19b15fab33bab390d"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          1
+        ],
+        "candidateNumbers": {
+          "ko": [
+            1
+          ],
+          "ja": [
+            1
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "d7a3e5db717311d66b13cc4fdba5bad6f508492a9c4f4366724798b1079186c0",
+          "ja": "1c9a2c456ab4c8e4de76f6b07859e78f2a42229aaa1d88686fef7488ef61152a"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-noukin-69a0d11bb6",
+      "candidateSkillId": "passive:Noukin",
+      "candidateSourceRowId": "Noukin",
+      "candidateSourceInternalId": "Noukin",
+      "expectedLegacyIdPrefix": "passive-passive-noukin-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "3e6106d97175988a72f4a925f4860199956615cafdf669dcd41b13e55f9e712c",
+        "ja": "50611fa9bdf303bf56b65cf3ead8f7a1f0928f3f9acdd490810b6181ba95a701"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          30,
+          -50
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-down1-ca85d82fb2",
+      "candidateSkillId": "passive:PAL_ALLAttack_down1",
+      "candidateSourceRowId": "PAL_ALLAttack_down1",
+      "candidateSourceInternalId": "PAL_ALLAttack_down1",
+      "expectedLegacyIdPrefix": "passive-passive-pal-allattack-down1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "f38b509a6ff45804847eb3f7501ac6183d3d8adf9f335c995b3e7d392d70d927",
+        "ja": "2d22b80c3f920e1bb0556cb2770e02a54cce7dded2d3184b8a01d01ca886461a"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          -10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-down2-8b5af4c7a8",
+      "candidateSkillId": "passive:PAL_ALLAttack_down2",
+      "candidateSourceRowId": "PAL_ALLAttack_down2",
+      "candidateSourceInternalId": "PAL_ALLAttack_down2",
+      "expectedLegacyIdPrefix": "passive-passive-pal-allattack-down2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "129a23797109da18f5957e8a42dd55af12b9ff460ee69d6d481b29726bb06752",
+        "ja": "092ce9f3e772205de2003c4271cd420682b0486ef18cf5a83f1ef5d5626501e5"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          -20
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-up1-f433e3338b",
+      "candidateSkillId": "passive:PAL_ALLAttack_up1",
+      "candidateSourceRowId": "PAL_ALLAttack_up1",
+      "candidateSourceInternalId": "PAL_ALLAttack_up1",
+      "expectedLegacyIdPrefix": "passive-passive-pal-allattack-up1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "a373035f008ae2943711fc9ea122c8b11dadbc3c82ecdbcb8ebab99652890bb1",
+        "ja": "27402adfd76c2a150f31a0834acc5c1aa31a914240e735890fd3c4f2eb39293c"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-allattack-up2-3b80a6eb56",
+      "candidateSkillId": "passive:PAL_ALLAttack_up2",
+      "candidateSourceRowId": "PAL_ALLAttack_up2",
+      "candidateSourceInternalId": "PAL_ALLAttack_up2",
+      "expectedLegacyIdPrefix": "passive-passive-pal-allattack-up2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "5c71d8cf5a993b44c84938a3346c856ad2b9e8312d105196321ec0efa5781b58",
+        "ja": "2c85c384c74ec1270745435e7dbcb8590984a9c23811214687c137d8b8d1b290"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          20
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-conceited-86e9327226",
+      "candidateSkillId": "passive:PAL_conceited",
+      "candidateSourceRowId": "PAL_conceited",
+      "candidateSourceInternalId": "PAL_conceited",
+      "expectedLegacyIdPrefix": "passive-passive-pal-conceited-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "3c8bc1073b7b096e6ee84831f3639b9c5a235b6dc2a7f6ccd67f9dfb76fc1e43",
+        "ja": "50c2f1abb92bbbbe3868443868cb0e733b8ba003627496c914476a6a830b363e"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          10,
+          -10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-corporate-slave-6ef0fc31fa",
+      "candidateSkillId": "passive:PAL_CorporateSlave",
+      "candidateSourceRowId": "PAL_CorporateSlave",
+      "candidateSourceInternalId": "PAL_CorporateSlave",
+      "expectedLegacyIdPrefix": "passive-passive-pal-corporate-slave-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "de78a51b8b70529ae8d395836ba0b9eb0bb190268ca30641361f610f6574866b",
+        "ja": "183f972c7a85d68def4902d437b355c4789698ed5bf8d9d9806b65d9caa59ef7"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          30,
+          -30
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-down-1-09d023691a",
+      "candidateSkillId": "passive:PAL_FullStomach_Down_1",
+      "candidateSourceRowId": "PAL_FullStomach_Down_1",
+      "candidateSourceInternalId": "PAL_FullStomach_Down_1",
+      "expectedLegacyIdPrefix": "passive-passive-pal-full-stomach-down-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "648fb8dfcf63ca8c8cb61de5f473571ad84c2c88d92067bb22c14bd6564429ec",
+        "ja": "9de22e2b22d8c81fea12b8427d48a60a564ecb37c55d3dd67b6a194d81589f1d"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "24cb48e1d0faeba8bb24e696dc98b1e78892194e63f34362892515d2ea8238c9",
+          "ja": "662c51fd5b56e1f3eba7d35887663c0ecd5c91fe7449e4eab4e2a337506ddc56"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-down-2-e1cbd8faf5",
+      "candidateSkillId": "passive:PAL_FullStomach_Down_2",
+      "candidateSourceRowId": "PAL_FullStomach_Down_2",
+      "candidateSourceInternalId": "PAL_FullStomach_Down_2",
+      "expectedLegacyIdPrefix": "passive-passive-pal-full-stomach-down-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "14a6c996d704d073e5ddc9f60c6df5aac4c04ca25b9e2af3cec398390d86eeb0",
+        "ja": "758bd905072cafc4adf5015a07e2904200396c34769677e3cad582c99a395180"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            15
+          ],
+          "ja": [
+            15
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "8be21e6138512b13b091b5ae8b69c35f3d5a75d800e8e5346ebcd05b069c1366",
+          "ja": "aef78b412e406a8ccb35771739ea60ede731d5d264c841c10f75a24ee0064527"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-up-1-e9eb2677b0",
+      "candidateSkillId": "passive:PAL_FullStomach_Up_1",
+      "candidateSourceRowId": "PAL_FullStomach_Up_1",
+      "candidateSourceInternalId": "PAL_FullStomach_Up_1",
+      "expectedLegacyIdPrefix": "passive-passive-pal-full-stomach-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "9a30f00e244fa53304155529f25151d20d3e3a7427821d8be2a3dae460748cab",
+        "ja": "3257dfa19df765c046d7af5066ed12e2848e8eaf42b0f6a0ea48aa1afb0c75e0"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "db0abe26d8f8d75c39cb34aebd53f5a89fa98ce26a1ddc154a42616c6374757d",
+          "ja": "1d1475ac27b6e7c5b2d33475f34e7535bcfda06198e4b0f3b185208fbaf41504"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-full-stomach-up-2-3fc661bea8",
+      "candidateSkillId": "passive:PAL_FullStomach_Up_2",
+      "candidateSourceRowId": "PAL_FullStomach_Up_2",
+      "candidateSourceInternalId": "PAL_FullStomach_Up_2",
+      "expectedLegacyIdPrefix": "passive-passive-pal-full-stomach-up-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "c7767dde62dd6ae850e0b1174b64cb76f0ff43975449da6cfbb22d4d8c072285",
+        "ja": "4775d607f1023460446d6317e3109723c9e580e2da9af7da7fcfcb5980d56198"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            15
+          ],
+          "ja": [
+            15
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "a56f0169eabd55591c57ab73753ac9e9821849a3689529fa0feda9c662e4c978",
+          "ja": "a42c8e8dc5eadd633b1d4d07467e0ca0caf5f25b6277329d0a3105788b3e2693"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-masochist-6e39cf3a41",
+      "candidateSkillId": "passive:PAL_masochist",
+      "candidateSourceRowId": "PAL_masochist",
+      "candidateSourceInternalId": "PAL_masochist",
+      "expectedLegacyIdPrefix": "passive-passive-pal-masochist-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "8ea8a270ecd7f3bdc188d8252dd9d98a1644ac009baf1b05eb0f25d821e6a54c",
+        "ja": "22dbfd942011a61ac848fb5a9b54ef6f550f0dfc8c4eb7fa0ebdfc8feaabddbf"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          15,
+          -15
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-oraora-2b5cd69aa9",
+      "candidateSkillId": "passive:PAL_oraora",
+      "candidateSourceRowId": "PAL_oraora",
+      "candidateSourceInternalId": "PAL_oraora",
+      "expectedLegacyIdPrefix": "passive-passive-pal-oraora-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "587ae8621cc948ecd14da38b8dd1bd8e7c4f928968e9d24629a21f176627bed5",
+        "ja": "9f3204de52d91d886694eeaacbbad1c1feabd259c77b1c3c3a4e2b885e7ff952"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          10,
+          -10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-rude-733b60f011",
+      "candidateSkillId": "passive:PAL_rude",
+      "candidateSourceRowId": "PAL_rude",
+      "candidateSourceInternalId": "PAL_rude",
+      "expectedLegacyIdPrefix": "passive-passive-pal-rude-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "9bc553d17232764f09d7028802ebf0efab318bfb034b8be92400416731fed724",
+        "ja": "b65f048383fca149549ee9acc750298151f61a73590bd305d7372cb520bb79e8"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          15,
+          -10
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sadist-e469d81a97",
+      "candidateSkillId": "passive:PAL_sadist",
+      "candidateSourceRowId": "PAL_sadist",
+      "candidateSourceInternalId": "PAL_sadist",
+      "expectedLegacyIdPrefix": "passive-passive-pal-sadist-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "c0232d3b893f49d21b203baf558bccc48afc3c6cfa860ca5526bcc1fb953a4ef",
+        "ja": "96c34b602ed0534540368091c656ee84da35889ab1fe65d467e113c0078a6eab"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          15,
+          -15
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-down-1-ac554a1d01",
+      "candidateSkillId": "passive:PAL_Sanity_Down_1",
+      "candidateSourceRowId": "PAL_Sanity_Down_1",
+      "candidateSourceInternalId": "PAL_Sanity_Down_1",
+      "expectedLegacyIdPrefix": "passive-passive-pal-sanity-down-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "2ad84ee4002495429cd29f1e05bd607abcaa7c0d9940f073edbcdcd7aef6eca1",
+        "ja": "0105a78c68ac5ded3e77b8fe294fdc270f005df192655e8f5d2678154d01e2ce"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "425e73351491dfa468777beefbb5271c4f2a09ca568ee77b7d64cfadcffb67b9",
+          "ja": "9d3925d1b610c4fd8e06d7daabd7d79b041895e083b7d0e185b0641dc97662ce"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-down-2-2c0876d536",
+      "candidateSkillId": "passive:PAL_Sanity_Down_2",
+      "candidateSourceRowId": "PAL_Sanity_Down_2",
+      "candidateSourceInternalId": "PAL_Sanity_Down_2",
+      "expectedLegacyIdPrefix": "passive-passive-pal-sanity-down-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "6d83ca4926a0371d91296e4ba4861794aef4afb30be563f5316f0b7d1a4bce0c",
+        "ja": "d62ac4cd280b4575ee44d681d5f83ecd2fbf56628b776f2a81f79fead7b6043a"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            15
+          ],
+          "ja": [
+            15
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "eae8970bb569bd02c84afb02f2f8eaa2cacc02971ef02f1757345d2f3eac8d73",
+          "ja": "04ba076a3be6b1c4d267a5f2a1cbe70b60ab7c5b0d9c1d17203b091e9a5c0580"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-up-1-d16c76d884",
+      "candidateSkillId": "passive:PAL_Sanity_Up_1",
+      "candidateSourceRowId": "PAL_Sanity_Up_1",
+      "candidateSourceInternalId": "PAL_Sanity_Up_1",
+      "expectedLegacyIdPrefix": "passive-passive-pal-sanity-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "c8421d3aeb52c898c285b898dc3a5096d8650da7cab2b2691bf04c2bd89791ed",
+        "ja": "592e2abc709dbfc2b41d6ab05a754851e965e5aa49b849575172eea8ee8f8ba0"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "c4fe98b56c1e00dcf7b03a3a778ebfb51ab088e64314b47b862d920a4979a853",
+          "ja": "f9bf3eba2590a682b71168e3b660bfea572124fe81b8dae5c2b8a80857022ff2"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-pal-sanity-up-2-86f2b9c7ac",
+      "candidateSkillId": "passive:PAL_Sanity_Up_2",
+      "candidateSourceRowId": "PAL_Sanity_Up_2",
+      "candidateSourceInternalId": "PAL_Sanity_Up_2",
+      "expectedLegacyIdPrefix": "passive-passive-pal-sanity-up-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "ad5788d4be11238f272ef0535d1be5915953d31bf679929d2a257790fb8dfdf9",
+        "ja": "d82ce1ae2112d9607ff493d21921b29337e7fb25bdbf66d7671ee5acd06fd298"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [
+            15
+          ],
+          "ja": [
+            15
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "8a03b582cba3b23ace2c48617ea83bd927119ff8f20145373f3b132eb596338f",
+          "ja": "31846b912bfc212f1dc589fd05522b9bea21754cb751b6b4bafe94e513ebf8e8"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-rare-329966f19e",
+      "candidateSkillId": "passive:Rare",
+      "candidateSourceRowId": "Rare",
+      "candidateSourceInternalId": "Rare",
+      "expectedLegacyIdPrefix": "passive-passive-rare-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "f706e984d0a4aae2c7134d3bf017306d429682aa91896f3c4d098f4b3ad3420b",
+        "ja": "c9c762336a4e25622e6cf1600f6a725bdec7ee2c188b1718c039d351a491df46"
+      },
+      "description": {
+        "status": "missing_source",
+        "legacyNumbers": [
+          15,
+          15
+        ],
+        "candidateNumbers": {
+          "ko": [],
+          "ja": []
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-sale-price-down-1-5a38b58522",
+      "candidateSkillId": "passive:SalePrice_Down_1",
+      "candidateSourceRowId": "SalePrice_Down_1",
+      "candidateSourceInternalId": "SalePrice_Down_1",
+      "expectedLegacyIdPrefix": "passive-passive-sale-price-down-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "fbdbd693b8235d2d895dc6663eeb328fcc876792e46b1d8c164be741139a4202",
+        "ja": "4a6bfafe7784ca14b0a0dbdd0d8e6b49e24b1e4f10005e5809e30aab8dd9c17f"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          -10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            -10
+          ],
+          "ja": [
+            -10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "6a2f8d202d3febbc2fed1c9ed205de29b3ce9fba023f5e8bc905697061689fcb",
+          "ja": "07f5ea11c89aa12991cec2cd150b71786eaf9aee201b362970c6c00d894cdeb1"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-sale-price-up-1-4662e36935",
+      "candidateSkillId": "passive:SalePrice_Up_1",
+      "candidateSourceRowId": "SalePrice_Up_1",
+      "candidateSourceInternalId": "SalePrice_Up_1",
+      "expectedLegacyIdPrefix": "passive-passive-sale-price-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "7475fbcd2d4d69870eed415689a4d968a7c3c71a5b8bda2c722c6c99731029e3",
+        "ja": "6116c55395a7a103eac88c00678c49a9be78b4f45725b96e61f2ceee4e3dd1de"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          5
+        ],
+        "candidateNumbers": {
+          "ko": [
+            5
+          ],
+          "ja": [
+            5
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "3b4d94f7546ed034f193996db5eac8474f8a53c566cfc76a848ca4f623ffc857",
+          "ja": "43f4d31d2327202907a902237d824f9164c72ee30ade1ef960f39fb05bdc229c"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-sale-price-up-2-ea9b88de09",
+      "candidateSkillId": "passive:SalePrice_Up_2",
+      "candidateSourceRowId": "SalePrice_Up_2",
+      "candidateSourceInternalId": "SalePrice_Up_2",
+      "expectedLegacyIdPrefix": "passive-passive-sale-price-up-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "8b7325e220de4f7ce2f1dae1097e318880662027ebd877bd58e7be1733b114a4",
+        "ja": "14756df66c403376b4122884e08799ac3c367a5275a06484e98e8ddcc3ac56d6"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          3
+        ],
+        "candidateNumbers": {
+          "ko": [
+            3
+          ],
+          "ja": [
+            3
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "d08bb669cbe0ad107ea2d59cf8e138b9cb45c6bea2b1455c8d86ea52e331b14c",
+          "ja": "fe9e1e8fe52f1c92a7f5b74bbd08ac3c5a2d5169bb4e5846ef5fc851c1825db3"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-stamina-down-1-bf2dd98d1c",
+      "candidateSkillId": "passive:Stamina_Down_1",
+      "candidateSourceRowId": "Stamina_Down_1",
+      "candidateSourceInternalId": "Stamina_Down_1",
+      "expectedLegacyIdPrefix": "passive-passive-stamina-down-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "0d67051ba8fe9140e0ea35925a392ed88bf0f8b6361a973d62cdbb8771418559",
+        "ja": "07a2ff2ce7654bf48d2cbfa3df92207db1efa32752427e719fbf64e69c86e48b"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          -25
+        ],
+        "candidateNumbers": {
+          "ko": [
+            -25
+          ],
+          "ja": [
+            -25
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "c2a1d31ec0481c5a944837eca01ff08a17f58296bca0a4f2b033e4553191f1f3",
+          "ja": "9e37293859ac716c76b8ade6c9f7c9d4b42aaeb3caed53d882d7a6e5ae721336"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-stamina-up-1-687ad27f7f",
+      "candidateSkillId": "passive:Stamina_Up_1",
+      "candidateSourceRowId": "Stamina_Up_1",
+      "candidateSourceInternalId": "Stamina_Up_1",
+      "expectedLegacyIdPrefix": "passive-passive-stamina-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "d07389b94f351b93e45c97c8621195fa5bd661b71fefad2f788b76cb761d3b7c",
+        "ja": "bec32abfea2fcb451761ce28e6b1e0003f8d301910407dd430304b38bb80765a"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          50
+        ],
+        "candidateNumbers": {
+          "ko": [
+            50
+          ],
+          "ja": [
+            50
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "833a662d4c4aa6f7bb01cedabcd49a2e8083bdf9a37beade0ea95f29e1de95e3",
+          "ja": "4d0823280489b127a19a20927578afd6b57f0dd8c2cdee4b9c0e39c969fbbd7e"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-stamina-up-2-801c8a1ef4",
+      "candidateSkillId": "passive:Stamina_Up_2",
+      "candidateSourceRowId": "Stamina_Up_2",
+      "candidateSourceInternalId": "Stamina_Up_2",
+      "expectedLegacyIdPrefix": "passive-passive-stamina-up-2-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "7aca3f1e194cb491f0a2e6e77f59d08a6dd2138a77f5d99c9982cd34ce3ef9d5",
+        "ja": "3fdf4fc140b21101b42ef9952445f5c83f069fbeb11aaf6b7a43b1cb43ece0e9"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          25
+        ],
+        "candidateNumbers": {
+          "ko": [
+            25
+          ],
+          "ja": [
+            25
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "377e829779e244ca4923ecff16c07b322e240b78462036a2db5c3f870d25b55f",
+          "ja": "377adc2c6ec7bcf0ef98ca8c52412761bc53135b20474fec68fed62e04276333"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-test-pal-egg-hatching-speed-up-e369a5abcb",
+      "candidateSkillId": "passive:Test_PalEgg_HatchingSpeed_Up",
+      "candidateSourceRowId": "Test_PalEgg_HatchingSpeed_Up",
+      "candidateSourceInternalId": "Test_PalEgg_HatchingSpeed_Up",
+      "expectedLegacyIdPrefix": "passive-passive-test-pal-egg-hatching-speed-up-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "f876e8e56283494495a08dcfca23ad1dd408cb874e2f1816f7880081389bffd6",
+        "ja": "591c024ceec72017c8d834403fc9a5ddbe7360764edc0829acdc53f31e019e37"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          100
+        ],
+        "candidateNumbers": {
+          "ko": [
+            100
+          ],
+          "ja": [
+            100
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "c23f702485ad32791d191421a582a26ca55eb6120f5bdc22ab3fb0f11d35366e",
+          "ja": "2e20808b4bfdbfa396153407e6021c90a37132b5a2ebb2653489f07cf9ff0ef8"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-atk-up-1-61cc757ea5",
+      "candidateSkillId": "passive:TrainerATK_UP_1",
+      "candidateSourceRowId": "TrainerATK_UP_1",
+      "candidateSourceInternalId": "TrainerATK_UP_1",
+      "expectedLegacyIdPrefix": "passive-passive-trainer-atk-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "b47a2722343c3294f995165558e11d4f6740c658f411d3476c139491dc5b0840",
+        "ja": "010a217c863f5c8c0daee7ff7a9134e7cda62f3e73197f97fc834eedbcef06ac"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "8d24fdca4ecc22885df33533eb55bc94e298a1945a676776e59551a73a34c97c",
+          "ja": "1465cee95cb1917585b4470b2323fcc538b1c7d0aaef4449bc1a2c32e28a6b22"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-def-up-1-0690f95e65",
+      "candidateSkillId": "passive:TrainerDEF_UP_1",
+      "candidateSourceRowId": "TrainerDEF_UP_1",
+      "candidateSourceInternalId": "TrainerDEF_UP_1",
+      "expectedLegacyIdPrefix": "passive-passive-trainer-def-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "a3a5d1bd6145c7b10783b9c3371753a931499012f986025a80d74369fbd846d1",
+        "ja": "b79f52ce8ecf769670f8802dbf864dd040baa4d87e933a010e7314e72466832e"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          10
+        ],
+        "candidateNumbers": {
+          "ko": [
+            10
+          ],
+          "ja": [
+            10
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "279b64f183a6361cee3c915f233075d162730d43c6bcbdcf274c1557256d4c51",
+          "ja": "b21b1350fa27b994b2f327056f06b077463d07846a332f09e82f2f77410098e6"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-logging-up1-536def0d3a",
+      "candidateSkillId": "passive:TrainerLogging_up1",
+      "candidateSourceRowId": "TrainerLogging_up1",
+      "candidateSourceInternalId": "TrainerLogging_up1",
+      "expectedLegacyIdPrefix": "passive-passive-trainer-logging-up1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "95610c381a5368beeee6788b5f67a96a69fc61887406739654e2ea1e02505ae6",
+        "ja": "40673ce3441a2ea0d90d9d03778e8c7811694d5477b59abd3bf08979580f0884"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          25
+        ],
+        "candidateNumbers": {
+          "ko": [
+            25
+          ],
+          "ja": [
+            25
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "65998a9083f3990626cc5f76a197415b2dcf2be5db09b354af959a1c95dd0b6f",
+          "ja": "8396d83aa318b36a40f69ed6f9878b97786b1e536b0b350fc3bd4b33ebe88e9e"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-mining-up1-e8bb571c3f",
+      "candidateSkillId": "passive:TrainerMining_up1",
+      "candidateSourceRowId": "TrainerMining_up1",
+      "candidateSourceInternalId": "TrainerMining_up1",
+      "expectedLegacyIdPrefix": "passive-passive-trainer-mining-up1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "04d6e81a15529629e872c5a734b634f05e3c567a0c87d2662a33cd5e31ca7bdd",
+        "ja": "81b68feeb51a1a285e05670220fdc10541fa94100822a6f6f1e38ed11b67fc60"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          25
+        ],
+        "candidateNumbers": {
+          "ko": [
+            25
+          ],
+          "ja": [
+            25
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "29920ede6b615b6f1e0abbb7293e82260c8ea035750d07122744a330c380362c",
+          "ja": "302eb46928f62d577561b5fb93fb20a9c1f90d7387fee95200b17734be727cc4"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-trainer-work-speed-up-1-457e282f83",
+      "candidateSkillId": "passive:TrainerWorkSpeed_UP_1",
+      "candidateSourceRowId": "TrainerWorkSpeed_UP_1",
+      "candidateSourceInternalId": "TrainerWorkSpeed_UP_1",
+      "expectedLegacyIdPrefix": "passive-passive-trainer-work-speed-up-1-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "f2935b65ce43ed1762a8a86c8cd6f01e4941a7a153168e5b80589459ebd528a1",
+        "ja": "a12e1b06e36d247fcd299fa67800705a88ce2c8995a2af499d1441bd589e1ba0"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          25
+        ],
+        "candidateNumbers": {
+          "ko": [
+            25
+          ],
+          "ja": [
+            25
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "feabe0241e3d3b1d4b06b5bf1bfcbd5b762290b383964d15590c08876e891ff1",
+          "ja": "d94a81cdd49ff520e30cd292a7426c5cd65e68778d2482bee40b6bed3c84882f"
+        }
+      }
+    },
+    {
+      "legacySkillId": "passive-passive-witch-a025ce7175",
+      "candidateSkillId": "passive:Witch",
+      "candidateSourceRowId": "Witch",
+      "candidateSourceInternalId": "Witch",
+      "expectedLegacyIdPrefix": "passive-passive-witch-",
+      "joinGuard": "legacy_public_id_prefix_exact",
+      "nameLocalePayloadSha256": {
+        "ko": "60ffcd1f2f4ab4498b98307f130f3eb5dfe6219c6d2e7d1da308baf53938328a",
+        "ja": "186ec1a871e42d204d8558aae122f5dcedd653bba74be4c43f06f1fe03923c8d"
+      },
+      "description": {
+        "status": "compatible",
+        "legacyNumbers": [
+          30,
+          30
+        ],
+        "candidateNumbers": {
+          "ko": [
+            30,
+            30
+          ],
+          "ja": [
+            30,
+            30
+          ]
+        },
+        "localePayloadSha256": {
+          "ko": "46b460ca74cb48c05b29a3ef1687975ee2426890588af784cbf6219c171cdd6d",
+          "ja": "1494d3de486930ae2bd9d5e4544e6b913612d355159e409fec6f6f127256cc54"
+        }
+      }
+    }
+  ]
+}

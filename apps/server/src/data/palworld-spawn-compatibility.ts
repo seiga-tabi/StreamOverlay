@@ -187,6 +187,31 @@ export function palworldSpawnCompatibilityEvidenceChecksum(
   return sha256Bytes(deterministicJson(evidencePayload(approval)));
 }
 
+export function createPalworldSpawnCompatibilityApproval(input: {
+  previousApproval: PalworldSpawnCompatibilityApproval;
+  mapImagesManifestSha256: string;
+}): PalworldSpawnCompatibilityApproval {
+  const previousApproval = assertPalworldSpawnCompatibilityApproval(
+    input.previousApproval
+  );
+  const mapImagesManifestSha256 = sha256At(
+    input.mapImagesManifestSha256,
+    "mapImagesManifestSha256"
+  );
+  const {
+    evidenceChecksum: _previousEvidenceChecksum,
+    ...previousEvidence
+  } = previousApproval;
+  const evidence = {
+    ...previousEvidence,
+    mapImagesManifestSha256
+  };
+  return assertPalworldSpawnCompatibilityApproval({
+    ...evidence,
+    evidenceChecksum: palworldSpawnCompatibilityEvidenceChecksum(evidence)
+  });
+}
+
 export function assertPalworldSpawnCompatibilityApproval(
   value: unknown
 ): PalworldSpawnCompatibilityApproval {

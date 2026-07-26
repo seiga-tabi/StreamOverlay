@@ -103,7 +103,9 @@ npm --workspace apps/server run generate:palworld-official-locale-overlay -- \
   --reviewer <검수자 ID> \
   --evidence-checksum <검수 증거 SHA-256> \
   --active-skill-mapping \
-    apps/server/src/data/palworld-pak-mappings/legacy-active-skill-locale-map.json
+    apps/server/src/data/palworld-pak-mappings/legacy-active-skill-locale-map.json \
+  --passive-skill-mapping \
+    apps/server/src/data/palworld-pak-mappings/legacy-passive-skill-locale-map.json
 ```
 
 생성물:
@@ -111,6 +113,8 @@ npm --workspace apps/server run generate:palworld-official-locale-overlay -- \
 - `official-source-fields.json`: locale member와 message key까지 고정한 exact source
 - `official-active-skill-evidence.json`: Pal ID·해금 레벨·전투 수치로 검증한
   legacy 액티브 스킬 217개의 공식 locale 연결 근거
+- `official-passive-skill-evidence.json`: versioned explicit mapping과 legacy 설명의
+  수치 의미를 검증한 패시브 스킬 79개의 공식 이름 및 호환 설명 연결 근거
 - `official-locale-compatibility.json`: ZIP·candidate·mapping·출력 checksum과 blocker
 - `ko.json`, `ja.json`: 공개 runtime snapshot
 - `ko-coverage.json`, `ja-coverage.json`: 공식·검수·fallback 상태 집계
@@ -121,6 +125,11 @@ npm --workspace apps/server run generate:palworld-official-locale-overlay -- \
 `rightsVerified: false`를 그대로 보존하며 동일 입력에서 byte-for-byte 같은 결과를
 만든다. 게시할 때는 모든 파일을 검증한 뒤 `manifest.json`과 active runtime selector를
 마지막에 원자적으로 갱신한다.
+
+패시브 스킬 이름은 explicit mapping 전체가 exact join될 때만 공개한다. 설명은 공식
+KO/JA 원본이 모두 존재하고 rich text가 해결되며 legacy 영문 설명의 숫자 의미가
+동일한 경우에만 `source_provided`로 승격한다. 원본 누락이나 버전 수치 차이가 있으면
+영문을 공식 번역처럼 복사하지 않고 fail-closed 상태로 남긴다.
 
 ## 4. 검증
 

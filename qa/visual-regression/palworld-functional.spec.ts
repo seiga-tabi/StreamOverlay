@@ -2,8 +2,12 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 import { resolve } from "node:path";
 import {
   PALWORLD_ELEMENTS,
+  PALWORLD_MAP_LOCATION_CATEGORIES,
+  PALWORLD_PASSIVE_EFFECT_FILTERS,
+  PALWORLD_PASSIVE_TIERS,
   PALWORLD_PUBLIC_NOTICE_JA,
   PALWORLD_PUBLIC_NOTICE_KO,
+  PALWORLD_SKILL_TYPES,
   PALWORLD_VARIANT_TYPES,
   PALWORLD_WORK_SUITABILITY_TYPES,
 } from "@streamops/shared";
@@ -13,6 +17,7 @@ import type {
   PalworldItemDetail,
   PalworldItemSummary,
   PalworldMapMarkersResponse,
+  PalworldMapLocationsResponse,
   PalworldPaginatedResponse,
   PalworldPalDetail,
   PalworldPalListFacets,
@@ -21,6 +26,7 @@ import type {
   PalworldPalSpawnResponse,
   PalworldPalSummary,
   PalworldSkillDetail,
+  PalworldSkillListFacets,
   PalworldSkillSummary,
 } from "@streamops/shared";
 
@@ -37,6 +43,7 @@ const metadata: PalworldDataMetadata = {
 const READY_PAL_IMAGE_URL = `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`;
 const READY_ITEM_IMAGE_URL = `/images/palworld/1.0.1/items/${"b".repeat(64)}.webp`;
 const READY_WORLD_MAP_URL = "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp";
+const READY_TREE_MAP_URL = "/images/palworld/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf.webp";
 const LOCAL_WEBP_FIXTURE = resolve("apps/dashboard/public/images/yorogg-logo.webp");
 
 const mapMarkers: PalworldMapMarkersResponse = {
@@ -79,6 +86,107 @@ const mapMarkers: PalworldMapMarkersResponse = {
     usageBasis: "operator_reference_use",
   },
 };
+
+const treeMapMarkers: PalworldMapMarkersResponse = {
+  state: "ready",
+  world: "tree",
+  markers: [{
+    id: "tree-015-dualith",
+    sourceRowId: "15",
+    sourceInternalId: "GrassGolem",
+    pal: {
+      id: "dualith",
+      number: 138,
+      nameKo: "스태초",
+      nameJa: "ウゴクゾー",
+      nameEn: "Dualith",
+      imageUrl: READY_PAL_IMAGE_URL,
+      imageWidth: 128,
+      imageHeight: 128,
+      elements: ["ground", "grass"],
+    },
+    level: 75,
+    normalizedX: 0.559563133,
+    normalizedY: 0.502340571,
+  }],
+  metadata,
+  overlay: {
+    schemaVersion: 1,
+    technicalStatus: "ready",
+    sourceType: "operator_pak_export",
+    archiveSha256: "1".repeat(64),
+    sourceMember: "Pal/DataTable/UI/DT_BossSpawnerLoactionData.json",
+    sourceMemberSha256: "2".repeat(64),
+    targetMapAssetSha256: "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf",
+    sourceGameVersion: null,
+    sourceSteamBuildId: null,
+    targetGameVersion: "1.0.1",
+    compatibilityBasis: "exact_map_geometry_and_coordinate_transform",
+    transformRevision: "tree-map-fmodel-bounds-v1",
+    rightsVerified: false,
+    usageBasis: "operator_reference_use",
+  },
+};
+
+function mapLocationsResponse(url: URL): PalworldMapLocationsResponse {
+  const world = url.searchParams.get("world") === "tree" ? "tree" : "main";
+  const requestedLayers = new Set(
+    (url.searchParams.get("layers") ?? "").split(",").filter(Boolean),
+  );
+  const layers = PALWORLD_MAP_LOCATION_CATEGORIES.filter((category) =>
+    requestedLayers.has(category)
+  );
+  const allLocations = [{
+    id: `${world}-egg-grass-001`,
+    category: "egg" as const,
+    subtype: "grass-01",
+    normalizedX: 0.35,
+    normalizedY: 0.45,
+  }, {
+    id: `${world}-resource-copper-ore-001`,
+    category: "resource" as const,
+    subtype: "copper-ore",
+    normalizedX: 0.55,
+    normalizedY: 0.65,
+  }].filter((location) => layers.includes(location.category));
+  const offset = Number(url.searchParams.get("offset") ?? "0");
+  const limit = Number(url.searchParams.get("limit") ?? "5000");
+  const locations = allLocations.slice(offset, offset + limit);
+  return {
+    state: locations.length > 0 ? "ready" : "confirmed_empty",
+    world,
+    layers,
+    offset,
+    limit,
+    total: allLocations.length,
+    returned: locations.length,
+    hasMore: offset + locations.length < allLocations.length,
+    locations,
+    metadata,
+    overlay: {
+      schemaVersion: 1,
+      technicalStatus: "ready",
+      sourceType: "operator_pak_export",
+      archiveSha256: "1".repeat(64),
+      sourceMember: "Maps/index.json",
+      sourceMemberSha256: "5".repeat(64),
+      targetMapAssetSha256: world === "tree"
+        ? "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf"
+        : "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
+      sourceGameVersion: null,
+      sourceSteamBuildId: null,
+      targetGameVersion: "1.0.1",
+      compatibilityBasis: "exact_world_actor_join_and_map_geometry",
+      transformRevision: world === "tree"
+        ? "tree-map-fmodel-bounds-v1"
+        : "main-map-fmodel-bounds-v1",
+      rightsVerified: false,
+      usageBasis: "operator_reference_use",
+      activationBasis: "versioned_compatibility_approval",
+      compatibilityApprovalSha256: "6".repeat(64),
+    },
+  };
+}
 
 function palSpawnResponse(palId: string): PalworldPalSpawnResponse {
   const overlay = {
@@ -556,8 +664,11 @@ const skills: PalworldSkillDetail[] = [
 ];
 
 function skillSummary(skill: PalworldSkillDetail): PalworldSkillSummary {
-  const { relatedPals: _relatedPals, metadata: _metadata, ...summary } = skill;
-  return summary;
+  const { relatedPals, metadata: _metadata, ...summary } = skill;
+  return {
+    ...summary,
+    relatedPalPreviews: relatedPals.slice(0, 3).map(({ pal }) => ({ ...pal })),
+  };
 }
 
 function normalize(value: string): string {
@@ -672,18 +783,68 @@ function filteredSkills(url: URL): PalworldSkillSummary[] {
   const query = url.searchParams.get("q");
   const type = url.searchParams.get("type");
   const element = url.searchParams.get("element");
+  const partnerElement = url.searchParams.get("partnerElement");
+  const passiveEffect = url.searchParams.get("passiveEffect");
+  const passiveTier = url.searchParams.get("passiveTier");
   const sort = url.searchParams.get("sort") ?? "name";
   const order = url.searchParams.get("order") === "desc" ? -1 : 1;
   return skills
     .filter((skill) => !query || matches(query, [skill.id, skill.nameKo ?? "", skill.nameJa ?? "", skill.nameEn, skill.descriptionKo ?? "", skill.descriptionJa ?? "", skill.descriptionEn ?? ""]))
     .filter((skill) => !type || skill.type === type)
-    .filter((skill) => !element || skill.element === element)
+    .filter((skill) => !element || (skill.type === "active" && skill.element === element))
+    .filter((skill) => !partnerElement || (skill.type === "partner" && skill.element === partnerElement))
+    .filter((skill) => !passiveEffect || (
+      skill.type === "passive"
+      && passiveEffectForSkill(skill) === passiveEffect
+    ))
+    .filter((skill) => !passiveTier || (
+      skill.type === "passive"
+      && skill.passiveTier === Number(passiveTier)
+    ))
     .sort((left, right) => {
       if (sort === "power") return order * ((left.power ?? Number.MAX_SAFE_INTEGER) - (right.power ?? Number.MAX_SAFE_INTEGER));
       if (sort === "unlockLevel") return order * ((left.unlockLevel ?? Number.MAX_SAFE_INTEGER) - (right.unlockLevel ?? Number.MAX_SAFE_INTEGER));
       return order * left.nameEn.localeCompare(right.nameEn);
     })
     .map(skillSummary);
+}
+
+function passiveEffectForSkill(skill: PalworldSkillSummary): (typeof PALWORLD_PASSIVE_EFFECT_FILTERS)[number] {
+  return skill.passiveAbility?.toLocaleUpperCase().includes("SAN") ? "san" : "other";
+}
+
+function skillListFacets(source: readonly PalworldSkillSummary[] = skills.map(skillSummary)): PalworldSkillListFacets {
+  const count = <T extends string | number>(values: readonly T[], value: T) =>
+    values.filter((candidate) => candidate === value).length;
+  const types = source.map((skill) => skill.type);
+  const activeElements = source.flatMap((skill) =>
+    skill.type === "active" && skill.element ? [skill.element] : []
+  );
+  const partnerElements = source.flatMap((skill) =>
+    skill.type === "partner" && skill.element ? [skill.element] : []
+  );
+  const passiveSkills = source.filter((skill) => skill.type === "passive");
+  const passiveEffects = passiveSkills.map(passiveEffectForSkill);
+  const passiveTiers = passiveSkills.flatMap((skill) =>
+    skill.passiveTier === undefined ? [] : [skill.passiveTier]
+  );
+  return {
+    types: PALWORLD_SKILL_TYPES
+      .map((value) => ({ value, count: count(types, value) }))
+      .filter((facet) => facet.count > 0),
+    activeElements: PALWORLD_ELEMENTS
+      .map((value) => ({ value, count: count(activeElements, value) }))
+      .filter((facet) => facet.count > 0),
+    partnerElements: PALWORLD_ELEMENTS
+      .map((value) => ({ value, count: count(partnerElements, value) }))
+      .filter((facet) => facet.count > 0),
+    passiveEffects: PALWORLD_PASSIVE_EFFECT_FILTERS
+      .map((value) => ({ value, count: count(passiveEffects, value) }))
+      .filter((facet) => facet.count > 0),
+    passiveTiers: PALWORLD_PASSIVE_TIERS
+      .map((value) => ({ value, count: count(passiveTiers, value) }))
+      .filter((facet) => facet.count > 0),
+  };
 }
 
 async function json(route: Route, body: unknown, status = 200): Promise<void> {
@@ -773,7 +934,11 @@ async function installApiFixtures(page: Page): Promise<void> {
       return;
     }
     if (url.pathname === "/api/palworld/map/markers") {
-      await json(route, mapMarkers);
+      await json(route, url.searchParams.get("world") === "tree" ? treeMapMarkers : mapMarkers);
+      return;
+    }
+    if (url.pathname === "/api/palworld/map/locations") {
+      await json(route, mapLocationsResponse(url));
       return;
     }
     if (url.pathname === "/api/palworld/map/spawns") {
@@ -806,7 +971,10 @@ async function installApiFixtures(page: Page): Promise<void> {
       return;
     }
     if (url.pathname === "/api/palworld/skills") {
-      await json(route, pageResponse(filteredSkills(url), url));
+      await json(route, {
+        ...pageResponse(filteredSkills(url), url),
+        facets: skillListFacets(),
+      });
       return;
     }
     if (url.pathname === "/api/palworld/breeding/parents") {
@@ -1754,7 +1922,10 @@ test("Pal·아이템·스킬 목록은 스크롤 시 다음 페이지를 누적�
   }));
   await page.route("**/api/palworld/skills?*", async (route) => {
     const url = new URL(route.request().url());
-    await json(route, pageResponse(manySkills, url));
+    await json(route, {
+      ...pageResponse(manySkills, url),
+      facets: skillListFacets(manySkills),
+    });
   });
   await page.goto("/palworld/skills");
   await expect(page.locator(".palworld-skill-card")).toHaveCount(24);
@@ -2190,11 +2361,16 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
 
   await expect(page.getByTestId("header-search")).toBeVisible();
   await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "스킬" })).toHaveAttribute("aria-current", "page");
-  const filters = page.locator(".palworld-skill-filter-bar select");
-  await expect(filters.nth(0)).toHaveValue("active");
-  await expect(filters.nth(1)).toHaveValue("ground");
-  await expect(filters.nth(2)).toHaveValue("power");
-  await expect(filters.nth(3)).toHaveValue("desc");
+  const skillTypeTabs = page.getByRole("navigation", { name: "스킬 종류" });
+  await expect(skillTypeTabs.getByRole("button", { name: "액티브 스킬" })).toHaveAttribute("aria-pressed", "true");
+  await expect(skillTypeTabs.getByRole("button", { name: "패시브 스킬" })).toHaveAttribute("aria-pressed", "false");
+  await expect(skillTypeTabs.getByRole("button", { name: "파트너 스킬" })).toHaveAttribute("aria-pressed", "false");
+  const elementFilters = page.getByRole("group", { name: "속성" });
+  await expect(elementFilters.getByRole("button", { name: "땅 속성 스킬로 필터" })).toHaveAttribute("aria-pressed", "true");
+  await expect(elementFilters.getByRole("button", { name: "땅 속성 스킬로 필터" }).locator(".palworld-element-icon")).toHaveCount(1);
+  await page.getByText("정렬 필터", { exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "정렬", exact: true })).toHaveValue("power");
+  await expect(page.getByRole("combobox", { name: "정렬 방향", exact: true })).toHaveValue("desc");
   await expect(page.getByTestId("palworld-skills-coverage")).toHaveCount(0);
   const translationReviewNotice = page.locator(".palworld-translation-review-notice");
   await expect(translationReviewNotice).toHaveCount(1);
@@ -2206,6 +2382,14 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
   await expect(skillCard).not.toContainText("영문 원문");
   await expect(skillCard).toContainText("위력 30");
   await expect(skillCard.locator(".palworld-element-icon")).toHaveCount(1);
+  const relatedPalPreview = skillCard.getByRole("group", { name: "관련 Pal" });
+  await expect(relatedPalPreview).toBeVisible();
+  await expect(relatedPalPreview.locator(".palworld-skill-related-preview-media")).toHaveCount(1);
+  await expect(relatedPalPreview.getByRole("img", { name: /아누비스/u })).toBeVisible();
+  await expect(relatedPalPreview.locator(".palworld-skill-related-preview-more")).toHaveCount(0);
+  await expect.poll(() => relatedPalPreview.evaluate((element) =>
+    element.scrollWidth <= element.clientWidth
+  )).toBe(true);
   await skillCard.getByRole("button", { name: "스킬 상세 보기" }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("skill")).toBe("active-ground-stone-blast-30-2");
   const dialog = page.getByTestId("skill-detail-modal").getByRole("dialog", { name: "스톤 샷" });
@@ -2223,6 +2407,25 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
   await expect(page.getByTestId("skill-detail-modal").getByRole("dialog", { name: "스톤 샷" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect.poll(() => new URL(page.url()).searchParams.has("skill")).toBe(false);
+
+  await skillTypeTabs.getByRole("button", { name: "패시브 스킬" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("type")).toBe("passive");
+  await expect.poll(() => new URL(page.url()).searchParams.has("element")).toBe(false);
+  const passiveTierFilters = page.getByRole("group", { name: "패시브 등급" });
+  await expect(page.getByRole("group", { name: "효과" })).toBeVisible();
+  await passiveTierFilters.getByRole("button", { name: "패시브 등급 +2로 필터" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("passiveTier")).toBe("2");
+
+  await skillTypeTabs.getByRole("button", { name: "파트너 스킬" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("type")).toBe("partner");
+  await expect.poll(() => new URL(page.url()).searchParams.has("passiveTier")).toBe(false);
+  await page.getByRole("group", { name: "속성" }).getByRole("button", { name: "땅 속성 스킬로 필터" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("partnerElement")).toBe("ground");
+
+  await skillTypeTabs.getByRole("button", { name: "액티브 스킬" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.has("partnerElement")).toBe(false);
+  await page.getByRole("group", { name: "속성" }).getByRole("button", { name: "땅 속성 스킬로 필터" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("element")).toBe("ground");
 
   await page.reload();
   await expect(page.getByRole("heading", { name: "Palworld 스킬", level: 1 })).toBeVisible();
@@ -2707,6 +2910,16 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.goForward();
   await expect(page).toHaveURL(/\/palworld\/map$/u);
   await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+  await page.getByRole("tab", { name: "세계수" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("world")).toBe("tree");
+  await expect(mapImage).toHaveAttribute("src", READY_TREE_MAP_URL);
+  await expect.poll(
+    () => mapImage.evaluate((image: HTMLImageElement) => image.naturalWidth),
+  ).toBe(4096);
+  await expect(page.getByRole("button", { name: "필드 보스: 스태초, Lv.75" })).toBeVisible();
+  await page.getByRole("tab", { name: "팰파고스섬" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.has("world")).toBe(false);
+  await expect(mapImage).toHaveAttribute("src", READY_WORLD_MAP_URL);
   const mobileViewport = (page.viewportSize()?.width ?? 1440) <= 768;
   const mobileFilterTrigger = page.getByRole("button", { name: "필터 1개" });
   const filterScope = mobileViewport
@@ -2719,7 +2932,52 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
   } else {
     await expect(mobileFilterTrigger).toBeHidden();
+    const filterContent = filterScope.locator(".palworld-map-filter-content");
+    const explorerMain = page.locator(".palworld-map-explorer-main");
+    const expandedWidth = await explorerMain.evaluate((element) => element.getBoundingClientRect().width);
+    await filterScope.getByRole("button", { name: "필터 숨기기" }).click();
+    await expect(filterContent).toBeHidden();
+    await expect(filterScope).toHaveAttribute("data-collapsed", "true");
+    await expect.poll(
+      () => explorerMain.evaluate((element) => element.getBoundingClientRect().width),
+    ).toBeGreaterThan(expandedWidth);
+    await filterScope.getByRole("button", { name: "필터 열기" }).click();
+    await expect(filterContent).toBeVisible();
+    await expect(filterScope).not.toHaveAttribute("data-collapsed", "true");
   }
+  const eggGroup = filterScope.locator(".palworld-map-filter-group").filter({
+    has: page.locator('[data-layer="egg-grass"]'),
+  });
+  const eggGroupToggle = eggGroup.getByRole("button", { name: "알", exact: true });
+  const eggGroupList = eggGroup.locator("ul");
+  const eggIcon = eggGroup.locator('[data-layer="egg-grass"] img');
+  await eggIcon.scrollIntoViewIfNeeded();
+  await expect(eggIcon).toBeVisible();
+  await expect.poll(
+    () => eggIcon.evaluate((image: HTMLImageElement) => image.naturalWidth),
+  ).toBeGreaterThan(0);
+  await eggGroupToggle.click();
+  await expect(eggGroupToggle).toHaveAttribute("aria-expanded", "false");
+  await expect(eggGroupList).toBeHidden();
+  await eggGroupToggle.click();
+  await expect(eggGroupToggle).toHaveAttribute("aria-expanded", "true");
+  await expect(eggGroupList).toBeVisible();
+  const resourceGroup = filterScope.locator(".palworld-map-filter-group").filter({
+    has: page.locator('[data-layer="resource-copper-ore"]'),
+  });
+  const resourceGroupAll = resourceGroup.locator('input[id$="-all"]');
+  await expect(resourceGroupAll).toBeEnabled();
+  await resourceGroupAll.check();
+  await expect.poll(
+    () => new URL(page.url()).searchParams.get("layers")?.split(","),
+  ).toContain("resource");
+  await expect(
+    page.locator('.palworld-map-location-marker[data-category="resource"]'),
+  ).toBeVisible();
+  await resourceGroupAll.uncheck();
+  await expect.poll(
+    () => new URL(page.url()).searchParams.get("layers")?.split(",") ?? [],
+  ).not.toContain("resource");
   const bossLayerCheckbox = filterScope.locator('[data-layer="boss"] input[type="checkbox"]');
   await expect(bossLayerCheckbox).toBeChecked();
   await bossLayerCheckbox.uncheck();

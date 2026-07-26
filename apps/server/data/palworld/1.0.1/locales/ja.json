@@ -5,7 +5,7 @@
   "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
   "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
   "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
-  "translationRevision": "official-locale-overlay-9499ec38e96ef9ca-eb408d81",
+  "translationRevision": "official-locale-overlay-23341e7d79a57bac-eb408d81",
   "translationMethod": "source_provided",
   "translationStatus": "incomplete",
   "translatedAt": "2026-07-25T00:00:00.000Z",
@@ -57485,6 +57485,1512 @@
           "sourceMember": "Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
           "sourceMemberSha256": "130382e5a242aab7f0c5aebd09242d60e40ed662929435c5eed5fc5bc73a0c7e",
           "text": "背中に乗って移動できる。\n一緒に戦っている間、このパルと同じパッシブスキルを持ったパルに遭遇する確率がLv.1 15 · Lv.2 18 · Lv.3 21 · Lv.4 24 · Lv.5 30%上がる。\n※一部のパッシブスキルを除く",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-alien-7fa1e23436",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "1dab7782bb15ec4f59a3a315ab805125e162ef26ec907f15acc5720bb0c2af01",
+          "sourceMessageKey": "PASSIVE_Alien",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "未知の生体細胞",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "d8744de4e58f7c67e2eaca4255f5fff631d9869ea237c8db6883ab5118d38ba4",
+          "sourceMessageKey": "PASSIVE_Alien_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "攻撃+10%\n炎属性ダメージ軽減15%\n雷属性ダメージ軽減15%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-cool-time-reduction-down-1-3cb8042ac5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "34ddf05479af440ee713b1f005eaea99e998026c2e294f4efbd604529ff898d3",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Down_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "のんびり屋さん",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "53e3d28b235649c8ba17163f51457e55fe2d17293f8a10f946485214fed3f7e9",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Down_1_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "アクティブスキルのクールタイム延長-15%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-cool-time-reduction-up-1-149b0a9ba1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "fc480c72ae03b86310362df009e216108404db48e153dee3737f019eee0532b1",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "冷静沈着",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "da3a7fa872632e1c109ae6df300c91d04c47edb76911a9bc2c7723ce4629b43c",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_1_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "アクティブスキルのクールタイム短縮30%\n攻撃+10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-cool-time-reduction-up-2-2b0c9bee61",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "eb3297c8a4f041bc546a547a99688bbd1abd08efd64b07e44d7925e369c3e8b2",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "せっかち",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "5e78ac651f3dda8a203587eb5d1783a9ea3c3d7ee2a7a4e293a8092ac0c22c59",
+          "sourceMessageKey": "PASSIVE_CoolTimeReduction_Up_2_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "アクティブスキルのクールタイム短縮15%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-down1-2a8d997bd0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "132acb74d485e7f2c7b3f84ac6affe6cd8d9af82701846d6a6e22b452c67c7c2",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_down1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "不器用",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-down2-365dff03b1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "7165a47840367e25ac2afd01955358c386006127bb8d64ffcad08bc2c08cb4ba",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_down2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "サボり癖",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-up1-bd91525958",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "787fb6df637613b3526223248821a43f4310cb2a256aee313cc8f89492453e26",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_up1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "まじめ",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-craft-speed-up2-ecbcdfabde",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "7e9c4fa0c3b7f1ecb4be34de5ea1fb3003571ffa99927cd2086f2633bf0cb49f",
+          "sourceMessageKey": "PASSIVE_CraftSpeed_up2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "職人気質",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-down1-5e3e3088c5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9ccb18ec2bb1b9cbf0435362b226b1321ff8f11ce1eb43d10b251a3eb5e07c11",
+          "sourceMessageKey": "PASSIVE_Deffence_down1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "うたれ弱い",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-down2-69086f3cf0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "59fd8248e66f934b23e9841775b2c828031fc1c3edd5ae96e5c229b8b6059727",
+          "sourceMessageKey": "PASSIVE_Deffence_down2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "すぐ骨折する",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-up1-b0b7e9a164",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "2c7baa84d4d3bb46e882001e89c53f45eb6478af4065372d2e8d2ffb7a4ea3ff",
+          "sourceMessageKey": "PASSIVE_Deffence_up1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "硬い皮膚",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-deffence-up2-90aaea5348",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "5123506540649a3dca9307414be980df4e6f40ecc5e09b03b51dcd806d57b88a",
+          "sourceMessageKey": "PASSIVE_Deffence_up2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "屈強な肉体",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "0d5dea3f3bd9b992c2b5d55394cb333bcbfb1eeaf498ab075956ee7c9b23dc35",
+          "sourceMessageKey": "PASSIVE_Deffence_up2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "防御+20%\nひるみ無効",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-aqua-1-pal-ef921d34d4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "2969ae4c91953ec27269f430a85f830904a47c71d1352daf33960c30c16c0919",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Aqua_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "水遊び好き",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "e255564f3cb688680184bb3b88d3a6fd6140a915a9e6885069c52a4e3fc7a745",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Aqua_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "水属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-aqua-2-pal-3c79819c40",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9168e34e2c0ed049a18abf2b1c7c920bef3dea67e68c0d51ccfd8a7a383e6af3",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Aqua_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "海皇",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dark-1-pal-cdd58dd4b4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "320823b129986f1d5c50e356956c0b8bd4a5a788b7cc6764d5020bfa80012107",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "夜の帳",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "c8c0ffd6f207940cb01b7f583354ae573bb7e7b7ad080e4c149bb7d913191b38",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "闇属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dark-2-pal-d576b4c3dc",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "b34b2733308a40f83ccf00ee2a2eec36c5de1fe03b7e7e317abc43f33a6bb2bb",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "冥王",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dragon-1-pal-51575a1218",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "754ce33cd74c3049618d501640f1f0195b083782c499b173e0c9526ef3221c2a",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dragon_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "竜の血族",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "ce5d7694f60b26144adaec839fa32207a20c8f587a92da390f5177625ea95b76",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dragon_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "竜属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-dragon-2-pal-76eb5880f9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "3d633d05f09ac2ce403b65c2ce8d2abd4304259ae954daf4e7407857dcffe4dc",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dragon_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "神龍",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-earth-1-pal-8810cf546b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "240fa8fb6b6fd4f86f11104afaff9be56812f75a5dff93943c7c16aa23f1b67a",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Earth_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "大地の力",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "7922e9b714a41a3b939b176545727f0cb976dc37884245bff1cc4d714ddaa9e5",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Earth_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "地属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-earth-2-pal-c4a348146c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "5df0859f3d977f30968c2f1e188c00330247a7ccad642df56d27099123344b4d",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Earth_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "地帝",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-fire-1-pal-117b7d811f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "b827b7b4db505ebd6687efece036d75d16b5dccf494fc43eda34d2a63bb28ac8",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "火遊び好き",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "0fdfdd4f0a5025512dd59cbe035432e45f8c004253715b3182f0878dd2fd8d25",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "炎属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-fire-2-pal-95f11a54a5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "838748c481ec62625ebfafdcc722a76ce2b618c28fb5a3f8be408c97deaca060",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "炎帝",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-ice-1-pal-c015f6d988",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "4864378ea7d24032a2c516ef5c188dc12f3793ffcdcdca3abafd063f7f8ea931",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Ice_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "冷血",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "355f6afd4d7ddfb618986f893242e97bb3fcc500573eb1f1130fd882dec800fa",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Ice_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "氷属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-ice-2-pal-164931b250",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "07fb4e9e5c77002b6c71547676dd0af0ff1116ffa7524fa8b358aba424767d87",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Ice_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "氷帝",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-leaf-1-pal-cc20101254",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9694f35d0820bf5bf7d148d58fb9170c57e515e86ed017865b5868b89b955633",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Leaf_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "草木の香り",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "9cedd2b43590ca836cea1f058e961e76ac899f35fbdc747eec6ed4a5d9385ee3",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Leaf_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "草属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-leaf-2-pal-9d88e55564",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "5cc60228025dce52adb523b68da6bd9b15c7dbac9932c1a8a95878f6e1199f07",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Leaf_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "精霊王",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-normal-1-pal-52797c409d",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "822ae66860ee052c23f6a141f02c592494685332dc875f0678516c290ab423c0",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Normal_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "無の境地",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "d6e2589d932b95ffb9330caeb5fe5cd9e27a173fe5f940a5123503098fc38e2e",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Normal_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "無属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-normal-2-pal-ead16695ee",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "d0c2e183085884bd35d8d6115712588935823951f60898d9e6a38d07bb0d3d75",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Normal_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "聖天",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-thunder-1-pal-ad7eeb0f6f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f5bec0037fadad28a66caaf37ffa148a46dcfd343f277f0b8915071e2ab75ed2",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Thunder_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "コンデンサ",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "f9dc2c06173c3bbe7f5b57182ad3e5f590d9b4343231e667ee15ae38d4d85aec",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Thunder_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "雷属性攻撃ダメージ増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-boost-thunder-2-pal-33f6532de1",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "cefdc0fa95956f79d27f9bd7de66b435b7d11de4c5c997feb4989faf48d07389",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Thunder_2_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "雷帝",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-aqua-1-pal-95e604fc20",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c811b27de6447d0f564b03c727fd133fabdd943656fe3f76fccad91eac947b17",
+          "sourceMessageKey": "PASSIVE_ElementResist_Aqua_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "防水加工",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "10ebccddc12846c4f1e8f172e2f0d59f5a6407a7a557109ed8193951f20e59d6",
+          "sourceMessageKey": "PASSIVE_ElementResist_Aqua_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "水属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-dark-1-pal-102e813b8f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "29fc2db5f3a04b9f5d2fe900f96742bd2825e6d79e3ce11765e439757067017b",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dark_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "陽キャラ",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "b5d6e78363a3fda37126d61e644e05f706ee1656ce360942c179d2a4f766548f",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dark_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "闇属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-dragon-1-pal-688a174630",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f20cc9022a5cac4f7896d51c6c1f191025cb9d5cae9a293b39c2622df495912a",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dragon_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "ドラゴンキラー",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "dda6765bbe48d6827b6ad168df29f4c8afd188736ac73f0c4541e5df9caf282e",
+          "sourceMessageKey": "PASSIVE_ElementResist_Dragon_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "竜属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-earth-1-pal-2e5019ad4d",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "ab9d1078d8d954fa5bc821306738fc7427350b228c0d12dfe66b362e28853355",
+          "sourceMessageKey": "PASSIVE_ElementResist_Earth_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "耐震構造",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "c3284d3e942c43279cf4b85ee93da35cc4fcf07f826cb35d677596f3e75975e6",
+          "sourceMessageKey": "PASSIVE_ElementResist_Earth_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "地属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-fire-1-pal-ef46091dd0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "1d3abccb2fd2a25fe320eb1842cac1d55068528d812215315b6108d5acaaefba",
+          "sourceMessageKey": "PASSIVE_ElementResist_Fire_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "日焼け好き",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "1771d9126840bc7d5c37d02feaf565d918029f95991d79711da22c9f33c3dbae",
+          "sourceMessageKey": "PASSIVE_ElementResist_Fire_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "炎属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-ice-1-pal-c74477e03c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "cdd99527af3824c9cd074afe8780373441232e1c80e7e55c8472aa1bdcae7390",
+          "sourceMessageKey": "PASSIVE_ElementResist_Ice_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "高温体質",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "ddc377d21a74b4df0572cd09e502b2ab8082787b87a733abee01c100f5cf5867",
+          "sourceMessageKey": "PASSIVE_ElementResist_Ice_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "氷属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-leaf-1-pal-4b6d7614d7",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c08f105f75078745741d64b08055ab494818c5bd9e1e215a7cf980b4a9fc35f8",
+          "sourceMessageKey": "PASSIVE_ElementResist_Leaf_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "防草効果",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "3f8e46f4f4d9ed8045890423372c5b9b79dbaaa8877b986df8174488bb459a1b",
+          "sourceMessageKey": "PASSIVE_ElementResist_Leaf_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "草属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-normal-1-pal-86334ce7a4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "723e54b5c4e4ef56ffb6ac19e7a381e04b87b0f8ab8132b647478620577a0f6c",
+          "sourceMessageKey": "PASSIVE_ElementResist_Normal_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "アブノーマル",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "8559e4d128de4369518e20fa2fc24d5c70a4203426c9d6275742cc692eb9a473",
+          "sourceMessageKey": "PASSIVE_ElementResist_Normal_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "無属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-element-resist-thunder-1-pal-ea32a45c64",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "cbefe0f5a6feea1a30cedd74b92651845e725e881e0ac48da7581e78c5f2fc79",
+          "sourceMessageKey": "PASSIVE_ElementResist_Thunder_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "絶縁体",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "061d1faffb09e51cbcf8f8e7cdd78281833a747b851fba6baa1c5ed12cdc5420",
+          "sourceMessageKey": "PASSIVE_ElementResist_Thunder_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "雷属性ダメージ軽減10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-eternal-flame-40c1710409",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "cb36f8d734bb983f4cb3f63151a820f864dd51164366a237c29d6bc409889b59",
+          "sourceMessageKey": "PASSIVE_EternalFlame",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "永炎",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "7177b90c95ea445d80dbfd8a607b559b48260b53a196d2a5b4cc273fe9ace0be",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Fire_Electric_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "炎属性攻撃ダメージ増加30%\n雷属性攻撃ダメージ増加30%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-legend-8ff382798f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c488a012d8296f7357e846f6cad3d7af37ac5592002f3d77f6725b7fc70b1831",
+          "sourceMessageKey": "PASSIVE_Legend",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "伝説",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-move-speed-up-1-7472b18355",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "59f15b66193be4c948fba27296f201f8cf1036bf0a408c66325efdbcea8d9d82",
+          "sourceMessageKey": "PASSIVE_MoveSpeed_up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "すばしこい",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "33659bbfa2724484bba72b6b302b62f4d86f064bbb9bce6b06436fc1a899b3ae",
+          "sourceMessageKey": "PASSIVE_PAL_MoveSpeed_up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "移動速度上昇10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-move-speed-up-2-dce52a41f8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "f55e82680f4fb3c965524cdd046d159343c45bc1aa8dc42323124c6e60d87557",
+          "sourceMessageKey": "PASSIVE_MoveSpeed_up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "走るのが得意",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "262310fa9eb01e78f19684efb1e39042c395f5e23c577bb1b81f10026b403895",
+          "sourceMessageKey": "PASSIVE_PAL_MoveSpeed_up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "移動速度上昇20%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-move-speed-up-3-c669e85b3e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "5813433a9071724998850b936fa1be038f52b3ed1c6ff6d3ce1e5d5f094e5bc3",
+          "sourceMessageKey": "PASSIVE_MoveSpeed_up_3",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "神速",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "8066a0388df1a0b9fb338ef83aed006adff715bf0638a1ccae3c7bdb06c38eb1",
+          "sourceMessageKey": "PASSIVE_PAL_MoveSpeed_up_3",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "移動速度上昇30%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-nocturnal-0c9ee8311c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "24dea0c88559d3e01d5799f7b1bf0522d11a588cff9be5996febad07158fbe3b",
+          "sourceMessageKey": "PASSIVE_Nocturnal",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "不眠",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "155473e1bc79383de0bf8b8abd427d3b685c12a5408e1354f30e696f46438322",
+          "sourceMessageKey": "PASSIVE_Nocturnal_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "夜になっても眠らず、働き続ける。",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-non-killing-7f81dcacf4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "8fd9995c63fa574b50f920e4f926f63f89d20ad2d9e092d19b15fab33bab390d",
+          "sourceMessageKey": "PASSIVE_NonKilling",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "手加減",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "1c9a2c456ab4c8e4de76f6b07859e78f2a42229aaa1d88686fef7488ef61152a",
+          "sourceMessageKey": "PASSIVE_NonKilling_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "平和主義者。\n攻撃対象のHPを1未満にできない。",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-noukin-69a0d11bb6",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "50611fa9bdf303bf56b65cf3ead8f7a1f0928f3f9acdd490810b6181ba95a701",
+          "sourceMessageKey": "PASSIVE_Noukin",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "脳筋",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-down1-ca85d82fb2",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "2d22b80c3f920e1bb0556cb2770e02a54cce7dded2d3184b8a01d01ca886461a",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_down1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "ビビり",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-down2-8b5af4c7a8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "092ce9f3e772205de2003c4271cd420682b0486ef18cf5a83f1ef5d5626501e5",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_down2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "ことなかれ主義者",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-up1-f433e3338b",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "27402adfd76c2a150f31a0834acc5c1aa31a914240e735890fd3c4f2eb39293c",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_up1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "勇敢",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-allattack-up2-3b80a6eb56",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "2c85c384c74ec1270745435e7dbcb8590984a9c23811214687c137d8b8d1b290",
+          "sourceMessageKey": "PASSIVE_PAL_ALLAttack_up2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "獰猛",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-conceited-86e9327226",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "50c2f1abb92bbbbe3868443868cb0e733b8ba003627496c914476a6a830b363e",
+          "sourceMessageKey": "PASSIVE_PAL_conceited",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "うぬぼれ屋",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-corporate-slave-6ef0fc31fa",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "183f972c7a85d68def4902d437b355c4789698ed5bf8d9d9806b65d9caa59ef7",
+          "sourceMessageKey": "PASSIVE_PAL_CorporateSlave",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "社畜",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-down-1-09d023691a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9de22e2b22d8c81fea12b8427d48a60a564ecb37c55d3dd67b6a194d81589f1d",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "小食",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "662c51fd5b56e1f3eba7d35887663c0ecd5c91fe7449e4eab4e2a337506ddc56",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "満腹度が減りにくい +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-down-2-e1cbd8faf5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "758bd905072cafc4adf5015a07e2904200396c34769677e3cad582c99a395180",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "ダイエットマスター",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "aef78b412e406a8ccb35771739ea60ede731d5d264c841c10f75a24ee0064527",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Down_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "満腹度が減りにくい +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-up-1-e9eb2677b0",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "3257dfa19df765c046d7af5066ed12e2848e8eaf42b0f6a0ea48aa1afb0c75e0",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "食いしんぼ",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "1d1475ac27b6e7c5b2d33475f34e7535bcfda06198e4b0f3b185208fbaf41504",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "満腹度が減りやすい +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-full-stomach-up-2-3fc661bea8",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "4775d607f1023460446d6317e3109723c9e580e2da9af7da7fcfcb5980d56198",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "無限の胃袋",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "a42c8e8dc5eadd633b1d4d07467e0ca0caf5f25b6277329d0a3105788b3e2693",
+          "sourceMessageKey": "PASSIVE_PAL_FullStomach_Up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "満腹度が減りやすい +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-masochist-6e39cf3a41",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "22dbfd942011a61ac848fb5a9b54ef6f550f0dfc8c4eb7fa0ebdfc8feaabddbf",
+          "sourceMessageKey": "PASSIVE_PAL_masochist",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "マゾヒスト",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-oraora-2b5cd69aa9",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "9f3204de52d91d886694eeaacbbad1c1feabd259c77b1c3c3a4e2b885e7ff952",
+          "sourceMessageKey": "PASSIVE_PAL_oraora",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "オラオラ系",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-rude-733b60f011",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "b65f048383fca149549ee9acc750298151f61a73590bd305d7372cb520bb79e8",
+          "sourceMessageKey": "PASSIVE_PAL_rude",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "粗暴",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sadist-e469d81a97",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "96c34b602ed0534540368091c656ee84da35889ab1fe65d467e113c0078a6eab",
+          "sourceMessageKey": "PASSIVE_PAL_sadist",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "サディスト",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-down-1-ac554a1d01",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "0105a78c68ac5ded3e77b8fe294fdc270f005df192655e8f5d2678154d01e2ce",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "ポジティブ思考",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "9d3925d1b610c4fd8e06d7daabd7d79b041895e083b7d0e185b0641dc97662ce",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "SAN値が減りにくい +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-down-2-2c0876d536",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "d62ac4cd280b4575ee44d681d5f83ecd2fbf56628b776f2a81f79fead7b6043a",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "ワーカーホリック",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "04ba076a3be6b1c4d267a5f2a1cbe70b60ab7c5b0d9c1d17203b091e9a5c0580",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Down_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "SAN値が減りにくい +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-up-1-d16c76d884",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "592e2abc709dbfc2b41d6ab05a754851e965e5aa49b849575172eea8ee8f8ba0",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "精神が不安定",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "f9bf3eba2590a682b71168e3b660bfea572124fe81b8dae5c2b8a80857022ff2",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "SAN値が減りやすい +10.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-pal-sanity-up-2-86f2b9c7ac",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "d82ce1ae2112d9607ff493d21921b29337e7fb25bdbf66d7671ee5acd06fd298",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "破滅願望",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "31846b912bfc212f1dc589fd05522b9bea21754cb751b6b4bafe94e513ebf8e8",
+          "sourceMessageKey": "PASSIVE_PAL_Sanity_Up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "SAN値が減りやすい +15.0%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-rare-329966f19e",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "c9c762336a4e25622e6cf1600f6a725bdec7ee2c188b1718c039d351a491df46",
+          "sourceMessageKey": "PASSIVE_Rare",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "希少",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-sale-price-down-1-5a38b58522",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "4a6bfafe7784ca14b0a0dbdd0d8e6b49e24b1e4f10005e5809e30aab8dd9c17f",
+          "sourceMessageKey": "PASSIVE_SalePrice_Down_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "みすぼらしい",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "07f5ea11c89aa12991cec2cd150b71786eaf9aee201b362970c6c00d894cdeb1",
+          "sourceMessageKey": "PASSIVE_SalePrice_Down_1_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "取引価格が悪化-10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-sale-price-up-1-4662e36935",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "6116c55395a7a103eac88c00678c49a9be78b4f45725b96e61f2ceee4e3dd1de",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "高貴",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "43f4d31d2327202907a902237d824f9164c72ee30ade1ef960f39fb05bdc229c",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_1_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "取引価格が改善+5%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-sale-price-up-2-ea9b88de09",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "14756df66c403376b4122884e08799ac3c367a5275a06484e98e8ddcc3ac56d6",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "良い毛並み",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "fe9e1e8fe52f1c92a7f5b74bbd08ac3c5a2d5169bb4e5846ef5fc851c1825db3",
+          "sourceMessageKey": "PASSIVE_SalePrice_Up_2_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "取引価格が改善+3%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-stamina-down-1-bf2dd98d1c",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "07a2ff2ce7654bf48d2cbfa3df92207db1efa32752427e719fbf64e69c86e48b",
+          "sourceMessageKey": "PASSIVE_Stamina_Down_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "引きこもり",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "9e37293859ac716c76b8ade6c9f7c9d4b42aaeb3caed53d882d7a6e5ae721336",
+          "sourceMessageKey": "PASSIVE_Stamina_Down_1_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "最大スタミナ-25%\n※ライド可能なパルのみ有効",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-stamina-up-1-687ad27f7f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "bec32abfea2fcb451761ce28e6b1e0003f8d301910407dd430304b38bb80765a",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "無限のスタミナ",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "4d0823280489b127a19a20927578afd6b57f0dd8c2cdee4b9c0e39c969fbbd7e",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_1_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "最大スタミナ+50%\n※ライド可能なパルのみ有効",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-stamina-up-2-801c8a1ef4",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "3fdf4fc140b21101b42ef9952445f5c83f069fbeb11aaf6b7a43b1cb43ece0e9",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_2",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "健康優良児",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "377adc2c6ec7bcf0ef98ca8c52412761bc53135b20474fec68fed62e04276333",
+          "sourceMessageKey": "PASSIVE_Stamina_Up_2_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "最大スタミナ+25%\n※ライド可能なパルのみ有効",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-test-pal-egg-hatching-speed-up-e369a5abcb",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "591c024ceec72017c8d834403fc9a5ddbe7360764edc0829acdc53f31e019e37",
+          "sourceMessageKey": "PASSIVE_Test_PalEgg_HatchingSpeed_Up",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "博愛主義者",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "2e20808b4bfdbfa396153407e6021c90a37132b5a2ebb2653489f07cf9ff0ef8",
+          "sourceMessageKey": "PASSIVE_Test_PalEgg_HatchingSpeed_Up_DESC",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "配合牧場にアサインされてる間、タマゴ生成速度が100%増加する",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-atk-up-1-61cc757ea5",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "010a217c863f5c8c0daee7ff7a9134e7cda62f3e73197f97fc834eedbcef06ac",
+          "sourceMessageKey": "PASSIVE_TrainerATK_UP_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "突撃指揮者",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "1465cee95cb1917585b4470b2323fcc538b1c7d0aaef4449bc1a2c32e28a6b22",
+          "sourceMessageKey": "PASSIVE_TrainerATK_UP_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "プレイヤーの攻撃増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-def-up-1-0690f95e65",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "b79f52ce8ecf769670f8802dbf864dd040baa4d87e933a010e7314e72466832e",
+          "sourceMessageKey": "PASSIVE_TrainerDEF_UP_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "堅城の軍師",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "b21b1350fa27b994b2f327056f06b077463d07846a332f09e82f2f77410098e6",
+          "sourceMessageKey": "PASSIVE_TrainerDEF_UP_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "プレイヤーの防御増加10%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-logging-up1-536def0d3a",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "40673ce3441a2ea0d90d9d03778e8c7811694d5477b59abd3bf08979580f0884",
+          "sourceMessageKey": "PASSIVE_TrainerLogging_up1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "伐採リーダー",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "8396d83aa318b36a40f69ed6f9878b97786b1e536b0b350fc3bd4b33ebe88e9e",
+          "sourceMessageKey": "PASSIVE_TrainerLogging_up1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "プレイヤーの伐採効率増加25%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-mining-up1-e8bb571c3f",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "81b68feeb51a1a285e05670220fdc10541fa94100822a6f6f1e38ed11b67fc60",
+          "sourceMessageKey": "PASSIVE_TrainerMining_up1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "鉱山のチーフ",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "302eb46928f62d577561b5fb93fb20a9c1f90d7387fee95200b17734be727cc4",
+          "sourceMessageKey": "PASSIVE_TrainerMining_up1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "プレイヤーの採掘効率増加25%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-trainer-work-speed-up-1-457e282f83",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "a12e1b06e36d247fcd299fa67800705a88ce2c8995a2af499d1441bd589e1ba0",
+          "sourceMessageKey": "PASSIVE_TrainerWorkSpeed_UP_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "モチベーター",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "d94a81cdd49ff520e30cd292a7426c5cd65e68778d2482bee40b6bed3c84882f",
+          "sourceMessageKey": "PASSIVE_TrainerWorkSpeed_UP_1",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "プレイヤーの作業速度増加25%",
+          "status": "source_provided"
+        }
+      }
+    },
+    {
+      "id": "passive-passive-witch-a025ce7175",
+      "kind": "skill",
+      "fields": {
+        "name": {
+          "sourceSha256": "186ec1a871e42d204d8558aae122f5dcedd653bba74be4c43f06f1fe03923c8d",
+          "sourceMessageKey": "PASSIVE_Witch",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
+          "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
+          "text": "魔女",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "1494d3de486930ae2bd9d5e4544e6b913612d355159e409fec6f6f127256cc54",
+          "sourceMessageKey": "PASSIVE_ElementBoost_Dark_Ice_1_PAL",
+          "sourceMember": "Pal/DataTable/Text/DT_SkillDescText_Common.json",
+          "sourceMemberSha256": "69e6717db9e4b938f05eaaa171fee474c6f385c1a29d0da185b08d4650cf8670",
+          "text": "闇属性攻撃ダメージ増加30%\n氷属性攻撃ダメージ増加30%",
           "status": "source_provided"
         }
       }

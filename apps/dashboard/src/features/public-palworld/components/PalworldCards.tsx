@@ -4,7 +4,12 @@ import { Card, CardContent } from "../../../shared/ui/Card";
 import { Badge } from "../../../shared/ui/Status";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { formatPalNumber } from "../utils/search";
-import { categoryLabel } from "../utils/labels";
+import {
+  categoryLabel,
+  itemRarityBand,
+  itemRarityLabel,
+  itemTypeLabel,
+} from "../utils/labels";
 import { resolvePalworldDescription, resolvePalworldName } from "../utils/localization";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldMedia } from "./PalworldMedia";
@@ -15,6 +20,10 @@ function rarityTone(rarity: number): "neutral" | "info" | "warning" {
   if (rarity >= 4) return "warning";
   if (rarity >= 2) return "info";
   return "neutral";
+}
+
+function itemRarityTone(rarity: number): "neutral" | "info" | "warning" {
+  return rarity > 4 ? "neutral" : rarityTone(rarity);
 }
 
 type ImageDimensions = { imageWidth?: number; imageHeight?: number };
@@ -81,11 +90,12 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
   const name = resolvePalworldName(item, locale);
   const description = resolvePalworldDescription(item, locale);
   const displayName = name.text;
+  const rarityLabel = itemRarityLabel(item.rarity, locale);
   return (
     <Card className="palworld-entity-card palworld-item-card" variant="interactive" padding="none" data-testid="item-card">
-      <div className="palworld-entity-media"><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={displayName} locale={locale} priority={priority} {...imageDimensions(item)} /></div>
+      <div className="palworld-entity-media" data-rarity-band={itemRarityBand(item.rarity)}><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={displayName} locale={locale} priority={priority} {...imageDimensions(item)} /></div>
       <CardContent>
-        <div className="palworld-card-kicker"><Badge size="sm" tone="info">{categoryLabel(item.category, locale)}</Badge><Badge size="sm" tone={rarityTone(item.rarity)}>★ {item.rarity}</Badge></div>
+        <div className="palworld-card-kicker"><Badge size="sm" tone="info">{item.itemType ? itemTypeLabel(item.itemType, locale) : categoryLabel(item.category, locale)}</Badge><Badge data-ja={itemRarityLabel(item.rarity, "ja")} data-ko={itemRarityLabel(item.rarity, "ko")} size="sm" tone={itemRarityTone(item.rarity)}>{rarityLabel}</Badge></div>
         <h3 title={displayName}>{displayName}</h3>
         <PalworldTranslationBadges
           locale={locale}
