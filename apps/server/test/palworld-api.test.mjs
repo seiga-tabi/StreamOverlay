@@ -86,6 +86,10 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(body.counts.breedingPairs, 41_329);
   assert.equal(body.domains.breeding.status, "incomplete");
   assert.equal(body.domains.breeding.metadata.gameVersion, "1.0.1");
+  assert.match(
+    body.domains.breeding.domainMetadata.sourceRevision,
+    /\+breeding@[a-f0-9]{64}$/u
+  );
   assert.equal(body.domains.skills.status, "incomplete");
   assert.equal(body.domains.skills.metadata.gameVersion, "1.0.1");
   assert.equal(body.domains.skills.metadata.sourceRevision, body.metadata.sourceRevision);
@@ -93,34 +97,34 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(body.domains.skills.domainMetadata.sourceRevision, body.domains.items.domainMetadata.sourceRevision);
   assert.deepEqual(body.coverage.palDetails, { available: 270, missing: 17, total: 287 });
   assert.deepEqual(body.coverage.itemImages, { available: 1_762, missing: 85, total: 1_847 });
-  assert.deepEqual(body.coverage.skillDetails, { available: 564, missing: 2, total: 566 });
+  assert.deepEqual(body.coverage.skillDetails, { available: 566, missing: 0, total: 566 });
   assert.deepEqual(body.coverage.elementImages, { available: 9, missing: 0, total: 9 });
   for (const locale of ["ko", "ja"]) {
     const translationCoverage = body.coverage.translations[locale];
-    assert.equal(translationCoverage.artifactTranslated, 5_348);
-    assert.equal(translationCoverage.publicUsable, 5_348);
-    assert.equal(translationCoverage.sourceProvided, 5_348);
+    assert.equal(translationCoverage.artifactTranslated, 5_350);
+    assert.equal(translationCoverage.publicUsable, 5_350);
+    assert.equal(translationCoverage.sourceProvided, 5_350);
     assert.equal(translationCoverage.humanReviewed, 0);
     assert.equal(translationCoverage.sourceLanguageFallback, 110);
-    assert.equal(translationCoverage.missingSource, 21);
+    assert.equal(translationCoverage.missingSource, 19);
     assert.equal(translationCoverage.sourceAnomalousFields, 0);
     assert.equal(translationCoverage.missingSourceSlots, 0);
     assert.deepEqual(translationCoverage.availability, {
-      translated: 5_348,
+      translated: 5_350,
       sourceLanguageFallback: 110,
-      missingSource: 21,
+      missingSource: 19,
       total: 5_479
     });
     assert.deepEqual(translationCoverage.review, {
-      sourceProvided: 5_348,
+      sourceProvided: 5_350,
       humanReviewed: 0,
       machineAssisted: 0,
-      total: 5_348
+      total: 5_350
     });
     assert.deepEqual(translationCoverage.sourceIntegrity, {
-      intact: 5_458,
+      intact: 5_460,
       sourceAnomalousFields: 0,
-      missingSourceFields: 21,
+      missingSourceFields: 19,
       missingSourceSlots: 0,
       total: 5_479
     });
@@ -142,6 +146,7 @@ test("모든 Palworld 공개 endpoint의 header와 최상위 release identity가
     "/api/palworld/skills/active-absolute-frost-8b7feb098a",
     "/api/palworld/breeding?parentA=lamball&parentB=cattiva",
     "/api/palworld/breeding/parents?child=anubis&limit=1",
+    "/api/palworld/breeding/partners?parent=lamball&limit=1",
     "/api/palworld/map/markers?world=main",
     "/api/palworld/map/spawns?world=main&pal=anubis"
   ];
@@ -186,6 +191,28 @@ test("Palworld JSON ETag는 같은 active release의 조건부 요청을 304로 
   );
   assert.equal(differentResource.res.statusCode, 200);
   assert.notEqual(differentResource.res.headers.ETag, first.res.headers.ETag);
+});
+
+test("교배 domain source identity가 바뀌면 결과 body가 같아도 API ETag를 갱신한다", async () => {
+  const path = "/api/palworld/breeding?parentA=penking&parentB=bushi";
+  const baseline = await request(createHandler(), path);
+  assert.equal(baseline.res.statusCode, 200);
+  const changedMeta = structuredClone(palworldDataService.meta());
+  changedMeta.domains.breeding.domainMetadata.sourceRevision =
+    `${changedMeta.metadata.sourceRevision}+breeding@${"0".repeat(64)}`;
+  const changedService = {
+    meta: () => changedMeta,
+    breeding: (query) => palworldDataService.breeding(query)
+  };
+  const refreshed = await request(
+    createHandler(changedService),
+    path,
+    "GET",
+    { "if-none-match": baseline.res.headers.ETag }
+  );
+  assert.equal(refreshed.res.statusCode, 200);
+  assert.deepEqual(refreshed.body, baseline.body);
+  assert.notEqual(refreshed.res.headers.ETag, baseline.res.headers.ETag);
 });
 
 test("같은 release에서도 공개 번역 표현이 바뀌면 Item·Skill 목록과 Pal 상세 ETag를 갱신한다", async () => {
@@ -623,11 +650,15 @@ test("교배 API는 일반·성별 특수 교배, 부모 위치 교환과 역검
   );
   const parents = await request(handler, "/api/palworld/breeding/parents?child=anubis&page=1&limit=10");
   const parentsPage2 = await request(handler, "/api/palworld/breeding/parents?child=anubis&page=2&limit=10");
+  const partners = await request(handler, "/api/palworld/breeding/partners?parent=lamball&page=1&limit=10");
+  const partnersPage2 = await request(handler, "/api/palworld/breeding/partners?parent=lamball&page=2&limit=10");
+  const normalPartners = await request(handler, "/api/palworld/breeding/partners?parent=katress&type=normal&page=1&limit=100");
+  const specialPartners = await request(handler, "/api/palworld/breeding/partners?parent=katress&type=special&page=1&limit=100");
   const mixedParents = await request(handler, "/api/palworld/breeding/parents?child=relaxaurus-lux&type=all&page=1&limit=1");
   const normalParents = await request(handler, "/api/palworld/breeding/parents?child=relaxaurus-lux&type=normal&page=1&limit=1");
   const specialParents = await request(handler, "/api/palworld/breeding/parents?child=relaxaurus-lux&type=special&page=1&limit=1");
   const selfParents = await request(handler, "/api/palworld/breeding/parents?child=panthalus&page=1&limit=10");
-  assert.equal(forward.body.result.child.id, "xenovader");
+  assert.equal(forward.body.result.child.id, "sibelyx");
   assert.equal(forward.body.state, "resolved");
   assert.equal(general.body.result.child.id, "daedream");
   assert.equal(fullCatalog.res.statusCode, 200);
@@ -644,6 +675,24 @@ test("교배 API는 일반·성별 특수 교배, 부모 위치 교환과 역검
   assert.equal(parents.body.pagination.totalPages, 24);
   assert.equal(parentsPage2.body.pagination.page, 2);
   assert.notEqual(parentsPage2.body.items[0].id, parents.body.items[0].id);
+  assert.equal(partners.body.parent.id, "lamball");
+  assert.equal(partners.body.pagination.total > 10, true);
+  assert.equal(partnersPage2.body.pagination.page, 2);
+  assert.notEqual(partnersPage2.body.items[0].id, partners.body.items[0].id);
+  assert.equal(
+    partners.body.items.every((pair) =>
+      pair.parentA.id === "lamball" || pair.parentB.id === "lamball"
+    ),
+    true
+  );
+  assert.equal(normalPartners.body.items.every((pair) => !pair.isSpecial), true);
+  assert.equal(specialPartners.body.items.every((pair) => pair.isSpecial), true);
+  assert.equal(
+    specialPartners.body.items.filter((pair) =>
+      pair.parentA.id === "katress" && pair.parentB.id === "wixen"
+    ).length,
+    2
+  );
   assert.equal(normalParents.body.pagination.total > 0, true);
   assert.equal(specialParents.body.pagination.total > 0, true);
   assert.equal(normalParents.body.items.every((pair) => !pair.isSpecial), true);
@@ -662,7 +711,9 @@ test("교배 API는 일반·성별 특수 교배, 부모 위치 교환과 역검
   );
   assert.equal(forward.body.metadata.gameVersion, "1.0.1");
   assert.equal(parents.body.metadata.gameVersion, "1.0.1");
+  assert.equal(partners.body.metadata.gameVersion, "1.0.1");
   assert.equal(forward.res.headers["X-Palworld-Data-Version"], "1.0.1");
+  assert.equal(partners.res.headers["X-Palworld-Data-Version"], "1.0.1");
 });
 
 test("잘못된 query와 존재하지 않는 ID는 안정적인 오류 code를 반환한다", async () => {
@@ -671,6 +722,8 @@ test("잘못된 query와 존재하지 않는 ID는 안정적인 오류 code를 �
   const traversal = await request(handler, "/api/palworld/items/%2E%2E%2Fsecret");
   const missing = await request(handler, "/api/palworld/pals/not-found");
   const invalidBreedingType = await request(handler, "/api/palworld/breeding/parents?child=anubis&type=unknown");
+  const invalidPartnerType = await request(handler, "/api/palworld/breeding/partners?parent=lamball&type=unknown");
+  const missingPartner = await request(handler, "/api/palworld/breeding/partners?parent=not-found");
   assert.equal(invalid.res.statusCode, 400);
   assert.equal(invalid.body.code, "PALWORLD_INVALID_QUERY");
   assert.equal(invalid.res.headers["Cache-Control"], "no-store");
@@ -681,6 +734,10 @@ test("잘못된 query와 존재하지 않는 ID는 안정적인 오류 code를 �
   assert.equal(missing.res.headers["Cache-Control"], "no-store");
   assert.equal(invalidBreedingType.res.statusCode, 400);
   assert.equal(invalidBreedingType.body.code, "PALWORLD_INVALID_QUERY");
+  assert.equal(invalidPartnerType.res.statusCode, 400);
+  assert.equal(invalidPartnerType.body.code, "PALWORLD_INVALID_QUERY");
+  assert.equal(missingPartner.res.statusCode, 404);
+  assert.equal(missingPartner.body.code, "PALWORLD_NOT_FOUND");
 });
 
 test("펠월드 API rate limit은 상세 ID를 바꿔도 하나의 공개 bucket으로 제한한다", async () => {

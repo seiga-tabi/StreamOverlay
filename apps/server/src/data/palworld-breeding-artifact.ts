@@ -56,6 +56,7 @@ export type PalworldBreedingManifest = {
   generatedAt: string;
   breedingSha256: string;
   reportSha256: string;
+  sourceChecksumsSha256: string;
   counts: PalworldBreedingCounts;
   runtimeActivation: boolean;
 };
@@ -210,7 +211,15 @@ export function assertPalworldBreedingArtifact(value: unknown): PalworldBreeding
   }
   const checksumFields = metadata.sourceType === "operator_pak_export"
     ? ["archive", "breedingArtifact"] as const
-    : ["atlasPals", "atlasBreeding", "palCalc", "catalog"] as const;
+    : [
+        "atlasPals",
+        "atlasBreeding",
+        "palCalc",
+        "catalog",
+        "breedingSourceAliases",
+        "breedingEligibilityCompatibility",
+        "candidateBreeding"
+      ] as const;
   const checksums = recordAt(
     metadata.sourceChecksums,
     "breeding.metadata.sourceChecksums",
@@ -348,16 +357,21 @@ export function assertPalworldBreedingArtifact(value: unknown): PalworldBreeding
     }
   }
   const excludedChildren = new Set(
-    specialRules
-      .filter((rule) => !(rule.parentAId === rule.parentBId && rule.parentAId === rule.childId))
-      .map((rule) => rule.childId)
+    specialRules.map((rule) => rule.childId)
   );
-  if (parameters.every((parameter) => excludedChildren.has(parameter.palId))) {
+  if (parameters.every((parameter) =>
+    parameter.ignoreCombi === true || excludedChildren.has(parameter.palId)
+  )) {
     fail("breeding.specialRules", "일반 교배 결과 후보를 모두 제외할 수 없습니다.");
   }
   const eligibleKeys = new Set<string>();
   for (const parameter of parameters) {
-    if (excludedChildren.has(parameter.palId)) continue;
+    if (
+      parameter.ignoreCombi === true
+      || excludedChildren.has(parameter.palId)
+    ) {
+      continue;
+    }
     const key = `${parameter.combiRank}\0${parameter.combiDuplicatePriority}\0${parameter.variantType}`;
     if (eligibleKeys.has(key)) fail("breeding.parameters", "일반 교배 동률 규칙으로 결정할 수 없는 Pal parameter가 있습니다.");
     eligibleKeys.add(key);
@@ -417,6 +431,7 @@ export function assertPalworldBreedingManifest(value: unknown): PalworldBreeding
     "generatedAt",
     "breedingSha256",
     "reportSha256",
+    "sourceChecksumsSha256",
     "counts",
     "runtimeActivation"
   ]);
@@ -425,6 +440,7 @@ export function assertPalworldBreedingManifest(value: unknown): PalworldBreeding
   isoAt(root.generatedAt, "breedingManifest.generatedAt");
   shaAt(root.breedingSha256, "breedingManifest.breedingSha256");
   shaAt(root.reportSha256, "breedingManifest.reportSha256");
+  shaAt(root.sourceChecksumsSha256, "breedingManifest.sourceChecksumsSha256");
   countsAt(root.counts, "breedingManifest.counts");
   if (root.runtimeActivation !== true) fail("breedingManifest.runtimeActivation", "검증된 artifact는 true여야 합니다.");
   return value as PalworldBreedingManifest;
@@ -484,7 +500,14 @@ export function assertPalworldBreedingImportReport(
     coverageAt(coverage[field], `breedingReport.fieldCoverage.${field}`, { available: total, missing: 0, total });
   }
   for (const field of ["bpClass", "ignoreCombi", "sourceRowId"] as const) {
-    coverageAt(coverage[field], `breedingReport.fieldCoverage.${field}`, { available: 0, missing: total, total });
+    const available = artifact.parameters.filter((parameter) =>
+      Object.hasOwn(parameter, field)
+    ).length;
+    coverageAt(
+      coverage[field],
+      `breedingReport.fieldCoverage.${field}`,
+      { available, missing: total - available, total }
+    );
   }
   const unresolved = arrayAt(root.unresolvedSourceInternalIds, "breedingReport.unresolvedSourceInternalIds", 10_000)
     .map((entry, index) => internalIdAt(entry, `breedingReport.unresolvedSourceInternalIds[${index}]`));
@@ -534,6 +557,14 @@ function sha256(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
+export function palworldBreedingSourceChecksumsSha256(
+  sourceChecksums: PalworldBreedingArtifact["metadata"]["sourceChecksums"]
+): string {
+  return createHash("sha256")
+    .update(JSON.stringify(sourceChecksums), "utf8")
+    .digest("hex");
+}
+
 export async function loadPalworldBreedingRuntimeSource(
   releaseRoot: string,
   options: { requireImportReport?: boolean } = {}
@@ -550,6 +581,15 @@ export async function loadPalworldBreedingRuntimeSource(
   const manifest = assertPalworldBreedingManifest(parseJson(manifestBytes, PALWORLD_BREEDING_MANIFEST_FILE));
   if (manifest.breedingSha256 !== sha256(artifactBytes)) fail("breedingManifest.breedingSha256", "실제 artifact checksum과 다릅니다.");
   const artifact = assertPalworldBreedingArtifact(parseJson(artifactBytes, PALWORLD_BREEDING_FILE));
+  if (
+    manifest.sourceChecksumsSha256
+    !== palworldBreedingSourceChecksumsSha256(artifact.metadata.sourceChecksums)
+  ) {
+    fail(
+      "breedingManifest.sourceChecksumsSha256",
+      "artifact source checksum identity와 다릅니다."
+    );
+  }
   const report = reportBytes === undefined
     ? undefined
     : assertPalworldBreedingImportReport(

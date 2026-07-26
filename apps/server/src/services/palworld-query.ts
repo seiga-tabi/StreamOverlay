@@ -64,6 +64,7 @@ const SKILL_LIST_QUERY_KEYS = new Set([
 const SEARCH_QUERY_KEYS = new Set(["q", "limit"]);
 const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB", "parentAGender", "parentBGender"]);
 const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "type", "page", "limit"]);
+const BREEDING_PARTNERS_QUERY_KEYS = new Set(["parent", "type", "page", "limit"]);
 const MAP_MARKERS_QUERY_KEYS = new Set(["world"]);
 const PAL_SPAWN_QUERY_KEYS = new Set(["world", "pal"]);
 const MAP_LOCATIONS_QUERY_KEYS = new Set([
@@ -144,6 +145,13 @@ export type PalworldBreedingQuery = {
 
 export type PalworldBreedingParentsQuery = {
   child: string;
+  type?: (typeof PALWORLD_BREEDING_PAIR_TYPES)[number];
+  page: number;
+  limit: number;
+};
+
+export type PalworldBreedingPartnersQuery = {
+  parent: string;
   type?: (typeof PALWORLD_BREEDING_PAIR_TYPES)[number];
   page: number;
   limit: number;
@@ -355,6 +363,15 @@ export function parsePalworldBreedingParentsQuery(params: URLSearchParams): Palw
   assertKnownKeys(params, BREEDING_PARENTS_QUERY_KEYS);
   return {
     child: requiredId(params, "child"),
+    type: optionalEnum(params, "type", PALWORLD_BREEDING_PAIR_TYPES) ?? "all",
+    ...pagination(params, 20)
+  };
+}
+
+export function parsePalworldBreedingPartnersQuery(params: URLSearchParams): PalworldBreedingPartnersQuery {
+  assertKnownKeys(params, BREEDING_PARTNERS_QUERY_KEYS);
+  return {
+    parent: requiredId(params, "parent"),
     type: optionalEnum(params, "type", PALWORLD_BREEDING_PAIR_TYPES) ?? "all",
     ...pagination(params, 20)
   };

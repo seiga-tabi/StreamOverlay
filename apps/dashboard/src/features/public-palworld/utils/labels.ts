@@ -5,6 +5,8 @@ import type {
   PalworldItemFilterCategory,
   PalworldItemRarityTier,
   PalworldGender,
+  PalworldPassiveEffectTarget,
+  PalworldPassiveEffectType,
   PalworldPassiveEffectFilter,
   PalworldSkillType,
   PalworldWorkSuitabilityType,
@@ -80,6 +82,68 @@ const passiveEffectFilterLabels: Record<PalworldPassiveEffectFilter, [string, st
   other: ["기타", "その他"],
 };
 
+const passiveEffectTypeLabels: Record<PalworldPassiveEffectType, [string, string]> = {
+  ActiveSkillCoolTime_Decrease: ["액티브 스킬 재사용 시간", "アクティブスキルのクールタイム"],
+  AutoHPRegeneRate: ["HP 자연 회복량", "HP自然回復量"],
+  BreedSpeed: ["교배 속도", "配合速度"],
+  BreedSpeed_InBaseCamp: ["거점 교배 속도", "拠点の配合速度"],
+  CraftSpeed: ["작업 속도", "作業速度"],
+  Defense: ["방어", "防御"],
+  ElementBoost_Dark: ["어둠 속성 공격 피해", "闇属性の攻撃ダメージ"],
+  ElementBoost_Dragon: ["용 속성 공격 피해", "竜属性の攻撃ダメージ"],
+  ElementBoost_Earth: ["땅 속성 공격 피해", "地属性の攻撃ダメージ"],
+  ElementBoost_Electricity: ["번개 속성 공격 피해", "雷属性の攻撃ダメージ"],
+  ElementBoost_Fire: ["화염 속성 공격 피해", "炎属性の攻撃ダメージ"],
+  ElementBoost_Ice: ["얼음 속성 공격 피해", "氷属性の攻撃ダメージ"],
+  ElementBoost_Leaf: ["풀 속성 공격 피해", "草属性の攻撃ダメージ"],
+  ElementBoost_Normal: ["무속성 공격 피해", "無属性の攻撃ダメージ"],
+  ElementBoost_Water: ["물 속성 공격 피해", "水属性の攻撃ダメージ"],
+  ElementResist_Dark: ["어둠 속성 피해 경감", "闇属性ダメージ軽減"],
+  ElementResist_Dragon: ["용 속성 피해 경감", "竜属性ダメージ軽減"],
+  ElementResist_Earth: ["땅 속성 피해 경감", "地属性ダメージ軽減"],
+  ElementResist_Electricity: ["번개 속성 피해 경감", "雷属性ダメージ軽減"],
+  ElementResist_Fire: ["화염 속성 피해 경감", "炎属性ダメージ軽減"],
+  ElementResist_Ice: ["얼음 속성 피해 경감", "氷属性ダメージ軽減"],
+  ElementResist_Leaf: ["풀 속성 피해 경감", "草属性ダメージ軽減"],
+  ElementResist_Normal: ["무속성 피해 경감", "無属性ダメージ軽減"],
+  ElementResist_Water: ["물 속성 피해 경감", "水属性ダメージ軽減"],
+  ExplosionResist: ["폭발 피해 경감", "爆発ダメージ軽減"],
+  FullStomatch_Decrease: ["포만도 감소량", "満腹度減少量"],
+  KnockbackInvalid_ForPassiveSkill: ["넉백 무효", "ノックバック無効"],
+  LeanBackInvalid_ForPassiveSkill: ["피격 경직 무효", "被弾のけぞり無効"],
+  LifeSteal: ["생명력 흡수", "ライフスティール"],
+  Logging: ["플레이어 벌목 효율", "プレイヤーの伐採効率"],
+  MaxHP: ["최대 HP", "最大HP"],
+  Mining: ["플레이어 채굴 효율", "プレイヤーの採掘効率"],
+  MoveSpeed: ["이동 속도", "移動速度"],
+  NightOwl: ["야간 활동", "夜間活動"],
+  Nocturnal: ["야행성", "夜行性"],
+  NonKilling: ["비살상", "非殺傷"],
+  PalEggHatchingSpeed: ["Pal 알 부화 속도", "パルのタマゴ孵化速度"],
+  PalSP_Increase: ["Pal 기력", "パルのスタミナ"],
+  PlayerSP_DecreaseRate: ["플레이어 기력 소비량", "プレイヤーのスタミナ消費量"],
+  ReloadSpeedUp: ["재장전 속도", "リロード速度"],
+  ResistAdditionalEffect_Burn: ["화상 무효", "炎上無効"],
+  ResistAdditionalEffect_Poison: ["독 무효", "毒無効"],
+  RideJumpCount_Increase: ["탑승 점프 횟수", "ライド中のジャンプ回数"],
+  Sanity_Decrease: ["SAN 감소량", "SAN値減少量"],
+  SelfDeathAddItemDrop: ["사망 시 아이템 드롭", "死亡時のアイテムドロップ"],
+  ShopBuyPrice_Money_Increase: ["구매 가격", "購入価格"],
+  ShopSellPrice_Money_Increase: ["판매 가격", "売却価格"],
+  ShotAttack: ["공격", "攻撃"],
+  SwimSpeed: ["수영 속도", "泳ぐ速度"],
+  WorkSuitabilityAddRank_MonsterFarm: ["목장 작업 적성", "牧場の作業適性"],
+  WorldTreeDecayImmunity: ["세계수 부식 면역", "世界樹の腐食耐性"],
+};
+
+const passiveEffectTargetLabels: Record<PalworldPassiveEffectTarget, [string, string]> = {
+  ToSelf: ["Pal", "パル"],
+  ToTrainer: ["플레이어", "プレイヤー"],
+  ToSelfAndTrainer: ["Pal·플레이어", "パル・プレイヤー"],
+  ToBuildObject: ["건축물", "建築物"],
+  None: ["대상 지정 없음", "対象指定なし"],
+};
+
 function translated<T extends string>(values: Record<T, [string, string]>, value: T, locale: PalworldLocale): string {
   return values[value]?.[locale === "ja" ? 1 : 0] ?? palworldI18n[locale].unknown;
 }
@@ -108,3 +172,5 @@ export const acquisitionLabel = (value: PalworldAcquisitionType, locale: Palworl
 export const genderLabel = (value: PalworldGender, locale: PalworldLocale) => translated(genderLabels, value, locale);
 export const skillTypeLabel = (value: PalworldSkillType, locale: PalworldLocale) => translated(skillTypeLabels, value, locale);
 export const passiveEffectFilterLabel = (value: PalworldPassiveEffectFilter, locale: PalworldLocale) => translated(passiveEffectFilterLabels, value, locale);
+export const passiveEffectTypeLabel = (value: PalworldPassiveEffectType, locale: PalworldLocale) => translated(passiveEffectTypeLabels, value, locale);
+export const passiveEffectTargetLabel = (value: PalworldPassiveEffectTarget, locale: PalworldLocale) => translated(passiveEffectTargetLabels, value, locale);

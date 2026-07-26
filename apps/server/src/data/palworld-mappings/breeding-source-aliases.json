@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "sourceRevision": "24181105",
+  "sourceMember": "palworld-atlas-data-main/published/v1/builds/24181105/breeding.json",
+  "sourceSha256": "dc39e4c8646eaa7f61573d832dcb854d31184713dfc815e0221dc83d947ae559",
+  "entries": [
+    {
+      "sourceInternalId": "Blueplatypus",
+      "canonicalInternalId": "BluePlatypus",
+      "reason": "Atlas breeding row의 이전 casing을 1.0.1 canonical Pal sourceInternalId에 exact 연결",
+      "reviewStatus": "approved"
+    }
+  ]
+}

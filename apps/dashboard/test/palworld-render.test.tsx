@@ -55,6 +55,7 @@ import { PalworldPalPicker } from "../src/features/public-palworld/components/Pa
 import { BreedingModeTabs } from "../src/features/public-palworld/components/PalworldBreedingControls";
 import {
   BreedingGenderAlternativeCard,
+  BreedingPartnerPairCard,
   BreedingRequestStatus,
   DirectBreedingResult,
   ReverseBreedingPairCard,
@@ -68,7 +69,10 @@ import {
   PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY,
   PalworldPalLocationMap,
 } from "../src/features/public-palworld/components/PalworldPalLocationMap";
-import { PalworldActiveSkillDetail } from "../src/features/public-palworld/components/PalworldDetailModals";
+import {
+  PalworldActiveSkillDetail,
+  PalworldPalDescription,
+} from "../src/features/public-palworld/components/PalworldDetailModals";
 import {
   clampPalworldMapView as clampSharedPalworldMapView,
   focusPalworldMapViewAt as focusSharedPalworldMapViewAt,
@@ -296,6 +300,8 @@ test("스킬 카드와 열린 상세는 locale 전환 시 번역문·검수 상�
     passiveAbilityKo: "공격력 +10%",
     passiveAbilityJa: "攻撃力 +10%",
     passiveAbility: "Attack +10%",
+    passiveEffectState: "available",
+    passiveEffects: [{ type: "ShotAttack", value: 10, target: "ToSelf" }],
     passiveTier: 1,
     relatedPalCount: 0,
     relatedPals: [],
@@ -310,13 +316,14 @@ test("스킬 카드와 열린 상세는 locale 전환 시 번역문·검수 상�
   const japanese = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ja" onOpenPal={() => undefined} />);
   assert.match(korean, /용감한 마음/u);
   assert.match(korean, /공격력이 증가한다/u);
-  assert.match(korean, /공격력 \+10%/u);
+  assert.match(korean, /효과 상세[\s\S]*공격[\s\S]*\+10%/u);
   assert.match(korean, /이 항목에는 적용되지 않습니다\./u);
   assert.equal((korean.match(/data-translation-status="machine_assisted"/gu) ?? []).length, 1);
   assert.equal((korean.match(/class="palworld-translation-review-notice"/gu) ?? []).length, 1);
   assert.doesNotMatch(korean, /data-ko="영문 원문"/u);
   assert.match(japanese, /勇敢な心/u);
   assert.match(japanese, /攻撃力が増加する/u);
+  assert.match(japanese, /効果詳細[\s\S]*攻撃[\s\S]*\+10%/u);
   assert.match(japanese, /この項目には適用されません。/u);
   assert.equal((japanese.match(/data-translation-status="machine_assisted"/gu) ?? []).length, 1);
   assert.equal((japanese.match(/class="palworld-translation-review-notice"/gu) ?? []).length, 1);
@@ -347,7 +354,7 @@ test("스킬 카드는 표시하지 않는 passive ability의 번역 상태를 B
   assert.doesNotMatch(korean, /영문 원문|Defense \+10%/u);
 });
 
-test("패시브 스킬 상세는 효과 원문이 없을 때 정보 없음 상태를 locale별로 표시한다", () => {
+test("패시브 스킬 상세는 구조화 효과 원문이 없을 때 정확한 상태를 locale별로 표시한다", () => {
   const metadata = {
     gameVersion: "1.0.1.100619",
     sourceName: "고정 스킬 데이터",
@@ -366,6 +373,7 @@ test("패시브 스킬 상세는 효과 원문이 없을 때 정보 없음 상�
     descriptionKo: "원본에 확인된 설명만 표시한다.",
     descriptionJa: "原文で確認できる説明のみ表示する。",
     descriptionEn: "Only verified source text is shown.",
+    passiveEffectState: "missing_source",
     passiveTier: 1,
     relatedPalCount: 0,
     relatedPals: [],
@@ -378,11 +386,118 @@ test("패시브 스킬 상세는 효과 원문이 없을 때 정보 없음 상�
   };
   const korean = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ko" onOpenPal={() => undefined} />);
   const japanese = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ja" onOpenPal={() => undefined} />);
-  assert.match(korean, /패시브 효과[\s\S]*원본 데이터에 정보가 없습니다/u);
-  assert.match(japanese, /パッシブ効果[\s\S]*元データに情報がありません/u);
+  assert.match(korean, /효과 상세[\s\S]*현재 원본 데이터에서 패시브 효과 수치를 확인할 수 없습니다/u);
+  assert.match(japanese, /効果詳細[\s\S]*現在の元データではパッシブ効果値を確認できません/u);
+  assert.doesNotMatch(korean, /원본 데이터에 정보가 없습니다/u);
+  assert.doesNotMatch(japanese, /元データに情報がありません/u);
 });
 
-test("패시브 스킬은 현지어 본문이 source language fallback이면 영어 대신 원본 없음 안내를 표시한다", () => {
+test("패시브 효과의 source mismatch와 data unavailable은 일반 원본 누락과 구분한다", () => {
+  const detail = (state: "source_mismatch" | "data_unavailable"): PalworldSkillDetail => ({
+    id: `passive-${state}`,
+    type: "passive",
+    nameKo: "상태 확인",
+    nameJa: "状態確認",
+    nameEn: "State Check",
+    descriptionEn: "Source-language description",
+    passiveTier: 1,
+    passiveEffectState: state,
+    relatedPalCount: 0,
+    relatedPals: [],
+    translation: {
+      name: { ko: "source_provided", ja: "source_provided" },
+      description: { ko: "source_language_fallback", ja: "source_language_fallback" },
+    },
+    metadata: {
+      gameVersion: "1.0.1.100619",
+      sourceName: "고정 스킬 데이터",
+      sourceUrl: "https://example.com/palworld-skills",
+      sourceRevision: "translation-r1",
+      extractedAt: "2026-07-22T00:00:00.000Z",
+      verifiedAt: "2026-07-22T00:00:00.000Z",
+      license: "operator_reference_use",
+    },
+  });
+  const mismatchKo = renderToStaticMarkup(<PalworldSkillDetailView detail={detail("source_mismatch")} locale="ko" onOpenPal={() => undefined} />);
+  const mismatchJa = renderToStaticMarkup(<PalworldSkillDetailView detail={detail("source_mismatch")} locale="ja" onOpenPal={() => undefined} />);
+  const unavailableKo = renderToStaticMarkup(<PalworldSkillDetailView detail={detail("data_unavailable")} locale="ko" onOpenPal={() => undefined} />);
+  const unavailableJa = renderToStaticMarkup(<PalworldSkillDetailView detail={detail("data_unavailable")} locale="ja" onOpenPal={() => undefined} />);
+
+  assert.match(mismatchKo, /현재 릴리스와 원본 효과 수치가 일치하지 않아/u);
+  assert.match(mismatchJa, /現在のリリースと元データの効果値が一致しないため/u);
+  assert.match(unavailableKo, /패시브 효과 데이터를 사용할 수 없습니다/u);
+  assert.match(unavailableJa, /パッシブ効果データを利用できません/u);
+  assert.doesNotMatch(`${mismatchKo}${unavailableKo}`, /원본 데이터에 정보가 없습니다|영문 원문/u);
+  assert.doesNotMatch(`${mismatchJa}${unavailableJa}`, /元データに情報がありません|英語原文/u);
+});
+
+test("구형 응답과 면역형 패시브 효과는 원본 누락이나 백분율로 오인하지 않는다", () => {
+  const base: PalworldSkillDetail = {
+    id: "passive-immunity",
+    type: "passive",
+    nameKo: "화상 면역",
+    nameJa: "炎上無効",
+    nameEn: "Burn Immunity",
+    descriptionEn: "Prevents burns.",
+    passiveTier: 1,
+    relatedPalCount: 0,
+    relatedPals: [],
+    translation: {
+      name: { ko: "source_provided", ja: "source_provided" },
+      description: { ko: "source_language_fallback", ja: "source_language_fallback" },
+    },
+    metadata: {
+      gameVersion: "1.0.1.100619",
+      sourceName: "고정 스킬 데이터",
+      sourceUrl: "https://example.com/palworld-skills",
+      sourceRevision: "translation-r1",
+      extractedAt: "2026-07-22T00:00:00.000Z",
+      verifiedAt: "2026-07-22T00:00:00.000Z",
+      license: "operator_reference_use",
+    },
+  };
+  const legacy = renderToStaticMarkup(
+    <PalworldSkillCard locale="ko" onOpen={() => undefined} skill={base} />,
+  );
+  const korean = renderToStaticMarkup(
+    <PalworldSkillDetailView
+      detail={{
+        ...base,
+        passiveEffectState: "available",
+        passiveEffects: [{
+          type: "ResistAdditionalEffect_Burn",
+          value: 100,
+          target: "ToSelf",
+        }],
+      }}
+      locale="ko"
+      onOpenPal={() => undefined}
+    />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldSkillDetailView
+      detail={{
+        ...base,
+        passiveEffectState: "available",
+        passiveEffects: [{
+          type: "ResistAdditionalEffect_Burn",
+          value: 100,
+          target: "ToSelf",
+        }],
+      }}
+      locale="ja"
+      onOpenPal={() => undefined}
+    />,
+  );
+
+  assert.match(legacy, /패시브 효과 데이터를 사용할 수 없습니다/u);
+  assert.doesNotMatch(legacy, /원본 데이터에 정보가 없습니다/u);
+  assert.match(korean, /화상 무효[\s\S]*적용/u);
+  assert.match(japanese, /炎上無効[\s\S]*適用/u);
+  assert.doesNotMatch(`${korean}${japanese}`, /\+100%/u);
+});
+
+test("패시브 스킬은 공식 설명문이 없어도 구조화 효과를 locale별로 표시한다", () => {
   const detail: PalworldSkillDetail = {
     id: "passive-source-language-fallback",
     type: "passive",
@@ -391,6 +506,8 @@ test("패시브 스킬은 현지어 본문이 source language fallback이면 영
     nameEn: "Hard Skin",
     descriptionEn: "Defense increases.",
     passiveAbility: "Defense +10%",
+    passiveEffectState: "available",
+    passiveEffects: [{ type: "Defense", value: 10, target: "ToSelf" }],
     passiveTier: 1,
     relatedPalCount: 0,
     relatedPals: [],
@@ -414,14 +531,16 @@ test("패시브 스킬은 현지어 본문이 source language fallback이면 영
   const japaneseDetail = renderToStaticMarkup(<PalworldSkillDetailView detail={detail} locale="ja" onOpenPal={() => undefined} />);
 
   assert.doesNotMatch(koreanCard, /Defense increases/u);
-  assert.match(koreanCard, /원본 데이터에 정보가 없습니다/u);
-  assert.match(koreanCard, /data-translation-status="source_language_fallback"/u);
+  assert.match(koreanCard, /방어 \+10%/u);
+  assert.doesNotMatch(koreanCard, /원본 데이터에 정보가 없습니다|data-translation-status="source_language_fallback"/u);
   assert.doesNotMatch(koreanDetail, /Defense increases|Defense \+10%/u);
-  assert.equal((koreanDetail.match(/원본 데이터에 정보가 없습니다/gu) ?? []).length, 2);
-  assert.equal((koreanDetail.match(/data-translation-status="source_language_fallback"/gu) ?? []).length, 2);
+  assert.match(koreanDetail, /공식 한국어 설명 문장은 제공되지 않지만/u);
+  assert.match(koreanDetail, /효과 상세[\s\S]*방어[\s\S]*\+10%[\s\S]*적용 대상: Pal/u);
+  assert.doesNotMatch(koreanDetail, /원본 데이터에 정보가 없습니다|data-translation-status="source_language_fallback"/u);
   assert.doesNotMatch(japaneseDetail, /Defense increases|Defense \+10%/u);
-  assert.equal((japaneseDetail.match(/元データに情報がありません/gu) ?? []).length, 2);
-  assert.equal((japaneseDetail.match(/data-translation-status="source_language_fallback"/gu) ?? []).length, 2);
+  assert.match(japaneseDetail, /公式の日本語説明文は提供されていません/u);
+  assert.match(japaneseDetail, /効果詳細[\s\S]*防御[\s\S]*\+10%[\s\S]*適用対象: パル/u);
+  assert.doesNotMatch(japaneseDetail, /元データに情報がありません|data-translation-status="source_language_fallback"/u);
 });
 
 test("패시브 스킬은 공식 source_provided 설명과 효과를 locale별로 그대로 표시한다", () => {
@@ -437,6 +556,8 @@ test("패시브 스킬은 공식 source_provided 설명과 효과를 locale별�
     passiveAbilityKo: "작업 속도 +50%",
     passiveAbilityJa: "作業速度 +50%",
     passiveAbility: "Work Speed +50%",
+    passiveEffectState: "available",
+    passiveEffects: [{ type: "CraftSpeed", value: 50, target: "ToSelf" }],
     passiveTier: 3,
     relatedPalCount: 0,
     relatedPals: [],
@@ -460,11 +581,11 @@ test("패시브 스킬은 공식 source_provided 설명과 효과를 locale별�
 
   assert.match(korean, /장인의 손/u);
   assert.match(korean, /작업 속도가 증가한다/u);
-  assert.match(korean, /작업 속도 \+50%/u);
+  assert.match(korean, /효과 상세[\s\S]*작업 속도[\s\S]*\+50%/u);
   assert.doesNotMatch(korean, /Work speed increases|Work Speed \+50%|원본 데이터에 정보가 없습니다/u);
   assert.match(japanese, /職人の手/u);
   assert.match(japanese, /作業速度が上昇する/u);
-  assert.match(japanese, /作業速度 \+50%/u);
+  assert.match(japanese, /効果詳細[\s\S]*作業速度[\s\S]*\+50%/u);
   assert.doesNotMatch(japanese, /Work speed increases|Work Speed \+50%|元データに情報がありません/u);
 });
 
@@ -486,7 +607,7 @@ test("스킬 페이지는 URL query 필터를 선택 상태로 복원한다", ()
       { value: -1, count: 10 },
     ],
   };
-  const html = renderToStaticMarkup(<PalworldSkillsPage locale="ja" onOpenPal={() => undefined} params={new URLSearchParams("type=passive&passiveEffect=attack&passiveTier=5&sort=power&order=desc")} />);
+  const html = renderToStaticMarkup(<PalworldSkillsPage locale="ja" params={new URLSearchParams("type=passive&passiveEffect=attack&passiveTier=5&sort=power&order=desc")} />);
   const passiveFilters = renderToStaticMarkup(<PalworldSkillsFilters
     facets={facets}
     locale="ja"
@@ -515,8 +636,8 @@ test("스킬 페이지는 URL query 필터를 선택 상태로 복원한다", ()
 });
 
 test("스킬 페이지의 기본 탭은 액티브이며 game data 속성 아이콘과 다국어 탭을 표시한다", () => {
-  const korean = renderToStaticMarkup(<PalworldSkillsPage locale="ko" onOpenPal={() => undefined} params={new URLSearchParams()} />);
-  const japanese = renderToStaticMarkup(<PalworldSkillsPage locale="ja" onOpenPal={() => undefined} params={new URLSearchParams()} />);
+  const korean = renderToStaticMarkup(<PalworldSkillsPage locale="ko" params={new URLSearchParams()} />);
+  const japanese = renderToStaticMarkup(<PalworldSkillsPage locale="ja" params={new URLSearchParams()} />);
 
   assert.match(korean, /aria-pressed="true"[^>]*data-selected="true"[^>]*>액티브 스킬/u);
   assert.match(korean, /액티브 스킬[\s\S]*패시브 스킬[\s\S]*파트너 스킬/u);
@@ -958,6 +1079,7 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   const tabs = renderToStaticMarkup(<BreedingModeTabs locale="ja" mode="child" onMode={() => undefined} />);
   const direct = renderToStaticMarkup(<DirectBreedingResult locale="ko" onCopy={() => undefined} onOpenPal={() => undefined} onViewParents={() => undefined} pair={pair} />);
   const reverse = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} />);
+  const partner = renderToStaticMarkup(<BreedingPartnerPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} />);
   const target = renderToStaticMarkup(<ReverseBreedingTargetSummary
     child={pair.child}
     loadedCount={12}
@@ -981,6 +1103,9 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(reverse, /불무사/u);
   assert.doesNotMatch(reverse, /실키누/u);
   assert.match(reverse, /계산기에 넣기/u);
+  assert.match(partner, /data-testid="breeding-partner-pair"/u);
+  assert.match(partner, /펭킹[\s\S]*불무사[\s\S]*실키누/u);
+  assert.match(partner, /계산기에 넣기/u);
   assert.match(target, /data-testid="breeding-target-summary"/u);
   assert.match(target, /실키누/u);
   assert.match(target, /aria-label="목표 Pal 상세 보기: 실키누"/u);
@@ -989,6 +1114,8 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(alternative, /この条件を適用/u);
   assert.match(alternative, /aria-label="この条件を適用: シルキーヌ, オス \/ メス"/u);
   assert.match(status, /role="status"[^>]*aria-live="polite"[^>]*aria-atomic="true"/u);
+  assert.equal(palworldI18n.ko.partnerPairSuggestions, "선택한 부모의 교배 조합");
+  assert.equal(palworldI18n.ja.partnerPairSuggestions, "選択した親パルの配合組み合わせ");
 });
 
 test("자동 로드 제어는 이전·다음 버튼 없이 스크롤 안내와 키보드 fallback을 제공한다", () => {
@@ -1121,6 +1248,101 @@ test("Pal 상세 액티브 스킬은 공식 source_provided 이름과 설명을 
   assert.match(japanese, /高速の水流を放つ/u);
   assert.doesNotMatch(korean, /Aqua Jet|Hurls a high speed ball/u);
   assert.doesNotMatch(japanese, /Aqua Jet|Hurls a high speed ball/u);
+});
+
+test("Xenolord Pal 상세는 공식 KO·JA 설명이 없을 때 영문 대신 현지어 원본 없음 상태를 표시한다", () => {
+  const xenolordDescription = {
+    descriptionEn: "It came from beyond the stars to bring ruin to this world.",
+    translation: {
+      description: {
+        ko: "source_language_fallback" as const,
+        ja: "source_language_fallback" as const,
+      },
+    },
+  };
+  const korean = renderToStaticMarkup(
+    <PalworldPalDescription detail={xenolordDescription} locale="ko" />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldPalDescription detail={xenolordDescription} locale="ja" />,
+  );
+
+  assert.doesNotMatch(korean, /It came from beyond the stars|영문 원문/u);
+  assert.doesNotMatch(japanese, /It came from beyond the stars|英語原文/u);
+  assert.match(korean, /원본 데이터에 정보가 없습니다/u);
+  assert.match(korean, /data-translation-status="missing_source"/u);
+  assert.match(japanese, /元データに情報がありません/u);
+  assert.match(japanese, /data-translation-status="missing_source"/u);
+});
+
+test("Pal 상세는 공식 source_provided KO·JA 설명을 영어로 대체하지 않는다", () => {
+  const officialDescription = {
+    descriptionKo: "별에서 온 초월적인 Pal이다.",
+    descriptionJa: "星から来た超越的なパル。",
+    descriptionEn: "A transcendent Pal from the stars.",
+    translation: {
+      description: {
+        ko: "source_provided" as const,
+        ja: "source_provided" as const,
+      },
+    },
+  };
+  const korean = renderToStaticMarkup(
+    <PalworldPalDescription detail={officialDescription} locale="ko" />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldPalDescription detail={officialDescription} locale="ja" />,
+  );
+
+  assert.match(korean, /별에서 온 초월적인 Pal이다/u);
+  assert.match(japanese, /星から来た超越的なパル/u);
+  assert.doesNotMatch(korean, /A transcendent Pal from the stars|원문 없음/u);
+  assert.doesNotMatch(japanese, /A transcendent Pal from the stars|原文なし/u);
+});
+
+test("스킬 카드 설명은 한 줄 말줄임하고 상세는 전체 설명을 유지한다", () => {
+  const css = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
+  const oneLineRule = css.match(
+    /\.palworld-skill-description\.palworld-localized-copy\s*\{(?<body>[^}]+)\}/u,
+  )?.groups?.body;
+  assert.ok(oneLineRule);
+  assert.match(oneLineRule, /overflow:\s*hidden;/u);
+  assert.match(oneLineRule, /text-overflow:\s*ellipsis;/u);
+  assert.match(oneLineRule, /white-space:\s*nowrap;/u);
+
+  const detail: PalworldSkillDetail = {
+    id: "active-long-description",
+    type: "active",
+    nameKo: "긴 설명 스킬",
+    nameJa: "長い説明のスキル",
+    nameEn: "Long Description Skill",
+    descriptionKo: "첫 문장 뒤에도 상세 화면에서 계속 읽을 수 있는 전체 설명입니다.",
+    descriptionJa: "最初の文の後も詳細画面で読める完全な説明です。",
+    descriptionEn: "The complete description remains available in the detail view.",
+    relatedPalCount: 0,
+    relatedPals: [],
+    translation: {
+      name: { ko: "source_provided", ja: "source_provided" },
+      description: { ko: "source_provided", ja: "source_provided" },
+    },
+    metadata: {
+      gameVersion: "1.0.1",
+      sourceName: "공식 게임 locale",
+      sourceUrl: "https://example.com/palworld-skills",
+      sourceRevision: "translation-r1",
+      extractedAt: "2026-07-22T00:00:00.000Z",
+      verifiedAt: "2026-07-22T00:00:00.000Z",
+      license: "operator_reference_use",
+    },
+  };
+  const detailHtml = renderToStaticMarkup(
+    <PalworldSkillDetailView detail={detail} locale="ko" onOpenPal={() => undefined} />,
+  );
+  assert.match(detailHtml, /첫 문장 뒤에도 상세 화면에서 계속 읽을 수 있는 전체 설명입니다/u);
+  assert.doesNotMatch(detailHtml, /palworld-skill-description/u);
 });
 
 test("이미지 없는 Pal은 카드 높이를 유지하는 한국어·일본어 대체 표시를 렌더한다", () => {

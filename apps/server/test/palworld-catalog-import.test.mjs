@@ -16,6 +16,12 @@ const { adaptPalworldCatalog } = await import("../dist/data/palworld-catalog-ada
 const { PALWORLD_SNAPSHOT } = await import("../dist/data/palworld-snapshot.js");
 const { loadPalworldPaldexRuntimeRelease } = await import("../dist/data/palworld-paldex-adapter.js");
 const { parseAllowedSqlTables } = await import("../dist/data/palworld-catalog-import.js");
+const {
+  assertPalworldBreedingCatalogRuleConsistency,
+  assertPalworldBreedingSourceAliasArtifact,
+  createPalworldBreedingSourceAliasResolver,
+  loadPalworldBreedingSourceAliases
+} = await import("../dist/data/palworld-breeding-source-alias.js");
 const { PalworldSourceArchive, crc32 } = await import("../dist/data/palworld-source-archive.js");
 
 const releaseRoot = new URL("../data/palworld/1.0.1/", import.meta.url);
@@ -154,6 +160,87 @@ test("catalog validator는 unknown field와 참조가 손상된 artifact를 거�
   assert.throws(() => assertPalworldCatalogArtifact(wrongBreedingCoverage), /특수 교배 조합 수/u);
 });
 
+test("교배 source alias는 고정 checksum과 exact ID만 허용한다", async () => {
+  const artifact = await loadPalworldBreedingSourceAliases();
+  assert.deepEqual(artifact.entries, [{
+    sourceInternalId: "Blueplatypus",
+    canonicalInternalId: "BluePlatypus",
+    reason: "Atlas breeding row의 이전 casing을 1.0.1 canonical Pal sourceInternalId에 exact 연결",
+    reviewStatus: "approved"
+  }]);
+  const resolver = createPalworldBreedingSourceAliasResolver({
+    artifact,
+    sourceInternalIds: new Set(["Blueplatypus", "SakuraSaurus"]),
+    canonicalInternalIds: new Set(["BluePlatypus", "SakuraSaurus"])
+  });
+  assert.equal(resolver.resolve("Blueplatypus"), "BluePlatypus");
+  assert.equal(resolver.resolve("SakuraSaurus"), "SakuraSaurus");
+  assert.equal(resolver.has("Blueplatypus"), true);
+
+  assert.throws(
+    () => assertPalworldBreedingSourceAliasArtifact({
+      ...artifact,
+      sourceSha256: "f".repeat(64)
+    }),
+    /고정 Atlas breeding checksum/u
+  );
+  assert.throws(
+    () => assertPalworldBreedingSourceAliasArtifact({
+      ...artifact,
+      unexpected: true
+    }),
+    /허용되지 않은 필드/u
+  );
+  assert.throws(
+    () => createPalworldBreedingSourceAliasResolver({
+      artifact,
+      sourceInternalIds: new Set(["Blueplatypus"]),
+      canonicalInternalIds: new Set(["SakuraSaurus"])
+    }),
+    /존재하지 않는 canonical Pal/u
+  );
+});
+
+test("catalog 교배 예외는 alias로 복구된 exact 누락 전체만 허용한다", () => {
+  const sourceRuleKeys = new Set(["legacy", "alias-a", "alias-b"]);
+  const aliasCorrectedRuleKeys = new Set(["alias-a", "alias-b"]);
+
+  assert.doesNotThrow(() => assertPalworldBreedingCatalogRuleConsistency({
+    sourceRuleKeys,
+    catalogRuleKeys: new Set(["legacy"]),
+    aliasCorrectedRuleKeys
+  }));
+  assert.doesNotThrow(() => assertPalworldBreedingCatalogRuleConsistency({
+    sourceRuleKeys,
+    catalogRuleKeys: new Set(sourceRuleKeys),
+    aliasCorrectedRuleKeys
+  }));
+  assert.throws(
+    () => assertPalworldBreedingCatalogRuleConsistency({
+      sourceRuleKeys,
+      catalogRuleKeys: new Set(["legacy", "alias-a"]),
+      aliasCorrectedRuleKeys
+    }),
+    /exact non-self 조합/u
+  );
+  assert.throws(
+    () => assertPalworldBreedingCatalogRuleConsistency({
+      sourceRuleKeys,
+      catalogRuleKeys: new Set(["legacy", "unexpected"]),
+      aliasCorrectedRuleKeys
+    }),
+    /source에 없는 조합/u
+  );
+  assert.throws(
+    () => assertPalworldBreedingCatalogRuleConsistency({
+      sourceRuleKeys,
+      catalogRuleKeys: new Set(["legacy"]),
+      aliasCorrectedRuleKeys: new Set(["alias-a", "alias-b", "not-source"])
+    }),
+    /source에 없는 교배 규칙/u
+  );
+});
+
 test("catalog adapter는 Pal sourceInternalId가 canonical mapping과 다르면 거부한다", async () => {
   const [catalogSource, paldexRelease] = await Promise.all([
     loadPalworldCatalogRuntimeSource(releaseRoot.pathname, {
@@ -210,6 +297,80 @@ test("catalog adapter는 sourceCategory를 12종에 exact 분류하고 알 수 �
   assert.throws(
     () => adaptPalworldCatalog({ ...input, catalog: unknownSpecialWeapon }),
     /지원하지 않는 Palworld SpecialWeapon sourceCategory/u
+  );
+});
+
+test("catalog adapter는 exact passive evidence만 구조화 효과로 공개한다", async () => {
+  const [catalogSource, paldexRelease] = await Promise.all([
+    loadPalworldCatalogRuntimeSource(releaseRoot.pathname, {
+      itemImageRoot: itemImageRoot.pathname,
+      elementImageRoot: elementImageRoot.pathname
+    }),
+    loadPalworldPaldexRuntimeRelease()
+  ]);
+  const input = {
+    basePaldex: paldexRelease,
+    catalog: catalogSource.catalog,
+    catalogChecksum: catalogSource.manifest.catalogSha256,
+    localizedSnapshot: PALWORLD_SNAPSHOT,
+    sourceChecksum: "a".repeat(64),
+    sourceInternalIds: paldexRelease.sourceInternalIds
+  };
+  const passiveSkills = catalogSource.catalog.skills.filter(
+    (skill) => skill.type === "passive"
+  );
+  assert.ok(passiveSkills.length > 1);
+  const withoutEvidence = adaptPalworldCatalog(input);
+  assert.equal(
+    withoutEvidence.snapshot.skills
+      .filter((skill) => skill.type === "passive")
+      .every((skill) =>
+        skill.passiveEffectState === "data_unavailable"
+        && skill.passiveEffects === undefined
+      ),
+    true
+  );
+
+  const availableSkill = passiveSkills[0];
+  const passiveEffectsBySkillId = new Map(
+    passiveSkills.map((skill) => [
+      skill.id,
+      skill.id === availableSkill.id
+        ? {
+            state: "available",
+            effects: [{ type: "ShotAttack", value: 10, target: "ToSelf" }]
+          }
+        : { state: "source_mismatch" }
+    ])
+  );
+  const adapted = adaptPalworldCatalog({
+    ...input,
+    passiveEffectsBySkillId
+  });
+  assert.deepEqual(
+    adapted.snapshot.skills.find((skill) => skill.id === availableSkill.id)
+      ?.passiveEffects,
+    [{ type: "ShotAttack", value: 10, target: "ToSelf" }]
+  );
+  assert.equal(
+    adapted.snapshot.skills.find((skill) => skill.id === availableSkill.id)
+      ?.passiveEffectState,
+    "available"
+  );
+  assert.equal(
+    adapted.snapshot.skills.find((skill) =>
+      skill.type === "passive" && skill.id !== availableSkill.id
+    )?.passiveEffectState,
+    "source_mismatch"
+  );
+  assert.throws(
+    () => adaptPalworldCatalog({
+      ...input,
+      passiveEffectsBySkillId: new Map([
+        [availableSkill.id, passiveEffectsBySkillId.get(availableSkill.id)]
+      ])
+    }),
+    /전체를 포함/u
   );
 });
 

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "release": "1.0.1",
   "status": "translation_compatibility_only",
   "candidateId": "candidate-1248184a4b527d94",
@@ -17,7 +17,10 @@
     "officialNames": 79,
     "compatibleDescriptions": 50,
     "missingSourceDescriptions": 19,
-    "numericMismatchDescriptions": 10
+    "numericMismatchDescriptions": 10,
+    "compatibleEffects": 68,
+    "sourceMismatchEffects": 11,
+    "effectRows": 99
   },
   "entries": [
     {
@@ -31,6 +34,25 @@
         "ko": "a9b833429707104d6ade4d02e486dab8d32fc27dca32d0349c13b386a3568031",
         "ja": "1dab7782bb15ec4f59a3a315ab805125e162ef26ec907f15acc5720bb0c2af01"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "b5f9d97b2514ee60f45d8cef683196d3f03314131234591cd19a783acbe7890d",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 10,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ElementResist_Fire",
+          "value": 15,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ElementBoost_Electricity",
+          "value": 15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -67,6 +89,15 @@
         "ko": "f8e291aa3259483a83e365181479f1045d26bc629c8c6db92d718381bf53fa6d",
         "ja": "34ddf05479af440ee713b1f005eaea99e998026c2e294f4efbd604529ff898d3"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "46620f2c0792dfa5b4ffc2c8d29a8d1e7ed78f2110b71f19138946535b3aa678",
+      "effects": [
+        {
+          "type": "ActiveSkillCoolTime_Decrease",
+          "value": -15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -97,6 +128,20 @@
         "ko": "c18b1bc2e32d3d4389bea2adaf91001830382738509f6f2cdb04674db422e3b0",
         "ja": "fc480c72ae03b86310362df009e216108404db48e153dee3737f019eee0532b1"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "9316270c50ce4d2666356cb334dd133f671abe5858f43e63bbd4f9343e75d1a1",
+      "effects": [
+        {
+          "type": "ActiveSkillCoolTime_Decrease",
+          "value": 30,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ShotAttack",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -130,6 +175,15 @@
         "ko": "72ce5058ac342eb2e4182d52c14d1cbbbc7db71b01ebd0da046b840a79e2a196",
         "ja": "eb3297c8a4f041bc546a547a99688bbd1abd08efd64b07e44d7925e369c3e8b2"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "807e9fd20cb338308a96aa4d9325f5eae2902f06e297664bfb9ae12e73dd6726",
+      "effects": [
+        {
+          "type": "ActiveSkillCoolTime_Decrease",
+          "value": 15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -160,6 +214,15 @@
         "ko": "421a2e2f2fcbfa70a9a0ca4aa2c2410db72ab5d49ff5c958419bcdc153df1fec",
         "ja": "132acb74d485e7f2c7b3f84ac6affe6cd8d9af82701846d6a6e22b452c67c7c2"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "ee2249462344c87f92111fb67fa345d7b67c0a57561545243278fb32269309a7",
+      "effects": [
+        {
+          "type": "CraftSpeed",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -182,6 +245,15 @@
         "ko": "650d1332a6edcdf86295bc19cb8875442b783381be326e26ae5a0ac128fe7953",
         "ja": "7165a47840367e25ac2afd01955358c386006127bb8d64ffcad08bc2c08cb4ba"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "9e72c1910ddeb23265cbd6b6ee0910f81b832535ac49392d9e6e7e0d0bf1ac0d",
+      "effects": [
+        {
+          "type": "CraftSpeed",
+          "value": -30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -204,6 +276,15 @@
         "ko": "b6f613dfd9ca01e1154f25135d7547ee5f266ba3bc063f4eee1c52f680e123de",
         "ja": "787fb6df637613b3526223248821a43f4310cb2a256aee313cc8f89492453e26"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "a32f58645e58babc3130b43e77d72531b3ad5b93e8618fef05e6b1aba8548462",
+      "effects": [
+        {
+          "type": "CraftSpeed",
+          "value": 20,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -226,6 +307,15 @@
         "ko": "3ab39a32274878edc1a2e5d2e1a5287c69f0a0d1cf7e6751752e2c2bc892d97e",
         "ja": "7e9c4fa0c3b7f1ecb4be34de5ea1fb3003571ffa99927cd2086f2633bf0cb49f"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "99a46f5bf10ad9a4fe39f2bc3d90d541147f3756d3ac9263341a21979f37469d",
+      "effects": [
+        {
+          "type": "CraftSpeed",
+          "value": 50,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -248,6 +338,15 @@
         "ko": "1748c08c642cf574f83c0bbe5c9fc6cab69850cfcea19e9603c30241817ce749",
         "ja": "9ccb18ec2bb1b9cbf0435362b226b1321ff8f11ce1eb43d10b251a3eb5e07c11"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "df25154137f264c4344a027e7d775cfea367216177e69e219256e3d382c07663",
+      "effects": [
+        {
+          "type": "Defense",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -270,6 +369,15 @@
         "ko": "e2253fd3d6f0bf185c5a51334e8931ad8088e9490bc5250246d00cb11f7683ed",
         "ja": "59fd8248e66f934b23e9841775b2c828031fc1c3edd5ae96e5c229b8b6059727"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "8a2b37eedd507ab26dd937a30b9779044365a613a93353f85296294156d56b12",
+      "effects": [
+        {
+          "type": "Defense",
+          "value": -20,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -292,6 +400,15 @@
         "ko": "88a8cff02db9cfcaaf04de44257c2b677dbe2a084dcca87d8d56041956b73c26",
         "ja": "2c7baa84d4d3bb46e882001e89c53f45eb6478af4065372d2e8d2ffb7a4ea3ff"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "5ce0c9186eab3f24675cc028e96c9afb5b1185a3ac954f0d65fce61fb5067c85",
+      "effects": [
+        {
+          "type": "Defense",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -314,6 +431,20 @@
         "ko": "e73e5149caa3fd323758ec8ee05aac809e529732cfb4d097ce57466e68898a3e",
         "ja": "5123506540649a3dca9307414be980df4e6f40ecc5e09b03b51dcd806d57b88a"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "052dadfb20fc2aac8fdae224b0d9340e2604196784c43d632ea64c6547fb059b",
+      "effects": [
+        {
+          "type": "Defense",
+          "value": 20,
+          "target": "ToSelf"
+        },
+        {
+          "type": "LeanBackInvalid_ForPassiveSkill",
+          "value": 0,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -344,6 +475,15 @@
         "ko": "0bb4674d19a44d7dc191a60344c975b32636fe78634e38403485f4038067c584",
         "ja": "2969ae4c91953ec27269f430a85f830904a47c71d1352daf33960c30c16c0919"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "9da98de25f1043461ef3115252d4f3dd66e36e9e4a854ed7e4b675b86fbc0916",
+      "effects": [
+        {
+          "type": "ElementBoost_Water",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -374,6 +514,15 @@
         "ko": "754579f9a542ba4d5e10775992ce7c40176ec404add82c12d0cf9b1bd8de3077",
         "ja": "9168e34e2c0ed049a18abf2b1c7c920bef3dea67e68c0d51ccfd8a7a383e6af3"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "4c322f4cb5b0ad3981d8c0dcd6540ff2d6e99c7b000811fbc6e3b67e4c8bde90",
+      "effects": [
+        {
+          "type": "ElementBoost_Water",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -400,6 +549,15 @@
         "ko": "7c0003d7a3c873513013c3c0536d2689208685c12b24ac9ebe176e653a33786c",
         "ja": "320823b129986f1d5c50e356956c0b8bd4a5a788b7cc6764d5020bfa80012107"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "7fd4c3dd733b6b1106fc35f709845944fbe472fdc030e3a571a9bd63b234feb4",
+      "effects": [
+        {
+          "type": "ElementBoost_Dark",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -430,6 +588,15 @@
         "ko": "1452e30454ce993eab29970f420ef06a88961ce9dcbd5096b70945dd5f999e9b",
         "ja": "b34b2733308a40f83ccf00ee2a2eec36c5de1fe03b7e7e317abc43f33a6bb2bb"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "7e9ef6b8c9a638818a7b2fe8293a60c8592b9d73f5b2d0144338e82b69982df5",
+      "effects": [
+        {
+          "type": "ElementBoost_Dark",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -456,6 +623,15 @@
         "ko": "e9cd777b05815f2cdc8f846f45969a0f06c67a3e5bf5e6cfa2f0ff64e25b5a9a",
         "ja": "754ce33cd74c3049618d501640f1f0195b083782c499b173e0c9526ef3221c2a"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "7db311e602fe04f44465b5d4db1a1ca072852011711cb5a5289196be41f429f8",
+      "effects": [
+        {
+          "type": "ElementBoost_Dragon",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -486,6 +662,15 @@
         "ko": "11cd5223cdb99d2f560dffa121540ac9174900cd7fea9b840ffe2e12adab309e",
         "ja": "3d633d05f09ac2ce403b65c2ce8d2abd4304259ae954daf4e7407857dcffe4dc"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "5f5e0461797dfa058b9a801ad3ee19ab08b9b7d5ca98770ce88da10e202787af",
+      "effects": [
+        {
+          "type": "ElementBoost_Dragon",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -512,6 +697,15 @@
         "ko": "65cb7d7cc58eeb1e41cf32e3e40cce31c18ab8f829505f424dbce18a024e21cc",
         "ja": "240fa8fb6b6fd4f86f11104afaff9be56812f75a5dff93943c7c16aa23f1b67a"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "bb8934157b102138f2bd6f5fbae2f62c06c6e71fa2f9f5e322718e58adf59b4d",
+      "effects": [
+        {
+          "type": "ElementBoost_Earth",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -542,6 +736,15 @@
         "ko": "a3dbc0179e7970d74ba13d9079a3e573c87015a7f65def6d10b63dd8dd07b56d",
         "ja": "5df0859f3d977f30968c2f1e188c00330247a7ccad642df56d27099123344b4d"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "05f08471fe627db7796b3c05154a7de3cc2a97fbbdc88c374db0c0ca039f4472",
+      "effects": [
+        {
+          "type": "ElementBoost_Earth",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -568,6 +771,15 @@
         "ko": "a8180b45e1019ad7dc904bec345e7d7b6224e51725efc33508067f1028c2541e",
         "ja": "b827b7b4db505ebd6687efece036d75d16b5dccf494fc43eda34d2a63bb28ac8"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "1598b2c6a4d28e0d6090d177d9ee7543efc7f08ed04e61d0259e5801f3c4a165",
+      "effects": [
+        {
+          "type": "ElementBoost_Fire",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -598,6 +810,15 @@
         "ko": "ea196d2702bc9b6749032b60e5156c33b7a5ef60281c3f2a74616c298bf909ea",
         "ja": "838748c481ec62625ebfafdcc722a76ce2b618c28fb5a3f8be408c97deaca060"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "740da146b8fee44a3fd88893412c74396728f9767acecae1ee2e139c4d6e911d",
+      "effects": [
+        {
+          "type": "ElementBoost_Fire",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -624,6 +845,15 @@
         "ko": "474530196746c6a3199890c86c62581432017d2717779ffc106c8e42aa94b813",
         "ja": "4864378ea7d24032a2c516ef5c188dc12f3793ffcdcdca3abafd063f7f8ea931"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "f4894bdbd29d2b19710975f13f56bb8a9ad3be6dbb8bddf3fdc0de220a39a64d",
+      "effects": [
+        {
+          "type": "ElementBoost_Ice",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -654,6 +884,15 @@
         "ko": "22d020e1c8b127c8edd25d5d4d501971a0478f8935f27b7a87a752b2748f282d",
         "ja": "07fb4e9e5c77002b6c71547676dd0af0ff1116ffa7524fa8b358aba424767d87"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "1cc11aacb522b6104f0267dc1cc9918eb5233c17bae1c17a63ad6d71035e0c8d",
+      "effects": [
+        {
+          "type": "ElementBoost_Ice",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -680,6 +919,15 @@
         "ko": "659b2d9217288f859c7bec976eda22c578942e7c058faf5a6e222d39b060c9e0",
         "ja": "9694f35d0820bf5bf7d148d58fb9170c57e515e86ed017865b5868b89b955633"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "84ba465473d135b44354942cefb425bd70ba15ebf4ae87183bef6fa9528cd3d4",
+      "effects": [
+        {
+          "type": "ElementBoost_Leaf",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -710,6 +958,15 @@
         "ko": "8e9d540e18987ef7fb018fd01273921a00ac5ea730b38ad0c88d3d9d7e71fb58",
         "ja": "5cc60228025dce52adb523b68da6bd9b15c7dbac9932c1a8a95878f6e1199f07"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "a50be19e9677e88c73d4b9087c71d231155c83744886c08fe0ef84820af22792",
+      "effects": [
+        {
+          "type": "ElementBoost_Leaf",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -736,6 +993,15 @@
         "ko": "9a51ac578dddb59694df34d6a1033e25f6549ad273f2fde2fe6b4207e0e44d14",
         "ja": "822ae66860ee052c23f6a141f02c592494685332dc875f0678516c290ab423c0"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "bc5192eb613dd7c77c63e4744c99ca89d8ccc48ad4b33e58f14606e5174150c3",
+      "effects": [
+        {
+          "type": "ElementBoost_Normal",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -766,6 +1032,15 @@
         "ko": "81b0255c5be74b99dbd1afca48d5d11fe80a17cc29e49b5e1d4bb1a9dac4851f",
         "ja": "d0c2e183085884bd35d8d6115712588935823951f60898d9e6a38d07bb0d3d75"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "d5c07d628a2ba019c14ac25e7b5128f53357fd24d1d5690526211981e60e63e7",
+      "effects": [
+        {
+          "type": "ElementBoost_Normal",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -792,6 +1067,15 @@
         "ko": "361bb1bd32f4b9bfe23ac7bca8258698d623b2b3a06de25221de8fae2a7d509f",
         "ja": "f5bec0037fadad28a66caaf37ffa148a46dcfd343f277f0b8915071e2ab75ed2"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "84c6a17fc4ab2db0ac00ff28c3ecddbfcb91efba846c44d892f553fa6e9e3d98",
+      "effects": [
+        {
+          "type": "ElementBoost_Electricity",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -822,6 +1106,15 @@
         "ko": "d21a23cf1e01bd2d1d397603380f75523227f2e0a2123c3285999b2ceb6e9589",
         "ja": "cefdc0fa95956f79d27f9bd7de66b435b7d11de4c5c997feb4989faf48d07389"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "814279f3ebaa7bb7a73bd4594f034b3db1bd92871d5fd02358ddaa694c1a6a82",
+      "effects": [
+        {
+          "type": "ElementBoost_Electricity",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -848,6 +1141,15 @@
         "ko": "6710c91eb42dc9a172f42ebcee7b0a7e6fba38d0bc4ff2c21963bedd15ab3793",
         "ja": "c811b27de6447d0f564b03c727fd133fabdd943656fe3f76fccad91eac947b17"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "9ed0cb4339944d202c7dbdcb407794e8cb1fc5ced8b6066cf3f70a9c23b8b391",
+      "effects": [
+        {
+          "type": "ElementResist_Water",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -878,6 +1180,15 @@
         "ko": "5ca353637daa1f3b3c0b5ae71ee9f71ddd7328befdc991ef9a5e3043862cdbed",
         "ja": "29fc2db5f3a04b9f5d2fe900f96742bd2825e6d79e3ce11765e439757067017b"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "292eb91e06866eab6912e34cf96d0ca209e1069befb9260629d8f1c23db66288",
+      "effects": [
+        {
+          "type": "ElementResist_Dark",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -908,6 +1219,15 @@
         "ko": "de429c72b4b27f8fb3325f549051bcf117e8002e0151e8e10920b3f46301c05e",
         "ja": "f20cc9022a5cac4f7896d51c6c1f191025cb9d5cae9a293b39c2622df495912a"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "fef19353af588740495d9822eefbd5b41f0f1d27a37aa6e1d330f42cb8ac73b6",
+      "effects": [
+        {
+          "type": "ElementResist_Dragon",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -938,6 +1258,15 @@
         "ko": "ac46f94bc2481a7eca22930bb4760e98619a34adf89dc71a0cf144396fdc6ecb",
         "ja": "ab9d1078d8d954fa5bc821306738fc7427350b228c0d12dfe66b362e28853355"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "3b3fea5870b72d81bcc508b5590f459088d463e4aef2f84f3ae98f7d11e57c04",
+      "effects": [
+        {
+          "type": "ElementResist_Earth",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -968,6 +1297,15 @@
         "ko": "a8cdbede3c4e6022e63cc28cec85ea8b19f3297dbd9bf36f64d19c3c093899d6",
         "ja": "1d3abccb2fd2a25fe320eb1842cac1d55068528d812215315b6108d5acaaefba"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "dc00dad0a2e28e85e5f8f1d88699d9fcbb2e0c6341e51327fab9624bb0ebfb6c",
+      "effects": [
+        {
+          "type": "ElementResist_Fire",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -998,6 +1336,15 @@
         "ko": "384ce8d997e7030b2dc93adfa28e36002c1edbb8e7f3cf58d7ae3f1b7cf9a1c3",
         "ja": "cdd99527af3824c9cd074afe8780373441232e1c80e7e55c8472aa1bdcae7390"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "02caf5813ed32a65ff21d6fbc30642f8e6323c43b70b307295315fa5068502d7",
+      "effects": [
+        {
+          "type": "ElementResist_Ice",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1028,6 +1375,15 @@
         "ko": "6490cd43320cb138eab8116502be681cc0d20f42b3690a6b9451d0b74faf01d7",
         "ja": "c08f105f75078745741d64b08055ab494818c5bd9e1e215a7cf980b4a9fc35f8"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "7b10261efd750139e3e0c7ada270e5cd48c356be958836fb710e620e10b8c69f",
+      "effects": [
+        {
+          "type": "ElementResist_Leaf",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1058,6 +1414,15 @@
         "ko": "89205a7d3f962644af0a10f866c86235c5cde4637451a08a27abe334f911d8d9",
         "ja": "723e54b5c4e4ef56ffb6ac19e7a381e04b87b0f8ab8132b647478620577a0f6c"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "b9a9c9c6b8ddc7aea8a204fd59b5e5394b07ff92f1c4ac5ae67db0a9903068f7",
+      "effects": [
+        {
+          "type": "ElementResist_Normal",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1088,6 +1453,15 @@
         "ko": "29526d9944f8b784d469d96fcc4d64242b4c4621e4a3407f918eb9780f35337d",
         "ja": "cbefe0f5a6feea1a30cedd74b92651845e725e881e0ac48da7581e78c5f2fc79"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "ada977794efc797cc26c7c7c467571da5be5d0a7b4dbb23835ae96ec920b33c9",
+      "effects": [
+        {
+          "type": "ElementResist_Electricity",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1118,6 +1492,20 @@
         "ko": "17afcbaceddfc3f9a58c21f0d438293fb6693ed62afd3e9edb298640d65df9db",
         "ja": "cb36f8d734bb983f4cb3f63151a820f864dd51164366a237c29d6bc409889b59"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "a6e285011b254330cb4f0ef6cb3154c91235c65971347a6bc15db2991bccae28",
+      "effects": [
+        {
+          "type": "ElementBoost_Fire",
+          "value": 30,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ElementBoost_Electricity",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1151,6 +1539,25 @@
         "ko": "d7a38fd8b5b8fe4baf5d2000054a6ef483fb3912434d91a6e291f78d5436a61d",
         "ja": "c488a012d8296f7357e846f6cad3d7af37ac5592002f3d77f6725b7fc70b1831"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "30dce1b29e69ad00e521e36c51f4aa7b0e52c77f5228f032b1075bb2f453fee7",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 20,
+          "target": "ToSelf"
+        },
+        {
+          "type": "Defense",
+          "value": 20,
+          "target": "ToSelf"
+        },
+        {
+          "type": "MoveSpeed",
+          "value": 20,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "numeric_mismatch",
         "legacyNumbers": [
@@ -1183,6 +1590,15 @@
         "ko": "c77798d2523ca435f801310c9aeb5290f329f7a5815d38eedfb93ad48d153d0e",
         "ja": "59f15b66193be4c948fba27296f201f8cf1036bf0a408c66325efdbcea8d9d82"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "490725f79c77e4eeb8787ee0e20a872b0d124c97cacd055d3074a7fb839d092e",
+      "effects": [
+        {
+          "type": "MoveSpeed",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1213,6 +1629,15 @@
         "ko": "b27aede46a3189f86803f1944aa74be732c46631d95c89031b1b0010ad97ad45",
         "ja": "f55e82680f4fb3c965524cdd046d159343c45bc1aa8dc42323124c6e60d87557"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "8281c331795b9da1ea1b96c9219018ade4f36d55a9a135d6977c3e458ab04dd2",
+      "effects": [
+        {
+          "type": "MoveSpeed",
+          "value": 20,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1243,6 +1668,15 @@
         "ko": "31f02f124ad510e23c82aa40fe450c9d19b3e15f0c45f980f20b223a73ed8cb4",
         "ja": "5813433a9071724998850b936fa1be038f52b3ed1c6ff6d3ce1e5d5f094e5bc3"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "2ca025fd9e41028c95fef9255e7947dae91500a14887e915492d867758b89d90",
+      "effects": [
+        {
+          "type": "MoveSpeed",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1273,6 +1707,15 @@
         "ko": "4ae62d8d05d250027633356a24f81cf6d1a42e02321b64fd6fac762939e40b45",
         "ja": "24dea0c88559d3e01d5799f7b1bf0522d11a588cff9be5996febad07158fbe3b"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "033f30bd56a6d9bb79d2de240a003c0f582bc01689315648d27005d21c59fc13",
+      "effects": [
+        {
+          "type": "Nocturnal",
+          "value": 0,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [],
@@ -1297,6 +1740,15 @@
         "ko": "bda37c792248e5c0a9adf72555724b624ea699a0f462a95cebf444bad29f8017",
         "ja": "8fd9995c63fa574b50f920e4f926f63f89d20ad2d9e092d19b15fab33bab390d"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "ede1637227a8e1f71674aa9aad9f4ed81e5ba0274af91fb2b1b2b4cdb682bc38",
+      "effects": [
+        {
+          "type": "NonKilling",
+          "value": 0,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1327,6 +1779,20 @@
         "ko": "3e6106d97175988a72f4a925f4860199956615cafdf669dcd41b13e55f9e712c",
         "ja": "50611fa9bdf303bf56b65cf3ead8f7a1f0928f3f9acdd490810b6181ba95a701"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "725a2e40bb4b516a9d0f69390990fbfc1574d9a1d5a8e7ef997f51af8432172b",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 30,
+          "target": "ToSelf"
+        },
+        {
+          "type": "CraftSpeed",
+          "value": -50,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1350,6 +1816,15 @@
         "ko": "f38b509a6ff45804847eb3f7501ac6183d3d8adf9f335c995b3e7d392d70d927",
         "ja": "2d22b80c3f920e1bb0556cb2770e02a54cce7dded2d3184b8a01d01ca886461a"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "fa27d21ea2a158505334541d7c4b3b937b3d8134d94f3df379d3d4ef6ff4865b",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1372,6 +1847,15 @@
         "ko": "129a23797109da18f5957e8a42dd55af12b9ff460ee69d6d481b29726bb06752",
         "ja": "092ce9f3e772205de2003c4271cd420682b0486ef18cf5a83f1ef5d5626501e5"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "a4b3fe241e1f492ecba83cd83f826e5c0c7c482a02fb0a931d45996d8b95e271",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": -20,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1394,6 +1878,15 @@
         "ko": "a373035f008ae2943711fc9ea122c8b11dadbc3c82ecdbcb8ebab99652890bb1",
         "ja": "27402adfd76c2a150f31a0834acc5c1aa31a914240e735890fd3c4f2eb39293c"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "fb776800f63c7d54ae69fae7a05ff37813abedb1535f96dd01bee138bfe9c302",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1416,6 +1909,15 @@
         "ko": "5c71d8cf5a993b44c84938a3346c856ad2b9e8312d105196321ec0efa5781b58",
         "ja": "2c85c384c74ec1270745435e7dbcb8590984a9c23811214687c137d8b8d1b290"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "47b4b0543d881cba404f28ffc316fac5027f6a386b1339d7dca81ed6275cbd7e",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 20,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1438,6 +1940,20 @@
         "ko": "3c8bc1073b7b096e6ee84831f3639b9c5a235b6dc2a7f6ccd67f9dfb76fc1e43",
         "ja": "50c2f1abb92bbbbe3868443868cb0e733b8ba003627496c914476a6a830b363e"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "56e030caa35b7795cd9b982b54ef51abc99f21c648e89ca7552b5362295ac0b9",
+      "effects": [
+        {
+          "type": "CraftSpeed",
+          "value": 10,
+          "target": "ToSelf"
+        },
+        {
+          "type": "Defense",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1461,6 +1977,20 @@
         "ko": "de78a51b8b70529ae8d395836ba0b9eb0bb190268ca30641361f610f6574866b",
         "ja": "183f972c7a85d68def4902d437b355c4789698ed5bf8d9d9806b65d9caa59ef7"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "05550ccc88f1a0d7de28e6d7721ebe30fb567b4f37f7c57e157f3cfcfa8dd596",
+      "effects": [
+        {
+          "type": "CraftSpeed",
+          "value": 30,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ShotAttack",
+          "value": -30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1484,6 +2014,15 @@
         "ko": "648fb8dfcf63ca8c8cb61de5f473571ad84c2c88d92067bb22c14bd6564429ec",
         "ja": "9de22e2b22d8c81fea12b8427d48a60a564ecb37c55d3dd67b6a194d81589f1d"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "8f980f6962601ba6b056f4ee2f9e34c7ec6ff4bfd6cfdd736c971d0b6a3cb9e4",
+      "effects": [
+        {
+          "type": "FullStomatch_Decrease",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1514,6 +2053,15 @@
         "ko": "14a6c996d704d073e5ddc9f60c6df5aac4c04ca25b9e2af3cec398390d86eeb0",
         "ja": "758bd905072cafc4adf5015a07e2904200396c34769677e3cad582c99a395180"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "e7f6bcaf786532bedd0e21fb4cf33d4b3a30822013a02369ae2fd383dd3c7a8c",
+      "effects": [
+        {
+          "type": "FullStomatch_Decrease",
+          "value": -15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1544,6 +2092,15 @@
         "ko": "9a30f00e244fa53304155529f25151d20d3e3a7427821d8be2a3dae460748cab",
         "ja": "3257dfa19df765c046d7af5066ed12e2848e8eaf42b0f6a0ea48aa1afb0c75e0"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "5e9060d8f52f890b8d56996aa79bb3c2abe15059c338ec493da9f004739ff8cb",
+      "effects": [
+        {
+          "type": "FullStomatch_Decrease",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1574,6 +2131,15 @@
         "ko": "c7767dde62dd6ae850e0b1174b64cb76f0ff43975449da6cfbb22d4d8c072285",
         "ja": "4775d607f1023460446d6317e3109723c9e580e2da9af7da7fcfcb5980d56198"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "1433f58a8f4926241d9e3d07ad328cf6e808ce44721d3992a3a90b48bf7a6d9e",
+      "effects": [
+        {
+          "type": "FullStomatch_Decrease",
+          "value": 15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1604,6 +2170,20 @@
         "ko": "8ea8a270ecd7f3bdc188d8252dd9d98a1644ac009baf1b05eb0f25d821e6a54c",
         "ja": "22dbfd942011a61ac848fb5a9b54ef6f550f0dfc8c4eb7fa0ebdfc8feaabddbf"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "df512cbcdc02d254b5207c2c62869ec0e1ff3e3b896c58f0653a05acc6514027",
+      "effects": [
+        {
+          "type": "Defense",
+          "value": 15,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ShotAttack",
+          "value": -15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1627,6 +2207,20 @@
         "ko": "587ae8621cc948ecd14da38b8dd1bd8e7c4f928968e9d24629a21f176627bed5",
         "ja": "9f3204de52d91d886694eeaacbbad1c1feabd259c77b1c3c3a4e2b885e7ff952"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "0523a5c96f264d165e837f4459f751af59fb1a9319927e6bdf396885b5ea3675",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 10,
+          "target": "ToSelf"
+        },
+        {
+          "type": "Defense",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1650,6 +2244,20 @@
         "ko": "9bc553d17232764f09d7028802ebf0efab318bfb034b8be92400416731fed724",
         "ja": "b65f048383fca149549ee9acc750298151f61a73590bd305d7372cb520bb79e8"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "4d9260dac286f74a3311e73dc6db971579098c79f4a3c347b89afb717617c563",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 15,
+          "target": "ToSelf"
+        },
+        {
+          "type": "CraftSpeed",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1673,6 +2281,20 @@
         "ko": "c0232d3b893f49d21b203baf558bccc48afc3c6cfa860ca5526bcc1fb953a4ef",
         "ja": "96c34b602ed0534540368091c656ee84da35889ab1fe65d467e113c0078a6eab"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "07c0a89a57bd86ae74b6311201bd0d2c9942c0b2c3bbf733bed25787a9d60dc6",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 15,
+          "target": "ToSelf"
+        },
+        {
+          "type": "Defense",
+          "value": -15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1696,6 +2318,15 @@
         "ko": "2ad84ee4002495429cd29f1e05bd607abcaa7c0d9940f073edbcdcd7aef6eca1",
         "ja": "0105a78c68ac5ded3e77b8fe294fdc270f005df192655e8f5d2678154d01e2ce"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "22bc6744d9580b7e3152350a2cc60c122c97c306a8023fa356b90a6eb696eaf3",
+      "effects": [
+        {
+          "type": "Sanity_Decrease",
+          "value": -10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1726,6 +2357,15 @@
         "ko": "6d83ca4926a0371d91296e4ba4861794aef4afb30be563f5316f0b7d1a4bce0c",
         "ja": "d62ac4cd280b4575ee44d681d5f83ecd2fbf56628b776f2a81f79fead7b6043a"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "c2b4a26bd522a5db87b2db6621ceff0cac04089b38cd8346914ff17039900c58",
+      "effects": [
+        {
+          "type": "Sanity_Decrease",
+          "value": -15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1756,6 +2396,15 @@
         "ko": "c8421d3aeb52c898c285b898dc3a5096d8650da7cab2b2691bf04c2bd89791ed",
         "ja": "592e2abc709dbfc2b41d6ab05a754851e965e5aa49b849575172eea8ee8f8ba0"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "be8be7b201b9e859cca7fa9a95e1f05541f3016d537f7096e88d9d014877a609",
+      "effects": [
+        {
+          "type": "Sanity_Decrease",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1786,6 +2435,15 @@
         "ko": "ad5788d4be11238f272ef0535d1be5915953d31bf679929d2a257790fb8dfdf9",
         "ja": "d82ce1ae2112d9607ff493d21921b29337e7fb25bdbf66d7671ee5acd06fd298"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "999efcecd23c622be8031190a7cdcb760a5a226860393a84afb0f82a6f637cbf",
+      "effects": [
+        {
+          "type": "Sanity_Decrease",
+          "value": 15,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1816,6 +2474,25 @@
         "ko": "f706e984d0a4aae2c7134d3bf017306d429682aa91896f3c4d098f4b3ad3420b",
         "ja": "c9c762336a4e25622e6cf1600f6a725bdec7ee2c188b1718c039d351a491df46"
       },
+      "effectState": "source_mismatch",
+      "effectsPayloadSha256": "8a680a7089cdcb1065eb0c6a519c716804b88888afa735ba3800ef26bdd124c4",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 15,
+          "target": "ToSelf"
+        },
+        {
+          "type": "Defense",
+          "value": 15,
+          "target": "None"
+        },
+        {
+          "type": "CraftSpeed",
+          "value": 20,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "missing_source",
         "legacyNumbers": [
@@ -1839,6 +2516,20 @@
         "ko": "fbdbd693b8235d2d895dc6663eeb328fcc876792e46b1d8c164be741139a4202",
         "ja": "4a6bfafe7784ca14b0a0dbdd0d8e6b49e24b1e4f10005e5809e30aab8dd9c17f"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "9fbe66599a2e2f9c2910092a185c0cda3b41131fe9ab2ed3c3df3814724f908b",
+      "effects": [
+        {
+          "type": "ShopSellPrice_Money_Increase",
+          "value": -10,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ShopBuyPrice_Money_Increase",
+          "value": 10,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1869,6 +2560,20 @@
         "ko": "7475fbcd2d4d69870eed415689a4d968a7c3c71a5b8bda2c722c6c99731029e3",
         "ja": "6116c55395a7a103eac88c00678c49a9be78b4f45725b96e61f2ceee4e3dd1de"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "4d7121d86ebeb093dc253273471f5acb65c9c472963c36e0a35bf6c889277e48",
+      "effects": [
+        {
+          "type": "ShopSellPrice_Money_Increase",
+          "value": 5,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ShopBuyPrice_Money_Increase",
+          "value": -5,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1899,6 +2604,20 @@
         "ko": "8b7325e220de4f7ce2f1dae1097e318880662027ebd877bd58e7be1733b114a4",
         "ja": "14756df66c403376b4122884e08799ac3c367a5275a06484e98e8ddcc3ac56d6"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "add1aff4d2cd390571fe6bf31bd3d7f960c6fb84c0a12894a3b90659abefa054",
+      "effects": [
+        {
+          "type": "ShopSellPrice_Money_Increase",
+          "value": 3,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ShopBuyPrice_Money_Increase",
+          "value": -3,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1929,6 +2648,15 @@
         "ko": "0d67051ba8fe9140e0ea35925a392ed88bf0f8b6361a973d62cdbb8771418559",
         "ja": "07a2ff2ce7654bf48d2cbfa3df92207db1efa32752427e719fbf64e69c86e48b"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "bdea45edfb8e0c058b6ae4763196829a9b7827df9a57616f344c8489c2653524",
+      "effects": [
+        {
+          "type": "PalSP_Increase",
+          "value": -25,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1959,6 +2687,15 @@
         "ko": "d07389b94f351b93e45c97c8621195fa5bd661b71fefad2f788b76cb761d3b7c",
         "ja": "bec32abfea2fcb451761ce28e6b1e0003f8d301910407dd430304b38bb80765a"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "534316044a5ce8d8484bcda34bc459ff6f3ec3d2b41de4169297090c0035023a",
+      "effects": [
+        {
+          "type": "PalSP_Increase",
+          "value": 50,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -1989,6 +2726,15 @@
         "ko": "7aca3f1e194cb491f0a2e6e77f59d08a6dd2138a77f5d99c9982cd34ce3ef9d5",
         "ja": "3fdf4fc140b21101b42ef9952445f5c83f069fbeb11aaf6b7a43b1cb43ece0e9"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "267a87afbf8ee18036d90d020d6ad91a43e565f13cbac2ad44ed33c572cac53d",
+      "effects": [
+        {
+          "type": "PalSP_Increase",
+          "value": 25,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -2019,6 +2765,15 @@
         "ko": "f876e8e56283494495a08dcfca23ad1dd408cb874e2f1816f7880081389bffd6",
         "ja": "591c024ceec72017c8d834403fc9a5ddbe7360764edc0829acdc53f31e019e37"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "a7e766b85616ff55599a5b0991e2a33643bddcdf4b017d712942437a1adf2501",
+      "effects": [
+        {
+          "type": "BreedSpeed",
+          "value": 100,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -2049,6 +2804,15 @@
         "ko": "b47a2722343c3294f995165558e11d4f6740c658f411d3476c139491dc5b0840",
         "ja": "010a217c863f5c8c0daee7ff7a9134e7cda62f3e73197f97fc834eedbcef06ac"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "394bce8342ae7b3d74e538a18185cae8825f9e2d53f16ceb050ba37e744ec1dd",
+      "effects": [
+        {
+          "type": "ShotAttack",
+          "value": 10,
+          "target": "ToTrainer"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -2079,6 +2843,15 @@
         "ko": "a3a5d1bd6145c7b10783b9c3371753a931499012f986025a80d74369fbd846d1",
         "ja": "b79f52ce8ecf769670f8802dbf864dd040baa4d87e933a010e7314e72466832e"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "caa05e89ad1d45b3041e7246009c0cb2e4890a75dcc78da55b8be724f35d2190",
+      "effects": [
+        {
+          "type": "Defense",
+          "value": 10,
+          "target": "ToTrainer"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -2109,6 +2882,15 @@
         "ko": "95610c381a5368beeee6788b5f67a96a69fc61887406739654e2ea1e02505ae6",
         "ja": "40673ce3441a2ea0d90d9d03778e8c7811694d5477b59abd3bf08979580f0884"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "6471ca5a2b7825cf3a4ad8437bca28c621b734b608ee56cee3b726b3cd90c406",
+      "effects": [
+        {
+          "type": "Logging",
+          "value": 25,
+          "target": "ToTrainer"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -2139,6 +2921,15 @@
         "ko": "04d6e81a15529629e872c5a734b634f05e3c567a0c87d2662a33cd5e31ca7bdd",
         "ja": "81b68feeb51a1a285e05670220fdc10541fa94100822a6f6f1e38ed11b67fc60"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "73b8c642f36c21375412c77cee7f0b72ed2e8be8b22b86d6587cf9a65d103487",
+      "effects": [
+        {
+          "type": "Mining",
+          "value": 25,
+          "target": "ToTrainer"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -2169,6 +2960,15 @@
         "ko": "f2935b65ce43ed1762a8a86c8cd6f01e4941a7a153168e5b80589459ebd528a1",
         "ja": "a12e1b06e36d247fcd299fa67800705a88ce2c8995a2af499d1441bd589e1ba0"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "012aaab1dea7e2f1a629b96221c7cadd4ed1fc7bb5a2ad87b37b4472d1de8538",
+      "effects": [
+        {
+          "type": "CraftSpeed",
+          "value": 25,
+          "target": "ToTrainer"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [
@@ -2199,6 +2999,20 @@
         "ko": "60ffcd1f2f4ab4498b98307f130f3eb5dfe6219c6d2e7d1da308baf53938328a",
         "ja": "186ec1a871e42d204d8558aae122f5dcedd653bba74be4c43f06f1fe03923c8d"
       },
+      "effectState": "available",
+      "effectsPayloadSha256": "18fdc682268b5c1074af81aab8e4d4c5637282af9d07fa550ba8bde04fdd033f",
+      "effects": [
+        {
+          "type": "ElementBoost_Dark",
+          "value": 30,
+          "target": "ToSelf"
+        },
+        {
+          "type": "ElementBoost_Ice",
+          "value": 30,
+          "target": "ToSelf"
+        }
+      ],
       "description": {
         "status": "compatible",
         "legacyNumbers": [

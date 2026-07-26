@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import {
   PALWORLD_SEARCH_MAX_LENGTH,
+  type PalworldPassiveEffect,
+  type PalworldPassiveEffectState,
   type PalworldSkill,
   type PalworldSkillDetail,
   type PalworldSkillSummary,
@@ -16,7 +18,11 @@ import { getPalworldSkill } from "../api/palworld";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { usePalworldSkills } from "../hooks/usePalworldSkills";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
-import { skillTypeLabel } from "../utils/labels";
+import {
+  passiveEffectTargetLabel,
+  passiveEffectTypeLabel,
+  skillTypeLabel,
+} from "../utils/labels";
 import { formatPalNumber } from "../utils/search";
 import {
   hasMachineAssistedTranslation,
@@ -51,29 +57,106 @@ function skillDescription(skill: PalworldSkill, locale: PalworldLocale) {
   return resolvePalworldDescription(skill, locale);
 }
 
-function skillPassiveAbility(skill: PalworldSkill, locale: PalworldLocale) {
-  return resolvePalworldLocalizedText(
-    skill,
-    "passiveAbility",
-    locale,
-    locale === "ja" ? skill.passiveAbilityJa : skill.passiveAbilityKo,
-    skill.passiveAbility,
-  );
-}
-
 function skillVisibleTranslationStatuses(skill: PalworldSkill, locale: PalworldLocale): PalworldTranslationDisplayStatus[] {
-  return [resolvePalworldName(skill, locale).status, skillDescription(skill, locale).status];
+  const nameStatus = resolvePalworldName(skill, locale).status;
+  const descriptionStatus = skillDescription(skill, locale).status;
+  return skill.type === "passive"
+    && (descriptionStatus === "source_language_fallback" || descriptionStatus === "missing_source")
+    ? [nameStatus]
+    : [nameStatus, descriptionStatus];
 }
 
-function visibleSkillBody(
+const PASSIVE_EFFECT_BOOLEAN_TYPES = new Set([
+  "KnockbackInvalid_ForPassiveSkill",
+  "LeanBackInvalid_ForPassiveSkill",
+  "NightOwl",
+  "Nocturnal",
+  "NonKilling",
+  "ResistAdditionalEffect_Burn",
+  "ResistAdditionalEffect_Poison",
+  "WorldTreeDecayImmunity",
+]);
+
+function passiveEffectData(skill: PalworldSkill): {
+  effects: readonly PalworldPassiveEffect[];
+  state: PalworldPassiveEffectState | undefined;
+} {
+  return {
+    effects: skill.passiveEffects ?? [],
+    state: skill.passiveEffectState,
+  };
+}
+
+function passiveEffectStateMessage(
+  state: PalworldPassiveEffectState | undefined,
+  locale: PalworldLocale,
+): string {
+  const text = palworldI18n[locale];
+  if (state === "source_mismatch") return text.passiveEffectSourceMismatch;
+  if (state === undefined || state === "data_unavailable" || state === "available") {
+    return text.passiveEffectDataUnavailable;
+  }
+  return text.passiveEffectMissingSource;
+}
+
+function formatPassiveEffectValue(
+  effect: PalworldPassiveEffect,
+  locale: PalworldLocale,
+): string {
+  if (PASSIVE_EFFECT_BOOLEAN_TYPES.has(effect.type)) {
+    return palworldI18n[locale].passiveEffectEnabled;
+  }
+  const value = effect.value.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR", {
+    maximumFractionDigits: 2,
+  });
+  const signed = effect.value > 0 ? `+${value}` : value;
+  if (effect.type === "RideJumpCount_Increase") {
+    return locale === "ja" ? `${signed}回` : `${signed}회`;
+  }
+  if (effect.type === "WorkSuitabilityAddRank_MonsterFarm") {
+    return `Lv. ${signed}`;
+  }
+  return `${signed}%`;
+}
+
+function passiveEffectSummary(skill: PalworldSkill, locale: PalworldLocale): string {
+  const { effects, state } = passiveEffectData(skill);
+  if (state !== "available" || effects.length === 0) {
+    return passiveEffectStateMessage(state, locale);
+  }
+  const first = effects[0]!;
+  const summary = `${passiveEffectTypeLabel(first.type, locale)} ${formatPassiveEffectValue(first, locale)}`;
+  if (effects.length === 1) return summary;
+  return `${summary} · ${palworldI18n[locale].passiveEffectMore.replace(
+    "{count}",
+    String(effects.length - 1),
+  )}`;
+}
+
+function visibleSkillDescription(
   skill: PalworldSkill,
   localized: ReturnType<typeof resolvePalworldLocalizedText>,
-  unavailableText: string,
+  locale: PalworldLocale,
+  mode: "card" | "detail",
 ): string {
-  if (skill.type === "passive" && localized.status === "source_language_fallback") {
-    return unavailableText;
+  const text = palworldI18n[locale];
+  if (
+    skill.type !== "passive"
+    || (
+      localized.status !== "source_language_fallback"
+      && localized.status !== "missing_source"
+    )
+  ) {
+    return localized.text || text.originalDataUnavailable;
   }
-  return localized.text || unavailableText;
+  const { state } = passiveEffectData(skill);
+  if (state === "available") {
+    return mode === "card"
+      ? passiveEffectSummary(skill, locale)
+      : text.passiveDescriptionUnavailableWithEffects;
+  }
+  if (mode === "detail" && state !== undefined) return "";
+  return passiveEffectStateMessage(state, locale);
 }
 
 function SkillBadges({ locale, skill }: { locale: PalworldLocale; skill: PalworldSkill }) {
@@ -152,31 +235,79 @@ export function PalworldSkillCard({ locale, onOpen, skill }: { locale: PalworldL
       sourceIntegrities={[name.sourceIntegrity, description.sourceIntegrity]}
       statuses={skillVisibleTranslationStatuses(skill, locale)}
     />
-    <p className="palworld-skill-description palworld-localized-copy">{visibleSkillBody(skill, description, text.originalDataUnavailable)}</p>
+    <p className="palworld-skill-description palworld-localized-copy">{visibleSkillDescription(skill, description, locale, "card")}</p>
     <SkillRelatedPalPreviews locale={locale} skill={skill} />
     <div className="palworld-skill-metrics"><span>{text.relatedPalCount} <strong>{skill.relatedPalCount.toLocaleString()}</strong></span>{skill.passiveTier !== undefined ? <span>{text.passiveTier} <strong>{skill.passiveTier}</strong></span> : null}</div>
     <Button size="sm" variant="secondary" onClick={() => onOpen(skill.id)}>{text.viewSkill}</Button>
   </CardContent></Card>;
 }
 
+function PassiveEffectDetails({
+  locale,
+  skill,
+}: {
+  locale: PalworldLocale;
+  skill: PalworldSkill;
+}) {
+  const text = palworldI18n[locale];
+  const { effects, state } = passiveEffectData(skill);
+  if (state === undefined) return null;
+  return (
+    <section className="palworld-passive-effect-section">
+      <h4>{text.passiveStructuredEffects}</h4>
+      {state === "available" && effects.length > 0 ? (
+        <ul className="palworld-passive-effect-list">
+          {effects.map((effect, index) => {
+            const target = passiveEffectTargetLabel(effect.target, locale);
+            return (
+              <li key={`${effect.type}-${effect.target}-${index}`}>
+                <span className="palworld-passive-effect-name">
+                  {passiveEffectTypeLabel(effect.type, locale)}
+                </span>
+                <strong>{formatPassiveEffectValue(effect, locale)}</strong>
+                <span
+                  className="palworld-passive-effect-target"
+                  data-ja={palworldI18n.ja.passiveEffectTargetLabel.replace(
+                    "{target}",
+                    passiveEffectTargetLabel(effect.target, "ja"),
+                  )}
+                  data-ko={palworldI18n.ko.passiveEffectTargetLabel.replace(
+                    "{target}",
+                    passiveEffectTargetLabel(effect.target, "ko"),
+                  )}
+                >
+                  {text.passiveEffectTargetLabel.replace("{target}", target)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p role="status">
+          {passiveEffectStateMessage(state, locale)}
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function PalworldSkillDetailView({ detail, locale, onOpenPal }: { detail: PalworldSkillDetail; locale: PalworldLocale; onOpenPal: (id: string) => void }) {
   const text = palworldI18n[locale];
   const name = resolvePalworldName(detail, locale);
   const description = skillDescription(detail, locale);
-  const passiveAbility = skillPassiveAbility(detail, locale);
   const relatedPalNames = detail.relatedPals.map(({ pal }) => resolvePalworldName(pal, locale));
   const relatedPalStatuses = relatedPalNames.map((relatedName) => relatedName.status);
+  const visibleDescription = visibleSkillDescription(detail, description, locale, "detail");
   const recordStatuses = [
     ...skillVisibleTranslationStatuses(detail, locale),
-    ...(detail.type === "passive" ? [passiveAbility.status] : []),
     ...relatedPalStatuses,
   ];
   const reviewNoticeId = `palworld-skill-translation-review-${detail.id}`;
   const hasReviewPending = hasMachineAssistedTranslation(recordStatuses);
   return <article className="palworld-detail" aria-describedby={hasReviewPending ? reviewNoticeId : undefined}>
     {hasReviewPending ? <PalworldTranslationReviewNotice id={reviewNoticeId} locale={locale} /> : null}
-    <div><SkillBadges locale={locale} skill={detail} /><h3>{skillName(detail, locale)}</h3><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[name.sourceIntegrity, description.sourceIntegrity]} statuses={skillVisibleTranslationStatuses(detail, locale)} /><p className="palworld-localized-copy">{visibleSkillBody(detail, description, text.originalDataUnavailable)}</p></div>
-    {detail.type === "passive" ? <section><h4>{text.passiveAbility}</h4><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[passiveAbility.sourceIntegrity]} statuses={[passiveAbility.status]} /><p className="palworld-localized-copy">{visibleSkillBody(detail, passiveAbility, text.originalDataUnavailable)}</p></section> : null}
+    <div><SkillBadges locale={locale} skill={detail} /><h3>{skillName(detail, locale)}</h3><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[name.sourceIntegrity, description.sourceIntegrity]} statuses={skillVisibleTranslationStatuses(detail, locale)} />{visibleDescription ? <p className="palworld-localized-copy">{visibleDescription}</p> : null}</div>
+    {detail.type === "passive" ? <PassiveEffectDetails locale={locale} skill={detail} /> : null}
     <section><h4>{text.relatedPals}</h4>{detail.relatedPals.length ? <><div className="palworld-link-list palworld-skill-related-list">{detail.relatedPals.map(({ pal, unlockLevel }) => {
       const displayName = relatedPalName(pal, locale);
       return <button className="palworld-related-pal-link" type="button" onClick={() => onOpenPal(pal.id)} key={pal.id}><span className="palworld-related-pal-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} intrinsicWidth={pal.imageWidth} intrinsicHeight={pal.imageHeight} alt={displayName} locale={locale} /></span><span>{formatPalNumber(pal.number, locale)} · {displayName}{unlockLevel !== undefined ? ` · ${text.unlockLevel} ${unlockLevel}` : ""}</span></button>;
@@ -217,7 +348,7 @@ export function SkillDetailModal({ locale, onClose, onOpenPal, skillId }: { loca
   </Modal>;
 }
 
-export function PalworldSkillsPage({ locale, onOpenPal, params }: { locale: PalworldLocale; onOpenPal: (id: string) => void; params: URLSearchParams }) {
+export function PalworldSkillsPage({ locale, params }: { locale: PalworldLocale; params: URLSearchParams }) {
   const {
     initialError: error,
     initialLoading: loading,

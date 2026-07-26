@@ -13,6 +13,9 @@ const {
 } = await import("../dist/services/palworld-data.js");
 const { PALWORLD_SNAPSHOT } = await import("../dist/data/palworld-snapshot.js");
 const {
+  loadPalworldBreedingRuntimeSource
+} = await import("../dist/data/palworld-breeding-artifact.js");
+const {
   PALWORLD_ITEM_FILTER_CATEGORIES,
   validatePalworldItemSummary,
   validatePalworldPaginatedResponse,
@@ -25,6 +28,12 @@ const {
 
 const service = await loadPalworldDataService();
 const releaseRoot = new URL("../data/palworld/1.0.1/", import.meta.url);
+const breedingManifest = JSON.parse(
+  await readFile(new URL("breeding-manifest.json", releaseRoot), "utf8")
+);
+const breedingArtifact = JSON.parse(
+  await readFile(new URL("breeding.json", releaseRoot), "utf8")
+);
 
 test("서비스는 주입된 스냅샷도 Shared schema로 검증한다", () => {
   assert.throws(() => new PalworldDataService(), TypeError);
@@ -37,6 +46,15 @@ test("명시적인 operator/shadow 경로만 snapshot 교배 index를 사용한�
     withoutIndex.breeding({ parentA: "penking", parentB: "bushi" }).state,
     "data_unavailable"
   );
+  const unavailablePartners = withoutIndex.breedingPartners({
+    parent: "lamball",
+    page: 1,
+    limit: 10
+  });
+  assert.equal(unavailablePartners.parent.id, "lamball");
+  assert.equal(unavailablePartners.state, "data_unavailable");
+  assert.deepEqual(unavailablePartners.items, []);
+  assert.equal(unavailablePartners.pagination.total, 0);
 
   const withIndex = new PalworldDataService(PALWORLD_SNAPSHOT, {
     useSnapshotBreedingPairs: true
@@ -61,6 +79,11 @@ test("명시적인 operator/shadow 경로만 snapshot 교배 index를 사용한�
   assert.equal(normal.pagination.total, 1);
   assert.equal(normal.pagination.totalPages, 1);
   assert.equal(normal.items.every((pair) => !pair.isSpecial), true);
+  assert.deepEqual(
+    withIndex.breedingPartners({ parent: "bushi", page: 1, limit: 10 }).items
+      .map((pair) => [pair.parentA.id, pair.parentB.id, pair.child.id]),
+    [["penking", "bushi", "anubis"]]
+  );
 });
 
 test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분리된 gate를 반환한다", () => {
@@ -87,9 +110,13 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
   );
   assert.equal(meta.domains.items.domainMetadata.gameVersion, "1.0.1.100619");
   assert.equal(meta.domains.skills.domainMetadata.gameVersion, "1.0.1.100619");
+  assert.equal(
+    meta.domains.breeding.domainMetadata.sourceRevision,
+    `${breedingArtifact.metadata.sourceRevision}+breeding@${breedingManifest.sourceChecksumsSha256}`
+  );
   assert.deepEqual(meta.coverage?.palDetails, { available: 270, missing: 17, total: 287 });
   assert.deepEqual(meta.coverage?.itemImages, { available: 1762, missing: 85, total: 1847 });
-  assert.deepEqual(meta.coverage?.skillDetails, { available: 564, missing: 2, total: 566 });
+  assert.deepEqual(meta.coverage?.skillDetails, { available: 566, missing: 0, total: 566 });
   assert.deepEqual(meta.gates.dataIntegrity, { passed: true, status: "ready" });
   assert.deepEqual(meta.gates.imageAssets, {
     status: "operator_acknowledged",
@@ -102,6 +129,51 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
     fallbackPals: 0,
     publicNoticeRequired: true
   });
+});
+
+test("활성 Pal 287종과 상세 스킬 이름은 공식 한국어·일본어 locale을 유지한다", () => {
+  const palSummaries = service.listPals({
+    sort: "number",
+    order: "asc",
+    page: 1,
+    limit: service.meta().counts.pals
+  }).items;
+  assert.equal(palSummaries.length, 287);
+  assert.equal(new Set(palSummaries.map((pal) => pal.id)).size, 287);
+
+  for (const summary of palSummaries) {
+    const pal = service.getPal(summary.id);
+    assert.equal(pal.translation?.name?.ko, "source_provided", `${pal.id} 한국어 이름`);
+    assert.equal(pal.translation?.name?.ja, "source_provided", `${pal.id} 일본어 이름`);
+    assert.notEqual(pal.nameKo, pal.nameEn, `${pal.id} 한국어 이름이 영문 fallback이면 안 됩니다.`);
+    assert.notEqual(pal.nameJa, pal.nameEn, `${pal.id} 일본어 이름이 영문 fallback이면 안 됩니다.`);
+
+    for (const skill of [
+      ...(pal.partnerSkill ? [pal.partnerSkill] : []),
+      ...pal.activeSkills
+    ]) {
+      assert.equal(
+        skill.translation?.name?.ko,
+        "source_provided",
+        `${pal.id}/${skill.id} 한국어 스킬 이름`
+      );
+      assert.equal(
+        skill.translation?.name?.ja,
+        "source_provided",
+        `${pal.id}/${skill.id} 일본어 스킬 이름`
+      );
+      assert.notEqual(
+        skill.translation?.description?.ko,
+        "source_language_fallback",
+        `${pal.id}/${skill.id} 한국어 스킬 설명`
+      );
+      assert.notEqual(
+        skill.translation?.description?.ja,
+        "source_language_fallback",
+        `${pal.id}/${skill.id} 일본어 스킬 설명`
+      );
+    }
+  }
 });
 
 test("runtime meta는 레코드 존재 여부가 아니라 실제 상세 필드별 coverage를 집계한다", () => {
@@ -408,8 +480,8 @@ test("아이템 공개 분류는 sourceCategory 기준 12종으로 모든 runtim
 });
 
 test("교배 조회는 부모 순서 교환, 동일 부모와 목표 Pal 역검색을 지원한다", () => {
-  assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).result?.child.id, "xenovader");
-  assert.equal(service.breeding({ parentA: "bushi", parentB: "penking" }).result?.child.id, "xenovader");
+  assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).result?.child.id, "sibelyx");
+  assert.equal(service.breeding({ parentA: "bushi", parentB: "penking" }).result?.child.id, "sibelyx");
   assert.equal(service.breeding({ parentA: "lamball", parentB: "lamball" }).result?.child.id, "lamball");
   assert.equal(service.breeding({ parentA: "lamball", parentB: "lamball" }).parentA.nameKo, "도로롱");
   assert.equal(service.breeding({ parentA: "cattiva", parentB: "lamball" }).result?.child.id, "daedream");
@@ -430,6 +502,30 @@ test("교배 조회는 부모 순서 교환, 동일 부모와 목표 Pal 역검�
   assert.equal(service.breeding({ parentA: "penking", parentB: "bushi" }).metadata.gameVersion, "1.0.1");
   assert.equal(parents.metadata.gameVersion, "1.0.1");
 
+  const partners = service.breedingPartners({ parent: "lamball", page: 1, limit: 10 });
+  assert.equal(partners.parent.id, "lamball");
+  assert.equal(partners.pagination.total > 0, true);
+  assert.equal(
+    partners.items.every((pair) =>
+      pair.parentA.id === "lamball" || pair.parentB.id === "lamball"
+    ),
+    true
+  );
+  assert.equal(partners.metadata.gameVersion, "1.0.1");
+  const specialPartners = service.breedingPartners({
+    parent: "katress",
+    type: "special",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(specialPartners.items.every((pair) => pair.isSpecial), true);
+  assert.equal(
+    specialPartners.items.filter((pair) =>
+      pair.parentA.id === "katress" && pair.parentB.id === "wixen"
+    ).length,
+    2
+  );
+
   const gendered = service.breeding({ parentA: "katress", parentB: "wixen" });
   assert.equal(gendered.state, "requires_gender");
   assert.deepEqual(gendered.alternatives.map((pair) => pair.child.id), ["katress-ignis", "wixen-noct"]);
@@ -439,6 +535,60 @@ test("교배 조회는 부모 순서 교환, 동일 부모와 목표 Pal 역검�
     parentAGender: "male",
     parentBGender: "female"
   }).result?.child.id, "wixen-noct");
+});
+
+test("Pal 상세 특수 부모는 active breeding artifact의 non-self 규칙과 일치한다", async () => {
+  const breedingSource = await loadPalworldBreedingRuntimeSource(
+    releaseRoot.pathname,
+    { requireImportReport: false }
+  );
+  const artifactPairs = breedingSource.artifact.specialRules
+    .filter((rule) =>
+      !(
+        rule.parentAId === rule.parentBId
+        && rule.parentAId === rule.childId
+      )
+    )
+    .map((rule) => [
+      rule.childId,
+      rule.parentAId,
+      rule.parentBId,
+      rule.parentAGender ?? "",
+      rule.parentBGender ?? ""
+    ].join("\0"))
+    .sort();
+  const detailPairs = [...new Set(
+    breedingSource.artifact.specialRules.map((rule) => rule.childId)
+  )]
+    .flatMap((childId) =>
+      service.getPal(childId).breeding.specialParentPairs.map((pair) => [
+        childId,
+        pair.parentAId,
+        pair.parentBId,
+        pair.parentAGender ?? "",
+        pair.parentBGender ?? ""
+      ].join("\0"))
+    )
+    .sort();
+  assert.deepEqual(detailPairs, artifactPairs);
+  assert.equal(
+    service.getPal("broncherry-aqua").breeding.specialParentPairs.some(
+      (pair) =>
+        pair.parentAId === "broncherry"
+        && pair.parentBId === "fuack"
+        && pair.parentA?.nameKo === "라브라돈"
+        && pair.parentB?.nameKo === "청부리"
+    ),
+    true
+  );
+  assert.equal(
+    service.getPal("fuack-ignis").breeding.specialParentPairs.some(
+      (pair) =>
+        pair.parentAId === "fuack"
+        && pair.parentBId === "flambelle"
+    ),
+    true
+  );
 });
 
 test("손상된 catalog와 누락된 교배 artifact는 sample 결과로 조용히 fallback하지 않는다", async (context) => {

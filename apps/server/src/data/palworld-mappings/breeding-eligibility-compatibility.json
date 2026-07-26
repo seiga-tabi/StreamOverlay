@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "status": "operator_acknowledged",
+  "decision": "allow_exact_breeding_eligibility_overlay",
+  "sourceVersionVerified": false,
+  "compatibilityBasis": "exact_common_pal_parameter_join",
+  "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+  "sourceTable": {
+    "member": "Pal/DataTable/Character/DT_PalMonsterParameter_Common.json",
+    "sha256": "cc1c3b63078489a8570b6eea435aec7a1cdbe6428cac1330080d10727460433c"
+  },
+  "candidate": {
+    "directory": "candidate-1248184a4b527d94-delta-2108e7bd60291174",
+    "id": "candidate-1248184a4b527d94",
+    "breedingSha256": "a52de9c23598bd1e5bba6ddc664e965cac5ec3a95dd39b2839a8b193533a1e9c"
+  },
+  "activeInputs": {
+    "paldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
+    "publicIdMapSha256": "174d68027ae7f7c54ecd3158f0d98a03eb644c4f70cfe2aba70aeddbe7a67acd"
+  },
+  "verification": {
+    "activeParameters": 287,
+    "candidateParameters": 288,
+    "commonParameters": 287,
+    "exactParameterMismatches": 0,
+    "expectedGeneralCandidates": 183
+  },
+  "overrides": [
+    {
+      "palId": "panthalus",
+      "sourceInternalId": "KingWhale",
+      "field": "ignoreCombi",
+      "value": true,
+      "reason": "고정 operator PAK DT_PalMonsterParameter_Common exact row의 IgnoreCombi=true를 공통 287종 검증 후 적용합니다."
+    }
+  ],
+  "reviewedAt": "2026-07-27T00:00:00.000Z",
+  "reviewer": "streamoverlay-data-maintenance",
+  "evidenceChecksum": "ac8380327702263da5e8947e1fa41e4a5071cceb492a8bd590a908a8b411d932",
+  "rightsVerified": false,
+  "usageBasis": "operator_reference_use"
+}

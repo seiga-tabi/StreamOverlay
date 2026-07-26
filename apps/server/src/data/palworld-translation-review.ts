@@ -4,7 +4,6 @@ import path from "node:path";
 import { assertPalworldPakCandidateArtifact } from "@streamops/shared";
 import {
   analyzeTranslationSource,
-  type TranslationFieldName,
   type TranslationSourceAnomalyCode,
 } from "../scripts/palworld-translation-artifacts.js";
 

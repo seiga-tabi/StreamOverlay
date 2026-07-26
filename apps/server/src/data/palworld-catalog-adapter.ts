@@ -9,6 +9,8 @@ import {
   type PalworldItemCategory,
   type PalworldItemDetail,
   type PalworldItemReference,
+  type PalworldPassiveEffect,
+  type PalworldPassiveEffectState,
   type PalworldPalDetail,
   type PalworldPalReference,
   type PalworldSkill,
@@ -69,6 +71,10 @@ export type PalworldCatalogAdapterInput = {
     staleSourceHash: Record<PalworldTranslationLocale, boolean>;
   };
   reviewedItemAliases?: readonly PalworldReviewedItemAlias[];
+  passiveEffectsBySkillId?: ReadonlyMap<string, {
+    state: PalworldPassiveEffectState;
+    effects?: readonly PalworldPassiveEffect[];
+  }>;
 };
 
 function publicItemType(
@@ -258,7 +264,11 @@ function catalogItemReference(
 function catalogSkill(
   skill: PalworldCatalogSkill,
   translations: TranslationRecordIndex,
-  unlockLevel?: number
+  unlockLevel?: number,
+  passiveEffectResolution?: {
+    state: PalworldPassiveEffectState;
+    effects?: readonly PalworldPassiveEffect[];
+  }
 ): PalworldSkill {
   const nameKo = translatedField(translations, "ko", "skill", skill.id, "name");
   const nameJa = translatedField(translations, "ja", "skill", skill.id, "name");
@@ -283,6 +293,19 @@ function catalogSkill(
     ...(skill.passiveAbility === undefined ? {} : { passiveAbility: skill.passiveAbility }),
     ...(passiveAbilityKo === undefined ? {} : { passiveAbilityKo: passiveAbilityKo.text }),
     ...(passiveAbilityJa === undefined ? {} : { passiveAbilityJa: passiveAbilityJa.text }),
+    ...(skill.type !== "passive"
+      ? {}
+      : {
+          passiveEffectState:
+            passiveEffectResolution?.state ?? "data_unavailable",
+          ...(passiveEffectResolution?.state !== "available"
+            ? {}
+            : {
+                passiveEffects: passiveEffectResolution.effects?.map(
+                  (effect) => ({ ...effect })
+                )
+              })
+        }),
     localization: {
       sourceLanguage: "en",
       ko: legacyLocalizationStatus(nameKo !== undefined, descriptionKo !== undefined, skill.descriptionEn !== undefined),
@@ -302,6 +325,8 @@ function catalogSkill(
         koHasExistingLocale: false,
         jaHasExistingLocale: false,
         hasSource: skill.descriptionEn !== undefined
+          || descriptionKo?.status === "source_provided"
+          || descriptionJa?.status === "source_provided"
       }),
       ...(skill.type !== "passive" ? {} : {
         passiveAbility: displayFieldState({
@@ -363,9 +388,21 @@ function translationCoverageForLocale(
   staleSourceHash: boolean,
   translationSnapshot: PalworldTranslationSnapshot | undefined
 ): PalworldTranslationDomainCoverage {
-  const palDescriptionSources = pals.filter((pal) => pal.descriptionEn !== undefined);
-  const itemDescriptionSources = items.filter((item) => item.descriptionEn !== undefined);
-  const skillDescriptionSources = skills.filter((skill) => skill.descriptionEn !== undefined);
+  const palDescriptionSources = pals.filter((pal) =>
+    pal.descriptionKo !== undefined
+    || pal.descriptionJa !== undefined
+    || pal.descriptionEn !== undefined
+  );
+  const itemDescriptionSources = items.filter((item) =>
+    item.descriptionKo !== undefined
+    || item.descriptionJa !== undefined
+    || item.descriptionEn !== undefined
+  );
+  const skillDescriptionSources = skills.filter((skill) =>
+    skill.descriptionKo !== undefined
+    || skill.descriptionJa !== undefined
+    || skill.descriptionEn !== undefined
+  );
   const skillPassiveAbilitySources = skills.filter((skill) => skill.passiveAbility !== undefined);
   const displayStatuses: PalworldTranslationDisplayStatus[] = [
     ...pals.flatMap((pal) => [pal.translation?.name?.[locale], pal.translation?.description?.[locale]]),
@@ -504,6 +541,42 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     catalogItemReference(item, localizedItemsById.get(item.id), assetAvailability.items, translationIndex)
   ]));
   const skillSourceById = new Map(catalog.skills.map((skill) => [skill.id, skill]));
+  if (input.passiveEffectsBySkillId !== undefined) {
+    for (const [skillId, resolution] of input.passiveEffectsBySkillId) {
+      const skill = skillSourceById.get(skillId);
+      if (skill?.type !== "passive") {
+        throw new TypeError(
+          `Palworld passive effect evidence가 passive skill을 참조하지 않습니다: ${skillId}`
+        );
+      }
+      if (
+        resolution.state === "available"
+        && (resolution.effects === undefined || resolution.effects.length === 0)
+      ) {
+        throw new TypeError(
+          `Palworld passive effect available evidence에 효과가 없습니다: ${skillId}`
+        );
+      }
+      if (
+        resolution.state !== "available"
+        && resolution.effects !== undefined
+      ) {
+        throw new TypeError(
+          `Palworld passive effect ${resolution.state} evidence에 효과를 포함할 수 없습니다: ${skillId}`
+        );
+      }
+    }
+    for (const skill of catalog.skills) {
+      if (
+        skill.type === "passive"
+        && !input.passiveEffectsBySkillId.has(skill.id)
+      ) {
+        throw new TypeError(
+          `Palworld passive effect evidence가 active passive skill 전체를 포함하지 않습니다: ${skill.id}`
+        );
+      }
+    }
+  }
   const palDetailsById = new Map(catalog.palDetails.map((detail) => [detail.palId, detail]));
   for (const detail of catalog.palDetails) {
     if (!basePalsById.has(detail.palId)) {
@@ -540,7 +613,12 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     const activeSkills = (activeAssignmentsByPal.get(pal.id) ?? []).map((assignment) => {
       const skill = skillSourceById.get(assignment.skillId);
       if (!skill) throw new TypeError(`Palworld active skill 참조가 없습니다: ${assignment.skillId}`);
-      return catalogSkill(skill, translationIndex, assignment.unlockLevel);
+      return catalogSkill(
+        skill,
+        translationIndex,
+        assignment.unlockLevel,
+        input.passiveEffectsBySkillId?.get(skill.id)
+      );
     });
     const partnerAssignments = partnerAssignmentsByPal.get(pal.id) ?? [];
     if (partnerAssignments.length > 1) {
@@ -635,7 +713,12 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
         })
       },
       ...(partnerSource === undefined ? {} : {
-        partnerSkill: catalogSkill(partnerSource, translationIndex, partnerAssignment?.unlockLevel)
+        partnerSkill: catalogSkill(
+          partnerSource,
+          translationIndex,
+          partnerAssignment?.unlockLevel,
+          input.passiveEffectsBySkillId?.get(partnerSource.id)
+        )
       }),
       activeSkills,
       drops: dropDetails.map((drop) => drop.item),
@@ -730,7 +813,12 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       };
     });
     return {
-      ...catalogSkill(skill, translationIndex, unlockLevels.length === 0 ? undefined : Math.min(...unlockLevels)),
+      ...catalogSkill(
+        skill,
+        translationIndex,
+        unlockLevels.length === 0 ? undefined : Math.min(...unlockLevels),
+        input.passiveEffectsBySkillId?.get(skill.id)
+      ),
       relatedPalCount: relatedPals.length,
       relatedPals,
       metadata: { ...metadata },
@@ -775,7 +863,14 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
   const coverage: PalworldDataCoverage = {
     palDetails: coverageCount(catalog.coverage.exactPalDetails, pals.length),
     itemDetails: coverageCount(items.length, items.length),
-    skillDetails: coverageCount(skills.filter((skill) => skill.descriptionEn).length, skills.length),
+    skillDetails: coverageCount(
+      skills.filter((skill) =>
+        skill.descriptionKo !== undefined
+        || skill.descriptionJa !== undefined
+        || skill.descriptionEn !== undefined
+      ).length,
+      skills.length
+    ),
     palDescriptions: coverageCount(
       pals.filter((pal) => pal.descriptionKo !== undefined || pal.descriptionJa !== undefined || pal.descriptionEn !== undefined).length,
       pals.length

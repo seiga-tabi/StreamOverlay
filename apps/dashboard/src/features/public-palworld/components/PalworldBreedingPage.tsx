@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   PalworldBreedingPair,
+  PalworldBreedingPartnersResponse,
   PalworldBreedingParentsResponse,
   PalworldBreedingResultResponse,
   PalworldBreedingGender,
@@ -12,6 +13,7 @@ import { Button } from "../../../shared/ui/Button";
 import { Card, CardContent } from "../../../shared/ui/Card";
 import {
   getPalworldBreeding,
+  getPalworldBreedingPartners,
   getPalworldBreedingParents,
   getPalworldPal,
   PalworldApiError,
@@ -22,13 +24,15 @@ import {
   clearPalworldBreedingParams,
   palworldBreedingParams,
   parsePalworldBreedingQuery,
+  samePalworldBreedingPalId,
   swapBreedingParents,
   type PalworldBreedingQueryState,
 } from "../utils/breeding";
 import { palworldUrl, setPalworldUrl } from "../utils/routes";
-import { PalworldInfiniteListError } from "../hooks/usePalworldInfiniteList";
+import { PalworldInfiniteListError, usePalworldInfiniteList } from "../hooks/usePalworldInfiniteList";
 import { BreedingGenderControls, BreedingModeTabs } from "./PalworldBreedingControls";
 import {
+  BreedingPartnerPairCard,
   BreedingGenderAlternativeCard,
   BreedingRequestStatus,
   DirectBreedingResult,
@@ -91,6 +95,43 @@ export function PalworldBreedingPage({
   const reverseRetryTimerRef = useRef<number | null>(null);
   const text = palworldI18n[locale];
   const detailModalOpen = Boolean(params.get("pal") || params.get("item") || params.get("skill"));
+  const singleParentId = parsedQuery.ok && query.mode === "parents"
+    ? query.parentA && !query.parentB
+      ? query.parentA
+      : query.parentB && !query.parentA
+        ? query.parentB
+        : undefined
+    : undefined;
+  const loadPartnerPage = useCallback((page: string | number, signal: AbortSignal) => {
+    if (!singleParentId) {
+      return Promise.reject(new TypeError("선택한 부모 Pal이 없습니다."));
+    }
+    return getPalworldBreedingPartners(singleParentId, Number(page), 12, signal);
+  }, [singleParentId]);
+  const {
+    initialError: partnerInitialError,
+    initialLoading: partnerInitialLoading,
+    loadMore: loadMorePartners,
+    loadMoreError: partnerLoadMoreError,
+    loadMoreLoading: partnerLoadMoreLoading,
+    loadMoreRetryBlocked: partnerLoadMoreRetryBlocked,
+    response: partnerResponse,
+    retryInitial: retryPartners,
+    retryLoadMore: retryLoadMorePartners,
+  } = usePalworldInfiniteList<PalworldBreedingPair, PalworldBreedingPartnersResponse>({
+    enabled: singleParentId !== undefined,
+    initialPage: 1,
+    itemKey: (pair) => pair.id,
+    loadPage: loadPartnerPage,
+    paused: detailModalOpen,
+    queryKey: `breeding-partners:${singleParentId ?? "none"}`,
+  });
+  const currentPartnerResponse = samePalworldBreedingPalId(
+    partnerResponse?.parent.id,
+    singleParentId,
+  )
+    ? partnerResponse
+    : null;
   paramsKeyRef.current = paramsKey;
 
   const navigate = useCallback((next: PalworldBreedingQueryState, replace = false) => {
@@ -115,8 +156,8 @@ export function PalworldBreedingPage({
       return;
     }
     if (query.mode === "parents") {
-      setParentA((current) => current?.id === query.parentA ? current : null);
-      setParentB((current) => current?.id === query.parentB ? current : null);
+      setParentA((current) => samePalworldBreedingPalId(current?.id, query.parentA) ? current : null);
+      setParentB((current) => samePalworldBreedingPalId(current?.id, query.parentB) ? current : null);
       setTarget(null);
       setReverse(IDLE_REQUEST);
       reverseLoadMoreControllerRef.current?.abort();
@@ -126,7 +167,7 @@ export function PalworldBreedingPage({
       reverseRetryBlockedRef.current = false;
       setReverseRetryBlocked(false);
     } else {
-      setTarget((current) => current?.id === query.child ? current : null);
+      setTarget((current) => samePalworldBreedingPalId(current?.id, query.child) ? current : null);
       setParentA(null);
       setParentB(null);
       setDirect(IDLE_REQUEST);
@@ -144,7 +185,7 @@ export function PalworldBreedingPage({
       currentId: string | undefined,
       setter: (pal: PalworldPalReference) => void,
     ): void => {
-      if (!id || id === currentId) return;
+      if (!id || samePalworldBreedingPalId(id, currentId)) return;
       void getPalworldPal(id, controller.signal)
         .then((pal) => {
           if (controller.signal.aborted || referenceRequestIdRef.current !== requestId) return;
@@ -464,6 +505,13 @@ export function PalworldBreedingPage({
       : reverse.status === "empty"
         ? text.noParentPairsStatus
       : "";
+  const partnerAnnouncement = partnerInitialLoading
+    ? text.calculatingStatus
+    : currentPartnerResponse?.state === "resolved"
+      ? formatCountMessage(text.partnerPairsStatus, currentPartnerResponse.pagination.total)
+      : currentPartnerResponse?.state === "not_found"
+        ? text.noParentPairsStatus
+        : "";
   const directLoading = direct.status === "loading";
   const reverseLoading = reverse.status === "loading";
 
@@ -515,10 +563,55 @@ export function PalworldBreedingPage({
           /> : null}
           <div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div>
         </CardContent></Card>
-        <section className="palworld-breeding-result" data-testid="breeding-result" aria-busy={directLoading}>
+        <section className="palworld-breeding-result" data-testid="breeding-result" aria-busy={directLoading || partnerInitialLoading}>
           <BreedingRequestStatus message={directAnnouncement} />
+          <BreedingRequestStatus message={partnerAnnouncement} />
           <div className="palworld-section-title"><h2>{text.breedingResult}</h2></div>
-          {!query.parentA || !query.parentB ? <PalworldEmpty description={text.autoCalculateHint} includeDefaultDescription={false} locale={locale} title={text.selectBothParents} /> : null}
+          {!query.parentA && !query.parentB ? <PalworldEmpty description={text.autoCalculateHint} includeDefaultDescription={false} locale={locale} title={text.selectAtLeastOneParent} /> : null}
+          {singleParentId ? <section className="palworld-breeding-result" data-testid="breeding-partner-results">
+            <div className="palworld-section-title">
+              <div>
+                <h3 data-ko={palworldI18n.ko.partnerPairSuggestions} data-ja={palworldI18n.ja.partnerPairSuggestions}>{text.partnerPairSuggestions}</h3>
+                <p data-ko={palworldI18n.ko.partnerPairSuggestionsDescription} data-ja={palworldI18n.ja.partnerPairSuggestionsDescription}>{text.partnerPairSuggestionsDescription}</p>
+              </div>
+            </div>
+            {partnerInitialLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={2} /></div> : null}
+            {partnerInitialError ? <PalworldError error={partnerInitialError} locale={locale} onRetry={retryPartners} /> : null}
+            {currentPartnerResponse?.state === "data_unavailable" ? <PalworldError
+              description={text.breedingDataUnavailableDescription}
+              descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription}
+              descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription}
+              locale={locale}
+              onRetry={retryPartners}
+              title={text.breedingDataUnavailable}
+              titleJa={palworldI18n.ja.breedingDataUnavailable}
+              titleKo={palworldI18n.ko.breedingDataUnavailable}
+            /> : null}
+            {currentPartnerResponse?.state === "not_found" ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.noPartnerPairs} /> : null}
+            {currentPartnerResponse?.state === "resolved" && currentPartnerResponse.items.length ? <>
+              <div className="palworld-breeding-partner-list">
+                {currentPartnerResponse.items.map((pair) => <BreedingPartnerPairCard
+                  key={pair.id}
+                  locale={locale}
+                  onOpenPal={onOpenPal}
+                  onUsePair={usePairInCalculator}
+                  pair={pair}
+                />)}
+              </div>
+              <PalworldAutoLoadControl
+                error={partnerLoadMoreError}
+                hasMore={currentPartnerResponse.pagination.hasNextPage}
+                loadedCount={currentPartnerResponse.items.length}
+                loading={partnerLoadMoreLoading}
+                locale={locale}
+                onLoadMore={() => { void loadMorePartners(); }}
+                onRetry={() => { void retryLoadMorePartners(); }}
+                paused={detailModalOpen}
+                retryBlocked={partnerLoadMoreRetryBlocked}
+                total={currentPartnerResponse.pagination.total}
+              />
+            </> : null}
+          </section> : null}
           {directLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={1} /></div> : null}
           {direct.status === "error" ? <PalworldError error={direct.error} locale={locale} onRetry={() => setDirectRevision((value) => value + 1)} /> : null}
           {direct.status === "data_unavailable" ? <PalworldError description={text.breedingDataUnavailableDescription} descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription} descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription} error={direct.error} locale={locale} onRetry={() => setDirectRevision((value) => value + 1)} title={text.breedingDataUnavailable} titleJa={palworldI18n.ja.breedingDataUnavailable} titleKo={palworldI18n.ko.breedingDataUnavailable} /> : null}

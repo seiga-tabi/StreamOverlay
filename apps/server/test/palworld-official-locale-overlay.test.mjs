@@ -62,8 +62,8 @@ function textOf(locale, kind, id, field) {
 test("공식 KO/JA overlay는 blocked candidate를 활성화하지 않고 exact source만 생성한다", () => {
   assert.doesNotThrow(() =>
     assertPalworldOfficialLocaleSourceFieldsArtifact(artifacts.officialSourceFields));
-  assert.equal(artifacts.officialSourceFields.counts.byLocale.ko, 5_348);
-  assert.equal(artifacts.officialSourceFields.counts.byLocale.ja, 5_348);
+  assert.equal(artifacts.officialSourceFields.counts.byLocale.ko, 5_350);
+  assert.equal(artifacts.officialSourceFields.counts.byLocale.ja, 5_350);
   assert.deepEqual(
     artifacts.compatibility.inputs.candidate.activationBlockers,
     ["EXPORT_METADATA_NOT_PROVIDED", "PUBLIC_ID_MAPPING_RELEASE_UNVERIFIED"],
@@ -73,6 +73,10 @@ test("공식 KO/JA overlay는 blocked candidate를 활성화하지 않고 exact 
   assert.equal(artifacts.compatibility.fuzzyMatchingUsed, false);
   assert.deepEqual(artifacts.compatibility.counts.officialUnresolved, { ko: 2, ja: 2 });
   assert.deepEqual(artifacts.compatibility.counts.officialUnjoined, { ko: 108, ja: 108 });
+  for (const id of ["partner-hangyu", "partner-hangyu-cryst"]) {
+    assert.equal(textOf("ko", "skill", id, "description")?.status, "source_provided");
+    assert.equal(textOf("ja", "skill", id, "description")?.status, "source_provided");
+  }
 });
 
 test("legacy passive skill 79개는 explicit exact mapping으로 이름을 연결하고 설명 수치 차이는 차단한다", () => {
@@ -87,6 +91,9 @@ test("legacy passive skill 79개는 explicit exact mapping으로 이름을 연�
     compatibleDescriptions: 50,
     missingSourceDescriptions: 19,
     numericMismatchDescriptions: 10,
+    compatibleEffects: 68,
+    sourceMismatchEffects: 11,
+    effectRows: 99,
   });
   assert.deepEqual(
     {
@@ -110,6 +117,32 @@ test("legacy passive skill 79개는 explicit exact mapping으로 이름을 연�
     ).length,
     10,
   );
+  assert.equal(
+    artifacts.passiveSkillEvidence.entries.filter(
+      (entry) => entry.effectState === "available",
+    ).length,
+    68,
+  );
+  assert.equal(
+    artifacts.passiveSkillEvidence.entries.find(
+      (entry) => entry.candidateSourceRowId === "Legend",
+    )?.effectState,
+    "source_mismatch",
+  );
+  assert.equal(
+    artifacts.passiveSkillEvidence.entries.find(
+      (entry) => entry.candidateSourceRowId === "Rare",
+    )?.effectState,
+    "source_mismatch",
+    "설명 원문이 없어도 legacy 수치와 구조화 효과가 다르면 공개하면 안 됩니다.",
+  );
+  assert.equal(
+    artifacts.passiveSkillEvidence.entries.reduce(
+      (sum, entry) => sum + entry.effects.length,
+      0,
+    ),
+    99,
+  );
 });
 
 test("패시브 explicit mapping과 evidence 변조는 fail-closed 처리한다", async () => {
@@ -129,6 +162,12 @@ test("패시브 explicit mapping과 evidence 변조는 fail-closed 처리한다"
   assert.throws(
     () => assertPalworldPassiveSkillLocaleEvidenceArtifact(tamperedEvidence),
     /상태와 수치|evidence/u,
+  );
+  const tamperedEffects = structuredClone(artifacts.passiveSkillEvidence);
+  tamperedEffects.entries[0].effects[0].value += 1;
+  assert.throws(
+    () => assertPalworldPassiveSkillLocaleEvidenceArtifact(tamperedEffects),
+    /effect|효과|payload/u,
   );
 });
 
@@ -298,12 +337,12 @@ test("KO/JA coverage 보고서는 snapshot과 corpus 기준의 실제 공개 집
     assert.equal(coverage.translationRevision, artifacts.snapshots[locale].translationRevision);
     assert.equal(coverage.translationStatus, artifacts.snapshots[locale].translationStatus);
     assert.deepEqual(coverage.coverage.status, {
-      source_provided: 5_348,
+      source_provided: 5_350,
       human_reviewed: 0,
       machine_assisted: 0,
     });
-    assert.equal(coverage.coverage.translated, 5_348);
-    assert.equal(coverage.coverage.total, 5_458);
+    assert.equal(coverage.coverage.translated, 5_350);
+    assert.equal(coverage.coverage.total, 5_460);
     assert.equal(coverage.coverage.missing, 110);
     assert.match(coverage.contentSha256, /^[a-f0-9]{64}$/u);
   }

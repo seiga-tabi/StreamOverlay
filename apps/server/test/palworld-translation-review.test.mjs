@@ -74,7 +74,7 @@ test("격리된 과거 번역 검수 요약은 당시 집계와 candidate activa
 
   assert.match(
     String(activeReviewBuildError),
-    /source anomaly locale 상태가 일치하지 않습니다/u,
+    /source anomaly locale 상태가 일치하지 않습니다|active (?:ko|ja):skill:partner-hangyu(?:-cryst)?:description source hash가 일치하지 않습니다/u,
   );
   assert.doesNotThrow(() => assertPalworldTranslationReviewSummary(summary));
   assert.equal(summary.schemaVersion, 1);

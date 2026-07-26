@@ -87909,6 +87909,24 @@
       "locale": "ja",
       "kind": "skill",
       "id": "partner-hangyu-cryst",
+      "field": "description",
+      "activeSourceInternalId": "WindChimes_Ice",
+      "candidateCanonicalId": "partner:hangyu-cryst",
+      "candidateSourceInternalId": "WindChimes_Ice",
+      "sourceIdentityJoinRule": "source_internal_id_exact",
+      "joinRule": "partner_pal_id_source_internal_id_message_key_exact",
+      "messageKey": "PAL_FIRST_SPAWN_DESC_Windchimes_Ice",
+      "text": "手持ちにいる間、装備中のグライダーの性能が変わる。\nグライド中は、ゆっくりと上昇することができる。\nLv.2 （グライダー性能強化：小） · Lv.3 （グライダー性能強化：中） · Lv.4 （グライダー性能強化：大） · Lv.5 （グライダー性能強化：特大）",
+      "textSha256": "781cdffdb10c1e06966ebdece70e50b9eac2d8fd4f63c6ffa101638cc5f72e08",
+      "status": "source_provided",
+      "richTextStatus": "resolved",
+      "sourceMember": "Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+      "sourceMemberSha256": "130382e5a242aab7f0c5aebd09242d60e40ed662929435c5eed5fc5bc73a0c7e"
+    },
+    {
+      "locale": "ja",
+      "kind": "skill",
+      "id": "partner-hangyu-cryst",
       "field": "name",
       "activeSourceInternalId": "WindChimes_Ice",
       "candidateCanonicalId": "partner:hangyu-cryst",
@@ -87922,6 +87940,24 @@
       "richTextStatus": "resolved",
       "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
       "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821"
+    },
+    {
+      "locale": "ja",
+      "kind": "skill",
+      "id": "partner-hangyu",
+      "field": "description",
+      "activeSourceInternalId": "WindChimes",
+      "candidateCanonicalId": "partner:hangyu",
+      "candidateSourceInternalId": "WindChimes",
+      "sourceIdentityJoinRule": "source_internal_id_exact",
+      "joinRule": "partner_pal_id_source_internal_id_message_key_exact",
+      "messageKey": "PAL_FIRST_SPAWN_DESC_Windchimes",
+      "text": "手持ちにいる間、装備中のグライダーの性能が変わる。\nグライド中は、ゆっくりと上昇することができる。\nLv.2 （グライダー性能強化：小） · Lv.3 （グライダー性能強化：中） · Lv.4 （グライダー性能強化：大） · Lv.5 （グライダー性能強化：特大）",
+      "textSha256": "781cdffdb10c1e06966ebdece70e50b9eac2d8fd4f63c6ffa101638cc5f72e08",
+      "status": "source_provided",
+      "richTextStatus": "resolved",
+      "sourceMember": "Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+      "sourceMemberSha256": "130382e5a242aab7f0c5aebd09242d60e40ed662929435c5eed5fc5bc73a0c7e"
     },
     {
       "locale": "ja",
@@ -184173,6 +184209,24 @@
       "locale": "ko",
       "kind": "skill",
       "id": "partner-hangyu-cryst",
+      "field": "description",
+      "activeSourceInternalId": "WindChimes_Ice",
+      "candidateCanonicalId": "partner:hangyu-cryst",
+      "candidateSourceInternalId": "WindChimes_Ice",
+      "sourceIdentityJoinRule": "source_internal_id_exact",
+      "joinRule": "partner_pal_id_source_internal_id_message_key_exact",
+      "messageKey": "PAL_FIRST_SPAWN_DESC_Windchimes_Ice",
+      "text": "보유하고 있는 동안, 장착 중인 글라이더의 성능이 변화한다.\n활공 중에 천천히 상승 기류를 탈 수 있다.\nLv.2 (글라이더 성능 강화: 소) · Lv.3 (글라이더 성능 강화: 중) · Lv.4 (글라이더 성능 강화: 대) · Lv.5 (글라이더 성능 강화: 특대)",
+      "textSha256": "60dd89b7a397454c5a1a42924b3bc8a546b8068a689d70e0db3614ec6e00f05f",
+      "status": "source_provided",
+      "richTextStatus": "resolved",
+      "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+      "sourceMemberSha256": "91ebda4f75e54fb40f89fc430fc5ff8eb6dd3f6086a07f3649551cce9e56b93e"
+    },
+    {
+      "locale": "ko",
+      "kind": "skill",
+      "id": "partner-hangyu-cryst",
       "field": "name",
       "activeSourceInternalId": "WindChimes_Ice",
       "candidateCanonicalId": "partner:hangyu-cryst",
@@ -184186,6 +184240,24 @@
       "richTextStatus": "resolved",
       "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
       "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375"
+    },
+    {
+      "locale": "ko",
+      "kind": "skill",
+      "id": "partner-hangyu",
+      "field": "description",
+      "activeSourceInternalId": "WindChimes",
+      "candidateCanonicalId": "partner:hangyu",
+      "candidateSourceInternalId": "WindChimes",
+      "sourceIdentityJoinRule": "source_internal_id_exact",
+      "joinRule": "partner_pal_id_source_internal_id_message_key_exact",
+      "messageKey": "PAL_FIRST_SPAWN_DESC_Windchimes",
+      "text": "보유하고 있는 동안, 장착 중인 글라이더의 성능이 변화한다.\n활공 중에 천천히 상승 기류를 탈 수 있다.\nLv.2 (글라이더 성능 강화: 소) · Lv.3 (글라이더 성능 강화: 중) · Lv.4 (글라이더 성능 강화: 대) · Lv.5 (글라이더 성능 강화: 특대)",
+      "textSha256": "60dd89b7a397454c5a1a42924b3bc8a546b8068a689d70e0db3614ec6e00f05f",
+      "status": "source_provided",
+      "richTextStatus": "resolved",
+      "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+      "sourceMemberSha256": "91ebda4f75e54fb40f89fc430fc5ff8eb6dd3f6086a07f3649551cce9e56b93e"
     },
     {
       "locale": "ko",
@@ -192541,19 +192613,19 @@
     }
   ],
   "counts": {
-    "total": 10696,
+    "total": 10700,
     "byLocale": {
-      "ko": 5348,
-      "ja": 5348
+      "ko": 5350,
+      "ja": 5350
     },
     "byKind": {
       "pal": 1108,
       "item": 7386,
-      "skill": 2202
+      "skill": 2206
     },
     "byField": {
       "name": 5400,
-      "description": 5296,
+      "description": 5300,
       "passiveAbility": 0
     }
   }

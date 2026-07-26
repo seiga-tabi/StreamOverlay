@@ -16,7 +16,7 @@ import {
   readNameCollisionOverrides,
   readReviewedGlossaryTerms,
   readReviewedNames,
-  assertStrictMachineNameQualityForImport,
+  assertNoMachineAssistedTranslationsForImport,
   assertReviewedNameRecords,
   sha256,
   stableJson,
@@ -125,7 +125,7 @@ async function main(): Promise<void> {
   }
   const records = mergeTranslationRecords(validatedCandidates);
   assertReviewedNameRecords(records, locale, reviewedNames);
-  assertStrictMachineNameQualityForImport(records, locale, sources.corpus, reviewedNames);
+  assertNoMachineAssistedTranslationsForImport(records, locale);
   const coverage = translationCoverage(records, sources.corpus);
   const statuses = coverage.status;
   const translationMethod = translationMethodForStatusCounts(statuses);

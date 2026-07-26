@@ -62,13 +62,30 @@ async function validateLocale(
   const reviewedTerms = await readReviewedGlossaryTerms();
   await readNameCollisionOverrides(translationNameCollisions(sources.corpus));
   const sourceByIdentity = new Map(sources.corpus.map((record) => [`${record.kind}:${record.id}`, record]));
+  const independentOfficialSourceFieldsByIdentity = new Map(
+    independentOfficialSourceFields
+      .filter((field) => field.locale === locale)
+      .map((field) => [
+        `${field.locale}:${field.kind}:${field.id}:${field.field}`,
+        field,
+      ]),
+  );
   const snapshot = expectSnapshotHeader(JSON.parse(await readFile(path.join(LOCALES_ROOT, `${locale}.json`), "utf8")), locale);
   if (snapshot.sourceCatalogSha256 !== sources.catalogSha256 || snapshot.sourcePaldexSha256 !== sources.paldexSha256 || snapshot.sourceRevision !== sources.sourceRevision) {
     throw new TypeError(`${locale}.json의 source hash 또는 revision이 현재 catalog와 일치하지 않습니다.`);
   }
   const identities = new Set<string>();
   const records = snapshot.records.map((record, index) => {
-    const validated = validateTranslationRecord(record, locale, sourceByIdentity, identicalAllowlist, `${locale}.records[${index}]`, reviewedNames, reviewedTerms);
+    const validated = validateTranslationRecord(
+      record,
+      locale,
+      sourceByIdentity,
+      identicalAllowlist,
+      `${locale}.records[${index}]`,
+      reviewedNames,
+      reviewedTerms,
+      independentOfficialSourceFieldsByIdentity,
+    );
     const identity = `${validated.kind}:${validated.id}`;
     if (identities.has(identity)) throw new TypeError(`${locale}.json에 중복 record가 있습니다: ${identity}`);
     identities.add(identity);
@@ -76,7 +93,11 @@ async function validateLocale(
   });
   assertUniqueSortedTranslationRecords(records, `${locale}.records`);
   assertReviewedNameRecords(records, locale, reviewedNames);
-  const coverage = translationCoverage(records, sources.corpus);
+  const coverage = translationCoverage(
+    records,
+    sources.corpus,
+    independentOfficialSourceFields.filter((field) => field.locale === locale),
+  );
   if (rejectMachineAssisted && coverage.status.machine_assisted !== 0) {
     throw new TypeError(
       `${locale}.json에는 공개 정책상 허용되지 않는 machine_assisted 필드가 `

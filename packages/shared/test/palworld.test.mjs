@@ -5,6 +5,7 @@ import {
   assertPalworldDataSnapshot,
   validatePalworldBreedingDataSnapshot,
   validatePalworldBreedingParentsResponse,
+  validatePalworldBreedingPartnersResponse,
   validatePalworldBreedingResultResponse,
   validatePalworldCompositeRuntimeManifest,
   validatePalworldDataCoverage,
@@ -23,6 +24,7 @@ import {
   validatePalworldPalListFacets,
   validatePalworldPalListResponse,
   validatePalworldPalSummary,
+  validatePalworldPassiveEffect,
   validatePalworldSearchResult,
   validatePalworldSkill,
   validatePalworldSkillAssignment,
@@ -978,6 +980,66 @@ test("스킬 summary와 detail은 영어 원문 fallback과 관련 Pal 배정을
   assert.equal(validatePalworldSkillAssignment({ ...activeSkillDetail.relatedPals[0], unlockLevel: 101 }).ok, false);
 });
 
+test("패시브 원본 효과는 상태와 strict type·target 계약을 함께 검증한다", () => {
+  const passiveSkill = {
+    id: "passive-brave",
+    type: "passive",
+    nameEn: "Brave",
+    passiveEffectState: "available",
+    passiveEffects: [
+      { type: "ShotAttack", value: 10, target: "ToSelf" }
+    ],
+    localization: englishFallback
+  };
+  assert.equal(validatePalworldSkill(passiveSkill).ok, true);
+  assert.equal(validatePalworldPassiveEffect(passiveSkill.passiveEffects[0]).ok, true);
+  assert.equal(validatePalworldSkill({
+    ...passiveSkill,
+    passiveEffects: []
+  }).ok, false);
+  assert.equal(validatePalworldSkill({
+    ...passiveSkill,
+    passiveEffectState: "source_mismatch"
+  }).ok, false);
+  assert.equal(validatePalworldSkill({
+    ...passiveSkill,
+    passiveEffectState: "source_mismatch",
+    passiveEffects: undefined
+  }).ok, true);
+  assert.equal(validatePalworldSkill({
+    ...passiveSkill,
+    passiveEffectState: undefined
+  }).ok, false);
+  assert.equal(validatePalworldSkill({
+    ...activeSkill,
+    passiveEffectState: "available",
+    passiveEffects: passiveSkill.passiveEffects
+  }).ok, false);
+  assert.equal(validatePalworldPassiveEffect({
+    ...passiveSkill.passiveEffects[0],
+    type: "UnknownEffect"
+  }).ok, false);
+  assert.equal(validatePalworldPassiveEffect({
+    ...passiveSkill.passiveEffects[0],
+    target: "ToUnknown"
+  }).ok, false);
+  assert.equal(validatePalworldPassiveEffect({
+    ...passiveSkill.passiveEffects[0],
+    value: Number.NaN
+  }).ok, false);
+  assert.equal(validatePalworldPassiveEffect({
+    ...passiveSkill.passiveEffects[0],
+    unexpected: true
+  }).ok, false);
+  assert.equal(validatePalworldSkill({
+    ...passiveSkill,
+    passiveEffects: [
+      passiveSkill.passiveEffects[0],
+      passiveSkill.passiveEffects[0]
+    ]
+  }).ok, false);
+});
+
 test("속성 정의는 고정 버전 content-hash 아이콘과 이미지 크기 쌍만 허용한다", () => {
   assert.equal(validatePalworldElementDefinition(elementDefinition).ok, true);
   assert.equal(validatePalworldElementDefinition({ ...elementDefinition, iconUrl: itemImageUrl }).ok, false);
@@ -1843,7 +1905,7 @@ test("스킬 목록 facet 응답은 종류·속성·패시브 효과와 등급�
   }
 });
 
-test("교배 결과와 목표 Pal 부모 목록 응답 validator를 제공한다", () => {
+test("교배 결과와 목표·선택 부모 기준 목록 응답 validator를 제공한다", () => {
   const resultResponse = {
     parentA: palReference,
     parentB: palReference,
@@ -1891,6 +1953,36 @@ test("교배 결과와 목표 Pal 부모 목록 응답 validator를 제공한다
     ...parentsResponse,
     child: { ...palReference, id: "lamball" }
   }).ok, false);
+
+  const partnersResponse = {
+    parent: palReference,
+    items: [breedingPair],
+    pagination: parentsResponse.pagination,
+    state: "resolved",
+    metadata
+  };
+  assert.equal(validatePalworldBreedingPartnersResponse(partnersResponse).ok, true);
+  assert.equal(validatePalworldBreedingPartnersResponse({
+    ...partnersResponse,
+    items: [{
+      ...breedingPair,
+      parentA: { ...palReference, id: "lamball" },
+      parentB: { ...palReference, id: "cattiva" }
+    }]
+  }).ok, false);
+  assert.equal(validatePalworldBreedingPartnersResponse({
+    ...partnersResponse,
+    items: [breedingPair, breedingPair],
+    pagination: {
+      ...parentsResponse.pagination,
+      pageSize: 2,
+      total: 2
+    }
+  }).ok, false);
+  assert.equal(validatePalworldBreedingPartnersResponse({
+    ...partnersResponse,
+    unexpected: true
+  }).ok, false);
 });
 
 test("교배 data snapshot은 exact schema·수치·참조·조건 충돌을 검증한다", () => {
@@ -1914,7 +2006,10 @@ test("교배 data snapshot은 exact schema·수치·참조·조건 충돌을 검
         atlasPals: "a".repeat(64),
         atlasBreeding: "b".repeat(64),
         palCalc: "c".repeat(64),
-        catalog: "d".repeat(64)
+        catalog: "d".repeat(64),
+        breedingSourceAliases: "e".repeat(64),
+        breedingEligibilityCompatibility: "f".repeat(64),
+        candidateBreeding: "0".repeat(64)
       }
     },
     parameters: [
@@ -1934,6 +2029,16 @@ test("교배 data snapshot은 exact schema·수치·참조·조건 충돌을 검
     }]
   };
   assert.equal(validatePalworldBreedingDataSnapshot(breedingSnapshot).ok, true);
+  assert.equal(validatePalworldBreedingDataSnapshot({
+    ...breedingSnapshot,
+    metadata: {
+      ...breedingSnapshot.metadata,
+      sourceChecksums: {
+        ...breedingSnapshot.metadata.sourceChecksums,
+        candidateBreeding: "1".repeat(63)
+      }
+    }
+  }).ok, false);
   assert.equal(validatePalworldBreedingDataSnapshot({ ...breedingSnapshot, unexpected: true }).ok, false);
   assert.equal(validatePalworldBreedingDataSnapshot({
     ...breedingSnapshot,

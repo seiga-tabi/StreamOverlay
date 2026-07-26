@@ -41,6 +41,72 @@ export const PALWORLD_PASSIVE_EFFECT_FILTERS = [
   "production",
   "other"
 ] as const;
+export const PALWORLD_PASSIVE_EFFECT_STATES = [
+  "available",
+  "source_mismatch",
+  "missing_source",
+  "data_unavailable"
+] as const;
+export const PALWORLD_PASSIVE_EFFECT_TARGETS = [
+  "None",
+  "ToSelf",
+  "ToTrainer",
+  "ToBuildObject",
+  "ToSelfAndTrainer"
+] as const;
+export const PALWORLD_PASSIVE_EFFECT_TYPES = [
+  "ShotAttack",
+  "ElementResist_Fire",
+  "ElementBoost_Electricity",
+  "AutoHPRegeneRate",
+  "ActiveSkillCoolTime_Decrease",
+  "CraftSpeed",
+  "Defense",
+  "LeanBackInvalid_ForPassiveSkill",
+  "KnockbackInvalid_ForPassiveSkill",
+  "ElementBoost_Water",
+  "ElementBoost_Dark",
+  "ElementBoost_Dragon",
+  "ElementBoost_Earth",
+  "ElementBoost_Fire",
+  "ElementBoost_Ice",
+  "ElementBoost_Leaf",
+  "ElementBoost_Normal",
+  "ElementResist_Water",
+  "ElementResist_Dark",
+  "ElementResist_Dragon",
+  "ElementResist_Earth",
+  "ElementResist_Ice",
+  "ElementResist_Leaf",
+  "ElementResist_Normal",
+  "ElementResist_Electricity",
+  "MoveSpeed",
+  "PalEggHatchingSpeed",
+  "BreedSpeed_InBaseCamp",
+  "ExplosionResist",
+  "LifeSteal",
+  "ResistAdditionalEffect_Burn",
+  "ResistAdditionalEffect_Poison",
+  "NightOwl",
+  "Nocturnal",
+  "NonKilling",
+  "FullStomatch_Decrease",
+  "Sanity_Decrease",
+  "PlayerSP_DecreaseRate",
+  "ReloadSpeedUp",
+  "RideJumpCount_Increase",
+  "ShopSellPrice_Money_Increase",
+  "ShopBuyPrice_Money_Increase",
+  "SelfDeathAddItemDrop",
+  "PalSP_Increase",
+  "SwimSpeed",
+  "BreedSpeed",
+  "Logging",
+  "Mining",
+  "WorkSuitabilityAddRank_MonsterFarm",
+  "WorldTreeDecayImmunity",
+  "MaxHP"
+] as const;
 export const PALWORLD_PASSIVE_TIERS = [-3, -2, -1, 1, 2, 3, 4, 5] as const;
 export const PALWORLD_LOCALIZATION_LANGUAGES = ["ko", "ja", "en"] as const;
 export const PALWORLD_LOCALIZATION_FIELD_STATUSES = [
@@ -171,6 +237,9 @@ export type PalworldWorkSuitabilityType = (typeof PALWORLD_WORK_SUITABILITY_TYPE
 export type PalworldVariantType = (typeof PALWORLD_VARIANT_TYPES)[number];
 export type PalworldSkillType = (typeof PALWORLD_SKILL_TYPES)[number];
 export type PalworldPassiveEffectFilter = (typeof PALWORLD_PASSIVE_EFFECT_FILTERS)[number];
+export type PalworldPassiveEffectState = (typeof PALWORLD_PASSIVE_EFFECT_STATES)[number];
+export type PalworldPassiveEffectTarget = (typeof PALWORLD_PASSIVE_EFFECT_TARGETS)[number];
+export type PalworldPassiveEffectType = (typeof PALWORLD_PASSIVE_EFFECT_TYPES)[number];
 export type PalworldPassiveTier = (typeof PALWORLD_PASSIVE_TIERS)[number];
 export type PalworldLocalizationLanguage = (typeof PALWORLD_LOCALIZATION_LANGUAGES)[number];
 export type PalworldLocalizationFieldStatus = (typeof PALWORLD_LOCALIZATION_FIELD_STATUSES)[number];
@@ -343,6 +412,12 @@ export type PalworldTranslationDisplayState = {
   location?: PalworldTranslationLocaleStatus;
 };
 
+export type PalworldPassiveEffect = {
+  type: PalworldPassiveEffectType;
+  value: number;
+  target: PalworldPassiveEffectTarget;
+};
+
 export type PalworldSkill = {
   id: string;
   sourceInternalId?: string;
@@ -361,6 +436,8 @@ export type PalworldSkill = {
   passiveAbility?: string;
   passiveAbilityKo?: string;
   passiveAbilityJa?: string;
+  passiveEffectState?: PalworldPassiveEffectState;
+  passiveEffects?: PalworldPassiveEffect[];
   localization?: PalworldLocalizationFallback;
   translation?: PalworldTranslationDisplayState;
 };
@@ -778,6 +855,9 @@ export type PalworldBreedingDataSnapshot = {
           atlasBreeding: string;
           palCalc: string;
           catalog: string;
+          breedingSourceAliases: string;
+          breedingEligibilityCompatibility: string;
+          candidateBreeding: string;
         };
       }
     | {
@@ -894,6 +974,11 @@ export type PalworldBreedingParentsResponse = PalworldPaginatedResponse<Palworld
   state: Exclude<PalworldBreedingResolutionState, "requires_gender">;
 };
 
+export type PalworldBreedingPartnersResponse = PalworldPaginatedResponse<PalworldBreedingPair> & {
+  parent: PalworldPalReference;
+  state: Exclude<PalworldBreedingResolutionState, "requires_gender">;
+};
+
 export type PalworldDataSnapshot = {
   metadata: PalworldDataMetadata;
   pals: PalworldPalDetail[];
@@ -943,6 +1028,8 @@ const PALWORLD_SKILL_KEYS = [
   "passiveAbility",
   "passiveAbilityKo",
   "passiveAbilityJa",
+  "passiveEffectState",
+  "passiveEffects",
   "localization",
   "translation"
 ] as const;
@@ -1707,6 +1794,29 @@ function validateLocalizationConsistencyAt(
   return valid(localization);
 }
 
+function validatePassiveEffectAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldPassiveEffect> {
+  const record = recordAt(value, path, ["type", "value", "target"]);
+  if (!record.ok) return record;
+  const type = enumAt(record.data.type, `${path}.type`, PALWORLD_PASSIVE_EFFECT_TYPES);
+  if (!type.ok) return type;
+  const effectValue = finiteNumberAt(
+    record.data.value,
+    `${path}.value`,
+    -1_000_000,
+    1_000_000
+  );
+  if (!effectValue.ok) return effectValue;
+  const target = enumAt(
+    record.data.target,
+    `${path}.target`,
+    PALWORLD_PASSIVE_EFFECT_TARGETS
+  );
+  return target.ok ? valid(record.data as PalworldPassiveEffect) : target;
+}
+
 function validateSkillAt(value: unknown, path: string): PalworldValidationResult<PalworldSkill> {
   const record = recordAt(value, path, PALWORLD_SKILL_KEYS);
   if (!record.ok) return record;
@@ -1776,6 +1886,51 @@ function validateSkillAt(value: unknown, path: string): PalworldValidationResult
     if (type.data !== "passive") return invalid(`${path}.${field}`, "passive 스킬에만 사용할 수 있습니다.");
     const passiveAbility = stringAt(candidate[field], `${path}.${field}`, MAX_DESCRIPTION_LENGTH);
     if (!passiveAbility.ok) return passiveAbility;
+  }
+  if (candidate.passiveEffectState !== undefined) {
+    if (type.data !== "passive") {
+      return invalid(
+        `${path}.passiveEffectState`,
+        "passive 스킬에만 사용할 수 있습니다."
+      );
+    }
+    const state = enumAt(
+      candidate.passiveEffectState,
+      `${path}.passiveEffectState`,
+      PALWORLD_PASSIVE_EFFECT_STATES
+    );
+    if (!state.ok) return state;
+    if (state.data === "available") {
+      const effects = arrayAt(
+        candidate.passiveEffects,
+        `${path}.passiveEffects`,
+        4,
+        validatePassiveEffectAt
+      );
+      if (!effects.ok) return effects;
+      if (effects.data.length === 0) {
+        return invalid(
+          `${path}.passiveEffects`,
+          "available 상태에는 하나 이상의 원본 효과가 필요합니다."
+        );
+      }
+      const unique = uniqueStringsAt(
+        effects.data.map((effect) => `${effect.type}\0${effect.target}`),
+        `${path}.passiveEffects`,
+        "효과 type·target 조합"
+      );
+      if (!unique.ok) return unique;
+    } else if (candidate.passiveEffects !== undefined) {
+      return invalid(
+        `${path}.passiveEffects`,
+        `${state.data} 상태에는 효과 배열을 제공할 수 없습니다.`
+      );
+    }
+  } else if (candidate.passiveEffects !== undefined) {
+    return invalid(
+      `${path}.passiveEffectState`,
+      "효과 배열을 제공하려면 원본 효과 상태가 필요합니다."
+    );
   }
   if (candidate.localization !== undefined) {
     const localization = validateLocalizationFallbackAt(candidate.localization, `${path}.localization`);
@@ -3386,6 +3541,12 @@ export function validatePalworldSkill(value: unknown): PalworldValidationResult<
   return validateSkillAt(value, "skill");
 }
 
+export function validatePalworldPassiveEffect(
+  value: unknown
+): PalworldValidationResult<PalworldPassiveEffect> {
+  return validatePassiveEffectAt(value, "passiveEffect");
+}
+
 export function validatePalworldSkillSummary(value: unknown): PalworldValidationResult<PalworldSkillSummary> {
   return validateSkillSummaryAt(value, "skill");
 }
@@ -4081,7 +4242,15 @@ export function validatePalworldBreedingDataSnapshot(
   }
   const checksumFields = sourceType === "operator_pak_export"
     ? ["archive", "breedingArtifact"] as const
-    : ["atlasPals", "atlasBreeding", "palCalc", "catalog"] as const;
+    : [
+        "atlasPals",
+        "atlasBreeding",
+        "palCalc",
+        "catalog",
+        "breedingSourceAliases",
+        "breedingEligibilityCompatibility",
+        "candidateBreeding"
+      ] as const;
   const checksums = recordAt(
     metadata.data.sourceChecksums,
     "breeding.metadata.sourceChecksums",
@@ -4917,6 +5086,63 @@ export function validatePalworldBreedingParentsResponse(
   return metadata.ok ? valid(record.data as PalworldBreedingParentsResponse) : metadata;
 }
 
+export function validatePalworldBreedingPartnersResponse(
+  value: unknown
+): PalworldValidationResult<PalworldBreedingPartnersResponse> {
+  const record = recordAt(value, "response", ["parent", "items", "pagination", "state", "metadata"]);
+  if (!record.ok) return record;
+  const parent = validatePalReferenceAt(record.data.parent, "response.parent");
+  if (!parent.ok) return parent;
+  const items = arrayAt(record.data.items, "response.items", MAX_API_COLLECTION_SIZE, validateBreedingPairAt);
+  if (!items.ok) return items;
+  const pagination = validatePaginationAt(record.data.pagination, "response.pagination");
+  if (!pagination.ok) return pagination;
+  const itemCount = validatePageItemCountAt(items.data.length, pagination.data, "response.items");
+  if (!itemCount.ok) return itemCount;
+  const state = enumAt(record.data.state, "response.state", [
+    "resolved",
+    "not_found",
+    "data_unavailable"
+  ] as const);
+  if (!state.ok) return state;
+  if (state.data === "resolved" && pagination.data.total === 0) {
+    return invalid("response.state", "resolved 상태에는 하나 이상의 교배 조합이 필요합니다.");
+  }
+  if (state.data !== "resolved" && pagination.data.total !== 0) {
+    return invalid("response.state", `${state.data} 상태에는 교배 조합이 없어야 합니다.`);
+  }
+  const seenPairIds = new Set<string>();
+  for (const [index, pair] of items.data.entries()) {
+    const isParentA = pair.parentA.id === parent.data.id;
+    const isParentB = pair.parentB.id === parent.data.id;
+    if (!isParentA && !isParentB) {
+      return invalid(`response.items[${index}]`, "요청한 부모 Pal이 교배 조합에 포함되어야 합니다.");
+    }
+    if (isParentA) {
+      const parentReference = validateCanonicalPalReferenceAt(
+        pair.parentA,
+        parent.data,
+        `response.items[${index}].parentA`
+      );
+      if (!parentReference.ok) return parentReference;
+    }
+    if (isParentB) {
+      const parentReference = validateCanonicalPalReferenceAt(
+        pair.parentB,
+        parent.data,
+        `response.items[${index}].parentB`
+      );
+      if (!parentReference.ok) return parentReference;
+    }
+    if (seenPairIds.has(pair.id)) {
+      return invalid(`response.items[${index}].id`, "응답 페이지에 중복 교배 조합이 있습니다.");
+    }
+    seenPairIds.add(pair.id);
+  }
+  const metadata = validateMetadataAt(record.data.metadata, "response.metadata");
+  return metadata.ok ? valid(record.data as PalworldBreedingPartnersResponse) : metadata;
+}
+
 function identifierAliases(id: string): string[] {
   const normalized = id.toLocaleLowerCase();
   return [...new Set([
@@ -5019,11 +5245,36 @@ function validateCanonicalSkillAt(
     "passiveTier",
     "passiveAbility",
     "passiveAbilityKo",
-    "passiveAbilityJa"
+    "passiveAbilityJa",
+    "passiveEffectState"
   ] as const) {
     if (skill[field] !== canonical[field]) {
       return invalid(`${path}.${field}`, "canonical 스킬 레코드와 일치해야 합니다.");
     }
+  }
+  const skillEffects = skill.passiveEffects;
+  const canonicalEffects = canonical.passiveEffects;
+  if (skillEffects === undefined || canonicalEffects === undefined) {
+    if (skillEffects !== canonicalEffects) {
+      return invalid(
+        `${path}.passiveEffects`,
+        "canonical 스킬 레코드와 일치해야 합니다."
+      );
+    }
+  } else if (
+    skillEffects.length !== canonicalEffects.length
+    || skillEffects.some((effect, index) => {
+      const canonicalEffect = canonicalEffects[index];
+      return canonicalEffect === undefined
+        || effect.type !== canonicalEffect.type
+        || effect.value !== canonicalEffect.value
+        || effect.target !== canonicalEffect.target;
+    })
+  ) {
+    return invalid(
+      `${path}.passiveEffects`,
+      "canonical 스킬 레코드와 일치해야 합니다."
+    );
   }
   if (!sameLocalizationFallback(skill.localization, canonical.localization)) {
     return invalid(`${path}.localization`, "canonical 스킬 레코드와 일치해야 합니다.");

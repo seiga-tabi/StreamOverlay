@@ -5,7 +5,7 @@
   "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
   "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
   "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
-  "translationRevision": "official-locale-overlay-23341e7d79a57bac-eb408d81",
+  "translationRevision": "official-locale-overlay-07f413ac2586f8e9-eb408d81",
   "translationMethod": "source_provided",
   "translationStatus": "incomplete",
   "translatedAt": "2026-07-25T00:00:00.000Z",
@@ -53798,6 +53798,14 @@
           "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
           "text": "하늘 그네",
           "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "60dd89b7a397454c5a1a42924b3bc8a546b8068a689d70e0db3614ec6e00f05f",
+          "sourceMessageKey": "PAL_FIRST_SPAWN_DESC_Windchimes",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+          "sourceMemberSha256": "91ebda4f75e54fb40f89fc430fc5ff8eb6dd3f6086a07f3649551cce9e56b93e",
+          "text": "보유하고 있는 동안, 장착 중인 글라이더의 성능이 변화한다.\n활공 중에 천천히 상승 기류를 탈 수 있다.\nLv.2 (글라이더 성능 강화: 소) · Lv.3 (글라이더 성능 강화: 중) · Lv.4 (글라이더 성능 강화: 대) · Lv.5 (글라이더 성능 강화: 특대)",
+          "status": "source_provided"
         }
       }
     },
@@ -53811,6 +53819,14 @@
           "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_SkillNameText_Common.json",
           "sourceMemberSha256": "56755c1c35449756c3417407b93528a4897c331a44d01968e873ffa8879f4375",
           "text": "겨울 하늘 그네",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "60dd89b7a397454c5a1a42924b3bc8a546b8068a689d70e0db3614ec6e00f05f",
+          "sourceMessageKey": "PAL_FIRST_SPAWN_DESC_Windchimes_Ice",
+          "sourceMember": "L10N/ko/Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+          "sourceMemberSha256": "91ebda4f75e54fb40f89fc430fc5ff8eb6dd3f6086a07f3649551cce9e56b93e",
+          "text": "보유하고 있는 동안, 장착 중인 글라이더의 성능이 변화한다.\n활공 중에 천천히 상승 기류를 탈 수 있다.\nLv.2 (글라이더 성능 강화: 소) · Lv.3 (글라이더 성능 강화: 중) · Lv.4 (글라이더 성능 강화: 대) · Lv.5 (글라이더 성능 강화: 특대)",
           "status": "source_provided"
         }
       }

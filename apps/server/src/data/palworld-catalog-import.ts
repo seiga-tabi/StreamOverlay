@@ -25,9 +25,12 @@ import {
 import {
   assertPalworldPaldexArtifact,
   assertPalworldPaldexReleaseManifest,
-  type PalworldPaldexRecord,
   type PalworldPaldexSkillRecord
 } from "./palworld-paldex-artifact.js";
+import {
+  createPalworldBreedingSourceAliasResolver,
+  loadPalworldBreedingSourceAliases
+} from "./palworld-breeding-source-alias.js";
 import { PalworldSourceArchive, sha256File } from "./palworld-source-archive.js";
 
 const REPOSITORY_ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
@@ -607,13 +610,22 @@ export async function importPalworldCatalog(input: {
     PalworldSourceArchive.open(input.pyPalArchivePath)
   ]);
   try {
-    const [atlasItemsBytes, atlasBreedingBytes, atlasManifestBytes, sqlBytes, paldexBytes, paldexManifestBytes] = await Promise.all([
+    const [
+      atlasItemsBytes,
+      atlasBreedingBytes,
+      atlasManifestBytes,
+      sqlBytes,
+      paldexBytes,
+      paldexManifestBytes,
+      breedingSourceAliases
+    ] = await Promise.all([
       atlasArchive.readEntry(ATLAS_ITEMS_MEMBER, 2 * 1024 * 1024),
       atlasArchive.readEntry(ATLAS_BREEDING_MEMBER, 256 * 1024),
       atlasArchive.readEntry(ATLAS_MANIFEST_MEMBER, 128 * 1024),
       pyPalArchive.readEntry(PYPAL_SQL_MEMBER, 8 * 1024 * 1024),
       readFile(path.join(PALWORLD_CATALOG_RELEASE_ROOT, "paldex.json")),
-      readFile(path.join(PALWORLD_CATALOG_RELEASE_ROOT, PALDEX_MANIFEST_FILE))
+      readFile(path.join(PALWORLD_CATALOG_RELEASE_ROOT, PALDEX_MANIFEST_FILE)),
+      loadPalworldBreedingSourceAliases()
     ]);
     if (sha256(atlasItemsBytes) !== ATLAS_ITEMS_SHA256) fail("Atlas items entry checksum이 고정값과 일치하지 않습니다.");
     if (sha256(atlasBreedingBytes) !== ATLAS_BREEDING_SHA256) fail("Atlas breeding entry checksum이 고정값과 일치하지 않습니다.");
@@ -637,17 +649,40 @@ export async function importPalworldCatalog(input: {
       sourceInternalId: requireString(record.sourceInternalId, `paldex.records[${index}].sourceInternalId`, 128)
     }));
     const palByInternalId = new Map(canonicalPals.map((pal) => [pal.sourceInternalId, pal]));
+    const breedingSourceAliasResolver =
+      createPalworldBreedingSourceAliasResolver({
+        artifact: breedingSourceAliases,
+        sourceInternalIds: new Set(
+          atlasBreeding.flatMap((pair) => [
+            pair.parentAId,
+            pair.parentBId,
+            pair.childId
+          ])
+        ),
+        canonicalInternalIds: new Set(palByInternalId.keys())
+      });
     let unresolvedBreedingReferences = 0;
     const specialBreedingPairs: PalworldCatalogSpecialBreedingPair[] = [];
     for (const pair of atlasBreeding) {
-      const parentA = palByInternalId.get(pair.parentAId);
-      const parentB = palByInternalId.get(pair.parentBId);
-      const child = palByInternalId.get(pair.childId);
+      const parentASourceInternalId =
+        breedingSourceAliasResolver.resolve(pair.parentAId);
+      const parentBSourceInternalId =
+        breedingSourceAliasResolver.resolve(pair.parentBId);
+      const childSourceInternalId =
+        breedingSourceAliasResolver.resolve(pair.childId);
+      const parentA = palByInternalId.get(parentASourceInternalId);
+      const parentB = palByInternalId.get(parentBSourceInternalId);
+      const child = palByInternalId.get(childSourceInternalId);
       if (!parentA || !parentB || !child) {
         unresolvedBreedingReferences += 1;
         continue;
       }
-      if (pair.parentAId === pair.parentBId && pair.parentAId === pair.childId) continue;
+      if (
+        parentASourceInternalId === parentBSourceInternalId
+        && parentASourceInternalId === childSourceInternalId
+      ) {
+        continue;
+      }
       specialBreedingPairs.push({
         parentAId: parentA.palId,
         parentBId: parentB.palId,

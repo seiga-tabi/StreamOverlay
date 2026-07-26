@@ -473,6 +473,7 @@ test("ready operator PAK snapshot을 active pointer와 분리된 공개 API serv
     "/api/palworld/skills/active-aqua-jet",
     "/api/palworld/breeding?parentA=beta&parentB=alpha",
     "/api/palworld/breeding/parents?child=alpha&page=1&limit=10",
+    "/api/palworld/breeding/partners?parent=alpha&page=1&limit=10",
     "/api/palworld/search?q=%EC%95%8C%ED%8C%8C",
     "/api/palworld/search?q=%E3%83%86%E3%82%B9%E3%83%88%E3%82%B9%E3%83%95%E3%82%A3%E3%82%A2"
   ];
@@ -521,8 +522,10 @@ test("ready operator PAK snapshot을 active pointer와 분리된 공개 API serv
   assert.equal(responses[7].body.state, "resolved");
   assert.equal(responses[7].body.result.child.id, "alpha");
   assert.equal(responses[8].body.pagination.total, 1);
-  assert.equal(responses[9].body.pals[0].id, "alpha");
-  assert.equal(responses[10].body.items[0].id, "sphere");
+  assert.equal(responses[9].body.parent.id, "alpha");
+  assert.equal(responses[9].body.pagination.total, 1);
+  assert.equal(responses[10].body.pals[0].id, "alpha");
+  assert.equal(responses[11].body.items[0].id, "sphere");
 });
 
 test("shadow API는 없는 ID와 unknown query를 각각 404와 400으로 구분한다", async () => {

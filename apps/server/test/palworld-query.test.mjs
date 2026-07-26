@@ -5,6 +5,7 @@ const {
   PalworldQueryError,
   normalizePalworldSearchTerm,
   parsePalworldBreedingParentsQuery,
+  parsePalworldBreedingPartnersQuery,
   parsePalworldBreedingQuery,
   parsePalworldItemListQuery,
   parsePalworldMapLocationsQuery,
@@ -160,6 +161,26 @@ test("검색과 교배 query는 빈 값, 중복 값, 알 수 없는 필드와 �
   ]) {
     assert.throws(
       () => parsePalworldBreedingParentsQuery(new URLSearchParams(invalid)),
+      PalworldQueryError
+    );
+  }
+
+  assert.deepEqual(
+    parsePalworldBreedingPartnersQuery(new URLSearchParams("parent=lamball&page=2&limit=12")),
+    { parent: "lamball", type: "all", page: 2, limit: 12 }
+  );
+  assert.deepEqual(
+    parsePalworldBreedingPartnersQuery(new URLSearchParams("parent=katress&type=special")),
+    { parent: "katress", type: "special", page: 1, limit: 20 }
+  );
+  for (const invalid of [
+    "parent=lamball&type=unknown",
+    "parent=lamball&type=all&type=normal",
+    "parent=lamball&child=anubis",
+    "parent=..%2Fsecret"
+  ]) {
+    assert.throws(
+      () => parsePalworldBreedingPartnersQuery(new URLSearchParams(invalid)),
       PalworldQueryError
     );
   }

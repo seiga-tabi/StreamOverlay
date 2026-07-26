@@ -9,6 +9,7 @@ import {
   validatePalworldMetaResponse,
   type PalworldBreedingPair,
   type PalworldBreedingParentsResponse,
+  type PalworldBreedingPartnersResponse,
   type PalworldBreedingResultResponse,
   type PalworldDataCoverage,
   type PalworldDataSnapshot,
@@ -87,6 +88,7 @@ import {
 import {
   normalizePalworldSearchTerm,
   type PalworldBreedingParentsQuery,
+  type PalworldBreedingPartnersQuery,
   type PalworldBreedingQuery,
   type PalworldItemListQuery,
   type PalworldPalListQuery,
@@ -376,6 +378,12 @@ function skillSummary(skill: PalworldSkillDetail): PalworldSkillSummary {
     ...(skill.passiveAbility === undefined ? {} : { passiveAbility: skill.passiveAbility }),
     ...(skill.passiveAbilityKo === undefined ? {} : { passiveAbilityKo: skill.passiveAbilityKo }),
     ...(skill.passiveAbilityJa === undefined ? {} : { passiveAbilityJa: skill.passiveAbilityJa }),
+    ...(skill.passiveEffectState === undefined
+      ? {}
+      : { passiveEffectState: skill.passiveEffectState }),
+    ...(skill.passiveEffects === undefined
+      ? {}
+      : { passiveEffects: skill.passiveEffects.map((effect) => ({ ...effect })) }),
     ...(skill.localization === undefined ? {} : { localization: { ...skill.localization } }),
     ...(skill.translation === undefined ? {} : { translation: structuredClone(skill.translation) }),
     relatedPalCount: skill.relatedPalCount,
@@ -486,7 +494,7 @@ function pageItems<T>(items: readonly T[], page: number, pageSize: number): T[] 
 
 type PalworldBreedingResolver = Pick<
   PalworldBreedingEngine,
-  "pairCount" | "resolve" | "parents"
+  "pairCount" | "resolve" | "parents" | "partners"
 >;
 
 function snapshotBreedingPairKey(parentAId: string, parentBId: string): string {
@@ -555,11 +563,16 @@ class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
     string,
     readonly PalworldBreedingEnginePair[]
   >;
+  private readonly pairsBySelectedParent: ReadonlyMap<
+    string,
+    readonly PalworldBreedingEnginePair[]
+  >;
 
   constructor(pairs: readonly PalworldBreedingPair[]) {
     this.pairCount = pairs.length;
     const pairsByParents = new Map<string, PalworldBreedingPair[]>();
     const pairsByChild = new Map<string, PalworldBreedingEnginePair[]>();
+    const pairsBySelectedParent = new Map<string, PalworldBreedingEnginePair[]>();
     for (const pair of pairs) {
       const parentKey = snapshotBreedingPairKey(
         pair.parentA.id,
@@ -587,12 +600,28 @@ class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
         ...(pairsByChild.get(pair.child.id) ?? []),
         indexedPair
       ]);
+      pairsBySelectedParent.set(pair.parentA.id, [
+        ...(pairsBySelectedParent.get(pair.parentA.id) ?? []),
+        indexedPair
+      ]);
+      if (pair.parentB.id !== pair.parentA.id) {
+        pairsBySelectedParent.set(pair.parentB.id, [
+          ...(pairsBySelectedParent.get(pair.parentB.id) ?? []),
+          indexedPair
+        ]);
+      }
     }
     this.pairsByParents = pairsByParents;
     this.pairsByChild = new Map(
       [...pairsByChild.entries()].map(([childId, childPairs]) => [
         childId,
         [...childPairs].sort(snapshotBreedingPairOrder)
+      ])
+    );
+    this.pairsBySelectedParent = new Map(
+      [...pairsBySelectedParent.entries()].map(([parentId, parentPairs]) => [
+        parentId,
+        [...parentPairs].sort(snapshotBreedingPairOrder)
       ])
     );
   }
@@ -630,6 +659,10 @@ class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
 
   parents(childId: string): PalworldBreedingEnginePair[] {
     return [...(this.pairsByChild.get(childId) ?? [])];
+  }
+
+  partners(parentId: string): PalworldBreedingEnginePair[] {
+    return [...(this.pairsBySelectedParent.get(parentId) ?? [])];
   }
 }
 
@@ -1226,6 +1259,26 @@ export class PalworldDataService {
     };
   }
 
+  breedingPartners(query: PalworldBreedingPartnersQuery): PalworldBreedingPartnersResponse {
+    const parent = this.getPal(query.parent);
+    const pairs = (this.breedingEngine?.partners(parent.id).map((pair) => this.enginePair(pair)) ?? [])
+      .filter((pair) => query.type === undefined
+        || query.type === "all"
+        || (query.type === "special" ? pair.isSpecial : !pair.isSpecial));
+    const pageInfo = pagination(query.page, query.limit, pairs.length);
+    return {
+      parent: palReference(parent),
+      items: pageItems(pairs, pageInfo.page, query.limit),
+      pagination: pageInfo,
+      state: this.breedingEngine === undefined
+        ? "data_unavailable"
+        : pairs.length === 0
+          ? "not_found"
+          : "resolved",
+      metadata: this.snapshot.metadata
+    };
+  }
+
   private requiredPal(id: string): PalworldPalDetail {
     const pal = identifierAliases(id).map((alias) => this.palsById.get(alias)).find(Boolean);
     if (!pal) throw new TypeError(`검증된 교배 artifact에 없는 Pal 참조가 있습니다: ${id}`);
@@ -1300,6 +1353,59 @@ function incompletePaldexSnapshot(release: PalworldPaldexRuntimeRelease): Palwor
     })),
     items: [],
     breedingPairs: []
+  });
+}
+
+function rehydratePalworldSpecialParentPairs(
+  snapshot: PalworldDataSnapshot,
+  breedingSource: PalworldBreedingRuntimeSource
+): PalworldDataSnapshot {
+  const palIds = new Set(snapshot.pals.map((pal) => pal.id));
+  const parameterIds = new Set(
+    breedingSource.artifact.parameters.map((parameter) => parameter.palId)
+  );
+  if (
+    palIds.size !== parameterIds.size
+    || [...palIds].some((palId) => !parameterIds.has(palId))
+  ) {
+    throw new PalworldBreedingArtifactError(
+      "active Pal snapshot과 교배 artifact의 canonical Pal 집합이 일치하지 않습니다."
+    );
+  }
+  const pairsByChild = new Map<
+    string,
+    PalworldPalDetail["breeding"]["specialParentPairs"]
+  >();
+  for (const rule of breedingSource.artifact.specialRules) {
+    if (
+      rule.parentAId === rule.parentBId
+      && rule.parentAId === rule.childId
+    ) {
+      continue;
+    }
+    const pairs = pairsByChild.get(rule.childId) ?? [];
+    pairs.push({
+      parentAId: rule.parentAId,
+      parentBId: rule.parentBId,
+      ...(rule.parentAGender === undefined
+        ? {}
+        : { parentAGender: rule.parentAGender }),
+      ...(rule.parentBGender === undefined
+        ? {}
+        : { parentBGender: rule.parentBGender })
+    });
+    pairsByChild.set(rule.childId, pairs);
+  }
+  return assertPalworldDataSnapshot({
+    ...snapshot,
+    pals: snapshot.pals.map((pal) => ({
+      ...pal,
+      breeding: {
+        ...pal.breeding,
+        specialParentPairs: (pairsByChild.get(pal.id) ?? [])
+          .map((pair) => ({ ...pair }))
+      }
+    }))
   });
 }
 
@@ -1448,6 +1554,18 @@ export async function loadPalworldDataService(options: {
     ) {
       throw new PalworldBreedingArtifactError("active Pal release와 교배 artifact provenance가 일치하지 않습니다.");
     }
+    const releasePalIds = new Set(release.pals.map((pal) => pal.id));
+    const breedingPalIds = new Set(
+      breedingSource.artifact.parameters.map((parameter) => parameter.palId)
+    );
+    if (
+      releasePalIds.size !== breedingPalIds.size
+      || [...releasePalIds].some((palId) => !breedingPalIds.has(palId))
+    ) {
+      throw new PalworldBreedingArtifactError(
+        "active Pal release와 교배 artifact의 canonical Pal 집합이 일치하지 않습니다."
+      );
+    }
     breedingEngine = new PalworldBreedingEngine(breedingSource.artifact);
     try {
       options.onBreedingState?.({
@@ -1459,6 +1577,8 @@ export async function loadPalworldDataService(options: {
       // 진단 callback 실패는 공개 데이터 runtime과 분리합니다.
     }
   } catch (error) {
+    breedingSource = undefined;
+    breedingEngine = undefined;
     const missing = (error as NodeJS.ErrnoException).code === "ENOENT";
     try {
       options.onBreedingState?.({
@@ -1474,6 +1594,14 @@ export async function loadPalworldDataService(options: {
       // 진단 callback 실패는 공개 데이터 runtime과 분리합니다.
     }
   }
+  const breedingDomainMetadata = breedingSource === undefined
+    ? undefined
+    : {
+        ...release.metadata,
+        sourceRevision:
+          `${release.metadata.sourceRevision}`
+          + `+breeding@${breedingSource.manifest.sourceChecksumsSha256}`
+      };
   try {
     const catalogSource = await loadPalworldCatalogDataSource(catalogRoot);
     let reviewedItemAliases: PalworldReviewedItemAlias[] = [];
@@ -1577,6 +1705,20 @@ export async function loadPalworldDataService(options: {
         throw error;
       }
     }
+    const passiveEffectEvidence = officialLocaleOverlay?.passiveSkillEvidence;
+    const passiveEffectsBySkillId = passiveEffectEvidence === undefined
+      ? undefined
+      : new Map(
+          passiveEffectEvidence.entries.map((entry) => [
+            entry.legacySkillId,
+            entry.effectState === "available"
+              ? {
+                  state: "available" as const,
+                  effects: entry.effects.map((effect) => ({ ...effect }))
+                }
+              : { state: "source_mismatch" as const }
+          ])
+        );
     const adaptedCatalog = adaptPalworldCatalog({
       basePaldex: release,
       catalog: catalogSource.catalog,
@@ -1595,18 +1737,27 @@ export async function loadPalworldDataService(options: {
         }
       },
       reviewedItemAliases,
+      ...(passiveEffectsBySkillId === undefined
+        ? {}
+        : { passiveEffectsBySkillId }),
       sourceChecksum: createHash("sha256")
         .update(release.manifest.paldexSha256)
         .update("\0")
         .update(catalogSource.manifest.catalogSha256)
         .digest("hex")
     });
+    const runtimeSnapshot = breedingSource === undefined
+      ? adaptedCatalog.snapshot
+      : rehydratePalworldSpecialParentPairs(
+          adaptedCatalog.snapshot,
+          breedingSource
+        );
     const requiredBreedingCoverage = breedingSource !== undefined
       && Object.values(breedingSource.fieldCoverage).every((field) =>
-        field.available === adaptedCatalog.snapshot.pals.length
-        && field.total === adaptedCatalog.snapshot.pals.length
+        field.available === runtimeSnapshot.pals.length
+        && field.total === runtimeSnapshot.pals.length
       )
-      ? adaptedCatalog.snapshot.pals.length
+      ? runtimeSnapshot.pals.length
       : 0;
     try {
       options.onCatalogState?.({
@@ -1618,14 +1769,17 @@ export async function loadPalworldDataService(options: {
     } catch {
       // 진단 callback 실패는 공개 데이터 runtime과 분리합니다.
     }
-    return new PalworldDataService(adaptedCatalog.snapshot, {
+    return new PalworldDataService(runtimeSnapshot, {
       sourceInternalIds: release.sourceInternalIds,
       domains: {
         ...adaptedCatalog.domains,
         breeding: {
           status: "incomplete",
           recordCount: breedingEngine?.pairCount ?? 0,
-          metadata: { ...adaptedCatalog.snapshot.metadata }
+          metadata: { ...runtimeSnapshot.metadata },
+          ...(breedingDomainMetadata === undefined
+            ? {}
+            : { domainMetadata: breedingDomainMetadata })
         }
       },
       gates: runtimeGates(release),
@@ -1633,8 +1787,8 @@ export async function loadPalworldDataService(options: {
         ...adaptedCatalog.coverage,
         breedingFields: {
           available: requiredBreedingCoverage,
-          missing: adaptedCatalog.snapshot.pals.length - requiredBreedingCoverage,
-          total: adaptedCatalog.snapshot.pals.length
+          missing: runtimeSnapshot.pals.length - requiredBreedingCoverage,
+          total: runtimeSnapshot.pals.length
         }
       },
       breedingEngine,
@@ -1670,7 +1824,13 @@ export async function loadPalworldDataService(options: {
       // 진단 callback 실패는 공개 데이터 runtime과 분리합니다.
     }
   }
-  const fallbackSnapshot = incompletePaldexSnapshot(release);
+  const baseFallbackSnapshot = incompletePaldexSnapshot(release);
+  const fallbackSnapshot = breedingSource === undefined
+    ? baseFallbackSnapshot
+    : rehydratePalworldSpecialParentPairs(
+        baseFallbackSnapshot,
+        breedingSource
+      );
   return new PalworldDataService(fallbackSnapshot, {
     sourceInternalIds: release.sourceInternalIds,
     domains: {
@@ -1687,7 +1847,10 @@ export async function loadPalworldDataService(options: {
       breeding: {
         status: "incomplete",
         recordCount: breedingEngine?.pairCount ?? 0,
-        metadata: fallbackSnapshot.metadata
+        metadata: fallbackSnapshot.metadata,
+        ...(breedingDomainMetadata === undefined
+          ? {}
+          : { domainMetadata: breedingDomainMetadata })
       },
       skills: {
         status: "unavailable",

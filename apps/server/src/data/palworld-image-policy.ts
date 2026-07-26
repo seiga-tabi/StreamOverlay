@@ -203,7 +203,7 @@ export function assertPalworldImageSourceMap(
     ]);
     const palId = stringAt(entry.palId, `${pathName}.palId`, 96);
     const sourceInternalId = stringAt(entry.sourceInternalId, `${pathName}.sourceInternalId`, 128);
-    const sourceFileName = assertSafeSourceFileName(entry.sourceFileName, `${pathName}.sourceFileName`);
+    assertSafeSourceFileName(entry.sourceFileName, `${pathName}.sourceFileName`);
     const sourceRevision = stringAt(entry.sourceRevision, `${pathName}.sourceRevision`, 128);
     if (
       !/^[A-Za-z0-9][A-Za-z0-9._+-]{0,127}$/u.test(sourceRevision)

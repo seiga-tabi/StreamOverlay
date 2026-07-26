@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { IncomingMessage, ServerResponse } from "node:http";
+import type { IncomingMessage } from "node:http";
 import { appConfig, originAllowed } from "../config.js";
 
 export type PrincipalType = "PUBLIC" | "DASHBOARD_ADMIN" | "OVERLAY_CLIENT" | "BRIDGE_SERVICE" | "OAUTH_CALLBACK";

@@ -100,6 +100,7 @@ export class PalworldBreedingEngine {
   private readonly generalCandidates: readonly PalworldBreedingPalParameter[];
   private readonly specialRulesByPair: ReadonlyMap<string, readonly PalworldBreedingSpecialRule[]>;
   private readonly reverseIndex: ReadonlyMap<string, readonly PalworldBreedingEnginePair[]>;
+  private readonly partnersIndex: ReadonlyMap<string, readonly PalworldBreedingEnginePair[]>;
 
   constructor(snapshot: unknown) {
     const artifact = assertPalworldBreedingArtifact(snapshot);
@@ -117,7 +118,9 @@ export class PalworldBreedingEngine {
     }
     this.specialRulesByPair = specialRulesByPair;
 
-    const specialOnlyChildren = new Set(nonSelfSpecialRules.map((rule) => rule.childId));
+    const specialOnlyChildren = new Set(
+      artifact.specialRules.map((rule) => rule.childId)
+    );
     this.generalCandidates = artifact.parameters.filter((parameter) =>
       parameter.ignoreCombi !== true
       && !specialOnlyChildren.has(parameter.palId)
@@ -125,6 +128,7 @@ export class PalworldBreedingEngine {
     this.generalCandidateCount = this.generalCandidates.length;
 
     const reverseIndex = new Map<string, PalworldBreedingEnginePair[]>();
+    const partnersIndex = new Map<string, PalworldBreedingEnginePair[]>();
     let pairCount = 0;
     for (let parentAIndex = 0; parentAIndex < this.parameters.length; parentAIndex += 1) {
       const parentA = this.parameters[parentAIndex]!;
@@ -138,6 +142,10 @@ export class PalworldBreedingEngine {
             : [];
         for (const pair of pairs) {
           reverseIndex.set(pair.childId, [...(reverseIndex.get(pair.childId) ?? []), pair]);
+          partnersIndex.set(pair.parentAId, [...(partnersIndex.get(pair.parentAId) ?? []), pair]);
+          if (pair.parentBId !== pair.parentAId) {
+            partnersIndex.set(pair.parentBId, [...(partnersIndex.get(pair.parentBId) ?? []), pair]);
+          }
           pairCount += 1;
         }
       }
@@ -146,6 +154,10 @@ export class PalworldBreedingEngine {
       reverseIndex.set(childId, [...pairs].sort(pairOrder));
     }
     this.reverseIndex = reverseIndex;
+    for (const [parentId, pairs] of partnersIndex) {
+      partnersIndex.set(parentId, [...pairs].sort(pairOrder));
+    }
+    this.partnersIndex = partnersIndex;
     this.pairCount = pairCount;
   }
 
@@ -213,5 +225,9 @@ export class PalworldBreedingEngine {
 
   parents(childId: string): PalworldBreedingEnginePair[] {
     return [...(this.reverseIndex.get(childId) ?? [])];
+  }
+
+  partners(parentId: string): PalworldBreedingEnginePair[] {
+    return [...(this.partnersIndex.get(parentId) ?? [])];
   }
 }

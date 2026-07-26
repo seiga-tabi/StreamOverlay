@@ -204,12 +204,15 @@ test("legacy 공식 locale runtime은 독립 active/passive evidence와 output c
     releaseRoot: root,
     ...expected,
   });
-  assert.equal(overlay.officialSourceFields.length, 10_696);
-  assert.equal(overlay.sourceArtifact.counts.byLocale.ko, 5_348);
-  assert.equal(overlay.sourceArtifact.counts.byLocale.ja, 5_348);
+  assert.equal(overlay.officialSourceFields.length, 10_700);
+  assert.equal(overlay.sourceArtifact.counts.byLocale.ko, 5_350);
+  assert.equal(overlay.sourceArtifact.counts.byLocale.ja, 5_350);
   assert.equal(overlay.activeSkillEvidence?.counts.activeSkills, 217);
   assert.equal(overlay.passiveSkillEvidence?.counts.activePassiveSkills, 79);
   assert.equal(overlay.passiveSkillEvidence?.counts.compatibleDescriptions, 50);
+  assert.equal(overlay.passiveSkillEvidence?.counts.compatibleEffects, 68);
+  assert.equal(overlay.passiveSkillEvidence?.counts.sourceMismatchEffects, 11);
+  assert.equal(overlay.passiveSkillEvidence?.counts.effectRows, 99);
   assert.equal(overlay.compatibility.candidateRuntimeActivationGranted, false);
   assert.equal(overlay.compatibility.rightsVerified, false);
 
@@ -301,6 +304,13 @@ test("legacy composite v5 service는 공식 KO/JA 이름을 source_provided 상�
   assert.equal(partnerSkill.nameKo, "사막의 수호신");
   assert.equal(partnerSkill.nameJa, "砂漠の守護神");
   assert.equal(partnerSkill.translation.name.ja, "source_provided");
+  for (const id of ["partner-hangyu", "partner-hangyu-cryst"]) {
+    const officialPartner = service.getSkill(id);
+    assert.equal(officialPartner.translation.description.ko, "source_provided");
+    assert.equal(officialPartner.translation.description.ja, "source_provided");
+    assert.ok(officialPartner.descriptionKo.length > 0);
+    assert.ok(officialPartner.descriptionJa.length > 0);
+  }
   const activeSkill = service.getSkill("active-absolute-frost-8b7feb098a");
   assert.equal(activeSkill.nameKo, "프로스트 아웃");
   assert.equal(activeSkill.nameJa, "フロストアウト");
@@ -311,6 +321,8 @@ test("legacy composite v5 service는 공식 KO/JA 이름을 source_provided 상�
   assert.equal(passiveSkill.nameJa, "未知の生体細胞");
   assert.equal(passiveSkill.translation.name.ko, "source_provided");
   assert.equal(passiveSkill.translation.description.ja, "source_provided");
+  assert.equal(passiveSkill.passiveEffectState, "available");
+  assert.ok(passiveSkill.passiveEffects.length > 0);
   const versionMismatchPassive = service.getSkill(
     "passive-passive-legend-8ff382798f",
   );
@@ -319,6 +331,37 @@ test("legacy composite v5 service는 공식 KO/JA 이름을 source_provided 상�
   assert.notEqual(
     versionMismatchPassive.translation.description.ko,
     "source_provided",
+  );
+  assert.equal(versionMismatchPassive.passiveEffectState, "source_mismatch");
+  assert.equal(versionMismatchPassive.passiveEffects, undefined);
+  const rarePassive = service.getSkill("passive-passive-rare-329966f19e");
+  assert.equal(rarePassive.passiveEffectState, "source_mismatch");
+  assert.equal(rarePassive.passiveEffects, undefined);
+  const passiveList = service.listSkills({
+    page: 1,
+    limit: 100,
+    type: "passive",
+  });
+  assert.equal(passiveList.pagination.total, 79);
+  assert.equal(
+    passiveList.items.filter(
+      (skill) => skill.passiveEffectState === "available",
+    ).length,
+    68,
+  );
+  assert.equal(
+    passiveList.items.filter(
+      (skill) => skill.passiveEffectState === "source_mismatch",
+    ).length,
+    11,
+  );
+  assert.equal(
+    passiveList.items.every((skill) =>
+      skill.passiveEffectState === "available"
+        ? (skill.passiveEffects?.length ?? 0) > 0
+        : skill.passiveEffects === undefined
+    ),
+    true,
   );
 });
 

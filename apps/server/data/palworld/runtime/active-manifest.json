@@ -62,17 +62,17 @@
       {
         "kind": "breeding",
         "file": "breeding.json",
-        "sha256": "9e3f35d9e64b81f6a7c42c6fced2f9c8165c4e3de4112a9790dec19aa833c555"
+        "sha256": "5f4ec64c3d3f97d1a365e8fc3560fb6eaa77499a264a5a5055bc75b9e0ce0472"
       },
       {
         "kind": "breeding-manifest",
         "file": "breeding-manifest.json",
-        "sha256": "ddef1b6f2b2fa8d7e28eaaf2950f5fba4bcf08b392d58a009a775744a9541106"
+        "sha256": "1ee7ecb0c63434840ba07f0a093b9065897357d1e0e83be06333a77e4165b3cf"
       },
       {
         "kind": "locale-manifest",
         "file": "locales/manifest.json",
-        "sha256": "4ca4361feaa54a318ba173de49df02dcb36fe2c3f9377bfecdd56fea256164f2"
+        "sha256": "b0251f60d10371631fb28363c842891ed10b887a22c2388cf2e5e6f50be30959"
       },
       {
         "kind": "locale-glossary",
@@ -82,17 +82,17 @@
       {
         "kind": "locale-ko",
         "file": "locales/ko.json",
-        "sha256": "b732714087184c797afe404d4979862e92020dbc8f65736e01a12148e3978a77"
+        "sha256": "c21a7b0ea891fed3742e1a18da63ad7e4fc8b85173cb650a3b9c7fa27f9067b7"
       },
       {
         "kind": "locale-ja",
         "file": "locales/ja.json",
-        "sha256": "3c99d88aaf26ebeba711efca0ab1588c95090aed50d516191fdb4bc5e67f2ea3"
+        "sha256": "a47931ac43fe25e3a28e5b73512bbfc83faf669c4895d931a9c7333826fa4096"
       },
       {
         "kind": "locale-official-source-fields",
         "file": "locales/official-source-fields.json",
-        "sha256": "23341e7d79a57bacd66a69ece32f86ebb32bf08420d439e35ab3433126014bcf"
+        "sha256": "07f413ac2586f8e9ff7a87a741681845852b8e4c07ddfde890fc42fa7047b8bf"
       },
       {
         "kind": "locale-official-active-skill-evidence",
@@ -102,12 +102,12 @@
       {
         "kind": "locale-official-passive-skill-evidence",
         "file": "locales/official-passive-skill-evidence.json",
-        "sha256": "7eb59347beb80c43522a1dc6649e97b60ebf6b7cb8d932f270732828f2933f99"
+        "sha256": "931f7467d22053b41020469163af248f5e1327d829bd6a782e662b7ef1f331e0"
       },
       {
         "kind": "locale-official-compatibility",
         "file": "locales/official-locale-compatibility.json",
-        "sha256": "5da4eb7ddfc5f2a84d4bdbb3efeecacda2d29a6585460b6fb34007a3a0a7988c"
+        "sha256": "abd6cf167b973c8808470f84a1e755a7ffc24c01014f0cf5e696d32572eae2f2"
       },
       {
         "kind": "reviewed-item-aliases",

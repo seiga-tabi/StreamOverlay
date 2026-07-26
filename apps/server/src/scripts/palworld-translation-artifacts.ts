@@ -166,19 +166,6 @@ const MISSING_VALUE_BEFORE_COMMA_PATTERN = /(?:^|\s),(?=\s|$)/gu;
 const PLACEHOLDER_RESIDUE_PATTERN = /XQZ|missing\s+source\s+value|ソース値が不足|원문\s*값\s*누락/iu;
 const KOREAN_SCRIPT_PATTERN = /[\p{Script=Hangul}]/u;
 const JAPANESE_SCRIPT_PATTERN = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
-const MACHINE_NAME_DENYLIST: Readonly<Record<TranslationLocale, ReadonlySet<string>>> = {
-  ko: new Set(["회사 소개", "지금 연락"]),
-  ja: new Set(["クアッドマックス", "夏期マックス", "サドル。"]),
-};
-const MACHINE_NAME_STRUCTURE_TOKENS = [
-  { english: "Schematic", ko: ["설계도"], ja: ["設計図"] },
-  { english: "Saddle", ko: ["안장"], ja: ["サドル", "鞍"] },
-  { english: "Ring", ko: ["반지", "링"], ja: ["指輪", "リング"] },
-  { english: "Meat", ko: ["고기", "육"], ja: ["肉", "ミート"] },
-  { english: "Egg", ko: ["알", "달걀"], ja: ["卵", "タマゴ", "エッグ"] },
-  { english: "Charm", ko: ["부적"], ja: ["お守り", "チャーム"] },
-  { english: "Sphere", ko: ["스피어"], ja: ["スフィア"] },
-] as const;
 
 function fail(message: string): never {
   throw new TypeError(`Palworld 번역 artifact 오류: ${message}`);
@@ -231,15 +218,6 @@ function numericSignature(value: string): { numbers: string[]; boundUnits: strin
 function glossaryTermAppearsInName(sourceText: string, englishTerm: string): boolean {
   const escaped = englishTerm.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   return new RegExp(`(?<![A-Za-z0-9])${escaped}(?![A-Za-z0-9])`, "u").test(sourceText);
-}
-
-function canonicalMachineName(value: string): string {
-  return value.normalize("NFKC").replace(/\s+/gu, " ").trim();
-}
-
-function englishNameContainsCanonicalName(sourceText: string, canonicalName: string): boolean {
-  const escaped = canonicalName.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-  return new RegExp(`(?<![A-Za-z0-9])${escaped}(?![A-Za-z0-9])`, "iu").test(sourceText);
 }
 
 function visibleCharacterCount(value: string): number {
@@ -520,6 +498,7 @@ export function validateTranslationRecord(
   pathName: string,
   reviewedNames: ReadonlyMap<string, string> = new Map(),
   reviewedTerms: ReadonlyMap<string, string> = new Map(),
+  independentOfficialSourceFields: ReadonlyMap<string, PalworldTranslationOfficialSourceField> = new Map(),
 ): TranslationRecord {
   const record = assertPlainObject(input, pathName);
   assertOnlyKeys(record, ["id", "kind", "fields"], pathName);
@@ -535,7 +514,6 @@ export function validateTranslationRecord(
     const inputField = inputFields[fieldName];
     if (inputField === undefined) continue;
     const sourceField = source.fields[fieldName];
-    if (!sourceField) fail(`${pathName}.fields.${fieldName}은 원문에 없는 필드입니다.`);
     const field = assertPlainObject(inputField, `${pathName}.fields.${fieldName}`);
     assertOnlyKeys(
       field,
@@ -603,7 +581,27 @@ export function validateTranslationRecord(
       if (sourceSha256 !== sha256(text)) {
         fail(`${pathName}.fields.${fieldName}.sourceSha256가 공식 locale 값 hash와 일치하지 않습니다.`);
       }
+      if (sourceField === undefined) {
+        const officialIdentity = `${locale}:${kind}:${id}:${fieldName}`;
+        const officialSourceField = independentOfficialSourceFields.get(officialIdentity);
+        if (
+          officialSourceField === undefined
+          || officialSourceField.messageKey !== sourceMessageKey
+          || officialSourceField.text !== text
+          || officialSourceField.textSha256 !== sourceSha256
+          || officialSourceField.sourceMember !== sourceMember
+          || officialSourceField.sourceMemberSha256 !== sourceMemberSha256
+        ) {
+          fail(
+            `${pathName}.fields.${fieldName}은 영어 원문에 없으므로 `
+            + "독립 검증된 공식 locale source와 exact match해야 합니다.",
+          );
+        }
+      }
     } else {
+      if (sourceField === undefined) {
+        fail(`${pathName}.fields.${fieldName}은 원문에 없는 필드입니다.`);
+      }
       if (officialMetadataFields.some((metadataField) => field[metadataField] !== undefined)) {
         fail(`${pathName}.fields.${fieldName}의 공식 source 출처 정보는 source_provided에만 허용됩니다.`);
       }
@@ -623,6 +621,9 @@ export function validateTranslationRecord(
       }
     }
     if (field.status === "machine_assisted") {
+      if (sourceField === undefined) {
+        fail(`${pathName}.fields.${fieldName}은 원문에 없는 필드입니다.`);
+      }
       validateMachineTranslationQuality(
         sourceField.sourceText,
         text,
@@ -637,6 +638,9 @@ export function validateTranslationRecord(
       fail(`${pathName}.fields.name.text가 검수된 glossary 이름과 일치하지 않습니다.`);
     }
     if (fieldName === "name" && field.status !== "source_provided") {
+      if (sourceField === undefined) {
+        fail(`${pathName}.fields.${fieldName}은 원문에 없는 필드입니다.`);
+      }
       for (const [termKey, reviewedTerm] of reviewedTerms) {
         const prefix = `${locale}:`;
         if (!termKey.startsWith(prefix)) continue;
@@ -650,6 +654,9 @@ export function validateTranslationRecord(
       fail(`${pathName}.fields.${fieldName}.text에 번역 중간 placeholder가 남아 있습니다.`);
     }
     if (field.status !== "source_provided") {
+      if (sourceField === undefined) {
+        fail(`${pathName}.fields.${fieldName}은 원문에 없는 필드입니다.`);
+      }
       const anomaly = analyzeTranslationSource(sourceField.sourceText);
       const marker = PALWORLD_TRANSLATION_MISSING_SOURCE_MARKER[locale];
       const markerCount = text.split(marker).length - 1;
@@ -677,69 +684,28 @@ export function validateTranslationRecord(
 }
 
 /**
- * 신규 import에만 적용하는 이름 의미 품질 gate입니다.
+ * 공개 locale import는 공식 원문 또는 사람 검수 결과만 허용합니다.
  *
- * 기존 감사용 locale artifact validator는 과거 상태를 계속 읽을 수 있어야 하므로
- * 이 검사는 validateTranslationRecord에 합치지 않고 import 직전에 명시적으로 호출합니다.
+ * 과거 감사 artifact를 읽는 validator는 machine_assisted 상태를 계속 이해하지만,
+ * 유지보수 import에서 해당 값을 runtime snapshot으로 다시 반입하지 못하게 차단합니다.
  */
-export function assertStrictMachineNameQualityForImport(
+export function assertNoMachineAssistedTranslationsForImport(
   records: readonly TranslationRecord[],
   locale: TranslationLocale,
-  corpus: readonly TranslationCorpusRecord[],
-  reviewedNames: ReadonlyMap<string, string>,
 ): void {
-  const sourceByIdentity = new Map(corpus.map((record) => [`${record.kind}:${record.id}`, record]));
-  const reviewedPals = corpus
-    .filter((record) => record.kind === "pal")
-    .map((record) => {
-      const english = record.fields.name?.sourceText;
-      const localized = reviewedNames.get(`${locale}:pal:${record.id}`);
-      return english && localized ? { id: record.id, english, localized } : undefined;
-    })
-    .filter((value): value is { id: string; english: string; localized: string } => value !== undefined)
-    .sort((left, right) => right.english.length - left.english.length || left.id.localeCompare(right.id, "en"));
-  const machineNamesByLocaleText = new Map<string, {
-    identity: string;
-    sourceText: string;
-  }>();
-
+  const machineFields: string[] = [];
   for (const record of records) {
-    if (record.kind !== "item" && record.kind !== "skill") continue;
-    const name = record.fields.name;
-    if (name?.status !== "machine_assisted") continue;
-    const identity = `${record.kind}:${record.id}`;
-    const sourceText = sourceByIdentity.get(identity)?.fields.name?.sourceText;
-    if (sourceText === undefined) fail(`${identity}:name의 canonical 영어 원문이 없습니다.`);
-    const translatedText = canonicalMachineName(name.text);
-
-    if (MACHINE_NAME_DENYLIST[locale].has(translatedText)) {
-      fail(`${identity}:name에 금지된 기계 보조 번역 문자열이 있습니다: ${translatedText}`);
-    }
-
-    for (const token of MACHINE_NAME_STRUCTURE_TOKENS) {
-      if (!englishNameContainsCanonicalName(sourceText, token.english)) continue;
-      if (!token[locale].some((localizedToken) => translatedText.includes(localizedToken))) {
-        fail(`${identity}:name이 구조 토큰 ${token.english}의 ${locale} 의미를 보존하지 않았습니다.`);
+    for (const fieldName of FIELD_ORDER) {
+      if (record.fields[fieldName]?.status === "machine_assisted") {
+        machineFields.push(`${record.kind}:${record.id}:${fieldName}`);
       }
     }
-
-    for (const pal of reviewedPals) {
-      if (
-        englishNameContainsCanonicalName(sourceText, pal.english)
-        && !translatedText.includes(canonicalMachineName(pal.localized))
-      ) {
-        fail(`${identity}:name이 canonical Pal ${pal.id}의 검수 ${locale} 이름을 보존하지 않았습니다.`);
-      }
-    }
-
-    const collisionKey = translatedText.toLocaleLowerCase(locale === "ko" ? "ko-KR" : "ja-JP");
-    const existing = machineNamesByLocaleText.get(collisionKey);
-    if (existing !== undefined && existing.sourceText !== sourceText) {
-      fail(
-        `${identity}:name과 ${existing.identity}:name의 서로 다른 영어 원문이 같은 ${locale} 기계 이름으로 합쳐졌습니다.`,
-      );
-    }
-    machineNamesByLocaleText.set(collisionKey, { identity, sourceText });
+  }
+  if (machineFields.length > 0) {
+    fail(
+      `${locale} 공개 import에는 machine_assisted 필드를 사용할 수 없습니다: `
+      + machineFields.slice(0, 20).join(", "),
+    );
   }
 }
 
@@ -797,7 +763,11 @@ export function assertUniqueSortedTranslationRecords(records: readonly Translati
   }
 }
 
-export function translationCoverage(records: readonly TranslationRecord[], corpus: readonly TranslationCorpusRecord[]) {
+export function translationCoverage(
+  records: readonly TranslationRecord[],
+  corpus: readonly TranslationCorpusRecord[],
+  independentOfficialSourceFields: readonly PalworldTranslationOfficialSourceField[] = [],
+) {
   const translated = new Map<string, TranslationField>();
   for (const record of records) {
     for (const field of FIELD_ORDER) {
@@ -805,18 +775,41 @@ export function translationCoverage(records: readonly TranslationRecord[], corpu
       if (value) translated.set(`${record.kind}:${record.id}:${field}`, value);
     }
   }
+  const sourceFieldIdentities = new Set<string>();
+  for (const record of corpus) {
+    for (const fieldName of FIELD_ORDER) {
+      if (record.fields[fieldName] !== undefined) {
+        sourceFieldIdentities.add(`${record.kind}:${record.id}:${fieldName}`);
+      }
+    }
+  }
+  for (const field of independentOfficialSourceFields) {
+    sourceFieldIdentities.add(`${field.kind}:${field.id}:${field.field}`);
+  }
   const byKind = Object.fromEntries((["pal", "item", "skill"] as const).map((kind) => {
     const sourceRecords = corpus.filter((record) => record.kind === kind);
-    const names = sourceRecords.filter((record) => record.fields.name).length;
-    const descriptions = sourceRecords.filter((record) => record.fields.description).length;
-    const passiveAbilities = sourceRecords.filter((record) => record.fields.passiveAbility).length;
+    const sourceIds = new Set(sourceRecords.map((record) => record.id));
+    for (const field of independentOfficialSourceFields) {
+      if (field.kind === kind) sourceIds.add(field.id);
+    }
+    const identitiesForField = (fieldName: TranslationFieldName) =>
+      [...sourceIds].filter((id) => sourceFieldIdentities.has(`${kind}:${id}:${fieldName}`));
+    const names = identitiesForField("name");
+    const descriptions = identitiesForField("description");
+    const passiveAbilities = identitiesForField("passiveAbility");
     return [kind, {
-      name: { translated: sourceRecords.filter((record) => translated.has(`${kind}:${record.id}:name`)).length, total: names },
-      description: { translated: sourceRecords.filter((record) => translated.has(`${kind}:${record.id}:description`)).length, total: descriptions },
-      passiveAbility: { translated: sourceRecords.filter((record) => translated.has(`${kind}:${record.id}:passiveAbility`)).length, total: passiveAbilities },
+      name: { translated: names.filter((id) => translated.has(`${kind}:${id}:name`)).length, total: names.length },
+      description: {
+        translated: descriptions.filter((id) => translated.has(`${kind}:${id}:description`)).length,
+        total: descriptions.length,
+      },
+      passiveAbility: {
+        translated: passiveAbilities.filter((id) => translated.has(`${kind}:${id}:passiveAbility`)).length,
+        total: passiveAbilities.length,
+      },
     }];
   }));
-  const total = corpus.reduce((sum, record) => sum + Object.keys(record.fields).length, 0);
+  const total = sourceFieldIdentities.size;
   const status = [...translated.values()].reduce((result, field) => {
     result[field.status] += 1;
     return result;

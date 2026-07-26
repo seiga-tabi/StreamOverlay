@@ -977,6 +977,38 @@ async function installApiFixtures(page: Page): Promise<void> {
       });
       return;
     }
+    if (url.pathname === "/api/palworld/breeding/partners") {
+      const parent = aliases(url.searchParams.get("parent") ?? "")
+        .find((id) => pals.some((pal) => pal.id === id));
+      if (!parent) {
+        await json(route, { error: "PALWORLD_NOT_FOUND", message: "Pal을 찾을 수 없습니다." }, 404);
+        return;
+      }
+      const type = url.searchParams.get("type") ?? "all";
+      const allPairs = parent === "penking" || parent === "bushi"
+        ? [breedingPair]
+        : parent === "katress" || parent === "wixen"
+          ? [
+            genderBreedingPair("katress", "wixen", "female"),
+            genderBreedingPair("katress", "wixen", "male"),
+          ]
+          : [{
+            id: `fixture-${parent}-self`,
+            parentA: palReference(parent),
+            parentB: palReference(parent),
+            child: palReference(parent),
+            isSpecial: false,
+          } satisfies PalworldBreedingPair];
+      const pairs = allPairs.filter((pair) =>
+        type === "all" || (type === "special" ? pair.isSpecial : !pair.isSpecial)
+      );
+      await json(route, {
+        parent: palReference(parent),
+        ...pageResponse(pairs, url, metadata),
+        state: pairs.length ? "resolved" : "not_found",
+      });
+      return;
+    }
     if (url.pathname === "/api/palworld/breeding/parents") {
       const child = aliases(url.searchParams.get("child") ?? "")
         .find((id) => id === "sibelyx" || id === "katress-ignis");
@@ -2382,6 +2414,10 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
   await expect(skillCard).not.toContainText("영문 원문");
   await expect(skillCard).toContainText("위력 30");
   await expect(skillCard.locator(".palworld-element-icon")).toHaveCount(1);
+  await expect.poll(() => skillCard.locator(".palworld-skill-description").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return [style.whiteSpace, style.overflow, style.textOverflow];
+  })).toEqual(["nowrap", "hidden", "ellipsis"]);
   const relatedPalPreview = skillCard.getByRole("group", { name: "관련 Pal" });
   await expect(relatedPalPreview).toBeVisible();
   await expect(relatedPalPreview.locator(".palworld-skill-related-preview-media")).toHaveCount(1);
@@ -2541,6 +2577,26 @@ test("부모 Pal 자동완성으로 일반 교배 결과를 조회하고 URL과 
   await expect(page.getByTestId("breeding-target-summary")).toContainText("실키누");
   await page.getByTestId("breeding-reverse-pair").getByRole("button", { name: "계산기에 넣기" }).click();
   await expect(page).toHaveURL(/mode=parents.*parentA=penking.*parentB=bushi/u);
+  await assertHealthyDocument(page, errors);
+});
+
+test("부모 Pal 한 마리만 선택하면 가능한 상대와 결과 목록을 표시하고 계산기에 반영한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/palworld/breeding?mode=parents&parentA=penking");
+
+  const partnerResults = page.getByTestId("breeding-partner-results");
+  await expect(partnerResults).toContainText("선택한 부모의 교배 조합");
+  await expect(partnerResults.getByTestId("breeding-partner-pair")).toHaveCount(1);
+  await expect(partnerResults).toContainText("펭킹");
+  await expect(partnerResults).toContainText("불무사");
+  await expect(partnerResults).toContainText("실키누");
+  await expect(page.getByTestId("breeding-direct-card")).toHaveCount(0);
+  await expect.poll(() => new URL(page.url()).searchParams.has("parentB")).toBe(false);
+
+  await partnerResults.getByRole("button", { name: "계산기에 넣기" }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("penking");
+  await expect.poll(() => new URL(page.url()).searchParams.get("parentB")).toBe("bushi");
+  await expect(page.getByTestId("breeding-direct-card")).toContainText("실키누");
   await assertHealthyDocument(page, errors);
 });
 

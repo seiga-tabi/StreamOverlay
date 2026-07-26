@@ -11,10 +11,9 @@ import {
   assertPalworldBreedingManifest,
   breedingCounts,
   loadPalworldBreedingRuntimeSource,
+  palworldBreedingSourceChecksumsSha256,
   type PalworldBreedingArtifact,
   type PalworldBreedingGender,
-  type PalworldBreedingImportReport,
-  type PalworldBreedingManifest,
   type PalworldBreedingSpecialRule
 } from "../data/palworld-breeding-artifact.js";
 import {
@@ -26,6 +25,17 @@ import {
   sha256Bytes,
   writeFileAtomic
 } from "../data/palworld-paldex-import.js";
+import {
+  assertPalworldBreedingCatalogRuleConsistency,
+  createPalworldBreedingSourceAliasResolver,
+  loadPalworldBreedingSourceAliasSource,
+  type PalworldBreedingSourceAliasArtifact
+} from "../data/palworld-breeding-source-alias.js";
+import {
+  loadPalworldBreedingEligibilityCompatibility,
+  verifyPalworldBreedingEligibilityCompatibility,
+  type PalworldBreedingEligibilityCompatibilityArtifact
+} from "../data/palworld-breeding-eligibility-compatibility.js";
 
 const BREEDING_SOURCE_PATH = path.join(
   PALWORLD_PALDEX_RELEASE_ROOT,
@@ -203,6 +213,14 @@ function buildRelease(
   publicIdMapValue: unknown,
   atlasBreedingValue: unknown,
   catalogValue: unknown,
+  breedingSourceAliases: PalworldBreedingSourceAliasArtifact,
+  breedingEligibilityInput: {
+    artifact: PalworldBreedingEligibilityCompatibilityArtifact;
+    artifactBytes: Uint8Array;
+    candidateBytes: Uint8Array;
+    activePaldexBytes: Uint8Array;
+    publicIdMapBytes: Uint8Array;
+  },
   sourceChecksums: PalworldBreedingArtifact["metadata"]["sourceChecksums"]
 ): {
   artifactText: string;
@@ -220,53 +238,97 @@ function buildRelease(
   const atlasById = new Map(atlasPals.map((pal) => [pal.id, pal]));
   const palCalcById = new Map(palCalc.Pals.map((pal) => [pal.InternalName, pal]));
   const publicIdByInternalId = new Map(publicIdMap.entries.map((entry) => [entry.sourceInternalId, entry.publicId]));
+  const breedingSourceAliasResolver =
+    createPalworldBreedingSourceAliasResolver({
+      artifact: breedingSourceAliases,
+      sourceInternalIds: new Set(
+        atlasBreeding.uniquePairs.flatMap((pair) => [
+          pair.parentAId,
+          pair.parentBId,
+          pair.childId
+        ])
+      ),
+      canonicalInternalIds: new Set(publicIdByInternalId.keys())
+    });
 
-  const parameters = publicIdMap.entries.map(({ sourceInternalId, publicId }) => {
-    const atlas = atlasById.get(sourceInternalId);
-    const calc = palCalcById.get(sourceInternalId);
-    const gender = palCalc.BreedingGenderProbability[sourceInternalId];
-    if (!atlas || !calc || !gender) throw new Error(`${sourceInternalId}: 고정 source exact join에 실패했습니다.`);
-    if (atlas.breedingRank !== calc.BreedingPower) {
-      throw new Error(`${sourceInternalId}: Atlas와 PalCalc CombiRank가 다릅니다.`);
-    }
-    if (gender.MALE < 0 || gender.MALE > 1 || Math.abs(gender.MALE + gender.FEMALE - 1) > 0.000_001) {
-      throw new Error(`${sourceInternalId}: 성별 확률이 올바르지 않습니다.`);
-    }
-    return {
-      palId: publicId,
-      sourceInternalId,
-      tribe: atlas.tribe,
-      combiRank: calc.BreedingPower,
-      combiDuplicatePriority: calc.BreedingPowerPriority,
-      maleProbability: gender.MALE,
-      variantType: calc.Id.IsVariant ? "variant" as const : "normal" as const
-    };
-  }).sort((left, right) => codePointCompare(left.palId, right.palId));
+  let parameters: PalworldBreedingArtifact["parameters"] =
+    publicIdMap.entries.map(({ sourceInternalId, publicId }) => {
+      const atlas = atlasById.get(sourceInternalId);
+      const calc = palCalcById.get(sourceInternalId);
+      const gender = palCalc.BreedingGenderProbability[sourceInternalId];
+      if (!atlas || !calc || !gender) throw new Error(`${sourceInternalId}: 고정 source exact join에 실패했습니다.`);
+      if (atlas.breedingRank !== calc.BreedingPower) {
+        throw new Error(`${sourceInternalId}: Atlas와 PalCalc CombiRank가 다릅니다.`);
+      }
+      if (gender.MALE < 0 || gender.MALE > 1 || Math.abs(gender.MALE + gender.FEMALE - 1) > 0.000_001) {
+        throw new Error(`${sourceInternalId}: 성별 확률이 올바르지 않습니다.`);
+      }
+      return {
+        palId: publicId,
+        sourceInternalId,
+        tribe: atlas.tribe,
+        combiRank: calc.BreedingPower,
+        combiDuplicatePriority: calc.BreedingPowerPriority,
+        maleProbability: gender.MALE,
+        variantType: calc.Id.IsVariant ? "variant" as const : "normal" as const
+      };
+    }).sort((left, right) => codePointCompare(left.palId, right.palId));
+  const eligibilityVerification =
+    verifyPalworldBreedingEligibilityCompatibility({
+      ...breedingEligibilityInput,
+      activeParameters: parameters
+    });
+  const eligibilityOverride =
+    eligibilityVerification.artifact.overrides[0];
+  parameters = parameters.map((parameter) =>
+    parameter.palId === eligibilityOverride.palId
+      ? { ...parameter, ignoreCombi: true }
+      : parameter
+  );
 
   const unresolvedSourceInternalIds = new Set<string>();
   const specialRules: PalworldBreedingSpecialRule[] = [];
+  const aliasCorrectedRuleKeys = new Set<string>();
   let unresolvedSourceRows = 0;
   for (const sourceRule of atlasBreeding.uniquePairs) {
-    const parentAId = publicIdByInternalId.get(sourceRule.parentAId);
-    const parentBId = publicIdByInternalId.get(sourceRule.parentBId);
-    const childId = publicIdByInternalId.get(sourceRule.childId);
+    const parentASourceInternalId =
+      breedingSourceAliasResolver.resolve(sourceRule.parentAId);
+    const parentBSourceInternalId =
+      breedingSourceAliasResolver.resolve(sourceRule.parentBId);
+    const childSourceInternalId =
+      breedingSourceAliasResolver.resolve(sourceRule.childId);
+    const parentAId = publicIdByInternalId.get(parentASourceInternalId);
+    const parentBId = publicIdByInternalId.get(parentBSourceInternalId);
+    const childId = publicIdByInternalId.get(childSourceInternalId);
     if (!parentAId || !parentBId || !childId) {
       unresolvedSourceRows += 1;
-      for (const sourceInternalId of [sourceRule.parentAId, sourceRule.parentBId, sourceRule.childId]) {
+      for (const sourceInternalId of [
+        parentASourceInternalId,
+        parentBSourceInternalId,
+        childSourceInternalId
+      ]) {
         if (!publicIdByInternalId.has(sourceInternalId)) unresolvedSourceInternalIds.add(sourceInternalId);
       }
       continue;
     }
-    specialRules.push({
+    const rule = {
       parentAId,
-      parentASourceInternalId: sourceRule.parentAId,
+      parentASourceInternalId,
       parentBId,
-      parentBSourceInternalId: sourceRule.parentBId,
+      parentBSourceInternalId,
       childId,
-      childSourceInternalId: sourceRule.childId,
+      childSourceInternalId,
       ...(sourceRule.parentAGender === undefined ? {} : { parentAGender: sourceRule.parentAGender }),
       ...(sourceRule.parentBGender === undefined ? {} : { parentBGender: sourceRule.parentBGender })
-    });
+    };
+    specialRules.push(rule);
+    if (
+      breedingSourceAliasResolver.has(sourceRule.parentAId)
+      || breedingSourceAliasResolver.has(sourceRule.parentBId)
+      || breedingSourceAliasResolver.has(sourceRule.childId)
+    ) {
+      aliasCorrectedRuleKeys.add(normalizedRuleKey(rule));
+    }
   }
   specialRules.sort((left, right) =>
     codePointCompare(left.childId, right.childId)
@@ -280,12 +342,14 @@ function buildRelease(
     .filter((rule) => !(rule.parentAId === rule.parentBId && rule.parentAId === rule.childId))
     .map(normalizedRuleKey));
   const catalogKeys = new Set(catalog.specialBreedingPairs.map(normalizedRuleKey));
-  if (
-    mappedNonSelfKeys.size !== catalogKeys.size
-    || [...mappedNonSelfKeys].some((key) => !catalogKeys.has(key))
-  ) {
-    throw new Error("catalog.specialBreedingPairs가 고정 Atlas source의 exact non-self 조합과 다릅니다.");
-  }
+  const aliasCorrectedNonSelfKeys = new Set(
+    [...aliasCorrectedRuleKeys].filter((key) => mappedNonSelfKeys.has(key))
+  );
+  assertPalworldBreedingCatalogRuleConsistency({
+    sourceRuleKeys: mappedNonSelfKeys,
+    catalogRuleKeys: catalogKeys,
+    aliasCorrectedRuleKeys: aliasCorrectedNonSelfKeys
+  });
 
   const artifact = assertPalworldBreedingArtifact({
     schemaVersion: 1,
@@ -293,7 +357,9 @@ function buildRelease(
     metadata: {
       gameVersion: PALWORLD_BREEDING_RELEASE,
       steamBuildId: sourceLock.steamBuildId,
-      sourceRevision: `atlas@${atlasSource.sourceRevision}+palcalc@${palCalcSource.sourceRevision}`,
+      sourceRevision:
+        `atlas@${atlasSource.sourceRevision}`
+        + `+palcalc@${palCalcSource.sourceRevision}`,
       sourceChecksums
     },
     parameters,
@@ -312,7 +378,7 @@ function buildRelease(
       tribe: { available: total, missing: 0, total },
       maleProbability: { available: total, missing: 0, total },
       bpClass: { available: 0, missing: total, total },
-      ignoreCombi: { available: 0, missing: total, total },
+      ignoreCombi: { available: 1, missing: total - 1, total },
       sourceRowId: { available: 0, missing: total, total }
     },
     unresolvedSourceInternalIds: [...unresolvedSourceInternalIds].sort(),
@@ -330,6 +396,8 @@ function buildRelease(
     generatedAt: sourceLock.artifactTimestamp,
     breedingSha256: sha256Bytes(Buffer.from(artifactText, "utf8")),
     reportSha256: sha256Bytes(Buffer.from(reportText, "utf8")),
+    sourceChecksumsSha256:
+      palworldBreedingSourceChecksumsSha256(artifact.metadata.sourceChecksums),
     counts,
     runtimeActivation: true
   });
@@ -344,13 +412,34 @@ const sourceLockBytes = await readFile(path.join(PALWORLD_PALDEX_RELEASE_ROOT, "
 const sourceLock = assertPalworldPaldexSourceLock(JSON.parse(sourceLockBytes.toString("utf8")) as unknown);
 const atlasSource = sourceLock.sources.find((source) => source.id === "atlas-pals")!;
 const palCalcSource = sourceLock.sources.find((source) => source.id === "palcalc-db")!;
-const [atlasBytes, palCalcBytes, publicIdMapBytes, atlasBreedingBytes, catalogBytes, catalogManifestBytes] = await Promise.all([
+const breedingEligibilityCompatibility =
+  await loadPalworldBreedingEligibilityCompatibility();
+const candidateBreedingPath = path.join(
+  PALWORLD_PALDEX_RELEASE_ROOT,
+  "../candidates",
+  breedingEligibilityCompatibility.artifact.candidate.directory,
+  PALWORLD_BREEDING_FILE
+);
+const [
+  atlasBytes,
+  palCalcBytes,
+  publicIdMapBytes,
+  atlasBreedingBytes,
+  catalogBytes,
+  catalogManifestBytes,
+  breedingSourceAliasSource,
+  candidateBreedingBytes,
+  activePaldexBytes
+] = await Promise.all([
   readFile(path.join(PALWORLD_PALDEX_SOURCE_CACHE_ROOT, "atlas-pals.json")),
   readFile(path.join(PALWORLD_PALDEX_SOURCE_CACHE_ROOT, "palcalc-db.json")),
   readFile(path.join(PALWORLD_PALDEX_MAPPING_ROOT, "public-id-map.json")),
   readFile(BREEDING_SOURCE_PATH),
   readFile(CATALOG_PATH),
-  readFile(CATALOG_MANIFEST_PATH)
+  readFile(CATALOG_MANIFEST_PATH),
+  loadPalworldBreedingSourceAliasSource(),
+  readFile(candidateBreedingPath),
+  readFile(path.join(PALWORLD_PALDEX_RELEASE_ROOT, "paldex.json"))
 ]);
 if (atlasBytes.length !== atlasSource.bytes || sha256Bytes(atlasBytes) !== atlasSource.sha256) {
   throw new Error("Atlas source checksum이 sources.lock.json과 일치하지 않습니다.");
@@ -377,11 +466,23 @@ const inputs = [
   JSON.parse(publicIdMapBytes.toString("utf8")) as unknown,
   JSON.parse(atlasBreedingBytes.toString("utf8")) as unknown,
   JSON.parse(catalogBytes.toString("utf8")) as unknown,
+  breedingSourceAliasSource.artifact,
+  {
+    artifact: breedingEligibilityCompatibility.artifact,
+    artifactBytes: breedingEligibilityCompatibility.bytes,
+    candidateBytes: candidateBreedingBytes,
+    activePaldexBytes,
+    publicIdMapBytes
+  },
   {
     atlasPals: atlasSource.sha256,
     atlasBreeding: EXPECTED_ATLAS_BREEDING_SHA256,
     palCalc: palCalcSource.sha256,
-    catalog: catalogManifest.catalogSha256
+    catalog: catalogManifest.catalogSha256,
+    breedingSourceAliases: sha256Bytes(breedingSourceAliasSource.bytes),
+    breedingEligibilityCompatibility:
+      sha256Bytes(breedingEligibilityCompatibility.bytes),
+    candidateBreeding: sha256Bytes(candidateBreedingBytes)
   } satisfies PalworldBreedingArtifact["metadata"]["sourceChecksums"]
 ] as const;
 const first = buildRelease(...inputs);

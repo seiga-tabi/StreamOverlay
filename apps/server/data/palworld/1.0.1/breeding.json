@@ -9,7 +9,10 @@
       "atlasPals": "57fb4bf837061c1160d5f72755152245fe793e1b0073328714efd63c65ba5b47",
       "atlasBreeding": "dc39e4c8646eaa7f61573d832dcb854d31184713dfc815e0221dc83d947ae559",
       "palCalc": "803d891afdb18bd00e24332844a7276bbe5c0855170ef90ef142f2f4d7698ed1",
-      "catalog": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552"
+      "catalog": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
+      "breedingSourceAliases": "8992fac459283350bade62cd2618fbc0adf4648dac2049d667319fcd1b8c6817",
+      "breedingEligibilityCompatibility": "b67fe710e5ce4032a845be3facf45df75be46727cfe0e813ef9196c44ecb6b40",
+      "candidateBreeding": "a52de9c23598bd1e5bba6ddc664e965cac5ec3a95dd39b2839a8b193533a1e9c"
     }
   },
   "parameters": [
@@ -1658,7 +1661,8 @@
       "combiRank": 20,
       "combiDuplicatePriority": 2000,
       "maleProbability": 0.5,
-      "variantType": "normal"
+      "variantType": "normal",
+      "ignoreCombi": true
     },
     {
       "palId": "pengullet",
@@ -2687,6 +2691,14 @@
       "childSourceInternalId": "Manticore_Dark"
     },
     {
+      "parentAId": "broncherry",
+      "parentASourceInternalId": "SakuraSaurus",
+      "parentBId": "fuack",
+      "parentBSourceInternalId": "BluePlatypus",
+      "childId": "broncherry-aqua",
+      "childSourceInternalId": "SakuraSaurus_Water"
+    },
+    {
       "parentAId": "broncherry-aqua",
       "parentASourceInternalId": "SakuraSaurus_Water",
       "parentBId": "broncherry-aqua",
@@ -3053,6 +3065,14 @@
       "parentBSourceInternalId": "IceHorse_Dark",
       "childId": "frostallion-noct",
       "childSourceInternalId": "IceHorse_Dark"
+    },
+    {
+      "parentAId": "fuack",
+      "parentASourceInternalId": "BluePlatypus",
+      "parentBId": "flambelle",
+      "parentBSourceInternalId": "LavaGirl",
+      "childId": "fuack-ignis",
+      "childSourceInternalId": "BluePlatypus_Fire"
     },
     {
       "parentAId": "fuack-ignis",

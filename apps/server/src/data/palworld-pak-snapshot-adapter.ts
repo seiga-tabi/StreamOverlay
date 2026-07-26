@@ -23,6 +23,7 @@ import {
   type PalworldItemCategory,
   type PalworldItemDetail,
   type PalworldItemReference,
+  type PalworldPassiveEffect,
   type PalworldPalDetail,
   type PalworldPalReference,
   type PalworldRuntimeGates,
@@ -443,29 +444,6 @@ function translationStatus(
       : "missing_source";
 }
 
-function palReference(pal: Pick<
-  PalworldPalDetail,
-  | "id"
-  | "number"
-  | "nameKo"
-  | "nameJa"
-  | "nameEn"
-  | "elements"
-  | "translation"
->): PalworldPalReference {
-  return {
-    id: pal.id,
-    number: pal.number,
-    nameKo: pal.nameKo,
-    nameJa: pal.nameJa,
-    ...(pal.nameEn === undefined ? {} : { nameEn: pal.nameEn }),
-    elements: [...pal.elements],
-    ...(pal.translation?.name === undefined
-      ? {}
-      : { translation: { name: { ...pal.translation.name } } })
-  };
-}
-
 function itemReference(item: Pick<
   PalworldItemDetail,
   "id" | "nameKo" | "nameJa" | "nameEn" | "localization" | "translation"
@@ -512,6 +490,12 @@ function skillValue(skill: PalworldSkillDetail, unlockLevel?: number): PalworldS
     ...(skill.passiveTier === undefined
       ? {}
       : { passiveTier: skill.passiveTier }),
+    ...(skill.passiveEffectState === undefined
+      ? {}
+      : { passiveEffectState: skill.passiveEffectState }),
+    ...(skill.passiveEffects === undefined
+      ? {}
+      : { passiveEffects: skill.passiveEffects.map((effect) => ({ ...effect })) }),
     ...(skill.localization === undefined
       ? {}
       : { localization: { ...skill.localization } }),
@@ -1035,6 +1019,28 @@ export function adaptPalworldPakCandidateToSnapshot(
       `skills.records[${index}].description`,
       { richText: true }
     );
+    const passiveEffects = type !== "passive"
+      ? undefined
+      : asRecords(
+          record.effects,
+          `skills.records[${index}].effects`
+        ).map((effect, effectIndex): PalworldPassiveEffect => ({
+          type: asString(
+            effect.type,
+            `skills.records[${index}].effects[${effectIndex}].type`
+          ) as PalworldPassiveEffect["type"],
+          value: asNumber(
+            effect.value,
+            `skills.records[${index}].effects[${effectIndex}].value`
+          ),
+          target: asString(
+            effect.target,
+            `skills.records[${index}].effects[${effectIndex}].target`
+          ) as PalworldPassiveEffect["target"]
+        }));
+    if (type === "passive" && passiveEffects?.length === 0) {
+      fail(`skills.records[${index}].effects: 공개 passive skill 원본 효과가 없습니다.`);
+    }
     const relatedPals = [...new Set(relatedIds)]
       .sort(codePointCompare)
       .map((palId) => {
@@ -1091,6 +1097,12 @@ export function adaptPalworldPakCandidateToSnapshot(
               record.rank,
               `skills.records[${index}].rank`
             )
+          }),
+      ...(passiveEffects === undefined
+        ? {}
+        : {
+            passiveEffectState: "available" as const,
+            passiveEffects
           }),
       localization,
       translation: {

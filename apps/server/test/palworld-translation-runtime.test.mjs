@@ -610,12 +610,12 @@ test("meta locale coverage는 데이터 수와 번역·fallback·missing-source 
     assert.equal(translated.missingSourceSlots, 0);
     assert.equal(translated.sourceIntegrity.sourceAnomalousFields, 0);
     assert.equal(translated.sourceIntegrity.missingSourceSlots, 0);
-    assert.equal(translated.sourceIntegrity.missingSourceFields, 21);
+    assert.equal(translated.sourceIntegrity.missingSourceFields, 19);
     assert.equal(translated.availability.translated, translated.review.total);
     assert.equal(translated.machineAssisted, 0);
-    assert.equal(translated.sourceProvided, 5_348);
+    assert.equal(translated.sourceProvided, 5_350);
     assert.equal(translated.humanReviewed, 0);
-    assert.equal(translated.artifactTranslated, 5_348);
-    assert.equal(translated.publicUsable, 5_348);
+    assert.equal(translated.artifactTranslated, 5_350);
+    assert.equal(translated.publicUsable, 5_350);
   }
 });

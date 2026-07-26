@@ -2,16 +2,17 @@
   "schemaVersion": 1,
   "release": "1.0.1",
   "generatedAt": "2026-07-15T07:03:54.1507828+00:00",
-  "breedingSha256": "9e3f35d9e64b81f6a7c42c6fced2f9c8165c4e3de4112a9790dec19aa833c555",
-  "reportSha256": "b38c5ac6ff009d5ca4c9e9861d7f0d643e594ade3799026a91f5d374ffe3a8b2",
+  "breedingSha256": "5f4ec64c3d3f97d1a365e8fc3560fb6eaa77499a264a5a5055bc75b9e0ce0472",
+  "reportSha256": "e3dd713356f1cc466fb689eb08afc69f51a2f1dd2f9dfc572aac841041e3d066",
+  "sourceChecksumsSha256": "973309c8fbf68932fef3b28e7bc2b129ba10424f76a67654b7f87c231e22df78",
   "counts": {
     "parameters": 287,
     "sourceSpecialRows": 257,
-    "includedSpecialRows": 182,
+    "includedSpecialRows": 184,
     "includedSelfRules": 103,
-    "includedNonSelfRules": 79,
+    "includedNonSelfRules": 81,
     "genderedRules": 2,
-    "unresolvedSourceRows": 75
+    "unresolvedSourceRows": 73
   },
   "runtimeActivation": true
 }

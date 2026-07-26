@@ -5,11 +5,11 @@
   "counts": {
     "parameters": 287,
     "sourceSpecialRows": 257,
-    "includedSpecialRows": 182,
+    "includedSpecialRows": 184,
     "includedSelfRules": 103,
-    "includedNonSelfRules": 79,
+    "includedNonSelfRules": 81,
     "genderedRules": 2,
-    "unresolvedSourceRows": 75
+    "unresolvedSourceRows": 73
   },
   "fieldCoverage": {
     "combiRank": {
@@ -38,8 +38,8 @@
       "total": 287
     },
     "ignoreCombi": {
-      "available": 0,
-      "missing": 287,
+      "available": 1,
+      "missing": 286,
       "total": 287
     },
     "sourceRowId": {
@@ -51,7 +51,6 @@
   "unresolvedSourceInternalIds": [
     "BeardedDragon",
     "BlackFurDragon",
-    "Blueplatypus",
     "DarkMutant",
     "ElecLion",
     "GrassDragon",

@@ -422,7 +422,7 @@ export function PublicPalworldPage({
         {page === "pals" ? <PalworldPalsPage locale={locale} params={params} onOpenPal={openPalHere} /> : null}
         {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} params={params} /> : null}
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
-        {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} onOpenPal={openPalPage} /> : null}
+        {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} /> : null}
         {page === "map" ? <PalworldMapPage focusPalId={focusPalId} locale={locale} onOpenPal={openPalHere} /> : null}
         </Suspense> : null}
       </AppShellMain>

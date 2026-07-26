@@ -215,14 +215,6 @@ function stringAt(
   return valid(value);
 }
 
-function optionalStringAt(
-  value: unknown,
-  path: string,
-  maxLength: number
-): PalworldServerValidationResult<string | undefined> {
-  return value === undefined ? valid(undefined) : stringAt(value, path, maxLength);
-}
-
 function booleanAt(value: unknown, path: string): PalworldServerValidationResult<boolean> {
   return typeof value === "boolean" ? valid(value) : invalid(path, "boolean이어야 합니다.");
 }

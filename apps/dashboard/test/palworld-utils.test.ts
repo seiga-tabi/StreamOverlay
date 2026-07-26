@@ -15,6 +15,7 @@ import type {
 } from "@streamops/shared";
 import {
   getPalworldBreeding,
+  getPalworldBreedingPartners,
   getPalworldBreedingParents,
   getPalworldItems,
   getPalworldMapLocations,
@@ -30,7 +31,14 @@ import {
   searchPalworld,
 } from "../src/features/public-palworld/api/palworld";
 import { setPublicPath } from "../src/features/public-lol/utils/routes";
-import { breedingPairGendersForParents, clearPalworldBreedingParams, palworldBreedingParams, parsePalworldBreedingQuery, swapBreedingParents } from "../src/features/public-palworld/utils/breeding";
+import {
+  breedingPairGendersForParents,
+  clearPalworldBreedingParams,
+  palworldBreedingParams,
+  parsePalworldBreedingQuery,
+  samePalworldBreedingPalId,
+  swapBreedingParents,
+} from "../src/features/public-palworld/utils/breeding";
 import {
   clearPalworldPalsFilterParams,
   palworldPalsDetailFilterCount,
@@ -1127,6 +1135,22 @@ test("교배 URL query는 exact ID·성별·mode·page만 상태로 복원한다
   }
 });
 
+test("교배 단일 부모 direct-link의 underscore alias는 canonical 서버 응답과 같은 Pal로 처리한다", () => {
+  const parsed = parsePalworldBreedingQuery(
+    new URLSearchParams("mode=parents&parentA=broncherry_aqua"),
+  );
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.state.parentA, "broncherry_aqua");
+  assert.equal(
+    samePalworldBreedingPalId(parsed.state.parentA, "broncherry-aqua"),
+    true,
+  );
+  assert.equal(
+    samePalworldBreedingPalId(parsed.state.parentA, "broncherry"),
+    false,
+  );
+});
+
 test("Pal·Item·Skill 상세 query는 하나의 union state로 canonicalize한다", () => {
   const item = palworldDetailSelectionFromParams(new URLSearchParams("item=pal-sphere"));
   assert.deepEqual(item.selection, { type: "item", id: "pal-sphere" });
@@ -1307,6 +1331,19 @@ test("교배 API는 optional 성별 query를 전달하고 503 code를 보존한�
     assert.equal(reverseUrl.searchParams.get("page"), "2");
     assert.equal(reverseUrl.searchParams.get("limit"), "12");
     assert.equal(reverseUrl.searchParams.get("type"), "special");
+
+    await assert.rejects(
+      () => getPalworldBreedingPartners("lamball", 3, 12, undefined, "normal"),
+      (error: unknown) => error instanceof PalworldApiError
+        && error.status === 503
+        && error.code === "PALWORLD_DATA_UNAVAILABLE",
+    );
+    const partnersUrl = new URL(requestedUrl);
+    assert.equal(partnersUrl.pathname, "/api/palworld/breeding/partners");
+    assert.equal(partnersUrl.searchParams.get("parent"), "lamball");
+    assert.equal(partnersUrl.searchParams.get("page"), "3");
+    assert.equal(partnersUrl.searchParams.get("limit"), "12");
+    assert.equal(partnersUrl.searchParams.get("type"), "normal");
 
     const controller = new AbortController();
     await assert.rejects(

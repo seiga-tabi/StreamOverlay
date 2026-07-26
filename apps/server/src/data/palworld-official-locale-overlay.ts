@@ -4,6 +4,8 @@ import path from "node:path";
 import {
   assertPalworldPakCandidateArtifact,
   assertPalworldTranslationSnapshot,
+  validatePalworldPassiveEffect,
+  type PalworldPassiveEffect,
   type PalworldTranslationField,
   type PalworldTranslationFieldValue,
   type PalworldTranslationLocale,
@@ -264,7 +266,7 @@ export type PalworldActiveSkillLocaleEvidence = {
 };
 
 export type PalworldPassiveSkillLocaleEvidence = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   release: string;
   status: typeof PASSIVE_SKILL_EVIDENCE_STATUS;
   candidateId: string;
@@ -283,6 +285,9 @@ export type PalworldPassiveSkillLocaleEvidence = {
     compatibleDescriptions: number;
     missingSourceDescriptions: number;
     numericMismatchDescriptions: number;
+    compatibleEffects: number;
+    sourceMismatchEffects: number;
+    effectRows: number;
   };
   entries: Array<{
     legacySkillId: string;
@@ -292,6 +297,9 @@ export type PalworldPassiveSkillLocaleEvidence = {
     expectedLegacyIdPrefix: string;
     joinGuard: "legacy_public_id_prefix_exact";
     nameLocalePayloadSha256: Record<PalworldTranslationLocale, string>;
+    effectState: "available" | "source_mismatch";
+    effectsPayloadSha256: string;
+    effects: PalworldPassiveEffect[];
     description: {
       status: "compatible" | "missing_source" | "numeric_mismatch";
       legacyNumbers: number[];
@@ -434,6 +442,7 @@ type CandidatePassiveSkill = {
   sourceInternalId: string;
   name: PalworldTranslationLocalizedCandidateValue;
   description: PalworldTranslationLocalizedCandidateValue;
+  effects: PalworldPassiveEffect[];
 };
 
 type PassiveSkillLocaleResolution = {
@@ -1017,12 +1026,38 @@ function candidatePassiveSkillsAt(
     ) {
       fail(`${entryPath} passive skill source identity 또는 locale이 올바르지 않습니다.`);
     }
+    const effects = arrayAt(
+      input.effects,
+      `${entryPath}.effects`,
+      4,
+    ).map((effect, effectIndex): PalworldPassiveEffect => {
+      const effectPath = `${entryPath}.effects[${effectIndex}]`;
+      const effectRoot = recordAt(effect, effectPath, ["type", "value", "target"]);
+      const parsed = {
+        type: stringAt(effectRoot.type, `${effectPath}.type`, 96),
+        value: finiteNumberAt(effectRoot.value, `${effectPath}.value`),
+        target: stringAt(effectRoot.target, `${effectPath}.target`, 64),
+      };
+      const validated = validatePalworldPassiveEffect(parsed);
+      if (!validated.ok) {
+        fail(`${effectPath} Shared 원본 효과 검증에 실패했습니다: ${validated.error}`);
+      }
+      return validated.data;
+    });
+    if (effects.length === 0) {
+      fail(`${entryPath}.effects에 하나 이상의 원본 효과가 필요합니다.`);
+    }
+    const effectKeys = effects.map((effect) => `${effect.type}\0${effect.target}`);
+    if (new Set(effectKeys).size !== effectKeys.length) {
+      fail(`${entryPath}.effects에 중복 type·target 조합이 있습니다.`);
+    }
     return [{
       id,
       sourceRowId,
       sourceInternalId,
       name: localized.name,
       description: localized.description,
+      effects,
     }];
   });
   return [...skills].sort((left, right) => left.id.localeCompare(right.id, "en"));
@@ -1393,6 +1428,15 @@ function buildPassiveSkillLocaleResolution(input: {
       : descriptionCompatible
         ? "compatible" as const
         : "numeric_mismatch" as const;
+    const candidateEffectNumbers = candidate.effects.map((effect) => effect.value);
+    const effectState =
+      descriptionStatus === "numeric_mismatch"
+      || (
+        descriptionStatus === "missing_source"
+        && canonicalJson(candidateEffectNumbers) !== canonicalJson(legacyNumbers)
+      )
+        ? "source_mismatch" as const
+        : "available" as const;
 
     byLegacySkillId.set(legacySkill.id, {
       candidate,
@@ -1406,6 +1450,9 @@ function buildPassiveSkillLocaleResolution(input: {
       expectedLegacyIdPrefix,
       joinGuard: "legacy_public_id_prefix_exact",
       nameLocalePayloadSha256,
+      effectState,
+      effectsPayloadSha256: sha256(canonicalJson(candidate.effects)),
+      effects: candidate.effects.map((effect) => ({ ...effect })),
       description: {
         status: descriptionStatus,
         legacyNumbers,
@@ -1423,7 +1470,7 @@ function buildPassiveSkillLocaleResolution(input: {
   }
 
   const evidence = assertPalworldPassiveSkillLocaleEvidenceArtifact({
-    schemaVersion: 1,
+    schemaVersion: 2,
     release: input.catalog.release,
     status: PASSIVE_SKILL_EVIDENCE_STATUS,
     candidateId: input.candidateId,
@@ -1445,6 +1492,11 @@ function buildPassiveSkillLocaleResolution(input: {
         entry.description.status === "missing_source").length,
       numericMismatchDescriptions: entries.filter((entry) =>
         entry.description.status === "numeric_mismatch").length,
+      compatibleEffects: entries.filter((entry) =>
+        entry.effectState === "available").length,
+      sourceMismatchEffects: entries.filter((entry) =>
+        entry.effectState === "source_mismatch").length,
+      effectRows: entries.reduce((sum, entry) => sum + entry.effects.length, 0),
     },
     entries,
   });
@@ -2091,7 +2143,7 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
     "entries",
   ]);
   if (
-    root.schemaVersion !== 1
+    root.schemaVersion !== 2
     || root.status !== PASSIVE_SKILL_EVIDENCE_STATUS
     || root.joinRule !== PASSIVE_SKILL_MAPPING_JOIN_RULE
   ) {
@@ -2142,6 +2194,9 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
       "expectedLegacyIdPrefix",
       "joinGuard",
       "nameLocalePayloadSha256",
+      "effectState",
+      "effectsPayloadSha256",
+      "effects",
       "description",
     ]);
     const legacySkillId = safeIdAt(entry.legacySkillId, `${entryPath}.legacySkillId`);
@@ -2193,6 +2248,43 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
       ko: sha256At(nameHashes.ko, `${entryPath}.nameLocalePayloadSha256.ko`),
       ja: sha256At(nameHashes.ja, `${entryPath}.nameLocalePayloadSha256.ja`),
     };
+    if (
+      entry.effectState !== "available"
+      && entry.effectState !== "source_mismatch"
+    ) {
+      fail(`${entryPath}.effectState가 올바르지 않습니다.`);
+    }
+    const effectState = entry.effectState as
+      | "available"
+      | "source_mismatch";
+    const effects = arrayAt(
+      entry.effects,
+      `${entryPath}.effects`,
+      4,
+    ).map((effect, effectIndex): PalworldPassiveEffect => {
+      const validated = validatePalworldPassiveEffect(effect);
+      if (!validated.ok) {
+        fail(
+          `${entryPath}.effects[${effectIndex}] Shared 원본 효과 검증에 실패했습니다: `
+          + validated.error,
+        );
+      }
+      return validated.data;
+    });
+    if (effects.length === 0) {
+      fail(`${entryPath}.effects에 하나 이상의 원본 효과가 필요합니다.`);
+    }
+    const effectKeys = effects.map((effect) => `${effect.type}\0${effect.target}`);
+    if (new Set(effectKeys).size !== effectKeys.length) {
+      fail(`${entryPath}.effects에 중복 type·target 조합이 있습니다.`);
+    }
+    const effectsPayloadSha256 = sha256At(
+      entry.effectsPayloadSha256,
+      `${entryPath}.effectsPayloadSha256`,
+    );
+    if (effectsPayloadSha256 !== sha256(canonicalJson(effects))) {
+      fail(`${entryPath}.effectsPayloadSha256가 실제 효과 payload와 일치하지 않습니다.`);
+    }
     const descriptionRoot = recordAt(entry.description, `${entryPath}.description`, [
       "status",
       "legacyNumbers",
@@ -2258,6 +2350,18 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
     ) {
       fail(`${entryPath}.description 상태와 수치/hash evidence가 일치하지 않습니다.`);
     }
+    const candidateEffectNumbers = effects.map((effect) => effect.value);
+    const expectedEffectState =
+      descriptionStatus === "numeric_mismatch"
+      || (
+        descriptionStatus === "missing_source"
+        && canonicalJson(candidateEffectNumbers) !== canonicalJson(legacyNumbers)
+      )
+        ? "source_mismatch"
+        : "available";
+    if (effectState !== expectedEffectState) {
+      fail(`${entryPath}.effectState가 설명·원본 효과 수치 evidence와 일치하지 않습니다.`);
+    }
     return {
       legacySkillId,
       candidateSkillId,
@@ -2266,6 +2370,9 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
       expectedLegacyIdPrefix,
       joinGuard: "legacy_public_id_prefix_exact" as const,
       nameLocalePayloadSha256,
+      effectState,
+      effectsPayloadSha256,
+      effects,
       description: {
         status: descriptionStatus,
         legacyNumbers,
@@ -2281,6 +2388,9 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
     "compatibleDescriptions",
     "missingSourceDescriptions",
     "numericMismatchDescriptions",
+    "compatibleEffects",
+    "sourceMismatchEffects",
+    "effectRows",
   ]);
   const counts = {
     activePassiveSkills: integerAt(
@@ -2307,6 +2417,18 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
       countsRoot.numericMismatchDescriptions,
       "passiveSkillLocaleEvidence.counts.numericMismatchDescriptions",
     ),
+    compatibleEffects: integerAt(
+      countsRoot.compatibleEffects,
+      "passiveSkillLocaleEvidence.counts.compatibleEffects",
+    ),
+    sourceMismatchEffects: integerAt(
+      countsRoot.sourceMismatchEffects,
+      "passiveSkillLocaleEvidence.counts.sourceMismatchEffects",
+    ),
+    effectRows: integerAt(
+      countsRoot.effectRows,
+      "passiveSkillLocaleEvidence.counts.effectRows",
+    ),
   };
   if (
     counts.activePassiveSkills !== entries.length
@@ -2318,14 +2440,21 @@ export function assertPalworldPassiveSkillLocaleEvidenceArtifact(
       !== entries.filter((entry) => entry.description.status === "missing_source").length
     || counts.numericMismatchDescriptions
       !== entries.filter((entry) => entry.description.status === "numeric_mismatch").length
+    || counts.compatibleEffects
+      !== entries.filter((entry) => entry.effectState === "available").length
+    || counts.sourceMismatchEffects
+      !== entries.filter((entry) => entry.effectState === "source_mismatch").length
+    || counts.effectRows
+      !== entries.reduce((sum, entry) => sum + entry.effects.length, 0)
     || counts.compatibleDescriptions
       + counts.missingSourceDescriptions
       + counts.numericMismatchDescriptions !== entries.length
+    || counts.compatibleEffects + counts.sourceMismatchEffects !== entries.length
   ) {
     fail("passiveSkillLocaleEvidence counts가 실제 entries와 일치하지 않습니다.");
   }
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     release: stringAt(root.release, "passiveSkillLocaleEvidence.release", 64),
     status: PASSIVE_SKILL_EVIDENCE_STATUS,
     candidateId: stringAt(
@@ -2611,22 +2740,28 @@ function buildCoverage(
       translated.set(`${record.kind}:${record.id}:${field}`, value);
     }
   }
+  const sourceFieldKeys = new Set(
+    corpus.records.flatMap((record) =>
+      Object.keys(record.fields).map((field) =>
+        `${record.kind}:${record.id}:${field}`)),
+  );
+  for (const [key, value] of translated) {
+    if (value.status === "source_provided") sourceFieldKeys.add(key);
+  }
   const byKind = Object.fromEntries(KINDS.map((kind) => {
-    const sourceRecords = corpus.records.filter((record) => record.kind === kind);
     return [kind, Object.fromEntries(FIELDS.map((field) => [
       field,
       {
-        translated: sourceRecords.filter((record) =>
-          record.fields[field] !== undefined
-          && translated.has(`${kind}:${record.id}:${field}`)).length,
-        total: sourceRecords.filter((record) => record.fields[field] !== undefined).length,
+        translated: [...sourceFieldKeys].filter((key) =>
+          key.startsWith(`${kind}:`)
+          && key.endsWith(`:${field}`)
+          && translated.has(key)).length,
+        total: [...sourceFieldKeys].filter((key) =>
+          key.startsWith(`${kind}:`) && key.endsWith(`:${field}`)).length,
       },
     ]))];
   })) as PalworldOfficialLocaleCoverageArtifact["coverage"]["byKind"];
-  const total = corpus.records.reduce(
-    (sum, record) => sum + Object.keys(record.fields).length,
-    0,
-  );
+  const total = sourceFieldKeys.size;
   const status = {
     source_provided: 0,
     human_reviewed: 0,
@@ -3810,6 +3945,68 @@ export async function buildPalworldOfficialLocaleOverlay(
           sourceMemberSha256: official.sourceMemberSha256,
         });
       }
+    }
+  }
+  // Legacy catalog에 영문 설명 필드가 없어 기존 corpus가 만들지 못한 partner
+  // 설명도 candidate의 exact Pal/sourceInternalId join과 양쪽 공식 locale member
+  // checksum이 모두 검증된 경우에만 source_provided로 추가합니다. candidate 전체
+  // runtime을 활성화하거나 표시 이름으로 연결하지 않습니다.
+  for (const skill of catalog.skills) {
+    if (
+      skill.type !== "partner"
+      || skill.descriptionEn !== undefined
+      || !skill.id.startsWith("partner-")
+    ) {
+      continue;
+    }
+    const palId = skill.id.slice("partner-".length);
+    const candidate = candidateMaps.candidateSkillById.get(`partner:${palId}`);
+    const localized = candidate?.description;
+    const entityInfo = candidateEntityInfo({
+      kind: "skill",
+      id: skill.id,
+      ...activeMaps,
+      ...candidateMaps,
+      activeSkillCompatibilityByLegacyId:
+        activeSkillResolution.byLegacySkillId,
+      passiveSkillCompatibilityByLegacyId:
+        passiveSkillResolution.byLegacySkillId,
+      aliasApplications,
+    });
+    if (localized === undefined || entityInfo === undefined) continue;
+    const officialByLocale = Object.fromEntries(
+      LOCALES.map((locale) => [
+        locale,
+        palworldTranslationOfficialLocaleValue(
+          localized,
+          locale,
+          localeByKey[locale],
+          true,
+        ),
+      ]),
+    ) as Record<
+      PalworldTranslationLocale,
+      ReturnType<typeof palworldTranslationOfficialLocaleValue>
+    >;
+    if (LOCALES.some((locale) => officialByLocale[locale] === undefined)) {
+      continue;
+    }
+    for (const locale of LOCALES) {
+      const official = officialByLocale[locale]!;
+      officialRecords.push({
+        locale,
+        kind: "skill",
+        id: skill.id,
+        field: "description",
+        ...entityInfo,
+        messageKey: localized.messageKey,
+        text: official.text,
+        textSha256: official.valueSha256,
+        status: "source_provided",
+        richTextStatus: "resolved",
+        sourceMember: official.sourceMember,
+        sourceMemberSha256: official.sourceMemberSha256,
+      });
     }
   }
   officialRecords.sort((left, right) =>

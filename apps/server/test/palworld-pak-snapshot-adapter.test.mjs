@@ -655,6 +655,14 @@ test("canonical PAK candidate를 전체 참조를 보존한 snapshot으로 변�
   assert.equal(first.snapshot.pals[0].translation.name.ko, "source_provided");
   assert.equal(first.snapshot.items[0].translation.name.ja, "source_provided");
   assert.equal(first.snapshot.skills[0].sourceInternalId, "WaterJet");
+  assert.deepEqual(
+    first.snapshot.skills.find((skill) => skill.id === "passive-brave"),
+    {
+      ...first.snapshot.skills.find((skill) => skill.id === "passive-brave"),
+      passiveEffectState: "available",
+      passiveEffects: [{ type: "ShotAttack", value: 10, target: "ToSelf" }]
+    }
+  );
   assert.equal(first.snapshot.items[0].recipes[0].materials[0].item.id, "item-one");
   assert.equal(first.snapshot.pals[0].dropDetails[0].item.id, "item-one");
   assert.equal(first.snapshot.pals[0].activeSkills[0].id, "active-waterjet");

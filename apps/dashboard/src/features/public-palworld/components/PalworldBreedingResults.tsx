@@ -187,6 +187,35 @@ export function ReverseBreedingPairCard({
   </Card>;
 }
 
+export function BreedingPartnerPairCard({
+  locale,
+  onOpenPal,
+  onUsePair,
+  pair,
+}: {
+  locale: PalworldLocale;
+  onOpenPal: (id: string) => void;
+  onUsePair: (pair: PalworldBreedingPair) => void;
+  pair: PalworldBreedingPair;
+}) {
+  const text = palworldI18n[locale];
+  return <Card className="palworld-breeding-partner-card" data-testid="breeding-partner-pair">
+    <CardHeader><PairTypeBadges locale={locale} pair={pair} /></CardHeader>
+    <CardContent>
+      <div className="palworld-reverse-parents">
+        <BreedingPalButton locale={locale} onOpen={onOpenPal} pal={pair.parentA} role={text.parentRoleA} />
+        <span aria-hidden="true">＋</span>
+        <BreedingPalButton locale={locale} onOpen={onOpenPal} pal={pair.parentB} role={text.parentRoleB} />
+      </div>
+      <div className="palworld-direct-result-connector" aria-hidden="true">↓</div>
+      <BreedingPalButton emphasis="target" locale={locale} onOpen={onOpenPal} pal={pair.child} role={text.resultPal} />
+      <div className="palworld-reverse-pair-actions">
+        <Button variant="secondary" onClick={() => onUsePair(pair)}>{text.sendToCalculator}</Button>
+      </div>
+    </CardContent>
+  </Card>;
+}
+
 export function BreedingRequestStatus({ message }: { message: string }) {
   return <p className="yoro-u-sr-only" role="status" aria-live="polite" aria-atomic="true">{message}</p>;
 }

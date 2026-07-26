@@ -5,7 +5,7 @@ import {
   type PalworldPalListResponse
 } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
-import { Card, CardContent } from "../../../shared/ui/Card";
+import { Card } from "../../../shared/ui/Card";
 import { Input } from "../../../shared/ui/Form";
 import {
   Modal,

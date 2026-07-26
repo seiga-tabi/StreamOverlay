@@ -165,7 +165,8 @@ test("Palworld 데이터가 없으면 Palworld GET API만 고정 503이고 healt
     "/api/palworld/map/markers?world=main",
     "/api/palworld/map/spawns?world=main&pal=anubis",
     "/api/palworld/breeding?parentA=penking&parentB=bushi",
-    "/api/palworld/breeding/parents?child=anubis"
+    "/api/palworld/breeding/parents?child=anubis",
+    "/api/palworld/breeding/partners?parent=lamball"
   ];
   for (const pathname of paths) {
     const response = await request(handler, pathname);

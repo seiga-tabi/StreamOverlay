@@ -153,6 +153,15 @@ export function swapBreedingParents<T>(parentA: T | null, parentB: T | null): [T
   return [parentB, parentA];
 }
 
+export function samePalworldBreedingPalId(
+  left: string | undefined,
+  right: string | undefined,
+): boolean {
+  if (left === undefined || right === undefined) return false;
+  const normalizeAlias = (id: string): string => id.toLocaleLowerCase().replaceAll("_", "-");
+  return normalizeAlias(left) === normalizeAlias(right);
+}
+
 export function breedingPairGendersForParents(
   pair: PalworldBreedingPair,
   parentAId: string,
@@ -160,13 +169,19 @@ export function breedingPairGendersForParents(
 ): { parentAGender: PalworldBreedingGender; parentBGender: PalworldBreedingGender } | undefined {
   const condition = pair.genderCondition;
   if (!condition || condition.parentA === "any" || condition.parentB === "any") return undefined;
-  if (pair.parentA.id === parentAId && pair.parentB.id === parentBId) {
+  if (
+    samePalworldBreedingPalId(pair.parentA.id, parentAId)
+    && samePalworldBreedingPalId(pair.parentB.id, parentBId)
+  ) {
     return {
       parentAGender: condition.parentA,
       parentBGender: condition.parentB,
     };
   }
-  if (pair.parentA.id === parentBId && pair.parentB.id === parentAId) {
+  if (
+    samePalworldBreedingPalId(pair.parentA.id, parentBId)
+    && samePalworldBreedingPalId(pair.parentB.id, parentAId)
+  ) {
     return {
       parentAGender: condition.parentB,
       parentBGender: condition.parentA,

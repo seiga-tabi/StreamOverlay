@@ -277,14 +277,6 @@ function sha256At(value: unknown, path: string): string {
   return text;
 }
 
-function nullableStringAt(value: unknown, path: string, maxLength = 2048): string | null {
-  return value === null ? null : stringAt(value, path, maxLength);
-}
-
-function nullableIntegerAt(value: unknown, path: string, min: number, max: number): number | null {
-  return value === null ? null : integerAt(value, path, min, max);
-}
-
 function assertArray(value: unknown, path: string, maxLength: number): unknown[] {
   if (!Array.isArray(value) || value.length > maxLength) fail(path, `최대 ${maxLength}개 배열이어야 합니다.`);
   return value;

@@ -1,5 +1,6 @@
 import type {
   PalworldBreedingPairType,
+  PalworldBreedingPartnersResponse,
   PalworldBreedingParentsResponse,
   PalworldBreedingResultResponse,
   PalworldBreedingGender,
@@ -22,6 +23,7 @@ import type {
 import {
   PALWORLD_SEARCH_MAX_LENGTH,
   validatePalworldBreedingParentsResponse,
+  validatePalworldBreedingPartnersResponse,
   validatePalworldBreedingResultResponse,
   validatePalworldItemDetail,
   validatePalworldItemSummary,
@@ -360,4 +362,16 @@ export function getPalworldBreedingParents(
   const params = new URLSearchParams({ child, page: String(page), limit: String(pageSize) });
   if (type !== "all") params.set("type", type);
   return publicGet(queryPath("/api/palworld/breeding/parents", params), signal, validatePalworldBreedingParentsResponse);
+}
+
+export function getPalworldBreedingPartners(
+  parent: string,
+  page = 1,
+  pageSize = 12,
+  signal?: AbortSignal,
+  type: PalworldBreedingPairType = "all",
+): Promise<PalworldBreedingPartnersResponse> {
+  const params = new URLSearchParams({ parent, page: String(page), limit: String(pageSize) });
+  if (type !== "all") params.set("type", type);
+  return publicGet(queryPath("/api/palworld/breeding/partners", params), signal, validatePalworldBreedingPartnersResponse);
 }

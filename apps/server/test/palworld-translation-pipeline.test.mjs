@@ -8,7 +8,7 @@ const {
   PALWORLD_TRANSLATION_MISSING_SOURCE_MARKER,
   PALWORLD_TRANSLATION_SOURCE_ANOMALY_NOTE,
   analyzeTranslationSource,
-  assertStrictMachineNameQualityForImport,
+  assertNoMachineAssistedTranslationsForImport,
   assertReviewedNameRecords,
   assertUniqueSortedTranslationRecords,
   independentOfficialSourceFieldsForRecords,
@@ -215,107 +215,16 @@ test("번역 후보 validator는 숫자 순서와 kg·초·레벨·배율 단위
   );
 });
 
-test("신규 import 이름 gate는 대표 오류 문자열을 차단하지만 legacy record validator는 계속 감사할 수 있다", () => {
-  const cases = [
-    { locale: "ko", text: "회사 소개" },
-    { locale: "ko", text: "지금 연락" },
-    { locale: "ja", text: "クアッドマックス" },
-    { locale: "ja", text: "夏期マックス" },
-    { locale: "ja", text: "サドル。" },
-  ];
-  for (const { locale, text } of cases) {
-    const source = sourceRecord({ description: undefined });
-    const sourceByIdentity = new Map([["item:test-item", source]]);
-    const candidate = translationRecord(source, { name: text });
-    assert.doesNotThrow(
-      () => validateTranslationRecord(candidate, locale, sourceByIdentity, new Set(), "candidate"),
-    );
-    const validated = validateTranslationRecord(candidate, locale, sourceByIdentity, new Set(), "candidate");
-    assert.throws(
-      () => assertStrictMachineNameQualityForImport([validated], locale, [source], new Map()),
-      /금지된 기계 보조 번역 문자열/u,
-    );
-  }
-});
-
-test("신규 import 이름 gate는 서로 다른 영어 이름이 동일한 machine locale 이름으로 붕괴하는 것을 차단한다", () => {
-  const firstSource = sourceRecord({ id: "first-item", name: "First Item", description: undefined });
-  const secondSource = sourceRecord({ id: "second-item", name: "Second Item", description: undefined });
-  const sources = [firstSource, secondSource];
-  const sourceByIdentity = new Map(sources.map((source) => [`${source.kind}:${source.id}`, source]));
-  const records = sources.map((source) => validateTranslationRecord(
-    translationRecord(source, { name: "같은 아이템" }),
-    "ko",
-    sourceByIdentity,
-    new Set(),
-    `candidate.${source.id}`,
-  ));
+test("공개 locale import는 이름과 설명의 machine_assisted 상태를 모두 차단한다", () => {
+  const source = sourceRecord();
+  const machine = translationRecord(source);
+  const reviewed = translationRecord(source, { status: "human_reviewed" });
   assert.throws(
-    () => assertStrictMachineNameQualityForImport(records, "ko", sources, new Map()),
-    /서로 다른 영어 원문이 같은 ko 기계 이름/u,
+    () => assertNoMachineAssistedTranslationsForImport([machine], "ko"),
+    /machine_assisted 필드를 사용할 수 없습니다/u,
   );
-});
-
-test("신규 import 이름 gate는 구조 토큰과 canonical Pal 검수 이름을 보존한다", () => {
-  const lamball = sourceRecord({ id: "lamball", kind: "pal", name: "Lamball", description: undefined });
-  const reviewedNames = new Map([
-    ["ko:pal:lamball", "도로롱"],
-    ["ja:pal:lamball", "モコロン"],
-  ]);
-  const structureCases = [
-    { english: "Lamball Saddle Schematic 2", ko: "도로롱 안장 설계도 2", ja: "モコロンのサドル設計図2" },
-    { english: "Lamball Ring 1", ko: "도로롱 반지 1", ja: "モコロンの指輪1" },
-    { english: "Lamball Meat", ko: "도로롱 고기", ja: "モコロンの肉" },
-    { english: "Lamball Egg", ko: "도로롱 알", ja: "モコロンの卵" },
-    { english: "Lamball Charm", ko: "도로롱 부적", ja: "モコロンのお守り" },
-    { english: "Lamball Sphere", ko: "도로롱 스피어", ja: "モコロンのスフィア" },
-  ];
-  for (const [index, entry] of structureCases.entries()) {
-    const source = sourceRecord({
-      id: `structured-${index}`,
-      name: entry.english,
-      description: undefined,
-    });
-    const corpus = [lamball, source];
-    const sourceByIdentity = new Map(corpus.map((record) => [`${record.kind}:${record.id}`, record]));
-    for (const locale of ["ko", "ja"]) {
-      const validated = validateTranslationRecord(
-        translationRecord(source, { name: entry[locale] }),
-        locale,
-        sourceByIdentity,
-        new Set(),
-        "candidate",
-      );
-      assert.doesNotThrow(
-        () => assertStrictMachineNameQualityForImport([validated], locale, corpus, reviewedNames),
-      );
-    }
-  }
-
-  const saddle = sourceRecord({ id: "bad-saddle", name: "Lamball Saddle", description: undefined });
-  const corpus = [lamball, saddle];
-  const sourceByIdentity = new Map(corpus.map((record) => [`${record.kind}:${record.id}`, record]));
-  const missingPal = validateTranslationRecord(
-    translationRecord(saddle, { name: "램볼 안장" }),
-    "ko",
-    sourceByIdentity,
-    new Set(),
-    "candidate",
-  );
-  assert.throws(
-    () => assertStrictMachineNameQualityForImport([missingPal], "ko", corpus, reviewedNames),
-    /canonical Pal lamball/u,
-  );
-  const missingToken = validateTranslationRecord(
-    translationRecord(saddle, { name: "도로롱 탈것" }),
-    "ko",
-    sourceByIdentity,
-    new Set(),
-    "candidate",
-  );
-  assert.throws(
-    () => assertStrictMachineNameQualityForImport([missingToken], "ko", corpus, reviewedNames),
-    /구조 토큰 Saddle/u,
+  assert.doesNotThrow(
+    () => assertNoMachineAssistedTranslationsForImport([reviewed], "ko"),
   );
 });
 
@@ -549,6 +458,78 @@ test("공식 source_provided 필드는 exact 출처 metadata를 보존하고 최
     ),
     /독립 검증된 official-source-fields\.json/u,
   );
+
+  const officialDescriptionText = "영어 corpus에는 없지만 공식 한국어 locale에는 있는 설명";
+  const officialDescription = {
+    id: source.id,
+    kind: source.kind,
+    fields: {
+      description: {
+        sourceSha256: sha256(officialDescriptionText),
+        sourceMessageKey: "ITEM_DESC_TestItem",
+        sourceMember: "L10N/ko/Pal/DataTable/Text/DT_ItemDescriptionText_Common.json",
+        sourceMemberSha256: "e".repeat(64),
+        text: officialDescriptionText,
+        status: "source_provided",
+      },
+    },
+  };
+  const independentOfficialDescription = {
+    locale: "ko",
+    kind: "item",
+    id: "test-item",
+    field: "description",
+    messageKey: "ITEM_DESC_TestItem",
+    text: officialDescriptionText,
+    textSha256: sha256(officialDescriptionText),
+    sourceMember: "L10N/ko/Pal/DataTable/Text/DT_ItemDescriptionText_Common.json",
+    sourceMemberSha256: "e".repeat(64),
+  };
+  assert.throws(
+    () => validateTranslationRecord(
+      officialDescription,
+      "ko",
+      sourceByIdentity,
+      new Set(),
+      "candidate",
+    ),
+    /독립 검증된 공식 locale source/u,
+  );
+  assert.deepEqual(
+    validateTranslationRecord(
+      officialDescription,
+      "ko",
+      sourceByIdentity,
+      new Set(),
+      "candidate",
+      new Map(),
+      new Map(),
+      new Map([[
+        "ko:item:test-item:description",
+        independentOfficialDescription,
+      ]]),
+    ),
+    officialDescription,
+  );
+  assert.throws(
+    () => validateTranslationRecord(
+      officialDescription,
+      "ko",
+      sourceByIdentity,
+      new Set(),
+      "candidate",
+      new Map(),
+      new Map(),
+      new Map([[
+        "ko:item:test-item:description",
+        {
+          ...independentOfficialDescription,
+          sourceMemberSha256: "f".repeat(64),
+        },
+      ]]),
+    ),
+    /독립 검증된 공식 locale source/u,
+  );
 });
 
 test("번역 coverage와 method는 source_provided·human_reviewed·machine_assisted를 분리 집계한다", () => {
@@ -614,6 +595,41 @@ test("번역 coverage와 method는 source_provided·human_reviewed·machine_assi
     }),
     "machine_assisted",
   );
+
+  const officialOnlyDescription = {
+    locale: "ko",
+    kind: "item",
+    id: officialSource.id,
+    field: "description",
+    messageKey: "ITEM_DESC_Official",
+    text: "공식 설명",
+    textSha256: sha256("공식 설명"),
+    sourceMember: "L10N/ko/Pal/DataTable/Text/DT_ItemDescriptionText_Common.json",
+    sourceMemberSha256: "f".repeat(64),
+  };
+  const coverageWithOfficialOnlyField = translationCoverage(
+    [{
+      ...records[0],
+      fields: {
+        ...records[0].fields,
+        description: {
+          sourceSha256: officialOnlyDescription.textSha256,
+          sourceMessageKey: officialOnlyDescription.messageKey,
+          sourceMember: officialOnlyDescription.sourceMember,
+          sourceMemberSha256: officialOnlyDescription.sourceMemberSha256,
+          text: officialOnlyDescription.text,
+          status: "source_provided",
+        },
+      },
+    }, ...records.slice(1)],
+    [officialSource, humanSource, machineSource],
+    [officialOnlyDescription],
+  );
+  assert.equal(coverageWithOfficialOnlyField.byKind.item.description.total, 1);
+  assert.equal(coverageWithOfficialOnlyField.byKind.item.description.translated, 1);
+  assert.equal(coverageWithOfficialOnlyField.total, coverage.total + 1);
+  assert.equal(coverageWithOfficialOnlyField.translated, coverage.translated + 1);
+  assert.equal(coverageWithOfficialOnlyField.missing, coverage.missing);
 });
 
 test("최종 snapshot record는 중복 없이 canonical 순서여야 한다", () => {

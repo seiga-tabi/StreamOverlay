@@ -5,7 +5,7 @@
   "sourceCatalogSha256": "9ee539c494a9785680a56d96c0dff810ee5433ff1f3f75628be238b7cf268552",
   "sourcePaldexSha256": "e0cf0b39e41efce6fce2e2f5e918c74b57f1d8be5a59bf18687be69f29224b53",
   "sourceRevision": "24181105+db70ea654aea70c4b1a4b0045bccfe58164cf01a",
-  "translationRevision": "official-locale-overlay-23341e7d79a57bac-eb408d81",
+  "translationRevision": "official-locale-overlay-07f413ac2586f8e9-eb408d81",
   "translationMethod": "source_provided",
   "translationStatus": "incomplete",
   "translatedAt": "2026-07-25T00:00:00.000Z",
@@ -53798,6 +53798,14 @@
           "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
           "text": "空中ブランコ",
           "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "781cdffdb10c1e06966ebdece70e50b9eac2d8fd4f63c6ffa101638cc5f72e08",
+          "sourceMessageKey": "PAL_FIRST_SPAWN_DESC_Windchimes",
+          "sourceMember": "Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+          "sourceMemberSha256": "130382e5a242aab7f0c5aebd09242d60e40ed662929435c5eed5fc5bc73a0c7e",
+          "text": "手持ちにいる間、装備中のグライダーの性能が変わる。\nグライド中は、ゆっくりと上昇することができる。\nLv.2 （グライダー性能強化：小） · Lv.3 （グライダー性能強化：中） · Lv.4 （グライダー性能強化：大） · Lv.5 （グライダー性能強化：特大）",
+          "status": "source_provided"
         }
       }
     },
@@ -53811,6 +53819,14 @@
           "sourceMember": "Pal/DataTable/Text/DT_SkillNameText_Common.json",
           "sourceMemberSha256": "8b66eb15bffc9a205289a550f9df04a4b275755e9770b118baee3cb05055a821",
           "text": "寒空ブランコ",
+          "status": "source_provided"
+        },
+        "description": {
+          "sourceSha256": "781cdffdb10c1e06966ebdece70e50b9eac2d8fd4f63c6ffa101638cc5f72e08",
+          "sourceMessageKey": "PAL_FIRST_SPAWN_DESC_Windchimes_Ice",
+          "sourceMember": "Pal/DataTable/Text/DT_PalFirstActivatedInfoText.json",
+          "sourceMemberSha256": "130382e5a242aab7f0c5aebd09242d60e40ed662929435c5eed5fc5bc73a0c7e",
+          "text": "手持ちにいる間、装備中のグライダーの性能が変わる。\nグライド中は、ゆっくりと上昇することができる。\nLv.2 （グライダー性能強化：小） · Lv.3 （グライダー性能強化：中） · Lv.4 （グライダー性能強化：大） · Lv.5 （グライダー性能強化：特大）",
           "status": "source_provided"
         }
       }
