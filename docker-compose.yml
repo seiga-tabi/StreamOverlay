@@ -5,9 +5,9 @@ services:
       context: .
       dockerfile: apps/server/Dockerfile
       args:
-        APP_VERSION: ${APP_VERSION:-0.1.0}
-        GIT_SHA: ${GIT_SHA:-unknown}
-        BUILD_TIME: ${BUILD_TIME:-unknown}
+        APP_VERSION: ${APP_VERSION:-0.1.0-dev}
+        GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
+        BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
     container_name: streamops-server
     restart: unless-stopped
     environment:
@@ -28,6 +28,8 @@ services:
       TWITCH_PUBLIC_REDIRECT_URI: ${TWITCH_PUBLIC_REDIRECT_URI:-http://localhost:3000/api/public/twitch/auth/callback}
       TWITCH_EXTRA_SCOPES: ${TWITCH_EXTRA_SCOPES:-}
       TWITCH_TOKEN_STORE_PATH: ${TWITCH_TOKEN_STORE_PATH:-/app/.streamops/twitch-token.json}
+      TWITCH_TOKEN_ENCRYPTION_KEY: ${TWITCH_TOKEN_ENCRYPTION_KEY:-}
+      TWITCH_TOKEN_ENCRYPTION_KEY_FILE: ${TWITCH_TOKEN_ENCRYPTION_KEY_FILE:-}
       TWITCH_USER_ACCESS_TOKEN: ${TWITCH_USER_ACCESS_TOKEN:-}
       TWITCH_BROADCASTER_ID: ${TWITCH_BROADCASTER_ID:-}
       TWITCH_BOT_USER_ID: ${TWITCH_BOT_USER_ID:-}
@@ -93,9 +95,9 @@ services:
       LEGAL_PROCESSORS_JA: ${LEGAL_PROCESSORS_JA:-}
       LEGAL_CROSS_BORDER_TRANSFER_KO: ${LEGAL_CROSS_BORDER_TRANSFER_KO:-}
       LEGAL_CROSS_BORDER_TRANSFER_JA: ${LEGAL_CROSS_BORDER_TRANSFER_JA:-}
-      APP_VERSION: ${APP_VERSION:-0.1.0}
-      GIT_SHA: ${GIT_SHA:-unknown}
-      BUILD_TIME: ${BUILD_TIME:-unknown}
+      APP_VERSION: ${APP_VERSION:-0.1.0-dev}
+      GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
+      BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
     read_only: true
     tmpfs:
       - /tmp

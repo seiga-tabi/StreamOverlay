@@ -1467,7 +1467,7 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
   await page.keyboard.press("Escape");
   await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
   await accountButton.click();
-  await page.getByRole("heading", { name: "펠월드 데이터베이스" }).click();
+  await page.keyboard.press("Escape");
   await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Offline Pal", { exact: true })).toHaveCount(0);
@@ -1499,7 +1499,7 @@ test("Twitch 상태 API 오류는 미설정으로 오표시하지 않고 Palworl
   await expect(page.getByText("Twitch 기능이 설정되지 않았습니다.")).toHaveCount(0);
   const search = page.getByTestId("hero-search").getByRole("searchbox");
   await search.fill("펭킹");
-  await expect(page.getByTestId("header-search").getByRole("option", { name: /펭킹/u })).toBeVisible();
+  await expect(page.getByTestId("hero-search").getByRole("option", { name: /펭킹/u })).toBeVisible();
 });
 
 test("Twitch 팔로우 API 오류가 발생해도 Palworld 홈 검색은 계속 동작한다", async ({ page }) => {
@@ -1910,7 +1910,7 @@ test("Pal 도감 검색·facet·chip·초기화·정렬은 URL을 단일 적용 
   await expect(elementGroup.getByRole("button", { name: /땅/u })).toHaveAttribute("aria-pressed", "true");
   await expect(workGroup.getByRole("button", { name: /채굴/u })).toHaveAttribute("aria-pressed", "true");
   await expect(elementGroup.getByRole("button", { name: /물/u })).toBeVisible();
-  await expect(filterSurface.getByRole("combobox", { name: "희귀도", exact: true })).toHaveValue("10");
+  await expect(filterSurface.getByRole("combobox", { name: "레어도", exact: true })).toHaveValue("10");
   await expect(filterSurface.getByRole("option", { name: /★ 20/u })).toHaveCount(0);
   await expect(filterSurface.getByRole("combobox", { name: "종류", exact: true })).toHaveValue("special");
   if (mobileFilters) await page.keyboard.press("Escape");
@@ -2589,7 +2589,7 @@ test("일반 스폰과 필드 보스의 data_unavailable 상태는 정상 layer�
 test("underscore 아이템 ID의 직접 URL로 아이템 상세 Modal을 연다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld/items?rarity=0");
-  await expect(page.getByRole("combobox", { name: "희귀도", exact: true })).toHaveValue("0");
+  await expect(page.getByRole("button", { name: "레어도 일반 선택", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.goto("/palworld/items?item=pal_sphere");
 
   await expect(page.getByTestId("header-search")).toBeVisible();
@@ -3207,7 +3207,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.goto("/palworld/items");
   await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" }).click();
 
-  await expect(page).toHaveURL(/\/palworld\/map$/u);
+  await expect(page).toHaveURL(/\/palworld\/map(?:\?.*)?$/u);
   await expect(page.getByTestId("header-search")).toBeVisible();
   await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { name: "Palworld 월드 지도", level: 1 })).toHaveClass(/yoro-u-sr-only/u);
@@ -3291,7 +3291,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.goBack();
   await expect(page).toHaveURL(/\/palworld\/items$/u);
   await page.goForward();
-  await expect(page).toHaveURL(/\/palworld\/map$/u);
+  await expect(page).toHaveURL(/\/palworld\/map(?:\?.*)?$/u);
   await expect(page.getByTestId("palworld-map-image")).toBeVisible();
   await page.getByRole("tab", { name: "세계수" }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("world")).toBe("tree");
@@ -3460,7 +3460,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.getByRole("dialog", { name: "아누비스" }).getByRole("button", { name: "Pal 상세 보기" }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("pal")).toBe("anubis");
   await expect(page.getByTestId("pal-detail-modal")).toBeVisible();
-  await page.getByTestId("pal-detail-modal").getByRole("button", { name: "닫기" }).click();
+  await page.getByTestId("pal-detail-modal").getByRole("button", { name: "닫기", exact: true }).click();
   await expect.poll(() => new URL(page.url()).searchParams.has("pal")).toBe(false);
   await page.getByRole("dialog", { name: "아누비스" }).getByRole("button", { name: "위치 정보 닫기" }).click();
   await expect.poll(() => new URL(page.url()).searchParams.has("marker")).toBe(false);

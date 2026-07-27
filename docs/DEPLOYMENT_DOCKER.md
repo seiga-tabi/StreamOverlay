@@ -27,6 +27,8 @@ docker build \
 
 push 후 `docker image inspect` 또는 registry 화면에서 immutable digest를 확인하고 릴리즈 기록에 `Git SHA`, image tag, digest를 함께 적습니다.
 
+production runtime validation은 `APP_VERSION`, 실제 `GIT_SHA`, ISO-8601 `BUILD_TIME`이 누락되거나 `unknown`이면 기동을 거부합니다. build args 없이 생성한 image를 운영에 사용하지 않습니다.
+
 ## 배포 전 검증
 
 먼저 운영자가 `.env`에 실제 법적 운영정보와 외부 서비스 자격 증명을 입력합니다. 이후 아래 도구로 HTTPS URL, callback, CORS와 내부 secret을 안전하게 보정합니다. 기본 실행은 dry-run이며 secret 값은 출력하지 않습니다. 전체 production 검증이 실패하면 `--write`를 지정해도 원본 파일은 변경되지 않습니다.
@@ -39,6 +41,32 @@ npm run validate:runtime
 ```
 
 `LEGAL_*`, Riot production key, Twitch client secret처럼 운영자가 확정해야 하는 값은 이 도구가 만들지 않습니다.
+
+### Twitch OAuth token 암호화 migration
+
+production에서는 `TWITCH_TOKEN_ENCRYPTION_KEY` 또는 `TWITCH_TOKEN_ENCRYPTION_KEY_FILE` 중 하나에 다른 secret과 재사용하지 않은 32바이트 key가 필요합니다. key 값은 로그나 릴리즈 기록에 남기지 않습니다.
+
+서버 시작은 평문 token을 자동 변환하지 않습니다. 평문 저장소가 발견되면 OAuth 기능은 fail-closed로 중단되며, 운영자가 방송이 없는 유지보수 시간에 다음 관리 명령을 명시적으로 실행해야 합니다.
+
+```bash
+npm --workspace apps/server run migrate:twitch-token-encryption -- \
+  --token-store /state/twitch-token.json \
+  --follower-token-store /state/streamer-follower-oauth-tokens.json \
+  --state-directory /state \
+  --backup-directory /encrypted-backup/streamops \
+  --key-file /run/secrets/twitch_token_encryption_key \
+  --operator-approved \
+  --backup-storage-encrypted
+```
+
+- snapshot은 application state directory 밖의 storage-level encryption이 적용된 경로에 만들고 directory `0700`, file `0600`을 확인합니다.
+- 배포 직전이면서 OAuth token write가 중지된 시점의 snapshot ID와 시각을 기록합니다.
+- staging에서 migration, 첫 재시작, 두 번째 재시작과 token metadata 일치를 확인합니다.
+- rollback image digest와 배포 전 state snapshot을 한 쌍으로 기록합니다.
+- 새 key를 분실하거나 변경하면 기존 암호문을 읽을 수 없음을 운영자에게 알립니다.
+- migration 이후 암호화 저장소를 이해하지 못하는 이전 image로 되돌릴 때는 컨테이너만 교체하지 말고, 승인된 배포 전 snapshot을 함께 복원합니다.
+- 방송 중이거나 EventSub·Followers 갱신이 활발한 시간에는 migration을 실행하지 않습니다.
+- backup 확인, key 확인, staging 검증, 운영자 승인, rollback image 확인 중 하나라도 빠지면 명령을 실행하지 않습니다.
 
 ```bash
 npm ci

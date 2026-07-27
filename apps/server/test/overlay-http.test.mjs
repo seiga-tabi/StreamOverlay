@@ -943,6 +943,14 @@ test("production HTTP는 HTTPS로 redirect하고 HTTPS 응답은 HSTS를 포함�
     await handler(createRequest("GET", "/health/live", undefined, { "x-forwarded-proto": "https" }), secureRes);
     assert.equal(secureRes.statusCode, 200);
     assert.equal(secureRes.headers["Strict-Transport-Security"], "max-age=15552000; includeSubDomains");
+
+    const healthWithoutProxyHeader = createResponse();
+    await handler(createRequest("GET", "/health/ready"), healthWithoutProxyHeader);
+    assert.equal(healthWithoutProxyHeader.statusCode, 200);
+    assert.equal(
+      healthWithoutProxyHeader.headers["Strict-Transport-Security"],
+      "max-age=15552000; includeSubDomains"
+    );
   } finally {
     appConfig.nodeEnv = previous.nodeEnv;
     appConfig.publicBaseUrl = previous.publicBaseUrl;

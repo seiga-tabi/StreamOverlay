@@ -10,6 +10,7 @@
     "start": "node dist/index.js",
     "validate:config": "tsx src/scripts/validate-config.ts",
     "validate:runtime": "tsx src/scripts/validate-runtime-config.ts",
+    "migrate:twitch-token-encryption": "tsx src/scripts/migrate-twitch-token-encryption.ts",
     "fetch:palworld-data": "tsx src/scripts/fetch-palworld-paldex.ts",
     "generate:palworld-data": "tsx src/scripts/generate-palworld-paldex.ts",
     "generate:palworld-breeding": "tsx src/scripts/generate-palworld-breeding.ts",

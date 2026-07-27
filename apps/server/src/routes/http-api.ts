@@ -886,9 +886,9 @@ function requestProtocol(req: IncomingMessage): "http" | "https" {
   return encrypted ? "https" : "http";
 }
 
-function securityHeadersForRequest(req: IncomingMessage): Record<string, string> {
+function securityHeadersForRequest(_req: IncomingMessage): Record<string, string> {
   const headers: Record<string, string> = { ...SECURITY_HEADERS };
-  if (appConfig.nodeEnv === "production" && requestProtocol(req) === "https") {
+  if (appConfig.nodeEnv === "production") {
     headers["Strict-Transport-Security"] = "max-age=15552000; includeSubDomains";
   }
   return headers;

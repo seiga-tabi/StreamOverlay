@@ -4910,14 +4910,14 @@
 
 @media (min-width: 48.001rem) {
   .palworld-map-workspace {
-    align-items: start;
+    align-items: stretch;
     gap: 0;
   }
 
   .palworld-map-filter-panel.palworld-map-desktop-filter {
-    align-self: start;
+    align-self: stretch;
     block-size: auto;
-    max-block-size: calc(100dvh - var(--yoro-space-8));
+    max-block-size: none;
     border-start-end-radius: 0;
     border-end-end-radius: 0;
     box-shadow: var(--yoro-shadow-none);

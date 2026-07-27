@@ -13,6 +13,10 @@ function strongSecret(label) {
   return `${label}_${"a".repeat(48)}`;
 }
 
+function strongEncryptionKey(seed = 0) {
+  return Buffer.from(Array.from({ length: 32 }, (_, index) => (index + seed) % 256)).toString("base64");
+}
+
 function runConfigValidation(envPatch, dotenvMode = 0o600) {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-runtime-config-"));
   const emptyEnv = path.join(dir, ".env");
@@ -22,6 +26,9 @@ function runConfigValidation(envPatch, dotenvMode = 0o600) {
     HOME: process.env.HOME,
     DOTENV_CONFIG_PATH: emptyEnv,
     NODE_ENV: "production",
+    APP_VERSION: "1.4.5",
+    GIT_SHA: "af4e7b9",
+    BUILD_TIME: "2026-07-27T07:35:19Z",
     PUBLIC_BASE_URL: "https://bot.example.com",
     DASHBOARD_BASE_URL: "https://bot.example.com",
     OVERLAY_BASE_URL: "https://bot.example.com/overlay",
@@ -30,6 +37,7 @@ function runConfigValidation(envPatch, dotenvMode = 0o600) {
     DASHBOARD_AUTH_TOKEN: strongSecret("dashboard"),
     OVERLAY_ACCESS_TOKEN: strongSecret("overlay"),
     BRIDGE_SHARED_SECRET: strongSecret("bridge"),
+    TWITCH_TOKEN_ENCRYPTION_KEY: strongEncryptionKey(4),
     LEGAL_OPERATOR_NAME: "Yoro Individual Service Operator",
     LEGAL_CONTACT_ADDRESS: "1-2-3 Chiyoda, Tokyo, Japan",
     LEGAL_PRIVACY_OFFICER_NAME: "Privacy Operations Lead",
@@ -113,6 +121,51 @@ test("production 설정은 강한 secret과 https origin이면 통과한다", ()
   assert.deepEqual(JSON.parse(result.stdout), { ok: true });
 });
 
+test("production 설정은 실제 build version·Git SHA·build 시각을 요구한다", () => {
+  const result = runConfigValidation({
+    APP_VERSION: "not-a-version",
+    GIT_SHA: "unknown",
+    BUILD_TIME: "unknown"
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stdout, /APP_VERSION/);
+  assert.match(result.stdout, /GIT_SHA/);
+  assert.match(result.stdout, /BUILD_TIME/);
+  assert.doesNotMatch(result.stdout, /not-a-version/);
+
+  const explicitTestIdentity = runConfigValidation({
+    APP_VERSION: "0.0.0-test",
+    GIT_SHA: "0000000000000000000000000000000000000000",
+    BUILD_TIME: "1970-01-01T00:00:00.000Z"
+  });
+  assert.equal(explicitTestIdentity.status, 2);
+  assert.match(explicitTestIdentity.stdout, /development\/test identity/u);
+  assert.match(explicitTestIdentity.stdout, /Git commit SHA/u);
+});
+
+test("production 설정은 runtime identity와 Docker image metadata 불일치를 차단한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-release-metadata-"));
+  const metadataPath = path.join(dir, "release.json");
+  try {
+    writeFileSync(metadataPath, JSON.stringify({
+      version: "1.4.5",
+      gitSha: "0123456789abcdef0123456789abcdef01234567",
+      builtAt: "2026-07-27T07:35:19Z"
+    }), { mode: 0o444 });
+    const mismatch = runConfigValidation({ IMAGE_RELEASE_METADATA_PATH: metadataPath });
+    assert.equal(mismatch.status, 2, mismatch.stderr || mismatch.stdout);
+    assert.match(mismatch.stdout, /Docker image metadata/u);
+
+    const matching = runConfigValidation({
+      IMAGE_RELEASE_METADATA_PATH: metadataPath,
+      GIT_SHA: "0123456789abcdef0123456789abcdef01234567"
+    });
+    assert.equal(matching.status, 0, matching.stderr || matching.stdout);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("production 설정은 확정된 공개 법적 운영정보를 요구한다", () => {
   const result = runConfigValidation({
     LEGAL_OPERATOR_NAME: "초안 운영자 정보",
@@ -144,7 +197,7 @@ test("production 지원 메일함은 webhook secret과 32바이트 암호화 key
     SUPPORT_MAILBOX_ENABLED: "true",
     SUPPORT_MAILBOX_ADDRESS: "support@yoro.gg",
     SUPPORT_MAILBOX_WEBHOOK_SECRET: strongSecret("support_webhook"),
-    SUPPORT_MAILBOX_ENCRYPTION_KEY: Buffer.alloc(32, 5).toString("base64")
+    SUPPORT_MAILBOX_ENCRYPTION_KEY: strongEncryptionKey(5)
   });
   assert.equal(valid.status, 0, valid.stderr || valid.stdout);
 
@@ -159,6 +212,21 @@ test("production 지원 메일함은 webhook secret과 32바이트 암호화 key
   assert.match(invalid.stdout, /SUPPORT_MAILBOX_ADDRESS/);
   assert.match(invalid.stdout, /SUPPORT_MAILBOX_ENCRYPTION_KEY/);
   assert.doesNotMatch(invalid.stdout, /support_webhook/);
+});
+
+test("production 설정은 Twitch OAuth token 암호화 key를 요구한다", () => {
+  const missing = runConfigValidation({ TWITCH_TOKEN_ENCRYPTION_KEY: undefined });
+  assert.equal(missing.status, 2);
+  assert.match(missing.stdout, /TWITCH_TOKEN_ENCRYPTION_KEY/);
+
+  const invalid = runConfigValidation({ TWITCH_TOKEN_ENCRYPTION_KEY: "invalid" });
+  assert.equal(invalid.status, 2);
+  assert.match(invalid.stdout, /TWITCH_TOKEN_ENCRYPTION_KEY/);
+  assert.doesNotMatch(invalid.stdout, /invalid/);
+
+  const weak = runConfigValidation({ TWITCH_TOKEN_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString("base64") });
+  assert.equal(weak.status, 2);
+  assert.match(weak.stdout, /TWITCH_TOKEN_ENCRYPTION_KEY/);
 });
 
 test("production 설정은 약한 secret, http URL, wildcard CORS를 거부하고 secret 값을 출력하지 않는다", () => {

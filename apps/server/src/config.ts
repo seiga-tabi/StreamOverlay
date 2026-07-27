@@ -66,6 +66,22 @@ function normalizedOrigin(value: string): string | undefined {
   }
 }
 
+function imageReleaseMetadata(): { version: string; gitSha: string; builtAt: string } | undefined {
+  const metadataPath = process.env.IMAGE_RELEASE_METADATA_PATH?.trim();
+  if (!metadataPath) return undefined;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(metadataPath, "utf8")) as Record<string, unknown>;
+    if (
+      typeof parsed.version !== "string"
+      || typeof parsed.gitSha !== "string"
+      || typeof parsed.builtAt !== "string"
+    ) return undefined;
+    return { version: parsed.version, gitSha: parsed.gitSha, builtAt: parsed.builtAt };
+  } catch {
+    return undefined;
+  }
+}
+
 const DEFAULT_EVENTSUB_SUBSCRIPTIONS = [
   "stream.online",
   "stream.offline",
@@ -80,6 +96,7 @@ const localNoAuth = localNoAuthRequested && nodeEnv !== "production";
 const dashboardAuthToken = localNoAuth ? "" : envOrFile("DASHBOARD_AUTH_TOKEN");
 const overlayAccessToken = localNoAuth ? "" : envOrFile("OVERLAY_ACCESS_TOKEN");
 const bridgeSharedSecret = envOrFile("BRIDGE_SHARED_SECRET", "dev-secret-change-me");
+const imageBuild = imageReleaseMetadata();
 
 export const appConfig = {
   nodeEnv,
@@ -88,6 +105,7 @@ export const appConfig = {
     gitSha: env("GIT_SHA", "unknown"),
     builtAt: env("BUILD_TIME", "unknown")
   },
+  imageBuild,
   allowInsecureDev: boolEnv("ALLOW_INSECURE_DEV", false),
   port: Number(env("PORT", "3000")),
   publicBaseUrl: env("PUBLIC_BASE_URL", "http://localhost:3000"),
@@ -102,6 +120,7 @@ export const appConfig = {
     publicRedirectUri: env("TWITCH_PUBLIC_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/public/twitch/auth/callback`),
     extraScopes: listEnv("TWITCH_EXTRA_SCOPES"),
     tokenStorePath: env("TWITCH_TOKEN_STORE_PATH", path.resolve(projectRoot, ".streamops", "twitch-token.json")),
+    tokenEncryptionKey: envOrFile("TWITCH_TOKEN_ENCRYPTION_KEY"),
     userAccessToken: env("TWITCH_USER_ACCESS_TOKEN"),
     broadcasterId: env("TWITCH_BROADCASTER_ID"),
     botUserId: env("TWITCH_BOT_USER_ID"),
@@ -265,6 +284,34 @@ function validateCorsOrigins(errors: string[]): void {
   }
 }
 
+function validateBuildMetadata(errors: string[]): void {
+  if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(appConfig.build.version)) {
+    errors.push("APP_VERSION은 production에서 유효한 semantic version이어야 합니다.");
+  } else if (/(?:^|[.-])(?:dev|test)(?:[.+-]|$)/i.test(appConfig.build.version)) {
+    errors.push("APP_VERSION은 production에서 development/test identity를 사용할 수 없습니다.");
+  }
+  if (!/^[a-f0-9]{7,40}$/i.test(appConfig.build.gitSha) || /^0+$/u.test(appConfig.build.gitSha)) {
+    errors.push("GIT_SHA는 production에서 실제 Git commit SHA여야 합니다.");
+  }
+  const builtAt = Date.parse(appConfig.build.builtAt);
+  if (!Number.isFinite(builtAt) || !/^\d{4}-\d{2}-\d{2}T/.test(appConfig.build.builtAt)) {
+    errors.push("BUILD_TIME은 production에서 유효한 ISO-8601 시각이어야 합니다.");
+  }
+  if (process.env.IMAGE_RELEASE_METADATA_PATH && !appConfig.imageBuild) {
+    errors.push("Docker image release metadata를 읽거나 검증할 수 없습니다.");
+  }
+  if (
+    appConfig.imageBuild
+    && (
+      appConfig.imageBuild.version !== appConfig.build.version
+      || appConfig.imageBuild.gitSha !== appConfig.build.gitSha
+      || appConfig.imageBuild.builtAt !== appConfig.build.builtAt
+    )
+  ) {
+    errors.push("runtime release identity와 Docker image metadata가 일치하지 않습니다.");
+  }
+}
+
 function validateDotenvPermissions(errors: string[]): void {
   for (const dotenvPath of dotenvPaths) {
     if (!fs.existsSync(dotenvPath)) continue;
@@ -291,7 +338,8 @@ function encryptionKeyBytes(value: string): Buffer | undefined {
 }
 
 function isValidEncryptionKey(value: string): boolean {
-  return encryptionKeyBytes(value)?.byteLength === 32;
+  const key = encryptionKeyBytes(value);
+  return Boolean(key && key.byteLength === 32 && new Set(key).size >= 8);
 }
 
 function secretMaterial(value: string): Buffer {
@@ -361,6 +409,7 @@ export function legalRuntimeConfigReady(): boolean {
 export function validateRuntimeConfig(): RuntimeConfigValidationResult {
   const errors: string[] = [];
   if (isProduction()) {
+    validateBuildMetadata(errors);
     if (appConfig.allowInsecureDev) errors.push("ALLOW_INSECURE_DEV는 production에서 사용할 수 없습니다.");
     if (appConfig.security.localNoAuthRequested) errors.push("STREAMOPS_LOCAL_NO_AUTH는 production에서 사용할 수 없습니다.");
     if (appConfig.security.allowLegacyWsQueryAuth) errors.push("ALLOW_LEGACY_WS_QUERY_AUTH는 production에서 사용할 수 없습니다.");
@@ -371,6 +420,7 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
       ["DASHBOARD_AUTH_TOKEN", appConfig.security.dashboardAuthToken],
       ["OVERLAY_ACCESS_TOKEN", appConfig.security.overlayAccessToken],
       ["BRIDGE_SHARED_SECRET", appConfig.bridge.sharedSecret],
+      ["TWITCH_TOKEN_ENCRYPTION_KEY", appConfig.twitch.tokenEncryptionKey],
       ...(appConfig.supportMailbox.enabled
         ? [
             ["SUPPORT_MAILBOX_WEBHOOK_SECRET", appConfig.supportMailbox.webhookSecret] as [string, string],
@@ -393,6 +443,9 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
     validateCorsOrigins(errors);
     validateDotenvPermissions(errors);
     errors.push(...collectLegalConfigErrors());
+    if (!isValidEncryptionKey(appConfig.twitch.tokenEncryptionKey)) {
+      errors.push("TWITCH_TOKEN_ENCRYPTION_KEY는 32바이트 base64 또는 64자리 hex 값이어야 합니다.");
+    }
     if (appConfig.supportMailbox.enabled) {
       validateSecret(errors, "SUPPORT_MAILBOX_WEBHOOK_SECRET", appConfig.supportMailbox.webhookSecret);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(appConfig.supportMailbox.address)) {

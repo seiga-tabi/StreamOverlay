@@ -5,6 +5,11 @@
 ## Runtime 설정
 
 - [ ] 실제 `LEGAL_*` 운영정보와 Riot/Twitch 자격 증명을 운영 secret 저장소에 입력했다.
+- [ ] image의 `APP_VERSION`, `GIT_SHA`, `BUILD_TIME`이 실제 release와 일치한다.
+- [ ] 다른 secret과 재사용하지 않은 `TWITCH_TOKEN_ENCRYPTION_KEY`를 secret 저장소에 입력했다.
+- [ ] Twitch OAuth token state의 배포 전 backup과 암호화 migration rollback 절차를 확인했다.
+- [ ] backup이 application state directory 외부의 암호화 저장소에 있고 `0700`/`0600` 권한을 사용한다.
+- [ ] staging에서 명시적 token migration 후 첫 번째·두 번째 재시작과 backup 복원 훈련을 통과했다.
 - [ ] `chmod 600 .env`로 환경 파일 권한을 제한했다.
 - [ ] `npm run configure:production -- --domain yoro.gg` dry-run이 통과했다.
 - [ ] `npm run configure:production -- --domain yoro.gg --write` 후 `npm run validate:runtime`이 통과했다.

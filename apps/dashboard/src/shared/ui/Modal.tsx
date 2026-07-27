@@ -33,6 +33,7 @@ type ModalContextValue = {
 };
 
 const ModalContext = createContext<ModalContextValue | null>(null);
+const openModalStack: symbol[] = [];
 
 export type ModalProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "role"> & {
   children: ReactNode;
@@ -181,6 +182,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
     const reactId = useId();
     const modalId = getModalId(reactId);
     const dialogRef = useRef<HTMLDivElement | null>(null);
+    const stackIdRef = useRef(Symbol("modal"));
     const previousFocusRef = useRef<HTMLElement | null>(null);
     const [labelledById, setLabelledById] = useState<string | undefined>();
     const [describedById, setDescribedById] = useState<string | undefined>();
@@ -229,6 +231,27 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
         target?.focus();
       };
     }, [open, returnFocusRef]);
+
+    useEffect(() => {
+      if (!open || closing || !closeOnEscape) return undefined;
+      const stackId = stackIdRef.current;
+      openModalStack.push(stackId);
+      const handleDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
+        if (
+          event.key !== "Escape"
+          || event.defaultPrevented
+          || openModalStack.at(-1) !== stackId
+        ) return;
+        event.preventDefault();
+        requestClose();
+      };
+      document.addEventListener("keydown", handleDocumentKeyDown);
+      return () => {
+        document.removeEventListener("keydown", handleDocumentKeyDown);
+        const index = openModalStack.lastIndexOf(stackId);
+        if (index >= 0) openModalStack.splice(index, 1);
+      };
+    }, [closeOnEscape, closing, open, requestClose]);
 
     useEffect(() => {
       if (!open || closing) {

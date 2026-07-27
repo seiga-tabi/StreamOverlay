@@ -30,6 +30,7 @@
     "test:visual:diff": "playwright test",
     "test:visual:update": "playwright test --update-snapshots",
     "configure:production": "node scripts/configure-production-runtime.mjs",
+    "build:production-image": "node scripts/build-production-image.mjs",
     "validate:config": "npm --workspace apps/server run validate:config",
     "validate:runtime": "npm --workspace apps/server run validate:runtime",
     "validate:palworld-data": "npm --workspace apps/server run validate:palworld-data",

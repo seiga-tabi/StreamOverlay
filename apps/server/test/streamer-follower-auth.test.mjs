@@ -315,23 +315,31 @@ test("옛 access token의 지연된 401은 새 OAuth 연결 token을 만료 처�
 test("로컬 scoped token 저장소는 한 고정 파일에 owner별로 원자 저장하고 권한을 제한한다", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "streamops-follower-token-store-"));
   const filePath = path.join(directory, "fixed", "streamer-follower-tokens.json");
+  const encryptionKey = Buffer.alloc(32, 23).toString("base64");
   try {
-    const store = new LocalJsonStreamerFollowerTokenStore(filePath);
+    const store = new LocalJsonStreamerFollowerTokenStore(filePath, encryptionKey);
     await Promise.all([
       store.set("101", storedToken("101")),
       store.set("202", storedToken("202"))
     ]);
 
-    const parsed = JSON.parse(await fs.readFile(filePath, "utf8"));
+    const raw = await fs.readFile(filePath, "utf8");
+    const parsed = JSON.parse(raw);
     assert.equal(parsed.version, 1);
-    assert.deepEqual(Object.keys(parsed.tokensByBroadcasterId).sort(), ["101", "202"]);
+    assert.equal(parsed.algorithm, "aes-256-gcm");
+    assert.doesNotMatch(raw, /access-101|refresh-101|access-202|refresh-202/);
     assert.equal((await fs.stat(path.dirname(filePath))).mode & 0o777, 0o700);
     assert.equal((await fs.stat(filePath)).mode & 0o777, 0o600);
     assert.equal(await fs.stat(`${filePath}.tmp`).catch(() => undefined), undefined);
 
-    const reloaded = new LocalJsonStreamerFollowerTokenStore(filePath);
+    const reloaded = new LocalJsonStreamerFollowerTokenStore(filePath, encryptionKey);
     assert.equal((await reloaded.get("101"))?.accessToken, "access-101");
     assert.equal((await reloaded.get("202"))?.accessToken, "access-202");
+    const wrongKeyStore = new LocalJsonStreamerFollowerTokenStore(
+      filePath,
+      Buffer.alloc(32, 24).toString("base64")
+    );
+    await assert.rejects(() => wrongKeyStore.get("101"));
     await reloaded.clear("101");
     assert.equal(await reloaded.get("101"), undefined);
     assert.equal((await reloaded.get("202"))?.accessToken, "access-202");

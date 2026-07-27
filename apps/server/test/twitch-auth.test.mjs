@@ -4,7 +4,14 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { TwitchAuthService, TwitchOAuthStateStore } from "../dist/services/twitch-auth.js";
-import { LocalJsonTwitchTokenStore, MemoryTwitchTokenStore } from "../dist/services/twitch-token-store.js";
+import {
+  LocalJsonTwitchTokenStore,
+  MemoryTwitchTokenStore,
+  TWITCH_TOKEN_AAD
+} from "../dist/services/twitch-token-store.js";
+import { STREAMER_FOLLOWER_TOKEN_AAD } from "../dist/services/streamer-follower-token-store.js";
+import { decryptTwitchTokenDocument } from "../dist/services/twitch-token-encryption.js";
+import { migrateTwitchTokenStores } from "../dist/services/twitch-token-migration.js";
 import { PublicTwitchAuthService, PublicTwitchViewerSessionStore } from "../dist/services/public-twitch-auth.js";
 
 const baseConfig = {
@@ -276,7 +283,8 @@ test("연결 상태는 누락된 scope를 missing_scopes로 표시한다", async
 test("로컬 Twitch token 저장소는 디렉터리와 파일 권한을 제한한다", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "streamops-token-store-"));
   const filePath = path.join(directory, "nested", "twitch-token.json");
-  const store = new LocalJsonTwitchTokenStore(filePath);
+  const encryptionKey = Buffer.alloc(32, 17).toString("base64");
+  const store = new LocalJsonTwitchTokenStore(filePath, encryptionKey);
   const token = {
     accessToken: "access",
     refreshToken: "refresh",
@@ -288,10 +296,15 @@ test("로컬 Twitch token 저장소는 디렉터리와 파일 권한을 제한�
   };
 
   await store.set(token);
+  const firstCiphertext = await fs.readFile(filePath, "utf8");
+  await store.set(token);
+  const secondCiphertext = await fs.readFile(filePath, "utf8");
   const directoryMode = (await fs.stat(path.dirname(filePath))).mode & 0o777;
   const fileMode = (await fs.stat(filePath)).mode & 0o777;
   assert.equal(directoryMode, 0o700);
   assert.equal(fileMode, 0o600);
+  assert.doesNotMatch(await fs.readFile(filePath, "utf8"), /access|refresh/);
+  assert.notEqual(firstCiphertext, secondCiphertext);
 
   await fs.chmod(path.dirname(filePath), 0o755);
   await fs.chmod(filePath, 0o644);
@@ -300,4 +313,183 @@ test("로컬 Twitch token 저장소는 디렉터리와 파일 권한을 제한�
   assert.equal(loaded?.accessToken, "access");
   assert.equal((await fs.stat(path.dirname(filePath))).mode & 0o777, 0o700);
   assert.equal((await fs.stat(filePath)).mode & 0o777, 0o600);
+});
+
+test("변조된 Twitch token 암호문은 다른 AAD와 mutation에서 fail-closed 된다", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "streamops-token-tamper-"));
+  const filePath = path.join(directory, "twitch-token.json");
+  const encryptionKey = Buffer.alloc(32, 23).toString("base64");
+  const token = {
+    accessToken: "sentinel-access-token",
+    refreshToken: "sentinel-refresh-token",
+    tokenType: "bearer",
+    scopes: ["user:read:chat"],
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    broadcaster: { id: "1234", login: "tester", displayName: "Tester" },
+    updatedAt: new Date().toISOString()
+  };
+  try {
+    const store = new LocalJsonTwitchTokenStore(filePath, encryptionKey);
+    await store.set(token);
+    const raw = await fs.readFile(filePath, "utf8");
+    assert.doesNotMatch(raw, /sentinel-access-token|sentinel-refresh-token/u);
+    assert.throws(
+      () => decryptTwitchTokenDocument(
+        raw,
+        Buffer.from(encryptionKey, "base64"),
+        STREAMER_FOLLOWER_TOKEN_AAD
+      )
+    );
+    assert.equal(
+      decryptTwitchTokenDocument(raw, Buffer.from(encryptionKey, "base64"), TWITCH_TOKEN_AAD).legacyPlaintext,
+      false
+    );
+
+    const envelope = JSON.parse(raw);
+    envelope.ciphertext = `${envelope.ciphertext[0] === "A" ? "B" : "A"}${envelope.ciphertext.slice(1)}`;
+    await fs.writeFile(filePath, `${JSON.stringify(envelope)}\n`, { mode: 0o600 });
+    const damaged = await fs.readFile(filePath, "utf8");
+    const reopened = new LocalJsonTwitchTokenStore(filePath, encryptionKey);
+    await assert.rejects(() => reopened.get(), /STATE_UNAVAILABLE/u);
+    assert.equal(reopened.getLoadState(), "encryption_failed");
+    await assert.rejects(() => reopened.set(token), /STATE_UNAVAILABLE/u);
+    await assert.rejects(() => reopened.clear(), /STATE_UNAVAILABLE/u);
+    assert.equal(await fs.readFile(filePath, "utf8"), damaged);
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("평문 Twitch token 저장소는 명시적 승인·외부 backup 전에는 변경되지 않는다", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "streamops-token-migration-"));
+  const stateDirectory = path.join(directory, "state");
+  const backupDirectory = path.join(directory, "backup");
+  const filePath = path.join(stateDirectory, "twitch-token.json");
+  const followerFilePath = path.join(stateDirectory, "streamer-follower-tokens.json");
+  const token = {
+    accessToken: "legacy-access",
+    refreshToken: "legacy-refresh",
+    tokenType: "bearer",
+    scopes: ["user:read:chat"],
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    broadcaster: { id: "1234", login: "tester", displayName: "Tester" },
+    updatedAt: new Date().toISOString()
+  };
+  const followerDocument = {
+    version: 1,
+    tokensByBroadcasterId: {
+      "1234": token
+    }
+  };
+  const encryptionKey = Buffer.alloc(32, 18).toString("base64");
+  try {
+    await fs.mkdir(stateDirectory, { recursive: true });
+    await fs.writeFile(filePath, JSON.stringify(token), { mode: 0o600 });
+    await fs.writeFile(followerFilePath, JSON.stringify(followerDocument), { mode: 0o600 });
+    const original = await fs.readFile(filePath, "utf8");
+
+    const store = new LocalJsonTwitchTokenStore(filePath, encryptionKey);
+    await assert.rejects(() => store.get(), /승인된 마이그레이션/u);
+    assert.equal(await fs.readFile(filePath, "utf8"), original);
+    await assert.rejects(() => migrateTwitchTokenStores({
+      tokenStorePath: filePath,
+      followerTokenStorePath: followerFilePath,
+      stateDirectory,
+      backupDirectory,
+      encryptionKey,
+      operatorApproved: false,
+      backupStorageEncryptedConfirmed: true
+    }));
+    assert.equal(await fs.readFile(filePath, "utf8"), original);
+
+    const result = await migrateTwitchTokenStores({
+      tokenStorePath: filePath,
+      followerTokenStorePath: followerFilePath,
+      stateDirectory,
+      backupDirectory,
+      encryptionKey,
+      operatorApproved: true,
+      backupStorageEncryptedConfirmed: true
+    });
+    assert.equal(result.migrated.length, 2);
+    assert.ok(result.backupSnapshotDirectory);
+    assert.equal((await fs.stat(result.backupSnapshotDirectory)).mode & 0o777, 0o700);
+    assert.equal(
+      (await fs.stat(path.join(result.backupSnapshotDirectory, path.basename(filePath)))).mode & 0o777,
+      0o600
+    );
+    assert.equal(
+      await fs.readFile(path.join(result.backupSnapshotDirectory, path.basename(filePath)), "utf8"),
+      original
+    );
+    assert.doesNotMatch(await fs.readFile(filePath, "utf8"), /legacy-access|legacy-refresh/);
+    assert.doesNotMatch(await fs.readFile(followerFilePath, "utf8"), /legacy-access|legacy-refresh/);
+    assert.equal((await new LocalJsonTwitchTokenStore(filePath, encryptionKey).get())?.accessToken, "legacy-access");
+
+    const secondRun = await migrateTwitchTokenStores({
+      tokenStorePath: filePath,
+      followerTokenStorePath: followerFilePath,
+      stateDirectory,
+      backupDirectory,
+      encryptionKey,
+      operatorApproved: true,
+      backupStorageEncryptedConfirmed: true
+    });
+    assert.equal(secondRun.migrated.length, 0);
+    assert.equal(secondRun.alreadyEncrypted.length, 2);
+    assert.equal(secondRun.backupSnapshotDirectory, undefined);
+
+    const wrongKeyStore = new LocalJsonTwitchTokenStore(filePath, Buffer.alloc(32, 19).toString("base64"));
+    await assert.rejects(() => wrongKeyStore.get());
+
+    await fs.copyFile(path.join(result.backupSnapshotDirectory, path.basename(filePath)), filePath);
+    await fs.copyFile(
+      path.join(result.backupSnapshotDirectory, path.basename(followerFilePath)),
+      followerFilePath
+    );
+    assert.equal((await new LocalJsonTwitchTokenStore(filePath).get())?.accessToken, "legacy-access");
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("unknown field가 있는 legacy Twitch token은 마이그레이션하지 않는다", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "streamops-token-invalid-migration-"));
+  const stateDirectory = path.join(directory, "state");
+  const backupDirectory = path.join(directory, "backup");
+  const filePath = path.join(stateDirectory, "twitch-token.json");
+  const followerFilePath = path.join(stateDirectory, "streamer-follower-tokens.json");
+  const token = {
+    accessToken: "legacy-access",
+    refreshToken: "legacy-refresh",
+    tokenType: "bearer",
+    scopes: ["user:read:chat"],
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    broadcaster: { id: "1234", login: "tester", displayName: "Tester" },
+    updatedAt: new Date().toISOString(),
+    unexpected: true
+  };
+  const followerDocument = { version: 1, tokensByBroadcasterId: {} };
+  const encryptionKey = Buffer.alloc(32, 24).toString("base64");
+  try {
+    await fs.mkdir(stateDirectory, { recursive: true });
+    await fs.writeFile(filePath, JSON.stringify(token), { mode: 0o600 });
+    await fs.writeFile(followerFilePath, JSON.stringify(followerDocument), { mode: 0o600 });
+    const originalToken = await fs.readFile(filePath, "utf8");
+    const originalFollower = await fs.readFile(followerFilePath, "utf8");
+
+    await assert.rejects(() => migrateTwitchTokenStores({
+      tokenStorePath: filePath,
+      followerTokenStorePath: followerFilePath,
+      stateDirectory,
+      backupDirectory,
+      encryptionKey,
+      operatorApproved: true,
+      backupStorageEncryptedConfirmed: true
+    }));
+    assert.equal(await fs.readFile(filePath, "utf8"), originalToken);
+    assert.equal(await fs.readFile(followerFilePath, "utf8"), originalFollower);
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
 });

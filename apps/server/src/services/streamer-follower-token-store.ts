@@ -1,14 +1,59 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { TwitchStoredToken } from "./twitch-token-store.js";
+import {
+  decodeTwitchTokenEncryptionKey,
+  decryptTwitchTokenDocument,
+  encryptTwitchTokenDocument
+} from "./twitch-token-encryption.js";
 
 const STORE_VERSION = 1;
 const TWITCH_USER_ID_PATTERN = /^\d{1,32}$/;
+export const STREAMER_FOLLOWER_TOKEN_AAD = "streamops:streamer-follower-token:v1";
+const STORE_DOCUMENT_KEYS = ["tokensByBroadcasterId", "version"] as const;
+const TOKEN_KEYS = [
+  "accessToken",
+  "broadcaster",
+  "expiresAt",
+  "refreshToken",
+  "scopes",
+  "tokenType",
+  "updatedAt"
+] as const;
+const BROADCASTER_KEYS = ["displayName", "id", "login", "profileImageUrl"] as const;
 
 type StoredTokenDocument = {
   version: typeof STORE_VERSION;
   tokensByBroadcasterId: Record<string, TwitchStoredToken>;
 };
+
+export function parseStreamerFollowerTokenDocument(value: unknown): StoredTokenDocument {
+  if (
+    !value
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || !hasOnlyKeys(value as Record<string, unknown>, STORE_DOCUMENT_KEYS)
+  ) {
+    throw new Error("Twitch follower OAuth token 저장소 버전 또는 형식이 올바르지 않습니다.");
+  }
+  const parsed = value as Partial<StoredTokenDocument>;
+  if (
+    parsed.version !== STORE_VERSION
+    || !parsed.tokensByBroadcasterId
+    || typeof parsed.tokensByBroadcasterId !== "object"
+    || Array.isArray(parsed.tokensByBroadcasterId)
+  ) {
+    throw new Error("Twitch follower OAuth token 저장소 버전 또는 형식이 올바르지 않습니다.");
+  }
+  const tokensByBroadcasterId: Record<string, TwitchStoredToken> = {};
+  for (const [rawBroadcasterId, tokenValue] of Object.entries(parsed.tokensByBroadcasterId)) {
+    const broadcasterId = requiredBroadcasterId(rawBroadcasterId);
+    const token = normalizedStoredToken(tokenValue, broadcasterId);
+    if (!token) throw new Error("Twitch follower OAuth token 저장소에 올바르지 않은 레코드가 있습니다.");
+    tokensByBroadcasterId[broadcasterId] = token;
+  }
+  return { version: STORE_VERSION, tokensByBroadcasterId };
+}
 
 export interface StreamerFollowerTokenStore {
   get(broadcasterId: string): Promise<TwitchStoredToken | undefined>;
@@ -42,6 +87,10 @@ function optionalString(value: unknown): string | undefined {
   return normalized || undefined;
 }
 
+function hasOnlyKeys(value: Record<string, unknown>, allowed: readonly string[]): boolean {
+  return Object.keys(value).every((key) => allowed.includes(key));
+}
+
 function cloneStoredToken(token: TwitchStoredToken): TwitchStoredToken {
   return {
     ...token,
@@ -56,6 +105,7 @@ function normalizedStoredToken(value: unknown, broadcasterId: string): TwitchSto
   const broadcaster = input.broadcaster;
   if (!broadcaster || typeof broadcaster !== "object" || Array.isArray(broadcaster)) return undefined;
   const broadcasterInput = broadcaster as Record<string, unknown>;
+  if (!hasOnlyKeys(input, TOKEN_KEYS) || !hasOnlyKeys(broadcasterInput, BROADCASTER_KEYS)) return undefined;
   const storedBroadcasterId = optionalString(broadcasterInput.id);
   const accessToken = optionalString(input.accessToken);
   const refreshToken = optionalString(input.refreshToken);
@@ -133,10 +183,17 @@ export class MemoryStreamerFollowerTokenStore implements StreamerFollowerTokenSt
 
 export class LocalJsonStreamerFollowerTokenStore implements StreamerFollowerTokenStore {
   private readonly tokens = new Map<string, TwitchStoredToken>();
+  private readonly encryptionKey?: Buffer;
   private loadInFlight?: Promise<void>;
   private mutationChain: Promise<void> = Promise.resolve();
+  private loadState: "not_loaded" | "ready" | "corrupted" | "unreadable" | "encryption_failed" = "not_loaded";
 
-  constructor(private readonly filePath: string) {}
+  constructor(
+    private readonly filePath: string,
+    encryptionKey = ""
+  ) {
+    this.encryptionKey = decodeTwitchTokenEncryptionKey(encryptionKey);
+  }
 
   async get(broadcasterId: string): Promise<TwitchStoredToken | undefined> {
     const ownerId = requiredBroadcasterId(broadcasterId);
@@ -210,27 +267,46 @@ export class LocalJsonStreamerFollowerTokenStore implements StreamerFollowerToke
   }
 
   private async load(): Promise<void> {
-    await this.ensureStorageDirectory();
     try {
+      await this.ensureStorageDirectory();
       await fs.chmod(this.filePath, 0o600);
       const raw = await fs.readFile(this.filePath, "utf8");
-      const parsed = JSON.parse(raw) as Partial<StoredTokenDocument>;
-      if (parsed.version !== STORE_VERSION || !parsed.tokensByBroadcasterId || typeof parsed.tokensByBroadcasterId !== "object") {
-        throw new Error("Twitch follower OAuth token 저장소 버전 또는 형식이 올바르지 않습니다.");
+      let decoded: ReturnType<typeof decryptTwitchTokenDocument>;
+      try {
+        decoded = decryptTwitchTokenDocument(raw, this.encryptionKey, STREAMER_FOLLOWER_TOKEN_AAD);
+      } catch {
+        this.loadState = "encryption_failed";
+        throw new Error("STATE_UNAVAILABLE:streamer_follower_token:encryption_failed");
       }
+      const parsed = parseStreamerFollowerTokenDocument(JSON.parse(decoded.plaintext));
       const loaded = new Map<string, TwitchStoredToken>();
       for (const [rawBroadcasterId, value] of Object.entries(parsed.tokensByBroadcasterId)) {
-        const broadcasterId = requiredBroadcasterId(rawBroadcasterId);
-        const token = normalizedStoredToken(value, broadcasterId);
-        if (!token) throw new Error("Twitch follower OAuth token 저장소에 올바르지 않은 레코드가 있습니다.");
-        loaded.set(broadcasterId, token);
+        loaded.set(rawBroadcasterId, value);
       }
       this.tokens.clear();
       for (const [broadcasterId, token] of loaded) this.tokens.set(broadcasterId, token);
+      if (decoded.legacyPlaintext && this.encryptionKey) {
+        this.tokens.clear();
+        this.loadState = "encryption_failed";
+        throw new Error("평문 Twitch follower OAuth token 저장소는 승인된 마이그레이션이 필요합니다.");
+      }
+      this.loadState = "ready";
     } catch (error) {
-      if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") return;
+      if (typeof error === "object" && error && "code" in error && error.code === "ENOENT") {
+        this.loadState = "ready";
+        return;
+      }
+      if (this.loadState === "not_loaded") {
+        this.loadState = typeof error === "object" && error && "code" in error
+          ? "unreadable"
+          : "corrupted";
+      }
       throw error;
     }
+  }
+
+  getLoadState(): typeof this.loadState {
+    return this.loadState;
   }
 
   private async enqueueMutation(operation: () => Promise<void>): Promise<void> {
@@ -248,7 +324,11 @@ export class LocalJsonStreamerFollowerTokenStore implements StreamerFollowerToke
       )
     };
     const temporaryPath = `${this.filePath}.tmp`;
-    await fs.writeFile(temporaryPath, `${JSON.stringify(document, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+    const plaintext = JSON.stringify(document);
+    const storedDocument = this.encryptionKey
+      ? encryptTwitchTokenDocument(plaintext, this.encryptionKey, STREAMER_FOLLOWER_TOKEN_AAD)
+      : `${JSON.stringify(document, null, 2)}\n`;
+    await fs.writeFile(temporaryPath, storedDocument, { encoding: "utf8", mode: 0o600 });
     await fs.rename(temporaryPath, this.filePath);
     await fs.chmod(this.filePath, 0o600);
   }

@@ -394,7 +394,12 @@ const store = new Store({
   communityStatePath: `${appConfig.paths.state}/community-posts.json`,
   runtimeStatePath: `${appConfig.paths.state}/runtime-state.json`,
   onPersistenceError: (failure) => {
-    logger.error({ type: "store.persistence_failed", ...failure });
+    logger.error({
+      type: "store.persistence_failed",
+      store: failure.scope,
+      operation: failure.operation,
+      errorCode: `STORE_${failure.scope.toUpperCase()}_${failure.operation.toUpperCase()}_FAILED`
+    });
   }
 });
 const sessions = new DashboardSessionStore();
@@ -402,10 +407,14 @@ const events = new EventBus();
 const dashboard = new DashboardHub(store);
 const overlay = new OverlayHub(logger, store, () => dashboard.broadcastSnapshot());
 const bridge = new BridgeManager(logger, store, dashboard);
-const twitchTokenStore = new LocalJsonTwitchTokenStore(appConfig.twitch.tokenStorePath);
+const twitchTokenStore = new LocalJsonTwitchTokenStore(
+  appConfig.twitch.tokenStorePath,
+  appConfig.twitch.tokenEncryptionKey
+);
 const twitchAuth = new TwitchAuthService(twitchTokenStore, new TwitchOAuthStateStore());
 const streamerFollowerTokenStore = new LocalJsonStreamerFollowerTokenStore(
-  `${appConfig.paths.state}/streamer-follower-oauth-tokens.json`
+  `${appConfig.paths.state}/streamer-follower-oauth-tokens.json`,
+  appConfig.twitch.tokenEncryptionKey
 );
 const streamerFollowerAuth = new StreamerFollowerAuthService(
   streamerFollowerTokenStore,

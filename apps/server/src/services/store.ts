@@ -102,7 +102,10 @@ export type StoreReadiness = {
   ok: boolean;
   checks: Record<string, boolean>;
   errors: string[];
+  loadStates: Record<StorePersistenceFailure["scope"], PersistenceLoadState>;
 };
+
+export type PersistenceLoadState = "not_loaded" | "ready" | "corrupted" | "unreadable" | "encryption_failed";
 
 export type TwitchStreamLiveStatus = {
   twitchUserId: string;
@@ -956,6 +959,13 @@ export class Store {
   private communitySanctions: CommunitySanction[] = [];
   private communityCleanupTimer?: NodeJS.Timeout;
   private readonly persistenceFailures = new Map<string, StorePersistenceFailure>();
+  private readonly persistenceLoadStates: Record<StorePersistenceFailure["scope"], PersistenceLoadState> = {
+    followers: "not_loaded",
+    streamer_riot_ids: "not_loaded",
+    tournaments: "not_loaded",
+    community: "not_loaded",
+    runtime: "not_loaded"
+  };
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
   private overlayStatus: OverlayStatus = {
     clientCount: 0,
@@ -999,6 +1009,7 @@ export class Store {
   }
 
   private scopedFollowerState(broadcasterUserId: string, create = true): ScopedFollowerState | undefined {
+    this.assertPersistenceAvailable("followers");
     const normalizedBroadcasterUserId = requiredBroadcasterUserId(broadcasterUserId);
     const existing = this.followersByBroadcaster.get(normalizedBroadcasterUserId);
     if (existing || !create) return existing;
@@ -1008,6 +1019,7 @@ export class Store {
   }
 
   private scopedParticipationRuntime(streamerId: string, create = true): ScopedParticipationRuntime | undefined {
+    this.assertPersistenceAvailable("runtime");
     const normalizedStreamerId = streamerId.trim();
     if (!normalizedStreamerId) return undefined;
     const existing = this.participationByStreamer.get(normalizedStreamerId);
@@ -1018,11 +1030,13 @@ export class Store {
   }
 
   private participationQueueFor(streamerId?: string): ParticipationEntry[] {
+    this.assertPersistenceAvailable("runtime");
     if (!streamerId) return this.participationQueue;
     return this.scopedParticipationRuntime(streamerId)?.queue ?? [];
   }
 
   private participationOpenFor(streamerId?: string): boolean {
+    this.assertPersistenceAvailable("runtime");
     if (!streamerId) return this.status.participation === "open";
     return this.scopedParticipationRuntime(streamerId, false)?.isOpen === true;
   }
@@ -1044,10 +1058,25 @@ export class Store {
 
   private clearPersistenceFailure(scope: StorePersistenceFailure["scope"]): void {
     this.persistenceFailures.delete(scope);
+    this.persistenceLoadStates[scope] = "ready";
   }
 
   private isMissingStateFile(error: unknown): boolean {
     return error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT";
+  }
+
+  private markPersistenceLoadFailure(scope: StorePersistenceFailure["scope"], error: unknown): void {
+    this.persistenceLoadStates[scope] = error instanceof SyntaxError
+      || (error instanceof Error && !("code" in error))
+      ? "corrupted"
+      : "unreadable";
+  }
+
+  private assertPersistenceAvailable(scope: StorePersistenceFailure["scope"]): void {
+    const state = this.persistenceLoadStates[scope];
+    if (state === "corrupted" || state === "unreadable" || state === "encryption_failed") {
+      throw new Error(`STATE_UNAVAILABLE:${scope}:${state}`);
+    }
   }
 
   getReadiness(): StoreReadiness {
@@ -1082,7 +1111,8 @@ export class Store {
         statePathsWritable,
         persistenceHealthy: errors.length === 0
       },
-      errors
+      errors,
+      loadStates: { ...this.persistenceLoadStates }
     };
   }
 
@@ -1091,11 +1121,11 @@ export class Store {
       clearTimeout(this.followerPersistTimer);
       this.followerPersistTimer = undefined;
     }
-    this.persistFollowerState();
-    this.persistStreamerRiotIdState();
-    this.persistTournamentState();
-    this.persistCommunityState();
-    this.persistRuntimeState();
+    if (this.persistenceLoadStates.followers === "ready") this.persistFollowerState();
+    if (this.persistenceLoadStates.streamer_riot_ids === "ready") this.persistStreamerRiotIdState();
+    if (this.persistenceLoadStates.tournaments === "ready") this.persistTournamentState();
+    if (this.persistenceLoadStates.community === "ready") this.persistCommunityState();
+    if (this.persistenceLoadStates.runtime === "ready") this.persistRuntimeState();
   }
 
   async flushRuntimeState(): Promise<void> {
@@ -1521,13 +1551,15 @@ export class Store {
       if (missingStateFile) {
         this.clearPersistenceFailure("followers");
       } else {
+        this.markPersistenceLoadFailure("followers", error);
         this.reportPersistenceFailure({ scope: "followers", operation: "load", filePath: this.options.followerStatePath, error: toSafeErrorMessage(error) });
       }
     }
   }
 
   private persistFollowerState(): void {
-    if (!this.options.followerStatePath || this.followerPersistenceBlocked) return;
+    if (!this.options.followerStatePath) return;
+    this.assertPersistenceAvailable("followers");
     let tmpPath: string | undefined;
     try {
       const dir = path.dirname(this.options.followerStatePath);
@@ -1581,28 +1613,38 @@ export class Store {
     try {
       const raw = fs.readFileSync(this.options.streamerRiotIdStatePath, "utf8");
       const parsed = objectRecord(JSON.parse(raw));
-      const requests = Array.isArray(parsed?.requests) ? parsed.requests : [];
+      if (parsed?.version !== 1 || !Array.isArray(parsed.requests)) {
+        throw new Error("streamer Riot ID 상태 파일 schema가 올바르지 않습니다.");
+      }
+      const requests = parsed.requests;
       const needsDashboardAccessMigration = requests.some((value) => {
         const request = objectRecord(value);
         return request?.status === "approved" &&
           request.dashboardEnabled === true &&
           (!optionalString(request.dashboardSlug) || !optionalString(request.dashboardKey));
       });
-      this.streamerRiotIdRequests = requests
-        .map(normalizedStreamerRiotIdRequest)
-        .filter((request): request is StreamerRiotIdRequest => Boolean(request));
+      const normalizedRequests = requests.map(normalizedStreamerRiotIdRequest);
+      if (normalizedRequests.some((request) => !request)) {
+        throw new Error("streamer Riot ID 상태 파일에 올바르지 않은 레코드가 있습니다.");
+      }
+      this.streamerRiotIdRequests = normalizedRequests as StreamerRiotIdRequest[];
       this.clearPersistenceFailure("streamer_riot_ids");
       if (needsDashboardAccessMigration) this.persistStreamerRiotIdState();
     } catch (error) {
       this.streamerRiotIdRequests = [];
-      if (!this.isMissingStateFile(error)) {
+      const missingStateFile = this.isMissingStateFile(error);
+      if (!missingStateFile) {
+        this.markPersistenceLoadFailure("streamer_riot_ids", error);
         this.reportPersistenceFailure({ scope: "streamer_riot_ids", operation: "load", filePath: this.options.streamerRiotIdStatePath, error: toSafeErrorMessage(error) });
+      } else {
+        this.clearPersistenceFailure("streamer_riot_ids");
       }
     }
   }
 
   private persistStreamerRiotIdState(): void {
     if (!this.options.streamerRiotIdStatePath) return;
+    this.assertPersistenceAvailable("streamer_riot_ids");
     try {
       const dir = path.dirname(this.options.streamerRiotIdStatePath);
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
@@ -1624,21 +1666,30 @@ export class Store {
     try {
       const raw = fs.readFileSync(this.options.tournamentStatePath, "utf8");
       const parsed = objectRecord(JSON.parse(raw));
-      const tournaments = Array.isArray(parsed?.tournaments) ? parsed.tournaments : [];
-      this.tournaments = tournaments
-        .map(normalizedStreamerTournament)
-        .filter((tournament): tournament is StreamerTournament => Boolean(tournament));
+      if (parsed?.version !== 1 || !Array.isArray(parsed.tournaments)) {
+        throw new Error("대회 상태 파일 schema가 올바르지 않습니다.");
+      }
+      const tournaments = parsed.tournaments.map(normalizedStreamerTournament);
+      if (tournaments.some((tournament) => !tournament)) {
+        throw new Error("대회 상태 파일에 올바르지 않은 레코드가 있습니다.");
+      }
+      this.tournaments = tournaments as StreamerTournament[];
       this.clearPersistenceFailure("tournaments");
     } catch (error) {
       this.tournaments = [];
-      if (!this.isMissingStateFile(error)) {
+      const missingStateFile = this.isMissingStateFile(error);
+      if (!missingStateFile) {
+        this.markPersistenceLoadFailure("tournaments", error);
         this.reportPersistenceFailure({ scope: "tournaments", operation: "load", filePath: this.options.tournamentStatePath, error: toSafeErrorMessage(error) });
+      } else {
+        this.clearPersistenceFailure("tournaments");
       }
     }
   }
 
   private persistTournamentState(): void {
     if (!this.options.tournamentStatePath) return;
+    this.assertPersistenceAvailable("tournaments");
     try {
       const dir = path.dirname(this.options.tournamentStatePath);
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
@@ -1660,31 +1711,40 @@ export class Store {
     try {
       const raw = fs.readFileSync(this.options.communityStatePath, "utf8");
       const parsed = objectRecord(JSON.parse(raw));
-      const posts = Array.isArray(parsed?.posts) ? parsed.posts : [];
-      this.communityPosts = posts
-        .map(normalizedCommunityPost)
-        .filter((post): post is CommunityPost => Boolean(post));
-      const reports = Array.isArray(parsed?.reports) ? parsed.reports : [];
-      this.communityReports = reports
-        .map(normalizedCommunityReport)
-        .filter((report): report is CommunityPostReport => Boolean(report));
-      const sanctions = Array.isArray(parsed?.sanctions) ? parsed.sanctions : [];
-      this.communitySanctions = sanctions
-        .map(normalizedCommunitySanction)
-        .filter((sanction): sanction is CommunitySanction => Boolean(sanction));
+      if (
+        (parsed?.version !== 1 && parsed?.version !== 2)
+        || !Array.isArray(parsed.posts)
+        || (parsed.version === 2 && (!Array.isArray(parsed.reports) || !Array.isArray(parsed.sanctions)))
+      ) {
+        throw new Error("커뮤니티 상태 파일 schema가 올바르지 않습니다.");
+      }
+      const posts = parsed.posts.map(normalizedCommunityPost);
+      const reports = (parsed.version === 2 ? parsed.reports as unknown[] : []).map(normalizedCommunityReport);
+      const sanctions = (parsed.version === 2 ? parsed.sanctions as unknown[] : []).map(normalizedCommunitySanction);
+      if ([...posts, ...reports, ...sanctions].some((record) => !record)) {
+        throw new Error("커뮤니티 상태 파일에 올바르지 않은 레코드가 있습니다.");
+      }
+      this.communityPosts = posts as CommunityPost[];
+      this.communityReports = reports as CommunityPostReport[];
+      this.communitySanctions = sanctions as CommunitySanction[];
       this.clearPersistenceFailure("community");
     } catch (error) {
       this.communityPosts = [];
       this.communityReports = [];
       this.communitySanctions = [];
-      if (!this.isMissingStateFile(error)) {
+      const missingStateFile = this.isMissingStateFile(error);
+      if (!missingStateFile) {
+        this.markPersistenceLoadFailure("community", error);
         this.reportPersistenceFailure({ scope: "community", operation: "load", filePath: this.options.communityStatePath, error: toSafeErrorMessage(error) });
+      } else {
+        this.clearPersistenceFailure("community");
       }
     }
   }
 
   private persistCommunityState(): void {
     if (!this.options.communityStatePath) return;
+    this.assertPersistenceAvailable("community");
     try {
       const dir = path.dirname(this.options.communityStatePath);
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
@@ -1709,40 +1769,80 @@ export class Store {
       const raw = fs.readFileSync(this.options.runtimeStatePath, "utf8");
       const parsed = objectRecord(JSON.parse(raw));
       const participation = objectRecord(parsed?.participation);
+      if (
+        parsed?.version !== 3
+        || !participation
+        || typeof participation.isOpen !== "boolean"
+        || !Number.isInteger(participation.revision)
+        || Number(participation.revision) < 0
+        || !Array.isArray(participation.queue)
+      ) {
+        throw new Error("runtime 상태 파일 schema가 올바르지 않습니다.");
+      }
       this.participationRevision = normalizedNonNegativeInteger(participation?.revision);
-      const queue = Array.isArray(participation?.queue) ? participation.queue : [];
-      this.participationQueue = queue
-        .map(normalizedParticipationEntry)
-        .filter((entry): entry is ParticipationEntry => Boolean(entry))
+      const normalizedQueue = participation.queue.map(normalizedParticipationEntry);
+      if (normalizedQueue.some((entry) => !entry)) {
+        throw new Error("runtime 상태 파일의 참여 대기열 레코드가 올바르지 않습니다.");
+      }
+      this.participationQueue = (normalizedQueue as ParticipationEntry[])
         .slice(-2000);
       this.status.participation = participation?.isOpen === true ? "open" : "closed";
       const streamerProfile = objectRecord(participation?.streamerProfile);
+      if (participation.streamerProfile !== undefined && !streamerProfile) {
+        throw new Error("runtime 상태 파일의 스트리머 프로필이 올바르지 않습니다.");
+      }
       this.participationStreamerProfile = streamerProfile
         ? cloneParticipationStreamerProfile(streamerProfile as ParticipationStreamerProfile)
         : undefined;
       this.participationByStreamer.clear();
       const scopedParticipation = objectRecord(parsed?.participationByStreamer);
+      if (parsed?.participationByStreamer !== undefined && !scopedParticipation) {
+        throw new Error("runtime 상태 파일의 tenant 참여 상태가 올바르지 않습니다.");
+      }
       for (const [streamerId, rawRuntime] of Object.entries(scopedParticipation ?? {})) {
         const runtime = objectRecord(rawRuntime);
-        if (!streamerId.trim() || !runtime) continue;
-        const scopedQueue = (Array.isArray(runtime.queue) ? runtime.queue : [])
-          .map(normalizedParticipationEntry)
-          .filter((entry): entry is ParticipationEntry => Boolean(entry))
+        if (
+          !streamerId.trim()
+          || !runtime
+          || typeof runtime.isOpen !== "boolean"
+          || !Number.isInteger(runtime.revision)
+          || Number(runtime.revision) < 0
+          || !Array.isArray(runtime.queue)
+        ) {
+          throw new Error("runtime 상태 파일의 tenant 참여 상태 레코드가 올바르지 않습니다.");
+        }
+        const normalizedScopedQueue = runtime.queue.map(normalizedParticipationEntry);
+        if (normalizedScopedQueue.some((entry) => !entry)) {
+          throw new Error("runtime 상태 파일의 tenant 참여 대기열 레코드가 올바르지 않습니다.");
+        }
+        const scopedQueue = (normalizedScopedQueue as ParticipationEntry[])
           .slice(-2000)
           .map((entry) => ({ ...entry, streamerId }));
         const scopedProfile = objectRecord(runtime.streamerProfile);
+        const session = normalizedParticipationSession(runtime.session, streamerId);
+        if (
+          (runtime.streamerProfile !== undefined && !scopedProfile)
+          || (runtime.session !== undefined && !session)
+        ) {
+          throw new Error("runtime 상태 파일의 tenant 프로필 또는 session이 올바르지 않습니다.");
+        }
         this.participationByStreamer.set(streamerId, {
           isOpen: runtime.isOpen === true,
           revision: normalizedNonNegativeInteger(runtime.revision),
           queue: scopedQueue,
           streamerProfile: scopedProfile ? cloneParticipationStreamerProfile(scopedProfile as ParticipationStreamerProfile) : undefined,
-          session: normalizedParticipationSession(runtime.session, streamerId)
+          session
         });
       }
       this.lolAutomationByStreamer.clear();
       const automationByStreamer = objectRecord(parsed?.lolAutomationByStreamer);
+      if (parsed?.lolAutomationByStreamer !== undefined && !automationByStreamer) {
+        throw new Error("runtime 상태 파일의 tenant 자동화 설정이 올바르지 않습니다.");
+      }
       for (const [streamerId, rawSettings] of Object.entries(automationByStreamer ?? {})) {
-        if (!streamerId.trim()) continue;
+        if (!streamerId.trim() || !objectRecord(rawSettings)) {
+          throw new Error("runtime 상태 파일의 tenant 자동화 설정 레코드가 올바르지 않습니다.");
+        }
         this.lolAutomationByStreamer.set(streamerId, normalizedLolAutomationSettings(rawSettings, streamerId));
       }
       this.clearPersistenceFailure("runtime");
@@ -1753,8 +1853,12 @@ export class Store {
       this.participationByStreamer.clear();
       this.lolAutomationByStreamer.clear();
       this.status.participation = "closed";
-      if (!this.isMissingStateFile(error)) {
+      const missingStateFile = this.isMissingStateFile(error);
+      if (!missingStateFile) {
+        this.markPersistenceLoadFailure("runtime", error);
         this.reportPersistenceFailure({ scope: "runtime", operation: "load", filePath: this.options.runtimeStatePath, error: toSafeErrorMessage(error) });
+      } else {
+        this.clearPersistenceFailure("runtime");
       }
     }
   }
@@ -1782,6 +1886,7 @@ export class Store {
 
   private persistRuntimeState(): number {
     if (!this.options.runtimeStatePath) return 0;
+    this.assertPersistenceAvailable("runtime");
     const generation = ++this.runtimePersistRequestedGeneration;
     this.startRuntimePersistWorker();
     return generation;
@@ -1789,6 +1894,7 @@ export class Store {
 
   private startRuntimePersistWorker(): void {
     if (!this.options.runtimeStatePath || this.runtimePersistTask) return;
+    this.assertPersistenceAvailable("runtime");
     this.runtimePersistTask = this.runRuntimePersistWorker().finally(() => {
       this.runtimePersistTask = undefined;
       if (this.runtimePersistCompletedGeneration < this.runtimePersistRequestedGeneration) {
@@ -1861,6 +1967,7 @@ export class Store {
   }
 
   listCommunityPosts(limit = 50, category?: CommunityPostCategory): CommunityPost[] {
+    this.assertPersistenceAvailable("community");
     this.cleanupExpiredPartyCommunityPosts();
     const safeLimit = Math.max(1, Math.min(100, Math.trunc(Number(limit) || 50)));
     return this.communityPosts
@@ -1871,6 +1978,7 @@ export class Store {
   }
 
   getCommunityPostByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): CommunityPost | undefined {
+    this.assertPersistenceAvailable("community");
     this.cleanupExpiredPartyCommunityPosts();
     const safeUserId = twitchUserId?.trim();
     if (!safeUserId) return undefined;
@@ -1879,6 +1987,7 @@ export class Store {
   }
 
   countCommunityPostsByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): number {
+    this.assertPersistenceAvailable("community");
     this.cleanupExpiredPartyCommunityPosts();
     const safeUserId = twitchUserId?.trim();
     if (!safeUserId) return 0;
@@ -1886,6 +1995,7 @@ export class Store {
   }
 
   getCommunityPostById(postId: string | undefined): CommunityPost | undefined {
+    this.assertPersistenceAvailable("community");
     this.cleanupExpiredPartyCommunityPosts();
     const safePostId = postId?.trim();
     if (!safePostId) return undefined;
@@ -1894,6 +2004,7 @@ export class Store {
   }
 
   getCommunityModerationSnapshot(limit = 200): CommunityModerationSnapshot {
+    this.assertPersistenceAvailable("community");
     this.cleanupExpiredPartyCommunityPosts();
     const safeLimit = Math.max(1, Math.min(500, Math.trunc(Number(limit) || 200)));
     return {
@@ -1913,6 +2024,7 @@ export class Store {
   }
 
   isCommunityUserSanctioned(twitchUserId: string | undefined, referenceMs = Date.now()): boolean {
+    this.assertPersistenceAvailable("community");
     const safeUserId = twitchUserId?.trim();
     if (!safeUserId) return false;
     return this.communitySanctions.some((sanction) => {
@@ -1929,6 +2041,7 @@ export class Store {
     reporterTwitchLogin: string;
     reporterDisplayName: string;
   }): CommunityPostReport | undefined {
+    this.assertPersistenceAvailable("community");
     const postId = input.postId.trim();
     const reporterTwitchUserId = input.reporterTwitchUserId.trim();
     const reporterTwitchLogin = input.reporterTwitchLogin.trim();
@@ -1963,6 +2076,7 @@ export class Store {
     reason?: string;
     updatedBy: string;
   }): CommunityPost | undefined {
+    this.assertPersistenceAvailable("community");
     const postId = input.postId.trim();
     const updatedBy = input.updatedBy.trim();
     const postIndex = this.communityPosts.findIndex((post) => post.id === postId);
@@ -2003,6 +2117,7 @@ export class Store {
     expiresAt?: string;
     updatedBy: string;
   }): CommunitySanction | undefined {
+    this.assertPersistenceAvailable("community");
     const twitchUserId = input.twitchUserId.trim();
     const updatedBy = input.updatedBy.trim();
     if (!twitchUserId || !updatedBy) return undefined;
@@ -2038,6 +2153,7 @@ export class Store {
   }
 
   createCommunityPost(input: CommunityPostCreateInput & CommunityPostAuthorInput): CommunityPost | undefined {
+    this.assertPersistenceAvailable("community");
     const title = input.title.trim();
     const body = input.body.trim();
     const category = normalizedCommunityCategory(input.category);
@@ -2087,6 +2203,7 @@ export class Store {
     riotTagLine?: string;
     tags?: string[] | string;
   }): CommunityPost | undefined {
+    this.assertPersistenceAvailable("community");
     this.cleanupExpiredPartyCommunityPosts();
     const safePostId = postId.trim();
     const title = input.title.trim();
@@ -2113,6 +2230,7 @@ export class Store {
   }
 
   addCommunityPostComment(postId: string, input: CommunityPostCommentCreateInput & CommunityPostCommentAuthorInput): CommunityPost | undefined {
+    this.assertPersistenceAvailable("community");
     this.cleanupExpiredPartyCommunityPosts();
     const safePostId = postId.trim();
     const body = input.body.trim();
@@ -2155,6 +2273,7 @@ export class Store {
   }
 
   listPublicTournaments(): StreamerTournament[] {
+    this.assertPersistenceAvailable("tournaments");
     return this.tournaments
       .filter((tournament) => tournament.visibility === "public")
       .map(cloneStreamerTournament)
@@ -2162,11 +2281,13 @@ export class Store {
   }
 
   getPublicTournamentBySlug(slug: string): StreamerTournament | undefined {
+    this.assertPersistenceAvailable("tournaments");
     const tournament = this.tournaments.find((candidate) => candidate.visibility === "public" && candidate.slug === slug);
     return tournament ? cloneStreamerTournament(tournament) : undefined;
   }
 
   listDashboardTournaments(input: { role: "admin" | "streamer"; twitchUserId?: string }): StreamerTournament[] {
+    this.assertPersistenceAvailable("tournaments");
     return this.tournaments
       .filter((tournament) => input.role === "admin" || tournament.ownerTwitchUserId === input.twitchUserId)
       .map(cloneStreamerTournament)
@@ -2174,6 +2295,7 @@ export class Store {
   }
 
   upsertStreamerTournament(input: TournamentUpsertInput, owner: StreamerRiotIdRequest): StreamerTournament | undefined {
+    this.assertPersistenceAvailable("tournaments");
     if (owner.status !== "approved") return undefined;
     const title = input.title?.trim();
     if (!title) return undefined;
@@ -2222,6 +2344,7 @@ export class Store {
   }
 
   deleteStreamerTournament(id: string, owner: StreamerRiotIdRequest): boolean {
+    this.assertPersistenceAvailable("tournaments");
     if (owner.status !== "approved") return false;
     const index = this.tournaments.findIndex((tournament) => tournament.id === id && tournament.ownerTwitchUserId === owner.twitchUserId);
     if (index < 0) return false;
@@ -2231,6 +2354,7 @@ export class Store {
   }
 
   listStreamerRiotIdRequests(): StreamerRiotIdRequest[] {
+    this.assertPersistenceAvailable("streamer_riot_ids");
     return this.streamerRiotIdRequests
       .map(cloneStreamerRiotIdRequest)
       .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
@@ -2241,6 +2365,7 @@ export class Store {
   }
 
   upsertStreamerRiotIdRequest(input: StreamerRiotIdRequestInput): StreamerRiotIdRequest {
+    this.assertPersistenceAvailable("streamer_riot_ids");
     const now = nowIso();
     const normalizedRiotId = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
     const approvedSame = this.streamerRiotIdRequests.find((request) =>
@@ -2312,6 +2437,7 @@ export class Store {
     reviewer?: string;
     note?: string;
   }): StreamerRiotIdRequest | undefined {
+    this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) => candidate.id === input.requestId);
     if (!request) return undefined;
     const now = nowIso();
@@ -2361,6 +2487,7 @@ export class Store {
     reviewer?: string;
     note?: string;
   }): StreamerRiotIdRequest | undefined {
+    this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) => candidate.id === input.requestId);
     if (!request || request.status !== "approved") return undefined;
     const now = nowIso();
@@ -2380,6 +2507,7 @@ export class Store {
     profileLinkLabel?: string;
     profileLinks?: StreamerProfileLink[];
   }): StreamerRiotIdRequest | undefined {
+    this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) =>
       candidate.twitchUserId === input.twitchUserId &&
       candidate.status === "approved"
@@ -2400,6 +2528,7 @@ export class Store {
     riotGameName: string;
     riotTagLine: string;
   }): StreamerRiotIdRequest | undefined {
+    this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) =>
       candidate.twitchUserId === input.twitchUserId &&
       candidate.status === "approved"
@@ -2418,6 +2547,7 @@ export class Store {
   }
 
   setParticipationStreamerProfile(profile: ParticipationStreamerProfile | undefined, streamerId?: string): ParticipationStreamerProfile | undefined {
+    this.assertPersistenceAvailable("runtime");
     if (streamerId) {
       const runtime = this.scopedParticipationRuntime(streamerId);
       if (!runtime) return undefined;
@@ -2430,6 +2560,7 @@ export class Store {
   }
 
   getParticipationStreamerProfile(streamerId?: string): ParticipationStreamerProfile | undefined {
+    this.assertPersistenceAvailable("runtime");
     const profile = streamerId
       ? this.scopedParticipationRuntime(streamerId, false)?.streamerProfile
       : this.participationStreamerProfile;
@@ -2485,11 +2616,13 @@ export class Store {
   }
 
   getParticipationRevision(streamerId?: string): number {
+    this.assertPersistenceAvailable("runtime");
     if (!streamerId) return this.participationRevision;
     return this.scopedParticipationRuntime(streamerId, false)?.revision ?? 0;
   }
 
   advanceParticipationRevision(streamerId?: string): number {
+    this.assertPersistenceAvailable("runtime");
     if (!streamerId) {
       this.participationRevision += 1;
       this.persistRuntimeState();
@@ -2619,6 +2752,7 @@ export class Store {
   }
 
   setParticipationOpen(open: boolean, streamerId?: string): void {
+    this.assertPersistenceAvailable("runtime");
     if (streamerId) {
       const runtime = this.scopedParticipationRuntime(streamerId);
       if (!runtime) return;
@@ -2644,6 +2778,7 @@ export class Store {
   }
 
   getLolAutomationSettings(streamerId: string): LolAutomationSettings {
+    this.assertPersistenceAvailable("runtime");
     const normalizedStreamerId = streamerId.trim();
     return {
       ...normalizedLolAutomationSettings(this.lolAutomationByStreamer.get(normalizedStreamerId), normalizedStreamerId)
@@ -2651,6 +2786,7 @@ export class Store {
   }
 
   listLolAutomationSettings(): LolAutomationSettings[] {
+    this.assertPersistenceAvailable("runtime");
     return [...this.lolAutomationByStreamer.keys()]
       .map((streamerId) => this.getLolAutomationSettings(streamerId));
   }
@@ -2677,6 +2813,7 @@ export class Store {
   }
 
   listParticipationSessions(): ParticipationSession[] {
+    this.assertPersistenceAvailable("runtime");
     return [...this.participationByStreamer.values()]
       .map((runtime) => cloneParticipationSession(runtime.session))
       .filter((session): session is ParticipationSession => Boolean(session));
