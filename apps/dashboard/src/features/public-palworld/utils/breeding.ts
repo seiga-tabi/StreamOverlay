@@ -3,6 +3,8 @@ import {
   type PalworldBreedingGender,
   type PalworldBreedingPair,
   type PalworldBreedingPairType,
+  type PalworldGender,
+  type PalworldPalReference,
 } from "@streamops/shared";
 
 export type PalworldBreedingMode = "parents" | "child";
@@ -160,6 +162,46 @@ export function samePalworldBreedingPalId(
   if (left === undefined || right === undefined) return false;
   const normalizeAlias = (id: string): string => id.toLocaleLowerCase().replaceAll("_", "-");
   return normalizeAlias(left) === normalizeAlias(right);
+}
+
+export type OrientedBreedingPair = {
+  selectedParent: PalworldPalReference;
+  partnerParent: PalworldPalReference;
+  child: PalworldPalReference;
+  selectedParentGender?: PalworldGender;
+  partnerParentGender?: PalworldGender;
+  isSpecial: boolean;
+};
+
+export function orientBreedingPairForSelectedParent(
+  pair: PalworldBreedingPair,
+  selectedParentId: string,
+): OrientedBreedingPair | undefined {
+  if (samePalworldBreedingPalId(pair.parentA.id, selectedParentId)) {
+    return {
+      selectedParent: pair.parentA,
+      partnerParent: pair.parentB,
+      child: pair.child,
+      ...(pair.genderCondition ? {
+        selectedParentGender: pair.genderCondition.parentA,
+        partnerParentGender: pair.genderCondition.parentB,
+      } : {}),
+      isSpecial: pair.isSpecial,
+    };
+  }
+  if (samePalworldBreedingPalId(pair.parentB.id, selectedParentId)) {
+    return {
+      selectedParent: pair.parentB,
+      partnerParent: pair.parentA,
+      child: pair.child,
+      ...(pair.genderCondition ? {
+        selectedParentGender: pair.genderCondition.parentB,
+        partnerParentGender: pair.genderCondition.parentA,
+      } : {}),
+      isSpecial: pair.isSpecial,
+    };
+  }
+  return undefined;
 }
 
 export function breedingPairGendersForParents(

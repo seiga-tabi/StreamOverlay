@@ -32,11 +32,11 @@ import { palworldUrl, setPalworldUrl } from "../utils/routes";
 import { PalworldInfiniteListError, usePalworldInfiniteList } from "../hooks/usePalworldInfiniteList";
 import { BreedingGenderControls, BreedingModeTabs } from "./PalworldBreedingControls";
 import {
-  BreedingPartnerPairCard,
+  BreedingCombinationList,
+  BreedingCombinationListSkeleton,
   BreedingGenderAlternativeCard,
   BreedingRequestStatus,
   DirectBreedingResult,
-  ReverseBreedingPairCard,
   ReverseBreedingTargetSummary,
 } from "./PalworldBreedingResults";
 import { PalworldPalPicker } from "./PalworldPalPicker";
@@ -515,8 +515,8 @@ export function PalworldBreedingPage({
   const directLoading = direct.status === "loading";
   const reverseLoading = reverse.status === "loading";
 
-  return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.breedingKicker}</span><h1 data-ko={palworldI18n.ko.breeding} data-ja={palworldI18n.ja.breeding}>{text.breeding}</h1><p data-ko={palworldI18n.ko.breedingDescription} data-ja={palworldI18n.ja.breedingDescription}>{text.breedingDescription}</p></div></header>
+  return <section aria-labelledby="palworld-breeding-title" className="palworld-page-section">
+    <h1 className="yoro-u-sr-only" data-ko={palworldI18n.ko.breeding} data-ja={palworldI18n.ja.breeding} id="palworld-breeding-title">{text.breeding}</h1>
     {!parsedQuery.ok ? (
       <PalworldError
         description={text.invalidBreedingQueryDescription}
@@ -571,11 +571,11 @@ export function PalworldBreedingPage({
           {singleParentId ? <section className="palworld-breeding-result" data-testid="breeding-partner-results">
             <div className="palworld-section-title">
               <div>
-                <h3 data-ko={palworldI18n.ko.partnerPairSuggestions} data-ja={palworldI18n.ja.partnerPairSuggestions}>{text.partnerPairSuggestions}</h3>
+                <h3 id="palworld-breeding-partner-list-title" data-ko={palworldI18n.ko.partnerPairSuggestions} data-ja={palworldI18n.ja.partnerPairSuggestions}>{text.partnerPairSuggestions}</h3>
                 <p data-ko={palworldI18n.ko.partnerPairSuggestionsDescription} data-ja={palworldI18n.ja.partnerPairSuggestionsDescription}>{text.partnerPairSuggestionsDescription}</p>
               </div>
             </div>
-            {partnerInitialLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={2} /></div> : null}
+            {partnerInitialLoading ? <BreedingCombinationListSkeleton locale={locale} variant="partner-results" /> : null}
             {partnerInitialError ? <PalworldError error={partnerInitialError} locale={locale} onRetry={retryPartners} /> : null}
             {currentPartnerResponse?.state === "data_unavailable" ? <PalworldError
               description={text.breedingDataUnavailableDescription}
@@ -589,27 +589,37 @@ export function PalworldBreedingPage({
             /> : null}
             {currentPartnerResponse?.state === "not_found" ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.noPartnerPairs} /> : null}
             {currentPartnerResponse?.state === "resolved" && currentPartnerResponse.items.length ? <>
-              <div className="palworld-breeding-partner-list">
-                {currentPartnerResponse.items.map((pair) => <BreedingPartnerPairCard
-                  key={pair.id}
+              <div
+                aria-labelledby="palworld-breeding-partner-list-title"
+                className="palworld-breeding-combination-scroll"
+                data-testid="breeding-partner-scroll"
+                role="region"
+                tabIndex={0}
+              >
+                <BreedingCombinationList
+                  labelledBy="palworld-breeding-partner-list-title"
+                  loading={partnerLoadMoreLoading}
                   locale={locale}
                   onOpenPal={onOpenPal}
                   onUsePair={usePairInCalculator}
-                  pair={pair}
-                />)}
+                  pairs={currentPartnerResponse.items}
+                  selectedParentId={singleParentId}
+                  total={currentPartnerResponse.pagination.total}
+                  variant="partner-results"
+                />
+                <PalworldAutoLoadControl
+                  error={partnerLoadMoreError}
+                  hasMore={currentPartnerResponse.pagination.hasNextPage}
+                  loadedCount={currentPartnerResponse.items.length}
+                  loading={partnerLoadMoreLoading}
+                  locale={locale}
+                  onLoadMore={() => { void loadMorePartners(); }}
+                  onRetry={() => { void retryLoadMorePartners(); }}
+                  paused={detailModalOpen}
+                  retryBlocked={partnerLoadMoreRetryBlocked}
+                  total={currentPartnerResponse.pagination.total}
+                />
               </div>
-              <PalworldAutoLoadControl
-                error={partnerLoadMoreError}
-                hasMore={currentPartnerResponse.pagination.hasNextPage}
-                loadedCount={currentPartnerResponse.items.length}
-                loading={partnerLoadMoreLoading}
-                locale={locale}
-                onLoadMore={() => { void loadMorePartners(); }}
-                onRetry={() => { void retryLoadMorePartners(); }}
-                paused={detailModalOpen}
-                retryBlocked={partnerLoadMoreRetryBlocked}
-                total={currentPartnerResponse.pagination.total}
-              />
             </> : null}
           </section> : null}
           {directLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={1} /></div> : null}
@@ -658,28 +668,47 @@ export function PalworldBreedingPage({
           </div>
           <div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div>
         </CardContent></Card>
-        <section className="palworld-breeding-result" data-testid="breeding-parent-results" aria-busy={reverseLoading}>
+        <section className="palworld-breeding-result" data-testid="breeding-parent-results" aria-busy={reverseLoading || reverseLoadMoreLoading}>
           <BreedingRequestStatus message={reverseAnnouncement} />
-          <div className="palworld-section-title"><h2>{text.childToParents}</h2></div>
+          <div className="palworld-section-title"><h2 id="palworld-breeding-reverse-list-title">{text.childToParents}</h2></div>
           {!query.child ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.selectTarget} /> : null}
-          {reverseLoading ? <div className="palworld-breeding-result-skeleton"><PalworldLoading locale={locale} count={1} /></div> : null}
+          {reverseLoading ? <BreedingCombinationListSkeleton locale={locale} variant="reverse-results" /> : null}
           {query.child && target ? <ReverseBreedingTargetSummary child={target} loadedCount={reverse.data?.items.length} locale={locale} onOpenPal={onOpenPal} pagination={reverse.data?.pagination} /> : null}
           {reverse.status === "error" ? <PalworldError error={reverse.error} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} /> : null}
           {reverse.status === "data_unavailable" ? <PalworldError description={text.breedingDataUnavailableDescription} descriptionJa={palworldI18n.ja.breedingDataUnavailableDescription} descriptionKo={palworldI18n.ko.breedingDataUnavailableDescription} error={reverse.error} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} title={text.breedingDataUnavailable} titleJa={palworldI18n.ja.breedingDataUnavailable} titleKo={palworldI18n.ko.breedingDataUnavailable} /> : null}
           {reverse.status === "empty" ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.noParentPairs} /> : null}
-          {reverse.status === "success" && reverse.data?.items.length ? <div className="palworld-parent-pair-list">{reverse.data.items.map((pair) => <ReverseBreedingPairCard pair={pair} locale={locale} onOpenPal={onOpenPal} onUsePair={usePairInCalculator} key={pair.id} />)}</div> : null}
-          {reverse.status === "success" && reverse.data ? <PalworldAutoLoadControl
-            error={reverseLoadMoreError}
-            hasMore={reverse.data.pagination.hasNextPage}
-            loadedCount={reverse.data.items.length}
-            loading={reverseLoadMoreLoading}
-            locale={locale}
-            onLoadMore={() => { void loadMoreReversePairs(); }}
-            onRetry={() => { void loadMoreReversePairs(); }}
-            paused={detailModalOpen}
-            retryBlocked={reverseRetryBlocked}
-            total={reverse.data.pagination.total}
-          /> : null}
+          {reverse.status === "success" && reverse.data?.items.length ? (
+            <div
+              aria-labelledby="palworld-breeding-reverse-list-title"
+              className="palworld-breeding-combination-scroll"
+              data-testid="breeding-reverse-scroll"
+              role="region"
+              tabIndex={0}
+            >
+              <BreedingCombinationList
+                labelledBy="palworld-breeding-reverse-list-title"
+                loading={reverseLoadMoreLoading}
+                locale={locale}
+                onOpenPal={onOpenPal}
+                onUsePair={usePairInCalculator}
+                pairs={reverse.data.items}
+                total={reverse.data.pagination.total}
+                variant="reverse-results"
+              />
+              <PalworldAutoLoadControl
+                error={reverseLoadMoreError}
+                hasMore={reverse.data.pagination.hasNextPage}
+                loadedCount={reverse.data.items.length}
+                loading={reverseLoadMoreLoading}
+                locale={locale}
+                onLoadMore={() => { void loadMoreReversePairs(); }}
+                onRetry={() => { void loadMoreReversePairs(); }}
+                paused={detailModalOpen}
+                retryBlocked={reverseRetryBlocked}
+                total={reverse.data.pagination.total}
+              />
+            </div>
+          ) : null}
         </section>
       </div>}
     </>}

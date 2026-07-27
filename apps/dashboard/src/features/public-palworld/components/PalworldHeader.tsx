@@ -44,6 +44,20 @@ export function PalworldHeader({
   const navRef = useRef<HTMLElement>(null);
   const navScrollRef = useRef<HTMLDivElement>(null);
 
+  const revealNavItem = useCallback((item: HTMLElement) => {
+    const row = navScrollRef.current;
+    const nav = navRef.current;
+    if (!row || !nav) return;
+    const scroller = nav.scrollWidth > nav.clientWidth + 1 ? nav : row;
+    const itemStart = item.offsetLeft;
+    const itemEnd = itemStart + item.offsetWidth;
+    if (itemStart < scroller.scrollLeft) {
+      scroller.scrollLeft = itemStart;
+    } else if (itemEnd > scroller.scrollLeft + scroller.clientWidth) {
+      scroller.scrollLeft = itemEnd - scroller.clientWidth;
+    }
+  }, []);
+
   const closeMenus = useCallback(() => {
     setGameMenuOpen(false);
     setLocaleMenuOpen(false);
@@ -57,26 +71,6 @@ export function PalworldHeader({
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [closeMenus]);
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      const row = navScrollRef.current;
-      if (!row) return;
-      const activeItem = navRef.current?.querySelector<HTMLElement>("[aria-current='page']");
-      if (activeItem) {
-        const rowRect = row.getBoundingClientRect();
-        const activeRect = activeItem.getBoundingClientRect();
-        if (activeRect.left < rowRect.left) {
-          row.scrollTo({ left: Math.max(0, row.scrollLeft + activeRect.left - rowRect.left) });
-        } else if (activeRect.right > rowRect.right) {
-          row.scrollTo({ left: row.scrollLeft + activeRect.right - rowRect.right });
-        }
-      }
-      const maxScroll = Math.max(0, row.scrollWidth - row.clientWidth);
-      setNavScroll({ start: row.scrollLeft > 1, end: row.scrollLeft < maxScroll - 1 });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [page]);
 
   useEffect(() => {
     const row = navScrollRef.current;
@@ -119,9 +113,8 @@ export function PalworldHeader({
   }
 
   return (
-    <header className={`public-app-header public-app-header-v2 palworld-header${searchContent ? "" : " home"}`} ref={headerRef}>
-      <div className="public-header-top-band">
-        <div className="public-header-primary-row">
+    <header className={`public-app-header public-app-header-v2 palworld-header${searchContent ? "" : " is-home"}`} ref={headerRef}>
+      <div className="palworld-header-layout">
           <div className="public-header-product-cluster">
             <button className="public-header-brand" type="button" onClick={() => setPalworldUrl("/palworld")} aria-label={palworldI18n[locale].home}>
               <img className="public-brand-logo public-brand-logo-full public-brand-logo-topbar" src="/images/yorogg-topbar-logo.webp" alt="YORO.gg" />
@@ -180,11 +173,6 @@ export function PalworldHeader({
             <strong data-ko={palworldI18n.ko.gameMenu} data-ja={palworldI18n.ja.gameMenu}>{palworldI18n[locale].gameMenu}</strong>
           </button>
           {gameMenuOpen ? <div className="public-mobile-game-tray"><PublicGameSelector activePage="palworld" onPage={handleGame} mode="tray" /></div> : null}
-        </div>
-      </div>
-      <div className="public-header-bottom-band">
-        <div className="public-header-bottom-row palworld-header-bottom-row">
-          {searchContent}
           <div
             className={`public-header-secondary-row palworld-secondary-row${navScroll.start ? " can-scroll-start" : ""}${navScroll.end ? " can-scroll-end" : ""}`}
             data-scrollable={navScroll.start || navScroll.end ? "true" : undefined}
@@ -201,7 +189,10 @@ export function PalworldHeader({
                     data-ko={item.ko}
                     data-ja={item.ja}
                     onClick={() => setPalworldUrl(palworldPathForPage(item.page))}
-                    onFocus={(event) => event.currentTarget.scrollIntoView({ block: "nearest", inline: "nearest" })}
+                    onFocus={(event) => {
+                      const item = event.currentTarget;
+                      window.requestAnimationFrame(() => revealNavItem(item));
+                    }}
                     key={item.page}
                   >
                     <strong>{locale === "ja" ? item.ja : item.ko}</strong>
@@ -210,7 +201,7 @@ export function PalworldHeader({
               })}
             </nav>
           </div>
-        </div>
+          {searchContent}
       </div>
     </header>
   );

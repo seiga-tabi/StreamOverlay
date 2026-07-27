@@ -34,6 +34,7 @@ import { setPublicPath } from "../src/features/public-lol/utils/routes";
 import {
   breedingPairGendersForParents,
   clearPalworldBreedingParams,
+  orientBreedingPairForSelectedParent,
   palworldBreedingParams,
   parsePalworldBreedingQuery,
   samePalworldBreedingPalId,
@@ -1101,6 +1102,25 @@ test("성별 조건은 현재 부모 순서에 맞게 적용하고 교환된 응
     { parentAGender: "female", parentBGender: "male" },
   );
   assert.equal(breedingPairGendersForParents(pair, "missing", "anubis"), undefined);
+  assert.deepEqual(orientBreedingPairForSelectedParent(pair, "lamball"), {
+    selectedParent: pair.parentA,
+    partnerParent: pair.parentB,
+    child: pair.child,
+    selectedParentGender: "male",
+    partnerParentGender: "female",
+    isSpecial: true,
+  });
+  assert.deepEqual(orientBreedingPairForSelectedParent(pair, "ANUBIS"), {
+    selectedParent: pair.parentB,
+    partnerParent: pair.parentA,
+    child: pair.child,
+    selectedParentGender: "female",
+    partnerParentGender: "male",
+    isSpecial: true,
+  });
+  assert.equal(orientBreedingPairForSelectedParent(pair, "missing"), undefined);
+  assert.equal(pair.parentA.id, "lamball");
+  assert.deepEqual(pair.genderCondition, { parentA: "male", parentB: "female" });
 });
 
 test("교배 URL query는 exact ID·성별·mode·page만 상태로 복원한다", () => {

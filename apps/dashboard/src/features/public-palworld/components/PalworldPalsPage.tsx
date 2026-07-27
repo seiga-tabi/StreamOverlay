@@ -129,14 +129,8 @@ export function PalworldPalsPage({
   }
 
   return (
-    <section className="palworld-page-section palworld-pals-page">
-      <header className="palworld-page-heading">
-        <div>
-          <span aria-hidden="true">{text.palsKicker}</span>
-          <h1 data-ja={palworldI18n.ja.pals} data-ko={palworldI18n.ko.pals}>{text.pals}</h1>
-          <p data-ja={palworldI18n.ja.palsDescription} data-ko={palworldI18n.ko.palsDescription}>{text.palsDescription}</p>
-        </div>
-      </header>
+    <section aria-labelledby="palworld-pals-title" className="palworld-page-section palworld-pals-page">
+      <h1 className="yoro-u-sr-only" data-ja={palworldI18n.ja.pals} data-ko={palworldI18n.ko.pals} id="palworld-pals-title">{text.pals}</h1>
 
       <Card as="section" className="palworld-pals-search-card" padding="md">
         <form aria-label={text.nameSearch} className="palworld-pals-search palworld-pal-search-form" onSubmit={submit} role="search">
@@ -155,65 +149,69 @@ export function PalworldPalsPage({
         </form>
       </Card>
 
-      <div className="palworld-pals-desktop-filter">
-        <PalworldPalsDesktopFilterPanel
-          clearDisabled={!hasFilters}
-          facets={facets}
-          locale={locale}
-          onClear={clearFilters}
-          onUpdate={update}
-          params={params}
-        />
-      </div>
+      <div className="palworld-catalog-layout">
+        <aside aria-label={text.detailedFilters} className="palworld-catalog-filter-rail palworld-pals-desktop-filter">
+          <PalworldPalsDesktopFilterPanel
+            clearDisabled={!hasFilters}
+            facets={facets}
+            locale={locale}
+            onClear={clearFilters}
+            onUpdate={update}
+            params={params}
+          />
+        </aside>
 
-      <Button
-        aria-expanded={filterOpen}
-        aria-haspopup="dialog"
-        className="palworld-pal-mobile-filter-trigger palworld-pals-mobile-filter-trigger"
-        data-testid="pal-filter-trigger"
-        onClick={() => setFilterOpen(true)}
-        ref={filterTriggerRef}
-        type="button"
-        variant="secondary"
-      >
-        {text.filterCount.replace("{count}", String(detailFilterCount))}
-      </Button>
-
-      <Modal
-        className="palworld-pals-filter-modal"
-        onClose={() => setFilterOpen(false)}
-        open={filterOpen}
-        returnFocusRef={filterTriggerRef}
-        size="lg"
-      >
-        <ModalHeader>
-          <div>
-            <ModalTitle>{text.detailedFilters}</ModalTitle>
-            <ModalDescription>{text.detailedFiltersDescription}</ModalDescription>
+        <div className="palworld-catalog-results">
+          <div className="palworld-catalog-mobile-toolbar">
+            <Button
+              aria-expanded={filterOpen}
+              aria-haspopup="dialog"
+              className="palworld-pal-mobile-filter-trigger palworld-pals-mobile-filter-trigger"
+              data-testid="pal-filter-trigger"
+              onClick={() => setFilterOpen(true)}
+              ref={filterTriggerRef}
+              type="button"
+              variant="secondary"
+            >
+              {text.filterCount.replace("{count}", String(detailFilterCount))}
+            </Button>
           </div>
-          <ModalCloseButton aria-label={text.closeFilters}>×</ModalCloseButton>
-        </ModalHeader>
-        <ModalContent>
-          <PalworldPalsFilterControls facets={facets} locale={locale} onUpdate={update} params={params} />
-        </ModalContent>
-        <ModalFooter>
-          <Button disabled={!hasFilters} onClick={clearFilters} type="button" variant="ghost">{text.clearFilters}</Button>
-          <Button onClick={() => setFilterOpen(false)} type="button">{text.close}</Button>
-        </ModalFooter>
-      </Modal>
 
-      <PalworldPalsAppliedFilters locale={locale} onRemove={removeFilter} params={params} />
+          <Modal
+            className="palworld-pals-filter-modal"
+            onClose={() => setFilterOpen(false)}
+            open={filterOpen}
+            returnFocusRef={filterTriggerRef}
+            size="lg"
+          >
+            <ModalHeader>
+              <div>
+                <ModalTitle>{text.detailedFilters}</ModalTitle>
+                <ModalDescription>{text.detailedFiltersDescription}</ModalDescription>
+              </div>
+              <ModalCloseButton aria-label={text.closeFilters}>×</ModalCloseButton>
+            </ModalHeader>
+            <ModalContent>
+              <PalworldPalsFilterControls facets={facets} locale={locale} onUpdate={update} params={params} />
+            </ModalContent>
+            <ModalFooter>
+              <Button disabled={!hasFilters} onClick={clearFilters} type="button" variant="ghost">{text.clearFilters}</Button>
+              <Button onClick={() => setFilterOpen(false)} type="button">{text.close}</Button>
+            </ModalFooter>
+          </Modal>
 
-      <PalworldPalsResultToolbar
-        loadedCount={response?.items.length ?? 0}
-        loading={loading}
-        locale={locale}
-        onUpdate={update}
-        pagination={response?.pagination}
-        params={params}
-      />
+          <PalworldPalsAppliedFilters locale={locale} onRemove={removeFilter} params={params} />
 
-      <div aria-busy={loading || loadMoreLoading} className="palworld-pals-results" data-testid="palworld-pals-results">
+          <PalworldPalsResultToolbar
+            loadedCount={response?.items.length ?? 0}
+            loading={loading}
+            locale={locale}
+            onUpdate={update}
+            pagination={response?.pagination}
+            params={params}
+          />
+
+          <div aria-busy={loading || loadMoreLoading} className="palworld-pals-results" data-testid="palworld-pals-results">
         {loading && !error ? <PalworldLoading locale={locale} /> : null}
         {error ? <PalworldError error={error} locale={locale} onRetry={retryInitial} /> : null}
         {!loading && !error && response?.items.length === 0 && response.pagination.total === 0 ? (
@@ -253,6 +251,8 @@ export function PalworldPalsPage({
             />
           </>
         ) : null}
+          </div>
+        </div>
       </div>
     </section>
   );

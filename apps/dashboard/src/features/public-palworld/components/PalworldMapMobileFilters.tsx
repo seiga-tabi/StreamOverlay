@@ -1,15 +1,20 @@
 import type { RefObject } from "react";
 import {
   Modal,
+  ModalCloseButton,
   ModalContent,
+  ModalFooter,
+  ModalHeader,
   ModalTitle,
 } from "../../../shared/ui/Modal";
+import { Button } from "../../../shared/ui/Button";
 import {
   PalworldMapFilterPanel,
   type PalworldMapFilterPanelProps,
 } from "./PalworldMapFilterPanel";
 import { resolvePalworldMapLabel } from "./PalworldMapExplorerTypes";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+import { palworldI18n } from "../i18n/palworld-i18n";
 
 export type PalworldMapMobileFiltersProps = Omit<
   PalworldMapFilterPanelProps,
@@ -28,11 +33,14 @@ export function PalworldMapMobileFilters({
   copy,
   locale,
   onClose,
+  onReset,
   open,
   returnFocusRef,
   ...panelProps
 }: PalworldMapMobileFiltersProps) {
   useBodyScrollLock(open);
+  const closeLabel = palworldI18n[locale].close;
+  const resetLabel = resolvePalworldMapLabel(copy.reset, locale);
 
   return (
     <Modal
@@ -43,13 +51,21 @@ export function PalworldMapMobileFilters({
       returnFocusRef={returnFocusRef}
       size="sm"
     >
-      <ModalTitle
-        className="yoro-u-sr-only"
-        data-ja={copy.title.ja}
-        data-ko={copy.title.ko}
-      >
-        {resolvePalworldMapLabel(copy.title, locale)}
-      </ModalTitle>
+      <ModalHeader className="palworld-map-mobile-filters__header">
+        <ModalTitle
+          data-ja={copy.title.ja}
+          data-ko={copy.title.ko}
+        >
+          {resolvePalworldMapLabel(copy.title, locale)}
+        </ModalTitle>
+        <ModalCloseButton
+          aria-label={closeLabel}
+          data-ja={palworldI18n.ja.close}
+          data-ko={palworldI18n.ko.close}
+        >
+          <span aria-hidden="true">×</span>
+        </ModalCloseButton>
+      </ModalHeader>
       <ModalContent className="palworld-map-mobile-filters__content">
         <PalworldMapFilterPanel
           {...panelProps}
@@ -62,8 +78,27 @@ export function PalworldMapMobileFilters({
               onClose();
             }
           }}
+          onReset={onReset}
         />
       </ModalContent>
+      <ModalFooter className="palworld-map-mobile-filters__footer">
+        <Button
+          data-ja={copy.reset.ja}
+          data-ko={copy.reset.ko}
+          onClick={onReset}
+          variant="secondary"
+        >
+          {resetLabel}
+        </Button>
+        <Button
+          data-ja={palworldI18n.ja.close}
+          data-ko={palworldI18n.ko.close}
+          onClick={onClose}
+          variant="primary"
+        >
+          {closeLabel}
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 }

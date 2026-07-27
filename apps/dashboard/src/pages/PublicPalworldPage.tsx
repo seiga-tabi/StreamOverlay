@@ -98,6 +98,11 @@ export function PublicPalworldPage({
   const selectedSkillId = detailRoute.selection?.type === "skill" ? detailRoute.selection.id : undefined;
   const selectedCondensationStars = palworldCondensationStarsFromParams(params);
   const selectedSpawnPeriod = palworldSpawnPeriodFromParams(params);
+  const pageFrame = page === "map"
+    ? "map"
+    : page === "pals" || page === "items" || page === "skills"
+      ? "catalog"
+      : "tool";
 
   setActivePublicLocale(locale);
 
@@ -379,7 +384,7 @@ export function PublicPalworldPage({
           twitchStatus={twitchStatus}
         />
       </AppShellHeader>
-      <AppShellMain className="palworld-main" id="palworld-main">
+      <AppShellMain className="palworld-main" data-page-frame={pageFrame} id="palworld-main">
         {!knownPage ? <PalworldNotFoundPage locale={locale} /> : null}
         {knownPage ? <Suspense fallback={(
           <SkeletonCard

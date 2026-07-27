@@ -54,6 +54,7 @@ import { PalworldPalStatsGraph } from "../src/features/public-palworld/component
 import { PalworldPalPicker } from "../src/features/public-palworld/components/PalworldPalPicker";
 import { BreedingModeTabs } from "../src/features/public-palworld/components/PalworldBreedingControls";
 import {
+  BreedingCombinationList,
   BreedingGenderAlternativeCard,
   BreedingPartnerPairCard,
   BreedingRequestStatus,
@@ -145,6 +146,8 @@ test("펠월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 
   const child = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="pals" searchContent={<div data-testid="header-search">검색</div>} />);
   assert.doesNotMatch(home, /data-testid="header-search"/);
   assert.match(child, /data-testid="header-search"/);
+  assert.match(home, /class="public-app-header public-app-header-v2 palworld-header is-home"/);
+  assert.doesNotMatch(home, /palworld-header home/);
   assert.match(child, /data-testid="palworld-secondary-nav"/);
   assert.match(child, /aria-current="page"[^>]*data-ko="Pal 도감"/);
   assert.match(home, /class="public-brand-mark public-brand-mobile-logo" src="\/images\/yorogg-home-logo\.webp" alt="" aria-hidden="true"/);
@@ -1079,7 +1082,26 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   const tabs = renderToStaticMarkup(<BreedingModeTabs locale="ja" mode="child" onMode={() => undefined} />);
   const direct = renderToStaticMarkup(<DirectBreedingResult locale="ko" onCopy={() => undefined} onOpenPal={() => undefined} onViewParents={() => undefined} pair={pair} />);
   const reverse = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} />);
-  const partner = renderToStaticMarkup(<BreedingPartnerPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} />);
+  const partner = renderToStaticMarkup(<BreedingPartnerPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} selectedParentId="penking" />);
+  const partnerList = renderToStaticMarkup(<BreedingCombinationList
+    labelledBy="partner-list-title"
+    locale="ko"
+    onOpenPal={() => undefined}
+    onUsePair={() => undefined}
+    pairs={[pair]}
+    selectedParentId="penking"
+    total={287}
+    variant="partner-results"
+  />);
+  const reverseList = renderToStaticMarkup(<BreedingCombinationList
+    labelledBy="reverse-list-title"
+    locale="ja"
+    onOpenPal={() => undefined}
+    onUsePair={() => undefined}
+    pairs={[pair]}
+    total={1}
+    variant="reverse-results"
+  />);
   const target = renderToStaticMarkup(<ReverseBreedingTargetSummary
     child={pair.child}
     loadedCount={12}
@@ -1089,6 +1111,14 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   />);
   const alternative = renderToStaticMarkup(<BreedingGenderAlternativeCard locale="ja" onApply={() => undefined} onOpenPal={() => undefined} pair={pair} />);
   const status = renderToStaticMarkup(<BreedingRequestStatus message="결과 1개" />);
+  const breedingPageSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldBreedingPage.tsx", import.meta.url),
+    "utf8",
+  );
+  const breedingCss = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
 
   assert.equal((tabs.match(/role="tab"/gu) ?? []).length, 2);
   assert.match(tabs, /親から結果を探す[\s\S]*結果パルの親を探す/u);
@@ -1106,6 +1136,13 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(partner, /data-testid="breeding-partner-pair"/u);
   assert.match(partner, /펭킹[\s\S]*불무사[\s\S]*실키누/u);
   assert.match(partner, /계산기에 넣기/u);
+  assert.match(partnerList, /role="table"/u);
+  assert.match(partnerList, /aria-rowcount="288"/u);
+  assert.match(partnerList, /가능한 조합 287개/u);
+  assert.match(partnerList, /현재 1\/287개 표시/u);
+  assert.match(partnerList, /선택한 부모[\s\S]*상대 부모[\s\S]*결과 Pal/u);
+  assert.match(reverseList, /親パル1[\s\S]*親パル2[\s\S]*条件・操作/u);
+  assert.doesNotMatch(reverseList, /シルキーヌ/u);
   assert.match(target, /data-testid="breeding-target-summary"/u);
   assert.match(target, /실키누/u);
   assert.match(target, /aria-label="목표 Pal 상세 보기: 실키누"/u);
@@ -1114,6 +1151,20 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(alternative, /この条件を適用/u);
   assert.match(alternative, /aria-label="この条件を適用: シルキーヌ, オス \/ メス"/u);
   assert.match(status, /role="status"[^>]*aria-live="polite"[^>]*aria-atomic="true"/u);
+  assert.match(breedingPageSource, /data-testid="breeding-partner-scroll"[\s\S]*<PalworldAutoLoadControl/u);
+  assert.match(breedingPageSource, /data-testid="breeding-reverse-scroll"[\s\S]*<PalworldAutoLoadControl/u);
+  assert.match(
+    breedingCss,
+    /\.palworld-breeding-combination-scroll\s*\{[\s\S]*?block-size:\s*clamp\([^;]+;[\s\S]*?overflow-y:\s*auto;/u,
+  );
+  assert.match(
+    breedingCss,
+    /\.palworld-breeding-result > \.palworld-section-title\s*\{[\s\S]*?padding-block-start:\s*var\(--yoro-space-4\);/u,
+  );
+  assert.match(
+    breedingCss,
+    /\.palworld-breeding-combination-copy > strong\s*\{[\s\S]*?color:\s*var\(--yoro-color-text-strong\);/u,
+  );
   assert.equal(palworldI18n.ko.partnerPairSuggestions, "선택한 부모의 교배 조합");
   assert.equal(palworldI18n.ja.partnerPairSuggestions, "選択した親パルの配合組み合わせ");
 });
@@ -1584,8 +1635,9 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
     korean,
     /data-layer="statue-lifmunk"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/pals\//u,
   );
-  assert.match(korean, /현재 화면의 위치/u);
-  assert.match(korean, /휠·핀치/u);
+  assert.doesNotMatch(korean, /현재 화면의 위치/u);
+  assert.doesNotMatch(korean, /현재 게시 릴리스에서 검증된/u);
+  assert.doesNotMatch(korean, /휠·핀치/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
   assert.match(japanese, />フィルター 1件</u);
   assert.match(japanese, /移動・場所/u);
@@ -1599,7 +1651,8 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
     japanese,
     /検証済みのフィールドボス、野生スポーン、移動・収集地点が表示されたPalworldワールドマップ/u
   );
-  assert.match(japanese, /ホイール・ピンチ/u);
+  assert.doesNotMatch(japanese, /現在公開中のリリースで検証済み/u);
+  assert.doesNotMatch(japanese, /ホイール・ピンチ/u);
 
   const css = readFileSync(
     new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
@@ -2118,7 +2171,7 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   assert.match(detailSource, /period=\{spawnPeriod\}/u);
   assert.match(
     css,
-    /\.palworld-pal-location-loading,[\s\S]*?\.palworld-pal-location-preview\s*\{[\s\S]*?inline-size:\s*min\(100%, clamp\(20rem, 50vw, 40rem\)\);[\s\S]*?justify-self:\s*center;/u,
+    /\.palworld-pal-location-loading,[\s\S]*?\.palworld-pal-location-preview\s*\{[\s\S]*?inline-size:\s*100%;[\s\S]*?justify-self:\s*center;/u,
   );
   assert.match(
     css,
@@ -2130,26 +2183,24 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   );
 });
 
-test("페이지 기술 키커와 Pal·도감 번호·레벨 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
-  assert.equal(palworldI18n.ko.palsKicker, "PAL 도감");
-  assert.equal(palworldI18n.ja.palsKicker, "パル図鑑");
-  assert.equal(palworldI18n.ko.breedingKicker, "교배");
-  assert.equal(palworldI18n.ja.breedingKicker, "配合");
+test("페이지 상단 소개 문구는 숨기고 Pal·도감 번호·레벨 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
   assert.equal(palworldI18n.ko.palEntityLabel, "Pal");
   assert.equal(palworldI18n.ja.palEntityLabel, "パル");
 
   const sources = [
-    ["PalworldHome.tsx", "homeKicker"],
-    ["PalworldStreamersPage.tsx", "streamersKicker"],
-    ["PalworldPalsPage.tsx", "palsKicker"],
-    ["PalworldBreedingPage.tsx", "breedingKicker"],
-    ["PalworldItemsPage.tsx", "itemsKicker"],
-    ["PalworldSkillsPage.tsx", "skillsKicker"],
-    ["PalworldMapPage.tsx", "mapKicker"],
+    ["PalworldHome.tsx", ["homeKicker", "description"]],
+    ["PalworldStreamersPage.tsx", ["streamersKicker", "streamersDescription"]],
+    ["PalworldPalsPage.tsx", ["palsKicker", "palsDescription"]],
+    ["PalworldBreedingPage.tsx", ["breedingKicker", "breedingDescription"]],
+    ["PalworldItemsPage.tsx", ["itemsKicker", "itemsDescription"]],
+    ["PalworldSkillsPage.tsx", ["skillsKicker", "skillsDescription"]],
   ] as const;
-  for (const [fileName, key] of sources) {
+  for (const [fileName, hiddenKeys] of sources) {
     const source = readFileSync(new URL(`../src/features/public-palworld/components/${fileName}`, import.meta.url), "utf8");
-    assert.match(source, new RegExp(`text\\.${key}`, "u"), fileName);
+    assert.match(source, /yoro-u-sr-only/u, fileName);
+    for (const key of hiddenKeys) {
+      assert.doesNotMatch(source, new RegExp(`text\\.${key}(?![A-Za-z])`, "u"), fileName);
+    }
   }
 
   const searchForm = readFileSync(new URL("../src/features/public-palworld/components/PalworldSearchForm.tsx", import.meta.url), "utf8");

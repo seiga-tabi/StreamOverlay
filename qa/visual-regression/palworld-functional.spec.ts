@@ -2715,7 +2715,7 @@ test("목표 Pal 역검색은 스크롤 위치에서 다음 조합을 자동으�
   await assertHealthyDocument(page, errors);
 });
 
-test("교배 직접 결과와 역검색 카드는 요구 화면 크기에서 수평 overflow 없이 표시된다", async ({ page }) => {
+test("교배 직접 결과와 고밀도 조합 목록은 요구 화면 크기에서 수평 overflow 없이 표시된다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   const viewports = [
     { width: 360, height: 800 },
@@ -2723,6 +2723,7 @@ test("교배 직접 결과와 역검색 카드는 요구 화면 크기에서 수
     { width: 430, height: 932 },
     { width: 768, height: 1024 },
     { width: 1024, height: 768 },
+    { width: 1180, height: 820 },
     { width: 1440, height: 1000 },
   ];
 
@@ -2740,6 +2741,42 @@ test("교배 직접 결과와 역검색 카드는 요구 화면 크기에서 수
     expect(Math.abs(directTabBounds!.y - reverseTabBounds!.y)).toBeLessThanOrEqual(1);
     expect(reverseTabBounds!.x + reverseTabBounds!.width).toBeLessThanOrEqual(viewport.width + 1);
     await expect(page.getByTestId("breeding-direct-card").locator(".palworld-direct-result-hero")).toBeVisible();
+    await assertHealthyDocument(page, errors);
+
+    await page.goto("/palworld/breeding?mode=parents&parentA=penking");
+    const partnerResults = page.getByTestId("breeding-partner-results");
+    const partnerTable = partnerResults.getByRole("table", { name: "선택한 부모의 교배 조합" });
+    const partnerRow = page.getByTestId("breeding-partner-pair").first();
+    await expect(partnerTable).toBeVisible();
+    await expect(partnerResults).toContainText("가능한 조합 1개");
+    await expect(partnerResults).toContainText("현재 1/1개 표시");
+    await expect(partnerRow.locator(":scope > [role='cell']")).toHaveCount(3);
+    if (viewport.width <= 768) {
+      const parentCells = partnerRow.locator(":scope > .palworld-breeding-combination-cell.is-pal");
+      const resultCell = partnerRow.locator(":scope > .palworld-breeding-combination-result");
+      const [firstParentBounds, secondParentBounds, resultBounds] = await Promise.all([
+        parentCells.nth(0).boundingBox(),
+        parentCells.nth(1).boundingBox(),
+        resultCell.boundingBox(),
+      ]);
+      expect(firstParentBounds).not.toBeNull();
+      expect(secondParentBounds).not.toBeNull();
+      expect(resultBounds).not.toBeNull();
+      expect(secondParentBounds!.x).toBeGreaterThan(firstParentBounds!.x);
+      expect(resultBounds!.y).toBeGreaterThan(firstParentBounds!.y);
+    } else {
+      const headers = partnerTable.getByRole("columnheader");
+      const cells = partnerRow.locator(":scope > [role='cell']");
+      for (let index = 0; index < 3; index += 1) {
+        const [headerBounds, cellBounds] = await Promise.all([
+          headers.nth(index).boundingBox(),
+          cells.nth(index).boundingBox(),
+        ]);
+        expect(headerBounds).not.toBeNull();
+        expect(cellBounds).not.toBeNull();
+        expect(Math.abs(headerBounds!.x - cellBounds!.x)).toBeLessThanOrEqual(1);
+      }
+    }
     await assertHealthyDocument(page, errors);
 
     await page.goto("/palworld/breeding?mode=child&child=sibelyx");
@@ -2926,7 +2963,8 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect(page).toHaveURL(/\/palworld\/map$/u);
   await expect(page.getByTestId("header-search")).toBeVisible();
   await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("heading", { name: "Palworld 월드 지도", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Palworld 월드 지도", level: 1 })).toHaveClass(/yoro-u-sr-only/u);
+  await expect(page.locator(".palworld-map-page > .palworld-page-heading")).toHaveCount(0);
   const mapImage = page.getByTestId("palworld-map-image");
   await expect(mapImage).toBeVisible();
   await expect(mapImage).toHaveAttribute("src", READY_WORLD_MAP_URL);
@@ -2960,6 +2998,18 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   ).not.toBe(transformBeforeDrag);
   await page.getByRole("button", { name: "배율 초기화" }).click();
   await expect(page.getByText("100%", { exact: true })).toBeVisible();
+  const [resetViewportBounds, resetImageBounds] = await Promise.all([
+    viewport.boundingBox(),
+    mapImage.boundingBox(),
+  ]);
+  expect(resetViewportBounds).not.toBeNull();
+  expect(resetImageBounds).not.toBeNull();
+  expect(resetImageBounds!.x).toBeGreaterThanOrEqual(resetViewportBounds!.x - 1);
+  expect(resetImageBounds!.y).toBeGreaterThanOrEqual(resetViewportBounds!.y - 1);
+  expect(resetImageBounds!.x + resetImageBounds!.width)
+    .toBeLessThanOrEqual(resetViewportBounds!.x + resetViewportBounds!.width + 1);
+  expect(resetImageBounds!.y + resetImageBounds!.height)
+    .toBeLessThanOrEqual(resetViewportBounds!.y + resetViewportBounds!.height + 1);
 
   await page.goBack();
   await expect(page).toHaveURL(/\/palworld\/items$/u);
@@ -2977,6 +3027,27 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect.poll(() => new URL(page.url()).searchParams.has("world")).toBe(false);
   await expect(mapImage).toHaveAttribute("src", READY_WORLD_MAP_URL);
   const mobileViewport = (page.viewportSize()?.width ?? 1440) <= 768;
+  await expect.poll(
+    () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
+  ).toBe(true);
+  const legendTrigger = mobileViewport
+    ? page.locator(".palworld-map-mobile-command-bar").getByRole("button", { name: "지도 범례" })
+    : page.locator(".palworld-map-layer-legend").getByRole("button", { name: "지도 범례" });
+  await expect(legendTrigger).toBeVisible();
+  await legendTrigger.click();
+  if (mobileViewport) {
+    const legendSheet = page.getByRole("dialog", { name: "지도 범례" });
+    await expect(legendSheet).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+    await legendSheet.getByRole("button", { name: "닫기" }).click();
+    await expect(legendSheet).toBeHidden();
+    await expect(legendTrigger).toBeFocused();
+  } else {
+    await expect(legendTrigger).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(".palworld-map-legend-content")).toBeVisible();
+    await legendTrigger.click();
+    await expect(legendTrigger).toHaveAttribute("aria-expanded", "false");
+  }
   const mobileFilterTrigger = page.getByRole("button", { name: "필터 1개" });
   const filterScope = mobileViewport
     ? page.getByTestId("palworld-map-mobile-filters")
@@ -2985,6 +3056,8 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     await expect(mobileFilterTrigger).toBeVisible();
     await mobileFilterTrigger.click();
     await expect(filterScope).toBeVisible();
+    await expect(filterScope.getByRole("heading", { name: "지도 필터" })).toBeVisible();
+    await expect(filterScope.locator(".palworld-map-mobile-filters__footer")).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
   } else {
     await expect(mobileFilterTrigger).toBeHidden();
@@ -3049,7 +3122,10 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect.poll(() => new URL(page.url()).searchParams.has("layers")).toBe(false);
   await expect(page.getByTestId("palworld-map-boss-markers")).toBeVisible();
   if (mobileViewport) {
-    await filterScope.getByRole("button", { name: "필터 숨기기" }).click();
+    await filterScope
+      .locator(".palworld-map-mobile-filters__header")
+      .getByRole("button", { name: "닫기" })
+      .click();
     await expect(filterScope).toBeHidden();
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("");
     await expect(mobileFilterTrigger).toBeFocused();
@@ -3067,7 +3143,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect(bossMarker).toBeFocused();
   await bossMarker.click();
   await expect(page.getByRole("dialog", { name: "아누비스" })).toBeVisible();
-  await page.getByRole("heading", { name: "Palworld 월드 지도", level: 1 }).click();
+  await page.locator(".palworld-map-toolbar").click();
   await expect.poll(() => new URL(page.url()).searchParams.has("marker")).toBe(false);
   await bossMarker.click();
   await expect(page.getByRole("dialog", { name: "아누비스" })).toBeVisible();
@@ -3081,7 +3157,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
 
   await page.locator(".public-locale-button").click();
   await page.getByRole("menuitemradio", { name: /JP/u }).click();
-  await expect(page.getByRole("heading", { name: "Palworld ワールドマップ", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Palworld ワールドマップ", level: 1 })).toHaveClass(/yoro-u-sr-only/u);
   await expect(page.getByRole("button", { name: "マップを拡大" })).toBeVisible();
   await expect(page.getByRole("button", { name: "フィールドボス: アヌビス, Lv.55" })).toBeVisible();
   await assertHealthyDocument(page, errors);
@@ -3220,8 +3296,60 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
     await expect(page).toHaveURL(/\/palworld\/map$/u);
     await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" })).toHaveAttribute("aria-current", "page");
     await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+    const mobileMapLayout = viewport.width <= 768;
+    if (!mobileMapLayout) {
+      const [baseMapBounds, baseMapImageBounds] = await Promise.all([
+        page.getByTestId("palworld-map-viewport").boundingBox(),
+        page.getByTestId("palworld-map-image").boundingBox(),
+      ]);
+      expect(baseMapBounds).not.toBeNull();
+      expect(baseMapImageBounds).not.toBeNull();
+      expect(baseMapImageBounds!.x).toBeGreaterThanOrEqual(baseMapBounds!.x - 1);
+      expect(baseMapImageBounds!.y).toBeGreaterThanOrEqual(baseMapBounds!.y - 1);
+      expect(baseMapImageBounds!.x + baseMapImageBounds!.width)
+        .toBeLessThanOrEqual(baseMapBounds!.x + baseMapBounds!.width + 1);
+      expect(baseMapImageBounds!.y + baseMapImageBounds!.height)
+        .toBeLessThanOrEqual(baseMapBounds!.y + baseMapBounds!.height + 1);
+    }
     await page.goto("/palworld/map?focusPal=anubis");
-    const mapLegend = page.getByRole("group", { name: "지도 범례" });
+    const mapViewport = page.getByTestId("palworld-map-viewport");
+    const mapToolbar = page.locator(".palworld-map-toolbar");
+    const [mapBounds, toolbarBounds] = await Promise.all([
+      mapViewport.boundingBox(),
+      mapToolbar.boundingBox(),
+    ]);
+    expect(mapBounds).not.toBeNull();
+    expect(toolbarBounds).not.toBeNull();
+    expect(mapBounds!.x).toBeGreaterThanOrEqual(0);
+    expect(mapBounds!.x + mapBounds!.width).toBeLessThanOrEqual(viewport.width + 1);
+    if (mobileMapLayout) {
+      const commandBounds = await page.locator(".palworld-map-mobile-command-bar").boundingBox();
+      expect(commandBounds).not.toBeNull();
+      expect(commandBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y);
+      expect(commandBounds!.y + commandBounds!.height).toBeLessThanOrEqual(mapBounds!.y + mapBounds!.height);
+      expect(toolbarBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y + mapBounds!.height);
+    } else {
+      const [sidebarBounds, cardBounds] = await Promise.all([
+        page.locator(".palworld-map-desktop-filter").boundingBox(),
+        page.locator(".palworld-map-card").boundingBox(),
+      ]);
+      expect(sidebarBounds).not.toBeNull();
+      expect(cardBounds).not.toBeNull();
+      expect(Math.abs(sidebarBounds!.x + sidebarBounds!.width - cardBounds!.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(sidebarBounds!.height - cardBounds!.height)).toBeLessThanOrEqual(1);
+      expect(toolbarBounds!.x).toBeGreaterThanOrEqual(mapBounds!.x);
+      expect(toolbarBounds!.x + toolbarBounds!.width).toBeLessThanOrEqual(mapBounds!.x + mapBounds!.width);
+    }
+    const mapLegend = mobileMapLayout
+      ? page.getByRole("dialog", { name: "지도 범례" })
+      : page.getByRole("group", { name: "지도 범례" });
+    if (mobileMapLayout) {
+      await page.locator(".palworld-map-mobile-command-bar")
+        .getByRole("button", { name: "지도 범례" })
+        .click();
+    } else {
+      await mapLegend.getByRole("button", { name: "지도 범례" }).click();
+    }
     await expect(mapLegend).toBeVisible();
     await expect(mapLegend).toContainText("일반 야생 스폰");
     await expect.poll(() => mapLegend.evaluate((element) =>
@@ -3230,6 +3358,9 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
     await expect.poll(() => page.evaluate(() =>
       document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
     )).toBe(true);
+    if (mobileMapLayout) {
+      await mapLegend.getByRole("button", { name: "닫기" }).click();
+    }
     await assertHealthyDocument(page, errors);
   }
 });

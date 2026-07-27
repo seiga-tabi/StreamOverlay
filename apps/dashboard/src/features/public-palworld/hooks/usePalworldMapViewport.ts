@@ -118,6 +118,7 @@ export function usePalworldMapViewport(enabled: boolean) {
   const pointersRef = useRef(new Map<number, PalworldMapPoint>());
   const passiveTouchRef = useRef(new Map<number, PalworldMapPoint>());
   const gestureRef = useRef<PalworldMapGesture>();
+  const renderFrameRef = useRef<number>();
 
   const commitView = useCallback((nextView: PalworldMapViewState): void => {
     const viewport = viewportRef.current;
@@ -128,6 +129,22 @@ export function usePalworldMapViewport(enabled: boolean) {
     );
     viewRef.current = clampedView;
     setView(clampedView);
+  }, []);
+
+  const commitViewOnAnimationFrame = useCallback((nextView: PalworldMapViewState): void => {
+    const viewport = viewportRef.current;
+    viewRef.current = clampPalworldMapView(
+      nextView,
+      viewport?.clientWidth ?? 0,
+      viewport?.clientHeight ?? 0,
+    );
+    if (renderFrameRef.current !== undefined) {
+      return;
+    }
+    renderFrameRef.current = window.requestAnimationFrame(() => {
+      renderFrameRef.current = undefined;
+      setView(viewRef.current);
+    });
   }, []);
 
   const zoomAt = useCallback((nextZoom: number, anchor?: PalworldMapPoint): void => {
@@ -168,6 +185,12 @@ export function usePalworldMapViewport(enabled: boolean) {
     observer.observe(viewport);
     return () => observer.disconnect();
   }, [commitView]);
+
+  useEffect(() => () => {
+    if (renderFrameRef.current !== undefined) {
+      window.cancelAnimationFrame(renderFrameRef.current);
+    }
+  }, []);
 
   function pointFromPointer(event: PointerEvent<HTMLDivElement>): PalworldMapPoint {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -272,7 +295,7 @@ export function usePalworldMapViewport(enabled: boolean) {
         PALWORLD_MAP_MIN_ZOOM,
         PALWORLD_MAP_MAX_ZOOM,
       );
-      commitView({
+      commitViewOnAnimationFrame({
         x: center.x - (gesture.anchorContent.x * zoom),
         y: center.y - (gesture.anchorContent.y * zoom),
         zoom,
@@ -284,7 +307,7 @@ export function usePalworldMapViewport(enabled: boolean) {
       gestureRef.current = { kind: "drag", lastPoint: point };
       return;
     }
-    commitView({
+    commitViewOnAnimationFrame({
       ...viewRef.current,
       x: viewRef.current.x + (point.x - gesture.lastPoint.x),
       y: viewRef.current.y + (point.y - gesture.lastPoint.y),

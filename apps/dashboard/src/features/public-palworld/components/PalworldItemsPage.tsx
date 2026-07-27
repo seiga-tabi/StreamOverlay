@@ -109,8 +109,8 @@ export function PalworldItemsPage({ locale, onOpenItem, params }: { locale: Palw
     ])
   )) ?? false;
 
-  return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.itemsKicker}</span><h1 data-ko={palworldI18n.ko.items} data-ja={palworldI18n.ja.items}>{text.items}</h1><p data-ko={palworldI18n.ko.itemsDescription} data-ja={palworldI18n.ja.itemsDescription}>{text.itemsDescription}</p></div></header>
+  return <section aria-labelledby="palworld-items-title" className="palworld-page-section palworld-catalog-page palworld-items-page">
+    <h1 className="yoro-u-sr-only" data-ko={palworldI18n.ko.items} data-ja={palworldI18n.ja.items} id="palworld-items-title">{text.items}</h1>
     {hasReviewPending ? <PalworldTranslationReviewNotice locale={locale} /> : null}
     <form className="palworld-item-filter-panel" onSubmit={submit} aria-label={text.filter}>
       <div className="palworld-item-search-row">

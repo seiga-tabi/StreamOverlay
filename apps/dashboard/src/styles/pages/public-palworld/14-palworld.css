@@ -21,37 +21,57 @@
 }
 
 .palworld-header.public-app-header,
-.palworld-header.public-app-header.home {
+.palworld-header.public-app-header.is-home {
   min-inline-size: 0;
   margin: var(--yoro-space-0) !important;
 }
 
-.palworld-header .public-header-top-band,
-.palworld-header .public-header-bottom-band {
-  inline-size: 100%;
-  min-inline-size: 0;
-}
-
-.palworld-header .public-header-primary-row,
-.palworld-header .public-header-bottom-row {
+.palworld-header-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
   inline-size: min(100%, var(--yoro-size-public-header-max));
   min-inline-size: 0;
+  gap: var(--yoro-space-3);
   margin-inline: auto;
+  padding: var(--yoro-space-3) var(--yoro-size-public-header-padding-inline);
 }
 
-.palworld-header-bottom-row {
-  display: flex !important;
-  align-items: center;
-  justify-content: space-between !important;
-  gap: var(--yoro-space-5) !important;
+.palworld-header-layout > .public-header-product-cluster,
+.palworld-header-layout > .public-header-tools,
+.palworld-header-layout > .palworld-secondary-row,
+.palworld-header-layout > .palworld-search-form {
+  grid-area: auto !important;
+  min-inline-size: 0;
 }
 
-.palworld-header.home .palworld-header-bottom-row {
-  justify-content: center !important;
+.palworld-header-layout > .public-header-product-cluster {
+  grid-column: 1;
+}
+
+.palworld-header-layout > .public-header-tools {
+  grid-column: 3;
+}
+
+.palworld-header-layout > .palworld-secondary-row,
+.palworld-header-layout > .palworld-search-form {
+  grid-column: 1 / -1;
+}
+
+.palworld-header-layout > .palworld-secondary-row {
+  grid-row: 2;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.palworld-header-layout > .palworld-search-form {
+  grid-row: 3;
 }
 
 .palworld-secondary-row {
   min-inline-size: 0;
+  justify-content: flex-start !important;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-inline: contain;
@@ -69,10 +89,26 @@
   gap: clamp(var(--yoro-space-2), 1vw, var(--yoro-space-5)) !important;
 }
 
+.palworld-shell.public-dashboard-shell .palworld-header .palworld-header-nav {
+  inline-size: max-content !important;
+  max-inline-size: none !important;
+  justify-self: start !important;
+  justify-content: flex-start !important;
+  gap: var(--yoro-space-2) !important;
+  overflow: visible !important;
+}
+
 .palworld-header-nav > button {
   flex: none;
   min-block-size: var(--yoro-size-touch-target);
+  font-family: inherit !important;
+  font-size: var(--yoro-font-size-sm) !important;
+  font-weight: var(--yoro-font-weight-bold) !important;
   white-space: nowrap;
+}
+
+.palworld-header-nav > button > strong {
+  font: inherit !important;
 }
 
 .palworld-shell.public-dashboard-shell .palworld-header.public-app-header .palworld-header-nav.public-header-nav > button.active::after {
@@ -238,6 +274,18 @@
   padding: clamp(var(--yoro-space-4), 3vw, var(--yoro-space-10)) !important;
 }
 
+.palworld-main[data-page-frame="catalog"] {
+  inline-size: min(100%, 84rem);
+}
+
+.palworld-main[data-page-frame="tool"] {
+  inline-size: min(100%, 72rem);
+}
+
+.palworld-main[data-page-frame="map"] {
+  inline-size: min(100%, var(--yoro-size-public-header-max));
+}
+
 .palworld-hero {
   position: relative;
   display: grid;
@@ -245,7 +293,7 @@
   min-inline-size: 0;
   overflow: visible;
   gap: var(--yoro-space-5);
-  padding: clamp(var(--yoro-space-10), 9vw, 7rem) clamp(var(--yoro-space-4), 5vw, var(--yoro-space-12));
+  padding: clamp(var(--yoro-space-8), 6vw, var(--yoro-space-12)) clamp(var(--yoro-space-4), 5vw, var(--yoro-space-12));
   border: thin solid color-mix(in srgb, var(--palworld-accent) 25%, var(--yoro-color-border));
   border-radius: var(--yoro-radius-xl);
   background:
@@ -602,14 +650,21 @@
   color: var(--yoro-color-text-muted);
 }
 
+.palworld-map-page .palworld-page-heading > div {
+  max-inline-size: 48rem;
+}
+
 .palworld-map-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   min-inline-size: 0;
   overflow: hidden;
 }
 
 .palworld-map-workspace {
   display: grid;
-  grid-template-columns: minmax(17.5rem, 20rem) minmax(0, 1fr);
+  grid-template-columns: clamp(14.5rem, 18vw, 17.5rem) minmax(0, 1fr);
   align-items: start;
   min-inline-size: 0;
   gap: var(--yoro-space-4);
@@ -620,12 +675,17 @@
 }
 
 .palworld-map-explorer-main {
+  position: relative;
   display: grid;
   min-inline-size: 0;
   gap: var(--yoro-space-4);
 }
 
 .palworld-map-mobile-filter-trigger {
+  display: none;
+}
+
+.palworld-map-mobile-command-bar {
   display: none;
 }
 
@@ -902,17 +962,13 @@
   inset-block-end: var(--yoro-space-3);
   z-index: var(--yoro-z-sticky);
   display: grid;
-  grid-template-columns: repeat(3, minmax(var(--yoro-size-touch-target), auto));
+  grid-template-columns: minmax(var(--yoro-size-touch-target), auto);
   gap: var(--yoro-space-1);
   padding: var(--yoro-space-1);
   border: thin solid var(--yoro-color-border);
   border-radius: var(--yoro-radius-lg);
   background: var(--yoro-color-surface-strong);
   box-shadow: var(--yoro-shadow-panel);
-}
-
-.palworld-map-viewport > .palworld-map-controls > :last-child {
-  grid-column: 1 / -1;
 }
 
 .palworld-map-marker-error {
@@ -931,6 +987,7 @@
 }
 
 .palworld-map-figure {
+  position: relative;
   min-inline-size: 0;
   margin: 0;
 }
@@ -942,6 +999,7 @@
 
 .palworld-map-viewport {
   position: relative;
+  inline-size: 100%;
   min-inline-size: 0;
   overflow: hidden;
   overscroll-behavior: contain;
@@ -949,6 +1007,12 @@
   cursor: grab;
   /* 1배율에서는 상세 Modal의 세로 스크롤을 허용하고, 확대 후에만 지도 제스처를 독점합니다. */
   touch-action: pan-y;
+}
+
+@media (min-width: 64rem) {
+  .palworld-map-viewport {
+    block-size: clamp(30rem, calc(100dvh - 17rem), 42rem);
+  }
 }
 
 .palworld-map-viewport[data-zoomed="true"] {
@@ -975,6 +1039,9 @@
     )
     scale(var(--palworld-map-zoom, 1));
   transform-origin: 0 0;
+}
+
+.palworld-map-viewport[data-panning="true"] .palworld-map-stage {
   will-change: transform;
 }
 
@@ -1031,40 +1098,81 @@
 }
 
 .palworld-map-layer-legend {
+  position: absolute;
+  inset-block-start: calc(var(--yoro-size-touch-target) + var(--yoro-space-6));
+  inset-inline-start: var(--yoro-space-3);
+  z-index: var(--yoro-z-sticky);
+  display: grid;
+  min-inline-size: 0;
+  max-inline-size: min(20rem, calc(100% - (var(--yoro-space-6) * 2)));
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.palworld-map-legend-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border: 0;
+  background: transparent;
+  color: var(--yoro-color-text-strong);
+  font: inherit;
+  font-weight: var(--yoro-font-weight-bold);
+  text-align: start;
+  cursor: pointer;
+}
+
+.palworld-map-legend-toggle:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: calc(var(--yoro-focus-ring-width) * -1);
+  border-radius: inherit;
+}
+
+.palworld-map-legend-content {
+  max-block-size: min(30rem, 58dvh);
+  overflow-y: auto;
+  padding: var(--yoro-space-3);
+  border-block-start: thin solid var(--yoro-color-border);
+  overscroll-behavior: contain;
+}
+
+.palworld-map-legend-content[hidden] {
+  display: none;
+}
+
+.palworld-map-legend-content > ul,
+.palworld-map-legend-sheet__content > ul {
   display: grid;
   min-inline-size: 0;
   gap: var(--yoro-space-2);
-  padding: var(--yoro-space-3) var(--yoro-space-4);
-  border-block-end: thin solid var(--yoro-color-border);
-  background: var(--yoro-color-surface-muted);
-}
-
-.palworld-map-layer-legend > ul {
-  display: flex;
-  align-items: stretch;
-  flex-wrap: wrap;
-  min-inline-size: 0;
-  gap: var(--yoro-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.palworld-map-layer-legend li {
+.palworld-map-layer-legend li,
+.palworld-map-legend-sheet__content li {
   display: flex;
   align-items: flex-start;
   min-inline-size: 0;
   gap: var(--yoro-space-2);
 }
 
-.palworld-map-layer-legend li > span:last-child {
+.palworld-map-layer-legend li > span:last-child,
+.palworld-map-legend-sheet__content li > span:last-child {
   display: grid;
   min-inline-size: 0;
   gap: var(--yoro-space-1);
   overflow-wrap: anywhere;
 }
 
-.palworld-map-layer-legend small {
+.palworld-map-layer-legend small,
+.palworld-map-legend-sheet__content small {
   color: var(--yoro-color-text-muted);
 }
 
@@ -1542,28 +1650,14 @@
   min-block-size: calc(var(--yoro-size-touch-target) * 6);
 }
 
-.palworld-map-caption,
 .palworld-map-hint {
   margin: 0;
   color: var(--yoro-color-text-muted);
 }
 
-.palworld-map-caption {
-  display: grid;
-  gap: var(--yoro-space-1);
-  padding: var(--yoro-space-4);
-  border-block-start: thin solid var(--yoro-color-border);
-  background: var(--yoro-color-surface);
-}
-
-.palworld-map-caption p,
-.palworld-map-caption small {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
 .palworld-map-hint {
-  padding: var(--yoro-space-0) var(--yoro-space-4) var(--yoro-space-4);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  border-block-start: thin solid var(--yoro-color-border);
   background: var(--yoro-color-surface);
   font-size: var(--yoro-font-size-sm);
 }
@@ -2047,6 +2141,27 @@
 }
 
 .palworld-pals-mobile-filter-trigger {
+  display: none;
+}
+
+.palworld-catalog-layout {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-6);
+}
+
+.palworld-catalog-filter-rail,
+.palworld-catalog-results {
+  min-inline-size: 0;
+}
+
+.palworld-catalog-results {
+  display: grid;
+  align-content: start;
+  gap: var(--yoro-space-5);
+}
+
+.palworld-catalog-mobile-toolbar {
   display: none;
 }
 
@@ -2878,16 +2993,24 @@
 }
 
 .palworld-breeding-result,
-.palworld-parent-pair-list,
-.palworld-breeding-partner-list,
 .palworld-gender-alternative-list {
   display: grid;
   min-inline-size: 0;
   gap: var(--yoro-space-4);
 }
 
-.palworld-parent-pair-list,
-.palworld-breeding-partner-list,
+.palworld-breeding-result {
+  color: var(--yoro-color-text);
+}
+
+.palworld-breeding-result > .palworld-section-title {
+  padding-block-start: var(--yoro-space-4);
+}
+
+.palworld-breeding-result .palworld-section-title :is(h2, h3) {
+  color: var(--yoro-color-text-strong);
+}
+
 .palworld-gender-alternative-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -2920,8 +3043,6 @@
 
 .palworld-direct-result-card .yoro-card__content,
 .palworld-gender-alternative-card .yoro-card__content,
-.palworld-breeding-partner-card .yoro-card__content,
-.palworld-reverse-pair-card .yoro-card__content,
 .palworld-reverse-target-summary .yoro-card__content {
   display: grid;
   min-inline-size: 0;
@@ -3039,9 +3160,7 @@
   gap: var(--yoro-space-2);
 }
 
-.palworld-gender-alternative-card .yoro-card__header,
-.palworld-breeding-partner-card .yoro-card__header,
-.palworld-reverse-pair-card .yoro-card__header {
+.palworld-gender-alternative-card .yoro-card__header {
   align-items: center;
 }
 
@@ -3071,6 +3190,239 @@
   color: var(--yoro-color-text-strong);
 }
 
+.palworld-breeding-combination-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2) var(--yoro-space-4);
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-breeding-combination-summary strong {
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-breeding-combination-scroll {
+  block-size: clamp(28rem, 62dvh, 42rem);
+  min-inline-size: 0;
+  overflow-y: auto;
+  overscroll-behavior-block: contain;
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-text);
+  scrollbar-gutter: stable;
+}
+
+.palworld-breeding-combination-scroll:focus-visible {
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
+}
+
+.palworld-breeding-combination-scroll > .palworld-breeding-combination-summary {
+  padding: var(--yoro-space-4);
+  border-block-end: thin solid var(--yoro-color-border);
+  background: var(--yoro-color-surface);
+}
+
+.palworld-breeding-combination-list {
+  min-inline-size: 0;
+  overflow: clip;
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-text);
+}
+
+.palworld-breeding-combination-scroll > .palworld-breeding-combination-list {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.palworld-breeding-combination-scroll > .palworld-auto-load {
+  border-block-start: thin solid var(--yoro-color-border);
+  background: var(--yoro-color-surface);
+}
+
+.palworld-breeding-combination-header > div,
+.palworld-breeding-combination-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 1.15fr);
+  min-inline-size: 0;
+}
+
+.palworld-breeding-combination-header {
+  background: var(--yoro-color-surface-strong);
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-breeding-combination-scroll .palworld-breeding-combination-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--yoro-z-raised);
+}
+
+.palworld-breeding-combination-header [role="columnheader"],
+.palworld-breeding-combination-header > div > span {
+  min-inline-size: 0;
+  padding: var(--yoro-space-4);
+}
+
+.palworld-breeding-combination-row {
+  min-block-size: 5rem;
+  border-block-start: thin solid var(--yoro-color-border);
+  content-visibility: auto;
+  contain-intrinsic-block-size: 5rem;
+  transition:
+    background-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.palworld-breeding-combination-row:focus-within {
+  background: var(--palworld-accent-soft);
+}
+
+.palworld-breeding-combination-cell {
+  min-inline-size: 0;
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+}
+
+.palworld-breeding-combination-cell.is-pal {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-breeding-combination-pal {
+  grid-template-columns: 3rem minmax(0, 1fr);
+  inline-size: 100%;
+  min-block-size: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-1);
+  border-color: transparent;
+  border-radius: var(--yoro-radius-md);
+  background: transparent;
+}
+
+.palworld-breeding-combination-media {
+  inline-size: 3rem;
+  block-size: 3rem;
+  overflow: hidden;
+  border-radius: var(--yoro-radius-md);
+}
+
+.palworld-breeding-combination-media .palworld-media,
+.palworld-breeding-combination-media img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-breeding-combination-copy {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-breeding-combination-copy > strong {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: var(--yoro-color-text-strong);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.palworld-breeding-combination-meta {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-1);
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-breeding-combination-meta .yoro-badge,
+.palworld-breeding-combination-cell > .yoro-badge,
+.palworld-breeding-combination-badges .yoro-badge {
+  max-inline-size: 100%;
+  white-space: normal;
+}
+
+.palworld-breeding-combination-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+}
+
+.palworld-breeding-combination-result .palworld-breeding-combination-cell {
+  padding: var(--yoro-space-0);
+}
+
+.palworld-breeding-combination-cell.is-action {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: var(--yoro-space-2);
+}
+
+.palworld-breeding-combination-result .is-action {
+  justify-items: end;
+}
+
+.palworld-breeding-combination-badges {
+  display: flex;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-breeding-combination-symbol,
+.palworld-breeding-combination-mobile-label {
+  display: none;
+}
+
+.palworld-breeding-combination-invalid {
+  margin: var(--yoro-space-0);
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-danger);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-danger-bg);
+  color: var(--yoro-color-danger);
+}
+
+.palworld-breeding-combination-skeleton-cell {
+  min-block-size: 3rem;
+  margin: var(--yoro-space-3) var(--yoro-space-4);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-strong);
+}
+
+.palworld-breeding-combination-row.is-appending {
+  content-visibility: visible;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .palworld-breeding-combination-row:hover {
+    background: var(--palworld-accent-soft);
+  }
+
+  .palworld-breeding-combination-pal:hover {
+    border-color: var(--palworld-accent);
+    background: var(--yoro-color-surface-strong);
+  }
+}
+
 .palworld-copy-feedback {
   margin: var(--yoro-space-0);
   color: var(--yoro-color-text-muted);
@@ -3086,7 +3438,17 @@
 }
 
 .palworld-detail-modal .yoro-modal__dialog {
+  --yoro-modal-width: 72rem;
+
+  inline-size: min(100%, 72rem) !important;
   max-inline-size: calc(100vw - var(--yoro-space-8));
+}
+
+.palworld-detail-modal .yoro-modal__header {
+  position: relative;
+  z-index: var(--yoro-z-sticky);
+  flex: none;
+  background: var(--yoro-color-surface-strong);
 }
 
 .palworld-detail {
@@ -3338,7 +3700,7 @@
 .palworld-pal-location-loading,
 .palworld-pal-location-preview {
   position: relative;
-  inline-size: min(100%, clamp(20rem, 50vw, 40rem));
+  inline-size: 100%;
   min-inline-size: 0;
   justify-self: center;
   aspect-ratio: 1;
@@ -3582,6 +3944,16 @@
   .palworld-card-work-list {
     margin-inline: var(--yoro-space-2);
     padding-block: var(--yoro-space-2);
+  }
+
+  .palworld-card-work-list > :nth-child(n + 4) {
+    display: none;
+  }
+
+  .palworld-pal-card .palworld-card-open-action {
+    min-block-size: var(--yoro-space-8);
+    margin: 0 var(--yoro-space-2) var(--yoro-space-2);
+    width: calc(100% - (var(--yoro-space-2) * 2));
   }
 
   .palworld-pal-location-toolbar {
@@ -3986,6 +4358,209 @@
   clip-path: inset(50%);
 }
 
+@keyframes palworld-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--yoro-space-2));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.palworld-main > .palworld-page-section,
+.palworld-main > .palworld-hero {
+  animation: palworld-page-enter var(--yoro-motion-duration-base) var(--yoro-motion-ease-emphasized);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .palworld-entity-card,
+  .palworld-skill-card,
+  .palworld-breeding-pal-button {
+    transition:
+      border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      box-shadow var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+  }
+
+  .palworld-entity-card:hover,
+  .palworld-skill-card:hover,
+  .palworld-breeding-pal-button:hover {
+    box-shadow: var(--yoro-shadow-soft);
+    transform: translateY(calc(var(--yoro-space-1) * -1));
+  }
+
+  .palworld-entity-card .palworld-media-image {
+    transition: transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+  }
+
+  .palworld-entity-card:hover .palworld-media-image {
+    transform: scale(1.02);
+  }
+}
+
+@media (min-width: 80rem) {
+  .palworld-catalog-layout {
+    grid-template-columns: 17.5rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .palworld-catalog-filter-rail {
+    position: sticky;
+    inset-block-start: var(--yoro-space-4);
+    max-block-size: calc(100svh - var(--yoro-space-8));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .palworld-catalog-page {
+    grid-template-columns: 17.5rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .palworld-catalog-page > .palworld-page-heading {
+    grid-column: 1 / -1;
+  }
+
+  .palworld-catalog-page > form {
+    position: sticky;
+    inset-block-start: var(--yoro-space-4);
+    grid-column: 1;
+    grid-row: 2 / span 20;
+    max-block-size: calc(100svh - var(--yoro-space-8));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .palworld-catalog-page > :not(.palworld-page-heading):not(form) {
+    grid-column: 2;
+  }
+
+  .palworld-item-filter-secondary,
+  .palworld-skill-filter-secondary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-item-search-row,
+  .palworld-skill-search-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-item-search-row .yoro-button,
+  .palworld-skill-search-row .yoro-button {
+    inline-size: 100%;
+  }
+}
+
+@media (min-width: 96rem) {
+  .palworld-header.public-app-header {
+    display: block !important;
+    min-block-size: var(--yoro-size-public-header-height);
+    border-block-end: thin solid var(--yoro-color-border);
+    background: var(--yoro-color-surface-strong);
+  }
+
+  .palworld-header-layout {
+    grid-template-columns: auto minmax(30rem, 1fr) 12rem auto;
+    min-block-size: var(--yoro-size-public-header-height);
+    padding-block: var(--yoro-space-2);
+  }
+
+  .palworld-header-layout > .public-header-product-cluster {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 !important;
+    inline-size: auto !important;
+  }
+
+  .palworld-header-layout > .palworld-secondary-row {
+    grid-column: 2 / 3 !important;
+    grid-row: 1 !important;
+    inline-size: 100%;
+  }
+
+  .palworld-header-layout > .palworld-search-form.is-header {
+    grid-column: 3 / 4 !important;
+    grid-row: 1 !important;
+    inline-size: 100%;
+  }
+
+  .palworld-header-layout > .public-header-tools {
+    grid-column: 4 / 5 !important;
+    grid-row: 1 !important;
+    inline-size: auto !important;
+  }
+
+  .palworld-header.is-home .palworld-header-layout {
+    grid-template-columns: auto minmax(20rem, 1fr) auto;
+  }
+
+  .palworld-header.is-home .palworld-header-layout > .palworld-secondary-row {
+    grid-column: 2 / 3 !important;
+  }
+
+  .palworld-header.is-home .palworld-header-layout > .public-header-tools {
+    grid-column: 3 / 4 !important;
+  }
+}
+
+@media (min-width: 64rem) and (max-width: 95.999rem) {
+  .palworld-header-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 28rem);
+  }
+
+  .palworld-header-layout > .public-header-product-cluster {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .palworld-header-layout > .public-header-tools {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end;
+  }
+
+  .palworld-header-layout > .palworld-secondary-row {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  .palworld-header-layout > .palworld-search-form {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    inline-size: 100%;
+  }
+
+  .palworld-pal-filter-controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .palworld-pal-filter-options {
+    max-block-size: 18rem;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 79.999rem) {
+  .palworld-pals-desktop-filter {
+    display: none;
+  }
+
+  .palworld-catalog-mobile-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-inline-size: 0;
+    gap: var(--yoro-space-2);
+  }
+
+  .palworld-pals-mobile-filter-trigger {
+    display: inline-flex;
+  }
+}
+
 @media (max-width: 75rem) {
   .palworld-entity-grid,
   .palworld-skeleton-grid {
@@ -3994,6 +4569,89 @@
 
   .palworld-skill-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 48.001rem) {
+  .palworld-map-workspace {
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .palworld-map-filter-panel.palworld-map-desktop-filter {
+    align-self: stretch;
+    block-size: auto;
+    max-block-size: none;
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+    box-shadow: var(--yoro-shadow-none);
+  }
+
+  .palworld-map-desktop-filter .palworld-map-filter-content {
+    max-block-size: none;
+    block-size: calc(100% - (var(--yoro-size-touch-target) + var(--yoro-space-6)));
+  }
+
+  .palworld-map-card {
+    display: flex;
+    flex-direction: column;
+    block-size: auto;
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    box-shadow: var(--yoro-shadow-none);
+  }
+
+  .palworld-map-card .palworld-map-canvas-shell {
+    display: block;
+    flex: none;
+    min-block-size: 0;
+  }
+
+  .palworld-map-card .palworld-map-figure {
+    display: block;
+    flex: none;
+    min-block-size: 0;
+  }
+
+  .palworld-map-card .palworld-map-viewport {
+    block-size: auto;
+  }
+
+  .palworld-map-card .palworld-map-hint {
+    flex: none;
+  }
+
+  .palworld-map-toolbar {
+    position: absolute;
+    inset-block-start: var(--yoro-space-3);
+    inset-inline-end: var(--yoro-space-3);
+    z-index: var(--yoro-z-sticky);
+    max-inline-size: min(72%, 46rem);
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-2);
+    border: thin solid var(--yoro-color-border);
+    border-radius: var(--yoro-radius-lg);
+    background: color-mix(in srgb, var(--yoro-color-surface-strong) 92%, transparent);
+    box-shadow: var(--yoro-shadow-panel);
+  }
+
+  .palworld-map-toolbar-info {
+    min-inline-size: 0;
+  }
+
+  .palworld-map-toolbar-info > .yoro-badge {
+    max-inline-size: min(19rem, 42vw);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .palworld-map-layer-legend {
+    inset-block-start: var(--yoro-space-3);
+  }
+
+  .palworld-map-viewport > .palworld-map-controls {
+    inset-block-end: calc(var(--yoro-space-12) + var(--yoro-space-3));
   }
 }
 
@@ -4043,8 +4701,6 @@
     mask-image: linear-gradient(to right, transparent, var(--yoro-color-text) var(--yoro-space-8), var(--yoro-color-text) calc(100% - var(--yoro-space-8)), transparent);
   }
 
-  .palworld-parent-pair-list,
-  .palworld-breeding-partner-list,
   .palworld-gender-alternative-list {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -4054,13 +4710,92 @@
   }
 }
 
+@media (min-width: 48.001rem) and (max-width: 63.999rem) {
+  .palworld-map-workspace,
+  .palworld-map-workspace[data-filter-collapsed="true"] {
+    grid-template-columns: minmax(14rem, 15.5rem) minmax(0, 1fr);
+  }
+
+  .palworld-map-workspace[data-filter-collapsed="true"] {
+    grid-template-columns: minmax(10rem, max-content) minmax(0, 1fr);
+  }
+
+  .palworld-map-filter-panel {
+    position: sticky;
+    inset-block-start: var(--yoro-space-4);
+    max-block-size: calc(100dvh - var(--yoro-space-8));
+  }
+
+  .palworld-map-filter-content {
+    max-block-size: calc(100dvh - (var(--yoro-space-8) * 3));
+  }
+
+  .palworld-map-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .palworld-map-viewport {
+    block-size: clamp(32rem, calc(100dvh - 14rem), 40rem);
+  }
+}
+
 @media (max-width: 48rem) {
-  .palworld-header .public-header-primary-row,
-  .palworld-header .public-header-bottom-row {
+  .palworld-header-layout {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    inline-size: 100%;
+    gap: var(--yoro-space-2);
     padding-inline: max(var(--yoro-space-3), env(safe-area-inset-left)) max(var(--yoro-space-3), env(safe-area-inset-right)) !important;
   }
 
+  .palworld-header-layout > .public-header-product-cluster,
+  .palworld-header-layout > .public-header-tools,
+  .palworld-header-layout > .public-mobile-menu-toggle,
+  .palworld-header-layout > .palworld-secondary-row,
+  .palworld-header-layout > .palworld-search-form,
+  .palworld-header-layout > .public-mobile-game-tray {
+    grid-area: auto !important;
+  }
+
+  .palworld-header-layout > .public-header-product-cluster {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    inline-size: auto !important;
+  }
+
+  .palworld-header-layout > .public-header-tools {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    inline-size: auto !important;
+  }
+
+  .palworld-header-layout > .public-mobile-menu-toggle {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+
+  .palworld-header-layout > .palworld-secondary-row {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    inline-size: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .palworld-header-layout > .palworld-search-form {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    inline-size: 100% !important;
+  }
+
+  .palworld-header-layout > .public-mobile-game-tray {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+  }
+
   .palworld-header-nav {
+    min-inline-size: max-content !important;
+    overflow: visible !important;
     gap: var(--yoro-space-2) !important;
     padding-inline-end: var(--yoro-space-3);
   }
@@ -4102,25 +4837,72 @@
   .palworld-map-toolbar {
     align-items: stretch;
     flex-direction: column;
+    order: 2;
+    border-block-start: thin solid var(--yoro-color-border);
+    border-block-end: 0;
+  }
+
+  .palworld-map-layer-legend {
+    display: none;
+  }
+
+  .palworld-map-canvas-shell {
+    order: 1;
+  }
+
+  .palworld-map-hint {
+    order: 3;
   }
 
   .palworld-map-desktop-filter {
-    display: none;
+    display: none !important;
   }
 
   .palworld-map-mobile-filter-trigger {
     display: inline-flex;
-    justify-self: start;
   }
 
-  .palworld-map-mobile-filters {
+  .palworld-map-mobile-command-bar {
+    position: absolute;
+    inset-block-start: var(--yoro-space-3);
+    inset-inline: var(--yoro-space-3);
+    z-index: var(--yoro-z-sticky);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    min-inline-size: 0;
+    gap: var(--yoro-space-2);
+    pointer-events: none;
+  }
+
+  .palworld-map-mobile-command-bar > * {
+    pointer-events: auto;
+  }
+
+  .palworld-map-mobile-command-bar .yoro-button,
+  .palworld-map-mobile-command-bar .yoro-badge {
+    box-shadow: var(--yoro-shadow-soft);
+  }
+
+  .palworld-map-mobile-command-bar .yoro-badge {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .palworld-map-mobile-filters,
+  .palworld-map-legend-sheet {
     place-items: end center;
     padding: var(--yoro-space-0);
   }
 
-  .palworld-map-mobile-filters .yoro-modal__dialog {
+  .palworld-map-mobile-filters .yoro-modal__dialog,
+  .palworld-map-legend-sheet .yoro-modal__dialog {
     inline-size: 100%;
-    max-block-size: min(82dvh, 44rem);
+    max-block-size: min(92dvh, 48rem);
     border-inline: none;
     border-block-end: none;
     border-radius:
@@ -4128,12 +4910,32 @@
       var(--yoro-radius-lg)
       var(--yoro-space-0)
       var(--yoro-space-0);
+    padding-block-end: env(safe-area-inset-bottom);
   }
 
   .palworld-map-mobile-filters__content {
     display: flex;
     overflow: hidden;
     padding: var(--yoro-space-0);
+  }
+
+  .palworld-map-mobile-filters__header {
+    flex: none;
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+  }
+
+  .palworld-map-mobile-filters__footer {
+    display: grid;
+    flex: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding:
+      var(--yoro-space-3)
+      var(--yoro-space-4)
+      max(var(--yoro-space-3), env(safe-area-inset-bottom));
+  }
+
+  .palworld-map-mobile-filters__footer .yoro-button {
+    inline-size: 100%;
   }
 
   .palworld-map-mobile-filters__panel {
@@ -4148,25 +4950,61 @@
     box-shadow: var(--yoro-shadow-none);
   }
 
+  .palworld-map-mobile-filters__panel .palworld-map-filter-header {
+    display: none;
+  }
+
   .palworld-map-mobile-filters__panel .palworld-map-filter-content {
     flex: 1;
     max-block-size: none;
   }
 
+  .palworld-map-legend-sheet__content {
+    overflow-y: auto;
+    padding-block-end: max(var(--yoro-space-6), env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+  }
+
   .palworld-map-controls {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(var(--yoro-size-touch-target), auto));
     inline-size: 100%;
   }
 
-  .palworld-map-controls > :last-child {
-    grid-column: 1 / -1;
-  }
-
   .palworld-map-viewport > .palworld-map-controls {
-    grid-template-columns: repeat(3, minmax(var(--yoro-size-touch-target), auto));
+    grid-template-columns: repeat(2, minmax(var(--yoro-size-touch-target), auto));
     inline-size: auto;
     max-inline-size: calc(100% - (var(--yoro-space-6) * 2));
+    inset-block-end: calc(var(--yoro-space-12) + var(--yoro-space-2));
+  }
+
+  .palworld-map-viewport {
+    block-size: min(
+      58dvh,
+      calc(100vw - (var(--yoro-space-6) + 2px)),
+      40rem
+    );
+  }
+
+  .palworld-map-page > .palworld-page-heading {
+    padding-block: var(--yoro-space-1) var(--yoro-space-3);
+  }
+
+  .palworld-map-page > .palworld-page-heading h1 {
+    margin-block: 0 var(--yoro-space-1);
+    font-size: var(--yoro-font-size-xl);
+  }
+
+  .palworld-map-page > .palworld-page-heading > div > span {
+    display: none;
+  }
+
+  .palworld-map-page > .palworld-page-heading p {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: var(--yoro-font-size-sm);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .palworld-map-marker-popover {
@@ -4194,6 +5032,14 @@
 
   .palworld-entity-grid.palworld-pal-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .palworld-catalog-mobile-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-inline-size: 0;
+    gap: var(--yoro-space-2);
   }
 
   .palworld-item-filter-chip-list,
@@ -4288,6 +5134,20 @@
     border-end-end-radius: var(--yoro-space-0);
   }
 
+  .palworld-detail-modal .yoro-modal__dialog::before,
+  .palworld-pals-filter-modal .yoro-modal__dialog::before,
+  .palworld-map-mobile-filters .yoro-modal__dialog::before,
+  .palworld-map-legend-sheet .yoro-modal__dialog::before {
+    align-self: center;
+    flex: none;
+    inline-size: var(--yoro-space-10);
+    block-size: var(--yoro-space-1);
+    margin-block-start: var(--yoro-space-2);
+    border-radius: var(--yoro-radius-pill);
+    background: var(--yoro-color-border-strong);
+    content: "";
+  }
+
   .palworld-detail-modal .yoro-modal__content {
     padding: var(--yoro-space-4);
     padding-block-end: max(var(--yoro-space-6), env(safe-area-inset-bottom));
@@ -4333,8 +5193,112 @@
 }
 
 @media (max-width: 48rem) {
-  .palworld-pals-page .palworld-pal-filter-panel {
-    display: none;
+  .palworld-breeding-combination-scroll {
+    block-size: clamp(24rem, 58dvh, 34rem);
+    scrollbar-gutter: auto;
+  }
+
+  .palworld-breeding-combination-header,
+  .palworld-breeding-combination-scroll .palworld-breeding-combination-header {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .palworld-breeding-combination-row {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    min-block-size: 0;
+    padding: var(--yoro-space-3);
+    gap: var(--yoro-space-2);
+    contain-intrinsic-block-size: 16rem;
+  }
+
+  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal {
+    padding: var(--yoro-space-0);
+  }
+
+  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal:first-child {
+    grid-column: 1;
+  }
+
+  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal:nth-of-type(2) {
+    grid-column: 3;
+  }
+
+  .palworld-breeding-combination-symbol {
+    display: block;
+    align-self: center;
+    color: var(--palworld-accent);
+    font-size: var(--yoro-font-size-lg);
+    font-weight: var(--yoro-font-weight-black);
+    text-align: center;
+  }
+
+  .palworld-breeding-combination-symbol.is-plus {
+    grid-column: 2;
+  }
+
+  .palworld-breeding-combination-symbol.is-arrow {
+    grid-column: 1 / -1;
+  }
+
+  .palworld-breeding-combination-mobile-label {
+    display: block;
+    color: var(--yoro-color-text-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .palworld-breeding-combination-cell.is-pal {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .palworld-breeding-combination-pal {
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+  }
+
+  .palworld-breeding-combination-media {
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+  }
+
+  .palworld-breeding-combination-result,
+  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-action {
+    grid-column: 1 / -1;
+    inline-size: 100%;
+    padding: var(--yoro-space-3) var(--yoro-space-0) var(--yoro-space-0);
+    border-block-start: thin solid var(--yoro-color-border);
+  }
+
+  .palworld-breeding-combination-result {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-breeding-combination-result .is-action,
+  .palworld-breeding-combination-row > .is-action {
+    justify-items: stretch;
+  }
+
+  .palworld-breeding-combination-cell.is-action .yoro-button {
+    inline-size: 100%;
+  }
+
+  .palworld-breeding-combination-badges {
+    justify-content: flex-start;
+  }
+
+  .palworld-breeding-combination-row.is-appending,
+  .palworld-breeding-combination-list.is-loading .palworld-breeding-combination-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-breeding-combination-skeleton-cell {
+    min-block-size: 4rem;
+    margin: var(--yoro-space-1);
   }
 
   .palworld-pal-mobile-filter-trigger {
@@ -4375,6 +5339,19 @@
 }
 
 @media (max-width: 22rem) {
+  .palworld-breeding-combination-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal:first-child,
+  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal:nth-of-type(2),
+  .palworld-breeding-combination-symbol.is-plus,
+  .palworld-breeding-combination-symbol.is-arrow,
+  .palworld-breeding-combination-result,
+  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-action {
+    grid-column: 1;
+  }
+
   .palworld-entity-grid,
   .palworld-skeleton-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -4508,5 +5485,35 @@
 @media (prefers-reduced-motion: reduce) {
   .palworld-shell * {
     scroll-behavior: auto !important;
+  }
+
+  .palworld-main > .palworld-page-section,
+  .palworld-main > .palworld-hero {
+    animation: none;
+  }
+
+  .palworld-entity-card,
+  .palworld-skill-card,
+  .palworld-breeding-pal-button,
+  .palworld-breeding-combination-row,
+  .palworld-entity-card .palworld-media-image,
+  .palworld-work-suitability-tooltip {
+    transition: none;
+  }
+
+  .palworld-entity-card:hover,
+  .palworld-skill-card:hover,
+  .palworld-breeding-pal-button:hover,
+  .palworld-entity-card:hover .palworld-media-image,
+  .palworld-work-suitability-badge.is-compact:is(:hover, :focus-visible) .palworld-work-suitability-tooltip {
+    transform: none;
+  }
+
+  .palworld-shell .yoro-skeleton {
+    animation: none;
+  }
+
+  .palworld-map-legend-sheet .yoro-modal__dialog {
+    transition: none;
   }
 }

@@ -46,11 +46,7 @@ export function PalworldStreamersPage({
   return (
     <section className="palworld-page-section palworld-streamers-page" aria-labelledby="palworld-streamers-title">
       <header className="palworld-page-heading palworld-streamers-heading">
-        <div>
-          <span data-ko={palworldI18n.ko.streamersKicker} data-ja={palworldI18n.ja.streamersKicker}>{text.streamersKicker}</span>
-          <h1 id="palworld-streamers-title" data-ko={palworldI18n.ko.streamersTitle} data-ja={palworldI18n.ja.streamersTitle}>{text.streamersTitle}</h1>
-          <p data-ko={palworldI18n.ko.streamersDescription} data-ja={palworldI18n.ja.streamersDescription}>{text.streamersDescription}</p>
-        </div>
+        <h1 className="yoro-u-sr-only" id="palworld-streamers-title" data-ko={palworldI18n.ko.streamersTitle} data-ja={palworldI18n.ja.streamersTitle}>{text.streamersTitle}</h1>
         <div className="palworld-streamers-heading-actions">
           {status.connected ? (
             <StatusPill size="sm" tone="success" data-ko={`${palworldI18n.ko.connectedAs}: ${status.user?.displayName ?? status.user?.login ?? "Twitch"}`} data-ja={`${palworldI18n.ja.connectedAs}: ${status.user?.displayName ?? status.user?.login ?? "Twitch"}`}>

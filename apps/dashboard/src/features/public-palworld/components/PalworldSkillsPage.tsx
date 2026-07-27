@@ -407,8 +407,8 @@ export function PalworldSkillsPage({ locale, params }: { locale: PalworldLocale;
     setPalworldUrl(`${current.pathname}${current.search}`);
   }
 
-  return <section className="palworld-page-section">
-    <header className="palworld-page-heading"><div><span aria-hidden="true">{text.skillsKicker}</span><h1 data-ko={palworldI18n.ko.skillsTitle} data-ja={palworldI18n.ja.skillsTitle}>{text.skillsTitle}</h1><p data-ko={palworldI18n.ko.skillsDescription} data-ja={palworldI18n.ja.skillsDescription}>{text.skillsDescription}</p></div></header>
+  return <section aria-labelledby="palworld-skills-title" className="palworld-page-section palworld-catalog-page palworld-skills-page">
+    <h1 className="yoro-u-sr-only" data-ko={palworldI18n.ko.skillsTitle} data-ja={palworldI18n.ja.skillsTitle} id="palworld-skills-title">{text.skillsTitle}</h1>
     {hasReviewPending ? <PalworldTranslationReviewNotice locale={locale} /> : null}
     <form className="palworld-skill-filter-panel" onSubmit={submit} aria-label={text.filter}>
       <PalworldSkillsFilters
