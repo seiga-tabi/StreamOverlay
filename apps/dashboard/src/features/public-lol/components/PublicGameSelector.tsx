@@ -64,6 +64,12 @@ function gameSubtitle(game: PublicGameOption): string {
   return t().palworldSubtitle;
 }
 
+function gameSelectionLabel(game: PublicGameOption): string {
+  return game.id === "league-of-legends"
+    ? t().selectLeagueOfLegends
+    : t().selectPalworld;
+}
+
 export function PublicGameSelector({
   activePage,
   onPage,
@@ -159,12 +165,6 @@ export function PublicGameSelector({
     if (!open || mode !== "dropdown") return undefined;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (
-        event.target instanceof Element
-        && event.target.closest(".public-mobile-menu-toggle, .public-mobile-game-tray")
-      ) {
-        return;
-      }
       if (!selectorRef.current?.contains(event.target as Node)) {
         setOpen(false);
       }
@@ -190,6 +190,7 @@ export function PublicGameSelector({
             type="button"
             role="option"
             aria-selected={isSelected}
+            aria-label={gameSelectionLabel(game)}
             data-ko={game.ko}
             data-ja={game.ja}
             onClick={() => selectGame(game)}
@@ -244,7 +245,7 @@ export function PublicGameSelector({
       <button
         className="public-game-selector-trigger"
         type="button"
-        aria-label={t().gameMenu}
+        aria-label={t().gameMenuLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen(!open)}

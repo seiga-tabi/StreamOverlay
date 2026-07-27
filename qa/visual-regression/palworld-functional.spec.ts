@@ -1391,14 +1391,49 @@ async function assertHealthyDocument(page: Page, errors: string[]): Promise<void
 }
 
 async function chooseGame(page: Page, game: "league" | "palworld"): Promise<void> {
-  const optionName = game === "league" ? /리그 오브 레전드/u : /펠월드/u;
-  if ((page.viewportSize()?.width ?? 1440) <= 600) {
-    await page.locator(".public-mobile-menu-toggle").click();
-    await page.locator(".public-mobile-game-tray").getByRole("option", { name: optionName }).click();
+  const optionName = game === "league" ? "리그 오브 레전드 선택" : "Palworld 선택";
+  if ((page.viewportSize()?.width ?? 1440) <= 768) {
+    await page.getByRole("button", { name: "메뉴 열기", exact: true }).click();
+    await page.getByRole("dialog", { name: "메뉴" })
+      .getByRole("option", { name: optionName, exact: true })
+      .click();
     return;
   }
   await page.locator(".public-game-selector-trigger").click();
-  await page.locator(".public-game-selector-menu").getByRole("option", { name: optionName }).click();
+  await page.locator(".public-game-selector-menu")
+    .getByRole("option", { name: optionName, exact: true })
+    .click();
+}
+
+function usesMobilePublicMenu(page: Page): boolean {
+  return (page.viewportSize()?.width ?? 1440) <= 768;
+}
+
+async function openMobilePublicMenu(page: Page) {
+  await page.getByRole("button", { name: "메뉴 열기", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "메뉴" });
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+async function selectPublicLocale(page: Page, locale: "ko" | "ja"): Promise<void> {
+  if (usesMobilePublicMenu(page)) {
+    const dialog = await openMobilePublicMenu(page);
+    const option = dialog.getByRole("radio", {
+      name: locale === "ja" ? /일본어|日本語/u : /한국어|韓国語/u,
+    });
+    await option.click();
+    const localizedDialog = page.getByRole("dialog", { name: locale === "ja" ? "メニュー" : "메뉴" });
+    await expect(localizedDialog.getByRole("radio", {
+      name: locale === "ja" ? /일본어|日本語/u : /한국어|韓国語/u,
+    })).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("Escape");
+    await expect(localizedDialog).toHaveCount(0);
+    return;
+  }
+
+  await page.locator(".public-locale-button").click();
+  await page.getByRole("menuitemradio", { name: locale === "ja" ? /JP/u : /KR/u }).click();
 }
 
 test.beforeEach(async ({ page }) => {
@@ -1447,28 +1482,44 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
   await installConnectedTwitchFixtures(page);
   const errors = collectRuntimeErrors(page);
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  if (usesMobilePublicMenu(page)) {
+    const mobileMenu = await openMobilePublicMenu(page);
+    await expect(mobileMenu.getByText("Pal Viewer", { exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+  } else {
+    await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  }
 
   await chooseGame(page, "palworld");
   await expect(page).toHaveURL(/\/palworld$/u);
-  const accountButton = page.getByRole("button", { name: "Pal Viewer" });
-  await expect(accountButton).toBeVisible();
-  await accountButton.click();
-  await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toBeVisible();
-  const dashboardMenuItem = page.getByRole("menuitem", { name: "대시보드 열기" });
-  const logoutMenuItem = page.getByRole("menuitem", { name: "로그아웃" });
-  await expect(dashboardMenuItem).toBeVisible();
-  await expect(dashboardMenuItem).toBeFocused();
-  await page.keyboard.press("ArrowDown");
-  await expect(logoutMenuItem).toBeFocused();
-  await page.keyboard.press("ArrowUp");
-  await expect(dashboardMenuItem).toBeFocused();
-  await expect(page.getByRole("menu").getByText(/Riot ID|내 전적/u)).toHaveCount(0);
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
-  await accountButton.click();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
+  if (usesMobilePublicMenu(page)) {
+    const mobileMenu = await openMobilePublicMenu(page);
+    await expect(mobileMenu.getByText("Pal Viewer", { exact: true })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "대시보드 열기" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "로그아웃" })).toBeVisible();
+    await expect(mobileMenu.getByText(/Riot ID|내 전적/u)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog", { name: "메뉴" })).toHaveCount(0);
+  } else {
+    const accountButton = page.getByRole("button", { name: "Pal Viewer" });
+    await expect(accountButton).toBeVisible();
+    await accountButton.click();
+    await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toBeVisible();
+    const dashboardMenuItem = page.getByRole("menuitem", { name: "대시보드 열기" });
+    const logoutMenuItem = page.getByRole("menuitem", { name: "로그아웃" });
+    await expect(dashboardMenuItem).toBeVisible();
+    await expect(dashboardMenuItem).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(logoutMenuItem).toBeFocused();
+    await page.keyboard.press("ArrowUp");
+    await expect(dashboardMenuItem).toBeFocused();
+    await expect(page.getByRole("menu").getByText(/Riot ID|내 전적/u)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
+    await accountButton.click();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
+  }
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Offline Pal", { exact: true })).toHaveCount(0);
   await expect(page.getByTestId("public-live-streamer-rail").getByText("중복 Live Pal", { exact: true })).toHaveCount(0);
@@ -1481,7 +1532,13 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
 test("Palworld 하위 데이터 페이지는 Twitch 상태만 조회하고 홈 진입 시 팔로우 목록을 지연 조회한다", async ({ page }) => {
   const fixture = await installConnectedTwitchFixtures(page);
   await page.goto("/palworld/pals");
-  await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  if (usesMobilePublicMenu(page)) {
+    const mobileMenu = await openMobilePublicMenu(page);
+    await expect(mobileMenu.getByText("Pal Viewer", { exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+  } else {
+    await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  }
   expect(fixture.followedRequestCount()).toBe(0);
 
   await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" }).click();
@@ -1583,8 +1640,7 @@ test("Palworld route SEO와 skip link는 locale·base canonical을 반영한다"
   await page.keyboard.press("Tab");
   await expect(skipLink).toBeFocused();
 
-  await page.locator(".public-locale-button").click();
-  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await selectPublicLocale(page, "ja");
   await expect(page).toHaveTitle("配合組み合わせ | YORO.gg");
   await expect(skipLink).toHaveText("本文へ移動");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://yoro.gg/palworld/breeding");
@@ -1651,7 +1707,12 @@ test("Palworld OAuth marker는 기존 검색 query를 보존해 제거하고 현
   await expect(palModal).toHaveCount(0);
 
   const authRequestPromise = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/public/twitch/auth/start");
-  await page.getByRole("button", { name: "Twitch 로그인" }).first().click();
+  if (usesMobilePublicMenu(page)) {
+    const mobileMenu = await openMobilePublicMenu(page);
+    await mobileMenu.getByRole("button", { name: "Twitch 로그인" }).click();
+  } else {
+    await page.getByRole("button", { name: "Twitch 로그인" }).first().click();
+  }
   const authRequest = await authRequestPromise;
   const returnTo = new URL(authRequest.url()).searchParams.get("return_to");
   expect(returnTo).toBe(`/palworld/search?q=${encodeURIComponent("아누비스")}`);
@@ -1718,7 +1779,13 @@ test("모바일 Pal·아이템·스킬 상세는 핸들 드래그로 복귀하�
 test("Palworld OAuth callback 표시 후 공유 Twitch 상태를 재조회하고 marker만 제거한다", async ({ page }) => {
   const fixture = await installConnectedTwitchFixtures(page);
   await page.goto("/palworld/technology?order=desc&viewer_twitch=connected");
-  await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  if (usesMobilePublicMenu(page)) {
+    const mobileMenu = await openMobilePublicMenu(page);
+    await expect(mobileMenu.getByText("Pal Viewer", { exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+  } else {
+    await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
+  }
   await expect.poll(() => fixture.statusRequestCount()).toBeGreaterThanOrEqual(2);
   const currentUrl = new URL(page.url());
   expect(currentUrl.pathname).toBe("/palworld/technology");
@@ -1729,14 +1796,25 @@ test("Palworld OAuth callback 표시 후 공유 Twitch 상태를 재조회하고
 test("Palworld 로그아웃은 공유 session을 제거해 LoL에서도 미로그인 상태가 된다", async ({ page }) => {
   const fixture = await installConnectedTwitchFixtures(page);
   await page.goto("/palworld");
-  await page.getByRole("button", { name: "Pal Viewer" }).click();
-  await page.getByRole("menuitem", { name: "로그아웃" }).click();
+  if (usesMobilePublicMenu(page)) {
+    const mobileMenu = await openMobilePublicMenu(page);
+    await mobileMenu.getByRole("button", { name: "로그아웃" }).click();
+  } else {
+    await page.getByRole("button", { name: "Pal Viewer" }).click();
+    await page.getByRole("menuitem", { name: "로그아웃" }).click();
+  }
   await expect.poll(() => fixture.isConnected()).toBe(false);
   await expect(page.getByRole("button", { name: "Twitch 로그인" }).first()).toBeVisible();
 
   await chooseGame(page, "league");
   await expect(page).toHaveURL(/\/$/u);
-  await expect(page.getByRole("button", { name: /Twitch/u }).first()).toBeVisible();
+  if (usesMobilePublicMenu(page)) {
+    const mobileMenu = await openMobilePublicMenu(page);
+    await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+    await page.keyboard.press("Escape");
+  } else {
+    await expect(page.getByRole("button", { name: /Twitch/u }).first()).toBeVisible();
+  }
 });
 
 test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL 상세 Modal을 지원한다", async ({ page }) => {
@@ -1879,8 +1957,7 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(specialDialog).not.toContainText("katress");
   await expect(specialDialog).not.toContainText("wixen");
   await page.keyboard.press("Escape");
-  await page.locator(".public-locale-button").click();
-  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await selectPublicLocale(page, "ja");
   await page.evaluate(() => {
     window.history.pushState(null, "", "/palworld/pals?pal=katress-ignis");
     window.dispatchEvent(new PopStateEvent("popstate"));
@@ -1957,8 +2034,7 @@ test("Pal 도감 검색·facet·chip·초기화·정렬은 URL을 단일 적용 
   await expect(page.getByText("조건에 맞는 Pal 0종 · 0종 표시", { exact: true })).toBeVisible();
   await expect(page.getByText("조건에 맞는 Pal이 없습니다.", { exact: true })).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
-  await page.locator(".public-locale-button").click();
-  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await selectPublicLocale(page, "ja");
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("존재하지않는Pal");
   await expect(page.getByText("条件に一致するパル 0体 · 0体を表示", { exact: true })).toBeVisible();
   if (mobileFilters) await page.getByTestId("pal-filter-trigger").click();
@@ -2698,8 +2774,7 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
 
   await page.reload();
   await expect(page.getByRole("heading", { name: "Palworld 스킬", level: 1 })).toBeVisible();
-  await page.locator(".public-locale-button").click();
-  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await selectPublicLocale(page, "ja");
   await expect(page.getByRole("heading", { name: "Palworld スキル", level: 1 })).toBeVisible();
   await expect(translationReviewNotice).toContainText(
     "一部の名称と説明は自動翻訳後の確認中です。",
@@ -3130,8 +3205,7 @@ test("통합 검색은 한국어와 일본어 이름 결과를 표시한다", as
   await expect(page.getByRole("heading", { name: "아누비스", level: 1 })).toBeVisible();
   await expect(page.getByTestId("pal-card").filter({ hasText: "아누비스" })).toBeVisible();
 
-  await page.locator(".public-locale-button").click();
-  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await selectPublicLocale(page, "ja");
   const headerSearch = page.getByTestId("header-search").getByRole("searchbox");
   await headerSearch.fill("パルスフィア");
   await headerSearch.press("Enter");
@@ -3193,8 +3267,7 @@ test("모든 Palworld 공개 경로 하단에 한국어·일본어 비공식 출
     await expect(koreanFooter.getByRole("link", { name: /Palworld · 외부 사이트, 새 창에서 열기/u })).toHaveAttribute("target", "_blank");
     await expect(koreanFooter.getByRole("link", { name: /Pocketpair · 외부 사이트, 새 창에서 열기/u })).toHaveAttribute("rel", "noopener noreferrer");
 
-    await page.locator(".public-locale-button").click();
-    await page.getByRole("menuitemradio", { name: /JP/u }).click();
+    await selectPublicLocale(page, "ja");
     const japaneseFooter = page.getByTestId("palworld-source-footer");
     await expect(japaneseFooter.locator("p")).toHaveText(PALWORLD_PUBLIC_NOTICE_JA);
     await expect(japaneseFooter.getByRole("link", { name: /Palworld · 外部サイト、新しいタブで開く/u })).toBeVisible();
@@ -3465,8 +3538,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.getByRole("dialog", { name: "아누비스" }).getByRole("button", { name: "위치 정보 닫기" }).click();
   await expect.poll(() => new URL(page.url()).searchParams.has("marker")).toBe(false);
 
-  await page.locator(".public-locale-button").click();
-  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await selectPublicLocale(page, "ja");
   await expect(page.getByRole("heading", { name: "Palworld ワールドマップ", level: 1 })).toHaveClass(/yoro-u-sr-only/u);
   await expect(page.getByRole("button", { name: "マップを拡大" })).toBeVisible();
   await expect(page.getByRole("button", { name: "フィールドボス: アヌビス, Lv.55" })).toBeVisible();
@@ -3517,8 +3589,7 @@ test("Palworld 화면은 외부 origin 이미지 요청 없이 카드·자동완
   await parent.getByRole("option", { name: /펭킹/u }).click();
   await expect(parent.getByRole("img", { name: "펭킹" })).toBeVisible();
 
-  await page.locator(".public-locale-button").click();
-  await page.getByRole("menuitemradio", { name: /JP/u }).click();
+  await selectPublicLocale(page, "ja");
   const japaneseSearch = page.getByTestId("header-search").getByRole("searchbox");
   await japaneseSearch.fill("キャプペン");
   await japaneseSearch.press("Enter");
@@ -3547,32 +3618,50 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
     await page.goto("/palworld");
     const localeButton = page.locator(".public-locale-button");
     const profileButton = page.locator(".public-twitch-login-chip");
-    const productCluster = page.locator(".public-header-product-cluster");
-    const headerTools = page.locator(".public-header-tools");
-    await expect(localeButton).toBeVisible();
-    await expect(profileButton).toBeVisible();
+    const productCluster = page.locator(".public-game-header__product");
+    const headerTools = page.locator(".public-game-header__tools");
+    const mobileMenuButton = page.getByRole("button", { name: "메뉴 열기", exact: true });
+    if (viewport.width <= 768) {
+      await expect(localeButton).toBeHidden();
+      await expect(profileButton).toBeHidden();
+      await expect(mobileMenuButton).toBeVisible();
+      await mobileMenuButton.click();
+      const mobileMenu = page.getByRole("dialog", { name: "메뉴" });
+      await expect(mobileMenu.getByRole("heading", { name: "게임 선택" })).toBeVisible();
+      await expect(mobileMenu.getByRole("heading", { name: "언어" })).toBeVisible();
+      await expect(mobileMenu.getByRole("heading", { name: "Twitch 계정" })).toBeVisible();
+      await expect(mobileMenu.getByText("아주 긴 Twitch 프로필 표시 이름")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(mobileMenu).toBeHidden();
+      await expect(mobileMenuButton).toBeFocused();
+    } else {
+      await expect(localeButton).toBeVisible();
+      await expect(profileButton).toBeVisible();
+    }
     const [localeBounds, profileBounds, productBounds, toolsBounds] = await Promise.all([
       localeButton.boundingBox(),
       profileButton.boundingBox(),
       productCluster.boundingBox(),
       headerTools.boundingBox(),
     ]);
-    expect(localeBounds).not.toBeNull();
-    expect(profileBounds).not.toBeNull();
     expect(productBounds).not.toBeNull();
-    expect(toolsBounds).not.toBeNull();
-    expect(localeBounds!.x + localeBounds!.width).toBeLessThanOrEqual(profileBounds!.x);
-    const productToolsOverlap = (
-      productBounds!.x < toolsBounds!.x + toolsBounds!.width
-      && productBounds!.x + productBounds!.width > toolsBounds!.x
-      && productBounds!.y < toolsBounds!.y + toolsBounds!.height
-      && productBounds!.y + productBounds!.height > toolsBounds!.y
-    );
-    expect(productToolsOverlap, `${viewport.width}px에서 게임 선택과 헤더 도구가 겹치지 않아야 합니다.`).toBe(false);
+    if (viewport.width > 768) {
+      expect(localeBounds).not.toBeNull();
+      expect(profileBounds).not.toBeNull();
+      expect(toolsBounds).not.toBeNull();
+      expect(localeBounds!.x + localeBounds!.width).toBeLessThanOrEqual(profileBounds!.x);
+      const productToolsOverlap = (
+        productBounds!.x < toolsBounds!.x + toolsBounds!.width
+        && productBounds!.x + productBounds!.width > toolsBounds!.x
+        && productBounds!.y < toolsBounds!.y + toolsBounds!.height
+        && productBounds!.y + productBounds!.height > toolsBounds!.y
+      );
+      expect(productToolsOverlap, `${viewport.width}px에서 게임 선택과 헤더 도구가 겹치지 않아야 합니다.`).toBe(false);
+    }
     await expect(page.getByTestId("public-live-streamer-rail").locator(".public-home-live-card")).toHaveCount(1);
     await assertHealthyDocument(page, errors);
 
-    const secondaryRow = page.locator(".palworld-secondary-row");
+    const secondaryRow = page.locator(".public-horizontal-nav");
     const homeMenu = page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" });
     const mapMenu = page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" });
     await homeMenu.focus();

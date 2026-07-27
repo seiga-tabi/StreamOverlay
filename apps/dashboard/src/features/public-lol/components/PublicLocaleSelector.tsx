@@ -9,6 +9,81 @@ export type PublicLocaleSelectorProps = {
   onOpenChange?: (open: boolean) => void;
 };
 
+function applyLocale(nextLocale: PublicLocale, onLocale: (locale: PublicLocale) => void): void {
+  window.localStorage.setItem("preferredLanguage", nextLocale);
+  window.dispatchEvent(new CustomEvent("languagechange", {
+    detail: { language: nextLocale }
+  }));
+  onLocale(nextLocale);
+}
+
+export function PublicLocaleOptions({
+  ariaLabel,
+  locale,
+  onLocale,
+}: {
+  ariaLabel?: string;
+  locale: PublicLocale;
+  onLocale: (locale: PublicLocale) => void;
+}) {
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const options: Array<{ locale: PublicLocale; code: string; label: string }> = [
+    { locale: "ko", code: "KR", label: t().languageKo },
+    { locale: "ja", code: "JP", label: t().languageJa }
+  ];
+
+  function focusOption(index: number): void {
+    const nextIndex = (index + options.length) % options.length;
+    optionRefs.current[nextIndex]?.focus();
+  }
+
+  function handleOptionKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number): void {
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault();
+      focusOption(index + 1);
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault();
+      focusOption(index - 1);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      focusOption(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      focusOption(options.length - 1);
+    }
+  }
+
+  return (
+    <div
+      aria-label={ariaLabel ?? t().language}
+      className="public-locale-options"
+      role="radiogroup"
+    >
+      {options.map((option, index) => (
+        <button
+          aria-checked={option.locale === locale}
+          className={`public-locale-option${option.locale === locale ? " active" : ""}`}
+          data-ja={option.locale === "ja" ? option.label : undefined}
+          data-ko={option.locale === "ko" ? option.label : undefined}
+          key={option.locale}
+          onClick={() => applyLocale(option.locale, onLocale)}
+          onKeyDown={(event) => handleOptionKeyDown(event, index)}
+          ref={(node) => {
+            optionRefs.current[index] = node;
+          }}
+          role="radio"
+          type="button"
+        >
+          <span className="public-locale-option-radio" aria-hidden="true" />
+          <strong>{option.label}</strong>
+          <small>{option.code}</small>
+          <span className="public-locale-option-check" aria-hidden="true">✓</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function PublicLocaleSelector({
   locale,
   onLocale,
@@ -45,11 +120,7 @@ export function PublicLocaleSelector({
   }, []);
 
   function selectLocale(nextLocale: PublicLocale): void {
-    window.localStorage.setItem("preferredLanguage", nextLocale);
-    window.dispatchEvent(new CustomEvent("languagechange", {
-      detail: { language: nextLocale }
-    }));
-    onLocale(nextLocale);
+    applyLocale(nextLocale, onLocale);
     setOpen(false);
     restoreTriggerFocus();
   }

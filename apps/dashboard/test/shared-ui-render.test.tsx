@@ -10,7 +10,9 @@ import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTo
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
 import { Button } from "../src/shared/ui/Button";
 import { StatusPill } from "../src/shared/ui/Status";
-import { PublicTwitchAccountChip } from "../src/shared/PublicTwitchAccountChip";
+import { PublicTwitchAccountChip, PublicTwitchAccountPanel } from "../src/shared/PublicTwitchAccountChip";
+import { PublicMobileMenuSheet } from "../src/shared/PublicMobileMenuSheet";
+import { PublicGameHeaderFrame } from "../src/shared/PublicGameChrome";
 
 test("Shared Button loading 상태가 중복 클릭 방지와 접근성 속성을 함께 출력한다", () => {
   const html = renderToStaticMarkup(<Button loading loadingLabel="검색 중">검색</Button>);
@@ -146,8 +148,99 @@ test("LoL PublicAppHeader가 공통 Twitch account chip으로 기존 프로필�
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, /src="https:\/\/example\.com\/avatar\.png"/);
   assert.match(html, />YORO</);
-  assert.match(html, /class="public-brand-mark public-brand-mobile-logo" src="\/images\/yorogg-home-logo\.webp" alt="" aria-hidden="true"/);
+  assert.match(html, /class="public-game-header__brand-logo" src="\/images\/yorogg-home-logo\.webp" alt="YORO\.gg"/);
   assert.doesNotMatch(html, /src="\/images\/yorogg-mark\.png"/);
+  assert.match(html, /data-testid="lol-primary-nav"/u);
+  assert.match(html, /홈[\s\S]*스트리머[\s\S]*참여[\s\S]*대회[\s\S]*커뮤니티/u);
+  assert.match(html, /aria-current="page"[^>]*data-ko="홈"/u);
+  assert.match(html, /data-ko="메뉴" data-ja="メニュー"/u);
+  assert.match(html, /aria-haspopup="dialog"/u);
+  assert.match(html, /aria-label="메뉴 열기"/u);
+  assert.match(html, /aria-label="주 메뉴"/u);
+});
+
+test("모바일 통합 메뉴는 게임·언어·Twitch를 중첩 팝오버 없이 렌더링한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicMobileMenuSheet
+      activePage="search"
+      id="test-mobile-menu"
+      labels={{
+        close: "메뉴 닫기",
+        game: "게임 선택",
+        language: "언어",
+        login: "Twitch 로그인",
+        loginLoading: "로그인 중…",
+        logout: "로그아웃",
+        title: "메뉴",
+        twitch: "Twitch 계정",
+        twitchUnavailable: "현재 Twitch 로그인을 사용할 수 없습니다.",
+      }}
+      locale="ko"
+      onClose={() => undefined}
+      onGamePage={() => undefined}
+      onLocale={() => undefined}
+      onTwitchLogin={() => undefined}
+      onTwitchLogout={() => undefined}
+      open
+      twitchConfigured={false}
+      twitchConnected={false}
+    />
+  );
+
+  assert.match(html, /data-sheet-state="opening"/u);
+  assert.match(html, /<h3>게임 선택<\/h3>[\s\S]*<h3>언어<\/h3>[\s\S]*<h3>Twitch 계정<\/h3>/u);
+  assert.match(html, /role="listbox"/u);
+  assert.match(html, /role="radiogroup"/u);
+  assert.match(html, /현재 Twitch 로그인을 사용할 수 없습니다/u);
+  assert.doesNotMatch(html, /public-locale-popover/u);
+  assert.doesNotMatch(html, /public-twitch-profile-menu/u);
+});
+
+test("모바일 Twitch inline 패널은 로그인 계정과 기존 action을 일반 버튼으로 제공한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicTwitchAccountPanel
+      configured
+      connected
+      loginLabel="Twitch 로그인"
+      loginLoadingLabel="로그인 중…"
+      logoutLabel="로그아웃"
+      menuActions={[{
+        id: "dashboard",
+        label: "대시보드",
+        onSelect: () => undefined,
+        variant: "dashboard",
+      }]}
+      onLogin={() => undefined}
+      onLogout={() => undefined}
+      unavailableLabel="사용할 수 없습니다."
+      user={{ displayName: "YORO", login: "yoro" }}
+    />
+  );
+
+  assert.match(html, />YORO</u);
+  assert.match(html, />@yoro</u);
+  assert.match(html, />대시보드</u);
+  assert.match(html, />로그아웃</u);
+  assert.doesNotMatch(html, /role="menu"/u);
+});
+
+test("공개 게임 Header frame은 1행 product·search·tools와 2행 navigation 구조를 유지한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicGameHeaderFrame
+      accountTools={<span>TOOLS</span>}
+      brand={<span>BRAND</span>}
+      gameSelector={<span>GAME</span>}
+      mobileMenuToggle={<button type="button">MENU</button>}
+      navigation={<nav>NAV</nav>}
+      pageActions={<button type="button">FILTER</button>}
+      search={<form>SEARCH</form>}
+    />
+  );
+
+  assert.match(html, /public-game-header__primary-row[\s\S]*public-game-header__product[\s\S]*BRAND[\s\S]*GAME/u);
+  assert.match(html, /public-game-header__primary-row[\s\S]*public-game-header__search-slot[\s\S]*SEARCH[\s\S]*FILTER[\s\S]*public-game-header__tools[\s\S]*TOOLS/u);
+  assert.match(html, /public-game-header__secondary-row[\s\S]*public-game-header__nav-slot[\s\S]*NAV/u);
+  assert.match(html, /data-search="true"/u);
 });
 
 test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기 동작을 유지한다", () => {

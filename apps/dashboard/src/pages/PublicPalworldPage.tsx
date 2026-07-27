@@ -86,6 +86,9 @@ export function PublicPalworldPage({
   const followedAbortRef = useRef<AbortController | null>(null);
   const logoutInFlightRef = useRef(false);
   const mountedRef = useRef(true);
+  const viewerTwitchConnectedRef = useRef(
+    new URLSearchParams(window.location.search).get("viewer_twitch") === "connected",
+  );
   const needsFollowedChannels = page === "home";
   const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
   const routeQuery = params.toString();
@@ -193,7 +196,7 @@ export function PublicPalworldPage({
     let disposed = false;
     let retryTimer: number | undefined;
     const query = new URLSearchParams(window.location.search);
-    const viewerConnected = query.get("viewer_twitch") === "connected";
+    const viewerConnected = viewerTwitchConnectedRef.current;
     if (viewerConnected) {
       query.delete("viewer_twitch");
       const nextQuery = query.toString();

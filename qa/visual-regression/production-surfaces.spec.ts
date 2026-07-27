@@ -252,6 +252,36 @@ test("Public Profile", async ({ page }) => {
   await assertStableSurface(page, errors, "public-profile.png");
 });
 
+test("LoL 공개 하위 페이지는 화면 중앙에 배치된다", async ({ page }) => {
+  const paths = [
+    "/follow",
+    "/participation",
+    "/lol/tournaments/calendar",
+    "/community/server",
+    "/privacy",
+    "/terms",
+    "/contact",
+  ];
+
+  for (const path of paths) {
+    await page.goto(path);
+    const content = page.locator(".public-dashboard-center");
+    await expect(content).toBeVisible();
+
+    const geometry = await content.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const root = document.documentElement;
+      return {
+        centerDelta: Math.abs((bounds.left + bounds.width / 2) - root.clientWidth / 2),
+        horizontalOverflow: root.scrollWidth - root.clientWidth,
+      };
+    });
+
+    expect(geometry.centerDelta, `${path} 콘텐츠가 화면 중앙에 있어야 합니다.`).toBeLessThanOrEqual(1);
+    expect(geometry.horizontalOverflow, `${path}에 수평 overflow가 없어야 합니다.`).toBeLessThanOrEqual(0);
+  }
+});
+
 test("Dashboard", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/dashboard");

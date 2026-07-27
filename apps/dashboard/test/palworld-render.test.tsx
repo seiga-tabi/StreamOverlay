@@ -149,11 +149,10 @@ test("펠월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 
   const child = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="pals" searchContent={<div data-testid="header-search">검색</div>} />);
   assert.doesNotMatch(home, /data-testid="header-search"/);
   assert.match(child, /data-testid="header-search"/);
-  assert.match(home, /class="public-app-header public-app-header-v2 palworld-header is-home"/);
-  assert.doesNotMatch(home, /palworld-header home/);
+  assert.match(home, /class="public-game-header palworld-header" data-home="true"/);
   assert.match(child, /data-testid="palworld-secondary-nav"/);
   assert.match(child, /aria-current="page"[^>]*data-ko="Pal 도감"/);
-  assert.match(home, /class="public-brand-mark public-brand-mobile-logo" src="\/images\/yorogg-home-logo\.webp" alt="" aria-hidden="true"/);
+  assert.match(home, /class="public-game-header__brand-logo" src="\/images\/yorogg-home-logo\.webp" alt="YORO\.gg"/);
   assert.doesNotMatch(home, /src="\/images\/yorogg-mark\.png"/);
 });
 

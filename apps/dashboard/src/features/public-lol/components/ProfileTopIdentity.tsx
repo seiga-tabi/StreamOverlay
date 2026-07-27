@@ -39,7 +39,7 @@ export function ProfileTopIdentity({
         {identity.profileIconUrl ? <img src={identity.profileIconUrl} alt="" /> : <span>{identity.avatarFallbackLabel}</span>}
       </div>
       <div className="public-profile-top-copy">
-        <PageHeader className="public-profile-shared-page-header" layout="compact">
+        <PageHeader as="div" className="public-profile-shared-page-header" layout="compact">
           <PageHeaderEyebrow>
             <StatusPill
               className={["public-profile-primary-rank", identity.primaryRankClassName].filter(Boolean).join(" ")}

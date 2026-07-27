@@ -1,4 +1,4 @@
-import { AppShellFooter } from "../../../shared/ui/AppShell";
+import { PublicGameFooterFrame } from "../../../shared/PublicGameChrome";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 
 const PALWORLD_OFFICIAL_URL = "https://www.palworldgame.com/";
@@ -34,13 +34,13 @@ export function PalworldSourceFooter({ locale }: { locale: PalworldLocale }) {
   const noticePrefix = text.sourceNotice.slice(0, palworldLabelStart);
   const sourceSeparator = text.sourceNotice.slice(palworldLabelStart + "Palworld".length, pocketpairLabelStart);
   return (
-    <AppShellFooter
+    <PublicGameFooterFrame
       aria-label={text.footerLabel}
       className="palworld-footer"
       data-testid="palworld-source-footer"
-    >
-      <strong>YORO.gg</strong>
-      <p
+      brand="YORO.gg"
+      disclaimer={(
+        <p
         data-ja={palworldI18n.ja.sourceNotice}
         data-ko={palworldI18n.ko.sourceNotice}
       >
@@ -49,6 +49,7 @@ export function PalworldSourceFooter({ locale }: { locale: PalworldLocale }) {
         {sourceSeparator}
         <ExternalSourceLink href={POCKETPAIR_OFFICIAL_URL} locale={locale}>Pocketpair</ExternalSourceLink>
       </p>
-    </AppShellFooter>
+      )}
+    />
   );
 }

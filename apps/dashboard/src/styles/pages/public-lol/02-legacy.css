@@ -1948,7 +1948,7 @@
 .public-dashboard-shell .public-search-form,
 .public-dashboard-shell.theme-dark .public-app-header .public-search-form,
 .public-dashboard-shell.theme-dark .public-home-search-stage .public-search-form,
-.public-dashboard-shell:not(.public-home-shell) .public-search-form,
+.public-dashboard-shell:not(.public-home-shell) main .public-search-form,
 .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-form {
   border-color: rgba(113, 154, 255, .66) !important;
   background:
@@ -4873,100 +4873,6 @@
   }
 }
 
-.public-site-footer {
-  max-width: min(1320px, calc(100% - 32px));
-  margin: 32px auto 0;
-  padding: 20px 22px 22px;
-  border: 1px solid rgba(126, 177, 223, 0.52);
-  border-bottom: 0;
-  border-radius: 24px 24px 0 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(213, 241, 255, 0.78)),
-    #f3f7fb;
-  color: #4f6682;
-  text-align: center;
-  box-shadow: 0 -18px 48px rgba(97, 157, 214, 0.16);
-}
-
-.public-site-footer-nav {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding-bottom: 14px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid rgba(126, 177, 223, 0.36);
-}
-
-.public-site-footer-nav a {
-  min-height: 38px;
-  border: 1px solid rgba(126, 177, 223, 0.58);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #10233f;
-  padding: 0 16px;
-  font-weight: 950;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 10px 24px rgba(97, 157, 214, 0.12);
-  transition: transform 0.16s ease, border-color 0.16s ease, color 0.16s ease;
-}
-
-.public-site-footer-nav a:hover,
-.public-site-footer-nav a:focus-visible {
-  transform: translateY(-1px);
-  border-color: rgba(92, 124, 255, 0.62);
-  color: #4d63ff;
-  outline: none;
-}
-
-.public-site-footer-brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 0 0 10px;
-}
-
-.public-site-footer-brand-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: 15px;
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(circle at 70% 22%, rgba(213, 241, 255, 0.92), transparent 34%),
-    linear-gradient(135deg, #5c7cff, #9a5cff);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 950;
-  line-height: 1;
-  box-shadow: 0 12px 24px rgba(92, 124, 255, 0.2);
-}
-
-.public-site-footer-brand-word {
-  color: #10233f;
-  font-size: 22px;
-  font-weight: 950;
-  letter-spacing: 0;
-}
-
-.public-site-footer p {
-  max-width: 940px;
-  margin: 0 auto 8px;
-  color: #5d7390;
-  font-size: 13px;
-  font-weight: 850;
-  line-height: 1.5;
-}
-
-.public-site-footer strong {
-  display: block;
-  color: #10233f;
-  font-size: 13px;
-  font-weight: 950;
-}
-
 .public-legal-page {
   max-width: min(1040px, calc(100% - 32px));
   margin: 28px auto;
@@ -5335,33 +5241,6 @@ html[lang="ja"] .public-dashboard-shell .public-tournament-calendar-day button s
 }
 
 @media (max-width: 760px) {
-  .public-site-footer {
-    max-width: calc(100% - 20px);
-    margin-top: 32px;
-    padding: 18px 12px 20px;
-    border-radius: 20px 20px 0 0;
-  }
-
-  .public-site-footer-nav {
-    gap: 8px;
-  }
-
-  .public-site-footer-nav a {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
-
-  .public-site-footer-brand-mark {
-    width: 36px;
-    height: 36px;
-    border-radius: 13px;
-    font-size: 13px;
-  }
-
-  .public-site-footer-brand-word {
-    font-size: 19px;
-  }
-
   .public-legal-page {
     max-width: calc(100% - 20px);
     margin: 18px auto;

@@ -32,6 +32,109 @@ export type PublicTwitchAccountChipProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+export type PublicTwitchAccountPanelProps = {
+  configured: boolean;
+  connected: boolean;
+  user?: PublicTwitchAccountUser;
+  loginLabel: string;
+  loginLoading?: boolean;
+  loginLoadingLabel: string;
+  unavailableLabel: string;
+  logoutLabel: string;
+  menuActions?: PublicTwitchAccountMenuAction[];
+  onAction?: () => void;
+  onLogin: () => void;
+  onLogout: () => void;
+};
+
+export function PublicTwitchAccountPanel({
+  configured,
+  connected,
+  user,
+  loginLabel,
+  loginLoading = false,
+  loginLoadingLabel,
+  unavailableLabel,
+  logoutLabel,
+  menuActions = [],
+  onAction,
+  onLogin,
+  onLogout,
+}: PublicTwitchAccountPanelProps) {
+  const displayName = user?.displayName || user?.login || loginLabel;
+
+  if (!connected) {
+    return (
+      <div className="public-twitch-account-panel" aria-busy={loginLoading || undefined}>
+        <button
+          className="public-twitch-account-panel__login"
+          disabled={!configured || loginLoading}
+          onClick={() => {
+            onAction?.();
+            onLogin();
+          }}
+          type="button"
+        >
+          <span aria-hidden="true">T</span>
+          <strong>{loginLoading ? loginLoadingLabel : loginLabel}</strong>
+        </button>
+        {!configured ? (
+          <p className="public-twitch-account-panel__status" role="status">
+            {unavailableLabel}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="public-twitch-account-panel">
+      <div className="public-twitch-account-panel__profile">
+        {user?.profileImageUrl ? (
+          <img
+            src={user.profileImageUrl}
+            alt=""
+            onError={(event) => {
+              event.currentTarget.hidden = true;
+              event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+            }}
+          />
+        ) : null}
+        <span aria-hidden="true" hidden={Boolean(user?.profileImageUrl)}>T</span>
+        <div>
+          <strong>{displayName}</strong>
+          {user?.login ? <small>@{user.login}</small> : null}
+        </div>
+      </div>
+      <div className="public-twitch-account-panel__actions">
+        {menuActions.map((action) => (
+          <button
+            className={action.variant === "dashboard" ? "dashboard" : undefined}
+            key={action.id}
+            onClick={() => {
+              onAction?.();
+              action.onSelect();
+            }}
+            type="button"
+          >
+            {action.label}
+          </button>
+        ))}
+        <button
+          className="danger"
+          onClick={() => {
+            onAction?.();
+            onLogout();
+          }}
+          type="button"
+        >
+          {logoutLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function PublicTwitchAccountChip({
   configured,
   connected,

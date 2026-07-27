@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { StreamerRiotIdRequest } from "@streamops/shared";
+import { PublicGameHeaderFrame } from "../../../shared/PublicGameChrome";
+import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
 import { PublicTwitchAccountChip, type PublicTwitchAccountMenuAction } from "../../../shared/PublicTwitchAccountChip";
-import { t, type PublicLocale } from "../i18n/public-lol-i18n";
+import { publicI18n, t, type PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget, PublicTwitchViewerStatus } from "../types/public-lol";
 import { PublicGameSelector } from "./PublicGameSelector";
 import { PublicHeaderMenu } from "./PublicHeaderMenu";
@@ -50,19 +52,25 @@ export function PublicAppHeader({
   onStreamerRegister,
   onStreamerDashboard,
   onStreamerRecord,
-  onTwitchLogout
+  onTwitchLogout,
 }: PublicAppHeaderProps) {
-  const [gameMenuOpen, setGameMenuOpen] = useState(false);
+  const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
-  const registeredStreamerRequest = isRegisteredStreamerRequest(twitchStatus.streamerRiotRequest) ? twitchStatus.streamerRiotRequest : undefined;
-  const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved" && twitchStatus.streamerRiotRequest?.status !== "pending";
+  const headerRef = useRef<HTMLDivElement>(null);
+  const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const registeredStreamerRequest = isRegisteredStreamerRequest(twitchStatus.streamerRiotRequest)
+    ? twitchStatus.streamerRiotRequest
+    : undefined;
+  const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved"
+    && twitchStatus.streamerRiotRequest?.status !== "pending";
   const canOpenStreamerDashboard = registeredStreamerRequest?.dashboardEnabled === true;
 
   const closeMenus = useCallback(() => {
-    setGameMenuOpen(false);
+    setGameSelectorOpen(false);
+    setMobileMenuOpen(false);
     setLocaleMenuOpen(false);
     setFilterOpen(false);
     setTwitchMenuOpen(false);
@@ -80,6 +88,12 @@ export function PublicAppHeader({
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
+      if (
+        event.target instanceof Element
+        && event.target.closest(".public-bottom-sheet")
+      ) {
+        return;
+      }
       if (!headerRef.current?.contains(event.target as Node)) {
         closeMenus();
       }
@@ -103,109 +117,131 @@ export function PublicAppHeader({
     twitchMenuActions.push({ id: "register", label: t().streamerRiotRegister, onSelect: onStreamerRegister });
   }
   if (canOpenStreamerDashboard) {
-    twitchMenuActions.push({ id: "dashboard", label: t().streamerDashboardOpen, onSelect: onStreamerDashboard, variant: "dashboard" });
+    twitchMenuActions.push({
+      id: "dashboard",
+      label: t().streamerDashboardOpen,
+      onSelect: onStreamerDashboard,
+      variant: "dashboard",
+    });
   }
   if (registeredStreamerRequest) {
     twitchMenuActions.push({ id: "record", label: t().streamerRecordOpen, onSelect: onStreamerRecord });
   }
 
+  const accountTools = (
+    <>
+      <PublicLocaleSelector
+        locale={locale}
+        onLocale={onLocale}
+        onAutoLocale={onAutoLocale}
+        open={localeMenuOpen}
+        onOpenChange={(open) => {
+          setLocaleMenuOpen(open);
+          if (open) {
+            setGameSelectorOpen(false);
+            setMobileMenuOpen(false);
+            setFilterOpen(false);
+            setTwitchMenuOpen(false);
+          }
+        }}
+      />
+      <PublicTwitchAccountChip
+        configured={twitchStatus.configured}
+        connected={twitchStatus.connected}
+        loginLabel={t().twitchViewerLogin}
+        loginLabelJa={publicI18n.ja.twitchViewerLogin}
+        loginLabelKo={publicI18n.ko.twitchViewerLogin}
+        loginTitle={t().twitchLoginRequired}
+        logoutLabel={t().twitchViewerLogout}
+        logoutLabelJa={publicI18n.ja.twitchViewerLogout}
+        logoutLabelKo={publicI18n.ko.twitchViewerLogout}
+        menuActions={twitchMenuActions}
+        menuLabel={t().twitchProfileMenu}
+        onLogin={onTwitchLogin}
+        onLogout={onTwitchLogout}
+        onOpenChange={(open) => {
+          setTwitchMenuOpen(open);
+          if (open) {
+            setGameSelectorOpen(false);
+            setMobileMenuOpen(false);
+            setLocaleMenuOpen(false);
+            setFilterOpen(false);
+          }
+        }}
+        open={twitchMenuOpen}
+        user={twitchStatus.user}
+      />
+    </>
+  );
+  const pageActions = showFilters ? (
+    <div className="public-header-popover-wrap">
+      <button
+        className={`public-filter-button ${filterActive ? "active" : ""}`}
+        type="button"
+        aria-expanded={filterOpen}
+        onClick={() => {
+          setFilterOpen((open) => {
+            const nextOpen = !open;
+            if (nextOpen) {
+              setGameSelectorOpen(false);
+              setMobileMenuOpen(false);
+              setLocaleMenuOpen(false);
+              setTwitchMenuOpen(false);
+            }
+            return nextOpen;
+          });
+        }}
+      >
+        <span aria-hidden="true">▽</span>
+        <strong>{filterActive ? t().activeFilter : t().filter}</strong>
+      </button>
+      {filterOpen ? filterContent : null}
+    </div>
+  ) : undefined;
+
   return (
-    <header
-      id={showSearch ? "public-search" : undefined}
-      className={`public-app-header public-app-header-v2 ${showSearch ? "" : "home"}${gameMenuOpen ? " game-menu-open" : ""}`}
-      ref={headerRef}
-    >
-      <div className="public-header-top-band">
-        <div className="public-header-primary-row">
-          <div className="public-header-product-cluster">
-            <button className="public-header-brand" type="button" onClick={handleHome} aria-label={t().home}>
-              <img className="public-brand-logo public-brand-logo-full public-brand-logo-topbar" src="/images/yorogg-topbar-logo.webp" alt={t().brand} />
-              <img className="public-brand-mark public-brand-mobile-logo" src="/images/yorogg-home-logo.webp" alt="" aria-hidden="true" />
-            </button>
-            <PublicGameSelector
-              activePage={activePage}
-              onPage={handleMenuPage}
-              open={gameMenuOpen}
-              onOpenChange={(open) => {
-                setGameMenuOpen(open);
-                if (open) {
-                  setLocaleMenuOpen(false);
-                  setFilterOpen(false);
-                  setTwitchMenuOpen(false);
-                }
-              }}
+    <div id={showSearch ? "public-search" : undefined} ref={headerRef}>
+      <PublicGameHeaderFrame
+        accountTools={accountTools}
+        brand={(
+          <button className="public-game-header__brand" type="button" onClick={handleHome} aria-label={t().home}>
+            <img
+              className="public-game-header__brand-logo"
+              src="/images/yorogg-home-logo.webp"
+              alt={t().brand}
             />
-          </div>
-          <div className="public-header-tools">
-            <PublicLocaleSelector
-              locale={locale}
-              onLocale={onLocale}
-              onAutoLocale={onAutoLocale}
-              open={localeMenuOpen}
-              onOpenChange={(open) => {
-                setLocaleMenuOpen(open);
-                if (open) {
-                  setGameMenuOpen(false);
-                  setFilterOpen(false);
-                  setTwitchMenuOpen(false);
-                }
-              }}
-            />
-            <PublicTwitchAccountChip
-              configured={twitchStatus.configured}
-              connected={twitchStatus.connected}
-              loginLabel={t().twitchViewerLogin}
-              loginTitle={t().twitchLoginRequired}
-              logoutLabel={t().twitchViewerLogout}
-              menuActions={twitchMenuActions}
-              menuLabel={t().twitchProfileMenu}
-              onLogin={onTwitchLogin}
-              onLogout={onTwitchLogout}
-              onOpenChange={(open) => {
-                setTwitchMenuOpen(open);
-                if (open) {
-                  setGameMenuOpen(false);
-                  setLocaleMenuOpen(false);
-                  setFilterOpen(false);
-                }
-              }}
-              open={twitchMenuOpen}
-              user={twitchStatus.user}
-            />
-            {showFilters ? (
-              <div className="public-header-popover-wrap">
-                <button
-                  className={`public-filter-button ${filterActive ? "active" : ""}`}
-                  type="button"
-                  aria-expanded={filterOpen}
-                  onClick={() => {
-                    setFilterOpen((open) => {
-                      const nextOpen = !open;
-                      if (nextOpen) {
-                        setGameMenuOpen(false);
-                        setLocaleMenuOpen(false);
-                        setTwitchMenuOpen(false);
-                      }
-                      return nextOpen;
-                    });
-                  }}
-                >
-                  <span aria-hidden="true">▽</span>
-                  <strong>{filterActive ? t().activeFilter : t().filter}</strong>
-                </button>
-                {filterOpen ? filterContent : null}
-              </div>
-            ) : null}
-          </div>
+          </button>
+        )}
+        className="lol-public-game-header"
+        gameSelector={(
+          <PublicGameSelector
+            activePage={activePage}
+            onPage={handleMenuPage}
+            open={gameSelectorOpen}
+            onOpenChange={(open) => {
+              setGameSelectorOpen(open);
+              if (open) {
+                setMobileMenuOpen(false);
+                setLocaleMenuOpen(false);
+                setFilterOpen(false);
+                setTwitchMenuOpen(false);
+              }
+            }}
+          />
+        )}
+        home={!showSearch}
+        mobileMenuToggle={(
           <button
-            className="public-mobile-menu-toggle"
-            type="button"
-            aria-label={t().gameMenu}
-            aria-expanded={gameMenuOpen}
+            aria-controls="lol-mobile-menu"
+            aria-expanded={mobileMenuOpen}
+            aria-haspopup="dialog"
+            aria-label={mobileMenuOpen ? t().closeMobileMenu : t().openMobileMenu}
+            className="public-game-header__menu-button"
             onClick={() => {
-              setGameMenuOpen((open) => {
+              setMobileMenuOpen((open) => {
                 const nextOpen = !open;
                 if (nextOpen) {
+                  setGameSelectorOpen(false);
                   setLocaleMenuOpen(false);
                   setFilterOpen(false);
                   setTwitchMenuOpen(false);
@@ -213,25 +249,56 @@ export function PublicAppHeader({
                 return nextOpen;
               });
             }}
+            ref={mobileMenuTriggerRef}
+            type="button"
           >
-            <span aria-hidden="true" />
-            <strong>{t().gameMenu}</strong>
+            <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+            <strong data-ko={publicI18n.ko.mobileMenu} data-ja={publicI18n.ja.mobileMenu}>
+              {t().mobileMenu}
+            </strong>
           </button>
-          {gameMenuOpen ? (
-            <div className="public-mobile-game-tray">
-              <PublicGameSelector activePage={activePage} onPage={handleMenuPage} mode="tray" />
-            </div>
-          ) : null}
-        </div>
-      </div>
-      <div className="public-header-bottom-band">
-        <div className="public-header-bottom-row">
-          {showSearch ? searchContent : null}
-          <div className="public-header-secondary-row">
-            <PublicHeaderMenu activePage={activePage} activeTarget={activeTarget} onPage={handleMenuPage} />
-          </div>
-        </div>
-      </div>
-    </header>
+        )}
+        mobileMenu={(
+          <PublicMobileMenuSheet
+            activePage={activePage}
+            id="lol-mobile-menu"
+            labels={{
+              close: t().closeMobileMenu,
+              game: t().gameMenu,
+              language: t().language,
+              login: t().twitchViewerLogin,
+              loginLoading: t().twitchLoginLoading,
+              logout: t().twitchViewerLogout,
+              title: t().mobileMenu,
+              twitch: t().twitchAccount,
+              twitchUnavailable: t().twitchNotConfigured,
+            }}
+            locale={locale}
+            onClose={() => setMobileMenuOpen(false)}
+            onGamePage={handleMenuPage}
+            onLocale={onLocale}
+            onTwitchLogin={onTwitchLogin}
+            onTwitchLogout={onTwitchLogout}
+            open={mobileMenuOpen}
+            returnFocusRef={mobileMenuTriggerRef}
+            twitchActions={twitchMenuActions}
+            twitchConfigured={twitchStatus.configured}
+            twitchConnected={twitchStatus.connected}
+            twitchUser={twitchStatus.user}
+          />
+        )}
+        navigation={(
+          <PublicHeaderMenu
+            activePage={activePage}
+            activeTarget={activeTarget}
+            onPage={handleMenuPage}
+          />
+        )}
+        pageActions={pageActions}
+        search={showSearch ? searchContent : undefined}
+      />
+    </div>
   );
 }

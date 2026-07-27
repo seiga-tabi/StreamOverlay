@@ -1301,24 +1301,24 @@
   -webkit-text-fill-color: #f8f9fa !important;
 }
 
-.public-dashboard-shell .public-search-form .public-search-field,
-.public-dashboard-shell .public-search-form .public-search-field input,
-.public-dashboard-shell .public-search-form .public-home-shared-input.yoro-input,
-.public-dashboard-shell .public-search-form .public-ranking-shared-input.yoro-input {
+.public-dashboard-shell .public-app-header .public-search-form .public-search-field,
+.public-dashboard-shell .public-app-header .public-search-form .public-search-field input,
+.public-dashboard-shell .public-app-header .public-search-form .public-home-shared-input.yoro-input,
+.public-dashboard-shell .public-app-header .public-search-form .public-ranking-shared-input.yoro-input {
   background: transparent !important;
 }
 
-.public-dashboard-shell .public-search-form .public-search-field input,
-.public-dashboard-shell .public-search-form .public-home-shared-input.yoro-input,
-.public-dashboard-shell .public-search-form .public-ranking-shared-input.yoro-input {
+.public-dashboard-shell .public-app-header .public-search-form .public-search-field input,
+.public-dashboard-shell .public-app-header .public-search-form .public-home-shared-input.yoro-input,
+.public-dashboard-shell .public-app-header .public-search-form .public-ranking-shared-input.yoro-input {
   color: #f8f9fa !important;
   caret-color: #f8f9fa !important;
   -webkit-text-fill-color: #f8f9fa !important;
 }
 
-.public-dashboard-shell .public-search-form .public-search-field input::placeholder,
-.public-dashboard-shell .public-search-form .public-home-shared-input.yoro-input::placeholder,
-.public-dashboard-shell .public-search-form .public-ranking-shared-input.yoro-input::placeholder {
+.public-dashboard-shell .public-app-header .public-search-form .public-search-field input::placeholder,
+.public-dashboard-shell .public-app-header .public-search-form .public-home-shared-input.yoro-input::placeholder,
+.public-dashboard-shell .public-app-header .public-search-form .public-ranking-shared-input.yoro-input::placeholder {
   color: rgba(248, 249, 250, .5) !important;
 }
 
@@ -3210,91 +3210,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   box-shadow:
     inset 0 0 0 1px rgba(255, 107, 107, .32),
     inset 0 0 18px rgba(255, 107, 107, .08) !important;
-}
-
-/* Public footer 최종 보정: 밝은 법적 고지 카드 톤을 현재 회색 다크 테마와 통일 */
-.public-dashboard-shell .public-site-footer {
-  max-width: min(1680px, calc(100% - 32px)) !important;
-  margin: 36px auto 0 !important;
-  padding: 24px 28px 28px !important;
-  border: 1px solid rgba(248, 249, 250, .16) !important;
-  border-bottom: 0 !important;
-  border-radius: 28px 28px 0 0 !important;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(248, 249, 250, .12), transparent 34%),
-    linear-gradient(180deg, rgba(73, 80, 87, .9), rgba(52, 58, 64, .88)) !important;
-  color: #f8f9fa !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 -18px 42px rgba(33, 37, 41, .16) !important;
-}
-
-.public-dashboard-shell .public-site-footer-nav {
-  gap: 10px !important;
-  padding-bottom: 18px !important;
-  margin-bottom: 20px !important;
-  border-bottom: 1px solid rgba(248, 249, 250, .14) !important;
-}
-
-.public-dashboard-shell .public-site-footer-nav a {
-  min-height: 42px !important;
-  padding: 0 18px !important;
-  border: 1px solid rgba(248, 249, 250, .18) !important;
-  border-radius: 999px !important;
-  background: rgba(33, 37, 41, .42) !important;
-  color: #f8f9fa !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-.public-dashboard-shell .public-site-footer-nav a:hover,
-.public-dashboard-shell .public-site-footer-nav a:focus-visible {
-  transform: none !important;
-  border-color: rgba(123, 92, 255, .54) !important;
-  background: rgba(123, 92, 255, .16) !important;
-  color: #ffffff !important;
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(123, 92, 255, .16) !important;
-}
-
-.public-dashboard-shell .public-site-footer-brand {
-  margin-bottom: 12px !important;
-}
-
-.public-dashboard-shell .public-site-footer-brand-mark {
-  width: 38px !important;
-  height: 38px !important;
-  border: 1px solid rgba(123, 92, 255, .52) !important;
-  border-radius: 14px !important;
-  background:
-    radial-gradient(circle at 68% 22%, rgba(255, 255, 255, .18), transparent 34%),
-    linear-gradient(135deg, #212529, #343a40) !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 20px rgba(33, 37, 41, .24) !important;
-}
-
-.public-dashboard-shell .public-site-footer-brand-word,
-.public-dashboard-shell .public-site-footer strong {
-  color: #f8f9fa !important;
-  text-shadow: none !important;
-}
-
-.public-dashboard-shell .public-site-footer p {
-  color: rgba(248, 249, 250, .72) !important;
-  text-shadow: none !important;
-}
-
-@media (max-width: 760px) {
-  .public-dashboard-shell .public-site-footer {
-    max-width: calc(100% - 20px) !important;
-    margin-top: 28px !important;
-    padding: 18px 14px 22px !important;
-    border-radius: 22px 22px 0 0 !important;
-  }
-
-  .public-dashboard-shell .public-site-footer-nav a {
-    min-height: 40px !important;
-  }
 }
 
 /* 메인 상단바 우측 도구 정렬: 언어/로그인 버튼을 메뉴 중심선에 맞춤 */

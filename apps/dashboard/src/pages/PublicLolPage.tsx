@@ -11,7 +11,7 @@ import {
   type CommunityPostSubmitInput
 } from "../features/public-lol/api/community";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
-import { AppShell, AppShellFooter, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
+import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../shared/ui/Card";
 import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../shared/ui/EmptyState";
@@ -2262,7 +2262,7 @@ function PublicParticipationJoinPage({
 
   return (
     <section className="public-panel public-menu-page-panel public-participation-page public-streamer-detail-shared-page">
-      <PageHeader className="public-section-head public-participation-shared-header" layout="split">
+      <PageHeader as="div" className="public-section-head public-participation-shared-header" layout="split">
         <PageHeaderTitle as="h2"  >{t().followJoinTitle}</PageHeaderTitle>
         <PageHeaderDescription  >{t().followJoinSubtitle}</PageHeaderDescription>
         <PageHeaderActions className="public-participation-actions">
@@ -2565,7 +2565,7 @@ function PublicTwitchFollowedPanel({
 
   return (
     <section id="public-twitch-followed" className="public-panel public-twitch-followed-panel public-streamers-shared-panel">
-      <PageHeader className="public-section-head public-streamers-shared-header" layout="split">
+      <PageHeader as="div" className="public-section-head public-streamers-shared-header" layout="split">
         <PageHeaderEyebrow>
           <StatusPill size="sm" tone={status.connected ? "streamer" : "warning"}>
             {status.connected ? status.user?.displayName ?? "Twitch" : t().twitchViewerLogin}
@@ -2813,8 +2813,8 @@ function PublicCommunityPage({
       sidebarMode="drawer"
       variant="public"
     >
-      <AppShellHeader className="public-community-shared-header">
-        <PageHeader layout="split">
+      <AppShellHeader as="div" className="public-community-shared-header">
+        <PageHeader as="div" layout="split">
           <PageHeaderEyebrow  >
             {t().community}
           </PageHeaderEyebrow>
@@ -2871,7 +2871,7 @@ function PublicCommunityPage({
         </Navigation>
       </AppShellSidebar>
 
-      <AppShellMain className="public-community-shared-main" id={`public-community-${category}-main`}>
+      <AppShellMain as="div" className="public-community-shared-main" id={`public-community-${category}-main`}>
         <div className="public-community-shared-metrics">
           <Metric label={listTitle} value={visiblePosts.length} tone={isParty ? "streamer" : "info"} size="sm" />
           <Metric label={t().communityCommentsTitle} value={commentCount} tone="neutral" size="sm" />
@@ -3134,8 +3134,8 @@ function PublicCommunityWritePage({
       sidebarMode="drawer"
       variant="public"
     >
-      <AppShellHeader className="public-community-shared-header">
-        <PageHeader layout="split">
+      <AppShellHeader as="div" className="public-community-shared-header">
+        <PageHeader as="div" layout="split">
           <PageHeaderEyebrow  >{t().community}</PageHeaderEyebrow>
           <PageHeaderTitle
             as="h2"
@@ -3173,7 +3173,7 @@ function PublicCommunityWritePage({
         </Navigation>
       </AppShellSidebar>
 
-      <AppShellMain className="public-community-shared-main" id="public-community-write-main">
+      <AppShellMain as="div" className="public-community-shared-main" id="public-community-write-main">
         <Card className="public-community-compose standalone public-community-shared-compose" padding="lg" variant="glass">
           {!twitchStatus.connected ? (
             <EmptyState variant="community" as="div">
@@ -3456,8 +3456,8 @@ function PublicCommunityDetailPage({
       sidebarMode="drawer"
       variant="public"
     >
-      <AppShellHeader className="public-community-shared-header">
-        <PageHeader layout="split">
+      <AppShellHeader as="div" className="public-community-shared-header">
+        <PageHeader as="div" layout="split">
           <PageHeaderEyebrow  >{t().community}</PageHeaderEyebrow>
           <PageHeaderTitle as="h2"  >
             {t().communityDetailTitle}
@@ -3502,7 +3502,7 @@ function PublicCommunityDetailPage({
         </Navigation>
       </AppShellSidebar>
 
-      <AppShellMain className="public-community-shared-main" id="public-community-detail-main">
+      <AppShellMain as="div" className="public-community-shared-main" id="public-community-detail-main">
       {!post ? (
         <EmptyState variant="community" as="div">
           <EmptyStateIcon>!</EmptyStateIcon>
@@ -4069,8 +4069,8 @@ function PublicTournamentCalendarPage({
       sidebarMode="drawer"
       variant="public"
     >
-      <AppShellHeader className="public-tournament-shared-header">
-        <PageHeader layout="split">
+      <AppShellHeader as="div" className="public-tournament-shared-header">
+        <PageHeader as="div" layout="split">
           <PageHeaderEyebrow  >
             {t().contentMenu}
           </PageHeaderEyebrow>
@@ -4090,7 +4090,7 @@ function PublicTournamentCalendarPage({
           </PageHeaderActions>
         </PageHeader>
       </AppShellHeader>
-      <AppShellMain className="public-tournament-shared-main" id="public-tournament-calendar-main">
+      <AppShellMain as="div" className="public-tournament-shared-main" id="public-tournament-calendar-main">
         {loading ? (
           <div className="public-tournament-shared-loading" role="status" aria-label={t().searching}>
             <SkeletonCard loadingLabel={t().searching} />
@@ -4202,8 +4202,8 @@ function PublicTournamentListPage({
       sidebarMode="drawer"
       variant="public"
     >
-      <AppShellHeader className="public-tournament-shared-header">
-        <PageHeader layout="split">
+      <AppShellHeader as="div" className="public-tournament-shared-header">
+        <PageHeader as="div" layout="split">
           <PageHeaderEyebrow  >
             {t().contentMenu}
           </PageHeaderEyebrow>
@@ -4223,7 +4223,7 @@ function PublicTournamentListPage({
           </PageHeaderActions>
         </PageHeader>
       </AppShellHeader>
-      <AppShellMain className="public-tournament-shared-main" id="public-tournament-list-main">
+      <AppShellMain as="div" className="public-tournament-shared-main" id="public-tournament-list-main">
         {loading ? (
           <div className="public-tournament-list-grid">
             <SkeletonCard loadingLabel={t().searching} />
@@ -4409,8 +4409,8 @@ function PublicTournamentPage({
       showSkipLink={false}
       variant="public"
     >
-      <AppShellHeader className="public-tournament-shared-header">
-        <PageHeader layout="split">
+      <AppShellHeader as="div" className="public-tournament-shared-header">
+        <PageHeader as="div" layout="split">
           <PageHeaderEyebrow  >
             {t().contentMenu}
           </PageHeaderEyebrow>
@@ -4453,7 +4453,7 @@ function PublicTournamentPage({
         </Navigation>
       </AppShellSidebar>
 
-      <AppShellMain className="public-tournament-shared-main" id="public-tournament-detail-main">
+      <AppShellMain as="div" className="public-tournament-shared-main" id="public-tournament-detail-main">
         {loading ? (
           <div className="public-tournament-shared-loading" role="status" aria-label={t().searching}>
             <SkeletonCard loadingLabel={t().searching} />
@@ -7500,8 +7500,13 @@ export function PublicLolPage({
 
   if (streamerRegisterOpen) {
     return (
-      <main className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}>
-        <section className="public-app-main">
+      <AppShell
+        className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}
+        mainId="public-streamer-register-main"
+        skipLinkLabel={t().skipToContent}
+        variant="public"
+      >
+        <AppShellHeader as="div">
           <PublicAppHeader
             locale={locale}
             profile={profile}
@@ -7534,6 +7539,8 @@ export function PublicLolPage({
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
           />
+        </AppShellHeader>
+        <AppShellMain className="public-app-main" id="public-streamer-register-main">
           <PublicStreamerRegistrationScreen
             status={twitchStatus}
             onLogin={startTwitchLogin}
@@ -7543,10 +7550,10 @@ export function PublicLolPage({
               void loadFollowedLol();
             }}
           />
-        </section>
+        </AppShellMain>
         <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
-      </main>
+      </AppShell>
     );
   }
 
@@ -7554,8 +7561,8 @@ export function PublicLolPage({
     return (
       <AppShell
         className={`public-lol-shell public-dashboard-shell public-home-shell public-home-shared-shell theme-${theme}`}
-        renderRoot={({ children, ...rootProps }) => <main {...rootProps}>{children}</main>}
-        showSkipLink={false}
+        mainId="public-search-main"
+        skipLinkLabel={t().skipToContent}
         variant="public"
       >
         <AppShellHeader as="div" className="public-home-shared-header">
@@ -7618,9 +7625,7 @@ export function PublicLolPage({
             text={publicHomeSearchPanelText()}
           />
         </AppShellMain>
-        <AppShellFooter as="div" className="public-home-shared-footer">
-          <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
-        </AppShellFooter>
+        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
     );
@@ -7628,8 +7633,13 @@ export function PublicLolPage({
 
   if (activeMainPage !== "search" || !profile) {
     return (
-      <main className={`public-lol-shell public-dashboard-shell theme-${theme}`}>
-        <div className="public-standard-header-frame">
+      <AppShell
+        className={`public-lol-shell public-dashboard-shell theme-${theme}`}
+        mainId="public-main"
+        skipLinkLabel={t().skipToContent}
+        variant="public"
+      >
+        <AppShellHeader as="div" className="public-standard-header-frame">
           <PublicAppHeader
             locale={locale}
             profile={profile}
@@ -7661,8 +7671,8 @@ export function PublicLolPage({
             onFilters={setFilters}
             onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
           />
-        </div>
-        <section className="public-app-main">
+        </AppShellHeader>
+        <AppShellMain className="public-app-main" id="public-main">
           {loading ? <SeigaSearchLoader /> : null}
           <div className="public-profile-layout">
             <div className="public-dashboard-content-grid">
@@ -7672,10 +7682,10 @@ export function PublicLolPage({
               </section>
             </div>
           </div>
-        </section>
+        </AppShellMain>
         <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
-      </main>
+      </AppShell>
     );
   }
 
@@ -7686,7 +7696,7 @@ export function PublicLolPage({
     <AppShell
       className={`public-lol-shell public-dashboard-shell public-profile-shared-shell theme-${theme}`}
       mainId="public-profile-main"
-      renderRoot={({ children, ...rootProps }) => <main {...rootProps}>{children}</main>}
+      skipLinkLabel={t().skipToContent}
       variant="public"
     >
       <AppShellHeader as="div" className="public-profile-shared-header public-standard-header-frame">
@@ -7789,9 +7799,7 @@ export function PublicLolPage({
           </div>
         </div>
       </AppShellMain>
-      <AppShellFooter as="div" className="public-profile-shared-footer">
-        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
-      </AppShellFooter>
+      <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
     </AppShell>
   );

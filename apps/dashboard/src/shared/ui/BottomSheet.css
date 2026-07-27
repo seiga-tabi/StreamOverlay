@@ -1,0 +1,91 @@
+.public-bottom-sheet {
+  place-items: end center;
+  padding:
+    var(--yoro-space-0)
+    max(var(--yoro-space-0), env(safe-area-inset-right))
+    var(--yoro-space-0)
+    max(var(--yoro-space-0), env(safe-area-inset-left));
+  background: color-mix(in srgb, var(--yoro-color-product-gray-field-text) 56%, transparent);
+  opacity: 1;
+  transition: opacity var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard);
+}
+
+.public-bottom-sheet.yoro-modal[data-state="closing"] {
+  opacity: 0;
+}
+
+.public-bottom-sheet .yoro-modal__dialog {
+  inline-size: min(100%, 30rem);
+  max-block-size: min(88dvh, 40rem);
+  border-block-end: 0;
+  border-radius:
+    var(--yoro-radius-lg)
+    var(--yoro-radius-lg)
+    var(--yoro-space-0)
+    var(--yoro-space-0);
+  background: var(--yoro-color-product-gray-field-text);
+  color: var(--yoro-color-product-gray-text);
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  transition: none;
+}
+
+.public-bottom-sheet.yoro-modal[data-state="closing"] .yoro-modal__dialog {
+  transform: none;
+  opacity: 1;
+}
+
+.public-bottom-sheet__surface {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-block-size: 0;
+  inline-size: 100%;
+  transform: translate3d(0, 0, 0);
+  transition: transform var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard);
+}
+
+.public-bottom-sheet[data-sheet-state="opening"] .public-bottom-sheet__surface {
+  transform: translate3d(0, 100%, 0);
+}
+
+.public-bottom-sheet[data-sheet-state="closing"] .public-bottom-sheet__surface {
+  transform: translate3d(0, 100%, 0);
+}
+
+.public-bottom-sheet[data-sheet-state="open"] .public-bottom-sheet__surface {
+  transition-duration: var(--yoro-motion-duration-slow);
+  transition-timing-function: var(--yoro-motion-ease-emphasized);
+}
+
+.public-bottom-sheet__header {
+  flex: none;
+  padding: var(--yoro-space-4);
+  border-color: var(--yoro-color-product-gray-border);
+}
+
+.public-bottom-sheet__header .yoro-modal__title {
+  color: var(--yoro-color-product-gray-text);
+}
+
+.public-bottom-sheet__header .yoro-modal__close-button {
+  border-color: var(--yoro-color-product-gray-border);
+  background: var(--yoro-color-product-gray-surface);
+  color: var(--yoro-color-product-gray-text);
+}
+
+.public-bottom-sheet__content {
+  min-block-size: 0;
+  padding:
+    var(--yoro-space-4)
+    var(--yoro-space-4)
+    max(var(--yoro-space-5), env(safe-area-inset-bottom));
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-bottom-sheet,
+  .public-bottom-sheet__surface {
+    transition: none;
+  }
+}
