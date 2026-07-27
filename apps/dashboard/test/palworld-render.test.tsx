@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type {
   PalworldBreedingPair,
   PalworldItemReference,
+  PalworldItemSummary,
   PalworldMapMarker,
   PalworldPalCondensationProfile,
   PalworldPalListFacets,
@@ -27,6 +28,7 @@ import { PalworldMapFilterPanel } from "../src/features/public-palworld/componen
 import { PalworldMapLocationLayer } from "../src/features/public-palworld/components/PalworldMapLocationLayer";
 import { PalworldMapMarkerPopover } from "../src/features/public-palworld/components/PalworldMapMarkerPopover";
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
+import { PalworldMobileDismissHandle } from "../src/features/public-palworld/components/PalworldMobileDismissHandle";
 import {
   clampPalworldMapView,
   focusPalworldMapViewAt,
@@ -45,7 +47,8 @@ import {
 import { PalworldAutoLoadControl } from "../src/features/public-palworld/components/PalworldAutoLoadControl";
 import { PalworldItemsPage } from "../src/features/public-palworld/components/PalworldItemsPage";
 import { PalworldSourceFooter } from "../src/features/public-palworld/components/PalworldSourceFooter";
-import { PalworldStreamersPage } from "../src/features/public-palworld/components/PalworldStreamersPage";
+import { TechnologyUnlockCard } from "../src/features/public-palworld/components/PalworldTechnologyPage";
+import { groupTechnologyUnlockItems } from "../src/features/public-palworld/utils/technology";
 import { PalworldSkillCard, PalworldSkillDetailView, PalworldSkillsPage } from "../src/features/public-palworld/components/PalworldSkillsPage";
 import { PalworldSkillsFilters } from "../src/features/public-palworld/components/PalworldSkillsFilters";
 import { PalworldElementBadge } from "../src/features/public-palworld/components/PalworldElementBadge";
@@ -169,16 +172,17 @@ test("펠월드 홈 Hero는 모바일 검색 제안이 경계 밖에서도 잘�
   assert.match(shellRule, /overflow-x:\s*clip;/u);
 });
 
-test("Palworld 2행 메뉴는 한국어·일본어 7개 순서와 스트리머 활성 상태를 유지한다", () => {
-  const korean = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="streamers" searchContent={<div data-testid="header-search">검색</div>} />);
+test("Palworld 2행 메뉴는 한국어·일본어 7개 순서와 기술 해금 활성 상태를 유지한다", () => {
+  const korean = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="technology" searchContent={<div data-testid="header-search">검색</div>} />);
   const japanese = renderToStaticMarkup(<PalworldHeader locale="ja" onLocale={() => undefined} page="home" />);
   const skills = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="skills" searchContent={<div data-testid="header-search">검색</div>} />);
   const map = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="map" searchContent={<div data-testid="header-search">검색</div>} />);
   assert.equal((korean.match(/<nav[^>]*data-testid="palworld-secondary-nav"[\s\S]*?<button/gu) ?? []).length > 0, true);
-  assert.equal((korean.match(/data-ko="(?:홈|스트리머|Pal 도감|교배 조합|아이템|스킬|지도)"/gu) ?? []).length, 7);
-  assert.match(korean, /홈[\s\S]*스트리머[\s\S]*Pal 도감[\s\S]*교배 조합[\s\S]*아이템[\s\S]*스킬[\s\S]*지도/u);
-  assert.match(korean, /aria-current="page"[^>]*data-ko="스트리머"/u);
-  assert.match(japanese, /ホーム[\s\S]*配信者[\s\S]*パル図鑑[\s\S]*配合組み合わせ[\s\S]*アイテム[\s\S]*スキル[\s\S]*マップ/u);
+  assert.equal((korean.match(/data-ko="(?:홈|Pal 도감|교배 조합|아이템|기술 해금|스킬|지도)"/gu) ?? []).length, 7);
+  assert.match(korean, /홈[\s\S]*Pal 도감[\s\S]*교배 조합[\s\S]*아이템[\s\S]*기술 해금[\s\S]*스킬[\s\S]*지도/u);
+  assert.match(korean, /aria-current="page"[^>]*data-ko="기술 해금"/u);
+  assert.doesNotMatch(korean, /data-ko="스트리머"/u);
+  assert.match(japanese, /ホーム[\s\S]*パル図鑑[\s\S]*配合組み合わせ[\s\S]*アイテム[\s\S]*技術解放[\s\S]*スキル[\s\S]*マップ/u);
   assert.match(skills, /aria-current="page"[^>]*data-ko="스킬"/u);
   assert.match(map, /aria-current="page"[^>]*data-ko="지도"/u);
 });
@@ -688,7 +692,6 @@ test("Palworld 홈은 기존 meta·shortcut·summary 없이 로그인 CTA가 있
     onOpenItem={() => undefined}
     onOpenPal={() => undefined}
     onSearch={() => undefined}
-    onShowStreamers={() => undefined}
     onTwitchLogin={() => undefined}
     twitchConfigured
     twitchConnected={false}
@@ -700,56 +703,41 @@ test("Palworld 홈은 기존 meta·shortcut·summary 없이 로그인 CTA가 있
   assert.match(html, /data-testid="public-live-streamer-rail"/u);
 });
 
-test("Palworld 스트리머 페이지는 LIVE와 오프라인을 함께 표시하고 LoL 전용 정보를 노출하지 않는다", () => {
-  const channels = [
-    { twitchUserId: "offline", twitchLogin: "offline_user", twitchDisplayName: "Offline User", followedAt: "2026-07-22T00:00:00.000Z", isLive: false },
-    { twitchUserId: "live", twitchLogin: "live_user", twitchDisplayName: "Live User", followedAt: "2026-07-22T00:00:00.000Z", isLive: true, gameName: "Palworld", title: "함께 모험해요", viewerCount: 321, channelUrl: "https://www.twitch.tv/live_user" },
-  ];
-  const html = renderToStaticMarkup(<PalworldStreamersPage
-    channels={channels}
-    error={false}
-    loading={false}
-    locale="ko"
-    onLogin={() => undefined}
-    onRefresh={() => undefined}
-    status={{ connected: true, configured: true, requiredScopes: [], missingScopes: [], user: { id: "viewer", login: "viewer", displayName: "Viewer" } }}
-    total={101}
-  />);
-  assert.match(html, /Live User[\s\S]*Offline User/u);
-  assert.match(html, /data-ko="LIVE"/u);
-  assert.match(html, /data-ko="오프라인"/u);
-  assert.match(html, /target="_blank" rel="noopener noreferrer"/u);
-  assert.match(html, /팔로우 채널 101/u);
-  assert.doesNotMatch(html, /Riot ID|랭크|전적 보기|구독 tier/u);
-});
+test("기술 해금 아이템은 레벨별로 묶이고 카드 전체에서 상세를 열 수 있다", () => {
+  const item: PalworldItemSummary = {
+    id: "technology-item",
+    nameKo: "상급 작업대",
+    nameJa: "上級作業台",
+    nameEn: "Advanced Workbench",
+    category: "building",
+    itemType: "valuable",
+    rarity: 2,
+    technologyLevel: 32,
+    acquisitionMethods: [],
+  };
+  const korean = renderToStaticMarkup(
+    <TechnologyUnlockCard item={item} locale="ko" onOpen={() => undefined} />,
+  );
+  const japanese = renderToStaticMarkup(
+    <TechnologyUnlockCard item={item} locale="ja" onOpen={() => undefined} />,
+  );
+  const groups = groupTechnologyUnlockItems([
+    item,
+    { ...item, id: "technology-item-2" },
+    { ...item, id: "technology-item-3", technologyLevel: 33 },
+  ]);
 
-test("Palworld 스트리머 화면은 loading·error·empty 상태를 구분한다", () => {
-  const status = { connected: true, configured: true, requiredScopes: [], missingScopes: [] };
-  const loading = renderToStaticMarkup(<PalworldStreamersPage channels={[]} error={false} loading locale="ja" onLogin={() => undefined} onRefresh={() => undefined} status={status} />);
-  const error = renderToStaticMarkup(<PalworldStreamersPage channels={[]} error loading={false} locale="ko" onLogin={() => undefined} onRefresh={() => undefined} status={{ ...status, connected: false, configured: false }} />);
-  const empty = renderToStaticMarkup(<PalworldStreamersPage channels={[]} error={false} loading={false} locale="ja" onLogin={() => undefined} onRefresh={() => undefined} status={status} />);
-  assert.match(loading, /aria-busy="true"/u);
-  assert.match(error, /role="alert"/u);
-  assert.match(empty, /フォロー中のチャンネルがありません/u);
-});
-
-test("Palworld 스트리머 화면은 미설정·미로그인·오프라인 전용 상태를 구분한다", () => {
-  const baseStatus = { connected: false, configured: false, requiredScopes: [], missingScopes: [] };
-  const notConfigured = renderToStaticMarkup(<PalworldStreamersPage channels={[]} error={false} loading={false} locale="ko" onLogin={() => undefined} onRefresh={() => undefined} status={baseStatus} />);
-  const loggedOut = renderToStaticMarkup(<PalworldStreamersPage channels={[]} error={false} loading={false} locale="ja" onLogin={() => undefined} onRefresh={() => undefined} status={{ ...baseStatus, configured: true }} />);
-  const offlineOnly = renderToStaticMarkup(<PalworldStreamersPage
-    channels={[{ twitchUserId: "offline", twitchLogin: "offline_user", twitchDisplayName: "Offline User", followedAt: "2026-07-22T00:00:00.000Z", isLive: false }]}
-    error={false}
-    loading={false}
-    locale="ko"
-    onLogin={() => undefined}
-    onRefresh={() => undefined}
-    status={{ ...baseStatus, connected: true, configured: true }}
-  />);
-  assert.match(notConfigured, /Twitch 기능이 설정되지 않았습니다/u);
-  assert.match(loggedOut, /Twitch ログインが必要です/u);
-  assert.match(offlineOnly, /현재 LIVE 방송이 없습니다/u);
-  assert.match(offlineOnly, /Offline User/u);
+  assert.match(korean, /data-testid="technology-unlock-card"/u);
+  assert.match(korean, /data-technology-level="32"/u);
+  assert.match(korean, /상급 작업대/u);
+  assert.match(korean, /aria-haspopup="dialog"/u);
+  assert.match(korean, /role="button"/u);
+  assert.match(japanese, /上級作業台/u);
+  assert.match(japanese, /上級作業台のテクノロジー解放アイテム詳細を見る/u);
+  assert.deepEqual(groups.map((group) => [group.level, group.items.map((groupItem) => groupItem.id)]), [
+    [32, ["technology-item", "technology-item-2"]],
+    [33, ["technology-item-3"]],
+  ]);
 });
 
 test("Pal 도감 상세 필터는 서버 facet만 아이콘·텍스트 단일 선택으로 렌더한다", () => {
@@ -850,6 +838,34 @@ test("현지화가 없는 아이템 카드는 영문 원문 Badge와 영어 이�
   assert.match(html, /data-rarity-band="common"/u);
 });
 
+test("기술 해금 레벨은 아이템 카드에서 숨기고 상세 정보에서만 표시한다", () => {
+  const card = renderToStaticMarkup(
+    <ItemCard
+      item={{
+        id: "technology-item",
+        nameKo: "기술 아이템",
+        nameJa: "技術アイテム",
+        nameEn: "Technology Item",
+        category: "other",
+        rarity: 1,
+        technologyLevel: 12,
+      }}
+      locale="ko"
+      onOpen={() => undefined}
+    />,
+  );
+  const detailSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldDetailModals.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.doesNotMatch(card, /기술 해금 레벨|Lv\.12|palworld-card-note/u);
+  assert.match(
+    detailSource,
+    /labelKo=\{palworldI18n\.ko\.technologyLevel\}[\s\S]*detail\.technologyLevel \?\? text\.none/u,
+  );
+});
+
 test("아이템 카드 이미지 영역은 레어도 단계별 디자인 상태를 제공한다", () => {
   const rarities = [
     [0, "common", "일반"],
@@ -878,6 +894,56 @@ test("아이템 카드 이미지 영역은 레어도 단계별 디자인 상태�
   const css = readFileSync(new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url), "utf8");
   assert.match(css, /data-rarity-band="epic"[\s\S]*--palworld-item-rarity-accent: var\(--yoro-color-secondary\)/u);
   assert.match(css, /data-rarity-band="legendary"[\s\S]*--palworld-item-rarity-accent: var\(--palworld-gold\)/u);
+});
+
+test("검증된 설계도는 설계도 이미지 위에 완성 아이템 이미지를 장식으로 합성한다", () => {
+  const blueprintImageUrl = `/images/palworld/1.0.1/items/${"b".repeat(64)}.webp`;
+  const targetImageUrl = `/images/palworld/1.0.1/items/${"c".repeat(64)}.webp`;
+  const blueprint = {
+    id: "test-blueprint",
+    nameKo: "시험용 검 설계도",
+    nameJa: "テスト剣の設計図",
+    nameEn: "Test Sword Schematic",
+    imageUrl: blueprintImageUrl,
+    imageWidth: 256,
+    imageHeight: 256,
+    category: "other" as const,
+    itemType: "blueprint" as const,
+    blueprintTarget: {
+      id: "test-sword",
+      nameKo: "시험용 검",
+      nameJa: "テスト剣",
+      nameEn: "Test Sword",
+      imageUrl: targetImageUrl,
+      imageWidth: 256,
+      imageHeight: 256,
+    },
+    rarity: 2,
+  };
+  const composite = renderToStaticMarkup(
+    <ItemCard item={blueprint} locale="ko" onOpen={() => undefined} />,
+  );
+  const unverified = renderToStaticMarkup(
+    <ItemCard
+      item={{
+        ...blueprint,
+        blueprintTarget: {
+          ...blueprint.blueprintTarget,
+          imageUrl: "https://example.com/unverified.webp",
+        },
+      }}
+      locale="ko"
+      onOpen={() => undefined}
+    />,
+  );
+
+  assert.match(composite, /class="palworld-item-media-composite is-blueprint"/u);
+  assert.match(composite, new RegExp(`src="${blueprintImageUrl}"`, "u"));
+  assert.match(composite, new RegExp(`class="palworld-blueprint-target-image"[\\s\\S]*src="${targetImageUrl}"`, "u"));
+  assert.match(composite, /alt="" aria-hidden="true" class="palworld-blueprint-target-image"/u);
+  assert.equal((composite.match(/<img/gu) ?? []).length, 2);
+  assert.doesNotMatch(unverified, /palworld-blueprint-target-image/u);
+  assert.equal((unverified.match(/<img/gu) ?? []).length, 1);
 });
 
 test("아이템 카드의 12분류는 legacy category보다 itemType을 우선해 locale별로 표시한다", () => {
@@ -1414,6 +1480,41 @@ test("이미지 없는 Pal은 카드 높이를 유지하는 한국어·일본어
   assert.match(korean, /aria-label="도로롱 · 이미지 준비 중"/);
   assert.match(korean, /data-ko="이미지 준비 중"/);
   assert.match(japanese, /aria-label="モコロン · 画像準備中"/);
+});
+
+test("모바일 상세 핸들은 한국어·일본어 닫기 동작과 reduced-motion 스타일을 제공한다", () => {
+  const korean = renderToStaticMarkup(
+    <PalworldMobileDismissHandle locale="ko" onDismiss={() => undefined} />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldMobileDismissHandle locale="ja" onDismiss={() => undefined} />,
+  );
+  const detailSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldDetailModals.tsx", import.meta.url),
+    "utf8",
+  );
+  const skillSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldSkillsPage.tsx", import.meta.url),
+    "utf8",
+  );
+  const css = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(korean, /aria-label="아래로 끌어 상세 보기 닫기"/u);
+  assert.match(korean, /data-testid="palworld-mobile-dismiss-handle"/u);
+  assert.match(japanese, /aria-label="下にスワイプして詳細を閉じる"/u);
+  assert.equal((detailSource.match(/<PalworldMobileDismissHandle/gu) ?? []).length, 2);
+  assert.equal((skillSource.match(/<PalworldMobileDismissHandle/gu) ?? []).length, 1);
+  assert.match(
+    css,
+    /\.palworld-detail-modal \.palworld-mobile-dismiss-handle\s*\{[\s\S]*?touch-action:\s*none;/u,
+  );
+  assert.match(
+    css,
+    /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.palworld-detail-modal \.yoro-modal__dialog\s*\{[\s\S]*?transition:\s*none;/u,
+  );
 });
 
 test("Pal 카드는 왼쪽 이미지·오른쪽 정보·하단 작업 적성 구조로 표시한다", () => {
@@ -2250,10 +2351,10 @@ test("페이지 상단 소개 문구는 숨기고 Pal·도감 번호·레벨 표
 
   const sources = [
     ["PalworldHome.tsx", ["homeKicker", "description"]],
-    ["PalworldStreamersPage.tsx", ["streamersKicker", "streamersDescription"]],
     ["PalworldPalsPage.tsx", ["palsKicker", "palsDescription"]],
     ["PalworldBreedingPage.tsx", ["breedingKicker", "breedingDescription"]],
     ["PalworldItemsPage.tsx", ["itemsKicker", "itemsDescription"]],
+    ["PalworldTechnologyPage.tsx", ["technologyKicker", "technologyDescription"]],
     ["PalworldSkillsPage.tsx", ["skillsKicker", "skillsDescription"]],
   ] as const;
   for (const [fileName, hiddenKeys] of sources) {
@@ -2269,10 +2370,14 @@ test("페이지 상단 소개 문구는 숨기고 Pal·도감 번호·레벨 표
     readFileSync(new URL("../src/features/public-palworld/components/PalworldCards.tsx", import.meta.url), "utf8"),
     readFileSync(new URL("../src/features/public-palworld/components/PalworldDetailModals.tsx", import.meta.url), "utf8"),
   ].join("\n");
+  const localizedLevelSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldPalLocationMap.tsx", import.meta.url),
+    "utf8",
+  );
   assert.match(searchForm, /text\.palEntityLabel/u);
   assert.doesNotMatch(searchForm, /· Pal/u);
-  assert.match(cardAndDetail, /text\.levelPrefix/u);
-  assert.doesNotMatch(cardAndDetail, /Lv\.\$\{/u);
+  assert.match(localizedLevelSource, /text\.levelPrefix/u);
+  assert.doesNotMatch(`${cardAndDetail}\n${localizedLevelSource}`, /Lv\.\$\{/u);
 });
 
 test("sitemap은 query 없는 Palworld 공개 base 경로를 모두 포함한다", () => {
@@ -2281,14 +2386,15 @@ test("sitemap은 query 없는 Palworld 공개 base 경로를 모두 포함한다
     "/palworld",
     "/palworld/pals",
     "/palworld/items",
+    "/palworld/technology",
     "/palworld/skills",
     "/palworld/breeding",
     "/palworld/map",
-    "/palworld/streamers",
   ]) {
     assert.match(sitemap, new RegExp(`<loc>https://yoro\\.gg${path}</loc>`, "u"), path);
   }
   assert.doesNotMatch(sitemap, /<loc>[^<]*\?/u);
+  assert.doesNotMatch(sitemap, /\/palworld\/streamers/u);
 });
 
 test("공통 footer는 정확한 한국어·일본어 비공식 출처 공지와 안전한 공식 링크를 렌더한다", () => {

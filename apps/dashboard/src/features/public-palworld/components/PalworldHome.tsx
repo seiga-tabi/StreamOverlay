@@ -19,7 +19,6 @@ export function PalworldHome({
   onOpenItem,
   onOpenPal,
   onSearch,
-  onShowStreamers,
   onTwitchLogin,
   twitchConfigured,
   twitchConnected,
@@ -33,7 +32,6 @@ export function PalworldHome({
   onOpenItem: (id: string) => void;
   onOpenPal: (id: string) => void;
   onSearch: (query: string) => void;
-  onShowStreamers: () => void;
   onTwitchLogin: () => void;
   twitchConfigured: boolean;
   twitchConnected: boolean;
@@ -65,7 +63,6 @@ export function PalworldHome({
       notConfiguredTitle={localizedText(locale, "twitchNotConfiguredTitle")}
       onLogin={onTwitchLogin}
       onRetry={onLiveRetry}
-      onViewAll={onShowStreamers}
       retryAction={localizedText(locale, "retryTwitch")}
       state={liveState}
       streamers={liveStreamers}

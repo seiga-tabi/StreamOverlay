@@ -43,6 +43,7 @@ const ITEM_LIST_QUERY_KEYS = new Set([
   "rarity",
   "rarityTier",
   "acquisition",
+  "technology",
   "sort",
   "order",
   "page",
@@ -111,6 +112,7 @@ export type PalworldItemListQuery = {
   rarity?: number;
   rarityTier?: (typeof PALWORLD_ITEM_RARITY_TIERS)[number];
   acquisition?: (typeof PALWORLD_ACQUISITION_TYPES)[number];
+  technology?: "unlockable";
   sort: (typeof PALWORLD_ITEM_SORTS)[number];
   order: PalworldSortOrder;
   page: number;
@@ -317,6 +319,7 @@ export function parsePalworldItemListQuery(params: URLSearchParams): PalworldIte
     rarity,
     rarityTier,
     acquisition: optionalEnum(params, "acquisition", PALWORLD_ACQUISITION_TYPES),
+    technology: optionalEnum(params, "technology", ["unlockable"] as const),
     sort: optionalEnum(params, "sort", PALWORLD_ITEM_SORTS) ?? "name",
     order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
     ...pagination(params, 24)

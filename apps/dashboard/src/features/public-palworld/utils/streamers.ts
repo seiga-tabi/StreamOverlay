@@ -23,7 +23,7 @@ function safeTwitchChannelUrl(channel: PublicTwitchFollowedLolChannel): string |
     : undefined;
 }
 
-export function uniqueFollowedTwitchChannels(
+function uniqueFollowedTwitchChannels(
   channels: readonly PublicTwitchFollowedLolChannel[],
 ): PublicTwitchFollowedLolChannel[] {
   const unique = new Map<string, PublicTwitchFollowedLolChannel>();
@@ -33,15 +33,6 @@ export function uniqueFollowedTwitchChannels(
     unique.set(id, channel);
   }
   return [...unique.values()];
-}
-
-export function sortedFollowedTwitchChannels(
-  channels: readonly PublicTwitchFollowedLolChannel[],
-): PublicTwitchFollowedLolChannel[] {
-  return uniqueFollowedTwitchChannels(channels).sort((left, right) => {
-    if (left.isLive !== right.isLive) return left.isLive ? -1 : 1;
-    return left.twitchDisplayName.localeCompare(right.twitchDisplayName);
-  });
 }
 
 export function palworldHomeLiveStreamerCards(
@@ -71,8 +62,4 @@ export function palworldHomeLiveStreamerCards(
         statusLabel: "LIVE",
       };
     });
-}
-
-export function twitchChannelUrl(channel: PublicTwitchFollowedLolChannel): string | undefined {
-  return safeTwitchChannelUrl(channel);
 }

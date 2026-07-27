@@ -1409,6 +1409,21 @@ test("아이템 summary는 rarity 0과 고정 버전 item content-hash WebP만 �
     assert.equal(validatePalworldItemSummary({ ...summary, imageUrl }).ok, false, imageUrl);
   }
   assert.equal(validatePalworldItemSummary({ ...summary, itemType: "unknown" }).ok, false);
+  assert.equal(validatePalworldItemSummary({
+    ...summary,
+    id: "pal-sphere-blueprint",
+    itemType: "blueprint",
+    blueprintTarget: itemReference
+  }).ok, true);
+  assert.equal(validatePalworldItemSummary({
+    ...summary,
+    blueprintTarget: itemReference
+  }).ok, false);
+  assert.equal(validatePalworldItemSummary({
+    ...summary,
+    itemType: "blueprint",
+    blueprintTarget: { ...itemReference, id: summary.id }
+  }).ok, false);
   assert.equal(validatePalworldItemSummary({ ...summary, rarity: -1 }).ok, false);
 });
 

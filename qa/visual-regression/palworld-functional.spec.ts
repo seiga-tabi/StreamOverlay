@@ -766,12 +766,14 @@ function filteredItems(url: URL): PalworldItemSummary[] {
   const category = url.searchParams.get("category");
   const rarity = url.searchParams.get("rarity");
   const acquisition = url.searchParams.get("acquisition");
+  const technology = url.searchParams.get("technology");
   const sort = url.searchParams.get("sort") ?? "name";
   return items
     .filter((item) => !query || matches(query, [...aliases(item.id), item.nameKo, item.nameJa, item.nameEn]))
     .filter((item) => !category || item.category === category)
     .filter((item) => !rarity || item.rarity === Number(rarity))
     .filter((item) => !acquisition || item.acquisitionMethods.some((method) => method.type === acquisition))
+    .filter((item) => technology !== "unlockable" || item.technologyLevel !== undefined)
     .sort((left, right) => {
       if (sort === "rarity") return left.rarity - right.rarity;
       if (sort === "price") return (left.sellPrice ?? Number.MAX_SAFE_INTEGER) - (right.sellPrice ?? Number.MAX_SAFE_INTEGER);
@@ -780,6 +782,53 @@ function filteredItems(url: URL): PalworldItemSummary[] {
     })
     .map(itemSummary);
 }
+
+test("기술 해금 페이지는 레벨 타임라인과 상세 연결을 PC·모바일에서 유지한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  const technologyItems = Array.from({ length: 12 }, (_, index): PalworldItemSummary => ({
+    ...itemSummary(items[0]!),
+    id: index === 0 ? "pal-sphere" : `technology-item-${index + 1}`,
+    nameKo: index === 0 ? "Pal 스피어" : `기술 아이템 ${index + 1}`,
+    nameJa: index === 0 ? "パルスフィア" : `テクノロジーアイテム ${index + 1}`,
+    nameEn: index === 0 ? "Pal Sphere" : `Technology Item ${index + 1}`,
+    technologyLevel: index < 8 ? 2 : 3,
+  }));
+  const technologyRequests: URL[] = [];
+  await page.route("**/api/palworld/items?*", async (route) => {
+    const url = new URL(route.request().url());
+    technologyRequests.push(url);
+    await json(route, pageResponse(technologyItems, url));
+  });
+
+  for (const viewport of [
+    { width: 1440, height: 1000, columns: 6 },
+    { width: 390, height: 844, columns: 2 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/palworld/technology");
+    await expect(page.getByTestId("technology-unlock-card")).toHaveCount(12);
+    await expect(page.getByText("기술 해금 아이템 12개")).toBeVisible();
+    await expect(page.locator(".palworld-technology-level-group")).toHaveCount(2);
+    await expect(page.locator(".palworld-technology-level-marker").first()).toHaveText("2");
+    await expect.poll(() => page.locator(".palworld-technology-level-grid").first().evaluate((element) =>
+      getComputedStyle(element).gridTemplateColumns.split(" ").length
+    )).toBe(viewport.columns);
+    await expect.poll(() => page.locator(".palworld-technology-level-marker").first().evaluate((element) =>
+      getComputedStyle(element).position
+    )).toBe("sticky");
+    await expect.poll(() => page.evaluate(() =>
+      document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
+    )).toBe(true);
+  }
+
+  expect(technologyRequests.every((url) =>
+    url.searchParams.get("technology") === "unlockable"
+    && url.searchParams.get("sort") === "technologyLevel"
+  )).toBe(true);
+  await page.getByRole("button", { name: "Pal 스피어 기술 해금 아이템 상세 보기" }).click();
+  await expect(page.getByTestId("item-detail-modal")).toContainText(/기술 해금 레벨\s*2/u);
+  await assertHealthyDocument(page, errors);
+});
 
 function filteredSkills(url: URL): PalworldSkillSummary[] {
   const query = url.searchParams.get("q");
@@ -1308,8 +1357,8 @@ test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고
   await assertHealthyDocument(page, errors);
 });
 
-test("LoL의 공개 Twitch session은 Palworld 프로필과 LIVE 목록에 그대로 연결된다", async ({ page }) => {
-  const fixture = await installConnectedTwitchFixtures(page);
+test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 그대로 연결된다", async ({ page }) => {
+  await installConnectedTwitchFixtures(page);
   const errors = collectRuntimeErrors(page);
   await page.goto("/");
   await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
@@ -1338,26 +1387,8 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 LIVE 목록에 그�
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Offline Pal", { exact: true })).toHaveCount(0);
   await expect(page.getByTestId("public-live-streamer-rail").getByText("중복 Live Pal", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("button", { name: "전체 보기" }).click();
-  await expect(page).toHaveURL(/\/palworld\/streamers$/u);
-  await expect(page.getByTestId("header-search")).toBeVisible();
-  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "스트리머" })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByTestId("palworld-streamer-list").locator(".palworld-streamer-card")).toHaveCount(2);
-  await expect(page.getByTestId("palworld-streamer-list").locator(".palworld-streamer-card").nth(0)).toContainText("Live Pal");
-  await expect(page.getByTestId("palworld-streamer-list")).toContainText("Offline Pal");
-  await expect(page.getByText("팔로우 채널 2")).toBeVisible();
   await expect(page.getByText(/Riot ID|랭크|전적 보기/u)).toHaveCount(0);
-
-  const beforeRefresh = fixture.followedRequestCount();
-  await page.getByRole("button", { name: "새로고침" }).evaluate((button: HTMLButtonElement) => {
-    button.click();
-    button.click();
-  });
-  await expect.poll(() => fixture.followedRequestCount()).toBe(beforeRefresh + 1);
-  await page.goBack();
-  await expect(page).toHaveURL(/\/palworld$/u);
-  await page.goForward();
-  await expect(page).toHaveURL(/\/palworld\/streamers$/u);
+  await expect(page.getByRole("button", { name: "전체 보기" })).toHaveCount(0);
   await assertHealthyDocument(page, errors);
 });
 
@@ -1373,14 +1404,14 @@ test("Palworld 하위 데이터 페이지는 Twitch 상태만 조회하고 홈 �
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
 });
 
-test("Twitch 상태 API 오류는 미설정으로 오표시하지 않고 Palworld 검색과 분리된다", async ({ page }) => {
+test("Twitch 상태 API 오류는 미설정으로 오표시하지 않고 Palworld 홈 검색과 분리된다", async ({ page }) => {
   await page.route("**/api/public/twitch/status", async (route) => {
     await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "unavailable" }) });
   });
-  await page.goto("/palworld/streamers");
-  await expect(page.getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
+  await page.goto("/palworld");
+  await expect(page.getByTestId("public-live-streamer-rail").getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
   await expect(page.getByText("Twitch 기능이 설정되지 않았습니다.")).toHaveCount(0);
-  const search = page.getByTestId("header-search").getByRole("searchbox");
+  const search = page.getByTestId("hero-search").getByRole("searchbox");
   await search.fill("펭킹");
   await expect(page.getByTestId("header-search").getByRole("option", { name: /펭킹/u })).toBeVisible();
 });
@@ -1540,14 +1571,72 @@ test("Palworld OAuth marker는 기존 검색 query를 보존해 제거하고 현
   expect(returnTo).toBe(`/palworld/search?q=${encodeURIComponent("아누비스")}`);
 });
 
+test("모바일 Pal·아이템·스킬 상세는 핸들 드래그로 복귀하거나 닫힌다", async ({ page }) => {
+  const mobileViewport = (page.viewportSize()?.width ?? 0) <= 768;
+  await page.goto("/palworld/pals?pal=anubis");
+  const palModal = page.getByTestId("pal-detail-modal");
+  const palDialog = palModal.locator(".yoro-modal__dialog");
+  const palHandle = palModal.getByTestId("palworld-mobile-dismiss-handle");
+  await expect(palModal).toBeVisible();
+
+  if (!mobileViewport) {
+    await expect(palHandle).toBeHidden();
+    await palModal.getByRole("button", { name: "닫기" }).click();
+    await expect(palModal).toHaveCount(0);
+    return;
+  }
+
+  await expect(palHandle).toBeVisible();
+  await expect(palHandle).toHaveAttribute("aria-label", "아래로 끌어 상세 보기 닫기");
+  const handleBox = await palHandle.boundingBox();
+  expect(handleBox).not.toBeNull();
+
+  async function dragHandle(distance: number): Promise<void> {
+    const box = await palHandle.boundingBox();
+    expect(box).not.toBeNull();
+    const x = box!.x + box!.width / 2;
+    const y = box!.y + box!.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y + distance, { steps: 6 });
+    await page.mouse.up();
+  }
+
+  await dragHandle(24);
+  await expect(palModal).toBeVisible();
+  await expect.poll(() => palDialog.evaluate((element) => {
+    const transform = window.getComputedStyle(element).transform;
+    return transform === "none" ? 0 : new DOMMatrix(transform).m42;
+  })).toBeLessThanOrEqual(1);
+
+  await dragHandle(140);
+  await expect(palModal).toHaveCount(0);
+  await expect.poll(() => new URL(page.url()).searchParams.has("pal")).toBe(false);
+
+  await page.goto("/palworld/items?item=pal_sphere");
+  const itemModal = page.getByTestId("item-detail-modal");
+  const itemHandle = itemModal.getByTestId("palworld-mobile-dismiss-handle");
+  await expect(itemHandle).toBeVisible();
+  await itemHandle.click();
+  await expect(itemModal).toBeVisible();
+  await itemHandle.focus();
+  await page.keyboard.press("Enter");
+  await expect(itemModal).toHaveCount(0);
+
+  await page.goto("/palworld/skills?skill=active-ground-stone-blast-30-2");
+  await expect(
+    page.getByTestId("skill-detail-modal").getByTestId("palworld-mobile-dismiss-handle"),
+  ).toBeVisible();
+});
+
 test("Palworld OAuth callback 표시 후 공유 Twitch 상태를 재조회하고 marker만 제거한다", async ({ page }) => {
   const fixture = await installConnectedTwitchFixtures(page);
-  await page.goto("/palworld/streamers?view=all&viewer_twitch=connected");
+  await page.goto("/palworld/technology?order=desc&viewer_twitch=connected");
   await expect(page.getByRole("button", { name: "Pal Viewer" })).toBeVisible();
   await expect.poll(() => fixture.statusRequestCount()).toBeGreaterThanOrEqual(2);
   const currentUrl = new URL(page.url());
-  expect(currentUrl.pathname).toBe("/palworld/streamers");
-  expect(currentUrl.searchParams.get("view")).toBe("all");
+  expect(currentUrl.pathname).toBe("/palworld/technology");
+  expect(currentUrl.searchParams.get("order")).toBe("desc");
   expect(currentUrl.searchParams.has("viewer_twitch")).toBe(false);
 });
 
@@ -2973,10 +3062,10 @@ test("PC 화면에서 모든 펠월드 페이지 본문을 중앙 정렬한다",
   await page.setViewportSize({ width: 1440, height: 1000 });
   const routes = [
     "/palworld",
-    "/palworld/streamers",
     "/palworld/pals",
     "/palworld/breeding",
     "/palworld/items",
+    "/palworld/technology",
     "/palworld/skills",
     "/palworld/map",
     `/palworld/search?q=${encodeURIComponent("아누비스")}`,
@@ -2997,10 +3086,10 @@ test("PC 화면에서 모든 펠월드 페이지 본문을 중앙 정렬한다",
 test("모든 Palworld 공개 경로 하단에 한국어·일본어 비공식 출처 공지를 표시한다", async ({ page }) => {
   const routes = [
     "/palworld",
-    "/palworld/streamers",
     "/palworld/pals",
     "/palworld/breeding",
     "/palworld/items",
+    "/palworld/technology",
     "/palworld/skills",
     "/palworld/map",
     `/palworld/search?q=${encodeURIComponent("아누비스")}`,
@@ -3395,18 +3484,6 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
     );
     expect(productToolsOverlap, `${viewport.width}px에서 게임 선택과 헤더 도구가 겹치지 않아야 합니다.`).toBe(false);
     await expect(page.getByTestId("public-live-streamer-rail").locator(".public-home-live-card")).toHaveCount(1);
-    await assertHealthyDocument(page, errors);
-
-    await page.getByRole("button", { name: "전체 보기" }).click();
-    const streamerCards = page.getByTestId("palworld-streamer-list").locator(".palworld-streamer-card");
-    await expect(streamerCards).toHaveCount(2);
-    await expect(streamerCards.first()).not.toHaveAttribute("tabindex");
-    await expect(streamerCards.last()).not.toHaveAttribute("tabindex");
-    const watchLinks = page.getByTestId("palworld-streamer-list").getByRole("link", { name: "방송 보기" });
-    await watchLinks.first().focus();
-    await expect(watchLinks.first()).toBeFocused();
-    await watchLinks.last().focus();
-    await expect(watchLinks.last()).toBeFocused();
     await assertHealthyDocument(page, errors);
 
     const secondaryRow = page.locator(".palworld-secondary-row");

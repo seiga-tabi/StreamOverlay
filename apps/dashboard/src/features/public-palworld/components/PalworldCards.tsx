@@ -12,7 +12,7 @@ import {
 } from "../utils/labels";
 import { resolvePalworldDescription, resolvePalworldName } from "../utils/localization";
 import { PalworldElementBadge } from "./PalworldElementBadge";
-import { PalworldMedia } from "./PalworldMedia";
+import { PalworldItemMedia, PalworldMedia } from "./PalworldMedia";
 import { PalworldTranslationBadges } from "./PalworldTranslationBadge";
 import { PalworldWorkSuitabilityBadge } from "./PalworldWorkSuitabilityBadge";
 
@@ -115,7 +115,7 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
   const rarityLabel = itemRarityLabel(item.rarity, locale);
   return (
     <Card className="palworld-entity-card palworld-item-card" variant="interactive" padding="none" data-testid="item-card">
-      <div className="palworld-entity-media" data-rarity-band={itemRarityBand(item.rarity)}><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={displayName} locale={locale} priority={priority} {...imageDimensions(item)} /></div>
+      <div className="palworld-entity-media" data-rarity-band={itemRarityBand(item.rarity)}><PalworldItemMedia alt={displayName} item={item} locale={locale} priority={priority} /></div>
       <CardContent>
         <div className="palworld-card-kicker"><Badge size="sm" tone="info">{item.itemType ? itemTypeLabel(item.itemType, locale) : categoryLabel(item.category, locale)}</Badge><Badge data-ja={itemRarityLabel(item.rarity, "ja")} data-ko={itemRarityLabel(item.rarity, "ko")} size="sm" tone={itemRarityTone(item.rarity)}>{rarityLabel}</Badge></div>
         <h3 title={displayName}>{displayName}</h3>
@@ -126,7 +126,6 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
           statuses={[name.status, description.status]}
         />
         <p className="palworld-card-description palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
-        {item.technologyLevel !== undefined ? <p className="palworld-card-note">{text.technologyLevel} · {text.levelPrefix}{item.technologyLevel}</p> : null}
       </CardContent>
       <Button
         aria-haspopup="dialog"

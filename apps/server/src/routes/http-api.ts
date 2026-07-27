@@ -1046,10 +1046,10 @@ function publicLolReturnUrlForRequest(req: IncomingMessage): string {
 
 const PUBLIC_TWITCH_PALWORLD_RETURN_PATHS = new Set([
   "/palworld",
-  "/palworld/streamers",
   "/palworld/pals",
   "/palworld/breeding",
   "/palworld/items",
+  "/palworld/technology",
   "/palworld/skills",
   "/palworld/map",
   "/palworld/search"
@@ -1619,10 +1619,6 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
       title: "펠월드 데이터베이스 | YORO.gg",
       description: "Pal, 아이템, 스킬과 교배 정보를 한곳에서 확인하세요."
     },
-    "/palworld/streamers": {
-      title: "팔로우 중인 스트리머 | YORO.gg",
-      description: "Twitch에서 팔로우 중인 채널의 현재 방송 상태를 확인하세요."
-    },
     "/palworld/pals": {
       title: "Pal 도감 | YORO.gg",
       description: "Palworld Pal의 속성, 능력치, 작업 적성과 상세 정보를 확인하세요."
@@ -1634,6 +1630,10 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
     "/palworld/items": {
       title: "아이템 | YORO.gg",
       description: "Palworld 아이템의 분류, 제작 재료와 상세 정보를 확인하세요."
+    },
+    "/palworld/technology": {
+      title: "Palworld 기술 해금 | YORO.gg",
+      description: "기술 레벨별로 해금되는 Palworld 아이템을 확인하세요."
     },
     "/palworld/skills": {
       title: "Palworld 스킬 | YORO.gg",

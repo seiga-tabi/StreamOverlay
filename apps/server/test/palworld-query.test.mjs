@@ -56,16 +56,21 @@ test("아이템 목록 query는 허용된 필터와 정렬을 해석한다", () 
     PalworldQueryError
   );
   const classified = parsePalworldItemListQuery(new URLSearchParams(
-    "itemType=sphere_module&rarityTier=legendary"
+    "itemType=sphere_module&rarityTier=legendary&technology=unlockable"
   ));
   assert.equal(classified.itemType, "sphere_module");
   assert.equal(classified.rarityTier, "legendary");
+  assert.equal(classified.technology, "unlockable");
   assert.throws(
     () => parsePalworldItemListQuery(new URLSearchParams("rarity=4&rarityTier=legendary")),
     PalworldQueryError
   );
   assert.throws(
     () => parsePalworldItemListQuery(new URLSearchParams("rarityTier=unknown")),
+    PalworldQueryError
+  );
+  assert.throws(
+    () => parsePalworldItemListQuery(new URLSearchParams("technology=unknown")),
     PalworldQueryError
   );
 });

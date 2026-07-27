@@ -9,10 +9,10 @@ import { palworldPathForPage, setPalworldUrl, type PalworldPage } from "../utils
 
 const navItems: Array<{ page: Exclude<PalworldPage, "search">; ko: string; ja: string }> = [
   { page: "home", ko: palworldI18n.ko.home, ja: palworldI18n.ja.home },
-  { page: "streamers", ko: palworldI18n.ko.streamers, ja: palworldI18n.ja.streamers },
   { page: "pals", ko: palworldI18n.ko.pals, ja: palworldI18n.ja.pals },
   { page: "breeding", ko: palworldI18n.ko.breeding, ja: palworldI18n.ja.breeding },
   { page: "items", ko: palworldI18n.ko.items, ja: palworldI18n.ja.items },
+  { page: "technology", ko: palworldI18n.ko.technology, ja: palworldI18n.ja.technology },
   { page: "skills", ko: palworldI18n.ko.skills, ja: palworldI18n.ja.skills },
   { page: "map", ko: palworldI18n.ko.map, ja: palworldI18n.ja.map },
 ];

@@ -112,6 +112,23 @@ function publicItemType(
   );
 }
 
+export function resolvePalworldBlueprintTargetSourceInternalId(
+  blueprintSourceInternalId: string,
+  targetSourceInternalIds: ReadonlySet<string>
+): string | undefined {
+  const prefix = "Blueprint_";
+  if (!blueprintSourceInternalId.startsWith(prefix)) return undefined;
+
+  let candidate = blueprintSourceInternalId.slice(prefix.length);
+  while (candidate.length > 0) {
+    if (targetSourceInternalIds.has(candidate)) return candidate;
+    const separator = candidate.lastIndexOf("_");
+    if (separator < 0) return undefined;
+    candidate = candidate.slice(0, separator);
+  }
+  return undefined;
+}
+
 export class PalworldCatalogAdapterError extends Error {
   readonly code = "PALWORLD_CATALOG_ADAPTER_INVALID";
 
@@ -540,6 +557,12 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     item.id,
     catalogItemReference(item, localizedItemsById.get(item.id), assetAvailability.items, translationIndex)
   ]));
+  const nonBlueprintItemsBySourceInternalId = new Map(
+    catalog.items.flatMap((item) =>
+      publicItemType(item) === "blueprint" ? [] : [[item.sourceInternalId, item] as const]
+    )
+  );
+  const nonBlueprintSourceInternalIds = new Set(nonBlueprintItemsBySourceInternalId.keys());
   const skillSourceById = new Map(catalog.skills.map((skill) => [skill.id, skill]));
   if (input.passiveEffectsBySkillId !== undefined) {
     for (const [skillId, resolution] of input.passiveEffectsBySkillId) {
@@ -734,6 +757,19 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
   const items: PalworldItemDetail[] = catalog.items.map((item) => {
     const localized = localizedItemsById.get(item.id);
     const reference = itemReferences.get(item.id)!;
+    const itemType = publicItemType(item);
+    const blueprintTargetSourceInternalId = itemType === "blueprint"
+      ? resolvePalworldBlueprintTargetSourceInternalId(
+          item.sourceInternalId,
+          nonBlueprintSourceInternalIds
+        )
+      : undefined;
+    const blueprintTargetItem = blueprintTargetSourceInternalId === undefined
+      ? undefined
+      : nonBlueprintItemsBySourceInternalId.get(blueprintTargetSourceInternalId);
+    const blueprintTarget = blueprintTargetItem === undefined
+      ? undefined
+      : itemReferences.get(blueprintTargetItem.id);
     const descriptionKoTranslation = translatedField(translationIndex, "ko", "item", item.id, "description");
     const descriptionJaTranslation = translatedField(translationIndex, "ja", "item", item.id, "description");
     const materials = item.craftingMaterials.map((material) => {
@@ -753,7 +789,8 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       ...reference,
       sourceInternalId: item.sourceInternalId,
       category: item.category as PalworldItemCategory,
-      itemType: publicItemType(item),
+      itemType,
+      ...(blueprintTarget === undefined ? {} : { blueprintTarget }),
       rarity: item.rarity,
       ...(descriptionKoTranslation?.text === undefined && localized?.descriptionKo === undefined ? {} : {
         descriptionKo: descriptionKoTranslation?.text ?? localized!.descriptionKo!

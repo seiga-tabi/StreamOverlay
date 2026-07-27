@@ -5,7 +5,7 @@ const PALWORLD_PUBLIC_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/u;
 const PALWORLD_CONDENSATION_STAR_VALUES = new Set(["0", "1", "2", "3", "4"]);
 const PALWORLD_SPAWN_PERIOD_VALUES = new Set(["all", "day", "night"]);
 
-export type PalworldPage = "home" | "streamers" | "pals" | "breeding" | "items" | "skills" | "map" | "search";
+export type PalworldPage = "home" | "pals" | "breeding" | "items" | "technology" | "skills" | "map" | "search";
 export type PalworldSpawnPeriod = "all" | "day" | "night";
 export type PalworldDetailSelection =
   | { type: "pal"; id: string }
@@ -14,10 +14,10 @@ export type PalworldDetailSelection =
 
 const PAGE_PATHS: Record<PalworldPage, string> = {
   home: "/palworld",
-  streamers: "/palworld/streamers",
   pals: "/palworld/pals",
   breeding: "/palworld/breeding",
   items: "/palworld/items",
+  technology: "/palworld/technology",
   skills: "/palworld/skills",
   map: "/palworld/map",
   search: "/palworld/search",

@@ -575,6 +575,7 @@ export type PalworldPalDetail = PalworldPalSummary & {
 export type PalworldItemSummary = PalworldItemReference & {
   category: PalworldItemCategory;
   itemType?: PalworldItemFilterCategory;
+  blueprintTarget?: PalworldItemReference;
   rarity: number;
   descriptionKo?: string;
   descriptionJa?: string;
@@ -2608,6 +2609,7 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
     "localization",
     "category",
     "itemType",
+    "blueprintTarget",
     "rarity",
     "descriptionKo",
     "descriptionJa",
@@ -2644,6 +2646,19 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
       PALWORLD_ITEM_FILTER_CATEGORIES
     );
     if (!itemType.ok) return itemType;
+  }
+  if (candidate.blueprintTarget !== undefined) {
+    if (candidate.itemType !== "blueprint") {
+      return invalid(`${path}.blueprintTarget`, "설계도 아이템에만 완성 아이템 참조를 포함할 수 있습니다.");
+    }
+    const blueprintTarget = validateItemReferenceAt(
+      candidate.blueprintTarget,
+      `${path}.blueprintTarget`
+    );
+    if (!blueprintTarget.ok) return blueprintTarget;
+    if (blueprintTarget.data.id === candidate.id) {
+      return invalid(`${path}.blueprintTarget.id`, "설계도 자신을 완성 아이템으로 참조할 수 없습니다.");
+    }
   }
   const rarity = integerAt(candidate.rarity, `${path}.rarity`, 0, MAX_RARITY);
   if (!rarity.ok) return rarity;
@@ -2859,6 +2874,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
     "localization",
     "category",
     "itemType",
+    "blueprintTarget",
     "rarity",
     "descriptionKo",
     "descriptionJa",
@@ -2894,6 +2910,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
       ...(candidate.localization === undefined ? {} : { localization: candidate.localization }),
       category: candidate.category,
       ...(candidate.itemType === undefined ? {} : { itemType: candidate.itemType }),
+      ...(candidate.blueprintTarget === undefined ? {} : { blueprintTarget: candidate.blueprintTarget }),
       rarity: candidate.rarity,
       descriptionKo: candidate.descriptionKo,
       descriptionJa: candidate.descriptionJa,
@@ -5429,6 +5446,27 @@ export function validatePalworldDataSnapshot(value: unknown): PalworldValidation
         `snapshot.items[${index}].imageUrl`,
         "아이템 이미지 경로 버전은 snapshot metadata.gameVersion과 같아야 합니다."
       );
+    }
+    if (item.blueprintTarget !== undefined) {
+      const canonicalItem = itemsById.get(item.blueprintTarget.id);
+      if (!canonicalItem) {
+        return invalid(
+          `snapshot.items[${index}].blueprintTarget`,
+          `존재하지 않는 완성 아이템 참조입니다: ${item.blueprintTarget.id}`
+        );
+      }
+      if (canonicalItem.itemType === "blueprint") {
+        return invalid(
+          `snapshot.items[${index}].blueprintTarget`,
+          "완성 아이템은 다른 설계도를 참조할 수 없습니다."
+        );
+      }
+      const reference = validateCanonicalItemReferenceAt(
+        item.blueprintTarget,
+        canonicalItem,
+        `snapshot.items[${index}].blueprintTarget`
+      );
+      if (!reference.ok) return reference;
     }
     for (const [materialIndex, material] of item.craftingMaterials.entries()) {
       const canonicalItem = itemsById.get(material.item.id);

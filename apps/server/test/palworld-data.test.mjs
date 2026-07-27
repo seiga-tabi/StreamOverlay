@@ -424,6 +424,38 @@ test("아이템 목록은 종류, 획득 방식, 희귀도와 정렬을 적용�
     limit: 10
   });
   assert.equal(sourceInternalId.items.some((item) => item.id === "pal-sphere"), true);
+
+  const blueprint = service.listItems({
+    q: "Blueprint_Accessory_AquaResist_1_2",
+    itemType: "blueprint",
+    sort: "name",
+    order: "asc",
+    page: 1,
+    limit: 10
+  }).items.find((item) => item.blueprintTarget !== undefined);
+  assert.ok(blueprint?.blueprintTarget);
+  assert.deepEqual(
+    service.getItem(blueprint.id).blueprintTarget,
+    blueprint.blueprintTarget
+  );
+});
+
+test("기술 해금 목록은 검증된 기술 레벨이 있는 아이템만 레벨순으로 반환한다", () => {
+  const response = service.listItems({
+    technology: "unlockable",
+    sort: "technologyLevel",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(response.pagination.total > 0, true);
+  assert.equal(response.items.every((item) => item.technologyLevel !== undefined), true);
+  assert.deepEqual(
+    response.items.map((item) => item.technologyLevel),
+    [...response.items]
+      .map((item) => item.technologyLevel)
+      .sort((left, right) => left - right)
+  );
 });
 
 test("아이템 공개 분류는 sourceCategory 기준 12종으로 모든 runtime 아이템을 빠짐없이 분류한다", () => {

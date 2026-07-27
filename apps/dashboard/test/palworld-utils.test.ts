@@ -75,7 +75,7 @@ import {
   palworldSpawnPointRadius,
   summarizePalworldSpawnPoints,
 } from "../src/features/public-palworld/utils/spawns";
-import { palworldHomeLiveStreamerCards, sortedFollowedTwitchChannels } from "../src/features/public-palworld/utils/streamers";
+import { palworldHomeLiveStreamerCards } from "../src/features/public-palworld/utils/streamers";
 import { getPublicTwitchFollowedChannels, getPublicTwitchStatus, logoutPublicTwitch, publicTwitchLoginUrl } from "../src/features/public-twitch/api";
 import { applyPalworldCondensationStage } from "../src/features/public-palworld/components/PalworldPalCondensation";
 import { buildPalworldPalStatRows } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
@@ -205,7 +205,7 @@ test("지도 광물 source subtype은 이름 추측 없이 10개 공개 필터�
 
 test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한다", () => {
   assert.equal(palworldPageFromPath("/palworld"), "home");
-  assert.equal(palworldPageFromPath("/palworld/streamers"), "streamers");
+  assert.equal(palworldPageFromPath("/palworld/technology"), "technology");
   assert.equal(palworldPageFromPath("/palworld/pals/"), "pals");
   assert.equal(palworldPageFromPath("/palworld/breeding"), "breeding");
   assert.equal(palworldPageFromPath("/palworld/items"), "items");
@@ -213,7 +213,7 @@ test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(palworldPageFromPath("/palworld/map"), "map");
   assert.equal(palworldPageFromPath("/palworld/search"), "search");
   assert.equal(palworldPathForPage("pals"), "/palworld/pals");
-  assert.equal(palworldPathForPage("streamers"), "/palworld/streamers");
+  assert.equal(palworldPathForPage("technology"), "/palworld/technology");
   assert.equal(palworldPathForPage("map"), "/palworld/map");
   assert.equal(palworldPathForPage("skills"), "/palworld/skills");
   assert.equal(palworldUrl("search", new URLSearchParams({ q: "아누비스" })), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
@@ -222,6 +222,8 @@ test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(isPalworldPath("/lol/summoners/jp/test-JP1"), false);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding"), true);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding/"), true);
+  assert.equal(isKnownPalworldPagePath("/palworld/streamers"), false);
+  assert.equal(palworldPageFromPath("/palworld/streamers"), "home");
   assert.equal(isKnownPalworldPagePath("/palworld/not-a-page"), false);
 });
 
@@ -311,12 +313,12 @@ test("Pal 도감 목록 API는 전체 facet 응답만 허용하고 잘못된 fac
 
 test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query만 보존한다", () => {
   assert.equal(palworldTwitchReturnTo("/palworld", ""), "/palworld");
-  assert.equal(palworldTwitchReturnTo("/palworld/streamers", "?view=all"), "/palworld/streamers?view=all");
+  assert.equal(palworldTwitchReturnTo("/palworld/technology", "?order=desc"), "/palworld/technology?order=desc");
   assert.equal(palworldTwitchReturnTo("/palworld/map", ""), "/palworld/map");
   assert.equal(palworldTwitchReturnTo("/palworld/skills", "?type=active"), "/palworld/skills?type=active");
   assert.equal(palworldTwitchReturnTo("/palworld/search", "?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4&viewer_twitch=connected"), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
   assert.equal(palworldTwitchReturnTo("//evil.example", "?q=x"), "/palworld");
-  assert.equal(palworldTwitchReturnTo("/palworld\\streamers", ""), "/palworld");
+  assert.equal(palworldTwitchReturnTo("/palworld\\technology", ""), "/palworld");
   assert.match(publicTwitchLoginUrl("/palworld/search?q=Pal"), /\/api\/public\/twitch\/auth\/start\?return_to=%2Fpalworld%2Fsearch%3Fq%3DPal$/u);
 });
 
@@ -570,10 +572,6 @@ test("Palworld LIVE 목록은 Twitch user ID로 중복 제거하고 LIVE만 최�
   assert.equal(cards[0]?.primaryMeta, "Palworld");
   assert.match(cards[0]?.secondaryMeta ?? "", /방송 0 · 0명 시청/u);
   assert.equal(cards.some((card) => card.id === "user-13"), false);
-
-  const sorted = sortedFollowedTwitchChannels([channels.at(-1)!, channels[2]]);
-  assert.equal(sorted[0]?.isLive, true);
-  assert.equal(sorted.at(-1)?.isLive, false);
 });
 
 test("공개 Twitch 상태·팔로우·로그아웃 요청은 공유 session cookie를 포함한다", async () => {
@@ -874,6 +872,7 @@ test("Palworld API client는 network·timeout·손상 응답을 결과 없음과
 test("Palworld SEO metadata는 locale과 route를 반영하고 상세 query 대신 base page를 canonical로 사용한다", () => {
   const koreanHome = palworldSeoMetadata("home", "ko");
   const japaneseBreeding = palworldSeoMetadata("breeding", "ja");
+  const technology = palworldSeoMetadata("technology", "ko");
   const search = palworldSeoMetadata("search", "ko");
   assert.equal(koreanHome.canonicalUrl, "https://yoro.gg/palworld");
   assert.match(koreanHome.title, /펠월드 데이터베이스/u);
@@ -881,6 +880,8 @@ test("Palworld SEO metadata는 locale과 route를 반영하고 상세 query 대�
   assert.equal(japaneseBreeding.canonicalUrl, "https://yoro.gg/palworld/breeding");
   assert.match(japaneseBreeding.title, /配合組み合わせ/u);
   assert.match(japaneseBreeding.description, /親/u);
+  assert.equal(technology.canonicalUrl, "https://yoro.gg/palworld/technology");
+  assert.match(technology.title, /기술 해금/u);
   assert.equal(search.canonicalUrl, "https://yoro.gg/palworld/search");
   assert.doesNotMatch(search.canonicalUrl, /\?/u);
 });

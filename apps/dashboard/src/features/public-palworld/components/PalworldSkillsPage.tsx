@@ -34,6 +34,7 @@ import { setPalworldUrl } from "../utils/routes";
 import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import { PalworldPreviousLoadControl } from "./PalworldPreviousLoadControl";
 import { PalworldMedia } from "./PalworldMedia";
+import { PalworldMobileDismissHandle } from "./PalworldMobileDismissHandle";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import {
   PalworldSkillsFilters,
@@ -339,6 +340,7 @@ export function SkillDetailModal({ locale, onClose, onOpenPal, skillId }: { loca
   }, [revision, skillId]);
 
   return <Modal open={Boolean(skillId)} onClose={onClose} size="lg" className="palworld-detail-modal" data-testid="skill-detail-modal">
+    <PalworldMobileDismissHandle locale={locale} onDismiss={onClose} />
     <ModalHeader><ModalTitle>{detail ? skillName(detail, locale) : text.details}</ModalTitle><ModalCloseButton aria-label={text.close}>×</ModalCloseButton></ModalHeader>
     <ModalContent>
       {!detail && !error ? <SkeletonCard loadingLabel={text.loading} /> : null}

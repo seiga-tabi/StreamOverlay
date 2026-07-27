@@ -14,10 +14,10 @@ export function palworldSeoMetadata(page: PalworldPage, locale: PalworldLocale):
   const route = page === "search" ? "search" : page;
   const values: Record<PalworldPage, { description: string; title: string }> = {
     home: { title: text.brand, description: text.description },
-    streamers: { title: text.streamersTitle, description: text.streamersDescription },
     pals: { title: text.pals, description: text.palsDescription },
     breeding: { title: text.breeding, description: text.breedingDescription },
     items: { title: text.items, description: text.itemsDescription },
+    technology: { title: text.technologyTitle, description: text.technologyDescription },
     skills: { title: text.skillsTitle, description: text.skillsDescription },
     map: { title: text.mapTitle, description: text.mapDescription },
     search: { title: text.searchResults, description: text.searchDescription },

@@ -351,6 +351,9 @@ function itemSummary(item: PalworldItemDetail): PalworldItemSummary {
     ...(item.translation === undefined ? {} : { translation: structuredClone(item.translation) }),
     category: item.category,
     ...(item.itemType === undefined ? {} : { itemType: item.itemType }),
+    ...(item.blueprintTarget === undefined ? {} : {
+      blueprintTarget: structuredClone(item.blueprintTarget)
+    }),
     rarity: item.rarity,
     ...(item.descriptionKo === undefined ? {} : { descriptionKo: item.descriptionKo }),
     ...(item.descriptionJa === undefined ? {} : { descriptionJa: item.descriptionJa }),
@@ -1035,6 +1038,7 @@ export class PalworldDataService {
       query.rarity ?? "",
       query.rarityTier ?? "",
       query.acquisition ?? "",
+      query.technology ?? "",
       query.sort,
       query.order,
       query.locale ?? "en"
@@ -1056,6 +1060,7 @@ export class PalworldDataService {
         return item.rarity === 4;
       })
       .filter((item) => query.acquisition === undefined || item.acquisitionMethods.some((method) => method.type === query.acquisition))
+      .filter((item) => query.technology !== "unlockable" || item.technologyLevel !== undefined)
       .sort((left, right) => {
         if (query.sort === "price") {
           return compareOptionalNumber(left.sellPrice, right.sellPrice, query.order)

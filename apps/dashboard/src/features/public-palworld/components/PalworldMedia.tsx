@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { PalworldItemSummary } from "@streamops/shared";
 import type { PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldI18n } from "../i18n/palworld-i18n";
 
@@ -66,4 +67,84 @@ export function PalworldMedia({
     onError={() => setFailed(true)}
     width={width}
   />;
+}
+
+function PalworldBlueprintTargetImage({
+  imageHeight,
+  imageUrl,
+  imageWidth,
+  priority,
+}: {
+  imageHeight?: number;
+  imageUrl: string;
+  imageWidth?: number;
+  priority: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [imageUrl]);
+
+  if (failed) return null;
+  return (
+    <img
+      {...{ fetchpriority: priority ? "high" : "auto" }}
+      alt=""
+      aria-hidden="true"
+      className="palworld-blueprint-target-image"
+      decoding="async"
+      height={Number.isInteger(imageHeight) && (imageHeight ?? 0) > 0 ? imageHeight : 256}
+      loading={priority ? "eager" : "lazy"}
+      onError={() => setFailed(true)}
+      src={imageUrl}
+      width={Number.isInteger(imageWidth) && (imageWidth ?? 0) > 0 ? imageWidth : 256}
+    />
+  );
+}
+
+export function PalworldItemMedia({
+  alt,
+  item,
+  locale,
+  priority = false,
+}: {
+  alt: string;
+  item: PalworldItemSummary;
+  locale: PalworldLocale;
+  priority?: boolean;
+}) {
+  const target = item.itemType === "blueprint" ? item.blueprintTarget : undefined;
+  const targetImageUrl = isLocalPalworldImageUrl(target?.imageUrl, "item")
+    ? target.imageUrl
+    : undefined;
+  const hasBlueprintComposition = isLocalPalworldImageUrl(item.imageUrl, "item")
+    && targetImageUrl !== undefined;
+
+  return (
+    <div
+      className={[
+        "palworld-item-media-composite",
+        hasBlueprintComposition ? "is-blueprint" : "",
+      ].filter(Boolean).join(" ")}
+    >
+      <PalworldMedia
+        alt={alt}
+        imageUrl={item.imageUrl}
+        intrinsicHeight={item.imageHeight}
+        intrinsicWidth={item.imageWidth}
+        kind="item"
+        locale={locale}
+        priority={priority}
+      />
+      {hasBlueprintComposition ? (
+        <PalworldBlueprintTargetImage
+          imageHeight={target?.imageHeight}
+          imageUrl={targetImageUrl}
+          imageWidth={target?.imageWidth}
+          priority={priority}
+        />
+      ) : null}
+    </div>
+  );
 }

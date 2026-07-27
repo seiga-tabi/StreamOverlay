@@ -38,7 +38,7 @@ import {
 } from "../utils/localization";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { PalworldItemReferenceButton } from "./PalworldItemReferenceButton";
-import { PalworldMedia } from "./PalworldMedia";
+import { PalworldItemMedia, PalworldMedia } from "./PalworldMedia";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldPalCondensation } from "./PalworldPalCondensation";
 import { PalworldPalLocationMap } from "./PalworldPalLocationMap";
@@ -48,6 +48,7 @@ import {
 } from "./PalworldTranslationBadge";
 import { PalworldWorkSuitabilityBadge } from "./PalworldWorkSuitabilityBadge";
 import { PalworldDetailError } from "./PalworldStates";
+import { PalworldMobileDismissHandle } from "./PalworldMobileDismissHandle";
 
 type NameReference = PalworldTranslationCarrier & {
   id: string;
@@ -355,6 +356,7 @@ export function PalDetailModal({
   const reviewNoticeId = detail ? `palworld-pal-translation-review-${detail.id}` : undefined;
   return (
     <Modal open={Boolean(palId)} onClose={onClose} size="lg" className="palworld-detail-modal palworld-pal-detail-modal" data-testid="pal-detail-modal">
+      <PalworldMobileDismissHandle locale={locale} onDismiss={onClose} />
       <ModalHeader><ModalTitle>{displayName}</ModalTitle><ModalCloseButton aria-label={text.close}>×</ModalCloseButton></ModalHeader>
       <ModalContent>
         {!detail && !error ? <SkeletonCard loadingLabel={text.loading} /> : null}
@@ -450,6 +452,7 @@ export function ItemDetailModal({
   const reviewNoticeId = detail ? `palworld-item-translation-review-${detail.id}` : undefined;
   return (
     <Modal open={Boolean(itemId)} onClose={onClose} size="lg" className="palworld-detail-modal" data-testid="item-detail-modal">
+      <PalworldMobileDismissHandle locale={locale} onDismiss={onClose} />
       <ModalHeader><ModalTitle>{displayName}</ModalTitle><ModalCloseButton aria-label={text.close}>×</ModalCloseButton></ModalHeader>
       <ModalContent>
         {!detail && !error ? <SkeletonCard loadingLabel={text.loading} /> : null}
@@ -463,7 +466,7 @@ export function ItemDetailModal({
               ? <PalworldTranslationReviewNotice id={reviewNoticeId} locale={locale} />
               : null}
             <div className="palworld-detail-hero">
-              <div className="palworld-detail-media palworld-item-detail-media" data-rarity-band={itemRarityBand(detail.rarity)}><PalworldMedia kind="item" imageUrl={detail.imageUrl} alt={displayName} locale={locale} priority {...imageDimensions(detail)} /></div>
+              <div className="palworld-detail-media palworld-item-detail-media" data-rarity-band={itemRarityBand(detail.rarity)}><PalworldItemMedia alt={displayName} item={detail} locale={locale} priority /></div>
               <div><h3>{displayName}</h3>{name ? <PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[name.sourceIntegrity]} statuses={[name.status]} /> : null}<div className="palworld-badge-row"><Badge tone="info">{detail.itemType ? itemTypeLabel(detail.itemType, locale) : categoryLabel(detail.category, locale)}</Badge><Badge data-ja={itemRarityLabel(detail.rarity, "ja")} data-ko={itemRarityLabel(detail.rarity, "ko")} tone={detail.rarity > 4 ? "neutral" : "warning"}>{rarityLabel}</Badge></div></div>
             </div>
             <dl className="palworld-detail-list">

@@ -359,10 +359,10 @@ test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀
     });
     const allowedPaths = [
       "/palworld",
-      "/palworld/streamers",
       "/palworld/pals",
       "/palworld/breeding",
       "/palworld/items",
+      "/palworld/technology",
       "/palworld/skills",
       "/palworld/map",
       "/palworld/search?q=%ED%8C%94%20100%25&pal=pal-1",
@@ -417,7 +417,7 @@ test("공개 Twitch OAuth 복귀 URL은 신뢰되지 않은 Host를 설정된 pu
     });
     const req = createRequest(
       "GET",
-      "/api/public/twitch/auth/start?return_to=%2Fpalworld%2Fstreamers",
+      "/api/public/twitch/auth/start?return_to=%2Fpalworld%2Ftechnology",
       undefined,
       { host: "evil.example" }
     );
@@ -426,7 +426,7 @@ test("공개 Twitch OAuth 복귀 URL은 신뢰되지 않은 Host를 설정된 pu
     await handler(req, res);
 
     assert.equal(res.statusCode, 302);
-    assert.equal(capturedReturnUrl, "http://localhost:3000/palworld/streamers?viewer_twitch=connected");
+    assert.equal(capturedReturnUrl, "http://localhost:3000/palworld/technology?viewer_twitch=connected");
   });
 });
 
@@ -454,6 +454,7 @@ test("공개 Twitch OAuth는 외부·정규화·userinfo 우회 복귀 경로를
       "/palworld\\@evil.example",
       "/palworld%5c@evil.example",
       `/palworld${deeplyEncodedBackslash}@evil.example`,
+      "/palworld/streamers",
       "/palworld\u000astreamers",
       "/palworld/../dashboard",
       "/palworld/search?q=%250a",

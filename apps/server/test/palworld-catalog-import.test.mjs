@@ -12,7 +12,10 @@ const {
   loadPalworldCatalogRuntimeSource,
   validatePalworldCatalogAssetFiles
 } = await import("../dist/data/palworld-catalog-artifact.js");
-const { adaptPalworldCatalog } = await import("../dist/data/palworld-catalog-adapter.js");
+const {
+  adaptPalworldCatalog,
+  resolvePalworldBlueprintTargetSourceInternalId
+} = await import("../dist/data/palworld-catalog-adapter.js");
 const { PALWORLD_SNAPSHOT } = await import("../dist/data/palworld-snapshot.js");
 const { loadPalworldPaldexRuntimeRelease } = await import("../dist/data/palworld-paldex-adapter.js");
 const { parseAllowedSqlTables } = await import("../dist/data/palworld-catalog-import.js");
@@ -281,6 +284,30 @@ test("catalog adapter는 sourceCategory를 12종에 exact 분류하고 알 수 �
   };
   const adapted = adaptPalworldCatalog(input);
   assert.equal(adapted.snapshot.items.every((item) => item.itemType !== undefined), true);
+  const blueprints = adapted.snapshot.items.filter((item) => item.itemType === "blueprint");
+  assert.equal(blueprints.length, 490);
+  assert.equal(blueprints.filter((item) => item.blueprintTarget !== undefined).length, 462);
+  const accessoryBlueprint = blueprints.find(
+    (item) => item.sourceInternalId === "Blueprint_Accessory_AquaResist_1_2"
+  );
+  const accessoryTarget = adapted.snapshot.items.find(
+    (item) => item.sourceInternalId === "Accessory_AquaResist_1"
+  );
+  assert.equal(accessoryBlueprint?.blueprintTarget?.id, accessoryTarget?.id);
+  assert.equal(
+    resolvePalworldBlueprintTargetSourceInternalId(
+      "Blueprint_AncientArmor_2_5",
+      new Set(["AncientArmor", "AncientArmor_2"])
+    ),
+    "AncientArmor_2"
+  );
+  assert.equal(
+    resolvePalworldBlueprintTargetSourceInternalId(
+      "Blueprint_Unverified_Building",
+      new Set(["OtherItem"])
+    ),
+    undefined
+  );
 
   const unknown = structuredClone(catalogSource.catalog);
   unknown.items[0].sourceCategory = "Unknown/Unknown";

@@ -23,7 +23,7 @@ import { PalworldSearchForm } from "../features/public-palworld/components/Palwo
 import { PalworldSearchResults } from "../features/public-palworld/components/PalworldSearchResults";
 import { PalworldSkillsPage, SkillDetailModal } from "../features/public-palworld/components/PalworldSkillsPage";
 import { PalworldSourceFooter } from "../features/public-palworld/components/PalworldSourceFooter";
-import { PalworldStreamersPage } from "../features/public-palworld/components/PalworldStreamersPage";
+import { PalworldTechnologyPage } from "../features/public-palworld/components/PalworldTechnologyPage";
 import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i18n/palworld-i18n";
 import {
   PALWORLD_VERSION_MISMATCH_EVENT,
@@ -86,7 +86,7 @@ export function PublicPalworldPage({
   const followedAbortRef = useRef<AbortController | null>(null);
   const logoutInFlightRef = useRef(false);
   const mountedRef = useRef(true);
-  const needsFollowedChannels = page === "home" || page === "streamers";
+  const needsFollowedChannels = page === "home";
   const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
   const routeQuery = params.toString();
   const detailRoute = useMemo(
@@ -100,9 +100,11 @@ export function PublicPalworldPage({
   const selectedSpawnPeriod = palworldSpawnPeriodFromParams(params);
   const pageFrame = page === "map"
     ? "map"
-    : page === "pals" || page === "items" || page === "skills"
-      ? "catalog"
-      : "tool";
+    : page === "technology"
+      ? "technology"
+      : page === "pals" || page === "items" || page === "skills"
+        ? "catalog"
+        : "tool";
 
   setActivePublicLocale(locale);
 
@@ -405,28 +407,16 @@ export function PublicPalworldPage({
             onOpenItem={openItemPage}
             onOpenPal={openPalPage}
             onSearch={navigateSearch}
-            onShowStreamers={() => setPalworldUrl(palworldUrl("streamers"))}
             onTwitchLogin={startTwitchLogin}
             twitchConfigured={twitchStatus.configured}
             twitchConnected={twitchStatus.connected}
-          />
-        ) : null}
-        {page === "streamers" ? (
-          <PalworldStreamersPage
-            channels={followedChannels?.channels ?? []}
-            error={twitchError}
-            loading={twitchLoading}
-            locale={locale}
-            onLogin={startTwitchLogin}
-            onRefresh={() => void retryTwitch()}
-            status={twitchStatus}
-            total={followedChannels?.total}
           />
         ) : null}
         {page === "search" ? <PalworldSearchResults locale={locale} query={params.get("q") ?? ""} onOpenPal={openPalHere} onOpenItem={openItemHere} /> : null}
         {page === "pals" ? <PalworldPalsPage locale={locale} params={params} onOpenPal={openPalHere} /> : null}
         {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} params={params} /> : null}
         {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
+        {page === "technology" ? <PalworldTechnologyPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
         {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} /> : null}
         {page === "map" ? <PalworldMapPage focusPalId={focusPalId} locale={locale} onOpenPal={openPalHere} /> : null}
         </Suspense> : null}
