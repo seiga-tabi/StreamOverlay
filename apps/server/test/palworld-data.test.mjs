@@ -448,7 +448,7 @@ test("기술 해금 목록은 검증된 기술 레벨이 있는 아이템만 레
     page: 1,
     limit: 100
   });
-  assert.equal(response.pagination.total > 0, true);
+  assert.equal(response.pagination.total, 380);
   assert.equal(response.items.every((item) => item.technologyLevel !== undefined), true);
   assert.deepEqual(
     response.items.map((item) => item.technologyLevel),
@@ -456,6 +456,95 @@ test("기술 해금 목록은 검증된 기술 레벨이 있는 아이템만 레
       .map((item) => item.technologyLevel)
       .sort((left, right) => left - right)
   );
+
+  assert.deepEqual(
+    [
+      ["grappling-gun", 12],
+      ["grappling-gun2", 17],
+      ["grappling-gun3", 31],
+      ["grappling-gun4", 49],
+      ["flame-thrower", 52],
+      ["glider-tera", 52],
+      ["shield-ultra", 55],
+      ["grappling-gun5", 63],
+    ].map(([id, level]) => [id, service.getItem(id).technologyLevel, level]),
+    [
+      ["grappling-gun", 12, 12],
+      ["grappling-gun2", 17, 17],
+      ["grappling-gun3", 31, 31],
+      ["grappling-gun4", 49, 49],
+      ["flame-thrower", 52, 52],
+      ["glider-tera", 52, 52],
+      ["shield-ultra", 55, 55],
+      ["grappling-gun5", 63, 63],
+    ]
+  );
+
+  const melpacaSaddle = service.getItem("skill-unlock-alpaca");
+  assert.equal(melpacaSaddle.technologyPal?.id, "melpaca");
+  assert.match(melpacaSaddle.technologyPal?.imageUrl ?? "", /\/pals\/[a-f0-9]{64}\.webp$/u);
+  assert.equal(
+    service.getItem("skill-unlock-thunderdog-ice").technologyPal?.id,
+    "rayhound-cryst"
+  );
+  const allItemSummaries = service.listItems({
+    sort: "name",
+    order: "asc",
+    page: 1,
+    limit: service.meta().counts.items
+  }).items;
+  const palGear = allItemSummaries.filter((item) => item.id.startsWith("skill-unlock-"));
+  assert.equal(palGear.length, 138);
+  assert.equal(palGear.every((item) => item.technologyPal !== undefined), true);
+});
+
+test("기술 해금 전용 목록은 아이템과 검증된 건축물 217개를 함께 반환한다", () => {
+  const response = service.listTechnologyUnlocks({
+    locale: "ko",
+    order: "asc",
+    page: 1,
+    limit: 100
+  });
+  assert.equal(response.pagination.total, 597);
+  assert.equal(response.items[0].technologyLevel, 1);
+  assert.equal(
+    response.items.every(
+      (unlock, index, entries) =>
+        index === 0 || entries[index - 1].technologyLevel <= unlock.technologyLevel
+    ),
+    true
+  );
+
+  const workbench = service.listTechnologyUnlocks({
+    q: "원시적인 작업대",
+    locale: "ko",
+    order: "asc",
+    page: 1,
+    limit: 10
+  });
+  assert.equal(workbench.pagination.total, 1);
+  assert.deepEqual(
+    workbench.items.map((unlock) => [
+      unlock.kind,
+      unlock.kind === "building" ? unlock.sourceRowId : unlock.item.id,
+      unlock.technologyLevel
+    ]),
+    [["building", "Workbench", 1]]
+  );
+  assert.match(
+    workbench.items[0].imageUrl,
+    /\/technology\/assets\/item\/[a-f0-9]{64}\.webp$/u
+  );
+
+  const japanese = service.listTechnologyUnlocks({
+    q: "原始的な作業台",
+    locale: "ja",
+    order: "asc",
+    page: 1,
+    limit: 10
+  });
+  assert.equal(japanese.pagination.total, 1);
+  assert.equal(japanese.items[0].kind, "building");
 });
 
 test("아이템 공개 분류는 sourceCategory 기준 12종으로 모든 runtime 아이템을 빠짐없이 분류한다", () => {

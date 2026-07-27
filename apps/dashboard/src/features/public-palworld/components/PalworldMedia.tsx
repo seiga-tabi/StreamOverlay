@@ -6,11 +6,12 @@ import { palworldI18n } from "../i18n/palworld-i18n";
 const LOCAL_PALWORLD_IMAGE_PATTERNS = {
   pal: /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/pals\/[0-9a-f]{64}\.webp$/u,
   item: /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/items\/[0-9a-f]{64}\.webp$/u,
+  building: /^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/technology\/assets\/item\/[0-9a-f]{64}\.webp$/u,
 } as const;
 
 export function isLocalPalworldImageUrl(
   imageUrl: string | undefined,
-  kind?: "pal" | "item"
+  kind?: "pal" | "item" | "building"
 ): imageUrl is string {
   if (typeof imageUrl !== "string") return false;
   return kind
@@ -31,7 +32,7 @@ export function PalworldMedia({
   alt: string;
   imageUrl?: string;
   locale: PalworldLocale;
-  kind: "pal" | "item";
+  kind: "pal" | "item" | "building";
   intrinsicHeight?: number;
   intrinsicWidth?: number;
   loading?: "eager" | "lazy";
@@ -51,7 +52,7 @@ export function PalworldMedia({
   if (!safeImageUrl || failed) {
     return (
       <div className={`palworld-media-fallback is-${kind}`} role="img" aria-label={`${alt} · ${fallback}`}>
-        <span aria-hidden="true">{kind === "pal" ? "P" : "◇"}</span>
+        <span aria-hidden="true">{kind === "pal" ? "P" : kind === "building" ? "▣" : "◇"}</span>
         <small data-ko={palworldI18n.ko.imageFallback} data-ja={palworldI18n.ja.imageFallback}>{fallback}</small>
       </div>
     );

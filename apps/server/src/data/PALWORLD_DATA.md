@@ -19,6 +19,42 @@ Palworld 1.0.1의 검증된 287종 Pal 텍스트·수치 데이터는 `apps/serv
 
 Importer는 ZIP traversal·symlink·암호화 entry·압축 해제 크기·CRC, SQL table/column allowlist, PNG signature/chunk CRC/decode, duplicate ID와 orphan reference를 fail-closed로 검사한다. Pal과 item 연결은 exact ID 또는 versioned explicit mapping만 사용하며 fuzzy match나 배열 순서 연결은 사용하지 않는다. 생성 asset은 확대하지 않고 투명도를 보존한 content-hash WebP로 저장한다.
 
+## 기술 해금 건축물
+
+기술 해금 페이지의 건축물 217개는 운영자가 제공한 다음 고정 export를 exact ID로 결합한다.
+
+- `Content.zip` SHA-256 `1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384`
+  - 기술 해금표
+  - 기본 일본어·한국어 기술/건축물 이름
+  - `Pal/Texture/BuildObject` PNG
+- `delta.zip` SHA-256 `2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443`
+  - 건축물 데이터
+  - 건축물 ID와 아이콘 asset의 exact mapping
+
+`Blueprint.zip`은 건축물 Blueprint class 동작 검토용이며 기술 해금 목록 생성에는 사용하지 않는다. `InventoryItemIcon.zip`은 일반 item icon export라 건축물 카드 생성에는 사용하지 않는다.
+
+재생성 명령:
+
+```bash
+npm --workspace apps/server run import:palworld-technology-buildings -- \
+  --content-archive /absolute/path/Content.zip \
+  --content-sha256 1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384 \
+  --delta-archive /absolute/path/delta.zip \
+  --delta-sha256 2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443
+```
+
+향후 export가 누락되면 FModel에서 다음 경로를 JSON/PNG로 함께 Export한다.
+
+- `/Game/Pal/DataTable/Technology/DT_TechnologyRecipeUnlock_Common`
+- `/Game/Pal/DataTable/MapObject/Building/DT_BuildObjectDataTable`
+- `/Game/Pal/DataTable/MapObject/Building/DT_BuildObjectIconDataTable`
+- `/Game/Pal/DataTable/Text/DT_TechnologyNameText_Common`
+- `/Game/Pal/DataTable/Text/DT_MapObjectNameText_Common`
+- `/Game/L10N/ko/Pal/DataTable/Text/DT_TechnologyNameText_Common`
+- `/Game/L10N/ko/Pal/DataTable/Text/DT_MapObjectNameText_Common`
+- `/Game/Pal/Texture/BuildObject/PNG`
+- `/Game/Pal/Texture/BuildObject/Icon`
+
 ## 출처와 재현성
 
 - Pal 287종은 고정 source와 mapping에서 결정적으로 생성한다. item·skill 통합 catalog도 위 checksum의 Atlas·pyPal archive에서 allowlist importer로 정규화하며, 해당 integrity gate가 실패하면 기존 sample fallback을 `ready`로 표시하지 않는다.

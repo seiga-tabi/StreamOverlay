@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type {
-  PalworldItemSummary,
   PalworldPaginatedResponse,
+  PalworldTechnologyUnlockSummary,
 } from "@streamops/shared";
 import { PALWORLD_SEARCH_MAX_LENGTH } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { Card, CardContent } from "../../../shared/ui/Card";
 import { Input, Select } from "../../../shared/ui/Form";
-import { getPalworldItems } from "../api/palworld";
+import { getPalworldTechnologyUnlocks } from "../api/palworld";
 import { usePalworldInfiniteList } from "../hooks/usePalworldInfiniteList";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import {
@@ -19,47 +19,80 @@ import { resolvePalworldName } from "../utils/localization";
 import { setPalworldUrl } from "../utils/routes";
 import { groupTechnologyUnlockItems } from "../utils/technology";
 import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
-import { PalworldItemMedia } from "./PalworldMedia";
+import { PalworldItemMedia, PalworldMedia } from "./PalworldMedia";
 import { PalworldPreviousLoadControl } from "./PalworldPreviousLoadControl";
 import { PalworldEmpty, PalworldError, PalworldLoading } from "./PalworldStates";
 
 const FILTER_KEYS = ["q", "order", "page"] as const;
 
 export function TechnologyUnlockCard({
-  item,
+  unlock,
   locale,
   onOpen,
   priority = false,
 }: {
-  item: PalworldItemSummary;
+  unlock: PalworldTechnologyUnlockSummary;
   locale: PalworldLocale;
-  onOpen: (item: PalworldItemSummary) => void;
+  onOpen: (id: string) => void;
   priority?: boolean;
 }) {
   const text = palworldI18n[locale];
-  const name = resolvePalworldName(item, locale).text;
-  const level = item.technologyLevel;
-  if (level === undefined) return null;
+  const item = unlock.kind === "item" ? unlock.item : undefined;
+  const name = resolvePalworldName(item ?? unlock, locale).text;
+  const technologyPalName = item?.technologyPal
+    ? resolvePalworldName(item.technologyPal, locale).text
+    : undefined;
+  const rarityBand = item ? itemRarityBand(item.rarity) : "common";
 
   return (
     <Card
-      aria-haspopup="dialog"
-      aria-label={text.openTechnologyItem.replace("{name}", name)}
+      {...(item ? {
+        "aria-haspopup": "dialog" as const,
+        "aria-label": text.openTechnologyItem.replace("{name}", name),
+        onClick: () => onOpen(item.id),
+      } : {})}
       as="article"
-      className="palworld-entity-card palworld-item-card palworld-technology-card"
-      data-technology-level={level}
+      className="palworld-entity-card palworld-technology-card"
+      data-rarity-band={rarityBand}
+      data-technology-kind={unlock.kind}
+      data-technology-level={unlock.technologyLevel}
       data-testid="technology-unlock-card"
-      onClick={() => onOpen(item)}
       padding="none"
-      variant="interactive"
+      variant={item ? "interactive" : "default"}
     >
-      <div className="palworld-entity-media palworld-technology-card-media" data-rarity-band={itemRarityBand(item.rarity)}>
-        <PalworldItemMedia alt={name} item={item} locale={locale} priority={priority} />
+      <div className="palworld-entity-media palworld-technology-card-media" data-rarity-band={rarityBand}>
+        {item?.technologyPal && technologyPalName ? (
+          <PalworldMedia
+            alt={technologyPalName}
+            imageUrl={item.technologyPal.imageUrl}
+            intrinsicHeight={item.technologyPal.imageHeight}
+            intrinsicWidth={item.technologyPal.imageWidth}
+            kind="pal"
+            locale={locale}
+            priority={priority}
+          />
+        ) : item ? (
+          <PalworldItemMedia alt={name} item={item} locale={locale} priority={priority} />
+        ) : unlock.kind === "building" ? (
+          <PalworldMedia
+            alt={name}
+            imageUrl={unlock.imageUrl}
+            intrinsicHeight={unlock.imageHeight}
+            intrinsicWidth={unlock.imageWidth}
+            kind="building"
+            locale={locale}
+            priority={priority}
+          />
+        ) : null}
       </div>
       <CardContent>
         <h3 title={name}>{name}</h3>
         <p className="palworld-technology-card-type">
-          {item.itemType ? itemTypeLabel(item.itemType, locale) : categoryLabel(item.category, locale)}
+          {item
+            ? item.itemType
+              ? itemTypeLabel(item.itemType, locale)
+              : categoryLabel(item.category, locale)
+            : text.technologyBuilding}
         </p>
       </CardContent>
     </Card>
@@ -94,13 +127,14 @@ export function PalworldTechnologyPage({
     retryInitial,
     retryLoadMore,
     retryLoadPrevious,
-  } = usePalworldInfiniteList<PalworldItemSummary, PalworldPaginatedResponse<PalworldItemSummary>>({
+  } = usePalworldInfiniteList<
+    PalworldTechnologyUnlockSummary,
+    PalworldPaginatedResponse<PalworldTechnologyUnlockSummary>
+  >({
     initialPage: params.get("page") ?? "1",
     itemKey: (item) => item.id,
     loadPage: (page, signal) => {
       const apiParams = new URLSearchParams({
-        technology: "unlockable",
-        sort: "technologyLevel",
         order: params.get("order") === "desc" ? "desc" : "asc",
         page: String(page),
         locale,
@@ -108,7 +142,7 @@ export function PalworldTechnologyPage({
       });
       const query = params.get("q")?.trim();
       if (query) apiParams.set("q", query);
-      return getPalworldItems(apiParams, signal);
+      return getPalworldTechnologyUnlocks(apiParams, signal);
     },
     paused: Boolean(params.get("item")),
     queryKey: `${locale}:${routeQuery}`,
@@ -228,10 +262,10 @@ export function PalworldTechnologyPage({
                   <div className="palworld-technology-level-grid">
                     {group.items.map((item) => (
                       <TechnologyUnlockCard
-                        item={item}
+                        unlock={item}
                         key={item.id}
                         locale={locale}
-                        onOpen={(selected) => onOpenItem(selected.id)}
+                        onOpen={onOpenItem}
                         priority={priorityItemIds.has(item.id)}
                       />
                     ))}

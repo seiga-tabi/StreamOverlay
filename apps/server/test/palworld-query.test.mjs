@@ -12,7 +12,8 @@ const {
   parsePalworldPalSpawnQuery,
   parsePalworldPalListQuery,
   parsePalworldSkillListQuery,
-  parsePalworldSearchQuery
+  parsePalworldSearchQuery,
+  parsePalworldTechnologyListQuery
 } = await import("../dist/services/palworld-query.js");
 
 test("펠월드 검색어는 공백, 대소문자와 전각 문자를 안정적으로 정규화한다", () => {
@@ -71,6 +72,25 @@ test("아이템 목록 query는 허용된 필터와 정렬을 해석한다", () 
   );
   assert.throws(
     () => parsePalworldItemListQuery(new URLSearchParams("technology=unknown")),
+    PalworldQueryError
+  );
+});
+
+test("기술 해금 query는 검색·언어·레벨 방향과 pagination만 허용한다", () => {
+  assert.deepEqual(
+    parsePalworldTechnologyListQuery(new URLSearchParams(
+      "q=%EB%AA%A8%EB%8B%A5%EB%B6%88&locale=ko&order=desc&page=2&limit=24"
+    )),
+    {
+      q: "모닥불",
+      locale: "ko",
+      order: "desc",
+      page: 2,
+      limit: 24
+    }
+  );
+  assert.throws(
+    () => parsePalworldTechnologyListQuery(new URLSearchParams("sort=name")),
     PalworldQueryError
   );
 });

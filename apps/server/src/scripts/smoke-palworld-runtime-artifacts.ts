@@ -71,6 +71,9 @@ import {
 import {
   loadPalworldMapLayerIconManifest
 } from "../data/palworld-map-layer-icon-manifest.js";
+import {
+  PALWORLD_TECHNOLOGY_BUILDINGS
+} from "../data/palworld-technology-buildings.generated.js";
 import { inspectPalworldWebp } from "../data/palworld-image-import.js";
 
 const REQUIRED_LEGACY_RELEASE_FILES = [
@@ -309,16 +312,18 @@ async function assertExactStaticAssetUrls(input: {
   expectedUrls: ReadonlySet<string>;
 }): Promise<void> {
   const expectedPrefix = `/images/palworld/${input.release}/`;
-  const expectedByDirectory = new Map<string, Set<string>>();
+  const expectedFilesByDirectory = new Map<string, Set<string>>();
+  const expectedChildrenByDirectory = new Map<string, Set<string>>();
   for (const imageUrl of input.expectedUrls) {
     if (!imageUrl.startsWith(expectedPrefix)) {
       throw new Error("Palworld static asset URL의 release가 active release와 일치하지 않습니다.");
     }
     const relative = imageUrl.slice(expectedPrefix.length);
     const segments = relative.split("/");
-    if (
+    const isCatalogAsset = (
       segments.length !== 2
-      || ![
+        ? false
+        : [
         "pals",
         "items",
         "elements",
@@ -327,26 +332,48 @@ async function assertExactStaticAssetUrls(input: {
         "maps",
         "map-icons"
       ].includes(segments[0]!)
-      || !CONTENT_HASH_WEBP_PATTERN.test(segments[1]!)
+    );
+    const isTechnologyAsset = (
+      segments.length === 4
+      && segments[0] === "technology"
+      && segments[1] === "assets"
+      && segments[2] === "item"
+    );
+    const fileName = segments.at(-1);
+    if (
+      (!isCatalogAsset && !isTechnologyAsset)
+      || fileName === undefined
+      || !CONTENT_HASH_WEBP_PATTERN.test(fileName)
     ) {
       throw new Error("Palworld static asset URL이 허용된 content-hash 경로가 아닙니다.");
     }
-    const names = expectedByDirectory.get(segments[0]!) ?? new Set<string>();
-    names.add(segments[1]!);
-    expectedByDirectory.set(segments[0]!, names);
+    const directorySegments = segments.slice(0, -1);
+    const directoryName = directorySegments.join("/");
+    const names = expectedFilesByDirectory.get(directoryName) ?? new Set<string>();
+    names.add(fileName);
+    expectedFilesByDirectory.set(directoryName, names);
+    for (let index = 0; index < directorySegments.length; index += 1) {
+      const parent = directorySegments.slice(0, index).join("/");
+      const children = expectedChildrenByDirectory.get(parent) ?? new Set<string>();
+      children.add(directorySegments[index]!);
+      expectedChildrenByDirectory.set(parent, children);
+    }
   }
   await assertRuntimeDirectory(input.releaseStaticRoot, "Palworld release static asset");
-  await assertExactRuntimeFiles(
-    input.releaseStaticRoot,
-    [...expectedByDirectory.keys()],
-    "Palworld release static asset"
-  );
-  for (const [directoryName, expectedNames] of expectedByDirectory) {
+  const rootEntries = expectedChildrenByDirectory.get("") ?? new Set<string>();
+  await assertExactRuntimeFiles(input.releaseStaticRoot, [...rootEntries], "Palworld release static asset");
+  const directories = new Set([
+    ...expectedFilesByDirectory.keys(),
+    ...[...expectedChildrenByDirectory.keys()].filter(Boolean)
+  ]);
+  for (const directoryName of directories) {
     const directory = path.join(input.releaseStaticRoot, directoryName);
     await assertRuntimeDirectory(directory, `Palworld ${directoryName} static asset`);
+    const expectedNames = expectedFilesByDirectory.get(directoryName) ?? new Set<string>();
+    const expectedChildren = expectedChildrenByDirectory.get(directoryName) ?? new Set<string>();
     await assertExactRuntimeFiles(
       directory,
-      [...expectedNames],
+      [...expectedChildren, ...expectedNames],
       `Palworld ${directoryName} static asset`
     );
     for (const fileName of expectedNames) {
@@ -615,7 +642,8 @@ async function validateLegacyRuntime(
     ...catalog.elementImagesManifest.entries.map((entry) => entry.imageUrl),
     ...mapImagesManifest.entries.map((entry) => entry.imageUrl),
     ...(mapLayerIconsManifest?.entries.map((entry) => entry.imageUrl) ?? []),
-    ...(workImagesManifest?.entries.map((entry) => entry.imageUrl) ?? [])
+    ...(workImagesManifest?.entries.map((entry) => entry.imageUrl) ?? []),
+    ...PALWORLD_TECHNOLOGY_BUILDINGS.map((entry) => entry.imageUrl)
   ]);
   await assertExactStaticAssetUrls({
     releaseStaticRoot: staticRoot,
@@ -992,6 +1020,9 @@ async function assertPakRuntimeStaticAssets(
   layout: Extract<PalworldRuntimeLayout, { kind: "pak" }>
 ): Promise<void> {
   const expectedUrls = await collectManifestImageUrls(layout.releaseRoot, layout.manifest);
+  for (const entry of PALWORLD_TECHNOLOGY_BUILDINGS) {
+    expectedUrls.add(entry.imageUrl);
+  }
   const palworldRoot = path.join(
     repositoryRoot,
     `apps/dashboard/${staticDirectory}/images/palworld`

@@ -576,6 +576,7 @@ export type PalworldItemSummary = PalworldItemReference & {
   category: PalworldItemCategory;
   itemType?: PalworldItemFilterCategory;
   blueprintTarget?: PalworldItemReference;
+  technologyPal?: PalworldPalReference;
   rarity: number;
   descriptionKo?: string;
   descriptionJa?: string;
@@ -583,6 +584,27 @@ export type PalworldItemSummary = PalworldItemReference & {
   sellPrice?: number;
   technologyLevel?: number;
 };
+
+export type PalworldTechnologyUnlockSummary =
+  | {
+      id: string;
+      kind: "item";
+      technologyLevel: number;
+      item: PalworldItemSummary;
+    }
+  | {
+      id: string;
+      kind: "building";
+      sourceRowId: string;
+      nameKo: string;
+      nameJa: string;
+      imageUrl: string;
+      imageWidth: number;
+      imageHeight: number;
+      technologyLevel: number;
+      tier: number;
+      cost: number;
+    };
 
 export type PalworldCraftingMaterial = {
   item: PalworldItemReference;
@@ -2610,6 +2632,7 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
     "category",
     "itemType",
     "blueprintTarget",
+    "technologyPal",
     "rarity",
     "descriptionKo",
     "descriptionJa",
@@ -2659,6 +2682,13 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
     if (blueprintTarget.data.id === candidate.id) {
       return invalid(`${path}.blueprintTarget.id`, "설계도 자신을 완성 아이템으로 참조할 수 없습니다.");
     }
+  }
+  if (candidate.technologyPal !== undefined) {
+    const technologyPal = validatePalReferenceAt(
+      candidate.technologyPal,
+      `${path}.technologyPal`
+    );
+    if (!technologyPal.ok) return technologyPal;
   }
   const rarity = integerAt(candidate.rarity, `${path}.rarity`, 0, MAX_RARITY);
   if (!rarity.ok) return rarity;
@@ -2727,6 +2757,76 @@ function validateItemSummaryAt(value: unknown, path: string): PalworldValidation
     }
   }
   return valid(candidate as PalworldItemSummary);
+}
+
+function validateTechnologyUnlockSummaryAt(
+  value: unknown,
+  path: string
+): PalworldValidationResult<PalworldTechnologyUnlockSummary> {
+  const base = recordAt(value, path, [
+    "id",
+    "kind",
+    "technologyLevel",
+    "item",
+    "sourceRowId",
+    "nameKo",
+    "nameJa",
+    "imageUrl",
+    "imageWidth",
+    "imageHeight",
+    "tier",
+    "cost"
+  ]);
+  if (!base.ok) return base;
+  const id = idAt(base.data.id, `${path}.id`);
+  if (!id.ok) return id;
+  const kind = enumAt(base.data.kind, `${path}.kind`, ["item", "building"] as const);
+  if (!kind.ok) return kind;
+  const level = integerAt(base.data.technologyLevel, `${path}.technologyLevel`, 0, 100);
+  if (!level.ok) return level;
+  if (kind.data === "item") {
+    if (
+      base.data.sourceRowId !== undefined
+      || base.data.nameKo !== undefined
+      || base.data.nameJa !== undefined
+      || base.data.imageUrl !== undefined
+      || base.data.imageWidth !== undefined
+      || base.data.imageHeight !== undefined
+      || base.data.tier !== undefined
+      || base.data.cost !== undefined
+    ) {
+      return invalid(path, "아이템 기술 해금에는 건축물 전용 필드를 포함할 수 없습니다.");
+    }
+    const item = validateItemSummaryAt(base.data.item, `${path}.item`);
+    if (!item.ok) return item;
+    if (item.data.technologyLevel !== level.data) {
+      return invalid(`${path}.technologyLevel`, "아이템의 기술 해금 레벨과 일치해야 합니다.");
+    }
+    return valid(value as PalworldTechnologyUnlockSummary);
+  }
+  if (base.data.item !== undefined) {
+    return invalid(`${path}.item`, "건축물 기술 해금에는 아이템을 포함할 수 없습니다.");
+  }
+  const sourceRowId = stringAt(base.data.sourceRowId, `${path}.sourceRowId`, 160);
+  if (!sourceRowId.ok) return sourceRowId;
+  for (const field of ["nameKo", "nameJa"] as const) {
+    const name = stringAt(base.data[field], `${path}.${field}`, MAX_NAME_LENGTH);
+    if (!name.ok) return name;
+  }
+  const imageUrl = stringAt(base.data.imageUrl, `${path}.imageUrl`, MAX_URL_LENGTH);
+  if (!imageUrl.ok) return imageUrl;
+  if (!/^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/technology\/assets\/item\/[0-9a-f]{64}\.webp$/u.test(imageUrl.data)) {
+    return invalid(`${path}.imageUrl`, "검증된 로컬 건축물 기술 이미지 경로여야 합니다.");
+  }
+  for (const field of ["imageWidth", "imageHeight"] as const) {
+    const dimension = integerAt(base.data[field], `${path}.${field}`, 1, 8_192);
+    if (!dimension.ok) return dimension;
+  }
+  const tier = integerAt(base.data.tier, `${path}.tier`, 0, 100);
+  if (!tier.ok) return tier;
+  const cost = integerAt(base.data.cost, `${path}.cost`, 0, 1_000);
+  if (!cost.ok) return cost;
+  return valid(value as PalworldTechnologyUnlockSummary);
 }
 
 function validateCraftingMaterialAt(value: unknown, path: string): PalworldValidationResult<PalworldCraftingMaterial> {
@@ -2875,6 +2975,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
     "category",
     "itemType",
     "blueprintTarget",
+    "technologyPal",
     "rarity",
     "descriptionKo",
     "descriptionJa",
@@ -2911,6 +3012,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
       category: candidate.category,
       ...(candidate.itemType === undefined ? {} : { itemType: candidate.itemType }),
       ...(candidate.blueprintTarget === undefined ? {} : { blueprintTarget: candidate.blueprintTarget }),
+      ...(candidate.technologyPal === undefined ? {} : { technologyPal: candidate.technologyPal }),
       rarity: candidate.rarity,
       descriptionKo: candidate.descriptionKo,
       descriptionJa: candidate.descriptionJa,
@@ -4211,6 +4313,12 @@ export function validatePalworldPalCondensationProfile(
 
 export function validatePalworldItemSummary(value: unknown): PalworldValidationResult<PalworldItemSummary> {
   return validateItemSummaryAt(value, "item");
+}
+
+export function validatePalworldTechnologyUnlockSummary(
+  value: unknown
+): PalworldValidationResult<PalworldTechnologyUnlockSummary> {
+  return validateTechnologyUnlockSummaryAt(value, "technologyUnlock");
 }
 
 export function validatePalworldItemDetail(value: unknown): PalworldValidationResult<PalworldItemDetail> {

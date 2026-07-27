@@ -49,6 +49,13 @@ const ITEM_LIST_QUERY_KEYS = new Set([
   "page",
   "limit"
 ]);
+const TECHNOLOGY_LIST_QUERY_KEYS = new Set([
+  "q",
+  "locale",
+  "order",
+  "page",
+  "limit"
+]);
 const SKILL_LIST_QUERY_KEYS = new Set([
   "q",
   "locale",
@@ -114,6 +121,14 @@ export type PalworldItemListQuery = {
   acquisition?: (typeof PALWORLD_ACQUISITION_TYPES)[number];
   technology?: "unlockable";
   sort: (typeof PALWORLD_ITEM_SORTS)[number];
+  order: PalworldSortOrder;
+  page: number;
+  limit: number;
+};
+
+export type PalworldTechnologyListQuery = {
+  q?: string;
+  locale?: "ko" | "ja";
   order: PalworldSortOrder;
   page: number;
   limit: number;
@@ -321,6 +336,18 @@ export function parsePalworldItemListQuery(params: URLSearchParams): PalworldIte
     acquisition: optionalEnum(params, "acquisition", PALWORLD_ACQUISITION_TYPES),
     technology: optionalEnum(params, "technology", ["unlockable"] as const),
     sort: optionalEnum(params, "sort", PALWORLD_ITEM_SORTS) ?? "name",
+    order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
+    ...pagination(params, 24)
+  };
+}
+
+export function parsePalworldTechnologyListQuery(
+  params: URLSearchParams
+): PalworldTechnologyListQuery {
+  assertKnownKeys(params, TECHNOLOGY_LIST_QUERY_KEYS);
+  return {
+    q: optionalText(params, "q"),
+    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
     order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
     ...pagination(params, 24)
   };

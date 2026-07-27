@@ -1396,7 +1396,8 @@ test("아이템 summary는 rarity 0과 고정 버전 item content-hash WebP만 �
     descriptionJa: item.descriptionJa,
     descriptionEn: item.descriptionEn,
     sellPrice: item.sellPrice,
-    technologyLevel: item.technologyLevel
+    technologyLevel: item.technologyLevel,
+    technologyPal: palReference
   };
   assert.equal(validatePalworldItemSummary(summary).ok, true);
   for (const imageUrl of [
@@ -1423,6 +1424,10 @@ test("아이템 summary는 rarity 0과 고정 버전 item content-hash WebP만 �
     ...summary,
     itemType: "blueprint",
     blueprintTarget: { ...itemReference, id: summary.id }
+  }).ok, false);
+  assert.equal(validatePalworldItemSummary({
+    ...summary,
+    technologyPal: { ...palReference, imageUrl: itemImageUrl }
   }).ok, false);
   assert.equal(validatePalworldItemSummary({ ...summary, rarity: -1 }).ok, false);
 });

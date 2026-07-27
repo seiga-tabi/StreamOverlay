@@ -36,6 +36,10 @@ import {
   localizedReviewedItemsByCanonicalId,
   type PalworldReviewedItemAlias
 } from "./palworld-reviewed-item-aliases.js";
+import {
+  resolvePalworldTechnologyLevel,
+  resolvePalworldTechnologyPalSourceInternalId
+} from "./palworld-technology-compatibility.js";
 
 const ELEMENT_NAMES: Readonly<Record<PalworldElement, { ko: string; ja: string; en: string }>> = {
   neutral: { ko: "무속성", ja: "無属性", en: "Neutral" },
@@ -753,6 +757,12 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     };
   });
   const palsById = new Map(pals.map((pal) => [pal.id, pal]));
+  const palIdBySourceInternalId = new Map(
+    Object.entries(input.sourceInternalIds).map(([palId, sourceInternalId]) => [
+      sourceInternalId,
+      palId,
+    ]),
+  );
 
   const items: PalworldItemDetail[] = catalog.items.map((item) => {
     const localized = localizedItemsById.get(item.id);
@@ -785,6 +795,20 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       if (!pal) throw new TypeError(`Palworld item drop Pal 참조가 없습니다: ${item.id} -> ${palId}`);
       return palReference(pal);
     });
+    const technologyPalSourceInternalId =
+      resolvePalworldTechnologyPalSourceInternalId(item);
+    const technologyPalId = technologyPalSourceInternalId === undefined
+      ? undefined
+      : palIdBySourceInternalId.get(technologyPalSourceInternalId);
+    if (technologyPalSourceInternalId !== undefined && technologyPalId === undefined) {
+      throw new TypeError(
+        `Palworld Pal 장비의 Pal 참조가 없습니다: ${item.id} -> ${technologyPalSourceInternalId}`
+      );
+    }
+    const technologyPal = technologyPalId === undefined
+      ? undefined
+      : palsById.get(technologyPalId);
+    const technologyLevel = resolvePalworldTechnologyLevel(item);
     return {
       ...reference,
       sourceInternalId: item.sourceInternalId,
@@ -800,7 +824,8 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       }),
       ...(item.descriptionEn === undefined ? {} : { descriptionEn: item.descriptionEn }),
       ...(item.sellPrice === undefined ? {} : { sellPrice: item.sellPrice }),
-      ...(item.technologyLevel === undefined ? {} : { technologyLevel: item.technologyLevel }),
+      ...(technologyLevel === undefined ? {} : { technologyLevel }),
+      ...(technologyPal === undefined ? {} : { technologyPal: palReference(technologyPal) }),
       weight: item.weight,
       maxStack: item.maxStack,
       ...(item.durability === undefined ? {} : { durability: item.durability }),

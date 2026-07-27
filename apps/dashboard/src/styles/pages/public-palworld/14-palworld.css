@@ -1751,22 +1751,70 @@
 }
 
 .palworld-technology-card {
+  --palworld-technology-rarity-accent: var(--yoro-color-border-strong);
+  --palworld-technology-rarity-surface: var(--yoro-color-surface-muted);
+
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  block-size: 100%;
-  min-block-size: 14rem;
+  grid-template-rows: minmax(0, 1fr) auto;
+  aspect-ratio: 1;
+  min-block-size: 0;
+  gap: 0;
   overflow: hidden;
 }
 
-.palworld-technology-card-media {
-  position: relative;
+.yoro-card.palworld-technology-card[data-rarity-band] {
+  border: medium solid var(--palworld-technology-rarity-accent);
+  background: var(--palworld-technology-rarity-surface);
 }
 
-.palworld-technology-card .yoro-card__content {
+.palworld-technology-card[data-rarity-band="uncommon"] {
+  --palworld-technology-rarity-accent: var(--yoro-color-success);
+  --palworld-technology-rarity-surface: color-mix(in srgb, var(--yoro-color-success-bg) 78%, var(--yoro-color-surface-muted));
+}
+
+.palworld-technology-card[data-rarity-band="rare"] {
+  --palworld-technology-rarity-accent: var(--yoro-color-info);
+  --palworld-technology-rarity-surface: color-mix(in srgb, var(--yoro-color-info-bg) 78%, var(--yoro-color-surface-muted));
+}
+
+.palworld-technology-card[data-rarity-band="epic"] {
+  --palworld-technology-rarity-accent: var(--yoro-color-secondary);
+  --palworld-technology-rarity-surface: color-mix(in srgb, var(--yoro-color-secondary) 12%, var(--yoro-color-surface-muted));
+}
+
+.palworld-technology-card[data-rarity-band="legendary"] {
+  --palworld-technology-rarity-accent: var(--palworld-gold);
+  --palworld-technology-rarity-surface: color-mix(in srgb, var(--palworld-gold) 12%, var(--yoro-color-surface-muted));
+}
+
+.yoro-card.palworld-technology-card[data-variant="interactive"]:hover {
+  border-color: var(--palworld-technology-rarity-accent);
+}
+
+.palworld-technology-card .palworld-technology-card-media {
+  position: relative;
+  min-block-size: 0;
+  aspect-ratio: auto;
+  border-block-end: 0;
+  background: transparent;
+}
+
+.palworld-technology-card-media > .palworld-media-image,
+.palworld-technology-card-media > .palworld-item-media-composite {
+  min-block-size: 0;
+  block-size: 100%;
+}
+
+.palworld-technology-card-media .palworld-media-image {
+  min-block-size: 0;
+  max-block-size: 100%;
+}
+
+.palworld-entity-card.palworld-technology-card .yoro-card__content {
   align-content: center;
   justify-items: center;
-  gap: var(--yoro-space-2);
-  padding: var(--yoro-space-3);
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3);
   text-align: center;
 }
 
@@ -1857,12 +1905,8 @@
     gap: var(--yoro-space-2);
   }
 
-  .palworld-technology-card {
-    min-block-size: 11.5rem;
-  }
-
-  .palworld-technology-card .yoro-card__content {
-    padding: var(--yoro-space-2);
+  .palworld-entity-card.palworld-technology-card .yoro-card__content {
+    padding: var(--yoro-space-1) var(--yoro-space-2) var(--yoro-space-2);
   }
 
   .palworld-technology-card h3 {

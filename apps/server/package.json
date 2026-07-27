@@ -21,6 +21,7 @@
     "generate:palworld-spawns": "tsx src/scripts/generate-palworld-spawns.ts",
     "import:palworld-images": "tsx src/scripts/import-palworld-images.ts",
     "import:palworld-catalog": "tsx src/scripts/import-palworld-catalog.ts",
+    "import:palworld-technology-buildings": "tsx src/scripts/import-palworld-technology-buildings.ts",
     "preflight:palworld-pak": "tsx src/scripts/preflight-palworld-pak.ts",
     "import:palworld-pak": "tsx src/scripts/import-palworld-pak.ts",
     "promote:palworld-pak": "tsx src/scripts/promote-palworld-pak.ts",

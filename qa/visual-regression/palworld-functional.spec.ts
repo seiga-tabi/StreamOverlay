@@ -28,6 +28,7 @@ import type {
   PalworldSkillDetail,
   PalworldSkillListFacets,
   PalworldSkillSummary,
+  PalworldTechnologyUnlockSummary,
 } from "@streamops/shared";
 
 const metadata: PalworldDataMetadata = {
@@ -603,6 +604,7 @@ function itemSummary(item: PalworldItemDetail): PalworldItemSummary {
     ...(item.descriptionEn ? { descriptionEn: item.descriptionEn } : {}),
     ...(item.sellPrice === undefined ? {} : { sellPrice: item.sellPrice }),
     ...(item.technologyLevel === undefined ? {} : { technologyLevel: item.technologyLevel }),
+    ...(item.technologyPal === undefined ? {} : { technologyPal: item.technologyPal }),
   };
 }
 
@@ -785,16 +787,38 @@ function filteredItems(url: URL): PalworldItemSummary[] {
 
 test("기술 해금 페이지는 레벨 타임라인과 상세 연결을 PC·모바일에서 유지한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
-  const technologyItems = Array.from({ length: 12 }, (_, index): PalworldItemSummary => ({
-    ...itemSummary(items[0]!),
-    id: index === 0 ? "pal-sphere" : `technology-item-${index + 1}`,
-    nameKo: index === 0 ? "Pal 스피어" : `기술 아이템 ${index + 1}`,
-    nameJa: index === 0 ? "パルスフィア" : `テクノロジーアイテム ${index + 1}`,
-    nameEn: index === 0 ? "Pal Sphere" : `Technology Item ${index + 1}`,
-    technologyLevel: index < 8 ? 2 : 3,
-  }));
+  const technologyItems = Array.from({ length: 12 }, (_, index): PalworldTechnologyUnlockSummary => {
+    const item: PalworldItemSummary = {
+      ...itemSummary(items[0]!),
+      id: index === 0 ? "pal-sphere" : `technology-item-${index + 1}`,
+      nameKo: index === 0 ? "Pal 스피어" : `기술 아이템 ${index + 1}`,
+      nameJa: index === 0 ? "パルスフィア" : `テクノロジーアイテム ${index + 1}`,
+      nameEn: index === 0 ? "Pal Sphere" : `Technology Item ${index + 1}`,
+      rarity: index % 5,
+      technologyLevel: index < 8 ? 2 : 3,
+      ...(index === 0 ? {
+        technologyPal: {
+          id: pals[0]!.id,
+          number: pals[0]!.number,
+          nameKo: pals[0]!.nameKo,
+          nameJa: pals[0]!.nameJa,
+          nameEn: pals[0]!.nameEn,
+          imageUrl: pals[0]!.imageUrl,
+          imageWidth: pals[0]!.imageWidth,
+          imageHeight: pals[0]!.imageHeight,
+          elements: [...pals[0]!.elements],
+        },
+      } : {}),
+    };
+    return {
+      id: `technology-item-${item.id}`,
+      kind: "item",
+      technologyLevel: item.technologyLevel!,
+      item,
+    };
+  });
   const technologyRequests: URL[] = [];
-  await page.route("**/api/palworld/items?*", async (route) => {
+  await page.route("**/api/palworld/technology?*", async (route) => {
     const url = new URL(route.request().url());
     technologyRequests.push(url);
     await json(route, pageResponse(technologyItems, url));
@@ -807,12 +831,61 @@ test("기술 해금 페이지는 레벨 타임라인과 상세 연결을 PC·모
     await page.setViewportSize(viewport);
     await page.goto("/palworld/technology");
     await expect(page.getByTestId("technology-unlock-card")).toHaveCount(12);
-    await expect(page.getByText("기술 해금 아이템 12개")).toBeVisible();
+    await expect(page.getByText("기술 해금 항목 12개")).toBeVisible();
     await expect(page.locator(".palworld-technology-level-group")).toHaveCount(2);
     await expect(page.locator(".palworld-technology-level-marker").first()).toHaveText("2");
+    await expect(page.getByTestId("technology-unlock-card").first().locator("img")).toHaveAttribute(
+      "src",
+      /\/images\/palworld\/1\.0\.1\/pals\/[a-f0-9]{64}\.webp$/u,
+    );
     await expect.poll(() => page.locator(".palworld-technology-level-grid").first().evaluate((element) =>
       getComputedStyle(element).gridTemplateColumns.split(" ").length
     )).toBe(viewport.columns);
+    await expect.poll(() => page.getByTestId("technology-unlock-card").first().evaluate((element) => {
+      const { width, height } = element.getBoundingClientRect();
+      return Math.abs(width - height) <= 1;
+    })).toBe(true);
+    const rarityStyles = await page.getByTestId("technology-unlock-card").evaluateAll((cards) =>
+      cards.slice(0, 2).map((card) => {
+        const style = getComputedStyle(card);
+        return {
+          backgroundColor: style.backgroundColor,
+          borderColor: style.borderColor,
+          borderWidth: style.borderTopWidth,
+        };
+      })
+    );
+    expect(rarityStyles[0]?.backgroundColor).not.toBe(rarityStyles[1]?.backgroundColor);
+    expect(rarityStyles[0]?.borderColor).not.toBe(rarityStyles[1]?.borderColor);
+    expect(rarityStyles.every((style) => style.borderWidth === "3px")).toBe(true);
+    const mediaStyle = await page.getByTestId("technology-unlock-card").first()
+      .locator(".palworld-technology-card-media")
+      .evaluate((media) => {
+        const style = getComputedStyle(media);
+        return {
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+          borderBottomWidth: style.borderBottomWidth,
+        };
+      });
+    expect(mediaStyle).toEqual({
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      backgroundImage: "none",
+      borderBottomWidth: "0px",
+    });
+    const mediaSizing = await page.getByTestId("technology-unlock-card").evaluateAll((cards) =>
+      cards.slice(0, 2).map((card) => {
+        const media = card.querySelector(".palworld-technology-card-media");
+        const image = media?.querySelector("img");
+        return {
+          imageHeight: image?.getBoundingClientRect().height ?? 0,
+          mediaHeight: media?.getBoundingClientRect().height ?? 0,
+        };
+      })
+    );
+    expect(mediaSizing.every(({ imageHeight, mediaHeight }) =>
+      mediaHeight > 0 && imageHeight > 0 && imageHeight <= mediaHeight + 1
+    )).toBe(true);
     await expect.poll(() => page.locator(".palworld-technology-level-marker").first().evaluate((element) =>
       getComputedStyle(element).position
     )).toBe("sticky");
@@ -822,8 +895,9 @@ test("기술 해금 페이지는 레벨 타임라인과 상세 연결을 PC·모
   }
 
   expect(technologyRequests.every((url) =>
-    url.searchParams.get("technology") === "unlockable"
-    && url.searchParams.get("sort") === "technologyLevel"
+    url.searchParams.get("order") === "asc"
+    && url.searchParams.get("locale") === "ko"
+    && url.searchParams.get("limit") === "24"
   )).toBe(true);
   await page.getByRole("button", { name: "Pal 스피어 기술 해금 아이템 상세 보기" }).click();
   await expect(page.getByTestId("item-detail-modal")).toContainText(/기술 해금 레벨\s*2/u);
@@ -1019,6 +1093,18 @@ async function installApiFixtures(page: Page): Promise<void> {
     }
     if (url.pathname === "/api/palworld/items") {
       await json(route, pageResponse(filteredItems(url), url));
+      return;
+    }
+    if (url.pathname === "/api/palworld/technology") {
+      const unlocks: PalworldTechnologyUnlockSummary[] = filteredItems(url)
+        .filter((item) => item.technologyLevel !== undefined)
+        .map((item) => ({
+          id: `technology-item-${item.id}`,
+          kind: "item",
+          technologyLevel: item.technologyLevel!,
+          item,
+        }));
+      await json(route, pageResponse(unlocks, url));
       return;
     }
     if (url.pathname === "/api/palworld/skills") {

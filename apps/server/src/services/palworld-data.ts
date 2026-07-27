@@ -31,7 +31,8 @@ import {
   type PalworldSkillDetail,
   type PalworldSkillListFacets,
   type PalworldSkillListResponse,
-  type PalworldSkillSummary
+  type PalworldSkillSummary,
+  type PalworldTechnologyUnlockSummary
 } from "@streamops/shared";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -86,6 +87,9 @@ import {
   type PalworldLoadedCondensationRules
 } from "../data/palworld-condensation-artifact.js";
 import {
+  PALWORLD_TECHNOLOGY_BUILDINGS
+} from "../data/palworld-technology-buildings.generated.js";
+import {
   normalizePalworldSearchTerm,
   type PalworldBreedingParentsQuery,
   type PalworldBreedingPartnersQuery,
@@ -93,7 +97,8 @@ import {
   type PalworldItemListQuery,
   type PalworldPalListQuery,
   type PalworldSkillListQuery,
-  type PalworldSortOrder
+  type PalworldSortOrder,
+  type PalworldTechnologyListQuery
 } from "./palworld-query.js";
 
 // release 전환 중 서로 다른 endpoint의 하루짜리 stale 응답이 섞이지 않도록
@@ -353,6 +358,9 @@ function itemSummary(item: PalworldItemDetail): PalworldItemSummary {
     ...(item.itemType === undefined ? {} : { itemType: item.itemType }),
     ...(item.blueprintTarget === undefined ? {} : {
       blueprintTarget: structuredClone(item.blueprintTarget)
+    }),
+    ...(item.technologyPal === undefined ? {} : {
+      technologyPal: structuredClone(item.technologyPal)
     }),
     rarity: item.rarity,
     ...(item.descriptionKo === undefined ? {} : { descriptionKo: item.descriptionKo }),
@@ -1096,6 +1104,61 @@ export class PalworldDataService {
     const item = identifierAliases(id).map((alias) => this.itemsById.get(alias)).find(Boolean);
     if (!item) throw new PalworldRecordNotFoundError("item", id);
     return item;
+  }
+
+  listTechnologyUnlocks(
+    query: PalworldTechnologyListQuery
+  ): PalworldPaginatedResponse<PalworldTechnologyUnlockSummary> {
+    this.ensureDomainAvailable("items");
+    const term = query.q ? normalizePalworldSearchTerm(query.q) : undefined;
+    const itemUnlocks: PalworldTechnologyUnlockSummary[] = this.supplementalSnapshot.items
+      .filter((item) => item.technologyLevel !== undefined)
+      .map((item) => ({
+        id: `technology-item-${item.id}`,
+        kind: "item" as const,
+        technologyLevel: item.technologyLevel!,
+        item: itemSummary(item)
+      }));
+    const buildingUnlocks = PALWORLD_TECHNOLOGY_BUILDINGS.map((building) => ({
+      ...building
+    }));
+    const nameOf = (
+      unlock: PalworldTechnologyUnlockSummary
+    ): { id: string; nameKo?: string; nameJa?: string; nameEn?: string } =>
+      unlock.kind === "item" ? unlock.item : unlock;
+    const filtered = [...itemUnlocks, ...buildingUnlocks]
+      .filter((unlock) => {
+        if (term === undefined) return true;
+        const name = nameOf(unlock);
+        return matchNormalizedSearchFields(
+          term,
+          searchFields([
+            ...identifierAliases(unlock.id),
+            unlock.kind === "building" ? unlock.sourceRowId : unlock.item.id,
+            name.nameKo ?? "",
+            name.nameJa ?? "",
+            name.nameEn ?? ""
+          ])
+        ) !== undefined;
+      })
+      .sort((left, right) => {
+        const level = direction(
+          left.technologyLevel - right.technologyLevel,
+          query.order
+        );
+        if (level !== 0) return level;
+        return compareLocalizedName(
+          nameOf(left),
+          nameOf(right),
+          query.locale ?? "ko"
+        ) || compareCanonicalId(left, right);
+      });
+    const pageInfo = pagination(query.page, query.limit, filtered.length);
+    return {
+      items: pageItems(filtered, pageInfo.page, query.limit),
+      pagination: pageInfo,
+      metadata: this.snapshot.metadata
+    };
   }
 
   listSkills(query: PalworldSkillListQuery): PalworldSkillListResponse {

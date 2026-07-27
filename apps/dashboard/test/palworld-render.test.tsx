@@ -713,29 +713,49 @@ test("기술 해금 아이템은 레벨별로 묶이고 카드 전체에서 상�
     itemType: "valuable",
     rarity: 2,
     technologyLevel: 32,
+    technologyPal: {
+      id: "anubis",
+      number: 100,
+      nameKo: "아누비스",
+      nameJa: "アヌビス",
+      nameEn: "Anubis",
+      imageUrl: `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`,
+      imageWidth: 128,
+      imageHeight: 128,
+      elements: ["ground"],
+    },
     acquisitionMethods: [],
   };
+  const unlock = {
+    id: `technology-item-${item.id}`,
+    kind: "item" as const,
+    technologyLevel: item.technologyLevel!,
+    item,
+  };
   const korean = renderToStaticMarkup(
-    <TechnologyUnlockCard item={item} locale="ko" onOpen={() => undefined} />,
+    <TechnologyUnlockCard unlock={unlock} locale="ko" onOpen={() => undefined} />,
   );
   const japanese = renderToStaticMarkup(
-    <TechnologyUnlockCard item={item} locale="ja" onOpen={() => undefined} />,
+    <TechnologyUnlockCard unlock={unlock} locale="ja" onOpen={() => undefined} />,
   );
   const groups = groupTechnologyUnlockItems([
-    item,
-    { ...item, id: "technology-item-2" },
-    { ...item, id: "technology-item-3", technologyLevel: 33 },
+    unlock,
+    { ...unlock, id: "technology-item-2", item: { ...item, id: "technology-item-2" } },
+    { ...unlock, id: "technology-item-3", technologyLevel: 33, item: { ...item, id: "technology-item-3", technologyLevel: 33 } },
   ]);
 
   assert.match(korean, /data-testid="technology-unlock-card"/u);
   assert.match(korean, /data-technology-level="32"/u);
+  assert.match(korean, /data-rarity-band="rare"/u);
+  assert.match(korean, /\/images\/palworld\/1\.0\.1\/pals\/[a-f0-9]{64}\.webp/u);
+  assert.doesNotMatch(korean, /\/images\/palworld\/1\.0\.1\/items\//u);
   assert.match(korean, /상급 작업대/u);
   assert.match(korean, /aria-haspopup="dialog"/u);
   assert.match(korean, /role="button"/u);
   assert.match(japanese, /上級作業台/u);
   assert.match(japanese, /上級作業台のテクノロジー解放アイテム詳細を見る/u);
   assert.deepEqual(groups.map((group) => [group.level, group.items.map((groupItem) => groupItem.id)]), [
-    [32, ["technology-item", "technology-item-2"]],
+    [32, ["technology-item-technology-item", "technology-item-2"]],
     [33, ["technology-item-3"]],
   ]);
 });

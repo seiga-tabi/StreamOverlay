@@ -155,7 +155,8 @@ import {
   parsePalworldPalSpawnQuery,
   parsePalworldPalListQuery,
   parsePalworldSkillListQuery,
-  parsePalworldSearchQuery
+  parsePalworldSearchQuery,
+  parsePalworldTechnologyListQuery
 } from "../services/palworld-query.js";
 import type { PalworldMapMarkerProvider } from "../data/palworld-map-marker-artifact.js";
 import type { PalworldSpawnProvider } from "../data/palworld-spawn-artifact.js";
@@ -275,6 +276,7 @@ function palworldRateLimitGroup(pathname: string): {
     pathname === "/api/palworld/meta"
     || pathname === "/api/palworld/pals"
     || pathname === "/api/palworld/items"
+    || pathname === "/api/palworld/technology"
     || pathname === "/api/palworld/skills"
   ) {
     return { group: "list", list: true };
@@ -5906,6 +5908,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (url.pathname === "/api/palworld/items") {
           const query = parsePalworldItemListQuery(url.searchParams);
           const response = palworldData.listItems(query);
+          return sendJson(req, res, 200, response, cacheHeadersFor(response));
+        }
+        if (url.pathname === "/api/palworld/technology") {
+          const query = parsePalworldTechnologyListQuery(url.searchParams);
+          const response = palworldData.listTechnologyUnlocks(query);
           return sendJson(req, res, 200, response, cacheHeadersFor(response));
         }
         const palworldItemDetailMatch = url.pathname.match(/^\/api\/palworld\/items\/([^/]+)$/);

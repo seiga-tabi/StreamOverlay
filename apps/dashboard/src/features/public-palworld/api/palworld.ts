@@ -18,6 +18,7 @@ import type {
   PalworldSearchResult,
   PalworldSkillDetail,
   PalworldSkillListResponse,
+  PalworldTechnologyUnlockSummary,
   PalworldValidator,
 } from "@streamops/shared";
 import {
@@ -37,6 +38,7 @@ import {
   validatePalworldSearchResult,
   validatePalworldSkillDetail,
   validatePalworldSkillListResponse,
+  validatePalworldTechnologyUnlockSummary,
 } from "@streamops/shared";
 import { runtimeConfig } from "../../../runtime-config";
 
@@ -321,6 +323,20 @@ export function getPalworldPal(id: string, signal?: AbortSignal): Promise<Palwor
 
 export function getPalworldItems(params: URLSearchParams, signal?: AbortSignal): Promise<PalworldPaginatedResponse<PalworldItemSummary>> {
   return publicGet(queryPath("/api/palworld/items", params), signal, (value) => validatePalworldPaginatedResponse(value, validatePalworldItemSummary));
+}
+
+export function getPalworldTechnologyUnlocks(
+  params: URLSearchParams,
+  signal?: AbortSignal
+): Promise<PalworldPaginatedResponse<PalworldTechnologyUnlockSummary>> {
+  return publicGet(
+    queryPath("/api/palworld/technology", params),
+    signal,
+    (value) => validatePalworldPaginatedResponse(
+      value,
+      validatePalworldTechnologyUnlockSummary
+    )
+  );
 }
 
 export function getPalworldItem(id: string, signal?: AbortSignal): Promise<PalworldItemDetail> {

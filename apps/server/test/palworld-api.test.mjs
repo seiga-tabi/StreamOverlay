@@ -11,7 +11,8 @@ const {
   validatePalworldPaginatedResponse,
   validatePalworldPalListResponse,
   validatePalworldSkillDetail,
-  validatePalworldSkillListResponse
+  validatePalworldSkillListResponse,
+  validatePalworldTechnologyUnlockSummary
 } = await import("@streamops/shared");
 const palworldDataService = await loadPalworldDataService();
 
@@ -361,6 +362,7 @@ test("Pal과 아이템 목록 API는 filter와 pagination을 적용한다", asyn
   const facetPage = await request(handler, "/api/palworld/pals?sort=number&page=1&limit=1");
   const rarityVariants = await request(handler, "/api/palworld/pals?rarity=10&variant=variant&sort=number&page=1&limit=100");
   const items = await request(handler, "/api/palworld/items?category=sphere&acquisition=craft&sort=technologyLevel&order=desc&page=1&limit=5");
+  const technology = await request(handler, "/api/palworld/technology?q=%EC%9B%90%EC%8B%9C%EC%A0%81%EC%9D%B8%20%EC%9E%91%EC%97%85%EB%8C%80&locale=ko&page=1&limit=5");
   const zeroRarityItems = await request(handler, "/api/palworld/items?rarity=0&page=1&limit=5");
   const legendarySphereModules = await request(
     handler,
@@ -388,6 +390,18 @@ test("Pal과 아이템 목록 API는 filter와 pagination을 적용한다", asyn
   assert.equal(items.body.items.every((item) => !("sourceInternalId" in item)), true);
   assert.equal(items.body.items.every((item, index, entries) => index === 0 || entries[index - 1].technologyLevel >= item.technologyLevel), true);
   assert.equal(validatePalworldPaginatedResponse(items.body, validatePalworldItemSummary).ok, true);
+  assert.equal(technology.res.statusCode, 200);
+  assert.equal(
+    validatePalworldPaginatedResponse(
+      technology.body,
+      validatePalworldTechnologyUnlockSummary
+    ).ok,
+    true
+  );
+  assert.deepEqual(
+    technology.body.items.map((unlock) => [unlock.kind, unlock.sourceRowId]),
+    [["building", "Workbench"]]
+  );
   assert.equal(items.body.pagination.pageSize, 5);
   assert.equal(zeroRarityItems.res.statusCode, 200);
   assert.equal(zeroRarityItems.body.items.length, 5);
